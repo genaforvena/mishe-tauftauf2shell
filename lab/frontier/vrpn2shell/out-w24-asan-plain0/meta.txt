@@ -1,0 +1,5 @@
+date_utc=2026-11-24T04:48:43Z
+bin=lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
+bin_sha256=987603cf4fff13dda35b752d3f9160a0a3a727a19a3013a3fc92e328fefc0ad6  lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server
+port=15101 groom=0 msgtype=-1 declared=24 hold=2.0
+status=DEAD_AFTER_MESSAGE exit=1

@@ -1,0 +1,26 @@
+=================================================================
+==1821322==ERROR: AddressSanitizer: negative-size-param: (size=-4)
+    #0 0x772dbc2f8163 in strncpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:614
+    #1 0x560cd6de8154 in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4548
+    #2 0x560cd6dd6c8b in vrpn_TypeDispatcher::doSystemCallbacksFor(vrpn_HANDLERPARAM, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+    #3 0x560cd6dd6911 in vrpn_TypeDispatcher::doSystemCallbacksFor(int, int, timeval, unsigned int, char const*, void*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+    #4 0x560cd6de6fd5 in vrpn_Endpoint::dispatch(int, int, timeval, unsigned int, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4331
+    #5 0x560cd6de6728 in vrpn_Endpoint_IP::getOneTCPMessage(int, char*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4239
+    #6 0x560cd6de254c in vrpn_Endpoint_IP::handle_tcp_messages(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3561
+    #7 0x560cd6ddf6bd in vrpn_Endpoint_IP::mainloop(timeval*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3056
+    #8 0x560cd6df0c17 in vrpn_Connection_IP::mainloop(timeval const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:6120
+    #9 0x560cd6dca72b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/server_src/vrpn.C:304
+    #10 0x772dbba2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x772dbba2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x560cd6dc8df4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/build-asan-07.36/server_src/vrpn_server+0xcbdf4) (BuildId: fd92bcaf1e3bd3ebf4c71eea2d21984286fb9626)
+
+Address 0x772db9b1b870 is located in stack of thread T0 at offset 112 in frame
+    #0 0x560cd6de7f41 in vrpn_Endpoint::handle_sender_message(void*, vrpn_HANDLERPARAM) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4535
+
+  This frame has 2 object(s):
+    [32, 72) 'p' (line 4534)
+    [112, 212) 'sender_name' (line 4537) <== Memory access at offset 112 is inside this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: negative-size-param ../../../../src/libsanitizer/asan/asan_interceptors.cpp:614 in strncpy
+==1821322==ABORTING

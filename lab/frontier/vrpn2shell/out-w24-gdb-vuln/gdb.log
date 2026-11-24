@@ -1,0 +1,12 @@
+Breakpoint 1 at 0x49d82: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4548.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+STRNCPY_SITE payload_len=0 buffer=0x5555556f3380 name=0x7fffffffd890
+0x5555556f3380:	0x65	0x72	0x0a	0x68	0x6f	0x70	0x6f	0x70
+#0  vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4548
+#1  0x0000555555596d88 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#2  0x0000555555596c8f in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=0, time=..., len=0, buffer=0x5555556f3380 "er\nhopopt\t0\tHOPOPT\t\t# IPv6 Hop-by-Hop Option [RFC1883]\nicmp\t1\tICMP\t\t# internet control message protocol\nigmp\t2\tIGMP\t\t# Internet Group Management\nggp\t3\tGGP\t\t# gateway-gateway protocol\nipencap\t4\tIP-ENCA"..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+
+Program received signal SIGBUS, Bus error.
+0x000055555559ddb2 in vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4554
+4554	    sender_name[i] = '\0';

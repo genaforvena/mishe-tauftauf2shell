@@ -695,3 +695,50 @@ afterwards. The three W21 DEAD-139 rows now have a mapped cause (unwritable
 stack-gap address), the SIGBUS variant is a gdb-fixed-layout artifact. No
 chosen byte, no live-state landing at these offsets, no command, no rung 5,
 grade unchanged. Author self-observation, not independently replayed.
+
+## W24 — payload_len underflow (2026-11-24 ~04:5xZ)
+
+No build change. New wire-side scripts `wire_underflow.py`,
+`probe-underflow.sh`, `probe-underflow-gdb.sh` and
+`probe-underflow-after.sh` send a 24-byte VRPN header with `header[0]=24`
+(so `payload_len = 0`) and optional prior message that fills the reused
+`d_tcpInbuf` with chosen bytes. No external host; ports 15101-15113 only.
+
+Source lines: vulnerable `vrpn-07.36/vrpn_Connection.C:4548` (SENDER) and
+`:4476` (TYPE); fixed `vrpn-fixed/vrpn_Connection.C:4552` and `:4480`. The
+fixed commit leaves the same `strncpy` length expression; its clamp at
+`:4558`/`:4486` fixes only the later index write.
+
+- `out-w24-asan-plain0/`: ASan v07.36 binary
+  `987603cf4fff13dda35b752d3f9160a0a3a727a19a3013a3fc92e328fefc0ad6`,
+  port 15101, `negative-size-param (size=-4)` at `:4548`, exit 1.
+- `out-w24-asan-type/`: same binary, port 15113, `negative-size-param
+  (size=-4)` at `:4476`, exit 1.
+- `out-w24-plain-plain0/`: plain vulnerable `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`,
+  port 15102, exit 135 SIGBUS. `out-w24-plain-type/` port 15105 exit 139.
+- `out-w24-gdb-vuln/gdb.log` port 15109: `STRNCPY_SITE payload_len=0`,
+  `p.buffer[0:4]=65 72 0a 68`, SIGBUS at `:4554`; gdb maps the crash to
+  the stale huge index, not the copy. `out-w24-gdb-fixed/gdb.log` port 15110
+  shows the fixed handler reached with `payload_len=0` and no fault.
+- `out-w24-fixed-after-groom/gdb.log` port 15111: fixed binary with 512-byte
+  groom, breakpoint after the `strncpy`, 48 destination bytes dumped and
+  unchanged (no groomed `0x41`): glibc 2.39 performs a zero-store for the
+  huge length. A separate runtime-forced local C check confirmed the same
+  zero-store (`n=18446744073709551612`, all destination bytes unchanged)
+  with an actual `strncpy@plt` call. Behavior on another libc is UNKNOWN.
+- Controls: `out-w24-fixed-plain0/` port 15103 and `out-w24-fixed-retry/`
+  port 15106 (fixed binary, ALIVE); `out-w24-safe28/` port 15107 (declared
+  28 with 4 real body bytes, ALIVE); `out-w24-vuln-groom0/` port 15112
+  (vulnerable binary, 512-byte groom with zero index bytes, ALIVE). The last
+  control isolates the stale index as the cause of the plain crash.
+- `out-w24-asan-groom512/` port 15108: ASan groomed run, same
+  `negative-size-param`, exit 1.
+
+All probes were author self-observation, not independently replayed. No
+new rung, no chosen byte, no command, no rung 5. All ports loopback and
+freed; `pgrep vrpn_server` and `ss -ltn` for 151xx were empty afterwards.
+- `out-w24-plain-safe/` port 15104 is a malformed early control: it declared
+  length 28 but sent no body bytes, so the server reported "Can't read body"
+  and the handler was never reached. It is preserved as a negative harness
+  row and is not evidence of safety; `out-w24-safe28/` is the valid control.
+Do not resweep these points on this host/glibc.

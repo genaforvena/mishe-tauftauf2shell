@@ -1,0 +1,7 @@
+vrpn: vrpn_Endpoint::getOneTCPMessage: Can't read body: Connection reset by peer
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
+Deleting forwarder server
+Deleting generic server object...
+All devices closed...
+Deleting connection
+Deleted server and connection, Exiting.

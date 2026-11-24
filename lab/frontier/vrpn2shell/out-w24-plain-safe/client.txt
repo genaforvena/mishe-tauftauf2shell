@@ -1,0 +1,2 @@
+short: len=24 declared=28 msgtype=-1
+cookie=b'vrpn: ver. 07.36  0\x00\x00\x00\x00\x00'

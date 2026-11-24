@@ -1063,8 +1063,72 @@ addresses, and there is no chosen byte, pointer with downstream use, command or
 rung 5. Grade unchanged. Author self-observation, not independently replayed.
 All ports were loopback and freed; `pgrep vrpn_server` was empty afterwards.
 
+## W24 — shortest wire message exposes a second, unfixed source bug (2026-11-24 ~04:5xZ)
+
+Source-level finding, not present in W1-W23: the lower bound on `p.payload_len`
+is missing. `getOneTCPMessage` computes `payload_len = len - 24` as `size_t`
+(`:4213`) and dispatches values 0-3 unfiltered; `handle_sender_message`
+rejects only `payload_len > 100` (`:4541`) and then calls
+`strncpy(sender_name, p.buffer + 4, p.payload_len - sizeof(vrpn_int32))` at
+`:4548`. The subtraction is done in `size_t`, so `payload_len` 0-3 yields
+lengths `2^64-4` .. `2^64-1`. The same expression exists at `:4476` (TYPE) and,
+unchanged by the upstream fix, at fixed `:4552` / `:4480`. CVE-2026-123200's
+clamp fixes only the later index write; it does not fix this underflow.
+
+Wire reachability: a 24-byte VRPN TCP header with `header[0] = 24` has
+`payload_len = 0` and `ceil_len = 0`, so the shortest possible message drives
+both handlers. New `probe-underflow.sh` + `wire_underflow.py` send it on
+loopback; `probe-underflow-gdb.sh` and `probe-underflow-after.sh` instrument
+the frame. `out-w24-gdb-vuln/gdb.log` and `out-w24-gdb-fixed/gdb.log` both show
+`STRNCPY_SITE payload_len=0` in `handle_sender_message`, so the input reaches
+the site in both builds, not just the vulnerable one.
+
+- ASan v07.36, `out-w24-asan-plain0/` (port 15101): `ERROR: AddressSanitizer:
+  negative-size-param: (size=-4)` at `:4548`, then the real chain
+  `doSystemCallbacksFor:1446` -> `:1424` -> `dispatch:4331` ->
+  `getOneTCPMessage:4239` -> `handle_tcp_messages:3561`; exit 1. TYPE sink
+  `out-w24-asan-type/` (port 15113) reports the same error at `:4476`.
+  This is a new error class for this plant (negative `strncpy` length), not
+  the W1-W23 `WRITE of size 1` at the index store.
+- Plain Debug -O0 vulnerable, `out-w24-plain-plain0/` (port 15102):
+  `DEAD_AFTER_MESSAGE exit=135` (SIGBUS); TYPE `out-w24-plain-type/` (port
+  15105) `exit=139`. But gdb maps the crash to the **old** large-index bug:
+  `out-w24-gdb-vuln/gdb.log` shows `p.buffer[0:4] = 65 72 0a 68` ("er\\nh",
+  stale bytes from the reused `d_tcpInbuf`), read as `i = 0x65720a68`, and
+  SIGBUS at `:4554` on `sender_name[i]`. The short message did not supply
+  that index; leftover buffer bytes did.
+- **Zero-store consumer**: glibc 2.39 `strncpy` with a length near `2^64`
+  writes nothing. A runtime-forced local check (volatile length, real
+  `strncpy@plt` call) prints `n=18446744073709551612`, survives, and leaves
+  every destination byte at its initial `0x7f`. Consistently,
+  `out-w24-fixed-after-groom/gdb.log` (fixed binary, groomed buffer)
+  breaks after the `strncpy` and dumps 48 destination bytes: 40 zeros and
+  unchanged stack words, no groomed `0x41` bytes. ASan flags the source
+  defect before glibc's guard; a plain build has no out-of-bounds store
+  from this underflow on this host. Behavior on another libc is UNKNOWN.
+- Controls: fixed plain `out-w24-fixed-plain0/` (port 15103) and
+  `out-w24-fixed-retry/` (port 15106) survive; safe input declared 28 with
+  4 real body bytes `out-w24-safe28/` (port 15107) survives; vulnerable with
+  a 512-byte groom whose first four bytes are zero, making the stale index
+  zero, `out-w24-vuln-groom0/` (port 15112) survives. That last control
+  isolates the cause: the plain crash needs the stale huge index, not the
+  underflowing copy.
+
+No chosen byte, no new rung-4 boundary, no command, no rung 5, grade
+unchanged. Author self-observation, not independently replayed. All ports
+15101-15113 were loopback and were freed; `pgrep vrpn_server` and `ss -ltn`
+for that range were empty afterwards. Do not resweep these points.
+
 ## Limits and next work
 
+
+- W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
+  length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports
+  `negative-size-param (size=-4)`; glibc 2.39 performs a zero-store, so a
+  plain build has no OOB write from this path and the observed plain crash is
+  the known large-index bug with the index taken from stale receive-buffer
+  bytes. No chosen byte, no new rung-4 boundary, no rung 5. Do not resweep
+  declared length 24 with these builds; behavior on another libc is UNKNOWN.
 - W8 is independently replayed (W115/#1453) and ESTABLISHED at the rung-3
   scope; W10 corrected its build label and re-ran the vulnerable functional
   rows on the real -O2 binary. W11/W12's marker claim is independently
