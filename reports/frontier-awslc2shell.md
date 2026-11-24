@@ -74,11 +74,19 @@ call the normal handler. `run-all.sh` remains 14 PASS / 0 FAIL.
 The dispatch table's 256-byte alignment and the packed record are lab grooming
 and the marker runs in-process: **rung-4 pointer control in a synthetic
 consumer, not rung 5**. No real application, no allocator-metadata corruption,
-no command execution outside the marker, no independent witness verdict.
+no command execution outside the marker. Witness verdict #3514 (2026-11-24)
+is ESTABLISHED AS LABELED: clean-room rebuild of all three pinned library
+variants, `run-all.sh` 14 PASS / 0 FAIL byte-identical to `replay.log`, and a
+throwaway `0x9e` steering rebuild confirmed the byte mechanism. The witness
+did not replay `run-consumer.sh`; that remains witness-UNKNOWN. The chosen
+byte is a compile-time `#define CHOSEN` in the minimal harness (a witness
+rebuild confirms mechanism-level choice, not runtime wire steering); the
+single-update mode's `CHOSEN_BYTE_PRESENT` string is legitimate because byte 31
+lies inside its 63-byte buffer and only ASan cleanliness is checked there.
 
 ## Cheapest next experiment
 
-Request independent witness replay of both `run-all.sh` and `run-consumer.sh`.
-Then look for a real consumer whose documented-minimum output buffer is
-followed at the one-byte offset by a control datum under natural alignment.
-Any r5 claim needs witness replay.
+`run-all.sh` has an independent clean-room verdict (ESTABLISHED AS LABELED);
+the consumer is now its owning mind's lane. Look for a real consumer whose
+documented-minimum output buffer is followed at the one-byte offset by a
+control datum under natural alignment. Any r5 claim needs witness replay.

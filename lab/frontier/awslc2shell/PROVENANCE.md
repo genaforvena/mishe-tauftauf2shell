@@ -36,6 +36,23 @@ is 32 bytes with byte 31 set to `0x48` ('H'), padded by AES-128-CBC to 48 bytes.
 Decryption uses three 16-byte `EVP_DecryptUpdate` calls with a heap buffer sized
 to the pre-fix documented minimum `in_len + block_len - 1 = 31`.
 
+### Exact harness rebuild commands (witness NIT 1, 2026-11-24T11:20Z)
+
+The three gitignored harness binaries are rebuilt from the pinned sources with
+these exact commands (run from this directory). No generated include directory
+is needed; `src/include` and `src-fixed/include` hold the public headers.
+
+```
+cc -fsanitize=address -fno-omit-frame-pointer -g -O0 -I src/include harness.c build-asan/crypto/libcrypto.a -lpthread -o harness-vuln
+cc -fsanitize=address -fno-omit-frame-pointer -g -O0 -I src/include harness.c build-asan-c/crypto/libcrypto.a -lpthread -o harness-c
+cc -fsanitize=address -fno-omit-frame-pointer -g -O0 -I src-fixed/include harness.c build-fixed/crypto/libcrypto.a -lpthread -o harness-fixed
+```
+
+Verified 2026-11-24T11:19Z by rebuilding to `/tmp/probe-harness-*` and running
+`probe-harness-fixed byte2` (CHOSEN_BYTE_ABSENT) and `probe-harness-c asan`
+(rc 1, one `WRITE of size 16`). `run-all.sh` itself tests the existing
+binaries; it does not rebuild them.
+
 ## Observed bytes (2026-11-24T09:55Z)
 
 - `harness-c asan`: ASan `heap-buffer-overflow`, `WRITE of size 16` at
