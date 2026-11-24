@@ -7725,3 +7725,60 @@ no new rung or primitive.
 CodebaseMemory W7 (`0f98a70`) only folded the previously published local
 stdio `query_graph` tool-path reach into the frontier brief; the row and the
 addenda above already carry that claim, so no docs passage was stale (doc-ok).
+
+### Imgproxy2Shell W6 — glibc safe-linking bound (author-side negative)
+
+Same pinned imgproxy 4.0.15 / fixed 4.0.16 and libvips builds as the Imgproxy
+row above; glibc here is 2.39. The probe
+`lab/frontier/imgproxy2shell/provision/ico_gdb_tcache.py` has sha256
+`95326911b40a37fb9e6b72a9acfe7cb3a683005da906f571a690eb399c9fcb55`
+(recomputed locally). From `provision/`, with the pinned binaries and libvips
+in place, the three cured runs are:
+
+    python3 ico_gdb_tcache.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w6v9 2 0x61000000 30
+    python3 ico_gdb_tcache.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w6v27 2 '($pos + 0x10)' 30
+    python3 ico_gdb_tcache.py ./imgproxy-icofixed \
+      ../../libvips2shell/build-vuln-plain/libvips w6fixed1 2 '($pos + 0x10)' 30
+
+Only loopback ports 18080/18081 are used. At the wrapped-size
+`vips_foreign_load_read_full` breakpoint the probe reads the live tcache `next`
+at `actual_data+18`, decodes `ptr ^ (pos >> 12)`, patches an encoded target and
+calls `malloc(0x20)` twice from the inferior; the patch and both mallocs are
+debugger-forced, only the ICO body arrives over the wire. Expect W5's decoded
+live `next=0x7fff7c03ec70` but its raw wire value `0x4141414141414141` to
+decode noncanonically; with the unmapped `0x61000000` target the first malloc
+returns the victim and the second faults in `tcache_get_n`
+(`http-ico-w6v9.log`); with a mapped heap-derived target the second malloc
+returns exactly that address (`http-ico-w6v27.log`,
+`http-ico-w6v30.log`). The fixed control returns HTTP 500 `ICO image data is
+too large` with zero breakpoint hits (`http-ico-w6fixed1.log`). Full log
+digests and the preserved unmapped/negative runs are in `PROVENANCE.md` W6;
+heap addresses vary and no wire-only safe-link key is established. No
+code-pointer write, marker, command or witness verdict; no rung cell moved.
+A clean-archive replay at `314fa5d` reproduced the mechanic in 2 of 7 layouts,
+with the second `malloc(0x20)` returning the chosen heap-derived address twice
+and the fixed binary answering HTTP 500 with zero breakpoint hits; five
+top-chunk or live-data layouts are preserved as negatives and the throwaway
+tree and replay logs were not retained (`PROVENANCE.md`, 12:31–12:33Z).
+
+### Munt2Shell W182 — post-overflow second-call reuse (negative, replayed)
+
+Same pinned `libmt32emu_2_8_3` / fix `1749f7fe` tarballs and static libraries as
+the Munt row above; build the plain libraries with `real/build_and_run.sh`
+first. From `lab/frontier/munt2shell/real`, `./reuse_probe.sh` drives the real
+pinned library through the public API with a first oversized block, `0xF7`, a
+second differently chosen 40,001-byte block, `0xF7`, then a complete 102-byte
+SysEx; the 16384-byte `new[]` tail is a harness observation region, not an
+upstream object. Expect all six modes (`vuln-repeat`, `vuln-safe`,
+`vuln-baseline`, `fixed-repeat`, `fixed-safe`, `fixed-baseline`) rc=0; the
+second 40,001-byte call writes zero new bytes, `tail_0x37` stays 0, each `0xF7`
+increments the debug counter without dispatch and the complete SysEx still
+dispatches (`sysex=1`, `lastlen=102`). Raw outputs are the six tracked
+`real/evidence/reuse-*.out`. The author clean-archive replay at `baa31e6`
+rebuilt from `git archive HEAD lab/frontier/munt2shell` with the ignored tarball
+copied in and all six outputs sha256-identical (digests in `REPLAY.md`); it is
+an author replay, not the witness verdict. No held-state reuse, new consumer of
+the forged tail, pointer, marker, command or rung change; rungs 1-4 ESTABLISHED
+and r5 UNKNOWN stand.

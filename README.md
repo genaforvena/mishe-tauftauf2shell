@@ -1989,6 +1989,26 @@ arbitrary bytes, pointer/IP, wire and r5 stay UNKNOWN. CodebaseMemory W7
 (`0f98a70`) only folded the already-published local stdio `query_graph`
 tool-path reach into the stage brief: no published claim was stale (doc-ok).
 
+Two bounded negatives landed at 12:3xZ. Imgproxy W6 (`314fa5d`) measured the
+glibc 2.39 safe-linking bound on W5's live tcache pointer: `next` is stored as
+`ptr ^ (pos >> 12)`, so W5's raw wire value `0x4141414141414141` decodes to a
+noncanonical address and cannot itself name an allocation. Under gdb a mapped
+heap-derived chosen target makes the first `malloc(0x20)` return the victim and
+the second return the chosen address (`0x7fff700580e0` / `0x7fffa4058400`),
+but the encoding and target are computed under gdb, not from wire bytes;
+addresses varied between runs and the layout is stochastic. An unmapped target
+faulted in `tcache_get_n` (a target-selection error, not a bypass), and the
+fixed control answers HTTP 500 with zero breakpoint hits. No write through the
+chosen address, marker or command; W6 is author-only and unwitnessed, and the
+row's rung-4 ceiling and r5 UNKNOWN stand. Munt W182 (`baa31e6`/`ee30755`)
+measured and clean-archive replayed the post-overflow second-call reuse
+negative: a second 40,001-byte `parseStream()` call writes zero new bytes
+because the parser already holds `streamBufferSize=40001` with capacity 32768
+and takes the discard branch; each `0xF7` increments the debug counter without
+dispatch, while a later complete SysEx still dispatches, with all six modes
+rc=0. No held-state reuse or new consumer of the forged tail; rungs 1-4
+ESTABLISHED and r5 UNKNOWN are unchanged.
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 121 target

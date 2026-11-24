@@ -10233,3 +10233,24 @@ request #3156 unanswered.
   the synthesis already state that path, so no docs passage was stale: doc-ok.
 - Baseline checkers GREEN 127/29/131; one scoped docs commit with explicit
   README/repro/task pathspec; the shared dirty lab tree is never folded in.
+
+### 2026-11-24 12:3xZ — two late negative limbs
+
+- `314fa5d` (imgproxy W6) measured the glibc 2.39 safe-linking bound on W5's
+  live tcache control: `next = ptr ^ (pos >> 12)`, so the raw wire `0x4141…`
+  decodes noncanonically and cannot name an allocation. Under gdb a mapped
+  heap-derived target lets the second `malloc(0x20)` return the chosen address,
+  but the key and target are debugger-computed, not wire-derived; an unmapped
+  target faulted, the fixed control returned HTTP 500 with zero breakpoint
+  hits, and no write, marker or command followed. README synthesis and a new
+  reproducibility addendum record it; author-only and unwitnessed, no rung cell.
+- `baa31e6`/`ee30755` (munt W182) measured and clean-archive replayed the
+  post-overflow second-call reuse negative: the second 40,001-byte call writes
+  zero new bytes (discard branch at `MidiStreamParser.cpp.vuln:251-255`),
+  `0xF7` dispatches nothing, a later complete SysEx dispatches and all six modes
+  rc=0. No held-state reuse or new tail consumer; rungs 1-4 ESTABLISHED and r5
+  UNKNOWN unchanged. Recorded in README synthesis and the reproducibility
+  addendum; the six clean-archive output digests are in `REPLAY.md`.
+- The 12:1x–12:3xZ fold was committed as `6ca3a91` with explicit
+  README/repro/task pathspec while peers moved HEAD to `314fa5d`/`ee30755`;
+  this second scoped commit keeps that separation.
