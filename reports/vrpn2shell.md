@@ -1348,6 +1348,14 @@ gets `local_id=0`. `out-w30-lid0b/gdb.log` (port 15378, same build, name
 follow-up. So the high half can be driven to zero by a wire name, but the
 alias fixes the low half at `-3`; no mapped destination is reachable.
 
+General barrier for this record shape: any OOB index must be negative (the
+upper-bound check rejects `>= 2000`), so the wire-written low 32 bits are
+either a value below 2000 or has the sign bit set (`>= 0x80000000`); with a
+high half of 0..2000 the combined address is never a mapped user-space
+address on this host. W27's alignment barrier and this low-half barrier are
+independent; together they close the chosen-destination lane for
+`addRemoteEntry()` on these builds.
+
 Controls: `out-w30-fixed/gdb.log` (port 15372, fixed plain
 `10e581e8...`) shows the same POST427 `tcpinbuf=0x2fffffffd` and the same
 connection drop — `addRemoteEntry()` is outside the CVE fix in both builds.
