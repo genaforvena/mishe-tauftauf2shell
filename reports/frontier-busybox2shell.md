@@ -116,7 +116,8 @@ live object holding a controlled pointer, no function-pointer or
 return-address control, no shellcode, no command execution. Witness replay
 is complete and ESTABLISHED rungs 1-4 at the labeled scope (§8), with NO
 rung 5; the witness found no counterexample within those conditions.
-§9 measures why the obvious top-chunk primitive cannot supply that pointer.
+§9 measures why the obvious top-chunk primitive cannot supply that pointer;
+§10 shows the same trigger in a real affected-version distro binary.
 Both safe controls need the operator's
 `-b 64` action (UI:R in the advisory) and the server must ignore the option;
 that precondition is advisory-consistent but not deployment-measured.
@@ -136,9 +137,10 @@ pointer/IP control and does not change the rung-5 ceiling.
    guard-passing value only returns `rbuf+80`, inside the overflow. No live
    code pointer is reachable by that primitive; a different primitive would be
    needed for any control-flow claim.
-3. Build a stock `tftpd` control that acknowledges `blksize` and confirm the
-   same RRQ cannot trigger fallback; then test a plain distribution BusyBox
-   applet under the same loopback server. Do not infer RCE from a crash.
+3. Done (§10): the OACK control acknowledges `blksize` and that RRQ does not
+   fall back (rc 0); a real affected-version distribution BusyBox binary under
+   the same loopback server reproduces fallback and chosen-byte heap
+   corruption. No RCE inferred from the abort; rung 5 still unattempted.
 
 ## 6. Ranking
 
@@ -292,3 +294,51 @@ fallback + 516-byte ERROR wire path as §7; gdb only observes.
   and no command. Other primitives remain untested, so this is a measured
   ceiling for the top-chunk path only, not a universal proof. Rung 4 stands as
   independently witnessed (§8); rung 5 is still unattempted and unmeasured.
+
+## 10. Distribution-artifact replay (W4, 2026-11-24 04:1xZ, loopback)
+
+The remaining §5 item 3 lane asked whether the trigger reaches a real shipped
+artifact rather than only a from-source build. It does. The host's Ubuntu 24.04
+`busybox-static` package supplies `/usr/bin/busybox` (sha256sum
+`dbac288c29ba568459550a2da9e7ae0ded6b1fc728ee9fad3044c44e62d6ac14`,
+`dpkg-query`: `busybox-static 1:1.36.1-6ubuntu3.1 amd64`). Upstream 1.36.1 lies
+numerically inside the range Debian OSV names for this CVE (`1:1.35.0-4` …
+`1:1.38.0-3`); the Ubuntu packaging suffix is not separately enumerated by the
+advisory, so this is a numeric-range match, not a vendor assertion. Its `tftp`
+applet accepts `-b SIZE` (`tftp --help` lists it), and its real RRQ carries
+`blksize 64`.
+
+`lab/frontier/busybox2shell/run-distro.sh` drives the existing `heap_probe.py`
+and `malicious_tftp.py` against that binary, every socket on 127.0.0.1.
+Transcript `distro_evidence.log` SHA-256
+`7b6cc11c1afd6e04281f5605c4e54b28de2cbded7fd3223199bc291369cdd38d`
+(04:14:07–04:14:23Z). Seven legs:
+
+1. Attack with `-b 64` and chosen top-size `0x4141414141414141`: client prints
+   `tftp: falling back to blocksize 512`, then `malloc(): corrupted top size`,
+   rc -6 (SIGABRT).
+2. Same attack with the original top size `0x20cb1`: fallback still printed,
+   server-error path exits rc 1 with no abort — the failure follows the
+   chosen bytes.
+3. Chosen `0x4242424242424242`: same abort, rc -6.
+4. Chosen `0x21`: glibc `malloc.c:2599 (sysmalloc)` assertion, rc -6.
+5. Control without `-b 64` and the same 516-byte ERROR: RRQ has no `blksize`,
+   no fallback line, rc 1, no abort.
+6. Conforming OACK control with `-b 64`: server acknowledges `blksize`, rc 0,
+   no fallback line.
+7. Default-blksize control: rc 0, no fallback line.
+
+A second `sh run-distro.sh` replay gave the same rc/message classification on
+all seven legs (transcript `/tmp/distro-replay2.log`, not committed; clock
+varies). No code was injected into the client. The static binary has no debug
+symbols here, so no gdb backtrace was taken in this leg; the source path
+`bb_error_msg` → `vasprintf` → `malloc` is the one measured on the plain build
+in §7–§9, and the observed abort text is consistent with it.
+
+**Grade unchanged: rungs 1-4.** This adds deployment reachability at the
+artifact level — a real affected-version distro binary, not only a local
+build — and completes §5 item 3. It adds no pointer control, no ASLR defeat,
+no command and no rung 5. The UI:R precondition (operator passes `-b 64`,
+server ignores the option) is still a lab condition, not a deployment
+measurement. This is an author measurement; witness acceptance remains
+limited to §8.

