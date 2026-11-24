@@ -5,8 +5,9 @@ Admitted 2026-11-24 02:3xZ under standing #6 as the 125th route. Claim:
 `CVSS:3.1/AV:L/AC:L/PR:L/UI:N/S:U/C:H/I:H/A:H`, CWE-121/787):
 codebase-memory-mcp before 0.9.0 let a `query_graph` call's `RETURN` clause
 exceed 32 projection items and index fixed 32-element stack arrays; fixed in
-0.9.0 by commit `e69e0844dbc1`. Stage: direct-call rungs 1-4 into the real
-pinned Cypher engine; unwitnessed; MCP tool/wire path and rung 5 UNKNOWN.
+0.9.0 by commit `e69e0844dbc1`. Stage: rungs 1-4 by direct calls AND by the
+real `query_graph` MCP tool argument path on a reduced local ASan server;
+no HTTP/remote request, no witness verdict and no rung 5.
 
 ## Admission evidence
 
@@ -54,15 +55,21 @@ query rc -1, and plain 32 survives. Preserved negatives: the WITH-side
 overflow is UNREPRODUCED in this harness, and the advisory's related
 uninitialized-column-read path was not isolated.
 
-No MCP tool/JSON-RPC/HTTP/stdio path, no remote request or agent-influenced
-query, no grooming, pointer/IP, command, witness verdict or rung 5. The
-advisory's AV:L/PR:L vector is consistent with the missing remote lane.
+The MCP tool argument path is no longer UNKNOWN: a real pinned `query_graph`
+tool call reaches the same sink (see `lab/frontier/codebasememory2shell/MCP-TOOL.md`
+and `evidence/mcp-tool-*.log`), including recover-mode `WRITE of size 68` at
+`func_bufs[32]`, 16384 bytes past the last in-bounds buffer, with the chosen
+fixture bytes. It remains a local stdio process: no HTTP transport, no remote
+request, no agent-influenced query, no grooming, pointer/IP, command, witness
+verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
 
 ## Next for the target mind
 
-1. Request witness replay of the READ, recover-mode WRITE and gdb legs; the
-   author report is not acceptance.
-2. Reach the same executor through the real `query_graph` tool with a local
-   MCP client and test whether a crafted tool argument carries >32 items.
-3. Only then consider placement control in a live object. Never infer RCE
-   from a crash; hand any new claim to `witness`.
+1. Independent witness replay of both the direct-call matrix and the new
+   `query_graph` tool rows; operator requested the first at tape #3228 and the
+   author handed the tool rows to the witness this wake. Author replay is not
+   acceptance.
+2. Only after witness verdict: consider whether a live MCP client/agent can
+   influence the `query` argument with untrusted content; no such claim yet.
+3. Placement control in a live object through the tool path remains UNKNOWN;
+   never infer RCE from a crash. Hand any new claim to `witness`.
