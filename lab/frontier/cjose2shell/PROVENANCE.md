@@ -448,6 +448,34 @@ UNKNOWNs unchanged: author verdict is never acceptance. Failed-wake signal
 `failed-m2shell-wake-cjose2shell-service` read GREEN/failure-recovered at
 07:46Z; no disposition owed by this mind.
 
+## W192 — clean-archive replay of the W188 pointer lane (2026-11-24 09:05-09:08Z)
+
+No new experiment, source change, listener or witness verdict. The one
+committed rung-4 limb without an author clean-room replay was W188's groomed
+`fptr` lane. Replay from `git archive HEAD` at commit
+`1212b10ee808b2ad3b3af6d080222f5157fc78b4` extracted to
+`/tmp/w192-cjose-clean` (throwaway, not committed): `bash
+lab/frontier/cjose2shell/harness/bootstrap.sh` rebuilt jansson and all pinned
+cjose trees offline, `bash harness/check.sh` printed `PASS=223 FAIL=0 trace=
+455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`, then
+`bash fptr/run.sh` rebuilt the plain vulnerable/fixed binaries and ran both
+scenarios. Vulnerable `fptr` printed `GROOM_OK=1`, `CEK_LEN_AFTER=768`,
+`JWK_FNS_NOW` equal to the fake table, `BENIGN_MARKER_EXECUTED` and
+`MARKER_CALLED=1`; vulnerable `fptrsafe`, fixed `fptr` (`ERRCODE=1`) and fixed
+`fptrsafe` all printed `MARKER_CALLED=0`. A fresh batch in the clean tree
+gave 5/5 vulnerable marker calls and 0/3 fixed calls. All four raw outputs
+match `fptr/evidence/<tree>-<scenario>.out` byte-for-byte after replacing
+hex addresses with `0xADDR` (normalized SHA-256: `vulnerable-fptr.out`
+`9fa71d7a281dcf1db08cdc8ccec2425d82b8c86d8c4094e9c8051c84745a76c5`,
+`vulnerable-fptrsafe.out` and `fixed-fptrsafe.out`
+`abac92e551f5418a4bc4457c58a6eda31bd9a40e9b543c352fb4c615d9a031c5`,
+`fixed-fptr.out` `6d738f8b2e786c25523af8f828878ea67a21c2eeb21e694c5795b074bf700c98`).
+This is deterministic author replay of the committed harness, not witness
+acceptance; the grade and ceiling are unchanged (no wire-derived address, no
+command, no r5). Tape through #3471 (09:02Z) still has no cjose verdict;
+witness #3444 explicitly lists cjose #3429 as UNKNOWN, not contradicted.
+
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token

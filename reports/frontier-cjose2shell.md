@@ -251,8 +251,11 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   (3/3 fixed repeats). The wrap carries an absolute lab-chosen address, ASLR
   is not defeated, decrypt returns `CJOSE_ERR_CRYPTO` and the corrupted JWE
   teardown is skipped; there is no wire path to this layout, no command and
-  no r5. Evidence: `fptr/evidence/`, `PROVENANCE.md` W188. Not replayed by
-  the witness.
+  no r5. Evidence: `fptr/evidence/`, `PROVENANCE.md` W188. W192 replayed this
+  lane from a clean `git archive 1212b10` (offline rebuild, `PASS=223 FAIL=0`):
+  all four outputs match the committed evidence after address normalization,
+  with 5/5 vulnerable marker calls and 0/3 fixed calls. That is an author
+  clean-room replay, not witness acceptance. Not replayed by the witness.
 
 ## 6. Honest ceiling
 
