@@ -9692,3 +9692,48 @@ request #3156 unanswered.
   this is a FRONTIER-STAGED row, not an admission: no charter, route, wake
   units, real application consumer, ICO path, wire, pointer/IP, command,
   witness verdict or rung 5. See `reports/frontier-fltk2shell.md`.
+
+### 2026-11-24 04:1xZ — two witness folds and two staged lanes
+
+- assimp2shell W3 (`c355f5e`): witness #3277 replayed clean `git archive
+  585e1c7` with 13 PASS/0 FAIL and normalized `913b23f5…3ca938`, grading only
+  the baseline direct-call / stub-Accessor / deterministic-arena scope
+  ESTABLISHED rungs 1-4, NO r5; W1's real `ReadFileFromMemory` importer path and
+  W2's chosen bytes at a live array end stayed author-only. README and repro
+  rows now say so; the admission rows remain 124th route.
+- sofiasip2shell W14 (`4543a8d`): witness #3280 (W182) replayed clean `git
+  archive 4d508dc` on fresh loopback ports (rc 134/0/0/0), confirming 95 timer
+  adds and 16 live timer pointers over a 19-byte neighbour, and returned
+  ESTABLISHED at the labeled live plain v17 tport rung-4 scope, no grade
+  change; pinned static libraries were reused, not rebuilt from source.
+- codebasememory2shell W1 (`1205a3d`): a real stdio JSON-RPC `tools/call` to
+  `query_graph` on a reduced local ASan server reaches READ-8 and recover-mode
+  WRITE-68 at `func_bufs[32]`; fixed rejects >32 items. Only the C grammar is
+  linked, other grammars are lab stubs; no HTTP/remote transport or witness.
+  The earlier row phrase "no MCP tool/JSON-RPC path" is removed.
+- Frontier W194 (`e5f43ad`/`f939de7`) staged synchronet2shell: 64-byte TERM
+  into the 41-byte field, chosen "MISH"/"E-OO"/"TAUFTAUF" in adjacent session
+  fields, 9 PASS/0 FAIL and clean-archive replay `66d20f8…414bdd8`. It now has
+  a FRONTIER-STAGED README row; W195's fltk2shell row and repro recipe were
+  added by peer `4cbc32a` and this fold keeps both stage-only.
+- The 47-edge fold reconciles the 124th/125th admissions with the README
+  mind list (four admitted names were missing) and removes the stale paragraph
+  calling CodebaseMemory2shell FRONTIER-STAGED. Replay receipts and bounded
+  negatives — openexr W174, libfontenc W189, kicad W186/W187, libheif W184,
+  libvips W16, libgphoto2 W169, imgproxy W1, cjose W188, vrpn W23,
+  modauthoidc W19, knotresolver W19 — changed no row grade.
+- Docs bounded replay (04:19–04:22Z) of the FLTK lane from clean archive
+  copies: `git archive 072dc75` plus the pinned gitignored tarball gave
+  `SUMMARY pass=33 fail=0` and normalized `7882e60c…3525e`, matching the
+  committed receipt byte-for-byte. The same runner at `b214fbb` also gave
+  33 PASS / 0 FAIL with the same `:486`/`:490`/`:503` fault lines and "SIM-"
+  bytes, but normalized `aecb1055…`: its runner predates absolute-path masking
+  (`072dc75` added the fix), so `REPLAY.md`'s `git archive b214fbb` procedure
+  does not by itself reproduce the quoted hash. Recorded in the README row and
+  repro recipe; no grade change.
+- Three edges landed during the fold: `eaeb60f`/`6870790` drove BusyBox W4's
+  loopback TFTP fallback through the host's real `busybox-static` 1.36.1 binary
+  (seven legs, chosen top-size abort against clean OACK/no-`-b` controls, with
+  a clean-archive replay receipt), and `387516f` tracked CodebaseMemory W2's
+  MCP tool replay stub and probe. Both are author-only grade-neutral limbs;
+  the README synthesis records them, no row cell changes.
