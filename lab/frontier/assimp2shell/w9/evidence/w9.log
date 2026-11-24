@@ -1,0 +1,51 @@
+# w5_real_vuln case=vec4pos mode=vuln rc=1
+# w5_real_vuln case=mat4pos-count1 mode=vuln rc=1
+# w5_real_vuln case=mat4norm-count1 mode=vuln rc=1
+# w5_real_vuln case=mat4tex-count1 mode=vuln rc=1
+# w5_real_vuln case=idx3 mode=vuln rc=1
+# w5_real_vuln case=mat4idx-count1 mode=vuln rc=1
+PASS baseline-vec4pos
+PASS baseline-vec4pos-asan
+PASS baseline-mat4pos
+PASS baseline-mat4norm
+PASS baseline-mat4tex
+PASS baseline-idx3
+PASS baseline-mat4idx
+# w9_real_7090 case=idx3 mode=fixed7090 rc=1
+# w9_real_7090 case=mat4idx-count1 mode=fixed7090 rc=1
+PASS idx3-fixed7090-reject
+PASS idx3-fixed7090-no-asan
+PASS mat4idx-count1-fixed7090-reject
+PASS mat4idx-count1-fixed7090-no-asan
+# w9_real_7090 case=vec4pos mode=fixed7090 rc=1
+# w9_real_7090 case=mat4pos-count1 mode=fixed7090 rc=1
+# w9_real_7090 case=mat4norm-count1 mode=fixed7090 rc=1
+# w9_real_7090 case=mat4tex-count1 mode=fixed7090 rc=1
+# w9_real_7090 case=texcount-mismatch mode=fixed7090 rc=1
+PASS fixed7090-vec4pos-still-oob
+PASS fixed7090-mat4pos-still-oob
+PASS fixed7090-mat4norm-still-oob
+PASS fixed7090-mat4tex-still-oob
+PASS fixed7090-texcount-still-read
+PASS fixed7090-vec4pos-asan
+PASS fixed7090-mat4pos-count1-asan
+PASS fixed7090-mat4norm-count1-asan
+PASS fixed7090-mat4tex-count1-asan
+PASS fixed7090-texcount-mismatch-asan
+# w9_real_7090 case=safe mode=fixed7090 rc=0
+PASS fixed7090-safe-clean
+RESULT 22 PASS / 0 FAIL
+570d7c65059d70081bdff92b3e631ad631aa3d433206a2630caf5f86d00fa961  w9/evidence/idx3-fixed7090.out
+9a89c6950302032bc8e40c01a490be41d6b7bd26618d8e901da925b572ac013f  w9/evidence/idx3-vuln.out
+570d7c65059d70081bdff92b3e631ad631aa3d433206a2630caf5f86d00fa961  w9/evidence/mat4idx-count1-fixed7090.out
+7ccaccee0000eb0bcecbf083e46e92529ab76f8dee0ed2458ffabff18ae7db61  w9/evidence/mat4idx-count1-vuln.out
+fe41651ea852a71f4585f1a5252796bcbb87d441e5fb48d9933ab83895f836ad  w9/evidence/mat4norm-count1-fixed7090.out
+865da9a66c021824b83ad3d87ccceef14efdfd871d439834edf718f5ebe2ae15  w9/evidence/mat4norm-count1-vuln.out
+b4c7ee124185b8b93ef405a68901dc2acaf2ca644d7f4805cce45e013b33eb25  w9/evidence/mat4pos-count1-fixed7090.out
+b82eef9c9a196999e11632f479993f4fab3dedd587f6b3c93f7d03553043bfe2  w9/evidence/mat4pos-count1-vuln.out
+f54e6fbce02bda06808196306f0e1d20310445b373d19a3de3114f634846e751  w9/evidence/mat4tex-count1-fixed7090.out
+e3e6f235d61e183b2c3ac64f5940f95114a829da0cc128dcc82defa67cef6fa2  w9/evidence/mat4tex-count1-vuln.out
+3091b054b2fdbab9d3f522cb98a8b6fd2e7fac3303b9325f9876bccd8ea73e43  w9/evidence/safe-fixed7090.out
+5a52854c67ff4c245807ecdcfa678374c5a4368877716d497661a1ec87f7f8ec  w9/evidence/texcount-mismatch-fixed7090.out
+46b18c207f42dce7a5c20817af5a56889d55e00d8d33d7c90ede6d5913eecf17  w9/evidence/vec4pos-fixed7090.out
+8a5fbe0856a8f731733726ddf08eca8adc7b3da5d387bbd48b813be2834cc0ab  w9/evidence/vec4pos-vuln.out

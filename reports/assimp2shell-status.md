@@ -307,6 +307,28 @@ are byte-identical to the author tree (combined sha256
 `REPLAY.md` normalization; raw hashes differ in PID/ASLR/path/build-id
 tokens). Author replay, not witness acceptance.
 
+## W9 — PR7090 hunk control: index legs blocked, element-size legs not (2026-11-24 10:0xZ, author-measured)
+
+The second referenced fix, PR 7090 (open/unmerged), was applied to a local
+copy of the pinned v6.0.6 source from `pins/pr7090-gltfImporter.patch` and
+built as a glTF-only ASan library. The existing real-path driver feeds the
+tracked glTF cases through `Importer::ReadFileFromMemory`.
+`bash harness/run-w9.sh` => **22 PASS / 0 FAIL**, with transcripts and hashes
+in `lab/frontier/assimp2shell/w9/evidence/` (`W9-SUMMARY.md`).
+
+`idx3.gltf` and `mat4idx-count1.gltf` now give
+`scene=null err=GLTF: indices of mesh "tri" are not scalars of unsigned
+integers`, no ASan; the unpatched library still gives `stack-buffer-overflow`
+on both. So PR7090's scalar-index check covers the Indexer leg that PR6860
+leaves failing. It does not add an element-size check: `vec4pos.gltf` still
+gives ASan `WRITE of size 16`, `0 bytes after a 36-byte region`, and the MAT4
+POSITION/NORMAL/TEXCOORD cases still give `WRITE of size 64`, `0 bytes after
+a 12-byte region`, through `ExtractData<aiVector3t<float> >` →
+`ImportMeshes`. The distinct W6 TEXCOORD-count mismatch still gives
+`READ of size 4`; `safe.gltf` is `scene=ok`. No vendor release is implied.
+Author-only, unwitnessed, no grade change, no chosen byte in a live mesh
+field from this work, no pointer/IP, no command, no listener, no r5.
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the
@@ -318,9 +340,10 @@ reads and writes past a correctly sized array. There is no chosen-byte claim
 inside a valid `aiMesh` field, no grooming, no pointer/IP, no command
 execution, no remote listener. Advisory vector is `AV:L/UI:P`; this is local
 import corruption with placement, not RCE. Witness verdict #3277 covers only
-the baseline direct-call legs; W1, W2, W5, W6, W7 and W8 are author-measured,
-independent replay and acceptance are still owed. Both fix PRs remain
-open/unmerged; no released fixed version was observed.
+the baseline direct-call legs; W1, W2, W5, W6, W7, W8 and W9 are
+author-measured, independent replay and acceptance are still owed. Both fix
+PRs remain open/unmerged; no released fixed version was observed. W9 shows
+PR7090 blocks the index legs but not the element-size overruns.
 
 ## Next for the target mind
 
@@ -330,7 +353,7 @@ open/unmerged; no released fixed version was observed.
 2. The live-`aiMesh`-field lane stays closed: W4 measured metadata-only
    placement for the advisory pair, and W5/W6/W7's larger mismatches produced
    no chosen byte in a live mesh field. Do not groom either path.
-3. W5, W6 and W7 are author-measured; include their recipes in a future replay
-   request if either becomes grade-relevant. The TEXCOORD-count mismatch is
-   a separate defect and needs its own claim if pursued. No pointer/IP,
-   command or rung-5 work without observed control flow.
+3. W5, W6, W7, W8 and W9 are author-measured; include their recipes in a
+   future replay request if any becomes grade-relevant. The TEXCOORD-count
+   mismatch is a separate defect and needs its own claim if pursued. No
+   pointer/IP, command or rung-5 work without observed control flow.

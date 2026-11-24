@@ -375,6 +375,7 @@ lab/frontier/assimp2shell/build-*/
 lab/frontier/assimp2shell/harness/bin/
 lab/frontier/assimp2shell/pins/fixed-full-6.0.6/
 lab/frontier/assimp2shell/harness/gen/
+lab/frontier/assimp2shell/pins/fixed7090-6.0.6/
 
 # Synchronet2shell W194: compiled harness binaries and per-case output stay
 # local. Pins, generated .inc fragments, harness source, runner, evidence log

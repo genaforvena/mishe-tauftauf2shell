@@ -292,11 +292,36 @@ normalizing PIDs, addresses, checkout paths and build ids as in `REPLAY.md`).
 Author replay, not witness acceptance.
 
 
+## W9 — PR7090 hunk control: index legs blocked, element-size legs not (2026-11-24 10:0xZ, author-measured)
+
+The second referenced fix (PR 7090, open/unmerged) was applied as a pinned
+hunk overlay to the pinned importer source and built as a glTF-only ASan
+library; `harness/real_driver.cpp` feeds the tracked crafted documents through
+`Importer::ReadFileFromMemory`. `bash harness/run-w9.sh` => **22 PASS /
+0 FAIL**; transcripts in `lab/frontier/assimp2shell/w9/evidence/`, summary in
+`W9-SUMMARY.md`.
+
+The hunk rejects non-scalar index accessors in `ImportMeshes`: `idx3.gltf` and
+`mat4idx-count1.gltf` both give `scene=null err=GLTF: indices of mesh "tri"
+are not scalars of unsigned integers`, no ASan report, while the unpatched
+library still gives `stack-buffer-overflow` on both. This closes the
+preserved Indexer negative from PR6860 with a different proposed fix. The
+same hunk does NOT add an element-size check: `vec4pos.gltf` still gives
+ASan `WRITE of size 16`, `0 bytes after a 36-byte region`, and the MAT4
+POSITION/NORMAL/TEXCOORD cases still give `WRITE of size 64`, `0 bytes after
+a 12-byte region`, with `ExtractData<aiVector3t<float> >` → `ImportMeshes`
+frames. The distinct W6 TEXCOORD-count mismatch still gives `READ of size 4`;
+`safe.gltf` is `scene=ok`. PR7090 alone is not a fix for the CVE's
+element-size defect. Author-only, unwitnessed; no grade change, no chosen
+byte in a live mesh field from this work, no pointer/IP, no command, no r5.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5,
 W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field, so the placement
-lane stays closed. The TEXCOORD count mismatch is a separate defect and needs
-its own claim if pursued; only observed control-flow placement would reopen
-rung 4. Never relabel placement as control flow or RCE without observation.
+lane stays closed. W9 separated the two proposed fixes: PR7090 blocks the
+index legs but not the element-size overruns. The TEXCOORD count mismatch is
+a separate defect and needs its own claim if pursued; only observed
+control-flow placement would reopen rung 4. Never relabel placement as
+control flow or RCE without observation.
