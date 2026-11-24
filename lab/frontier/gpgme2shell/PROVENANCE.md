@@ -23,6 +23,8 @@ cc -std=c99 -g -O0 -fsanitize=address -fno-omit-frame-pointer -DFIXED -o fixed-a
 cc -std=c99 -g -O0 -o vuln-plain harness.c
 cc -std=c99 -g -O0 -DFIXED -o fixed-plain harness.c
 ```
+Clean `git archive HEAD lab/frontier/gpgme2shell | tar x -C /tmp/w210-gpgme`
+replay of commit `88addf93` also gave 19 PASS / 0 FAIL.
 
 Each binary is run as `./<bin> <attack|safe> <byte> <offset>`; stdout/stderr
 and rc land in `evidence/<case>.out` and `.rc`. Final in-tree run: 19 PASS /
@@ -42,4 +44,4 @@ offset 1014) are chosen by the runner, not hardcoded in the vulnerable path.
 - The advisory is AV:N but the lab exercises a prefilled header line, not a
   network or pipe input; wire reach stays UNKNOWN.
 - No pointer/IP/command control, no allocator metadata claim, no rung 5.
-  Dedicated window, registry entry and operator admission are PENDING.
+  Dedicated window and registry entry are live; operator admission PENDING.

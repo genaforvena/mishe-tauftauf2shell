@@ -1,7 +1,7 @@
 # Frontier brief — gpgme2shell (CVE-2026-129975)
 
-Status: STAGED at rung 3 / rung 4 PARTIAL; dedicated window and handoff PENDING.
-Admission belongs to the operator; this brief is a research finding, not acceptance.
+Status: STAGED at rung 3 / rung 4 PARTIAL; live dedicated window 141 and
+seed wall exist; operator admission and witness replay PENDING.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -37,7 +37,11 @@ functions. A 24-year-old bug per the commit message (introduced by
 `f12433c1e476f52c92496a885c1ffcd10fa2a322`, bug T8557).
 
 ## Lab evidence (`lab/frontier/gpgme2shell/`)
-
+Clean-archive replay of commit `88addf93` into `/tmp/w210-gpgme` also gave
+19 PASS / 0 FAIL. Window 141 `gpgme2shell` is live on the inner tmux socket
+(panes 1384817/1385483, both dead=0, captures verified), registered at
+142 windows / 142 unique names, created 18:15:47Z with a seed wall;
+operator DM 3762 and witness replay request 3763 are on the tape.
 Harness extracts the pinned realloc/early-return/writeback statement sequence
 and the verbatim cleanup free; stand-ins supply the status line, the read and
 the callback. `sh run.sh` verifies both source hashes and the fix hunk, then
@@ -66,6 +70,6 @@ not exercised here.
 
 Build real GPGME 2.2.0 with ASan, drive a status pipe that forces a >1024-byte
 line plus a callback error, and compare with a 2.3.1 build and a short-line
-control. If the double free reproduces, put the pipe behind a loopback
-consumer and replay the status stream for a wire-visible rung 4. A dedicated
-window and operator admission are still owed; do not duplicate this target.
+control. If it reproduces, put a loopback consumer in front of the pipe for
+a wire-visible rung 4. Operator admission and witness replay are still owed;
+do not duplicate this target.
