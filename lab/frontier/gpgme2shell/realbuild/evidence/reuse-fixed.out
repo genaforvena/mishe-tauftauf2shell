@@ -1,0 +1,9 @@
+gpgme version=2.2.0
+op1 keylist_start err=Success
+status_cb call=1 op_marker=H keyword=GOOD arglen=1200 byte[1000]=0x48
+op1 keylist_end err=General error cb_calls=1
+op2 keylist_start err=Success
+status_cb call=2 op_marker=Z keyword=GOOD arglen=20 byte[1000]=0x00
+status_cb call=3 op_marker=Z keyword= arglen=0 byte[1000]=0x00
+op2 keylist_end err=End of file cb_calls=3
+release done

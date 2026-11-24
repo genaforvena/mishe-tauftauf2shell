@@ -1,0 +1,45 @@
+gpgme version=2.2.0
+op1 keylist_start err=Success
+status_cb call=1 op_marker=H keyword=GOOD arglen=1200 byte[1000]=0x48
+op1 keylist_end err=General error cb_calls=1
+=================================================================
+==2228457==ERROR: AddressSanitizer: attempting double-free on 0x519000000080 in thread T0:
+    #0 0x5f93e9d9625a in free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0xe925a) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+    #1 0x5f93e9df0a94 in gpg_release /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine-gpg.c:602:5
+    #2 0x5f93e9dec56d in _gpgme_engine_release /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine.c:569:5
+    #3 0x5f93e9e56149 in _gpgme_op_reset /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/op-support.c:106:4
+    #4 0x5f93e9dd8c17 in gpgme_op_keylist_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/keylist.c:1295:9
+    #5 0x5f93e9dd5088 in do_keylist /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:36:9
+    #6 0x5f93e9dd4dd2 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:81:3
+    #7 0x7f859082a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7f859082a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5f93e9cfb6a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0x4e6a4) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+
+0x519000000080 is located 0 bytes inside of 1024-byte region [0x519000000080,0x519000000480)
+freed by thread T0 here:
+    #0 0x5f93e9d96910 in realloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0xe9910) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+    #1 0x5f93e9e00541 in read_status /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine-gpg.c:1494:16
+    #2 0x5f93e9dffddb in status_handler /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine-gpg.c:1624:9
+    #3 0x5f93e9e54c3b in _gpgme_run_io_cb /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/wait.c:222:9
+    #4 0x5f93e9e55430 in _gpgme_wait_on_condition /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/wait-private.c:112:9
+    #5 0x5f93e9dded40 in gpgme_op_keylist_next /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/keylist.c:1451:13
+    #6 0x5f93e9dd5109 in do_keylist /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:40:13
+    #7 0x5f93e9dd4d91 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:76:3
+    #8 0x7f859082a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7f859082a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5f93e9cfb6a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0x4e6a4) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+
+previously allocated by thread T0 here:
+    #0 0x5f93e9d964f3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0xe94f3) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+    #1 0x5f93e9df0019 in gpg_new /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine-gpg.c:666:24
+    #2 0x5f93e9dec254 in _gpgme_engine_new /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/engine.c:532:13
+    #3 0x5f93e9e5638b in _gpgme_op_reset /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/op-support.c:122:13
+    #4 0x5f93e9dd8c17 in gpgme_op_keylist_start /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/gpgme-asan-build/src/../../gpgme-2.2.0/src/keylist.c:1295:9
+    #5 0x5f93e9dd5088 in do_keylist /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:36:9
+    #6 0x5f93e9dd4d91 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status_reuse.c:76:3
+    #7 0x7f859082a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7f859082a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5f93e9cfb6a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0x4e6a4) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178)
+
+SUMMARY: AddressSanitizer: double-free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gpgme2shell/realbuild/status-reuse-vuln+0xe925a) (BuildId: 8f8c07c3a147e54222ce828e7718ec6c0396a178) in free
+==2228457==ABORTING

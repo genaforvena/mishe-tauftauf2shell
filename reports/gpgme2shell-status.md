@@ -143,3 +143,29 @@ Clean-archive replay of HEAD `3fb983e3` into `/tmp/gpgme-w3-clean`:
 `sh run-real.sh` 21 PASS / 0 FAIL and `sh ../run.sh` 19 PASS / 0 FAIL,
 rc 0 throughout. This is an author-side replay, not a witness verdict;
 independent replay requests #3808, #3911 and #3919 remain UNKNOWN.
+
+## W4 — second public operation reclaims the stale buffer (2026-11-24 23:3xZ)
+
+`realbuild/status_reuse.c` performs one keylist with a long status line whose
+monitor callback returns `GPG_ERR_GENERAL`, then a second, short-line keylist
+on the same context. In real GPGME 2.2.0 under ASan, the second
+`gpgme_op_keylist_start()` calls `_gpgme_op_reset()`, which releases the
+still-attached engine and frees the stale `gpg->status.buffer` at
+`engine-gpg.c:602` *before the second operation begins*. Raw
+`realbuild/evidence/reuse-vuln.out` (rc 1) shows `status_cb call=1
+op_marker=H keyword=GOOD arglen=1200 byte[1000]=0x48`, the first op's
+`General error`, `attempting double-free`, the realloc first free in
+`read_status engine-gpg.c:1494`, and the second free through
+`_gpgme_engine_release → _gpgme_op_reset → gpgme_op_keylist_start
+keylist.c:1295`; no second-op callback is reached.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-reuse.sh` gives
+`PASS=24 FAIL=0`. The patched 2.2.0 and stock 2.3.1 controls (`reuse-fixed`,
+`reuse-231`) exit 0 with no sanitizer report, start op2 and print its
+callback's `op_marker=Z keyword=GOOD arglen=20`. `build-real.sh` now links
+the three reuse drivers from a clean archive.
+
+Grade unchanged: this is earlier rung-4 mechanics in the same ASan build,
+not pointer/IP/command control, not a benign side effect, not stock or live
+reach, and not r5. Witness replay of this fourth path is owed alongside
+#3808, #3911 and #3919.

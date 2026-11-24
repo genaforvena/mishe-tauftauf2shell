@@ -29,3 +29,6 @@ realbuild/status-trigger-wire-vuln
 realbuild/status-trigger-wire-fixed
 realbuild/status-trigger-wire-231
 realbuild/wireloop/
+realbuild/status-reuse-vuln
+realbuild/status-reuse-fixed
+realbuild/status-reuse-231

@@ -35,7 +35,7 @@ GPGME trees with `CC=clang CFLAGS='-fsanitize=address -fno-omit-frame-pointer
 -g -O0' LDFLAGS='-fsanitize=address'`, static only, prefix
 `realbuild/prefix`. It builds/installs the two dependencies and the three
 GPGME static libraries with `ASAN_OPTIONS=detect_leaks=0`, then links the
-six drivers against `libgpgme.a`, `libassuan.a` and `libgpg-error.a`.
+nine drivers against `libgpgme.a`, `libassuan.a` and `libgpg-error.a`.
 `ASAN_OPTIONS=detect_leaks=0` is needed only while building: libgpg-error's
 `yat2m` doc tool leaks under LeakSanitizer. Each GPGME `make` ends with a
 tests-directory link error; the static library is complete before that point.
@@ -46,10 +46,12 @@ sh run-real.sh
 sh make-realkeys.sh
 sh run-real-gpg.sh
 sh run-wire.sh
+sh run-reuse.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
 network contact and writes raw output to `evidence/real-*.out` / `.rc`.
+`sh run-reuse.sh` adds 24 assertions on the second-operation path below.
 
 `make-realkeys.sh` generates four loopback-only throwaway OpenPGP keys with
 the host `/usr/bin/gpg` (empty passphrase, no network). A 1200-character UID
@@ -88,6 +90,19 @@ install the monitor callback; `gpgme_set_status_cb()` returns
 `--version` with a synthetic 2.2.40 string and writes one
 `[GNUPG:] GOOD <1200 bytes>\n` line to the fd supplied via `--status-fd`,
 with a runtime-chosen byte at status-args offset 1000.
+
+## Second-operation trigger
+
+`status_reuse.c` issues one failing long-line keylist and then a second,
+short-line keylist on the same context. In 2.2.0 the second
+`gpgme_op_keylist_start()` calls `_gpgme_op_reset()`, which releases the
+still-attached engine and frees the stale `gpg->status.buffer` at
+`engine-gpg.c:602` before the second operation starts. ASan reports the
+double free with the realloc at `read_status engine-gpg.c:1494` as the
+first free; the patched build and stock 2.3.1 run both operations and
+receive the second callback's bytes. Raw output is in
+`evidence/reuse-{vuln,fixed,231}.out` / `.rc`. This is still ASan-only
+rung-4 mechanics: no allocator-metadata, pointer, IP or command control.
 
 ## Loopback wire path
 
