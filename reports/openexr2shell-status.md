@@ -346,3 +346,5 @@ command or marker. Rung 5 UNKNOWN; this claim unwitnessed — W161 established
 only the earlier all-FLOAT file. The prior "OOB bytes are allocator-derived"
 claim is now scoped to all-FLOAT parts. Would change mind: a witness
 counterexample or an unmodified network-facing consumer reaching this sink.
+Both W178 checks replay from clean `git archive HEAD` at `aebf617` with
+pinned build trees symlinked in, reproducing all committed evidence hashes.

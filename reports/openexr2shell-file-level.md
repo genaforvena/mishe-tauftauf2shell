@@ -787,4 +787,7 @@ the all-FLOAT file). The earlier ceiling statement that file control never
 reaches OOB contents is now falsified for mixed-channel parts; it stands only
 for the all-FLOAT parts of W160/W163/W170/W172/W174. Would change mind: an
 unmodified network-facing EXR consumer reaching this sink, or a witness
-counterexample to the normalized observations above.
+counterexample to the normalized observations above. Both W178 checks replay
+from a clean `git archive HEAD` at `aebf617` with the gitignored pinned build
+trees symlinked in: `sh harness/mixed-check.sh` reproduced all five evidence
+hashes above and `sh harness/offset-check.sh` reproduced its evidence hash.
