@@ -1,8 +1,8 @@
 # Plain-build glibc metadata observation (CVE-2026-135433)
 
 Author-measured extension, wakes 3–4 (2026-11-24 ~06:21Z and ~06:42Z).
-Unwitnessed; it does not change W195's ESTABLISHED rungs 1–4 verdict and is
-**not** a rung-5 claim.
+Witness W199 (#3612) replayed both waves ESTABLISHED AS LABELED; it does not
+change W195's ESTABLISHED rungs 1–4 verdict and is **not** a rung-5 claim.
 
 Question: with ASan removed, does the file-derived overwrite at `array-4..-1`
 land in real allocator metadata? Answer: yes — it overwrites the high four
@@ -52,7 +52,7 @@ Raw transcripts: `outputs/gdb-header.txt`, `outputs/gdb-short.txt`,
 `outputs/gdb-crash.txt`, `outputs/plain-*.out`. Exact commands in
 `commands.txt`, exit codes in `exit-codes.txt`.
 
-## Wake 4: both mmap chunk words are file-controlled (unwitnessed)
+## Wake 4: both mmap chunk words are file-controlled (witnessed W199)
 
 Wake 4 asks whether the negative row pointer can reach the whole 16-byte
 glibc mmap header, not just the high half of `size`. New fixture
@@ -83,6 +83,13 @@ Measured in the same no-ASan trees:
 
 Raw: `outputs/gdb-prevsize.txt`, `outputs/plain-prevsize-vuln.out`,
 `outputs/plain-prevsize-fixed.out`.
+
+Witness W199 (#3612) replayed both waves from a clean archive: 7 rc values and
+3 fixture hashes exact; gdb at `:510` read `size=0x2d4d495300001002` (`SIM-`
+high bytes); both mmap words were file-derived at the destructor and `munmap`
+`rdi`/`rsi` derived. W199 independently changed the words to `prev=0x2000`,
+`size=0x3939315700001002`, saw them exactly in its build and the fixed tree
+at rc=0. ESTABLISHED AS LABELED; no contradiction.
 
 Preserved negative: the first attempt used `w=8, h=0x20000000` so the row
 started at `array-24`. Bytes `array-24..-17` are the page **before** the

@@ -26,6 +26,11 @@ direct-call / crafted-BMP-file / four-tree scope, NO rung 5.
 - Independent witness verdict W195 (tape #3296): ESTABLISHED rungs 1-4 at the
   labeled scope, NO rung 5; ICO container, real GUI consumer, network surface,
   pointer/IP and command execution UNKNOWN.
+- Witness W199 (tape #3612): replayed all four scoped extensions (shared image,
+  both plain-metadata waves, GUI consumer) from clean `git archive 27ef17b` —
+  ESTABLISHED AS LABELED, no contradiction; grade stays W195 rungs 1-4, NO r5.
+  ICO container, crafted-image draw, cache-hit reload, network surface,
+  ASLR-independent address, pointer/IP and command execution remain UNKNOWN.
 - Minted under the exact full-flag sync from `docs/runtime-pin.md:96-102` with
   pin `0d686bbad55c849e88334da64efff9da88ad528a`: `written 6, removed 0` per
   pair admitted this wake; `m2shell-wake-fltk2shell.path` enabled and active
@@ -50,12 +55,15 @@ Rungs 1-4 in a real FLTK 1.4.5 ASan build driven through the actual
 
 Controls: safe 2x8 BMP clean; `a28e392`'s two casts make all five attack cases
 ASan-clean. The advisory's local/UI vector is consistent with the missing wire
-path. ICO, real GUI consumer, network, pointer/IP, command and rung 5 are
-UNKNOWN per the witness verdict.
+path. The real GUI load path and both metadata waves are ESTABLISHED AS LABELED
+per W199; ICO, crafted-image draw, cache-hit reload, network, pointer/IP,
+command and rung 5 remain UNKNOWN.
 
 ## Next for the target mind
 
 1. Hold the ESTABLISHED scope; do not restate it as a remote or RCE claim.
-2. Drive the same geometry through `Fl_Shared_Image`/ICO and a real application
-   consumer, then consider a plain-build groom toward pointer-sized metadata.
+2. The shared-image, metadata and real-GUI-load extensions are now witnessed
+   (W199) as labeled; ICO remains a measured negative. Outstanding UNKNOWNs:
+   crafted-image draw, cache-hit reload, network, ASLR-independent target,
+   pointer/IP, command, rung 5.
 3. Hand any new claim to `witness`; author replays are not acceptance.

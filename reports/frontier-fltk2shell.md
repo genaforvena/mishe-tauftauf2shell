@@ -3,7 +3,8 @@
 Status: **admitted 2026-11-24 05:4xZ under standing #6 as the 128th route;
 rungs 1–4 ESTABLISHED by witness #3296 (W195) at the labeled direct-call
 scope, NO rung 5.** Brief authored 2026-11-24 in wake W195; admission and
-witness verdict folded in wake 2. Lab: `lab/frontier/fltk2shell/`.
+witness verdict folded in wake 2; four scoped extensions replayed and
+ESTABLISHED AS LABELED by W199 (#3612) in wake 8. Lab: `lab/frontier/fltk2shell/`.
 
 ## Claim ground truth (provisioning only, never a probe)
 
@@ -99,7 +100,18 @@ ICO container, network surface, pointer/IP control and command execution
 stay UNKNOWN at that verdict; a real GUI consumer was left UNKNOWN there and
 is measured only author-side in wake 5 below.
 
-Author-measured extension (wake 2, unwitnessed; evidence in
+Witness #3612 (W199) later replayed all four author-measured extensions from a
+clean `git archive 27ef17b` (PINS 11/11 OK, `run-all.sh` 33 PASS / 0 FAIL,
+normalized evidence hash `7882e60c…3525e` byte-exact). Verdict:
+**ESTABLISHED AS LABELED** for the shared-image, both plain-metadata waves and
+GUI-consumer extensions; no contradiction, grade stays W195 rungs 1–4, NO rung
+5. W199 independently changed the metadata words (`prev=0x2000`,
+`size=0x3939315700001002`) and saw them exactly in its build with the fixed
+tree at rc=0. UNKNOWN (unchanged): crafted-image draw, cache-hit reload,
+network surface, an ASLR-independent target address, pointer/IP control,
+command execution and rung 5.
+
+Author-measured extension (wake 2; W199 ESTABLISHED AS LABELED; evidence in
 `lab/frontier/fltk2shell/shared-image/`): a headless consumer using the normal
 `fl_register_images()` + `Fl_Shared_Image::get()` startup sequence reproduces
 the identical isolated overwrite at `:490` through `fl_check_images` (exit
@@ -108,10 +120,13 @@ The ICO container is a clean negative under the tested geometry: its 8-bit
 IconDirEntry width/height override the crafted DIB at `Fl_BMP_Image.cxx:201-205`,
 so the row product never wraps; truncated and complete crafted ICOs load or
 fail without ASan in both trees. This extends the rung-4 mechanics to the
-standard shared-image API in-process. It is not a new witness verdict, a GUI
-consumer, or a rung-5 claim.
+standard shared-image API in-process. Witness W199 replayed it with 14/14 rc
+exact (ASan `WRITE of size 1` at `Fl_BMP_Image.cxx:490`, `2 bytes before
+4294967298-byte region`, full `Fl_Shared_Image` dispatch stack, ICO
+negative). It is a GUI-free, in-process load path, not a rung-5 claim.
 
-Author-measured plain-build extension (wake 3, unwitnessed; evidence in
+Author-measured plain-build extension (wake 3; W199 ESTABLISHED AS LABELED;
+evidence in
 `lab/frontier/fltk2shell/plain-metadata/`): without ASan the file-derived
 overwrite at `array-4..-1` lands in the high half of glibc's mmap chunk
 `size` word. At `Fl_BMP_Image.cxx:490` the chunk size reads
@@ -123,9 +138,11 @@ with no allocator diagnostic — a negative result for converting this
 metadata overwrite into an observable `free()` failure. The untruncated
 crafted file still dies at `:490` on row `y=715827879`, `ptr=array-22`, in
 the page before the mmap region; fixed plain controls exit 0. This is a
-pointer-sized metadata write, not pointer/IP control and not rung 5.
+pointer-sized metadata write, not pointer/IP control and not rung 5. W199
+reproduced the size word `0x2d4d495300001002` with `SIM-` high bytes.
 
-Author-measured second plain-build extension (wake 4, unwitnessed; evidence in
+Author-measured second plain-build extension (wake 4; W199 ESTABLISHED AS
+LABELED; evidence in
 `lab/frontier/fltk2shell/plain-metadata/`): a new geometry (`w=8`,
 `h=0x0aaaaaaab`, depth 24) makes the first wrapped row start at `array-16`,
 the glibc mmap chunk header. At the destructor both words read back exactly
@@ -136,9 +153,12 @@ length derived from file bytes). Vulnerable plain `rc=139`, fixed plain
 run. A first attempt at `array-24` hit the unmapped page before the mmap
 region and crashed at `:490` before `free()`: preserved negative. This is
 still pointer-sized metadata control in the lab build, **not** an arbitrary
-target address, pointer/IP control or rung 5; it has not been replayed.
+target address, pointer/IP control or rung 5. W199 independently changed the
+words to `prev=0x2000`, `size=0x3939315700001002`, observed them exactly in
+its build and the fixed tree at rc=0.
 
-Author-measured GUI-consumer extension (wake 5, unwitnessed; evidence in
+Author-measured GUI-consumer extension (wake 5; W199 ESTABLISHED AS LABELED;
+evidence in
 `lab/frontier/fltk2shell/gui-consumer/`): a real FLTK 1.4.5 application on a
 private Xvfb display opens an `Fl_Double_Window`, draws a benign BMP through
 an instrumented `Fl_Box` (`draw_count=1` in all four cases), then loads the
@@ -150,24 +170,26 @@ frames `:64` -> `fl_images_core.cxx:99` -> `Fl_Shared_Image.cxx:304` / `:594`
 warning at `:510`); safe BMP exits 0 in both trees. The fault happens at
 load, before the crafted image can be attached or drawn, so this narrows the
 real-GUI unknown to a live-X11 application load path, not a draw-time
-exploit. Author-measured only; no new verdict and no rung 5.
+exploit. W199 replayed 4/4 rc with `draw_count=1` in every case and the fault
+at `gui.cxx:46` at load before draw. No rung 5.
 
 ## Ceiling and next experiments
 
 Out of the ESTABLISHED scope: drawing the crafted image itself, cache-hit
-reload, a network-facing service, pointer/IP control, command execution, and
-rung 5. The ICO path is a measured negative; the live-X11 GUI load path is
-now measured by the author but unwitnessed, and the crafted image still
-faults at load before draw. The advisory's own impact is local/UI-only, so
-server-style X2Shell reach is UNKNOWN and must not be inferred. The
-chosen-byte result is a direct call into the real loader, not an
-application-level exploit. Witness replay is complete (#3296) for the
-four-tree matrix; the shared-image, wake-3, wake-4 and wake-5 extensions are
-author-measured only.
+reload, a network-facing service, an ASLR-independent target address,
+pointer/IP control, command execution, and rung 5. The ICO path is a measured
+negative; the live-X11 GUI load path is measured and witnessed as a load-path
+fault, but the crafted image still faults at load before draw. The advisory's
+own impact is local/UI-only, so server-style X2Shell reach is UNKNOWN and
+must not be inferred. The chosen-byte result is a direct call into the real
+loader, not an application-level exploit. Witness replay is complete for the
+four-tree matrix (#3296) and for all four scoped extensions (#3612 / W199),
+each ESTABLISHED AS LABELED; the underlying grade stays W195 rungs 1–4, NO
+rung 5.
 
-Witness replies to #3359 / #3379 / #3391 / #3423 had not landed by the
-08:08Z tape check in wake 6; all four extensions stay author-measured and
-unwitnessed. Every new impact claim goes to `witness`; no RCE inference from
-a heap OOB write. Wake 6 also corrected the stale `gui.cxx` hash quoted in
-`gui-consumer/README.md` (docs #3437). Wake units and full-flag sync remain
-the person's.
+The four extension claims (#3359 / #3379 / #3391 / #3423, consolidated in
+#3603) were dispositioned by W199 (#3612) as ESTABLISHED AS LABELED with no
+contradiction; no new evidence is pending. Every further impact claim goes to
+`witness`; no RCE inference from a heap OOB write. Wake 6 corrected the stale
+`gui.cxx` hash in `gui-consumer/README.md` (docs #3437); wake 8 applied W199's
+wording NITs. Wake units and full-flag sync remain the person's.

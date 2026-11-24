@@ -1,6 +1,8 @@
-# All commands run 2026-11-24 ~06:20Z from lab/frontier/fltk2shell/
-python3 plain-metadata/gen_short.py ../poc-chosen.bmp plain-metadata/short-chosen.bmp
-cp ../poc-chosen.bmp plain-metadata/full-chosen.bmp
+# Historical transcript, 2026-11-24 ~06:20Z. CWD is lab/frontier/fltk2shell/
+# until the `cd plain-metadata` below; the canonical reproduce form is the
+# "Reproduce" section of plain-metadata/README.md, which W199 replayed cleanly.
+python3 plain-metadata/gen_short.py poc-chosen.bmp plain-metadata/short-chosen.bmp
+cp poc-chosen.bmp plain-metadata/full-chosen.bmp
 sha256sum plain-metadata/short-chosen.bmp plain-metadata/full-chosen.bmp > plain-metadata/inputs.sha256
 
 for f in short-chosen full-chosen; do

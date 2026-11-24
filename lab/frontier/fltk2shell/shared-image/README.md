@@ -1,7 +1,8 @@
 # Fl_Shared_Image / ICO probe (CVE-2026-135433)
 
 One bounded experiment on the `Fl_Shared_Image`/ICO path. All new files are in
-this directory; no existing lab file was modified and nothing was committed.
+this directory; no existing lab file was modified. The harness and evidence
+are committed (witness W199 replayed from `git archive 27ef17b`).
 Reproduce with `sh build.sh && sh run.sh`; `consumer-vuln` and `consumer-fixed`
 are local build products linked against the pre-built ASan FLTK trees and are
 not committed.
@@ -37,11 +38,13 @@ generation transcript in `run.log`; input bytes pinned in `inputs.sha256`.
 | `ico crafted.ico`, `shared crafted.ico` (118-byte BMP DIB wrapped) | 0 | `fail=-3`, EOF at offset 126; no ASan |
 | `ico crafted-full.ico`, `shared crafted-full.ico` (complete 2x256 resource, crafted DIB kept) | 0 | `fail=0 w=2 h=256 d=3`; no ASan |
 
-Same cases in the fixed plus1647 ASan tree: all rc=0, no ASan. For `shared`/
-`direct` with the standalone crafted BMP the loader ends with EOF at
-`Fl_BMP_Image.cxx:510` and `fail=-3 w=2 h=0 d=0` (the `(size_t)` row-pointer
-fix keeps writes in bounds; the 118-byte file then cannot satisfy 715827883
-rows). ICO cases in the fixed tree match the vulnerable tree.
+Same cases in the fixed plus1647 ASan tree: all rc=0, no ASan. With the
+standalone crafted BMP the loader ends with EOF at `Fl_BMP_Image.cxx:510`:
+the `direct` case prints `fail=-3 w=2 h=0 d=0`, while the headless `shared`
+case prints `SHARED RESULT file=../poc-chosen.bmp w=2 h=0 d=0 image=...` with
+no `fail` field (the `(size_t)` row-pointer fix keeps writes in bounds; the
+118-byte file then cannot satisfy 715827883 rows). ICO cases in the fixed tree
+match the vulnerable tree.
 
 ## Guards / negative result
 
@@ -57,4 +60,6 @@ standalone BMP reaches the same fault through the normal handler dispatch.
 
 No GUI window, draw/render path, cache-hit reload, other formats, 32-bit build,
 non-ASan build, or any control-flow/IP/RCE behavior. ASan detection in-process
-only; this is not a rung-5 claim and makes no witness-acceptance claim.
+only; this is not a rung-5 claim. Witness W199 (#3612) replayed the
+shared-image cases ESTABLISHED AS LABELED (14/14 rc exact, full
+`Fl_Shared_Image` dispatch stack, ICO negative).

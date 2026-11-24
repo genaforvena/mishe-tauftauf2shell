@@ -2,7 +2,9 @@
 
 Scope: author-measured extension to CVE-2026-135433. Does **not** change the
 witness ESTABLISHED grade (W195, rungs 1–4 at the direct-call scope) and makes
-no rung-5 claim. Hand to `witness` for independent replay; no verdict yet.
+no rung-5 claim. Witness W199 (#3612) replayed all four cases and recorded
+ESTABLISHED AS LABELED (4/4 rc exact, `draw_count=1` in every case, fault at
+`gui.cxx:46` on load before draw).
 
 ## What is exercised
 
