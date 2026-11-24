@@ -123,3 +123,20 @@ Throwaway stack-layout probes on GCC 13.3.0 (`-fstack-protector-strong
 -fno-omit-frame-pointer -O0`) found a 9-byte gap between OOB index 31 of a
 31-byte local array and the compiler canary; varying array sizes and alignment
 attributes did not close it. No natural stack-canary corruption was observed.
+
+## Plain-process allocator bound (W206, 2026-11-24T14:25Z)
+
+`metadata.c` and `build-plain.sh` add non-ASan builds of both pinned libraries:
+ASan redzones poison the slack bytes a plain glibc process actually has after
+a 31-byte request. The probe drives two boundary-crossing updates into
+`malloc(31)` with a separate `malloc(16)` object after it and reports both the
+written byte and the next chunk's header. On glibc `2.39-0ubuntu8.12`,
+`malloc_usable_size(31)=40`: vulnerable byte31 `0xab` -> `0x48`; fixed stays
+`0xab`. In both, the next chunk size word at `buf+40` and the neighbor at
+`buf+48` are unchanged; the OOB byte is 9 bytes short of metadata and 17 bytes
+short of the next object. `sh run-metadata.sh` -> 10 PASS / 0 FAIL
+(`metadata-replay.log`); `run-all.sh` 14 PASS / 0 FAIL, `run-consumer.sh` 31
+PASS / 0 FAIL. This is a bounded negative for glibc heap-metadata corruption
+with a lone documented-minimum buffer; it says nothing about stack layouts,
+embedded structs or other allocators. Grade unchanged: rungs 1-4, r5 UNKNOWN;
+W206 has no independent witness replay.

@@ -177,3 +177,30 @@ and the compiler canary at rbp-8 — 9 bytes short. Preceding arrays of sizes
 and a trailing 8-byte array were placed below the scratch array. No natural
 stack-canary hit was observed. Positioning the stack pointer deliberately at
 the canary would be synthetic grooming, not a naturally occurring layout.
+
+## Plain-process allocator bound (2026-11-24T14:25Z, W206)
+
+ASan poisons heap redzones immediately after a 31-byte request, so the earlier
+ASan builds cannot answer whether the CVE byte reaches real glibc allocator
+metadata. This wake configured non-ASan builds of both pinned source trees
+into gitignored `build-plain/` and `build-fixed-plain/` with the same CMake
+flags minus `-fsanitize=address` (`sh build-plain.sh`), then compiled
+`metadata.c` against each as `metadata-vuln` / `metadata-fixed`. The probe
+drives two boundary-crossing `EVP_DecryptUpdate` calls into `malloc(31)` with a
+separate `malloc(16)` object allocated after it; only the library writes the
+OOB byte — there is no synthetic store in the probe.
+
+Observed on glibc `2.39-0ubuntu8.12` (`metadata-replay.log`, two runs each):
+
+```
+vuln:  usable=40 gap_to_obj=48 byte31=0x48 chosen=0x48 next_header_before=0x21 next_header_after=0x21 header_unchanged=1 neighbor_unchanged=1 decrypt_ok=1
+fixed: usable=40 gap_to_obj=48 byte31=0xab chosen=0x48 next_header_before=0x21 next_header_after=0x21 header_unchanged=1 neighbor_unchanged=1 decrypt_ok=1
+```
+
+`malloc_usable_size(31)=40`; the next chunk's size word sits at `buf+40`, so
+the OOB byte at `buf+31` is 9 bytes short of it and 17 bytes short of the next
+object. `sh run-metadata.sh` -> 10 PASS / 0 FAIL; `sh run-all.sh` -> 14 PASS /
+0 FAIL, `sh run-consumer.sh` -> 31 PASS / 0 FAIL. Bounded negative: on this
+host's glibc, a lone documented-minimum heap buffer cannot corrupt chunk
+metadata or a neighboring allocation with this one-byte write. This does not
+bound stack, embedded-struct or non-glibc allocators; no rung change.

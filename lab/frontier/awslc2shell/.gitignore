@@ -11,3 +11,7 @@
 /harness-fixed
 /consumer-vuln
 /consumer-fixed
+/build-plain/
+/build-fixed-plain/
+/metadata-vuln
+/metadata-fixed

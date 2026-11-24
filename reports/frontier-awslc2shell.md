@@ -112,6 +112,17 @@ stack-layout probe on GCC 13.3.0 found a 9-byte gap between the OOB index and
 the compiler canary, so no natural stack-canary impact was observed. Grade
 unchanged: rungs 1-4, r5 UNKNOWN; W204/W205 have no independent replay.
 
+W206 (2026-11-24T14:25Z) closed the heap-metadata lane with plain, non-ASan
+builds of both pinned libraries: `metadata.c` drives two boundary-crossing
+updates into `malloc(31)` followed by a separate `malloc(16)` object. On host
+glibc 2.39 `malloc_usable_size(31)` is 40: the CVE byte lands at offset 31 of
+that usable region, 9 bytes before the next chunk's size word (at `buf+40`) and
+17 bytes before the next object. Vulnerable: byte31 `0xab` -> `0x48`, next
+header and neighbor unchanged; fixed: byte31 stays `0xab`, same controls.
+`sh build-plain.sh` then `sh run-metadata.sh` -> 10 PASS / 0 FAIL
+(`metadata-replay.log`); grade unchanged, no allocator/IP control. ASan
+poisons the 9 slack bytes, which is why a plain build is needed here.
+
 ## Cheapest next experiment
 
 `run-all.sh` and the original consumer lane have independent clean-room

@@ -1,0 +1,13 @@
+vuln: usable=40 gap_to_obj=48 byte31=0x48 chosen=0x48 next_header_before=0x21 next_header_after=0x21 header_unchanged=1 neighbor_unchanged=1 decrypt_ok=1
+fixed: usable=40 gap_to_obj=48 byte31=0xab chosen=0x48 next_header_before=0x21 next_header_after=0x21 header_unchanged=1 neighbor_unchanged=1 decrypt_ok=1
+PASS vuln_chosen_byte: 1
+PASS fixed_byte_unchanged: 1
+PASS vuln_rc: 0
+PASS fixed_rc: 1
+PASS vuln_metadata_unchanged: 1
+PASS fixed_metadata_unchanged: 1
+PASS vuln_neighbor_unchanged: 1
+PASS fixed_neighbor_unchanged: 1
+PASS vuln_decrypt_ok: 1
+PASS fixed_decrypt_ok: 1
+RESULT: 10 PASS / 0 FAIL
