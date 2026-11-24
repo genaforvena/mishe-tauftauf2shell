@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+HIT i=0 glyph=-4 encs=0x555555c48240 rhs=$1 = 5457485
+HIT i=1 glyph=-1 encs=0x555555c48240 rhs=$2 = 5457741
+HIT i=2 glyph=-1 encs=0x555555c48240 rhs=$3 = 5457997
+HIT i=3 glyph=-1 encs=0x555555c48240 rhs=$4 = 5458253
+double free or corruption (out)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+A debugging session is active.
+
+	Inferior 1 [process 1065246] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

@@ -1,0 +1,124 @@
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-asan
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 06:14 UTC-NoPython-D.
+ Based on source from git with hash: c73bc62e294ce7bc381c4be3edc1e40667634afe
+=================================================================
+==1070573==ERROR: AddressSanitizer: heap-use-after-free on address 0x502000001674 at pc 0x5fa8aec2ab5b bp 0x7ffc0049fdb0 sp 0x7ffc0049fda0
+WRITE of size 4 at 0x502000001674 thread T0
+    #0 0x5fa8aec2ab5a in PcfReadEncodingsNames /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+    #1 0x5fa8aec2be12 in PcfParse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1831
+    #2 0x5fa8aec2f93b in SFImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
+    #3 0x5fa8aec30448 in _SFImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+    #4 0x5fa8aec31709 in FVImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2329
+    #5 0x5fa8ae643793 in bImport /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:2306
+    #6 0x5fa8ae699342 in docall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9225
+    #7 0x5fa8ae69a1c0 in handlename /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9338
+    #8 0x5fa8ae69e5cf in term /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9576
+    #9 0x5fa8ae69fed9 in mul /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9721
+    #10 0x5fa8ae6a07f3 in add /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9767
+    #11 0x5fa8ae6a1707 in comp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9842
+    #12 0x5fa8ae6a217d in _and /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9886
+    #13 0x5fa8ae6a27b2 in _or /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9918
+    #14 0x5fa8ae6a2ea7 in assign /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9951
+    #15 0x5fa8ae6a454c in expr /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10029
+    #16 0x5fa8ae6a620f in ff_statement /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10242
+    #17 0x5fa8ae6a7906 in ProcessNativeScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10389
+    #18 0x5fa8ae6a83bd in _CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10493
+    #19 0x5fa8ae6a866d in CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10530
+    #20 0x5fa8ae451cb8 in fontforge_main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/startnoui.c:134
+    #21 0x5fa8ae4515ac in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/main.c:33
+    #22 0x78f4bb62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #23 0x78f4bb62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #24 0x5fa8ae4514c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-asan/bin/fontforge+0x1f24c4) (BuildId: b8869daeadd10c9e58d2b595b7cb29f01740655f)
+
+0x502000001674 is located 4 bytes inside of 10-byte region [0x502000001670,0x50200000167a)
+freed by thread T0 here:
+    #0 0x78f4bc4fc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x5fa8aec2d365 in SFSetFontName /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1972
+    #2 0x5fa8aec2ea96 in SFImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2100
+    #3 0x5fa8aec30448 in _SFImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+    #4 0x5fa8aec31709 in FVImportBDF /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2329
+    #5 0x5fa8ae643793 in bImport /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:2306
+    #6 0x5fa8ae699342 in docall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9225
+    #7 0x5fa8ae69a1c0 in handlename /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9338
+    #8 0x5fa8ae69e5cf in term /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9576
+    #9 0x5fa8ae69fed9 in mul /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9721
+    #10 0x5fa8ae6a07f3 in add /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9767
+    #11 0x5fa8ae6a1707 in comp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9842
+    #12 0x5fa8ae6a217d in _and /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9886
+    #13 0x5fa8ae6a27b2 in _or /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9918
+    #14 0x5fa8ae6a2ea7 in assign /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9951
+    #15 0x5fa8ae6a454c in expr /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10029
+    #16 0x5fa8ae6a620f in ff_statement /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10242
+    #17 0x5fa8ae6a7906 in ProcessNativeScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10389
+    #18 0x5fa8ae6a83bd in _CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10493
+    #19 0x5fa8ae6a866d in CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10530
+    #20 0x5fa8ae451cb8 in fontforge_main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/startnoui.c:134
+    #21 0x5fa8ae4515ac in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/main.c:33
+    #22 0x78f4bb62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #23 0x78f4bb62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #24 0x5fa8ae4514c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-asan/bin/fontforge+0x1f24c4) (BuildId: b8869daeadd10c9e58d2b595b7cb29f01740655f)
+
+previously allocated by thread T0 here:
+    #0 0x78f4bc4f74e8 in strdup ../../../../src/libsanitizer/asan/asan_interceptors.cpp:578
+    #1 0x5fa8aeac3143 in copy /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/Unicode/memory.c:43
+    #2 0x5fa8ae93b751 in GetNextUntitledName /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splineutil2.c:3045
+    #3 0x5fa8ae93c0d0 in SplineFontBlank /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splineutil2.c:3094
+    #4 0x5fa8ae93cb36 in SplineFontNew /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splineutil2.c:3133
+    #5 0x5fa8ae63e490 in bNew /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:1841
+    #6 0x5fa8ae699342 in docall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9225
+    #7 0x5fa8ae69a1c0 in handlename /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9338
+    #8 0x5fa8ae69e5cf in term /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9576
+    #9 0x5fa8ae69fed9 in mul /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9721
+    #10 0x5fa8ae6a07f3 in add /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9767
+    #11 0x5fa8ae6a1707 in comp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9842
+    #12 0x5fa8ae6a217d in _and /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9886
+    #13 0x5fa8ae6a27b2 in _or /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9918
+    #14 0x5fa8ae6a2ea7 in assign /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:9951
+    #15 0x5fa8ae6a454c in expr /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10029
+    #16 0x5fa8ae6a620f in ff_statement /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10242
+    #17 0x5fa8ae6a7906 in ProcessNativeScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10389
+    #18 0x5fa8ae6a83bd in _CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10493
+    #19 0x5fa8ae6a866d in CheckIsScript /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:10530
+    #20 0x5fa8ae451cb8 in fontforge_main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/startnoui.c:134
+    #21 0x5fa8ae4515ac in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforgeexe/main.c:33
+    #22 0x78f4bb62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #23 0x78f4bb62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #24 0x5fa8ae4514c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-asan/bin/fontforge+0x1f24c4) (BuildId: b8869daeadd10c9e58d2b595b7cb29f01740655f)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751 in PcfReadEncodingsNames
+Shadow bytes around the buggy address:
+  0x502000001380: fa fa fd fd fa fa fd fd fa fa fd fa fa fa fd fd
+  0x502000001400: fa fa fd fd fa fa fd fa fa fa fd fd fa fa fd fd
+  0x502000001480: fa fa fd fd fa fa 00 02 fa fa 00 00 fa fa fd fd
+  0x502000001500: fa fa 00 02 fa fa fd fd fa fa fd fd fa fa fd fd
+  0x502000001580: fa fa fd fd fa fa fd fd fa fa 00 02 fa fa 00 00
+=>0x502000001600: fa fa fd fa fa fa 05 fa fa fa 05 fa fa fa[fd]fd
+  0x502000001680: fa fa fd fd fa fa fd fd fa fa fd fa fa fa 00 07
+  0x502000001700: fa fa 00 fa fa fa 00 03 fa fa 00 04 fa fa 00 05
+  0x502000001780: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fd
+  0x502000001800: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fd
+  0x502000001880: fa fa fd fa fa fa fd fa fa fa fd fd fa fa fd fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1070573==ABORTING

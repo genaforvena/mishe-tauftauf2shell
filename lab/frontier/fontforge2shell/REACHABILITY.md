@@ -122,10 +122,28 @@ reports `WRITE of size 4` at :1751. `gdb-zero-write-post.out` confirms RHS
 `getformint16()`) and a too-short truncation. Some other plausible size
 value remains UNKNOWN; no pointer/IP or command control.
 
+## W4 (2026-11-24 10:3xZ) — file-chosen negative glyph index
+
+`getformint16()` at :1354 is `getc() | (getc()<<8)` with no EOF check.
+Truncating a glyph index after **one** byte makes `glyph = low-256`, i.e.
+a file-chosen negative index `encs[-256]..encs[-1]`, instead of the fixed
+EOF `-1` of W1-W3. Four PCF inputs (`idx-fc/f8/f0/01.pcf`, each
+`truncated.pcf` cut at 0x122 with one low byte appended) drove the real
+plain process at `glyph=-4/-8/-16/-255, i=0` in `gdb-idx-*.out`; with -4 a
+hardware watchpoint on `encs-16` caught `0 -> 0x53464d`, bytes
+`4d 46 53 00` at `0x555555c48230` (`gdb-half-watch.out`). ASan reports
+the steered write as heap-buffer-overflow (-4), heap-use-after-free in a
+chunk freed by `PcfReadBitmaps` (-8) or `SFSetFontName` (-255), and a
+later -1 write for -16; all four inputs exit 0 on the patched build and
+134 on the vulnerable plain build (`steer-controls.txt`). Details, hashes,
+the failed one-byte-offset attempt and the limits are in `STEERING.md`.
+This steers the same four-byte write to chosen offsets before `encs`;
+no pointer/IP, command, ASLR/grooming or witness verdict, NO r5.
+
 ## Scope
 
-Headless CLI scripting `Import()` on this host. Chosen bytes at the fixed
-`encs[-1]` offset in the real process and plain-build abort are now
-measured (W2 above). The GUI `Import()` menu, other loaders, pointer/IP
-control, command execution, ASLR/grooming and independent witness replay
-of this real-build path remain UNKNOWN.
+Headless CLI scripting `Import()` on this host. Chosen bytes at a
+file-chosen offset before `encs` are now measured (W2/W4), as are the
+plain-build abort and glibc metadata consumer (W2/W3). The GUI `Import()`
+menu, other loaders, pointer/IP control, command execution, ASLR/grooming,
+and independent witness replay of the real-build path remain UNKNOWN.

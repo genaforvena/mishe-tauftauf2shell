@@ -37,3 +37,11 @@ inspect the malloc chunk header before/after the negative write and at
 `free(encs)`; see `CONSUMER.md` and the transcript sha256s there. No
 loopback service, GUI or external target was involved. This extension is
 author-side and awaits any independent witness verdict.
+
+W4 (2026-11-24 10:3xZ): no external reads or new source trees. Four new
+PCF inputs were derived locally from the already-pinned `truncated.pcf`
+by truncating at byte 0x122 and appending one glyph-index low byte; the
+same local ASan/plain/fixed builds and gdb were used. `STEERING.md` has
+input hashes, transcripts and the failed first byte placement. No loopback
+service, GUI or external target was involved; this extension is author-side
+and unwitnessed, with no grade change.

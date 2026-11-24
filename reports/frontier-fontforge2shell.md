@@ -112,6 +112,15 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   build exits 0, while ASan still reports `WRITE of size 4` at :1751
   (`CONSUMER.md`). Impact therefore depends on the file-derived value;
   some other plausible chunk size remains UNKNOWN.
+  W4 steered the same write to a file-chosen offset (`STEERING.md`): a
+  glyph index truncated after one low byte makes `getformint16()` return
+  `low-256`, so the real process wrote `encs[-4]`, `encs[-8]`,
+  `encs[-16]` and `encs[-255]` for four crafted PCF files; gdb confirmed
+  the indices and bytes `4d 46 53 00` at `encs-16` for -4, ASan saw
+  heap-use-after-free in chunks freed by `PcfReadBitmaps` / `SFSetFontName`
+  for -8 / -255, and all four inputs exit 0 patched, 134 vulnerable plain.
+  This steers the rung-4 write but adds no pointer/IP, command, ASLR study
+  or witness verdict; NO r5.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.

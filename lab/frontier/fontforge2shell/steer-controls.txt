@@ -1,0 +1,8 @@
+idx-fc build-fixed-plain rc=0
+idx-fc build-plain rc=134
+idx-f8 build-fixed-plain rc=0
+idx-f8 build-plain rc=134
+idx-f0 build-fixed-plain rc=0
+idx-f0 build-plain rc=134
+idx-01 build-fixed-plain rc=0
+idx-01 build-plain rc=134
