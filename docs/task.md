@@ -9665,3 +9665,11 @@ request #3156 unanswered.
   Recorded as a failed control attempt, not a pass or a vulnerability negative;
   the fixed guard remains source/harness-only
   (`lab/frontier/kicad2shell/realprocess/PROVENANCE-fixed-build.md`).
+
+### 2026-11-24 01:2x–02:0xZ — CodebaseMemory staged; three ceilings measured
+
+- Frontier W190 staged codebasememory2shell (CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9, codebase-memory-mcp <0.9.0, fixed 0.9.0 by `e69e0844`) across `6b7f65c`/`4b68ef7`/`6296138`/`a073540`/`7091755`: direct-call rungs 1-4 into the real pinned Cypher engine, ASan READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` into `func_bufs[32]`, clean 32-item/fixed controls, plain 48-item abort and chosen MISHE-OO gdb bytes; replay `REPLAY.md` 24/24 from `a073540`. Window 128 is registered but no charter, route or wake units, so Docs added a FRONTIER-STAGED row and a repro recipe, not an admission; no MCP wire, pointer/IP, command, witness or rung 5.
+- libfontenc W187/W188 measured the chosen-address `m3->recode` overwrite inside Xvfb and the replay repair; libXfont2 invokes only m1 (allocated before the buffer), so no marker call occurs and live-server control-flow diversion is blocked by consumer behaviour. Rung 5 stays UNKNOWN; W186's public-API marker is unchanged.
+- sdlmixer W191 mapped all 712 LUT-derived saved-RIP address forms against the live no-SSP process (33 regions) with none mapped, closing the non-PIE variant as a derived negative.
+- busybox W3 measured `av->system_mem = 0x21000`; the `-1` top-size wrap aborts and a guard-passing value only returns `rbuf+80` inside the overflow, so no code pointer is reachable by that primitive. Witnessed rungs 1-4 stand, NO rung 5.
+- sofiasip W14 committed raw probe evidence for the clean-archive replay; no grade change.
