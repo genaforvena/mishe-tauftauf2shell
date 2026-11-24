@@ -88,13 +88,17 @@ one fix line.
 Direct call against the pinned source slice with lab stubs for AIFF IO, types
 and the conversion LUT: no SDL/SDL_mixer build *in this scope*, no consumer
 executed, no socket/wire delivery, no live process, no pointer or
-instruction-pointer control, no benign marker, no command, no witness verdict
-and no rung 5. The advisory's own threat model is `AV:L/UI:P` (crafted local
-AIFF-C file, passive victim). As with the WAV sibling, the primitive writes a
-fixed LUT float bit pattern chosen by an input byte — not an address derived
-from input — so control-flow steering is not claimed. Independent replay of
-this scope has been requested on the chat tape; this author result is not
-acceptance.
+instruction-pointer control, no benign marker, no command and no rung 5. The
+advisory's own threat model is `AV:L/UI:P` (crafted local AIFF-C file, passive
+victim). As with the WAV sibling, the primitive writes a fixed LUT float bit
+pattern chosen by an input byte — not an address derived from input — so
+control-flow steering is not claimed.
+
+Witness #3497 (W192) graded this scope ESTABLISHED as labeled, rungs 1-4, not
+rung 5, from a clean `git archive` of `61b9580`: 3/3 pins, 12 binaries,
+`check.sh` PASS=134 FAIL=0 with the exact trace. The witness's LUT
+counterexample (`0x41414141`) proved the stored word follows the LUT, not the
+checker. The author result is now independently replayed, not merely pending.
 
 The W195 extension in `REALAIFF.md` lifts the "no AIFF-C file / no real
 decoder build / no consumer" part by driving a crafted AIFF-C file through a
@@ -102,4 +106,5 @@ real SDL_mixer 3.2.4 build with the AIFF decoder enabled (`check-real.sh`, 51
 PASS / 0 FAIL, trace
 `4d96b2b63ce8c86e73375d8c8ab685a494bea3b8de6a9d61d5ad18d101f9ffc8`). That
 is a separately labeled scope; it still claims no wire, pointer/IP, marker,
-command, witness verdict or rung 5.
+command or rung 5. Witness #3497 graded it ESTABLISHED at rungs 1-4 as
+labeled, also not rung 5.

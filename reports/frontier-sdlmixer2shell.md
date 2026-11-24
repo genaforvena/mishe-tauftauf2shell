@@ -13,6 +13,9 @@ and independent witness replays are complete: witness #2942 graded ESTABLISHED
 at the labeled direct-call lab scope, rungs 1-4 only, explicitly not rung 5;
 witness #3000 (W180) graded the W179 real-caller / from-source SDL3 scope
 ESTABLISHED at the same rungs, explicitly not rung 5.
+Witness #3497 (W192) graded the two AIFF sibling scopes (§4i, §4j)
+ESTABLISHED as labeled, rungs 1-4 only, explicitly not rung 5. Those grades
+belong to CVE-2026-122329 and stay separate from this charter's WAV grade.
 
 A real SDL_mixer 3.2.4 build fed a crafted on-disk A-law WAV demonstrates
 file-path reachability to the vulnerable store (W180, author-observed,
@@ -27,9 +30,12 @@ bytes into the same decoder through real mixer APIs, also author-observed.
   published 2026-11-05; origin issue libsdl-org/SDL_mixer#907, PR #910. It
   describes a stack-based buffer overflow in `FetchXLaw()` decoding A-law or
   mu-law WAV, with claimed code execution. The RCE claim is **not reproduced
+  here.**
 - The AIFF sibling CVE-2026-122329 / fix `3448684` is a separate CVE with its
   own grade; W194 mined it as a named adjacent lane (§4i) under the planted
   stalled-lane doctrine, kept distinct from this charter CVE.
+  Witness #3497 graded both AIFF scopes ESTABLISHED at rungs 1-4 as labeled,
+  explicitly not rung 5; the WAV charter grade is unchanged.
 - Affected: SDL_mixer 3.1.2 through 3.2.4 (advisory prose). The pinned
   vulnerable source is tag `release-3.2.4`, raw
   `src/decoder_wav.c` SHA-256
@@ -304,12 +310,23 @@ on three runs, trace
 `1bdfc38d601a558c6c600ca363293c73dcf446f87b8fb6e50ff1a1e9d43ad183`, pins 3/3.
 Commands, full evidence and ceiling in `harness/aiff/AIFF.md`.
 
-This is author-observed rungs 1-4 for the **AIFF** CVE at the direct-call
-scope, unwitnessed; it does not change the WAV charter grade. Section 4j
-extends the same CVE to a real AIFF-C file and a real SDL_mixer build as a
-separately labeled scope. Still no wire, pointer control, marker or command in
-either scope, and the advisory's threat model is `AV:L/UI:P`. Witness replay
-requested for the direct-call scope on tape; no verdict yet.
+This is rungs 1-4 for the **AIFF** CVE at the direct-call scope. It does not
+change the WAV charter grade; section 4j extends the same CVE to a real AIFF-C
+file and a real SDL_mixer build as a separately labeled scope. Still no wire,
+pointer control, marker or command in either scope, and the advisory's threat
+model is `AV:L/UI:P`.
+
+Witness #3497 (W192) graded this scope ESTABLISHED as labeled: clean `git
+archive` replay of commit `61b9580` (tarball SHA-256
+`65c341652fe7a9c6bf3f6d862ee4dacfa289d044e705aeb85e9b284fba9bdad0`), 3/3
+pins, 12 rebuilt binaries, unmodified `check.sh` PASS=134 FAIL=0 with the
+exact trace. Witness ASan reported `WRITE of size 4` at
+`decoder_aiff.c.vuln:95`, `[32,1056) 'buffer'`, access offset 1056; gdb saw
+`I=128`, `LUT=5a5a5a5a`, `buffer+1020..1027 = 11 11 11 11 5a 5a 5a 5a`.
+A scratch `set_lut(0x41414141u)` put four `0x41` bytes at the same offset,
+showing the word is LUT-steered, not baked into the checker. Grade: rungs 1-4,
+one uniform chosen word (not an arbitrary alphabet), distinct from the WAV
+charter grades, NO rung 5. NIT only; no repair owed.
 
 ## 4j. Real AIFF-C file through the real SDL_mixer decoder (W195, 2026-11-24)
 
@@ -343,10 +360,31 @@ real `COMM`/`SSND` layout; the A-law/mu-law compression type selects
   pins 9/9 in `harness/aiff/REAL.sha256`. Commands, full evidence and the
   ceiling are in `harness/aiff/REALAIFF.md`.
 
-Grade: author-observed rungs 1-4 in the real-file/real-decoder scope for the
-AIFF CVE, unwitnessed, distinct from the direct-call scope (§4i) and from the
-WAV charter. No wire, request-facing listener, pointer/IP, marker, command or
-rung 5. Independent replay requested on the chat tape; no verdict yet.
+Grade: rungs 1-4 in the real-file/real-decoder scope for the AIFF CVE,
+distinct from the direct-call scope (§4i) and from the WAV charter. No wire,
+request-facing listener, pointer/IP, marker, command or rung 5.
+
+Witness #3497 (W192) graded this scope ESTABLISHED as labeled: clean `git
+archive` replay of commit `11adba7` (tarball SHA-256
+`0f9902965622baf79e4288197ab58fa37ecd3c9ee6a52874aabdde4b8eb03b21`) with
+isolated deps (copied vulnerable mixer source, read-only symlinks to the
+provisioned SDL3 source/build, fresh `-DSDLMIXER_AIFF=ON` mixer builds), so
+the live evidence tree was untouched. Unmodified `run-real.sh`: 9/9
+`REAL.sha256` pins, PASS=51 FAIL=0, exact trace. Witness ASan reported
+`WRITE of size 4` at `decoder_aiff.c:95:16` via `FetchALaw`/`FetchULaw` ->
+`AIFF_decode:541` -> `MIX_DecodeAudio:3190`, `[32,1056) 'buffer'`, frame
+offset 1180; play mode repeated it on thread T1 through `DecodeMore:306` /
+`MixerCallback`; fixed-ASan and safe-input controls stayed clean. Because
+`check-real.sh` only asserts on committed gdb `.out` files, the witness
+re-ran the probe on its own replay binary: `length=256`, `i=1`,
+`out=buffer+1020`, `lutword=bae001c0`, bytes `00 00 00 00 c0 01 e0 ba` at
+`buffer+1020`. A file-steering counterexample (data byte at file offset 71,
+`0x56` -> `0xa5`) gave `buf1=a5`, `lutword=3f040108`, OOB bytes `08 01 04
+3f` at the same offset: two distinct file bytes yield two distinct real
+A-law LUT words at the chosen OOB offset. Grade: rungs 1-4, conversion-table
+word selected by an input byte, NOT an address; no wire, listener, pointer,
+IP, marker, command, NO rung 5. NIT only (`check-real.sh` does not regenerate
+its gdb evidence); witness closed that gap independently, no repair owed.
 
 ## 5. Next distinct rung move
 
@@ -382,6 +420,9 @@ the lab's older 3.2.4. Witness #2942 and #3000 graded the two earlier harness
 scopes ESTABLISHED at rungs 1-4, NOT rung 5; the W180 on-disk claim (#3053),
 the W181 wire claim, the W182 sample and W183 upstream-CLI claim are
 author-observed and unwitnessed (replay requests queued).
+Witness #3497 graded the AIFF sibling's two scopes (§4i, §4j) ESTABLISHED at
+rungs 1-4 as labeled, explicitly not rung 5; that grade belongs to
+CVE-2026-122329 and does not change the WAV charter grade or this ceiling.
 Section 4g closes the partial-overwrite variant and section 4h finds no
 LUT-derived address, PIE or non-PIE, mapped in the live no-SSP process. There
 is no request-facing SDL_mixer listener, attacker-chosen pointer, instruction-pointer

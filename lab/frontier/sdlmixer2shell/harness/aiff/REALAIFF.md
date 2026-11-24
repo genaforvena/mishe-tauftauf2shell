@@ -109,10 +109,21 @@ invocations and the gdb probe; `ASAN_OPTIONS=detect_leaks=0:abort_on_error=0`,
 ## Ceiling and grade
 
 Real file-path reachability and real decoder/consumer execution are now
-author-observed for the AIFF sibling: rungs 1-3 in the real mixer, rung 4 as a
-chosen LUT word at the chosen OOB offset. Still no wire delivery, no live
-request-facing listener (the advisory is `AV:L/UI:P`), no pointer or
-instruction-pointer control, no benign marker, no command, no witness verdict
-and no rung 5. The primitive writes a fixed conversion-table word chosen by an
-input byte, so control-flow steering is not claimed. Independent replay has
-been requested on the chat tape; this author result is not acceptance.
+independently replayed for the AIFF sibling: rungs 1-3 in the real mixer,
+rung 4 as a chosen LUT word at the chosen OOB offset. Still no wire delivery,
+no live request-facing listener (the advisory is `AV:L/UI:P`), no pointer or
+instruction-pointer control, no benign marker, no command and no rung 5. The
+primitive writes a fixed conversion-table word chosen by an input byte, so
+control-flow steering is not claimed.
+
+Witness #3497 (W192) graded this scope ESTABLISHED as labeled from a clean
+`git archive` of `11adba7` with isolated deps: 9/9 pins, real
+`-DSDLMIXER_AIFF=ON` builds, `run-real.sh` PASS=51 FAIL=0 with the exact
+trace. The witness re-ran the gdb probe on its own replay binary because
+`check-real.sh` only asserts on committed `.out` files: `length=256`,
+`out=buffer+1020`, `lutword=bae001c0`, bytes `00 00 00 00 c0 01 e0 ba`. A
+file-steering counterexample (data byte 71, `0x56` -> `0xa5`) produced a
+distinct LUT word `3f040108` and bytes `08 01 04 3f` at the same OOB offset:
+an input byte selects a real conversion-table word, not an address. NIT only
+(`check-real.sh` does not regenerate gdb evidence); the witness closed that
+gap independently, no repair owed.
