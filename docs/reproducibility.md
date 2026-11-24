@@ -5607,8 +5607,11 @@ plain tail exactly 1, while pinned-fixed ASan is rc 0; `single-40001` is the
 known ASan `WRITE of size 40001` control with plain tail `7233/16384`.
 Raw outputs `evidence/frag-*.out` and the rc matrix are committed; the pinned
 sources and binaries are regenerable as above. The defect needs one
-`parseStream()` call with at least 32769 unterminated bytes; all in-tree call
-sites are non-network (ALSA cap 5572 bytes). Grade unchanged, rung 5 UNKNOWN.
+`parseStream()` call with at least 32769 unterminated bytes; the Linux ALSA
+caller is capped at 5572 bytes. W180 audited every non-test call site: two
+non-Linux paths (`CoreMidiDriver.cpp:36`, `winmm_drv.cpp:324`) pass caller
+lengths unclamped and remain unbuilt/UNKNOWN here (W180 recipe below). Grade
+unchanged, rung 5 UNKNOWN.
 Brief: `reports/frontier-munt2shell.md` §9.
 
 ## 2026-11-23 15:0xZ — libfontenc2shell operator admission replay
@@ -6669,12 +6672,10 @@ named explicitly. All runs stay on loopback or in a local build.
   replay request #3053. The LUT image makes every ordered A-law word
   non-canonical and every mu-law canonical pair's high word zero, so saved-RIP
   bytes are LUT words and arbitrary IP steering is closed negatively.
-- **OpenEXR W168 OIIO blocker**: resume
-  `cmake --build oiiolab/build-oiio-asan -j8` from `lab/openexr2shell-real`;
-  900 s reached 1/124 edges, a `-j2` probe hit GCC-13
-  `-Werror=maybe-uninitialized` in `std::regex`, and after a local
-  `-Wno-error=maybe-uninitialized` a 1020 s `-j2` run reached 19/124. No OIIO
-  consumer was linked or run; the claim stays UNTESTED (`reports/openexr2shell-status.md`).
+- **OpenEXR OIIO closure**: W173 resolved the OIIO claim as a static-source
+  negative (flat EXR geometry and OIIO dispatch block the sink), superseding
+  W165/W168's build-resume instruction; no consumer was linked or run. W177
+  then measured the partial-overwrite survivability boundary negative below.
 - **Munt W177 PoC availability**: reader-proxy fetches of both hackmd notes
   returned 404/403 and the author profile lists no notes; "Public PoC"
   metadata stays unsubstantiated and the contents UNKNOWN
@@ -7288,10 +7289,11 @@ advisory itself makes no remote claim.
   24 zero bytes at `tail[40..63]`, `ssh_rc=255`, `server_rc=0`. The
   authenticated `clclient-repaired-64` probe shows `client set TERM
   status=0 len=64` but `client ACTIVE status=-16` / `POP status=-11`. TERM is
-  -43 (`CRYPT_ERROR_NOTFOUND`) for every channel ID 0-7, so the 64-byte cap
-  and chosen offsets remain direct-API observations, not a wire result. No
-  real `sbbs3` build, DoS, witness or rung 5; next step is the real BBS SSH
-  path. Raw wire logs are committed under `wire/evidence/`.
+  -43 (`CRYPT_ERROR_NOTFOUND`) for every channel ID 0-7, so at the time the
+  64-byte cap and chosen offsets were direct-API observations only. W3 found
+  this was a probe artefact and reached the same write from a real loopback
+  pty-req with witness acceptance at the synthetic-struct scope (recipe
+  below); the W2 negative itself is preserved, not erased.
 - **Sdlmixer W195, real AIFF-C file through real SDL_mixer (`1292e08`,
   `11adba7`)**: with the gitignored `deps/` tree provisioned as in
   `lab/frontier/sdlmixer2shell/harness/aiff/REALAIFF.md`, `sh
@@ -7337,3 +7339,178 @@ advisory itself makes no remote claim.
   pointer, command or witness; grade stays rungs 3-4, NO rung 5. Receipts:
   `reports/libheif2shell-status.md` § W186 and
   `lab/frontier/libheif2shell/real/PROVENANCE-real.md` § W186.
+
+## 2026-11-24 07:1x–07:4xZ — source audits, wire TERM, real-file and GUI limbs
+
+These recipes extend already-admitted lanes. No new route, window or role;
+the only rung cell that moves is LibRaw R4 (W187/DM 3405). Witness verdicts
+are named at their exact scope; everything else is author/source-only. Where
+the lane-index row still carries an older ceiling, this section supersedes it.
+
+- **Munt W180, in-tree `parseStream()` length audit (`e4430ca`)**: read
+  `lab/frontier/munt2shell/real/in_tree_call_lengths.md` against the pinned
+  `libmt32emu_2_8_3` tarball (sha256 `81f8c462…faef875`, verified in
+  `PINS.sha256`). Bounded non-test callers: ALSA `alsadrv.cpp:1182` (5572
+  measured), OSS `OSSMidiPortDriver.cpp:95` (`BUFFER_SIZE=1024`), Win32
+  `Win32Driver.cpp:135` (0x8000 ring minus 8-byte header = 32760) and `:383`
+  (4096-byte `MIDIHDR`). Two unclamped local paths remain:
+  `mt32emu_qt/src/mididrv/CoreMidiDriver.cpp:34-36` forwards 16-bit
+  `packet->length`, and `mt32emu_win32drv/src/winmm_drv.cpp:320-324` forwards
+  application `midiHdr->dwBufferLength` through public `MODM_LONGDATA`. Both
+  parsers inherit the vulnerable `MidiStreamParserImpl::parseStream()`; neither
+  host exists on this Linux workstation, so both are unbuilt and whether they
+  can emit >32768 bytes is UNKNOWN. Source-only correction to the report's
+  earlier "no consumer in this tree" wording; no run, bytes, witness, command
+  or grade change.
+- **Vrpn W25, stock `-O0` negative-index sweep (`ed9d7c7`)**: from
+  `lab/frontier/vrpn2shell`, run `probe-func-dos.sh` + `wire_inject.py` with
+  the plain vulnerable binary (`build-plain-07.36`, sha256
+  `5cf49457…340bd74`) in one fresh loopback process per index on ports
+  15200-15221; gdb maps use `probe-frame-write.sh` on 15300-15306. Sweep
+  -1,-2,-4,-8,-12,-16,-20,-24,-32,-40,-48,-56,-64,-72,-80,-96,-112,-120,-128:
+  only -4 and -8 are `DEAD_AFTER_MESSAGE exit=139` (SIGSEGV); every other
+  index stays ALIVE. Fixed `-O0` (`build-plain-fixed`, sha256
+  `10e581e8…ea2f45`) -8/-16, TYPE fixed -4 and safe in-bounds 4 stay alive.
+  `out-w25-gdb-4/gdb.log` maps -4 to byte 4 of the live `endpoint` pointer
+  (`0x5555556f3220` → `0x5500556f3220`, saved RIP unchanged, SIGSEGV at
+  `vrpn_Connection.C:4560`), the same W3 primitive at a different byte;
+  -1/-2/-16/-32/-64/-128 dumps are byte-identical already-zero frame bytes,
+  and the -128 gdb continuation timed out after both breakpoints (UNKNOWN).
+  Author self-observation, no chosen byte, new rung-4 boundary, command,
+  witness or grade change. Raw `out-w25-*/` evidence and hashes: `PROVENANCE.md`
+  § W25. Do not resweep this set on the same binary.
+- **Codebasememory W4, source-bound WITH negative (`ff10d85`)**: read the
+  pinned `src/cypher/cypher.c`. `with_add_vbinding_var()` (`:3585-3591`)
+  stores projected items only while `vb->var_count < CYP_BUF_16` (16); both
+  `execute_with_simple` (`:3673-3679`) and `execute_with_aggregate`
+  (`:3642-3654`) call it, so WITH items 17+ are silently dropped and the
+  48-item harness query returns 1 row / 1 column. ASan vulnerable stays clean
+  at 48/64 WITH; the fixed build rejects >32 with query rc -1. No new run,
+  WITH-side WRITE, witness, pointer, command or grade change
+  (`reports/codebasememory2shell-status.md` § W4).
+- **LibRaw W3/W4, file-steered halfwords (`949f138`, `be36dec`)**: from
+  `lab/frontier/libraw2shell`, run
+  `python3 craft_whitelevel_poc.py evidence/nonzero-oob.input OUT 4095`.
+  The generator (sha256 `ab5ace42392c8558d4c939d1524a9ffb29a112acb021b8141ce9a0dd8b30d1cf`,
+  verified locally) rewrites one little-endian u32 DNG WhiteLevel at file
+  offset `0x102` in the W2 source (`b59f64e9…69341`), leaving the IFD and
+  JPEG strip intact. Derived inputs WL2048/4095/8191/16383 have sha256
+  `d398d0e7…35f5` / `8d9b5204…b905` / `50c91fbb…e42b` / `2547a078…bc8`
+  (all six hashes recomputed locally and matching `PINS.md`). Plain `-O0`
+  gdb breakpoint `xtrans_demosaic.cpp:427` with index >= 68,644 gives
+  `IDX=68644 delta=0` and after-store words `0xffff 0xea99 0xffff 0x0000`
+  (WL2048), `0xafdf 0x7544 0x9c55 0x0000` (WL4095),
+  `0x57ec 0x3a9f 0x4e27 0x0000` (WL8191),
+  `0x2bf5 0x1d4f 0x2712 0x0000` (WL16383), recorded in the four tracked
+  `evidence/gdb-whitelevel*.txt` transcripts. WL4095 controls: ASan
+  vulnerable `-n 1` rc 1 `WRITE of size 2` at `:427`, 0 bytes after a
+  550,176-byte region; fixed rc 0 empty; vulnerable without `-n` rc 0 empty.
+  Witness W187 (DM 3405) replayed W2's saturated `0xffff` write and upgraded
+  R4 from PARTIAL to demonstrated chosen-nonzero-halfword; witness DM 3413
+  regenerated the generator and all four inputs in a clean room, `cmp` showed
+  exactly one changed u32 (255 → 4095), and graded the steering claim
+  ESTABLISHED AS LABELED: three distinct non-saturated halfwords at the chosen
+  offset, NOT arbitrary 16-bit values. No real camera file, GUI, network,
+  pointer/IP, command or r5; fixed control is the reporter's patch only.
+- **Synchronet W3/W4, wire TERM (`fe8cb5c`, `559d495`, `86ed83c`, `0e66d24`)**:
+  `bash lab/frontier/synchronet2shell/wire/run-wire-proof.sh` drives a
+  loopback OpenSSH 9.6 pty-req with TERM=64 through the vendored cryptlib
+  getter; expect rc 0, **PASS=10 FAIL=0**, `READER TERM status=0 len=64`,
+  chosen `0x54` at offsets 0/44/48/52, ASan
+  `stack-buffer-overflow WRITE of size 64` in `memcpy` via
+  `attributeCopyParams → getAttributeFunction → sessionMessageFunction →
+  cryptGetAttributeString → reader_thread ssh_server7.c:124`, and clean
+  40-byte and `cb6d77dbca` fixed-form controls. W2's `-43` was a probe
+  artefact (reader blocked in `cryptPopData`; channel deselected after a read
+  timeout), preserved as a negative. The author clean `git archive fe8cb5c`
+  replay with gitignored `src-tree/` symlinked in matched 10/0. Witness wake
+  189 (DM #3427) re-archived `fe8cb5c`, verified 8/8 `PINS.sha256`, rebuilt
+  `libcl.a` (sha256 `584494acfcd7c531878fb951c848a97b8a9a84960f1ff477935303cae952e3c2`,
+  a gitignored artifact), replayed the unmodified script at 10/0 and graded
+  rungs 1-4 ESTABLISHED at the labeled synthetic-struct scope with a
+  counterexample TERM of 44x`A`+`MISH`+`E-OO`+`TAUFTAUF`+4x`Z` giving
+  `line_delay=0x4853494d`, `console=0x4f4f2d45`, `wordwrap[0..7]='TAUFTAUF'`.
+  Witness NITs: `CRYPT_SSHOPTION_NONE_AUTH` is forced in the probe, and the
+  fixed-form control covers only the patched copy inside a 1000-byte-padded
+  struct. W4's real-build feasibility probe is a tooling negative: direct
+  `g++ -fsyntax-only` of `src/sbbs3/answer.cpp` fails on auto-generated
+  `jscpucfg.h` and MSVC-only `__int*` in mozjs headers, and `make -C src/sbbs3
+  -j2` fails with `autoconf-2.13 not found` then `zip not found in $PATH`;
+  real `sbbs3`/`answer()` needs local provisioning only. No measured DoS,
+  pointer/IP, command or r5; no host packages were changed.
+- **OpenEXR W177, partial-overwrite survivability negative (`4a66f9f`,
+  `2f1554d`, `40aeb08`)**: from `lab/openexr2shell-real`, run
+  `sh harness/partial-length-check.sh`. It first regenerates
+  `cases/baseline.exr` with `./bin-vuln-plain/gen_baseline` and asserts sha256
+  `07edcb58a3f2d63eedb5f746229f83dfc879981bf8a9d9cdf66df43a4cd6eb8e`, so a
+  clean archive needs no external EXR, then asserts PoC hashes
+  `5a831920…2ddf689` (a66.exr) and `d50e9d95…29ebc41` (b67.exr). Sweep S=17..512
+  (`bitSize=4*S`, 68..2048-byte copies into a 64-byte destination): S=66
+  (264 bytes) rc 1 `DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA`, S=67 (268
+  bytes) rc 134 `free(): invalid pointer`, 3/3 each; guarded allocator
+  `changed=200` / `changed=204` equals `copy-64` exactly. Normalized gdb
+  transcripts (`ebe5043b…de3b3b3b`, `34bedc0f…fe369b`, both recomputed
+  locally from tracked evidence) show `SINK n=264/268 src_minus_dst=304`,
+  `LIVE-PTR-COUNT scanned=11 inside=1` with only `decode.unpacked_buffer
+  off=+0` (the destination), and `BEFORE`/`AFTER dst+272=0x42`/`0x43`,
+  `dst+304=0x4141414141414141` unchanged. `RESULT PASS` three times in-tree
+  and once from clean `git archive HEAD` at `2f1554d` (symlinks to gitignored
+  `src/`, `build-vuln-plain/`, `bin-vuln-plain/`). The check uses equal-length
+  input paths: a longer path makes even S=66 abort, a preserved caveat. Both
+  copies stop short of W171's live scratch pointers; no survivable copy
+  reaches one, no pointer/IP/command, no grade change, rung 5 UNKNOWN. OIIO
+  was separately closed as a static-source negative by W173.
+- **FLTK W5, real X11 GUI consumer (`67436e5`)**: from
+  `lab/frontier/fltk2shell/gui-consumer`, `sh build.sh && sh run.sh` against
+  the prebuilt plus1632/plus1647 ASan trees. `run.sh` starts its own
+  `Xvfb :177 -screen 0 640x480x24 -nolisten tcp` (refuses if occupied), then
+  attaches a benign 2x8 BMP to an `Fl_Box` in a real `Fl_Double_Window` and
+  pumps five `Fl::wait(0.05)` cycles; all four cases print
+  `GUI RESULT shown draw_count=1 safe=2x8 depth=3` before the crafted load.
+  Expect `vuln-crafted rc=134` with ASan `WRITE of size 1`, 2 bytes before a
+  4294967298-byte region at `Fl_BMP_Image.cxx:490` via `:64` →
+  `fl_images_core.cxx:99` → `Fl_Shared_Image.cxx:304`/`:144`/`:594` →
+  `gui.cxx:46`, and rc 0 for vuln-safe, fixed-crafted and fixed-safe. Input
+  pins: `135edc0a…13008` (poc-chosen.bmp), `031fb41f…99cb0a6` (safe.bmp),
+  `b84e070c…853bc` (gui.cxx, confirmed by a fresh local `sha256sum` and the
+  tracked `inputs.sha256`). Receipt-keeping NIT: the same directory's README
+  quotes a different `gui.cxx` hash (`bb7e4c23…da0da0`); that receipt needs
+  the FLTK author's repair and neither hash is asserted here beyond the
+  recomputed local value. The fault is at image load, before draw; author-only
+  and UNWITNESSED — witness #3296 covers only the four-tree direct-call
+  matrix. ICO is a measured negative; no cache-hit reload, wire, pointer/IP,
+  command or rung 5.
+- **FontForge W2, chosen bytes in the real `Import()` process (`1f26ade`)**:
+  two plain Debug trees with `-DENABLE_SANITIZER=none` (`build-plain/`,
+  `build-fixed-plain/`). Run `gdb -batch -x gdb-real-plain.cmd
+  ./build-plain/bin/fontforge` with the pinned 296-byte `truncated.pcf`: a
+  hardware watchpoint on `*(int*)((char*)encs-4)` shows `glyph=-1, i=3`,
+  `Old value = 0`, `New value = 5458253` (`0x53494d`) and
+  `x/4xb &encs[-1]` = `4d 49 53 00` (three chosen bytes; the fourth is zero
+  for these field values). Plain vulnerable rc 134 `double free or corruption
+  (out)` (`3021d38c…c53f`), patched rc 0 (`60f02f95…e482`), vulnerable
+  complete-table rc 0 (`ce8173e7…4eaf`); transcript `gdb-real-plain.out`
+  sha256 `8d704e5d…35431`. The ASan-binary gdb attempt is a preserved
+  negative: it reached `glyph=-1` and printed RHS `0x53494d` but never
+  exposed a post-write byte. Author-only, UNWITNESSED; #3309's ESTABLISHED
+  scope is the direct-call/in-memory-table/stand-in-struct matrix. GUI
+  `Import()`, other loaders, pointer/IP, command, ASLR/grooming and r5
+  UNKNOWN.
+- **Jq adjacent advisory disposition (`2bcdde2`)**: operator DM #3419
+  (07:37Z) screened GHSA-cfh2-vwfq-qfmm (`--rawfile` invalid-state reuse after
+  a handled "String too long", High 7.1, affected `<=1.8.1`, fixed 1.8.2)
+  **NOT admitted**: file-facing path, no advisory RCE claim, and the published
+  sparse-file PoC needs ~4.2 GB peak RSS against this slice's 2 GiB guard.
+  No seed wall, charter, staged replay or window; a named negative, not a
+  research result. `cd lab/frontier/jq2shell && sha256sum -c PINS.sha256`
+  (paths are lane-relative) gives 14/14 OK. No build, large run, guard
+  change, replay or grade change. Re-offer only with a measured lower-memory
+  trigger or a web-reachable vector plus standing-#6 replay.
+- **Cjose W191 replay-delivery repair (`32b39fa`)**: the commit changes only
+  `lab/frontier/cjose2shell/PROVENANCE.md` § W191. The optional replay offers
+  from W186 (#3105), W187 (#3141) and W188 (#3232) had no verdict and were
+  absent from the witness wall's open items, so each was re-delivered once as
+  chat #3429 with commits, recipes and the unchanged rung-4-only ceiling.
+  No new experiment, build, input, listener, hash, witness verdict or grade
+  change; W184's mod_auth_openidc negative alone is witness-ESTABLISHED
+  (#3079), and author results are never acceptance.

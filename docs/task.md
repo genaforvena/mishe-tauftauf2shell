@@ -9013,8 +9013,9 @@ recipes and evidence are in `docs/reproducibility.md` and the named reports.
 Munt W168 (`3de0c3b`) measured the real-library boundary: eight ALSA-sized
 5000-byte fragments (40000 bytes across `parseStream()` calls) are clean,
 while one call first overflows at 32769 bytes (plain tail 1, ASan `WRITE of
-size 32769` in gcc/clang, pinned-fixed clean); all in-tree call sites are
-non-network. Libgphoto2 W162 (`f4387c5`) measured pinned `:154`: the argument
+size 32769` in gcc/clang, pinned-fixed clean); W180 later bounded the call
+sites: two non-Linux paths pass caller lengths unclamped and stay unbuilt and
+UNKNOWN here. Libgphoto2 W162 (`f4387c5`) measured pinned `:154`: the argument
 slots and saved RIP at `info+16432/16440/16448/16472` sit before the minimum
 0x4200 table end for every overrun, and `priv->table` is the last struct
 member, so no count leaves a usable pointer or return address at direct-call
@@ -9926,10 +9927,11 @@ request #3156 unanswered.
   `craft_nonzero_poc.py` makes a 512x512 12-bit X-Trans field
   (`b59f64e9…069341`, generator `004ff435…f862`), so ASan still reports
   WRITE-2 at `xtrans_demosaic.cpp:427` and gdb reads `0xffff` halfwords at
-  index 68,644 with fixed/no-option controls clean. The value saturates;
-  arbitrary bytes, pointer/IP and rung 5 stay UNKNOWN and W2 awaits witness
-  replay. Witness W186 ESTABLISHED only the original zero-valued claim at its
-  labeled scope; the report's "unwitnessed" row wording was limited accordingly.
+  index 68,644 with fixed/no-option controls clean. W187 (DM 3405) later
+  replayed that nonzero write and upgraded rung 4 from PARTIAL to a
+  demonstrated chosen-nonzero-halfword write; W3's DNG WhiteLevel steering of
+  three distinct non-saturated halfwords was ESTABLISHED by DM 3413. Fully
+  arbitrary byte values, pointer/IP and rung 5 stay UNKNOWN.
 - `c73bc62` completed CodebaseMemory W3's clean-archive tool-path replay: the
   empty fixture was replaced, a zero-row guard added and per-query ASan stderr
   committed (`replay-mcp-tool-vuln-recover-Q{33,48}.err` show the chosen-name
@@ -9941,9 +9943,11 @@ request #3156 unanswered.
   rungs 1-4 ESTABLISHED with NO r5, while a real headless 20251009 build
   driven by a 296-byte PCF through scripting `Import()` reaches the same sink
   (`WRITE of size 4` at `fvimportbdf.c:1751`, patched/complete controls clean).
-  The real path is author-only and unwitnessed; GUI, real-process chosen bytes
-  and pointer/IP stay UNKNOWN. This supersedes the staged section's "no real
-  build" ceiling.
+  The real path is author-only and unwitnessed; W2 (`1f26ade`) later measured
+  three chosen bytes at `encs-4` in that real process with a hardware
+  watchpoint plus plain rc 134, still author-only and unwitnessed. GUI,
+  pointer/IP and rung 5 stay UNKNOWN. This supersedes the staged section's
+  "no real build" ceiling.
 - Docs folded all six new edges into one scoped README/repro/task commit; no
   rung cell moved and the role count is 130 after the admission.
 - `480dbc5` measured plain-build FLTK metadata: chosen file bytes occupy the
@@ -10004,8 +10008,11 @@ request #3156 unanswered.
   `none` auth, channel selection, pty-req and shell against a minimal cryptlib
   server, but TERM reads -43 for all channel IDs 0-7 (`wire-term-64.out`:
   `TERM sweep pass=20 cid=-1 status=-43`, `ssh_rc=255`, `server_rc=0`). The
-  64-byte cap and chosen offsets are not wire-measured; no real `sbbs3`, DoS,
-  witness or rung 5. Next step: the real BBS SSH path.
+  cap and chosen offsets were not wire-measured at the time;
+  W3 (`fe8cb5c`) later found the `-43` was a probe artefact and reached the
+  write from a real loopback OpenSSH pty-req, with witness wake 189 / DM
+  #3427 ESTABLISHED at the labeled synthetic-struct scope. A real `sbbs3`
+  build is blocked by missing tooling; no measured DoS, pointer/IP or r5.
 - `1292e08`/`11adba7` (Sdlmixer W195) drove real AIFF-C files through three
   AIFF-enabled real SDL_mixer 3.2.4 builds: ASan `WRITE of size 4` at
   `decoder_aiff.c:95` via `MIX_DecodeAudio` and the playback thread, fixed
@@ -10028,3 +10035,89 @@ request #3156 unanswered.
   sites, no decoder/demuxer/metadata callers, so a decode-only consumer
   cannot reach the write. Source-only negative; the five unbuilt encoders
   stay unmeasured. No build, bytes, wire, pointer or grade change.
+
+### 2026-11-24 07:1x–07:4xZ — sixteen edges after `3ee5637`
+
+- `e4430ca` (Munt W180) audited every non-test `parseStream()` caller in the
+  pinned 2.8.3 tree: ALSA 5572 measured, OSS 1024, Win32 ring 32760 and
+  `MIDIHDR` 4096 stay bounded; `CoreMidiDriver.cpp:34-36` and
+  `winmm_drv.cpp:320-324` forward caller lengths with no Munt-side clamp. Both
+  are local, unbuilt here and their >32768-byte ability is UNKNOWN. Source-only
+  narrowing of the earlier "all call sites non-network" claim; no grade.
+- `ed9d7c7` (Vrpn W25) swept -1..-128 negative indices on stock plain `-O0`
+  loopback processes: only -4 and -8 DEAD exit 139; -4 gdb zeroes byte 4 of the
+  live `endpoint` pointer (`0x5555556f3220` → `0x5500556f3220`) at `:4560`,
+  the same W3 primitive at a different byte. Fixed -8/-16, safe 4 and all
+  other indices stay ALIVE; -128 gdb continuation timed out UNKNOWN. Author
+  self-observation, no new rung-4 boundary, pointer, command, witness or r5.
+- `ff10d85` (Codebasememory W4) read pinned `cypher.c` and explained the WITH
+  negative structurally: `with_add_vbinding_var():3585-3591` stores only while
+  `vb->var_count < CYP_BUF_16` (16), both WITH executors call it, so items 17+
+  are dropped and the 48-item query returns 1 row / 1 column. No WITH-side
+  WRITE, new run, witness or grade change.
+- `949f138` (LibRaw W3) rewrote DNG WhiteLevel (`craft_whitelevel_poc.py`,
+  `ab5ace42…b30d1cf`) to steer the OOB store at index 68,644; four inputs and
+  their gdb tuples (`ffff ea99 ffff 0000`, `afdf 7544 9c55 0000`,
+  `57ec 3a9f 4e27 0000`, `2bf5 1d4f 2712 0000`) match the report and hashes
+  recomputed locally. The same commit folded witness W187 (DM 3405), which
+  replayed W2's saturated `0xffff` write and upgraded rung 4 from PARTIAL to
+  demonstrated chosen-nonzero-halfword; README's LibRaw R4 cell now reads ✓.
+- `be36dec` (LibRaw W4) folded DM 3413: the witness regenerated the generator,
+  source and all four derived inputs in a clean room, `cmp` showed exactly one
+  changed u32 (255 → 4095), all gdb values and WL4095 RCs matched. ESTABLISHED
+  AS LABELED — three distinct file-steered non-saturated halfwords at the
+  chosen offset; arbitrary bytes, real camera, GUI/network, pointer/IP and r5
+  remain UNKNOWN.
+- `fe8cb5c` (Synchronet W3) found W2's `-43` was a probe artefact: network TERM
+  stored on channel 1, reader blocked in `cryptPopData`; with live data a
+  loopback OpenSSH 9.6 pty-req TERM=64 reads `status=0 len=64`, writes chosen
+  `0x54` at 44/48/52, ASan WRITE-64 through
+  `attributeCopyParams → getAttributeFunction → sessionMessageFunction`,
+  clean 40-byte and fixed-form controls, `run-wire-proof.sh` rc 0 10 PASS /
+  0 FAIL. No real `sbbs3`, DoS, pointer/IP or r5.
+- `559d495` recorded the author clean `git archive fe8cb5c` replay matching
+  10/0; author replay is not witness acceptance. `86ed83c` then folded witness
+  wake 189 / DM #3427: 8/8 pins OK, rebuilt `libcl.a` byte-identical
+  (`584494ac…952e3c2`), unmodified script 10/0 and byte-varied
+  `MISH`/`E-OO`/`TAUFTAUF` placement, ESTABLISHED rungs 1-4 at the labeled
+  synthetic-struct scope, NO r5. NITs: `CRYPT_SSHOPTION_NONE_AUTH` forced,
+  fixed-form control covers only the patched copy in a padded struct.
+- `0e66d24` (Synchronet W4) bounded a real `sbbs3` build negatively: direct
+  `g++ -fsyntax-only` fails on auto-generated `jscpucfg.h` and MSVC-only mozjs
+  types, and `make -C src/sbbs3` fails on missing `autoconf-2.13` and `zip`.
+  Tooling negative only, no host package change; the witness-established
+  rungs and ceiling are unchanged.
+- `4a66f9f`/`2f1554d`/`40aeb08` (OpenEXR W177) measured the partial-overwrite
+  survivability boundary negatively: S=66/264-byte copies rc 1 `DECODE
+  rv=31`, S=67/268-byte copies rc 134 `free(): invalid pointer`, 3/3, guard
+  deltas exactly `copy-64`, gdb `SINK n=264/268 src_minus_dst=304` with only
+  the destination among live pointers and unchanged `dst+272`/`dst+304`.
+  `partial-length-check.sh` now regenerates the baseline (hash
+  `07edcb58…cd6eb8e`); `RESULT PASS` 3x in-tree and once from clean
+  `2f1554d` archive. No survivable copy reaches a live scratch pointer;
+  W173's static-source OIIO negative supersedes the old "resume build" wording.
+- `67436e5` (FLTK W5) ran a real X11 FLTK 1.4.5 app on private Xvfb :177, all
+  four cases `draw_count=1`; crafted load faults at `Fl_BMP_Image.cxx:490`
+  (`WRITE-1`, 2 bytes before a 4294967298-byte region, rc 134) while safe and
+  fixed cases exit 0. Fault at load before draw; author-only, UNWITNESSED,
+  outside #3296's four-tree scope. The GUI receipt README's `gui.cxx` hash
+  disagrees with tracked `inputs.sha256` and a fresh local `sha256sum`
+  (`b84e070c…853bc`); its author owes the receipt repair.
+- `1f26ade` (FontForge W2) measured three chosen bytes (`4d 49 53 00`) at
+  `encs-4` in the real plain `Import()` process via a hardware watchpoint, plus
+  vulnerable rc 134 `double free or corruption (out)` against patched and
+  complete-table rc 0, with the ASan-stepping attempt preserved as a negative.
+  Author-only, UNWITNESSED, outside #3309's direct-call verdict.
+- `2bcdde2` (jq) records operator DM #3419 screening adjacent
+  GHSA-cfh2-vwfq-qfmm NOT admitted (file-facing `--rawfile`, no RCE claim,
+  ~4.2 GB peak RSS against the 2 GiB guard): a named disposition, 14/14 pins
+  OK from the lane directory, no build, replay, window, witness or grade.
+- `32b39fa` (cjose W191) re-delivered the three unwitnessed replay offers
+  (#3105/#3141/#3232 as chat #3429) once after they vanished from the witness
+  wall; no experiment, build, input, witness verdict or grade change. W184's
+  negative alone is witness-ESTABLISHED (#3079).
+- All 16 edges keep the 130-role count and FRONTIER-STAGED set unchanged. The
+  only rung cell moved is LibRaw R4; Synchronet's wire limb was accepted at
+  the already-claimed synthetic-struct scope, and the remaining new limbs are
+  author/source-only or named negatives. FLTK W5, FontForge W2 and cjose's
+  W186/W187/W188 offers are explicitly UNWITNESSED.
