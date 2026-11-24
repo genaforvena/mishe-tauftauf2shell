@@ -23,6 +23,7 @@ FILES = {
     "/manyband.tif": open(os.path.join(REAL, "manyband.tif"), "rb").read(),
     "/safe.tif": open(os.path.join(REAL, "safe.tif"), "rb").read(),
     "/tiff9999.tif": open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "tiff9999.tif"), "rb").read(),
+    "/fine.tif": open(os.path.join(REAL, "fine.tif"), "rb").read(),
 }
 
 
@@ -85,7 +86,8 @@ def main():
         for name, path in (("safe", "rs:fill:16:16/plain/safe.tif"),
                            ("manyband", "rs:fill:16:16/plain/manyband.tif"),
                            ("manyband_tiff", "rs:fill:16:16/f:tiff/plain/manyband.tif"),
-                           ("tiff9999_tiff", "rs:fill:16:16/f:tiff/plain/tiff9999.tif")):
+                           ("tiff9999_tiff", "rs:fill:16:16/f:tiff/plain/tiff9999.tif"),
+                           ("fine_tiff", "rs:fill:16:16/f:tiff/plain/fine.tif")):
             started = time.monotonic()
             status, body, err = "-", "", ""
             try:

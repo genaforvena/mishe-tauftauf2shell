@@ -145,3 +145,46 @@ fixed `safe=200` and all crafted cases `500` with `image: dimension overflow`.
 The replay output is in `/tmp/imgproxy2shell-replay.mTCwcl/` (throwaway; not
 committed). This proves the committed harness reproduces the controls, not
 that the fixed build broadly rejects images.
+
+## W2 — fine-geometry TIFF over imgproxy HTTP (2026-11-24, DM #3259)
+
+Bounded response to libvips2shell W16, which moved the negative-offset WRITE
+from `bpl=-7296` (unmapped) to `bpl=-16` (the live vips tracked-size field)
+using a fine geometry: width 89478485, height 2, 12 bands, 32-bit samples,
+`ls=4294967280=2^32-16`. Its `real/fine.tif` (154 B,
+`sha256=c3e12050213321d5f4f87b4fcac487a0b6588292c92020611bac33f586157d44`)
+was served over the same loopback-only HTTP path as W1; no new target, no
+library-side tree was edited.
+
+`provision/http_probe.py` gained `/fine.tif` and a `fine_tiff` case
+(`rs:fill:16:16/f:tiff/plain/fine.tif`); new script digest
+`sha256=fd47010a936daec8cab90c520079b21d02df7d9952807a39350e60d061dbc63d`.
+Both binaries and libvips trees are W1's. Per-request timeout 8 s; both legs
+used 127.0.0.1:18080/18081 only.
+
+- Vulnerable 8.18.2 (`http-w2fine-vuln.log`,
+  `sha256=e7f4465138f99acdec5a2e2a0eb56b169dea0fb5b5cda545e8b554343c855fd1`):
+  `safe=200` in 0.01 s; `manyband=500` in 0.01 s (flatten blocker);
+  `manyband_tiff`, `tiff9999_tiff`, `fine_tiff` all `TimeoutError` at 8.06-8.09 s.
+- Fixed 8.18.2+patch (`http-w2fine-fixed.log`,
+  `sha256=014cafbe13663cc3b25ac14dad431c2d7a4cd225ec58236433a85dec73b3b659`):
+  `safe=200`; all crafted cases `500` in <2 ms. For `fine.tif` the log line
+  `Completed in 516.009µs ... status=500 error="image: dimension overflow"`
+  stacks through `vips.(*Image).Load ... vips/vips.go:298` and
+  `initialLoadImage ... processing.go:161`.
+
+Structural endpoint blocker (pinned v4.0.0 source, read-only):
+`vips/vips.go:314-334` implements `LoadThumbnail` for HEIC/AVIF only;
+`imagetype/defs.go:144-156` sets TIFF `SupportsThumbnail: false`;
+`processing/scale_on_load.go:29-42` allows shrink-on-load only for JPEG,
+WEBP and thumbnail-capable formats. TIFF has no reduced or lazy load route
+through imgproxy, so a line size of `2^32-16` forces the same full memory
+image (4,294,967,280 B/line × 2 lines ≈ 8.59 GB) whose zero-fill stall
+libvips2shell W7/W8 measured under this 2 GiB wake cgroup. The fine `bpl=-16`
+does not make the paint path reachable from the HTTP endpoint here. No
+region/paint frame, allocator-field overwrite, pointer, marker side effect,
+ASan report or witness verdict was observed in the imgproxy process. Host
+memory limits were not changed and no longer-timeout retry was attempted.
+Grade unchanged: ICO lane rungs 1-4; TIFF consumer limb rung 4 at header and
+processing entry only; rung 5 UNKNOWN. Preserved as a measured negative for
+this endpoint route.
