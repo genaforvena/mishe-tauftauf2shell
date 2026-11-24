@@ -1,0 +1,8 @@
+/vuln-asan
+/vuln-plain
+/fixed-asan
+/fixed-plain
+/vuln-asan-fp
+/evidence/
+/replay.log
+*.out
