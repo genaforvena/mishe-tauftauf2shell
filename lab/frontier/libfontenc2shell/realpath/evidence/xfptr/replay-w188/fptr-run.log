@@ -1,0 +1,4 @@
+benign_marker=00000000004011d6 words=11d6 40 0 0
+vuln-crafted rc=0
+vuln-safe rc=0
+fixed-crafted rc=0

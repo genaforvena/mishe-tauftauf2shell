@@ -260,6 +260,20 @@ reach. Reordering mapping types did not change that. Rung 4 memory control in
 a live server, not control-flow diversion there, not a command, not remote
 input, not privileged context; witness has not replayed W187.
 
+W188 (2026-11-24) replayed W186/W187 from a clean `git archive HEAD` at
+`7091755`. W186 matched exactly. W187's committed runner did **not**: it
+hardcoded map n=3 as the post-buffer target, while the clean layout put
+n=1..4 before the buffer; two intermediate runner variants failed by letting
+the target's own `ENDMAPPING` reinitialise its recode or by moving buffer
+allocation to the word mappings. The committed runner now selects the first
+post-buffer map and keeps an early `0xff00` decoy that allocates the buffer
+during mapping 2. The final clean replay targeted n=5 at the same
+buffer+0x20050 offset, wrote the marker address into its recode in both
+crafted runs, left vulnerable-safe and fixed controls clean, and again saw
+zero marker calls with `FontEncRecode` invoked only on m1. Receipts and all
+three negatives are in `realpath/evidence/xfptr/replay-w188/`; this is an
+author replay, not a witness verdict, and the grade is unchanged.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -294,8 +308,8 @@ input, not privileged context; witness has not replayed W187.
   overwrite of a live function pointer inside Xvfb, but libXfont2 recodes only
   m1 (allocated before the buffer), so the hijacked pointer is never invoked:
   control-flow diversion in the live server is blocked by consumer behaviour.
-  The witness replay (#2867) covered the earlier scopes only; W183, W186 and
-  W187 have not been witness-replayed. The row-1024 plain crash is service
+  The witness replay (#2867) covered the earlier scopes only; W183, W186,
+  W187 and W188 have not been witness-replayed. The row-1024 plain crash is service
   loss, not execution. A layout-independent redirect is blocked: with ASLR on,
   heap low 12 bits are stable but bits 12-15 vary across runs, while `setCode()`
   writes full 16-bit words from a static file. Rung 5 is UNKNOWN.
@@ -330,5 +344,6 @@ setuid X server and no active display-manager unit were found, so that
 precondition is not demonstrable here. Layout-independent redirect is blocked
 by ASLR randomizing heap bits 12-15 against 16-bit static-file stores. Both
 witness verdicts are folded; the witness owes no evidence on earlier scopes
-and has not replayed W183, W186 or W187. Full commands, negatives and
-counterexamples are in `PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186/W187.
+and has not replayed W183, W186, W187 or W188. Full commands, negatives and
+counterexamples are in `PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186/W187/W188
+and `realpath/evidence/xfptr/replay-w188/`.

@@ -1,0 +1,250 @@
+ARCHIVE vuln 7418fa7a77d1faf795ae40ea92f9ec2828e2a0b9 -> /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln/out-plain
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln/out-plain'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln/out-asan
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+libfontenc 1.1.9
+
+  User defined options
+    b_sanitize: address
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-vuln/out-asan'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+ARCHIVE fixed 5920c6ee144fffff84b62f5b479171f734f15316 -> /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed/out-plain
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed/out-plain'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed/out-asan
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+libfontenc 1.1.9
+
+  User defined options
+    b_sanitize: address
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-fixed/out-asan'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+ARCHIVE 1.1.9 libfontenc-1.1.9 -> /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9/out-plain
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9/out-plain'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9/out-asan
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.9
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Build targets in project: 1
+
+libfontenc 1.1.9
+
+  User defined options
+    b_sanitize: address
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.9/out-asan'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+ARCHIVE 1.1.10 libfontenc-1.1.10 -> /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10/out-plain
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.10
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Program pytest found: YES (/home/mesh-home/.local/bin/pytest)
+Build targets in project: 2
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10/out-plain'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+The Meson build system
+Version: 1.3.2
+Source dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10
+Build dir: /tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10/out-asan
+Build type: native build
+Project name: libfontenc
+Project version: 1.1.10
+C compiler for the host machine: cc (gcc 13.3.0 "cc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0")
+C linker for the host machine: cc ld.bfd 2.42
+Host machine cpu family: x86_64
+Host machine cpu: x86_64
+Compiler for C supports arguments -fno-strict-aliasing: YES 
+Found pkg-config: YES (/usr/bin/pkg-config) 1.8.1
+Run-time dependency fontutil found: YES 1.3.1
+Run-time dependency zlib found: YES 1.3
+Run-time dependency xproto found: YES 7.0.33
+Checking for function "reallocarray" : YES 
+Configuring config.h using configuration
+Program pytest found: YES (/home/mesh-home/.local/bin/pytest)
+Build targets in project: 2
+
+libfontenc 1.1.10
+
+  User defined options
+    b_sanitize: address
+
+Found ninja-1.13.2.git.kitware.jobserver-pipe-1 at /home/mesh-home/.local/bin/ninja
+ninja: Entering directory `/tmp/lf2s-w188-clean/lab/frontier/libfontenc2shell/build-1.1.10/out-asan'
+[1/3] Compiling C object libfontenc.so.1.0.0.p/src_fontenc.c.o
+[2/3] Compiling C object libfontenc.so.1.0.0.p/src_encparse.c.o
+[3/3] Linking target libfontenc.so.1.0.0
+=== public API matrix ===
+vuln-plain-safe rc=0: FontEncFind=0x59cce5fc8270
+vuln-plain-crafted rc=0: FontEncFind=0x55c349915270
+vuln-asan-safe rc=0: FontEncFind=0x504000000010
+vuln-asan-crafted rc=1: ==4048569==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x70f5e28f69fc at pc 0x70f5e3139e3b bp 0x7fff5d936420 sp 0x7fff5d936410
+fixed-plain-safe rc=0: FontEncFind=0x5ea6bff2d270
+fixed-plain-crafted rc=0: FontEncFind=0x58e228b46270
+fixed-asan-safe rc=0: FontEncFind=0x504000000010
+fixed-asan-crafted rc=0: FontEncFind=0x504000000010
+1.1.9-plain-safe rc=0: FontEncFind=0x58e497bb7270
+1.1.9-plain-crafted rc=0: FontEncFind=0x563a75cbb270
+1.1.9-asan-safe rc=0: FontEncFind=0x504000000010
+1.1.9-asan-crafted rc=1: ==4048630==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7e491574e9fc at pc 0x7e49158c0e5b bp 0x7ffcffdee6f0 sp 0x7ffcffdee6e0
+1.1.10-plain-safe rc=0: FontEncFind=0x5cd9ac8a3270
+1.1.10-plain-crafted rc=0: FontEncFind=0x581c2ba15270
+1.1.10-asan-safe rc=0: FontEncFind=0x504000000010
+1.1.10-asan-crafted rc=0: FontEncFind=0x504000000010
+=== live Xvfb matrix ===
+vuln safe client_rc=0 asan_logs=0 
+fixed safe client_rc=0 asan_logs=0 
+vuln crafted client_rc=1 asan_logs=1 
+fixed crafted client_rc=0 asan_logs=0 
+1.1.9 crafted client_rc=1 asan_logs=1 
+1.1.10 crafted client_rc=0 asan_logs=0 

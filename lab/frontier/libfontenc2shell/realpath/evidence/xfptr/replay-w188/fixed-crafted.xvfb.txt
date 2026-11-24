@@ -1,0 +1,20 @@
+# fixed-crafted — filtered distinctive lines from raw Xvfb stderr
+# recode_call_count=131073
+# marker_call_count=0
+LF_FIND charset=crafted-1 enc=0x55555584b440
+LF_FIND_MAP n=10 m=0x5555559493b0 recode=0x7ffff7fb2891
+LF_FIND_MAP n=11 m=0x555555949410 recode=0x7ffff7fb2891
+LF_FIND_MAP n=12 m=0x555555949470 recode=0x7ffff7fb2891
+LF_FIND_MAP n=1 m=0x55555584b4a0 recode=0x7ffff7fb2891
+LF_FIND_MAP n=2 m=0x55555584b730 recode=0x7ffff7fb2891
+LF_FIND_MAP n=3 m=0x55555584b790 recode=0x7ffff7fb2891
+LF_FIND_MAP n=4 m=0x55555584b810 recode=0x7ffff7fb2891
+LF_FIND_MAP n=5 m=0x555555949150 recode=0x7ffff7fb2891
+LF_FIND_MAP n=6 m=0x5555559491d0 recode=0x7ffff7fb2891
+LF_FIND_MAP n=7 m=0x555555949250 recode=0x7ffff7fb2891
+LF_FIND_MAP n=8 m=0x5555559492d0 recode=0x7ffff7fb2891
+LF_FIND_MAP n=9 m=0x555555949350 recode=0x7ffff7fb2891
+LF_MARKER_ADDR=0x7a3b19eaf159
+LF_MARKER_ADDR=0x7ffff7fb9159
+LF_RECODE_MAP=0x55555584b4a0
+Errors from xkbcomp are not fatal to the X server

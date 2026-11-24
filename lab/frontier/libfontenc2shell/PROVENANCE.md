@@ -484,3 +484,39 @@ a live server is demonstrated; control-flow diversion there is not. No
 command, remote input or privileged context, and rung 5 stays UNKNOWN. The
 runner recalibrates because the LD_PRELOAD path length shifts the heap by
 0x20 between environments. Witness has not replayed W187.
+
+## W188 clean-archive replay of W186/W187 and runner repair (2026-11-24 01:57Z)
+
+From `git archive HEAD lab/frontier/libfontenc2shell` at `7091755` into
+`/tmp/lf2s-w188-clean`, `LF2S_SRC=/tmp/libfontenc-src sh ./rebuild.sh`
+rebuilt all eight libraries and matched the W155/W156 matrix. W186 replayed
+exactly: `benign_marker=0x4011d6`, vulnerable crafted `m3 recode=0x4011d6`,
+`BENIGN_MARKER_EXECUTED`, return `0xabcd1234`, other mappings untouched,
+rc 0; safe and fixed clean.
+
+W187 did **not** replay from the committed script. Calibration chose the
+hardcoded `LF_FIND_MAP n=3`, but in this layout n=1..4 are before the buffer
+and n=5 is the first map after it: `idx=-1064656` and no overwrite. A second
+attempt with dynamic n=5 selection produced `idx=65584` but mapping n=5's own
+`ENDMAPPING` reinitialised `recode` after the first two word writes, so the
+pointer stayed at the library address. A third attempt with eight `0x0000`
+decoys moved buffer allocation to the first word mapping; the first
+post-buffer map became n=10 and the runner's explicit assertion stopped it.
+All three negatives are preserved in
+`realpath/evidence/xfptr/replay-w188/failed-*.txt`.
+
+The committed `xlive/run-xfptr.sh` now keeps eight decoys but restores decoy
+#2's `0xff00` code (which allocates the 131072-byte buffer during mapping 2)
+and selects the first `n>=3` map above the buffer, requiring it to precede
+the four word mappings. Final clean replay:
+`target=n5 m3=0x555555a73590 buffer=0x555555a53540 idx=65584`,
+`m3_recode=0x7ffff7fb9159` (the marker) in both vulnerable crafted runs,
+`0x7ffff7fb2885` in vulnerable safe, `0x7ffff7fb2891` in fixed `5920c6e`,
+zero marker calls, `recode_targets=0x55555584b4a0` (m1) in every case, no
+crash, no Xvfb left. Full receipts and commands:
+`realpath/evidence/xfptr/replay-w188/REPLAY.md`.
+
+No grade change. The map number is layout-dependent (n=3 in W187, n=5 here),
+but the same offset from the buffer and the same consumer limit hold: the
+overwritten pointer is not invoked in Xvfb. This is an author replay, not a
+witness verdict; the witness has not replayed W183, W186, W187 or W188.

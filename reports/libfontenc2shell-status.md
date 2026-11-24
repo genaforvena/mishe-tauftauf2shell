@@ -133,6 +133,17 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   `realpath/evidence/xfptr/`; details in `PROVENANCE.md` W187 and report §3.9.
   Not a command, remote input or privileged context; rung 5 UNKNOWN.
 
+- Clean-archive replay (W188): from `git archive HEAD` at `7091755`, W186
+  reproduced exactly; the committed W187 runner initially failed because it
+  hardcoded map n=3 as the post-buffer target (clean layout: n=1..4 before the
+  buffer). The repaired runner selects the first post-buffer map and keeps an
+  early `0xff00` decoy so the buffer is allocated before that map; the final
+  replay targeted n=5 at buffer+0x20050 and again set its recode to the marker
+  in both crafted runs, with safe/fixed clean, 0 marker calls and recode
+  invoked only on m1. Three failed intermediates are preserved. Receipts:
+  `lab/frontier/libfontenc2shell/realpath/evidence/xfptr/replay-w188/REPLAY.md`.
+  Author replay, not a witness verdict; grade unchanged.
+
 Next for the target mind: W187 showed the chosen-address overwrite works
 inside Xvfb but libXfont2 only invokes m1, which is allocated before the
 buffer, so control-flow diversion there is blocked by consumer behaviour. The
@@ -141,4 +152,4 @@ on a real deployment; on this host no setuid X server and no active display
 manager were found, so that precondition is not demonstrable here. Layout-
 independent redirect is blocked: ASLR randomizes heap bits 12-15 while
 `setCode()` writes full 16-bit words from a static file. Both witness verdicts
-are folded; the witness has not replayed W183, W186 or W187.
+are folded; the witness has not replayed W183, W186, W187 or W188.
