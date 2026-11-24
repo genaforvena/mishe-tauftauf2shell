@@ -1,0 +1,26 @@
+-- Configuring SDL3_mixer 3.2.4
+-- SDL3_mixer backends:
+-- - enabled:  aiff
+-- - disabled: opus vorbis_stb vorbis_tremor vorbis_vorbisfile flac_libflac flac_drflac gme mod_xmp mp3_drmp3 mp3_mpg123 midi_fluidsynth midi_timidity wave voc au wavpack
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/mixer-aiff-vuln-asan-build
+ninja: no work to do.
+-- Configuring SDL3_mixer 3.2.4
+-- SDL3_mixer backends:
+-- - enabled:  aiff
+-- - disabled: opus vorbis_stb vorbis_tremor vorbis_vorbisfile flac_libflac flac_drflac gme mod_xmp mp3_drmp3 mp3_mpg123 midi_fluidsynth midi_timidity wave voc au wavpack
+-- Configuring done (0.1s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/mixer-aiff-fixed-asan-build
+[1/2] Building C object CMakeFiles/SDL3_mixer-static.dir/src/decoder_aiff.c.o
+[2/2] Linking C static library libSDL3_mixer.a
+-- Configuring SDL3_mixer 3.2.4
+-- SDL3_mixer backends:
+-- - enabled:  aiff
+-- - disabled: opus vorbis_stb vorbis_tremor vorbis_vorbisfile flac_libflac flac_drflac gme mod_xmp mp3_drmp3 mp3_mpg123 midi_fluidsynth midi_timidity wave voc au wavpack
+-- Configuring done (0.0s)
+-- Generating done (0.0s)
+-- Build files have been written to: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/mixer-aiff-vuln-nossp-build
+ninja: no work to do.
+BUILD_OK

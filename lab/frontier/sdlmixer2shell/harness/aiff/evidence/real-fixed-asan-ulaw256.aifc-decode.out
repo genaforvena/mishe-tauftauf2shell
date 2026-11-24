@@ -1,0 +1,5 @@
+MODE=decode PATH=ulaw256.aifc AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=1 framesize=4
+DECODE round=0 got=1024
+DECODE round=1 got=0
+RESULT=OK total=1024

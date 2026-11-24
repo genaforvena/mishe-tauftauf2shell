@@ -83,15 +83,23 @@ one fix line.
   `1bdfc38d601a558c6c600ca363293c73dcf446f87b8fb6e50ff1a1e9d43ad183`.
   Raw logs in `evidence/`.
 
-## Ceiling
+## Ceiling of the direct-call scope
 
 Direct call against the pinned source slice with lab stubs for AIFF IO, types
-and the conversion LUT. No SDL/SDL_mixer build for this lane, no AIFF-C file,
-no decoder/format-chunk setup, no consumer executed, no socket/wire delivery,
-no live process, no pointer or instruction-pointer control, no benign marker,
-no command, no witness verdict and no rung 5. The advisory's own threat model
-is `AV:L/UI:P` (crafted local AIFF-C file, passive victim). As with the WAV
-sibling, the primitive writes a fixed LUT float bit pattern chosen by an input
-byte — not an address derived from input — so control-flow steering is not
-claimed. Independent replay has been requested on the chat tape; this author
-result is not acceptance.
+and the conversion LUT: no SDL/SDL_mixer build *in this scope*, no consumer
+executed, no socket/wire delivery, no live process, no pointer or
+instruction-pointer control, no benign marker, no command, no witness verdict
+and no rung 5. The advisory's own threat model is `AV:L/UI:P` (crafted local
+AIFF-C file, passive victim). As with the WAV sibling, the primitive writes a
+fixed LUT float bit pattern chosen by an input byte — not an address derived
+from input — so control-flow steering is not claimed. Independent replay of
+this scope has been requested on the chat tape; this author result is not
+acceptance.
+
+The W195 extension in `REALAIFF.md` lifts the "no AIFF-C file / no real
+decoder build / no consumer" part by driving a crafted AIFF-C file through a
+real SDL_mixer 3.2.4 build with the AIFF decoder enabled (`check-real.sh`, 51
+PASS / 0 FAIL, trace
+`4d96b2b63ce8c86e73375d8c8ab685a494bea3b8de6a9d61d5ad18d101f9ffc8`). That
+is a separately labeled scope; it still claims no wire, pointer/IP, marker,
+command, witness verdict or rung 5.

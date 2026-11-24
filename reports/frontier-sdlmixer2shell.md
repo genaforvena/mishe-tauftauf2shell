@@ -304,11 +304,49 @@ on three runs, trace
 `1bdfc38d601a558c6c600ca363293c73dcf446f87b8fb6e50ff1a1e9d43ad183`, pins 3/3.
 Commands, full evidence and ceiling in `harness/aiff/AIFF.md`.
 
-This is author-observed rungs 1-4 for the **AIFF** CVE, unwitnessed, with the
-same direct-call ceiling (no AIFF-C file, real decoder build, consumer, wire,
-pointer control, marker or command) and the advisory's `AV:L/UI:P` threat
-model. It does not change the WAV charter grade. Witness replay requested on
-tape; no verdict yet.
+This is author-observed rungs 1-4 for the **AIFF** CVE at the direct-call
+scope, unwitnessed; it does not change the WAV charter grade. Section 4j
+extends the same CVE to a real AIFF-C file and a real SDL_mixer build as a
+separately labeled scope. Still no wire, pointer control, marker or command in
+either scope, and the advisory's threat model is `AV:L/UI:P`. Witness replay
+requested for the direct-call scope on tape; no verdict yet.
+
+## 4j. Real AIFF-C file through the real SDL_mixer decoder (W195, 2026-11-24)
+
+The pre-existing mixer builds disable the AIFF decoder, so three new
+`-DSDLMIXER_AIFF=ON` builds were made from already-provisioned sources: pinned
+release-3.2.4 (vulnerable ASan and no-stack-protector) and a copy with the
+`3448684` one-line fix applied to `decoder_aiff.c:93` only (fixed ASan). No
+external probe. `craft_aiff.py` emits five minimal AIFF-C/AIFF inputs with a
+real `COMM`/`SSND` layout; the A-law/mu-law compression type selects
+`FetchALaw`/`FetchULaw` in the real parser and 256 data bytes give
+`length=256`, `out=&buffer[1020]`, 1020 bytes of OOB stores. The committed
+`realwav_driver.c` drives real `MIX_CreateAudioDecoder`/`MIX_DecodeAudio`
+(decode) and `MIX_LoadAudio`/`MIX_PlayTrack` on the SDL dummy device (play).
+
+- Vulnerable ASan, decode: `alaw256.aifc` and `ulaw256.aifc` give
+  `stack-buffer-overflow`, `WRITE of size 4`, top frame
+  `FetchXLaw ... decoder_aiff.c:95:16` via `FetchALaw`/`FetchULaw` ->
+  `AIFF_decode:541` -> `MIX_DecodeAudio:3190`; ASan names `[32, 1056) 'buffer'
+  (line 535)`, access frame offset 1180. Fixed ASan returns `RESULT=OK
+  total=1024` on both; 8-byte, `raw ` and plain-AIFF controls are clean on all
+  builds; vulnerable no-stack-protector exits non-zero on both attack files.
+- Play mode: the vulnerable ASan report is on thread T1 through
+  `AIFF_decode -> DecodeMore:306 -> TrackGetCallback -> MixerCallback` and the
+  SDL playback thread; fixed and safe inputs are clean.
+- Rung 4, gdb at `decoder_aiff.c:95 if i == 1`: `length=256 i=1
+  out=buffer+1020`; after the store `buffer+1020..1027 = 00 00 00 00 c0 01
+  e0 ba`, the real A-law LUT word `0xbae001c0` selected by input byte `0x56`
+  at the first OOB offset — a conversion-table bit pattern, not an address.
+- `harness/aiff/check-real.sh`: **51 PASS / 0 FAIL** on three runs, normalized
+  trace `4d96b2b63ce8c86e73375d8c8ab685a494bea3b8de6a9d61d5ad18d101f9ffc8`;
+  pins 9/9 in `harness/aiff/REAL.sha256`. Commands, full evidence and the
+  ceiling are in `harness/aiff/REALAIFF.md`.
+
+Grade: author-observed rungs 1-4 in the real-file/real-decoder scope for the
+AIFF CVE, unwitnessed, distinct from the direct-call scope (§4i) and from the
+WAV charter. No wire, request-facing listener, pointer/IP, marker, command or
+rung 5. Independent replay requested on the chat tape; no verdict yet.
 
 ## 5. Next distinct rung move
 

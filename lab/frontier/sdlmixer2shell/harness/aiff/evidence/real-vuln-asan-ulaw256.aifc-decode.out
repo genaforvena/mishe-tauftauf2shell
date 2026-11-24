@@ -1,0 +1,54 @@
+MODE=decode PATH=ulaw256.aifc AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=1 framesize=4
+=================================================================
+==3555027==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7327b960049c at pc 0x5d3ef8bb0c75 bp 0x7ffcd9858920 sp 0x7ffcd9858918
+WRITE of size 4 at 0x7327b960049c thread T0
+    #0 0x5d3ef8bb0c74 in FetchXLaw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:95:16
+    #1 0x5d3ef8bb0079 in FetchULaw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:102:12
+    #2 0x5d3ef8badb6e in AIFF_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:541:20
+    #3 0x5d3ef8b9e932 in MIX_DecodeAudio /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:3190:14
+    #4 0x5d3ef8b8b368 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/realwav/realwav_driver.c:60:23
+    #5 0x7327bb02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7327bb02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5d3ef8ab19e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/evidence/aiff-driver-vuln-asan+0x349e4) (BuildId: ac7be8d9fadd3862816e626a326c911a5eb832a4)
+
+Address 0x7327b960049c is located in stack of thread T0 at offset 1180 in frame
+    #0 0x5d3ef8bad94f in AIFF_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:532
+
+  This frame has 1 object(s):
+    [32, 1056) 'buffer' (line 535) <== Memory access at offset 1180 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:95:16 in FetchXLaw
+Shadow bytes around the buggy address:
+  0x7327b9600200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600400: 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x7327b9600480: f3 f3 f3[f3]00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7327b9600700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3555027==ABORTING

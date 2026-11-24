@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x13386: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c, line 95.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+MODE=decode PATH=alaw256.aifc AUDIO_DRIVER=dummy MIX_DECODERS=3
+SPEC freq=8000 format=33056 channels=1 framesize=4
+
+Breakpoint 1, FetchXLaw (tdata=0x55555557ee90, buffer=0x7fffffffdbc0 "UVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224UVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224UVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224UVWXYZ[\\"..., buflen=1024, lut=0x555555569b70 <MIX_alawToFloat>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:95
+95	        out[i] = lut[buffer[i]];
+HIT length=256 i=255 out=0x7fffffffdfbc buffer=0x7fffffffdbc0 lut=3d8c0118
+94	    for (int i = length - 1; i >= 0; i--) {
+0x7fffffffdfbc:	0x00	0x00	0x00	0x00	0x90	0xee	0x57	0x55

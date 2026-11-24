@@ -1,0 +1,18 @@
+vuln-asan alaw256.aifc ASAN-STACK-WRITE4-AIFF-95-VIA-REAL-MIXER
+vuln-asan ulaw256.aifc ASAN-STACK-WRITE4-AIFF-95-VIA-REAL-MIXER
+vuln-asan alaw8.aifc clean-RESULT-OK
+vuln-asan raw256.aifc clean-RESULT-OK
+vuln-asan pcm8_256.aiff clean-RESULT-OK
+fixed-asan alaw256.aifc FIXED-clean-RESULT-OK
+fixed-asan ulaw256.aifc FIXED-clean-RESULT-OK
+fixed-asan alaw8.aifc FIXED-clean-RESULT-OK
+fixed-asan raw256.aifc FIXED-clean-RESULT-OK
+fixed-asan pcm8_256.aiff FIXED-clean-RESULT-OK
+vuln-nossp alaw256.aifc no-stack-protector-nonzero-rc
+vuln-nossp ulaw256.aifc no-stack-protector-nonzero-rc
+vuln-nossp alaw8.aifc clean-RESULT-OK
+vuln-nossp raw256.aifc clean-RESULT-OK
+vuln-nossp pcm8_256.aiff clean-RESULT-OK
+vuln-asan alaw256.aifc play ASAN-WRITE4-ON-AUDIO-THREAD-T1
+fixed-asan alaw256.aifc play clean-RESULT-OK
+gdb real-decoder i=1 buffer+1024 A-law-LUT-word-bae001c0

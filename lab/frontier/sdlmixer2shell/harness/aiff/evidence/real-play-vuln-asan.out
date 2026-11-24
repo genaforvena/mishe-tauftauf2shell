@@ -1,0 +1,65 @@
+MODE=play PATH=alaw256.aifc AUDIO_DRIVER=dummy MIX_DECODERS=3
+PLAY started=1
+=================================================================
+==3555881==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x737ed00b649c at pc 0x5b7de3227c75 bp 0x737ed0eb5160 sp 0x737ed0eb5158
+WRITE of size 4 at 0x737ed00b649c thread T1
+    #0 0x5b7de3227c74 in FetchXLaw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:95:16
+    #1 0x5b7de32270a9 in FetchALaw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:107:12
+    #2 0x5b7de3224b6e in AIFF_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:541:20
+    #3 0x5b7de3218cd8 in DecodeMore /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:306:14
+    #4 0x5b7de3209f53 in TrackGetCallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:381:17
+    #5 0x737ed3cdf20e in SDL_GetAudioStreamDataAdjustGain (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0+0x3520e) (BuildId: 9a0c997b0e5f57f28deadec1d0264d595f6c146a)
+    #6 0x5b7de3216842 in MixerCallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/SDL_mixer.c:587:28
+    #7 0x737ed3cdf20e in SDL_GetAudioStreamDataAdjustGain (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0+0x3520e) (BuildId: 9a0c997b0e5f57f28deadec1d0264d595f6c146a)
+    #8 0x737ed3cd8b75 in SDL_PlaybackAudioThreadIterate (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0+0x2eb75) (BuildId: 9a0c997b0e5f57f28deadec1d0264d595f6c146a)
+    #9 0x737ed3cdc1f7 in PlaybackAudioThread SDL_audio.c
+    #10 0x737ed3d52ed9 in SDL_RunThread (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0+0xa8ed9) (BuildId: 9a0c997b0e5f57f28deadec1d0264d595f6c146a)
+    #11 0x737ed3df0a55 in RunThread SDL_systhread.c
+    #12 0x5b7de31c131c in asan_thread_start(void*) asan_interceptors.cpp.o
+    #13 0x737ed389cb63 in start_thread nptl/pthread_create.c:447:8
+    #14 0x737ed3929e8b in clone3 misc/../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+Address 0x737ed00b649c is located in stack of thread T1 at offset 1180 in frame
+    #0 0x5b7de322494f in AIFF_decode /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:532
+
+  This frame has 1 object(s):
+    [32, 1056) 'buffer' (line 535) <== Memory access at offset 1180 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+Thread T1 created by T0 here:
+    #0 0x5b7de31a91a5 in pthread_create (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/evidence/aiff-driver-vuln-asan+0xb51a5) (BuildId: ac7be8d9fadd3862816e626a326c911a5eb832a4)
+    #1 0x737ed3df0a2a in SDL_SYS_CreateThread (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL3-3.4.0-build/libSDL3.so.0+0x146a2a) (BuildId: 9a0c997b0e5f57f28deadec1d0264d595f6c146a)
+
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/decoder_aiff.c:95:16 in FetchXLaw
+Shadow bytes around the buggy address:
+  0x737ed00b6200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6400: 00 00 00 00 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+=>0x737ed00b6480: f3 f3 f3[f3]00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x737ed00b6700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3555881==ABORTING
