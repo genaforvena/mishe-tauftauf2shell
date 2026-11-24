@@ -1,8 +1,9 @@
 #!/bin/bash
 # W186 replay check for the fixed-build real-process control.
-# Run from the repository root; checks committed pins and evidence only.
+# Resolve the repo root from this script so a clean git archive replay works.
 set -u
-cd "$(git rev-parse --show-toplevel)" || exit 1
+HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+cd "$HERE/../../../.." || exit 1
 B=lab/frontier/kicad2shell
 P="$B/provisioned/kicad10-config/10.0"
 PINS="$B/realprocess/fixtures/PINS-w186.sha256"
