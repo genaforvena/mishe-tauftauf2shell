@@ -1,0 +1,10 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18564 -t 18565 -c community.list -F labfed -M
+p &nak
+p &peer
+p peer
+p &mac_buf
+p &sockbuf
+quit

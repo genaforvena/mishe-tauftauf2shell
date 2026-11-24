@@ -121,6 +121,11 @@ raw output are `live/w2_followup.py`, `live/gdb-cmds-w2.txt`,
 - A second experiment that sent a second attack NAK tripped the same
   watchpoint inside the `decode_buf` memcpy (`__memcpy_avx_unaligned_erms`),
   again a re-write of the destination region, not consumption.
+- The forwarding branch's `struct peer_info *peer` is register-resident in
+  this build: at the post-decode breakpoint GDB rejects `p &peer` with
+  "isn't an lvalue" while `&nak` is `0x7fffffffc850`. It is therefore not
+  one of the overwritten stack slots; raw output in
+  `live/evidence/gdb-w2-peer.out`.
 
 Ceiling unchanged: rung 4 for chosen bytes at chosen stack offsets; no
 measured consumed pointer, benign-marker execution, control-flow takeover

@@ -1,0 +1,21 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+24/Nov/2026 23:34:03 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+24/Nov/2026 23:34:03 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+24/Nov/2026 23:34:03 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 23:34:03 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+24/Nov/2026 23:34:03 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 23:34:03 [supernode.c:660] supernode is listening on UDP 18564 (main)
+24/Nov/2026 23:34:03 [supernode.c:669] supernode opened TCP 18564 (aux)
+24/Nov/2026 23:34:03 [supernode.c:676] supernode is listening on TCP 18564 (aux)
+24/Nov/2026 23:34:03 [supernode.c:685] supernode is listening on UDP 18565 (management)
+24/Nov/2026 23:34:03 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+24/Nov/2026 23:34:03 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+24/Nov/2026 23:34:03 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=134, now=1795563247) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+$1 = (n2n_REGISTER_SUPER_NAK_t *) 0x7fffffffc850
+/tmp/n2n_w2_peer.txt:6: Error in sourced command file:
+Can't take address of "peer" which isn't an lvalue.
