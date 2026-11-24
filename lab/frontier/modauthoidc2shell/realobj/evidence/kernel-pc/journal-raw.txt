@@ -1,0 +1,4 @@
+Nov 24 04:47:11 mesh-home kernel: pl-vuln[1808615]: segfault at 7db86bdf6388 ip 00005d5f4bea3563 sp 00007ffd57c54a60 error 7 in pl-vuln[5d5f4bea3000+1000] likely on CPU 2 (core 2, socket 0)
+Nov 24 04:47:12 mesh-home kernel: pl-vuln[1808627]: segfault at 7bb5d0fc0388 ip 00005729f1c39563 sp 00007ffd534d65d0 error 7 in pl-vuln[5729f1c39000+1000] likely on CPU 8 (core 0, socket 0)
+Nov 24 04:47:14 mesh-home kernel: pl-vuln[1808698]: segfault at 73661cde3388 ip 00005cf1bf721563 sp 00007ffecded3d70 error 7 in pl-vuln[5cf1bf721000+1000] likely on CPU 11 (core 3, socket 0)
+Nov 24 04:47:15 mesh-home kernel: pl-vuln[1808734]: segfault at 7c1f16fb2388 ip 00005a3398d49563 sp 00007ffcb0e1df40 error 7 in pl-vuln[5a3398d49000+1000] likely on CPU 0 (core 0, socket 0)

@@ -1,0 +1,30 @@
+start_utc=2026-11-24T04:47:11Z
+end_utc=2026-11-24T04:47:11Z
+cwd=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj
+--- hashes before ---
+d9e1f3a3f0e27d8409f4433ff1644000d82b361cc535e36f4467b788d7d15679  pl-vuln
+08e40556a93b238e1f11be1c6746e52ad4c8f28e7d23c308c41c00b0a1a2dc2f  pl-fixed
+221269266e8dd43ff336294f1fe3a3381d2e9f1fb40cc57c82740f125b34682f  pl-release
+eae591b4f5d450379ec57f401350467797844dd0d537cd6c63664bd79273f136  driver_long.c
+--- source pin ---
+./fix-8017478.patch: OK
+./state.c.4301b536: OK
+./state.c.8017478: OK
+./state.c.v2.4.19.4: OK
+MO_TOKEN_LEN=65000 ./pl-vuln read 0 (6 trials)
+pl-vuln trial=1 rc=139 first=
+pl-vuln trial=2 rc=139 first=
+pl-vuln trial=3 rc=134 first=VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+pl-vuln trial=4 rc=0 first=VARIANT=vuln-4301b536 RC=1 PROCESS_CALLS=1
+pl-vuln trial=5 rc=139 first=
+pl-vuln trial=6 rc=139 first=
+pl-fixed trial=1 rc=0 first=VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+pl-fixed trial=2 rc=0 first=VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+pl-fixed trial=3 rc=0 first=VARIANT=fixed-8017478 RC=0 PROCESS_CALLS=0
+pl-release trial=1 rc=0 first=VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+pl-release trial=2 rc=0 first=VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+pl-release trial=3 rc=0 first=VARIANT=release-v2.4.19.4 RC=0 PROCESS_CALLS=0
+end_utc=2026-11-24T04:47:16Z
+d9e1f3a3f0e27d8409f4433ff1644000d82b361cc535e36f4467b788d7d15679  pl-vuln
+08e40556a93b238e1f11be1c6746e52ad4c8f28e7d23c308c41c00b0a1a2dc2f  pl-fixed
+221269266e8dd43ff336294f1fe3a3381d2e9f1fb40cc57c82740f125b34682f  pl-release

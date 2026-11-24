@@ -566,3 +566,31 @@ NUL, no chosen byte, pointer control, consumer dereference, command or rung 5.
 Author-only and unwitnessed at this scope. Re-run:
 `cd lab/frontier/modauthoidc2shell/full && bash probe-sys-response.sh &&
 bash probe-sys-response-gdb.sh`.
+
+## Kernel-recorded native PC at the NUL store (2026-11-24 W20)
+
+The W14 realobj SIGSEGV had only a gdb-observed PC. The kernel also records
+it, with no debugger, preload or shim. `realobj/evidence/kernel-pc/` holds the
+raw capture. At 04:47:11Z-04:47:16Z the W14 binaries were run unchanged
+(`pl-vuln` `d9e1f3a3f0e27d8409f4433ff1644000d82b361cc535e36f4467b788d7d15679`,
+`pl-fixed` `08e40556a93b238e1f11be1c6746e52ad4c8f28e7d23c308c41c00b0a1a2dc2f`,
+`pl-release` `221269266e8dd43ff336294f1fe3a3381d2e9f1fb40cc57c82740f125b34682f`;
+4/4 pinned blobs OK), six `MO_TOKEN_LEN=65000 ./pl-vuln read 0` trials and
+three trials each of the fixed and released binaries. `pl-vuln` gave 4 rc 139,
+1 rc 134 (dispatch then glibc abort) and 1 rc 0 with dispatch. The kernel
+logged four SIGSEGV lines, all with IP low bits `0x563`, distinct ASLR bases,
+fault addresses ending `0x388`, and `error 7` (user write protection fault).
+
+The ELF text LOAD starts at vaddr `0x1000`, the mapping base printed by the
+kernel, so the IP is ELF vaddr `0x1563`. `addr2line` maps it to
+`oidc_state_cookies_parse_token` at pinned `state.c.4301b536:219`;
+`objdump` shows `c6 00 00  movb $0x0,(%rax)` there, and each kernel `Code:`
+line is byte-exact over `0x1550`-`0x1577` with `<c6>` marking the fault. Fixed
+and released controls were 3/3 rc 0, `PROCESS_CALLS=0`, with no kernel record.
+
+Grade unchanged: rung 4 scoped, author-only. This removes gdb from the harness
+PC attribution only; there is still no wire path, consumed pointer side
+effect, chosen byte value or rung 5. Apache children produced no kernel
+SIGSEGV lines in the W15 window, so W15/W16/W19 wire PCs stay
+debugger-observed. Raw: `realobj/evidence/kernel-pc/{run-20261124.txt,
+journal-raw.txt,journal-window.txt,symbolization.txt,README.md}`.

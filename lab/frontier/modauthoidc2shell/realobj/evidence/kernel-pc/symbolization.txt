@@ -1,0 +1,35 @@
+binary=pl-vuln sha256=d9e1f3a3f0e27d8409f4433ff1644000d82b361cc535e36f4467b788d7d15679
+--- addr2line IP offset 0x1563 (kernel prints ip low 12 bits 0x563 within text VMA at +0x1000) ---
+oidc_state_cookies_parse_token
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/modauthoidc2shell/realobj/state.c.4301b536:219
+--- objdump 0x1550-0x1580 ---
+
+pl-vuln:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000001550 <oidc_state_cookies_parse_token+0x85>:
+    1550:	d8 0f                	fmuls  (%rdi)
+    1552:	b6 00                	mov    $0x0,%dh
+    1554:	3c 3d                	cmp    $0x3d,%al
+    1556:	74 07                	je     155f <oidc_state_cookies_parse_token+0x94>
+    1558:	b8 00 00 00 00       	mov    $0x0,%eax
+    155d:	eb 3d                	jmp    159c <oidc_state_cookies_parse_token+0xd1>
+    155f:	48 8b 45 d8          	mov    -0x28(%rbp),%rax
+    1563:	c6 00 00             	movb   $0x0,(%rax)
+    1566:	48 83 45 d8 01       	addq   $0x1,-0x28(%rbp)
+    156b:	4c 8b 45 c8          	mov    -0x38(%rbp),%r8
+    156f:	48 8b 7d d0          	mov    -0x30(%rbp),%rdi
+    1573:	48 8b 4d d8          	mov    -0x28(%rbp),%rcx
+    1577:	48 8b 55 f8          	mov    -0x8(%rbp),%rdx
+    157b:	48 8b 75 e0          	mov    -0x20(%rbp),%rsi
+    157f:	48                   	rex.W
+--- ELF LOAD segments ---
+  PHDR           0x000040 0x0000000000000040 0x0000000000000040 0x0002d8 0x0002d8 R   0x8
+  INTERP         0x000318 0x0000000000000318 0x0000000000000318 0x00001c 0x00001c R   0x1
+      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
+  LOAD           0x000000 0x0000000000000000 0x0000000000000000 0x000ca8 0x000ca8 R   0x1000
+  LOAD           0x001000 0x0000000000001000 0x0000000000001000 0x000f69 0x000f69 R E 0x1000
+  LOAD           0x002000 0x0000000000002000 0x0000000000002000 0x000460 0x000460 R   0x1000
+  LOAD           0x002cf0 0x0000000000003cf0 0x0000000000003cf0 0x000330 0x000410 RW  0x1000

@@ -372,3 +372,23 @@ PC but debugger-observed, byte always NUL, no chosen byte, pointer control,
 consumer dereference, command or rung 5; author-only and unwitnessed at this
 scope. Raw: `full/evidence/sys-response/README.md` and
 `full/evidence/sys-response-gdb/README.md`.
+
+### W20 kernel-recorded native PC (2026-11-24)
+
+The W14 non-ASan realobj fault can be attributed without a debugger. The
+kernel's own SIGSEGV report (read via `journalctl -k`; `dmesg` is denied here)
+recorded four faults in six unchanged `MO_TOKEN_LEN=65000 ./pl-vuln read 0`
+trials, all with IP low bits `0x563`, distinct ASLR bases and `error 7` (user
+write protection fault). The ELF text LOAD starts at vaddr `0x1000`, the
+mapping base the kernel prints, so the IP is `0x1563`: `addr2line` maps it to
+`oidc_state_cookies_parse_token` at pinned `state.c.4301b536:219`, `objdump`
+shows `movb $0x0,(%rax)` there, and the kernel `Code:` bytes match the
+instruction stream byte-exact with the faulting `c6` marked. Fixed and
+released binaries were 3/3 clean with no kernel record. Full raw capture and
+hashes: `lab/frontier/modauthoidc2shell/realobj/evidence/kernel-pc/README.md`.
+
+This removes gdb from the **harness** PC attribution only. Grade stays rung 4
+scoped and author-only: no wire path, consumed pointer side effect, chosen
+byte value or rung 5; the byte is always NUL. The live-wire W15/W16/W19 PCs
+remain debugger-observed — Apache children produce no kernel SIGSEGV lines on
+this host.
