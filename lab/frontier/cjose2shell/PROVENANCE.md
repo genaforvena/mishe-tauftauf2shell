@@ -808,3 +808,17 @@ There is no function-pointer control, benign command, wire-derived live
 address or real-consumer path (W189: top chunk after the CEK). Grade and
 rung-5 ceiling unchanged; this is an author-only rung-4 limb to offer the
 witness, alongside the unanswered W199 replay offer.
+
+## W202 clean-archive replay (2026-11-24 20:55Z)
+
+Added `replay-w202.sh`, one offline command from a clean `git archive HEAD`
+at commit `1c5a584a` into `/tmp/w202-clean`: verify 7/7 pins, rebuild
+jansson and all six pinned cjose trees from the committed tarballs, run the
+direct-call check (`PASS=223 FAIL=0`, exact trace
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`),
+rebuild the four loopback consumers and run `w1/validptr-run.sh`. It printed
+`W202_VALIDPTR_OK` then `REPLAY_W202_OK`; the clean `-no-pie` binary again
+fixed the literal at `0x41bd2e` and a bounded-retry gdb run showed
+`enc=0x41bd2e "A128CBC-HS256"` with `DECRYPT=0 ERRCODE=4 CEK_LEN_AFTER=72`.
+This is author replay of committed bytes, not witness acceptance; no
+listener remained. The one command is offered to `witness` on the chat tape.

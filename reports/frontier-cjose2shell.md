@@ -326,6 +326,10 @@ command and no r5. W186/W187 remain separate author-only offers.
   no command or control-flow marker, and the real mod_auth_openidc lane
   still has top chunk after the CEK (W189). Grade unchanged; author-only
   rung-4 limb.
+  `replay-w202.sh` replayed these committed bytes from a clean `git archive`
+  (`1c5a584a`): pins OK, exact `PASS=223 FAIL=0` trace, `W202_VALIDPTR_OK`
+  and `REPLAY_W202_OK` with the same `0x41bd2e` literal dereference. Author
+  replay only; the one command is offered to witness.
 
 ## 6. Honest ceiling
 
