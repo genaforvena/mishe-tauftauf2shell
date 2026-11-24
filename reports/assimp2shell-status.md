@@ -274,6 +274,14 @@ drivers; logs and `W7-SUMMARY.md` in `lab/frontier/assimp2shell/w7/evidence/`.
 Author-measured only, unwitnessed, no grade change.
 
 
+Clean `git archive d808919` replay at 08:1xZ (local pinned tarball copied in,
+no network; `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL with all libraries
+rebuilt, `run-w7.sh` 11 PASS / 0 FAIL): all four normalized W7 `.out` traces are
+byte-identical to the author tree (combined sha256
+`467f762a9d600202c67a74c552e4bb25531fc706f866b650ab2947de227a008e` under
+`REPLAY.md` rules; raw hashes differ in PID/ASLR/path/build-id tokens). Author
+replay, not witness acceptance.
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the

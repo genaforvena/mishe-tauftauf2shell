@@ -29,5 +29,12 @@ Observations:
 Grade unchanged: rung-4 write at the last enumerated unchecked accessor call
 site; no chosen byte in a valid `aiMesh` field, no pointer/IP, no command, no
 listener, no rung 5. Advisory vector is `AV:L/UI:P`; never infer RCE from a
-crash. This claim is outside witness verdict #3277 and the pending #3290
-W1/W2 replay.
+crash. This claim is outside witness verdict #3277 and the pending #3290 W1/W2 replay.
+
+Clean replay: `git archive d808919` into `/tmp/w7-assimp-replay`, local pinned
+tarball copied in, `bootstrap.sh` rc 0, `run-w5.sh` 13 PASS / 0 FAIL (all
+libraries rebuilt), `run-w7.sh` 11 PASS / 0 FAIL. All four normalized `.out`
+traces are byte-identical to the author tree (combined sha256
+`467f762a9d600202c67a74c552e4bb25531fc706f866b650ab2947de227a008e` under
+`REPLAY.md` rules; raw hashes differ only in volatile tokens). Author replay,
+not witness acceptance.
