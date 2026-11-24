@@ -14,13 +14,11 @@ header/processing-entry scope, with the fine.tif stall attribution
 CONTRADICTED and corrected below. No r5 anywhere.
 **Witness closure #3407 (2026-11-24):** the W2 repair at `24221c9` was verified
 against W185; W1/W2 are CLOSED, not reopened.
-**W3/W4 (2026-11-24, this lab, witness replay pending):** a real loopback HTTP
-GET into a real imgproxy 4.0.0 process reproduces the wrapped-size abort with
-an ICO-fixed control (W3), and gdb in that live process captures the C
-write-site frame and reads back 32 attacker-chosen bytes at `data+14` (W4).
-The consumer limb therefore reaches rung 4 at the chosen-byte/chosen-offset
-scope. Pointer/IP control, marker execution, remote command and rung 5 stay
-UNKNOWN.
+**Witness W200 (2026-11-24 13:25Z, tape #3635):** W3/W4/W5/W6 are ALL
+ESTABLISHED AS LABELED on a clean-archive replay; the live HTTP consumer
+limb stays at rung 4 with no r5. W7 remains an author finding: W200 agrees
+its source-bound negative closes the wire-only key route but did not
+replay W7 itself.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -159,10 +157,11 @@ favicon ICO returned HTTP 200 on the same binary. A control built with only
 `vips_foreign_load_ico_header: ICO image data is too large` and stayed alive.
 This upgrades the consumer limb from header/entry to a real-process crash
 and allocator-detected heap corruption. W4 below adds the live chosen-byte
-readback and the symbolised C write site; pointer control and rung 5 remain
-UNKNOWN. See PROVENANCE section W3.
+readback and the symbolised C write site; W5 adds witness-established
+control of live tcache metadata. Controlled allocation, marker execution,
+remote command and r5 remain UNKNOWN. See PROVENANCE section W3.
 
-### W4 — live chosen-byte readback at the C write site (2026-11-24, unwitnessed)
+### W4 — live chosen-byte readback at the C write site (2026-11-24, witness W200 ESTABLISHED AS LABELED)
 
 `provision/ico_gdb_readback.py` serves the same 54-byte hostile ICO on
 127.0.0.1:18081, launches the unmodified `imgproxy-vuln` CLI under gdb on
@@ -198,12 +197,13 @@ chosen offset in a real imgproxy process reached over unauthenticated loopback
 HTTP, at the symbolised C write site. This is not rung 5: the overwritten
 object is heap metadata / the next chunk, not a function pointer or return
 address, and no marker execution or remote command was observed. The harness
-grade (rungs 1-4, witness W185) is unchanged; W3/W4 await witness replay.
+grade (rungs 1-4, witness W185) is unchanged; witness W200 replayed and
+established W3/W4 (section below).
 
 Both legs reproduced from a clean `git archive HEAD` extraction with only the
 gitignored CLI binaries symlinked in (PROVENANCE W4 clean-replay note).
 
-### W5 — groomed spill reaches a live allocator pointer (2026-11-24, unwitnessed)
+### W5 — groomed spill reaches a live allocator pointer (2026-11-24, witness W200 ESTABLISHED AS LABELED)
 
 The W4 assumption that the spill always lands on the arena top was wrong under
 heap grooming. `provision/ico_gdb_groom.py` sends benign favicon GETs in the
@@ -227,7 +227,7 @@ Full logs, digests, negative runs, the fixed control and a clean-archive replay
 at `4c4937d` are in PROVENANCE W5; the replay reproduced the pointer-control
 transition with preload=6 but hit the top-chunk layout in five preload=2 runs.
 
-### W6 — safe-linking bound on live tcache control (2026-11-24, unwitnessed)
+### W6 — safe-linking bound on live tcache control (2026-11-24, witness W200 ESTABLISHED AS LABELED)
 
 glibc here is 2.39, so tcache `next` is protected as `ptr ^ (pos >> 12)`. In
 W5's `http-ico-w5final1.log`, the live `next=0x00007ff883f42c4e` at
@@ -263,6 +263,40 @@ is not known to a wire-only attacker here; no write through the chosen
 address to a code pointer, marker execution or command was observed. The
 layout is stochastic; layout-dependent negatives are preserved rather than
 retried into existence.
+
+## Witness W200 — clean-archive replay of W3/W4/W5/W6 (2026-11-24 13:25Z)
+
+Tape #3635, witness wall W200. From `git archive 314fa5d` into
+`/tmp/w200-imgproxy`, with only the two gitignored CLI binaries symlinked
+and libvips pointed at `build-vuln-plain/libvips` (the `.so` subdirectory,
+not the tree root — a setup note, not a finding), the witness matched all
+four committed probe hashes and both curated W6 log hashes. Extracts:
+
+- W3: vulnerable process `rc=2`, `malloc(): corrupted top size`; ICO-fixed
+  HTTP 500 with `ICO image data is too large` in the server log and the
+  generic `Internal error` body; process alive.
+- W4: `GDB_HIT` at `read_full` with `rdx=0xfffffff5`, `vips.c:1304`,
+  frame 0 `icoload.c:161`, 32 chosen `5a5b5c5d` bytes at `actual_data`;
+  fixed control zero `GDB_HIT`.
+- W5: preload=3 showed PRE live pointer `0x00007ff89ffbefd5` plus key at
+  `0x7fffa0005580`, POST the same position overwritten with
+  `0x4141414141414141` plus the chosen pattern, victim size `0x35`
+  intact; the preload=2 top-chunk negative was preserved.
+- W6: seven attempts with target `$pos+0x10`, two positives (`w200p3`,
+  `w200p5`): live size `0x35` tcache victim; the first forced
+  `malloc(0x20)` returned the victim and both `entries[1]` and the second
+  malloc returned exactly the encoded chosen target, with qwords
+  readable; the other five nil/top-chunk/live-data negatives were
+  preserved. The witness independently derived the safe-link key from
+  `pos=0x7fffa0058370`, `pos>>12=0x7fffa0058`, and confirmed
+  `target^key=0x7ff85fff83d8` matches the patched `next` byte-exact. Fixed
+  control: benign 200s, hostile 500, zero breakpoint hits.
+- Counterexample check: the chosen W6 allocation is real tcache mechanics,
+  but both mallocs and the `next` patch are debugger-forced; the key is
+  gdb-computed, not wire-derived, and the W7 source-bound negative closes
+  the wire-only route. Verdict: ESTABLISHED AS LABELED, no upgrade to r5,
+  no contradiction. W7 itself was not replayed in W200 and stays
+  author-only.
 
 ## Remaining gap to a rung-5 attempt
 
