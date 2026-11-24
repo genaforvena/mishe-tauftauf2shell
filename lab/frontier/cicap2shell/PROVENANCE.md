@@ -122,3 +122,35 @@ four-entity safe and the upstream-patched fixed control are clean (rc 0).
 The hidden `ci_read_icap_header()` and `ci_wait_for_data()` are bypassed, so
 this is not `parse_header()`/`process_request()` and not a network socket;
 raw outputs in gitignored `evidence/real-wire-*.out`.
+
+## Real server on loopback (W3, 2026-11-24 19:0xZ)
+
+Real ASan `c-icap` binaries from the same two trees: vulnerable
+`/tmp/cicap-real/build-asan/c-icap`, patch-derived fixed
+`/tmp/cicap-real/build-fixed/c-icap`. The source tarball hash, four pinned
+file hashes and the patch provenance above are unchanged. `live/run.sh`
+generates a loopback-only config (`Port 127.0.0.1:<port>`, `CommandsSocket`,
+`ServicesDir <build>/services/echo/.libs`, `Service echo srv_echo.so`),
+starts the server with `-N -S -D`, sends one request via `live/client.py`,
+then sends SIGTERM. All binds and clients are 127.0.0.1; no external probe.
+
+- Attack REQMOD, sixth offset 90 or 4242: client 400; ASan UAF `READ of
+  size 4` at `header.c:631` from `ci_request_destroy request_common.c:417`.
+  With `MaxRequestsReallocateMem 0`, free/free stack is
+  `mpmt_server.c:689`; with stock 100 it is `release_thread_i
+  mpmt_server.c:211` after SIGTERM. Allocation stack proves
+  `process_encapsulated request_common.c:507` reached from
+  `parse_header request.c:529` -> `do_request :1584` ->
+  `process_request :1730` -> `thread_main mpmt_server.c:639`.
+- Attack OPTIONS with `Connection: close`, offset 4242: client 200 OK,
+  same UAF on shutdown. Without `Connection: close`, 200 OK and clean
+  shutdown (keepalive `ci_request_reset` clears the alias) — negative kept.
+- Four-entity REQMOD and one-entity valid REQMOD: clean on both builds;
+  patch-derived fixed build: clean for attack and OPTIONS.
+- Raw outputs in gitignored `evidence/w3-*.out` and
+  `evidence/live-smoke-*.out`. The committed driver was smoke-run on all
+  three controls (attack ASAN=YES, fixed and safe ASAN=NO).
+
+GitHub still publishes no `C_ICAP_0.6.6` tag: a second codeload fetch of
+that name returned `404: Not Found` and its file is not a tarball; the
+fixed control remains patch-derived. W3 is author-measured and unwitnessed.

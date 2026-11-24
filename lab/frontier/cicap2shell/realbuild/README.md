@@ -70,3 +70,14 @@ Observed (raw outputs `../evidence/real-wire-*.out`):
 Scope: a local socketpair, not a network socket; no `parse_request()` /
 `process_request()` and no running `icap-server`. No wire reach off loopback,
 no pointer/IP/command control, no r5.
+
+## W3 — real server on loopback (19:0xZ)
+
+`live/run.sh` starts the real ASan `c-icap` binary from either build tree
+on 127.0.0.1, sends one crafted request with `live/client.py`, stops the
+server and reports `ASAN=YES|NO`. Six-entity REQMOD (90/4242) and six-entity
+OPTIONS with `Connection: close` (4242) both drive the full
+`parse_header()`/`process_request()` path and end in the `header.c:631`
+UAF at teardown; safe, valid one-entity and patch-derived fixed controls
+are clean. Full commands, the keepalive negative and the live-server
+ceiling are in `live/README.md`; raw output in `../evidence/live-*.out`.

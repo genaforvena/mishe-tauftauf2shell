@@ -78,16 +78,20 @@ selects the patch-derived guard and teardown text.
 
 ## Rung-4 feasibility and ceiling
 
-Rung 3 is confirmed both on pinned upstream functions and in a real ASan
-c-icap 0.6.5 build calling exported `process_encapsulated()` and
-`ci_request_destroy()` on a real `ci_request_t`; rung 4 is PARTIAL: a
-wire-selected entity value (90, 72 or 4242) lands in the live adjacent
-`trash_entities[0].start` slot. No arbitrary byte stream or pointer-value
-control, no chosen IP/code execution, no allocator metadata, no ICAP server,
-no network socket and no `parse_header()`/`process_request()` path: the AV:N
-path is claimed by the advisory but not exercised here. Stock layout is no
-longer UNKNOWN in the pinned release (real `request.h:113-114` confirms the
-adjacency); wire reach stays UNKNOWN, and there is no rung 5.
+Rung 3 is confirmed on pinned upstream functions, in a real ASan c-icap
+0.6.5 library (W1/W2) and now in a real ASan `c-icap` server (W3); rung 4 is
+PARTIAL: a wire-selected entity value (90, 72 or 4242) lands in the live
+adjacent `trash_entities[0].start` slot. No arbitrary byte stream or
+pointer-value control, no chosen IP/code execution, no allocator metadata
+and no r5. W3 drives the server's own `parse_header()`/`process_request()`
+from a loopback TCP request, so the earlier "no ICAP server / no network
+socket / no AV:N path" boundary is withdrawn for 127.0.0.1: an OPTIONS
+request with six entities and `Connection: close` returns 200 OK before the
+UAF fires at teardown. No traffic left loopback, no proxy or real client
+consumed it, and the wire value's effect on the aliased slot was measured in
+W1/W2, not in W3's server logs. Stock layout is no longer UNKNOWN in the
+pinned release (real `request.h:113-114` confirms the adjacency); wider
+deployment reach stays UNKNOWN, and there is no rung 5.
 
 ## Real-build result (W1) and cheapest next experiment
 
@@ -119,4 +123,24 @@ header. Values 90/4242 again give `alias=1`, the chosen `trash0_start` and the
 `header.c:631` UAF; safe and patch-derived fixed controls are clean. The
 hidden `ci_read_icap_header()` and `ci_wait_for_data()` are bypassed, so this
 is neither the full `parse_header()` path nor a network socket: wire reach
-stays UNKNOWN and the W1/W2 lanes remain author-measured and unwitnessed.
+stays UNKNOWN for that harness lane; W3 below closes the server and
+loopback-socket gap. The W1/W2 lanes remain author-measured and unwitnessed.
+
+## W3 — full parse path in a live loopback server (19:0xZ)
+
+`realbuild/live/run.sh` starts the real pinned 0.6.5 ASan `c-icap` binary
+with the echo service on 127.0.0.1, sends one crafted request and reports
+whether ASan fired. REQMOD with six `req-body` entities (offset 90 or 4242)
+returns 400 but reaches `parse_header request.c:529` ->
+`process_encapsulated request_common.c:507`, and the `header.c:631` UAF
+appears at teardown. OPTIONS with six entities, value 4242 and
+`Connection: close` returns **200 OK** and then the same UAF on graceful
+shutdown at `mpmt_server.c:211`; with `MaxRequestsReallocateMem 0` the same
+free pair fires immediately at `mpmt_server.c:689`. The same OPTIONS request
+without `Connection: close` returns 200 OK and shuts down cleanly because
+keepalive calls `ci_request_reset()` and clears the alias; that negative is
+preserved. Four-entity REQMOD (400), one-entity REQMOD (200 OK) and the
+patch-derived fixed build are clean. Raw server output in gitignored
+`evidence/w3-*.out`; recipe, exact commands and the live-server ceiling in
+`lab/frontier/cicap2shell/realbuild/live/README.md`. W3 is author-measured
+and unwitnessed; witness replay of W1/W2/W3 is outstanding.

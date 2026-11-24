@@ -48,10 +48,14 @@ claim stay claims in this lab.
 Rung 4 is PARTIAL: the wire-selected value (90, 72 or 4242) lands in the
 live adjacent `trash_entities[0].start` slot, observed before the double free.
 No arbitrary byte stream, pointer/IP/command control, allocator metadata,
-ICAP server or network socket was exercised. Stock layout is confirmed in the
-pinned release (real `request.h:113-114`); wire reach stays UNKNOWN; no rung 5.
-An ASan field-padding probe produced no report for the intra-object alias and
-is preserved as a negative, not a pass.
+real proxy or command execution. W3 exercises the full
+`parse_header()`/`process_request()` path in a real ASan c-icap server from
+a loopback TCP request, including a 200 OK OPTIONS variant; no traffic left
+loopback and no client or proxy consumed it. Stock layout is confirmed in
+the pinned release (real `request.h:113-114`); 127.0.0.1 wire reach is
+demonstrated only in the lab, wider deployment reach stays UNKNOWN, and
+there is no rung 5. An ASan field-padding probe produced no report for the
+intra-object alias and is preserved as a negative, not a pass.
 
 ## Witness verdict (W205, #3753)
 Independent replay from `git archive 58435874 lab/frontier/cicap2shell`
@@ -67,14 +71,18 @@ no c-icap build, wire socket, pointer/IP/marker or command was witnessed.
 
 ## Next bounded work
 
-A real `C_ICAP_0.6.5` ASan build reproduces the same alias, chosen value and
-`header.c:631` use-after-free from `ci_request_destroy` through exported
-library APIs on a real `ci_request_t` (W1). W2 feeds a complete ICAP request
-through an `AF_UNIX` socketpair via the exported read/unpack/parser functions
-with the same outcome; four-entity and upstream-patched controls are clean.
-Neither lane reaches `parse_header()`/`process_request()` or a network socket.
-Next: drive those full paths into this build, then put an `icap-server` in
-front; only that can move wire reach off UNKNOWN. GitHub has no 0.6.6 tag, so
-the fixed control is patch-derived, not a released binary.
-The witness verdict is recorded above and in the README row; do not
-infer RCE from advisory prose or a harness marker.
+W1 reproduces the same alias, chosen value and `header.c:631` use-after-free
+in a real ASan `C_ICAP_0.6.5` library; W2 feeds a complete ICAP request
+through an `AF_UNIX` socketpair via exported read/unpack/parser functions.
+W3 starts the real ASan `c-icap` server on 127.0.0.1 with its echo service:
+six-entity REQMOD reaches `parse_header request.c:529` and ends in the same
+UAF at teardown, while an OPTIONS request with six entities and
+`Connection: close` returns 200 OK before firing it on graceful shutdown.
+Four-entity, one-entity valid and patch-derived fixed controls are clean;
+an OPTIONS request without `Connection: close` shuts down cleanly because
+keepalive resets the aliased slot. All three real-build lanes remain
+author-measured: the witness verdict above covers only the pinned-function
+claim. Next bounded work is an independent witness replay of W1/W2/W3
+from the committed recipes. GitHub has no 0.6.6 tag, so the fixed control
+is patch-derived, not a released binary. Do not infer RCE from advisory
+prose or a harness marker.

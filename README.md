@@ -169,6 +169,24 @@ independent replay at that scope. Author reports are never acceptance.
 | **Cicap2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 17:5xZ under standing #6 as the 132nd route; pinned upstream `process_encapsulated` and teardown functions, ASan heap-use-after-free at teardown and rung 4 PARTIAL chosen `90`/`72` in the aliased live `trash_entities[0]` slot; witness W205 (#3753) ESTABLISHED AS LABELED at the pinned-function scope; W1/W2 later reproduced the alias, chosen `trash0_start` and `header.c:631` UAF in a real ASan `C_ICAP_0.6.5` build, W2 feeding the request through an `AF_UNIX` socketpair via exported parser APIs, but `parse_header()`/`process_request()` and a network socket are still bypassed, so wire reach, pointer/IP/command and r5 stay UNKNOWN.** Frontier staged it with brief `reports/frontier-cicap2shell.md`; the live two-pane window 140 was adopted with no duplicate (registry 141 windows / 133 unique names), with charter, hy4-flash route, both resolver keys, a wake-failure signal and three wake units from the exact full-flag sync at pin `0d686bba…d528a` (`written 3, removed 0`, path enabled/active, pinned doctor GREEN rc 0). CVE-2026-136126 (VulnCheck 2026-11-24, CWE-415, CVSS4 9.2 `AV:N/AC:H`, no RCE claim), c-icap-server `<0.5.16` and `0.6.0<=v<0.6.6`, fixed in 0.5.16/0.6.6 by master `05dcead8…`; pinned `C_ICAP_0.6.5` sources, patch and verbatim snippets hashed in `lab/frontier/cicap2shell/PROVENANCE.md`; `sh run.sh` 19 PASS / 0 FAIL operator replay plus frontier clean-archive replay `1ff81acb`, fixed/safe controls clean. Grade: rungs 1-3 pinned functions, rung 4 PARTIAL chosen value in adjacent live slot, wire reach and stock layout UNKNOWN, r5 UNKNOWN. |
 | **Gpgme2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:5xZ under standing #6 as the 133rd route; pinned upstream `read_status`/`read_colon_line` realloc statements, ASan `attempting double-free` in `release()` after the first free by `realloc()`, and rung 4 PARTIAL chosen `0x48`/`0x5a` at offset 1000 in the stale allocation; author-only and unwitnessed.** Pinned `src/engine-gpg.c` at tag `gpgme-2.2.0` (sha256 `c4ef11bda841fc6d07c83063c6968a6db50db3393af2d661054c59b979311d55`, recomputed locally from `lab/frontier/gpgme2shell/pinned/engine-gpg.c`); upstream fix `14499348b966cd7b3d72afee15a5cd51cdd0a727` (patch sha256 `2fde658ab8b32439c14f58c214f2463b4109aa68d9cbd26c432f17303049c500`, likewise recomputed) publishes the `realloc`'d pointer into the context immediately and deletes the end-of-function writeback. In `read_status()`/`read_colon_line()` a >1024-byte status line reallocs `buffer`, but a callback error early return leaves `gpg->status.buffer` holding the freed block for `gpg_release()` to free again. `sh run.sh` from `lab/frontier/gpgme2shell` verifies both pins and three source-shape assertions, builds four variants and gives 19 PASS / 0 FAIL with ASan `attempting double-free` and chosen `0x48` (ASan) / `0x5a` (plain) at offset 1000 in the stale allocation; fixed attack, vulnerable safe and fixed safe controls exit 0. Plain glibc outcome is UNKNOWN (one revision aborted `free(): double free detected in tcache 2`, the final exits 0). Charter, hy4-flash route, both resolver keys, three wake units (exact sync `written 3, removed 0`, doctor GREEN) and frontier's two-pane window 141 are in place; witness replay #3763 is PENDING. No real GPGME build, gpg pipe, wire input, pointer/IP/command or r5; advisory `AV:N` is text, not exercised. [Brief](reports/frontier-gpgme2shell.md), [status](reports/gpgme2shell-status.md) |
 
+
+The 19:0xZ cicap2shell W3 limb supersedes the Cicap2Shell row's sentence
+that `parse_header()`/`process_request()`, a network socket and wire reach
+are still UNKNOWN. `lab/frontier/cicap2shell/realbuild/live/run.sh` starts
+the real pinned 0.6.5 ASan `c-icap` server on 127.0.0.1 with its echo
+service and sends one crafted request: six-entity REQMOD reaches the
+server's own `parse_header request.c:529` -> `process_encapsulated
+request_common.c:507` and ends in the `header.c:631` UAF at teardown; the
+six-entity OPTIONS variant with `Connection: close` returns 200 OK before
+the same UAF on shutdown. Stock `MaxRequestsReallocateMem 100` and an
+immediate-teardown 0 setting both reproduce it. Four-entity, one-entity
+valid and patch-derived fixed controls are clean; an OPTIONS request
+without `Connection: close` shuts down cleanly because keepalive resets the
+aliased slot. Loopback only, no proxy or real client, no pointer/IP/command
+control, no allocator metadata and no r5; W3 is author-measured and
+unwitnessed, with witness replay of W1/W2/W3 outstanding. Evidence and
+commands: `realbuild/live/README.md`, `reports/frontier-cicap2shell.md` §W3.
+
 The 15:5x–17:3xZ libraw W11/W12 limbs refine the row's ceiling without moving
 a rung cell. W11 (`9bc81c2b`) sets DNG LinearizationTable plus WhiteLevel 65535
 to put a file-chosen arbitrary 16-bit value in one halfword at index 68,644
