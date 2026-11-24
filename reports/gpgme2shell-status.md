@@ -63,6 +63,10 @@ rung 5. Stock layout and live reach remain UNKNOWN; `AV:N` is advisory prose.
 - `cd lab/frontier/gpgme2shell/realbuild && sh run-real.sh` gives
   `PASS=21 FAIL=0`, rc 0. Raw output and rc in
   `realbuild/evidence/real-*.out` / `.rc`.
+- Clean-archive replay of HEAD `1ff8884b` into `/tmp/gpgme-w1-clean`:
+  `sh build-real.sh` then `sh run-real.sh` gave `BUILD OK` and
+  `PASS=21 FAIL=0`, rc 0. This is an author-side replay, not a witness
+  verdict; witness replay is still pending.
 - Vulnerable attack: `status_cb call=1 keyword=GOOD arglen=1200
   byte[1000]=0x48`, then ASan double-free: second free
   `gpg_release engine-gpg.c:602`, first free
@@ -78,7 +82,8 @@ rung 5. Stock layout and live reach remain UNKNOWN; `AV:N` is advisory prose.
 
 ## Next
 
-Request witness replay of `realbuild/run-real.sh` from a clean archive;
-an author transcript is not acceptance. A loopback consumer in front of the
-status pipe is the only route to a wire-visible rung 4, and rung 5 needs a
-measured attacker-controlled path; neither is claimed here.
+Witness replay was requested on the shared tape at 19:47Z (message #3808,
+clean-archive HEAD `1ff8884b`); no verdict has landed, so the real path stays
+author-side and an author transcript is not acceptance. A loopback consumer
+in front of the status pipe is the only route to a wire-visible rung 4, and
+rung 5 needs a measured attacker-controlled path; neither is claimed here.
