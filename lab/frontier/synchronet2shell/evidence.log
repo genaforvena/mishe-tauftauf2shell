@@ -1,0 +1,97 @@
+2026-11-24T02:42:57Z sha256 of pins:
+pins/answer-parent.cpp: OK
+pins/answer-fixed.cpp: OK
+pins/cryptapi.c: OK
+pins/gen_defs.h: OK
+pins/sbbsdefs.h: OK
+pins/sbbs.h: OK
+pins/ssl.c: OK
+pins/telnet.h: OK
+430ee7bbefc5e34fc1982aab9210d8bc68d7a234bb16c0d9487587530baefa9b  pins/answer-parent.cpp
+c836079b80209a70d8677dc8ea117013dc6b9f223419336d67940bf51e490bcd  pins/answer-fixed.cpp
+ca21382b33fb774eefac325c439e96b2bb7a455a3dabbdb024ea372ddae868b4  pins/cryptapi.c
+0fb4d4763e2275246c5840618ca5907dc2ca611e27f6d6e05b340b1f1ee06e4d  pins/gen_defs.h
+fdd247997f471280ec6d9936a374c05923fbbd98208010028b3941828a807761  pins/sbbsdefs.h
+b1cf8600c1c60a2abcf4d84161536faad4d66a07308caee1cf7c9ebfc9cff950  pins/sbbs.h
+81a860b198dce7045a9fe045c2cf96e879d4446cb9c77bdf641a09af30cf524a  pins/ssl.c
+a07664551c62620248025e8d0398a66080d6928cf2d7f6b5af08f7b7dbd9252d  pins/telnet.h
+vuln.inc: pinned lines 543-549, 322 bytes
+fixed.inc: pinned lines 542-549, 453 bytes
+helper.inc: pinned lines 34-61, 543 bytes
+Build ids: g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0 | Ubuntu clang version 18.1.3 (1ubuntu1)
+=== asan-vuln-g++-term64 (len=64, want=overflow) rc=1
+=================================================================
+==98361==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b7e96800059 at pc 0x7b7e990fb303 bp 0x7ffe43299290 sp 0x7ffe43298a38
+WRITE of size 64 at 0x7b7e96800059 thread T0
+    #0 0x7b7e990fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5e358c046479 in cryptGetAttributeString harness/answer_harness.cpp:66
+    #2 0x5e358c046a1d in main harness/vuln.inc:1
+    #3 0x7b7e9882a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7b7e9882a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5e358c046284 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/build/vuln-asan-g+++0x1284) (BuildId: 19cce72b86595899a555cf27076e8817cce4aaa5)
+
+Address 0x7b7e96800059 is located in stack of thread T0 at offset 89 in frame
+    #0 0x5e358c046883 in main harness/answer_harness.cpp:96
+
+  This frame has 2 object(s):
+    [32, 36) 'l' (line 102)
+    [48, 89) 's' (line 99) <== Memory access at offset 89 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x7b7e967ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b7e967ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+PASS asan-vuln-g++-term64
+=== asan-vuln-clang-term64 (len=64, want=overflow) rc=1
+=================================================================
+==98382==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7b6916400049 at pc 0x60212e86d0d8 bp 0x7ffea16eb720 sp 0x7ffea16eaee0
+WRITE of size 64 at 0x7b6916400049 thread T0
+    #0 0x60212e86d0d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/build/vuln-asan-clang+0xc50d7) (BuildId: d68934f51a15b508bbe9c2d58305c412e5fe7079)
+    #1 0x60212e8b03d2 in cryptGetAttributeString(int, int, void*, int*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/harness/answer_harness.cpp:66:5
+    #2 0x60212e8afcd5 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/harness/vuln.inc:1:7
+    #3 0x7b691842a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7b691842a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x60212e7d4344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/build/vuln-asan-clang+0x2c344) (BuildId: d68934f51a15b508bbe9c2d58305c412e5fe7079)
+
+Address 0x7b6916400049 is located in stack of thread T0 at offset 73 in frame
+    #0 0x60212e8afb3f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/harness/answer_harness.cpp:96
+
+  This frame has 2 object(s):
+    [32, 73) 's' (line 99)
+    [112, 116) 'l' (line 102) <== Memory access at offset 73 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/build/vuln-asan-clang+0xc50d7) (BuildId: d68934f51a15b508bbe9c2d58305c412e5fe7079) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x7b69163ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7b69163ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+PASS asan-vuln-clang-term64
+=== asan-vuln-g++-term40 (len=40, want=clean) rc=0
+MODEL=redzone LEN=40 terminal_bytes=4141414141414141414141414141414141414141414141414141414141414141414141414141414100
+PASS asan-vuln-g++-term40
+=== asan-fixed-g++-term64 (len=64, want=clean) rc=0
+MODEL=layout LEN=64 terminal_head=41414141414141414141414141414141 line_delay=00000000 console=00000000 wordwrap_head=00000000000000000000000000000000
+FIXED_CONTROL_OK
+PASS asan-fixed-g++-term64
+=== asan-fixed-clang-term64 (len=64, want=clean) rc=0
+MODEL=layout LEN=64 terminal_head=41414141414141414141414141414141 line_delay=00000000 console=00000000 wordwrap_head=00000000000000000000000000000000
+FIXED_CONTROL_OK
+PASS asan-fixed-clang-term64
+=== plain-vuln-g++-term64 (len=64, want=CHOSEN_BYTES_OK) rc=0
+MODEL=layout LEN=64 terminal_head=41414141414141414141414141414141 line_delay=4853494d console=4f4f2d45 wordwrap_head=54415546544155465a5a5a5a00000000
+CHOSEN_BYTES_OK
+PASS plain-vuln-g++-term64
+=== plain-vuln-clang-term64 (len=64, want=CHOSEN_BYTES_OK) rc=0
+MODEL=layout LEN=64 terminal_head=41414141414141414141414141414141 line_delay=4853494d console=4f4f2d45 wordwrap_head=54415546544155465a5a5a5a00000000
+CHOSEN_BYTES_OK
+PASS plain-vuln-clang-term64
+=== plain-vuln-g++-term40 (len=40, want=SHORT_CONTROL_OK) rc=0
+MODEL=layout LEN=40 terminal_head=41414141414141414141414141414141 line_delay=00000000 console=00000000 wordwrap_head=00000000000000000000000000000000
+SHORT_CONTROL_OK
+PASS plain-vuln-g++-term40
+=== plain-fixed-g++-term64 (len=64, want=FIXED_CONTROL_OK) rc=0
+MODEL=layout LEN=64 terminal_head=41414141414141414141414141414141 line_delay=00000000 console=00000000 wordwrap_head=00000000000000000000000000000000
+FIXED_CONTROL_OK
+PASS plain-fixed-g++-term64
+RESULT 9 PASS / 0 FAIL
