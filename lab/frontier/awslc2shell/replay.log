@@ -1,0 +1,15 @@
+PASS vuln_asan_rc: 1
+PASS vuln_asan_write: 1
+PASS vuln_asan_site: 1
+PASS vuln_asan_offset: 1
+PASS vuln_asm_asan_read: 1
+PASS vuln_asm_asan_site: 1
+PASS vuln_chosen_byte: 1
+PASS fixed_byte_unmodified: 1
+PASS fixed_asan_rc: 0
+PASS fixed_asan_clean: 0
+PASS vuln_single_clean: 0
+PASS vuln_nopad_clean: 0
+PASS vuln_cipher_sha: 1
+PASS fixed_cipher_sha: 1
+RESULT: 14 PASS / 0 FAIL

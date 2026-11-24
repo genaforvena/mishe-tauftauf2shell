@@ -1,0 +1,10 @@
+/src/
+/src-fixed/
+/build-asan/
+/build-asan-c/
+/build-fixed/
+/*.tar.gz
+/harness-vuln
+/build-*.log
+/cmake*.log
+/harness-fixed
