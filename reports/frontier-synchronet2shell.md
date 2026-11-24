@@ -463,6 +463,14 @@ without waiting for the port to settle. `run-clientlen.sh` now waits for
 before connecting. The live rerun after that repair is 6 PASS / 0 FAIL; this
 is a tooling repair, not a change to the TERM-bound claim.
 
+Author clean `git archive ce0a0208 lab/frontier/synchronet2shell` replay at
+18:31Z, with the gitignored `src-tree/` and `provision/` symlinked in and the
+live tree untouched, reproduced rc 0 and **6 PASS / 0 FAIL**. Raw
+`results.txt` and `provenance.txt` are byte-identical; the six case transcripts
+differ only in client-relative timestamps and in the timing/line order of the
+thread-scheduled `CHANNEL TYPE` lines, and all six normalized digests match
+(`termlen/evidence/clientlen/REPLAY.md`). This is an author replay, not a
+witness verdict.
 
 ## Ceiling and cheapest next experiment
 
