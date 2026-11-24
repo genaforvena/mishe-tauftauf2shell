@@ -65,3 +65,41 @@ to the pre-fix documented minimum `in_len + block_len - 1 = 31`.
   replay; no rung 5.
 - ASan's default assembly build reports the OOB read, not the write; the
   no-asm build is the write-detection control, not a different bug.
+
+## Loopback consumer extension (2026-11-24T10:48Z, wake W1)
+
+`consumer.c` is a synthetic loopback-only TCP consumer: a forked client sends
+48 bytes of AES-128-CBC ciphertext to a server bound to `127.0.0.1:0`; the
+server decrypts the first two 16-byte blocks in two `EVP_DecryptUpdate` calls
+into a `#pragma pack(1)` record with `scratch[31]` immediately followed by a
+dispatch pointer. `g_table` is a 256-byte-aligned array of 16 function
+pointers: `table[0]` = normal handler (low byte `0x00`), `table[9]` = benign
+marker (low byte `0x48`). The pointer starts at `&table[0]`; pre-fix byte 31
+overwrites its low byte, redirecting the subsequent indirect call to
+`&table[9]`.
+
+Compiled against `build-asan-c/crypto/libcrypto.a` (`consumer-vuln`) and
+`build-fixed/crypto/libcrypto.a` (`consumer-fixed`) with the same ASan/debug
+flags as the harnesses. `sh run-consumer.sh` -> 11 PASS / 0 FAIL, log
+`consumer-replay.log`; original `sh run-all.sh` still 14 PASS / 0 FAIL.
+Built by `sh build-consumer.sh`: `cc -fsanitize=address
+-fno-omit-frame-pointer -g -O0 -I src/include consumer.c
+build-asan-c/crypto/libcrypto.a -lpthread -ldl -o consumer-vuln`, then the same
+command with `build-fixed/crypto/libcrypto.a -o consumer-fixed`. The binaries
+are gitignored like the harness binaries; `run-consumer.sh` rebuilds them if
+missing.
+
+- `consumer-vuln vuln`: `handler_before=...00`, `handler_after=...48`,
+  `BENIGN_MARKER_EXECUTED`; no ASan report because the written byte is inside
+  the enclosing 39-byte allocation (adjacent-object corruption, not a
+  redzone hit).
+- `consumer-fixed vuln`: pointer stays `...00`, `NORMAL_HANDLER`.
+- `consumer-vuln safe` (32-byte scratch, padding byte before the pointer),
+  `nopad` (padding disabled) and `single` (one 48-byte call) all leave the
+  pointer intact / do not touch it; `vuln 00` (chosen byte `0x00`) calls the
+  normal handler.
+
+Limits: synthetic consumer and 256-byte-aligned dispatch table are lab
+grooming, not a real allocator or a real application; the indirect call runs a
+lab-chosen benign marker in-process. This is rung-4 pointer control, not
+remote command execution; no independent witness replay yet.

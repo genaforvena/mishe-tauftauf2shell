@@ -48,18 +48,27 @@ RCE claim remain claims in this lab.
    vulnerable single-call and padding-disabled runs are clean; both pinned
    source hashes match.
 
-Rung 4 is PARTIAL: after the boundary-crossing call, with one extra allocated
-byte, the canary `0xab` at offset 31 is replaced by the chosen `0x48` in the
-vulnerable build and remains `0xab` in the fixed build. No pointer, IP,
-allocator metadata, adjacent-object corruption, command or wire input is
-observed. Rung 5 is UNKNOWN: no live target process, no loopback wire replay,
-no vulnerable/fixed/safe wire controls. No independent witness verdict yet.
+Rung 4 is now demonstrated in a synthetic loopback consumer, not merely a
+canary harness (`lab/frontier/awslc2shell/consumer.c`, `run-consumer.sh`,
+`consumer-replay.log`: 11 PASS / 0 FAIL at 2026-11-24T10:48Z). A forked client
+sends 48 bytes of AES-128-CBC ciphertext over TCP to `127.0.0.1:0`; the server
+decrypts two 16-byte updates into a packed record whose `scratch[31]` is
+immediately followed by a dispatch pointer. The chosen plaintext byte `0x48`
+overwrites the pointer's low byte from `0x00` to `0x48`, redirecting the
+subsequent indirect call from `table[0]` (normal handler) to `table[9]`
+(benign marker). `BENIGN_MARKER_EXECUTED` is observed only in the vulnerable
+build. Fixed-library, 32-byte-scratch, padding-disabled, single-call and
+chosen-byte-`0x00` controls all leave the normal handler intact; the original
+`run-all.sh` replay remains 14 PASS / 0 FAIL.
+
+Limits: synthetic consumer, 256-byte-aligned dispatch table and in-process
+benign marker are lab grooming. No real application, no allocator-metadata
+corruption, no command execution outside the marker, no independent witness
+verdict. Rung 5 remains UNKNOWN: no live non-synthetic target and no witness
+replay of the wire path.
 
 ## Next bounded work
 
-Request a witness replay; then build a loopback-only consumer that decrypts
-attacker-supplied CBC ciphertext in multiple updates into a
-documented-minimum buffer and test whether the single chosen byte can change
-a control datum in a groomed or guarded adjacent object. Preserve the fixed,
-single-call and padding-disabled controls. Never infer RCE from a harness
-marker or advisory reachability prose.
+Request an independent witness replay of both `run-all.sh` and
+`run-consumer.sh`. Never infer RCE from a harness marker or advisory
+reachability prose.

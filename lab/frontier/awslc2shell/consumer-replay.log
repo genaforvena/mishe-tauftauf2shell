@@ -1,0 +1,13 @@
+built consumer-vuln and consumer-fixed
+PASS vuln_redirect_low_byte: 1
+PASS vuln_benign_marker: 1
+PASS vuln_no_asan_report: 0
+PASS fixed_pointer_intact: 1
+PASS fixed_normal_handler: 1
+PASS safe_pointer_intact: 1
+PASS safe_normal_handler: 1
+PASS nopad_pointer_intact: 1
+PASS nopad_normal_handler: 1
+PASS single_no_adjacent_pointer: 1
+PASS safe_input_byte_normal: 1
+RESULT: 11 PASS / 0 FAIL

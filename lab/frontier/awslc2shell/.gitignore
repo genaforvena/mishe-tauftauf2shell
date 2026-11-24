@@ -9,3 +9,5 @@
 /build-*.log
 /cmake*.log
 /harness-fixed
+/consumer-vuln
+/consumer-fixed

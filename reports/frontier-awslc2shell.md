@@ -57,20 +57,28 @@ a 31-byte heap buffer. `sh run-all.sh` -> 14 PASS / 0 FAIL (log `replay.log`).
   byte `0x10` on the final update, so chosen-byte capture requires stopping
   after the boundary-crossing call.
 
-## Rung-4 feasibility and ceiling
+## Rung-4 feasibility and ceiling (updated 2026-11-24T10:48Z)
 
 Rung 1 (deterministic trigger), rung 2 (buffer smaller than bytes written) and
 **rung 3 (ASan-confirmed OOB write in the real upstream library)** are observed.
-Rung 4 is **partial**: one attacker-chosen byte at a chosen offset in a minimal
-harness; no pointer, IP or command control, no adjacent-object corruption,
-no real application build, no network/wire input, no rung 5. No upstream issue
-or public PoC was located; the claim source is the vendor advisory and patch.
+Rung 4 advanced in wake W1 from a canary byte to pointer control in a synthetic
+loopback consumer (`lab/frontier/awslc2shell/consumer.c`): attacker-supplied
+ciphertext over TCP `127.0.0.1:0`, two 16-byte `EVP_DecryptUpdate` calls into a
+packed record with `scratch[31]` followed by a dispatch pointer. Chosen byte
+`0x48` changes the pointer's low byte `0x00` -> `0x48`, redirecting the
+indirect call from `table[0]` (normal handler) to `table[9]` (benign marker).
+`sh run-consumer.sh` -> 11 PASS / 0 FAIL (`consumer-replay.log`); fixed-library,
+32-byte-scratch, padding-disabled, single-call and byte-`0x00` controls all
+call the normal handler. `run-all.sh` remains 14 PASS / 0 FAIL.
+
+The dispatch table's 256-byte alignment and the packed record are lab grooming
+and the marker runs in-process: **rung-4 pointer control in a synthetic
+consumer, not rung 5**. No real application, no allocator-metadata corruption,
+no command execution outside the marker, no independent witness verdict.
 
 ## Cheapest next experiment
 
-Compile a small network-facing consumer that decrypts attacker-supplied CBC
-ciphertext in multiple updates into a documented-minimum heap buffer (e.g. an
-embedded TLS/recordparser test), then use a guard-page allocator or heap groom
-to place a pointer-adjacent object after the buffer and test whether the single
-chosen byte can alter a control datum. Independently replay with the fixed
-library and with a 32-byte buffer. Any r5 claim needs a witness replay.
+Request independent witness replay of both `run-all.sh` and `run-consumer.sh`.
+Then look for a real consumer whose documented-minimum output buffer is
+followed at the one-byte offset by a control datum under natural alignment.
+Any r5 claim needs witness replay.
