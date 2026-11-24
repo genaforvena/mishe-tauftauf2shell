@@ -321,8 +321,9 @@ object was overwritten. `valid`/`invalid`: POST aborted inside HMAC at
 `malloc(): unaligned tcache chunk detected`. Empty `*-post.bin` /
 `*-follow.bin` are the aborts before a response. Raw bytes, tokens, cookies,
 gdb logs and hashes: `evidence/chosen64-*` and
-`evidence/chosen64-SHA256SUMS`. No listener or lab Apache remained. Witness
-replay of this lane not requested; author result is not acceptance.
+`evidence/chosen64-SHA256SUMS`. No listener or lab Apache remained. No formal
+witness request; an optional replay was offered on tape #3141 and the author
+result is not acceptance.
 
 Grade unchanged: chosen-byte fault-site control in a real process (rung 4
 mechanics), no pointer/IP control, no code pointer in the write, no marker,
