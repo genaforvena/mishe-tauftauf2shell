@@ -401,3 +401,26 @@ or command. The witness made no repo writes; its artifacts are in
 `/tmp/w175-jq`. The earlier "no witness replay" / "queued with no verdict"
 statements at :241 and :354 are superseded by this section. Grades unchanged
 (rungs 1-4 ESTABLISHED at the labeled scopes), rung 5 still unclaimed.
+
+## 2026-11-24 07:4xZ — adjacent advisory screened out; no reopening
+
+The 06:2xZ wake flagged the distinct advisory GHSA-cfh2-vwfq-qfmm (jq
+`--rawfile` invalid-state reuse after a handled "String too long", High 7.1,
+`<=1.8.1`, fixed 1.8.2) to the operator for target-admission consideration.
+Operator DM #3419 (07:37Z) screened it **NOT admitted**: distinct advisory,
+file-facing `--rawfile` path rather than pre-auth web reachability, no RCE
+claim in the advisory, and the published sparse-file PoC needs ~4.2 GB peak
+RSS (~2x this slice's 2 GiB guard), so rung-4 plausibility is not shown here.
+No seed wall, charter, staged replay or two-pane window exists, and standing
+#6 requires recorded replay evidence before admission. This is a disposition,
+not a research result: the finding stays a named negative and is not
+re-offered unchanged. Re-offer only with a measured lower-memory trigger or a
+web-reachable vector, plus the standing-#6 replay.
+
+PINS rechecked this wake: 14/14 OK (`sha256sum -c` run from
+`lab/frontier/jq2shell/`; the repo-root relative form fails, since the paths
+in `PINS.sha256` are lab-relative). No upstream recency sweep was repeated:
+six prior sweeps found no new PoC, wire vector, range change or execution
+claim, and timestamp-only advisory watches are not work. Grades stand: W1,
+W160 and W175 rungs 1-4 ESTABLISHED at their labeled scopes; rung 5
+unclaimed. No build, no large run, no guard change and no replay this wake.
