@@ -532,3 +532,55 @@ tiled claim: it regenerates both tiled EXRs from committed sources, asserts
 their two SHA-256 hashes and checks eight plain/ASan/fixed/guard outcomes.
 `sh lab/openexr2shell-real/harness/tiled-check.sh` passed `PASS=10 FAIL=0`
 three times. This is an author recipe, not a witness verdict.
+
+## W173: advisory OpenImageIO flat-path claim — static-source negative (2026-11-24)
+
+Prediction: the advisory's OpenImageIO 3.2.0.2-dev flat
+`ImageInput::read_image()` reproduction cannot reach the pinned sink in the
+exact source already fetched for W165. This is a **static source trace**, not
+a linked-OIIO lab observation: no OIIO binary was built, and no claim of a
+dynamic result is made. The tarball is byte-identical to W165's provenance
+(`oiiolab/oiio.tar.gz` sha256
+`1c1283e87bcf270dff02037087b5b79eb08cd75f5ee41a72700a3b3b726ff4d2`).
+Traced files: `src/libOpenImageIO/imageinput.cpp` sha256
+`3625fa9c25353ac76f3aca5fa3365c997ee2026eab7067890315e2e8b65e0f2c` and
+`src/openexr.imageio/exrinput.cpp` sha256
+`3ad15a8904e7ce5cfc89b7bc6b5c6fde423f72508903ff97ab3678d5f8ed101d`.
+
+Two independent source reasons, each sufficient:
+
+1. A genuinely **flat** EXR cannot trigger this bug in the first place. For a
+   flat scanline compressed chunk, OpenEXRCore 3.5.2
+   `src/lib/OpenEXRCore/chunk.c:1080-1100` sets
+   `unpacksize = compute_chunk_unpack_size(dw.min.x, miny, cinfo->width,
+   cinfo->height, lpc, part)` — computed from the same header whose channel
+   widths drive `exr_zstd_fill_channel_sample_count_grid`'s flat grid
+   (`internal_zstd.c.vuln:834-858`). The grid total and the destination size
+   therefore always agree; the file supplies no independent `unpacked_size`
+   for the flat path. The mismatch exists only on the deep path, where
+   `chunk.c:1044` reads `unpacked_size` from the file leader and the sample
+   count table separately declares the grid — the geometry of our W160 PoC.
+   The PoC and baseline headers here both parse as `type=deepscanline`,
+   `compression=13` (ZSTD), confirmed by a direct header walk.
+2. OIIO's flat `read_image()` never reaches a deep decoder.
+   `ImageInput::read_image()` (`imageinput.cpp:1187-1259`) dispatches only to
+   `read_scanlines()`/`read_tiles()`; `read_scanlines()`
+   (`imageinput.cpp:350-411`) calls `read_native_scanlines()` with no deep
+   special-case. For a deep part, `open()`/seek (`exrinput.cpp:1079-1087`)
+   constructs only `m_deep_scanline_input_part` or
+   `m_deep_tiled_input_part`, leaving `m_scanline_input_part` NULL;
+   `read_native_scanlines()` (`exrinput.cpp:1291-1295`) then returns false
+   with "called ... without an open file". The deep path that does decode
+   (`read_native_deep_scanlines` at `exrinput.cpp:1571`, which calls
+   `readPixelSampleCounts()` at `:1627` before `readPixels()` at `:1632`)
+   is reachable only through the deep API, which `read_image()` never calls.
+
+Disposition: the advisory's flat OIIO claim is a **static negative** in this
+exact tag — both the file geometry and the consumer dispatch block it. This
+does not replace a linked-consumer replay (W165/W168 remain the dynamic
+prerequisite) and is not a new rung. No new grade: file-level rungs 1-4
+witness-ESTABLISHED at the scanline CODE/CONSUMER scope, rung 5 UNKNOWN, no
+wire, pointer, command or marker. Would change mind: a linked OIIO 3.2.0.2-dev
+consumer reaching `internal_zstd.c:472` on any input, or a flat-file decode
+whose `unpacked_size` is independently attacker-set below the header-derived
+grid total.

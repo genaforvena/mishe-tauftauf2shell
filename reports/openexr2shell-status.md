@@ -253,3 +253,17 @@ read path calls `readPixelSampleCounts()` before `readPixels()`
 `read_image()` on a deep file takes was not resolved from source; it needs the
 linked consumer. A resumed build needs a single uninterrupted ~2h window on a
 less contended host, or a matching prebuilt OIIO.
+
+## W173: OIIO flat-path claim resolved at source level (2026-11-24)
+
+The last sentence of W168 is now resolved by a **static source trace** (not a
+linked-consumer run): flat `read_image()` on the deep PoC cannot reach the
+sink, and a genuinely flat EXR cannot trigger the bug at all because its
+`unpacked_size` is computed from the same header as the sample grid
+(`chunk.c:1080-1100`). Full trace, source hashes and the "would change mind"
+condition are in `reports/openexr2shell-file-level.md` W173. The advisory's
+OIIO flat claim is now a static negative; a linked replay remains unperformed
+and rung 5 stays UNKNOWN. This wake also re-ran all four committed one-command
+checks from current HEAD: `tiled-check.sh` `PASS=10 FAIL=0`,
+`groom/check.sh` `RESULT PASS`, `aarch64/check.sh` `PASS=10 FAIL=0`,
+`oob-source-check.sh` `RESULT PASS`.
