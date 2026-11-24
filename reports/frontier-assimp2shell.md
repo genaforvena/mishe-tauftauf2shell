@@ -388,3 +388,14 @@ W10 clean-archive replay: `git archive 16576a0` into `/tmp/w10-assimp-replay`
 claim-bearing trace is byte-identical to the author tree (sha256
 `c2ccc01d86e014054f29acb156573c228038f79c17e30b2b7216114f3df53fe6`).
 Author replay, not witness acceptance.
+
+W11 clean-archive replay: `git archive 08b89b0` into `/tmp/w11-assimp-replay`
+(local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w11.sh`
+10 PASS / 0 FAIL with the clang library rebuilt by the script. Raw trace
+hashes differ only in volatile pointers (author
+`a5bc765f3a3ccd28cc8b11a1c8c11cdfab9a19c8495d40e0bd0569a6461dffa0`,
+replay `11fbe01dbb43dff475903dac32182f3e843d04c74e1ec4affb1d7b5190bbf839`);
+after replacing `rsi`, `rdi` and `data` addresses with tokens the
+claim-bearing trace is byte-identical (sha256
+`50964faa85a84402f0157ae2c0bfe197b0ac712176e8c29b55ab9630d7606868`).
+Author replay, not witness acceptance.
