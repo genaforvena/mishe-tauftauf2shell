@@ -413,3 +413,24 @@ ceiling: `reports/openexr2shell-file-level.md` W181.
 Clean-archive replay at `0d138b5` reproduced `RESULT PASS` and the aggregate
 normalized-output hash `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`
 exactly (15 commit-observed evidence files).
+
+## W182: no code pointer in the C++ deep-path overwrite window (2026-11-24)
+
+W171 mapped the 4096-byte copy onto live glibc chunks only on the flat
+`exrcheck` path and found no function pointer or vtable; the advisory's C++
+`DeepScanLineInputFile::readPixels` path had not been mapped. A filtered gdb
+probe (`harness/cpp-heap-victims.cmd`) stops at the 4096-byte inverse-sort
+memcpy in the vulnerable plain build, classifies every 8-byte word in
+`[dst,dst+4096)` against the process's executable and main-binary rodata
+mappings, walks the heap chunks and scans the live `decode` pipeline structs.
+Result: `PTR-HITS total=0`, three chunks (`-16/0x50`, `+64/0x30`,
+`+112/0x1490`), and three live pointer fields, all of them the *value*
+`decode.unpacked_buffer` at `+0` rather than pointer fields located inside the
+window. Two of three chunk headers are clobbered, yet this consumer survives
+to a clean `EXR_ERR_INVALID_SAMPLE_DATA` exception (rc=1), not an abort. Fixed
+build rejects with `EXR_ERR_CORRUPT_CHUNK`; safe baseline returns 0. No live
+control-flow target on either measured path, so the rung-5 pointer-control
+option stays closed locally. `RESULT PASS` three times byte-stably; clean
+archive replay receipt follows. No wire, chosen bytes, pointer write, command
+or marker. Unwitnessed, no grade change, rung 5 UNKNOWN.
+

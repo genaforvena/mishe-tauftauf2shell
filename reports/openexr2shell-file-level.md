@@ -974,3 +974,56 @@ pinned build trees and `src/` symlinked from the live tree,
 output sha256
 `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff36925876273fa`, identical
 to the three working-tree runs. Receipt only, no new claim.
+
+## W182: heap victims on the C++ deep-scanline path — negative (2026-11-24)
+
+Hypothesis: unlike the flat Core path of W171, the advisory's C++
+`DeepScanLineInputFile::readPixels` path might allocate a C++ object with a
+vtable or callback pointer inside the 4096-byte overwrite window, giving a
+live control-flow target for file-chosen bytes.
+
+Method: `harness/cpp-heap-victims.cmd` pins inferior ASLR off, breaks on the
+4096-byte memcpy reached from `sort2_4ByteChannels_tiled` (a source breakpoint
+at `internal_zstd.c:472` resolves to a line with no code in this build), parses
+`info proc mappings` into executable and main-binary rodata ranges, scans every
+aligned word in `[dst,dst+4096)` for values in those ranges, walks glibc chunk
+headers from the destination, and scans the `decoder`/`decode` locals in live
+frames for pointer values inside the window. `harness/cpp-heap-victims-check.sh`
+regenerates the 692-byte all-FLOAT PoC (sha256 `283cec0e...`), writes the
+normalized observation plus baseline and fixed controls, and asserts each
+line.
+
+Observed: `SINK n=4096 src_minus_dst=101584`, `PTR-HITS total=0`; chunks
+`off=-16 size=0x50`, `off=+64 size=0x30`, `off=+112 size=0x1490`;
+`LIVE-PTR-COUNT scanned=33 inside=3`, the three inside pointers being the
+`decode.unpacked_buffer` *value* at `+0` in `exr_decoding_run`,
+`exr_uncompress_chunk` and `internal_exr_undo_zstd` frames, not pointer fields
+stored in the overwritten range. `HDR-CORRUPTED 2/3` after the copy. The plain
+consumer nonetheless continues to `EXR_ERR_INVALID_SAMPLE_DATA` and exits
+with rc=1 (no `free(): invalid pointer` abort as in the flat N=128 case of
+W181); fixed build returns `EXR_ERR_CORRUPT_CHUNK`, safe baseline 0.
+
+Inconclusive side probe, preserved as a negative: driving the mixed-channel
+PoC of W178 through the same C++ consumer reaches the pinned sink (ASan
+`READ of size 128` at `internal_zstd.c:472`), but a filtered gdb readback after
+the fortified memcpy wrapper showed no `0x3c`/`0x5a` byte runs at the
+destination. The post-`finish` memory read is ambiguous for that wrapper, so
+this is not offered as evidence against W178/W181's chosen-byte results; it
+only means no C++-path chosen-byte claim is made here.
+
+Replay: three working-tree runs of `sh harness/cpp-heap-victims-check.sh`
+gave `RESULT PASS` and hashes
+`7cb9f1f8d20246fd63f9fafa4dbb686d0d6179a39b83210ebadcce184b7ac8e4`
+(heap observation), `c0d6ac03b8b428e203a31f77a56c431c65463c65bda7333684a944e57d00d03d`
+(baseline) and
+`5667c65f80bb786ba515e1e0ae845e78182424c922a1ab59b039e6b8aea43eee` (fixed).
+Clean-archive replay receipt follows.
+
+Disposition: the no-control-flow-target result now covers both measured
+consumers (flat W171 and C++ W182). No wire, no chosen bytes, no pointer or
+control-flow write, no command, no marker. No grade change; this section is
+unwitnessed and W161 remains the only ESTABLISHED verdict (older all-FLOAT
+file). Rung 5 stays UNKNOWN. Would change mind: a measured live code pointer
+inside a survivable overwrite, a wire-fed unmodified consumer, or a witness
+counterexample.
+

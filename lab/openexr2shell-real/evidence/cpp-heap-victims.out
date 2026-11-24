@@ -1,0 +1,15 @@
+SINK n=4096 src_minus_dst=101584
+ PTR-HITS total=0
+ CHUNK-COUNT total=3 first_off=64
+ CHUNK off=-16 size=0x50 hdr=0x51
+ CHUNK off=+64 size=0x30 hdr=0x31
+ CHUNK off=+112 size=0x1490 hdr=0x1491
+ LIVE-PTR-COUNT scanned=33 inside=3
+ LIVE-PTR-INSIDE exr_decoding_run.decode.unpacked_buffer off=+0
+ LIVE-PTR-INSIDE exr_uncompress_chunk.decode.unpacked_buffer off=+0
+ LIVE-PTR-INSIDE internal_exr_undo_zstd.decode.unpacked_buffer off=+0
+ HDR-CORRUPTED 2/3
+ END-PY
+cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Corrupt sample count table
+cases/poc.exr: (EXR_ERR_INVALID_SAMPLE_DATA) Decode pipeline unable to unpack deep sample table
+READPIXELS exception: Unable to run decoder
