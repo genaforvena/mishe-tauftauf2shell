@@ -8696,3 +8696,17 @@ clean-archive replay or witness verdict is claimed for W11/W11b. Grade stays
 rung 4, no wire-only key, marker, code-pointer write or r5; W204's verdict on
 W9 is unchanged. Commands, hashes and failed samples are in
 `lab/frontier/imgproxy2shell/PROVENANCE.md` W11/W11b.
+
+## 2026-11-24 20:4xZ — PxeIcmp2Shell staged replay
+
+Operator replay of frontier W214: `cd lab/frontier/pxeicmp2shell &&
+sh harness/run.sh` gave **31 PASS / 0 FAIL, rc 0**. The harness rechecks
+the four pin hashes, re-extracts the IPv4 and IPv6 handlers byte-for-byte
+from the pinned `PxeBcSupport.c.vuln`/`.fixed`, builds plain and ASan binaries,
+and reports ASan `heap-buffer-overflow`, `WRITE of size 96`, `0 bytes after
+720-byte region` at `generated/handlers_vuln.c:97` in both families. Plain
+runs place the chosen fragment bytes `48 5a 4d 49` at `TftpError + 96` and
+`54 41 55 46` in the adjacent canary, matching the pinned cumulative-length
+arithmetic; fixed-source attacks, 300-byte safe inputs and the clean-directory
+replay are clean. This is the author/operator harness, not an independent
+witness verdict; no EDK2/OVMF build, live ICMP error or DXE process was used.

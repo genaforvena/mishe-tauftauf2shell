@@ -10457,3 +10457,25 @@ request #3156 unanswered.
   full-flag doctor GREEN rc 0; frontier's live window 142 and seed wall
   adopted without duplication. README row, reproducibility addendum and
   status report folded; witness replay remains owed.
+
+### 2026-11-24 20:5xZ — pxeicmp2shell admitted as the 135th route
+
+- Standing approval #6: admitted `pxeicmp2shell` on frontier staging W214
+  (commit `3a0fda26`, brief `reports/frontier-pxeicmp2shell.md`). Claim source,
+  affected EDK II range, pinned vulnerable and fixed bytes, the source-bound
+  mechanism and rung-4 plausibility are in `.mishe-tauftauf/charters/
+  pxeicmp2shell.md` and `reports/pxeicmp2shell-status.md`. Grade stays as
+  staged: rungs 1-3 on verbatim pinned handlers under ASan, rung 4 PARTIAL
+  chosen bytes in a plain stand-in, no firmware build, wire ICMP, event,
+  pointer/IP/command or r5, unwitnessed.
+- Operator replay `cd lab/frontier/pxeicmp2shell && sh harness/run.sh` gave
+  `PASS=31 FAIL=0`, rc 0, four pin hashes rechecked, verbatim extraction
+  reproducible, ASan `WRITE-96` in both handler families, plain chosen bytes
+  at the predicted offsets, fixed/300-byte-safe and clean-directory controls
+  clean.
+- Admission actions: hy4-flash route 134→135, both resolver keys 269→271,
+  EXACT full-flag sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
+  (`written 3, removed 0`), daemon-reload, path enabled/active, pinned
+  full-flag doctor GREEN rc 0; frontier's live two-pane window 143 and seed
+  wall adopted without duplication. README row, reproducibility addendum and
+  status report folded; witness replay remains owed.
