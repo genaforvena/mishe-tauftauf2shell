@@ -779,3 +779,32 @@ Evidence and exact build commands:
 `check_im_consumer.py` PASS=7 FAIL=0. Grade UNCHANGED rung 3 plus rung 4,
 NOT rung 5; no wire request, chosen bytes at the overflow, pointer control,
 command or witness verdict.
+
+## W201 AV1 consumer-selection gap closed from pinned source (2026-11-24)
+
+W189's negative says ImageMagick's AVIF sequence path uses the AOM encoder,
+which has no padding call. Since pinned v1.23.6 DOES have the padding call in
+`encoder_svt.cc`, that conclusion could have been an artifact of W189's
+AOM-only build. It is not: pinned source shows the default AV1 encoder is
+always AOM, even in a build containing SVT, and the one CLI that can select an
+encoder by name refuses mixed-size sequence frames.
+
+- `encoder_aom.cc:250` sets `AOM_PLUGIN_PRIORITY = 60`;
+  `encoder_svt.cc:146` sets `SVT_PLUGIN_PRIORITY = 40`.
+  `plugin_registry.h:44-49` orders encoder descriptors highest-priority first;
+  `heif_encoding.cc:129-151` has `heif_context_get_encoder_for_format()` take
+  `get_filtered_encoder_descriptors(format, nullptr)` and use `descriptors[0]`.
+- ImageMagick's `WriteHEICSequenceImage` calls exactly that unnamed API at
+  `heic.c:2141-2142`. It has no encoder-name option, so AOM wins whether or
+  not the SVT plugin is compiled in. `heif-enc` can select an encoder by name
+  (`examples/heif_enc.cc:2046`) and has a sequence mode, but its frame loop
+  (`heif_enc.cc:2753-2758`) rejects a frame whose size differs from the first
+  frame before any `heif_track_encode_sequence_image` call.
+- `check_av1_consumer_guards.py` (in `lab/frontier/libheif2shell/real/neighbour/`)
+  asserts all of the above from the pinned trees: PASS=10 FAIL=0, in-tree and
+  from a clean `git archive` replay. This is a source-level check, not a build
+  or a live run; no new rung. Grade UNCHANGED rung 3 plus rung 4, NOT rung 5.
+
+Still open: a real consumer with a named HEVC/x264/x265/kvazaar/vvenc encoder
+and no size guard. No such consumer has been built or run. The advisory's
+AV:N vector remains advisory text.
