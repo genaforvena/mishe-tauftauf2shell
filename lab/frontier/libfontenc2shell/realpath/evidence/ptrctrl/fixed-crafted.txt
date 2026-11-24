@@ -1,0 +1,10 @@
+FontEncFind=0x555555562230
+mapping1=0x555555562290 client=0x5555555624e0 len=1 row=258 first=0 map=0x555555562500 map0=1 code=0 recode=1
+mapping2=0x555555562520 client=0x555555562560 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+mapping3=0x555555562580 client=0x5555555625c0 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+mapping4=0x5555555625e0 client=0x555555562620 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+mapping5=0x555555562640 client=0x555555562680 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+mapping6=0x5555555626a0 client=0x5555555626e0 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+mapping7=0x555555562700 client=0x555555562740 len=0 row=258 first=0 map=(nil) map0=65535 code=0 recode=0
+
+RC=0

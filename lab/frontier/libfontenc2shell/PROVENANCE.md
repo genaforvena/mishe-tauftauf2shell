@@ -374,3 +374,39 @@ ahead of the buffer is wilderness/top chunk, and no live object, saved pointer,
 control-flow target, marker or command was observed. Ceiling stays rung 3
 under ASan plus availability-only plain crash; rung 4 object control and rung 5
 remain UNKNOWN. Do not read this as a pass.
+
+## W183 chosen-byte overwrite of a live object pointer (2026-11-24 00:0xZ)
+
+W181's identity ramp wrote index-derived values into wilderness, so I tested
+whether later mappings could reach an object the parser allocates **after**
+the buffer. `parseEncodingFile()` allocates `sm` (`FontEncSimpleMapRec`, 16
+bytes) and its compact `newmap` at `ENDMAPPING` (`encparse.c:641-658`). A
+seven-mapping `.enc` with `SIZE 256 258` uses `0xff00` -> index 65790 (+508
+bytes) for chosen marker words and `0xfe10`..`0xfe13` -> indices
+65548..65551 (+24..+30 bytes) to replace all four 16-bit halves of mapping2's
+already-live `sm->map` pointer. Each mapping's first CODE resets first/last,
+so there is no ramp: exactly one chosen store per mapping.
+
+Real public-API evidence in `realpath/evidence/ptrctrl/`: vulnerable plain
+with `MALLOC_MMAP_THRESHOLD_=262144` and ASLR disabled (`setarch -R`) changes
+mapping2 `map` from its in-bounds target (holding `0x1111`) to
+`0x55555558257a` (+26 bytes past the buffer, where another chosen store
+placed `0x5558`); `FontEncRecode(254, mapping2)` returns 21848 (`0x5558`)
+instead of 4369 (`0x1111`). Vulnerable `SIZE 256 256` safe input leaves the
+pointer and value unchanged. Fixed `5920c6e` rejects every out-of-range
+mapping (`map=(nil)`, `len=0`, `recode=0`). Vulnerable ASan reports `WRITE of
+size 2` at `encparse.c:495`, 508 bytes after the 131072-byte region from
+`reallocarray` at `:477`, frames through `FontEncFind:738`. `gdb-layout.txt`
+records the store addresses and the live-object allocation order; gdb's
+environment shifts every allocation 0x10 lower than the `setarch -R` runner,
+so the hardcoded words target the runner layout. `run.sh` regenerates all
+five output files.
+
+This adds rung 4 at the real-library public API: chosen bytes at chosen
+offsets, full overwrite of one live object's data pointer and an observed
+read through it under a fixed ASLR-off layout. It is not a function pointer
+or saved return address; no control-flow diversion, marker execution,
+command, X server process, wire delivery, privileged context or witness
+replay was added. The earlier single-mapping heap-neighbour negative result
+is preserved, not erased: W183 needs seven mappings and a brk layout. Rung 5
+stays UNKNOWN.

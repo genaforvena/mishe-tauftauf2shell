@@ -1,0 +1,63 @@
+=================================================================
+==3472751==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7ffff7f109fc at pc 0x7ffff7f99e3b bp 0x7fffffffc4f0 sp 0x7fffffffc4e0
+WRITE of size 2 at 0x7ffff7f109fc thread T0
+    #0 0x7ffff7f99e3a in setCode ../src/encparse.c:495
+    #1 0x7ffff7f9b1ee in parseEncodingFile ../src/encparse.c:672
+    #2 0x7ffff7f9cbba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #3 0x7ffff7f9cd94 in FontEncReallyLoad ../src/encparse.c:962
+    #4 0x7ffff7f9e51b in FontEncLoad ../src/fontenc.c:780
+    #5 0x7ffff7f9e311 in FontEncFind ../src/fontenc.c:738
+    #6 0x55555555533c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/evidence/ptrctrl/probe.c:26
+    #7 0x7ffff742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7ffff742a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x5555555551e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/ptrctrl/probe-vuln-asan+0x11e4) (BuildId: 45cdc98f55f90a9b0d6d4b5ae756a97d09bbd0bb)
+
+0x7ffff7f109fc is located 508 bytes after 131072-byte region [0x7ffff7ef0800,0x7ffff7f10800)
+allocated by thread T0 here:
+    #0 0x7ffff78fc91d in reallocarray ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:92
+    #1 0x7ffff7f99ad1 in setCode ../src/encparse.c:477
+    #2 0x7ffff7f9b1ee in parseEncodingFile ../src/encparse.c:672
+    #3 0x7ffff7f9cbba in FontEncReallyReallyLoad ../src/encparse.c:941
+    #4 0x7ffff7f9cd94 in FontEncReallyLoad ../src/encparse.c:962
+    #5 0x7ffff7f9e51b in FontEncLoad ../src/fontenc.c:780
+    #6 0x7ffff7f9e311 in FontEncFind ../src/fontenc.c:738
+    #7 0x55555555533c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/evidence/ptrctrl/probe.c:26
+    #8 0x7ffff742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7ffff742a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5555555551e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libfontenc2shell/realpath/tmp/ptrctrl/probe-vuln-asan+0x11e4) (BuildId: 45cdc98f55f90a9b0d6d4b5ae756a97d09bbd0bb)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../src/encparse.c:495 in setCode
+Shadow bytes around the buggy address:
+  0x7ffff7f10700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff7f10780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff7f10800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x7ffff7f10980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]
+  0x7ffff7f10a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7ffff7f10c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3472751==ABORTING
+
+RC=1
