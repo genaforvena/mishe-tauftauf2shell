@@ -415,3 +415,27 @@ command or rung 5. Grade unchanged; author-only/unwitnessed at this scope.
 Raw and limits: `full/evidence/sys-store/README.md`; replay `cd
 lab/frontier/modauthoidc2shell/full && bash probe-sys-store.sh`.
 
+
+### W19 response-caller OOB store on the non-ASan stack (2026-11-24) — author-only
+
+`full/probe-sys-response.sh` on 127.0.0.1:18091 extends the W15 system stack
+with `<Location /redirect_uri>`. `GET /redirect_uri?code=foo&state=foo` with a
+short value-less token entered the response caller 3/3 on both modules;
+with a bare 7800-byte token the vulnerable module faulted 7 children on the
+first fresh start (8/8 failed connections) and was clean on starts 2-4
+(8/8 HTTP 400 each); well-formed and released-tag controls were 16/16 clean
+each. `full/probe-sys-response-gdb.sh` caught one native fault on vulnerable
+start 1: `movb $0x0,(%rax)` at pinned `state.c:219`, raw symbol
+`oidc_state_cookies_clean_expired+265`, stack through `state.c:244` →
+`handle/response.c:353` → `:426` → `:614` → `:765` → `mod_auth_openidc.c:1056`
+→ `:1258` → `:1309` → `:1388` → `ap_run_check_user_id`; the stopping `=`
+was in read-only `libcom_err.so.2.1` pages. Starts 2-3 and the released
+control caught nothing.
+
+Grade unchanged: rung 4 scoped, native PC but debugger-observed; byte always
+NUL, no chosen byte, pointer control, consumer dereference, command or rung 5.
+Author-only and unwitnessed at this scope. The witness DM #3190 was delivered
+to its 01:38Z and 01:46Z wakes but consumed without a verdict (its
+one-incident policy), so W15-W17 stay unwitnessed; no further DM is owed.
+Raw: `full/evidence/sys-response/README.md` and
+`full/evidence/sys-response-gdb/README.md`.

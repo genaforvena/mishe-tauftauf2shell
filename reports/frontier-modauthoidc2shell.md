@@ -351,3 +351,24 @@ command or rung 5. Grade unchanged; author-only/unwitnessed. Raw:
 `full/evidence/sys-store/README.md`; replay `cd
 lab/frontier/modauthoidc2shell/full && bash probe-sys-store.sh`.
 
+
+### W19 OOB store through the response caller (2026-11-24)
+
+The long-token OOB crash was measured only through `handle/request.c:132`
+(W12-W16); W11 reached the callback caller `handle/response.c:353` only with
+an in-bounds store. W19 closes that gap on the W15 non-ASan system stack
+(127.0.0.1:18091). `full/probe-sys-response.sh` sends
+`GET /redirect_uri?code=foo&state=foo` with a bare 7800-byte value-less state
+cookie: response caller entered 8/8 per start; vulnerable start 1 faulted
+7 children (8/8 failed connections), starts 2-4 were clean with HTTP 400;
+well-formed and released-tag controls 16/16 clean each.
+`full/probe-sys-response-gdb.sh` captured a native PC on vulnerable start 1:
+`movb $0x0,(%rax)` at pinned `state.c:219` (raw symbol
+`oidc_state_cookies_clean_expired+265`), stack `:219` → `state.c:244` →
+`handle/response.c:353` → `:426` → `:614` → `:765` → `mod_auth_openidc.c:1056`
+→ `:1258` → `:1309` → `:1388` → `ap_run_check_user_id`; the stopping `=` lay
+in read-only `libcom_err.so.2.1` pages. Grade unchanged: rung 4 scoped, native
+PC but debugger-observed, byte always NUL, no chosen byte, pointer control,
+consumer dereference, command or rung 5; author-only and unwitnessed at this
+scope. Raw: `full/evidence/sys-response/README.md` and
+`full/evidence/sys-response-gdb/README.md`.

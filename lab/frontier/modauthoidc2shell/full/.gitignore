@@ -41,3 +41,10 @@ httpd-sys-store-fixed.pid
 error-sys-store.log
 error-sys-store-fixed.log
 evidence/sys-gdb/*-error.log
+httpd-sys-response.pid
+httpd-sys-response-fixed.pid
+error-sys-response.log
+error-sys-response-fixed.log
+evidence/sys-response/*-error.log
+evidence/sys-response/*-start.out
+evidence/sys-response-gdb/*-error.log

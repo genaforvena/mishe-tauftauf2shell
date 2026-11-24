@@ -526,3 +526,43 @@ always NUL, and the client chooses only the offset. No controlled pointer,
 consumer dereference, command or rung 5. Author-only and unwitnessed at this
 scope; grade unchanged. Re-run: `cd full && bash probe-sys-store.sh`.
 
+
+## OOB NUL store through the response caller (2026-11-24 W19)
+
+W11 reached the second pre-auth caller `handle/response.c:353` only with an
+in-bounds second cookie; W12-W16 drove the OOB scan only through
+`handle/request.c:132`. W19 closes that asymmetry on the genuinely non-ASan
+system-httpd / system-APR stack (no shim, `LD_PRELOAD`, ptrace or
+`ASAN_OPTIONS` in the sweep; gdb observe-only in the capture). Full recipe,
+hashes, raw transcripts and limits: `full/evidence/sys-response/README.md`
+and `full/evidence/sys-response-gdb/README.md`.
+
+`full/probe-sys-response.sh` adds `<Location /redirect_uri>` to the W15
+system configs and sends `GET /redirect_uri?code=foo&state=foo` on
+127.0.0.1:18091. Short value-less token: response caller entered 3/3 on the
+vulnerable module and 3/3 on the released tag, both HTTP 400. Bare
+7800-byte value-less token: vulnerable start 1 faulted 7 children (8/8 failed
+connections); vulnerable starts 2-4 had 0 faults and 8/8 HTTP 400 each;
+well-formed 7800-byte token 0 faults, 16/16 400; released tag bare token
+0 faults, 16/16 400. First-start bimodality matches W15/W16. Module hashes
+unchanged from W15: vulnerable
+`59d9a2f935654ba6bb2f20509b12e1c598d9246d2237fe92aeb7afda3b116701`,
+released `704f0d5fa55c64308415a8d8b31d92230bbd3cb1f15da580f7108fd2df5375a3`,
+`/usr/sbin/apache2`
+`8e37d897784a95b8c3402e1457a72d736cc10abf13d9666b78fecbc55849087f`.
+
+`full/probe-sys-response-gdb.sh` captured a native fault on vulnerable start
+1 (starts 2-3 and the released control clean). PC `0x7ed17ed2cbc2`, raw symbol
+`oidc_state_cookies_clean_expired+265`, instruction `movb $0x0,(%rax)`, gdb
+line `state.c:219` — the NUL store, not the OOB read. Native stack:
+`:219` → `state.c:244` → `handle/response.c:353` → `:426` → `:614` → `:765` →
+`mod_auth_openidc.c:1056` → `:1258` → `:1309` → `:1388` →
+`ap_run_check_user_id`. Stopping `=` at `0x7ed17eb17395`, in read-only `r--p`
+pages of `libcom_err.so.2.1`; the address and byte come from adjacent process
+memory, not the wire.
+
+Grade unchanged: rung 4 scoped, native PC but debugger-observed, byte always
+NUL, no chosen byte, pointer control, consumer dereference, command or rung 5.
+Author-only and unwitnessed at this scope. Re-run:
+`cd lab/frontier/modauthoidc2shell/full && bash probe-sys-response.sh &&
+bash probe-sys-response-gdb.sh`.
