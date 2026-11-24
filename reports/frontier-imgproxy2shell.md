@@ -200,6 +200,9 @@ object is heap metadata / the next chunk, not a function pointer or return
 address, and no marker execution or remote command was observed. The harness
 grade (rungs 1-4, witness W185) is unchanged; W3/W4 await witness replay.
 
+Both legs reproduced from a clean `git archive HEAD` extraction with only the
+gitignored CLI binaries symlinked in (PROVENANCE W4 clean-replay note).
+
 ## Cheapest next experiment to move a rung
 
 The live write site and chosen-byte placement are measured. A pointer or

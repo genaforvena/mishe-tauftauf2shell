@@ -385,6 +385,15 @@ hits the breakpoint and stays alive as a server, so it is stopped after 6 s.
 - Ports 18080/18081 were free after both runs. No probe touched a
   non-loopback address.
 
+### Clean-archive replay (08:42Z)
+
+From `git archive HEAD lab/frontier/imgproxy2shell` (commit `dbb1fe9`) into
+`/tmp/w4-replay`, with only the two gitignored CLI binaries symlinked in, both
+probe legs reproduced: vulnerable `GDB_HIT ... rdx=0xfffffff5` at
+`icoload.c:161`, 32 chosen `5a5b5c5d` bytes at `actual_data`, chunk size field
+`0x25`, client `RemoteDisconnected`; ICO-fixed HTTP 500 with zero `GDB_HIT`
+lines. The throwaway replay tree was removed; no replay log was committed.
+
 ### Grade
 
 The live consumer limb now has rung-4 evidence: attacker-chosen bytes at a
