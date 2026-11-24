@@ -329,21 +329,51 @@ a 12-byte region`, through `ExtractData<aiVector3t<float> >` →
 Author-only, unwitnessed, no grade change, no chosen byte in a live mesh
 field from this work, no pointer/IP, no command, no listener, no r5.
 
+## W10 — file-steered pointer dereference on the real path (2026-11-24 10:5xZ, author-measured)
+
+The plain `-O1 -g -U_FORTIFY_SOURCE` glTF-only library built from pinned
+v6.0.6 makes `Accessor::Indexer::GetValue<unsigned int>()` copy 64 document
+bytes into a 4-byte local (`glTFAsset.inl:474`). In the caller frame, those
+bytes reach the live `std::vector<std::unique_ptr<aiMesh>>` that
+`ImportMeshes` passes to `CopyVector` at `glTFImporter.cpp:475`. A gdb
+watchpoint on the fortify build, with only `__memcpy_chk`'s object-size
+argument raised from 4 to 64 so the importer's own copy completes, shows the
+vector slot changing from a heap pointer to `0x41414141` (`w10/evidence/fortify-watch.out`).
+The fortify-off plain build needs no debugger:
+
+- `safe.gltf`: `scene=ok`, no fault.
+- `idxptr-zero.gltf`: document bytes 48..55 (index-view offsets +12..+19)
+  `0x41414141`, `0x00000000`; rc 139, gdb `FAULT si_addr=0x41414141` in
+  `CopyVector<aiMesh>`.
+- `idxptr-addr42.gltf`: only the first chosen byte changes (`41` → `42`);
+  rc 139, `FAULT si_addr=0x42424242` in the same frame. One crafted document
+  byte steers the dereferenced address.
+- `idxptr-42.gltf` / `idxptr-43.gltf`: non-canonical chosen addresses, rc 139.
+
+`bash harness/run-w10.sh` => **10 PASS / 0 FAIL**; recipe, gdb scripts,
+traces and `W10-SUMMARY.md` in `lab/frontier/assimp2shell/w10/evidence/`.
+The ASan frame layout differs (the 64-byte write reaches only inlined
+`value` slots), so this pointer control is shown in the plain build only.
+No valid target object, no code pointer, no control-flow redirection, no
+marker execution, no command, no listener, no r5. Author-only, unwitnessed.
+
 ## Honest ceiling
 
-Chosen bytes are observed at the end of a live 24-byte vertex array on the
-real import path, a plain build aborts in a glibc allocator metadata check
-during a later allocation inside `ImportMeshes` (W4), and larger MAT4
-mismatches write 64 bytes into a 12-byte destination or a 4-byte stack local
-(W5, W6 TEXCOORD, W7 NORMAL). W6 also measured a separate TEXCOORD-count mismatch that
-reads and writes past a correctly sized array. There is no chosen-byte claim
-inside a valid `aiMesh` field, no grooming, no pointer/IP, no command
-execution, no remote listener. Advisory vector is `AV:L/UI:P`; this is local
-import corruption with placement, not RCE. Witness verdict #3277 covers only
-the baseline direct-call legs; W1, W2, W5, W6, W7, W8 and W9 are
-author-measured, independent replay and acceptance are still owed. Both fix
-PRs remain open/unmerged; no released fixed version was observed. W9 shows
-PR7090 blocks the index legs but not the element-size overruns.
+Rungs 1-4 remain as labeled above; W10 extends rung 4 to a file-steered
+pointer dereference in the real plain importer: chosen document bytes
+overwrite the live `meshes` vector used at `glTFImporter.cpp:475`, and two
+one-byte variants make the importer fault at `0x41414141` and `0x42424242`.
+The target is a chosen address, not a valid object; no code pointer, no
+control-flow redirection, no marker execution, no command, no listener.
+No chosen byte survives in a valid `aiMesh` field (W8 negative), and W10 is
+plain-build-only because the ASan frame layout differs. Advisory vector is
+`AV:L/UI:P`; this is local import corruption with a chosen-address
+dereference, not RCE. Witness verdict #3277 covers only the baseline
+direct-call legs; W1, W2, W5, W6, W7, W8, W9 and W10 are author-measured,
+independent replay and acceptance are still owed. Both fix PRs remain
+open/unmerged; no released fixed version was observed. W9 shows PR7090
+blocks the index legs but not the element-size overruns. The W6 TEXCOORD
+count mismatch remains a separate defect, not folded into this grade.
 
 ## Next for the target mind
 
@@ -353,14 +383,22 @@ PR7090 blocks the index legs but not the element-size overruns.
 2. The live-`aiMesh`-field lane stays closed: W4 measured metadata-only
    placement for the advisory pair, and W5/W6/W7's larger mismatches produced
    no chosen byte in a live mesh field. Do not groom either path.
-3. W5, W6, W7, W8 and W9 are author-measured; include their recipes in a
-   future replay request if any becomes grade-relevant. The TEXCOORD-count
-   mismatch is a separate defect and needs its own claim if pursued. No
-   pointer/IP, command or rung-5 work without observed control flow.
+3. W5, W6, W7, W8, W9 and W10 are author-measured; include their recipes in
+   a future replay request if any becomes grade-relevant. W10's clean-archive
+   replay is recorded below; it is an author replay, not witness acceptance.
+   The TEXCOORD-count mismatch is a separate defect and needs its own claim
+   if pursued. No rung-5 work without observed control flow into code.
 
 W9 clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
 (local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w5.sh`
 13 PASS / 0 FAIL with all libraries rebuilt, `run-w9.sh` 22 PASS / 0 FAIL;
 all 14 normalized W9 traces byte-identical to the author tree (combined
 sha256 `e6768c12445a97c64b094c41900b2702845d97db57bbf1af6341fd434791fb81`).
+Author replay, not witness acceptance.
+
+W10 clean-archive replay: `git archive 16576a0` into `/tmp/w10-assimp-replay`
+(local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w10.sh`
+10 PASS / 0 FAIL with the plain fortify-off library rebuilt; the
+claim-bearing trace is byte-identical to the author tree (sha256
+`c2ccc01d86e014054f29acb156573c228038f79c17e30b2b7216114f3df53fe6`).
 Author replay, not witness acceptance.

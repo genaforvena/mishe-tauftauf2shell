@@ -1,0 +1,37 @@
+Temporary breakpoint 1 at 0x1349: file harness/placement_driver.cpp, line 21.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=2, argv=0x7fffffffe248) at harness/placement_driver.cpp:21
+21	int main(int argc, char **argv) {
+Breakpoint 2 at gnu-indirect-function resolver at 0x7ffff7537610
+
+Breakpoint 2, __memcpy_chk_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:249
+warning: 249	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+AT-CHK dest=0x7fffffffbfc4 src=0x555555580044 len=64 objsz=4
+#4  Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319
+319	                        SetFace(faces[i], data.GetUInt(i));
+CALLER aim_slot=0x7fffffffbfc8 meshes_slot=0x7fffffffbfd0
+$1 = (aiMesh *) 0x555555570180
+$2 = 1
+Hardware watchpoint 3: -location *(unsigned long*)&aim
+Hardware watchpoint 4: -location *(unsigned long*)&meshes
+#0  __memcpy_chk_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:249
+warning: 249	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+
+Hardware watchpoint 4: -location *(unsigned long*)&meshes
+
+Old value = 93824992343968
+New value = 1094795585
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:272
+272	in ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S
+AFTER-WRITE
+#4  Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319
+319	                        SetFace(faces[i], data.GetUInt(i));
+$3 = (aiMesh *) 0x3f80000000000000
+$4 = 36170086280083512
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:272
+#1  0x00007ffff7d333e1 in memcpy (__len=64, __src=<optimized out>, __dest=0x7fffffffbfc4) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  glTF::Accessor::Indexer::GetValue<unsigned int> (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl:474
+#3  glTF::Accessor::Indexer::GetUInt (i=0, this=<synthetic pointer>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.h:368
+#4  Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319

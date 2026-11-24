@@ -111,11 +111,15 @@ corrected in the rung-4 row above; no grade impact.
   check is a separate unmerged change; neither is an upstream release.
 - Rung 4 is scoped: baseline chosen bytes land past a synthetic heap
   allocation; W2 chosen bytes land at the end of a live 24-byte vertex array
-  in the real importer, not in a valid `aiMesh` field or a function pointer.
-  The W2 ASan callback unpoisons 16 redzone bytes for observation only; it is
-  instrumentation, not attacker control. No grooming, pointer/IP, command or
-  rung 5, and no witness verdict for W1/W2. Advisory vector is `AV:L/UI:P`
-  (local file import), not a remote listening service.
+  in the real importer, not in a valid `aiMesh` field. W10 extends rung 4 to
+  a file-steered pointer dereference in the plain importer: one crafted byte
+  changes the fault address from `0x41414141` to `0x42424242`, but the target
+  is not a valid object and there is no code pointer, control-flow
+  redirection, marker, command or r5. W10 is plain-build-only (the ASan frame
+  layout differs) and unwitnessed. The W2 ASan callback unpoisons 16 redzone
+  bytes for observation only; it is instrumentation, not attacker control.
+  No grooming, no witness verdict for W1/W2 or W10. Advisory vector is
+  `AV:L/UI:P` (local file import), not a remote listening service.
 - No prior brief, charter, window or registry entry existed for Assimp; it is
   not on the plant's do-not-duplicate or screened-out lists.
 
@@ -315,20 +319,45 @@ frames. The distinct W6 TEXCOORD-count mismatch still gives `READ of size 4`;
 element-size defect. Author-only, unwitnessed; no grade change, no chosen
 byte in a live mesh field from this work, no pointer/IP, no command, no r5.
 
+## W10 — file-steered pointer dereference (2026-11-24 10:5xZ, author-measured)
+
+The plain `-O1 -g -U_FORTIFY_SOURCE` build of pinned v6.0.6 lets
+`Indexer::GetValue<uint32_t>()` copy 64 chosen document bytes into a 4-byte
+local; in that plain caller frame they reach the live
+`std::vector<std::unique_ptr<aiMesh>>` used by `CopyVector` at
+`glTFImporter.cpp:475`. `idxptr-zero.gltf` carries `0x41414141`, `0x00000000`
+in document bytes 48..55 and faults with gdb `si_addr=0x41414141`;
+`idxptr-addr42.gltf` changes one byte to `0x42` and faults at `0x42424242`.
+`safe.gltf` is `scene=ok`. `bash harness/run-w10.sh` => **10 PASS / 0 FAIL**;
+evidence and `W10-SUMMARY.md` in `lab/frontier/assimp2shell/w10/evidence/`.
+A gdb watchpoint on the fortify build (only `__memcpy_chk`'s object-size
+argument raised so the importer's own copy completes) shows the live vector
+slot take `0x41414141`. This is a chosen address, not a valid object or a
+code pointer; no control-flow redirection, marker, command, listener or r5.
+The ASan frame layout differs, so this is plain-build-only and unwitnessed.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5,
 W6, W7 and W8 measured larger and distinct-site overruns through the real
-importer but found no chosen byte in a live `aiMesh` field, so the placement
-lane stays closed. W9 separated the two proposed fixes: PR7090 blocks the
-index legs but not the element-size overruns. The TEXCOORD count mismatch is
-a separate defect and needs its own claim if pursued; only observed
-control-flow placement would reopen rung 4. Never relabel placement as
-control flow or RCE without observation.
+importer but found no chosen byte in a live `aiMesh` field. W9 separated the
+two proposed fixes: PR7090 blocks the index legs but not the element-size
+overruns. W10 shows a chosen-address dereference in the plain importer, not
+control-flow placement; only observed control flow into code would reopen
+any further grade. The TEXCOORD count mismatch is a separate defect. Never
+relabel pointer corruption or placement as control flow or RCE without
+observation.
 
 W9 clean-archive replay: `git archive f1769aa` into `/tmp/w9-assimp-replay`
 (local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w5.sh`
 13 PASS / 0 FAIL with all libraries rebuilt, `run-w9.sh` 22 PASS / 0 FAIL;
 all 14 normalized W9 traces byte-identical to the author tree (combined
 sha256 `e6768c12445a97c64b094c41900b2702845d97db57bbf1af6341fd434791fb81`).
+Author replay, not witness acceptance.
+
+W10 clean-archive replay: `git archive 16576a0` into `/tmp/w10-assimp-replay`
+(local pinned tarball copied in), `bootstrap.sh` rc 0, `run-w10.sh`
+10 PASS / 0 FAIL with the plain fortify-off library rebuilt; the
+claim-bearing trace is byte-identical to the author tree (sha256
+`c2ccc01d86e014054f29acb156573c228038f79c17e30b2b7216114f3df53fe6`).
 Author replay, not witness acceptance.
