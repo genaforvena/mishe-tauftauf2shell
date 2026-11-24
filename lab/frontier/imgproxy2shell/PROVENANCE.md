@@ -954,7 +954,7 @@ existence. No fixed-binary control was rerun; W8/W202 and W204 already
 measured it. Grade stays rung 4: no wire-only key, marker, code-pointer
 write or r5. Author finding, unwitnessed; W204's verdict on W9 is unchanged.
 
-## W11 — poisoned head is transient, not cross-thread (2026-11-24 18:58-19:12Z, author, unwitnessed)
+## W11 — poisoned head is transient, not cross-thread (2026-11-24 18:44-18:50Z, author, unwitnessed)
 
 Question left open by W10: GDB printed the wire-decoded tcache head after a
 natural malloc, but no later malloc returned it. The new probe reuses
@@ -994,3 +994,26 @@ is established. Non-victim layouts (`w11b1`-`b3`, `c1`-`c3`, `c5`-`c6`)
 aborted on the top chunk with `RAW (nil)` and are preserved in
 `/tmp/w11-out`, not retried into existence. Grade stays rung 4; author
 finding, unwitnessed; W204's verdict on W9 is unchanged.
+
+### W11b — second-request attempt never reached a poisoned head (2026-11-24 18:50-18:52Z, author, unwitnessed)
+
+`provision/ico_post_request_consume.py` sha256
+`11586943663317277978c871f9d85dc2b066f5afabd4641d5807ae7582e60bcf`
+keeps the W9 probe and a twenty-malloc observation script, then issues a
+second benign GET on 127.0.0.1:18180 after the hostile GET (via the probe's
+post-hostile `sleep(0.3)`). In six samples (`w11e1`-`w11e6`) the second GET
+reached a survivor twice (`e2`, `e4`) but the spill target was away from the
+live head (`GDB_WIRE_DECODED 0x4067` / `0x67`), so those runs say nothing
+about the poisoned chain. `http-ico-w11b-e2.log` sha256
+`fa33f1215004c6a3d3c544f98c9be11464299784fca2ae6a1b666d0d31da8ac7`
+records twenty natural `malloc(0x20)` returns in two threads, all `WIRE=0`.
+In twelve more samples (`w11f1`-`f12`) several had the victim layout, but the
+second GET failed; in six final samples (`w11g1`-`g6`) with a gated
+`vips_foreign_load_ico_header` breakpoint, `g4` again had the victim layout
+(`head/POS 0x7fffa40583f0`, decoded `0x7fffa4054058`) but the second GET
+returned `RemoteDisconnected`: the twenty-malloc script had already reached
+`quit`, killing the process. `http-ico-w11b-g4.log` sha256
+`ebcb231e8b33ce7ba4cd56d4dce8b4999ae2d268bf1ffb8cf228531b12eee710`.
+So the second-request route is untested against a poisoned head, not
+negative evidence of consumption; all runs and failures are preserved in
+`/tmp/w11-out`. Grade stays rung 4; W204's verdict on W9 is unchanged.

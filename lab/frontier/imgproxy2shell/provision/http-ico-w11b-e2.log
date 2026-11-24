@@ -1,0 +1,197 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 2359230)]
+[New Thread 0x7fffae39e6c0 (LWP 2359231)]
+[New Thread 0x7fffadb9d6c0 (LWP 2359232)]
+[New Thread 0x7fffad39c6c0 (LWP 2359233)]
+[New Thread 0x7fffacb9b6c0 (LWP 2359234)]
+[New Thread 0x7fff97fff6c0 (LWP 2359235)]
+[New Thread 0x7fff96ffd6c0 (LWP 2359236)]
+[New Thread 0x7fff977fe6c0 (LWP 2359237)]
+[New Thread 0x7fff961ff6c0 (LWP 2359312)]
+[New Thread 0x7fff959fe6c0 (LWP 2359313)]
+[New Thread 0x7fff951fd6c0 (LWP 2359314)]
+[Switching to Thread 0x7fffadb9d6c0 (LWP 2359232)]
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fffa4067bc0, buf=buf@entry=0x7fffa4067cbe, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fffa406f5a0) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_TCACHE_PRE head=0x7fff780093b0 count=6 thread=4 tcache=0x7fffa40008e0
+GDB_WIRE_DECODED 0x4067 RAW 0x7fffa0000 POS 0x7fffa4067cd0
+Breakpoint 2 at 0x7ffff76ad730: malloc. (47 locations)
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+GDB_M1_HIT size=0x20 thread=4 head=0x7fff780093b0 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $2 = (void *) 0x7fff780093b0
+GDB_M1_RET 0x7fff780093b0 WIRE=0 thread=4
+GDB_M1_AFTER head=0x7fffa4067980 count=5
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M2_HIT size=0x20 thread=4 head=0x7fffa4003bc0 count=7
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $3 = (void *) 0x7fffa4003bc0
+GDB_M2_RET 0x7fffa4003bc0 WIRE=0 thread=4
+GDB_M2_AFTER head=0x7fff780093b0 count=6
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M3_HIT size=0x20 thread=4 head=0x7fffa4065b50 count=7
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $4 = (void *) 0x7fffa4065b50
+GDB_M3_RET 0x7fffa4065b50 WIRE=0 thread=4
+GDB_M3_AFTER head=0x7fff780093b0 count=6
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M4_HIT size=0x20 thread=4 head=0x7fffa4003bc0 count=7
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $5 = (void *) 0x7fffa4003bc0
+GDB_M4_RET 0x7fffa4003bc0 WIRE=0 thread=4
+GDB_M4_AFTER head=0x7fff780093b0 count=6
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M5_HIT size=0x20 thread=4 head=0x7fffa4065b50 count=7
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $6 = (void *) 0x7fffa4065b50
+GDB_M5_RET 0x7fffa4065b50 WIRE=0 thread=4
+GDB_M5_AFTER head=0x7fff780093b0 count=6
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M6_HIT size=0x20 thread=4 head=0x7fffa4003bc0 count=7
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $7 = (void *) 0x7fffa4003bc0
+GDB_M6_RET 0x7fffa4003bc0 WIRE=0 thread=4
+GDB_M6_AFTER head=0x7fff780093b0 count=6
+time="2026-11-24 18:50:51" level="ERROR" msg="Completed in 101.616992ms /insecure/rs:fill:16:16/plain/hostile.ico" request_id="EEAQ87YQfGex9WFvsYItr" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: unable to read ICO image data from the source" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"
+[Switching to Thread 0x7fff97fff6c0 (LWP 2359235)]
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M7_HIT size=0x20 thread=7 head=0x7fff78023710 count=5
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $8 = (void *) 0x7fff78023710
+GDB_M7_RET 0x7fff78023710 WIRE=0 thread=7
+GDB_M7_AFTER head=0x7fff9001f400 count=4
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M8_HIT size=0x20 thread=7 head=0x7fff90057e50 count=7
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $9 = (void *) 0x7fff90057e50
+GDB_M8_RET 0x7fff90057e50 WIRE=0 thread=7
+GDB_M8_AFTER head=0x7fff9005a350 count=6
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M9_HIT size=0x20 thread=7 head=0x7fff9005a350 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $10 = (void *) 0x7fff9005a350
+GDB_M9_RET 0x7fff9005a350 WIRE=0 thread=7
+GDB_M9_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M10_HIT size=0x20 thread=7 head=0x7fff900580d0 count=7
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $11 = (void *) 0x7fff900580d0
+GDB_M10_RET 0x7fff900580d0 WIRE=0 thread=7
+GDB_M10_AFTER head=0x7fff90057e50 count=6
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M11_HIT size=0x20 thread=7 head=0x7fff90057e50 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $12 = (void *) 0x7fff90057e50
+GDB_M11_RET 0x7fff90057e50 WIRE=0 thread=7
+GDB_M11_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M12_HIT size=0x20 thread=7 head=0x7fff900580d0 count=6
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $13 = (void *) 0x7fff900580d0
+GDB_M12_RET 0x7fff900580d0 WIRE=0 thread=7
+GDB_M12_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M13_HIT size=0x20 thread=7 head=0x7fff90057e50 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $14 = (void *) 0x7fff90057e50
+GDB_M13_RET 0x7fff90057e50 WIRE=0 thread=7
+GDB_M13_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M14_HIT size=0x20 thread=7 head=0x7fff9006b730 count=7
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $15 = (void *) 0x7fff9006b730
+GDB_M14_RET 0x7fff9006b730 WIRE=0 thread=7
+GDB_M14_AFTER head=0x7fff9003d720 count=6
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M15_HIT size=0x20 thread=7 head=0x7fff900233c0 count=5
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $16 = (void *) 0x7fff900233c0
+GDB_M15_RET 0x7fff900233c0 WIRE=0 thread=7
+GDB_M15_AFTER head=0x7fff9001f400 count=4
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M16_HIT size=0x20 thread=7 head=0x7fff9006b730 count=5
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $17 = (void *) 0x7fff9006b730
+GDB_M16_RET 0x7fff9006b730 WIRE=0 thread=7
+GDB_M16_AFTER head=0x7fff9001f400 count=4
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M17_HIT size=0x20 thread=7 head=0x7fff9006b730 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $18 = (void *) 0x7fff9006b730
+GDB_M17_RET 0x7fff9006b730 WIRE=0 thread=7
+GDB_M17_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M18_HIT size=0x20 thread=7 head=0x7fff900628a0 count=7
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $19 = (void *) 0x7fff900628a0
+GDB_M18_RET 0x7fff900628a0 WIRE=0 thread=7
+GDB_M18_AFTER head=0x7fff900646c0 count=6
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M19_HIT size=0x20 thread=7 head=0x7fff900646c0 count=6
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $20 = (void *) 0x7fff900646c0
+GDB_M19_RET 0x7fff900646c0 WIRE=0 thread=7
+GDB_M19_AFTER head=0x7fff900233c0 count=5
+
+Thread 7 "imgproxy-vuln" hit Breakpoint 2.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M20_HIT size=0x20 thread=7 head=0x7fff9005a3c0 count=6
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $21 = (void *) 0x7fff9005a3c0
+GDB_M20_RET 0x7fff9005a3c0 WIRE=0 thread=7
+GDB_M20_AFTER head=0x7fff900233c0 count=5

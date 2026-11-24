@@ -551,6 +551,14 @@ returned the wire-decoded pointer. Grade stays rung 4; no wire-only key,
 marker, code-pointer write or r5. Commands, hashes and negatives are in
 `lab/frontier/imgproxy2shell/PROVENANCE.md` (W11).
 
+A follow-up probe tried a second natural HTTP request after the hostile one
+(`provision/ico_post_request_consume.py`); it never reached a poisoned-head
+survivor. In six earlier samples where it did reach a survivor, the spill was
+away from the live head; in the victim-layout samples the 20-malloc GDB script
+exhausted and killed the process before the second request arrived. No
+consumption is inferred from either group; the probe and logs are preserved
+in PROVENANCE (W11b).
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay
