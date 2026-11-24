@@ -430,6 +430,18 @@ or r5. The chosen address is unmapped under ASLR and must inherit the original
 pointer's high bits, so this is a narrower primitive than full pointer
 replacement, not a step toward control flow.
 
+W14 clean-archive replay at 15:51Z: `git archive 75ff847f` into
+`/tmp/w14-assimp-replay-75ff847f` (local pinned tarball copied in, no
+network), `bootstrap.sh` rc 0, `run-w14.sh` 7 PASS / 0 FAIL with the plain
+gcc -O2 library and driver rebuilt by `run-w12.sh`. The raw traces differ in
+two layout-dependent `PRE` lines only (safe begin `...f520` author vs `...f560`
+replay, and the conditional `real_matches_safe` line); after dropping those
+two lines the claim-bearing traces are byte-identical, sha256
+`72c2a6be901a933cba998763787f459e6256438a852234dba1658189af6d4198`. Chosen
+fault addresses, the high-32-bit inheritance, the CopyVector frame, the
+restored-low-word abort and every PASS/FAIL line compare verbatim. Author
+replay, not witness acceptance; no grade change.
+
 ## Next lane
 
 Independent witness replay of W1/W2 is still owed; the clean-archive author
