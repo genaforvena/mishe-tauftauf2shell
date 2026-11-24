@@ -21,9 +21,10 @@ The rungs are depth of proof, not boxes to tick:
   request input makes a live target run a lab-chosen benign command, with
   vulnerable, fixed and safe-input controls and an independent witness replay.
   Additive and per-build, never a relabel of a pointer fault or an in-process
-  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. FreeSWITCH,
-  Iec61850 and Ruby R5 cells are witness-ESTABLISHED under their labeled
-  conditions (#1118/#1127; Ruby independent clean-archive replay of `8b9d8f9`).
+  marker; [docs/rce.md](docs/rce.md) is the acceptance contract. Eleven R5
+  cells are witness-ESTABLISHED, each only under the build, oracle and
+  configuration scope named in its row; author-only command claims stay
+  UNKNOWN.
 
 Rung cells: `✓` demonstrated · `◐` limited (harness-only, instrumented, or a
 count-controlled effect) · `—` not demonstrated.
@@ -40,7 +41,7 @@ independent replay at that scope. Author reports are never acceptance.
 | Target | R1 | R2 | R3 | R4 | R5 | Evidence / boundary |
 |---|---|---|---|---|---|---|
 | **Ruby2Shell** | ✓ | ✓ | ✓ | ✓ | ✓ | **LIVE — rung 5 witness-ESTABLISHED at the labeled host/harness conditions.** One multipart POST drives Stage C poisoning into a forged CRuby `T_DATA` finalizer (`dfree=system`, `data=` request command), producing a target-created benign marker; independent clean-archive replay of `8b9d8f9` reproduced two varied-command attacks and safe/fixed controls. Requires custom grooming/GC middleware plus mtrace/ObjectSpace/maps oracles; ASLR stays on, post-response abort remains possible, and stock-app oracle-free RCE/persistence are not claimed. 2026-11-24 stock Rails follow-up: N=524 gives a traced `0x200→0x250` split, but no `0x3f0` consumer, disclosure, command or persistence; 3/3 clean attacks abort, safe/fixed controls survive. R4 witnesses: #51, #65, #89. [Report](reports/ruby2shell-investigation.md) |
-| **PHP2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE/CODE** — main lane rung 4 CONSTRAINED on CGI and mod_php; wake-56 DOM lane reaches read-side chosen-pointer rung 4 on a plain local CLI (`USE_ZEND_ALLOC=0`, N=88, fault only), no SAPI, arbitrary write or marker there. Witness: #138 CGI and #258 mod_php rung-4 constrained; #126, #208, #287 rung-3 grades; #98/#103/#108 splice rungs 1/2. DOM lane author-observed; FPM stays rung 3. [Status](reports/php2shell-status.md) |
+| **PHP2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE/CODE** — main lane rung 4 CONSTRAINED on CGI and mod_php; wake-58 `drupal-afterRCE` lane adds DEMONSTRATED rung 4: an unauthenticated CVE-2026-126714 rfc1867 splice into real Drupal 11.4.13 over loopback FastCGI promotes a chosen session record and takes over user 1 at `/user/1` on a release-like 8.4.27-app build, with an 8.4.28-app fixed control clean; conditioned on the advisory's vulnerable ini and a shim SIGKILL interruption, no PHP execution or r5. Wake-56 DOM lane reaches read-side chosen-pointer rung 4 on a plain local CLI (`USE_ZEND_ALLOC=0`, N=88, fault only), no SAPI, arbitrary write or marker there. Witness: #138 CGI and #258 mod_php rung-4 constrained; #126, #208, #287 rung-3 grades; #98/#103/#108 splice rungs 1/2. DOM and Drupal lanes author-observed; FPM stays rung 3. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | ✓ | ✓ | ✓ | — | — | **CODE** — rung 3 chosen-byte placement at a capacity boundary on real ASan httpd 2.4.70 under gdb, fixed control clean; Stage C closed unreachable on this host (wire-byte alphabet, Huffman probe). Adjacent L2–L6 rung 3; L1/L7/L8/L9 rung 1–2 (L9 is auth-state corruption, no confirmed UAF). A 2026-11-21 frontier lane on the brief's CVE-2026-119618 (pinned 2.4.70/2.4.71, locally built **ASan APR**) confirms rung 1 by driving the wrong-pool `apr_table_setn()` marker 300/300 and 2000/2000, but its 2000+ full-table writes give 0 ASan reports and its one child SIGSEGV is unrepeated. That build-bound negative is preserved as contradictory evidence, not a refutation: this plant's rung 3 faults in uninstrumented system libapr with reproducible differential child SEGVs (3 vs 0 at `LogLevel info`) and a corrupted `pool->child` under gdb. Both agree the written value is the fixed string `0` — no chosen byte, pointer control or RCE. Earlier reviews #279 found a probe defect and #294 replayed the repair with no verdict change; witness W94/W95 (tape #1176) then graded this build-bound reconciliation ESTABLISHED at the labeled grade — rung 3 stands, rung 4 unclaimed, no replay — with the ASan-APR allocator/race cause nit corrected in `64ecc54` and CLOSED. Default-MPM RCE stays a claim. [Report](reports/apache2shell-investigation.md) · [CVE-2026-119618 brief](reports/frontier-apache2shell.md) |
 | **Mosquitto2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — ASan 256-byte write past a 1-byte region in `net__read_ws`, fixed control clean; Stage A places chosen bytes at a chosen offset. Witness #246 ESTABLISHED the wire-only pre-auth 32 KiB heap read with live pointer disclosure (4/4 fresh brokers). Rung 4 is information disclosure only; enlargement stays layout-dependent and wire-to-code-execution UNVERIFIED. [Status](reports/mosquitto2shell-status.md) |
 | **Node2Shell** | ✓ | ✓ | ✓ | — | — | **CODE** — two independent Alt-Svc terminators on pinned v24.22.2: stock-glibc abort 10/10, Memcheck differential against a clean v24.22.3 control. No combination primitive or control; rung 4 not demonstrated. [Status](reports/node2shell-status.md) |
@@ -170,8 +171,8 @@ independent replay at that scope. Author reports are never acceptance.
 | **Gpgme2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:5xZ under standing #6 as the 133rd route; pinned upstream `read_status`/`read_colon_line` realloc statements, ASan `attempting double-free` in `release()` after the first free by `realloc()`, and rung 4 PARTIAL chosen `0x48`/`0x5a` at offset 1000 in the stale allocation; pinned-statement scope witnessed #3796 with its bounds NIT fixed, real-build W1 author-only.** Pinned `src/engine-gpg.c` at tag `gpgme-2.2.0` (sha256 `c4ef11bda841fc6d07c83063c6968a6db50db3393af2d661054c59b979311d55`, recomputed locally from `lab/frontier/gpgme2shell/pinned/engine-gpg.c`); upstream fix `14499348b966cd7b3d72afee15a5cd51cdd0a727` (patch sha256 `2fde658ab8b32439c14f58c214f2463b4109aa68d9cbd26c432f17303049c500`, likewise recomputed) publishes the `realloc`'d pointer into the context immediately and deletes the end-of-function writeback. In `read_status()`/`read_colon_line()` a >1024-byte status line reallocs `buffer`, but a callback error early return leaves `gpg->status.buffer` holding the freed block for `gpg_release()` to free again. `sh run.sh` from `lab/frontier/gpgme2shell` verifies both pins and three source-shape assertions, builds four variants and gives 19 PASS / 0 FAIL with ASan `attempting double-free` and chosen `0x48` (ASan) / `0x5a` (plain) at offset 1000 in the stale allocation; fixed attack, vulnerable safe and fixed safe controls exit 0. Plain glibc outcome is UNKNOWN (one revision aborted `free(): double free detected in tcache 2`, the final exits 0). Charter, hy4-flash route, both resolver keys, three wake units (exact sync `written 3, removed 0`, doctor GREEN) and frontier's two-pane window 141 are in place. Witness #3796 closed the pinned-statement scope (19 PASS after the offset-guard NIT). W1 built real GPGME 2.2.0 under ASan: the real `realloc()` at `engine-gpg.c:1494` runs through a loopback status pipe and the real early return, chosen `0x48`/`0x5a`/`0x37` appear in the real callback before the real second free at `gpg_release():602`, patched-2.2.0, stock-2.3.1 and short-line controls are clean (`PASS=21 FAIL=0`, clean-archive replay at `1ff8884b`). W1 replay #3808 is pending. No wire input, pointer/IP/command or r5; advisory `AV:N` is text, not exercised. [Brief](reports/frontier-gpgme2shell.md), [status](reports/gpgme2shell-status.md) |
 | **Hping3Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 19:5xZ under standing #6 as the 134th route; verbatim pinned `display_ipopt()` RR branch, ASan global-buffer-overflow `WRITE-68`/`WRITE-86` into the 40-byte `old_rr` global, rung 4 PARTIAL packet-derived chosen bytes at chosen offsets in the adjacent live canary; witness W207 (#3822) ESTABLISHED AS LABELED at that pinned-function scope, later W1/W2 real-build wire limbs author-only, no grade change or r5.** CVE-2026-136131 (VulnCheck 2026-11-24, CWE-787, CVSS4 6.0 `AV:N/AC:H/UI:P`), affected hping commits `7257579b` through master tip `3547c769`, no fixed version; pinned `display_ipopt.c`/`waitpacket.c`/`hping2.h` and fix-patch sha256 in `lab/frontier/hping3shell/PROVENANCE.md`, 12 PASS / 0 FAIL in-tree and clean archive. W1 built the pinned tree with libpcap under ASan: crafted loopback RR replies reach `display_ipopt()` with `WRITE-68`/`WRITE-86` (9 PASS). W2 built the real plain binary: crafted loopback RR bytes land in the GDB-labelled adjacent `rc4_sbox` (4 PASS attack, 3 PASS zero baseline, 3 PASS patched control). The reachable 251-byte window contains only `old_rr.0` and `rc4_sbox`; no function pointer, GOT slot or other control-flow object. No pointer/IP/command or r5; `AV:N` is advisory prose, stock glibc outcome and post-fix `.bss` layout UNKNOWN. W207 replayed only the pinned-function stage; both wire stages remain author-only and unwitnessed. [Status](reports/hping3shell-status.md) |
 | **PxeIcmp2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 20:5xZ under standing #6 as the 135th route; verbatim pinned `PxeBcSupport.c` IPv4/IPv6 ICMP-error copy loops, ASan `heap-buffer-overflow WRITE of size 96` 0 bytes after a 720-byte region at `handlers_vuln.c:97`, rung 4 PARTIAL chosen fragment bytes `48 5a 4d 49` at `TftpError+96` and `54 41 55 46` in the adjacent plain-build canary; witness #3852 ESTABLISHED AS LABELED on a clean archive (31 PASS, independent 16-byte marker probe), no grade change or r5; no firmware build, loopback ICMP, event forging, pointer/IP/command.** CVE-2026-97631 / GHSA-99cj-7hg9-mp4m (2026-10-22, Critical CVSS4 9.5 `AV:N/AC:L/AT:P/PR:N/UI:N`), EDK II master as of 2026-09-14, pinned `edk2-stable202608` commit `2970e569…`; public fix PR #13302 merged at `fa789071…`. Four-pin `SHA256SUMS` and byte-for-byte extracted handlers in `lab/frontier/pxeicmp2shell/`; operator replay `sh harness/run.sh` = 31 PASS / 0 FAIL rc 0 with fixed, 300-byte-safe and clean-directory controls. Frontier's live two-pane window 143 adopted without duplication; hy4-flash route 134→135, both resolver keys 269→271, exact full-flag sync `written 3, removed 0`, path enabled/active, pinned doctor GREEN. |
-| **N2n2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:2xZ under standing #6 as the 136th route; verbatim pinned `decode_REGISTER_SUPER_NAK()`/`decode_buf()` from n2n `wire.c`, ASan `heap-buffer-overflow WRITE of size 96` 0 bytes after a 64-byte region via `handlers_vuln.c:47`/`:81`, rung 4 PARTIAL chosen wire bytes `48 5a 4d 49` in the adjacent plain-build canary, unwitnessed, no supernode build, live UDP NAK, stack canary/return address, pointer/IP/command or r5.** CVE-2026-136404 (VulDB 2026-11-24, CWE-121/787), ntop n2n 3.0–3.1.1, vulnerable `dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff`, fixed `854fbbe01bbf131bf4cb88f8450d7084267668e1` (PR #1243); pinned sources and hashes in `lab/frontier/n2n2shell/PROVENANCE.md`, 15 PASS / 0 FAIL in-tree. The advisory's `sn_utils.c` stack-overflow attribution is a claim: the harness exercises the decoder's heap/struct overflow with stand-in types only. |
-| **Pgactive2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 22:2xZ under standing #6 as the 137th route; verbatim pinned `pgactive_parse_replident_name()` (v2.1.9 `src/pgactive_catalogs.c:347-358`) with the unbounded trailing `%s` from `include/pgactive_internal.h:31`, ASan `stack-buffer-overflow WRITE of size 97` at offset 96 of the 64-byte stack `NameData`, rung 4 PARTIAL chosen `48 5a 4d 49` read inside the live function at offsets 0/64/92; witness W209 (#3898) ESTABLISHED AS LABELED from a clean archive (19 PASS / 0 FAIL), no grade change or r5; no real PostgreSQL/pgactive build, SQL/replication wire path, saved pointer/return address, IP or command.** CVE-2026-134068 (CNA Amazon, 2026-11-24, CWE-787, CVSS4 7.7 `AV:N/AC:H/PR:L`), affected pgactive >=2.1.0 <2.1.10, fixed 2.1.10; pinned tags v2.1.9 `f34c8aa6f9f5c4ad5ee4bfdf93fef4b000be8f9e` and v2.1.10 `c3829ddb81c8c8e927b6e5a0baba3b1a016fcb52`, hashes in `lab/frontier/pgactive2shell/PROVENANCE.md`, 19 PASS / 0 FAIL in-tree. The advisory's authenticated `PR:L` precondition and command-execution claim stay claims; stand-in PG types only. |
+| **N2n2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:2xZ under standing #6 as the 136th route; verbatim pinned `decode_REGISTER_SUPER_NAK()`/`decode_buf()` from n2n `wire.c`, ASan `heap-buffer-overflow WRITE of size 96` 0 bytes after a 64-byte region via `handlers_vuln.c:47`/`:81`, rung 4 PARTIAL chosen wire bytes `48 5a 4d 49` in the adjacent plain-build canary. W1 later reaches a real pinned supernode with one loopback UDP NAK: ASan stack `WRITE-96` in the live `nak` and 96 chosen bytes at `nak+14..109`, including two pointer-shaped slots; W2's hardware-watchpoint follow-ups saw no consumed-pointer read. No control of a consumed pointer, canary or return address, command or r5; the live limb is unwitnessed.** CVE-2026-136404 (VulDB 2026-11-24, CWE-121/787), ntop n2n 3.0–3.1.1, vulnerable `dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff`, fixed `854fbbe01bbf131bf4cb88f8450d7084267668e1` (PR #1243); pinned sources and hashes in `lab/frontier/n2n2shell/PROVENANCE.md`, 15 PASS / 0 FAIL in-tree. The advisory's `sn_utils.c` stack-overflow attribution is now reproduced locally on the live supernode; full evidence `reports/n2n2shell-live.md`. |
+| **Pgactive2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 22:2xZ under standing #6 as the 137th route; verbatim pinned `pgactive_parse_replident_name()` (v2.1.9 `src/pgactive_catalogs.c:347-358`) with the unbounded trailing `%s` from `include/pgactive_internal.h:31`, ASan `stack-buffer-overflow WRITE of size 97` at offset 96 of the 64-byte stack `NameData`, rung 4 PARTIAL chosen `48 5a 4d 49` read inside the live function at offsets 0/64/92; witness W209 (#3898) ESTABLISHED AS LABELED from a clean archive (19 PASS / 0 FAIL), no grade change or r5. A later author-only SQL path calls the pinned wrapper in a live PostgreSQL 16.15 backend and gets ASan `WRITE-161` with a clean fixed control, but captures no chosen bytes there; no full pgactive build, replication wire path, saved pointer/return address, IP or command, and the SQL path is unwitnessed.** CVE-2026-134068 (CNA Amazon, 2026-11-24, CWE-787, CVSS4 7.7 `AV:N/AC:H/PR:L`), affected pgactive >=2.1.0 <2.1.10, fixed 2.1.10; pinned tags v2.1.9 `f34c8aa6f9f5c4ad5ee4bfdf93fef4b000be8f9e` and v2.1.10 `c3829ddb81c8c8e927b6e5a0baba3b1a016fcb52`, hashes in `lab/frontier/pgactive2shell/PROVENANCE.md`, 19 PASS / 0 FAIL in-tree. The advisory's authenticated `PR:L` precondition and command-execution claim stay claims; stand-in PG types only. |
 
 
 The 19:0xZ cicap2shell W3 limb supplies the real-server evidence summarized
@@ -230,6 +231,40 @@ or r5, author-side and unwitnessed. Reports:
 `reports/frontier-imgproxy2shell.md`, `reports/vrpn2shell.md`,
 `reports/openexr2shell-status.md` §W190, `reports/openexr2shell-file-level.md`,
 `reports/libheif2shell-status.md`, `reports/frontier-libraw2shell.md` §W15.
+
+Later scope corrections from the post-`d40ddefd` edges (all author-only and
+unwitnessed unless a verdict is named; no rung cell moves): Assimp W22 puts a
+file-chosen object pointer and fake `aiMesh` in the live scene, and W24 makes a
+document-chosen saved return address call a benign marker in a plain lab build
+(`TAUF_MARKER_CALLED`); no shell command, remote path or r5. Gpgme W2 reaches
+the double free through a real `/usr/bin/gpg` (36 PASS), W3 through
+attacker-chosen loopback HTTP key bytes on 127.0.0.1:11372 (32 PASS,
+wire-visible rung 4), W4 through a second keylist (24 PASS); no pointer/IP/
+command or r5. CodebaseMemory W12 narrows the C-string canary negative to
+populated writes: an empty item-38 property skips the `memcpy`, later strides
+pass the saved RIP into caller-frame storage with RC=0, and the ancestor RIP
+stays unreachable because `col_names` caps at 32. Imgproxy W14 corrects W13's
+classifier (two code-shaped qwords were pre-existing outside the written span);
+`replay-w13.sh` returns `REPLAY_W13_OK` 3/3 with `code_ptr_qwords=0`. Libgphoto2
+W177 reads the frame canary and saved rbp/RIP through real
+`gp_camera_file_get(GP_FILE_TYPE_RAW)` at `library.c:213` without device
+readback, and W178's short-reply vusb patch has a clean 146 PASS / 0 FAIL
+replay. OpenEXR's stale "resume cmake --build … when host load permits" and
+"aarch64 remains untested" clauses are superseded by W173's static-source
+negative and W169's qemu-aarch64 `PASS=10`; W191 explains W190's abort (COPY1
+zeroes the next-chunk header before COPY2) and W192 (`N=768`, `U=4N`) places
+file bytes in a live tcache `next` with COPY1 in bounds but no malloc
+consuming it. Cicap W6 finds a plain-real-library teardown negative with no
+wire bytes, and W7/W8's `replay-all.sh` covers W1/W2/W3/W4/W6 with 72 PASS /
+0 FAIL from a clean archive including self-fetch. Jq's second-advisory lane
+is a named 32-bit negative: no i386 multilib, so `-m32` cannot link even a
+trivial program; no build, guard or grade change. Reports:
+`reports/frontier-assimp2shell.md`, `reports/gpgme2shell-status.md`,
+`reports/codebasememory2shell-status.md`,
+`reports/frontier-imgproxy2shell.md`,
+`reports/frontier-libgphoto2shell.md`,
+`reports/openexr2shell-file-level.md`, `reports/cicap2shell-status.md`,
+`reports/jq2shell-status.md`.
 
 The 15:5x–17:3xZ libraw W11/W12 limbs refine the row's ceiling without moving
 a rung cell. W11 (`9bc81c2b`) sets DNG LinearizationTable plus WhiteLevel 65535
@@ -2306,9 +2341,10 @@ author-only, with a live window and seed wall but no charter, route, wake unit
 or mind-count change; operator admission and witness replay are PENDING. All
 these limbs stay author-side/unwitnessed except the named witness verdicts;
 rung 5 stays UNKNOWN throughout.
+Frontier staged `open5gs2shell` at 23:0xZ on CVE-2026-116543 (empty-boundary SBI multipart parser in pinned Open5GS v2.8.0): the verbatim pinned parser under ASan reports `WRITE of size 1` 0 bytes after a 65-byte region, and a plain build writes the state-machine-forced periodic `00 0d 0a` pattern into an adjacent heap object — rung 3 plus rung 4 PARTIAL, not arbitrary chosen bytes. `sh lab/frontier/open5gs2shell/harness/run.sh` gives 21 PASS / 0 FAIL, with a clean-archive replay of `2eeee948` reproducing 21/0 and the trace hash recorded in the brief. No real Open5GS build, SBI listener or wire request, no pointer, command or r5; witness replay UNKNOWN. A charter and live window 146 exist but operator admission is pending, so this stays FRONTIER-STAGED: no route, wake unit, table row or mind-count change. Evidence: `reports/frontier-open5gs2shell.md`, `reports/open5gs2shell-status.md`.
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 121 target
+Each admitted family is its own mind with its own tmux window: 133 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -2321,27 +2357,29 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `gpfdist2shell`, `gct2shell`, `imgproxy2shell`, `firebird2shell`,
 `rtp2httpd2shell`, `zephyr2shell`, `zenohpico2shell`, `libwebsockets2shell`,
 `pillow2shell`, `datasketches2shell`, `rabbitmqc2shell`, `hnswlib2shell`,
-`asn1scc2shell`, `iec618502shell`, `openjpeg2shell`,
-`wolfssl2shell`, `htslib2shell`, `civetweb2shell`,
+`asn1scc2shell`, `awslc2shell`, `iec618502shell`, `openjpeg2shell`,
+`wolfssl2shell`, `htslib2shell`, `civetweb2shell`, `cicap2shell`,
 `open625412shell`, `knotresolver2shell`, `ats2shell`, `exim2shell`,
 `netty2shell`, `wamr2shell`, `perl2shell`, `msquic2shell`,
 `proftpd2shell`, `soes2shell`, `vrpn2shell`, `netx2shell`, `wazuh2shell`,
-`mapserver2shell`, `nanomsg2shell`, `pgpool2shell`, `ud3tn2shell`,
-`bacnet2shell`, `fastnetmon2shell`, `pnet2shell`, `snac2shell`,
-`inetutils2shell`, `h2o2shell`, `libyang2shell`, `msgpack2shell`,
-`sofiasip2shell`, `ytnef2shell`, `baresip2shell`, `connman2shell`,
-`pppd2shell`, `libssh22shell`, `tacplus2shell`, `ntpsec2shell`,
-`uhttpd2shell`, `libvnc2shell`, `gdbserver2shell`, `erlang2shell`,
-`minisnmpd2shell`, `ettercap2shell`, `ghostscript2shell`,
-`llamarpc2shell`, `zlib2shell`, `snap72shell`, `mongoose2shell`,
-`modauthoidc2shell`, `radvdump2shell`, `fluentbit2shell`, `ffmpeg2shell`,
-`psqlodbc2shell`, `thrift2shell`, `libvips2shell`, `jq2shell`,
-`openexr2shell`, `libheif2shell`, `fqterm2shell`, `munt2shell`,
-`libfontenc2shell`, `libgphoto2shell`, `kicad2shell`, `ndpi2shell`,
+`mapserver2shell`, `nanomsg2shell`, `pgpool2shell`, `pgactive2shell`,
+`ud3tn2shell`, `bacnet2shell`, `fastnetmon2shell`, `pnet2shell`,
+`snac2shell`, `inetutils2shell`, `h2o2shell`, `hping3shell`,
+`libyang2shell`, `msgpack2shell`, `sofiasip2shell`, `ytnef2shell`,
+`baresip2shell`, `connman2shell`, `pppd2shell`, `pxeicmp2shell`,
+`libssh22shell`, `tacplus2shell`, `ntpsec2shell`, `uhttpd2shell`,
+`libvnc2shell`, `gdbserver2shell`, `erlang2shell`, `minisnmpd2shell`,
+`ettercap2shell`, `ghostscript2shell`, `llamarpc2shell`, `zlib2shell`,
+`snap72shell`, `mongoose2shell`, `modauthoidc2shell`, `radvdump2shell`,
+`fluentbit2shell`, `ffmpeg2shell`, `psqlodbc2shell`, `thrift2shell`,
+`libvips2shell`, `jq2shell`, `openexr2shell`, `libheif2shell`,
+`fqterm2shell`, `munt2shell`, `libfontenc2shell`, `libgphoto2shell`,
+`kicad2shell`, `ndpi2shell`, `n2n2shell`, `synchronet2shell`,
 `sdlmixer2shell`, `cjose2shell`, `thorvg2shell`, `busybox2shell`,
-`imagemagick2shell`, `codebasememory2shell` and `assimp2shell`. Each builds
-affected and fixed versions locally, writes harnesses, drives toward rung 4
-and authors its report under `reports/`.
+`fontforge2shell`, `fltk2shell`, `contiki2shell`, `libraw2shell`,
+`gpgme2shell`, `imagemagick2shell`, `codebasememory2shell` and
+`assimp2shell`. Each builds affected and fixed versions locally, writes
+harnesses, drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a
 reproducible harness to the operator; **docs** keeps this README and `docs/`

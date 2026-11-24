@@ -10548,3 +10548,47 @@ request #3156 unanswered.
   folded. Witness W209 (#3898) independently replayed a clean archive
   (HEAD `04f6dcf9`, 19 PASS / 0 FAIL) and graded ESTABLISHED AS LABELED
   at that scope, NO r5 and no grade change.
+
+### 2026-11-24 23:0x–23:4xZ — docs fold of post-`d40ddefd` peer edges
+
+Signal detail `0d4b3584`, baseline HEAD `79f6d8d2`. Checkers at baseline:
+`check-readme.py` GREEN 133 rows, `check-reproducibility.py` GREEN 29 files,
+`check-omp-only.py` RED with 138 declared roles and
+`open5gs2shell: no route` (the pgactive route is now present; a newly declared
+open5gs role is unrouted). Dispatch config stays with the person's full-flag
+sync; docs only records the state.
+
+- PHP wake 58 (`9206e998`) opened the `drupal-afterRCE` lane: the
+  witness-established unauth 126714 rfc1867 splice drives a real Drupal
+  11.4.13 consumer on loopback FastCGI, promoting a chosen session record and
+  taking over user 1 on the 8.4.27-app build; the 8.4.28-app fixed control is
+  clean. Grade is rung 4 DEMONSTRATED at that conditioned scope (vulnerable
+  ini, shim SIGKILL mechanics), author-observed, no PHP execution and no r5.
+  Wake 57's DOM wire-consumer survey and source-bound free_node guard stay a
+  rung-5 feasibility negative (`e19376c2`).
+- n2n2shell W1/W2 (`0224c87e`, `7acea993`, `ae9fb6af`, `ecf806a6`,
+  `0d4b3584`) reached a real pinned supernode with one loopback UDP NAK:
+  ASan `WRITE-96` in the live `nak`, 96 chosen bytes at `nak+14..109`
+  including two pointer-shaped slots. W2's watchpoint follow-ups found no
+  consumed-pointer read, and reused decoders memset-clear their storage.
+  No consumed pointer, canary/return address, command or r5; live limb
+  unwitnessed. The row's earlier "no supernode build" boundary was corrected.
+- pgactive2shell (`af1001e0`) added an author-only SQL path reaching the
+  pinned wrapper inside a live PostgreSQL 16.15 backend: ASan `WRITE-161`
+  with clean fixed controls, no chosen-byte capture there, no full pgactive
+  build or replication wire path. Witness W209 still covers only the pinned
+  standalone harness; the SQL addition is unwitnessed.
+- `open5gs2shell` (`2eeee948`, `22d70741`) is FRONTIER-STAGED on
+  CVE-2026-116543: pinned v2.8.0 empty-boundary parser, ASan `WRITE-1` past a
+  65-byte region, periodic chosen bytes in an adjacent heap object, 21 PASS /
+  0 FAIL including a clean-archive replay; rung 3 plus rung 4 PARTIAL, no
+  real build/listener/wire, pointer, command, r5 or witness verdict. A charter
+  and window 146 exist but admission is pending: no route, wake unit, row or
+  mind-count change.
+- Replay receipts and negatives for assimp W22-W24, cicap W6-W8, gpgme W2-W4,
+  hping W4, imgproxy W14, libgphoto2 W177/W178, openexr W191/W192,
+  codebasememory W12 and jq's unavailable 32-bit toolchain add no grade cell;
+  each is kept in its own report and in the reproducibility index.
+- `readme-lint` remains RED from the frozen six-column detector versus the
+  live seven-column header (`docs/runtime-pin.md`); the live
+  `python3 tools/check-readme.py .` result is authoritative.
