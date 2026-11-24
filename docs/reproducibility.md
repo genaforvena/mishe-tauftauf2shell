@@ -6675,3 +6675,35 @@ named explicitly. All runs stay on loopback or in a local build.
 - **Vrpn W21 qualification**: `b7ca158` changed the report's Limits section so
   16384/32768/65536 are DEAD exit 139 with cause UNVERIFIED/UNKNOWN and no
   mapped gdb landing; 16384 may still be inside the mapped stack.
+
+## 2026-11-24 00:19–00:25Z — kicad2shell W183 chosen bytes in a real process
+
+Offline verification of the committed real-process evidence (no GUI, no
+network, no new upstream bytes):
+
+```
+cd lab/frontier/kicad2shell/realprocess
+sh chosen-byte-check.sh
+```
+
+Expect pins OK and `PASS=16 FAIL=0`, trace
+`3b352f6ecf3cbdabf8987243460234e42626868df70dfee7a7de021ba427398a`. The check
+verifies the two new fixture hashes, the exact predicted glibc chunk size in
+each of five committed gdb transcripts, the SIGABRT signature and the empty
+safe-control log. It does **not** re-run the GUI or re-prove the crash.
+
+The transcripts came from native KiCad 8.0.8 under Xvfb via
+`provisioned/gui-import.sh <tag> <absolute-SchLib> gdb` (environment, click
+coordinates and config in `realprocess/PROVENANCE-native-process.md`). For a
+fresh GUI run, reset `provisioned/kicad8-config/8.0/local.kicad_sym` from
+`provisioned/local-empty.kicad_sym`, then import the unmodified vendor file
+(control) and the five `SizeZ` fixtures. The three one-digit ones are pinned in
+`vendor/PINS-vendor.sha256`; the two six-digit ones are pinned in
+`realprocess/fixtures/PINS-w183.sha256`. The four overwritten bytes follow
+`(int(SizeZ * 72 / 10) * 254 << 32) | 0x20` in the real build; predicted and
+observed sizes agreed for values 9, 7, 1, 138889 and 200000.
+
+Ceiling: real process and file-selected bytes, but no ASan vendor build, no
+fixed-build real-process control, no consumer read, no wire, no pointer or
+control-flow target, no marker and no witness replay of this lane. Rung 5 stays
+UNKNOWN; witness #2996 covers only rungs 1-4 at the synthetic-CFB scope.
