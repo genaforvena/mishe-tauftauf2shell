@@ -7,7 +7,10 @@ AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 author-measured in W5/W6 and replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
-authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9 updates 2026-11-24.
+authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10 updates
+2026-11-24. W10 source audit bounds this pinned build to one 64-byte remote
+TERM setter and finds no control-flow target in the overwritten span; no rung
+change.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -375,22 +378,68 @@ tree untouched, reproduced rc 0, 9 PASS / 0 FAIL and the same two probe
 counts. This is an author replay, not an independent verdict.
 
 
+## W10 pinned-source ceiling: one 64-byte TERM setter, no control-flow target (2026-11-24, author source audit)
+
+A read-only audit of the gitignored pinned tree at parent `42f586d7` closes the
+"other attribute sources" limit left in W8/W9 and the charter's control-flow
+question, without a new build or probe. Every cited line was re-read in the
+pinned tree:
+
+- The pinned cryptlib has only `CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL`
+  (`3rdp/src/cl/cryptlib.h:1285`); there is no `CRYPT_SESSINFO_TERMINAL` in
+  the active headers or sources. Its sole remotely reachable setter is the
+  SSH pty-req handler: `session/ssh2_msgsvr.c:533` maps `"pty-req"` to
+  `REQUEST_PTY`, and `:668-670` reads `readString32(stream, stringBuffer,
+  CRYPT_MAX_TEXTSIZE /* 64 */, &stringLength)` then calls
+  `setChannelAttributeS(...)` only when `stringLength > 0`. SSH `env` is a
+  `REQUEST_NOOP` at `:543`; telnet and rlogin TERM handling never sets the
+  attribute (`src/sbbs3/main.cpp:1793-1794`, `answer.cpp:145-151`,
+  `answer.cpp:590-591`).
+- Local/generic sets are capped too: `session/ssh2_channel.c:723-727` passes
+  `CRYPT_MAX_TEXTSIZE` as the destination bound to `attributeCopyParams`,
+  which rejects `sourceLength > destMaxLength` at
+  `3rdp/src/cl/misc/int_api.c:328-330`; the attribute ACL range is
+  `1..CRYPT_MAX_TEXTSIZE` (`kernel/attr_acl.c:3693-3704`). The asymmetry is
+  in the GET: `cryptapi.c:2599-2603` advertises `MAX_ATTRIBUTE_SIZE` (4096)
+  capacity and overwrites the caller's `*valueLength`, while
+  `answer.cpp:542-547` supplies a 41-byte array with `l = 0`.
+- No control-flow target lies in the reachable 23 bytes. `src/sbbs3/sbbs.h:485`
+  declares `class sbbs_t` with no `virtual` member anywhere in that header;
+  `:702-705` places `terminal[41]`, `line_delay`, `console` and
+  `wordwrap[1001]` at offsets 0/44/48/52. Bytes 44..63 are two `uint32`
+  scalars and `wordwrap[0..11]`. Consumers use them as a delay
+  (`terminal.h:275-276`, measured in W6), `CON_*` flag bits, and string data;
+  the only pointer exposures are data pointers for Baja (`exec.cpp:96`
+  `(char*)wordwrap` and `:241` `(int32_t*)&console`). No function pointer,
+  vtable entry or computed call target.
+
+This is a structural source result, not a new wire or probe measurement and
+not a witness verdict. It keeps the rung and availability ceiling unchanged:
+inside this pinned build, "other attribute sources" is now a bounded negative
+rather than UNKNOWN, while other builds, versions and configurations remain
+UNKNOWN. No RCE inference.
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
 replay of W5/W6/W8/W9. No-credential TERM reach at a config without
 `SSH_ANYAUTH` is now a measured negative for this pinned build (W7 stock
 client and W9 custom pre-auth client), not an open gap inside this build;
-other builds and configurations with valid credentials stay UNKNOWN.
+other builds and configurations with valid credentials stay UNKNOWN. Inside
+this pinned build W10 also closes the "other attribute sources" wording:
+the pty-req handler is the only remote terminal setter and every setter path
+is capped at 64 bytes; offsets 44..63 hold scalar timing/flag data and string
+bytes, with no function pointer, vtable entry or computed call target. Those
+are source bounds, not a new probe measurement; other builds stay UNKNOWN.
 The advisory's claimed thread-block/socket-exhaustion DoS is measured at real
-`answer()` scope in W6 with a fixed control. The 64-byte TERM and the no-size copy are measured
-at the real cryptlib API, from a network pty-req through the real vendored
-cryptlib getter, inside a real `sbbs3` build's `sbbs_t::answer()` on
-loopback; W8 pins the 64-byte maximum to the vendored pty-req parser and
-corroborates it on the wire. No claim that the adjacent-field overwrite
-yields code execution: the advisory's own impact vector is availability-only
-(`VC:N/VI:N`). W5 and W6 are author evidence with one-command replays, not
-yet independently replayed.
+`answer()` scope in W6 with a fixed control. The 64-byte TERM and the no-size
+copy are measured at the real cryptlib API, from a network pty-req through the
+real vendored cryptlib getter, inside a real `sbbs3` build's
+`sbbs_t::answer()` on loopback; W8 pins the 64-byte maximum to the vendored
+pty-req parser and corroborates it on the wire. No claim that the
+adjacent-field overwrite yields code execution: the advisory's own impact
+vector is availability-only (`VC:N/VI:N`). W5 and W6 are author evidence with
+one-command replays, not yet independently replayed.
 
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)
