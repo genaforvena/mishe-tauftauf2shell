@@ -926,3 +926,49 @@ replayed. Ports 15361-15369 were loopback and freed; no server left running.
 the canonical slot map is `out-w29-scan-plain2/gdb.log` and the canonical dump
 is `out-w29-scan-plain6/heap.bin`.
 Do not resweep sender -2 on these binaries.
+
+## W30 — sender -3 aliases the live TCP input pointer (2026-11-24 ~20:2xZ)
+
+New scripts (local, SHA-256): `probe-xlation-tcpinbuf.sh`
+`cb25aaafd96d1beb53ddb7cbf779fcc7e2a709d2e10adce813d2a32b7b1c44ad`,
+`wire_xlation_followup.py`
+`c1f20d8d0158ae0ebf9e9ae3815ae5f34dbcc3c9b9903be81d8518b4578ddd8f`.
+No source change and no rebuild: vulnerable plain `-O0`
+`5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`,
+fixed plain `10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`
+(per-run digests in each `out-w30-*/meta.txt`).
+
+`probe-xlation-tcpinbuf.sh <out> <port> <sender> [follow]` runs a cookie
+exchange, one chosen-sender SENDER message and a second benign SENDER message,
+with gdb breaks at `:405`, `:4562`, `:427` and `:4228` printing the OOB slot,
+the dispatcher sender-ID table, the post-store pointer and each message's
+body buffer. Canonical vulnerable log `out-w30-smoke/gdb.log` (port 15382,
+SHA-256 `d8d4bc299d91cd19d804f33938d8270a3d7fd1d28adb8f4d8c7777c4d70b8715`)
+records PRE405 `slot=0x...3348 slotdata=(nil) plus8=0x5555556f3380`, POST427
+`plus8=0x2fffffffd tcpinbuf=0x2fffffffd remote_id=-3 local_id=2`, then
+`GETBODY buf=0x2fffffffd ceil_len=104`, `Can't read body: Bad address` and
+`TCP handling failed, dropping connection`. `out-w30-dispatch3/gdb.log`
+(port 15376, same digest) additionally records `SENDERID[0]=VRPN Control`,
+`SENDERID[1]=vrpn_Forwarder_Brain`. `out-w30-lid0b/gdb.log` (port 15378,
+name `VRPN Control`, NUL index 20, SHA-256
+`176a91859e6953a456ecd04ded357ea99750071a633e127052bc4fd43cfffe55`)
+records `local_id=0`, POST427 `plus8=0xfffffffd tcpinbuf=0xfffffffd` and the
+same `Bad address` on the follow-up: the high half can be wire-driven to zero,
+but the -3 alias fixes the low half, so the pointer stays unmapped.
+
+Controls: `out-w30-fixed/gdb.log` (port 15372, SHA-256
+`f715677675755e532b2389d6ea6f064a981ccc531dbacd65eb5fe0d3f5a1c9b2`)
+shows the same POST427 pointer and connection drop on the fixed plain build;
+`out-w30-safe/gdb.log` (port 15373, SHA-256
+`41ff436921e3d10cd860324cbd0c126100218401039e1a29e9cc0e02363bb107`)
+shows both bodies at `buf=0x5555556f3380` with no drop. Fixed-commit line
+numbers differ: gdb resolves `:405` to source line 409 on that build, while
+`:427` and the `Bad address` message are identical.
+
+Grade unchanged: chosen offset into live state, a two-packet pre-auth DoS, no
+chosen destination address, no command, no rung 5. Author self-observation,
+not replayed. Failed probe iterations `out-w30-vuln2/`, `out-w30-fixed2/`,
+`out-w30-safe2/` and `out-w30-lid0/` (a too-long default name and a broken
+intermediate wrapper) were removed; the canonical logs above are the
+surviving evidence. Ports 15371-15382 were loopback and freed; no server left
+running. Do not resweep sender -3 on these binaries.

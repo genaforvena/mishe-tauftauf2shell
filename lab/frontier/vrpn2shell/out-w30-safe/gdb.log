@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x40af9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 405.
+Breakpoint 2 at 0x40bb2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 427.
+Breakpoint 3 at 0x49404: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 4228.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+GETBODY buf=0x5555556f3380 ceil_len=104 fd=6
+PRE405 slot=0x5555557033b8 slotdata=(nil) plus8=0xffffffffffffffff plus12=-1 this=0x555555703370
+POST427 slot=0x5555557033b8 slotdata=0x5555556f18d0 plus8=0x200000004 tcpinbuf=0x5555556f3380 remote_id=4 local_id=2
+GETBODY buf=0x5555556f3380 ceil_len=104 fd=6
+PRE405 slot=0x5555557033b8 slotdata=0x5555556f18d0 plus8=0x200000004 plus12=2 this=0x555555703370
+POST427 slot=0x5555557033b8 slotdata=0x5555556f18d0 plus8=0x300000004 tcpinbuf=0x5555556f3380 remote_id=4 local_id=3
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)
