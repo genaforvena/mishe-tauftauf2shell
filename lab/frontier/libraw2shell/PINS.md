@@ -44,6 +44,12 @@
 | `w9/toppad-map.gdb` | W9 D=512 top-pad=0 mapping probe | `cdd0c0436d4743d42cf8ee02580153a3926399ce186ae579a7a86c5a9a065917` |
 | `w9/walk512.gdb` | W9 D=512 chunk-header walk (header read did not yield a usable size) | `5218f8861647e8c9674ab6eb1010bdf533f900d050cbdba033f3da21471b6bf6` |
 | `w9/hashes.sha256` | W9 input/script hash record | `2384a3b5ee4541c0fe31f90277cde3abdbc2e74de483ecffd138fef8fda84557` |
+| `craft_blacklevel_poc.py` | lab-only W10 BlackLevel steering generator | `cf7245af95b8636ea8a06acaabdbc6d3fd3f7c1aa9a674ce17078ad892869cac` |
+| `w10/targetdead.input` | W10 WL=3230 BL=6, exact `0xdead` at index 68,644 | `a1367d1e73606b183ef5175174c64d3a54070827e1184643c1a24a526772553c` |
+| `w10/target2222.input` | W10 WL=21084 BL=1, exact `0x2222` at index 68,644 | `eb69f4e3ffd3f288f9244f0da73e12071a753c546a7accaac501d8eeeabf90c3` |
+| `w10/instrument.patch` | lab-only one-shot fprintf calibration patch (not the claimed consumer) | `f2b2843645656d0f3c33a36ad7e11f574a91bf032ea983f8e63af7f7ad5c02cb` |
+| `w10/grid-wide-results.txt` | corrected 441-point WL/BL calibration grid | `a4e71e340d673ae49bfc5ea77847de1d0126f0e86387097393652f2c46f3ae8b` |
+| `w10/grid-invalid-argv.txt` | invalid `"-n 1"` single-argv grid, preserved negative | `6317735c71496a81acf8d513b92583fbcce7192df6cee8404721777bb2eaefd8` |
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.

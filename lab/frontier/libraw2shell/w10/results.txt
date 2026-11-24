@@ -1,0 +1,65 @@
+W10 results — second file-controlled value knob: DNG BlackLevel (2026-11-24)
+
+Prediction before experiment: w10/prediction.txt (sha256
+2facbc183b8785c536e7b56f4f1f160831d7515ec7b54996e50654ac2ffd88e1).
+
+Generator: craft_blacklevel_poc.py (sha256
+cf7245af95b8636ea8a06acaabdbc6d3fd3f7c1aa9a674ce17078ad892869cac).
+It rewrites the pinned PoC's unused IFD slot 2 (tag 0x00fe, LONG count 1,
+value 0) as tag 0xc61a (BlackLevel), SHORT count 1. Source binding: pinned
+src/metadata/tiff.cpp:1275 case 0xc61a, len==1 branch at :1307-1310 sets
+dng_black/black. WhiteLevel is still set by craft_whitelevel_poc.py.
+
+Calibration build only: w10/instrument.patch applies a one-shot fprintf at
+xtrans_demosaic.cpp:427 to a copy of the -O0 tree; it prints the three
+stored halfwords at the first OOB index before the store. It is a lab
+calibration aid, NOT the claimed consumer. Final claims were re-measured on
+the unmodified o0/LibRaw-0.22.3/bin/dcraw_emu under gdb (w10/probe.gdb,
+sha256 22e21cad8c35cf0cda8edce4b927949bed73f0f57d7ea9b7da3cfce49b1a66ef).
+
+BlackLevel parsed (unmodified build, gdb, -n 1, WL=11036):
+  BL=0    IDX=68644 black=0 white=11036 0x4141 0x2b82 0x3a00
+  BL=1                       black=1               0x4139 0x2b7d 0x39f9
+  BL=2                       black=2               0x4132 0x2b78 0x39f3
+  BL=10                      black=10              0x40f7 0x2b51 0x39bf
+  BL=100                     black=100             0x3e57 0x2991 0x3769
+  BL=1000                    black=1000            0x217e 0x1656 0x1dc6
+These five inputs were trimmed after recording; the values are in the
+committed report and reproduced from the generator.
+
+Measurement error preserved: the first 441-point calibration grid invoked
+dcraw_emu with "-n 1" as ONE argv element. The consumer printed
+`Unknown option "-n 1".` and produced a different value map; its candidate
+WL=3235 BL=1 "0xdead" was WRONG: correct argv and gdb give 0xde95. The
+invalid map is kept as w10/grid-invalid-argv.txt; it is not evidence.
+
+Corrected grid (argv `-n` and `1` separate), WL 3225..3245 x BL 0..20:
+w10/grid-wide-results.txt, 441 points, one exact pre-chosen target:
+  WL=3230 BL=6 -> 0xdead at index 68,644.
+Input w10/targetdead.input sha256
+a1367d1e73606b183ef5175174c64d3a54070827e1184643c1a24a526772553c.
+
+Unmodified -O0 gdb confirmation (3/3, w10/dead-gdb-1.txt .. -3.txt):
+  IDX=68644 dest=0x55555573abc0 alloc=549152
+  avg=57005,38009,50670,1 black=6 white=3230
+  stored 0xdead 0x9479 0xc5ee 0x0000.
+Controls on the same input: ASan vulnerable -n 1 rc1 WRITE of size 2 at
+xtrans_demosaic.cpp:427 (w10/dead-asan-vuln.out); fixed -n 1 rc0 empty
+(w10/dead-asan-fixed.out); vulnerable without -n rc0 empty
+(w10/dead-asan-safe.out).
+
+A second pre-chosen target was selected after the first hit: 0x2222, which
+the W6 WL-only sweep could not reach. Streaming search over WL 21080..21120
+x BL 0..20 found WL=21084 BL=1. Input w10/target2222.input sha256
+eb69f4e3ffd3f288f9244f0da73e12071a753c546a7accaac501d8eeeabf90c3.
+Unmodified -O0 gdb (w10/target2222-gdb-1.txt .. -3.txt):
+  IDX=68644 avg=8738,5826,7767,1 black=1 white=21084
+  stored 0x2222 0x16c2 0x1e57 0x0000.
+Controls: ASan vulnerable rc1 WRITE-2, fixed rc0, no-option rc0
+(w10/target2222-asan-*.out).
+
+Negative/limits: two exact values from two integer DNG fields are NOT an
+arbitrary 16-bit alphabet; the 441-point grid left many targets unreachable
+at their local (WL,BL) granularity. W6/W7 WL-only misses remain valid
+negatives; this is a different, additional field. No pointer/IP, marker,
+command, live adjacent object, GUI consumer, wire path or r5.

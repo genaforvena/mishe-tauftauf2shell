@@ -1,0 +1,29 @@
+--- o0/LibRaw-0.22.3/src/demosaic/xtrans_demosaic.cpp	2026-10-24 09:24:46.000000000 +0000
++++ w10/probe-tree/src/demosaic/xtrans_demosaic.cpp	2026-11-24 14:19:06.760319916 +0000
+@@ -416,6 +416,7 @@
+                             max = hm[d];
+                     max -= max >> 3;
+ 
++static int w10printed = 0;
+                     int avg[4];
+                     memset(avg, 0, sizeof avg);
+                     for (int dd = 0; dd < ndir; dd++)
+@@ -424,6 +425,18 @@
+                             FORC3 avg[c] += rgb[dd][row][col][c];
+                             avg[3]++;
+                         }
++                    if (!w10printed && avg[3] &&
++                        (row + top) * width + col + left >= 68644)
++                    {
++                        w10printed = 1;
++                        fprintf(stderr,
++                                "W10PROBE IDX=%d c0=%x c1=%x c2=%x black=%d white=%d\n",
++                                (row + top) * width + col + left,
++                                avg[0] / avg[3], avg[1] / avg[3],
++                                avg[2] / avg[3],
++                                imgdata.color.dng_levels.dng_black,
++                                imgdata.color.dng_levels.dng_whitelevel[0]);
++                    }
+                     FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+                 }
+         }

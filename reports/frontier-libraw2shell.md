@@ -364,6 +364,51 @@ because `$?` was read after a command substitution had reset it; re-running
 with `rc=$?` captured immediately gave 139 for all three inputs. The wrong
 value was never published in the report or the wall.
 
+## Second file-controlled value knob: DNG BlackLevel (W10, 2026-11-24 14:1x-14:3xZ; author-side)
+
+Prediction recorded before the experiment in
+`lab/frontier/libraw2shell/w10/prediction.txt`: the pinned TIFF parser handles
+DNG `BlackLevel` (tag `0xc61a`) at `src/metadata/tiff.cpp:1275`, and the
+`len == 1` branch at `:1307-1310` sets `dng_black`/`black`. If that field is a
+second integer knob, the W6 target `0xdead`, unreachable with WhiteLevel
+alone, should become reachable. `craft_blacklevel_poc.py` rewrites the PoC's
+unused IFD slot 2 (tag `0x00fe`, LONG count 1 value 0) as tag `0xc61a`, SHORT
+count 1; the JPEG strip, CFA and WhiteLevel are untouched.
+
+On the unmodified `-O0` build under gdb with `-n 1` and WhiteLevel 11,036,
+BlackLevel 0/1/2/10/100/1000 produced first-OOB stores
+`0x4141 / 0x4139 / 0x4132 / 0x40f7 / 0x3e57 / 0x217e` at index 68,644, and
+gdb reported `black=1 ... white=11036` for BL=1: the tag is parsed and
+steers the value. A one-shot `fprintf` patch to a copied `-O0` tree
+(`w10/instrument.patch`) made a 441-point grid practical; all final claims
+below were re-measured on the unmodified build.
+
+Corrected grid over WhiteLevel 3,225-3,245 and BlackLevel 0-20
+(`w10/grid-wide-results.txt`) hit the pre-chosen `0xdead` at WL=3,230, BL=6.
+Input `w10/targetdead.input` sha256
+`a1367d1e73606b183ef5175174c64d3a54070827e1184643c1a24a526772553c`.
+Three fresh unmodified `-O0` gdb runs gave `IDX=68644`, `avg=57005,38009,
+50670,1`, `black=6 white=3230`, and stored `0xdead 0x9479 0xc5ee 0x0000`
+(`w10/dead-gdb-1.txt` .. `-3.txt`). Controls: ASan vulnerable `-n 1` rc 1
+`WRITE of size 2` at `:427`; fixed `-n 1` rc 0 empty; vulnerable without
+`-n` rc 0 empty. A second pre-chosen target, `0x2222` (also missed by W6's
+WL-only sweep), was hit at WL=21,084, BL=1 with input
+`w10/target2222.input` sha256
+`eb69f4e3ffd3f288f9244f0da73e12071a753c546a7accaac501d8eeeabf90c3`;
+3/3 gdb runs stored `0x2222 0x16c2 0x1e57 0x0000` at index 68,644, with the
+same ASan/fixed/no-option control triple.
+
+Measurement error preserved: the first grid passed `"-n 1"` as a single argv
+element, so the consumer printed `Unknown option "-n 1".` and produced a
+different value map. It falsely indicated WL=3,235, BL=1 -> `0xdead`; correct
+argv and gdb give `0xde95` there. The invalid map is kept in
+`w10/grid-invalid-argv.txt` and is not evidence. The two exact values are a
+refinement, not an arbitrary alphabet: the grid left many targets
+unreachable at their local (WL, BL) granularity. W6/W7 WL-only misses stay
+valid negatives for that narrower method. No pointer/IP, marker, command,
+adjacent live object, GUI, wire path or r5. Full method, hashes and raw
+traces: `lab/frontier/libraw2shell/w10/results.txt`.
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
@@ -377,7 +422,10 @@ calibration, with a preserved negative for a second target. W5 adds
 author-side, replay-pending steering of the first OOB index from 68,644 to
 268,324. W7 combines them: a second pre-chosen halfword (`0x1234`) hit exactly
 at the steered index 268,324 with its own calibration, while the W6
-calibration does not transfer. W8 adds a host-specific heap-layout result:
+calibration does not transfer. W10 adds a second independent file field,
+DNG BlackLevel, that makes two further pre-chosen halfwords (`0xdead`,
+`0x2222`) exact at index 68,644, each 3/3 stable with clean controls;
+WL-only misses are not erased. W8 adds a host-specific heap-layout result:
 the store crosses one free top chunk and faults at the heap edge, with no
 live neighbor to hijack in this path; it is a structural negative result,
 not a new primitive. Neither changes the ceiling. Fully
@@ -447,13 +495,16 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
   metadata tag; W6 hit one pre-chosen value `0x4141` exactly at index 68,644
   and W7 hit another (`0x1234`) exactly at index 268,324, each with its own
-  calibration. Several other targets (`0xdead`, `0x1234`/`0x2222` at D=512,
-  `0x4141` at D=1024) were unreachable at their local WhiteLevel granularity.
-  None demonstrates an arbitrary 16-bit alphabet. Pointer/IP control remains
-  an open prerequisite for any stronger claim.
-- The W5 frame-size/IDX steering result and the W6/W7 exact-hit results are
-  author-side only; witness replay for W5 was requested and has not arrived.
-  Do not treat them as ESTABLISHED.
+  WhiteLevel calibration. `0xdead` and `0x2222` were unreachable at D=512 via
+  WhiteLevel alone (W6 negatives), but W10 reached both exactly by adding a
+  second DNG integer field, BlackLevel (`0xdead` at WL=3,230/BL=6; `0x2222`
+  at WL=21,084/BL=1). Other targets (`0x1234` at D=512 via WL, `0x4141` at
+  D=1024) remain unreachable at their local granularity; a 441-point
+  (WL,BL) grid did not cover every halfword. None demonstrates an arbitrary
+  16-bit alphabet. Pointer/IP control remains an open prerequisite.
+- The W5 frame-size/IDX steering result, the W6/W7 exact-hit results and the
+  W10 two-field exact hits are author-side only; witness replay for W5 was
+  requested and has not arrived. Do not treat them as ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.

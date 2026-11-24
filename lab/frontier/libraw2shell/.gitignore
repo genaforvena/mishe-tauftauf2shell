@@ -10,3 +10,14 @@
 *.out.bin
 /trace.txt
 /run-output.txt
+/w10/*
+!/w10/*.gdb
+!/w10/prediction.txt
+!/w10/instrument.patch
+!/w10/results.txt
+!/w10/target*.input
+!/w10/grid-*.txt
+!/w10/dead-gdb-*.txt
+!/w10/target2222-gdb-*.txt
+!/w10/dead-asan-*.out
+!/w10/target2222-asan-*.out

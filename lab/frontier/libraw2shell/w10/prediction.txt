@@ -1,0 +1,15 @@
+W10 prediction, recorded before any BlackLevel experiment (2026-11-24T14:12Z UTC).
+
+Claim under test: LibRaw 0.22.3's pinned TIFF parser accepts DNG BlackLevel
+(tag 0xc61a) as a second integer image-derived knob. With WhiteLevel fixed,
+the OOB halfword at index 68,644 should decrease as BlackLevel rises, with a
+step different from the WhiteLevel step. Combining the two knobs should hit
+the earlier UNREACHABLE pre-chosen target 0xdead exactly at index 68,644,
+where WhiteLevel alone produced 0xdeb3/0xdec5/0xdea1/0xde8f (W6 negatives).
+
+Keep criterion: an exact 0xdead store at the first OOB index with a committed
+generator, an ASan vulnerable/fixed/no-option control triple and repeatable
+gdb output; report as ONE more exact chosen value, not an arbitrary alphabet.
+Revise if the second knob is coarser than WhiteLevel; revert if the tag is
+ignored (BL=0 and BL>0 produce identical stores) or LibRaw rejects the file.
+Never claim pointer/IP, consumer, wire or r5 from this result.
