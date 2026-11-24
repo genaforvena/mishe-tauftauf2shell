@@ -256,6 +256,12 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   all four outputs match the committed evidence after address normalization,
   with 5/5 vulnerable marker calls and 0/3 fixed calls. That is an author
   clean-room replay, not witness acceptance. Not replayed by the witness.
+W193 added `replay-w188.sh`, a single offline command that performs the whole
+clean-archive replay (pins, jansson and cjose rebuild, `check.sh`, `fptr/run.sh`
+and its own control assertions); from a clean archive it printed
+`REPLAY_W188_OK` with the same `PASS=223 FAIL=0` trace and byte-identical
+normalized fptr outputs. This lowers witness replay cost but is still an
+author replay, not witness acceptance.
 
 ## 6. Honest ceiling
 

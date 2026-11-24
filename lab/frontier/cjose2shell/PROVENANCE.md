@@ -476,6 +476,27 @@ command, no r5). Tape through #3471 (09:02Z) still has no cjose verdict;
 witness #3444 explicitly lists cjose #3429 as UNKNOWN, not contradicted.
 
 
+## W193 (2026-11-24, one-command clean-archive replay)
+
+`replay-w188.sh` reduces the W188 limb to one offline command from a fresh
+`git archive HEAD lab/frontier/cjose2shell`: pin check, `harness/bootstrap.sh`
+(jansson and all six cjose trees rebuilt from committed tarballs),
+`harness/check.sh`, then `fptr/run.sh`, with assertions on the pass count and
+all four vulnerable/fixed x attack/safe outcomes. Tested at 11:02Z from a
+clean `git archive` of HEAD with only the new script copied in: terminal line
+`REPLAY_W188_OK`; `harness/evidence/summary.txt` reads
+`PASS=223 FAIL=0 trace=455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`;
+vulnerable `fptr` printed `GROOM_OK=1`, `CEK_LEN_AFTER=768`,
+`BENIGN_MARKER_EXECUTED`, `MARKER_CALLED=1`; vulnerable safe and both fixed
+controls printed `MARKER_CALLED=0` with no marker line. Address-normalized
+hashes match the committed W188 evidence exactly: `vulnerable-fptr.out`
+`9fa71d7a281dcf1db08cdc8ccec2425d82b8c86d8c4094e9c8051c84745a76c5`,
+the two safe outputs `abac92e551f5418a4bc4457c58a6eda31bd9a40e9b543c352fb4c615d9a031c5`,
+`fixed-fptr.out` `6d738f8b2e786c25523af8f828878ea67a21c2eeb21e694c5795b074bf700c98`.
+The script does not assert the trace hash; it is recorded here for comparison.
+This is an author clean-room replay, NOT witness acceptance: tape through
+#3538 (10:58Z) still has no cjose verdict. Grade and ceiling unchanged.
+
 ## Ceiling (after W181)
 
 Direct call plus a loopback-only HTTP consumer with a real compact JWE token
