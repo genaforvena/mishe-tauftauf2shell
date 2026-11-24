@@ -1153,6 +1153,95 @@ and a second persistent command remain UNKNOWN, not achieved. Reopen on the
 published stock-Rails mechanics or a measured stock first-taker/disclosure and
 survivable allocator layout.
 
+### Stock Rails follow-up — true allocator split, rung 5 still blocked (2026-11-24)
+
+`lab/repro/ruby2shell-stock-rails-setup.sh` generates an unmodified
+`rails new --minimal` application (Rails 8.1.4.1, Puma 8.1.2, Rack 3.2.8), and
+`RUBY2SHELL_STOCK_RAILS_FULL=1` generates a full `rails new` application (the
+generated lockfile selected Rack 3.2.9). No route, controller, middleware,
+ObjectSpace dump, maps read, debugger write or marker hook is added.
+`lab/repro/ruby2shell-stock-rails.sh` launches the selected app on loopback and
+uses only multipart bytes. Its default mode has no preload; the separate
+`RUBY2SHELL_STOCK_CASE_PROBE=1` mode is analysis-only and is never an
+oracle-free result.
+
+Rails' development routing-error page reflects the original `_method` and other
+multipart parameters through `PP.pp(filtered_parameters)`. With
+`charset=ASCII-8BIT` on the non-method parts this is a valid escaped-string
+response channel, not a native-address disclosure. It does not expose an
+`RString` buffer pointer or a libc address.
+
+#### Measured N=524 split and exact controls
+
+The useful fixed body has 32 non-file parts of 1024 bytes, each filled with
+little-endian `[prev_size=0x250, size=0x90]`, a 256-byte filler with the same
+pair, and `_method = "a" + 0xDF*523`. The common environment is:
+
+```
+RUBY2SHELL_STOCK_N=524
+RUBY2SHELL_STOCK_DRAIN=1024:32
+RUBY2SHELL_STOCK_DRAIN_FAKE=1
+RUBY2SHELL_STOCK_FILL=256
+RUBY2SHELL_STOCK_FILL_PREV=0x250
+RUBY2SHELL_STOCK_FILL_SIZE=0x90
+RUBY2SHELL_STOCK_PART_CHARSET=1
+```
+
+For the trailing-byte experiment, `RUBY2SHELL_STOCK_TAIL_HEX=00005102` replaces
+the last four `_method` bytes. Run `attack`, `control`, or `fixed` as the first
+argument of `ruby2shell-stock-rails.sh` with those variables exported. The
+fixed mode uses plain 3.4.13 with byte-identical malicious body bytes.
+
+The analysis probe's most useful observation is preserved in
+`lab/build/evidence/stock-rails-rails-stage2d-n524-r498.server.log`:
+
+```
+B ... size=0x201 ... next_prev=0x250 next_size=0x90
+A ... size=0x253 ... next_prev=0x250 next_size=0x90
+C ... request=0x222 ... size=0x235
+V ... size=0x235 fd=0x20a bk=0x1f2 ... next_prev=0x20 next_size=0x90
+```
+
+This is a real `0x200 -> 0x250` expansion, not a flag-only `0x251 -> 0x253`
+case. The second mapping-buffer allocation (`request=0x222`) returns V as a
+`0x230` chunk. Its `capa=0x20a` and `used=0x1f2` are visible at the V free.
+The mapping bytes therefore extend ten bytes into the original physical
+remainder and replace its size low bytes with `0x251`. This is author-observed
+stock-application allocator control, not a rung-5 result and not an independent
+witness grade change.
+
+A fixed-shape batch of 512 fresh processes with the four-byte tail recorded 16
+valid expanded headers: ten `0x210`, three `0x250`, two `0x220`, and one
+`0x200`; 47 total runs completed the attack and later health request. The only
+`0x200` case above had no result-allocation return of the forged physical
+chunk. The forged physical chunk remained unobserved by a useful consumer.
+A separate seeded 512-layout N=524/572 search found zero `0x3f0` physical
+neighbors (one valid `0x250` expansion with a different neighbor, 131 total
+survivors). A full-default-Rails batch of 24 probes likewise found no `0x3f0`
+consumer and produced eight non-expanding survivors. These are negative
+results, not exploit successes.
+
+The final uninstrumented matrix uses the exact N=524/tail body above:
+
+- **3/3 affected attacks:** pre-response SIGABRT, HTTP 000, no later request.
+- **3/3 safe affected controls:** attack-shaped multipart bytes except pure
+  `0xDF` `_method`, HTTP 404 plus later `/up` HTTP 200, clean SIGTERM.
+- **3/3 fixed 3.4.13 controls with identical malicious bytes:** HTTP 404 plus
+  later `/up` HTTP 200, clean SIGTERM.
+
+Evidence is `lab/build/evidence/stock-rails-rails-final-{attack,safe,fixed}-*`.
+There is no command marker, target `execve`, address oracle, exploited surviving
+process or second command to test. The true split does not supply the Stage-C
+`0x3f0` tcache neighbor needed by the existing finalizer chain, and blind
+safe-link partial overwrites do not replace it: `REVEAL_PTR` needs the heap page
+mask, and a copied mask only retargets a same-page legitimate successor.
+
+**Rung-5 boundary:** stock/oracle-free/persistent RCE remains **NOT ACHIEVED**.
+The new result is a measured stock allocator split and a clean negative control
+matrix, not RCE. Reopen on Veria's published stock-Rails mechanics (still
+unpublished at 2026-11-24T04:11Z) or a measured pointer-bearing `0x3f0`
+physical consumer followed by a wire-visible disclosure and a second command.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class

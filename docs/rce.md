@@ -94,6 +94,19 @@ No stock command, oracle, reliable survival or second command was achieved.
 Stock Rails remains UNKNOWN; Veria's PoC is still unpublished. See the Ruby
 report's bounded-negative section and `ruby2shell-stock-baseline.{ru,sh}`.
 
+The 2026-11-24 stock Rails follow-up advances allocator evidence but does not
+change that verdict. `ruby2shell-stock-rails{,-setup}.sh` uses an unmodified
+`rails new` app. N=524 with 32 fake-header multipart parts produced a traced
+`0x200→0x250` expansion and a `0x230` second mapping-buffer allocation; four
+trailing invariant bytes changed the original remainder's size to `0x251`.
+No useful physical consumer, `0x3f0` tcache neighbor or address disclosure
+followed, including in a separate seeded 512-layout search. Final
+uninstrumented attacks aborted 3/3 pre-response; safe affected and fixed
+controls survived 3/3. No command or persistent second-request execution was
+achieved, so the established host/harness-specific rung-5 result remains the
+only Ruby2Shell RCE claim. Veria's stock Rails PoC remained unpublished at
+2026-11-24T04:11Z.
+
 The IEC61850 lane is also witness-ESTABLISHED at the labeled conditions
 (verdict #1127, W89): `bash lab/frontier/libiec61850/r5_system.sh <abs-outdir>`
 drives a wire-supplied chain through ObtainFile staging to real libc `system`,

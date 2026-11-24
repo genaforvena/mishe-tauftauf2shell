@@ -5,6 +5,21 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-24 — stock Rails follow-up: true allocator split, rung 5 NOT
+  ACHIEVED.** New `ruby2shell-stock-rails{,-setup}.sh` runs an unmodified
+  `rails new --minimal` app (optional full `rails new`). With N=524 and 32
+  1024-byte multipart parts, analysis-only case tracing captured a real
+  `0x200→0x250` expansion and the second mapping buffer returning V as a
+  `0x230` chunk (`stage2d-n524-r498.server.log`). Four trailing invariant bytes
+  replace the original remainder's size with `0x251`, but no useful physical
+  consumer followed. A seeded 512-layout search found no `0x3f0` neighbor; the
+  full app did not provide one either. Final clean matrix: **3/3 attacks abort
+  pre-response; 3/3 safe affected and 3/3 fixed controls return 404 plus later
+  200 and survive.** No address disclosure, command execution, persistent
+  process or second command exists. This is new rung-4-class allocator evidence,
+  not stock/oracle-free/persistent RCE. Exact recipes and negative hypotheses
+  are in the investigation report.
+
 - **2026-11-22 — stock/oracle-free/persistent RCE attempt: bounded NEGATIVE.**
   New `lab/repro/ruby2shell-stock-baseline.{ru,sh}` runs classic Sinatra/Puma
   with no routes, custom middleware, preload, ObjectSpace, maps or debugger in
