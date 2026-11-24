@@ -86,5 +86,40 @@ replay also gave 12 PASS / 0 FAIL, rc 0.
 - Stock glibc behavior of an overflow in `.bss` stays UNKNOWN; the plain
   harness continues because the chosen canary is a benign array, not an
   active control-flow object.
-- The advisory's AV:N precondition (`-G`/`--rroute`, matching packet) is
-  not exercised; no external system was contacted with probes.
+- The advisory's `AV:N` precondition (`-G`/`--rroute`, matching packet) was
+  exercised on loopback in W1 (below); no external system was probed.
+
+## W1 wire stage (2026-11-24 20:3xZ)
+
+`wire/run-wire.sh` is the replayable script; `wire/wire-test.sh` starts a real
+`hping3 -D -1 -G -I lo -c 3 -i 1 127.0.0.2` under `sudo -n` (PID is written
+by a wrapper shell before `exec`) and `wire/inject_rr.py` sends the crafted
+reply from 127.0.0.2 to 127.0.0.1 through an IP_HDRINCL raw socket. The tree
+is copied from `provision/hping-src` (HEAD `3547c769`), configured
+`./configure --no-tcl`, built with
+`make CCOPT='-O0 -g -fsanitize=address -fcommon -Wall -Wno-unused -I../compat'`.
+Two build repairs were needed and are kept here: Linux has no `net/bpf.h`
+(empty `wire/compat/net/bpf.h` stub; its only use is `#if`-guarded off), and
+GCC's `-fno-common` default breaks 2014 tentative definitions in the headers
+(`-fcommon` restores the intended linkage). No pinned source was hand-edited.
+
+Input details: IPv4 IHL=15 (60-byte header), RR option `07 ff 48` (type,
+length 255, pointer 0x48) plus `OMIS` padding to 40 option bytes, ICMP echo
+reply type 0 with 64 bytes of `OMIS` payload. The echo id is packed in host
+byte order (x86 little-endian) because hping assigns `getpid() & 0xffff`
+without `htons`; a network-order id does not match and produces no abort.
+
+Observed: `WRITE of size 68` at `wire/hping-src/display_ipopt.c:112`, 0 bytes
+after `old_rr` (size 40), rc 1; pointer `0x5a` gives `WRITE of size 86` at the
+same frame; repeat deterministic; valid RR (length 39, pointer 8) and the
+same attack against the patched real build exit 0 with no ASan error and
+print the injected RR. Kernel emits ICMP parameter-problem for the malformed
+option, but pcap still delivers the original packet to the process.
+`sh run-wire.sh`: 9 PASS / 0 FAIL rc 0, repeated from a clean lab copy.
+
+Preserved negatives: AF_PACKET injection on `lo` produced no frames captured
+by tcpdump; IP_HDRINCL works. Checksum replacement in the first injector
+dropped the ICMP id and produced id 0, which hping ignored. ASan redzones
+poison the bytes adjacent to `old_rr` in the real binary, so chosen-byte
+control remains observable only in the plain stand-in harness. No pointer,
+IP or command control and no r5; witness replay of this stage is UNKNOWN.

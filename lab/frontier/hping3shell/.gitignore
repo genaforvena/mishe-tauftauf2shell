@@ -6,3 +6,11 @@
 /standin/fixed_display_ipopt.c
 /evidence/.failed
 *.o
+/wire/hping-src/
+/wire/fixed-src/
+/wire/compat/
+/wire/evidence/
+/wire/*.out
+/wire/*.log
+/wire/payload.pid
+/wire/__pycache__/

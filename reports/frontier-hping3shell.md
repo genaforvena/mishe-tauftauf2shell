@@ -1,8 +1,10 @@
 # Frontier brief — hping3shell (CVE-2026-136131)
 
-Status 2026-11-24 20:0xZ: STAGED at rung 3 / rung 4 PARTIAL; ADMITTED as
-the 134th route 19:5xZ, witness W207 ESTABLISHED AS LABELED (#3820). Superseded
-after admission by a target-owned status report, if one is written.
+Status 2026-11-24 20:3xZ: STAGED at rung 3; rung 4 WIRE-VISIBLE in a live
+loopback lab process (author-side W1), witness replay of the wire stage OWED.
+ADMITTED as the 134th route 19:5xZ, witness W207 ESTABLISHED AS LABELED
+(#3820) for the earlier pinned-function scope. Superseded after admission by
+the target-owned status report.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -72,24 +74,28 @@ lab/frontier/hping3shell | tar x -C /tmp/w212-hping` replay. Raw output in
 
 ## Rung-4 feasibility and ceiling
 
-Rung 3 is confirmed on the verbatim upstream function under ASan. Rung 4 is
-PARTIAL: packet-derived chosen bytes land at chosen offsets in a live
-adjacent global in the plain build. There is no hping build, no pcap/raw
-socket, no live process, no wire input, no pointer/IP/command control and no
-rung 5. The advisory's AV:N reach is a claim, not exercised here; the
-post-fix real-binary `.bss` layout and stock glibc outcome stay UNKNOWN.
-ASan redzones put the adjacent bytes in poison, so the canary observation is
-necessarily from the plain build. The `IPOPT_LSRR` branch's unbounded forward
-walk is noted in issue #80 but not tested here.
+Rung 3 is confirmed on the verbatim upstream function under ASan. Rung 4 now
+has two distinct observations: WIRE-VISIBLE in a live ASan hping3 process
+(crafted loopback RR reply reaches `display_ipopt()`, ASan `WRITE-68`/`86`
+0 bytes after `old_rr[40]`), and chosen packet bytes at chosen offsets in an
+adjacent live global in the plain stand-in harness. There is still no
+pointer/IP/command control and no rung 5. Stock glibc outcome, real post-fix
+`.bss` layout and `IPOPT_LSRR` stay UNKNOWN. ASan redzones poison the adjacent
+bytes in the real binary, so the chosen-byte observation remains harness-only.
+W207 witnessed the earlier pinned-function stage only; the wire stage awaits
+independent replay.
 
-## Cheapest next experiment
+## Wire experiment (W1, 20:3xZ) — done, author-side
 
-Build the pinned hping tree under ASan with libpcap, run
-`hping3 -G` against a loopback target and inject a crafted RR reply from a
-second loopback socket; compare with a locally patched build and a valid RR
-control. If the loopback packet reaches `display_ipopt()`, that moves the
-claim to a wire-visible rung 4. Target admitted 19:5xZ; witness replay closed
-ESTABLISHED AS LABELED; do not duplicate this target.
+`lab/frontier/hping3shell/wire/run-wire.sh` builds the real pinned tree and
+the locally patched tree under ASan + libpcap, runs `hping3 -1 -G -I lo`
+against 127.0.0.2 and injects crafted RR replies from a second loopback
+socket. In-tree and from a clean copy: **9 PASS / 0 FAIL, rc 0**. Pointer
+`0x48` → ASan `WRITE-68`, pointer `0x5a` → `WRITE-86`, both at
+`display_ipopt.c:112` with 0 bytes after `old_rr[40]`; repeat deterministic;
+valid RR and patched build clean. Reproduction details and limits are in
+`reports/hping3shell-status.md`. Witness replay of this stage is the next
+step; rung 5 is not claimed.
 
 ## Witness disposition (W207, #3820)
 

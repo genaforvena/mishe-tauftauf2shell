@@ -44,16 +44,50 @@ and any RCE claim stay claims in this lab.
   recorded in the operator wall. Witness W207 (#3822) returned ESTABLISHED
   AS LABELED at this pinned-function scope; no grade change, no r5.
 
-## Current grade
+## Wire stage (2026-11-24 20:3xZ, author-side)
 
-Rungs 1-3 on the verbatim pinned upstream function under ASan; rung 4
-PARTIAL — packet-derived chosen bytes at chosen offsets in a live adjacent
-global in the plain build. No hping build, no libpcap or raw socket, no live
-process, no wire input, no pointer/IP/command control and no rung 5. The
-advisory's `AV:N` is prose; stock glibc outcome, post-fix real `.bss` layout
-and the `IPOPT_LSRR` branch are UNKNOWN. W207 independently reproduced these
-limits at the pinned-function scope; no hping build, wire, pointer or r5 was
-witnessed.
+- Real tree: `provision/hping-src` (HEAD `3547c769`, `display_ipopt.c`
+  `e8ef2dd6…dcbb5e7b`) copied to `wire/hping-src`, configured `--no-tcl` and
+  built with `-fsanitize=address -fcommon` plus an empty `compat/net/bpf.h`
+  stub (BSD-only header, its use is `#if`-guarded off on Linux). No pinned
+  source was hand-edited. The fixed tree is the same build with
+  `pinned/fix.patch` applied (patched sha256
+  `70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`).
+- Input: `hping3 -D -1 -G -I lo -c 3 -i 1 127.0.0.2` under `sudo -n`, PID
+  captured from a wrapper shell; a second loopback socket sends an ICMP echo
+  reply from 127.0.0.2 to 127.0.0.1 with IHL=15, RR option bytes
+  `07 ff 48`, `OMIS` padding and a 64-byte `OMIS` payload. The echo id is
+  packed in host byte order (x86 little-endian) to match hping's
+  `getpid() & 0xffff` check.
+- `cd lab/frontier/hping3shell/wire && sh run-wire.sh`: **9 PASS / 0 FAIL,
+  rc 0**, reproduced from a clean copy of the lab. Pointer `0x48` aborts the
+  live process with ASan `global-buffer-overflow`, `WRITE of size 68`, frame
+  `display_ipopt wire/hping-src/display_ipopt.c:112`, 0 bytes after the
+  40-byte `old_rr`; pointer `0x5a` gives `WRITE of size 86` at the same
+  frame; the attack is deterministic on repeat. Valid RR (`rr_len=39`,
+  pointer `8`) and the same attack against the patched real build both exit
+  0 with no ASan error and print the RR from the injected packet.
+- The kernel answers the malformed option with ICMP parameter-problem, but
+  pcap still delivers the original packet to the live hping3 process. Raw
+  output: `wire/evidence/wire-{attack,attack2,repeat,valid-rr,fixed-attack}.out`.
+- Limits: ASan detection only in the real binary; chosen bytes at chosen
+  offsets are still observed only in the plain stand-in harness. No pointer,
+  IP or command control, no stock-glibc outcome, no r5. W207 witnessed only
+  the earlier pinned-function stage; this wire stage awaits independent
+  replay.
+
+## Current grade (2026-11-24 20:3xZ)
+
+Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is now
+WIRE-VISIBLE in the live lab, author-side: a crafted ICMP RR reply injected
+from 127.0.0.2 to 127.0.0.1 reaches `display_ipopt()` in a real ASan hping3
+process and aborts with `WRITE of size 68` / `86` past `old_rr[40]`; a valid
+RR reply and the locally patched build stay clean. Chosen bytes at chosen
+offsets in an adjacent live global remain demonstrated only in the plain
+stand-in harness (ASan redzones poison that memory in the real binary). No
+pointer/IP/command control and no rung 5. Stock glibc outcome, real post-fix
+`.bss` layout and `IPOPT_LSRR` stay UNKNOWN. The wire stage is author-side
+only; witness replay of it is OWED.
 
 ## Witness verdict (W207, #3822)
 
@@ -70,12 +104,7 @@ are corrected above and in the README row; no measurement changed.
 
 ## Next
 
-The pinned-function replay is witnessed; the open lane is the loopback wire
-build below.
-
-The cheapest next experiment is a loopback ASan + libpcap build of the
-pinned tree running `hping3 -G` with an injected crafted RR reply from a
-second loopback socket, compared against a
-locally patched build and a valid-RR control. A wire-visible rung 4 requires
-that packet to reach `display_ipopt()`; rung 5 additionally requires a
-measured attacker-controlled execution path and is not claimed here.
+Witness replay of the wire stage is owed: from a clean copy of
+`lab/frontier/hping3shell`, run `cd wire && sh run-wire.sh` (9 PASS / 0 FAIL,
+rc 0 here and in a clean-copy replay). After that, the only depth lane is a
+measured attacker-controlled execution path; nothing observed supports r5.
