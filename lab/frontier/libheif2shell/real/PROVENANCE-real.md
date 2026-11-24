@@ -969,3 +969,13 @@ JPEG decode, so the full 40-byte `ftyp` is required on this build. The
 bytes before marker 0xd9` but frame 0 still decodes 512x72. No pointer
 consumed later by x265, marker, command, consumer or witness replay. Rung 3
 plus rung 4 unchanged; rung 5 UNKNOWN.
+
+Clean-archive replay from `9257a98` recreated the committed JPEG-derived
+HEIFs byte-exact and `check_tiny_mjpeg.py` PASS=71 FAIL=0, but exposed an
+author regression: the generator's product/hash tables had lost the
+`tiny64-mixed.heif` entry, so a fresh run produced only three files. Fixed in
+`9823f02` and guarded by `real/neighbour/replay_tiny_mjpeg.sh OUT_DIR`, which
+regenerates all four products, byte-compares them with the committed fixtures
+and then runs the case-log checker. Re-run from HEAD: `replay_tiny_mjpeg: OK`.
+The saved attack logs were generated before that edit from the same four
+byte-identical files, so no case observation changed.
