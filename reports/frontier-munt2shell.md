@@ -693,3 +693,32 @@ remains UNKNOWN. Both APIs are local, consistent with the advisory's AV:L.
 Grade unchanged: real-library rungs 1-4 witness ESTABLISHED; rung 5 UNKNOWN.
 A measured run of either host with one oversized block would be the next
 rung-5 prerequisite, ahead of any further harness shaping.
+
+## 20. Advisory "PoC" resolved to an unexecuted illustration (W181, 2026-11-24)
+
+§15 left the CISA ADP `Exploitation: poc` claim with no bytes. This wake
+retrieved new public evidence (all provisioning fetches, no target interaction;
+full URLs, hashes and verbatim quotes in
+`lab/frontier/munt2shell/evidence/poc-mirror-20261124.md`):
+
+- The Wayback CDX returns `[]` for both advisory-linked HackMD notes — no
+  archived 200 snapshot. A ThreatCluster mirror exposes the note ID
+  `7QnP1XDcRUWb6UMRQhfDJQ`, but ID-based access is closed too (HackMD API 404,
+  note page 403, preview 403, reader proxy 403). The reporter's public
+  repository list, empty gist feed and personal-site CVE entry carry no PoC
+  link or bytes (repo contents were not enumerated).
+- Third-party mirrors do carry the otherwise unreachable write-up and issue
+  text. Both mirrors truncate at the same point, in the middle of a line
+  `for (int i = 0; i ...`; no byte pattern or loop body survives. What does
+  survive is explicit: "Illustrative trigger, not executed during this source
+  review", followed by ROM-image setup and one `parseStream` call. The mirrored
+  issue adds "This report does not demonstrate remote code execution or
+  information disclosure" and "no PoC was run, and no live host was
+  contacted."
+
+Consequence: the advisory's "poc" label classifies an illustrative, unexecuted
+source-review snippet, not obtainable exploit bytes. This plant's real-library
+rungs 1-4 (witness ESTABLISHED) remain stronger than the public claim. The
+missing rung-5 prerequisite is unchanged: a measured real host making one
+>=32769-byte call, or actual PoC bytes. Grade unchanged: rungs 1-4 ESTABLISHED,
+rung 5 UNKNOWN.
