@@ -1,0 +1,4 @@
+RESULT PASS
+7cb9f1f8d20246fd63f9fafa4dbb686d0d6179a39b83210ebadcce184b7ac8e4  evidence/cpp-heap-victims.out
+c0d6ac03b8b428e203a31f77a56c431c65463c65bda7333684a944e57d00d03d  evidence/cpp-heap-baseline.out
+5667c65f80bb786ba515e1e0ae845e78182424c922a1ab59b039e6b8aea43eee  evidence/cpp-heap-fixed.out

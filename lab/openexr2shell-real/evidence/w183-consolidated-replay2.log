@@ -1,0 +1,12 @@
+=== exrcheck-mixed-check.sh 11:33:01 ===
+RC=0
+RESULT PASS
+=== offset-steer-check.sh 11:33:03 ===
+RC=0
+RESULT PASS
+=== exrcheck-steer-check.sh 11:33:07 ===
+RC=0
+RESULT PASS
+=== cpp-heap-victims-check.sh 11:33:14 ===
+RC=0
+RESULT PASS

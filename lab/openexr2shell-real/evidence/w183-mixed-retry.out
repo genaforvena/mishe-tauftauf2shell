@@ -1,0 +1,13 @@
+RESULT PASS
+SINK-ENTER out=ADDR in=ADDR channels=2 height=1 in-out=176
+COPY1 dst=ADDR src=ADDR len=128 dst-out=0 src-in=64
+COPY2 dst=ADDR src=ADDR len=64 dst-out=128 src-in=0
+ADDR:	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c
+ADDR:	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c
+ADDR:	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c	0x3c
+bca5174944825cfc887b7f3059bd0a070cce03b34d82c1f38cfacb981a02d54f  evidence/exrcheck-mixed-asan-baseline.out
+c0bda7dad628418f738a39aad57d667242411dd980c559d2fca088679c4d5d31  evidence/exrcheck-mixed-asan-poc.out
+381d52ddf65e21160a8d579187babf3779cebba9da9326a867bd95bb979c5cb7  evidence/exrcheck-mixed-fixed-asan-poc.out
+bca5174944825cfc887b7f3059bd0a070cce03b34d82c1f38cfacb981a02d54f  evidence/exrcheck-mixed-plain-baseline.out
+81224ceac01c8a5d9d73ef9a62b604654749259472ae4060ad19745287ccdaca  evidence/exrcheck-mixed-plain-poc.out
+81060fd4adffe282cdfbf5d9a85fb722082e8cef568ab937559b3bfc77c31bac  evidence/exrcheck-mixed-gdb.out
