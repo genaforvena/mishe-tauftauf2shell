@@ -63,3 +63,76 @@ Clean replay from `git archive HEAD` at commit `2366ef4` reproduced
 `sha256=6b0391599520bc899f169268e08699155888f0018274f9c2a2e12bcd31c2dad5`
 in a fresh temp directory. ASan PIDs, addresses and build paths are excluded
 from the trace digest so clean replays are byte-identical.
+
+## W1 — imgproxy 4.0.0 as a real HTTP consumer of the CVE-2026-69242 TIFF (2026-11-24)
+
+Bounded experiment for DM #3226 (standing #8). No new target, no grade
+change; the original CVE-2026-123614 ICO lane above is unchanged.
+
+### Materials and build
+
+- imgproxy v4.0.0 source from codeload
+  `https://codeload.github.com/imgproxy/imgproxy/tar.gz/refs/tags/v4.0.0`,
+  tarball `sha256=02190571e68cfef01d7c0714654df1042e36b5bffcfa6ce28562bdd2a2e7dc62`,
+  extracted to `provision/imgproxy-4.0.0/`. Its `go.mod` requires Go 1.26.0;
+  `GOTOOLCHAIN=go1.26.0 go version` auto-provisioned that toolchain in 14 s
+  and `go mod download` finished rc 0 in 39 s (provisioning only).
+- Built the real CLI (`./cli`, not the root library package) twice against
+  libvips2shell's pinned plain trees with
+  `CGO_ENABLED=1 GOMAXPROCS=2 go build -p 2`, using the two pkg-config shims
+  `provision/pc-vuln/vips.pc` (8.18.2 tree) and `provision/pc-fixed/vips.pc`
+  (8.18.2 tree with the pinned v8.18.3 `image.c` fix). Both builds rc 0.
+  `ldd` under the matching `LD_LIBRARY_PATH` resolves
+  `libvips.so.42` to `build-vuln-plain/libvips` vs `build-fixed-plain/libvips`.
+  The two binaries are byte-identical
+  (`sha256=ea2317df2a42d30e81f33e0cfd822b49b99996545ffc49026573212b03d8165d`):
+  no rpath, so the library tree is selected at run time by `LD_LIBRARY_PATH`.
+- `provision/http_probe.py` (`sha256=81154bd5e99251a3f620f0954de8b1f7ec9b8a0b4b5f32ca8932351ae9d1ba7e`)
+  starts a source server on 127.0.0.1:18081, launches imgproxy bound to
+  127.0.0.1:18080 and issues GET
+  `/insecure/rs:fill:16:16/[f:tiff/]plain/<fixture>`. Loopback source address
+  is blocked by default, so the lab sets
+  `IMGPROXY_ALLOW_LOOPBACK_SOURCE_ADDRESSES=true`. No non-loopback address
+  is contacted. Fixtures: libvips2shell `real/safe.tif` (142 B),
+  `real/manyband.tif` (154 B, 10000 bands), and locally generated
+  `provision/tiff9999.tif` (`sha256=7e70e5945eb16e9fb6d78ab5774e96b506f2e7c7508d0df97a80e6f0963f3931`,
+  60000x2x9999 uint32, line 2,399,760,000 bytes > INT_MAX, width below the
+  VIPS_MAX_COORD cap).
+
+### Observations (raw logs `provision/http-*.log`)
+
+- Safe control: HTTP 200 and a 16x16 JPEG in both builds, e.g. `http-vulntiff.log`
+  `status=200 ... image_url="http://127.0.0.1:18081/safe.tif"`.
+- Vulnerable + default JPEG output, 10000-band TIFF: HTTP 500 in 6.5 ms with
+  `error="linear: vector must have 1 or 9999 elements"`, stack
+  `vips.(*Image).Flatten ... processing/flatten.go:8`. The 9999-band variant
+  gives the analogous 9998-element message. imgproxy's flatten step rejects
+  many-band images before any region access; this is an endpoint blocker for
+  the default output path, not a libvips fix observation.
+- Vulnerable + `f:tiff` output (TIFF supports alpha, so flatten is skipped):
+  both crafted fixtures produce no response within a 15 s per-request
+  timeout, while the safe control in the same run returns 200 in 0.00 s
+  (`http-vulntiff.log`). The requests enter real imgproxy processing and
+  do not complete under this wake's 2 GiB cgroup; this is consistent with
+  libvips2shell W7/W8's measured multi-GB tile-buffer zero-fill stall, not
+  an independently measured stack in this wake.
+- Fixed + the same two crafted fixtures: HTTP 500 in <2 ms with
+  `error="image: dimension overflow\n\nimage: dimension overflow"` and stack
+  `vips.(*Image).Load ... vips/vips.go:298` ->
+  `processing.(*Processor).initialLoadImage ... processing/processing.go:161`
+  (`http-fixtiff.log`). The fix rejects at image load inside the imgproxy
+  process, before processing. `f:png` is rejected earlier in both trees
+  (`Resulting image format is not supported: png`) because PNG saving is
+  disabled in the pinned libvips build.
+
+### Scope, negatives and grade
+
+This is the first observation of the crafted TIFF reaching header acceptance
+and processing entry in an actual imgproxy process over a real HTTP request;
+libvips2shell W14 had only lab scaffolding. It is not the negative-offset
+write: no TIFF scanline decode, no truncated `bpl`, no region/paint frame,
+no chosen-byte write, no pointer, no benign marker side effect, no ASan
+report, no witness verdict. Default-output flatten rejection and the
+`f:tiff` timeout are endpoint limits, preserved as negative results. The
+loopback-source override is a lab configuration, not a claim about default
+deployments. Grade unchanged: rungs 1-4 for the ICO lane; rung 5 UNKNOWN.

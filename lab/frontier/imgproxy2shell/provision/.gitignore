@@ -1,0 +1,6 @@
+# Provisioned third-party source, toolchain inputs and build outputs.
+/imgproxy-v400.tar.gz
+/go.mod.v400
+/imgproxy-4.0.0/
+/imgproxy-vuln
+/imgproxy-fixed

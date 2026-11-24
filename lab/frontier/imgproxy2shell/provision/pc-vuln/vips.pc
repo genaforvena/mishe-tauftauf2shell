@@ -1,0 +1,11 @@
+prefix=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libvips2shell
+includedir=${prefix}/src/libvips-8.18.2/libvips/include
+buildincdir=${prefix}/build-vuln-plain/libvips/include
+libdir=${prefix}/build-vuln-plain/libvips
+
+Name: vips
+Description: pinned vulnerable libvips 8.18.2 (imgproxy2shell lab shim)
+Version: 8.18.2
+Requires: glib-2.0 >= 2.52, gio-2.0, gobject-2.0
+Libs: -L${libdir} -lvips
+Cflags: -I${includedir} -I${buildincdir}
