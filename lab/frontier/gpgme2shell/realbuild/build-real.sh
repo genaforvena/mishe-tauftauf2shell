@@ -46,21 +46,22 @@ if [ ! -f gpgme-fixed/src/engine-gpg.c ] ||
   (cd gpgme-fixed && patch -p1 --forward < "$HERE/../pinned/fix.patch")
 fi
 
-FLAGS="CFLAGS=-fsanitize=address -fno-omit-frame-pointer -g -O0"
+CF='-fsanitize=address -fno-omit-frame-pointer -g -O0'
+LF='-fsanitize=address'
 BASE="--enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX --with-libassuan-prefix=$PREFIX"
 [ -d err-build ] || mkdir err-build
-[ -f err-build/Makefile ] || (cd err-build && LDFLAGS=-fsanitize=address ../libgpg-error-1.50/configure \
-  --prefix="$PREFIX" --enable-static --disable-shared CC=clang $FLAGS)
+[ -f err-build/Makefile ] || (cd err-build && CFLAGS="$CF" LDFLAGS="$LF" ../libgpg-error-1.50/configure \
+  --prefix="$PREFIX" --enable-static --disable-shared CC=clang)
 [ -d assuan-build ] || mkdir assuan-build
-[ -f assuan-build/Makefile ] || (cd assuan-build && LDFLAGS=-fsanitize=address ../libassuan-2.5.7/configure \
+[ -f assuan-build/Makefile ] || (cd assuan-build && CFLAGS="$CF" LDFLAGS="$LF" ../libassuan-2.5.7/configure \
   --prefix="$PREFIX" --enable-static --disable-shared --with-libgpg-error-prefix="$PREFIX" \
-  CC=clang $FLAGS)
+  CC=clang)
 for pair in gpgme-asan-build:gpgme-2.2.0 gpgme-fixed-build:gpgme-fixed gpgme-231-build:gpgme-2.3.1; do
   build=${pair%%:*}; tree=${pair##*:}
   [ -d "$build" ] || mkdir "$build"
   if [ ! -f "$build/Makefile" ]; then
-    (cd "$build" && PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" LDFLAGS=-fsanitize=address ../"$tree"/configure \
-      --prefix="$PREFIX" $BASE CC=clang $FLAGS)
+    (cd "$build" && PKG_CONFIG_PATH="$PREFIX/lib/pkgconfig" CFLAGS="$CF" LDFLAGS="$LF" ../"$tree"/configure \
+      --prefix="$PREFIX" $BASE CC=clang)
   fi
 done
 
