@@ -1008,3 +1008,71 @@ failure. The lab's pinned builds link only x265 (`find` over
 `/tmp/libheif2shell-vuln-plain` and `-asan` shows only
 `plugins/encoder_x265.cc.o`), so the five sibling call sites are unmeasured.
 No new grade: rung 3 plus rung 4, NO rung 5. Author observation only.
+
+## W187 single-image consumer reach check (2026-11-24)
+
+No build was compiled and no consumer was run this wake; the consumer trees
+were read only, and one gdb observation on an existing pinned ASan build is
+recorded below. This refines W186's decoder-side negative.
+
+Commands and direct observations:
+
+- `grep -rn 'heif_context_encode|heif_image_extend_padding|heif_encoder'`
+  over `lab/frontier/libvips2shell/src/libvips-8.18.2` found
+  `libvips/foreign/heifsave.c:325` calling `heif_context_encode_image()` and
+  no call to `heif_image_extend_padding_to_size`.
+- `grep -rn 'heif|HEIF'` over
+  `lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0` found
+  `vips/vips.c:1268-1275` (`vips_heifsave_go`) calling
+  `vips_heifsave_target()` for HEIC output, plus HEIF load-only paths; no
+  direct libheif encoder or padding API call.
+- In the pinned `v1.23.6` tree, `libheif/plugins/encoder_x265.cc:1243-1260`
+  shows `x265_encode_image()` calling
+  `x265_start_sequence_encoding_intern(encoder, image, input_class, 1, 25,
+  nullptr, false)` and then `x265_encode_sequence_frame(image, 0)`; the
+  sequence-frame function at `:1102-1200` calls
+  `heif_image_extend_padding_to_size` at `:1139-1141` with
+  `encoder->param->sourceWidth/sourceHeight`.
+- `encoder_x265.cc:1039-1044` sets those fields from
+  `heif_image_get_width/height(image, heif_channel_Y)` of the same image and
+  rounds both up via `rounded_size()`.
+- `libheif/image/pixelimage.cc:594-612` rejects only non-uniform non-Cb/Cr
+  component sizes; `:613-655` allocates at the requested subsampled size and
+  copies `component.m_width`/`m_height` rows. With request dimensions derived
+  from the same image and rounded up, the copy stays in bounds. A mixed-size
+  *sequence* is still required, as in every W161-W184 reproduction.
+
+Interpretation and limits: single-image HEIF encoding is a real route into
+the function (correcting an over-broad implication of W186), but the two
+available consumer trees cannot create the mixed-size frame pair. This is
+source reasoning, not a run of imgproxy or libvips, and says nothing about
+unexamined consumers. No wire byte, pointer, command or witness verdict.
+Grade UNCHANGED: rung 3 plus rung 4, NO rung 5.
+
+### W187 observed single-image control (pinned ASan build, no rebuild)
+
+`gdb` on the already-built pinned ASan `heif-enc`
+(`/tmp/libheif2shell-vuln-asan/examples/heif-enc`, W161 build) with the
+committed `neighbour/gdb_single_image.cmd` and
+`neighbour/evidence/tiny-mjpeg/uniform64.jpg` (SHA-256
+`4f0396f825c0ff492161c03509d2d184e742b48bd5720534dfbf8772cd7492dc`,
+512x64) under `ASAN_OPTIONS=detect_leaks=0`:
+
+```
+break heif_image_extend_padding_to_size
+run .../uniform64.jpg -o /tmp/w187-single.heif
+bt 5
+```
+
+Observed (`neighbour/evidence/single-image-padding.gdb.out`): breakpoint hit
+at `heif_image.cc:402` with `min_physical_width=512, min_physical_height=64`;
+frames `#1 x265_encode_sequence_frame ... encoder_x265.cc:1139`,
+`#2 x265_encode_image ... encoder_x265.cc:1252`,
+`#3 Encoder_HEVC::encode ... hevc_enc.cc:75`,
+`#4 ImageItem::encode ... image_item.cc:578`. Inferior exited normally, no
+ASan report. `python3 neighbour/check_single_image.py` PASS=8 FAIL=0.
+
+This is an observed clean single-image encode through the public API, not a
+network consumer and not the mixed-size sequence trigger. It confirms the
+source-level call chain above but does not by itself prove the absence of a
+bug in unexamined consumers. No grade change.

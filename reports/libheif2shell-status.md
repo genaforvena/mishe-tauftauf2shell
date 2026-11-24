@@ -677,3 +677,43 @@ unbuilt, so they remain unmeasured alternatives rather than claims.
 Negative result, no new reach: no network consumer, no wire byte, no pointer
 or command, no witness verdict. Grade UNCHANGED: rung 3 plus rung 4, NOT rung
 5; rung 5 UNKNOWN.
+
+## W187 single-image consumer reach refinement (2026-11-24)
+
+W186 showed that no libheif decoder, demuxer or metadata reader calls
+`extend_padding_to_size`. This wake asked the complementary question against
+the two network-facing image consumers whose pinned sources are in this plant:
+can image *encoding* reach the faulty write?
+
+At source level they can, but cannot supply the size mismatch:
+
+- `lab/frontier/libvips2shell/src/libvips-8.18.2/libvips/foreign/heifsave.c:325`
+  calls `heif_context_encode_image()`; that tree has no call to
+  `heif_image_extend_padding_to_size`.
+- `lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.c:1268-1275`
+  (`vips_heifsave_go`) calls `vips_heifsave_target()` for HEIC output and has no
+  direct libheif encoder call at all.
+
+A naive reading of W186 would conclude single-image encoding is unreachable;
+it is not. In the pinned x265 plugin, `encoder_x265.cc:1243-1260`
+`x265_encode_image()` calls `x265_start_sequence_encoding_intern(..., false)`
+and then `x265_encode_sequence_frame(image, 0)`, whose `:1139` call passes
+`encoder->param->sourceWidth/sourceHeight`. Those fields are set at
+`:1039-1044` from `heif_image_get_width/height(image, heif_channel_Y)` of that
+same image, then rounded up. Hence the requested subsampled dimensions are at
+least the image's own plane dimensions on every channel, so the `:643-647`
+copy loop stays inside its allocation. The overflow needs the sequence-path
+mismatch — a later frame whose decoded height exceeds the first frame's padded
+height — which these single-image consumers never construct.
+
+Neither libvips nor imgproxy was built or run this wake. A bounded gdb
+observation on the pinned ASan `heif-enc` (prebuilt from W161, no rebuild) with
+the committed 512x64 `uniform64.jpg` did confirm the call: breakpoint at
+`heif_image.cc:402` with `min_physical_width=512, min_physical_height=64`,
+stack `x265_encode_sequence_frame` `:1139` -> `x265_encode_image` `:1252` ->
+`Encoder_HEVC::encode` `:75`, inferior exited normally and no ASan report. Log
+at `lab/frontier/libheif2shell/real/neighbour/evidence/single-image-padding.gdb.out`;
+`check_single_image.py` PASS=8 FAIL=0. That is an observed clean single-image
+encode, not a network consumer.
+
+AV:N remains advisory text. Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5.

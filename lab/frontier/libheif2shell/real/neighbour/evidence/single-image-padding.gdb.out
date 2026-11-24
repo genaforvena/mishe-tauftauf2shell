@@ -1,0 +1,46 @@
+Breakpoint 1 at 0x169126: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_image.cc, line 402.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff2dff6c0 (LWP 1000257)]
+[New Thread 0x7ffff25fe6c0 (LWP 1000258)]
+[New Thread 0x7ffff12f46c0 (LWP 1000259)]
+[New Thread 0x7fffeffea6c0 (LWP 1000260)]
+[New Thread 0x7fffeece06c0 (LWP 1000261)]
+[New Thread 0x7fffed9d66c0 (LWP 1000262)]
+[New Thread 0x7fffec6cc6c0 (LWP 1000263)]
+[New Thread 0x7fffeb3c26c0 (LWP 1000264)]
+[New Thread 0x7fffea0b86c0 (LWP 1000265)]
+[New Thread 0x7fffe8dae6c0 (LWP 1000266)]
+[New Thread 0x7fffe7aa46c0 (LWP 1000267)]
+[New Thread 0x7fffe679a6c0 (LWP 1000268)]
+[New Thread 0x7fffe54906c0 (LWP 1000269)]
+[New Thread 0x7fffe41866c0 (LWP 1000270)]
+[New Thread 0x7fffe2e7c6c0 (LWP 1000271)]
+[New Thread 0x7fffe1b726c0 (LWP 1000272)]
+[New Thread 0x7fffdfd5f6c0 (LWP 1000273)]
+
+Thread 1 "heif-enc" hit Breakpoint 1, heif_image_extend_padding_to_size (image=0x7ffff3c030e0, min_physical_width=512, min_physical_height=64) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_image.cc:402
+402	{
+#0  heif_image_extend_padding_to_size (image=0x7ffff3c030e0, min_physical_width=512, min_physical_height=64) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/api/libheif/heif_image.cc:402
+#1  0x0000555555bfc355 in x265_encode_sequence_frame (encoder_raw=0x512000000340, image=0x7ffff3c030e0, frame_nr=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1139
+#2  0x0000555555bfcf9f in x265_encode_image (encoder_raw=0x512000000340, image=0x7ffff3c030e0, input_class=heif_image_input_class_normal) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/plugins/encoder_x265.cc:1252
+#3  0x0000555555b89ccb in Encoder_HEVC::encode (this=0x50d000000050, image=std::shared_ptr<HeifPixelImage> (use count 3, weak count 1) = {...}, encoder=0x502000000290, options=..., input_class=heif_image_input_class_normal) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/codecs/hevc_enc.cc:75
+#4  0x00005555557781a1 in ImageItem::encode (this=0x519000001990, image=std::shared_ptr<HeifPixelImage> (use count 3, weak count 1) = {...}, h_encoder=0x502000000290, options=..., input_class=heif_image_input_class_normal) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/src/libheif-v1.23.6/libheif/image-items/image_item.cc:578
+[Thread 0x7fffdfd5f6c0 (LWP 1000273) exited]
+[Thread 0x7ffff2dff6c0 (LWP 1000257) exited]
+[Thread 0x7ffff25fe6c0 (LWP 1000258) exited]
+[Thread 0x7ffff12f46c0 (LWP 1000259) exited]
+[Thread 0x7fffeffea6c0 (LWP 1000260) exited]
+[Thread 0x7fffeece06c0 (LWP 1000261) exited]
+[Thread 0x7fffed9d66c0 (LWP 1000262) exited]
+[Thread 0x7fffec6cc6c0 (LWP 1000263) exited]
+[Thread 0x7fffeb3c26c0 (LWP 1000264) exited]
+[Thread 0x7fffea0b86c0 (LWP 1000265) exited]
+[Thread 0x7fffe8dae6c0 (LWP 1000266) exited]
+[Thread 0x7fffe7aa46c0 (LWP 1000267) exited]
+[Thread 0x7fffe679a6c0 (LWP 1000268) exited]
+[Thread 0x7fffe54906c0 (LWP 1000269) exited]
+[Thread 0x7fffe41866c0 (LWP 1000270) exited]
+[Thread 0x7fffe2e7c6c0 (LWP 1000271) exited]
+[Thread 0x7fffe1b726c0 (LWP 1000272) exited]
+[Inferior 1 (process 1000249) exited normally]
