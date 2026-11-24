@@ -493,3 +493,42 @@ hash above. No grade change: rung 4 file-level CODE/CONSUMER, W161
 witness-ESTABLISHED at the scanline
 scope, tiled/aarch64 replay requested from witness on tape #3133, rung 5
 UNKNOWN. No chosen bytes, pointer target, command, marker or wire work.
+
+## W172: earlier-chunk heap grooming does not supply the OOB bytes (2026-11-24)
+
+Prediction: W163/W170 changed only the forged chunk's pixel byte, so a prior
+*valid* chunk of the same 64-byte allocation class might leave file-derived
+bytes in the heap adjacent to the forged chunk's 64-byte source scratch. If
+so, the 4032-byte overrun could carry file-chosen bytes and the structural
+ceiling would be wrong.
+
+Tracked experiment under `lab/openexr2shell-real/groom/`: `gen_groom.cpp`
+writes a 16x2 deep+ZSTD one-FLOAT-channel EXR with all pixels set to one byte
+(0x41 or 0x5a); row 0 is a valid 64-byte-unpacked chunk. `make_poc_groom.py`
+keeps row 0 byte-for-byte and forges row 1 with `S=1024, U=64`. `groom_harness.c`
+decodes row 0 then row 1 in one process, so row 0's allocations are freed
+before the sink. `check.sh` builds both variants, runs four 0x41 and two 0x5a
+traces under gdb, breaks on `memcpy if $rdx == 4096`, dumps the 4096 source
+bytes and normalizes them with `analyze.py`.
+
+Result: the sink is reached (`SINK n=4096`, row 1 `rv=31` then the usual
+`free(): invalid pointer` abort). In every run the first 64 source bytes are
+uniform and equal the file byte. In all five comparisons against run 41 the
+differences lie in a single 8-byte window (observed at source offsets
+3928..3935 in the check replay and 3944..3951 in an earlier /tmp run); that
+window differs across repeats of the *same* file. No OOB region tracks the
+file byte. `sh lab/openexr2shell-real/groom/check.sh` passed 10/10 runs with
+evidence sha256
+`c1d93fe1aeb712bc7126969ace60ce41e1e16a68f483f2bf8b3e634e23954634`;
+one earlier run failed only because a residue byte coincidentally matched,
+so `analyze.py` now asserts a small window with at most two coincidental
+matches rather than exact set equality. Disposition: keep the negative.
+File bytes from an earlier chunk do not become the OOB source; the ceiling
+from W163/W170 stands. No grade change: file-level rungs 1-4, rung 5 UNKNOWN.
+No pointer, command, marker, wire or witness work in this experiment.
+
+W172 also added `harness/tiled-check.sh`, a one-command replay of the W164
+tiled claim: it regenerates both tiled EXRs from committed sources, asserts
+their two SHA-256 hashes and checks eight plain/ASan/fixed/guard outcomes.
+`sh lab/openexr2shell-real/harness/tiled-check.sh` passed `PASS=10 FAIL=0`
+three times. This is an author recipe, not a witness verdict.

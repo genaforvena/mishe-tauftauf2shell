@@ -345,3 +345,4 @@ lab/openexr2shell-real/build-*/
 lab/openexr2shell-real/bin-*/
 lab/openexr2shell-real/cases/*.exr
 lab/openexr2shell-real/evidence/build-*.log
+lab/openexr2shell-real/evidence/replay-*.out
