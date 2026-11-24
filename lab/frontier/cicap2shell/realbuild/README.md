@@ -112,3 +112,13 @@ was captured directly). Raw outputs in `../evidence/w6-*.out`. This is a
 negative rung-5 measurement: the second `free()` argument is glibc
 free-list metadata, not wire-controlled; other allocators/builds are
 UNKNOWN.
+
+## W7 — one command for the whole replay (23:1xZ)
+
+From a clean archive, `sh ../replay-all.sh [WORKDIR]` builds all three trees
+above itself and asserts every lane, including `sh ../run.sh` and the W3/W4
+live-server runs. Set `CICAP_TARBALL` to a local copy of the pinned release
+tarball to replay without network access; otherwise the script fetches the
+tagged tarball and checks its sha256. It aborts with `SETUP_FAIL` on a bad
+pin or build and ends with `REPLAY_ALL_OK n PASS / 0 FAIL` only on full
+success. Author clean-archive receipt (commit `44c7baa7`): 72 PASS / 0 FAIL.

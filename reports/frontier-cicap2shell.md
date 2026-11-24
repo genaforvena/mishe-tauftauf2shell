@@ -188,3 +188,17 @@ Four-entity safe input destroys four entities once and exits 0. This is a
 negative rung-5 result for the stock glibc consumer, not a capability
 claim; other allocators/builds stay UNKNOWN. Raw output in gitignored
 `evidence/w6-*.out`; author-measured and unwitnessed.
+
+## W7 — one-command replay of all lanes (23:1xZ)
+
+`lab/frontier/cicap2shell/replay-all.sh` removes the dependence on the
+author-local `/tmp/cicap-real` build trees: from a clean archive it checks
+the tarball and four source pins, builds the ASan, patch-derived fixed and
+plain trees itself, links the five harnesses, and asserts `sh run.sh` plus
+every W1/W2/W3/W4/W6 lane with all controls. The fixed tree uses the
+committed `realbuild/fixed-release.patch` — the 05dcead change with release
+context. Author clean-archive receipt for commit `44c7baa7`:
+`REPLAY_ALL_OK 72 PASS / 0 FAIL`, rc 0. No new observation, no grade or
+ceiling change; the real-build lanes remain unwitnessed. A single witness
+run of this script would answer the still-owed #3794 (W1/W2/W3) and #3865
+(W4) asks.

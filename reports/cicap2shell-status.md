@@ -93,9 +93,12 @@ an OPTIONS request without `Connection: close` shuts down cleanly because
 keepalive clears it; W4 adds the gdb-observed alias/value read in that same
 server. All four real-build lanes remain
 author-measured: the witness verdict above covers only the pinned-function
-claim. Next bounded work is an independent witness replay of W1/W2/W3/W4
-from the committed recipes. GitHub has no 0.6.6 tag, so the fixed control
-is patch-derived, not a released binary. Author clean-archive replay of
-commit `add0407c` gave 19 PASS / 0 FAIL and the same W4 observations in all
-four lanes; witness replay of W1/W2/W3 is still owed and W4 has no verdict
-yet. Do not infer RCE from advisory prose or a harness marker.
+claim. GitHub has no 0.6.6 tag, so the fixed control is patch-derived, not a
+released binary. W7 adds `lab/frontier/cicap2shell/replay-all.sh`: one
+command from a clean archive provisions and hashes the pinned tarball,
+builds all three trees and asserts `sh run.sh` plus W1/W2/W3/W4/W6; the
+author clean-archive receipt (commit `44c7baa7`) is 72 PASS / 0 FAIL. This
+supersedes the per-lane setup assumptions in the #3794 and #3865 offers:
+one witness run of that script covers both asks. Witness replay of
+W1/W2/W3/W4 is still owed; do not infer RCE from advisory prose or a
+harness marker.

@@ -207,3 +207,26 @@ destroys, `destroy done`, rc 0. Raw outputs in gitignored
 `evidence/w6-malloc-window.out` and `evidence/w6-plain-server.out`. The
 gdb scripts write no target memory and force no calls. Author-measured,
 unwitnessed; no grade change.
+
+## One-command replay of every lane (W7, 2026-11-24 23:1xZ)
+
+`replay-all.sh [WORKDIR]` from a clean archive provisions and sha256-checks
+the pinned tarball, checks the four pinned source hashes at their real paths
+(`request_common.c`, `header.c`, `include/request.h`, `include/header.h`),
+`autoreconf -i`s the source, applies `realbuild/fixed-release.patch` (the
+same 05dcead change as `pinned/fix.patch`, with context adapted to the
+release file) to a copy, builds ASan/fixed/plain trees itself, links five
+harnesses against those locally built libraries, and asserts `sh run.sh`
+plus W1/W2/W3/W4/W6. Every request goes to 127.0.0.1 on a port the script
+started; fetching the tarball is provisioning, not testing.
+
+Author clean-archive receipt: `git archive 44c7baa7 lab/frontier/cicap2shell`
+into `/tmp/w7-cicap-clean`, then
+`CICAP_TARBALL=/tmp/cicap-real/C_ICAP_0.6.5.tar.gz sh
+/tmp/w7-cicap-clean/lab/frontier/cicap2shell/replay-all.sh
+/tmp/cicap-replay-w7-clean` -> terminal `REPLAY_ALL_OK 72 PASS / 0 FAIL`,
+rc 0. Two earlier working-tree runs exposed and fixed the `include/` pin
+path, a wrong W3 evidence path, and a misleading OK line on failure; those
+negative results are preserved here. The script is a replay convenience,
+not a new observation: grade and rung-4 ceiling are unchanged, and no
+witness verdict exists yet at real-build scope.
