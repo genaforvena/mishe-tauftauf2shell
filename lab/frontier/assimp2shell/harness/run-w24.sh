@@ -50,14 +50,16 @@ check pin-asset 'PIN glTFAsset.inl ok=True'
 check pin-importer 'PIN glTFImporter.cpp ok=True'
 
 common='-O0 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
-build_lib() { # build dir, source tree, C flags, CXX flags, asan flag
-    local bld="$1" source="$2" cflags="$3" cxxflags="$4" asan="${5-}"
+build_lib() { # build dir, source tree, C flags, CXX flags, asan flag, build type
+    local bld="$1" source="$2" cflags="$3" cxxflags="$4" asan="${5-}" bt="${6-}"
     if [ -f "$bld/bin/libassimp.so.6.0.6" ]; then return; fi
     local btype='' ; local -a extra=()
     if [ "$asan" = asan ]; then
         btype=Release
         extra=(-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address
                -DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=address)
+    elif [ -n "$bt" ]; then
+        btype="$bt"
     fi
     cmake -G Ninja -S "$source" -B "$bld" -DCMAKE_BUILD_TYPE="$btype" \
         -DCMAKE_C_FLAGS="$cflags" -DCMAKE_CXX_FLAGS="$cxxflags" \
@@ -74,7 +76,10 @@ build_lib "$nsp" "$src" "$common -fno-stack-protector" "$common -fno-stack-prote
 build_lib build-min-plain-nf-o0 "$src" "$common" "$common"
 o1flags='-O1 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
 o2flags='-O2 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
-build_lib build-min-plain-nf "$src" "$o1flags" "$o1flags"
+# The author's -O1 control is a Release build with explicit -O1; CMake's
+# appended -O3 inlines GetValue into ImportMeshes. Keep that configuration
+# so the measured frame layout matches the baseline W12/W24 observations.
+build_lib build-min-plain-nf "$src" "$o1flags" "$o1flags" '' Release
 build_lib build-min-plain-nf-o2 "$src" "$o2flags" "$o2flags"
 
 fix7090=pins/fixed7090-6.0.6
