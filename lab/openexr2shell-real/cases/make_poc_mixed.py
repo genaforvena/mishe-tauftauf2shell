@@ -18,6 +18,9 @@ BASE = sys.argv[1] if len(sys.argv) > 1 else "work-mixed/baseline_deep_mixed.exr
 OUT = sys.argv[2] if len(sys.argv) > 2 else "work-mixed/poc_mixed.exr"
 N = int(sys.argv[3]) if len(sys.argv) > 3 else 32
 BYTE = int(sys.argv[4], 0) if len(sys.argv) > 4 else 0x3C
+SEG1 = bytes.fromhex(sys.argv[5]) if len(sys.argv) > 5 else None
+if SEG1 is not None and len(SEG1) != 2 * N:
+    raise SystemExit("segment 1 must be exactly 2*N bytes")
 
 data = open(BASE, "rb").read()
 p = 8
@@ -46,7 +49,7 @@ for c in counts:
 assert len(tbl) == 64 * 4
 
 # Inner ZSTD payload: one 2N-byte segment of 2-byte elements, all BYTE.
-inner = struct.pack("<Q", 2 * N) + bytes([BYTE]) * (2 * N)
+inner = struct.pack("<Q", 2 * N) + (SEG1 if SEG1 is not None else bytes([BYTE]) * (2 * N))
 with tempfile.NamedTemporaryFile(delete=False) as tf:
     tf.write(inner)
     tmp = tf.name

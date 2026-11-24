@@ -1594,3 +1594,63 @@ watchpoint is installed once and never fires: the next stop is
 poisoned tcache in this consumer before the abort, so W190 remains chosen
 bytes in live metadata, not demonstrated steering. Grade unchanged; the
 watchpoint is a one-off probe, not part of `w190-tcache-check.sh`.
+
+## W191: COPY1 kills the next-chunk header before any forged tcache can be used (2026-11-24)
+
+W190 left two open questions: why every N=1072 probe aborted in `free()`, and
+whether the poisoned 0x90 tcache entry could be consumed. Prediction: preserve
+the live bytes around the tcache `next` word so that only that pointer changes,
+and the consumer will reach a malloc instead of aborting. Prediction FAILED —
+the abort is caused earlier by COPY1's out-of-bounds *source* bytes, before
+COPY2 (and therefore the tcache word) runs at all.
+
+Method: at the pinned sink with `set disable-randomization on` and the W190
+N=1072 0x5a file, `harness/w191-dump2.cmd` enumerated a live 0x90 tcache head
+at `dst+4304` and dumped the 2144-byte COPY2 destination just before COPY2;
+`harness/w191-header.cmd` dumped the unpacked allocation's next-chunk header
+at `dst+2144..2160` before and after COPY1. `cases/make_poc_mixed.py` was
+given an optional fifth argument: a hex SEG1 that is the exact source of the
+fully file-chosen COPY2. Its default path still generates the byte-identical
+W190 file (`663d0267...`). Bytes 24..31 of the dump (the tcache key) vary
+between processes; the stable 16-byte prefix and a chosen `next` word
+`0x4141414141414141`, with zeros after, gave PoC sha256
+`63f840c31dd5d2a474cfce9807a038881838f3dee52539c3fd064e94df7f7d04`.
+
+Observed: before COPY1 the next-chunk size word at `dst+2152` is `0x31`;
+after COPY1 it is zero (`hdr-before.bin` sha256
+`c9536f755e345a275a9a663061bf1571d92dfc55f0dce4f38a7e8826c70936d7`,
+`hdr-after.bin` sha256
+`374708fff7719dd5979ec875d56cd2286f6d3cf7ec317a3b25632aab28ec37bb`).
+COPY1 spans `dst+0..+4288` while the unpacked allocation is only 2160 bytes,
+so its OOB source bytes zero the header at `+2152`. `exrcheck -c` then aborts
+in `_int_free_merge_chunk(p, size=2160)` from
+`internal_decode_free_buffer(coding.c:219)` via
+`exr_decoding_destroy(decoding.c:740)` with `double free or corruption (!prev)`.
+The preserved-prefix PoC aborts the same way (rc 134, normalized
+`evidence/w191-preserve.out` sha256
+`e01439b82f00318e95c5f87bab6b5b85e63c4b8690abc32ae5afc7175d7434ce`):
+preserving COPY2 bytes does not help because COPY1 already broke the header.
+A full `U=4N=4288` variant (COPY1 in bounds, entire COPY2 file-chosen) had
+**no** live tcache pointer in the destination window — a separate negative.
+Controls: valid baseline rc 0, fixed 3.5.3 build rc 1 with `bad`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w191-abort-cause-check.sh` prints `RESULT PASS` rc 0, byte-stable in
+two consecutive runs; check-output evidence hashes
+`c2443f686aa3f0443330773a38e8912f67c9bd6061b94cc4829877816323ef77`
+(dump), `9a39cd1aed0987ab4d9dfbba287fd8e4cb6b496f6731f043b87311fc13efc0e5`
+(header), `e01439b8...` (preserved PoC),
+`5fc4dbd7b5b8302e0e301d90f2d6573994646ca1e14fb8c148e00bb47654c217` (valid)
+and `67759ace6dd560a80173324660f9cd13eefce9d5cbc105c35ed7946838a535e1`
+(fixed).
+
+Disposition: keep as a causal negative. W190 remains chosen bytes in a live
+tcache `next` word; this wake explains why no malloc consumes it in this
+consumer and shows that file-control of the COPY2 bytes cannot repair the
+earlier header damage. Scope: one pinned 3.5.2 build, one forged geometry,
+ASLR off, gdb observation, local file path only. No pointer consumed, no
+control-flow diversion, no command, marker, socket or wire. Grade unchanged;
+no new witness verdict; rung 5 stays UNKNOWN. Would change my mind: a
+geometry where COPY1 stays in bounds *and* a live tcache pointer lies in the
+COPY2 window, an observed malloc from a forged entry, or a witness
+counterexample.
