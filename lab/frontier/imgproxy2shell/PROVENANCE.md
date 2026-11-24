@@ -302,3 +302,25 @@ process, no pointer/marker control, no remote command. The C write site at
 `icoload.c:161` is still established by the verbatim-statement harness, not
 by a C frame in this plain-build crash log. Grade: ICO rungs 1-4 unchanged;
 the consumer limb is newly ESTABLISHED at crash/corruption scope.
+
+### Clean replay and ASan negative (05:44-05:45Z)
+
+From `git archive 7ec6de8` (only my lab path) with the two gitignored CLI
+binaries symlinked in, `ico_probe.py` again produced vulnerable `rc=2` /
+`malloc(): corrupted top size` and ICO-fixed HTTP 500 with
+`ICO image data is too large`; the throwaway replay tree was removed.
+
+An ASan imgproxy was built from the same vulnerable source with
+`CGO_CFLAGS=-fsanitize=address -g -O0 -fno-omit-frame-pointer`,
+`CGO_LDFLAGS=-fsanitize=address` and the `pc-vuln-asan/vips.pc` shim pointing
+at libvips2shell's `build-vuln-asan` tree; binary
+`sha256=0f3e336018c421aa1f0a01f7ecbaa35a42a5e755c644b9bb5e8a735824dce203`.
+`ASAN_OPTIONS=help=1` proved the runtime was active, and `ldd` resolved both
+libasan.so.8 and the ASan libvips. Nevertheless two hostile-ICO runs
+(`http-ico-vuln-asan-hostile.log`, `-asan-preload.log`) returned HTTP 500
+`unable to read ICO image data from the source` with NO ASan report, with and
+without `LD_PRELOAD=libasan.so`. This is a preserved negative about this
+instrumented toolchain combination, not a refutation of the plain-build crash
+or the verbatim-statement ASan harness: the ICO-fixed plain control isolates
+the vulnerable loader as the cause of the live abort. No live C write-site
+frame or chosen-byte readback was obtained; the grade above is unchanged.
