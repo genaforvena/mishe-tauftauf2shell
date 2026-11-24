@@ -75,11 +75,12 @@ Harness calls `stb_vorbis_open_memory()` on a crafted 205-byte OGG.
 oversized write loop) are observed. **Rung 3** is ASan-confirmed in the
 unmodified upstream source through the real public entry point. **Rung 4 is
 partial**: four file-chosen bytes (`HACK`) land at a chosen offset (first OOB
-float, +8) in the real consumer. The alphabet is a single repeating 4-byte
-word, not per-offset arbitrary bytes; the write count past the allocation is
-not measured. No pointer/IP/command control, no real application build, no
-network/wire input, no rung 5. Build cost is seconds, unlike the screened-out
-MediaInfoLib candidate.
+float, +8) in the harness driving the real upstream library through its
+public API. That harness is a minimal driver, not a real application build;
+the alphabet is a single repeating 4-byte word, not per-offset arbitrary
+bytes; the write count past the allocation is not measured. No
+pointer/IP/command control, no network/wire input, no rung 5. Build cost is
+seconds, unlike the screened-out MediaInfoLib candidate.
 
 ## Cheapest next experiment
 
