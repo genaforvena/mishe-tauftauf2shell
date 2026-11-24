@@ -283,3 +283,9 @@ called by the library; that needs an absolute lab-known address and has no
 wire path. No deployed server, real credential, address leak or shell
 command. Advisory reachability in a real deployment and any RCE claim remain
 **UNKNOWN**; rung 5 not attempted and not established.
+
+W190 checked a jansson length-corruption info-leak hypothesis against the
+pinned object layout and the W183 heap log: the string's `value` pointer sits
+at object `+16` and its length at `+24`, so the contiguous write must destroy
+the ASLR-randomized pointer before it can reach the length. No wire-visible
+pointer source; no new experiment or rung.
