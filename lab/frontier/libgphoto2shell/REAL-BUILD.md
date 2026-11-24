@@ -254,3 +254,35 @@ chosen-target execution still conditional on canary knowledge, rung 5
 UNKNOWN. No pin, committed patch, harness or library source changed; the
 local-only probe is preserved as `evidence/replay-groom_leak_probe.c`, raw
 output and commands in `evidence/real-plain-groom-negative.out`.
+
+## Clean-archive W167 replay and loopback socket reply (W169, 2026-11-24)
+
+W167 was rebuilt from `git archive 12056b0` into `/tmp/w169-lgp` with 4/4
+pins OK and the 2.5.34 tarball sha256 `5df9e774…7f28`. The clean plain
+build reproduced `M2SHELL_IP_CONTROL_MARKER`, `RC=0`, and every control
+(count 100, wrong canary, `0x5a` RIP, all-`0x5a`, fixed camlib and fix
+reversal). This rules out an untracked-local-tree artifact; it is not an
+independent witness verdict on #3081.
+
+The same clean tree then received a local-only vusb mode `k`
+(`evidence/replay-vusb-socket.patch`): the 1-byte and 0x200-byte handshake
+replies stay local, but the 16384-byte allocation-table read is fetched with
+`connect()`/`recv()` from `127.0.0.1:M2SHELL_JL2005_PORT`. The lab sender
+(`evidence/replay-socket_sender.py`) reads the target's own printed canary
+and marker address from its stderr log and sends a 0x4000-byte payload with
+those values at reply offsets `0x3E28` and `0x3E38`. Observed: sender logs
+`addr=127.0.0.1:37862 bytes=16384`, the camlib logs
+`VUSB_SOCKET got=16384 size=16384`, the target prints
+`M2SHELL_IP_CONTROL_MARKER` and `RC=0`. Controls: count 100 reads only 1536
+wire bytes with no marker; wrong canary over the wire gives `rc=134`; a
+correct canary with `0x5a` RIP gives `rc=139`; the fixed camlib makes no
+bulk read and gives no marker; reversing the fix restores the marker.
+
+Scope: this is a loopback TCP connection into a lab-patched virtual port,
+not USB/IP, a physical bus, a camera consumer or a remote host. The canary
+comes from the target's own TLS via its diagnostic output, so no
+device-only canary recovery is shown; the marker is an in-process function,
+not a command. It closes the "no socket" observation gap but does not move
+the grade: rung 3 at the real heap destination, local rung-4 chosen-target
+execution conditional on canary knowledge, rung 5 UNKNOWN. Commands and raw
+output: `evidence/real-plain-socket-loopback.out`.

