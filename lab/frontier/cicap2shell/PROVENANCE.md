@@ -176,3 +176,10 @@ forces teardown right after the request.
 - Raw output: gitignored `evidence/w4-*.out`. The build trees, pins and
   patch provenance above are unchanged; W4 adds no new source or binary.
   Author-measured and unwitnessed.
+
+Clean-archive receipt: `git archive add0407c lab/frontier/cicap2shell |
+tar x -C /tmp/w4-cicap-clean-1795554570` ran `sh run.sh` (19 PASS / 0 FAIL)
+and all four `observe.sh` lanes from that copy: vulnerable 4242/90 each
+`alias=1` with matching `e5_start`/`t0_start` and ASAN=YES, four-entity and
+patch-derived fixed `e5=(nil) t0=(nil)` with ASAN=NO. Author-side replay
+only; witness verdict on W4 is UNKNOWN.

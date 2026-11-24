@@ -86,5 +86,7 @@ server. All four real-build lanes remain
 author-measured: the witness verdict above covers only the pinned-function
 claim. Next bounded work is an independent witness replay of W1/W2/W3/W4
 from the committed recipes. GitHub has no 0.6.6 tag, so the fixed control
-is patch-derived, not a released binary. Do not infer RCE from advisory
-prose or a harness marker.
+is patch-derived, not a released binary. Author clean-archive replay of
+commit `add0407c` gave 19 PASS / 0 FAIL and the same W4 observations in all
+four lanes; witness replay of W1/W2/W3 is still owed and W4 has no verdict
+yet. Do not infer RCE from advisory prose or a harness marker.
