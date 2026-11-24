@@ -169,3 +169,26 @@ The vuln/fixed safe and baseline pairs are expected to share digests: neither
 path writes chosen bytes past the allocation. The `/tmp` copy was not
 retained. Details and grade limits: report §21; grade unchanged (rungs 1-4
 ESTABLISHED, rung 5 UNKNOWN).
+
+## Author clean-archive replay at commit 1a02552f (2026-11-24 W183)
+
+Downstream-allocator-consumer lane (`real/live_probe.sh`), from
+`git archive HEAD lab/frontier/munt2shell` into `/tmp/w183-munt`, with the
+provisioned pinned tarball copied into the ignored `real/src/` directory:
+
+```
+cd /tmp/w183-munt/lab/frontier/munt2shell/real
+./prepare_src.sh
+./build_and_run.sh
+./live_probe.sh
+```
+
+`prepare_src.sh` verified the tarball and both pinned-file sets; the plain
+static libraries were rebuilt from source. All seven cases reproduced the
+committed rc matrix (`shaped` 0, `unshaped` 134, `none` 0, `safe` 0, fixed
+`safe` 0, fixed `fixed` 0, `shaped-nobuf` 0). Because the driver prints ASLR
+pointers, comparison used `sed -E 's/0x[0-9a-f]+/0xADDR/g'` on all seven
+`.out` files plus `live-results.txt`: all eight normalized files were
+byte-identical to the committed evidence (`FAIL=0`). The `/tmp` copy was
+not retained. Details and grade limits: `real/LIVE_CONSUMER.md`, report §22;
+grade unchanged (rungs 1-4 ESTABLISHED, rung 5 UNKNOWN).
