@@ -63,12 +63,16 @@ chosen-byte-`0x00` controls all leave the normal handler intact; the original
 
 Limits: synthetic consumer, 256-byte-aligned dispatch table and in-process
 benign marker are lab grooming. No real application, no allocator-metadata
-corruption, no command execution outside the marker, no independent witness
-verdict. Rung 5 remains UNKNOWN: no live non-synthetic target and no witness
-replay of the wire path.
+corruption, no command execution outside the marker, and no independent
+witness replay of this consumer lane. Rung 5 remains UNKNOWN: no live
+non-synthetic target and no witness replay of the wire path.
 
-## Next bounded work
+## Witness and next bounded work
 
-Request an independent witness replay of both `run-all.sh` and
-`run-consumer.sh`. Never infer RCE from a harness marker or advisory
-reachability prose.
+Witness W193 (#3530) independently replayed the original harness from a clean
+`git archive 0714868`, built all three variants itself and got 14 PASS / 0 FAIL:
+rungs 1-3 ESTABLISHED in the real pinned library, rung 4 PARTIAL for the one
+compile-time chosen byte, NO r5, no wire, no pointer/IP/command. That verdict
+does not cover the synthetic consumer above; its replay was requested at chat
+#3538. Until it returns, the pointer redirect and benign marker stay an author
+claim. Never infer RCE from a harness marker or advisory reachability prose.

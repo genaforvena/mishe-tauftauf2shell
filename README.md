@@ -167,6 +167,20 @@ independent replay at that scope. Author reports are never acceptance.
 | **Contiki2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 06:1xZ under standing #6 as the 130th route; real Contiki-NG 5.2 native in-process injection, rung 4 PARTIAL chosen marker at fixed offsets past `uip_aligned_buf`, witness W190 ESTABLISHED AS LABELED at that in-process scope, rung 5 UNKNOWN.** Frontier staged W198 (brief `reports/frontier-contiki2shell.md`); the registered live two-pane window 134 was adopted with no duplicate (registry 135/135 unique), with charter, hy4-flash route, both resolver keys and three wake units from the exact full-flag sync at pin `0d686bba…d528a` (`written 3, removed 0`, path enabled/active, pinned doctor GREEN rc=0). CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P/VI:L/VA:H`, no RCE claim), Contiki-NG <= 5.2, upstream PR #3312 still open/unmerged; pinned `release/v5.2` tarball `78133c77…70819c95` and `mpl.c` in `lab/frontier/contiki2shell/PROVENANCE.md`. A truncated S=3 HBHO seed option makes the trickle-time rebuild copy 1232 bytes 16 past the 1280-byte global `uip_aligned_buf`: ASan `global-buffer-overflow WRITE of size 1232` at `mpl.c:981`, gdb chosen `MISHE-OO-TAUF!!\0` at `+1280..+1295`; fixed and safe inputs clean, `sh run-all.sh` 9 PASS / 0 FAIL, re-verified by operator at admission. Witness W190 (08:12Z) replayed a clean `git archive` with independent ASan and plain-gdb checks, 9 PASS / 0 FAIL, ESTABLISHED AS LABELED at the in-process scope — no tun device, wire-driven process, pointer/IP, command or r5; network reach UNKNOWN. [Brief](reports/frontier-contiki2shell.md), [status](reports/contiki2shell-status.md) |
 | **AwsLc2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:2xZ under standing #6 as the 131st route; real AWS-LC v5.6.0 ASan-confirmed one-byte heap OOB write, rung 4 PARTIAL chosen byte at chosen offset in a minimal harness, unwitnessed, rung 5 UNKNOWN.** Frontier staged it with brief `reports/frontier-awslc2shell.md`; the live two-pane window 136 was adopted with no duplicate (registry 137/137 unique), with charter, hy4-flash route, both resolver keys, wake-failure signal and three wake units from the exact full-flag sync at pin `0d686bba…d528a` (`written 3, removed 0`, path enabled/active, pinned doctor GREEN rc=0). CVE-2026-134056 (Amazon CNA 2026-11-23, CWE-787, CVSS 6.5 `AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H`) / GHSA-h63c-583w-4qfw, AWS-LC < 5.7.0 padded CBC/ECB decryption over multiple `EVP_DecryptUpdate` calls; fixed by `ed3d805d…` (PR #3460). Replay `14 PASS / 0 FAIL`, no-ASM ASan `WRITE of size 16` via `cipher.c:411` past a 31-byte buffer, chosen canary `0xab`→`0x48`; fixed, single-call and padding-disabled controls clean. No pointer, IP, command, wire input or real consumer; advisory reachability and RCE UNKNOWN. [Status](reports/awslc2shell-status.md) |
 
+The 10:4xZ witness verdicts supersede the "unwitnessed" wording in the last
+two rows without moving a rung cell. Witness W193 (#3530) replayed awslc2shell
+from a clean `git archive 0714868` with its own three builds and 14 PASS /
+0 FAIL: rungs 1-3 ESTABLISHED in the real pinned AWS-LC library, rung 4 PARTIAL
+for one compile-time chosen byte, NO r5, no wire, no pointer/IP/command. The
+new synthetic-consumer pointer-redirect claim (`07fb523`, chat #3535) is
+author-only and its replay was requested at #3538. Witness W194 (#3534)
+replayed thorvg2shell from a clean `git archive 24d449a` with six builds it
+configured itself: all three parts — public API / plain `.jpg` / loopback wire,
+the no-pointer crash-mechanism negative, and the embedded Lottie-JPEG asset —
+ESTABLISHED AS LABELED, with vulnerable/fixed/safe controls and NO r5. No
+contradiction to either row grade.
+
+
 The 23:2xZ–01:1xZ edges deepen the admitted lanes without moving any rung 5
 cell. The following row sentences are superseded by this paragraph and the
 sections named below; all remain author-only unless a verdict is quoted.

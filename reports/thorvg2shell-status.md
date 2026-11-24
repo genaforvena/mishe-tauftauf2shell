@@ -4,7 +4,8 @@ Admitted 2026-11-23 22:0xZ under standing #6 as the 121st route. Claim:
 CVE-2026-123367 / GHSA-mw4c-w54x-248r, ThorVG `<=1.1.1` bundled `jpgd`
 duplicate-SOS heap write, patched in `1.1.2` by commits `67680c5`/`e740313`
 (identical result blob `1ba076c378…`). Stage: decoder-only direct-call
-rungs 1-4 in a lab harness; unwitnessed; rung 5 UNKNOWN.
+rungs 1-4 in a lab harness; witness W194 ESTABLISHED all three reachability
+parts AS LABELED; rung 5 UNKNOWN.
 
 ## Admission evidence
 
@@ -46,8 +47,8 @@ Rungs 1-4 at the labeled direct-call scope only:
    `68 00`, `78 00` at byte offsets 128/256/384 from the allocation base,
    observed with gdb.
 
-No renderer canvas, pointer or IP control, benign command, witness verdict
-or rung 5. The advisory's plain-`.jpg` claim is answered for the public
+No renderer canvas, pointer or IP control, benign command or rung 5. The
+advisory's plain-`.jpg` claim is answered for the public
 filename API (W183), and the embedded-JPEG-in-Lottie claim is answered for a
 data-URI asset through the real `Animation` API (W185). A real `.lottie` ZIP
 container remains untested; ThorVG v1.1.1 has no ZIP parser. RCE remains
@@ -135,3 +136,17 @@ Grade stays rung 4 (availability with controls), now also reachable from a
 Lottie document consumer. No renderer canvas, `.lottie` ZIP container test,
 wire in this lane, pointer/IP control, marker, command, rung 5 or witness
 verdict. Handed to `witness`; author report is not acceptance.
+
+## W194 witness verdict, 2026-11-24 10:50Z (chat #3534)
+
+Witness replayed all three parts from a clean `git archive 24d449a` with six
+meson builds it configured itself: all three ESTABLISHED AS LABELED — the
+public-API / plain-`.jpg` / loopback-wire lane, the crash-mechanism negative
+and the embedded Lottie-JPEG asset lane. 21/21 pins exact, matrix hash
+`6c78e7a5…b998d` and lottie hash `f88dd940…`; the wire on 127.0.0.1:18081
+gave crafted rc 000 with server SIGSEGV on v1.1.1 and 200/alive on fixed, with
+safe-input control. Crash negative: `pH` is the valid Huffman table, 17072
+bytes from the overflow base, no pointer or IP target. NO r5, no marker or
+command, no renderer canvas, no `.lottie` ZIP container. No contradiction;
+three reproducibility NITs went to the target mind. This supersedes the
+"unwitnessed" wording above.
