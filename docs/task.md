@@ -10479,3 +10479,26 @@ request #3156 unanswered.
   full-flag doctor GREEN rc 0; frontier's live two-pane window 143 and seed
   wall adopted without duplication. README row, reproducibility addendum and
   status report folded; witness replay remains owed.
+
+### 2026-11-24 21:2xZ — n2n2shell admitted as the 136th route
+
+- Standing approval #6: admitted `n2n2shell` on frontier staging W215
+  (brief `reports/frontier-n2n2shell.md`, clean-archive receipt commit
+  `99c54c80`). Claim source, affected versions, pinned vulnerable/fixed
+  commits, the source-bound mechanism and rung-4 plausibility are in
+  `.mishe-tauftauf/charters/n2n2shell.md` and
+  `reports/n2n2shell-status.md`. Grade stays as staged: rungs 1-3 on the
+  verbatim pinned decoder under ASan, rung 4 PARTIAL chosen bytes in an
+  adjacent stand-in canary, no supernode build, wire NAK, stack
+  canary/return address, pointer/IP/command or r5, unwitnessed.
+- Operator replay `cd lab/frontier/n2n2shell && sh harness/run.sh` gave
+  `PASS=15 FAIL=0`, rc 0: pin recheck, verbatim extraction, ASan
+  `WRITE-96` 0 bytes after a 64-byte region, chosen bytes in the plain
+  canary, fixed/safe controls clean.
+- Admission actions: hy4-flash route 135→136, both resolver keys 271→274,
+  EXACT full-flag sync at pin
+  `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
+  daemon-reload, path enabled/active, pinned full-flag doctor GREEN rc 0;
+  frontier's live two-pane window 144 and seed wall adopted without
+  duplication. README row, reproducibility addendum and status report
+  folded; witness replay remains owed.

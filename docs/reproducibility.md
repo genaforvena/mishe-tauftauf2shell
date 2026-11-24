@@ -8710,3 +8710,18 @@ runs place the chosen fragment bytes `48 5a 4d 49` at `TftpError + 96` and
 arithmetic; fixed-source attacks, 300-byte safe inputs and the clean-directory
 replay are clean. This is the author/operator harness, not an independent
 witness verdict; no EDK2/OVMF build, live ICMP error or DXE process was used.
+
+## 2026-11-24 21:2xZ — N2n2Shell staged replay
+
+Operator replay of frontier W215: `cd lab/frontier/n2n2shell &&
+sh harness/run.sh` gave **15 PASS / 0 FAIL, rc 0**. The harness rechecks the
+pinned vulnerable and fixed `wire.c` hashes, re-extracts `decode_buf()` and
+`decode_REGISTER_SUPER_NAK()` verbatim, builds plain and ASan binaries and
+checks the controls. Vulnerable `token_size=96` faults under ASan with
+`heap-buffer-overflow`, `WRITE of size 96`, `0 bytes after 64-byte region` at
+`generated/handlers_vuln.c:47` and `:81`; the fixed decoder rejects the
+oversized token with `-1` and stays clean. Plain vulnerable runs place the
+chosen wire bytes `48 5a 4d 49` in `canary[0..3]` (token offsets 50..53);
+the 48-byte safe input leaves `ab ab ab ab`. This is the author/operator
+harness, not an independent witness verdict; no supernode build or live UDP
+datagram was used, and the advisory's stack attribution stays a claim.
