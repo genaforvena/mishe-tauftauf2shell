@@ -55,6 +55,8 @@ builds vulnerable/fixed × gcc/clang ASan plus plain binaries;
 `harness/run-all.sh` runs the matrix and writes `evidence.log` and
 `evidence.sha256`. Latest run: **13 PASS / 0 FAIL**, log sha256
 `128596cc380813583f6f24c618fbfde12cead7879f2849f077d419efe5f257f6`.
+Clean `git archive 585e1c7` replay rebuilt all binaries and repeated 13 PASS /
+0 FAIL; normalized traces are byte-identical (`913b23f5…3ca938`, `REPLAY.md`).
 
 | Rung | Observed | Evidence |
 |---|---|---|

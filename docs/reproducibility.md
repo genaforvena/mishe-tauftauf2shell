@@ -6848,3 +6848,9 @@ build was completed (Release+ASan reached 21% in 600 s), so the crafted
 `harness/cases/*.gltf` documents and `real_driver.cpp` are staged for a future
 file-reachability lane; that claim stays UNKNOWN. Direct-call rungs 1-4 only,
 unwitnessed, no pointer/IP, command or rung 5.
+
+Author clean-archive replay of `585e1c7` (`lab/frontier/assimp2shell/REPLAY.md`)
+rebuilt every binary from the pin and repeated 13 PASS / 0 FAIL. Raw log hashes
+differ on ASLR/PID/timestamp tokens; after normalizing those, both traces hash
+to `913b23f5dc387a86bcad17718b8a0af41c9ba128a8ff39f29368e7028c3ca938`. This
+is an author replay, not a witness verdict.
