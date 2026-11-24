@@ -1,0 +1,63 @@
+W197 ENC=gcm128 CEK_EXPECT=16 SCENARIO=oobbig EXTRA=1000
+IMPORT=1 ERRCODE=0
+CEK_LEN_BEFORE=0 EK_RAW_LEN=1024
+EXPECTED_WRITE_LEN=1016 UNWRAP_RC=1016 EXPECTED_BYTE_AT_CEK=4d
+=================================================================
+==4094957==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50200000cb60 at pc 0x79fa3f6fac7f bp 0x7ffd37175e10 sp 0x7ffd371755b8
+WRITE of size 1016 at 0x50200000cb60 thread T0
+    #0 0x79fa3f6fac7e in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x79fa3f2e56b2  (/lib/x86_64-linux-gnu/libcrypto.so.3+0x2e56b2) (BuildId: 2eb7babe130d27bd183d57702b02626012169094)
+    #2 0x79fa3f2e59a3 in CRYPTO_128_unwrap (/lib/x86_64-linux-gnu/libcrypto.so.3+0x2e59a3) (BuildId: 2eb7babe130d27bd183d57702b02626012169094)
+    #3 0x79fa3f0b8836 in AES_unwrap_key (/lib/x86_64-linux-gnu/libcrypto.so.3+0xb8836) (BuildId: 2eb7babe130d27bd183d57702b02626012169094)
+    #4 0x56d600953248 in _cjose_jwe_decrypt_ek_aes_kw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:595
+    #5 0x56d6009606cd in cjose_jwe_decrypt /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:2151
+    #6 0x56d60093f531 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/harness/enc-driver.c:134
+    #7 0x79fa3ec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x79fa3ec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x56d60093e084 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/harness/enc-vuln-asan+0xa084) (BuildId: 5e4ddd47bb81e1e7d7572406450732175e5b3755)
+
+0x50200000cb60 is located 0 bytes after 16-byte region [0x50200000cb50,0x50200000cb60)
+allocated by thread T0 here:
+    #0 0x79fa3f6fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x56d60094fd07 in _cjose_jwe_malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:193
+    #2 0x56d6009517f0 in _cjose_jwe_set_cek_aes_gcm /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:407
+    #3 0x56d60095317d in _cjose_jwe_decrypt_ek_aes_kw /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:589
+    #4 0x56d6009606cd in cjose_jwe_decrypt /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:2151
+    #5 0x56d60093f531 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/harness/enc-driver.c:134
+    #6 0x79fa3ec2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x79fa3ec2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x56d60093e084 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/harness/enc-vuln-asan+0xa084) (BuildId: 5e4ddd47bb81e1e7d7572406450732175e5b3755)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
+Shadow bytes around the buggy address:
+  0x50200000c880: fa fa 00 01 fa fa 00 01 fa fa fd fd fa fa 00 00
+  0x50200000c900: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+  0x50200000c980: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+  0x50200000ca00: fa fa fd fd fa fa fd fd fa fa fd fd fa fa fd fd
+  0x50200000ca80: fa fa 00 07 fa fa fd fd fa fa fd fa fa fa 00 01
+=>0x50200000cb00: fa fa fd fa fa fa 00 02 fa fa 00 00[fa]fa fa fa
+  0x50200000cb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50200000cc00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50200000cc80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50200000cd00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50200000cd80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4094957==ABORTING

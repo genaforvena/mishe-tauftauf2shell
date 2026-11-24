@@ -617,3 +617,43 @@ multiple of 8 (RFC 3394 rejects the 41-byte segment) while glibc allocations
 are 16-byte aligned, so pointer fields in heap objects are overwritten whole
 or not at all: partial low-byte pointer overwrite is not available here
 without a separate read primitive, which W190/W195 did not find.
+
+## W197 — enc-selected CEK size sweep (2026-11-24 15:33-15:36Z)
+
+New lab-only files only: `harness/{enc-driver.c,enc-run.sh}` and
+`harness/evidence/enc197/` (80 outputs, summary, gdb backtrace,
+`enc197-SHA256SUMS`). No pinned bytes, existing harness, build output or
+consumer config touched; no listener or Apache started.
+
+Prediction: pinned `jwe.c:283-297` dispatches `set_cek` by the attacker-
+controlled `enc`; `:396-411` and `:455-470` allocate 16/24/32/48/64 bytes.
+Every earlier wake used only the 32-byte A128CBC-HS256 CEK, so a different
+`enc` might place a different adjacent object behind the CEK. The new driver
+builds a real A128KW compact JWE for each `enc`, replaces encrypted_key with
+an RFC 3394-valid wrap of chosen bytes under the lab KEK, and calls real
+import/decrypt in gcc vulnerable/fixed plain and ASan libraries.
+
+Measured (4 binaries x 5 enc x 4 scenarios = 80 cases): safe wraps decrypt
+to the 15-byte plaintext with `PLAIN_MATCH=1` in all four builds; in the
+vulnerable plain and ASan builds every oversized case writes `raw_len-8`
+chosen bytes and reports `CEK_LEN_AFTER = raw_len-8` on the enc-selected
+allocation (ASan: `heap-buffer-overflow WRITE of size 24` into a 16-byte
+region for `gcm128/oob8`, `WRITE of size 64` into a 48-byte region for
+`cbc384/oob16`, both from `_cjose_jwe_malloc` `jwe.c:193` through the real
+`AES_unwrap_key` at `jwe.c:595`). All 15 fixed-build oversized cases reject
+with `ERRCODE=1` and keep `CEK_LEN_AFTER` at the enc-selected size; fixed
+ASan is clean. Vulnerable plain faults vary by allocation size: `gcm128`
+`oob16` and `cbc384`/`cbc512` `oob16`/`oobbig` abort, `gcm192 oob8` and
+`cbc512 oobbig` SIGSEGV, others exit 0 with an auth-tag failure
+(`ERRCODE=4`). gdb on `gcm192 oob8`
+(`evidence/enc197/gdb-gcm192-oob8.log`) places the SIGSEGV in
+`arena_for_chunk` from `free` inside libcrypto `EVP_CIPHER_fetch`, called by
+`_cjose_jwe_decrypt_dat_aes_gcm` (`jwe.c:1323`): the 32-byte write corrupts
+the next chunk's size field on a 24-byte CEK, not a pointer or control-flow
+target.
+
+Conclusion: the missing length check generalizes to every cjose-supported
+`enc` and every CEK size, but changing the CEK allocation size exposes no
+wire-derived pointer. ASLR, RFC 3394's 8-byte write granularity (W196) and
+the absence of a read primitive (W190/W195) still block rung 5. No new rung,
+address leak, marker, command or r5.

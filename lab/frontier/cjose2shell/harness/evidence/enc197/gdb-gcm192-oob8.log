@@ -1,0 +1,23 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+W197 ENC=gcm192 CEK_EXPECT=24 SCENARIO=oob8 EXTRA=8
+IMPORT=1 ERRCODE=0
+CEK_LEN_BEFORE=0 EK_RAW_LEN=40
+EXPECTED_WRITE_LEN=32 UNWRAP_RC=32 EXPECTED_BYTE_AT_CEK=4d
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff76ade81 in arena_for_chunk (ptr=0x5555555b7bb0) at ./malloc/arena.c:153
+warning: 153	./malloc/arena.c: No such file or directory
+#0  0x00007ffff76ade81 in arena_for_chunk (ptr=0x5555555b7bb0) at ./malloc/arena.c:153
+#1  arena_for_chunk (ptr=0x5555555b7bb0) at ./malloc/arena.c:151
+#2  __GI___libc_free (mem=0x5555555b7bc0) at ./malloc/malloc.c:3397
+#3  0x00007ffff7c1f868 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#4  0x00007ffff7c200d6 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#5  0x00007ffff7bfa646 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#6  0x00007ffff7bfaae4 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#7  0x00007ffff7bf8592 in EVP_CIPHER_fetch () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#8  0x00007ffff7bf932f in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#9  0x00007ffff7bf9903 in EVP_CipherInit_ex () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#10 0x0000555555562551 in _cjose_jwe_decrypt_dat_aes_gcm (jwe=0x5555555b7930, err=0x7fffffffcfe0) at jwe.c:1323
+#11 0x0000555555564ec4 in cjose_jwe_decrypt (jwe=0x5555555b7930, jwk=0x555555576540, content_len=0x7fffffffcf70, err=0x7fffffffcfe0) at jwe.c:2157
+#12 0x000055555555896b in main (argc=3, argv=0x7fffffffe248) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/harness/enc-driver.c:134

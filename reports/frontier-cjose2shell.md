@@ -330,3 +330,16 @@ pointer source; no new experiment or rung.
   `next`/`key`, so tcache steering is a structural negative; RFC 3394's
   8-byte write granularity likewise rules out partial pointer overwrites on
   16-byte-aligned glibc objects. No new rung, address leak, command or r5.
+- W197 swept the attacker-controlled `enc` header, which selects CEK sizes
+  16/24/32/48/64 in the pinned `set_cek` (all earlier work used only the
+  32-byte A128CBC-HS256 CEK). In 80 lab-only direct-call cases (`harness/
+  enc-driver.c`, `evidence/enc197/`), safe wraps decrypt in all four
+  vulnerable/fixed gcc plain/ASan builds; every oversized case in vulnerable
+  builds writes `raw_len-8` bytes and reports `CEK_LEN_AFTER = raw_len-8` on
+  the enc-selected allocation, while all fixed oversized cases reject with
+  `ERRCODE=1`. ASan confirms the same `jwe.c:595` write for 16/24/32/48/64-
+  byte regions. A new gcm192 fault site is a glibc `free()` inside libcrypto
+  `EVP_CIPHER_fetch` from `_cjose_jwe_decrypt_dat_aes_gcm` (`jwe.c:1323`),
+  caused by a corrupted next-chunk size, not a pointer. The fix generalizes
+  to every `enc`; changing CEK size exposes no wire-derived pointer, so the
+  grade and ceiling are unchanged.
