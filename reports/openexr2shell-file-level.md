@@ -584,3 +584,44 @@ wire, pointer, command or marker. Would change mind: a linked OIIO 3.2.0.2-dev
 consumer reaching `internal_zstd.c:472` on any input, or a flat-file decode
 whose `unpacked_size` is independently attacker-set below the header-derived
 grid total.
+
+## W174: large earlier chunk still supplies no file-chosen OOB bytes (2026-11-24)
+
+Prediction: W172's negative used a 64-byte valid row 0, the same size class as
+the forged chunk's scratch. A **16 KiB** valid row 0, filled entirely with the
+file pixel byte, might leave file-derived bytes in the heap adjacent to the
+64-byte scratch and make the 4032-byte overrun carry attacker-chosen bytes.
+
+Method under `lab/openexr2shell-real/groom/`: `gen_groom_large.cpp` writes a
+16x2 deep+ZSTD one-FLOAT-channel EXR with row 0 at 256 samples/pixel (unpacked
+16384, all 0x41 or all 0x5a) and row 1 at one sample/pixel.
+`make_poc_groom.py` keeps row 0 byte-for-byte and forges row 1 with
+`S=1024, U=64`. `groom_harness_flat.c` decodes row 0 into a contiguous deep
+buffer, then row 1, in one process. `check-large.sh` rebuilds both binaries
+from the pinned plain v3.5.2 tree, regenerates both byte variants, and at
+`break memcpy if $rdx == 4096` dumps the 4096 source bytes in five runs
+(three 0x41, two 0x5a); `analyze_large.py` asserts the negative.
+
+Generated files: baseline41 sha256
+`50b40225bb07cacae6841c8a92e90580eb61dcf4c4487bc570fe89a99b974f83`,
+baseline5a `3041d1c402c679276a86a0384a85b140bede742f55f00a1c24946c7cf088259c`,
+poc41 `a36ec53c4e83ce884a605515a9c4d9a6a7374c2ef91b8c96121298f4bcb62826`,
+poc5a `f9ab75b474d5e392ec5e088327ceb680ed94a9e063eb0b60b095ee35ffa0b7fc`.
+All five runs reached `CHUNK y=1 ... unpacked=64` and `SINK n=4096`; the in-bounds
+64 source bytes track the forged pixel byte in every run.
+
+Result: **negative**. Across source offsets 64..4095, zero offsets track the
+file byte and zero offsets differ between the 0x41 and 0x5a variants. The OOB
+window is 3820 zero bytes plus constant allocator residue in both variants.
+`sh lab/openexr2shell-real/groom/check-large.sh` gives `RESULT PASS`
+(normalized evidence `groom/evidence/groom-large.out`). Earlier setup failures
+are preserved: a 64 KiB row 0 is split into multiple deep chunks and the
+one-chunk-per-scanline harness crashed before the sink; a contiguous flat
+destination was required for the valid 16 KiB row. Disposition: keep the
+negative. The structural ceiling from W163/W170/W172 stands for both a
+same-size and a 256x-larger earlier chunk; the file still controls copy length
+and destination offset only. No grade change: file-level rungs 1-4,
+witness-ESTABLISHED at the scanline CODE/CONSUMER scope, rung 5 UNKNOWN; no
+pointer, command, marker, wire or witness work in this experiment. Would
+change mind: any OOB source offset that tracks a file byte under a different
+allocation layout.

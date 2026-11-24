@@ -25,7 +25,8 @@ Admission changes no grade.
   number and no CWE are stated by the advisory (both UNKNOWN). Affected
   OpenEXR 3.5.0, 3.5.1, 3.5.2 and `main`; patched in 3.5.3. The advisory's
   692-byte file PoC and 4032-byte overrun were reproduced here in W160/W161;
-  its OpenImageIO flat-path reproduction remains an untested claim.
+  its OpenImageIO flat-path reproduction is a static-source negative (W173),
+  not a linked-consumer run.
 - Mechanism in pinned bytes: `compute_sorting_lookup()` returns the 2-byte
   channel subtotal as `splitPoint` and discards the full grid total.
   `sort2_4ByteChannels_tiled()` recomputes that total per row and runs
@@ -114,8 +115,8 @@ The same file also reproduces through the advisory's C++
 ASan build (`cpp-vuln-poc.out`: `memcpy-param-overlap` at pinned
 `internal_zstd.c:472`; baseline `READPIXELS ok rv=0`), while the pinned 3.5.3
 build throws `Unable to run decoder` with no ASan report
-(`cpp-fixed-poc.out`). Deep-tiled was confirmed in W164 below; OpenImageIO and
-aarch64 remain untested.
+(`cpp-fixed-poc.out`). Deep-tiled was confirmed in W164, aarch64 in W169, and
+the OIIO flat claim resolved as a static negative in W173.
 
 ## Witness verdict W161 (2026-11-23)
 
@@ -267,3 +268,16 @@ and rung 5 stays UNKNOWN. This wake also re-ran all four committed one-command
 checks from current HEAD: `tiled-check.sh` `PASS=10 FAIL=0`,
 `groom/check.sh` `RESULT PASS`, `aarch64/check.sh` `PASS=10 FAIL=0`,
 `oob-source-check.sh` `RESULT PASS`.
+
+## W174: larger earlier chunk does not supply file-chosen OOB bytes (2026-11-24)
+
+A valid 16 KiB row 0 (256 samples/pixel, every sample set to the file pixel
+byte 0x41 or 0x5a) followed by the forged 64-byte row 1 still produced an OOB
+source window with zero file-tracking and zero variant-dependent offsets in
+five gdb runs. `sh lab/openexr2shell-real/groom/check-large.sh` gives
+`RESULT PASS` twice at HEAD `cd7d804`; the same wake re-ran all four earlier
+one-command checks with no change. This extends the W163/W170/W172 negative
+from a same-size to a 256x-larger preceding chunk. Full method, hashes and
+setup failures: `reports/openexr2shell-file-level.md` W174. No grade change:
+file-level rungs 1-4, witness-ESTABLISHED at the scanline CODE/CONSUMER scope,
+rung 5 UNKNOWN.

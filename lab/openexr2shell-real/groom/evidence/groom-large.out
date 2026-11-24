@@ -1,0 +1,20 @@
+PASS two-variants 41=['41', '41r', '41r2'] 5a=['5a', '5a2']
+RUN 41 size=4096 inbounds=0x41
+PASS size-41
+PASS inbounds-41
+RUN 41r size=4096 inbounds=0x41
+PASS size-41r
+PASS inbounds-41r
+RUN 41r2 size=4096 inbounds=0x41
+PASS size-41r2
+PASS inbounds-41r2
+RUN 5a size=4096 inbounds=0x5a
+PASS size-5a
+PASS inbounds-5a
+RUN 5a2 size=4096 inbounds=0x5a
+PASS size-5a2
+PASS inbounds-5a2
+OOB tracked=0 differing=0
+PASS no-file-byte-in-oob
+PASS difference-window-short count=0
+RESULT PASS
