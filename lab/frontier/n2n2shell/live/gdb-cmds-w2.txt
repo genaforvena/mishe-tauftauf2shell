@@ -1,0 +1,18 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18544 -t 18545 -c community.list -F labfed -M
+rwatch -l *(unsigned long *)((char *)&nak + 96)
+rwatch -l *(unsigned long *)((char *)&nak + 104)
+printf "W2 WATCHPOINTS SET\n"
+commands 1
+silent
+printf "W2 breakpoint now=%lu\n", now
+continue
+end
+continue
+printf "W2 STOP REASON REACHED\n"
+bt 5
+x/6i $pc
+info registers rip
+quit

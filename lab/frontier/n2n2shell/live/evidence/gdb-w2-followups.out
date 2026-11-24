@@ -1,0 +1,32 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+24/Nov/2026 23:31:15 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+24/Nov/2026 23:31:15 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+24/Nov/2026 23:31:15 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 23:31:15 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+24/Nov/2026 23:31:15 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 23:31:15 [supernode.c:660] supernode is listening on UDP 18534 (main)
+24/Nov/2026 23:31:15 [supernode.c:669] supernode opened TCP 18534 (aux)
+24/Nov/2026 23:31:15 [supernode.c:676] supernode is listening on TCP 18534 (aux)
+24/Nov/2026 23:31:15 [supernode.c:685] supernode is listening on UDP 18535 (management)
+24/Nov/2026 23:31:15 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+24/Nov/2026 23:31:15 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+24/Nov/2026 23:31:15 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=134, now=1795563078) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+Hardware read watchpoint 2: -location *(unsigned long *)((char *)&nak + 96)
+Hardware read watchpoint 3: -location *(unsigned long *)((char *)&nak + 104)
+W2 WATCHPOINTS SET
+
+Hardware read watchpoint 3: -location *(unsigned long *)((char *)&nak + 104)
+
+Value = 0
+decode_REGISTER_SUPER (reg=reg@entry=0x7fffffffc850, cmn=cmn@entry=0x7fffffffc760, base=base@entry=0x7fffffffd800 "\003\003", rem=rem@entry=0x7fffffffc710, idx=idx@entry=0x7fffffffc718) at src/wire.c:456
+456	    retval += decode_cookie(&reg->cookie, base, rem, idx);
+W2 STOP REASON REACHED
+#0  decode_REGISTER_SUPER (reg=reg@entry=0x7fffffffc850, cmn=cmn@entry=0x7fffffffc760, base=base@entry=0x7fffffffd800 "\003\003", rem=rem@entry=0x7fffffffc710, idx=idx@entry=0x7fffffffc718) at src/wire.c:456
+#1  0x0000555555561e05 in process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=63, now=1795563080) at src/sn_utils.c:1898
+#2  0x00005555555658aa in run_sn_loop (sss=sss@entry=0x5555555800c0 <sss_node>) at src/sn_utils.c:2664
+#3  0x0000555555558422 in main (argc=<optimized out>, argv=0x7fffffffe1b8) at src/supernode.c:741

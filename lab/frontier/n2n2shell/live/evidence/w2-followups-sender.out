@@ -1,0 +1,4 @@
+23:32:20 sent attack NAK len=134
+23:32:21 sent QUERY_PEER len=38
+23:32:22 sent REGISTER_SUPER len=63
+23:32:23 sent REGISTER_SUPER_ACK len=58

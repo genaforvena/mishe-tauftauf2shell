@@ -90,3 +90,39 @@ UNKNOWN; the earlier witness verdict (#3901) covers only the stand-in
 harness. Next bounded step: witness replay of the live datagram and a
 determination of whether those slots are read after decode; a rung-5
 attempt requires a measured consumed-pointer path first.
+
+## W2 follow-up paths: no consumed-pointer read (2026-11-24 23:32Z)
+
+Bounded experiment on the plain build, one attack NAK followed by three
+other loopback datagrams while hardware read watchpoints sat on the two
+overwritten slots (`&nak + 96`, `&nak + 104`). The sender, gdb commands and
+raw output are `live/w2_followup.py`, `live/gdb-cmds-w2.txt`,
+`live/evidence/w2-followups-sender.out`,
+`live/evidence/gdb-w2-followups.out` and
+`live/evidence/gdb-w2-followups-rip.out`.
+
+- Source check: in `process_udp` the NAK case
+  (`sn_utils.c:2307-2368`) reads only in-bounds `nak.srcMac` and re-encodes
+  from `nak`; the named locals `mac_buf`/`sockbuf` are at `nak+224`/`+288`.
+  It does not read the overwritten region.
+- No watchpoint fired for `QUERY_PEER` (message type 11) or for the
+  `REGISTER_SUPER_ACK` (7) that followed. The sole trip, at
+  `&nak+104`, occurred on the later `REGISTER_SUPER` (5) in
+  `decode_REGISTER_SUPER` (`wire.c:456`); the watched value had become 0 and
+  RIP was `mov %r8,%rcx` at `decode_REGISTER_SUPER+82`, i.e. the trap
+  follows the inlined `memset(reg, 0, sizeof(...))` at `wire.c:454`.
+  This is a clearing store that x86 reports to GDB's read watchpoint, not
+  a consumer read of the attacker bytes.
+- Structural reason: `reg` in the REGISTER_SUPER case is allocated at the
+  same stack address as `nak` in the NAK case (`0x7fffffffc850` in this
+  build); the stale slots alias `reg.auth.token[38..47]`, which that
+  decoder memsets before any field read. With our token_size=0 datagram
+  they are not decoded as token either.
+- A second experiment that sent a second attack NAK tripped the same
+  watchpoint inside the `decode_buf` memcpy (`__memcpy_avx_unaligned_erms`),
+  again a re-write of the destination region, not consumption.
+
+Ceiling unchanged: rung 4 for chosen bytes at chosen stack offsets; no
+measured consumed pointer, benign-marker execution, control-flow takeover
+or rung 5. Witness replay of the live datagram (#3909) is still owed and
+is required before this live experiment is ESTABLISHED.
