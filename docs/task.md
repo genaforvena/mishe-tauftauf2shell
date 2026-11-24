@@ -5263,8 +5263,10 @@ witness replay and rung 5 stay UNKNOWN for both.
   scope and both commands reproduce with marker-absent controls only at
   `argoff 0x300`; at the committed/default `argoff 0x2f0` the command limb
   failed twice because `gnutls_deinit` zeroed the command string before
-  dispatch. Author clarification requested in #1376; the README R5 cell is
-  ◐, not ESTABLISHED, and ASLR-on/stock exploitability stays UNKNOWN.
+  dispatch. Author #1381 gave the exact invocation (`argv[4]=0x300` in both
+  marker runs); witness #1380 narrowed its MIXED verdict to the harness default
+  `0x2f0`, used only in the no-command RIP trace. No formal grade change: the
+  R5 row stays ◐ and ASLR-on/stock exploitability is UNKNOWN.
 - **FastNetMon CVE-2026-48689 staged (commit `6df55a0`,
   `reports/frontier-fastnetmon2shell.md`)**: pinned vulnerable header parent
   `97b04568b6f1` and fix `fa80390ed44`, SHA-256 pins and URLs in
@@ -6215,10 +6217,13 @@ show stable low 20 bits (`slot1 0xaa000`, `system 0x58750`) but varying
 bits 20-23 (`c/4/8` heap, `8/0/4` libc). A 3-byte patch must write that
 nibble, so one-shot byte-granular partial overwrite of both the heap command
 address and the libc target is not deterministic on this host; guessed-nibble
-repeats were not tested and stay UNKNOWN. The library-relative route is
-untouched: a libgnutls text pointer's bits 12+ are fixed relative to its
-mapping base, but whether `priv+0x110` designates a useful same-library call
-target is UNKNOWN. No grade change and no claimed R5 on stock/ASLR-on.
+repeats were not tested and stay UNKNOWN. Wake 19 (`3c45339`) closed the
+library-relative PLT route for the sampled objects: two ASLR-on inventories with
+recorded libgnutls mapping bases identify the live dispatch target at file offset
+`0x137e70`, find no libgnutls text pointer in the 814-byte writable span, and
+place the only command-execution stub at `0x34da0`, outside the reachable 64 KiB
+region. Other reachable objects and a guessed-nibble route stay UNKNOWN. No grade
+change and no claimed R5 on stock/ASLR-on.
 
 ## 2026-11-22 21:2xZ admissions (operator, standing #6)
 
