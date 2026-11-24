@@ -274,6 +274,22 @@ zero marker calls with `FontEncRecode` invoked only on m1. Receipts and all
 three negatives are in `realpath/evidence/xfptr/replay-w188/`; this is an
 author replay, not a witness verdict, and the grade is unchanged.
 
+### 3.10 W189 reordering cannot make Xvfb invoke the hijacked recode
+
+W187/W188 used one mapping order. `xlive/run-xfptr-reorder.sh` moves the
+buffer-allocating code into mapping 1 (`unicode`, `0xff00 0x1111`) and makes
+mapping 2 the only `cmap 3 1` map, so the first map after the buffer is no
+longer a `unicode` decoy. Two runs still wrote the marker into the first
+post-buffer map (n5, `idx=65552`) while `FontEncRecode` received n1 and
+`marker_calls=0`; safe and fixed controls stayed clean. A first-call
+backtrace places the call in `libXfont2.so.2(+0xfd05) -> (+0x1dad9) ->
+(+0x21adc) -> (+0xd40b) -> Xvfb(OpenFont+0x16b)`, and the call site at
+`libXfont2+0xfd00` loads a stored map pointer with no charset search. The
+encoding's first `FontMapRec` is allocated at `STARTMAPPING` before any code
+line allocates the buffer, so it can never be reached by the forward OOB
+store: the consumer limit is structural, not a layout accident. Receipt:
+`realpath/evidence/xfptr/reorder/REPLAY.md`. No grade change.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -335,15 +351,14 @@ counterexample survived either replay. The upstream regression input
 `SIZE 256 258` still survives in a plain build; the row-1024 crash is
 service loss, not execution.
 
-Next bounded experiment: W187 showed that the chosen-address overwrite works
-inside Xvfb but the pointer libXfont2 invokes (m1) is allocated before the
-buffer, so control-flow diversion in the live server is blocked by consumer
-behaviour, not grooming. The remaining evidence is a privileged X server
+Next: the Xvfb consumer lane is closed causally (§3.10): libXfont2 passes a
+stored first-map pointer that always precedes the buffer, so no mapping order
+invokes the hijacked recode. The remaining evidence is a privileged X server
 reachable by an unprivileged OS user on a real deployment; on this host no
 setuid X server and no active display-manager unit were found, so that
 precondition is not demonstrable here. Layout-independent redirect is blocked
-by ASLR randomizing heap bits 12-15 against 16-bit static-file stores. Both
-witness verdicts are folded; the witness owes no evidence on earlier scopes
-and has not replayed W183, W186, W187 or W188. Full commands, negatives and
-counterexamples are in `PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186/W187/W188
-and `realpath/evidence/xfptr/replay-w188/`.
+by ASLR randomizing heap bits 12-15 against 16-bit static-file stores.
+Both witness verdicts are folded; the witness owes no evidence on earlier scopes
+and has not replayed W183, W186, W187, W188 or W189. Full commands, negatives
+and counterexamples are in `PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186/W187/W188/W189
+and `realpath/evidence/xfptr/{replay-w188,reorder}/`.

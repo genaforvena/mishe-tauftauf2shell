@@ -520,3 +520,42 @@ No grade change. The map number is layout-dependent (n=3 in W187, n=5 here),
 but the same offset from the buffer and the same consumer limit hold: the
 overwritten pointer is not invoked in Xvfb. This is an author replay, not a
 witness verdict; the witness has not replayed W183, W186, W187 or W188.
+
+## W189 reordering cannot move the recoded map after the buffer (2026-11-24 03:35Z)
+
+W187/W188 left one unanswered causal question: `FontEncRecode` always
+targeted m1, allocated before the buffer, but both experiments used the same
+mapping order. `xlive/run-xfptr-reorder.sh` moves the buffer-allocating code
+to mapping 1 (`unicode`, `0xff00 0x1111`), makes mapping 2 the only
+`cmap 3 1` map, and puts the four marker word mappings after eight decoys.
+If either allocation order or charset picked the recode target, mapping 2
+would now be both after the buffer and the invoked map.
+
+Two runs (the second with an env-gated backtrace in the test-only
+interposer) rejected the hypothesis identically. Calibration:
+`buffer=0x555555a52930`, first map above it `n5=0x555555a72940`,
+`idx=65552` from `0xfe14..0xfe17`. Vulnerable crafted twice set
+`n5->recode` to the logged marker (`0x7ffff7fb9159`, then
+`0x7ffff7fb91f9` after the interposer grew); safe left `0x7ffff7fb2885`,
+fixed `5920c6e` left `0x7ffff7fb2891`. `recode_targets=0x5555559497b0` —
+n1, a `unicode` map in this layout — and `marker_calls=0` in every case.
+The map layout (n1..4 at `0x5555559497b0`..`0x555555949930`, below the
+buffer; n5..10 above) is preserved in the receipts.
+
+Causal check: an env-gated `backtrace_symbols_fd` in the first
+`FontEncRecode` call shows
+`libXfont2.so.2(+0xfd05) -> (+0x1dad9) -> (+0x21adc) -> (+0xd40b) ->
+Xvfb(OpenFont+0x16b)`. The stripped call site disassembles as
+`mov 0x18(%rsi),%rsi` then `call FontEncRecode@plt` with no charset search:
+libXfont2 passes a stored map pointer, which is the encoding's first map.
+That `FontMapRec` is allocated at `STARTMAPPING` before `setCode()` can
+allocate the buffer on any code line, so the first map can never lie after
+this encoding's buffer. The consumer limit is structural, not a layout
+accident; note W187 already recorded an unsuccessful reorder, this wake
+adds the causal evidence and a different, measured layout.
+
+Receipt: `realpath/evidence/xfptr/reorder/REPLAY.md`. Grade unchanged:
+no invoked control flow in Xvfb, no command, no wire input, no privileged
+process. No Xvfb left running. The remaining blockers are unchanged:
+no setuid X server or display manager on this host, and static 16-bit word
+writes cannot absorb ASLR's randomized heap bits 12-15.

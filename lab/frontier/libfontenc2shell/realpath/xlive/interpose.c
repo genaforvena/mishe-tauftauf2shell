@@ -5,6 +5,7 @@
  * address is baked into a crafted .enc by run-xfptr.sh.
  */
 #define _GNU_SOURCE
+#include <execinfo.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <dlfcn.h>
@@ -56,8 +57,17 @@ FontEncPtr FontEncFind(const char *charset, const char *fontfile)
 unsigned FontEncRecode(unsigned code, FontMapPtr mapping)
 {
     static unsigned (*real_recode)(unsigned, void *);
+    static int bt_done;
     if (!real_recode)
         real_recode = dlsym(RTLD_NEXT, "FontEncRecode");
     fprintf(stderr, "LF_RECODE_MAP=%p\n", mapping);
+    if (!bt_done && getenv("LF_BT")) {
+        void *frames[16];
+        int n = backtrace(frames, 16);
+        fprintf(stderr, "LF_RECODE_BT_BEGIN\n");
+        backtrace_symbols_fd(frames, n, 2);
+        fprintf(stderr, "LF_RECODE_BT_END\n");
+        bt_done = 1;
+    }
     return real_recode(code, mapping);
 }

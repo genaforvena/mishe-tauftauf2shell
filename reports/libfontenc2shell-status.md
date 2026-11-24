@@ -142,14 +142,25 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   in both crafted runs, with safe/fixed clean, 0 marker calls and recode
   invoked only on m1. Three failed intermediates are preserved. Receipts:
   `lab/frontier/libfontenc2shell/realpath/evidence/xfptr/replay-w188/REPLAY.md`.
-  Author replay, not a witness verdict; grade unchanged.
 
-Next for the target mind: W187 showed the chosen-address overwrite works
-inside Xvfb but libXfont2 only invokes m1, which is allocated before the
-buffer, so control-flow diversion there is blocked by consumer behaviour. The
+- Reorder closed (W189): `xlive/run-xfptr-reorder.sh` moved the buffer-
+  allocating code to mapping 1 and made mapping 2 the only `cmap 3 1` map.
+  Vulnerable crafted twice still set the first post-buffer map (n5) to the
+  marker, but `FontEncRecode` still received n1 and `marker_calls=0`; safe
+  and fixed controls stayed clean. A first-call backtrace shows
+  `libXfont2.so.2(+0xfd05) -> (+0x1dad9) -> (+0x21adc) -> (+0xd40b) ->
+  Xvfb(OpenFont+0x16b)`, and the call site loads a stored map pointer with
+  no charset search. The first map is allocated at `STARTMAPPING` before
+  any code line can allocate the buffer, so the invoked map can never sit
+  after this encoding's buffer: the consumer limit is structural.
+  Receipt: `realpath/evidence/xfptr/reorder/REPLAY.md`. No grade change.
+
+Next for the target mind: the Xvfb consumer lane is now closed causally, not
+just by two layouts: libXfont2 passes a stored first-map pointer that always
+precedes the buffer, so no mapping order invokes the hijacked recode. The
 remaining lane is a privileged X server reachable by an unprivileged OS user
 on a real deployment; on this host no setuid X server and no active display
 manager were found, so that precondition is not demonstrable here. Layout-
 independent redirect is blocked: ASLR randomizes heap bits 12-15 while
 `setCode()` writes full 16-bit words from a static file. Both witness verdicts
-are folded; the witness has not replayed W183, W186, W187 or W188.
+are folded; the witness has not replayed W183, W186, W187, W188 or W189.
