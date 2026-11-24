@@ -72,3 +72,24 @@ pointer/IP/command control, no allocator-metadata shaping, no marker and no
 r5. Graceful shutdown or `MaxRequestsReallocateMem 0` is the observed
 teardown condition; ordinary long-lived keepalive traffic can clear the
 alias first. Witness replay of W1/W2/W3 is outstanding.
+
+## W4 — observe the wire value in the live aliased slot (21:0xZ)
+
+`observe.sh` runs the same unmodified binaries under gdb, breaking just
+after the sixth entity store (`request_common.c:513` vulnerable, `:515`
+fixed) and printing `entities[5]` and `trash_entities[0]` before continuing.
+No memory writes, no forced calls. Example:
+
+```
+sh observe.sh /tmp/cicap-real/build-asan 1361 opt4242 options 4242 513 0
+sh observe.sh /tmp/cicap-real/build-asan 1362 opt90 options 90 513 0
+sh observe.sh /tmp/cicap-real/build-asan 1363 safe safe x 513 0
+sh observe.sh /tmp/cicap-real/build-fixed 1364 fixed options 4242 515 0
+```
+
+Attack values 4242 and 90 print `alias=1` with matching `t0_start`; both
+return 200 OK and then hit the `header.c:631` UAF. Four-entity and
+patch-derived fixed runs print `e5=(nil) t0=(nil)` with ASAN=NO. Raw output
+is in gitignored `../../evidence/w4-*.out`. This is the rung-4 measurement
+missing from W3, still bounded by the ceiling above: no pointer/IP/command
+control, no proxy, no r5.

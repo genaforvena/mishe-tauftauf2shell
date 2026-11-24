@@ -154,3 +154,25 @@ then sends SIGTERM. All binds and clients are 127.0.0.1; no external probe.
 GitHub still publishes no `C_ICAP_0.6.6` tag: a second codeload fetch of
 that name returned `404: Not Found` and its file is not a tarball; the
 fixed control remains patch-derived. W3 is author-measured and unwitnessed.
+
+## Gdb-observed alias in the real server (W4, 2026-11-24 21:0xZ)
+
+`realbuild/live/observe.sh` starts the same two unmodified binaries under
+gdb with a loopback-only config. Its generated command file breaks at
+`request_common.c:513` (vulnerable) or `:515` (patch-derived fixed), just
+after the entity-assignment loop, prints `req->entities[5]` and
+`req->trash_entities[0]` plus their `start`/`type`, then `continue`. The
+breakpoint writes no memory and forces no call. `MaxRequestsReallocateMem 0`
+forces teardown right after the request.
+
+- Vulnerable OPTIONS, wire value 4242, 200 OK to the client:
+  `W4_HIT e5=0x5020002690b0 t0=0x5020002690b0`,
+  `W4_VAL e5_start=4242 e5_type=2 t0_start=4242 t0_type=2 alias=1`,
+  then ASan UAF `header.c:631`.
+- Same with wire value 90: `e5_start=90 t0_start=90 alias=1`, same UAF.
+- Four-entity REQMOD: `e5=(nil) t0=(nil)`, 400, ASAN=NO.
+- Patch-derived fixed build with the six-entity OPTIONS input:
+  `e5=(nil) t0=(nil)`, 200 OK, ASAN=NO.
+- Raw output: gitignored `evidence/w4-*.out`. The build trees, pins and
+  patch provenance above are unchanged; W4 adds no new source or binary.
+  Author-measured and unwitnessed.

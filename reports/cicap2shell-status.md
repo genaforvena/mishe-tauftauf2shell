@@ -46,7 +46,8 @@ claim stay claims in this lab.
    rc 0; fixed attack and safe builds are ASan-clean with rc 0.
 
 Rung 4 is PARTIAL: the wire-selected value (90, 72 or 4242) lands in the
-live adjacent `trash_entities[0].start` slot, observed before the double free.
+live adjacent `trash_entities[0].start` slot, observed before the double free
+and, in W4, inside the real ASan server (`alias=1`, `start=90/4242`).
 No arbitrary byte stream, pointer/IP/command control, allocator metadata,
 real proxy or command execution. W3 exercises the full
 `parse_header()`/`process_request()` path in a real ASan c-icap server from
@@ -80,9 +81,10 @@ UAF at teardown, while an OPTIONS request with six entities and
 `Connection: close` returns 200 OK before firing it on graceful shutdown.
 Four-entity, one-entity valid and patch-derived fixed controls are clean;
 an OPTIONS request without `Connection: close` shuts down cleanly because
-keepalive resets the aliased slot. All three real-build lanes remain
+keepalive clears it; W4 adds the gdb-observed alias/value read in that same
+server. All four real-build lanes remain
 author-measured: the witness verdict above covers only the pinned-function
-claim. Next bounded work is an independent witness replay of W1/W2/W3
+claim. Next bounded work is an independent witness replay of W1/W2/W3/W4
 from the committed recipes. GitHub has no 0.6.6 tag, so the fixed control
 is patch-derived, not a released binary. Do not infer RCE from advisory
 prose or a harness marker.

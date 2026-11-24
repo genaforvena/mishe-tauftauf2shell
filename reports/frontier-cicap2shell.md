@@ -88,8 +88,9 @@ from a loopback TCP request, so the earlier "no ICAP server / no network
 socket / no AV:N path" boundary is withdrawn for 127.0.0.1: an OPTIONS
 request with six entities and `Connection: close` returns 200 OK before the
 UAF fires at teardown. No traffic left loopback, no proxy or real client
-consumed it, and the wire value's effect on the aliased slot was measured in
-W1/W2, not in W3's server logs. Stock layout is no longer UNKNOWN in the
+consumed it. W4's observing-only gdb breakpoint prints the wire-selected
+value in the live aliased slot inside that same server (below). Stock layout
+is no longer UNKNOWN in the
 pinned release (real `request.h:113-114` confirms the adjacency); wider
 deployment reach stays UNKNOWN, and there is no rung 5.
 
@@ -144,3 +145,22 @@ patch-derived fixed build are clean. Raw server output in gitignored
 `evidence/w3-*.out`; recipe, exact commands and the live-server ceiling in
 `lab/frontier/cicap2shell/realbuild/live/README.md`. W3 is author-measured
 and unwitnessed; witness replay of W1/W2/W3 is outstanding.
+
+## W4 — wire value observed in the real server's live alias (21:0xZ)
+
+`realbuild/live/observe.sh` breaks at `request_common.c:513`, one line after
+the sixth `req->entities[num++]` store in the *unmodified* ASan 0.6.5 server,
+and prints the two adjacent slots before continuing. Breakpoints print only;
+no memory write, no forced call. An OPTIONS request with six entities over
+loopback TCP and `Connection: close` returns 200 OK, and gdb reports
+`e5=0x5020002690b0 t0=0x5020002690b0`, `e5_start=4242 t0_start=4242
+alias=1`; repeating with wire value 90 gives `e5_start=90 t0_start=90
+alias=1`. Both runs end in the same `header.c:631` ASan UAF with
+`MaxRequestsReallocateMem 0`. Four-entity REQMOD gives `e5=(nil) t0=(nil)`
+and no sanitizer; the patch-derived fixed build with the same OPTIONS input
+also gives `e5=(nil) t0=(nil)` and no sanitizer. Raw outputs in gitignored
+`evidence/w4-*.out`. This closes the W3 measurement gap: rung 4's wire value
+is now seen in the live aliased slot of the real server, not just the pinned
+harness and socket-fed library. Still no pointer/IP/command control, no
+allocator metadata, no proxy or real client, no r5; author-measured and
+unwitnessed at this scope.
