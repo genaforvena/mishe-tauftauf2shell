@@ -7531,3 +7531,140 @@ the lane-index row still carries an older ceiling, this section supersedes it.
   No new experiment, build, input, listener, hash, witness verdict or grade
   change; W184's mod_auth_openidc negative alone is witness-ESTABLISHED
   (#3079), and author results are never acceptance.
+
+## 2026-11-24 07:1x–09:2xZ — staged stbvorbis, offset steering and clean replays
+
+### StbVorbis2Shell W201 (FRONTIER-STAGED, `lab/frontier/stbvorbis2shell`)
+
+CVE-2026-89266 (VulnCheck, 2026-09-11), CWE-787, stb_vorbis <= 1.22; fixed
+only on the dev branch as of this date, so the numeric fixed release is
+UNKNOWN. Vulnerable pin: `https://raw.githubusercontent.com/nothings/stb/2c980bb59875b0d32144a71867fbdebb2f77cd20/stb_vorbis.c`, sha256
+`4c7cb2ff1f7011e9d67950446b7eb9ca044f2e464d76bfbb0b84dd2e23e65636`.
+Fixed control: the dev-branch `stb_vorbis.c`, sha256
+`daedcc5ca51d5af8e910816d30ac6d791c4c0364ea5c8c7625bff429371e86a5`,
+carrying `CODEBOOK_LIMIT (1<<18)` and a guard at line 3815. All four hashes
+were rechecked locally with `sha256sum`. Build and run:
+`cd lab/frontier/stbvorbis2shell && sh run-all.sh` (offline, loopback only):
+builds -O0/ASan/plain vulnerable and fixed harnesses, regenerates both PoCs
+and prints 9 PASS / 0 FAIL, rc 0. Expected bytes: ASan
+`heap-buffer-overflow WRITE of size 4` at `stb_vorbis.c:3889` in
+`start_decoder`, 0 bytes after an 8-byte `setup_malloc` region from line 3880
+(`4 * 16519105 * 65 = 2^32+4`, truncated to `int` 4); fixed build rc 0 with
+no report; gdb at the third write reads `val` and stored word
+`0x4b434148` ("HACK"). PoC hashes: `exploit.ogg`
+`e3ec321924803dced6a9cd1b30202f02770982836995d73686cbc87fe6c0b793`,
+`chosen.ogg`
+`31c4686a65b13f2303f6d0e39020c8390fda1a5f81c2d4e997ddaae3aa86050d`
+(both 205 bytes, tracked); `evidence/*.out` are gitignored and regenerated
+by `run-all.sh`; full log and negatives in `PROVENANCE.md`. This is rung 4
+PARTIAL at a repeating 4-byte word and one offset; write count, real
+consumer, wire, pointer, command, witness verdict and r5 are UNKNOWN. Window
+135 is live but there is no charter or wake unit: FRONTIER-STAGED, mind count
+unchanged at 130.
+
+### Openexr2Shell W180 — file-steered destination offset
+
+Affected 3.5.0–3.5.2 / fixed 3.5.3 as in the row above; no new pins. From the
+repo root, `cd lab/openexr2shell-real && sh harness/offset-steer-check.sh`
+with the gitignored pinned build trees and `src/` symlinked from the live
+tree. The generator sizes both chunk leader and inner ZSTD frame to 2N;
+N=32 stays byte-identical to the older case
+(`484b1c35…593a52`, `efb6bbd2…f033b`), N=64/128 give
+`41f840cb…106a6`/`a0d8c886…ce03b` and
+`38767b7e…01bc`/`9f716aec…b8f0`. Expected: vulnerable plain writes
+128/256/512 changed guard bytes at `decode.unpacked_buffer+4N` for
+N=32/64/128, gdb reads `0x3c`/`0x5a` fill at each offset, fixed returns
+`DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` with zero changes; result `RESULT PASS`
+three times in-tree and from `git archive 9f42ba6` with all 16 normalized
+hashes identical (`7393c9d4…`, `762110cb…`, `62e2a8fd…`, `f1ec8eda…`,
+`234c689e…`, `8997f403…` in `reports/openexr2shell-file-level.md`). Negative:
+changing only N while keeping the 64-byte frame gives rv=23 and no write.
+Evidence `evidence/offset-*.out` is gitignored and rebuilt by the check;
+author-only, unwitnessed, no r5.
+
+### Imgproxy2Shell W5 — live tcache pointer under grooming
+
+Pinned imgproxy 4.0.15 / fixed 4.0.16 and the pinned libvips build as in the
+row above. The probe is
+`lab/frontier/imgproxy2shell/provision/ico_gdb_groom.py`, sha256
+`571ae9496da846f6e29ff03dd2577cc99d7077ecd41b86f5738d8d4f9aa62a82`
+(rechecked locally); run it from `provision/` as recorded in
+`PROVENANCE.md` W5, e.g. `python3 ico_gdb_groom.py ./imgproxy-vuln
+../../libvips2shell/build-vuln-plain/libvips w5final1 2
+rs:fill:16:16/plain/hostile.ico 12 30 ptr`, with the fixed binary in place
+of `imgproxy-vuln` as the control. It binds only 127.0.0.1:18080/18081,
+sends benign favicon GETs before the hostile ICO in one process under gdb
+and dumps quadwords at `data-16`. Expected in `ptr` mode: a free tcache
+chunk's `next` at `actual_data+18` becomes chosen
+`0x4141414141414141` while size `0x35` is preserved and the next
+`malloc(0x20)` consumes the victim; fixed returns HTTP 500 and never hits
+the breakpoint. Grooming is stochastic (3/6 preloads; clean archive replay
+at `4c4937d` succeeded at preload=6 and hit the top layout in five
+preload=2 runs). The `provision/http-ico-*.log` files are tracked; gdb
+transcripts and digests are in `PROVENANCE.md` W5. No mapped target, write
+through the pointer, marker or command; author-only, unwitnessed, rung 4.
+
+### Cjose2Shell W192 — clean-archive replay of the groomed fptr lane
+
+Pins, build and `check.sh` recipe are in the row above. Extract
+`git archive 1212b10ee808b2ad3b3af6d080222f5157fc78b4`, then
+`bash lab/frontier/cjose2shell/harness/bootstrap.sh`,
+`bash harness/check.sh` (expect `PASS=223 FAIL=0 trace=455b8494…338e9da7`)
+and `bash fptr/run.sh`. Expected: vulnerable `fptr` prints `GROOM_OK=1`,
+`CEK_LEN_AFTER=768`, `BENIGN_MARKER_EXECUTED`, `MARKER_CALLED=1`;
+vulnerable `fptrsafe` and both fixed scenarios print `MARKER_CALLED=0`,
+5/5 vulnerable and 0/3 fixed marker calls in a fresh batch. Four raw
+outputs match `fptr/evidence/` after hex-address normalization; normalized
+hashes `9fa71d7a…a76c5` (vulnerable-fptr), `abac92e5…a031c5` (both safe),
+`6d738f8b…700c98` (fixed-fptr). Author replay, not witness acceptance; no
+wire-derived address, command or r5.
+
+### Codebasememory2Shell W5 — tool-path replay from a clean tree
+
+Affected `<0.9.0` / fixed `0.9.0`, four pins in
+`lab/frontier/codebasememory2shell/PINS.sha256` as in the row above. From
+the repo root, `git archive HEAD | tar -x -C /tmp/cbm-replay`, copy the two
+hash-verified tarballs into the fresh tree's `pins/`, then
+`bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` (at HEAD
+`4c353c3` the script fix was substituted from the working tree). Expected:
+4/4 pins OK; `vuln-asan` N=33/48 rc=1 with ASan `READ of size 8` at
+`cypher.c:2568`; `vuln-recover` N=33/48 rc=0 with `WRITE of size 68` at
+`project_item:3379` and the chosen `MISHE_OO…` name; `fixed-asan` clean.
+The three row logs and both recover `-Q33.err`/`-Q48.err` files match the
+canonical hashes after normalizing only volatile tokens (root path, timing,
+ASan PIDs/addresses/BuildId, stack dumps). Raw artifacts are gitignored and
+regenerated by `replay.sh`; local stdio only, no witness verdict or r5.
+
+### Receipts
+
+FontForge W3's `zero-write.pcf` replay (`0912800`, documented in
+`reports/frontier-fontforge2shell.md` and its `CONSUMER.md`) keeps the chunk
+size at `0x21` and the plain build clean while ASan still reports
+`WRITE of size 4` at `fvimportbdf.c:1751`; `gdb-zero-write-post.out` shows
+four zero bytes at `encs-4`. FLTK W6's `27ef17b` repairs the receipt's
+`gui.cxx` hash to `b84e070c…853bc`, matching `inputs.sha256` and a local
+`sha256sum -c` (3/3 OK). Neither adds a verdict, rung cell or mind-count
+change.
+
+### LibRaw2Shell W6 — one exact chosen halfword (author-side)
+
+Same pinned 0.22.3 / reporter-two-line fixed control and the W3 harness as
+in the LibRaw row above; generator `craft_whitelevel_poc.py` is pinned at
+`ab5ace42392c8558d4c939d1524a9ffb29a112acb021b8141ce9a0dd8b30d1cf`.
+From `lab/frontier/libraw2shell`, run
+`python3 craft_whitelevel_poc.py evidence/nonzero-oob.input OUT 11036`
+(input sha256
+`b59f64e9837b06a8f0ca07a3776e961e7d0493794e0d6cb38fbcb80022069341`);
+the output is byte-identical to `evidence/wl-probe-11036.input`, sha256
+`b856c1c62d48a63f9c3d42a4d32be11033c0dc405fcbcc063f6b9ddaa6d61215`
+(recomputed locally). Under a plain `-O0` gdb breakpoint at
+`xtrans_demosaic.cpp:427` the OOB store at index 68,644 reads
+`0x4141 0x2b82 0x3a00 0x0000`; the ASan vulnerable tree with `-n 1` reports
+`WRITE of size 2` 0 bytes after the 550,176-byte region (rc 1), fixed rc 0,
+vulnerable without `-n` rc 0. Bracketing WL 11,035/11,037 gives
+`0x4142`/`0x413f`; a second target `0xdead` at WL 3,234 gave `0xdeb3`, with
+WL 3,233–3,236 stepping ~18 per unit — the negative is preserved. GDB logs
+and control outputs are in `evidence/` and `PINS.md`; the binary `.input`
+files are gitignored and regenerated by the generator. One exact value, not
+an arbitrary 16-bit alphabet; author-side only, unwitnessed, no pointer,
+wire or r5.
