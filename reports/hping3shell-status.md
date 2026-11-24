@@ -116,6 +116,11 @@ the offsets. `wire/run-wire.sh` is unchanged.
   `70f0112d…b471cb7aaa7f0ba846c7`): **3 PASS / 0 FAIL**; `rc4_sbox[0..45]`
   stays all zero, so the chosen bytes are attributable to the unclamped
   `memcpy`. Evidence: `wire/evidence/plain-fixed-{gdb,proof,run}.out`.
+- Ceiling measurement: `nm -n -S plain-src/hping3` filtered to the 251-byte
+  write span `0x29dc0..0x29ebb` contains exactly two objects — `old_rr.0`
+  and `random.c`'s `rc4_sbox`. No function pointer, GOT slot or control-flow
+  object is reachable; overwriting the sbox would change PRNG output, not
+  execution. This path offers no measured route to r5.
 
 ## Current grade (2026-11-24 20:5xZ)
 
