@@ -2,11 +2,12 @@
 
 **Verdict: rung 4 demonstrated by direct calls into the real, pinned Cypher
 engine — attacker-chosen bytes land at attacker-chosen offsets past a 32-element
-stack array, and a default plain build aborts with stack smashing. Recommend
-admission to a dedicated target mind.** The missing lane is the MCP tool / wire
-path: this lab calls `cbm_cypher_execute()` directly, so remote reachability and
-rung 5 remain UNKNOWN. The advisory itself scores AV:L/PR:L, so a remote path
-is not claimed by the CNA either.
+stack array, and a default plain build aborts with stack smashing.** The target
+mind later reached the same sink through a real `query_graph` stdio tool call on
+a reduced local ASan server (`lab/frontier/codebasememory2shell/MCP-TOOL.md`,
+`reports/codebasememory2shell-status.md`); that is still a local process, so
+remote reachability, an agent-influenced query and rung 5 remain UNKNOWN. The
+advisory itself scores AV:L/PR:L, so a remote path is not claimed by the CNA.
 
 ## 1. Ground truth (claim sources, read-only provisioning)
 
@@ -107,20 +108,23 @@ byte-level observation of chosen bytes at offsets selected by the projection
 item index, plus a default-build stack-smashing abort. This is stronger than a
 fixed-byte or fixed-offset write.
 
-**Not reached:** the `query_graph` MCP tool layer and any JSON-RPC/HTTP/stdio
-wire path; no remote request, no agent-influenced query, no grooming into a
-live object, no saved-RIP/pointer/IP control, no command execution, no ASLR
-bypass, no witness replay and no rung 5. The advisory's CVSS attack vector is
-LOCAL with PR:L, consistent with the missing remote lane. Whether a malicious
-tool argument can carry a >32-item clause to this executor in a deployed MCP
-server is UNKNOWN.
+**Not reached:** any remote request, HTTP transport, agent-influenced query,
+grooming into a live object, saved-RIP/pointer/IP control, command execution,
+ASLR bypass, witness replay or rung 5. The `query_graph` MCP tool layer and a
+local stdio JSON-RPC path have since been reached by the target mind on a reduced
+ASan server of the pinned tree (N=33/48 ASan READ at `cypher.c:2568`; recover-mode
+`WRITE of size 68` at `func_bufs[32]` with indexed-fixture bytes; fixed release
+rejects >32) — see `lab/frontier/codebasememory2shell/MCP-TOOL.md` and
+`reports/codebasememory2shell-status.md`. That is a local tool argument, not a
+wire request. The advisory's CVSS attack vector is LOCAL with PR:L, consistent
+with the missing remote lane; whether a deployed MCP server can carry a >32-item
+clause from an attacker-influenced agent remains UNKNOWN.
 
-**Cheapest next experiment that could move it up:** build the pinned vulnerable
-tree's real `codebase-memory-mcp` binary with ASan, start it on loopback only,
-and send one `query_graph` tool call whose query has 48 RETURN items, with the
-32-item and fixed-release calls as controls. If the ASan WRITE reproduces
-through that path, the target gains a real tool-argument trigger; that is a
-target mind's lane, not a reason for this brief to claim rung 5.
+**Tool-path follow-through (done):** the target mind built the pinned vulnerable
+tree's ASan server, drove a real `query_graph` stdio tool call with 48 RETURN
+items and ran the 32-item and fixed-release controls. Results, the reduced-build
+description and the file-steering check are in `MCP-TOOL.md`; none of it claims
+remote reach or rung 5.
 
 **Disposition:** stage for admission with a dedicated two-pane window. Operator
 owns final admission.
