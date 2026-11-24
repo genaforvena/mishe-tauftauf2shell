@@ -122,22 +122,21 @@ write can directly overwrite the row pointer array. Raw logs:
   `func_bufs` occupies 35456-51840. The objects above `func_bufs` are char
   arrays only: `buf[128]` at 52096, `buf[128]` at 52256, `buf[128]` at 52416,
   `key[1024]` at 52576 and `cbuf[2048]` at 53728.
-- Plain build at the `cypher.c:4118` breakpoint: `&vals[0]=0x7fffffff5230`,
-  `&vals[31]=0x7fffffff5328`, `&func_bufs[0]=0x7fffffff5330`,
-  `&func_bufs[32]=0x7fffffff9330`, `$rbp=0x7fffffff9f70`, canary slot
-  `$rbp-8=0x7fffffff9f68`. `vals[]` sits immediately BELOW `func_bufs`; the
-  write runs upward from `func_bufs[32]`, 16,408 bytes above the last row
-  pointer, so it cannot reach the array. Item 38's 68-byte payload starts at
-  0x9f30 and reaches the canary at 0x9f68, consistent with the plain 48-item
-  stack-smashing abort. The same breakpoint's backtrace shows
-  chosen-byte-derived garbage in outer inlined frame argument slots; whether
-  any such slot is live after the canary check is NOT established.
+  `&func_bufs[32]=0x7fffffff9330`, `$rbp=0x7fffffff9f70`. `vals[]` sits
+  immediately BELOW `func_bufs`; the write runs upward from `func_bufs[32]`,
+  16,408 bytes above the last row pointer, so it cannot reach the array.
+  Item 38's 70-byte payload starts at 0x9f30 and crosses the real canary at
+  `$rbp-0x38`=0x9f38 (payload offset 8), consistent with the plain 48-item
+  stack-smashing abort. W10 corrects this section's earlier label of
+  `$rbp-8`=0x9f68 as the canary: the disassembly shows that slot is saved r15.
+  The same breakpoint's backtrace shows chosen-byte-derived garbage in outer
+  inlined frame argument slots; W10 bounds whether any of it is used.
 
 Conclusion: direct overwrite of the projection row pointers is a structural
-negative for this compiler/build, not an empirical miss. Pointer control at
-higher strides and in a live object remains UNKNOWN. No source, harness,
-build flag, pin, matrix row or witness request changed; grade stays rungs 1-4,
-no wire/pointer/command, no rung 5.
+negative for this compiler/build, not an empirical miss. Register-byte control
+at higher strides is bounded by the canary in W10; use of a live pointer object
+remains UNKNOWN. No source, harness, build flag, pin, matrix row or witness
+request changed; grade stays rungs 1-4, no wire/pointer-use/command, no r5.
 
 ## W9 — loopback HTTP `/rpc` reaches the same sink (new transport, no grade change)
 
@@ -177,3 +176,38 @@ agent-influenced query was observed, and there is no pointer/IP, command,
 witness verdict or rung 5. The advisory's AV:L/PR:L vector still fits. The
 HTTP row is author replay, not independent acceptance; no witness request was
 changed by this measurement.
+
+## W10 — control-flow bound: canary blocks register use (read-only, no grade change)
+
+`lab/frontier/codebasememory2shell/control-flow-bound.sh` captures
+`evidence/control-flow-bound.txt` (sha256
+`d4ef143804853e79482bcd8decd9c5ac93d8b560586ce46ba2b83d33eefe32a4`);
+gdb only reads memory and registers. Frame-relative arithmetic removes the
+ASLR-dependent absolute addresses used in the W8 log: `func_bufs[0] =
+rbp-0x4c40`, item stride `0x200`, so `func_bufs[38] = rbp-0x40`. The real
+canary is `rbp-0x38` (payload offset 8), the six callee-saved registers
+rbx/r12-r15/rbp lie at `rbp-0x28..rbp+0` (offsets 0x18..0x40), and saved RIP
+is `rbp+8` (offset 0x48).
+
+- Clean N=32: canary ends in `0x00`, saved RIP is `0x555555570629`.
+- N=48: chosen bytes fill `rbp-0x40..rbp+0x45` ("MISHE-OO01234567…"), so the
+  canary holds `0x30` ('0') where the clean run had `0x00`, and all six saved
+  registers hold chosen bytes. The 70-byte copy stops two bytes short of
+  saved RIP, which still reads `0x555555570629`.
+- The pinned build's `execute_single` loads `fs:0x28` into `rbp-0x38` in its
+  prologue; the epilogue compares it at `0x1806c` and branches to
+  `__stack_chk_fail` before restoring registers at `0x18084-0x1808d` or
+  `ret` at `0x1808e`. The plain 48-item run reports
+  `*** stack smashing detected ***`.
+- `project_item` copies `strlen(raw)`, capped at 511 (`cypher.c:3374-3381`):
+  a C string cannot place `0x00` at offset 8 without ending there, so no
+  longer property value can preserve the canary's zero low byte and still
+  reach saved RIP. Any item-38-or-later write therefore aborts before those
+  registers are restored or used.
+
+Conclusion: chosen-byte control over saved registers, but no control-flow use;
+saved-RIP control is a structural negative for this compiler/build. This
+supersedes W8's open "pointer control at higher strides" phrasing and corrects
+its label of `rbp-8` as the canary (that slot is saved r15). No source,
+harness, binary, pin, matrix row, witness request or grade changed: rungs 1-4,
+no wire/usable-pointer/command, no witness verdict, no rung 5.
