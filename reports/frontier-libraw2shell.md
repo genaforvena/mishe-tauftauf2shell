@@ -409,6 +409,44 @@ valid negatives for that narrower method. No pointer/IP, marker, command,
 adjacent live object, GUI, wire path or r5. Full method, hashes and raw
 traces: `lab/frontier/libraw2shell/w10/results.txt`.
 
+## Arbitrary 16-bit value from DNG LinearizationTable (W11, 2026-11-24 15:5x-16:1xZ; author-side)
+
+Prediction recorded on the wake wall before the first run: the pinned
+`src/metadata/tiff.cpp:1109-1113` parses DNG tag `0xc618` (LinearizationTable)
+with `linear_table(len)`, which fills `curve[]` from file bytes and extends the
+last entry over all 65,536 samples (`src/utils/curves.cpp:145-155`);
+`src/decoders/dng.cpp:34-51` stores `curve[raw]` into every decoded pixel.
+`craft_linearization_poc.py` (sha256
+`74ca3ee9a74e410682bb3588c0e99fa9c499f294ca79eb76e1055d4fb213cc1c`) rewrites
+the PoC's unused IFD slot 2 as `0xc618` SHORT count 1. With the source
+WhiteLevel of 255 the store still saturated to `0xffff`; setting WhiteLevel
+to 65535 with the existing `craft_whitelevel_poc.py` makes the scale factor
+65535/65535 and removes that confound. The saturation is preserved as a
+negative, and a low-value probe (`0x0010`, WL=255, stored about `0x1010`)
+showed the table is applied rather than overwritten by a later gamma curve.
+
+Seven pre-chosen values were mapped with a fast breakpoint probe: `0x0001`,
+`0x00a5`, `0x1337`, `0x7f7f`, `0x8000`, `0xbeef` and `0xffff` each produced
+exactly the same value in the second stored halfword. Exact first-OOB index
+(68,644) was then confirmed on the unmodified `-O0` build under gdb with
+`-n 1`, 3/3 byte-identical runs each: `0xbeef` stored
+`0xffff 0xbeef 0xfe93 0x0000`, `0x1337` stored
+`0x1cd1 0x1337 0x199e 0x0000`, `0x00a5` stored
+`0x00f6 0x00a5 0x00db 0x0000`; the edges `0x0001` and `0xffff` were confirmed
+once each (`0x0000 0x0001 0x0001 0x0000` and all three `0xffff`). Input hashes,
+traces and the exact command sequence are in
+`lab/frontier/libraw2shell/w11/results.txt` and PINS.md. Each input passed the
+same control triple: ASan vulnerable `-n 1` rc 1 `WRITE of size 2` at `:427`,
+fixed `-n 1` rc 0 empty, vulnerable without `-n` rc 0 empty.
+
+This is an arbitrary 16-bit value in **one** of the three halfwords written at
+the chosen offset, from two ordinary DNG metadata fields. The other two
+halfwords are X-Trans interpolation results and are not independently chosen
+(see the exact values above); this is not an arbitrary byte sequence across
+the whole store. No pointer/IP, marker, command, adjacent live object, GUI
+consumer, wire path or r5. Author-side only; no witness replay.
+
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
@@ -425,11 +463,16 @@ at the steered index 268,324 with its own calibration, while the W6
 calibration does not transfer. W10 adds a second independent file field,
 DNG BlackLevel, that makes two further pre-chosen halfwords (`0xdead`,
 `0x2222`) exact at index 68,644, each 3/3 stable with clean controls;
-WL-only misses are not erased. W8 adds a host-specific heap-layout result:
+WL-only misses are not erased. W11 adds a file-chosen arbitrary 16-bit value
+in the second halfword at index 68,644 via the DNG LinearizationTable plus
+WhiteLevel=65535, exact 3/3 for `0xbeef`, `0x1337` and `0x00a5`, with both
+edges checked once and clean controls; the other two halfwords remain
+interpolation-determined. W8 adds a host-specific heap-layout result:
 the store crosses one free top chunk and faults at the heap edge, with no
 live neighbor to hijack in this path; it is a structural negative result,
-not a new primitive. Neither changes the ceiling. Fully
-arbitrary byte values and pointer/IP control remain UNKNOWN. Rank: high
+not a new primitive. W11 does not change the offset, the other two halfwords
+or the local-file threat model; fully arbitrary byte sequences and pointer/IP
+control remain UNKNOWN. Rank: high
 tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
 target since 2026-11-24 05:4xZ; NO rung 5.
@@ -491,20 +534,25 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   property. Neither is a grooming study or an adjacent-object exploit:
   no live object or pointer was identified between the scratch buffer
   and the fault. No pointer/IP, no marker, NO r5.
-- Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
-  `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
-  metadata tag; W6 hit one pre-chosen value `0x4141` exactly at index 68,644
-  and W7 hit another (`0x1234`) exactly at index 268,324, each with its own
-  WhiteLevel calibration. `0xdead` and `0x2222` were unreachable at D=512 via
+- Arbitrary byte sequences remain UNKNOWN, but a 16-bit value in one stored
+  halfword is now file-controlled: W2 wrote a saturated constant `0xffff`; W3
+  steered three distinct non-saturated halfwords via one DNG metadata tag; W6
+  hit one pre-chosen value `0x4141` exactly at index 68,644 and W7 hit another
+  (`0x1234`) exactly at index 268,324, each with its own WhiteLevel
+  calibration. `0xdead` and `0x2222` were unreachable at D=512 via
   WhiteLevel alone (W6 negatives), but W10 reached both exactly by adding a
   second DNG integer field, BlackLevel (`0xdead` at WL=3,230/BL=6; `0x2222`
-  at WL=21,084/BL=1). Other targets (`0x1234` at D=512 via WL, `0x4141` at
-  D=1024) remain unreachable at their local granularity; a 441-point
-  (WL,BL) grid did not cover every halfword. None demonstrates an arbitrary
-  16-bit alphabet. Pointer/IP control remains an open prerequisite.
-- The W5 frame-size/IDX steering result, the W6/W7 exact-hit results and the
-  W10 two-field exact hits are author-side only; witness replay for W5 was
-  requested and has not arrived. Do not treat them as ESTABLISHED.
+  at WL=21,084/BL=1). W11's DNG LinearizationTable with WL=65535 put seven
+  pre-chosen 16-bit values, including both edges, into the second halfword at
+  index 68,644 (three confirmed 3/3), but the first and third halfwords are
+  interpolation-determined, so this is not an arbitrary byte sequence or a
+  fully arbitrary multi-halfword alphabet. Other targets remain unreachable
+  at the narrower methods' local granularity; the 441-point (WL,BL) grid did
+  not cover every halfword. Pointer/IP control remains an open prerequisite.
+- The W5 frame-size/IDX steering result, the W6/W7 exact-hit results, the
+  W10 two-field exact hits and the W11 linearization values are author-side
+  only; witness replay for W5 was requested and has not arrived. Do not treat
+  them as ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.

@@ -50,6 +50,14 @@
 | `w10/instrument.patch` | lab-only one-shot fprintf calibration patch (not the claimed consumer) | `f2b2843645656d0f3c33a36ad7e11f574a91bf032ea983f8e63af7f7ad5c02cb` |
 | `w10/grid-wide-results.txt` | corrected 441-point WL/BL calibration grid | `a4e71e340d673ae49bfc5ea77847de1d0126f0e86387097393652f2c46f3ae8b` |
 | `w10/grid-invalid-argv.txt` | invalid `"-n 1"` single-argv grid, preserved negative | `6317735c71496a81acf8d513b92583fbcce7192df6cee8404721777bb2eaefd8` |
+| `craft_linearization_poc.py` | lab-only W11 DNG LinearizationTable generator | `74ca3ee9a74e410682bb3588c0e99fa9c499f294ca79eb76e1055d4fb213cc1c` |
+| `w11/targetbeef.input` | W11 LinearizationTable=0xbeef WL=65535, exact `0xbeef` channel 1 at index 68,644 | `cf5030ebfa46f3badc4498e4ec4230c670ba010b70f5ace3a872d8fcbc33d33b` |
+| `w11/target1337.input` | W11 LinearizationTable=0x1337 WL=65535, exact `0x1337` channel 1 at index 68,644 | `b10072878cda73d1530a3156789e9742ccd791a9389f589516548dd9bd23cd8f` |
+| `w11/target00a5.input` | W11 LinearizationTable=0x00a5 WL=65535, exact `0x00a5` channel 1 at index 68,644 | `d01e8cba907216b7fab1fad070e52f4d529271074b9f93c0b75573bfb440d548` |
+| `w11/target0001.input` | W11 low edge, exact `0x0001` channel 1 at index 68,644 | `1ca11ebfa5fdcfbd02fe85f13c6690023c3c588e193dbb9c1d124121385a769d` |
+| `w11/targetffff.input` | W11 high edge, all three channels `0xffff` at index 68,644 | `93ad684af7b1fe11846711293cb0f998d27de67cfb96666df6570242ef8bf7d4` |
+| `w11/results.txt` | W11 full method, hashes, values, controls and limits | `9ca25f6c7421f81a14a1e620b52d8c206153c4f689e37aaca86ec19d82f7c1dd` |
+
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.
