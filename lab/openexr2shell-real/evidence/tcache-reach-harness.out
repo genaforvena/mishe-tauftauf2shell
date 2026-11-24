@@ -1,0 +1,4 @@
+BASE=0xNORM tcache=0xNORM
+TCACHE idx=7 size=0x90 n=1 head_off=+3104 hits=[]
+TCACHE idx=61 size=0x3f0 n=7 head_off=+7744 hits=[(5, 272)]
+FINISHED

@@ -151,3 +151,21 @@ harness-supplied grooming and a fixed layout — not control flow, not wire,
 not rung 5. Scope, conditions, negatives and replay:
 `reports/openexr2shell-file-level.md` W187 and
 `lab/openexr2shell-real/harness/tcache-steer-check.sh`.
+
+
+## 9. Target-mind extension W188 (2026-11-24) — unmodified-consumer tcache reach: negative
+
+The dedicated mind tested whether W187's address steering survives removing
+the purpose-built harness. A gdb probe at entry to the pinned sink enumerates
+glibc 2.39 tcache chains and reports any tcache user pointer inside the
+384-byte copy window (`dst+0..dst+384`), with absolute addresses normalized
+away. In the groomed `-no-pie` harness it finds the expected freed 0x3f0
+chunk at `dst+272` (chain index 5), so the detector is sensitive to the W187
+condition. In UNMODIFIED upstream `exrcheck -c`, with equal-length paths for a
+valid baseline, the fully file-chosen W184 PoC and the W186 size-word PoC,
+the only occupied tcache bin at the sink is one 0x90 chunk at `+4448`/`+4288`
+bytes past `outPtr`; `hits=[]` in all three. No tcache `next` word is in the
+overwrite window, so the file alone does not reproduce W187's grooming. This
+is a preserved negative at file-level rungs 1-4, not a grade change and not
+rung 5. Replay and full evidence: `reports/openexr2shell-file-level.md` W188
+and `lab/openexr2shell-real/harness/tcache-reach-check.sh`.
