@@ -150,6 +150,7 @@ containers whose host ports bind only to loopback.
 | FontForge2Shell | [brief](../reports/frontier-fontforge2shell.md), [status](../reports/fontforge2shell-status.md) | CVE-2026-135295, pinned tag `20251009` `fvimportbdf.c` `df766f9c…f0eb30d` and fix `65e80b5` patch `f2745243…5e99175` in `lab/frontier/fontforge2shell/pinned/` and `PINS.md` | `cd lab/frontier/fontforge2shell && ./run-all.sh` (rebuilds five binaries offline from the verbatim pinned function and fix hunk) | gcc ASan `WRITE of size 4` four bytes before a 16-byte region at `harness.c:126`, plain abort 134, fixed and complete-table controls clean, gdb `4d 49 53 00` at `encs-4` (top byte structurally zero); `evidence.log` raw `c0eda4e6…`, normalized `56fd8ada…5633bb` matching `REPLAY.md`, 5/5 RCs; admitted 05:4xZ as 126th route; author replay, unwitnessed, rung 5 UNKNOWN |
 | LibRaw2Shell | [brief](../reports/frontier-libraw2shell.md), [status](../reports/libraw2shell-status.md) | CVE-2026-135176, LibRaw exactly 0.22.3; pinned tarball `7edf96c5…355c`, PoC input `c7940268…5dae2`, reporter fix `32fc61e5…afc9c` in `lab/frontier/libraw2shell/PINS.md` | `cd lab/frontier/libraw2shell && ./bootstrap.sh && ./run-all.sh` (offline real `dcraw_emu` builds, all three option forms, fixed/safe controls) | ASan `WRITE of size 2` 0 past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; `evidence.log` `8ad12e49…874f57` 10 PASS/0 FAIL; chosen offset 68,644 but zero halfwords, all byte-control attempts preserved as negatives; admitted 05:4xZ as 127th route; author transcript, unwitnessed, rung 5 UNKNOWN |
 | LibreCAD2Shell (screened out) | [brief](../reports/frontier-librecad2shell.md) | CVE-2026-135294 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibreCAD <= 2.2.1.6, fix `4e51048…` (PR #3287); vulnerable v2.2.1.6 `rs_filterdxf1.cpp` `0cde2846…0a2097` and patch `9cdb82e6…7026` pinned in `lab/frontier/librecad2shell/pinned/` | none — source-bound screening only, no harness or trigger committed | `file.size()` (`qint64`) narrows into 32-bit `_bNum` near 4 GiB; `new char[_bNum+16]` then `fBuf[_bNum]='\0'` is a fixed one-byte underwrite before an 8-byte allocation, with `dos2unix()` as the in-function consumer. Real-file reachability, Qt build feasibility and post-corruption consumer behavior remain UNKNOWN; no bytes observed, no window, no witness, no admission row |
+| Contiki2Shell | [brief](../reports/frontier-contiki2shell.md) | CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P`, no RCE claim), Contiki-NG <= 5.2; pinned `release/v5.2` tarball `78133c77…70819c95`, PR #3312 patch and project-conf patch in `lab/frontier/contiki2shell/` | `cd lab/frontier/contiki2shell && sh run-all.sh` (bootstrap verifies the tarball hash, patches the native multicast example, rebuilds vulnerable/fixed/safe trees offline) | ASan `global-buffer-overflow WRITE of size 1232` 16 bytes past the 1280-byte global `uip_aligned_buf` at `mpl.c:981` from `data_message_expiration`, gdb chosen `MISHE-OO-TAUF!!\0` at `base+1280..+1295` (`gdb-inspect.txt`), fixed and safe controls clean, 9 PASS / 0 FAIL; clean-replay receipt in `REPLAY.md`. In-process packet injection with no tun/wire process; FRONTIER-STAGED, unwitnessed, rung 5 UNKNOWN |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -7062,3 +7063,60 @@ advisory itself makes no remote claim.
   dump, and the ALIVE/DEAD statuses in each `meta.txt`. This checks the
   receipts, not a fresh build; builds remain gitignored and regenerate with
   the target's own pinned scripts.
+
+## 2026-11-24 05:4x–06:0xZ — Contiki stage, FLTK shared image, live ICO crash
+
+- **Contiki2Shell W198 (FRONTIER-STAGED, `e89ebd3`)**: `cd
+  lab/frontier/contiki2shell && sh run-all.sh` verifies the pinned
+  `contiki-ng-release-v5.2.tar.gz` (`78133c77…70819c95`), applies the
+  `project-conf.patch` and open-PR `fix-pr3312.patch`, and builds the real
+  native multicast example three ways. Expect `RESULT: PASS=9 FAIL=0`: the
+  vulnerable ASan build reports `global-buffer-overflow WRITE of size 1232`
+  from `data_message_expiration` at `mpl.c:981`, `gdb-inspect.txt` records
+  chosen `MISHE-OO-TAUF!!\0` at `uip_aligned_buf+1280..+1295`, and the fixed
+  and complete-option controls stay clean. `REPLAY.md` repeats that matrix
+  from a fresh bootstrap; source tarball, tree and `*.out` logs are gitignored
+  and regenerate from the pinned archive. No tun device or wire process was
+  started; rung 4 is partial and rung 5 UNKNOWN.
+- **Fltk2Shell witness/pin fold and shared-image extension (`141a729`,
+  `b0d8d63`)**: the four-tree `bash run-all.sh` recipe above is unchanged;
+  `PINS.sha256` now records `gen_bmp.py` as `69dd2a2a…` and `REPLAY.md` points
+  at `072dc75`, where path masking landed (the earlier `b214fbb` runner gave
+  33 PASS / 0 FAIL with a path-only hash difference). Witness #3296 replayed
+  from `b214fbb` and graded rungs 1-4 ESTABLISHED at the direct-call scope.
+  For the author-only extension, run `cd
+  lab/frontier/fltk2shell/shared-image && sh build.sh && sh run.sh` after
+  `run-all.sh` has built the ASan trees: the headless
+  `Fl_Shared_Image::get()` consumer aborts with ASan `2 bytes before
+  4294967298-byte region` at `Fl_BMP_Image.cxx:490` in the vulnerable
+  `plus1632` tree and is clean in the fixed tree, while both crafted ICO
+  geometries are clean in both trees because the IconDirEntry 8-bit
+  dimensions override the wrapped DIB. Raw per-case stdout/stderr and exit
+  codes are tracked under `shared-image/outputs/`; consumer binaries are
+  gitignored build products. No witness replay, GUI, pointer or command.
+- **Imgproxy2Shell W3 live ICO crash (`7ec6de8`, `87a52fd`)**: run
+  `python3 lab/frontier/imgproxy2shell/provision/ico_probe.py <imgproxy-binary>
+  <libvips-libdir> <tag> /insecure/rs:fill:16:16/plain/hostile.ico` against
+  the already built pinned 4.0.0 CLI (source and proxy bind only to
+  127.0.0.1). Expect three fresh-process `rc=2` runs with
+  `malloc(): corrupted top size` and Go frames through
+  `vips.(*Image).Load`/`initialLoadImage`; the benign ICO yields HTTP 200 and
+  the v4.0.16-loader-only control yields 500 `ICO image data is too large`.
+  A clean `7ec6de8` replay matched. The ASan imgproxy binary
+  (`0f3e3360…dce203`) instead returns HTTP 500 with no report, with and
+  without `LD_PRELOAD=libasan.so`: preserve that negative; do not substitute
+  it for the harness's C write-site ASan. No chosen-byte readback, pointer,
+  command or r5.
+- **Synchronet2Shell W1 real cryptlib (`d0c1a2c`)**: after provisioning the
+  pinned `42f586d7` tree, run `bash
+  lab/frontier/synchronet2shell/real-cryptlib/run-all.sh`; expect ASan
+  `heap-buffer-overflow WRITE of size 64` 0 bytes after a 41-byte heap
+  destination via `cryptGetAttributeString` → `attributeCopyParams` →
+  `memcpy` (`real-redzone-64.out`), a clean 40-byte control, and chosen bytes
+  at real session offsets 44/48/52 in the plain probe. The loopback
+  `wire/` SSH pty-req attempts never delivered TERM (poll `-43`, broken pipe,
+  protocol errors `-16`/`-41`); those negatives are preserved, with no wire
+  reach, DoS, witness verdict or r5. The Synchronet row's stub-model wording
+  is superseded for the direct API, not for the network path.
+- **Docs bounded check (06:0xZ)**: receipts were read from the five new edges
+  and the tracked reports/logs; no new lab build or replay was run here.

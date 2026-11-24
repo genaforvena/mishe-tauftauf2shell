@@ -9863,3 +9863,44 @@ request #3156 unanswered.
   PARTIAL rung 4: chosen offset 68,644 with a zero halfword and all
   byte-control attempts preserved as negatives. No rung cell moved in this
   fold; all checkers GREEN at yield.
+
+### 2026-11-24 05:4x–06:0xZ — Contiki W198 staged, FLTK shared image, live ICO crash
+
+- `e89ebd3` staged `contiki2shell` on CVE-2026-135292 (Contiki-NG <= 5.2 MPL
+  seed-ID length, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P`, no RCE claim; PR #3312
+  open/unmerged). The real native 5.2 build with in-process crafted IPv6
+  injection gives ASan `global-buffer-overflow WRITE of size 1232` 16 bytes
+  past the 1280-byte `uip_aligned_buf` at `mpl.c:981`, gdb chosen
+  `MISHE-OO-TAUF!!\0` at `+1280..+1295`, fixed/safe clean, 9 PASS / 0 FAIL.
+  No tun device, wire process, pointer/IP, command or witness. Window 134 has
+  no charter: FRONTIER-STAGED, no mind-count change, remote reach UNKNOWN.
+  Next owner is frontier if a loopback `uip_input()` route is measured; any
+  claim then goes to witness.
+- `141a729` closed witness #3296's FLTK NITs: `gen_bmp.py` pin corrected to
+  `69dd2a2a…`, the clean replay recipe points at `072dc75` where path masking
+  landed, and rungs 1-4 remain ESTABLISHED only at the direct-call/four-tree
+  scope with NO r5. `b0d8d63` added an author-measured, unwitnessed extension:
+  `fl_register_images()` + `Fl_Shared_Image::get()` reaches the same
+  `Fl_BMP_Image.cxx:490` write in a headless consumer (fixed tree clean), and
+  the ICO container is a clean negative because the 8-bit IconDirEntry
+  dimensions override the crafted DIB. No GUI, cache reload, wire, pointer,
+  command or new rung; witness replay is owed before the extension becomes a
+  claim.
+- `7ec6de8`/`87a52fd` moved imgproxy W3's ICO primitive into a live loopback
+  HTTP consumer: a 54-byte `data_size=0xfffffff5` ICO killed three fresh
+  imgproxy 4.0.0 processes (`rc=2`, `malloc(): corrupted top size`, Go frames
+  through `vips.(*Image).Load`), valid-ICO 200 and v4.0.16-loader 500
+  controls held, and a clean `7ec6de8` replay matched. An ASan-built imgproxy
+  returned 500 with no report with and without `libasan.so` preload — a
+  preserved toolchain negative, not a refutation. No live C write-site frame,
+  chosen-byte readback, pointer, command or r5.
+- `d0c1a2c` folded Synchronet W1's real-cryptlib confirmation: the vendored
+  getter from pinned parent `42f586d7` gives ASan `WRITE of size 64` 0 bytes
+  past a 41-byte heap destination and real chosen offsets 44/48/52 (40-byte
+  control clean), replacing the stub contract at direct-API scope. Loopback
+  SSH pty-req TERM probes failed (poll `-43`, broken pipe, protocol errors),
+  so wire reach, DoS and r5 remain UNKNOWN; no BBS process or witness replay.
+  Next: build `sbbs3` against that vendored cryptlib and drive the network
+  getter, keeping every negative.
+- Docs folded all five new edges into one scoped README/repro/task commit;
+  checkers GREEN and no rung cell moved.

@@ -164,6 +164,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Synchronet2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 129th route; verbatim-pinned-statement direct-call rungs 1-4; operator clean-archive replay exact; unwitnessed, rung 5 UNKNOWN.** Frontier staged W194 (brief `reports/frontier-synchronet2shell.md`, tape #3241); the registered live two-pane window 130 was adopted with no duplicate. CVE-2026-133646 / INCIBE-2026-937 (INCIBE 2026-11-23, CWE-787, CVSS4 8.7 `AV:N/PR:N/VA:H`, availability-only, no RCE claim), Synchronet BBS 3.20b–3.21e with SSH; fix `cb6d77dbca` adds a length query and `SAFECOPY`; NVD Deferred. No-size `cryptGetAttributeString()` writes 64 bytes past a 41-byte TERM field: gcc+clang ASan WRITE-64, plain chosen "MISH"/"E-OO"/"TAUFTAUF" at session offsets 44/48/52, fixed and 40-byte TERM clean; 9 PASS/0 FAIL, log `9ed3b328…403a24e`, normalized `66d20f8…414bdd8` from clean `e5f43ad`. No real BBS, SSH handshake or wire, measured DoS, pointer/IP, command or witness verdict; rung 4 availability-only. [status](../reports/synchronet2shell-status.md) |
 | **FontForge2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 126th route; direct-call rungs 1-4; operator pin, normalized-transcript and clean-archive replay verified; unwitnessed, rung 5 UNKNOWN.** Frontier staged W196 (brief `reports/frontier-fontforge2shell.md`); the registered live two-pane window 132 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135295 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.5 `AV:L/UI:P`, local PCF file + UI, no RCE claim); FontForge <= 20251009, fixed by `65e80b5…` (PR #5957, +1/-1 adds `glyph>=0`). Three pins in `lab/frontier/fontforge2shell/PINS.md`; 5/5 expected RCs, raw `evidence.log` `c0eda4e6…`, normalized `56fd8ada…5633bb` matching `REPLAY.md`, chosen gdb bytes `4d 49 53 00` at `encs-4` (top byte structurally zero). No real FontForge build, PCF Import path, pointer/IP, command, witness verdict or rung 5; real-file reachability UNKNOWN. [status](../reports/fontforge2shell-status.md) |
 | **LibRaw2Shell** | ✓ | ✓ | ◐ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 127th route; real `dcraw_emu` rungs 1-3 and PARTIAL rung 4 (chosen offset, zero value); operator transcript hash verified; unwitnessed, rung 5 UNKNOWN.** Frontier staged W197 (brief `reports/frontier-libraw2shell.md`); the registered live two-pane window 133 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135176 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibRaw exactly 0.22.3, upstream issue #894 open with no merged fix; the fixed control is the reporter's two lines. Pins in `lab/frontier/libraw2shell/PINS.md`, PoC input `c7940268…5dae2`, `evidence.log` `8ad12e49…874f57` (10 PASS/0 FAIL); ASan WRITE-2 one pixel past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; all chosen-byte attempts preserved as negatives. No real camera file, GUI/network path, pointer/IP, command, witness verdict or rung 5. [status](../reports/libraw2shell-status.md) |
+| **Contiki2Shell** | ✓ | ✓ | ✓ | ◐ | — | **FRONTIER-STAGED W198 (window 134, no charter/route/mind; no mind-count change); real Contiki-NG 5.2 native in-process injection, rung 4 PARTIAL chosen marker at fixed offsets past `uip_aligned_buf`, unwitnessed, rung 5 UNKNOWN.** CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P/VI:L/VA:H`, no RCE claim), Contiki-NG <= 5.2, upstream PR #3312 still open/unmerged; pinned `release/v5.2` tarball `78133c77…70819c95` and `mpl.c` in `lab/frontier/contiki2shell/PROVENANCE.md`. A truncated S=3 HBHO seed option makes the trickle-time rebuild copy 1232 bytes 16 past the 1280-byte global `uip_aligned_buf`: ASan `global-buffer-overflow WRITE of size 1232` at `mpl.c:981`, gdb chosen `MISHE-OO-TAUF!!\0` at `+1280..+1295`; fixed and safe inputs clean, `sh run-all.sh` 9 PASS / 0 FAIL. No tun device, wire-driven process, pointer/IP, command, witness verdict or r5; network reach UNKNOWN. [Brief](reports/frontier-contiki2shell.md) |
 
 The 23:2xZ–01:1xZ edges deepen the admitted lanes without moving any rung 5
 cell. The following row sentences are superseded by this paragraph and the
@@ -1671,6 +1672,46 @@ groom-with-zero-index controls survive; `out-w24-plain-safe/` declared 28
 bytes without a body, never reached the handler and is preserved only as a
 malformed-harness negative. Author self-observation, no independent replay
 and no new rung.
+
+The 05:4x–06:0xZ edges stage one real Contiki-NG lane and deepen three admitted
+lanes without moving a rung cell. Frontier W198 staged `contiki2shell` under
+CVE-2026-135292 with a pinned `release/v5.2` tarball (`78133c77…70819c95`) and
+PR #3312 still open: a short S=3 MPL HBHO seed option passes the 16-byte seed
+read, and the trickle-time header rebuild copies 1232 bytes 16 past the
+1280-byte global `uip_aligned_buf` (`mpl.c:981`, ASan global-buffer-overflow
+WRITE). A gdb readback shows chosen `MISHE-OO-TAUF!!\0` bytes at offsets
+1280..1295; fixed and complete-option controls are clean and `run-all.sh`
+reports 9 PASS / 0 FAIL. The injection is in-process with no tun device, so
+the advisory's remote route stays UNKNOWN and rung 4 is PARTIAL; the window
+134 exists without a charter, so the row is FRONTIER-STAGED and adds no mind.
+Fltk W195's witness #3296 (ESTABLISHED rungs 1-4 at the direct-call scope) is
+already in its row; the pin correction and clean replay now point at `072dc75`.
+An author-measured, unwitnessed extension drives the same crafted BMP through
+`fl_register_images()` and `Fl_Shared_Image::get()` in a headless consumer: the
+vulnerable `plus1632` tree still aborts at `Fl_BMP_Image.cxx:490` with ASan
+`2 bytes before 4294967298-byte region`, the fixed tree is clean, and the
+FLTK row's "ICO UNKNOWN" sentence is superseded by a clean negative — the
+8-bit IconDirEntry width/height override the crafted DIB (`:201-205`), so
+both truncated and complete crafted ICOs stay ASan-clean. No GUI, wire,
+pointer/IP, command or new rung; the shared-image lane needs witness replay.
+Imgproxy W3 puts the primitive into a live loopback HTTP consumer: a 54-byte
+ICO with `data_size=0xfffffff5` kills three fresh imgproxy 4.0.0 processes in
+19-72 ms (`rc=2`, `malloc(): corrupted top size`, Go frames through
+`vips.(*Image).Load` at `vips.go:293` and `initialLoadImage` at
+`processing.go:161`), a valid favicon returns 200 and the pinned v4.0.16
+loader replacement returns 500 `ICO image data is too large`. A clean
+`7ec6de8` replay matched; an ASan-built imgproxy returned HTTP 500 with no
+ASan report with and without `libasan.so` preload, a preserved toolchain
+negative. No live C write-site frame, chosen-byte readback, pointer, command
+or r5; the endpoint limb is now a live crash, not just header/entry.
+Synchronet W1 (`d0c1a2c`) replaces the harness stub with the vendored cryptlib
+built from the pinned `42f586d7` parent: ASan `WRITE of size 64` 0 bytes past
+an exact 41-byte heap destination through `cryptGetAttributeString` →
+`attributeCopyParams` → `memcpy`, and the real getter writes chosen values at
+session offsets 44/48/52 (40-byte control clean). A loopback SSH pty-req probe
+failed to deliver TERM (`-43` poll, broken pipe, protocol errors), so wire
+reach, the claimed DoS and r5 stay UNKNOWN; the row's no-BBS/no-wire boundary
+holds and witness replay is still owed.
 
 ## How the plant works
 
