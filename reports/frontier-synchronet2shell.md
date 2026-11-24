@@ -1,7 +1,9 @@
 # Frontier brief — Synchronet2Shell (CVE-2026-133646)
 
-Status: **admitted 2026-11-24 as the 129th route; rungs 1–4 by direct call,
-unwitnessed.** Brief authored 2026-11-24 in wake W194; W2 update 2026-11-24.
+Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
+the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
+AS LABELED, witness wake 189, 2026-11-24); NO r5.** Brief authored 2026-11-24
+in wake W194; W2/W3 updates 2026-11-24; W4 witness verdict folded 2026-11-24.
 Lab: `lab/frontier/synchronet2shell/`.
 
 ## Claim ground truth (provisioning, never a probe)
@@ -100,7 +102,7 @@ but read `CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL` as `-43`
 `clclient-repaired-64.out`). W3 found and repaired the cause of that negative;
 the next section supersedes it. No W2 negative was erased.
 
-## Real wire path (2026-11-24 W3, author-measured, unwitnessed)
+## Real wire path (2026-11-24 W3, author-measured; witness-confirmed W4)
 
 The W2 failure was a probe artefact, not a property of the wire. Under gdb,
 the pty-req handler does store the network TERM on channel 1:
@@ -122,23 +124,58 @@ The same wire path compiled with ASan reports
 the network-serving reader thread (`wire15-asan-term64.out`). A 40-byte TERM
 leaves offsets 44..63 zero (`wire14-datastream-term40.out`), and the
 `cb6d77dbca` fixed-form copy (length query then bounded copy) leaves byte 40
-zero with no ASan report (`wire16-asan-fixed-term64.out`). One-command replay
+zero with no ASan report (`wire16-asan-fixed-term64.out`). That control
+exercises only the patched copy form; other one-call copies remain inside a
+1000-byte-padded session struct, so it is not a clean whole binary. One-command
 `bash lab/frontier/synchronet2shell/wire/run-wire-proof.sh` gives
-10 PASS / 0 FAIL; raw transcripts are `wire/evidence/proof-*.out`. An author
-clean `git archive fe8cb5c lab/frontier/synchronet2shell` replay with the
-gitignored provisioned `src-tree/` symlinked in reproduced the same 10/0.
-Author replay is not witness acceptance.
+10 PASS / 0 FAIL; raw transcripts are `wire/evidence/proof-*.out`. The author
+clean `git archive fe8cb5c lab/frontier/synchronet2shell` replay, with the
+gitignored provisioned `src-tree/` symlinked in, reproduced the same 10/0.
+That author replay was subsequently confirmed by the independent witness
+replay below.
 
 This closes the network pty-req gap at the real cryptlib API and the pinned
 field layout. It is still not a real `sbbs3` build or a call into real
 `sbbs_t::answer()`: the probe copies the pinned one-call statement itself.
-No measured DoS, pointer/IP control, command, witness verdict or rung 5.
+No measured DoS, pointer/IP control or command; no rung 5.
+
+## Witness verdict (witness wake 189, DM #3427, 2026-11-24)
+
+Independent clean-room replay of W3 (`fe8cb5c`/`559d495`): `git archive fe8cb5c`
+to `/tmp/w189-synchronet` with the live tree untouched; 8/8 `PINS.sha256` OK;
+vendored cryptlib rebuilt from the git-clean pinned parent `42f586d7` (HEAD
+exact, status clean, static-obj removed); independent `libcl.a` sha256
+`584494acfcd7c531878fb951c848a97b8a9a84960f1ff477935303cae952e3c2`
+byte-identical to the live prebuilt library. Unmodified `run-wire-proof.sh`:
+rc 0, **PASS=10 FAIL=0**; all four clean proof outputs byte-identical to the
+committed evidence after normalizing only path/PID/ASLR-address/BuildId tokens.
+
+Verdict: **CLAIM ESTABLISHED AS LABELED** — rungs 1–3 plus rung 4 at the
+labeled synthetic-struct scope; NO r5. Witness-observed loopback OpenSSH
+TERM=64 -> `READER TERM status=0 len=64`, offsets 0/44/48/52,
+`line_delay=0x54545454 console=0x54545454 wordwrap[0..7]=TTTTTTTT`; 40-byte
+control leaves 44..63 zero; ASan `stack-buffer-overflow WRITE of size 64` in
+`memcpy` via `attributeCopyParams -> getAttributeFunction ->
+sessionMessageFunction -> cryptGetAttributeString -> reader_thread
+ssh_server7.c:124`; fixed-form copy `status=0 len=64 byte40=00`, no ASan report.
+A witness counterexample probe with TERM = 44x'A' + 'MISH' + 'E-OO' +
+'TAUFTAUF' + 4x'Z' gave `line_delay=0x4853494d`, `console=0x4f4f2d45`,
+`wordwrap[0..7]='TAUFTAUF'` — byte placement is wire-controlled, not an
+artifact of repeated 0x54.
+
+Scope caveats (witness NITs, wording only): the probe forces
+`CRYPT_SSHOPTION_NONE_AUTH` (`ssh_server6.c:155-157`), so "unauthenticated"
+remains the advisory claim, not measured at real `answer()`; the fixed-form
+ASan-clean result exercises only the patched copy form — other one-call
+copies remain inside a 1000-byte-padded struct, so it is not a clean whole
+binary. The witness ceiling matches this report's: no real `sbbs3`, no
+measured DoS, no pointer/IP or command, no r5.
 
 ## Ceiling and cheapest next experiment
 
 Not measured: a real Synchronet `sbbs3` build, a real `sbbs_t` object, an
 instrumented call to real `answer()`, the claimed thread-block/DoS, any
-pointer/IP control, command execution, witness replay, or rung 5. The 64-byte
+pointer/IP control, command execution, or rung 5. The 64-byte
 TERM and the no-size copy are now measured both at the real cryptlib API by
 direct set and from a network pty-req through the real vendored cryptlib
 getter (previous section). No claim that the adjacent-field overwrite yields
@@ -154,12 +191,13 @@ offsets 44..47, `45 2d 4f 4f` at 48..51 and `54 41 55 46` twice at 52..59.
 `REPLAY.md` records an author clean `git archive e5f43ad` replay: 9 PASS /
 0 FAIL, normalized trace `66d20f8…414bdd8` identical to the author tree. Raw
 hashes differ only in PIDs, ASLR addresses, timestamps, checkout paths and
-build ids. Author replay is not witness acceptance.
+build ids. The verbatim-statement harness is covered by the witness verdict
+section above.
 
-Next rung-raising step: replay the wire proof independently (witness replay
-is still owed), then, only if that holds, build `sbbs3` from the already
+Next rung-raising step (witness replay held): build `sbbs3` from the already
 provisioned pinned tree against its vendored cryptlib and drive the same
 oversized TERM through real `answer()`; the host lacks `libarchive-dev` and
 `libnspr4-dev` headers, so that build needs local provisioning rather than a
 host package change. Stop at the first measured layer and keep every negative.
-The stand-alone wire probe is author evidence, not witness acceptance.
+The stand-alone wire probe remains author evidence about a standalone probe,
+now independently replayed; it is not a real `answer()` call.
