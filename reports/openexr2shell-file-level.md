@@ -909,3 +909,9 @@ Scope and grade unchanged: local EXR path, purpose-built C harness, no wire,
 socket, pointer/control-flow target, command or marker. No witness verdict
 for this section; the W161 verdict covers only the older all-FLOAT file.
 Rung 5 stays UNKNOWN.
+
+Clean-archive replay at commit `9f42ba6`: `git archive HEAD
+lab/openexr2shell-real` into `/tmp/w180-openexr`, with the gitignored pinned
+build trees and `src/` symlinked from the live tree,
+`sh harness/offset-steer-check.sh` -> `RESULT PASS` and all 16 normalized
+evidence hashes identical to the working-tree runs.

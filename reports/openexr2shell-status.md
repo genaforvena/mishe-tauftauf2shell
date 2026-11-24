@@ -388,3 +388,6 @@ while keeping the 64-byte inner frame yields rv=23 and no write, so the
 frame and leader must scale together. No wire, pointer, command or marker;
 this section is unwitnessed and rung 5 stays UNKNOWN. Full hashes, evidence
 and ceiling: `reports/openexr2shell-file-level.md` W180.
+
+Clean-archive replay at `9f42ba6` reproduced `RESULT PASS` and all 16
+normalized evidence hashes exactly.
