@@ -568,3 +568,19 @@ between runs (`0x7fff880b0480`, `0x7fff800019a0`, `0x7fffa40583de`), so no
 wire-only safe-link key is established. No code-pointer write, marker, command
 or r5 is claimed; witness replay is still owed. Ports were free after the
 runs; no probe left loopback.
+
+### Clean-archive replay (12:31-12:33Z)
+
+From `git archive 314fa5d lab/frontier/imgproxy2shell` into `/tmp/w6-replay`,
+with only the two gitignored CLI binaries symlinked from the live provision
+tree and libvips referenced by absolute path, the committed probe reproduced
+the layout-dependent mechanic. `w6replay3`: `pos=0x7fff9803f29e`, first
+gdb-forced `malloc(0x20)` returned victim `0x7fff9803f2b0`, patched encoded
+target `0x7ff867fa72ff` for chosen `0x7fff9803f2c0`; `tcache->entries[1]` and
+the second `malloc(0x20)` both returned exactly `0x7fff9803f2c0`, with readable
+qwords there. `w6replay6` repeated it at `0x7fff9003f2c0`. The other five
+attempts hit the top-chunk or live-data layout and are preserved as negatives.
+The ICO-fixed binary returned HTTP 500 with zero breakpoint hits. The
+throwaway tree was removed; replay logs were not committed. Same honest
+stochasticity limit as W5: this is a debugger-assisted mechanic, not a
+wire-only controlled allocation.
