@@ -1,0 +1,110 @@
+# W175 (2026-11-24): short canary-safe reply, real consumer canary leak
+
+Author experiment, NOT an independent witness verdict. Grade unchanged at
+rung 4 (synthetic lab vusb replies, lab-placed victim/guards, no device-
+observable channel, no pointer control, no command). All work in a throwaway
+replay tree `/tmp/w174-lgp` from `git archive 833729ad`; pins 4/4 OK, tarball
+`5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28`,
+vulnerable camlib `0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185`.
+
+## Local-only changes to the throwaway tree (NOT committed)
+
+1. `vusb.c` mode `v` honours `M2SHELL_JL2005_LEN`, capping the bulk reply `n`
+   BEFORE the existing `memset(bytes, 0x5a, n)` at vusb.c:183:
+
+       if (m2[0] == 'v') {
+           const char *lv = getenv("M2SHELL_JL2005_LEN");
+           if (lv) { int limv = (int)strtol(lv, NULL, 0); if (n > limv) n = limv; }
+       }
+
+   The mode-v victim+guards condition was widened from
+   `m2[0]=='v' && n>=0x3E40` to `m2[0]=='v'` so grooming still runs on a
+   short reply. Rebuilt with `make -C libgphoto2_port -j4`, copied
+   `libgphoto2_port/.libs/vusb.so` over
+   `installdir-plain/lib/libgphoto2_port/0.12.2/vusb.so`.
+2. `M2SHELL_JL2005_TOTAL` sets first-block `bytes[8..11] = 00 00 ff ff` so
+   `total_data_in_camera = 0xffff * blocksize > 0` and the download sanity
+   check at library.c:244 passes.
+3. Local probe: copy of `live/canary_leak_probe.c`, adds an `OWN_CANARY` print
+   (`mov %fs:0x28`), a `m2s_victim_file` global, a filename argv[2], and
+   `GP_FILE_TYPE_RAW`. Built `-O0 -g -rdynamic -fno-omit-frame-pointer`.
+
+## Why the cap must precede the early memset (gdb watchpoint)
+
+First local attempt capped `n` AFTER vusb.c:183. A hardware watchpoint on
+`jl2005c_init`'s `rbp-8` showed the overwrite source:
+
+  #0 __memset_avx2_unaligned_erms
+  #1 gp_port_vusb_read (...bytes=0x7fffffff8b50 'Z'..., size=16384) at vusb/vusb.c:183
+  #2 gp_port_read (...data=0x7fffffff8b50..., size=16384) at gphoto2-port.c:439
+  #3 jl2005c_init (...) at jl2005c/jl2005c.c:152
+
+The full-size 0x5a memset clobbered the canary regardless of the returned
+length. W166's mode `p` capped before it. With the cap moved before the
+memset, `*** stack smashing detected ***` disappears.
+
+## Positive 1: normal init with no gdb stack injection
+
+Env from replay tree `T`:
+
+  P=$T/src/libgphoto2-2.5.34-plain/installdir-plain
+  CAMLIBS=$P/lib/libgphoto2/2.5.34
+  IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib
+  M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1024
+  M2SHELL_JL2005_LEN=0x3E28 M2SHELL_VUSB_GUARDS=4
+  M2SHELL_VUSB_DRAIN=28 M2SHELL_JL2005_FILL=0 M2SHELL_JL2005_TOTAL=1
+  <probe> usb:001,001 jl_1024.ppm        # no gdb, no canary/RIP env
+
+Observed: `VUSB_VICTIM 0x5e83d9c60e60`, `gp_camera_init rc=0`, file count
+1024, `file_get rc=0`, no stack smashing, no top-size abort. DRAIN sweep at
+LEN=0x3E28/GUARDS=4 with fill=0x41: 20..27 aborted on `malloc(): corrupted
+top size`, 28 worked. The victim offset is the criterion, not the DRAIN
+number (cf. W174). Controls: full reply (LEN unset) with GUARDS=4 gives
+`stack smashing detected`; LEN=0x3E28 with GUARDS=0 gives `malloc():
+corrupted top size`.
+
+gdb observation of the same canary-safe setup (gdb only reads; no
+`m2s_hexenv` calls):
+
+  OWN_CANARY=1d987751fea3ee00
+  CANARY_COPY table+0x3FF8 = 0x1d987751fea3ee00
+  CALLER_CANARY_SLOT = 0x1d987751fea3ee00
+  gp_camera_init rc=0 ; [Inferior 1 exited normally]
+
+So the live stack canary survives the oversized `:152` read (reply stops at
+bulk 0x3E28, eight bytes before `info+0x4028 = rbp-8`) and the `:154` source
+over-read copies it verbatim into `priv->table+0x3FF8`.
+
+## Positive 2: the real gp_camera_file_get consumer returns the canary
+
+The table entry for photo index 1023 is `table+0x3FF0..0x3FFF`; its second
+halfword is the canary copy. File `jl_1024.ppm` maps to that index
+(`gp_list_populate` uses `x+1`). `GP_FILE_TYPE_RAW` returns `pic_buffer`
+unchanged (library.c:338-341); `GP_FILE_TYPE_NORMAL` decompresses it into a
+PPM and destroys the entry. Three independent runs:
+
+  run1 OWN_CANARY=06761b4482cea100
+       file_get rc=0 size=16 header=000000000000000000a1ce82441b7606
+  run2 OWN_CANARY=a236a04cc2e58600
+       file_get rc=0 size=16 header=00000000000000000086e5c24ca036a2
+  run3 OWN_CANARY=8fbc6e26c2cf5200
+       file_get rc=0 size=16 header=00000000000000000052cfc2266ebc8f
+
+In each run the header's last 8 bytes little-endian equal `OWN_CANARY`
+exactly, and change with the per-process canary. This overturns W166's
+"heap copy of the canary is not consumer-visible" disposition: with W172's
+guard chunks, a sane `total_data_in_camera`, a zero-fill short reply and the
+RAW file type, the real libgphoto2 API returns the canary to a caller.
+
+## Scope / remaining ceiling
+
+The canary is returned to a HOST consumer (the lab probe), not to the
+device: no host-to-device echo of `priv->table` exists in this camlib, so a
+real malicious device still has no readback channel. No gdb writes, but the
+victim/guards are lab-placed and the replies are synthetic. No pointer
+control from this leak alone, no command, no USB/IP or remote request, no
+witness replay. Rung 4 author-side; rung 5 UNKNOWN. A zero-fill reply
+without `M2SHELL_JL2005_TOTAL` leaves `total_data_in_camera == 0` and hangs
+in library.c:264's download loop (observed, killed at 105 s).
+
+No pin, harness, committed patch, report or witness ask changed.

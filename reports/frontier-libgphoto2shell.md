@@ -321,3 +321,22 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   zeroed, fixed and reversed cases matched W172. Author replay, not a witness
   verdict; grade unchanged at rung 4. Commands, layout sweep and raw results:
   `lab/frontier/libgphoto2shell/evidence/real-plain-clean-replay.out`.
+
+- Canary-safe reply and consumer-visible canary copy (W175, 2026-11-24): a
+  lab vusb reply capped at bulk offset `0x3E28` (eight bytes before the
+  canary at `info+0x4028 = rbp-8`), combined with W172's guard chunks and
+  `DRAIN=28`, reaches `gp_camera_init rc=0` in the plain real build with the
+  process canary naturally intact and no gdb stack injection. The `:154`
+  source over-read copies that canary into `priv->table+0x3FF8` (gdb read:
+  `CANARY_COPY == CALLER_CANARY_SLOT == OWN_CANARY`). With a zero-fill reply,
+  first-block bytes `8..11 = 00 00 ff ff` to keep `total_data_in_camera > 0`,
+  and `GP_FILE_TYPE_RAW`, the real `gp_camera_file_get()` returns a 16-byte
+  record whose last eight bytes equal the per-process canary in three
+  independent runs. This overturns W166's "not consumer-visible" outcome;
+  the early full-size `memset` in `vusb.c:183`, not a structural barrier,
+  caused the earlier canary clobber. The leak goes to a HOST consumer — this
+  camlib has no host-to-device echo of `priv->table` — so a malicious device
+  still has no readback channel. No pointer control, command, wire or
+  witness replay; rung 4 author-side, rung 5 UNKNOWN. Exact env, local
+  throwaway patch and raw runs:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-canary-safe-init.out`.
