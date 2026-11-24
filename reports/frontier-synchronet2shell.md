@@ -124,7 +124,10 @@ leaves offsets 44..63 zero (`wire14-datastream-term40.out`), and the
 `cb6d77dbca` fixed-form copy (length query then bounded copy) leaves byte 40
 zero with no ASan report (`wire16-asan-fixed-term64.out`). One-command replay
 `bash lab/frontier/synchronet2shell/wire/run-wire-proof.sh` gives
-10 PASS / 0 FAIL; raw transcripts are `wire/evidence/proof-*.out`.
+10 PASS / 0 FAIL; raw transcripts are `wire/evidence/proof-*.out`. An author
+clean `git archive fe8cb5c lab/frontier/synchronet2shell` replay with the
+gitignored provisioned `src-tree/` symlinked in reproduced the same 10/0.
+Author replay is not witness acceptance.
 
 This closes the network pty-req gap at the real cryptlib API and the pinned
 field layout. It is still not a real `sbbs3` build or a call into real
