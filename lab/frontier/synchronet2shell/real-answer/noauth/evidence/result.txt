@@ -1,0 +1,13 @@
+Captured stdout of `bash lab/frontier/synchronet2shell/real-answer/noauth/run-noauth.sh`
+run 2026-11-24 09:57–10:00Z (wake W7). Verbatim tool output:
+
+patching file src/sbbs3/answer.cpp
+Hunk #1 succeeded at 546 (offset 1 line).
+NOAUTH ANYAUTH_PROBE_COUNT=1
+NOAUTH NOAUTH_PROBE_COUNT=0
+NOAUTH NOAUTH_ACTIVE_COUNT=1
+NOAUTH NOAUTH_ANYAUTH_LOG_COUNT=0
+NOAUTH NOAUTH_CLIENT_BYTES=138
+NOAUTH CONTROL_OK anyauth config reached the verbatim copy
+NOAUTH DEFAULT_CONFIG_REACH_NO overflow did not reach without SSH_ANYAUTH
+NOAUTH EVIDENCE_DIR=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/real-answer/noauth/evidence

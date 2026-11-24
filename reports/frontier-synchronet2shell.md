@@ -4,9 +4,11 @@ Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
 the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
 AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 `sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
-author-measured in W5/W6 and replay still owed; NO r5.** Brief authored
-2026-11-24 in wake W194; W2/W3/W4/W5/W6 updates 2026-11-24. Lab:
-`lab/frontier/synchronet2shell/`.
+author-measured in W5/W6 and replay still owed; W7 measures a
+default-config, no-credential negative at real `answer()`; NO r5.** Brief
+authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7 updates 2026-11-24.
+Lab: `lab/frontier/synchronet2shell/`.
+
 
 ## Claim ground truth (provisioning, never a probe)
 
@@ -241,17 +243,50 @@ This demonstrates the advisory's availability impact in a real `sbbs3`
 build with vulnerable/fixed controls; it is author evidence with replay
 owed, and implies nothing about pointer/IP control or code execution.
 
+## W7 default-config, no-credential negative (2026-11-24, author-measured)
+
+`SSH_ANYAUTH` is a non-default option: pinned `main.cpp:6047-6050` sets
+`CRYPT_SSHOPTION_NONE_AUTH` only under it, and `answer.cpp:270-295` takes a
+separate no-credential activation path. To test the advisory's
+"unauthenticated" wording at real `answer()`,
+`bash lab/frontier/synchronet2shell/real-answer/noauth/run-noauth.sh` builds
+the same vulnerable verbatim statement plus the instrumentation-only probe,
+then runs the same binary on loopback port 22225 with `SSH_ANYAUTH` and on
+22226 with that one token removed. Both cases use stock OpenSSH with
+`PreferredAuthentications=none`, no password or key, and the W5/W6 64-byte
+chosen TERM. The W5/W6 replay scripts are byte-unchanged.
+
+The control logged one
+`REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45
+off52=TAUFTAUF`; the no-`SSH_ANYAUTH` server accepted the TCP connection,
+attached node 1 and logged one `SESSINFO_ACTIVE`, but logged **zero** probes.
+The client saw `lab@127.0.0.1: Permission denied (publickey,password).` and
+the session failed before the TERM copy. Transcripts:
+`real-answer/noauth/evidence/`.
+
+This is a negative result, kept rather than retried away: with `SSH_ANYAUTH`
+the W5/W6 measurements used no credentials, so no-credential reach is real
+on that configuration. At a config without it, a stock OpenSSH client sends
+pty-req only after authentication, so this probe does **not** refute the
+advisory's unauthenticated claim for a custom client that sends pty-req
+earlier, nor for other authentication configurations. Default-config remote
+reach stays UNKNOWN; no rung change and no new witness replay request.
+
+
 ## Ceiling and cheapest next experiment
 
-Not measured: pointer/IP control, command execution, rung 5, and independent
-replay of W5/W6. The advisory's claimed thread-block/socket-exhaustion DoS
-is now measured at real `answer()` scope in W6 with a fixed control. The
-64-byte TERM and the no-size copy are measured at the real cryptlib API,
-from a network pty-req through the real vendored cryptlib getter, inside a
-real `sbbs3` build's `sbbs_t::answer()` on loopback. No claim that the
-adjacent-field overwrite yields code execution: the advisory's own impact
-vector is availability-only (`VC:N/VI:N`). W5 and W6 are author evidence
-with one-command replays, not yet independently replayed.
+Not measured: pointer/IP control, command execution, rung 5, independent
+replay of W5/W6, and no-credential TERM reach at a config without
+`SSH_ANYAUTH` (W7 negative, not a refutation). The advisory's claimed
+thread-block/socket-exhaustion DoS is measured at real `answer()` scope in
+W6 with a fixed control. The 64-byte TERM and the no-size copy are measured
+at the real cryptlib API, from a network pty-req through the real vendored
+cryptlib getter, inside a real `sbbs3` build's `sbbs_t::answer()` on
+loopback. No claim that the adjacent-field overwrite yields code execution:
+the advisory's own impact vector is availability-only (`VC:N/VI:N`). W5 and
+W6 are author evidence with one-command replays, not yet independently
+replayed.
+
 
 `gdb.txt` (sha256 `968fa2093607c70425343fe569fe91ee7bc467d7077dc52ff4914cd24691f128`)
 is a batch gdb transcript of the same plain vulnerable binary at the statement
