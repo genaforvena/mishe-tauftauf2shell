@@ -66,17 +66,20 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   directory without a privileged font dir; OS-level unprivileged X display
   access and server privilege remain UNKNOWN. No grade change.
 - Ceiling: no remote wire delivery, OS-level unprivileged X display access,
-  pointer control, allocator grooming toward a live object, control-flow
-  diversion, marker side effect, ROP or command was observed. X-protocol font
-  path injection into a running server is demonstrated (W180); privileged
-  font-dir write is not required in that model.
+  control-flow diversion, marker side effect, ROP or command was observed.
+  X-protocol font path injection into a running server is demonstrated
+  (W180); privileged font-dir write is not required in that model.
+  Pointer control over a live object's data pointer is now demonstrated at
+  the public API under a fixed ASLR-off layout (W183), but not over a saved
+  pointer or function pointer.
   The `0x5a5a` bytes are chosen data, not execution; the 16-bit
   `sm->first` truncates 65790 to 254, so only the chosen value survives.
   **For `SIZE 256 258` there is still no plain-build crash**: the vulnerable
   Xvfb keeps running and `xdpyinfo` answers, as the witness replayed. The
   row-1024 plain crash is availability impact only, not execution. No live
-  object lies at the 508-byte destination (mmap usable slack by default, brk
-  top chunk with a raised mmap threshold). Rung 5 UNKNOWN.
+  object lay at the 508-byte destination for a **single** mapping (mmap usable
+  slack by default, brk top chunk with a raised mmap threshold); W183 does
+  place live objects there with seven mappings. Rung 5 UNKNOWN.
 - Second OOB write site (W181): a two-mapping `.enc` (`SIZE 256 1024`,
   indices 255 and 261375) bypasses the single-mapping skip of the identity
   ramp and makes `setCode()` write 195840 contiguous 16-bit values past the
@@ -88,12 +91,24 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   Evidence and reproduction: `lab/frontier/libfontenc2shell/realpath/evidence/
   ramp/README.txt`; details in `PROVENANCE.md` W181. The values are index-derived,
   not chosen data, and no live object or pointer was observed: grade unchanged.
+- Live-object pointer control (W183): a seven-mapping `SIZE 256 258` `.enc`
+  writes chosen words at +508 and +24..+30 bytes past the buffer. The later
+  stores replace all four 16-bit halves of mapping2's already-live
+  `sm->map` pointer; `FontEncRecode(254, mapping2)` then returns the chosen
+  `0x5558` from the redirected address instead of `0x1111`. Vulnerable safe
+  input keeps `0x1111`; fixed `5920c6e` rejects all out-of-range mappings;
+  vulnerable ASan reports `WRITE of size 2` at `encparse.c:495`, 508 bytes
+  past the 131072-byte region. Evidence: `lab/frontier/libfontenc2shell/
+  realpath/evidence/ptrctrl/` (run with `sh .../ptrctrl/run.sh`);
+  details in `PROVENANCE.md` W183 and report §3.7. Rung 4 at the real-library
+  public API; not a function pointer, not rung 5, and the absolute target
+  needs ASLR off.
 
-Next for the target mind: only on an observed saved pointer or control-flow
-target, attempt a bounded benign marker with vulnerable, fixed and safe-input
-controls. Alternative evidence: a production X configuration whose allocator
-places a live object at the destination before the store, or the OS-level
-unprivileged-to-privileged X display precondition (W180 covers runtime
-injection, not display access or server privilege). Neither is assumed. Both
-witness verdicts are folded; the witness owes no further evidence on any
-measured scope.
+Next for the target mind: W183 found a live data pointer but no saved pointer
+or control-flow target, so only on such an observation should a bounded benign
+marker be attempted with vulnerable, fixed and safe-input controls.
+Alternative evidence: the OS-level unprivileged-to-privileged X display
+precondition (W180 covers runtime injection, not display access or server
+privilege), or remove the fixed-layout requirement for W183. Neither is
+assumed. Both witness verdicts are folded; the witness owes no further
+evidence on any measured scope and has not replayed W183.

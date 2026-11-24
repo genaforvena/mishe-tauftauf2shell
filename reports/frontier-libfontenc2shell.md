@@ -170,6 +170,38 @@ OOB entries. Evidence and reproduction: `realpath/evidence/ramp/README.txt`,
 live object, saved pointer or control-flow target was observed: this widens
 the OOB write but does not change the grade.
 
+
+### 3.7 W183 chosen-byte overwrite of a live object pointer (public API)
+
+W181's ramp wrote index-derived values into wilderness. A seven-mapping
+`.enc` gives a chosen 2-byte store at a chosen OOB offset *after* the parser
+has allocated its per-mapping `FontEncSimpleMapRec` objects
+(`encparse.c:641-658`). With `SIZE 256 258`, `0xff00` reaches index 65790
+(+508 bytes) and `0xfe10`..`0xfe13` reach indices 65548..65551
+(+24..+30 bytes). Each mapping's first CODE resets `first/last`, so there is
+no identity ramp: one chosen store per mapping. The four +24..+30 stores
+replace all four 16-bit halves of mapping2's live `sm->map` data pointer.
+
+With `MALLOC_MMAP_THRESHOLD_=262144` and ASLR disabled (`setarch -R`), the
+real vulnerable library's mapping2 `map` changes from its in-bounds target
+(holding chosen `0x1111`) to `0x55555558257a`, +26 bytes past the buffer,
+where another of the chosen stores placed `0x5558`. The public
+`FontEncRecode(254, mapping2)` returns 21848 (`0x5558`) instead of 4369
+(`0x1111`): an observed read through the redirected live-object pointer.
+Controls: vulnerable `SIZE 256 256` safe input leaves the pointer and value
+unchanged; fixed `5920c6e` rejects every out-of-range mapping (`map=(nil)`,
+`len=0`, `recode=0`); vulnerable ASan reports `WRITE of size 2` at
+`encparse.c:495`, 508 bytes past the 131072-byte region from `reallocarray`
+at `:477`. Inputs, probe, runner, raw outputs and gdb layout are in
+`realpath/evidence/ptrctrl/`; reproduce with `sh .../ptrctrl/run.sh`.
+
+This is rung 4 at the real-library public-API boundary: chosen bytes at
+chosen offsets plus full overwrite of one live object's data pointer and an
+observed read through it. It is not a function pointer or saved return
+address, and the target is an absolute heap address that needs the fixed
+ASLR-off layout. No control-flow diversion, marker execution, command, X
+server process, wire delivery or privileged context was exercised.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -187,22 +219,28 @@ the OOB write but does not change the grade.
   `0x21002`, `malloc_usable_size=135152`), so 508 bytes past the nominal end
   is inside usable slack, not a neighbouring object. With
   `MALLOC_MMAP_THRESHOLD_=262144` it is a brk chunk followed by the top chunk
-  (`0x20011`, next size `0x20cd1`); still no live object at the destination.
-  `reallocarray` at `:469` and the store at `:495` have no intervening
-  allocation in this parse path.
+  (`0x20011`, next size `0x20cd1`); for a **single** mapping no live object is
+  at the destination, and `reallocarray` at `:469` and the store at `:495`
+  have no intervening allocation in that parse path. W183 (§3.7) preserves
+  this negative result for one mapping but shows that **seven** mappings let
+  the parser itself allocate live `FontEncSimpleMapRec` objects after the
+  buffer before the later stores, so the destination is no longer only
+  wilderness.
 - The 16-bit `sm->first` truncates 65790 to 254, so only the chosen value,
-  not the chosen index, survives into the copied map. No pointer control,
-  allocator grooming toward a live object, control-flow diversion, marker
-  side effect or command was observed. The independent witness replay (#2867)
-  confirmed the earlier scopes; it did not add live-object control or a
-  remote path. The row-1024 plain crash is service loss, not execution.
-  Rung 5 is UNKNOWN.
+  not the chosen index, survives into the copied map. W183 adds pointer
+  control over one live object's data pointer, but no control-flow diversion,
+  marker side effect or command was observed. The independent witness replay
+  (#2867) confirmed the earlier scopes; it did not add live-object control or
+  a remote path, and W183 has not been witness-replayed. The row-1024 plain
+  crash is service loss, not execution. Rung 5 is UNKNOWN.
 
 ## 5. Grade and handoff
 
 Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
-with attacker-request-driven chosen bytes at a chosen offset; rung 4 is
-limited to the local chosen-store demonstration (no live-object control);
+with attacker-request-driven chosen bytes at a chosen offset; rung 4 includes
+both the local chosen-store demonstration and W183's chosen-byte overwrite of
+a live parser object's data pointer at the real-library public API, observed
+through a public `FontEncRecode` read, but only under a fixed ASLR-off layout;
 a **plain-build crash (availability impact) is demonstrated** in a live Xvfb
 at `SIZE 256 1024`; rung 5 UNKNOWN. Two independent verdicts are folded:
 #2867 established rungs 1-4 CODE/HARNESS and live rung 3 from a clean
@@ -217,13 +255,14 @@ counterexample survived either replay. The upstream regression input
 `SIZE 256 258` still survives in a plain build; the row-1024 crash is
 service loss, not execution.
 
-Next bounded experiment: only on an observed saved pointer or control-flow
-target, consider a benign marker with vulnerable, fixed and safe-input
-controls. Alternative evidence: find a production X configuration whose
-allocator places a live object past this allocation before the store, or
+Next bounded experiment: W183 observed a live data pointer but no saved
+pointer or control-flow target, so the same boundary as before still applies:
+only on an observed saved pointer or control-flow target, consider a benign
+marker with vulnerable, fixed and safe-input controls. Alternative evidence:
 establish the OS-level unprivileged-to-privileged X display precondition on a
-real deployment (W180 established runtime X-protocol injection only). Neither
-is assumed here. Both witness verdicts are folded; the witness owes no further
-evidence on the earlier scopes or the row-1024 matrix. Full commands, negatives
-and the setup-error counterexample are in `PROVENANCE.md`
-W155/W156/W172/W180/W181.
+real deployment (W180 established runtime X-protocol injection only), or
+remove the fixed-layout requirement for W183. Neither is assumed here. Both
+witness verdicts are folded; the witness owes no further evidence on the
+earlier scopes or the row-1024 matrix, and has not replayed W183. Full
+commands, negatives and the setup-error counterexample are in `PROVENANCE.md`
+W155/W156/W172/W180/W181/W183.
