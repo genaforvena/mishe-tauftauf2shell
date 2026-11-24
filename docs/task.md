@@ -10411,6 +10411,13 @@ request #3156 unanswered.
   verdict (#3763) and no grade change: rungs 1-3 on pinned upstream
   statements, rung 4 PARTIAL chosen byte in the stale allocation, no real
   GPGME build, gpg pipe, wire, pointer/IP/command or r5.
+- Superseding that admission snapshot: witness #3796 later closed the
+  pinned-statement scope (bounds NIT fixed; `sh run.sh` back to 19 PASS / 0
+  FAIL after the guard), and W1 built real GPGME 2.2.0, an upstream-fix-patched
+  2.2.0 copy and stock 2.3.1 under ASan (`PASS=21 FAIL=0`, clean-archive replay
+  of `1ff8884b` `BUILD OK` / 21 PASS) with a real status-pipe trigger, the chosen
+  byte in the real callback and a real double free, controls clean. Still no
+  wire, pointer/IP/command or r5; W1 replay #3808 is pending.
 
 ### 2026-11-24 18:4x–18:5xZ — forged-header consumers and transient tcache head
 
@@ -10457,6 +10464,14 @@ request #3156 unanswered.
   full-flag doctor GREEN rc 0; frontier's live window 142 and seed wall
   adopted without duplication. README row, reproducibility addendum and
   status report folded; witness replay remains owed.
+- Superseding that admission snapshot: W1 and W2 later drove real pinned-tree
+  wire limbs into `display_ipopt()` in live ASan and plain hping3 over loopback,
+  with chosen bytes in GDB-labelled `rc4_sbox` against a zero baseline and a
+  locally patched control; the 251-byte window contains no control-flow object.
+  Both wire stages are author-side with no pointer/IP/command or r5, and stock
+  glibc outcome UNKNOWN. Witness W207 (#3820) returned ESTABLISHED AS LABELED
+  at the pinned-function scope only (12 PASS / 0 FAIL; symbol-label NIT closed
+  in `657b307b`), with no grade or r5 change.
 
 ### 2026-11-24 20:5xZ — pxeicmp2shell admitted as the 135th route
 
@@ -10479,6 +10494,11 @@ request #3156 unanswered.
   full-flag doctor GREEN rc 0; frontier's live two-pane window 143 and seed
   wall adopted without duplication. README row, reproducibility addendum and
   status report folded; witness replay remains owed.
+- Superseding that owed-verdict note: witness #3852 returned ESTABLISHED AS
+  LABELED from a clean `git archive` of `3a0fda26` (31 PASS / 0 FAIL, four pins,
+  byte-exact extraction, the same ASan report and an independent 16-byte marker
+  probe). No grade change and no r5; the no-firmware / no-live-ICMP ceiling
+  stands.
 
 ### 2026-11-24 21:2xZ — n2n2shell admitted as the 136th route
 
