@@ -142,7 +142,8 @@ tracked cases. `vec4pos.gltf` gives ASan `heap-buffer-overflow`, `WRITE of size
 `stack-buffer-overflow WRITE of size 12` in `ImportMeshes`; `safe.gltf` is
 clean. The PR6860 hunk overlay blocks vec4pos but not idx3.
 `harness/run-realpath.sh`: **8 PASS / 0 FAIL**, evidence
-`realpath/evidence/`. Author-measured; outside verdict #3277, not replayed.
+`realpath/evidence/`. Author-measured; outside verdict #3277; clean-archive
+author replay recorded below.
 
 ## W2 — chosen bytes on the real path (2026-11-24 03:02Z, commit `8725d56`)
 
@@ -156,7 +157,7 @@ records the reported address, unpoisons only those 16 redzone bytes with
 bytes. A plain non-ASan build aborts with `malloc(): invalid size (unsorted)`
 (rc 134); fixed-hunk and safe controls are clean. `run-placement.sh`:
 **11 PASS / 0 FAIL**, evidence `placement/evidence/`. Author-measured;
-witness replay owed.
+clean-archive author replay recorded below; independent witness replay owed.
 
 ## W4 — placement lane closed as a negative (2026-11-24 04:30Z)
 
@@ -389,8 +390,11 @@ at the matching level, and feeds the tracked documents through
 
 ## Next lane
 
-Replay W1/W2 independently, preserving any contradiction as a negative. W5,
-W6, W7 and W8 measured larger and distinct-site overruns through the real
+Independent witness replay of W1/W2 is still owed; the clean-archive author
+replay below is reproducibility evidence, not acceptance. Preserve any
+contradiction as a negative.
+
+W5, W6, W7 and W8 measured larger and distinct-site overruns through the real
 importer but found no chosen byte in a live `aiMesh` field. W9 separated the
 two proposed fixes: PR7090 blocks the index legs but not the element-size
 overruns. W10 shows a chosen-address dereference in the plain importer, not
@@ -434,3 +438,19 @@ optimization libraries rebuilt by the script; the normalized trace is
 byte-identical to the author tree (sha256
 `f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af`,
 `diff -q` empty). Author replay, not witness acceptance.
+
+W13 clean-archive replay at 15:1xZ: `git archive 958fc8ca` into
+`/tmp/w13-assimp-replay-958fc8ca` (local pinned tarball copied in, no
+network), `bootstrap.sh` rc 0 with all 10 pins OK, `run-realpath.sh`
+8 PASS / 0 FAIL and `run-placement.sh` 11 PASS / 0 FAIL with the vulnerable,
+PR6860-overlay and plain glTF-only libraries all rebuilt. The seven W1 `.out`
+traces normalize to sha256
+`4885c7ccc1008642280e83a3e6ba13725ff43a78ca825eb9ad7496042ca87422` and the
+five W2 `.out` traces to
+`2900d8985ce616aeb1a0f357b9fdb59f443d0e09c584ca8c888e732247ee6ef3`, both
+byte-identical to the author tree (`diff -q` empty) after replacing PIDs,
+addresses, checkout paths and build ids under the `REPLAY.md` rules. No claim
+content was normalized. Source-bound ceiling rechecked: pinned
+`BaseImporter.h:318-347` `CopyVector` copies raw mesh pointers and calls no
+function through the slot W10 overwrites, so that slot offers no observed
+path to control flow. Author replay, not witness acceptance; no grade change.
