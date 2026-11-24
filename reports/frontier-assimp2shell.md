@@ -814,18 +814,35 @@ Rung 4 mechanics are now observed at this labeled scope, but the grade
 ceiling is unchanged and NO r5 exists. Author-measured; witness replay is
 owed and no prior verdict covers W24.
 
+Clean-tree reproducibility: `git archive 3ad56fb6 lab/frontier/assimp2shell`
+into `/tmp/w24-clean` with the local pinned tarball copied in, `bootstrap.sh`
+rc 0, all six libraries built from scratch there. The archived harness's
+first run gave **10 PASS / 2 FAIL**: my new build helper had configured the
+"-O1" control without CMake's Release build type, producing a different
+frame at -O1 (a live saved RIP at +20 and a canary abort) instead of the
+author tree's Release-based layout (inlined `GetValue`, nearest RIP +1124).
+That is a preserved harness/reproducibility negative, not a change to the
+claim. Commit `79f6d8d2` pins that control to Release; rerunning the corrected
+harness in the same clean tree (only that one library rebuilt) gave **12 PASS
+/ 0 FAIL** with trace sha256
+`3e54def233947ebee942114d4acc2c08b8409e0802b451fea26819b94ffe5deb`,
+byte-identical to the author trace. This is an author clean-tree replay of
+the corrected harness, not a fresh archive replay of `79f6d8d2` and not
+witness acceptance. Note the build condition: the -O1 observation is the
+Release-based configuration used by W12, not a bare -O1 configure.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
 change, no r5. Independent witness replay of W1/W2, the W3-W13 real-importer
-legs, W18 (#3773), W19, W20 and W22 is still owed; clean-archive author
-replays are reproducibility evidence, not acceptance. Preserve any
-contradiction as a negative. Witness wakes failed earlier on engine-cap
-saturation (owner operator) but resumed at 22:01Z for other targets; no
-assimp verdict has arrived. The W22 request is chat #3899, re-prioritized at
-#3921 (22:3xZ); W20's offer is #3864. W23 (`cd17836f`) is a preserved negative
-and does not need witness acceptance. W1/W2, W18, W19, W20 and W22 stay
-author-only.
+legs, W18 (#3773), W19, W20, W22 and W24 (offered at #3944) are still owed;
+clean-archive author replays are reproducibility evidence, not acceptance.
+Preserve any contradiction as a negative. Witness wakes failed earlier on
+engine-cap saturation (owner operator) but resumed at 22:01Z for other
+targets; no assimp verdict has arrived. The W22 request is chat #3899,
+re-prioritized at #3921 (22:3xZ); W20's offer is #3864. W23 (`cd17836f`) is a
+preserved negative and does not need witness acceptance. W1/W2, W18, W19,
+W20, W22 and W24 stay author-only.
 W20 replays with one command
 from a clean archive: `git archive 702041cc lab/frontier/assimp2shell`, copy
 the local pinned tarball into `pins/`, then `bash bootstrap.sh &&
