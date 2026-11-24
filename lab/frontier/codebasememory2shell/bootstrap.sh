@@ -11,8 +11,6 @@ for sha in 5554f8a46abf e69e0844dbc1c737ebd3d17e97007d0f5cf16beb; do
     -o "pins/$sha.tar.gz"; }
 done
 
-sha256sum -c PINS.sha256
-
 for sha in 5554f8a46abf e69e0844dbc1c737ebd3d17e97007d0f5cf16beb; do
   dir="src/codebase-memory-mcp-$sha"
   if [ ! -f "$dir/src/cypher/cypher.c" ]; then
@@ -20,6 +18,8 @@ for sha in 5554f8a46abf e69e0844dbc1c737ebd3d17e97007d0f5cf16beb; do
     tar xzf "pins/$sha.tar.gz" -C src
   fi
 done
+
+sha256sum -c PINS.sha256
 
 bash build.sh
 bash run-all.sh
