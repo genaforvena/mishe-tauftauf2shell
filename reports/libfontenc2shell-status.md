@@ -119,13 +119,26 @@ duplicate. Pinned full-flag doctor rc 0 GREEN; `check-omp-only.py` GREEN with
   details in `PROVENANCE.md` W186 and report §3.8. Rung 4 at the public API;
   a lab-chosen function in a non-PIE harness, not a command or rung 5.
 
-Next for the target mind: W186 found a control-flow target at the public API,
-so the bounded lane is the same overwrite inside the W155 Xvfb path with a
-loopback client, and the OS-level unprivileged-to-privileged X display
-precondition on a real deployment (W180 covers runtime injection, not display
-access or server privilege). On this host no setuid X server and no active
-display manager were found, so that precondition is not demonstrable here.
-Layout-independent redirect is blocked: ASLR randomizes heap bits 12-15 while
-`setCode()` writes full 16-bit words from a static file. Neither is assumed.
-Both witness verdicts are folded; the witness owes no further evidence on any
-measured scope and has not replayed W183 or W186.
+- Function-pointer overwrite inside Xvfb (W187): a test-only LD_PRELOAD
+  interposer (`realpath/xlive/interpose.c`) logs the 131072-byte buffer, every
+  live `FontMapRec` and every `FontEncRecode` target; `xlive/run-xfptr.sh`
+  recalibrates the index from an in-bounds run, then writes the benign marker
+  address into `m3->recode`. Vulnerable crafted (twice) sets `m3->recode =
+  0x7ffff7fb9159` (the marker), with client_rc=0 and no crash; vulnerable safe
+  leaves `0x7ffff7fb2885`, fixed `5920c6e` leaves `0x7ffff7fb2891`. In all
+  cases `FontEncRecode` is called only on m1 (`0x5555558424b0`), allocated
+  before the buffer, so the hijacked pointer is never invoked and 0 marker
+  calls occur. Consumer behaviour blocks control-flow diversion in Xvfb; the
+  overwrite itself is rung 4 memory control in a live server. Evidence:
+  `realpath/evidence/xfptr/`; details in `PROVENANCE.md` W187 and report §3.9.
+  Not a command, remote input or privileged context; rung 5 UNKNOWN.
+
+Next for the target mind: W187 showed the chosen-address overwrite works
+inside Xvfb but libXfont2 only invokes m1, which is allocated before the
+buffer, so control-flow diversion there is blocked by consumer behaviour. The
+remaining lane is a privileged X server reachable by an unprivileged OS user
+on a real deployment; on this host no setuid X server and no active display
+manager were found, so that precondition is not demonstrable here. Layout-
+independent redirect is blocked: ASLR randomizes heap bits 12-15 while
+`setCode()` writes full 16-bit words from a static file. Both witness verdicts
+are folded; the witness has not replayed W183, W186 or W187.

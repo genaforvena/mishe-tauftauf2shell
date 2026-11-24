@@ -233,6 +233,33 @@ there is no command, saved return address, X server process or wire input, and
 the marker has not been reproduced inside Xvfb or witness-replayed. Rung 4,
 not rung 5.
 
+### 3.9 W187 chosen-address function-pointer overwrite inside Xvfb
+
+The W186 overwrite was repeated inside the live loopback Xvfb of §3.3. A
+test-only LD_PRELOAD interposer (`xlive/interpose.c`, not pinned upstream
+source) logs the 131072-byte buffer, every live `FontMapRec` from
+`FontEncFind`, every `FontEncRecode` target and its own benign marker address.
+`xlive/run-xfptr.sh` first calibrates on an in-bounds input, then computes
+`idx = (m3 + 0x10 - buffer)/2` and writes the four marker words into mappings
+4..7. Two `cmap 3 1` decoys make m3 the first `unicode` mapping and place it
+after the buffer.
+
+With the vulnerable library, crafted input sets `m3->recode =
+0x7ffff7fb9159`, exactly the interposer's marker address, twice, with
+client_rc=0 and no crash. Vulnerable safe input leaves the library recode
+address `0x7ffff7fb2885`; fixed `5920c6e` leaves `0x7ffff7fb2891`. In every
+case `FontEncRecode` is called only on m1 (`0x5555558424b0`), the mapping
+allocated **before** the buffer, so the overwritten pointer is never invoked
+and zero marker calls occur. Matrix and filtered logs:
+`realpath/evidence/xfptr/`.
+
+This is a consumer-behaviour limit, not a grooming failure: the chosen-address
+overwrite of a live function pointer does work inside a real X server, but
+libXfont2 recodes only the first mapping, which the forward OOB store cannot
+reach. Reordering mapping types did not change that. Rung 4 memory control in
+a live server, not control-flow diversion there, not a command, not remote
+input, not privileged context; witness has not replayed W187.
+
 ## 4. Feasibility, constraints and preserved negative results
 
 - The advisory's vector is local. No remote wire delivery was exercised. A
@@ -263,21 +290,22 @@ not rung 5.
   function pointer with a chosen address that `FontEncRecode` executes in the
   harness. That is still a benign marker under an ASLR-off, fixed-layout,
   non-PIE direct-call setup: no saved return address, command, X server
-  process or wire input. The witness replay (#2867) covered the earlier scopes
-  only; W183 and W186 have not been witness-replayed. The row-1024 plain crash
-  is service loss, not execution. A layout-independent redirect is blocked:
-  with ASLR on, heap low 12 bits are stable but bits 12-15 vary across runs,
-  while `setCode()` writes full 16-bit words from a static file. Rung 5 is
-  UNKNOWN.
-
-## 5. Grade and handoff
-
+  process or wire input. W187 (§3.9) confirms the same chosen-address
+  overwrite of a live function pointer inside Xvfb, but libXfont2 recodes only
+  m1 (allocated before the buffer), so the hijacked pointer is never invoked:
+  control-flow diversion in the live server is blocked by consumer behaviour.
+  The witness replay (#2867) covered the earlier scopes only; W183, W186 and
+  W187 have not been witness-replayed. The row-1024 plain crash is service
+  loss, not execution. A layout-independent redirect is blocked: with ASLR on,
+  heap low 12 bits are stable but bits 12-15 vary across runs, while `setCode()`
+  writes full 16-bit words from a static file. Rung 5 is UNKNOWN.
 Grade at this wake: **rung 3 confirmed in a live X server process** under ASan
 with attacker-request-driven chosen bytes at a chosen offset; rung 4 includes
 the local chosen-store demonstration, W183's chosen-byte overwrite of a live
 parser object's data pointer at the real-library public API, and W186's
 chosen-address overwrite of a live `FontMapRec.recode` function pointer that
-executes a benign marker through the public `FontEncRecode` call — the latter
+executes a benign marker through the public `FontEncRecode` call, and W187's
+same overwrite inside a live Xvfb where the pointer is not invoked — the first
 two only under a fixed ASLR-off layout (W186 additionally non-PIE);
 a **plain-build crash (availability impact) is demonstrated** in a live Xvfb
 at `SIZE 256 1024`; rung 5 UNKNOWN. Two independent verdicts are folded:
@@ -293,14 +321,14 @@ counterexample survived either replay. The upstream regression input
 `SIZE 256 258` still survives in a plain build; the row-1024 crash is
 service loss, not execution.
 
-Next bounded experiment: W186 found a control-flow target at the public API,
-so the remaining question is whether the same chosen-address overwrite can be
-observed inside the W155 Xvfb path with a loopback client, and whether a
-privileged X server reachable by an unprivileged OS user exists on a real
-deployment. On this host no setuid X server and no active display-manager unit
-were found, so the OS-level precondition is not demonstrable here. Layout-
-independent redirect is blocked by ASLR randomizing heap bits 12-15 against
-16-bit static-file stores. These are not assumed. Both witness verdicts are
-folded; the witness owes no evidence on earlier scopes and has not replayed
-W183 or W186. Full commands, negatives and counterexamples are in
-`PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186.
+Next bounded experiment: W187 showed that the chosen-address overwrite works
+inside Xvfb but the pointer libXfont2 invokes (m1) is allocated before the
+buffer, so control-flow diversion in the live server is blocked by consumer
+behaviour, not grooming. The remaining evidence is a privileged X server
+reachable by an unprivileged OS user on a real deployment; on this host no
+setuid X server and no active display-manager unit were found, so that
+precondition is not demonstrable here. Layout-independent redirect is blocked
+by ASLR randomizing heap bits 12-15 against 16-bit static-file stores. Both
+witness verdicts are folded; the witness owes no evidence on earlier scopes
+and has not replayed W183, W186 or W187. Full commands, negatives and
+counterexamples are in `PROVENANCE.md` W155/W156/W172/W180/W181/W183/W186/W187.

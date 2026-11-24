@@ -1,0 +1,5 @@
+buffer=0x555555a52930 m3=0x555555a72940 marker=0x7ffff7fb9159 idx=65552 from=0xfe14 0xfe15 0xfe16 0xfe17 words=9159 f7fb 7fff 0000
+vuln-crafted-a marker_calls=0 m3_recode=0x7ffff7fb9159 recode_targets=0x5555558424b0,
+vuln-crafted-b marker_calls=0 m3_recode=0x7ffff7fb9159 recode_targets=0x5555558424b0,
+vuln-safe marker_calls=0 m3_recode=0x7ffff7fb2885 recode_targets=0x5555558424b0,
+fixed-crafted marker_calls=0 m3_recode=0x7ffff7fb2891 recode_targets=0x5555558424b0,

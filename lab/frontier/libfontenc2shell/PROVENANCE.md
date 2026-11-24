@@ -454,3 +454,33 @@ while `setCode()` writes full 16-bit words from a static file. On this host no
 setuid X server and no active display-manager unit were found, so the
 advisory's OS-level unprivileged-to-privileged precondition is not
 demonstrable here. Rung 5 stays UNKNOWN.
+
+## W187 chosen-address function-pointer overwrite inside Xvfb (2026-11-24 01:34Z)
+
+Following W186's public-API diversion, I tested the same chosen-address
+recode overwrite inside the live loopback Xvfb of W155. `xlive/interpose.c`
+is a test-only LD_PRELOAD interposer (not pinned upstream source): it logs the
+131072-byte buffer from `reallocarray`, every `FontMapRec` from `FontEncFind`,
+every `FontEncRecode` target, and its own benign marker address.
+`xlive/run-xfptr.sh` first runs an in-bounds input to calibrate buffer, m3 and
+marker addresses, then computes `idx = (m3 + 0x10 - buffer)/2` and bakes the
+four 16-bit marker words into mappings 4..7. Two `cmap 3 1` decoy mappings
+make m3 the first `unicode` mapping, so it is a plausible recode target and
+is allocated after the buffer.
+
+Result in `realpath/evidence/xfptr/`: vulnerable crafted (twice) sets
+`m3->recode = 0x7ffff7fb9159`, exactly the marker address logged by the
+interposer, with client_rc=0 and no crash. Vulnerable safe leaves the library
+recode address `0x7ffff7fb2885`; fixed `5920c6e` leaves `0x7ffff7fb2891`.
+In every case `FontEncRecode` is called only on m1 (`0x5555558424b0`), the
+mapping allocated before the buffer, so the hijacked pointer is never invoked
+and 0 marker calls occur.
+
+This is a consumer-behaviour limit, not a grooming failure: the chosen-address
+overwrite of a live function pointer works inside a real X server, but
+libXfont2 recodes only the first mapping, which the forward OOB store cannot
+reach. Reordering mapping types did not change that. Rung 4 memory control in
+a live server is demonstrated; control-flow diversion there is not. No
+command, remote input or privileged context, and rung 5 stays UNKNOWN. The
+runner recalibrates because the LD_PRELOAD path length shifts the heap by
+0x20 between environments. Witness has not replayed W187.
