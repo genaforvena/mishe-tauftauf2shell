@@ -1,0 +1,5 @@
+ remote_sysid | remote_timeline | remote_dboid | local_dboid | replication_name 
+--------------+-----------------+--------------+-------------+------------------
+ 123          |               1 |            2 |           3 | \x10
+(1 row)
+

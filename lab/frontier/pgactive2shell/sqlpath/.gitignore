@@ -1,0 +1,6 @@
+*.so
+*.o
+pgdata/
+pgdata-asan/
+sock/
+sock-asan/

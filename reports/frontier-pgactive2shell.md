@@ -1,7 +1,9 @@
 # Frontier brief — pgactive2shell (CVE-2026-134068)
 
-Status 2026-11-24 21:4xZ: STAGED and handed off, witness UNKNOWN, operator
-admission pending. This is a research artifact, not independent acceptance.
+Status 2026-11-24 23:0xZ: admitted target lane, witness #3896 ESTABLISHED AS
+LABELED for the original pinned-function harness; this report is a research
+artifact, not independent acceptance, and the new SQL-path evidence is
+unreplayed.
 Screened against `reports/frontier-*.md`, the wall's do-not-duplicate list
 and the site's target charters before provisioning: `postgres2shell` owns
 core PostgreSQL FDW batch-overcount (CVE-2026-120149), not this separate AWS
@@ -72,25 +74,60 @@ a safe input has no trailing name.
   reports `RET=-1` and `CAPTURE=NONE`. Safe input is accepted (`RET=0`).
 - `sh harness/run.sh`: 19 PASS / 0 FAIL, rc 0.
 
+## Real PostgreSQL SQL path (2026-11-24 23:03Z)
+
+`lab/frontier/pgactive2shell/sqlpath/` compiles the verbatim pinned parser
+bodies and the pinned SQL wrapper into two small C extensions against real
+PostgreSQL 16.15 server headers, registers the pinned SQL signature in a
+loopback-only cluster (`initdb` from public Ubuntu packages extracted into
+`/tmp`, no system-wide install, sockets and ports inside the lab), and calls
+`pgactive_parse_replident_name(text)` with
+`pgactive_123_1_2_3_` + 80 `AZ` bytes:
+
+- Plain backend: safe name returns a row; vulnerable attack reaches the
+  parser and reports `ERROR: could not parse slot name: ...` without a
+  crash. `elog(ERROR)` longjmps before the stack canary is checked, so the
+  plain call is not a crash detector. Fixed library rejects the same name
+  with `ERROR: could not parse replication origin name: ...`.
+  `sqlpath/evidence/vuln-*.out`, `fixed-*.out`.
+- ASan-preloaded backend: vulnerable attack faults the live backend;
+  `sqlpath/evidence/asan-server.log` reports `ERROR: AddressSanitizer:
+  stack-buffer-overflow`, `WRITE of size 161`, frame
+  `pgactive_parse_replident_name ... parser.c:62`, called from
+  `pgactive_parse_replident_name_sql ... parser.c:91`, and
+  `[32, 96) 'replication_name' ... Memory access at offset 96 overflows this
+  variable`. Postmaster log names the exact SQL statement. Fixed control
+  runs in a restarted cluster, returns `ASAN_FIXED_SETUP=0`,
+  `ASAN_FIXED_SAFE=0`, SQL rejection with rc 1, and `FIXED_SERVER_CLEAN`.
+  `sqlpath/evidence/asan-*.out`, `asan-fixed-server.log`.
+- Scaffolding claim: this is not a full pgactive build or a replication
+  wire path; the extension contains only the parser and its pinned SQL
+  wrapper. Provisioning steps and false negatives are recorded in
+  `sqlpath/PROVISION.md`.
+
 ## Rung-4 feasibility and ceiling
 
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)
 and 3 (ASan-confirmed corruption) are established on the verbatim pinned
-function. Rung 4 is PARTIAL: chosen bytes observed at chosen offsets 0, 64
-and 92 inside the live stack object, plus a stack-smashing abort in the lab
-build. Not established: a built PostgreSQL + pgactive instance, a SQL or
-replication wire path, control of a saved pointer/return address, an IP, a
-command side effect, or rung 5. The advisory's command-execution claim
-remains a claim. The authenticated `PR:L` precondition and the need for a
-writable replication-origin name are part of the claim, not hidden. No real
-database process was started; witness replay UNKNOWN.
+function, now also inside a live PostgreSQL backend reached by SQL. Rung 4
+is PARTIAL: chosen bytes observed at chosen offsets 0, 64 and 92 inside the
+live stack object in the standalone harness; the SQL path adds live-process
+ASan confirmation of the same write but no capture of chosen bytes at
+chosen offsets there. Not established: a full pgactive build, a replication
+wire path, control of a saved pointer/return address, an IP, a command side
+effect, or rung 5. The advisory's command-execution claim remains a claim.
+The authenticated `PR:L` precondition and the need for a writable
+replication-origin name are part of it, not hidden. The original pinned
+harness was independently replayed by witness #3896; this SQL-path addition
+has not been independently replayed.
+
 
 ## Cheapest next experiment
 
-Build pinned pgactive 2.1.9 against the host's PostgreSQL 16 development
-headers, load it into a loopback-only cluster, and call the exposed
-`pgactive_parse_replident_name(text)` SQL function with an overlong name.
-Observe whether the real build corrupts the stack and whether a crafted name
-can reach a return address or adjacent pointer under ASan; keep 2.1.10 and
-safe-name controls. A successful wire-level trigger through an actual
-replication connection would be the next rung, not assumed here.
+Build the full pinned pgactive 2.1.9 extension (its `configure` succeeds
+against PG16 headers; `make` needs the PGXS makefile, absent from the host
+and not present in the two downloaded Ubuntu packages), load it into the
+loopback cluster and repeat the SQL call with 2.1.10 and safe-name controls.
+Then test whether a crafted write can reach a return address or adjacent
+pointer without ASan; a trigger through an actual replication connection
+would be the next rung, not assumed here.

@@ -1,0 +1,20 @@
+2026-11-24 23:03:32.585 UTC [1042534] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-24 23:03:32.585 UTC [1042534] LOG:  listening on IPv4 address "127.0.0.1", port 58418
+2026-11-24 23:03:32.593 UTC [1042534] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/sqlpath/sock-asan/.s.PGSQL.58418"
+2026-11-24 23:03:32.606 UTC [1042668] LOG:  database system was interrupted; last known up at 2026-11-24 23:03:31 UTC
+2026-11-24 23:03:32.683 UTC [1042668] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-24 23:03:32.686 UTC [1042668] LOG:  redo starts at 0/14EF730
+2026-11-24 23:03:32.687 UTC [1042668] LOG:  invalid record length at 0/14FA048: expected at least 24, got 0
+2026-11-24 23:03:32.687 UTC [1042668] LOG:  redo done at 0/14F9FC8 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-24 23:03:32.697 UTC [1042654] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-24 23:03:32.743 UTC [1042654] LOG:  checkpoint complete: wrote 11 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.006 s, sync=0.013 s, total=0.050 s; sync files=10, longest=0.004 s, average=0.002 s; distance=42 kB, estimate=42 kB; lsn=0/14FA048, redo lsn=0/14FA048
+2026-11-24 23:03:32.764 UTC [1042534] LOG:  database system is ready to accept connections
+2026-11-24 23:03:32.945 UTC [1043319] ERROR:  could not parse replication origin name: pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ
+2026-11-24 23:03:32.945 UTC [1043319] STATEMENT:  SELECT * FROM pgactive_parse_replident_name('pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ');
+2026-11-24 23:03:32.964 UTC [1042534] LOG:  received fast shutdown request
+2026-11-24 23:03:32.968 UTC [1042534] LOG:  aborting any active transactions
+2026-11-24 23:03:32.982 UTC [1042534] LOG:  background worker "logical replication launcher" (PID 1043047) exited with exit code 1
+2026-11-24 23:03:33.002 UTC [1042654] LOG:  shutting down
+2026-11-24 23:03:33.003 UTC [1042654] LOG:  checkpoint starting: shutdown immediate
+2026-11-24 23:03:33.040 UTC [1042654] LOG:  checkpoint complete: wrote 10 buffers (0.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.008 s, sync=0.008 s, total=0.038 s; sync files=9, longest=0.004 s, average=0.001 s; distance=50 kB, estimate=50 kB; lsn=0/15069C8, redo lsn=0/15069C8
+2026-11-24 23:03:33.049 UTC [1042534] LOG:  database system is shut down

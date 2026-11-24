@@ -1,0 +1,73 @@
+2026-11-24 23:03:31.806 UTC [1042353] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-24 23:03:31.807 UTC [1042353] LOG:  listening on IPv4 address "127.0.0.1", port 58418
+2026-11-24 23:03:31.814 UTC [1042353] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/sqlpath/sock-asan/.s.PGSQL.58418"
+2026-11-24 23:03:31.829 UTC [1042361] LOG:  database system was shut down at 2026-11-24 23:03:31 UTC
+2026-11-24 23:03:31.867 UTC [1042353] LOG:  database system is ready to accept connections
+=================================================================
+==1042393==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7fade7400060 at pc 0x7faded091ad0 bp 0x7ffe3b96ff30 sp 0x7ffe3b96f6b8
+WRITE of size 161 at 0x7fade7400060 thread T0
+    #0 0x7faded091acf in scanf_common ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342
+    #1 0x7faded0cd312 in __isoc99_vsscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1493
+    #2 0x7faded0cdeab in __isoc99_sscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1526
+    #3 0x7fadeb6b8556 in pgactive_parse_replident_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/sqlpath/parser.c:62
+    #4 0x7fadeb6b8804 in pgactive_parse_replident_name_sql /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/sqlpath/parser.c:91
+    #5 0x5f7e6767bf8b in ExecMakeTableFunctionResult (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x361f8b) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #6 0x5f7e676902f9  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x3762f9) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #7 0x5f7e67670842 in standard_ExecutorRun (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x356842) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #8 0x5f7e6784b794  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x531794) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #9 0x5f7e6784d2e7 in PortalRun (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x5332e7) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #10 0x5f7e67847390  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x52d390) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #11 0x5f7e6784e68a in PostgresMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x53468a) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #12 0x5f7e67a2e3d2  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x7143d2) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #13 0x5f7e677b67a8 in PostmasterMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49c7a8) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #14 0x5f7e6747b296 in main (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161296) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #15 0x7fadeba2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x7fadeba2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x5f7e6747b854 in _start (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161854) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+
+Address 0x7fade7400060 is located in stack of thread T0 at offset 96 in frame
+    #0 0x7fadeb6b8475 in pgactive_parse_replident_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/sqlpath/parser.c:59
+
+  This frame has 1 object(s):
+    [32, 96) 'replication_name' (line 60) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+Shadow bytes around the buggy address:
+  0x7fade73ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade73ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade73ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade73fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade73fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7fade7400000: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x7fade7400080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade7400100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade7400180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade7400200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7fade7400280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1042393==ABORTING
+2026-11-24 23:03:32.369 UTC [1042353] LOG:  server process (PID 1042393) exited with exit code 1
+2026-11-24 23:03:32.369 UTC [1042353] DETAIL:  Failed process was running: SELECT * FROM pgactive_parse_replident_name('pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ');
+2026-11-24 23:03:32.369 UTC [1042353] LOG:  terminating any other active server processes
+2026-11-24 23:03:32.386 UTC [1042353] LOG:  received immediate shutdown request
+2026-11-24 23:03:32.390 UTC [1042353] LOG:  abnormal database system shutdown
+2026-11-24 23:03:32.393 UTC [1042353] LOG:  database system is shut down
