@@ -1,0 +1,13 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18494 -t 18495 -c community.list -F labfed -M
+printf "HIT safe-control breakpoint\n"
+p/x &nak
+p/x *(unsigned long *)((char *)&nak + 96)
+p/x *(unsigned long *)((char *)&nak + 104)
+info symbol *(void **)((char *)&nak + 104)
+p/x &mac_buf
+bt 3
+continue
+quit

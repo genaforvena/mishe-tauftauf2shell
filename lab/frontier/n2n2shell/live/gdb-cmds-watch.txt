@@ -1,0 +1,11 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18504 -t 18505 -c community.list -F labfed -M
+rwatch -l *(unsigned long *)((char *)&nak + 96)
+rwatch -l *(unsigned long *)((char *)&nak + 104)
+printf "WATCHPOINTS SET; continuing\n"
+continue
+printf "READ WATCHPOINT HIT\n"
+bt 3
+quit

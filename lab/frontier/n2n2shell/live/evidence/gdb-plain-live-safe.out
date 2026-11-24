@@ -1,0 +1,37 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+24/Nov/2026 22:23:42 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+24/Nov/2026 22:23:42 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+24/Nov/2026 22:23:42 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 22:23:42 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+24/Nov/2026 22:23:42 [sn_utils.c:164] calculated shared secrets for edge authentication
+24/Nov/2026 22:23:42 [supernode.c:660] supernode is listening on UDP 18484 (main)
+24/Nov/2026 22:23:42 [supernode.c:669] supernode opened TCP 18484 (aux)
+24/Nov/2026 22:23:42 [supernode.c:676] supernode is listening on TCP 18484 (aux)
+24/Nov/2026 22:23:42 [supernode.c:685] supernode is listening on UDP 18485 (management)
+24/Nov/2026 22:23:42 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+24/Nov/2026 22:23:42 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+24/Nov/2026 22:23:42 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=86, now=1795559024) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+HIT process_udp:2331 after safe decode
+&nak=0x7fffffffc850 nakbuf=0x7fffffffce00
+0x7fffffffc850:	0x44	0x33	0x22	0x11	0x02	0x00	0x00	0x00
+0x7fffffffc858:	0x00	0x01	0x00	0x00	0x30	0x00	0x48	0x5a
+0x7fffffffc860:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffc868:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffc870:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffc878:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffc880:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffc888:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x00	0x00
+0x7fffffffc890:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffffffc898:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffffffc8a0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffffffc8a8:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffffffc8b0:	0x40	0xc9	0xff	0xff	0xff	0x7f	0x00	0x00
+0x7fffffffc8b8:	0x95	0xc2	0xca	0xf7	0xff	0x7f	0x00	0x00
+#0  process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=86, now=1795559024) at src/sn_utils.c:2331
+#1  0x00005555555658aa in run_sn_loop (sss=sss@entry=0x5555555800c0 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000555555558422 in main (argc=<optimized out>, argv=0x7fffffffe1b8) at src/supernode.c:741

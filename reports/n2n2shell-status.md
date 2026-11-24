@@ -50,8 +50,11 @@ ASan reports `stack-buffer-overflow`, `WRITE of size 96`, frames
 `wire.c:179` <- `wire.c:651` <- `sn_utils.c:2322`, in the stack `nak` at
 `sn_utils.c:2308`; safe and fixed-decoder controls are clean. Rung 4 is
 established for chosen bytes at chosen offsets in that live process's
-stack (gdb: 96 chosen bytes at `nak+14..109`). Not established: control of
-a live pointer, canary or return address, command execution, or rung 5.
+stack (gdb: 96 chosen bytes at `nak+14..109`, including two pointer-shaped
+slots whose safe-baseline values were a stack address and libc
+`_int_malloc+3173`; hardware read watchpoints did not fire on the NAK path
+after decode). Not established: control of a consumed pointer, canary or
+return address, command execution, or rung 5.
 The advisory's `sn_utils.c` stack attribution is now reproduced locally;
 witness replay of the live experiment is UNKNOWN. Full evidence
 `reports/n2n2shell-live.md`.

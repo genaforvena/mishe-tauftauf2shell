@@ -55,21 +55,38 @@ token bytes. Safe input: `token_size=48`, length 86. Attack input:
   `&nak=0x7fffffffc850`; bytes `48 5a 4d 49` repeat from offset 14 through
   offset 109 of `nak`, i.e. all 96 attacker-chosen token bytes land at their
   chosen offsets in the live supernode's stack. `nak.auth.token` is 48 bytes
-  (offsets 14..61), so offsets 62..109 are past the destination. Adjacent
-  named locals in this plain layout are further away (`mac_buf` at
-  `nak+224`, `sockbuf` at `nak+288`); no live pointer or return address was
-  observed overwritten. `live/evidence/gdb-plain-live-attack.out`.
+  (offsets 14..61), so offsets 62..109 are past the destination. Named
+  locals in this plain layout are further away (`mac_buf` at `nak+224`,
+  `sockbuf` at `nak+288`); two pointer-shaped stack slots at `nak+96` and
+  `nak+104` are inside the overwritten range (next section). No return
+  address was reached. `live/evidence/gdb-plain-live-attack.out`.
+
+## Pointer-shaped slots overwritten (plain build, safe baseline)
+
+The same gdb breakpoint with the safe 48-byte input shows the bytes that
+the attack replaces: `*(uint64_t *)(&nak+96)` is `0x7fffffffc940`
+(`&mac_buf + 16`, a stack address) and `*(uint64_t *)(&nak+104)` is
+`0x7ffff7cac295`, which gdb resolves to `_int_malloc+3173` in the host
+libc. With the attack input those two eight-byte slots read
+`48 5a 4d 49 48 5a` and `4d 49 48 5a 4d 49` — chosen wire bytes. Hardware
+read watchpoints set on both slots after decode did not fire during ~11 s
+of continued execution on this no-peer NAK path; consumption on other paths
+is still UNKNOWN. Evidence: `live/evidence/gdb-plain-live-safe.out`,
+`live/evidence/gdb-safe-pointer-slots.out` and
+`live/evidence/gdb-watch-pointer-slots.out`.
 
 ## Ceiling
 
 Rungs 1-3 now on a real pinned supernode process reached by one UDP
 datagram, not just the stand-in harness. Rung 4 is established for chosen
 bytes at chosen offsets in that live process's stack under the loopback,
-no-auth conditions above; it is NOT pointer control, benign-marker
-execution, a stack canary/return-address hit, or stock-allocator behavior.
+no-auth conditions above, including two pointer-shaped stack slots whose
+baseline values were a stack address and a libc `_int_malloc` code address.
+It is NOT demonstrated control of a consumed pointer, benign-marker
+execution, a canary/return-address hit, or stock-allocator behavior.
 No rung 5: no command execution, no IP/control-flow takeover, no
 independently witnessed replay. Witness verdict for this live experiment is
 UNKNOWN; the earlier witness verdict (#3901) covers only the stand-in
 harness. Next bounded step: witness replay of the live datagram and a
-plain-build search for a live object at the overwritten offsets; a rung-5
-attempt requires a measured pointer/control path first.
+determination of whether those slots are read after decode; a rung-5
+attempt requires a measured consumed-pointer path first.

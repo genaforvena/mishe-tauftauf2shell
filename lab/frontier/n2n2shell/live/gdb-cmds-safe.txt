@@ -1,0 +1,10 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18484 -t 18485 -c community.list -F labfed -M
+printf "HIT process_udp:2331 after safe decode\n"
+printf "&nak=%p nakbuf=%p\n", &nak, &nakbuf
+x/112bx &nak
+bt 3
+continue
+quit
