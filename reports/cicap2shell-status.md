@@ -45,13 +45,13 @@ claim stay claims in this lab.
 3. Controls: four-entity safe input leaves `entities[5]=(nil)`, alias 0 and
    rc 0; fixed attack and safe builds are ASan-clean with rc 0.
 
-Rung 4 is PARTIAL: the wire-selected value (90 or 72) lands in the live
-adjacent `trash_entities[0].start` slot, observed before the double free.
+Rung 4 is PARTIAL: the wire-selected value (90, 72 or 4242) lands in the
+live adjacent `trash_entities[0].start` slot, observed before the double free.
 No arbitrary byte stream, pointer/IP/command control, allocator metadata,
-real c-icap build, ICAP server or network socket was exercised. Stock layout
-beyond the pinned field order is UNKNOWN; wire reach is UNKNOWN; there is no
-rung 5. An ASan field-padding probe produced no report for the intra-object
-alias and is preserved as a negative, not a pass.
+ICAP server or network socket was exercised. Stock layout is confirmed in the
+pinned release (real `request.h:113-114`); wire reach stays UNKNOWN; no rung 5.
+An ASan field-padding probe produced no report for the intra-object alias and
+is preserved as a negative, not a pass.
 
 ## Witness verdict (W205, #3753)
 Independent replay from `git archive 58435874 lab/frontier/cicap2shell`
@@ -67,9 +67,13 @@ no c-icap build, wire socket, pointer/IP/marker or command was witnessed.
 
 ## Next bounded work
 
-Build the pinned `C_ICAP_0.6.5` tree under ASan, drive a real ICAP request
-with six `req-body` entities through the request parser into teardown, and
-observe the same UAF/double free with 0.6.6 and four-entity controls. Only a
-measured loopback `icap-server` replay can move wire reach off UNKNOWN.
+A real `C_ICAP_0.6.5` ASan build now reproduces the same alias, chosen value
+and `header.c:631` use-after-free from `ci_request_destroy` through exported
+library APIs on a real `ci_request_t`; four-entity and upstream-patched
+controls are clean. It does not yet pass through `parse_header()` or a socket.
+Next: feed a full ICAP request from a loopback socket through
+`process_request()`/`parse_header()` into that build, then put an
+`icap-server` in front; only that can move wire reach off UNKNOWN. GitHub has
+no 0.6.6 tag, so the fixed control is patch-derived, not a released binary.
 The witness verdict is recorded above and in the README row; do not
 infer RCE from advisory prose or a harness marker.

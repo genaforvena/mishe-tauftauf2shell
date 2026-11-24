@@ -72,8 +72,9 @@ recording raw output under gitignored `evidence/` and `.rc` files, summary in
 
 ## Known limits / negatives
 
-- Extracted functions with stand-in `ci_headers_*` and a reduced
-  `ci_request_t`; no c-icap build, no ICAP server, no wire request, no real
+- The original harness uses extracted functions with stand-in `ci_headers_*`
+  and a reduced `ci_request_t`; the real-build lane below supersedes the
+  "no c-icap build" part. Still no ICAP server, no wire request, no real
   `ci_request_destroy()` call from a worker, no live process, no pointer/IP
   or command control, no allocator metadata, no rung 5.
 - ASan flags the use-after-free read at the start of the second destroy, not
@@ -86,3 +87,28 @@ recording raw output under gitignored `evidence/` and `.rc` files, summary in
 - Witness replay #3733 returned ESTABLISHED AS LABELED (#3753): clean archive
   `58435874`, 19 PASS / 0 FAIL, hash pins and source-bound guard verified,
   sixth-entity wire value steers the aliased slot; no grade change, no r5.
+
+## Real c-icap build (W1, 2026-11-24 18:3xZ)
+
+Pinned release tarball
+`6ac51b6dd39690a6ccc62e807f065e92131498687d4201a69ae9570b68bab1e5`
+(`C_ICAP_0.6.5` tag, codeload GitHub), built with
+`CFLAGS/LDFLAGS=-fsanitize=address` via `autoreconf -i`, `configure` and
+`make -j4`, all rc 0. The four pinned sources hash-match that tarball exactly.
+`realbuild/real_api_harness.c` links the built `libicapapi.so.6.0.5` and calls
+the exported `ci_request_alloc`, `process_encapsulated` and
+`ci_request_destroy` on a real `ci_request_t` (no harness stand-ins).
+
+- Sixth value `90`, `72` and `4242`: `alias=1`, `trash0_type=2`,
+  `trash0_start=<value>`; ASan `heap-use-after-free`, `READ of size 4` at
+  `destroy_encaps_entity header.c:631` from `ci_request_destroy
+  request_common.c:417`, freed at `header.c:635` from `:413`; rc 1.
+- Four-entity safe: `entities[5]=(nil)`, alias 0, rc 0, no sanitizer report.
+- Fixed control: no `C_ICAP_0.6.6` tag exists (latest tag 0.6.5), so
+  `pinned/fix.patch` was applied to a 0.6.5 copy (hunk 2 applied by hand
+  because of context drift) and rebuilt: attack and safe both rc 0,
+  `alias=0`, no sanitizer report. No released 0.6.6 binary was built.
+- Raw outputs in gitignored `evidence/real-*.out`; exact recipe and scope
+  limit in `realbuild/README.md`. The header string reaches the exported
+  parser function directly, not through `parse_header()` or a socket: no
+  wire, no ICAP server, no pointer/IP/command control, no r5.

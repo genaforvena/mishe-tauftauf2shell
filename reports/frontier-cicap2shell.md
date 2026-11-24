@@ -78,21 +78,35 @@ selects the patch-derived guard and teardown text.
 
 ## Rung-4 feasibility and ceiling
 
-Rung 3 is confirmed on pinned upstream functions; rung 4 is PARTIAL: a
-wire-selected entity value (90 or 72) at a chosen adjacent slot, with an
-observed UAF/double free at request teardown. No arbitrary byte stream or
-pointer-value control, no chosen IP/code execution, no allocator metadata,
-no real c-icap build, no live ICAP server and no network input: the AV:N
-path is claimed by the advisory but not exercised here. Stock layout
-beyond the pinned struct field order is UNKNOWN, and there is no rung 5.
+Rung 3 is confirmed both on pinned upstream functions and in a real ASan
+c-icap 0.6.5 build calling exported `process_encapsulated()` and
+`ci_request_destroy()` on a real `ci_request_t`; rung 4 is PARTIAL: a
+wire-selected entity value (90, 72 or 4242) lands in the live adjacent
+`trash_entities[0].start` slot. No arbitrary byte stream or pointer-value
+control, no chosen IP/code execution, no allocator metadata, no ICAP server,
+no network socket and no `parse_header()`/`process_request()` path: the AV:N
+path is claimed by the advisory but not exercised here. Stock layout is no
+longer UNKNOWN in the pinned release (real `request.h:113-114` confirms the
+adjacency); wire reach stays UNKNOWN, and there is no rung 5.
 
-## Cheapest next experiment
+## Real-build result (W1) and cheapest next experiment
 
-Build the pinned `C_ICAP_0.6.5` tree with ASan, feed a real ICAP request
-with six `req-body` entities through the request parser and let the worker
-destroy the request; observe the same `process_encapsulated` ->
-`ci_request_destroy` UAF/double free, with a 0.6.6 build and a four-entity
-request as controls. If that reproduces, put a loopback `icap-server` in
-front of it and replay the header from a local client for a wire-visible
-rung 4. Witness replay (#3753) returned ESTABLISHED AS LABELED: clean-archive
-`58435874` replay 19 PASS / 0 FAIL, no contradiction, no grade change, no r5.
+A pinned `C_ICAP_0.6.5` tarball
+(`6ac51b6d…bab1e5`) was built under ASan; its four source files hash-match
+the lab pins. `lab/frontier/cicap2shell/realbuild/real_api_harness.c` links
+the built `libicapapi.so.6.0.5` and calls the exported functions on a real
+`ci_request_t`: sixth values 90/72/4242 each give `alias=1`, a matching
+`trash0_start`, and ASan `heap-use-after-free` `READ of size 4` at
+`header.c:631` from `ci_request_destroy request_common.c:417`; the four-entity
+safe input and the upstream-patched fixed control are clean (rc 0). GitHub
+publishes no 0.6.6 tag, so the fixed control is patch-derived, not a released
+0.6.6 binary. Recipe, raw outputs and scope limit:
+`lab/frontier/cicap2shell/realbuild/README.md` and
+`PROVENANCE.md` §"Real c-icap build".
+
+Next: feed a complete ICAP request from a loopback socket through
+`process_request()`/`parse_header()` into this build, then put a real
+`icap-server` in front for a wire-visible rung 4. Witness replay (#3753)
+returned ESTABLISHED AS LABELED for the original pinned-function claim:
+clean-archive `58435874` replay 19 PASS / 0 FAIL, no contradiction, no grade
+change, no r5; the real-build lane is author-measured and unwitnessed.
