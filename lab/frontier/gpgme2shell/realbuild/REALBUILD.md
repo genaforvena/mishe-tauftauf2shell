@@ -45,6 +45,7 @@ sh build-real.sh
 sh run-real.sh
 sh make-realkeys.sh
 sh run-real-gpg.sh
+sh run-wire.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
@@ -72,8 +73,8 @@ visible in the real `IMPORTED` status callback before the early return;
 
 ## Limits
 
-The real gpg process is driven by local key material; there is still no
-network-facing consumer, no wire input, no allocator metadata claim, no
+`run-real-gpg.sh` uses local key material; the wire section below adds a
+loopback-only HKP response. There is no allocator-metadata claim, no
 pointer/IP/command control and no rung 5. Plain (non-ASan) glibc outcome for
 the real build is UNKNOWN; only the ASan builds are asserted. Witness replay
 of the real paths is pending; an author transcript is not acceptance.
@@ -87,3 +88,24 @@ install the monitor callback; `gpgme_set_status_cb()` returns
 `--version` with a synthetic 2.2.40 string and writes one
 `[GNUPG:] GOOD <1200 bytes>\n` line to the fd supplied via `--status-fd`,
 with a runtime-chosen byte at status-args offset 1000.
+
+## Loopback wire path
+
+`wireloop.py` starts an HKP HTTP listener on 127.0.0.1:11372 serving one
+armored key, signs a fixed message with the throwaway key, and runs a
+verifying GNUPGHOME configured with `auto-key-retrieve` and that keyserver.
+`status_trigger_realgpg_verify.c` calls `gpgme_op_verify()` with the same
+failing status callback. The attacker-controlled wire response supplies the
+long UID; gpg emits `[GNUPG:] IMPORTED` with `args[1000]` set by the key.
+
+```
+cd lab/frontier/gpgme2shell/realbuild
+sh run-wire.sh
+```
+
+`run-wire.sh` asserts 32 checks with raw output in
+`realgpg/evidence/wire-*.out` / `.rc`. Vulnerable long-key cases fault with
+the three chosen bytes; patched, stock 2.3.1 and short-key cases are clean.
+This is a wire-visible rung 4 in the lab, not rung 5: no pointer/IP/command
+control, no benign command side effect and no claim about stock layouts or
+live targets. Witness replay of all real paths is still pending.

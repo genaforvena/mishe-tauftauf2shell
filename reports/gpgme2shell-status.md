@@ -37,16 +37,16 @@ The advisory's network reach and any RCE claim stay claims in this lab.
 
 ## Current grade (after W1 real-library reproduction)
 
-Rung 3 on pinned upstream statements; rung 4 upgraded from PARTIAL to
-demonstrated mechanics in a real GPGME ASan build: a chosen status-derived
-byte is observed at a chosen offset in the real status callback before the
-real second free, through a real status pipe and real early return. No wire
-input, no pointer/IP/command control, no allocator-metadata claim and no
-rung 5. Stock layout and live reach remain UNKNOWN; `AV:N` is advisory prose.
+Rung 3 on pinned upstream statements; rung 4 demonstrated in real ASan
+builds, including a loopback wire response that supplies the long status
+line (W3 below). There is no pointer/IP/command control, no allocator-metadata
+claim and no rung 5. Stock layout and live reach remain UNKNOWN; `AV:N` is
+advisory prose.
 
-1. Deterministic trigger: a >1024-byte status line from a loopback fake gpg
-   reaches the real `realloc()` at `engine-gpg.c:1494`; a public status
-   callback error takes the pinned early return before writeback.
+1. Deterministic trigger: a >1024-byte status line from a fake gpg, a real
+   gpg import or a loopback HKP response reaches the real `realloc()` at
+   `engine-gpg.c:1494`; a public status callback error takes the pinned early
+   return before writeback.
 2. Confirmed corruption: ASan `attempting double-free` in real
    `gpg_release()` at `engine-gpg.c:602` after that realloc, with the
    allocation recorded in `gpg_new()` at `:666`.
@@ -112,3 +112,27 @@ sanitizer-clean, with the callback reached in every control.
 Grade stays rung 4 mechanics: no wire consumer, no allocator-metadata claim,
 no pointer/IP/command control and no r5. Witness replay #3808 of the W1 real
 path remains UNKNOWN; W2 is author-side as well.
+
+## W3 — loopback wire response drives the same free (2026-11-24 22:3xZ)
+
+`realbuild/wireloop.py` serves one armored key from an HTTP listener bound
+to 127.0.0.1:11372; a fresh GNUPGHOME has `auto-key-retrieve` and that
+keyserver, and a signed message whose public key is absent makes real gpg
+fetch the key over the wire. Probe `wireprobe/hkp_probe.py` measured the
+resulting status line at 1252 bytes before any GPGME driver was involved.
+`status_trigger_realgpg_verify.c` drives `gpgme_op_verify()` through public
+APIs with the same failing status callback.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-wire.sh` gives
+`PASS=32 FAIL=0`; raw evidence in `realgpg/evidence/wire-*.out` / `.rc`.
+All three vulnerable wire cases show `keyword=IMPORTED arglen=1234` with
+`byte[1000]=0x48` / `0x5a` / `0x37`, `verify err=General error`, then the
+same ASan double free (`gpg_release :602` after `read_status :1494`), rc 1.
+Patched 2.2.0, stock 2.3.1 and short-key wire controls are rc 0 and
+sanitizer-clean with the status callback reached.
+
+This is a wire-visible rung 4 in the lab: attacker-chosen loopback HTTP
+bytes produce the chosen byte in the stale allocation before the second
+free. Still no pointer/IP/command control, no benign command side effect,
+no stock-layout or live-target claim and no r5. All real paths remain
+author-side pending independent replay.

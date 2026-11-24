@@ -67,14 +67,16 @@ chosen offset before the real second free, first with a loopback fake gpg and
 then with the host `/usr/bin/gpg` importing an armored key with a long UID
 (`realbuild/run-real.sh` 21 PASS / 0 FAIL; `realbuild/run-real-gpg.sh` 36 PASS
 / 0 FAIL). Patched 2.2.0, stock 2.3.1 and short-line controls stay clean.
-There is still no wire consumer, no pointer/IP/command control, no
-allocator-metadata claim and no r5; live reach and stock layout stay UNKNOWN.
-`AV:N` is advisory prose, not exercised here. Both real paths are author-side;
-witness replay of the real-GPGME path is still UNKNOWN.
+There is still no pointer/IP/command control, no allocator-metadata claim
+and no r5; live reach and stock layout stay UNKNOWN. `AV:N` is advisory
+prose, not exercised here. A loopback HKP response now supplies the long
+line through a real gpg verify (`run-wire.sh` 32 PASS / 0 FAIL), so rung 4
+is wire-visible in the lab, but all real paths remain author-side pending
+independent replay.
 
 ## Cheapest next experiment
 
-Obtain an independent replay of the real-GPGME paths, then put a loopback
-consumer in front of the status path to test whether attacker-controlled
-wire input can produce the long line. Rung 5 requires a measured path to a
-live target process and a benign side effect; neither is claimed here.
+Obtain an independent replay of the three real-GPGME paths (fake-gpg, real
+gpg import, loopback HKP verify). Rung 5 would then need a measured path
+from wire input to command execution in a live target process with an
+observed benign side effect; none is claimed here.

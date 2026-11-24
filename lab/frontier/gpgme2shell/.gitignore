@@ -25,3 +25,7 @@ realbuild/status-trigger-realgpg-231
 realbuild/realgpg/
 realbuild/wireprobe/
 wireprobe/
+realbuild/status-trigger-wire-vuln
+realbuild/status-trigger-wire-fixed
+realbuild/status-trigger-wire-231
+realbuild/wireloop/
