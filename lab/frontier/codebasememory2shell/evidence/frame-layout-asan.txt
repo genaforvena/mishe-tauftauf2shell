@@ -1,0 +1,97 @@
+Breakpoint 1 at 0xa9a16e: file src/cypher/cypher.c, line 4118.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+=================================================================
+==1496026==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ffff51004e0 at pc 0x555555fc2bba bp 0x7ffffffec070 sp 0x7ffffffec060
+READ of size 8 at 0x7ffff51004e0 thread T0
+    #0 0x555555fc2bb9 in rb_set_columns src/cypher/cypher.c:2568
+    #1 0x555555fe8895 in build_return_columns src/cypher/cypher.c:4095
+    #2 0x555555fe8895 in execute_return_clause src/cypher/cypher.c:4382
+    #3 0x555555fe8895 in execute_single src/cypher/cypher.c:4442
+    #4 0x5555560011f8 in cbm_cypher_execute src/cypher/cypher.c:4473
+    #5 0x555555fc008b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/harness.c:54
+    #6 0x7ffff682a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7ffff682a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x555555fbf6f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/codebasememory2shell/harness-vuln-asan+0xa6b6f4) (BuildId: 02d22ddfa544c2a2a162a552accd07184e079ec1)
+
+Address 0x7ffff51004e0 is located in stack of thread T0 at offset 1248 in frame
+    #0 0x555555fe2ecc in execute_single src/cypher/cypher.c:4398
+
+  This frame has 40 object(s):
+    [48, 52) 'scan_count' (line 4403)
+    [64, 68) 'bind_cap' (line 4407)
+    [80, 84) 'bind_count' (line 4409)
+    [96, 100) 'extra_count' (line 4356)
+    [112, 116) 'edge_count' (line 4272)
+    [128, 132) 'tc' (line 4212)
+    [144, 148) 'tcap' (line 4213)
+    [160, 168) 'scanned' (line 4402)
+    [192, 200) 'bindings' (line 4408)
+    [224, 232) 'var_name' (line 4410)
+    [256, 264) 'extra_nodes' (line 4355)
+    [288, 296) 'tv' (line 4337)
+    [320, 328) 'edges' (line 4271)
+    [352, 360) 'tmp' (line 4210)
+    [384, 392) 'tv' (line 4214)
+    [416, 480) 'found' (line 4288)
+    [512, 640) 'vars' (line 4144)
+    [672, 928) 'vars' (line 3863)
+    [992, 1248) 'col_names' (line 4076) <== Memory access at offset 1248 overflows this variable
+    [1312, 1568) 'vals' (line 4046)
+    [1632, 1888) 'row' (line 4017)
+    [1952, 2208) 'vals' (line 4112)
+    [2272, 2656) 'vals' (line 4153)
+    [2720, 3104) 'col_names' (line 4125)
+    [3168, 4192) 'vals' (line 3867)
+    [4320, 5944) 'b' (line 4413)
+    [6080, 7704) 'nb' (line 4296)
+    [7840, 9464) 'nb' (line 4312)
+    [9600, 11224) 'nb' (line 4172)
+    [11360, 12984) 'nb' (line 4178)
+    [13120, 14744) 'nb' (line 4207)
+    [14880, 16504) 'nb' (line 4222)
+    [16640, 18688) 'bufs' (line 4018)
+    [18816, 35200) 'valbufs' (line 4047)
+    [35456, 51840) 'func_bufs' (line 4113)
+    [52096, 52224) 'buf' (line 4082)
+    [52256, 52384) 'buf' (line 4088)
+    [52416, 52544) 'buf' (line 4127)
+    [52576, 53600) 'key' (line 4045)
+    [53728, 55776) 'cbuf' (line 3876)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cypher/cypher.c:2568 in rb_set_columns
+Shadow bytes around the buggy address:
+  0x7ffff5100200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100280: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100380: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x7ffff5100400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ffff5100480: 00 00 00 00 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x7ffff5100500: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100600: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x7ffff5100680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100700: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1496026==ABORTING
+[Inferior 1 (process 1496026) exited with code 01]
+No stack.

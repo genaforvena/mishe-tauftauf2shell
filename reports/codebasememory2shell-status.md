@@ -106,3 +106,33 @@ This closes the clean-checkout replay gap, not the independent-witness gap.
    influence the `query` argument with untrusted content; no such claim yet.
 3. Placement control in a live object through the tool path remains UNKNOWN;
    never infer RCE from a crash. Hand any new claim to `witness`.
+
+## W8 — frame-layout bound on the placement lane (read-only, no claim change)
+
+Read-only gdb measurement on the pinned vulnerable build (gcc -O1,
+`-fno-omit-frame-pointer`, same flags as `build.sh`), to test whether the OOB
+write can directly overwrite the row pointer array. Raw logs:
+`lab/frontier/codebasememory2shell/evidence/frame-layout-plain.txt` and
+`evidence/frame-layout-asan.txt`.
+
+- ASan frame map with `execute_return_simple()` inlined into `execute_single()`:
+  `vals` (line 4112, the row pointers) occupies offsets 1952-2208;
+  `func_bufs` occupies 35456-51840. The objects above `func_bufs` are char
+  arrays only: `buf[128]` at 52096, `buf[128]` at 52256, `buf[128]` at 52416,
+  `key[1024]` at 52576 and `cbuf[2048]` at 53728.
+- Plain build at the `cypher.c:4118` breakpoint: `&vals[0]=0x7fffffff5230`,
+  `&vals[31]=0x7fffffff5328`, `&func_bufs[0]=0x7fffffff5330`,
+  `&func_bufs[32]=0x7fffffff9330`, `$rbp=0x7fffffff9f70`, canary slot
+  `$rbp-8=0x7fffffff9f68`. `vals[]` sits immediately BELOW `func_bufs`; the
+  write runs upward from `func_bufs[32]`, 16,408 bytes above the last row
+  pointer, so it cannot reach the array. Item 38's 68-byte payload starts at
+  0x9f30 and reaches the canary at 0x9f68, consistent with the plain 48-item
+  stack-smashing abort. The same breakpoint's backtrace shows
+  chosen-byte-derived garbage in outer inlined frame argument slots; whether
+  any such slot is live after the canary check is NOT established.
+
+Conclusion: direct overwrite of the projection row pointers is a structural
+negative for this compiler/build, not an empirical miss. Pointer control at
+higher strides and in a live object remains UNKNOWN. No source, harness,
+build flag, pin, matrix row or witness request changed; grade stays rungs 1-4,
+no wire/pointer/command, no rung 5.

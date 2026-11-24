@@ -1,0 +1,17 @@
+Breakpoint 1 at 0x17c00: file src/cypher/cypher.c, line 4118.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, execute_return_simple (rb=0x7fffffff9fb0, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x5555557486c0) at src/cypher/cypher.c:4118
+warning: Source file is more recent than executable.
+4118	        rb_add_row(rb, vals);
+VALS0=0x7fffffff5230 VALS31=0x7fffffff5328 FUNC0=0x7fffffff5330 FUNC32=0x7fffffff9330 RB=0x7fffffff9fb0 CANARY=0x7fffffff9f68
+Stack level 0, frame at 0x7fffffff9f80:
+ rip = 0x55555556bc00 in execute_return_simple (src/cypher/cypher.c:4118); saved rip = 0x555555570629
+ inlined into frame 1
+ source language c.
+ Arglist at unknown address.
+ Locals at unknown address, Previous frame's sp in rsp
+#0  execute_return_simple (rb=0x7fffffff9fb0, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x5555557486c0) at src/cypher/cypher.c:4118
+#1  execute_return_clause (rb=0x7fffffff9fb0, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x5555557486c0, q=0x555555748550) at src/cypher/cypher.c:4386
+#2  execute_single (store=<error reading variable: Cannot access memory at address 0x7a79787775dd>, q=0x555555748550, q@entry=<error reading variable: Cannot access memory at address 0x7a79787775cd>, project=0x5555556ad06b "test", project@entry=<error reading variable: Cannot access memory at address 0x7a79787775d5>, max_rows=100000, max_rows@entry=1886350957, rb=0x7fffffff9fb0, rb@entry=0x7a79787775f5) at src/cypher/cypher.c:4442
