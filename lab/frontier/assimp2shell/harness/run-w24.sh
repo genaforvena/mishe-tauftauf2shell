@@ -50,20 +50,50 @@ check pin-asset 'PIN glTFAsset.inl ok=True'
 check pin-importer 'PIN glTFImporter.cpp ok=True'
 
 common='-O0 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
-if [ ! -f "$nsp/bin/libassimp.so.6.0.6" ]; then
-    cmake -G Ninja -S "$src" -B "$nsp" \
-        -DCMAKE_BUILD_TYPE= -DCMAKE_C_FLAGS="$common -fno-stack-protector" \
-        -DCMAKE_CXX_FLAGS="$common -fno-stack-protector" \
+build_lib() { # build dir, source tree, C flags, CXX flags, asan flag
+    local bld="$1" source="$2" cflags="$3" cxxflags="$4" asan="${5-}"
+    if [ -f "$bld/bin/libassimp.so.6.0.6" ]; then return; fi
+    local btype='' ; local -a extra=()
+    if [ "$asan" = asan ]; then
+        btype=Release
+        extra=(-DCMAKE_EXE_LINKER_FLAGS=-fsanitize=address
+               -DCMAKE_SHARED_LINKER_FLAGS=-fsanitize=address)
+    fi
+    cmake -G Ninja -S "$source" -B "$bld" -DCMAKE_BUILD_TYPE="$btype" \
+        -DCMAKE_C_FLAGS="$cflags" -DCMAKE_CXX_FLAGS="$cxxflags" \
         -DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF \
         -DASSIMP_BUILD_GLTF_IMPORTER=ON \
         -DASSIMP_BUILD_ALL_EXPORTERS_BY_DEFAULT=OFF \
         -DASSIMP_BUILD_ASSIMP_TOOLS=OFF \
-        -DASSIMP_BUILD_TESTS=OFF \
-        -DASSIMP_BUILD_SAMPLES=OFF \
-        -DASSIMP_BUILD_ZLIB=ON \
-        -DASSIMP_WARNINGS_AS_ERRORS=OFF >/dev/null
-    cmake --build "$nsp" --parallel 2 --target assimp >/dev/null
+        -DASSIMP_BUILD_TESTS=OFF -DASSIMP_BUILD_SAMPLES=OFF \
+        -DASSIMP_BUILD_ZLIB=ON -DASSIMP_WARNINGS_AS_ERRORS=OFF \
+        "${extra[@]}" >/dev/null
+    cmake --build "$bld" --parallel 2 --target assimp >/dev/null
+}
+build_lib "$nsp" "$src" "$common -fno-stack-protector" "$common -fno-stack-protector"
+build_lib build-min-plain-nf-o0 "$src" "$common" "$common"
+o1flags='-O1 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
+o2flags='-O2 -g -U_FORTIFY_SOURCE -DNDEBUG -fno-omit-frame-pointer'
+build_lib build-min-plain-nf "$src" "$o1flags" "$o1flags"
+build_lib build-min-plain-nf-o2 "$src" "$o2flags" "$o2flags"
+
+fix7090=pins/fixed7090-6.0.6
+if [ ! -f "$fix7090/code/AssetLib/glTF/glTFImporter.cpp" ]; then
+    rm -rf "$fix7090"
+    cp -a "$src" "$fix7090"
+    patch -d "$fix7090" -p0 code/AssetLib/glTF/glTFImporter.cpp < pins/pr7090-gltfImporter.patch
 fi
+fix6860=pins/fixed-full-6.0.6
+if [ ! -f "$fix6860/code/AssetLib/glTF/glTFAsset.inl" ]; then
+    rm -rf "$fix6860"
+    cp -a "$src" "$fix6860"
+    cp pins/fixed-6.0.6/code/AssetLib/glTF/glTFAsset.inl \
+        "$fix6860/code/AssetLib/glTF/glTFAsset.inl"
+    patch -d "$fix6860" -p0 < pins/pr6860-gltfAsset.h-decl.patch
+fi
+asanflags='-O1 -g0 -fsanitize=address -fno-omit-frame-pointer'
+build_lib build-min-7090 "$fix7090" "$asanflags" "$asanflags" asan
+build_lib build-min-fixed "$fix6860" "$asanflags" "$asanflags" asan
 
 build_driver() { # output, build dir, extra driver flags
     local out="$1" bld="$2" extra="${3-}"
