@@ -822,3 +822,39 @@ fixed the literal at `0x41bd2e` and a bounded-retry gdb run showed
 `enc=0x41bd2e "A128CBC-HS256"` with `DECRYPT=0 ERRCODE=4 CEK_LEN_AFTER=72`.
 This is author replay of committed bytes, not witness acceptance; no
 listener remained. The one command is offered to `witness` on the chat tape.
+
+## W203 — wire-delivered JWK `fns` pointer with benign marker (2026-11-24 21:00-21:06Z)
+
+New files only under `w1/wmarker/`; no pinned byte, existing harness file,
+config or other mind's file changed. `server.c` is derived from `w1/server.c`
+and built `-no-pie -g -O0` against the pinned vulnerable and fixed static
+cjose trees plus the locally built jansson. It allocates a 32-byte hole
+before `cjose_jwk_import()`, reports the hole/JWK delta to stdout, frees the
+hole before `cjose_jwe_decrypt()`, and defines a non-static
+`wmarker_fake_fntable` whose `free_func` prints `BENIGN_MARKER_EXECUTED`.
+`client.py` derives an RFC 3394-valid wrap of a 768-byte plaintext whose
+offsets 720..767 preserve the JWK fields learned from that run's lab stdout
+(prev_size, size, `kty`, `kid`, `retained`, `keysize`, `keydata`) and replace
+only `fns` at JWK+0x28 with `0x4213e0`, the fixed address of the fake table
+(`nm wmarker_fake_fntable`). The 776-byte raw `encrypted_key` is carried in
+a real HTTP GET to one ephemeral 127.0.0.1 listener.
+
+Measured on author rerun of `sh w1/wmarker/run.sh` (`WMARKER_OK`): the
+layout printed `DELTA=720`, `FNS_OFFSET_IN_JWK=40`; vulnerable attack log
+`JWK_FNS_NOW=0x4213e0`, `BENIGN_MARKER_EXECUTED`, `MARKER_CALLED=1`,
+`GROOM_OK=1`, `CEK_LEN_AFTER=768` (decrypt itself fails with `ERRCODE=1`).
+Fixed control with the same attack *parameters* printed `ERRCODE=1`,
+`CEK_LEN_AFTER=32`, `JWK_FNS_NOW=0x420d60`, `MARKER_CALLED=0`. Safe token:
+`CEK_LEN_AFTER=32`, `MARKER_CALLED=0`. The 16 bounded grooming retries and
+all three final logs are in `w1/wmarker/evidence/`, with
+`WMARKER-SHA256SUMS` (24 files, `sha256sum -c` OK). No listener or wmarker
+process remained.
+
+Limits: this is W188's indirect-call mechanics moved behind a real HTTP
+request, still with a build-known absolute address, not a leaked or
+wire-derived live address. Preserving `keydata` requires the lab server's
+own stdout report; the fixed control reuses parameters, so its token is
+not byte-identical to the vulnerable one. Heap/PIE ASLR is not defeated,
+no command runs, and the real mod_auth_openidc consumer's CEK is followed
+by top chunk (W189), not a JWK. Grade and r5 ceiling unchanged; author-only
+limb to offer witness independently.

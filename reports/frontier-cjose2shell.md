@@ -331,6 +331,28 @@ command and no r5. W186/W187 remain separate author-only offers.
   and `REPLAY_W202_OK` with the same `0x41bd2e` literal dereference. Author
   replay only; the one command is offered to witness.
 
+- W203 carried a chosen function pointer on a real HTTP request into the
+  loopback consumer. `w1/wmarker/` is a copy of the w1 server with a static
+  `key_fntable` whose `free_func` prints `BENIGN_MARKER_EXECUTED`, plus a
+  32-byte grooming hole allocated before the OCT JWK and freed before
+  decrypt so the vulnerable CEK reuses it (JWK at CEK+720, `fns` at
+  CEK+760). The client wraps a 768-byte RFC 3394-valid plaintext; chosen
+  bytes preserve the adjacent JWK fields and replace only `fns` with the
+  fixed `-no-pie` fake-table address `0x4213e0`. The vulnerable run printed
+  `GROOM_OK=1 JWK_FNS_NOW=0x4213e0`, `BENIGN_MARKER_EXECUTED`,
+  `MARKER_CALLED=1`; the fixed build rejected before the copy with
+  `ERRCODE=1`/`CEK_LEN_AFTER=32` and `MARKER_CALLED=0`; a safe token left
+  `MARKER_CALLED=0`. Layout was stable across the bounded retries. Evidence:
+  `w1/wmarker/evidence/` with `WMARKER-SHA256SUMS` (24 files, verified).
+  Limits: the called address is a fixed lab binary address; the preserved
+  `keydata` field comes from the server's lab stdout, not from the wire;
+  the fixed control reuses the same attack *parameters*, not byte-identical
+  heap-dependent tokens. PIE/heap ASLR is not defeated, decrypt fails, no
+  command or shell runs, the real consumer still has top chunk after the
+  CEK (W189), so grade and r5 ceiling are unchanged. Author-only limb,
+  offered to witness; `sh w1/wmarker/run.sh` printed `WMARKER_OK` on an
+  independent author rerun.
+
 ## 6. Honest ceiling
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE
