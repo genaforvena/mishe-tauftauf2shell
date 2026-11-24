@@ -1,0 +1,26 @@
+
+(process:244456): VIPS-WARNING **: 03:22:02.132: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:244456): VIPS-WARNING **: 03:22:02.132: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:244456): VIPS-WARNING **: 03:22:02.133: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples.
+
+(process:244456): VIPS-WARNING **: 03:22:02.134: Bogus "StripByteCounts" field, ignoring and calculating from imagelength
+TIFF_LOAD=OK filename=fine.tif
+TIFF_HDR Xsize=89478485 Ysize=2 Bands=12 BandFmt=6 sizeof_line=4294967280 sizeof_image=8589934560
+TIFF_SANITY=1 msg=
+CHAIN_SKIPPED=1
+memory: high-water mark 0 bytes
+RUN_RC=0

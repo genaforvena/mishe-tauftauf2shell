@@ -497,8 +497,15 @@ metadata field in the default allocator layout, with no grooming:
 
 - Geometry `Xsize=89478485, Ysize=2, Bands=12, BandFmt=UINT (32-bit)` gives
   `ps=48`, `ls=4294967280 = 2^32-16`, `bpl=-16`; width is below the real
-  loader's `VIPS_MAX_COORD=100000000` cap. `vips_image_write_prepare()` on a
-  real memory image allocates the real 8,589,934,560-byte buffer.
+- **The geometry is real-loader-expressible.** The runner generates a 154-byte
+  TIFF (`python3 mktiff.py fine.tif 89478485 2 12 32 3`) and loads its header
+  through `VipsForeignLoadTiff` with `SKIP_CHAIN=1`. Vulnerable 8.18.2 reports
+  `TIFF_LOAD=OK ... sizeof_line=4294967280 sizeof_image=8589934560` and
+  `TIFF_SANITY=1 msg=`; fixed rejects with
+  `TIFF_LOAD=ERR msg=image: dimension overflow`. No pixel decode occurs in
+  this header-only leg.
+- `vips_image_write_prepare()` on a real memory image with that geometry
+  allocates the real 8,589,934,560-byte buffer.
 - Pinned `vips_region_paint_pel()` (`region.c:974-1008`) with a 1-pel,
   two-line rect has `ws=48` and executes `memcpy(to-16, to, 48)`.
   `vips_tracked_free()` reads its block size from `data-16..data-9`
@@ -513,15 +520,16 @@ metadata field in the default allocator layout, with no grooming:
   no size-field write, `RUN_RC=0`. Safe control `Xsize=64, Bands=12`:
   `bpl=3072`, `TRACKED_SIZE_BEFORE == TRACKED_SIZE_AFTER == 0x1810`, no
   free-time warning, `RUN_RC=0`.
-- Runner `lab/frontier/libvips2shell/real/run-fine.sh` checks 19 assertions;
-  `RESULT fail=0`, rc 0 in-tree. Reproducibility from a clean `git archive` is
-  recorded in `PROVENANCE.md` §W16.
+- Runner `lab/frontier/libvips2shell/real/run-fine.sh` checks 26 assertions;
+  `RESULT fail=0`, rc 0, warning-free compile in-tree. Reproducibility from a
+  clean `git archive` is recorded in `PROVENANCE.md` §W16.
 
 **Ceiling.** This is a rung-4 refinement: chosen bytes in a live allocator
 *accounting field* with an observed free-time effect, on the default layout,
 versus W6's unmapped fault or anonymous victim. The field is a `size_t` used
 in arithmetic and a warning branch — not a pointer, vtable, saved return
 address or control-flow diversion. The write is still a direct
-`vips_region_paint_pel()` call on a programmatically created image; no TIFF
-pixel decode, live consumer, command, marker or witness verdict for rung 5.
+`vips_region_paint_pel()` call on a programmatically created image; the
+header-only leg reaches real header acceptance but no TIFF pixel decode, live
+consumer, command, marker or witness verdict for rung 5.
 Grade unchanged: rungs 1–4; rung 5 UNKNOWN.

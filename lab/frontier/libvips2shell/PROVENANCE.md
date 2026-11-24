@@ -629,18 +629,29 @@ chosen ink bytes (`0x41`) therefore replace the live tracked size.
 | Artifact | SHA-256 |
 | --- | --- |
 | `real/fine.c` | `4b3fefc35327a0c70e71d660cfb245b90360440c058e9b91f25768ff6b02c8de` |
-| `real/run-fine.sh` | `1ddf4faa4b86393f59ce50078c3b77bd10930613d3e7310a2eb6fd6e83edc677` |
-| `real/fine-vuln-craft.out` | `60bed3f8b4dd1ccd468db3ff80f881cb64b00a7691cc7db78dc97fe616550669` |
+| `real/run-fine.sh` | `4e6f5b8a4463812fdb1ba1372beb46e68744a8c48c202b7ae7498568237544a5` |
+| `real/fine-vuln-craft.out` | `ef2ff2fa4643e59acf5634d65630bfc4f1dee5ffb5147805adf54632d36df0c0` |
 | `real/fine-fixed-craft.out` | `ead0996d8bf1cd5855bb382b903ed553ad8fe240445d2148cd763bba51853eec` |
-| `real/fine-vuln-safe.out` | `6f70427f4340ff77c808e32929754fdc8c273b2c19700e07a928fd2fb4510029` |
+| `real/fine-vuln-safe.out` | `36848e115e333f1467e387199f60264aa80c0121f16445a7b773524b53c71afd` |
+| `real/fine-hdr-vuln.out` | `2ba6794f6012846add7e508b14d7f31386c4859bb798fc9abb7da187c68c1f6a` |
+| `real/fine-hdr-fixed.out` | `9059885fe566a815fb9619f5e307a0fe3220f603a5f65391174e7528a8d097da` |
 
 ### Observations
 
 Plain pinned builds (not ASan: a redzone would abort at the first poisoned
-byte and hide the allocator field). `real/run-fine.sh` builds both probes and
-runs three legs with a 90 s timeout each; 19 anchored assertions,
-`RESULT fail=0`, process rc 0, clean compile.
-
+byte and hide the allocator field). `real/run-fine.sh` builds four probes,
+generates `fine.tif` with the committed `mktiff.py`, and runs five legs with a
+90 s timeout each; 26 anchored assertions, `RESULT fail=0`, process rc 0,
+warning-free compile. The raw `.out` files carry run-specific timestamps and
+pointer values; the assertions, not their file digests, are the replayable
+evidence.
+- Real TIFF header leg: `python3 mktiff.py fine.tif 89478485 2 12 32 3`
+  produces a 154-byte file. Vulnerable plain build with `SKIP_CHAIN=1`:
+  `TIFF_LOAD=OK filename=fine.tif`,
+  `TIFF_HDR Xsize=89478485 Ysize=2 Bands=12 BandFmt=6 sizeof_line=4294967280
+  sizeof_image=8589934560`, `TIFF_SANITY=1 msg=`, `CHAIN_SKIPPED=1`,
+  `RUN_RC=0`. Fixed plain build: `TIFF_LOAD=ERR msg=image: dimension
+  overflow`, `RUN_RC=0`. Header only; no pixel was decoded in this leg.
 - Vulnerable + craft: `IMAGE mode=craft Xsize=89478485 Ysize=2 Bands=12
   BandFmt=4 sizeof_line=4294967280 sizeof_image=8589934560`,
   `REGION bpl=-16 lskip=18446744073709551600 valid={0,0,1,2} ws=48`.
@@ -669,8 +680,8 @@ field in the default layout, and chosen bytes there change free-time behaviour".
 The field is a `size_t` size used in arithmetic and a warning branch, not a
 pointer, vtable, saved return address or control-flow diversion; `0x41` bytes
 are not code. The sink is still a direct `vips_region_paint_pel()` call on a
-programmatically created memory image: no TIFF decode, no live consumer, no
-wire/request in this leg, no command, no marker, no witness verdict. Grade
+programmatically created memory image: no TIFF pixel decode, no live consumer,
+no wire/request in this leg, no command, no marker, no witness verdict. Grade
 unchanged: rungs 1–4; rung 5 UNKNOWN. A compile-warning correction during this
 wake restored two omitted `printf` arguments; the final build is warning-free.
 

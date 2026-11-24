@@ -25,6 +25,13 @@ gcc $CFLAGS -I"$ROOT/build-fixed-plain" -I"$ROOT/build-fixed-plain/libvips/inclu
 	-I"$ROOT/src/libvips-fixed/libvips/include" $INC -o fine-fixed fine.c \
 	-L"$FIXED_LIB" -lvips $LIB || exit 1
 
+gcc $CFLAGS -I"$ROOT/build-vuln-plain" -I"$ROOT/build-vuln-plain/libvips/include" \
+	$INC -o fine-hdr-vuln probe.c -L"$VULN_LIB" -lvips $LIB || exit 1
+gcc $CFLAGS -I"$ROOT/build-fixed-plain" -I"$ROOT/build-fixed-plain/libvips/include" \
+	-I"$ROOT/src/libvips-fixed/libvips/include" $INC -o fine-hdr-fixed probe.c \
+	-L"$FIXED_LIB" -lvips $LIB || exit 1
+python3 mktiff.py fine.tif 89478485 2 12 32 3 || exit 1
+
 run() {
 	local lib=$1 bin=$2 out=$3 mode=$4
 	LD_LIBRARY_PATH="$lib" timeout 90 "./$bin" "$mode" >"$out" 2>&1
@@ -35,6 +42,13 @@ run() {
 run "$VULN_LIB" fine-vuln fine-vuln-craft.out craft
 run "$FIXED_LIB" fine-fixed fine-fixed-craft.out craft
 run "$VULN_LIB" fine-vuln fine-vuln-safe.out safe
+
+LD_LIBRARY_PATH="$VULN_LIB" SKIP_CHAIN=1 timeout 90 ./fine-hdr-vuln fine.tif \
+	>fine-hdr-vuln.out 2>&1
+printf 'RUN_RC=%d\n' "$?" >>fine-hdr-vuln.out
+LD_LIBRARY_PATH="$FIXED_LIB" SKIP_CHAIN=1 timeout 90 ./fine-hdr-fixed fine.tif \
+	>fine-hdr-fixed.out 2>&1
+printf 'RUN_RC=%d\n' "$?" >>fine-hdr-fixed.out
 
 fail=0
 check() {
@@ -53,6 +67,16 @@ absent() {
 		echo "PASS $1 :: absent $2"
 	fi
 }
+
+# The same fine geometry is expressible as a 154-byte TIFF and accepted by
+# the real loader on the vulnerable build, rejected on the fixed build.
+check fine-hdr-vuln.out 'TIFF_LOAD=OK filename=fine.tif'
+check fine-hdr-vuln.out 'TIFF_HDR Xsize=89478485 Ysize=2 Bands=12 BandFmt=6 sizeof_line=4294967280 sizeof_image=8589934560'
+check fine-hdr-vuln.out 'TIFF_SANITY=1 msg='
+check fine-hdr-vuln.out 'CHAIN_SKIPPED=1'
+check fine-hdr-vuln.out 'RUN_RC=0'
+check fine-hdr-fixed.out 'TIFF_LOAD=ERR msg=image: dimension overflow'
+check fine-hdr-fixed.out 'RUN_RC=0'
 
 # Vulnerable + fine craft: ls=2^32-16, bpl=-16, write reaches the live
 # vips_tracked_malloc size field at data-16 without an unmapped fault.
