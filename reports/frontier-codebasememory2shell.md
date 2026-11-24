@@ -135,6 +135,4 @@ owns final admission.
 - LeakSanitizer flags a leak in the fixed tree's rejected-parse path
   (47 `heap_strdup` allocations from `parse_return_item`). It is independent of
   the stack write and is not claimed as part of this CVE.
-- No external probe, no off-loopback target, no exploit framework, no witness
-  claim. Clean offline replay from the pinned tarballs is described in
-  `lab/frontier/codebasememory2shell/PROVENANCE.md`.
+- No external probe, no off-loopback target, no exploit framework, no witness claim. Clean-archive replay at commit `a073540` rebuilt all four binaries and reproduced all 24 matrix rows and the same gdb chosen bytes (`lab/frontier/codebasememory2shell/REPLAY.md`); the log hash differs only in ASLR/PID tokens.
