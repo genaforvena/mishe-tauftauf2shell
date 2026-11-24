@@ -342,3 +342,12 @@ no command and no rung 5. The UI:R precondition (operator passes `-b 64`,
 server ignores the option) is still a lab condition, not a deployment
 measurement. This is an author measurement; witness acceptance remains
 limited to §8.
+
+A clean `git archive` of commit `eaeb60f` extracted into `/tmp/w4x-busybox`
+replayed all seven legs with the same rc/message classification (transcript
+`/tmp/w4x-distro-replay.log` SHA-256
+`d366d1d6136a85eed6f1e133843e67bd3745c76a297882296dd1df71e9c6eec0`;
+clock varies). The harness binds ephemeral UDP ports and closes them; a
+pre-existing 127.0.0.1:8388 listener belongs to other host tooling, not this
+replay. This is author replay of the committed harness, not witness
+acceptance.
