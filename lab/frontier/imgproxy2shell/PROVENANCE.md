@@ -512,3 +512,18 @@ execution or command ran. Grooming is stochastic (three of six sweep runs had
 a live pointer in the spill window); no claim of determinism is made. W3/W4
 and now W5 remain author observations until witness replay. No external
 address was contacted; ports 18080/18081 were free after the runs.
+
+### Clean-archive replay (09:32Z)
+
+From `git archive HEAD lab/frontier/imgproxy2shell` (commit `4c4937d`) into
+`/tmp/w5-replay`, with only the two gitignored CLI binaries symlinked in and
+the libvips tree referenced by absolute path, the committed probe reproduced
+the write mechanics in every run: chosen `0x4141414141414141` at `data+32`
+and victim size `0x35` preserved. Five preload=2 attempts hit the top-chunk
+layout (no live pointer in the spill), but a preload=6 attempt reproduced the
+full transition: `next=0x00007ff87bfaa77e` before the write,
+`next=0x4141414141414141` after, and `malloc(0x20)` returning the victim chunk
+`0x7fff8402e9f0`. The fixed binary returned HTTP 500 with zero breakpoint
+hits. The throwaway tree was removed; no replay logs were committed. This is
+an honest limit on determinism: the pointer-control leg needs a groomed layout
+that occurred in roughly half the attempts, not on every request.

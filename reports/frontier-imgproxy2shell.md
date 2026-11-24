@@ -223,7 +223,9 @@ pointer, marker execution or command was observed, so this is still rung 4,
 not rung 5. Grooming is stochastic, not deterministic. The allocation geometry
 itself is invariant: only `data_size` 0xfffffff3..0xffffffff wraps, giving
 allocations of 1..13 bytes, all served from the same 0x20 glibc size class.
-Full logs, digests, negative runs and the fixed control are in PROVENANCE W5.
+Full logs, digests, negative runs, the fixed control and a clean-archive replay
+at `4c4937d` are in PROVENANCE W5; the replay reproduced the pointer-control
+transition with preload=6 but hit the top-chunk layout in five preload=2 runs.
 
 ## Remaining gap to a rung-5 attempt
 
