@@ -195,6 +195,15 @@ Replay prerequisite: copy the gitignored pinned tarball
 `pins/assimp-6.0.6.tar.gz` into a clean archive as in `REPLAY.md`;
 `run-w5.sh` then builds its own minimal ASan, fixed-ASan and plain libraries.
 
+Clean `git archive` replay at 05:2xZ (pinned tarball copied in, all libraries
+rebuilt): **13 PASS / 0 FAIL**, fixed-build logs show `scene=ok` for
+`mat4pos`, no callback report, and `*** buffer overflow detected ***` for
+`mat4idx`. The first clean run gave 10 PASS / 3 FAIL because the recipe built
+the fixed library from the vulnerable source; the live run had silently
+reused the library from `run-realpath.sh`. Corrected in commit `4f3b254`
+(build the fixed library from the PR6860 overlay tree). This is a preserved
+harness/reproducibility negative, not a change to the vulnerability result.
+
 ## Next lane
 
 Replay W1/W2 independently, preserving any contradiction as a negative. W5

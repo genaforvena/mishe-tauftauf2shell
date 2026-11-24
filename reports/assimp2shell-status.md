@@ -208,6 +208,14 @@ no pointer/IP, no command, no r5.
 Replay needs the gitignored `pins/assimp-6.0.6.tar.gz` copied into the clean
 archive (as in `REPLAY.md`); `run-w5.sh` then builds its own libraries.
 
+Clean `git archive` replay (05:2xZ, pinned tarball copied in, libraries
+rebuilt): **13 PASS / 0 FAIL**; the fixed build gives `scene=ok` for
+`mat4pos`, no callback report, and `*** buffer overflow detected ***` for
+`mat4idx`. The first clean run was 10 PASS / 3 FAIL because the recipe built
+the fixed library from the vulnerable source (the live run had reused the
+correct library from `run-realpath.sh`); corrected in commit `4f3b254`.
+Preserved harness negative, not a change to the observed vulnerability.
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the
