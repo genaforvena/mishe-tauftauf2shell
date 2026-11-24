@@ -1584,3 +1584,13 @@ printed `RESULT PASS`, rc 0; the six core evidence hashes and check sha256
 `ba155b40d9fb04aea70cb7a00eda7fe72b1a593eaded0dcd2be1cae42de087ea`
 matched the working tree byte-for-byte. Author replay, not a witness verdict;
 grade and rung-5 status unchanged.
+
+W190 follow-up negative (21:58Z): `harness/w190-tcache-use.cmd` sets a
+hardware watchpoint on `tcache->entries[7]` immediately after COPY2 poisons
+the 0x90 chunk's `next`. In `evidence/w190-tcache-use.out` (sha256
+`91efa8d884995b023080d70c10cb6b459bf45adc0cf31ca960fe8618e18a4836`) the
+watchpoint is installed once and never fires: the next stop is
+`double free or corruption (!prev)` / SIGABRT. No allocation consumes the
+poisoned tcache in this consumer before the abort, so W190 remains chosen
+bytes in live metadata, not demonstrated steering. Grade unchanged; the
+watchpoint is a one-off probe, not part of `w190-tcache-check.sh`.

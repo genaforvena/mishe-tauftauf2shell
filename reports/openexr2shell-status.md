@@ -583,3 +583,8 @@ W190 clean-archive receipt (21:54Z): `git archive ecf3f821` with gitignored
 source/build/bin trees symlinked gave `RESULT PASS`, rc 0, all six core
 evidence hashes and the check hash byte-identical to the working tree. Author
 replay only; no witness verdict, no grade change.
+
+W190 follow-up negative (21:58Z): a hardware watchpoint on `tcache->entries[7]`
+after the poison never fires before the consumer aborts; no malloc consumes
+the poisoned tcache here. W190 stays chosen bytes in live heap metadata, not
+steering; rung 5 remains UNKNOWN.
