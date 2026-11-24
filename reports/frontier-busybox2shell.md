@@ -136,7 +136,8 @@ pointer/IP control and does not change the rung-5 ceiling.
    `size > av->system_mem` guard blocks the `-1` wraparound allocation, and a
    guard-passing value only returns `rbuf+80`, inside the overflow. No live
    code pointer is reachable by that primitive; a different primitive would be
-   needed for any control-flow claim.
+   needed for any control-flow claim. §11 closes the remaining consumer gap:
+   the DATA path also has no allocation after the overflow.
 3. Done (§10): the OACK control acknowledges `blksize` and that RRQ does not
    fall back (rc 0); a real affected-version distribution BusyBox binary under
    the same loopback server reproduces fallback and chosen-byte heap
@@ -351,3 +352,53 @@ clock varies). The harness binds ephemeral UDP ports and closes them; a
 pre-existing 127.0.0.1:8388 listener belongs to other host tooling, not this
 replay. This is author replay of the committed harness, not witness
 acceptance.
+
+## 11. W5 DATA-consumer ceiling: no post-overflow allocation (2026-11-24 06:3xZ, loopback)
+
+§9's negative result was explicitly bounded to the ERROR consumer (opcode 5):
+after the overflow, `bb_error_msg` calls `vasprintf`, whose malloc returns
+`rbuf+80`, and then the client exits. The receive loop has a second live
+consumer — after an unrecognized first packet forces the fallback, a matching
+DATA block (opcode 3) is written to the local file and the loop continues —
+which §9 did not exercise. That is the one path where a later allocation could
+consume the corrupted top chunk, so it was measured.
+
+`lab/frontier/busybox2shell/data_probe.py` drives the stock plain 1.37.0
+client over the real loopback UDP path; no code is injected. The wire sets the
+top-chunk size word at `rbuf+72` to `0x4141414141414141`, which glibc's
+`size > av->system_mem` guard turns into an immediate `malloc(): corrupted
+top size` SIGABRT for *any* subsequent malloc — a sensitive detector. A short
+84-byte DATA block (4-byte header + 80-byte payload) still covers `rbuf+72..79`
+with 12 bytes of overflow, while `full_write` sees 80 != 512 and sets
+`finished=1`, keeping the output file from being unlinked on exit (`tftp.c:703`,
+`:745-746`, `:759-760`). Transcript `data_probe_evidence.log` SHA-256
+`8d22cfe3daf7a4cc9d9edab1b58260ebbd6b13b7d479a9db11e6267e22c7aa3c`
+(2026-11-24T06:34Z; two replays gave byte-identical transcripts — the log
+carries no timestamp).
+
+- Leg A — DATA consumer, aborting top size: rc 0, no abort. The 80-byte output
+  file holds `4141414141414141` at offset 68 (= `rbuf+72`), so the chosen
+  top-size word crossed the UDP path, overflowed `rbuf`, and reached a real
+  file sink; yet no allocation followed before normal exit.
+- Leg B — ERROR consumer, same aborting top size: `malloc(): corrupted top
+  size`, rc -6. Detector control: this wire value does produce the abort on
+  the §9 path, so Leg A's silence is not a disabled detector.
+- Leg C — DATA consumer, original top size `0x20cb1`: rc 0, no abort, file
+  offset 68 holds `b10c020000000000`. Input control: the failure follows the
+  chosen bytes.
+
+**Source-bound reading.** `rbuf` is the second and last `xmalloc` in
+`tftp_protocol` (`:331-332`); before the overflow at `:602` the client makes
+no attacker-triggerable allocation that places a live object after `rbuf`, so
+the overflow targets the wilderness only. After it, the only reachable
+allocation is the ERROR path's `vasprintf` (§9: returns `rbuf+80`, used solely
+to format and print); the DATA path has none (measured above), and both
+consumer paths then exit. No chosen pointer reaches a live object, no
+tcache/fastbin poisoning, no function-pointer or return-address control, no
+command. This upgrades §9's "measured ceiling for the top-chunk path only" to
+a source-and-observation-bound ceiling for both consumer paths of this stock
+client. It remains a ceiling for this build and primitive class, not a
+universal proof for all allocators or configurations.
+
+Grade unchanged: rungs 1-4 (witness verdict §8). No new rung, no rung 5.
+Author measurement, not witness acceptance.

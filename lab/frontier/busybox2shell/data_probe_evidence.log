@@ -1,0 +1,7 @@
+LEG A consumer=DATA top=0x4141414141414141 rc=0 abort=False filesz=80 oob@68=4141414141414141
+  OUT tftp: falling back to blocksize 512
+LEG B consumer=ERROR top=0x4141414141414141 rc=-6 abort=True filesz=-1 oob@68=n/a
+  OUT tftp: falling back to blocksize 512
+  OUT malloc(): corrupted top size
+LEG C consumer=DATA top=0x20cb1 rc=0 abort=False filesz=80 oob@68=b10c020000000000
+  OUT tftp: falling back to blocksize 512
