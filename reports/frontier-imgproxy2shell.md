@@ -227,11 +227,49 @@ Full logs, digests, negative runs, the fixed control and a clean-archive replay
 at `4c4937d` are in PROVENANCE W5; the replay reproduced the pointer-control
 transition with preload=6 but hit the top-chunk layout in five preload=2 runs.
 
+### W6 — safe-linking bound on live tcache control (2026-11-24, unwitnessed)
+
+glibc here is 2.39, so tcache `next` is protected as `ptr ^ (pos >> 12)`. In
+W5's `http-ico-w5final1.log`, the live `next=0x00007ff883f42c4e` at
+`pos=0x7fff7c03ef10` decodes with `pos>>12=0x7fff7c03e` to
+`0x7fff7c03ec70`, a valid near-heap address; W5's raw wire value
+`0x4141414141414141` decodes to a noncanonical address and cannot itself name
+an allocation. `provision/ico_gdb_tcache.py`
+(`sha256=95326911b40a37fb9e6b72a9acfe7cb3a683005da906f571a690eb399c9fcb55`)
+measures the remaining mechanic under gdb in the live process: at the
+`read_full` breakpoint it reads the live tcache head, patches its `next` with
+a gdb-encoded chosen address and calls `malloc(0x20)` twice.
+
+- `http-ico-w6v9.log` (`b16751c6...6700`): with the desired layout
+  (`pos=0x7fff880b0480`, live decoded `next=0x7fff880b01e0`), the first
+  gdb-forced `malloc(0x20)` returned the victim `0x7fff880b0480` and
+  `tcache->entries[1]` became exactly the encoded chosen address `0x61000000`;
+  the second `malloc(0x20)` faulted in `tcache_get_n`.
+- `http-ico-w6v23.log` (`482ef01e...0c33b`) and `w6v24`: negative — gdb cannot
+  access that static `.bss` address although `info proc mappings` shows the
+  range rw; an unmapped target is a target-selection error, not a safe-link
+  bypass.
+- `http-ico-w6v27.log` (`681fe8ae...d82d4`) and `w6v30` (`b4372941...e8e8`):
+  with a mapped, heap-derived gdb target (`$pos + 0x10`), both
+  `tcache->entries[1]` and the second `malloc(0x20)` returned exactly that
+  chosen address (`0x7fff700580e0` and `0x7fffa4058400`), with the target
+  qwords readable.
+- Fixed control `http-ico-w6fixed1.log` (`47bab70f...c906`): HTTP 500
+  `ICO image data is too large`, zero breakpoint hits.
+
+Grade stays rung 4: encoding and target are computed under gdb, not derived
+from wire bytes; heap addresses differed between runs, so the safe-link key
+is not known to a wire-only attacker here; no write through the chosen
+address to a code pointer, marker execution or command was observed. The
+layout is stochastic; layout-dependent negatives are preserved rather than
+retried into existence.
+
 ## Remaining gap to a rung-5 attempt
 
-A mapped attacker-chosen target address plus a later attacker-influenced write
-to a live code pointer would be needed; neither was observed. No external
-target is ever contacted.
+A mapped attacker-chosen target address, the safe-link key
+`pos >> 12` for that live heap position, and a later attacker-influenced write
+to a live code pointer would all be needed; W6 measured the first two only
+under gdb, not from wire bytes. No external target is ever contacted.
 
 ## What would change my mind
 
