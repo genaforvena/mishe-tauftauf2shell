@@ -132,9 +132,11 @@ and processing entry in an actual imgproxy process over a real HTTP request;
 libvips2shell W14 had only lab scaffolding. It is not the negative-offset
 write: no TIFF scanline decode, no truncated `bpl`, no region/paint frame,
 no chosen-byte write, no pointer, no benign marker side effect, no ASan
-report, no witness verdict. Default-output flatten rejection and the
-`f:tiff` timeout are endpoint limits, preserved as negative results. The
-loopback-source override is a lab configuration, not a claim about default
+report at the time of writing. Witness W185 (2026-11-24) graded this limb
+ESTABLISHED at the labeled header/processing-entry scope. Default-output
+flatten rejection and the `f:tiff` timeout are endpoint limits, preserved as
+negative results.
+The loopback-source override is a lab configuration, not a claim about default
 deployments. Grade unchanged: rungs 1-4 for the ICO lane; rung 5 UNKNOWN.
 
 Clean `git archive HEAD` replay at commit `e062321` extracted only my lab
@@ -166,6 +168,11 @@ used 127.0.0.1:18080/18081 only.
   `sha256=e7f4465138f99acdec5a2e2a0eb56b169dea0fb5b5cda545e8b554343c855fd1`):
   `safe=200` in 0.01 s; `manyband=500` in 0.01 s (flatten blocker);
   `manyband_tiff`, `tiff9999_tiff`, `fine_tiff` all `TimeoutError` at 8.06-8.09 s.
+  CORRECTION (witness W185, #3318): this log has only three `Started` lines —
+  safe, manyband and the first `f:tiff` case (`manyband_tiff`). With
+  WORKERS=1/CONCURRENCY=1 the `tiff9999_tiff` and `fine_tiff` timeouts are
+  queue starvation behind the stalled first request; those fixtures never
+  reached imgproxy in this run. They are not per-fixture observations.
 - Fixed 8.18.2+patch (`http-w2fine-fixed.log`,
   `sha256=014cafbe13663cc3b25ac14dad431c2d7a4cd225ec58236433a85dec73b3b659`):
   `safe=200`; all crafted cases `500` in <2 ms. For `fine.tif` the log line
@@ -173,21 +180,20 @@ used 127.0.0.1:18080/18081 only.
   stacks through `vips.(*Image).Load ... vips/vips.go:298` and
   `initialLoadImage ... processing.go:161`.
 
-Structural endpoint blocker (pinned v4.0.0 source, read-only):
-`vips/vips.go:314-334` implements `LoadThumbnail` for HEIC/AVIF only;
-`imagetype/defs.go:144-156` sets TIFF `SupportsThumbnail: false`;
-`processing/scale_on_load.go:29-42` allows shrink-on-load only for JPEG,
-WEBP and thumbnail-capable formats. TIFF has no reduced or lazy load route
-through imgproxy, so a line size of `2^32-16` forces the same full memory
-image (4,294,967,280 B/line × 2 lines ≈ 8.59 GB) whose zero-fill stall
-libvips2shell W7/W8 measured under this 2 GiB wake cgroup. The fine `bpl=-16`
-does not make the paint path reachable from the HTTP endpoint here. No
-region/paint frame, allocator-field overwrite, pointer, marker side effect,
-ASan report or witness verdict was observed in the imgproxy process. Host
-memory limits were not changed and no longer-timeout retry was attempted.
-Grade unchanged: ICO lane rungs 1-4; TIFF consumer limb rung 4 at header and
-processing entry only; rung 5 UNKNOWN. Preserved as a measured negative for
-this endpoint route.
+Structural facts (pinned v4.0.0 source, read-only): `vips/vips.go:314-334`
+implements `LoadThumbnail` for HEIC/AVIF only; `imagetype/defs.go:144-156`
+sets TIFF `SupportsThumbnail: false`; `processing/scale_on_load.go:29-42`
+allows shrink-on-load only for JPEG, WEBP and thumbnail-capable formats. TIFF
+has no reduced load route through imgproxy. The earlier attribution of the
+8.59 GB full-image zero-fill stall to `fine.tif` over this HTTP route is
+WITHDRAWN: imgproxy's own guard (`config.go:46` MaxSrcResolution=50,000,000,
+`security/checker.go:65-66` width*height*frames check) rejects the fine
+geometry (89,478,485 x 2 = 178,956,970 px) before decode. No region/paint
+frame, allocator-field overwrite, pointer, marker side effect or ASan report
+was observed in the imgproxy process for any crafted TIFF; host memory limits
+were not changed. Grade unchanged: ICO lane rungs 1-4; TIFF consumer limb
+rung 4 at header and processing entry only; rung 5 UNKNOWN. The fine-geometry
+HTTP route is a preserved negative at the endpoint guard, not a decode stall.
 
 Clean `git archive HEAD` replay at commit `5d5b455` (throwaway
 `/tmp/imgproxy2shell-w2replay.JTgDOC/`, not committed) extracted only my lab
@@ -195,4 +201,43 @@ path and symlinked in the two gitignored binaries. With a 6 s timeout the
 vulnerable leg again returned `safe=200`, `manyband=500`, and timeouts for
 all three crafted `f:tiff` cases (including `fine_tiff` at 6.11 s); the fixed
 leg again returned `safe=200` and `500` for all crafted cases. This confirms
-the committed harness reproduces the W2 controls.
+the committed harness reproduces the five-case control behavior; under W185
+the later-case timeouts are queue starvation, not per-fixture observations.
+
+### Isolated fine.tif correction (W185 follow-up, 2026-11-24 05:20Z)
+
+`provision/isolated_probe.py` (`sha256=97f7f28ca11d1a0e4c08509d48c5a1563b7d9493a4c26e452fa38cf526f4b4c0`)
+starts a fresh loopback-only source server (127.0.0.1:18081) and one imgproxy
+process (127.0.0.1:18080, WORKERS=1, CONCURRENCY=1) and sends exactly one GET
+`/insecure/rs:fill:16:16/f:tiff/plain/fine.tif`, so no earlier request can
+starve it. Command: `python3 lab/frontier/imgproxy2shell/provision/isolated_probe.py
+<binary> <libdir> <tag> rs:fill:16:16/f:tiff/plain/fine.tif 8`.
+- Vulnerable 8.18.2 (`http-isolated-w2fine-isolated-vuln.log`,
+  `sha256=bdb81d236646a5583e2da924a3cb314177ded549cdb6ebff9203cd757bc8696a`):
+  HTTP 422 "Invalid source image"; log line
+  `Completed in 6.115145ms ... status=422 ... error="Source image resolution is too big"`.
+  The 89,478,485 x 2 fine
+  geometry exceeds MaxSrcResolution=50,000,000 (`config.go:46`,
+  `security/checker.go:65-66`) and is rejected before libvips header load.
+- Fixed 8.18.2+patch (`http-isolated-w2fine-isolated-fixed.log`,
+  `sha256=4de461c0447ddb7352530879b36ebd3e2c9ecab6f9ff6e564b235134dccfe60c`):
+  HTTP 500 "Internal error"; log line
+  `Completed in 7.23163ms ... status=500 error="image: dimension overflow"`.
+  Stack `vips/vips.go:298` ->
+  `processing.go:161`.
+This 422-vs-500 contrast is the measured endpoint blocker: in the vulnerable
+build fine.tif never reaches libvips or any paint path. `http_probe.py`
+(`sha256=fd47010a936daec8cab90c520079b21d02df7d9952807a39350e60d061dbc63d`)
+is unchanged; the existing five-case logs keep their original digests.
+
+### Witness verdict W185 (#3318, 2026-11-24)
+
+Witness clean-archive replay: ICO lane rungs 1-4 ESTABLISHED (10 PASS / 0 FAIL,
+both five-run digests `6b039159...dad5`, ASan WRITE of size 32 at pinned
+`icoload_v4.0.15.c:161`); W1 real-HTTP limb ESTABLISHED at the labeled
+header/processing-entry scope; W2's fine.tif vulnerable-timeout / 8.59 GB
+full-image attribution CONTRADICTED as corrected above; NO r5 anywhere. The
+witness also ran tiff9999.tif alone in a fresh vulnerable process: one
+Started line and an 8.01 s timeout with no completion, so the many-band
+stall limb remains established. This author amendment is not a new verdict;
+the witness verifies the committed text at its next healthy wake.

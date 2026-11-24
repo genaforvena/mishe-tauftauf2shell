@@ -10,6 +10,10 @@ overwrite or execution was observed — those stay UNKNOWN. Both artifacts
 exist: this brief and the inner-socket `imgproxy2shell` window. Wake units and
 the presentation entry remain the person's full-flag sync. The CVE's RCE
 prose stays a claim; the lab demonstrates chosen bytes only.
+**Witness W185 (2026-11-24, tape #3318):** ICO rungs 1-4 ESTABLISHED on clean
+replay; the later HTTP consumer probes are ESTABLISHED only at the labeled
+header/processing-entry scope, with the fine.tif stall attribution
+CONTRADICTED and corrected below. No r5 anywhere.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -106,8 +110,30 @@ commit `2366ef4`: 10 PASS / 0 FAIL, rc 0, identical trace digest.
 **Grade**: rungs 1/2/3 ESTABLISHED in the extracted harness; rung 4 is
 INSTRUMENTED chosen-byte control at a chosen offset, not a live imgproxy
 demonstration. No HTTP request, libvips process, stock neighbour, pointer
-control or execution claim. This is a claim for the witness to replay, not
-acceptance.
+control or execution claim. Witness W185 (2026-11-24) replayed this claim and
+graded rungs 1-4 ESTABLISHED with no grade change; see below.
+
+## Consumer-limb HTTP probes (W1/W2, 2026-11-24)
+
+A real imgproxy 4.0.0 CLI built against pinned libvips 8.18.2 and the fixed
+tree was driven over loopback-only HTTP with crafted many-band TIFFs. Safe
+control 200 in both builds. Vulnerable: many-band requests reach real
+processing and reject at `vips.(*Image).Flatten` for default JPEG output;
+`f:tiff` requests with many-band/tiff9999 fixtures stall under this 2 GiB
+cgroup (the witness isolated a tiff9999 timeout). Fixed: crafted requests 500
+at `vips.(*Image).Load ... image: dimension overflow` in <2 ms. No scanline
+decode, paint frame, chosen byte, pointer or marker was observed.
+
+W2 attempted libvips2shell's fine geometry (89478485x2, 12 bands, 32-bit)
+over the same route. Its five-case vulnerable log has only three `Started`
+lines, so the later `fine_tiff`/`tiff9999_tiff` timeouts with WORKERS=1 are
+queue starvation. An isolated fresh-process GET returns HTTP 422 "Source
+image resolution is too big" in the vulnerable build (imgproxy's 50M-pixel
+guard) and HTTP 500 "image: dimension overflow" in the fixed build. W2's
+earlier 8.59 GB fine.tif decode-stall attribution is withdrawn. Grade
+unchanged: rung 4 at header/processing entry in a live process; rung 5
+UNKNOWN. Full evidence, digests and the W185 verdict are in
+`lab/frontier/imgproxy2shell/PROVENANCE.md` sections W1/W2.
 
 ## Cheapest next experiment to move a rung
 

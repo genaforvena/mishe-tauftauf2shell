@@ -1,0 +1,18 @@
+time="2026-11-24 05:21:13" level="INFO" msg="OpenTelemetry monitoring" enabled=false logs=false metrics=false
+time="2026-11-24 05:21:13" level="WARNING" msg="No keys defined, signature checking is disabled" name="IMGPROXY_KEY" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 05:21:13" level="WARNING" msg="No salts defined, signature checking is disabled" name="IMGPROXY_SALT" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 05:21:13" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="png" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 05:21:13" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="gif" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 05:21:13" level="INFO" msg="Starting server at 127.0.0.1:18080"
+time="2026-11-24 05:21:13" level="INFO" msg="Started /insecure/rs:fill:16:16/f:tiff/plain/fine.tif" request_id="7xuK-PYXBbDVKNco0gwGV" method="GET" client_ip="127.0.0.1"
+time="2026-11-24 05:21:13" level="WARNING" msg="Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples." source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Bogus \"StripByteCounts\" field, ignoring and calculating from imagelength" source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples." source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Bogus \"StripByteCounts\" field, ignoring and calculating from imagelength" source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples." source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Bogus \"StripByteCounts\" field, ignoring and calculating from imagelength" source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples." source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Bogus \"StripByteCounts\" field, ignoring and calculating from imagelength" source="VIPS"
+time="2026-11-24 05:21:13" level="WARNING" msg="Completed in 2.129868ms /insecure/rs:fill:16:16/f:tiff/plain/fine.tif" request_id="7xuK-PYXBbDVKNco0gwGV" method="GET" status=422 client_ip="127.0.0.1" error="Source image resolution is too big" error_docs_url="https://docs.imgproxy.net/configuration/options#security"
+time="2026-11-24 05:21:13" level="INFO" msg="Shutting down the server..."
+memory: high-water mark 0 bytes
