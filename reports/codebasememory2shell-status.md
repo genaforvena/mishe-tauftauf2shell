@@ -202,8 +202,10 @@ is `rbp+8` (offset 0x48).
 - `project_item` copies `strlen(raw)`, capped at 511 (`cypher.c:3374-3381`):
   a C string cannot place `0x00` at offset 8 without ending there, so no
   longer property value can preserve the canary's zero low byte and still
-  reach saved RIP. Any item-38-or-later write therefore aborts before those
-  registers are restored or used.
+  reach saved RIP. Any item-38 write with a non-empty property aborts before
+  those registers are restored or used. W12 refines this: an empty item-38
+  property copies zero bytes, so later strides can write past saved RIP while
+  the process still returns (see W12 below).
 
 Conclusion: chosen-byte control over saved registers, but no control-flow use;
 saved-RIP control is a structural negative for this compiler/build. This
@@ -237,3 +239,39 @@ Witness W206's live pending-replay list no longer named the HTTP request
 No verdict has arrived; author replay still is not independent acceptance.
 Grade unchanged: rungs 1-4, loopback-only transport, no wire, pointer use,
 command, verdict or rung 5.
+
+## W12 — post-canary strides: caller-frame write measured, ancestor RIP unreachable
+
+`lab/frontier/codebasememory2shell/control-flow-bypass.sh` rebuilds a
+throwaway direct-call harness from the pinned vulnerable `cypher.c` (same
+plain-build flags) and captures `evidence/control-flow-bypass.txt`, sha256
+`06e862c667df18d17ec598a789256834ea2786a1a89d4de4522cd9922c562400`.
+No canonical harness, pin, matrix row or witness request changed.
+
+- `project_item()` skips its `memcpy` for an empty property (`cypher.c:3374-3381`).
+  A 40-item query whose item-38 property is empty and item-39 property holds
+  23 chosen bytes therefore leaves the canary low byte at `0x00` and returns
+  RC=0 / 1 row / 40 columns. The same 48-item query with all properties
+  populated still aborts with `*** stack smashing detected ***` (W10).
+- gdb at `cypher.c:4118` measures `func_bufs[39] = rbp+0x1c0`: chosen bytes
+  land past this frame's saved RIP (`rbp+8`) in caller-owned storage. The
+  backtrace identifies that region as the `query` text buffer of
+  `cbm_cypher_execute`.
+- A 63-byte chosen value also covers the pointer-like words at `rbp+0x1d0`
+  and `rbp+0x1d8` (they read `0x5555…`/`0x7fff…` with the 23-byte value) and
+  the process still returns RC=0. Those caller-frame words are dead in this
+  build: no live-pointer use was observed. A C string cannot carry the zero
+  bytes needed for a canonical pointer in any case.
+- Reaching an ancestor saved RIP requires roughly item index 1134 (main's
+  return slot is `rbp+0x4198` in this build). It is unreachable: the parser
+  grows `ret->items` without a width cap, but `build_return_columns()` fills
+  only `col_names[0..31]` (`cypher.c:4074`) while `rb_set_columns()` reads
+  `cols[0..count-1]` (`:2568`). N=1135 faults before the projection loop in
+  `heap_strdup(cols[i]=0x1)`, both with plain properties and with per-item
+  aliases. Per-item aliases do not help because the fill loop itself is
+  capped at 32.
+
+This corrects W8's "register-byte control at higher strides" and narrows
+W10's canary bound: the canary blocks a *populated* item-38 write, not every
+later write. Grade unchanged: rungs 1-4; chosen bytes reach caller-frame
+storage but no live pointer, IP, command, witness verdict or rung 5.

