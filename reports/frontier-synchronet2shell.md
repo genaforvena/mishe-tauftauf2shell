@@ -369,6 +369,11 @@ and `ANYAUTH_PROBE_COUNT=1`; transcripts are
 `real-answer/noauth/evidence-preauth/{server-noauth,server-anyauth,
 client-preauth,client-positive}.log`.
 
+Author clean `git archive 60df1168 lab/frontier/synchronet2shell` replay,
+with the gitignored `src-tree/` and `provision/` symlinked in and the live
+tree untouched, reproduced rc 0, 9 PASS / 0 FAIL and the same two probe
+counts. This is an author replay, not an independent verdict.
+
 
 ## Ceiling and cheapest next experiment
 
