@@ -16,14 +16,18 @@ CONTRADICTED and corrected below. No r5 anywhere.
 against W185; W1/W2 are CLOSED, not reopened.
 **Witness W200 (2026-11-24 13:25Z, tape #3635):** W3/W4/W5/W6 are ALL
 ESTABLISHED AS LABELED on a clean-archive replay; the live HTTP consumer
-limb stays at rung 4 with no r5. W7 remains an author finding: W200 agrees
-its source-bound negative closes the wire-only key route but did not
-replay W7 itself.
+limb stays at rung 4 with no r5. At the time W7 was an author finding:
+W200 agreed its source-bound negative closes the wire-only key route but did
+not replay W7 itself; W202 later replayed and graded it (below).
 **Witness W201 (2026-11-24 14:13Z, tape #3660):** W8 is ESTABLISHED AS LABELED
 on a clean-archive replay; no contradiction, no grade change, no r5. The
 wire-only low-16 relative tcache-`next` retarget holds, but no later
 allocation through the wire head was proved and W7's no-wire-only-key
 boundary stays closed.
+**Witness W202 (2026-11-24, tape #3685):** W7's no-wire-visible-heap-leak
+negative is ESTABLISHED AS LABELED on a clean archive, with fresh upstream
+source hashes independently checked; no contradiction, no grade change, no
+r5. All live-limb claims W3-W8 now have witness verdicts.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -312,7 +316,7 @@ under gdb, not from wire bytes. W7 below shows this loader path supplies no
 wire-visible heap-byte reader to derive that key. No external target is ever
 contacted.
 
-## W7 — no wire-visible heap leak on this loader path (unwitnessed)
+## W7 — no wire-visible heap leak on this loader path (witness W202 ESTABLISHED AS LABELED)
 
 The r5 gap is structural, not merely unmeasured. In the pinned vendored
 `vips/vips.c:1302-1315`, `vips_foreign_load_read_full` returns 1 only after
@@ -332,7 +336,9 @@ Commands, digests and raw logs are in `lab/frontier/imgproxy2shell/PROVENANCE.md
 (W7). Grade remains rung 4; wire-only controlled allocation and r5 are not
 established. A clean `git archive 6f8581a7` replay reproduced the pattern and
 PNG legs (digests and the initial harness-path failure are in PROVENANCE W7).
-This is an author finding, not a witness verdict.
+A clean `git archive 21a233bc` replay by witness W202 confirmed the probe and
+log hashes, all three live negatives, the fixed control and the pinned source
+bound; see W202 below. Grade stays rung 4.
 
 ## W8 — wire-only partial tcache-next retarget (witness W201 ESTABLISHED AS LABELED)
 
@@ -383,6 +389,31 @@ head. gdb3 (malloc breakpoint at `0x1f6efc`) and gdb6 (pre-size `0x25` →
 following `malloc(0x20)` did not return the decoded head, so no later
 allocation in an unsanitized process is proved. Verdict ESTABLISHED AS
 LABELED, no grade change, no r5; W7's no-wire-only-key boundary stays closed.
+
+## Witness W202 — clean-archive replay of W7 (2026-11-24, tape #3685)
+
+The witness replayed `git archive 21a233bc lab/frontier/imgproxy2shell` into
+`/tmp/w202-imgproxy`, symlinking only the two gitignored CLI binaries and the
+sibling libvips tree. Probe sha256 `e422a599…8140` and all three committed W7
+log hashes (`017b0b48…a380`, `a4c51930…bb52`, `0f16c098…ed6e`) matched. Rather
+than trusting the vendored source, the witness fetched a fresh v4.0.0 codeload
+tarball (`02190571…`) and independent `vips.c` (`a0e7720b…`) and `icoload.c`
+(`2eabd58d…`) copies; all matched the pinned hashes.
+
+Live: all three bodies (pattern, complete PNG, lying IDAT) returned rc=2,
+status `-`, length 0, `RemoteDisconnected` in 0.013-0.064 s; each log had
+`malloc(): corrupted top size`, SIGABRT and `signal arrived during cgo
+execution`, with no chosen `5a5b5c5d` bytes. The fixed control on the same
+pattern returned HTTP 500 `ICO image data is too large` with the process alive
+(rc=None). ASLR was 2. The witness independently checked the response sites
+(`middlewares.go:120-134` fixed public message, `vips.go:132-136` fixed vips
+error buffer, `error_page.go:150-180` no `%p`, `router.go:206-231`
+header-derived IDs, `request_methods.go:166-231` integers/URL options) and
+found no heap-byte or pointer reflector. Replay logs were not byte-identical
+to the committed logs because Go goroutine states and m/thread IDs vary;
+probe and log hashes and all live outcomes were exact. Verdict ESTABLISHED AS
+LABELED, no contradiction, no grade change, no r5; W7's no-wire-only-key
+boundary stays closed and W201 remains the ceiling.
 
 ## What would change my mind
 

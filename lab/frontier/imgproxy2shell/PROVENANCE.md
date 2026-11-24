@@ -585,7 +585,7 @@ throwaway tree was removed; replay logs were not committed. Same honest
 stochasticity limit as W5: this is a debugger-assisted mechanic, not a
 wire-only controlled allocation.
 
-## W7 — no wire-visible heap leak on the ICO path (2026-11-24 12:51-12:54Z, unwitnessed)
+## W7 — no wire-visible heap leak on the ICO path (2026-11-24 12:51-12:54Z, witness W202 ESTABLISHED AS LABELED)
 
 Source-bound negative, checked against the pinned bytes in this tree:
 `provision/imgproxy-4.0.0/vips/vips.c`
@@ -641,7 +641,8 @@ run from `provision/` as:
 Verdict: this closes the only plausible wire-only derivation of the safe-link
 key on this loader path. Grade stays rung 4; no marker, code-pointer write or
 r5 is claimed. Superseded /tmp logs and the throwaway first version of the
-probe are deleted; ports were free after the runs. Unwitnessed author finding.
+probe are deleted; ports were free after the runs. Witness W202 graded this
+ESTABLISHED AS LABELED (below).
 
 ### Clean-archive replay (12:56-12:57Z)
 
@@ -657,8 +658,8 @@ The first replay attempt used a wrong libvips path (`lab/libvips2shell`
 instead of `lab/frontier/libvips2shell`), so the binary failed to start with
 `libvips.so.42: cannot open shared object file` and `PROXY_LISTEN=FAIL`; that
 harness error is preserved here, and the corrected path replayed cleanly.
-Replay logs were not committed; the throwaway tree was removed. This is the
-author's replay, not witness acceptance.
+Replay logs were not committed; the throwaway tree was removed. This was the
+author's replay; witness W202 replayed it independently (below).
 
 ## W8 — wire-only partial tcache-next retarget (2026-11-24 13:49-14:01Z, witness W201 ESTABLISHED AS LABELED)
 
@@ -768,3 +769,32 @@ head (`M2_RET` differs), so no consumption by a later allocation in an
 unsanitized process is proved. Verdict ESTABLISHED AS LABELED, no
 contradiction, no grade change, no r5; W7's no-wire-only-key boundary stays
 closed.
+
+### Witness W202 — clean-archive replay (2026-11-24, tape #3685)
+
+Witness verdict on #3644 / commit `21a233bc`: W7's "no wire-visible heap leak"
+negative is ESTABLISHED AS LABELED. Clean room:
+`git archive 21a233bc lab/frontier/imgproxy2shell` → `/tmp/w202-imgproxy`,
+only the two gitignored CLI binaries and the sibling `libvips2shell` tree
+symlinked. Probe sha256
+`e422a59974088057b0f89a4629c5f3526f87dac04bc9aab7163298ef8de48140` and all
+three committed W7 log hashes (`017b0b48…a380`, `a4c51930…bb52`,
+`0f16c098…ed6e`) matched exactly. The witness also fetched fresh upstream
+bytes — v4.0.0 codeload tarball `02190571…`, `vips.c` `a0e7720b…` and
+`icoload.c` `2eabd58d…` — and confirmed the pinned source hashes rather than
+trusting the vendored copy.
+
+Live: all three probes rc=2, status `-`, length 0, `RemoteDisconnected` in
+0.013-0.064 s; each log had `malloc(): corrupted top size`, SIGABRT and
+`signal arrived during cgo execution`; no chosen `5a5b5c5d` bytes. Fixed
+control on the same pattern: HTTP 500 `ICO image data is too large`, process
+alive (rc=None). ASLR=2. Response sites checked at pinned bytes:
+`server/middlewares.go:120-134` fixed public message, `server/vips/vips.go:132-136`
+fixed error buffer, `server/error_page.go:150-180` no `%p`,
+`server/router.go:206-231` header-derived IDs,
+`server/handlers/processing/request_methods.go:166-231` integers/URL options.
+No heap-byte or pointer reflector. Replay logs are not byte-identical to the
+committed logs because Go goroutine states and m/thread IDs vary; that is
+runtime scheduling, not a behavioral difference. Verdict ESTABLISHED AS
+LABELED, no contradiction, no grade change, no r5; the no-wire-only-key
+boundary stays closed and W201 remains the ceiling. Ports 18080/18081 free.
