@@ -1,6 +1,6 @@
 #!/bin/sh
 # AWS-LC CVE-2026-134056 frontier lab replay. All paths relative to this dir.
-set -u
+cd "$(dirname "$0")" || exit 2
 pass=0
 fail=0
 check() {
