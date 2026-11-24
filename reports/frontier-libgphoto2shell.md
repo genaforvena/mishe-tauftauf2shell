@@ -361,3 +361,27 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   Source citations, disposition and the unchanged harness check
   (`PASS=146 FAIL=0`) are in
   `lab/frontier/libgphoto2shell/evidence/w176-closed-readback-lanes.out`.
+
+- Real-API disclosure of the overflowed frame (W177, 2026-11-24): with the
+  W175 canary-safe short reply and a device count of 1053 (still the W175
+  16848-byte `:154` source over-read), `gp_camera_file_get(...,
+  GP_FILE_TYPE_RAW)` reads `priv->table + 16*k` at `library.c:213` for
+  filename numbers above 1024 — past the fixed 16384-byte table and into
+  the stack bytes the `memmove` copied there. In three fresh processes the
+  canary at k=1023 equalled the probe's own `%fs:0x28` value, and the two
+  words at k=1024 (`info+0x4030/0x4038`, exactly the slots W167 overwrites)
+  were a saved frame pointer and a code pointer that changed with ASLR.
+  gdb in the same process showed those words byte-for-byte equal to the
+  saved rbp/RIP at `jl2005c_init`'s caller slot. Further entries disclosed a
+  second frame canary and the caller `rbx`/`rbp`/RIP that W171 obtains by
+  gdb injection: k=1038's words matched `GDB_AT_R2` and `GDB_AT_R2_8`
+  exactly. Controls: count 100 gives `rc=-108` (no entry); a full reply
+  gives `*** stack smashing detected ***` before any file_get; count 1054
+  needs more guard chunks and shows a tcache double-free on repeated
+  reads. This means the W167/W171 author-side gdb *reads* could be replaced
+  by real-API reads, but W176 still holds: the bytes return to a HOST
+  consumer and no camlib `gp_port_write` echoes them to the device. No
+  device-only canary recovery, no wire, no command, no witness verdict.
+  Rung 4 author-side; rung 5 UNKNOWN. Evidence, probe and gdb map:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-stack-leak.out`,
+  `replay-stack-leak-probe.c`, `replay-w177-map.gdb`.

