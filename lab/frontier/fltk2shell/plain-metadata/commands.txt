@@ -39,3 +39,18 @@ gdb -q -batch -ex 'run poc-chosen.bmp' -ex 'bt 12' \
 # Extra crash-pointer check (not saved as a separate transcript):
 gdb -q -batch -ex 'run poc-chosen.bmp' -ex 'frame 0' -ex 'print y' \
   -ex 'print ptr' -ex 'print x' -ex 'print array' ../driver-plain
+
+# Wake 4: both mmap chunk words (w=8, h=0x0aaaaaaab), 2026-11-24 ~06:42Z
+python3 plain-metadata/gen_prevsize.py ../poc-chosen.bmp plain-metadata/prevsize.bmp
+sha256sum plain-metadata/prevsize.bmp
+timeout 30 ../driver-plain plain-metadata/prevsize.bmp > plain-metadata/outputs/plain-prevsize-vuln.out 2>&1; echo "vuln rc=$?"
+timeout 30 ../driver-plain-fixed plain-metadata/prevsize.bmp > plain-metadata/outputs/plain-prevsize-fixed.out 2>&1; echo "fixed rc=$?"
+gdb -q -batch ./driver-plain \
+  -ex 'set pagination off' -ex 'break Fl_BMP_Image.cxx:489' \
+  -ex 'run plain-metadata/prevsize.bmp' \
+  -ex 'printf "AT_FIRST_WRITE y=%d array=%p ptr=%p diff=%ld\\n", y, array, ptr, (char*)ptr-(char*)array' \
+  -ex 'x/2gx array-16' -ex 'break Fl_Image.cxx:460' -ex 'break munmap' \
+  -ex 'continue' -ex 'printf "AT_DESTRUCTOR\\n"' -ex 'x/2gx array-16' \
+  -ex 'continue' -ex 'printf "AT_MUNMAP\\n"' -ex 'info registers rdi rsi' \
+  -ex 'bt 6' -ex 'continue' \
+  > plain-metadata/outputs/gdb-prevsize.txt 2>&1

@@ -8,3 +8,11 @@ safe (../safe.bmp) vulnerable rc=0
 # y=715827879, ptr=array-22 (page before mmap region)
 # gdb: vulnerable short-chosen reaches munmap_chunk via Fl_RGB_Image::~Fl_RGB_Image
 # and exits 0, no glibc diagnostic
+
+# Wake 4: prevsize.bmp (w=8, h=0x0aaaaaaab, one 23-byte pixel row)
+prevsize.bmp  vulnerable plain rc=139   fixed plain rc=0
+# Same file under gdb (ASLR disabled): exits 0; munmap args below.
+# gdb: first write ptr=array-16; header before write prev_size=0 size=0x100001002
+# gdb: at Fl_Image.cxx:460 header prev_size=0x3000 size=0x0000000200001002
+# gdb: __GI_munmap rdi=0x7ffef75fc000 (= chunk p - 0x3000),
+#      rsi=0x200004000 (= 0x3000 + masked size)

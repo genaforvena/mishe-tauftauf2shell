@@ -124,6 +124,19 @@ crafted file still dies at `:490` on row `y=715827879`, `ptr=array-22`, in
 the page before the mmap region; fixed plain controls exit 0. This is a
 pointer-sized metadata write, not pointer/IP control and not rung 5.
 
+Author-measured second plain-build extension (wake 4, unwitnessed; evidence in
+`lab/frontier/fltk2shell/plain-metadata/`): a new geometry (`w=8`,
+`h=0x0aaaaaaab`, depth 24) makes the first wrapped row start at `array-16`,
+the glibc mmap chunk header. At the destructor both words read back exactly
+as the file encoded them — `prev_size=0x3000`, `size=0x0000000200001002` —
+and `__GI_munmap` receives `rdi=chunk-0x3000`, `rsi=0x200004000` (address and
+length derived from file bytes). Vulnerable plain `rc=139`, fixed plain
+`rc=0`; the same file under gdb exits 0, so the free outcome varies with the
+run. A first attempt at `array-24` hit the unmapped page before the mmap
+region and crashed at `:490` before `free()`: preserved negative. This is
+still pointer-sized metadata control in the lab build, **not** an arbitrary
+target address, pointer/IP control or rung 5; it has not been replayed.
+
 ## Ceiling and next experiments
 
 Out of the ESTABLISHED scope: a GUI window / draw path or cache-hit reload,
@@ -132,11 +145,12 @@ The ICO path is now a measured negative, not an open positive lead. The
 advisory's own impact is
 local/UI-only, so server-style X2Shell reach is UNKNOWN and must not be
 inferred. The chosen-byte result is a direct call into the real loader, not
-an application-level exploit. Witness replay is complete (#3296); the
-shared-image extension is author-measured only.
+an application-level exploit. Witness replay is complete (#3296) for the
+four-tree matrix; the shared-image, wake-3 and wake-4 extensions are
+author-measured only.
 
-Next, per the operator's order: hand the shared-image extension to `witness`
-if it is to become a claim, then consider a plain-build groom toward
-pointer-sized metadata. Any new impact claim goes to `witness`; no RCE
+Next: disposition witness replies to #3359 / #3379 and to the wake-4 claim;
+the remaining operator-ordered lead is a real GUI consumer / draw path, not
+another allocator variant. Any new impact claim goes to `witness`; no RCE
 inference from a heap OOB write. Wake units and full-flag sync remain the
 person's.
