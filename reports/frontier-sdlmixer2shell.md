@@ -27,8 +27,9 @@ bytes into the same decoder through real mixer APIs, also author-observed.
   published 2026-11-05; origin issue libsdl-org/SDL_mixer#907, PR #910. It
   describes a stack-based buffer overflow in `FetchXLaw()` decoding A-law or
   mu-law WAV, with claimed code execution. The RCE claim is **not reproduced
-  here**. The AIFF sibling CVE-2026-122329 / fix `3448684` is a separate
-  candidate and is not mixed into this target.
+- The AIFF sibling CVE-2026-122329 / fix `3448684` is a separate CVE with its
+  own grade; W194 mined it as a named adjacent lane (§4i) under the planted
+  stalled-lane doctrine, kept distinct from this charter CVE.
 - Affected: SDL_mixer 3.1.2 through 3.2.4 (advisory prose). The pinned
   vulnerable source is tag `release-3.2.4`, raw
   `src/decoder_wav.c` SHA-256
@@ -280,6 +281,34 @@ non-PIE text window `[0x400000, 0x800000)` (minimum nonzero pattern
 target either. The overflow corrupts the saved RIP but cannot form an address
 this process maps. Derived negative on the real no-SSP build, not a rung
 change: no chosen pointer, marker, command or witness verdict.
+
+## 4i. Adjacent lane: AIFF `FetchXLaw()` sibling (W194, 2026-11-24)
+
+The plant's stalled-lane doctrine (docs/task.md) calls for mining the next bug
+in the same fix series once the charter target is at its ceiling.
+CVE-2026-122329's fix `34486847a607540ce9ef5fbe20979c7140bf8c82` applies the
+identical one-line change to `src/decoder_aiff.c:93` that `df966f6` applies to
+`decoder_wav.c:757`. The pinned `release-3.2.4` AIFF source
+(SHA-256 `82824b1dd4715d3f8a70eec647b20a7c3d0bd6a06c7318d9445105e4ad71a99b`)
+has the same doubled-stride `FetchXLaw()` at `:86-98` and the same
+`Uint8 buffer[1024]` caller at `:535`; the WAV fix tree never patched it, so
+the fixed slice is pinned bytes plus that one fix line.
+
+`lab/frontier/sdlmixer2shell/harness/aiff/` slices `:86-98` under `#line` with
+lab IO/LUT stubs and builds the same 12 binaries. gcc/clang ASan report
+`stack-buffer-overflow`, `WRITE of size 4`,
+`FetchXLaw ... decoder_aiff.c.vuln:95`, `[32,1056) 'buffer'`, access at offset
+1056; gdb sees `I=128`, `LUT=5a5a5a5a`, `buffer+1020..1027 =
+11 11 11 11 5a 5a 5a 5a`; fixed runs are clean. `check.sh`: 134 PASS / 0 FAIL
+on three runs, trace
+`1bdfc38d601a558c6c600ca363293c73dcf446f87b8fb6e50ff1a1e9d43ad183`, pins 3/3.
+Commands, full evidence and ceiling in `harness/aiff/AIFF.md`.
+
+This is author-observed rungs 1-4 for the **AIFF** CVE, unwitnessed, with the
+same direct-call ceiling (no AIFF-C file, real decoder build, consumer, wire,
+pointer control, marker or command) and the advisory's `AV:L/UI:P` threat
+model. It does not change the WAV charter grade. Witness replay requested on
+tape; no verdict yet.
 
 ## 5. Next distinct rung move
 

@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x129c: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/decoder_aiff.c.vuln, line 95.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, FetchXLaw (tdata=0x555555558c70 <g_tdata>, buffer=0x7fffffffdcf0 "", buflen=1024, lut=0x555555558060 <g_lut_store>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/decoder_aiff.c.vuln:95
+warning: 95	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/decoder_aiff.c.vuln: No such file or directory
+I=128 LUT=5a5a5a5a
+94	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdlmixer2shell/harness/aiff/decoder_aiff.c.vuln
+0x7fffffffe0ec:	0x11	0x11	0x11	0x11	0x5a	0x5a	0x5a	0x5a
