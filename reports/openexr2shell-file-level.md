@@ -633,3 +633,57 @@ witness-ESTABLISHED at the scanline CODE/CONSUMER scope, rung 5 UNKNOWN; no
 pointer, command, marker, wire or witness work in this experiment. Would
 change mind: any OOB source offset that tracks a file byte under a different
 allocation layout.
+
+## W177: partial-overwrite survivability boundary — negative (2026-11-24)
+
+Prediction: W171 found live scratch buffers at `dst+272` and `dst+304` inside
+the 4096-byte overwrite, but the plain build aborts in `free()` before those
+pointers can matter. A reduced forged sample count might overwrite only the
+first scratch pointer while leaving glibc metadata intact, producing an
+observable second-order effect without the abort.
+
+Method: `cases/make_poc.py` accepts the forged count `S` as its third argument;
+`S` sweeps 17..512 give `bitSize = 4*S` copies of 68..2048 bytes into the same
+64-byte destination. Each generated EXR was replayed with
+`bin-vuln-plain/flat_harness` and `bin-vuln-plain/guarded_harness`. A new gdb
+script, `harness/partial-length.cmd`, breaks at the real sink for a chosen
+copy length and lists live `decode` pointers inside the destination range.
+
+Result: **negative**. Copies through 264 bytes (`S=66`) return
+`DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA` with rc 1; copies from 268 bytes
+(`S=67`) onward abort with `free(): invalid pointer`, rc 134. Both outcomes
+held 3/3 repeats. The guarded allocator measured `changed=200` and `changed=204`
+guard bytes respectively, exactly `copy-64`, so the write beyond the
+destination really happens in both cases. At the sink the survivable case
+reports `SINK n=264 src_minus_dst=304`, one live pointer inside the range
+(`decode.unpacked_buffer off=+0`, the destination itself) and unchanged bytes
+at `dst+272` and `dst+304` before and after the copy: the 264-byte copy stops
+eight bytes short of W171's first scratch buffer. The aborting 268-byte copy
+also stops short of it; its abort is heap-metadata corruption, not pointer
+control. No survivable copy in this build reaches a live scratch pointer.
+
+Both PoCs are reproducible and hash-pinned:
+`work-partial/a66.exr` sha256
+`5a831920b08f3b0db8f7fc305c94d69a6ec23e51ba0179c1a17759db02ddf689`
+(692 bytes, `S=66, U=64`) and `work-partial/b67.exr` sha256
+`d50e9d95f4a316c12a9c45e834a9b89d821c0aab600b53476c2f0fefa29ebc41`
+(`S=67, U=64`). One-command replay from `lab/openexr2shell-real`:
+`sh harness/partial-length-check.sh` -> `RESULT PASS` in two working-tree runs.
+Normalized gdb observations are byte-stable across both runs:
+`evidence/partial-length.out` sha256
+`ebe5043b2d086911d12756b868b354838e39052eebd94a35fb2c5092b0de3b3b` and
+`evidence/partial-length-268.out` sha256
+`34bedc0f91967c08e5de9595bee48c3da2ac2b3f0bb5fe39a65a7bfea5fe369b`. The
+aborting case also shows `SINK n=268 src_minus_dst=304`, one live pointer
+inside the range and unchanged words at `dst+272` and `dst+304`.
+
+Layout caveat: the boundary is label- and path-length-sensitive. With the
+longer filename `work-partial/poc-s66.exr`, even `S=66` aborted; the committed
+check uses two equal-length names so the comparison is controlled. This is a
+property of this glibc build and harness, not a universal threshold for the
+vulnerability. Disposition: keep the negative. No grade change: file-level
+rungs 1-4, W161 witness-ESTABLISHED at the scanline CODE/CONSUMER scope, rung 5
+UNKNOWN. No chosen OOB bytes, pointer target, command, marker, wire or witness
+work in this experiment. Would change mind: a survivable copy in this or
+another live build that reaches and deterministically controls a live pointer
+or function address.

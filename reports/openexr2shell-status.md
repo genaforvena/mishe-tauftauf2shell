@@ -284,3 +284,19 @@ chunk. Full method, hashes and setup failures:
 `reports/openexr2shell-file-level.md` W174. No grade change:
 file-level rungs 1-4, witness-ESTABLISHED at the scanline CODE/CONSUMER scope,
 rung 5 UNKNOWN.
+
+## W177: no survivable copy reaches a live scratch pointer (2026-11-24)
+
+Reducing the forged sample count from 1024 found a plain-build boundary:
+copies through 264 bytes (`S=66`) return `DECODE rv=31` with rc 1, while
+copies from 268 bytes (`S=67`) abort with `free(): invalid pointer`, rc 134,
+3/3 repeats each. The guarded allocator measures exactly `copy-64` changed
+bytes on both sides. gdb at the 264- and 268-byte sinks shows the source 304
+bytes past the destination and only the destination pointer inside the copy
+range; words at `dst+272` and `dst+304` are unchanged, so neither case reaches
+W171's live scratch buffers. The boundary is path-length-sensitive in this
+glibc layout and is not a universal threshold. Replay:
+`sh lab/openexr2shell-real/harness/partial-length-check.sh` -> `RESULT PASS`
+twice, byte-stable evidence hashes in `reports/openexr2shell-file-level.md`
+W177. Grade unchanged: file-level rungs 1-4, witness-ESTABLISHED at the
+scanline CODE/CONSUMER scope, rung 5 UNKNOWN.

@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x5870 (252 locations)
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+START rv=0
+CHUNK rv=0 packed=52 unpacked=64 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=0
+
+Breakpoint 1.254, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+SINK n=264 src_minus_dst=304
+LIVE-PTR-COUNT scanned=11 inside=1
+LIVE-PTR-INSIDE decode.unpacked_buffer off=+0
+BEFORE dst+272=0x42 dst+304=0x4141414141414141
+459	        for (int i = 0; i < channelsSize; ++i)
+AFTER  dst+272=0x42 dst+304=0x4141414141414141
+END-PY
