@@ -1,0 +1,4 @@
+opened=1
+pre_consume_header=5a5a5a5a5a5a5a5a5a5a5a5a
+malloc(): corrupted top size
+Aborted (core dumped)

@@ -1,0 +1,7 @@
+opened=1
+pre_consume_header=5a5a5a5a5a5a5a5a01000100
+playSysex=1
+post_consume_header=5a5a5a5a5a5a5a5a71000000
+tail=f0373737373737373737373737373737
+grows=1 new_count=1 mal_count=0
+new[0] len=102 ptr=0x638cd565c480 delta=32784

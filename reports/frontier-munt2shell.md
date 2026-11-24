@@ -816,3 +816,37 @@ and no chosen overflow byte is read back. W182's "no in-library consumer of
 the forged tail" therefore stands for the tail; this section narrows the
 earlier blanket wording to a measured downstream header consumer. Grade
 unchanged: real-library rungs 1-4 ESTABLISHED, rung 5 UNKNOWN.
+
+## 23. In-library `pushSysex` consumer of the forged header (W184, 2026-11-24)
+
+W183 found a downstream allocator consumer of the forged top chunk (libc stdio
+through the default debug handler) but could not reach the obvious in-library
+candidate: `Synth::open()` needs SHA1-pinned Roland ROMs, so the unprovisioned
+synth has `midiQueue == NULL` and `playSysex()` returns early. This wake closes
+that specific gap in a separately labelled lab build. Both verbatim pinned
+trees are built as static libraries with `-DMT32EMU_WITH_TESTING` added to
+`CMAKE_CXX_FLAGS`; the macro only exposes munt's own test accessor hooks
+(`Synth.cpp:2914`, `c_interface/c_interface.cpp:1025`) and changes no parser
+byte. The driver links the pinned tree's `src/test/FakeROMs.cpp`, which makes
+synthetic ROM images with the expected SHA1, and calls the public
+`Synth::open(control, pcm)`. No ROM was fetched. Replay:
+`cd lab/frontier/munt2shell/real && ./push_probe.sh`; raw evidence in
+`real/evidence/push-*.out` and `real/PUSH_CONSUMER.md`.
+
+After a shaped 40001-byte overflow, a second, legitimate 102-byte SysEx sent
+through the public `Synth::playSysex()` API reaches the real
+`MidiEventQueue::pushSysex()` allocation. The vulnerable `shaped` case returns
+`rc=0`: the forged `01000100` header at `buf+32776` becomes `71000000`, and
+`new[0] len=102` lands at `buf+32784`, inside the region overwritten by the
+first input. The dump `tail=f0373737...` is the library copying the second
+SysEx's host-chosen bytes into that region. `unshaped` aborts `rc=134` with
+`malloc(): corrupted top size`; `none` keeps the header until a teardown abort
+(`double free or corruption (!prev)`); `safe`, fixed `safe`/`fixed` allocate no
+32768-byte buffer; and `stdbuf -o0` leaves the `shaped` result unchanged, so
+stdio is not the consumer here. Unlike W183, this one is inside the library.
+
+Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+UNKNOWN. The bytes read back at `buf+32784` come from the *second*, legitimate
+input, not from the 40001-byte overflow; the ROMs are synthetic test fixtures;
+and no real host, wire input, audio pipeline, pointer control or command is
+exercised. `MT32EMU_WITH_TESTING` is a build variant, not shipped config.

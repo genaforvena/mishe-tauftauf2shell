@@ -1,0 +1,7 @@
+opened=1
+pre_consume_header=5a5a5a5a5a5a5a5a5a5a5a5a
+post_consume_header=5a5a5a5a5a5a5a5a5a5a5a5a
+tail=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+grows=1 new_count=0 mal_count=0
+double free or corruption (!prev)
+Aborted (core dumped)

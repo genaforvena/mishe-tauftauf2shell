@@ -14,6 +14,8 @@ alphabet-*-plain
 wire-vuln-*
 wire-fixed-*
 neighbor-vuln-2_8_3
+push-vuln-2_8_3
+push-fixed-1749f7f
 neighbor-fixed-1749f7f
 live-vuln-2_8_3
 live-fixed-1749f7f
