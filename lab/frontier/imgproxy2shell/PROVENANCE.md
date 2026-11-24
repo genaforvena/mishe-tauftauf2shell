@@ -720,3 +720,16 @@ has zero `GDB_HIT` and a live process. No wire-only absolute address, no
 key derivation, no code-pointer write, no marker execution and no r5.
 Author finding, unwitnessed; the surviving plain runs do not prove that the
 retargeted head was consumed by a later allocation in an unsanitized process.
+
+### Clean-archive replay (14:03-14:05Z)
+
+From `git archive a9309b1c lab/frontier/imgproxy2shell` into
+`/tmp/w8-archive`, with only the two gitignored CLI binaries and the
+gitignored plain libvips tree symlinked from the live lab,
+`python3 /tmp/w8-archive/lab/frontier/imgproxy2shell/provision/replay_partial_next.py /tmp/w8-archive-out`
+returned `W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=2 PLAIN_SURVIVAL=3`; both
+fixed controls passed. Two gdb runs had the 0x35 victim with the wire low-16
+change and the matching tcache head (e.g. decoded/head `0x7fff80050058`),
+three plain runs survived with HTTP 500. The remaining runs kept their
+top-chunk/live-data negatives in that outdir. Logs were not committed; this
+is the author's clean-archive replay, not witness acceptance.
