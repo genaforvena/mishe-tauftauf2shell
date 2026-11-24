@@ -1,0 +1,54 @@
+=================================================================
+==78941==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7330a73001a0 at pc 0x7330aa07df79 bp 0x7ffe8c9bab00 sp 0x7ffe8c9baaf0
+WRITE of size 12 at 0x7330a73001a0 thread T0
+    #0 0x7330aa07df78 in unsigned int glTF::Accessor::Indexer::GetValue<unsigned int>(int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x47df78) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #1 0x7330aa06c24c in Assimp::glTFImporter::ImportMeshes(glTF::Asset&) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x46c24c) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #2 0x7330aa0706de in Assimp::glTFImporter::InternReadFile(std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, aiScene*, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x4706de) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #3 0x7330a9ce372a in Assimp::BaseImporter::ReadFile(Assimp::Importer*, std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, Assimp::IOSystem*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0xe372a) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #4 0x7330a9d395ef in Assimp::Importer::ReadFile(char const*, unsigned int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x1395ef) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #5 0x7330a9d3eb56 in Assimp::Importer::ReadFileFromMemory(void const*, unsigned long, unsigned int, char const*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x13eb56) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+    #6 0x619afb4f271a in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/real_driver_fixed+0x271a) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+    #7 0x7330a942a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7330a942a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x619afb4f2364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/real_driver_fixed+0x2364) (BuildId: c6d285d0fd6c806f83d6680e6ca72db5c7e321c0)
+
+Address 0x7330a73001a0 is located in stack of thread T0 at offset 32 in frame
+    #0 0x7330aa07db8f in unsigned int glTF::Accessor::Indexer::GetValue<unsigned int>(int) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x47db8f) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99)
+
+  This frame has 1 object(s):
+    [32, 36) 'value' (line 490) <== Memory access at offset 32 partially overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-fixed/bin/libassimp.so.6+0x47df78) (BuildId: 93f84d8efdee0affa0fea18b9da5c8fb19b2bd99) in unsigned int glTF::Accessor::Indexer::GetValue<unsigned int>(int)
+Shadow bytes around the buggy address:
+  0x7330a72fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a72fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a7300000: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7330a7300080: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x7330a7300100: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x7330a7300180: f1 f1 f1 f1[04]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x7330a7300200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a7300280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a7300300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a7300380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7330a7300400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==78941==ABORTING

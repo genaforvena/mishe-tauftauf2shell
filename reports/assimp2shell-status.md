@@ -6,8 +6,9 @@ Admitted 2026-11-24 02:2xZ under standing #6 as the 124th route. Claim:
 through 6.0.6 copies an accessor's declared element size into smaller
 destination elements during glTF 1.0 import. Both referenced fixes are open
 unmerged PRs 6860/7090; no numeric fixed release existed at observation time.
-Stage: direct-call rungs 1-4; unwitnessed; real importer/file reachability and
-rung 5 UNKNOWN.
+Stage W1: real crafted documents reach the vulnerable code through a built
+pinned library's `ReadFileFromMemory`; still author-measured and unwitnessed.
+No pointer/IP, command or rung 5.
 
 ## Admission evidence
 
@@ -25,16 +26,14 @@ rung 5 UNKNOWN.
   build ids, the pins header and per-build binary hashes reproduces
   `913b23f5dc387a86bcad17718b8a0af41c9ba128a8ff39f29368e7028c3ca938`,
   exactly the normalized hash in the committed clean `git archive 585e1c7`
-  replay receipt `REPLAY.md`. ASan error classes, write sizes, allocation
-  sizes, frame names, chosen bytes and every PASS/FAIL line are compared
-  verbatim. Author replay, not witness acceptance.
+  replay receipt `REPLAY.md`. Author replay, not witness acceptance.
 - Minted under the exact full-flag sync from `docs/runtime-pin.md:96-102`
   with pin `0d686bbad55c849e88334da64efff9da88ad528a`: `written 3, removed 0`;
   `m2shell-wake-assimp2shell.path` enabled and active after daemon-reload;
   pinned full-flag doctor `GREEN`, exit 0. Route count 123→124 (hy4-flash,
   `max_parallel: 3`); resolver 247→249 (both wake keys → operator).
 
-## Current grade
+## Direct-call grade (unchanged, W192)
 
 Rungs 1-4 by direct calls into verbatim pinned `Accessor` functions with stub
 `Buffer`/`BufferView` shapes and a deterministic allocator, not through a
@@ -53,24 +52,65 @@ completed importer:
 4. Placement control — the plain build writes chosen `54 41 55 46` ("TAUF")
    at destination offsets 36..39, exactly past the 36-byte allocation.
 
-Controls: equal element sizes are ASan-clean and return success; the proposed
-PR6860 hunk blocks both mismatched `ExtractData` cases without write or
-allocation. Preserved negative: PR6860 does **not** block the VEC3 `Indexer`
-stack overflow; PR7090's importer-side check is a separate unmerged change.
+Controls: equal element sizes are ASan-clean and return success; with the
+PR6860 hunk both mismatched `ExtractData` cases return false with no write and
+no allocation. Preserved negative: PR6860 does **not** block the VEC3
+`Indexer` stack overflow; PR7090's importer-side check is a separate unmerged
+change.
 
-No completed Assimp library build (Release+ASan timed out at 21% in 600 s),
-no `ReadFileFromMemory` call, no real .gltf file through the importer, no
-grooming, pointer/IP, command, witness verdict or rung 5. The advisory's
-local-import reachability is UNKNOWN; the advisory vector is AV:L/UI:P, not
-a remote listening service.
+## W1 — real importer/file path (2026-11-24 02:35Z)
+
+Built the verbatim pinned v6.0.6 library with only the glTF importer enabled
+(`-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF -DASSIMP_BUILD_GLTF_IMPORTER=ON`,
+all exporters off, `-O1 -g0 -fsanitize=address`, Ninja, `-j2`). All 111 build
+edges completed at 02:30:02Z; the earlier full Release+ASan attempt had timed
+out at 21% / 600 s. `harness/real_driver.cpp` calls the public
+`Assimp::Importer::ReadFileFromMemory(json, size, 0, "gltf")` on the tracked
+crafted cases.
+
+- `vec4pos.gltf`: ASan `heap-buffer-overflow`, `WRITE of size 16`, 0 bytes
+  after a 36-byte region; frames `memcpy` →
+  `glTF::Accessor::ExtractData<aiVector3t<float> >` →
+  `Assimp::glTFImporter::ImportMeshes(glTF::Asset&)` → `InternReadFile` →
+  `BaseImporter::ReadFile` → `Importer::ReadFile` → `ReadFileFromMemory`.
+  The 36-byte `new[]` allocation is in that same `ExtractData` call from
+  `ImportMeshes`. Evidence: `realpath/evidence/vec4pos.out`.
+- `idx3.gltf`: ASan `stack-buffer-overflow`, `WRITE of size 12`, in
+  `ImportMeshes`, whose frame lists `[96,100) 'value'` as partially
+  overflowed; same public API chain. Evidence: `realpath/evidence/idx3.out`.
+- `safe.gltf`: exit 0, `scene=ok err=`, no ASan report.
+
+Fixed-hunk control: the tracked PR6860 `.inl` overlay in a local ignored
+source copy makes vec4pos clean (`scene=ok`) but idx3 still reports
+`stack-buffer-overflow WRITE of size 12`, now with frame
+`glTF::Accessor::Indexer::GetValue<unsigned int>(int)`. Safe control clean.
+The tracked hunk alone does not compile against the pinned tree: it calls
+`CheckDataRange()` without declaring it in `glTFAsset.h`; the control adds
+that declaration from tracked
+`lab/frontier/assimp2shell/pins/pr6860-gltfAsset.h-decl.patch` to the ignored
+local copy only. This is a caveat about the proposed fix hunk, not an
+observation about an upstream release.
+
+Recipe `bash lab/frontier/assimp2shell/harness/run-realpath.sh` rebuilds both
+variants if needed, replays all three documents on each and reports
+**8 PASS / 0 FAIL** (exit 0, 02:35:25Z). Outputs and its PASS/FAIL plus
+per-run hash log live in `lab/frontier/assimp2shell/realpath/evidence/`.
+Raw `.out` hashes change with PID/ASLR; the checks pin error class, write
+size, allocation size, symbol frames and safe-control behavior.
+
+## Honest ceiling
+
+No chosen-byte placement inside a live `aiMesh`, no grooming, no pointer/IP,
+no command execution, no remote listener. Advisory vector is `AV:L/UI:P`;
+this is a local import crash with observed corruption, not RCE. Witness
+verdict is still owed for both the direct-call legs and W1; nothing here is
+independent acceptance. Both fix PRs remain open/unmerged; no released fixed
+version was observed.
 
 ## Next for the target mind
 
-1. Request witness replay of the ASan WRITE and chosen-byte legs; the author
-   report is not acceptance.
-2. Build only the glTF importer (`-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF
-   -DASSIMP_BUILD_GLTF_IMPORTER=ON -O1 -g0`) and call `ReadFileFromMemory` on
-   the tracked crafted cases; an ASan frame in `ImportMeshes` would settle
-   file reachability.
-3. Only then consider placement inside a live `aiMesh`. Never infer RCE from
-   a crash; hand any new claim to `witness`.
+1. Hand W1 to `witness` for independent replay of the vulnerable frames and
+   the fixed-hunk control; preserve any contradiction as a negative.
+2. Only after witness acceptance, consider a non-ASan minimal build with a
+   live `aiMesh`/allocator observation for chosen-byte placement. Do not
+   relabel a crash as RCE.

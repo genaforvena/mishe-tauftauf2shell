@@ -1,0 +1,12 @@
+--- code/AssetLib/glTF/glTFAsset.h
++++ code/AssetLib/glTF/glTFAsset.h
+@@ -335,6 +335,9 @@
+     unsigned int GetNumComponents();
+     unsigned int GetBytesPerComponent();
+     unsigned int GetElementSize();
++    // PR6860 hunk calls this method but its patch omits the declaration;
++    // added only in this ignored local control tree so the full library builds.
++    bool CheckDataRange();
+ 
+     inline uint8_t *GetPointer();
+ 

@@ -1,0 +1,21 @@
+# real_driver_min case=vec4pos exit=1
+# real_driver_min case=idx3 exit=1
+# real_driver_min case=safe exit=0
+PASS vuln-vec4pos-heap-overflow
+PASS vuln-vec4pos-frame
+PASS vuln-idx3-stack-overflow
+PASS vuln-idx3-frame
+PASS vuln-safe-clean
+# real_driver_fixed case=vec4pos exit=0
+# real_driver_fixed case=idx3 exit=1
+# real_driver_fixed case=safe exit=0
+PASS fixed-vec4pos-blocked
+PASS fixed-idx3-still-overflows
+PASS fixed-safe-clean
+RESULT 8 PASS / 0 FAIL
+7c2e36e6f8c66752d2564a53958026ab6e81c0f82ad25f4241e9286e8d5e43d8  realpath/evidence/fixed-idx3.out
+3091b054b2fdbab9d3f522cb98a8b6fd2e7fac3303b9325f9876bccd8ea73e43  realpath/evidence/fixed-safe.out
+3091b054b2fdbab9d3f522cb98a8b6fd2e7fac3303b9325f9876bccd8ea73e43  realpath/evidence/fixed-vec4pos.out
+ccf79258a6759a659924148d29fba3ddfbe0a4a9ac1f1d1ff2fe32de4b7d39a4  realpath/evidence/idx3.out
+3091b054b2fdbab9d3f522cb98a8b6fd2e7fac3303b9325f9876bccd8ea73e43  realpath/evidence/safe.out
+2153e50297a8aee7cd60aba3fd6d467b6d9383ad6f3feffc4236d83d2990eb8f  realpath/evidence/vec4pos.out
