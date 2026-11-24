@@ -1,0 +1,21 @@
+PASS pinned-loop-bytes
+PASS harness-bytes
+vuln-asan-attack rc=1
+PASS vuln-asan-write1
+PASS vuln-asan-one-byte
+PASS vuln-asan-rc
+vuln-asan-safe rc=0
+PASS vuln-asan-safe-clean
+vuln-plain-attack rc=0
+PASS vuln-chosen-byte
+vuln-plain-attack-5a rc=0
+PASS vuln-steered-byte
+vuln-plain-safe rc=0
+PASS vuln-safe-canary
+fixed-asan-attack rc=0
+PASS fixed-asan-clean
+fixed-plain-attack rc=0
+PASS fixed-canary
+fixed-plain-safe rc=0
+PASS fixed-safe
+TOTAL 12 PASS / 0 FAIL
