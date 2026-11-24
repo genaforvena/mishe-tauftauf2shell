@@ -243,10 +243,25 @@ normalized sha256 `b4dd27d115f1de31383f82fe5aa9820af26cff9fa550661ca7024f3173054
 under `REPLAY.md` rules; raw hashes differ only in PID/ASLR/path/build-id
 tokens). Author replay, not witness acceptance.
 
+## W7 — final unchecked accessor site: NORMAL (2026-11-24 08:1xZ, author-measured)
+
+`harness/cases/mat4norm-count1.gltf` exercises the one site W6 enumerated but
+left untested: NORMAL extraction at `glTFImporter.cpp:285-287` applies a
+MAT4/FLOAT accessor (elemSize 64) into a 12-byte `aiVector3D`. Through the
+built pinned library's `ReadFileFromMemory`: ASan `WRITE of size 64`, `0 bytes
+after 12-byte region`, frames `memcpy` → `ExtractData<aiVector3t<float> >` →
+`ImportMeshes` → `ReadFileFromMemory`; PR6860 overlay gives `scene=ok` with
+no report; callback run completes with `scene=ok` and shows the chosen
+`TAUFW6MARK01` inside the 12-byte destination and following source bytes at
+the OOB address, not in a live `aiMesh` field; plain build SIGSEGV (rc 139).
+`bash harness/run-w7.sh` => **11 PASS / 0 FAIL**, evidence and exact scope note
+in `lab/frontier/assimp2shell/w7/evidence/`. Author-measured, unwitnessed;
+no pointer/IP, command or r5.
+
 ## Next lane
 
-Replay W1/W2 independently, preserving any contradiction as a negative. W5
-and W6 measured larger and distinct-site overruns through the real importer
+Replay W1/W2 independently, preserving any contradiction as a negative. W5, W6
+and W7 measured larger and distinct-site overruns through the real importer
 but found no chosen byte in a live `aiMesh` field, so the placement lane stays
 closed. The TEXCOORD count mismatch is a separate defect and needs its own
 claim if pursued; only observed control-flow placement would reopen rung 4.

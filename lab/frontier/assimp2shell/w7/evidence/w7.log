@@ -1,0 +1,20 @@
+# w5_real_vuln case=mat4norm-count1 mode=asan label=asan rc=1
+PASS norm-write64
+PASS norm-region12
+PASS norm-extract-frame
+PASS norm-import-frame
+PASS norm-realpath-frame
+# w5_real_fixed case=mat4norm-count1 mode=fixed label=fixed rc=0
+PASS norm-fixed-clean
+# w5_cb_vuln case=mat4norm-count1 mode=cb label=cb rc=0
+PASS norm-cb-addr
+PASS norm-cb-scene-ok
+PASS norm-cb-post-write
+PASS norm-cb-chosen-bytes
+# w5_plain case=mat4norm-count1 mode=plain label=plain rc=139
+PASS norm-plain-fault
+RESULT 11 PASS / 0 FAIL
+b8fe1b8ff899846b2e7c9cbe7008f08dee67bf0bec9477bc27b822e2d7e7cad4  w7/evidence/mat4norm-count1-asan.out
+2aa4e0caceb4d120d7db7d0c44dfc4716dd13341f449875b6090b610cd07df28  w7/evidence/mat4norm-count1-cb.out
+ad6335521e05a23c24ae0fb79c8cabe0cf2acd069c164fa0fd19f1e35dc896a2  w7/evidence/mat4norm-count1-fixed.out
+e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855  w7/evidence/mat4norm-count1-plain.out

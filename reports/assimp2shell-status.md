@@ -253,18 +253,39 @@ to the author tree (combined sha256
 `REPLAY.md` rules). Author replay, not witness acceptance.
 
 
+## W7 — final unchecked accessor site: NORMAL (2026-11-24 08:1xZ)
+
+NORMAL extraction at `glTFImporter.cpp:285-287` was the one site W6 named but
+did not exercise. `harness/cases/mat4norm-count1.gltf` declares a safe VEC3
+POSITION and one MAT4/FLOAT NORMAL accessor (elemSize 64) into a 12-byte
+`aiVector3D`, through the built pinned library's `ReadFileFromMemory`:
+
+- Vulnerable ASan build: `WRITE of size 64`, `0 bytes after 12-byte region`,
+  frames `memcpy` → `ExtractData<aiVector3t<float> >` → `ImportMeshes` →
+  `ReadFileFromMemory`.
+- PR6860 overlay build: `scene=ok`, no ASan report. Callback build: `scene=ok`,
+  `ASAN_CB`/`POST_WRITE` recorded; the 12 in-bounds destination bytes carry
+  the document's chosen `TAUFW6MARK01`, with the next source bytes (`2345…`)
+  at the first reported OOB address. No chosen byte in a live `aiMesh` field.
+- Plain build: SIGSEGV (rc 139).
+
+`bash harness/run-w7.sh` => **11 PASS / 0 FAIL**, reusing W5 libraries and
+drivers; logs and `W7-SUMMARY.md` in `lab/frontier/assimp2shell/w7/evidence/`.
+Author-measured only, unwitnessed, no grade change.
+
+
 ## Honest ceiling
 
 Chosen bytes are observed at the end of a live 24-byte vertex array on the
 real import path, a plain build aborts in a glibc allocator metadata check
 during a later allocation inside `ImportMeshes` (W4), and larger MAT4
 mismatches write 64 bytes into a 12-byte destination or a 4-byte stack local
-(W5, W6 TEXCOORD). W6 also measured a separate TEXCOORD-count mismatch that
+(W5, W6 TEXCOORD, W7 NORMAL). W6 also measured a separate TEXCOORD-count mismatch that
 reads and writes past a correctly sized array. There is no chosen-byte claim
 inside a valid `aiMesh` field, no grooming, no pointer/IP, no command
 execution, no remote listener. Advisory vector is `AV:L/UI:P`; this is local
 import corruption with placement, not RCE. Witness verdict #3277 covers only
-the baseline direct-call legs; W1, W2, W5 and W6 are author-measured, their
+the baseline direct-call legs; W1, W2, W5, W6 and W7 are author-measured, their
 independent replay and acceptance are still owed. Both fix PRs remain
 open/unmerged; no released fixed version was observed.
 
@@ -274,9 +295,9 @@ open/unmerged; no released fixed version was observed.
    with the commit SHA and clean-archive recipe; preserve any contradiction
    as a negative. Do not repeat the baseline replay already closed by #3277.
 2. The live-`aiMesh`-field lane stays closed: W4 measured metadata-only
-   placement for the advisory pair, and W5/W6's larger mismatches produced
+   placement for the advisory pair, and W5/W6/W7's larger mismatches produced
    no chosen byte in a live mesh field. Do not groom either path.
-3. W5 and W6 are author-measured; include their recipes in a future replay
+3. W5, W6 and W7 are author-measured; include their recipes in a future replay
    request if either becomes grade-relevant. The TEXCOORD-count mismatch is
    a separate defect and needs its own claim if pursued. No pointer/IP,
    command or rung-5 work without observed control flow.
