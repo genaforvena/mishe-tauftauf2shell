@@ -588,3 +588,32 @@ no measured wire route into the W188 groomed layout.
 W195 extended the forward scan to 8 KiB: the only mapping-resident words were
 three stale libc FILE/vtable remnants inside free top-chunk space (one data,
 two code pointers), with no live object; forward contents vary by run.
+
+## W196 — chosen CEK bytes are cleansed before free (2026-11-24 14:08-14:10Z)
+
+Hypothesis: the classic tcache `next`/`key` poisoning lane through the freed
+CEK is unavailable because `_cjose_release_cek()` (`jwe.c:72-83`) memsets
+`cek_len` bytes before `free()`. New lab-only `fptr/cleanse.c` +
+`fptr/cleanse-run.sh` link `--wrap=free` and dump the CEK's first 48 bytes at
+`free()` entry; four scenarios on the existing plain gcc vulnerable/fixed
+static libraries, no new build of pinned trees, no listener.
+
+Measured (`fptr/evidence/cleanse-*.out`, hashes in `cleanse196-SHA256SUMS`):
+vulnerable `attack` (48-byte raw key, 40-byte chosen wrap) reached
+`CEK_LEN_AFTER=40` with `5a` x32 + `MISHE-CL` at `cek+0..39` before release;
+at `free()` entry all 40 bytes were zero and `cek+40..47` still held the
+unchanged next-chunk size `0x...c1`. Vulnerable `safe` (40-byte raw, no OOB)
+had `CEK_LEN_AFTER=32` and zeros at free. Fixed `attack` rejected
+(`ERRCODE=1`, `CEK_LEN_AFTER=32`): the random CEK was present before release
+and zeroed at free. Fixed `safe` was zero at free. The decrypt copy freed at
+`jwe.c:2136` uses the same helper and the same `cek_len`.
+
+Conclusion: glibc tcache metadata (`next` at chunk user `+0`, `key` at `+8`)
+never receives attacker-chosen bytes from this overflow, in either the
+original CEK or the decrypt copy; safe-linking therefore sees a null tcache
+successor. Structural negative for tcache steering; no new rung, no wire,
+no address leak, no command. Also note the primitive's write length is a
+multiple of 8 (RFC 3394 rejects the 41-byte segment) while glibc allocations
+are 16-byte aligned, so pointer fields in heap objects are overwritten whole
+or not at all: partial low-byte pointer overwrite is not available here
+without a separate read primitive, which W190/W195 did not find.

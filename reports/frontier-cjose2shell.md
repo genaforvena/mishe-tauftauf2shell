@@ -318,3 +318,15 @@ pinned object layout and the W183 heap log: the string's `value` pointer sits
 at object `+16` and its length at `+24`, so the contiguous write must destroy
 the ASLR-randomized pointer before it can reach the length. No wire-visible
 pointer source; no new experiment or rung.
+
+- W196 tested the remaining tcache-poisoning hypothesis with a lab-only
+  `--wrap=free` driver on the pinned plain libraries (`fptr/cleanse.c`,
+  `fptr/cleanse-run.sh`). Vulnerable attack with a 40-byte chosen wrap had
+  `5a`x32 + `MISHE-CL` at `cek+0..39` before release, but
+  `_cjose_release_cek()` (`jwe.c:72-83`) zeroes `cek_len` bytes before
+  `free()`: all 40 bytes were zero at `free()` entry, with the next-chunk
+  size at `+40` unchanged. Vulnerable safe, fixed attack and fixed safe
+  controls were also zero at free. No attacker-chosen byte reaches tcache
+  `next`/`key`, so tcache steering is a structural negative; RFC 3394's
+  8-byte write granularity likewise rules out partial pointer overwrites on
+  16-byte-aligned glibc objects. No new rung, address leak, command or r5.
