@@ -136,3 +136,10 @@ bytes produce the chosen byte in the stale allocation before the second
 free. Still no pointer/IP/command control, no benign command side effect,
 no stock-layout or live-target claim and no r5. All real paths remain
 author-side pending independent replay.
+
+Clean-archive replay of HEAD `3fb983e3` into `/tmp/gpgme-w3-clean`:
+`sh build-real.sh` gave `BUILD OK`; after `sh make-realkeys.sh`,
+`sh run-wire.sh` 32 PASS / 0 FAIL, `sh run-real-gpg.sh` 36 PASS / 0 FAIL,
+`sh run-real.sh` 21 PASS / 0 FAIL and `sh ../run.sh` 19 PASS / 0 FAIL,
+rc 0 throughout. This is an author-side replay, not a witness verdict;
+independent replay requests #3808, #3911 and #3919 remain UNKNOWN.
