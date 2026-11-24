@@ -520,3 +520,10 @@ against code/rodata and the process exits cleanly with `bad` (rc 1); fixed
 1-4, rung 5 UNKNOWN, no pointer/control-flow target, command, marker or
 witness verdict.
 
+
+W185 clean-archive receipt (13:35Z): `RESULT PASS`, rc 0, all six evidence
+hashes and the aggregate `56e3a182397fac2e76038d5cd1e6a3bc29f44afd4c10b19d5576d0a26a6c3dcf`
+matched the working tree from `git archive 22a8eeec` with gitignored pinned
+source/build/bin trees symlinked. Author replay, not a witness verdict;
+grade unchanged.
+

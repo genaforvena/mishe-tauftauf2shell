@@ -1222,3 +1222,14 @@ pointer or control-flow target, command or marker. Would change mind: a live
 control-flow target inside a survivable chosen-byte window, a network-facing
 unmodified consumer, or a witness counterexample.
 
+
+W185 clean-archive receipt (13:35Z): `git archive 22a8eeec lab/openexr2shell-real`
+into `/tmp/w185-openexr-clean` with gitignored `src/`, `build-*` and `bin-*`
+trees symlinked from the live checkout; `sh harness/heap-window-check.sh`
+printed `RESULT PASS`, rc 0. All six normalized evidence hashes matched the
+working tree byte-for-byte and the aggregate sha256 of the hash listing was
+`56e3a182397fac2e76038d5cd1e6a3bc29f44afd4c10b19d5576d0a26a6c3dcf` in both.
+Commit `22a8eeec` carries the two probe scripts, the check, the six evidence
+files and both report sections; this receipt is a separate scoped commit.
+Author replay only, not a witness verdict; grade unchanged.
+
