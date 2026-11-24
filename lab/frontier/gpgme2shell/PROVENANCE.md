@@ -44,4 +44,9 @@ offset 1014) are chosen by the runner, not hardcoded in the vulnerable path.
 - The advisory is AV:N but the lab exercises a prefilled header line, not a
   network or pipe input; wire reach stays UNKNOWN.
 - No pointer/IP/command control, no allocator metadata claim, no rung 5.
-  Dedicated window and registry entry are live; operator admission PENDING.
+  The parent harness was staged by frontier; operator admission is complete.
+- Superseded for live-path claims by `realbuild/`: real GPGME 2.2.0, an
+  upstream-fix-patched 2.2.0 copy and stock 2.3.1 were built under ASan and
+  driven through a real status pipe (`realbuild/REALBUILD.md`,
+  `realbuild/run-real.sh`, 21 PASS / 0 FAIL). The limits above describe this
+  extracted-statement harness only, not the real-library run.

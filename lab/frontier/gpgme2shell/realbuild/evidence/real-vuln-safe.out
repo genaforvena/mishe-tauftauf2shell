@@ -1,0 +1,6 @@
+gpgme version=2.2.0
+keylist_start err=Success
+status_cb call=1 keyword=GOOD arglen=120 byte[1000]=0x00
+status_cb call=2 keyword= arglen=0 byte[1000]=0x00
+keylist_end err=End of file cb_calls=2
+release done

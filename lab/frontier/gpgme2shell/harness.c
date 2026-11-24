@@ -120,7 +120,8 @@ int main(int argc, char **argv)
   callback_fails = strcmp(argv[1], "attack") == 0;
   chosen_byte = (unsigned char)strtoul(argv[2], NULL, 0);
   chosen_offset = strtoul(argv[3], NULL, 0);
-  if (chosen_offset >= 1024)
+  /* old[14 + offset] must stay inside the 1024-byte setup allocation. */
+  if (chosen_offset > 1009)
     return 2;
 
   memset(&gpg, 0, sizeof(gpg));

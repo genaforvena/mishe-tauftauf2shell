@@ -1,7 +1,9 @@
 # Frontier brief — gpgme2shell (CVE-2026-129975)
 
-Status: STAGED at rung 3 / rung 4 PARTIAL; live dedicated window 141 and
-seed wall exist; operator admission and witness replay PENDING.
+Status at staging (2026-11-24 18:xxZ): STAGED at rung 3 / rung 4 PARTIAL,
+witness replay PENDING. Superseded by `reports/gpgme2shell-status.md` after
+admission and the real-library reproduction; keep the evidence below as the
+pinned statement-extract baseline.
 
 ## Verified ground truth (read-only provisioning)
 

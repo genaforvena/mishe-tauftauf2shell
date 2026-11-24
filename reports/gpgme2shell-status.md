@@ -35,21 +35,50 @@ The advisory's network reach and any RCE claim stay claims in this lab.
   daemon-reload, path enabled/active and pinned full-flag doctor GREEN rc 0.
   Witness replay #3763 remains UNKNOWN.
 
-## Current grade
+## Current grade (after W1 real-library reproduction)
 
-1. Deterministic trigger: a status line longer than the remaining 1024-byte
-   space reaches the pinned `realloc()` sequence in a verbatim extract of
-   `read_status()`; a callback error takes the early return without the
-   context writeback.
-2. Confirmed corruption: ASan `attempting double-free` in `release()` after
-   `realloc()` freed the block; fixed patch, safe short-line and fixed-safe
-   controls are clean.
-3. Rung 4 PARTIAL: chosen status-derived `0x48`/`0x5a` is read back at the
-   chosen offset 1000 in the stale allocation before the second free.
+Rung 3 on pinned upstream statements; rung 4 upgraded from PARTIAL to
+demonstrated mechanics in a real GPGME ASan build: a chosen status-derived
+byte is observed at a chosen offset in the real status callback before the
+real second free, through a real status pipe and real early return. No wire
+input, no pointer/IP/command control, no allocator-metadata claim and no
+rung 5. Stock layout and live reach remain UNKNOWN; `AV:N` is advisory prose.
 
-No full GPGME build, gpg process or status pipe, no wire input, no
-pointer/IP/command control, no allocator-metadata claim and no rung 5. Stock
-layout and live reach are UNKNOWN; `AV:N` is advisory text, not exercised.
-Cheapest next experiment: build pinned GPGME 2.2.0 with ASan, force a >1024
-status line and callback error through a real pipe, compare with 2.3.1 and
-short-line controls, then add a loopback consumer only if that reproduces.
+1. Deterministic trigger: a >1024-byte status line from a loopback fake gpg
+   reaches the real `realloc()` at `engine-gpg.c:1494`; a public status
+   callback error takes the pinned early return before writeback.
+2. Confirmed corruption: ASan `attempting double-free` in real
+   `gpg_release()` at `engine-gpg.c:602` after that realloc, with the
+   allocation recorded in `gpg_new()` at `:666`.
+3. Rung 4 mechanics: chosen `0x48` / `0x5a` / `0x37` at status-args offset
+   1000 printed by the real callback in the vulnerable build, not in the
+   patched or 2.3.1 controls.
+
+## W1 evidence (2026-11-24 19:3xZ)
+
+- `lab/frontier/gpgme2shell/realbuild/` builds real GPGME 2.2.0, an
+  upstream-fix-patched 2.2.0 copy and stock 2.3.1 under ASan; source URLs,
+  tarball hashes, build commands and limits are in `REALBUILD.md`. The built
+  2.2.0 `engine-gpg.c` hashes to the pin `c4ef11bd…311d55`.
+- `cd lab/frontier/gpgme2shell/realbuild && sh run-real.sh` gives
+  `PASS=21 FAIL=0`, rc 0. Raw output and rc in
+  `realbuild/evidence/real-*.out` / `.rc`.
+- Vulnerable attack: `status_cb call=1 keyword=GOOD arglen=1200
+  byte[1000]=0x48`, then ASan double-free: second free
+  `gpg_release engine-gpg.c:602`, first free
+  `read_status engine-gpg.c:1494`, allocation `gpg_new :666`. Repeats with
+  runtime-chosen `Z` (`0x5a`) and `7` (`0x37`), rc 1 each time.
+- Controls: patched 2.2.0 attack, stock 2.3.1 attack, and short-line attack
+  against vulnerable and patched builds all rc 0 with no sanitizer report;
+  they still reach the status callback, so the difference is the long line
+  plus missing writeback, not an unexercised callback.
+- Witness NIT from #3796 addressed: `harness.c:123-125` now rejects offsets
+  above 1009, so `old[14+offset]` stays inside the 1024-byte setup
+  allocation. Parent `sh run.sh` re-run after the guard fix: 19 PASS / 0 FAIL.
+
+## Next
+
+Request witness replay of `realbuild/run-real.sh` from a clean archive;
+an author transcript is not acceptance. A loopback consumer in front of the
+status pipe is the only route to a wire-visible rung 4, and rung 5 needs a
+measured attacker-controlled path; neither is claimed here.

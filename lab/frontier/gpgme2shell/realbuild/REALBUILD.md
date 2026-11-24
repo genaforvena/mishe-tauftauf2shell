@@ -1,0 +1,78 @@
+# Real GPGME build — CVE-2026-129975
+
+This directory holds a real GPGME build driven through a status pipe, not the
+statement-extract harness in the parent directory. All sources were fetched
+from gnupg.org (provisioning only); no probe left loopback.
+
+## Provisioned tarballs
+
+| file | URL | sha256 |
+| --- | --- | --- |
+| `src/gpgme-2.2.0.tar.bz2` | `https://gnupg.org/ftp/gcrypt/gpgme/gpgme-2.2.0.tar.bz2` | `7160e80e84dafd00d956c84891c533bb7ab16a6a54fbe1574b2f3acf0496977b` |
+| `src/gpgme-2.3.1.tar.bz2` | `https://gnupg.org/ftp/gcrypt/gpgme/gpgme-2.3.1.tar.bz2` | `2bf94e0e677e5a8fc31f79dd323f91c5416b36fb851058bc1e8bce39f2642434` |
+| `src/libgpg-error-1.50.tar.bz2` | `https://gnupg.org/ftp/gcrypt/libgpg-error/libgpg-error-1.50.tar.bz2` | `69405349e0a633e444a28c5b35ce8f14484684518a508dc48a089992fe93e20a` |
+| `src/libassuan-2.5.7.tar.bz2` | `https://gnupg.org/ftp/gcrypt/libassuan/libassuan-2.5.7.tar.bz2` | `0103081ffc27838a2e50479153ca105e873d3d65d8a9593282e9c94c7e6afb76` |
+
+Built `gpgme-2.2.0/src/engine-gpg.c` hashes to the pinned
+`c4ef11bda841fc6d07c83063c6968a6db50db3393af2d661054c59b979311d55`.
+The patched control applies `../pinned/fix.patch` (sha256
+`2fde658ab8b32439c14f58c214f2463b4109aa68d9cbd26c432f17303049c500`)
+to a copy of the 2.2.0 tree; its `engine-gpg.c` hashes to
+`10179f7853d9284a21af4ad4ab94753654aa40119f9bdef43852e98482b75b08`.
+Stock 2.3.1 has the immediate writeback at `engine-gpg.c:1501`.
+
+## Build commands
+
+From this directory (paths are absolute because the autotools prefix is
+recorded in generated scripts):
+
+```
+HERE=$PWD
+PREFIX=$HERE/prefix
+FLAGS="CFLAGS=-fsanitize=address -fno-omit-frame-pointer -g -O0 LDFLAGS=-fsanitize=address"
+tar xjf src/libgpg-error-1.50.tar.bz2
+tar xjf src/libassuan-2.5.7.tar.bz2
+tar xjf src/gpgme-2.2.0.tar.bz2
+tar xjf src/gpgme-2.3.1.tar.bz2
+cp -a gpgme-2.2.0 gpgme-fixed
+(cd gpgme-fixed && patch -p1 --forward < ../pinned/fix.patch)
+for d in err-build assuan-build gpgme-asan-build gpgme-fixed-build gpgme-231-build; do mkdir -p $d; done
+(cd err-build && ../libgpg-error-1.50/configure --prefix=$PREFIX --enable-static --disable-shared CC=clang $FLAGS)
+(cd assuan-build && ../libassuan-2.5.7/configure --prefix=$PREFIX --enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX CC=clang $FLAGS)
+(cd gpgme-asan-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-2.2.0/configure --prefix=$PREFIX --enable-static --disable-shared --with-libgpg-error-prefix=$PREFIX --with-libassuan-prefix=$PREFIX CC=clang $FLAGS)
+(cd gpgme-fixed-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-fixed/configure ...same flags...)
+(cd gpgme-231-build && PKG_CONFIG_PATH=$PREFIX/lib/pkgconfig ../gpgme-2.3.1/configure ...same flags...)
+ASAN_OPTIONS=detect_leaks=0 make -C err-build -j2 && make -C err-build install
+ASAN_OPTIONS=detect_leaks=0 make -C assuan-build -j2 && make -C assuan-build install
+ASAN_OPTIONS=detect_leaks=0 make -C gpgme-asan-build -j2   # tests linkage fails; lib is complete
+... likewise for gpgme-fixed-build and gpgme-231-build
+clang -fsanitize=address -fno-omit-frame-pointer -g -O0 \
+  -I gpgme-asan-build/src -I prefix/include -o status-trigger status_trigger.c \
+  gpgme-asan-build/src/.libs/libgpgme.a prefix/lib/libassuan.a prefix/lib/libgpg-error.a -lpthread -ldl
+# substitute gpgme-fixed-build and gpgme-231-build for status-trigger-fixed/-231
+```
+
+`ASAN_OPTIONS=detect_leaks=0` is needed only while building: libgpg-error's
+`yat2m` doc tool leaks under LeakSanitizer. Each GPGME `make` ends with a
+tests-directory link error; the static library is complete before that point.
+Run `sh run-real.sh` for the six cases and 21 assertions; it makes no network
+contact and writes raw output to `evidence/real-*.out` / `.rc`.
+
+## Trigger
+
+`status_trigger.c` uses public APIs only: `gpgme_set_engine_info()` points at
+`fake-gpg.py`; `gpgme_set_ctx_flag(ctx, "full-status", "1")` makes the engine
+install the monitor callback; `gpgme_set_status_cb()` returns
+`GPG_ERR_GENERAL` for args longer than 500 bytes. `fake-gpg.py` answers
+`--version` with a synthetic 2.2.40 string and writes one
+`[GNUPG:] GOOD <1200 bytes>\n` line to the fd supplied via `--status-fd`,
+with a runtime-chosen byte at status-args offset 1000.
+
+## Limits
+
+The fake gpg is a stand-in for the external engine binary: no real gpg
+process, no network-facing consumer, no wire input, no allocator metadata
+claim, no pointer/IP/command control and no rung 5. Plain (non-ASan) glibc
+outcome for the real build is UNKNOWN; only the ASan builds are asserted.
+Witness replay of this real path is pending; an author transcript is not
+acceptance.
