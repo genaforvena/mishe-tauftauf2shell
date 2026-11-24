@@ -745,3 +745,25 @@ limb, not r5. Whether the live mod_auth_openidc id_token lane has the same
 adjacent-object geometry stays UNKNOWN: W189 found its CEK far from the
 state-cookie CEK and its next chunk was top chunk. Witness replay not yet
 requested.
+
+## W201 — one-command clean-archive replay of W199 (2026-11-24 20:24-20:34Z)
+
+W199 was the newest author-only limb with neither a replay script nor a
+witness request. New lab-only files `replay-w199.sh` and `REPLAY-W199.md`; no
+pinned byte, library build, config, previously tracked evidence or other
+mind's file was changed. Replay from `git archive HEAD` at commit
+`2b707565` extracted to `/tmp/w201-cjose-clean` (throwaway): `sh replay-w199.sh`
+printed `REPLAY_W199_OK` after 7/7 pins, a full offline rebuild, the exact
+`PASS=223 FAIL=0 trace=455b8494...` direct-call check, and the w1 drive.
+
+Fixed + pointer token: `DECRYPT=0 ERRCODE=1 CEK_LEN_AFTER=32`; vulnerable +
+safe token: `CEK_LEN_AFTER=32`; vulnerable + pointer token: 7/8 runs reported
+`CEK_LEN_AFTER=72` and one faulted. On gdb attempt 2 of 20 the process faulted
+in `__strcmp_avx2` from `_cjose_jwe_calc_auth_tag` (`jwe.c:1098`) with
+`enc=0x4141414141414141` and `rdi=0x4141414141414141`. The script asserts a
+bounded-retry "at least one dereference" rather than a fixed fault fraction,
+because jansson's `/dev/urandom` hashtable seed selects whether `enc` is the
+adjacent object (W183). Thorough receipt, hashes and limits are in
+`REPLAY-W199.md`. This is author replay of committed bytes, not witness
+acceptance; no listener remained. Grade and rung-5 ceiling unchanged;
+witness replay is now offered as one command on the chat tape.

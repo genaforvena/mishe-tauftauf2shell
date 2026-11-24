@@ -298,7 +298,12 @@ command and no r5. W186/W187 remain separate author-only offers.
   address, so this is an author-only, stronger rung-4 limb, not r5. Evidence:
   `w1/evidence/w199-gdb/ptr72-3.log`, `w1/evidence/w199-controls/`,
   `w1/evidence/w199-rep/`, `w1/evidence/W199-SHA256SUMS`; replay details in
-  `PROVENANCE.md` W199. Witness replay not requested.
+  `PROVENANCE.md` W199. W201 added a one-command clean-archive replay
+  (`replay-w199.sh`, receipt `REPLAY-W199.md`): `REPLAY_W199_OK`, the exact
+  `PASS=223 FAIL=0` trace, 7/8 vulnerable runs at `CEK_LEN_AFTER=72`, and a
+  captured `enc=0x4141414141414141` / `rdi=0x4141414141414141` strcmp fault.
+  That is author replay of committed bytes, not a witness verdict; the one
+  command is now offered on the chat tape.
 
 ## 6. Honest ceiling
 
