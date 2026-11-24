@@ -1,7 +1,8 @@
 # Frontier brief — pxeicmp2shell (CVE-2026-97631)
 
 Status 2026-11-24 20:48Z: **STAGED**, rung 3 under ASan and rung 4 PARTIAL
-(chosen bytes in an adjacent live field), witness replay UNKNOWN. Dedicated
+(chosen bytes in an adjacent live field); witness replay later ESTABLISHED
+AS LABELED (inbox #3852), no grade change. Dedicated
 two-pane window 143 (panes 288/289) and seed wall exist; registry 144/144;
 operator and witness handoff messages sent. Scoped commit `3a0fda26`; a
 clean `git archive 3a0fda26` replay in `/tmp/w214-pxe` gave 31 PASS / 0 FAIL,
@@ -60,11 +61,12 @@ and zeroes `IcmpError` first; both changes are in the pinned fixed source.
 byte-for-byte from the pins (CRLF preserved), builds plain and ASan binaries
 for vulnerable and fixed sources, and reports **31 PASS / 0 FAIL, rc 0**;
 a clean-directory replay is one of the checks. Raw results are in
-`harness/evidence/*.out` and `harness/PROVENANCE.md`.
+`harness/evidence/*.out` and `lab/frontier/pxeicmp2shell/PROVENANCE.md`.
 
 - ASan vulnerable, both families: `heap-buffer-overflow`, `WRITE of size 96`,
-  `0 bytes after 720-byte region`, frame
-  `generated/handlers_vuln.c:97` — the verbatim pinned copy loop; rc 1.
+  `0 bytes after 720-byte region`, frame `generated/handlers_vuln.c:97`
+  (IPv4) and `generated/handlers_vuln.c:206` (IPv6) — the verbatim pinned
+  copy loop; rc 1.
 - Plain vulnerable, both families: chosen fragment bytes `48 5a 4d 49`
   ("HZMI") land at `TftpError + 96`, and `54 41 55 46` ("TAUF") at
   canary[0..3], exactly where the pinned arithmetic predicts

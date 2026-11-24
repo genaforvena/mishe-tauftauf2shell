@@ -1,6 +1,6 @@
 # pxeicmp2shell — status
 
-Admitted 2026-11-24 20:5xZ under standing approval #6 as the 135th engine
+Admitted 2026-11-24 20:50Z under standing approval #6 as the 135th engine
 route. Claim: `CVE-2026-97631` / `GHSA-99cj-7hg9-mp4m`, "Pre-boot RCE in EDK II
 PXE driver" (2026-10-22), Critical CVSS 4.0 9.5
 `AV:N/AC:L/AT:P/PR:N/UI:N/VC:H/VI:H/VA:H/SC:H/SI:H/SA:H`, CWE-120/131/787.
@@ -31,7 +31,8 @@ pre-boot RCE chain remains a claim; nothing here exercises it.
   sh harness/run.sh` gave **PASS=31 FAIL=0, rc 0**. Both pin extraction and
   verbatim-substring checks passed; ASan vulnerable runs abort in the IPv4 and
   IPv6 families with `heap-buffer-overflow`, `WRITE of size 96`, `0 bytes
-  after 720-byte region` at `generated/handlers_vuln.c:97`. Plain runs place
+  after 720-byte region` at `generated/handlers_vuln.c:97` (IPv4) and `:206`
+  (IPv6). Plain runs place
   chosen fragment bytes `48 5a 4d 49` ("HZMI") at `TftpError + 96` and
   `54 41 55 46` ("TAUF") in the adjacent canary, matching the pinned
   arithmetic (`sizeof_icmperror=504`, `tftp_off=540`,
@@ -53,12 +54,15 @@ that memory in the instrumented build. No EDK2/OVMF firmware build, no
 loopback ICMP error, no live DXE process, no event-table target, no pointer,
 IP or command control and no rung 5. Stock DXE allocator behavior, whether a
 real `PXEBC_PRIVATE_DATA` layout matches the stand-in offsets, and the
-advisory's ring-0 event-forging claim stay UNKNOWN. Witness replay is OWED;
-this evidence is the author/operator harness, not an independent verdict.
+advisory's ring-0 event-forging claim stay UNKNOWN. Witness replay is now
+ESTABLISHED AS LABELED (inbox #3852, verdict for commit `3a0fda26`): a clean
+`git archive` room reproduced 31 PASS / 0 FAIL, all four pin hashes and
+byte-exact handler extraction, the same ASan report (v4 `:97`, v6 `:206`),
+and an independent 16-byte non-periodic marker probe. No grade change, NO r5.
 
 ## Next
 
-Independent witness replay of `sh harness/run.sh` from a clean copy of the
-lab, then — only from an observed live write — a pinned EDK2/OVMF build with
-a loopback ICMP error injected into a PXE-booting guest, with fixed and
-valid-message controls. Nothing measured supports r5.
+Witness replay is complete and the grade stands as recorded above. A rung-5
+lane would require a live write in a real DXE process: the public PoC needs
+bridge mode and sudo, outside this plant's loopback-only grant, so no
+firmware build is staged on a claim. Nothing measured supports r5.
