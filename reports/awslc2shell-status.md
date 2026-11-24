@@ -38,6 +38,8 @@ RCE claim remain claims in this lab.
 1. Deterministic trigger: 32-byte plaintext (last byte `0x48`) encrypted to
    48 bytes of AES-128-CBC ciphertext, decrypted in three 16-byte updates
    into a 31-byte buffer (`in_len + block_len - 1`).
+   The same one-byte overrun was reproduced with an 8-byte block cipher
+   (3DES-EDE-CBC, `b = 8`) in W211 below; it is not AES-specific.
 2. Confirmed corruption: in the no-ASM ASan build, `heap-buffer-overflow`
    `WRITE of size 16` at `aes_nohw.c:377` via `EVP_DecryptUpdate
    (cipher.c:411)`, 0 bytes after the 31-byte region allocated in
@@ -217,5 +219,36 @@ reports `n1=0` for the 16-byte boundary update and `n2=4096` for the 4081-byte
 second update (fixed library: also 4096), confirming the 4096-byte bound
 numerically rather than only from source.
 
+W210 (2026-11-24T18:10Z, source-bound) generalizes that bound beyond AES-CBC.
+Let `B = sizeof(ctx->buf)` and `b` be the block size. `enc_read` supplies
+`t = B - b + 1`; on a boundary-crossing update the vulnerable path writes a
+`b`-byte carry and then `floor(t/b)*b` bulk bytes. With `B = kb + r`,
+`0 <= r < b`, that total is `B - r` when `r < b - 1` and `B + 1` only when
+`r = b - 1`. Every padded AWS-LC block cipher has `b = 8` (DES, RC2) or
+`b = 16` (AES), and `B = 4096` gives `r = 0` for both; stream ciphers have
+`b = 1`, which skips the withholding path (`cipher.c:405` requires `b > 1`).
+So this one in-tree caller cannot overflow for any supported cipher, and the
+missing precondition would be a buffer size congruent to `b - 1` modulo `b`.
+No new lab artifact; grade unchanged.
+
 Grade unchanged: rungs 1-4, r5 UNKNOWN. Source-bound, author-only; no witness
 replay and no new lab artifact is claimed for this observation.
+
+## 8-byte block confirmation (W211, 2026-11-24T18:14Z)
+
+All earlier suites used AES with `b = 16`. `des-oob.c` and `run-des.sh` add a
+3DES-EDE-CBC case with `b = 8`: a 16-byte plaintext (last byte `0x48`) is
+encrypted to 24 bytes, then the first two 8-byte ciphertext blocks are
+decrypted in two `EVP_DecryptUpdate` calls into `malloc(15)` — the documented
+minimum `in_len + b - 1` for one update. Vulnerable no-ASM ASan reports
+`heap-buffer-overflow`, `WRITE of size 1`, 0 bytes after the 15-byte region,
+frame `DES_ede3_cbc_encrypt_ex (src/crypto/des/des.c:840)` ->
+`des_ede3_cbc_cipher (e_des.c:93)` -> `EVP_EncryptUpdate (cipher.c:259)` ->
+`EVP_DecryptUpdate (cipher.c:411)`. Controls: vulnerable with a 32-byte buffer
+is clean (`n1=0 n2=8`, chosen byte `0x48` lands inside the buffer); fixed
+library is clean at both 15 and 32 bytes (`0xab` tail). `sh run-des.sh` ->
+11 PASS / 0 FAIL (`des-replay.log`); the other five suites still give
+14 / 31 / 10 / 16 / 15 PASS, 0 FAIL. The overflow is therefore not AES- or
+`b = 16`-specific; it remains exactly one byte per boundary-crossing update.
+Author-only, no witness replay, no real consumer, grade unchanged: rungs 1-4,
+r5 UNKNOWN.
