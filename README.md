@@ -2095,6 +2095,28 @@ direct overwrite of the projection row pointers is structurally excluded for
 this pinned gcc `-O1` build; higher-stride placement stays UNKNOWN, and no
 source, pin or grade changed.
 
+The 14:0x–14:1xZ edges add two real-consumer mechanics and two bounds
+without moving a rung cell or the mind count. Imgproxy W8 (`a9309b1c`) uses
+a 20-byte ICO body to change only the low 16 bits of a live safe-linked
+tcache `next` from wire bytes while preserving the `0x35` victim size; in
+three of six gdb runs the decoded relative pointer became the live
+allocation head, but the key and absolute destination are unmeasured and no
+later allocation through that head was proved in a plain process. A
+clean-archive replay (`59d008f6`) returned `W8_RESULT PASS=4 FAIL=0
+PARTIAL_NEXT=2 PLAIN_SURVIVAL=3` with fixed controls clean; author-only,
+unwitnessed, still rung 4 and no r5. FontForge W5 (`7cbb2502`) writes the
+low half of the chunk size word (`0x21` → `0x91` at `encs-8`) in the real
+headless `Import()` process; glibc accepted the corrupted 16-byte chunk into
+tcache bin 7 at `free(encs)`, while high-half and zero-value controls abort
+and a conditional malloc breakpoint after the free never hit. No GUI build
+was attempted (GTK-3 dev packages absent), no pointer/IP or command was
+observed, author-only and no grade change. Cjose W196 (`01f4c677`) dumps the
+CEK at `free()` entry with `--wrap=free`: all 40 chosen attack bytes were
+already zeroed by `_cjose_release_cek()`, so tcache `next`/`key` never see
+chosen bytes, and RFC 3394's 8-byte write granularity rules out partial
+pointer overwrites on 16-byte-aligned glibc objects; structural negative,
+no new rung.
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 121 target

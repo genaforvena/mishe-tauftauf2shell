@@ -8065,3 +8065,97 @@ OOB write from `func_bufs[32]` cannot reach `vals[]`: direct row-pointer
 overwrite is structurally excluded for this build. Outer-frame chosen-byte
 garbage and higher-stride live-object placement remain UNKNOWN; no source,
 pin, matrix cell or rung changed (`f02a9953`).
+
+## 2026-11-24 14:0x–14:1xZ — wire-side tcache retarget, chunk-size confusion, CEK cleanse
+
+All three limbs extend already-admitted lanes: no new charter, window, rung
+cell or mind count, and all are author-side and unwitnessed at these scopes.
+
+### Imgproxy2Shell W8 — wire-only low-16 tcache next retarget
+
+Same pinned imgproxy 4.0.15 / fixed 4.0.16 binaries and plain libvips tree
+as the Imgproxy row above; host glibc 2.39, ASLR 2, loopback 127.0.0.1:
+18180/18181 only. Recomputed from `a9309b1c`: `ico_partial_next.py` sha256
+`f03dbc448c3ddffc61a5db7a1e1816f9b54a4d7df6c3a94d4967241992f0ca7f`,
+`replay_partial_next.py` sha256
+`2e69125a6742844b2a032b843e230bc87308375876e04ad64682b42c9dce6f26`.
+With the gitignored CLI binaries and plain libvips tree available beside the
+lab, from `lab/frontier/imgproxy2shell/provision`:
+
+```
+python3 replay_partial_next.py /absolute/outdir
+```
+
+Expect `W8_RESULT PASS=4 FAIL=0 PARTIAL_NEXT=2 PLAIN_SURVIVAL=3` on the clean
+`git archive a9309b1c` replay (`59d008f6`); the in-tree run had
+`PARTIAL_NEXT=3 PLAIN_SURVIVAL=2` (layout is stochastic, all negatives kept
+in the outdir). Decisive gdb log `http-ico-w8-gdb1.log`: live tcache `next`
+`0x00007ff86ffc7e08` → `0x00007ff86ffc0000` (only the low 16 bits from
+wire bytes), size still `0x35`, and after `malloc(0x20)` head
+`0x7fff90050058` at base `0x7fff900580b0`. Fixed ICO returns HTTP 500
+`ICO image data is too large` with zero gdb hits; two of six plain runs
+survive with HTTP 500 and an alive process. No key derivation, absolute
+wire address, later allocation through the wire head in an unsanitized
+process, code-pointer write, marker or r5. Logs regenerate with the runner;
+per-log hashes and negatives are in `lab/frontier/imgproxy2shell/PROVENANCE.md`
+§ W8.
+
+### FontForge2Shell W5 — low half of the chunk size word
+
+Same pinned 20251009 headless `ENABLE_GUI=OFF` builds as the FontForge row
+above; W5 did not rebuild the pinned source. Hashes recomputed from
+`7cbb2502`: `make-size-case.py`
+`310a34961e74bf041404bd8e693936cd6e13fbce9e97219715d42bf3a0efff10`,
+`size-91.pcf` `e29a2e464c4fbafadc09fc68776e295d2e165e6113f75b6ff93d40f27f3c9dd2`,
+`size-ff.pcf` `56b62c1e6d22c76869210efdc8f6e91d531bebcdcedd42d223ab4b6481356fbe`,
+`size-zero.pcf` `79fc8f7e707deeacac565e544f7ce89f76c233a16ac7c22e98a72a3ff41c1f9f`,
+`size-complete.pcf`
+`2cc1a4238476420c7d2b97ac636ffce934af13c3aec581a896e3037e56eca16d`.
+From `lab/frontier/fontforge2shell`:
+
+```
+gdb -q -batch -x gdb-size-word.cmd ./build-plain/bin/fontforge
+ASAN_OPTIONS=detect_leaks=0 ./build-asan/bin/fontforge -script import-size-91.ff
+ASAN_OPTIONS=detect_leaks=0 ./build-asan/bin/fontforge -script import-size-complete.ff
+gdb -q -batch -x gdb-tcache-reuse.cmd ./build-plain/bin/fontforge
+```
+
+Expect the watchpoint at `encs-8` to read `Old value = 33`, `New value =
+145` and the later `x/gx` to show `0x91`; at `free(encs)` the word is still
+`0x91` and `tcache->entries[7] = encs` after the free. Vulnerable plain
+exits 0 on `size-91.pcf` and `size-complete.pcf`, 134 on `size-ff.pcf` and
+`size-zero.pcf`; patched plain exits 0 on all four. ASan reports
+`WRITE of size 4` at `fvimportbdf.c:1751` for the three negative inputs
+(`8 bytes before a 16-byte region` for glyph `-2`) with no report for the
+complete table. The conditional `__libc_malloc` probe for requests
+`0x71..0x88` after the free never hits: no later consumer of that tcache
+entry was observed. No GUI build (GTK-3 dev packages absent), pointer/IP,
+command, witness replay of the real path or r5. Details and per-run logs in
+`SIZE.md` and `REACHABILITY.md`.
+
+### Cjose2Shell W196 — chosen CEK bytes cleansed before free()
+
+Same pinned plain gcc vulnerable/fixed cjose libraries and jansson prefix as
+the Cjose row above; no listener and no new pinned-tree build. Hashes
+recomputed from `01f4c677`: `fptr/cleanse.c`
+`da28bdbc5634c0e0638d3e70d860ec402a23b6e25f3d2cf3f06fd5f2c465de54`,
+`fptr/cleanse-run.sh`
+`92c81271cff8bd9aff202b34481813309f19ea7248ea415870f89a92231adea4`.
+From `lab/frontier/cjose2shell/fptr`, with the two pinned static libraries
+already built by the harness bootstrap:
+
+```
+sh cleanse-run.sh
+```
+
+The script re-checks `PINS.sha256`, links `--wrap=free` drivers and rewrites
+the gitignored `evidence/cleanse-{vulnerable,fixed}-{attack,safe}.out`.
+Expect 40 chosen bytes (`5a` x32 + `MISHE-CL` at `cek+0..39`) before release
+and all zero at `free()` entry in vulnerable attack, with the next-chunk
+size at `+40` unchanged; vulnerable safe `CEK_LEN_AFTER=32`, fixed attack
+`ERRCODE=1` with `CEK_LEN_AFTER=32`, fixed safe zero at free. Four output
+hashes are in `evidence/cleanse196-SHA256SUMS`. No attacker-chosen byte
+reaches tcache `next`/`key`, and RFC 3394's 8-byte write granularity also
+rules out partial pointer overwrites on 16-byte-aligned glibc objects. No
+new rung, address leak, command or r5; reasoning in
+`lab/frontier/cjose2shell/PROVENANCE.md` § W196.
