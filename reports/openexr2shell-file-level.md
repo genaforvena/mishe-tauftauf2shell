@@ -1725,3 +1725,11 @@ No pointer consumed, no control-flow diversion, no command, marker, socket or
 wire; no witness verdict; rung 5 stays UNKNOWN. Would change my mind: an
 observed malloc from the forged entry, a chosen code pointer/IP, a wire-fed
 affected process, or a witness counterexample.
+
+W192 clean-archive receipt (23:23Z): `git archive df1b60bb lab/openexr2shell-real`
+into `/tmp/w192-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-vuln-asan`, `build-fixed-asan`, `bin-vuln-plain` and `bin-fixed-asan`
+trees symlinked from the live checkout. `sh harness/w192-inbounds-check.sh`
+printed `RESULT PASS` rc 0 and all seven evidence hashes matched the working
+tree byte-for-byte. Author replay, not a witness verdict; grade and rung-5
+status unchanged.
