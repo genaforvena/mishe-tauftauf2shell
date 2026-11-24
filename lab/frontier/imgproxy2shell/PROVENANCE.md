@@ -322,5 +322,76 @@ libasan.so.8 and the ASan libvips. Nevertheless two hostile-ICO runs
 without `LD_PRELOAD=libasan.so`. This is a preserved negative about this
 instrumented toolchain combination, not a refutation of the plain-build crash
 or the verbatim-statement ASan harness: the ICO-fixed plain control isolates
-the vulnerable loader as the cause of the live abort. No live C write-site
-frame or chosen-byte readback was obtained; the grade above is unchanged.
+the vulnerable loader as the cause of the live abort. At W3 time no live C
+write-site frame or chosen-byte readback had been obtained; W4 below closes
+that specific gap without changing the ASan-toolchain negative.
+
+## W4 — live chosen-byte readback at the C write site (2026-11-24 08:37-08:40Z)
+
+`provision/ico_gdb_readback.py`
+(`sha256=f7d8118df92dc3c92fbcfaa3eb9503dcd9d932707d6a73260a2fe4e1a6db13d0`)
+is the committed, replayable version of the /tmp experiment used first at
+08:37Z. It serves the same 54-byte hostile ICO on 127.0.0.1:18081, launches
+the unmodified `provision/imgproxy-vuln` CLI under `gdb -batch` on
+127.0.0.1:18080 with `LD_LIBRARY_PATH` set to libvips2shell's
+`build-vuln-plain/libvips`, sends one unauthenticated GET to
+`/insecure/rs:fill:16:16/plain/hostile.ico`, and sets a conditional breakpoint
+on `vips_foreign_load_read_full` when its `len` argument is `0xfffffff5`.
+On a hit it saves `$rsi` (the read destination), steps out with `finish` and
+dumps 48 bytes there plus the malloc chunk header. Both endpoints are
+loopback-only; the gdb command file is generated in /tmp and removed.
+
+Reproduction commands (from this directory):
+
+    python3 ico_gdb_readback.py ./imgproxy-vuln \
+      ../../libvips2shell/build-vuln-plain/libvips \
+      vuln-gdb-readback rs:fill:16:16/plain/hostile.ico
+    python3 ico_gdb_readback.py ./imgproxy-icofixed \
+      ../../libvips2shell/build-vuln-plain/libvips \
+      icofixed-gdb-control rs:fill:16:16/plain/hostile.ico 8 6
+
+The sixth argument bounds how long gdb is waited on; the fixed binary never
+hits the breakpoint and stays alive as a server, so it is stopped after 6 s.
+
+### Observations
+
+- Vulnerable log `provision/http-ico-vuln-gdb-readback.log`
+  (`sha256=cfd1a9287ac0945e63f6f17f5da79901fcdaf46860e581bee32af081bca83522`).
+  The client lost the connection (`RemoteDisconnected`) with no HTTP status.
+  gdb hit the breakpoint at `vips.c:1304` with
+  `len@entry=4294967285` (`0xfffffff5`), called from
+  `vips_foreign_load_ico_header` at `icoload.c:161`. Frame 0-10:
+  `icoload.c:161` -> libvips `foreign.c:1154` -> `vips_object_build` ->
+  `vips_call_by_name("icoload_source")` -> `vips_icoload_source`
+  (`icoload.c:491`) -> `vips_icoload_source_go` (`icoload.c:501`) ->
+  `_cgo_...Cfunc_vips_icoload_source_go` -> `runtime.asmcgocall` -> handler.
+  The C write site is symbolised in the live process, not only in the harness.
+- `buf = actual_data = 0x7fffa00027be`; derived `data = actual_data - 14 =
+  0x7fffa00027b0`. `read_full` returned 0 (source EOF after 32 available
+  bytes); the 48-byte dump at `actual_data` began `5a 5b 5c 5d` four times
+  (32 chosen bytes) and then zeros. The chunk size field at `data-8` was
+  `0x25` = 0x20 (a 32-byte chunk) with `PREV_INUSE|NON_MAIN_ARENA`; the
+  non-main-arena bit is consistent with the cgo call running on a worker
+  thread. A 3-byte `g_malloc0` request has 24 usable bytes, so a 32-byte
+  write at offset +14 runs 22 bytes past usable space into the next chunk's
+  header and data. That is the live layout behind W3's `malloc(): corrupted
+  top size`.
+- Fixed control log `provision/http-ico-icofixed-gdb-control.log`
+  (`sha256=ec24fe8b85bc51875000503283b164de4831689f1ea46b4ed4522535139c1e86`).
+  HTTP 500 with `vips_foreign_load_ico_header: ICO image data is too large`,
+  process alive, and **zero** `GDB_HIT` lines: the fixed loader rejects the
+  size before allocating and before `read_full`, so the wrapped-size call
+  never occurs.
+- Ports 18080/18081 were free after both runs. No probe touched a
+  non-loopback address.
+
+### Grade
+
+The live consumer limb now has rung-4 evidence: attacker-chosen bytes at a
+chosen offset in a real imgproxy process, reached over unauthenticated
+loopback HTTP, captured at the symbolised C write site. This is not rung 5:
+the overwritten object is the next chunk's heap metadata/data, not a function
+pointer or return address, and no marker execution or remote command was
+observed. Harness rungs 1-4 (witness W185) and W1/W2 (witness #3407) are
+unchanged. W3/W4 are author observations awaiting independent witness replay;
+the witness wakes were failing on the engine-cap class at 08:29-08:33Z.

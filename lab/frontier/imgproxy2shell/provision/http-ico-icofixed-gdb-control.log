@@ -1,0 +1,35 @@
+CLIENT status=500 elapsed err='' body='Internal error'
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da8760: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 442110)]
+[New Thread 0x7fffae39e6c0 (LWP 442111)]
+[New Thread 0x7fffadb9d6c0 (LWP 442112)]
+[New Thread 0x7fffad39c6c0 (LWP 442113)]
+[New Thread 0x7fffacb9b6c0 (LWP 442114)]
+[New Thread 0x7fff97fff6c0 (LWP 442119)]
+[New Thread 0x7fff977fe6c0 (LWP 442120)]
+[New Thread 0x7fff96ffd6c0 (LWP 442121)]
+[New Thread 0x7fff967fc6c0 (LWP 442123)]
+[New Thread 0x7fff95ffb6c0 (LWP 442124)]
+[New Thread 0x7fff957fa6c0 (LWP 442131)]
+[New Thread 0x7fff94ff96c0 (LWP 442132)]
+time="2026-11-24 08:39:15" level="INFO" msg="OpenTelemetry monitoring" enabled=false logs=false metrics=false
+time="2026-11-24 08:39:15" level="WARNING" msg="No keys defined, signature checking is disabled" name="IMGPROXY_KEY" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 08:39:15" level="WARNING" msg="No salts defined, signature checking is disabled" name="IMGPROXY_SALT" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 08:39:15" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="png" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 08:39:15" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="gif" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 08:39:15" level="INFO" msg="Starting server at 127.0.0.1:18080"
+time="2026-11-24 08:39:15" level="INFO" msg="Started /insecure/rs:fill:16:16/plain/hostile.ico" request_id="H2u-1c1xqo9WBmyGHaaFu" method="GET" client_ip="127.0.0.1"
+time="2026-11-24 08:39:15" level="ERROR" msg="Completed in 297.348221ms /insecure/rs:fill:16:16/plain/hostile.ico" request_id="H2u-1c1xqo9WBmyGHaaFu" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: ICO image data is too large" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0-icofix/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"

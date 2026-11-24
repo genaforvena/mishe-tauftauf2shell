@@ -4,16 +4,23 @@
 wake units minted, tape #812) and witness verdict ESTABLISHED AS CLAIMED with
 no grade change (tape #813/#814, 2026-11-21 11:01Z).** Rungs 1/2/3 are
 ESTABLISHED in an extracted, verbatim-pin harness; rung 4 is ESTABLISHED AS
-INSTRUMENTED chosen bytes at a chosen offset. No live imgproxy HTTP server,
-libvips runtime, real uploaded ICO, stock allocator neighbour, pointer
-overwrite or execution was observed — those stay UNKNOWN. Both artifacts
-exist: this brief and the inner-socket `imgproxy2shell` window. Wake units and
-the presentation entry remain the person's full-flag sync. The CVE's RCE
-prose stays a claim; the lab demonstrates chosen bytes only.
-**Witness W185 (2026-11-24, tape #3318):** ICO rungs 1-4 ESTABLISHED on clean
-replay; the later HTTP consumer probes are ESTABLISHED only at the labeled
+INSTRUMENTED chosen bytes at a chosen offset. Both artifacts exist: this brief
+and the inner-socket `imgproxy2shell` window. Wake units and the presentation
+entry remain the person's full-flag sync. The CVE's RCE prose stays a claim;
+the lab demonstrates chosen bytes only.
+**Witness W185 (2026-11-24, tape #3318):** ICO harness rungs 1-4 ESTABLISHED on
+clean replay; the then-available HTTP consumer probes were graded only at the
 header/processing-entry scope, with the fine.tif stall attribution
 CONTRADICTED and corrected below. No r5 anywhere.
+**Witness closure #3407 (2026-11-24):** the W2 repair at `24221c9` was verified
+against W185; W1/W2 are CLOSED, not reopened.
+**W3/W4 (2026-11-24, this lab, witness replay pending):** a real loopback HTTP
+GET into a real imgproxy 4.0.0 process reproduces the wrapped-size abort with
+an ICO-fixed control (W3), and gdb in that live process captures the C
+write-site frame and reads back 32 attacker-chosen bytes at `data+14` (W4).
+The consumer limb therefore reaches rung 4 at the chosen-byte/chosen-offset
+scope. Pointer/IP control, marker execution, remote command and rung 5 stay
+UNKNOWN.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -75,9 +82,10 @@ compiled from the pinned call site, not a libc routine whose dispatch depends
 on the host. Exact-size `malloc` under ASan detects the first past-end store;
 a 1 MiB mmap collaborator places the 3-byte allocation at a known offset so
 chosen body bytes can be read back; an `mprotect` guard page turns the first
-past-end store into a fault. Real libvips source/read behaviour, Go callback
-boundaries and glibc chunk neighbours were not measured, so which object a
-given ICO entry reaches in a live imgproxy is **UNKNOWN**.
+past-end store into a fault. Real libvips source/read behaviour, the Go/cgo
+callback boundary and the live glibc chunk header are now measured in W3/W4
+below; what remains UNKNOWN is control of a live pointer or return address,
+not the reachability of the write.
 
 ## Local harness evidence (10 PASS / 0 FAIL, replayed)
 
@@ -150,17 +158,55 @@ favicon ICO returned HTTP 200 on the same binary. A control built with only
 `vips/icoload.c` replaced by the pinned v4.0.16 loader returned HTTP 500 with
 `vips_foreign_load_ico_header: ICO image data is too large` and stayed alive.
 This upgrades the consumer limb from header/entry to a real-process crash
-and allocator-detected heap corruption. It does NOT add chosen-byte readback,
-pointer control, a C write-site frame or rung 5; see PROVENANCE section W3.
+and allocator-detected heap corruption. W4 below adds the live chosen-byte
+readback and the symbolised C write site; pointer control and rung 5 remain
+UNKNOWN. See PROVENANCE section W3.
+
+### W4 — live chosen-byte readback at the C write site (2026-11-24, unwitnessed)
+
+`provision/ico_gdb_readback.py` serves the same 54-byte hostile ICO on
+127.0.0.1:18081, launches the unmodified `imgproxy-vuln` CLI under gdb on
+127.0.0.1:18080 against libvips 8.18.2 from `build-vuln-plain/libvips`, sends
+one unauthenticated GET, and breaks conditionally on
+`vips_foreign_load_read_full` with `len == 0xfffffff5`. Raw output:
+`provision/http-ico-vuln-gdb-readback.log`.
+
+Observed in that live process (addresses are ASLR-dependent):
+
+- Breakpoint hit at `vips.c:1304` with `len@entry=4294967285`, called from
+  `vips_foreign_load_ico_header` at `icoload.c:161`. Frames 0-10 run
+  `icoload.c:161` -> libvips `foreign.c:1154` -> `vips_icoload_source_go`
+  (`icoload.c:501`) -> `_cgo_...Cfunc_vips_icoload_source_go` ->
+  `runtime.asmcgocall` -> the HTTP handler: the C write site is symbolised in
+  the real imgproxy process, not only in the harness.
+- `buf = actual_data = 0x...7be`; `data = actual_data - 14 = 0x...7b0`.
+  `read_full` returns 0 (source EOF after 32 bytes); a 48-byte dump at
+  `actual_data` begins `5a 5b 5c 5d` four times (32 chosen bytes), then zeros.
+- The malloc chunk size field at `data-8` reads `0x25` = 0x20 (a 32-byte chunk)
+  plus `PREV_INUSE|NON_MAIN_ARENA` (non-main arena because the cgo call runs on
+  a worker thread). A 3-byte `g_malloc0` request has 24 usable bytes, so a
+  32-byte write starting at offset +14 runs 22 bytes past usable space into
+  the next chunk. That is the concrete live layout glibc later reports as
+  `malloc(): corrupted top size` in W3.
+- Control: the same breakpoint and request against the ICO-fixed binary
+  (`http-ico-icofixed-gdb-control.log`) produced HTTP 500
+  `ICO image data is too large`, **no breakpoint hit**, process alive: the
+  fixed loader rejects the size before allocating or calling `read_full`.
+
+Grade: the consumer limb now has rung-4 evidence — attacker-chosen bytes at a
+chosen offset in a real imgproxy process reached over unauthenticated loopback
+HTTP, at the symbolised C write site. This is not rung 5: the overwritten
+object is heap metadata / the next chunk, not a function pointer or return
+address, and no marker execution or remote command was observed. The harness
+grade (rungs 1-4, witness W185) is unchanged; W3/W4 await witness replay.
 
 ## Cheapest next experiment to move a rung
 
-The live HTTP crash is measured. The remaining gap to rung-4 impact in the
-live process is the C write site and chosen-byte placement: capture a
-symbolised ASan report at the real `vips_foreign_load_read_full` /
-`icoload.c:161` frame and read back the chosen bytes at `data+14`, then
-measure the actual libvips/glibc neighbours of the 3-byte buffer before any
-pointer or marker claim. No external target is ever contacted.
+The live write site and chosen-byte placement are measured. A pointer or
+marker claim would need the 32-byte write to land on a live code pointer;
+the measured layout puts it on the next chunk's header/data, so that path is
+likely blocked and must be disproved before any r5 work. No external target
+is ever contacted.
 
 ## What would change my mind
 

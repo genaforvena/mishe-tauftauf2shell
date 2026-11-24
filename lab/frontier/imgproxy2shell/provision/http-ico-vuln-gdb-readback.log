@@ -1,0 +1,68 @@
+CLIENT status=- elapsed err='RemoteDisconnected: Remote end closed connection without response' body=''
+=== GDB OUTPUT ===
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 436857)]
+[New Thread 0x7fffae39e6c0 (LWP 436858)]
+[New Thread 0x7fffadb9d6c0 (LWP 436859)]
+[New Thread 0x7fffad39c6c0 (LWP 436860)]
+[New Thread 0x7fffacb9b6c0 (LWP 436861)]
+[New Thread 0x7fff97fff6c0 (LWP 436866)]
+[New Thread 0x7fff977fe6c0 (LWP 436867)]
+[New Thread 0x7fff96ffd6c0 (LWP 436868)]
+[New Thread 0x7fff967fc6c0 (LWP 436869)]
+[New Thread 0x7fff95ffb6c0 (LWP 436870)]
+[New Thread 0x7fff957fa6c0 (LWP 436871)]
+time="2026-11-24 08:38:28" level="INFO" msg="OpenTelemetry monitoring" enabled=false logs=false metrics=false
+time="2026-11-24 08:38:28" level="WARNING" msg="No keys defined, signature checking is disabled" name="IMGPROXY_KEY" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 08:38:28" level="WARNING" msg="No salts defined, signature checking is disabled" name="IMGPROXY_SALT" format="comma-separated hex-encoded strings" value=""
+time="2026-11-24 08:38:28" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="png" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 08:38:28" level="WARNING" msg="can't be a preferred format as it's saving is not supported" format="gif" name="IMGPROXY_PREFERRED_FORMATS" format="comma-separated image formats" value=""
+time="2026-11-24 08:38:28" level="INFO" msg="Starting server at 127.0.0.1:18080"
+time="2026-11-24 08:38:28" level="INFO" msg="Started /insecure/rs:fill:16:16/plain/hostile.ico" request_id="7yDYVaUXb4TSTbWIZpPy2" method="GET" client_ip="127.0.0.1"
+[Switching to Thread 0x7fffae39e6c0 (LWP 436858)]
+
+Thread 3 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fffa00011b0, buf=buf@entry=0x7fffa00027be, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT read_full rdi(source)=0x7fffa00011b0 rsi(buf)=0x7fffa00027be rdx(len)=0xfffffff5
+GDB base(data)=0x7fffa00027b0 actual_data=0x7fffa00027be
+GDB_BEFORE 4x8 at base-16:
+0x7fffa00027a0:	0x0000000000000000	0x0000000000000025
+0x7fffa00027b0:	0x0000000000000000	0x0000000000000000
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fffa0001300) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_AFTER 48 bytes at actual_data:
+0x7fffa00027be:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fffa00027c6:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fffa00027ce:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fffa00027d6:	0x5a	0x5b	0x5c	0x5d	0x5a	0x5b	0x5c	0x5d
+0x7fffa00027de:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffa00027e6:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+GDB_CHUNK 4x8 at base-16:
+0x7fffa00027a0:	0x0000000000000000	0x0000000000000025
+0x7fffa00027b0:	0x0000000000000000	0x5b5a000000000000
+GDB_BT
+#0  0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fffa0001300) at icoload.c:161
+#1  0x00007ffff7a4217b in vips_foreign_load_build (object=0x7fffa0001300) at ../src/libvips-8.18.2/libvips/foreign/foreign.c:1154
+#2  0x00007ffff7bb92f6 in vips_object_build (object=0x7fffa0001300) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:372
+#3  0x00007ffff7bcec89 in vips_cache_operation_buildp (operation=0x7fffae39d8b0) at ../src/libvips-8.18.2/libvips/iofuncs/cache.c:1062
+#4  0x00007ffff7bd99c8 in vips_call_required_optional (operation=0x7fffae39d8b0, required=0x7fffae39d8f0, optional=0x7fffae39d9d0) at ../src/libvips-8.18.2/libvips/iofuncs/operation.c:974
+#5  0x00007ffff7bd9b39 in vips_call_by_name (operation_name=0x3b6ea89 "icoload_source", option_string=0x0, required=0x7fffae39d8f0, optional=0x7fffae39d9d0) at ../src/libvips-8.18.2/libvips/iofuncs/operation.c:1014
+#6  0x00007ffff7bda26b in vips_call_split (operation_name=0x3b6ea89 "icoload_source", optional=0x7fffae39d9d0) at ../src/libvips-8.18.2/libvips/iofuncs/operation.c:1121
+#7  0x0000000002da555a in vips_icoload_source (source=<optimized out>, out=<optimized out>) at icoload.c:491
+#8  0x0000000002da559a in vips_icoload_source_go (source=<optimized out>, out=<optimized out>, lo=...) at icoload.c:501
+#9  0x0000000002da1a36 in _cgo_149f5ac2ab3f_Cfunc_vips_icoload_source_go (v=0xc38eadb9268) at /tmp/go-build/cgo-gcc-prolog:830
+#10 0x0000000000497824 in runtime.asmcgocall () at /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/asm_amd64.s:995
+#11 0x00000c38ead15860 in ??? ()
