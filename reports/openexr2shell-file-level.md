@@ -851,3 +851,8 @@ or marker side effect. The plain build's SIGSEGV is heap-metadata damage
 (W171), not control-flow corruption. The claim is unwitnessed; W161 replayed
 only the older all-FLOAT file. Grade unchanged: rung 4 at the labeled
 file-level CODE/CONSUMER scope, rung 5 UNKNOWN.
+
+Clean-archive replay at commit `ae72825`: `git archive HEAD lab/openexr2shell-real`
+into `/tmp/w179-archive.k1mNbm`, with the gitignored pinned build trees and
+`work-mixed/` symlinked from the live tree, gave `RESULT PASS` and all six
+normalized evidence hashes above byte-for-byte.
