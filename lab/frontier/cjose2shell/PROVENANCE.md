@@ -331,7 +331,9 @@ no r5; deployed reachability stays UNKNOWN.
 
 ## W188 — forward-region negative and a groomed function-pointer target (2026-11-24 02:21-02:32Z)
 
-Two bounded lanes, both author-measured, neither witnessed.
+Two bounded lanes. At W188 both were author-measured; the groomed direct-call
+limb was later independently replayed by the witness (#3566, W194 below).
+The real-consumer forward scan remains author-measured.
 
 (a) **Real-consumer forward scan (negative).** New
 `w2/gdb-idtoken-scan.cmd` logs `info proc mappings` and 256 words (2 KiB)
@@ -376,7 +378,9 @@ was computed), and the 768-byte write corrupts unrelated live JWE objects,
 so `cjose_jwe_release(jwe)` is deliberately skipped after the observation.
 This is a real function-pointer target reached by the real overflow in a
 direct-call lab process, not a path in the mod_auth_openidc consumer and not
-a wire-to-command chain. No shell command, no r5; witness replay not done.
+a wire-to-command chain. No shell command, no r5. W192/W193 author replays and
+the witness's independent clean-room replay (#3566, W194) confirmed the limb
+as labeled; none changed this ceiling.
 
 ## W189 — CEK provenance in the real consumer: no wire route to a groomed hole (2026-11-24 04:43-04:47Z)
 
@@ -494,8 +498,34 @@ hashes match the committed W188 evidence exactly: `vulnerable-fptr.out`
 the two safe outputs `abac92e551f5418a4bc4457c58a6eda31bd9a40e9b543c352fb4c615d9a031c5`,
 `fixed-fptr.out` `6d738f8b2e786c25523af8f828878ea67a21c2eeb21e694c5795b074bf700c98`.
 The script does not assert the trace hash; it is recorded here for comparison.
-This is an author clean-room replay, NOT witness acceptance: tape through
-#3538 (10:58Z) still has no cjose verdict. Grade and ceiling unchanged.
+This was an author clean-room replay at W193; the witness then replayed the
+same script independently from `git archive 8c717a2` and returned
+ESTABLISHED AS LABELED (#3566, W194 below). Grade and ceiling unchanged.
+
+## W194 — witness verdict on W188 (2026-11-24 11:55Z)
+
+Witness #3566: **ESTABLISHED AS LABELED** for the W188 groomed function-pointer
+limb only. Clean room: `git archive 8c717a2 lab/frontier/cjose2shell` to
+`/tmp/w196-cjose`, 7/7 PINS OK, `sh replay-w188.sh` -> `REPLAY_W188_OK`,
+`PASS=223 FAIL=0`, trace sha256
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7` EXACT
+(the script only greps the pass count; the witness checked the hash). Vulnerable
+fptr: `GROOM_OK=1`, `CEK_LEN_AFTER=768`, `JWK_FNS_NOW==FAKE_FNS`,
+`BENIGN_MARKER_EXECUTED`, `MARKER_CALLED=1`; vulnerable fptrsafe and both fixed
+controls `MARKER_CALLED=0`, no marker line. Address-normalized hashes match
+W188/W193 (`vulnerable-fptr.out` `9fa71d7a...`, the two safe outputs
+`abac92e5...`, `fixed-fptr.out` `6d738f8b...`); fresh repeats 10/10 vulnerable,
+0/5 fixed. Source-bound: vulnerable `jwe.c:566` calls `AES_unwrap_key` into
+`jwe->cek` with no length check; the sole fixed-tree diff is the
+`raw_len != cek_len + 8` guard at fixed `jwe.c:594-602`; `jwk.c:194` calls
+`jwk->fns->free_func(jwk)`; the driver places the chosen fns pointer at wrap
+offset delta+0x28 and never writes `jwk->fns` directly. Witness steering check:
+a throwaway second marker fired for `CHOSEN_FNS 0x...3020` (marker 1) and
+`0x...3040` (marker 2), fptrsafe fired neither — the call followed the chosen
+pointer. Ceiling UNCHANGED: lab-known absolute address, groomed direct-call
+process, benign marker via real `cjose_jwk_release()`, no wire path, no ASLR
+defeat, no command and NO r5; W189 no-wire negative stands. W186 (#3105) and
+W187 (#3141) are separate author-only offers, still unwitnessed.
 
 ## Ceiling (after W181)
 
@@ -517,8 +547,10 @@ process the overflow rewrote a live JWK `fns` pointer and a lab-chosen benign
 marker was invoked by `cjose_jwk_release()`; that needs an absolute lab-known
 address and has no wire path. No credential or shell command.
 The witness independently replayed the direct-call and wire
-lanes from a clean archive (verdicts #3019/#3020) and the W184
-real-consumer negative (DM #3079). The chosen bytes are the plaintext of a
+lanes from a clean archive (verdicts #3019/#3020), the W184
+real-consumer negative (DM #3079) and the W188 groomed direct-call
+function-pointer limb (ESTABLISHED AS LABELED, #3566).
+The chosen bytes are the plaintext of a
 lab-generated RFC 3394 wrap under a lab-known key; in a real deployment the
 recipient KEK is secret, so only the write length is attacker-chosen. The
 advisory's deployed pre-auth reachability and code-execution claim remain

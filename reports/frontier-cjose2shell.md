@@ -15,8 +15,9 @@ operator admission and the person's full-flag sync.
 Clean offline `git archive 841b716` replay: 73 files, 7/7 pins, 8 binaries
 rebuilt from committed tarballs, `PASS=223 FAIL=0` with the exact same trace;
 see `lab/frontier/cjose2shell/REPLAY.md`. The witness independently replayed
-the direct-call and W181 wire lanes from a clean archive (verdicts #3019/#3020);
-see section 6.
+the direct-call and W181 wire lanes from a clean archive (verdicts #3019/#3020)
+and the W188 groomed function-pointer limb (ESTABLISHED AS LABELED, #3566);
+see section 5.
 
 ## 1. Verified ground truth
 
@@ -254,14 +255,25 @@ replays, but the plain 56-byte outcome varies by build/run (below).
   no r5. Evidence: `fptr/evidence/`, `PROVENANCE.md` W188. W192 replayed this
   lane from a clean `git archive 1212b10` (offline rebuild, `PASS=223 FAIL=0`):
   all four outputs match the committed evidence after address normalization,
-  with 5/5 vulnerable marker calls and 0/3 fixed calls. That is an author
-  clean-room replay, not witness acceptance. Not replayed by the witness.
-W193 added `replay-w188.sh`, a single offline command that performs the whole
-clean-archive replay (pins, jansson and cjose rebuild, `check.sh`, `fptr/run.sh`
-and its own control assertions); from a clean archive it printed
-`REPLAY_W188_OK` with the same `PASS=223 FAIL=0` trace and byte-identical
-normalized fptr outputs. This lowers witness replay cost but is still an
-author replay, not witness acceptance.
+  with 5/5 vulnerable marker calls and 0/3 fixed calls. W193 reduced that
+  replay to one offline command, `replay-w188.sh` (pins, jansson and all six
+  cjose trees rebuilt from committed tarballs, `check.sh`, `fptr/run.sh` and
+  control assertions); from a clean archive it printed `REPLAY_W188_OK` with
+  the same `PASS=223 FAIL=0` trace and byte-identical normalized outputs.
+W194: the witness independently replayed this W188 limb from a clean
+`git archive 8c717a2` and returned **ESTABLISHED AS LABELED** (#3566). Its
+clean room checked 7/7 pins, `REPLAY_W188_OK` and the exact trace hash
+`455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`;
+vulnerable fptr showed `GROOM_OK=1`, `CEK_LEN_AFTER=768`,
+`JWK_FNS_NOW==FAKE_FNS`, `BENIGN_MARKER_EXECUTED` and `MARKER_CALLED=1`,
+while vulnerable safe and both fixed controls stayed at 0 (10/10 fresh
+vulnerable repeats, 0/5 fixed); normalized output hashes match the committed
+W188/W193 evidence. The witness also steered a second marker in a throwaway
+driver copy: `CHOSEN_FNS 0x...3020` fired marker 1 and `0x...3040` fired
+marker 2, showing the call followed the chosen pointer. Grade and ceiling are
+unchanged: lab-known absolute address, groomed direct-call process, benign
+marker through real `cjose_jwk_release()`, no wire path, no ASLR defeat, no
+command and no r5. W186/W187 remain separate author-only offers.
 
 ## 6. Honest ceiling
 
@@ -289,9 +301,11 @@ adjacent to the CEK in those runs. W188 found no pointer in the real
 consumer's forward 2 KiB, but in a groomed direct-call process the same
 overflow rewrote a live JWK `fns` pointer and a lab-chosen benign marker was
 called by the library; that needs an absolute lab-known address and has no
-wire path. No deployed server, real credential, address leak or shell
-command. Advisory reachability in a real deployment and any RCE claim remain
-**UNKNOWN**; rung 5 not attempted and not established.
+wire path. The witness independently replayed that W188 limb from a clean
+archive and ESTABLISHED it AS LABELED (#3566): rung-4 mechanics in a groomed
+direct-call process, not a deployed path. No deployed server, real credential,
+address leak or shell command. Advisory reachability in a real deployment and
+any RCE claim remain **UNKNOWN**; rung 5 not attempted and not established.
 
 W190 checked a jansson length-corruption info-leak hypothesis against the
 pinned object layout and the W183 heap log: the string's `value` pointer sits
