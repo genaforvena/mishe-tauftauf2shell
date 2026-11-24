@@ -1105,3 +1105,60 @@ earlier 1200s consolidated-replay timeout was host contention from the same
 build, now resolved by killing those stale compilers.
 
 
+
+## W184: whole second-stage overwrite is file-chosen (2026-11-24)
+
+Prediction: W178/W181 showed a handful of file-chosen bytes past the destination,
+but the first copy still crossed the allocation boundary and its OOB portion
+was allocator residue. If the forged `unpacked_size` is large enough to hold the
+FLOAT row, the first inverse-sort copy should stay in bounds and the entire
+second copy should land past the allocation with every OOB byte coming from the
+crafted file.
+
+Method: `cases/make_poc_mixed_full.py` forges a deep ZSTD chunk with `N=64`
+samples on the last pixel, `split=2N=128`, grid total `6N=384`, and
+`unpacked_size=U=4N=256`. The inner frame carries the two segments that
+`exr_zstd_segment_layout()` requires (`128` bytes of 2-byte elements and `128`
+bytes of 4-byte elements), both filled with one chosen byte. The baseline EXR
+is regenerated with the committed pinned generator. Both variants (0x3c and
+0x5a) and the baseline run through `bin-vuln-plain/guarded_harness`, the
+fixed 3.5.3 `bin-fixed-asan/guarded_harness`, the unguarded
+`bin-vuln-asan/flat_harness`, and gdb breakpoints at the sink and at the
+post-decode guard report. The one-command replay is
+`sh harness/mixed-full-check.sh`; the PoC hashes are
+`1fafb97255ad2178d8d68a1dec703f89b08aba2ac5f647658f3cd9187e6c8ba0`
+(0x3c) and `2ab3ea9751736720030d606cd3dd947dd000039da537a47bf822f1f18dd618f7`
+(0x5a), both small local files; baseline
+`9aa2073dce40b893f648f0fb078b738538e65a569cb00079d4128612e7fa3d04`.
+
+Result: the sink trace (`evidence/full-oob-gdb-copies.out`) shows
+`SINKCOPY dst_off=0 src_off=128 n=256` followed by
+`SINKCOPY dst_off=256 src_off=0 n=128`. The first copy ends exactly at the
+256-byte allocation; the second starts exactly past it. The guarded allocator
+reports `GUARD-CHANGE alloc=24 size=256 changed=128 first=+0` with
+`actual@first=0x3c` / `0x5a`, and the baseline reports `changed=0`. gdb dumps
+all 128 bytes at `decode.unpacked_buffer+256` as the chosen byte for each
+variant (`evidence/full-oob-gdb-3c.out`, `-5a.out`). The fixed build rejects
+with `DECODE rv=23 EXR_ERR_CORRUPT_CHUNK` and no guard change.
+
+Caveat preserved: the unguarded ASan build aborts earlier, on the first copy's
+OOB *source* `READ of size 256` at pinned `internal_zstd.c:472`, so it never
+reaches the second copy's write. The guarded allocator backfills each
+suballocation with a 16 KiB guard inside one large `malloc` region, which is
+why ASan cannot see the suballocation overflow; the WRITE is measured by the
+guard bytes and gdb readback, not by ASan. The vulnerable plain build returns
+`DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA` after the sink, before any further
+consumer of the chosen OOB bytes.
+
+Replay: `RESULT PASS` in three consecutive working-tree runs; nine normalized
+evidence hashes byte-stable (`evidence/full-oob-*.out`), aggregate normalized
+sha256 `d04f151a539362d22d58ec4c4e8c06c4ee0689fd88aa29c5824ba2e7becf946f`.
+This is an author replay of a new author claim, not a witness verdict. Scope:
+local crafted EXR file, in-process C harness, no wire/socket, pointer or
+control-flow target, command or marker. No grade change: file-level rungs 1-4
+at the labeled CODE/CONSUMER scope, W161 witness-ESTABLISHED still covers only
+the all-FLOAT file, W164/W169/W178/W179/W180/W181/W182 and this W184 remain
+unverdicted, and rung 5 stays UNKNOWN. Would change mind: a measured live
+control-flow target inside this fully chosen OOB region, or a witness
+counterexample.
+

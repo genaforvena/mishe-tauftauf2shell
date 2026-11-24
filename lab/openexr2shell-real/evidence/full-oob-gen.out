@@ -1,0 +1,5 @@
+wrote work-mixed/baseline_deep_mixed.exr
+baseline y=0 samptab=112 packed=56 unpacked=384
+poc: N=64 byte=0x3c U=256 grid=384 split=128 COPY1=256 COPY2=128 at dst+256 frame=57 wrote=715
+baseline y=0 samptab=112 packed=56 unpacked=384
+poc: N=64 byte=0x5a U=256 grid=384 split=128 COPY1=256 COPY2=128 at dst+256 frame=57 wrote=715

@@ -1,0 +1,2 @@
+SINKCOPY dst_off=0 src_off=128 n=256
+SINKCOPY dst_off=256 src_off=0 n=128

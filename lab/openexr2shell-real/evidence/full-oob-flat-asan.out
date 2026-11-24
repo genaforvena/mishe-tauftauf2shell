@@ -1,0 +1,4 @@
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+READ of size 256 at ADDR thread T0
+    #2 ADDR in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+ADDR is located 0 bytes after 256-byte region [ADDR,ADDR)

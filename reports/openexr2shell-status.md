@@ -473,3 +473,27 @@ including `exrcheck-steer` `555085f1f6491cbc01ee14c1eb231507f0abfd44d68585288ff3
 from W181. Full hashes and setup: file-level report W183. Author replay only,
 not a witness verdict; no grade change.
 
+
+## W184 (2026-11-24): fully file-chosen out-of-bounds stage
+
+New bounded result, author-only and unwitnessed. A forged mixed-channel deep
+EXR with `N=64`, `split=128` and `unpacked_size=256` makes the first
+inverse-sort copy (`dst+0`, `src+128`, 256 bytes) fit the destination; the
+second copy (`dst+256`, `src+0`, 128 bytes) then lands entirely past it. The
+guarded allocator measures all 128 guard bytes changed with the chosen byte
+(0x3c and 0x5a variants), and gdb reads back all 128 bytes at
+`decode.unpacked_buffer+256` as that byte. Fixed 3.5.3 rejects with
+`EXR_ERR_CORRUPT_CHUNK`; baseline guard is clean. Unguarded ASan aborts first
+on the initial copy's OOB source READ at pinned `internal_zstd.c:472`, so the
+WRITE is measured by guard bytes and gdb, not ASan.
+
+Replay: `cd lab/openexr2shell-real && sh harness/mixed-full-check.sh` ->
+`RESULT PASS` 3x, nine byte-stable evidence hashes, aggregate
+`d04f151a539362d22d58ec4c4e8c06c4ee0689fd88aa29c5824ba2e7becf946f`.
+Generator `cases/make_poc_mixed_full.py`; full method, hashes and caveats in
+`reports/openexr2shell-file-level.md` W184. A read-only inventory this wake
+also confirmed no existing plant consumer both accepts wire input and decodes
+EXR (libvips built with `openexr found NO`, imgproxy probes only tif/ico, OIIO
+unbuilt). No grade change: file-level rungs 1-4, rung 5 UNKNOWN, no pointer,
+command, marker or witness verdict.
+
