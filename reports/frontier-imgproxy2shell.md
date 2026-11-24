@@ -28,6 +28,13 @@ boundary stays closed.
 negative is ESTABLISHED AS LABELED on a clean archive, with fresh upstream
 source hashes independently checked; no contradiction, no grade change, no
 r5. All live-limb claims W3-W8 now have witness verdicts.
+**W9 (2026-11-24 16:20Z, author, unwitnessed):** 49 loopback GDB traces answer
+W8's open consumption question with a measured allocator blocker: on every
+layout where wire bytes put the poisoned 0x35 tcache chunk at the live head,
+the first natural `malloc(0x20)` returned that victim and left the wire-decoded
+pointer as head with count 6, but the process aborted in `free(): invalid next
+size (fast)` before any later 0x20 allocation. The surviving runs had the
+spill away from the live head. Grade stays rung 4, no wire-only key and no r5.
 
 ## Verified ground truth (claim sources + this lab, 2026-11-21)
 
@@ -414,6 +421,38 @@ to the committed logs because Go goroutine states and m/thread IDs vary;
 probe and log hashes and all live outcomes were exact. Verdict ESTABLISHED AS
 LABELED, no contradiction, no grade change, no r5; W7's no-wire-only-key
 boundary stays closed and W201 remains the ceiling.
+
+## W9 — no natural allocation through the wire head (2026-11-24, author, unwitnessed)
+
+W8 proved a wire-only low-16-bit retarget of a live safe-linked tcache `next`
+and left one limit open: the following `malloc(0x20)` did not return the
+decoded head, so no later consumption in an unsanitized process was shown.
+`provision/ico_post_poison_trace.py`
+(`sha256=563f5f7a44e5aacd43c12132eb9cdb0cc39fbfec1d1cbbb02e6aa20aba34e6f0`)
+extends the W8 probe with observation only — GDB prints the post-write wire
+decoded head, up to ten natural `malloc(0x20)` returns, the tcache head/count
+after each and the observing thread number; it writes no memory and reaches
+malloc by `continue`, never `call`.
+
+Forty-nine runs on 127.0.0.1:18180/18181 used the pinned plain `imgproxy-vuln`,
+the 42-byte ICO with a 20-byte body, `LOW=0x0`, `size=0x25` and two benign
+preloads. Ten runs had the poisoned 0x35 chunk as the live tcache head; eight
+of those carry the post-write decode. In all eight
+(`http-ico-w9-victim1.log`, `http-ico-w9-victim2.log` among them) the first
+`malloc(0x20)` returned the victim, the head became exactly the wire-decoded
+pointer at count 6, and the process then stopped in
+`free(): invalid next size (fast)` / SIGABRT before any second 0x20 malloc.
+All ten victim layouts aborted the same way. The seven runs that survived the
+hostile request with HTTP 500 and a live process all had the spill away from
+the live tcache head, so they are not consumption of the wire head either.
+No run returned the wire-decoded pointer from a later allocation.
+
+This is a measured allocator blocker, not a claim about which freed chunk
+triggers the abort: the exact aborting free call was not identified. Layout is
+stochastic and ASLR-dependent; all negatives were kept in `/tmp/w9-out` and
+are not retried into existence. Grade stays rung 4; no wire-only key, marker,
+code-pointer write or r5. Commands, hashes and raw excerpts are in
+`lab/frontier/imgproxy2shell/PROVENANCE.md` (W9).
 
 ## What would change my mind
 

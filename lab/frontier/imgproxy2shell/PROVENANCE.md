@@ -798,3 +798,63 @@ committed logs because Go goroutine states and m/thread IDs vary; that is
 runtime scheduling, not a behavioral difference. Verdict ESTABLISHED AS
 LABELED, no contradiction, no grade change, no r5; the no-wire-only-key
 boundary stays closed and W201 remains the ceiling. Ports 18080/18081 free.
+
+## W9 — no natural allocation through the wire head (2026-11-24 16:09-16:20Z, author, unwitnessed)
+
+Question left open by W8/W201: the wire-derived tcache head existed at count 6
+after the first natural `malloc(0x20)`, but the next measured malloc did not
+return it. Hypothesis: intervening frees bury that head, or the process aborts
+before the next 0x20 allocation. Bounded test: observe every subsequent
+natural `malloc(0x20)` in the plain process, with no debugger writes and no
+forced calls.
+
+Probe `provision/ico_post_poison_trace.py` sha256
+`563f5f7a44e5aacd43c12132eb9cdb0cc39fbfec1d1cbbb02e6aa20aba34e6f0`; it is
+the W8 probe (`ico_partial_next.py` sha256
+`f03dbc448c3ddffc61a5db7a1e1816f9b54a4d7df6c3a94d4967241992f0ca7f`) with GDB
+prints added for the post-write decoded head, up to ten later malloc returns,
+tcache head/count after each, and the observing thread, plus a pinned lab
+path. Curated victim logs:
+`provision/http-ico-w9-victim1.log` sha256
+`eece51a1119804cff430aa307cca01f9a8000d92e976afb3b96e8745e898315e`,
+`provision/http-ico-w9-victim2.log` sha256
+`7711dbe350e556acf82e4b515845377bc830c5e8bfe0f5a4737e7c68d4e82993`.
+Ports 18180/18181 were free before use; all traffic stayed on 127.0.0.1.
+
+Command shape (49 runs, tags `w9a1`, `w9b1-8`, `w9c9-24`, `w9d25-48`):
+
+```
+W8_OUTDIR=/tmp/w9-out python3 ico_post_poison_trace.py TAG 0x0 20 2 gdb
+```
+
+Pinned plain `imgproxy-vuln`, sibling plain libvips tree, 42-byte ICO with a
+20-byte body, `LOW=0`, size `0x25`, two benign preloads. Result: 10 of 49 runs
+put the poisoned 0x35 chunk at the live tcache head (`head == base+0x20`); 8
+of those carry the post-write decode added before those runs. In all 8, M1
+returned the victim, `GDB_TCACHE_1 head` equalled `GDB_WIRE_DECODED` at count
+6, and `free(): invalid next size (fast)` / SIGABRT followed before any second
+`malloc(0x20)`; all 10 victim layouts aborted the same way. Seven non-victim
+runs survived the hostile request with HTTP 500 and a live process, but their
+spill was not at the live head. Zero runs returned the wire-decoded pointer
+from a later allocation. Excerpt from `http-ico-w9-victim1.log`:
+
+```
+GDB_TCACHE_PRE head=0x7fff7803ef10 count=7
+GDB_WIRE_DECODED 0x7fff7803803e RAW 0x7ff887f40000 POS 0x7fff7803ef10
+GDB_M1_HIT size=0x20 thread=12
+GDB_M1_RET 0x7fff7803ef10
+GDB_TCACHE_1 head=0x7fff7803803e count=6
+free(): invalid next size (fast)
+Thread 12 "imgproxy-vuln" received signal SIGABRT, Aborted.
+GDB_M2_HIT size=0x48a77 thread=12
+GDB_M2_RET (nil)
+```
+
+The two `GDB_M2_*` lines are script output at the SIGABRT stop with a stale
+`$rdi`; they are not a `malloc(0x20)` hit. The aborting `free()` call and
+chunk were not identified, so this records the observed allocator blocker,
+not a stronger causal claim. Layout is stochastic and ASLR-dependent; the
+other 39 logs (including top-chunk aborts and non-head layouts) remain in
+`/tmp/w9-out` and are not retried into existence. No fixed-binary control was
+rerun here; W8/W202 already measured it. Grade stays rung 4: no wire-only key,
+no marker, no code-pointer write, no r5. Unwitnessed author finding.
