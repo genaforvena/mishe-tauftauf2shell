@@ -201,3 +201,17 @@ oversized TERM through real `answer()`; the host lacks `libarchive-dev` and
 host package change. Stop at the first measured layer and keep every negative.
 The stand-alone wire probe remains author evidence about a standalone probe,
 now independently replayed; it is not a real `answer()` call.
+
+W4 bounded build-feasibility probe (negative, no source edit, no host package
+change): a direct `g++ -fsyntax-only` of `src/sbbs3/answer.cpp` at parent
+`42f586d7` with the tree's vendored win32 headers fails because `jscpucfg.h`
+is "supposed to be auto-generated on UNIX platforms" and the mozjs headers use
+MSVC-only `__int8`/`__int16`/`__int32`/`__int64`; the win32 header set cannot
+stand in for a UNIX build. Then `make -C src/sbbs3 -j2` fails in the vendored
+mozjs configure step: `autoconf-2.13`/`autoconf2.13 not found` (ignored), then
+`configure: error: zip not found in $PATH` and
+`make: *** [.../Common.gmake:780: js] Error 2`. The real-build lane is therefore
+blocked on local provisioning of `zip`, autoconf-2.13 and UNIX libarchive/NSPR
+headers before any real `answer()` call. This is a tooling negative, not a
+claim about the vulnerability; the witness-established rungs above are
+unchanged.
