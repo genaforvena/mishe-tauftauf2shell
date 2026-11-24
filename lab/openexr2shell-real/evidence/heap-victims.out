@@ -1,0 +1,42 @@
+Breakpoint 1 at 0x5870 (252 locations)
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+START rv=0
+CHUNK rv=0 packed=52 unpacked=64 width=64 height=1
+INIT rv=0 channels=1
+ROUTINES rv=0
+RUN flags=0
+
+Breakpoint 1.254, __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:255
+warning: 255	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+SINK n=4096 src_minus_dst=304
+CHUNK-COUNT total=20 first_off=64
+LIVE-PTR-COUNT scanned=11 inside=3
+LIVE-PTR-INSIDE decode.unpacked_buffer off=+0
+LIVE-PTR-INSIDE decode.scratch_buffer_2 off=+272
+LIVE-PTR-INSIDE decode.scratch_buffer_1 off=+304
+sort2_4ByteChannels_tiled (inPtr=<optimized out>, num_samples_grid=num_samples_grid@entry=0x5555556e21d0, channels=channels@entry=0x7fffffffdfe8, channelsSize=channelsSize@entry=1, forward=forward@entry=false, height=height@entry=1, outPtr=<optimized out>, sorting_lookup=0x5555556e21d8) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:459
+459	        for (int i = 0; i < channelsSize; ++i)
+CHUNK off=-16 size=0x50 hdr_before=0x51 hdr_after=0x51 same
+CHUNK off=+64 size=0x30 hdr_before=0x31 hdr_after=0xb11 CHANGED
+CHUNK off=+112 size=0x90 hdr_before=0x91 hdr_after=0x0 CHANGED
+CHUNK off=+256 size=0x20 hdr_before=0x21 hdr_after=0x0 CHANGED
+CHUNK off=+288 size=0x50 hdr_before=0x51 hdr_after=0x0 CHANGED
+CHUNK off=+368 size=0xb10 hdr_before=0xb11 hdr_after=0x0 CHANGED
+CHUNK off=+3200 size=0x20 hdr_before=0x20 hdr_after=0xd CHANGED
+CHUNK off=+3232 size=0x50 hdr_before=0x51 hdr_after=0x5555556067aa CHANGED
+CHUNK off=+3312 size=0x40 hdr_before=0x41 hdr_after=0x5555556066ea CHANGED
+CHUNK off=+3376 size=0x30 hdr_before=0x31 hdr_after=0x5555556066ea CHANGED
+CHUNK off=+3424 size=0x30 hdr_before=0x31 hdr_after=0x91 CHANGED
+CHUNK off=+3472 size=0x30 hdr_before=0x31 hdr_after=0x5555556e2e00 CHANGED
+CHUNK off=+3520 size=0x50 hdr_before=0x51 hdr_after=0x5555556e2ee0 CHANGED
+CHUNK off=+3600 size=0x40 hdr_before=0x41 hdr_after=0x3f800000 CHANGED
+CHUNK off=+3664 size=0x40 hdr_before=0x41 hdr_after=0x31 CHANGED
+CHUNK off=+3728 size=0x90 hdr_before=0x91 hdr_after=0x5555556e2e30 CHANGED
+CHUNK off=+3872 size=0x30 hdr_before=0x31 hdr_after=0x5555556e2ee0 CHANGED
+CHUNK off=+3920 size=0x30 hdr_before=0x31 hdr_after=0x5555556e2e90 CHANGED
+CHUNK off=+3968 size=0x30 hdr_before=0x31 hdr_after=0x0 CHANGED
+CHUNK off=+4016 size=0x110 hdr_before=0x111 hdr_after=0x1 CHANGED
+HDR-CORRUPTED 19/20
+FIRST-HDR off=+64 before=0x31 after-changed=yes
+END-PY

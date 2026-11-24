@@ -442,3 +442,53 @@ well — the file sets the copy length and destination offset, not the
 out-of-bounds bytes. The 8-byte nondeterministic window is a caveat for any
 future chosen-byte claim, not a control channel. No pointer, command, marker
 or wire work; no grade change, rung 5 still UNKNOWN.
+
+## W171: which live heap objects the 4096-byte copy reaches (2026-11-24)
+
+Charter option 2's first half was still unmeasured: W163/W170 proved the
+copied bytes are not file-chosen, but did not map what the copy destroys in
+the aborting plain build. Recipe: `harness/heap-victims.cmd` breaks on
+`memcpy` with `$rdx == 4096` in `bin-vuln-plain/flat_harness` with the
+692-byte PoC (sha256 `283cec0e...`), walks glibc chunks forward from the
+destination's chunk using their size words, scans `decode` pointer fields in
+`main`, then steps over the copy and re-reads each header. gdb's inferior
+ASLR is pinned off so pointer-derived residue bytes stay byte-stable.
+
+Observed in `evidence/heap-victims.out` (three identical runs, sha256
+`94928edccc5785b82ff4ed3571ca027d86d61122c39e5614906998886035983c`):
+
+```
+SINK n=4096 src_minus_dst=304
+CHUNK-COUNT total=20 first_off=64
+LIVE-PTR-COUNT scanned=11 inside=3
+LIVE-PTR-INSIDE decode.unpacked_buffer off=+0
+LIVE-PTR-INSIDE decode.scratch_buffer_2 off=+272
+LIVE-PTR-INSIDE decode.scratch_buffer_1 off=+304
+CHUNK off=-16 size=0x50 hdr_before=0x51 hdr_after=0x51 same
+CHUNK off=+64 size=0x30 hdr_before=0x31 hdr_after=0xb11 CHANGED
+CHUNK off=+368 size=0xb10 hdr_before=0xb11 hdr_after=0x0 CHANGED
+HDR-CORRUPTED 19/20
+FIRST-HDR off=+64 before=0x31 after-changed=yes
+```
+
+The destination's own 0x50 chunk is intact; the write starts exactly at its
+end (`+64`), with the next chunk's header changing from `0x31` to `0xb11`.
+Nineteen of twenty chunk headers in the 4096-byte span are clobbered; several
+after-values are heap pointers (`0x5555...`), consistent with W170's finding
+that the source's out-of-bounds bytes are allocator residue. Of eleven
+pointer fields in `decode`, three lie in the span: the destination itself,
+`scratch_buffer_2` at `+272` (the sample grid / sorting lookup backing
+`num_samples_grid` and `sorting_lookup` at the sink) and `scratch_buffer_1`
+at `+304` (the source). No function pointer, vtable, C++ image object or
+application callback lies in the span: `ctxt` (`0x...1ad0`), `deep_ptrs`
+(`0x...1d60`) and `deep_data` are all before the destination. This is the
+concrete mechanism behind the plain build's `free(): invalid pointer` abort:
+live Core scratch buffers and adjacent heap metadata, not a control-flow
+target.
+
+`sh lab/openexr2shell-real/harness/heap-victims-check.sh` regenerates the PoC,
+checks its sha256, reruns the map, asserts eight lines and prints `RESULT
+PASS`; it passed twice with the evidence hash above. No grade change:
+rung 4 file-level CODE/CONSUMER, W161 witness-ESTABLISHED at the scanline
+scope, tiled/aarch64 replay requested from witness on tape #3133, rung 5
+UNKNOWN. No chosen bytes, pointer target, command, marker or wire work.
