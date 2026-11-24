@@ -7504,9 +7504,15 @@ the lane-index row still carries an older ceiling, this section supersedes it.
   `fvimportbdf.c:1770` catches `free(encs)` reading that header immediately
   before the glibc abort, while `gdb-header-fixed.out` and
   `gdb-header-complete.out` keep `0x21` and exit normally. Metadata corruption,
-  not a pointer primitive; a field set yielding a plausible size or a silent
-  overwrite is UNKNOWN. Author-side and unwitnessed, no claim beyond the
-  witnessed direct-call rungs 1-4 and no rung 5.
+  not a pointer primitive. `0912800` measured a silent variant: `zero-write.pcf`
+  (sha256 `f20ef994…08b5d`) carries value zero, the size word stays `0x21` and
+  the plain build exits 0 (`plain-zero-write-import.out`), while ASan still
+  reports `WRITE of size 4` at `:1751`; `gdb-zero-write-post.out` shows
+  `00 00 00 00` at `encs-4` and an intact `0x21` at `free(encs)`. An earlier
+  `zero-value.pcf` attempt with `min2=max2=0xfffd` is a preserved negative
+  (`getformint16()` does not sign-extend). Some other plausible 64-bit chunk
+  size remains UNKNOWN; author-side and unwitnessed, no claim beyond rungs 1-4
+  and no rung 5.
 - **Jq adjacent advisory disposition (`2bcdde2`)**: operator DM #3419
   (07:37Z) screened GHSA-cfh2-vwfq-qfmm (`--rawfile` invalid-state reuse after
   a handled "String too long", High 7.1, affected `<=1.8.1`, fixed 1.8.2)

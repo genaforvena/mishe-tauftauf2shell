@@ -1862,7 +1862,10 @@ real plain build: the four bytes at `encs-4` are the high half of `encs`'s own
 glibc chunk size, which changes `0x21` → `0x0053494d00000021`, and
 `free(encs)` at `fvimportbdf.c:1770` was caught reading the corrupted header
 just before the abort while patched and complete controls keep `0x21`.
-Metadata corruption, not a pointer primitive; author-only, unwitnessed, no
+Metadata corruption, not a pointer primitive; a zero-valued variant
+(`0912800`) keeps the size word at `0x21` and the plain build clean while ASan
+still reports `WRITE of size 4`, so impact depends on the file-derived value
+and some other plausible chunk size is UNKNOWN. Author-only, unwitnessed, no
 grade change. The FLTK GUI receipt's README quotes `gui.cxx`
 `bb7e4c23…da0da0`, but the tracked `inputs.sha256` and a fresh `sha256sum` both
 give `b84e070c…853bc`; the receipt needs the author's repair and no hash is

@@ -10036,7 +10036,7 @@ request #3156 unanswered.
   cannot reach the write. Source-only negative; the five unbuilt encoders
   stay unmeasured. No build, bytes, wire, pointer or grade change.
 
-### 2026-11-24 07:1x–07:4xZ — seventeen edges after `3ee5637`
+### 2026-11-24 07:1x–07:4xZ — eighteen edges after `3ee5637`
 
 - `e4430ca` (Munt W180) audited every non-test `parseStream()` caller in the
   pinned 2.8.3 tree: ALSA 5572 measured, OSS 1024, Win32 ring 32760 and
@@ -10114,6 +10114,13 @@ request #3156 unanswered.
   `fvimportbdf.c:1770` just before the abort; patched and complete controls
   keep `0x21`. Metadata corruption, not a pointer primitive; author-side,
   unwitnessed, no grade or rung 5.
+- `0912800` (FontForge W3) measured the silent-value boundary: `zero-write.pcf`
+  carries zero in the same negative write, the chunk size stays `0x21` and the
+  plain build exits 0 while ASan still reports `WRITE of size 4` at `:1751`;
+  the earlier `min2=max2=0xfffd` attempt was a preserved negative because
+  `getformint16()` does not sign-extend. Impact depends on the file-derived
+  value; some other plausible size is UNKNOWN. Author-only, unwitnessed, no
+  grade or rung 5.
 - `2bcdde2` (jq) records operator DM #3419 screening adjacent
   GHSA-cfh2-vwfq-qfmm NOT admitted (file-facing `--rawfile`, no RCE claim,
   ~4.2 GB peak RSS against the 2 GiB guard): a named disposition, 14/14 pins
@@ -10122,7 +10129,7 @@ request #3156 unanswered.
   (#3105/#3141/#3232 as chat #3429) once after they vanished from the witness
   wall; no experiment, build, input, witness verdict or grade change. W184's
   negative alone is witness-ESTABLISHED (#3079).
-- All 17 edges keep the 130-role count and FRONTIER-STAGED set unchanged. The
+- All 18 edges keep the 130-role count and FRONTIER-STAGED set unchanged. The
   only rung cell moved is LibRaw R4; Synchronet's wire limb was accepted at
   the already-claimed synthetic-struct scope, and the remaining new limbs are
   author/source-only or named negatives. FLTK W5, FontForge W2 and cjose's
