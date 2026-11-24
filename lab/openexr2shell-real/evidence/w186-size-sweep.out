@@ -1,0 +1,9 @@
+word=0x0021 rc=1 msg=bad
+word=0x0031 rc=1 msg=bad
+word=0x0041 rc=1 msg=bad
+word=0x0051 rc=1 msg=bad
+word=0x0091 rc=1 msg=bad
+word=0x0101 rc=1 msg=bad
+word=0x1001 rc=1 msg=bad
+word=0x1011 rc=1 msg=bad
+word=uniform rc=1 msg=bad

@@ -1,0 +1,3 @@
+DECODE rv=31 EXR_ERR_INVALID_SAMPLE_DATA
+GUARD-CHANGE alloc=24 size=256 changed=128 first=+0 expected=0x7c actual@first=0x5a
+GUARD-TOTAL post-decode changed=128

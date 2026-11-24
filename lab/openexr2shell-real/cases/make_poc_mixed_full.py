@@ -25,7 +25,13 @@ BYTE = int(sys.argv[4], 0)
 U = int(sys.argv[5]) if len(sys.argv) > 5 else 4 * N
 if U % 2 or U <= 2 * N:
     raise SystemExit("U must be even and greater than 2*N")
-
+SEG1 = bytes.fromhex(sys.argv[6]) if len(sys.argv) > 6 else None
+if SEG1 is not None and len(SEG1) != 2 * N:
+    raise SystemExit("segment 1 must be exactly 2*N bytes")
+seg1 = SEG1 if SEG1 is not None else bytes([BYTE]) * (2 * N)
+seg2 = bytes([BYTE]) * (U - 2 * N)
+if SEG1 is not None:
+    print(f"seg1[8:16]={seg1[8:16].hex()} seg2[0:8]={seg2[:8].hex()}")
 data = open(BASE, "rb").read()
 p = 8
 while True:
@@ -51,8 +57,8 @@ for c in counts:
     tbl += struct.pack("<I", cum)
 assert len(tbl) == 64 * 4
 
-inner = (struct.pack("<Q", 2 * N) + bytes([BYTE]) * (2 * N)
-         + struct.pack("<Q", U - 2 * N) + bytes([BYTE]) * (U - 2 * N))
+inner = (struct.pack("<Q", 2 * N) + seg1
+         + struct.pack("<Q", U - 2 * N) + seg2)
 with tempfile.NamedTemporaryFile(delete=False) as tf:
     tf.write(inner)
     tmp = tf.name

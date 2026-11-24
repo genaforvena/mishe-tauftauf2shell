@@ -1,0 +1,2 @@
+DECODE rv=23 EXR_ERR_CORRUPT_CHUNK
+GUARD-TOTAL post-decode changed=0

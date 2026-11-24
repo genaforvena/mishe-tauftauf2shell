@@ -123,3 +123,14 @@ CODE/CONSUMER scope, no counterexample, not rung 5. Full evidence:
 `reports/openexr2shell-file-level.md`. No wire input, application process,
 pointer control or command execution was exercised at either scope. Rung 5
 is UNKNOWN and unproven; frontier owns no further work on this target.
+
+
+## 7. Target-mind extension W186 (2026-11-24)
+
+The dedicated mind measured the W184 survivable file-chosen overwrite in
+unmodified `exrcheck -c`: it reaches the adjacent live glibc chunk header
+(`next_size` `0x31` -> file-chosen `0x41` under a gdb watchpoint), but eight
+chosen size words and a uniform control give the same outcome under a fixed
+heap layout; byte-identical files differ only when argv length changes the
+layout. No pointer/IP, wire or command. File-level rungs 1-4 only, rung 5
+still UNKNOWN. Full evidence: `reports/openexr2shell-file-level.md` W186.

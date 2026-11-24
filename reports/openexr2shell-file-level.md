@@ -1233,3 +1233,55 @@ Commit `22a8eeec` carries the two probe scripts, the check, the six evidence
 files and both report sections; this receipt is a separate scoped commit.
 Author replay only, not a witness verdict; grade unchanged.
 
+
+
+## W186: live malloc-metadata reach, no steerable behavior (2026-11-24)
+
+Hypothesis: W184 showed 128 fully file-chosen bytes land past the destination
+allocation and the process survives with `EXR_ERR_INVALID_SAMPLE_DATA`; W185
+showed no live control-flow pointer in that window. glibc chunk headers do
+live immediately after a malloc user buffer, so this wake measured whether
+the overwrite reaches allocator metadata that the process later consults,
+and whether a chosen word in that header steers the outcome.
+
+Method: `cases/make_size_word_poc.py` extends W184's generator so the eight
+bytes of segment 1 that become COPY2 source offsets 8..15 encode a chosen
+64-bit word. The pinned ZSTD segment transform interleaves segment 1's two
+halves (`source[2i] = seg1[i]`, `source[2i+1] = seg1[64+i]`), measured with a
+marker-file gdb dump; the wrapper writes `seg1[4:8]` and `seg1[68:72]`. In
+unmodified `build-vuln-plain/bin/exrcheck -c`, a hardware watchpoint at
+`outPtr+264` stops on the COPY2 write into the adjacent live chunk header.
+
+Measured (`evidence/w186-gdb-chunk.out`):
+
+```
+ENTRY own_size=0x111 next_prev=0x40000000010000 next_size=0x31
+WATCH next_prev=0x5a5a5a5a5a5a5a5a next_size=0x41 src8=5a5a5a5a5a5a5a5a4100000000000000
+```
+
+The live chunk's size word at `dst+264` changes from `0x31` to the fully
+file-chosen `0x41`; its `prev_size` at `dst+256` becomes eight chosen bytes.
+This is allocator metadata, not a pointer field, and it is reached in an
+unmodified consumer.
+
+NEGATIVE on steering: byte-identical PoC `work-mixed/w186a.exr` aborts with
+`munmap_chunk(): invalid pointer` (rc 134), while the same bytes copied to
+`work-mixed/w186longname.exr` print `bad` (rc 1). The difference is process
+heap layout (argv/filename length), not a chosen value. Under nine
+equal-length filenames, eight chosen size words (`0x0021` through `0x1011`)
+and the uniform-`0x5a` control all produce the same rc 1 / `bad` outcome
+(`evidence/w186-size-sweep.out`). No tested word gives a controlled write,
+tcache retarget, pointer/IP value or command. Fixed 3.5.3 rejects the chunk
+before the sink (`DECODE rv=23`, guard unchanged); baseline decodes `OK`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/chunk-header-check.sh` -> `RESULT PASS` three times in the working
+tree; nine byte-stable evidence hashes, aggregate
+`f878197c66c812f3fd9ae4d30c9c702441999be8ef3705f25d4f8ce1d1755e01`.
+The W184 replay still passes unchanged. Scope: local crafted EXR, in-process
+decode in an unmodified tool, no wire, no pointer or control-flow target,
+no command, no marker. No grade change: file-level rungs 1-4, witness
+ESTABLISHED only W158/W161, W164/W169/W178/W179/W180/W181/W182/W184/W185
+and this W186 unverdicted, rung 5 UNKNOWN. Would change my mind: a chosen
+word that changes a live pointer or allocation address under a fixed layout,
+a wire-fed unmodified consumer, or a witness counterexample.
