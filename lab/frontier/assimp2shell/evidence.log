@@ -1,0 +1,495 @@
+=== pins 2026-11-24T02:16:57Z ===
+pins/assimp-6.0.6.tar.gz: OK
+pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl: OK
+pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp: OK
+pins/fixed-6.0.6/code/AssetLib/glTF/glTFAsset.inl: OK
+pins/pr6860-gltfAsset.inl.patch: OK
+pins/pr7090-gltfImporter.patch: OK
+harness/harness.cpp: OK
+harness/cases/vec4pos.gltf: OK
+harness/cases/idx3.gltf: OK
+harness/cases/safe.gltf: OK
+7403e295026ee276a9b5f977a54a8442e0f96d5d239217823f1f17f82a396f23  gen/vuln/pinned.inc
+5b9631c894d2037119f9117e180f3f15344cabe2bf8bc5856e6b9d9c56d7b6bf  gen/fixed/pinned.inc
+76a8eadfff1cddc4460d9ecd7073925b2fcd1c29d1c05334c2608d8eda3e9b1c  bin/fixed-clang++-asan
+4bbab938991435568bbce0a5a5f6f04e4c401e00f94c5cdec3366a4f5c021365  bin/fixed-g++-asan
+50e2349ee1eae729c224b82fc82b0ef1881869f2b7f49d457f256beec7f50a96  bin/fixed-plain
+c05ec19f5a562f27b13b12859409d91d483864baf92672154688ebad79a8ae93  bin/vuln-clang++-asan
+9d56e9bad63c6f2a3449ed5b772237aef37e8a005930264c8d489f7455672b5e  bin/vuln-g++-asan
+9233a04473a367a08645415244c675c8d49ef5904abb9000c25a791ddb4b465f  bin/vuln-plain
+=== direct-vuln-g++-vec4pos ===
+=================================================================
+==4193267==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x504000000034 at pc 0x7cab4d4fb303 bp 0x7ffc5cbb51b0 sp 0x7ffc5cbb4958
+WRITE of size 16 at 0x504000000034 thread T0
+    #0 0x7cab4d4fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x618e9976490d in bool Accessor::ExtractData<V3>(V3*&) gen/vuln/pinned.inc:40
+    #2 0x618e99763af4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:108
+    #3 0x7cab4cc2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cab4cc2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x618e99763324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-g++-asan+0x2324) (BuildId: 59bdc7976a44dcdb3471f10fd35c266da2dfceeb)
+
+0x504000000034 is located 0 bytes after 36-byte region [0x504000000010,0x504000000034)
+allocated by thread T0 here:
+    #0 0x7cab4d4fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x618e9976483d in bool Accessor::ExtractData<V3>(V3*&) gen/vuln/pinned.inc:35
+    #2 0x618e99763af4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:108
+    #3 0x7cab4cc2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cab4cc2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x618e99763324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-g++-asan+0x2324) (BuildId: 59bdc7976a44dcdb3471f10fd35c266da2dfceeb)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x503ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x504000000000: fa fa 00 00 00 00[04]fa fa fa fa fa fa fa fa fa
+  0x504000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193267==ABORTING
+rc=1
+=== direct-fixed-g++-vec4pos ===
+mode=vec4pos elemSize=16 count=3 ok=0 out=null expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=2
+=== direct-vuln-g++-vec3idx ===
+=================================================================
+==4193281==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50200000001c at pc 0x72d783afb303 bp 0x7fff38fb29f0 sp 0x7fff38fb2198
+WRITE of size 12 at 0x50200000001c thread T0
+    #0 0x72d783afb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x61ec52dbfd50 in bool Accessor::ExtractData<unsigned int>(unsigned int*&) gen/vuln/pinned.inc:40
+    #2 0x61ec52dbef31 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:132
+    #3 0x72d78322a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x72d78322a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x61ec52dbe324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-g++-asan+0x2324) (BuildId: 59bdc7976a44dcdb3471f10fd35c266da2dfceeb)
+
+0x50200000001c is located 0 bytes after 12-byte region [0x502000000010,0x50200000001c)
+allocated by thread T0 here:
+    #0 0x72d783afe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x61ec52dbfc88 in bool Accessor::ExtractData<unsigned int>(unsigned int*&) gen/vuln/pinned.inc:35
+    #2 0x61ec52dbef31 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:132
+    #3 0x72d78322a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x72d78322a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x61ec52dbe324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-g++-asan+0x2324) (BuildId: 59bdc7976a44dcdb3471f10fd35c266da2dfceeb)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa 00[04]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193281==ABORTING
+rc=1
+=== direct-fixed-g++-vec3idx ===
+mode=vec3idx elemSize=12 count=3 ok=0 out=null
+rc=2
+=== direct-vuln-g++-idx3 ===
+=================================================================
+==4193292==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7cec04100024 at pc 0x7cec06afb303 bp 0x7fff428b2370 sp 0x7fff428b1b18
+WRITE of size 12 at 0x7cec04100024 thread T0
+    #0 0x7cec06afb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x615af53c6ae4 in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) gen/vuln/pinned.inc:56
+    #2 0x615af53c5e1b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:125
+    #3 0x7cec0622a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cec0622a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x615af53c5324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-g++-asan+0x2324) (BuildId: 59bdc7976a44dcdb3471f10fd35c266da2dfceeb)
+
+Address 0x7cec04100024 is located in stack of thread T0 at offset 36 in frame
+    #0 0x615af53c696f in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) gen/vuln/pinned.inc:52
+
+  This frame has 1 object(s):
+    [32, 36) 'value' (line 55) <== Memory access at offset 36 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x7cec040ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec040ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec040ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec040fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec040fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7cec04100000: f1 f1 f1 f1[04]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x7cec04100080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec04100100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec04100180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec04100200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cec04100280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193292==ABORTING
+rc=1
+=== direct-fixed-g++-idx3 ===
+=================================================================
+==4193298==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x716809300024 at pc 0x71680bcfb303 bp 0x7fff1c990970 sp 0x7fff1c990118
+WRITE of size 12 at 0x716809300024 thread T0
+    #0 0x71680bcfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5da54dc41176 in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) gen/fixed/pinned.inc:82
+    #2 0x5da54dc3fe1b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:125
+    #3 0x71680b42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x71680b42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5da54dc3f324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/fixed-g++-asan+0x2324) (BuildId: a22620b4ab6c33f1caabd5c246f2683b76be54df)
+
+Address 0x716809300024 is located in stack of thread T0 at offset 36 in frame
+    #0 0x5da54dc40d15 in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) gen/fixed/pinned.inc:70
+
+  This frame has 1 object(s):
+    [32, 36) 'value' (line 71) <== Memory access at offset 36 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x7168092ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7168092ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7168092ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7168092fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7168092fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x716809300000: f1 f1 f1 f1[04]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x716809300080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x716809300100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x716809300180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x716809300200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x716809300280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193298==ABORTING
+rc=1
+=== direct-vuln-g++-safe ===
+mode=safe elemSize=12 count=3 ok=1 out=set expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=0
+=== direct-fixed-g++-safe ===
+mode=safe elemSize=12 count=3 ok=1 out=set expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=0
+=== direct-vuln-clang++-vec4pos ===
+=================================================================
+==4193316==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x504000000034 at pc 0x5d5f7a4400d8 bp 0x7ffd7289dc20 sp 0x7ffd7289d3e0
+WRITE of size 16 at 0x504000000034 thread T0
+    #0 0x5d5f7a4400d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+    #1 0x5d5f7a4837a1 in bool Accessor::ExtractData<V3>(V3*&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:40:13
+    #2 0x5d5f7a482f3e in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:108:23
+    #3 0x7e435a22a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7e435a22a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5d5f7a3a7344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x2c344) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+
+0x504000000034 is located 0 bytes after 36-byte region [0x504000000010,0x504000000034)
+allocated by thread T0 here:
+    #0 0x5d5f7a4808d1 in operator new[](unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x1058d1) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+    #1 0x5d5f7a483625 in bool Accessor::ExtractData<V3>(V3*&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:35:15
+    #2 0x5d5f7a482f3e in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:108:23
+    #3 0x7e435a22a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x7e435a22a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5d5f7a3a7344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x2c344) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x503ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x504000000000: fa fa 00 00 00 00[04]fa fa fa fa fa fa fa fa fa
+  0x504000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193316==ABORTING
+rc=1
+=== direct-fixed-clang++-vec4pos ===
+mode=vec4pos elemSize=16 count=3 ok=0 out=null expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=2
+=== direct-vuln-clang++-vec3idx ===
+=================================================================
+==4193491==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50200000001c at pc 0x638f9bf0c0d8 bp 0x7ffcb51fb440 sp 0x7ffcb51fac00
+WRITE of size 12 at 0x50200000001c thread T0
+    #0 0x638f9bf0c0d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+    #1 0x638f9bf4ff34 in bool Accessor::ExtractData<unsigned int>(unsigned int*&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:40:13
+    #2 0x638f9bf4f19f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:132:23
+    #3 0x756f9fc2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x756f9fc2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x638f9be73344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x2c344) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+
+0x50200000001c is located 0 bytes after 12-byte region [0x502000000010,0x50200000001c)
+allocated by thread T0 here:
+    #0 0x638f9bf4c8d1 in operator new[](unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x1058d1) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+    #1 0x638f9bf4fdb5 in bool Accessor::ExtractData<unsigned int>(unsigned int*&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:35:15
+    #2 0x638f9bf4f19f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:132:23
+    #3 0x756f9fc2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x756f9fc2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x638f9be73344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x2c344) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa 00[04]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193491==ABORTING
+rc=1
+=== direct-fixed-clang++-vec3idx ===
+mode=vec3idx elemSize=12 count=3 ok=0 out=null
+rc=2
+=== direct-vuln-clang++-idx3 ===
+=================================================================
+==4193538==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x789d07b00024 at pc 0x60b7644190d8 bp 0x7ffd5ba57470 sp 0x7ffd5ba56c30
+WRITE of size 12 at 0x789d07b00024 thread T0
+    #0 0x60b7644190d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+    #1 0x60b76445cb5f in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:56:5
+    #2 0x60b76445c11b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:125:33
+    #3 0x789d09a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x789d09a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x60b764380344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0x2c344) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2)
+
+Address 0x789d07b00024 is located in stack of thread T0 at offset 36 in frame
+    #0 0x60b76445c9df in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/vuln/pinned.inc:52
+
+  This frame has 1 object(s):
+    [32, 36) 'value' (line 55) <== Memory access at offset 36 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/vuln-clang++-asan+0xc50d7) (BuildId: b754ba3cb0059b206f6c69f12ee79dd0971dc3c2) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x789d07affd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07affe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07affe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07afff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07afff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x789d07b00000: f1 f1 f1 f1[04]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x789d07b00080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07b00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07b00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07b00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x789d07b00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193538==ABORTING
+rc=1
+=== direct-fixed-clang++-idx3 ===
+=================================================================
+==4193550==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x72d950f00024 at pc 0x573e8d87a0d8 bp 0x7fff70e8cef0 sp 0x7fff70e8c6b0
+WRITE of size 12 at 0x72d950f00024 thread T0
+    #0 0x573e8d87a0d7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/fixed-clang++-asan+0xc50d7) (BuildId: 87b19d0afd9502280cb495ecec5cab4bfcf754db)
+    #1 0x573e8d8be01f in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/fixed/pinned.inc:82:5
+    #2 0x573e8d8bd11b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/harness.cpp:125:33
+    #3 0x72d952e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x72d952e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x573e8d7e1344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/fixed-clang++-asan+0x2c344) (BuildId: 87b19d0afd9502280cb495ecec5cab4bfcf754db)
+
+Address 0x72d950f00024 is located in stack of thread T0 at offset 36 in frame
+    #0 0x573e8d8bdacf in unsigned int Accessor::Indexer::GetValue<unsigned int>(int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/gen/fixed/pinned.inc:70
+
+  This frame has 1 object(s):
+    [32, 36) 'value' (line 71) <== Memory access at offset 36 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/harness/bin/fixed-clang++-asan+0xc50d7) (BuildId: 87b19d0afd9502280cb495ecec5cab4bfcf754db) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x72d950effd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950effe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950effe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950efff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950efff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x72d950f00000: f1 f1 f1 f1[04]f3 f3 f3 00 00 00 00 00 00 00 00
+  0x72d950f00080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950f00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950f00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950f00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x72d950f00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4193550==ABORTING
+rc=1
+=== direct-vuln-clang++-safe ===
+mode=safe elemSize=12 count=3 ok=1 out=set expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=0
+=== direct-fixed-clang++-safe ===
+mode=safe elemSize=12 count=3 ok=1 out=set expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+rc=0
+=== direct-vuln-plain-vec4pos ===
+mode=vec4pos elemSize=16 count=3 ok=1 out=set expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+arena+32: 45 2d 4f 4f 54 41 55 46 00 00 00 00 00 00 00 00 00 00 00 00
+rc=0
+=== direct-vuln-plain-vec3idx ===
+mode=vec3idx elemSize=12 count=3 ok=1 out=set
+arena+0: 61 62 63 64 6d 6e 6f 70 79 7a 7b 7c 7d 7e 7f 80 81 82 83 84 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+rc=0
+=== direct-fixed-plain-vec4pos ===
+mode=vec4pos elemSize=16 count=3 ok=0 out=null expect=36..47: 4d 49 53 48 45 2d 4f 4f 54 41 55 46
+arena+32: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+rc=2
+=== assertions ===
+PASS direct-vuln-g++-vec4pos heap
+PASS direct-vuln-g++-vec4pos write16
+PASS direct-vuln-g++-vec4pos region36
+PASS direct-vuln-clang++-vec4pos heap
+PASS direct-vuln-clang++-vec4pos write16
+PASS direct-vuln-clang++-vec4pos region36
+PASS direct-vec3idx-write12
+PASS direct-idx3-stack
+PASS direct-idx3-value
+PASS direct-fixed-g++-vec4pos clean
+PASS direct-fixed-clang++-vec4pos clean
+PASS direct-fixed-g++-vec3idx clean
+PASS plain-chosen-tauf
+failures=0
+evidence.log hash recorded in evidence.sha256

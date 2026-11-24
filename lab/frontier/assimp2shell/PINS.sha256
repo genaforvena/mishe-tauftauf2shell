@@ -1,0 +1,10 @@
+5f7ed412b76575621df0525a762b31da5874afff352b3a890c6308db4ac7204c  pins/assimp-6.0.6.tar.gz
+7536766857f7d29fec524557aa6e84c36a24132e7090fbfa8ee019ff92e75e15  pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl
+e5d97a5f3fdec437c7f125e8a411487853c93bb4c2b37e7da039298d9f7f1fb4  pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp
+e74e18a06ada124ec80d0f94683d93364137e0ffca7187d2bcf2665f229a082b  pins/fixed-6.0.6/code/AssetLib/glTF/glTFAsset.inl
+d4e1510316f941bdbe6436481f720bf469cb0fcdd3b1c8debcef09f492471db0  pins/pr6860-gltfAsset.inl.patch
+9bffa4de61e6e0c87bc5f760450cb5322b12c2b599d40f117dbfc9ab2f3c36a3  pins/pr7090-gltfImporter.patch
+909bcd440f4e85de9ec435ed05045b99e8d28565fea8b8787e6da775f6d8fd1c  harness/harness.cpp
+f5acbc9533b8dbf76bad8f8de1a21c978d8b602c1e97dfadd92176340e6630ba  harness/cases/vec4pos.gltf
+dae564b433ceb71ec0919589525b08f57a65a93ac993e7fc12ea73f41f4bc84b  harness/cases/idx3.gltf
+a03d8a4971ce3f6dd7683ab1d89201d5e876ef56b94d70395bb3dbe00aa970af  harness/cases/safe.gltf

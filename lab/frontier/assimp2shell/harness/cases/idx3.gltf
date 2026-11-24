@@ -1,0 +1,16 @@
+{
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 48, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAAACAPwAAAAAAAAAAAAAAAAAAgD8AAAAAAAAAAAEAAAACAAAA" } },
+  "bufferViews": {
+    "pos_view": { "buffer": "buf", "byteOffset": 0, "byteLength": 36, "target": 34962 },
+    "idx_view": { "buffer": "buf", "byteOffset": 36, "byteLength": 12, "target": 34963 }
+  },
+  "accessors": {
+    "pos": { "bufferView": "pos_view", "byteOffset": 0, "componentType": 5126, "count": 3, "type": "VEC3" },
+    "idx": { "bufferView": "idx_view", "byteOffset": 0, "componentType": 5125, "count": 1, "type": "VEC3" }
+  },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos" }, "indices": "idx", "mode": 0 } ] } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+}

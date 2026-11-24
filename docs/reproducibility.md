@@ -144,6 +144,7 @@ containers whose host ports bind only to loopback.
 | ImageMagick2Shell | [brief](../reports/frontier-imagemagick2shell.md), [status](../reports/imagemagick2shell-status.md) | CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq, pinned 7.1.2-34/35 tarballs and both `MagickCore/stream.c` blobs hashed in `lab/frontier/imagemagick2shell/PINS.sha256` | `sh lab/frontier/imagemagick2shell/bootstrap.sh` from a clean archive (builds all three configurations, then `run-all.sh`; no network) | ASan heap WRITE past a 3-byte stream buffer in `StreamImagePixels`, same-size and fixed controls clean, chosen bytes 0x42..0x48 at offsets 3..23 under gdb; clean `git archive 7873caf` replay `REPLAY.log` `385bbe95…c01667a`; admitted 00:3xZ under standing #6 as the 123rd route; direct-call rungs 1-4, unwitnessed, CLI/file reachability and rung 5 UNKNOWN |
 | Hydra2Shell (screened out) | [brief](../reports/frontier-hydra2shell.md) | CVE-2026-133274, pinned `v9.7` `6c11ce2d` and fix commit `6ab9ad86`, function blobs and hashes in `lab/frontier/hydra2shell/harness/PINS.sha256` | `sh lab/frontier/hydra2shell/harness/run-all.sh`; loopback wire recipe in `lab/frontier/hydra2shell/PROVENANCE.md` | gcc+clang ASan `negative-size-param -1` direct call and in real v9.7 `http-post-form` over 127.0.0.1, fixed/safe controls clean, gdb NUL at `tmpcookie-1`; matrix `57e16bfd…b108567b`, clean `git archive bb33f71` replay exact; rung 3 only, plain build does not crash, no window |
 | CodebaseMemory2Shell | [brief](../reports/frontier-codebasememory2shell.md) | CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9; pinned parent `5554f8a46abf` and fix `e69e0844dbc1` tarballs, both `src/cypher/cypher.c` blobs hashed in `lab/frontier/codebasememory2shell/PINS.sha256` | `bash lab/frontier/codebasememory2shell/bootstrap.sh` (verifies pins, fetching from codeload only if absent, extracts trees, rebuilds all four binaries, regenerates matrix and gdb transcript) | ASan OOB READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` ← `execute_return_simple:4116` into `func_bufs[32]`, 32/fixed controls clean, plain 48-item stack-smash abort, gdb chosen "MISHE-OO…" bytes at `func_bufs+16384`; matrix `f8c81a5c…7a6d`; clean `git archive a073540` replay 24/24 rows and same gdb bytes (`REPLAY.md`), log hash differs only in ASLR/PID tokens; direct-call rungs 1-4 only, MCP tool/wire path and rung 5 UNKNOWN, unwitnessed |
+| Assimp2Shell | [brief](../reports/frontier-assimp2shell.md) | CVE-2026-134861 (VulnCheck 2026-11-22, CWE-787, CVSS4 AV:L/UI:P); pinned v6.0.6 tarball and both `glTFAsset.inl` blobs, PR 6860/7090 hunk hashes in `lab/frontier/assimp2shell/PINS.sha256` | `bash lab/frontier/assimp2shell/bootstrap.sh` then `bash lab/frontier/assimp2shell/harness/run-all.sh` (rebuilds vuln/fixed × gcc/clang ASan plus plain harnesses offline) | gcc+clang ASan `WRITE of size 16` 0 bytes after a 36-byte region and `WRITE of size 12` after a 12-byte region, `Indexer` stack-buffer-overflow, plain chosen "TAUF" at offsets 36..39, fixed-PR blocks `ExtractData` but not `Indexer`; 13 PASS/0 FAIL, log `128596cc…f257f6`; direct-call rungs 1-4 only, unwitnessed, real importer/file path UNKNOWN |
 
 ### 2026-11-22 post-admission follow-on evidence (author-only except netx witnesses #1262/#1296 and nanomsg witness W107; Soes limbs replayed by W105)
 
@@ -6823,3 +6824,27 @@ OpenEXR rows and adds the recipes absent from the index.
 - **Sdlmixer W191**: `harness/realwav/gdb-map.cmd` plus `lut_maps_check.py` compare every saved-RIP value formable from the 512 pinned LUT words with the live no-SSP process's 33 mappings (`evidence/LUT-MAPS.out`, `MAPS.sha256`, 5/5 OK): zero of 712 ordered word pairs, zero preserved-high `0x00005555` values and zero `0x00000000` non-PIE partials are mapped, and no LUT word lies in `[0x400000,0x800000)`. Derived negative, not a rung change.
 - **BusyBox W3**: `sh run-malloc.sh` (calling `malloc_probe.py`) writes `malloc_evidence.log` sha256 `98d1130912f849d815a2abe2df0733430814ef024ee463263414ec60b7003082`: chunk sizes above `av->system_mem = 0x21000` abort with `malloc(): corrupted top size`, so the `-1` house-of-force wrap is closed; a guard-passing value returns `rbuf+80` (inside the overflow) under gdb at `DELTA=80` across three ASLR-shifted runs. No chosen pointer in a live object; the witnessed rungs 1-4 grade is unchanged.
 - **SofiaSip W14**: raw probe evidence for the clean-archive replay committed under `libbuild/evidence/w14/`; no grade or claim change.
+
+## 2026-11-24 02:1xZ — staged Assimp glTF accessor lane (W192)
+
+### Assimp2Shell W192 (FRONTIER-STAGED, `lab/frontier/assimp2shell`)
+
+`bash lab/frontier/assimp2shell/bootstrap.sh` verifies the tracked pin manifest
+and fetches only the recorded 146 MB codeload v6.0.6 tarball when it is absent
+(provisioning, not a probe). `bash lab/frontier/assimp2shell/harness/run-all.sh`
+then re-extracts the verbatim pinned `Accessor::GetPointer`, `ExtractData` and
+`Indexer` functions into generated includes, builds vulnerable/fixed × gcc/clang
+ASan plus two plain binaries, runs the matrix offline and writes `evidence.log`
+and `evidence.sha256`. Expect 13 PASS / 0 FAIL: both vulnerable ASan builds
+report `heap-buffer-overflow`, `WRITE of size 16`, 0 bytes after a 36-byte
+region for the VEC4/FLOAT position accessor, the VEC3/uint index accessor gives
+`WRITE of size 12` after a 12-byte region, and `Indexer::GetValue<uint32_t>`
+gives `stack-buffer-overflow` into `[32,36) 'value'`. The fixed control uses the
+**open, unmerged** PR 6860 hunk: both `ExtractData` cases return false with no
+write, but the Indexer case still overflows — a preserved negative, not a
+released fixed-version claim. The plain deterministic allocator shows the
+chosen `54 41 55 46` ("TAUF") at destination offsets 36..39. No full Assimp
+build was completed (Release+ASan reached 21% in 600 s), so the crafted
+`harness/cases/*.gltf` documents and `real_driver.cpp` are staged for a future
+file-reachability lane; that claim stays UNKNOWN. Direct-call rungs 1-4 only,
+unwitnessed, no pointer/IP, command or rung 5.
