@@ -651,3 +651,29 @@ the JPEG samples. The 72-row source JPEG logs "Corrupt JPEG data: 11
 extraneous bytes before marker 0xd9" although frame 0 decodes 512x72.
 Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5; no pointer later used by
 x265, command, live consumer or witness verdict. Author observation only.
+
+## W186 structural negative: no decoder path to the padding write (2026-11-24)
+
+Re-inspected the pinned `v1.23.6` source tree at
+`lab/frontier/libheif2shell/src/libheif-v1.23.6` to settle whether a
+decode-only libheif consumer (for example libvips/imgproxy, which has its own
+live loopback lane in this plant) could reach the faulty function. It cannot.
+The complete call-site set for `extend_padding_to_size` in `libheif/` is one
+public-API wrapper (`api/libheif/heif_image.cc:403`, declared at
+`heif_image.h:432`) and six encoder plugins: `encoder_x265.cc:1139`,
+`encoder_x264.cc:1022`, `encoder_kvazaar.cc:690`, `encoder_svt.cc:1055`,
+`encoder_uvg266.cc:689` and `encoder_vvenc.cc:673`. There is no call site in
+any decoder, demuxer or metadata reader. The only remaining reference outside
+those sites is a comment at `image/pixelimage.cc:733`.
+
+This explains every W161-W184 reproduction: they all drive the
+decoder-to-**encoder** re-encode path, because encoding is the only internal
+route into the write. A decode-only consumer cannot trigger it without
+explicitly calling the public `heif_image_extend_padding_to_size()` API, which
+no image-decoding pipeline does. The pinned builds in this lab compile only
+the x265 plugin; the other five encoder call sites are source-present but
+unbuilt, so they remain unmeasured alternatives rather than claims.
+
+Negative result, no new reach: no network consumer, no wire byte, no pointer
+or command, no witness verdict. Grade UNCHANGED: rung 3 plus rung 4, NOT rung
+5; rung 5 UNKNOWN.

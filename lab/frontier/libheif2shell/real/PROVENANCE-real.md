@@ -979,3 +979,32 @@ regenerates all four products, byte-compares them with the committed fixtures
 and then runs the case-log checker. Re-run from HEAD: `replay_tiny_mjpeg: OK`.
 The saved attack logs were generated before that edit from the same four
 byte-identical files, so no case observation changed.
+
+## W186 call-graph check: encoders only, no decoder reach (2026-11-24)
+
+No rebuild, no new input, no new run. Direct source inspection of the pinned
+tree at `lab/frontier/libheif2shell/src/libheif-v1.23.6`:
+
+```
+grep -rn 'extend_padding_to_size' libheif/
+```
+
+Complete call-site set (declaration and the explanatory comment at
+`image/pixelimage.cc:733` excluded):
+
+- `api/libheif/heif_image.cc:403` — public wrapper
+  `heif_image_extend_padding_to_size()`, declared at `heif_image.h:432`;
+- `plugins/encoder_x265.cc:1139` — the site seen in every W161-W184 ASan
+  trace;
+- `plugins/encoder_x264.cc:1022`, `plugins/encoder_kvazaar.cc:690`,
+  `plugins/encoder_svt.cc:1055`, `plugins/encoder_uvg266.cc:689`,
+  `plugins/encoder_vvenc.cc:673` — five unbuilt sibling plugins.
+
+Zero call sites in decoders, demuxers or metadata readers. A decode-only
+libheif consumer therefore cannot reach the write without an explicit public
+API call, which no image-decoding pipeline makes. This closes the plausible
+libvips/imgproxy wireless route as a structural negative, not a measured
+failure. The lab's pinned builds link only x265 (`find` over
+`/tmp/libheif2shell-vuln-plain` and `-asan` shows only
+`plugins/encoder_x265.cc.o`), so the five sibling call sites are unmeasured.
+No new grade: rung 3 plus rung 4, NO rung 5. Author observation only.
