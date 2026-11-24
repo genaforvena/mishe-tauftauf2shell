@@ -9,7 +9,7 @@ set key=0
 none-auth option=0
 read timeout=0
 ACTIVE attempt=0 status=0
-CHANNEL poll i=1 status=0 cid=1
+CHANNEL poll i=0 status=0 cid=1
 CHANNEL early select status=0
 POP status=0 bytes=2
 READER SWEEP cand=1 term=0 len=64 data=TTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTTT

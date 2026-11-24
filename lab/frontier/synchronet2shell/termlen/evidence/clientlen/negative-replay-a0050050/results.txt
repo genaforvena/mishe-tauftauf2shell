@@ -1,0 +1,3 @@
+RESULT pass=5 fail=1
+client=paramiko 5.1.0, pty-req TERM length recorded before encryption
+server=W8 term_server (verbatim wire/ssh_server6.c via recorded sed)

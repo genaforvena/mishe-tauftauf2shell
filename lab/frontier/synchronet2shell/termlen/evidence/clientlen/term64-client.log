@@ -1,9 +1,9 @@
   0.08 CLIENT kex done remote_version='SSH-2.0-cryptlib(SBBS)'
   0.18 CLIENT service ssh-userauth accepted
-  0.19 CLIENT auth_none accepted
-  0.19 CLIENT channel open chanid=0
-  0.19 CLIENT WIRE_PTYREQ term_len=64 head=b'TTTTTTTT'
-  0.19 CLIENT shell request sent
+  0.18 CLIENT auth_none accepted
+  0.18 CLIENT channel open chanid=0
+  0.18 CLIENT WIRE_PTYREQ term_len=64 head=b'TTTTTTTT'
+  0.18 CLIENT shell request sent
 Socket exception: Connection reset by peer (104)
-  0.59 CLIENT channel error OSError('Socket is closed')
-  0.59 CLIENT PASS exact wire TERM length 64
+  0.58 CLIENT channel error OSError('Socket is closed')
+  0.58 CLIENT PASS exact wire TERM length 64

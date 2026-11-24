@@ -9,7 +9,7 @@ set key=0
 none-auth option=0
 read timeout=0
 ACTIVE attempt=0 status=0
-CHANNEL poll i=1 status=0 cid=1
+CHANNEL poll i=0 status=0 cid=1
 CHANNEL early select status=0
 POP status=0 bytes=2
 READER SWEEP cand=1 term=-43 len=-1 data=
@@ -23,8 +23,6 @@ READER TERM status=-43 len=-1 data=
 POP status=0 bytes=2
 READER SWEEP cand=1 term=-43 len=-1 data=
 READER TERM status=-43 len=-1 data=
-CHANNEL TYPE 'shell' len=5
-CHANNEL TYPE final waits=0 status=0
 POP status=0 bytes=2
 READER SWEEP cand=1 term=-43 len=-1 data=
 READER TERM status=-43 len=-1 data=
@@ -136,6 +134,8 @@ READER TERM status=-43 len=-1 data=
 POP status=-41 bytes=0
 READER SWEEP cand=1 term=-43 len=-1 data=
 READER TERM status=-43 len=-1 data=
+CHANNEL TYPE 'shell' len=5
+CHANNEL TYPE final waits=7 status=0
 TERM sweep pass=20 cid=-1 status=0 len=0
 COPY status=-43 len=-1
 offsets: terminal=0 line_delay=44 console=48 wordwrap=52

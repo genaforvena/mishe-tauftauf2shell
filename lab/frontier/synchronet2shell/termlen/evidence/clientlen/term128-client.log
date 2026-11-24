@@ -1,8 +1,8 @@
-  0.09 CLIENT kex done remote_version='SSH-2.0-cryptlib(SBBS)'
-  0.19 CLIENT service ssh-userauth accepted
-  0.19 CLIENT auth_none accepted
-  0.19 CLIENT channel open chanid=0
-  0.19 CLIENT WIRE_PTYREQ term_len=128 head=b'TTTTTTTT'
-  0.19 CLIENT shell request sent
-  8.20 CLIENT done
-  8.20 CLIENT PASS exact wire TERM length 128
+  0.17 CLIENT kex done remote_version='SSH-2.0-cryptlib(SBBS)'
+  0.27 CLIENT service ssh-userauth accepted
+  0.28 CLIENT auth_none accepted
+  0.28 CLIENT channel open chanid=0
+  0.28 CLIENT WIRE_PTYREQ term_len=128 head=b'TTTTTTTT'
+  0.28 CLIENT shell request sent
+  8.28 CLIENT done
+  8.28 CLIENT PASS exact wire TERM length 128

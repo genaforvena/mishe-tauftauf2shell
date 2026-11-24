@@ -1,0 +1,16 @@
+term_server.c: In function ‘main’:
+term_server.c:134:9: warning: ignoring return value of ‘cryptInit’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+  134 |         cryptInit();
+      |         ^~~~~~~~~~~
+run_case n=64 client_rc=0
+PASS n=64 client handed exactly 64 TERM bytes to the transport
+PASS n=64 server getter returned len=64
+run_case n=65 client_rc=0
+PASS n=65 client handed exactly 65 TERM bytes to the transport
+PASS n=65 server getter never returned len>64 (max=none)
+run_case n=128 client_rc=124
+FAIL n=128 client did not send exactly 128 TERM bytes (rc=124; evidence/clientlen/term128-client.log)
+PASS n=128 server getter never returned len>64 (max=none)
+RESULT pass=5 fail=1
+client=paramiko 5.1.0, pty-req TERM length recorded before encryption
+server=W8 term_server (verbatim wire/ssh_server6.c via recorded sed)

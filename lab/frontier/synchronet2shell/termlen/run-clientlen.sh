@@ -40,10 +40,18 @@ run_case() {
     local pid rc
 
     pgrep -f '/termlen/term_server$' | xargs -r kill 2>/dev/null
+    for _ in $(seq 1 40); do
+        ss -ltn 'sport = :22227' 2>/dev/null | grep -q LISTEN || break
+        sleep 0.25
+    done
+    sleep 0.5
     : > "$out"
     ./term_server > "$out" 2>&1 &
     pid=$!
-    sleep 1
+    for _ in $(seq 1 40); do
+        ss -ltn 'sport = :22227' 2>/dev/null | grep -q LISTEN && break
+        sleep 0.25
+    done
     PYTHONPATH="$PY" timeout $((seconds + 10)) python3 term_client.py \
         --port 22227 --term-length "$n" --seconds "$seconds" > "$client" 2>&1
     rc=$?

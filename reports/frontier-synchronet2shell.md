@@ -452,6 +452,18 @@ and the parser cap remains pinned in `session/ssh2_msgsvr.c:661-670` and
 `enc_dec/misc_rw.c:332-334`. No new rung, no real `answer()` call here, no
 witness verdict; other builds and clients stay UNKNOWN.
 
+The first clean-archive replay (commit `a0050050`, 18:29Z) scored
+**5 PASS / 1 FAIL**: the 128-byte client timed out because the fresh server
+logged `ACTIVE attempt=0 status=-41` (`CRYPT_ERROR_READ`) and never opened a
+channel, while 64 and 65 passed. The transcripts are preserved in
+`termlen/evidence/clientlen/negative-replay-a0050050/`, together with the
+diagnosis: the script killed the previous server and started the next one
+without waiting for the port to settle. `run-clientlen.sh` now waits for
+127.0.0.1:22227 to be free before each case and for the new server to listen
+before connecting. The live rerun after that repair is 6 PASS / 0 FAIL; this
+is a tooling repair, not a change to the TERM-bound claim.
+
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
