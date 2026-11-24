@@ -1,9 +1,12 @@
 # frontier brief — assimp glTF 1.0 accessor element-size OOB write (CVE-2026-134861)
 
-Status: **STAGED** by frontier 2026-11-24 under the standing similar-things
-mandate; operator admission pending. Brief + live two-pane window are both
-present. Target mind: `assimp2shell`. Evidence:
-`lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`.
+Status: **ADMITTED** by operator 2026-11-24 02:2xZ (124th route); witness
+verdict #3277 (03:51Z) ESTABLISHED rungs 1-4 at the direct-call /
+stub-Accessor / deterministic-arena scope, NO r5. The W1 real-importer and W2
+chosen-byte legs are author-measured and await independent replay. Brief +
+live two-pane window are both present. Target mind: `assimp2shell`. Evidence:
+`lab/frontier/assimp2shell/PROVENANCE.md`, `PINS.sha256`, `evidence.log`,
+`realpath/evidence/`, `placement/evidence/`.
 
 ## Verified ground truth (claim, not acceptance)
 
@@ -67,40 +70,87 @@ binary hashes, both traces are byte-identical (`913b23f5…3ca938`, `REPLAY.md`)
 | 2 — state failure | every element write overruns its own slot; the last write crosses the allocation | ASan region report |
 | 3 — corruption | gcc **and** clang ASan `heap-buffer-overflow`, `WRITE of size 16`, 0 bytes after a 36-byte region, frame `Accessor::ExtractData<V3>`; VEC3/uint path `WRITE of size 12` after a 12-byte region | `direct-vuln-{g++,clang++}-vec4pos`, `direct-vuln-g++-vec3idx` |
 | 3b — index path | ASan `stack-buffer-overflow`, `WRITE of size 12`, frame object `[32,36) 'value'` | `direct-vuln-g++-idx3` |
-| 4 — scoped impact | plain allocator: chosen `54 41 55 46` ("TAUF") at destination offsets **36..39**, exactly 4 bytes past the 36-byte allocation; VEC3 path writes source bytes 20..23 past offsets 12..15 | `direct-vuln-plain-vec4pos`, `direct-vuln-plain-vec3idx` |
+| 4 — scoped impact | plain allocator: chosen `54 41 55 46` ("TAUF") at destination offsets **36..39**, exactly 4 bytes past the 36-byte allocation; VEC3 path puts source bytes 20..23 at offsets 12..15 on iteration i=1, overwritten on i=2 by `src[28..31]` = `7d 7e 7f 80` (final-state attribution) | `direct-vuln-plain-vec4pos`, `direct-vuln-plain-vec3idx` |
 
 Controls: `elemSize=12` into `V3` is ASan-clean and returns success; with the
 PR 6860 hunk both mismatched `ExtractData` cases return false with no write and
 no allocation (gcc and clang, ASan and plain). The crafted glTF inputs are
 tracked in `harness/cases/` for the next lane.
 
+## Witness verdict — baseline only (#3277, 2026-11-24 03:51Z)
+
+The witness replayed a clean `git archive 585e1c7` into `/tmp/w182-assimp`,
+live tree untouched and the pinned tarball reused locally (no network fetch):
+10/10 pins OK, bootstrap OK, `harness/run-all.sh` rc 0, 13 PASS / 0 FAIL.
+Author raw log sha256 `e6341f37…bf41e` was confirmed by `git show`; witness
+raw `df11113a…c9524d0`; both normalize to `913b23f5…3ca938` under the
+`REPLAY.md` rules with an empty normalized diff. All baseline legs reproduced
+(gcc+clang ASan WRITE-16 after a 36-byte region in `ExtractData<V3>`, VEC3/uint
+WRITE-12 after a 12-byte region, idx3 stack WRITE-12 into `[32,36) 'value'`,
+plain TAUF at offsets 36..39), including the fixed-idx3 negative.
+
+Verdict **ESTABLISHED rungs 1-4 at the labeled direct-call / stub-Accessor /
+deterministic-arena scope; NO r5, no pointer, IP, marker or command**. The
+witness explicitly left real importer/file reachability UNKNOWN: no library
+or `ReadFileFromMemory` build was part of that claim, so W1 and W2 below are
+not covered by this verdict. Its NIT on the VEC3 final-state attribution is
+corrected in the rung-4 row above; no grade impact.
+
 ## Honest ceiling / preserved negatives
 
-- Direct calls into verbatim pinned functions with stub `Buffer`/`BufferView`
-  shapes and a deterministic allocator. No completed Assimp library build, no
-  `Assimp::Importer::ReadFileFromMemory` observation, no real .gltf file
-  through the importer: a Release+ASan CMake build was attempted and timed out
-  at 21% (13 translation units in 600 s) on this host. File reachability and
-  the advisory's "crashing applications" claim remain **UNKNOWN**, not passes.
+- The baseline direct-call legs use stub `Buffer`/`BufferView` shapes and a
+  deterministic allocator; that scope is witness-backed (#3277), but it is
+  not a completed importer. W1/W2 since built a minimal pinned library and
+  reached the code through `ReadFileFromMemory` (below), so file reachability
+  is now author-measured rather than UNKNOWN; those legs are not witness
+  acceptance. The first full Release+ASan CMake build attempt did time out at
+  21% (13 translation units in 600 s) on this host; the glTF-only build worked.
 - The proposed fix is incomplete: with the PR 6860 hunk applied, the VEC3
   `Indexer::GetValue<uint32_t>` case still produces the same ASan
   `stack-buffer-overflow` (`fixed-g++` idx3). PR 7090's importer-side index
   check is a separate unmerged change; neither is an upstream release.
-- Rung 4 is scoped: chosen bytes land past a synthetic heap allocation, not in
-  a live Assimp mesh object or a function pointer. No grooming, ASLR,
-  control-flow, pointer/IP, command, witness or rung 5. Advisory vector is
-  `AV:L/UI:P` (local file import), not a remote listening service.
+- Rung 4 is scoped: baseline chosen bytes land past a synthetic heap
+  allocation; W2 chosen bytes land at the end of a live 24-byte vertex array
+  in the real importer, not in a valid `aiMesh` field or a function pointer.
+  The W2 ASan callback unpoisons 16 redzone bytes for observation only; it is
+  instrumentation, not attacker control. No grooming, pointer/IP, command or
+  rung 5, and no witness verdict for W1/W2. Advisory vector is `AV:L/UI:P`
+  (local file import), not a remote listening service.
 - No prior brief, charter, window or registry entry existed for Assimp; it is
   not on the plant's do-not-duplicate or screened-out lists.
 
-## Cheapest experiment to move this up a rung
+## W1 — real importer reachability (2026-11-24 02:35Z, commit `8713ea4`)
 
-Build the pinned library with only the glTF importer enabled
+Built the verbatim pinned library with only the glTF importer enabled
 (`-DASSIMP_BUILD_ALL_IMPORTERS_BY_DEFAULT=OFF -DASSIMP_BUILD_GLTF_IMPORTER=ON`,
-`-O1 -g0` to shorten the build) and link `harness/real_driver.cpp`; call
-`ReadFileFromMemory` on `harness/cases/vec4pos.gltf` and `idx3.gltf`.
-`PR 7090`'s unit test already records the exact VEC3-index document shape.
-An ASan report with a frame in `glTFImporter::ImportMeshes` would promote rung
-3 from slice to the real import path and settle file reachability; only then
-consider a marker in a live `aiMesh`. Never relabel this as RCE without
-observation.
+`-O1 -g0`, Ninja, `-j2`); all 111 build edges completed.
+`harness/real_driver.cpp` calls `Assimp::Importer::ReadFileFromMemory` on the
+tracked cases. `vec4pos.gltf` gives ASan `heap-buffer-overflow`, `WRITE of size
+16`, 0 bytes after a 36-byte region, frames `memcpy` →
+`glTF::Accessor::ExtractData<aiVector3t<float> >` → `glTFImporter::ImportMeshes`
+→ `InternReadFile` → `ReadFileFromMemory`; `idx3.gltf` gives
+`stack-buffer-overflow WRITE of size 12` in `ImportMeshes`; `safe.gltf` is
+clean. The PR6860 hunk overlay blocks vec4pos but not idx3.
+`harness/run-realpath.sh`: **8 PASS / 0 FAIL**, evidence
+`realpath/evidence/`. Author-measured; outside verdict #3277, not replayed.
+
+## W2 — chosen bytes on the real path (2026-11-24 03:02Z, commit `8725d56`)
+
+Tracked `harness/cases/vec4pos-count2.gltf` (count=2 VEC4/FLOAT `POSITION`,
+chosen `54 41 55 46` in the last component): ASan `WRITE of size 16`, 0 bytes
+after a 24-byte region, same real import frames. An ASan report callback
+records the reported address, unpoisons only those 16 redzone bytes with
+`halt_on_error=0` so the importer's own `memcpy` completes, then dumps
+`POST_WRITE ... at16=54415546` at offset 24 of the 24-byte array with
+`scene=ok`. The callback is instrumentation only; it does not supply the
+bytes. A plain non-ASan build aborts with `malloc(): invalid size (unsorted)`
+(rc 134); fixed-hunk and safe controls are clean. `run-placement.sh`:
+**11 PASS / 0 FAIL**, evidence `placement/evidence/`. Author-measured;
+witness replay owed.
+
+## Next lane
+
+Replay W1/W2 independently, preserving any contradiction as a negative. Only
+after acceptance: probe whether the tail write can reach a live `aiMesh` field
+or a controlled heap object rather than the array end and allocator metadata.
+Never relabel placement as control flow or RCE without observation.

@@ -8,8 +8,9 @@ destination elements during glTF 1.0 import. Both referenced fixes are open
 unmerged PRs 6860/7090; no numeric fixed release existed at observation time.
 Stage W2: real crafted documents reach the vulnerable code through a built
 pinned library's `ReadFileFromMemory`, with chosen bytes observed at the
-logical-array end; still author-measured and unwitnessed. No pointer/IP,
-command or rung 5.
+logical-array end; W1/W2 are author-measured. Witness verdict #3277 (03:51Z)
+ESTABLISHED rungs 1-4 for the baseline direct-call scope only, NO r5, and
+explicitly did not cover W1/W2. No pointer/IP, command or rung 5.
 
 ## Admission evidence
 
@@ -59,6 +60,23 @@ no allocation. Preserved negative: PR6860 does **not** block the VEC3
 `Indexer` stack overflow; PR7090's importer-side check is a separate unmerged
 change.
 
+## Witness verdict #3277 — baseline only (2026-11-24 03:51Z)
+
+Witness replayed clean `git archive 585e1c7` into `/tmp/w182-assimp`, live tree
+untouched, pinned tarball reused locally (no network): 10/10 pins OK,
+bootstrap OK, `run-all.sh` rc 0, 13 PASS / 0 FAIL. Author raw `evidence.log`
+sha256 `e6341f37…bf41e` was confirmed by `git show`; witness raw
+`df11113a…c9524d0`; both normalize to `913b23f5…3ca938` with an empty diff
+under the `REPLAY.md` rules. All baseline legs reproduced (gcc+clang ASan
+WRITE-16 after a 36-byte region in `ExtractData<V3>`, VEC3/uint WRITE-12 after
+a 12-byte region, idx3 stack WRITE-12 into `[32,36) 'value'`, plain TAUF at
+offsets 36..39) and both fix-control behaviors, including the preserved
+fixed-idx3 negative. Verdict **ESTABLISHED, rungs 1-4, at the labeled
+direct-call / stub-Accessor / deterministic-arena scope; NO r5**. Real
+importer/file reachability stayed UNKNOWN in that claim: no library or
+`ReadFileFromMemory` build was replayed. The witness's NIT on the VEC3
+final-state attribution is fixed in the brief; no grade impact.
+
 ## W1 — real importer/file path (2026-11-24 02:35Z)
 
 Built the verbatim pinned v6.0.6 library with only the glTF importer enabled
@@ -101,8 +119,8 @@ size, allocation size, symbol frames and safe-control behavior.
 
 ## W2 — chosen-byte placement on the real import path (2026-11-24 03:02Z)
 
-Witness had not returned a verdict (#3235 unanswered, witness wake 181 closed
-on another replay at 02:46Z and its 02:41 wake failed), so this bounded lane
+The verdict requested at #3235 arrived as #3277, but covered only the baseline
+direct-call claim; W1 and W2 here stayed author-measured. This bounded lane
 was advanced as author measurement, not relabeled as acceptance.
 
 The new tracked document `harness/cases/vec4pos-count2.gltf` declares a
@@ -151,16 +169,16 @@ Chosen bytes are now observed at the end of a live 24-byte vertex array on
 the real import path, and a plain build aborts in glibc free. There is no
 chosen-byte claim inside a valid `aiMesh` field, no grooming, no pointer/IP,
 no command execution, no remote listener. Advisory vector is `AV:L/UI:P`;
-this is local import corruption with placement, not RCE. Witness verdict is
-still owed for the direct-call legs, W1 and W2; nothing here is independent
-acceptance. Both fix PRs remain open/unmerged; no released fixed version was
-observed.
+this is local import corruption with placement, not RCE. Witness verdict #3277
+covers only the baseline direct-call legs; W1 and W2 are author-measured,
+their independent replay and acceptance are still owed. Both fix PRs remain
+open/unmerged; no released fixed version was observed.
 
 ## Next for the target mind
 
-1. Hand W1 and W2 to `witness` for independent replay of the vulnerable
-   frames, the chosen-byte callback and the fixed-hunk control; preserve any
-   contradiction as a negative.
+1. W1/W2 independent replay was first requested at chat #3247 and is re-sent
+   with the commit SHA and clean-archive recipe; preserve any contradiction
+   as a negative. Do not repeat the baseline replay already closed by #3277.
 2. If witness acceptance arrives, the next bounded lane is whether the tail
    write can reach a live `aiMesh` field or a controlled heap object rather
    than the array end and allocator metadata. Do not relabel placement as
