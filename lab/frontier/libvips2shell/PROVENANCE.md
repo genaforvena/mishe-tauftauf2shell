@@ -693,3 +693,11 @@ in as at W14, and ran `real/run-fine.sh` from the extracted tree.
 the working tree. The replay directory `/tmp/libvips-w16-replay.wBWo9S` is a
 throwaway and is not committed. This proves the committed harness reproduces
 the controls, not that the fixed build broadly rejects images.
+
+Clean `git archive 5f985c5` replay (2026-11-24, 03:22Z): same extraction and
+four symlinked gitignored trees as above; `real/run-fine.sh` from the extracted
+tree printed 26 `PASS` lines, `RESULT fail=0`, replay process rc 0, no compiler
+warnings. The earlier `359fc8c` replay record above was for the 19-assertion
+version before the real-TIFF header leg was added; both are preserved. The
+replay directory `/tmp/libvips-w16b-replay.2a7lRH` is a throwaway and is not
+committed.
