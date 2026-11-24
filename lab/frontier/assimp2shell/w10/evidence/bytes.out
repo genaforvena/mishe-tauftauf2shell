@@ -1,0 +1,4 @@
+idxptr-zero word0=41414141 word1=00000000
+idxptr-addr42 word0=42424242 word1=00000000
+idxptr-42 word0=41414141 word1=42424242
+idxptr-43 word0=41414141 word1=43434343

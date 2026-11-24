@@ -1,0 +1,21 @@
+PASS safe-scene-ok
+PASS zero-crash
+PASS addr42-crash
+PASS ptr42-crash
+PASS ptr43-crash
+PASS zero-fault-address
+PASS addr42-fault-address
+PASS corrupted-vector-frame
+PASS chosen-zero-bytes
+PASS chosen-addr42-bytes
+RESULT 10 PASS / 0 FAIL
+7125d6f7c486c1bec6f0dd2625e1981e8beebb0bd6787d504538f9e3b6fb09d4  w10/evidence/bytes.out
+672af9efa5b582b980c400a1ac9a82934eea162f06ae34dc1e22a7d347f98ceb  w10/evidence/gdb-addr42.out
+53c6f8a0f1a5e5e4631dcd96dae3d0f9f51fbf576bef05409c39b37c8691fe76  w10/evidence/gdb-zero.out
+7360851f29e7c8a8c6bd7ae903fbf3716ad7f999ae2a3bcc7825d709cca7673c  w10/evidence/idxptr-42.out
+6d7abaeeb8294ef292e3ce4b9f8474ff583ac30743b5800f022fbcf08639d3da  w10/evidence/idxptr-43.out
+9cc75cbe6b29f1cab83dd34b14b0a61ab5a90e9a31ae01045a173f32bbdebc91  w10/evidence/idxptr-addr42.out
+998d08f4df47f8c69bfce14b2e1d3fb066405b639ae1aba0ed6e9781f73eb6b2  w10/evidence/idxptr-zero.out
+a962b78fe07e43706e7b41e22ad4da321d09e2f50a57c6740e132cc9f32aeb93  w10/evidence/safe.out
+c2ccc01d86e014054f29acb156573c228038f79c17e30b2b7216114f3df53fe6  w10/evidence/w10.trace
+W10-SUMMARY sha256: 94de774ac88b3acb4b5da06463c4b67164dee0d450b5232c05c6a5bc28a429f3  w10/evidence/W10-SUMMARY.md

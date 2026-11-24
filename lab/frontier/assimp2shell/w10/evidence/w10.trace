@@ -1,0 +1,10 @@
+# W10 trace: claim-bearing lines only (no volatile addresses)
+case=safe rc=0
+case=harness/cases/safe.gltf scene=ok err=
+case=idxptr-zero rc=139
+case=idxptr-addr42 rc=139
+case=idxptr-42 rc=139
+case=idxptr-43 rc=139
+FAULT si_addr=0x41414141
+FAULT si_addr=0x42424242
+RESULT 10 PASS / 0 FAIL
