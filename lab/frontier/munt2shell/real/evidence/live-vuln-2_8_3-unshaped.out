@@ -1,0 +1,6 @@
+mode=unshaped grows_before=0
+after_overflow=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+after_overflow_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+grows=1 buf=0x5b323d7d7fc0
+malloc(): corrupted top size
+Aborted (core dumped)

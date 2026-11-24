@@ -765,3 +765,54 @@ Also checked this wake: no Windows/macOS host, Wine, QEMU, `/dev/midi*`,
 CoreMIDI and WinMM lengths of §19 cannot be exercised here. A fresh advisory
 search returned only the aggregators already traced in §20 — no new PoC bytes.
 Grade unchanged: real-library rungs 1-4 ESTABLISHED, rung 5 UNKNOWN.
+
+## 22. Downstream allocator consumer of the forged top chunk (W183, 2026-11-24)
+
+W179 showed eight 7-bit attack bytes at source offset 32776 forging glibc's
+top-chunk size to `0x10001`, and W182 showed that a second caller block cannot
+reuse the corrupted *buffer*. The open question was whether any later real
+allocation consumes the forged *chunk header* through a normal API path.
+`lab/frontier/munt2shell/real/live_driver.cpp`, replayed by `./live_probe.sh`
+against the pinned plain static libraries, records allocations without
+consuming corrupted metadata: an `operator new[]` hook and `--wrap=malloc`
+only log sizes and pointers; input buffers come from `__real_malloc`.
+
+The intended in-library candidate was
+`Synth::playSysex() -> MidiEventQueue::pushSysex() -> new Bit8u[sysexLength]`
+(upstream `Synth.cpp:2285`, allocator `:2163`). It is **unreachable here**:
+`midiQueue` is created only by `Synth::open()` (`Synth.cpp:945`), which needs
+SHA1-pinned Roland ROM images absent from this lab; with `midiQueue == NULL`
+`playSysex()` returns false at `:1149`. Both post-arm allocation logs are
+`count=0` in every case — a recorded prerequisite gap, not an omitted check.
+No ROM was fetched.
+
+A different consumer did appear. With `streamBufferSize=40001 > capacity=32768`,
+the second legitimate `parseStream()` call takes the overrun branch of
+`parseSysexFragment()` and calls `printDebug()`; the default
+`ReportHandler::printDebug` is `vprintf` (`Synth.cpp:395-398`). The forged top
+chunk is then consumed by libc's stdout buffer allocation.
+
+| case | rc | header at buf+32776 after second call |
+| --- | --- | --- |
+| vuln `shaped` | 0 | `11 10 00 00 00 00 00 00` (changed) |
+| vuln `unshaped` | 134 | `malloc(): corrupted top size`, no output |
+| vuln `none` (no second call) | 0 | `01 00 01 00 00 00 00 00` unchanged |
+| vuln `shaped-nobuf` (`stdbuf -o0`) | 0 | `01 00 01 00 00 00 00 00` unchanged |
+| vuln `safe`, fixed `safe`/`fixed` | 0 | no 32768 allocation |
+
+`post_good1_wide` also shows the library's own message as ASCII at buf+32784:
+`70617273655379736578467261676d656e743a205379734578206d6573736167...` =
+`"parseSysexFragment: SysEx messag..."`. libc's internal `malloc` is
+invisible to `--wrap=malloc`, hence the empty wrapped log. Unbuffering stdout
+removes both the header change and the in-region string, so the causal link is
+controlled, not inferred from correlated bytes. Full evidence and limits in
+`lab/frontier/munt2shell/real/LIVE_CONSUMER.md`.
+
+Reading: this is a real downstream consumer of corrupted allocator metadata,
+reached by a normal public-API input sequence with no harness-created consumer.
+It is **not** a consumer of the 7233 forged tail bytes — the bytes at
+buf+32784 are a library-generated debug string, the consumer is libc stdio,
+and no chosen overflow byte is read back. W182's "no in-library consumer of
+the forged tail" therefore stands for the tail; this section narrows the
+earlier blanket wording to a measured downstream header consumer. Grade
+unchanged: real-library rungs 1-4 ESTABLISHED, rung 5 UNKNOWN.

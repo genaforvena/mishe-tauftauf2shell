@@ -15,3 +15,5 @@ wire-vuln-*
 wire-fixed-*
 neighbor-vuln-2_8_3
 neighbor-fixed-1749f7f
+live-vuln-2_8_3
+live-fixed-1749f7f

@@ -1,0 +1,7 @@
+mode=safe grows_before=0
+grows=0 buf=(nil)
+after_good1_new count=0
+after_good1_malloc count=0
+after_good2_new count=0
+after_good2_malloc count=0
+done grows=0

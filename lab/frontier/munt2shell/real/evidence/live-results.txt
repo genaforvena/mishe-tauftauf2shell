@@ -1,0 +1,68 @@
+live-vuln-2_8_3-shaped rc=0
+  mode=shaped grows_before=0
+  after_overflow=5a5a5a5a5a5a5a5a0100010000000000
+  after_overflow_wide=5a5a5a5a5a5a5a5a01000100000000005a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  grows=1 buf=0x5a9968d11fc0
+  after_good1_new count=0
+  after_good1_malloc count=0
+  post_good1_header=5a5a5a5a5a5a5a5a1110000000000000
+  post_good1_wide=5a5a5a5a5a5a5a5a111000000000000070617273655379736578467261676d656e743a205379734578206d6573736167
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=1
+live-vuln-2_8_3-unshaped rc=134
+  mode=unshaped grows_before=0
+  after_overflow=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  after_overflow_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  grows=1 buf=0x5b323d7d7fc0
+  malloc(): corrupted top size
+  Aborted (core dumped)
+live-vuln-2_8_3-none rc=0
+  mode=none grows_before=0
+  after_overflow=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  after_overflow_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  grows=1 buf=0x62cca7be2fc0
+  after_good1_new count=0
+  after_good1_malloc count=0
+  post_good1_header=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  post_good1_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=1
+live-vuln-2_8_3-safe rc=0
+  mode=safe grows_before=0
+  grows=0 buf=(nil)
+  after_good1_new count=0
+  after_good1_malloc count=0
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=0
+live-fixed-1749f7f-safe rc=0
+  mode=safe grows_before=0
+  grows=0 buf=(nil)
+  after_good1_new count=0
+  after_good1_malloc count=0
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=0
+live-fixed-1749f7f-fixed rc=0
+  mode=fixed grows_before=0
+  grows=0 buf=(nil)
+  after_good1_new count=0
+  after_good1_malloc count=0
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=0
+live-vuln-2_8_3-shaped-nobuf rc=0
+  mode=shaped grows_before=0
+  after_overflow=5a5a5a5a5a5a5a5a0100010000000000
+  after_overflow_wide=5a5a5a5a5a5a5a5a01000100000000005a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  grows=1 buf=0x637b5e742fc0
+  parseSysexFragment: SysEx message lacks end-of-sysex (0xf7), ignored
+  after_good1_new count=0
+  after_good1_malloc count=0
+  post_good1_header=5a5a5a5a5a5a5a5a0100010000000000
+  post_good1_wide=5a5a5a5a5a5a5a5a01000100000000005a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+  after_good2_new count=0
+  after_good2_malloc count=0
+  done grows=1

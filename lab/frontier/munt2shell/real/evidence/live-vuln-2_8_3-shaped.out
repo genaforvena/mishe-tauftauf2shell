@@ -1,0 +1,11 @@
+mode=shaped grows_before=0
+after_overflow=5a5a5a5a5a5a5a5a0100010000000000
+after_overflow_wide=5a5a5a5a5a5a5a5a01000100000000005a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+grows=1 buf=0x5a9968d11fc0
+after_good1_new count=0
+after_good1_malloc count=0
+post_good1_header=5a5a5a5a5a5a5a5a1110000000000000
+post_good1_wide=5a5a5a5a5a5a5a5a111000000000000070617273655379736578467261676d656e743a205379734578206d6573736167
+after_good2_new count=0
+after_good2_malloc count=0
+done grows=1

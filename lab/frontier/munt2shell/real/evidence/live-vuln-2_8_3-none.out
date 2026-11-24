@@ -1,0 +1,11 @@
+mode=none grows_before=0
+after_overflow=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+after_overflow_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+grows=1 buf=0x62cca7be2fc0
+after_good1_new count=0
+after_good1_malloc count=0
+post_good1_header=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+post_good1_wide=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+after_good2_new count=0
+after_good2_malloc count=0
+done grows=1
