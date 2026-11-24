@@ -225,3 +225,32 @@ driver are preserved for replay as
 `evidence/replay-vusb-local-modes.patch` (applies on top of the committed
 `live/vusb-jl2005.patch`) and `evidence/replay-two_stage_probe.c`. Pins,
 committed vusb patch and harness are unchanged.
+
+## Groomed-heap canary-safe reply (W168, 2026-11-24) — negative
+
+W166 left one variable untested: heap layout. Its canary-safe short reply
+(`M2SHELL_JL2005_VUSB=p`, `M2SHELL_JL2005_LEN=0x3E28`) copies the live
+canary into `priv->table+0x3FF8`, but `table` was followed by the top chunk
+and the same over-read destroyed its size, so `gp_camera_file_get()` aborted
+in malloc. W168 tried to place a live allocated chunk immediately after the
+camera-private allocation, keeping all setup allocations and rejected probe
+chunks live, then called the same real consumer APIs.
+
+Five layout shapes were measured (naive hole; adjacent pair with rejected
+holes freed; adjacent pair with rejected holes kept; oversized hole 32552;
+hole 17848 sized to leave an exact 0x4050 remainder). In every case
+`camera_init`'s `calloc(1,16448)` did not reuse the prepared hole: an
+intermediate allocation inside `gp_camera_init()` splits any free hole
+before `camera_init` runs (gdb: hole chunk 0x4051/0x7F31 before, 0x571 at
+`camera_init` entry). `priv` was always the chunk after the live victim,
+so the 464-byte overflow again reached the top chunk, and the first consumer
+allocation aborted (`malloc(): corrupted top size` or `invalid size
+(unsorted)`) before any file bytes were returned. No `gp_camera_init rc=`
+line and no file data in any run.
+
+Disposition: the W166 leak remains non-consumer-visible under grooming too.
+Grade unchanged — rung 3 at the real heap destination, W167's local
+chosen-target execution still conditional on canary knowledge, rung 5
+UNKNOWN. No pin, committed patch, harness or library source changed; the
+local-only probe is preserved as `evidence/replay-groom_leak_probe.c`, raw
+output and commands in `evidence/real-plain-groom-negative.out`.

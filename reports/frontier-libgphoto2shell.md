@@ -210,3 +210,13 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `live/vusb-jl2005.patch`) and `evidence/replay-two_stage_probe.c`. A bounded
   replay of this local claim was asked of the witness at 22:36Z (tape #3081);
   no verdict yet.
+
+- Groomed-heap canary lane (W168, 2026-11-24, negative): five local heap
+  layouts failed to make `camera_init`'s `calloc` reuse a prepared hole;
+  an intermediate allocation inside `gp_camera_init()` splits the hole
+  before `camera_init` runs, so the canary-safe short reply still overflows
+  the top chunk and the first real consumer allocation aborts before any
+  bytes return. W166's canary copy remains non-consumer-visible; grade
+  unchanged. Commands, five observed failures and disposition in
+  `lab/frontier/libgphoto2shell/evidence/real-plain-groom-negative.out`;
+  local probe `evidence/replay-groom_leak_probe.c`.

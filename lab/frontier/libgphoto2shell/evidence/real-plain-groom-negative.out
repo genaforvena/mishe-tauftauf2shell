@@ -1,0 +1,83 @@
+# W168 (2026-11-24): groomed-heap canary-safe reply, closed negative
+#
+# Question: W166's canary-safe short reply copies the live canary into
+# priv->table+0x3FF8 but the consumer aborts because the same over-read
+# destroys the heap top size. Can heap grooming put a live chunk after the
+# camera-private allocation so the overflow lands on a live neighbour and
+# the canary becomes readable through a real libgphoto2 API?
+#
+# All runs: real libgphoto2 2.5.34 plain (no-ASan) build in
+# src/libgphoto2-2.5.34-plain, local-only vusb mode 'p' from
+# evidence/replay-vusb-local-modes.patch, local probe live/groom_leak_probe.c
+# (preserved as evidence/replay-groom_leak_probe.c). No pin, committed patch,
+# harness or library source was changed. No bus, wire or network.
+#
+# Build (from repo root):
+#   P=$PWD/lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34-plain/installdir-plain
+#   gcc -O0 -g -fno-omit-frame-pointer -I$P/include \
+#     -o lab/frontier/libgphoto2shell/live/groom_leak_probe \
+#     lab/frontier/libgphoto2shell/live/groom_leak_probe.c \
+#     -L$P/lib -lgphoto2 -lgphoto2_port -Wl,-rpath,$P/lib
+# Run env (each run):
+#   CAMLIBS=$P/lib/libgphoto2/2.5.34
+#   IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+#   LD_LIBRARY_PATH=$P/lib
+#   M2SHELL_JL2005_VUSB=p M2SHELL_JL2005_COUNT=1024
+#   M2SHELL_JL2005_LEN=0x3E28
+#   port usb:001,001
+# Probe allocates all libgphoto2 setup objects first, then a size-matched
+# hole plus a live 0x400-byte victim chunk, frees the hole, calls
+# gp_camera_init(), then calls gp_camera_folder_list_files() and
+# gp_camera_file_get(cam, "/", "jl_1023.ppm", GP_FILE_TYPE_NORMAL, ...).
+
+=== attempt 1: naive hole (malloc 16448), victim from an old free bin ===
+hole=0x56a5fe7375f0 victim=0x56a5fe733ab0 delta=-15168
+malloc(): corrupted top size
+RC=134
+gdb: abort in malloc_printerr("malloc(): corrupted top size") reached
+      from the first allocation after the overflow; no file bytes returned.
+
+=== attempt 2: search for a fresh adjacent pair, rejected pairs freed ===
+hole=0x5d411a78ca50 victim=0x5d411a790aa0 delta=16464 kept=15
+RC=139
+gdb: SIGSEGV in unlink_chunk at malloc.c:1610, called from _int_malloc for
+      a 4096-byte stdout buffer. The rejected holes had been freed; the
+      overflow hit a free chunk's link metadata. Corrected: rejected pairs
+      stay allocated in later attempts.
+
+=== attempt 3: adjacent pair, rejected pairs kept, hole 16448 ===
+hole=0x5e5595533a50 victim=0x5e5595537aa0 delta=16464 kept=15
+malloc(): corrupted top size
+RC=134
+gdb at jl2005c.c:154: priv=0x55555559feb0, i.e. victim+0x410 — the camera
+      private allocation came from the TOP, not the freed hole. The hole
+      chunk size had changed from 0x4051 before gp_camera_init() to 0x571
+      at camera_init entry: an intermediate allocation splits the hole.
+
+=== attempt 4: oversized hole 32552 (chunk 0x7F30) ===
+hole=0x600e48b3fa90 victim=0x600e48b479c0 delta=32560 kept=15
+malloc(): invalid size (unsorted)
+RC=134
+gdb: hole chunk 0x7F31 before gp_camera_init(), 0x571 at camera_init.
+      The intermediate allocation again takes a fixed 0x570 chunk from the
+      front, leaving the remainder (0x79C0) too small for calloc(1,16448).
+
+=== attempt 5: hole 17848 (chunk 0x45C0) to leave an exact 0x4050 remainder ===
+hole=0x641dd76c7670 victim=0x641dd76cbc30 delta=17856 kept=15
+malloc(): corrupted top size
+RC=134
+gdb at jl2005c.c:154: priv=0x5555555a5040 = victim+0x410. calloc still
+      allocated from the top after the live victim; the prepared remainder
+      was not reused. The overflow therefore again reached the top chunk,
+      and the first consumer allocation aborted before any file bytes were
+      returned. No `gp_camera_init rc=` line, no file_get data in any run.
+
+=== disposition ===
+Negative under the new variable. Three layout shapes (naive, adjacent,
+split-compensated) all failed to make camera_init's calloc reuse the
+prepared chunk; an intermediate allocation inside gp_camera_init splits any
+free hole before camera_init runs. The canary copy observed in W166 still
+has no real consumer path. Grade unchanged: rung 3 at the real heap
+destination, local rung-4 chosen-target execution conditional on canary
+knowledge (W167), rung 5 UNKNOWN. Pins, committed vusb patch, real-build
+trees and harness untouched; only local probe artifacts were added.
