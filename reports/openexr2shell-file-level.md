@@ -668,8 +668,12 @@ Both PoCs are reproducible and hash-pinned:
 (692 bytes, `S=66, U=64`) and `work-partial/b67.exr` sha256
 `d50e9d95f4a316c12a9c45e834a9b89d821c0aab600b53476c2f0fefa29ebc41`
 (`S=67, U=64`). One-command replay from `lab/openexr2shell-real`:
-`sh harness/partial-length-check.sh` -> `RESULT PASS` in two working-tree runs.
-Normalized gdb observations are byte-stable across both runs:
+`sh harness/partial-length-check.sh` -> `RESULT PASS` in three working-tree
+runs and once from a clean `git archive HEAD` at `2f1554d` into
+`/tmp/w177-openexr-archive` (symlinks to the gitignored pinned `src/`,
+`build-vuln-plain/` and `bin-vuln-plain/` trees). The check regenerates the
+gitignored baseline from the pinned generator, so no external EXR is needed.
+Normalized gdb observations are byte-stable across every run:
 `evidence/partial-length.out` sha256
 `ebe5043b2d086911d12756b868b354838e39052eebd94a35fb2c5092b0de3b3b` and
 `evidence/partial-length-268.out` sha256

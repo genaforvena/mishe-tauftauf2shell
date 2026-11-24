@@ -297,6 +297,7 @@ range; words at `dst+272` and `dst+304` are unchanged, so neither case reaches
 W171's live scratch buffers. The boundary is path-length-sensitive in this
 glibc layout and is not a universal threshold. Replay:
 `sh lab/openexr2shell-real/harness/partial-length-check.sh` -> `RESULT PASS`
-twice, byte-stable evidence hashes in `reports/openexr2shell-file-level.md`
+3x in the working tree and once from clean `git archive HEAD` `2f1554d`, with
+byte-stable evidence hashes in `reports/openexr2shell-file-level.md`
 W177. Grade unchanged: file-level rungs 1-4, witness-ESTABLISHED at the
 scanline CODE/CONSUMER scope, rung 5 UNKNOWN.
