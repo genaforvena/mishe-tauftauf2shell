@@ -413,7 +413,7 @@ recovered from the live process, which no measured response provides.
 No new rung-4 claim, no r5, no command. No listener or lab Apache remained;
 hashes in `w2/evidence/gdb-cek-provenance-SHA256SUMS`.
 
-## W190 — jansson length-corruption info-leak hypothesis: structural negative (2026-11-24 06:26-06:33Z)
+## W190 — jansson length-corruption info-leak hypothesis: structural negative (2026-11-24 06:24-06:27Z)
 
 Queued hypothesis: if the overflow could enlarge the `length` of the adjacent
 jansson string without breaking it, a later serialization might read past the
