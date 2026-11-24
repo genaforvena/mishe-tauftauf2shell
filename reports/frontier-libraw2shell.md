@@ -207,6 +207,8 @@ WL 11,035 gave `0x4142` and WL 11,037 gave `0x413f`
 calibration. ASan vulnerable `-n 1` on the exact-hit input: rc 1,
 `WRITE of size 2` at `:427`, 0 bytes after the 550,176-byte region; fixed tree
 rc 0; vulnerable no-option rc 0 (`evidence/wl4141-controls.txt`).
+The exact-hit store was stable 3/3 in fresh plain `-O0` gdb runs, each
+`0x4141 0x2b82 0x3a00 0x0000` at the same index.
 
 Negative result preserved: a second target, `0xdead`, with WL 3,234 produced
 `0xdeb3` (`evidence/wl-dead.input`, `evidence/gdb-wl-dead.txt`); WL
@@ -215,6 +217,11 @@ Negative result preserved: a second target, `0xdead`, with WL 3,234 produced
 alone therefore does not reach every halfword: this is ONE exact chosen value
 at the chosen offset, not an arbitrary 16-bit alphabet. Ceiling unchanged:
 no pointer/IP, no consumer beyond `dcraw_emu`, no wire path, NO r5.
+Two further pre-chosen targets also missed: `0x1234` at WL 39,560 produced
+`0x1232` (`evidence/wl1234-39560.input`, sha256
+`a6886f0be95480efbab3fdbc2fdc98a0a7dafc0f6879cfeb805f1099677683b4`) and
+`0x2222` at WL 21,098 produced `0x2220` (`evidence/wl2222-21098.input`, sha256
+`4a1eed482ee63601a932ffc47b61027a1e83dc0cd8450f00476cc3d01a982620`).
 Author-side only; no witness replay was requested this wake.
 
 ## Frame-size steering of the first OOB index (W5, 2026-11-24 08:2xZ; author-side)
