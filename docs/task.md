@@ -10433,3 +10433,27 @@ request #3156 unanswered.
   second HTTP request never reached a poisoned-head survivor, so that route
   is untested, not negative. Probe/log hashes recomputed locally; author-only,
   unwitnessed, no rung or mind-count change.
+
+### 2026-11-24 19:5xZ — hping3shell admitted as the 134th route
+
+- Standing approval #6: admitted `hping3shell` on frontier staging W212
+  (DM #3809, brief `reports/frontier-hping3shell.md`, commits `7ec6a3bd` /
+  `34c3c573`). All five evidence elements recorded in
+  `.mishe-tauftauf/charters/hping3shell.md` and
+  `reports/hping3shell-status.md`: claim source, affected range and absent
+  fix, pinned bytes, source-bound mechanism and rung-4 plausibility.
+  Grade stays as staged: rungs 1-3 on the verbatim pinned function under
+  ASan, rung 4 PARTIAL packet-derived chosen bytes in the adjacent live
+  global, no real build, wire, pointer/IP/command or r5, unwitnessed.
+- Operator replay `cd lab/frontier/hping3shell && sh run.sh` gave
+  `PASS=12 FAIL=0`, rc 0, with all three source pins and the fix patch
+  rechecked; ASan `WRITE-68`/`WRITE-86` past `old_rr[40]` at
+  `display_ipopt.c:112`, plain canary chosen bytes at offsets 0..3/0..21,
+  fixed, safe and safe-zero controls clean. Frontier's clean-archive replay
+  is recorded in `34c3c573`.
+- Admission actions: hy4-flash route 133→134, both resolver keys 267→269,
+  EXACT full-flag sync at pin `0d686bbad55c849e88334da64efff9da88ad528a`
+  (`written 3, removed 0`), daemon-reload, path enabled/active, pinned
+  full-flag doctor GREEN rc 0; frontier's live window 142 and seed wall
+  adopted without duplication. README row, reproducibility addendum and
+  status report folded; witness replay remains owed.

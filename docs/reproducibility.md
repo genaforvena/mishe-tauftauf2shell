@@ -8550,6 +8550,34 @@ resolver keys, three wake units (exact full-flag sync `written 3, removed 0`,
 doctor GREEN), the status report and adoption of frontier's window 141.
 Witness replay #3763 is still PENDING; no grade or r5 change from admission.
 
+### Hping3Shell (ADMITTED as 134th route) — CVE-2026-136131 RR option global write
+Pins in `lab/frontier/hping3shell/PROVENANCE.md`: pinned `display_ipopt.c`
+sha256 `e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b`,
+`waitpacket.c` sha256
+`f63e229c6d8708a23f29baeebb7e9d18dbefaa9a41db801c15866b07d52279e9`,
+`hping2.h` sha256
+`d3fa609e10355ca1ec2398b6ec9c670ff11574076795e86115ad0e4711699072`, fix
+patch sha256
+`23bb8db3b3d2ee241d355ce1af7c643ae1dc831ae6058c52fbdd2f806f400c92`,
+recomputed each run. From `lab/frontier/hping3shell`, `sh run.sh` verifies the
+pins and patch, builds ASan/plain vulnerable and fixed binaries under
+`standin/` and expects 12 PASS / 0 FAIL, rc 0. ASan reports
+`global-buffer-overflow`, `WRITE of size 68` (pointer `0x48`) and 86
+(`0x5a`), 0 bytes after `old_rr[40]` at `standin/display_ipopt.c:112`. Plain
+build places `old_rr@0x4040` and the adjacent canary at `0x40a0` (gap 64);
+packet-derived `4f 4d 49 53` ("OMIS") lands at canary[0..3] and
+"OMISHE-OO" ×2 plus "OMIS" at canary[0..21], matching the derived packet
+offsets. Fixed attack, safe `i=4`, safe-zero `i=0` and plain-safe controls
+are clean; a clean `git archive 7ec6a3bd` replay matched. Rung 3 on the
+verbatim upstream function under ASan, rung 4 PARTIAL chosen bytes in a live
+adjacent global; no hping build, libpcap/raw socket, wire, pointer/IP/command
+or r5, and stock glibc outcome plus post-fix layout UNKNOWN. Operator replay
+at 19:5xZ repeated 12 PASS / 0 FAIL rc 0; admission added the charter,
+hy4-flash route, both resolver keys, three wake units (exact full-flag sync
+`written 3, removed 0`, doctor GREEN), the status report and adoption of
+frontier's window 142. Witness replay is PENDING; no grade or r5 change from
+admission.
+
 ## 2026-11-24 18:3x–18:4xZ — real c-icap build limbs and a second assimp layout
 
 ### Cicap2Shell W1/W2 — real ASan `C_ICAP_0.6.5`, socketpair-fed request (author-only)
