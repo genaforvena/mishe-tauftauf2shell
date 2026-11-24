@@ -1,7 +1,9 @@
 # Frontier brief — Fltk2Shell (CVE-2026-135433)
 
-Status: **locally staged, rungs 1–4 by direct call; candidate, not admitted.**
-Brief authored 2026-11-24 in wake W195. Lab: `lab/frontier/fltk2shell/`.
+Status: **admitted 2026-11-24 05:4xZ under standing #6 as the 128th route;
+rungs 1–4 ESTABLISHED by witness #3296 (W195) at the labeled direct-call
+scope, NO rung 5.** Brief authored 2026-11-24 in wake W195; admission and
+witness verdict folded in wake 2. Lab: `lab/frontier/fltk2shell/`.
 
 ## Claim ground truth (provisioning only, never a probe)
 
@@ -32,7 +34,10 @@ Brief authored 2026-11-24 in wake W195. Lab: `lab/frontier/fltk2shell/`.
 
 ## Source-bound mechanism (pinned bytes, not advisory prose)
 
-Files pinned in `lab/frontier/fltk2shell/` with SHA-256 in `PINS.sha256`.
+Files pinned in `lab/frontier/fltk2shell/` with SHA-256 in `PINS.sha256`;
+`run-all.sh` enforces the tarball pin, the other pins are provenance records.
+The `gen_bmp.py` pin was stale (`a950ad4a…`) and is corrected in wake 2 to
+the committed file's `69dd2a2a…`; see `PROVENANCE.md`.
 Pinned `Fl_BMP_Image.release-1.4.5.cxx` is byte-identical to
 `fltk-release-1.4.5/src/Fl_BMP_Image.cxx` in the upstream tarball.
 
@@ -80,23 +85,31 @@ no exploit framework or external target was contacted.
 
 `run-all.sh` rebuilds all four trees, regenerates the fixtures, runs the
 matrix and asserts **33 PASS / 0 FAIL**; normalized transcript `evidence.log`.
-Clean `git archive b214fbb` replay rebuilt all four trees and repeated
+Clean `git archive 072dc75` replay rebuilt all four trees and repeated
 33 PASS / 0 FAIL with a byte-exact normalized transcript
-(`7882e60c…3525e`); see `lab/frontier/fltk2shell/REPLAY.md`. Full
+(`7882e60c…3525e`); the earlier `b214fbb` runner's different normalized hash
+came solely from unmasked absolute paths. See `lab/frontier/fltk2shell/REPLAY.md`.
 `evidence.log` sha256 is `71b373d0…d4d8c6`.
 
-## Ceiling and cheapest next experiment
+Witness #3296 (W195) independently replayed the four-tree matrix from a clean
+`b214fbb` archive: all four trees rebuilt, `SUMMARY pass=33 fail=0`, and its
+normalized transcript matched byte-exactly. Verdict: **ESTABLISHED rungs 1–4**
+at the labeled direct-call / crafted-BMP-file / four-tree scope, NO rung 5.
+ICO container, real GUI consumer, network surface, pointer/IP control and
+command execution stay UNKNOWN.
 
-Not measured: a real application consumer beyond the constructor, the ICO
-container path, a network-facing service, pointer/IP control, command
-execution, witness replay, or rung 5. The advisory's own impact is
+## Ceiling and next experiments
+
+Out of the ESTABLISHED scope: a real application consumer beyond the
+constructor, the ICO container path, a network-facing service, pointer/IP
+control, command execution, and rung 5. The advisory's own impact is
 local/UI-only, so server-style X2Shell reach is UNKNOWN and must not be
 inferred. The chosen-byte result is a direct call into the real loader, not
-an application-level exploit.
+an application-level exploit. Witness replay is complete (#3296).
 
-Cheapest next experiment: drive the same 118-byte geometry through
-`Fl_Shared_Image`/ICO and a real GUI-less application consumer to see whether
-the attacker bytes land in a heap object with a controllable consumer; then
-a plain-build groom to test whether pointer-sized metadata can be reached.
-The operator owns final admission; the person owns wake units and full-flag
-sync.
+The operator's ordered next step is to drive the same geometry through
+`Fl_Shared_Image`/ICO and a GUI-less application consumer to see whether the
+attacker bytes land in a heap object with a controllable consumer; only then
+a plain-build groom toward pointer-sized metadata. Any new impact claim goes
+to `witness`; no RCE inference from a heap OOB write. Wake units and full-flag
+sync remain the person's.

@@ -92,7 +92,7 @@ note "== plus1647: a28e392 row casts, fixed control =="
 for c in safe poc-alloc poc-b poc-c poc-chosen; do
   rc=$(run_case driver-plus1647 "$c"); check "asan-plus1647-$c-rc" "$rc" 0
   grep -q 'ERROR: AddressSanitizer' "last-driver-plus1647-$c.out" \
-    && check "asan-plus1647-$c-clean" no yes || check "asan-plus1647-$c-clean" no no
+    && check "asan-plus1647-$c-asan-report" none found || check "asan-plus1647-$c-asan-report" none none
 done
 
 note "== chosen bytes, plain build under gdb =="

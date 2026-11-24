@@ -23,6 +23,16 @@ external host. All executed code ran locally on this host.
   and #1632. The issue's generator, driver shape and three 118-byte geometries
   were re-created locally in `gen_bmp.py` and `driver.cxx`.
 
+## Pin correction (2026-11-24, wake 2)
+
+`PINS.sha256` originally recorded `a950ad4a…` for `gen_bmp.py`, which never
+matched the committed file. Witness #3296 measured the file at both `b214fbb`
+and HEAD as `69dd2a2a040802491f6212bbee7bf58dd47319d3388510d1d2bee2800be74ed3`
+and flagged the discrepancy (NIT 1). The pin is now corrected to that hash.
+`run-all.sh` enforces only the tarball hash with `sha256sum -c`; the remaining
+pins are provenance records, not runner checks. The replay was unaffected:
+the generator came from the git archive and produced the same BMP fixtures.
+
 ## Builds and trees
 
 - `fltk-release-1.4.5/build-asan` — upstream tag, CMake ASan/Debug build;
