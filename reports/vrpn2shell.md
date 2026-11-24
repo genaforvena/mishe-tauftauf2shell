@@ -1188,15 +1188,14 @@ is isolated, and fills 96 name bytes with `0x42`; `probe-xlation.sh` and
   ASan stops before the chosen-byte copy at `:414`.
 - **gdb, plain -O0, sender -2** (`out-w26-gdb-s-2/gdb.log`):
   `d_entry = 0x555555703378`, `useEntry = -2`. The OOB slot
-  `d_entry[-2].name` at `0x...3358` is NULL before the call (the 640 bytes
-  surveyed before `d_entry` are zero), so `:406` allocates a 100-byte buffer
-  and stores its pointer `0x0000555555702d88` into that out-of-bounds slot.
-  `:414` then copies the wire-chosen bytes to that buffer: PRE bytes are all
-  zero, POST bytes are `42 42 42 42 00 42 42 42 42 ...` (the `00` at offset 4
-  is the isolated in-bounds NUL index). This is a wire-chosen **offset** with
-  an out-of-bounds **pointer store** whose pointee holds wire-chosen bytes;
-  the 100-byte copy itself lands in the freshly allocated buffer, not at a
-  wire-chosen address. Process survives.
+  `d_entry[-2].name` at `0x...3358` already holds a heap pointer
+  `0x0000555555702d88` before the call (visible in that very log), so the
+  `if (!d_entry[useEntry].name)` branch at `:405-406` does not allocate.
+  `:414` copies the wire-chosen bytes through that pre-existing pointer: PRE
+  bytes are all zero, POST bytes are `42 42 42 42 00 42 42 42 42 ...` (the
+  `00` at offset 4 is the isolated in-bounds NUL index). W29 identifies the
+  pointer as the endpoint's live `d_udpInbuf`; the earlier "freshly allocated
+  buffer" wording is retired. Process survives.
 - **Debugger-free controls**: plain vulnerable sender -2 ALIVE
   (`out-w26-plain-s-2/`), fixed-commit sender -2 ALIVE
   (`out-w26-fixed-s-2/`), TYPE sink sender -2 ALIVE
@@ -1266,6 +1265,57 @@ into an allocation-owned buffer, but still no wire-chosen destination, no
 command side effect and no rung 5. Author self-observation, not independently
 replayed. Do not resweep these index points on the same binaries.
 
+## W29 — the -2 OOB record aliases live endpoint pointer fields (2026-11-24 ~17:2xZ)
+
+W26 surveyed 640 bytes before `d_entry` and W27 sampled a few negative
+SENDER indices; the whole ~32 KB before `d_senders.d_entry[0]` had not been
+mapped. New `probe-xlation-scan.sh` + `w29-scan.py` break at `:405` on a benign
+sender-4 message, read the 32016 bytes before the table through the gdb
+inferior, print every nonzero 8-byte word at 16-byte stride, and quit before
+any `memcpy` — the probe never mutates the process it inspects.
+
+`out-w29-scan-plain2/gdb.log` (port 15362, plain -O0 vulnerable `5cf49457...`,
+`d_entry=0x555555703378`) has exactly two nonzero aligned words in that range:
+
+- k=-1 at `0x...3368` = `0x7d11`, the table's own malloc chunk size (W26's
+  sender -1 fault).
+- k=-2 at `0x...3358` = `0x555555702d88`, a heap pointer already present
+  before the call.
+
+Every slot from k=-3 to k=-1999 is zero: those bytes are the endpoint's
+inline, still-empty input buffers. `out-w29-scan-plain6/heap.bin` (a 163856-byte
+gdb dump from `base-0x20000` to `base+0x8010`) and
+`gdb ptype /o vrpn_Endpoint_IP` identify the alias. In `out-w29-owner/gdb.log`
+(port 15367) the endpoint at `0x5555556f3220` appears as frame #1's `this`;
+its `d_tcpInbuf` is at +65840, `d_udpInbuf` at +65848 and `d_NICaddress` at
++65856, while `d_udpAlignedInbuf[0]` is at +64360. Since
+`&d_entry[-2] = endpoint + 65848`, the aliased `.name` slot is the live
+`d_udpInbuf` and its value is the live UDP receive buffer. W26's copy does not
+allocate a new name buffer; it writes wire bytes into that buffer.
+
+`out-w29-alias-endpoint/gdb.log` (port 15368, SENDER sender -2, in-bounds NUL
+index 4) confirms both effects: PRE414 `slot=0x...3358 name=0x...2d88
+remote_id=0 local_id=0 plus8=(nil)`; POST427 `slotdata=0x...2d88
+plus8=0x2fffffffe remote_id=-2 local_id=2`, with the pointee's first bytes
+`42 42 42 42 00 42 ...`. The +8 word of the same OOB record is the live
+`d_NICaddress`: the wire `remote_id` supplies its low 32 bits and the
+server-assigned `local_id` its high 32 bits. Here that yields the noncanonical
+`0x00000002fffffffe`. `setNICaddress()` would `delete[]` it (`:3911`), but its
+callers (`:5955/:6047/:6228`) run at connection setup, and no in-run consumer
+of the corrupted value was observed. The high half is not attacker-chosen:
+`local_id` is bounded by the server's local-ID allocator (at most 2000 =
+`0x7d0`), far below the high half of any mapped heap or stack address
+(`0x5555` / `0x7fff`). The fixed plain build shows the identical alias
+(`out-w29-alias-fixed/gdb.log`, port 15369): this code is outside the CVE fix.
+
+Grade unchanged: wire-chosen bytes into a live UDP input buffer and a
+wire-chosen int32 into the low half of a live pointer, but no full chosen
+address, no command side effect and no rung 5. This is an author
+self-observation at the "chosen offset into live state" rung-4 scope, not
+independently replayed. Ports 15361-15369 were loopback and freed; no
+`vrpn_server` was left running. Do not resweep the W26 sender set or the W27
+indices; the new scripts and digests are in `PROVENANCE.md` W29.
+
 ## Limits and next work
 
 - W25 closes the negative-index lane on stock `-O0`: indices -1 through -128
@@ -1291,7 +1341,15 @@ replayed. Do not resweep these index points on the same binaries.
   chosen bytes, not a chosen address; no command, no rung 5. Both builds
   affected. Author self-observation, not replayed; do not resweep these two
   index points or the W26 sender set on the same binaries.
-
+- W29 maps the region W26 did not: in the whole ~32 KB before
+  `d_senders.d_entry[0]` only k=-1 (the table's malloc chunk size) and k=-2
+  hold nonzero aligned words. k=-2 is the live `vrpn_Endpoint_IP::d_udpInbuf`
+  pointer, so the W26 sender -2 copy writes wire-chosen bytes into the UDP
+  input buffer rather than a fresh 100-byte allocation; the record's +8 word
+  is `d_NICaddress`, whose low 32 bits are the wire sender and whose high 32
+  bits are the server-assigned `local_id`. No full chosen address, no command,
+  no rung 5. Both builds affected; author self-observation, not replayed. Do
+  not resweep sender -2 on these binaries.
 - W24 found a second source defect: `payload_len` 0-3 underflows the `strncpy`
   length at vulnerable `:4548`/`:4476` and fixed `:4552`/`:4480`. ASan reports
   `negative-size-param (size=-4)`; glibc 2.39 performs a zero-store, so a

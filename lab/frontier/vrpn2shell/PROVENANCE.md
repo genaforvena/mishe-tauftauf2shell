@@ -868,3 +868,61 @@ Both messages go out on one TCP connection so they reach the same endpoint.
 Grade unchanged: no wire-chosen destination, no command side effect, no
 rung 5. Author self-observation, not independently replayed. Do not resweep
 the W26 sender set or these two index points on the same binaries.
+
+## W29 — endpoint-field alias of the -2 OOB record (2026-11-24 ~17:2xZ)
+
+New scripts (local, SHA-256): `probe-xlation-scan.sh`
+`2ace227d2a9ff5ab773b0d45ca247b6dcd85616d69c51a35b33fbdc549555a4c`,
+`w29-scan.py` (gdb helper)
+`320e1fdc39b31c649473a61a5f8d1d1ef61de1a1d11306cc2dad9fe89116adf0`,
+`probe-xlation-owner.sh`
+`25d2770d842df3680acd3ace84d56aff6fba44604451df85b0c7f7c786c9c69a`,
+`probe-xlation-alias-endpoint.sh`
+`d277c717221117109019252c8d9dcc643ece69ac9fce77a64f01931a8c1599e6`.
+No source change and no rebuild: the W26 binaries are reused, vulnerable plain
+`-O0` `5cf4945768615a55da3401c7608f4223dd1f8f04fb89f2387f6ff6c22340bd74`
+and fixed plain `10e581e895c25f39bea153b4d5ce1014796190fb9bd5f901693115d176ea2f45`
+(per-run digests in each `out-w29-*/meta.txt`).
+
+`probe-xlation-scan.sh <out> <port> 4` breaks at `:405` on a benign sender-4
+message, reads 32016 bytes ending at `&d_entry[0]` through the gdb inferior,
+prints every nonzero aligned word, then quits before `memcpy` (no mutation of
+the inspected process). `out-w29-scan-plain2/gdb.log` (port 15362) shows only
+k=-1 = `0x7d11` (table chunk size) and k=-2 = `0x555555702d88`; k=-3..-1999
+are all zero. `out-w29-scan-plain6/heap.bin` is a 163856-byte dump from
+`base-0x20000` to `base+0x8010` (SHA-256
+`8579305886ffe424efe2866238ffc6a6f35748c46089fca7b34cf1ebcb197c94`);
+`gdb -ex 'set max-value-size 100000' -ex 'ptype /o vrpn_Endpoint_IP'`
+gives `d_tcpInbuf` +65840, `d_udpInbuf` +65848, `d_NICaddress` +65856,
+`d_udpAlignedInbuf[0]` +64360. `out-w29-owner/gdb.log` (port 15367) places the
+endpoint at `0x5555556f3220` (frame #1 `this`), so `&d_entry[-2] =
+endpoint+65848 = d_udpInbuf` and the pre-existing pointer is
+`d_udpAlignedInbuf[0]`.
+
+`out-w29-alias-endpoint/gdb.log` (port 15368, sender -2, NUL index 4, SHA-256
+`4dc50bcf60f4d5e66d7bc07a2f63aa72c5fa20c6d17c0c4c5622b5fb8fe7b171`)
+records PRE414 `slot=0x...3358 name=0x...2d88 remote_id=0 local_id=0
+plus8=(nil)` and POST427 `slotdata=0x...2d88 plus8=0x2fffffffe remote_id=-2
+local_id=2`; the pointee bytes become `42 42 42 42 00 42 ...`. Thus the 100
+wire bytes land in the live UDP input buffer, while the record's +8 word is
+the live `d_NICaddress`: low 32 bits from the wire sender, high 32 bits from
+the server-assigned `local_id`. `setNICaddress()` would `delete[]` it
+(`:3911`) but its callers are setup-time only (`:5955/:6047/:6228`); no in-run
+consumer was observed. The fixed build shows the same alias
+(`out-w29-alias-fixed/gdb.log`, port 15369, SHA-256
+`9aca38220973edb0a920d9b5c8709e6c69a9bb873f974572e3f07f44333a64a9`).
+
+Correction to W26: `out-w26-gdb-s-2/gdb.log` already showed
+`0x555555703358: 0x0000555555702d88` at `:405`, so the slot was not NULL and
+`:406` did not allocate a fresh 100-byte buffer. The report's W26 paragraph
+and Limits entry now use the measured `d_udpInbuf` alias.
+
+Grade unchanged: chosen offset and chosen bytes into a live input buffer, a
+wire-chosen low half of a live pointer whose high half is server-assigned, no
+full chosen address, no command, no rung 5. Author self-observation, not
+replayed. Ports 15361-15369 were loopback and freed; no server left running.
+`out-w29-scan-plain{,3,4,5}/` are superseded probe iterations (an initial
+8-byte offset error, then incremental dump additions), kept as raw history;
+the canonical slot map is `out-w29-scan-plain2/gdb.log` and the canonical dump
+is `out-w29-scan-plain6/heap.bin`.
+Do not resweep sender -2 on these binaries.

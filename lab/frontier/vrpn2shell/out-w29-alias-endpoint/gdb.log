@@ -1,0 +1,15 @@
+Breakpoint 1 at 0x40b3b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 414.
+Breakpoint 2 at 0x40bb2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PRE414 slot=0x555555703358 name=0x555555702d88 remote_id=0 local_id=0 slotdata=0x555555702d88 plus8=(nil)
+0x555555702d88:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555702d90:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+POST427 slot=0x555555703358 slotdata=0x555555702d88 plus8=0x2fffffffe remote_id=-2 local_id=2
+0x555555702d88:	0x42	0x42	0x42	0x42	0x00	0x42	0x42	0x42
+0x555555702d90:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+#0  vrpn_TranslationTable::addRemoteEntry (this=0x555555703370, name=0x7fffffffd8f0 "BBBB", remote_id=-2, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:427
+#1  0x000055555559af39 in vrpn_Endpoint::newRemoteSender (this=0x5555556f3220, sender_name=0x7fffffffd8f0 "BBBB", remote_id=-2, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3229
+#2  0x000055555559de2f in vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4574
+vrpn_Endpoint::getOneTCPMessage:  Can't read header (this is normal when a connection is dropped)
+vrpn: TCP handling failed, dropping connection (this is normal when a connection is dropped)

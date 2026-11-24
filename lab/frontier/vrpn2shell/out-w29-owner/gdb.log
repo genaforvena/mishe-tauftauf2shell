@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x40af9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C, line 405.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+AT405 base=0x555555703378 slot=0x555555703358 value=0x555555702d88 useEntry=4
+#0  vrpn_TranslationTable::addRemoteEntry (this=0x555555703370, name=0x7fffffffd8f0 "BBBB", remote_id=4, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:405
+#1  0x000055555559af39 in vrpn_Endpoint::newRemoteSender (this=0x5555556f3220, sender_name=0x7fffffffd8f0 "BBBB", remote_id=4, local_id=2) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:3229
+#2  0x000055555559de2f in vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4574
+#3  0x0000555555596d88 in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, p=..., userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1446
+#4  0x0000555555596c8f in vrpn_TypeDispatcher::doSystemCallbacksFor (this=0x7ffff7bbd010, type=-1, sender=4, time=..., len=100, buffer=0x5555556f3380 "", userdata=0x5555556f3220) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:1424
+#2  0x000055555559de2f in vrpn_Endpoint::handle_sender_message (userdata=0x5555556f3220, p=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vrpn2shell/src/vrpn-07.36/vrpn_Connection.C:4574
+4574	    if (endpoint->newRemoteSender(sender_name, p.sender, local_id) == -1) {
+lab/frontier/vrpn2shell/out-w29-owner/gdb.cmd:18: Error in sourced command file:
+No symbol "__func__" in current context.
