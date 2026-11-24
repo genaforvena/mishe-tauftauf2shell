@@ -2032,9 +2032,15 @@ READ, so the WRITE is guard-and-gdb measured, not ASan-observed.
 Libheif W188 found a source-level sequence consumer in ImageMagick 7's HEIC
 coder (`coders/heic.c:2076`, `:2202-2205`, `:2230-2349`): the track takes the
 first frame's dimensions but later frames keep their own, with no size check.
-This narrows W186/W187's no-sequence-consumer implication, but this plant's
-binaries have no HEIC delegate and host libheif 1.17.6 is below the 1.20.0
-guard, so no delegate build, run or chosen bytes exist; grade unchanged.
+W189 tested that hypothesis with a real ImageMagick 7.1.2-34 build linked to
+the pinned libheif v1.23.6 static library: a two-frame 512x64 / 64x65 input
+(SHA-256 `73590bbd…f392d`, recomputed here) encoded `.heic` as two still
+images and `.avif` as two mixed frames, both rc 0; `check_im_consumer.py` gave
+7 PASS / 0 FAIL. The sequence branch is AVIF-only (`heic.c:2516-2547`) and
+selects AV1 (`heic.c:2141-2142`), whose pinned encoder never calls
+`extend_padding_to_size`; no crash, chosen bytes at the sink, pointer or grade
+change. The gdb padding breakpoint is not a clean negative (two static copies
+of libheif were linked). Author-only, unwitnessed, rung 5 UNKNOWN.
 Frontier staged Lwnode2Shell (CVE-2026-135746 / GHSA-mvm7-rjgq-6j36, PR base
 `b3de7be5`) on the one-byte `WriteOneByte()` capacity overflow: the verbatim
 pinned loop under ASan reports `WRITE of size 1` 0 bytes past an 8-byte
@@ -2044,6 +2050,16 @@ No lwnode/Escargot build, JS trigger or real API call; witness replay #3627
 has no verdict. FRONTIER-STAGED only — no charter, route, wake unit or mind
 count. The duplicate llamarpc2shell staging was reverted in `8eaf510f` and
 `e5ae3bd9`, leaving its admitted row unchanged.
+Assimp W12 audited the optimizer flags: the W10/W11 "`-O1`" plain libraries
+actually ended at `-O3`, because CMake's `Release` flags are appended after
+the requested `-O1`. `bash harness/run-w12.sh` rebuilds pinned v6.0.6 with
+explicit `-O{0,2,3}` and gives 17 PASS / 0 FAIL: both chosen fault addresses
+(`0x41414141`, `0x42424242`) survive gcc -O2/-O3 at `glTFImporter.cpp:475`,
+while -O0 aborts on a stack canary before the dereference; the safe input
+stays clean and the normalized trace `f2f6d6ee…c7d8af` was byte-identical in
+a clean `git archive 3f540a2e` replay. Author-only and unwitnessed; W11's
+clang negative stands, no valid object or code pointer, no marker, command
+or r5.
 
 ## How the plant works
 

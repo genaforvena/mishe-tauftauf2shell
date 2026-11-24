@@ -7906,3 +7906,69 @@ AS LABELED for the four extensions, no contradiction, grade stays W195 rungs
 1-4, NO r5. Crafted-image draw (the fault is at load, before draw),
 cache-hit reload, wire, ASLR-independent target, pointer/IP and command stay
 UNKNOWN. Full replay record: `reports/frontier-fltk2shell.md` W199.
+
+### Libheif2Shell W189 — real ImageMagick consumer rejects mixed-size reach
+
+Affected/fixed versions and pins as in the Libheif2Shell row above; no new
+source pin. W189 supersedes W188's "no delegate build or run": ImageMagick
+7.1.2-34 was built from `lab/frontier/imagemagick2shell/vuln` (read only)
+against the pinned v1.23.6 static `libheif.a` and its `libheif/api` headers in
+a `/tmp` tree. `configure` selected host libheif 1.17.6 despite the supplied
+variables, so the generated Makefile library variables must be overridden on
+the `make` command line; the exact flags are in
+`lab/frontier/libheif2shell/real/neighbour/evidence/im-consumer/README.md`.
+The final binary links no `libheif.so` and reports `HEIC rw+`. From that
+evidence directory `python3 check_im_consumer.py .` checks committed bytes
+only and returned 7 PASS / 0 FAIL here: `mixed-frames.miff` SHA-256
+`73590bbd702820ebebba3c9e490f694fdbd5cfdcc1281f6ca92958eed71f392d`
+(recomputed), both `heic-mixed.rc` and `avif-mixed.rc` are 0, and `heif-info`
+shows 512x64 + 64x65 in both outputs; `.heic` gives two independent still
+images, `.avif` two AV1 frames. Structural negative: `heic.c:2516-2547` takes
+the sequence branch only for AVIF and `heic.c:2141-2142` selects AV1, while
+pinned v1.23.6 calls `extend_padding_to_size` only in x265/x264/kvazaar/svt/
+uvg266/vvenc and the public wrapper, not AOM. `gdb-padding.out` is NOT a clean
+breakpoint negative: two static copies of libheif were linked. No ASan build,
+crash, chosen bytes at the sink, pointer, command, witness verdict or rung
+change. Full notes: `reports/libheif2shell-status.md` W189.
+
+### Assimp2Shell W12 — explicit gcc optimization matrix
+
+Affected through 6.0.6 / open PRs 6860 and 7090 as in the row above; no new
+pins. A flag audit found the W10/W11 libraries were configured with
+`-DCMAKE_BUILD_TYPE=Release`, whose `-O3 -DNDEBUG` is appended after the
+requested `-O1`. From `lab/frontier/assimp2shell`, after `bash bootstrap.sh`,
+run `bash harness/run-w12.sh`; it rebuilds the pinned library with an empty
+build type and explicit `-O{0,2,3} -g -U_FORTIFY_SOURCE -DNDEBUG
+-fno-omit-frame-pointer` (verbatim flags in `w12/evidence/o*-flags.txt`),
+compiles the driver at the matching level and feeds the tracked `safe.gltf`,
+`idxptr-zero.gltf` and `idxptr-addr42.gltf` through `ReadFileFromMemory`.
+Expect 17 PASS / 0 FAIL in `w12/evidence/w12.log`: `VERDICT o2 PORTABLE` and
+`VERDICT o3 PORTABLE` with `si_addr=0x41414141` / `0x42424242` in
+`CopyVector<aiMesh>` at `glTFImporter.cpp:475`; `VERDICT o0 DIFFERENT`
+(stack-canary abort before the dereference) and `scene=ok` for the safe input
+at all levels. Chosen words in `w12/evidence/bytes.out` are `41414141` and
+`42424242`. Normalized trace SHA-256
+`f2f6d6ee18e2196706550b8de4a32840793b4eb7f25de4117e160f9d10c7d8af`
+(recomputed here). Author clean-archive replay: `git archive 3f540a2e` into a
+temp dir with the local pinned tarball copied in (no network), `bootstrap.sh`
+rc 0, all three libraries rebuilt by the script, 17 PASS / 0 FAIL and a
+byte-identical trace (`21916409`). Author-only, unwitnessed; W11's clang
+negative stands, and there is no valid object or code pointer, marker,
+control-flow redirection, command or r5.
+
+### Synchronet2Shell W9 — custom pre-auth client cannot reach the copy
+
+From `lab/frontier/synchronet2shell`, with the gitignored `src-tree` at pinned
+parent `42f586d70792e46b4934176976bc7949b312dede`, run
+`bash real-answer/noauth/run-preauth.sh` (script SHA-256
+`5672214b38a5fc5dbd4ef4bf70832cc49eebd835ad89caf65ec8d36b58c7500a`,
+recomputed here). It rebuilds `sbbs3` and drives a scripted paramiko 5.1.0
+client over loopback only, with no authentication request before the pty-req;
+the two-byte channel-open accommodation for cryptlib's parser is documented
+in `reports/frontier-synchronet2shell.md` W9. Expect 9 PASS / 0 FAIL, zero
+`REAL_ANSWER_PROBE` lines in `evidence-preauth/server-noauth.log` (checked
+locally) and one in `server-anyauth.log`: without `SSH_ANYAUTH` the state
+machine rejects channel establishment before the pre-auth TERM can reach the
+copy, while the none-auth positive control writes `MISH`/`E-OO`/`TAUFTAUF`
+bytes. Author-measured, unwitnessed; no grade or rung change. Other builds
+or configurations with valid credentials stay UNKNOWN.
