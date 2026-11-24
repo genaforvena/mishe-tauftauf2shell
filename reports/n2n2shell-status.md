@@ -44,20 +44,21 @@ system was probed.
 
 ## Current grade
 
-Rungs 1-3 on the verbatim pinned decoder under ASan. Rung 4 is PARTIAL:
-chosen wire bytes appear at chosen offsets in a live adjacent object in the
-plain stand-in; ASan redzones poison that memory in the instrumented build.
-Not established: a built supernode, a UDP datagram to a live process, a
-stack canary or return address, pointer or IP control, command execution,
-or rung 5. Whether a real supernode build lands the advisory's stack
-overflow at `sn_utils.c`, the stock allocator outcome and witness replay
-stay UNKNOWN.
+Rungs 1-3 on the verbatim pinned decoder and, since 2026-11-24 22:1xZ, on a
+real pinned supernode process reached by one loopback UDP NAK datagram:
+ASan reports `stack-buffer-overflow`, `WRITE of size 96`, frames
+`wire.c:179` <- `wire.c:651` <- `sn_utils.c:2322`, in the stack `nak` at
+`sn_utils.c:2308`; safe and fixed-decoder controls are clean. Rung 4 is
+established for chosen bytes at chosen offsets in that live process's
+stack (gdb: 96 chosen bytes at `nak+14..109`). Not established: control of
+a live pointer, canary or return address, command execution, or rung 5.
+The advisory's `sn_utils.c` stack attribution is now reproduced locally;
+witness replay of the live experiment is UNKNOWN. Full evidence
+`reports/n2n2shell-live.md`.
 
 ## Next
 
-Cheapest measured step: build the pinned vulnerable supernode (`cmake` from
-`provision/n2n-vuln.tar.gz`) with ASan, configure a loopback community and
-send one crafted `REGISTER_SUPER_NAK` datagram, keeping fixed-commit and
-safe-input controls. Any rung-5 claim needs an independently witnessed
-loopback wire path with an observed benign command side effect; none is
-measured here.
+Witness replay of the live datagram and the stand-in harness, then a
+plain-build search for a live object at the overwritten offsets. A rung-5
+attempt needs a measured pointer/control path and an independently
+witnessed loopback benign-command side effect; none is measured here.

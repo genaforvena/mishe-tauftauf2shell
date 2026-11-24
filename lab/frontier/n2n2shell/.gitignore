@@ -3,3 +3,4 @@ harness/asan-fixed
 harness/plain-vuln
 harness/plain-fixed
 *.o
+provision/build/
