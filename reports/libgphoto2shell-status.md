@@ -44,6 +44,18 @@ Admission adds no grade.
   fixed build makes no oversized device request. No real USB hardware, wire,
   camera consumer, socket, pointer-control chain, command, marker side effect
   or witness verdict. Rung 5 UNKNOWN.
+- W171 (author-observed, unwitnessed): the device reply restores the real
+  caller frame (canary, saved rbx/rbp/RIP) so `jl2005c_init` returns normally
+  into `camera_init` and `gp_camera_init` reports rc=0. The device-chosen
+  pointer and length survive in a live `CameraFile`; the real
+  `gp_file_get_data_and_size()` returns them and dereferencing the pointer
+  yields a device-chosen 29-byte marker. Safe fill, count 100, wrong canary,
+  fixed/reversed camlib and two omitted-restore failures are recorded.
+  Canary and saved registers come from gdb reading the live process, victim
+  placement and drain=22 are lab hooks, gphoto2's own `gp_file_save()` aborts
+  at `malloc(): corrupted top size`, and no USB/wire/command path exists.
+  Rung 4 at the real post-normal-return scope; rung 5 UNKNOWN. Evidence:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-normal-return-deref.out`.
 
 Next for the target mind: replay the virtual-port lane independently
 (`lab/frontier/libgphoto2shell/REAL-BUILD.md`) and hunt counterexamples to the

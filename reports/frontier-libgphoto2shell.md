@@ -268,3 +268,24 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   local-only diff and probe:
   `lab/frontier/libgphoto2shell/evidence/real-plain-heap-pointer-control.out`,
   `replay-vusb-victim.patch`, `replay-victim_probe.c`.
+
+- Normal return and pointer dereference (W171, 2026-11-24): the device reply
+  also restores `camera_init`'s canary (at its `rbp-0x18`) and saved
+  `rbx`/`rbp`/RIP, so `jl2005c_init` returns normally into the real caller
+  and `gp_camera_init` reports rc=0 — no `finish()` diversion. Under the
+  gdb-injected frame values the heap shifts, so drain=22 (not W170's 24)
+  keeps the victim at `priv+0x4050`; drain 24 leaves it unreachable. With
+  drain 22, the real `gp_file_get_data_and_size()` returns the device-chosen
+  pointer `0x5555...6010` and length `0x1d`, and dereferencing them reads
+  the device-chosen marker `M2SHELL_DEREF_MARKER_20261124`. Safe fill returns
+  `data=(nil) size=0x0`; count 100 and the fixed camlib produce no victim;
+  wrong canary aborts; omitting either caller-frame restore crashes in
+  `camera_init`. gphoto2's own `gp_file_save()` aborts at
+  `malloc(): corrupted top size`, so the dereference is the probe's own
+  read of the API-returned pointer. Canary and all saved registers are
+  read from the live process by gdb, victim placement is a lab hook, and
+  no USB/wire/command path exists. Rung 4 at the real post-normal-return
+  scope; rung 5 UNKNOWN. Evidence and replay bundle:
+  `lab/frontier/libgphoto2shell/evidence/real-plain-normal-return-deref.out`,
+  `replay-vusb-normal-return.patch`, `replay-normal_return_probe.c`,
+  `replay-normal-return.gdb`.

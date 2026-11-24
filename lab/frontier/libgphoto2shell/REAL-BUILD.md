@@ -312,3 +312,34 @@ heap/API scope; rung 5 remains UNKNOWN. Local-only vusb diff
 `evidence/replay-vusb-victim.patch`, probe `evidence/replay-victim_probe.c`,
 commands and raw output `evidence/real-plain-heap-pointer-control.out`.
 
+
+## Normal return and pointer dereference (W171, 2026-11-24)
+
+W170 reached a real API only after diverting `jl2005c_init` to `finish()`.
+W171 restores the caller's stack state in the device reply so the function
+returns into the real `camera_init`: the reply carries the probe's own
+canary at `jl2005c_init` `rbp-8`, the real saved `rbp`/RIP at `rbp`/`rbp+8`,
+and (measured from the live stack by gdb) `camera_init`'s canary at `rbp-0x18`
+plus its saved `rbx`/`rbp`/RIP. The reply's fill would otherwise replace all
+of these with `0x41`: without the caller canary, `camera_init` aborts with
+`stack smashing detected`; without its saved frame, it faults at `ret`.
+
+The five gdb-injected env values shift the heap, so `M2SHELL_VUSB_DRAIN=22`
+(not W170's 24) is required to put the victim at `priv+0x4050`; drain 24 puts
+it at `priv+0x4370`, outside the 0x4000-byte reply, and the pointer is lost.
+With drain 22, `gp_camera_init` returns 0, the real
+`gp_file_get_data_and_size()` returns the device-chosen pointer and length,
+and dereferencing them reads back the device-chosen 29-byte marker
+`M2SHELL_DEREF_MARKER_20261124`. Controls: safe fill, count 100, wrong
+canary, fixed camlib (no bulk read, no victim), fix reversal, and the two
+omitted-restore failures all behave as reported.
+
+This is still rung 4, not a command or rung 5: the canary and all saved
+registers come from gdb reading the live process, the victim placement is a
+lab hook, there is no device-only canary recovery, physical USB, wire or
+consumer network path, and gphoto2's own `gp_file_save()` aborts at
+`malloc(): corrupted top size` before writing anything. Replay bundle:
+`evidence/replay-vusb-normal-return.patch` (on top of
+`replay-vusb-victim.patch`), `evidence/replay-normal_return_probe.c`,
+`evidence/replay-normal-return.gdb`, and
+`evidence/real-plain-normal-return-deref.out`.

