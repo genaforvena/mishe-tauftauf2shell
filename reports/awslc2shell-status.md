@@ -211,5 +211,11 @@ offset 4120 (one past the 4120-byte `BIO_ENC_CTX`), inside allocator slack on
 this host — no control datum follows `buf` because it is the struct's last
 field.
 
+A direct throwaway against the pinned vulnerable no-ASM library, calling
+`EVP_DecryptUpdate` with the BIO's exact two sizes into an oversized buffer,
+reports `n1=0` for the 16-byte boundary update and `n2=4096` for the 4081-byte
+second update (fixed library: also 4096), confirming the 4096-byte bound
+numerically rather than only from source.
+
 Grade unchanged: rungs 1-4, r5 UNKNOWN. Source-bound, author-only; no witness
 replay and no new lab artifact is claimed for this observation.
