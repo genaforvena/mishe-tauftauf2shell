@@ -1,0 +1,227 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1301945)]
+[New Thread 0x7fffae39e6c0 (LWP 1301948)]
+[New Thread 0x7fffadb9d6c0 (LWP 1301949)]
+[New Thread 0x7fffad39c6c0 (LWP 1301950)]
+[New Thread 0x7fffacb9b6c0 (LWP 1301951)]
+[New Thread 0x7fff97fff6c0 (LWP 1301952)]
+[New Thread 0x7fff977fe6c0 (LWP 1301953)]
+[New Thread 0x7fff96ffd6c0 (LWP 1301954)]
+[New Thread 0x7fff967fc6c0 (LWP 1301955)]
+[New Thread 0x7fff95ffb6c0 (LWP 1301959)]
+[New Thread 0x7fff951ff6c0 (LWP 1302142)]
+[New Thread 0x7fff949fe6c0 (LWP 1302143)]
+[New Thread 0x7fff77fff6c0 (LWP 1302145)]
+[Switching to Thread 0x7fff977fe6c0 (LWP 1301953)]
+
+Thread 8 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fff88067210, buf=buf@entry=0x7fff8803eefe, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+GDB_BASE 0x7fff8803eef0 ACTUAL 0x7fff8803eefe
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fff88000ca0) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_RET=(nil)
+GDB_TCACHE_PRE head=0x7fff8803ef10 count=7
+GDB_WIRE_DECODED 0x7fff8803803e RAW 0x7ff877fb0000 POS 0x7fff8803ef10
+Breakpoint 2 at 0x7ffff76ade10: free. (57 locations)
+Breakpoint 3 at 0x7ffff76ad730: malloc. (47 locations)
+GDB_FREE ptr=0x7fff8803ee20 chunksize=0x55 ret=0x7ffff7f59d78 thread=8
+0x7fff8803ee10:	0x0000000000000000	0x0000000000000055
+0x7fff8803ee20:	0x0000000000000000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8803ee20) at ./malloc/malloc.c:3359
+#1  0x00007ffff7f59d78 in g_closure_unref () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#2  0x00007ffff7f71c09 in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+GDB_FREE ptr=0x7fff8803e640 chunksize=0x45 ret=0x7ffff7f8a23b thread=8
+0x7fff8803e630:	0x00007fff8803e8a0	0x0000000000000045
+0x7fff8803e640:	0x0000000000000000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8803e640) at ./malloc/malloc.c:3359
+#1  0x00007ffff7f8a23b in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+#2  0x00007ffff7f7a591 in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+GDB_FREE ptr=0x7fff8803ee00 chunksize=0x25 ret=0x7ffff7bbaf46 thread=8
+0x7fff8803edf0:	0x000000000000656c	0x0000000000000025
+0x7fff8803ee00:	0x0000006567616d69	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8803ee00) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bbaf46 in vips_object_set_property (gobject=0x7fff88003b10, property_id=1, value=0x7fff977fd400, pspec=0x7fff840014b0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:1240
+#2  0x00007ffff7f6b1fa in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+GDB_FREE ptr=0x7fff88067970 chunksize=0x24 ret=0x7ffff7bbaf46 thread=8
+0x7fff88067960:	0x00000000000001a0	0x0000000000000024
+0x7fff88067970:	0x6c63206567616d69	0x0000000000737361
+#0  __GI___libc_free (mem=0x7fff88067970) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bbaf46 in vips_object_set_property (gobject=0x7fff88003b10, property_id=2, value=0x7fff977fd400, pspec=0x7fff840026c0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:1240
+#2  0x00007ffff7f6b1fa in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+GDB_FREE ptr=0x7fff8803ede0 chunksize=0x25 ret=0x7ffff7bbaf46 thread=8
+0x7fff8803edd0:	0x0000000000000000	0x0000000000000025
+0x7fff8803ede0:	0x0036352d706d6574	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8803ede0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bbaf46 in vips_object_set_property (gobject=0x7fff88003b10, property_id=804, value=0x7fff977fd400, pspec=0x7fff8407f8c0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:1240
+#2  0x00007ffff7f6b1fa in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+GDB_FREE ptr=0x7fff88067bd0 chunksize=0x24 ret=0x7ffff7bbaf46 thread=8
+0x7fff88067bc0:	0x00000000000001c0	0x0000000000000024
+0x7fff88067bd0:	0x00007ff877fb0070	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff88067bd0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bbaf46 in vips_object_set_property (gobject=0x7fff88003b10, property_id=805, value=0x7fff977fd400, pspec=0x7fff8407fa00) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:1240
+#2  0x00007ffff7f6b1fa in ??? () at /lib/x86_64-linux-gnu/libgobject-2.0.so.0
+
+Thread 8 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+GDB_M1_HIT size=0x20 thread=8
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $2 = (void *) 0x7fff8803ef10
+GDB_M1_RET 0x7fff8803ef10
+GDB_TCACHE_1 head=0x7fff8803803e count=6
+GDB_FREE ptr=0x7fff8803e680 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e670:	0x00007fff88003b10	0x0000000000000045
+0x7fff8803e680:	0x00007fff840014b0	0x00007fff84001000
+#0  __GI___libc_free (mem=0x7fff8803e680) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e680) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e5c0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e5b0:	0x0000000000000000	0x0000000000000045
+0x7fff8803e5c0:	0x00007fff8407fd90	0x00007fff8407fe20
+#0  __GI___libc_free (mem=0x7fff8803e5c0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e5c0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e860 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e850:	0x0000000000000000	0x0000000000000045
+0x7fff8803e860:	0x00007fff8407eed0	0x00007fff8407ef60
+#0  __GI___libc_free (mem=0x7fff8803e860) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e860) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff88041290 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff88041280:	0x0000000000000000	0x0000000000000045
+0x7fff88041290:	0x00007fff8407ed10	0x00007fff8407ed70
+#0  __GI___libc_free (mem=0x7fff88041290) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff88041290) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e7a0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e790:	0x0000000000000000	0x0000000000000045
+0x7fff8803e7a0:	0x00007fff8407ff10	0x00007fff8407ffb0
+#0  __GI___libc_free (mem=0x7fff8803e7a0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e7a0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e350 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e340:	0x0000000000000000	0x0000000000000045
+0x7fff8803e350:	0x00007fff8407f780	0x00007fff8407f810
+#0  __GI___libc_free (mem=0x7fff8803e350) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e350) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e410 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e400:	0x0000000000000000	0x0000000000000045
+0x7fff8803e410:	0x00007fff8407f3a0	0x00007fff8407f440
+#0  __GI___libc_free (mem=0x7fff8803e410) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e410) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e450 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e440:	0x0000000000000000	0x0000000000000045
+0x7fff8803e450:	0x00007fff8407fa00	0x00007fff8407fa70
+#0  __GI___libc_free (mem=0x7fff8803e450) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e450) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e600 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e5f0:	0x00007fff8407f270	0x0000000000000045
+0x7fff8803e600:	0x00007fff8407f270	0x00007fff8407f2d0
+#0  __GI___libc_free (mem=0x7fff8803e600) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e600) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e390 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e380:	0x0000000000000000	0x0000000000000045
+0x7fff8803e390:	0x00007fff8407fb60	0x00007fff8407fbf0
+#0  __GI___libc_free (mem=0x7fff8803e390) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e390) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e490 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e480:	0x0000000000000000	0x0000000000000045
+0x7fff8803e490:	0x00007fff8407f4f0	0x00007fff8407f590
+#0  __GI___libc_free (mem=0x7fff8803e490) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e490) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e4d0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e4c0:	0x0000000000000000	0x0000000000000045
+0x7fff8803e4d0:	0x00007fff8407f140	0x00007fff8407f1a0
+#0  __GI___libc_free (mem=0x7fff8803e4d0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e4d0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e6e0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e6d0:	0x0000000000000000	0x0000000000000045
+0x7fff8803e6e0:	0x00007fff840800c0	0x00007fff84080110
+#0  __GI___libc_free (mem=0x7fff8803e6e0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e6e0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e510 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e500:	0x0000000000000000	0x0000000000000045
+0x7fff8803e510:	0x00007fff8407edc0	0x00007fff8407ee20
+#0  __GI___libc_free (mem=0x7fff8803e510) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e510) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e720 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e710:	0x0000000000000000	0x0000000000000045
+0x7fff8803e720:	0x00007fff8407f010	0x00007fff8407f070
+#0  __GI___libc_free (mem=0x7fff8803e720) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e720) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e3d0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e3c0:	0x0000000000000000	0x0000000000000045
+0x7fff8803e3d0:	0x00007fff840026c0	0x00007fff840025b0
+#0  __GI___libc_free (mem=0x7fff8803e3d0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e3d0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e820 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e810:	0x0000000000000000	0x0000000000000045
+0x7fff8803e820:	0x00007fff8407f640	0x00007fff8407f6d0
+#0  __GI___libc_free (mem=0x7fff8803e820) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e820) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803e8a0 chunksize=0x45 ret=0x7ffff7bb98fc thread=8
+0x7fff8803e890:	0x0000000000000000	0x0000000000000045
+0x7fff8803e8a0:	0x00007fff8407f8c0	0x00007fff8407f930
+#0  __GI___libc_free (mem=0x7fff8803e8a0) at ./malloc/malloc.c:3359
+#1  0x00007ffff7bb98fc in vips_argument_instance_free (argument_instance=0x7fff8803e8a0) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:549
+#2  0x00007ffff78ffc22 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff88003550 chunksize=0x125 ret=0x7ffff78ffcd3 thread=8
+0x7fff88003540:	0x0000000000000000	0x0000000000000125
+0x7fff88003550:	0x0000000000000000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff88003550) at ./malloc/malloc.c:3359
+#1  0x00007ffff78ffcd3 in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff79016e0 in g_hash_table_remove_all () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8805aad0 chunksize=0x125 ret=0x7ffff78ffcdc thread=8
+0x7fff8805aac0:	0x0000000000000000	0x0000000000000125
+0x7fff8805aad0:	0x0000000000000000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8805aad0) at ./malloc/malloc.c:3359
+#1  0x00007ffff78ffcdc in ??? () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff79016e0 in g_hash_table_remove_all () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff88007580 chunksize=0x95 ret=0x7ffff79016e0 thread=8
+0x7fff88007570:	0x0000000000000000	0x0000000000000095
+0x7fff88007580:	0x0000000000000000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff88007580) at ./malloc/malloc.c:3359
+#1  0x00007ffff79016e0 in g_hash_table_remove_all () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff79026ba in g_hash_table_destroy () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+GDB_FREE ptr=0x7fff8803ef10 chunksize=0x25 ret=0x7ffff7902653 thread=8
+0x7fff8803ef00:	0x5b5a5d5c5b5a5d5c	0x0000000000000025
+0x7fff8803ef10:	0x00007ff877fb0000	0x0000000000000000
+#0  __GI___libc_free (mem=0x7fff8803ef10) at ./malloc/malloc.c:3359
+#1  0x00007ffff7902653 in g_hash_table_unref () at /lib/x86_64-linux-gnu/libglib-2.0.so.0
+#2  0x00007ffff7bb999b in vips_argument_table_destroy (table=0x7fff8805ed30) at ../src/libvips-8.18.2/libvips/iofuncs/object.c:573
+free(): invalid next size (fast)
+
+Thread 8 "imgproxy-vuln" received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+GDB_AFTER1 rdi=0x13dd28 rip=0x7ffff769ebec
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff764527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff76288ff in __GI_abort () at ./stdlib/abort.c:79

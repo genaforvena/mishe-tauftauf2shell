@@ -1,0 +1,208 @@
+warning: File "/home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /home/mesh-home/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.26.0.linux-amd64/src/runtime/runtime-gdb.py
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+To completely disable this security protection add
+	set auto-load safe-path /
+line to your configuration file "/home/mesh-home/.config/gdb/gdbinit".
+For more information about this security protection see the
+"Auto-loading safe path" section in the GDB manual.  E.g., run from the shell:
+	info "(gdb)Auto-loading safe path"
+Breakpoint 1 at 0x2da86f0: file vips.c, line 1304.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7fffaeb9f6c0 (LWP 1425386)]
+[New Thread 0x7fffae39e6c0 (LWP 1425387)]
+[New Thread 0x7fffadb9d6c0 (LWP 1425388)]
+[New Thread 0x7fffad39c6c0 (LWP 1425389)]
+[New Thread 0x7fffacb9b6c0 (LWP 1425390)]
+[New Thread 0x7fff97fff6c0 (LWP 1425391)]
+[New Thread 0x7fff977fe6c0 (LWP 1425392)]
+[New Thread 0x7fff96ffd6c0 (LWP 1425393)]
+[New Thread 0x7fff967fc6c0 (LWP 1425394)]
+[New Thread 0x7fff95ffb6c0 (LWP 1425395)]
+[New Thread 0x7fff957fa6c0 (LWP 1425398)]
+[New Thread 0x7fff949ff6c0 (LWP 1425410)]
+[New Thread 0x7fff77fff6c0 (LWP 1425411)]
+[New Thread 0x7fff6ffff6c0 (LWP 1425412)]
+[Switching to Thread 0x7fffadb9d6c0 (LWP 1425388)]
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 1, vips_foreign_load_read_full (source=0x7fffa4066a40, buf=buf@entry=0x7fffa401e1ee, len=len@entry=4294967285) at vips.c:1304
+1304	{
+GDB_HIT rdx=0xfffffff5
+GDB_BASE 0x7fffa401e1e0 ACTUAL 0x7fffa401e1ee
+0x0000000002da4ec2 in vips_foreign_load_ico_header (load=0x7fffa4063810) at icoload.c:161
+161	  if (vips_foreign_load_read_full(ico->source, actual_data, data_size) <= 0) {
+Value returned is $1 = 0
+GDB_TCACHE_PRE head=0x7fffa401e200 count=7
+GDB_WIRE_DECODED 0x7fffa401401e RAW 0x7ff85bfb0000 POS 0x7fffa401e200
+Breakpoint 2 at 0x7ffff76ade10: free. (57 locations)
+Breakpoint 3 at 0x7ffff76ad730: malloc. (47 locations)
+GDB_FREE ptr=0x7fffa401e110 chunksize=0x55 ret=0x7ffff7f59d78
+GDB_FREE ptr=0x7fffa401d930 chunksize=0x45 ret=0x7ffff7f8a23b
+GDB_FREE ptr=0x7fffa401e0f0 chunksize=0x25 ret=0x7ffff7bbaf46
+GDB_FREE ptr=0x7fffa407ef00 chunksize=0x24 ret=0x7ffff7bbaf46
+GDB_FREE ptr=0x7fffa401e0d0 chunksize=0x25 ret=0x7ffff7bbaf46
+GDB_FREE ptr=0x7fffa407f160 chunksize=0x24 ret=0x7ffff7bbaf46
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+GDB_M1_HIT size=0x20 thread=4
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $2 = (void *) 0x7fffa401e200
+GDB_M1_RET 0x7fffa401e200 WIRE=0
+GDB_FREE ptr=0x7fffa401db10 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d8b0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401da50 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d740 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401db50 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa4020680 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d640 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d680 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d780 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401db90 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401dad0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d9d0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401da10 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d7c0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d800 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa4020600 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401da90 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d6c0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa406e130 chunksize=0x125 ret=0x7ffff78ffcd3
+GDB_FREE ptr=0x7fffa40215a0 chunksize=0x125 ret=0x7ffff78ffcdc
+GDB_FREE ptr=0x7fffa406e970 chunksize=0x95 ret=0x7ffff79016e0
+GDB_FREE ptr=0x7fffa401e200 chunksize=0x35 ret=0x7ffff7902653
+GDB_FREE ptr=0x7fffa401cd40 chunksize=0x35 ret=0x7ffff790265c
+GDB_FREE ptr=0x7fffa4077220 chunksize=0x75 ret=0x7ffff7bb999b
+GDB_FREE ptr=0x7fffa4020480 chunksize=0x35 ret=0x7ffff7f793ce
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M2_HIT size=0x20 thread=4
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $3 = (void *) 0x7fffa401bfd0
+GDB_M2_RET 0x7fffa401bfd0 WIRE=0
+GDB_TCACHE_2 head=0x7fffa401401e count=6
+GDB_FREE ptr=0x7fffa4078470 chunksize=0x25 ret=0x7ffff7936534
+GDB_FREE ptr=0x7fffa407ef80 chunksize=0x24 ret=0x7ffff7bb5165
+GDB_FREE ptr=0x7fffa401b730 chunksize=0x55 ret=0x7ffff7bb5339
+GDB_FREE ptr=0x7fffa4004020 chunksize=0x25 ret=0x7ffff7bd3e2b
+GDB_FREE ptr=0x7fffa401cd10 chunksize=0x35 ret=0x7ffff7bd3e37
+GDB_FREE ptr=0x7fff70008ac0 chunksize=0x55 ret=0x7ffff78ffcd3
+GDB_FREE ptr=0x7fffa401d840 chunksize=0x55 ret=0x7ffff78ffcdc
+GDB_FREE ptr=0x7fffa4042240 chunksize=0x35 ret=0x7ffff79016e0
+GDB_FREE ptr=0x7fffa401bfd0 chunksize=0x35 ret=0x7ffff7902653
+GDB_FREE ptr=0x7fffa4020480 chunksize=0x35 ret=0x7ffff790265c
+GDB_FREE ptr=0x7fffa407e780 chunksize=0x74 ret=0x7ffff7bd3f94
+GDB_FREE ptr=0x7fffa401dfd0 chunksize=0x25 ret=0x7ffff78f2996
+GDB_FREE ptr=0x7fffa401dfb0 chunksize=0x25 ret=0x7ffff78f2996
+GDB_FREE ptr=0x7fffa4020640 chunksize=0x45 ret=0x7ffff7bba61c
+GDB_FREE ptr=0x7fffa4078510 chunksize=0x195 ret=0x7ffff7f7ef23
+GDB_FREE ptr=0x7fffa401c950 chunksize=0x25 ret=0x7ffff7bbaf46
+GDB_FREE ptr=0x7fffa407f200 chunksize=0x35 ret=0x7ffff7bbaf46
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M3_HIT size=0x20 thread=4
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $4 = (void *) 0x7fffa401cd40
+GDB_M3_RET 0x7fffa401cd40 WIRE=0
+GDB_TCACHE_3 head=0x7fffa401401e count=6
+GDB_FREE ptr=0x7fffa401d8f0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d700 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa4020580 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff70008b10 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff70008a30 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d970 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff700209a0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff70020cd0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa405a0c0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa404dee0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff70020bf0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa40205c0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fff70018a30 chunksize=0xa5 ret=0x7ffff78ffcd3
+GDB_FREE ptr=0x7fff7000c0e0 chunksize=0x95 ret=0x7ffff78ffcdc
+GDB_FREE ptr=0x7fffa40204e0 chunksize=0x55 ret=0x7ffff79016e0
+GDB_FREE ptr=0x7fffa401cd40 chunksize=0x35 ret=0x7ffff7902653
+GDB_FREE ptr=0x7fffa407f200 chunksize=0x35 ret=0x7ffff790265c
+GDB_FREE ptr=0x7fffa4022840 chunksize=0x75 ret=0x7ffff7bb999b
+GDB_FREE ptr=0x7fffa401dfb0 chunksize=0x25 ret=0x7ffff78f2996
+GDB_FREE ptr=0x7fffa401d150 chunksize=0x45 ret=0x7ffff7bba61c
+GDB_FREE ptr=0x7fffa4063810 chunksize=0xc5 ret=0x7ffff7f7ef23
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M4_HIT size=0x20 thread=4
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $5 = (void *) 0x7fffa4020480
+GDB_M4_RET 0x7fffa4020480 WIRE=0
+GDB_TCACHE_4 head=0x7fffa401401e count=6
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M5_HIT size=0x20 thread=4
+0x00007ffff7919b7a in g_malloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $6 = (void *) 0x7fffa401cd40
+GDB_M5_RET 0x7fffa401cd40 WIRE=0
+GDB_TCACHE_5 head=0x7fffa401401e count=6
+GDB_FREE ptr=0x7fffa4020480 chunksize=0x35 ret=0x7ffff790044b
+GDB_FREE ptr=0x7fffa401cd40 chunksize=0x35 ret=0x7ffff79005bb
+
+Thread 4 "imgproxy-vuln" hit Breakpoint 3.1, __GI___libc_malloc (bytes=32) at ./malloc/malloc.c:3294
+3294	in ./malloc/malloc.c
+GDB_M6_HIT size=0x20 thread=4
+0x00007ffff791a8ca in g_realloc () from /lib/x86_64-linux-gnu/libglib-2.0.so.0
+Value returned is $7 = (void *) 0x7fffa4020480
+GDB_M6_RET 0x7fffa4020480 WIRE=0
+GDB_TCACHE_6 head=0x7fffa401401e count=6
+GDB_FREE ptr=0x7fffa401d210 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401c330 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401cdc0 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d290 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401d250 chunksize=0x45 ret=0x7ffff7bb98fc
+GDB_FREE ptr=0x7fffa401b730 chunksize=0x55 ret=0x7ffff78ffcd3
+GDB_FREE ptr=0x7fff70008ac0 chunksize=0x55 ret=0x7ffff78ffcdc
+GDB_FREE ptr=0x7fffa407f200 chunksize=0x35 ret=0x7ffff79016e0
+GDB_FREE ptr=0x7fffa4020480 chunksize=0x35 ret=0x7ffff7902653
+GDB_FREE ptr=0x7fffa401cd40 chunksize=0x35 ret=0x7ffff790265c
+GDB_FREE ptr=0x7fffa4022840 chunksize=0x75 ret=0x7ffff7bb999b
+GDB_FREE ptr=0x7fffa404eff0 chunksize=0x35 ret=0x7ffff78d9765
+GDB_FREE ptr=0x7fffa401dfb0 chunksize=0x25 ret=0x7ffff78f2996
+GDB_FREE ptr=0x7fffa401d8f0 chunksize=0x45 ret=0x7ffff7bba61c
+GDB_FREE ptr=0x7fffa4066a40 chunksize=0xd5 ret=0x7ffff7f7ef23
+time="2026-11-24 18:16:55" level="ERROR" msg="Completed in 412.610297ms /insecure/rs:fill:16:16/plain/hostile.ico" request_id="KHLwRpsk0J9R6GSuKeoQF" method="GET" status=500 client_ip="127.0.0.1" error="vips_foreign_load_ico_header: unable to read ICO image data from the source" stack="/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:136 github.com/imgproxy/imgproxy/v3/vips.Error\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/vips/vips.go:298 github.com/imgproxy/imgproxy/v3/vips.(*Image).Load\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:161 github.com/imgproxy/imgproxy/v3/processing.(*Processor).initialLoadImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/processing/processing.go:79 github.com/imgproxy/imgproxy/v3/processing.(*Processor).ProcessImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request_methods.go:162 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).processImage\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/request.go:118 github.com/imgproxy/imgproxy/v3/handlers/processing.(*request).execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/handlers/processing/handler.go:93 github.com/imgproxy/imgproxy/v3/handlers/processing.(*Handler).Execute\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:88 github.com/imgproxy/imgproxy/v3/server.(*Router).WithPanic-fm.(*Router).WithPanic.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/middlewares.go:103 github.com/imgproxy/imgproxy/v3/server.(*Router).WithReportError-fm.(*Router).WithReportError.func1\n/home/mesh-home/mishe-tauftauf2shell/lab/frontier/imgproxy2shell/provision/imgproxy-4.0.0/server/router.go:142 github.com/imgproxy/imgproxy/v3/server.(*Router).ServeHTTP"
+[New Thread 0x7fff777fe6c0 (LWP 1428584)]
+[Switching to Thread 0x7fff777fe6c0 (LWP 1428584)]
+GDB_FREE ptr=0x81187e0 chunksize=0x21 ret=0x2da08f6
+[Switching to Thread 0x7fff6ffff6c0 (LWP 1425412)]
+GDB_FREE ptr=0x7fffa4066a20 chunksize=0x24 ret=0x7ffff7baba80
+[Switching to Thread 0x7fff949ff6c0 (LWP 1425410)]
+GDB_FREE ptr=0x7fffa4067f30 chunksize=0x24 ret=0x7ffff7baba80
+[Switching to Thread 0x7fff77fff6c0 (LWP 1425411)]
+GDB_FREE ptr=0x7fffa40669a0 chunksize=0x24 ret=0x7ffff7baba80
+[Switching to Thread 0x7fff6ffff6c0 (LWP 1425412)]
+GDB_FREE ptr=0x7fffa406f510 chunksize=0x64 ret=0x7ffff7699400
+[Switching to Thread 0x7fff949ff6c0 (LWP 1425410)]
+GDB_FREE ptr=0x7fffa4066860 chunksize=0x64 ret=0x7ffff7699400
+[Switching to Thread 0x7fff77fff6c0 (LWP 1425411)]
+GDB_FREE ptr=0x7fffa40512f0 chunksize=0x65 ret=0x7ffff7699400
+[Switching to Thread 0x7fff6ffff6c0 (LWP 1425412)]
+[Switching to Thread 0x7fff949ff6c0 (LWP 1425410)]
+[Switching to Thread 0x7fff77fff6c0 (LWP 1425411)]
+[Switching to Thread 0x7fff6ffff6c0 (LWP 1425412)]
+[Switching to Thread 0x7fff77fff6c0 (LWP 1425411)]
+[Switching to Thread 0x7fff949ff6c0 (LWP 1425410)]
+[Switching to Thread 0x7fff6ffff6c0 (LWP 1425412)]
+GDB_FREE ptr=0x7fff680008e0 chunksize=0x295 ret=0x7ffff76ae01e
+[Thread 0x7fff6ffff6c0 (LWP 1425412) exited]
+[Switching to Thread 0x7fff77fff6c0 (LWP 1425411)]
+GDB_FREE ptr=0x7fff700008e0 chunksize=0x295 ret=0x7ffff76ae01e
+[Switching to Thread 0x7fff949ff6c0 (LWP 1425410)]
+GDB_FREE ptr=0x7fff7c0008e0 chunksize=0x295 ret=0x7ffff76ae01e
+[Thread 0x7fff77fff6c0 (LWP 1425411) exited]
+[Thread 0x7fff949ff6c0 (LWP 1425410) exited]
+[Switching to Thread 0x7fffae39e6c0 (LWP 1425387)]
+[New Thread 0x7fff949ff6c0 (LWP 1434719)]
+[Switching to Thread 0x7fff949ff6c0 (LWP 1434719)]
+GDB_FREE ptr=0x7fffa0000d20 chunksize=0x25 ret=0x2da08f6

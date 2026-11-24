@@ -892,3 +892,64 @@ Victim rate 3/22 versus the author's 10/49 is stochastic; all negatives were
 preserved in `/tmp/w204-out` and are not retried into existence. Verdict
 ESTABLISHED AS LABELED, no contradiction, no grade change, no r5; W201
 remains the ceiling.
+
+## W10 — aborting free identified; size-preserving body never consumed (2026-11-24 18:11-18:20Z, author, unwitnessed)
+
+Question left open by witness W204: W9 recorded the allocator blocker
+(`free(): invalid next size (fast)`) but did not attribute it to a freeing
+call or chunk. Both probes below reuse `ico_post_poison_trace.py`
+(`sha256=563f5f7a44e5aacd43c12132eb9cdb0cc39fbfec1d1cbbb02e6aa20aba34e6f0`)
+verbatim and replace only its GDB command script; GDB prints memory and
+backtraces, writes no memory and forces no call. All traffic stayed on
+127.0.0.1:18180/18181; those ports were free before use.
+
+`provision/ico_free_attribution.py` sha256
+`9f88ac4e030af4208700d5f589f4951cefb4b1f2f39df069da5cfd9d4446940d`;
+after the write it breaks on every natural `free()` and prints `$rdi`, the
+chunk size at `$rdi-8`, the caller return address and `bt 3`. Command shape
+(eight runs `w10c10`-`w10c17`):
+
+```
+W8_OUTDIR=/tmp/w10-out python3 ico_free_attribution.py w10c13 0x0 20 2 gdb 0x25
+```
+
+Pinned plain `imgproxy-vuln`, 42-byte ICO, 20-byte body, `LOW=0`, two benign
+preloads. Two runs had the wire-head layout and aborted identically. In
+`http-ico-w10-attr1.log` sha256
+`76ec9157ac4506a8c8afcefd4b82cf9a8cd2a0811283a98b78b8a457215d2ea4`:
+`GDB_TCACHE_PRE head=0x7fff8803ef10 count=7`,
+`GDB_WIRE_DECODED 0x7fff8803803e RAW 0x7ff877fb0000 POS 0x7fff8803ef10`,
+M1 returned `0x7fff8803ef10`, head became `0x7fff8803803e` at count 6, then
+`GDB_FREE ptr=0x7fff8803ef10 chunksize=0x25 ret=0x7ffff7902653`, header
+`0x7fff8803ef00: 0x5b5a5d5c5b5a5d5c 0x0000000000000025`, frames
+`#1 g_hash_table_unref ()` and `#2 vips_argument_table_destroy
+(../src/libvips-8.18.2/libvips/iofuncs/object.c:573)`, then
+`free(): invalid next size (fast)` and SIGABRT. `http-ico-w10-attr2.log`
+sha256
+`98f5551321d161a86318e709639dd2252c46f44524f100e504f7377b9ca47e5e`
+repeated it at `0x7fff8c0b0610` with decoded `0x7fff8c0bc0b0` and the same
+two frames. W9's body writes `SIZE=0x25` (the wrapped allocation size) at
+`body[10:18]`, over the victim chunk's original `0x35` size field; the free
+of the just-returned victim therefore faults on the rewritten size.
+
+`provision/ico_wire_head_consume.py` sha256
+`c9f315a15e9f69276fb6537d9014c299caec3c87766c96624a177ed950801df9`
+observes ten natural `malloc(0x20)` returns and compares each with `$wire`.
+With `SIZE=0x35` the wire bytes preserve the victim size field. Twenty runs
+(`w10d20`-`d27`, `w10e30`-`e41`) had no `WIRE=1` line. In
+`http-ico-w10-size35-victim.log` sha256
+`902b1958da7887dd8deb1ade6cab2715b4968774eb303d59e258842261311037`
+(`w10e41`): pre head/`POS 0x7fffa401e200` count 7, raw `0x7ff85bfb0000`,
+decoded `0x7fffa401401e`; M1 returned `0x7fffa401e200`; the victim was
+freed with `chunksize=0x35` and no abort; M2-M6 returned
+`0x7fffa401bfd0`, `0x7fffa401cd40`, `0x7fffa4020480`, `0x7fffa401cd40`,
+`0x7fffa4020480` (`WIRE=0` throughout), while the GDB `tcache` expression
+still printed `head=0x7fffa401401e count=6`. Those mallocs were `g_realloc`
+calls in the reported thread; the probe could not establish that they
+consumed the poisoned tcache, so no wire-head consumption is claimed. Six
+size-preserving runs (`e30`, `e33`, `e34`, `e39`, `e40`, `e41`) survived the
+hostile request with HTTP 500 and a live process; the other layouts and all
+non-consumptions remain in `/tmp/w10-out` and are not retried into
+existence. No fixed-binary control was rerun; W8/W202 and W204 already
+measured it. Grade stays rung 4: no wire-only key, marker, code-pointer
+write or r5. Author finding, unwitnessed; W204's verdict on W9 is unchanged.

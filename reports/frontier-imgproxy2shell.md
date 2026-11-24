@@ -488,6 +488,42 @@ versus the author's 10/49 is stochastic; all negatives were preserved in
 `/tmp/w204-out`. Verdict ESTABLISHED AS LABELED, no contradiction, no grade
 change, no r5; W201 remains the ceiling.
 
+## W10 — aborting free identified; size-preserving wire body still never consumed (2026-11-24, author, unwitnessed)
+
+W9 left the aborting free unidentified. `provision/ico_free_attribution.py`
+reuses the W9 probe with one change to its GDB script: after the write it
+prints every natural `free()` pointer, chunk size, caller address and a short
+backtrace. It writes no memory and forces no calls. Two of eight runs with
+`SIZE=0x25` had the wire-head layout and aborted at the same place: in
+`w10c13` the first `malloc(0x20)` returned `0x7fff8803ef10` and left the
+wire-decoded `0x7fff8803803e` as head at count 6, then
+`__GI___libc_free(mem=0x7fff8803ef10)` was called from `g_hash_table_unref`
+(`0x7ffff7902653`) under `vips_argument_table_destroy`
+(`libvips/iofuncs/object.c:573`); its chunk-size field at `mem-8` read `0x25`,
+with the chosen `5a5b5c5d` pattern in the preceding word, and
+`free(): invalid next size (fast)` followed. `w10c14` showed the same call
+chain at `0x7fff8c0b0610`. W9's wire body writes `0x25` over the victim's
+original `0x35` chunk-size field, which explains why the free of the
+just-returned victim aborts before a later allocation can consume the head.
+This is a causal attribution of the W9 blocker, not a new capability.
+
+Setting `SIZE=0x35` preserves that field using wire bytes alone.
+`provision/ico_wire_head_consume.py` observes ten natural `malloc(0x20)`
+returns and compares each with the decoded head. Across twenty such runs
+(`w10d20`-`d27`, `w10e30`-`e41`) no malloc returned the decoded pointer. In
+the measured victim `w10e41`: pre head/`POS` `0x7fffa401e200` (count 7), raw
+`0x7ff85bfb0000`, decoded `0x7fffa401401e`; M1 returned the victim, the
+victim was then freed with its size field intact at `0x35` and no abort
+followed; M2-M6 returned `0x7fffa401bfd0`, `0x7fffa401cd40`,
+`0x7fffa4020480`, `0x7fffa401cd40`, `0x7fffa4020480` — all `WIRE=0` — while
+the GDB `tcache` expression still printed the decoded head at count 6. The
+probe could not establish that those mallocs consumed the poisoned thread's
+tcache, so no consumption is claimed. Six size-preserving runs survived the
+hostile request with HTTP 500 and a live process; all negatives are kept and
+not retried into existence. Grade stays rung 4; no wire-only key, marker,
+code-pointer write or r5. Commands, digests and logs are in
+`lab/frontier/imgproxy2shell/PROVENANCE.md` (W10).
+
 ## What would change my mind
 
 A primary source showing the addition happens in 64-bit arithmetic, a replay
