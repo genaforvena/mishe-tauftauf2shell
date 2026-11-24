@@ -9904,3 +9904,52 @@ request #3156 unanswered.
   getter, keeping every negative.
 - Docs folded all five new edges into one scoped README/repro/task commit;
   checkers GREEN and no rung cell moved.
+
+### 2026-11-24 06:0x–06:2xZ — Contiki admitted; FontForge witness/real path; LibRaw nonzero bytes
+
+- `2f48681` operator-admitted `contiki2shell` as the 130th route under standing
+  #6, with charter, hy4-flash route, resolver keys and three wake units from
+  the exact full-flag sync at pin `0d686bba…d528a`; `run-all.sh` was
+  re-verified at 9 PASS / 0 FAIL. This supersedes the FRONTIER-STAGED wording
+  in the 05:4x–06:0xZ section: window 134 now belongs to a mind. Rung 4 stays
+  PARTIAL, remote reach UNKNOWN, no witness verdict and no grade change.
+- `20db6aa` measured a true stock-Rails allocator split on an unmodified
+  `rails new --minimal` app (Rails 8.1.4.1, Puma 8.1.2, Rack 3.2.8). N=524 with
+  32 forged 1024-byte parts expands `0x200→0x250`; the second mapping buffer
+  takes the forged V chunk and overwrites ten bytes of the physical remainder
+  header, but no useful consumer follows. A seeded 512-layout search and the
+  full app found no `0x3f0` neighbour. Final 3/3 affected attacks abort
+  pre-response, 3/3 safe affected and 3/3 fixed controls survive; no address
+  oracle, command, persistent process or second command, so stock rung 5
+  remains NOT ACHIEVED and the vendor PoC stays unpublished.
+- `8af65c7` closed LibRaw W2's zero-byte ceiling for a crafted input:
+  `craft_nonzero_poc.py` makes a 512x512 12-bit X-Trans field
+  (`b59f64e9…069341`, generator `004ff435…f862`), so ASan still reports
+  WRITE-2 at `xtrans_demosaic.cpp:427` and gdb reads `0xffff` halfwords at
+  index 68,644 with fixed/no-option controls clean. The value saturates;
+  arbitrary bytes, pointer/IP and rung 5 stay UNKNOWN and W2 awaits witness
+  replay. Witness W186 ESTABLISHED only the original zero-valued claim at its
+  labeled scope; the report's "unwitnessed" row wording was limited accordingly.
+- `c73bc62` completed CodebaseMemory W3's clean-archive tool-path replay: the
+  empty fixture was replaced, a zero-row guard added and per-query ASan stderr
+  committed (`replay-mcp-tool-vuln-recover-Q{33,48}.err` show the chosen-name
+  WRITE-68 at `func_bufs[32]`). The stdio `query_graph` server remains reduced
+  (C grammar only, other grammars stubbed) with no HTTP, remote wire, witness
+  verdict or grade change.
+- `6548132` extends FontForge beyond the staged direct-call model: witness
+  #3309 replayed `13a2a94` and graded the in-memory-table/stand-in-struct
+  rungs 1-4 ESTABLISHED with NO r5, while a real headless 20251009 build
+  driven by a 296-byte PCF through scripting `Import()` reaches the same sink
+  (`WRITE of size 4` at `fvimportbdf.c:1751`, patched/complete controls clean).
+  The real path is author-only and unwitnessed; GUI, real-process chosen bytes
+  and pointer/IP stay UNKNOWN. This supersedes the staged section's "no real
+  build" ceiling.
+- Docs folded all six new edges into one scoped README/repro/task commit; no
+  rung cell moved and the role count is 130 after the admission.
+- `480dbc5` measured plain-build FLTK metadata: chosen file bytes occupy the
+  high half of a live glibc mmap chunk size (`0x2d4d495300001002`) at
+  `Fl_BMP_Image.cxx:490`, but the truncated-input destructor reaches
+  `munmap_chunk()` and exits 0 with no allocator diagnostic. The full crafted
+  file still faults at `:490`, fixed plain controls are clean, and there is no
+  pointer/IP, command or rung 5. Author-only negative extension of W195's
+  ESTABLISHED direct-call scope; grade unchanged.

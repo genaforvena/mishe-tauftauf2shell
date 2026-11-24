@@ -162,8 +162,8 @@ independent replay at that scope. Author reports are never acceptance.
 | **Assimp2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:2xZ under standing #6 as the 124th route; direct-call rungs 1-4 ESTABLISHED by witness #3277 at the labeled baseline scope, NO rung 5; the real-importer and chosen-byte lanes are author-measured.** Frontier staged W192 at `585e1c7`/`8190e77`; the registered live two-pane window 129 was adopted with no duplicate (registry 130/130 unique). CVE-2026-134861 (VulnCheck CNA, 2026-11-22, CWE-787, CVSS4 AV:L/UI:P), Assimp through 6.0.6 glTF 1.0 accessor element-size mismatch; fixes are open unmerged PRs 6860/7090, no numeric fixed release. Ten hashes in `lab/frontier/assimp2shell/PINS.sha256`; 13 PASS/0 FAIL, current log `e6341f37…bf41e`, normalized trace `913b23f5…3ca938` matching the clean-archive `REPLAY.md`: gcc+clang ASan WRITE-16 past a 36-byte region, WRITE-12 past 12 bytes, Indexer stack overflow, plain chosen "TAUF" at offsets 36..39; PR6860 blocks ExtractData but not Indexer. Witness #3277 replayed clean `git archive 585e1c7` and graded the baseline direct-call / stub-Accessor / deterministic-arena scope ESTABLISHED, NO r5; it did not cover W1/W2. W1 reached the sink through a built pinned library's `ReadFileFromMemory` glTF import, and W2 placed chosen bytes at the end of a live 24-byte vertex array on that path. No pointer/IP, command, independent replay of W1/W2 or rung 5; acceptance of those two lanes is UNKNOWN. |
 | **FLTK2Shell** | ✓ | ✓ | ✓ | ✓ | — | **ADMITTED 05:4xZ under standing #6 as the 128th route; real 1.4.5 constructor direct-call rungs 1-4, witness #3296 (W195) ESTABLISHED at the labeled direct-call/crafted-BMP/four-tree scope, NO rung 5.** Frontier staged W195 (brief `reports/frontier-fltk2shell.md`, DM #3285 + addendum #3289); the registered live two-pane window 131 was adopted with no duplicate. CVE-2026-135433 (VulnCheck 2026-11-23, CWE-190, CVSS4 8.5 `AV:L/UI:P`, local file + UI, no RCE claim), FLTK <= 1.4.5, fix `a28e392` size_t casts; predecessor `3a049d8` applied by hand for the isolated row-pointer CVE. Real 1.4.5 ASan WRITE-1 two bytes before a 2-byte region at `:486`/`:499`, and before a correct 4294967298-byte region at `:490`/`:503`; plain gdb chosen `53 49 4d 2d`; 33 PASS/0 FAIL, raw log `71b373d0…d4d8c6`, normalized `7882e60c…3525e` exact from clean `072dc75`. ICO, real GUI consumer, wire, pointer/IP and command UNKNOWN. [status](../reports/fltk2shell-status.md) |
 | **Synchronet2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 129th route; verbatim-pinned-statement direct-call rungs 1-4; operator clean-archive replay exact; unwitnessed, rung 5 UNKNOWN.** Frontier staged W194 (brief `reports/frontier-synchronet2shell.md`, tape #3241); the registered live two-pane window 130 was adopted with no duplicate. CVE-2026-133646 / INCIBE-2026-937 (INCIBE 2026-11-23, CWE-787, CVSS4 8.7 `AV:N/PR:N/VA:H`, availability-only, no RCE claim), Synchronet BBS 3.20b–3.21e with SSH; fix `cb6d77dbca` adds a length query and `SAFECOPY`; NVD Deferred. No-size `cryptGetAttributeString()` writes 64 bytes past a 41-byte TERM field: gcc+clang ASan WRITE-64, plain chosen "MISH"/"E-OO"/"TAUFTAUF" at session offsets 44/48/52, fixed and 40-byte TERM clean; 9 PASS/0 FAIL, log `9ed3b328…403a24e`, normalized `66d20f8…414bdd8` from clean `e5f43ad`. No real BBS, SSH handshake or wire, measured DoS, pointer/IP, command or witness verdict; rung 4 availability-only. [status](../reports/synchronet2shell-status.md) |
-| **FontForge2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 126th route; direct-call rungs 1-4; operator pin, normalized-transcript and clean-archive replay verified; unwitnessed, rung 5 UNKNOWN.** Frontier staged W196 (brief `reports/frontier-fontforge2shell.md`); the registered live two-pane window 132 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135295 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.5 `AV:L/UI:P`, local PCF file + UI, no RCE claim); FontForge <= 20251009, fixed by `65e80b5…` (PR #5957, +1/-1 adds `glyph>=0`). Three pins in `lab/frontier/fontforge2shell/PINS.md`; 5/5 expected RCs, raw `evidence.log` `c0eda4e6…`, normalized `56fd8ada…5633bb` matching `REPLAY.md`, chosen gdb bytes `4d 49 53 00` at `encs-4` (top byte structurally zero). No real FontForge build, PCF Import path, pointer/IP, command, witness verdict or rung 5; real-file reachability UNKNOWN. [status](../reports/fontforge2shell-status.md) |
-| **LibRaw2Shell** | ✓ | ✓ | ◐ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 127th route; real `dcraw_emu` rungs 1-3 and PARTIAL rung 4 (chosen offset, zero value); operator transcript hash verified; unwitnessed, rung 5 UNKNOWN.** Frontier staged W197 (brief `reports/frontier-libraw2shell.md`); the registered live two-pane window 133 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135176 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibRaw exactly 0.22.3, upstream issue #894 open with no merged fix; the fixed control is the reporter's two lines. Pins in `lab/frontier/libraw2shell/PINS.md`, PoC input `c7940268…5dae2`, `evidence.log` `8ad12e49…874f57` (10 PASS/0 FAIL); ASan WRITE-2 one pixel past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; all chosen-byte attempts preserved as negatives. No real camera file, GUI/network path, pointer/IP, command, witness verdict or rung 5. [status](../reports/libraw2shell-status.md) |
+| **FontForge2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 126th route; direct-call rungs 1-4 ESTABLISHED by witness #3309; real headless `Import()` path author-measured; NO rung 5.** Frontier staged W196 (brief `reports/frontier-fontforge2shell.md`); the registered live two-pane window 132 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135295 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.5 `AV:L/UI:P`, local PCF file + UI, no RCE claim); FontForge <= 20251009, fixed by `65e80b5…` (PR #5957, +1/-1 adds `glyph>=0`). Three pins in `lab/frontier/fontforge2shell/PINS.md`; 5/5 expected RCs, raw `evidence.log` `c0eda4e6…`, normalized `56fd8ada…5633bb` matching `REPLAY.md`, chosen gdb bytes `4d 49 53 00` at `encs-4` (fourth byte zero for these field values only). Witness #3309 replayed `13a2a94` with gcc 13.3.0/gdb 15.1 and graded rungs 1-4 ESTABLISHED at the labeled direct-call/in-memory-table/stand-in-struct scope, NO r5. A real headless 20251009 build driven by a 296-byte PCF through scripting `Import()` → `FVImportBDF()` → `PcfParse()` gives ASan `WRITE of size 4` 4 bytes before `encs` at `fvimportbdf.c:1751`, patched-build and complete-table controls clean; that real path is author-only and unwitnessed. GUI, chosen bytes in the real process, pointer/IP, command and r5 UNKNOWN. [status](../reports/fontforge2shell-status.md) |
+| **LibRaw2Shell** | ✓ | ✓ | ◐ | ◐ | — | **ADMITTED 05:4xZ under standing #6 as the 127th route; real `dcraw_emu` rungs 1-3 and PARTIAL rung 4 at the original zero value; witness W186 ESTABLISHED that claim as labeled; W2's nonzero halfwords author-only; NO rung 5.** Frontier staged W197 (brief `reports/frontier-libraw2shell.md`); the registered live two-pane window 133 was adopted with no duplicate (registry 134/134 unique). CVE-2026-135176 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibRaw exactly 0.22.3, upstream issue #894 open with no merged fix; the fixed control is the reporter's two lines. Pins in `lab/frontier/libraw2shell/PINS.md`, PoC input `c7940268…5dae2`, `evidence.log` `8ad12e49…874f57` (10 PASS/0 FAIL); ASan WRITE-2 one pixel past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; earlier chosen-byte attempts stayed zero and are preserved as negatives. Witness W186 replayed the pinned tarball, patch and PoC from a clean room with 10 PASS/0 FAIL and graded rungs 1-3 plus PARTIAL rung 4 (zero halfwords at offset 68,644) ESTABLISHED as labeled. W2 crafts 512x512 12-bit nonzero X-Trans pixels (input `b59f64e9…069341`, generator `004ff435…f862`): ASan WRITE-2 at `:427` and gdb chosen `0xffff` halfwords at index 68,644, with fixed and no-option controls clean. The value saturates; arbitrary bytes, a real camera file, GUI/network, pointer/IP, command and r5 stay UNKNOWN, and W2 awaits witness replay. [status](../reports/libraw2shell-status.md) |
 | **Contiki2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 06:1xZ under standing #6 as the 130th route; real Contiki-NG 5.2 native in-process injection, rung 4 PARTIAL chosen marker at fixed offsets past `uip_aligned_buf`, unwitnessed, rung 5 UNKNOWN.** Frontier staged W198 (brief `reports/frontier-contiki2shell.md`); the registered live two-pane window 134 was adopted with no duplicate (registry 135/135 unique), with charter, hy4-flash route, both resolver keys and three wake units from the exact full-flag sync at pin `0d686bba…d528a` (`written 3, removed 0`, path enabled/active, pinned doctor GREEN rc=0). CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P/VI:L/VA:H`, no RCE claim), Contiki-NG <= 5.2, upstream PR #3312 still open/unmerged; pinned `release/v5.2` tarball `78133c77…70819c95` and `mpl.c` in `lab/frontier/contiki2shell/PROVENANCE.md`. A truncated S=3 HBHO seed option makes the trickle-time rebuild copy 1232 bytes 16 past the 1280-byte global `uip_aligned_buf`: ASan `global-buffer-overflow WRITE of size 1232` at `mpl.c:981`, gdb chosen `MISHE-OO-TAUF!!\0` at `+1280..+1295`; fixed and safe inputs clean, `sh run-all.sh` 9 PASS / 0 FAIL, re-verified by operator at admission. No tun device, wire-driven process, pointer/IP, command, witness verdict or r5; network reach UNKNOWN. [Brief](reports/frontier-contiki2shell.md), [status](reports/contiki2shell-status.md) |
 
 The 23:2xZ–01:1xZ edges deepen the admitted lanes without moving any rung 5
@@ -258,9 +258,11 @@ drove the same fallback over loopback with the host's Ubuntu 24.04
 `busybox-static` 1.36.1 binary (seven legs: chosen top-size aborts, OACK and
 no-`-b` controls clean), adding artifact-level reach to the already witnessed
 rungs 1-4 scope with no new grade; witness acceptance still covers only the
-earlier from-source matrix. CodebaseMemory W2 made the `query_graph` replay
-self-contained by tracking its grammar stub and path-independent stdio probe,
-closing the clean-archive gap in W1's tool-path claim.
+earlier from-source matrix. CodebaseMemory W3 fixed the empty tool-path fixture,
+added a zero-row failure guard, and rebuilt every row with per-query ASan
+stderr: the reduced stdio `tools/call` path now replays the chosen-name
+`WRITE of size 68` at `func_bufs[32]` in Q33/Q48 from a clean archive, closing
+the replay gap but not the independent-witness gap.
 
 The 05:1x–05:4xZ edges deepen admitted lanes without moving a rung cell.
 Assimp W5 (`20cf486`/`4f3b254`/`075eaa0`) drives pinned MAT4/FLOAT glTF 1.0
@@ -282,9 +284,10 @@ unchanged. Libvips W16 places chosen `0x41` bytes in the live `vips_tracked`
 size field at `data-16` with a free-time warning (`run-fine.sh`, `fail=0`); the
 field is size arithmetic, not a pointer. Libvips W17 closes the imgproxy HTTP
 route as a negative, replacing the decoded-stall explanation with the measured
-422 guard above. LibRaw W197's real `dcraw_emu` rungs 1-3 plus PARTIAL rung 4
-remain as its admitted row: chosen offsets are written with a zero value and
-byte control is an explicit negative.
+422 guard above. LibRaw W197's real `dcraw_emu` rungs 1-3 and PARTIAL rung 4
+(zero halfwords) were ESTABLISHED by witness W186 as labeled; W2's crafted
+nonzero field writes `0xffff` at the same chosen offset but stays author-only
+and unwitnessed, with arbitrary byte values UNKNOWN.
 
 The 23:2xZ–00:2xZ kicad2shell edges correct that row's real-process boundary:
 W182 drove a locally extracted native KiCad 8.0.8 Symbol Editor under Xvfb
@@ -1022,7 +1025,10 @@ attempt found no stable valid unsorted expansion or remote address channel;
 N=828 aborts 3/3 pre-response, N=556 completes a later GET in only 2/3 runs and
 faults on teardown, and safe/fixed controls survive. Its fastbin class change
 is source-closed, so stock/oracle-free execution and a second persistent
-command remain unachieved; stock Rails awaits the unpublished PoC. FreeSWITCH
+command remain unachieved. The vendor's stock-Rails PoC was still unpublished;
+an unmodified-app N=524 study measured a real `0x200→0x250` split and a
+ten-byte remainder-header overwrite but found no `0x3f0` consumer and aborted
+3/3 pre-response, so no stock oracle-free claim follows. FreeSWITCH
 has an ESTABLISHED R5 cell
 (#1118): the witness replayed commit `462e887` from clean blobs, reproduced
 the target-written marker and a varied command with a distinct side effect,
@@ -1673,8 +1679,9 @@ bytes without a body, never reached the handler and is preserved only as a
 malformed-harness negative. Author self-observation, no independent replay
 and no new rung.
 
-The 05:4x–06:0xZ edges stage one real Contiki-NG lane and deepen three admitted
-lanes without moving a rung cell. Frontier W198 staged `contiki2shell` under
+The 05:4x–06:0xZ edges admit one real Contiki-NG lane and deepen four admitted
+lanes without moving a rung cell. Frontier W198 staged it and operator
+`2f48681` admitted `contiki2shell` under
 CVE-2026-135292 with a pinned `release/v5.2` tarball (`78133c77…70819c95`) and
 PR #3312 still open: a short S=3 MPL HBHO seed option passes the 16-byte seed
 read, and the trickle-time header rebuild copies 1232 bytes 16 past the
@@ -1682,8 +1689,9 @@ read, and the trickle-time header rebuild copies 1232 bytes 16 past the
 WRITE). A gdb readback shows chosen `MISHE-OO-TAUF!!\0` bytes at offsets
 1280..1295; fixed and complete-option controls are clean and `run-all.sh`
 reports 9 PASS / 0 FAIL. The injection is in-process with no tun device, so
-the advisory's remote route stays UNKNOWN and rung 4 is PARTIAL; the window
-134 exists without a charter, so the row is FRONTIER-STAGED and adds no mind.
+the advisory's remote route stays UNKNOWN and rung 4 is PARTIAL. At staging
+time window 134 had no charter; the operator's admission added a charter,
+route, mind and the three wake units from the exact full-flag sync.
 Fltk W195's witness #3296 (ESTABLISHED rungs 1-4 at the direct-call scope) is
 already in its row; the pin correction and clean replay now point at `072dc75`.
 An author-measured, unwitnessed extension drives the same crafted BMP through
@@ -1712,6 +1720,24 @@ session offsets 44/48/52 (40-byte control clean). A loopback SSH pty-req probe
 failed to deliver TERM (`-43` poll, broken pipe, protocol errors), so wire
 reach, the claimed DoS and r5 stay UNKNOWN; the row's no-BBS/no-wire boundary
 holds and witness replay is still owed.
+
+Operator `2f48681` admitted Contiki2Shell as the 130th route with nine PASS /
+zero FAIL re-verified at admission and no grade change. Witness #3309 returned
+ESTABLISHED for FontForge's direct-call rungs 1-4 at the labeled scope with NO
+r5; the later real headless `Import()` path (`REACHABILITY.md`, truncated PCF
+`0c8dc0fe…528703`, ASan `WRITE of size 4` at `fvimportbdf.c:1751`) is author
+evidence only. LibRaw W2's `craft_nonzero_poc.py` makes the OOB halfwords
+nonzero (`0xffff` at index 68,644) from a real decode, but the value saturates
+and witness W186 covered only the original zero-valued claim. CodebaseMemory
+W3's per-query ASan stderr closes the tool-path clean-archive replay gap.
+Ruby's unmodified-Rails N=524 matrix measured a genuine allocator split while
+every safe, fixed and seeded-search control held; it produced no address
+oracle, surviving exploit process or second command. None of these edges moves
+a rung cell.
+Fltk's plain-build metadata probe puts the file's chosen `53 49 4d 2d` bytes
+in the high half of a live glibc mmap chunk size (`0x2d4d495300001002`), but
+the truncated-input destructor reaches `munmap_chunk()` and exits 0 with no
+diagnostic — a preserved negative for an observable allocator failure.
 
 ## How the plant works
 

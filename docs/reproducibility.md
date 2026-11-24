@@ -143,12 +143,12 @@ containers whose host ports bind only to loopback.
 | BusyBox2Shell | [brief](../reports/frontier-busybox2shell.md) | CVE-2026-124737, pinned 1.37.0 tarball, vulnerable/fixed `tftp.c`, one-line fix and config hashed in `lab/frontier/busybox2shell/PINS.sha256` | `sh lab/frontier/busybox2shell/run-all.sh` (five legs, loopback UDP only) | ASan WRITE-516 at `rbuf+68`, clean OACK/default-blksize/fixed controls and "MISHE-OO" gdb bytes; rungs 1-4 on a real wire, unwitnessed, rung 5 UNKNOWN |
 | ImageMagick2Shell | [brief](../reports/frontier-imagemagick2shell.md), [status](../reports/imagemagick2shell-status.md) | CVE-2026-130664 / GHSA-3pf7-cjfr-3fpq, pinned 7.1.2-34/35 tarballs and both `MagickCore/stream.c` blobs hashed in `lab/frontier/imagemagick2shell/PINS.sha256` | `sh lab/frontier/imagemagick2shell/bootstrap.sh` from a clean archive (builds all three configurations, then `run-all.sh`; no network) | ASan heap WRITE past a 3-byte stream buffer in `StreamImagePixels`, same-size and fixed controls clean, chosen bytes 0x42..0x48 at offsets 3..23 under gdb; clean `git archive 7873caf` replay `REPLAY.log` `385bbe95…c01667a`; admitted 00:3xZ under standing #6 as the 123rd route. Witness #3204 (W181) replayed clean `git archive a073540`, 5/5 pins and the same `REPLAY.log` hash; witness `evidence.log` `5547d698…ce40d3`, normalized diff empty except build path and BuildId. verdict **ESTABLISHED rungs 1-4 at the labeled direct-call/in-process scope, NO r5**; file/coder reachability and the CLI `-extract` READ excluded and UNKNOWN, rung 5 UNKNOWN. NIT: the gdb bytes are the harness `0x41+(i%26)` pattern and geometry growth is harness-assigned, not attacker-chosen values. |
 | Hydra2Shell (screened out) | [brief](../reports/frontier-hydra2shell.md) | CVE-2026-133274, pinned `v9.7` `6c11ce2d` and fix commit `6ab9ad86`, function blobs and hashes in `lab/frontier/hydra2shell/harness/PINS.sha256` | `sh lab/frontier/hydra2shell/harness/run-all.sh`; loopback wire recipe in `lab/frontier/hydra2shell/PROVENANCE.md` | gcc+clang ASan `negative-size-param -1` direct call and in real v9.7 `http-post-form` over 127.0.0.1, fixed/safe controls clean, gdb NUL at `tmpcookie-1`; matrix `57e16bfd…b108567b`, clean `git archive bb33f71` replay exact; rung 3 only, plain build does not crash, no window |
-| CodebaseMemory2Shell | [brief](../reports/frontier-codebasememory2shell.md), [status](../reports/codebasememory2shell-status.md) | CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9; pinned parent `5554f8a46abf` and fix `e69e0844dbc1` tarballs, both `src/cypher/cypher.c` blobs hashed in `lab/frontier/codebasememory2shell/PINS.sha256` | `bash lab/frontier/codebasememory2shell/bootstrap.sh` for the direct-call matrix; `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` for the real `query_graph` tool path (verifies pins, copies the tracked grammar stub, rebuilds vuln/recover/fixed with forced `-B`, drives tracked `probe.py` over stdio) | ASan OOB READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` ← `execute_return_simple:4116` into `func_bufs[32]`, 32/fixed controls clean, plain 48-item stack-smash abort, gdb chosen "MISHE-OO…" bytes at `func_bufs+16384`; matrix `f8c81a5c…7a6d`; clean `git archive a073540` replay 24/24 rows. W1's real stdio `tools/call` to `query_graph` reaches READ-8 and recover-mode `WRITE of size 68` at the same array with fixed rejecting >32 (`MCP-TOOL.md`); reduced server build with only the C grammar linked and the other grammars stubbed, no HTTP/socket/remote wire; rungs 1-4 local-only, unwitnessed, no rung 5 |
+| CodebaseMemory2Shell | [brief](../reports/frontier-codebasememory2shell.md), [status](../reports/codebasememory2shell-status.md) | CVE-2026-114494 / GHSA-vpgh-g3jg-ggx9; pinned parent `5554f8a46abf` and fix `e69e0844dbc1` tarballs, both `src/cypher/cypher.c` blobs hashed in `lab/frontier/codebasememory2shell/PINS.sha256` | `bash lab/frontier/codebasememory2shell/bootstrap.sh` for the direct-call matrix; `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh` for the real `query_graph` tool path (verifies pins, copies the tracked grammar stub, rebuilds vuln/recover/fixed with forced `-B`, drives tracked `probe.py` over stdio) | ASan OOB READ at `cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379` ← `execute_return_simple:4116` into `func_bufs[32]`, 32/fixed controls clean, plain 48-item stack-smash abort, gdb chosen "MISHE-OO…" bytes at `func_bufs+16384`; matrix `f8c81a5c…7a6d`; clean `git archive a073540` replay 24/24 rows. W1's real stdio `tools/call` to `query_graph` reaches READ-8 and recover-mode `WRITE of size 68` at the same array with fixed rejecting >32 (`MCP-TOOL.md`); W3 fixed the empty fixture, added a zero-row guard and committed per-query ASan stderr (`evidence/replay-mcp-tool-vuln-recover-Q{33,48}.err` show the chosen-name WRITE-68 at `func_bufs[32]`), completing the clean-archive tool-path replay. Reduced server build with only the C grammar linked and the other grammars stubbed, no HTTP/socket/remote wire; rungs 1-4 local-only, unwitnessed, no rung 5 |
 | Assimp2Shell | [brief](../reports/frontier-assimp2shell.md), [status](../reports/assimp2shell-status.md) | CVE-2026-134861 (VulnCheck 2026-11-22, CWE-787, CVSS4 AV:L/UI:P); pinned v6.0.6 tarball and both `glTFAsset.inl` blobs, PR 6860/7090 hunk hashes in `lab/frontier/assimp2shell/PINS.sha256` | `bash lab/frontier/assimp2shell/bootstrap.sh` then `bash lab/frontier/assimp2shell/harness/run-all.sh` (rebuilds vuln/fixed × gcc/clang ASan plus plain harnesses offline); W1/W2 drivers in `realpath/` and `placement/` | gcc+clang ASan `WRITE of size 16` 0 bytes after a 36-byte region and `WRITE of size 12` after a 12-byte region, `Indexer` stack-buffer-overflow, plain chosen "TAUF" at offsets 36..39, fixed-PR blocks `ExtractData` but not `Indexer`; 13 PASS/0 FAIL, log `e6341f37…bf41e`, clean-archive normalized replay `913b23f5…3ca938`; witness #3277 replayed `git archive 585e1c7` and graded those baseline direct-call legs ESTABLISHED rungs 1-4, NO r5. W1 reaches the sink through a built pinned library's `ReadFileFromMemory` glTF import and W2 places chosen bytes at a live 24-byte array end; both author-only. No pointer/IP, command or rung 5 |
 | Synchronet2Shell | [brief](../reports/frontier-synchronet2shell.md), [status](../reports/synchronet2shell-status.md) | CVE-2026-133646 / INCIBE-2026-937, availability-only; eight pinned upstream files, fix `cb6d77dbca` and parent `42f586d7` hashed in `lab/frontier/synchronet2shell/PINS.sha256` | `cd lab/frontier/synchronet2shell && bash bootstrap.sh && bash harness/run-all.sh` (offline, 7 binaries, 9 cases) | gcc+clang ASan `stack-buffer-overflow WRITE of size 64` past the 41-byte TERM field; plain chosen "MISH"/"E-OO"/"TAUFTAUF" at offsets 44/48/52; fixed hunk and 40-byte TERM clean; 9 PASS/0 FAIL, log `9ed3b328…403a24e`, clean `git archive e5f43ad` normalized `66d20f8…414bdd8`; admitted 05:4xZ as 129th route; author replay, unwitnessed, rung 5 UNKNOWN |
 | Fltk2Shell | [brief](../reports/frontier-fltk2shell.md), [status](../reports/fltk2shell-status.md) | CVE-2026-135433, pinned `release-1.4.5` `Fl_BMP_Image.cxx`, fix `a28e392` and predecessor `3a049d8` blobs hashed in `lab/frontier/fltk2shell/PINS.sha256` | `cd lab/frontier/fltk2shell && bash run-all.sh` (rebuilds four real FLTK trees offline, regenerates the 118-byte BMP fixtures) | Real 1.4.5 ASan `WRITE of size 1` 2 bytes before a 2-byte allocation at `:486`/`:499`; with `3a049d8` applied the allocation is 4294967298 bytes and the write is still 2 bytes before it at `:490`/`:503`; plain gdb chosen `53 49 4d 2d`; safe BMP and `a28e392` clean; 33 PASS/0 FAIL, raw `71b373d0…d4d8c6`, normalized `7882e60c…3525e` exact from clean `072dc75`; admitted 05:4xZ as 128th route; witness W195 ESTABLISHED rungs 1-4, NO rung 5 |
-| FontForge2Shell | [brief](../reports/frontier-fontforge2shell.md), [status](../reports/fontforge2shell-status.md) | CVE-2026-135295, pinned tag `20251009` `fvimportbdf.c` `df766f9c…f0eb30d` and fix `65e80b5` patch `f2745243…5e99175` in `lab/frontier/fontforge2shell/pinned/` and `PINS.md` | `cd lab/frontier/fontforge2shell && ./run-all.sh` (rebuilds five binaries offline from the verbatim pinned function and fix hunk) | gcc ASan `WRITE of size 4` four bytes before a 16-byte region at `harness.c:126`, plain abort 134, fixed and complete-table controls clean, gdb `4d 49 53 00` at `encs-4` (top byte structurally zero); `evidence.log` raw `c0eda4e6…`, normalized `56fd8ada…5633bb` matching `REPLAY.md`, 5/5 RCs; admitted 05:4xZ as 126th route; author replay, unwitnessed, rung 5 UNKNOWN |
-| LibRaw2Shell | [brief](../reports/frontier-libraw2shell.md), [status](../reports/libraw2shell-status.md) | CVE-2026-135176, LibRaw exactly 0.22.3; pinned tarball `7edf96c5…355c`, PoC input `c7940268…5dae2`, reporter fix `32fc61e5…afc9c` in `lab/frontier/libraw2shell/PINS.md` | `cd lab/frontier/libraw2shell && ./bootstrap.sh && ./run-all.sh` (offline real `dcraw_emu` builds, all three option forms, fixed/safe controls) | ASan `WRITE of size 2` 0 past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; `evidence.log` `8ad12e49…874f57` 10 PASS/0 FAIL; chosen offset 68,644 but zero halfwords, all byte-control attempts preserved as negatives; admitted 05:4xZ as 127th route; author transcript, unwitnessed, rung 5 UNKNOWN |
+| FontForge2Shell | [brief](../reports/frontier-fontforge2shell.md), [status](../reports/fontforge2shell-status.md) | CVE-2026-135295, pinned tag `20251009` `fvimportbdf.c` `df766f9c…f0eb30d` and fix `65e80b5` patch `f2745243…5e99175` in `lab/frontier/fontforge2shell/pinned/` and `PINS.md` | `cd lab/frontier/fontforge2shell && ./run-all.sh` (rebuilds five binaries offline from the verbatim pinned function and fix hunk); real headless build/Import() invocation in `REACHABILITY.md` | gcc ASan `WRITE of size 4` four bytes before a 16-byte region at `harness.c:126`, plain abort 134, fixed and complete-table controls clean, gdb `4d 49 53 00` at `encs-4` (fourth byte zero for these field values only); `evidence.log` raw `c0eda4e6…`, normalized `56fd8ada…5633bb`, 5/5 RCs; admitted 05:4xZ as 126th route; witness #3309 ESTABLISHED rungs 1-4 at the direct-call scope, NO r5. Real headless `Import()` on the 296-byte PCF gives ASan `WRITE of size 4` at `fvimportbdf.c:1751` with patched/complete-table controls clean; that path is author-only and unwitnessed; rung 5 UNKNOWN |
+| LibRaw2Shell | [brief](../reports/frontier-libraw2shell.md), [status](../reports/libraw2shell-status.md) | CVE-2026-135176, LibRaw exactly 0.22.3; pinned tarball `7edf96c5…355c`, PoC input `c7940268…5dae2`, reporter fix `32fc61e5…afc9c` in `lab/frontier/libraw2shell/PINS.md` | `cd lab/frontier/libraw2shell && ./bootstrap.sh && ./run-all.sh` (offline real `dcraw_emu` builds, all three option forms, fixed/safe controls); `python3 craft_nonzero_poc.py` writes `evidence/nonzero-oob.input` for W2 | ASan `WRITE of size 2` 0 past a 550176-byte region at `xtrans_demosaic.cpp:427`, plain rc 139, fixed/safe clean; `evidence.log` `8ad12e49…874f57` 10 PASS/0 FAIL; admitted 05:4xZ as 127th route; original PoC stores zero halfwords at offset 68,644 — witness W186 clean-room replay ESTABLISHED rungs 1-3 and PARTIAL rung 4 as labeled. W2's crafted input `b59f64e9…069341` (generator `004ff435…f862`) gives ASan WRITE-2 and gdb `0xffff` halfwords at index 68,644 with fixed/no-option controls clean; value saturates, arbitrary bytes UNKNOWN and W2 unwitnessed; rung 5 UNKNOWN |
 | LibreCAD2Shell (screened out) | [brief](../reports/frontier-librecad2shell.md) | CVE-2026-135294 (VulnCheck 2026-11-23, CWE-787, CVSS4 5.8 `AV:L/AC:H/AT:P/UI:P`, no RCE claim), LibreCAD <= 2.2.1.6, fix `4e51048…` (PR #3287); vulnerable v2.2.1.6 `rs_filterdxf1.cpp` `0cde2846…0a2097` and patch `9cdb82e6…7026` pinned in `lab/frontier/librecad2shell/pinned/` | none — source-bound screening only, no harness or trigger committed | `file.size()` (`qint64`) narrows into 32-bit `_bNum` near 4 GiB; `new char[_bNum+16]` then `fBuf[_bNum]='\0'` is a fixed one-byte underwrite before an 8-byte allocation, with `dos2unix()` as the in-function consumer. Real-file reachability, Qt build feasibility and post-corruption consumer behavior remain UNKNOWN; no bytes observed, no window, no witness, no admission row |
 | Contiki2Shell | [brief](../reports/frontier-contiki2shell.md), [status](../reports/contiki2shell-status.md) | CVE-2026-135292 (VulnCheck 2026-11-23, CWE-787, CVSS4 8.3 `AV:N/AC:H/AT:P`, no RCE claim), Contiki-NG <= 5.2; pinned `release/v5.2` tarball `78133c77…70819c95`, PR #3312 patch and project-conf patch in `lab/frontier/contiki2shell/` | `cd lab/frontier/contiki2shell && sh run-all.sh` (bootstrap verifies the tarball hash, patches the native multicast example, rebuilds vulnerable/fixed/safe trees offline) | ASan `global-buffer-overflow WRITE of size 1232` 16 bytes past the 1280-byte global `uip_aligned_buf` at `mpl.c:981` from `data_message_expiration`, gdb chosen `MISHE-OO-TAUF!!\0` at `base+1280..+1295` (`gdb-inspect.txt`), fixed and safe controls clean, 9 PASS / 0 FAIL; clean-replay receipt in `REPLAY.md`, re-verified by operator at admission 06:1xZ. In-process packet injection with no tun/wire process; ADMITTED as the 130th route, unwitnessed, rung 5 UNKNOWN |
 
@@ -7066,7 +7066,7 @@ advisory itself makes no remote claim.
 
 ## 2026-11-24 05:4x–06:0xZ — Contiki stage, FLTK shared image, live ICO crash
 
-- **Contiki2Shell W198 (FRONTIER-STAGED, `e89ebd3`)**: `cd
+- **Contiki2Shell W198 (staged `e89ebd3`, operator-admitted `2f48681`)**: `cd
   lab/frontier/contiki2shell && sh run-all.sh` verifies the pinned
   `contiki-ng-release-v5.2.tar.gz` (`78133c77…70819c95`), applies the
   `project-conf.patch` and open-PR `fix-pr3312.patch`, and builds the real
@@ -7120,3 +7120,70 @@ advisory itself makes no remote claim.
   is superseded for the direct API, not for the network path.
 - **Docs bounded check (06:0xZ)**: receipts were read from the five new edges
   and the tracked reports/logs; no new lab build or replay was run here.
+
+## 2026-11-24 06:0x–06:2xZ — Contiki admission, FontForge witness/real path, LibRaw nonzero, tool-path replay
+
+- **Contiki2Shell admission (`2f48681`)**: the operator's README/repro row now
+  names the charter, route, mind and three wake units minted by the exact
+  full-flag sync at pin `0d686bba…d528a`; `sh run-all.sh` was re-verified at
+  9 PASS / 0 FAIL. The staged brief and the nine-case recipe above are
+  unchanged, and rung 4 remains PARTIAL with no tun/wire process; no grade
+  moved and the admission adds no witness verdict.
+- **Ruby2Shell stock Rails N=524 (commit `20db6aa`)**: the recipe is already in
+  the Ruby lane above (`ruby2shell-stock-rails-setup.sh` and
+  `ruby2shell-stock-rails.sh`). With the exact N=524/drain/fill/tail
+  environment, the analysis-only case probe records a real `0x200→0x250`
+  expansion and a second mapping buffer returning the forged V chunk
+  (`stock-rails-rails-stage2d-n524-r498.server.log`); the final matrix is 3/3
+  pre-response SIGABRT and 3/3 safe affected plus 3/3 fixed controls returning
+  404 and later `/up` 200. A seeded 512-layout search found no `0x3f0`
+  physical neighbour, and the full default app found none either. No address
+  disclosure, command, persistent process or second request; rung 5 stays
+  NOT ACHIEVED. The vendor PoC was still unpublished.
+- **FontForge witness and real Import() (commit `6548132`)**: witness #3309
+  replayed a clean archive of `13a2a94` with gcc 13.3.0/gdb 15.1 and graded
+  the direct-call/in-memory-table/stand-in-struct rungs 1-4 ESTABLISHED with
+  NO r5; the real-build path was outside that verdict. For the real path,
+  build `fontforgeexe` from tag `20251009` with `-DENABLE_GUI=OFF
+  -DENABLE_SANITIZER=address -DENABLE_NATIVE_SCRIPTING=ON` (full flags in
+  `lab/frontier/fontforge2shell/REACHABILITY.md`), then run
+  `ASAN_OPTIONS=detect_leaks=0 ./build-asan/bin/fontforge -script import-pcf.ff`
+  in that tree: expect exit 1 and one ASan `WRITE of size 4` four bytes before
+  `encs` at `fvimportbdf.c:1751` (`real-import-asan.out` sha256
+  `8c199e9e…115e0f8c`; truncated PCF `0c8dc0fe…528703`). The patched build
+  and `import-complete.ff` exit 0 with no report. GUI, real-process chosen
+  bytes, pointer/IP, command and independent replay of this path are UNKNOWN.
+- **LibRaw W2 nonzero halfwords (commit `8af65c7`)**: from
+  `lab/frontier/libraw2shell`, `python3 craft_nonzero_poc.py` writes
+  `evidence/nonzero-oob.input` (`b59f64e9…069341`; generator `004ff435…f862`)
+  by changing the embedded JPEG to 512x512, `BitsPerSample` 8→12 and
+  `StripByteCounts` 48→20048. Running the pinned ASan `dcraw_emu` with `-n 1`
+  gives `heap-buffer-overflow WRITE of size 2` at `xtrans_demosaic.cpp:427`;
+  gdb at the first store reads `IDX=68644 avg={131070,131070,131070,2}` and
+  after it `{0xffff, 0xffff, 0xffff, 0x0000}`; the fixed tree and the
+  no-option vulnerable run are rc 0 with empty ASan output. The written value
+  is a saturated constant, not an arbitrary byte, and W2 awaits witness
+  replay; the earlier zero-valued claim was ESTABLISHED by W186.
+- **CodebaseMemory W3 tool-path replay (commit `c73bc62`)**: rerun
+  `bash lab/frontier/codebasememory2shell/mcp-tool/replay.sh`; W2's empty
+  fixture could show only the READ and fixed-parse control. W3 tracks a
+  nonempty fixture, adds a zero-row failure guard and commits per-query ASan
+  stderr: `evidence/replay-mcp-tool-vuln-recover-Q33.err` and `-Q48.err` carry
+  the chosen-name `WRITE of size 68` at `func_bufs[32]`. This closes the
+  clean-archive replay gap, not the independent-witness gap; no HTTP, remote
+  wire, pointer/IP, command or rung 5.
+- **Docs bounded check**: receipts were read from the six new edges and the
+  tracked reports/logs (libraw input/generator hashes and gdb halfwords,
+  FontForge Import ASan line and truncated PCF hash, CodebaseMemory Q33
+  WRITE-68); no new lab build or replay was run here.
+- **Fltk2Shell plain-build metadata (`480dbc5`)**: from `lab/frontier/fltk2shell`,
+  `python3 plain-metadata/gen_short.py poc-chosen.bmp plain-metadata/short-chosen.bmp`
+  (`2d26f388…8bf14`) and run `../driver-plain` / `../driver-plain-fixed` on
+  `short-chosen.bmp` and `full-chosen.bmp` as in `plain-metadata/README.md`.
+  gdb at `Fl_BMP_Image.cxx:490` reads mmap chunk size `0x0000000100001002`;
+  after the first row `plain-metadata/outputs/gdb-short.txt` reads
+  `0x2d4d495300001002` (chosen `53 49 4d 2d` in the high half). The truncated
+  vulnerable run reaches `munmap_chunk()` from `~Fl_RGB_Image` and exits 0
+  with no diagnostic; the full crafted file SIGSEGVs at `:490`, fixed plain
+  controls exit 0. No pointer/IP, command or rung 5; the silent free is a
+  negative result, not a new grade, and W195's verdict is unchanged.
