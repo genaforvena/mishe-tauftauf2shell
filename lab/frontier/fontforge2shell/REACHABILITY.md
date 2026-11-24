@@ -163,13 +163,34 @@ study, GUI `Import()` menu or witness verdict, NO r5. A GUI build was not
 attempted: `gtk+-3.0` is not installed on this host and the existing
 builds are `ENABLE_GUI=OFF`.
 
+## W6 (2026-11-24 19:2xZ) — real consumer of the poisoned tcache entry
+
+`CONSUME.md` closes W5's "no observed consumer" gap at the labeled
+real-headless path. A second `Import()` in the same process makes
+`FVImportBDF:2317` emit a localized notice; glibc gettext's
+`_nl_make_l10nflist` calls `malloc(128)`, which returns the `encs` chunk
+poisoned by `size-91.pcf` (size word `0x21 -> 0x91`, physically a 0x20
+chunk in tcache bin 7). `gdb-real-consumer.out` shows the returned
+pointer equal to the corrupted chunk and a subsequent `memcpy` with
+`__len=91` whose watchpoint caught the following chunk's size word
+changing from `-1` to `0x62616c2f6c6c6568` ("hell/lab"), beyond the
+physical 24-byte usable area. Vulnerable plain and patched builds both
+exit 0 on the two-import script; vulnerable ASan still reports the
+`WRITE of size 4` at :1751, patched ASan and the complete-table control
+are clean. The overflow bytes are the host's locale path, not
+file-derived; the file controls the corrupted size value and hence the
+poisoned size class. No pointer/IP, command, ASLR study or witness
+verdict, NO r5. Negative lanes are preserved in `CONSUME.md`.
+
 ## Scope
 
 Headless CLI scripting `Import()` on this host. Chosen bytes at a
 file-chosen offset before `encs` are now measured (W2/W4), as are the
-plain-build abort, the high-half glibc metadata consumer (W2/W3) and a
-low-half chunk-size rewrite accepted by `free()` into tcache bin 7 (W5).
-No later consumer of that tcache entry was observed on this path. The GUI
-`Import()` menu (GTK-3 dev packages absent, `ENABLE_GUI=OFF` builds),
-other loaders, pointer/IP control, command execution, ASLR/grooming, and
-independent witness replay of the real-build path remain UNKNOWN.
+plain-build abort, the high-half glibc metadata consumer (W2/W3), a
+low-half chunk-size rewrite accepted by `free()` into tcache bin 7 (W5),
+and a real gettext consumer of that poisoned entry that writes past the
+physical chunk on a second `Import()` (W6). The GUI `Import()` menu
+(GTK-3 dev packages absent, `ENABLE_GUI=OFF` builds), other loaders,
+pointer/IP control, command execution, ASLR/grooming, chosen bytes in
+the overflow, and independent witness replay of the real-build path
+remain UNKNOWN.

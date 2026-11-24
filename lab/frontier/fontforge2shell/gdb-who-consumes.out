@@ -1,0 +1,26 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+encsp=0x555555c48980
+Hardware watchpoint 2: *(long*)($encsp-8)
+
+Hardware watchpoint 2: *(long*)($encsp-8)
+
+Old value = 81
+New value = 145
+PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1748
+1748		for ( i=0; i<tot; ++i ) {
+write1 size=91
+[Inferior 1 (process 3303871) exited normally]
+write2 size=gdb-who-consumes.cmd:11: Error in sourced command file:
+Cannot access memory at address 0x555555c48978

@@ -55,3 +55,15 @@ input hashes, transcripts, return codes and the negative tcache-consumer
 probe. No loopback service, GUI or external target was involved. A GUI
 build was not attempted because `gtk+-3.0` is not installed here. This
 extension is author-side and unwitnessed, with no grade change.
+
+W6 (2026-11-24 19:2xZ): no external reads or new source trees. W5's
+pinned `size-91.pcf` was reused; `sponge-32.pcf` was generated locally
+from the pinned `truncated.pcf` PROPERTIES table plus a minimal 32-glyph
+METRICS/BITMAPS/ENCODINGS set (`make-consumer-case.py` records the byte
+layout). The same local plain, patched and ASan builds and gdb were
+used; `CONSUME.md` holds the input/transcript hashes, return codes, the
+real gettext consumer and the preserved negative lanes. The overflow
+bytes come from this host's locale path, not from any external source;
+no probe, scan or client contacted any external host and no loopback
+service was involved. This extension is author-side and unwitnessed,
+with no grade change.

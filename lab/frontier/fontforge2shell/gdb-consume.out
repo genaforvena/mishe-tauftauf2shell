@@ -1,0 +1,99 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+POISON encsp=0x555555c48980
+Breakpoint 2 at 0x7ffff72ad730: file ./malloc/malloc.c, line 3294.
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $1 = (void *) 0x555555c50540
+M128[0] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $2 = (void *) 0x555555c50540
+M128[1] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $3 = (void *) 0x555555c50540
+M128[2] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $4 = (void *) 0x555555c50540
+M128[3] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffc0d0 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffc0f0 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $5 = (void *) 0x555555c50540
+M128[4] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffc0d0 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffc0f0 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $6 = (void *) 0x555555c50540
+M128[5] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffc0d0 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffc0f0 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $7 = (void *) 0x555555c50540
+M128[6] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffc0d0 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffc0f0 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $8 = (void *) 0x555555c50540
+M128[7] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00005555558db9bd in PcfReadBitmaps (file=0x555555c21c00, toc=0x555555c4c500, b=0x555555c47fc0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1675
+1675	    offsets = malloc(cnt*sizeof(int));
+Value returned is $9 = (void *) 0x555555c50540
+M128[8] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00005555558dbdcd in PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c4c500, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1726
+1726	    encs = malloc(b->glyphcnt*sizeof(int));
+Value returned is $10 = (void *) 0x555555c50540
+M128[9] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $11 = (void *) 0x555555c50540
+M128[10] ret=0x555555c50540 equal=0
+
+Breakpoint 2, __GI___libc_malloc (bytes=bytes@entry=128) at ./malloc/malloc.c:3294
+warning: 3294	./malloc/malloc.c: No such file or directory
+0x00007ffff724088e in _nl_make_l10nflist (l10nfile_list=l10nfile_list@entry=0x7ffff7405a58 <_nl_loaded_domains>, dirlist=dirlist@entry=0x555555c21810 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain/share/locale", dirlist_len=91, mask=mask@entry=0, language=language@entry=0x7fffffffd110 "en_US.UTF-8", territory=territory@entry=0x0, codeset=0x0, normalized_codeset=0x0, modifier=0x0, filename=0x7fffffffd130 "LC_MESSAGES/FontForge.mo", do_allocate=0) at ../intl/l10nflist.c:166
+warning: 166	../intl/l10nflist.c: No such file or directory
+Value returned is $12 = (void *) 0x555555c50540
+M128[11] ret=0x555555c50540 equal=0

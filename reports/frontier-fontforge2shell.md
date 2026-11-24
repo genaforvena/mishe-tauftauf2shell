@@ -137,6 +137,20 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   is a size-confusion mechanic, not pointer/IP control; no r5. A GUI
   build was not attempted: `gtk+-3.0` is absent and existing builds are
   `ENABLE_GUI=OFF`.
+  W6 measured a real consumer of that poisoned entry (`CONSUME.md`): a
+  second `Import()` in the same process makes `FVImportBDF:2317` emit a
+  localized notice, and glibc gettext's `_nl_make_l10nflist` calls
+  `malloc(128)`, which returns the corrupted `encs` chunk (gdb: returned
+  pointer equals the poisoned chunk, size word still `0x91`). A
+  subsequent `memcpy` with `__len=91` writes the host locale path into
+  the physically 24-byte chunk, overwriting the following chunk's size
+  word (`0x62616c2f6c6c6568`, "hell/lab") past the usable area. Vulnerable
+  plain and patched builds exit 0 on the two-import script; vulnerable
+  ASan still reports the `WRITE of size 4` at :1751, patched ASan and the
+  complete-table control are clean. The overflow bytes are host-derived,
+  not file-chosen; the file controls the corrupted size value and thus
+  the poisoned size class. No pointer/IP, command, chosen overflow bytes
+  or witness verdict; NO r5.
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, pointer/IP, command execution, ASLR/grooming
   study or real-process marker; no rung 5.
@@ -151,7 +165,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   real-build path, including W2's real-process chosen bytes, is author-side
   with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
   remain UNKNOWN.
-  The W3 allocator-consumer measurement is author-side as well; no claim
-  beyond rungs 1-4 is made from it.
+  The W3, W5 and W6 allocator/consumer measurements are author-side as
+  well; no claim beyond rungs 1-4 is made from them.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.

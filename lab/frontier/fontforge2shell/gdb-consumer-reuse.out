@@ -1,0 +1,42 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+HIT glyph=-2 i=0 encs=0x555555c48980
+0x555555c48940:	0x0000000000000000	0x0000000000000000
+Hardware watchpoint 2: *(long*)((char*)$encsp-8)
+
+Hardware watchpoint 2: *(long*)((char*)$encsp-8)
+
+Old value = 81
+New value = 145
+PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1748
+1748		for ( i=0; i<tot; ++i ) {
+AFTER WRITE sizeword:
+0x555555c48940:	0x0000000000000000	0x0000000000000000
+Breakpoint 3 at 0x5555558dc674: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1835.
+
+Breakpoint 3, PcfParse (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1835
+1835	    mult = calloc(mcnt+1,sizeof(BDFChar *)); multcnt=0;
+BEFORE MULT CALLOC encsp=0x555555c48980 mcnt=15 sf->glyphcnt=30
+Hardware watchpoint 4: *(long*)((char*)$encsp+0x48)
+1836	    for ( i=0; i<mcnt; ++i ) {
+AFTER MULT CALLOC mult=0x555555c50540 encsp=0x555555c48980 equal=0 mcnt=15
+0x555555c48960:	0x0000000000000000	0x0000000000000000
+0x555555c48970:	0x0000000000000000	0x0000000000000091
+0x555555c48980:	0x0000555000960c88	0x5cb0e53c3d2d4049
+0x555555c48990:	0x0000010b00000109	0x0000010f0000010d
+0x555555c489a0:	0x0000011300000111	0x0000011700000115
+0x555555c489b0:	0x0000011b00000119	0x000000000000011d
+[Inferior 1 (process 3257635) exited normally]
+gdb-consumer-reuse.cmd:21: Error in sourced command file:
+No stack.
