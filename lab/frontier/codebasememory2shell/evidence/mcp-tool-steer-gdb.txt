@@ -1,0 +1,70 @@
+gdb steering check, 2026-11-24 10:4xZ, tool path, pinned vulnerable build.
+Method: throwaway probe (not committed) indexes a fixture whose Function name is
+a distinct 68-byte C identifier STEEREDabcdefghij...; a real stdio tools/call
+query_graph with 33 RETURN f.name items is fed to mcp-tool/bin/vuln-recover
+under gdb -batch: break cypher.c:3379 (the project_item memcpy), ignore the
+first 32 in-bounds hits, then dump the 33rd hit locals. ASLR addresses vary;
+the chosen bytes and the len=68 do not. No canonical replay log or script changed.
+=== RAW OUTPUT ===
+CHOSEN2_LEN=68 CHOSEN2=STEEREDabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija
+INDEX_RC=0 INDEX_TOTAL=True
+INDEX_OUT={"jsonrpc":"2.0","id":1,"result":{"content":[{"type":"text","text":"{\"project\":\"probe\",\"skipped_count\":0,\"nodes\":5,\"edges\":4,\"expected_nodes\":5,\"expected_edges\":4,\"adr_present\":false,\"adr_hint\":\"Project indexed. Consider creating an Architecture Decision Record: explore the codeba
+GDB_RC=0
+Breakpoint 1 at 0xd69a78: file src/cypher/cypher.c, line 3379.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+[New Thread 0x7ffff6bc16c0 (LWP 1082059)]
+[New Thread 0x7fffb3bbf6c0 (LWP 1082060)]
+
+Thread 1 "vuln-recover" hit Breakpoint 1, project_item (b=b@entry=0x529000000200, item=item@entry=0x521000003100, func_buf=func_buf@entry=0x7ffff510ca80 "", buf_sz=buf_sz@entry=512) at src/cypher/cypher.c:3379
+3379	        memcpy(func_buf, raw, len);
+HIT_33RD_MEMCPY
+len = 68
+raw = 0x507000000100 "STEEREDabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija"
+$1 = 0x7ffff510ca80
+$2 = 68
+0x507000000100:	"STEEREDabcdefghijabcdefghijabcdefghijabcdefghijabcdefghijabcdefghija"
+0x507000000100:	0x53	0x54	0x45	0x45	0x52	0x45	0x44	0x61
+0x507000000108:	0x62	0x63	0x64	0x65	0x66	0x67	0x68	0x69
+0x507000000110:	0x6a	0x61	0x62	0x63	0x64	0x65	0x66	0x67
+0x507000000118:	0x68	0x69	0x6a	0x61	0x62	0x63	0x64	0x65
+0x507000000120:	0x66	0x67	0x68	0x69	0x6a	0x61	0x62	0x63
+0x507000000128:	0x64	0x65	0x66	0x67	0x68	0x69	0x6a	0x61
+0x507000000130:	0x62	0x63	0x64	0x65	0x66	0x67	0x68	0x69
+0x507000000138:	0x6a	0x61	0x62	0x63	0x64	0x65	0x66	0x67
+0x507000000140:	0x68	0x69	0x6a	0x61
+
+GDB_STDERR_TAIL=568 in rb_set_columns
+Shadow bytes around the buggy address:
+  0x7ffff5100200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100280: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100380: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x7ffff5100400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ffff5100480: 00 00 00 00 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x7ffff5100500: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100600: 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2 00 00 00 00
+  0x7ffff5100680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffff5100700: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+src/cypher/cypher.c:4115:17: runtime error: index 32 out of bounds for type 'char *[32]'
+

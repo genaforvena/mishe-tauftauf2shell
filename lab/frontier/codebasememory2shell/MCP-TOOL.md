@@ -74,8 +74,26 @@ reports on stderr:
 
 This is rung-3 corruption and rung-4 index-selected placement reached through
 the real MCP tool argument path, still local-only. The chosen bytes at the
-destination were previously observed byte-for-byte with gdb in the direct-call
-harness (`evidence/GDB.txt`); this tool-path rebuild did not repeat gdb.
+destination were observed byte-for-byte with gdb in the direct-call harness
+(`evidence/GDB.txt`) and, on the tool path, in the W6 steering check below.
+
+## File-steering of the chosen bytes (W6, 2026-11-24)
+
+`evidence/mcp-tool-steer-gdb.txt`. The chosen bytes are not a harness constant:
+they are the `Function` name from a fixture indexed through the real
+`index_repository` tool call. A throwaway probe wrote a distinct 68-byte C
+identifier, `STEEREDabcdefghij…`, into `probe.c`, indexed it (rc=0, 5 nodes /
+4 edges), then sent one real stdio `tools/call` `query_graph` with 33 `RETURN
+f.name` items to the unchanged `mcp-tool/bin/vuln-recover` binary under
+`gdb -batch`. A breakpoint at the `project_item` memcpy (`cypher.c:3379`) with
+the first 32 in-bounds hits ignored stopped on the 33rd: `func_buf =
+0x7ffff510ca80`, `len = 68`, `raw = "STEEREDabcdefghij…"` with each byte shown.
+`func_buf` is the same OOB destination ASan reports at offset 51840 =
+`func_bufs[32]`; UBSan also reports `index 32 out of bounds for type 'char
+*[32]'` at `cypher.c:4115`. Changing the fixture identifier therefore changes
+the bytes staged for the OOB write. ASLR addresses vary per run; the chosen
+bytes and `len = 68` do not. No canonical replay log, `probe.py` or
+`replay.sh` was changed by this check.
 
 ## Fixed-release control (`evidence/mcp-tool-fixed-asan.log`)
 

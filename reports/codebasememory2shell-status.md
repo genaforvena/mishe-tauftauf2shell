@@ -69,6 +69,12 @@ fixture bytes. It remains a local stdio process: no HTTP transport, no remote
 request, no agent-influenced query, no grooming, pointer/IP, command, witness
 verdict or rung 5. The advisory's AV:L/PR:L vector remains consistent.
 
+W6 closes the tool-path byte-choice gap: a distinct 68-byte identifier in the
+indexed fixture (`STEEREDabcdefghij…`) was staged at the OOB destination as
+`len = 68` bytes from `raw` on the 33rd `project_item` memcpy under gdb, so
+the chosen bytes come from the indexed file, not a harness constant
+(`evidence/mcp-tool-steer-gdb.txt`, `MCP-TOOL.md` § "File-steering").
+
 The tool-path claim is clean-archive replayable and fully replayed by the
 author: `mcp-tool/replay.sh` tracks its previously untracked lab stub
 (`grammar_zz_labstub.c`, sha256
