@@ -1,0 +1,17 @@
+--- a/display_ipopt.c
++++ b/display_ipopt.c
+@@ -97,8 +97,14 @@
+ 			if (i > j)
+ 				i = j;
+ 			i -= IPOPT_MINOFF;
+ 			if (i <= 0)
+ 				continue;
++			/* local fix from upstream issue #80: bound by buffer
++			 * capacity and by bytes actually present in the header */
++			if (i > MAX_IPOPTLEN)
++				i = MAX_IPOPTLEN;
++			if (i > hlen)
++				i = hlen;
+ 			if (i == old_rrlen
+ 			    && cp == (u_char *)buf + sizeof(struct myiphdr) + 2
+ 			    && !memcmp((char *)cp, old_rr, i)) {

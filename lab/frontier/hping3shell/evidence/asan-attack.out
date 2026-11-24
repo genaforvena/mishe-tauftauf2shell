@@ -1,0 +1,45 @@
+=================================================================
+==3897012==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5ef09b123668 at pc 0x729a210fb303 bp 0x7ffd590c1a40 sp 0x7ffd590c11e8
+WRITE of size 68 at 0x5ef09b123668 thread T0
+    #0 0x729a210fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5ef09b11f8c5 in display_ipopt standin/display_ipopt.c:112
+    #2 0x5ef09b11ffcc in main standin/harness.c:69
+    #3 0x729a20c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x729a20c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5ef09b11f324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/hping3shell/asan/harness+0x2324) (BuildId: d9cf196fef9cbcea944b9c8e6f52c36365579b60)
+
+0x5ef09b123668 is located 56 bytes before global variable 'canary' defined in 'standin/harness.c:17:15' (0x5ef09b1236a0) of size 512
+0x5ef09b123668 is located 0 bytes after global variable 'old_rr' defined in 'standin/display_ipopt.c:56:13' (0x5ef09b123640) of size 40
+SUMMARY: AddressSanitizer: global-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x5ef09b123380: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5ef09b123400: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5ef09b123480: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5ef09b123500: f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9 f9
+  0x5ef09b123580: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+=>0x5ef09b123600: 04 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00[f9]f9 f9
+  0x5ef09b123680: f9 f9 f9 f9 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5ef09b123700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5ef09b123780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5ef09b123800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5ef09b123880: 00 00 00 00 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3897012==ABORTING

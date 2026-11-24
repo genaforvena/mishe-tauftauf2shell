@@ -1,0 +1,8 @@
+/provision/
+/asan/
+/plain/
+/fixed/
+/standin/display_ipopt.c
+/standin/fixed_display_ipopt.c
+/evidence/.failed
+*.o

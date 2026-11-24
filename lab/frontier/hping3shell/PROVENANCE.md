@@ -1,0 +1,87 @@
+# PROVENANCE — hping3shell lab (CVE-2026-136131)
+
+## Pinned inputs (read-only provisioning, no external probing)
+
+- `pinned/display_ipopt.c`, `pinned/waitpacket.c`, `pinned/hping2.h` copied
+  verbatim from `https://github.com/antirez/hping.git` at master tip
+  `3547c7691742c6eaa31f8402e0ccbb81387c1b99` (2014 tree, no later fix).
+  sha256 respectively:
+  `e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b`,
+  `f63e229c6d8708a23f29baeebb7e9d18dbefaa9a41db801c15866b07d52279e9`,
+  `d3fa609e10355ca1ec2398b6ec9c670ff11574076795e86115ad0e4711699072`.
+  `run.sh` rechecks the `display_ipopt.c` hash every run.
+- `pinned/fix.patch`: local hunk implementing the fix recommended in
+  upstream issue #80 (clamp `i` to `MAX_IPOPTLEN` and to `hlen`); sha256
+  `23bb8db3b3d2ee241d355ce1af7c643ae1dc831ae6058c52fbdd2f806f400c92`.
+  Patched source sha256
+  `70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`.
+- Advisory and issue read through `read` only; no external packet probes.
+
+## Why `standin/` copies
+
+C quoted includes resolve to the source file's own directory before `-I`.
+Compiling `pinned/display_ipopt.c` directly picked the full upstream
+`pinned/hping2.h` (missing `byteorder.h`) rather than the minimal stand-in.
+`run.sh` therefore does `cp pinned/display_ipopt.c standin/display_ipopt.c`
+and `cp fixed/display_ipopt.c standin/fixed_display_ipopt.c`: byte-identical
+copies, only the include resolution changes. `standin/hping2.h` reproduces
+the option constants and `struct myiphdr` from the pinned header verbatim;
+`standin/globals.h` is empty because the pinned function uses no globals
+from it. `standin/harness.c` supplies the packet buffer, the RR option and
+an adjacent `.bss` canary; it never edits the pinned function.
+
+## Exact build commands (from `lab/frontier/hping3shell/`)
+
+```
+patch -s -o fixed/display_ipopt.c pinned/display_ipopt.c < pinned/fix.patch
+cp pinned/display_ipopt.c standin/display_ipopt.c
+cp fixed/display_ipopt.c standin/fixed_display_ipopt.c
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -fsanitize=address -I standin -c standin/display_ipopt.c -o asan/display_ipopt.o
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -fsanitize=address -I standin -c standin/harness.c -o asan/harness.o
+gcc -fsanitize=address -o asan/harness asan/display_ipopt.o asan/harness.o
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -fsanitize=address -I standin -c standin/fixed_display_ipopt.c -o asan/display_ipopt_fixed.o
+gcc -fsanitize=address -o asan/harness_fixed asan/display_ipopt_fixed.o asan/harness.o
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -I standin -c standin/display_ipopt.c -o plain/display_ipopt.o
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -I standin -c standin/harness.c -o plain/harness.o
+gcc -o plain/harness plain/display_ipopt.o plain/harness.o
+gap=$(nm -n plain/harness | awk '$3 ~ /^old_rr/ {o=strtonum("0x"$1)} $3=="canary" {c=strtonum("0x"$1)} END{print c-o}')
+gcc -O0 -g -std=gnu99 -Wall -Wno-unused -I standin -DCANARY_GAP=$gap -c standin/harness.c -o plain/harness.o
+gcc -o plain/harness plain/display_ipopt.o plain/harness.o
+```
+
+Each case runs as `asan/harness <attack|attack2|safe|safe-zero>` or
+`plain/harness <attack|attack2|safe>`; stdout+stderr and rc are captured in
+`evidence/<case>.out`. Final in-tree run: 12 PASS / 0 FAIL, rc 0.
+
+## Observed results (exact values)
+
+- `evidence/asan-attack.out`: `global-buffer-overflow`, `WRITE of size 68`,
+  `display_ipopt standin/display_ipopt.c:112`, 0 bytes after `old_rr` (size
+  40), rc 1. `evidence/asan-attack2.out`: same with `WRITE of size 86`.
+- `evidence/plain-attack.out`: `CANARY_GAP=64`; canary[0..3] =
+  `4f 4d 49 53`. `evidence/plain-attack2.out`: canary[0..21] =
+  `4f 4d 49 53 48 45 2d 4f 4f` ×2 + `4f 4d 49 53`. The `EXPECT:` line is
+  computed independently from packet byte `22 + 64 + offset` and matches.
+- `evidence/asan-safe.out`, `asan-safe-zero.out`, `fixed-asan-attack.out`:
+  rc 0, no sanitizer error. `evidence/plain-safe.out`: canary all zero.
+- `nm -n plain/harness`: `old_rr.0` at `0x4040`, `canary` at `0x40a0`.
+
+## Known limits and preserved negatives
+
+- First harness revision failed: `patch -q` is unsupported by this `patch`;
+  the local hunk initially had a wrong line count (7 vs 8 context lines),
+  and compiling from `pinned/` selected the full upstream header. All three
+  were repaired in `run.sh` and `pinned/fix.patch`; the failures are kept
+  here rather than erased.
+- An early `gap` computation matched `$3=="old_rr"` but the linker emits
+  `old_rr.0`, yielding a tautological canary comparison; the check now uses
+  `^old_rr` and requires a non-zero packet-derived byte in the canary.
+- Stand-in constants/struct, no hping build, no pcap/raw socket, no wire,
+  no live hping process, no pointer/IP/command control, no allocator
+  metadata claim and no rung 5. ASan redzones poison the adjacent canary,
+  so chosen bytes are observed only in the plain build.
+- Stock glibc behavior of an overflow in `.bss` stays UNKNOWN; the plain
+  harness continues because the chosen canary is a benign array, not an
+  active control-flow object.
+- The advisory's AV:N precondition (`-G`/`--rroute`, matching packet) is
+  not exercised; no external system was contacted with probes.

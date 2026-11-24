@@ -1,0 +1,40 @@
+MODE=safe-zero OPTLEN=255 OPTPTR=0x04 CANARY_GAP=40
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+CANARY: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+EXPECT: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00

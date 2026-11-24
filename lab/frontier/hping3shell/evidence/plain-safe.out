@@ -1,0 +1,37 @@
+MODE=safe OPTLEN=255 OPTPTR=0x08 CANARY_GAP=64
+RR: 	77.73.83.72
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+unknown option 2d
+unknown option 4f
+unknown option 4f
+unknown option 4d
+unknown option 49
+unknown option 53
+unknown option 48
+unknown option 45
+CANARY: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+EXPECT: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
