@@ -1,0 +1,10 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422e0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+IDX=268324 avg={16706,16690,16691,1}
+0x555555946cd0:	0x0000	0x0000	0x0000	0x0000
+399	                for (int col = MIN(left, 8); col < mcol - 8; col++)
+0x555555946cd0:	0x4142	0x4132	0x4133	0x0000

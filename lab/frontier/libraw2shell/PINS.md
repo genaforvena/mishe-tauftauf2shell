@@ -19,6 +19,18 @@
 | `evidence/wl-probe-11036.input` | W6 variant, WhiteLevel 11,036, exact `0x4141` at index 68,644 | `b856c1c62d48a63f9c3d42a4d32be11033c0dc405fcbcc063f6b9ddaa6d61215` |
 | `evidence/wl-probe-11035.input` | W6 calibration neighbour, `0x4142` | `8d865153c01b4128e270fa1e5bcc9988865dae48829c94bca5eb955d1d1cce09` |
 | `evidence/wl-dead.input` | W6 negative target, WL 3,234 -> `0xdeb3`, not `0xdead` | `6ed079d8c97e89bdd3eff5367064ef32fffa4b4d66e5746cbc53a24f6c5192da` |
+| `evidence/dim1024-wl11036.input` | W7 negative: W6 WL does not transfer to D=1024 | `6df37eb18792169d21fbd60179a1368a992fe1e1537c22d89ed7a7e40e76ae70` |
+| `evidence/dim1024-wl6864.input` | W7 target-1 probe at far index, `0x4146` | `805e7b4007e4ae49dfde1badd8c8a67d4ed93d9b2d4e20b55ed94158e02ef502` |
+| `evidence/dim1024-wl6866.input` | W7 target-1 probe, `0x4142` | `65dca5a48b6f48d6a316632bd8ddc9cb6cb17be2da138d12b9ee927f728d2049` |
+| `evidence/dim1024-wl6867.input` | W7 target-1 probe, `0x413e` | `aab51772ae94f86efd3faf89457b3944a0d1d2142da1f196713b97f9e8caf4f3` |
+| `evidence/dim1024-wl24600.input` | W7 target-2 bracket, `0x1235` | `c0c5df90f5f03a4b8625b784e4e653e240a548f2e47e76a06398b6ed2ab50fbc` |
+| `evidence/dim1024-wl24601.input` | W7 exact pre-chosen `0x1234` at index 268,324 | `b894e63c5e70cf685bb1a309e9c14ee265bcec8068a6bbe4aac55023138c0f77` |
+| `evidence/dim1024-wl24602.input` | W7 target-2 bracket, `0x1233` | `d35f0d336eab74161fe9cef1fc936a882b516df8a69b747af412edb9b3d35f93` |
+| `evidence/dim1024-wl24603.input` | W7 second exact `0x1234` hit | `1fedbfcf3f4807ac37e2cce3467a2fb34b29d04e56b48ee5f366f264482ffa55` |
+| `evidence/dim1024-wl24606.input` | W7 sweep, `0x1233` | `566c84a57ce21f5e73128a02104c2e0bc1549806f0a4c0ec85a9c9d2581f0b68` |
+| `evidence/dim1024-wl24607.input` | W7 sweep, `0x1233` | `0d2d9e00f52fbd90f2973bfb85a9c343267ab3c1a4b609b8ef2e4f8907b40191` |
+| `evidence/dim1024-wl24608.input` | W7 sweep, `0x1233` | `f01be451f0051806b18aa820b759c231e11579fd9aca2e731e1d2a5ed7a99782` |
+| `evidence/dim1024-wl24609.input` | W7 sweep, `0x1233` | `37cebe51c26b055895d07d0cffa1d0ef7c0875fa8bca43f30a5f825bedaea5d9` |
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
 (CVE-2026-135176, 2026-11-23). Report: `https://github.com/LibRaw/LibRaw/issues/894`.

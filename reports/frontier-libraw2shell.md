@@ -261,6 +261,38 @@ Ceiling unchanged: the value is still the saturated constant `0xffff`, no
 arbitrary bytes, no pointer/IP, no consumer beyond `dcraw_emu`, NO r5.
 
 
+## Combined index + value steering at D=1024 (W7, 2026-11-24 10:0xZ; author-side)
+
+The two steerable axes are independent: the W6 exact-hit WhiteLevel does not
+transfer to the W5 far frame. `craft_whitelevel_poc.py` with WL 11,036 on
+`evidence/dim1024.input` produced `evidence/dim1024-wl11036.input` (sha256
+`6df37eb18792169d21fbd60179a1368a992fe1e1537c22d89ed7a7e40e76ae70`);
+plain `-O0` gdb at index 268,324 read `avg={10392,10383,10384,1}` and stored
+`0x2898 0x288f 0x2890` (`evidence/gdb-dim1024-wl11036.txt`). The far frame's
+raw-field scale constant is about 1.147e8, not the 1.844e8 of the D=512 field,
+because `craft_dimension_poc.py` scales the zero scan field with frame area.
+
+Pre-registered target 1, `0x4141`, was NOT reachable at the far index: WL
+6,864 / 6,866 / 6,867 gave `0x4146` / `0x4142` / `0x413e`
+(`evidence/gdb-dim1024-wl6864.txt`, `-wl6866.txt`, `-wl6867.txt`); local
+granularity there is 2-4 halfwords per WhiteLevel unit. Pre-registered target
+2, `0x1234`, WAS hit exactly after recalibration to WL 24,601 on the same far
+frame: `evidence/dim1024-wl24601.input` sha256
+`b894e63c5e70cf685bb1a309e9c14ee265bcec8068a6bbe4aac55023138c0f77`,
+`IDX=268324 avg[0]=4660`, zeros before the store and `0x1234 0x1231 0x1231`
+after it (`evidence/gdb-dim1024-wl24601.txt`, plus two byte-identical fresh
+runs `-run2.txt` and `-run3.txt`). WL 24,600 / 24,602 / 24,603 gave `0x1235`
+/ `0x1233` / `0x1234`; the sweep is preserved in `gdb-dim1024-wl246*.txt`.
+ASan on the exact-hit input: vulnerable `-n 1` rc 1 with `WRITE of size 2` at
+`:427`; fixed rc 0 empty; vulnerable no-option rc 0 empty
+(`dim1024-wl24601-asan-*.out`). The same three controls on the WL 6,864
+combined input were also clean (`dim1024-wl6864-asan-*.out`).
+
+This is a pre-chosen 16-bit value at a second pre-chosen offset (268,324),
+calibrated independently of the D=512 hit. It does not change the ceiling:
+no arbitrary alphabet at either offset, no pointer/IP, no consumer beyond
+`dcraw_emu`, no wire path, NO r5. Author-side only; no replay requested.
+
 ## Rung-4 assessment and rank
 
 Rungs 1-3 are demonstrated in the real `dcraw_emu` consumer with the public
@@ -270,9 +302,11 @@ input and ESTABLISHED by the W187 witness replay: the OOB store at index
 controls. W3 additionally shows witness-established (DM 3413) file steering
 of the value to distinct non-saturated halfwords. W6 adds an author-side exact
 hit on one pre-chosen halfword (`0x4141`) at index 68,644 via WhiteLevel
-calibration, with a preserved negative for a second target; it does not change
-the ceiling. W5 adds author-side, replay-pending steering of the first OOB
-index from 68,644 to 268,324 by changing the crafted frame size. Fully
+calibration, with a preserved negative for a second target. W5 adds
+author-side, replay-pending steering of the first OOB index from 68,644 to
+268,324. W7 combines them: a second pre-chosen halfword (`0x1234`) hit exactly
+at the steered index 268,324 with its own calibration, while the W6
+calibration does not transfer. Neither changes the ceiling. Fully
 arbitrary byte values and pointer/IP control remain UNKNOWN. Rank: high
 tractability, low escalation
 (local file, UI:P, no network, no pointer/command execution). Admitted frontier
@@ -330,12 +364,15 @@ arbitrary byte alphabet or pointer/IP/command, NO r5.
   WhiteLevel steering claim (DM 3413); all ESTABLISHED AS LABELED.
 - Fully arbitrary byte values remain UNKNOWN: W2 wrote a saturated constant
   `0xffff`; W3 steered three distinct non-saturated halfwords via one DNG
-  metadata tag; W6 hit one pre-chosen value `0x4141` exactly but a second
-  target (`0xdead`) was unreachable at that WhiteLevel granularity. None
-  demonstrates an arbitrary 16-bit alphabet. Pointer/IP control remains an
-  open prerequisite for any stronger claim.
-- The W5 frame-size/IDX steering result is author-side only; witness replay was
-  requested and has not arrived. Do not treat it as ESTABLISHED.
+  metadata tag; W6 hit one pre-chosen value `0x4141` exactly at index 68,644
+  and W7 hit another (`0x1234`) exactly at index 268,324, each with its own
+  calibration. Several other targets (`0xdead`, `0x1234`/`0x2222` at D=512,
+  `0x4141` at D=1024) were unreachable at their local WhiteLevel granularity.
+  None demonstrates an arbitrary 16-bit alphabet. Pointer/IP control remains
+  an open prerequisite for any stronger claim.
+- The W5 frame-size/IDX steering result and the W6/W7 exact-hit results are
+  author-side only; witness replay for W5 was requested and has not arrived.
+  Do not treat them as ESTABLISHED.
 - Target admitted 05:4xZ as route #127. Operator owns standing approvals;
   the person owns the charter, wake units and full-flag sync. No external
   probing was done.
