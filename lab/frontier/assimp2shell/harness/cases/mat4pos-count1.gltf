@@ -1,0 +1,12 @@
+{
+  "asset": { "version": "1.0" },
+  "buffers": { "buf": { "byteLength": 64, "uri": "data:application/octet-stream;base64,AAAAAAAAAAAAAAAAVEFVRlc1TUFSSzAxVzVNQVJLMDJBQkNERUZHSElKS0xNTk9QUVJTVFVWV1hZWltcXV5fYA==" } },
+  "bufferViews": { "view": { "buffer": "buf", "byteOffset": 0, "byteLength": 64, "target": 34962 } },
+  "accessors": {
+    "pos": { "bufferView": "view", "byteOffset": 0, "componentType": 5126, "count": 1, "type": "MAT4" }
+  },
+  "meshes": { "tri": { "primitives": [ { "attributes": { "POSITION": "pos" }, "mode": 4 } ] } },
+  "nodes": { "node": { "meshes": [ "tri" ] } },
+  "scenes": { "scene": { "nodes": [ "node" ] } },
+  "scene": "scene"
+}

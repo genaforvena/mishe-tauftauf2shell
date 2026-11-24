@@ -1,0 +1,30 @@
+# w5_real_vuln case=mat4pos-count1 mode=asan rc=1
+PASS mat4pos-write64
+PASS mat4pos-region12
+PASS mat4pos-frame
+# w5_real_fixed case=mat4pos-count1 mode=asan rc=0
+PASS mat4pos-fixed-clean
+# w5_cb_vuln case=mat4pos-count1 mode=cb rc=0
+PASS mat4pos-chosen-bytes
+PASS mat4pos-import-completed
+# w5_cb_fixed case=mat4pos-count1 mode=cb rc=0
+PASS mat4pos-cb-fixed-clean
+# w5_plain case=mat4pos-count1 mode=plain rc=134
+PASS mat4pos-plain-abort
+# w5_real_vuln case=mat4idx-count1 mode=asan rc=1
+PASS mat4idx-stack-write64
+PASS mat4idx-write64
+PASS mat4idx-value-frame
+# w5_real_fixed case=mat4idx-count1 mode=asan rc=134
+PASS mat4idx-fixed-still-fails
+# w5_real_vuln case=safe mode=asan rc=0
+PASS safe-clean
+RESULT 13 PASS / 0 FAIL
+6b74244521c8e9bcc6d0e174aaaf2570fa4d4ba7598a2df2a9e01458b47dd04c  w5/evidence/chosen-fixed.out
+3a147079beb594f4799d9e3e7a39ec4f27f0fb20bf5ca35a08df63f2d0dba53c  w5/evidence/chosen-vuln.out
+1685c6ad2a9cb6a93e44269cb43a98b3040bf4b42fc27ec236f5aba85233f3ca  w5/evidence/mat4idx-fixed.out
+00f289ee7bbb7d0655493435d604e23054b4b491ef5ffa912a932de88d4dc407  w5/evidence/mat4idx-vuln.out
+ad6335521e05a23c24ae0fb79c8cabe0cf2acd069c164fa0fd19f1e35dc896a2  w5/evidence/mat4pos-fixed.out
+e13d44a8b3bc3c664f35459ccaa6dcde655813806402e2556c2e5f361126b607  w5/evidence/mat4pos-plain.out
+09efc6f19303b6fd47ca76e999f652dbefbb912f79ed31a72428143a3cfef40c  w5/evidence/mat4pos-vuln.out
+3091b054b2fdbab9d3f522cb98a8b6fd2e7fac3303b9325f9876bccd8ea73e43  w5/evidence/safe.out

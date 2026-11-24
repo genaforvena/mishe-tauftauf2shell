@@ -160,9 +160,42 @@ import control was found; no grooming was attempted. Evidence:
 `placement/evidence/w4-negative.log` and `harness/placement_probe.cpp`.
 This is a preserved negative, not a grade change.
 
+## W5 — larger declared-vs-actual mismatch on the real path (2026-11-24 05:1xZ)
+
+Source-bound in the pinned bytes: `AttribType` accepts `MAT4` (16 components)
+and FLOAT, so `Accessors::GetElementSize()` is 64; `ImportMeshes` applies a
+POSITION accessor to `aiVector3D` and reads indices through `Indexer` with no
+type check (`glTFImporter.cpp:280-283`, `:308-360`). Two new tracked glTF 1.0
+documents exercise this through `ReadFileFromMemory` on the built pinned
+v6.0.6 glTF-only library:
+
+- `mat4pos-count1.gltf`: one MAT4/FLOAT `POSITION`, destination
+  `new aiVector3D[1]` = 12 bytes. ASan `heap-buffer-overflow`, `WRITE of size
+  64`, 0 bytes after the 12-byte region, frames `memcpy` →
+  `Accessor::ExtractData<aiVector3t<float> >` → `ImportMeshes` →
+  `ReadFileFromMemory`. The report callback (instrumentation only) unpoisons
+  the 64-byte redzone so the importer's own copy completes; the post-write
+  dump starts `at80=54415546…`, the document's chosen `TAUF` at the first
+  out-of-bounds offset. The document's later markers are not present at that
+  address after import. The plain non-ASan build aborts with
+  `malloc(): invalid size (unsorted)`. With the PR6860 hunk: `scene=ok`, no
+  ASan report (its hard check rejects `elemSize > sizeof(T)`).
+- `mat4idx-count1.gltf`: POINTS mode with a MAT4/FLOAT index accessor.
+  `Indexer::GetValue<uint32_t>` copies 64 bytes into a 4-byte local: ASan
+  `stack-buffer-overflow`, `WRITE of size 64`, frame lists `[96,100) 'value'`
+  as partially overflowed. With the PR6860 hunk the case aborts with
+  `*** buffer overflow detected ***`: the preserved negative, that hunk does
+  not fix the Indexer path.
+
+`harness/run-w5.sh`: **13 PASS / 0 FAIL**, logs in `w5/evidence/`. Author-
+measured, unwitnessed; outside verdict #3277 and the pending W1/W2 replay.
+The larger mismatch extends the write but yields no chosen byte inside a
+valid `aiMesh` field, no pointer/IP, no command and no rung 5.
+
 ## Next lane
 
-Replay W1/W2 independently, preserving any contradiction as a negative. The
-live-`aiMesh`-field lane is closed by W4; only a different accessor/target
-pair with a larger declared-versus-actual mismatch would reopen placement.
+Replay W1/W2 independently, preserving any contradiction as a negative. W5
+measured a 64-byte mismatch through the real importer but found no chosen
+byte in a live `aiMesh` field, so the placement lane stays closed. Only a
+different pair with observed control-flow placement would reopen it.
 Never relabel placement as control flow or RCE without observation.
