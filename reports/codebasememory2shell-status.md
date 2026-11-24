@@ -245,7 +245,7 @@ command, verdict or rung 5.
 `lab/frontier/codebasememory2shell/control-flow-bypass.sh` rebuilds a
 throwaway direct-call harness from the pinned vulnerable `cypher.c` (same
 plain-build flags) and captures `evidence/control-flow-bypass.txt`, sha256
-`06e862c667df18d17ec598a789256834ea2786a1a89d4de4522cd9922c562400`.
+`e72b28a49a945b409b90de76635765cfefbbe1179931be1aee2d9d9910356ebb`.
 No canonical harness, pin, matrix row or witness request changed.
 
 - `project_item()` skips its `memcpy` for an empty property (`cypher.c:3374-3381`).

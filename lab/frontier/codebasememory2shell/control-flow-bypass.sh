@@ -55,6 +55,14 @@ say ""
 say "=== build ==="
 (
   cd "$VULN"
+  gcc -std=c11 -g -O1 -w -Ivendored/mimalloc/include -Ivendored/mimalloc/src \
+    -DMI_OVERRIDE=0 -c vendored/mimalloc/src/static.c -o /tmp/cbm-w12-mimalloc.o
+  gcc -std=c11 -D_DEFAULT_SOURCE -g -O1 -w -Iinternal/cbm \
+    -Iinternal/cbm/vendored/ts_runtime/include -Iinternal/cbm/vendored/ts_runtime/src \
+    -c internal/cbm/ts_runtime.c -o /tmp/cbm-w12-tsruntime.o
+) >> "$LOG" 2>&1
+(
+  cd "$VULN"
   gcc -std=c11 -D_DEFAULT_SOURCE -D_GNU_SOURCE -g -O1 -fno-omit-frame-pointer -w \
     -Isrc -Ivendored -Ivendored/sqlite3 -Ivendored/mimalloc/include \
     -Iinternal/cbm -Iinternal/cbm/vendored/ts_runtime/include \
@@ -67,7 +75,7 @@ say "=== build ==="
     src/foundation/compat_regex.c src/foundation/mem.c src/foundation/diagnostics.c \
     src/foundation/profile.c src/foundation/dump_verify.c src/foundation/limits.c \
     src/foundation/subprocess.c vendored/sqlite3/sqlite3.c vendored/yyjson/yyjson.c \
-    "$HERE/.mimalloc-plain.o" "$HERE/.tsruntime-plain.o" \
+    /tmp/cbm-w12-mimalloc.o /tmp/cbm-w12-tsruntime.o \
     -lm -lpthread -lz -lstdc++
 ) >> "$LOG" 2>&1
 say "build RC=$?"

