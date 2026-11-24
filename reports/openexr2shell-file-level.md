@@ -791,3 +791,63 @@ counterexample to the normalized observations above. Both W178 checks replay
 from a clean `git archive HEAD` at `aebf617` with the gitignored pinned build
 trees symlinked in: `sh harness/mixed-check.sh` reproduced all five evidence
 hashes above and `sh harness/offset-check.sh` reproduced its evidence hash.
+
+## W179: chosen bytes reach the sink through unmodified exrcheck -c (2026-11-24)
+
+Prediction: W178's file-chosen-byte result was measured only with the
+purpose-built `guarded_harness`; the unmodified upstream `exrcheck -c` tool
+that W162 showed reaching the same pinned sink should also reach it with the
+mixed-channel file, including the copy whose source bytes come from the file.
+
+Inputs: the committed W178 generator and mutator outputs, baseline sha256
+`9aa2073dce40b893f648f0fb078b738538e65a569cb00079d4128612e7fa3d04` and PoC
+sha256 `484b1c35f66e18db3e263346e100da44a199e4bdf08c0678afe113b042593a52`.
+Commands from `lab/openexr2shell-real`:
+
+```
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:log_path=stderr \
+  ./build-vuln-asan/bin/exrcheck -c work-mixed/poc_mixed.exr
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0:log_path=stderr \
+  ./build-fixed-asan/bin/exrcheck -c work-mixed/poc_mixed.exr
+./build-vuln-plain/bin/exrcheck -c work-mixed/poc_mixed.exr
+gdb -q -batch -x harness/gdb-exrcheck-mixed.cmd ./build-vuln-plain/bin/exrcheck
+sh harness/exrcheck-mixed-check.sh
+```
+
+Observations: the unmodified vulnerable ASan tool exits 1 with
+`heap-buffer-overflow`, `READ of size 128` at pinned
+`sort2_4ByteChannels_tiled internal_zstd.c:472`, over the end of the 64-byte
+scratch allocated at `:1335`, via `exr_decoding_run decoding.c:602` ->
+`readCoreScanlinePart ImfCheckFile.cpp:1467` -> `main.cpp:166`. This first
+copy is the FLOAT row's over-read, so ASan stops before the file-chosen HALF
+copy. The fixed ASan tool prints `bad` with no ASan report; both baselines
+print `OK` with rc 0. The unmodified vulnerable plain tool exits 139
+(SIGSEGV) on the PoC.
+
+The gdb command file breaks at the sink function and at glibc's memcpy
+implementation, and prints offsets relative to the function's `outPtr` and
+`inPtr`: `COPY1 ... len=128 dst-out=0 src-in=64`, then
+`COPY2 ... len=64 dst-out=128 src-in=0`. The second copy's source is the
+in-bounds 64-byte scratch holding the file's `0x3c` HALF block; the 8 bytes at
+the destination before the copy are `0x20 0x00 ...` and after the copy are
+eight `0x3c`. This is 64 file-chosen bytes written at `outPtr+128`, i.e. 64
+bytes past the 64-byte `decode.unpacked_buffer`, reached by an unmodified
+upstream binary.
+
+`harness/exrcheck-mixed-check.sh` regenerates all six normalized evidence
+logs, asserts the controls, the two copy offsets, the `0x3c` readback and the
+input hashes, and prints `RESULT PASS`. It passed three times byte-stably in
+the working tree with normalized log sha256s: `asan-baseline`
+`bca5174944825cfc887b7f3059bd0a070cce03b34d82c1f38cfacb981a02d54f`,
+`asan-poc` `c0bda7dad628418f738a39aad57d667242411dd980c559d2fca088679c4d5d31`,
+`fixed-asan-poc` `381d52ddf65e21160a8d579187babf3779cebba9da9326a867bd95bb979c5cb7`,
+`gdb` `81060fd4adffe282cdfbf5d9a85fb722082e8cef568ab937559b3bfc77c31bac`,
+`plain-baseline` `bca5174944825cfc887b7f3059bd0a070cce03b34d82c1f38cfacb981a02d54f`,
+`plain-poc` `81224ceac01c8a5d9d73ef9a62b604654749259472ae4060ad19745287ccdaca`.
+
+Scope and disposition: still a local EXR path and a command-line validation
+tool, not a wire-fed live target; no pointer or control-flow target, command
+or marker side effect. The plain build's SIGSEGV is heap-metadata damage
+(W171), not control-flow corruption. The claim is unwitnessed; W161 replayed
+only the older all-FLOAT file. Grade unchanged: rung 4 at the labeled
+file-level CODE/CONSUMER scope, rung 5 UNKNOWN.

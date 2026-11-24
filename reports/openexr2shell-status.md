@@ -348,3 +348,27 @@ claim is now scoped to all-FLOAT parts. Would change mind: a witness
 counterexample or an unmodified network-facing consumer reaching this sink.
 Both W178 checks replay from clean `git archive HEAD` at `aebf617` with
 pinned build trees symlinked in, reproducing all committed evidence hashes.
+
+## W179: unmodified exrcheck -c reaches the mixed-channel chosen-byte sink (2026-11-24)
+
+The W178 file-chosen-byte result is not an artifact of the purpose-built
+guarded harness. The unmodified upstream `exrcheck -c` binary built from the
+pinned v3.5.2 tree reaches the same pinned `internal_zstd.c:472` sink with the
+710-byte mixed-channel PoC: vulnerable ASan reports `READ of size 128` from
+past the 64-byte scratch via `exr_decoding_run decoding.c:602` and
+`readCoreScanlinePart ImfCheckFile.cpp:1467`; fixed ASan prints `bad`; both
+baselines print `OK`; the vulnerable plain build exits 139 (SIGSEGV).
+
+Under gdb the plain build performs two copies at the sink: 128 bytes from
+scratch offset 64 (FLOAT row), then 64 bytes from the in-bounds, file-derived
+`0x3c` scratch block to `outPtr+128` (HALF row), 64 bytes past the 64-byte
+destination. The destination's first 8 bytes change from
+`0x20 0x00 ...` to eight `0x3c`. `harness/exrcheck-mixed-check.sh` replays all
+six normalized evidence logs and prints `RESULT PASS`, byte-stable in three
+working-tree runs. Full commands, hashes and ceiling:
+`reports/openexr2shell-file-level.md`, W179 section.
+
+No grade change: rung 4 at the labeled file-level CODE/CONSUMER scope, now also
+observed through an unmodified upstream validation tool; still a local path,
+no wire, no pointer/control-flow target, no command or marker, rung 5 UNKNOWN.
+The new claim is unwitnessed (W161 covered only the older all-FLOAT file).
