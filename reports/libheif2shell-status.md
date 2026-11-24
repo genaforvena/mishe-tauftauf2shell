@@ -540,3 +540,41 @@ untested, and the first frame's rows 64..71 are libjpeg filler because the
 entropy stream holds only 64 rows. Grade UNCHANGED: rung 3 plus rung 4, NOT
 rung 5. No pointer, command, real consumer, ASLR study or witness verdict;
 author observation only.
+
+## W182 plain-build fault modes on the advisory-size file (2026-11-23)
+
+The advisory also claims a Release SIGSEGV "through a pointer later used by
+x265". W181 observed a 36,879-byte allocation and an ASan fault on the first
+OOB store; the plain-build fault mode and that pointer claim were still
+untested at this size. No rebuild: the committed W181 input family and the
+W161 pinned v1.23.6 plain/ASan build trees and fixed pin were reused.
+
+`make_short_overflow_sequence.py` patches only frame 1's SOF0 height of the
+W181 advisory-size input (frame 0 remains 512x72), producing 4,262-byte files
+`h71.heif` / `h72.heif` / `h80.heif` / `h96.heif` with asserted SHA-256 hashes.
+On the plain build the W181 `advisory.heif` (frame 1 64x512) exits 139 in 3/3
+runs; `h71` and `h72` exit 0 with both frames encoded; `h80` and `h96` exit
+134 with `free(): corrupted unsorted chunks` (3/3 for h80). Under ASan with
+`detect_leaks=0`, h71/h72 are clean and h80/h96 report `heap-buffer-overflow`,
+`WRITE of size 64`, 0 bytes after the same 36,879-byte region at
+`pixelimage.cc:644`. The fixed pin decodes h71/h80 but rejects frame 1 at
+encode with rc 2 "All frames of a sequence must have the size of the first
+frame". `check_plain_fault_modes.py` PASS=30 FAIL=0 over the saved inputs,
+outputs, exit codes and gdb logs.
+
+gdb refines both plain faults. For the W181 file, SIGSEGV occurs inside
+`__memcpy_avx_unaligned_erms` called directly by
+`HeifPixelImage::extend_padding_to_size`; the destination address is `0xb0`
+past the end of the process `[heap]` mapping and x265 is a caller, not the
+consumer. For h80, SIGABRT comes from `malloc_printerr` /
+`__GI___libc_free` called by `extend_padding_to_size` when it frees the old
+plane after the bounded row-copy overflow. Neither fault is a corrupted
+pointer later consumed by x265: the advisory's specific "pointer later used
+by x265" narrative is not reproduced on this local file-to-encoder path.
+
+Grade UNCHANGED: rung 3 plus rung 4, NOT rung 5. The advisory-size SIGSEGV is
+observed locally, but as an OOB store or immediate glibc metadata check, not
+control flow. No valid pointer, command, real consumer, ASLR-independent
+address or witness verdict. Full commands, hashes and saved logs are in
+`lab/frontier/libheif2shell/real/PROVENANCE-real.md` W182 and
+`real/neighbour/evidence/advisory-size/`.

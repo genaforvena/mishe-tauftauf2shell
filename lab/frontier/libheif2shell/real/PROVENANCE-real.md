@@ -728,3 +728,85 @@ ASLR study or witness verdict. Grade unchanged: rung 3 plus rung 4, NOT rung
 The committed `advisory.out` has one trailing space removed from ASan's
 "Partially addressable" legend line to satisfy `git diff --check`; all
 diagnostic lines are otherwise verbatim.
+
+## W182 plain-build fault modes at advisory allocation size (2026-11-23)
+
+No libheif rebuild. The W181 committed input family and these existing build
+trees were reused: vulnerable plain Release `/tmp/libheif2shell-vuln-plain`
+(`-O2`, no sanitizer, debug info), vulnerable ASan
+`/tmp/libheif2shell-vuln-asan`, fixed ASan `/tmp/libheif2shell-fixed-asan`,
+and the W181 relinked drivers `/tmp/w181-size/driver` and
+`/tmp/w181-size/fixed-driver`. All are pinned v1.23.6 / 9ec655f as described
+in W161; the driver is the committed `real/reencode_sequence.cc` (SHA-256
+`c89dd64aa3fab4544a4d79e2e49f8f082c1b1c2cd402898850c81c911f056778`).
+
+Inputs. `neighbour/make_advisory_size_sequence.py` produced the W181 advisory
+file (SHA-256 `d749c1bd05264319a26449eeb73bccd771c0eb327524f27c658ac679f4ce79fe`,
+4262 bytes, frame 0 SOF 512x72 / frame 1 SOF 64x512). The new committed
+`neighbour/make_short_overflow_sequence.py OUTPUT_DIR` imports that generator's
+`patch` helper and changes only frame 1's SOF0 height; its four asserted
+outputs are `h71.heif` SHA-256
+`2c3b8667400880bd844373134932598ffe47fcb91011ee92e1cfc5e84c7a2bbb`,
+`h72.heif` SHA-256
+`259a985b2ee466c0fba1262c83b3304ad26441ca0585fbfcb9c0888abb937ac9`,
+`h80.heif` SHA-256
+`2793a2123a8b80fb751aa74b9f827afe0e78a7393c14f4ffc171a316773cdac4`, and
+`h96.heif` SHA-256
+`f92fc8e960acc828b51526ba634b3f0b829d62282a26a368745f4d8271eff56d` (all 4262
+bytes). The entropy-coded JPEG samples are untouched. Frame 0 still supplies
+x265's 512x72 coded size, so the replacement plane is 36,879 bytes.
+
+Commands (all from a scratch directory, evidence under
+`neighbour/evidence/advisory-size/`, exit codes saved in matching `.rc`
+files; no network, no service):
+
+```
+python3 real/neighbour/make_short_overflow_sequence.py SCRATCH_DIR
+/tmp/libheif2shell-reencode-plain advisory.heif out.heif      # plain-advisory.out/rc
+/tmp/libheif2shell-reencode-plain h71.heif out.heif           # plain-h71.out/rc
+/tmp/libheif2shell-reencode-plain h72.heif out.heif           # plain-h72.out/rc
+/tmp/libheif2shell-reencode-plain h80.heif out.heif           # plain-h80.out/rc
+/tmp/libheif2shell-reencode-plain h96.heif out.heif           # plain-h96.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver h71.heif out.heif   # asan-h71.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver h72.heif out.heif   # asan-h72.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver h80.heif out.heif   # asan-h80.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/driver h96.heif out.heif   # asan-h96.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/fixed-driver h71.heif out.heif  # fixed-h71.out/rc
+ASAN_OPTIONS=detect_leaks=0 /tmp/w181-size/fixed-driver h80.heif out.heif  # fixed-h80.out/rc
+gdb -q -batch -ex 'set pagination off' -ex 'run advisory.heif out.heif' \
+    -ex 'bt 12' -ex 'info registers rip rdi rsi rdx' -ex 'info proc mappings' \
+    --args /tmp/libheif2shell-reencode-plain                   # gdb-plain-advisory.out
+gdb -q -batch -ex 'set pagination off' -ex 'run h80.heif out.heif' \
+    -ex 'bt 14' -ex 'info registers rip' \
+    --args /tmp/libheif2shell-reencode-plain                   # gdb-plain-h80.out
+python3 real/neighbour/check_plain_fault_modes.py neighbour/evidence/advisory-size
+```
+
+Observed plain rc: advisory 139, h71 0, h72 0, h80 134, h96 134; advisory,
+h80 repeated 3x each with the same rc (`plain-repeat.txt`). ASan rc:
+h71 0 and h72 0 with both frames encoded and no report; h80 1 and h96 1 with
+`heap-buffer-overflow`, `WRITE of size 64`, 0 bytes after a 36879-byte region
+at `pixelimage.cc:644` via `heif_image.cc:403` and `encoder_x265.cc:1139`.
+Fixed pin on h71/h80: frame 1 decode succeeds, encode rc 2 "All frames of a
+sequence must have the size of the first frame", no ASan. The checker reports
+PASS=30 FAIL=0.
+
+gdb for the advisory file: `Thread 1 received signal SIGSEGV` in
+`__memcpy_avx_unaligned_erms`, frame #1
+`HeifPixelImage::extend_padding_to_size`, frame #3
+`x265_encode_sequence_frame`, `rdx=0x40`, `rdi=0x5555559090b0`, while
+`info proc mappings` places `[heap]` at `0x555555769000-0x555555909000` in
+that run — the destination is `0xb0` past the heap mapping, not a corrupt
+function or data pointer dereferenced by x265. Addresses are ASLR-dependent
+and are evidence text only. For h80, gdb shows SIGABRT from `malloc_printerr`
+with `free(): corrupted unsorted chunks`, `__GI___libc_free` at frame #10 and
+`extend_padding_to_size` at #11; x265 appears only as its caller at #13.
+
+Negative caveat: h71/h72 produce no reallocation in this build, so they are
+negative controls, not a "small overflow with clean return". The bounded
+overflow at h80/h96 is detected by glibc at the old-plane free before x265
+can consume any overwritten object; no clean return, live pointer, command
+or witness verdict. Trailing whitespace on the ASan legend line and gdb
+mapping lines was stripped while capturing those three logs to satisfy
+`git diff --check`; all diagnostic content is otherwise verbatim.
+Grade remains rung 3 plus rung 4, NOT rung 5.

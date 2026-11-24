@@ -1,0 +1,7 @@
+Corrupt JPEG data: premature end of data segment
+track declared: 512x64
+frame 0 decoded: 512x72 stride=512
+frame 0 encoded
+Corrupt JPEG data: 428 extraneous bytes before marker 0xd9
+frame 1 decoded: 64x72 stride=64
+frame 1 encoded

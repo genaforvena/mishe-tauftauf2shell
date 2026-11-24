@@ -1,0 +1,199 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Corrupt JPEG data: premature end of data segment
+track declared: 512x64
+frame 0 decoded: 512x72 stride=512
+[New Thread 0x7ffff61ff6c0 (LWP 3303155)]
+[New Thread 0x7ffff59fe6c0 (LWP 3303156)]
+[New Thread 0x7ffff51fd6c0 (LWP 3303157)]
+[New Thread 0x7ffff49fc6c0 (LWP 3303158)]
+[New Thread 0x7fffe7fff6c0 (LWP 3303159)]
+[New Thread 0x7fffe77fe6c0 (LWP 3303160)]
+[New Thread 0x7fffe6ffd6c0 (LWP 3303161)]
+[New Thread 0x7fffe67fc6c0 (LWP 3303162)]
+[New Thread 0x7fffe5ffb6c0 (LWP 3303163)]
+[New Thread 0x7fffe57fa6c0 (LWP 3303164)]
+[New Thread 0x7fffe4ff96c0 (LWP 3303165)]
+[New Thread 0x7fffc7fff6c0 (LWP 3303166)]
+[New Thread 0x7fffc77fe6c0 (LWP 3303167)]
+[New Thread 0x7fffc6ffd6c0 (LWP 3303168)]
+[New Thread 0x7fffc67fc6c0 (LWP 3303169)]
+[New Thread 0x7fffc5ffb6c0 (LWP 3303170)]
+[New Thread 0x7fffc57fa6c0 (LWP 3303171)]
+[New Thread 0x7fffa7fff6c0 (LWP 3303173)]
+[New Thread 0x7fffa77fe6c0 (LWP 3303174)]
+[New Thread 0x7fffa6ffd6c0 (LWP 3303175)]
+frame 0 encoded
+frame 1 decoded: 64x512 stride=64
+
+Thread 1 "libheif2shell-r" received signal SIGSEGV, Segmentation fault.
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:271
+warning: 271	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:271
+#1  0x0000555555662774 in HeifPixelImage::extend_padding_to_size(unsigned int, unsigned int, bool, heif_security_limits const*) ()
+#2  0x0000555555590f58 in heif_image_extend_padding_to_size ()
+#3  0x00005555556d734b in x265_encode_sequence_frame(void*, heif_image const*, unsigned long) [clone .part.0] ()
+#4  0x00005555556f4722 in Encoder_HEVC::encode_sequence_frame(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const&, heif_image_input_class, unsigned int, unsigned int, unsigned long) ()
+#5  0x0000555555604202 in Track_Visual::encode_image(std::shared_ptr<HeifPixelImage> const&, heif_encoder*, heif_sequence_encoding_options const*, heif_image_input_class) ()
+#6  0x0000555555599f62 in heif_track_encode_sequence_image ()
+#7  0x000055555558f61d in main (argc=3, argv=0x7fffffffe2d8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libheif2shell/real/reencode_sequence.cc:62
+rip            0x7ffff6388da1      0x7ffff6388da1 <__memcpy_avx_unaligned_erms+33>
+rdi            0x5555559090b0      93824996118704
+rsi            0x555555798390      93824994608016
+rdx            0x40                64
+process 3303146
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555578000    0x24000        0x0  r--p   /tmp/libheif2shell-reencode-plain
+      0x555555578000     0x555555707000   0x18f000    0x24000  r-xp   /tmp/libheif2shell-reencode-plain
+      0x555555707000     0x55555575b000    0x54000   0x1b3000  r--p   /tmp/libheif2shell-reencode-plain
+      0x55555575b000     0x555555767000     0xc000   0x207000  r--p   /tmp/libheif2shell-reencode-plain
+      0x555555767000     0x555555768000     0x1000   0x213000  rw-p   /tmp/libheif2shell-reencode-plain
+      0x555555768000     0x555555769000     0x1000        0x0  rw-p
+      0x555555769000     0x555555909000   0x1a0000        0x0  rw-p   [heap]
+      0x7fff98000000     0x7fff98021000    0x21000        0x0  rw-p
+      0x7fff98021000     0x7fff9c000000  0x3fdf000        0x0  ---p
+      0x7fff9c000000     0x7fff9c021000    0x21000        0x0  rw-p
+      0x7fff9c021000     0x7fffa0000000  0x3fdf000        0x0  ---p
+      0x7fffa0000000     0x7fffa0021000    0x21000        0x0  rw-p
+      0x7fffa0021000     0x7fffa4000000  0x3fdf000        0x0  ---p
+      0x7fffa67fd000     0x7fffa67fe000     0x1000        0x0  ---p
+      0x7fffa67fe000     0x7fffa6ffe000   0x800000        0x0  rw-p
+      0x7fffa6ffe000     0x7fffa6fff000     0x1000        0x0  ---p
+      0x7fffa6fff000     0x7fffa77ff000   0x800000        0x0  rw-p
+      0x7fffa77ff000     0x7fffa7800000     0x1000        0x0  ---p
+      0x7fffa7800000     0x7fffa8000000   0x800000        0x0  rw-p
+      0x7fffa8000000     0x7fffa8021000    0x21000        0x0  rw-p
+      0x7fffa8021000     0x7fffac000000  0x3fdf000        0x0  ---p
+      0x7fffac000000     0x7fffacd24000   0xd24000        0x0  rw-p
+      0x7fffacd24000     0x7fffb0000000  0x32dc000        0x0  ---p
+      0x7fffb0000000     0x7fffb0021000    0x21000        0x0  rw-p
+      0x7fffb0021000     0x7fffb4000000  0x3fdf000        0x0  ---p
+      0x7fffb4000000     0x7fffb4021000    0x21000        0x0  rw-p
+      0x7fffb4021000     0x7fffb8000000  0x3fdf000        0x0  ---p
+      0x7fffb8000000     0x7fffb8021000    0x21000        0x0  rw-p
+      0x7fffb8021000     0x7fffbc000000  0x3fdf000        0x0  ---p
+      0x7fffbc000000     0x7fffbc021000    0x21000        0x0  rw-p
+      0x7fffbc021000     0x7fffc0000000  0x3fdf000        0x0  ---p
+      0x7fffc0000000     0x7fffc0021000    0x21000        0x0  rw-p
+      0x7fffc0021000     0x7fffc4000000  0x3fdf000        0x0  ---p
+      0x7fffc46cf000     0x7fffc4ffa000   0x92b000        0x0  rw-p
+      0x7fffc4ffa000     0x7fffc4ffb000     0x1000        0x0  ---p
+      0x7fffc4ffb000     0x7fffc57fb000   0x800000        0x0  rw-p
+      0x7fffc57fb000     0x7fffc57fc000     0x1000        0x0  ---p
+      0x7fffc57fc000     0x7fffc5ffc000   0x800000        0x0  rw-p
+      0x7fffc5ffc000     0x7fffc5ffd000     0x1000        0x0  ---p
+      0x7fffc5ffd000     0x7fffc67fd000   0x800000        0x0  rw-p
+      0x7fffc67fd000     0x7fffc67fe000     0x1000        0x0  ---p
+      0x7fffc67fe000     0x7fffc6ffe000   0x800000        0x0  rw-p
+      0x7fffc6ffe000     0x7fffc6fff000     0x1000        0x0  ---p
+      0x7fffc6fff000     0x7fffc77ff000   0x800000        0x0  rw-p
+      0x7fffc77ff000     0x7fffc7800000     0x1000        0x0  ---p
+      0x7fffc7800000     0x7fffc8000000   0x800000        0x0  rw-p
+      0x7fffc8000000     0x7fffc8021000    0x21000        0x0  rw-p
+      0x7fffc8021000     0x7fffcc000000  0x3fdf000        0x0  ---p
+      0x7fffcc000000     0x7fffcc021000    0x21000        0x0  rw-p
+      0x7fffcc021000     0x7fffd0000000  0x3fdf000        0x0  ---p
+      0x7fffd0000000     0x7fffd0021000    0x21000        0x0  rw-p
+      0x7fffd0021000     0x7fffd4000000  0x3fdf000        0x0  ---p
+      0x7fffd4000000     0x7fffd4021000    0x21000        0x0  rw-p
+      0x7fffd4021000     0x7fffd8000000  0x3fdf000        0x0  ---p
+      0x7fffd8000000     0x7fffd8021000    0x21000        0x0  rw-p
+      0x7fffd8021000     0x7fffdc000000  0x3fdf000        0x0  ---p
+      0x7fffdc000000     0x7fffdc021000    0x21000        0x0  rw-p
+      0x7fffdc021000     0x7fffe0000000  0x3fdf000        0x0  ---p
+      0x7fffe0000000     0x7fffe0021000    0x21000        0x0  rw-p
+      0x7fffe0021000     0x7fffe4000000  0x3fdf000        0x0  ---p
+      0x7fffe47a1000     0x7fffe47f9000    0x58000        0x0  rw-p
+      0x7fffe47f9000     0x7fffe47fa000     0x1000        0x0  ---p
+      0x7fffe47fa000     0x7fffe4ffa000   0x800000        0x0  rw-p
+      0x7fffe4ffa000     0x7fffe4ffb000     0x1000        0x0  ---p
+      0x7fffe4ffb000     0x7fffe57fb000   0x800000        0x0  rw-p
+      0x7fffe57fb000     0x7fffe57fc000     0x1000        0x0  ---p
+      0x7fffe57fc000     0x7fffe5ffc000   0x800000        0x0  rw-p
+      0x7fffe5ffc000     0x7fffe5ffd000     0x1000        0x0  ---p
+      0x7fffe5ffd000     0x7fffe67fd000   0x800000        0x0  rw-p
+      0x7fffe67fd000     0x7fffe67fe000     0x1000        0x0  ---p
+      0x7fffe67fe000     0x7fffe6ffe000   0x800000        0x0  rw-p
+      0x7fffe6ffe000     0x7fffe6fff000     0x1000        0x0  ---p
+      0x7fffe6fff000     0x7fffe77ff000   0x800000        0x0  rw-p
+      0x7fffe77ff000     0x7fffe7800000     0x1000        0x0  ---p
+      0x7fffe7800000     0x7fffe8000000   0x800000        0x0  rw-p
+      0x7fffe8000000     0x7fffe8021000    0x21000        0x0  rw-p
+      0x7fffe8021000     0x7fffec000000  0x3fdf000        0x0  ---p
+      0x7fffec000000     0x7fffec021000    0x21000        0x0  rw-p
+      0x7fffec021000     0x7ffff0000000  0x3fdf000        0x0  ---p
+      0x7ffff0000000     0x7ffff0021000    0x21000        0x0  rw-p
+      0x7ffff0021000     0x7ffff4000000  0x3fdf000        0x0  ---p
+      0x7ffff4006000     0x7ffff41fc000   0x1f6000        0x0  rw-p
+      0x7ffff41fc000     0x7ffff41fd000     0x1000        0x0  ---p
+      0x7ffff41fd000     0x7ffff49fd000   0x800000        0x0  rw-p
+      0x7ffff49fd000     0x7ffff49fe000     0x1000        0x0  ---p
+      0x7ffff49fe000     0x7ffff51fe000   0x800000        0x0  rw-p
+      0x7ffff51fe000     0x7ffff51ff000     0x1000        0x0  ---p
+      0x7ffff51ff000     0x7ffff59ff000   0x800000        0x0  rw-p
+      0x7ffff59ff000     0x7ffff5a00000     0x1000        0x0  ---p
+      0x7ffff5a00000     0x7ffff6200000   0x800000        0x0  rw-p
+      0x7ffff6200000     0x7ffff6228000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff6228000     0x7ffff63b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff63b1000     0x7ffff6400000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff6400000     0x7ffff6404000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff6404000     0x7ffff6406000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff6406000     0x7ffff6413000     0xd000        0x0  rw-p
+      0x7ffff6424000     0x7ffff65d2000   0x1ae000        0x0  rw-p
+      0x7ffff65d2000     0x7ffff65d6000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff65d6000     0x7ffff65fa000    0x24000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff65fa000     0x7ffff65fe000     0x4000    0x28000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff65fe000     0x7ffff65ff000     0x1000    0x2b000  r--p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff65ff000     0x7ffff6600000     0x1000    0x2c000  rw-p   /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+      0x7ffff6600000     0x7ffff669d000    0x9d000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff669d000     0x7ffff67e5000   0x148000    0x9d000  r-xp   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff67e5000     0x7ffff686c000    0x87000   0x1e5000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff686c000     0x7ffff6877000     0xb000   0x26b000  r--p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff6877000     0x7ffff687a000     0x3000   0x276000  rw-p   /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+      0x7ffff687a000     0x7ffff687e000     0x4000        0x0  rw-p
+      0x7ffff6894000     0x7ffff68a4000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff68a4000     0x7ffff6923000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff6923000     0x7ffff697b000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff697b000     0x7ffff697c000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff697c000     0x7ffff697d000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff697d000     0x7ffff6981000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2
+      0x7ffff6981000     0x7ffff69ce000    0x4d000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2
+      0x7ffff69ce000     0x7ffff69fe000    0x30000    0x51000  r--p   /usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2
+      0x7ffff69fe000     0x7ffff69ff000     0x1000    0x81000  r--p   /usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2
+      0x7ffff69ff000     0x7ffff6a00000     0x1000    0x82000  rw-p   /usr/lib/x86_64-linux-gnu/libjpeg.so.8.2.2
+      0x7ffff6a00000     0x7ffff6a15000    0x15000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libaom.so.3.8.2
+      0x7ffff6a15000     0x7ffff6e33000   0x41e000    0x15000  r-xp   /usr/lib/x86_64-linux-gnu/libaom.so.3.8.2
+      0x7ffff6e33000     0x7ffff6f1e000    0xeb000   0x433000  r--p   /usr/lib/x86_64-linux-gnu/libaom.so.3.8.2
+      0x7ffff6f1e000     0x7ffff6f2e000    0x10000   0x51d000  r--p   /usr/lib/x86_64-linux-gnu/libaom.so.3.8.2
+      0x7ffff6f2e000     0x7ffff6f33000     0x5000   0x52d000  rw-p   /usr/lib/x86_64-linux-gnu/libaom.so.3.8.2
+      0x7ffff6f33000     0x7ffff6f7f000    0x4c000        0x0  rw-p
+      0x7ffff6f96000     0x7ffff6f99000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0
+      0x7ffff6f99000     0x7ffff6fa0000     0x7000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0
+      0x7ffff6fa0000     0x7ffff6fa2000     0x2000     0xa000  r--p   /usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0
+      0x7ffff6fa2000     0x7ffff6fa3000     0x1000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0
+      0x7ffff6fa3000     0x7ffff6fa4000     0x1000     0xc000  rw-p   /usr/lib/x86_64-linux-gnu/libnuma.so.1.0.0
+      0x7ffff6fa4000     0x7ffff6fa8000     0x4000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libde265.so.0.1.8
+      0x7ffff6fa8000     0x7ffff6fee000    0x46000     0x4000  r-xp   /usr/lib/x86_64-linux-gnu/libde265.so.0.1.8
+      0x7ffff6fee000     0x7ffff6ffa000     0xc000    0x4a000  r--p   /usr/lib/x86_64-linux-gnu/libde265.so.0.1.8
+      0x7ffff6ffa000     0x7ffff6ffb000     0x1000    0x56000  r--p   /usr/lib/x86_64-linux-gnu/libde265.so.0.1.8
+      0x7ffff6ffb000     0x7ffff6ffc000     0x1000    0x57000  rw-p   /usr/lib/x86_64-linux-gnu/libde265.so.0.1.8
+      0x7ffff6ffc000     0x7ffff7000000     0x4000        0x0  rw-p
+      0x7ffff7000000     0x7ffff7063000    0x63000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libx265.so.199
+      0x7ffff7063000     0x7ffff7f0b000   0xea8000    0x63000  r-xp   /usr/lib/x86_64-linux-gnu/libx265.so.199
+      0x7ffff7f0b000     0x7ffff7f7b000    0x70000   0xf0b000  r--p   /usr/lib/x86_64-linux-gnu/libx265.so.199
+      0x7ffff7f7b000     0x7ffff7f8b000    0x10000   0xf7b000  r--p   /usr/lib/x86_64-linux-gnu/libx265.so.199
+      0x7ffff7f8b000     0x7ffff7f8e000     0x3000   0xf8b000  rw-p   /usr/lib/x86_64-linux-gnu/libx265.so.199
+      0x7ffff7f8e000     0x7ffff7f9e000    0x10000        0x0  rw-p
+      0x7ffff7fa1000     0x7ffff7fa8000     0x7000        0x0  rw-p
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
