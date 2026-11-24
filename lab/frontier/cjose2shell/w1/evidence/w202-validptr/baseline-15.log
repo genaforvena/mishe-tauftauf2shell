@@ -1,0 +1,27 @@
+Breakpoint 1 at 0x40daa1: file jwe.c, line 1094.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=42301
+REQUEST_BYTES=411
+TOKEN_BYTES=291
+WIRE_SEG_B64=107 WIRE_DECODE=1 WIRE_EK_RAW_LEN=80
+IMPORT=1 ERRCODE=0
+JWE_CEK_LEN_BEFORE=0 JWE_EK_RAW_LEN=80
+
+Breakpoint 1, _cjose_jwe_calc_auth_tag (enc=0x4141414141414141 <error: Cannot access memory at address 0x4141414141414141>, jwe=0x4235e0, md=0x7fffffff5f80 "\023", md_len=0x7fffffff5f54, err=0x7fffffff60c0) at jwe.c:1094
+1094	{
+$1 = 0x4141414141414141 <error: Cannot access memory at address 0x4141414141414141>
+0x4141414141414141:	<error: Cannot access memory at address 0x4141414141414141>
+#0  _cjose_jwe_calc_auth_tag (enc=0x4141414141414141 <error: Cannot access memory at address 0x4141414141414141>, jwe=0x4235e0, md=0x7fffffff5f80 "\023", md_len=0x7fffffff5f54, err=0x7fffffff60c0) at jwe.c:1094
+#1  0x000000000040eaec in _cjose_jwe_decrypt_dat_aes_cbc (jwe=0x4235e0, err=0x7fffffff60c0) at jwe.c:1400
+#2  0x0000000000410fc7 in cjose_jwe_decrypt (jwe=0x4235e0, jwk=0x4235a0, content_len=0x7fffffff6060, err=0x7fffffff60c0) at jwe.c:2157
+#3  0x00000000004049c2 in main (argc=1, argv=0x7fffffffe268) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w1/server.c:139
+
+Program received signal SIGSEGV, Segmentation fault.
+__strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+warning: 283	../sysdeps/x86_64/multiarch/strcmp-avx2.S: No such file or directory
+#0  __strcmp_avx2 () at ../sysdeps/x86_64/multiarch/strcmp-avx2.S:283
+#1  0x000000000040dad2 in _cjose_jwe_calc_auth_tag (enc=0x4141414141414141 <error: Cannot access memory at address 0x4141414141414141>, jwe=0x4235e0, md=0x7fffffff5f80 "\023", md_len=0x7fffffff5f54, err=0x7fffffff60c0) at jwe.c:1098
+#2  0x000000000040eaec in _cjose_jwe_decrypt_dat_aes_cbc (jwe=0x4235e0, err=0x7fffffff60c0) at jwe.c:1400
+#3  0x0000000000410fc7 in cjose_jwe_decrypt (jwe=0x4235e0, jwk=0x4235a0, content_len=0x7fffffff6060, err=0x7fffffff60c0) at jwe.c:2157
+W199_PTR72 TOKEN_LEN=291 PTR=4141414141414141 RESPONSE=b''

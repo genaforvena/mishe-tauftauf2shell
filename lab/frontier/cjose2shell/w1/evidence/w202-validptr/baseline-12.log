@@ -1,0 +1,34 @@
+Breakpoint 1 at 0x40daa1: file jwe.c, line 1094.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+PORT=45607
+REQUEST_BYTES=411
+TOKEN_BYTES=291
+WIRE_SEG_B64=107 WIRE_DECODE=1 WIRE_EK_RAW_LEN=80
+IMPORT=1 ERRCODE=0
+JWE_CEK_LEN_BEFORE=0 JWE_EK_RAW_LEN=80
+
+Breakpoint 1, _cjose_jwe_calc_auth_tag (enc=0x423950 "A128CBC-HS256", jwe=0x4235e0, md=0x7fffffff5f80 "\023", md_len=0x7fffffff5f54, err=0x7fffffff60c0) at jwe.c:1094
+1094	{
+$1 = 0x423950 "A128CBC-HS256"
+0x423950:	"A128CBC-HS256"
+#0  _cjose_jwe_calc_auth_tag (enc=0x423950 "A128CBC-HS256", jwe=0x4235e0, md=0x7fffffff5f80 "\023", md_len=0x7fffffff5f54, err=0x7fffffff60c0) at jwe.c:1094
+#1  0x000000000040eaec in _cjose_jwe_decrypt_dat_aes_cbc (jwe=0x4235e0, err=0x7fffffff60c0) at jwe.c:1400
+#2  0x0000000000410fc7 in cjose_jwe_decrypt (jwe=0x4235e0, jwk=0x4235a0, content_len=0x7fffffff6060, err=0x7fffffff60c0) at jwe.c:2157
+#3  0x00000000004049c2 in main (argc=1, argv=0x7fffffffe268) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w1/server.c:139
+DECRYPT=0 ERRCODE=4 PLAIN_LEN=0 CEK_LEN_AFTER=72
+CEK_PTR=0x4234c0
+CEK_MINUS16=00000000000000003100000000000000
+CEK_PLUS24=5a5a5a5a5a5a5a5a4d495348452d4f4f31000000000000000200000001000000
+NEIGHBOUR off=+0 size=32 caller=0x4170f3
+NEIGHBOUR off=+48 size=25 caller=0x4170f3
+NEIGHBOUR off=+96 size=32 caller=0x4170f3
+NEIGHBOUR off=+144 size=58 caller=0x4170f3
+NEIGHBOUR off=+224 size=48 caller=0x4069d3
+NEIGHBOUR off=+96 size=35 caller=0x4052fd
+NEIGHBOUR off=+144 size=72 caller=0x4170f3
+NEIGHBOUR off=+48 size=32 caller=0x4170f3
+NEIGHBOUR off=+0 size=32 caller=0x40b25b
+[Inferior 1 (process 1690643) exited normally]
+No stack.
+HTTP/1.1 401 Unauthorized\r\nContent-Type: text/plain\r\nContent-Length: 3\r\nConnection: close\r\n\r\nNO\n'

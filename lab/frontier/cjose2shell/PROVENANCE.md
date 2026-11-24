@@ -767,3 +767,44 @@ adjacent object (W183). Thorough receipt, hashes and limits are in
 `REPLAY-W199.md`. This is author replay of committed bytes, not witness
 acceptance; no listener remained. Grade and rung-5 ceiling unchanged;
 witness replay is now offered as one command on the chat tape.
+
+## W202 — wire-carried valid pointer accepted by the real decrypt path (2026-11-24 20:37-20:54Z)
+
+W199 showed a wire-chosen value reaching `enc` in `strcmp` at `jwe.c:1098`,
+but the value was `0x4141414141414141`, a recognizable non-address. W202
+asked whether the same wire field can carry a *valid* pointer that the real
+decrypt path dereferences without faulting. Scope: one loopback synthetic
+consumer, one `-no-pie` vulnerable build plus fixed/safe controls; no new
+source tree, no pinned byte changed, no listener left.
+
+Setup: `w1/build.sh`'s `w1-trace-vuln` is `-no-pie` (`readelf` Type EXEC),
+so the pinned cjose literal `CJOSE_HDR_ENC_A128CBC_HS256 = "A128CBC-HS256"`
+has the fixed address `0x41bd2e` (`gdb -batch -ex 'p ...'` measured it;
+heap addresses stay randomized). `w1/ptr-client.py` accepts an optional
+third CLI argument: the 16 little-endian hex digits written at plaintext
+offset 64, which become `cek+64..71` through the lab KEK and the real
+RFC 3394 wrap. `w1/validptr-run.sh` computes the literal address from the
+binary, drives one ephemeral 127.0.0.1 w1 process per case, breaks in
+`_cjose_jwe_calc_auth_tag`, prints `enc` and `x/s enc`, continues, and
+asserts the controls. Retries are bounded because W183's random jansson
+seed decides whether the adjacent 25-byte string is `enc`.
+
+Measured: on valid-pointer attempt 9 of 11, gdb showed
+`enc=0x41bd2e "A128CBC-HS256"`, `0x41bd2e: "A128CBC-HS256"`, a normal
+process exit (`DECRYPT=0 ERRCODE=4 PLAIN_LEN=0 CEK_LEN_AFTER=72`, HTTP 401),
+and no SIGSEGV in any of the 11 attempts. The baseline token with
+`0x4141414141414141` faulted in `__strcmp_avx2` from `jwe.c:1098` on
+baseline attempt 16 of 16 (log `baseline-nonaddress.log`). The fixed build
+rejected the valid-pointer token before the write (`DECRYPT=0 ERRCODE=1
+CEK_LEN_AFTER=32`), and the safe token on the vulnerable build kept
+`CEK_LEN_AFTER=32`. Evidence in `w1/evidence/w202-validptr/` (address.txt,
+all 27 attempt logs, selected baseline and valid-pointer logs) and
+`w1/evidence/W202-SHA256SUMS` (33 files, `sha256sum -c` OK).
+
+Limit: the address is build-known from a lab binary, not leaked from a
+target and not a live heap address; PIE/heap ASLR is not defeated. `strcmp`
+accepting the pointer is a data-pointer dereference, not an indirect call.
+There is no function-pointer control, benign command, wire-derived live
+address or real-consumer path (W189: top chunk after the CEK). Grade and
+rung-5 ceiling unchanged; this is an author-only rung-4 limb to offer the
+witness, alongside the unanswered W199 replay offer.

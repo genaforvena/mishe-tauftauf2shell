@@ -305,6 +305,28 @@ command and no r5. W186/W187 remain separate author-only offers.
   That is author replay of committed bytes, not a witness verdict; the one
   command is now offered on the chat tape.
 
+- W202 turned W199's wire-chosen non-address into a *valid* pointer. The
+  `-no-pie` `w1-trace-vuln` build fixes the cjose literal
+  `"A128CBC-HS256"` at `0x41bd2e`; `w1/ptr-client.py` now takes an optional
+  little-endian pointer, so the real HTTP token carries
+  `2e bd 41 00 00 00 00 00` at plaintext offset 64. Under gdb in
+  `_cjose_jwe_calc_auth_tag`, the successful run shows
+  `enc=0x41bd2e "A128CBC-HS256"`, `x/s enc` prints the literal, `strcmp`
+  succeeds, the process exits normally with `DECRYPT=0 ERRCODE=4
+  CEK_LEN_AFTER=72`, and the HTTP reply is the ordinary 401. The same
+  build/token with `0x4141414141414141` faults in `__strcmp_avx2` at
+  `jwe.c:1098`; the fixed build rejects the valid-pointer token with
+  `ERRCODE=1`/`CEK_LEN_AFTER=32`; the safe token keeps `CEK_LEN_AFTER=32`.
+  Jansson's random seed decides whether the adjacent string is `enc`
+  (W183), so `w1/validptr-run.sh` retries 1/11 valid-pointer attempts and
+  1/16 baseline attempts hit that adjacency; no run with the valid address
+  faulted. Evidence: `w1/evidence/w202-validptr/` and `W202-SHA256SUMS`
+  (33 files, `sha256sum -c` OK). The address is build-known, not leaked or
+  wire-derived from a live target; heap/PIE ASLR is not defeated, there is
+  no command or control-flow marker, and the real mod_auth_openidc lane
+  still has top chunk after the CEK (W189). Grade unchanged; author-only
+  rung-4 limb.
+
 ## 6. Honest ceiling
 
 Direct call plus a loopback-only synthetic consumer, with a real compact JWE
