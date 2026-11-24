@@ -188,3 +188,32 @@ buffer is followed at that offset by an attacker-relevant control datum.
 W209 shows an in-tree caller exists but is immune by its own sizing, W207
 rules out the natural stack layout and W206 rules out glibc heap metadata
 with a lone minimum buffer on this host. Any r5 claim needs witness replay.
+
+W212 (2026-11-24T19:0xZ) demonstrates a second-order effect:
+`frame-datum.c` uses a natural `struct { uint8_t data[31]; uint8_t len;
+uint8_t body[128]; }`, so the CVE byte lands on `len` at offset 31 with no
+packing, tag or table. The vulnerable library changes `len` `1 -> 72`, and the
+consumer's subsequent `memcpy(dest, body, len)` into an 8-byte allocation gives
+ASan `heap-buffer-overflow`, `WRITE of size 72`, rc 1. Fixed (`len` stays 1),
+safe (`0`) and steer (`2`) are clean. A `wire` mode feeds the 48-byte
+ciphertext from stdin (generator emits it from a runtime byte), so the steering
+value is attacker-supplied: wire `48` on vulnerable/ fixed and wire `02`/`00`
+on vulnerable give the same outcomes. ASan is in the harness only, linked to
+the plain pinned libs, so the report is the second-order copy, not the original
+one-byte write. `sh run-frame-datum.sh -> 27 PASS / 0 FAIL`
+(`frame-datum-replay.log`, two runs byte-identical). Still a synthetic consumer
+with a deliberately undersized destination; no real app, pointer/IP, command
+or wire-to-command path; author-only, no witness replay, grade unchanged.
+
+W213 (2026-11-24T19:0xZ, source-bound) is a census of all 14 real
+`EVP_DecryptUpdate`/`EVP_CipherUpdate` callers in the pinned tree. No in-tree
+caller meets the full precondition: PEM, PKCS#8 and TLS session-ticket decrypt
+are single-call on a fresh ctx; TLS CBC AEAD and the ACVP wrapper set padding
+disabled so the withholding branch is unreachable; `bssl enc -d`
+(`tool-openssl/enc.cc:168`) is multi-call but has 17 bytes of slack beyond the
+documented minimum; `tool/speed.cc` over-allocates or uses custom ciphers; and
+the PKCS#7 cipher BIO is immune as shown by W209/W210. No adjacent in-object
+control datum is reachable from any real caller's output buffer in this tree.
+This closes the in-tree consumer lane for the pinned library; an out-of-tree
+application remains the only real-consumer path and is still unknown. Grade
+unchanged: rungs 1-4, r5 UNKNOWN.

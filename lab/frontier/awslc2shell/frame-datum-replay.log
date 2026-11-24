@@ -1,0 +1,52 @@
+--- byte-mode (ciphertext synthesised in harness) ---
+vuln: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0x48 len_before=1 len_after=72 decrypt_ok=1 dest_cap=8
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 72
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+RC vuln=1
+fixed: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0x48 len_before=1 len_after=1 decrypt_ok=1 dest_cap=8
+RC fixed=0
+safe: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0x00 len_before=0 len_after=0 decrypt_ok=1 dest_cap=8
+RC safe=0
+steer: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0x02 len_before=1 len_after=2 decrypt_ok=1 dest_cap=8
+RC steer=0
+--- wire-mode (ciphertext from stdin) ---
+wire: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0xff len_before=1 len_after=72 decrypt_ok=1 dest_cap=8
+ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 72
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+RC wire=1
+wire: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0xff len_before=1 len_after=1 decrypt_ok=1 dest_cap=8
+RC wire=0
+wire: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0xff len_before=1 len_after=2 decrypt_ok=1 dest_cap=8
+RC wire=0
+wire: data_off=0 len_off=31 body_off=32 struct_size=160 chosen=0xff len_before=1 len_after=0 decrypt_ok=1 dest_cap=8
+RC wire=0
+PASS natural_layout_byte_vuln: 1
+PASS natural_layout_wire_vuln: 1
+PASS byte_vuln_len_corrupted: 1
+PASS byte_vuln_asan_write72: 1
+PASS byte_vuln_abort: RC vuln=1
+PASS byte_fixed_len_clean: 1
+PASS byte_fixed_no_asan: 0
+PASS byte_fixed_rc: RC fixed=0
+PASS byte_safe_len_clean: 1
+PASS byte_safe_no_asan: 0
+PASS byte_safe_rc: RC safe=0
+PASS byte_steer_len_two: 1
+PASS byte_steer_no_asan: 0
+PASS byte_steer_rc: RC steer=0
+PASS wire_vuln_len_corrupted: 1
+PASS wire_vuln_asan_write72: 1
+PASS wire_vuln_abort: RC wire=1
+PASS wire_fixed_len_clean: 1
+PASS wire_fixed_no_asan: 0
+PASS wire_fixed_rc: RC wire=0
+PASS wire_steer_len_two: 1
+PASS wire_steer_no_asan: 0
+PASS wire_steer_rc: RC wire=0
+PASS wire_safe_len_zero: 1
+PASS wire_safe_no_asan: 0
+PASS wire_safe_rc: RC wire=0
+PASS decrypt_ok_all: 8
+RESULT: 27 PASS / 0 FAIL

@@ -252,3 +252,69 @@ library is clean at both 15 and 32 bytes (`0xab` tail). `sh run-des.sh` ->
 `b = 16`-specific; it remains exactly one byte per boundary-crossing update.
 Author-only, no witness replay, no real consumer, grade unchanged: rungs 1-4,
 r5 UNKNOWN.
+
+## Second-order length corruption (W212, 2026-11-24T19:0xZ)
+
+`frame-datum.c`, `build-frame-datum.sh` and `run-frame-datum.sh` test whether
+the CVE's one byte can corrupt a datum a consumer actually *uses* for a memory
+operation. Natural C layout, no `#pragma pack`, no tag, no table, no grooming:
+`struct frame { uint8_t data[31]; uint8_t len; uint8_t body[128]; }` puts `len`
+at offset 31, exactly where the CVE writes, and `body` at 32 with enough bytes
+that a corrupted length cannot over-read the source. `data[31]` is the
+documented-minimum output at the EVP boundary; a heap destination is sized for
+the initial length (`1`, capacity `8`) and the consumer then copies `len`
+bytes from `body` into it.
+
+Harness-only ASan linked against the W206 plain (non-ASan) pinned libraries:
+the library's original one-byte write stays inside the global struct, so ASan
+reports only the second-order copy. Vulnerable byte-mode `0x48` changes
+`len_before=1` -> `len_after=72` and the `memcpy` gives
+`heap-buffer-overflow`, `WRITE of size 72`, rc 1. Fixed-library `0x48` leaves
+`len=1` and is clean; safe `0x00` leaves `len=0` and is clean; a second value
+`0x02` drives `len=2` and stays clean. A `wire` mode reads the 48-byte
+ciphertext from stdin (`gen` emits it from a runtime byte), so the steering
+value is attacker-supplied rather than a compile-time macro: wire `48` on the
+vulnerable library gives the same 72-byte ASan write, wire `48` on the fixed
+library and wire `02`/`00` on the vulnerable library are clean. Offsets
+`data=0 len=31 body=32 size=160` and `decrypt_ok=1` in all eight runs.
+`sh run-frame-datum.sh -> 27 PASS / 0 FAIL` (`frame-datum-replay.log`); the
+output is normalized (PID/addresses stripped) and two consecutive runs are
+byte-identical (sha256 `65d4723e…c67c1ec77ac`).
+
+This is a causal amplification of the one-byte write into a larger,
+ASan-confirmed heap overflow through a control datum at a natural offset, but
+the consumer is still synthetic and the destination is deliberately sized for
+the pre-decrypt length. No real application, no pointer/IP, no command, no
+wire-to-command path. Grade unchanged: rungs 1-4, r5 UNKNOWN; author-only, no
+witness replay.
+
+## In-tree caller census (W213, 2026-11-24T19:0xZ, source-bound)
+
+A full read-only census of every `EVP_DecryptUpdate`/`EVP_CipherUpdate` call in
+the pinned v5.6.0 tree (14 real sites, excluding tests/fuzz/generated vectors)
+compares against `src-fixed`. No real caller in this tree meets the full OOB
+precondition:
+
+- `crypto/pem/pem_lib.c:356-363` (`PEM_do_header`): single in-place call on a
+  fresh local ctx, so `final_used=0`.
+- `crypto/pkcs8/pkcs8.c:349,355-356` (`pkcs8_pbe_decrypt`): exact
+  `OPENSSL_malloc(in_len)`, single call, fresh ctx.
+- `ssl/extensions.cc:3841-3847` (session-ticket decrypt): exact-size heap
+  `Array`, one call with a freshly initialized ctx.
+- `crypto/cipher_extra/e_tls.c:85,247-288`: `EVP_CIPH_NO_PADDING`, so the
+  vulnerable withholding branch (`cipher.c:405`) is unreachable.
+- `tool-openssl/enc.cc:168,169,183` (`bssl enc -d`): multi-call, but
+  `outbuf[BUF_SIZE + EVP_MAX_BLOCK_LENGTH]` = 1056 bytes versus the 1039-byte
+  documented minimum for a 1024-byte chunk — 17 bytes of slack, so the stray
+  byte stays inside the buffer.
+- `crypto/pkcs7/bio/cipher.c:100`: the only multi-call documented-minimum
+  site; W209/W210 already show its chunk arithmetic tops out at exactly 4096
+  bytes and `ctx->buf` is the last field of the heap `BIO_ENC_CTX`.
+- `tool/speed.cc` and the ACVP wrapper over-allocate, use XTS/custom ciphers,
+  or set padding disabled and reinitialize each iteration.
+
+No adjacent in-object control datum is reachable from any real caller's
+output buffer in this tree. This closes the in-tree consumer lane for the
+pinned library; it says nothing about out-of-tree applications linked against
+it. No new lab artifact, no witness replay, grade unchanged: rungs 1-4, r5
+UNKNOWN.
