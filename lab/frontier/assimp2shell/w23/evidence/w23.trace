@@ -1,0 +1,10 @@
+WORD36 0x7ffff7fd01ec BUFBASE 0x5555555807e0
+DOC bytes=1278
+CTL startptr rc=134 free(): double free detected in tcache 2
+GDB second-free=#9  0x00007ffff7d24d03 in std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release (this=0x5555555805f0) at /usr/include/c++/13/bits/shared_ptr_base.h:346
+CTL noover rc=0 ptr0=0x555555570830 verts0=3 faces0=1
+IP residue=_dl_lookup_symbol_x + 300 in section .text of /lib64/ld-linux-x86-64.so.2
+IP saved-rip-slot-minus-dst=0x464 far=1
+CTL safe rc=0 case=harness/cases/safe.gltf scene=ok err=
+NEG aslr-on rc=139
+TOTAL pass=9 fail=0

@@ -1,0 +1,21 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+free(): double free detected in tcache 2
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff744527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff74288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff74297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff75cf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff74a90b5 in malloc_printerr (str=str@entry=0x7ffff75d2c10 "free(): double free detected in tcache 2") at ./malloc/malloc.c:5775
+#7  0x00007ffff74ab61f in _int_free (av=0x7ffff7604ac0 <main_arena>, p=<optimized out>, have_lock=0) at ./malloc/malloc.c:4541
+#8  0x00007ffff74ade8e in __GI___libc_free (mem=0x5555555807e0) at ./malloc/malloc.c:3398
+#9  0x00007ffff7d24d03 in std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release (this=0x5555555805f0) at /usr/include/c++/13/bits/shared_ptr_base.h:346
+#10 std::_Sp_counted_base<(__gnu_cxx::_Lock_policy)2>::_M_release (this=0x5555555805f0) at /usr/include/c++/13/bits/shared_ptr_base.h:317
+#11 std::__shared_count<(__gnu_cxx::_Lock_policy)2>::~__shared_count (this=0x5555555807a8, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/shared_ptr_base.h:1071
+#12 std::__shared_ptr<unsigned char, (__gnu_cxx::_Lock_policy)2>::~__shared_ptr (this=0x5555555807a0, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/shared_ptr_base.h:1524
+#13 std::shared_ptr<unsigned char>::~shared_ptr (this=0x5555555807a0, __in_chrg=<optimized out>) at /usr/include/c++/13/bits/shared_ptr.h:175

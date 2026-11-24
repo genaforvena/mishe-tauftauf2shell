@@ -1,0 +1,3 @@
+case=harness/cases/safe.gltf scene=ok err=
+meshes=1
+ptr0=0x55555556fed0 verts0=3 faces0=1

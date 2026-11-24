@@ -1,0 +1,16 @@
+No source file named glTFImporter.cpp.
+Breakpoint 1 (glTFImporter.cpp:475) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Assimp::glTFImporter::ImportMeshes (this=<optimized out>, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:475
+475	    CopyVector(meshes, mScene->mMeshes, mScene->mNumMeshes);
+_dl_lookup_symbol_x + 300 in section .text of /lib64/ld-linux-x86-64.so.2
+Stack level 0, frame at 0x7fffffffc9a0:
+ rip = 0x7ffff7d12f73 in Assimp::glTFImporter::ImportMeshes (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:475); saved rip = 0x7ffff7d14812
+ called by frame at 0x7fffffffd1e0
+ source language c++.
+ Arglist at 0x7fffffffc4b0, args: this=<optimized out>, r=...
+ Locals at 0x7fffffffc4b0, Previous frame's sp is 0x7fffffffc9a0
+ Saved registers:
+  rbx at 0x7fffffffc968, rbp at 0x7fffffffc990, r12 at 0x7fffffffc970, r13 at 0x7fffffffc978, r14 at 0x7fffffffc980, r15 at 0x7fffffffc988, rip at 0x7fffffffc998

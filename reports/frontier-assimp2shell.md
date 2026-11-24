@@ -703,6 +703,40 @@ with tokens, both traces are byte-identical, sha256
 `46858ccdb6ad0214e6ec20ffbf39289af5341a79b6aa91323767d63d19c919a0`. Author
 replay, not witness acceptance; no grade change.
 
+## W23 — two bounded negatives: no clean return and no IP (2026-11-24 22:3xZ, author-measured)
+
+W22 left two "can this go further?" questions. Both close as negatives here.
+
+- **(A) No clean plain-process return by grooming the vector storage.**
+  The decoded buffer base is a real allocation start (glibc size word `0xa1`
+  at `buffer-8`). Pointing the overflowed vector `begin` at that base, with
+  `finish=cap=buffer+8`, the fake `unique_ptr` slot at decoded offset 0 and
+  the chosen 12-byte `aiMesh` header at offset 16, makes the vector
+  destructor's deallocate valid. The import still aborts:
+  `free(): double free detected in tcache 2` (rc 134), and the gdb backtrace
+  puts the second free in `std::_Sp_counted_base::_M_release` — the decoded
+  buffer is owned by the `Asset`'s shared_ptr, which frees it again at
+  teardown. The causal `nooverstart.gltf` control keeps the captured vector
+  words with the same fake bytes: rc 0, `ptr0=<real mesh> verts0=3 faces0=1`.
+  W22's plain-process abort remains a stated harness artifact; this route
+  does not remove it.
+- **(B) No return address in the overwritten window.** The file-chosen word
+  at window offset 36 is `0x7ffff7fd01ec`, which resolves to
+  `_dl_lookup_symbol_x + 300` in `ld-linux-x86-64.so.2` — a stale
+  symbol-lookup residue. `ImportMeshes`' saved-RIP *slot* is `0x464` bytes
+  above the 64-byte `memcpy` destination, far outside the write. No code
+  pointer, marker, IP or control-flow redirection at this call site and gcc
+  `-O2`.
+
+`bash harness/run-w23.sh` => **9 PASS / 0 FAIL**, trace sha256
+`88a6e501bb74dba161553ef07d825abcc5a83310c0ba6dc6ecec30909ef4d97b`.
+The script recalibrates buffer base and window through the unmodified
+`run-w22.sh`, so absolute addresses are fresh per tree; safe input (rc 0) and
+ASLR-on negative (rc 139) are included. It reuses the pinned `-O2` plain
+library and a minimal driver that reads the live scene and calls `_Exit`
+before destructors. Author-measured, unwitnessed; preserved negatives only,
+no grade change and NO r5.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade

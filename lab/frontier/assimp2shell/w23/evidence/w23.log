@@ -1,0 +1,9 @@
+PASS calibration
+PASS doc
+PASS A: shared_ptr-owned buffer double free
+PASS A: second free from shared_ptr release
+PASS A: causal no-overwrite control
+PASS A: no-overwrite keeps real mesh fields
+PASS B: offset-36 word is stale ld.so residue
+PASS B: no saved RIP inside write window
+PASS safe input imports
