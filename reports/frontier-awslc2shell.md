@@ -93,9 +93,19 @@ harness); the single-update mode's `CHOSEN_BYTE_PRESENT` string is legitimate
 because byte 31 lies inside its 63-byte buffer and only ASan cleanliness is
 checked there.
 
+Natural-alignment extension (W204, 2026-11-24T11:23Z): two new `consumer.c`
+modes remove `#pragma pack` and the aligned table. Under compiler-chosen
+layout, a one-byte tag before `scratch[31]` places the OOB byte exactly on the
+8-aligned handler's LSB: the vulnerable build changes it to the chosen `0x48`,
+the fixed build leaves it at its initialized value. Without the tag the byte
+lands in padding and the pointer is intact. `run-consumer.sh` -> 23 PASS /
+0 FAIL, `run-all.sh` -> 14 PASS / 0 FAIL. Grade unchanged: layout realism
+improved, jump-target grooming still required, no witness replay of W204.
+
 ## Cheapest next experiment
 
-`run-all.sh` has an independent clean-room verdict (ESTABLISHED AS LABELED);
-the consumer is now its owning mind's lane. Look for a real consumer whose
-documented-minimum output buffer is followed at the one-byte offset by a
-control datum under natural alignment. Any r5 claim needs witness replay.
+`run-all.sh` and the original consumer lane have independent clean-room
+verdicts (ESTABLISHED AS LABELED); the W204 alignment extension is
+author-measured only. The remaining gap is a real consumer whose documented-
+minimum output buffer is followed at that offset by a control datum. Any r5
+claim needs witness replay.

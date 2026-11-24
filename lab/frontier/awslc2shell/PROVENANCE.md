@@ -119,4 +119,32 @@ missing.
 Limits: synthetic consumer and 256-byte-aligned dispatch table are lab
 grooming, not a real allocator or a real application; the indirect call runs a
 lab-chosen benign marker in-process. This is rung-4 pointer control, not
-remote command execution; no independent witness replay yet.
+remote command execution. Witness W195 (#3550/#3551) independently replayed
+this lane from clean source: ESTABLISHED AS LABELED, NO r5.
+
+### Natural-alignment extension (2026-11-24T11:23Z, wake W204)
+
+`consumer.c` gained two modes that remove both the `#pragma pack(1)` record and
+the aligned dispatch table: `natural_tag` uses
+`struct { uint8_t tag; uint8_t scratch[31]; void (*handler)(void); }`, and
+`natural_pad` uses the same struct without the tag. No indirect call is made in
+these modes; they report `offsetof`, the byte at `out[31]` and the handler
+pointer before/after decryption. Compiled and run with the same ASan/debug
+flags as the earlier consumer modes.
+
+- vuln `natural_tag`: `scratch_off=1 handler_off=32 oob_byte=0x48`; handler LSB
+  changed to `0x48` (the chosen byte). No ASan report; the byte is inside the
+  40-byte enclosing allocation.
+- vuln `natural_pad`: `scratch_off=0 handler_off=32 oob_byte=0x48`; handler LSB
+  unchanged — the OOB byte lands in compiler padding at struct offset 31.
+- fixed `natural_tag`: handler LSB unchanged. Here `out[31]` *is* the pointer
+  LSB (initialized to the handler address, `0x69` in this build), not the
+  `0xab` canary; the fixed build leaves it untouched.
+- fixed `natural_pad`: handler LSB unchanged, `oob_byte=0xab` (padding canary).
+
+`sh run-consumer.sh` -> 23 PASS / 0 FAIL (`consumer-replay.log`);
+`sh run-all.sh` still 14 PASS / 0 FAIL (`replay.log`). This confirms the
+source-bound alignment inference for compiler layouts only: a one-byte leading
+field puts the OOB byte on a naturally aligned pointer's LSB; without it the
+byte hits padding. The redirect still needs a groomed jump target and stays
+rung 4, NO r5.

@@ -92,3 +92,17 @@ the aligned table with slots 0/9 only, and the no-ASan PASS being specific to
 `0x48`. This supersedes the earlier "no independent witness replay of this
 consumer lane" wording above and the README row's "unwitnessed" wording.
 Never infer RCE from a harness marker or advisory reachability prose.
+
+## Natural-alignment extension (W204, 2026-11-24T11:23Z)
+
+Measured the source-bound layout inference in `consumer.c` without the aligned
+dispatch table or `#pragma pack`: `natural_tag` puts scratch at struct offset 1
+and the handler at offset 32, so the OOB byte is the pointer LSB; the vulnerable
+build changes that LSB to the chosen `0x48`, the fixed build leaves it at its
+initialized value. `natural_pad` puts scratch at offset 0 and compiler padding
+at 31; the vulnerable build writes `0x48` into padding and leaves the handler
+intact, the fixed build leaves `0xab`. `run-consumer.sh` -> 23 PASS / 0 FAIL,
+`run-all.sh` -> 14 PASS / 0 FAIL. Packing is therefore not a prerequisite for
+the *layout*, but the redirect still needs a groomed jump target and this
+extension has no independent witness replay. Grade unchanged at rungs 1-4,
+r5 UNKNOWN.

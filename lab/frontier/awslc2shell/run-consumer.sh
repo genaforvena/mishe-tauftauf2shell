@@ -44,5 +44,44 @@ check "single_no_adjacent_pointer" "1" "$(printf '%s\n' "$single" | grep -c 'sin
 other=$(./consumer-vuln vuln 00 2>&1)
 check "safe_input_byte_normal" "1" "$(printf '%s\n' "$other" | grep -c 'NORMAL_HANDLER')"
 
+
+# Natural-alignment modes: compiler-chosen layout, no aligned dispatch table
+# and no indirect call. Compare before/after handler LSBs per binary because
+# each build's handler address has its own fixed low byte.
+before_lsb() {
+  printf '%s\n' "$1" | sed -n 's/.*handler_before=.*low=0x\([0-9a-f][0-9a-f]\).*/\1/p'
+}
+after_lsb() {
+  printf '%s\n' "$1" | sed -n 's/.*handler_after=.*low=0x\([0-9a-f][0-9a-f]\).*/\1/p'
+}
+
+nat_tag_v=$(./consumer-vuln natural_tag 2>&1)
+v=$(before_lsb "$nat_tag_v")
+w=$(after_lsb "$nat_tag_v")
+check "natural_tag_vuln_lsb_is_chosen" "48" "$w"
+check "natural_tag_vuln_lsb_changed" "1" "$([ "$w" != "$v" ] && echo 1 || echo 0)"
+check "natural_tag_vuln_layout" "1" "$(printf '%s\n' "$nat_tag_v" | grep -c 'mode=natural_tag layout scratch_off=1 handler_off=32 oob_byte=0x48')"
+check "natural_tag_vuln_no_indirect_call" "1" "$(printf '%s\n' "$nat_tag_v" | grep -c 'mode=natural_tag natural_layout_no_indirect_call')"
+check "natural_tag_vuln_no_asan_report" "0" "$(printf '%s\n' "$nat_tag_v" | grep -c 'ERROR: AddressSanitizer')"
+
+nat_tag_f=$(./consumer-fixed natural_tag 2>&1)
+v=$(before_lsb "$nat_tag_f")
+w=$(after_lsb "$nat_tag_f")
+check "natural_tag_fixed_lsb_unchanged" "$v" "$w"
+# Here byte 31 is the pointer LSB itself, initialized to the handler address.
+check "natural_tag_fixed_pointer_bytes_intact" "1" "$(printf '%s\n' "$nat_tag_f" | grep -c "mode=natural_tag layout scratch_off=1 handler_off=32 oob_byte=0x$v")"
+
+nat_pad_v=$(./consumer-vuln natural_pad 2>&1)
+v=$(before_lsb "$nat_pad_v")
+w=$(after_lsb "$nat_pad_v")
+check "natural_pad_vuln_lsb_unchanged" "$v" "$w"
+check "natural_pad_vuln_byte31_chosen" "1" "$(printf '%s\n' "$nat_pad_v" | grep -c 'mode=natural_pad layout scratch_off=0 handler_off=32 oob_byte=0x48')"
+check "natural_pad_vuln_no_asan_report" "0" "$(printf '%s\n' "$nat_pad_v" | grep -c 'ERROR: AddressSanitizer')"
+
+nat_pad_f=$(./consumer-fixed natural_pad 2>&1)
+v=$(before_lsb "$nat_pad_f")
+w=$(after_lsb "$nat_pad_f")
+check "natural_pad_fixed_lsb_unchanged" "$v" "$w"
+check "natural_pad_fixed_byte31_canary" "1" "$(printf '%s\n' "$nat_pad_f" | grep -c 'mode=natural_pad layout scratch_off=0 handler_off=32 oob_byte=0xab')"
 echo "RESULT: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]
