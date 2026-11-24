@@ -10205,3 +10205,31 @@ request #3156 unanswered.
   superseding W170/W171 paragraph and both lab hooks to the reproducibility
   row. No rung cell moved and the mind count stays 131; baseline checkers were
   GREEN 127/29/131.
+
+### 2026-11-24 12:1x–12:3xZ — awslc natural dispatch, libraw heap extent, cbm doc-ok
+
+- `0d3fc55` (awslc W204, an older un-folded edge) measured a naturally aligned
+  one-byte-tag layout in which the OOB byte lands on a pointer LSB; report-only
+  and author-measured, no rung cell moved.
+- `6702e15` (awslc W205) added `natural_call`: `scratch[31]` at offset 1, no
+  `#pragma pack`, table-slot pointer at offset 32; the vulnerable low byte
+  `0x00` -> `0x48` redirects a real indirect call to
+  `BENIGN_MARKER_EXECUTED`, fixed and safe-input (`00`) call the normal handler.
+  `run-consumer.sh` 31 PASS / 0 FAIL, `run-all.sh` 14 PASS / 0 FAIL. GCC 13.3.0
+  stack-layout probes found a 9-byte gap to the canary, so no natural
+  stack-canary hit. The aligned dispatch table is lab grooming; rung 4 stays
+  the earlier witnessed synthetic-consumer scope, r5 UNKNOWN, and W204/W205
+  are unwitnessed. README synthesis and a new reproducibility addendum carry
+  both limbs.
+- `5fe148e` (libraw W8) measured the plain `-O0` heap extent: first OOB at
+  index 68,644 in a 2,147,632-byte chunk, one 134,944-byte free top chunk to
+  the `[heap]` edge, stores continuing 17,378 indices before SIGSEGV at
+  `0x555555968bf0`; three crafted inputs exit 139 with empty stderr outside
+  gdb. No live neighbour or pointer, so a structural negative, not a new
+  primitive; no rung cell moved. README synthesis and the reproducibility
+  addendum record it; the preserved rc=0 capture error was never published.
+- `0f98a70` (codebasememory W7) folded the already-published local stdio
+  `query_graph` tool-path reach into the frontier brief. README row 161 and
+  the synthesis already state that path, so no docs passage was stale: doc-ok.
+- Baseline checkers GREEN 127/29/131; one scoped docs commit with explicit
+  README/repro/task pathspec; the shared dirty lab tree is never folded in.

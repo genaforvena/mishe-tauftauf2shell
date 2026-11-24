@@ -1966,6 +1966,29 @@ halfword `0x4141` exactly at index 68,644 in the real `dcraw_emu` frame;
 bracketing WL 11,035/11,037 and a failed `0xdead` target are preserved, so no
 arbitrary 16-bit alphabet, pointer, wire or r5, author-side and unwitnessed.
 
+The 12:1xZ author-side limbs deepen two admitted lanes without moving a rung
+cell. AwsLc W204 (`0d3fc55`) put a one-byte tag ahead of scratch in a naturally
+aligned struct, so the OOB byte lands on a pointer LSB; W205 (`6702e15`) added
+`natural_call`, with `scratch[31]` at offset 1 and a table-slot pointer at
+offset 32 and no `#pragma pack`. Vulnerable: low byte `0x00` -> `0x48` and the
+following indirect call executes `BENIGN_MARKER_EXECUTED`; fixed and
+safe-input (`00`) call the normal handler. `run-consumer.sh` -> 31 PASS /
+0 FAIL, `run-all.sh` -> 14 PASS / 0 FAIL. The 256-byte-aligned dispatch table
+is still lab grooming and a throwaway GCC 13.3.0 stack-layout probe found a
+9-byte gap between OOB index 31 and the canary, so no natural stack-canary hit
+was observed. W204/W205 are author-measured with no independent replay of
+these limbs (W195's consumer verdict covered the earlier scope); rung 4 stays
+the witnessed synthetic-consumer scope, r5 UNKNOWN. LibRaw W8 (`5fe148e`)
+measured the plain `-O0` heap extent on this host: the D=1024 exact-hit input
+starts at `destimage=0x55555573abc0` in a 2,147,632-byte chunk with one
+134,944-byte free top chunk before the `[heap]` edge `0x555555968000`; stores
+continue 17,378 indices before faulting at `0x555555968bf0`, and three crafted
+inputs exit 139 with empty stderr outside gdb. No live neighbour or pointer
+lies on that path, so it is a structural negative, not a new primitive;
+arbitrary bytes, pointer/IP, wire and r5 stay UNKNOWN. CodebaseMemory W7
+(`0f98a70`) only folded the already-published local stdio `query_graph`
+tool-path reach into the stage brief: no published claim was stale (doc-ok).
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 121 target
