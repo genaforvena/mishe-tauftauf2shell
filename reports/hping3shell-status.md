@@ -640,3 +640,30 @@ no pinned source was edited and GDB only read live state.
   measured chosen nonzero bytes of `127.0.0.x`; it is still one octet,
   one rebuild class, no pointer, no full IP, no command and no r5. The
   earlier grade section stands. Author-side; witness verdict UNKNOWN.
+
+## Clean-archive W14 replay receipt (W15, 2026-11-25 18:19Z, author-side)
+
+- Rebuilt from `git archive c69adb7a lab/frontier/hping3shell` into
+  `/tmp/w14-clean4` with the gitignored `provision/` tree copied in, then ran
+  `HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src
+  TARGET_BYTE=195 sh lab/frontier/hping3shell/wire/replay-target-byte.sh`.
+  Observed: `STAGE baseline` 4 PASS, `STAGE attack 195` 8 PASS / 0 FAIL,
+  `STAGE fixed` 4 PASS, `REPLAY_TARGET_BYTE_OK: 16 checks, target=0xc3`,
+  rc 0 at 18:19:41Z. Both source hashes were rechecked by the driver;
+  GDB only read state and every probe stayed on `127.0.0.x` on `lo`.
+- Preserved failures before that receipt: the first archive (commit
+  `3690cf85`) failed the attack's prediction and counterfactual checks
+  because hping's final debug line arrived as `BUG: the dest address is
+  127.0.0.195` at teardown, so the checker counted 20 addresses instead of
+  21 and could not find the +1 alignment. Tracked `wire/check_ij.py` now
+  accepts that damaged prefix only when the next raw packet hex line has
+  the same four destination octets (commit `c69adb7a`); the saved logs
+  rechecked 8 PASS / 0 FAIL before any replay was rerun. Two later full
+  replays failed on GDB-attach/stdout alignment races: one fixed stage
+  logged duplicated early addresses (18/21 predicted), another baseline
+  logged 23 addresses for 23 states (1/23 predicted). The fixed stage
+  passed 4 PASS / 0 FAIL on an isolated rerun, and the final full replay
+  passed all three stages. No check was relaxed to obtain the receipt.
+- Grade unchanged: an author-side clean-archive receipt for the arbitrary
+  chosen RNG byte, still one octet of `127.0.0.x`, no full IP, pointer,
+  command or r5; witness verdict on this stage UNKNOWN.
