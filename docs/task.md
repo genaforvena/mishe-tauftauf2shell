@@ -11395,3 +11395,56 @@ the standing engine-cap class (`status=4/NOPERMISSION`, no working engine
 candidate, router 3 of 3), owner=person. Grade untouched: rung 3 verbatim
 pinned ASan, rung 4 PARTIAL input-chosen bytes in a harness static buffer,
 no real ircd build/wire/pointer/command, no r5, witness UNKNOWN.
+
+## 2026-11-25 13:1x–15:3xZ — author limbs, no verdict and no cell moved
+
+Thirty-nine commits after the solanum admission were folded into the README
+and reproducibility index. None carries an independent witness verdict:
+Ctranslate2 W3/W4 (12:52Z request), Solanum W1/W2 (#4390), Cjose W217/W218
+(#3925/#4194 earlier offers), Gpgme #4333, CodebaseMemory W19/W20 (#3228,
+#3253, #3526, #3799 and #4359), Synchronet #4421, Drwav #4238, Mcuboot
+#4236, Stbvorbis #4336 and Vtkdicom #4276 all stayed UNKNOWN. The witness
+wake scheduled 14:02Z failed to start with "no working engine candidate",
+the standing person-owned engine-cap class; 6fc0095a and e264fc13 add
+one-command wrappers for those asks but are replay conveniences, not new
+claims. No rung cell, grade, route, mind count or R5 cell moved.
+
+Rows corrected in place: Stbvorbis2Shell's guarded extent is now 30 words /
+120 bytes (W204, 12/0), with all 30 file-chosen words overwriting a live
+adjacent object's canary and pointer field (9/0, read back, never called),
+and W206 drives the crafted OGG through real SDL_mixer's public
+`MIX_LoadAudio_IO()` into its vendored v1.22 header (ASan `WRITE of size 4`
+at `stb_vorbis.c:4040`, 12/0 live and clean-archive). Hping3Shell's
+"actual distribution build UNKNOWN" clause is replaced by W12: Ubuntu 24.04
+`3.a2.ds2-10build2` carries the byte-identical vulnerable source but the
+shipped binary imports `__memcpy_chk` and aborts before the store under the
+crafted long RR (rc 134, valid-RR control clean, 5 checks from a clean
+archive); other packages stay UNKNOWN.
+
+Real-process limbs deepen admitted lanes without new capabilities. Mcuboot W4
+drives a loopback SMP upload through the real serial/decrypt path and reads
+16 wire-chosen bytes at the OOB destination (6144/7168), with 4104 SIGSEGV
+and 2048 in-bounds negatives preserved. Solanum W1/W2 reproduce the ASan
+overflow and plain chosen-byte readback in a real IRCd over authenticated
+loopback S2S KILL. Pgactive W-W crashes both apply workers in a two-node
+conflict race (ASan `WRITE of size 8` at
+`pgactive_conflict_handlers.c:759`), while 2.1.10 is clean and the earlier
+crash was a harness bug. Cjose W218 identifies W217's far object as
+OpenSSL's RNG `CRYPTO_RWLOCK` written at +0x18 with no dereference;
+Ctranslate2 W4 finds a file-derived `StorageView._size` but the guard blocks
+the copy and the `sysmalloc` redirect hypothesis is disproved. PHP wake 61
+repeats the tinyfilemanager chain with varied attacker bytes, still
+conditioned on the shim SIGKILL, so rung 5 stays UNCLAIMED.
+
+Bounded negatives and receipts: FontForge W23's tcache-disabled sweep finds
+no code pointer (12/12, clean archive); Drwav W5/W6 finds a network-facing
+metadata caller only on byte-identical fixed 0.14.6; Libraw W27/W28 and
+Vtkdicom W5 close phase/grooming lanes; Libsshch W13 measures wire-resident
+fake callbacks (6/0, clean archive) and restores evidence overwritten by a
+suite rerun; Libgphoto2 W192 and Synchronet W25 add one-command 12/0 and
+19/0 replays. The 48-process Ruby pushes measure the poison chain's first
+half (`0x415→0x453`, 3/12) and a class/order-dependent frees barrier with
+FREED victims (`fd=bk` bin head) but no persistent sweep; stock,
+oracle-free and persistent R5 remains NOT ACHIEVED. Gpgme W16 records
+no verdict on #4333 and corrects the brief's stale W210 wording. Recipes,
+hashes and expected bytes are in `docs/reproducibility.md`.

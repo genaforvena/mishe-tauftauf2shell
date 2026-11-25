@@ -10145,11 +10145,13 @@ named above is gitignored and regenerates with the cited scripts.
 - **StbVorbis2Shell extent and replay** — `sh
   lab/frontier/stbvorbis2shell/run-seq.sh` (4 PASS / 0 FAIL) rebuilds the plain
   harness and checks four distinct file-derived OOB words; `sh
-  lab/frontier/stbvorbis2shell/run-guard.sh` (11 PASS / 0 FAIL) routes the
+  lab/frontier/stbvorbis2shell/run-guard.sh` (11 PASS / 0 FAIL at this fold;
+  W204 later re-ran it at 12 PASS / 0 FAIL) routes the
   8-byte `c->multiplicands` allocation to a RW page with a `PROT_NONE` page
   behind it and observes `j=0`, `k=31`, `div=0x80000000` at `stb_vorbis.c:3895`
-  with file-derived words at indices 2..30 — 29 words / 116 bytes past the
-  region. The guard page is never reached; the plain libc build instead
+  with file-derived words at indices 2..31 — 30 words / 120 bytes past the
+  region, correcting this paragraph's earlier 29-word reading. The guard page
+  is never reached; the plain libc build instead
   aborts in `malloc(): invalid size (unsorted)`. This supersedes the staged
   loop-bound description; grade stays rung 4 PARTIAL, witness UNKNOWN.
 - **Ctranslate22Shell real source and pointer gap** — from
@@ -10228,3 +10230,88 @@ grade, route, mind count or R5 cell.
 - **Grade** — rung 3 pinned verbatim function, rung 4 PARTIAL chosen bytes
   past a harness static 512-byte buffer, no real wire/pointer/command, no
   r5; witness replay still owed before any rung-4 publication.
+
+## 2026-11-25 13:1x–15:3xZ — real-consumer, real-build and one-command replay limbs
+
+All commands below run on loopback or offline; raw outputs are gitignored
+under each lane's `evidence/` directory and regenerate with the named
+script. No limb in this section returned a witness verdict: every replay
+offer remained UNKNOWN and the 14:02Z witness wake failed to start for the
+known engine-cap reason. No grade, rung, route, mind count or R5 cell moved.
+
+- **StbVorbis W204/W206** — `sh lab/frontier/stbvorbis2shell/run-guard.sh`
+  (12 PASS / 0 FAIL) measures 30 file-chosen words / 120 bytes past the
+  8-byte region; `sh lab/frontier/stbvorbis2shell/run-object.sh` (9/0) shows
+  those words in a live adjacent object's canary and both halves of its
+  pointer field (`fp_low=0x4b434148`), read back but never called. The guarded
+  `nodiv-seq.ogg` (`26306dfa5e5c9d1f3d24163c8a0d048d45de614fb86e748b10d555c52d254ea6`)
+  is a negative-result artifact, not a trigger. W206's
+  `sh lab/frontier/stbvorbis2shell/run-consumer.sh` (12/0) drives the crafted
+  OGG through real SDL_mixer `MIX_LoadAudio_IO()` into its vendored v1.22
+  header: ASan `WRITE of size 4` at `stb_vorbis.c:4040`, fixed and safe clean.
+  A clean `git archive eb785d31` replayed all six scripts with the same
+  counts.
+- **Hping3 W12 distro binary** — `sh wire/replay-distro.sh` under
+  `lab/frontier/hping3shell` provisions Ubuntu 24.04 package
+  `3.a2.ds2-10build2` (deb sha256 `b98e33f9…bdd6e7c5`, shipped
+  `/usr/sbin/hping3` sha256 `d0181f16…edc9cd`) without installing it, checks
+  the packaged `display_ipopt.c` is byte-identical to the pin
+  (`e8ef2dd6…dcbb5e7b`), then sends the crafted long RR from `127.0.0.2` to
+  `127.0.0.1` on `lo`: 5 PASS / 0 FAIL with rc 134
+  (`*** buffer overflow detected ***`) before any global write and a clean
+  valid-RR control. A clean `git archive 20a65c8f` reproduced `REPLAY_DISTRO_OK:
+  5 checks`, rc 0. Other distributions and fortify-disabled builds stay
+  UNKNOWN.
+- **Real-process lanes** — Mcuboot W4: the native loopback SMP upload driver
+  under `lab/frontier/mcuboot2shell/real/smp` drives wire-chosen plaintext
+  through real `boot_serial_input()` → `bs_upload()` →
+  `decrypt_region_inplace()` and reads `WIRE-CHOICE-1234` at the OOB
+  destination for `ih_hdr_size` 6144 and 7168, with 2048 in-bounds clean
+  and 4104 SIGSEGV preserved as a negative. Solanum W1/W2: authenticated
+  loopback S2S KILL in a real ASan IRCd gives `WRITE of size 564` at
+  `m_kill.c:277` (63-byte peer name + 490-byte reason, 18/0 harness and 6/0
+  controls); the plain build reads `chosen_A_past_buf=50/51` past `buf` via
+  `/proc/PID/mem`. Pgactive W-W: `sh run-two.sh` under
+  `lab/frontier/pgactive2shell` crashes both loopback PG16.15 apply workers
+  in a 2.1.9 conflict race with ASan `WRITE of size 8` at
+  `pgactive_conflict_handlers.c:759`; 2.1.10 is clean and the earlier crash
+  was a harness bug (clean-archive receipt of `52473a73` reproduces the two
+  terminations).
+- **Written far-field writes and negatives** — Cjose W217/W218:
+  `REPLAY_W217` 10/0 and `REPLAY_W218_IDENT` 8/0 in the real bearer lane;
+  a 144-byte write from a 152-byte `encrypted_key` lands in OpenSSL's
+  56-byte RNG `CRYPTO_RWLOCK` at `cek+0x70` (+0x18 inside), HTTP 401, no
+  dereference. Ctranslate2 W4: `realbuild/downstream-probe.sh` (8/8)
+  observes a file-derived `StorageView._size=0x8282828282828282` at
+  `storage_view.cc:411` but the `size != _size` guard blocks the copy; the
+  `sysmalloc`-prev_size hypothesis is disproved from glibc 2.39 and a heap
+  dump. FontForge W23: `sh replay-w23.sh` 12/12 with
+  `GLIBC_TUNABLES=glibc.malloc.tcache_count=0` finds no code pointer in the
+  128 KiB negative-glyph window (clean-archive receipt from `f2dd5a78`).
+  Drwav W5/W6: `run-all.sh` 25/0 and the marker consumer 14/0; the only
+  network-facing metadata-API caller found vendors byte-identical fixed
+  0.14.6 (`fad60f1e…f308cd`), so no vulnerable wire lane. Libraw W27/W28
+  and Vtkdicom W5 are source/phase and grooming negatives with clean-archive
+  receipts.
+- **One-command replay consolidations** — Synchronet W25:
+  `bash lab/frontier/synchronet2shell/release-label/term320b/run-witness320b.sh`
+  runs W21–W24 and asserts 19 PASS / 0 FAIL live and from a clean archive
+  (sub-lanes 4/0, 5/0, 13/0, 7/0); shipped 3.20b servers use
+  `SSH_ANYAUTH`. CodebaseMemory W19/W20: `bash
+  lab/frontier/codebasememory2shell/run-witness.sh` runs the direct matrix,
+  stdio tool and HTTP replays with snapshot/restore and asserts the ASan
+  `READ of size 8` at `cypher.c:2568` and the recover-mode `WRITE` at
+  `project_item:3379`; no new replay was observed and the verdict stays
+  UNKNOWN. Libgphoto2 W192: `replay-clang-control-flow.sh` gives 12/0 live
+  and from `git archive f1459319` (tarball `5df9e774…f28`); Lgphoto2's
+  differing `jl2005c.so` hash is a debug-path artifact.
+- **PHP varied attacker bytes** — `lab/repro/w61-varied-tfm.sh` (wake 61)
+  repeats the tinyfilemanager chain with session id
+  `cafebabe00112233445566778899babe` and 700-byte `Y` filler. The affected
+  8.4.27-app build prints `PHP2SHELL-R5-MARKER:php2shell-r5-142933` and
+  `uid=1000(mesh-home)...` from the live FPM worker
+  (`lab/build/evidence/w61-varied/…`, sha256
+  `572a2f6dd8075a506d436421e2a73d379c804f532f52703f87e91c609044d9c3`);
+  8.4.28-app with the same bytes writes exactly 1019 bytes, promotes no
+  session and prints no marker. The shim SIGKILL remains a condition, so
+  full rung 5 stays UNCLAIMED.
