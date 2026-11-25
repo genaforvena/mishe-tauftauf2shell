@@ -38,6 +38,8 @@ def main():
     ap.add_argument("--fill", type=int, default=0)
     ap.add_argument("--i0", type=int, default=32)
     ap.add_argument("--j0", type=int, default=128)
+    ap.add_argument("--target-index", type=int, default=-1)
+    ap.add_argument("--target-byte", type=int, default=0)
     ap.add_argument("--expect", choices=("attack", "baseline", "fixed"), default="attack")
     a = ap.parse_args()
     st = states_from(a.gdb_log)
@@ -98,6 +100,11 @@ def main():
         print("IJ SUMMARY: %d checks run, FAIL" % n)
         return 1
     p = filled[0]
+    if a.target_index >= 0 and st[p][2][a.target_index] != a.target_byte:
+        bad("sbox[%d]=0x%02x at filled state, expected 0x%02x" %
+            (a.target_index, st[p][2][a.target_index], a.target_byte))
+    elif a.target_index >= 0:
+        ok("sbox[%d]=0x%02x at filled state" % (a.target_index, a.target_byte))
     ok("state %d has sbox[0..186] filled with 0x%02x" % (p, a.fill))
 
     i_obs, j_obs, _ = st[p]
@@ -116,15 +123,17 @@ def main():
     else:
         bad("live hp_rand.j=0x%02x differs from written j0=0x%02x" % (j_obs, a.j0))
 
+    chosen = a.target_byte if a.target_index >= 0 else a.fill
     tail = [ad[p + best + k][3] for k in range(len(ad) - p - best)]
-    hits = sum(b == a.fill for b in tail)
+    hits = sum(b == chosen for b in tail)
     print("observed destination low bytes after state %d: %s" %
           (p, " ".join("%02x" % b for b in tail)))
     if hits >= 2:
         ok("%d/%d post-attack probe destinations equal the chosen byte 0x%02x" %
-           (hits, len(tail), a.fill))
+           (hits, len(tail), chosen))
     else:
-        bad("only %d/%d post-attack destinations equal 0x%02x" % (hits, len(tail), a.fill))
+        bad("only %d/%d post-attack destinations equal 0x%02x" %
+            (hits, len(tail), chosen))
 
     if p > 0 and base.predicted(st[p - 1])[3] != ad[p + best][3]:
         ok("unattacked counterfactual %02x != observed %02x" %

