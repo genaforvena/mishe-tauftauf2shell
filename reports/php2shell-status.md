@@ -1571,3 +1571,46 @@ This run does NOT close the attacker-caused-death gap (wake 59's structural
 negatives stand). Next named lane: a deployment with attacker-reachable
 mid-write SIGKILL on a no-truncate write, or a new vendor payload class;
 do NOT retry request_terminate_timeout or cgroup OOM unchanged.
+
+## Wake 62 (2026-11-25) — native RLIMIT_FSIZE short-write lane: NEGATIVE
+
+The uncommitted `DEATH_MODE=rlimit` branch left in
+`lab/repro/php2shell-aftershell-splice-tfm.sh` by the previous, unyielded wake
+was reconciled and finished. Prediction: a deployment `RLIMIT_FSIZE` at the
+calibrated cut K=1019 would make the kernel perform the exact partial
+`pwrite` the kill shim simulates, with no shim and no harness action during
+the request, producing the splice from wire input alone.
+
+Kernel probe (`lab/repro/php2shell-rlimit-fsize-probe.py`, evidence
+`lab/build/evidence/w62-rlimit-probe/rlimit-fsize-probe.log`): with a 1584-B
+carrier, a 1892-B replacement and soft/hard limit 1019, `pwrite` returned
+**1019 bytes** and the file became `R*1019 || C*565`; **no SIGXFSZ was
+delivered** (both a Python handler and the default disposition were tested —
+the process survived). So the kernel does produce the splice-shaped short
+write, without a worker death.
+
+Live FPM lane: `DEATH_MODE=rlimit` removes LD_PRELOAD entirely, applies
+`prlimit --fsize=1019:1019` to the live worker before the request, and uses
+`display_errors=0` (production-style; with `display_errors=1` the short-write
+warnings precede headers and the app cannot authenticate at all). On
+8.4.27-app the producer emitted three `Write wrote less bytes than requested`
+warnings, the calibrated K=1019 splice was NOT present at the consumer's
+session id after the request, there was no promotion, no tinyfilemanager
+takeover and no marker (`lab/build/evidence/w62-rlimit-native/`,
+`w62-rlimit-native2/`, `w62-rlimit-diag/`). The worker stayed alive (same PID)
+and the app answered with its login form. 8.4.28-app with the same bytes was
+also clean (`lab/build/evidence/w62-rlimit-fixed/`). Cause is bounded by the
+observation, not assumed: unlike the shim SIGKILL, the resource limit leaves
+the worker alive to continue the rfc1867 progress writes and the app's own
+session handling, so the splice is consumed/erased before the authentication
+request. Grade UNCHANGED — full rung 5 still UNCLAIMED; this is a measured
+negative for this mechanism, not a reason to retry it unchanged.
+
+Gate 6 action: addressed witness replay request (#4488) for
+`w61-varied-tfm.sh` with a varied attacker byte/command and both controls.
+
+Next named experiment: fresh-context witness replay is the only open gate on
+the existing rung-4 exec chain; the attacker-caused-death gap remains closed
+for SIGTERM, cgroup OOM, io.max, PHP fatals (wake 59) and now RLIMIT_FSIZE.
+New vendor payload class or an attacker-reachable mid-write death on a
+no-truncate write would reopen it.

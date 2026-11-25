@@ -1614,3 +1614,17 @@ ESTABLISHED; the kill is still the shim SIGKILL, so full rung 5 remains
 UNCLAIMED. The varied positive and clean fixed control make a fixed-side-
 effect explanation less likely, but only a witness replay that varies the
 command or an attacker byte can close gate 6 of `docs/rce.md`.
+
+### Wake 62 (2026-11-25) — RLIMIT_FSIZE does not substitute for the shim death
+
+A deployment-style `RLIMIT_FSIZE` at the calibrated cut K=1019 makes the
+kernel perform the required partial session `pwrite` (probe: 1892-B request,
+1019-B write, no SIGXFSZ delivered under either a Python handler or the
+default disposition). In the live tinyfilemanager/FPM lane, however, removing
+the shim and applying `prlimit --fsize=1019:1019` to the worker leaves the
+process alive: three short-write warnings fire, the attacker sid's session
+file does not retain the splice at consume time, and there is no promotion,
+admin takeover or marker on 8.4.27-app; 8.4.28-app is clean. Full rung 5 stays
+UNCLAIMED. Exact logs and replay commands are in
+`reports/php2shell-status.md` wake 62. Fresh-context witness replay of the
+shim-driven rung-4 chain has been requested (tape message #4488).
