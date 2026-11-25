@@ -1928,3 +1928,64 @@ and `bin-fixed-asan` trees symlinked from the live checkout. From the archive,
 `sh harness/w195-chosen-deref.sh` printed `RESULT PASS` rc 0 and all five
 evidence hashes matched the working tree byte-for-byte. Author replay, not a
 witness verdict; grade and rung-5 status unchanged.
+
+## W196: mapped file-chosen pointer dereferenced by the consumer (2026-11-25)
+
+Prediction from W195: a chosen pointer to a *mapped* address whose bytes are
+also file-chosen would turn W195's unmapped crash into a read of attacker-
+chosen data. **Positive for rung-4 chosen-pointer mechanics; rung 5 unchanged.**
+
+Source lead: `attr_destroy()` switches on `attr->type` (`exr_attribute_t`
+offset 0x14), and `EXR_ATTR_STRING` (enum **20**, not 19 — `EXR_ATTR_RATIONAL`
+is 19) reaches `exr_attr_string_destroy()`, which calls
+`ctxt->free_fn(s->str)` when `s->alloc_size > 0` (`string.c:270-271`).
+
+Method: with gdb `set disable-randomization on` (ASLR OFF in the debuggee, so
+file-carried absolute addresses are meaningful), the pinned sink's COPY2
+window is a fully file-chosen `dst+3072..dst+4608`. `cases/make_w196_poc.py`
+starts from the committed W195 pre-COPY2 dump, writes a fake
+`exr_attribute_t` at `dst+1152` (type=20, union pointer to a fake
+`exr_attr_string_t` at `dst+1216` with `alloc_size=1` and `str=dst+1264`),
+puts the fake attribute's address at the measured `entries[0]` slot, gives
+`dst+1256` a plausible `0x91` chunk size word and fills `dst+1264..` with
+`0x5a`. Two-variable fixed point (destination address and slot offset both
+move with frame size): `dst=0x5555558280a0`, `slot=1088`, frame 479. The
+generated `cases/p196-fake-attr.exr` sha256 is
+`07eac4278b3890cdbaf27719c3b448f28c45236c1f7c8e39272820d7190cad13`; every
+pointer value is carried in the EXR, none forced by the debugger.
+
+Observations in the **UNMODIFIED pinned 3.5.2 `exrcheck -c`**: at the switch
+`attr_destroy(attr=0x555555828520, ...)` with `TYPE=20` and
+`STRPTR=0x555555828560`; at `string.c:270`,
+`S=0x555555828560 STR=0x555555828590 ALLOC=1 LEN=90`, and memory at the
+chosen `STR` is `0x5a5a5a5a5a5a5a5a` with the chosen `0x91` size word at
+`STR-8`. The next instruction is `mov 0x8(%rsi),%rdi`; a breakpoint on libc
+`free` then pins `__GI___libc_free(mem=0x555555828590)` and `FREE_RDI` to the
+same chosen address in one run. So the consumer dereferences a mapped,
+file-chosen pointer, reads file-chosen bytes at it, and passes that pointer
+to `free()`. Plain rc 139; valid control rc 0 `OK`; fixed 3.5.3 rc 1 `bad`;
+ASan `READ of size 3072` at pinned `internal_zstd.c:472`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w196-chosen-free.sh` -> `RESULT PASS` rc 0, six evidence hashes
+byte-identical on two runs: attr
+`8cbfaaa0a7b9e516c5564cff81e41ec7f763615367d8df91b331675387fd412d`,
+free `4c6c3e13a4e5af0ebab9011040f6176e529feabdebe72ed0cbedd1948ebac5e7`,
+plain `19517f6f690c4343bbc504b582cae1f4e0a0aa074b8a6244f6865aa38a7369e6`,
+valid `043d72d916be8948cd85f6937306e63355be57f21ad76fe7bc3c950b16286835`,
+fixed `4263399a904ddc75b5e6bd19ea8f4a8eca91d7dcd0a39081ab0ef8e3ca73d93e`,
+ASan `bd0cdff7e9e213728b9d392628bdfa5492c3097ea5f856b1bd38ca3f056dd29b`.
+
+Disposition: answers W195's open question positively at rung 4. The ABI is a
+chosen-pointer *argument* to the consumer's existing free call, not a chosen
+function pointer: `ctxt->free_fn` is unchanged and no code pointer lies in
+the overwrite window (W182/W185). Worse, the mapped address requires ASLR
+OFF, which is a lab condition; under ASLR-on the same pointer would be stale.
+No chosen IP, control-flow diversion, wire/request input, command, marker
+side effect or witness verdict was observed. No rung-5 change. Would change
+my mind: a witness verdict, a chosen code pointer/IP reached from the file,
+a mapped chosen pointer that works with ASLR on, or a wire-fed affected
+process. The wrong-enum (19 = RATIONAL) attempt is preserved: it dispatched
+to `default:` and freed the fake attr at `0x555555828520`, an equally valid
+chosen-pointer free but not the STRING path; the correct value is 20.
+
