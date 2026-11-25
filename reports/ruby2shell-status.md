@@ -6,6 +6,28 @@ byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
 
+- **2026-11-25 (twelfth push, direct session) — the frees-timing
+  barrier PARTIALLY broken: freed victims measured for the first
+  time; the sweep's class/order dependence named;
+  stock/oracle-free/persistent remains NOT ACHIEVED.** Four more
+  poison arms (48 fresh processes, N ∈ {988, 1516}, thread-pinned,
+  200×400B sub-embed-floor fillers in the attack body): the attack's
+  parse GC frees part of the previous plant population before the
+  upcase — address-matched 0x411/0x3E1 planted frees land pre-B
+  (4-13/run) and the upcase now hits FREED chunks (victims'
+  `fd=bk` = the arena unsorted-bin head, previously unseen). But the
+  sweep is class/order-dependent: the small parts' chunks free while
+  the 0x620-class big parts' slices/values NEVER do (zero 0x621
+  frees in 24/24 runs) — buffer1 keeps landing on rack chunks and
+  the freed rack victims die at the request's own unsorted scans
+  (10/12 attack aborts; their successors carry unforgeable rack
+  data). Two driver defects found by body audit and fixed (a builder
+  edit had dropped the `_method` part — one vacuous arm; the
+  analyzer's CLAIM_LIST parse); the builder now takes per-part claim
+  forges (`size@hdr:neigh_size`), honeypot drainers, and a
+  three-offset plant forge. Named next: plant part ORDER arms at
+  fixed classes to isolate what the sweep visits. No command, no
+  persistence, no grade change.
 - **2026-11-25 (eleventh push, direct session) — the poison chain's
   first half measured live (planted-chunk growth 0x415→0x453 with a
   chosen scan forgery); its binding blocker named with bytes: sweep

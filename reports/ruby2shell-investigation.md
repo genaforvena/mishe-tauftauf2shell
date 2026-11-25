@@ -2104,6 +2104,53 @@ Boundary: the poison chain's first half is measured live
  plant request and the upcase, against Ruby's sweep persistence. No
  command, no persistence, no grade change; stock/oracle-free/
  persistent rung 5 remains **NOT ACHIEVED**.
+
+### Sweep-pressure arms — the frees-timing barrier PARTIALLY broken;
+### freed victims measured; the sweep's class/order dependence named
+### (2026-11-25, direct session, twelfth push)
+
+Four more arms of the poison driver (48 fresh processes,
+N ∈ {988, 1516}, thread-pinned, filler pressure via sub-embed-floor
+parts in the attack body) attacked the sweep-persistence blocker
+directly:
+
+- **Filler pressure works for the small classes:** with 200×400B
+  filler parts before the `_method`, the attack's parse triggers a GC
+  that frees part of the PREVIOUS plant request's population before
+  the upcase — address-matched frees of the 980B-parts' 0x411 slices
+  and 0x3E1 values land pre-B (4-13 per run), and for the first time
+  the upcase hits FREED chunks: victims with `fd=bk` = the arena
+  unsorted-bin head (the freed signature), previously unseen in any
+  arm.
+- **But the sweep is class/order-dependent:** in the alternating
+  big/small plant arm (1548B parts interleaved with 980B parts), the
+  0x410/0x3E0-class small parts' chunks free, while the 0x620-class
+  big parts' slices/values NEVER do — zero `0x621`-sizefield frees in
+  24/24 runs across two arms, with the planted 0x620 pool therefore
+  empty and buffer1's tcache pops landing on rack chunks (the
+  honeypot drain pops fresh allocations). The freed victims that do
+  materialize are rack/small chunks whose physical successors carry
+  unforgeable rack data, so the grown chunks die at the request's own
+  unsorted scans (10/12 attack aborts,
+  `mismatching next->prev_size`/`invalid next size`).
+- **Two driver defects found and fixed by body audit:** a builder edit
+  dropped the `_method` part entirely (one arm was vacuous — 12/12
+  healthy processes with no upcase; caught by dumping the built
+  body), and the in-driver analyzer's CLAIM_LIST parse rejected the
+  new per-part forge spec (`size@hdr:neigh_size`). Both fixed; the
+  builder now takes per-part claim forge parameters, honeypot parts
+  (pool drainers), and the plant forge covers three check-qword
+  offsets.
+
+Boundary: the frees-timing barrier is now PARTIALLY broken with the
+small classes proven sweepable pre-upcase and freed victims measured;
+the named question is why the 0x620-class planted chunks are never
+swept (GC page-visit order, allocation order, or object-graph
+positioning) — the next arm varies plant part ORDER (all-big-first vs
+all-small-first vs interleaved, same classes) and watches which
+population frees. No command, no persistence, no grade change;
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -2342,3 +2389,24 @@ Boundary: the poison chain's first half is measured live
     attack body itself planting earlier parts whose sweep lands
     mid-parse). Stock/oracle-free/persistent rung 5 stays NOT
     ACHIEVED.
+
+17. **Done this direct-session push (2026-11-25, twelfth batch): the
+    frees-timing barrier is PARTIALLY broken — freed victims measured
+    for the first time.** Filler pressure (200×400B sub-embed-floor
+    parts in the attack body) makes the attack's parse GC free part of
+    the previous plant population before the upcase: address-matched
+    0x411/0x3E1 planted frees land pre-B (4-13/run) and the upcase
+    now hits FREED chunks (victims' `fd=bk` = the unsorted-bin head).
+    But the sweep is class/order-dependent: in the alternating
+    big/small plant arm the small parts' chunks free while the
+    0x620-class big parts' slices/values NEVER do (zero 0x621 frees
+    in 24/24 runs) — buffer1 keeps landing on rack chunks and the
+    freed rack victims die at the request's own unsorted scans
+    (10/12 attack aborts, their successors' rack data unforgeable).
+    Two driver defects found by body audit and fixed (a builder edit
+    had dropped the `_method` part — one vacuous arm; the analyzer's
+    CLAIM_LIST parse). Named next: vary the plant part ORDER at fixed
+    classes (all-big-first / all-small-first / interleaved) to
+    isolate what the sweep visits, then re-run the honeypot drain
+    against the measured rack-top count. Stock/oracle-free/persistent
+    rung 5 stays NOT ACHIEVED.

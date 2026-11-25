@@ -326,6 +326,26 @@ exact-fit claim never fires. One driver defect (a shared case-arm
 file disarming later parallel runs) was found and fixed.
 Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
+The 2026-11-25 twelfth push partially breaks the frees-timing barrier
+(four poison arms, 48 fresh `rails new --minimal` processes): filler
+pressure — 200 sub-embed-floor parts in the attack body — makes the
+attack's parse GC free part of the previous plant population before
+the upcase (address-matched 0x411/0x3E1 planted frees pre-B, 4-13 per
+run), and for the first time the upcase hits FREED chunks (victims'
+`fd=bk` = the arena unsorted-bin head). The sweep is class/order-
+dependent though: the small parts' chunks free while the 0x620-class
+big parts' slices/values never do (zero 0x621 frees in 24/24 runs) —
+buffer1 keeps landing on rack chunks, and the freed rack victims die
+at the request's own unsorted scans (10/12 attack aborts; their
+successors carry unforgeable rack data). Two driver defects were
+caught by body audit (a builder edit had silently dropped the
+`_method` part — one vacuous arm; the analyzer's CLAIM_LIST parse)
+and fixed; the builder now takes per-part claim forges
+(`size@hdr:neigh_size`), honeypot drainers, and a three-offset plant
+forge. Named next: plant part ORDER arms at fixed classes to isolate
+exactly what the sweep visits.
+Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed
