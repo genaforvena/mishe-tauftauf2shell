@@ -1391,6 +1391,19 @@ inside a REFLECTED drain-string body — that would make both the allocator
 metadata (tcache pointers) and any chosen overlay bytes wire-visible in
 the error page — the missing oracle-free disclosure + readback channel.
 
+First sampling pass of the carve-landing experiment (same day): a
+60-run shaped sweep over the carve-position knobs — `N` ∈ {508, 524, 556}
+and drain part sizes 1024/1152/1280 bytes ×32 parts (five arms, tags
+`stock-rails-consS-n*-*`, gitignored bulk) — produced 11 surviving runs
+and 22 runs with post-attack victim pops, and a byte-exact parse of every
+surviving response found **zero** reflected-value corruption: the split
+remainder did not land inside any reflected drain string in the sampled
+space. Together with the 14 earlier surviving responses (all clean), the
+reflection channel remains unproven as an oracle; landing it needs
+additional geometry knobs (drain part count, filler shape, part order) or
+the forged region's position to move relative to the reflected chunks.
+Preserved as a negative result, not retried into existence.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1438,13 +1451,15 @@ the error page — the missing oracle-free disclosure + readback channel.
 6. **Done this wake (2026-11-25):** the victim-region consumer provenance
    experiment is closed as a bounded negative — the 0x21c/0x1f8 pops are
    fixed-size framework allocations, invariant under attacker header and
-   route shaping, so they stay allocator mechanics. New measured levers
-   for the stock path: the surviving unsorted-split overlap (fake
-   remainder carved into the neighbor region and recycled by real
-   request-thread allocations with an on-thread free), the result-string
-   victim pop in unsorted geometries, and the verbatim params reflection
-   of the dev error page. Named next experiment: shape the carve position
-   (`RUBY2SHELL_STOCK_N`, drain sizes) into a reflected drain-string body
-   for a wire-visible disclosure + readback channel. Veria's PoC remains
-   unpublished at the dated trigger; reopen on its mechanics when it
-   drops. Rung 5 stock/oracle-free/persistent: still NOT ACHIEVED.
+   route shaping, so they stay allocator mechanics. The carve-landing
+   pass (60-run N/drain-size sweep) found no reflected-value corruption
+   in 11 surviving runs. New measured levers for the stock path: the
+   surviving unsorted-split overlap (fake remainder carved into the
+   neighbor region and recycled by real request-thread allocations with
+   an on-thread free), the result-string victim pop in unsorted
+   geometries, and the verbatim params reflection of the dev error page.
+   Named next: shape the carve position into a reflected drain-string
+   body via the remaining knobs (drain part count, filler shape, part
+   order) for a wire-visible disclosure + readback channel. Veria's PoC
+   remains unpublished at the dated trigger; reopen on its mechanics when
+   it drops. Rung 5 stock/oracle-free/persistent: still NOT ACHIEVED.

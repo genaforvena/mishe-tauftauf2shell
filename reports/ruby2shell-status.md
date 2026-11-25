@@ -27,7 +27,11 @@ byte; attacker controls buffer size via input length). Affected
   unchanged since 21 Nov 03:52Z, PoC still unpublished; the day's public
   GitHub PoC repos are crash/sanitizer-level only. Named next: shape the
   carve position (N, drain sizes) into a reflected drain-string body for
-  wire-visible allocator-metadata disclosure + readback.
+  wire-visible allocator-metadata disclosure + readback. First
+  carve-landing pass is negative: the 60-run N ∈ {508,524,556} × drain
+  {1024,1152,1280} sweep (consS-*) produced 11 survivors and zero
+  reflected-value corruption; remaining knobs are drain part count,
+  filler shape, part order.
 - **2026-11-25 — consumer-visibility correction: the forged `0x251` qword
   is structurally inert; Veria PoC still unpublished.** The committed case
   probe compared malloc user pointers against the forged chunk-start
