@@ -91,11 +91,42 @@ headers. `sh harness/run-all.sh` → 25 PASS / 0 FAIL, GCC and Clang:
 
 1. Done: `sh harness/run-all.sh` in a clean checkout gives 25 PASS / 0 FAIL
    with pins 3/3 OK; the witness independently replayed the same at 07:52Z.
-2. Try a real consumer of `drwav_init_file_with_metadata()` on loopback file
-   input and measure whether an application's allocator places a useful
-   object at a file-chosen low-half address without harness patching.
-3. Done: witness replay completed 07:52Z (ESTABLISHED AS LABELED). Remaining
-   work is a real-consumer/allocator measurement, not another replay.
+2. Done (W1, 09:04Z): the verbatim upstream dr_libs 0.14.5 test consumer
+   `tests/wav/wav_decoding.c` was built unmodified against the pinned header
+   and fed a crafted on-disk WAV through `drwav_init_file_with_metadata()`.
+   ASan WRITE fault through the public file API, fixed and safe controls
+   clean, 18 PASS / 0 FAIL. See `lab/frontier/drwav2shell/consumer/README.md`.
+   The chosen word reaches the live metadata array only with a debugger-
+   measured low half; no application-owned object is reachable in this build.
+3. Done: witness replay completed 07:52Z (ESTABLISHED AS LABELED for the
+   in-memory harness grade). W1 adds the real-consumer measurement below;
+   its new lane has no witness verdict.
+
+## Real-consumer measurement (W1, 2026-11-25 09:04Z)
+
+`lab/frontier/drwav2shell/consumer/run-consumer.sh` builds the verbatim
+upstream `wav-0.14.5` test consumer `tests/wav/wav_decoding.c` (hash-pinned
+copies in `consumer/upstream/`, `consumer/consumer.sha256`) against the pinned
+vulnerable and fixed headers. `make_wav.py` writes the 150-byte crafted RIFF
+from file-supplied fields; no consumer or library source is patched.
+`sh consumer/run-consumer.sh` → 18 PASS / 0 FAIL.
+
+- Vulnerable build, file low pointer `0x41414141`: ASan `SEGV` WRITE at
+  `0x50f041414155`, frame 0 `drwav__read_cue_to_metadata_obj()` (`dr_wav.h:2306`),
+  via `drwav_init_file_with_metadata()` (`:5390`) from unmodified
+  `decode_test_file()` (`wav_decoding.c:319`). Process exits 1. Rung 3 now has
+  a real consumer and an on-disk file input, not only the in-memory harness.
+- Vulnerable build with matching `smpl` loop count and fixed 0.14.6 build with
+  the attack file: both pass, rc 0, no sanitizer error.
+- With file low half `0x40` (measured from the live metadata array under
+  `setarch -R gdb`), the chosen words appear at `wav.pMetadata+24` in the
+  unmodified consumer; `metadataCount=1` for two parsed chunks. This remains
+  an instrumented, leak-dependent observation.
+- Negative preserved: the consumer's own 150-byte `libsndfile.pFileData` buffer
+  lives at `0x50e000000040` while the metadata array lives at
+  `0x50f000000040`; only the low 32 bits are file-controlled, so the app-owned
+  buffer is out of reach. No application-owned object, wire input, pointer-IP,
+  command, shell or rung 5 observed. No witness verdict for this lane.
 
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.

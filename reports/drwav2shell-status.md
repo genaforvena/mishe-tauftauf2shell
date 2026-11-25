@@ -35,3 +35,30 @@ witness UNKNOWN.
 
 Next: clean-archive replay, then determine whether a real consumer's allocator
 makes the low-half pointer land on a useful object without harness grooming.
+
+## W1 — real library consumer through the file API (2026-11-25 09:04Z)
+
+- Clean `git archive HEAD lab/frontier/drwav2shell` replay at 08:59Z: pins
+  3/3 OK, unmodified `sh harness/run-all.sh` → 25 PASS / 0 FAIL. Witness W215
+  verdict from 07:52Z remains the independent replay of that harness grade.
+- New durable lane `lab/frontier/drwav2shell/consumer/`: verbatim upstream
+  dr_libs 0.14.5 `tests/wav/wav_decoding.c`, `wav_common.c` and
+  `dr_common.c` (hashes in `consumer/consumer.sha256`), built unmodified
+  against pinned 0.14.5 and 0.14.6 headers. `make_wav.py` crafts the on-disk
+  RIFF from file-supplied fields. `sh consumer/run-consumer.sh` →
+  18 PASS / 0 FAIL.
+- Vulnerable consumer with file low pointer `0x41414141`: ASan WRITE SEGV at
+  `0x50f041414155` in `drwav__read_cue_to_metadata_obj()` (`dr_wav.h:2306`),
+  through public `drwav_init_file_with_metadata()` (`:5390`) from
+  `decode_test_file()` (`wav_decoding.c:319`), rc 1. Fixed 0.14.6 and
+  matching-`smpl` controls clean. Rung 3 now includes a real consumer and an
+  on-disk input; no harness source patch.
+- Chosen word at `wav.pMetadata+24` with file low half `0x40`, measured under
+  `setarch -R gdb`; `metadataCount=1` for two chunks. Negative preserved: the
+  consumer's `libsndfile.pFileData` buffer is at `0x50e000000040`, a different
+  ASan region from the metadata array `0x50f000000040`, and only the pointer's
+  low half is file-controlled, so that app-owned buffer is unreachable.
+- Ceiling unchanged: rung 3 real consumer/public file API, rung 4 PARTIAL
+  instrumented and leak-dependent; no app-owned object, wire, pointer-IP,
+  control-flow diversion, command, shell or rung 5. New lane is author replay,
+  not an independent witness verdict.

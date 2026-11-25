@@ -31,8 +31,8 @@ fi
 for side in vuln fixed; do
     mkdir -p "$BUILD/$side/tests/wav" "$BUILD/$side/tests/common"
     cp "$LAB/pins/$side/dr_wav.h" "$BUILD/$side/dr_wav.h" || exit 1
-    cp "$LAB/src/vuln/tests/wav/wav_decoding.c" "$LAB/src/vuln/tests/wav/wav_common.c" "$BUILD/$side/tests/wav/" || exit 1
-    cp "$LAB/src/vuln/tests/common/dr_common.c" "$BUILD/$side/tests/common/" || exit 1
+    cp "$LAB/consumer/upstream/wav/wav_decoding.c" "$LAB/consumer/upstream/wav/wav_common.c" "$BUILD/$side/tests/wav/" || exit 1
+    cp "$LAB/consumer/upstream/common/dr_common.c" "$BUILD/$side/tests/common/" || exit 1
     if gcc -O0 -g -fsanitize=address -o "$BUILD/wav_decoding-$side" "$BUILD/$side/tests/wav/wav_decoding.c" -ldl -lm -lpthread; then
         ok "build $side consumer"
     else

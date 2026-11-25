@@ -1,21 +1,21 @@
 AddressSanitizer:DEADLYSIGNAL
 =================================================================
-==2642998==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x5cadea529884 bp 0x7ffc389ea560 sp 0x7ffc389ea440 T0)
-==2642998==The signal is caused by a WRITE memory access.
-    #0 0x5cadea529884 in drwav__read_cue_to_metadata_obj /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:2306
-    #1 0x5cadea52db08 in drwav__metadata_process_chunk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:2825
-    #2 0x5cadea535d68 in drwav_init__internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:3724
-    #3 0x5cadea53dd7c in drwav_init_file__internal_FILE /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:5344
-    #4 0x5cadea53e21d in drwav_init_file_with_metadata /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:5390
-    #5 0x5cadea557560 in decode_test_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:319
-    #6 0x5cadea5578f5 in decode_test_directory /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:374
-    #7 0x5cadea5579e9 in decode_test /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:392
-    #8 0x5cadea557ab4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:423
-    #9 0x78625f82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #10 0x78625f82a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #11 0x5cadea526764 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/wav_decoding-vuln+0x6764) (BuildId: ba4d073b66e6428687bae232ca78fb2ce3c4ebbb)
+==2710376==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x5818665ce884 bp 0x7ffd4a8c5190 sp 0x7ffd4a8c5070 T0)
+==2710376==The signal is caused by a WRITE memory access.
+    #0 0x5818665ce884 in drwav__read_cue_to_metadata_obj /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:2306
+    #1 0x5818665d2b08 in drwav__metadata_process_chunk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:2825
+    #2 0x5818665dad68 in drwav_init__internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:3724
+    #3 0x5818665e2d7c in drwav_init_file__internal_FILE /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:5344
+    #4 0x5818665e321d in drwav_init_file_with_metadata /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:5390
+    #5 0x5818665fc560 in decode_test_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:319
+    #6 0x5818665fc8f5 in decode_test_directory /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:374
+    #7 0x5818665fc9e9 in decode_test /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:392
+    #8 0x5818665fcab4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/wav_decoding.c:423
+    #9 0x709cc102a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x709cc102a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5818665cb764 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/wav_decoding-vuln+0x6764) (BuildId: ba4d073b66e6428687bae232ca78fb2ce3c4ebbb)
 
 AddressSanitizer can not provide additional info.
 SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/vuln/tests/wav/../../dr_wav.h:2306 in drwav__read_cue_to_metadata_obj
-==2642998==ABORTING
+==2710376==ABORTING
 rc=1

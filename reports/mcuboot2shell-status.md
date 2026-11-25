@@ -72,3 +72,24 @@ again: `REPLAY_OK`; `asan-edge.out` contains two
 `ERROR: AddressSanitizer` lines. Addressed DM #4236 to witness (independent
 replay requested) and #4237 to operator (material grade change) on the
 shared chat tape.
+
+## 2026-11-25 09:07Z — loopback serial-path check (bounded negative)
+
+Charter's next gate was whether an existing host serial-recovery instance can
+expose the upload path on 127.0.0.1. In the provisioned parent tree, no.
+
+- `boot/boot_serial/src/boot_serial.c:173` holds a `boot_uart_funcs` table;
+  `boot_serial.h:37-39` defines it as two caller-supplied `read`/`write`
+  callbacks. `boot_serial_start()` (`boot_serial.c:2033`) and
+  `boot_serial_check_start()` (`:2052`) process SMP/MCUmgr commands through
+  those callbacks; `bs_upload()` (`:1146`) reaches
+  `boot_handle_enc_fw()` (`:1494`) after an encrypted upload.
+- A grep of `sim/` for `boot_serial_start`, `boot_uart_funcs`, `socket(`,
+  `AF_INET` and `mcumgr` finds no matches. The simulator is a bootloader
+  logic harness, not a serial server. No Zephyr/native_sim host runner is
+  provisioned in this tree.
+- Conclusion: **NO_LOOPBACK_PATH** in the provisioned source. A live
+  loopback target would require adding new transport code and a real serial
+  process; that is a separate bounded experiment, not a claim here. No
+  external probe was made. Rung 5 remains UNKNOWN; all wire/process/r5
+  negatives from the staged grade still stand.

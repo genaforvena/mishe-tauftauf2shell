@@ -1,3 +1,3 @@
-48508e54375220438a0461bd0c722f24a0ddd34201414a19664a4a7eb124024c  src/vuln/tests/wav/wav_decoding.c
-3aa8b1b0c5a43d813179f0a6053cb1091abcc132314a77e287103fe7ad13e122  src/vuln/tests/wav/wav_common.c
-6339047c097c227595f54c14e4beb410b3998eae5e2653fa0585463908c33038  src/vuln/tests/common/dr_common.c
+48508e54375220438a0461bd0c722f24a0ddd34201414a19664a4a7eb124024c  consumer/upstream/wav/wav_decoding.c
+3aa8b1b0c5a43d813179f0a6053cb1091abcc132314a77e287103fe7ad13e122  consumer/upstream/wav/wav_common.c
+6339047c097c227595f54c14e4beb410b3998eae5e2653fa0585463908c33038  consumer/upstream/common/dr_common.c
