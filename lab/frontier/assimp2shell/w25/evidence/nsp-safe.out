@@ -1,0 +1,2 @@
+MARKER_ADDR=0x401396
+case=harness/cases/safe.gltf scene=ok err=

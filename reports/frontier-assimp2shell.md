@@ -831,6 +831,41 @@ the corrected harness, not a fresh archive replay of `79f6d8d2` and not
 witness acceptance. Note the build condition: the -O1 observation is the
 Release-based configuration used by W12, not a bare -O1 configure.
 
+## W25 — a narrower index write does not relax the W24 build conditions (2026-11-25 00:4xZ, author-measured)
+
+W24's benign marker needed a 64-byte MAT4/FLOAT index copy at -O0 with
+`-fno-stack-protector`. One obvious way to try removing the canary condition
+is to declare a smaller accessor element and ask whether a 16-byte VEC4/FLOAT
+index copy still reaches the saved RIP at `&value + 12` but stops before the
+canary. `harness/cases/mat4idx-count1.gltf` was reduced to a 16-byte `vidx`
+bufferView with `"type": "VEC4"` and a 52-byte buffer; the low 32 bits of each
+driver's freshly measured `-no-pie` marker address were placed at decoded
+offset 48 (write offset 12). Two preserved negatives resulted:
+
+- At -O0 **with** the host's default stack protector the process aborts rc 134
+  (`*** stack smashing detected ***`) and never calls the marker. A fresh gdb
+  probe on the 16-byte `memcpy@plt` shows the canary slot at `dest + 4`,
+  **inside** `[dest, dest+16)`, while the saved RIPs of `GetValue` and
+  `GetUInt` sit at `dest + 20` and `dest + 52`, outside it. Because every
+  `Indexer::GetValue` copy starts at `&value`, no accessor element size can
+  reach a saved RIP without crossing the canary at +4 in this build.
+- At -O0 **without** the protector the 16-byte window overwrites only the low
+  32-bit half of the saved RIP at `dest + 12`; the high half `0x7fff` belongs
+  to the library return address (`0x7ffff7c1987a`). The crafted low word
+  therefore forms an unmapped address and the process faults rc 139 with no
+  marker. The 64-byte MAT4 case, which writes both halves of that slot, still
+  calls the marker rc 0 — W24 is unchanged.
+
+`bash harness/run-w25.sh` => **8 PASS / 0 FAIL**, trace
+`w25/evidence/w25.trace` sha256
+`5532748382ca4383a9ff39354e1c8910192592c3e46b72176d859e5d6fa5f864`.
+The script regenerates all three documents from the tracked base and fresh
+marker addresses, runs four plain processes and two gdb frame probes, and
+checks both source pins. Grade and ceiling are unchanged: this is a negative
+at the same labeled, local-file, `-O0`/`-no-pie` scope, not an upstream-default
+build, not a command, not r5. Author-measured; it needs no witness acceptance,
+but it is reproducible evidence for the W24 replay offer.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade

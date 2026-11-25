@@ -1,0 +1,9 @@
+PIN glTFAsset.inl ok=True
+PIN glTFImporter.cpp ok=True
+CASE nsp-safe rc=0 marker=0 scene=ok
+CASE sp-vec4 rc=134 marker=0 scene=
+CASE nsp-vec4 rc=139 marker=0 scene=
+CASE nsp-mat4 rc=0 marker=1 scene=
+FRAME sp-vec4 hit=1 len=16 canary_inwrite=4 rips_inwrite=- nearest_above=20 rip1_hi=0x7fff
+FRAME nsp-vec4 hit=1 len=16 canary_inwrite=- rips_inwrite=12 nearest_above=12 rip1_hi=0x7fff
+RESULT 8 PASS / 0 FAIL

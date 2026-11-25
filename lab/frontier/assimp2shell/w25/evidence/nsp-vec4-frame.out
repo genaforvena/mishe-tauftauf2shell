@@ -1,0 +1,25 @@
+Temporary breakpoint 1 at 0x4013f7: file harness/w24_driver.cpp, line 23.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Temporary breakpoint 1, main (argc=2, argv=0x7fffffffe258) at harness/w24_driver.cpp:23
+23	    if (argc != 2) return 64;
+Breakpoint 2 at 0x7ffff76a5260 (3 locations)
+MARKER_ADDR=0x401396
+
+Breakpoint 2.2, 0x00007ffff7b12820 in memcpy@plt () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/build-min-plain-o0-nsp/bin/libassimp.so.6
+W25_HIT dest=0x7fffffffc82c src=0x42d934 len=16
+W25_CANARY -116
+W25_RIP frame=0 delta=-36 val=0x7ffff7c26037
+#1  0x00007ffff7c26037 in glTF::Accessor::Indexer::GetValue<unsigned int> (this=0x7fffffffc870, i=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.inl:474
+474	    memcpy(&value, data + i * stride, elemSize);
+W25_RIP frame=1 delta=12 val=0x7ffff7c1987a
+#2  0x00007ffff7c1987a in glTF::Accessor::Indexer::GetUInt (this=0x7fffffffc870, i=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFAsset.h:368
+368	            return GetValue<unsigned int>(i);
+W25_RIP frame=2 delta=44 val=0x7ffff7c15bc0
+#3  0x00007ffff7c15bc0 in Assimp::glTFImporter::ImportMeshes (this=0x41b960, r=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:319
+319	                        SetFace(faces[i], data.GetUInt(i));
+W25_RIP frame=3 delta=476 val=0x7ffff7c1805e
+#4  0x00007ffff7c1805e in Assimp::glTFImporter::InternReadFile (this=0x41b960, pFile="$$$___magic___$$$.gltf", pScene=0x41d1a0, pIOHandler=0x7fffffffd280) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/assimp2shell/pins/assimp-6.0.6/code/AssetLib/glTF/glTFImporter.cpp:738
+738	    ImportMeshes(asset);
+W25_RIP frame=4 delta=2572 val=0x7ffff7b3f344

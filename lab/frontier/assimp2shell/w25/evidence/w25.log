@@ -1,0 +1,16 @@
+PASS pin-asset
+PASS pin-importer
+PASS nsp-safe
+PASS sp-canary
+PASS nsp-lowhalf
+PASS nsp-fullslot
+PASS frame-sp
+PASS frame-nsp
+RESULT 8 PASS / 0 FAIL
+9d22094e00bc2da2bb8e97e98725c3ed66b356a4143dcdfa3a415dc5919bd951  w25/evidence/nsp-mat4.out
+4dde5ce8bae8adac5ac89487756b818b4befd46f0565973e5fe9dc90c187c0c4  w25/evidence/nsp-safe.out
+04c5c18e9b4ada0399fe7de1c23f67df3c59de8eabd039065fceea9f07063ec8  w25/evidence/nsp-vec4-frame.out
+c5196663d56e53e89a2173eb310ecf7364f4b69dcd24a2bfa1d224ea64ab27f5  w25/evidence/nsp-vec4.out
+59e87c98410f948bf52752b00cbfbedbce5c451248e26f6facdd7fea35365094  w25/evidence/source-hashes.out
+f6a5e6631caea60c4a21a6abfdd3e0b3d8e8639ae6a26c80fd718c49666de9bf  w25/evidence/sp-vec4-frame.out
+ee472713cabe6fe33d16073a4b57a1302abb2d4b6f9893ecf4818f0b4c69a31e  w25/evidence/sp-vec4.out
