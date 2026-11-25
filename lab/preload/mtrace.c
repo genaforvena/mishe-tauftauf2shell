@@ -48,6 +48,7 @@ static __thread char *case_win_lo = 0;
 static __thread char *case_win_hi = 0;
 static __thread int case_waiting_second = 0;
 static __thread int case_overflow_seen = 0;
+static int case_wide = 0;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -63,8 +64,8 @@ static void mtrace_init(void)
     case_arm_file = getenv("MTRACE_CASE_ARM_FILE");
     emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
     case_stop_c = getenv("MTRACE_CASE_STOP_C") != NULL;
-    free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
     dump_bins = getenv("MTRACE_DUMP_BINS") != NULL;
+    case_wide = getenv("MTRACE_CASE_WIDE") != NULL;
 }
 
 /* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
@@ -132,8 +133,8 @@ static void case_snapshot(const char *tag, size_t sizefield)
     char *physical = victim_header + (sizefield & ~(size_t)7);
     if (tag[0] == 'B') {
         case_physical = physical;
-        case_win_lo = physical + 0x10;
-        case_win_hi = physical + 0x78;
+        case_win_lo = case_wide ? (char *)case_victim : physical + 0x10;
+        case_win_hi = case_wide ? next : physical + 0x78;
     }
     char buf[512];
     int len = snprintf(buf, sizeof buf,
@@ -195,8 +196,10 @@ static void case_allocation(size_t size, void *p)
     } else if (case_win_lo && (char *)p >= case_win_lo &&
                (char *)p < case_win_hi) {
         len = snprintf(buf, sizeof buf,
-                       "P tid=%ld request=%#lx ptr=%p size=%#lx\n",
-                       syscall(SYS_gettid), size, p, case_read((char *)p - 8));
+                       "P tid=%ld request=%#lx ptr=%p size=%#lx "
+                       "next=%#lx key=%#lx\n",
+                       syscall(SYS_gettid), size, p, case_read((char *)p - 8),
+                       case_read(p), case_read((char *)p + 8));
     } else {
         return;
     }

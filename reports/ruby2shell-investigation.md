@@ -2707,3 +2707,44 @@ stays **NOT ACHIEVED**.
       8-byte `next` overlap nor the wire-nominated target is available in
       12 fresh processes. Grade unchanged; stock/oracle-free/persistent
       rung 5 remains **NOT ACHIEVED**.
+
+24. **Stock small-class overlap search — bounded NEGATIVE, with the missing
+    consumer geometry named (2026-11-25, direct session).** The analysis
+    preload gained `MTRACE_CASE_WIDE=1` (P/Q coverage across the whole grown
+    victim) and P lines now include `next`/`key`; the claim driver gained
+    `RUBY2SHELL_CLAIM_{PLANT,DRAIN}_ROUTE` and `_METHOD`, allowing benign
+    multipart plants to use `POST /up` plus `_method=GET` and avoid the dev
+    404 render. Both changes were built and smoked (`plant=200`).
+    - A 144-process wide consH-20 survey produced 13 survivors and 54 runs
+      with window P/Q activity, but no attacker-shaped tcache `next` and no
+      target pop. The one-byte write remained a size-field rewrite.
+    - The final `rb_str_new` copy is a second possible overlap writer, not
+      just the second mapping buffer. Geometry enumeration gives N=1036 /
+      victim `0x801→0x851` / final `0x820`, and N=1052 /
+      `0x815→0x853` / final `0x840`, where the final copy can cross the
+      physical successor. Planted arms did not produce the required FREE
+      victim: `n1036av2` never showed B `0x801`; one N=1052 run
+      (`svbatch2-14`) showed B `0x815→0x853` with live `P`-filled fd/bk, but
+      the final `0x834` allocation went elsewhere and the process aborted.
+    - A useful stock consumer was then observed directly:
+      `n524p400full-1` (N=524, plant `1000x80`, filler `400x400`) shows B
+      `0x405→0x453`, a later `M 0 3f8 <victim>` / C-at-victim, and a real
+      physical successor at victim+`0x400` with P/Q activity. This proves a
+      later request can consume the corrupted small-class chunk. It does
+      **not** yet poison tcache: a same-bin request is bounded by the
+      original physical extent, so its chosen bytes stop before the
+      successor's `next`. The useful overshoot requires the victim to enter
+      unsorted (tcache saturation) and a LARGER request to split the
+      corrupted extent.
+    - Routed plants and tiny (`1x2000`) pressure improved placement but not
+      the required state: `n972routed` put both buffer1 and victim at planted
+      slice addresses, while `n972clean`/`n972smallplant` put buffer1 on a
+      planted slice but the victim in a consolidated giant. No command,
+      persistence or grade change; stock/oracle-free/persistent rung 5 stays
+      **NOT ACHIEVED**.
+    - Named next: saturate tcache `0x400` with seven dummy chunks, route a
+      four-part `1000` plant through `/up` with `_method=GET`, use tiny
+      pressure, and attack at N=972. The payoff is adjacent
+      `[A 0x400][V 0x400 unsorted→0x450][T 0x410 tcache]`, followed by a
+      `0x420` claim (content 1039) whose chosen bytes cross V's physical
+      end into T's `next`. Observe P `next`/`key`; controls stay mandatory.
