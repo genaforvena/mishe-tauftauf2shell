@@ -1,0 +1,9 @@
+W210 clean-archive replay, 2026-11-25 23:1xZ
+archive: git archive a6ce59ff lab/openexr2shell-real -> /tmp/w210-clean
+symlinked from the live checkout: src/, build-vuln-asan/, build-fixed-asan/,
+build-vuln-plain/ and the gitignored cases/p209-stream-chain.exr
+command: sh harness/w210-stream-chain-negative.sh
+result: RESULT PASS rc 0; three plain ASLR-off runs rc 139 with no marker
+evidence hash (working tree and clean archive, identical):
+022e8bba8a5b2b95a64861e8d9f57d8d61cfbc2eef98f535a7d5e56c235f7726  evidence/w210-stream-chain-negative.out
+Author replay, not a witness verdict; grade unchanged.

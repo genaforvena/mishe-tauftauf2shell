@@ -2682,3 +2682,10 @@ Grade unchanged: W202 remains witness-confirmed ESTABLISHED AS LABELED at its
 ASLR-off local-file scope; W209 and W210 are author-only and rung 5 stays
 UNKNOWN. Would change the grade: a working stream-mode chain with controls,
 an ASLR-on address route, or a wire-fed affected process.
+
+W210 clean-archive receipt (23:1xZ): `git archive a6ce59ff
+lab/openexr2shell-real` into `/tmp/w210-clean`, with the gitignored `src/`,
+three build trees and `cases/p209-stream-chain.exr` symlinked from the live
+checkout, returned `RESULT PASS` rc 0 with the same `022e8bba...` evidence
+hash. Receipt: `lab/openexr2shell-real/evidence/w210-clean-archive.out`.
+Author replay, not a witness verdict; grade unchanged.
