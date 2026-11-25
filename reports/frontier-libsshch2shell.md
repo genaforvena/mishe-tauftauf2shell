@@ -126,6 +126,16 @@ added; its evidence file was overwritten by the passing rerun, so that
 negative is transcript-only, not a preserved file. Fixed `groom-survive`
 control: data #2 suppressed, target unchanged, no ASan.
 
+Bounded negative (mode removed, transcript-only): a `groom-rebuild` variant
+tried to avoid the detach by allocating fresh replacement objects for the
+freed stdout buffer and callback-list iterator after the channel free. The
+new objects did not land at the old addresses (`SERVER rebuild buf_old=0x...
+buf_new=0x... buf_match=0 it_old=0x... it_new=0x... it_match=0`); ASan still
+faulted at pinned `channels.c:708` while the death callback still showed the
+chosen-pointer write (`target=0x41414141414141c1`). The experimental mode
+and its throwaway evidence file were removed. A clean-exit lane without app
+detachment is therefore not established.
+
 The detach is explicitly lab-only, not a realistic application pattern:
 it isolates the chosen-pointer write from unrelated UAF faults. Base
 `run-all.sh` (5 PASS / 0 FAIL) and W2 `run-extra.sh` (8 PASS / 0 FAIL) still
