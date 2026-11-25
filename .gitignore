@@ -381,6 +381,7 @@ lab/frontier/assimp2shell/pins/fixed7090-6.0.6/
 # local. Pins, generated .inc fragments, harness source, runner, evidence log
 # and gdb transcript stay tracked.
 lab/frontier/synchronet2shell/build/
+lab/frontier/synchronet2shell/release-label/term320b/build/
 
 # Fltk2shell W195: pinned tarball, extracted trees, local builds, compiled
 # drivers and per-case ASan output stay local. PINS, patches, generator,

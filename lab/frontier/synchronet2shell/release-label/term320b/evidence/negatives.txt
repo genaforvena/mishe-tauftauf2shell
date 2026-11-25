@@ -1,0 +1,12 @@
+First run of run-term320b.sh scored 9 PASS / 1 FAIL
+(evidence.log sha256 469d93b6819849eef4593d2fed9b44a708a0cf72f0ff1e26c7ed1b5b693df66d).
+The failing case was asan-320b-g++-term40: the harness's REDZONE_MODEL branch
+returned 4 for len != 64 by design, while expect_asan requires rc=0 for a
+clean control. The ASan output itself was clean (no report). This is a
+harness return-code mistake, not a property of the shipped 3.20b copy.
+Repair: the REDZONE_MODEL branch now returns 0; ASan still signals the
+64-byte overflow through a nonzero process status. Two earlier gen.sh
+failures were also scaffolding errors: the extracted .inc omitted the
+closing brace of the shipped if-block, and the line-index assertions used
+one-based rather than zero-based offsets. Both were corrected before the
+final run. No failure was erased from the record.

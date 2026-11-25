@@ -9,12 +9,14 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18 updates 2026-11-25. W10 source audit bounds this
-pinned build to one 64-byte remote TERM setter and finds no control-flow
+2026-11-24; W15/W16/W18/W19 updates 2026-11-25. W10 source audit bounds the
+pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
-no-size getter and field layout in the shipped 3.21e release at source
-level. None changes the rung or the availability ceiling.
+no-size getter and field layout in the shipped 3.21e release; W19 finds that
+the earliest affected shipped release 3.20b instead places two `link_list_t`
+pointers in the 64-byte reach, measured only at source-bound harness scope.
+None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -584,6 +586,42 @@ This confirms the advisory's affected-release wording for the shipped 3.21e
 **at source level only**: no build, wire session or runtime bytes were
 measured in this lane, no claim is made about 3.20b or other releases, and no
 rung changes. It is an author check, not a witness verdict.
+
+## W19 earliest affected release: 3.20b pointer reach (2026-11-25, author source-bound harness)
+
+W18 checked only the upper end of the advisory's claimed range. The mirror's
+tag list (82 tags via the GitHub API) contains `sbbs320b`, `sbbs320d`,
+`sbbs321c` and `sbbs321e`, but **no 3.22 tag**, so the advisory's recommended
+"3.22 build B / post-19-Nov 3.22a" cannot be verified as a numeric release
+here and stays UNKNOWN. Provisioning the raw files of the earliest claimed
+affected tag `sbbs320b` (commit
+`db9c5d6fd37ef74b6e6ca647308d351e656de18d`) found the same no-size getter at
+`answer.cpp:520`, `TELNET_TERM_MAXLEN 40` at `telnet.h:109`, but a **different
+adjacent field block**: `sbbs.h:644-647` reads `terminal[41]`,
+`int cterm_version`, `link_list_t savedlines`, `lbuf`. In the pinned
+`src/xpdev/link_list.h:67-79`, `savedlines.first` and `savedlines.last` are
+pointers at offsets 0 and 8 of that struct, i.e. at `sbbs_t+48` and `+56`.
+A 64-byte TERM therefore reaches all 16 pointer bytes; the scalar-only
+ceiling W10 found holds for the pinned 3.21e-era parent, not for this
+shipped release.
+
+`release-label/term320b/run-term320b.sh` provisions the five pinned raw
+files, extracts the verbatim 3.20b statement into `vuln320b.inc` and runs
+gcc and clang ASan redzone plus plain full-layout cases: **10 PASS / 0 FAIL**
+live at 04:31:08Z. Plain output reads
+`cterm_version=43434343 first=0x4646464646464646 last=0x4c4c4c4c4c4c4c4c`;
+ASan reports `WRITE of size 64` for both compilers; the 40-byte TERM leaves
+both pointers zero. The first run was 9 PASS / 1 FAIL from a harness return
+code, preserved in `evidence/negatives.txt`, not a property of the copy.
+Raw `evidence/evidence.log` sha256
+`d5a926a964a2bc492986eda9b497e603a53ed25c62e603a1700bdbf1a7a3a6df`.
+
+This is chosen pointer control at the source-bound harness scope for a
+second shipped release. Source consumers of the overwritten list exist in
+3.20b (`con_out.cpp:1519/1524` push/pop on `&savedlines`,
+`main.cpp:3922` `listFree(&savedlines)` at teardown), but no 3.20b build,
+wire session, runtime dereference, control-flow target, command, witness
+verdict or rung change was measured; the advisory remains availability-only.
 
 ## Ceiling and cheapest next experiment
 
