@@ -1,0 +1,2 @@
+mode=attack fragmentBytes=500 offset=1000 region=1100 error=1
+canary0=5a canary300=MISHE-OO

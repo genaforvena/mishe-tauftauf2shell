@@ -1,0 +1,2 @@
+mode=safe fragmentBytes=100 offset=1000 region=1100 error=0
+allocation=exact
