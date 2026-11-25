@@ -1,0 +1,59 @@
+=================================================================
+==3699573==ERROR: AddressSanitizer: heap-use-after-free on address 0x506000000080 at pc 0x57c1684f8066 bp 0x7ffd7c3ae8e0 sp 0x7ffd7c3ae0a0
+READ of size 32 at 0x506000000080 thread T0
+    #0 0x57c1684f8065 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0xc5065) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+    #1 0x57c168539b82 in channel_default_bufferize /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/harness.c:152:5
+    #2 0x57c1685391a8 in channel_rcv_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/channel_rcv_data.inc:85:9
+    #3 0x57c168538d46 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/harness.c:271:10
+    #4 0x7a266c02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7a266c02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x57c16845f364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0x2c364) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+
+0x506000000080 is located 0 bytes inside of 64-byte region [0x506000000080,0x5060000000c0)
+freed by thread T0 here:
+    #0 0x57c1684f9f1a in free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0xc6f1a) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+    #1 0x57c1685388b9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/harness.c:241:9
+    #2 0x7a266c02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7a266c02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x57c16845f364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0x2c364) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+
+previously allocated by thread T0 here:
+    #0 0x57c1684fa1b3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0xc71b3) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+    #1 0x57c168538842 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/harness.c:231:30
+    #2 0x7a266c02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7a266c02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x57c16845f364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0x2c364) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667)
+
+SUMMARY: AddressSanitizer: heap-use-after-free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/harness/vuln-asan+0xc5065) (BuildId: 5b9255e2208bf09be02762c07e22072df661c667) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x505ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x505ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x505fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x505fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506000000000: fa fa fa fa 00 00 00 00 00 00 03 fa fa fa fa fa
+=>0x506000000080:[fd]fd fd fd fd fd fd fd fa fa fa fa 00 00 00 00
+  0x506000000100: 00 00 00 00 fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x506000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3699573==ABORTING

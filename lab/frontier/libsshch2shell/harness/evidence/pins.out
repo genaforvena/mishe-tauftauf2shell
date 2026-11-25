@@ -1,0 +1,9 @@
+src/advisory.txt: OK
+src/channels.c.fixed: OK
+src/channels.c.vuln: OK
+src/channels.h.fixed: OK
+src/channels.h.vuln: OK
+src/libssh.h.fixed: OK
+src/libssh.h.vuln: OK
+src/ssh2.h.fixed: OK
+src/ssh2.h.vuln: OK

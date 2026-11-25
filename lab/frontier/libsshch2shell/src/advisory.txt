@@ -1,0 +1,57 @@
+===========================================================
+== Subject:     Possible UAF while processing data on closed channels
+==
+== CVE ID#:     CVE-2026-59850
+==
+== Versions:    libssh < 0.12.1; < 0.11.5
+==
+== Summary:     The channels data callbacks are invoked on closed channels
+==              which might cause memory issues, when the channel data was
+==              already freed.
+==
+== Component:   server and client
+==
+===========================================================
+
+===========
+Description
+===========
+
+Closing channel means there should be no more data sent through that channel.
+If malicious actor tries to do this for example on the SFTP channel,
+he might invoke user callbacks handling data that was already freed,
+causing potential UAF or crashes.
+
+==================
+Patch Availability
+==================
+
+Patches addressing the issues have been posted to:
+https://www.libssh.org/security/
+Additionally, libssh 0.12.1 and 0.11.5 have been issued
+as security releases to correct the defect.  SSH administrators are
+advised to upgrade to these releases or apply the patch as soon
+as possible.
+
+==================
+CVSSv3 calculation
+==================
+CVSS:3.1/AV:N/AC:L/PR:L/UI:N/S:U/C:N/I:N/A:L (4.3)
+
+==========
+Workaround
+==========
+
+Manually verify the channel is not closed inside of your
+channel data callbacks.
+
+=======
+Credits
+=======
+
+Originally reported by Zhou Qingyang.
+Patches provided by Jakub Jelen of the libssh team.
+
+==========================================================
+== The libssh team
+==========================================================

@@ -1,0 +1,2 @@
+DEREF byte=M marker=MISHE-LIBSSH-UAF
+RESULT mode=attack rc=1 error=0 callback_bytes=32
