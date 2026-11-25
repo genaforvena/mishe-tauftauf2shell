@@ -664,6 +664,10 @@ provisions all eight files, checks their SHA-256 pins and the exact source
 lines above: **17 PASS / 0 FAIL**, rc 0, live at 06:12:19Z. The first run
 was 16 PASS / 1 FAIL from an ambiguous grep needle, preserved in
 `consumer320b/evidence/negatives.txt`; no source claim changed.
+A clean `git archive 1db3684f` replay at 06:13:31Z also scored 17 PASS /
+0 FAIL; after dropping the single timestamp line both normalized logs hash to
+`e74779de80745ffbef72dd1f5e1403aa64c18a53ade8907f4fca0ba8bbba9732`
+(`consumer320b/REPLAY.md`). Author replay only, not a witness verdict.
 
 ## Ceiling and cheapest next experiment
 
