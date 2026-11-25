@@ -676,3 +676,23 @@ global whose address the client sends; callee/session addresses are
 forked-peer ASLR-local; app-owned fake callback objects, in-callback free,
 authenticated peer (PR:L) and the W3 detach remain. No persistent shell or
 remote command service. NOT ESTABLISHED rung 5; additive and unwitnessed.
+
+Clean-archive receipt (commit `e4bfe196`, 2026-11-25 17:50Z): `git archive HEAD
+lab/frontier/libsshch2shell` was extracted into `/tmp/w14-arch`, with symlinks
+to this lab's two pinned mirror trees, their plain build directories and
+hostkey (the archive carries no build artifacts or private key).
+`run-realsystem.sh` there rebuilt both plain Release libraries from the pinned
+trees and reported 6 PASS / 0 FAIL, rc 0: `vuln-rs` (data #2, REALSYS armed,
+wire callee, no trampoline, marker file), `fixed-rs` (no data #2, no REALSYS,
+no file), `vuln-rs-bad` (rc 1, no `SERVER done`, no file), and three repeats.
+Fresh replay evidence `evidence-rs-vuln-rs.out` there:
+`CLIENT realsystem fn=0x7b170f058750 sess=0x5954e954ddc0 cmd=touch evidence-wire-vuln-groom-realsystem.marker bad=0`,
+`SERVER REALSYS armed fn=0x7b170f058750 sess=0x5954e954ddc0`,
+`SERVER done data_packets=2 marker_hits=0`,
+`SERVER target_after=0x41414141414141c1 groom_ptr=0x59551f140ac0`,
+`CLIENT rc=0 SERVER status=0x0`; the marker was renamed to
+`evidence-rs-sideeffect.kept`. Distinct addresses from the in-tree W14 run
+confirm an independently rebuilt replay, not a copied log. This checks
+committed harness and driver text from a clean archive; W14 remains additive
+and unwitnessed. The archive run wrote only under `/tmp/w14-arch`, so the
+pinned in-tree evidence is unchanged.
