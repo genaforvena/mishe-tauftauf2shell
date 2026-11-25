@@ -1,0 +1,46 @@
+=================================================================
+==3716048==ERROR: AddressSanitizer: global-buffer-overflow on address 0x55bc8f2119a0 at pc 0x7851392ced69 bp 0x7ffd9f028e60 sp 0x7ffd9f0285f0
+WRITE of size 723 at 0x55bc8f2119a0 thread T0
+    #0 0x7851392ced68 in vsprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1671
+    #1 0x7851392d051b in sprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1714
+    #2 0x55bc8f20dedc in ms_kill /home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/pinned_vuln.h:108
+    #3 0x55bc8f20e40d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/probe.c:46
+    #4 0x785138e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x785138e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x55bc8f20d364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/vuln-gcc-asan+0x2364) (BuildId: 9f84b2efb8e6635c9ac2ff102adc358863f07d0a)
+
+0x55bc8f2119a0 is located 0 bytes after global variable 'buf' defined in 'prelude.h:64:13' (0x55bc8f2117a0) of size 512
+0x55bc8f2119a0 is located 32 bytes before global variable 'mishe_source' defined in 'prelude.h:67:22' (0x55bc8f2119c0) of size 272
+SUMMARY: AddressSanitizer: global-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1671 in vsprintf
+Shadow bytes around the buggy address:
+  0x55bc8f211700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9
+  0x55bc8f211780: f9 f9 f9 f9 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x55bc8f211980: 00 00 00 00[f9]f9 f9 f9 00 00 00 00 00 00 00 00
+  0x55bc8f211a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211a80: 00 00 00 00 00 00 00 00 00 00 f9 f9 f9 f9 f9 f9
+  0x55bc8f211b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x55bc8f211c00: 00 00 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3716048==ABORTING

@@ -1,0 +1,45 @@
+=================================================================
+==3716313==ERROR: AddressSanitizer: global-buffer-overflow on address 0x5fbe560b1640 at pc 0x5fbe5566d190 bp 0x7fff06c76440 sp 0x7fff06c75be0
+WRITE of size 723 at 0x5fbe560b1640 thread T0
+    #0 0x5fbe5566d18f in vsprintf (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/vuln-clang-asan+0x5218f) (BuildId: ab122c199830c486cd6644791159760ed5c785f1)
+    #1 0x5fbe5566e28e in sprintf (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/vuln-clang-asan+0x5328e) (BuildId: ab122c199830c486cd6644791159760ed5c785f1)
+    #2 0x5fbe5572153d in ms_kill /home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/./pinned_vuln.h:108:2
+    #3 0x5fbe55720b71 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/probe.c:46:2
+    #4 0x75a6b542a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x75a6b542a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5fbe55647354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/vuln-clang-asan+0x2c354) (BuildId: ab122c199830c486cd6644791159760ed5c785f1)
+
+0x5fbe560b1640 is located 0 bytes after global variable 'buf' defined in '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/./prelude.h:64' (0x5fbe560b1440) of size 512
+SUMMARY: AddressSanitizer: global-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/solanum2shell/harness/vuln-clang-asan+0x5218f) (BuildId: ab122c199830c486cd6644791159760ed5c785f1) in vsprintf
+Shadow bytes around the buggy address:
+  0x5fbe560b1380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 f9 f9
+  0x5fbe560b1400: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x5fbe560b1480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fbe560b1500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fbe560b1580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x5fbe560b1600: 00 00 00 00 00 00 00 00[f9]f9 f9 f9 f9 f9 f9 f9
+  0x5fbe560b1680: f9 f9 f9 f9 f9 f9 f9 f9 00 00 00 00 00 00 00 00
+  0x5fbe560b1700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fbe560b1780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fbe560b1800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5fbe560b1880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3716313==ABORTING

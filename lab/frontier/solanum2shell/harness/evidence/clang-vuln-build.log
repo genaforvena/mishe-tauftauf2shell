@@ -1,0 +1,91 @@
+In file included from probe.c:9:
+./pinned_vuln.h:48:62: warning: too many arguments in call to 'sendto_one_numeric'
+   47 |                         sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+      |                         ~~~~~~~~~~~~~~~~~~
+   48 |                                            form_str(ERR_NOSUCHNICK), IsDigit(*user) ? "*" : user);
+      |                                                                                                 ^
+./pinned_vuln.h:47:22: warning: passing arguments to 'sendto_one_numeric' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   47 |                         sendto_one_numeric(source_p, ERR_NOSUCHNICK,
+      |                                           ^
+./pinned_vuln.h:51:82: warning: too many arguments in call to 'sendto_one_notice'
+   51 |                 sendto_one_notice(source_p, ":KILL changed from %s to %s", user, target_p->name);
+      |                 ~~~~~~~~~~~~~~~~~                                                              ^
+./pinned_vuln.h:51:20: warning: passing arguments to 'sendto_one_notice' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   51 |                 sendto_one_notice(source_p, ":KILL changed from %s to %s", user, target_p->name);
+      |                                  ^
+./pinned_vuln.h:56:80: warning: too many arguments in call to 'sendto_one_numeric'
+   56 |                 sendto_one_numeric(source_p, ERR_CANTKILLSERVER, form_str(ERR_CANTKILLSERVER));
+      |                 ~~~~~~~~~~~~~~~~~~                                                           ^
+./pinned_vuln.h:56:21: warning: passing arguments to 'sendto_one_numeric' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   56 |                 sendto_one_numeric(source_p, ERR_CANTKILLSERVER, form_str(ERR_CANTKILLSERVER));
+      |                                   ^
+./pinned_vuln.h:65:46: warning: too many arguments in call to 'sendto_one'
+   64 |                         sendto_one(target_p, ":%s KILL %s :%s",
+      |                         ~~~~~~~~~~
+   65 |                                    source_p->name, target_p->name, reason);
+      |                                                                          ^
+./pinned_vuln.h:64:14: warning: passing arguments to 'sendto_one' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   64 |                         sendto_one(target_p, ":%s KILL %s :%s",
+      |                                   ^
+./pinned_vuln.h:70:30: warning: too many arguments in call to 'sendto_one'
+   68 |                         sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
+      |                         ~~~~~~~~~~
+   69 |                                    source_p->name, source_p->username, source_p->host,
+   70 |                                    target_p->name, reason);
+      |                                                          ^
+./pinned_vuln.h:68:14: warning: passing arguments to 'sendto_one' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   68 |                         sendto_one(target_p, ":%s!%s@%s KILL %s :%s",
+      |                                   ^
+./pinned_vuln.h:84:32: warning: too many arguments in call to 'sendto_realops_snomask'
+   80 |                 sendto_realops_snomask(IsService(source_p) ? SNO_SKILL : SNO_GENERAL, L_ALL,
+      |                 ~~~~~~~~~~~~~~~~~~~~~~
+   81 |                                      "Received KILL message for %s!%s@%s. From %s Path: %s!%s!%s!%s %s",
+   82 |                                      target_p->name, target_p->username, target_p->orighost, source_p->name,
+   83 |                                      source_p->servptr->name, source_p->host, source_p->username,
+   84 |                                      source_p->name, reason);
+      |                                                            ^
+./pinned_vuln.h:80:25: warning: passing arguments to 'sendto_realops_snomask' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   80 |                 sendto_realops_snomask(IsService(source_p) ? SNO_SKILL : SNO_GENERAL, L_ALL,
+      |                                       ^
+./pinned_vuln.h:89:39: warning: too many arguments in call to 'ilog'
+   86 |                 ilog(L_KILL, "%c %s %s!%s@%s %s %s",
+      |                 ~~~~
+   87 |                      MyConnect(target_p) ? 'O' : 'R', get_oper_name(source_p),
+   88 |                      target_p->name, target_p->username, target_p->host,
+   89 |                      target_p->servptr->name, reason);
+      |                                                     ^
+./pinned_vuln.h:86:7: warning: passing arguments to 'ilog' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   86 |                 ilog(L_KILL, "%c %s %s!%s@%s %s %s",
+      |                     ^
+./pinned_vuln.h:96:32: warning: too many arguments in call to 'sendto_realops_snomask'
+   93 |                 sendto_realops_snomask(SNO_SKILL, L_ALL,
+      |                 ~~~~~~~~~~~~~~~~~~~~~~
+   94 |                                      "Received KILL message for %s!%s@%s. From %s %s",
+   95 |                                      target_p->name, target_p->username, target_p->orighost,
+   96 |                                      source_p->name, reason);
+      |                                                            ^
+./pinned_vuln.h:93:25: warning: passing arguments to 'sendto_realops_snomask' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   93 |                 sendto_realops_snomask(SNO_SKILL, L_ALL,
+      |                                       ^
+./pinned_vuln.h:100:55: warning: too many arguments in call to 'ilog'
+   98 |                 ilog(L_KILL, "S %s %s!%s@%s %s %s",
+      |                 ~~~~
+   99 |                      source_p->name, target_p->name, target_p->username,
+  100 |                      target_p->host, target_p->servptr->name, reason);
+      |                                                                     ^
+./pinned_vuln.h:98:7: warning: passing arguments to 'ilog' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+   98 |                 ilog(L_KILL, "S %s %s!%s@%s %s %s",
+      |                     ^
+./pinned_vuln.h:103:55: warning: too many arguments in call to 'relay_kill'
+  103 |         relay_kill(client_p, source_p, target_p, path, reason);
+      |         ~~~~~~~~~~                                           ^
+./pinned_vuln.h:103:12: warning: passing arguments to 'relay_kill' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+  103 |         relay_kill(client_p, source_p, target_p, path, reason);
+      |                   ^
+./pinned_vuln.h:110:47: warning: too many arguments in call to 'exit_client'
+  110 |         exit_client(client_p, target_p, source_p, buf);
+      |         ~~~~~~~~~~~                                  ^
+./pinned_vuln.h:110:13: warning: passing arguments to 'exit_client' without a prototype is deprecated in all versions of C and is not supported in C23 [-Wdeprecated-non-prototype]
+  110 |         exit_client(client_p, target_p, source_p, buf);
+      |                    ^
+22 warnings generated.
