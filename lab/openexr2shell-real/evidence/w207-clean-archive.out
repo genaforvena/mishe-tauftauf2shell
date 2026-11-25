@@ -1,0 +1,19 @@
+Commit: 2f12c2e5 (openexr2shell W207)
+Command: git archive 2f12c2e5 lab/openexr2shell-real | tar -x -C /tmp/w207-clean2
+Gitignored symlinks from the live checkout: src, build-vuln-plain and the
+whole gitignored cases/*.exr set (the committed cases/*.py and *.cpp sources
+are shadowed only in the replay tree).
+Replay: cd /tmp/w207-clean2/lab/openexr2shell-real &&
+  sh harness/w207-leak-negative.sh
+RESULT PASS rc 0
+evidence/w207-leak-negative.out sha256:
+d5d7b448cbd14293b6f834102e574c23be5c7b412477d39c5ac0bcb05e031ae5
+Matches the working-tree replay three times and byte-identical after the
+clean replay; no addresses are normalized in this evidence because ASLR is
+left enabled and no address is printed by the case sweep.
+
+A first clean-archive attempt at commit 4e53936e failed its case-count
+assertion because `find cases` does not descend a symlinked directory; the
+harness now uses `find cases/` and the fresh archive above passes. The
+ASLR-on streamed-FIFO (`exrcheck -c -s`) variant timed out at 40 s without a
+verdict and stays UNKNOWN; it is not a pass or a failure of the chain.

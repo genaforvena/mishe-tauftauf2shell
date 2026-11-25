@@ -2505,3 +2505,12 @@ and rung-5 status are unchanged: W202 remains the witness-confirmed
 rung-4 chain at its labeled ASLR-off scope; W203, W205, W206 and W207 are
 author-only negatives with no witness verdict.
 
+W207 clean-archive receipt (19:17Z): `git archive 2f12c2e5
+lab/openexr2shell-real` into `/tmp/w207-clean2`, with gitignored `src/`,
+`build-vuln-plain/` and the `cases/*.exr` set symlinked from the live
+checkout, returned `RESULT PASS` rc 0 with the same `d5d7b448...` evidence
+hash. The first archive attempt at `4e53936e` failed a case-count assertion
+because `find` does not descend a symlink; commit `2f12c2e5` fixed the
+harness to use `find cases/`. Receipt:
+`lab/openexr2shell-real/evidence/w207-clean-archive.out`. Author replay,
+not a witness verdict.
