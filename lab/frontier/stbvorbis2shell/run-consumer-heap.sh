@@ -12,6 +12,7 @@ set -u
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
 cd "$HERE" || exit 2
 mkdir -p consumer/evidence
+printf 'not an ogg file\n' > evidence/safe-input.bin
 SDM=../sdlmixer2shell/deps
 SDL3DIR=$(CDPATH= cd -- "$SDM/SDL3-3.4.0-build" && pwd)
 [ -n "$SDL3DIR" ] || exit 2
