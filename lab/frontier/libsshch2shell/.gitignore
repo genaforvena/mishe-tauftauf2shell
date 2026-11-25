@@ -12,3 +12,8 @@ real/real_wire
 real/real_wire-vuln
 real/real_wire-fixed
 real/*.log
+real/build-plain-vuln/
+real/build-plain-fixed/
+real/real_wire-plain-*
+real/plain-run/
+real/*.marker

@@ -1,12 +1,14 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W5: independent witness verdict #4161 (W214) is ESTABLISHED
+Status 2026-11-25 W10: independent witness verdict #4161 (W214) is ESTABLISHED
 AS LABELED for the five unmodified real-build suites replayed from a clean
 archive of `c5ece2a9` — rung 3 on a real authenticated loopback wire, rung 4
 mechanics, and rung 5 MECHANICS only, NOT ESTABLISHED as remote execution.
-No contradiction, no grade change, no NIT; PR:L and the lab-only detach, malloc
-reuse and trampoline conditions stand. Staged harness 24 PASS / 0 FAIL; real
-suites base 5/0, extra 8/0, survive 7/0, call 9/0, exec 8/0, all rc 0.
+No contradiction, no grade change, no NIT; PR:L and the lab-only detach,
+malloc reuse and trampoline conditions stand. Staged harness 24 PASS / 0 FAIL;
+real suites base 5/0, extra 8/0, survive 7/0, call 9/0, exec 8/0, all rc 0.
+W10 adds an unwitnessed plain non-ASan replay (9 PASS / 0 FAIL) that removes
+the `quarantine_size_mb=0` condition from these mechanics; no grade change.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -341,3 +343,57 @@ provisioned investigation; none is claimed here. Thread (2) (ASLR-independent
 address) remains open exactly as recorded in W7. `file` on all three lab
 binaries (`real_wire`, `real_wire-vuln`, `real_wire-fixed`) reports PIE, so
 no existing build offers a fixed code address either.
+
+## W10: plain non-ASan replay of the chosen-pointer mechanics (2026-11-25 11:40Z)
+
+New additive evidence, not yet witness-replayed; no claim or grade change. The
+only lab condition previously tied to ASan mechanics — `ASAN_OPTIONS`
+`quarantine_size_mb=0`, used to force the freed 128-byte channel chunk to be
+reused — is not needed in an ordinary build. `real/run-plain.sh` builds both
+pinned commits with `-DCMAKE_BUILD_TYPE=Release` and no sanitizer, compiles the
+UNMODIFIED committed `real_wire.c` against each static libssh, and runs the
+three W3/W4 lanes on 127.0.0.1. `asan-shim/sanitizer/asan_interface.h` only
+stubs `__asan_set_death_callback`, which the harness uses for an extra ASan
+diagnostic line; `ldd` confirms neither plain binary links the ASan runtime.
+No library source, pinned commit or committed harness text was changed.
+
+Result: **9 PASS / 0 FAIL**, rc 0 — `groom-survive`, `groom-call`, `groom-exec`
+on the vulnerable commit; all three on the fixed commit; and three independent
+vulnerable `groom-survive` repeats. Evidence:
+`real/evidence-plain-{vuln,fixed}-groom-{survive,call,exec}.out`,
+`real/evidence-plain-vuln-survive-repeat{1,2,3}.out`, and the zero-byte touch
+marker at `real/evidence-plain-exec-sideeffect.kept`.
+
+- Vulnerable `groom-survive`: `SERVER groom alloc=0x... wire_off120=0x...
+  target=0x... survive=1` followed by
+  `SERVER target_after=0x41414141414141c1` and `CLIENT rc=0 SERVER
+  status=0x0` — the wire-chosen address at offset 120 receives the
+  `channels.c:706` read-modify-write in a plain build. Same `target_after` in
+  all three repeats; only the ASLR-dependent addresses change.
+- Vulnerable `groom-call`: `SERVER call fake_cbs=0x... node=0x... fn=0x...`,
+  `SERVER MARKER called len=0 hits=1`, chosen-pointer write present, clean
+  exit. The indirect callee at `channels.c:697` is wire-selected.
+- Vulnerable `groom-exec`: `CLIENT sent exec cmd=touch
+  evidence-wire-vuln-groom-exec.marker fn=0x...`,
+  `SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+  `SERVER EXEC rc=0`, chosen-pointer write present, clean exit, and the
+  marker file existed and was renamed to `evidence-plain-exec-sideeffect.kept`
+  before the controls ran.
+- Fixed commit, all three lanes: `SERVER done data_packets=1`, no `SERVER data
+  #2`, no marker call, no trampoline call, no file,
+  `SERVER target_after=0x4141414141414141`. The vendor `CLOSED_REMOTE` guard
+  suppresses the second data packet in a plain build too.
+
+Ceiling discipline: the accepted witness ceiling is unchanged. W10 removes
+one lab-only condition (ASan quarantine tuning) from the *mechanics*, not from
+the vulnerability preconditions. Still required: PR:L authenticated peer; the
+application frees a remotely closed channel inside its data callback; the
+W3/W4 detachment of the channel's stdout buffer and callback list; app-owned
+fake callback objects for the call lanes; an ASLR-local trampoline address
+chosen by a client forked from the same binary; and a benign fixed command
+through an in-harness `system()`. No persistent shell, remote command service
+or ASLR-independent address is demonstrated. The five witness-replayed ASan
+suites remain the accepted evidence; W10 is additive and awaits any future
+independent replay. What would change the grade: a benign command reached
+without the lab detach/trampoline, or a provisioned consumer with a real
+in-callback free.
