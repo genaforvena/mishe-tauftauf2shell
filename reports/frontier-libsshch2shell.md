@@ -384,6 +384,15 @@ marker at `real/evidence-plain-exec-sideeffect.kept`.
   `SERVER target_after=0x4141414141414141`. The vendor `CLOSED_REMOTE` guard
   suppresses the second data packet in a plain build too.
 
+Clean-archive receipt (commit `132d6a9e`, 2026-11-25 11:46Z): the committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD`
+into a throwaway directory, with symlinks to this lab's already-provisioned
+mirror trees and hostkey. `sh real/run-plain.sh` there rebuilds both plain
+libraries from those pinned trees and reports 9 PASS / 0 FAIL, rc 0, with the
+same chosen-pointer write, marker call, trampoline command and fixed-build
+suppression. This checks the committed script and shim text, not a fresh
+fetch of libssh.
+
 Ceiling discipline: the accepted witness ceiling is unchanged. W10 removes
 one lab-only condition (ASan quarantine tuning) from the *mechanics*, not from
 the vulnerability preconditions. Still required: PR:L authenticated peer; the
