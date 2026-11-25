@@ -174,6 +174,37 @@ any length. Exact offsets, commands and logs are in
 route toward a stronger rung 4 on this host; it does not alter the earlier
 marker-based rung-4 evidence.
 
+## Catalog-derived origin-name reachability (2026-11-25 03:34Z)
+
+`pgactive_parse_replident_name()` also has an internal caller: pinned
+`pgactive_catalogs.c:321` passes a name obtained from
+`replorigin_by_oid()` in `pgactive_fetch_sysid_via_node_id_ifexists()`.
+`realbuild/originpath/` tests the name-length preconditions on a loopback
+PostgreSQL 16.15 cluster with the full pinned 2.1.9 library loaded:
+
+- `pg_replication_origin_create()` accepted names of 66, 67, 99 and 275
+  bytes; the catalog stored all of them. A catalog-derived origin name can
+  therefore be long enough to overflow the parser's 64-byte `NameData`.
+  No wire trigger was exercised.
+- `pg_create_logical_replication_slot()` truncated a 96-byte requested
+  name to 63 bytes in `pg_replication_slots`, so the output-plugin slot-name
+  caller at `pgactive_output.c:382` cannot receive an overlong name through
+  this route on this build.
+- A plain `LOGIN` role can neither create replication origins nor call the
+  parser: both are owner-only (`proacl`) and non-`SECURITY DEFINER`. The
+  global-lock functions that reach the parser internally are also revoked
+  from PUBLIC in the pinned install script. No lower-privilege route was
+  demonstrated, consistent with the advisory's `PR:L` plus specific
+  privileges.
+- Driving the catalog-derived route through
+  `pgactive_get_global_locks_info()` was attempted and failed: a single-node
+  group stayed in state `b`, and lock acquisition reported "database ... is
+  not configured for pgactive or pgactive is still starting up". That route
+  is UNKNOWN, not demonstrated and not ruled out.
+
+Exact commands, rc values and preserved negatives are in
+`realbuild/originpath/FINDINGS.md` and `realbuild/originpath/evidence/`.
+
 ## Rung-4 feasibility and ceiling
 
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)

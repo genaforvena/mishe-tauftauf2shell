@@ -1,0 +1,7 @@
+            proname            |              proacl               | prosecdef 
+-------------------------------+-----------------------------------+-----------
+ pg_replication_origin_create  | {"\"mesh-home\"=X/\"mesh-home\""} | f
+ pgactive_parse_replident_name | {"\"mesh-home\"=X/\"mesh-home\""} | f
+ pgactive_parse_slot_name      | {"\"mesh-home\"=X/\"mesh-home\""} | f
+(3 rows)
+

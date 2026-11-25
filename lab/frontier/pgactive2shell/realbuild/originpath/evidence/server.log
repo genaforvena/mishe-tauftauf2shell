@@ -1,0 +1,61 @@
+2026-11-25 03:35:35.293 UTC [555964] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 03:35:35.293 UTC [555964] LOG:  listening on IPv4 address "127.0.0.1", port 58429
+2026-11-25 03:35:35.297 UTC [555964] LOG:  listening on Unix socket "/tmp/.s.PGSQL.58429"
+2026-11-25 03:35:35.308 UTC [555967] LOG:  database system was shut down at 2026-11-25 03:35:35 UTC
+2026-11-25 03:35:35.324 UTC [555964] LOG:  database system is ready to accept connections
+2026-11-25 03:35:35.409 UTC [555973] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 03:35:35.417 UTC [555973] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 03:35:35.428 UTC [555964] LOG:  background worker "pgactive supervisor" (PID 555973) exited with exit code 1
+2026-11-25 03:35:35.498 UTC [555964] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 03:35:35.499 UTC [555964] LOG:  parameter "pgactive.skip_ddl_replication" changed to "off"
+2026-11-25 03:35:36.440 UTC [556315] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 03:35:36.562 UTC [556327] LOG:  logical decoding found consistent point at 0/1A43FB0
+2026-11-25 03:35:36.562 UTC [556327] DETAIL:  There are no running transactions.
+2026-11-25 03:35:36.562 UTC [556327] STATEMENT:  SELECT pg_create_logical_replication_slot('pgactive_1_1_1_1_' || repeat('a', 80), 'pgactive');
+2026-11-25 03:35:36.609 UTC [556338] ERROR:  permission denied for function pg_replication_origin_create
+2026-11-25 03:35:36.609 UTC [556338] STATEMENT:  SET ROLE lowpriv; SELECT pg_replication_origin_create('lowpriv_origin');
+2026-11-25 03:35:36.616 UTC [556340] ERROR:  permission denied for function pgactive_parse_replident_name
+2026-11-25 03:35:36.616 UTC [556340] STATEMENT:  SET ROLE lowpriv; SELECT * FROM pgactive.pgactive_parse_replident_name('pgactive_123_1_2_3_'::text);
+2026-11-25 03:35:36.642 UTC [556344] LOG:  node identity of node being created is (7711947656172256568,0,5)
+2026-11-25 03:35:36.642 UTC [556344] CONTEXT:  PL/pgSQL function _pgactive_begin_join_private(text,text,text,text,boolean,boolean,boolean,boolean) line 40 at RAISE
+	SQL statement "SELECT pgactive._pgactive_begin_join_private(
+	        caller := '',
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        remote_dsn := join_using_dsn,
+	        bypass_collation_check := bypass_collation_check,
+	        bypass_node_identifier_creation := bypass_node_identifier_creation,
+	        bypass_user_tables_check := bypass_user_tables_check,
+	        data_only_node_init := data_only_node_init)"
+	PL/pgSQL function pgactive_join_group(text,text,text,integer,text[],boolean,boolean,boolean,boolean) line 71 at PERFORM
+	SQL statement "SELECT pgactive.pgactive_join_group(
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        join_using_dsn := null,
+	        apply_delay := apply_delay,
+	        replication_sets := replication_sets,
+	        bypass_user_tables_check := true)"
+	PL/pgSQL function pgactive_create_group(text,text,integer,text[]) line 84 at PERFORM
+2026-11-25 03:35:36.642 UTC [556344] STATEMENT:  SELECT pgactive.pgactive_create_group('node1', 'dbname=postgres host=/tmp port=58429', 1, ARRAY['default']);
+2026-11-25 03:35:36.685 UTC [556315] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 03:35:36.685 UTC [556315] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 03:35:36.688 UTC [556351] ERROR:  extension "pgactive" has no update path from version "2.1.9" to version "2.1.8"
+2026-11-25 03:35:36.690 UTC [555964] LOG:  background worker "pgactive per-db worker" (PID 556351) exited with exit code 1
+2026-11-25 03:35:41.699 UTC [557122] ERROR:  extension "pgactive" has no update path from version "2.1.9" to version "2.1.8"
+2026-11-25 03:35:41.701 UTC [556353] ERROR:  node node1 cannot reach ready state within 5 seconds, current state is b
+2026-11-25 03:35:41.701 UTC [556353] CONTEXT:  PL/pgSQL function pgactive.pgactive_wait_for_node_ready(integer,integer) line 81 at RAISE
+2026-11-25 03:35:41.701 UTC [556353] STATEMENT:  SELECT pgactive.pgactive_wait_for_node_ready(5);
+2026-11-25 03:35:41.702 UTC [555964] LOG:  background worker "pgactive per-db worker" (PID 557122) exited with exit code 1
+2026-11-25 03:35:41.710 UTC [557124] ERROR:  database with oid=5 is not configured for pgactive or pgactive is still starting up
+2026-11-25 03:35:41.710 UTC [557124] STATEMENT:  SELECT pg_replication_origin_session_setup('pgactive_123_1_2_3_' || repeat('a', 80)); SELECT pgactive.pgactive_acquire_global_lock('ddl_lock');
+2026-11-25 03:35:41.717 UTC [557126] ERROR:  database with oid=5 is not configured for pgactive or pgactive is still starting up
+2026-11-25 03:35:41.717 UTC [557126] STATEMENT:  SELECT * FROM pgactive.pgactive_get_global_locks_info();
+2026-11-25 03:35:41.718 UTC [555964] LOG:  received fast shutdown request
+2026-11-25 03:35:41.723 UTC [555964] LOG:  aborting any active transactions
+2026-11-25 03:35:41.723 UTC [556315] FATAL:  terminating background worker "pgactive supervisor" due to administrator command
+2026-11-25 03:35:41.725 UTC [555964] LOG:  background worker "logical replication launcher" (PID 555974) exited with exit code 1
+2026-11-25 03:35:41.732 UTC [555964] LOG:  background worker "pgactive supervisor" (PID 556315) exited with exit code 1
+2026-11-25 03:35:41.732 UTC [555965] LOG:  shutting down
+2026-11-25 03:35:41.733 UTC [555965] LOG:  checkpoint starting: shutdown immediate
+2026-11-25 03:35:41.815 UTC [555965] LOG:  checkpoint complete: wrote 1161 buffers (7.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.032 s, sync=0.020 s, total=0.083 s; sync files=426, longest=0.004 s, average=0.001 s; distance=5467 kB, estimate=5467 kB; lsn=0/1A46500, redo lsn=0/1A46500
+2026-11-25 03:35:41.826 UTC [555964] LOG:  database system is shut down

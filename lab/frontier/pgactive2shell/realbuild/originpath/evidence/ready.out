@@ -1,0 +1,3 @@
+NOTICE:  checking status of pgactive.pgactive_create_group
+ERROR:  node node1 cannot reach ready state within 5 seconds, current state is b
+CONTEXT:  PL/pgSQL function pgactive.pgactive_wait_for_node_ready(integer,integer) line 81 at RAISE

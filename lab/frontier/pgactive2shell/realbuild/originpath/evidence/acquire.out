@@ -1,0 +1,6 @@
+ pg_replication_origin_session_setup 
+-------------------------------------
+ 
+(1 row)
+
+ERROR:  database with oid=5 is not configured for pgactive or pgactive is still starting up
