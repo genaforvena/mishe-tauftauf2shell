@@ -161,7 +161,7 @@ This is a build-dependent negative, not a grade change.
   not corruption, chosen-byte control or r5. It narrows the earlier
   "stock-glibc outcome UNKNOWN" only for this pinned source rebuilt with
   this host's GCC at `-O2`; an actual distribution `hping3` package build
-  and other fortify settings remain UNKNOWN.
+  remains UNKNOWN. Other fortify settings were surveyed in W11 below.
   A clean-archive replay from commit `90d635d6` (`git archive` plus the
   gitignored `provision/` tree, `wire/replay-o2.sh`) gave
   `STAGE OK baseline 4` / `attack 3` / `fixed 4`,
@@ -198,6 +198,47 @@ gcc build of W2/W6 and not a distribution package. No full IP, pointer,
 command or r5. Full 4-byte address control was deliberately not attempted:
 an `x.x.x.x` probe would leave loopback. Witness verdict UNKNOWN.
 
+## Layout/fortify survey and clang -O2 extension (W11, 2026-11-25 11:48Z, author-side)
+
+Six more rebuilds of the pinned source (each `display_ipopt.c` rechecked at
+`e8ef2dd6…dcbb5e7b`) were surveyed with `nm -n -S` and `objdump`: gcc at
+`-O1`, `-Os`, and `-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0`, clang at
+`-O1`, `-Os`, and `-O2`. In every layout the 251-byte span starting at
+`old_rr` holds only `old_rr` (40 bytes), `old_rrlen`, `hp_rand.i`/`j`,
+`rc4_seedflag` and part of `rc4_sbox`: gcc places `old_rrlen@+0x28`,
+`j@+0x40`, `i@+0x44`, `seedflag@+0x48`, `sbox@+0x60` (155 of its 256 bytes
+reachable); clang places `old_rrlen@-0x10`, `i@+0x30`, `j@+0x34`,
+`seedflag@+0x38`, `sbox@+0x40` (187 bytes reachable). No pointer, GOT entry
+or control-flow object lies in any span, across all nine surveyed builds
+(W2/W8/W9 plus W11). This is a static layout result, not an execution claim.
+
+The consumer also narrows W8's "other fortify settings UNKNOWN": host GCC 13
+fortifies this copy at `-O1`, `-Os` and `-O2` (`mov $0x28,%ecx` then
+`__memcpy_chk@plt` in `display_ipopt`), while GCC `-O2` with fortify disabled
+inlines `rep movsq` into `old_rr` and clang at `-O1`/`-Os`/`-O2` calls plain
+`memcpy`. An actual distribution `hping3` package build stays UNKNOWN.
+
+Live loopback extension of W9: the same `wire/inject_rr_ij.py` /
+`wire/check_ij.py` pair against a clang **-O2** build from the pinned source
+gave attack **7 PASS / 0 FAIL** (GDB `i=0x20`, `j=0x80` at the filled state;
+16/16 post-attack probe low bytes `0x00`; counterfactual `0x17`), baseline
+**4 PASS / 0 FAIL** (no filled state), and a locally patched clang -O2 build
+(source sha256 `70f0112d…b471cb7aaa7f0ba846c7`) **4 PASS / 0 FAIL**; rc 0.
+GDB only read state and no probe left `127.0.0.x` on `lo`. The first attempt
+failed before launching hping because `rng-ij-proof.sh` prefixes `BIN` with
+`$PWD`, so an absolute `/tmp` path was not found; rerunning from a gitignored
+in-tree copy succeeded.
+
+Clean-archive replay from commit `46bce010` (`git archive` of
+`lab/frontier/hping3shell`, gitignored `provision/` copied in,
+`HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src sh
+lab/frontier/hping3shell/wire/replay-ij-o2.sh`): `STAGE baseline` 4 checks
+PASS, `STAGE attack` 7 PASS, `STAGE fixed` 4 PASS,
+`REPLAY_IJ_O2_OK: 15 checks`, rc 0. Two earlier clean-replay failures are
+preserved: a wrong `fix.patch` relative path and a lost `cd` line in the new
+driver, both fixed before this replay. Still no full IP, pointer, command or
+r5; witness verdict UNKNOWN.
+
 ## Current grade (2026-11-25 00:49Z)
 
 Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is
@@ -212,14 +253,16 @@ dominates subsequent probe destinations (15/16 to 17/17 across measured
 runs), with no debugger steering.
 A valid RR reply and the locally patched build stay clean. Only the low byte
 of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. The
-`-O2` rebuild on this host detects the copy in `__memcpy_chk` and aborts
-before any write (W8). The clang `-O0` rebuild (W9) additionally reaches
-`hp_rand.i`/`hp_rand.j`, giving 16/16 deterministic chosen-byte control in
-that build; it is author-side and still only the low byte. An actual
+`-O2` rebuild on this host aborts in `__memcpy_chk` before any write (W8);
+W11 found the same fortified consumer at GCC `-O1`/`-Os` and plain `memcpy`
+at clang `-O1`/`-Os`/`-O2`. The clang `-O0` rebuild (W9) and clang `-O2`
+(W11) additionally reach `hp_rand.i`/`hp_rand.j`, giving 16/16 deterministic
+chosen-byte control in those builds; author-side and still only the low
+byte. No surveyed build puts a pointer in the 251-byte span. An actual
 distribution build and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
 pinned-function stage W207 ESTABLISHED; W6 W212 ESTABLISHED, both with no
-grade change. The two wire stages (#3942), W5 (#3958) and W9 remain
-author-side with verdicts UNKNOWN.
+grade change. The two wire stages (#3942), W5 (#3958), W9 and W11's clang
+extension remain author-side with verdicts UNKNOWN.
 
 
 ## Witness verdict (W207, #3822)
@@ -412,6 +455,24 @@ tracked fix patch itself. Two preserved runner failures were fixed before
 this clean replay: a `nm` column mismatch (`$3` type vs `$4` name) and a
 GDB command list that cannot put two commands on one line; plus a checker
 regex that missed GDB's `<hp_rand.i>` symbol annotation. No new grade.
+
+W11's clang -O2 receipt (commit `46bce010`, author-side):
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell &&
+rm -rf /tmp/w11-o2 && mkdir -p /tmp/w11-o2 &&
+git archive 46bce010 lab/frontier/hping3shell | tar x -C /tmp/w11-o2 &&
+cp -a lab/frontier/hping3shell/provision /tmp/w11-o2/lab/frontier/hping3shell/ &&
+cd /tmp/w11-o2 &&
+HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
+  sh lab/frontier/hping3shell/wire/replay-ij-o2.sh
+```
+
+Observed: `STAGE baseline` 4 PASS, `STAGE attack` 7 PASS, `STAGE fixed` 4
+PASS, `REPLAY_IJ_O2_OK: 15 checks`, rc 0. The driver builds both clang -O2
+trees from the gitignored pinned source and applies the tracked fix patch
+itself. Two preserved clean-replay failures: a wrong `fix.patch` relative
+path and a lost `cd` line, both fixed before this replay. No new grade.
 
 After the owed verdicts the only depth lane is a measured
 attacker-controlled execution path; nothing observed supports r5.
