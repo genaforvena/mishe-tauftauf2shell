@@ -1,0 +1,17 @@
+CASE=staged curl_rc=0 nrf_alive=YES nrf_rc=1
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 10:11:19.687[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:19.687[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:19.687[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:19.687[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:19.687[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|==267820==ERROR: LeakSanitizer: detected memory leaks|
+CASE=safe curl_rc=0 nrf_alive=YES nrf_rc=1
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 10:11:20.378[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|==267967==ERROR: LeakSanitizer: detected memory leaks|
+CASE=abc curl_rc=0 nrf_alive=YES nrf_rc=1
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 10:11:21.022[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:21.023[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 10:11:21.023[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|==268222==ERROR: LeakSanitizer: detected memory leaks|
+CASE=attack curl_rc=56 nrf_alive=NO nrf_rc=1
+  CURL: curl: (56) Recv failure: Connection reset by peer
+code=000 proto=0 size=0
+  RESP: 
+  LOG: ==268598==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x507000003a91 at pc 0x7df84953eb78 bp 0x7df84100eef0 sp 0x7df84100eee0|    #0 0x7df84953eb77 in multipart_parser_execute ../open5gs-2.8.0/lib/sbi/contrib/multipart_parser.c:260|    #1 0x7df849574a0c in parse_multipart ../open5gs-2.8.0/lib/sbi/message.c:3380|    #1 0x7df84953d7f4 in multipart_parser_init ../open5gs-2.8.0/lib/sbi/contrib/multipart_parser.c:82|    #2 0x7df849574896 in parse_multipart ../open5gs-2.8.0/lib/sbi/message.c:3375|SUMMARY: AddressSanitizer: heap-buffer-overflow ../open5gs-2.8.0/lib/sbi/contrib/multipart_parser.c:260 in multipart_parser_execute|

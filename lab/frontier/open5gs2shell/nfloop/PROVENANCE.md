@@ -49,3 +49,24 @@ vulnerable crash. Summary traces: `evidence/vuln-run.out`,
 Expected: vulnerable attack -> curl rc 56, NRF rc 134 (SIGABRT in talloc
 free during `parse_multipart` cleanup); staged/safe/abc -> HTTP 400, NRF
 alive; fixed attack -> HTTP 400 with `Empty multipart boundary`, NRF alive.
+
+## AddressSanitizer variant (2026-11-25 10:1xZ)
+
+With the same environment as step 4, build each source copy again with
+`meson setup build/bld-asan build/open5gs-2.8.0 --prefix=<lab>/local-install
+--buildtype=debug -Db_sanitize=address` (and `bld-fixed-asan` with the fixed
+source), then `ninja -j4 -C <bld> src/nrf/open5gs-nrfd`. Both targets build
+1886/1886 RC 0; logs are `build/nrfd-asan-build.log` and
+`build/nrfd-fixed-asan-build.log`.
+
+Replay with
+`TAG=asan ASAN_OPTIONS=detect_leaks=0 NRF_BIN=../build/bld-asan/src/nrf/open5gs-nrfd sh run.sh`
+and the matching `asanfixed` / `bld-fixed-asan` pair. Traces:
+`evidence/asan-noleak-run.out` and `evidence/asanfixed-noleak-run.out`.
+Without `detect_leaks=0`, LeakSanitizer reports unrelated leaks when the
+controls are terminated and makes their wait rc 1 even though the HTTP
+responses are correct (`evidence/asan-run.out`). The vulnerable attack
+produces a real `heap-buffer-overflow WRITE of size 1` at
+`multipart_parser.c:260`, 0 bytes past the 65-byte region from
+`multipart_parser_init:82`, on the live NRF call stack; the patched build
+rejects it with `Empty multipart boundary` and no ASan report.

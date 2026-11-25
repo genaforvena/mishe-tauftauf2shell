@@ -1,10 +1,12 @@
 # Frontier brief — open5gs2shell (CVE-2026-116543)
 
-Current status (2026-11-25 08:4xZ): rung 4 DEMONSTRATED on a real Open5GS
-v2.8.0 NRF (pre-auth loopback h2c request kills the NF process; vulnerable
-and fixed controls in the section below). NO r5: no chosen pointer,
-instruction pointer or command. Witness replay of the new real-NF evidence
-is requested but not yet returned; this remains an author report.
+Current status (2026-11-25 10:1xZ): rung 3 ASan-confirmed inside the live
+Open5GS v2.8.0 NRF (WRITE of size 1 at `multipart_parser.c:260`, 0 bytes
+past the 65-byte region) and rung 4 DEMONSTRATED on that NF (pre-auth
+loopback h2c request kills the process; vulnerable, fixed, safe and ABC
+controls). NO r5: no chosen pointer, instruction pointer or command.
+Witness replay of the new real-NF evidence is still pending; this remains
+an author report.
 
 Status 2026-11-24 23:0xZ: STAGED at rung 3 (ASan-confirmed corruption) plus
 rung 4 PARTIAL (periodic attacker-chosen bytes in an adjacent heap object),
@@ -373,3 +375,49 @@ vulnerable attack `curl_rc=56 nrf_alive=NO nrf_rc=134`, fixed attack
 (fixed), identical to the committed `nfloop/evidence/{vuln-run,fixed-run}.out`
 traces. This is a clean-source replay with freshly provisioned local build
 artifacts; witness replay is still pending.
+
+## AddressSanitizer replay on the live NRF (2026-11-25 10:1xZ)
+
+The W5 live crash had a gdb SIGABRT in talloc free but no ASan report from
+the real NF process. Both pinned source copies were rebuilt with Meson
+`-Db_sanitize=address` in `build/bld-asan` and `build/bld-fixed-asan`
+(1886/1886 targets, RC 0; logs `build/nrfd-asan-build.log` and
+`build/nrfd-fixed-asan-build.log`), then the same four `nfloop` fixtures were
+sent to 127.0.0.1:18777 over h2c with the loopback-only config. With default
+ASan options all controls answered HTTP 400 but exited rc 1 because
+LeakSanitizer reported unrelated leaks on SIGTERM
+(`nfloop/evidence/asan-run.out`); re-running with
+`ASAN_OPTIONS=detect_leaks=0` gives clean control exits without hiding any
+heap error from the attack.
+
+Vulnerable run (`nfloop/evidence/asan-noleak-run.out`; detailed report in
+`nfloop/evidence/asan-attack.stdout`):
+
+- Attack-396: curl rc 56, connection reset, NRF dead, wait rc 1.
+  `AddressSanitizer: heap-buffer-overflow`, `WRITE of size 1`,
+  `0x507000003a91 is located 0 bytes after 65-byte region
+  [0x507000003a50,0x507000003a91)`. Frames:
+  `#0 multipart_parser_execute lib/sbi/contrib/multipart_parser.c:260`,
+  `#1 parse_multipart lib/sbi/message.c:3380`,
+  `#2 parse_content :3120`, `#3 ogs_sbi_parse_request :1311`,
+  `#4 nrf_state_operational src/nrf/nrf-sm.c:78`. Allocation:
+  `malloc` in `#1 multipart_parser_init multipart_parser.c:82`, called from
+  `parse_multipart message.c:3375` on the same live call stack.
+- Staged-394, safe-10 and ABC-396 controls: HTTP 400 `No NFInstanceId`,
+  NRF alive, rc 0, no ASan report. Fixture hashes are unchanged from the W5
+  table.
+
+Patched run (`nfloop/evidence/asanfixed-noleak-run.out`): all four cases
+alive rc 0 with no ASan report; staged/safe give HTTP 400
+`No NFInstanceId`, while ABC and attack give HTTP 400
+`cannot parse HTTP message` with
+`ERROR: Empty multipart boundary (message.c:3376)`.
+
+This upgrades rung 3 from the pinned shim to **ASan-confirmed memory
+corruption in the live unmodified NRF**, at the advisory sink and allocation
+site. Rung 4 remains DEMONSTRATED at process-kill level (non-ASan build,
+W5). NO r5: the ASan build swaps in the ASan allocator, the plain build's
+talloc-free SIGABRT is a separate stock-allocator observation, and neither
+provides a chosen pointer, instruction pointer or command. Witness replay
+of the real-NF claim (#4225) is still pending, so the new ASan evidence is
+author-reported, not independent acceptance.
