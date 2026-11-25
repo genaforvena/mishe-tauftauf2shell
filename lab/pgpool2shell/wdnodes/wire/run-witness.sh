@@ -52,7 +52,7 @@ echo "=== W10: three loopback wire cases (~67 s) ==="
 bash run.sh || exit 1
 echo "=== W10: live-gdb readbacks (~30 s each) ==="
 bash gdb-run.sh 0x42424242 wxyzUUUUUUUU gdb-w9-post.out gdb-w9-post.peer gdb-w9-post.cmd || exit 1
-bash gdb-run.sh 0x11111111 wxyzAAAAAAAA gdb-w9-post-alt.out gdb-w9-post-alt.peer gdb-w9-post-alt.cmd || exit 1
+bash gdb-run.sh 0x11111111 wxyzAAAAAAAA gdb-w9-post-alt.out gdb-w9-post-alt.peer gdb-w9-post.cmd || exit 1
 echo "=== W11: wd_authkey-set probe (~23 s) ==="
 bash auth-probe.sh || exit 1
 bash hash-evidence.sh || exit 1
