@@ -1,0 +1,28 @@
+Author smoke of `sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay.sh`,
+2026-11-25 21:14Z-21:18Z, from clean `git archive HEAD` at
+/tmp/pgactive-two-witness.JiSYSx. This is an author receipt, NOT an
+independent witness verdict; the rung ceiling is unchanged.
+
+Final run, four arms in one command:
+
+  v219-insert RC=0 LIB_OK=1 TERM1=1 TERM2=1 expect TERM>=1, signal 11
+  v2210-insert RC=0 LIB_OK=1 TERM1=0 TERM2=0 expect TERM=0
+  v219-delete RC=0 LIB_OK=1 TERM1=1 TERM2=1 expect TERM>=1, signal 6
+  v2210-delete RC=0 LIB_OK=1 TERM1=0 TERM2=0 expect TERM=0
+  VERDICT=PASS FAILURES=0
+
+LIB_OK compares the used library hash captured by run-two.sh:
+2.1.9 = 3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998
+2.1.10 = 986917a8656c4d099659a148cb077570e233b8d358273354f06b06f57ab2885a
+After the run the installed library is back on 2.1.9, ports 58431/58432 are
+free and no lab postmaster is left. Signal assertions read the saved server
+logs after each arm, because the apply worker crashes after run-two.sh's
+mid-run log excerpt.
+
+First smoke attempt (21:14Z) FAILED: 8 assertions. Causes were in the new
+wrapper, not the lane: it omitted VERSION so all arms installed 2.1.9, it
+asserted signal text before the crash was logged, and an aborted run left a
+postmaster on port 58432 so the following PGSTART2=1. Fixed by passing
+VERSION per arm, asserting on post-run server logs, killing lane-owned
+leftovers on the two ports at entry, and restoring the library on EXIT.
+Preserved here: a later PASS does not erase the earlier failure.

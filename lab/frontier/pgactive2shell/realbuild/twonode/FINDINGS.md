@@ -179,3 +179,15 @@ causal reading. It does not add attacker byte control: the stored value is
 the fixed boolean `true`. The vulnerable library is restored after both
 runs (verified `3177a37c...162998`), both clusters are stopped by the
 script and no process remains on ports 58431/58432. Rung ceiling unchanged.
+
+## One-command replay (2026-11-25 21:18Z)
+
+`sh witness-replay.sh` extracts a clean `git archive HEAD` of this lane and
+runs all four arms above in one command, checking each arm's used-library
+hash, termination counts and post-run server-log signal text. Author smoke
+at 21:14Z-21:18Z printed `VERDICT=PASS FAILURES=0`: 2.1.9 insert signal 11
+with 1 termination per node, 2.1.10 insert 0/0, 2.1.9 delete signal 6 with
+1/1, 2.1.10 delete 0/0. `witness-replay-smoke.txt` keeps that receipt and
+the earlier wrapper-only FAIL; neither is an independent witness verdict.
+Run it in a fresh context for an actual replay. The script clears these
+lane-owned ports at entry and restores the 2.1.9 library on EXIT.
