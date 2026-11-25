@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -21,7 +21,8 @@ loop, still source-bound; W21 builds the **shipped 3.20b release**, sends the
 64-byte TERM over loopback SSH, observes the chosen bytes in
 `savedlines.first/.last` and a gdb-confirmed SIGSEGV at `listFreeNodes`;
 W22 replays the same release and wire TERM with the pinned `cb6d77dbca`
-hunk applied and observes clean fields and completed teardown.
+hunk applied and observes clean fields and completed teardown; W24 shows the
+W21 faulting load reads `0x20(%rax)` with `rax` equal to the wire-chosen pointer.
 None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
@@ -829,3 +830,19 @@ the sweep. Receipt: `release-label/term320b/real320b/evidence/determinism/
 REPLAY-DETERMINISM.md` with all six server transcripts. No rung change and
 no new claim: this is author evidence of stability, not a witness verdict,
 and it says nothing about pointer/IP control, command execution or r5.
+
+## W24 — W21 fault instruction uses the wire-chosen pointer (2026-11-25, author)
+
+A witness can ask whether W21's `listFreeNodes` SIGSEGV comes from the chosen
+`savedlines.first` or from unrelated list state. `release-label/term320b/
+real320b/run-faultaddr320b.sh` replays the same 64-byte chosen TERM over a
+real 3.20b `answer()` under gdb: **7 PASS / 0 FAIL**, rc 0. At the fault the
+log shows `mov 0x20(%rax),%rax` at `listFreeNodes+67` (`link_list.c:78`),
+`rax = 0x465541544f4f2d45`, `list->first = 0x465541544f4f2d45`, `node =
+0x465541544f4f2d45`, and `offsetof(list_node_t, flags) = 0x20`; the implied
+dereference address is `0x465541544f4f2d65`, unmapped. The direct `si_addr`
+cross-check is a preserved negative: gdb reports `(nil)` for `$_siginfo` at
+this threaded stop, so the instruction and register are the evidence
+(`real320b/evidence/REPLAY-FAULTADDR.md`). No rung change: pointer/IP control
+of a useful target, command execution and r5 remain absent; author replay,
+witness verdict still owed.
