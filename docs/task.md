@@ -11469,7 +11469,9 @@ file, the command is benign, and the process faults afterwards; the earlier
 "no command" sentence in the row is limited to the W188 steering limb.
 Stbvorbis W207 shows 30 chosen words clobbering a free chunk's size in a real
 SDL_mixer consumer, with padding grooming negative and still no chosen word
-in a live consumer-owned field. Hping3 W13 gets conditional sbox byte control
+in a live consumer-owned field; a `624df6c1` clean-archive receipt ran all
+seven committed Stbvorbis scripts rc 0 after the earlier archive's missing
+safe input was fixed in-script. Hping3 W13 gets conditional sbox byte control
 from the hidden RC4 `j`, no full IP. Open5GS W8 proves its OOB bytes are
 forced `00 0d 0a`; Cjose W219 sweeps `enc`-selected CEK sizes without a
 dereference; Awslc W223 synthesizes W213–W216's real-caller ceiling; N2n W16

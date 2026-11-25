@@ -10358,6 +10358,11 @@ script. Nothing in this section is a full-build replay unless stated.
   clobber (grooming negative). Requires the gitignored SDL/SDL_mixer trees in
   `../sdlmixer2shell/deps`; raw `.out` files are gitignored. No pointer in a
   live consumer-owned field, no wire, no command and no verdict.
+  A clean `git archive 624df6c1` with SDL dependencies symlinked read-only
+  replayed all seven scripts rc 0: heap 11/0 + 14/0, `run-consumer.sh` 12/0,
+  `run-all.sh` 9/0, `run-seq.sh` 4/0, `run-guard.sh` 12/0, `run-object.sh` 9/0,
+  `run-neighbor.sh` 9/0. The earlier `0c8b7c75` archive had one FAIL from the
+  missing gitignored safe input, fixed by generating it in the script.
 - **Hping3 W13 — conditional permutation byte control** — pinned
   `display_ipopt.c` sha256
   `e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b`,

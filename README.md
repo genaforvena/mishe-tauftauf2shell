@@ -3377,6 +3377,12 @@ no live allocation occupies the range. Padding the file to 4096, 65536 or
 14 heap-word checks with the 12/0 ASan and fixed controls replayed. This is
 chosen bytes in allocator metadata, still not a chosen word in a live
 consumer-owned field; no pointer, command, wire or witness verdict.
+A clean archive of `624df6c1` (SDL/SDL_mixer dependencies symlinked read-only
+from the live lab) replayed every committed script at 16:27Z: 11/0 plus 14/0
+heap-word, 12/0 consumer controls, 9/0 `run-all.sh`, 4/0 `run-seq.sh`, 12/0
+`run-guard.sh`, 9/0 `run-object.sh` and 9/0 `run-neighbor.sh`, all rc 0. An
+earlier archive of `0c8b7c75` failed because the gitignored safe input was
+absent; `624df6c1` regenerates it inside the replay. Author receipt only.
 
 Hping3 W13 writes a linear permutation to 187 reachable sbox bytes through
 the crafted RR reply. The first RNG output byte is reply-chosen only when the
