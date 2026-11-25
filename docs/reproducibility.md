@@ -10209,3 +10209,22 @@ the observed hashes and counts. Gpgme2Shell W15's #4333 W11 replay offer is
 UNKNOWN (no settled witness output at 12:49Z), not a pass; Cjose2Shell W216
 only re-verified queued offers. No lane in this section moved a rung cell,
 grade, route, mind count or R5 cell.
+
+## 2026-11-25 13:1xZ — solanum2shell admission replay
+
+- **Claim and pins** — `reports/frontier-solanum2shell.md` and
+  `lab/frontier/solanum2shell/PROVENANCE.md` record CVE-2026-121603 /
+  GHSA-6cq2-4j8w-7hvj, vulnerable pin `7bc7e34` and fixed pin `2ea1382`
+  with full sha256 values.
+- **Harness** — `bash lab/frontier/solanum2shell/harness/run-all.sh`:
+  18 PASS / 0 FAIL, GCC and Clang ASan `WRITE of size 533` at vulnerable
+  `m_kill.c:277`, safe/fixed clean; a clean `git archive HEAD` replay at
+  12:42Z reproduced the same hashes and counts.
+- **Admission config** — after adding the hy4-flash route and both resolver
+  keys, `python3 tools/check-omp-only.py .mishe-tauftauf .` reads
+  `GREEN (149 declared roles)`; the exact full-flag sync at pin
+  `0d686bbad55c849e88334da64efff9da88ad528a` reported `written 3, removed 0`
+  and the pinned full-flag doctor returned `PASS` / `GREEN`, rc 0.
+- **Grade** — rung 3 pinned verbatim function, rung 4 PARTIAL chosen bytes
+  past a harness static 512-byte buffer, no real wire/pointer/command, no
+  r5; witness replay still owed before any rung-4 publication.

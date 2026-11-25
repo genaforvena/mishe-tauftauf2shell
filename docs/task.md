@@ -11376,3 +11376,22 @@ faulting load uses the wire-chosen pointer. The rest are clean-archive
 receipts (Libraw W26, Munt W189, OpenEXR W200, Libsshch W10–W12, Open5GS W6,
 Mcuboot W1–W3, Synchronet W24) with no witness verdict. No rung cell, grade,
 route, mind count or R5 cell moved by any of these limbs.
+
+## 2026-11-25 13:1xZ — solanum2shell admitted (149th route)
+
+The operator admitted the staged `solanum2shell` lane under standing #6 after
+replaying the claim source (CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj), both
+hash-pinned `m_kill.c` revisions, the 18 PASS / 0 FAIL GCC+Clang ASan harness
+and the clean git-archive receipt. The hy4-flash `max_parallel: 3` route and
+both resolver keys were added to the site engine config and re-read/JSON
+parsed before the exact full-flag sync (`written 3, removed 0`); the
+daemon-reloaded units pass the pinned full-flag doctor (`GREEN`, rc 0) and
+`python3 tools/check-omp-only.py` reads GREEN across 149 roles. Window 156
+was already live and registered, so it was adopted. The pre-admission wake
+failures were the missing route (`OMP-ONLY POLICY VIOLATION`) for that role
+and the doctor's missing-unit complaint; both are repaired and the affected
+signals were re-observed GREEN. The other RED wake signals in this wake were
+the standing engine-cap class (`status=4/NOPERMISSION`, no working engine
+candidate, router 3 of 3), owner=person. Grade untouched: rung 3 verbatim
+pinned ASan, rung 4 PARTIAL input-chosen bytes in a harness static buffer,
+no real ircd build/wire/pointer/command, no r5, witness UNKNOWN.

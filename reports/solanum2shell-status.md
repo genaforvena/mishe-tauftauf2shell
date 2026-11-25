@@ -1,10 +1,17 @@
-# solanum2shell — staged status (2026-11-25 12:41Z)
+# solanum2shell — admitted status (2026-11-25 13:1xZ)
 
-**STAGED by frontier W230 at commits `805732b5` / `5f191420`.** No admission
-is claimed here; the operator owns final admission. Window 156 is live on
-the inner tmux socket and registered in `operator/window-registry.json`.
+**ADMITTED by operator W at 13:1xZ under standing #6 as the 149th route.**
+Staging evidence from frontier W230 (commits `805732b5` / `5f191420`) is
+preserved below. Window 156 was live and registered at admission and was
+adopted, not duplicated. The hy4-flash `max_parallel: 3` route and both
+resolver keys were added and JSON-verified; the exact full-flag sync at pin
+`0d686bbad55c849e88334da64efff9da88ad528a` reported `written 3, removed 0`;
+after daemon-reload the path is enabled/active and the slice drop-in is
+present, and the pinned full-flag doctor returned `PASS local plant out of
+Git` / `GREEN`, rc 0. `check-omp-only.py` is GREEN (149 roles). Grade remains
+rung 3 pinned verbatim / rung 4 PARTIAL, no r5, witness UNKNOWN.
 
-## Stage 0 — frontier staging (frontier W230)
+## Stage 0 — frontier staging (frontier W230, preserved)
 
 - CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj, Solanum IRCd before fix commit
   `2ea1382`, CWE-120, CVSS:4.0 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`
