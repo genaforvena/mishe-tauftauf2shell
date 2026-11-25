@@ -10669,3 +10669,56 @@ no rung cell, grade, route, mind count or R5 cell moved.
   OOM only on truncate-first writes, page-quantized partials, io.max/PHP
   fatals ineffective). Rung 5 stays UNCLAIMED; the gap is now measured and
   structural, not merely unattempted.
+
+### 2026-11-25 01:2x–01:4xZ — docs fold of post-`5a197a81` author edges
+
+Signal detail `b6e68db8`, baseline HEAD `f369f7b3`, final HEAD `e9351342`
+(two n2n W4 replay commits landed mid-wake). Baseline checkers: readme-lint
+GREEN 133 rows, reproducibility GREEN 29 files; `check-omp-only.py` RED with
+139 declared roles, `open5gs2shell: no route` and `yojimbo2shell: no route`.
+The two no-route charters are newer than `routes.json`; dispatch config stays
+with the person's full-flag sync (never a bare `mishe sync`). All limbs below
+are author-side and unwitnessed; no rung cell, grade, route, mind count or R5
+cell moved. `readme-lint` RED is the frozen six-column checker in
+`docs/runtime-pin.md`; live GREEN is authoritative.
+
+- OpenEXR W194 (`dff3426d`, clean receipt `1d68f9d8`, ASLR control
+  `b6e68db8`) attributes the plain SIGSEGV to the stale dump pointer
+  `E[0]=0x555555828210`, not the three file-chosen `E[2]` words; with `setarch
+  -R` all three PoCs exit rc 1 `bad` without a fault. W193's "ASLR left
+  enabled" wording is corrected (gdb disables randomization by default).
+  Evidence hashes recomputed locally; author-only, r5 UNKNOWN.
+- FontForge W11 (`f3b9dd98`) corrects W10's `char*` label to `BDFChar.bitmap`
+  and adds a real `Save()`-time dereference at `sfd.c:1671` of a file-chosen
+  pointer (rc 139 at `0x0000555500414243`, ceiling input at
+  `0x000055550100FEFF`). The reachable window is below the lowest PIE mapping;
+  no chosen mapped target, marker, command or r5; witness #3309 still covers
+  direct-call rungs 1-4 only.
+- CodebaseMemory W14 (`8e973719`) bounds far strides with the live `[stack]`
+  mapping: saved RIP near item 70 lies above the mapping end in 16 ASLR
+  placements, twelve 71-item attempts exit 139 in `memcpy`, and W12's absolute
+  C-string-zero claim is retracted. Chosen bytes reach caller-frame storage
+  only; no live pointer, command or r5.
+- Synchronet W16 (`be7d19a2`, clean replay `f369f7b3`) measures default-config
+  valid-password node exhaustion: four chosen 64-byte TERMs park four real
+  `sbbs3` termNode threads and refuse the fifth login, with the upstream fixed
+  form serving five sessions (10 PASS / 0 FAIL, zero `SSH_ANYAUTH`). Author
+  replay only; witness wake 189's verdict stays at the synthetic-struct scope;
+  no pointer/IP, command, grade change or r5.
+- N2n W3 (`7e939185`, `d8bec71b`) shows the live forwarding encoder consuming
+  the OOB token bytes as DATA and re-emitting a 134-byte NAK (86-byte safe
+  control), a fixed-build ASan READ-96 on the peer path, and a 2048-byte
+  receive cap leaving canary/RIP 1,488/1,552 bytes out of wire reach. W4
+  (`f18dd8bf`, `e9351342`) adds a one-command clean-room replay observed at
+  19 PASS / 0 FAIL locally with four live gdb chosen-word checks. No consumed
+  pointer, control-flow takeover, command or r5; live-limb replay #3909 owed.
+- Yojimbo2shell (`aaa7dc7a`) is FRONTIER-STAGED on a CVE/GHSA-UNKNOWN remote
+  fragment heap overflow upstream-fixed by `d3d4f339…` (parent `3c6b5e85…`):
+  verbatim pinned `ProcessPacketFragment` gives ASan `WRITE of size 500` 0
+  bytes past a 1100-byte region and chosen `MISHE-OO` at plain canary offset
+  300, 20 PASS / 0 FAIL with 7/7 pins (also observed locally) and clean
+  fixed/safe controls. No real build, wire, pointer, command, r5 or witness
+  verdict; the upstream packet path is post-authentication. A gitignored site
+  charter and window 147 exist but admission is pending, so no route, wake
+  unit, row or mind-count change; the checker's no-route line is dispositioned
+  above.

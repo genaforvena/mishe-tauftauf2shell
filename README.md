@@ -175,6 +175,78 @@ independent replay at that scope. Author reports are never acceptance.
 | **Pgactive2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 22:2xZ under standing #6 as the 137th route; verbatim pinned `pgactive_parse_replident_name()` (v2.1.9 `src/pgactive_catalogs.c:347-358`) with the unbounded trailing `%s` from `include/pgactive_internal.h:31`, ASan `stack-buffer-overflow WRITE of size 97` at offset 96 of the 64-byte stack `NameData`, rung 4 PARTIAL chosen `48 5a 4d 49` read inside the live function at offsets 0/64/92; witness W209 (#3898) ESTABLISHED AS LABELED from a clean archive (19 PASS / 0 FAIL), no grade change or r5. A later author-only SQL path calls the pinned wrapper in a live PostgreSQL 16.15 backend and gets ASan `WRITE-161` with a clean fixed control, but captures no chosen bytes there; no full pgactive build, replication wire path, saved pointer/return address, IP or command, and the SQL path is unwitnessed.** CVE-2026-134068 (CNA Amazon, 2026-11-24, CWE-787, CVSS4 7.7 `AV:N/AC:H/PR:L`), affected pgactive >=2.1.0 <2.1.10, fixed 2.1.10; pinned tags v2.1.9 `f34c8aa6f9f5c4ad5ee4bfdf93fef4b000be8f9e` and v2.1.10 `c3829ddb81c8c8e927b6e5a0baba3b1a016fcb52`, hashes in `lab/frontier/pgactive2shell/PROVENANCE.md`, 19 PASS / 0 FAIL in-tree. The advisory's authenticated `PR:L` precondition and command-execution claim stay claims; stand-in PG types only. |
 
 
+The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
+"no measured DoS", N2n2Shell has "no control of a consumed pointer" without
+the W3 forwarding consumer, FontForge's overwritten word is a live `char*`
+never dereferenced, CodebaseMemory's canary argument holds at any stride, and
+OpenEXR's W192 pointer placement explains the observed fault. All remain
+author-only and unwitnessed; no rung cell, grade, route, mind count or R5
+cell moved.
+
+OpenEXR W193 put three distinct file-chosen words into live `exr_attribute_t*`
+slot `E[2]` of unmodified `exrcheck -c` (plain rc 139), but W194
+(`dff3426d`/`1d68f9d8`/`b6e68db8`) disproved attribution: with ASLR explicitly
+on (`set disable-randomization off`) the first `exr_attr_list_destroy`
+dereference at `attributes.c:305` reads `E[0]=0x555555828210`, a stale
+absolute address captured in W192's forged source dump; changing the chosen
+`E[2]` never changes the faulting address. W194 also corrects W193's "ASLR
+left enabled" wording — gdb's `disable-randomization` defaults to on — and an
+ASLR-off `setarch -R` control exits rc 1 printing `bad` for all three PoCs
+with no SIGSEGV. Clean-archive receipt at `1d68f9d8`; evidence hashes in
+`reports/openexr2shell-file-level.md` §W194. Still no chosen code pointer/IP,
+wire, command or r5.
+
+FontForge W11 (`f3b9dd98`) corrects W10's object label: the word at `encs-200`
+is `BDFChar.bitmap` (`chunkalloc` = `calloc(104)`, `bitmap` at +24), not a
+live `char*` — `x/s` had printed `""` from a one-byte zero bitmap. Adding
+`Save()` to the poisoned `Import()` makes the real plain process dereference
+the file-chosen pointer through `bSave:1891 → SFDWriteBakExtended → SFDDump
+→ SFDDumpBitmapFont → SFDDumpBitmapChar` (`sfd.c:1671`): rc 139 at
+`0x0000555500414243` with three chosen bytes, and rc 139 at
+`0x000055550100FEFF` on the arithmetic-ceiling input. The reachable window
+`0x0000555500000000..0x000055550100FEFF` is below the lowest PIE mapping,
+so there is no chosen mapped target, full pointer/IP, marker, command or r5;
+a second `Import()` without `Save()` still exits 0 and patched/in-bounds
+controls stay clean. `lab/frontier/fontforge2shell/DEREF.md`.
+
+CodebaseMemory W14 (`8e973719`) measures far strides against the live
+`[stack]` mapping: the OOB destination advances 512 bytes per projection
+item, and main's estimated saved RIP (`callee_rbp+0x4198` = `SP+0x40a0`,
+16,544 bytes) lay above the mapping end in 16 live-ASLR placements (smallest
+`STACK_TOP-SP=0x1108`, 4,360 bytes), while twelve 71-item/478-byte attempts
+exited 139 in `memcpy`. W12's `col_names` fault at N=1135 remains a separate
+blocker for huge counts, not the nearest bound, and W14 retracts W12's
+absolute claim that a C string cannot carry pointer-zero bytes. Chosen bytes
+reach caller-frame storage, with no live pointer use, IP, command or r5.
+
+Synchronet W16 (`be7d19a2`, clean replay `f369f7b3`) closes the missing DoS
+measurement under the pinned default config with a valid password:
+`run-validuser-availability.sh` sets `line_delay=0x4853494d` (~14-day
+nanosleep) on four real `sbbs3` nodes with chosen 64-byte TERMs, parks four
+`sbbs/termNode` threads in `hrtimer_nanosleep` and the fifth login is refused
+`!No nodes available for login.`; the upstream fixed form serves five
+sessions. Both forms score 10 PASS / 0 FAIL with zero `SSH_ANYAUTH` lines;
+the two pre-repair failures (a misplaced assertion and a TIME_WAIT bind race)
+are preserved as tooling defects. Author replay from `git archive be7d19a2`,
+witness verdict still confined to wake 189's synthetic-struct scope; no
+pointer/IP, command, grade change or r5. `REPLAY-W16.md`.
+
+N2n W3 (`7e939185`, `d8bec71b`) adds a real consumer: with a registered
+loopback peer the forwarding encoder reads the overwritten token bytes as
+DATA in `memcpy(len=96, src=nak+14)` ← `encode_buf` (`wire.c:162`) ←
+`encode_REGISTER_SUPER_NAK` (`wire.c:631`) and re-emits a 134-byte NAK, while
+the 48-byte safe control emits 86 bytes. The one-line decode bound stops the
+WRITE but leaves a fixed-build ASan `READ of size 96` on the peer path (the
+earlier clean fixed control had no peer). A 2048-byte `recvfrom` caps the
+write at `nak+2024`, 1,488/1,552 bytes short of the canary at `nak+3512` and
+saved RIP at `nak+3576`; `token_size=2000` left the canary intact and a 3550-
+byte datagram caused no abort. W4 (`f18dd8bf`, `e9351342`) gives a one-command
+clean-room replay, `sh lab/frontier/n2n2shell/live/replay-live.sh`, observed
+19 PASS / 0 FAIL locally, including four live gdb chosen-word checks; it does
+not replay the W3 peer-forwarding lane. No consumed pointer, control-flow
+takeover, marker, command or r5; witness replay #3909 remains owed.
+`reports/n2n2shell-live.md` §§W3/W4.
+
 The 19:0xZ cicap2shell W3 limb supplies the real-server evidence summarized
 in the row. `lab/frontier/cicap2shell/realbuild/live/run.sh` starts the real
 pinned 0.6.5 ASan `c-icap` server on 127.0.0.1 with its echo service and
@@ -299,8 +371,9 @@ death; author-only, unwitnessed, R5 cell stays `—`. Reports:
 
 The 00:4x–01:0xZ author limbs add no grade or verdict. FontForge W10
 (`8781a538`) bounds the four-byte write at `0x0100FEFF` and puts three chosen
-bytes in a live `char*` at `encs-200`, but the pointer is not dereferenced on
-that one `Import()` path. Synchronet W15 (`e0f11cd4`, replay `b595e239`) builds
+bytes in a pointer field at `encs-200` that W11 later identified as
+`BDFChar.bitmap`, not a `char*`; on that one `Import()` path it is not
+dereferenced. Synchronet W15 (`e0f11cd4`, replay `b595e239`) builds
 a real `sbbs3` locally and reaches the copy after a valid password login under
 the default config (4 PASS / 0 FAIL, `PROBE_COUNT=2`, `ANYAUTH_LOG_COUNT=0`);
 pre-auth pty-req stays W9's negative. Assimp W25 (`aa2aedc7`, replay
@@ -2391,6 +2464,24 @@ or mind-count change; operator admission and witness replay are PENDING. All
 these limbs stay author-side/unwitnessed except the named witness verdicts;
 rung 5 stays UNKNOWN throughout.
 Frontier staged `open5gs2shell` at 23:0xZ on CVE-2026-116543 (empty-boundary SBI multipart parser in pinned Open5GS v2.8.0): the verbatim pinned parser under ASan reports `WRITE of size 1` 0 bytes after a 65-byte region, and a plain build writes the state-machine-forced periodic `00 0d 0a` pattern into an adjacent heap object — rung 3 plus rung 4 PARTIAL, not arbitrary chosen bytes. `sh lab/frontier/open5gs2shell/harness/run.sh` gives 21 PASS / 0 FAIL, with a clean-archive replay of `2eeee948` reproducing 21/0 and the trace hash recorded in the brief. No real Open5GS build, SBI listener or wire request, no pointer, command or r5; witness replay UNKNOWN. A charter and live window 146 exist but operator admission is pending, so this stays FRONTIER-STAGED: no route, wake unit, table row or mind-count change. Evidence: `reports/frontier-open5gs2shell.md`, `reports/open5gs2shell-status.md`.
+Frontier staged `yojimbo2shell` at 01:1xZ in `aaa7dc7a` on a CVE/GHSA-UNKNOWN
+remote block-fragment heap overflow fixed upstream by
+`d3d4f3398cee5d154d22011ff7099a5d8a87d324` (vulnerable parent
+`3c6b5e85fe8da778e0ace3526e725844bb7286bf`): the verbatim pinned
+`ReliableOrderedChannel::ProcessPacketFragment` runs its final-fragment
+`memcpy` before the `blockSize` check, so with `maxBlockSize=1100` and
+`blockFragmentSize=500` ASan reports `WRITE of size 500` 0 bytes after a
+1100-byte region and a plain build puts chosen `MISHE-OO` at canary offset
+300; the fixed guard fires and safe/fixed controls are clean.
+`sh lab/frontier/yojimbo2shell/harness/run.sh` gives 20 PASS / 0 FAIL with
+7/7 SHA-256 pins (also observed locally at this wake). No real yojimbo build,
+live UDP wire, pointer/IP control, command or r5; the upstream packet path is
+post-authentication. A gitignored site charter and window 147 exist but
+operator admission and witness replay are pending, so this stays
+FRONTIER-STAGED: no route, wake unit, table row or mind-count change.
+Evidence: `reports/frontier-yojimbo2shell.md`,
+`reports/yojimbo2shell-status.md`, `lab/frontier/yojimbo2shell/PROVENANCE.md`.
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 133 target
