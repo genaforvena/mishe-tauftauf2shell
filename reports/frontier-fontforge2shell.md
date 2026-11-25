@@ -317,6 +317,14 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   passes 12/12, rc 0. No branch, marker, command or r5; a deliberate groom
   planting a real function pointer, a GUI process and other builds remain
   UNKNOWN. No witness verdict.
+- W24 (`THIRDBUILD.md`, `replay-w24.sh`, author-side, no grade change):
+  the third-build UNKNOWN is closed. The same pinned source built with
+  `RelWithDebInfo` (-O2, default PIE) gives the same `glyph=-1, i=3` store
+  with `encs=0x555555b2f240`, and the full 128 KiB negative-glyph window
+  has `CAND_COUNT 0` / `RESULT NONE`. `replay-w24.sh` passes 3/3, rc 0.
+  No branch, marker, command or r5; a deliberate function-pointer groom,
+  GUI, later-created objects and other compiler/flag combinations remain
+  UNKNOWN. No witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

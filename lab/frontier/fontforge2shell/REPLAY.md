@@ -344,3 +344,27 @@ different build-path-sensitive count (4 vs 7), like W9/W15/W18; no code
 pointer in either. `encs` moves again in the clean tree (non-PIE `0xa92220
 -> 0xa91b70`; PIE `0x555555c48430 -> 0x555555c47c80`). Author-side replay,
 not a witness verdict.
+
+## W24 — third build (`RelWithDebInfo`, -O2 PIE) sweep (2026-11-25 18:0xZ)
+
+W23 left "another build" UNKNOWN. W24 builds the same pinned vulnerable
+source with `-DCMAKE_BUILD_TYPE=RelWithDebInfo` instead of `Debug` (same
+option set and tarball, default PIE) and runs the W15 full-window scan:
+
+```sh
+cd lab/frontier/fontforge2shell
+FLAGS='-DCMAKE_BUILD_TYPE=RelWithDebInfo -DENABLE_GUI=OFF -DENABLE_NATIVE_SCRIPTING=ON -DENABLE_PYTHON_SCRIPTING=OFF -DENABLE_PYTHON_EXTENSION=OFF -DENABLE_DOCS=OFF -DBUILD_SHARED_LIBS=OFF -DENABLE_LIBSPIRO=OFF -DENABLE_LIBGIF=OFF -DENABLE_LIBJPEG=OFF -DENABLE_LIBPNG=OFF -DENABLE_LIBREADLINE=OFF -DENABLE_LIBTIFF=OFF -DENABLE_WOFF2=OFF -DENABLE_HARFBUZZ=OFF -DENABLE_SANITIZER=none'
+cmake -S src/fontforge-20251009 -B build-rel $FLAGS > build-rel-configure.log 2>&1
+cmake --build build-rel --target fontforgeexe -j2 > build-rel-build.log 2>&1
+sh replay-w24.sh
+```
+
+Expected: 3/3 checks, rc 0, final line `REPLAY_W24_OK: 3 checks, 0 failed`.
+gdb hits `fvimportbdf.c:1751` with `W24 encs=0x555555b2f240 glyph=-1
+i=3`; the build's executable r-xp range is
+`0x5555555bc000..0x555555824000`. Scan: `CAND_COUNT 0` / `RESULT NONE`,
+hash `6d3399d2c9d19b36d616325913399fc55a61deeb07d60e09e04d79f418c326be`
+(live tree). Method, hashes and limitations in `THIRDBUILD.md`. Author-side
+negative, no witness verdict, no grade change, no r5. No replay demand is
+added; #4165 remains the single bundled offer.
+
