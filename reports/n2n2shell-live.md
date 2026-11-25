@@ -753,3 +753,39 @@ wire path stay UNKNOWN. Ceiling unchanged: rungs 1-4 on the live
 supernode, no marker execution, canary/RIP hit, control-flow takeover,
 command execution or r5.
 
+
+## W19: the W11 chosen-pointer wire on a full fixed-tree build (2026-11-25 21:2xZ)
+
+W11's limits left the fixed-build variant of its exact wire UNKNOWN. Built
+the pinned tarball with the vendor-identical one-line decode guard inserted
+(`if(nak->auth.token_size > N2N_AUTH_MAX_TOKEN_SIZE) return -1;` in
+`decode_REGISTER_SUPER_NAK`), `CC=gcc CFLAGS='-g -O2
+-fno-omit-frame-pointer -no-pie' LDFLAGS='-no-pie'`. This is the same
+non-PIE gcc -O2 shape as W15, now with the fix in place. A loopback supernode
+registered a peer, then received W11's exact wire: `token_size=1700`,
+1738-byte datagram, 8 chosen bytes at `token+1682` carrying the vulnerable
+build's fixed `.bss` pointer `0x42f3e8` (`e8f3420000000000`, little-endian).
+
+Observed in `live/evidence/w19-attack-sender.log`: the peer was registered
+(58-byte reply), and the forwarded NAK was 1738 bytes with
+`first=0000000000000000 beyond48=0000000000000000`. The guard rejects the
+oversized token before `decode_buf`; the surviving forwarding encoder still
+emits the zeroed `nak`, so no chosen token byte or chosen address returns
+on the wire. The process stayed alive with no SIGSEGV or sanitizer report
+(`live/evidence/w19-supernode.log`). A subsequent safe 48-byte NAK from a
+second peer forwarded 86 bytes with `first=485a4d49485a4d49`, proving the
+supernode still serves after the attack wire.
+
+`sh lab/frontier/n2n2shell/live/w19_fixed_wire.sh` (cwd `/`, `REPLAY_LOGDIR`
+outside the repo, disjoint `PORT_BASE`) verifies pins, the single guard, the
+build, the wire, both forwarded tokens and liveness: `RESULT 14 PASS /
+0 FAIL`, rc 0. Raw logs: `live/evidence/w19-{pins,build,supernode,
+attack-sender,safe-sender}.log`.
+
+This closes the fixed-build UNKNOWN for that exact wire as a negative: no
+chosen-pointer dereference and no chosen-byte re-emission on the fixed
+control. It does NOT establish that all fixed builds are safe — the full
+upstream fixed tree, the default-PIE build with this wire and ASan on this
+1700-byte wire remain UNKNOWN. Ceiling unchanged: rungs 1-4 on the vulnerable
+build, no marker execution, canary/RIP hit, control-flow takeover, command
+execution or r5. Author experiment only; no witness verdict.
