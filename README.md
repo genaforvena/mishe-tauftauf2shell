@@ -40,7 +40,7 @@ independent replay at that scope. Author reports are never acceptance.
 
 | Target | R1 | R2 | R3 | R4 | R5 | Evidence / boundary |
 |---|---|---|---|---|---|---|
-| **Ruby2Shell** | ✓ | ✓ | ✓ | ✓ | ✓ | **LIVE — rung 5 witness-ESTABLISHED at the labeled host/harness conditions.** One multipart POST drives Stage C poisoning into a forged CRuby `T_DATA` finalizer (`dfree=system`, `data=` request command), producing a target-created benign marker; independent clean-archive replay of `8b9d8f9` reproduced two varied-command attacks and safe/fixed controls. Requires custom grooming/GC middleware plus mtrace/ObjectSpace/maps oracles; ASLR stays on, post-response abort remains possible, and stock-app oracle-free RCE/persistence are not claimed. 2026-11-24 stock Rails follow-up: N=524 gives a traced `0x200→0x250` split, but no `0x3f0` consumer, disclosure, command or persistence; 3/3 clean attacks abort, safe/fixed controls survive. R4 witnesses: #51, #65, #89. [Report](reports/ruby2shell-investigation.md) |
+| **Ruby2Shell** | ✓ | ✓ | ✓ | ✓ | ✓ | **LIVE — rung 5 witness-ESTABLISHED at the labeled host/harness conditions.** One multipart POST drives Stage C poisoning into a forged CRuby `T_DATA` finalizer (`dfree=system`, `data=` request command), producing a target-created benign marker; independent clean-archive replay of `8b9d8f9` reproduced two varied-command attacks and safe/fixed controls. Requires custom grooming/GC middleware plus mtrace/ObjectSpace/maps oracles; ASLR stays on, post-response abort remains possible, and stock-app oracle-free RCE/persistence are not claimed. 2026-11-24 stock Rails follow-up: N=524 gives a traced `0x200→0x250` split, but no `0x3f0` consumer, disclosure, command or persistence; 3/3 clean attacks abort, safe/fixed controls survive. 2026-11-25 wire-leak push: the dev 404 params reflection on the unmodified app leaks the request-thread glibc arena region base (three near-constant region offsets, 11/11 victim-correlated — tcache key wire-known) and Ruby GC-page pointers (live maps-confirmed, replaces `ObjectSpace.dump`), 20 historical responses plus one live classified instance; structurally NO libc/code pointer (worker-arena bins are in-region), zero attacker-chosen upcase bytes in 432 responses, second attack on a survivor aborts 3/3 — first missing oracle measured, full stock rung-5 still NOT ACHIEVED. R4 witnesses: #51, #65, #89. [Report](reports/ruby2shell-investigation.md) |
 | **PHP2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE/CODE** — main lane rung 4 CONSTRAINED on CGI and mod_php; wake-58 `drupal-afterRCE` lane adds DEMONSTRATED rung 4: an unauthenticated CVE-2026-126714 rfc1867 splice into real Drupal 11.4.13 over loopback FastCGI promotes a chosen session record and takes over user 1 at `/user/1` on a release-like 8.4.27-app build, with an 8.4.28-app fixed control clean; conditioned on the advisory's vulnerable ini and a shim SIGKILL interruption (Drupal core itself has no designed PHP execution). Wake 59 (`d7dae529`) takes the same splice into tinyfilemanager 2.6: the promoted `filemanager` session reaches its DESIGNED admin upload and `/evil.php` executes in the live FPM worker with a unique marker and `id`; fixed/no-kill/safe controls are clean, but the death is still the shim and attacker-caused death was measured NEGATIVE (SIGTERM handled mid-pwrite, cgroup OOM only on truncate-first writes, page-quantized partials), so no r5. Wake-56 DOM lane reaches read-side chosen-pointer rung 4 on a plain local CLI (`USE_ZEND_ALLOC=0`, N=88, fault only), no SAPI, arbitrary write or marker there. Witness: #138 CGI and #258 mod_php rung-4 constrained; #126, #208, #287 rung-3 grades; #98/#103/#108 splice rungs 1/2. DOM, Drupal and FPM lanes author-observed; the FPM splice limb is rung 3 without the shim. [Status](reports/php2shell-status.md) |
 | **Apache2Root** | ✓ | ✓ | ✓ | — | — | **CODE** — rung 3 chosen-byte placement at a capacity boundary on real ASan httpd 2.4.70 under gdb, fixed control clean; Stage C closed unreachable on this host (wire-byte alphabet, Huffman probe). Adjacent L2–L6 rung 3; L1/L7/L8/L9 rung 1–2 (L9 is auth-state corruption, no confirmed UAF). A 2026-11-21 frontier lane on the brief's CVE-2026-119618 (pinned 2.4.70/2.4.71, locally built **ASan APR**) confirms rung 1 by driving the wrong-pool `apr_table_setn()` marker 300/300 and 2000/2000, but its 2000+ full-table writes give 0 ASan reports and its one child SIGSEGV is unrepeated. That build-bound negative is preserved as contradictory evidence, not a refutation: this plant's rung 3 faults in uninstrumented system libapr with reproducible differential child SEGVs (3 vs 0 at `LogLevel info`) and a corrupted `pool->child` under gdb. Both agree the written value is the fixed string `0` — no chosen byte, pointer control or RCE. Earlier reviews #279 found a probe defect and #294 replayed the repair with no verdict change; witness W94/W95 (tape #1176) then graded this build-bound reconciliation ESTABLISHED at the labeled grade — rung 3 stands, rung 4 unclaimed, no replay — with the ASan-APR allocator/race cause nit corrected in `64ecc54` and CLOSED. Default-MPM RCE stays a claim. [Report](reports/apache2shell-investigation.md) · [CVE-2026-119618 brief](reports/frontier-apache2shell.md) |
 | **Mosquitto2Shell** | ✓ | ✓ | ✓ | ✓ | — | **LIVE** — ASan 256-byte write past a 1-byte region in `net__read_ws`, fixed control clean; Stage A places chosen bytes at a chosen offset. Witness #246 ESTABLISHED the wire-only pre-auth 32 KiB heap read with live pointer disclosure (4/4 fresh brokers). Rung 4 is information disclosure only; enlargement stays layout-dependent and wire-to-code-execution UNVERIFIED. [Status](reports/mosquitto2shell-status.md) |
@@ -234,6 +234,26 @@ wire substitute on an unmodified app. The harness matrix re-verified (attack
 marker + pop, safe-input and fixed 3.4.13 controls clean). Stock/oracle-free/
 persistent R5 stays NOT ACHIEVED.
 
+The 2026-11-25 sixth push (direct session) answers Ruby2Shell's named
+reflection lead and measures the first missing oracle wire-only. The
+48-part/filler-first arm aborts 6/6 (top-chunk pop → `sysmalloc`), but the
+new committed `ruby2shell-reflect-scan.py` found the channel already firing
+in the 32-part consH20-tail geometry: 20 saved stock-Rails 404 responses
+(17% of surviving stage2d arms, previously never byte-parsed) reflect
+post-parse allocator/Ruby metadata inside live drain bodies — fake `0x25`
+chunk sizes, PREV_INUSE'd `0x91` pattern qwords and pointer pairs, i.e. a
+bin insertion whose chunk overlaps a live wire-chosen string. Live
+classification (`ruby2shell-stock-leakclass.sh` + `ruby2shell-leak-maps.py`,
+post-response `/proc/PID/maps` read outside the request path) shows the
+pair partner pins the request-thread glibc arena region base
+(region+{0x8c660,0x8c760,0x8cdb0}, 11/11 victim-correlated — tcache key
+wire-known) and the live instance's other pointer is a Ruby GC-page
+address (`[anon:Ruby:GC:...]`), replacing `ObjectSpace.dump`. Structural
+negatives: the worker-arena bin heads are in-region, so this channel can
+never leak libc; zero attacker-chosen `0x53`-runs in 432 parameter-bearing
+responses; a second attack on a leak survivor aborts 3/3. First oracle
+measured; full stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+
 The 2026-11-25 fifth push closes Ruby2Shell's consH-20 low-byte tcache
 retarget lead as a bounded negative
 (`lab/repro/ruby2shell-consH20-retarget.sh`, 144 fresh processes of the
@@ -246,6 +266,15 @@ input. The overflow byte changed the victim's size field (`0x201`→`0x253`),
 not the fake `0x20` chunk's tcache `next`, so no oracle-free Stage-B analog
 was steered. Stock/oracle-free/persistent R5 stays NOT ACHIEVED; the
 witness-ESTABLISHED harness-condition R5 cell is unchanged.
+The 2026-11-25 main-arena lead is also closed as a bounded negative
+(`lab/repro/ruby2shell-mainarena-leak.sh`, 12 fresh `rails new --minimal`
+processes at `MALLOC_ARENA_MAX=1`, then 12 more at an N=532 body). Victims
+landed in `[heap]` 16/16, and two N=524 victims held a real libc pointer in
+their `fd=bk` (`libc.so.6 +0x203b20`, maps-confirmed), but every survivor's
+reflected 404 params were byte-clean: 544 parts, zero pointer-shaped qwords.
+The +8 length shift changed the chunk size class, not the write offset, so
+the byte still hit the victim SIZE field. No libc/code-base oracle from this
+route; stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at

@@ -1691,6 +1691,127 @@ The driver was smoke-tested (`RUBY2SHELL_RETARGET_COUNT=2
 RUBY2SHELL_RETARGET_TAIL=0`); `xargs` exit 123 from pre-response SIGABRTs is
 expected and recorded, not a driver failure.
 
+### Wire-only heap disclosure through the 404 params reflection — measured, live-classified (2026-11-25, direct-session push)
+
+The owner asked again for full rung-5. The named next experiment was executed
+first: with the two untried knobs (drain part count 48 and
+`RUBY2SHELL_STOCK_ORDER=filler-first`), the attack aborts pre-response in
+**6/6 fresh processes** — `Fatal glibc error: malloc.c:2599 (sysmalloc):
+assertion failed …` (tags `stock-rails-consH20-reflect-*`). At 48×1024-byte
+drain parts the first case buffer no longer pops the boot-recycled
+0x240-class chunk; it carves the top chunk and the 0x53 byte lands on the
+top size field. The count knob overshoots the surviving class, so the named
+arm is a bounded negative.
+
+The reflection channel was then measured directly with a new committed
+byte-scanner, `lab/repro/ruby2shell-reflect-scan.py`, which unescapes the
+dev routing-error page's `PP.pp(filtered_parameters)` block and byte-diffs
+every reflected multipart value against the request body. Bulk-scanning all
+492 saved stock-Rails 404 responses (416 parameter-bearing) found **20 files
+whose reflected drain bodies carry raw pointer-shaped qwords** — including
+17% (8/47) of the surviving stage2d responses, arms that had previously been
+mtrace-tabulated but never byte-parsed. The corruption signature inside a hit
+value (parts d8/d11/d13/f) is post-parse allocator/Ruby metadata, e.g.
+`[0x77441, 0x25, PTR, 0x100000001, 0x20, 0x91, <pattern>]`: a fake 0x20
+chunk size (0x25), the PREV_INUSE'd 0x90 pattern qword (0x91), and one or
+two pointers eight bytes apart. The writer is a bin insertion whose chunk
+overlaps the live reflected drain string — glibc performing a free whose
+range covers live wire-chosen data, the arrangement the six wire-shaped
+grooming blockers hunted, observed here in the surviving class.
+
+Live classification used a second new committed pair:
+`lab/repro/ruby2shell-stock-leakclass.sh` replays the exact consH20-tail
+wire body (the saved `stock-rails-rails-stage2d-n524-r238.body`) against a
+fresh unmodified `rails new --minimal` process per run and snapshots
+`/proc/PID/maps` from outside the request path whenever the process is
+still alive after the 404 response; `lab/repro/ruby2shell-leak-maps.py`
+classifies every reflected pointer against that snapshot. 266 runs were
+launched 6-way on loopback (the final wave truncated by a harness
+timeout); 25–26 surviving responses carried maps snapshots, and one live
+leak instance landed:
+
+- **The request-thread glibc arena region base leaks wire-only.** The
+  mtrace B lines put the attack victim in an unlabeled anon mapping — a
+  Puma worker thread's glibc arena whose unsorted-bin head is in-region
+  (`fd=0x…000090 bk=0x…000090`, i.e. region+0x90) — and the reflected
+  pair partner is an in-region pointer at one of three near-constant
+  offsets: region+0x8c660 (×5), region+0x8c760 (×5), region+0x8cdb0 (×1)
+  across the 11 consH/stage2d instances (13 PTR_B values total including
+  the fuzz-geometry variant +0x4d1f0), same region prefix as the victim
+  in 11/11. One leaked value therefore pins the arena region base —
+  the tcache safe-link key and any in-arena target address become
+  wire-known. This is the first missing oracle of the harness chain,
+  now measured wire-only on the unmodified app.
+- **A Ruby GC-page pointer leaks wire-only.** The live instance
+  (`stock-rails-lc-lc-75.html`, `.maps`) resolves to
+  `[anon:Ruby:GC:default:heap_page_body_allocate] +0x43a6c8` — the other
+  pointer class is GC-page addresses, which can substitute
+  `ObjectSpace.dump` as a GC-heap discovery mechanism.
+- **No libc pointer class exists in this channel.** The corrupted chunks
+  live in the worker-thread arena; its bin heads are in-region, not in
+  libc's `main_arena`, so unsorted/smallbin fd/bk can structurally never
+  leak libc through this route. Across the 416 parameter-bearing
+  historical responses plus the live survivors, zero libc, ruby-binary
+  or code pointers were reflected. The harness's `system` finalizer
+  therefore stays oracle-blocked on a stock app.
+- **No attacker-chosen upcase bytes ever reach a reflected body**: a
+  byte-exact scan of all 432 historical parameter-bearing values found
+  zero `0x53`-run deviations — the reflected corruption is exclusively
+  allocator/Ruby metadata, not a wire-shaped Stage-B analog.
+- **A second attack request on a leak survivor aborts 3/3** (live batch
+  wave-1, `h2=000`), so leak-then-attack chaining on one process is
+  blocked at this geometry, corroborating the persistence blocker.
+
+Boundary: this is new rung-4-class disclosure evidence — wire-only
+information disclosure of arena-region and GC-page addresses on the
+unmodified production stack, ~13% of surviving responses (9/72 across the
+historical stage2d survivors and the live batch). No command, no libc
+oracle, no attacker-chosen write and no persistence exist; stock/oracle-
+free/persistent rung 5 remains **NOT ACHIEVED**. Veria's page was
+re-checked at the dated trigger (stamp still 2026-11-21T03:52Z, PoC
+unpublished) and durendal.sh still publishes no mechanics; nothing
+external was adopted as fact.
+
+### Main-arena libc-oracle lead — bounded NEGATIVE (2026-11-25, this wake)
+
+Item 10 named main-thread-arena geometry as the first lead for the missing
+libc/code-base oracle. New driver `lab/repro/ruby2shell-mainarena-leak.sh`
+replays the saved consH20-tail wire body against a fresh unmodified
+`rails new --minimal` process per run with `MALLOC_ARENA_MAX=1` (lab-only
+environment tuning, not an app edit), snapshots `/proc/PID/maps` outside the
+request path for survivors, and classifies reflected params with the
+committed scanner/classifier pair. Loopback only; analysis only.
+
+- **Arm A (saved N=524 body, 12 fresh processes):** 4 survivors returned 404
+  with maps; every victim sat in `[heap]` (4/4), i.e. the main arena rather
+  than a Puma worker arena. Two victims carried
+  `fd=bk=0x79d399204b20` / `0x7d9644404b20`; both map to
+  `/usr/lib/x86_64-linux-gnu/libc.so.6` at file offset `0x203000`
+  (`libc+0x203b20`). So a genuine libc pointer does exist in the victim's
+  metadata under this geometry. It never crosses into the wire: all four
+  responses were byte-clean (136 reflected parts, zero deviations, zero
+  pointer-shaped qwords), and `ruby2shell-leak-maps.py` reported
+  `with-leaks=0`.
+- **Arm B (N=532, otherwise identical 32x1024 pattern-drain/filler geometry
+  and `00005102` tail, 12 fresh processes):** 12/12 survived with maps, all
+  victims again in `[heap]`, 408 reflected parts byte-clean, zero pointers.
+  The +8 shift moved the request's chunk size (`first_request=0x238` →
+  `0x240`), not the write offset: mtrace still shows the byte landing on
+  the victim SIZE field (`0x2d0`→`0x253`, `0x5f964ed8920d`→`0x5f964ed89253`).
+  fd/bk is therefore unreachable by the length knob alone.
+- A default-geometry re-run of `ruby2shell-stock-leakclass.sh` (24 fresh
+  processes) yielded one survivor with maps; its 34 reflected parts were
+  byte-clean with no reflected pointers, consistent with item 10.
+
+Boundary: this closes the main-arena variant of the libc-oracle hunt. The
+default multi-arena channel still leaks only arena-region and GC-page
+addresses (item 10); no libc/code base, attacker-chosen write or persistence
+is observed. Stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**;
+the witness-ESTABLISHED harness-condition rung-5 cell is unchanged. No grade
+change. The driver is committed; evidence lives in
+`lab/build/evidence/stock-rails-mainarena{,-fd}-*`.
+
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1784,3 +1905,33 @@ expected and recorded, not a driver failure.
    part order (the untried knobs of the closed 60-run sweep), then scan the
    dev 404 response for forged-window qwords; a wire-visible glibc-heap
    pointer is the first oracle still missing.
+
+10. **Done this direct-session push (2026-11-25): the named reflection
+   lead is ANSWERED — the first missing oracle is now measured.** The
+   48-part/filler-first arm aborts 6/6 (top-chunk pop → sysmalloc), but
+   byte-scanning the saved and fresh 404 responses with the new
+   `ruby2shell-reflect-scan.py` found the channel already firing in the
+   32-part consH20-tail geometry: 20 historical responses and one live
+   maps-confirmed instance reflect arena-region pointers
+   (region+{0x8c660,0x8c760,0x8cdb0} — the arena base, hence the tcache
+   key, leaks wire-only) plus Ruby GC-page pointers (replacing
+   `ObjectSpace.dump`). Structurally absent: any libc/code pointer (the
+   worker-thread arena's bin heads are in-region), attacker-chosen upcase
+   bytes (0 S-runs in 432 responses) and second-request survival (3/3
+   aborts). Named next: hunt a libc/code-base oracle on a different
+   surface (main-thread-arena geometry, GC-page content spill, or a
+   production-mode render) and steer which drain part gets hit — the
+   landed window now has a measured detector.
+11. **Done this wake (2026-11-25): main-arena libc-oracle lead closed —
+    bounded NEGATIVE.** With `MALLOC_ARENA_MAX=1` the victim lands in
+    `[heap]` and two runs even held a maps-confirmed libc pointer
+    (`libc+0x203b20`) in victim `fd=bk`, but 16 survivors across the N=524
+    and N=532 arms reflected 544 byte-clean parts and zero pointers: the
+    metadata never crossed into the wire body, and the +8 length shift only
+    changed the chunk size class (`0x238`→`0x240`), not the write offset.
+    Named next: hunt a surface that carries the main-arena victim's fd/bk
+    qword into a reflected string — vary drain count/order under
+    `MALLOC_ARENA_MAX=1` (the untried 48-part/filler-first arm) and try a
+    production-mode no-debug render; classify any hit against
+    `libc+0x203b20`. The GC-page content spill is the fallback lead.
+    Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
