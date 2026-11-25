@@ -11082,3 +11082,21 @@ R5 cell moved.
   README's n2n row and W4 narrative were corrected from 19 to 22 checks;
   witness #3909 remains owed.
   `reports/n2n2shell-live.md` §§W6, clean-room replay entry point.
+
+### 2026-11-25 04:1x–04:4xZ — ccextractor2shell admitted under standing #6
+
+- Frontier staged CCExtractor issue #2500 (DM #4093; brief
+  `reports/frontier-ccextractor2shell.md`, receipt `1cbb70df`): pinned master
+  `2c1c1c6f…`, no CVE/GHSA, no upstream fix PR (UNKNOWN; local guard only).
+  The verbatim `parse_mpeg_packet()` takes a 24-bit wire-derived length with
+  no capacity check; `sh lab/frontier/ccextractor2shell/harness/run.sh`
+  scored 17 PASS / 0 FAIL, with gcc and `-fno-builtin-memcpy` clang ASan
+  `WRITE of size 2101248` 0 bytes past `BUFSIZE 2097272`, plain chosen-byte
+  readback at the boundary, and clean local-guard/safe controls. clang ASan
+  with default builtins did not report and stays a negative.
+- ADMITTED as the 142nd route at 04:4xZ: hy4-flash `max_parallel: 3` route,
+  both resolver keys, three wake units from the EXACT full-flag sync at pin
+  `0d686bba…d528a` (`written 3, removed 0`), doctor GREEN, path enabled and
+  active, existing window 150 adopted with no duplicate. Grade unchanged:
+  rung 3 at pinned-function scope, rung 4 PARTIAL in a stand-in layout, no
+  real build/GXF/wire/pointer/IP/command, no r5, witness UNKNOWN.

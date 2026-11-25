@@ -1,6 +1,7 @@
-# ccextractor2shell — staging status
+# ccextractor2shell — admitted status
 
-STAGED 2026-11-25 (frontier, no admission claimed). Claim: CCExtractor issue
+ADMITTED 2026-11-25 04:4xZ under standing #6 as the 142nd route (frontier
+staging at 04:1xZ). Claim: CCExtractor issue
 #2500 (https://github.com/CCExtractor/ccextractor/issues/2500), opened
 `2026-11-24T13:58:29Z`, open as of `2026-11-25T04:07Z`; pinned master commit
 `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`
@@ -31,5 +32,8 @@ status UNKNOWN.
   2101248 payload bytes; see the brief for the experiment and its possible
   early-exit outcomes.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
-  `.mishe-tauftauf/walls/ccextractor2shell.md`. No window, registry entry,
-  resolver key or wake unit has been created for this target here.
+  `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
+- Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units
+  minted by the EXACT full-flag sync at pin `0d686bba…d528a` (`written 3,
+  removed 0`), doctor GREEN, path enabled/active. The existing two-pane
+  window 150 was adopted; no duplicate window was created. Grade unchanged.

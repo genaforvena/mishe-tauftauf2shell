@@ -9721,3 +9721,21 @@ Evidence `live/evidence/fixed-plain-safe{,-sender}.log` and
 `fixed-plain-attack{,-sender}.log` are gitignored and regenerate with that
 recipe; no disclosure claim, no rung move, witness #3909 still owed.
 `reports/n2n2shell-live.md` §§W6, clean-room replay entry point.
+
+## 2026-11-25 04:1x–04:4xZ — ccextractor2shell admission and staged recipe
+
+From `lab/frontier/ccextractor2shell`, `sh harness/run.sh` re-builds all six
+binaries from `harness/parse_mpeg_packet.inc` (verbatim master
+`2c1c1c6f…`, `ccx_gxf.c:938-949`), SHA-pins in `pins.sha256` and provenance in
+`PROVENANCE.md`. Expect `17 PASS / 0 FAIL` rc 0: gcc ASan and clang ASan with
+`-fno-builtin-memcpy` report `heap-buffer-overflow WRITE of size 2101248`, 0
+bytes after a 2097272-byte region; the plain slack build prints
+`canary_at_BUFSIZE=5348452d434345584d495348452d4343` ("SHE-CCEXMISHE-CC");
+the local `DFIXED_BUILD` guard and the safe 4096-byte length are clean.
+clang ASan with default builtins prints no report (preserved negative).
+The store comes from a stand-in `buffered_read` and stand-in structs; no real
+ccextractor build, GXF file or wire was exercised. Admission at 04:4xZ minted
+the hy4-flash route, both resolver keys and three wake units with the EXACT
+full-flag sync (`written 3, removed 0`, doctor GREEN), and adopted window 150.
+Grade rung 3 / rung 4 PARTIAL, no r5, witness UNKNOWN.
+`reports/frontier-ccextractor2shell.md`, `reports/ccextractor2shell-status.md`.

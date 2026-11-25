@@ -177,6 +177,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Yojimbo2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 139th route; verbatim pinned `ReliableOrderedChannel::ProcessPacketFragment` final-fragment `memcpy` before the `blockSize` check, ASan `WRITE of size 500` 0 bytes after a 1100-byte region and plain chosen `MISHE-OO` at canary offset 300; fixed guard and safe controls clean. `sh lab/frontier/yojimbo2shell/harness/run.sh` 20 PASS / 0 FAIL with 7/7 SHA-256 pins. No CVE/GHSA or fixed release known.** W1 (`28d3c8c5`) builds the real pinned parent under ASan and drives the fix commit's regression through real `Connection::ProcessPacket` (`yojimbo_reliable_ordered_channel.cpp:716`, allocation at `yojimbo_reliable_ordered_channel.h:321`, fixed control clean), then an authenticated netcode UDP pair on 127.0.0.1 with a chosen `MISHE-LOOP` marker and a clean fixed control. W1b (`ff6c5e02`, report `30f77300`) reads the chosen marker back at `blockData+1200` under gdb after decrypt: rung 4 DEMONSTRATED only at the non-default 1100/500 config, post-auth, client and server in one process, with gdb-assisted readback — hence the `◐` cell. W2 (`f25517f8`) supersedes W1b's no-pointer bound: the 1100-byte block sits 605024 bytes into a 10 MiB TLSF arena from `BaseClient::CreateInternal`, the 0xAB filler corrupts the adjacent channel vptr at `blockData+1152` (the W1 `Connection::Reset()` SEGV), and the same encrypted final fragment carries a chosen 8-byte fake-vtable address that redirects a live virtual call to `MISHE-VTABLE-CALL` twice before a later TLSF teardown crash; the fixed-channel control is clean. Pointer control plus a benign marker in a non-PIE ASan lab build with the marker pre-placed, still post-auth and one-process; production use of a non-multiple block config stays UNKNOWN. No separate remote process, ASLR-realistic derivation, chosen shell command or r5, witness UNKNOWN. Upstream fix `d3d4f339…`; window 147. |
 | **Libsshch2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 140th route; verbatim pinned libssh `channel_rcv_data()` closed-channel data UAF, ASan heap-use-after-free `READ of size 32` 0 bytes inside a 64-byte region at `channel_default_bufferize`, plain chosen byte `M` / marker `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed guard suppresses it, safe channel clean. `sh harness/run-all.sh` 24 PASS / 0 FAIL. Authenticated peer required; no real SSH build, wire packet, pointer/IP control, command or r5; witness UNKNOWN.** CVE-2026-59850 (fixed 0.12.1/0.11.5); window 148; distinct from `libssh22shell`. |
 | **Socat2Shell** | ✓ | ✓ | — | — | — | **ADMITTED 03:3xZ under standing #6 as the 141st route; W2 (`1a34d2de`) dispositioned the candidate as a remote connection-abort bug on this host, NOT a memory-safety find. Real unmodified socat 1.8.1.1/1.8.1.2 ASan builds over a 127.0.0.1-only SOCKS5 listener show `W read(7, ..., -1): Bad address`, exit 255 and NO ASan report. Real `readfull()` passes SIZE_MAX to `read(2)`, which returns EFAULT before storing any byte; the harness's `WRITE of size 600` is a `memcpy` stand-in artifact. A source census finds no cap or alternate read behind any configure option, length bytes 0xf8..0xff yield negative counts (`SIZE_MAX .. SIZE_MAX-4`) after the first 5-byte read, and `sh real/run-count-probe.sh` (8 PASS / 0 FAIL) measures EFAULT-before-store for every count this bug generates on x86-64 Linux 6.8.0-149-generic; a 32-bit `size_t` build is UNKNOWN (no multilib). Harness 15 PASS / 0 FAIL, real replay 9 PASS / 0 FAIL. Rung 3 corruption and rung 4 chosen bytes NOT established, rung 5 not attempted, witness UNKNOWN.** CVE-2026-56123 / Socat advisory 10 (fixed 1.8.1.2); window 149 adopted. |
+| **Ccextractor2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 04:4xZ under standing #6 as the 142nd route; rung 3 ASan-confirmed in the verbatim pinned CCExtractor `parse_mpeg_packet()` (`ccx_gxf.c:938-949`, master `2c1c1c6f…`), rung 4 PARTIAL chosen bytes at the nominal `BUFSIZE` boundary in a stand-in `buffered_read`/struct layout; `sh lab/frontier/ccextractor2shell/harness/run.sh` 17 PASS / 0 FAIL. No CVE/GHSA or upstream fix PR (fix UNKNOWN; the guard is a local hunk), no real build, no GXF file or wire, no pointer/IP/command, no r5, witness UNKNOWN.** clang ASan with default builtins did not report — preserved negative. Two-pane window 150 adopted, no duplicate. `reports/frontier-ccextractor2shell.md`, `reports/ccextractor2shell-status.md`. |
 
 
 The 01:5x–02:1xZ limbs supersede the Munt2Shell row's blanket "no pointer
@@ -449,6 +450,23 @@ keys and the three wake units are minted (EXACT full-flag sync `written 3,
 removed 0`), doctor GREEN; the existing handoff window 149 was adopted with
 no duplicate. `reports/frontier-socat2shell.md`,
 `reports/socat2shell-status.md`.
+
+Ccextractor2Shell is ADMITTED at 04:4xZ under standing #6 as the 142nd route,
+from the staged CCExtractor issue #2500 (opened 2026-11-24T13:58:29Z, still
+open at 2026-11-25T04:07Z; no CVE/GHSA, no upstream fix PR, fix status
+UNKNOWN). The pinned master `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`
+derives a 24-bit `mpeg_pic_size` of 0x201000 (2101248) from four control bytes
+and passes it to the verbatim `parse_mpeg_packet()` without a capacity check;
+`buffered_read` is a stand-in `memcpy` and the structs/layout are stand-ins.
+gcc ASan and clang ASan with `-fno-builtin-memcpy` report `WRITE of size
+2101248` 0 bytes past a 2097272-byte region; clang ASan with default builtins
+is a preserved negative. The plain slack build reads back the chosen repeating
+`"MISHE-CCEX"` pattern at `BUFSIZE`, and a locally written bounds guard plus
+the safe length are clean. Grade: rung 3 at the pinned-function scope, rung 4
+PARTIAL in the stand-in layout, no real executable, GXF file or wire, no
+pointer/IP/command and no r5; witness UNKNOWN. Hy4-flash route, both resolver
+keys and three wake units minted (EXACT full-flag sync `written 3, removed 0`,
+doctor GREEN, path enabled/active); window 150 adopted without a duplicate.
 
 AwsLc W214 (`c8026e5a`, source-bound, author-side) narrows the row's
 "out-of-tree application as the only real-consumer path" boundary: a read-only
@@ -2887,7 +2905,7 @@ and the later open5gs/libsshch lanes supersede it for those two. Evidence:
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 137 target
+Each admitted family is its own mind with its own tmux window: 138 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -2921,7 +2939,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `sdlmixer2shell`, `cjose2shell`, `thorvg2shell`, `busybox2shell`,
 `fontforge2shell`, `fltk2shell`, `contiki2shell`, `libraw2shell`,
 `gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
-`open5gs2shell`, `yojimbo2shell`, `libsshch2shell` and `socat2shell`. Each builds affected
+`open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell` and
+`ccextractor2shell`. Each builds affected
 harnesses, drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a
