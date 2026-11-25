@@ -1,0 +1,53 @@
+=== pins 2026-11-25T20:52:47Z ===
+pins/5554f8a46abf.tar.gz: OK
+pins/e69e0844dbc1c737ebd3d17e97007d0f5cf16beb.tar.gz: OK
+src/codebase-memory-mcp-5554f8a46abf/src/cypher/cypher.c: OK
+src/codebase-memory-mcp-e69e0844dbc1c737ebd3d17e97007d0f5cf16beb/src/cypher/cypher.c: OK
+PASS: 4 pins hash-verified
+=== builds 2026-11-25T20:52:48Z ===
+PASS: shared vendored objects built
+PASS: vuln canary-off build
+PASS: vuln canary-off Z-bytes control build
+PASS: fixed canary-off build
+PASS: vuln canary-on control build
+=== in-bounds control 2026-11-25T20:54:59Z ===
+PASS: N=32 canary-off clean rc=0
+PASS: N=32 returns 32 columns
+=== chosen-byte pointer 2026-11-25T20:54:59Z ===
+PASS: chosen "GHIJKLMN" is the live b pointer in binding_free
+PASS: fault reached from real execute_single
+PASS: changing property bytes to Z*8 changes the live pointer
+=== fixed and canary controls 2026-11-25T20:55:00Z ===
+PASS: fixed canary-off N=40 rc=0
+PASS: fixed pin rejects N=40
+PASS: fixed pin parse-time rejection
+lab/frontier/codebasememory2shell/canary-off-pointer.sh: line 95: 561275 Aborted                 (core dumped) "$OUT/vuln-canary-alt" 40 RETURN > "$OUT/canary40.out" 2>&1
+PASS: vuln canary-on N=40 aborts rc=134
+PASS: canary blocks the same overflow
+--- n32.out ---
+KIND=RETURN ITEMS=32 RC=0 ROWS=1 COLS=32 QUERY_LEN=280 ERR=(none)
+CHOSEN_LEN=80 CHOSEN=MISHE-OO0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01ABCDEFGH
+--- gdb-base.txt ---
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+binding_free (b=0x4e4d4c4b4a494847) at src/cypher/cypher.c:2290
+2290	    for (int i = 0; i < b->var_count; i++) {
+#0  binding_free (b=0x4e4d4c4b4a494847) at src/cypher/cypher.c:2290
+#1  0x000000000040bcb1 in execute_single (store=store@entry=0x5ad2a0, q=q@entry=0x5e1150, project=project@entry=0x546058 "test", max_rows=max_rows@entry=100000, rb=rb@entry=0x7fffffffa050) at src/cypher/cypher.c:4448
+--- gdb-alt.txt ---
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+binding_free (b=0x5a5a5a5a5a5a5a5a) at src/cypher/cypher.c:2290
+2290	    for (int i = 0; i < b->var_count; i++) {
+#0  binding_free (b=0x5a5a5a5a5a5a5a5a) at src/cypher/cypher.c:2290
+#1  0x000000000040bcb1 in execute_single (store=store@entry=0x5ad2a0, q=q@entry=0x5e1150, project=project@entry=0x546058 "test", max_rows=max_rows@entry=100000, rb=rb@entry=0x7fffffffa050) at src/cypher/cypher.c:4448
+--- fixed40.out ---
+KIND=RETURN ITEMS=40 RC=-1 ROWS=0 COLS=0 QUERY_LEN=344 ERR=failed to parse query
+CHOSEN_LEN=80 CHOSEN=MISHE-OO0123456789ABCDEFZZZZZZZZMNOPQRSTWXYZabcdefghijklmnopqrstuvwxyz01ABCDEFGH
+--- canary40.out ---
+*** stack smashing detected ***: terminated
+RESULT: PASS=16 FAIL=0

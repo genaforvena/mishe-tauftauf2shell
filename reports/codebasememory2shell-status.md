@@ -68,8 +68,11 @@ and `evidence/mcp-tool-*.log`), including recover-mode `WRITE of size 68` at
 `func_bufs[32]`, 16384 bytes past the last in-bounds buffer, with the chosen
 fixture bytes. The stdio row is a local process; W9 adds a real loopback HTTP
 `/rpc` request reaching the same sink. Neither is a remote request: there is no
-agent-influenced query, no grooming, pointer/IP, command, witness verdict or
-rung 5. The advisory's AV:L/PR:L vector remains consistent.
+agent-influenced query, no grooming, no usable pointer/IP in the pinned build,
+no command, witness verdict or rung 5. The advisory's AV:L/PR:L vector remains
+consistent. W23 adds chosen-byte control of a live pointer in a lab-only build
+with the stack canary disabled; that is a compiler-configuration mechanic, not
+a property of the pinned build.
 
 W6 closes the tool-path byte-choice gap: a distinct 68-byte identifier in the
 indexed fixture (`STEEREDabcdefghij…`) was staged at the OOB destination as
@@ -377,3 +380,41 @@ validation of every assertion, not a claim of such a run. No pin, harness,
 matrix row, canonical evidence file, build, grade or research lane changed;
 the witness verdict remains UNKNOWN, not contradicted. The witness wall at
 16:14Z still names #4426 as a next bounded incident.
+
+## W23 — canary-off pointer probe (lab-only compiler variant; no grade change)
+
+Question: W10/W12 bounded saved-RIP and live-pointer use in the pinned build
+by its stack canary. Does the same unbounded `RETURN` overflow become pointer
+control when only that compiler hardening is removed? One bounded experiment:
+`lab/frontier/codebasememory2shell/canary-off-pointer.sh` rebuilds the two
+hash-verified pinned trees with `-fno-stack-protector -no-pie` plus a
+lab-authored `pointer-probe.c` direct-call harness whose 80-byte property puts
+`GHIJKLMN` at property offset 24..31 (the `-DALT_CHOSEN` control puts
+`ZZZZZZZZ` there).
+Run: `bash lab/frontier/codebasememory2shell/canary-off-pointer.sh
+/tmp/cbm-w23-final > evidence/canary-off-pointer.txt` (~2.5 min, gdb needed).
+
+Captured at 20:52–20:55Z on the final committed script: 4/4 pins OK, four
+builds, **16 PASS / 0 FAIL**.
+N=32 in the canary-off vulnerable build stays clean (`ROWS=1 COLS=32`). N=40
+faults at a live pointer in the real engine:
+`binding_free (b=0x4e4d4c4b4a494847) at src/cypher/cypher.c:2290`, reached
+from `execute_single` at `:4448`; the bytes are `GHIJKLMN` at property offset
+24..31. In the otherwise identical `-DALT_CHOSEN` build the pointer becomes
+`0x5a5a5a5a5a5a5a5a` — changing only attacker-chosen property bytes changes
+the value at a chosen offset of a live engine pointer. Fixed pin with the same
+flags and N=40 rejects at parse time (`RC=-1`, `failed to parse query`), and
+the vulnerable pin rebuilt *with* its canary aborts in `__stack_chk_fail`
+(rc 134, `*** stack smashing detected ***`) on the same 80-byte property.
+Raw gdb backtraces and all control output are in
+`lab/frontier/codebasememory2shell/evidence/canary-off-pointer.txt`.
+
+Scope: this is chosen-byte control of a data pointer in a *synthetic compiler
+configuration* of the pinned source, exercised by a local direct call. The
+shipped/pinned canary build still aborts before that pointer is used, no saved
+IP or control-flow target was changed, no benign marker was executed, and
+there is no wire request, grooming, command or rung 5. It narrows "no pointer
+control" to the pinned build; it does not upgrade the grade. No pin, canonical
+matrix row, harness used by `run-witness.sh`, witness request or verdict
+changed. Witness W221 (20:13Z) was working on php2shell #4510/#4513/#4535;
+#4426 still has no verdict, UNKNOWN rather than contradicted.
