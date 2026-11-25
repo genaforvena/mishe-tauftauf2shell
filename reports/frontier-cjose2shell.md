@@ -385,8 +385,10 @@ called by the library; that needs an absolute lab-known address and has no
 wire path. The witness independently replayed that W188 limb from a clean
 archive and ESTABLISHED it AS LABELED (#3566): rung-4 mechanics in a groomed
 direct-call process, not a deployed path. No deployed server, real credential,
-address leak or shell command. Advisory reachability in a real deployment and
-any RCE claim remain **UNKNOWN**; rung 5 not attempted and not established.
+address leak or shell command. W212 now measures **lab pre-auth reachability**
+in a real consumer (no cookie, no POST, no prior request). Advisory
+reachability in a real deployment and any RCE claim remain **UNKNOWN**;
+rung 5 not attempted and not established.
 
 W190 checked a jansson length-corruption info-leak hypothesis against the
 pinned object layout and the W183 heap log: the string's `value` pointer sits
@@ -442,3 +444,30 @@ pointer source; no new experiment or rung.
   buffer here that could carry a control datum. This is a source-scope
   structural negative corroborating the W189/W195 heap scans, not a wire
   result: no grade change, no r5.
+- W212 measured the advisory's pre-auth reachability claim inside the lab
+  consumer, without a cookie, POST, state or prior request. Source route in
+  the pinned local mod_auth_openidc 2.4.15.1 tree: `src/oauth.c:578`
+  `oidc_oauth_validate_jwt_access_token()` makes an OCT JWK from
+  `OIDCClientSecret`, `:592` calls `oidc_jwt_parse`, and `jose.c:1144` calls
+  `cjose_jwe_import()`/`cjose_jwe_decrypt()`; `oidc_alg2kty()` (`jose.c:225`)
+  maps A128KW to OCT. In real Apache on 127.0.0.1:18444 with `AuthType
+  oauth20`, one `GET /private` carrying an `Authorization: Bearer` compact
+  JWE with a 56-byte raw `encrypted_key` logged
+  `W2B_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3` and
+  `W2B_AES_UNWRAP_KEY_REACHED`; the response was HTTP 401 after integrity
+  failure. With the lab config's 16-byte KEK and an RFC 3394 wrap of
+  `MISHE-W212-` x 4 + `MISH`, gdb at vulnerable `jwe.c:602` saw
+  `cek_len_before=32` and all 48 chosen bytes at `jwe->cek[0..47]`. The
+  statically fixed-cjose module on 127.0.0.1:18445 rejected the same 56-byte
+  wire token with `CJOSE_ERR_INVALID_ARG` at `jwe.c:599` before unwrap; its
+  40-byte control reached unwrap and failed integrity at `:608`. Two failed
+  setups are preserved: a missing `OIDCRedirectURI` prevents Apache startup,
+  and a 29-byte client secret fails `AES_set_decrypt_key` at pinned
+  `jwe.c:585` before unwrap. `sh
+  lab/frontier/cjose2shell/w2/run-oauth-bearer.sh` replays all three lanes in
+  9 PASS / 0 FAIL; two live-tree consecutive runs were identical, no listener
+  left. This is rung-4 pre-auth reachability and chosen-byte control in a
+  real consumer at the labeled loopback/lab-KEK scope. It is not deployed
+  reachability: the lab config supplies the OCT KEK, ASLR is not defeated,
+  there is no pointer/IP target, benign command or wire-derived address, and
+  the witness has not replayed it. No grade change or r5.

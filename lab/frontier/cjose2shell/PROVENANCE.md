@@ -887,3 +887,47 @@ The W199 closing paragraph above previously called that geometry UNKNOWN;
 it now names the measured negative and the one thing that is genuinely
 unmeasured (which jansson object identity occupies `cek+48` there).
 No build, token, listener, grade or ceiling change; no new witness offer.
+
+## W212 — unauthenticated bearer compact JWE reaches the unwrap (2026-11-25 07:39-07:45Z)
+
+Artifacts (all under `lab/frontier/cjose2shell/w2/`): `apache-oauth-bearer.conf`
+(127.0.0.1:18444, `AuthType oauth20`, 16-byte
+`OIDCClientSecret "0123456789abcdef"`),
+`apache-oauth-bearer-fixed.conf` (127.0.0.1:18445, same values, fixed module),
+`gdb-oauth-bearer.cmd`, `gdb-oauth-bearer-chosen.cmd`,
+`gdb-oauth-bearer-fixed.cmd`, `probe-oauth-bearer.py` and the one-command
+`run-oauth-bearer.sh`. Binaries are the already-pinned W198 pair: vulnerable
+`mod_auth_openidc/.libs/mod_auth_openidc.so` sha256
+`f1be85cfaf9e2db3935bd5a775bd8e76406e64817a46be72e6517cd1fd6b24cd` and
+fixed `mod_auth_openidc-fixed/.libs/mod_auth_openidc.so` sha256
+`928b7a905e7fc2bda135a3297692fa61bf94ec64dd406e8ab35b4b82f24d9456`;
+neither was rebuilt. No new source, no external probe, one loopback listener
+at a time, stopped by the runner.
+
+Replay: `sh lab/frontier/cjose2shell/w2/run-oauth-bearer.sh` prints
+`REPLAY_OAUTH_BEARER: 9 PASS / 0 FAIL`. Two consecutive live-tree runs at
+07:44Z printed the same nine checks and `ss -ltn` showed no 18444/18445
+listener afterwards. Raw request/response/gdb evidence:
+`evidence/oauth-bearer{,-chosen,-fixed}-*.log`, `evidence/oauth-bearer*{56,40}-*.bin`.
+Normalized gdb log hashes from the final replay:
+`evidence/oauth-bearer-gdb.log` `affd6074f0a5d38d91f9900f07390a893201e102251d4894b13ee9bf612fe91a`,
+`evidence/oauth-bearer-chosen-gdb.log` `e0f99ae63da08dd53900384a2bcd4e92b1651bdc0ae2c919a8632a8a62e93cef`,
+`evidence/oauth-bearer-fixed-gdb.log` `76993077ec8aea93c3214f45e868eefcf78597f16a4d5135f894189f14a00204`.
+Request bytes contain a fresh random IV/ciphertext per run, so they are not
+hash-pinned; the 56-byte raw `encrypted_key` length and header are fixed.
+
+Measured: vulnerable oversized and 40-byte `Bearer` GETs both reach
+`W2B_AES_UNWRAP_KEY_REACHED`; with config-derived KEK the post-unwrap dump at
+`jwe.c:602` shows `cek_len_before=32` and 48 chosen bytes; fixed rejects the
+oversized token at `jwe.c:599` before unwrap and only reaches unwrap for the
+40-byte control. Earlier failed setups are preserved: absent
+`OIDCRedirectURI` caused Apache exit 01, and a 29-byte client secret reached
+`_cjose_jwe_decrypt_ek_aes_kw` but failed `AES_set_decrypt_key` at pinned
+`jwe.c:585`, so no unwrap. The fixed lane's first replay check also failed
+because its error log accumulated a prior run's `line: 599`; the runner now
+truncates that log at startup and two subsequent runs were identical.
+
+Ceiling: lab pre-auth reachability and chosen-byte control in a real consumer,
+not a deployment. The lab configuration supplies the OCT KEK; there is no
+cookie/state requirement but also no pointer/IP target, ASLR defeat, benign
+command, real credential or r5. Author-only until independently replayed.

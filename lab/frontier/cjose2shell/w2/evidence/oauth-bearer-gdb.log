@@ -1,0 +1,23 @@
+Function "oidc_oauth_validate_jwt_access_token" not defined.
+Breakpoint 1 (oidc_oauth_validate_jwt_access_token) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "cjose_jwe_decrypt" not defined.
+Breakpoint 3 (cjose_jwe_decrypt) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 4 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 5 (AES_unwrap_key) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W2B_OAUTH_VALIDATE_JWT_REACHED
+W2B_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2B_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2B_AES_KW_DECRYPT_REACHED raw_len=56 cek_len=0 jwk_kty=3
+W2B_AES_UNWRAP_KEY_REACHED
+W2B_OAUTH_VALIDATE_JWT_REACHED
+W2B_OIDC_JWE_DECRYPT_IMPL_REACHED
+W2B_CJOSE_JWE_DECRYPT_REACHED jwk_kty=3
+W2B_AES_KW_DECRYPT_REACHED raw_len=40 cek_len=0 jwk_kty=3
+W2B_AES_UNWRAP_KEY_REACHED
