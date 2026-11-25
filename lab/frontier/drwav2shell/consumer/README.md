@@ -153,3 +153,21 @@ Two source-index angles bound the remaining r5 prerequisite:
 No native remote-input metadata-API caller was measured. Index coverage is
 not proof of absence, and no wire-driven corruption, command, shell or r5 is
 claimed.
+
+## Further index angles and candidate triage (W11, 2026-11-25 20:52Z)
+
+Two attempted corpora failed to serve results: grep.app returned a Vercel
+Security Checkpoint page and searchcode.com returned `404`; neither is an
+absence result. Three vendors newly surfaced by web search were triaged:
+Zoundream's client (vendors 0.14.6, `drwav_init()` only at `audio.c:66`),
+RavEngine and YARP (no indexed metadata-API call outside their headers).
+The previously unsearched `drwav_open_*_with_metadata()` spelling and
+`drwav_init_file_with_metadata_w` were covered by pinned-header flag sites
+plus Sourcegraph/Debian queries; no caller was found. OpenRBX's header
+history has one commit, `3bcb593f9388`, which introduced fixed 0.14.6 with
+its metadata path, so there is no vulnerable earlier revision of that
+network-facing consumer.
+
+No new native network metadata caller was measured; index coverage is not
+proof of absence. Raw queries and responses:
+`evidence/w11-index-angles.txt`. Grade unchanged, no replay repeated.

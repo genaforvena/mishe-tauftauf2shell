@@ -1,0 +1,64 @@
+W11 index angles + candidate triage, 2026-11-25 20:44-20:51Z
+Scope: source provisioning / read-only code search. No probe left the host.
+
+=== Angle 5a: grep.app (new corpus) — BLOCKED ===
+GET https://grep.app/api/search?q=drwav_init_with_metadata
+Response: 25098 bytes of HTML, title "Vercel Security Checkpoint"
+(checked /tmp/grepapp-init.json; not JSON, so no results were obtained).
+No conclusion about caller absence follows from this failure.
+
+=== Angle 5b: searchcode.com (new corpus) — UNAVAILABLE ===
+GET https://searchcode.com/api/codesearch_I/?q=drwav_init_with_metadata
+Response: literal "404" (19 bytes). No results obtained.
+
+=== Angle 5c: web search, non-header dr_wav vendors ===
+Query: "drwav_init_with_metadata" -site:github.com -"dr_wav.h"
+New vendor candidates surfaced (not previously in W6/W8/W9/W10):
+  Zoundream/zoundream_client_c  third_party/dr_wav.h
+  RavEngine/RavEngine           deps/dr_wav/dr_wav.h (banner v0.13.16)
+  YARP                          voiceBoxSynthesizer/dr_wav.h (docs page)
+Others were advisory/docs pages, upstream dr_wav.h or already-known repos.
+
+Zoundream at 2897a8c31a51ba35455473220bdd6218f6e14770:
+  third_party/dr_wav.h banner "dr_wav - v0.14.6 - TBD" (fixed)
+  audio.c:66  drwav_init(&file->wav, on_read, on_seek, on_tell, file->stream, NULL)
+  api.c, client_core.c, audio.c contain no *_with_metadata call.
+  Ruled out: neither vulnerable bytes nor the metadata API.
+
+Sourcegraph v=V3 regex query (header excluded), one per repo:
+  context:global repo:github.com/<repo> patternType:regexp
+  /drwav_init_[a-z_]*with_metadata\(/ count:100 -file:dr_wav\.h
+Results: 0 content matches for RavEngine/RavEngine, robotlocomotion/yarp,
+Zoundream/zoundream_client_c and a bare yarp repo filter.
+Positive control with the same query shape:
+  repo:github.com/NaGaa95/sphaira ->
+  sphaira/source/utils/audio.cpp:473 drwav_init_with_metadata(...)
+so the empty results are a real index negative, not a query syntax failure.
+
+=== Angle 5d: unexamined API spellings ===
+Pinned vulnerable header flag sites (grep DRWAV_WITH_METADATA):
+  291 define; 3265 parse gate; 3912 init_with_metadata;
+  5390 init_file_with_metadata; 5402 init_file_with_metadata_w;
+  5664 init_memory_with_metadata.
+W9's regex covered only drwav_init_*_with_metadata. The remaining public
+spelling family drwav_open_*_with_metadata was checked:
+  Sourcegraph context:global patternType:regexp
+  /drwav_open_[a-z_]*with_metadata\(/ count:1000 -file:dr_wav\.h
+  fork:yes archived:yes -> 0 content matches.
+  Debian Code Search /grep q=drwav_open_file_with_metadata -path:dr_wav.h
+  -> "# 0 results in 0 packages".
+No new native caller from that family in either corpus.
+
+=== Angle 5e: OpenRBX history (W6 candidate) ===
+GET https://api.github.com/repos/OpenRBX-org/OpenRBX/commits?path=3rdparty/dr_libs/dr_wav.h&per_page=30
+Single entry: sha 3bcb593f9388, 2026-11-21T06:25:49Z,
+"Replace FMOD with OpenAL Soft". The metadata audio path and the
+byte-identical fixed 0.14.6 header arrive together; no earlier revision of
+this consumer has a dr_wav metadata path to downgrade to vulnerable bytes.
+
+=== Disposition ===
+No native network-facing metadata-API caller on vulnerable bytes measured.
+These are bounded index negatives, not proof of absence. Grade unchanged:
+rung 3 real consumer/public API; rung 4 file-chosen control flow to a lab
+marker; no wire-driven corruption, command, shell, service or r5. No witness
+verdict on W1/W2/W3/W4/W9/W10/W11 as of 20:51Z.

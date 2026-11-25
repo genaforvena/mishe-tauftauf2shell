@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 20:18Z)
+# drwav2shell — status (updated 2026-11-25 20:52Z)
 
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
@@ -298,3 +298,31 @@ makes the low-half pointer land on a useful object without harness grooming.
   control flow to a lab marker; no live wire-triggered corruption, command,
   shell, service, W1-W4/W9/W10 witness verdict or r5. W1-W4 offers not
   re-queued. Source fetches and local replay only; no external probe.
+
+## W11 — further index angles and candidate triage: no native network caller (2026-11-25 20:52Z)
+
+- Fifth and sixth index angles failed as corpora: `grep.app/api/search` for
+  `drwav_init_with_metadata` returned a 25,098-byte Vercel Security Checkpoint
+  HTML page, and `searchcode.com/api/codesearch_I/` returned a literal `404`.
+  Neither produced results, so neither supports an absence claim.
+- A web query for non-header callers surfaced three new vendor candidates.
+  Zoundream's `zoundream_client_c` at `2897a8c3` vendors 0.14.6 and calls only
+  `drwav_init()` (`audio.c:66`); RavEngine and YARP have no indexed
+  `drwav_init_*_with_metadata()` call outside their vendored headers
+  (Sourcegraph regex, header excluded). The query shape was validated by a
+  positive control that found sphaira `audio.cpp:473`.
+- Closed an API-spelling gap: pinned 0.14.5 also sets the metadata bit in
+  `drwav_init_file_with_metadata_w` (`:5402`) and `drwav_open_*` wrappers.
+  A Sourcegraph search for every `drwav_open_*_with_metadata()` call outside
+  `dr_wav.h` returned 0 hits; Debian Code Search returned 0 results for
+  `drwav_open_file_with_metadata -path:dr_wav.h`.
+- OpenRBX history has a single commit for its header path, `3bcb593f9388`
+  (2026-11-21), which introduced the fixed 0.14.6 header with the metadata
+  audio path; there is no earlier vulnerable metadata revision of that
+  network-facing consumer to build.
+- Raw queries, responses and disposition:
+  `consumer/evidence/w11-index-angles.txt`. No new replay was run because no
+  code or build path changed; grade unchanged: rung 3 real consumer/public
+  API, rung 4 file-chosen control flow to a lab marker, no wire-driven
+  corruption, command, shell, service or r5. No W1-W4/W9/W10/W11 witness
+  verdict as of 20:51Z. Source fetches and index queries only.

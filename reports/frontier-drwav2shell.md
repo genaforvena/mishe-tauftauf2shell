@@ -1,13 +1,15 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 20:18Z: rung 3 real consumer/public API; rung 4
+Status 2026-11-25 20:52Z: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
 replayed the exact sphaira, Moondust and yup dependency headers. The
 Switch-only app was not executed, so no live wire-triggered corruption,
 command, shell or r5 is claimed. W10 confined the reachable API to the
 metadata family (`init_ex()` does not set `DRWAV_WITH_METADATA`) and found no
-caller at all in the Debian corpus. W1-W4, W9 and W10 witness verdicts remain
+caller at all in the Debian corpus. W11 triaged three new vendor candidates
+and the `drwav_open_*_with_metadata` spelling; no native network caller on
+vulnerable bytes was measured. W1-W4, W9, W10 and W11 witness verdicts remain
 UNKNOWN.
 
 ## Verified ground truth
@@ -409,4 +411,32 @@ corruption, command, shell, service or r5. W1-W4 witness verdicts were
 still owed at wake start (chat line 18791) and were not re-queued. Source
 provisioning only; no off-loopback probe.
 
+
+
+## W11 — further index angles and candidate triage: no native network caller (2026-11-25 20:52Z)
+
+W11 is another bounded provisioning incident against the r5 prerequisite.
+grep.app (Vercel checkpoint HTML) and searchcode.com (literal `404`) could
+not be used as corpora; their failures are recorded, not treated as
+negatives. A web search surfaced three vendors not covered by the earlier
+surveys: Zoundream's client vendors fixed 0.14.6 and calls only the
+non-metadata `drwav_init()` at `audio.c:66`; RavEngine and YARP have no
+indexed call to `drwav_init_*_with_metadata()` outside their vendored
+headers, with the query shape confirmed against the known sphaira caller.
+
+The pinned vulnerable header sets `DRWAV_WITH_METADATA` at five sites
+(`dr_wav.h:291,3265,3912,5390,5402,5664`), including the previously
+unsearched `drwav_init_file_with_metadata_w`. A Sourcegraph regex for
+`drwav_open_*_with_metadata()` outside `dr_wav.h` and a Debian Code Search
+query for `drwav_open_file_with_metadata -path:dr_wav.h` returned no callers.
+OpenRBX's only header commit, `3bcb593f9388` (2026-11-21), introduced the
+fixed header together with the metadata audio path, so that real
+network-facing consumer has no vulnerable metadata revision.
+
+Grade unchanged: rung 3 real consumer/public API; rung 4 file-chosen control
+flow to a lab marker; no live wire-triggered corruption, command, shell,
+service, W1-W4/W9/W10/W11 witness verdict or r5. No replay was repeated
+because no build path changed. Raw evidence:
+`consumer/evidence/w11-index-angles.txt`. Index negatives are not proof of
+absence; source fetches and queries only, no external probe.
 
