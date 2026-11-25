@@ -35,3 +35,12 @@ realbuild/status-reuse-231
 realbuild/status-wire-reuse-vuln
 realbuild/status-wire-reuse-fixed
 realbuild/status-wire-reuse-231
+realbuild/prefix-plain/
+realbuild/err-plain-build/
+realbuild/assuan-plain-build/
+realbuild/gpgme-plain-build/
+realbuild/gpgme-plain-fixed-build/
+realbuild/status-reuse-plain-vuln
+realbuild/status-reuse-plain-fixed
+realbuild/evidence/reuse-plain-*.out
+realbuild/evidence/reuse-plain-*.rc

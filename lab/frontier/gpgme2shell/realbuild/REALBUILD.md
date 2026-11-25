@@ -48,6 +48,8 @@ sh run-real-gpg.sh
 sh run-wire.sh
 sh run-wire-reuse.sh
 sh run-reuse.sh
+sh build-plain.sh
+sh run-plain.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
@@ -55,6 +57,10 @@ network contact and writes raw output to `evidence/real-*.out` / `.rc`.
 `sh run-reuse.sh` adds 24 assertions on the second-operation path below.
 `sh run-wire-reuse.sh` adds 55 assertions on the wire-fed second-operation
 path; raw output is in `realgpg/evidence/wire-reuse-*.out` / `.rc` (gitignored).
+`sh build-plain.sh` reuses the provisioned trees to build libgpg-error,
+libassuan and GPGME 2.2.0 plus the patched copy with plain `CFLAGS='-g -O0'`
+and no sanitizer, into a separate `prefix-plain`; `sh run-plain.sh` adds 13
+assertions on the plain-glibc outcome below.
 
 `make-realkeys.sh` generates four loopback-only throwaway OpenPGP keys with
 the host `/usr/bin/gpg` (empty passphrase, no network). A 1200-character UID
@@ -80,9 +86,10 @@ visible in the real `IMPORTED` status callback before the early return;
 
 `run-real-gpg.sh` uses local key material; the wire section below adds a
 loopback-only HKP response. There is no allocator-metadata claim, no
-pointer/IP/command control and no rung 5. Plain (non-ASan) glibc outcome for
-the real build is UNKNOWN; only the ASan builds are asserted. Witness replay
-of the real paths is pending; an author transcript is not acceptance.
+pointer/IP/command control and no rung 5. The real-build plain-glibc outcome
+is now measured below (glibc 2.39 aborts on the second free); only the ASan
+builds are asserted for the deeper call-site evidence. Witness replay of the
+real paths is pending; an author transcript is not acceptance.
 
 ## Fake-engine trigger (pinned control)
 
@@ -106,6 +113,20 @@ first free; the patched build and stock 2.3.1 run both operations and
 receive the second callback's bytes. Raw output is in
 `evidence/reuse-{vuln,fixed,231}.out` / `.rc`. This is still ASan-only
 rung-4 mechanics: no allocator-metadata, pointer, IP or command control.
+
+## Plain-glibc outcome (no sanitizer)
+
+`build-plain.sh` builds real GPGME 2.2.0 and the fix-patched copy without
+ASan (plain `CFLAGS='-g -O0'`, separate `prefix-plain`) and links
+`status_reuse.c` against both. On glibc 2.39, `run-plain.sh` gives
+`PASS=13 FAIL=0`: the vulnerable driver rc 134 with `free(): double free
+detected in tcache 2` after its callback printed `arglen=1200
+byte[1000]=0x48`, and op2 never starts; the patched driver rc 0, starts op2
+and receives `op_marker=Z arglen=20` before a clean release. Raw output is
+in `evidence/reuse-plain-{vuln,fixed}.out` / `.rc`. The allocator's detector
+aborts before any metadata or control-flow use: this is a negative result
+for a plain-glibc control path, not an exploit. The parent statement
+harness's contradictory plain revisions remain recorded separately.
 
 ## Loopback wire path
 

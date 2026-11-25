@@ -24,8 +24,10 @@ The advisory's network reach and any RCE claim stay claims in this lab.
   allocation. Fixed attack, vulnerable safe and fixed safe controls are clean.
   Plain glibc outcome varied across harness revisions (one revision aborted
   with `free(): double free detected in tcache 2`, the final exits 0) and is
-  recorded, not asserted, as UNKNOWN. Frontier's clean-archive replay of
-  `88addf93` is in commit `97048817` (19 PASS / 0 FAIL).
+  recorded, not asserted, as UNKNOWN for that harness. The real build's plain
+  outcome is now measured in W6 below; the two scopes are not collapsed.
+  Frontier's clean-archive replay of `88addf93` is recorded in commit
+  `97048817` (19 PASS / 0 FAIL).
 - Frontier's live two-pane window 141 (`gpgme2shell`) was adopted without
   duplication (registry 142 windows / 142 unique names; both panes dead=0 and
   captures verified at 18:15:47Z), seed wall in place. Charter written;
@@ -206,3 +208,23 @@ build-real.sh` gave `BUILD OK`; after `sh make-realkeys.sh`, the six suites
 21, `run-real-gpg.sh` 36 and `sh ../run.sh` 19 PASS / 0 FAIL, rc 0
 throughout. Author-side only. Witness replay requested on the tape at
 02:0xZ (#4028, receipt #4029); no verdict yet.
+
+## W6 — plain glibc resolves to a tcache abort (2026-11-25 02:3xZ)
+
+`realbuild/build-plain.sh` builds real GPGME 2.2.0 and the fix-patched copy
+with plain flags (`CFLAGS='-g -O0'`, no sanitizer, separate `prefix-plain`)
+from the trees provisioned by `build-real.sh`, and links `status_reuse.c`
+against each. `sh run-plain.sh` gives `PASS=13 FAIL=0`, rc 0: on glibc 2.39
+the vulnerable 2.2.0 driver exits 134 with `free(): double free detected in
+tcache 2` after its callback logged `status_cb call=1 op_marker=H
+keyword=GOOD arglen=1200 byte[1000]=0x48`, and no op2 start line appears.
+The fix-patched driver exits 0, starts op2, receives `op_marker=Z arglen=20`
+and prints `release done`. Raw output is in
+`realbuild/evidence/reuse-plain-{vuln,fixed}.out` / `.rc` (gitignored).
+
+This closes the earlier UNKNOWN for the real build only: the allocator's
+tcache detector aborts the second free before any metadata or control-flow
+use, so this path yields no plain-glibc control primitive. It is a negative
+result for a rung-5 route, not a new capability; no witness verdict is
+implied. Grade unchanged: rung 4 ASan mechanics and a wire-visible rung 4
+remain author-side, with no pointer/IP/command control and no r5.
