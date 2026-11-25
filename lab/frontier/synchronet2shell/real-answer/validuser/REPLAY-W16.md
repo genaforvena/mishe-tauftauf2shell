@@ -44,3 +44,20 @@ run's assertion defect; both are pre-repair negatives, not target behavior).
 This is an author replay path, not a witness verdict. Timestamps, PIDs and
 socket numbers are volatile; assertion lines, probe hexdumps, auth lines and
 PASS/FAIL counts are compared verbatim.
+
+## Author clean-archive replay (2026-11-25T01:30Z)
+
+`git archive be7d19a2 lab/frontier/synchronet2shell` extracted to
+`/tmp/sync-w16-replay`, with the gitignored `src-tree/` and `provision/`
+symlinked from the live lab, gave rc 0 and `VALIDAVAIL RESULT: PASS=10
+FAIL=0`. All ten client transcripts were byte-identical to the author run
+(vulnerable sessions `c55002fcf22313c850bd824997e41e5337796be78490dbbb4e84fcaa2ad4c316`,
+vulnerable fifth `5e8aadfe1bcbe0758bc0b839747f8c5db84991789f597c96509d126a00c3278f`,
+fixed sessions `dcdcd9038e759341aac8047fee2e0e0df10e3eb173ca642e9d8d05292c3ef985`).
+Both server logs' assertion lines match after removing only the volatile
+`11/25 HH:MM:SS` prefix and four-digit
+socket numbers: vulnerable normalized sha256
+`f29f5e39dbbbd564ddc38a7b4bfea0fa8e03c4f974d78a22c53b8064a459070d`,
+fixed `e0661bc5cbbe0b2d2527f8fd1d2f6b8a3ebbe15b8455e312c3da746c96e40ac1`,
+identical in both runs. Each thread snapshot has four `hrtimer_nanosleep`
+termNode threads. This is an author replay, not a witness verdict.

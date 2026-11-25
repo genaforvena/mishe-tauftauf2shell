@@ -535,6 +535,11 @@ off48=00000000` lines, five `Attaching to Node` lines, five password
 successes, no refusal. Both server logs have zero `SSH_ANYAUTH` lines. Raw
 transcripts and thread snapshots: `real-answer/validuser/
 availability-evidence/`; replay recipe `REPLAY-W16.md`.
+Author clean `git archive be7d19a2` replay at 01:30Z scored **10 PASS /
+0 FAIL**, rc 0: all ten client transcripts byte-identical, and both server
+logs' assertion lines identical after removing only timestamps and socket
+numbers (vulnerable normalized sha256 `f29f5e39…a459070d`, fixed
+`e0661bc5…6c96e40ac1`). Author replay, not a witness verdict.
 
 Two pre-repair negatives are kept rather than erased: the first driver run
 scored 9 PASS / 1 FAIL because an assertion looked for a server-side login
