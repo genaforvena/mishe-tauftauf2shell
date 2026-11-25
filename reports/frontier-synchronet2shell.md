@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21/W22 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -810,3 +810,22 @@ reproduced 5 PASS / 0 FAIL and the same probe bytes; receipt
 `evidence/CLEAN-ARCHIVE.md`. Not a witness verdict. No pointer/IP or command
 path, no measured DoS rate and no rung 5; the advisory's availability ceiling
 is unchanged.
+
+## W23 — W21 live chosen-pointer replay is stable over three fresh runs (author)
+
+W21's shipped-3.20b wire result had a single live run. To measure the missing
+reproducibility fact, `release-label/term320b/real320b/run-determinism.sh`
+runs the unmodified W21 driver three times (10:46:51Z–10:47:45Z), each with a
+fresh loopback server on fresh ports and a rebuild of the same pinned
+`db9c5d6f` tree. Result **13 PASS / 0 FAIL**, rc 0: every run printed
+`RESULT: PASS=4 FAIL=0`, the 40-byte control left `first=(nil) last=(nil)`,
+the 64-byte chosen TERM produced
+`first=0x465541544f4f2d45 last=0x5a5a5a5a46554154` with `cv=4853494d`, and
+each session reached `Node 1 destructor begin` with no `destructor end`.
+Normalizing away only timestamps/prefixes, the probe payload plus teardown
+marker hash identically across all three runs
+(full sha256 `291d85a5beef73d415858d77bcad41f0d1f8552510c39771ba09a64705da5559`); `answer.cpp` was restored after
+the sweep. Receipt: `release-label/term320b/real320b/evidence/determinism/
+REPLAY-DETERMINISM.md` with all six server transcripts. No rung change and
+no new claim: this is author evidence of stability, not a witness verdict,
+and it says nothing about pointer/IP control, command execution or r5.

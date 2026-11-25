@@ -1,0 +1,6 @@
+patching file src/sbbs3/answer.cpp
+PASS real 3.20b answer(): 40-byte control leaves adjacent fields zero
+PASS real 3.20b answer(): chosen MISH at +44, E-OO/TAUF at +48, TAUF/ZZZZ at +56
+PASS chosen TERM session reached sbbs_t teardown
+PASS gdb fault frame is the chosen-pointer consumer
+RESULT: PASS=4 FAIL=0
