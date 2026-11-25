@@ -16,6 +16,11 @@
   stayed byte-identical `0x1e00000500000001`, and those bytes do not occur in
   either crafted file. The fatal pointer is allocator-derived stale data, not
   file-chosen. Pointer control through this OOB element: NOT OBSERVED (UNKNOWN).
+- Extended sweep: nine variants with an OB value of length 8/12/16/24/32/40/
+  48/64/96 bytes (distinctive `0x4a` fill) all showed the same stale
+  `Value.V` word at the same store offset; no length put file bytes or a
+  file-influenced pointer there. Simple adjacent-chunk grooming by crafted
+  DICOM values is a bounded negative; deeper grooming remains UNKNOWN.
 - Grade unchanged: rung 3 from crafted file bytes in the real reader, rung 4
   chosen tag bytes at the chosen OOB slot with a plain crash. No file control
   of the dereferenced pointer, no IP/control flow, no command, no wire path,

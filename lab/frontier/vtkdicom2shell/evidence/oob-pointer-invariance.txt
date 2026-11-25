@@ -26,3 +26,14 @@ The OOB element's stale Value.V is decreferenced by the real Set() that
 follows the OOB insert; this is the plain-build SIGSEGV, not a destructor.
 Grade unchanged: rung 4 chosen tag bytes at the chosen OOB slot; no pointer
 control, no IP/control-flow, no command, no wire path, no witness verdict.
+
+Extension — value-size sweep (same wake). The intermediate (0008,1107)
+element was replaced by an OB value of 0x4a bytes of length
+8/12/16/24/32/40/48/64/96 (files 282..370 bytes). gdb snapshot of the final
+insert in all nine cases:
+  Value.V = 0x1e00000500000001 (identical word, identical store offset
+  0x...5b58 / Value at 0x...5b60).
+No length places file bytes (0x4a...) or a file-influenced pointer in the OOB
+element's stale Value.V. The simple "groom the adjacent chunk with a crafted
+DICOM value" hypothesis is closed for this construct; deeper allocator
+grooming remains UNKNOWN, not demonstrated.
