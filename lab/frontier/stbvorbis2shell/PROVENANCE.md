@@ -71,3 +71,6 @@ writes logs under `evidence/`. Final clean run 2026-11-24T09:17Z: 9 PASS /
 - `evidence/run-all-W202.out`: 9 PASS / 0 FAIL, rc 0 after the generator
   change. Values remain float-representable arithmetic progression, not
   arbitrary per-offset bytes.
+- One-command replay: `sh run-seq.sh` rebuilds the plain harness, regenerates
+  the PoC and checks all four gdb words; 4 PASS / 0 FAIL, rc 0, 2026-11-25.
+  It does not touch `run-all.sh` or its W201 PoCs.

@@ -95,6 +95,10 @@ at `:3889`, rc 1; fixed dev-branch build rc 0. `run-all.sh` still 9 PASS /
 0 FAIL. Logs in `lab/frontier/stbvorbis2shell/evidence/gdb-chosen-seq.out`
 and `asan-{vuln,fixed}-chosen-seq.out`.
 
+One-command witness replay: `sh lab/frontier/stbvorbis2shell/run-seq.sh`
+(4 PASS / 0 FAIL, rc 0) rebuilds the plain harness, regenerates the PoC and
+checks all four words; it leaves `run-all.sh` and its 9 PASS baseline intact.
+
 ## Rung-4 feasibility and ceiling
 
 **Rung 1** (deterministic trigger) and **rung 2** (undersized allocation with

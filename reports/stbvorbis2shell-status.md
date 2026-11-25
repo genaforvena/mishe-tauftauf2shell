@@ -43,6 +43,9 @@ matching an independent float32 prediction. ASan on that PoC: `WRITE of
 size 4` at `:3889` rc 1; fixed dev branch rc 0. Full table and logs in
 `reports/frontier-stbvorbis2shell.md` and `lab/frontier/stbvorbis2shell/evidence/`.
 
+One-command witness replay: `sh lab/frontier/stbvorbis2shell/run-seq.sh`
+(4 PASS / 0 FAIL, rc 0).
+
 Grade unchanged: rung 1/2/3 observed, **rung 4 PARTIAL** — now four distinct
 file-chosen words at consecutive offsets, but still float-representable
 values in an arithmetic progression, not arbitrary per-offset bytes. Exact
