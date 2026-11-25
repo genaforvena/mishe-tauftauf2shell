@@ -378,3 +378,27 @@ Clean-archive receipt at `115ae976` (18:04Z): archive
 `6d3399d2c9d19b36d616325913399fc55a61deeb07d60e09e04d79f418c326be`
 is byte-identical to the live tree, with `CAND_COUNT 0` / `RESULT NONE`.
 Author-side replay, not a witness verdict.
+
+## W25 — late-allocation-state scan (2026-11-25 18:4xZ)
+
+W15/W18/W23/W24 scanned the write window at the vulnerable store and left a
+later-created object UNKNOWN. With `build-plain` and `build-nopie` present:
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w25.sh
+```
+
+`replay-w25.sh` drives `New(); Import(truncated.pcf); Save(...)`, stops at
+`fvimportbdf.c:1751 if glyph < 0`, saves `encs`, sets a later breakpoint at
+`sfd.c:1671`, continues and dumps the same 128 KiB window at the resulting
+stop. Both builds hit `glyph=-1 i=3` and then abort at the corrupted free
+with `double free or corruption (out)` before the later breakpoint. The
+PIE scan is `CAND_COUNT 0` / `RESULT NONE` (hash
+`313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76`,
+byte-identical to W15/W23); non-PIE is `CAND_COUNT 5` / `RESULT ASCII_ONLY`
+(hash `2c980b3dbe6842de7666460e55bbd1ce886ec91ff9c50cb3ece659aad77f63c0`,
+all short printable fragments). Expected oracle: 8/8 checks, rc 0, final
+line `REPLAY_W25_OK: 8 checks, 0 failed`. Method, hashes and limits in
+`LATESTATE.md`. Author-side negative, no witness verdict, no grade change,
+no r5; a PCF/grooming variant that survives the free, a GUI callback or a
+deliberately planted called function pointer remains UNKNOWN.

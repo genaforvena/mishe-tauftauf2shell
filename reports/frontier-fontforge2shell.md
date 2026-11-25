@@ -325,6 +325,17 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   No branch, marker, command or r5; a deliberate function-pointer groom,
   GUI, later-created objects and other compiler/flag combinations remain
   UNKNOWN. No witness verdict.
+- W25 (`LATESTATE.md`, `replay-w25.sh`, author-side, no grade change):
+  the late-allocation-state lane is bounded. In both real headless builds
+  the negative-glyph store (`glyph=-1 i=3`) is followed by glibc's
+  `double free or corruption (out)` before the later `Save()` breakpoint;
+  the same 128 KiB window at that abort has no code pointer (PIE
+  `RESULT NONE` with the W15/W23-identical hash
+  `313c4ce4…e75db76`; non-PIE `RESULT ASCII_ONLY`, five printable
+  fragments). `replay-w25.sh` passes 8/8, rc 0. No branch, marker,
+  command or r5; this trigger never reaches a later-created object,
+  and a surviving variant or deliberate groom stays UNKNOWN. No witness
+  verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
