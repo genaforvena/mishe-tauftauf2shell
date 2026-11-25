@@ -1,0 +1,62 @@
+--- a/test.cpp
++++ b/test.cpp
+@@ -1412,6 +1412,51 @@
+     return true;
+ }
+ 
++void test_connection_reliable_block_fragment_default_config()
++{
++    // W6: stock defaults are maxBlockSize=262144, blockFragmentSize=1024
++    // (include/yojimbo_config.h:147-148), an exact multiple. A peer-sent
++    // full-size final fragment must be accepted without reaching the guard.
++    TestMessageFactory messageFactory( GetDefaultAllocator() );
++
++    double time = 100.0;
++
++    ConnectionConfig config;
++    config.numChannels = 1;
++    config.channel[0].type = CHANNEL_TYPE_RELIABLE_ORDERED;
++
++    check( config.channel[0].maxBlockSize == 256 * 1024 );
++    check( config.channel[0].blockFragmentSize == 1024 );
++
++    Connection receiver( GetDefaultAllocator(), messageFactory, config, time );
++
++    const int maxFragmentsPerBlock = config.channel[0].GetMaxFragmentsPerBlock();
++    const int blockFragmentSize = config.channel[0].blockFragmentSize;
++    check( maxFragmentsPerBlock == 256 );
++
++    const int numFragments = maxFragmentsPerBlock;
++    const int fragmentId = numFragments - 1;
++    const int fragmentSize = blockFragmentSize;
++
++    uint8_t buffer[4096];
++    memset( buffer, 0, sizeof( buffer ) );
++    WriteStream stream( buffer, sizeof( buffer ) );
++    check( SerializeRawBlockFragmentPacket( stream, maxFragmentsPerBlock, blockFragmentSize, numFragments, fragmentId, fragmentSize ) );
++    stream.Flush();
++    const int packetBytes = stream.GetBytesProcessed();
++    check( packetBytes > 0 );
++
++    const bool processed = receiver.ProcessPacket( NULL, 0, buffer, packetBytes );
++    check( processed );
++
++    receiver.AdvanceTime( time );
++    check( receiver.GetErrorLevel() == CONNECTION_ERROR_NONE );
++
++    printf( "MISHE-DEFAULT-CFG accepted maxBlockSize=%d fragmentSize=%d fragmentId=%d packetBytes=%d\n",
++            config.channel[0].maxBlockSize, fragmentSize, fragmentId, packetBytes );
++    fflush( stdout );
++}
++
+ void test_connection_reliable_block_fragment_overflow()
+ {
+     // Regression test: a peer sends a reliable-ordered block fragment whose final fragment
+@@ -2946,6 +2991,7 @@
+         RUN_TEST( test_connection_reject_empty_packet );
+         RUN_TEST( test_connection_unreliable_rejects_block_fragment );
+         RUN_TEST( test_connection_reliable_block_fragment_on_disabled_blocks );
++        RUN_TEST( test_connection_reliable_block_fragment_default_config );
+         RUN_TEST( test_connection_reliable_block_fragment_overflow );
+         RUN_TEST( test_connection_reliable_over_budget_packet );
+ 

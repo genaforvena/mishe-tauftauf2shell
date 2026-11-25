@@ -3,3 +3,7 @@ harness/fixed-asan
 harness/vuln-plain
 harness/fixed-plain
 upstream/
+upstream-defaultcfg/
+/defaultcfg-asan.out
+defaultcfg-config.log
+defaultcfg-build.log

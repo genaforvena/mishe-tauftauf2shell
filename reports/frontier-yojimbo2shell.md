@@ -11,6 +11,9 @@ benign `touch` command in the wire input and observes the marker file in the
 victim, with fixed-channel and safe-input controls marker-absent. Author-only
 rung 5 MECHANICS at the labeled scope; independent witness replay is required
 for ESTABLISHED and has not happened.
+W6 measures the stock-config ceiling: the default 256KiB/1KiB channel is an
+exact multiple and accepts the largest legal final fragment without a fault;
+the same binary still faults on the 1100/500 non-multiple control.
 
 ## Verified ground truth (claim source)
 
@@ -344,3 +347,42 @@ occurs, but the command limb needs the non-PIE static trampoline address.
 Host `kernel.randomize_va_space` was not changed; no leak, no gdb-forced
 pointer and no ASLR-realistic derivation is claimed. Realistic PIE/ASLR
 exploitability stays UNKNOWN.
+
+## W6 — stock block config does not overflow (2026-11-25 04:59Z)
+
+`include/yojimbo_config.h:147-148` sets the unmodified defaults
+`maxBlockSize = 256*1024` and `blockFragmentSize = 1024`, so
+`GetMaxFragmentsPerBlock() == 256` and the final fragment starts at
+offset 255*1024 == 261120; a full 1024-byte copy ends exactly at the
+262144-byte allocation. To measure rather than infer this, the pinned parent
+tree was copied to `lab/frontier/yojimbo2shell/upstream-defaultcfg/` (the
+witness replay tree `upstream/` was not touched) and
+`defaultcfg-test.patch` added a test that hand-serializes the largest legal
+final fragment through real `Connection::ProcessPacket` with an otherwise
+stock `ConnectionConfig`, then registers it immediately before the existing
+1100/500 regression. ASan build flags match W1.
+
+The vulnerable parent channel gives, in one run:
+
+```
+MISHE-DEFAULT-CFG accepted maxBlockSize=262144 fragmentSize=1024 fragmentId=255 packetBytes=1030
+ERROR: AddressSanitizer: heap-buffer-overflow ... WRITE of size 500
+  ReliableOrderedChannel::ProcessPacketFragment (source/yojimbo_reliable_ordered_channel.cpp:716)
+  Connection::ProcessPacket (source/yojimbo_connection.cpp:340)
+```
+
+The stock fragment is accepted with no ASan report and no channel error; the
+immediately following 1100/500 control faults at the pinned sink, so the same
+binary demonstrates that the non-multiple channel is the load-bearing
+configuration. Overall rc 1 comes from that intentional control. Evidence
+`harness/evidence/defaultcfg-asan.out` sha256
+`f44f042138230f9068f81235eec602e823fffa73b88e92cc414272fca871f906`;
+replay with `sh lab/frontier/yojimbo2shell/defaultcfg-run.sh` (script sha256
+`4f19dad2539fd0e20e4ad68b62c06d14913808b100c7ed1918d2910a994043b3`, patch
+sha256 `985c55c6a3851c73bec738d90548ddc40c0a15bf345228babfa04838b4c0ec90`).
+
+This closes the "stock config" question as a measured negative, not a new
+rung: exploitability still needs an explicitly configured non-multiple
+channel, authentication, post-auth pointer control and (for the command limb)
+the non-PIE static trampoline. No external system was contacted; all sockets
+in the W3/W4/W5 replays were loopback-only.
