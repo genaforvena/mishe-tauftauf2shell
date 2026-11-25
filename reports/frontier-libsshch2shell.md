@@ -280,3 +280,64 @@ which changes on every rerun; the deterministic ASan allocator addresses stay.
 W6's `run-exec.sh` smoke regenerated three committed `real/evidence-*.out`
 files with new timestamps and addresses; those incidental changes were
 restored from HEAD, so the pinned evidence is unchanged.
+
+## W9: exhaustive data-callback survey in the pinned tree (2026-11-25 11:09Z)
+
+No replay, no new claim, no grade change. Thread (1) from W7 — "does a real
+application free a remotely closed channel from inside its data callback?" —
+was surveyed to completion in the pinned vulnerable tree
+`lab/frontier/libsshch2shell/real/libssh-vuln.tar.gz` (extracted as
+`real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/`). All nine
+`.channel_data_function =` registrations in that tree were checked; none
+contains a channel free, so the shipped code does not supply the
+app-free-inside-`channel_rcv_data()` precondition. The lab harness remains the
+only source of that condition; the accepted ceiling stands.
+
+Why the callback matters, from `src/channels.c`: `channel_rcv_data()` starts at
+line 593, invokes the registered data callback at lines 693-703, then uses
+`channel->counter` (705), `ssh_buffer_pass_bytes(buf, rest)` (708) and
+`grow_window(session, channel)` (710). A channel freed by that callback is
+therefore used again after it returns — the precise UAF shape the lab models.
+
+Registration-by-registration result:
+
+- `examples/sshd_direct-tcpip.c:548` → `my_channel_data_function()` (323-354).
+  Its error path calls `stack_socket_close()` (349), but that function
+  (231-241) only pushes a cleanup node onto `cleanup_stack`. The sole
+  `ssh_channel_free()` is at line 134 inside `do_cleanup()` (121-140), called
+  once at line 737, after `ssh_event_dopoll()` at 732. No free inside the
+  callback; this closes the loophole left by W7's main-loop check.
+- `examples/ssh_X11_client.c:170` → `copy_channel_to_fd_callback()` (641-664),
+  writes to a file descriptor. The eof/close callback
+  `channel_close_callback()` (667-687) only removes the event fd and closes
+  the temp fd; it is not a data callback and frees no channel.
+- `examples/ssh_server.c:768` → `data_function()` (281-298), writes to child
+  stdin; no free.
+- `examples/sample_sftpserver.c:336` → library
+  `sftp_channel_default_data_callback()` (`src/sftpserver.c:2107-2143`). On a
+  process failure it sends eof and closes the channel but explicitly comments
+  "Leave freeing resources on caller"; `sample_sftpserver.c` contains no
+  `sftp_free`/`ssh_channel_free` at all.
+- `src/connector.c:120` → `ssh_connector_channel_data_cb()` (589+, library
+  internal): routes data to an fd or another channel. `connector.c` has no
+  `ssh_channel_free` or `ssh_connector_free` call anywhere.
+- `tests/server/test_server/default_cb.c:874` → `channel_data_cb()` (271-298),
+  writes to child stdin; its eof callback (301+) does nothing but log.
+- `tests/server/test_server/sftpserver_cb.c:266` →
+  `sftp_channel_data_callback()` (226-249), which calls the library default
+  above and asserts a version field; no free.
+- The remaining frees seen by text search are not in data callbacks:
+  `tests/client/torture_client_callbacks.c:155,178,204,230` are in test bodies
+  after the API call returns; `tests/pkd/pkd_daemon.c:223` is an error branch
+  of the channel-open-request callback; `tests/fuzz/ssh_client_fuzzer.c:215`
+  is the `out:` label of the main path; `tests/client/` and
+  `tests/server/` direct-tcpip tests free after `ssh_channel_close()` in the
+  test body.
+
+Disposition: thread (1) stays open as an application-side property, not a
+shortcut available in the pinned libssh tree. Finding a third-party consumer
+that frees a channel inside a data callback would be a new, separately
+provisioned investigation; none is claimed here. Thread (2) (ASLR-independent
+address) remains open exactly as recorded in W7. `file` on all three lab
+binaries (`real_wire`, `real_wire-vuln`, `real_wire-fixed`) reports PIE, so
+no existing build offers a fixed code address either.
