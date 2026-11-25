@@ -1,0 +1,7 @@
+MODE=exrcheck -s -c, W202 chain re-derived by gdb fixed point
+SWEEP_FIXPOINT=dest=0x55555582a6f0 slot=1088 (only fixed point in scan)
+ASAN_SINK_RC=1 heap-buffer-overflow READ=3072 internal_zstd.c:472=1
+ASLR=off in plain and gdb runs (setarch -R / disable-randomization on)
+SLOT=0x900000511 EXPECTED=0x55555582ab70 TYPE=31
+CHAIN_COMMAND=not reached MARKER=absent
+RESULT PASS

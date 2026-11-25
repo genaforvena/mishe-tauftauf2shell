@@ -1,0 +1,23 @@
+Breakpoint 1 at 0x108450: file /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c, line 451.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p209-stream-chain.exr 
+Breakpoint 1, sort2_4ByteChannels_tiled (inPtr=0x555555844750 "", num_samples_grid=num_samples_grid@entry=0x55555582a730, channels=channels@entry=0x7fffffffdb98, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=0x555555829af0 " Q\200\367\377\177", sorting_lookup=0x55555582a740) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:451
+451	{
+#0  sort2_4ByteChannels_tiled (inPtr=0x555555844750 "", num_samples_grid=num_samples_grid@entry=0x55555582a730, channels=channels@entry=0x7fffffffdb98, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=0x555555829af0 " Q\200\367\377\177", sorting_lookup=0x55555582a740) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:451
+#1  0x000055555565db6b in exr_undo_zstd_v1 (uncompressed_size=<optimized out>, uncompressed_data=<optimized out>, comp_buf_size=<optimized out>, compressed_data=<optimized out>, decode=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+#2  internal_exr_undo_zstd (decode=0x7fffffffda90, compressed_data=<optimized out>, comp_buf_size=<optimized out>, uncompressed_data=0x555555829af0, uncompressed_size=3072) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+#3  0x0000555555634543 in exr_uncompress_chunk (decode=0x7fffffffda90) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+
+Program received signal SIGSEGV, Segmentation fault.
+exr_attr_list_destroy (ctxt=ctxt@entry=0x555555829570, list=list@entry=0x555555829648) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0x555555829570, list=list@entry=0x555555829648) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x000055555561a1c7 in internal_exr_destroy_part (ctxt=0x555555829570, cur=0x555555829640) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x000055555561ac57 in internal_exr_destroy_parts (ctxt=0x555555829570) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
+#3  internal_exr_destroy_context (ctxt=0x555555829570) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:463
+#4  0x000055555561880b in exr_finish (pctxt=0x7fffffffdd38) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/context.c:223
+#5  0x00005555555ce8db in Imf_3_5::(anonymous namespace)::runCoreChecks (reduceTime=false, reduceMemory=false, numBytes=1140, data=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1853
+#6  Imf_3_5::checkOpenEXRFile (data=data@entry=0x5555558290f0 "v/1\001\002\b", numBytes=numBytes@entry=1140, reduceMemory=reduceMemory@entry=false, reduceTime=reduceTime@entry=false, runCoreCheck=runCoreCheck@entry=true) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+#7  0x000055555558a070 in exrCheck (filename=0x7fffffffe6b3 "cases/p209-stream-chain.exr", reduceMemory=reduceMemory@entry=false, reduceTime=reduceTime@entry=false, useStream=useStream@entry=true, enableCoreCheck=enableCoreCheck@entry=true) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+#8  0x000055555558706b in main (argc=<optimized out>, argv=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166

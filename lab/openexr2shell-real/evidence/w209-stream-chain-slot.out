@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x10b910: file /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p209-stream-chain.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0x555555829570, list=list@entry=0x555555829648) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+SLOT=0x900000511 EXPECTED=0x55555582ab70 TYPE=31
+0x55555582ab30:	0x0000000900000511

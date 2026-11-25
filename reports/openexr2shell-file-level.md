@@ -2627,3 +2627,57 @@ remains witness-confirmed ESTABLISHED AS LABELED at its ASLR-off local-file
 scope; W203-W209 are author-only negatives. Would change the grade: a fresh
 stream-mode chain with controls, a usable ASLR-on address, or a wire-fed
 affected process.
+
+W209 clean-archive receipt (23:09Z): `git archive 3b0e48f5
+lab/openexr2shell-real` into `/tmp/w209-clean`, with the gitignored `src/`,
+three build trees and the two crafted EXRs symlinked from the live checkout,
+returned `RESULT PASS` rc 0 with the same `eebdce4a...` evidence hash.
+Receipt: `lab/openexr2shell-real/evidence/w209-clean-archive.out`. Author
+replay, not a witness verdict; grade unchanged.
+
+## W210: rebuilding the W202 chain for stream mode — negative (2026-11-25 23:1xZ)
+
+W209 explicitly left open a freshly re-derived stream-mode chain. Prediction:
+the W202 generator's two-variable fixed point (`dest`, `entries[0]` slot) can
+be re-measured under `-s -c` and then runs `system("touch /tmp/w202m")`.
+
+Method: a throwaway driver imports `cases/make_w202_poc.py`, replaces its gdb
+measurement command line with `exrcheck -s -c` on a separate output
+(`cases/p209-stream-chain.exr`), and keeps the W202 dump, chunk mutator, libc
+addresses and command bytes unchanged. Iteration from the file-path fixed
+point cycles `0x55555582a6f0 -> ...a700 -> ...a710 -> ...a6f0` without
+converging; a bounded sweep of `dest = 0x55555582a6c0..0x...a770` (step
+`0x10`) times slots 1072/1088/1104 finds exactly one fixed point:
+`dest=0x55555582a6f0 slot=1088`, 36 measurements, preserved in
+`evidence/w210-sweep.log`. The regenerated 1140-byte EXR has sha256
+`2e6d246c7842c87d6038917b26452ee7c96849906021cc557eba6c2708e2da19`; it still
+reaches `heap-buffer-overflow READ of size 3072` at pinned
+`internal_zstd.c:472` under ASan.
+
+Result: NEGATIVE for the command chain. Three plain ASLR-off
+(`setarch -R`) runs of `exrcheck -s -c cases/p209-stream-chain.exr` return
+rc 139 with no marker; gdb faults in `exr_attr_list_destroy` at
+`attributes.c:305`, never reaching `opaque.c:79`. At that site the live slot
+holds `list->entries[0] = 0x900000511`, while the forged attribute address is
+`0x55555582ab70` and its `type` really is 31 (`EXR_ATTR_OPAQUE`). The slot
+address was predicted correctly; its *contents* are not the file-chosen
+pointer in stream mode, because the interleave/copy shape differs from the
+file-path dump. No command, marker, chosen IP or side effect was observed.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w210-stream-chain-negative.sh` -> `RESULT PASS` rc 0 twice, stable
+evidence hash
+`022e8bba8a5b2b95a64861e8d9f57d8d61cfbc2eef98f535a7d5e56c235f7726` in
+`evidence/w210-stream-chain-negative.out`. The harness pins three source
+files, the crafted EXR and the sweep log, asserts the measured fixed point,
+checks the ASan sink, requires marker absence in three plain runs and verifies
+the stale slot value under gdb. Raw traces: `evidence/w210-asan-stream-chain.out`,
+`evidence/w209-stream-chain-{plain,gdb,backtrace,slot}.out`.
+
+Disposition: keep the negative. This closes the particular rebuild of W202's
+chain using the W195 dump and the W202 mutator for stream mode; it does not
+prove that a different dump, channel layout or mutator cannot rebuild one.
+Grade unchanged: W202 remains witness-confirmed ESTABLISHED AS LABELED at its
+ASLR-off local-file scope; W209 and W210 are author-only and rung 5 stays
+UNKNOWN. Would change the grade: a working stream-mode chain with controls,
+an ASLR-on address route, or a wire-fed affected process.

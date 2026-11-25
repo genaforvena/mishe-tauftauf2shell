@@ -1,0 +1,9 @@
+W209 clean-archive replay, 2026-11-25 23:09Z
+archive: git archive 3b0e48f5 lab/openexr2shell-real -> /tmp/w209-clean
+symlinked from the live checkout: src/, build-vuln-asan/, build-fixed-asan/,
+build-vuln-plain/ and the gitignored cases/poc.exr, cases/p202-memcpy-system.exr
+command: sh harness/w209-stream-mode-negative.sh
+result: RESULT PASS rc 0; three plain ASLR-off runs rc 134 with no marker
+evidence hash (working tree and clean archive, identical):
+eebdce4aa80f40eda60c89db0f6bce3bf2bda3585a200e71d32770f72f8ebafd  evidence/w209-stream-mode-negative.out
+Author replay, not a witness verdict; grade unchanged.
