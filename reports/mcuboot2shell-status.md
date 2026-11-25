@@ -195,3 +195,21 @@ ignored object, reproduced all four rows from `wire-groom-run.sh`:
   `boot_serial_input()`), no real encrypted image/key TLV (key load
   shimmed), no ASan in W4, no pointer/IP/command control, no benign command
   execution, no witness verdict. Author evidence only.
+
+## 2026-11-25 17:17Z — W5 rung-5 feasibility negative (target mind)
+
+Gdb (`sh real/smp/stack-layout.sh`) dumped the real native SMP process stack at
+the wrapper in `boot_enc_decrypt()`. Relative to the 4096-byte VLA base,
+saved return-address slots are `+5048` (`decrypt_image_inplace`), `+5096`
+(`boot_handle_enc_fw`) and `+5688` (`bs_upload`); the wrapper's own saved rip
+is at `-8`. Controlled OOB writes start above all of them (`6144` covers
+`[+6144,+8192)`, `7168` covers `[+7168,+8192)`) and the words there are
+groomed ciphertext/image data, not pointers. The `4104` row logs garbage
+`len=1929027880 dst_delta=40415` and SIGSEGVs, so it is not a controlled
+pointer write either. No chosen byte was observed in a saved return slot.
+
+Decision: return-address overwrite toward rung 5 is structurally closed at
+this native host build/frame geometry; grade unchanged (rung 4 DEMONSTRATED,
+rung 5 UNKNOWN). Not a universal closure: a Zephyr/real-MCU frame layout was
+not tested. Evidence `real/smp/evidence/stack-layout.txt`, recipe
+`real/smp/stack-layout.sh`. W3/W4 witness verdicts remain UNKNOWN.

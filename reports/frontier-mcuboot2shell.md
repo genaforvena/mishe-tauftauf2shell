@@ -242,3 +242,32 @@ no serial-port framing parser (the packet goes straight to
 shimmed), no ASan in W4, no pointer/IP/command control, no benign command
 execution and no witness replay. Rung 5 remains UNKNOWN. Witness verdict on
 W4 is UNKNOWN (author evidence only).
+
+## W5 rung-5 ceiling: no controlled write reaches a saved return address (2026-11-25 17:17Z, target mind)
+
+A gdb dump of the real native SMP process (breakpoint in the interposing
+`boot_enc_decrypt()` wrapper) measured the stack geometry at the
+wire-reachable OOB offsets. With the 4096-byte VLA base as origin, saved
+return-address slots sit at `+5048` (`decrypt_image_inplace`), `+5096`
+(`boot_handle_enc_fw`) and `+5688` (`bs_upload`); the wrapper's own saved rip
+is at `-8`, below the buffer. Their values are code addresses
+(`0x5555…`), confirmed in `info frame` output.
+
+The two controlled OOB writes start above every one of those slots:
+`ih_hdr_size=6144` writes `[+6144,+8192)` (2048 bytes) and `7168` writes
+`[+7168,+8192)` (1024 bytes). The words in that region are groomed
+ciphertext and image data (`0x4696a06174877e44` includes the TLV magic
+`7e44`); no code address (`0x5555…`) and no saved frame pointer (`0x7fff…`)
+appears there. The `4104` row is not a controlled write either: on a fresh
+`sh real/smp/run.sh` the wrapper logged `len=1929027880 dst_delta=40415`
+and the process SIGSEGVed (139). No chosen byte was observed in any saved
+return-address slot.
+
+Decision: the return-address-overwrite route to rung 5 is **structurally
+closed at this native host build and frame geometry**. Grade unchanged:
+rung 4 DEMONSTRATED through real SMP dispatch/CBOR; rung 5 UNKNOWN. This is
+not a universal closure — a Zephyr/native_sim or real-MCU build has a
+different frame layout and was not tested. Witness verdict on W4/W3 still
+UNKNOWN. Reproduce with `sh real/smp/stack-layout.sh` →
+`real/smp/evidence/stack-layout.txt`; raw words and frame map are in that
+file. Negative preserved; do not re-claim W4 as rung 5.

@@ -1,4 +1,4 @@
-PORT=37151
+PORT=40625
 SMP op=2 len=15396 group=1 id=1
 SMP wire_plaintext=WIRE-CHOICE-1234
 BS_UPLOAD len=15396 ok=1 decoded=4 img_size=15364 off=0 chunk_len=15364
@@ -8,7 +8,7 @@ SHIM flash_area_erase off=0 len=32768
 SHIM flash_area_write off=0 len=15360 first=3d
 SHIM flash_area_write off=15360 len=8 first=07
 BS_UPLOAD write_done rc=0 curr_off=0 img_size=15364
-BS_UPLOAD out rc=0 curr_off=15364 img_size=15364 fap=0x5ee0c3fe1020
+BS_UPLOAD out rc=0 curr_off=15364 img_size=15364 fap=0x5816812fa020
 BS_UPLOAD calling boot_handle_enc_fw
 PIN TLV at off=15360 magic=6907 tot=8
 PIN read_image_size rc=0 src_size=15368 hdr_size=7168 img_size=8192

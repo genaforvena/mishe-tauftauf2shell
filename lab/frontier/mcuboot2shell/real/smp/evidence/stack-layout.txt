@@ -1,0 +1,96 @@
+Breakpoint 1 at 0x1dbb: file smp-host.c, line 123.
+Breakpoint 2 at 0x158c: file smp-host.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+=== WRAPPER HIT delta=6144 base=0x7fffffff8a00 ===
+#0  boot_enc_decrypt (enc=enc@entry=0x7fffffff9a90, off=0, sz=0, blk_off=0, buf=0x7fffffffa200 "D~\207ta\240\226F\246\363\330i\225z\003\301@v\311\367e\321f@B]\261\214\216\f\311F\241+jϧp\021-n\225\315\3645\214\237x\350'\016G\316\326\373_S\344z\221\245\335{Yv\276\232\307,\213\242\230\2210K\26554u\023-\244\362Eu\326q\361\312\361\262+\311\370", <incomplete sequence \350>) at smp-host.c:79
+#1  0x0000555555555a81 in decrypt_region_inplace (sz=4096, off=<optimized out>, hdr=<optimized out>, fap=0x555555561020 <g_fa>, enc_data=0x7fffffff9a90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:178
+#2  decrypt_image_inplace (fa_p=fa_p@entry=0x555555561020 <g_fa>, hdr=hdr@entry=0x7fffffff9dc0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:293
+#3  0x0000555555555ca9 in boot_handle_enc_fw (flash_area=0x555555561020 <g_fa>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:330
+#4  0x0000555555556e2f in bs_upload (buf=buf@entry=0x7fffffffa0d8 "\244eimage", len=len@entry=14372) at boot_serial-host.c:1507
+Stack frame at 0x7fffffff8a00:
+ rip = 0x55555555558c in boot_enc_decrypt (smp-host.c:79); saved rip = 0x555555555a81
+ called by frame at 0x7fffffff9dc0
+ source language c.
+ Arglist at 0x7fffffff89a8, args: enc=enc@entry=0x7fffffff9a90, off=0, sz=0, blk_off=0, buf=0x7fffffffa200 "D~\207ta\240\226F\246\363\330i\225z\003\301@v\311\367e\321f@B]\261\214\216\f\311F\241+jϧp\021-n\225\315\3645\214\237x\350'\016G\316\326\373_S\344z\221\245\335{Yv\276\232\307,\213\242\230\2210K\26554u\023-\244\362Eu\326q\361\312\361\262+\311\370", <incomplete sequence \350>
+ Locals at 0x7fffffff89a8, Previous frame's sp is 0x7fffffff8a00
+ Saved registers:
+  rbx at 0x7fffffff89c8, rbp at 0x7fffffff89d0, r12 at 0x7fffffff89d8, r13 at 0x7fffffff89e0, r14 at 0x7fffffff89e8, r15 at 0x7fffffff89f0, rip at 0x7fffffff89f8
+Stack frame at 0x7fffffff9dc0:
+ rip = 0x555555555a81 in decrypt_region_inplace (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:178); saved rip = 0x555555555ca9
+ inlined into frame 2, caller of frame at 0x7fffffff8a00
+ source language c.
+ Arglist at unknown address.
+ Locals at unknown address, Previous frame's sp is 0x7fffffff8a00
+ Saved registers:
+  rbx at 0x7fffffff89c8, rbp at 0x7fffffff89d0, r12 at 0x7fffffff89d8, r13 at 0x7fffffff89e0, r14 at 0x7fffffff89e8, r15 at 0x7fffffff89f0, rip at 0x7fffffff89f8
+Stack frame at 0x7fffffff9dc0:
+ rip = 0x555555555a81 in decrypt_image_inplace (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:293); saved rip = 0x555555555ca9
+ called by frame at 0x7fffffff9df0, caller of frame at 0x7fffffff9dc0
+ source language c.
+ Arglist at 0x7fffffff9db0, args: fa_p=fa_p@entry=0x555555561020 <g_fa>, hdr=hdr@entry=0x7fffffff9dc0
+ Locals at 0x7fffffff9db0, Previous frame's sp is 0x7fffffff9dc0
+ Saved registers:
+  rbx at 0x7fffffff9d88, rbp at 0x7fffffff9db0, r12 at 0x7fffffff9d90, r13 at 0x7fffffff9d98, r14 at 0x7fffffff9da0, r15 at 0x7fffffff9da8, rip at 0x7fffffff9db8
+Stack frame at 0x7fffffff9df0:
+ rip = 0x555555555ca9 in boot_handle_enc_fw (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:330); saved rip = 0x555555556e2f
+ called by frame at 0x7fffffffa040, caller of frame at 0x7fffffff9dc0
+ source language c.
+ Arglist at 0x7fffffff9db8, args: flash_area=0x555555561020 <g_fa>
+ Locals at 0x7fffffff9db8, Previous frame's sp is 0x7fffffff9df0
+ Saved registers:
+  rbx at 0x7fffffff9de0, rip at 0x7fffffff9de8
+Stack frame at 0x7fffffffa040:
+ rip = 0x555555556e2f in bs_upload (boot_serial-host.c:1507); saved rip = 0x5555555571d5
+ called by frame at 0x7fffffffa0d0, caller of frame at 0x7fffffff9df0
+ source language c.
+ Arglist at 0x7fffffff9de8, args: buf=buf@entry=0x7fffffffa0d8 "\244eimage", len=len@entry=14372
+ Locals at 0x7fffffff9de8, Previous frame's sp is 0x7fffffffa040
+ Saved registers:
+  rbx at 0x7fffffffa008, rbp at 0x7fffffffa010, r12 at 0x7fffffffa018, r13 at 0x7fffffffa020, r14 at 0x7fffffffa028, r15 at 0x7fffffffa030, rip at 0x7fffffffa038
+-- words base+6104 .. base+6424 --
+0x7fffffffa1d8:	0xcccccccccccccccc	0xcccccccccccccccc
+0x7fffffffa1e8:	0xcccccccccccccccc	0xcccccccccccccccc
+0x7fffffffa1f8:	0xcccccccccccccccc	0x4696a06174877e44
+0x7fffffffa208:	0xc1037a9569d8f3a6	0x4066d165f7c97640
+0x7fffffffa218:	0x46c90c8e8cb15d42	0x2d1170a7cf6a2ba1
+0x7fffffffa228:	0x789f8c35f4cd956e	0x5ffbd6ce470e27e8
+0x7fffffffa238:	0x597bdda5917ae453	0x98a28b2cc79abe76
+0x7fffffffa248:	0x13753435b54b3091	0xf171d67545f2a42d
+0x7fffffffa258:	0xe814f8c92bb2f1ca	0x625a21702f618b00
+0x7fffffffa268:	0x841e4db0e08b62ac	0xe2e35daf6e93203c
+0x7fffffffa278:	0xda902a931ec574c8	0x3ffcac5f0f21fa58
+0x7fffffffa288:	0xa4d31f503baea5f7	0x5450a5822cc86719
+0x7fffffffa298:	0x7e7c4faa56b128c0	0xb53e252ca4c4977a
+0x7fffffffa2a8:	0xc1c25dbc0ac3d101	0xe3f854d7e1d9a29a
+0x7fffffffa2b8:	0xaca3404aa30af370	0xbc5a85f45e3d15da
+0x7fffffffa2c8:	0xafceab4b4ce7f040	0xfc8c6d0d1d768284
+0x7fffffffa2d8:	0x72d45564aca3cd97	0x3df56e69b2c793db
+0x7fffffffa2e8:	0x2c8837eb6fdbc16c	0xaacd191d8df52f0d
+0x7fffffffa2f8:	0x7486e5e4b9f771cd	0x201f99f8b26f5488
+0x7fffffffa308:	0x6a22afa0b70f0af9	0x38f12e5d0a480e96
+=== WRAPPER HIT delta=6144 base=0x7fffffff8a00 ===
+-- words base+6104 .. base+6424 --
+0x7fffffffa1d8:	0xcccccccccccccccc	0xcccccccccccccccc
+0x7fffffffa1e8:	0xcccccccccccccccc	0xcccccccccccccccc
+0x7fffffffa1f8:	0xcccccccccccccccc	0x4696a06174877e44
+0x7fffffffa208:	0xc1037a9569d8f3a6	0x4066d165f7c97640
+0x7fffffffa218:	0x46c90c8e8cb15d42	0x2d1170a7cf6a2ba1
+0x7fffffffa228:	0x789f8c35f4cd956e	0x5ffbd6ce470e27e8
+0x7fffffffa238:	0x597bdda5917ae453	0x98a28b2cc79abe76
+0x7fffffffa248:	0x13753435b54b3091	0xf171d67545f2a42d
+0x7fffffffa258:	0xe814f8c92bb2f1ca	0x625a21702f618b00
+0x7fffffffa268:	0x841e4db0e08b62ac	0xe2e35daf6e93203c
+0x7fffffffa278:	0xda902a931ec574c8	0x3ffcac5f0f21fa58
+0x7fffffffa288:	0xa4d31f503baea5f7	0x5450a5822cc86719
+0x7fffffffa298:	0x7e7c4faa56b128c0	0xb53e252ca4c4977a
+0x7fffffffa2a8:	0xc1c25dbc0ac3d101	0xe3f854d7e1d9a29a
+0x7fffffffa2b8:	0xaca3404aa30af370	0xbc5a85f45e3d15da
+0x7fffffffa2c8:	0xafceab4b4ce7f040	0xfc8c6d0d1d768284
+0x7fffffffa2d8:	0x72d45564aca3cd97	0x3df56e69b2c793db
+0x7fffffffa2e8:	0x2c8837eb6fdbc16c	0xaacd191d8df52f0d
+0x7fffffffa2f8:	0x7486e5e4b9f771cd	0x201f99f8b26f5488
+0x7fffffffa308:	0x6a22afa0b70f0af9	0x38f12e5d0a480e96
+=== WRAPPER HIT delta=0 base=0x7fffffff8a00 ===
+=== WRAPPER HIT delta=0 base=0x7fffffff8a00 ===
+[Inferior 1 (process 357994) exited normally]

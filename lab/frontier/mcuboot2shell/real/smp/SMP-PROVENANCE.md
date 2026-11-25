@@ -93,3 +93,34 @@ diff <(grep -v 'printf("BS_UPLOAD\|printf("PIN ' boot_serial-host.c | \
 
 Both diffs must show no functional change (only continuation lines of the
 removed `printf` calls).
+
+## W5 addendum — rung-5 feasibility negative (2026-11-25 17:17Z)
+
+`sh stack-layout.sh` (sha256
+`49f33954dabd7959a7ec1abb5f7a8db3a5887f010a7d9a4201a20d612be5ee29`)
+rebuilds `smp-host`, starts it on loopback, breaks at line 123 to launch the
+client, then breaks in the interposing `boot_enc_decrypt()` wrapper at line
+79 and records a gdb backtrace, `info frame 0..4` and 8-byte words around the
+wire-reachable OOB offsets. Output: `evidence/stack-layout.txt` (addresses
+are ASLR-dependent; the VLA-relative offsets are not).
+
+Measured with VLA base as origin: saved rip for `decrypt_image_inplace` at
+`+5048`, `boot_handle_enc_fw` at `+5096`, `bs_upload` at `+5688`; the
+wrapper's own saved rip at `-8`. Values are code addresses `0x5555…`. The
+controlled `6144` and `7168` writes cover `[+6144,+8192)` and
+`[+7168,+8192)` respectively — both entirely above those slots. Words at
+`+6144` are groomed ciphertext/image data (one contains TLV magic `7e44`);
+no `0x5555…` code address and no `0x7fff…` saved frame pointer appears.
+
+The `4104` row is a crash, not a controlled pointer write: a fresh
+`sh run.sh` logged `REAL_DECRYPT off=0 len=1929027880 blk_off=0
+dst_delta=40415` and `SERVER_RC=139`. Earlier W4 provenance recorded a
+`len=4088 dst_delta=4104` row for this case; both are preserved — the exact
+garbage values vary with stack state, and neither shows a chosen byte in a
+saved return slot. The canonical `run.sh` table (6144/7168 chosen readback,
+2048 control, 4104 crash) reproduced unchanged at 17:16Z.
+
+Conclusion: return-address overwrite toward rung 5 is structurally closed
+at this native host build/frame geometry, not universally (no Zephyr or
+real-MCU frame layout was measured). Grade stands rung 4 DEMONSTRATED, rung
+5 UNKNOWN; no witness verdict on W3/W4.
