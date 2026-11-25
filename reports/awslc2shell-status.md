@@ -430,3 +430,37 @@ control datum. Node is not an official AWS-LC consumer, so this is a source
 shape check conditional on linking the pinned library, not a tested Node
 build. No Node build, no witness replay; grade unchanged: rungs 1-4, r5 UNKNOWN.
 Third-party applications not provisioned here remain UNKNOWN.
+
+## Structural ceiling on a real-caller path (synthesis of W213-W216)
+
+The CVE writes at most `in_len + b` bytes into the caller buffer; the documented
+minimum at `include/openssl/cipher.h:155-158` is `in_len + b - 1`, so the one-byte
+overflow fires only when a caller both (a) carries a withheld block across two or
+more `EVP_DecryptUpdate` calls on one context with padding on, and (b) sizes the
+destination to exactly that documented minimum. Every real caller examined meets
+at most one of the two conditions:
+
+- W213 (all 14 in-tree decrypt callers): single-call PEM/PKCS#8/ticket paths,
+  AEAD/ACVP with padding off, `bssl enc -d` with 17 slack bytes, `speed.cc`
+  over-allocated, and the PKCS#7 cipher BIO immune by chunk arithmetic — no
+  documented-minimum multi-update padded buffer.
+- W214 (ten named projects inspected plus roughly fifty provisioned roots swept):
+  no caller with the carry-plus-exact-fit shape; every real decrypt is
+  single-call on a fresh ctx, padding-disabled, GCM AAD with `out=NULL`, or has
+  at least 17 slack bytes past the documented minimum.
+- W215 (pinned s2n-tls v1.5.16): every CBC path is in-place, block-aligned and
+  called once per context; `cipher.c:190` clears `final_used` on each re-init,
+  so no withheld block crosses records. No documented-minimum allocation.
+- W216 (Node.js v22.11.0 `CipherBase::Update`): the carry precondition does hold,
+  but `:813/:828` allocate `len + block_size` — one byte of slack that absorbs
+  the CVE byte; a throwaway ASan check was clean at 32 bytes and faulted at the
+  31-byte documented minimum.
+
+So no checked real caller offers the conjunction of streaming carry, an exact
+documented-minimum destination and an adjacent control datum; the one-byte
+steering demonstrations stay synthetic harnesses (W1/W204/W205/W208/W212). A
+rung-5 path needs a real network-facing caller meeting all three conditions.
+Unprovisioned third-party applications remain UNKNOWN, so this is a ceiling on
+what was checked, not a proof that no such caller exists. Grade unchanged:
+rungs 1-4, r5 UNKNOWN; author synthesis, no witness replay and no new build,
+ASan or wire run.
