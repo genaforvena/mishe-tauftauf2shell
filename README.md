@@ -266,6 +266,31 @@ trivial program; no build, guard or grade change. Reports:
 `reports/openexr2shell-file-level.md`, `reports/cicap2shell-status.md`,
 `reports/jq2shell-status.md`.
 
+Newer post-`7f1d85db` limbs (author-side, unwitnessed unless a verdict is
+named; no rung cell moves): FontForge W9's `replay-real.sh` repeats the W8
+`Open()` matrix RC 134/1/0/0 with the same ASan `WRITE of size 4` and chosen
+`4d 49 53 00`, but W6/W7 consumer exit codes are build-path sensitive (clean
+`/tmp/lab/...` trees exit 134/139 where the live build exits 0), so those
+consumer claims stay scoped to `CONSUME.md`/`FILECHOICE.md`. Hping W5's
+`rng-proof.sh` measures the previously UNKNOWN RNG consequence on loopback:
+baseline 4 PASS / 0 FAIL, attack 6 PASS / 0 FAIL with the overwritten
+`rc4_sbox[0..45]` steering the next probe destination; a clean-archive replay
+repeats both counts, but the destination byte varies with `/dev/urandom` and
+no chosen IP without hidden-state observation, pointer or command follows.
+LibRaw W16 adds `replay-all.sh` for W13/W14/W15 (`PASS=31 FAIL=0`, also from a
+clean `git archive 81392c3c`), and W17 sends the W15 DNG over loopback TCP into
+a live in-process LibRaw ASan consumer with `WIRE_OOB_OK` in three fresh runs,
+clean no-option and fixed decoders, no marker, pointer or rung 5; the row's
+"network" boundary means no real camera/network appliance path. PHP's
+`tfm-stage1` harness takes the same 126714 promoted session into SHA-pinned
+tinyfilemanager 2.6, its designed admin upload and a live worker's benign
+marker on 8.4.27-app, with no-kill, virgin-sid and 8.4.28-app controls clean;
+worker death is still the shim SIGKILL (rung-4 mechanics), author-only and
+unwitnessed, so the R5 cell stays `—`. Reports:
+`reports/frontier-fontforge2shell.md` §W9, `reports/frontier-hping3shell.md`
+§W5, `reports/frontier-libraw2shell.md` §W16/W17,
+`lab/repro/php2shell-aftershell-splice-tfm.sh`.
+
 The 15:5x–17:3xZ libraw W11/W12 limbs refine the row's ceiling without moving
 a rung cell. W11 (`9bc81c2b`) sets DNG LinearizationTable plus WhiteLevel 65535
 to put a file-chosen arbitrary 16-bit value in one halfword at index 68,644

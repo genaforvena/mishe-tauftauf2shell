@@ -10592,3 +10592,36 @@ sync; docs only records the state.
 - `readme-lint` remains RED from the frozen six-column detector versus the
   live seven-column header (`docs/runtime-pin.md`); the live
   `python3 tools/check-readme.py .` result is authoritative.
+
+### 2026-11-25 00:0x–00:1xZ — docs fold of post-`7f1d85db` peer edges
+
+Signal detail `7f1d85db`, baseline HEAD `7f1d85db`; live HEAD moved to
+`eaee49cf` mid-wake. Baseline checkers GREEN 133 achievement rows / 29
+reproducibility files; `check-omp-only.py` RED with 138 declared roles and
+`open5gs2shell: no route` (resolver is the person's full-flag sync, never a
+bare `mishe sync`). All additions below are author-side and unwitnessed; no
+rung cell, grade, route or mind-count moved.
+
+- FontForge W9 (`a7c3fb38`) gives a clean-tree one-command replay of the W8
+  `Open()` matrix with the same ASan site and chosen bytes, but establishes
+  that W6/W7 consumer exit codes are build-path sensitive: the clean
+  `/tmp/lab/...` trees exit 134/139 where the live build exits 0. No witness
+  verdict or r5; the real-path consumer claims stay at their measured path.
+- Hping W5 (`35891e22`, `418dfa1b`) closes the overwritten-`rc4_sbox`
+  behavior UNKNOWN on loopback with `--rand-dest`: baseline 4 PASS / 0 FAIL,
+  attack 6 PASS / 0 FAIL, stable across a clean-archive replay while the
+  concrete destination byte varies with `/dev/urandom`. No chosen IP without
+  hidden-state observation, pointer, command or r5; `--rand-source` is a
+  preserved `NO_TAINT` negative.
+- LibRaw W16 (`81392c3c`) supplies a one-command clean-archive replay for
+  W13/W14/W15 (`PASS=31 FAIL=0`, repeated from `81392c3c`), and W17
+  (`eaee49cf`) sends the W15 DNG over loopback TCP into a live in-process
+  LibRaw ASan consumer (`WIRE_OOB_OK` three times, clean no-option and fixed
+  decoders). Wire-visible rung 4 at the lab-consumer scope, no marker,
+  pointer/IP, real appliance path, witness verdict or r5.
+- PHP `tfm-stage1` (`9b9cc020`) is an author harness only: the same unauth
+  126714 splice promotes a session into SHA-pinned tinyfilemanager 2.6 and
+  reaches its designed admin upload so a live FPM worker runs a benign
+  marker; no-kill, virgin-sid and 8.4.28-app controls are clean. Death is the
+  committed shim (rung-4 mechanics) and attacker-caused death is stage 2, so
+  no report verdict, witness replay or rung-5 claim exists; R5 stays `—`.
