@@ -40,11 +40,11 @@ NO_INJECT=1 FILL=32 BIN=replay-src/hping3 EXPECT_SHA="$PINNED" \
 assert 4 evidence/rngctl-replay-baseline-proof.out baseline
 
 FILL=32 BIN=replay-src/hping3 EXPECT_SHA="$PINNED" \
-    RUN_TAG=replay-32 EXPECT=attack sh rngctl-proof.sh
+    RUN_TAG=replay EXPECT=attack sh rngctl-proof.sh
 assert 6 evidence/rngctl-replay-32-proof.out fill32
 
 FILL=64 BIN=replay-src/hping3 EXPECT_SHA="$PINNED" \
-    RUN_TAG=replay-64 EXPECT=attack sh rngctl-proof.sh
+    RUN_TAG=replay EXPECT=attack sh rngctl-proof.sh
 assert 6 evidence/rngctl-replay-64-proof.out fill64
 
 FILL=32 BIN=replay-fixed-src/hping3 EXPECT_SHA="$FIXED" \
