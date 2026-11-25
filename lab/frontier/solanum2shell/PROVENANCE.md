@@ -67,3 +67,53 @@ runs the controls; `evidence/` holds raw output.
 - No pointer target, function-pointer adjacency, controlled RIP, command
   execution or R5 evidence. No external system probed; loopback only where
   applicable (none used).
+
+## Real ircd build and loopback S2S KILL (target W1, 2026-11-25 13:5xZ)
+
+Pins re-hash-checked (`m_kill.{vuln,fixed}.c: OK`) and clean git-archive
+replay of `harness/run-all.sh` = 18 PASS / 0 FAIL at 13:41Z. Both real
+revisions were built verbatim from `git archive` snapshots
+(`real-build/{vuln,fixed}-src`, m_kill.c sha256 prefixes f4af269d /
+b1408e51) with meson 1.3.2, `-Dbuildtype=debug -Db_sanitize=address
+-Db_lundef=false -Dopenssl=enabled -Dgnutls=disabled -Dmbedtls=disabled`,
+`ninja -j4`, installed under `/tmp/solanum-{vuln,fixed}-install`.
+
+Loopback lane: one installed ircd at 127.0.0.1:17601 (vuln.conf) or
+:17602 (fixed.conf), a local victim client, and `live/peer_probe.py`
+performing the authenticated S2S handshake (`PASS labsecret TS 6 :2AB`,
+`CAPAB`, `SERVER <63-byte peer name> 1 :...`) before sending
+`:2AB KILL v :x <A*490>`. The peer name is 63 bytes so `sprintf(buf,
+"Killed (%s %s)", source_p->name, reason)` overflows with a reason that
+still fits the 512-byte wire line; the KILL prefix uses the 3-byte SID.
+
+- Vulnerable build, reason 490: `live/vuln-long-490-asan.log` =
+  `ERROR: AddressSanitizer: global-buffer-overflow`, `WRITE of size 564`,
+  `ms_kill ../vuln-src/modules/core/m_kill.c:277` ← `sprintf` ← `vsprintf`,
+  `0 bytes after global variable 'buf' ... of size 512`. KILL reached
+  `ms_kill` (peer probe saw the relayed KILL), PR:H credential required.
+- Fixed build, same 490-byte reason: `live/fixed-long-490-asan.log` has
+  zero ASan reports; the victim got `QUIT :Killed (link.aaa... AAA...)`.
+- Vulnerable build, safe 420-byte reason: `live/vuln-safe-420-asan.log`
+  has zero ASan reports; KILL delivered normally.
+- `bash live/run-controls.sh` = **6 PASS / 0 FAIL** replay of all three
+  controls. `harness/run-all.sh` remains 18 PASS / 0 FAIL stand-in
+  evidence; this real lane supersedes it as the primary evidence.
+
+Negatives and corrected assertions preserved:
+
+- First 510-byte-reason wire attempt had its reason truncated to 484 bytes
+  by the 512-byte line limit; no ASan report. This is a wire-boundary
+  negative, not a candidate disqualifier; the 63-byte peer name plus SID
+  prefix supplies the needed `buf` overhead inside that limit.
+- Initial TLS-disabled builds linked with an unresolved `arc4random_stir`;
+  rebuilt with OpenSSL enabled, which is the configuration used above.
+- A malformed edit left the fixed config's `class "server"` block with a
+  duplicate `connect` line; `-conftest` rejected it and the fixed control
+  was rerun after repair. No fixed-build result rests on that bad config.
+- The replay's first ASan-case assertion expected a victim QUIT, but ASan
+  halts the process before `exit_client` sends it. Assertions now check
+  the relayed KILL for the ASan case and QUIT for the clean cases.
+- No pointer control, chosen-byte readback in the real process image,
+  command execution, or R5. ASan redzones prevent chosen-byte readback
+  in the instrumented build; the earlier plain-build readback remains
+  stand-in evidence only. Witness replay is still owed.

@@ -428,3 +428,19 @@ lab/frontier/xschem2shell/harness/*-vuln-plain
 lab/frontier/xschem2shell/harness/*-fixed-asan
 lab/frontier/xschem2shell/harness/*-fixed-plain
 lab/frontier/xschem2shell/harness/evidence/*.build.log
+
+# Solanum2shell: upstream clone and ASan build trees stay local; configs,
+# replay scripts and small ASan/probe evidence stay tracked.
+lab/frontier/solanum2shell/upstream/
+lab/frontier/solanum2shell/real-build/
+lab/frontier/solanum2shell/live/*-ircd.log
+lab/frontier/solanum2shell/live/*.pid
+lab/frontier/solanum2shell/live/conftest.out
+lab/frontier/solanum2shell/live/fixed-conftest.out
+lab/frontier/solanum2shell/live/vuln-asan-510.log
+lab/frontier/solanum2shell/live/vuln-asan-long.log
+lab/frontier/solanum2shell/live/fixed490-asan.log
+lab/frontier/solanum2shell/live/probe-vuln-510.out
+lab/frontier/solanum2shell/live/probe-vuln-490.out
+lab/frontier/solanum2shell/live/probe-fixed490.out
+lab/frontier/solanum2shell/live/probe-vulnsafe420.out
