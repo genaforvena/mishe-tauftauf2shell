@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24/W26 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24/W26/W27 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -28,7 +28,9 @@ discloses that those real-build servers use `SSH_ANYAUTH`.
 W26 measures concurrent-load availability on that same shipped build: the
 W6/W16 node-exhaustion prediction fails there (the process SIGSEGVs at first
 teardown), while the pinned fixed form serves all five sessions; the failed
-prediction is preserved.
+prediction is preserved. W27 finds the smallest wire TERM that kills this
+shipped build: 52 uniform `A` bytes reach `savedlines.first`; 48 bytes only
+overwrite `line_delay` and the process survives.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -934,3 +936,32 @@ Clean-archive replay from commit `79f3710b` with a private copy of the pinned
 `db9c5d6f` tree returned 13 PASS / 0 FAIL at 16:43:28Z–16:44:05Z; seven
 normalized key-line digests matched the live run byte-for-byte
 (`availability320b/evidence/CLEAN-ARCHIVE.md`). Author replay, still unwitnessed.
+
+## W27 — smallest wire TERM that faults shipped 3.20b (2026-11-25, author)
+
+W21–W26 used 64-byte TERMs carrying chosen pointer bytes to show a
+`savedlines` pointer fault and whole-process SIGSEGV. The remaining causal
+question was how much of the 64-byte reach is actually needed for the
+availability impact. `release-label/term320b/termlen320b/run-termlen320b.sh`
+runs four fresh loopback SSH servers on the same real `db9c5d6f` build, one
+unauthenticated pty-req TERM each, all bytes `A` (no chosen pointer): 40, 42,
+48 and 52 bytes.
+
+Observed at 18:13:15Z–18:13:34Z: `l=40 off41=00 cv=00000000 first=(nil)
+last=(nil)`, `l=42 off41=41 cv=00000000 ...`, `l=48 off41=41 cv=41414141
+first=(nil) last=(nil)`, and `l=52 off41=41 cv=41414141 first=0x41414141
+last=(nil)`. For 40/42/48 the teardown completed and `/proc` showed
+`STATE=S` after the client; at 52 bytes the server logged `Node 1 destructor
+begin` with no `destructor end`, died with SIGSEGV, and the shell reported
+`Segmentation fault (core dumped)`. Result **13 PASS / 0 FAIL**, rc 0.
+
+So the first wire length that kills this build is 52 bytes — the length whose
+copy reaches `savedlines.first` at sbbs_t+48. The 48-byte case overwrites
+`line_delay` at sbbs_t+44 with `0x41414141` and stays alive, which closes the
+obvious alternative that any nonnumeric line-delay value produces the W6/W16
+node-exhaustion impact. No chosen bytes were needed for the 52-byte crash, but
+the fault's consumer attribution still rests on W24's gdb observation; W27
+does not identify a useful pointer target, command, DoS rate, ASLR defeat or
+r5. The first execution failed before any case because the provenance hash
+used a relative `$0`; the path was made absolute with no input or assertion
+change, as recorded in that lane's `REPLAY.md`. Author replay, unwitnessed.

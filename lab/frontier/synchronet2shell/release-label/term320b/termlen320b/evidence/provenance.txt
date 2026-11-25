@@ -1,0 +1,4 @@
+W27 shipped 3.20b TERM-length threshold; loopback SSH pty-req only
+4e4bff564e7fa7ac8a78e91fe3abd843971893ccfb8a909d137d3ddc6751b235  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/release-label/term320b/termlen320b/run-termlen320b.sh
+95a09eb98a77be78bc43e34435ce0c12e9c5c0c2a0fc12f4a25871a4bc8d21b2  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/release-label/term320b/real320b/probe-320b.patch
+db9c5d6fd37ef74b6e6ca647308d351e656de18d
