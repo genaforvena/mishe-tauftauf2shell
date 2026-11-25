@@ -1,0 +1,4 @@
+src/openexr-3.5.2/src/lib/OpenEXRCore/internal_b44_table.c:11:static uint16_t exrcore_expTable_data[65536];
+src/openexr-3.5.2/src/lib/OpenEXRCore/internal_b44_table.c:14:static uint16_t exrcore_logTable_data[65536];
+src/openexr-3.5.2/src/lib/OpenEXRCore/internal_dwa_table.c:11:static uint16_t exrcore_dwaToLinearTable_data[65536];
+src/openexr-3.5.2/src/lib/OpenEXRCore/internal_dwa_table.c:14:static uint16_t exrcore_dwaToNonLinearTable_data[65536];

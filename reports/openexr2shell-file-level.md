@@ -2312,3 +2312,52 @@ four `build-*` trees and the gitignored PoC symlinked from the live checkout;
 `sh harness/w202-benign-command.sh` returned `RESULT PASS` rc 0 with all five
 evidence hashes matching the working tree byte-for-byte. Author replay, not
 a witness verdict; grade and rung-5 status unchanged.
+
+## W203: W202's command chain fails with ASLR on — negative (2026-11-25 16:54Z)
+
+W202 runs `system("touch /tmp/w202m")` in the unmodified pinned 3.5.2
+`exrcheck -c`, but every forged pointer is an absolute file-carried address
+and every control uses `setarch -R`. Prediction tested here: the same PoC
+cannot reach the chosen call with ASLR left on, and this build has no
+fixed-address, file-filled buffer where the forged attribute, fake
+`exr_attr_opaquedata_t` and memcpy source could live. Result: NEGATIVE on
+both points, observed.
+
+Method and observations:
+
+- `cases/p202-memcpy-system.exr` was run five times with ASLR left on against
+  the PIE `exrcheck` and five times against the W199-style `-no-pie`
+  `exrcheck-nopie`, with no debugger and no `setarch`. All ten runs returned
+  139 and created no marker (`evidence/w203-plain-{exrcheck,exrcheck-nopie}.out`).
+- Under gdb with `set disable-randomization off`, both links fault at
+  `attributes.c:305` in `exr_attr_list_destroy`, dereferencing the stale
+  file-carried heap pointer (`ctxt=0x56a8f5892f00` for PIE,
+  `0x3e844f00` for non-PIE in the raw runs); neither reaches `opaque.c:79`
+  and neither prints the command string. Non-PIE code stays fixed
+  (`rip 0x4ff904`) while the heap moves, matching W201. The debugger sets no
+  pointer and forces no call; normalized traces are
+  `evidence/w203-gdb-{exrcheck,exrcheck-nopie}.out`.
+- A symbol scan of the non-PIE link lists every writable global of at least
+  32 bytes (`evidence/w203-globals.out`). The large ones are the four
+  64 KiB DWA/B44 tables, the HTJ2K VLC tables and const-initialized C++
+  string/vtable tables. In the pinned C++ library the only comparable
+  writable singleton is `Imf::Header`'s `CompressionStash`, which stores
+  compression records keyed by header pointer (`ImfHeader.cpp:98-203`), not
+  file bytes. The only file-scope non-const arrays in pinned OpenEXRCore are
+  the four compile-time DWA/B44 tables; neither table file contains a
+  `fread`, `memcpy` or `memmove` (`evidence/w203-core-static-arrays.out`).
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w203-aslr-on-negative.sh` -> `RESULT PASS` rc 0 three times, six
+stable evidence hashes: core arrays `b983240f...`, gdb PIE and non-PIE
+`79a6e641...`, globals `1c5498ec...`, plain PIE and non-PIE
+`eefbd6dc...`. The script re-checks the W202 PoC, generator, dump and gdb
+script hashes before running, and normalizes only ASLR-varying pointers and
+code addresses in the gdb traces.
+
+Disposition: this closes the fixed-address-staging route for W202 and
+confirms that the W202 chain is an ASLR-off lab condition, not an ASLR-on
+primitive. It does not close byte-granular partial overwrites, a heap/address
+leak, a longer gadget chain, another build or a wire-fed consumer.
+Grade unchanged: rung 4 author-only with a benign command and controls,
+no witness verdict and no wire input; rung 5 remains UNKNOWN.

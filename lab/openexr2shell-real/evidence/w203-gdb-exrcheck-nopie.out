@@ -1,0 +1,4 @@
+Program received signal SIGSEGV, Segmentation fault.
+exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+rip 0xCODE <exr_attr_list_destroy+68>
