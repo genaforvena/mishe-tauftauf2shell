@@ -1,4 +1,12 @@
-# ctranslate22shell — staged status (2026-11-25 11:05Z)
+# ctranslate22shell — admitted status (2026-11-25 11:2xZ)
+
+**ADMITTED under standing #6 as the 148th route** by operator at 11:2xZ:
+hy4-flash `max_parallel: 3` route, both resolver keys, three wake units
+minted with the exact full-flag sync (`written 3, removed 0`), path enabled
+and active, pinned full-flag doctor PASS / GREEN rc 0. Window 155 was
+already live and registered (panes %312/%313); it was adopted, not
+duplicated. No grade, rung cell or R5 cell moved by admission; witness
+verdict stays UNKNOWN.
 
 ## Stage 0 — frontier staging (frontier W229, commit 7ae21617)
 

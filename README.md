@@ -183,6 +183,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Vtkdicom2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:3xZ under standing #6 as the 145th route: hy4-flash route and three wake units minted, window 153 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-22879 / TALOS-2026-2366 (vtk-dicom 9.5.2, CWE-129, CVSS3.1 8.1 `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`); vendor patch 2026-06-01, source-bound fix `bcc8b26` citing the CVE, vulnerable parent `2dd74234`. `sh lab/frontier/vtkdicom2shell/harness/run-all.sh` 14 PASS / 0 FAIL under GCC and Clang: ASan heap-buffer-overflow `WRITE of size 4` at pinned `e->Tag = tag` in `vtkDICOMItem::FindDataElementOrInsert()` via `Set()`; plain build writes chosen `0x4841434b` / `0x42424242` at harness-groomed store+160/+168, fixed and no-delete controls clean. Stand-in dependency classes; no real vtk-dicom build, DICOM file/wire through a real reader, pointer/IP/control-flow hijack, command, rung 5 or witness verdict. `reports/frontier-vtkdicom2shell.md`, `reports/vtkdicom2shell-status.md`. |
 | **Xschem2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:4xZ under standing #6 as the 146th route: hy4-flash route and three wake units minted, window 154 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj (xschem 2.9.9 through 3.4.7, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; a file converter, not network-facing). Advisory cites fix `e29af39c`; vulnerable tag 3.4.7 = `3851bc5a`. Whole pinned `src/rawtovcd.c` at both versions; real `read_dataset()` on a crafted `.raw` header gives GCC and Clang ASan `heap-buffer-overflow WRITE of size 8` at pinned `:130`, fixed rejects; `sh lab/frontier/xschem2shell/harness/run-all.sh` 25 PASS / 0 FAIL. Rung 4 PARTIAL: file-chosen signed index reads back an allocator-derived pointer, not file-chosen stored bytes (tcache-grooming negative preserved). No function-pointer overwrite, control-flow hijack, wire, command, r5 or witness verdict. `reports/frontier-xschem2shell.md`, `reports/xschem2shell-status.md`. |
 | **StbVorbis2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:5xZ under standing #6 as the 147th route: hy4-flash route and three wake units minted, window 135 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-89266 (VulnCheck 2026-09-11, CWE-787, CVSS4 8.8 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H`, stb_vorbis <= 1.22); vulnerable v1.22 `2c980bb` sha256 `4c7cb2ff…e65636`, dev-branch fixed `daedcc5c…e86a5` with `CODEBOOK_LIMIT (1<<18)`, numeric fixed release UNKNOWN. `setup_malloc(vorb*, int)` truncates the file-derived `size_t` product `4 * 16519105 * 65 = 2^32+4` to `malloc(8)`; real `stb_vorbis_open_memory()` on a 205-byte OGG gives ASan `WRITE of size 4` at `stb_vorbis.c:3889`, fixed and safe inputs clean, and gdb reads file-chosen `4b 43 41 48` ("HACK") at the first OOB float (`lab/frontier/stbvorbis2shell/run-all.sh`, 9 PASS / 0 FAIL). Rung 4 PARTIAL at a repeating 4-byte word and one offset: no per-offset bytes, measured OOB extent, real consumer, wire, pointer, command or witness verdict; NO r5. `reports/stbvorbis2shell-status.md`. |
+| **Ctranslate22Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 11:2xZ under standing #6 as the 148th route: hy4-flash route and three wake units minted, window 155 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-102566 / GHSA-7xqx-34h9-2w97 (CTranslate2 <4.8.1, CWE-787, CVSS4 8.5 `AV:L/UI:P`; file-format loader, not network-facing); fix `d9b991e` (PR #2068), vulnerable pin v4.8.0. Verbatim pinned `consume<char>()` / `Model::load()` ranges with a stand-in 16-byte `StorageView`: 16 PASS / 0 FAIL under GCC and Clang, ASan `WRITE of size 17` / `64` at pinned `model.cc:657`, fixed pin rejects, safe payload clean, chosen-byte readback; clean git-archive replay 16/0. Rung 4 PARTIAL at one known offset behind a stand-in region; no real library build, pointer-IP, wire, command or r5; witness UNKNOWN. |
 
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
@@ -3132,9 +3133,19 @@ staged real-library grade is unchanged: rung 3 ASan and rung 4 PARTIAL at a
 repeating file-chosen word written past an 8-byte allocation, with NO r5 and
 no witness verdict. No grade, rung, witness or R5 cell moved by admission.
 
+The 2026-11-25 11:2xZ fold admits Ctranslate22Shell as the 148th route and
+supersedes its earlier FRONTIER-STAGED note above: the charter already
+existed, the hy4-flash route and both resolver keys were added, and the exact
+full-flag sync reported `written 3, removed 0`; path enabled/active and the
+pinned full-flag doctor returned PASS / GREEN rc 0. Window 155 was already
+live and registered and was adopted without duplication. The staged grade is
+unchanged: rung 3 pinned functions with ASan `WRITE`, rung 4 PARTIAL
+file-chosen bytes at one offset of a stand-in 16-byte region, NO r5 and
+witness UNKNOWN. No grade, rung, witness or R5 cell moved by admission.
+
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 147 target
+Each admitted family is its own mind with its own tmux window: 148 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -3170,8 +3181,9 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
 `open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell`,
 `ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell`,
-`xschem2shell` and `stbvorbis2shell`. Each builds affected harnesses,
-drives toward rung 4 and authors its report under `reports/`.
+`xschem2shell`, `stbvorbis2shell` and `ctranslate22shell`. Each builds
+affected harnesses, drives toward rung 4 and authors its report under
+`reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a
 reproducible harness to the operator; **docs** keeps this README and `docs/`

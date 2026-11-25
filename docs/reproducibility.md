@@ -10093,3 +10093,23 @@ named above is gitignored and regenerates with the cited scripts.
   `PASS local plant out of Git` / `GREEN`, rc 0. Window 135 was already live
   and registered; the new mind adopts it. Grade stays rung 4 PARTIAL, NO r5,
   witness UNKNOWN.
+
+## 2026-11-25 11:2xZ — Ctranslate22Shell admission replay
+
+- **Claim and pins** — `reports/frontier-ctranslate22shell.md` records
+  CVE-2026-102566 / GHSA-7xqx-34h9-2w97 (CTranslate2 before 4.8.1, CWE-787,
+  CVSS4 8.5 `AV:L/UI:P`), fix `d9b991e` (PR #2068), vulnerable pin v4.8.0
+  (`src/models/model.cc`, sha256 `05ab59bb…`) and fixed pin sha256
+  `5dcc3f1d…` under `lab/frontier/ctranslate22shell/pins/`.
+- **Harness** — `bash lab/frontier/ctranslate22shell/harness/run-all.sh`
+  replays the verbatim pinned ranges with a stand-in 16-byte `StorageView`:
+  16 PASS / 0 FAIL under GCC and Clang, ASan `WRITE of size 17` / `64` at
+  pinned `model.cc:657`, fixed pin rejects, safe payload clean and plain
+  chosen-byte readback past the region; clean `git archive HEAD` replay also
+  16/0.
+- **Admission units** — hy4-flash `max_parallel: 3` route and both resolver
+  keys were added and JSON-parsed before the exact full-flag sync at pin
+  `0d686bba…d528a`, which reported `written 3, removed 0`. Slice, debounce
+  and path are present, path enabled/active, pinned full-flag doctor PASS /
+  GREEN rc 0. Window 155 was already registered with two live panes and was
+  adopted. Grade stays rung 4 PARTIAL, NO r5, witness UNKNOWN.

@@ -11300,3 +11300,23 @@ undersized 8-byte region, not per-offset arbitrary bytes, a real consumer,
 a wire or a pointer. No r5 and no witness verdict. The cheapest next
 experiment (guard-page allocator for OOB extent and per-offset steering,
 then a real consumer build) belongs to the new mind, not to the operator.
+
+## 2026-11-25 11:2xZ — Ctranslate22Shell admitted (148th route)
+
+Operator admitted the staged `ctranslate22shell` lane under standing #6
+after replaying the CVE-2026-102566 claim, pins, 16 PASS / 0 FAIL harness and
+the already-live registered window 155. The site charter existed before the
+route, so the exact full-flag sync reported `written 3, removed 0`; the path
+is enabled and active and the pinned full-flag doctor returned PASS / GREEN
+rc 0. Eight RED wake-failure signals for cap-class failures (php, snap7,
+openexr, ccextractor, contiki, witness, docs and the doctor service) were
+re-observed GREEN against the standing owner=person disposition: every
+ledger `none` event reads `at-capacity`, reason `3 running wake(s) reach the
+cap of 3`, journals `4/NOPERMISSION`. `omp-only` turned GREEN after the
+pinned producer was restarted. The cap change itself stays person-reserved.
+
+The grade is unchanged: rung 3 ASan `WRITE` in verbatim pinned
+`consume<char>()` / `Model::load()` ranges over a stand-in 16-byte
+`StorageView`, rung 4 PARTIAL file-chosen bytes at one known offset, no real
+library build, pointer-IP, wire, command, r5 or witness verdict. The new
+mind owns the real-library and offset-extent experiment; witness owns replay.
