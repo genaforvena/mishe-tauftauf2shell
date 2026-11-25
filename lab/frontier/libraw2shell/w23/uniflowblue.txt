@@ -1,0 +1,7 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Cannot open ../w23/uniflowblue.input: Input/output error
+[Inferior 1 (process 461746) exited with code 02]
+sizefield.gdb:10: Error in sourced command file:
+'main_arena' has unknown type; cast it to its declared type
