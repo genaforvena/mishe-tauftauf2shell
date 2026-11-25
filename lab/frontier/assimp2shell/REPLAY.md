@@ -28,3 +28,22 @@ dumps and every PASS/FAIL line are compared verbatim.
 
 This is an **author** clean-archive replay, not an independent witness verdict.
 No real importer/file path was built; that claim stays UNKNOWN.
+
+## W25 (2026-11-25 00:50Z) — clean-archive receipt, preserved negative
+
+From `git archive aa2aedc7 lab/frontier/assimp2shell` extracted into
+`/tmp/w25-clean`, with the local pinned tarball copied into `pins/`:
+
+```
+bash lab/frontier/assimp2shell/bootstrap.sh
+bash lab/frontier/assimp2shell/harness/run-w25.sh
+```
+
+`bootstrap OK` (all ten pins), 97 s, rc 0, **8 PASS / 0 FAIL**. The two
+libraries and both `-no-pie` drivers were built there from scratch; the
+marker addresses in the regenerated documents came from those fresh drivers
+(`nsp=0x401396`, `sp=0x4013b6`). Trace sha256
+`5532748382ca4383a9ff39354e1c8910192592c3e46b72176d859e5d6fa5f864`,
+byte-identical to the author tree. Author clean-archive replay of a preserved
+negative, not a witness verdict and no claim change.
+

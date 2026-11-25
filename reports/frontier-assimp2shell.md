@@ -866,6 +866,12 @@ at the same labeled, local-file, `-O0`/`-no-pie` scope, not an upstream-default
 build, not a command, not r5. Author-measured; it needs no witness acceptance,
 but it is reproducible evidence for the W24 replay offer.
 
+From `git archive aa2aedc7` into `/tmp/w25-clean` with the local pinned tarball
+copied in, `bootstrap.sh` and `harness/run-w25.sh` rebuilt both libraries and
+both drivers from scratch and gave **8 PASS / 0 FAIL** with the byte-identical
+trace sha256 above (receipt in `lab/frontier/assimp2shell/REPLAY.md`). That is
+an author clean-archive replay of a negative, not a witness verdict.
+
 ## Next lane
 
 W14 is independently replayed and ESTABLISHED AS LABELED (#3722); no grade
