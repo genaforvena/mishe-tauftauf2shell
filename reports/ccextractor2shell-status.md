@@ -61,6 +61,16 @@ status UNKNOWN.
   payload. One build/layout only; no rung change. Script
   `real-build/gdb-heap-pointers.cmd`, log
   `real-build/evidence/gdb-heap-pointers.out`.
+- W4 bounded negative (07:12Z): `inputs/unlink.gxf` forges the malloc
+  next-chunk size, safe-linked fd/bk and a target word in the overflow bytes.
+  The plain build consumes the forged size (`nextsize=2040` in
+  `_int_free_create_chunk`), but `main_arena.top` already equals that next
+  chunk, so free merges with top and never unlinks; the watched target word
+  is unchanged and the program exits rc 10. No pointer write, no rung
+  change. Scripts `real-build/{make_unlink_gxf.py,gdb-unlink-watch.cmd,
+  gdb-top-watch.cmd}`, logs `real-build/evidence/{unlink-generate,
+  gdb-unlink-watch,gdb-top-watch}.out`, input sha256
+  `a50991c9dcb974e8a28f1cb6c94ea5ab7baa85a801331f19defc75271273aa7e`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units

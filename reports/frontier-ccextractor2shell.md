@@ -314,3 +314,55 @@ alter the rung 3/4 grades or establish rung 5.
 - Whether the real write can be followed by a controlled indirect call or
   command execution: UNKNOWN; nothing measured supports a rung-5 claim.
 - Independent witness replay and operator-visible acceptance: UNKNOWN.
+
+## W4 bounded negative 2026-11-25 07:12Z: forged chunk metadata merges with top
+
+Question: can attacker-chosen bytes past `BUFSIZE` forge the malloc
+next-chunk header so the program's terminal `free(data->buffer)` performs a
+controlled unlink (a chosen pointer written to a chosen address)? Answer: no
+in this build and layout. The chunk reached by the overflow **is the arena
+top chunk**, so glibc takes the top-merge path and never dereferences the
+forged `fd`/`bk`.
+
+`real-build/make_unlink_gxf.py` writes `inputs/unlink.gxf` (sha256
+`a50991c9dcb974e8a28f1cb6c94ea5ab7baa85a801331f19defc75271273aa7e`,
+2101312 bytes). It keeps the W1 MAP/MEDIA packets and size field
+`00 20 10 00`, and fills the first 2097264 payload bytes with `0x41` before
+planting, at payload offsets relative to `data->buffer`: `0x200070` =
+`0x200080` (nextchunk `prev_size` = buffer chunk size), `0x200078` =
+`0x7f9` (forged nextchunk size 0x7f8 + PREV_INUSE), `0x200080`/`0x200088` =
+safe-linked `fd = T-0x18` and `bk = P-0x18`, `T = P+0x100` holding `P`
+(satisfying both unlink checks), and `P+0x800` = `0x810` (clear
+PREV_INUSE so forward consolidation should be selected). `P` is taken from
+a GDB observation; the generator takes it as an argument, because GDB's
+`disable-randomization` fixes it per invocation but stdio redirection
+shifts the heap base by `0x4020` here.
+
+Plain pinned build under GDB (`/tmp/ccx2shell-plain/ccextractor`, redirected
+stdout: `buffer=0x5555564209b0`, `P=0x555556620a20`): all forged words were
+present at the breakpoint, and the conditional `free` breakpoint hit at
+`delete_demuxer_data ccx_demuxer.c:440` with `mem=0x5555564209b0`. A hardware
+watchpoint on `T` never fired; `T` stayed `0x555556620a20` through the free
+and the program exited rc 10 with no glibc diagnostic. Logs:
+`real-build/evidence/gdb-unlink-watch.out`,
+`real-build/evidence/unlink-generate.out`.
+
+The causal reason was measured directly in
+`real-build/evidence/gdb-top-watch.out`: `main_arena.top` was
+`0x555556620a20` **before** the free, i.e. equal to `P`. A watchpoint on
+that pointer fired inside
+`_int_free_create_chunk (nextsize=2040, nextchunk=0x555556620a20,
+size=2099320, p=0x5555564209a0, av=main_arena) at malloc.c:4758`, called by
+`_int_free_merge_chunk (malloc.c:4700)` from `__GI___libc_free
+(malloc.c:3398)`. `nextsize=2040` is exactly the forged `0x7f8`: the chosen
+size field is consumed by glibc, but because `nextchunk == av->top` the
+allocator merges with the top chunk (`main_arena.top` becomes
+`0x5555564209a0 = buffer-16`) and never calls `unlink_chunk`. No pointer
+write, no rung-5 mechanic.
+
+Limits: one glibc build, one heap layout, one allocation order; a layout
+where a regular free chunk follows `data->buffer` (not measured here) could
+take a different path. Rung 3 and rung 4 are unchanged; rung 5 and the
+witness verdict remain UNKNOWN. No pinned source, harness source or earlier
+evidence was edited.
+

@@ -1,0 +1,71 @@
+W4 top-chunk watch on unlink.gxf. Plain pinned build, GDB disables ASLR,
+stdout redirected (layout: buffer=0x5555564209b0). Forged P/T values were
+written by make_unlink_gxf.py with P=0x555556620a20. Verbatim GDB output:
+
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /tmp/ccx2shell-plain/ccextractor.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+Breakpoint 1 at 0x253723: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c, line 1220.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: lab/frontier/ccextractor2shell/real-build/inputs/unlink.gxf
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: No]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+
+-----------------------------------------------------------------
+[KOpening file: lab/frontier/ccextractor2shell/real-build/inputs/unlink.gxf
+File seems to be a GXF[KAnalyzing data in general mode
+  0%  |  00:00
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+1220			len -= mpeg_pic_size;
+W4TOP buffer=0x5555564209b0 P=0x555556620a20 top_before=0x555556620a20
+Breakpoint 2 at 0x7ffff72ade10: free. (57 locations)
+Hardware watchpoint 3: -location main_arena.top
+Hardware watchpoint 4: -location *(unsigned long*)$p
+Hardware watchpoint 5: -location *(unsigned long*)$t
+100%  |  00:00
+Number of NAL_type_7: 0
+Number of VCL_HRD: 0
+Number of NAL HRD: 0
+Number of jump-in-frames: 0
+Number of num_unexpected_sei_length: 0
+Breakpoint 2.1, __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3359
+warning: 3359	./malloc/malloc.c: No such file or directory
+W4TOP STOP1 reason=óúH…ÿ„Ó
+W4TOP top_now=0x555556620a20 P_prev_size=0x200080 T=0x555556620a20
+#0  __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3359
+#1  0x00005555557a2de8 in delete_demuxer_data (data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_demuxer.c:440
+#2  0x000055555576294d in delete_datalist (list=0x0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:866
+#3  0x00005555557652ad in general_loop (ctx=0x5555563da2b0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1692
+#4  0x0000555555691cce in start_ccx () at /tmp/ccx2shell-upstream-asan/src/ccextractor.c:200
+
+Hardware watchpoint 3: -location main_arena.top
+
+Old value = (struct malloc_chunk *) 0x555556620a20
+New value = (struct malloc_chunk *) 0x5555564209a0
+0x00007ffff72ab182 in _int_free_create_chunk (nextsize=2040, nextchunk=0x555556620a20, size=2099320, p=0x5555564209a0, av=0x7ffff7404ac0 <main_arena>) at ./malloc/malloc.c:4758
+4758	in ./malloc/malloc.c
+W4TOP STOP2
+W4TOP top_now=0x5555564209a0 P_prev_size=0x200080 T=0x555556620a20
+#0  0x00007ffff72ab182 in _int_free_create_chunk (nextsize=2040, nextchunk=0x555556620a20, size=2099320, p=0x5555564209a0, av=0x7ffff7404ac0 <main_arena>) at ./malloc/malloc.c:4758
+#1  _int_free_merge_chunk (av=0x7ffff7404ac0 <main_arena>, p=0x5555564209a0, size=<optimized out>) at ./malloc/malloc.c:4700
+#2  0x00007ffff72ade8e in __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3398
+#3  0x00005555557a2de8 in delete_demuxer_data (data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_demuxer.c:440
+#4  0x000055555576294d in delete_datalist (list=0x0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:866

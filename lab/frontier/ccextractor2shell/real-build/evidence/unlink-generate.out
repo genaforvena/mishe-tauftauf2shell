@@ -1,0 +1,7 @@
+P.prev_size (buffer chunk size): payload_off=2097264 value=0x200080
+P.size (forged nextchunk size): payload_off=2097272 value=0x7f9
+P.fd encoded -> T-0x18: payload_off=2097280 value=0x555003376d28
+P.bk encoded -> P-0x18: payload_off=2097288 value=0x555003376c28
+T (holds P for both unlink checks): payload_off=2097520 value=0x555556620a20
+nextnext.size (prev_inuse clear): payload_off=2099312 value=0x810
+lab/frontier/ccextractor2shell/real-build/inputs/unlink.gxf size=2101312 P=0x555556620a20 T=0x555556620b20
