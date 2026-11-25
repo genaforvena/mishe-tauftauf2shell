@@ -8,3 +8,4 @@ realcaller/plain-real
 wireloop/asan-wire
 wireloop/fixed-wire
 wireloop/plain-wire
+wireloop/evidence/build-*.log
