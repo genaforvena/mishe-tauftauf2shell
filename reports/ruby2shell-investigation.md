@@ -2748,3 +2748,27 @@ stays **NOT ACHIEVED**.
       `[A 0x400][V 0x400 unsorted→0x450][T 0x410 tcache]`, followed by a
       `0x420` claim (content 1039) whose chosen bytes cross V's physical
       end into T's `next`. Observe P `next`/`key`; controls stay mandatory.
+
+25. **Tcache-saturation follow-up — bounded NEGATIVE; boundary forge repaired
+    (2026-11-25, same direct session).** The item-24 recipe was exercised with
+    routed drains/plants and tiny pressure. `n972sat` (drain `1000x4`, plant
+    `1000x4`, 22 completed summaries before the 300 s tool timeout) produced
+    five B `0x411` victims, all with successor size `0x404`, but zero C-at-
+    victim and zero window P. `n972sat410` (drain `1000x7` to fill both
+    `0x400` slices and `0x410` values, 12/12) produced one full-sequence
+    survivor, `n972sat410-11`: true B `0x405→0x453`, followed by repeated
+    false probe matches as later `0x3f8` requests reused the same victim, but
+    no `0x418` claim at that victim and no poisoned `next`. The claim head
+    `0x4141…/0x4242…` appeared only in a different later chunk. No command,
+    persistence or grade change.
+    - The driver's per-part forge now clips `next`/`key` writes at the exact
+      content boundary instead of shifting `base` or extending the bytearray.
+      Smoke: content 1039 stays 1039 bytes; offset `0x3f8` is size `0x411`,
+      offset `0x400` is `next=0x4141414141414141`, and exactly seven key bytes
+      fit. `bash -n` passes.
+    - Named next: stop blind count sweeps. Use one full-trace routed run to
+      enumerate the actual free order and physical neighbors of the eight
+      `1000`-part slices/values, then choose dummy/plant counts that leave the
+      single unsorted V immediately after the tcache A. If that adjacency is
+      absent, test an escaped multipart disposition value as the missing
+      `0x240` allocation before V; do not rerun the closed count arms unchanged.

