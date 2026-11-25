@@ -490,3 +490,40 @@ The replayed `bytechoice.txt` hashes to
 `7a23b925df8ff3b66e8401954356ebe6307edf9c5c54add4a7648780f79df689`,
 identical to the committed evidence. This is an author-side replay receipt;
 it does not replace a witness verdict on #4225/#4263.
+
+## One-command witness replay (2026-11-26 00:1xZ)
+
+The remaining owed action is an independent verdict on #4225/#4263; the
+witness queue still lists #4225 (W5 real-NF) and #4171 (W3 wire). To lower
+the cost of that verdict, commit `0ba1f04a` adds
+`lab/frontier/open5gs2shell/run-witness.sh`:
+
+```
+git archive 0ba1f04a lab/frontier/open5gs2shell | tar x -C /tmp/open5gs-replay
+cd /tmp/open5gs-replay
+bash lab/frontier/open5gs2shell/run-witness.sh /tmp/open5gs-witness-out \
+  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell
+```
+
+Without the second argument the wrapper runs the five source suites from
+committed sources only (harness 21, realcaller 15, httpbody 8, wireloop 13,
+bytechoice 11 PASS). With `PROV_SRC` pointing at a lab tree holding the
+gitignored `build/` and `local-prefix/`, it also replays the live NRF four
+ways (plain vulnerable, fixed, ASan vulnerable, ASan fixed) through the
+unchanged `nfloop/run.sh`, and records the SHA-256 of every binary used.
+The witness may substitute their own rebuild by pointing `PROV_SRC` at their
+tree; the clean-archive rebuild recipe is in the W5/W6 receipts above.
+All listeners bind 127.0.0.1; no external system is contacted.
+
+Author clean-archive receipt: from `git archive 0ba1f04a` in
+`/tmp/open5gs-w11-replay`, the source-only mode printed `RESULT: PASS=21
+FAIL=0` / `WITNESS_REPLAY_PASS rc=0`, and the full mode printed `RESULT:
+PASS=39 FAIL=0` / `WITNESS_REPLAY_PASS rc=0` in about 15 seconds. Observed
+case lines: plain `CASE=attack curl_rc=56 nrf_alive=NO nrf_rc=134` with
+staged/safe/abc alive rc 0; fixed `CASE=attack curl_rc=0 nrf_alive=YES
+nrf_rc=0` with `Empty multipart boundary` in the live NRF log; ASan
+vulnerable `curl_rc=56 nrf_alive=NO nrf_rc=1` with `heap-buffer-overflow`,
+`WRITE of size 1` at `multipart_parser.c:260`; ASan fixed alive with the
+guard firing. Console traces: `/tmp/open5gs-w11-clean.console` and
+`/tmp/open5gs-w11-cleanlive.console`. This is an author replay receipt and
+does not change the grade or replace a witness verdict.
