@@ -322,3 +322,41 @@ before the passing replay above. Commits: `fb3cfc13` (offer record),
 `fcf3ffa9` (wrapper), `89d8628b` (fix). Grade unchanged: rung 4
 DEMONSTRATED under the groom condition, rung 5 UNKNOWN; witness verdicts
 UNKNOWN.
+
+## 2026-11-25 22:56Z — W10 source-graph consumer negative (target mind)
+
+Read-only check of the real upstream call chain behind the pinned write,
+prompted by the W8 finding that no clean-return control-flow object is in
+reach on this native build. Chat #4573/#4574 remain the canonical replay
+offer; no third local replay was run, and no witness verdict has arrived
+(witness queue at 22:56Z: nfdump, codebasememory, aspell, libraw, awslc).
+
+Facts from the provisioned parent tree,
+`lab/frontier/mcuboot2shell/upstream-parent/boot/boot_serial/src/`:
+
+* `boot_serial_encryption.c:119-204` — `decrypt_region_inplace()` takes the
+  absolute `ih_hdr_size` as `idx` at `:162` and passes `&buf[idx]` to
+  `boot_enc_decrypt()` at `:175-177`. The fixed tree
+  `upstream/boot/boot_serial/src/boot_serial_encryption.c:160-161` instead
+  computes `idx = hdr->ih_hdr_size - abs_off` with
+  `blk_sz = chunk_sz - idx`, i.e. an index bounded by the sector chunk.
+* `boot_serial_encryption.c:183-188` — after decryption the only consumers
+  of `buf` are `flash_area_write(fap, off + bytes_copied, buf, chunk_sz)`
+  and the stack wipe at `:202`. The OOB-decrypted bytes at `buf+idx` with
+  `idx > chunk_sz` are outside the written span and are never stored in the
+  flashed image; they can only corrupt adjacent stack state.
+* `boot_serial.c:1481` sends the SMP response (`boot_serial_output()`)
+  *before* `:1494` calls `boot_handle_enc_fw(fap)`; the only post-decrypt
+  action is the error log at `:1495-1497`. No zcbor/command dispatch parses
+  decrypted bytes in this path.
+* The other in-tree `boot_enc_decrypt()` callers
+  (`bootutil/src/loader.c:922`, `ram_load.c:185`,
+  `bootutil_img_hash.c:210`) use `off - hdr->ih_hdr_size` as the AES block
+  offset argument, not as a buffer index; the index bug is local to the
+  serial recovery path.
+
+Disposition: on the real SMP consumer there is no post-decrypt command
+dispatch or flashed-payload path for the OOB bytes, consistent with W5/W8.
+Rung 4 stays DEMONSTRATED only under the documented groom; rung 5 stays
+UNKNOWN. This is source-graph evidence, not a build or wire measurement,
+and it does not change any witness verdict.
