@@ -274,7 +274,9 @@ their `fd=bk` (`libc.so.6 +0x203b20`, maps-confirmed), but every survivor's
 reflected 404 params were byte-clean: 544 parts, zero pointer-shaped qwords.
 The +8 length shift changed the chunk size class, not the write offset, so
 the byte still hit the victim SIZE field. No libc/code-base oracle from this
-route; stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+route. The same arm with 48 drain parts and filler-first order aborted 11/12
+pre-response; its one survivor was byte-clean too, closing the count/order
+knobs on both geometries. Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at

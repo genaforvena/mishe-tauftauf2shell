@@ -1799,6 +1799,11 @@ committed scanner/classifier pair. Loopback only; analysis only.
   `0x240`), not the write offset: mtrace still shows the byte landing on
   the victim SIZE field (`0x2d0`→`0x253`, `0x5f964ed8920d`→`0x5f964ed89253`).
   fd/bk is therefore unreachable by the length knob alone.
+- **Arm C (48x1024 drain parts, `ORDER=filler-first`, N=524, 12 fresh
+  processes):** 11/12 aborted pre-response and one survivor returned 404
+  with maps; its 50 reflected parts were byte-clean with no pointers. The
+  count/order knobs left untried by item 10 are therefore closed on both
+  geometries — they overshoot the surviving class.
 - A default-geometry re-run of `ruby2shell-stock-leakclass.sh` (24 fresh
   processes) yielded one survivor with maps; its 34 reflected parts were
   byte-clean with no reflected pointers, consistent with item 10.
@@ -1809,7 +1814,7 @@ addresses (item 10); no libc/code base, attacker-chosen write or persistence
 is observed. Stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**;
 the witness-ESTABLISHED harness-condition rung-5 cell is unchanged. No grade
 change. The driver is committed; evidence lives in
-`lab/build/evidence/stock-rails-mainarena{,-fd}-*`.
+`lab/build/evidence/stock-rails-mainarena{,-fd,arena48}-*`.
 
 
 ## Next
@@ -1928,10 +1933,11 @@ change. The driver is committed; evidence lives in
     (`libc+0x203b20`) in victim `fd=bk`, but 16 survivors across the N=524
     and N=532 arms reflected 544 byte-clean parts and zero pointers: the
     metadata never crossed into the wire body, and the +8 length shift only
-    changed the chunk size class (`0x238`→`0x240`), not the write offset.
-    Named next: hunt a surface that carries the main-arena victim's fd/bk
-    qword into a reflected string — vary drain count/order under
-    `MALLOC_ARENA_MAX=1` (the untried 48-part/filler-first arm) and try a
-    production-mode no-debug render; classify any hit against
-    `libc+0x203b20`. The GC-page content spill is the fallback lead.
-    Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
+    changed the chunk size class (`0x238`→`0x240`), not the write offset;
+    a 48-part/filler-first arm added 11/12 aborts and one byte-clean
+    survivor. Named next: abandon the count/order knobs (closed on both
+    geometries) and hunt a different surface that carries the main-arena
+    victim's fd/bk qword into a reflected string — a production-mode
+    no-debug render, or the GC-page content spill; classify any hit
+    against `libc+0x203b20`. Stock/oracle-free/persistent rung 5 stays
+    NOT ACHIEVED.
