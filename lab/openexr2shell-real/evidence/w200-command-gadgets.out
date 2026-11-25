@@ -1,0 +1,15 @@
+exrcheck=build-vuln-plain/bin/exrcheck
+modules=libc.so.6,libdeflate.so.0,libgcc_s.so.1,libm.so.6,libstdc++.so.6,libzstd.so.1
+module_sha256 libc.so.6 755a371e86cc9f564ab54f66140747700fb0a103f698f659f2060f707897e09a
+module_sha256 libdeflate.so.0 608c8d7e4345a9ff4b57aa853ce0c355cf2e1d5ec11b8bee86fb4760bba8a15f
+module_sha256 libgcc_s.so.1 d93224d2b0dab4247598be683adca02f5cf00586f99c187579cd7e92058fb7cb
+module_sha256 libm.so.6 5dcc4d25466e29ca390ed6fabb371c69b65dff6fa4e91c34561057a020d6994a
+module_sha256 libstdc++.so.6 1fd75fe70354a416d75aef22bcae68c47bd25d20e2d0568c30b1a9838cf62f11
+module_sha256 libzstd.so.1 0a2128bc10841fb29e76d08d945864dfb0b6a66da5df6df5d8299197439e54bb
+lookahead=8
+instructions=1042369
+command_imports=0 
+direct_command_branches=35 libc.so.6:58440:call   10ed90 <posix_spawn@@GLIBC_2.15> libc.so.6:87736:call   10ed90 <posix_spawn@@GLIBC_2.15> libc.so.6:eea2a:jmp    eea43 <execl@@GLIBC_2.2.5+0xb3> libc.so.6:eeb1d:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:eeb40:jmp    ee9fe <execl@@GLIBC_2.2.5+0x6e> libc.so.6:eeb4a:jmp    ee9e6 <execl@@GLIBC_2.2.5+0x56> libc.so.6:eeb6a:jmp    eead8 <execl@@GLIBC_2.2.5+0x148> libc.so.6:eeb75:jmp    eea95 <execl@@GLIBC_2.2.5+0x105> libc.so.6:eeb8d:jmp    eeb22 <execl@@GLIBC_2.2.5+0x192> libc.so.6:eec3a:jmp    eec53 <execle@@GLIBC_2.2.5+0xb3> libc.so.6:eed28:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:eed48:jmp    eec0e <execle@@GLIBC_2.2.5+0x6e> libc.so.6:eed52:jmp    eebf6 <execle@@GLIBC_2.2.5+0x56> libc.so.6:eed79:jmp    eece8 <execle@@GLIBC_2.2.5+0x148> libc.so.6:eed90:jmp    eed22 <execle@@GLIBC_2.2.5+0x182> libc.so.6:eed98:jmp    eeca5 <execle@@GLIBC_2.2.5+0x105> libc.so.6:eedb0:jmp    eed2d <execle@@GLIBC_2.2.5+0x18d> libc.so.6:eee5a:jmp    eee73 <execlp@@GLIBC_2.2.5+0xb3> libc.so.6:eef70:jmp    eee2e <execlp@@GLIBC_2.2.5+0x6e> libc.so.6:eef7a:jmp    eee16 <execlp@@GLIBC_2.2.5+0x56> libc.so.6:eef9a:jmp    eef08 <execlp@@GLIBC_2.2.5+0x148> libc.so.6:eefa5:jmp    eeec5 <execlp@@GLIBC_2.2.5+0x105> libc.so.6:eefbd:jmp    eef52 <execlp@@GLIBC_2.2.5+0x192> libc.so.6:eefde:jmp    eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef0ce:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef31a:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef37f:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef503:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef65e:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef820:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:ef9f9:call   eeff0 <execve@@GLIBC_2.2.5> libc.so.6:110106:jmp    110081 <posix_spawnp@@GLIBC_2.15+0xd1> libc.so.6:1104f0:jmp    10ffd0 <posix_spawnp@@GLIBC_2.15+0x20> libc.so.6:1112ba:call   10ed90 <posix_spawn@@GLIBC_2.15> libc.so.6:170cef:call   eedc0 <execlp@@GLIBC_2.2.5>
+rsi_to_rdi_then_command_branch=0 
+execve_immediate_in_windows=0
+rsi_to_rdi_then_indirect_call=1 libc.so.6:97c7f:0x380(%r12)

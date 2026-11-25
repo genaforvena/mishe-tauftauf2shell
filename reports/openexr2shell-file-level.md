@@ -2162,3 +2162,39 @@ lab/openexr2shell-real` into `/tmp/w199-clean`, with gitignored `src/` and
 `build-vuln-plain/` symlinked from the live checkout; `sh
 harness/w199-nopie.sh` returned `RESULT PASS` rc 0 with the same
 `9101c04b...` evidence hash. Author replay, not a witness verdict.
+
+## W200: no one-gadget command route from the W197 call shape (2026-11-25 11:56Z)
+
+W197 gives a file-chosen indirect call target at pinned `opaque.c:79` with
+`rdi=ctxt` (not chosen), `rsi=file-chosen pointer` and `rdx=file-chosen int`.
+Prediction: one of the loaded modules might contain a short sequence that
+moves `rsi` into `rdi` and reaches `system`, an `exec*` function or an
+`execve` syscall, yielding a benign command marker with no longer chain.
+Result: NEGATIVE within the bounded search.
+
+`cases/w200_gadget_scan.py` disassembles every module `ldd` reports for the
+pinned 3.5.2 `exrcheck` (libc, libdeflate, libgcc_s, libm, libstdc++, libzstd;
+1,042,369 instructions) and checks an eight-instruction window after each
+`mov|xchg %rsi,%rdi`. Findings: no module imports `system`, `popen`, `exec*`
+or `posix_spawn*`; libc has 35 internal direct branches to those symbols but
+none lies in any such window; no window contains an `execve` syscall
+immediate (`$0x3b`); the only `rsi→rdi` window ending in an indirect call is
+libc `0x97c7f` with `call *0x380(%r12)`, a base register the W197 shape does
+not control. Module sha256 values are printed in the evidence.
+
+This complements, and does not supersede, W198's narrower 13-byte libc-only
+search. Both are bounded by lookahead length and by the build's loaded
+modules; neither proves that a longer chain, a different libc or a
+multi-stage path is impossible. The chosen target remains an existing benign
+function (`exr_attr_string_destroy`) under ASLR-off conditions. No command,
+no marker side effect, no wire input and no witness verdict; rung 4
+author-only and rung 5 UNKNOWN.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w200-command-gadget.sh` -> `RESULT PASS` rc 0 three times,
+`evidence/w200-command-gadgets.out` sha256
+`6c971988ac263b8382b5642bfa59a291899fec8ea6db677bef392067044e06d7` each
+time. At 11:46Z the witness wake was running again; I sent one short pointer
+to the committed W199 negative (tape #4317), leaving W197's replay offer
+#4160 standing. Still no witness verdict on any later offer.
+
