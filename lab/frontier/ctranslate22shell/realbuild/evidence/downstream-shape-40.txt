@@ -1,0 +1,56 @@
+W6 downstream shape-field probe (2026-11-25 22:1xZ). Offline, no network.
+Driver: realbuild/consumer-downstream built by downstream-probe.sh from the
+verbatim vulnerable model.cc (sha256 rechecked by that script:
+05ab59bb4413df14d36fbbb0d82ff6ce6fe0bee72245245f8ecec773d4cc2c65).
+Invocation: ./consumer-downstream 40 (default 'A' payload).
+
+gdb -q -batch -ex 'set pagination off' -ex 'catch throw' -ex 'run 40' \
+  -ex 'up 2' -ex 'p other._shape' -ex 'p this->_size' -ex 'p/x this->_data' \
+  -ex 'p other._size' -ex 'p/x other._data' --args ./consumer-downstream 40
+
+Frame #1: StorageView::copy_from<float> (this=0x555555615b08,
+data=0x555555615780, size=4) at storage_view.cc:411
+Frame #2: StorageView::copy_from(this=0x555555615b08, other=...) at
+storage_view.cc:371, called by the StorageView copy ctor in get_variables().
+
+$1 = -9042521604759584126                 (this->_size = 0x8282828282828282)
+$2 = 0x0                                  (this->_data)
+$3 = 4                                    (other._size)
+$4 = 0x555555615780                       (other._data)
+$5 = std::vector of length 2, capacity 2 = {4702111234474983745, 2}
+$6 = 4702111234474983745                  (other._shape[0] = 0x4141414141414141)
+$7 = 2                                    (other._shape[1])
+
+Heap dump at the throw (excerpt; full dump from the probe run):
+0x555555615780: 0x4141414141414141  0x4141414141414141
+0x555555615790: 0x4141414141414141  0x4141414141414141
+0x5555556157a0: 0x4141414141414141  0x0000000000000002
+0x5555556157e0: 0x0000555555601680  0x0000555555615780   (other allocator/_data)
+0x5555556157f0: 0x0000000000000004  0x0000000000000004   (other size fields)
+0x555555615b28: 0x0000000000000000  0x8282828282828282   (this allocated_size/_size)
+0x555555615b38: 0x0000555555615a70  0x0000555555615a80   (this shape vector)
+
+gdb ptype /o ctranslate2::StorageView: _data at +24, _allocated_size +32,
+_size +40, _shape +48; total 72 bytes.
+
+Mechanism: the 40-byte store starts at the source StorageView's data buffer
+(0x...5780) and reaches source shape[0] at buffer+0x20 (0x...57a0). Payload
+bytes 32..39 are file-chosen 0x41, so source shape[0] is a live
+file-chosen dim_t 0x4141414141414141; shape[1] stays 2 because it lies just
+past the 40-byte store. resize_as(other) computes compute_size(shape) =
+dim0 * dim1 = 0x8282828282828282 and writes it to the destination _size;
+the copy_from guard then rejects it against other._size = 4. The chosen
+value in a live object is therefore a size field, not a pointer.
+
+The pointer fields that copy_from would dereference are other._data at
+0x...57e8 (buffer+0x68) and the destination _data at 0x...5b20. Both belong
+to objects constructed after the vulnerable store (W2 control block and
+StorageView), so their constructors overwrite any chosen bytes; reaching
+other._data with a longer store also crosses live allocator chunk headers.
+A second run with a fixed-length hex argv of different payload bytes
+(32 x 41 + 8 x 42) aborted before the copy instead of reaching it: the argv,
+not just the byte value, shifts this heap layout, matching W4's recorded
+layout dependency. No chosen pointer or control flow was observed.
+
+Result: W4's open question resolves NEGATIVE for this layout. Grade stays
+rung 3 CONFIRMED / rung 4 PARTIAL, AV:L/UI:P ceiling, rung 5 NOT CLAIMED.

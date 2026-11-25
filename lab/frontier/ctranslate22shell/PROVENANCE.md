@@ -243,3 +243,28 @@ counterexample, no grade change, NO r5. Full evidence:
   negative) and W4 (`sysmalloc`-prev_size negative; `_size` guard blocks
   `primitives::copy`) still hold. Grade stays rung 3 CONFIRMED / rung 4
   PARTIAL with the AV:L/UI:P ceiling; rung 5 NOT CLAIMED.
+
+## W6 shape-field mechanism (2026-11-25 22:1xZ) — negative result
+
+One bounded gdb inspection answered the W4 open question in this layout.
+Raw capture: `realbuild/evidence/downstream-shape-40.txt` (deterministic
+`./consumer-downstream 40` from `downstream-probe.sh`, verbatim pin sha256
+`05ab59bb…`). At the `storage_view.cc:411` throw, the source
+`StorageView` (`&other=0x5555556157d0`, `_data=0x555555615780`, `_size=4`)
+has `_shape = {0x4141414141414141, 2}`; the destination has `_size =
+0x8282828282828282` and `_data=0x0`. `ptype /o` puts `_data` at offset 24,
+`_size` at 40 and `_shape` at 48 in a 72-byte `StorageView`.
+
+The source shape vector's storage is at buffer+0x20, so payload bytes
+32..39 of the 40-byte store overwrite `shape[0]` (a live `dim_t`, allocated
+before the store). `shape[1]=2` sits just past the store. `resize_as(other)`
+then sets the destination `_size` to `compute_size(shape) = 0x4141… * 2 =
+0x8282…`, which fails the guard against `other._size=4`; `primitives::copy`
+is still not reached. The pointer fields a dereference would need are in
+objects constructed after the store (`other._data` at buffer+0x68,
+destination `_data`), and their constructors overwrite chosen bytes there.
+A second run with a fixed-length hex argv using different bytes aborted
+before the copy, confirming W4's layout dependency rather than providing a
+second value. No chosen pointer, control flow or command: rung 4 stays
+PARTIAL, rung 5 NOT CLAIMED. This closes the W4 question for this layout;
+do not retry the same probe.

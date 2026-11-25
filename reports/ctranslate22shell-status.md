@@ -144,3 +144,14 @@ no grade cell moved. The W2/W3/W4 negatives remain in force. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w223-ctranslate22shell/detail.md`; the
 dated fold in `lab/frontier/ctranslate22shell/PROVENANCE.md`.
 
+W6 follow-up (22:1xZ), same grade: a gdb inspection of the deterministic
+40-byte downstream run shows the file-chosen live field is the source
+`StorageView::_shape[0]` at buffer+0x20 (a `dim_t` allocated before the
+store), not a pointer. Its value `0x4141…` times the untouched `shape[1]=2`
+becomes the destination `_size=0x8282…`, which fails the copy guard; the
+`_data` pointers live in objects constructed after the store and are
+rewritten by their constructors. A variant byte payload through a hex argv
+aborted before the copy (layout shift). W4's open rung-4 question is
+negative for this layout; raw capture in
+`realbuild/evidence/downstream-shape-40.txt`, detail in `PROVENANCE.md`.
+
