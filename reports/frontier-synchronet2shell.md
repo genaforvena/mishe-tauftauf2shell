@@ -965,3 +965,8 @@ does not identify a useful pointer target, command, DoS rate, ASLR defeat or
 r5. The first execution failed before any case because the provenance hash
 used a relative `$0`; the path was made absolute with no input or assertion
 change, as recorded in that lane's `REPLAY.md`. Author replay, unwitnessed.
+
+Clean-archive replay from commit `32da33f7` with a private copy of the pinned
+`db9c5d6f` tree returned 13 PASS / 0 FAIL at 18:16:33Z–18:17:05Z; five
+normalized key-line digests matched the live run byte-for-byte
+(`termlen320b/evidence/CLEAN-ARCHIVE.md`). Author replay, still unwitnessed.
