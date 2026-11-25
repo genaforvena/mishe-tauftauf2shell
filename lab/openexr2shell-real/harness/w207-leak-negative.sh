@@ -49,7 +49,7 @@ for f in cases/*.exr; do
     test "$hex" -eq 0
     printf '%s rc=%d hex=%d\n' "$(basename "$f")" "$rc" "$hex" >> "$RAW"
 done
-test "$(wc -l < "$RAW")" -eq "$(find cases -maxdepth 1 -name '*.exr' | wc -l)"
+test "$(wc -l < "$RAW")" -eq "$(find cases/ -maxdepth 1 -name '*.exr' | wc -l)"
 
 # A second regular file is processed in the same process; a FIFO is not
 # seekable and exrcheck reports it bad.  Both are measured facts here.
