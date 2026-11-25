@@ -1920,3 +1920,11 @@ malloc from a poisoned entry, wire, command, marker or witness verdict was
 observed. No rung-5 change. Would change my mind: a witness verdict, a chosen
 mapped pointer whose dereference returns file-chosen data, a chosen IP, or a
 wire-fed affected process.
+
+W195 clean-archive receipt (02:21Z): `git archive HEAD lab/openexr2shell-real`
+into `/tmp/w195-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-fixed-plain`, `build-vuln-asan`, `build-fixed-asan`, `bin-vuln-plain`
+and `bin-fixed-asan` trees symlinked from the live checkout. From the archive,
+`sh harness/w195-chosen-deref.sh` printed `RESULT PASS` rc 0 and all five
+evidence hashes matched the working tree byte-for-byte. Author replay, not a
+witness verdict; grade and rung-5 status unchanged.
