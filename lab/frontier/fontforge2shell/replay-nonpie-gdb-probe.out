@@ -15,6 +15,6 @@ PROBE enc=257 i=0 bfc->bitmap=0xa91e30 pt=0xa91e30
 0xa91e30:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
 A debugging session is active.
 
-	Inferior 1 [process 901435] will be killed.
+	Inferior 1 [process 35163] will be killed.
 
 Quit anyway? (y or n) [answered Y; input not from terminal]

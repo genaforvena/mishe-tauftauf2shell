@@ -307,6 +307,16 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   string fragments (`RESULT ASCII_ONLY`). `replay-w18.sh` passes 7/7, rc 0.
   No branch, marker, command or r5; other heap states, later-created
   objects, other builds and GUI remain UNKNOWN. No witness verdict.
+- W23 (`ALLOCSTATE-TCACHE.md`, `replay-w23.sh`, author-side, no grade
+  change): a third allocation state — `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`
+  — moved `encs` in both real headless builds (PIE `0x555555c48240` ->
+  `0x555555c47d50`, `-0x4f0`; non-PIE `0xa92030` -> `0xa91c40`, `-0x3f0`)
+  with the same `glyph=-1, i=3` store. The full 128 KiB negative-glyph
+  window still has no code pointer: PIE `CAND_COUNT 0` / `RESULT NONE`,
+  non-PIE printable string fragments (`RESULT ASCII_ONLY`). `replay-w23.sh`
+  passes 12/12, rc 0. No branch, marker, command or r5; a deliberate groom
+  planting a real function pointer, a GUI process and other builds remain
+  UNKNOWN. No witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

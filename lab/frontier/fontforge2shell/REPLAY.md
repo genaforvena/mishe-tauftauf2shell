@@ -310,3 +310,26 @@ hash `313c4ce4…6a2176094` is byte-identical to the live tree; the non-PIE
 scan has three printable fragments instead of six and the `encs` delta is
 `+0x7b0` instead of `+0x730` (W9/W15 build-path sensitivity). No candidate
 is a code pointer in either tree. Author-side replay, not a witness verdict.
+
+## W23 — tcache-disabled allocation state sweep (2026-11-25 15:0xZ)
+
+`replay-w23.sh` repeats the full-window code-pointer scan under a third
+allocator state, `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`, with no new
+build. It first records an untuned baseline transcript and requires `encs`
+to move in the notcache lane, proving the state actually changed, then
+scans for live code pointers. Prerequisites: `replay-real.sh` and
+`replay-nonpie.sh` in the same tree.
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w23.sh
+```
+
+Expected: 12/12 checks, rc 0, final line `REPLAY_W23_OK: 12 checks, 0 failed`.
+Same `glyph=-1, i=3` store in both lanes. PIE `CAND_COUNT 0` / `RESULT NONE`;
+non-PIE `RESULT ASCII_ONLY` with a bounded path-sensitive count (7 in the
+live tree). `encs` moved `-0x3f0` (non-PIE) and `-0x4f0` (PIE). Normalized
+hashes: `scan-w23-pie.out` `313c4ce4…6a2176094` (byte-identical to W15's
+and W18's PIE scans), `scan-w23-nopie.out`
+`249952b3…de64637a743d6`. Full method, gdb transcripts and limitations in
+`ALLOCSTATE-TCACHE.md`. Author-side negative, no witness verdict, no grade
+change, no r5.

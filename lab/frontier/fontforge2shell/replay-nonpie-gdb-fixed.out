@@ -15,6 +15,6 @@ FIXED enc=257 i=0 bfc->bitmap=0xa91dc0
 0xa91dc0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
 A debugging session is active.
 
-	Inferior 1 [process 901458] will be killed.
+	Inferior 1 [process 35217] will be killed.
 
 Quit anyway? (y or n) [answered Y; input not from terminal]

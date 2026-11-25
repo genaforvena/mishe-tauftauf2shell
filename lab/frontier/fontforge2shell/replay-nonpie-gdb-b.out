@@ -18,6 +18,6 @@ HIT enc=261 i=0 bfc=0xa91f60 bfc->bitmap=0x5a4344 pt=0x5a4344
 #2  0x0000000000521556 in SFD_Dump (sfd=0xa6ba50, sf=0xa7d5f0, map=0xa7fa20, normal=0x0, todir=0, dirname=0xa7e5b0 "/tmp/ff2s-w14-value-nonpie-b.sfd") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:2834
 A debugging session is active.
 
-	Inferior 1 [process 901361] will be killed.
+	Inferior 1 [process 34860] will be killed.
 
 Quit anyway? (y or n) [answered Y; input not from terminal]
