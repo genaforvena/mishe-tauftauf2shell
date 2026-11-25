@@ -9533,12 +9533,13 @@ on loopback.
   plus W5 #3958 stay OWED. `reports/hping3shell-status.md` §Witness verdict
   W212.
 
-## 2026-11-25 03:2xZ — socat2shell FRONTIER-STAGED lane
+## 2026-11-25 03:2xZ — socat2shell FRONTIER-STAGED lane (rung corrected)
 
-Staged at rung 3 with a scoped rung 4 PARTIAL; author-only, unwitnessed, no
-rung cell, route, mind count or R5 cell moved. Raw source trees, binaries and
-logs are gitignored and regenerate with the command below. No probe leaves
-this machine.
+Rung 1/2 on a real build (deterministic connection abort); rung 3 memory
+corruption and rung 4 chosen bytes NOT established on the real consumer, rung
+5 not attempted. Author-only, unwitnessed, no rung cell, route, mind count or
+R5 cell moved. Raw source trees, binaries and logs are gitignored and
+regenerate with the commands below. No probe leaves this machine.
 
 - Claim: Socat security advisory 10
   (`http://www.dest-unreach.org/socat/contrib/socat-secadv10.html`, pinned as
@@ -9547,25 +9548,33 @@ this machine.
   `http://www.dest-unreach.org/socat/download/socat-1.8.1.2.patch` is pinned
   as `src/socat-1.8.1.2.patch`; its only source change is `char dstdata[]`
   to `unsigned char dstdata[]` in both `struct socks5_request` and
-  `struct socks5_reply` of `xio-socks5.h`. Vulnerable tarball
-  `socat-1.8.1.1.tar.gz` and seven source/patch pins are in
-  `lab/frontier/socat2shell/src/pins.sha256`, with URLs in `PROVENANCE.md`.
-- From `lab/frontier/socat2shell`, `sh harness/run-all.sh` re-extracts and
-  SHA-checks every pin and printed `TOTAL pass=15 fail=0`, rc 0, here. Expect
-  gcc and clang ASan `heap-buffer-overflow WRITE of size 600`, 0 bytes after
-  a 262-byte region, in `readfull` ← `_xioopen_socks5_read_reply` on
-  `xio-socks5.inc:12`; the plain build prints canary
-  `4d495348452d534f434b53` ("MISHE-SOCKS") starting at reply offset 262.
-  Mechanism: signed `char` length byte 0xfb promotes to -5, giving
-  `bytes_to_read=2` with `bytes_read=5`; the -3 read count becomes a huge
-  `size_t`, so server-supplied bytes land past the 262-byte reply allocated
-  at `xio-socks5.c:551`. Safe IPv4 reply and attack against the fixed
-  1.8.1.2 header are sanitizer-clean with rc 0; fixed plain canary stays
-  zeroed.
-- Ceiling: the harness models what a malicious server sends and explicitly
-  disables glibc fortify because at default `-O1` fortify aborts before
-  ASan. No real socat build, loopback wire, pointer/IP, marker execution,
-  witness verdict or r5. Charter/window/seed wall exist without a route;
+  `struct socks5_reply` of `xio-socks5.h`. Both tarballs and seven source/patch
+  pins are in `lab/frontier/socat2shell/src/pins.sha256`, URLs in
+  `PROVENANCE.md`.
+- Pinned-function harness (synthetic consumer): from
+  `lab/frontier/socat2shell`, `sh harness/run-all.sh` re-extracts and
+  SHA-checks every pin and printed `TOTAL pass=15 fail=0`, rc 0, here. It
+  reports gcc/clang ASan `heap-buffer-overflow WRITE of size 600`, 0 bytes
+  after a 262-byte region, and plain canary `MISHE-SOCKS` at reply+262 with
+  fixed/safe controls clean. Mechanism: signed `char` length byte 0xfb
+  promotes to -5, so `bytes_to_read=2` with `bytes_read=5` and the -3 count
+  becomes SIZE_MAX. The ASan WRITE comes from the harness's `memcpy`
+  stand-in for `readfull()` and explicitly disables glibc fortify (default
+  `-O1` aborts before ASan); it is not evidence about the shipped consumer.
+- Real-build loopback correction (`d7ea43d1`): both 1.8.1.1 and 1.8.1.2 were
+  built unmodified under clang ASan with `--disable-openssl`. From
+  `lab/frontier/socat2shell/real`, `sh run-real.sh` scored 9 PASS / 0 FAIL,
+  rc 0, here; `evil_socks5.py` binds only 127.0.0.1 and sends
+  `05 00`, then `05 00 00 03 fd` plus 600 chosen bytes or a well-formed IPv4
+  reply. Vulnerable attack logs
+  `W read(7, 0x512000000045, -1): Bad address` and exits 255 with NO ASan
+  report; vulnerable IPv4, fixed attack and fixed IPv4 all exit 0 clean.
+  Real `readfull()` (`sysutils.c:101-141`) loops `Read(fd, buff, exptg)`;
+  with `exptg=SIZE_MAX` this host's `read(2)` returns EFAULT before storing
+  any byte, so the advisory's unbounded heap write is not reproducible on
+  this consumer. Any future write claim must show it on the real path.
+- Ceiling: no chosen-byte primitive, pointer/IP, marker execution, witness
+  verdict or r5. Charter, window 149 and seed wall exist without a route;
   `check-omp-only.py` reads RED with `socat2shell: no route` and 141 roles,
   resolver the person's full-flag sync (never a bare `mishe sync`).
   `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.

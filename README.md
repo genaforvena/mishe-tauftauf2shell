@@ -423,28 +423,32 @@ witness verdict stay UNKNOWN. The raw logs and `upstream/` tree are gitignored
 and regenerate from the pinned clone and commands above; a staged-harness
 smoke here scored 20 PASS / 0 FAIL with 7/7 pins.
 
-Socat2Shell is FRONTIER-STAGED (`4f3b7916`, W221): CVE-2026-56123 (Socat
-security advisory 10, CWE-122, CVSS4 9.2 `AV:N/AC:H`), affected 1.8.0.0–
-1.8.1.1, fixed in 1.8.1.2 by making `dstdata[]` unsigned in `xio-socks5.h`;
-source URLs, tarball and patch pins are in
-`lab/frontier/socat2shell/PROVENANCE.md` and `src/pins.sha256`. A signed
-`char` length byte 0xfb promotes to -5, so `bytes_to_read=2` while
-`bytes_read=5`; the negative count becomes a huge `size_t` in `readfull()`
-and the malicious server's bytes are written past the 262-byte reply
-allocated at `xio-socks5.c:551`. From `lab/frontier/socat2shell`,
-`sh harness/run-all.sh` re-extracts and pin-checks every source and printed
-`TOTAL pass=15 fail=0` rc 0 here: gcc and clang ASan `WRITE of size 600`
-0 bytes after a 262-byte region in `_xioopen_socks5_read_reply`, plain
-canary `MISHE-SOCKS` at reply+262, and safe-IPv4 / fixed-1.8.1.2 controls
-clean. Rung 3 is CONFIRMED on the verbatim pinned function and rung 4 is
-PARTIAL at the chosen length, write extent and bytes scope; the harness uses
-stand-ins and explicitly disables glibc fortify (at default `-O1` fortify
-aborts before ASan). There is no real socat build, loopback wire, pointer/IP,
-marker execution, witness verdict or r5. A charter, window and seed wall
-exist but no route, so omp-only is RED with 141 roles and
-`socat2shell: no route`; admission belongs to the operator, and no README
-row, rung cell or mind-count change is made here.
-`reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
+Socat2Shell is FRONTIER-STAGED (`4f3b7916`, W221; rung corrected by
+`d7ea43d1`): CVE-2026-56123 (Socat security advisory 10, CWE-122, CVSS4 9.2
+`AV:N/AC:H`), affected 1.8.0.0–1.8.1.1, fixed in 1.8.1.2 by making
+`dstdata[]` unsigned in `xio-socks5.h`; source URLs, tarball and patch pins
+are in `lab/frontier/socat2shell/PROVENANCE.md` and `src/pins.sha256`. A
+signed `char` length byte 0xfb promotes to -5, so `bytes_to_read=2` while
+`bytes_read=5`; the negative count reaches `readfull()` as SIZE_MAX. The
+pinned-function harness still prints `TOTAL pass=15 fail=0` from
+`sh harness/run-all.sh`, but its ASan `WRITE of size 600` past a 262-byte
+reply comes from a `memcpy` stand-in for `readfull()`, not from the shipped
+consumer. A real-build loopback replay corrects the earlier rung-3/rung-4
+claim: both releases were built unmodified under clang ASan with
+`--disable-openssl`, and a 127.0.0.1-only SOCKS5 server sends
+`05 00 00 03 fd` plus 600 chosen bytes. From
+`lab/frontier/socat2shell/real`, `sh run-real.sh` scored 9 PASS / 0 FAIL
+here: the vulnerable build logs `W read(7, 0x512000000045, -1): Bad address`
+and exits 255 with no ASan report, while fixed and safe replies exit 0.
+The real `readfull()` (`sysutils.c:101-141`) passes SIZE_MAX to `read(2)`,
+which returns EFAULT before storing any byte. Grade is corrected to rung 1/2
+on a real build (deterministic connection abort); rung 3 memory corruption
+and rung 4 chosen bytes are NOT established on the real consumer, rung 5 is
+not attempted, and the witness verdict is UNKNOWN. No pointer/IP, marker,
+command or r5. A charter, window 149 and seed wall exist but no route, so
+omp-only is RED with 141 roles and `socat2shell: no route`; admission belongs
+to the operator, and no README row, rung cell or mind-count change is made
+here. `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
 
 The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
 "no measured DoS", N2n2Shell has "no control of a consumed pointer" without

@@ -10971,19 +10971,27 @@ labels stay as recorded below.
   expected bytes and gitignored-regeneration notes are in
   `docs/reproducibility.md` under the 03:1xZ lane.
 
-### 2026-11-25 03:2xZ — socat2shell staged (FRONTIER-STAGED, no route)
+### 2026-11-25 03:2xZ — socat2shell staged, rung corrected (no route)
 
 - Frontier W221 (`4f3b7916`) staged CVE-2026-56123 (Socat advisory 10,
   CWE-122, CVSS4 9.2 `AV:N/AC:H`; affected 1.8.0.0–1.8.1.1, fixed 1.8.1.2
-  by an unsigned `dstdata[]`) from a pinned tarball, patch and advisory.
-  Signed-char sign extension of SOCKS5 DOMAINNAME length 0xfb makes the
-  `readfull()` count a huge `size_t`; the verbatim pinned-function harness
-  scores 15 PASS / 0 FAIL here, with gcc/clang ASan `WRITE of size 600`
-  after a 262-byte reply and plain `MISHE-SOCKS` at reply+262, safe and fixed
-  controls clean. Rung 3 CONFIRMED, rung 4 PARTIAL at the chosen-scope;
-  stand-ins, no real build/wire, fortify disabled in the harness, no
-  pointer/IP, marker, witness or r5.
-- Charter, window and seed wall exist but no route: operator owns admission;
-  omp-only is RED with 141 roles and `socat2shell: no route`. No README row,
-  rung cell, grade or mind-count change. Recipe and pins are in
-  `docs/reproducibility.md` under the 03:2xZ lane.
+  by an unsigned `dstdata[]`) from a pinned tarball, patch, advisory and a
+  verbatim pinned-function harness (`harness/run-all.sh` 15 PASS / 0 FAIL
+  here). Signed-char sign extension of DOMAINNAME length 0xfb makes the count
+  a huge `size_t`; the harness's ASan `WRITE of size 600` comes from a
+  `memcpy` stand-in for `readfull()` with fortify disabled, not from the
+  shipped consumer.
+- Correction (`d7ea43d1`): unmodified real 1.8.1.1 and 1.8.1.2 builds under
+  clang ASan and a 127.0.0.1-only malicious SOCKS5 server give
+  `real/run-real.sh` 9 PASS / 0 FAIL here. The vulnerable attack logs
+  `W read(7, 0x512000000045, -1): Bad address` and exits 255 with NO ASan
+  report; fixed and safe replies exit 0. Real `readfull()` passes SIZE_MAX to
+  `read(2)`, which returns EFAULT before storing a byte. Grade corrected:
+  rung 1/2 on a real build (deterministic connection abort); rung 3 memory
+  corruption and rung 4 chosen bytes NOT established on the real consumer,
+  rung 5 not attempted, witness UNKNOWN. The earlier harness-only rung-3
+  claim is preserved as corrected in the brief/status.
+- Charter, window 149 and seed wall exist but no route: operator owns
+  admission; omp-only is RED with 141 roles and `socat2shell: no route`. No
+  README row, rung cell, grade cell or mind-count change. Recipe, pins and
+  expected bytes are in `docs/reproducibility.md` under the 03:2xZ lane.
