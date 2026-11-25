@@ -1,0 +1,458 @@
+== W192 base build and controls ==
+== pins ==
+lab/frontier/libgphoto2shell/pins/fix-6a3393d.patch: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.c.fixed: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.c.vuln: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.h.vuln: OK
+== clean source and lab patches ==
+vulnerable jl2005c.c sha256 0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185 OK
+== full clang 18 build, no stack canary ==
+jl2005c.so sha256 63c86f430f97245b9a68497660fd592b2ed8756e3790e4ddf520aa1faf267720
+== probe ==
+derived MARKER=0x401520 SINK=0x4040c0 TOP=0x4040f0
+== fixed control: upstream 6a3393d, camlib rebuilt in place ==
+== fix reversed, identical attack again ==
+PASS COUNT100 rc=0
+PASS COUNT100 no marker
+PASS ATTACK marker executed
+PASS ATTACK rc=42
+PASS NORET device-chosen write observed
+PASS NORET no marker
+PASS NORET rc=139
+PASS FIXED no marker
+PASS FIXED rc=0
+PASS FIXED no device-chosen write
+PASS RESTORED marker executed
+PASS RESTORED rc=42
+RESULT: 12 PASS / 0 FAIL
+== add W193 mode r and rebuild only vusb ==
+checking file libgphoto2_port/vusb/vusb.c
+Hunk #1 succeeded at 169 with fuzz 1.
+Hunk #2 succeeded at 190 (offset 1 line).
+patching file libgphoto2_port/vusb/vusb.c
+Hunk #1 succeeded at 169 with fuzz 1.
+Hunk #2 succeeded at 190 (offset 1 line).
+make: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+make  all-recursive
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+Making all in po
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/po'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/po'
+Making all in libgphoto2_port
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+Making all in .
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+  CC       vusb/la-vusb.lo
+  CCLD     vusb.la
+  iol LIBADD   ./libgphoto2_port/libgphoto2_port.la
+  iol LDFLAGS  -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2'
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+Making all in tests
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+make[2]: Nothing to be done for 'all'.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+Making all in doc
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+Dummy target all-local without gtk-doc.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+make: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+make: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+Making install in po
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/po'
+if test "libgphoto2_port" = "gettext-tools"; then \
+  /usr/bin/mkdir -p /tmp/w193-lgp-base/build/installdir/share/gettext/po; \
+  for file in Makefile.in.in remove-potcdate.sin quot.sed boldquot.sed en@quot.header en@boldquot.header insert-header.sin Rules-quot   Makevars.template; do \
+    /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/po/$file \
+		    /tmp/w193-lgp-base/build/installdir/share/gettext/po/$file; \
+  done; \
+  for file in Makevars; do \
+    rm -f /tmp/w193-lgp-base/build/installdir/share/gettext/po/$file; \
+  done; \
+else \
+  : ; \
+fi
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/po'
+Making install in libgphoto2_port
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/lib'
+ /bin/bash ../libtool   --mode=install /usr/bin/install -c   libgphoto2_port.la '/tmp/w193-lgp-base/build/installdir/lib'
+libtool: install: /usr/bin/install -c .libs/libgphoto2_port.so.12.2.0 /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port.so.12.2.0
+libtool: install: (cd /tmp/w193-lgp-base/build/installdir/lib && { ln -s -f libgphoto2_port.so.12.2.0 libgphoto2_port.so.12 || { rm -f libgphoto2_port.so.12 && ln -s libgphoto2_port.so.12.2.0 libgphoto2_port.so.12; }; })
+libtool: install: (cd /tmp/w193-lgp-base/build/installdir/lib && { ln -s -f libgphoto2_port.so.12.2.0 libgphoto2_port.so || { rm -f libgphoto2_port.so && ln -s libgphoto2_port.so.12.2.0 libgphoto2_port.so; }; })
+libtool: install: /usr/bin/install -c .libs/libgphoto2_port.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port.la
+libtool: finish: PATH="/home/mesh-home/mishe-tauftauf2shell/.mishe-tauftauf/bin:/home/mesh-home/.local/bin:/usr/local/bin:/usr/bin:/bin:/sbin" ldconfig -n /tmp/w193-lgp-base/build/installdir/lib
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /tmp/w193-lgp-base/build/installdir/lib
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+make[2]: Nothing to be done for 'install-data-am'.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/libgphoto2_port'
+Making install in .
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/bin'
+ /usr/bin/install -c gphoto2-port-config '/tmp/w193-lgp-base/build/installdir/bin'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2_port'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/AUTHORS /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/README /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/NEWS '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2_port'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2'
+ /bin/bash ./libtool   --mode=install /usr/bin/install -c   serial.la usb1.la usbdiskdirect.la usbscsi.la disk.la vusb.la ptpip.la '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2'
+libtool: warning: relinking 'serial.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o serial.la serial/la-unix.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/serial.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/serial.so
+libtool: install: /usr/bin/install -c .libs/serial.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/serial.la
+libtool: warning: relinking 'usb1.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o usb1.la libusb1/usb1_la-libusb1.lo ./libgphoto2_port/libgphoto2_port.la -lusb-1.0 -lpthread )
+libtool: install: /usr/bin/install -c .libs/usb1.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usb1.so
+libtool: install: /usr/bin/install -c .libs/usb1.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usb1.la
+libtool: warning: relinking 'usbdiskdirect.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o usbdiskdirect.la usbdiskdirect/la-linux.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/usbdiskdirect.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usbdiskdirect.so
+libtool: install: /usr/bin/install -c .libs/usbdiskdirect.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usbdiskdirect.la
+libtool: warning: relinking 'usbscsi.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o usbscsi.la usbscsi/la-linux.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/usbscsi.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usbscsi.so
+libtool: install: /usr/bin/install -c .libs/usbscsi.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/usbscsi.la
+libtool: warning: relinking 'disk.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o disk.la disk/la-disk.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/disk.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/disk.so
+libtool: install: /usr/bin/install -c .libs/disk.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/disk.la
+libtool: warning: relinking 'vusb.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o vusb.la vusb/la-vusb.lo vusb/la-vcamera.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/vusb.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/vusb.so
+libtool: install: /usr/bin/install -c .libs/vusb.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/vusb.la
+libtool: warning: relinking 'ptpip.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/libgphoto2_port; /bin/bash "/tmp/w193-lgp-base/build/libgphoto2_port/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Wall -Wmissing-declarations -Wmissing-prototypes -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/iolib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 -o ptpip.la ptpip/la-ptpip.lo ./libgphoto2_port/libgphoto2_port.la -lpthread )
+libtool: install: /usr/bin/install -c .libs/ptpip.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/ptpip.so
+libtool: install: /usr/bin/install -c .libs/ptpip.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2/ptpip.la
+libtool: finish: PATH="/home/mesh-home/mishe-tauftauf2shell/.mishe-tauftauf/bin:/home/mesh-home/.local/bin:/usr/local/bin:/usr/bin:/bin:/sbin" ldconfig -n /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/include'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/include/gphoto2'
+ /usr/bin/install -c -m 644  /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port.h /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port-info-list.h /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port-log.h /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port-version.h /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port-portability.h /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/gphoto2/gphoto2-port-result.h '/tmp/w193-lgp-base/build/installdir/include/gphoto2'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/lib/pkgconfig'
+ /usr/bin/install -c -m 644 libgphoto2_port.pc '/tmp/w193-lgp-base/build/installdir/lib/pkgconfig'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/libgphoto2_port/0.12.2/vcamera'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port/vusb/README.txt '/tmp/w193-lgp-base/build/installdir/share/libgphoto2_port/0.12.2/vcamera'
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+Making install in tests
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+make[2]: Nothing to be done for 'install-exec-am'.
+make[2]: Nothing to be done for 'install-data-am'.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/tests'
+Making install in doc
+make[1]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+Dummy target all-local without gtk-doc.
+make[2]: Entering directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+make[2]: Nothing to be done for 'install-exec-am'.
+Dummy target install-data-local without gtk-doc
+Re-run configure with gtk-doc and adequate parameters and run make again to build docs.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port/doc'
+make: Leaving directory '/tmp/w193-lgp-base/build/libgphoto2_port'
+== safe count-100 control (no bulk partial write) ==
+
+=== SAFE ===
+AFTER_INIT rc=0 CAM_PL=0x61b03f86b600 MODEL=43 NB=100 BLOCK=200 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+RC=0
+== fixed 16-candidate fork sweep, one inherited ASLR/heap layout ==
+
+=== SWEEP ===
+VUSB_PARTIAL=0430 n=15922
+SIGSEGV PARTIAL=- CAM_PL=0x5a5a5a5a5a5a5a5a
+VUSB_PARTIAL=1430 n=15922
+AFTER_INIT rc=0 CAM_PL=(nil) MODEL=00 NB=-1 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=SIGSEGV PARTIAL=- CAM_PL=(nil)
+VUSB_PARTIAL=2430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=3430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=4430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=5430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=6430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=7430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=0 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=8430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=5a NB=1515870810 BLOCK=5a5a5a5a TOTAL=5a5a5a5a5a5a5a5a DATA=0x5a5a5a5a5a5a5a5a
+TABLE_DIRECT=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+DIRECT_RESULT=0
+VUSB_PARTIAL=9430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=5a NB=1515870810 BLOCK=5a5a5a5a TOTAL=5a5a5a5a5a5a5a5a DATA=0x5a5a5a5a5a5a5a5a
+TABLE_DIRECT=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+DIRECT_RESULT=0
+VUSB_PARTIAL=a430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=5a NB=1515870810 BLOCK=5a5a5a5a TOTAL=5a5a5a5a5a5a5a5a DATA=0x5a5a5a5a5a5a5a5a
+TABLE_DIRECT=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+DIRECT_RESULT=0
+VUSB_PARTIAL=b430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=43 NB=1 BLOCK=200 TOTAL=200 DATA=(nil)
+TABLE_DIRECT=573139335a5a000100005a5a00005a5a
+DIRECT_RESULT=1 SWEEP_HIT=b
+VUSB_PARTIAL=c430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=d430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=e430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+VUSB_PARTIAL=f430 n=15922
+AFTER_INIT rc=0 CAM_PL=0x594b5d2ab600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+RC=0
+== gdb byte proof with ASLR off; candidate derived only here ==
+GDB original=0x555555567600 low16=7600 derived_partial=0x7430
+
+=== GDB_ATTACK ===
+Function "jl2005c_init" not defined.
+Breakpoint 1 (jl2005c_init) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567600) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:49
+49		int model_string = 0;
+Breakpoint 2 at 0x7ffff7c28a1b: file /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c, line 154.
+VUSB_PARTIAL=7430 n=15922
+
+Breakpoint 2, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567430) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:154
+154		memmove(priv->table, info + 0x30, alloc_table_size - 0x30);
+GDB_ATTACK ORIG=0x555555567600 SLOT=0x555555567430 DEST=0x555555567470 RBP=0x7fffffffb610 RIP=0x7ffff7c277f3
+0x5555555675e8:	0x762f322e32312e30	0x0000616c00627375
+0x5555555675f8:	0x0000000000004051	0x0000000000000000
+AFTER_INIT rc=0 CAM_PL=0x555555567600 MODEL=43 NB=1 BLOCK=200 TOTAL=200 DATA=(nil)
+TABLE_DIRECT=573139335a5a000100005a5a00005a5a
+DIRECT_RESULT=1
+[Inferior 1 (process 1130058) exited normally]
+RC=0
+== upstream-fix control and reversal ==
+patching file camlibs/jl2005c/jl2005c.c
+make: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+  CC       jl2005c/la-jl2005c.lo
+  CCLD     jl2005c.la
+make: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+make: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+Making install in .
+make[1]: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+  cam CPPFLAGS -D_GPHOTO2_INTERNAL_CODE -DLOCALEDIR="/tmp/w193-lgp-base/build/installdir/share/locale" -DCAMLIBS="/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34" -I/tmp/w193-lgp-base/src/libgphoto2-2.5.34 -I.. -I/tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port
+  cam LIBADD   ../libgphoto2/libgphoto2.la ../libgphoto2_port/libgphoto2_port/libgphoto2_port.la
+  cam LDFLAGS  -module -no-undefined -avoid-version -export-dynamic -export-symbols '/tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/camlib.sym' -rpath '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+make[2]: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+make[2]: Nothing to be done for 'install-exec-am'.
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+ /bin/bash ../libtool   --mode=install /usr/bin/install -c   jl2005c.la '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+libtool: warning: relinking 'jl2005c.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/camlibs; /bin/bash "/tmp/w193-lgp-base/build/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Werror=unknown-warning-option -Wall -Wextra -Wmost -Werror=incompatible-pointer-types -Werror=implicit -Werror=int-conversion -Wno-error=reserved-identifier -Wno-error=documentation-deprecated-sync -Wno-unused-parameter -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/camlib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34 -o jl2005c.la jl2005c/la-library.lo jl2005c/la-jl2005c.lo jl2005c/la-jpeg_memsrcdest.lo jl2005c/la-jl2005bcd_decompress.lo jl2005c/la-img_enhance.lo ../libgphoto2/libgphoto2.la ../libgphoto2_port/libgphoto2_port/libgphoto2_port.la -ljpeg -lm )
+libtool: install: /usr/bin/install -c .libs/jl2005c.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.so
+libtool: install: /usr/bin/install -c .libs/jl2005c.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.la
+libtool: finish: PATH="/home/mesh-home/mishe-tauftauf2shell/.mishe-tauftauf/bin:/home/mesh-home/.local/bin:/usr/local/bin:/usr/bin:/bin:/sbin" ldconfig -n /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/adc65/README.adc65 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/agfa-cl20/README.agfa-cl20 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/aox/README.aox /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ax203/README.ax203-compression /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ax203/README.ax203 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/canon/README.canon /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/clicksmart310/README.clicksmart310 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9050 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9051 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9052 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.905C /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.913D /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/enigma13/README.enigma13 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/gsmart300/README.gsmart300 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/iclick/README.iclick /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jamcam/README.jamcam /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005a/README.jl2005a /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/README.jl2005c /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/README.jl2005bcd-compression /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/README.konica /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/largan/lmini/README.largan-lmini /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/lg_gsm/README.lg_gsm /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/mars/README.mars /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/minolta/dimagev/README.minolta-dimagev /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/mustek/README.mustek /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/coolshot/README.panasonic-coolshot /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/l859/README.panasonic-l859 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/README.panasonic /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pccam300/README.pccam300 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pccam600/README.pccam600 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pentax/README.pentax /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ptp2/README.ptp2 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/smal/README.smal /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sonix/README.sonix /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sonydscf1/README.sonydscf1 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/soundvision/README.soundvision /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/spca50x/README.spca50x /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sq905/README.913C /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sq905/README.sq905 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/st2205/README.st2205-compression '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/st2205/README.st2205 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/toshiba/pdrm11/README.toshiba-pdrm11 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/tp6801/README.tp6801 '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/libgphoto2/2.5.34/konica'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/english /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/french /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/german /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/japanese /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/korean /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/spanish '/tmp/w193-lgp-base/build/installdir/share/libgphoto2/2.5.34/konica'
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+Making install in canon/doc
+make[1]: Entering directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+Dummy target all-local without gtk-doc.
+make[2]: Entering directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make[2]: Nothing to be done for 'install-exec-am'.
+Dummy target install-data-local without gtk-doc
+Re-run configure with gtk-doc and adequate parameters and run make again to build docs.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+
+=== GDB_FIXED ===
+Function "jl2005c_init" not defined.
+Breakpoint 1 (jl2005c_init) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567600) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:49
+49		int model_string = 0;
+Breakpoint 2 at 0x7ffff7c27a46: file /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c, line 159.
+AFTER_INIT rc=0 CAM_PL=0x555555567600 MODEL=00 NB=1022 BLOCK=0 TOTAL=0 DATA=(nil)
+TABLE_DIRECT=00000000000000000000000000000000
+DIRECT_RESULT=0
+[Inferior 1 (process 1130663) exited with code 06]
+No registers.
+0x5555555675e8:	Cannot access memory at address 0x5555555675e8
+The program is not being run.
+RC=1
+patching file camlibs/jl2005c/jl2005c.c
+make: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+  CC       jl2005c/la-jl2005c.lo
+  CCLD     jl2005c.la
+make: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+make: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+Making install in .
+make[1]: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+  cam CPPFLAGS -D_GPHOTO2_INTERNAL_CODE -DLOCALEDIR="/tmp/w193-lgp-base/build/installdir/share/locale" -DCAMLIBS="/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34" -I/tmp/w193-lgp-base/src/libgphoto2-2.5.34 -I.. -I/tmp/w193-lgp-base/src/libgphoto2-2.5.34/libgphoto2_port
+  cam LIBADD   ../libgphoto2/libgphoto2.la ../libgphoto2_port/libgphoto2_port/libgphoto2_port.la
+  cam LDFLAGS  -module -no-undefined -avoid-version -export-dynamic -export-symbols '/tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/camlib.sym' -rpath '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+make[2]: Entering directory '/tmp/w193-lgp-base/build/camlibs'
+make[2]: Nothing to be done for 'install-exec-am'.
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+ /bin/bash ../libtool   --mode=install /usr/bin/install -c   jl2005c.la '/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34'
+libtool: warning: relinking 'jl2005c.la'
+libtool: install: (cd /tmp/w193-lgp-base/build/camlibs; /bin/bash "/tmp/w193-lgp-base/build/libtool"  --silent --tag CC --mode=relink clang -O0 -g -fPIC -fno-omit-frame-pointer -Werror=unknown-warning-option -Wall -Wextra -Wmost -Werror=incompatible-pointer-types -Werror=implicit -Werror=int-conversion -Wno-error=reserved-identifier -Wno-error=documentation-deprecated-sync -Wno-unused-parameter -module -no-undefined -avoid-version -export-dynamic -export-symbols /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/camlib.sym -rpath /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34 -o jl2005c.la jl2005c/la-library.lo jl2005c/la-jl2005c.lo jl2005c/la-jpeg_memsrcdest.lo jl2005c/la-jl2005bcd_decompress.lo jl2005c/la-img_enhance.lo ../libgphoto2/libgphoto2.la ../libgphoto2_port/libgphoto2_port/libgphoto2_port.la -ljpeg -lm )
+libtool: install: /usr/bin/install -c .libs/jl2005c.soT /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.so
+libtool: install: /usr/bin/install -c .libs/jl2005c.lai /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.la
+libtool: finish: PATH="/home/mesh-home/mishe-tauftauf2shell/.mishe-tauftauf/bin:/home/mesh-home/.local/bin:/usr/local/bin:/usr/bin:/bin:/sbin" ldconfig -n /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34
+----------------------------------------------------------------------
+Libraries have been installed in:
+   /tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34
+
+If you ever happen to want to link against installed libraries
+in a given directory, LIBDIR, you must either use libtool, and
+specify the full pathname of the library, or use the '-LLIBDIR'
+flag during linking and do at least one of the following:
+   - add LIBDIR to the 'LD_LIBRARY_PATH' environment variable
+     during execution
+   - add LIBDIR to the 'LD_RUN_PATH' environment variable
+     during linking
+   - use the '-Wl,-rpath -Wl,LIBDIR' linker flag
+   - have your system administrator add LIBDIR to '/etc/ld.so.conf'
+
+See any operating system documentation about shared libraries for
+more information, such as the ld(1) and ld.so(8) manual pages.
+----------------------------------------------------------------------
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/adc65/README.adc65 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/agfa-cl20/README.agfa-cl20 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/aox/README.aox /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ax203/README.ax203-compression /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ax203/README.ax203 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/canon/README.canon /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/clicksmart310/README.clicksmart310 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9050 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9051 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.9052 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.905C /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/digigr8/README.913D /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/enigma13/README.enigma13 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/gsmart300/README.gsmart300 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/iclick/README.iclick /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jamcam/README.jamcam /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005a/README.jl2005a /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/README.jl2005c /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/README.jl2005bcd-compression /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/README.konica /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/largan/lmini/README.largan-lmini /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/lg_gsm/README.lg_gsm /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/mars/README.mars /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/minolta/dimagev/README.minolta-dimagev /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/mustek/README.mustek /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/coolshot/README.panasonic-coolshot /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/l859/README.panasonic-l859 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/panasonic/README.panasonic /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pccam300/README.pccam300 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pccam600/README.pccam600 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/pentax/README.pentax /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/ptp2/README.ptp2 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/smal/README.smal /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sonix/README.sonix /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sonydscf1/README.sonydscf1 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/soundvision/README.soundvision /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/spca50x/README.spca50x /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sq905/README.913C /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/sq905/README.sq905 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/st2205/README.st2205-compression '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/st2205/README.st2205 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/toshiba/pdrm11/README.toshiba-pdrm11 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/tp6801/README.tp6801 '/tmp/w193-lgp-base/build/installdir/share/doc/libgphoto2/camlibs'
+ /usr/bin/mkdir -p '/tmp/w193-lgp-base/build/installdir/share/libgphoto2/2.5.34/konica'
+ /usr/bin/install -c -m 644 /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/english /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/french /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/german /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/japanese /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/korean /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/konica/localization/spanish '/tmp/w193-lgp-base/build/installdir/share/libgphoto2/2.5.34/konica'
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+Making install in canon/doc
+make[1]: Entering directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+Dummy target all-local without gtk-doc.
+make[2]: Entering directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make[2]: Nothing to be done for 'install-exec-am'.
+Dummy target install-data-local without gtk-doc
+Re-run configure with gtk-doc and adequate parameters and run make again to build docs.
+make[2]: Leaving directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make[1]: Leaving directory '/tmp/w193-lgp-base/build/camlibs/canon/doc'
+make: Leaving directory '/tmp/w193-lgp-base/build/camlibs'
+
+=== GDB_RESTORED ===
+Function "jl2005c_init" not defined.
+Breakpoint 1 (jl2005c_init) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567600) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:49
+49		int model_string = 0;
+Breakpoint 2 at 0x7ffff7c28a1b: file /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c, line 154.
+VUSB_PARTIAL=7430 n=15922
+
+Breakpoint 2, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567430) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:154
+154		memmove(priv->table, info + 0x30, alloc_table_size - 0x30);
+GDB_ATTACK ORIG=0x555555567600 SLOT=0x555555567430 DEST=0x555555567470 RBP=0x7fffffffb600 RIP=0x7ffff7c277f3
+0x5555555675e8:	0x762f322e32312e30	0x0000616c00627375
+0x5555555675f8:	0x0000000000004051	0x0000000000000000
+AFTER_INIT rc=0 CAM_PL=0x555555567600 MODEL=43 NB=1 BLOCK=200 TOTAL=200 DATA=(nil)
+TABLE_DIRECT=573139335a5a000100005a5a00005a5a
+DIRECT_RESULT=1
+[Inferior 1 (process 1131197) exited normally]
+RC=0
+PASS W192 base 12 PASS / 0 FAIL
+PASS SAFE no partial bulk write
+PASS SAFE direct no marker
+PASS SAFE rc=0
+PASS 16 fixed candidates ran
+PASS exactly one ASLR-on direct hit
+PASS direct hit table marker
+PASS sweep parent rc=0
+PASS gdb frame values present
+PASS partial slot = original-0x1d0
+PASS memmove destination = original-0x190
+PASS saved RIP not overwritten
+PASS gdb attack direct marker
+PASS fixed no partial bulk write
+PASS fixed no direct marker
+PASS restored direct marker
+RESULT: 16 PASS / 0 FAIL

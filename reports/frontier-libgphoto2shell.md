@@ -489,8 +489,9 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   clang 18 at the same plain flags puts `info` at `rbp-0x4050..-0x31`, spills
   `priv`/`port`/`camera` at `rbp-0x20/-0x18/-0x10`, and emits NO stack
   canary (`0` `%fs:0x28` references in 455 disassembly lines). Bulk offsets
-  `0x3E30`/`0x3E38`/`0x3E40` therefore reach the three pointer slots, and
-  saved RIP is at bulk `0x3E50`. A full clean-tarball 2.5.34 build with
+  `0x3E30`/`0x3E38`/`0x3E40` therefore reach the three pointer slots;
+  saved RBP and saved RIP are at bulk `0x3E50` and `0x3E58`. A full clean-tarball
+  2.5.34 build with
   `CC=clang`, the committed vusb patch and the committed `p`-mode patch
   confirms the installed camlib has the same frame; at real
   `jl2005c.c:154` the destination is the `priv` slot reloaded from
@@ -553,3 +554,31 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   of a source change. This makes the replay self-contained but changes no
   grade: still author-side rung 4, unwitnessed, lab-assisted, synthetic vusb,
   no wire or command, rung 5 UNKNOWN.
+
+- Address-independent partial pointer overwrite (W193, 2026-11-25): the W190
+  clang frame puts the spilled `priv` pointer at bulk offset `0x3E30`. A new
+  lab-only vusb mode caps the reply at `0x3E32` and changes only the low two
+  bytes of that slot; port, camera, saved RBP and saved RIP remain live. Eight
+  ASLR-on samples put `priv` at `...?600`, so the 16 fixed values
+  `0x0430 + n*0x1000` cover one matching four-bit heap guess without an
+  absolute address. A fork sweep gives all candidates the same inherited
+  ASLR and heap layout; exactly one child hit. On a match the slot becomes
+  `priv-0x1d0`; the real `:154` memmove starts at `priv-0x190` and ends at
+  `priv+0x4040`, exactly the end of the original user allocation. gdb
+  measured original `0x555555567600`, slot `0x555555567430`, destination
+  `0x555555567470` and live saved RIP `0x7ffff7c277f3`. `gp_camera_init`
+  returned 0 and direct table readback began `57 31 39 33` (`W193`).
+
+  The direct probe deliberately performs no allocation after the corrupted
+  heap. An earlier real file-get attempt succeeded once with tree-specific
+  allocator metadata bytes, but the clean replay showed those values are not
+  portable and aborted at the next malloc; that consumer result is NOT
+  counted. The durable ASLR-on result is the normal init return plus chosen
+  private fields/table bytes at a device-chosen relative offset. This is a
+  4-bit ASLR guess, not an absolute target, physical/wire USB, command,
+  witness verdict or rung 5. Replay:
+  `lab/frontier/libgphoto2shell/live/replay-partial-priv.sh`,
+  `evidence/replay-vusb-partial-priv.patch`,
+  `evidence/replay-partial-priv-probe.c`, and
+  `evidence/w193-partial-priv-replay.out`. Grade remains author-side rung 4,
+  unwitnessed and synthetic-vusb-only; rung 5 UNKNOWN.
