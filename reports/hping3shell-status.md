@@ -833,7 +833,7 @@ no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
 - Ceiling: three independently reply-chosen octets held across nine
   consecutive loopback probes, not a full IP (the `127.x.x.x` template
   fixes octet 0; `x.x.x.x` would leave loopback), no pointer, command, or
-  r5. Author-side; witness verdict UNKNOWN.
+  r5. Witness W224 replay: ESTABLISHED AS LABELED (section below).
 
 ### Clean-archive W18 receipt (2026-11-25 21:30:46Z, author-side)
 
@@ -852,5 +852,31 @@ no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
   `REPLAY_PATTERN_REPEAT_OK: 3 stages`, rc 0. Probes stayed in 127/8 on
   `lo`; GDB only read live state. Grade unchanged: rung 4 extends from one
   packet to nine consecutive reply-driven packets with three distinct
-  chosen octets; still no full IP, pointer, command or r5. Witness verdict
-  UNKNOWN.
+  chosen octets; still no full IP, pointer, command or r5. Witness W224
+  replay: ESTABLISHED AS LABELED (section below).
+
+### Witness W224 replay (2026-11-25 22:01-22:03Z): W18 ESTABLISHED AS LABELED
+
+- Verdict DM `4600` (22:05:01Z) and full detail in the site's
+  `.mishe-tauftauf/artifacts/witness-w224-hping3shell/detail.md`: **ESTABLISHED
+  AS LABELED**, no contradiction, no grade change, NO r5.
+- Unmodified HEAD wrapper (sha256
+  `66c79a828efc459403d2cceb7a904fdf014d7f59ba83d9a092de814ccbe8fa96`,
+  worktree == clean archive) from `git archive 6fef8e61` into `/tmp/hp3-w224`,
+  gitignored `provision/` copied in; 67 s rc 0, baseline 4 PASS, attack 5
+  PASS, fixed 4 PASS. Both pins sha256 exact: vulnerable `e8ef2dd6…dcbb5e7b`,
+  patched `70f0112d…b471cb7aaa7f0ba846c7`. Pinned `display_ipopt.c:112` is
+  the store; `fix.patch` clamps `i` to `MAX_IPOPTLEN` and `hlen`.
+- Attack: 187-byte pattern at states 4-12, 13/13 full destinations predicted
+  from read-only GDB, chosen `127.11.22.33` 9/9, counterfactual
+  `127.195.242.194`. The author's different counterfactual
+  (`127.181.149.250`) is `/dev/urandom` seeding, not a contradiction. Fixed
+  with the same 14 RR frames: no pattern, zero chosen; no-inject baseline
+  clean. Independent RC4 recomputation from the committed
+  `patterns/w17-three-distinct.hex` with `i0=32`, `j0=16` gives the same
+  `127.11.22.33`.
+- Accepted ceiling: three chosen octets inside `127.x.x.x` over nine
+  consecutive reply-driven loopback probes; no full IP, pointer, command,
+  live non-loopback target or wire-to-shell path. No byte-identical evidence
+  claim (the W18 status receipt is author-side).
+
