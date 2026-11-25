@@ -1,7 +1,10 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 07:0xZ: STAGED and handed to its own mind/window. This is a
-research claim plus local lab evidence, not independent acceptance.
+Status 2026-11-25 07:05Z: STAGED and HANDED OFF. Brief, status, charter and
+seed wall are written; inner two-pane window 152 is live (panes %306/%307,
+dead=0, captures 902/248 bytes) and registered 153/153 unique entries.
+Commit `0a0ec93f`; clean git-archive replay gave 25 PASS / 0 FAIL with all
+three pinned hashes OK. This is local lab evidence, not witness acceptance.
 
 ## Verified ground truth
 

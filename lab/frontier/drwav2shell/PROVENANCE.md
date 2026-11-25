@@ -58,3 +58,11 @@ clang -O0 -g -fsanitize=address -I ../pins/vuln  -o vuln-asan-clang harness.c
   pointer half is overwritten, the high half stays in the metadata allocator's
   region. This is why the destination is a heap buffer of the same size class
   as the metadata block.
+
+## Clean archive replay (2026-11-25 07:03Z)
+
+`git archive HEAD lab/frontier/drwav2shell | tar -x -C /tmp/drwav-clean`,
+then `sha256sum -c pins/pins.sha256` (3 files OK) and `sh harness/run-all.sh`
+in the extracted tree: 25 PASS / 0 FAIL in
+`harness/evidence/run-all-archive.log` (not committed; replay log lives in the
+throwaway tree). Commit that carried the archive: `0a0ec93f`.

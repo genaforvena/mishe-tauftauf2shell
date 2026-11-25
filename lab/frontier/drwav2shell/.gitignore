@@ -1,3 +1,4 @@
+src/
 src/vuln/.git/
 src/fixed/.git/
 harness/vuln-asan
