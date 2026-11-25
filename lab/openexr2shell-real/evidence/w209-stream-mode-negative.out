@@ -1,0 +1,14 @@
+MODE=exrcheck -s -c (file read into memory, PtrIStream, runCoreChecks)
+BASELINE_VULN_ASAN_RC=0 OK=1
+POC_VULN_ASAN_RC=1
+==PID==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [ADDR,ADDR) and [ADDR, ADDR) overlap
+    #2 ADDR in sort2_4ByteChannels_tiled LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+SUMMARY: AddressSanitizer: memcpy-param-overlap ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+POC_FIXED_ASAN_RC=1 bad=1 asan=0
+P202_VULN_ASAN_RC=1
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+READ of size 3072 at ADDR thread T0
+    #2 ADDR in sort2_4ByteChannels_tiled LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+ASLR=off in plain and gdb runs (setarch -R / disable-randomization on)
+GDB_OPAQUE_79_HIT=0 SYSTEM_RDI_HIT=0 MARKER=absent
+RESULT PASS

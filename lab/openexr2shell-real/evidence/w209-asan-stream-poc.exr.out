@@ -1,0 +1,59 @@
+ file cases/poc.exr =================================================================
+==2401997==ERROR: AddressSanitizer: memcpy-param-overlap: memory ranges [0x5060000001a0,0x5060000011a0) and [0x506000000200, 0x506000001200) overlap
+    #0 0x7c5b800fb16d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x63b161c37676 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x63b161c37676 in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+    #3 0x63b161c39f17 in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+    #4 0x63b161c39f17 in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x63b161be9c22 in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x63b161beb2d9 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x63b161bed4bd in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x63b161aa57ca in readCoreScanlinePart /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 0x63b161aa76f4 in checkCoreFile /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 0x63b161ab789e in runCoreChecks /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1851
+    #11 0x63b161ab789e in Imf_3_5::checkOpenEXRFile(char const*, unsigned long, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+    #12 0x63b1619d8106 in exrCheck(char const*, bool, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+    #13 0x63b1619d88bb in main /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 0x7c5b7f82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x7c5b7f82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x63b1619d6e64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: 38d2fd35a5ba2367e4e0ce26a5c7b629a6530600)
+
+0x5060000001e0 is located 0 bytes after 64-byte region [0x5060000001a0,0x5060000001e0)
+allocated by thread T0 here:
+    #0 0x7c5b800fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x63b161c47924 in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x63b161c48dab in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x63b161bed485 in update_pack_unpack_ptrs /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:81
+    #4 0x63b161bed485 in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:594
+    #5 0x63b161aa57ca in readCoreScanlinePart /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #6 0x63b161aa76f4 in checkCoreFile /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #7 0x63b161ab789e in runCoreChecks /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1851
+    #8 0x63b161ab789e in Imf_3_5::checkOpenEXRFile(char const*, unsigned long, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+    #9 0x63b1619d8106 in exrCheck(char const*, bool, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+    #10 0x63b1619d88bb in main /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #11 0x7c5b7f82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x7c5b7f82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x63b1619d6e64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: 38d2fd35a5ba2367e4e0ce26a5c7b629a6530600)
+
+0x506000000240 is located 0 bytes after 64-byte region [0x506000000200,0x506000000240)
+allocated by thread T0 here:
+    #0 0x7c5b800fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x63b161c47924 in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x63b161c48dab in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x63b161c397c3 in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1335
+    #4 0x63b161c397c3 in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x63b161be9c22 in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x63b161beb2d9 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x63b161bed4bd in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x63b161aa57ca in readCoreScanlinePart /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 0x63b161aa76f4 in checkCoreFile /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 0x63b161ab789e in runCoreChecks /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1851
+    #11 0x63b161ab789e in Imf_3_5::checkOpenEXRFile(char const*, unsigned long, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+    #12 0x63b1619d8106 in exrCheck(char const*, bool, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+    #13 0x63b1619d88bb in main /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 0x7c5b7f82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x7c5b7f82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x63b1619d6e64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: 38d2fd35a5ba2367e4e0ce26a5c7b629a6530600)
+
+SUMMARY: AddressSanitizer: memcpy-param-overlap ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+==2401997==ABORTING

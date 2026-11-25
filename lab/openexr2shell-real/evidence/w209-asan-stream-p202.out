@@ -1,0 +1,74 @@
+ file cases/p202-memcpy-system.exr =================================================================
+==2412044==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51f000001a80 at pc 0x734fc1cfb42e bp 0x7ffeacf592a0 sp 0x7ffeacf58a48
+READ of size 3072 at 0x51f000001a80 thread T0
+    #0 0x734fc1cfb42d in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x60e02d02c676 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x60e02d02c676 in sort2_4ByteChannels_tiled /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+    #3 0x60e02d02ef17 in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+    #4 0x60e02d02ef17 in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x60e02cfdec22 in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x60e02cfe02d9 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x60e02cfe24bd in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x60e02ce9a7ca in readCoreScanlinePart /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 0x60e02ce9c6f4 in checkCoreFile /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 0x60e02ceac89e in runCoreChecks /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1851
+    #11 0x60e02ceac89e in Imf_3_5::checkOpenEXRFile(char const*, unsigned long, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+    #12 0x60e02cdcd106 in exrCheck(char const*, bool, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+    #13 0x60e02cdcd8bb in main /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 0x734fc142a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x734fc142a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x60e02cdcbe64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: 38d2fd35a5ba2367e4e0ce26a5c7b629a6530600)
+
+0x51f000001a80 is located 0 bytes after 3072-byte region [0x51f000000e80,0x51f000001a80)
+allocated by thread T0 here:
+    #0 0x734fc1cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x60e02d03c924 in internal_exr_alloc /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 0x60e02d03ddab in internal_decode_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 0x60e02d02e7c3 in exr_undo_zstd_v1 /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1335
+    #4 0x60e02d02e7c3 in internal_exr_undo_zstd /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 0x60e02cfdec22 in decompress_data /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 0x60e02cfe02d9 in exr_uncompress_chunk /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 0x60e02cfe24bd in exr_decoding_run /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 0x60e02ce9a7ca in readCoreScanlinePart /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 0x60e02ce9c6f4 in checkCoreFile /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 0x60e02ceac89e in runCoreChecks /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1851
+    #11 0x60e02ceac89e in Imf_3_5::checkOpenEXRFile(char const*, unsigned long, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1883
+    #12 0x60e02cdcd106 in exrCheck(char const*, bool, bool, bool, bool) /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:93
+    #13 0x60e02cdcd8bb in main /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 0x734fc142a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x734fc142a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x60e02cdcbe64 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: 38d2fd35a5ba2367e4e0ce26a5c7b629a6530600)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x51f000001800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51f000001880: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51f000001900: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51f000001980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51f000001a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x51f000001a80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51f000001b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51f000001b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51f000001c00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51f000001c80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51f000001d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2412044==ABORTING

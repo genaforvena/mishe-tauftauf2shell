@@ -2576,3 +2576,54 @@ rc 0 with the same `f3f6031a...` evidence hash. Receipt:
 `lab/openexr2shell-real/evidence/w208-clean-archive.out`. Author replay,
 not a witness verdict.
 
+
+## W209: shipped `-s -c` in-memory stream mode — sink positive, command chain negative (2026-11-25 23:0xZ)
+
+Prediction: W162 tested the shipped `exrcheck -c` file path; W207's `-s`
+FIFO run timed out and stayed UNKNOWN. The shipped `-s` mode actually reads a
+seekable path into a `vector<char>` and calls the C++ stream API
+(`src/bin/exrcheck/main.cpp:57-94`,
+`src/lib/OpenEXRUtil/ImfCheckFile.cpp:1872-1889`). If that mode reaches the
+pinned ZSTD sink, it is a second shipped-tool surface; if W202's benign
+command chain also transfers, it would add a mode to the rung-4 boundary.
+
+Result: sink POSITIVE, command chain NEGATIVE, both measured on pinned 3.5.2.
+Vulnerable ASan `exrcheck -s -c cases/baseline.exr` prints `OK` rc 0;
+`cases/poc.exr` gives `AddressSanitizer: memcpy-param-overlap` at
+`sort2_4ByteChannels_tiled internal_zstd.c:472`; fixed ASan gives `bad` with
+no ASan report. Vulnerable ASan `exrcheck -s -c cases/p202-memcpy-system.exr`
+gives `heap-buffer-overflow READ of size 3072` at the same pinned line, so the
+stream path really reaches the same overwrite.
+
+But in three plain ASLR-off (`setarch -R`) runs the stream-mode W202 PoC
+aborts rc 134 with `free(): invalid pointer`, creates no `/tmp/w202m` marker,
+and a gdb run with `set disable-randomization on` never hits the breakpoint at
+`opaque.c:79` (`GDB_OPAQUE_79_HIT=0`, `SYSTEM_RDI_HIT=0`). The file-carried
+absolute addresses and heap layout are calibrated for the file-path decode;
+reading the whole EXR into a `vector<char>` first changes that layout. No
+stream-mode command side effect was observed, and no attempt was made to
+re-derive a fresh fixed-point chain for this mode.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w209-stream-mode-negative.sh` -> `RESULT PASS` rc 0 three times,
+stable normalized evidence hash
+`eebdce4aa80f40eda60c89db0f6bce3bf2bda3585a200e71d32770f72f8ebafd` in
+`evidence/w209-stream-mode-negative.out`. The harness pins three source files
+and three EXRs by sha256, asserts the source-owned stream path, checks the
+vulnerable/fixed/safe controls, requires marker absence in the three plain
+runs and rejects any gdb hit of the W202 chain. Raw observations:
+`evidence/w209-asan-stream-poc.exr.out`, `evidence/w209-asan-stream-p202.out`,
+`evidence/w209-fixed-asan-stream-poc.out`,
+`evidence/w209-plain-stream-p202.out` and
+`evidence/w209-gdb-stream-p202.raw.out`.
+
+Disposition: keep both facts. This closes the "W202 command chain also runs
+through the shipped stream mode with the same file" route for this exact PoC;
+it does not prove that a stream-mode chain cannot be rebuilt with new
+addresses and a new dump. The `-s` mode still requires a seekable filesystem
+path (`ifstream::seekg`), so this is not a wire or stdin route and does not
+clear W207's streamed-FIFO UNKNOWN. Grade and rung-5 status unchanged: W202
+remains witness-confirmed ESTABLISHED AS LABELED at its ASLR-off local-file
+scope; W203-W209 are author-only negatives. Would change the grade: a fresh
+stream-mode chain with controls, a usable ASLR-on address, or a wire-fed
+affected process.
