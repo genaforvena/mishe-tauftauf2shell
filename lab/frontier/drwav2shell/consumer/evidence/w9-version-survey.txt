@@ -1,0 +1,152 @@
+W9 source-index + header experiment, 2026-11-25 19:40-19:48Z
+
+Query A (Sourcegraph public .api/search/stream, v=V3, fork:yes archived:yes):
+  context:global file:dr_wav.h patternType:regexp /dr_wav - v0\.1[0-4]\.[0-9]+/ count:1000
+134 content matches; vendored dr_wav versions <=0.14.5 by repo (path | banner):
+  github.com/Audio4Linux/JDSP4Linux | libjamesdsp/subtree/Main/DSPManager/jni/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/Audio4Linux/JDSP4Linux | libjamesdsp/subtree/Main/libjamesdsp/jni/jamesdsp/jdsp/Effects/eel2/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/Const-me/Whisper | Examples/OldMain/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/DragonMinded/libdragon | tools/audioconv64/dr_wav.h | dr_wav - v0.13.11 - 07-07-2023
+  github.com/EQMG/Acid | External/dr_libs/dr_wav.h | dr_wav - v0.12.15 - 2020-11-21
+  github.com/EasyRPG/Player | src/external/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/ElgenTidwell/Chisel | Core/MonoGame.Forked/native/monogame/external/faudio/utils/wavcommon/dr_wav.h | dr_wav - v0.12.2 - 2020-04-21
+  github.com/FNA-XNA/FAudio | utils/wavcommon/dr_wav.h | dr_wav - v0.12.2 - 2020-04-21
+  github.com/Farama-Foundation/stable-retro | cores/32x/platform/common/dr_libs/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/Fewnity/Xenity-Engine | Xenity_Engine/include/dr_wav.h | dr_wav - v0.13.17 - 2024-12-17
+  github.com/Frikallo/parakeet.cpp | third_party/dr_libs/dr_wav.h | dr_wav - v0.14.5 - TBD
+  github.com/GameEngineering/EP01_SandSim | third_party/include/gs/external/dr_libs/dr_wav.h | dr_wav - v0.12.7 - 2020-07-15
+  github.com/HookedBehemoth/sys-tune | sys-tune/source/impl/dr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/IppClub/Dora-SSR | Source/3rdParty/soloud/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/Ka1-S/LYNX-SHARE | third_party/ysfx/thirdparty/dr_libs/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/Konstantin8105/c4go | tests/raylib/external/dr_wav.h | dr_wav - v0.13.4 - 2021-12-08
+  github.com/Mormert/jle | engine/3rdparty/SoLoud/audiosource/wav/dr_wav.h | dr_wav - v0.11.4 - 2020-01-29
+  github.com/MrFrenik/gunslinger | external/dr_libs/dr_wav.h | dr_wav - v0.12.7 - 2020-07-15
+  github.com/OpenOrbis/OpenOrbis-PS4-Toolchain | samples/audio-wav/audio-wav/dr_wav.h | dr_wav - v0.11.5 - 2020-03-07
+  github.com/OpenSiFli/SiFli-SDK | external/tinymp3/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/Overload-Technologies/Overload | Dependencies/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/PABannier/bark.cpp | examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/PABannier/encodec.cpp | examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/QSWWLTN/DigitalLife | Plugins/RuntimeAudioImporter/Source/ThirdParty/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/Qsgs-Fans/FreeKill | thirdparty/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/RavEngine/RavEngine | deps/dr_wav/dr_wav.h | dr_wav - v0.13.16 - 2024-02-27
+  github.com/Ryuk17/SpeechAlgorithms | VoiceActivityDetection/WebRTC_VAD/src/dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/SAT-R/sa2 | tools/BriBaSA_ex/ext/raylib/src/external/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/Samsung/TizenRT | os/board/bk7239n/src/include/modules/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/SasLuca/rayfork | source/libs/dr_wav.h | dr_wav - v0.12.9 - 2020-08-02
+  github.com/Siv3D/OpenSiv3D | Siv3D/src/ThirdParty/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/ThatGuyMcd/DKR-R | runtime-recomp/third_party/dr_libs/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/TomasBorquez/mate.h | tests/07-raylib-source-code/src/external/dr_wav.h | dr_wav - v0.13.16 - 2024-02-27
+  github.com/VCVRack/Fundamental | src/dr_wav.h | dr_wav - v0.13.16 - 2024-02-27
+  github.com/WohlSoft/Moondust-Project | _common/AudioProcessor/codec/wav/dr_wav.h | dr_wav - v0.14.1 - 2025-09-10
+  github.com/aenu1/aps3e | app/src/main/cpp/rpcs3/3rdparty/FAudio/utils/wavcommon/dr_wav.h | dr_wav - v0.12.2 - 2020-04-21
+  github.com/balisujohn/tortoise.cpp | dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/cdevelop/FreeSWITCH-ASR | testsad/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/clockworkpi/PicoCalc | Code/pico_multi_booter/picomite/dr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/cpuimage/WebRTC_AECM | dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/cpuimage/WebRTC_VAD | dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/dgcor/DGEngine | DGEngine.core/src/SFML/dr_wav.h | dr_wav - v0.13.13 - 2023-11-02
+  github.com/doriaxengine/doriax | engine/libs/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/dosbox-staging/dosbox-staging | src/libs/decoders/dr_wav.h | dr_wav - v0.13.11 - 07-07-2023
+  github.com/dpjudas/SurrealEngine | Thirdparty/dr_wav.h | dr_wav - v0.12.11 - 2020-09-08
+  github.com/facebookresearch/seamless_communication | ggml/examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/falkTX/Carla | source/modules/ysfx/thirdparty/dr_libs/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/ggerganov/ggmorse | examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/ggerganov/ggwave | examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/ggerganov/kbd-audio | dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/gtreshchev/RuntimeAudioImporter | Source/ThirdParty/dr_wav.h | dr_wav - v0.13.14 - 2023-12-02
+  github.com/handy-computer/transcribe.cpp | examples/common/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/intel/neural-speed | neural_speed/models/whisper/dr_wav.h | statements at the end of this file. dr_wav - v0.12.16 - 2020-12-02
+  github.com/james34602/JamesDSPManager | Main/DSPManager/jni/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/james34602/JamesDSPManager | Main/libjamesdsp/jni/jamesdsp/jdsp/Effects/eel2/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/james34602/SpleeterRT | Executable/dr_wav.h | dr_wav - v0.12.12 - 2020-09-28
+  github.com/jamiebullock/LibXtract | examples/simpletest/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/janhq/cortex.cpp | engine/utils/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/jarikomppa/soloud | src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/joel16/3DShell | libs/include/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/joel16/CMFileManager-PSP | libs/include/dr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/joncampbell123/dosbox-x | src/libs/decoders/dr_wav.h | dr_wav - v0.13.6 - 2022-04-10
+  github.com/jurihock/stftPitchShift | cpp/StftPitchShift/dr_libs/dr_wav.h | dr_wav - v0.13.13 - 2023-11-02
+  github.com/kfrlib/kfr | src/io/dr/dr_wav.h | dr_wav - v0.11.1 - 2019-10-07
+  github.com/kondrak/vkQuake2 | client/miniaudio/dr_wav.h | dr_wav - v0.12.3 - 2020-04-30
+  github.com/lets-all-be-stupid-forever/circuit-artist | third_party/raylib/src/external/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/lighttransport/LightUSD | src/external/dr_wav.h | dr_wav - v0.13.7 - 2022-09-17
+  github.com/mattiasgustavsson/dos-like | source/libs/dr_wav.h | dr_wav - v0.13.1 - 2021-07-31
+  github.com/mattiasgustavsson/yarnspin | source/libs/dr_wav.h | dr_wav - v0.13.8 - 2023-03-25
+  github.com/maxmakesmods/Half-Life-VR | src/cl_dll/dr_wav.h | dr_wav - v0.11.3 - 2020-01-12
+  github.com/meemknight/cmakeSetup | thirdparty/raudio/include/external/dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/meemknight/game-in-cpp-full-course | thirdparty/raudio/include/external/dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/meemknight/ourCraft | thirdparty/raudio/include/external/dr_wav.h | dr_wav - v0.12.4 - 2020-05-16
+  github.com/melon/qingwu-zimu | extraResources/whisper/examples/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/michele-perrone/OpenPiano | OpenPianoCore/Source/dr_wav.h | dr_wav - v0.13.4 - 2021-12-08
+  github.com/nbarkhina/DosWasmX | code/src/libs/decoders/dr_wav.h | dr_wav - v0.13.6 - 2022-04-10
+  github.com/nyadla-sys/whisper.tflite | whisper_android/app/src/main/cpp/tf-lite-api/tensorflow_src/tensorflow/lite/examples/minimal/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/nyadla-sys/whisper.tflite | whisper_native/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/planetis-m/naylib | src/raylib/external/dr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/porres/pd-else | Source/Audio/sfz~/sfizz/library/benchmarks/dr_wav.h | dr_wav - v0.11.2 - 2019-12-02
+  github.com/porres/pd-else | Source/Audio/sfz~/sfizz/library/external/st_audiofile/thirdparty/dr_libs/dr_wav.h | dr_wav - v0.13.8 - 2023-03-25
+  github.com/porres/pd-else | Source/Audio/sfz~/sfizz/library/external/st_audiofile/thirdparty/dr_libs/tests/external/miniaudio/extras/dr_wav.h | dr_wav - v0.11.5 - 2020-03-07
+  github.com/pounat/absorb | packages/whisper_ggml_plus/android/src/whisper/src/examples/dr_wav.h | dr_wav - v0.14.4 - 2026-01-17
+  github.com/pounat/absorb | packages/whisper_ggml_plus/ios/Classes/whisper/examples/dr_wav.h | dr_wav - v0.14.4 - 2026-01-17
+  github.com/pounat/absorb | packages/whisper_ggml_plus/macos/Classes/whisper/examples/dr_wav.h | dr_wav - v0.14.4 - 2026-01-17
+  github.com/qualcomm/qidk | Solutions/NLPSolution3-AutomaticSpeechRecognition-Whisper/Android_App_Whisper/app/src/main/cpp/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/ray-cast/AnimatorGo | contrib/minimp3/dr_wav.h | dr_wav - v0.12.12 - 2020-09-28
+  github.com/raysan5/raudio | src/external/dr_wav.h | dr_wav - v0.13.13 - 2023-11-02
+  github.com/realidkroo/Mochy-Music | app/src/main/cpp/third_party/jamesdsp_eel2/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/rh1tech/frank-os | apps/source/basic/dr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/roc-streaming/roc-toolkit | 3rdparty/dr_wav/dr_wav.h | dr_wav - v0.13.14 - 2023-12-02
+  github.com/sfztools/sfizz | benchmarks/dr_wav.h | dr_wav - v0.11.2 - 2019-12-02
+  github.com/shibatch/SSRC | src/libshibatchdsp/xdr_wav.h | dr_wav - v0.14.0 - TBD
+  github.com/sp-nitech/SPTK | third_party/dr_libs/dr_wav.h | dr_wav - v0.14.3 - 2025-12-14
+  github.com/spacefarergames/AloneInTheDarkReHaunted | TatouSource/ThirdParty/soloud.cmake/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/spotify/pedalboard | vendors/dr_wav.h | dr_wav - v0.14.4 - TBD
+  github.com/stoermelder/vcvrack-packone | dep/drlibs/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+  github.com/tallbl0nde/TriPlayer | Common/include/decoders/dr_wav.h | dr_wav - v0.12.5 - 2020-05-27
+  github.com/texus/TGUI | examples/android/RAYLIB/app/src/main/cpp/deps/raylib/external/dr_wav.h | dr_wav - v0.13.16 - 2024-02-27
+  github.com/timschneeb/RootlessJamesDSP | app/src/main/cpp/libjdspimptoolbox/dr_wav.h | dr_wav - v0.12.8 - 2020-07-25
+  github.com/tmikov/imgui-react-runtime | external/soloud/src/audiosource/wav/dr_wav.h | dr_wav - v0.13.2 - 2021-10-02
+  github.com/tsoding/musializer | thirdparty/raylib-5.5/src/external/dr_wav.h | dr_wav - v0.13.16 - 2024-02-27
+  github.com/typesense/typesense | include/dr_wav.h | dr_wav - v0.13.14 - 2023-12-02
+  github.com/vilassn/whisper_android | whisper_native/app/src/main/cpp/tf-lite-api/tensorflow_src/tensorflow/lite/examples/minimal/dr_wav.h | dr_wav - v0.12.16 - 2020-12-02
+  github.com/vyanhursky/DefJamFFNY-recomp | thirdparty/audio-decoders/dr_wav.h | dr_wav - v0.14.5 - 2026-03-03
+
+Query B (call sites, vendored header excluded):
+  context:global repo:^github\.com/<repo>$ drwav count:300 -file:dr_wav\.h
+  roc-streaming/roc-toolkit: wav_source.cpp:166 drwav_init_file(); :81 seek; :137 read; no metadata API
+  typesense/typesense: src/aq_model.cpp:29 drwav_init_memory(); :50 read_pcm_frames_s16; no metadata API
+  cdevelop/FreeSWITCH-ASR: testsad/main.c:16 drwav_init_file(); :82 init_file_write; no metadata API
+  jamiebullock/LibXtract: examples/simpletest/simpletest.cpp:118 drwav_open_file_and_read_pcm_frames_f32(); no metadata API
+  EasyRPG/Player: src/decoder_drwav.cpp:65,67 drwav_init_ex(); no metadata API
+  sp-nitech/SPTK: src/main/wav2raw.cc:195 init_file, :200 init_memory; raw2wav.cc:115 init_memory_write_sequential; no metadata API
+  spotify/pedalboard: juce_PatchedWavAudioFormat.h:56 drwav_init(); no metadata API
+  stoermelder/vcvrack-packone: siren_extract_features.cpp:74 drwav_init_file(); no metadata API
+  NaGaa95/sphaira: audio.cpp:473 drwav_init_with_metadata() (metadata API, Switch-only runtime)
+  WohlSoft/Moondust-Project: audio_wav.cpp metadata API (local files only)
+
+Version-shape experiment: exact roc-toolkit header
+  URL https://raw.githubusercontent.com/roc-streaming/roc-toolkit/master/3rdparty/dr_wav/dr_wav.h
+  SHA256 72c483563fccfe60c9f97076116bdeb6a8672c1f8f181faf4bff8f89cfe0f3ff
+  Banner dr_wav - v0.13.14 - 2023-12-02
+  Unchanged harness/harness.c compiled clang -O0 -g -fsanitize=address -I <header dir>
+  chosen: DRWAV_VERSION_STRING=0.13.14, init=OK metadataCount=1, CHOSEN_WORD_PRESENT=1
+  bad: ASan SEGV 0x50f041414155, drwav__read_cue_to_metadata_obj at dr_wav.h:2257
+  safe: metadataCount=2, CHOSEN_WORD_PRESENT=0
+  Raw: w9-roc01314-{chosen,bad,safe}.out
+
+Negative: none of the native network-facing vulnerable-version repos above call a metadata API;
+the metadata-API callers remain Switch-only, local-only or on fixed 0.14.6. No live wire corruption or r5.
+
+Query C (complete indexed real metadata-API call sites, header excluded):
+  context:global patternType:regexp /drwav_init_[a-z_]*with_metadata\(/ count:1000 -file:dr_wav\.h fork:yes archived:yes
+  18 line hits; real application/library callers:
+  NaGaa95/sphaira audio.cpp:473 (Switch-only, network-derived file path)
+  OpenRBX-org/OpenRBX AudioSystem.cpp:156 (fixed 0.14.6)
+  WohlSoft/Moondust-Project audio_wav.cpp:336 and :562 write (local files)
+  Zorkats/G-Diffuser decoders.c:283 (fixed 0.14.6)
+  matt-pulsipher/GT3-revisited music_file.cpp:246 (fixed 0.14.6)
+  ossia/score tests/unit/FxLooperTest.cpp:1107 (test-only)
+  ossia/libossia write_loop_wav.hpp:120 (write-only metadata API)
+  Farama-Foundation/stable-retro and porres/pd-else tests/wav/dr_wav_decoding.c:318 (upstream dr_libs tests)
+  mackron/dr_libs tests/dr_libs_test_wav.c:566,570 (upstream tests)
+  anthropics/defending-code-reference-harness targets/drlibs/entry.c:20 (synthetic harness)
+  michele-perrone/OpenPiano dr_wav.cpp:2153 etc. (library implementation, not a caller)
+  No native network-facing application caller on vulnerable bytes appears in this indexed set.

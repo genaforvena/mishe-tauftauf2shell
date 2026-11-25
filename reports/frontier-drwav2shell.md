@@ -361,3 +361,49 @@ service, witness verdict on W1-W4 or r5. No W1-W4 replay was re-queued. All
 fetches were source provisioning; no external system was probed.
 
 
+## W9 — version-banner survey and 0.13.14 header replay: no native network metadata caller (2026-11-25 19:48Z)
+
+W9 is one bounded provisioning incident aimed at the last open r5
+prerequisite: a native, network-facing caller of a metadata init API on
+vulnerable bytes. A third Sourcegraph angle mapped vendored `dr_wav.h`
+version banners across public repos (query and the 105 vulnerable-banner
+rows in `consumer/evidence/w9-version-survey.txt`), then excluded the
+vendored header to inspect real call sites. The plausible native network
+candidates both vendor vulnerable-shaped headers but do NOT use the metadata
+API: roc-toolkit 0.13.14 calls only `drwav_init_file()` in
+`src/internal_modules/roc_sndio/wav_source.cpp:166`, and typesense 0.13.14
+calls only `drwav_init_memory()` in `src/aq_model.cpp:29`. FreeSWITCH-ASR
+(0.13.7, test tool), LibXtract (0.14.5, example), EasyRPG (0.14.5,
+`drwav_init_ex()`), SPTK, pedalboard and vcvrack-packone likewise use
+non-metadata initializers. The metadata-API callers remain sphaira
+(Switch-only), Moondust (local files), yup (no in-repo network origin),
+OpenRBX/GT3 (fixed 0.14.6).
+
+For completeness, a regex query for every metadata-init call with the
+vendored header excluded returned 18 line hits: real callers are sphaira,
+OpenRBX, Moondust, G-Diffuser, GT3, ossia/score (test-only) and
+ossia/libossia (write-only); the rest are upstream dr_libs tests,
+synthetic harnesses or library definitions. No native network-facing
+application caller on vulnerable bytes is in the indexed set (query C in
+`consumer/evidence/w9-version-survey.txt`). Index coverage is still not
+proof of absence.
+
+The exact roc-toolkit header
+(SHA-256 `72c483563fccfe60c9f97076116bdeb6a8672c1f8f181faf4bff8f89cfe0f3ff`,
+banner `dr_wav - v0.13.14 - 2023-12-02`) was compiled with the unchanged
+`harness/harness.c` under Clang ASan. `chosen` gives
+`DRWAV_VERSION_STRING=0.13.14`, `metadataCount=1`,
+`CHOSEN_WORD_PRESENT=1`; `bad` faults at `0x50f041414155` in
+`drwav__read_cue_to_metadata_obj` (`dr_wav.h:2257`); the `safe` matching-loop
+control gives `metadataCount=2`, no chosen word, rc 0. Raw output:
+`consumer/evidence/w9-roc01314-{chosen,bad,safe}.out`. This confirms the
+desync is not unique to 0.14.x and rules out the version boundary as the
+reason no native network caller appeared.
+
+Grade unchanged: rung 3 real consumer/public API; rung 4 file-chosen
+control flow to a lab marker in a -no-pie consumer; no live wire-triggered
+corruption, command, shell, service or r5. W1-W4 witness verdicts were
+still owed at wake start (chat line 18791) and were not re-queued. Source
+provisioning only; no off-loopback probe.
+
+

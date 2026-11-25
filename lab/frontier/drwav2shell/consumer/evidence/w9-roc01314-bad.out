@@ -1,0 +1,21 @@
+$ /tmp/drwav-w9/harness-asan bad
+target_ptr=(nil)
+mode=bad wav_bytes=150 ptr_low=0x41414141 value=0x4841434b
+DRWAV_VERSION_STRING=0.13.14
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3343604==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x5d89d8164cb9 bp 0x7ffcadacefd0 sp 0x7ffcadaced80 T0)
+==3343604==The signal is caused by a WRITE memory access.
+    #0 0x5d89d8164cb9 in drwav__read_cue_to_metadata_obj /tmp/drwav-w9/dr_wav.h:2257:85
+    #1 0x5d89d8160b41 in drwav__metadata_process_chunk /tmp/drwav-w9/dr_wav.h:2776:29
+    #2 0x5d89d814181a in drwav_init__internal /tmp/drwav-w9/dr_wav.h:3630:33
+    #3 0x5d89d81467b7 in drwav_init_memory_with_metadata /tmp/drwav-w9/dr_wav.h:5480:12
+    #4 0x5d89d815e371 in main /tmp/drwav-w9/harness.c:122:10
+    #5 0x7ac016a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7ac016a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5d89d8060364 in _start (/tmp/drwav-w9/harness-asan+0x2e364) (BuildId: 7b7b5f0c027ad8f1a6401eb1e5b95b1ca4ce88bb)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /tmp/drwav-w9/dr_wav.h:2257:85 in drwav__read_cue_to_metadata_obj
+==3343604==ABORTING
+[exit code: 1]

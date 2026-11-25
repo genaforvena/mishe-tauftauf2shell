@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 19:10Z)
+# drwav2shell — status (updated 2026-11-25 19:48Z)
 
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
@@ -228,4 +228,36 @@ makes the low-half pointer land on a useful object without harness grooming.
   file-chosen control flow to a lab marker; no live wire-triggered corruption,
   command, shell, service, W1-W4 witness verdict or r5. No W1-W4 replay was
   re-queued. Source provisioning only; no external probe.
+
+
+## W9 — version-banner survey and 0.13.14 header replay (2026-11-25 19:48Z)
+
+- Third code-index angle: 134 Sourcegraph version-banner matches, 105 rows
+  with vendored `dr_wav.h` at or below 0.14.5; exact query, rows and
+  call-site notes in `consumer/evidence/w9-version-survey.txt`.
+- Negative for the last r5 prerequisite: the native network-facing
+  vulnerable-version candidates do not call the metadata API. roc-toolkit
+  0.13.14 uses `drwav_init_file()` (`wav_source.cpp:166`); typesense 0.13.14
+  uses `drwav_init_memory()` (`aq_model.cpp:29`). FreeSWITCH-ASR, LibXtract,
+  EasyRPG, SPTK, pedalboard and vcvrack-packone use non-metadata
+  initializers. Known metadata callers are Switch-only, local-only, no
+  network origin in-repo, or on fixed 0.14.6.
+
+- A regex query for every metadata-init call with the header excluded
+  returned 18 hits: real callers are sphaira, OpenRBX, Moondust, G-Diffuser,
+  GT3, ossia/score (test-only) and ossia/libossia (write-only); the rest are
+  upstream tests, a synthetic harness or library definitions (query C in
+  `consumer/evidence/w9-version-survey.txt`). Index coverage is not proof
+  of absence.
+- Exact roc-toolkit 0.13.14 header
+  (SHA-256 `72c483563fccfe60c9f97076116bdeb6a8672c1f8f181faf4bff8f89cfe0f3ff`)
+  under the unchanged harness: `chosen` `metadataCount=1` and
+  `CHOSEN_WORD_PRESENT=1`; `bad` ASan SEGV at `0x50f041414155`
+  (`dr_wav.h:2257`); `safe` `metadataCount=2`, no chosen word, rc 0. Raw:
+  `consumer/evidence/w9-roc01314-{chosen,bad,safe}.out`. The desync is not
+  unique to 0.14.x.
+- Grade unchanged: rung 3 real consumer/public API; rung 4 file-chosen
+  control flow to a lab marker; no live wire corruption, command, shell,
+  service, W1-W4 witness verdict or r5. W1-W4 offers not re-queued. Source
+  fetches only, no external probe.
 
