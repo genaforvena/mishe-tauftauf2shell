@@ -1,0 +1,31 @@
+RANGE 0x405000..0x785000 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-nopie/bin/fontforge
+RANGE 0x7ffff5001000..0x7ffff5002000 /usr/lib/x86_64-linux-gnu/libicudata.so.74.2
+RANGE 0x7ffff6e68000..0x7ffff6f6d000 /usr/lib/x86_64-linux-gnu/libicuuc.so.74.2
+RANGE 0x7ffff717c000..0x7ffff71a0000 /usr/lib/x86_64-linux-gnu/libblkid.so.1.1.0
+RANGE 0x7ffff71b1000..0x7ffff71b2000 /usr/lib/x86_64-linux-gnu/libbrotlicommon.so.1.1.0
+RANGE 0x7ffff71d9000..0x7ffff71f6000 /usr/lib/x86_64-linux-gnu/libselinux.so.1
+RANGE 0x7ffff7228000..0x7ffff73b1000 /usr/lib/x86_64-linux-gnu/libc.so.6
+RANGE 0x7ffff7439000..0x7ffff746d000 /usr/lib/x86_64-linux-gnu/libmount.so.1.1.0
+RANGE 0x7ffff747f000..0x7ffff74ed000 /usr/lib/x86_64-linux-gnu/libpcre2-8.so.0.11.2
+RANGE 0x7ffff7527000..0x7ffff75a6000 /usr/lib/x86_64-linux-gnu/libm.so.6
+RANGE 0x7ffff769d000..0x7ffff77e5000 /usr/lib/x86_64-linux-gnu/libstdc++.so.6.0.33
+RANGE 0x7ffff7891000..0x7ffff7898000 /usr/lib/x86_64-linux-gnu/libffi.so.8.1.4
+RANGE 0x7ffff789d000..0x7ffff789f000 /usr/lib/x86_64-linux-gnu/libgmodule-2.0.so.0.8000.0
+RANGE 0x7ffff78a7000..0x7ffff78c9000 /usr/lib/x86_64-linux-gnu/liblzma.so.5.4.5
+RANGE 0x7ffff78d7000..0x7ffff78df000 /usr/lib/x86_64-linux-gnu/libbrotlidec.so.1.1.0
+RANGE 0x7ffff78e9000..0x7ffff7911000 /usr/lib/x86_64-linux-gnu/libpng16.so.16.43.0
+RANGE 0x7ffff7920000..0x7ffff792e000 /usr/lib/x86_64-linux-gnu/libbz2.so.1.0.4
+RANGE 0x7ffff7936000..0x7ffff795a000 /usr/lib/x86_64-linux-gnu/libgcc_s.so.1
+RANGE 0x7ffff796f000..0x7ffff79a6000 /usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0.8000.0
+RANGE 0x7ffff79fe000..0x7ffff7b15000 /usr/lib/x86_64-linux-gnu/libgio-2.0.so.0.8000.0
+RANGE 0x7ffff7bb3000..0x7ffff7c53000 /usr/lib/x86_64-linux-gnu/libglib-2.0.so.0.8000.0
+RANGE 0x7ffff7ce0000..0x7ffff7cf2000 /usr/lib/x86_64-linux-gnu/libz.so.1.3
+RANGE 0x7ffff7d29000..0x7ffff7e8f000 /usr/lib/x86_64-linux-gnu/libxml2.so.2.9.14
+RANGE 0x7ffff7ee9000..0x7ffff7f7a000 /usr/lib/x86_64-linux-gnu/libfreetype.so.6.20.1
+RANGE 0x7ffff7fab000..0x7ffff7fad000 /usr/lib/x86_64-linux-gnu/gconv/MACINTOSH.so
+RANGE 0x7ffff7fb1000..0x7ffff7fb3000 /usr/lib/x86_64-linux-gnu/gconv/ISO8859-1.so
+RANGE 0x7ffff7fc3000..0x7ffff7fc5000 [vdso]
+RANGE 0x7ffff7fc6000..0x7ffff7ff1000 /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+WINDOW encs-1024..encs
+CAND_COUNT 0
+RESULT NONE

@@ -1,0 +1,29 @@
+Breakpoint 1 at 0x387fbf: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1750.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c60, toc=0x555555c37cb0, sf=0x555555c33820, map=0x555555c35c30, b=0x555555c48000, encname=0x555555c47f80) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1750
+1750		    if ( glyph!=0xffff && glyph<b->glyphcnt ) {
+RANGE full glyph=48882 accepted=0
+[Inferior 1 (process 3245392) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c60, toc=0x555555c37cb0, sf=0x555555c33820, map=0x555555c35c30, b=0x555555c48000, encname=0x555555c47f80) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1750
+1750		    if ( glyph!=0xffff && glyph<b->glyphcnt ) {
+RANGE partial glyph=-14 accepted=1
+[Inferior 1 (process 3245401) exited normally]

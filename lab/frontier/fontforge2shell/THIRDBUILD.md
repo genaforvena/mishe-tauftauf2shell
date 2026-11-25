@@ -2,16 +2,16 @@
 
 ## Question and decision rule
 
-W15/W18/W23 swept the 128 KiB negative-glyph write window at the vulnerable
-store in two headless builds (default PIE `Debug`, local non-PIE `Debug`) at
-three allocation states (untuned, prior complete import, tcache disabled).
+W15/W18/W23 swept an over-wide 128 KiB dump at the vulnerable store in two
+headless builds (default PIE `Debug`, local non-PIE `Debug`) at three
+allocation states (untuned, prior complete import, tcache disabled).
 Each disposition explicitly left **another build** UNKNOWN. W24 tests that
 variable with a third build: same pinned vulnerable source, `RelWithDebInfo`
 (-O2 with debug info), default PIE.
 
-Decision rule: break at `fvimportbdf.c:1751 if glyph < 0`, dump
-`encs-131072 .. encs`, and scan every aligned 8-byte word against that
-build's `r-xp` mapping. Any candidate in a later-called object would be a
+Decision rule as executed: break at `fvimportbdf.c:1751 if glyph < 0`, dump
+the over-wide `encs-131072 .. encs` range, and scan every aligned 8-byte word
+against that build's `r-xp` mapping. Any candidate in a later-called object would be a
 rung-4 widening (branch at a chosen mapped address), preserved and handed to
 `witness`. Zero candidates, or printable string fragments only, is an
 author-side negative with no grade change.

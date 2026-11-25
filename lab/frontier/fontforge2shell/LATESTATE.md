@@ -1,62 +1,88 @@
-# W25 — late-allocation state in the real builds (2026-11-25)
+# W26 — actual negative reach and surviving-free later state (2026-11-25)
 
-## Question and decision rule
+## Correction: the writable window is 1024 bytes, not 128 KiB
 
-W15/W18/W23/W24 scanned the negative-glyph write window at the instant of the
-vulnerable store. All explicitly left a **later-created object** UNKNOWN: after
-`encs[-1]` is overwritten, a later allocation could place a live function
-pointer inside the same window, which a later call might branch to. That would
-be a rung-4 widening (a branch at a chosen mapped address), still not r5
-without a benign marker or command.
+W15/W18/W23/W24/W25 described `glyph` as a signed 16-bit value and scanned
+`encs-131072 .. encs`. That was wrong. Pinned `getformint16()`
+(`fvimportbdf.c:1354-1363`) assembles bytes into an `int` but never
+sign-extends:
 
-Decision rule: stop at `fvimportbdf.c:1751 if glyph < 0`, save `encs`, continue
-to a later source breakpoint (`sfd.c:1671` in `Save()`), and scan the same
-`(char*)encs-131072 .. encs` window at that later moment. A candidate in the
-executable `r-xp` mapping that belongs to a later-called object is a positive
-and goes to `witness`. An abort before the later breakpoint, or an ASCII-only /
-empty window, is an author-side negative with no grade change.
+- a complete two-byte index is `0..65535`;
+- a missing high byte after a present low byte yields `low-256`, i.e.
+  `-256..-1`;
+- EOF before either byte yields `-1`.
 
-## Method and observed result
+The vulnerable guard `glyph!=0xffff && glyph<b->glyphcnt` therefore accepts
+negative indices only in `-256..-1`. The single 4-byte store reaches
+`encs-1024 .. encs-4`. Repeated EOF iterations can rewrite `encs-4`, but do
+not extend the range.
 
-`replay-w25.sh` generates an in-tree `w25-late.ff`
-(`New(); Import("<tree>/truncated.pcf"); Save("/tmp/ff2s-w25-late-<lane>.sfd")`)
-and a per-build gdb command. Both real headless builds are required:
-`build-plain` from `replay-real.sh` and `build-nopie` from `replay-nonpie.sh`.
+`make-range-case.py` builds the discriminator. In both real headless builds,
+gdb at `fvimportbdf.c:1750` reports:
 
-Both runs hit the vulnerable store with `glyph=-1 i=3`, then the process
-aborts at the corrupted free with glibc's `double free or corruption (out)`
-**before** `sfd.c:1671` is reached. The dump is therefore taken at the abort,
-not at a genuine later-object state; that is the honest limit of this lane.
-No PCF variant in this lab was measured to survive to a later breakpoint.
+```
+RANGE full glyph=48882 accepted=0       # complete 0xBEF2
+RANGE partial glyph=-14 accepted=1      # low 0xF2, high byte EOF
+```
 
-- PIE (`build-plain`, `encs=0x555555c48280`, r-xp
-  `0x5555555bc000..0x55555593c000`): `CAND_COUNT 0`, `RESULT NONE` —
-  `scan-w25-pie.out` hash
-  `313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76`,
-  byte-identical to W15/W23's write-time PIE scan.
-- non-PIE (`build-nopie`, `encs=0xa92070`, r-xp `0x405000..0x785000`):
-  `CAND_COUNT 5`, `RESULT ASCII_ONLY` (`nis`, `ENT`, `ell`, `ENT`, `ENT`) —
-  `scan-w25-nopie.out` hash
-  `2c980b3dbe6842de7666460e55bbd1ce886ec91ff9c50cb3ece659aad77f63c0`.
-  All five words are short printable fragments, not code pointers; the count
-  is build-path sensitive as in W15/W18/W23.
+Inputs: `range-full.pcf` sha256
+`5fca5c1919fe02319321a5de9e7bb59780cadab1b78408aad70b60815e3722c8`;
+`range-partial.pcf` sha256
+`8e2e6732d3faf464bcc2c1bd55d943bb452aff98d07e01e21afdbde25e7ce5cf`.
+The earlier 128 KiB scans covered a superset, so their observed bytes remain
+valid; their reach wording and any conclusion that depended on the larger
+range are corrected here.
 
-`sh replay-w25.sh` asserts 8 path-independent checks: the negative store, the
-abort message, absence of a hit on the later `Save()` breakpoint and no
-`RESULT CODE_POINTER_CANDIDATES` in each lane. Live-tree result: 8/8 PASS,
-rc 0, `REPLAY_W25_OK: 8 checks, 0 failed`.
+## Surviving-free later-object scan
+
+W25 could not reach a later object because the high-size-word corruption
+aborts at `free(encs)`. W7 already measured a surviving input:
+`size-71.pcf` writes `0x71` into the low size word at `encs-8`; a second
+`Import(choice-4.pcf)` reuses the chunk for `pcf_properties.props`.
+
+`replay-w26.sh` stops at `fvimportbdf.c:1751 if glyph<0`, saves `encs`, stops
+at `fvimportbdf.c:1469 if props==$w26e`, dumps the heap, and continues to the
+real `Save()` consumer at `sfd.c:1671`. Both `build-plain` (PIE) and
+`build-nopie` report `glyph=-2 i=0`, `props==encs`, `cnt=3`, and reach the
+later Save breakpoint. `scan-w26.py` scans only the final 1024 bytes of the
+dump against every `r-xp` mapping, including shared libraries and the vDSO.
+Both are `CAND_COUNT 0` / `RESULT NONE`:
+
+```
+b88042281496bd3687aa256fc2832ce070f73db7dfd8ea2c8ca04389f8d1887a  scan-w26-pie.out
+eb4d373e8b716dbb2ef3287700f0757a0d1360f39029702e094311eb7452a321  scan-w26-nopie.out
+```
+
+Live-tree replay: 18/18 PASS, rc 0, final line
+`REPLAY_W26_OK: 18 checks, 0 failed`. Build prerequisites are the existing
+`build-plain` and `build-nopie` trees plus W7's generated PCFs; the script
+builds nothing and uses no network or loopback service.
+
+## Preserved failed lead: called gconv pointers exist, but out of reach
+
+The first W26 scan mistakenly covered the old 128 KiB range and all code
+mappings. It found five libc text pointers in both builds at
+`encs-66616`, `-66608`, `-66512`, `-33736` and `-33632`. Gdb resolved them to
+`__gconv_transform_utf8_internal`, `__gconv_btwoc_ascii`,
+`__gconv_transform_internal_ucs4le`, `__gconv_transform_ucs4le_internal` and
+`__gconv_transform_internal_utf8`. Breakpoints on the pointer values showed
+`__gconv_transform_utf8_internal` and its UCS4-LE step called after the store
+through `iconv -> UniFromEnc -> SCBuildDummy -> _SFMakeChar`.
+
+That looked like a called-function-pointer target, so a PCF with complete
+index `0xBEF2` (intended as `-16654`) and RHS `0x00414243` was built. It never
+reached `fvimportbdf.c:1751`: gdb at `:1750` showed `glyph=48882`, rejected by
+the guard. The apparent target is 65 KiB before `encs`; the real negative
+reach is 1 KiB. This is an author-side negative caused by the missing
+sign-extension assumption, not a pointer-control result.
 
 ## Disposition
 
-No live code pointer appears in the window, and with this trigger the process
-never reaches a later allocation state: the corrupted free aborts first. Grade
-unchanged — witness #3309 ESTABLISHED rungs 1-4 only at direct-call scope, no
-r5. This is an author-side negative, not a witness verdict. A PCF/grooming
-variant that survives the free, a GUI callback, or a deliberately planted
-function pointer that is later called remains UNKNOWN; any of those with an
-observed branch at a chosen address changes the decision and goes to
-`witness`.
-
-Build prerequisites: `sh replay-real.sh` and `sh replay-nonpie.sh` first. No
-network, no loopback service, no external probe. Raw heap dumps are not
-byte-stable; the normalized scans and gdb transcripts are the stable evidence.
+No executable pointer is present in the actual reachable window at the
+measured surviving-free later-consumer state in either build. The range
+correction narrows all earlier window claims; it does not change the
+witness-established direct-call grade. No branch at a chosen address, no
+marker, no command, no r5, no witness verdict and no new replay demand.
+#4165 remains the single queued bundled offer. A different heap state that
+places a live called pointer within `encs-1024..encs-4`, or a second-stage
+overflow that reaches one, remains UNKNOWN and would require fresh evidence.

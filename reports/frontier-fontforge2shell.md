@@ -46,6 +46,13 @@ so `glyph == -1`. The lower-bound check is missing: `-1 != 0xffff` and
 The fix adds `glyph>=0` to the condition. Repeats with a shorter table and
 either byte order; `0xffff` is already excluded separately.
 
+`getformint16()` does not sign-extend complete two-byte values. W26 measured
+that `0xBEF2` decodes as `48882` and is rejected, while low byte `0xF2`
+followed by EOF decodes as `-14` and is accepted. Thus file-controlled
+negative indices are only `-256..-1`; the 4-byte write reaches
+`encs-1024 .. encs-4`. Repeated EOF indices can rewrite `encs-4` but do not
+extend that range.
+
 ## Local experiment actually run (loopback-free, direct call)
 
 `lab/frontier/fontforge2shell/harness.c` copies
@@ -254,10 +261,10 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   (zero here, `0x00005555` in PIE) and W12's byte-3 ceiling is unchanged.
   Author-side replay, no witness verdict for this lane.
 - W15 (`FUNCTIONPTR.md`, `replay-w15.sh`, author-side, no grade change):
-  scanned every aligned 8-byte word in the whole negative-glyph write
-  window (`encs-131072 .. encs-4`, the full signed-16-bit index range) for
-  a value in each build's `r-xp` mapping at the vulnerable store. The
-  default PIE build has zero candidates; the non-PIE lab build has only
+  scanned an over-wide 128 KiB dump (`encs-131072 .. encs-4`) for a value
+  in each build's `r-xp` mapping at the vulnerable store. W26 corrected the
+  actual reach to `encs-1024 .. encs-4`; the earlier scan covered a superset.
+  The default PIE build has zero candidates; the non-PIE lab build has only
   ASCII string fragments (6 in the live tree, 5 in a clean archive — the
   count is build-path sensitive, like W9's consumer rc), never code
   pointers. `replay-w15.sh` asserts the path-independent invariant and
@@ -302,7 +309,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   in-bounds `complete.pcf` before the pinned `truncated.pcf` moved `encs`
   by `+0x730` in both real headless builds (PIE `0x555555c48240` ->
   `0x555555c48970`; non-PIE `0xa92030` -> `0xa92760`), with the same
-  `glyph=-1, i=3` store. The full 128 KiB negative-glyph window still has
+  `glyph=-1, i=3` store. The over-wide 128 KiB dump still has
   no code pointer: PIE `CAND_COUNT 0` / `RESULT NONE`, non-PIE six printable
   string fragments (`RESULT ASCII_ONLY`). `replay-w18.sh` passes 7/7, rc 0.
   No branch, marker, command or r5; other heap states, later-created
@@ -311,8 +318,8 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   change): a third allocation state — `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`
   — moved `encs` in both real headless builds (PIE `0x555555c48240` ->
   `0x555555c47d50`, `-0x4f0`; non-PIE `0xa92030` -> `0xa91c40`, `-0x3f0`)
-  with the same `glyph=-1, i=3` store. The full 128 KiB negative-glyph
-  window still has no code pointer: PIE `CAND_COUNT 0` / `RESULT NONE`,
+  with the same `glyph=-1, i=3` store. The over-wide 128 KiB dump still has
+  no code pointer: PIE `CAND_COUNT 0` / `RESULT NONE`,
   non-PIE printable string fragments (`RESULT ASCII_ONLY`). `replay-w23.sh`
   passes 12/12, rc 0. No branch, marker, command or r5; a deliberate groom
   planting a real function pointer, a GUI process and other builds remain
@@ -320,7 +327,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
 - W24 (`THIRDBUILD.md`, `replay-w24.sh`, author-side, no grade change):
   the third-build UNKNOWN is closed. The same pinned source built with
   `RelWithDebInfo` (-O2, default PIE) gives the same `glyph=-1, i=3` store
-  with `encs=0x555555b2f240`, and the full 128 KiB negative-glyph window
+  with `encs=0x555555b2f240`, and the over-wide 128 KiB dump
   has `CAND_COUNT 0` / `RESULT NONE`. `replay-w24.sh` passes 3/3, rc 0.
   No branch, marker, command or r5; a deliberate function-pointer groom,
   GUI, later-created objects and other compiler/flag combinations remain
@@ -329,7 +336,7 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   the late-allocation-state lane is bounded. In both real headless builds
   the negative-glyph store (`glyph=-1 i=3`) is followed by glibc's
   `double free or corruption (out)` before the later `Save()` breakpoint;
-  the same 128 KiB window at that abort has no code pointer (PIE
+  the over-wide 128 KiB dump at that abort has no code pointer (PIE
   `RESULT NONE` with the W15/W23-identical hash
   `313c4ce4…e75db76`; non-PIE `RESULT ASCII_ONLY`, five printable
   fragments). `replay-w25.sh` passes 8/8, rc 0. No branch, marker,
@@ -340,6 +347,21 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   the pinned tarball, 8/8 PASS rc 0, same store-and-abort sequence, PIE
   scan hash byte-identical and non-PIE path-sensitive ASCII-only count
   of 4. Author-side, not a witness verdict.
+- W26 (`LATESTATE.md`, `replay-w26.sh`, author-side correction/negative):
+  pinned `getformint16()` does not sign-extend. A complete `0xBEF2` index is
+  `glyph=48882 accepted=0`; low byte `0xF2` with EOF as the high byte is
+  `glyph=-14 accepted=1`, measured in both real builds. The actual negative
+  index range is `-256..-1`, so the writable window is `encs-1024 .. encs-4`,
+  not 128 KiB. W15/W18/W23/W24/W25 scanned a superset; their byte observations
+  remain valid but their reach wording is corrected. W26 then uses W7's
+  surviving `size-71.pcf` poison plus `choice-4.pcf`: both builds reach the
+  real second `pcf_properties.props` consumer and later `Save()`, and the
+  actual 1 KiB window has zero candidates against every executable mapping.
+  `replay-w26.sh` passes 18/18, rc 0. An initial over-wide scan found called
+  libc gconv pointers near `encs-66616`, but the intended `-16654` index
+  decoded as unsigned `48882` and never reached the store; that lead is
+  unreachable and preserved as a negative. No branch, marker, command, r5,
+  grade change or witness verdict. #4165 remains the single queued offer.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

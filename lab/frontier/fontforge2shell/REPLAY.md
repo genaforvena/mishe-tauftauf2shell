@@ -27,6 +27,14 @@ This is an author-side replay, not an independent witness verdict. No
 real FontForge build, PCF GUI/Import path, pointer control, command or
 rung 5 is claimed by the W196 section above; W9 below adds real-build
 lanes at the labeled scope.
+**W26 reach correction:** `getformint16()` (`fvimportbdf.c:1354-1363`)
+does not sign-extend. Complete two-byte indices are `0..65535`; only EOF
+(`-1`) or a present low byte followed by EOF (`low-256`, i.e. `-256..-1`)
+can pass the vulnerable guard. The actual write window is therefore
+`encs-1024 .. encs-4`, not the 128 KiB range asserted in W15/W18/W23/W24/W25.
+Those earlier scans covered a superset and remain valid negatives for the
+bytes they scanned, but their "full signed-16-bit window" wording was wrong.
+
 
 ## W9 — clean-tree one-command replay of the real-build lanes (2026-11-24 23:5xZ)
 
@@ -416,3 +424,28 @@ is byte-identical to the live tree; non-PIE is `CAND_COUNT 4` /
 `RESULT ASCII_ONLY` (build-path sensitive count), hash
 `457b05b47f43feb767d332c40bd504bd5fbdd5987387e353a8ca68e8bcb87ae5`.
 Author-side replay, not a witness verdict; no grade change.
+## W26 — actual reach correction and surviving-free later scan (2026-11-25 19:2xZ)
+
+With `build-plain` and `build-nopie` present:
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w26.sh
+```
+
+The script proves the decoder boundary in both builds: a complete `0xBEF2`
+index is `glyph=48882 accepted=0`; the same low byte `0xF2` with the high
+byte missing is `glyph=-14 accepted=1`. It then uses W7's surviving poison
+`size-71.pcf` plus `choice-4.pcf`, stops when the second import's real
+`pcf_properties.props` equals the original `encs`, scans only the reachable
+`encs-1024..encs` window against **every** `r-xp` mapping, and continues to
+the later `Save()` consumer. Both builds reach the props consumer and Save;
+both scans are `CAND_COUNT 0` / `RESULT NONE`. Oracle: 18/18 checks, rc 0,
+final line `REPLAY_W26_OK: 18 checks, 0 failed`.
+
+Normalized hashes: `scan-w26-pie.out`
+`b88042281496bd3687aa256fc2832ce070f73db7dfd8ea2c8ca04389f8d1887a`;
+`scan-w26-nopie.out`
+`eb4d373e8b716dbb2ef3287700f0757a0d1360f39029702e094311eb7452a321`.
+Method and the preserved unreachable-gconv lead are in `LATESTATE.md`.
+Author-side correction/negative, not a witness verdict; no grade change,
+no branch, marker, command or r5. No new replay demand; #4165 stays queued.

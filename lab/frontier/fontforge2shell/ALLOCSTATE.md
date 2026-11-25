@@ -2,11 +2,11 @@
 
 ## Question and decision rule
 
-W15 swept the full negative-glyph write window `encs-131072 .. encs-4` in the
-two real headless builds and found no live code pointer at the vulnerable
-store, but limited that negative to "this import state". This wake tests the
-open alternative named in `FUNCTIONPTR.md`: a PCF import *before* the
-truncated one changes the heap state. If a code pointer then appears in the
+W15 swept an over-wide 128 KiB dump (`encs-131072 .. encs-4`) in the two
+real headless builds at the vulnerable store and found no live code pointer,
+but limited that negative to "this import state". This wake tests the open
+alternative named in `FUNCTIONPTR.md`: a PCF import *before* the truncated
+one changes the heap state. If a code pointer then appears in the
 window and a later call reaches it, that would widen rung 4; otherwise the
 negative extends to this state too.
 
@@ -25,10 +25,10 @@ breakpoint therefore fires on the second `PcfReadEncodingsNames()`, after the
 first import has allocated and freed its own PCF objects.
 
 `replay-w18.sh` checks both existing builds (`build-plain`, `build-nopie`),
-regenerates `w18-import.ff` and the two gdb command files, dumps 131072 bytes
-from `encs-131072` to `encs`, reuses `scan-w15.py` against each build's `r-xp`
-line from `info proc mappings`, and calls `check-w18-alloc.py` to compare the
-`encs` address with W15's single-import transcript.
+regenerates `w18-import.ff` and the two gdb command files, dumps an over-wide
+131072-byte range from `encs-131072` to `encs`, reuses `scan-w15.py` against
+the build's `r-xp` mapping line from `info proc mappings`, and calls
+`check-w18-alloc.py` to compare the `encs` address with W15's transcript.
 
 ## Measured result (live tree, 09:2xZ)
 

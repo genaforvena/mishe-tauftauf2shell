@@ -9,21 +9,21 @@ pointer** in the real process, so that a later call would branch to a chosen
 address? That would be a rung-4 widening (a branch at a chosen mapped
 address), still not r5 without a benign marker or command.
 
-Decision rule: break at `fvimportbdf.c:1751` with `glyph<0`, dump the whole
-address range reachable by a negative 16-bit glyph, and look for 8-byte
-aligned words whose value lies in the executable's `r-xp` mapping at that
-moment. Keep a positive only if a candidate is a real code pointer in a live
-object that the process later calls; otherwise record a negative and leave
-the grade unchanged.
+Decision rule as executed: break at `fvimportbdf.c:1751` with `glyph<0`,
+dump the then-assumed negative range, and look for aligned words in the
+executable's `r-xp` mapping. W26 corrected the range assumption; the dump
+was a superset, so the observed bytes remain valid.
 
-## Source-bound reach
+## Source-bound reach (corrected by W26)
 
-`fvimportbdf.c:1749` reads `glyph = getformint16(...)`, a signed 16-bit
-value, and `:1750` accepts every `glyph != 0xffff && glyph < glyphcnt`.
-After truncation the file controls one index in `-32768..-1`, so the single
-store at `:1751` reaches byte offsets `encs-131072 .. encs-4` (later EOF
-indices are `-1` and hit the `encs` chunk header). W14's `-50` write is
-`encs-200`, inside this window.
+`fvimportbdf.c:1749` reads `glyph = getformint16(...)`, but
+`getformint16()` (`:1354-1363`) does **not** sign-extend. A complete
+two-byte index is `0..65535`; EOF yields `-1`, and a present low byte with a
+missing high byte yields `low-256` (`-256..-1`). The vulnerable guard
+therefore accepts negative indices only in `-256..-1`, and the store at
+`:1751` reaches `encs-1024 .. encs-4`. W14's `-50` write is `encs-200`,
+inside that actual window. See `LATESTATE.md` for the two-build gdb
+discriminator and the corrected all-executable-mapping later-state scan.
 
 ## Method
 
@@ -73,12 +73,12 @@ nothing and needs no network or loopback service.
 
 ## Disposition
 
-No function pointer is reachable in the negative-glyph window at write time
-in either measured build. W14's mapped address stays a data pointer. No
-branch at a chosen address, no marker, no command, no r5, grade unchanged.
-The negative is limited to these two headless builds, this import state and
-the instant of the vulnerable store. Another build, another allocation
-state (e.g. a PCF that changes the heap before `encs`), or a later-created
-object could differ; those remain UNKNOWN. A real code pointer candidate
-followed by an observed call/branch at a chosen address would change the
-decision and goes to `witness`.
+No function pointer was observed in the bytes W15 scanned, and W26 found
+none in the actual `encs-1024..encs` window at the measured surviving-free
+later-consumer state when every executable mapping was included. W14's
+mapped address stays data only. No branch at a chosen address, no marker,
+no command, no r5, grade unchanged. The negative is limited to these
+headless builds and measured states; another heap state that places a live
+called pointer inside the actual 1 KiB window remains UNKNOWN. A real code
+pointer candidate followed by an observed call/branch at a chosen address
+would change the decision and goes to `witness`.

@@ -2,9 +2,9 @@
 
 ## Question and decision rule
 
-W15 swept the negative-glyph write window `encs-131072 .. encs-4` in two
-builds at one import state and found no live code pointer. W18 repeated the
-sweep after a prior PCF import shifted `encs` by `+0x730` — still none.
+W15 swept an over-wide 128 KiB dump (`encs-131072 .. encs-4`) in two builds
+at one import state and found no live code pointer. W18 repeated the sweep
+after a prior PCF import shifted `encs` by `+0x730` — still none.
 Both docs explicitly left "another allocation state" UNKNOWN. This wake
 tests a third, fundamentally different glibc state without a new build:
 `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`, which disables tcache and
@@ -28,7 +28,7 @@ tunable on the notcache lane. `replay-w23.sh` runs, for both
 1. an untuned baseline gdb transcript (`gdb-w23-<mode>-base.out`) recording
    the `encs` address at the vulnerable store;
 2. a `GLIBC_TUNABLES=glibc.malloc.tcache_count=0` gdb transcript
-   (`gdb-w23-<mode>-notcache.out`) with a 131072-byte dump of
+   (`gdb-w23-<mode>-notcache.out`) with an over-wide 131072-byte dump of
    `(char*)encs-131072 .. (char*)encs` plus `info proc mappings`;
 3. `scan-w15.py` against the notcache dump and the build's `r-xp` line.
 
