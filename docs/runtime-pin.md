@@ -43,8 +43,9 @@ them; re-apply on upgrade.
   accumulated two timeouts and a cooling entry in
   `engine/routing-state.json` (the owner reported it rate-limited), while the
   pinned omp-only checker had never been widened and read RED. The owner
-  directed hy4-flash-only: each of the 149 routes again has exactly one
-  `opencode-go/hy4-flash-free` candidate (`max_parallel: 3`, site wake cap 5),
+  directed hy4-flash-only: all 152 declared roles, including the three that
+  previously had no route, now have exactly one `opencode-go/hy4-flash-free`
+  candidate at `max_parallel: 5`, matching the site wake cap of 5;
   hungerg-free is recorded under `routes.json`'s `retired` key, its
   cooling/timeout entries were cleared, and both `tools/check-omp-only.py`
   copies plus the pinned `engine_router.py` guard again allow exactly
@@ -158,8 +159,11 @@ there is a pin issue, not a missing README row.
   check from 16:49 to 17:19Z recorded 9 yields, 0 timeouts, max yield
   gap 344 s, and peak memory 6.441G against the then-6G high; the extra
   headroom to 8G/10G was added because that left no margin. The engine
-  router still enforces `max_parallel: 3` per candidate, so the site
-  cap of 5 admits five wake processes but only three engines.
+  router enforced `max_parallel: 3` per candidate at that time, so the site
+  cap of 5 admitted five wake processes but only three engines; on
+  2026-11-25 the owner raised every route's `max_parallel` to 5 so the router
+  admits five engines, matching the site wake cap instead of the three-engine
+  limit recorded above.
 - The site-local verified binaries (`bin/mishe-tape`, `mishe-records`,
   `mishe-signal-*`) are byte-identical copies of the upstream plant's
   installed framer binaries, with their `*.install.json` sha256 records

@@ -10525,10 +10525,10 @@ drivers. Normalized receipts named below are tracked in their lanes.
 
 The route-policy commits are already reflected in `docs/runtime-pin.md` and
 `docs/self-healing.md`: the 17:00Z hungerg-free fallback addition was reversed
-the same day after that model was rate-limited, so every role again has exactly
-one `opencode-go/hy4-flash-free` route (`max_parallel: 3`) under the site wake
-cap of 5, with hungerg-free retired in `routes.json`. No target grade or
-admission changed.
+the same day after that model was rate-limited. All 152 declared roles,
+including three that previously had no route, now have exactly one
+`opencode-go/hy4-flash-free` route at `max_parallel: 5` under the site wake cap
+of 5, with hungerg-free retired in `routes.json`. No target grade changed.
 
 ## 2026-11-25 17:1x–17:4xZ — witness verdict, chosen RNG byte, short-write negative
 
@@ -10652,6 +10652,10 @@ admission changed.
   remain missing; full-flag sync is person-reserved. No route or live unit
   delivery is claimed. The pinned single-model OMP checker remains stale
   against the directed two-model routes and is not an acceptance signal.
+  Superseded later on 2026-11-25 by the owner's hy4-flash-only direction:
+  all 152 declared roles (including these three) now have one hy4-flash route
+  at `max_parallel: 5`; HungerG is retired and both checkers enforce the
+  single-model allowlist. Generated units remain person-reserved.
 
 ## 2026-11-25 18:0x–18:5xZ — author receipts, negatives and one witness fold
 

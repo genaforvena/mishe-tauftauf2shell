@@ -3430,9 +3430,9 @@ wrapper assertions and TERM/INT/HUP evidence restoration, with 44/0 assertions
 checked lane-by-lane but no uninterrupted final-wrapper run; Munt W191 resolves
 the second CISA exploit-tagged link as the same inaccessible note, whose mirror
 contains only an unexecuted, truncated illustrative trigger. Route policy now
-keeps exactly one `opencode-go/hy4-flash-free` candidate per role; the
-same-day hungerg-free fallback was retired after rate limiting, and
-`docs/runtime-pin.md` carries the exact allowlist and concurrency limits.
+keeps exactly one `opencode-go/hy4-flash-free` candidate per role at
+`max_parallel: 5`; the same-day hungerg-free fallback was retired after rate
+limiting, and `docs/runtime-pin.md` carries the exact allowlist and limits.
 
 
 The 2026-11-25 17:1x–17:4xZ fold covers the ten author edges after
