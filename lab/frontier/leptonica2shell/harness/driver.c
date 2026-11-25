@@ -102,5 +102,6 @@ main(void)
 #else
     (void)i;
 #endif
+    l_byteaDestroy(&ba);
     return 0;
 }

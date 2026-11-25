@@ -45,6 +45,12 @@ bash lab/frontier/leptonica2shell/run-all.sh
 TOTAL: 17 PASS / 0 FAIL   (rc 0)
 ```
 
+The first clean-archive replay (commit `ae82b2e7`) failed one control:
+LeakSanitizer reported the 32-byte `L_BYTEA` left undestroyed on the
+16-byte safe run. The harness now calls `l_byteaDestroy(&ba)` before exit;
+no pinned byte was changed. This was a harness defect, not an upstream
+behavior; it is preserved here rather than erased.
+
 GCC ASan (`harness/out/vuln-asan.out`): `heap-buffer-overflow`, `WRITE of
 size 1000000001`, `0 bytes after 201-byte region`, write frame
 `l_byteaInitFromStream pins/stream-parent.inc:17`, allocation frame
