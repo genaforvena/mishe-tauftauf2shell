@@ -573,3 +573,46 @@ It adds no graded claim: rungs 1-3 pinned, rung-4 chosen wire bytes in the
 stale buffer before the second free, no pointer/IP/command, no side effect,
 no stock/live claim and no r5. #4333 stays UNKNOWN, not declined and not
 GREEN; an addressed verdict DM closes it.
+
+## W18 — source-bound check of the heap-address prerequisite (2026-11-25 19:3xZ)
+
+No suite was repeated. The witness wall is at W220, IN PROGRESS on the
+php2shell W63 gate-6 replay (#4510/#4513); it schedules no gpgme2shell
+incident, and no verdict DM or unread message landed. #4333/#4487 stay
+UNKNOWN, not declined and not GREEN. W210 remains the sole ESTABLISHED
+verdict, at pinned-statement scope only.
+
+W12 closed plain-glibc tcache poisoning on the grounds that safe-linking
+(glibc 2.32+) needs the stale chunk's heap address and no observed callback
+exposed one. This wake checks that premise against the pinned source instead
+of against harness observations, in
+`lab/frontier/gpgme2shell/pinned/engine-gpg.c` (sha256 `c4ef11bd…311d55`):
+
+- `read_status` :1499-1500 fills the realloc'd buffer from the status pipe.
+  Every callback argument is a slice of that same text: `buffer + 9` and
+  `rest` at :1549-1550, `rest` at :1582-1583, a one-byte empty string at
+  :1512-1514 on EOF. GPGME injects no pointer, size or address.
+- `read_colon_line` :1652 fills the colon buffer from the colon pipe. The
+  callbacks at :1700/:1708 receive `linep` or `buffer` (pipe text), the
+  preprocess callback at :1684 receives `buffer`, and EOF passes NULL at
+  :1660.
+- The file's only `%p` formatting is a debug TRACE at :175-177 in
+  `gpg_io_event`; a separate event callback at :178-179 receives GPGME's
+  internal `type_data` pointer, not status/colon text, and is outside this
+  bug's callback window. No `%p`, `0x`, `%lx` or `%llx` formatting exists in
+  the status or colon line paths, so no GPGME-side address is written into
+  either line. Whether a pipe producer could emit address-looking text that
+  a caller mistakes for a heap address is UNKNOWN here and was not observed
+  in any suite.
+- `gpg_release` :601-604 frees `status.buffer` and `colon.buffer`; :607-608
+  frees `cmd.keyword`, which W9 measured aliasing the stale realloc'd chunk.
+  In observed branches no function-pointer-bearing GPGME field is reclaimed
+  in that window.
+
+This strengthens W12's ceiling from "no suite saw a heap pointer" to a
+source-bound statement for the pinned revision: the missing prerequisite
+cannot come from GPGME's own status or colon callback API. It adds no
+capability. Grade unchanged: rungs 1-3 pinned, rung-4 chosen wire bytes in
+the stale buffer, no pointer/IP/command control, no side effect, no
+stock-layout or live-target claim, no r5. All real-path results remain
+author-side.
