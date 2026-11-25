@@ -1,0 +1,69 @@
+drwav2shell W13 — Moondust network-downloader -> metadata API trace (source provisioning only)
+2026-11-25 22:46Z. No runtime, no external probe, no loopback service. Result: EXPLICIT NEGATIVE.
+
+PROVISIONING (read-only, verbatim commands executed)
+  curl -fsSL --max-time 60 'https://api.github.com/repos/WohlSoft/Moondust-Project/git/trees/fe246974754b09bf5716a93458583467037e8c64?recursive=1' -o /tmp/moondust-tree.json
+  curl -fL --max-time 180 -o /tmp/moondust-f246974.tar.gz 'https://github.com/WohlSoft/Moondust-Project/archive/fe246974754b09bf5716a93458583467037e8c64.tar.gz'
+  mkdir -p /tmp/moondust-src
+  tar -xzf /tmp/moondust-f246974.tar.gz -C /tmp/moondust-src --wildcards '*/_common/AudioProcessor/*' '*/Manager/*' '*/Engine/audio/*' '*/MusicPlayer/MainWindow/*'
+  tar -xzf /tmp/moondust-f246974.tar.gz -C /tmp/moondust-src --exclude='*/Content/*' --exclude='*/Documents/*' --exclude='*_resources*'
+  sha256sum /tmp/moondust-f246974.tar.gz
+    bfc56296908ecfb56fcd9e8f9cc04973f74bbd3573589ebfc46d6f5de28de86b  /tmp/moondust-f246974.tar.gz
+  Tree root below: /tmp/moondust-src/Moondust-Project-fe246974754b09bf5716a93458583467037e8c64
+  (W6/W8 pinned Moondust commit fe246974754b09bf5716a93458583467037e8c64; vendored header
+   _common/AudioProcessor/codec/wav/dr_wav.h:3 banner "dr_wav - v0.14.1 - 2025-09-10",
+   :148-151 DRWAV_VERSION 0.14.1 — vulnerable-shaped pass-1/pass-2 smpl/cue desync per W8.)
+
+METADATA ENTRY POINT (targeted line reads; paths relative to tree root)
+  _common/AudioProcessor/codec/audio_wav.cpp:321-341
+    321: bool MDAudioWAV::openRead(SDL_RWops *file)
+    329:     m_file = file;
+    337:     if(!drwav_init_with_metadata(wav, sdl_wav_read, sdl_wav_seek, sdl_wav_tell, m_file, 0, &allocs))
+  A whole-tree grep for the literal `drwav_init_with_metadata` found exactly this one call
+  site; all other hits were the vendored dr_wav.h declarations/definitions (:997, :3881).
+
+UPSTREAM OF THAT CALL (same tree)
+  _common/AudioProcessor/audio_processor.cpp:166    m_rw_in = SDL_RWFromFile(file.c_str(), "rb");
+  _common/AudioProcessor/audio_processor.cpp:193-198 switch(format) { case FORMAT_WAV: case FORMAT_AIFF:
+                                                        m_in_file.reset(new MDAudioWAV); break; }
+  _common/AudioProcessor/audio_processor.cpp:299    if(!m_in_file->openRead(m_rw_in))
+  -> the bytes are read from a local filesystem path supplied as `const std::string &file`
+     to MoondustAudioProcessor::openInFile() (declared audio_processor.h:89).
+
+ALL openInFile() CALL SITES IN THE PINNED TREE (grep, whole extracted source)
+  XTConvert/src/libxtconvert.cpp:1372   m_audioCvt.openInFile(in_path.toStdString(), std::string(), nullptr, &spec_wanted)
+  XTConvert/src/libxtconvert.cpp:1455   m_audioCvt.openInFile(in_path.toStdString(), musicArgs.toStdString(), nullptr, &spec_wanted)
+  test/Maintainer/AudioConverterTest/coverter_dialogue.cpp:190
+                                        m_cvt.openInFile(inPath.toStdString(), inPathArgs.toStdString(), nullptr, &wanted)
+  (definition at audio_processor.cpp:148; declaration at audio_processor.h:89 are not callers.)
+  Only two classes instantiate MoondustAudioProcessor (grep `MoondustAudioProcessor|MDAudioWAV`):
+  XTConvert/src/libxtconvert.cpp:231 `MoondustAudioProcessor m_audioCvt;` and
+  test/Maintainer/AudioConverterTest/coverter_dialogue.h:40 `MoondustAudioProcessor m_cvt;`.
+
+DOWNLOADER SIDE (same tree)
+  Manager/mainwindow.h:6     #include <http_downloader/http_downloader.h>
+  Manager/mainwindow.h:24    HttpDownloader downloader;
+  Manager/mainwindow.cpp:185-189 case ACT_DOWNLOAD_FILE: ... downloader.downloadFile(currentAct.param1, currentAct.param2);
+  Manager/mainwindow.cpp:193-200 next queue step parses tempDir + "/configs.index" as a config-pack XML list.
+  Manager/http_downloader/http_downloader.cpp:52-58 derives fileName from the URL path and
+    targetFile = QFileInfo(toDir + "/" + fileName).filePath();
+  Manager/http_downloader/http_downloader.cpp:65-81 opens that targetFile QIODevice::WriteOnly
+    and schedules the QNetworkAccessManager GET; httpReadyRead (:160-170) writes reply bytes to it.
+  A grep of the entire Manager/ subtree for
+    `openInFile|drwav_init_with_metadata|MoondustAudioProcessor|MDAudioWAV`
+  returned "No matches found".
+
+CONCLUSION (negative, bounded by this pinned tree)
+  Moondust's native network downloader writes config-index/config-pack files into Manager's
+  tempDir; it never calls the AudioProcessor metadata path. The only in-repo callers of
+  drwav_init_with_metadata are a local-file batch converter (XTConvert) and an in-tree
+  maintainer test dialog. A human could manually download a .wav and then convert it, but
+  that is a user-mediated file workflow, not a native network-derived caller. W6's
+  `SDL_RWFromFile` local-only disposition is therefore confirmed at the call-graph level
+  for commit fe246974...; this does not make Moondust an r5 lane.
+
+LIMITS: source inspection of one pinned commit only; no Moondust build or run was performed
+  this wake, and absence in this tree is not proof of absence in future revisions or plugins.
+  The sphaira network-backed FsStdio path remains source-only (Switch runtime out of scope).
+  Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen control flow to a
+  lab marker; no wire-triggered corruption, command, shell or r5.

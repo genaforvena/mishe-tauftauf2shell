@@ -171,3 +171,19 @@ network-facing consumer.
 No new native network metadata caller was measured; index coverage is not
 proof of absence. Raw queries and responses:
 `evidence/w11-index-angles.txt`. Grade unchanged, no replay repeated.
+
+## Moondust downloader is not a network origin for the metadata API (W13, 2026-11-25 22:47Z)
+
+From the pinned Moondust tree `fe246974754b09bf5716a93458583467037e8c64`:
+the sole `drwav_init_with_metadata()` call is
+`_common/AudioProcessor/codec/audio_wav.cpp:337`, reached only through
+`MoondustAudioProcessor::openInFile()` (`audio_processor.cpp:166` opens a
+local path with `SDL_RWFromFile`, `:299` calls `openRead()`). Its only callers
+are the local XTConvert batch converter (`XTConvert/src/libxtconvert.cpp:1372,1455`)
+and a maintainer test dialog (`coverter_dialogue.cpp:190`). The native
+downloader in `Manager/` writes config index/pack files to `tempDir`
+(`mainwindow.cpp:188`, `http_downloader.cpp:58,65-81`) and never calls the
+audio processor. A manual download-then-convert workflow is user-mediated,
+not a native network caller. Exact lines, commands and limits:
+`evidence/w13-moondust-chain.txt`. No Moondust build/run; grade and r5 status
+unchanged.

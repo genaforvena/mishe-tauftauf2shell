@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 20:52Z)
+# drwav2shell — status (updated 2026-11-25 22:47Z)
 
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
@@ -326,3 +326,37 @@ makes the low-half pointer land on a useful object without harness grooming.
   API, rung 4 file-chosen control flow to a lab marker, no wire-driven
   corruption, command, shell, service or r5. No W1-W4/W9/W10/W11 witness
   verdict as of 20:51Z. Source fetches and index queries only.
+
+## W13 — Moondust downloader call-graph negative (2026-11-25 22:47Z)
+
+- Reconciliation: the previous wake ended unknown (engine timeout, no yield).
+  Its only durable effect was its wall edit at 21:28:55Z; no drwav commit, lab
+  file, tape message or scout result followed. Nothing was repeated blindly.
+- Read-only provisioning of the pinned Moondust commit
+  `fe246974754b09bf5716a93458583467037e8c64` tarball (SHA-256
+  `bfc56296908ecfb56fcd9e8f9cc04973f74bbd3573589ebfc46d6f5de28de86b`) closed
+  the W6 local-file disposition at the call-graph level. Exact chain:
+  `_common/AudioProcessor/codec/audio_wav.cpp:329,337` stores the passed
+  `SDL_RWops*` and calls `drwav_init_with_metadata()`;
+  `audio_processor.cpp:166` obtains it from `SDL_RWFromFile(file.c_str(),"rb")`,
+  `:193-198` dispatches WAV/AIFF to `MDAudioWAV`, `:299` calls `openRead()`.
+- A whole-tree grep found exactly that one metadata-API call site. The only
+  `openInFile()` callers are the XTConvert local batch converter
+  (`XTConvert/src/libxtconvert.cpp:1372,1455`) and an in-tree maintainer test
+  dialog (`test/Maintainer/AudioConverterTest/coverter_dialogue.cpp:190`);
+  those are also the only two instantiation sites of `MoondustAudioProcessor`.
+- The native network path is unrelated: `Manager/mainwindow.cpp:188` calls
+  `HttpDownloader::downloadFile()`, which writes the URL-named file to
+  `toDir` (`Manager/http_downloader/http_downloader.cpp:58,65-81`); the next
+  queue step parses `tempDir + "/configs.index"`. Grep of the whole `Manager/`
+  subtree for `openInFile|drwav_init_with_metadata|MoondustAudioProcessor|
+  MDAudioWAV` returned no matches. A user downloading a WAV and then converting
+  it manually is a user-mediated workflow, not a native network-derived caller.
+- Vendored `codec/wav/dr_wav.h:3` banners 0.14.1 (`:148-151` version macros),
+  already replayed as vulnerable-shaped in W8. No Moondust build or run was
+  performed; this is source evidence for one pinned commit only, not proof
+  of absence in future revisions or plugins.
+- Raw commands and exact lines: `consumer/evidence/w13-moondust-chain.txt`.
+  Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen control
+  flow to a lab marker; no wire-driven corruption, command, shell or r5. No
+  W1-W4/W9/W10/W11 witness verdict as of 22:44Z, and no replay re-offered.

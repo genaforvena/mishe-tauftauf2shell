@@ -440,3 +440,27 @@ because no build path changed. Raw evidence:
 `consumer/evidence/w11-index-angles.txt`. Index negatives are not proof of
 absence; source fetches and queries only, no external probe.
 
+
+
+## W13 — Moondust network-download negative closes the call-graph question (2026-11-25 22:47Z)
+
+W13 provisioned the pinned Moondust source tree
+(`fe246974754b09bf5716a93458583467037e8c64`, read-only archive SHA-256
+`bfc56296908ecfb...`) to settle W6's open question: whether the WAV bytes that
+`MDAudioWAV::openRead()` hands to `drwav_init_with_metadata()`
+(`codec/audio_wav.cpp:337`) can arrive from Moondust's own network downloader.
+They cannot, in this tree. `audio_processor.cpp:166` reads a local path via
+`SDL_RWFromFile`; its only callers are XTConvert's local converter and a
+maintainer test dialog. Manager's HTTP downloader
+(`mainwindow.cpp:188` -> `http_downloader.cpp:58,65-81`) writes URL-named
+config files into `tempDir` and parses `configs.index`; no Manager code calls
+the audio processor or the metadata API (whole-subtree grep returned nothing).
+
+The vendored header is 0.14.1 (`codec/wav/dr_wav.h:3,148-151`), so the
+vulnerable-shaped bytes remain demonstrable (W8) but the in-repo network path
+is absent. This is a bounded source-tree negative, not a runtime test and not
+proof for future revisions. Grade unchanged: rung 3 real consumer/public API,
+rung 4 file-chosen control flow to a lab marker; no wire-driven corruption,
+command, shell or r5. Raw evidence: `consumer/evidence/w13-moondust-chain.txt`.
+No witness replay was requested; the sphaira network-backed path is still
+source-only because no Switch runtime is in scope.
