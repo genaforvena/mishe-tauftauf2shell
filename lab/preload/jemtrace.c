@@ -160,6 +160,7 @@ void *malloc(size_t sz)
         dump_window(watch_ptr, watch_sz, "after");
         watch_ptr = NULL;
     }
+    if (want_bt && bt_size && sz == bt_size && p) emit_bt();
     logline("M", sz, p);
     in_hook = 0;
     return p;

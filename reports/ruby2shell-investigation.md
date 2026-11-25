@@ -3373,3 +3373,20 @@ distinct command is demonstrated. Stock/oracle-free/persistent rung 5 stays
 **NOT ACHIEVED**. Named next: identify the adjacent `calloc(0x48)` consumer
 and sweep other exact size classes (64/96/112/…/1024) for an adjacent
 first qword whose low byte is security-relevant.
+
+**Size-class sweep (same day):** the wire harness accepts `JEM_CLASS=C` and
+derives `m = C − 65`, `capa = C − 24` so the request equals the jemalloc class
+exactly. Sixteen fresh processes, one attack each, C ∈ {80, 96, 112, 128,
+160, 192, 224, 256, 320, 384, 448, 512, 640, 768, 896, 1024}; tags
+`jemwire2-<C>`, traces `lab/build/evidence/jemwire2-<C>.trace`. A capa-paired
+analysis (case-buffer dump block followed by an adjacent first qword with low
+byte `0x53`) found **exactly one paired corruption in every one of the 16
+classes**, with the process surviving and HTTP 404 in every arm. The
+adjacent chunk is allocated in-request (most often `calloc(0x58)` or
+`calloc(0x78)`, sometimes `malloc(0x3ea)`); allocation backtraces were
+collected but `addr2line` attribution is noisy and no adjacent consumer is
+named. The primitive therefore generalises across jemalloc small classes —
+the attacker chooses the class via `_method` length — but no tested class
+produced a crash, a disclosure, a command or a code-pointer source. This is a
+bounded positive for corruption reachability and a bounded negative for
+impact through the first qword alone; rung 5 remains NOT ACHIEVED.
