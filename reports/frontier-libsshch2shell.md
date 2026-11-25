@@ -204,10 +204,11 @@ Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
 loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
 at chosen offsets of a recycled freed channel object drive a write to a chosen
 address, select an indirect callee, and execute a benign in-process marker.
-The command lane is **rung 5 MECHANICS only**, author-reported and NOT
-ESTABLISHED: a wire-borne string is executed by a lab trampoline in the live
-server process, not by a real application callback pattern, with no witness
-replay. Required lab conditions remain explicit: authenticated peer (PR:L),
+The command lane is **rung 5 MECHANICS only**, witness-replayed and accepted
+as labeled but NOT ESTABLISHED as remote execution: a wire-borne string is
+executed by a lab trampoline in the live server process, not by a real
+application callback pattern. Required lab conditions remain explicit:
+authenticated peer (PR:L),
 application frees a remotely closed channel from inside its data callback,
 application reuses the freed 128-byte chunk for wire bytes, ASan quarantine
 disabled, W3/W4 detachment of the channel's stdout buffer and callback list,
