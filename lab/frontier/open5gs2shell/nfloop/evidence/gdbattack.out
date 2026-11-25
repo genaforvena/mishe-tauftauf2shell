@@ -1,0 +1,34 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Open5GS daemon v2.8.0
+
+[32m11/25 08:39:13.012[0m: [[33mapp[0m] [1;32mINFO[0m: Configuration: '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/nfloop/nrf.yaml' (../open5gs-2.8.0/lib/app/ogs-init.c:144)
+[32m11/25 08:39:13.012[0m: [[33mapp[0m] [1;32mINFO[0m: File Logging: '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/nfloop/evidence/nrf.log' (../open5gs-2.8.0/lib/app/ogs-init.c:147)
+[32m11/25 08:39:13.012[0m: [[33mapp[0m] [1;32mINFO[0m: LOG-LEVEL: 'info' (../open5gs-2.8.0/lib/app/ogs-init.c:150)
+[32m11/25 08:39:13.015[0m: [[33msbi[0m] [1;32mINFO[0m: NF Service [nnrf-nfm] (../open5gs-2.8.0/lib/sbi/context.c:2012)
+[32m11/25 08:39:13.015[0m: [[33msbi[0m] [1;32mINFO[0m: NF Service [nnrf-disc] (../open5gs-2.8.0/lib/sbi/context.c:2012)
+[32m11/25 08:39:13.015[0m: [[33msbi[0m] [1;32mINFO[0m: nghttp2_server() [http://127.0.0.1]:18777 (../open5gs-2.8.0/lib/sbi/nghttp2-server.c:454)
+[New Thread 0x7ffff42006c0 (LWP 1902886)]
+[32m11/25 08:39:13.016[0m: [[33mapp[0m] [1;32mINFO[0m: NRF initialize...done (../open5gs-2.8.0/src/nrf/app.c:31)
+
+Thread 2 "open5gs-nrfd" received signal SIGABRT, Aborted.
+[Switching to Thread 0x7ffff42006c0 (LWP 1902886)]
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff704527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff70288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7ec23b0 in ?? () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/nfloop/../local-prefix/usr/lib/x86_64-linux-gnu/libtalloc.so.2
+#6  0x00007ffff7ef3c76 in ogs_talloc_free (ptr=0x7fffec006b00, location=0x7ffff7fa5410 "../open5gs-2.8.0/lib/sbi/message.c:3498") at ../open5gs-2.8.0/lib/core/ogs-memory.c:107
+#7  0x00007ffff7f5ec8b in parse_multipart (message=0x7ffff41ff740, http=0x7ffff579e080) at ../open5gs-2.8.0/lib/sbi/message.c:3498
+#8  0x00007ffff7f5c8f6 in parse_content (message=0x7ffff41ff740, http=0x7ffff579e080) at ../open5gs-2.8.0/lib/sbi/message.c:3120
+#9  0x00007ffff7f51fa5 in ogs_sbi_parse_request (message=0x7ffff41ff740, request=0x7ffff579e010) at ../open5gs-2.8.0/lib/sbi/message.c:1311
+#10 0x000055555555dc3a in nrf_state_operational (s=0x7ffff41ffc60, e=0x7fffec00fcf0) at ../open5gs-2.8.0/src/nrf/nrf-sm.c:78
+#11 0x00007ffff7f06a98 in ogs_fsm_dispatch (fsm=0x7ffff41ffc60, event=0x7fffec00fcf0) at ../open5gs-2.8.0/lib/core/ogs-fsm.c:127
+#12 0x000055555555a111 in nrf_main (data=0x0) at ../open5gs-2.8.0/src/nrf/init.c:128
+#13 0x00007ffff7ef6b50 in thread_worker (arg=0x5555555d3600) at ../open5gs-2.8.0/lib/core/ogs-thread.c:67
+#14 0x00007ffff709cb64 in start_thread (arg=<optimized out>) at ./nptl/pthread_create.c:447
+#15 0x00007ffff7129e8c in clone3 () at ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+rip            0x7ffff709ebec      0x7ffff709ebec <__GI___pthread_kill+284>

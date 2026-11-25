@@ -1,0 +1,17 @@
+CASE=staged curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 08:43:23.208[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:23.208[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:23.208[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:23.208[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:23.208[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:23.208[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|
+CASE=safe curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 08:43:23.669[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|
+CASE=abc curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 08:43:24.115[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:24.115[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0/lib/sbi/message.c:3301)|[32m11/25 08:43:24.115[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0/src/nrf/nrf-sm.c:127)|
+CASE=attack curl_rc=56 nrf_alive=NO nrf_rc=134
+  CURL: curl: (56) Recv failure: Connection reset by peer
+code=000 proto=0 size=0
+  RESP: 
+  LOG: 

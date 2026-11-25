@@ -1,0 +1,18 @@
+logger:
+  file:
+    path: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/nfloop/evidence/nrf.log
+  level: info
+
+global:
+  max:
+    ue: 1024
+
+nrf:
+  serving:
+    - plmn_id:
+        mcc: 999
+        mnc: 70
+  sbi:
+    server:
+      - address: 127.0.0.1
+        port: 18777

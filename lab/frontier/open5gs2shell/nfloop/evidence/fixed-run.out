@@ -1,0 +1,16 @@
+CASE=staged curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 08:43:26.209[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0-fixed/lib/sbi/message.c:3301)|[32m11/25 08:43:26.209[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0-fixed/lib/sbi/message.c:3301)|[32m11/25 08:43:26.209[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0-fixed/lib/sbi/message.c:3301)|[32m11/25 08:43:26.209[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0-fixed/lib/sbi/message.c:3301)|[32m11/25 08:43:26.209[0m: [[33msbi[0m] [1;33mERROR[0m: Unknown content_type [(null)] (../open5gs-2.8.0-fixed/lib/sbi/message.c:3301)|[32m11/25 08:43:26.209[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0-fixed/src/nrf/nrf-sm.c:127)|
+CASE=safe curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=89
+  RESP: {"type":"/nnrf-nfm/v1","title":"No NFInstanceId","status":400,"instance":"/nf-instances"}
+  LOG: [32m11/25 08:43:26.679[0m: [[33mnrf[0m] [1;33mERROR[0m: No NFInstanceId (../open5gs-2.8.0-fixed/src/nrf/nrf-sm.c:127)|
+CASE=abc curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=50
+  RESP: {"title":"cannot parse HTTP message","status":400}
+  LOG: [32m11/25 08:43:27.125[0m: [[33msbi[0m] [1;33mERROR[0m: Empty multipart boundary (../open5gs-2.8.0-fixed/lib/sbi/message.c:3376)|[32m11/25 08:43:27.125[0m: [[33msbi[0m] [1;33mERROR[0m: parse_content() failed (../open5gs-2.8.0-fixed/lib/sbi/message.c:1312)|[32m11/25 08:43:27.125[0m: [[33mnrf[0m] [1;33mERROR[0m: cannot parse HTTP message (../open5gs-2.8.0-fixed/src/nrf/nrf-sm.c:81)|
+CASE=attack curl_rc=0 nrf_alive=YES nrf_rc=0
+  CURL: code=400 proto=2 size=50
+  RESP: {"title":"cannot parse HTTP message","status":400}
+  LOG: [32m11/25 08:43:27.597[0m: [[33msbi[0m] [1;33mERROR[0m: Empty multipart boundary (../open5gs-2.8.0-fixed/lib/sbi/message.c:3376)|[32m11/25 08:43:27.597[0m: [[33msbi[0m] [1;33mERROR[0m: parse_content() failed (../open5gs-2.8.0-fixed/lib/sbi/message.c:1312)|[32m11/25 08:43:27.597[0m: [[33mnrf[0m] [1;33mERROR[0m: cannot parse HTTP message (../open5gs-2.8.0-fixed/src/nrf/nrf-sm.c:81)|

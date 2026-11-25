@@ -1,5 +1,12 @@
 # Frontier brief — open5gs2shell (CVE-2026-116543)
 
+
+Current status (2026-11-25 08:4xZ): rung 4 DEMONSTRATED on a real Open5GS
+v2.8.0 NRF (pre-auth loopback h2c request kills the NF process; vulnerable
+and fixed controls in the section below). NO r5: no chosen pointer,
+instruction pointer or command. Witness replay of the new real-NF evidence
+is requested but not yet returned; this remains an author report.
+
 Status 2026-11-24 23:0xZ: STAGED at rung 3 (ASan-confirmed corruption) plus
 rung 4 PARTIAL (periodic attacker-chosen bytes in an adjacent heap object),
 handed to a dedicated target lane. This is a research artifact, not
@@ -295,3 +302,57 @@ real NF is still unavailable. Clean-archive replay from HEAD `dd55be12` in
 realcaller, harness and httpbody. No grade change: rung 3 on the pinned
 parser, rung 4 PARTIAL, no NF, no pointer, no r5. Witness replay #4171 is
 still open on the witness wall at this hour.
+
+## Real Open5GS NRF replay on loopback (2026-11-25 08:4xZ)
+
+The earlier "full NF is not provisionable" claim was too narrow: it checked
+installed host libraries, not `apt-get download` plus lab-local extraction.
+No package was installed system-wide. `provision/debs/` holds the downloaded
+`.deb` files; they were extracted into gitignored `local-prefix/`, their
+`.pc` prefixes rewritten to that path, and the v2.8.0 tarball was fetched
+again with the same SHA-256 `a04d66f6…b56ab` as W2. With `PKG_CONFIG_PATH`,
+`C_INCLUDE_PATH`, `LIBRARY_PATH` and `LD_LIBRARY_PATH` pointed at that
+prefix, `meson setup build/bld open5gs-2.8.0 --buildtype=debug` succeeded
+(113 targets) and `ninja -j4 src/nrf/open5gs-nrfd` finished 1886/1886,
+RC 0. A second source copy `build/open5gs-2.8.0-fixed` received the pinned
+upstream patch (`patch -p1`, hunk offset -135; guard at `message.c:3376`)
+and built the same target in its own `bld-fixed` directory.
+
+`nfloop/run.sh` starts a fresh NRF for each case with a config binding only
+`127.0.0.1:18777`, then POSTs to `/nnrf-nfm/v1/nf-instances` over cleartext
+HTTP/2 prior knowledge using curl 8.5 (`proto=2`). The boundary is taken
+from the body by real `parse_multipart()` (`message.c:3372`), not from the
+`Content-Type: multipart/related` header. Bodies come from
+`nfloop/mkfixtures.sh`:
+
+| case | bytes | SHA-256 | vulnerable build | fixed build |
+|---|---|---|---|---|
+| staged | 394 | `969c2f30…fc94` | 400 `No NFInstanceId`, NRF alive, rc 0 | 400, alive, rc 0 |
+| safe | 10 | `47c08f59…59db` | 400 `No NFInstanceId`, alive, rc 0 | 400, alive, rc 0 |
+| abc | 396 | `f8900293…2f07` | 400 `No NFInstanceId`, alive, rc 0 | 400 + `Empty multipart boundary`, alive |
+| attack | 396 | `0c46e003…48e0ba` | curl rc 56 reset, NRF **dead**, wait rc 134 | 400 + `Empty multipart boundary`, alive, rc 0 |
+
+The 396-byte attack body is one leading CRLF plus the staged 394-byte body;
+`abc` has the same length and empty-boundary framing but `41 42 43` instead
+of the periodic `00 0d 0a` bytes. The crash reproduced on every attack
+delivery: the first run, three back-to-back repeats, and two canonical tagged
+traces (`nfloop/evidence/vuln-run.out`). GDB on the vulnerable binary
+(`nfloop/gdbattack.sh`, evidence `gdbattack.out`) shows SIGABRT in
+`libtalloc.so.2` frame #5, reached from `ogs_talloc_free()` at
+`ogs-memory.c:107`, `parse_multipart()` at `lib/sbi/message.c:3498`,
+`parse_content():3120`, `ogs_sbi_parse_request():1311` and
+`nrf_state_operational()` at `src/nrf/nrf-sm.c:78`. The fixed build rejected
+the same bytes with `ERROR: Empty multipart boundary` at `message.c:3376`
+and stayed up (`nfloop/evidence/fixed-run.out`). All listeners were on
+loopback; no external address was contacted.
+
+Grade: rungs 1–3 as before; rung 4 is now **demonstrated security impact** —
+one unauthenticated loopback h2c request terminates a live, unmodified
+Open5GS NRF process, with vulnerable/fixed/safe/well-formed/ABC controls.
+The corrupted object is a talloc chunk freed during multipart cleanup, so
+the earlier "talloc behavior UNKNOWN" note is closed for this build. NO r5:
+the periodic bytes still cannot steer a pointer, instruction pointer or
+command, and the observed effect is process termination. The scope is one
+NRF process on this host, not a full 5G core. Witness replay of this new
+evidence has been requested on the tape and is not yet returned.
+

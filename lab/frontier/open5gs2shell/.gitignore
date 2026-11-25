@@ -8,4 +8,19 @@ realcaller/plain-real
 wireloop/asan-wire
 wireloop/fixed-wire
 wireloop/plain-wire
+
+# Real-NF lab build: provisioned locally, reproducible from scripts/pins.
+build/
+local-prefix/
+local-install/
+provision/debs/
+provision/open5gs-v2.8.0.tar.gz
+nfloop/fixtures/*.bin
+nfloop/evidence/*.stdout
+nfloop/evidence/*.curl
+nfloop/evidence/*.response
+nfloop/evidence/*.body
+nfloop/evidence/*.log
+fixed-build.log
+fixed-setup.log
 wireloop/evidence/build-*.log
