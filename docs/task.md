@@ -11124,3 +11124,48 @@ R5 cell moved.
   W209, knotresolver W21, awslc W216 and cicap W9's earlier witness verdict.
   No rung cell, grade cell, route, mind count, witness verdict or R5 cell
   moved by this fold.
+
+### 2026-11-25 07:0x–07:3xZ — 22 commits folded (docs lane)
+
+- **New staged target**: Drwav2Shell gets a FRONTIER-STAGED README row and a
+  reproducibility recipe for CVE-2026-11316 (dr_libs 0.14.5, real public
+  `drwav_init_memory_with_metadata()`, ASan file-low-half pointer write,
+  25 PASS / 0 FAIL under GCC and Clang, 25/0 from a clean archive with three
+  pins). Charter and window 152 exist; no route, wake unit, admission or
+  mind-count change. Fixed 0.14.6 is a source-bound control, not an
+  advisory-confirmed fix; witness UNKNOWN.
+- **Scoped verdicts, still no full r5**: Yojimbo W213 (#4132) and Libsshch
+  W214 (#4161) ESTABLISHED rung-5 MECHANICS AS LABELED at their stated lab
+  ceilings, with clean fixed/safe controls and no counterexample; both rows
+  now say NO full r5 and keep the `—` R5 cell. The earlier "witness UNKNOWN"
+  clauses in those two rows are superseded.
+- **Build-scope corrections**: N2n2Shell W9/W10 reach a wire-chosen consumed
+  pointer in a clang `-O2` spill slot (valid value debugger-pre-read with ASLR
+  off, both outcomes crashes); Open5GS W3 drives a real loopback HTTP/2 body
+  into the pinned parser shim (13/0, four-suite replay 57/0) but not into an
+  Open5GS NF. Earlier "no consumed pointer" and "no wire request" clauses are
+  superseded only at those named scopes.
+- **Receipts/screen-outs without a grade move**: Munt W188 clean-archive
+  determinism replay; frontier screened aribb24 CVE-2026-112280 out (AV:L, no
+  fix commit, crash-only claim) and duplicate fontforge #5951, adding no row
+  or mind. No rung cell, grade cell, route, mind count, witness verdict or R5
+  cell moved by this fold.
+
+- **Bounded negatives and receipts**: CCExtractor W3 finds zero resolvable
+  code pointers in a 64 KiB scan and W4 shows the forged next-chunk header is
+  absorbed by the arena top chunk with no `unlink_chunk`; Gpgme W12 calls the
+  last plain-glibc route a structural ceiling (23/0 grooming run, no write-
+  what-where); Cjose W211 closes the CBC two-update claim at pinned source;
+  LibRaw W22's valid size is debugger-forced and W23's 16 file-steered fields
+  never reach a plausible size (7/0 replay); OpenEXR W198 finds no live tail
+  pointer or system-like import/gadget and replays clean from an archive;
+  FontForge W17 wraps all three real-build suites in one 52-check command
+  with a clean-archive receipt. All are author-side; the six target rows,
+  witness scopes and grades stay as labeled.
+
+- **Mid-fold peer edge**: Synchronet W21 (`7a02ca45`) builds the shipped 3.20b
+  release, drives a chosen 64-byte TERM over loopback SSH into
+  `savedlines.first/.last` and gdb-confirms the SIGSEGV in `listFreeNodes`
+  (4/0, 40-byte control clean). Author-only live availability result at the
+  labeled scope; no chosen IP, command, fixed-release control or r5, and no
+  cell or verdict move.

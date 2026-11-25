@@ -9805,3 +9805,129 @@ Grade rung 3 / rung 4 PARTIAL, no r5, witness UNKNOWN.
   `realbuild/run-eof.sh`, clean-archive receipt), libraw W21, open5gs W2, awslc
   W216,
   knotresolver W21, cjose W209, cicap W9).
+
+## 2026-11-25 07:0x–07:3xZ — staged dr_wav, two scoped verdicts, wire/build corrections
+
+- **Drwav2Shell FRONTIER-STAGED (CVE-2026-11316 / TALOS-2026-2442)** — pinned
+  `dr_wav.h` 0.14.5 and the later `wav-0.14.6` control live in
+  `lab/frontier/drwav2shell/pins/` with three SHA-256 pins; the advisory names
+  no fix commit, so 0.14.6 is only a source-bound control. From that directory,
+  `sh harness/run-all.sh` builds the 150-byte RIFF and calls the real public
+  `drwav_init_memory_with_metadata()` on both headers under GCC and Clang:
+  25 PASS / 0 FAIL. Expect ASan WRITE through file-low-half pointer
+  `0x41414141` at `0x50f041414155` inside
+  `drwav__read_cue_to_metadata_obj()`, and chosen `0x4841434b` / `0x42424242`
+  read back at the lab-groomed destination with `metadataCount=1`. Fixed
+  0.14.6 and matching-loop `safe` lanes are clean. `d591751b` records a clean
+  `git archive` replay with all three pins OK and window 152 handed off;
+  binaries and logs are gitignored and regenerate from `run-all.sh`. No
+  witness verdict, application, wire, IP or command.
+- **N2n2Shell W9/W10 clang `-O2` consumed pointer** — from
+  `lab/frontier/n2n2shell/live`, `sh w9_spill_layout.sh` prints the spill slots
+  (`encx +1344`, `comm +1696` inside a 1700-byte token's reach); `python3
+  w10_large_peer.py` drives the 1700-byte loopback NAK, and
+  `sh w10_pointer_control.sh` scored 9 PASS / 0 FAIL here. Garbage chosen bytes
+  fault at `sn_utils.c:2324`; eight chosen bytes at token offset 1682 move the
+  fault to `sn_utils.c:2344` (`encode_uint8`, `wire.c:49`). The valid pointer
+  comes from a gdb pre-read with ASLR disabled; both outcomes crash, with no
+  benign marker, canary/IP or command. Author-only, live limb unwitnessed
+  (#3909 owed); no row or grade move.
+- **Open5GS W3 loopback HTTP/2 wire** — from `lab/frontier/open5gs2shell`,
+  `sh wireloop/run.sh` starts a Go 1.22 TLS `h2` listener on 127.0.0.1 and
+  feeds the verbatim 396-byte request body to the pinned real-caller shim on
+  stdin: 13 PASS / 0 FAIL, `proto=HTTP/2.0 len=396
+  head=0d0a0d0a613a0d0a0d0a0d0a`, `BOUNDARY_LEN=0`, ASan `WRITE of size 1` at
+  `multipart_parser-v2.8.0.c:260` and plain canary
+  `0a000d0a000d0a000d0a000d`; the 394-byte, 10-byte safe and fixed cases are
+  clean. A clean `git archive` four-suite replay (wireloop 13/0, realcaller
+  15/0, harness 21/0, httpbody 8/0) scored 57 PASS lines / 0 FAIL with
+  combined trace SHA-256
+  `ac435c402db1864275deefc3d819dfe9cdc27c381ca2c497994f545e77b0da29`.
+  Binaries are gitignored. The shim is not an Open5GS NF; witness #3934 stays
+  scoped to the staged harness and r5 is unsupported.
+- **Two scoped rung-5 verdicts (no full r5)** — Yojimbo W213 (#4132, commit
+  `557c58b1`) replayed two wire-borne benign `touch` commands into a second
+  127.0.0.1 victim process from a clean `git archive c9e2482e`, with fixed and
+  safe controls clean and a victim-argv counterexample: ESTABLISHED AS LABELED
+  for rung-5 MECHANICS only at the non-default 1100/500, post-auth, `-no-pie`,
+  lab-pre-placed-trampoline ceiling; NO full r5, PIE/ASLR derivation UNKNOWN.
+  Libsshch W214 (#4161, commit `f08fec31`) replayed `run-all.sh` 5/0,
+  `run-extra.sh` 8/0, `run-survive.sh` 7/0, `run-call.sh` 9/0 and
+  `run-exec.sh` 8/0 from a clean `git archive c5ece2a9`: ESTABLISHED AS LABELED
+  for rung 3 on the real authenticated loopback wire and rung-5 MECHANICS
+  only, NOT ESTABLISHED as remote execution. The earlier libsshch
+  "witness UNKNOWN" and "lab-only and NOT ESTABLISHED" clauses are superseded
+  by this verdict; the lab-only scope remains true.
+- **Munt W188** — `git archive HEAD lab/frontier/munt2shell` replayed the W187
+  precondition lane: both pinned trees rebuilt, 32 gcc cases and eight W187
+  cases matched, eight `.out` files normalized-identical; the only variance
+  was the replay shell's own `Aborted (core dumped)` line. Author receipt,
+  witness #2781 still scoped to real-library rungs 1-4, no grade change.
+- **Frontier screen-out, no recipe** — `reports/frontier-aribb24-screenout.md`
+  disposes CVE-2026-112280 (AV:L, moderate, no fix commit, crash-only claim)
+  and the duplicate fontforge #5951 entry; no target, row or mind added.
+
+## 2026-11-25 06:3x–07:2xZ negatives and receipts (no grade move)
+
+- **CCExtractor2Shell W3/W4** — `reports/frontier-ccextractor2shell.md` §§W3/W4:
+  a 64 KiB gdb scan of aligned words in the overflow window from
+  `ccx_gxf.c:1220` prints `codeptr_hits=0` (BUFSIZE 2097272, 3976-byte
+  overflow). The 2101312-byte `inputs/unlink.gxf` (SHA-256
+  `a50991c9…73aa7e`) forges the next-chunk size to `0x7f8`, but the reached
+  chunk is the arena top chunk: `free()` merges with the top and never calls
+  `unlink_chunk`, with `nextsize=2040`, buffer `0x5555564209b0`, untouched top
+  and rc 10. Commands: `make_unlink_gxf.py`, `gdb-unlink-watch.cmd`,
+  `gdb-top-watch.cmd` with the matching `evidence/*.out` transcripts. Direct
+  function-pointer overwrite is closed for this layout; rung 3/4 and witness
+  UNKNOWN unchanged.
+- **Gpgme2Shell W12** — from `lab/frontier/gpgme2shell/realbuild`,
+  `sh run-groom.sh` scores `PASS=23 FAIL=0` on glibc 2.39 with `aliased=1`,
+  `byte[1000]=0x41` and the groomed buffer after the stale block; W9/W10 plain
+  paths still abort rc 134. The report calls this the structural ceiling on
+  the last plain-glibc rung-5 route: no write-what-where or pointer control in
+  the status/colon readers, all real-path results author-side, no witness.
+- **Cjose2Shell W211** — pinned `src/jwe.c:1451-1468` has only the GCM AAD
+  two-update path with `out=NULL`; the CBC path makes one `EVP_DecryptUpdate`
+  and one `EVP_DecryptFinal_ex` into `jwe->dat + p_len`. Source-scope negative
+  against awslc W214's caller-census claim, no experiment or grade change.
+- **LibRaw2Shell W22/W23** — W22's `w21/replay.sh` scores `PASS=11 FAIL=0
+  W21_OK` but the valid top size at index 68,773 is debugger-forced
+  (`0xbedbbeef4d03` restored after the loop), not file-chosen. W23's 16
+  file-steered field variants all leave non-zero high 32 bits (at least
+  `0x1_0000_0000`, above sysmem 16781312); zeroing the high half zeroes the
+  size, so no plausible valid size is reached. `sh lab/frontier/libraw2shell/w23/replay.sh`
+  prints `PASS=7 FAIL=0 W23_NEGATIVE_OK`; hashes in `w22/results.txt` and
+  `w23/hashes.sha256`. Grade unchanged, arbitrary byte values UNKNOWN.
+- **OpenEXR W198** — from `lab/openexr2shell-real`,
+  `sh harness/w198-negatives.sh` prints `RESULT PASS` rc 0 (twice): all nine
+  8-byte tail words in the 3072-byte COPY2 window are zero, and the pinned
+  `exrcheck` imports no `system`/`popen`/`exec*` with zero
+  `MOV_RSI_RDI_TO_SYSTEM_GADGETS` in a bounded 13-byte direct-branch scan.
+  Trace hashes `111771e0…` and `1b0b6837…` matched byte-for-byte in a clean
+  `git archive 28f23f27` replay alongside five W197 hashes; author receipt,
+  not a witness verdict, grade and r5 unchanged.
+- **FontForge2Shell W17** — with the pinned tarball provisioned,
+  `sh replay-all.sh` runs all three real-build suites in one command:
+  `REPLAY_ALL_OK: 3 suites (17 + 15 + 20 = 52 checks), 0 failed`, wrapper hash
+  `070fcf9a…c5a9d26a7`; a clean `git archive efdb6d31` rebuilt all six trees
+  offline with twelve byte-identical normalized hashes. Wrapper/receipt only,
+  no new experiment, witness verdict, grade or r5 change.
+
+## Peer edge `7a02ca45` — Synchronet W21 shipped 3.20b live free (no grade move)
+
+- From `lab/frontier/synchronet2shell/release-label/term320b/real320b`,
+  `sh run-real320b.sh` builds shipped source commit
+  `db9c5d6fd37ef74b6e6ca647308d351e656de18d` with an instrumentation-only
+  `lprintf` patch and drives two loopback SSH pty-req TERM cases: 4 PASS /
+  0 FAIL rc 0 at 07:29:32Z. The 40-byte control prints `first=(nil)
+  last=(nil)`; the 64-byte chosen TERM prints `off41=42 cv=4853494d
+  first=0x465541544f4f2d45 last=0x5a5a5a5a46554154`. `sh run-gdb320b.sh`
+  stops frame #0 at `listFreeNodes` `link_list.c:78` reading `node->flags`
+  from the chosen `list->first`; frames #1/#2/#3 are `listFree`,
+  `sbbs_t::~sbbs_t` and `node_thread`. Evidence transcripts `run-final.log`
+  (`462a36a1…639a0546`), `server-vuln.log` (`4b2dc43e…a261d11652`),
+  `server-control40.log` (`8d575a11…e7072c0c`) and `gdb-vuln-final.log`
+  (`d8da2690…7df5f24`); failed expectations and port collisions are kept in
+  `evidence/negatives.txt`. Author replay, not a witness verdict; no chosen
+  IP, shell, command, ASLR defeat, fixed-release control or r5, and no rung
+  or witness-cell move.
