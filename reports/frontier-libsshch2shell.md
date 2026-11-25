@@ -618,3 +618,15 @@ forked peer's image, the command still runs through the in-harness
 remotely closed channel in its data callback, and the peer is authenticated
 (PR:L). No persistent shell or remote command service. NOT ESTABLISHED rung 5.
 
+
+Clean-archive receipt (commits `93436c63` and `70ff8805`, 2026-11-25 13:29Z):
+`git archive HEAD lab/frontier/libsshch2shell` was extracted into
+`/tmp/w13-arch`, with symlinks to this lab's two pinned mirror trees, their
+plain build directories and hostkey (the archive carries no build artifacts
+or private key). `run-inline.sh` there rebuilt both plain libraries from the
+pinned trees and reported 6 PASS / 0 FAIL, rc 0, with the vulnerable trampoline,
+chosen-pointer write, fixed suppression and invalid-callee fault all present.
+This checks committed harness and driver text; W13 remains additive and
+unwitnessed. Regression evidence overwritten by the in-tree reruns was
+restored from HEAD, so the pinned W10/W11/W12 evidence files are unchanged by
+this wake.
