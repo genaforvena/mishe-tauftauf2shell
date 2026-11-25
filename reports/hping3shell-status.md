@@ -122,6 +122,49 @@ the offsets. `wire/run-wire.sh` is unchanged.
   object is reachable; overwriting the sbox would change PRNG output, not
   execution. This path offers no measured route to r5.
 
+## Optimized (-O2) build: fortified consumer aborts before the write (W8, 2026-11-25 03:49Z, author-side)
+
+One bounded experiment tested whether the 251-byte span could reach more
+valuable globals when the pinned tree is compiled with optimization. It did
+not: on this host the optimized build's consumer detects the overflow first.
+This is a build-dependent negative, not a grade change.
+
+- Rebuilt the unmodified pinned tree (`display_ipopt.c` sha256
+  `e8ef2dd6…dcbb5e7b`) with GCC 13.3.0 and
+  `CCOPT='-O2 -g -fcommon -Wall -Wno-unused -I../compat'`. Ubuntu's GCC
+  defaults to `_FORTIFY_SOURCE 3` at `-O2` (`gcc -dM -E -O2 - </dev/null`
+  shows it; `-O0` does not). `objdump -d` of `display_ipopt` shows
+  `mov $0x28,%ecx` followed by `call __memcpy_chk@plt` at `0xa489` — the
+  destination bound is the real 40-byte `old_rr`.
+- `nm -n -S` layout in this `-O2` binary: `old_rr.0@0x24c00` (40 bytes),
+  `j.0@0x24c40`, `i.1@0x24c44`, `rc4_seedflag@0x24c48`, `random.c`'s
+  `rc4_sbox@0x24c60`. Unlike the `-O0` build, the 251-byte span would
+  cover the RC4 indices here. That hypothetical was tested and negated:
+  the write never completes.
+- `wire/inject_rr_o2.py` sends three crafted loopback ICMP RR replies
+  (`rr_len=255`, `ptr=0xff`, 205-byte payload) whose bytes 18..21 set
+  `j=7`, 22..25 set `i=5`, 26..29 set `rc4_seedflag=1` and 50..204 set
+  `sbox[0..154]=0x41`. `wire/o2-index-proof.sh` runs
+  `hping3 -D -1 -G --rand-dest -I lo -c 24 -i 1 127.0.0.x` and reads
+  `i/j/sbox` read-only at the `hp_rand` breakpoint.
+- Vulnerable `-O2` attack: **3 PASS / 0 FAIL** — the live process ends with
+  `*** buffer overflow detected ***: terminated`, GDB sees four states and
+  no state with the crafted `i/j/fill`, so no global was overwritten. The
+  same frame in the `-O0` build still performs the silent overwrite of W2/W6;
+  the difference is the compiled consumer, not the packet.
+- Controls: no-injection baseline **4 PASS / 0 FAIL** (23 GDB states, 24
+  probe destinations, no abort); locally patched tree rebuilt at `-O2`
+  (patched source sha256 `70f0112d…b471cb7aaa7f0ba846c7`) with the same
+  injection **4 PASS / 0 FAIL** (20 states, 21 destinations, no abort).
+  Raw evidence: `wire/evidence/o2-{attack,baseline,fixed}-*`.
+- Ceiling preserved: this is a denial of service in the fortified build,
+  not corruption, chosen-byte control or r5. It narrows the earlier
+  "stock-glibc outcome UNKNOWN" only for this pinned source rebuilt with
+  this host's GCC at `-O2`; an actual distribution `hping3` package build
+  and other fortify settings remain UNKNOWN. A clean-archive replay receipt
+  is recorded below once `wire/replay-o2.sh` has been run from a commit.
+
+
 ## Current grade (2026-11-25 00:49Z)
 
 Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is

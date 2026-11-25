@@ -17,3 +17,7 @@
 /wire/plain-src/
 /wire/plain.pid
 /wire/plain-fixed-src/
+/wire/opt-src/
+/wire/opt-fixed-src/
+/wire/replay-o2-src/
+/wire/replay-o2-fixed-src/
