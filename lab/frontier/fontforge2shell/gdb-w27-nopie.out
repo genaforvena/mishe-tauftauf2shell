@@ -1,0 +1,21 @@
+Breakpoint 1 at 0x724fc3: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-nopie
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-25 04:07 UTC-NoPython-D.
+ Based on source from git with hash: c13188a4e17f912f2e20a264981b3c4746c71439
+
+Breakpoint 1, PcfReadEncodingsNames (file=0xa6ba50, toc=0xa81aa0, sf=0xa7d610, map=0xa7fa20, b=0xa91df0, encname=0xa91d70) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+W27 lane=nopie encs=0xa92070 encname=0xa91d70 delta=-768
+W27 tounicode=0xa7e3a0 fromunicode=0xa89d60 tounicode_func=(nil) fromunicode_func=(nil)
+W27 offsets 72 80 88 96
+A debugging session is active.
+
+	Inferior 1 [process 3729583] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

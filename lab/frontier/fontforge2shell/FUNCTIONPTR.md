@@ -82,3 +82,14 @@ headless builds and measured states; another heap state that places a live
 called pointer inside the actual 1 KiB window remains UNKNOWN. A real code
 pointer candidate followed by an observed call/branch at a chosen address
 would change the decision and goes to `witness`.
+
+## W27 follow-up: called-pointer lane closed for these builds
+
+`CALLEDPATH.md` measures the heap `Encoding` object at `encs-768`: its
+`tounicode_func`/`fromunicode_func` slots (offsets 88/96) are NULL with no
+assignment site, and a file-derived write of `0x414243` into the live
+`tounicode` descriptor reaches `iconv(cd=0x414243)` but faults in glibc
+`__gconv` at `gconv.c:45` before any indirect call. The chosen address is
+dereferenced as data, not called. No branch at a chosen address; the
+UNKNOWN in this disposition stays open only for GUI, other loaders, other
+build configurations and second-stage overflows.

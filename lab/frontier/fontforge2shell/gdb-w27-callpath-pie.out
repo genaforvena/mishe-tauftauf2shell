@@ -1,0 +1,36 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c60, toc=0x555555c37cb0, sf=0x555555c33820, map=0x555555c35c30, b=0x555555c48000, encname=0x555555c47f80) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+W27C lane=pie before glyph=-174 tounicode=0x555555c345b0
+1752						(i%(max2-min2+1) + min1);
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+1748		for ( i=0; i<tot; ++i ) {
+W27C lane=pie after glyph=-174 tounicode=0x555500414243
+Breakpoint 2 at 0x7ffff722a7b0: file ./iconv/iconv.c, line 32.
+
+Breakpoint 2, iconv (cd=0x555500414243, inbuf=0x7fffffffbd70, inbytesleft=0x7fffffffbd80, outbuf=0x7fffffffbd78, outbytesleft=0x7fffffffbd88) at ./iconv/iconv.c:32
+warning: 32	./iconv/iconv.c: No such file or directory
+W27C lane=pie iconv cd=0x555500414243
+#0  iconv (cd=0x555500414243, inbuf=0x7fffffffbd70, inbytesleft=0x7fffffffbd80, outbuf=0x7fffffffbd78, outbytesleft=0x7fffffffbd88) at ./iconv/iconv.c:32
+#1  0x00005555555c8e88 in UniFromEnc (enc=256, encname=0x555555c47f80) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/encoding.c:2578
+#2  0x0000555555715cd0 in SCBuildDummy (dummy=0x7fffffffbea0, sf=0x555555c33820, map=0x555555c35c30, i=256) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/splinefont.c:120
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff722ae53 in __gconv (cd=0x555500414243, inbuf=inbuf@entry=0x7fffffffbd70, inbufend=0x7fffffffbde2 '\001' <repeats 14 times>, outbuf=outbuf@entry=0x7fffffffbd78, outbufend=0x7fffffffbde0 "\001", irreversible=irreversible@entry=0x7fffffffbd10) at ./iconv/gconv.c:40
+warning: 40	./iconv/gconv.c: No such file or directory
+W27C lane=pie pc=0x7ffff722ae53
+A debugging session is active.
+
+	Inferior 1 [process 3729090] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

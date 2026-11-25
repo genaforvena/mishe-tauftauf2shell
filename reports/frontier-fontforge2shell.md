@@ -362,6 +362,22 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   decoded as unsigned `48882` and never reached the store; that lead is
   unreachable and preserved as a negative. No branch, marker, command, r5,
   grade change or witness verdict. #4165 remains the single queued offer.
+- W27 (`CALLEDPATH.md`, `replay-w27.sh`, author-side negative, no grade change):
+  measured the heap `Encoding` object at `encs-768` in both real headless
+  builds; its direct function-pointer fields `tounicode_func` /
+  `fromunicode_func` (offsets 88/96) are NULL with no assignment site in
+  the pinned source, and its live `tounicode` descriptor is at offset 72.
+  EOF is sticky, so a truncated PCF writes only one chosen negative offset
+  per import. A crafted PCF wrote `0x00414243` into `tounicode`: the
+  non-PIE build reached `iconv(cd=0x414243)` from `UniFromEnc`, then
+  faulted in glibc `__gconv` at `gconv.c:45` before any indirect call; PIE
+  inherited the high dword (`0x555500414243`). The chosen address is
+  dereferenced as data, never called. A single 4-byte write cannot build
+  the nested gconv chain needed for a call, and the real gconv step
+  pointers remain 33-65 KiB outside the reachable window. `replay-w27.sh`
+  passes 23/23 with rc 0. No branch at a chosen address, marker, command
+  or r5; GUI, other loaders and second-stage overflows stay UNKNOWN, and
+  no witness verdict or replay demand changes #4165.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

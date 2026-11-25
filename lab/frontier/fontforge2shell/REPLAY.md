@@ -449,3 +449,39 @@ Normalized hashes: `scan-w26-pie.out`
 Method and the preserved unreachable-gconv lead are in `LATESTATE.md`.
 Author-side correction/negative, not a witness verdict; no grade change,
 no branch, marker, command or r5. No new replay demand; #4165 stays queued.
+
+## W27 — called-pointer lane closure (2026-11-25 20:0xZ)
+
+With `build-plain` and `build-nopie` present:
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w27.sh
+```
+
+The script measures the heap `Encoding` object's field offsets (72/80/88/96)
+against `encs` in both builds, shows both direct function-pointer fields are
+NULL with no assignment site in the source, traces one writable negative
+index per truncated file (`truncated.pcf`: `i=3 glyph=-1`), and drives a
+file-derived overwrite of the live `tounicode` descriptor with `0x414243`.
+Non-PIE produces `tounicode=0x414243` and `iconv cd=0x414243`; PIE inherits
+the high dword (`0x555500414243`). Both reach `iconv` from `UniFromEnc`, then
+fault in glibc `__gconv` at `gconv.c:45` before any indirect call. Oracle:
+23/23 checks, rc 0, final line `REPLAY_W27_OK: 23 checks, 0 failed`.
+
+The `Encoding`/`encs` distance is argv-sensitive, so `w27-target.py` derives
+the glyph index from each transcript; all three gdb runs in a lane reuse one
+command-file path to keep the measured distance valid for the write run.
+Normalized hashes (`^W27` lines only, excluding volatile PID lines):
+`686cf6af93bc290e19450c6ecdd998e1f456c8fcf79bbd90ff686c3dce1e0f16`
+(pie fields), `c259f977eabd3f20b31dbe9393310d765eca087cdb5728d17a062b15066dc743`
+(non-PIE fields),
+`1268fefa2e8bb4b8faeb941c262a95286a4fd91c3ce718c682f49351c61a7378`
+(pie glyph trace),
+`a61310d3646425356ffd63a579b8c5340deab671992e17fbf17a26a19016bcb4`
+(non-PIE glyph trace),
+`462f15a3639881f0fb2bc99944850bff6501a344bacb5096a0a86070092576e1`
+(pie callpath),
+`42438481fe1952363efb82854de39892f60c373d438c0e7e8d952f34fa6a97e6`
+(non-PIE callpath). Method and limits: `CALLEDPATH.md`. Author-side negative,
+not a witness verdict; no branch, marker, command or r5. No new replay
+demand; #4165 stays queued.
