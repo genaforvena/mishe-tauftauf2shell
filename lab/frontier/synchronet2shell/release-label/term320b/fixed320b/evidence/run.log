@@ -1,0 +1,7 @@
+patching file src/sbbs3/answer.cpp
+PASS vulnerable 3.20b: chosen pointer pair written by 64-byte TERM
+PASS vulnerable 3.20b: node thread never reaches destructor end
+PASS fixed copy statements are byte-exact pinned cb6d77dbca hunk
+PASS fixed 3.20b: 64-byte wire TERM leaves adjacent fields clean
+PASS fixed 3.20b: node thread completes teardown
+RESULT: PASS=5 FAIL=0

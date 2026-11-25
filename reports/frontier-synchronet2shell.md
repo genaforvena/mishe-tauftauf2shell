@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -19,7 +19,9 @@ pointers in the 64-byte reach, measured only at source-bound harness scope;
 W20 traces those pointers through pinned 3.20b source to a teardown free
 loop, still source-bound; W21 builds the **shipped 3.20b release**, sends the
 64-byte TERM over loopback SSH, observes the chosen bytes in
-`savedlines.first/.last` and a gdb-confirmed SIGSEGV at `listFreeNodes`.
+`savedlines.first/.last` and a gdb-confirmed SIGSEGV at `listFreeNodes`;
+W22 replays the same release and wire TERM with the pinned `cb6d77dbca`
+hunk applied and observes clean fields and completed teardown.
 None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
@@ -763,5 +765,46 @@ Evidence: `release-label/term320b/real320b/REPLAY.md`,
 expectations, port collisions and an interrupted gdb retry are in
 `evidence/negatives.txt`. This is an author replay, not a witness verdict.
 It is a live chosen-pointer dereference with availability impact in the lab
-build: no chosen instruction pointer, shell, command, ASLR-defeat, fixed-form
-3.20b control or rung 5. The advisory's availability ceiling is unchanged.
+build: no chosen instruction pointer, shell, command, ASLR-defeat or rung 5.
+The fixed-form 3.20b control that was missing here is W22 below.
+
+## W22 — shipped 3.20b fixed-form control over the same wire TERM (author)
+
+`release-label/term320b/fixed320b/run-fixed320b.sh` rebuilds the same exact
+`db9c5d6f` release twice, on separate per-PID loopback ports. Phase 1 repeats
+W21's instrumentation-only probe and the 64-byte chosen TERM. Phase 2 restores
+`answer.cpp`, then `patch-fixed.py` replaces the no-size block with the
+statements read verbatim from `harness/fixed.inc` (pinned
+`answer-fixed.cpp:542-549`). The only adaptation is `client_socket.load()` →
+`client_socket` for 3.20b's plain int; one instrumentation `lprintf` follows
+the pinned `SAFECOPY`. The script re-reads the result and requires an exact
+pinned match after reversing those two mechanical changes; it printed
+`FIXED_HUNK_PINNED_OK lines=8 probe=1`. 3.20b's own `ssl.c` already has the
+pinned length-querying helper.
+
+Result, observed twice (08:20Z and 08:22Z): **5 PASS / 0 FAIL**, rc 0.
+Same 41xA + 3xB + `MISHE-OOTAUFTAUF` + 4xZ TERM in both phases:
+
+```
+vulnerable: REAL_320B_PROBE sizeof=41 l=64 off41=42 cv=4853494d first=0x465541544f4f2d45 last=0x5a5a5a5a46554154
+            Node 1 destructor begin                  (no destructor end)
+fixed:      FIXED_320B_PROBE sizeof=41 wire=64 len=40 off41=00 cv=00000000 first=(nil) last=(nil)
+            Node 1 destructor begin
+            Node 1 destructor end
+```
+
+Wire length is still 64 in the fixed phase; `strlen(terminal)=40` shows
+`SAFECOPY` bounded the field, byte 41 stayed zero, both `savedlines` pointers
+and `cterm_version` stayed clean, and teardown completed. The vulnerable phase
+in the same replay reproduces W21's chosen pointers and missing teardown, so
+the only differing variable is the fix hunk. Build log contains
+`Compiling answer.cpp` for the rebuilt binary.
+
+Evidence: `release-label/term320b/fixed320b/REPLAY.md` and `evidence/`
+(`run.log` sha256 `8825f5e0…20004e54`, `pinned-hunk.log` `0b8ac3b4…8684f73`,
+`server-vuln.log` `d02da635…523b0a59f`, `server-fixed.log`
+`0fda182c…c29c7a2f7c`). Server logs embed timestamps, ports and PIDs, so
+these are exact artifact hashes, not normalized invariants. Author replay on
+the ignored provisioned worktree, not a witness verdict and not a clean-archive
+receipt. No pointer/IP or command path, no measured DoS rate and no rung 5;
+the advisory's availability ceiling is unchanged.
