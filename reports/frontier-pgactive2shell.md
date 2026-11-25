@@ -176,6 +176,19 @@ disassembly correction are in `realbuild/layout/FINDINGS.md` and
 saved-pointer/return-address route toward a stronger rung 4 on this host;
 it does not alter the earlier marker-based rung-4 evidence.
 
+A 2026-11-25 08:06Z binary-only check extends this to the shipped,
+non-instrumented 2.1.9 library: the parser is inlined into
+`pgactive_parse_replident_name_sql` at 0x16290 with the same frame
+(buffer `rbp-0x70`, canary +72, saved RA +120), and the error path passes
+`riname` in a register rather than from an overwritten spill slot. A
+glibc 2.39 probe with the pinned five-conversion format returns 4 with the
+`%s` destination untouched and 5 for any non-empty tail, so the pinned
+`!= 4` check cannot be passed with an overflowing store. Full addresses
+and probe output:
+`realbuild/layout/evidence/production-frame-check.txt`. The rung ceiling
+is unchanged; this closes the saved-pointer route in the production build
+as well as the instrumented one.
+
 ## Catalog-derived origin-name reachability (2026-11-25 03:34Z)
 
 `pgactive_parse_replident_name()` also has an internal caller: pinned

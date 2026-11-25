@@ -80,3 +80,21 @@ disassembled; the o1 -40/+104 offsets are first-match observations, not
 verified slot locations. Outcome unchanged: no saved-pointer or IP
 control, no command side effect. The reason is the longjmp, not a return
 address below the buffer.
+
+## Production-build check 2026-11-25 08:06Z (binary only, no cluster)
+
+The earlier disassembly covered the instrumented opt build. The shipped,
+non-instrumented library (`evidence/pgactive.so.normal-backup`,
+sha256 `3177a37c...162998`) inlines the parser into
+`pgactive_parse_replident_name_sql` (0x16290) and has the same frame:
+buffer at `rbp-0x70`, canary at `rbp-0x28` (+72), saved RA at `rbp+8`
+(+120). Spilled `fcinfo`/`riname`/`values`/`isnull` registers sit at
++80/+88/+96/+104 — inside the overflow window — but the cold path passes
+`riname` in `%r12` and only the success return pops those slots. The
+success path is unreachable for an overflowing name: a throwaway glibc 2.39
+probe with the pinned five-conversion format returns 4 with the `%s`
+destination untouched, and returns 5 for any non-empty tail. Details and
+exact instruction addresses in `evidence/production-frame-check.txt`.
+The saved-pointer/IP route stays closed in the production build too; no
+cluster was started and no source was changed. Author observation, not a
+witness verdict.

@@ -1,0 +1,114 @@
+Production-build frame and sscanf return-count check (2026-11-25 08:06Z)
+========================================================================
+
+Question left open by evidence/disassembly-correction.txt: the 06:15Z
+disassembly was of the instrumented opt build left by run-layout.sh, which
+has a standalone pgactive_parse_replident_name symbol. Does the shipped,
+non-instrumented build put live data in the overflowed words or consume
+them before elog(ERROR)'s longjmp? This is a binary-only check; no cluster
+was started and no source was changed.
+
+Artifact
+--------
+lab/frontier/pgactive2shell/realbuild/layout/evidence/pgactive.so.normal-backup
+sha256 3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998
+This is the normal 2.1.9 library saved by run-layout.sh before/after its
+instrumented rebuild; nm -D shows no standalone parser symbol, only
+pgactive_parse_replident_name_sql (0x16290) and
+pgactive_parse_slot_name_sql (0x16130).
+
+Commands
+--------
+  nm -D <so> | grep -E 'parse_replident|parse_slot'
+  objdump -d --no-show-raw-insn --disassemble=pgactive_parse_replident_name_sql <so>
+  objdump -d --no-show-raw-insn --start-address=0xdc00 --stop-address=0xdc60 <so>
+  objdump -d --no-show-raw-insn --start-address=0xf730 --stop-address=0xf790 <so>
+  objdump -s --start-address=0x3c800 --stop-address=0x3c830 <so>
+
+Inlined parser frame in the production SQL wrapper
+---------------------------------------------------
+  1629f: mov %rdi,%rbx                   # fcinfo -> rbx
+  162ad: mov %fs:0x28,%rax
+  162b6: mov %rax,-0x28(%rbp)            # canary at rbp-40
+  162c4: call text_to_cstring
+  162d5: mov %rax,%r12                   # riname -> r12
+  162ee: lea -0x70(%rbp),%rbx            # sscanf destination = buffer offset 0
+  162f2: movb $0x0,-0xa1(%rbp)
+  162fc: lea -0xc0(%rbp),%rdx            # local_dboid
+  16305: lea -0xb8(%rbp),%rcx            # remote.sysid
+  16314: lea -0xcc(%rbp),%r9
+  1631b: lea -0xb4(%rbp),%r8
+  16329: lea 0x264e2(%rip),%rsi          # 0x3c812 = "pgactive_%lu_%u_%u_%u_%s"
+  16330: lea -0xa0(%rbp),%r13            # values[]
+  1633e: lea -0xa5(%rbp),%r14            # isnull[]
+  1634f: push %rbx                       # buffer pointer as call stack arg
+  16350: call __isoc23_sscanf@plt
+  16355: pop %rdx; pop %rcx
+  16357: cmp $0x4,%eax
+  1635a: jne dc1a <pgactive_parse_replident_name_sql.cold>
+  ...
+  163de: mov -0x28(%rbp),%rdx             # canary check only on success return
+  163e2: sub %fs:0x28,%rdx
+  163eb: jne 163fa <...+0x16a>            # __stack_chk_fail
+  163ed: lea -0x20(%rbp),%rsp
+  163f1: pop %rbx; pop %r12; pop %r13; pop %r14; pop %rbp; ret
+
+Frame arithmetic (identical to the instrumented opt build)
+-----------------------------------------------------------
+  replication_name : rbp-112 = buffer offset 0
+  canary           : rbp-40  = buffer offset +72
+  saved rbx (fcinfo) : rbp-32 = buffer offset +80
+  saved r12 (riname) : rbp-24 = buffer offset +88
+  saved r13 (values) : rbp-16 = buffer offset +96
+  saved r14 (isnull) : rbp-8  = buffer offset +104
+  saved rbp          : rbp+0  = buffer offset +112
+  saved RA           : rbp+8  = buffer offset +120
+
+Cold (error) path
+-----------------
+  dc1a: mov %r12,%rdi                    # riname in register, not a spilled slot
+  dc1d: call pgactive_parse_replident_name.part.0
+  dc22: call errstart_cold
+  dc35: call errmsg_internal
+  dc4f: call errfinish                   # throws; siglongjmp to an outer frame
+  f751 <pgactive_parse_replident_name.part.0>:
+  f75b: push %rbx
+  f75c: mov %rdi,%rbx
+  f764: call errstart_cold
+  f76a: mov %rbx,%rsi                    # %s argument for errmsg_internal
+  f776: call errmsg_internal
+  f78e: call errfinish
+
+The spilled registers at +80..+104 are restored only by the `pop` sequence
+on the success return. The error path reads `riname` from %r12 and never
+touches those slots; errfinish unwinds to a setjmp buffer in an outer
+frame, so the overwritten words are abandoned. No saved pointer, canary
+or return address is consumed by the production build either.
+
+glibc sscanf return-count probe (no PostgreSQL involved)
+---------------------------------------------------------
+Source: /tmp/pgactive-sscanf-probe.c (throwaway, outside the repo).
+gcc 13.3.0, glibc 2.39, built with `gcc -O0 -fno-stack-protector` and an
+oversized 256-byte `dst` so the long case cannot smash the probe's stack.
+Format: "pgactive_%lu_%u_%u_%u_%s" as expanded from the pinned header;
+dst filled with 0x7f before each call. Output (rc=0):
+
+  input=empty-tail n=4 dst[0]=7f dst[1]=7f
+  input=space-tail n=4 dst[0]=7f dst[1]=7f
+  input=empty-tail n=5 dst[0]=78 dst[1]=00
+  input=long       n=5 dst[0]=41 dst[1]=41
+
+Four assignments (the only count accepted by the pinned `!= 4` check)
+leave the `%s` destination untouched. Any non-empty `%s` match assigns a
+fifth item, returns 5 and takes the elog(ERROR) branch. A success return
+with an overflowing `%s` store is therefore not reachable on this host,
+so the live `values[]`/`isnull[]` pointers are never corrupted on a path
+that uses them.
+
+Outcome
+-------
+The 06:15Z saved-pointer conclusion holds for the shipped, non-instrumented
+library as well as the instrumented opt build. The only demonstrated
+control remains the explicitly instrumented in-function marker (rung 4
+AS LABELED). No IP, no command side effect, no rung 5. Author observation;
+not an independent witness verdict.
