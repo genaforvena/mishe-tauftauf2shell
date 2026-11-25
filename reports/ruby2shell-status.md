@@ -5,6 +5,25 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (eighth push, direct session) — cross-request plants
+  measured, the planted-victim pairing closed STRUCTURALLY, Einherjar
+  named next; stock/oracle-free/persistent remains NOT ACHIEVED.**
+  Plant parts below Ruby's ~809-byte embed threshold never malloc
+  (measured: zero matching allocations for 620/500B parts); embed-legal
+  plants allocate as content+9 value buffers plus fixed 0x400 parser
+  slices, and plant→attack survives 8/18 at N=892 with the pairing
+  visibly broken (buffer1 popped the plant frontier while buffer2 fell
+  back to a distant boot chunk). Sequential POSTs share one worker
+  thread/arena 3/3 — cross-request tcache plants are real. Closed on
+  paper: full successor next/key coverage plus the buffer2 pop admits
+  no 16-aligned victim class at any N (buffer2 `align16(N+30)`, content
+  `N−22`, growth ≤ +0x52 ⇒ victim ∈ [N−52, N−46], residues 8–14 mod 16)
+  — the natural class's 10-byte fd shortfall is structural. The
+  measured chosen `[prev_size, size]` header forge is the ceiling of
+  this write family; next named: the Einherjar route — content-planted
+  fake chunk + forged prev_size + cleared PREV_INUSE at the covered
+  boundary → backward consolidation onto the fake → overlap allocation
+  over the live successor. No command, no persistence, no grade change.
 - **2026-11-25 (seventh push, direct session) — the exploited process is
   multi-request-usable, and the write primitive is now a CHOSEN chunk
   header; the arena→libc delta hope and the immediate-second-attack

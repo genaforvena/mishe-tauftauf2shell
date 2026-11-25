@@ -1886,6 +1886,54 @@ live-object slack (garbage fd/bk reads like `0x66000010062`, sizes
 corruption. Wire-only chosen-header coverage is therefore pinned to the
 N ∈ [540, 588] band at this geometry.
 
+### Cross-request chunk plants — measured partials plus a STRUCTURAL pairing negative (2026-11-25, direct session, third batch)
+
+The multi-request substrate invites engineered plants: a benign request
+whose parse buffers become the attack's victim population. Three facts
+were measured first:
+
+- **Plant parts below Ruby's embed threshold are a malloc no-op.** 620-
+  and 500-byte parts produced ZERO matching mallocs (the ~809-byte VWA
+  embed rule applies to multipart values too — the Stage A `embedprobe`
+  lesson). Plants must be ≥ 809 bytes, so the smallest plantable class
+  is 0x330.
+- **Embed-legal plants allocate as measured:** 946-byte parts yield
+  `0x3bb` value buffers plus fixed `0x400` parser slices; 809-byte parts
+  yield `0x332` values (Rack 3.2.8: value = content+9, slice = fixed
+  1024). Plant→attack at N=892 survived 8/18 (404 + alive), and the
+  upcase demonstrably tolerates a broken pairing (buffer1 popped the
+  plant frontier at 0x…8675160 while buffer2 fell back to a distant
+  boot chunk at arena+0x3e80).
+- **Sequential POSTs share one worker thread/arena 3/3** (`tq-19`,
+  `tq-1`, `tq-7`: plant, benign and attack allocations all on one tid,
+  one region) — the per-thread-tcache blocker does NOT apply to this
+  request pattern, so cross-request plants via the thread's own tcache
+  are real.
+
+**The pairing triangle is then closed STRUCTURALLY.** For a planted
+victim V to give buffer2 the corrupted-boundary pop AND full successor
+`next`/`key` coverage: buffer2's class is `align16(N+30)`, the content
+span is `N−22`, the 0x53 growth is at most +0x52 (LSB 0x01), so
+`V ∈ [N−52, N−46]` — a 6-byte window spanning residues 8–14 (mod 16),
+which never contains a 16-aligned chunk class. No N works. This also
+explains the natural N=524 class: its 10-byte shortfall of the
+successor's fd is structural, not layout luck. Chosen-header coverage
+of `[prev_size, size]` (measured at N=588) is the ceiling of this write
+family.
+
+**Named next lead (Einherjar family, no next/key needed):** the covered
+boundary carries a chosen `prev_size` and a chosen successor `size`
+whose PREV_INUSE bit can be cleared; the upcase content behind the
+boundary can itself plant a fake chunk header inside the covered span.
+A later free/consolidation reading that forged `prev_size` would
+backward-consolidate onto the content-planted fake chunk and yield an
+overlapping allocation over the live successor region (a reflected
+drain string or a binned chunk) — the overlap write then serves the
+poison stage, with the leak (item 10) supplying the arena base. The
+`PROTECT_PTR` ambiguity drops out of the critical path for this family.
+Boundary unchanged: no command, no persistence, no grade change;
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -2033,3 +2081,23 @@ N ∈ [540, 588] band at this geometry.
     Boundary arms: N=508 (5 survivors, window short of the boundary) and
     N=604 (22/24 survive because the byte lands in live-object slack,
     zero coverage) pin the chosen-header band to N ∈ [540, 588].
+
+13. **Done this direct-session push (2026-11-25, third batch): the
+    planted-victim pairing is STRUCTURALLY closed; the Einherjar family
+    is named next.** Measured: plant parts below the 809-byte embed
+    threshold never malloc (plants must be ≥809B, class ≥0x330);
+    embed-legal plants allocate as `content+9` values plus fixed
+    `0x400` slices; plant→attack survives 8/18 at N=892 with the
+    pairing visibly broken (buffer1 on the plant frontier, buffer2 on a
+    distant boot chunk); sequential POSTs share one worker thread/arena
+    3/3, so cross-request tcache plants are real. Closed on paper: the
+    pairing triangle (buffer2 `align16(N+30)`, content `N−22`, growth
+    ≤ +0x52) admits no 16-aligned victim class at any N — the natural
+    class's 10-byte fd shortfall is structural. The chosen
+    `[prev_size, size]` header forge at the covered boundary is the
+    ceiling of this write family; the Einherjar route (content-planted
+    fake chunk + forged prev_size + cleared PREV_INUSE → backward
+    consolidation onto the fake → overlap allocation over the live
+    successor) is the named next experiment, with the arena-base leak
+    feeding any address stage. Stock/oracle-free/persistent rung 5
+    stays NOT ACHIEVED.
