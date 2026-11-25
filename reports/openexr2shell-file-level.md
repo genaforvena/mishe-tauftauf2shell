@@ -2068,3 +2068,11 @@ absolute pointer is not mapped to the crafted data under ASLR. `ctxt->free_fn`
 sits at `ctxt+96`, before the sink, so the forward copy cannot reach it.
 No ASLR-on chosen pointer is demonstrated by W196 or W197.
 
+W197 clean-archive receipt (05:21Z): `git archive HEAD lab/openexr2shell-real`
+from commit `cc39716b` into `/tmp/w197-clean`, with the gitignored `src/`,
+`build-vuln-plain`, `build-fixed-plain`, `build-vuln-asan`, `build-fixed-asan`
+and the four `bin-*` trees symlinked from the live checkout. From the archive,
+`sh harness/w197-chosen-ip.sh` printed `RESULT PASS` rc 0 and all five
+evidence hashes matched the working tree byte-for-byte. Author replay, not a
+witness verdict; grade and rung-5 status unchanged from the W197 disposition.
+
