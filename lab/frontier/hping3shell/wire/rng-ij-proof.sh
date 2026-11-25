@@ -1,7 +1,8 @@
 #!/bin/sh
 # clang -O0 build: crafted RR reply sets hp_rand.i/hp_rand.j and fills rc4_sbox.
-# Loopback only: 127.0.0.x probes on lo; GDB only reads live state.
-# BIN=... EXPECT=attack|baseline|fixed FILL=.. I0=.. J0=..
+# Loopback-only --rand-dest templates: 127.0.0.x by default; TARGET_TEMPLATE
+# may select other 127/8 octets. GDB only reads live state.
+# BIN=... EXPECT=attack|baseline|fixed FILL=.. I0=.. J0=.. TARGET_TEMPLATE=..
 set -u
 cd "$(dirname "$0")" || exit 1
 mkdir -p evidence
@@ -14,6 +15,11 @@ I0=${I0:-32}
 J0=${J0:-128}
 TARGET_INDEX=${TARGET_INDEX:--1}
 TARGET_BYTE=${TARGET_BYTE:-0}
+TARGET_TEMPLATE=${TARGET_TEMPLATE:-127.0.0.x}
+case "$TARGET_TEMPLATE" in
+    127.*|127) ;;
+    *) echo "TARGET_TEMPLATE must stay inside 127/8 loopback"; exit 2 ;;
+esac
 [ -x "$BIN" ] || { echo "$BIN missing"; exit 2; }
 src="${BIN%/hping3}/display_ipopt.c"
 sha=$(sha256sum "$src" | cut -d' ' -f1)
@@ -31,7 +37,7 @@ pidf="evidence/ij-$tag.pid"
 sudo -n rm -f "$pidf" "$run" "$gd"
 : > "$run"; : > "$gd"
 
-sudo -n sh -c "echo \$\$ > '$PWD/$pidf'; exec '$PWD/$BIN' -D -1 -G --rand-dest -I lo -c 24 -i 1 127.0.0.x" \
+sudo -n sh -c "echo \$\$ > '$PWD/$pidf'; exec '$PWD/$BIN' -D -1 -G --rand-dest -I lo -c 24 -i 1 $TARGET_TEMPLATE" \
     > "$run" 2>&1 &
 hp=$!
 pid=0

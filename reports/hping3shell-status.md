@@ -667,3 +667,47 @@ no pinned source was edited and GDB only read live state.
 - Grade unchanged: an author-side clean-archive receipt for the arbitrary
   chosen RNG byte, still one octet of `127.0.0.x`, no full IP, pointer,
   command or r5; witness verdict on this stage UNKNOWN.
+
+## Three chosen destination octets inside loopback (W16, 2026-11-25 18:5xZ, author-side)
+
+W13's `127.0.x.x` attempt used a random permutation, so octets 2 and 3 were
+not chosen and its negative said nothing about a constant fill. The W14
+mechanism does give multi-octet control: with `S[0..186]=T` and `2T <= 186`,
+every `hp_rand()` call emits `S[2T]=T`. `select_next_random_dest()` consumes
+the first byte of one call per `x` octet, so `--rand-dest 127.x.x.x` emits
+`127.T.T.T`. Every probe remains inside 127/8 on `lo`; the crafted reply is
+still 127.0.0.2 -> 127.0.0.1, and GDB only reads state.
+
+- `wire/rng-ij-proof.sh` gained a `TARGET_TEMPLATE` override that refuses
+  anything outside 127/8. `wire/check_multioctet.py` predicts the **full**
+  destination from live `i`, `j` and all 256 sbox bytes (`seq[0]`, `seq[4]`,
+  `seq[8]` for three wildcards), then asserts the chosen address and an
+  unattacked counterfactual. The older `check_ij.py` hardcodes one wildcard
+  and is inapplicable on this template — its `FAIL 02` is a predictor
+  limitation, not a failed write; it is preserved in the raw stage output.
+- `T=1`, clang `-O0` in-tree attack (`ij-w16-multi-1-*`): all 20 full
+  destinations predicted from GDB state; 15/16 post-attack probes were
+  `127.1.1.1`, counterfactual `127.135.47.231`; sbox filled at states 4..17.
+  `MULTI SUMMARY: 4 checks run, PASS`.
+- `T=0x2a` (`ij-w16-attack2-*`): 10/16 probes were `127.42.42.42`,
+  counterfactual `127.72.87.94`; the fill is less stable because RC4 swaps
+  disturb the constant region faster (`2T=84`). Honest partial result: the
+  mechanism is not a durable multi-packet stream for larger fill values.
+- Controls with the same template: no-inject baseline (23 states, 24
+  destinations) and locally patched clang build (20 states, 21
+  destinations) had no filled state and zero chosen addresses; both
+  `MULTI SUMMARY: 4 checks run, PASS`.
+- One-command `wire/replay-multioctet.sh` rebuilds vulnerable and locally
+  patched trees from the pinned source, rechecks both hashes, and runs all
+  three stages. In-tree at 18:56Z: baseline 4 PASS, attack 4 PASS
+  (14/16 `127.1.1.1`, counterfactual `127.132.99.43`), fixed 4 PASS,
+  `REPLAY_MULTIOCTET_OK: 12 checks, fill=0x01`, rc 0. A first run failed
+  with `label: parameter not set` because the stage function never assigned
+  its positional arguments; fixed before the passing replay.
+- Ceiling: this is three chosen octets of a **127/8 loopback destination**,
+  not a full IP — octet 1 is fixed by the template, `x.x.x.x` would send
+  probes off loopback and is out of scope, and no off-loopback vector was
+  tested. No pointer, command or r5. These stages are author-side; W13's
+  `127.0.x.x` rejection claim is not what explains this result, and the
+  witness verdict on W16 is UNKNOWN.
+
