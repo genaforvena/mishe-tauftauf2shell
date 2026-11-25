@@ -58,4 +58,14 @@ link_groom_driver() {
 }
 link_groom_driver status-groom-plain-vuln gpgme-plain-build
 link_groom_driver status-groom-plain-fixed gpgme-plain-fixed-build
+
+link_internal_driver() {
+  out=$1; build=$2
+  clang -g -O0 -I "$build/src" -I "$PREFIX/include" -o "$out" \
+    status_internal_groom.c \
+    "$build/src/.libs/libgpgme.a" "$PREFIX/lib/libassuan.a" \
+    "$PREFIX/lib/libgpg-error.a" -lpthread -ldl
+}
+link_internal_driver status-internal-plain-vuln gpgme-plain-build
+link_internal_driver status-internal-plain-fixed gpgme-plain-fixed-build
 echo "BUILD PLAIN OK"

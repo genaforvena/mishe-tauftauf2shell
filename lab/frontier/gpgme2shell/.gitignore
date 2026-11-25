@@ -53,3 +53,8 @@ realbuild/status-groom-plain-vuln
 realbuild/status-groom-plain-fixed
 realbuild/evidence/groom-*.out
 realbuild/evidence/groom-*.rc
+realbuild/status-internal-plain-vuln
+realbuild/status-internal-plain-fixed
+realbuild/evidence/internal-*.out
+realbuild/evidence/internal-*.rc
+realbuild/evidence/internal-*.cmd

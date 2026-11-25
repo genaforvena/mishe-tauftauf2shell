@@ -316,3 +316,36 @@ run-plain.sh` `PASS=13 FAIL=0` and `sh ../run.sh` `PASS=19 FAIL=0`, rc 0
 throughout. The replayed vulnerable groomed case again prints `aliased=1`
 and `groom_buf byte[1000]=0x41 after byte[1000]=0x41`; `groom-vuln-0.rc`
 is 134. Author-side only; scope note #4101 sent to witness, no verdict.
+
+## W9 — attacker-sized GPGME-internal groom is not silent (2026-11-25 04:3xZ)
+
+W8's silent alias needed a lab callback to allocate `malloc(1024)` between
+the realloc and the early return. W9 asks whether the victim library itself
+can do that grooming from attacker-controlled status bytes.
+`realbuild/status_internal_groom.c` sets a passphrase callback so the first
+operation (`gpgme_op_export`) arms `gpg_set_command_handler()` and therefore
+`gpg->cmd.used`. `fake-internal-gpg.py` emits a `[GNUPG:] GET_LINE` whose
+1020-byte keyword puts `0x48` at offset 1000 and no LF in the first 1024
+bytes, forcing `realloc()` at `engine-gpg.c:1494`; the GET_LINE branch then
+calls GPGME's own `strdup(rest)` at `:1567` with that attacker-sized,
+attacker-filled argument. A 600-byte `[GNUPG:] GOOD` line then returns
+`GPG_ERR_GENERAL` from the monitor callback, skipping the writeback at
+`:1610`.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-internal.sh` gives
+`PASS=18 FAIL=0`, rc 0; raw output in `evidence/internal-*.out` / `.rc`
+(gitignored). Under gdb at the strdup site,
+`gpg->status.buffer == gpg->cmd.keyword` (`equal=1`): the library's own
+attacker-sized allocation reclaimed the stale status chunk. The vulnerable
+build nevertheless exits 134 with `free(): double free detected in tcache
+2` at the next operation's reset — the reclaimed chunk is also owned by
+`gpg->cmd.keyword` and is freed twice in `gpg_release()`. Fix-patched 2.2.0,
+the short-line vulnerable control and the short-line patched control all exit
+0, start op2 and print `release done`.
+
+This closes the lab-groom-free limb as a negative result: an internal,
+attacker-sized groom is a crash, not W8's silent alias. It adds no
+pointer/IP/command control, no chosen-address write, no side effect, no
+stock-layout or live-target claim and no r5. Grade unchanged. The tape was
+checked at 04:33Z: no verdict has landed on #3808/#3911/#3919/#3945/#4028/
+#4053/#4101; all real-path results remain author-side.

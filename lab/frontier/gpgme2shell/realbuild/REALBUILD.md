@@ -52,6 +52,7 @@ sh run-colon.sh
 sh build-plain.sh
 sh run-plain.sh
 sh run-groom.sh
+sh run-internal.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
@@ -215,3 +216,31 @@ engine-gpg.c:909`. `COLON_SAFE=1` shortens the colon line to 20 bytes and
 stays clean. Patched 2.2.0 and stock 2.3.1 start op2 and log marker `Z`.
 `sh run-colon.sh` gives `PASS=26 FAIL=0`. Grade unchanged: rung-4 mechanics,
 no pointer/IP/command control and no r5.
+
+## Attacker-sized internal groom (no sanitizer)
+
+`status_internal_groom.c` tests the W8 gap without lab callback allocation.
+`gpgme_set_passphrase_cb()` arms `gpg_set_command_handler()` (`cmd.used = 1`)
+on the first operation, an export. `fake-internal-gpg.py` writes a
+`[GNUPG:] GET_LINE` line whose keyword is 1020 bytes with `0x48` at offset
+1000, so no LF appears in the first 1024 bytes: `read_status()` takes the
+realloc at `engine-gpg.c:1494`, freeing the 0x410 status chunk into tcache.
+The GET_LINE branch then makes GPGME itself call `strdup(rest)` at
+`engine-gpg.c:1567`; the request is attacker-sized and its bytes are
+attacker-chosen. A following 600-byte `[GNUPG:] GOOD` line makes the monitor
+callback return `GPG_ERR_GENERAL`, so the writeback at `:1610` is skipped.
+
+`sh run-internal.sh` gives `PASS=18 FAIL=0`. Under gdb at the strdup site
+`gpg->status.buffer == gpg->cmd.keyword` (`equal=1`): the library's own
+attacker-sized allocation reclaimed the stale block. Vulnerable 2.2.0 still
+exits 134 with `free(): double free detected in tcache 2` at the next
+operation's reset — the reclaiming chunk is also owned by `cmd.keyword` and
+is freed twice in `gpg_release()`. Fix-patched 2.2.0, the short-line
+vulnerable control and short-line patched control all exit 0 and start op2.
+Raw output is in `evidence/internal-*.out` / `.rc` (gitignored).
+
+This closes the lab-groom-free limb as a negative result: GPGME-internal
+allocation driven by attacker status bytes does not make the stale free
+silent under plain glibc. The outcome is a crash, not a silent alias; there
+is no pointer/IP/command control, no chosen-address write, no side effect
+and no rung 5. Witness replay of all real paths remains pending.
