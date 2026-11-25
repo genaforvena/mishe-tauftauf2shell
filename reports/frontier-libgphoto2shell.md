@@ -608,3 +608,15 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `evidence/replay-vusb-heap-header-repair.patch`,
   `evidence/replay-file-consumer-probe.c`,
   `evidence/w194-file-consumer.out`.
+
+  Clean-archive counterexample (same wake): rebuilding the W193 base from
+  commit `ddb8785f` in a fresh `/tmp` tree put `priv` at `...?620`, so W193's
+  fixed 16-candidate sweep (all ending `0x430`) had no hit and its replay
+  ended 14 PASS / 2 FAIL; only the gdb-derived `0x7450` matched. Running W194
+  in that clean tree with the derived candidate and the same three repair
+  constants aborted at `corrupted size vs. prev_size` in both attack and
+  no-repair cases (5 PASS / 8 FAIL), with no consumer write. The three words
+  are therefore tree-specific, not a device-recoverable value: the consumer
+  lane remains closed without host-derived allocator metadata. Raw:
+  `evidence/w193-clean-base-sweep-negative.out`,
+  `evidence/w194-clean-archive-negative.out`.

@@ -1,0 +1,45 @@
+== apply lab-only W194 header repair to W193 base ==
+checking file libgphoto2_port/vusb/vusb.c
+patching file libgphoto2_port/vusb/vusb.c
+libtool: warning: relinking 'serial.la'
+libtool: warning: relinking 'usb1.la'
+libtool: warning: relinking 'usbdiskdirect.la'
+libtool: warning: relinking 'usbscsi.la'
+libtool: warning: relinking 'disk.la'
+libtool: warning: relinking 'vusb.la'
+libtool: warning: relinking 'ptpip.la'
+== attack: ASLR off, device-chosen partial priv, header repair on ==
+=== ATTACK (rc 134) ===
+VUSB_PARTIAL=7450 n=15922
+AFTER_INIT rc=0
+corrupted size vs. prev_size
+Aborted (core dumped)
+== control: same corruption with no header repair ==
+=== NO_REPAIR (rc 134) ===
+VUSB_PARTIAL=7450 n=15922
+AFTER_INIT rc=0
+corrupted size vs. prev_size
+Aborted (core dumped)
+== control: wrong 4-bit candidate with ASLR off, repair on ==
+=== WRONG (rc 134) ===
+VUSB_PARTIAL=5430 n=15922
+AFTER_INIT rc=0
+corrupted size vs. prev_size
+Aborted (core dumped)
+== control: safe count 100 ==
+=== SAFE (rc 0) ===
+AFTER_INIT rc=0
+PASS attack init rc=0
+FAIL attack real file listing
+FAIL attack real gp_camera_file_get
+FAIL attack real API data
+FAIL attack W193 marker through real API
+FAIL attack real gp_file_save
+FAIL attack saved host file starts with device bytes
+FAIL no-repair malloc abort
+PASS no-repair no consumer side effect
+FAIL wrong-candidate control aborts without consumer write
+PASS wrong-candidate control no W193 marker
+PASS safe count init rc=0
+PASS safe count no W193 marker
+RESULT: 5 PASS / 8 FAIL
