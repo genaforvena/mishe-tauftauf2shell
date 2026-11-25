@@ -55,6 +55,12 @@ Receipts
   clean archive, consolidated:
     PASS bootstrap / w13-w14-w15 / wire / w21 / w23
     REPLAY_W13_W14_W15_OK, WIRE_OOB_OK, W21_OK, W23_NEGATIVE_OK
+
+  fresh git archive of committed HEAD ba544c32 (one command, includes build):
+    git archive HEAD lab/frontier/libraw2shell | tar x -C /tmp/lr-w26-final
+    cd /tmp/lr-w26-final/lab/frontier/libraw2shell && sh replay-frontier.sh
+    PASS bootstrap / w13-w14-w15 / wire / w21 / w23
+    REPLAY_W13_W14_W15_OK, WIRE_OOB_OK, W21_OK, W23_NEGATIVE_OK
     REPLAY_FRONTIER_OK
 
 No new rung, no grade change: rungs 1-3 witness-established, rung 4
