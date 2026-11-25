@@ -1,5 +1,24 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 18:38Z — W7 predecessor-item grooming negative (refined stale word)
+
+- Refinement, not a new rung: W4/W5's byte-identical stale OOB `Value.V` word
+  is variant-scoped. `lab/frontier/vtkdicom2shell/tools/
+  make-preceding-item-variant.py` adds N well-formed sibling items (PLEN
+  0x4a-filled OB elements each) before the crafted item; `tools/oob-word.gdb`
+  reads slot 5 at `Item.cxx:195` (`evidence/
+  predecessor-item-groom-negative.txt`).
+- Measured: PLEN 1-4 keeps `e+8(V)=1e00000500000001`; PLEN>=5 (N>=1) gives
+  `0d00000300000001`, saturating at N=8/PLEN=16. A preceding top-level SQ
+  attribute leaves the first value. Both words are stale `Value` headers
+  (`low32=00000001`, small bytes in `high32`), never a mapped pointer; every
+  variant still SIGSEGVs in `ReferenceCount::operator--`. No file byte at the
+  dereferenced address; pointer control stays NOT OBSERVED (UNKNOWN), not
+  proven impossible.
+- Grade unchanged: rung 3 from crafted FILE bytes in the real reader, rung 4
+  chosen tag bytes at the chosen OOB slot with a plain crash. No pointer/IP
+  control, no command, no wire path, no witness verdict.
+
 ## 2026-11-25 18:03Z — W6 advisory version gap closed at exact 9.5.2 source
 
 - VTK v9.5.2's `Remote/vtkDICOM.remote.cmake` pins its bundled vtk-dicom at

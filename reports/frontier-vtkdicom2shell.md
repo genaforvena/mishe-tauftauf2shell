@@ -272,3 +272,26 @@ standalone 0.8.17-53 version gap remains UNKNOWN.
   no pointer/IP/control-flow, no command, no wire path, no witness verdict.
   Vendor June-patch bytes remain UNKNOWN; VTK 9.6.0/9.6.1 still pin a
   vulnerable `Item.cxx` whose sha256 equals the vulnerable parent.
+
+## W7 — predecessor-item grooming: two-state stale header, negative (2026-11-25 18:38Z)
+
+W4/W5 called the stale OOB `Value.V` word byte-identical across their
+variants. That invariance is variant-scoped, not global: preceding sibling
+items inside the same crafted SQ change it in a bounded, two-state way.
+`tools/make-preceding-item-variant.py` adds N well-formed items (PLEN
+0x4a-filled OB elements each) before the crafted item; `tools/oob-word.gdb`
+prints slot 5 at `Item.cxx:195` (`evidence/predecessor-item-groom-negative.txt`).
+
+- PLEN 1-4 / N=0: `e+8(V)=1e00000500000001`, as in W4/W5.
+- PLEN >=5 (N>=1): `e+8(V)=0d00000300000001`; N=8/PLEN=16 saturates there.
+  A preceding top-level SQ attribute (1/2/4/8/16 elements) leaves the word
+  unchanged at `1e000005...`.
+- Both words decode as a stale `vtkDICOMValue::Value` header (`low32=00000001`
+  reference count, small header bytes in `high32`), not a mapped address.
+  Every variant still SIGSEGVs in `vtkDICOMReferenceCount::operator--`; no
+  file byte appears at the dereferenced address and no pointer-shaped word
+  was observed. File control of the stale pointer remains NOT OBSERVED
+  (UNKNOWN), not proven impossible.
+- Grade unchanged: rung 3 from crafted FILE bytes in the real reader, rung 4
+  chosen tag bytes at the chosen OOB slot with a plain crash. No pointer/IP
+  control, no command, no wire path, no witness verdict.

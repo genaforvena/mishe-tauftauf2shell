@@ -1,0 +1,52 @@
+W7 2026-11-25 — predecessor-item grooming: bounded negative, one refinement
+
+Question (open since W4/W5): is the stale `Value.V` at the OOB slot (the word
+dereferenced by `vtkDICOMValue::operator=` at Value.h:426, causing the plain
+build SIGSEGV) attacker-controllable? W4/W5 varied DICOM value lengths inside
+and before the crafted item and always observed `0x1e00000500000001`; they
+recorded "byte-identical" and left deeper grooming UNKNOWN. This wake varies
+allocation churn from *earlier sibling items in the same sequence*, which W4
+and W5 never did.
+
+Build: `build-vuln/bin/dicomdump` (real vulnerable vtk-dicom, lab-local VTK
+9.1). Env: `LD_LIBRARY_PATH=$PWD/deps/root/usr/lib/x86_64-linux-gnu`.
+Builder: `python3 tools/make-preceding-item-variant.py FILE N PLEN [VR]`
+(N preceding well-formed items; PLEN 8-byte 0x4a-filled OB elements each;
+crafted item byte-identical to make-undef-ob-dos.py with final tag 4841434b).
+Probe: `gdb -q -batch -x tools/oob-word.gdb -ex 'run FILE' -ex 'bt 2' -ex quit
+./build-vuln/bin/dicomdump`. The gdb script prints the OOB element (slot 5 of
+a 4-slot store) at `vtkDICOMItem.cxx:195` before the tag write.
+
+Observed at the final crafted Set (`tag=4841,434b`, `n=5`, `slot=5`):
+
+  N=0  PLEN=4    e+8(V)=1e00000500000001   SIGSEGV, ReferenceCount::operator--
+  N=1  PLEN=4    e+8(V)=1e00000500000001   SIGSEGV
+  N=1  PLEN=5    e+8(V)=0d00000300000001   SIGSEGV
+  N=1  PLEN=16   e+8(V)=0d00000300000001   SIGSEGV
+  N=8  PLEN=16   e+8(V)=0d00000300000001   SIGSEGV
+
+Sweep at N=1 (PLEN 1..64): PLEN 1-4 -> `1e00000500000001`, PLEN 5-64 ->
+`0d00000300000001`. Sweep at PLEN=16 (N 0..16): N=0 -> `1e000005...`,
+N>=1 -> `0d000003...`. So the stale word is a TWO-STATE allocator artifact
+selected by the preceding sibling item's element count (5 is the first count
+that forces a larger element store), not a globally invariant constant. The
+W4/W5 invariance claim holds only for the variants they tested; refine it.
+
+Both states decode as `low32=00000001` (ReferenceCount), `high32` small
+header bytes (`1e000005` / `0d000003`) — a stale `vtkDICOMValue::Value`
+header, not a mapped address. Every variant still SIGSEGVs in
+`vtkDICOMReferenceCount::operator--` on the stale word. No variant produced a
+pointer-shaped word, no file byte was found at the dereferenced address, and
+the final chosen tag write still lands at slot 5.
+
+Bounded second negative: a well-formed top-level SQ attribute *before* the
+crafted SQ (1 attribute, 1/2/4/8/16 elements in its item, via the same builder
+shape) left `e+8(V)=1e00000500000001` and the same SIGSEGV in all five runs.
+Allocation churn outside the crafted sequence does not prime the OOB word.
+
+Disposition: keep the refinement (two-state stale header selected by sibling
+item size), preserve the negative. File control of a dereferenceable pointer
+at the OOB slot remains NOT OBSERVED (UNKNOWN), not proven impossible. Grade
+unchanged: rung 3 from crafted FILE bytes in the real reader, rung 4 chosen
+tag bytes at the chosen OOB slot with a plain crash; no pointer/IP control,
+no command, no wire path, no witness verdict.
