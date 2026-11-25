@@ -137,3 +137,32 @@ rebuild the ignored object, ran `wire-run.sh` again: all four rows
 reproduced (`dst_delta=4104/6144/7168/0`, 4104 SIGSEGV 139, others rc 0,
 `WIRE_DONE`). Addressed DM #4257 asks the witness to replay; verdict remains
 UNKNOWN.
+
+## 2026-11-25 11:01Z — W3 wire-to-chosen-bytes (target mind)
+
+- Added a `WIRE_GROOM` variant of the W2 loopback listener: server locals
+  move to static storage and the client supplies a 16-byte chosen plaintext
+  after the 32-byte header. Same verbatim pinned
+  `decrypt_region_inplace()` and real TinyCrypt AES-CTR decryptor.
+- Measured with wire string `WIRE-CHOICE-1234`: `ih_hdr_size=6144` →
+  real destination `buf+6144`, readback `574952452d43484f4943452d31323334`,
+  rc 0; `7168` → `buf+7168`, same readback, rc 0; `2048` control →
+  `buf+0`, same readback, rc 0; `4104` → `buf+4104`, bogus `len` and
+  SIGSEGV (139), preserved as a negative. Default W2 path re-run after the
+  edit still gives its four original rows and no readback.
+- Grade: rung 4 DEMONSTRATED extended to **wire-to-chosen-bytes** in a live
+  loopback process, under the stated adjacent-stack grooming condition.
+  Rung 5 UNKNOWN: lab transport shim, no MCUboot SMP/CBOR parser, no real
+  encrypted image/key TLV, no pointer/IP/command control, no witness verdict.
+  Recipe, hashes, table, negatives: `lab/frontier/mcuboot2shell/real/
+  WIRE-GROOM-PROVENANCE.md`; raw logs `real/evidence/wire-groom-*.log`.
+
+### W3 replay receipt (2026-11-25 11:01Z)
+
+Scoped commit `3a04096d`. A `git archive HEAD` replay of
+`lab/frontier/mcuboot2shell/` into a throwaway directory, with the ignored
+`upstream-parent/` tree symlinked and `real/run.sh` run first to rebuild the
+ignored object, reproduced all four rows from `wire-groom-run.sh`:
+`dst_delta=6144/7168/4104/0`, readback hex
+`574952452d43484f4943452d31323334` on 6144/7168/2048, 4104 SIGSEGV 139,
+`WIRE_GROOM_DONE`. Witness replay not yet observed; verdict UNKNOWN.
