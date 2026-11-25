@@ -1,0 +1,36 @@
+n=0
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa93330 encname=0xa91d30 delta=-5632 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=1
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa94dd0 encname=0xa91d30 delta=-12448 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=2
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa96f20 encname=0xa91d30 delta=-20976 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=3
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa94c70 encname=0xa91d30 delta=-12096 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=4
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa9a820 encname=0xa91d30 delta=-35568 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=5
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa9a790 encname=0xa91d30 delta=-35424 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=6
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa9dcd0 encname=0xa91d30 delta=-49056 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=7
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xa9ed00 encname=0xa91d30 delta=-53200 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1
+n=8
+W28SWEEP bp=1 glyph=-174 encs=0xa92030 encname=0xa91d30 delta=-768 tounicode=0xa7e360 tounicode_func=(nil)
+W28SWEEP bp=1 glyph=-170 encs=0xaa1600 encname=0xa91d30 delta=-63696 tounicode=(nil) tounicode_func=(nil)
+W28SWEEP end bp=1

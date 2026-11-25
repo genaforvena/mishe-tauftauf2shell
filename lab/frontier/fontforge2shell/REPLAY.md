@@ -485,3 +485,26 @@ Normalized hashes (`^W27` lines only, excluding volatile PID lines):
 (non-PIE callpath). Method and limits: `CALLEDPATH.md`. Author-side negative,
 not a witness verdict; no branch, marker, command or r5. No new replay
 demand; #4165 stays queued.
+
+## W28 — two-import function-pointer lane (2026-11-25 21:3xZ)
+
+With `build-plain` and `build-nopie` present:
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w28.sh
+```
+
+Two crafted PCFs make two negative-glyph writes in one non-PIE process: the
+first zeroes the live `Encoding.tounicode` descriptor at `encs-696` (plain
+rc 0, so the process survives), the second tries to set `tounicode_func` at
+`encs-680` to the chosen non-PIE `putchar@plt` address `0x406ec0`. Gdb shows
+`delta=-768` at the first store but `delta=-5632` at the second: each import
+reallocates `encs` far from the cached `Encoding`, so the function-pointer
+slot is never written and `encoding.c:2593` is never reached. A 0..8
+benign-import sweep keeps `encname` fixed and moves the second `encs`
+5632..63696 bytes away; `New()` between imports gives `+67120`. Oracle:
+11/11 checks, rc 0, final line `REPLAY_W28_OK: 11 checks, 0 failed`.
+Method, hashes and limits: `FUNCPATH.md`. Author-side negative, not a
+witness verdict; no branch, marker, command, r5 or grade change. No new
+replay demand; #4165 stays queued.
+

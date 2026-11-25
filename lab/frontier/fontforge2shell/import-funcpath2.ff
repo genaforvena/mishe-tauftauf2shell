@@ -1,0 +1,4 @@
+New()
+Import("/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/funczero.pcf")
+New()
+Import("/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/funcptr.pcf")

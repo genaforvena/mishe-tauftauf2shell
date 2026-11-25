@@ -378,6 +378,21 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   passes 23/23 with rc 0. No branch at a chosen address, marker, command
   or r5; GUI, other loaders and second-stage overflows stay UNKNOWN, and
   no witness verdict or replay demand changes #4165.
+
+- W28 (`FUNCPATH.md`, `replay-w28.sh`, author-side negative, no grade change):
+  two truncated PCFs in one non-PIE import script zero the live
+  `Encoding.tounicode` descriptor at `encs-696` (plain rc 0, process survives)
+  and then try to install the chosen `0x406ec0` (`putchar@plt`) into
+  `tounicode_func` at `encs-680`. Gdb measured `delta=-768` at the first
+  store, but `delta=-5632` at the second: each import reallocates `encs` far
+  from the cached `Encoding`, so the function-pointer slot is never written
+  and `encoding.c:2593` is never reached. A 0..8 benign-import sweep keeps
+  `encname` fixed and puts the second `encs` 5632..63696 bytes away; `New()`
+  between imports gives `+67120`. `replay-w28.sh` passes 11/11, rc 0. No
+  indirect call, branch at a chosen address, marker, command, r5 or witness
+  verdict; GUI, another loader and a second-stage overflow stay UNKNOWN,
+  and #4165 remains the single queued offer.
+
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

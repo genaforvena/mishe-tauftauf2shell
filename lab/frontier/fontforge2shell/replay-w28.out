@@ -1,0 +1,17 @@
+PASS plain two-import run survives first descriptor zeroing
+PASS first store sees live iconv descriptor
+PASS first store sees NULL tounicode_func
+PASS second import zeroes tounicode
+PASS no indirect call through tounicode_func
+PASS second encs is farther than 1 KiB from Encoding
+PASS nine sweep cases recorded
+PASS every sweep case has both stores
+PASS every second store is out of the 1 KiB reach
+PASS tounicode_func has a guarded call site
+PASS no assignment site for tounicode_func
+=== W28 normalized hashes ===
+funczero.pcf  9e2735c0a773506cb14237567d5df4a9ea21c86be64ec9a5ffdac27923434fe1
+funcptr.pcf  b0ee11863282f72f71510a4973606ddc2a378e20077421c684ce25a2eb1c3657
+gdb-w28-funcpath-nopie.out  47f5fe7fec750cdf4d3a1aad4532eb6f368e16cc2e822f68160879e850bc8776
+gdb-w28-sweep.out  04183cf9250dd1cfcd30fb5eba07d6799d5927951b252260e7586e422f97a4b4
+REPLAY_W28_OK: 11 checks, 0 failed
