@@ -160,3 +160,30 @@ warning present, all 11 normalized hashes reproduced exactly; CLOSED
 ESTABLISHED at the labeled reproduction-condition scope. W10's live-gdb
 chosen-value readback was not part of that replay. No follow-on dereference
 established.
+
+## One-command clean-archive replay (2026-11-25 23:30–23:35Z, author)
+
+W10's live-gdb chosen-value readback and W11's auth condition now have one
+driver. From a clean `git archive HEAD` containing `lab/frontier/pgpool2shell`
+and `lab/pgpool2shell`, with `PGPOOL_LAB` naming the provisioned lab that
+holds the two gitignored pinned tarballs:
+
+    PGPOOL_LAB=/abs/path/to/lab/frontier/pgpool2shell \
+      bash lab/pgpool2shell/wdnodes/wire/run-witness.sh
+
+The wrapper rechecks `src/SHA256SUMS` (2/2 OK), rebuilds plain 4.7.2 and
+4.7.3 from the verified tarballs in a fresh TMPDIR, then runs W10's three
+wire cases, both live-gdb readbacks with the published CHOSEN/HOST pairs,
+and W11's auth probe. It diffs regenerated `hash-evidence.sh` output against
+the committed 11-entry `EVIDENCE_HASHES.txt`. Each sub-runner checks ports
+19003–19006 and kills only its own children.
+
+Author run at commit `d379108d` from `git archive HEAD` extracted to
+`/tmp/w9-witness-clean2`: `WITNESS REPLAY PASS`, rc 0, all 11 normalized
+hashes identical, including both gdb readbacks. An earlier run at
+`efa6f075` failed 10/11 because the wrapper named a nonexistent
+`gdb-w9-post-alt.cmd`; the committed alt trace used `gdb-w9-post.cmd`,
+fixed at `d379108d`. This is an author clean-archive receipt, NOT an
+independent witness verdict. Grade unchanged: rung 4 wire-scope chosen
+bytes, no rung 3 on this branch, no crash, no chosen address, no command,
+no rung 5.
