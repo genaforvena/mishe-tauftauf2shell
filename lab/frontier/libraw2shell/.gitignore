@@ -21,3 +21,8 @@
 !/w10/target2222-gdb-*.txt
 !/w10/dead-asan-*.out
 !/w10/target2222-asan-*.out
+/wire/wire-decoder
+/wire/wire-*.out
+/wire/wire-out/
+/wire/wire-run*/
+/replay-out/
