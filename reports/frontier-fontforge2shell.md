@@ -393,6 +393,20 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   verdict; GUI, another loader and a second-stage overflow stay UNKNOWN,
   and #4165 remains the single queued offer.
 
+- W29 (`TWOSTORE.md`, `replay-w29.sh`, author-side negative, no grade change):
+  `pcfSeekToType()` takes only the first `PCF_BDF_ENCODINGS` TOC entry, so a
+  duplicate table cannot provide a second offset. One trailing index byte
+  with `tot=2` does perform two negative stores in one `encs` allocation:
+  gdb in both builds shows `glyph=-2` at `i=0` (`encs[-8]`, value 0) then
+  `glyph=-1` at `i=1` (`encs[-4]`, value 1), with the chunk-size high dword
+  `0x1` after the loop and `SIGABRT` (plain non-PIE rc 134). Sticky EOF forces
+  the second offset and its value is V0+1 (divisor > 1) or V0+256 (divisor 1),
+  so there is no second independently chosen destination and no survivable
+  multi-write primitive. This refines W27's "one chosen offset per import".
+  `replay-w29.sh` passes 16/16, rc 0. No branch at a chosen address, marker,
+  command, r5 or witness verdict; GUI, other loaders and second-stage
+  overflows stay UNKNOWN, and #4165 remains the single queued offer.
+
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

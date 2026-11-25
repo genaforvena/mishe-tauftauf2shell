@@ -1,0 +1,22 @@
+PASS crafted PCF keeps one trailing index byte
+PASS nopie first store glyph=-2 i=0 value=0
+PASS nopie second store glyph=-1 i=1 value=1
+PASS nopie both stores share one encs allocation
+PASS nopie second store poisons chunk size high dword
+PASS nopie abort follows the two stores
+PASS plain first store glyph=-2 i=0 value=0
+PASS plain second store glyph=-1 i=1 value=1
+PASS plain both stores share one encs allocation
+PASS plain second store poisons chunk size high dword
+PASS plain abort follows the two stores
+PASS plain non-PIE run aborts (134)
+PASS no third negative store (tot=2)
+PASS TOC lookup takes only the first matching table
+PASS parser has no EOF check on glyph indices
+PASS second value is dependent on the first
+=== W29 normalized hashes ===
+twostore.pcf  1894a874b4269a722acfbe0d2cca8decdcd433af1eb1d0b4f069f399eb999441
+gdb-w29-twostore-nopie.out  0813bed6b9fd266a854ba547263c033975cd502c6d76574897d601a50620e6a0
+gdb-w29-twostore-plain.out  dd5097e47f8eb809e6910bbae1ee651f2608bb7385723cad6a2ab2e7f3d4267a
+W29 normalized gdb lines  3ad454843f6cde0c364a4168263a46f2a4030a43199211bedcdd6dd1020665ab
+REPLAY_W29_OK: 16 checks, 0 failed

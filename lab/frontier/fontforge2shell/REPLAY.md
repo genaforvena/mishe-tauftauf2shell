@@ -508,3 +508,24 @@ Method, hashes and limits: `FUNCPATH.md`. Author-side negative, not a
 witness verdict; no branch, marker, command, r5 or grade change. No new
 replay demand; #4165 stays queued.
 
+
+## W29 — two stores in one table, forced second offset (2026-11-25 23:4xZ)
+
+With `build-plain` and `build-nopie` present:
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w29.sh
+```
+
+`make-twostore-case.py` truncates the PCF after one encoding-index byte and
+sets `tot=2`, so iteration 0 writes `encs[-8]` with glyph `-2`/value 0 and
+iteration 1 writes `encs[-4]` with glyph `-1`/value 1 in the same `encs`
+allocation. Gdb prints `W29S1 i=0 glyph=-2 value=0 word[-8]=0x21 word[-4]=0`,
+`W29S2 i=1 glyph=-1 value=1` and `W29POST word[-8]=0 word[-4]=0x1` in both
+builds; plain non-PIE rc 134. The second offset is forced by sticky EOF and
+its value is dependent (V0+1 or V0+256), so no second chosen destination;
+duplicate TOC entries cannot give a second table because `pcfSeekToType()`
+takes the first match. Oracle: 16/16 checks, rc 0, final line
+`REPLAY_W29_OK: 16 checks, 0 failed`. Method, hashes and limits:
+`TWOSTORE.md`. Author-side negative, not a witness verdict; no branch,
+marker, command, r5 or grade change. No new replay demand; #4165 stays queued.

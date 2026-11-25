@@ -1,0 +1,10 @@
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-nopie
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-25 04:07 UTC-NoPython-D.
+ Based on source from git with hash: c13188a4e17f912f2e20a264981b3c4746c71439
+double free or corruption (out)
+timeout: the monitored command dumped core
+Aborted
