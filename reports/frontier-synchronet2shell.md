@@ -615,6 +615,10 @@ both pointers zero. The first run was 9 PASS / 1 FAIL from a harness return
 code, preserved in `evidence/negatives.txt`, not a property of the copy.
 Raw `evidence/evidence.log` sha256
 `d5a926a964a2bc492986eda9b497e603a53ed25c62e603a1700bdbf1a7a3a6df`.
+A clean `git archive 28c3fe15` replay reproduced 10 PASS / 0 FAIL; after
+normalizing only volatile tokens (preserving the chosen pointer constants)
+both logs hash to
+`a4612f97bddb1dc25037d53203ce491be2800693ef4271beef1e82a435ffcb72`.
 
 This is chosen pointer control at the source-bound harness scope for a
 second shipped release. Source consumers of the overwritten list exist in
@@ -625,7 +629,7 @@ verdict or rung change was measured; the advisory remains availability-only.
 
 ## Ceiling and cheapest next experiment
 
-Not measured: pointer/IP control, command execution, rung 5, independent
+Not measured: control-flow pointer/IP, command execution, rung 5, independent
 replay of W5/W6/W8/W9/W15/W16. No-credential TERM reach at a config without
 `SSH_ANYAUTH` is now a measured negative for this pinned build (W7 stock
 client and W9 custom pre-auth client), not an open gap inside this build;
