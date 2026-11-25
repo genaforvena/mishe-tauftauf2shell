@@ -24,6 +24,11 @@ b1408e513f39e80c969513982a04522c6c182ad5d2ae37041ff1bc92ffeecd8d  pins/m_kill.fi
 
 Function ranges: `ms_kill()` vulnerable `:170-280`, fixed `:170-284`;
 store vulnerable `:277`, fixed `:281`. Fix hunk at fixed `:200-203`.
+Clean `git archive HEAD lab/frontier/solanum2shell` replay at 12:42Z in
+`/tmp/solanum230-CrUl7J`: 18 PASS / 0 FAIL, identical pin hashes and ASan
+result. Staging commits: `805732b5` then `5f191420`, the latter dropping an
+accidentally indexed gitlink for the provisioned `upstream/` clone (source
+clone is read-only provisioning, never part of the checked tree).
 
 ## Harness and exact evidence
 

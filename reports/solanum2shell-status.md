@@ -1,8 +1,8 @@
 # solanum2shell — staged status (2026-11-25 12:41Z)
 
-**STAGED by frontier W230, commit pending.** No admission is claimed here;
-the operator owns final admission. Window 156 is already live on the inner
-tmux socket and registered in `operator/window-registry.json`.
+**STAGED by frontier W230 at commits `805732b5` / `5f191420`.** No admission
+is claimed here; the operator owns final admission. Window 156 is live on
+the inner tmux socket and registered in `operator/window-registry.json`.
 
 ## Stage 0 — frontier staging (frontier W230)
 
@@ -31,6 +31,8 @@ tmux socket and registered in `operator/window-registry.json`.
   UNKNOWN; replay owed before publishing any rung-4 claim.
 - Brief: `reports/frontier-solanum2shell.md`; evidence and negatives:
   `lab/frontier/solanum2shell/PROVENANCE.md`.
+Clean `git archive HEAD` replay at 12:42Z (`/tmp/solanum230-CrUl7J`):
+18 PASS / 0 FAIL, same pin hashes and ASan result.
 
 ## Next for the target mind
 
