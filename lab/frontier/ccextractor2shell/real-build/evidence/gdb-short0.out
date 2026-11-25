@@ -1,0 +1,44 @@
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /tmp/ccx2shell-plain/ccextractor.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+Breakpoint 1 at 0x253723: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c, line 1220.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: lab/frontier/ccextractor2shell/real-build/inputs/short0.gxf
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: No]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+
+-----------------------------------------------------------------
+[KOpening file: lab/frontier/ccextractor2shell/real-build/inputs/short0.gxf
+File seems to be a GXF[KAnalyzing data in general mode
+
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+1220			len -= mpeg_pic_size;
+SHORT after_parse data_len=2101248 buffer=0x5555564209b0 boundary=0x555556620a28
+0x5555564209b0:	0xa0	0x47	0x3e	0x56	0x55	0x55	0x00	0x00
+Breakpoint 2 at 0x555555762ff7: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c, line 1041.
+
+Breakpoint 2, process_data (enc_ctx=0x555556409810, dec_ctx=0x5555563dc7a0, data_node=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1041
+1041				memmove(data_node->buffer, data_node->buffer + got, (size_t)(data_node->len - got));
+SHORT memmove got=2101245 data_len=2101248 move_len=3 src=0x5555566219ad dst=0x5555564209b0
+#0  process_data (enc_ctx=0x555556409810, dec_ctx=0x5555563dc7a0, data_node=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1041
+#1  0x0000555555763d76 in process_non_multiprogram_general_loop (ctx=0x5555563da2b0, datalist=0x7fffffffdff8, data_node=0x7fffffffe000, dec_ctx=0x7fffffffdff0, enc_ctx=0x7fffffffe010, min_pts=0x7fffffffe008, ret=0, caps=0x7fffffffdfcc) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1298
+#2  0x00005555557644a0 in general_loop (ctx=0x5555563da2b0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1462
+#3  0x0000555555691cce in start_ccx () at /tmp/ccx2shell-upstream-asan/src/ccextractor.c:200

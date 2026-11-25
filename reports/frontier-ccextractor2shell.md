@@ -1,19 +1,19 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 06:46Z (W3): rung 3 and rung 4 CONFIRMED, plus a new
-bounded negative — no code pointer found in overflow reach in this build's
-heap layout. Rung 3 remains CONFIRMED through the real
-`buffered_read`/`read(2)` consumer into a real `malloc(BUFSIZE)` region.
-Rung 4 is CONFIRMED without the earlier debugger-only condition: a crafted
-GXF whose first bytes past `BUFSIZE` are `00 00 01 B3` changes the program's
-own MPEG-2 parser consumed length from 2101248 to 2097348, and ASan
-(`halt_on_error=0`) reports a subsequent `READ of size 3900` at
-`boundary+76` in `memmove` called by `process_data` (`general_loop.c:1041`).
-Rung 5 and witness verdict remain UNKNOWN: no controlled indirect call,
-pointer or command was observed. Issue #2500 rechecked at 06:46Z: still
-open, created/updated `2026-11-24T13:58:29Z`; no fix PR or CVE observed.
-No CVE/GHSA and no upstream fix PR were observed; the guard is a local
-hunk, not a vendor patch. All input files, logs and generators live in
+Status 2026-11-25 07:41Z (W5): rung 3 and rung 4 CONFIRMED; three bounded
+negatives recorded (W3 no code pointer, W4 forged chunk metadata merges with
+top, W5 truncated MEDIA payload produces no write primitive). Rung 3 remains
+CONFIRMED through the real `buffered_read`/`read(2)` consumer into a real
+`malloc(BUFSIZE)` region. Rung 4 is CONFIRMED without the earlier
+debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
+`00 00 01 B3` changes the program's own MPEG-2 parser consumed length from
+2101248 to 2097348, and ASan (`halt_on_error=0`) reports a subsequent
+`READ of size 3900` at `boundary+76` in `memmove` called by `process_data`
+(`general_loop.c:1041`). Rung 5 and witness verdict remain UNKNOWN: no
+controlled indirect call, pointer or command was observed. Issue #2500 was
+last rechecked 06:46Z (open, no fix PR or CVE observed). No CVE/GHSA and no
+upstream fix PR were observed; the guard is a local hunk, not a vendor patch.
+All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
 
@@ -366,3 +366,44 @@ take a different path. Rung 3 and rung 4 are unchanged; rung 5 and the
 witness verdict remain UNKNOWN. No pinned source, harness source or earlier
 evidence was edited.
 
+## W5 bounded negative 2026-11-25 07:39-07:41Z: truncated MEDIA payload
+
+Last open hypothesis from W4: `ccx_gxf.c:943-944` adds the full declared
+`mpeg_pic_size` to `data->len` even when `buffered_read` returns short at EOF.
+Prediction was that this might drive a much larger `memmove` of stale heap
+bytes. Measured answer: no new write primitive and no larger attacker-steered
+read. With a short or absent payload the `read(2)` never crosses `BUFSIZE`,
+so no chunk metadata is corrupted; the inflated length only makes the
+program's scanner walk stale heap bytes and shift a tiny, stale remainder.
+
+`real-build/make_short_gxf.py` keeps the full `00 20 10 00` (2101248) field
+and complete-packet header length but cuts the file payload to 4096 bytes
+(`inputs/short.gxf`, 4160 bytes, sha256
+`669ad20202d822aa3865b1795fae3501dec38096ba9a35130b47c7b9f4990745`) or to
+zero bytes (`inputs/short0.gxf`, 64 bytes, sha256
+`e2b32bf30cc2673e2ee9b85db1b45d94949e7d14f8f732b3654f12cc60cd1ee2`).
+No pinned source, harness source or earlier evidence was edited.
+
+Real ASan build with `ASAN_OPTIONS=detect_leaks=0:halt_on_error=0` on both
+inputs: rc 10, exactly one heap-buffer-overflow each —
+**`READ of size 3` at `boundary+3973`**, stack `memmove` interceptor →
+`memmove string_fortified.h:36` → `process_data general_loop.c:1041` →
+`process_non_multiprogram_general_loop general_loop.c:1298`. There is **no**
+`read()`-origin `WRITE` report and no `free()` diagnostic, unlike the
+full-payload W1/W2 inputs. Logs: `real-build/evidence/asan-short.out`,
+`real-build/evidence/asan-short0.out`.
+
+Plain pinned build under GDB (`real-build/gdb-short.cmd`) confirms the
+mechanism for both inputs: at `ccx_gxf.c:1220` `data_len=2101248` although
+only 4096 (or 0) bytes arrived; at `general_loop.c:1041` `got=2101245`,
+`data_node->len=2101248`, so `move_len=3` and the source is
+`buffer+2101245 = boundary+3973`. The scanner's chosen offset comes from
+stale heap content, not from attacker-supplied bytes, and the shifted 3 bytes
+are stale as well. Transcripts: `real-build/evidence/gdb-short.out`,
+`real-build/evidence/gdb-short0.out`.
+
+Limits: one glibc build, one heap layout; a different stale-heap content
+could place `got` elsewhere and change the tiny read size, but the truncated
+file supplies no bytes past `BUFSIZE` to write with, so this path cannot
+restore the W1/W2 write primitive. Rung 3 and rung 4 are unchanged; rung 5
+and the witness verdict remain UNKNOWN.

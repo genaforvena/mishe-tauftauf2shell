@@ -71,6 +71,17 @@ status UNKNOWN.
   gdb-top-watch.cmd}`, logs `real-build/evidence/{unlink-generate,
   gdb-unlink-watch,gdb-top-watch}.out`, input sha256
   `a50991c9dcb974e8a28f1cb6c94ea5ab7baa85a801331f19defc75271273aa7e`.
+- W5 bounded negative (07:41Z): `inputs/{short,short0}.gxf` declare the full
+  `00 20 10 00` size but cut the file payload to 4096 or 0 bytes. `data->len`
+  is still inflated to 2101248, yet no `read()` WRITE crosses `BUFSIZE`; ASan
+  with `halt_on_error=0` reports only `READ of size 3` at `boundary+3973` in
+  `memmove` (`process_data general_loop.c:1041`), and GDB measures
+  `got=2101245`, `move_len=3`. The shifted bytes are stale heap, not
+  attacker-controlled; no new write primitive or pointer control, no rung
+  change. Scripts `real-build/{make_short_gxf.py,gdb-short.cmd}`, logs
+  `real-build/evidence/{asan-short,asan-short0,gdb-short,gdb-short0}.out`,
+  input sha256 `669ad20202d822aa3865b1795fae3501dec38096ba9a35130b47c7b9f4990745`
+  and `e2b32bf30cc2673e2ee9b85db1b45d94949e7d14f8f732b3654f12cc60cd1ee2`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units
