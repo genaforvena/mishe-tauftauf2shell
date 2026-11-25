@@ -3499,6 +3499,52 @@ and doctor is RED for the six missing unit files. No route or operational
 unit delivery is claimed. The pinned single-model OMP checker also remains
 stale against the owner-directed two-model routes; it is not hand-greened.
 
+The 2026-11-25 18:0x–18:5xZ fold covers the 30 author edges after
+`77a552ce`; only the operator admission `fde6f94e` touched docs paths and
+self-folded its two rows. No edge outside that admission carries an
+independent witness verdict. The new verdict is Openexr2Shell W204, already
+folded into its report: witness wake W218 (#4457) returned ESTABLISHED AS
+LABELED for the benign `touch` through an unmodified `exrcheck -c`, matching
+all five committed hashes from a clean `34832cb6` archive; ASLR was off, the
+EXR was local, no wire target existed, full r5 stays UNKNOWN and the verdict
+does not cover W203's ASLR-on negative. PHP2Shell W63 extends the preserved
+W62 short-write negative: a native `RLIMIT_CPU=1s`/`RLIMIT_FSIZE=1024` chain
+(`DEATH_MODE=rlimit PREBURN=1`, ASLR on, no phase-2 LD_PRELOAD) reaches the
+author-side rung-5 gates 1–5 in a live 8.4.27 FPM worker, with marker
+`php2shell-r5-w63-final-1837` and output hash `7df36e9a…`; the fixed 8.4.28
+build leaves exactly 1024 bytes and no marker. Gate 6 stays OPEN: without a
+clean-checkout replay that varies the command, full r5 is NOT ESTABLISHED.
+Libsshch2Shell W16 puts a wire-resident `touch` string at a probe-derived
+slot and calls the real libc `system()` (6 PASS / 0 FAIL, marker side effect,
+fixed and bad-callee controls clean); a stale hard-coded slot scored 2 PASS /
+4 FAIL, and the callee address remains forked-peer ASLR-local, so this is
+author-only rung-5 mechanics, not r5.
+
+The remaining limbs are chosen-byte reaches, replay receipts and negatives,
+all with unchanged grades. Stbvorbis2Shell W208 drives file-chosen bytes
+into a live glibc `_IO_save_base` in a real consumer (17/0; `_IO_save_base`
+`0x4b4341484b434148` at k=27, plain rc 139, fixed and safe rc 0) but only
+rung 4 PARTIAL. Vtkdicom2Shell W6 pins the exact VTK 9.5.2 bundled source,
+ASan `WRITE of size 4` 32 bytes past a 136-byte region, and W7's
+predecessor-item grooming yields only stale `Value` headers, no pointer.
+Openexr2Shell W205 finds no libc-resident alternate `ctxt` victim under
+ASLR on (`COMMAND_PLT_CALLS=0`), W206 finds no same-mapping command call
+among the eight function-pointer slots; Fontforge2Shell W24's third PIE
+build and W25's late Save state both score `CAND_COUNT 0` for a code pointer.
+Libgphoto2Shell W193 overwrites 16 bits of `priv` with one ASLR-on fork-sweep
+hit (16/0) but no absolute target or command. Pgactive2Shell's
+`local==NULL` delete/delete conflict aborts with signal 6 live (fixed clean,
+clean-archive replay exact) with a fixed boolean, not an attacker byte.
+Synchronet2Shell W27 finds a 52-byte wire TERM threshold (13/0) on shipped
+3.20b; the 48-byte arm corrupts only `line_delay`. Hping3 W15, N2n W17,
+Openexr W205/W206, Fontforge W24/W25, Libsshch W16 and Pgactive receipts
+were replayed from clean archives, and Ruby's free-order map, tcache
+saturation, escaped disposition and stock small-class overlap arms remain
+bounded negatives: no claim/pop, command or persistence, and stock RCE
+stays NOT ACHIEVED. No rung cell, grade, route, mind count or R5 cell moved
+by any of these limbs.
+
+
 ## How the plant works
 
 Each admitted family is its own mind with its own tmux window: 151 target

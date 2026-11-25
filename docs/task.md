@@ -11604,3 +11604,42 @@ checker allows both models but still reports the two absent target routes.
 That frozen detector/input mismatch is recorded, not hand-greened. Exact
 replay commands and the person-owned route shape are in
 `docs/reproducibility.md`.
+
+## 2026-11-25 18:0x–18:5xZ — 30 edges folded; one witness verdict, no grade movement
+
+Thirty commits landed after `77a552ce`; only the operator's admission
+`fde6f94e` touched README/repro/task and self-folded the Aspell and
+FreeImage rows, so the other 29 needed folding here. No rung cell, grade,
+route, mind count or R5 cell moved. The only independent verdict in the
+window was witness W218 (#4457) for Openexr2Shell W204: ESTABLISHED AS
+LABELED at the benign-command, ASLR-off, local-EXR `exrcheck -c` scope, with
+full r5 UNKNOWN and no coverage of W203's ASLR-on negative.
+
+PHP2Shell W63 is the closest new limb to r5: a native RLIMIT chain reaches
+author-side gates 1–5 with a varying SID, a live marker and a fixed-control
+negative, but gate 6 stays OPEN until a clean-checkout witness varies the
+command; full r5 remains NOT ESTABLISHED. Libsshch2Shell W16 places a
+wire-resident command in a real `system()` call at a probe-derived slot
+(6/0, marker created, fixed and bad-callee clean), but the stale-slot arm
+is 2/4 and the callee address stays ASLR-local, so this is author-only
+rung-5 mechanics. Stbvorbis2Shell W208 reaches a live glibc FILE pointer
+in a real consumer (17/0) yet stays rung 4 PARTIAL with no pointer target.
+Vtkdicom2Shell W6 closes the exact VTK 9.5.2 version gap; W7's predecessor
+grooming and Openexr W205/W206, Fontforge W24/W25, Ruby's free-order/
+saturation/escaped-disposition/stock-overlap arms, Libgphoto2 W193's
+16-bit partial `priv` overwrite and Pgactive's `local==NULL` signal-6
+conflict are negatives or count-controlled results with no command,
+persistence or witness. Synchronet W27's 52-byte TERM threshold, Hping3
+W15's `0xc3` octet, N2n W17's witness-shaped replay and the clean-archive
+receipts for Libsshch, Openexr, Fontforge, Hping3 and Pgactive are author
+replays, not verdicts; all queued witness offers remain UNKNOWN. Exact
+commands, hashes and gitignored-evidence regeneration are in
+`docs/reproducibility.md`.
+
+The two RED signals named in the previous fold are unchanged and outside a
+docs commit's scope: readme-lint reports `achievement header has 7 cells,
+expected 6` from the pinned six-column checker while the live seven-column
+checker is GREEN (`docs/runtime-pin.md:48-57`), resolver the person's exact
+full-flag sync, never bare `mishe sync`; `check-omp-only.py` remains RED for
+`aspell2shell: no route` and `freeimage2shell: no route`, resolver the
+operator under the person's engine-config reservation.

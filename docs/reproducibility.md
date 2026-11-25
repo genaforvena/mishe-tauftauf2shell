@@ -10650,3 +10650,104 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   remain missing; full-flag sync is person-reserved. No route or live unit
   delivery is claimed. The pinned single-model OMP checker remains stale
   against the directed two-model routes and is not an acceptance signal.
+
+## 2026-11-25 18:0x–18:5xZ — author receipts, negatives and one witness fold
+
+- **Openexr2Shell W204 — independent verdict fold** — witness wake W218
+  (#4457) replayed `sh harness/w202-benign-command.sh` from a clean
+  `git archive 34832cb6`; `RESULT PASS`, rc 0, all five committed hashes
+  matched (chain `54115664…`, ASan `71552269…`), with `touch /tmp/w202m` at
+  d+1152 and type 31 at d+1172. Mutating the command byte under ASLR gives
+  rc 139 and no marker; fixed build and safe input stay clean. Verdict:
+  ESTABLISHED AS LABELED, benign command in shipped `exrcheck -c`, ASLR off,
+  local EXR only; no wire, live target, full r5, or coverage of W203's
+  ASLR-on negative. Detail: `.mishe-tauftauf/artifacts/witness-wall-w218-detail.md`.
+- **PHP2Shell W63 — native RLIMIT chain** — on kernel `6.8.0-149-generic`,
+  `CLK_TCK=100`, ASLR enabled and no phase-2 LD_PRELOAD, run
+  `DEATH_MODE=rlimit PREBURN=1 MTAG=php2shell-r5-w63-final-1837 PORT=18134 bash lab/repro/php2shell-aftershell-splice-tfm.sh lab/build/php-8.4.27-app/sapi/fpm/php-fpm lab/src/php2shell-r5-app/tfm-app/web lab/build/evidence/w63-native-final 18134`.
+  Expect soft=hard `RLIMIT_CPU=1s`/`RLIMIT_FSIZE=1024`, 98 ticks
+  (79 coarse + 18 fine preburn), a 1597-byte carrier, a 1902-byte
+  replacement, `new-record-prefix:True tail==carrier-tail:True`, marker
+  `php2shell-r5-w63-final-1837`, `uid=1000(mesh-home)` and output hash
+  `7df36e9a43417600d7c44b356195671df63e17c12f378fe8ffc5ab4b10d7c1ab`;
+  the varied-SID `cafebabe00112233445566778899babe` run hashes
+  `d3cf9df0ebd39854dfa25bf8add955a7138879f7eb9a6a2d9d92abf161176be1`.
+  Fixed 8.4.28 (PORT 18140) leaves exactly 1024 bytes,
+  `tail==carrier-tail:False`, no upload/marker, hash
+  `67e59740f8f10b362fd7b29b646b14e2906fd9edec6532bf3254e0868afb76f1`.
+  Author-side gates 1–5 only; gate 6 and full r5 stay UNKNOWN until a clean-checkout
+  witness varies the command. W62's bare-FSIZE negative stays preserved.
+- **Libsshch2Shell W16 — wire-resident command** — `sh lab/frontier/libsshch2shell/real/run-wirecmd.sh`
+  builds vulnerable `a540e276…`/fixed `7dfabb1f…` with clang ASan and
+  `-DW14_REALSYSTEM -DW16_WIRECMD`; expect 6 PASS / 0 FAIL, rc 0,
+  `CLIENT wirecmd fn=… sess=… cmd=touch evidence-wire-wirecmd.marker bad=0`,
+  `SERVER done data_packets=2`, `target_after=0x41414141414141c1` and the
+  renamed marker; fixed and bad-callee (`fn=0x4141414141414141`, status
+  `0x100`) controls create no marker. The slot is probe-derived from
+  `SERVER groom alloc`; the stale constant from W2/W3 scored 2 PASS /
+  4 FAIL with an ASan `printf_common` overflow at `real_wire.c:240`.
+  Clean-archive replay `0527035c` also scores 6/0 with different addresses.
+  Author-only rung-5 mechanics; ASLR-local callee, no witness.
+- **Stbvorbis2Shell W208 — live FILE pointer** — `sh lab/frontier/stbvorbis2shell/run-consumer-preload.sh`
+  expects 17 PASS / 0 FAIL (plus `run-consumer.sh` 12/0); the 205-byte
+  `chosen.ogg` writes through indices 8..31 into `c->multiplicands+32`, so
+  gdb reads `_IO_save_base=0x4b4341484b434148` at k=27, with the same value
+  in `_IO_backup_base`/`_IO_save_end`; plain rc 139, ASan rc 134, fixed and
+  safe rc 0. The safe `preload-safe.ogg` is sha256
+  `3a619dff0ccaacd6b7fc0f52bde37d4fd20b767b34407924eb4377358da87992`.
+  Rung 4 PARTIAL only; no pointer target, command, witness or r5.
+- **Openexr2Shell W205/W206 and Fontforge2Shell W24/W25 negatives** —
+  `sh harness/w205-partial-pointer-negative.sh` and
+  `sh harness/w206-ctxt-pointer-negative.sh` in `lab/openexr2shell-real`
+  each expect `RESULT PASS` rc 0; hashes
+  `dc3ac7dffa162bba97f73c36c78f3e0fdbbd2054d28c59f035e97e521f3dc9ae` and
+  `6f9b5993506999d7d60fdb32b440a0252f84e409099f32940953a47677aa4948`.
+  W205 reports `COMMAND_PLT_CALLS=0` with PIE/libc bases differing under
+  ASLR; W206 finds seven resolvable slots all inside PIE exrcheck, none in
+  libc. Both clean-archive receipts (`fd48b728`, `590e669c`) match.
+  In `lab/frontier/fontforge2shell`, `sh replay-w24.sh` scores 3/0 on the
+  RelWithDebInfo PIE build with `CAND_COUNT 0`/`RESULT NONE` and scan hash
+  `6d3399d2c9d19b36d616325913399fc55a61deeb07d60e09e04d79f418c326be`;
+  `sh replay-w25.sh` scores 8/0, hits `glyph=-1 i=3` and aborts before the
+  later Save breakpoint, with PIE `RESULT NONE` and non-PIE
+  `RESULT ASCII_ONLY` (clean-archive receipts `ed9d7a61`, `9dba13dd`).
+  No code pointer, witness or r5 in any arm.
+- **Vtkdicom2Shell W6/W7** — exact VTK v9.5.2 pin
+  `d29a996ab2a49375a59cef5e381c1c25185ffa50`, `vtkDICOMItem.cxx` sha256
+  `c53664edef2e5a7fa99237ef5a7b8e0eb62f371b289cca3cfda34e7cb44ee35c`;
+  `cmake -S src-952 -B build-952 -DVTK_DIR=… -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF`
+  then `./build-952/bin/reader-probe-952 evidence/undef-ob-chosen.dcm`
+  expects rc 139, gdb `OOBWRITE tag=4841,434b key=4841434b n=5 slot=5`
+  and ASan `WRITE of size 4` 32 bytes after a 136-byte region at
+  `vtkDICOMItem.cxx:195`. W7's `tools/make-preceding-item-variant.py`
+  yields stale `Value` headers (`low32=00000001`) at every predecessor
+  count, never a pointer-shaped word; the `dicomdump` CLI rejects the bytes.
+- **Other exact receipts and negatives** — `sh lab/frontier/libgphoto2shell/live/replay-partial-priv.sh`
+  expects `RESULT: 16 PASS / 0 FAIL`, one ASLR-on fork-sweep hit at n=15922
+  and an ASLR-off saved-RIP slot, no absolute target or command;
+  `SKIP_BUILD=1 bash lab/frontier/freeimage2shell/run-all.sh` expects
+  `RESULT 9 PASS / 0 FAIL`, ASan `WRITE of size 4` at `PluginGIF.cpp:743`
+  and `PAST_PIXELS=554154ff554154ff554154ff` at `bits+400/+404/+408`.
+  `git archive e00ea425 lab/frontier/pgactive2shell/realbuild/twonode`
+  plus `ACTION=SKIP CONFLICT_TYPE=delete_delete VERSION=2.1.9|2.1.10 sh run-two.sh`
+  expects one signal-6 termination on vulnerable
+  `3177a37c…`, zero on fixed `986917a8…`. `git archive c69adb7a lab/frontier/hping3shell`
+  plus `HPING_SRC=… TARGET_BYTE=195 sh wire/replay-target-byte.sh` expects
+  `REPLAY_TARGET_BYTE_OK: 16 checks, target=0xc3`; the damaged debug
+  destination line is accepted only with matching raw packet octets.
+  `git archive HEAD lab/frontier/n2n2shell` plus `sh live/replay-all.sh`
+  expects `REPLAY_ALL_OK`, 7 PASS / 0 FAIL with 15/0 harness and 22/0 live
+  checks. `release-label/term320b/termlen320b/run-termlen320b.sh` in
+  Synchronet expects 13 PASS / 0 FAIL, a 52-byte TERM giving
+  `first=0x41414141` and SIGSEGV where 40/42/48-byte arms survive.
+  Ruby's `lab/repro/ruby2shell-freeorder-map.py`, tcache-saturation,
+  escaped-disposition and wide stock overlap traces log no claim/pop, no
+  poisoned `next` and no command; `MTRACE_FREE_DUMP` was restored in
+  `lab/preload/mtrace.c` and rebuilt with
+  `gcc -shared -fPIC -O2 lab/preload/mtrace.c -o lab/preload/mtrace.so`.
+- **Gitignored evidence** — ASan/gdb outputs, clean-archive scratch trees
+  and preload binaries are intentionally gitignored; regenerate each by the
+  command quoted above from the named commit or pinned source. Addresses
+  in ASLR-on dumps are normalized before hash comparison. Every receipt in
+  this section is author-side; only W204 above carries an independent
+  verdict, and no rung cell or R5 claim moved.
