@@ -186,12 +186,14 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   clean binaries with the live scripts. The rung-4 overflow result is
   unchanged, but consumer rc claims are limited to the exact build path
   measured in `CONSUME.md` / `FILECHOICE.md`. No pointer/IP, command or r5.
-- W10 (`VALUE-CEILING.md`, author-side, no grade change): the single-
-  iteration RHS is `min2*256 + min1` and both fields are 16-bit
-  `getformint16()` values, so the write value is at most `0x0100FEFF` —
-  byte 3 is only 0 or 1, never an arbitrary address byte. The real plain
-  build measured `0x21 -> 0x0100feff00000021` and bytes `ff fe 00 01`
-  at `encs-4` on `value-ceiling.pcf`. A live pointer at byte offset
+- W10 (`VALUE-CEILING.md`, author-side, no grade change): for the single-
+  iteration `i=0` input the RHS is `min2*256 + min1` with two 16-bit
+  `getformint16()` fields; the real plain build measured `0x21 ->
+  0x0100feff00000021` and bytes `ff fe 00 01` at `encs-4` on
+  `value-ceiling.pcf`. W12 corrected W10's `0x0100FEFF` "hard ceiling"
+  overclaim: with `d=1` and `i=65535` the value reaches `0x01FFFE00`
+  (`CEILING-CORRECTION.md`, bytes `00 fe ff 01`). In both cases byte 3
+  is only 0 or 1, never an arbitrary address byte. A live pointer at byte offset
   `encs-200`, inside the file-chosen `-256..-1` glyph range, was changed by
   `glyph=-50` with RHS `0x00414243` from `0x0000555555c227f0` to
   `0x0000555500414243` (gdb hardware watchpoint). W11 corrected the W10
@@ -209,15 +211,25 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   SFDDumpBitmapFont -> SFDDumpBitmapChar` reads `bfc->bitmap[i]` at
   `sfd.c:1671`; gdb sees `SIGSEGV` with `pt = bfc->bitmap =
   0x0000555500414243` (three file-chosen bytes), plain rc 139.
-  `value-atkceiling.pcf` faults at `0x000055550100FEFF`, the exact
-  arithmetic ceiling. In-bounds control exits 0 on plain and ASan; both
+  `value-atkceiling.pcf` faults at `0x000055550100FEFF` (W10's claimed
+  value, not the true ceiling after W12).
+  In-bounds control exits 0 on plain and ASan; both
   patched builds exit 0; vulnerable ASan halts at the original WRITE-4
   before `Save()`. The reachable window is
-  `0x0000555500000000..0x000055550100FEFF` — below the lowest PIE mapping
+  `0x0000555500000000..0x0000555501FFFE00` — below the lowest PIE mapping
   (`0x555555554000`), hence unmapped in this build: no chosen mapped
   target, no full pointer control, no marker, no command, no r5. A second
   import without `Save()` still exits 0. Author-side replay receipt in
   `REPLAY.md`; no witness verdict.
+- W12 (`CEILING-CORRECTION.md`, author-side, no grade change): correction
+  of the W10/W11 arithmetic overclaim. `make-value-ceiling-high.py` builds a
+  131361-byte PCF with `min2=max2=0xffff, min1=0, max1=0xffff` and 65535
+  skipped `0xffff` indices; at `i=65535` the truncated index writes
+  `0x01FFFE00` at `encs-4` in the real plain build (`gdb-value-ceiling-high.out`,
+  watchpoint word `0x01fffe0000000021`, bytes `00 fe ff 01`), plain rc 134,
+  fixed-plain 0, ASan 1 at `:1751`, patched 0. The true maximum is
+  `0x01FFFE00`, not `0x0100FEFF`; byte 3 is still only `0/1`, the window
+  stays unmapped, no r5, no witness.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

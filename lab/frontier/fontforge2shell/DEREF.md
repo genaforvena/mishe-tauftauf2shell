@@ -64,8 +64,9 @@ $2 = 0x555500414243
 are file-chosen (the pinned file's RHS), byte 3 is `0x00`, upper four bytes
 stay host-derived `0x00005555`. Plain rc 139.
 
-`value-atkceiling.pcf` (RHS `0x0100FEFF`, glyph `-50`) gives the maximum
-reachable value; `gdb-deref-ceiling.out` (sha256
+`value-atkceiling.pcf` (RHS `0x0100FEFF`, glyph `-50`) gives W10's claimed
+ceiling value, not the true maximum after W12 (`CEILING-CORRECTION.md`). The
+fault is in `gdb-deref-ceiling.out` (sha256
 `f84d661d859aade7792f8eb44daad29263bb47f238b1c3c5cea7236fb024562f`):
 
 ```
@@ -75,7 +76,7 @@ $2 = 0x55550100feff
 ```
 
 Plain rc 139. So two different file-chosen fault addresses were measured,
-including the exact arithmetic ceiling from `VALUE-CEILING.md`.
+including W10's claimed ceiling; W12 raises the true ceiling to `0x01FFFE00`.
 
 ## 3. Control matrix (`deref-controls.txt`)
 
@@ -96,10 +97,10 @@ observation only. Both patched builds and both in-bounds controls are clean.
 
 ## 4. Address bound (why this is not rung 5)
 
-One 32-bit store writes `min2*256 + min1 <= 0x0100FEFF`; the upper four
-bytes of the original heap pointer stay `0x00005555`. The reachable
-target window is therefore
-`0x0000555500000000 .. 0x000055550100FEFF`. In the measured process,
+One 32-bit store writes at most `0x01FFFE00` (W12; `0x0100FEFF` was the
+`i=0` sub-case); the upper four bytes of the original heap pointer stay
+`0x00005555`. The reachable target window is therefore
+`0x0000555500000000 .. 0x0000555501FFFE00`. In the measured process,
 `info proc mappings` puts the lowest PIE mapping at `0x555555554000`
 and the heap at `0x555555bc4000..0x555555c68000`, both well above that
 window. The chosen addresses are unmapped, so both observed dereferences

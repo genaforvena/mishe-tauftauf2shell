@@ -203,11 +203,18 @@ live `char*` — `x/s` had printed `""` from a one-byte zero bitmap. Adding
 the file-chosen pointer through `bSave:1891 → SFDWriteBakExtended → SFDDump
 → SFDDumpBitmapFont → SFDDumpBitmapChar` (`sfd.c:1671`): rc 139 at
 `0x0000555500414243` with three chosen bytes, and rc 139 at
-`0x000055550100FEFF` on the arithmetic-ceiling input. The reachable window
-`0x0000555500000000..0x000055550100FEFF` is below the lowest PIE mapping,
+`0x000055550100FEFF` on W10's claimed-ceiling input. The reachable window
+`0x0000555500000000..0x0000555501FFFE00` is below the lowest PIE mapping,
 so there is no chosen mapped target, full pointer/IP, marker, command or r5;
 a second `Import()` without `Save()` still exits 0 and patched/in-bounds
 controls stay clean. `lab/frontier/fontforge2shell/DEREF.md`.
+
+FontForge W12 (`CEILING-CORRECTION.md`, author-side, no grade change) corrects
+W10's "hard ceiling" overclaim: with `d=max2-min2+1=1` and the truncated glyph
+at `i=65535`, the real plain build writes `0x01FFFE00` at `encs-4` (bytes
+`00 fe ff 01`, watchpoint word `0x01fffe0000000021`, plain rc 134, patched
+0, ASan 1 at `:1751`). The true maximum is `0x01FFFE00`, not `0x0100FEFF`,
+but byte 3 is still only `0/1`: no mapped target and no r5.
 
 CodebaseMemory W14 (`8e973719`) measures far strides against the live
 `[stack]` mapping: the OOB destination advances 512 bytes per projection
@@ -370,10 +377,11 @@ death; author-only, unwitnessed, R5 cell stays `—`. Reports:
 `lab/repro/php2shell-aftershell-splice-tfm.sh`.
 
 The 00:4x–01:0xZ author limbs add no grade or verdict. FontForge W10
-(`8781a538`) bounds the four-byte write at `0x0100FEFF` and puts three chosen
-bytes in a pointer field at `encs-200` that W11 later identified as
-`BDFChar.bitmap`, not a `char*`; on that one `Import()` path it is not
-dereferenced. Synchronet W15 (`e0f11cd4`, replay `b595e239`) builds
+(`8781a538`) measured the `i=0` four-byte write value `0x0100FEFF` (W12 later
+raised the true maximum to `0x01FFFE00`) and put three chosen bytes in a
+pointer field at `encs-200` that W11 identified as `BDFChar.bitmap`, not a
+`char*`; on that one `Import()` path it is not dereferenced. Synchronet W15
+(`e0f11cd4`, replay `b595e239`) builds
 a real `sbbs3` locally and reaches the copy after a valid password login under
 the default config (4 PASS / 0 FAIL, `PROBE_COUNT=2`, `ANYAUTH_LOG_COUNT=0`);
 pre-auth pty-req stays W9's negative. Assimp W25 (`aa2aedc7`, replay

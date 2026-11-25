@@ -1,0 +1,6 @@
+# W12 control matrix (2026-11-25 01:5xZ), author-side, same four local builds
+input                       build        rc   note
+value-ceiling-high.pcf      plain        134  double free or corruption (out)
+value-ceiling-high.pcf      fixed-plain  0
+value-ceiling-high.pcf      asan         1    WRITE of size 4 at fvimportbdf.c:1751
+value-ceiling-high.pcf      fixed        0    patched ASan

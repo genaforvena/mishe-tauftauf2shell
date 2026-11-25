@@ -7,7 +7,7 @@ unwitnessed, NO grade change, NO r5. No external read, probe, loopback
 service or new source tree: every PCF is derived from the already-pinned
 `truncated.pcf` by `make-value-ceiling.py` / `make-ptr-target.py`.
 
-## 1. The written int has a hard arithmetic ceiling
+## 1. The written int's ceiling is 0x01FFFE00, not 0x0100FEFF (corrected W12)
 
 Pinned `fvimportbdf.c:1751` (source-bound hash `df766f9c…eb30d`):
 
@@ -16,11 +16,13 @@ encs[glyph] = (i/(max2-min2+1) + min2)*256 + (i%(max2-min2+1) + min1);
 ```
 
 `min2/max2/min1/max1` all come from `getformint16()` (`:1354`), whose value
-is `getc() | (getc()<<8)` in `[0,65535]`. With `min2=max2`, `min1=max1`,
-`tot=1`, iteration `i=0`, the RHS is exactly `min2*256 + min1`, bounded by
-`65535*256 + 65535 = 0x0100FEFF`. Bits 24..31 are only the carry out of
-`min2*256`; they are `0x00` or `0x01`, never a chosen address byte. The
-first three bytes are fully chosen by the file.
+is `getc() | (getc()<<8)` in `[0,65535]`. W10 derived `0x0100FEFF` only for
+`min2=max2, min1=max1, tot=1, i=0` and wrongly called it a hard ceiling. With
+`d=max2-min2+1=1` and a large loop index the RHS reaches `0x01FFFE00`;
+`CEILING-CORRECTION.md` measures that in the real build at `i=65535`
+(bytes `00 fe ff 01` at `encs-4`). Bits 24..31 still are only `0x00` or
+`0x01`, never a chosen address byte; the first three bytes are file-chosen.
+`value-ceiling.pcf` below remains a valid `i=0` measurement, not the ceiling.
 
 `value-ceiling.pcf` (sha256
 `0785b632664dfb2f2252a48c5165d6f8adcbeb134100f5afe7883b16a78b426f`,
@@ -121,8 +123,9 @@ cases corrupt live heap data instead and need no glibc detection.
 
 Rung 4, real headless build, author-side and unwitnessed: three chosen bytes
 at a chosen offset inside a live `BDFChar.bitmap` field (pointer-bearing
-object; W10's `char*` label was corrected in W11), plus the exact arithmetic
-ceiling of the primitive (byte 3 is 0/1 only). W11 adds a measured
+object; W10's `char*` label was corrected in W11), plus the byte-3-only-0/1
+structural bound (W12 corrected the numeric ceiling from `0x0100FEFF` to
+`0x01FFFE00`; see `CEILING-CORRECTION.md`). W11 adds a measured
 dereference at a file-chosen address during `Save()` (`DEREF.md`). NO full
 pointer control, no marker execution, no command, no ASLR/grooming study,
 no GUI, no r5. No witness verdict is implied and the existing #3309 grade

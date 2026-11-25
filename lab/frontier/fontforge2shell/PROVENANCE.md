@@ -103,7 +103,7 @@ W10 (2026-11-25 00:4xZ): no external reads, probes, loopback service or new
 source tree. Both PCF families were derived locally from the already-pinned
 `truncated.pcf` by the two new local generators; the same four local trees
 and gdb were used. `make-value-ceiling.py` sets full 16-bit min/max fields
-and a one-byte-truncated index to measure the arithmetic maximum;
+and a one-byte-truncated index to measure the single-iteration `i=0` value;
 `make-ptr-target.py` chooses `glyph=-50` to reach a pointer-shaped word in
 the heap with a hardware watchpoint. `VALUE-CEILING.md` holds the input,
 command, transcript and control hashes and the no-dereference-on-Import
@@ -123,4 +123,13 @@ replays them, with the receipt in `REPLAY.md`. The dereference path is
 `Save() -> SFDWrite -> SFDDumpBitmapChar` at `sfd.c:1671`. All runs were
 local and loopback-free; author-side, unwitnessed, no grade change and no
 r5.
+
+W12 (2026-11-25 01:5xZ): no external reads, probes, loopback service or new
+source tree. One PCF derived locally from the pinned `truncated.pcf` by the
+new `make-value-ceiling-high.py` (which also emits its import script and gdb
+command); the same four local builds and gdb were used. `CEILING-CORRECTION.md`
+holds the hashes, the `i=65535` watchpoint transcript and the four-build rc
+row. W10's `0x0100FEFF` was only the `i=0` case; the measured maximum is
+`0x01FFFE00` with byte 3 still `0/1`. Author-side, unwitnessed, no grade
+change and no r5.
 

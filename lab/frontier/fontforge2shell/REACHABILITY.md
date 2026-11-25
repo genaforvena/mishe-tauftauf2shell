@@ -221,11 +221,12 @@ witness verdict; NO r5.
 ## W10 (2026-11-25 00:4xZ) — value ceiling and a pointer-bearing target
 
 `VALUE-CEILING.md` closes two open questions at the labeled real-headless
-scope. (1) The written int is `(min2*256 + min1)` for this single-iteration
-input, and both fields are 16-bit `getformint16()` values, so the maximum
-is `0x0100FEFF`: byte 3 is 0 or 1, never a chosen address byte. The real
-plain build with `value-ceiling.pcf` measured the size word go `0x21` ->
-`0x0100feff00000021`, bytes `ff fe 00 01` at `encs-4`. (2) A live pointer
+scope. (1) For this single-iteration input the RHS is `(min2*256 + min1)`,
+both fields are 16-bit `getformint16()` values, and W10 measured `0x21` ->
+`0x0100feff00000021`, bytes `ff fe 00 01` at `encs-4`. W10 wrongly called
+`0x0100FEFF` a hard ceiling; W12 (`CEILING-CORRECTION.md`) measured the true
+maximum `0x01FFFE00` at `i=65535` with `d=1`, bytes `00 fe ff 01`. Byte 3
+is 0 or 1 in both cases, never a chosen address byte. (2) A live pointer
 at byte offset `encs-200`, inside the file-chosen `-256..-1` glyph range,
 was changed by `value-atk50.pcf` (`glyph=-50`, RHS `0x00414243`) from
 `0x0000555555c227f0` to `0x0000555500414243` — three file-chosen bytes
@@ -247,10 +248,10 @@ unwitnessed, NO r5 and no grade change.
 SFDDumpBitmapChar`, which reads `bfc->bitmap[i]` at `sfd.c:1671`. The real
 plain process faults at `pt = bfc->bitmap = 0x0000555500414243` (gdb,
 `gdb-deref.out`), rc 139; `value-atkceiling.pcf` faults at
-`0x000055550100FEFF`, the exact RHS ceiling. In-bounds control and both
-patched builds exit 0; vulnerable ASan halts at the original WRITE-4
+`0x000055550100FEFF` (W10's claimed value, not the true ceiling after W12).
+In-bounds control and both patched builds exit 0; vulnerable ASan halts at the original WRITE-4
 before `Save()`. A second import without `Save()` still exits 0.
-The reachable window is `0x0000555500000000..0x000055550100FEFF`;
+The reachable window is `0x0000555500000000..0x0000555501FFFE00`;
 the lowest PIE mapping is `0x555555554000`, so the chosen addresses are
 unmapped. No mapped target, full pointer control, marker, command or r5.
 Author-side, unwitnessed, no grade change.
@@ -266,10 +267,10 @@ that entry that writes past the physical chunk on a second `Import()`
 (W6), FILE-BYTES chosen by a one-byte PCF variant written 40 bytes past
 that chunk's usable area by `pcf_properties` (W7), the same overflow
 through file OPEN (W8), and a clean-tree one-command replay receipt (W9).
-W10 measures the write-value ceiling (byte 3 is only 0/1) and a chosen
-write of three bytes into a live `BDFChar.bitmap` at `encs-200`. W11
-adds a measured dereference at the file-chosen address through `Save()`,
-still inside an unmapped window. Full pointer control, marker execution,
+W10 measures the byte-3-only-0/1 bound at `i=0` and a chosen write of three
+bytes into a live `BDFChar.bitmap` at `encs-200`; W12 corrects the numeric
+ceiling to `0x01FFFE00`. W11 adds a measured dereference at the file-chosen
+address through `Save()`, still inside an unmapped window. Full pointer control, marker execution,
 the GUI `Import()`/File-Open menus (GTK-3 dev packages absent,
 `ENABLE_GUI=OFF` builds), bare command-line file open (W8 negative),
 other loaders, ASLR/grooming, and independent witness replay of the

@@ -114,3 +114,25 @@ printed by the replay match `DEREF.md`: atk50
 This is another author-side replay on the same host, not an independent
 witness verdict. No full pointer control, chosen mapped target, marker
 execution, command or r5 is claimed.
+
+## W12 — true write-value ceiling 0x01FFFE00 (2026-11-25 01:5xZ)
+
+`make-value-ceiling-high.py` regenerates `value-ceiling-high.pcf` (131361
+bytes), `import-value-ceiling-high.ff` and `gdb-value-ceiling-high.cmd` from
+the pinned `truncated.pcf`. With the four builds present, from this directory:
+
+```sh
+python3 make-value-ceiling-high.py
+gdb -q -batch -x gdb-value-ceiling-high.cmd ./build-plain/bin/fontforge
+for b in build-plain build-fixed-plain build-asan build-fixed; do
+  ASAN_OPTIONS=detect_leaks=0 ./$b/bin/fontforge -script import-value-ceiling-high.ff >/dev/null 2>&1
+  echo "$b rc=$?"
+done
+```
+
+Expected: gdb `HIT glyph=-1 i=65535`, `$1 = 0x1fffe00`, watchpoint word
+`0x01fffe0000000021`, bytes `00 fe ff 01` at `encs-4`; rc row
+134/0/1/0 in `ceiling-high-controls.txt`. This corrects W10/W11's
+`0x0100FEFF` "hard ceiling" overclaim (`CEILING-CORRECTION.md`); byte 3 is
+still only `0/1`, no mapped target and no r5. Author-side replay on this
+host, not an independent witness verdict.
