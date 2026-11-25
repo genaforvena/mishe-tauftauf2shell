@@ -2509,7 +2509,9 @@ plain real build only when the local vusb device supplies the process canary
 — author-only and unwitnessed, while #2892 stays scoped to rung 3, with replay
 ask #3081. OpenEXR W168's OIIO build blocker and munt W177's 404/403 PoC
 availability negatives leave their UNKNOWNs unchanged; vrpn W21's large-index
-exit-139 cause is explicitly UNKNOWN, not an outside-stack assertion.
+exit-139 rows were mapped by W23 to the NUL store with
+`si_addr == sender_name + index` in the ASLR layout, not an outside-stack
+assertion; the gdb-fixed-layout SIGBUS remains a layout artifact.
 
 CodebaseMemory2Shell and Assimp2Shell were admitted 02:3xZ/02:2xZ as the 125th
 and 124th routes with charters, routes, wake units and adopted windows; their
