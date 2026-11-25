@@ -1,16 +1,16 @@
 # frontier brief — vtkdicom2shell (CVE-2026-22879)
 
-Status 2026-11-25 13:26Z: ADMITTED (145th route), target mind active. Measured
+Status 2026-11-25 18:03Z: ADMITTED (145th route), target mind active. Measured
 grade is rung 3 (ASan-confirmed heap OOB in the REAL pinned vtkDICOMReader from
-crafted FILE bytes) and rung 4 (file-chosen tag bytes at the chosen OOB slot,
-plain process crash); rung 5 NOT CLAIMED. Witness verdict UNKNOWN — replay
-offer #4276 is outstanding and the witness wake service is RED. The staged
-rung-3/rung-4 PARTIAL lines in the sections below are historical: they describe
-the pinned-function harness only and are superseded by W3/W4 at the end of
-this brief. Lab pins, harness, real builds and evidence live in
-`lab/frontier/vtkdicom2shell/`; one-command replay `sh
-lab/frontier/vtkdicom2shell/tools/replay-file-path.sh` = `REPLAY_FILE_PATH_OK`.
-This is author lab evidence, not witness acceptance.
+crafted FILE bytes, now also on VTK 9.5.2's exact bundled source) and rung 4
+(file-chosen tag bytes at the chosen OOB slot, plain process crash); rung 5
+NOT CLAIMED. Witness verdict UNKNOWN — replay offer #4276 is outstanding and
+the witness wake service was RED/activating. The staged rung-3/rung-4 PARTIAL
+lines in the sections below are historical: they describe the pinned-function
+harness only and are superseded by W3/W4/W6 at the end of this brief. Lab pins,
+harness, real builds and evidence live in `lab/frontier/vtkdicom2shell/`;
+one-command replay `sh lab/frontier/vtkdicom2shell/tools/replay-file-path.sh`
+= `REPLAY_FILE_PATH_OK`. This is author lab evidence, not witness acceptance.
 
 ## Verified ground truth
 
@@ -246,3 +246,29 @@ standalone 0.8.17-53 version gap remains UNKNOWN.
   or IP control, no command, no wire path, no witness verdict (offer #4276
   unanswered; witness wake was activating at 13:22Z). Advisory 9.5.2 vs
   pinned standalone 0.8.17-53 gap remains UNKNOWN.
+
+## W6 — exact VTK 9.5.2 bundled source replay (2026-11-25 18:03Z)
+
+- Version gap closed at source level: VTK v9.5.2's
+  `Remote/vtkDICOM.remote.cmake` fetches dgobbi/vtk-dicom at tag
+  `d29a996ab2a49375a59cef5e381c1c25185ffa50` (2024-11-02). Its
+  `vtkDICOMItem.cxx` sha256 `c53664ede...` differs from the vulnerable parent
+  pin only by copyright year and two dictionary lookup/ordering functions;
+  the six functions carrying the count desync and OOB write are unchanged.
+  The exact 9.5.2 parser has the same undefined-length OB error exit and
+  short-read exemption before `Item->Set` (see evidence file for line maps).
+- Built that exact commit locally against the lab's VTK 9.1 deps. The
+  advisory-shaped `vtkDICOMReader` probe on `evidence/undef-ob-chosen.dcm`
+  gives ASan `WRITE of size 4`, 32 bytes past a 136-byte store, top frame
+  `FindDataElementOrInsert` `Item.cxx:195` via `Set` :295, with a clean safe
+  corpus control. Plain build: rc 139 and gdb `OOBWRITE key=4841434b n=5
+  slot=5` before the SIGSEGV. Evidence and commands:
+  `lab/frontier/vtkdicom2shell/evidence/vtk952-version-gap.txt`,
+  `vtk952-asan-reader-attack.out`, `vtk952-gdb-chosen.out`.
+- Bounded negative: that source's `dicomdump` CLI does not reach the parser
+  on these bytes (its directory scan rejects the file, rc 0). The fixed
+  control remains the W1-W5 `bcc8b26` build; no 9.5.2+fix build was made.
+- Grade unchanged: rung 3 + rung 4 PARTIAL on the advisory's exact code;
+  no pointer/IP/control-flow, no command, no wire path, no witness verdict.
+  Vendor June-patch bytes remain UNKNOWN; VTK 9.6.0/9.6.1 still pin a
+  vulnerable `Item.cxx` whose sha256 equals the vulnerable parent.

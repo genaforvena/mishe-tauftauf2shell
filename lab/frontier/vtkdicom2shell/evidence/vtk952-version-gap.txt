@@ -1,0 +1,76 @@
+W6 2026-11-25 18:00Z — closing the advisory's 9.5.2 version gap from
+provisioned source, with no external probe.
+
+1. Advisory TALOS-2026-2366 confirms vulnerable "vtk-dicom (version(s):
+   9.5.2)" and its stack paths name /work/vtk/source/Remote/vtkDICOM/...,
+   i.e. the copy bundled into VTK 9.5.2. Read-only provisioning:
+   https://raw.githubusercontent.com/Kitware/VTK/v9.5.2/Remote/vtkDICOM.remote.cmake
+   says vtk_fetch_module(vtkDICOM ... GIT_TAG
+   d29a996ab2a49375a59cef5e381c1c25185ffa50).
+
+2. That commit was already in the lab's local dgobbi/vtk-dicom clone
+   (`git log -1`: 2024-11-02 "Bump the version number to 0.8.17"). Its
+   Source/vtkDICOMItem.cxx sha256 is
+   c53664edef2e5a7fa99237ef5a7b8e0eb62f371b289cca3cfda34e7cb44ee35c,
+   versus pinned vulnerable parent
+   2814380a5034e4feb43a5795b1eb1c56e3f9287cfffc7973a38d94683147a02b.
+   `diff -u` shows only the copyright year and two unrelated dictionary
+   lookup/ordering functions; NewDataElement, FreeList, CopyList,
+   CopyDataElements, FindDataElementOrInsert and Set(tag,v) are unchanged,
+   including the live-count/store-count desync and the OOB index. The exact
+   9.5.2 parser also has the same undefined-length OB error path and the
+   same short-read exemption before Item->Set (src-952/Source/
+   vtkDICOMParser.cxx:1261-1273 and :1594/:1615; the 2026 parent pins are
+   :1291-1303 and :1624/:1645).
+
+3. Built the exact d29a996 source in lab-local src-952/ + build-952/ against
+   the same lab-local VTK 9.1 deps as the earlier W1-W5 builds. Configure:
+   cmake -S src-952 -B build-952 -DVTK_DIR=$PWD/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1 -DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+   then `cmake --build build-952 --target dicomdump -j4` (rc 0). The full
+   `all` target fails only on a missing lab-local VTK 9.1
+   vtkWrapHierarchy-9.1 executable (evidence/vtk952-build.log), unrelated
+   to the library and CLI. A reader probe (tools/reader-probe.cxx) was
+   compiled with that tree's flags and linked against its libvtkDICOM-9.1.a.
+
+4. CAVEAT preserved: 9.5.2's `dicomdump` CLI does NOT reach the parser on
+   the crafted file (rc 0, no output; no ReadFile/Set breakpoints hit),
+   because its vtkDICOMDirectory scan rejects these bytes before parsing.
+   This is CLI-specific and does not contradict the reader path below.
+
+5. Advisory-shaped reader result on the exact 9.5.2 source:
+   LD_LIBRARY_PATH=$PWD/deps/root/usr/lib/x86_64-linux-gnu
+   ./build-952/bin/reader-probe-952 evidence/undef-ob-chosen.dcm
+     -> rc 139 (SIGSEGV); parser errors "Encapsulated object is missing
+        (FFFE,E000) tag" at byte offsets 204 and 226.
+   The safe corpus control evidence/corpus/a-exp-US-0.dcm -> rc 0,
+   "reader Update completed".
+   gdb -q -batch -x tools/chosen.gdb ./build-952/bin/reader-probe-952
+     -> OOBWRITE tag=4841,434b key=4841434b n=5 store=0x...9c8
+        e=0x...a68 slot=5, then SIGSEGV. Full trace:
+        evidence/vtk952-gdb-chosen.out.
+   Hence the advisory's exact bundled source, not just the 2026 standalone
+   parent, puts file-chosen tag bytes in the out-of-range slot and crashes.
+
+6. Vendor patch date gap remains UNKNOWN: VTK 9.5.3 has no such remote pin;
+   VTK 9.6.0/9.6.1 pin d1e25090f354542d7bd85c08ee36d8dc22bbbcd8
+   (2025-12-05), whose Item.cxx sha256 equals the VULNERABLE pin
+   2814380a... . The upstream fix bcc8b26 (2026-08-23) is not yet in a
+   fetched VTK release pin. No claim about the vendor's June patch bytes.
+7. ASan control from the exact same d29a996 tree (build-952-asan, same
+   CXX flags as the earlier ASan build; log evidence/vtk952-asan-build.log):
+   `ASAN_OPTIONS=detect_leaks=0
+    ./build-952-asan/bin/reader-probe-952-asan evidence/undef-ob-chosen.dcm`
+   -> rc 1, `ERROR: AddressSanitizer: heap-buffer-overflow`,
+   `WRITE of size 4`, `0x50d0000001b8 is located 32 bytes after 136-byte
+   region`, top frame `vtkDICOMItem::FindDataElementOrInsert` at
+   `src-952/Source/vtkDICOMItem.cxx:195` via `Set` :295 via parser :1615;
+   allocation at `NewDataElement` :70 (`evidence/vtk952-asan-reader-attack.out`).
+   The same ASan reader on `evidence/corpus/a-exp-US-0.dcm` is clean
+   (rc 0, `reader Update completed`, `evidence/vtk952-asan-reader-safe.out`).
+   The fixed-build control remains the W1-W5 `build-fixed` binary built from
+   upstream fix bcc8b26; no separate 9.5.2+fix build was made in this wake.
+
+Grade unchanged: rung 3 + rung 4 PARTIAL on the exact 9.5.2 code as well as
+the pinned parent. No pointer/IP control, no command, no wire path, no
+witness verdict. All fetches were source provisioning; no external host was
+probed.

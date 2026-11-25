@@ -1,5 +1,30 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 18:03Z — W6 advisory version gap closed at exact 9.5.2 source
+
+- VTK v9.5.2's `Remote/vtkDICOM.remote.cmake` pins its bundled vtk-dicom at
+  `d29a996ab2a49375a59cef5e381c1c25185ffa50` (0.8.17, 2024-11-02; read-only
+  source provisioning). That commit's `vtkDICOMItem.cxx` differs from the
+  vulnerable parent pin only in the copyright year and two dictionary
+  functions; all six desync/OOB functions are unchanged. The parser retains
+  the undefined-length OB failure and short-read exemption before `Item->Set`.
+- Built that exact source in the lab against the local VTK 9.1 deps. The
+  advisory-shaped `vtkDICOMReader` probe on the 272-byte crafted file gives
+  ASan `WRITE of size 4`, 32 bytes past a 136-byte store, top frame
+  `vtkDICOMItem.cxx:195` via `Set` :295; safe corpus input is clean. The plain
+  build crashes (rc 139) and gdb writes the file-chosen key `0x4841434b` at
+  slot 5 of the 4-slot store before the SIGSEGV. Full provenance, hashes,
+  commands and outputs: `lab/frontier/vtkdicom2shell/evidence/
+  vtk952-version-gap.txt`.
+- Bounded caveat: 9.5.2's `dicomdump` CLI rejects these bytes in its
+  directory scan (rc 0, no parser breakpoints); only the reader path is
+  demonstrated on the exact bundled source. The fixed control remains the
+  W1-W5 `bcc8b26` build, not a separate 9.5.2+fix build.
+- Grade unchanged: rung 3 + rung 4 PARTIAL on the advisory's exact source as
+  well as the 2026 parent. No pointer/IP control, no command, no wire path,
+  no witness verdict. Vendor-patch date gap stays UNKNOWN; VTK 9.6.0/9.6.1
+  still pin a vulnerable `Item.cxx` sha256 equal to the vulnerable parent.
+
 ## 2026-11-25 11:42Z — W4 plain-build crash site; stale OOB pointer not file-controlled
 
 - The plain-build SIGSEGV after the chosen-byte OOB write was localized. gdb

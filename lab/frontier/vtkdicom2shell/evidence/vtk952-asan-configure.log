@@ -1,0 +1,138 @@
+-- The C compiler identification is GNU 13.3.0
+-- The CXX compiler identification is GNU 13.3.0
+-- Detecting C compiler ABI info
+-- Detecting C compiler ABI info - done
+-- Check for working C compiler: /usr/bin/cc - skipped
+-- Detecting C compile features
+-- Detecting C compile features - done
+-- Detecting CXX compiler ABI info
+-- Detecting CXX compiler ABI info - done
+-- Check for working CXX compiler: /usr/bin/c++ - skipped
+-- Detecting CXX compile features
+-- Detecting CXX compile features - done
+-- vtkDICOM: Building vtkDICOM outside of VTK
+-- The imported target "VTK::WrapHierarchy" references the file
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkWrapHierarchy-9.1"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/VTK-targets.cmake"
+but not all the files it references.
+
+-- The imported target "VTK::ParseJava" references the file
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkParseJava-9.1"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/VTK-targets.cmake"
+but not all the files it references.
+
+-- The imported target "VTK::WrapJava" references the file
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkWrapJava-9.1"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/VTK-targets.cmake"
+but not all the files it references.
+
+-- The imported target "VTK::vtkProbeOpenGLVersion" references the file
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkProbeOpenGLVersion-9.1"
+but this file does not exist.  Possible reasons include:
+* The file was deleted, renamed, or moved to another location.
+* An install or uninstall procedure did not complete successfully.
+* The installation package was faulty and contained
+   "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/VTK-targets.cmake"
+but not all the files it references.
+
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD
+-- Performing Test CMAKE_HAVE_LIBC_PTHREAD - Success
+-- Found Threads: TRUE  
+-- Found GLEW: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/libGLEW.a  
+-- Found OpenGL: /usr/lib/x86_64-linux-gnu/libGL.so  found components: OpenGL GLX 
+-- Found Python3: /usr/bin/python3 (found suitable version "3.12.3", minimum required is "3.12") found components: Interpreter Development.Module Development.Embed 
+-- Checking for module 'mpi-c'
+--   Package 'mpi-c', required by 'virtual:world', not found
+-- Could NOT find MPI_C (missing: MPI_C_LIB_NAMES MPI_C_HEADER_DIR MPI_C_WORKS) 
+-- Could NOT find MPI (missing: MPI_C_FOUND C) 
+-- Could not find the VTK package due to a missing dependency: MPI
+-- Found HDF5: /usr/lib/x86_64-linux-gnu/hdf5/serial/libhdf5.so;/usr/lib/x86_64-linux-gnu/libcrypto.so;/usr/lib/x86_64-linux-gnu/libcurl.so;/usr/lib/x86_64-linux-gnu/libpthread.a;/usr/lib/x86_64-linux-gnu/libsz.so;/usr/lib/x86_64-linux-gnu/libz.so;/usr/lib/x86_64-linux-gnu/libdl.a;/usr/lib/x86_64-linux-gnu/libm.so (found version "1.10.10") found components: C HL 
+-- Found NetCDF: /usr/include (found version "4.9.2") 
+-- Found OGG: /usr/lib/x86_64-linux-gnu/libogg.so  
+-- Could NOT find THEORA (missing: THEORA_LIBRARY THEORA_enc_LIBRARY THEORA_dec_LIBRARY THEORA_INCLUDE_DIR) 
+-- Could not find the VTK package due to a missing dependency: THEORA
+-- Could NOT find JsonCpp (missing: JsonCpp_LIBRARY JsonCpp_INCLUDE_DIR) (Required is at least version "0.7.0")
+-- Could not find the VTK package due to a missing dependency: JsonCpp
+-- Found LibXml2: /usr/lib/x86_64-linux-gnu/libxml2.so (found version "2.9.14") 
+-- Found ZLIB: /usr/lib/x86_64-linux-gnu/libz.so (found version "1.3")  
+-- Could NOT find GL2PS (missing: GL2PS_LIBRARY GL2PS_INCLUDE_DIR) (Required is at least version "1.4.2")
+-- Could not find the VTK package due to a missing dependency: GL2PS
+-- Found PNG: /usr/lib/x86_64-linux-gnu/libpng.so (found version "1.6.43") 
+-- Found SQLite3: /usr/include (found version "3.45.1") 
+-- Could NOT find Qt5OpenGL (missing: Qt5OpenGL_DIR)
+CMake Warning at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/VTK-vtk-module-find-packages.cmake:1008 (find_package):
+  Found package configuration file:
+
+    /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/Qt5/Qt5Config.cmake
+
+  but it set Qt5_FOUND to FALSE so package "Qt5" is considered to be NOT
+  FOUND.  Reason given by package:
+
+  Failed to find Qt5 component "OpenGL" config file at
+  "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/Qt5OpenGL/Qt5OpenGLConfig.cmake"
+
+
+
+
+Call Stack (most recent call first):
+  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/vtk-config.cmake:153 (include)
+  CMakeLists.txt:73 (find_package)
+
+
+-- Could not find the VTK package due to a missing dependency: Qt5
+-- Found LibPROJ: /usr/lib/x86_64-linux-gnu/libproj.so (found version "9.4.0") 
+-- Could NOT find Eigen3 (missing: Eigen3_INCLUDE_DIR) 
+-- Could not find the VTK package due to a missing dependency: Eigen3
+-- Found X11: /usr/include   
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so
+-- Looking for XOpenDisplay in /usr/lib/x86_64-linux-gnu/libX11.so;/usr/lib/x86_64-linux-gnu/libXext.so - found
+-- Looking for gethostbyname
+-- Looking for gethostbyname - found
+-- Looking for connect
+-- Looking for connect - found
+-- Looking for remove
+-- Looking for remove - found
+-- Looking for shmat
+-- Looking for shmat - found
+-- Looking for IceConnectionNumber in ICE
+-- Looking for IceConnectionNumber in ICE - found
+-- Found EXPAT: /usr/lib/x86_64-linux-gnu/libexpat.so (found version "2.6.1") 
+-- Could NOT find double-conversion (missing: double-conversion_LIBRARY double-conversion_INCLUDE_DIR) 
+-- Could not find the VTK package due to a missing dependency: double-conversion
+-- Found LZ4: /usr/lib/x86_64-linux-gnu/liblz4.so (found version "1.9.4") 
+-- Found LZMA: /usr/lib/x86_64-linux-gnu/liblzma.so (found version "5.4.5") 
+-- Found JPEG: /usr/lib/x86_64-linux-gnu/libjpeg.so (found version "80") 
+-- Found TIFF: /usr/lib/x86_64-linux-gnu/libtiff.so (found version "4.5.1")  
+-- Found Freetype: /usr/lib/x86_64-linux-gnu/libfreetype.so (found version "2.13.2") 
+-- Could NOT find utf8cpp (missing: utf8cpp_INCLUDE_DIR) 
+-- Could not find the VTK package due to a missing dependency: utf8cpp
+-- vtkDICOM: Building as an External VTK Module
+-- Performing Test COMPILER_HAS_HIDDEN_VISIBILITY
+-- Performing Test COMPILER_HAS_HIDDEN_VISIBILITY - Success
+-- Performing Test COMPILER_HAS_HIDDEN_INLINE_VISIBILITY
+-- Performing Test COMPILER_HAS_HIDDEN_INLINE_VISIBILITY - Success
+-- Performing Test COMPILER_HAS_DEPRECATED_ATTR
+-- Performing Test COMPILER_HAS_DEPRECATED_ATTR - Success
+CMake Warning at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/lib/x86_64-linux-gnu/cmake/vtk-9.1/vtkModuleWrapPython.cmake:687 (message):
+  Building shared Python modules against static VTK modules only supports
+  consuming the VTK modules via their Python interfaces due to the lack of
+  support for an SDK to use the same static libraries.
+Call Stack (most recent call first):
+  CMakeLists.txt:227 (vtk_module_wrap_python)
+
+
+-- Configuring done (4.9s)
+-- Generating done (0.1s)
+-- Build files have been written to: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/build-952-asan

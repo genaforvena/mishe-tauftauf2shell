@@ -1,0 +1,55 @@
+gmake[2]: *** No rule to make target '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkWrapHierarchy-9.1', needed by 'Source/CMakeFiles/vtkDICOM-hierarchy'.  Stop.
+gmake[2]: *** Waiting for unfinished jobs....
+[  1%] Generating the wrap hierarchy for VTK::DICOM
+[  1%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMMetaData.cxx.o
+[  1%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMFilePath.cxx.o
+[  2%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDictionary.cxx.o
+/bin/sh: 1: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/deps/root/usr/bin/vtkWrapHierarchy-9.1: not found
+gmake[2]: *** [Source/CMakeFiles/vtkDICOM-hierarchy.dir/build.make:125: lib/vtk-9.1/hierarchy/DICOM/vtkDICOM-hierarchy.txt] Error 127
+gmake[1]: *** [CMakeFiles/Makefile2:209: Source/CMakeFiles/vtkDICOM-hierarchy.dir/all] Error 2
+gmake[1]: *** Waiting for unfinished jobs....
+[  3%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMFile.cxx.o
+[  3%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMFileDirectory.cxx.o
+[  4%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMTag.cxx.o
+[  5%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMTagPath.cxx.o
+[  5%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMVR.cxx.o
+[  6%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMVM.cxx.o
+[  6%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMCharacterSet.cxx.o
+[  7%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMCharacterSetTables.cxx.o
+[  8%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDataElement.cxx.o
+[  8%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDictHash.cxx.o
+[  9%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDictEntry.cxx.o
+[  9%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDictPrivate.cxx.o
+[ 10%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMDirectory.cxx.o
+[ 10%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMFileSorter.cxx.o
+[ 11%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMGenerator.cxx.o
+[ 12%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMImageCodec.cxx.o
+[ 12%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMSCGenerator.cxx.o
+[ 13%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMCTGenerator.cxx.o
+[ 13%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMMRGenerator.cxx.o
+[ 14%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMParser.cxx.o
+[ 15%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMCompiler.cxx.o
+[ 15%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMReader.cxx.o
+[ 16%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMSliceSorter.cxx.o
+[ 16%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMSequence.cxx.o
+[ 17%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMItem.cxx.o
+[ 17%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMSorter.cxx.o
+[ 18%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMUtilities.cxx.o
+[ 19%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMUtilitiesUIDTable.cxx.o
+[ 19%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMValue.cxx.o
+[ 20%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMWriter.cxx.o
+[ 20%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMAlgorithm.cxx.o
+[ 21%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMLookupTable.cxx.o
+[ 22%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMApplyPalette.cxx.o
+[ 22%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMApplyRescale.cxx.o
+[ 23%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMToRAS.cxx.o
+[ 23%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMCTRectifier.cxx.o
+[ 24%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMMetaDataAdapter.cxx.o
+[ 24%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkDICOMUIDGenerator.cxx.o
+[ 25%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkNIFTIHeader.cxx.o
+[ 26%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkNIFTIReader.cxx.o
+[ 26%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkNIFTIWriter.cxx.o
+[ 27%] Building CXX object Source/CMakeFiles/DICOM.dir/vtkScancoCTReader.cxx.o
+[ 27%] Linking CXX static library ../lib/libvtkDICOM-9.1.a
+[ 27%] Built target DICOM
+gmake: *** [Makefile:136: all] Error 2

@@ -33,3 +33,16 @@
   Clang ASan/plain lanes and checks exactly 14 assertions. Result at staging:
   14 PASS / 0 FAIL. Every run is local; no external system was probed.
 - `upstream/` is a local clone used only to extract the pins; it is ignored.
+
+- Advisory version bound (W6): VTK v9.5.2's
+  `Remote/vtkDICOM.remote.cmake` (read-only fetch from Kitware/VTK) pins
+  `GIT_TAG d29a996ab2a49375a59cef5e381c1c25185ffa50`, already present in
+  the local `upstream/` clone (2024-11-02, "Bump the version number to
+  0.8.17"). That commit's `Source/vtkDICOMItem.cxx` sha256 is
+  `c53664edef2e5a7fa99237ef5a7b8e0eb62f371b289cca3cfda34e7cb44ee35c`;
+  its `Source/vtkDICOMParser.cxx` sha256 is
+  `60e4d38c9ef01c8d8f788274c8fd8edbfda6fca4ca151a8622e65fe9c8f70cd6`.
+  Exact-source build, ASan, gdb and controls:
+  `evidence/vtk952-version-gap.txt`. VTK 9.6.0/9.6.1 pin
+  `d1e25090f354542d7bd85c08ee36d8dc22bbbcd8`, whose `Item.cxx` sha256
+  equals the vulnerable parent pin.

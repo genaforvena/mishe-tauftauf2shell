@@ -6,4 +6,7 @@ build-fixed/
 vuln-src/
 fixed-src/
 probe.o
+src-952/
+build-952/
+build-952-asan/
 evidence/corpus/

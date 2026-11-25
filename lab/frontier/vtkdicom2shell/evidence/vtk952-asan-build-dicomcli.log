@@ -1,0 +1,6 @@
+[ 89%] Built target DICOM
+[ 96%] Building CXX object DicomCli/CMakeFiles/dicomcli.dir/readquery.cxx.o
+[ 96%] Building CXX object DicomCli/CMakeFiles/dicomcli.dir/progress.cxx.o
+[ 96%] Building CXX object DicomCli/CMakeFiles/dicomcli.dir/vtkConsoleOutputWindow.cxx.o
+[100%] Linking CXX static library ../lib/libdicomcli.a
+[100%] Built target dicomcli

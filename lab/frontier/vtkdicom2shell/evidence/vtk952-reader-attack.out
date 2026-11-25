@@ -1,0 +1,8 @@
+2026-11-25 18:00:38.047 (   0.005s) [        C1C84480]     vtkDICOMReader.cxx:2407   ERR| vtkDICOMReader (0x5be62b350dd0): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/src-952/Source/vtkDICOMParser.cxx, line 2467
+vtkDICOMParser (0x5be62b3554f0): At byte offset 204 in file "evidence/undef-ob-chosen.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+2026-11-25 18:00:38.047 (   0.005s) [        C1C84480]     vtkDICOMReader.cxx:2407   ERR| vtkDICOMReader (0x5be62b350dd0): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/src-952/Source/vtkDICOMParser.cxx, line 2467
+vtkDICOMParser (0x5be62b3554f0): At byte offset 226 in file "evidence/undef-ob-chosen.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
