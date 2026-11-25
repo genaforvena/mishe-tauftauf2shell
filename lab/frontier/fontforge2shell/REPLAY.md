@@ -301,3 +301,12 @@ bounded path-sensitive count (6 in the live tree). Normalized hashes:
 `scan-w18-pie.out` `313c4ce4…6a2176094` (byte-identical to W15's PIE scan).
 Full method, raw dump hashes and limitations in `ALLOCSTATE.md`. Author-side
 negative, no witness verdict, no grade change, no r5.
+
+Clean-archive receipt at `42e0f33f` (09:32Z): archive extracted to
+`/tmp/ff2s-w18-clean-I5iWW8`, pinned tarball copied in, both offline builds
+and the W15 baseline rebuilt; `replay-real.sh` 17/17, `replay-nonpie.sh`
+15/15, `replay-w15.sh` 6/6, `replay-w18.sh` 7/7, chain rc 0. The PIE scan
+hash `313c4ce4…6a2176094` is byte-identical to the live tree; the non-PIE
+scan has three printable fragments instead of six and the `encs` delta is
+`+0x7b0` instead of `+0x730` (W9/W15 build-path sensitivity). No candidate
+is a code pointer in either tree. Author-side replay, not a witness verdict.

@@ -51,6 +51,21 @@ fb1b4ea80db30fa4c3a0cd79e1abc94e4f7c4b381af2fdc48290bebf5bd6df7a  alloc-w18.out
 Raw dump hashes (volatile heap bytes; recorded for provenance only):
 `3a45cfb4…641664c8` (non-PIE), `e6079d07…9bbe468e` (PIE).
 
+## Clean-archive receipt (09:32Z)
+
+`git archive 42e0f33f lab/frontier/fontforge2shell` into
+`/tmp/ff2s-w18-clean-I5iWW8`, with the pinned tarball copied in, rebuilt
+both offline builds and the W15 baseline, then ran `sh replay-w18.sh`:
+`REPLAY_REAL_OK: 17/17`, `REPLAY_NONPIE_OK: 15 checks, 0 failed`,
+`REPLAY_W15_OK: 6 checks, 0 failed`, `REPLAY_W18_OK: 7 checks, 0 failed`,
+script chain rc 0. The PIE scan hash is byte-identical to the live tree
+(`313c4ce4…6a2176094`, i.e. no candidates in either). The non-PIE scan has
+three printable fragments instead of six (`8e08198c…60aca650de`), and the
+`encs` delta is `+0x7b0` instead of `+0x730`
+(`0x555555c48430` -> `0x555555c48be0`, `0xa92220` -> `0xa929d0`) — the same
+build-path sensitivity W9 and W15 recorded for this headless path. Both
+transcripts still report `glyph=-1 i=3`; the decision is unchanged.
+
 ## Disposition
 
 The changed allocation state still puts no live code pointer in the negative
