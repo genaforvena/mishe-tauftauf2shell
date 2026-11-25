@@ -356,4 +356,7 @@ vulnerable/fixed differential. It is not rung 5: the overwritten words are
 the fixed enum OID and pointer values, no command side effect and no
 saved instruction pointer. The CVE's `%s` parser primitive retains its
 separate rung-4-as-labeled status. Recipe, controls, binaries, hashes and
-limits are in `realbuild/twonode/FINDINGS.md` and `runs/`.
+limits are in `realbuild/twonode/FINDINGS.md` and `runs/`. An author
+clean-archive replay of commit `52473a73` reproduced both signal-11
+terminations (`realbuild/twonode/clean-archive-replay.txt`); an independent
+witness verdict is still owed.

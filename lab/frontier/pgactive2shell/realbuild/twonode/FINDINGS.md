@@ -134,3 +134,15 @@ a live process, and together with the vulnerable/fixed crash differential
 it makes the remote-triggered denial of service causal. The library hash was
 recorded before the run (`3177a37c...162998`) and restored afterwards.
 No command execution or instruction-pointer control is demonstrated.
+
+## Author clean-archive replay (2026-11-25 14:03Z)
+
+`git archive HEAD lab/frontier/pgactive2shell/realbuild/twonode` extracted
+to `/tmp/pgactive-two-clean` and `sh run-two.sh` there reproduced the
+result from committed bytes only: both nodes ready, handler registered,
+both inserts committed, `TERMINATIONS1=1 TERMINATIONS2=1` with signal 11
+in each server log. The first attempt hit a stale cluster left on port
+58432 by a harness-bug run; after stopping it the unchanged script
+replayed cleanly. Exact statuses, hashes and log lines are in
+`clean-archive-replay.txt`. This is an author replay, not an independent
+witness verdict.

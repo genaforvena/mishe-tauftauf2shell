@@ -1,0 +1,25 @@
+Author clean-archive replay, 2026-11-25 14:03Z (commit 52473a73).
+
+  git archive HEAD lab/frontier/pgactive2shell/realbuild/twonode | tar x -C /tmp/pgactive-two-clean
+  cd /tmp/pgactive-two-clean/lab/frontier/pgactive2shell/realbuild/twonode
+  sh run-two.sh
+
+Library recorded at startup
+(/tmp/twonode-used-sha.txt):
+  3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998  .../lib/pgactive.so
+
+Statuses:
+  NODE1_READY=r  NODE2_READY=r
+  HANDLER_REG1=0 HANDLER_REG2=0  INSERT1=0 INSERT2=0
+  PGSTOP1=0 PGSTOP2=0
+  TERMINATIONS1=1  TERMINATIONS2=1
+
+Server logs:
+  server1.log:91: ... background worker "pgactive apply worker" (PID 1417276)
+      was terminated by signal 11: Segmentation fault
+  server2.log:58: ... background worker "pgactive apply worker" (PID 1417275)
+      was terminated by signal 11: Segmentation fault
+
+First attempt failed only because a stale loopback cluster from an earlier
+harness-bug run still held port 58432; it was stopped and the replay was
+rerun unchanged. This is an author replay, not a witness verdict.
