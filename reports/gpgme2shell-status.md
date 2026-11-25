@@ -501,3 +501,8 @@ statements, rung-4 mechanics with chosen wire bytes in the stale buffer, no
 pointer/IP/command control, no benign side effect, no stock or live-target
 claim, no r5. All real-path results remain author-side; no witness verdict
 has landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101.
+
+Clean-archive replay of commit `d3d9a373` into `/tmp/gpgme-w13-clean`
+(`git archive` of the lab subtree, no network): `sh run-keybypass.sh` gave
+`PASS=9 FAIL=0`, rc 0 with the same three case outcomes. Author-side only;
+no witness verdict is claimed for this standalone mechanics probe.
