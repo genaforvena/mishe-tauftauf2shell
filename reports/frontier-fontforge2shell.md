@@ -184,6 +184,22 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   clean binaries with the live scripts. The rung-4 overflow result is
   unchanged, but consumer rc claims are limited to the exact build path
   measured in `CONSUME.md` / `FILECHOICE.md`. No pointer/IP, command or r5.
+- W10 (`VALUE-CEILING.md`, author-side, no grade change): the single-
+  iteration RHS is `min2*256 + min1` and both fields are 16-bit
+  `getformint16()` values, so the write value is at most `0x0100FEFF` —
+  byte 3 is only 0 or 1, never an arbitrary address byte. The real plain
+  build measured `0x21 -> 0x0100feff00000021` and bytes `ff fe 00 01`
+  at `encs-4` on `value-ceiling.pcf`. A live `char*` to `""` sits at byte
+  offset `encs-200`, inside the file-chosen `-256..-1` glyph range;
+  `glyph=-50` with RHS `0x00414243` changed it from
+  `0x0000555555c227f0` to `0x0000555500414243` — three file-chosen bytes
+  inside a real pointer field (gdb hardware watchpoint). Negative: the
+  changed pointer is not dereferenced on this one-`Import()` path (plain
+  rc 0); ASan reports only the `WRITE of size 4` at :1751. Source-bound,
+  the real post-overflow consumer `figureProperEncoding` (:198-279)
+  bounds-checks `enc` before `map->map[enc]` and recomputes `i` elsewhere.
+  Both patched builds and both in-bounds controls are clean. No full
+  pointer control, marker, command or r5, and no witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

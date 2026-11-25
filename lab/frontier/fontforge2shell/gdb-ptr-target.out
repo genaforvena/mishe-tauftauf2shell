@@ -1,0 +1,48 @@
+Breakpoint 1 at 0x387fd7: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c, line 1751.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Breakpoint 1, PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
+HIT glyph=-50 i=0 encs=0x555555c48240
+0x555555c48160:	0x0000000000000000	0x0007000000070000
+0x555555c48170:	0x0000000000010008	0x0000555555c227f0
+0x555555c48180:	0x0000000000000000	0x00000000ffffffff
+0x555555c48190:	0x0000000000000000	0x0000000000000000
+0x555555c481a0:	0x0000000000000000	0x0000000000080000
+0x555555c481b0:	0x0000000000000000	0x0000000000000000
+0x555555c481c0:	0x0000000000000000	0x0000000000000071
+0x555555c481d0:	0x0000000000000000	0x0007000000070000
+Hardware watchpoint 2: *(long*)((char*)encs-200)
+
+Hardware watchpoint 2: *(long*)((char*)encs-200)
+
+Old value = 93824999368688
+New value = 93823564857923
+PcfReadEncodingsNames (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1748
+1748		for ( i=0; i<tot; ++i ) {
+after write, pointer word at encs-200:
+0x555555c48178:	0x0000555500414243
+0x555555c48178:	0x43	0x42	0x41	0x00
+
+Watchpoint 2 deleted because the program has left the block in
+which its expression is valid.
+PcfParse (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1832
+1832	    if ( sf->onlybitmaps )
+end of run
+#0  PcfParse (file=0x555555c21c00, toc=0x555555c37c50, sf=0x555555c337e0, map=0x555555c35bf0, b=0x555555c47fc0, encname=0x555555c47f40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1832
+#1  0x00005555558ddfd3 in SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/value-atk50.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2164
+#2  0x00005555558de583 in _SFImportBDF (sf=0x555555c337e0, filename=0x555555c36ab0 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/value-atk50.pcf", ispk=2, toback=0, map=0x555555c35bf0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2226
+#3  0x00005555558dec6e in FVImportBDF (fv=0x555555c35c30, filename=0x555555c35e00 "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell", ispk=2, toback=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:2329
+A debugging session is active.
+
+	Inferior 1 [process 3188528] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

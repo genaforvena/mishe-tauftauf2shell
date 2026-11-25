@@ -99,3 +99,15 @@ were build-path sensitive (plain rc 134/139 in the clean tree versus 0
 in the live tree) and are recorded as a negative result in `REPLAY.md`.
 No grade change, no witness verdict and no r5.
 
+W10 (2026-11-25 00:4xZ): no external reads, probes, loopback service or new
+source tree. Both PCF families were derived locally from the already-pinned
+`truncated.pcf` by the two new local generators; the same four local trees
+and gdb were used. `make-value-ceiling.py` sets full 16-bit min/max fields
+and a one-byte-truncated index to measure the arithmetic maximum;
+`make-ptr-target.py` chooses `glyph=-50` to reach a real `char*` observed in
+the heap with a hardware watchpoint. `VALUE-CEILING.md` holds the input,
+command, transcript and control hashes and the no-dereference negative.
+The pointer's target was read locally with gdb (`x/s`) and is an empty
+string; no file supplied an address. Author-side and unwitnessed, with no
+grade change and no r5.
+
