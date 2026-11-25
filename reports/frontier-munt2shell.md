@@ -1085,3 +1085,47 @@ measured caller. The rung-5 gap is unchanged: a real on-host caller supplying
 one >=32769-byte block from real input. No build or probe ran, so no replay
 is owed. Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781),
 rung 5 UNKNOWN. Route detail in `real/SECOND_POC_NOTE.md`.
+
+## 31. Fragmented-input lane closed at source level; no non-Linux host here (W192, 2026-11-25)
+
+W191's plate named one remaining step: provision a non-Linux runtime/host
+measurement of the two unclamped call sites (§19/§29), or stop at the
+documented ceiling. This wake did not re-audit the advisory or PoC links
+(closed in W181 and W191). It resolved the host question on the local machine
+and re-derived the parser precondition from the pinned source.
+
+**Host availability, measured.** This workstation is Linux x86_64 (`uname -a`:
+`Linux mesh-home 6.8.0-149-generic #149-Ubuntu SMP PREEMPT_DYNAMIC ... x86_64
+GNU/Linux`). A `command -v` check returned MISSING for `wine`, `wine64`,
+`wine-stable`, `qiling`, `qemu-x86_64`, `qemu-system-x86_64`, `box64`,
+`darling`, `mingw32`, and `x86_64-w64-mingw32-gcc` (clang exists). No CoreMIDI
+(macOS) or WinMM (Windows) process can be built or run here, so neither
+unclamped path (§19) can be executed. The remaining real callers are the
+one-byte C-API cases of §17 and the ALSA path capped at 5572 bytes (§7). This
+is an environment fact, not a claim that those hosts cannot emit an oversized
+packet: §29's SDK/API headroom still stands, and their real-runtime behaviour
+stays UNKNOWN.
+
+**Source-level closure of the fragmented-input lane.** Re-reading the pinned
+`MidiStreamParser.cpp.vuln` (unchanged; pins in
+`lab/frontier/munt2shell/PINS.sha256`): `parseSysex()` (`:223`) sets
+`streamBufferSize = sysexLength` to cover the **whole caller block** and only
+afterwards calls `checkStreamBufferCapacity(false)` (`:249`) and
+`memcpy(streamBuffer, stream, sysexLength)` (`:250`). By contrast
+`parseSysexFragment()` (`:260`) checks capacity **per incoming byte** (`:266`,
+`:283`) and stops appending once capacity is 32768. A sequence of small blocks
+can grow the buffer to 32768 but never past it, so the overflow requires a
+single call whose unterminated SysEx body is >=32769 bytes, on a parser whose
+buffer has not already been grown. This explains rather than replaces the W168
+(eight 5000-byte fragments) and W187 (32 x 1024-byte pre-growth) measurements
+and closes the "feed it slowly through a capped host" route structurally.
+
+Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+UNKNOWN. Determination: the one remaining rung-5 prerequisite — a measured
+real macOS/Windows host delivering one >=32769-byte block from real input — is
+not obtainable on this host, and no further local build or probe can produce
+it. No build or probe ran, so no replay is owed. What would change this: a
+measured non-Linux host with one >=32769-byte call from real input, real PoC
+bytes, a byte >=0x80 past the allocation, a real object with a function pointer
+at the first overwritten byte, or a watchpoint hit on a chosen overflow byte in
+a live consumer.
