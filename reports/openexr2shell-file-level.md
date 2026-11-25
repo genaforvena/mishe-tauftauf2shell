@@ -2124,3 +2124,41 @@ PASS` rc 0 with all five W197 evidence hashes matching, and `sh
 harness/w198-negatives.sh` printed `RESULT PASS` rc 0 with both W198 hashes
 (`111771e0...`, `1b0b6837...`) matching the working tree byte-for-byte.
 Author replay, not a witness verdict; grade and rung-5 status unchanged.
+
+## W199: no-PIE relink does not rescue the file-chosen IP under ASLR (2026-11-25 10:55Z)
+
+Prediction: a `-no-pie` relink of the pinned 3.5.2 `exrcheck` would make code
+addresses invariant, so a file-carried code pointer could be reached without
+the W197 ASLR-off condition. Result: NEGATIVE, observed.
+
+Relinking the existing pinned objects with `c++ -no-pie` produces an
+`ELF 64-bit LSB executable` at fixed addresses (`opaque.c:79` breakpoint at
+`0x502f4e`). Running the committed W197 PoC against that binary under gdb with
+`set disable-randomization on` never reaches that breakpoint. Instead the
+process faults at `attributes.c:305` in `exr_attr_list_destroy` with
+`ctxt=0x6c6f00` (the PIE build has `ctxt=0x555555826f00`): the non-PIE link
+moves the heap base, so the file-carried absolute heap pointer written into
+`list->entries[0]` is stale and `attr_destroy()` dereferences garbage before
+the chosen destructor is invoked. Observed fault RIP
+`exr_attr_list_destroy+68` (`0x4ff904`), backtrace
+`exr_attr_list_destroy -> internal_exr_destroy_part -> internal_exr_destroy_parts`.
+
+One-command replay: `cd lab/openexr2shell-real && sh harness/w199-nopie.sh`
+-> `RESULT PASS` rc 0 twice, `evidence/w199-nopie.out` sha256
+`9101c04bf562c811659cfd59f9a09fab1dfc72aa03198c6285de007d5f053864` both
+times. The script relinks from the committed pinned objects; the PoC's sha256
+is checked before the run.
+
+This bounds the no-PIE-route idea at W197's fixed point. It is not a proof for
+other link modes or a regenerated fixed point: a PoC regenerated against the
+non-PIE heap geometry would need new absolute heap pointers, which again are
+not ASLR-invariant. No grade change: rung 4 author-only, no witness verdict,
+no r5. At 10:53Z the witness wake service was RED again (chat #4268) and the
+W197 replay offer #4160 had no verdict; the witness queue also holds drwav,
+mcuboot, open5gs, vtkdicom and hping3shell offers.
+
+W199 clean-archive receipt (10:56Z): `git archive c52b7604
+lab/openexr2shell-real` into `/tmp/w199-clean`, with gitignored `src/` and
+`build-vuln-plain/` symlinked from the live checkout; `sh
+harness/w199-nopie.sh` returned `RESULT PASS` rc 0 with the same
+`9101c04b...` evidence hash. Author replay, not a witness verdict.

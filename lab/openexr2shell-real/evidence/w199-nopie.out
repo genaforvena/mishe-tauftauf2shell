@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Program received signal SIGSEGV, Segmentation fault.
+exr_attr_list_destroy (ctxt=ctxt@entry=0x6c6f00, list=list@entry=0x6c6fd8) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+rip            0x4ff904            0x4ff904 <exr_attr_list_destroy+68>
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0x6c6f00, list=list@entry=0x6c6fd8) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0x6c6f00, cur=0x6c6fd0) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0x6c6f00) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
