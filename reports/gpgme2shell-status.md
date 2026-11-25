@@ -396,3 +396,34 @@ network); `sh build-plain.sh` gave `BUILD PLAIN OK`; `sh run-tcache-full.sh`
 `PASS=19 FAIL=0`, rc 0 throughout. The replayed gdb check again gave
 `equal=1` and the vulnerable full-bin case again aborted with `double free
 or corruption (!prev)`. Scope note #4125 sent to witness, no verdict.
+
+## W11 — EOF early return in read_status() (2026-11-25 06:2xZ)
+
+All prior status-line reproductions needed a user status callback that
+returned an error. W11 asks whether the other early return in `read_status()`
+is enough: `fake-eof-gpg.py` writes exactly 1024 bytes with no LF to the
+status pipe and exits, while `status_eof.c` installs a logging-only callback
+that always returns 0. With `readpos=1024` the next `read_status()` reallocs
+at `engine-gpg.c:1494`, freeing the 0x410 chunk, and returns at `:1519` on
+EOF (or `:1502` on a read error) before the writeback at `:1610`.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-eof.sh` gives
+`PASS=25 FAIL=0`, rc 0; raw output in `evidence/eof-*.out` / `.rc`
+(gitignored). Vulnerable 2.2.0 exits 1 with ASan `attempting double-free`
+in `gpg_release engine-gpg.c:602` at the next operation's
+`_gpgme_op_reset → gpgme_op_keylist_start keylist.c:1295`; the first free is
+`realloc read_status engine-gpg.c:1494`, and op2 never starts. Under gdb at
+the realloc site GPGME's buffer prints `buffer[1000]=0x48`, the byte chosen
+in the fake engine's 1024 wire bytes. Fix-patched 2.2.0, stock 2.3.1 and
+the vulnerable `EOF_LEN=20` control all exit 0, start op2 and print
+`release done`. Five consecutive vulnerable runs produced the same ASan
+double free; the EOF callback's log count varies (0 or 1) with fd-removal
+timing, so that incidental count is not a suite check.
+
+This widens the measured trigger from a failing application callback to a
+plain status-pipe close after a full unterminated buffer. Grade unchanged:
+rung-4 mechanics on a real GPGME build, with chosen wire bytes observed in
+the stale buffer before the second free. No pointer/IP/command control, no
+chosen-address write, no benign command side effect, no stock-layout or
+live-target claim and no r5. Every real path remains author-side: no
+witness verdict has landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101.

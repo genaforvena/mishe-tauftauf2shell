@@ -266,3 +266,29 @@ This is a bounded negative result on plain glibc 2.39: both allocator
 dispatch branches for the double free abort, so the W9 alias is not a
 tcache-dup or chosen-address write. No pointer/IP/command control, no side
 effect, no stock-layout or live-target claim and no rung 5.
+
+## EOF early return needs no callback error (W11)
+
+`fake-eof-gpg.py` writes exactly 1024 bytes with no LF to the status pipe and
+exits. `status_eof.c` installs a status callback that only logs and always
+returns 0. With `readpos=1024`, the next `read_status()` takes the realloc at
+`engine-gpg.c:1494` (freeing the 0x410 chunk) and then the `nread==0` early
+return at `:1519` (or a read error at `:1502`), both before the pointer
+writeback at `:1610`. No caller callback error is required: closing the pipe
+after a full un-terminated buffer is enough.
+
+`sh run-eof.sh` gives `PASS=25 FAIL=0`. Vulnerable 2.2.0 faults with ASan
+`attempting double-free` in `gpg_release engine-gpg.c:602` at the next
+operation's `_gpgme_op_reset → gpgme_op_keylist_start keylist.c:1295`, first
+free by `realloc read_status engine-gpg.c:1494`; op2 never starts. Under gdb
+at the realloc site, the GPGME buffer holds `buffer[1000]=0x48` from the
+fake engine's wire bytes. Fix-patched 2.2.0, stock 2.3.1 and the vulnerable
+`EOF_LEN=20` short-line control all exit 0, start op2 and print
+`release done`. Raw output is in `evidence/eof-*.out` / `.rc` (gitignored).
+
+The callback log count is timing-dependent (0 or 1) because the EOF event
+can race the fd-removal notification; the double-free outcome was stable in
+five consecutive runs. This widens the trigger from W1-W10's failing user
+callback to a plain gpg pipe close, but it is still rung-4 mechanics: no
+pointer/IP/command control, no chosen-address write, no benign command side
+effect, no stock-layout or live-target claim and no r5.

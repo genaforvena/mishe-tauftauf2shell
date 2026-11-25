@@ -137,4 +137,14 @@ link_colon_driver () {
 link_colon_driver colon-reuse-vuln gpgme-asan-build
 link_colon_driver colon-reuse-fixed gpgme-fixed-build
 link_colon_driver colon-reuse-231 gpgme-231-build
+link_eof_driver () {
+  out=$1; build=$2
+  clang -fsanitize=address -fno-omit-frame-pointer -g -O0 \
+    -I "$build/src" -I "$PREFIX/include" -o "$out" status_eof.c \
+    "$build/src/.libs/libgpgme.a" "$PREFIX/lib/libassuan.a" \
+    "$PREFIX/lib/libgpg-error.a" -lpthread -ldl
+}
+link_eof_driver status-eof-vuln gpgme-asan-build
+link_eof_driver status-eof-fixed gpgme-fixed-build
+link_eof_driver status-eof-231 gpgme-231-build
 echo "BUILD OK"

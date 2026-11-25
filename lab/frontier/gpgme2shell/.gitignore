@@ -63,3 +63,9 @@ realbuild/status-tcache-full-plain-fixed
 realbuild/evidence/tcachefull-*.out
 realbuild/evidence/tcachefull-*.rc
 realbuild/evidence/tcachefull-*.cmd
+realbuild/status-eof-vuln
+realbuild/status-eof-fixed
+realbuild/status-eof-231
+realbuild/evidence/eof-*.out
+realbuild/evidence/eof-*.rc
+realbuild/evidence/eof-*.cmd
