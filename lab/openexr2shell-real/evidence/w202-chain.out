@@ -1,0 +1,12 @@
+ASLR=off (gdb set disable-randomization on)
+CTXT=0x555555826f00 FREEFN_BEFORE=0x555555663e50 UNP=0x555555828618 SZ=104 TARGET=0x7ffff7feb900
+MEMCPY_RDI=0x555555826f00 RSI=0x555555828618 RDX=104 SRC_FREEFN=0x7ffff7658750
+SYSTEM_RDI=0x555555828520
+0x555555826f60:	0x00007ffff7658750
+touch /tmp/w202m
+touch /tmp/w202m
+Detaching after vfork from child process
+opaque.c:79
+memmove-vec-unaligned-erms.S
+memmove-vec-unaligned-erms.S
+memmove-vec-unaligned-erms.S

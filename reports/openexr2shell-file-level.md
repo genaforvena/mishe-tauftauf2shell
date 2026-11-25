@@ -2248,3 +2248,60 @@ lab/openexr2shell-real` into `/tmp/w201-clean`, with the gitignored `src/` and
 harness/w201-nopie-aslr-on.sh` returned `RESULT PASS` rc 0 with the same
 `0a6b8367...` evidence hash and PoC sha256 `c75957f1...`. Author replay, not
 a witness verdict.
+
+## W202: file-chosen memcpy rewrites ctxt->free_fn; consumer runs a benign command (2026-11-25 16:18Z)
+
+W197 left the indirect call target file-chosen but benign. Prediction: choose
+`memcpy` as that target, so the UNMODIFIED pinned 3.5.2 `exrcheck -c` executes
+`memcpy(ctxt, ud->unpacked_data, ud->unpacked_size)` with both source and
+length file-chosen; overwrite `ctxt->free_fn` (ctxt+96) with libc
+`__libc_system`, then let `attr_destroy()`'s trailing
+`ctxt->free_fn(attr)` (`attributes.c:271`) call `system(attr)`. The first 16
+bytes of the fake `exr_attribute_t` are the command string `touch /tmp/w202m`;
+`type=31` still sits at offset 20. Result: observed, with controls.
+
+Method: `cases/make_w202_poc.py` reuses the W195 pre-COPY2 dump and W197's
+two-variable fixed point (`dest=0x5555558280a0`, `slot=1088`); it writes the
+fake attribute, a `exr_attr_opaquedata_t` with `TARGET=libc memcpy`
+(`0x7ffff7feb900`), `unpacked_size=104`, `unpacked_data=dest+1400`, and at
+that source a payload whose bytes 96..103 are `SYSTEM=0x7ffff7658750`. The
+absolute addresses are the ASLR-off values measured once with gdb in the
+pinned build; every pointer, the target, the system address and the command
+come from the EXR. `cases/p202-memcpy-system.exr` sha256
+`7f3eda1b00f54b56ec75108f9012be6b035c8b6393ec1d7c2241f94be91e412e`.
+
+Observations in the UNMODIFIED pinned 3.5.2 `exrcheck -c`:
+
+- Under gdb ASLR-off, `opaque.c:79` shows `CTXT=0x555555826f00
+  FREEFN_BEFORE=0x555555663e50 UNP=0x555555828618 SZ=104
+  TARGET=0x7ffff7feb900`; at the chosen target,
+  `MEMCPY_RDI=0x555555826f00 RSI=0x555555828618 RDX=104
+  SRC_FREEFN=0x7ffff7658750`; memory at `ctxt+96` now reads
+  `0x00007ffff7658750`; at `__libc_system`, `SYSTEM_RDI=0x555555828520`
+  and `x/s` shows `"touch /tmp/w202m"`, followed by gdb's vfork detach for
+  the child. The debugger forced no pointer and no call.
+- Plain unmodified binaries with `setarch -R` (ASLR off, no debugger):
+  vulnerable 3.5.2 rc 139 with marker file created (`sha256
+  ba3fcb27c2fa1746e89409c3aba18556ceeed85886b33ea04e83c9686aad8301`
+  in the normalized evidence); fixed 3.5.3 on the same PoC rc 1 `bad`,
+  no marker; valid baseline on the vulnerable build rc 0 `OK`, no marker.
+- Vulnerable ASan build on the same PoC: `heap-buffer-overflow READ of size
+  3072` at pinned `internal_zstd.c:472`, through `exr_decoding_run` and
+  `readCoreScanlinePart ImfCheckFile.cpp:1467`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w202-benign-command.sh` -> `RESULT PASS` rc 0 twice, all five
+evidence hashes byte-identical: chain `54115664...`, vulnerable
+`ba3fcb27...`, fixed `46871818...`, safe `5cce1cae...`, ASan `71552269...`.
+The script checks the PoC, generator, dump and gdb-script hashes before any
+run, deletes the marker before each control, and normalizes PIDs, paths and
+addresses only in the ASan log.
+
+Disposition: this converts W197's chosen IP into an observed *command* with
+vulnerable, fixed and safe-input controls, all through the unmodified
+shipped `exrcheck -c`. It is still rung-4 mechanics at the rung-5 boundary:
+ASLR is off in every run (absolute file-carried addresses), the input is a
+local path with no wire/request, the command is a benign local `touch`, the
+process then faults, and there is no witness verdict. Rung 5 remains UNKNOWN.
+Would change the grade: an ASLR-on partial-overwrite or heap leak, a
+wire-fed affected process, or an independent witness replay and verdict.
