@@ -473,3 +473,16 @@ pointer source; no new experiment or rung.
   reachability: the lab config supplies the OCT KEK, ASLR is not defeated,
   there is no pointer/IP target, benign command or wire-derived address, and
   the witness has not replayed it. No grade change or r5.
+- W213 measured what the W212 overflow lands next to in the same pre-auth
+  bearer lane. At `jwe.c:602` a 40-byte control CEK (`0x555555667360`) and a
+  56-byte chosen-token CEK (`0x555555667390`) both had a `0x31` CEK chunk
+  followed by a `0x41` chunk with zeroed user bytes. The 48 chosen bytes fill
+  cek+0..47 and change only that next chunk's size field (`0x41` →
+  `0x4853494d2d323132`); user bytes from cek+48 and the next `0x41` header
+  are unchanged. Two fresh-process repeats matched. No live pointer, function
+  table or padded output buffer was adjacent in this configuration; this
+  agrees with the W189/W195/W211 negatives and does not settle the 64-byte
+  raw-key case (W187/W196 remain the authority). No pointer, marker, command,
+  ASLR defeat or wire-derived address was attempted; author-only, no grade
+  change, no r5. Evidence: `w2/evidence/w213-adj-{ctrl40,attack56}-gdb.log`
+  and PROVENANCE W213.

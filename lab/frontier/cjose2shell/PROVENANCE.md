@@ -950,3 +950,45 @@ a `SetHandler` that makes Apache answer HTTP 500 before auth. Two earlier
 clean-replay attempts under `/tmp` were failed setups, not negative results:
 one lacked the runner-created `html` DocumentRoot, one hit `/tmp/.htaccess`.
 The runner now creates `html` and the readiness poll sleeps 0.2 s per try.
+
+## W213 — adjacent heap object in the unauthenticated bearer lane (2026-11-25 08:26-08:29Z)
+
+Charter option 1's second question, which W212 did not measure: what does the
+48-byte overflow land next to in the real pre-auth consumer? Setup: the same
+private Apache, pinned module, vulnerable cjose build and config-derived KEK
+as W212, with a throwaway gdb command file, Apache config and two probe copies
+under `.mishe-tauftauf/tmp/w213-adj/` (gitignored, not committed). The runner
+starts Apache on 127.0.0.1:18444 as gdb's child and sends one unauthenticated
+bearer GET per process. Both tokens use the config KEK
+`30313233343536373839616263646566` so `jwe.c:602` is reached; 40 raw bytes is
+the intact control, 56 raw bytes wraps 48 chosen bytes. First attempt with a
+non-matching KEK on the control token stopped at `jwe.c:600` before the dump
+and is preserved as a failed setup in the throwaway log.
+Reproduce with pending breakpoints on `_cjose_jwe_decrypt_ek_aes_kw`,
+`AES_unwrap_key` and `jwe.c:602`; the last one's command list prints
+`jwe->cek`, then `x/16gx jwe->cek-16` and `x/112bx jwe->cek-16`. The W212
+config and module are unchanged; send the token with
+`W2_PORT=18444 W2_TAG=w213 W2_KEK=30313233343536373839616263646566 ./probe-oauth-bearer.py 40`
+and the same with `56`.
+
+Control (`w2/evidence/w213-adj-ctrl40-gdb.log`, sha256
+`dc77299a9c837709043b67d88a70dfbc16ccc661540f76186f8749bf9cc4ec49`): at
+`jwe.c:602` the CEK is `0x555555667360`, its chunk size is `0x31` at cek-8,
+and the next chunk at cek+32 has prev_size 0, size `0x41`, 48 zero bytes of
+in-chunk user data and a following chunk whose prev_size is 0 and size `0x41`.
+Attack (`w2/evidence/w213-adj-attack56-gdb.log`, sha256
+`74fcd25439fd199f18259e51afb699dafc1761bee28ff6506f99f74c1e387cb4`): the
+CEK is `0x555555667390` with the same layout; the chosen `4d 49 53 48 45 2d
+57 32 ...` fills cek+0..47, so the adjacent chunk's size field at cek+40
+reads `0x4853494d2d323132` instead of `0x41`. Bytes from cek+48 and the next
+`0x41` header are unchanged. Two fresh-process repeats produced the same CEK
+addresses, chunk sizes and overwritten bytes.
+
+Bounded negative for the 48-byte write in this pre-auth lane: the overflow
+reaches the adjacent chunk's size field but no observed live pointer, function
+table or padded output buffer. It agrees with the W189/W195 id_token heap
+scans and the W211 source-scope negative. This does not settle the 64-byte
+raw-key case (W187/W196 remain the authority); no pointer, marker, command,
+ASLR defeat or wire-derived address was attempted. Author-only, no grade
+change, no r5. Both runs returned HTTP 401 after the integrity failure and
+`ss -ltn` showed no 18444 listener afterwards.
