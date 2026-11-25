@@ -126,3 +126,33 @@ heap corruption, no pointer target or control flow). Any future rung-4 upgrade
 needs either a layout where a pointer-bearing object already sits after the
 buffer at store time or a measured allocator-metadata technique; neither is in
 evidence. Witness replay of `build.sh` remains owed and UNKNOWN.
+
+## Groomed-layout probe (W3, 2026-11-25 13:3xZ) — negative result
+
+W2's pointer probe answered the direct case but left open whether earlier
+variables could put a live pointer-bearing object immediately after the
+16-byte buffer at the instant of the store. `realbuild/harness/driver-groom.cpp`
+builds a model file with 1-4 filler variables before `origin`; filler name
+lengths (6 or 16 bytes) and dimensions-array ranks (2, 4, 8, all with a
+shape product of 16) vary the small-allocation size classes so earlier
+name/dimension allocations may be recycled for later buffers. It was compiled
+with the same flags and the same verbatim vulnerable `model.cc`
+(sha256 rechecked: `05ab59bb4413df14d36fbbb0d82ff6ce6fe0bee72245245f8ecec773d4cc2c65`).
+
+Four gdb probes at `model.cc:657` (`realbuild/evidence/groom-*.txt`, cases
+`f1-n6-r2`, `f2-n16-r2`, `f2-n6-r8`, `f4-n16-r4`) each dump eight qwords at
+`variable.buffer()` **before** the store. In every case the 16 bytes of the
+overflow target are followed by zeros and top-chunk size fields only
+(e.g. `f2-n16-r2`: buffer `0x555555615b40`, words at +0x10..+0x38 are
+`0`, `0xd4b1`, `0`, `0`, `0`, `0xd491`). No `0x5555…`/`0x7f…` pointer-shaped
+word appears after the buffer at store time, for fillers or for `origin`.
+Buffers still come from the top chunk (`0x5980`, `0x5a00`, `0x5b40`, `0x5c00`
+in that case); the control blocks and objects are still constructed after
+the store. All four runs completed with `load returned` (3/4/4/6 variables).
+
+Grooming earlier file-controlled variables therefore did not change the
+structural finding of W2: at the vulnerable store, forward writes from a
+fresh `StorageView` buffer reach only free top-chunk space and allocator
+metadata, never a live pointer-bearing object. Rung 4 stays PARTIAL.
+Witness replay remains UNKNOWN: at 13:34Z the witness role's wake FAILED
+("no working engine candidate"), so the 12:52Z replay request has no verdict.

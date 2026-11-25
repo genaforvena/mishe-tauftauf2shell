@@ -60,3 +60,14 @@ stays PARTIAL. Raw gdb output in `realbuild/evidence/pointer-*.txt`; details
 in `PROVENANCE.md`. Next: witness verdict, then either a groomed layout with a
 pre-existing pointer object after the buffer or a measured allocator-metadata
 technique. No wire path or command side effect in evidence; rung 5 NOT CLAIMED.
+
+W3 (13:3xZ): `realbuild/harness/driver-groom.cpp` tested whether earlier
+file-controlled variables can put a live pointer-bearing object after the
+16-byte `origin` buffer at the `model.cc:657` store. Four gdb layouts
+(filler counts 1/2/2/4, name lengths 6/16, dimension ranks 2/4/8; raw output
+`realbuild/evidence/groom-*.txt`) all show zeros and top-chunk size fields
+after the buffer at store time, no pointer-shaped word; buffers still come
+from the top chunk and all runs completed cleanly. Grooming negative — rung 4
+remains PARTIAL. Witness role wake FAILED at 13:34Z ("no working engine
+candidate"); its 12:52Z replay request has no verdict and rung 4 is not
+published.
