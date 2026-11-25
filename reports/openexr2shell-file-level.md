@@ -2462,3 +2462,46 @@ PIE mapping as W205's victim and the PIE binary has no command call to
 retarget to. It does not close a heap/address leak supplying full libc
 addresses, a wire-fed consumer, or a non-ctxt victim pointer. Grade and
 rung-5 status unchanged.
+
+## W207: no file-observable address leak for a same-process second file — negative (2026-11-25 19:1xZ)
+
+Prediction from a new source observation: `exrcheck` loops over every argv
+path and calls `exrCheck()` in one process
+(`src/bin/exrcheck/main.cpp:117,167`), so a second input could in principle
+be written after the first file's diagnostics are read. If normal decoding
+leaked a live heap or libc address, that address could be placed into a
+second file and W202's absolute-pointer chain could run with ASLR on, in a
+single unmodified process. Prediction: pinned 3.5.2 exposes such a leak.
+
+Result: NEGATIVE, measured and source-checked. Sweeping all 12 committed
+`cases/*.exr` through the pinned plain 3.5.2 `exrcheck -c` with ASLR left
+enabled produced zero `0x`-prefixed tokens in combined stdout/stderr,
+including all crashing and aborting inputs. The only context-address
+diagnostic, `internal_structs.c:62` `Context 0x%p: (%s) %s`, requires
+`ctxt->filename.str == NULL`; every context created by `exr_start_*` has a
+filename, and the decoding context explicitly installs `context_name` or
+`"<temporary>"` at `context.c:399`. `debug.c:250` prints three opaque
+handler pointers, but `exrcheck` never calls the debug printer. The
+two-regular-file condition is real (`OK OK`, rc 0); a FIFO second path is
+accepted as an argv path but reports `bad` (rc 1) because it is not
+seekable, so the dynamic-second-file variant is not available through that
+path either. An `-s` streamed FIFO run timed out without a verdict and is
+recorded as UNKNOWN, not as a pass or a failure of the chain.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w207-leak-negative.sh` -> `RESULT PASS` rc 0 three times, stable
+normalized evidence hash
+`d5d7b448cbd14293b6f834102e574c23be5c7b412477d39c5ac0bcb05e031ae5`
+in `evidence/w207-leak-negative.out`. The harness pins four source files
+and the baseline case by sha256, counts hex tokens per case and checks the
+regular-file and FIFO statuses.
+
+Disposition: keep the negative. This closes the "leak then reuse in a
+second file" lane for the pinned `exrcheck` as exercised: there is no
+file-observable ASLR-dependent address to bootstrap from, and a FIFO
+second path is rejected. It does not prove the absence of all leaks in
+other builds or consumers, nor close a wire-fed affected process. Grade
+and rung-5 status are unchanged: W202 remains the witness-confirmed
+rung-4 chain at its labeled ASLR-off scope; W203, W205, W206 and W207 are
+author-only negatives with no witness verdict.
+

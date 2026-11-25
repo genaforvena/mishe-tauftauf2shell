@@ -1,0 +1,21 @@
+ASLR=on (no setarch, no gdb)
+MULTI_FILE_LOOP=main.cpp:117 exrCheck() per argv path
+SECOND_REGULAR_FILE_STATUS=OK OK rc=0
+FIFO_SECOND_FILE_STATUS=OK bad rc=1 (FIFO not seekable)
+CONTEXT_PTR_LEAK_SITE=internal_structs.c:62 requires filename==NULL
+DECODE_CONTEXT_FILENAME=context.c:399 always set
+DEBUG_HANDLER_PRINT=debug.c:250 never called by exrcheck
+CASES_WITH_HEX_OUTPUT=0
+baseline.exr rc=0 hex=0
+baseline_tiled.exr rc=0 hex=0
+p193-e0-3131.exr rc=139 hex=0
+p193-e0-4141.exr rc=139 hex=0
+p193-e0-4242.exr rc=139 hex=0
+p195-chosen-deref.exr rc=139 hex=0
+p196-fake-attr.exr rc=139 hex=0
+p197-chosen-ip.exr rc=139 hex=0
+p202-memcpy-system.exr rc=139 hex=0
+poc.exr rc=134 hex=0
+poc5a.exr rc=134 hex=0
+poc_tiled.exr rc=134 hex=0
+RESULT PASS
