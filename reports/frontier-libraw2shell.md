@@ -758,4 +758,9 @@ live decode path and trigger the file-chosen OOB store. NOT rung 5: no chosen
 pointer/IP, benign marker, command side effect, ASLR study or live object at
 the written offsets; the consumer is a lab program, not a stock GUI or
 server, and no upstream merged fix exists. Author-side only; witness replay
-owed. All experiments were local and loopback-free.
+owed. All experiments were local and loopback-free. A clean `git archive
+c5657a2a` replay rebuilt the pinned trees with `bootstrap.sh` and reproduced
+all three lanes (`attack rc=1`, `no-option rc=0`, `fixed rc=0`,
+`WIRE_OOB_OK`); an earlier attempt from `eaee49cf` failed only because the
+runner resolved a caller-relative input path against `wire/`, corrected at
+`c5657a2a`.
