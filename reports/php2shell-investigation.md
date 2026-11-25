@@ -38,6 +38,27 @@ and no-kill controls are clean. Shim-delivered worker death keeps this at
 rung-4 mechanics; rung 5 (command execution) remains UNCLAIMED — see the
 wake-58 section below.
 
+**Amended 2026-11-24/25 (wake 59, owner rung-5 push): the 126714 unauth
+splice now reaches full COMMAND EXECUTION through a real application —
+tinyfilemanager 2.6 — with the shim kill still gating the rung-5 claim.**
+Same producer/consumer geometry as wake 58; the consumer app's entire
+auth state is `$_SESSION['filemanager']['logged']`, so the promoted
+record `filemanager|a:1:{s:6:"logged";s:5:"admin";}` (NUL-free) turns an
+anonymous request into the admin file manager; the app's DESIGNED upload
+then places evil.php in the docroot and the live FPM worker executes it
+(unique marker through the target process + `id` into a lab marker
+file). 8.4.28 (ftruncate fix), no-kill and safe-input controls all
+clean. The interrupted write remains the committed LD_PRELOAD kill shim
+(rung-4 mechanics): this wake MEASURED every stock attacker-reachable
+death mechanism on this host and found none that can interrupt the
+session pwrite in the splice-producing (no-truncate) shape — FPM's
+request_terminate_timeout SIGTERM is handled and never interrupts the
+copy (trace-proven), cgroup OOM fires only on truncate-first/fresh-page
+writes, io.max does not throttle buffered writes, PHP fatals are clean
+bailouts. Full rung 5 (attacker-caused mid-write death) stays UNCLAIMED
+with two structurally closed mechanisms; details, evidence logs and
+reopen conditions in `reports/php2shell-status.md` wake 59.
+
 Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
 new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
 — see the dedicated section below. It grades rung 2 as a demonstrated

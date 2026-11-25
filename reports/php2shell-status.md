@@ -1410,3 +1410,123 @@ shim kill (cgroup OOM or request_terminate_timeout mid-pwrite) — required
 for any full rung-5 claim on this lane regardless of gadget.
 Package installs recorded: `sudo apt-get install -y libgd-dev`
 (2.3.3, for the app runtime's Drupal platform requirement).
+
+## Wake 59 (2026-11-24/25) — rung-5 push: EXEC CHAIN CLOSED on a real app (shim kill); attacker-caused death measured NEGATIVE on every stock mechanism
+
+Owner push: "push php2shell to full rung-5; push earlier stages if
+needed."
+
+**(1) Stage 1 — unauth splice -> session takeover -> DESIGNED admin upload
+-> live-worker command execution, end-to-end on a real app (shim kill =
+rung-4 mechanics).** Consumer app hunt this wake (all source-verified from
+pinned fetches): Drupal 11.4.13 core has NO designed admin code-exec
+(`update_manager` absent, no /admin/modules/install route, no PHP filter);
+Backdrop keeps uid in the DB {sessions} table (D7-style, not in
+$_SESSION); Bludit 3.22 auth is session-resident (`$_SESSION['s_role']`,
+fingerprint = sha1 of the attacker's own User-Agent) but its admin has no
+code-exec upload; WonderCMS 3.7.2 hardens with an authStamp HMAC of the
+password hash (unknown to an unauth attacker) and older releases (3.4.3/
+3.6.0) have no designed exec; Chyrp Lite auth is a plain
+`$_SESSION['user_id']` integer but extensions are file-dropped, no upload
+UI; Typesetter uses checksummed custom session files, not PHP sessions;
+MantisBT auth is cookie-token based with a whirlpool-salted session key;
+Zenphoto auth is cookie-based. **tinyfilemanager 2.6** (pinned zipball
+sha256 e68f9daf..., extracted file sha256 94677b42..., committed
+`lab/php2shell/provision-tfm-app.sh`) satisfies every requirement with the
+DEFAULT config untouched: its whole auth state is
+`$_SESSION['filemanager']['logged']` (username string) — promoted record
+`filemanager|a:1:{s:6:"logged";s:5:"admin";}` is NUL-free and pipe-free
+inside the value, so it rides the exact wake-58 objk-filename geometry;
+line 352 accepts it because 'admin' is a key of the default $auth_users;
+and the app's DESIGNED admin function is file management: upload
+evil.php through the app's own upload form (no extension allowlist by
+default, token scraped from the logged-in page) and request it.
+Committed harness
+`lab/repro/php2shell-aftershell-splice-tfm.sh` (kill shim, calibrated
+cut like wake 58; `session.use_cookies=1` because tinyfilemanager never
+calls session_id() and PHP 8.4 ignores incoming cookies with
+use_cookies=0): on 8.4.27-app the respawned worker serves the consumer,
+PROMOTES the record, the app renders the admin file manager, the harness
+uploads evil.php through the app, and `/evil.php` executes in the live
+worker: unique marker `PHP2SHELL-R5-MARKER:<tag>` printed through the
+target process, `id` output (`uid=1000(mesh-home)...`), and a marker file
+with the `id` output inside the lab tmpdir — evidence
+`lab/build/evidence/aftershell-tfm-8.4.27-app-tfm.log`. Controls: no-kill
+control and virgin-sid safe-input control see the login form, upload
+rejected, no marker. 8.4.28-app: ftruncate-first kills the splice (1019-B
+file, carrier tail gone), no promotion, no takeover, no upload, no
+marker — evidence `aftershell-tfm-8.4.28-app-tfm.log`; NOTE a fix-series
+hardening observed and recorded: PHP 8.4.28 adds
+SESSION_CHECK_UPLOAD_PROGRESS_STATE (session.c:94-100) — ANY runtime
+session ini change (tinyfilemanager's session_cache_limiter() at its
+line 231) FATALS while session.upload_progress.enabled is On, so the
+harness switches the consumer phase to an app-health pool
+(upload_progress off, same save_path) for the fixed-build controls.
+Committed as `9b9cc020`.
+
+**(2) Stage 2 — attacker-caused death mid-pwrite: every stock mechanism
+MEASURED NEGATIVE (structural, not tuning):**
+
+- *FPM request_terminate_timeout (SIGTERM).* The kill itself is
+  attacker-caused and precise: master SIGTERMs the worker at T+~0.08s
+  ("execution timed out ... terminating", "exited on signal 15"), and
+  the kill lands wherever the request is (slow-sent upload loop,
+  FILE_START encode, update cycle). BUT the worker HANDLES SIGTERM
+  (strace shows the handler entry), and `generic_perform_write` only
+  aborts on `fatal_signal_pending` == SIGKILL — so a SIGTERM arriving
+  mid-pwrite NEVER interrupts the copy: observed directly under strace
+  (signal delivered 17 ms INTO a 67 MB pwrite; the write still returned
+  its full 67109199 before the death). >100 kill attempts (T sweep 3-8 s
+  plus 60 jittered): zero mid-write partials — every kill landed between
+  writes (file intact, splice absent). The one mid-write partial seen
+  earlier (67109199-file, 27 B shorter) was the worker dying between
+  syscall loop iterations, not an interrupted write.
+- *Cgroup memory.max OOM (kernel SIGKILL).* The OOM-kill itself fires
+  mid-request and can fire mid-pwrite — measured: memory.max=2400M with
+  the session save_path on tmpfs and `memory.swap.max=0` killed the
+  worker (oom_kill 1, master respawns) during a 512 MB session write and
+  left a PARTIAL file of 360091648 bytes = exactly 4096 x 87913 —
+  kernel writes are PAGE-QUANTIZED, so an interrupted session write cuts
+  at a page boundary (valuable: a page-grid alignment design with
+  4096-byte records makes every such k a valid promotion boundary).
+  But the mechanism has a structural flaw for THIS splice: the OOM only
+  crosses the cap on FRESH page charges, and a no-truncate splice write
+  (len(R) >= len(C), the only splice-producing shape) re-writes the SAME
+  already-charged tmpfs pages — zero fresh charge, zero OOM. Measured:
+  R>=C attack (filename +4096) under caps 118-122M with swap.max 0/4M/16M
+  and under ext4 save_path caps 100-130M: oom_kill 0 in every run, every
+  write completed. The caps that DID fire (120M small session, 2400M
+  512 MB session) were truncate-first writes (ftruncate shrinks, then
+  fresh pages charge) — the vendor-fixed variant-A shape whose zero-tail
+  cannot promote (wake-8 lesson). With ext4 save_path the pressure is
+  absorbed entirely by writeback reclaim (memory.events: max hits
+  2316-5911, oom 0); with tmpfs, by swap when swap.max is open.
+- *cgroup io.max* does not throttle buffered pwrites (writeback is
+  throttled, the dirtying process is not; measured: 16 MB pwrite
+  unmoved at wbps=2 MB/s).
+- *PHP memory_limit / max_input_time fatals* are clean bailouts between
+  operations; no allocation happens inside pwrite, so they can never
+  cut the write.
+- *Kernel OOM-kill on the bare host* would SIGKILL mid-write but
+  requires driving the whole host into OOM (21 GB free, host guard,
+  other plants) — out of lab bounds by charter.
+
+Stage-2 conclusion: on stock php-fpm (8.4.27-app/8.4.28-app, this host,
+kernel 6.8, cgroup v2), the advisory's "worker death mid-write" has NO
+attacker-reachable trigger that leaves the splice: SIGTERM cannot
+interrupt the write (handled), and memory-pressure OOM only cuts
+truncate-first/fresh writes (zero-tail). The committed kill shim
+remains the only splice-producing death — rung-4 mechanics, honestly
+labeled. Rung 5 for php2shell therefore remains UNCLAIMED; the gap is
+now MEASURED and STRUCTURAL (two closed mechanisms with direct
+evidence), not merely unattempted. Reopen conditions: a real deployment
+where workers are SIGKILLed mid-write by attacker-driven pressure on
+writes that do not pre-truncate (e.g., an external supervisor with
+SIGKILL escalation, a hard-oom container without swap AND with tmpfs
+save_path whose pages are charged per-write — that needs the pages to be
+swapped-out/reclaimed between writes, itself absorbed when swap exists),
+or a new PHP bug in the write path. The harness pieces for such a
+reopen are committed and reusable: the tfm exec-chain lane (stage 1),
+the slow FastCGI driver (`lab/repro/php2shell-slow-fcgi.py`,
+pre-delay/slow-after/rate knobs), the monotonic-timestamped LOG_ONLY
+shim, and the measured facts above.

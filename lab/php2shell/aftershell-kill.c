@@ -32,6 +32,7 @@
 #include <stdlib.h>
 #include <signal.h>
 #include <stdio.h>
+#include <time.h>
 #include <stddef.h>
 
 static ssize_t (*real_pwrite)(int, const void *, size_t, off_t);
@@ -44,7 +45,9 @@ static void dump_buffer(const void *buf, size_t n)
     if (!path) return;
     f = fopen(path, "ab");
     if (!f) return;
-    fprintf(f, "=== pwrite n=%zu ===\n", n);
+    struct timespec ts;
+    clock_gettime(CLOCK_MONOTONIC, &ts);
+    fprintf(f, "[%lu.%09lu] === pwrite n=%zu ===\n", ts.tv_sec, ts.tv_nsec, n);
     fwrite(buf, 1, n, f);
     fputc('\n', f);
     fclose(f);
