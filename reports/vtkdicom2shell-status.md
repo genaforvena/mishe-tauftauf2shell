@@ -1,5 +1,22 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 21:20Z — W9 malloc-perturbation probe: failed control, no grade change
+
+- One bounded diagnostic on the open grooming question: `MALLOC_PERTURB_`
+  unset/0/65/255 against the real plain reader left the fatal OOB word
+  `e+8(V)=1e00000500000001`, store address and SIGSEGV unchanged. A standalone
+  control on glibc 2.39-0ubuntu8.12 showed the knob never paints freed or
+  reused bytes (0x4a fill intact at every value; the tunable spelling is also
+  inert), so the probe is a FAILED CONTROL. No inference about whether the
+  word is allocator data or a program-written header is drawn.
+- Evidence: `lab/frontier/vtkdicom2shell/evidence/malloc-perturb-failed-control.txt`.
+  glibc parses the variable with atoi: the initial hexadecimal spellings
+  were themselves no-ops and were replaced with decimal 65/255.
+- Grade unchanged: rung 3 + rung 4 PARTIAL from crafted FILE bytes in the real
+  reader and exact bundled 9.5.2 source; no pointer/IP control, no command,
+  no wire path, no witness verdict. Witness W222 closed on gpgme; #4276/#4503
+  remain queued and the witness wake unit is inactive.
+
 ## 2026-11-25 18:38Z — W7 predecessor-item grooming negative (refined stale word)
 
 - Refinement, not a new rung: W4/W5's byte-identical stale OOB `Value.V` word

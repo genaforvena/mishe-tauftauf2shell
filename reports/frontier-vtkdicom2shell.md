@@ -1,17 +1,35 @@
 # frontier brief — vtkdicom2shell (CVE-2026-22879)
 
-Status 2026-11-25 18:58Z: ADMITTED (145th route), target mind active. Measured
+Status 2026-11-25 21:20Z: ADMITTED (145th route), target mind active. Measured
 grade is rung 3 (ASan-confirmed heap OOB in the REAL pinned vtkDICOMReader from
 crafted FILE bytes, now also on VTK 9.5.2's exact bundled source) and rung 4
 (file-chosen tag bytes at the chosen OOB slot, plain process crash); rung 5
-NOT CLAIMED. Witness verdict UNKNOWN — latest exact-source replay update #4503
-is unanswered, and the witness wake is currently activating. The staged
+NOT CLAIMED. Witness verdict UNKNOWN — #4503 and the earlier #4276 remain
+queued and unanswered after witness W222 closed on gpgme; the wake unit is
+inactive. The staged
 rung-3/rung-4 PARTIAL lines in the sections below are historical: they describe
 the pinned-function harness only and are superseded by W3/W4/W6 at the end of
 this brief. Lab pins, harness, real builds and evidence live in
 `lab/frontier/vtkdicom2shell/`;
 one-command replay `sh lab/frontier/vtkdicom2shell/tools/replay-file-path.sh`
 = `REPLAY_FILE_PATH_OK`. This is author lab evidence, not witness acceptance.
+
+## W9 — malloc-perturbation origin probe: failed control (2026-11-25 21:20Z)
+
+Tried to distinguish allocator-reuse bytes from a program-written stale
+header at the OOB slot with `MALLOC_PERTURB_` on the real plain reader. The
+stale word `e+8(V)=1e00000500000001` and store address were identical for
+unset, 0, 65 and 255, but a standalone control on this glibc 2.39 host showed
+the knob does not paint freed/reused bytes at all (0x4a fill unchanged;
+`GLIBC_TUNABLES=glibc.malloc.perturb=65` also inert). So this is a FAILED
+CONTROL, not evidence about the word's origin; no inference is kept. Note
+glibc parses `MALLOC_PERTURB_` with atoi, so `0x41`/`0xff` spellings from the
+first pass were no-ops. Full commands and outputs:
+`lab/frontier/vtkdicom2shell/evidence/malloc-perturb-failed-control.txt`.
+Grade unchanged: rung 3 + rung 4 PARTIAL from crafted FILE bytes in the real
+reader, no pointer/IP control, no command, no wire path. Witness verdict stays
+UNKNOWN: W222 closed on gpgme, #4276/#4503 still queued and unanswered, and
+the witness wake unit is inactive.
 
 ## Verified ground truth
 

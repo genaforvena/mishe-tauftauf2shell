@@ -1,0 +1,44 @@
+W9 2026-11-25 — MALLOC_PERTURB_ heap-origin diagnostic: FAILED CONTROL, no inference
+
+Question: is the fatal stale `Value.V` word at the OOB slot (dereferenced by
+`vtkDICOMValue::operator=` at Value.h:426, SIGSEGV in
+`vtkDICOMReferenceCount::operator--`) free-list/allocator data, or a header
+written by the program? A local malloc-perturbation knob should paint freed
+and reallocated heap bytes; if the OOB word changed with the paint byte it
+would be allocator reuse data, otherwise it could be program-written.
+
+Probe (real vulnerable build, plain):
+  cd lab/frontier/vtkdicom2shell
+  export LD_LIBRARY_PATH="$PWD/deps/root/usr/lib/x86_64-linux-gnu"
+  MALLOC_PERTURB_=<0|65|255> gdb -q -batch -x tools/oob-word.gdb \
+    -ex 'run evidence/undef-ob-dos.dcm' -ex 'bt 2' -ex quit \
+    ./build-vuln/bin/dicomdump
+
+Observed at the final crafted Set (`tag=0008,0008`, `n=5`, `slot=5`) for
+MALLOC_PERTURB_ unset, 0, 65 and 255:
+  OOBPRE n=5 store=0x5555557e5a78 e=0x5555557e5b18 slot=5 tag=0008,0008
+  OOBWORD e+0=0000000000000021 e+8(V)=1e00000500000001
+  SIGSEGV at vtkDICOMReferenceCount.h:50 via vtkDICOMValue.h:426
+Store address and both words identical in all four runs.
+
+Control: the knob did NOT perturb heap bytes on this host, so those four runs
+prove nothing about the word's origin. Confirmed in the inferior with
+`print (char*)getenv("MALLOC_PERTURB_")` at main -> "0x41" (note glibc parses
+with atoi, so hexadecimal spellings are 0; decimal 65/255 were also used).
+Standalone controls on this glibc 2.39-0ubuntu8.12 system:
+  # malloc(32), memset 0x4a, free, inspect byte 16 of the reused chunk
+  MALLOC_PERTURB_=0   -> 4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a
+  MALLOC_PERTURB_=65  -> 4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a
+  MALLOC_PERTURB_=255 -> 4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a4a
+  # freed chunk, bytes 8..31 (past tcache next/key)
+  all three settings -> unchanged 0x4a tail after tcache metadata
+Also tried GLIBC_TUNABLES=glibc.malloc.perturb=65: no change.
+
+Disposition: keep as a FAILED CONTROL, do not infer "program-written header"
+or "allocator metadata" from it. W7's two-state stale-header observation and
+W4/W5's file-byte-invariance remain the evidence; file control of a
+dereferenceable pointer at the OOB slot stays NOT OBSERVED (UNKNOWN). Grade
+unchanged: rung 3 crafted FILE -> real reader ASan OOB, rung 4 chosen tag
+bytes at the chosen OOB slot with a plain crash; no pointer/IP control, no
+command, no wire path, no witness verdict. MALLOC_PERTURB_ is a local knob,
+not attacker input, so even a working paint would not have changed the grade.
