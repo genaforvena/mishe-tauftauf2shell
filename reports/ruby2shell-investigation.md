@@ -2766,9 +2766,13 @@ stays **NOT ACHIEVED**.
       Smoke: content 1039 stays 1039 bytes; offset `0x3f8` is size `0x411`,
       offset `0x400` is `next=0x4141414141414141`, and exactly seven key bytes
       fit. `bash -n` passes.
-    - Named next: stop blind count sweeps. Use one full-trace routed run to
-      enumerate the actual free order and physical neighbors of the eight
-      `1000`-part slices/values, then choose dummy/plant counts that leave the
-      single unsorted V immediately after the tcache A. If that adjacency is
-      absent, test an escaped multipart disposition value as the missing
-      `0x240` allocation before V; do not rerun the closed count arms unchanged.
+    - Escaped multipart disposition names were then tested directly
+      (`escaped-name`, `escaped-sweep`, full M streams): no parser allocation
+      of request `0x238` appeared before a `0x3f1` slice. The many descending
+      `0x25b…0x220` M lines were dev-render prettyprint traffic, not a wire
+      primer. This closes the escaped-disposition lever.
+    - Named next: use one full-trace routed run to enumerate the actual free
+      order and physical neighbors of the eight `1000`-part slices/values,
+      then choose dummy/plant counts that leave the single unsorted V
+      immediately after the tcache A. Do not rerun the closed count or
+      escaped-name arms unchanged.
