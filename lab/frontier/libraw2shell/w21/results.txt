@@ -1,0 +1,61 @@
+W21 results — file-chosen bytes in LIVE allocator metadata (2026-11-25 05:3xZ, author-side)
+
+Question left open by W19: its heap walk found no live object after destimage,
+but the chunk immediately after destimage is the top chunk. Does the OOB store
+reach the top chunk's size field, and does the consumer's allocator later read
+the bytes written there? Prediction recorded before the pad-16 run: a file-chosen
+size-field value selects which glibc consistency check fires at a later free.
+
+Method and pinned bytes
+- Lab-only env MALLOC_TOP_PAD_=16777216 (also 67108864 for one control) keeps the
+  whole OOB write span mapped, so xtrans_interpolate() finishes instead of
+  SIGSEGV at :427. The env is a lab condition, not an image-controlled knob.
+- Two inputs: w13/dead-target.input (sha256
+  18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78, W13's
+  pre-chosen triple) and a new w21/zero.input (sha256
+  a77cfc30be34e908592b900a282363f4d30deedf6c96ec8f2719be809a475242) generated
+  by the unchanged craft_uncompressed_poc.py from w21/zero.json (sha256
+  cf7083cdabe8cb4d56d6f951547b575c0266ef2cdc8088065b932febbc8525ce):
+  every raw sample 0, every LinearizationTable entry 0, WhiteLevel 65535.
+- Unmodified -O0 dcraw_emu (sha256 ca941dae...) under w21/sizefield.gdb (sha256
+  9e322caf...): break at first OOB (IDX 68,644), disable that breakpoint, break
+  at xtrans_demosaic.cpp:436 (after the store loop), then break at abort().
+  The size field is addressed as (char*)main_arena.top + 8, not main_arena.top+8:
+  gdb pointer arithmetic on mchunkptr scales by sizeof(malloc_chunk).
+
+Preserved probe error: the first probe (w21/tophdr.gdb, w21/postloop.gdb) used
+main_arena.top + 8, which lands 384 bytes past the size field; its
+0xdeadbeef9000 reading was OOB scratch content, NOT allocator metadata. Those
+files are kept as negative evidence; the corrected probe is sizefield.gdb.
+
+Measurements (fresh gdb runs, ASLR addresses differ, field bytes repeat)
+- dead-target: destimage=0x555555a854b0, alloc=549152, malloc_usable_size
+  550184, main_arena.top=0x555555b0b9d0. Field (char*)top+8 is at destimage
+  offset 550184 (index 68,773). Before: 0xc0b631 (hw b631 00c0 0000 0000).
+  After the loop: 0xbedbbeef4d03 (hw 4d03 beef bedb 0000). At abort:
+  __GI_abort <- malloc_printerr("free(): invalid next size (normal)") <-
+  _int_free_merge_chunk(av, p=destimage, size=550192) <- __GI___libc_free.
+  Trace w21/sizefield-dead.txt sha256 d873089b...4734a11.
+- zero: top field before 0xc0b661, after 0x0000000000000000. At abort:
+  __GI_abort <- malloc_printerr("corrupted size vs. prev_size") <-
+  unlink_chunk <- _int_free_create_chunk (a different chunk whose next chunk
+  is destimage). Trace w21/sizefield-zero.txt sha256 c6158391...6de3493.
+- Plain (non-gdb) runs at pad 16 MiB and 64 MiB: dead-target rc134 stderr
+  "free(): invalid next size (normal)" (w21/pad16777216-o0.err and
+  pad16777216-plain.err, sha256 2b52f5d6...c763342); zero rc134 stderr
+  "corrupted size vs. prev_size" (w21/zero-o0-n1.err sha256
+  c1cf8db8...f9988ecee2f0fcf259).
+- Controls at pad 16 MiB: fixed dcraw_emu -n 1 rc0 and no-option vulnerable
+  rc0 for both inputs (stdout PPM, empty stderr). At default pad (128 KiB)
+  the loop SIGSEGVs before it can finish, so no allocator read is observable;
+  the metadata effect requires the lab env knob.
+
+Conclusion and grade
+The crafted image chooses the 48 low bits of the top chunk's live size field,
+and the two file-chosen values select two different glibc checks in a later
+free of the real dcraw_emu consumer. This is rung-4 control of live allocator
+metadata, not a live application object, pointer, IP, marker or command side
+effect. It does not reopen W19's object lane and is NOT rung 5. No grooming or
+ASLR study: the heap layout is a lab env condition. Author-side only; no
+witness verdict claimed. Replay: w21/replay.sh (one command, hash-checked).
+All experiments local and loopback-free.

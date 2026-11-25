@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422d0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W21 BEFORE top=0x555555b0b9a0 sf=0x555555b0b9a8 off=550184 idx=68773 val=0xc0b661 usable=550184 sysmem=16781312
+W21 BEFORE hw=b661 00c0 0000 0000
+Breakpoint 2 at 0x5555555dfd02: file src/demosaic/xtrans_demosaic.cpp, line 436.
+
+Breakpoint 2, LibRaw::xtrans_interpolate (this=0x7ffffff422d0, passes=3) at src/demosaic/xtrans_demosaic.cpp:436
+436	    free_omp_buffers(buffers, buffer_count);
+W21 AFTER sf=0 hw=0000 0000 0000 0000
+Breakpoint 3 at 0x7ffff7828820: file ./stdlib/abort.c, line 49.
+corrupted size vs. prev_size
+
+Breakpoint 3, __GI_abort () at ./stdlib/abort.c:49
+warning: 49	./stdlib/abort.c: No such file or directory
+W21 AT_ABORT sf=0
+#0  __GI_abort () at ./stdlib/abort.c:49
+#1  0x00007ffff78297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff79cf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#2  0x00007ffff78a90b5 in malloc_printerr (str=str@entry=0x7ffff79cd5e8 "corrupted size vs. prev_size") at ./malloc/malloc.c:5775
+#3  0x00007ffff78a9c56 in unlink_chunk (p=p@entry=0x555555a85470, av=0x7ffff7a04ac0 <main_arena>) at ./malloc/malloc.c:1611
+#4  0x00007ffff78ab1a3 in _int_free_create_chunk (nextsize=550192, nextchunk=0x555555a85470, size=<optimized out>, p=0x5555557f21f0, av=0x7ffff7a04ac0 <main_arena>) at ./malloc/malloc.c:4721

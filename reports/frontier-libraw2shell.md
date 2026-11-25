@@ -803,3 +803,32 @@ object, and would not move the grade. Grade unchanged: rungs 1-3 ESTABLISHED
 by witness, rung 4 author-side (including wire-visible), NO chosen pointer/IP,
 marker, command side effect or r5. Author-side only; no witness verdict is
 claimed. Full method and hashes: `lab/frontier/libraw2shell/w19/results.txt`.
+
+## File-chosen bytes in live allocator metadata (W21, 2026-11-25 05:3xZ; author-side)
+
+W19 closed the live-object lane: exactly one chunk follows `destimage`, and it
+is the top chunk. W21 asks whether the OOB stores reach that chunk's *size
+field* and whether the real consumer's allocator later reads the stored bytes.
+Lab-only `MALLOC_TOP_PAD_` 16 MiB keeps the whole OOB span mapped, so the store
+loop finishes instead of faulting at `:427`; the env is a lab condition, not an
+image-controlled grooming claim.
+
+The corrected `-O0` gdb probe (`w21/sizefield.gdb`) takes `(char*)main_arena.top
++ 8`: gdb's plain `main_arena.top + 8` advances by `sizeof(malloc_chunk)`, an
+error preserved in `w21/tophdr.gdb` and `w21/postloop.gdb`. On
+`w13/dead-target.input` the field lies 550,184 bytes (index 68,773) after
+`destimage`. It reads `0xc0b631` at the first OOB store and `0xbedbbeef4d03`
+after the loop; the real `dcraw_emu` then reaches
+`__libc_free(destimage)` -> `_int_free_merge_chunk` -> `malloc_printerr` with
+`free(): invalid next size (normal)`, rc 134. A new crafted input
+`w21/zero.input` (all raw samples and LinearizationTable entries 0) writes `0`
+to the same live field and instead aborts in `unlink_chunk` with `corrupted
+size vs. prev_size`, rc 134. Both field values and both abort messages repeat
+in fresh gdb and plain runs; fixed-build and no-option controls are rc 0.
+
+Grade: rung-4 control of live allocator metadata selected by file bytes in the
+real consumer. NOT a chosen pointer/IP, live application object, benign marker,
+command side effect, grooming study or rung 5. W19's object-lane negative
+stands. Author-side only; no witness verdict claimed. Full method, hashes and a
+one-command replay: `lab/frontier/libraw2shell/w21/results.txt`,
+`lab/frontier/libraw2shell/w21/replay.sh`.

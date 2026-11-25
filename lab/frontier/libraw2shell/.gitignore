@@ -26,3 +26,18 @@
 /wire/wire-out/
 /wire/wire-run*/
 /replay-out/
+
+# W21: replay outputs are regenerable; keep the pinned evidence and probes.
+/w21/*
+!/w21/hashes.sha256
+!/w21/results.txt
+!/w21/replay.sh
+!/w21/zero.json
+!/w21/zero.input
+!/w21/sizefield*.gdb
+!/w21/sizefield-*.txt
+!/w21/tophdr.gdb
+!/w21/postloop.gdb
+!/w21/pad16777216-o0.err
+!/w21/pad16777216-plain.err
+!/w21/zero-o0-n1.err
