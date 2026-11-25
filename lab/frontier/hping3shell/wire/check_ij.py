@@ -11,6 +11,37 @@ import sys
 import check_rng as base
 
 REACH = 187
+
+def addrs_from(path):
+    """hping debug destinations, with kill-time prefix damage corroborated.
+
+    One clean-archive replay ended with 'BUG: the dest address is ...'
+    instead of 'DEBUG: ...'.  Accept that line only when the immediately
+    following raw packet hex dump carries the same four destination
+    octets; a bare prefix match is never enough.
+    """
+    rx = re.compile(r"^(?:DEBUG|BUG): the dest address is "
+                    r"(\d+)\.(\d+)\.(\d+)\.(\d+)$")
+    lines = open(path).read().splitlines()
+    out = []
+    for n, line in enumerate(lines):
+        m = rx.match(line)
+        if not m:
+            continue
+        addr = tuple(int(x) for x in m.groups())
+        if line.startswith("DEBUG:"):
+            out.append(addr)
+            continue
+        wire = lines[n + 1].split() if n + 1 < len(lines) else []
+        if len(wire) >= 20:
+            try:
+                octets = tuple(int(x, 16) for x in wire[16:20])
+            except ValueError:
+                continue
+            if octets == addr:
+                out.append(addr)
+    return out
+
 def states_from(path):
     text = open(path).read()
     out = []
@@ -43,7 +74,7 @@ def main():
     ap.add_argument("--expect", choices=("attack", "baseline", "fixed"), default="attack")
     a = ap.parse_args()
     st = states_from(a.gdb_log)
-    ad = base.addrs_from(a.hping_out)
+    ad = addrs_from(a.hping_out)
     n = fails = 0
 
     def ok(msg):
