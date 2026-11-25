@@ -62,3 +62,7 @@ makes the low-half pointer land on a useful object without harness grooming.
   instrumented and leak-dependent; no app-owned object, wire, pointer-IP,
   control-flow diversion, command, shell or rung 5. New lane is author replay,
   not an independent witness verdict.
+- Post-commit clean-archive replay (09:08Z, HEAD `95fd53bc`): pins 3/3 OK,
+  unmodified harness `run-all.sh` 25 PASS / 0 FAIL and unmodified consumer
+  `run-consumer.sh` 18 PASS / 0 FAIL from the same extracted tree. Author
+  replay only; the new consumer lane has no independent verdict yet.
