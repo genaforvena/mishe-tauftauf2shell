@@ -386,3 +386,38 @@ second update there is no carry-plus-bulk span either way.
 No buffer in this application is sized to `in_len + b - 1`, so there is no
 adjacent control datum to corrupt. No build, ASan run or witness replay for
 W215; grade unchanged: rungs 1-4, r5 UNKNOWN.
+
+## Pinned Node.js streaming decipher census (W216, 2026-11-25T04:1xZ, source-bound)
+
+Node.js exposes a genuinely streaming decipher through repeated `update()`
+calls, so it is the first out-of-tree EVP caller checked with a long-lived
+context rather than one update per re-init. Provisioned only two upstream
+files from the pinned tag `v22.11.0` into gitignored
+`lab/frontier/awslc2shell/out-of-tree/node-v22.11.0-src/`: `node_crypto.cc`
+sha256 `df2056fabd18f1ed823aa146b5bc12659c6461913787b3f7ed50dcba0a9bf07b`
+and `crypto/crypto_cipher.cc` sha256
+`85ed219a22f4eedd1468bdfa1970c0d5bd1054f45b65498beacf63f8679f63e7`. Fetching
+the tagged source is provisioning; no build, no run and no external probe.
+
+`CipherBase::Update` (`crypto_cipher.cc:792-846`) reaches the vulnerable path:
+it calls `EVP_CipherUpdate` on the same `ctx_` for every `update()` chunk
+(`:831-835`), and pinned `cipher.c:529-537` dispatches a decipher context's
+`EVP_CipherUpdate` straight to `EVP_DecryptUpdate`. The carry precondition is
+therefore present, unlike W214/W215.
+
+The allocation closes the hole. `:810` reads
+`block_size = EVP_CIPHER_CTX_block_size(ctx_)`, `:813` sets
+`buf_len = len + block_size`, and `:828` allocates exactly `buf_len` bytes.
+Pinned `include/openssl/cipher.h:155-158` documents at most `in_len + b - 1`
+output bytes, and the CVE writes one byte beyond that, i.e. at most
+`in_len + b` bytes (W1 measured 32 bytes written for two 16-byte updates into
+a 31-byte documented minimum). Node's `len + b` buffer is an exact fit for
+that maximum, so the CVE byte lands inside the allocation rather than past it;
+`CHECK_LE(buf_len, ByteLength)` at `:837` would reject a larger output. The
+wrap-mode length probe at `:817-824` runs only for `kCipher`, not `kDecipher`.
+
+SOURCE-BOUND NEGATIVE by one byte of slack: no heap overflow, no adjacent
+control datum. Node is not an official AWS-LC consumer, so this is a source
+shape check conditional on linking the pinned library, not a tested Node
+build. No ASan, no witness replay; grade unchanged: rungs 1-4, r5 UNKNOWN.
+Third-party applications not provisioned here remain UNKNOWN.

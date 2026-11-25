@@ -250,3 +250,18 @@ carry at `cipher.c:405` cannot cross records; no buffer is sized to
 `flags` to 0, but with one update there is no carry-plus-bulk span either way.
 SOURCE-BOUND NEGATIVE; no build, ASan or witness replay; grade unchanged:
 rungs 1-4, r5 UNKNOWN.
+
+W216 (2026-11-25T04:1xZ, source-bound) checks Node.js as the first out-of-tree
+caller with a long-lived decipher context: pinned tag `v22.11.0` sources
+`node_crypto.cc` (sha256 `df2056fa…07b`) and `crypto_cipher.cc` (sha256
+`85ed219a…3e7`) were fetched into gitignored `out-of-tree/`.
+`CipherBase::Update` (`crypto_cipher.cc:792-846`) calls `EVP_CipherUpdate` per
+`update()` chunk on one `ctx_`, and pinned `cipher.c:529-537` dispatches a
+decipher context to the vulnerable `EVP_DecryptUpdate` — so the carry
+precondition holds. But `:810-828` allocates exactly `len + block_size`, while
+the CVE writes at most `in_len + block_size` bytes (one past the documented
+`in_len + b - 1` at `include/openssl/cipher.h:155-158`). The byte lands inside
+the allocation, and `:837` checks the returned length against it. SOURCE-BOUND
+NEGATIVE by one byte of slack; Node is not an official AWS-LC consumer and no
+build or ASan run was made. Grade unchanged: rungs 1-4, r5 UNKNOWN; other
+unprovisioned applications stay UNKNOWN.
