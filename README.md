@@ -233,6 +233,113 @@ Author-run; a clean `git archive 20123ce2` replay of all three `realbuild/`
 scripts matched the rc matrix and the same `WRITE of size 161` frames
 (`ba19500c`), still not an independent witness verdict. No grade change.
 
+The 02:29–02:4xZ limbs supersede the Gpgme2Shell row's unqualified "plain
+glibc outcome is UNKNOWN" and add replay/caller-boundary detail to the
+Open5gs2Shell row; no rung cell, grade, route, mind count or R5 cell moved.
+Gpgme W6 (`3aaa3f07`, clean-archive receipt `67a874c2`) builds real GPGME
+2.2.0 and the fix-patched copy without a sanitizer (`CFLAGS=-g -O0`,
+`CC=clang`, static-only into `prefix-plain`): from
+`lab/frontier/gpgme2shell/realbuild`, `sh build-plain.sh && sh run-plain.sh`
+documents the lane and `sh run-plain.sh` printed `PASS=13 FAIL=0` rc 0 here.
+On glibc 2.39 the vulnerable driver exits 134 with
+`free(): double free detected in tcache 2` after
+`status_cb call=1 op_marker=H keyword=GOOD arglen=1200 byte[1000]=0x48` and
+no second keylist; the patched driver exits 0 with `op2 keylist_start
+err=Success`, `op_marker=Z arglen=20` and `release done`. The tcache detector
+aborts before allocator metadata or control-flow use: a negative rung-5
+route, not a new capability. The parent statement harness's contradictory
+plain revisions stay UNKNOWN in their own scope; #4039 is a witness scope
+note with no verdict. `reports/gpgme2shell-status.md` §W6.
+
+Open5gs W1 (`6d5f8de9`, replay receipt `318023f3`) records witness message
+#3934 (witness wall W210) ESTABLISHED AS LABELED at the staged-harness scope
+(clean `git archive 22d70741`, `sh harness/run.sh` 21 PASS / 0 FAIL rc 0,
+trace SHA-256
+`6c3c5ecf1f9e4ec7ef8d907d24e033e16fe4b87d62408ef1c499c95086164253`,
+no grade change and NO r5), alongside the row's W217 label.
+`lab/frontier/open5gs2shell/realcaller/` derives the boundary as pinned
+`message-v2.8.0.c:3356-3381` does: the staged 394-byte body gives
+`BOUNDARY_LEN=2 BOUNDARY=a:` and an ASan-clean canary, while adding one
+leading CRLF (396 bytes) gives `BOUNDARY_LEN=0` and ASan `WRITE of size 1` at
+`multipart_parser-v2.8.0.c:260`, with plain canary `5a5a...` ->
+`0a000d0a000d0a000d0a000d` and fixed `RET=-1`. `sh realcaller/run.sh`
+scored 15 PASS / 0 FAIL here, and a clean `git archive HEAD` replay at
+`318023f3` reproduced 21/0 and 15/0. Whether a live SBI HTTP layer preserves
+that leading CRLF in `http->content` stays UNKNOWN; no wire request, pointer,
+command or r5.
+
+N2n W5 (`1029f346`) extends W1/W2's consumed-pointer negative: four batches
+of four hardware read watchpoints at `&nak+128/+136/+344/+432`,
+`+368/+392/+400/+424`, `+464/+488/+504/+536` and
+`+1608/+1616/+1632/+1640` never hit while the registered-peer run forwarded
+the 134-byte NAK with `beyond48=485a4d49485a4d49`. The excluded `+288` trip
+was a `sockbuf` store in `__vsnprintf_internal`, not a consumer read;
+unwatched words stay UNKNOWN and the W3 forwarding data copy is still the
+only measured consumer. Witness replay #3909 remains owed.
+`reports/n2n2shell-live.md` §W5.
+
+Libgphoto2 W181 (`12ca5894`) closes one W180-wall lane: pinned v2.5.34
+`pins/jl2005c.h.vuln:31-44` places `Info table[0x4000]` last at offset
+`0x40` in a `0x4040`-byte struct, with `data_cache` at `0x38`, and the
+forward `memmove` at `jl2005c.c.vuln:154` cannot reach it; real consumers
+use table bytes as data (`library.c:197-213`, `:338-341`,
+`gphoto2-file.c:315-325`) and `gp_filesystem_number`
+(`gphoto2-filesys.c:1365-1400`) has no negative index. The in-struct
+natural-consumer-pointer lane is CLOSED at pinned source level, while a
+natural pointer in a HEAP NEIGHBOUR of `priv` was not measured and stays
+UNKNOWN. `cd lab/frontier/libgphoto2shell && sh harness/check.sh` stayed
+`PASS=146 FAIL=0`, trace `e364f756…c6c98` (observed here); W170-W172's
+lab-assisted pointer placements and witness #2892's rung-3 scope are
+unmoved, author-only rung 4 and r5 UNKNOWN.
+
+Libsshch W1 (`a6893b10`, 02:4xZ) supersedes the row's "no real SSH build,
+wire packet" clause at the 01:58Z staged scope. Full pinned ASan libssh
+builds plus an authenticated 127.0.0.1 SSH replay, `sh
+lab/frontier/libsshch2shell/real/run-all.sh`, scored 5 PASS / 0 FAIL here:
+real KEX/password auth, channel open, a benign packet, then raw
+`CHANNEL_CLOSE` followed by `CHANNEL_DATA`; ASan `READ of size 8` at
+`channels.c:705:26` (120 bytes into the 128-byte channel) after the server
+app frees the remotely closed channel in its data callback
+(`real_wire.c:55`, not the report's `:52` citation), with
+`SERVER data #2 len=21 first=M off16=-` from `MISHE-LIBSSH-UAF-WIRE`.
+The fixed guard suppresses data #2 and both data-only controls are clean.
+Rung 3 is now confirmed in a real build on a real loopback wire, but rung 4
+stays PARTIAL under the stated application-free condition: the read is
+freed channel metadata, not attacker bytes at a chosen freed offset; no
+pointer/IP control, marker, command or r5. An authenticated peer is still
+required, witness UNKNOWN, route 140 and window 148 unchanged; no rung cell,
+grade or mind-count move.
+
+FontForge W13 (`e2d45f1b`, author-side, grade-neutral) turns the real-build
+offer into one command: with the pinned tarball supplied as `FF2S_TARBALL`,
+`sh lab/frontier/fontforge2shell/replay-real.sh` rebuilds four offline trees
+and asserts 17 build-path-independent rc cases (W8 `Open()` 134/0/1/0 plus
+complete 0/0; W11 `Save()` 139/0/139 plain and 0/1/0/0 fixed-plain/ASan/
+probe-ASan/fixed-ASan; W12 high ceiling 134/0/1/0), ending
+`REPLAY_REAL_OK: 17/17 stable-lane checks passed` rc 0 here. W6/W7 consumer
+rc stays informational because build-path sensitive; W12 gdb prints
+`HIT glyph=-1 i=65535`, `$1 = 0x1fffe00` and `00 fe ff 01`, with
+`value-ceiling-high.pcf` `9a6b2603…f6b82`. Live-tree and clean-archive
+receipts both scored 17/17; the script's current sha256 `f633dd37…266a42`
+supersedes W9's quoted `156dd583…acca9261` hash. Witness #3309 remains
+scoped to direct-call rungs 1-4; no rung, route, window, mind-count, grade
+or R5 cell moved.
+
+OpenEXR W196 (`61468419`, clean-archive receipt `3ff078b1`) answers W195's
+unmapped-pointer question at a labeled ASLR-off scope: in unmodified pinned
+3.5.2 `exrcheck -c`, file-chosen bytes forge an `exr_attribute_t` in the
+consumed `list->entries[0]` slot (`type=20`, `str` at `dst+1264`, size word
+`0x91`, chosen `0x5a` bytes). With gdb ASLR off, `ATTR=0x555555828520`,
+`STR=0x555555828590` and `FREE_RDI=STR`: the consumer's
+`exr_attr_string_destroy()` reads chosen bytes and passes the chosen pointer
+to the unchanged `ctxt->free_fn`. `cd lab/openexr2shell-real &&
+sh harness/w196-chosen-free.sh` printed `RESULT PASS` rc 0 here with six
+matching evidence hashes (free `4c6c3e13…bac5e7`, plain `19517f6f…369e6`);
+a 02:54Z `git archive 61468419` replay (gitignored src/build/bin trees
+symlinked) matched all six. Author replay, witness offered on tape #4048
+with no verdict: mapped only with ASLR off in the debuggee, no chosen code
+pointer/IP, wire, command, marker or r5; grade, rung, route, mind count and
+r5 status unchanged.
 
 The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
 "no measured DoS", N2n2Shell has "no control of a consumed pointer" without

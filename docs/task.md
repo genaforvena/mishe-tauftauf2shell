@@ -10819,3 +10819,103 @@ verdict moved; rung 5 stays UNKNOWN throughout.
   `reports/frontier-pgactive2shell.md` §Full pinned extension.
   A clean `git archive 20123ce2` replay (`ba19500c`) matched the three-script
   rc matrix and the same ASan frames; author replay, not a witness verdict.
+
+### 2026-11-25 02:29–02:4xZ — plain-glibc negative, caller framing, two negatives
+These four author-side limbs supersede scope wording only. No rung cell,
+grade, route, mind count or R5 cell moved; rung 5 stays UNKNOWN. Witness
+labels #4028/#4029, #4039 and #3909 are requests or scope notes unless a
+verdict is named below.
+
+- Gpgme W6 (`3aaa3f07`, clean-archive replay `67a874c2`) closes only the
+  real-build half of the row's "plain glibc outcome UNKNOWN": real GPGME
+  2.2.0 and the fix-patched copy built with `CFLAGS=-g -O0`, `CC=clang`,
+  static-only and no sanitizer. From
+  `lab/frontier/gpgme2shell/realbuild`, `sh build-plain.sh &&
+  sh run-plain.sh` is the recipe; `sh run-plain.sh` observed here printed
+  `PASS=13 FAIL=0` rc 0. On glibc 2.39 the vulnerable driver exits 134 with
+  `free(): double free detected in tcache 2` after `byte[1000]=0x48`,
+  `arglen=1200`, no second keylist; patched rc 0 with `op2 keylist_start
+  err=Success` and `release done`. Allocator detection precedes metadata or
+  control-flow use: a negative rung-5 route, not a capability. The parent
+  statement harness's one-abort/one-clean revisions stay UNKNOWN in their
+  own scope; tape #4039 has no verdict. `reports/gpgme2shell-status.md` §W6.
+
+- Open5gs W1 (`6d5f8de9`, replay receipt `318023f3`) corrects the staged
+  harness's `boundary=""` framing: `realcaller/realcaller.c` copies pinned
+  `message-v2.8.0.c:3324-3412`, and `sh realcaller/run.sh` (15 PASS / 0 FAIL
+  observed here) shows the 394-byte staged body yields `BOUNDARY_LEN=2
+  BOUNDARY=a:` clean, while one leading CRLF makes 396 bytes,
+  `BOUNDARY_LEN=0` and ASan `WRITE of size 1` at
+  `multipart_parser-v2.8.0.c:260`, plain canary `5a5a...` ->
+  `0a000d0a000d0a000d0a000d`, fixed `RET=-1`. Witness message #3934
+  (wall W210) replayed a clean `git archive 22d70741` staged harness 21 PASS
+  / 0 FAIL, ESTABLISHED AS LABELED, no grade change and NO r5; the W217 row
+  label stays as recorded. The `318023f3` clean archive reproduced 21/0 and
+  15/0 author-side. Live SBI CRLF preservation is UNKNOWN; no wire,
+  pointer/IP, command or r5.
+
+- N2n W5 (`1029f346`) adds 16 watched frame words at `&nak+128/+136/+344/
+  +432`, `+368/+392/+400/+424`, `+464/+488/+504/+536` and
+  `+1608/+1616/+1632/+1640`: no read hit in four gated peer-forward runs
+  that emitted `beyond48=485a4d49485a4d49`; the `+288` trip was a
+  `__vsnprintf_internal` store into `sockbuf`, excluded. Unwatched words
+  remain UNKNOWN, the W3 forwarding data copy is the only measured consumer,
+  witness replay #3909 is still owed, and no pointer, marker, IP or r5
+  follows. `reports/n2n2shell-live.md` §W5.
+
+- Libgphoto2 W181 (`12ca5894`) closes the in-struct natural-consumer-pointer
+  lane at pinned-source scope: `table` is last at `0x40` of `0x4040`,
+  `data_cache` at `0x38`, the `:154` memmove writes forward, real consumers
+  use table bytes as data and `gp_filesystem_number` has no negative index.
+  A natural pointer in a HEAP NEIGHBOUR of `priv` was not measured and stays
+  UNKNOWN. `sh harness/check.sh` stayed `PASS=146 FAIL=0` with trace
+  `e364f756…c6c98`; W170-W172's probe-supplied placements and witness #2892's
+  rung-3 scope are unchanged, author-side rung 4, r5 UNKNOWN.
+  `reports/frontier-libgphoto2shell.md` §W181.
+
+### 2026-11-25 02:4xZ — libsshch2shell W1 real-build wire limb (author-only)
+`a6893b10` adds full pinned clang-ASan libssh builds and an authenticated
+loopback SSH KEX/password session with raw `CHANNEL_CLOSE` then
+`CHANNEL_DATA`; `sh lab/frontier/libsshch2shell/real/run-all.sh` scored
+5 PASS / 0 FAIL here. ASan `heap-use-after-free READ of size 8` at
+`channels.c:705:26` follows an application `ssh_channel_free()` inside the
+data callback (`real_wire.c:55`, not the report's `:52` nit), with chosen
+wire bytes `MISHE-LIBSSH-UAF-WIRE` (len 21, `M`@0, `-`@16) delivered as
+`SERVER data #2`. Fixed guard suppresses data #2 and both data-only cases
+are clean. Rung 3 is real-build/wire confirmed; rung 4 stays PARTIAL under
+the stated app-free condition and reads freed channel metadata, not attacker
+bytes at a chosen freed offset: no pointer/IP control, marker, command or
+r5. Authenticated peer required; witness UNKNOWN, route 140, window 148 and
+mind count unchanged. `reports/frontier-libsshch2shell.md` §W1.
+
+### 2026-11-25 02:4x–02:5xZ — FontForge W13 and OpenEXR W196, author-only
+No rung cell, grade, route, window, mind count or R5 cell moved; witness
+labels stay as recorded below.
+
+- FontForge W13 (`e2d45f1b`) adds a self-checking one-command real replay:
+  `FF2S_TARBALL=<pinned tarball> sh lab/frontier/fontforge2shell/replay-real.sh`
+  rebuilds four offline trees and asserts 17 rc cases (W8 open 134/0/1/0
+  and complete 0/0; W11 `Save()` 139/0/139 plain and 0/1/0/0
+  fixed-plain/ASan/probe-ASan/fixed-ASan; W12 high ceiling 134/0/1/0),
+  observed here as `REPLAY_REAL_OK: 17/17 stable-lane checks passed` rc 0.
+  W6/W7 consumer rc remains informational because build-path sensitive;
+  the oracle uses rc only, with W12 gdb grep `0x1fffe00` and `00 fe ff 01`.
+  Live-tree and clean-archive receipts are author replays; the current
+  script hash `f633dd37…266a42` supersedes W9's quoted hash. Witness #3309
+  remains direct-call rungs 1-4 only, no r5; full pins in `PINS.md` and
+  `lab/frontier/fontforge2shell/REPLAY.md` §W13.
+
+- OpenEXR W196 (`61468419`, clean-archive receipt `3ff078b1`) makes W195's
+  chosen pointer mapped and consumed at a labeled ASLR-off scope: in
+  unmodified pinned 3.5.2 `exrcheck -c`, file bytes forge
+  `list->entries[0]` with `TYPE=20`, `STRPTR=0x555555828560`,
+  `STR=FREE_RDI=0x555555828590`, chosen `0x5a` data and a `0x91` size word;
+  the consumer reads that data and passes the chosen pointer to the
+  unchanged `ctxt->free_fn`. `cd lab/openexr2shell-real &&
+  sh harness/w196-chosen-free.sh` printed `RESULT PASS` rc 0 here with
+  matching evidence hashes; a 02:54Z `git archive 61468419` replay matched
+  all six. Author replay only; witness offered the one command on tape
+  #4048 with no verdict. No chosen code pointer/IP, wire, command, marker
+  or r5; mapped only while gdb's `disable-randomization` is on, so the
+  rung-4 chosen-pointer claim stays scoped to that condition.
+  `reports/openexr2shell-file-level.md` §W196.
