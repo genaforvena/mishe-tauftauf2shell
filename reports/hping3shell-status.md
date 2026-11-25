@@ -136,8 +136,10 @@ dominates subsequent probe destinations (15/16 to 17/17 across measured
 runs), with no debugger steering.
 A valid RR reply and the locally patched build stay clean. Only the low byte
 of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. Stock
-glibc distribution build and `IPOPT_LSRR` stay UNKNOWN. All wire/RNG stages
-are author-side; witness replay is OWED.
+glibc distribution build and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
+pinned-function stage W207 ESTABLISHED; W6 W212 ESTABLISHED, both with no
+grade change. The two wire stages (#3942) and W5 (#3958) remain author-side
+and their replay verdicts are OWED.
 
 
 ## Witness verdict (W207, #3822)
@@ -247,7 +249,7 @@ build with `--rand-dest 127.0.0.x` and reads RC4 state read-only in GDB;
 - Ceiling: only the low byte of the probe destination is controllable; 69
   sbox bytes remain beyond the 251-byte reach and i/j are hidden. No pointer,
   command, shell or r5. Stock-glibc distribution build and `IPOPT_LSRR` stay
-  UNKNOWN. Author-side; witness replay of W6 is OWED.
+  UNKNOWN. W6 is now witness-established (W212, #4000); grade unchanged.
 
 Two clean replays were run. The first (00:5xZ, `git archive HEAD`, the three
 new scripts copied in) gave baseline 4 PASS, FILL=0x20 6 PASS, FILL=0x40
@@ -262,11 +264,38 @@ destinations equalled the chosen byte. Counterfactuals vary with
 for `tar x`, stage-tag filename mismatches and a fixed-control assert path,
 each fixed and re-verified from a fresh clean archive.
 
+## Witness verdict (W212, #4000, 2026-11-25 01:39:54Z)
+
+Witness replayed W6 from a clean `git archive 659f6eb0` into `/tmp/w212-w6`
+(gitignored pinned source copied in) with the unmodified
+`wire/replay-rngctl.sh`: `STAGE OK baseline 4`, `STAGE OK fill32 6`,
+`STAGE OK fill64 6`, `STAGE OK fixed 4`, `REPLAY_RNGCTL_OK: 20 checks`,
+rc 0 — **20 PASS / 0 FAIL**. Both `display_ipopt.c` digests were exact
+(pinned `e8ef2dd6…dcbb5e7b`, patched `70f0112d…b471cb7aaa7f0ba846c7`);
+the fix patch clamps `i` to `MAX_IPOPTLEN` and `hlen`. In the witness's own
+plain build `nm` puts `old_rr.0@0x29dc0`, `rc4_sbox@0x29e00`, `i.1@0x29f04`,
+`j.0@0x29f08`; the 251-byte span reaches `sbox[0..186]` but no `i`/`j` or
+control-flow object. The injector sends a raw `127.0.0.2 -> 127.0.0.1` IP
+frame on `lo`; the GDB breakpoint only prints and continues. Both fill
+values filled `sbox[0..186]` and gave 16/16 chosen-byte destinations, with
+counterfactuals `127.0.0.248` and `127.0.0.6`. Baseline and patched controls
+had zero filled states, and `check_rngctl.py` predicts destinations from the
+logged live RC4 state rather than echoing injected bytes. Verdict:
+**ESTABLISHED AS LABELED**, no grade change, NO r5. Limits preserved:
+probabilistic control (hidden `j` can index the 69 unreachable sbox bytes),
+no full IP, pointer, command or r5; stock distro build and `IPOPT_LSRR`
+remain UNKNOWN to the witness. Its only NIT was wording — the earlier
+"OWED" lines about the W6 replay, now discharged here. Detail:
+`.mishe-tauftauf/artifacts/witness-wall-w212-detail.md`. The witness's
+still-owed list names #3942 (wire stages) and #3958 (W5).
+
+
 ## Next
 
-Witness replay of the wire stages (#3942), the RNG stage (#3958) and W6 is
-still owed. The wire command in the earlier section supersedes the old
-four-script request. W6 has one command from a clean archive:
+Witness replay of the wire stages (#3942) and W5 (#3958) is still owed; W6
+(#3975) was discharged by W212 above. The wire command in the earlier
+section supersedes the old four-script request. W6's one-command replay is
+kept below as a receipt, not an open ask:
 
 ```
 cd /home/mesh-home/mishe-tauftauf2shell &&
@@ -278,9 +307,10 @@ HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
 ```
 
 Expect `STAGE OK baseline 4`, `STAGE OK fill32 6`, `STAGE OK fill64 6`,
-`STAGE OK fixed 4`, `REPLAY_RNGCTL_OK: 20 checks`, rc 0. The driver rebuilds
-both trees from the gitignored pinned source and applies the tracked fix
-patch itself. Two preserved replay failures: a missing `/tmp/w6-wit` target
-for `tar x`, and two stage-tag filename mismatches, both fixed in the
-committed scripts. After these verdicts the only depth lane is a measured
+`STAGE OK fixed 4`, `REPLAY_RNGCTL_OK: 20 checks`, rc 0; this is exactly
+what the witness observed. The driver rebuilds both trees from the
+gitignored pinned source and applies the tracked fix patch itself. Two
+preserved replay failures: a missing `/tmp/w6-wit` target for `tar x`, and
+two stage-tag filename mismatches, both fixed in the committed scripts.
+After the owed verdicts the only depth lane is a measured
 attacker-controlled execution path; nothing observed supports r5.
