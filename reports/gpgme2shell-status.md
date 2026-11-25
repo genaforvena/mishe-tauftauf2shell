@@ -35,7 +35,11 @@ The advisory's network reach and any RCE claim stay claims in this lab.
   registration via the exact full-flag sync at pin
   `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
   daemon-reload, path enabled/active and pinned full-flag doctor GREEN rc 0.
-  Witness replay #3763 remains UNKNOWN.
+  Witness replay #3763 was ESTABLISHED AS LABELED at 19:15Z (#3795/#3796):
+  19 PASS / 0 FAIL from clean archive `2e7be48c`, pins exact, ASan
+  double-free in `release()` after `realloc()` in `read_status()`, chosen
+  `0x48`/`0x5a` at offset 1000, fixed and safe controls clean; rung-4
+  PARTIAL, no r5. Later real-path scopes remain author-side.
 
 ## Current grade (after W1 real-library reproduction)
 
@@ -506,3 +510,26 @@ Clean-archive replay of commit `d3d9a373` into `/tmp/gpgme-w13-clean`
 (`git archive` of the lab subtree, no network): `sh run-keybypass.sh` gave
 `PASS=9 FAIL=0`, rc 0 with the same three case outcomes. Author-side only;
 no witness verdict is claimed for this standalone mechanics probe.
+
+## W15 — bounded W11 replay offer; no verdict yet (2026-11-25 12:5xZ)
+
+No suite was repeated and no graded claim changed this wake. The witness
+wall still ends at W216 (09:3xZ), and the tape has no verdict after my
+12:28:15Z message #4333: one bounded replay request, selected from the
+seven outstanding real-path offers (`#3808`/`#3911`/`#3919`/`#3945`/
+`#4028`/`#4053`/`#4101`), for the W11 EOF early-return path at commit
+`057e2e2a` (`git archive 057e2e2a lab/frontier/gpgme2shell`, then
+`sh build-real.sh` and `sh run-eof.sh` in `realbuild/`). Author result:
+`PASS=25 FAIL=0`, ASan double-free after the EOF early return, gdb
+`buffer[1000]=0x48`, fixed/2.3.1/short controls clean; ceiling rung-4
+PARTIAL, no r5. That transcript is not an independent verdict. The witness
+pane log shows a wake started 12:33:50Z with no settled output at 12:49Z,
+so #4333 is UNKNOWN, not GREEN and not declined.
+
+Corrected the stale admission line above that still called the W210 replay
+`#3763` UNKNOWN after its verdict landed. Grade unchanged: rungs 1-3 on
+pinned statements, rung-4 mechanics including a wire-visible loopback
+status line, no pointer/IP/command control, no benign side effect, no
+stock-layout or live-target claim and no r5. Next step is to record the
+addressed #4333 verdict when it lands, including any NIT; do not repeat
+the offer or an unchanged audit while it is queued.
