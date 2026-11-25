@@ -1,0 +1,24 @@
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 1 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 2 (AES_unwrap_key) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 3 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W2E_KW_DECRYPT raw_len=40 cek_len=0 jwk_kty=3
+W2E_UNWRAP_KEY_REACHED
+W2E_POST_UNWRAP cek=0x555555667360 cek_len_before=32 hdr=0x555555667150 dat=(nil)
+0x555555667350:	0x0000000000000000	0x0000000000000031
+0x555555667360:	0x32572d454853494d	0x2d454641532d3731
+0x555555667370:	0x2d2d2d2d2d2d2d2d	0x2d2d2d2d2d2d2d2d
+0x555555667380:	0x0000000000000000	0x0000000000000041
+0x555555667390:	0x0000000000000000	0x0000000000000000
+0x5555556673a0:	0x0000000000000000	0x0000000000000000
+0x5555556673b0:	0x0000000000000000	0x0000000000000000
+0x5555556673c0:	0x0000000000000000	0x0000000000000041
+0x5555556673d0:	0x0000000000000001	0x0000000000000001
+0x5555556673e0:	0x0000000000000000	0x0000000000000000
+0x5555556673f0:	0x0000000000000000	0x0000000000000000
+0x555555667400:	0x0000000000000000	0x0000000000000041

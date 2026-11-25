@@ -1,0 +1,13 @@
+CHECK LONG_RAW152                  observed=1 expected=1
+CHECK LONG_UNWRAP                  observed=1 expected=1
+CHECK LONG_DUMP                    observed=1 expected=1
+CHECK LONG_CHOSEN_FAR              observed=1 expected=1
+CHECK SAFE_RAW40                   observed=1 expected=1
+CHECK PTR_RAW80                    observed=1 expected=1
+CHECK ZERO_RAW152                  observed=1 expected=1
+CHECK FIXED_REJECT599              observed=1 expected=1
+CHECK FIXED_NO_UNWRAP              observed=0 expected=0
+CHECK FIXED_KW_REACHED             observed=1 expected=1
+W217_DEREF_HITS long=0 zero=0 ptr=0 SIGNAL_LINES=0
+REPLAY_W217: 10 PASS / 0 FAIL
+NO_LISTENER_LEFT

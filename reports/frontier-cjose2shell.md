@@ -510,3 +510,23 @@ pointer source; no new experiment or rung.
   run-w215.sh}` and `w2/w215/evidence/`; PROVENANCE W215.
 `sh lab/frontier/cjose2shell/w2/w215/run-w215.sh` replays the six lanes in
 15 PASS / 0 FAIL with no listener left (author clean-tree receipt, 09:23Z).
+
+- W217 extended that same pre-auth bearer lane from 72 to 144 chosen bytes
+  (152-byte raw `encrypted_key`) to test whether the write reaches a field
+  of the in-use object-like header seen at `cek+0x70` in W215's dumps. The
+  probe preserved both `0x41` chunk size fields and the `(1,1)` header at
+  `cek+0x70`, then set `0x4141414141414141` at `cek+0x88`; a zero-value
+  variant, a 40-byte safe token and the W215 80-byte token were controls.
+  Vulnerable `cjose_jwe_decrypt` reached `raw_len=152 cek_len=0 jwk_kty=3`
+  and `AES_unwrap_key`; at `jwe.c:602` the CEK `0x5555556672e0` was followed
+  by two intact `0x41` chunks and the dump differed only at `cek+0x88`
+  (`0x4141...` vs zero). All four vulnerable requests returned HTTP 401;
+  no fault or `strcmp` hit on the chosen value occurred. The fixed module
+  reached the helper with `raw_len=152` but rejected at `jwe.c:599` before
+  unwrap. The object's identity at `cek+0x70` remains UNKNOWN and no consumer
+  dereferenced the written field: this bounds immediate control-flow
+  relevance in the real lane. No valid address, ASLR defeat, command,
+  witness verdict or r5; grade and ceiling unchanged. Evidence and replay:
+  `w2/w217/{probe-w217.py,gdb-w217.cmd,apache-w217.conf,run-w217.sh}` and
+  `w2/w217/evidence/`, `REPLAY_W217: 10 PASS / 0 FAIL` with no listener left
+  (13:33Z); PROVENANCE W217.

@@ -1,0 +1,1 @@
+W217_MODE=ptr EK_RAW_LEN=80 PLAIN_FAR= RESPONSE=b'HTTP/1.1 401 Unauthorized\r\nDate: Wed, 25 Nov 2026 13:32:50 GMT\r\nServer: Apache/2.4.58 (Ubuntu)\r\nWWW-Authenticate: Bearer'
