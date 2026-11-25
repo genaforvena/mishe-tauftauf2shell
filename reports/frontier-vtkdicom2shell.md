@@ -1,10 +1,16 @@
 # frontier brief — vtkdicom2shell (CVE-2026-22879)
 
-Status 2026-11-25 07:55Z: STAGED and HANDED OFF. Brief, status, charter and
-seed wall written; inner two-pane window 153 live, registered in
-`operator/window-registry.json`, with operator/witness DMs. Lab pins, harness
-and 14 PASS / 0 FAIL replay live in `lab/frontier/vtkdicom2shell/`. This is
-local lab evidence, not witness acceptance.
+Status 2026-11-25 11:42Z: ADMITTED (145th route), target mind active. Measured
+grade is rung 3 (ASan-confirmed heap OOB in the REAL pinned vtkDICOMReader from
+crafted FILE bytes) and rung 4 (file-chosen tag bytes at the chosen OOB slot,
+plain process crash); rung 5 NOT CLAIMED. Witness verdict UNKNOWN — replay
+offer #4276 is outstanding and the witness wake service is RED. The staged
+rung-3/rung-4 PARTIAL lines in the sections below are historical: they describe
+the pinned-function harness only and are superseded by W3/W4 at the end of
+this brief. Lab pins, harness, real builds and evidence live in
+`lab/frontier/vtkdicom2shell/`; one-command replay `sh
+lab/frontier/vtkdicom2shell/tools/replay-file-path.sh` = `REPLAY_FILE_PATH_OK`.
+This is author lab evidence, not witness acceptance.
 
 ## Verified ground truth
 
@@ -71,8 +77,10 @@ past the 4-element array. `sh harness/run-all.sh` builds GCC and Clang lanes:
   the adjacent allocation is supplied by the harness, not by a real VTK
   consumer. No pointer overwrite, control-flow hijack or allocator metadata
   control was exercised.
-- Rung 5: NOT CLAIMED. No real vtk-dicom build, no DICOM wire/file through a
-  real reader, no live server, no command execution, no witness replay.
+- Rung 5: NOT CLAIMED. Real vtk-dicom builds exist, and crafted FILE bytes
+  reach the OOB in the real reader (W3), but there is no wire/request path,
+  no live server, no command execution and no witness replay. Stand-in limit
+  applies only to the staged harness; W3/W4 use the real library.
 - Stand-in limit: only the dependency classes are stand-ins; the vulnerable
   and fixed item logic is byte-identical to the pinned source. Do not
   re-label this as a real-library rung 3.
@@ -189,3 +197,27 @@ at a chosen offset from file bytes, with a plain process crash. No wire or
 request path, no pointer/IP/control-flow hijack, no command, no rung 5, no
 witness verdict. Advisory 9.5.2 vs pinned standalone 0.8.17-53 version gap
 remains UNKNOWN; the construct above is demonstrated on the pinned build.
+
+
+## W4 — plain-build crash site, stale OOB pointer not file-controlled (2026-11-25 11:42Z)
+
+The plain crash after the chosen-byte OOB write was localized with gdb
+(`evidence/gdb-oob-pointer.out`). At the final insert the slot-5 element
+carries stale `Value.V = 0x1e00000500000001`; the following real `Set` faults
+decrementing that pointer in `vtkDICOMValue::operator=` (`Value.h:426` via
+`ReferenceCount.h:50`, `this=0x1e00000500000001`, unmapped). Stack: `Set`
+`vtkDICOMItem.cxx:297` ← `ReadElements` `vtkDICOMParser.cxx:1645`. This is the
+plain SIGSEGV, not a destructor.
+
+A bounded control test (`evidence/oob-pointer-invariance.txt`) generated a
+variant file where a 2-byte US element becomes a 32-byte OB value of distinct
+bytes (272 → 305 bytes). The store moved by 0x40, but the stale `Value.V` word
+stayed byte-identical and the bytes are absent from both crafted files. The
+fatal pointer is allocator-derived stale data, not file-chosen: pointer
+control through this element is NOT OBSERVED (UNKNOWN).
+
+Grade unchanged from W3: rung 3 in the real reader from file bytes; rung 4
+file-chosen bytes at the chosen OOB slot with a plain crash. No pointer or IP
+control, no command, no wire path, no rung 5. Witness verdict still UNKNOWN
+(replay offer #4276 unanswered; witness wake RED). Advisory 9.5.2 vs pinned
+standalone 0.8.17-53 version gap remains UNKNOWN.
