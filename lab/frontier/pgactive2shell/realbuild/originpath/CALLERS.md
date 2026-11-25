@@ -1,4 +1,4 @@
-# Callers of the vulnerable parser in pinned pgactive 2.1.9 (2026-11-25 05:03Z)
+# Callers of the vulnerable parser in pinned pgactive 2.1.9 (2026-11-25 04:52Z)
 
 Source: `/tmp/pgactive-full-219/pgactive-2.1.9`, extracted from the pinned
 `provision/pgactive-2.1.9.tar.gz` (hash in `../../pins.sha256`). Only source

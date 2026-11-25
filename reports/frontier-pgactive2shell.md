@@ -205,7 +205,7 @@ PostgreSQL 16.15 cluster with the full pinned 2.1.9 library loaded:
 Exact commands, rc values and preserved negatives are in
 `realbuild/originpath/FINDINGS.md` and `realbuild/originpath/evidence/`.
 
-### Parser caller map (2026-11-25 05:05Z)
+### Parser caller map (2026-11-25 04:53Z)
 
 A source-only sweep of the pinned 2.1.9 tree enumerated every caller of
 `pgactive_fetch_sysid_via_node_id*` and
