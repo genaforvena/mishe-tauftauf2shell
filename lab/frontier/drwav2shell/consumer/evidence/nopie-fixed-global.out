@@ -1,0 +1,19 @@
+Breakpoint 1 at 0x417919: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/nopie-fixed/tests/wav/wav_decoding.c, line 326.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, decode_test_file (pFilePath=0x7fffffffdfa0 "tests/testvectors/wav/tests/attack.wav") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/nopie-fixed/tests/wav/wav_decoding.c:326
+326	    result = decode_test_file_s32(&libsndfile, &wav);
+TARGET_ADDR=0x41e108
+0x41e108 <g_libsndfile>:	0x000000000041f330	0x00007ffff7f2cf50
+=======================================================================
+DECODE TESTING
+=======================================================================
+tests/testvectors/wav/tests               RESULT  
+  attack.wav                              Passed
+
+=======================================================================
+DECODE PROFILING (LOWER IS BETTER)
+=======================================================================
+
+[Inferior 1 (process 3109890) exited normally]

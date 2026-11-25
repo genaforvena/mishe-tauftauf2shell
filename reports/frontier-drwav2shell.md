@@ -148,5 +148,31 @@ consumer, but the low pointer was measured in a fixed-ASLR lab process, not
 leaked by the file. No wire, pointer-IP, control-flow diversion, command,
 shell or rung 5. The W2 lane is author replay with no witness verdict.
 
+
+## Leak-free fixed-address write in a non-PIE consumer (W3, 2026-11-25 12:16Z)
+
+`lab/frontier/drwav2shell/consumer/run-nopie.sh` rebuilds the same unmodified
+upstream consumer with `-no-pie` against the pinned 0.14.5/0.14.6 headers. In
+this build the brk heap and the binary's `.data`/`.bss` both sit below 4 GiB
+(measured `wav.pMetadata=0x42d850`, `libsndfile.pFileData=0x42da40`, globals
+at `0x41e108`/`0x41e118`), so the allocator-derived high 32 bits of the
+hijacked cue pointer are zero. The file's low-32 field is therefore the FULL
+write address: no address leak, no `setarch -R`, no gdb write, no source
+patch. A 150-byte RIFF with low pointer `0x41e0f0` places the two file words
+`0x4841434b`/`0x42424242` in the consumer's own `g_libsndfile` global at the
+fixed link-time address `0x41e108`; changing only that field to `0x41e100`
+places them in the function-pointer global `libsndfile__sf_close` at `0x41e118`.
+`sh consumer/run-nopie.sh` → 11 PASS / 0 FAIL, including fixed-header and
+matching-`smpl` controls clean and the uninstrumented consequence (rc 139 when
+the corrupted global is later used). Raw output in `consumer/evidence/nopie-*.out`.
+
+This removes the W2 leak dependency for a non-PIE build and demonstrates
+8 attacker-chosen bytes at an attacker-chosen fixed application address.
+It is still rung 4: no wire/request input, no pointer-to-IP overwrite, no
+benign marker execution, no command, shell, live service or rung 5. The
+function-pointer write is an observation at a breakpoint, not a control-flow
+hijack claim. All three consumer lanes remain author replay with no witness
+verdict.
+
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
