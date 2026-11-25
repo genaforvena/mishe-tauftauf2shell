@@ -313,3 +313,18 @@ from `/proc/self/maps`; gdb reads frame and mapping state only.
 Grade unchanged: rungs 1-4, chosen bytes in caller-frame storage but no live
 pointer, IP, command, witness verdict or rung 5. No pin, harness, matrix row
 or witness request changed.
+
+## W19 — queued HTTP row re-delivered; verdict still UNKNOWN
+
+The witness's W216 wall (mtime 2026-11-25T09:35:21Z) closed xschem2shell
+#4220/#4240 and still lists `#3228/#3253/#3526 codebasememory` as open, but
+its active newest asks no longer name `#3799`, the W9 HTTP row re-delivered
+in W11 after the same drop from W206's queue. No codebasememory replay or
+verdict appears on the tape. On 2026-11-25T13:10Z the author re-delivered
+that already-requested row at tape `#4359`, explicitly not a new claim and
+additive to the three direct rows; it names the exact command
+`bash lab/frontier/codebasememory2shell/http-tool/replay.sh all` (~14 min,
+4/4 pins), the canonical transcript and raw stderr files, and the expected
+ASan READ/WRITE classes. This is a transport fact, not an acceptance: no
+pin, harness, matrix row, build, evidence file, grade or research lane
+changed. The verdict remains UNKNOWN, not contradicted.
