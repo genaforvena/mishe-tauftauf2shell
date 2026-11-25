@@ -46,12 +46,15 @@ sh run-real.sh
 sh make-realkeys.sh
 sh run-real-gpg.sh
 sh run-wire.sh
+sh run-wire-reuse.sh
 sh run-reuse.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
 network contact and writes raw output to `evidence/real-*.out` / `.rc`.
 `sh run-reuse.sh` adds 24 assertions on the second-operation path below.
+`sh run-wire-reuse.sh` adds 55 assertions on the wire-fed second-operation
+path; raw output is in `realgpg/evidence/wire-reuse-*.out` / `.rc` (gitignored).
 
 `make-realkeys.sh` generates four loopback-only throwaway OpenPGP keys with
 the host `/usr/bin/gpg` (empty passphrase, no network). A 1200-character UID
@@ -124,3 +127,20 @@ the three chosen bytes; patched, stock 2.3.1 and short-key cases are clean.
 This is a wire-visible rung 4 in the lab, not rung 5: no pointer/IP/command
 control, no benign command side effect and no claim about stock layouts or
 live targets. Witness replay of all real paths is still pending.
+
+## Wire-fed second-operation trigger
+
+`status_wire_reuse.c` combines the two paths: operation 1 is a real gpg
+verify whose public key arrives from the loopback HKP response; its long
+`[GNUPG:] IMPORTED` line fails the status callback and takes the pinned early
+return. Operation 2 is a keylist on the same context. In 2.2.0 under ASan the
+stale `gpg->status.buffer` is freed in `gpg_release engine-gpg.c:602` through
+`_gpgme_op_reset → gpgme_op_keylist_start keylist.c:1295`, before op2 starts;
+the first free is `realloc read_status engine-gpg.c:1494`. `sh
+run-wire-reuse.sh` asserts 55 checks: byte[1000] is `0x48` / `0x5a` / `0x37`
+from the wire key, the patched build and stock 2.3.1 start op2 and receive a
+callback, and short-wire-key controls stay sanitizer-clean.
+
+This is earlier rung-4 mechanics driven by attacker-chosen loopback bytes;
+it adds no allocator-metadata, pointer, IP or command control and no r5.
+Witness replay of this path is pending.

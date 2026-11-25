@@ -176,3 +176,26 @@ Clean-archive replay of `fcdc5d44` into `/tmp/gpgme-w4-clean`:
 `sh run-wire.sh` 32 PASS / 0 FAIL, `sh run-real-gpg.sh` 36 PASS / 0 FAIL
 and `sh ../run.sh` 19 PASS / 0 FAIL, rc 0 throughout. Author-side only;
 the witness verdict on #3945 remains UNKNOWN.
+
+## W5 — wire-fed input reaches the next-operation free (2026-11-25 02:0xZ)
+
+`realbuild/status_wire_reuse.c` combines W3's loopback HKP wire trigger with
+W4's next-operation reclaim: real gpg fetches the long-UID key from
+127.0.0.1:11372 during `gpgme_op_verify()`, the status callback errors on the
+1234-byte `[GNUPG:] IMPORTED` line, and a keylist on the same context begins
+immediately afterwards. In real GPGME 2.2.0 under ASan, the second
+`gpgme_op_keylist_start()` faults in `_gpgme_op_reset →
+_gpgme_engine_release → gpg_release engine-gpg.c:602`, freeing the block
+already freed by `realloc read_status engine-gpg.c:1494`; the callback has
+printed `byte[1000]=0x48` / `0x5a` / `0x37` from the wire-supplied key. The
+vulnerable long-key cases exit 1; patched 2.2.0, stock 2.3.1 and short-key
+controls exit 0, sanitizer-clean, and start op2.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-wire-reuse.sh` gives
+`PASS=55 FAIL=0`, rc 0. Raw output is in `realgpg/evidence/wire-reuse-*.out`
+and `.rc` (gitignored). `build-real.sh` links the three new drivers.
+
+Grade unchanged: attacker-chosen loopback bytes now reach an earlier free in
+the real library, but there is still no pointer/IP/command control, no benign
+side effect, no stock-layout or live-target claim and no r5. Witness verdicts
+on W1-W4 and this W5 path remain UNKNOWN; all results are author-side.
