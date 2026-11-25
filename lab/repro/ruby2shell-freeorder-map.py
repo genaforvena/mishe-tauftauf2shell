@@ -62,20 +62,41 @@ def main():
     ap.add_argument('--plant-parts', type=int, default=4)
     args = ap.parse_args()
     m, f, d, marks = parse(args.log)
+    drain_byte = 0x64
+    plant_byte = 0x70
+
+    def phase_of(x):
+        line, _, ptr = x
+        fr = first_after(f.get(ptr, []), line)
+        if not fr:
+            return None
+        dd = next((q for q in d.get(ptr, []) if abs(q[0] - fr[0]) <= 1), None)
+        if not dd:
+            return None
+        if dd[2] == dd[3] == drain_byte * 0x0101010101010101:
+            return 'drain'
+        if dd[2] == dd[3] == plant_byte * 0x0101010101010101:
+            return 'plant'
+        return None
+
     slices = [x for x in m if x[1] == args.slice_req]
-    want = 2 * (args.drain_parts + args.plant_parts)
-    if len(slices) < want:
-        print(f'only {len(slices)} slice allocations; need {want}', file=sys.stderr)
-        return 2
-    drain = slices[:2 * args.drain_parts]
-    plant = slices[2 * args.drain_parts:want]
     vals = [x for x in m if x[1] == args.value_req]
-    def values_for(phase):
-        lo, hi = phase[0][0], phase[-1][0]
-        return [x for x in vals if lo < x[0] <= hi + 100][:len(phase) // 2]
+    drain = [x for x in slices if phase_of(x) == 'drain'][:2 * args.drain_parts]
+    plant = [x for x in slices if phase_of(x) == 'plant'][:2 * args.plant_parts]
+    drain_vals = [x for x in vals if phase_of(x) == 'drain'][:args.drain_parts]
+    plant_vals = [x for x in vals if phase_of(x) == 'plant'][:args.plant_parts]
+    if len(drain) != 2 * args.drain_parts or len(plant) != 2 * args.plant_parts:
+        print(f'classified slices: drain={len(drain)}/{2 * args.drain_parts} '
+              f'plant={len(plant)}/{2 * args.plant_parts}', file=sys.stderr)
+        return 2
+    if len(drain_vals) != args.drain_parts or len(plant_vals) != args.plant_parts:
+        print(f'classified values: drain={len(drain_vals)}/{args.drain_parts} '
+              f'plant={len(plant_vals)}/{args.plant_parts}', file=sys.stderr)
+        return 2
     alloc = {}
-    for name, phase in (('drain', drain), ('plant', plant)):
-        for x in phase + values_for(phase):
+    for name, phase, vphase in (('drain', drain, drain_vals),
+                                ('plant', plant, plant_vals)):
+        for x in phase + vphase:
             alloc[x[0]] = (name, 'slice' if x[1] == args.slice_req else 'value', x)
     all_alloc = sorted(m, key=lambda x: x[2])
     print(f'== {args.log}: slice_req={args.slice_req:#x} '

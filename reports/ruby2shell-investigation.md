@@ -2886,3 +2886,53 @@ stays **NOT ACHIEVED**.
       not consumed by the 1,200-part filler); verify with `S`/`E` lines and
       the B physical pointer before spending on claim forging. Safe/fixed
       controls remain mandatory for any impact claim.
+29. **Corrected plant identity, live tcache/occupancy measurement, and the
+    stock-Sinatra A/V/T geometry — bounded NEGATIVE at the claim (2026-11-25,
+    this wake).** No command, persistence or grade change; stock/oracle-free/
+    persistent rung 5 stays **NOT ACHIEVED**.
+    - `lab/repro/ruby2shell-freeorder-map.py` was fixed to classify a chunk by
+      its pre-free D qwords (`0x6464…` drain, `0x7070…` plant) instead of by
+      allocation rank. The old split-by-rank table mixed drain traffic into the
+      plant phase; item 28's identification of `n972tc-3`'s tcache head and
+      upcase buffer as planted slices is therefore **retracted** — those rows
+      carry drain bytes. The corrected table for the same log puts the real
+      plant chunks at `0x7b0d2ca86…`/`0x7b0d2ca87…`, not at `0x7b0d2c9e5…`.
+    - `lab/preload/mtrace.c` gained opt-in direct reads of the request thread's
+      glibc tcache struct (`MTRACE_DUMP_TCACHE=1`, `S`/`E` lines for bins 61–63),
+      pre-free occupancy at plant/drain chunks (`MTRACE_TCACHE_FREE_DUMP=1`,
+      `Y` lines), a fastbin walk (`MTRACE_DUMP_FASTBINS=1`, `N` lines), and
+      bin dumps at a chosen request size (`MTRACE_DUMP_REQUEST=0x43f` plus
+      `MTRACE_DUMP_BINS=1`, `L` lines). The real tcache cutoff on this host is
+      `0x410` (bin 63); `0x420` is not tcache-managed. At B, fastbins were
+      empty in the sampled runs.
+    - Rails occupancy is a hard blocker at the value class: with drain
+      `1000x7`, tcache bin 63 is already full (7) before the first planted
+      `0x410` value is freed, so every planted value enters unsorted. Adding
+      live `1000`-byte consumers before the filler and moving `_method` before
+      the filler did not change that occupancy in the measured runs.
+    - `lab/repro/ruby2shell-shrink-claim.sh` now supports
+      `RUBY2SHELL_CLAIM_STACK=sinatra` (stock classic Sinatra app, same body
+      builder and evidence format), plus `CONSUMER_SPEC` and `METHOD_FIRST`
+      analysis knobs. Stock Sinatra has no dev-param render and puts the four
+      planted values in bin 63. With `N=972`, drain `984x7`, plant `1000x6`,
+      filler `1x1200`, `CHURN=0`, `POISON_NEXT=0x91`, claim content 1078 at
+      `0x400:0x414`, the B snapshot in `stock-sinatra-allbin-1.server.log`
+      shows the exact wanted state: buffer1 is a planted `0x400` slice, its
+      physical successor V is a planted `0x401` unsorted chunk grown to
+      `0x453`, and the next physical chunk T is a planted `0x414` tcache
+      entry. The upcase's second `0x3e2` mapping buffer was served from the
+      `0x3f0` shield head, so V survived the immediate splitter.
+    - The payoff still fails: the later `0x43f` claim request allocated at
+      `0x7fdb0402bba0`, not at V, and the all-bin dump immediately before it
+      no longer showed V in unsorted. The probe then popped T and printed
+      `P request=0x401 … key=0` with the old `fd`, not the claim's forged
+      `0x4141…` bytes. Fastbins were empty, so the leading hypothesis is the
+      large-request `malloc_consolidate` path consuming/rebinning V before the
+      smallbin/largebin lookup; it is not yet byte-confirmed. No claim pop,
+      no chosen-byte write at T's `next`, no command, no persistence.
+    - Veria's page is unchanged (stamp 21 Nov 03:52Z, PoC still unpublished);
+      the independent public `evenomn/CVE-2026-132825` repository documents
+      local crash/corruption only and explicitly no remote delivery path.
+      Named next: identify the exact post-upcase large allocation that removes
+      V (dump bins at `0xc00` and other intermediate large requests in the
+      same geometry), then shield that class before repeating the claim.

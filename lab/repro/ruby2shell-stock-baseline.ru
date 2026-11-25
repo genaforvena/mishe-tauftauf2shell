@@ -7,4 +7,4 @@ gem 'rackup', '2.3.1'
 gem 'webrick', '1.9.2'
 require 'sinatra'
 set :bind, '127.0.0.1'
-set :port, 4550
+set :port, ENV.fetch('RUBY2SHELL_STOCK_PORT', '4550').to_i

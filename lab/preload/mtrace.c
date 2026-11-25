@@ -35,6 +35,8 @@ static int case_stop_c = 0;
 static int case_stop = 0;
 static int dump_bins = 0;
 static unsigned long arena_head = 0;
+static int dump_fastbins = 0;
+static size_t dump_request = 0;
 static size_t case_first_request = 0;
 static const char *case_arm_file = 0;
 static const char *emit_arm_file = 0;
@@ -51,6 +53,7 @@ static __thread int case_waiting_second = 0;
 static __thread int case_overflow_seen = 0;
 static int case_wide = 0;
 static int dump_tcache = 0;
+static int tcache_free_dump = 0;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -70,6 +73,10 @@ static void mtrace_init(void)
     dump_bins = getenv("MTRACE_DUMP_BINS") != NULL;
     case_wide = getenv("MTRACE_CASE_WIDE") != NULL;
     dump_tcache = getenv("MTRACE_DUMP_TCACHE") != NULL;
+    dump_request = (size_t)strtoull(getenv("MTRACE_DUMP_REQUEST") ?
+                                   getenv("MTRACE_DUMP_REQUEST") : "0", NULL, 0);
+    dump_fastbins = getenv("MTRACE_DUMP_FASTBINS") != NULL;
+    tcache_free_dump = getenv("MTRACE_TCACHE_FREE_DUMP") != NULL;
     emit_tid = getenv("MTRACE_TID") != NULL;
 }
 
@@ -82,15 +89,32 @@ static void emit(const char *tag, unsigned long a, unsigned long b,
                  unsigned long c);
 static void bin_dump(unsigned long head)
 {
-    static const int bins[] = {1, 71, 72, 73, 96};
-    for (unsigned k = 0; k < sizeof bins / sizeof bins[0]; k++) {
-        int idx = bins[k];
+    for (unsigned idx = 1; idx < 128; idx++) {
         unsigned long bin = head + (unsigned long)(idx - 1) * 0x10;
-        unsigned long p = case_read((void *)(bin + 0x18));  /* bk = oldest */
+        unsigned long p = case_read((void *)(bin + 0x18));  /* bk = newest */
         for (int n = 0; n < 120 && p != bin && p >= 0x1000; n++) {
             unsigned long sz = case_read((void *)(p + 8));
-            emit("L", (unsigned long)idx, p, sz);
+            emit("L", idx, p, sz);
             unsigned long next = case_read((void *)(p + 0x10));
+            if (next == p)
+                break;
+            p = next;
+        }
+    }
+}
+
+static void fastbin_dump(unsigned long unsorted_head)
+{
+    unsigned long av = unsorted_head - 96;
+    for (unsigned idx = 0; idx < 10; idx++) {
+        unsigned long p = case_read((void *)(av + 16 + idx * 8));
+        if (!p)
+            emit("N", idx, 0, 0);
+        for (unsigned n = 0; n < 64 && p; n++) {
+            unsigned long size = case_read((void *)(p + 8));
+            emit("N", idx, p, size);
+            unsigned long fd = case_read((void *)(p + 16));
+            unsigned long next = fd ^ ((p + 16) >> 12);
             if (next == p)
                 break;
             p = next;
@@ -192,14 +216,14 @@ static void tcache_dump(void)
     }
     void **entries = (void **)(counts + 64);
     unsigned long key = 0;
-    for (unsigned idx = 62; idx <= 63; idx++) {
+    for (unsigned idx = 61; idx <= 63; idx++) {
         if (counts[idx] && entries[idx]) {
             key = case_read((char *)entries[idx] + 8);
             if (key)
                 break;
         }
     }
-    for (unsigned idx = 62; idx <= 63; idx++) {
+    for (unsigned idx = 61; idx <= 63; idx++) {
         unsigned count = counts[idx];
         unsigned long head = (unsigned long)(uintptr_t)entries[idx];
         emit("S", idx, count, head);
@@ -253,6 +277,16 @@ static void case_snapshot(const char *tag, size_t sizefield)
                            case_read(physical + 0x40), case_read(physical + 0x48));
         if (glen > 0)
             write(out_fd, gbuf, (size_t)glen);
+    }
+    if (tag[0] == 'B') {
+        void *tc = current_tcache();
+        if (tc)
+            arena_head = (unsigned long)(uintptr_t)tc - 0x460;
+        if (dump_fastbins) {
+            emit("Z", 0, 0, 0);
+            if (arena_head)
+                fastbin_dump(arena_head);
+        }
     }
     if (tag[0] == 'B' && dump_tcache)
         tcache_dump();
@@ -344,6 +378,8 @@ void *malloc(size_t size)
         if (case_stop)
             kill(getpid(), SIGTRAP);
     }
+    if (dump_request && size == dump_request && dump_bins && arena_head)
+        bin_dump(arena_head);
     void *p = __libc_malloc(size);
     case_allocation(size, p);
     if (case_waiting_second && size == case_first_request) {
@@ -379,6 +415,18 @@ void free(void *p)
         if (p == case_victim)
             case_snapshot("V", sizefield);
         case_window_free(p);
+        if (tcache_free_dump &&
+            ((sizefield & ~(size_t)7) == 0x400 ||
+             (sizefield & ~(size_t)7) == 0x410)) {
+            unsigned long q0 = case_read(p);
+            unsigned long q8 = case_read((char *)p + 8);
+            if (q0 == q8 &&
+                (q0 == 0x6464646464646464UL ||
+                 q0 == 0x7070707070707070UL)) {
+                emit("Y", (unsigned long)(uintptr_t)p, sizefield, q0);
+                tcache_dump();
+            }
+        }
         if (free_dump && (sizefield & ~(size_t)7) >= 0x300 &&
             (sizefield & ~(size_t)7) <= 0x500) {
             char buf[160];
