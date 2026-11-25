@@ -2392,3 +2392,36 @@ wire or live target. The verdict does not cover W203's ASLR-on negative
 (author replay only). Grade and rung-5 status are unchanged: full r5 remains
 UNKNOWN with the concrete blockers a wire-fed affected process and an
 ASLR-tolerant pointer route.
+
+## W205: partial-pointer retarget of W202's victim — negative (2026-11-25 18:1xZ)
+
+Prediction: the W202 chain needs ASLR off only because it writes the full
+eight-byte address of libc `system` into `ctxt->free_fn`; a byte-granular
+partial overwrite that preserved the random high bytes might work with ASLR
+on. Measured NEGATIVE at this victim: the live `ctxt->free_fn` is not a libc
+pointer. W202's committed chain trace records
+`FREEFN_BEFORE=0x555555663e50`; with the pinned PIE load bias
+`0x555555554000` that is exactly `internal_exr_free` at binary offset
+`0x10fe50` (`memory.c:67`), not libc `free` at offset `0xade10`. The desired
+callee `system` is at libc offset `0x58750`. With ASLR left on, two gdb
+mapping readings give independent PIE bases (`0x5ee75ce73000`,
+`0x594eb0c38000`) and independent libc bases (`0x740bd1600000`,
+`0x703ad6200000`): no overwrite that preserves the high bytes of a PIE
+function pointer can cross into the libc mapping, for any partial length.
+The pinned PIE binary has zero `system`/`popen`/`exec*`-family PLT calls, so
+there is also no same-mapping command call to retarget to.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w205-partial-pointer-negative.sh` -> `RESULT PASS` rc 0 three times
+with normalized evidence hash
+`dc3ac7dffa162bba97f73c36c78f3e0fdbbd2054d28c59f035e97e521f3dc9ae`;
+raw mapping values in `evidence/w205-aslr-maps.out` vary by design. The
+script re-checks the W202 chain pointer, the four symbol offsets and the
+absence of command PLTs before measuring the mappings.
+
+Disposition: keep the negative. This closes the byte-granular partial
+retarget of W202's `ctxt->free_fn` under ASLR on; it does not close a
+heap/address leak that supplies full libc addresses, a different live
+victim pointer, or a wire-fed consumer. Grade unchanged. W203's stale
+file-carried heap pointers still stop the chain at `attributes.c:305`
+before `opaque.c:79` is reached, so an ASLR-on command remains UNKNOWN.
