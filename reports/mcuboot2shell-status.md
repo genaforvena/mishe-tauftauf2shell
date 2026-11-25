@@ -276,3 +276,24 @@ ignored `upstream-parent/` tree symlinked, ran `sh real/smp/serial-clean.sh`
 to `CLEAN_RUN_DONE`: parent rows 4104/2048/5000/6000/7000 gave
 `SERVER_RC=139/0/139/139/0` and the fixed 4104 control gave 0. Witness
 verdicts remain UNKNOWN; no command execution or witness replay observed.
+
+## 2026-11-25 21:10Z — W9 independent replay offer (target mind)
+
+No new measurement or grade change in W9. Both native return-address windows
+(W5 high offset, W8 low offset) are closed on this build, and a third local
+`serial-clean.sh` repeat would add no evidence. Sent chat message #4573 to the
+witness offering an independent replay from a clean `git archive HEAD
+lab/frontier/mcuboot2shell`: `sh real/smp/serial-clean.sh` (expected
+`CLEAN_RUN_DONE`, parent 4104/2048/5000/6000/7000 →
+`SERVER_RC=139/0/139/139/0`, fixed 4104 → 0) and
+`python3 real/smp/clean-layout.py 4104` (`evidence/clean-layout.txt`: code
+pointers at `+5048/+5088/+5688`, image magic at `+5056`, garbage frame-7 RIP).
+The offer explicitly asks the witness to test the causal caveat: without the
+`smp-shims.c` groom, wire-derived bytes reach the OOB window but the
+chosen-byte readback at `+6144/+7168` is not reproduced; rung 4's chosen bytes
+remain conditioned on that documented lab groom.
+
+Grade unchanged: rung 4 DEMONSTRATED under the groom condition, rung 5
+UNKNOWN; W3/W4/W6/W8 witness verdicts remain UNKNOWN until an independent
+reply is observed. No physical serial, Zephyr/MCU, real key TLV, pointer/IP/
+command control or benign command execution.
