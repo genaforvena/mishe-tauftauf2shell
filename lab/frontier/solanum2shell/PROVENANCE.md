@@ -117,3 +117,27 @@ Negatives and corrected assertions preserved:
   command execution, or R5. ASan redzones prevent chosen-byte readback
   in the instrumented build; the earlier plain-build readback remains
   stand-in evidence only. Witness replay is still owed.
+
+## Plain real-ircd layout probe (target mind, 2026-11-25 14:1xZ)
+
+To measure what a plain (no-ASan) real process holds past `buf`, the
+verbatim `real-build/vuln-src` snapshot was rebuilt without sanitizers
+(`real-build/plain-build`, meson flags as above, `--prefix
+/tmp/solanum-plainfx`, installed there so authd resolves). `live/
+layout-probe.sh` replays: start the plain ircd on 127.0.0.1:17601 with
+`live/vuln.conf`, send the authenticated S2S KILL with reason 490 as in
+the ASan lane, locate the RW mapping of `modules/m_kill.so` in
+`/proc/$PID/maps`, and read `/proc/$PID/mem` at mapping base + 0x220 —
+the ELF symbol `buf` is at vaddr 0x5220 in a segment whose RW mapping
+begins at vaddr 0x5000 (the earlier wrong guess base+0x1220 read an
+unrelated anonymous anonymous mapping and is discarded). Observed from
+the live process after the KILL: `buf` starts `Killed (link.aaaa...`,
+all 512 bytes through `buf+511` are the sprintf result, and the first
+51 bytes past the declared 512-byte object are chosen `A`s except the
+terminal NUL (`buf+0x230: 41 41 29 00 ...`). The next bytes are ELF
+dynamic-relocation / module data of the adjacent `m_kick.so` mapping,
+not a pointer consumed by `ms_kill`. `layout-probe.sh` prints
+`chosen_A_past_buf=50/51` (one byte is the terminating NUL). Raw probe
+output: `live/probe-layout-final.out`, `live/layout-final-stdout.log`.
+Ceiling unchanged: rung 4 PARTIAL — live chosen bytes at a known global
+offset in a real plain process — no pointer target, no command, no R5.
