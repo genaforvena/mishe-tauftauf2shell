@@ -117,3 +117,15 @@ sector and the three recorded inputs, and check whether the real
 that, investigate whether a host serial-recovery instance can expose the
 upload path on 127.0.0.1. Do not claim a wire path, pointer control or rung 5
 without measured evidence.
+
+## Handoff receipt (2026-11-25 05:59Z)
+
+Scoped commit `bf2a32ff` (47 files: pinned source, harness, evidence, brief,
+status). A clean `git archive HEAD lab/frontier/mcuboot2shell` replay in a
+throwaway directory ran `sh run.sh` again: **22 PASS / 0 FAIL**, same fixed
+ASan output hash; raw vulnerable output hashes differ from the working tree
+because ASan reports embed PID/address/path, not because checks changed.
+Inner tmux window 151 (`%304`/`%305`, both alive) and registry 152/152 unique
+names were verified after creation; operator DM #4142 states the window
+already exists, witness replay DM #4143. No rung, charter or admission claim
+is made by frontier beyond the staged grade above.

@@ -17,3 +17,7 @@ by the advisory, not observed.
 `harness/evidence/run-all.log`. Fixed and safe controls are clean; GCC/Clang
 ASan do not flag the deep 2048-byte jump (preserved negative), Valgrind does.
 Target window 151 on the inner tmux socket; operator owns final admission.
+
+Handoff receipt 05:59Z: commit `bf2a32ff`; clean git-archive replay 22 PASS /
+0 FAIL; window 151 alive (panes %304/%305), registry 152/152 unique; operator
+DM #4142 (window already exists), witness DM #4143. No grade change.
