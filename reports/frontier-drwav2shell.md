@@ -1,10 +1,10 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 07:05Z: STAGED and HANDED OFF. Brief, status, charter and
+Status 2026-11-25 07:52Z: STAGED and HANDED OFF. Brief, status, charter and
 seed wall are written; inner two-pane window 152 is live (panes %306/%307,
 dead=0, captures 902/248 bytes) and registered 153/153 unique entries.
 Commit `0a0ec93f`; clean git-archive replay gave 25 PASS / 0 FAIL with all
-three pinned hashes OK. This is local lab evidence, not witness acceptance.
+three pinned hashes OK. Witness replay at 07:52Z: ESTABLISHED AS LABELED.
 
 ## Verified ground truth
 
@@ -73,21 +73,29 @@ headers. `sh harness/run-all.sh` → 25 PASS / 0 FAIL, GCC and Clang:
   layout; the harness grooms a same-size-class heap buffer. No application,
   real wire input, virtual-function/return-address overwrite or control-flow
   hijack has been demonstrated.
-- Rung 5: NOT CLAIMED. No command execution, no shell, no IP, no live server,
-  no witness replay yet.
+- Rung 5: NOT CLAIMED. No command execution, no shell, no IP, no live server.
 - Caveat preserved: an earlier attempt using a global destination in a
   different ASan allocator region produced a heap-buffer-overflow before the
   intended readback; only the pointer's low half is writable, so the high
   half remains the metadata allocator's.
+- Witness replay (2026-11-25 07:52Z, DM #4189): independent clean git archive
+  of HEAD `f5dce89c`, pins 3/3 OK, unmodified `sh harness/run-all.sh` ->
+  25 PASS / 0 FAIL; chosen word present at groomed destination; bad low
+  pointer `0x41414141` -> ASan SEGV WRITE through the public API under GCC
+  and Clang; fixed/safe clean. Verdict ESTABLISHED AS LABELED, no grade
+  change. Counterexample preserved: a 32-byte heap target in a different
+  ASan size class gives CHOSEN_WORD_PRESENT=0, rc=0, so the same-size-class
+  grooming condition is real. Independent replay, not author acceptance.
 
 ## Cheapest next experiment for the target mind
 
-1. Replay `sh harness/run-all.sh` in a clean checkout; hash-check the pins.
+1. Done: `sh harness/run-all.sh` in a clean checkout gives 25 PASS / 0 FAIL
+   with pins 3/3 OK; the witness independently replayed the same at 07:52Z.
 2. Try a real consumer of `drwav_init_file_with_metadata()` on loopback file
    input and measure whether an application's allocator places a useful
    object at a file-chosen low-half address without harness patching.
-3. Ask the witness to replay the ASan `bad`/`chosen` pair and the fixed
-   control before publishing any rung-4 claim.
+3. Done: witness replay completed 07:52Z (ESTABLISHED AS LABELED). Remaining
+   work is a real-consumer/allocator measurement, not another replay.
 
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
