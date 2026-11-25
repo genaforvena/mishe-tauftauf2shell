@@ -72,22 +72,19 @@ verbatim pinned method with minimal stand-ins; `sh harness/run.sh` gives
 - fixed build: upstream guard fires, no ASan report, canary unchanged.
 - safe exact-fit fragment: clean in both builds.
 
-Feasibility: cheap and reproducible at rung 3/4 PARTIAL with a pinned C++
-function. Barriers to more: the harness is not a real yojimbo build; the
-upstream packet path is post-authentication; production use of a non-multiple
-block config is not established. No wire, pointer/IP, allocator steering or
-command execution, so no rung 5.
+Feasibility at staging time was rung 3 plus rung 4 PARTIAL with a pinned C++
+function; the real-build and wire barriers below were then addressed in W1/W1b.
+The post-authentication ceiling remains: production use of a non-multiple block
+config is still UNKNOWN, and no pointer/IP control or command execution was
+obtained, so no rung 5.
 
-## Cheapest next experiment for the target mind
+## Original staging plan (completed in W1/W1b)
 
-Build the pinned parent with upstream CMake and the bundled crypto (`-DYOJIMBO_SYSTEM_SODIUM=ON` if system sodium is present), run the fix commit's
-`test_connection_reliable_block_fragment_overflow` regression under ASan to
-confirm the write through real `Connection::ProcessPacket`, then try a live
-authenticated loopback client/server pair with the non-default
-`maxBlockSize=1100` / `blockFragmentSize=500` config to observe whether the
-chosen bytes survive the decrypt/reassembly consumer. That would move the
-claim from pinned-function to real-library rung 4; it does not by itself make
-an RCE claim.
+The staged plan was to build the pinned parent under ASan, replay the fix
+commit's regression through real `Connection::ProcessPacket`, then try an
+authenticated loopback pair with a non-default block config. All three were
+done on 2026-11-25; see W1 and W1b below. The bundled sodium was used —
+`-DYOJIMBO_SYSTEM_SODIUM=ON` was not needed. No RCE claim resulted.
 
 ## W1 — real library build and authenticated loopback (2026-11-25 03:00-03:07Z)
 
