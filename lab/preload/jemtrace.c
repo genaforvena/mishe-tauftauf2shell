@@ -38,6 +38,7 @@ static size_t watch_sz;
 static size_t post_size;
 static size_t bt_size;
 static int want_bt;
+static size_t free_q0;
 
 static const char hx[] = "0123456789abcdef";
 
@@ -122,6 +123,8 @@ __attribute__((constructor)) static void jemtrace_init(void)
     if (fdvar) logfd = atoi(fdvar);
     if (szvar) watch_size = (size_t)strtoul(szvar, NULL, 0);
     const char *btvar = getenv("JEMTRACE_BT_SIZE");
+    const char *freevar = getenv("JEMTRACE_FREE_Q0");
+    if (freevar) free_q0 = (size_t)strtoul(freevar, NULL, 0);
     if (btvar) { bt_size = (size_t)strtoul(btvar, NULL, 0); want_bt = 1; }
     const char *armvar = getenv("JEMTRACE_ARM_SIZE");
     if (armvar) arm_size = (size_t)strtoul(armvar, NULL, 0);
@@ -190,6 +193,10 @@ void free(void *p)
 {
     if (!ready || in_hook) { __libc_free(p); return; }
     in_hook = 1;
+    if (p && free_q0 && *(size_t *)p == free_q0 && watch_size) {
+        dump_window(p, watch_size, "before");
+        dump_window(p, watch_size, "after");
+    }
     real_free(p);
     logline("F", 0, p);
     in_hook = 0;

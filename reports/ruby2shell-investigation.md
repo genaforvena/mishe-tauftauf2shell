@@ -3326,3 +3326,50 @@ the tracer armed by the request itself, and identify the adjacent
 allocation's caller. If no wire-shaped consumer appears, close the
 exact-size jemalloc lane as a bounded negative and record it beside the
 glibc lane.
+
+### Wire-only jemalloc corruption on stock Sinatra — clean control triple (2026-11-25, direct session)
+
+The in-process experiment was promoted to the wire: new
+`lab/repro/ruby2shell-jemalloc-wire.sh` sends one multipart POST to the
+**unmodified** `ruby2shell-stock-baseline.ru` classic Sinatra app on loopback.
+No route, middleware, marker, ObjectSpace, maps read or debugger is in the
+request path; the only lab condition is `LD_PRELOAD=jemtrace.so:libjemalloc.so.2`
+and an out-of-path trace fd. The `_method` part carries exactly the
+exact-size-class geometry (`0xDF×20 + 'a'×15 + 0xDF`, N=36, capa=56, R=80);
+the safe arm carries 36 inert bytes of the same length, and the fixed arm
+sends the malicious bytes to plain 3.4.13. The tracer detects the case buffer
+at free by its `capa=0x38` first qword and dumps the adjacent 80-byte region.
+
+Batch: 3 fresh processes per arm, tags
+`lab/build/evidence/jemwire-{a,c,f}{1,2,3}.trace`.
+
+| arm | body | Ruby | adjacent first qword `0x…53` |
+| --- | --- | --- | --- |
+| attack ×3 | 20 ß + 15 a + ß | 3.4.12 | **1 hit in each of 3/3** |
+| safe ×3 | 36 × 'a' | 3.4.12 | 0 in 3/3 |
+| fixed ×3 | malicious bytes | 3.4.13 | 0 in 3/3 |
+
+Representative `jemwire-a1` pair (same process, same tid):
+
+```
+M ... 0x...ae40 0x50              # case buffer, request 80
+W ... 0x...ae40 0x38 / 0x39 / 0x0 / 0x5353... b=...  # capa/used/output
+W ... 0x...ae90 0x0000000000000053 a=...      # adjacent live region, first qword
+```
+
+The adjacent address was last allocated in-request by `calloc(0x48)` shortly
+before the case buffer. An optional backtrace build resolves one frame to
+`trans_sweep` in `transcode.c`, but the symbolisation is noisy and the
+structure is **not** named here; its identity is UNKNOWN. Process survives
+both requests in all nine arms.
+
+This is the first **wire-only** observation in this plant of the one-byte
+overflow reaching a live adjacent allocation, with a clean
+affected/safe/fixed control triple, on an unmodified stock app and without
+any in-request oracle. It is still a corruption/impact mechanic: the byte is
+fixed `0x53`, it changes one low byte of one qword, no command is executed,
+no code-pointer source exists without a forbidden oracle, and no second
+distinct command is demonstrated. Stock/oracle-free/persistent rung 5 stays
+**NOT ACHIEVED**. Named next: identify the adjacent `calloc(0x48)` consumer
+and sweep other exact size classes (64/96/112/…/1024) for an adjacent
+first qword whose low byte is security-relevant.
