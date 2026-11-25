@@ -1,0 +1,63 @@
+Disassembly check of the saved-pointer layout claim (2026-11-25 06:15Z)
+=======================================================================
+
+Artifacts and commands
+----------------------
+/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so is the instrumented
+PGXS-default ("opt") build left by the last run-layout.sh execution; it is
+the same build whose LAYOUT/LAYOUTWIN lines are in layout-opt-server.log.
+The installed/backup normal library
+(lab/frontier/pgactive2shell/realbuild/layout/evidence/pgactive.so.normal-backup,
+sha256 3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998)
+has no standalone pgactive_parse_replident_name symbol (nm -D shows only
+pgactive_parse_replident_name_sql), so these offsets describe the
+instrumented build only.
+
+  objdump -d --no-show-raw-insn --disassemble=pgactive_parse_replident_name \
+    /tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so
+  objdump -d --no-show-raw-insn --start-address=0xf6d0 --stop-address=0xf800 \
+    /tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so
+  objdump -s --start-address=0x3c838 --stop-address=0x3c870 \
+    /tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so
+
+Relevant instructions
+---------------------
+  20cf0 <pgactive_parse_replident_name>:
+  20cf4: push   %rbp
+  20d0a: mov    %rsp,%rbp
+  20d11: lea    -0x70(%rbp),%r12        # NameStr(replication_name)
+  20d1d: mov    0x8(%rbp),%r13          # caller return address (PRE)
+  20d21: mov    %fs:0x28,%rax
+  20d2a: mov    %rax,-0x28(%rbp)        # stack canary
+  20d30: push   %r12
+  20d32: call   __isoc23_sscanf@plt
+  20d39: cmp    $0x4,%eax
+  20d3c: jne    ... <pgactive_parse_replident_name.cold>
+  ...
+  f6d4: mov    %r13,%rsi               # PRE passed to layout dump
+  f6d7: mov    %r12,%rdi               # buffer base
+  f6da: call   pgactive_layout_dump.constprop.0
+
+Frame arithmetic
+----------------
+  replication_name : rbp-0x70 = buffer offset 0
+  stack canary     : rbp-0x28 = buffer offset +72
+  saved return addr: rbp+0x08 = buffer offset +120
+
+The earlier note identified offset -32 (rbp-0x70-32 = rbp-0x90) as "the
+saved return address" because the downward search for PRE matched there
+first. That slot is below the frame pointer and is not this function's
+return-address slot; what places the copy there was not determined and
+stays UNKNOWN. The real return-address slot at +120 is overwritten:
+in the N=256 LAYOUTWIN line, bytes at offsets 104..127 alternate 41 5a,
+so offset 120 = 0x41 and 121 = 0x5a.
+
+Outcome
+-------
+.rodata at 0x3c842 is "pgactive_%lu_%u_%u_%u_%s": five conversions. A
+non-empty trailing name assigns the fifth conversion, sscanf returns 5,
+and the pinned `!= 4` check sends every overflowing input to
+elog(ERROR)'s longjmp. The overwritten return-address slot at +120 and
+canary at +72 are therefore never consumed. The saved-pointer/IP route
+stays closed; the reason is the longjmp, not a return address below the
+buffer. No cluster was started for this check; no host setting changed.

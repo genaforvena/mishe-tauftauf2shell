@@ -20,27 +20,32 @@ Loopback only: 127.0.0.1:58423, socket `/tmp/pgactive-layout-sock`.
 
 ## Observed
 
-- o1: `PRE=0x74dd997497d7`, `BASE=0x7ffc7ac14f90`; saved return address at
-  offset **-40** relative to `replication_name`, second copy of the same
-  value at **+104**.
-- opt: `PRE=0x71c1adcae310`, `BASE=0x7ffdc6d77490`; saved return address at
-  offset **-32**, second copy at **+120**.
+- o1: `PRE=0x74dd997497d7`, `BASE=0x7ffc7ac14f90`; first downward search
+  match at offset **-40** relative to `replication_name`, another at
+  **+104**.
+- opt: `PRE=0x71c1adcae310`, `BASE=0x7ffdc6d77490`; first downward search
+  match at **-32**, another at **+120**. Disassembly of this build places
+  the real saved return-address slot at +120 (see correction below).
 - A payload of `AZ` repeated N bytes writes exactly N+1 bytes starting at
   offset 0: N=16 covers offsets 0..31, N=48 covers 0..95, N=96 covers
   0..191, N>=128 covers every window offset 0..254 with `41 5a` repeating.
-- At N=256 the +104/+120 copy of the return-address value is
-  `415a415a415a415a` in both builds; the -40/-32 slot is unchanged.
+- At N=256 the +104/+120 words read `415a415a415a415a` in both builds;
+  the -40/-32 words are unchanged.
 - No backend terminated at any payload length; `SELECT 1` afterwards
   succeeds. Every run reaches `ERROR: could not parse slot name: ...`.
 
 ## Interpretation (negative result)
 
-1. In both build layouts the parser's real saved return address is **below**
-   the 64-byte buffer. A `%s` store grows upward from offset 0, so it cannot
-   reach that slot at any length.
-2. The overwritten +104/+120 slot holds another copy of the same code
-   address, but control leaves the function via `elog(ERROR)` longjmp, not
-   `ret`; that copy is never consumed.
+1. In the opt build the parser's `replication_name` is at `rbp-0x70`, the
+   stack canary at `rbp-0x28` (offset +72) and the saved return address at
+   `rbp+8` (offset +120). The -32 match from the downward search is below
+   the frame pointer and is not this function's return-address slot; what
+   placed that copy there stays UNKNOWN. The original claim that the saved
+   RA sits below the buffer was wrong; see `evidence/disassembly-correction.txt`.
+2. The +120 slot is overwritten by payloads of 120 bytes or more: at N=256
+   its bytes alternate `41 5a`. The canary at +72 is overwritten too.
+   Neither is consumed, because control leaves via `elog(ERROR)` longjmp,
+   not `ret`.
 3. Every input that makes `%s` match also makes the pinned `!= 4` check
    fail, so the overflow is always followed immediately by the error
    longjmp. Caller-frame locals above the buffer are abandoned, not
@@ -56,3 +61,22 @@ lab socket path exceeded PostgreSQL's 107-byte limit; the socket was moved
 to `/tmp`, and that failed attempt is preserved only in ignored logs.
 Do not retry a gdb attach: `ptrace_scope=1` denies it
 (`../sqlpath/evidence/gdb-live-capture.out`); the host guard was untouched.
+
+## Correction 2026-11-25 06:15Z (machine-code check, no new cluster)
+
+`objdump -d --disassemble=pgactive_parse_replident_name` on the opt build
+left by `run-layout.sh` (`/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so`)
+shows `lea -0x70(%rbp),%r12` for the `sscanf` destination,
+`mov %fs:0x28,%rax; mov %rax,-0x28(%rbp)` for the canary, and
+`mov 0x8(%rbp),%r13` for the caller return address. The function's saved
+RA is therefore at `rbp+8`, i.e. 120 bytes above the buffer. The cold
+path passes that same value to the layout helper. The `.rodata` format at
+0x3c842 is `pgactive_%lu_%u_%u_%u_%s`; any non-empty match assigns five
+conversions, so the pinned `!= 4` test always sends an overflowing input
+to the error longjmp. Full commands, instruction excerpt, frame
+arithmetic and the N=256 window bytes are in
+`evidence/disassembly-correction.txt`. Only the opt build was
+disassembled; the o1 -40/+104 offsets are first-match observations, not
+verified slot locations. Outcome unchanged: no saved-pointer or IP
+control, no command side effect. The reason is the longjmp, not a return
+address below the buffer.

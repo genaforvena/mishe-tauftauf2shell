@@ -163,16 +163,18 @@ and a known 2.1.10 `pg_dump` header incompatibility are recorded in
 
 `realbuild/layout/` instruments the complete pinned 2.1.9 library without
 ASan to emit the parser's stack window after the overflow, at payload lengths
-0..256. Both `-O1` and PGXS default flags place the parser's saved return
-address **below** `replication_name` (offset -40 and -32 respectively), while
-a second copy of the same code address sits above it (offset +104 and +120).
-Chosen `41 5a` bytes overwrite the upper copy but never the saved slot; the
-function always exits through the `elog(ERROR)` longjmp, so the overwritten
-caller-frame words are abandoned, not dereferenced. No backend terminated at
-any length. Exact offsets, commands and logs are in
-`realbuild/layout/FINDINGS.md`. This closes the saved-pointer/return-address
-route toward a stronger rung 4 on this host; it does not alter the earlier
-marker-based rung-4 evidence.
+0..256. PGXS-default build measurements put the first matching copy of the
+caller return-address value below the buffer (offset -32); a later
+machine-code check corrected that identification: `replication_name` is at
+`rbp-0x70`, the stack canary at `rbp-0x28` (offset +72) and the function's
+saved return address at `rbp+8` (offset +120). Long payloads overwrite
+the +120 slot and the canary, but every overflowing input exits via
+`elog(ERROR)` longjmp, so neither word is consumed. No backend terminated
+at any length. Exact offsets, commands, logs and the 2026-11-25 06:15Z
+disassembly correction are in `realbuild/layout/FINDINGS.md` and
+`realbuild/layout/evidence/disassembly-correction.txt`. This closes the
+saved-pointer/return-address route toward a stronger rung 4 on this host;
+it does not alter the earlier marker-based rung-4 evidence.
 
 ## Catalog-derived origin-name reachability (2026-11-25 03:34Z)
 
@@ -237,8 +239,9 @@ the `LIVE_CAPTURE` marker before the error longjmp. The marker is
 instrumentation, not a saved pointer or an IP; the ASan build confirms the
 same write independently, now also in the complete pinned 2.1.9 extension via
 the real SQL function. Not established: a replication wire path, control of a
-saved pointer/return address (structurally blocked in this build layout, see
-above), an IP, a command side effect, or rung 5. The
+saved pointer/return address (the saved RA at +120 is overwritten but the
+pinned `!= 4` check sends every overflowing input through the error
+longjmp; see correction above), an IP, a command side effect, or rung 5. The
 advisory's command-execution claim remains a claim. The authenticated
 `PR:L` precondition and the need for a writable replication-origin name are
 part of it, not hidden. The original
@@ -248,11 +251,13 @@ live-capture and full-extension evidence has not been independently replayed.
 
 ## Cheapest next experiment
 
-The saved-pointer route in the real extension is now measured and closed:
-the saved return address sits below the buffer and the error longjmp
-abandons every overwritten word above it. Any further rung-4 attempt needs a
-different consumer or a real replication wire path; neither is established
-here. Witness replay of the commit containing `realbuild/` should run
+The saved-pointer route in the real extension is measured and closed: the
+return-address slot at +120 is overwritten, but the pinned five-conversion
+format makes every matching `%s` input fail the `!= 4` check, so the error
+longjmp abandons it and the canary at +72 is never checked. Any further
+rung-4 attempt needs a different consumer or a real replication wire path;
+neither is established here. Witness replay of the commit containing
+`realbuild/` should run
 `sh run-real.sh`, `VERSION=2.1.10 LABEL=fixed sh run-real.sh` and
 `sh run-real-asan.sh` with the provisioning in `realbuild/PROVISION.md`;
 SQL-path, live-capture, full-extension and layout evidence stays unreplayed
