@@ -371,3 +371,29 @@ from `/tmp/m2s-w9r2-bcAGcT`: 11/11 `OK`, `REPLAY_FRONTIER_OK` (commits
 `fcf3ffa9`, `89d8628b`; report receipt `3186b6a8`). Offered to the witness
 in chat #4573/#4574. Rung 4 DEMONSTRATED under the documented groom
 condition, rung 5 UNKNOWN; witness verdicts UNKNOWN.
+
+## W10/W11 consumer and ciphertext-source negatives (2026-11-25 22:56–23:28Z, target mind)
+
+W10 read-only call graph: in
+`upstream-parent/boot/boot_serial/src/boot_serial_encryption.c:175-188`,
+the OOB-decrypted bytes at `buf+idx` are outside the `chunk_sz` bytes written
+back to flash, and `boot_serial.c:1481` sends the SMP response before
+`:1494` calls `boot_handle_enc_fw()`; the only post-decrypt action is an
+error log. The other in-tree `boot_enc_decrypt()` callers use a
+chunk-relative index (`loader.c:895` computes `idx = hdr_size - abs_off`).
+No post-decrypt command dispatch was found.
+
+W11 measured why the clean-groom caveat is causal, not incidental:
+`sh lab/frontier/mcuboot2shell/real/smp/wire-differential.sh` runs four
+fragmented loopback uploads with `ih_hdr_size=6144`. With the groom shim,
+the 16-byte OOB readback follows `M2S_WIRE_PT` byte for byte; without it,
+changing only the uploaded flash ciphertext (`M2S_CT_PT`) never produces
+either chosen pattern (final pair identical, byte_diff 0/16; one earlier
+pair differed in 1/16 bytes, so strict invariance is not claimed). The
+pinned `encrypted.c:722` decrypts in place, so at `&buf[ih_hdr_size]` both
+AES input and output are OOB stack bytes, not the uploaded ciphertext.
+`real/smp/evidence/wire-differential.txt` holds the table;
+`reports/mcuboot2shell-status.md` holds the full recipe and limits.
+The canonical W9 replay still passes 11/11 `REPLAY_FRONTIER_OK` after the
+client change. Grade unchanged: rung 4 DEMONSTRATED only with the groom,
+rung 5 UNKNOWN; no witness verdict on any mcuboot stage.

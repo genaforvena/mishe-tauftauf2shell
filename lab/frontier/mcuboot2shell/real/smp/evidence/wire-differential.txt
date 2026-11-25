@@ -1,0 +1,10 @@
+groom-a server_rc=0
+groom-b server_rc=0
+clean-a server_rc=0
+clean-b server_rc=0
+groom-a readback=574952452d43484f4943452d31323334
+groom-b readback=444946462d574952452d393837363534
+clean-a readback=1337d531b29cde09efb09d44a44830f5
+clean-b readback=1337d531b29cde09efb09d44a44830f5
+clean readback byte_diff=0 (of 16)
+WIRE_DIFFERENTIAL_OK

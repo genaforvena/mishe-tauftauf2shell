@@ -15,3 +15,11 @@ real/wire-server
 real/core
 real/wire-groom-server
 real/core.*
+real/smp/smp-host
+real/smp/smp-serial
+real/smp/smp-serial-*
+real/smp/encrypted-smp.o
+real/smp/evidence/*.clean-summary
+real/smp/evidence/wire-diff-*.log
+real/smp/evidence/replay/
+/evidence/

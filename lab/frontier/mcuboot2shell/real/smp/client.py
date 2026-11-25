@@ -5,6 +5,7 @@ The payload is a real MCUboot image header, an encrypted-image body and a
 valid IMAGE_TLV_INFO_MAGIC block at BOOT_TLV_OFF(hdr) = hdr + ih_img_size,
 so the pinned read_image_size() succeeds and decrypt_image_inplace() runs.
 """
+import os
 import socket
 import struct
 import sys
@@ -31,7 +32,10 @@ assert len(head) == 32
 image = bytearray(head + b"\xcc" * (tlv_off - len(head)) + struct.pack("<HH", 0x6907, 8))
 fragmented = len(sys.argv) > 3
 clean = len(sys.argv) > 4 and sys.argv[4] == "clean"
-pt = b"WIRE-CHOICE-1234"
+pt = os.environ.get("M2S_WIRE_PT", "WIRE-CHOICE-1234").encode()
+assert len(pt) == 16, "M2S_WIRE_PT must be exactly 16 bytes"
+ct_pt = os.environ.get("M2S_CT_PT", pt.decode()).encode()
+assert len(ct_pt) == 16, "M2S_CT_PT must be exactly 16 bytes"
 if clean and hdr > 4096:
     from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
     # Clean build: no harness groom; the pinned &buf[ih_hdr_size] write
@@ -44,7 +48,7 @@ if clean and hdr > 4096:
     ks = b"".join(aes.update(b"\x00" * 12 + b.to_bytes(4, "big"))
                   for b in range(256, 256 + (n + 15) // 16 + 1))[:n]
     for i in range(n):
-        image[4096 + hdr + i] = ks[i] ^ pt[i % 16]
+        image[4096 + hdr + i] = ks[i] ^ ct_pt[i % 16]
 s = socket.create_connection(("127.0.0.1", port), timeout=15)
 if fragmented:
     s.sendall(pt)

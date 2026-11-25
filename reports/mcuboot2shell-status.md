@@ -360,3 +360,51 @@ dispatch or flashed-payload path for the OOB bytes, consistent with W5/W8.
 Rung 4 stays DEMONSTRATED only under the documented groom; rung 5 stays
 UNKNOWN. This is source-graph evidence, not a build or wire measurement,
 and it does not change any witness verdict.
+
+## 2026-11-25 23:28Z — W11 wire-vs-flash ciphertext differential (target mind)
+
+No mcuboot verdict arrived; the tape through #4632 still ends with the
+witness on nfdump/codebasememory/aspell/libraw/awslc. The canonical
+`replay-frontier.sh` offer from W9 was not re-sent. One bounded experiment
+closes the causal question left by W8's groom caveat.
+
+`lab/frontier/mcuboot2shell/real/smp/wire-differential.sh` drives four
+fragmented loopback SMP uploads with `ih_hdr_size=6144`, all `SERVER_RC=0`,
+all `dst_delta=6144`. `client.py` now separates the 16-byte wire prefix
+(`M2S_WIRE_PT`) from the plaintext used to build the uploaded flash
+ciphertext (`M2S_CT_PT`); defaults preserve the old behavior. Evidence:
+`real/smp/evidence/wire-differential.txt` and `wire-diff-*.log`.
+
+* Groom build, prefix `WIRE-CHOICE-1234` then `DIFF-WIRE-987654` (flash
+  ciphertext held fixed): OOB readback is
+  `574952452d43484f4943452d31323334` then
+  `444946462d574952452d393837363534`. The chosen 16 bytes track the wire
+  prefix exactly, as in W4/W6.
+* `nogroom` build, prefix held fixed and only the flash ciphertext changed:
+  the final run reads back
+  `1337d531b29cde09efb09d44a44830f5` in both arms (byte_diff 0/16;
+  `WIRE_DIFFERENTIAL_OK`). An earlier run of the same pair differed in one
+  of 16 bytes (`...b39c...` vs `...b09c...`), so strict invariance is not
+  claimed; neither run produced either chosen 16-byte pattern.
+
+Cause from the pinned source: `upstream-parent/boot/bootutil/src/encrypted.c:722`
+calls `bootutil_aes_ctr_decrypt(..., buf, sz, blk_off, buf)` in place. At
+`&buf[ih_hdr_size]` the AES input and output are the same OOB stack bytes;
+the uploaded ciphertext lives in `buf[0..chunk_sz)` and is never the source
+for the OOB window. `smp-shims.c:45-52` is what preloads `g_groom_ct` into
+`buf+idx`, which is why only the groom condition yields chosen bytes. This
+is a measured differential on the native build, not a universal closure for
+custom crypto implementations with separate input/output buffers.
+
+W10 correction: `upstream-parent/boot/bootutil/src/loader.c:889-924` does pass
+`&buf[idx]`, but its `idx = hdr->ih_hdr_size - abs_off` is relative to the
+chunk and smaller than `chunk_sz`; W10's compressed phrase "off -
+ih_hdr_size ... not as a buffer index" should be read that way. The serial
+recovery path remains the only absolute-index caller found.
+
+After the client edit, `M2S_UPSTREAM=$PWD/upstream-parent sh
+replay-frontier.sh` was re-run in-tree: 11/11 `OK`, `REPLAY_FRONTIER_OK`,
+so the W9 canonical replay is unchanged. Grade unchanged: rung 4
+DEMONSTRATED only with the documented groom; rung 5 UNKNOWN. All witness
+verdicts on this lane remain UNKNOWN (author evidence only). Chat #4573/#4574
+stay the standing replay offer; no new demand was sent.
