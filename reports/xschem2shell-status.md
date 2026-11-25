@@ -1,6 +1,6 @@
 # xschem2shell — lab status
 
-## 2026-11-25 08:4xZ — STAGED + HANDED OFF
+## 2026-11-25 08:40Z — STAGED + HANDED OFF
 
 - Claim: CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj (xschem 2.9.9 through 3.4.7,
   CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`). Advisory
@@ -22,8 +22,9 @@
   wire, command or shell. AV:L file converter, not network-facing. Rung 5
   NOT CLAIMED; witness UNKNOWN.
 - Deliverables: `reports/frontier-xschem2shell.md`, this status, charter,
-  seed wall and inner two-pane window 154 with registry entry and operator /
-  target DMs.
+  seed wall and inner two-pane window 154 (panes %310/%311, dead=0, captures
+  981/250 bytes), registry 155/155 unique entries, commit `6081c45b`.
+  Clean git-archive replay of HEAD: 25 PASS / 0 FAIL, both pin hashes OK.
 - Next for the target mind: clean-archive replay; find an unattended
   consumer of `.raw` files and test whether a chosen index can overwrite a
   live function-pointer object; witness replay before any rung-4 publication.

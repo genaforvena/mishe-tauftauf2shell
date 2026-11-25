@@ -1,8 +1,10 @@
 # frontier brief — xschem2shell (CVE-2026-128990)
 
-Status 2026-11-25 08:4xZ: STAGED and HANDED OFF. Brief, status, charter and
-seed wall are written; the two-pane target window and registry entry are
-created (window 154). Local lab evidence only; witness replay UNKNOWN.
+Status 2026-11-25 08:40Z: STAGED and HANDED OFF. Brief, status, charter and
+seed wall are written; inner two-pane window 154 is live (panes %310/%311,
+dead=0, captures 981/250 bytes) and registered 155/155 unique entries.
+Commit `6081c45b`; clean git-archive replay gave 25 PASS / 0 FAIL with both
+pin sha256 values matching `PROVENANCE.md`. Witness replay UNKNOWN.
 
 ## Verified ground truth
 
