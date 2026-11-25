@@ -1129,3 +1129,48 @@ is a bounded rung-4 byte-placement result and a negative for immediate
 control-flow relevance, not a valid address, ASLR defeat, command, wire-
 derived pointer, witness verdict or r5. The KEK remains config-derived.
 Grades and the rung-5 ceiling are unchanged.
+
+## W218 — identity of W217's far object: OpenSSL RNG lock (2026-11-25 14:46-14:51Z)
+
+Question left by W215/W217: the 0x41 chunk at `cek+0x60`, whose user start
+`cek+0x70` held `(type=1, refcount=1)`-looking words in both attack and
+control dumps, was unidentified. W217 wrote chosen `0x4141...` at `cek+0x88`
+without a fault or dereference, so it was not a live Jansson value used on
+this path. Is it an application object, a synchronization object, or stale
+heap state?
+
+Method: new lab-only `w2/w217/gdb-w218-ident.cmd` (gdb Python) and
+`w2/w217/run-w218-ident.sh`. One W217 `long` bearer request to
+127.0.0.1:18444 under a fresh gdb-started Apache. A `malloc` breakpoint with
+a `FinishBreakpoint` records every 48..56-byte allocation whose returned
+pointer equals W217's stable target user address `0x555555667350` (gdb
+disables ASLR; the config and probe are unchanged). A `free` breakpoint on
+the same pointer records any later release. No pinned byte, module, existing
+evidence or other mind's file was changed; no listener was left.
+
+Measured (`w2/w217/evidence/gdb-w218-ident.log`): the target address is
+allocated once, at
+`W218_ALLOC_TARGET ptr=0x555555667350 size=56 caller=CRYPTO_zalloc`, with
+stack `CRYPTO_zalloc <- CRYPTO_THREAD_lock_new <- RAND_get_rand_method <-
+RAND_bytes_ex <- _cjose_jwe_malloc (bytes=32, random=true) at jwe.c:201`.
+That is OpenSSL's one-time RNG-method initialization, triggered by the
+32-byte randomized CEK allocation itself; the 56-byte lock object is a
+glibc 0x41 chunk allocated in the same top-chunk run, 0x130 after the CEK.
+Pinned jansson struct sizes/offsets (`jansson_private.h`, compiled check)
+are `json_t` 16 bytes (type@0, refcount@8), `json_string_t` value@16,
+length@24 and `json_array_t` size@16, entries@24, table@32, so the `(1,1)`
+words are not a Jansson object here. The glibc `pthread_rwlock_t` is 56
+bytes; W217's written field at `cek+0x88` is offset +0x18 inside it. No
+`W218_FREE_TARGET` occurred before capture; the request returned HTTP 401
+and no fault or chosen-value dereference was observed.
+
+`cd lab/frontier/cjose2shell/w2/w217 && sh run-w218-ident.sh` printed
+`REPLAY_W218_IDENT: 8 PASS / 0 FAIL` and `NO_LISTENER_LEFT` at 14:50Z.
+
+Conclusion: W217's far field is an OpenSSL `CRYPTO_RWLOCK` created by RNG
+initialization, not a Jansson/application object or control-flow datum.
+The chosen write lands on internal pthread-lock state while the request
+fails authentication; this names the object and closes the "is it live and
+relevant?" question with a negative. Not a pointer/IP control, valid
+address, ASLR defeat, command, witness verdict or r5; grade and ceiling
+unchanged. Preserve as a bounded rung-4/negative result, not a new limb.

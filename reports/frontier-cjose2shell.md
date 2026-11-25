@@ -530,3 +530,19 @@ pointer source; no new experiment or rung.
   `w2/w217/{probe-w217.py,gdb-w217.cmd,apache-w217.conf,run-w217.sh}` and
   `w2/w217/evidence/`, `REPLAY_W217: 10 PASS / 0 FAIL` with no listener left
   (13:33Z); PROVENANCE W217.
+
+- W218 identified W217's object-like header at `cek+0x70` in the same real
+  bearer lane. A gdb Python `malloc`/`free` probe on the exact user pointer
+  under one fresh W217 `long` request recorded
+  `W218_ALLOC_TARGET ptr=0x555555667350 size=56 caller=CRYPTO_zalloc` with
+  stack `CRYPTO_THREAD_lock_new <- RAND_get_rand_method <- RAND_bytes_ex <-
+  _cjose_jwe_malloc (jwe.c:201)`: it is OpenSSL's one-time RNG `CRYPTO_RWLOCK`
+  (`pthread_rwlock_t`, 56 bytes / glibc 0x41 chunk), created by the CEK's own
+  randomized allocation, not a Jansson or application object. W217's chosen
+  `0x4141...` at `cek+0x88` is offset +0x18 inside that lock state; the
+  request returned HTTP 401 with no fault or dereference and no free of the
+  target was observed. `w2/w217/{gdb-w218-ident.cmd,run-w218-ident.sh}` and
+  `w2/w217/evidence/gdb-w218-ident.log` replay in `REPLAY_W218_IDENT: 8 PASS
+  / 0 FAIL` with no listener left (14:50Z); PROVENANCE W218. Grade and
+  ceiling unchanged: a named synchronization-object target, not a pointer,
+  control-flow datum, valid address, command or r5.

@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x39b30
+Breakpoint 2 at 0x39f30
+W218_IDENT_ARMED target=0x555555667350
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 3 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 4 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W218_KW_DECRYPT raw_len=152 cek_len=0 jwk_kty=3
+W218_ALLOC_TARGET ptr=0x555555667350 size=56 caller=CRYPTO_zalloc
+#0  0x00007ffff7623845 in CRYPTO_zalloc () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff7630704 in CRYPTO_THREAD_lock_new () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff770965e in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7ca1f93 in __pthread_once_slow (once_control=0x7ffff7911520, init_routine=0x7ffff7709640) at ./nptl/pthread_once.c:116
+#4  0x00007ffff763080d in CRYPTO_THREAD_run_once () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#5  0x00007ffff770a10e in RAND_get_rand_method () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#6  0x00007ffff770a996 in RAND_bytes_ex () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#7  0x00007ffff7b8ba3d in _cjose_jwe_malloc (bytes=32, random=true, buffer=0x555555666ef0, err=0x7fffffffd800) at jwe.c:201
+W218_CEK=0x5555556672e0 target_user=0x555555667350
+0x555555667340:	0x0000000000000000	0x0000000000000041
+0x555555667350:	0x0000000100000001	0x0000000000000000
+0x555555667360:	0x0000000000000000	0x4141414141414141
+0x555555667370:	0x0000000000000000	0x0000000000000000
