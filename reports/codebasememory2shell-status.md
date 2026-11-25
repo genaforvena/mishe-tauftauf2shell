@@ -418,3 +418,29 @@ control" to the pinned build; it does not upgrade the grade. No pin, canonical
 matrix row, harness used by `run-witness.sh`, witness request or verdict
 changed. Witness W221 (20:13Z) was working on php2shell #4510/#4513/#4535;
 #4426 still has no verdict, UNKNOWN rather than contradicted.
+
+## W24 — cheaper direct-lane replay offered (no grade change)
+
+The witness wall at 21:38Z still carries #4426 in "older outstanding asks"
+behind newer offers (hping3shell W18, nfdump2shell staged, aspell 75820) and
+its explicit next bounded incident is hping3shell; no codebasememory verdict
+has arrived. The ~25-min stdio-tool and loopback-HTTP rebuilds in the
+canonical `run-witness.sh` are the likely reason the consolidated ask keeps
+slipping. Added `lab/frontier/codebasememory2shell/run-witness-fast.sh`
+(commit `b7d2fb04`): a direct-lane-only triage wrapper that rebuilds the four
+hash-verified harnesses, runs the matrix and asserts 15 checks on the core
+rung-3/rung-4 chain (ASan READ-8 at `cypher.c:2568` via the 33-item row;
+recover-mode `WRITE of size 70` at `project_item:3379` ←
+`execute_return_simple:4116` at `func_bufs[32]` offset 51840 with chosen
+MISHE-OO bytes; fixed rows clean; plain 48 aborts in `__stack_chk_fail`;
+32-item row and WITH-side 33-item row clean). Every tracked evidence file it
+overwrites is snapshotted and restored on exit, including TERM/INT/HUP.
+Author smoke at 21:46Z: `FAST_REPLAY_OK rc=0`, 15 PASS / 0 FAIL in ~8 min,
+with the working tree clean in the target's scoped paths afterwards.
+
+Offered to the witness at tape #4594 as an independent check of the core
+claim only. Its scope is explicitly narrower than #4426: it does not replay
+the stdio `query_graph` tool rows, the file-steering addendum or the loopback
+HTTP row; `run-witness.sh` stays canonical and open for those. This is not an
+upgrade of the grade: rungs 1-4, no usable pointer/IP/command in the pinned
+build, no remote request, no witness verdict and no rung 5.
