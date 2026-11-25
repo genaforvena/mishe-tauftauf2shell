@@ -38,6 +38,7 @@ DEATH_MODE=${DEATH_MODE:-shim}
 NATIVE_ATTACK=0
 GAP=${GAP:-0}
 [ "$GAP" = 0 ] || [ "$DEATH_MODE" = rlimit ] || { echo "GAP=1 requires DEATH_MODE=rlimit"; exit 2; }
+[ "$GAP" = 1 ] && [ -n "${CPU_LIMIT:-}" ] && { echo "GAP=1 forbids CPU_LIMIT"; exit 2; }
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
 if [ "$GAP" = 1 ]; then
     PROGRESS_FREQ=${PROGRESS_FREQ:-100%}
@@ -496,7 +497,7 @@ if [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ] && [ "$GAP" = 0 ]; then
     fi
     echo "producer-death-check: old=$OLDCHILD new=$NEWCHILD signal9=$(grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null && echo yes || echo no) ok=$DEATH_OK" >> "$LOG"
 elif [ "$GAP" = 1 ]; then
-    if [ "$GAP_FOUND" = 0 ] && [ "$GAP_PRODUCER_ALIVE_AT_UPLOAD" = 1 ] && [ "$NEWCHILD" = "$OLDCHILD" ] && kill -0 "$OLDCHILD" 2>/dev/null && ! grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null; then
+    if [ "$GAP_FOUND" = 0 ] && [ "$GAP_PRODUCER_ALIVE_AT_UPLOAD" = 1 ] && [ "$NEWCHILD" = "$OLDCHILD" ] && [ -z "${CPU_LIMIT:-}" ] && kill -0 "$OLDCHILD" 2>/dev/null && ! grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null; then
         GAP_NO_DEATH_OK=1
     fi
     echo "gap-no-death-check: watcher=$GAP_FOUND producer_alive_at_upload=$GAP_PRODUCER_ALIVE_AT_UPLOAD old=$OLDCHILD new=$NEWCHILD signal9=$(grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null && echo yes || echo no) ok=$GAP_NO_DEATH_OK" >> "$LOG"

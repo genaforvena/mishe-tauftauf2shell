@@ -10697,6 +10697,22 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   Author-side gates 1–5 only; gate 6 OPEN. Clean-checkout provisioning, build
   prerequisites and replay commands: `reports/php2shell-investigation.md` W65.
   Author hashes are receipt identifiers, not expected fresh-run hashes.
+- **PHP2Shell W66 — final audited witness base** — GAP mode now rejects any
+  `CPU_LIMIT` and requires it absent in the no-death verdict. Final harness
+  SHA-256 `b65814ce83dfddc77c8830708863fa47b3613e22ad23fcc4d8b833697f0aa0fc`.
+  Author positive with SID `0123456789abcdef0123456789abcdef`/filler `Q`,
+  ASLR=2: K=1024, exact-tail pre-consumer snapshot, live producer at authenticated
+  upload, unchanged PID/no signal 9, tinyfilemanager takeover, designed upload,
+  live-consumer marker `php2shell-r5-w66-gap-positive` + `uid=1000`, PID-bound
+  marker; final file does not retain the splice. Hash
+  `c160f0f2cd88916ec2355e24dbb68c23b40c75c4776147b18f342731dcebc86e`.
+  Same input on fixed 8.4.28: no watcher splice, no authenticated in-gap upload,
+  no takeover/marker, `negative=1`; hash
+  `c812fc6ca90b17250bb228e61db2ac07d2e570427dff268861ea77b686eea818`.
+  Gate 6 OPEN. Final witness recipe requires fresh SID
+  `0badc0de00112233445566778899beef`/filler `Z` for both builds; MTAG-only
+  variation is insufficient. Full recipe: `reports/php2shell-investigation.md`
+  W66. Author hashes are receipt identifiers only.
 - **Libsshch2Shell W16 — wire-resident command** — `sh lab/frontier/libsshch2shell/real/run-wirecmd.sh`
   builds vulnerable `a540e276…`/fixed `7dfabb1f…` with clang ASan and
   `-DW14_REALSYSTEM -DW16_WIRECMD`; expect 6 PASS / 0 FAIL, rc 0,

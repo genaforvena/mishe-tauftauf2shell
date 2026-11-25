@@ -1745,5 +1745,31 @@ no watcher splice, no authenticated in-gap upload, no takeover/marker,
 Grade: **author-side rung-5 gates 1–5 under labeled two-pool RLIMIT_FSIZE,
 no worker death; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** Clean-checkout
 provision/build/replay recipe and prerequisites are in
-`reports/php2shell-investigation.md` wake 65. Witness must vary `MTAG` or an
-attacker byte and assert structural fields, not author-log hashes.
+`reports/php2shell-investigation.md` wake 66. Witness must vary an attacker byte;
+MTAG alone is not variation. Assert structural fields, not author-log hashes.
+
+## Wake 66 (2026-11-25) — final witness base: CPU_LIMIT forbidden, fresh attacker-byte recipe
+
+Second independent review found W65 still allowed MTAG-only witness variation
+and did not explicitly forbid inherited `CPU_LIMIT` in GAP mode. W66 rejects
+`GAP=1` when `CPU_LIMIT` is set and requires it absent in `GAP_NO_DEATH_OK`.
+Final harness SHA-256
+`b65814ce83dfddc77c8830708863fa47b3613e22ad23fcc4d8b833697f0aa0fc`.
+
+Final author positive with SID `0123456789abcdef0123456789abcdef`, filler `Q`,
+ASLR=2: exact-tail pre-consumer snapshot, live producer at authenticated upload,
+unchanged PID/no signal 9, tinyfilemanager takeover, designed upload,
+live-consumer marker `php2shell-r5-w66-gap-positive` + `uid=1000`, PID-bound
+marker; final file did not retain the splice. Evidence
+`lab/build/evidence/w66-gap-positive/aftershell-tfm-8.4.27-app-tfm.log`, SHA-256
+`c160f0f2cd88916ec2355e24dbb68c23b40c75c4776147b18f342731dcebc86e`.
+Same input on fixed 8.4.28: no watcher splice, no authenticated in-gap upload,
+no takeover/marker, `negative=1`, timing/safe controls clean; SHA-256
+`c812fc6ca90b17250bb228e61db2ac07d2e570427dff268861ea77b686eea818`
+(`lab/build/evidence/w66-gap-fixed/`).
+
+Grade unchanged: **author-side rung-5 gates 1–5 under labeled two-pool
+RLIMIT_FSIZE; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** Final clean-checkout
+recipe uses fresh SID `0badc0de00112233445566778899beef`/filler `Z`, distinct
+from all author positives, for both vulnerable and fixed runs. MTAG may vary
+but is not the required attacker-byte variation.

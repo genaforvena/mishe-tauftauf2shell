@@ -1883,9 +1883,9 @@ GAP=1 DEATH_MODE=rlimit \
 Prerequisites: bash, python3, clang/cc, make/autotools, curl/tar/sha256sum,
 util-linux `prlimit`, psmisc `fuser`, procps `pgrep`, and development headers
 for gd/freetype/jpeg/webp, openssl, libxml2, sqlite3, curl and zlib. The witness
-must vary `MTAG` or another attacker byte and assert the structural log fields;
-the hashes above identify author receipts only and are not expected hashes for
-a fresh run.
+must vary an attacker byte; MTAG alone is not variation. W66 supplies the final
+distinct-byte witness recipe. The hashes above identify author receipts only and
+are not expected hashes for a fresh run.
 
 Grade: **author-side rung-5 gates 1–5 reproduced by the audited W65 harness
 under labeled two-pool `RLIMIT_FSIZE` conditions; gate 6 OPEN, full rung 5 NOT
@@ -1893,3 +1893,61 @@ ESTABLISHED.** No worker death, `RLIMIT_CPU`, debugger or phase-2 preload is
 used. The two FPM masters, shared session directory, upload-progress-off
 consumer, timing window and permissive tinyfilemanager upload configuration
 remain required conditions; stock/default-deployment reachability is UNKNOWN.
+
+### Wake 66 (2026-11-25) — final witness base: fresh attacker-byte recipe and CPU-limit prohibition
+
+A second independent review found two remaining W65 issues: the witness recipe
+reused the author's SID/filler and allowed MTAG-only variation (MTAG is a lab
+marker, not an attacker byte), and GAP mode did not explicitly forbid an
+inherited `CPU_LIMIT`. W66 rejects `GAP=1` with any `CPU_LIMIT` set and requires
+`CPU_LIMIT` absent in `GAP_NO_DEATH_OK`.
+
+Final harness SHA-256:
+`b65814ce83dfddc77c8830708863fa47b3613e22ad23fcc4d8b833697f0aa0fc`.
+Final author positive uses SID `0123456789abcdef0123456789abcdef`, filler `Q`,
+ASLR=2, K=1024, exact-tail pre-consumer snapshot, live producer at authenticated
+upload, unchanged producer PID, no signal 9, tinyfilemanager takeover, designed
+upload, live-consumer marker `php2shell-r5-w66-gap-positive` + `uid=1000` and a
+PID-bound marker. The final attacker file did not retain the splice. Evidence:
+`lab/build/evidence/w66-gap-positive/aftershell-tfm-8.4.27-app-tfm.log`, SHA-256
+`c160f0f2cd88916ec2355e24dbb68c23b40c75c4776147b18f342731dcebc86e`.
+Same input on fixed 8.4.28: no watcher splice, no authenticated in-gap upload,
+no takeover/marker, `negative=1`, timing/safe controls clean; SHA-256
+`c812fc6ca90b17250bb228e61db2ac07d2e570427dff268861ea77b686eea818`
+(`lab/build/evidence/w66-gap-fixed/`).
+
+Final clean-checkout witness recipe. The SID/filler pair below is distinct from
+both W65 author positives and the W66 author positive; use the same fresh pair
+for vulnerable and fixed runs. MTAG may also vary, but is not the required
+attacker-byte variation.
+
+```sh
+W=$(mktemp -d)
+git archive HEAD | tar -x -C "$W"
+cd "$W"
+mkdir -p lab/src lab/build lab/tmp
+sh lab/php2shell/provision.sh
+bash lab/php2shell/provision-tfm-app.sh
+bash lab/php2shell/build-app.sh 8.4.27
+bash lab/php2shell/build-app.sh 8.4.28
+
+KEEP_TMP=1 GAP=1 DEATH_MODE=rlimit \
+  SID=0badc0de00112233445566778899beef FILLER=Z \
+  MTAG=php2shell-r5-w66-witness PORT=18340 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w66-witness-vuln 18340
+
+GAP=1 DEATH_MODE=rlimit \
+  SID=0badc0de00112233445566778899beef FILLER=Z \
+  MTAG=php2shell-r5-w66-witness PORT=18350 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.28-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w66-witness-fixed 18350
+```
+
+Prerequisites are unchanged from W65. Witness must assert structural fields,
+not author-log hashes. Grade remains **author-side rung-5 gates 1–5 under
+labeled two-pool `RLIMIT_FSIZE`; gate 6 OPEN, full rung 5 NOT ESTABLISHED.**
