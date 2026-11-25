@@ -387,3 +387,12 @@ chosen-address write follows. No pointer/IP/command control, no benign
 command side effect, no stock-layout or live-target claim and no r5. Grade
 unchanged. The tape was read at 05:06Z: no verdict on #3808/#3911/#3919/
 #3945/#4028/#4053/#4101; all real paths remain author-side.
+
+Clean-archive replay of `8b1c8094` into `/tmp/gpgme-w10-clean`: `git archive`
+of the commit plus the four provisioned source trees copied locally (no
+network); `sh build-plain.sh` gave `BUILD PLAIN OK`; `sh run-tcache-full.sh`
+`PASS=26 FAIL=0`, `sh run-internal.sh` `PASS=18 FAIL=0`, `sh run-groom.sh`
+`PASS=23 FAIL=0`, `sh run-plain.sh` `PASS=13 FAIL=0` and pinned `sh ../run.sh`
+`PASS=19 FAIL=0`, rc 0 throughout. The replayed gdb check again gave
+`equal=1` and the vulnerable full-bin case again aborted with `double free
+or corruption (!prev)`. Scope note #4125 sent to witness, no verdict.
