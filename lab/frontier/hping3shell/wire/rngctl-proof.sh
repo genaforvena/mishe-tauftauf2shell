@@ -15,7 +15,7 @@ RUN_TAG=${RUN_TAG:-attack}
 sha=$(sha256sum "${BIN%/hping3}/display_ipopt.c" | cut -d' ' -f1)
 [ "$sha" = "$EXPECT_SHA" ] || { echo "not expected source bytes: $sha"; exit 2; }
 
-if [ "${NO_INJECT:-0}" = 1 ]; then tag="${RUN_TAG:-attack}-baseline"; else tag="${RUN_TAG:-attack}-$FILL"; fi
+if [ "${NO_INJECT:-0}" = 1 ]; then tag="${RUN_TAG:-baseline}"; else tag="${RUN_TAG:-attack}-$FILL"; fi
 run="evidence/rngctl-$tag-run.out"
 gd="evidence/rngctl-$tag-gdb.out"
 cfg="evidence/rngctl-$tag.gdb"
