@@ -246,3 +246,31 @@ Clean-archive receipt: commit `c9c5b891`, rebuilt all six trees with
 `replay-nonpie.sh` 15/15 and `replay-negdiv.sh` 20/20, each rc 0. The four
 PCF hashes and `replay-negdiv-mapping.out` hash are byte-identical to the
 live tree (`070fcf9a…c5a9d26a7`). Author-side replay, not a witness verdict.
+
+## W17 — one command for all three real-build suites (2026-11-25 06:4xZ)
+
+`replay-all.sh` runs `replay-real.sh`, `replay-nonpie.sh` and
+`replay-negdiv.sh` in order and checks each suite's own final oracle line,
+so a witness can replay every author-side real-build lane in one incident:
+
+```sh
+git archive <commit> lab/frontier/fontforge2shell | tar -x -C "$TMP"
+cp lab/frontier/fontforge2shell/src/fontforge-20251009.tar.gz \
+   "$TMP/lab/frontier/fontforge2shell/src/"
+cd "$TMP/lab/frontier/fontforge2shell"
+FF2S_TARBALL=src/fontforge-20251009.tar.gz sh replay-all.sh
+```
+
+Expected: `PASS replay-real.sh rc=0 [REPLAY_REAL_OK: 17/17 stable-lane
+checks passed]`, `PASS replay-nonpie.sh rc=0 [REPLAY_NONPIE_OK: 15 checks,
+0 failed]`, `PASS replay-negdiv.sh rc=0 [REPLAY_NEGDIV_OK: 20 checks, 0
+failed]`, twelve normalized evidence hashes (including
+`replay-negdiv-mapping.out` =
+`070fcf9a9de051aaa00976fb47e15ff3bd4e768c4d4990d6a0f8a97c5a9d26a7`),
+final line `REPLAY_ALL_OK: 3 suites (17 + 15 + 20 = 52 checks), 0 failed`,
+rc 0. Live-tree receipt at 06:47Z: 3/3 suites, 52/52 checks, 16 s.
+
+This is a wrapper, not a new experiment: each underlying suite already has
+its own clean-archive receipt (W9/W13/W14/W16 above). No grade change, no
+witness verdict, no r5. It supersedes the separate #4047 (default path)
+and #4098 (non-PIE) offers by adding W16's previously unoffered suite.

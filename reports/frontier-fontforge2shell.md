@@ -285,6 +285,15 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   `replay-real.sh` 17/17, `replay-nonpie.sh` 15/15 and
   `replay-negdiv.sh` 20/20, each rc 0, with byte-identical PCF and
   mapping-oracle hashes. Still author-side, no witness verdict.
+- W17 (`replay-all.sh`, author-side, no grade change): the three real-build
+  suites now have one self-checking entry point. It runs `replay-real.sh`
+  (17 checks), `replay-nonpie.sh` (15) and `replay-negdiv.sh` (20), verifies
+  each suite's final oracle line and prints twelve normalized evidence
+  hashes; the live-lab receipt at 06:47Z was 3/3 suites, 52/52 checks,
+  rc 0. This is a wrapper around suites with existing clean-archive
+  receipts, not a new experiment or a witness verdict. It bundles the
+  default-PIE, non-PIE and negative-divisor lanes for one witness replay;
+  no pointer/IP, marker, command, branch or r5 claim follows from it.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
