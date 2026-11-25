@@ -23,7 +23,8 @@ loop, still source-bound; W21 builds the **shipped 3.20b release**, sends the
 W22 replays the same release and wire TERM with the pinned `cb6d77dbca`
 hunk applied and observes clean fields and completed teardown; W24 shows the
 W21 faulting load reads `0x20(%rax)` with `rax` equal to the wire-chosen pointer.
-None changes the rung or the availability ceiling.
+W25 puts all four shipped-3.20b lanes behind one command for the witness and
+discloses that those real-build servers use `SSH_ANYAUTH`.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -849,3 +850,41 @@ witness verdict still owed. A clean `git archive 3e681d41` replay with a
 private copy of the provisioned build tree reproduced 7 PASS / 0 FAIL and
 byte-identical probe/instruction/register lines (receipt:
 `real320b/evidence/CLEAN-ARCHIVE-FAULTADDR.md`).
+
+
+## W25 — one witness command for the shipped-3.20b lanes (2026-11-25, author)
+
+The witness has four separate W21–W24 offers outstanding and no verdict on
+any of them. W25 replaces four one-lane asks with one command:
+
+```
+bash lab/frontier/synchronet2shell/release-label/term320b/run-witness320b.sh
+```
+
+The wrapper runs the four existing drivers unmodified and in order —
+`real320b/run-real320b.sh` (W21), `fixed320b/run-fixed320b.sh` (W22),
+`real320b/run-determinism.sh` (W23) and `real320b/run-faultaddr320b.sh`
+(W24) — captures each transcript into a gitignored outdir, and asserts the
+raw-byte chain over the transcripts. It restores `answer.cpp` and snapshots
+the committed evidence files it overwrites so the live receipts stay
+byte-exact. Author live run at 15:01:54Z–15:03:30Z: **19 PASS / 0 FAIL**,
+rc 0; each driver kept its own count (4/0, 5/0, 13/0, 7/0). An author replay
+from a clean `git archive HEAD` with a private copy of the provisioned tree
+reproduced 19 PASS / 0 FAIL, rc 0 at 15:06:44Z–15:08:16Z. The live and clean
+transcripts were kept at `/tmp/sync-w25-bundle-live.log` and
+`/tmp/sync-w25-clean-bundle.log` (gitignored, not durable evidence); the
+durable claim is the runnable command plus the four drivers' committed
+receipts. Consolidated replay offer: chat #4421.
+
+Scope disclosure material to the advisory wording: every shipped-3.20b
+driver's loopback INI includes `SSH_ANYAUTH`, so the real-`answer()` reach in
+W21–W24 is after KEX with no credential *on that configuration*. W7/W9
+measure the no-credential negative at a config without that token on the
+dev-parent build; W15/W16 measure valid-password reach on its default
+config. Those are separate builds and are not claimed to transfer.
+
+This is a consolidation, not a new claim or a rung change. Ceiling
+unchanged: chosen bytes at chosen `sbbs_t` offsets and a faulting load of the
+wire-chosen pointer in a real shipped build over a loopback SSH wire, with a
+pinned fixed-form control; no useful pointer/IP target, command, measured
+DoS rate, ASLR defeat or r5. Author replay, not independent acceptance.
