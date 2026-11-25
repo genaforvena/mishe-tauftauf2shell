@@ -34,6 +34,15 @@ ln -s /path/to/live/lab/frontier/synchronet2shell/provision ./provision
 bash real-answer/validuser/run-validuser.sh
 ```
 
+Author clean `git archive e0f11cd4 lab/frontier/synchronet2shell` replay at
+2026-11-25T01:01Z reproduced rc 0, `PASS=4 FAIL=0`, `PROBE_COUNT=2`,
+`ANYAUTH_LOG_COUNT=0`. Both client logs are byte-identical to the author run;
+the six `SSH login` / `password authentication successful` /
+`REAL_ANSWER_PROBE` server lines are identical except for the leading
+`11/25 HH:MM:SS` timestamp (node 1/2, sockets 0010/0013 and all hexdumps
+unchanged). Raw `server.log` sha256 differs for that reason: author
+`f315fe59…f06f3e43d27`, clean archive `1ea7a3b2…517ed02addf`.
+
 This is an author replay path, not a witness verdict. Timestamps, PIDs, node
 numbers and client-relative line ordering are volatile; the assertion lines,
 probe hexdumps, auth lines and PASS/FAIL counts are compared verbatim.

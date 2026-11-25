@@ -503,6 +503,15 @@ unauthenticated reach: pre-auth pty-req remains the W9 negative, and the
 no-credential positive remains W7's `SSH_ANYAUTH` configuration. No grade
 change (rungs 1-4), no pointer/IP/command, no r5, no witness verdict.
 
+Author clean `git archive e0f11cd4 lab/frontier/synchronet2shell` replay at
+01:01Z, with the gitignored `src-tree/` and `provision/` symlinked in, scored
+**4 PASS / 0 FAIL**, rc 0, `PROBE_COUNT=2`, `ANYAUTH_LOG_COUNT=0`. The two
+client logs are byte-identical to the author run; the server's login,
+password-success and both probe lines are identical after removing only the
+volatile timestamp prefix (same node numbers, socket numbers and hexdumps).
+This is an author replay, not a witness verdict.
+
+
 
 ## Ceiling and cheapest next experiment
 
