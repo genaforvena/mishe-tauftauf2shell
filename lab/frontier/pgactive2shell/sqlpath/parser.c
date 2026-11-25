@@ -17,6 +17,17 @@
 #include <inttypes.h>
 
 PG_MODULE_MAGIC;
+#ifdef LIVE_CAPTURE
+/* Instrumentation-only globals; absent from the verbatim vulnerable/fixed
+ * builds. Reads the already-written stack region from the live backend. */
+#define LIVE_CAPTURE_BYTES 128
+static char pgactive_live_capture[LIVE_CAPTURE_BYTES];
+static int	pgactive_live_capture_len = 0;
+PGDLLEXPORT Datum pgactive_live_capture_reset(PG_FUNCTION_ARGS);
+PG_FUNCTION_INFO_V1(pgactive_live_capture_reset);
+PGDLLEXPORT Datum pgactive_live_capture_bytes(PG_FUNCTION_ARGS);
+PG_FUNCTION_INFO_V1(pgactive_live_capture_bytes);
+#endif
 
 #define EMPTY_REPLICATION_NAME ""
 #define pgactiveNodeId_DEFINED
@@ -63,6 +74,10 @@ pgactive_parse_replident_name(const char *riname, pgactiveNodeId * node, Oid *lo
 			   &node->sysid, &node->timeline, &node->dboid, local_dboid,
 			   NameStr(replication_name)) != 4)
 	{
+#ifdef LIVE_CAPTURE
+		memcpy(pgactive_live_capture, &replication_name, LIVE_CAPTURE_BYTES);
+		pgactive_live_capture_len = LIVE_CAPTURE_BYTES;
+#endif
 		/* Note: the test above excludes non-empty replication names */
 		elog(ERROR, "could not parse slot name: %s", riname);
 	}
@@ -103,3 +118,23 @@ pgactive_parse_replident_name_sql(PG_FUNCTION_ARGS)
 
 	PG_RETURN_DATUM(HeapTupleGetDatum(returnTuple));
 }
+
+#ifdef LIVE_CAPTURE
+Datum
+pgactive_live_capture_reset(PG_FUNCTION_ARGS)
+{
+	pgactive_live_capture_len = 0;
+	PG_RETURN_VOID();
+}
+
+Datum
+pgactive_live_capture_bytes(PG_FUNCTION_ARGS)
+{
+	bytea	   *out;
+
+	out = (bytea *) palloc(VARHDRSZ + pgactive_live_capture_len);
+	SET_VARSIZE(out, VARHDRSZ + pgactive_live_capture_len);
+	memcpy(VARDATA(out), pgactive_live_capture, pgactive_live_capture_len);
+	PG_RETURN_BYTEA_P(out);
+}
+#endif

@@ -4,3 +4,9 @@ pgdata/
 pgdata-asan/
 sock/
 sock-asan/
+pgdata-gdb/
+pgdata-live/
+sock-gdb/
+sock-live/
+evidence/*.log
+evidence/*.bin

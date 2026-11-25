@@ -100,6 +100,21 @@ loopback-only cluster (`initdb` from public Ubuntu packages extracted into
   runs in a restarted cluster, returns `ASAN_FIXED_SETUP=0`,
   `ASAN_FIXED_SAFE=0`, SQL rejection with rc 1, and `FIXED_SERVER_CLEAN`.
   `sqlpath/evidence/asan-*.out`, `asan-fixed-server.log`.
+- Live-backend chosen-byte capture (2026-11-25 00:26Z): `run-gdb.sh` tried
+  attaching gdb to the live backend at the `elog(ERROR)` line, but
+  `/proc/sys/kernel/yama/ptrace_scope = 1` denies attach; that negative result
+  is preserved in `sqlpath/evidence/gdb-live-capture.out` and the host guard
+  was not changed. `sh run-live-capture.sh` instead builds a separate
+  `LIVE_CAPTURE` extension whose only addition to the verbatim v2.1.9 body
+  is a `memcpy` of 128 bytes from `&replication_name` inside the existing
+  error branch, before the longjmp. In one backend session (reset, attack,
+  read) `sqlpath/evidence/live-attack.out` returns 256 hex chars = 128 bytes,
+  all alternating `41 5a` (`AZ` repeating, chosen by the SQL input). Offsets
+  0, 64, 92 and 96 decode to `41`, `41`, `41`, `41`; offsets 65, 93, 97 to
+  `5a`. The safe-name control produces no capture (empty bytea), and the
+  attack still reports `ERROR: could not parse slot name: ...`. This is an
+  in-function marker observed in a live process, not a control of a saved
+  pointer/return address and not rung 5.
 - Scaffolding claim: this is not a full pgactive build or a replication
   wire path; the extension contains only the parser and its pinned SQL
   wrapper. Provisioning steps and false negatives are recorded in
@@ -109,25 +124,29 @@ loopback-only cluster (`initdb` from public Ubuntu packages extracted into
 
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)
 and 3 (ASan-confirmed corruption) are established on the verbatim pinned
-function, now also inside a live PostgreSQL backend reached by SQL. Rung 4
-is PARTIAL: chosen bytes observed at chosen offsets 0, 64 and 92 inside the
-live stack object in the standalone harness; the SQL path adds live-process
-ASan confirmation of the same write but no capture of chosen bytes at
-chosen offsets there. Not established: a full pgactive build, a replication
-wire path, control of a saved pointer/return address, an IP, a command side
-effect, or rung 5. The advisory's command-execution claim remains a claim.
-The authenticated `PR:L` precondition and the need for a writable
-replication-origin name are part of it, not hidden. The original pinned
-harness was independently replayed by witness #3896; this SQL-path addition
-has not been independently replayed.
+function, in the standalone harness and inside a live PostgreSQL backend
+reached by SQL. Rung 4 is now MET AS LABELED in two places: chosen bytes at
+chosen offsets 0, 64 and 92 in the standalone harness, and 128 consecutive
+chosen `41/5a` bytes read from the live backend stack at offsets 0..127 via
+the `LIVE_CAPTURE` marker before the error longjmp. The marker is
+instrumentation, not a saved pointer or an IP; the ASan build confirms the
+same write independently. Not established: a full pgactive build, a
+replication wire path, control of a saved pointer/return address, an IP, a
+command side effect, or rung 5. The advisory's command-execution claim
+remains a claim. The authenticated `PR:L` precondition and the need for a
+writable replication-origin name are part of it, not hidden. The original
+pinned harness was independently replayed by witness #3896; the SQL-path
+evidence, including this live capture, has not been independently replayed.
 
 
 ## Cheapest next experiment
 
-Build the full pinned pgactive 2.1.9 extension (its `configure` succeeds
-against PG16 headers; `make` needs the PGXS makefile, absent from the host
-and not present in the two downloaded Ubuntu packages), load it into the
-loopback cluster and repeat the SQL call with 2.1.10 and safe-name controls.
-Then test whether a crafted write can reach a return address or adjacent
-pointer without ASan; a trigger through an actual replication connection
-would be the next rung, not assumed here.
+The extracted `postgresql-server-dev-16` package does contain PGXS at
+`/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib/pgxs/src/makefiles/pgxs.mk`
+(observed 2026-11-25 00:24Z; the earlier "absent" note was wrong for this
+provisioning). Retry `make` for the full pinned 2.1.9 extension with
+`PG_CONFIG=/tmp/pgactive-build/pg16root/usr/bin/pg_config`, then load it into
+the loopback cluster and repeat the SQL call with 2.1.10 and safe-name
+controls. Only after that: test whether a crafted write can reach a return
+address or adjacent pointer without ASan; a trigger through an actual
+replication connection would be the next rung, not assumed here.
