@@ -1,0 +1,44 @@
+W195: gdb mapping of the natural (device-only) heap overflow on the W193
+clang build. Commands:
+
+  env CAMLIBS=/tmp/w193-lgp-base/build/installdir/lib/libgphoto2/2.5.34 \
+      IOLIBS=/tmp/w193-lgp-base/build/installdir/lib/libgphoto2_port/0.12.2 \
+      IOLIBS_PREFIX=vusb \
+      LD_LIBRARY_PATH=/tmp/w193-lgp-base/build/installdir/lib \
+      M2SHELL_JL2005_VUSB=s M2SHELL_JL2005_COUNT=100 \
+      gdb -q -batch -x /tmp/w195-post.gdb --args \
+      /tmp/w193-lgp-base/w194-file-consumer-probe usb:001,001 /tmp/w195-gdb-safe.bin
+
+gdb script: break jl2005c_init (save $rdx as $priv), then break
+jl2005c.c:155 (immediately after the :154 memmove) and dump
+`$priv+0x3fc0`. ASLR off. `priv` chunk size is 0x4051, so its table ends at
+`priv+0x4040`; the next chunk is the top chunk.
+
+Breakpoint 1, jl2005c_init (camera=0x55555555d450, port=0x55555555e840, priv=0x555555567600)
+PRIV=0x555555567600
+Breakpoint 2, jl2005c_init (...) at jl2005c.c:155
+POST_MEMMOVE_HEAP
+0x55555556b630:	0x0000000000000000	0x0000000000000000
+0x55555556b640:	0x0000000000000000	0x000000000000e9c1
+0x55555556b650:	0x0000000000000000	0x0000000000000000
+...
+
+Safe count (100) gives top prev_size 0 at priv+0x4040 and top size 0xe9c1
+at priv+0x4048. For count 1022 the :154 memmove destination is
+`priv->table` (priv+0x40), source `info+0x30`, and reply byte x is written
+to `info+0x200+x`; so destination table offset d is fed by reply offset
+`0x30 + d - 0x200`:
+
+  priv+0x4040 (top prev_size) -> d=0x4000 -> reply 0x3E30
+  priv+0x4048 (top size)      -> d=0x4008 -> reply 0x3E38
+
+clang's spilled `priv` pointer slot is also at reply offset 0x3E30
+(W192/W193: `rbp-0x20`, info+0x4030). A device-only short reply (vusb mode
+s, cap 0x3E20) leaves the pointer intact but zeroes the top size, so the
+first consumer malloc aborts at `malloc(): corrupted top size`. Supplying
+the top size needs a reply reaching 0x3E38, which necessarily overwrites the
+pointer slot at 0x3E30; keeping a valid destination therefore needs the
+live pointer value itself. Mode n demonstrates this with a gdb-derived
+0x555555567600 at 0x3E30 and 0xe9c1 at 0x3E38: init rc=0 and the real
+`gp_camera_folder_list_files()` returns count=1022. That is host-derived,
+lab-assisted rung-4 mechanics, not a device-only path.

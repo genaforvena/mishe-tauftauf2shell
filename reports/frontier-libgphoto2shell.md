@@ -620,3 +620,26 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   lane remains closed without host-derived allocator metadata. Raw:
   `evidence/w193-clean-base-sweep-negative.out`,
   `evidence/w194-clean-archive-negative.out`.
+
+- Device-only natural heap overflow is blocked by a coupled header/pointer
+  slot (W195, 2026-11-25, negative on the W193 clang build): vusb mode `s`
+  stops the bulk reply at `0x3E20`, before clang's spilled `priv` pointer
+  (`info+0x4030`, reply `0x3E30`), so `:154` keeps the real `priv->table`
+  destination with no host address, canary or W194 repair words. `gp_camera_init`
+  still returns 0 at count 1022, but the first consumer allocation aborts at
+  `malloc(): corrupted top size`. gdb at `jl2005c.c:155` measures the safe
+  count's top header at `priv+0x4040/0x4048` (prev_size 0, size `0xe9c1`);
+  the copy maps table offsets `0x4000/0x4008` to reply `0x3E30/0x3E38`, so
+  the bytes that would restore the top size necessarily overwrite the only
+  spilled copy of the live `priv` pointer. A causal control (mode `n`) with a
+  gdb-derived full pointer `0x555555567600` at `0x3E30` and the constant
+  `0xe9c1` at `0x3E38` reaches `gp_camera_folder_list_files rc=0 count=1022`;
+  a wrong top size aborts in `sysmalloc`, and the fixed camlib reduces the
+  bulk request from 16384 to 512 bytes (its `jl2005c_init` error is not
+  propagated by `camera_init`, so `gp_camera_init` still prints rc=0). No
+  device-only layout on this build survives the consumer; the host-supplied
+  pointer keeps this at lab-assisted rung 4, unwitnessed, rung 5 UNKNOWN.
+  Replay: `lab/frontier/libgphoto2shell/live/replay-w195-device-only-negative.sh`
+  (9 PASS / 0 FAIL), `evidence/w195-device-only-negative.out`,
+  `evidence/w195-top-header-map.out`,
+  `evidence/w195-vusb-natural-repair.patch`.

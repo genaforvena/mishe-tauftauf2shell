@@ -1,0 +1,37 @@
+# W195 lab-only vusb diff, relative to the W193 tree after
+# live/vusb-jl2005.patch, evidence/replay-vusb-local-modes.patch,
+# evidence/replay-vusb-ret.patch, evidence/replay-vusb-partial-priv.patch
+# and evidence/replay-vusb-heap-header-repair.patch.
+# Mode n caps the oversized bulk reply at 0x3E40 and writes a FULL host
+# priv pointer (from the environment, gdb-derived) at reply 0x3E30, plus the
+# build's constant top-chunk size word at reply 0x3E38. It is a causal
+# experiment only: the pointer is a live address, so this is NOT a
+# device-only path and NOT a rung-5 claim.
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -198,6 +198,7 @@
+ 		{
+ 			int n = size;
+ 			if (m2[0] == 's' && n > 0x3E20) n = 0x3E20;
++			if (m2[0] == 'n' && n > 0x3E40) n = 0x3E40;
+ 			if (m2[0] == 'r' && n > 0x3E32) n = 0x3E32;
+ 			if (m2[0] == 'p') {
+ 				const char *ls = getenv("M2SHELL_JL2005_LEN");
+@@ -206,5 +207,17 @@
+ 			}
+ 			memset(bytes, 0x5a, (size_t)n);
++			if (m2[0] == 'n' && n >= 0x3E40) {
++				const char *ps = getenv("M2SHELL_W195_PRIV");
++				const char *ts = getenv("M2SHELL_W195_TOP");
++				unsigned long long pv = ps ? strtoull(ps, NULL, 0) : 0;
++				unsigned long long tv = ts ? strtoull(ts, NULL, 0) : 0;
++				int k;
++				for (k = 0; k < 8; k++) {
++					bytes[0x3E30+k] = (char)((pv >> (8*k)) & 0xff);
++					bytes[0x3E38+k] = (char)((tv >> (8*k)) & 0xff);
++				}
++				fprintf(stderr, "W195_NATURAL priv=%llx top=%llx n=%d\n", pv, tv, n);
++			}
+ 			if (m2[0] == 'r' && n >= 0x3E32) {
+ 				const char *ps = getenv("M2SHELL_JL2005_PRIV16");
+ 				unsigned int v = ps ? (unsigned int)strtoul(ps, NULL, 0) : 0;
