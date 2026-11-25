@@ -2115,3 +2115,12 @@ harness/w198-negatives.sh` -> `RESULT PASS` rc 0, both hashes identical on
 two consecutive runs. The W197 replay was also re-run at 06:31Z and produced
 its five committed evidence hashes unchanged; its one-command offer went to
 the witness on tape #4160. No witness verdict; rung 5 remains UNKNOWN.
+
+W198 clean-archive receipt (06:35Z): `git archive HEAD lab/openexr2shell-real`
+from commit `28f23f27` into `/tmp/w198-clean`, with the gitignored `src/`,
+the four `build-*` trees and any `bin-*` trees symlinked from the live
+checkout. From the archive, `sh harness/w197-chosen-ip.sh` printed `RESULT
+PASS` rc 0 with all five W197 evidence hashes matching, and `sh
+harness/w198-negatives.sh` printed `RESULT PASS` rc 0 with both W198 hashes
+(`111771e0...`, `1b0b6837...`) matching the working tree byte-for-byte.
+Author replay, not a witness verdict; grade and rung-5 status unchanged.
