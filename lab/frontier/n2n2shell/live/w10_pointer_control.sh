@@ -11,7 +11,6 @@ set -u
 HERE=$(cd "$(dirname "$0")" || exit 1; pwd)
 N2N=$(cd "$HERE/.." || exit 1; pwd)
 TARBALL=$N2N/provision/n2n-vuln.tar.gz
-COMMUNITY=$N2N/provision/build/n2n-plain/community.list
 SENDER=$HERE/w10_large_peer.py
 EVID=$HERE/evidence
 WORK=${TMPDIR:-/tmp}/n2n2shell-w10-replay.$$
@@ -28,7 +27,6 @@ check() {
 mkdir -p "$WORK/src" || exit 1
 tar xzf "$TARBALL" -C "$WORK/src" || exit 1
 SRC=$WORK/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff
-cp "$COMMUNITY" "$SRC/community.list" || exit 1
 (cd "$SRC" && sh autogen.sh &&
     CC=clang CFLAGS="-g -O2 -fno-omit-frame-pointer" ./configure &&
     make -j4 supernode) >"$EVID/w10-replay-build.log" 2>&1
