@@ -9,11 +9,12 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16 updates 2026-11-25. W10 source audit bounds this pinned
-build to one 64-byte remote
-TERM setter and finds no control-flow target in the overwritten span; W11
-measures the exact client pty-req TERM length and closes W8's client-truncation
-residual. Neither changes the rung or the availability ceiling.
+2026-11-24; W15/W16/W18 updates 2026-11-25. W10 source audit bounds this
+pinned build to one 64-byte remote TERM setter and finds no control-flow
+target in the overwritten span; W11 measures the exact client pty-req TERM
+length and closes W8's client-truncation residual; W18 confirms the same
+no-size getter and field layout in the shipped 3.21e release at source
+level. None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -556,6 +557,31 @@ unchanged (rungs 1–4): chosen field bytes and a thread-park/node-exhaustion
 effect, with a fixed control; no pointer/IP control, command or r5. Author
 evidence, not a witness verdict; no claim about other builds, configs or
 credentials.
+
+## W18 shipped 3.21e release label (2026-11-25, author source-bound)
+
+W1–W16 use the development parent `42f586d7`. To check that this is not a
+dev-only defect, W18 provisions the four raw files named by the GitHub
+mirror's lightweight `sbbs321e` tag (commit
+`d2a6dcb27169796c3931f81c22b90d656d32bd97`) and checks them against the
+already-pinned parent copies. `sbbsdefs.h` reads `VERSION "3.21"` and
+`REVISION 'e'`; `answer.cpp:513` calls the same no-size getter
+`cryptGetAttributeString(ssh_session, CRYPT_SESSINFO_SSH_CHANNEL_TERMINAL,
+terminal, &l)` followed by the same NUL clamp; the getter-plus-clamp block
+and the adjacent `sbbs_t` field block (`terminal[41]`, `line_delay`,
+`console`, `wordwrap`) are byte-identical to the pinned parent; `telnet.h`
+gives `TELNET_TERM_MAXLEN 40`, so the 64-byte wire cap still reaches 23 bytes
+past the 41-byte field. `lab/frontier/synchronet2shell/release-label/run-release321e.sh`
+is **11 PASS / 0 FAIL**; hashes and limits are in its `REPLAY.md`. Two wrong
+observations are preserved in `evidence/negatives.txt`: the mirror's `start`
+tag (a 2000 cvs2svn import with VERSION "3.00" and no SSH getter) is not the
+peeled `sbbs321e` tag, and the first assertion run failed only on leading
+indentation, 6 PASS / 1 FAIL.
+
+This confirms the advisory's affected-release wording for the shipped 3.21e
+**at source level only**: no build, wire session or runtime bytes were
+measured in this lane, no claim is made about 3.20b or other releases, and no
+rung changes. It is an author check, not a witness verdict.
 
 ## Ceiling and cheapest next experiment
 

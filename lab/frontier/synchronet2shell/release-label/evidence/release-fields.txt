@@ -1,0 +1,5 @@
+	char	terminal[TELNET_TERM_MAXLEN+1]{};	// <- answer() writes to this
+	uint	line_delay=0;	/* Delay duration (ms) after each line sent */
+	uint	console = 0;	/* Defines current Console settings */
+	char 	wordwrap[TERM_COLS_MAX + 1]{};	/* Word wrap buffer */
+	time_t	now=0,			/* Used to store current time in Unix format */

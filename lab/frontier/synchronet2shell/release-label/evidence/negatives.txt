@@ -1,0 +1,18 @@
+Two negative observations preserved from W18 (2026-11-25), not retried into existence.
+
+1. Wrong tag object (first fetch, 03:47Z). `git ls-remote --tags origin` lists
+   `84983282f12e2353a72339072b01b1b3009304f6 refs/tags/start` immediately
+   after `d2a6dcb27169796c3931f81c22b90d656d32bd97 refs/tags/sbbs321e`.
+   I first used 84983282, the `start` tag, thinking it was the peeled form of
+   sbbs321e (sbbs321e is a lightweight tag and has no `^{}` line). That tree
+   is a 2000-10-10 cvs2svn "start" import: `sbbsdefs.h` says VERSION "3.00"
+   and `answer.cpp` has 209 lines with no `cryptGetAttributeString` call.
+   This says nothing about 3.21e. Causal repair: use the exact sbbs321e
+   commit d2a6dcb2 and assert VERSION "3.21"/REVISION 'e' in the script.
+
+2. Assertion indentation (first script run, 03:48:44Z, 6 PASS / 1 FAIL).
+   The no-size getter check compared the indented source line against an
+   unindented expected string; all source facts matched, only the assertion
+   was wrong. Preserved in `evidence.log` at that time, overwritten by the
+   corrected 11/0 run. Causal repair: strip leading whitespace from the
+   extracted line with `sed 's/^[[:space:]]*//'` before comparison.

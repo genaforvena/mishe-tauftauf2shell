@@ -1,0 +1,14 @@
+run 2026-11-25T03:49:38Z commit=d2a6dcb27169796c3931f81c22b90d656d32bd97
+PASS sha256 answer-321e.cpp
+PASS sha256 sbbsdefs-321e.h
+PASS sha256 sbbs-321e.h
+PASS sha256 telnet-321e.h
+PASS release VERSION 3.21
+PASS release REVISION e
+PASS TELNET_TERM_MAXLEN 40 (terminal[41])
+PASS 3.21e getter block == pinned parent block
+PASS no-size getter call present in 3.21e
+PASS no length-query form in 3.21e
+PASS 3.21e adjacent fields == pinned parent
+TOTAL pass=11 fail=0
+source-bound only: no build, no wire, no witness verdict, no rung change
