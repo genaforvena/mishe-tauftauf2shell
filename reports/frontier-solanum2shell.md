@@ -4,6 +4,12 @@ Status 2026-11-25 12:40Z: STAGED locally; brief and pinned ASan harness
 written. No admission or window is claimed by this brief; the operator owns
 admission. Window 156 was created by frontier before handoff.
 
+> Updated 2026-11-25 17:4xZ: the staged-era ceilings below were later
+> measured in real ircd builds and independently replayed. Published grade:
+> rung 3 real ircd process / rung 4 PARTIAL, ESTABLISHED AS LABELED with the
+> PR:H prerequisite, chosen bytes at a known global offset, no pointer or
+> command, no r5. See `reports/solanum2shell-status.md` (W1–W5).
+
 ## Verified ground truth
 
 - Claim: CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj, published 2026-11-03,

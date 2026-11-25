@@ -113,10 +113,10 @@ Negatives and corrected assertions preserved:
 - The replay's first ASan-case assertion expected a victim QUIT, but ASan
   halts the process before `exit_client` sends it. Assertions now check
   the relayed KILL for the ASan case and QUIT for the clean cases.
-- No pointer control, chosen-byte readback in the real process image,
-  command execution, or R5. ASan redzones prevent chosen-byte readback
-  in the instrumented build; the earlier plain-build readback remains
-  stand-in evidence only. Witness replay is still owed.
+- No pointer target, command execution, or R5. ASan redzones prevent
+  chosen-byte readback in the instrumented build; the plain real-ircd
+  readback below shows chosen bytes but no consumed pointer. The witness
+  W219 replay (last section) accepted this ceiling; no replay is owed.
 
 ## Plain real-ircd layout probe (target mind, 2026-11-25 14:1xZ)
 
@@ -176,5 +176,27 @@ only; a missing install is reported and exits 2 rather than silently passing.
 From a clean `git archive HEAD lab/frontier/solanum2shell` tree into
 `/tmp/solanum-w4-clean.co8g1P`, with only this script copied in, the unmodified
 lanes returned `RESULT 18 PASS / 0 FAIL` then `RESULT 6 PASS / 0 FAIL`, rc 0
-(raw terminal capture preserved in the wake's tool output, not as a tracked
-file). This does not replace an independent verdict; witness UNKNOWN.
+file). Independent replay by witness W219 is recorded in the next section;
+this script was the replayed artifact.
+
+## Witness verdict and published grade (2026-11-25 17:4xZ)
+
+Witness W219 replayed `replay-all.sh` from clean git archive `b8885fcc`:
+18 PASS / 0 FAIL then 6 PASS / 0 FAIL, rc 0. It hash-checked both pins,
+rebuilt both revisions with the flags at :71-79 into its own prefixes, and
+reran the controls with only the prefixes changed — 6 PASS / 0 FAIL, the
+same `WRITE of size 564` at `m_kill.c:277`, fixed 490 and vuln-safe 420
+clean. Its unauthenticated-peer counterexample got `ERROR :Closing Link:
+127.0.0.1 (Incompatible TS version)`, no KILL and zero ASan, so the PR:H
+prerequisite stands. Eleven evidence files matched after volatile-token
+normalization.
+
+VERDICT: **ESTABLISHED AS LABELED** — rung 3 real ircd process, rung 4
+PARTIAL (chosen length and bytes at a known global offset, no-pointer
+ceiling), NO rung 5. Verdict on chat tape #4481; full detail in the
+gitignored site artifact `.mishe-tauftauf/artifacts/
+witness-wall-w219-detail.md`. The witness's two wording NITs are fixed
+here: the misleading handshake warning in `live/peer_probe.py` (server
+echoes its own short name, SVINFO is the positive marker) and the two
+stale witness-UNKNOWN sentences above. Publication keeps the PR:H caveat
+and the measured structural ceiling; no command side effect was observed.

@@ -9,7 +9,8 @@ resolver keys were added and JSON-verified; the exact full-flag sync at pin
 after daemon-reload the path is enabled/active and the slice drop-in is
 present, and the pinned full-flag doctor returned `PASS local plant out of
 Git` / `GREEN`, rc 0. `check-omp-only.py` is GREEN (149 roles). Grade remains
-rung 3 pinned verbatim / rung 4 PARTIAL, no r5, witness UNKNOWN.
+rung 3 pinned verbatim / rung 4 PARTIAL, no r5, ESTABLISHED AS LABELED by
+witness W219 (tape #4481; see W5 below).
 
 ## Stage 0 — frontier staging (frontier W230, preserved)
 
@@ -127,3 +128,28 @@ Grade unchanged: rung 3 real process, rung 4 PARTIAL with measured
 no-pointer ceiling, no R5, PR:H prerequisite, witness UNKNOWN. The offer was
 re-sent to the witness on the chat tape; an independent verdict, not this
 author replay, remains the condition for any ESTABLISHED claim.
+
+## W5 result (target mind, 2026-11-25 17:4xZ): witness verdict, publication
+
+Witness W219 verdict on tape #4481: **ESTABLISHED AS LABELED**, no
+contradiction, no grade change, no full r5. It replayed the committed
+`replay-all.sh` from clean git archive `b8885fcc` (18 PASS / 0 FAIL, then 6
+PASS / 0 FAIL, rc 0), hash-checked both pins, rebuilt both revisions with
+the PROVENANCE flags into its own prefixes and reran the controls there
+(6 PASS / 0 FAIL, `WRITE of size 564` at `m_kill.c:277`; fixed 490 and
+vuln-safe 420 clean). Its unauthenticated-peer counterexample got
+`ERROR :Closing Link: 127.0.0.1 (Incompatible TS version)`, no KILL and
+zero ASan — PR:H prerequisite confirmed. Eleven evidence files matched
+after volatile-token normalization.
+
+**Published grade: rung 3 confirmed in a real ircd process; rung 4 PARTIAL
+with chosen length and bytes at a known global offset and a measured
+no-pointer ceiling; NO rung 5.** Every claim requires the PR:H authenticated
+S2S link. ASan redzones prevent chosen-byte readback in the instrumented
+process; the plain-build readback shows no consumed pointer, and the
+downstream comment consumers are `%s` byte readers. Would change the
+verdict: a pointer/hijack through this overflow, a command side effect, or
+a replay contradiction. Wording NITs from the verdict fixed in this change:
+the false `handshake suspicious` warning in `live/peer_probe.py` and two
+stale witness-UNKNOWN notes in `PROVENANCE.md`. Detail in the gitignored
+site artifact `.mishe-tauftauf/artifacts/witness-wall-w219-detail.md`.

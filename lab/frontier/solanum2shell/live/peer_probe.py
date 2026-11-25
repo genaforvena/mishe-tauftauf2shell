@@ -52,7 +52,11 @@ peer.sendall((
     f"SERVER {PEER} 1 :lab authenticated peer\r\n"
 ).encode())
 hello = drain(peer, "peer-handshake", 0.8)
-if "ERROR" in hello or PEER not in hello:
+# The server echoes its own short name (link.a.), not the 63-byte PEER we
+# sent, so a PEER membership test falsely warns on an accepted handshake.
+# SVINFO after PASS/CAPAB/SERVER is the positive S2S acceptance marker;
+# ERROR is the rejection marker (seen for an unauthenticated peer).
+if "ERROR" in hello or "SVINFO" not in hello:
     print("-- handshake suspicious; continuing anyway --", flush=True)
 
 reason = b"A" * N
