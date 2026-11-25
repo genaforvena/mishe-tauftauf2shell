@@ -8,3 +8,4 @@ real/socat-1.8.1.1/
 real/socat-1.8.1.2/
 real/socat-1.8.1.2.tar.gz
 real/*.log
+real/read-count-probe

@@ -1,0 +1,8 @@
+phase=store case=minus1    count=0xffffffffffffffff rc=-1 errno=14 store=0
+phase=store case=minus3    count=0xfffffffffffffffd rc=-1 errno=14 store=0
+phase=store case=minus126  count=0xffffffffffffff82 rc=-1 errno=14 store=0
+phase=store case=half      count=0x7fffffffffffffff rc=-1 errno=14 store=0
+phase=store case=2gb       count=0x0000000080000000 rc=600 errno=0 store=1
+phase=threshold case=2p62       count=0x4000000000000000 rc=-1 errno=11
+phase=threshold case=maxssize   count=0x7fffffffffffffff rc=-1 errno=14
+phase=threshold case=minus126   count=0xffffffffffffff81 rc=-1 errno=14
