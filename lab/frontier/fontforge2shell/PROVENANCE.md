@@ -133,3 +133,14 @@ row. W10's `0x0100FEFF` was only the `i=0` case; the measured maximum is
 `0x01FFFE00` with byte 3 still `0/1`. Author-side, unwitnessed, no grade
 change and no r5.
 
+
+W16 (2026-11-25 05:5xZ): no external reads, probes, loopback service or new
+source tree. `make-negdiv-case.py` derives four PCFs and one import script
+and gdb command from the already-pinned `truncated.pcf`; the all-skipped
+safe control is emitted by `replay-negdiv.sh`. The six locally built trees
+from `replay-real.sh` and `replay-nonpie.sh` and host gdb 15.1 were reused.
+`NEGDIV.md` holds the case hashes, the two live transcripts, the mapping
+containment check and the control matrix; `replay-negdiv.sh` reproduces all
+of them in one command. No file supplied a mapped address: the newly
+reachable `0xff` byte lands below the PIE binary and above the non-PIE
+text. Author-side, unwitnessed, no grade change and no r5.

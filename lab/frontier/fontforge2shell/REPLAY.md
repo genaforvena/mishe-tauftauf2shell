@@ -220,3 +220,23 @@ clean archive; the check now asserts the path-independent invariant.
 Full method, decision rule and limits in `FUNCTIONPTR.md`. Author-side
 negative, not a witness verdict: no live function pointer reachable in
 either measured build at write time, so W14's mapped address remains data.
+
+## W16 — negative-divisor write byte (2026-11-25 05:5xZ)
+
+With both build sets present (`replay-real.sh`, `replay-nonpie.sh`), one
+command regenerates the negative-divisor PCFs, reruns both gdb transcripts
+and checks the control matrix and mapping containment:
+
+```sh
+sh replay-negdiv.sh
+```
+
+Expected: `HIT glyph=-50 i=65532` in both transcripts, bytes
+`fe 05 01 ff` at `encs-200`, pointers `0x00005555ff0105fe` (PIE) and
+`0x00000000ff0105fe` (non-PIE), both outside every mapping printed in the
+same transcript, all-skipped safe control rc 0 in six trees, vulnerable
+plain/non-PIE rc 0, ASan rc 1 with `WRITE of size 4` at `:1751`, and the
+final line `REPLAY_NEGDIV_OK: 20 checks, 0 failed` with rc 0. The huge
+in-bounds variant faults in patched builds too and is not a control.
+Full arithmetic, hashes and disposition in `NEGDIV.md`. Author-side
+negative for mapped-target reach, not a witness verdict; grade unchanged.

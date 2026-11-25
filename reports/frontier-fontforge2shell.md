@@ -265,6 +265,22 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   reachable in either measured build at write time; W14's mapped address
   stays data only. No branch, marker, command or r5; limited to these
   builds and this import state.
+- W16 (`NEGDIV.md`, `replay-negdiv.sh`, author-side, no grade change): a
+  negative BDF_ENCODINGS divisor (`max2<min2-1`) makes the pinned `:1751`
+  RHS negative, so byte 3 of the written dword can be `0xff`, correcting
+  W12's wording that bits 24..31 are only `0x00`/`0x01` (its numeric
+  ceiling `0x01FFFE00` for nonnegative RHS stands). With
+  `min2=2,max2=0,min1=65534,max1=0, i=65532`, the truncated `glyph=-50`
+  changes `BDFChar.bitmap` from `0x0000555555c227f0` to
+  `0x00005555ff0105fe` in the default PIE build and to
+  `0x00000000ff0105fe` in the local non-PIE build. Both addresses are
+  outside every mapping in the same gdb transcript; no mapped target,
+  no branch, marker or command. The all-skipped safe control is clean in
+  all six trees, vulnerable plain/non-PIE exit 0, ASan reports the same
+  `WRITE of size 4` at `:1751`; `replay-negdiv.sh` passes 20/20 with rc 0.
+  The huge in-bounds variant faults in patched as well as vulnerable
+  builds via `MakeEncChar` at `:210` and is excluded as a control. No
+  witness verdict for this lane; grade unchanged.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
