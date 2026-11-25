@@ -1,0 +1,106 @@
+ASAN_BUILD=0
+INITDB1=0
+INITDB2=0
+PGSTART1=0
+PGSTART2=0
+CREATE1=0
+GUC1=0
+CREATE2=0
+GUC2=0
+CREATE_GROUP=0
+NODE1_READY=r
+JOIN_GROUP=0
+NODE2_READY=r
+TABLE1=0
+TABLE_ON_NODE2=t
+INSERT1=0
+TUPLE_ORIGIN_INSERT=0
+--- handlers ---
+cat: evidence/handler-fn1.out: No such file or directory
+cat: evidence/handler-reg1.out: No such file or directory
+cat: evidence/handler-fn2.out: No such file or directory
+cat: evidence/handler-reg2.out: No such file or directory
+--- rows ---
+ id |  val  
+----+-------
+  1 | node1
+(1 row)
+
+ id |   val   
+----+---------
+  1 | crafted
+(1 row)
+
+--- conflict log ---
+evidence/server2.log:==2156874==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x74ac0e606560 at pc 0x74ac14291ad0 bp 0x7ffc1f994ad0 sp 0x7ffc1f994258
+evidence/server2.log:    #6 0x74ac100b1b85 in pgactive_make_apply_conflict src/pgactive_conflict_logging.c:716
+evidence/server2.log:Address 0x74ac0e606560 is located in stack of thread T0 at offset 96 in frame
+evidence/server2.log:HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+evidence/server2.log:SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+evidence/server2.log:  Stack left redzone:      f1
+evidence/server2.log:  Stack mid redzone:       f2
+evidence/server2.log:  Stack right redzone:     f3
+evidence/server2.log:  Stack after return:      f5
+evidence/server2.log:  Stack use after scope:   f8
+evidence/server2.log:2026-11-25 22:22:55.903 UTC [2156660] LOG:  all server processes terminated; reinitializing
+evidence/server2.log:==2157036==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x74ac0e600ce0 at pc 0x74ac14291ad0 bp 0x7ffc1f994ad0 sp 0x7ffc1f994258
+evidence/server2.log:    #6 0x74ac100b1b85 in pgactive_make_apply_conflict src/pgactive_conflict_logging.c:716
+evidence/server2.log:Address 0x74ac0e600ce0 is located in stack of thread T0 at offset 96 in frame
+evidence/server2.log:HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+evidence/server2.log:SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+evidence/server2.log:  Stack left redzone:      f1
+evidence/server2.log:  Stack mid redzone:       f2
+evidence/server2.log:  Stack right redzone:     f3
+evidence/server2.log:  Stack after return:      f5
+evidence/server2.log:  Stack use after scope:   f8
+evidence/server2.log:2026-11-25 22:22:58.136 UTC [2156660] LOG:  all server processes terminated; reinitializing
+--- create group ---
+ pgactive_create_group 
+-----------------------
+ 
+(1 row)
+
+--- join group ---
+ pgactive_join_group 
+---------------------
+ 
+(1 row)
+
+--- nodes ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+--- table ---
+cat: evidence/table2.out: No such file or directory
+--- GUC ---
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+--- node status ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+PGSTOP1=0
+PGSTOP2=0
+TERMINATIONS1=0
+TERMINATIONS2=0

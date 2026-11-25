@@ -219,8 +219,9 @@ PostgreSQL 16.15 cluster with the full pinned 2.1.9 library loaded:
   group at 21:53Z: both nodes reached `r`, a 99-byte origin and session setup
   succeeded, but the diagnostic returned `owner_replorigin` NULL with
   `lock_mode=nolock`, no parse error and no termination, so the crafted name
-  never reached the parser. The route is UNKNOWN, not demonstrated and not
-  ruled out; evidence in `realbuild/twonode/catalogprobe/FINDINGS.md`.
+  never reached the parser. That global-lock route stays UNKNOWN. A *different*
+  catalog-derived route was established later that evening through conflict
+  logging in a live apply worker; see the 2026-11-25 22:23Z section below.
 
 Exact commands, rc values and preserved negatives are in
 `realbuild/originpath/FINDINGS.md` and `realbuild/originpath/evidence/`.
@@ -256,11 +257,12 @@ chosen `41/5a` bytes read from the live backend stack at offsets 0..127 via
 the `LIVE_CAPTURE` marker before the error longjmp. The marker is
 instrumentation, not a saved pointer or an IP; the ASan build confirms the
 same write independently, now also in the complete pinned 2.1.9 extension via
-the real SQL function. Not established: a replication wire path, control of a
-saved pointer/return address (the saved RA at +120 is overwritten but the
-pinned `!= 4` check sends every overflowing input through the error
-longjmp; see correction above), an IP, a command side effect, or rung 5. The
-advisory's command-execution claim remains a claim. The authenticated
+the real SQL function and, from 22:23Z, in a live apply worker driven by a
+remote insert (see below). Not established: arbitrary bytes carried on the
+replication wire, control of a saved pointer/return address (the saved RA at
+120 is overwritten but the pinned `!= 4` check sends every overflowing input
+through the error longjmp), an IP, a command side effect, or rung 5.
+The advisory's command-execution claim remains a claim. The authenticated
 `PR:L` precondition and the need for a writable replication-origin name are
 part of it, not hidden. The original
 pinned harness was independently replayed by witness #3896; the SQL-path,
@@ -272,9 +274,10 @@ live-capture and full-extension evidence has not been independently replayed.
 The saved-pointer route in the real extension is measured and closed: the
 return-address slot at +120 is overwritten, but the pinned five-conversion
 format makes every matching `%s` input fail the `!= 4` check, so the error
-longjmp abandons it and the canary at +72 is never checked. Any further
-rung-4 attempt needs a different consumer or a real replication wire path;
-neither is established here. Witness replay of the commit containing
+longjmp abandons it and the canary at +72 is never checked. The live apply-worker
+route below supplies the missing consumer and a remote trigger, but its
+crafted name still comes from local catalog state and still leaves through
+the same longjmp. Witness replay of the commit containing
 `realbuild/` should run
 `sh run-real.sh`, `VERSION=2.1.10 LABEL=fixed sh run-real.sh` and
 `sh run-real-asan.sh` with the provisioning in `realbuild/PROVISION.md`;
@@ -390,3 +393,44 @@ DoS differential, not a new primitive: the overwritten word is still the
 fixed canary byte, no chosen bytes, no saved IP and no command side effect.
 Rung ceiling unchanged. Evidence: `realbuild/twonode/runs/v219-deletedel/`
 and `runs/v2210-deletedel/`.
+
+## Catalog-derived parser in a live apply worker (2026-11-25 22:23Z)
+
+The catalog route is no longer just a precondition. `run-two.sh` gained a
+default-off `ORIGIN_TUPLE=1` arm: node 2 delays apply by 5 s, a privileged
+session there creates a 275-byte origin named
+`pgactive_1_1_1_1_` + 130 `AZ` pairs and inserts the conflicting row under it,
+then node 1's earlier insert is replayed. Last-update-wins sets `log_update`,
+so `pgactive_make_apply_conflict()` asks the parser about the local tuple's
+origin id (`pgactive_apply.c:782,798` →
+`pgactive_conflict_logging.c:716` → `pgactive_catalogs.c:321,351`). No conflict
+handler is configured, so the separate `fcinfo` defect cannot fire first.
+
+- Vulnerable 2.1.9, plain: `evidence/server2.log` reports
+  `could not parse slot name: pgactive_1_1_1_1_AZ...`; no termination, because
+  `elog(ERROR)` longjmps. Library sha256 `3177a37c...162998`.
+- Vulnerable 2.1.9, ASan-preloaded postmasters: two node-2 reports,
+  `stack-buffer-overflow`, `WRITE of size 261` at offset 96 of
+  `[32, 96) 'replication_name' (line 349)`, frame
+  `pgactive_parse_replident_name src/pgactive_catalogs.c:351`, called from
+  `pgactive_fetch_sysid_via_node_id_ifexists` (`:321`),
+  `pgactive_fetch_sysid_via_node_id` (`:338`),
+  `pgactive_make_apply_conflict src/pgactive_conflict_logging.c:716`,
+  `process_remote_insert src/pgactive_apply.c:798` and
+  `pgactive_apply_main src/pgactive_apply.c:3071`. ASan library sha256
+  `56550571...d29e`.
+- Fixed 2.1.10 control (sha256 `986917a8...2885a`): same setup and remote
+  insert, no ASan, no termination, and node 2 reports
+  `could not parse replication origin name: ...`.
+
+This is rung 3 confirmed in a live apply worker with a remotely triggered
+change and a vulnerable/fixed differential, and it supplies the live consumer
+missing from the earlier catalog work. It is not rung 5: the crafted name is
+local catalog state, not bytes carried on the wire; creation of that row is
+owner-only here; and the pinned `!= 4` check still sends every overflowing
+input through the error longjmp, so the saved RA and canary are never
+consumed. A first attempt that renamed the worker's own origin row poisoned
+slot-name generation and caused a restart loop; it is preserved as a negative
+in the same findings. Full commands, hashes, logs and limits:
+`realbuild/twonode/originwire/FINDINGS.md`. Author observation, not an
+independent witness verdict.

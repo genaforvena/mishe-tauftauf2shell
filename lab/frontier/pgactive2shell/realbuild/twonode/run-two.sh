@@ -14,6 +14,8 @@ VERSION=${VERSION:-2.1.9}
 NO_CONFLICT=${NO_CONFLICT:-0}
 CONFLICT_TYPE=${CONFLICT_TYPE:-insert_insert}
 CATALOG_PROBE=${CATALOG_PROBE:-0}
+ORIGIN_REWRITE=${ORIGIN_REWRITE:-0}
+ORIGIN_TUPLE=${ORIGIN_TUPLE:-0}
 LIBDIR=/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib
 V219SO=/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so.v219-installed
 V2210SO=/tmp/pgactive-full-2210/pgactive-2.1.10/pgactive.so
@@ -127,6 +129,27 @@ SQL
   echo '--- catalog probe ---'; cat evidence/catalog-session.out
 fi
 
+if [ "$ORIGIN_REWRITE" = 1 ]; then
+  # Give each apply worker's own replication-origin row a crafted long name.
+  # The worker captured its origin id at startup, so the catalog-derived
+  # name is what pgactive_fetch_sysid_via_node_id() parses on a conflict.
+  PAYLOAD=$(printf 'AZ%.0s' $(seq 1 130))
+  for N in 1 2; do
+    if [ "$N" = 1 ]; then Q="psql1"; else Q="psql2"; fi
+    $Q -Atc "SELECT roident, roname FROM pg_replication_origin WHERE roname LIKE 'pgactive%' ORDER BY roident;" \
+      >"evidence/origin-before$N.txt" 2>&1
+    status "ORIGIN_BEFORE$N" $?
+    while IFS='|' read -r RID NAME; do
+      [ -z "$RID" ] && continue
+      $Q -c "UPDATE pg_replication_origin SET roname = '${NAME}${PAYLOAD}' WHERE roident = $RID;" \
+        >>"evidence/origin-rewrite$N.out" 2>&1
+    done <"evidence/origin-before$N.txt"
+    $Q -Atc "SELECT roident, length(roname), roname FROM pg_replication_origin ORDER BY roident;" \
+      >"evidence/origin-after$N.txt" 2>&1
+    status "ORIGIN_AFTER$N" $?
+  done
+fi
+
 # Replicated table with a primary key. DDL replication is on; node 2 should
 # receive it automatically.
 psql1 -c "CREATE TABLE public.t (id int PRIMARY KEY, val text);" >evidence/table1.out 2>&1
@@ -156,7 +179,27 @@ fi
 
 # Race the two inserts so both commit before either apply worker delivers
 # the other's row; that yields an insert_insert conflict on both nodes.
-if [ "$NO_CONFLICT" = 1 ]; then
+if [ "$ORIGIN_TUPLE" = 1 ]; then
+    # Node 2 delays apply, so the crafted-origin row commits locally before
+    # node 1's older insert is replayed. The conflict logger then asks the
+    # parser about the local tuple's origin id, not the worker's own origin.
+    psql2 -c "ALTER SYSTEM SET pgactive.debug_apply_delay=5000;" >evidence/delay2.out 2>&1
+    psql2 -c "SELECT pg_reload_conf();" >>evidence/delay2.out 2>&1
+    LONG="pgactive_1_1_1_1_$(printf 'AZ%.0s' $(seq 1 130))"
+    printf '%s\n' "$LONG" >evidence/tuple-origin-name.txt
+    psql1 -c "INSERT INTO public.t VALUES (1, 'node1');" >evidence/insert1.out 2>&1
+    status INSERT1 $?
+    sleep 1
+    psql2 <<SQL >evidence/tuple-origin-session.out 2>&1
+SELECT pg_replication_origin_create('$LONG');
+BEGIN;
+SELECT pg_replication_origin_session_setup('$LONG');
+INSERT INTO public.t VALUES (1, 'crafted');
+COMMIT;
+SQL
+    status TUPLE_ORIGIN_INSERT $?
+    sleep 8
+elif [ "$NO_CONFLICT" = 1 ]; then
     # Control: handler configured, but only one node writes. No conflict,
     # so the resolver must not be called.
     psql1 -c "INSERT INTO public.t VALUES (1, 'node1');" >evidence/insert1.out 2>&1

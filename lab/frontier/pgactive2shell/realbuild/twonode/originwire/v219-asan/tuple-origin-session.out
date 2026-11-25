@@ -1,0 +1,10 @@
+ pg_replication_origin_create 
+------------------------------
+                            2
+(1 row)
+
+ pg_replication_origin_session_setup 
+-------------------------------------
+ 
+(1 row)
+

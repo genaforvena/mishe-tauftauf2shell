@@ -1,0 +1,229 @@
+2026-11-25 22:22:43.849 UTC [2156660] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 22:22:43.849 UTC [2156660] LOG:  listening on IPv4 address "127.0.0.1", port 58432
+2026-11-25 22:22:43.851 UTC [2156660] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/realbuild/twonode/s2/.s.PGSQL.58432"
+2026-11-25 22:22:43.892 UTC [2156664] LOG:  database system was shut down at 2026-11-25 22:22:43 UTC
+2026-11-25 22:22:43.917 UTC [2156660] LOG:  database system is ready to accept connections
+2026-11-25 22:22:44.036 UTC [2156667] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 22:22:44.047 UTC [2156667] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 22:22:44.111 UTC [2156660] LOG:  background worker "pgactive supervisor" (PID 2156667) exited with exit code 1
+2026-11-25 22:22:44.532 UTC [2156660] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 22:22:44.535 UTC [2156660] LOG:  parameter "pgactive.skip_ddl_replication" changed to "off"
+2026-11-25 22:22:45.160 UTC [2156734] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 22:22:45.903 UTC [2156773] LOG:  node identity of node being created is (7712238121562196197,0,5)
+2026-11-25 22:22:45.903 UTC [2156773] CONTEXT:  PL/pgSQL function _pgactive_begin_join_private(text,text,text,text,boolean,boolean,boolean,boolean) line 40 at RAISE
+	SQL statement "SELECT pgactive._pgactive_begin_join_private(
+	        caller := '',
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        remote_dsn := join_using_dsn,
+	        bypass_collation_check := bypass_collation_check,
+	        bypass_node_identifier_creation := bypass_node_identifier_creation,
+	        bypass_user_tables_check := bypass_user_tables_check,
+	        data_only_node_init := data_only_node_init)"
+	PL/pgSQL function pgactive_join_group(text,text,text,integer,text[],boolean,boolean,boolean,boolean) line 71 at PERFORM
+2026-11-25 22:22:45.903 UTC [2156773] STATEMENT:  SELECT pgactive.pgactive_join_group('node2', 'host=127.0.0.1 port=58432 dbname=postgres user=mesh-home', 'host=127.0.0.1 port=58431 dbname=postgres user=mesh-home');
+2026-11-25 22:22:46.623 UTC [2156734] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:46.623 UTC [2156734] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:46.793 UTC [2156734] LOG:  successfully started pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:47.017 UTC [2156815] LOG:  waiting for process 2156832 to execute command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pgactive_dump" for init_replica
+2026-11-25 22:22:48.019 UTC [2156815] LOG:  successfully executed command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pgactive_dump" for init_replica
+2026-11-25 22:22:48.024 UTC [2156815] LOG:  waiting for process 2156843 to execute command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pg_restore" for init_replica
+2026-11-25 22:22:49.025 UTC [2156815] LOG:  successfully executed command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pg_restore" for init_replica
+2026-11-25 22:22:49.295 UTC [2156870] LOG:  pgactive apply finished processing; replayed up to 0/1A48290 of required 0/1A456B0
+2026-11-25 22:22:49.295 UTC [2156870] CONTEXT:  apply COMMIT from node node1 (7712238116140529832,0,5,) forwarded from commit 0/0 on node node1 (7712238116140529832,0,5,)
+2026-11-25 22:22:49.425 UTC [2156877] LOG:  logical decoding found initial starting point at 0/1A46298
+2026-11-25 22:22:49.425 UTC [2156877] DETAIL:  Waiting for transactions (approximately 1) older than 746 to end.
+2026-11-25 22:22:49.425 UTC [2156877] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL pgactive
+2026-11-25 22:22:49.517 UTC [2156877] LOG:  logical decoding found consistent point at 0/1A463D8
+2026-11-25 22:22:49.517 UTC [2156877] DETAIL:  There are no running transactions.
+2026-11-25 22:22:49.517 UTC [2156877] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL pgactive
+2026-11-25 22:22:49.518 UTC [2156877] LOG:  exported logical decoding snapshot: "00000006-0000001C-1" with 0 transaction IDs
+2026-11-25 22:22:49.518 UTC [2156877] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL pgactive
+2026-11-25 22:22:49.527 UTC [2156877] LOG:  starting logical decoding for slot "pgactive_5_7712238116140529832_0_5__"
+2026-11-25 22:22:49.527 UTC [2156877] DETAIL:  Streaming transactions committing after 0/1A46410, reading WAL from 0/1A46298.
+2026-11-25 22:22:49.527 UTC [2156877] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:49.527 UTC [2156877] LOG:  logical decoding found initial starting point at 0/1A46298
+2026-11-25 22:22:49.527 UTC [2156877] DETAIL:  Waiting for transactions (approximately 1) older than 746 to end.
+2026-11-25 22:22:49.527 UTC [2156877] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:49.527 UTC [2156877] LOG:  logical decoding found consistent point at 0/1A463D8
+2026-11-25 22:22:49.527 UTC [2156877] DETAIL:  There are no running transactions.
+2026-11-25 22:22:49.527 UTC [2156877] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712238116140529832_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:50.318 UTC [2156660] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 22:22:50.320 UTC [2156660] LOG:  parameter "pgactive.debug_apply_delay" changed to "5000"
+=================================================================
+==2156874==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x74ac0e606560 at pc 0x74ac14291ad0 bp 0x7ffc1f994ad0 sp 0x7ffc1f994258
+WRITE of size 261 at 0x74ac0e606560 thread T0
+    #0 0x74ac14291acf in scanf_common ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342
+    #1 0x74ac142cd662 in __isoc23_vsscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1503
+    #2 0x74ac142ce23b in __isoc23_sscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1535
+    #3 0x74ac100a9495 in pgactive_parse_replident_name src/pgactive_catalogs.c:351
+    #4 0x74ac100aa743 in pgactive_fetch_sysid_via_node_id_ifexists src/pgactive_catalogs.c:321
+    #5 0x74ac100aa8d1 in pgactive_fetch_sysid_via_node_id src/pgactive_catalogs.c:338
+    #6 0x74ac100b1b85 in pgactive_make_apply_conflict src/pgactive_conflict_logging.c:716
+    #7 0x74ac10098338 in process_remote_insert src/pgactive_apply.c:798
+    #8 0x74ac1009e64d in pgactive_process_remote_action src/pgactive_apply.c:2420
+    #9 0x74ac1009e64d in pgactive_apply_work src/pgactive_apply.c:2815
+    #10 0x74ac1009e64d in pgactive_apply_main src/pgactive_apply.c:3071
+    #11 0x5cd6a00399cc in StartBackgroundWorker (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x4939cc) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #12 0x5cd6a0040ff7  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49aff7) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #13 0x5cd6a02b7647  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x711647) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #14 0x5cd6a00427a8 in PostmasterMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49c7a8) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #15 0x5cd69fd07296 in main (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161296) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #16 0x74ac12c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x74ac12c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x5cd69fd07854 in _start (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161854) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+
+Address 0x74ac0e606560 is located in stack of thread T0 at offset 96 in frame
+    #0 0x74ac100a93ec in pgactive_parse_replident_name src/pgactive_catalogs.c:348
+
+  This frame has 1 object(s):
+    [32, 96) 'replication_name' (line 349) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+Shadow bytes around the buggy address:
+  0x74ac0e606280: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x74ac0e606300: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+  0x74ac0e606380: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+  0x74ac0e606400: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x74ac0e606480: f1 f1 f1 f1 f1 f1 04 f2 00 f3 f3 f3 00 00 00 00
+=>0x74ac0e606500: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x74ac0e606580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e606600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e606680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e606700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e606780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2156874==ABORTING
+2026-11-25 22:22:55.835 UTC [2156660] LOG:  background worker "pgactive apply worker" (PID 2156874) exited with exit code 1
+2026-11-25 22:22:55.835 UTC [2156660] DETAIL:  Failed process was running: pgactive_apply: BEGIN origin(orig_lsn, timestamp): 0/1A4FA48, 2026-11-25 22:22:50.391226+00
+2026-11-25 22:22:55.835 UTC [2156660] LOG:  terminating any other active server processes
+2026-11-25 22:22:55.903 UTC [2156660] LOG:  all server processes terminated; reinitializing
+2026-11-25 22:22:55.936 UTC [2157004] LOG:  database system was interrupted; last known up at 2026-11-25 22:22:43 UTC
+2026-11-25 22:22:56.037 UTC [2157004] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-25 22:22:56.042 UTC [2157004] LOG:  redo starts at 0/14EF730
+2026-11-25 22:22:56.145 UTC [2157004] LOG:  invalid record length at 0/1A4CFE8: expected at least 24, got 0
+2026-11-25 22:22:56.145 UTC [2157004] LOG:  redo done at 0/1A4CFA0 system usage: CPU: user: 0.01 s, system: 0.02 s, elapsed: 0.10 s
+2026-11-25 22:22:56.149 UTC [2157005] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-25 22:22:56.228 UTC [2157005] LOG:  checkpoint complete: wrote 1168 buffers (7.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.054 s, sync=0.021 s, total=0.080 s; sync files=428, longest=0.002 s, average=0.001 s; distance=5494 kB, estimate=5494 kB; lsn=0/1A4CFE8, redo lsn=0/1A4CFE8
+2026-11-25 22:22:56.249 UTC [2156660] LOG:  database system is ready to accept connections
+2026-11-25 22:22:56.335 UTC [2157014] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 22:22:56.396 UTC [2156660] LOG:  background worker "pgactive supervisor" (PID 2157014) exited with exit code 1
+2026-11-25 22:22:57.447 UTC [2157030] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 22:22:57.448 UTC [2157030] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:57.448 UTC [2157030] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:57.554 UTC [2157030] LOG:  successfully started pgactive per-db worker for database "postgres" with OID 5
+=================================================================
+==2157036==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x74ac0e600ce0 at pc 0x74ac14291ad0 bp 0x7ffc1f994ad0 sp 0x7ffc1f994258
+WRITE of size 261 at 0x74ac0e600ce0 thread T0
+    #0 0x74ac14291acf in scanf_common ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342
+    #1 0x74ac142cd662 in __isoc23_vsscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1503
+    #2 0x74ac142ce23b in __isoc23_sscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1535
+    #3 0x74ac100a9495 in pgactive_parse_replident_name src/pgactive_catalogs.c:351
+    #4 0x74ac100aa743 in pgactive_fetch_sysid_via_node_id_ifexists src/pgactive_catalogs.c:321
+    #5 0x74ac100aa8d1 in pgactive_fetch_sysid_via_node_id src/pgactive_catalogs.c:338
+    #6 0x74ac100b1b85 in pgactive_make_apply_conflict src/pgactive_conflict_logging.c:716
+    #7 0x74ac10098338 in process_remote_insert src/pgactive_apply.c:798
+    #8 0x74ac1009e64d in pgactive_process_remote_action src/pgactive_apply.c:2420
+    #9 0x74ac1009e64d in pgactive_apply_work src/pgactive_apply.c:2815
+    #10 0x74ac1009e64d in pgactive_apply_main src/pgactive_apply.c:3071
+    #11 0x5cd6a00399cc in StartBackgroundWorker (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x4939cc) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #12 0x5cd6a0040ff7  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49aff7) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #13 0x5cd6a02b7647  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x711647) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #14 0x5cd6a00427a8 in PostmasterMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49c7a8) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #15 0x5cd69fd07296 in main (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161296) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #16 0x74ac12c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #17 0x74ac12c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #18 0x5cd69fd07854 in _start (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161854) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+
+Address 0x74ac0e600ce0 is located in stack of thread T0 at offset 96 in frame
+    #0 0x74ac100a93ec in pgactive_parse_replident_name src/pgactive_catalogs.c:348
+
+  This frame has 1 object(s):
+    [32, 96) 'replication_name' (line 349) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+Shadow bytes around the buggy address:
+  0x74ac0e600a00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x74ac0e600a80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+  0x74ac0e600b00: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+  0x74ac0e600b80: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x74ac0e600c00: f1 f1 f1 f1 f1 f1 04 f2 00 f3 f3 f3 00 00 00 00
+=>0x74ac0e600c80: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x74ac0e600d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e600d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e600e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e600e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x74ac0e600f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2157036==ABORTING
+2026-11-25 22:22:58.119 UTC [2156660] LOG:  background worker "pgactive apply worker" (PID 2157036) exited with exit code 1
+2026-11-25 22:22:58.119 UTC [2156660] DETAIL:  Failed process was running: pgactive_apply: BEGIN origin(orig_lsn, timestamp): 0/1A4FA48, 2026-11-25 22:22:50.391226+00
+2026-11-25 22:22:58.119 UTC [2156660] LOG:  terminating any other active server processes
+2026-11-25 22:22:58.136 UTC [2156660] LOG:  all server processes terminated; reinitializing
+2026-11-25 22:22:58.199 UTC [2157048] LOG:  database system was interrupted; last known up at 2026-11-25 22:22:56 UTC
+2026-11-25 22:22:58.246 UTC [2157048] LOG:  database system was not properly shut down; automatic recovery in progress
+2026-11-25 22:22:58.249 UTC [2157048] LOG:  recovered replication state of node 1 to 0/1A4F8C8
+2026-11-25 22:22:58.249 UTC [2157048] LOG:  recovered replication state of node 2 to 0/0
+2026-11-25 22:22:58.251 UTC [2157048] LOG:  redo starts at 0/1A4D060
+2026-11-25 22:22:58.251 UTC [2157048] LOG:  invalid record length at 0/1A4D278: expected at least 24, got 0
+2026-11-25 22:22:58.251 UTC [2157048] LOG:  redo done at 0/1A4D238 system usage: CPU: user: 0.00 s, system: 0.00 s, elapsed: 0.00 s
+2026-11-25 22:22:58.256 UTC [2157049] LOG:  checkpoint starting: end-of-recovery immediate wait
+2026-11-25 22:22:58.294 UTC [2157049] LOG:  checkpoint complete: wrote 3 buffers (0.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.001 s, total=0.040 s; sync files=2, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1A4D278, redo lsn=0/1A4D278
+2026-11-25 22:22:58.320 UTC [2156660] LOG:  database system is ready to accept connections
+2026-11-25 22:22:58.351 UTC [2157055] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 22:22:58.420 UTC [2156660] LOG:  background worker "pgactive supervisor" (PID 2157055) exited with exit code 1
+2026-11-25 22:22:59.491 UTC [2157061] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 22:22:59.492 UTC [2157061] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:59.492 UTC [2157061] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:59.597 UTC [2157061] LOG:  successfully started pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:59.713 UTC [2157086] ERROR:  could not connect to the server in replication mode: connection failed
+2026-11-25 22:22:59.722 UTC [2156660] LOG:  background worker "pgactive apply worker" (PID 2157086) exited with exit code 1
+2026-11-25 22:22:59.930 UTC [2156660] LOG:  received fast shutdown request
+2026-11-25 22:22:59.932 UTC [2156660] LOG:  aborting any active transactions
+2026-11-25 22:22:59.932 UTC [2157066] FATAL:  terminating background worker "pgactive per-db worker" due to administrator command
+2026-11-25 22:22:59.932 UTC [2157061] FATAL:  terminating background worker "pgactive supervisor" due to administrator command
+2026-11-25 22:22:59.998 UTC [2156660] LOG:  background worker "logical replication launcher" (PID 2157056) exited with exit code 1
+2026-11-25 22:23:00.003 UTC [2156660] LOG:  background worker "pgactive per-db worker" (PID 2157066) exited with exit code 1
+2026-11-25 22:23:00.010 UTC [2156660] LOG:  background worker "pgactive supervisor" (PID 2157061) exited with exit code 1
+2026-11-25 22:23:00.010 UTC [2157049] LOG:  shutting down
+2026-11-25 22:23:00.012 UTC [2157049] LOG:  checkpoint starting: shutdown immediate
+2026-11-25 22:23:00.018 UTC [2157049] LOG:  checkpoint complete: wrote 32 buffers (0.2%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.002 s, sync=0.002 s, total=0.009 s; sync files=19, longest=0.001 s, average=0.001 s; distance=0 kB, estimate=0 kB; lsn=0/1A4D508, redo lsn=0/1A4D508
+2026-11-25 22:23:00.031 UTC [2156660] LOG:  database system is shut down

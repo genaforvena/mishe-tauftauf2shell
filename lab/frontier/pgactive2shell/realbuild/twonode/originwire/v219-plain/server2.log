@@ -1,0 +1,62 @@
+2026-11-25 22:22:00.426 UTC [2155559] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 22:22:00.426 UTC [2155559] LOG:  listening on IPv4 address "127.0.0.1", port 58432
+2026-11-25 22:22:00.495 UTC [2155559] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/realbuild/twonode/s2/.s.PGSQL.58432"
+2026-11-25 22:22:00.555 UTC [2155567] LOG:  database system was shut down at 2026-11-25 22:21:59 UTC
+2026-11-25 22:22:00.694 UTC [2155559] LOG:  database system is ready to accept connections
+2026-11-25 22:22:00.917 UTC [2155601] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 22:22:00.921 UTC [2155601] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 22:22:00.991 UTC [2155559] LOG:  background worker "pgactive supervisor" (PID 2155601) exited with exit code 1
+2026-11-25 22:22:01.549 UTC [2155559] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 22:22:01.550 UTC [2155559] LOG:  parameter "pgactive.skip_ddl_replication" changed to "off"
+2026-11-25 22:22:01.725 UTC [2155668] LOG:  node identity of node being created is (7712237931872892052,0,5)
+2026-11-25 22:22:01.725 UTC [2155668] CONTEXT:  PL/pgSQL function _pgactive_begin_join_private(text,text,text,text,boolean,boolean,boolean,boolean) line 40 at RAISE
+	SQL statement "SELECT pgactive._pgactive_begin_join_private(
+	        caller := '',
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        remote_dsn := join_using_dsn,
+	        bypass_collation_check := bypass_collation_check,
+	        bypass_node_identifier_creation := bypass_node_identifier_creation,
+	        bypass_user_tables_check := bypass_user_tables_check,
+	        data_only_node_init := data_only_node_init)"
+	PL/pgSQL function pgactive_join_group(text,text,text,integer,text[],boolean,boolean,boolean,boolean) line 71 at PERFORM
+2026-11-25 22:22:01.725 UTC [2155668] STATEMENT:  SELECT pgactive.pgactive_join_group('node2', 'host=127.0.0.1 port=58432 dbname=postgres user=mesh-home', 'host=127.0.0.1 port=58431 dbname=postgres user=mesh-home');
+2026-11-25 22:22:02.013 UTC [2155693] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 22:22:02.013 UTC [2155693] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:02.013 UTC [2155693] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:02.113 UTC [2155693] LOG:  successfully started pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 22:22:02.218 UTC [2155694] LOG:  waiting for process 2155705 to execute command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pgactive_dump" for init_replica
+2026-11-25 22:22:03.219 UTC [2155694] LOG:  successfully executed command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pgactive_dump" for init_replica
+2026-11-25 22:22:03.220 UTC [2155694] LOG:  waiting for process 2155738 to execute command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pg_restore" for init_replica
+2026-11-25 22:22:04.221 UTC [2155694] LOG:  successfully executed command "/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/pg_restore" for init_replica
+2026-11-25 22:22:04.405 UTC [2155773] LOG:  pgactive apply finished processing; replayed up to 0/1A48290 of required 0/1A456B0
+2026-11-25 22:22:04.405 UTC [2155773] CONTEXT:  apply COMMIT from node node1 (7712237931416315012,0,5,) forwarded from commit 0/0 on node node1 (7712237931416315012,0,5,)
+2026-11-25 22:22:04.527 UTC [2155783] LOG:  logical decoding found consistent point at 0/1A463A0
+2026-11-25 22:22:04.527 UTC [2155783] DETAIL:  There are no running transactions.
+2026-11-25 22:22:04.527 UTC [2155783] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712237931416315012_0_5__" LOGICAL pgactive
+2026-11-25 22:22:04.527 UTC [2155783] LOG:  exported logical decoding snapshot: "00000006-00000025-1" with 0 transaction IDs
+2026-11-25 22:22:04.527 UTC [2155783] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712237931416315012_0_5__" LOGICAL pgactive
+2026-11-25 22:22:04.532 UTC [2155783] LOG:  starting logical decoding for slot "pgactive_5_7712237931416315012_0_5__"
+2026-11-25 22:22:04.532 UTC [2155783] DETAIL:  Streaming transactions committing after 0/1A463D8, reading WAL from 0/1A463A0.
+2026-11-25 22:22:04.532 UTC [2155783] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712237931416315012_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:04.532 UTC [2155783] LOG:  logical decoding found consistent point at 0/1A463A0
+2026-11-25 22:22:04.532 UTC [2155783] DETAIL:  There are no running transactions.
+2026-11-25 22:22:04.532 UTC [2155783] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712237931416315012_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:05.517 UTC [2155559] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 22:22:05.518 UTC [2155559] LOG:  parameter "pgactive.debug_apply_delay" changed to "5000"
+2026-11-25 22:22:10.544 UTC [2155779] ERROR:  could not parse slot name: pgactive_1_1_1_1_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ
+2026-11-25 22:22:10.544 UTC [2155779] CONTEXT:  apply INSERT from remote relation public.t in commit before 0/1A4FA48, xid 742 committed at 2026-11-25 22:22:05.540388+00 (action #2) from node node1 (7712237931416315012,0,5,)
+2026-11-25 22:22:10.549 UTC [2155559] LOG:  background worker "pgactive apply worker" (PID 2155779) exited with exit code 1
+2026-11-25 22:22:14.703 UTC [2155783] LOG:  unexpected EOF on standby connection
+2026-11-25 22:22:14.703 UTC [2155783] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712237931416315012_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 22:22:14.937 UTC [2155559] LOG:  received fast shutdown request
+2026-11-25 22:22:14.962 UTC [2155559] LOG:  aborting any active transactions
+2026-11-25 22:22:14.962 UTC [2155694] FATAL:  terminating background worker "pgactive per-db worker" due to administrator command
+2026-11-25 22:22:14.962 UTC [2155693] FATAL:  terminating background worker "pgactive supervisor" due to administrator command
+2026-11-25 22:22:14.969 UTC [2155559] LOG:  background worker "logical replication launcher" (PID 2155604) exited with exit code 1
+2026-11-25 22:22:14.969 UTC [2155559] LOG:  background worker "pgactive per-db worker" (PID 2155694) exited with exit code 1
+2026-11-25 22:22:14.988 UTC [2155559] LOG:  background worker "pgactive supervisor" (PID 2155693) exited with exit code 1
+2026-11-25 22:22:14.988 UTC [2155565] LOG:  shutting down
+2026-11-25 22:22:14.992 UTC [2155565] LOG:  checkpoint starting: shutdown immediate
+2026-11-25 22:22:15.141 UTC [2155565] LOG:  checkpoint complete: wrote 1171 buffers (7.1%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.079 s, sync=0.025 s, total=0.154 s; sync files=426, longest=0.005 s, average=0.001 s; distance=5494 kB, estimate=5494 kB; lsn=0/1A4CFF0, redo lsn=0/1A4CFF0
+2026-11-25 22:22:15.157 UTC [2155559] LOG:  database system is shut down
