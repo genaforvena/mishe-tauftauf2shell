@@ -1,0 +1,275 @@
+PORT=34469
+SMP wire_plaintext=WIRE-CHOICE-1234
+UART_READ requested=513 got=1
+UART_READ requested=512 got=1
+UART_READ requested=511 got=1
+UART_READ requested=510 got=5
+UART_READ requested=505 got=5
+UART_READ requested=500 got=97
+UART_READ requested=403 got=97
+UART_READ requested=306 got=97
+UART_READ requested=209 got=97
+UART_READ requested=112 got=39
+BS_UPLOAD len=432 ok=1 decoded=4 img_size=12300 off=0 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=0 img_num=0 area_size=32768
+SHIM flash_area_erase off=0 len=32768
+SHIM flash_area_write off=0 len=400 first=3d
+BS_UPLOAD write_done rc=0 curr_off=0 img_size=12300
+BS_UPLOAD out rc=0 curr_off=400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+UART_READ requested=513 got=1
+UART_READ requested=512 got=512
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=400 img_num=0 area_size=32768
+SHIM flash_area_write off=400 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=800 img_num=0 area_size=32768
+SHIM flash_area_write off=800 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=1200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=1200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=1200 img_num=0 area_size=32768
+SHIM flash_area_write off=1200 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=1200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=1600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=1600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=1600 img_num=0 area_size=32768
+SHIM flash_area_write off=1600 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=1600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=2000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=2000 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=2000 img_num=0 area_size=32768
+SHIM flash_area_write off=2000 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=2000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=2400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=2400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=2400 img_num=0 area_size=32768
+SHIM flash_area_write off=2400 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=2400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=2800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=2800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=2800 img_num=0 area_size=32768
+SHIM flash_area_write off=2800 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=2800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=3200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=3200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=3200 img_num=0 area_size=32768
+SHIM flash_area_write off=3200 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=3200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=3600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=3600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=3600 img_num=0 area_size=32768
+SHIM flash_area_write off=3600 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=3600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=4000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=4000 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=4000 img_num=0 area_size=32768
+SHIM flash_area_write off=4000 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=4000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=4400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=4400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=4400 img_num=0 area_size=32768
+SHIM flash_area_write off=4400 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=4400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=4800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=4800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=4800 img_num=0 area_size=32768
+SHIM flash_area_write off=4800 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=4800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=5200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=5200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=5200 img_num=0 area_size=32768
+SHIM flash_area_write off=5200 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=5200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=5600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=5600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=5600 img_num=0 area_size=32768
+SHIM flash_area_write off=5600 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=5600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=6000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=6000 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=6000 img_num=0 area_size=32768
+SHIM flash_area_write off=6000 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=6000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=6400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=6400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=6400 img_num=0 area_size=32768
+SHIM flash_area_write off=6400 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=6400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=6800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=6800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=6800 img_num=0 area_size=32768
+SHIM flash_area_write off=6800 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=6800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=7200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=7200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=7200 img_num=0 area_size=32768
+SHIM flash_area_write off=7200 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=7200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=7600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=7600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=7600 img_num=0 area_size=32768
+SHIM flash_area_write off=7600 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=7600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=8000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=8000 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=8000 img_num=0 area_size=32768
+SHIM flash_area_write off=8000 len=400 first=cc
+BS_UPLOAD write_done rc=0 curr_off=8000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=8400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=8400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=8400 img_num=0 area_size=32768
+SHIM flash_area_write off=8400 len=400 first=40
+BS_UPLOAD write_done rc=0 curr_off=8400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=8800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=8800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=8800 img_num=0 area_size=32768
+SHIM flash_area_write off=8800 len=400 first=9c
+BS_UPLOAD write_done rc=0 curr_off=8800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=9200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=9200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=9200 img_num=0 area_size=32768
+SHIM flash_area_write off=9200 len=400 first=e2
+BS_UPLOAD write_done rc=0 curr_off=9200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=9600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=9600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=9600 img_num=0 area_size=32768
+SHIM flash_area_write off=9600 len=400 first=91
+BS_UPLOAD write_done rc=0 curr_off=9600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=10000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=10000 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=10000 img_num=0 area_size=32768
+SHIM flash_area_write off=10000 len=400 first=b5
+BS_UPLOAD write_done rc=0 curr_off=10000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=10400 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=10400 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=10400 img_num=0 area_size=32768
+SHIM flash_area_write off=10400 len=400 first=a0
+BS_UPLOAD write_done rc=0 curr_off=10400 img_size=12300
+BS_UPLOAD out rc=0 curr_off=10800 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=10800 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=10800 img_num=0 area_size=32768
+SHIM flash_area_write off=10800 len=400 first=cf
+BS_UPLOAD write_done rc=0 curr_off=10800 img_size=12300
+BS_UPLOAD out rc=0 curr_off=11200 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=11200 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=11200 img_num=0 area_size=32768
+SHIM flash_area_write off=11200 len=400 first=e1
+BS_UPLOAD write_done rc=0 curr_off=11200 img_size=12300
+BS_UPLOAD out rc=0 curr_off=11600 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=436 ok=1 decoded=4 img_size=12300 off=11600 chunk_len=400
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=11600 img_num=0 area_size=32768
+SHIM flash_area_write off=11600 len=400 first=d0
+BS_UPLOAD write_done rc=0 curr_off=11600 img_size=12300
+BS_UPLOAD out rc=0 curr_off=12000 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD len=336 ok=1 decoded=4 img_size=12300 off=12000 chunk_len=300
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=12000 img_num=0 area_size=32768
+SHIM flash_area_write off=12000 len=296 first=4f
+SHIM flash_area_write off=12296 len=8 first=07
+BS_UPLOAD write_done rc=0 curr_off=12000 img_size=12300
+BS_UPLOAD out rc=0 curr_off=12300 img_size=12300 fap=0x5942e4961020
+UART_TX requested=8 sent=8
+UART_TX requested=13 sent=13
+BS_UPLOAD calling boot_handle_enc_fw
+PIN TLV at off=12296 magic=6907 tot=8
+PIN read_image_size rc=0 src_size=12304 hdr_size=4104 img_size=8192
+REAL_DECRYPT off=0 len=0 blk_off=0 dst_delta=4104
+READBACK delta=4104 first16=
+SHIM flash_area_erase off=0 len=4096
+SHIM flash_area_write off=0 len=4096 first=3d
+REAL_DECRYPT off=4096 len=4088 blk_off=0 dst_delta=4104
+READBACK delta=4104 first16=6a6e40d50ebade09b17408a0e61130f5
+CLIENT_PACKETS=31 CLIENT_FRAGMENTS=309 RESPONSE_BYTES=651
+hdr_size=4104 SERVER_RC=139

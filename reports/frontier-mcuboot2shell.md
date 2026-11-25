@@ -317,3 +317,43 @@ eight cases on 2026-11-25 19:54Z gives the fixed table above: fixed 4104 ends
 kept as a negative record; the temporary `debug-fixed-*` files were removed.
 Do not re-enable the groom in the fixed build and mistake its OOB for the
 vulnerability.
+
+## W8 clean-groom replay: low-offset window self-corrupts (2026-11-25 20:34Z, target mind)
+
+W5 closed the high-offset (6144/7168) return-address window. W8 tests the
+opposite side: a `nogroom` build of the pinned parent (`-DM2S_NO_GROOM`
+compiles the harness `flash_area_read()` OOB memcpy out of `smp-shims.c`;
+the fixed control was already groom-free) so that only the pinned
+`&buf[ih_hdr_size]` write can touch memory past the VLA. Recipe:
+`sh real/smp/serial-clean.sh` → `real/smp/evidence/clean-*.log`;
+`python3 real/smp/clean-layout.py 4104` →
+`real/smp/evidence/clean-layout.txt`.
+
+| build / wire hdr | pinned OOB call | rc | outcome |
+| --- | --- | --- | --- |
+| nogroom 4104 | `off=4096 len=4088 dst_delta=4104` | 139 | crash inside AES loop |
+| nogroom 5000 | `off=4096 len=3192 dst_delta=5000` | 139 | later garbage offsets |
+| nogroom 6000 | `off=4096 len=2192 dst_delta=6000` | 139 | later decrypts then crash |
+| nogroom 7000 | `off=4096 len=1192 dst_delta=7000` | 0 | clean return |
+| nogroom 2048 | in-bounds `dst_delta=2048` | 0 | safe control |
+| fixed 4104 | `dst_delta=8/0/0` | 0 | fixed control, in bounds |
+
+The gdb probe at the wrapper entry (`clean-layout.py`) shows code addresses
+at `g_buf_base+5048`, `+5088/+5096` and `+5688`, and the uploaded image magic
+`0x96f3b83d` at `+5056`: wire-derived bytes do reach the OOB window. The
+crash is `SIGSEGV` inside `tc_ctr_mode` at `*out++ = buffer[n] ^ *in++`,
+with a garbage return address in frame 7. The low-offset write overlaps the
+in-flight AES/decrypt frames and corrupts the decrypt loop before it can
+return, so no clean saved-rip handoff occurs.
+
+**Causal correction.** The earlier chosen-byte readback at `+6144/+7168`
+required the harness groom shim; with it removed the pinned write still
+corrupts memory, but the bytes are decryption of pre-existing stack state,
+not directly chosen wire bytes. Keep the groom as a documented lab
+condition. The scout map of all post-decrypt indirect calls found no
+stack-reachable non-RIP function pointer (targets are globals or
+reinitialized per packet; no atexit/signal/hook consumer), and the binary
+imports no `system`/`execve`. Combined with W5's high-offset negative, the
+return-address route is closed at both ends of this native build. Grade
+unchanged: rung 4 DEMONSTRATED under the recorded groom condition, rung 5
+UNKNOWN. No witness replay on W3/W4/W6/W8.

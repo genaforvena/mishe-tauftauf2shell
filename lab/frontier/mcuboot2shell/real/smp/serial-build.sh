@@ -9,13 +9,18 @@ case "$VARIANT" in
         OUT=smp-serial
         ENC_INC=encryption-host.inc
         ;;
+    nogroom)
+        OUT=smp-serial-nogroom
+        ENC_INC=encryption-host.inc
+        FIXED_DEFS=-DM2S_NO_GROOM
+        ;;
     fixed)
         OUT=smp-serial-fixed
         ENC_INC=../../src/mcuboot-fixed-boot_serial_encryption.c
         FIXED_DEFS=-DM2S_FIXED_CONTROL
         ;;
     *)
-        echo "usage: sh serial-build.sh [parent|fixed]" >&2
+        echo "usage: sh serial-build.sh [parent|fixed|nogroom]" >&2
         exit 2
         ;;
 esac

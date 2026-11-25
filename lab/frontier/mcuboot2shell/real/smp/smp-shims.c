@@ -39,7 +39,7 @@ int flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uint32
         g_idx = (uint32_t)((uint8_t *)dst)[8] |
                 ((uint32_t)((uint8_t *)dst)[9] << 8);
     }
-#if defined(M2S_FIXED_CONTROL)
+#if defined(M2S_NO_GROOM) || defined(M2S_FIXED_CONTROL)
     if (0) {
 #elif defined(M2S_SOCKET_UART)
     if (g_groom && off == SECT_SZ && g_idx > SECT_SZ && len >= 512 && g_idx < GROOM_CT_SZ) {

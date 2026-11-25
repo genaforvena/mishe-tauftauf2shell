@@ -1,0 +1,26 @@
+Breakpoint 1 at 0x1602: file smp-host.c, line 78.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+=== BEFORE_DECRYPT base=0x7fffffffc9a0 buf=0x7fffffffd9a8 off=4096 ===
+0x7fffffffdd50:	0x0000000000000000	0x0000555555555d66
+0x7fffffffdd60:	0x0000000096f3b83d	0x0000200000001008
+0x7fffffffdd70:	0x0000000000000004	0x0000000000000000
+0x7fffffffdd80:	0x0000555555571400	0x0000555555556e7f
+0x7fffffffdd78:	0x0000000000000000	0x0000555555571400
+0x7fffffffdd88:	0x0000555555556e7f	0x00007fffffffde08
+0x7fffffffdd98:	0xffffffff00086907	0x000055555555c496
+0x7fffffffdda8:	0x0000000000000005	0x0000555555557e17
+0x7fffffffdfd0:	0x0000555555560cf0	0x0000555555557216
+0x7fffffffdfe0:	0x000000001b04983f	0x0000555555560cf0
+0x7fffffffdff0:	0x00007fffffffe020	0x00007ffff7c93180
+0x7fffffffe000:	0x00007fffffffe010	0x0000000000000158
+
+Program received signal SIGSEGV, Segmentation fault.
+__memset_avx2_unaligned_erms () at ../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328
+warning: 328	../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S: No such file or directory
+#0  __memset_avx2_unaligned_erms () at ../sysdeps/x86_64/multiarch/memset-vec-unaligned-erms.S:328
+#1  0x0000555555555589 in memset (__len=0, __ch=0, __dest=0x7fffffffc9a0) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:59
+#2  bootutil_wipe_memory (p=p@entry=0x7fffffffc9a0, n=n@entry=0) at smp-host.c:48
+#3  0x0000555555555c14 in decrypt_region_inplace (sz=4096, off=<optimized out>, hdr=<optimized out>, fap=0x0, enc_data=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:205
+#4  decrypt_image_inplace (fa_p=<optimized out>, hdr=<optimized out>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/smp/encryption-host.inc:293
+#5  0x0000000000000000 in ?? ()

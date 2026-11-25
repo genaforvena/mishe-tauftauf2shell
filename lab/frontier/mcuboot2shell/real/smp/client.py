@@ -10,6 +10,7 @@ import struct
 import sys
 import time
 
+
 def upload_packet(chunk, off, total):
     payload = bytes([0xA4])
     payload += bytes([0x65]) + b"image" + bytes([0x00])
@@ -27,11 +28,26 @@ tlv_off = hdr + IMG_SIZE
 assert tlv_off + 8 <= 32768
 head = struct.pack("<IIHHII", 0x96F3B83D, 0, hdr, 0, IMG_SIZE, 4) + b"\x00" * 12
 assert len(head) == 32
-image = head + b"\xcc" * (tlv_off - len(head)) + struct.pack("<HH", 0x6907, 8)
+image = bytearray(head + b"\xcc" * (tlv_off - len(head)) + struct.pack("<HH", 0x6907, 8))
 fragmented = len(sys.argv) > 3
+clean = len(sys.argv) > 4 and sys.argv[4] == "clean"
+pt = b"WIRE-CHOICE-1234"
+if clean and hdr > 4096:
+    from cryptography.hazmat.primitives.ciphers import Cipher, algorithms, modes
+    # Clean build: no harness groom; the pinned &buf[ih_hdr_size] write
+    # decrypts stack leftovers. Upload ciphertext at the matching flash
+    # window so the test stays wire-only; OOB bytes come from earlier
+    # packet-processing stack state, not directly from this window.
+    n = 8192 - hdr
+    assert 0 < n <= 8192 and 4096 + hdr + n <= len(image)
+    aes = Cipher(algorithms.AES(bytes(range(16))), modes.ECB()).encryptor()
+    ks = b"".join(aes.update(b"\x00" * 12 + b.to_bytes(4, "big"))
+                  for b in range(256, 256 + (n + 15) // 16 + 1))[:n]
+    for i in range(n):
+        image[4096 + hdr + i] = ks[i] ^ pt[i % 16]
 s = socket.create_connection(("127.0.0.1", port), timeout=15)
 if fragmented:
-    s.sendall(b"WIRE-CHOICE-1234")
+    s.sendall(pt)
     packets = [upload_packet(image[off:off + 400], off, len(image))
                for off in range(0, len(image), 400)]
     fragments = 0
@@ -41,7 +57,7 @@ if fragmented:
         chunks.extend(packet[i:i + 97] for i in range(13, len(packet), 97))
         for chunk in chunks:
             s.sendall(chunk)
-            time.sleep(0.002)
+            time.sleep(0 if clean else 0.002)
         fragments += len(chunks)
     s.shutdown(socket.SHUT_WR)
     response = b""
@@ -53,5 +69,5 @@ if fragmented:
     print(f"CLIENT_PACKETS={len(packets)} CLIENT_FRAGMENTS={fragments} RESPONSE_BYTES={len(response)}")
 else:
     s.sendall(upload_packet(image, 0, len(image)))
-    s.sendall(b"WIRE-CHOICE-1234")
+    s.sendall(pt)
 s.close()

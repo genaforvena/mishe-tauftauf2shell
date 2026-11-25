@@ -252,3 +252,18 @@ again: `SERIAL_RUN_DONE`, eight `hdr_size=` rows with
 exit is already GREEN (`source=failure-recovered`, observed ~19:51Z); cause
 was the provider 429 retry-after, not a unit defect. Witness verdict on
 W3/W4/W6 remains UNKNOWN (author evidence only).
+
+## 2026-11-25 20:34Z — W8 clean-groom ceiling (target mind)
+
+Added a `nogroom` parent variant (`-DM2S_NO_GROOM`), a wire-clean runner
+`real/smp/serial-clean.sh` and a gdb probe `real/smp/clean-layout.py`.
+Clean replay: parent 4104/5000/6000 → rc 139 with OOB writes of 4088/3192/
+2192 bytes at `dst_delta` 4104/5000/6000; parent 7000 → rc 0 with 1192 bytes
+at `+7000`; parent 2048 and fixed 4104 → rc 0, in-bounds only. Gdb shows
+saved code addresses at `+5048/+5088/+5688` and uploaded image magic at
+`+5056`, but the low-offset write smashes `tc_ctr_mode` itself before return;
+frame 7 holds a garbage return address. Clean wire-only chosen bytes at OOB
+offsets are **not** demonstrated without the lab groom; rung 4 stands with
+that condition, rung 5 remains UNKNOWN. Host load 8–11 made the old 2 ms
+fragment sleeps flaky, so the clean runner sends fragments contiguously.
+Witness verdicts on all earlier rows remain UNKNOWN.

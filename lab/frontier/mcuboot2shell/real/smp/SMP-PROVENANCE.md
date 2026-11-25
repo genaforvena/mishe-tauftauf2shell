@@ -124,3 +124,17 @@ Conclusion: return-address overwrite toward rung 5 is structurally closed
 at this native host build/frame geometry, not universally (no Zephyr or
 real-MCU frame layout was measured). Grade stands rung 4 DEMONSTRATED, rung
 5 UNKNOWN; no witness verdict on W3/W4.
+
+## W8 addendum — clean-groom low-offset window (2026-11-25 20:34Z)
+
+`serial-build.sh nogroom` adds `-DM2S_NO_GROOM`; `serial-clean.sh` sends
+contiguous fragmented SMP packets with no harness OOB groom. Logs
+`evidence/clean-smp-serial-nogroom-*.log` cover hdr 4104/2048/5000/6000/7000
+and the fixed 4104 control. `clean-layout.py 4104` writes
+`evidence/clean-layout.txt`: at wrapper entry the saved return slots are
+code addresses at `g_buf_base+5048`, `+5088`, `+5096`, `+5688`, and image
+magic `0x96f3b83d` sits at `+5056`. The 4088-byte OOB write at `+4104`
+crosses those slots and the AES frames; the crash is inside `tc_ctr_mode`
+before the decrypt wrapper returns. Writes starting at `+7000` return
+cleanly but sit above every saved return slot. Preserved negatives: W5
+high-offset return addresses, W7 fixed groom anomaly, W8 self-corruption.
