@@ -1,0 +1,51 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 01:15:34 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+25/Nov/2026 01:15:34 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 01:15:34 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 01:15:34 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 01:15:34 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 01:15:34 [supernode.c:660] supernode is listening on UDP 18574 (main)
+25/Nov/2026 01:15:34 [supernode.c:669] supernode opened TCP 18574 (aux)
+25/Nov/2026 01:15:34 [supernode.c:676] supernode is listening on TCP 18574 (aux)
+25/Nov/2026 01:15:34 [supernode.c:685] supernode is listening on UDP 18575 (management)
+25/Nov/2026 01:15:34 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 01:15:34 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 01:15:34 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffde60, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffdf20 "\003\003", udp_size=134, now=1795569340) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+Hardware read watchpoint 2: -location *(unsigned long *)((char *)&nak + 96)
+Hardware read watchpoint 3: -location *(unsigned long *)((char *)&nak + 104)
+W3 WATCHPOINTS SET
+0x7fffffffcf70:	0x44	0x33	0x22	0x11	0x02	0x00	0x00	0x00
+0x7fffffffcf78:	0x00	0x01	0x00	0x00	0x60	0x00	0x48	0x5a
+0x7fffffffcf80:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcf88:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcf90:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcf98:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfa0:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfa8:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfb0:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfb8:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfc0:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfc8:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfd0:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffcfd8:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x00	0x00
+
+Hardware read watchpoint 3: -location *(unsigned long *)((char *)&nak + 104)
+
+Value = 80596575996237
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:376
+warning: 376	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+W3 FIRST WATCHPOINT STOP
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:376
+#1  0x0000555555571677 in memcpy (__len=96, __src=0x7fffffffce66, __dest=<optimized out>) at /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+#2  encode_buf (base=base@entry=0x7fffffffd520 "\003\002", idx=idx@entry=0x7fffffffce58, p=p@entry=0x7fffffffcf7e, s=96) at src/wire.c:162
+#3  0x0000555555572499 in encode_REGISTER_SUPER_NAK (base=base@entry=0x7fffffffd520 "\003\002", idx=idx@entry=0x7fffffffce58, common=common@entry=0x7fffffffce80, nak=nak@entry=0x7fffffffcf70) at src/wire.c:631
+#4  0x000055555556457d in process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffde60, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffdf20 "\003\003", udp_size=134, now=1795569340) at src/sn_utils.c:2344
+#5  0x00005555555658aa in run_sn_loop (sss=sss@entry=0x5555555800c0 <sss_node>) at src/sn_utils.c:2664
+#6  0x0000555555558422 in main (argc=<optimized out>, argv=0x7fffffffe8d8) at src/supernode.c:741
+rip            0x7ffff7d88e17      0x7ffff7d88e17 <__memcpy_avx_unaligned_erms+151>
+[Inferior 1 (process 3380191) killed]

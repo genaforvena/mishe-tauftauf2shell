@@ -1,0 +1,17 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18574 -t 18575 -c community.list -F labfed -M
+rwatch -l *(unsigned long *)((char *)&nak + 96)
+rwatch -l *(unsigned long *)((char *)&nak + 104)
+printf "W3 WATCHPOINTS SET\n"
+x/112bx &nak
+continue
+printf "W3 FIRST WATCHPOINT STOP\n"
+bt 12
+info registers rip
+disable 2 3
+continue &
+shell sleep 12
+kill
+quit

@@ -145,3 +145,55 @@ and `community` before reading none of them, so it does not consume stale
 fields either. This bounds the negative to reused decoder objects; other
 stack slots in the overflow span remain UNKNOWN, and no consumed pointer
 was observed for the two measured pointer-shaped slots.
+
+## W3: the forwarding encoder consumes the chosen bytes (2026-11-25 01:16Z)
+
+W2 had no matching peer, so the forwarding branch of the NAK case
+(`sn_utils.c:2335-2351`) never ran. `live/w3_peer_forward.py` binds a
+loopback UDP socket, registers a peer with MAC `02:00:00:00:00:01` through
+a `REGISTER_SUPER` from that socket, then sends the oversized NAK from a
+second socket. `live/gdb-cmds-w3.txt` breaks after decode and sets the same
+read watchpoints at `&nak+96`/`&nak+104`.
+
+- Plain vulnerable build: the `REGISTER_SUPER` was acknowledged (58-byte
+  reply). After the 134-byte attack NAK, watchpoint 3 fired. GDB reports the
+  value `0x494d5a48494d` (little-endian `4d 49 48 5a 4d 49`, chosen bytes,
+  plus two zero bytes at `nak+110..111` outside the 96-byte write) and the
+  backtrace: `__memcpy_avx_unaligned_erms` <-
+  `memcpy(len=96, src=0x7fffffffcf7e = nak+14)` <-
+  `encode_buf` (`wire.c:162`) <- `encode_REGISTER_SUPER_NAK` (`wire.c:631`)
+  <- `process_udp` (`sn_utils.c:2344`). This is a real consumer read of the
+  overwritten stack bytes, as DATA, not a pointer dereference.
+- The supernode then sent a 134-byte NAK to the registered peer. Its wire
+  token is 96 bytes of `48 5a 4d 49` repeated 24 times, including
+  `beyond48=485a4d49485a4d49` from offsets past the 48-byte `auth.token`
+  array. All attacker-chosen bytes that landed in the stack were read by a
+  live consumer and re-emitted on the loopback wire.
+- Safe control (`token_size=48`, same peer and ports): forwarded NAK was
+  86 bytes with only the 48 in-bounds chosen token bytes; no OOB region
+  was read or emitted. `live/evidence/w3-safe-plain{,-sender.out}`.
+- Fixed-control qualification: with a matching peer, the one-line decode
+  bound prevents the WRITE but the oversized `token_size` survives into the
+  encoder. The fixed ASan build aborts with `stack-buffer-overflow`,
+  `READ of size 96`, `encode_buf` (`wire.c:162`) <-
+  `encode_REGISTER_SUPER_NAK` (`wire.c:631`) <- `process_udp`
+  (`sn_utils.c:2344`); ASan places the read just past the 64-byte `nak`
+  object (`'nak3533' (line 2308)` at `[11136,11200)`) and reports that it
+  partially underflows `nakbuf`. No reply was forwarded. The earlier
+  "fixed control clean" result holds only on the no-peer path. Raw output:
+  `live/evidence/w3-attack-fixed.log`, `w3-attack-fixed-sender.out`.
+- Source corroboration (read-only): `nak` is 62 bytes, so `nak+62..109`
+  aliases the REGISTER_SUPER case's `reg.auth.token[2..47]` and
+  `reg.key_time[0..1]`; no NAK-case named local, saved register or caller
+  frame slot lives there, and the forwarding `peer` pointer is
+  register-resident. The two pointer-shaped compiler temporaries at
+  `+96`/`+104` have no proven post-decode consumer as pointers; their exact
+  provenance remains UNKNOWN.
+
+Raw W3 evidence: `live/evidence/w3-gdb.out`, `w3-sender.out`,
+`w3-safe-plain.log`, `w3-safe-plain-sender.out`, `w3-attack-fixed.log`,
+`w3-attack-fixed-sender.out`. Ceiling: rung 4 now includes a measured
+consumer read and wire re-emission of chosen bytes, not only a stack write.
+Still no consumed pointer, benign-marker execution, control-flow takeover
+or rung 5; witness replay of #3909 remains owed and is required before this
+live experiment is ESTABLISHED.
