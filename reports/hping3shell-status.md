@@ -392,5 +392,26 @@ what the witness observed. The driver rebuilds both trees from the
 gitignored pinned source and applies the tracked fix patch itself. Two
 preserved replay failures: a missing `/tmp/w6-wit` target for `tar x`, and
 two stage-tag filename mismatches, both fixed in the committed scripts.
+
+W9's clean-archive replay receipt (commit `62df0e01`, author-side):
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell &&
+rm -rf /tmp/w9-ij && mkdir -p /tmp/w9-ij &&
+git archive 62df0e01 lab/frontier/hping3shell | tar x -C /tmp/w9-ij &&
+cp -a lab/frontier/hping3shell/provision /tmp/w9-ij/lab/frontier/hping3shell/ &&
+cd /tmp/w9-ij &&
+HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
+  sh lab/frontier/hping3shell/wire/replay-ij.sh
+```
+
+Observed: `STAGE baseline` 4 checks PASS, `STAGE attack` 7 checks PASS,
+`STAGE fixed` 4 checks PASS, `REPLAY_IJ_OK: 15 checks`, rc 0. The driver
+builds both clang trees from the gitignored pinned source and applies the
+tracked fix patch itself. Two preserved runner failures were fixed before
+this clean replay: a `nm` column mismatch (`$3` type vs `$4` name) and a
+GDB command list that cannot put two commands on one line; plus a checker
+regex that missed GDB's `<hp_rand.i>` symbol annotation. No new grade.
+
 After the owed verdicts the only depth lane is a measured
 attacker-controlled execution path; nothing observed supports r5.
