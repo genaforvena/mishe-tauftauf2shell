@@ -1588,3 +1588,29 @@ quick ride; Moodle's admin plugin-upload is the heavier alternative);
 (b) a NUL-free gadget beyond phpggc templates; (c) attacker-caused worker
 death (cgroup OOM or `request_terminate_timeout` mid-`pwrite`), which any
 full rung-5 claim on this lane requires regardless of gadget.
+
+### Wake 61 (2026-11-25) — varied attacker bytes on the tinyfilemanager exec chain
+
+The wake-59 `tfm-aftershell` chain was replayed with two attacker bytes
+changed: session id `cafebabe00112233445566778899babe` (wake 59 used
+`deadbeef00112233445566778899aabb`) and the 700-byte replacement filler
+`Y` instead of `X`. Committed driver: `lab/repro/w61-varied-tfm.sh`; only
+those two constants differ from `php2shell-aftershell-splice-tfm.sh`.
+On 8.4.27-app the whole chain repeated: K=1019 splice on disk
+(`file[k:]==carrier[k:]`), record-boundary promotion of
+`filemanager|a:1:{s:6:"logged";s:5:"admin";}` in the app's own session
+write, admin takeover, upload of evil.php through the app's designed form,
+and the live FPM worker printing
+`PHP2SHELL-R5-MARKER:php2shell-r5-142933` plus `uid=1000(mesh-home)...`
+with a marker file. Evidence:
+`lab/build/evidence/w61-varied/aftershell-tfm-8.4.27-app-tfm.log`.
+On 8.4.28-app with the same varied bytes the file was exactly 1019 bytes
+(ftruncate-first), no promotion, no takeover, no upload, no marker
+(`lab/build/evidence/w61-varied-fixed/aftershell-tfm-8.4.28-app-tfm.log`).
+No-kill and virgin-sid controls stayed negative on both builds.
+
+This is author-side variance evidence, not fresh-context witness
+ESTABLISHED; the kill is still the shim SIGKILL, so full rung 5 remains
+UNCLAIMED. The varied positive and clean fixed control make a fixed-side-
+effect explanation less likely, but only a witness replay that varies the
+command or an attacker byte can close gate 6 of `docs/rce.md`.

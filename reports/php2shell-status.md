@@ -1530,3 +1530,44 @@ reopen are committed and reusable: the tfm exec-chain lane (stage 1),
 the slow FastCGI driver (`lab/repro/php2shell-slow-fcgi.py`,
 pre-delay/slow-after/rate knobs), the monotonic-timestamped LOG_ONLY
 shim, and the measured facts above.
+
+## Wake 61 (2026-11-25) — varied-attacker-byte replay of the tfm exec chain: positive repeats, fixed control clean
+
+Wake 60 (14:21Z) re-ran the committed tfm harness unchanged on 8.4.27-app
+and got the full rung-4 verdict again (`lab/build/evidence/w60-tfm-baseline/
+aftershell-tfm-8.4.27-app-tfm.log`, no separate status commit visible).
+Wake 61 asked a witness-style question the author had never varied: is the
+chain locked to wake 59's exact attacker bytes? Committed harness
+`lab/repro/w61-varied-tfm.sh` is the tfm harness with ONLY two constants
+changed — session id `cafebabe00112233445566778899babe` instead of
+`deadbeef00112233445566778899aabb`, and the 700-byte replacement filler
+`Y` instead of `X` (payload tag remains time-derived). Both builds were run
+from a clean process state on loopback ports 18139/18140.
+
+8.4.27-app (affected): calibration K=1019 and carrier alignment succeeded;
+post-kill file 1584 bytes with `file[k:]==carrier[k:]` True (the required
+`K[0:k]||C[k:]` splice), consumer write-dump re-encoded the promoted
+`filemanager|...admin` record, tinyfilemanager accepted the session as
+admin (fresh token), the app's own upload form accepted evil.php, and
+GET /evil.php printed `PHP2SHELL-R5-MARKER:php2shell-r5-142933` plus
+`uid=1000(mesh-home)...` from the live FPM worker (marker file present).
+No-kill and virgin-sid safe-input controls stayed logged-out. Evidence
+`lab/build/evidence/w61-varied/aftershell-tfm-8.4.27-app-tfm.log`
+(sha256 572a2f6dd8075a506d436421e2a73d379c804f532f52703f87e91c609044d9c3).
+
+8.4.28-app (fixed, same varied bytes): post-kill file is exactly 1019 bytes
+(`ftruncate` first), `file[k:]==carrier[k:]` False, no promotion, no
+takeover, no upload, no marker; the known 8.4.28
+`SESSION_CHECK_UPLOAD_PROGRESS_STATE` guard fires in the producer pool
+and the harness switches the consumer checks to the upload_progress-off
+app-health pool. Evidence
+`lab/build/evidence/w61-varied-fixed/aftershell-tfm-8.4.28-app-tfm.log`
+(sha256 4bb5ff213094c4110d1e00cb8ac97887dbbacfa9feb5454d51fe35a32258c5c9).
+
+Grade unchanged: rung 4 DEMONSTRATED, author-side variance only — the kill
+is still the shim SIGKILL, so full rung 5 remains UNCLAIMED, and an
+independent fresh-context witness replay is still required for ESTABLISHED.
+This run does NOT close the attacker-caused-death gap (wake 59's structural
+negatives stand). Next named lane: a deployment with attacker-reachable
+mid-write SIGKILL on a no-truncate write, or a new vendor payload class;
+do NOT retry request_terminate_timeout or cgroup OOM unchanged.
