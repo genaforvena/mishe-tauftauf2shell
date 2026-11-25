@@ -1817,6 +1817,66 @@ change. The driver is committed; evidence lives in
 `lab/build/evidence/stock-rails-mainarena{,-fd,arena48}-*`.
 
 
+### Multi-request substrate and chosen-header coverage — two measured positives (2026-11-25, direct session, second batch)
+
+Item 10's "second-request survival (3/3 aborts)" is now SUPERSEDED with
+bytes: those wave-1 runs sent the second ATTACK immediately. Three new
+request-sequence measurements on the unmodified app (consH20-tail N=524
+geometry, case-probe preload pinned, loopback only) show the exploited
+process is USABLE after a surviving attack:
+
+- **Benign multipart second request survives 2/2** (tags
+  `stock-rails-bq-13`, `bq-17`): after a surviving attack (404), a full
+  33-part multipart body with NO `_method` part parsed cleanly (404),
+  the process stayed alive, and a later `GET /up` returned 200.
+- **A complete second ATTACK survives after a benign interlude 3/3**
+  (tags `stock-rails-tq-19`, `tq-1`, `tq-7`): attack → benign multipart →
+  a second full `_method` attack all returned 404 on ONE process, which
+  then served `GET /up` 200. The immediate second-attack abort therefore
+  depends on the arrival order, not on a per-process one-shot limit; a
+  benign parse re-flows the damaged bins enough for another corruption to
+  pass. This is the substrate a leak-then-poison chain needs: request 1
+  leaks the arena region base (item 10), request 2 grooms benignly,
+  request 3 carries content computed from the leak.
+- **The arena→libc constant-delta hope is closed**: across 28 live
+  survivor maps snapshots, `libc_base − arena_region_base` took 21
+  distinct values spanning +0x25600000…+0x29400000 (2 MiB quantized,
+  ~62 MiB spread — GC-page mmaps between them vary per boot), so the
+  leaked region base does not pin libc.
+
+The write primitive was then re-measured beyond the one fixed byte. The
+second case buffer's capacity grows as `remaining×2+20`, so its
+attacker-chosen output window at the corrupted victim extends to
+~0x240 bytes — past the next chunk's header. A four-arm sweep
+N ∈ {540, 556, 572, 588} (24 fresh processes each, otherwise the
+consH20-tail geometry, case probe armed) measured:
+
+- **Chosen content covers the next-chunk header across the corrupted
+  boundary.** Covered runs show the boundary qwords reading
+  `next_prev=0x535353535353…` (the upcase output bytes) and
+  `next_size=0x251` (the planted `00005102` tail) — a FULLY chosen
+  16-byte chunk header at the split position, plus ~0x230 bytes of
+  chosen content behind it. N=540: 2 covered runs (binned victims);
+  N=588: 6 covered runs, **one of which SURVIVED** (`cov-n588-18`:
+  404 + later `/up` 200 with the forged `[0x5353…, 0x251]` header in
+  place). The tail design generalizes: the planted size qword is
+  attacker-chosen through the same four body bytes.
+- The covered successors in the sampled runs were split-fresh (top or
+  remainder) rather than linked bin chunks; malloc re-canonicalized the
+  region before any consumer read the forged header. The un-consumed
+  forge is preserved as a measured positive for allocator control, not
+  upgraded.
+
+Boundary: wire-only chosen-bytes-over-chunk-header is now measured on
+the stock app with a surviving instance, and multi-request chains on one
+process are measured possible. Still missing for stock/oracle-free/
+persistent rung 5: a consumer that reads the forged header into a
+controlled overlap or tcache poison, the `PROTECT_PTR` position
+ambiguity (the successor's page is only known ±0x8000 from the leak),
+the libc/code oracle (no wire channel; the main-arena variant is closed
+above), and a second COMMAND. Full rung 5 remains **NOT ACHIEVED**; no
+grade change.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1940,4 +2000,24 @@ change. The driver is committed; evidence lives in
     victim's fd/bk qword into a reflected string — a production-mode
     no-debug render, or the GC-page content spill; classify any hit
     against `libc+0x203b20`. Stock/oracle-free/persistent rung 5 stays
+    NOT ACHIEVED.
+
+12. **Done this direct-session push (2026-11-25, second batch): the
+    process is multi-request-usable and the write is a chosen header.**
+    A benign 33-part multipart (no `_method`) survives on an attack
+    survivor 2/2, and a complete second ATTACK survives after a benign
+    interlude 3/3 (`tq-19`, `tq-1`, `tq-7`) — item 10's immediate
+    second-attack abort is arrival-order-specific, superseding that
+    blocker and opening the leak→groom→poison chain substrate. The
+    arena→libc constant-delta oracle is closed (21 deltas in 28 live
+    snapshots). The N ∈ {540,556,572,588} coverage sweep measured chosen
+    content plus the `00005102` tail covering the next-chunk header at
+    the corrupted boundary — a fully chosen `[prev, size]` forge — with
+    one surviving N=588 instance (`cov-n588-18`); covered successors were
+    split-fresh and re-canonicalized before consumption. Named next:
+    make a linked bin chunk land at the covered boundary (steer the
+    carve across a binned successor — the drain part the leak runs hit
+    is now a measurable detector), then chase the consumer; the
+    `PROTECT_PTR` page ambiguity (±0x8000) and the libc oracle remain the
+    named blockers after that. Stock/oracle-free/persistent rung 5 stays
     NOT ACHIEVED.

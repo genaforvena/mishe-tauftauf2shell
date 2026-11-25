@@ -5,6 +5,50 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (seventh push, direct session) — the exploited process is
+  multi-request-usable, and the write primitive is now a CHOSEN chunk
+  header; the arena→libc delta hope and the immediate-second-attack
+  blocker are superseded; stock/oracle-free/persistent remains NOT
+  ACHIEVED.** On the consH20-tail N=524 geometry: a benign 33-part
+  multipart (no `_method`) survives on an attack survivor 2/2
+  (`bq-13`,`bq-17`), and a complete second ATTACK survives after a benign
+  interlude 3/3 (`tq-19`,`tq-1`,`tq-7`) — the earlier 3/3 second-request
+  abort was immediate-second-attack-specific. Across 28 live survivor
+  maps, `libc−arena` spans 21 distinct deltas (+0x25600000…+0x29400000),
+  closing the constant-delta libc oracle. The N ∈ {540,556,572,588}
+  96-run coverage sweep measured the second case buffer's chosen output
+  (capacity `remaining×2+20`) covering the next-chunk header at the
+  corrupted boundary: `next_prev=0x5353…` content plus the planted
+  `0x251` tail size — a fully chosen `[prev, size]` forge — with one
+  SURVIVING N=588 instance (`cov-n588-18`, 404 + later `/up` 200).
+  Covered successors were split-fresh and re-canonicalized before
+  consumption, so no controlled overlap or poison yet; the `PROTECT_PTR`
+  page ambiguity (±0x8000) and the libc oracle (main-arena variant
+  closed by the concurrent wake: `libc+0x203b20` in victim fd/bk never
+  reaches the wire) remain the named blockers. No command, no
+  persistence, no grade change.
+- **2026-11-25 (sixth push, direct session) — the first missing oracle is
+  now measured wire-only: the dev 404 params reflection leaks the
+  request-thread arena region base and Ruby GC-page pointers; libc has no
+  channel; stock/oracle-free/persistent remains NOT ACHIEVED.** The named
+  48-part/filler-first arm aborts 6/6 (top-chunk pop → `sysmalloc`). New
+  committed scanner `lab/repro/ruby2shell-reflect-scan.py` byte-parses the
+  404 `PP.pp` block: 20 historical responses (17% of surviving stage2d)
+  and one live maps-confirmed instance (`lc-lc-75`) reflect post-parse
+  allocator/Ruby metadata written into live drain bodies — fake 0x20 chunk
+  sizes (`0x25`), PREV_INUSE'd pattern qwords (`0x91`) and pointer pairs.
+  Classification (`ruby2shell-stock-leakclass.sh` +
+  `ruby2shell-leak-maps.py`, post-response `/proc/PID/maps` from outside
+  the request path): one pair class is in-region pointers at three
+  near-constant offsets (region+0x8c660/0x8c760/0x8cdb0, 11/11
+  victim-correlated) — one leaked value pins the arena base and thus the
+  tcache safe-link key; the live instance's other pointer is
+  `[anon:Ruby:GC:...]`, replacing `ObjectSpace.dump`. Structural
+  negatives: the worker-thread arena's bin heads are in-region, so this
+  channel can never leak libc; zero attacker-chosen `0x53`-runs in 432
+  responses; a second attack on a leak survivor aborts 3/3. No command,
+  no libc oracle, no chosen-byte write, no persistence. Veria stamp
+  unchanged at the 25 Nov trigger; durendal.sh still has no mechanics.
 - **2026-11-25 (fifth push) — consH-20 low-byte tcache retarget closed:
   bounded NEGATIVE; stock/oracle-free/persistent remains NOT ACHIEVED.**
   New committed driver `lab/repro/ruby2shell-consH20-retarget.sh` ran 144
