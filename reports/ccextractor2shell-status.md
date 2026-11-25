@@ -92,6 +92,16 @@ no upstream fix PR found, fix status UNKNOWN.
   post-overflow overlapping allocation; rung unchanged. Scripts
   `real-build/{gdb-layout.cmd,gdb-late-malloc.cmd}`, logs
   `real-build/evidence/{gdb-w6-layout,gdb-w6-late-malloc}.out`.
+- W7 bounded negative (09:43Z): the top chunk size field at
+  `buffer+BUFSIZE` is attacker-controlled on `attack.gxf`
+  (`0x584543432d454853`) and `readback.gxf` (`0x41414141b3010000`), but
+  `main_arena.top` stays at `P=0x555556620a20` through all post-parse
+  allocations and the terminal free. A GDB Python tracer logs 5 attack / 12
+  readback / 5 safe `__libc_malloc` calls and their returned pointers; all
+  pointers are at least 80800 bytes before `data->buffer`, so no object is
+  carved from the corrupted-top region. No new write primitive or pointer
+  control; rung unchanged. Scripts `real-build/gdb-w7-malloc-ret.{py,cmd}`,
+  log `real-build/evidence/gdb-w7-malloc-ret.out`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units

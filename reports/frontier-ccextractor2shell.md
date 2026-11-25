@@ -1,9 +1,10 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 08:54Z (W6): rung 3 and rung 4 CONFIRMED; four bounded
+Status 2026-11-25 09:43Z (W7): rung 3 and rung 4 CONFIRMED; five bounded
 negatives recorded (W3 no code pointer, W4 forged chunk metadata merges with
 top, W5 truncated MEDIA payload produces no write primitive, W6 no live
-ordinary chunk after `data->buffer`). Rung 3 remains
+ordinary chunk after `data->buffer`, W7 post-parse allocations never carve
+from the corrupted top). Rung 3 remains
 CONFIRMED through the real `buffered_read`/`read(2)` consumer into a real
 `malloc(BUFSIZE)` region. Rung 4 is CONFIRMED without the earlier
 debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
@@ -436,6 +437,34 @@ post-overflow allocation overlapping the corrupted top.
 Logs: `real-build/evidence/gdb-w6-layout.out`,
 `real-build/evidence/gdb-w6-late-malloc.out`. No GXF input, pinned source,
 harness source or prior evidence was changed. Rung 3 and rung 4 are
-unchanged; rung 5 and the witness verdict remain UNKNOWN. All four
-rung-5-adjacent structural ideas are now measured negatives in this build and
-layout.
+unchanged; rung 5 and the witness verdict remain UNKNOWN. At W6 time all
+four known structural ideas were measured negatives; W7 adds a fifth.
+
+## W7 bounded negative 2026-11-25 09:39-09:43Z: no post-parse allocation in overflow bytes
+
+W6 traced the late Rust allocations only on `safe.gxf`, where the top chunk
+size field was intact. The open question was whether the overflow-corrupted
+top becomes the source of a later allocation whose content — and possibly a
+callable object — is attacker-controlled. Answer in this build/layout: no.
+
+`real-build/gdb-w7-malloc-ret.py`, loaded by
+`real-build/gdb-w7-malloc-ret.cmd`, breaks at `ccx_gxf.c:1220` and logs the
+entry and return of the next 24 `__libc_malloc` calls through GDB
+`FinishBreakpoint`, then the terminal free of `data->buffer`. Plain pinned
+build, GDB disables ASLR, no stdout redirection. At parse and at free the
+top chunk size field at `buffer+BUFSIZE` holds attacker bytes on
+`attack.gxf` (`0x584543432d454853`) and `readback.gxf`
+(`0x41414141b3010000`), versus `0x205e1` on `safe.gxf`. Nevertheless
+`main_arena.top` stays `0x555556620a20` at every malloc entry and at the
+free, and all returned pointers are at most `0x55555640ce10` — 80800 bytes
+before `data->buffer=0x5555564209b0`, never in the overflow region starting
+at `buffer+BUFSIZE`. Five allocations occur on attack/safe and twelve on
+readback; all come from earlier free chunks, not the corrupted top. The old
+`gdb-late-malloc.cmd`, run unchanged on attack/readback, shows the same
+sizes and unchanged top.
+
+Log: `real-build/evidence/gdb-w7-malloc-ret.out`. Limits: one glibc build,
+one heap layout, allocations only through the terminal `free`; no crafted
+input was added and no pinned or harness source was edited. Rung 3 and rung
+4 are unchanged; there is still no controlled indirect call, pointer or
+command, so rung 5 and the witness verdict remain UNKNOWN.

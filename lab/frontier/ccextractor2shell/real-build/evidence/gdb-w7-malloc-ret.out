@@ -1,0 +1,81 @@
+W7 post-parse allocation negative, 2026-11-25 09:43Z. Pinned plain build
+/tmp/ccx2shell-plain/ccextractor, GDB Python tracer
+real-build/gdb-w7-malloc-ret.py loaded via real-build/gdb-w7-malloc-ret.cmd,
+run from the repo root with LD_LIBRARY_PATH=/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu.
+GDB disables ASLR; stdout was not redirected. GXF inputs and pinned source
+were not changed. Each of the three runs exited rc 0. Verbatim W7PY lines
+follow (interleaved program progress lines kept where they appeared).
+
+=== attack.gxf ===
+W7PY buf=0x5555564209b0 top=0x555556620a20 topsize_field=0x584543432d454853
+W7PY enter n=1 size=8 top=0x555556620a20
+W7PY ret n=1 ptr=0x5555563ca520
+W7PY enter n=2 size=8 top=0x555556620a20
+W7PY ret n=2 ptr=0x5555563ca600
+W7PY enter n=3 size=32 top=0x555556620a20
+W7PY ret n=3 ptr=0x5555563d73e0
+100%  |  00:00
+W7PY enter n=4 size=8 top=0x555556620a20
+W7PY ret n=4 ptr=0x5555563ca520
+W7PY enter n=5 size=8 top=0x555556620a20
+W7PY ret n=5 ptr=0x5555563ca600
+W7PY FREE top=0x555556620a20 topsize_field=0x584543432d454853
+
+=== readback.gxf ===
+W7PY buf=0x5555564209b0 top=0x555556620a20 topsize_field=0x41414141b3010000
+W7PY enter n=1 size=8 top=0x555556620a20
+W7PY ret n=1 ptr=0x5555563ca520
+W7PY enter n=2 size=8 top=0x555556620a20
+W7PY ret n=2 ptr=0x5555563ca600
+W7PY enter n=3 size=50 top=0x555556620a20
+W7PY ret n=3 ptr=0x55555640ce10
+W7PY enter n=4 size=46 top=0x555556620a20
+W7PY ret n=4 ptr=0x55555640ce10
+W7PY enter n=5 size=18 top=0x555556620a20
+W7PY ret n=5 ptr=0x5555563ca520
+W7PY enter n=6 size=15 top=0x555556620a20
+W7PY ret n=6 ptr=0x5555563ca520
+W7PY enter n=7 size=25 top=0x555556620a20
+W7PY ret n=7 ptr=0x5555563d73e0
+W7PY enter n=8 size=34 top=0x555556620a20
+W7PY ret n=8 ptr=0x5555563d73e0
+W7PY enter n=9 size=18 top=0x555556620a20
+W7PY ret n=9 ptr=0x5555563ca520
+100%  |  00:00
+W7PY enter n=10 size=8 top=0x555556620a20
+W7PY ret n=10 ptr=0x5555563ca520
+W7PY enter n=11 size=8 top=0x555556620a20
+W7PY ret n=11 ptr=0x5555563ca600
+W7PY enter n=12 size=32 top=0x555556620a20
+W7PY ret n=12 ptr=0x5555563d73e0
+W7PY FREE top=0x555556620a20 topsize_field=0x41414141b3010000
+
+=== safe.gxf (control) ===
+W7PY buf=0x5555564209b0 top=0x555556620a20 topsize_field=0x205e1
+W7PY enter n=1 size=8 top=0x555556620a20
+W7PY ret n=1 ptr=0x5555563ca520
+W7PY enter n=2 size=8 top=0x555556620a20
+W7PY ret n=2 ptr=0x5555563ca600
+W7PY enter n=3 size=32 top=0x555556620a20
+W7PY ret n=3 ptr=0x5555563d73e0
+100%  |  00:00
+W7PY enter n=4 size=8 top=0x555556620a20
+W7PY ret n=4 ptr=0x5555563ca520
+W7PY enter n=5 size=8 top=0x555556620a20
+W7PY ret n=5 ptr=0x5555563ca600
+W7PY FREE top=0x555556620a20 topsize_field=0x205e1
+
+Conclusion: the top chunk's size field (at buffer+BUFSIZE) is attacker bytes
+on attack/readback (0x584543432d454853, 0x41414141b3010000) and intact on
+safe (0x205e1). Yet main_arena.top stays 0x555556620a20 at every malloc entry
+and at the terminal free, and every returned pointer is at most
+0x55555640ce10 — 80800 bytes (0x13ba0) *before* data->buffer 0x5555564209b0,
+never in the overflow region [buffer+BUFSIZE, buffer+BUFSIZE+3976]. The
+post-parse allocations come from earlier free chunks, not from the corrupted
+top; no allocatable object is carved out of attacker-controlled overflow
+bytes. Rung 3 and rung 4 unchanged; no pointer or rung-5 claim.
+
+`gdb-late-malloc.cmd` was additionally run unchanged on attack.gxf and
+readback.gxf at 09:39Z: it logged the same 5 and 12 malloc sizes with top
+still P at every entry. Raw captures were kept in the gitignored site, not
+in the committed lab tree.
