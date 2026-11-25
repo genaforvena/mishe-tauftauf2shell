@@ -31,6 +31,7 @@ extern void __libc_free(void *);
 static int out_fd = 2;
 static unsigned long seq = 0;
 static int case_only = 0;
+static int case_stop_c = 0;
 static int case_stop = 0;
 static size_t case_first_request = 0;
 static const char *case_arm_file = 0;
@@ -59,6 +60,7 @@ static void mtrace_init(void)
                                           NULL, 0);
     case_arm_file = getenv("MTRACE_CASE_ARM_FILE");
     emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
+    case_stop_c = getenv("MTRACE_CASE_STOP_C") != NULL;
     free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
 }
 
@@ -134,6 +136,22 @@ static void case_snapshot(const char *tag, size_t sizefield)
         if (glen > 0)
             write(out_fd, gbuf, (size_t)glen);
     }
+    if (tag[0] == 'V') {
+        char hbuf[288];
+        int hlen = snprintf(hbuf, sizeof hbuf,
+                           "H tid=%ld victim=%p q0=%#lx q8=%#lx q10=%#lx q18=%#lx "
+                           "q20=%#lx q28=%#lx q30=%#lx q38=%#lx\n",
+                           syscall(SYS_gettid), case_victim,
+                           case_read(case_victim), case_read((char *)case_victim + 8),
+                           case_read((char *)case_victim + 0x10),
+                           case_read((char *)case_victim + 0x18),
+                           case_read((char *)case_victim + 0x20),
+                           case_read((char *)case_victim + 0x28),
+                           case_read((char *)case_victim + 0x30),
+                           case_read((char *)case_victim + 0x38));
+        if (hlen > 0)
+            write(out_fd, hbuf, (size_t)hlen);
+    }
 }
 
 static void case_allocation(size_t size, void *p)
@@ -156,6 +174,8 @@ static void case_allocation(size_t size, void *p)
     }
     if (len > 0)
         write(out_fd, buf, (size_t)len);
+    if (case_stop_c)
+        kill(getpid(), SIGSTOP);
 }
 
 

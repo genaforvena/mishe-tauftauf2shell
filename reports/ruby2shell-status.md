@@ -5,7 +5,29 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
-
+- **2026-11-25 (later wake) — consumer provenance closed: the 0x21c/0x1f8
+  pops are fixed-size, not wire-shaped; surviving unsorted-split overlap
+  measured; rung 5 stock remains NOT ACHIEVED.** The named experiment
+  closed by shaping only wire bytes: attacker headers padded to
+  L=0/60/120/240 and route paths lengthened +100/+300 left the
+  post-attack victim pops at exactly `0x21c` then `0x1f8` in all ten
+  surviving samples — framework-internal fixed-size allocations, C-internal
+  content, allocator mechanics, not a request-shaped Stage-B analog. New
+  measured levers: (1) run consH-20 class survives end to end — the forged
+  unsorted split carves a fake 0x20 chunk into the neighbor region and real
+  request-thread allocations recycle it, with an on-thread free (Q), 404 +
+  later 200, graceful teardown — so the 11-25 "Q=0" was geometry-specific;
+  (2) in B=0x451-class geometries the upcase result string itself pops and
+  splits the victim from unsorted (`C request=0x414 size=0x425`, gdb catch
+  gdbF-5); (3) the dev error page reflects all params verbatim (~169 KB) —
+  a candidate oracle-free disclosure channel, clean in the one parsed
+  surviving sample. Instrument caution: the preload's mapped page span is
+  a geometry knob (4-page builds keep the ~10% surviving class; the 6-page
+  RA build gave 0/124). Veria re-checked at the dated trigger: stamp
+  unchanged since 21 Nov 03:52Z, PoC still unpublished; the day's public
+  GitHub PoC repos are crash/sanitizer-level only. Named next: shape the
+  carve position (N, drain sizes) into a reflected drain-string body for
+  wire-visible allocator-metadata disclosure + readback.
 - **2026-11-25 — consumer-visibility correction: the forged `0x251` qword
   is structurally inert; Veria PoC still unpublished.** The committed case
   probe compared malloc user pointers against the forged chunk-start

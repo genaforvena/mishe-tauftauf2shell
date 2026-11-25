@@ -1307,6 +1307,89 @@ python3 lab/repro/ruby2shell-cons-vis-tabulate.py
 The batch loop ran the same environment 48 more times via
 `xargs -P6` with `RUBY2SHELL_STOCK_PORT=$((4560 + i % 6))` and tags
 `cons-vis-<i>`.
+### Victim-region consumer provenance — the 0x21c/0x1f8 pops are fixed-size,
+### not wire-shaped (2026-11-25)
+
+This wake closed the 11-25 named experiment. `lab/preload/mtrace.c` gained
+an `H` line (victim-chunk content qwords at every free of the victim) and an
+optional stop-at-pop mode (`MTRACE_CASE_STOP_C`, optionally gated by
+`MTRACE_CASE_STOP_REQ=0x21c,0x1f8` — synchronous `raise(SIGTRAP)`). A
+separate return-address-logging build (`lab/preload/mtrace-ra.c`,
+`ra=` chains plus a raw-syscall `/proc/self/maps` dump, resolver
+`lab/repro/ruby2shell-cons-ra-resolve.py`) identified one window consumer
+directly: the 0x4e6 window pop of run consJ-29 resolves into
+`ld-linux-x86-64.so.2` — a lazy `dlopen` allocation (libcrypt loading during
+the request), C-internal content. The `ruby2shell-stock-rails.sh` driver
+gained a `RUBY2SHELL_STOCK_EXTRA_HEADER` wire knob for the shaping test.
+
+**Shaping result: the 0x21c/0x1f8 consumers are not attacker-shaped.** With
+the exact 11-24/25 N=524/tail environment and the geometry-preserving mtrace
+build, batches varying ONLY wire bytes — an attacker header padded to
+L=0/60/120/240 bytes (10 runs each) and the route path lengthened by
+100/300 bytes (10 runs each) — produced ten surviving runs with the
+post-attack pops, and every one printed exactly `C request=0x21c` then
+`C request=0x1f8` at the victim user pointer (e.g. runs
+`stock-rails-consM-h{0,60,120,240}-*`, `stock-rails-consR-p{100,300}-*`,
+gitignored bulk). Fixed sizes invariant under header and route shaping mean
+the two consumers are framework-internal fixed-size allocations —
+**C-internal content, allocator mechanics**, not a request-shaped Stage-B
+analog on the unmodified app. The exact Ruby call sites remain UNKNOWN: the
+RA/gdb instruments cannot run in the producing geometry (see the coupling
+finding below), so no call-site claim is made. In the surviving samples the
+0x21c consumer frees the victim off the request thread (no H at its free) and
+the chunk returns with size LSB `0x05` at the 0x1f8 pop.
+
+**Measured structure facts around the split (analysis-only probe runs,
+author-observed):**
+
+- The unsorted-split overlap survives end to end in the wild: run
+  `stock-rails-consH-20` (B `0x221`→A `0x253`, real 0x220 victim in
+  unsorted, forged 0x250-class) split the forged size, carved a fake 0x20
+  remainder chunk 0x10 into the neighbor region, and real request-thread
+  allocations (`P request=0x3`, then `0x10`) occupied the fake chunk, with
+  one freed ON the request thread (`Q`). The 11-25 "Q=0/49" is
+  geometry-specific, not structural. The run completed 404 + later `/up`
+  200 and tore down gracefully. The planted `[0x250,0x90]` pattern at the
+  fake-next position is what let the split pass its checks.
+- In other geometries the upcase RESULT STRING (request `0x414`, nb 0x420)
+  itself pops the victim from unsorted and splits it: gdb catch
+  `consC-gdbF-5` printed `C request=0x414 ptr=<victim> size=0x425` in a
+  B=0x451 unsorted geometry. Engineering note: the SIGSTOP used there
+  engages asynchronously, so stop-time backtraces are late snapshots — the
+  trapped thread had already unwound into RoutingError handling
+  (`RUBY_TAG_RAISE` through `rb_ary_collect`), consistent with the
+  delivered 404.
+- The development routing-error page reflects every multipart parameter
+  verbatim (`PP.pp(filtered_parameters)`; measured 169434-byte response,
+  128530-byte params block). In the one surviving expansion sample whose
+  response was parsed, all 32 drain values were byte-clean: the carve did
+  not land inside a reflected string. The reflection channel exists, but
+  no forged region has been observed inside a reflected value.
+
+**Instrument-coupling caution (measured):** the recycled-chunk identity is
+hypersensitive to the preload's mapped page span. The 4-page mtrace builds
+reproduce the surviving target class (~10% of runs, e.g. consH 5/60
+0x21c-runs; consM/consR batches above); the 6-page RA build eliminated it
+(0/124 runs, `consJ`/`consK`). Any instrument that grows `mtrace.so` across
+a page boundary invalidates prior geometry statistics — future stock sweeps
+must pin the preload span. Environment-string padding is NOT a geometry
+knob (env strings live on the stack; 0/64 padded runs moved nothing).
+
+External re-check at the dated 2026-11-25 trigger: Veria's page stamp is
+unchanged since 21 Nov 03:52Z and the PoC remains unpublished; the day's
+public GitHub "PoC" repos (evenomn, googlesky, hackpatato) contain only
+crash/sanitizer-level reproductions — evenomn's glibc-effective one-byte
+size-LSB corruption (glibc 2.31, no-ASLR, local-only) matches this report's
+Stage A mechanics and adds no remote path. Nothing to reopen on.
+
+Boundary unchanged: no command, no disclosure, no persistence;
+stock/oracle-free/persistent RCE remains **NOT ACHIEVED**. The strongest
+new lever is the surviving unsorted-split overlap: the named next
+experiment is shaping the carve position (via `RUBY2SHELL_STOCK_N` and the
+drain part sizes, which move the split remainder) so the fake chunk lands
+inside a REFLECTED drain-string body — that would make both the allocator
+metadata (tcache pointers) and any chosen overlay bytes wire-visible in
+the error page — the missing oracle-free disclosure + readback channel.
 
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
@@ -1351,3 +1434,17 @@ The batch loop ran the same environment 48 more times via
    address oracles and absence of direct command/marker calls. No repair is
    owed. Broader request-shaped grooming, oracle-free ASLR reach and process
    survival remain explicit UNKNOWNs, not silently included in the grade.
+
+6. **Done this wake (2026-11-25):** the victim-region consumer provenance
+   experiment is closed as a bounded negative — the 0x21c/0x1f8 pops are
+   fixed-size framework allocations, invariant under attacker header and
+   route shaping, so they stay allocator mechanics. New measured levers
+   for the stock path: the surviving unsorted-split overlap (fake
+   remainder carved into the neighbor region and recycled by real
+   request-thread allocations with an on-thread free), the result-string
+   victim pop in unsorted geometries, and the verbatim params reflection
+   of the dev error page. Named next experiment: shape the carve position
+   (`RUBY2SHELL_STOCK_N`, drain sizes) into a reflected drain-string body
+   for a wire-visible disclosure + readback channel. Veria's PoC remains
+   unpublished at the dated trigger; reopen on its mechanics when it
+   drops. Rung 5 stock/oracle-free/persistent: still NOT ACHIEVED.

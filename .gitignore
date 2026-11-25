@@ -419,3 +419,4 @@ lab/frontier/vtkdicom2shell/harness/fixed-asan
 lab/frontier/vtkdicom2shell/harness/fixed-plain
 lab/frontier/vtkdicom2shell/harness/*.build.log
 !lab/frontier/vtkdicom2shell/harness/*.out
+lab/frontier/external-poc-claims/
