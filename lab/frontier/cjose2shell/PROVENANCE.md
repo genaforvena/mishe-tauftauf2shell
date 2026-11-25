@@ -931,3 +931,22 @@ Ceiling: lab pre-auth reachability and chosen-byte control in a real consumer,
 not a deployment. The lab configuration supplies the OCT KEK; there is no
 cookie/state requirement but also no pointer/IP target, ASLR defeat, benign
 command, real credential or r5. Author-only until independently replayed.
+
+Clean-archive replay (2026-11-25 07:54Z, author only): `git archive 35e02887`
+into a fresh directory under `.mishe-tauftauf/tmp/`, then copy in the four
+untracked pinned build trees `w2/{cjose-vuln,cjose-fixed,mod_auth_openidc,
+mod_auth_openidc-fixed}` from the live checkout and run
+`sh lab/frontier/cjose2shell/w2/run-oauth-bearer.sh`: `9 PASS / 0 FAIL`,
+rc 0, no 18444/18445 listener left. This is the same reuse of local
+build-instance binaries as the earlier W198 clean-archive replay, not a
+rebuild. Clean-tree normalized gdb log hashes:
+`oauth-bearer-gdb.log` `332fecb70579acb6693286275d2636a4c37385f937cfa36c80a8dc18737d6b9f`,
+`oauth-bearer-chosen-gdb.log` `58df218a735279c90fc6d187bdfc4c5d42b0b556c189355b27dff5af8a05bf48`,
+`oauth-bearer-fixed-gdb.log` `a1475e50e55ab122b9676ac5108b665ce01f30ff2445e967aff38c90232551ad`.
+They differ from the live-tree hashes above because the gdb log records the
+resolved `@HERE@` path; the nine checks and marker bytes are identical.
+Do not place the archive under `/tmp`: this host has a `/tmp/.htaccess` with
+a `SetHandler` that makes Apache answer HTTP 500 before auth. Two earlier
+clean-replay attempts under `/tmp` were failed setups, not negative results:
+one lacked the runner-created `html` DocumentRoot, one hit `/tmp/.htaccess`.
+The runner now creates `html` and the readiness poll sleeps 0.2 s per try.

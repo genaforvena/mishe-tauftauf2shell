@@ -465,9 +465,11 @@ pointer source; no new experiment or rung.
   and a 29-byte client secret fails `AES_set_decrypt_key` at pinned
   `jwe.c:585` before unwrap. `sh
   lab/frontier/cjose2shell/w2/run-oauth-bearer.sh` replays all three lanes in
-  9 PASS / 0 FAIL; two live-tree consecutive runs were identical, no listener
-  left. This is rung-4 pre-auth reachability and chosen-byte control in a
-  real consumer at the labeled loopback/lab-KEK scope. It is not deployed
+  9 PASS / 0 FAIL; three live-tree runs were identical, and a clean
+  `git archive 35e02887` replay with the four pinned untracked build trees
+  copied in was also 9 PASS / 0 FAIL, no listener left. This is rung-4
+  pre-auth reachability and chosen-byte control in a real consumer at the
+  labeled loopback/lab-KEK scope. It is not deployed
   reachability: the lab config supplies the OCT KEK, ASLR is not defeated,
   there is no pointer/IP target, benign command or wire-derived address, and
   the witness has not replayed it. No grade change or r5.
