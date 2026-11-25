@@ -1,6 +1,6 @@
 # frontier brief — yojimbo2shell (remote block-fragment heap overflow)
 
-Status 2026-11-25 07:25Z: real yojimbo ASan build confirms the write through
+Status 2026-11-25 07:2xZ: real yojimbo ASan build confirms the write through
 `Connection::ProcessPacket`; an authenticated UDP loopback pair carries a
 chosen 8-byte vtable pointer that redirects a live virtual call to a benign
 lab marker. Rung 3 CONFIRMED in a real build, rung 4 DEMONSTRATED with
