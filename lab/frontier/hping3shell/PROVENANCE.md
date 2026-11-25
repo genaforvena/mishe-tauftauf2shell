@@ -200,3 +200,35 @@ lab/frontier/hping3shell` plus the gitignored `provision/` copy) rebuilt
 attack, rc 0. Observed `127.0.0.251` vs counterfactual `127.0.0.226` there:
 the concrete byte varies with `/dev/urandom` seeding, the causal difference
 does not. No pinned source edited; all probes stayed in 127/8 on `lo`.
+
+## W6 — chosen RNG output byte (2026-11-25 00:49Z)
+
+New gitignored lab scripts: `wire/inject_rr_const.py` (205-byte ICMP payload:
+bytes 0..17 unique marker, bytes 18..204 one chosen constant),
+`wire/rngctl-proof.sh` (real plain build, `--rand-dest 127.0.0.x` on `lo`,
+read-only GDB state dump, optional `BIN`/`EXPECT`/`RUN_TAG`), and
+`wire/check_rngctl.py` (reuses `check_rng.py` parsing and RC4 step). No pinned
+source was edited; all traffic stayed in 127/8 on `lo`.
+
+- FILL=0x20: 6 PASS / 0 FAIL, rc 0, state 4 has `sbox[0..186]` at `0x20`,
+  16/16 post-attack destinations `127.0.0.32`, counterfactual `127.0.0.70`.
+- FILL=0x40: 6 PASS / 0 FAIL, rc 0, 16/16 destinations `127.0.0.64`,
+  counterfactual `127.0.0.132`.
+- Baseline `NO_INJECT=1`: 4 PASS / 0 FAIL. Patched binary
+  (`plain-fixed-src/hping3`, patched source sha256
+  `70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`):
+  4 PASS / 0 FAIL, no filled state.
+- Raw output: `wire/evidence/rngctl-{attack-baseline,attack-32,attack-64,
+  fixed-32}-{gdb,run,proof}.out`. The GDB log is evidence only; a stdout-only
+  count shows the same 16-byte trailing run of the chosen fill.
+- Clean-archive replay from `git archive HEAD` plus the gitignored
+  `provision/` tree and the three new scripts: plain/patched source hashes
+  exact, 4/6/6/4 PASS, rc 0, `CLEAN_REPLAY_W6_OK`. First attempt failed
+  because `/tmp/w6-hping-clean` did not exist for `tar x`; `mkdir -p` fixed
+  it. Two earlier injector assertion failures (28- and 32-byte RR markers)
+  sent no frame; checker FAILed correctly; 36-byte marker fixed it.
+- Negative: GCC 13 default `-fno-common` cannot link the pinned tree
+  (`hping2.h:360` `delaytable` tentative definition in every TU);
+  `wire/nocommon-negative.txt` keeps the failure. `-fcommon` is mandatory.
+- Ceiling: low byte only; 69 sbox bytes beyond reach, i/j hidden, no pointer,
+  command or r5. Author-side; witness replay OWED.

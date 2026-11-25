@@ -123,9 +123,23 @@ live `rc4_sbox` at each random-destination selection. Baseline: 4 PASS /
 Attack: 6 PASS / 0 FAIL, the overwritten `sbox[0..45]=0x13…0x40` predicts
 the observed next probe destination `127.0.0.79`, while the unattacked
 counterfactual is `127.0.0.179`. This closes the previous UNKNOWN about
-overwritten-RNG behavior; grade unchanged (rung 4, no chosen IP without
-hidden-state observation, no pointer/command, no r5). Details and the
+overwritten-RNG behavior; the W6 section below supersedes its then-current
+no-chosen-IP limit with a measured chosen output byte. No pointer/command or
+r5. Details and the
 negative `--rand-source` attempt are in `reports/hping3shell-status.md`.
+
+## Chosen RNG output byte (W6, 2026-11-25 00:49Z) — author-side
+
+A 205-byte crafted ICMP RR reply fills all 187 attacker-reachable bytes of
+`rc4_sbox` with one chosen value (`sbox[n] == payload[18+n]`, memcpy cap 251).
+`wire/rngctl-proof.sh` with `FILL=0x20` and `FILL=0x40` each gave 6 PASS /
+0 FAIL: all 16 post-attack probe destinations equal the chosen byte
+(`127.0.0.32` / `127.0.0.64`) with different unattacked counterfactuals;
+stdout alone shows the same trailing run without GDB steering. Baseline and
+patched-build controls are 4 PASS / 0 FAIL with no filled state. Clean-archive
+replay reproduced all four counts, rc 0. Only the low byte is controllable;
+no pointer, command or r5. Full receipt and preserved negatives in
+`reports/hping3shell-status.md`.
 
 ## Witness disposition (W207, #3820)
 

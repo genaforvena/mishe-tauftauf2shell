@@ -1,0 +1,25 @@
+W6 negative: GCC 13 default -fno-common cannot link the pinned tree
+2026-11-25 00:47Z, local experiment, no pinned source edited.
+
+Command (from a fresh copy of the gitignored provision/hping-src):
+  mkdir -p compat/net && : > compat/net/bpf.h
+  ./configure --no-tcl
+  make -j4 CCOPT='-O0 -g -fno-common -Wall -Wno-unused -I../compat'
+Result: BUILD_RC=2, collect2: ld returned 1 exit status.
+
+Representative exact linker lines (wire/nocommon-build.log, gitignored):
+  /usr/bin/ld: getifname.o:.../hping2.h:360: multiple definition of `delaytable'; main.o:.../hping2.h:360: first defined here
+  /usr/bin/ld: parseoptions.o:.../hping2.h:360: multiple definition of `delaytable'; main.o:.../hping2.h:360: first defined here
+  (same error for binding.o, cksum.o, display_ipopt.o and ~20 other objects)
+
+Cause: hping2.h:360 declares delaytable as a tentative definition, emitted
+strong by every translation unit under -fno-common. Therefore the -fcommon
+flag used by every existing harness is mandatory for this pinned tree, not
+an arbitrary build choice; the W2/W5/W6 global adjacency is measured in the
+build the source can actually produce unmodified.
+
+Unlinked -fno-common object layout (evidence only; no linked binary exists):
+  display_ipopt.o: delaytable 0x0 (0x3200), old_rrlen.1 0x3200 (4), old_rr.0 0x3220 (0x28)
+  random.o: rc4_sbox 0x0 (0x100), rc4_seedflag 0x100 (4), i.1 0x104 (4), j.0 0x108 (4)
+old_rr.0 is the last object in display_ipopt.o's .bss; any different downstream
+adjacency would require a source patch, which was not pursued.

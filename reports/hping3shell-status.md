@@ -122,19 +122,21 @@ the offsets. `wire/run-wire.sh` is unchanged.
   object is reachable; overwriting the sbox would change PRNG output, not
   execution. This path offers no measured route to r5.
 
-## Current grade (2026-11-24 20:5xZ)
+## Current grade (2026-11-25 00:49Z)
 
 Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is
-WIRE-VISIBLE and now includes chosen bytes at chosen offsets in a named
-adjacent global of the **real plain hping3 build**, author-side: a crafted
-loopback RR reply reaches `display_ipopt()`; the ASan build aborts with
-`WRITE of size 68` / `86` past `old_rr[40]`, and the plain build lets 251
-attacker-chosen bytes land at chosen offsets in `rc4_sbox` (verified by GDB
-with a zero baseline). A valid RR reply and the locally patched build stay
-clean. No pointer/IP/command control and no rung 5. Stock glibc outcome,
-`IPOPT_LSRR` stay UNKNOWN; the behavior change from the overwritten
-`rc4_sbox` is now measured (W5 below). Both wire stages are author-side
-only; witness replay of each is OWED.
+WIRE-VISIBLE and includes chosen bytes at chosen offsets in a named adjacent
+global of the **real plain hping3 build**: a crafted loopback RR reply reaches
+`display_ipopt()`; the ASan build aborts with `WRITE of size 68` / `86` past
+`old_rr[40]`, and the plain build lets 251 attacker-chosen bytes land at
+chosen offsets in `rc4_sbox` (GDB + zero baseline + patched control). W5
+measured changed RNG output; W6 measures **attacker-chosen output** — all 187
+reachable sbox bytes become a reply-chosen constant and all 16 subsequent
+probe destinations equal that chosen byte, with no debugger steering.
+A valid RR reply and the locally patched build stay clean. Only the low byte
+of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. Stock
+glibc distribution build and `IPOPT_LSRR` stay UNKNOWN. All wire/RNG stages
+are author-side; witness replay is OWED.
 
 
 ## Witness verdict (W207, #3822)
@@ -192,9 +194,10 @@ destination chosen by `hp_rand()` from the overwritten `rc4_sbox`.
   prediction from the overwritten sbox, while the unattacked counterfactual
   from the prior state is `127.0.0.179`. Evidence
   `wire/evidence/rng-attack-{gdb,run,proof}.out`.
-- Ceiling unchanged: no function pointer in the 251-byte span, no chosen-IP
-  control without observing hidden i/j, no command, no rung 5. Author-side
-  only; the witness replay of both wire stages is still owed.
+- Ceiling at W5: no function pointer in the 251-byte span, no chosen-IP
+  control without observing hidden i/j, no command, no rung 5. W6 below
+  measures a chosen *byte* of output without debugger steering; full-IP
+  control remains UNKNOWN. Author-side only; witness replay still owed.
 - Negative preserved: the first attempt used `--rand-source`, but
   `waitpacket.c:94` checks the reply destination against `local.sin_addr`,
   which was randomized; no crafted frame reached `display_ipopt()` and the
@@ -208,10 +211,57 @@ attack 6 PASS / 0 FAIL, rc 0 both. The concrete destination bytes differ
 `hp_rand_init()` seeds from `/dev/urandom`; the causal property and counts
 are stable. No pinned source edited; all probes stayed in 127/8 on `lo`.
 
+## Chosen RNG output byte (W6, 2026-11-25 00:49Z)
+
+The W2 packet-to-global mapping (`rc4_sbox[n] == ICMP payload[18+n]`) and the
+251-byte `memcpy` cap mean a crafted reply can set **all 187 reachable sbox
+bytes**, not just the 46 bytes the W5 unique marker covered. A 205-byte
+payload whose bytes 18..204 carry one chosen constant fills that whole span.
+`wire/inject_rr_const.py` sends that reply (rr_len=255, ptr=0xff, 3 frames,
+loopback 127.0.0.2→127.0.0.1); `wire/rngctl-proof.sh` runs the real plain
+build with `--rand-dest 127.0.0.x` and reads RC4 state read-only in GDB;
+`wire/check_rngctl.py` checks the observed probe destinations.
+
+- `FILL=0x20`: **6 PASS / 0 FAIL, rc 0** — state 4 has `sbox[0..186]` filled
+  with `0x20`, all 16 subsequent probe destinations are `127.0.0.32`, and
+  the unattacked counterfactual is `127.0.0.70`.
+- `FILL=0x40`: **6 PASS / 0 FAIL, rc 0** — same shape, all 16 destinations
+  `127.0.0.64`, counterfactual `127.0.0.132`. Two different chosen values
+  show the output byte is selected by the reply, not a stable PRNG run.
+- Baseline (`NO_INJECT=1`): **4 PASS / 0 FAIL**; no filled state in 23 GDB
+  samples. Patched-build control (`BIN=plain-fixed-src/hping3`, source sha256
+  `70f0112d…b471cb7aaa7f0ba846c7`): **4 PASS / 0 FAIL**; the same crafted
+  reply leaves the sbox unfilled, tying the effect to the unclamped memcpy.
+- Stdout-only check: the trailing runs of `0x20`/`0x40` are 16 probes long
+  with no GDB involved, so GDB is observation/counterfactual only, never
+  part of steering. Raw evidence: `wire/evidence/rngctl-*-{gdb,run,proof}.out`.
+- Negative preserved: `-fno-common` (GCC 13 default) cannot link the pinned
+  tree — `hping2.h:360` tentatively defines `delaytable` in every TU; see
+  `wire/nocommon-negative.txt`. `-fcommon` is mandatory, not a harness choice.
+  Two earlier injector assertion failures (28- and 32-byte RR option markers
+  instead of 36) sent no frame and the checker correctly FAILed; fixed by
+  using `bytes(range(0xA0, 0xA0 + 36))`.
+- Ceiling: only the low byte of the probe destination is controllable; 69
+  sbox bytes remain beyond the 251-byte reach and i/j are hidden. No pointer,
+  command, shell or r5. Stock-glibc distribution build and `IPOPT_LSRR` stay
+  UNKNOWN. Author-side; witness replay of W6 is OWED.
+
+Clean-archive replay (00:5xZ) from `git archive HEAD lab/frontier/hping3shell`
+with the gitignored `provision/` tree and the three new scripts copied in:
+plain source sha256 `e8ef2dd6…dcbb5e7b` and patched source sha256
+`70f0112d…b471cb7aaa7f0ba846c7` exact; baseline 4 PASS, FILL=0x20 6 PASS,
+FILL=0x40 6 PASS, fixed control 4 PASS, rc 0 throughout, `CLEAN_REPLAY_W6_OK`.
+Counterfactuals vary with `/dev/urandom` seeding (`127.0.0.140` and
+`127.0.0.156` in the clean replay), while all 16 chosen destinations matched
+in both attack runs. The first replay attempt failed only because
+`/tmp/w6-hping-clean` was not created before `tar x`; fixed with `mkdir -p`.
+
 ## Next
 
-Witness replay of both wire stages is still owed. The single command in the
-previous section replaces the old four-script request; it must be replayed
-from the witness's own clean archive. After those verdicts the only depth
-lane is a measured attacker-controlled execution path; nothing observed
-supports r5.
+Witness replay of the wire stages (#3942) and the RNG stage (#3958) is still
+owed; W6 needs its own replay offer. The single command in the earlier
+section replaces the old four-script wire request. A clean-archive replay
+of W6 is the three new scripts plus `rngctl-proof.sh` with `NO_INJECT=1`,
+`FILL=32`, `FILL=64` and the patched-binary control. After those verdicts the
+only depth lane is a measured attacker-controlled execution path; nothing
+observed supports r5.
