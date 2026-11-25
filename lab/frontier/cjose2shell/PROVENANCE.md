@@ -992,3 +992,66 @@ raw-key case (W187/W196 remain the authority); no pointer, marker, command,
 ASLR defeat or wire-derived address was attempted. Author-only, no grade
 change, no r5. Both runs returned HTTP 401 after the integrity failure and
 `ss -ltn` showed no 18444 listener afterwards.
+
+## W215 — chosen value pointer at cek+64 in the real pre-auth bearer lane (2026-11-25 09:12-09:22Z)
+
+Charter option 1, third question: W199/W202 overwrote a *live* jansson value
+pointer at `cek+64` in the synthetic w1 consumer, while W213 found only a
+zeroed `0x41` chunk at `cek+48..95` in the real unauthenticated bearer lane
+after a 48-byte write. Does a larger attacker-sized write place a chosen
+pointer at that offset in the real consumer, and does anything dereference it?
+
+Committed material: `w2/w215/{apache-w215.conf,probe-w215.py,gdb-w215.cmd,
+run-w215.sh}`; raw logs under `w2/w215/evidence/`. One unauthenticated
+`GET /private` with an `Authorization: Bearer` compact JWE per fresh
+Apache/gdb process on 127.0.0.1:18444 (vulnerable) or :18445 (fixed), as in
+W212/W213. No listener remained. The lab KEK
+`30313233343536373839616263646566` makes the RFC 3394 integrity check pass;
+raw `encrypted_key` 80 wraps 72 chosen bytes. Plaintext layout: marker at
+0..31, zeros at 32..39 (next chunk `prev_size`), `41 00…` at 40..47 (preserve
+the next chunk size so glibc stays valid), jansson `json_string_t` shape at
+48..55 (`02 00 00 00 01 00 00 00`), length `0x10` at 56..63, and value pointer
+`0x4141414141414141` at 64..71. The `zero` mode uses zeros at 48..71; the
+`ctrl` mode is a correct 40-byte wrap.
+
+Vulnerable `ptr` run (`evidence/gdb-w215-ptr.log`):
+`W2E_KW_DECRYPT raw_len=80 cek_len=0 jwk_kty=3`, `W2E_UNWRAP_KEY_REACHED`, and
+at `jwe.c:602` `cek=0x555555667340`, CEK chunk size `0x31`, next chunk at
+cek+32 with prev_size 0 and size `0x41`. The dump shows
+`0x0000000100000002` at cek+48, `0x10` at cek+56 and
+`0x4141414141414141` at cek+64; bytes from cek+72 on and the following `0x41`
+headers are unchanged. Two fresh-process repeats
+(`gdb-w215-ptr-r2.log`, `gdb-w215-ptr-r3.log`) matched byte for byte at the same
+address. `zero` and `ctrl` reached the same helper with raw_len 80 and 40.
+No `W2E_STRCMP_PTR_HIT` (conditional breakpoint on `strcmp` arguments equal to
+the chosen pointer), no SIGSEGV/SIGABRT; every request returned HTTP 401 after
+the integrity failure, as in W212/W213.
+
+Fixed control (`evidence/oauth-bearer-fixed-gdb.log`,
+`evidence/oauth-bearer-fixed-apache_error.log`): the same 80-byte wire token
+reaches `W2BF_AES_KW_DECRYPT_REACHED raw_len=80 cek_len=0 jwk_kty=3` but no
+`AES_unwrap_key`; Apache logs `invalid argument [file: jwe.c, function:
+_cjose_jwe_decrypt_ek_aes_kw, line: 599]`, response 401.
+
+Bounded result: wire-chosen bytes can set a recognizable pointer-sized value
+at `cek+64` in the real pre-auth bearer lane (a 72-byte write extends W213's
+48-byte adjacency result), but the adjacent chunk's user area is not a live
+jansson object at this point in this consumer and no later code dereferenced
+the chosen value. The W199/W202 live-string adjacency remains a property of
+the synthetic w1 consumer, not observed behind a real HTTP request. No
+control-flow target, valid address, ASLR defeat, benign command or r5; the lab
+KEK is config-known, so byte values are not attacker-chosen in a deployment.
+Author-only, no grade change. All three witness offers stay queued unchanged;
+this measurement bounds them rather than adding a fourth limb.
+
+Author clean-tree receipt, 2026-11-25 09:23Z: `cd
+lab/frontier/cjose2shell/w2/w215 && sh run-w215.sh` printed 15 `CHECK` lines
+with all observed values matching, then `REPLAY_W215: 15 PASS / 0 FAIL` and
+`NO_LISTENER_LEFT`. The three vulnerable pointer logs are byte-identical
+(sha256 `6e4ce6a8031052595cb4c8df96eb9f16148e269c9c7a6fdf3912bf80ab35211e`);
+the fixed gdb log sha256 is
+`9c0db1a49eda1d70c7be6155beb5b793eda76d075f1956be1b04c926857804c0`.
+Earlier attempts in this wake are preserved in the same evidence directory:
+the first run used wrong response paths and the second accumulated a stale
+fixed error line; both were runner-check defects, not measurement changes,
+and were fixed before the clean receipt. No external target was contacted.

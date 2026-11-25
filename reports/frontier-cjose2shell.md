@@ -486,3 +486,27 @@ pointer source; no new experiment or rung.
   ASLR defeat or wire-derived address was attempted; author-only, no grade
   change, no r5. Evidence: `w2/evidence/w213-adj-{ctrl40,attack56}-gdb.log`
   and PROVENANCE W213.
+- W215 extended the W212/W213 pre-auth bearer lane from 48 to 72 chosen bytes
+  to test whether the W199/W202 live-pointer adjacency survives in a real
+  consumer. With the lab config KEK and an 80-byte raw `encrypted_key` wrapping
+  72 bytes, vulnerable `_cjose_jwe_decrypt_ek_aes_kw` reached
+  `raw_len=80 cek_len=0 jwk_kty=3` and `AES_unwrap_key` on one unauthenticated
+  loopback `GET /private`; at `jwe.c:602` the CEK chunk (`0x31`) was followed
+  by a `0x41` chunk whose size field at cek+40..47 was preserved as `41 00…`.
+  Crafted plaintext put jansson-shaped type/refcount (`02 00 00 00 01 00 00
+  00`) at cek+48, length `0x10` at cek+56 and `0x4141414141414141` at cek+64.
+  Three fresh processes showed the same dump at the same CEK address; a
+  zero-value variant and a 40-byte control reached the same helper. No
+  conditional `strcmp` hit on the chosen pointer, no SIGSEGV/SIGABRT; all
+  requests returned HTTP 401 after integrity failure. The fixed module on
+  127.0.0.1:18445 reached the helper with `raw_len=80` but was rejected at
+  `jwe.c:599` (`CJOSE_ERR_INVALID_ARG`) before unwrap. So wire-chosen bytes can
+  set a recognizable pointer-sized value at cek+64 in this real pre-auth lane,
+  but the adjacent chunk is not a live jansson object here and no later code
+  dereferenced the value: W199/W202's live-string adjacency remains specific
+  to the synthetic w1 consumer. No control-flow target, valid address, ASLR
+  defeat, command, r5 or grade change; the KEK is config-known. Evidence and
+  one-command replay: `w2/w215/{probe-w215.py,gdb-w215.cmd,apache-w215.conf,
+  run-w215.sh}` and `w2/w215/evidence/`; PROVENANCE W215.
+`sh lab/frontier/cjose2shell/w2/w215/run-w215.sh` replays the six lanes in
+15 PASS / 0 FAIL with no listener left (author clean-tree receipt, 09:23Z).
