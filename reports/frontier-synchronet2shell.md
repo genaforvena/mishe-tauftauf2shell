@@ -472,13 +472,47 @@ thread-scheduled `CHANNEL TYPE` lines, and all six normalized digests match
 (`termlen/evidence/clientlen/REPLAY.md`). This is an author replay, not a
 witness verdict.
 
+## W15 valid credentials under the default config (2026-11-25, author-measured)
+
+W7/W9 left "default-config reach with valid credentials" UNKNOWN because the
+pinned tree had no BBS user database. That prerequisite was not structural:
+the pinned tree carries `src/sbbs3/gcc.linux.x64.exe.debug/makeuser`, which
+creates `data/user/user.tab` offline from the existing ctrl config; passwords
+are stored cleartext and uppercased (`makeuser.c:174-177`, `answer.cpp:353`
+`stricmp`). The utility resolves `data_dir` under `ctrl/`, so the lab adds a
+`ctrl/data -> ../data` symlink. The created user `lab` has `LABPASS123` in its
+1000-byte record.
+
+`bash lab/frontier/synchronet2shell/real-answer/validuser/run-validuser.sh`
+builds the same verbatim vulnerable statement plus instrumentation-only probe
+used in W5/W7/W9, starts a real `sbbs3` on loopback 22229 with
+`Options = XTRN_MINIMIZED | ALLOW_SSH | NO_TELNET | NO_HOST_LOOKUP | NO_EVENTS`
+(no `SSH_ANYAUTH`), and connects with stock OpenSSH using `sshpass` and
+`PreferredAuthentications=password`. Both sessions logged
+`SSH login: 'lab'` and `SSH password authentication successful`; the server
+log has zero `SSH_ANYAUTH` lines. Result: **4 PASS / 0 FAIL** at
+2026-11-25T00:58Z: chosen 64-byte TERM `sizeof=41 l=64 off41=42
+off44=4853494d off48=4f4f2d45 off52=TAUFTAUF`; the 40-byte control logged
+`l=40` with zero adjacent bytes. Raw logs:
+`real-answer/validuser/evidence/{server.log,client-chosen64.log,client-control40.log}`.
+
+This closes the valid-credential/default-config UNKNOWN for this pinned build:
+the overflow is reachable after ordinary password login, not only with the
+non-default `SSH_ANYAUTH` token. It does **not** re-establish the advisory's
+unauthenticated reach: pre-auth pty-req remains the W9 negative, and the
+no-credential positive remains W7's `SSH_ANYAUTH` configuration. No grade
+change (rungs 1-4), no pointer/IP/command, no r5, no witness verdict.
+
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
-replay of W5/W6/W8/W9. No-credential TERM reach at a config without
+replay of W5/W6/W8/W9/W15. No-credential TERM reach at a config without
 `SSH_ANYAUTH` is now a measured negative for this pinned build (W7 stock
 client and W9 custom pre-auth client), not an open gap inside this build;
-other builds and configurations with valid credentials stay UNKNOWN. Inside
+the complementary valid-credential default-config reach is a measured positive
+in W15 for one provisioned user in this pinned build. Other builds,
+configurations and credentials stay UNKNOWN. Inside
 this pinned build W10 also closes the "other attribute sources" wording:
 the pty-req handler is the only remote terminal setter and every setter path
 is capped at 64 bytes; offsets 44..63 hold scalar timing/flag data and string
