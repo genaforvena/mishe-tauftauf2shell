@@ -14,6 +14,20 @@ this brief. Lab pins, harness, real builds and evidence live in
 one-command replay `sh lab/frontier/vtkdicom2shell/tools/replay-file-path.sh`
 = `REPLAY_FILE_PATH_OK`. This is author lab evidence, not witness acceptance.
 
+## W12 — string-VR sweep closes W11's last VR gap (2026-11-25 23:28Z)
+
+W11 left seven string VRs UNKNOWN after its 300 s sweep cap. This wake ran
+UT/LO/PN/SH/CS/DA/UI at N=1, PLEN=4 through the same real plain reader and
+`tools/oob-word.gdb`: all seven left `e+8(V)=1e00000500000001` at slot 5 and
+SIGSEGVed in `ReferenceCount::operator--`. The long-form string elements are
+rejected by the parser (`Parser.cxx:2501`), so no preceding Value is created
+and the crafted item's own US header is what the OOB element reuses. PLEN=8
+variants (UT/LO/UI) TIMEOUTed at 55 s and remain UNKNOWN. Evidence:
+`lab/frontier/vtkdicom2shell/evidence/string-vr-groom-negative.txt`. Grade
+unchanged: rung 3 real-reader ASan OOB from crafted FILE bytes, rung 4 PARTIAL
+chosen tag bytes at slot 5 with a plain crash; no mapped pointer, no IP/control
+flow, no command, no wire path, no witness verdict.
+
 ## W9 — malloc-perturbation origin probe: failed control (2026-11-25 21:20Z)
 
 Tried to distinguish allocator-reuse bytes from a program-written stale

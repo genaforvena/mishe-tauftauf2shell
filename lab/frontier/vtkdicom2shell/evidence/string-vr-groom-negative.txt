@@ -1,0 +1,39 @@
+W12 2026-11-25 23:28Z — string-VR sweep closes the W11 "seven string VRs UNKNOWN" gap
+
+Question: could a preceding sibling element with a string VR leave a mapped
+heap pointer in the stale 8 bytes at OOB DataElements[5].Value.V (dereferenced
+by vtkDICOMValue::operator= at Value.h:426 → ReferenceCount::operator--)?
+W11 varied seven numeric/binary VRs and found only Value-header-shaped words.
+String VRs were left UNKNOWN by the 300 s sweep cap.
+
+Build/probe: build-vuln/bin/dicomdump (real vulnerable vtk-dicom against
+lab-local VTK 9.1), LD_LIBRARY_PATH=deps/root/usr/lib/x86_64-linux-gnu.
+Variant: python3 tools/make-preceding-item-variant.py FILE 1 PLEN VR,
+N=1 preceding item, VR in UT/LO/PN/SH/CS/DA/UI, PLEN 4 and 8.
+Probe: gdb -q -batch -x tools/oob-word.gdb -ex 'run FILE' -ex 'bt 2' -ex quit.
+
+Observed (VR, PLEN, e+8(V), frame):
+  UT 4 1e00000500000001 ReferenceCount::operator--
+  LO 4 1e00000500000001 ReferenceCount::operator--
+  PN 4 1e00000500000001 ReferenceCount::operator--
+  SH 4 1e00000500000001 ReferenceCount::operator--
+  CS 4 1e00000500000001 ReferenceCount::operator--
+  DA 4 1e00000500000001 ReferenceCount::operator--
+  UI 4 1e00000500000001 ReferenceCount::operator--
+  UT/LO/UI 8: TIMEOUT at 55 s each — UNKNOWN, not a pass or counterexample.
+
+Why all PLEN=4 words are identical: the parser rejects these long-form string
+VR elements with "Encapsulated object is missing (FFFE,E000) tag"
+(Parser.cxx:2501, e.g. byte offsets 300 and 322 in the UT variant). No valid
+preceding Value object is created, so the reused chunk still holds the
+crafted item's own US header (VR 0x1e, VTK type 5). Full UT/PLEN=4 gdb output
+shape: OOBPRE n=5 slot=5 tag=4841,434b; OOBWORD e+0=0000000000000021
+e+8(V)=1e00000500000001; SIGSEGV at ReferenceCount.h:50 with
+this=0x1e00000500000001, via Value.h:426 → Item.cxx:297 → Parser.cxx:1645.
+
+Result: string VRs do not change the stale word from the US header; no mapped
+pointer, no file-chosen high half. PLEN>=8 string VRs remain UNKNOWN (the
+first eval sweep also timed out all seven at 40 s). No grade change: rung 3
+real-reader ASan OOB from crafted FILE bytes; rung 4 PARTIAL chosen tag bytes
+at slot 5 with a plain crash. No pointer/IP/control-flow control, no command,
+no wire/request path, no witness verdict. Vendor June-patch bytes UNKNOWN.

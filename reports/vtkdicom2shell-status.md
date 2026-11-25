@@ -1,5 +1,23 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 23:28Z — W12 string-VR sweep: no mapped pointer, W11 gap closed
+
+- Closed W11's explicit UNKNOWN for the seven string VRs. Same real plain
+  reader and `tools/make-preceding-item-variant.py` + `tools/oob-word.gdb`,
+  N=1, VR in UT/LO/PN/SH/CS/DA/UI at PLEN=4: every run wrote the chosen key
+  at slot 5 and left `e+8(V)=1e00000500000001`, the same US `Value` header,
+  then SIGSEGVed in `ReferenceCount::operator--`. The parser rejects those
+  long-form string elements (`Parser.cxx:2501`, "Encapsulated object is
+  missing (FFFE,E000) tag"), so no valid preceding Value is built and the
+  crafted item's own US header is what gets reused.
+- PLEN=8 variants (UT/LO/UI) all TIMEOUTed at 55 s and remain UNKNOWN — not
+  passes, not counterexamples. Evidence:
+  `lab/frontier/vtkdicom2shell/evidence/string-vr-groom-negative.txt`.
+- Grade unchanged: rung 3 real-reader ASan OOB from crafted FILE bytes,
+  rung 4 PARTIAL chosen tag bytes at slot 5 with a plain crash. No mapped
+  pointer, no pointer/IP control, no command, no wire path. Witness verdict
+  UNKNOWN — witness wall at 23:19Z still lists #4276/#4196 vtkdicom as queued.
+
 ## 2026-11-25 22:05Z — W11 stale-header decode: structural pointer-control negative
 
 - Bounded VR sweep on the real plain reader: one well-formed preceding
