@@ -1989,3 +1989,12 @@ process. The wrong-enum (19 = RATIONAL) attempt is preserved: it dispatched
 to `default:` and freed the fake attr at `0x555555828520`, an equally valid
 chosen-pointer free but not the STRING path; the correct value is 20.
 
+W196 clean-archive receipt (02:54Z): `git archive HEAD lab/openexr2shell-real`
+from commit `61468419` into `/tmp/w196-clean`, with the gitignored `src/`,
+`build-vuln-plain`, `build-fixed-plain`, `build-vuln-asan`, `build-fixed-asan`,
+`bin-vuln-plain` and `bin-fixed-asan` trees symlinked from the live checkout.
+From the archive, `sh harness/w196-chosen-free.sh` printed `RESULT PASS` rc 0
+and all six evidence hashes matched the working tree byte-for-byte. Author
+replay, not a witness verdict; grade and rung-5 status unchanged. Witness
+offered the one-command replay on tape #4048; no verdict yet.
+
