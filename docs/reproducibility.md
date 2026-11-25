@@ -10315,3 +10315,97 @@ known engine-cap reason. No grade, rung, route, mind count or R5 cell moved.
   8.4.28-app with the same bytes writes exactly 1019 bytes, promotes no
   session and prints no marker. The shim SIGKILL remains a condition, so
   full rung 5 stays UNCLAIMED.
+
+## 2026-11-25 16:1x–16:2xZ — real-consumer command, byte ceilings and replay receipts
+
+All commands below are offline or bound to loopback. No limb returned a
+witness verdict; grades and rung-5 cells are unchanged. Normalized evidence
+named below is tracked (for example `lab/openexr2shell-real/evidence/w202-*.out`
+and `lab/frontier/open5gs2shell/harness/bytechoice/evidence/bytechoice.txt`);
+other raw logs are gitignored per lane (for example
+`lab/frontier/hping3shell/.gitignore:12` and
+`lab/frontier/stbvorbis2shell/.gitignore:2`) and regenerate with the named
+script. Nothing in this section is a full-build replay unless stated.
+
+- **Openexr W202 — benign command in the shipped tool** — affected OpenEXR
+  3.5.2, fixed 3.5.3 (`reports/openexr2shell-file-level.md` §W202). Generate
+  the PoC from the committed W195 dump with
+  `python3 lab/openexr2shell-real/cases/make_w202_poc.py` (sha256
+  `7f3eda1b00f54b56ec75108f9012be6b035c8b6393ec1d7c2241f94be91e412e`), then
+  `cd lab/openexr2shell-real && sh harness/w202-benign-command.sh`. Expected:
+  `RESULT PASS` rc 0 on two runs, five byte-identical normalized hashes
+  (chain `54115664…`, vulnerable `ba3fcb27…`, fixed `46871818…`, safe
+  `5cce1cae…`, ASan `71552269…`). Under gdb ASLR-off,
+  `opaque.c:79` prints `CTXT=0x555555826f00`, `TARGET=0x7ffff7feb900`,
+  `RDX=104`; memory at `ctxt+96` becomes `0x00007ffff7658750` (`__libc_system`)
+  and `x/s` at `SYSTEM_RDI` shows `touch /tmp/w202m`. Plain `setarch -R`:
+  vulnerable rc 139 with the marker, fixed rc 1 `bad` without it, valid
+  baseline rc 0 without it; the vulnerable ASan build reports
+  `heap-buffer-overflow READ of size 3072` at `internal_zstd.c:472`.
+  `git archive 043a0d41 lab/openexr2shell-real` reproduced all five hashes.
+  Conditions: ASLR off, local file path, benign command, process faults after
+  the call; not R5 and no witness verdict.
+- **StbVorbis W207 — real-consumer heap metadata** — unmodified SDL_mixer
+  vendored stb_vorbis v1.22, plain `-O0 -g` build. Run
+  `sh lab/frontier/stbvorbis2shell/run-consumer-heap.sh`; the script generates
+  `evidence/safe-input.bin` itself. Expected: 11 shell PASS plus 14 heap-word
+  PASS, rc 0, with `vuln_rc=134` (`malloc(): invalid size (unsorted)`),
+  `safe_rc=0`, and a nested `run-consumer.sh` `TOTAL PASS=12 FAIL=0`.
+  `consumer/evidence/heap-gdb-snapshots.out` has `W207_PRE`/`W207_POST`
+  snapshots: 30 file-chosen `0x4b434148` words at `c->multiplicands+8..+124`
+  and the next free chunk size `0x91` → `0x4b434148` at `+24`; the sweep
+  outputs for 4096/65536/1048576-byte padding show the same address and
+  clobber (grooming negative). Requires the gitignored SDL/SDL_mixer trees in
+  `../sdlmixer2shell/deps`; raw `.out` files are gitignored. No pointer in a
+  live consumer-owned field, no wire, no command and no verdict.
+- **Hping3 W13 — conditional permutation byte control** — pinned
+  `display_ipopt.c` sha256
+  `e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b`,
+  locally patched control
+  `70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`.
+  With the gitignored pinned source copied in,
+  `HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src sh lab/frontier/hping3shell/wire/replay-perm.sh`
+  prints `STAGE OK baseline 3`, `STAGE OK attack-dec 5`,
+  `STAGE OK fixed-dec 3`, `REPLAY_PERM_OK: 3 stages`, rc 0, from a clean
+  archive of `feb3f33f`. Frames go from `127.0.0.2` to `127.0.0.1` on `lo`;
+  `fullip-proof.sh` reads `i`/`j`/`sbox` read-only in gdb and `check_perm.py`
+  checks destinations against the four-calls-per-packet RNG model. Observed
+  controlled bytes: `j=222`, index 5, `S[5]=4`, low byte 4 against a
+  counterfactual 22; `j=92`, index 131, `S[131]=130`, low byte 130 against
+  237. `j=156` put index 195 outside the 187-byte reach; a `127.0.x.x`
+  template was rejected by `waitpacket.c:94`. No full chosen IP, no verdict.
+- **Open5GS W8 — forced-value ceiling** — pinned v2.8.0 parser compiled
+  verbatim, `sh lab/frontier/open5gs2shell/harness/bytechoice/run.sh` gives
+  11 PASS / 0 FAIL. Expected canary for `00 0d 0a` x36 is
+  `CANARY_CHANGED=7`, `0a000d0a000d0a5a5a5a5a`; arbitrary 36-byte `41…` and
+  `41 42 43` x12 suffixes give `CANARY_CHANGED=0` with the canary unchanged;
+  substitutions break the chain and mid-chain CRLF only re-arms it. The
+  tracked `bytechoice.txt` hashes to
+  `7a23b925df8ff3b66e8401954356ebe6307edf9c5c54add4a7648780f79df689`.
+  A clean `git archive 0a6c868d` replayed 11/0 and `harness/run.sh` 21/0;
+  rung 3 ASan and rung 4 process-kill grades stay as labeled, NO r5.
+- **Cjose W219/W219b — enc-selected CEK sweep** — in the real loopback
+  pre-auth bearer lane with the lab Apache config, `sh w2/w219/run-w219.sh`
+  reported `REPLAY_W219: 18 PASS / 0 FAIL` and `run-w219b.sh`
+  `REPLAY_W219B: 11 PASS / 0 FAIL`. A128GCM (16-byte CEK), A256GCM (32),
+  A192CBC-HS384 (48), A256CBC-HS512 (64) and the 32-byte baseline all reach
+  `AES_unwrap_key`; fixed rejects at `jwe.c:599`. A256GCM faults in
+  `OPENSSL_sk_dup` (`malloc(): corrupted top size`) and A256CBC-HS512 in
+  `_cjose_release_cek` (`free(): invalid next size (fast)`); other cases
+  return HTTP 401. W219b writes 168 bytes over pointer-shaped fields at
+  `cek+0x80..0xa8` with `0x4141…`; none is dereferenced and the holding
+  object is UNKNOWN. Probes, gdb scripts and normalized evidence live in
+  `lab/frontier/cjose2shell/w2/w219/`; no listener is left running.
+- **Awslc W223 / N2n W16 / Solanum W3 — ceilings and one-command replays** —
+  Awslc's synthesis of W213–W216 is source-bound: no checked real caller has
+  both the withheld-block carry and a `in_len+b-1` destination; Node v22.11.0
+  allocates `len + block_size` and its ASan check was clean at 32 bytes,
+  faulting only at the 31-byte documented minimum. N2n's
+  `sh lab/frontier/n2n2shell/live/replay-all.sh` gave pins 5 OK, harness 15/0,
+  live 22/0, W10 9/0, W11 13/0, W13 11/0, W15 7/0, overall 7 PASS / 0 FAIL
+  from a clean archive of `a2284de2`; the first 4/3 attempt failed because
+  gitignored `community.list` was absent, fixed by using the pinned tarball's
+  copy. Solanum W3's plain real-ircd layout probe reads `buf` at vaddr
+  `0x5220`, size `0x200`, inside `.bss` ending `0x5420`; beyond the 50 chosen
+  `A`s and NUL at `+0x232` there is only ordinary ELF data, with 18/0 harness
+  and 6/0 ASan controls. All three remain author-side, unwitnessed.
