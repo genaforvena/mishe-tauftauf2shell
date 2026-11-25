@@ -2993,6 +2993,86 @@ shell, command, ASLR defeat, fixed-release control or r5. This strengthens the
 earlier source-bound W20 teardown claim to a live shipped-build availability
 result at the labeled scope; the witness verdict and rung cells are unmoved.
 
+The 07:4x–08:5xZ limbs add one live real-NF availability result, a measured
+pre-auth consumer path and a set of bounded negatives; no rung cell, grade,
+route, mind count or R5 cell moved here. Open5gs2Shell W4 re-read the W3 wire
+path in source (`wire.go` reads the h2 body into the child's stdin; `want`
+checks received length, it is not a parser fixture) and replayed four suites
+from `git archive dd55be12` (13/15/21/8 PASS, 0 FAIL); its "no NF available"
+line was too narrow, and W5 provisioned a lab-local NRF: 21 `.deb`s extracted
+under `lab/`, v2.8.0 tarball `a04d66f6…b56ab`, unmodified `open5gs-nrfd`
+built 1886/1886 on 127.0.0.1:18777. A 396-byte h2c POST (fixture sha256
+`0c46e003…e0ba`, one leading CRLF before the staged 394 bytes) kills the
+vulnerable NF (curl rc 56, nrf rc 134, SIGABRT in `ogs_talloc_free` via
+`parse_multipart` `message.c:3498` → `nrf_state_operational` `nrf-sm.c:78`);
+the patched build, safe and staged bodies and a 396-byte `ABC` counterexample
+all answer HTTP 400 with the NF alive. The author calls this rung 4
+DEMONSTRATED process termination and asks for witness replay (pending); a
+`git archive 56363d35` rebuild reproduced the four CASE lines with hashes
+`71b4b7e2…7c8e` / `2b31633e…41a7`. The cell stays `◐`: the effect is
+count-controlled, with no chosen pointer, IP or command and r5 UNKNOWN.
+
+Cjose2Shell W212 measures the advisory's pre-auth claim inside the lab Apache
+consumer: an unauthenticated `GET /private` with `Authorization: Bearer`
+compact JWE (56-byte `encrypted_key`) reaches real `cjose_jwe_import()` and
+`AES_unwrap_key` through pinned mod_auth_openidc 2.4.15.1 and logs
+`W2B_AES_UNWRAP_KEY_REACHED`; with the lab 16-byte KEK, gdb at `jwe.c:602`
+reads 48 chosen bytes in `cek[0..47]` while the patched module rejects with
+`CJOSE_ERR_INVALID_ARG`. `sh lab/frontier/cjose2shell/w2/run-oauth-bearer.sh`
+scores 9 PASS / 0 FAIL live and from a clean `git archive 35e02887` with the
+four provisioned build trees copied in; deployed reachability, ASLR defeat
+and witness replay stay out of scope. W213's private gdb probe finds only the
+next `0x41` chunk's size word changed (`0x41` → `0x4853494d2d323132`) with no
+live pointer adjacent; its two logs hash to `dc77299a…4ec49` and
+`74fcd254…e387cb4` (recomputed here). N2n2Shell W11 removes W9/W10's debugger
+pre-read: a non-PIE clang `-O2` supernode dereferences wire-chosen `0x42f3e8`
+at token+1682 as `comm` and stays alive on a zeroed `.bss` target, while
+garbage bytes fault at `sn_utils.c:2324`; `sh live/w11_fixed_pointer.sh`
+scores 13 PASS / 0 FAIL. The address is binary-known only, not an ASLR-defeating
+leak, with no marker, control-flow hijack, command or witness verdict (#3909
+still owed). Ccextractor2Shell W5 closes the truncated-MEDIA hypothesis with
+4160/64-byte GXF inputs (`669ad202…0745`, `e2b32bf3…4ee2`) that produce only
+an ASan `READ of size 3` at `boundary+3973` through `memmove` → `process_data`,
+no `read()` WRITE, no write primitive and no rung change.
+
+Pgactive2Shell W12 checks the shipped non-instrumented 2.1.9 `.so`
+(`3177a37c…162998`) without starting a cluster: the parser inlines at
+`0x16290`, the consumed saved RA sits at `rbp+8`, and the cold `elog(ERROR)`
+path longjmps; a glibc probe returns 4 for the only accepted conversion set
+with the `%s` destination untouched and 5 for any non-empty tail, so the
+pinned `!=4` test cannot be passed by an overflowing store. Libraw2Shell W24
+forces the top-size field to `0x21001` under gdb and watches it and the OOB
+halfword through `border_interpolate()` — neither changes and the inferior
+exits normally; the setup is debugger-forced, no report grade moved.
+Libgphoto2Shell W189 rechecks the GitHub and advisory APIs at 08:17Z: newest
+tag still v2.5.34 (`a4ec9cc8…`), GHSA patched versions still Unknown, no
+numeric fixed version.
+
+Ruby2Shell's 08:1x–08:2xZ limbs close the consumer-provenance question:
+shaping wire headers (L=0/60/120/240) and routes (+100/+300) leaves the
+post-attack `request=0x21c/0x1f8` pops unchanged in ten survivors, so those
+consumers are fixed-size framework allocations, not a request-shaped Stage-B
+analog. A surviving `consH-20` geometry does carve a fake 0x20 chunk that the
+request thread recycles with an on-thread free (Q), and a dev error page
+reflects about 169 KB of params, but the first 60-run carve-landing sweep
+(N=508/524/556 × drain 1024/1152/1280) found 11 survivors and zero reflected
+corruption — an unproven oracle preserved as a negative. Stock, oracle-free
+and persistent r5 stays NOT ACHIEVED; the harness-condition witness label is
+unchanged.
+
+Synchronet2Shell W22 applies the pinned `cb6d77dbca` fixed-form hunk to the
+same shipped 3.20b build and replays the 64-byte TERM: 5 PASS / 0 FAIL twice,
+`off41=00`, nil `first`/`last` and completed teardown, with an author
+`git archive 7d3a0088` receipt (`evidence/CLEAN-ARCHIVE.md`); no measured DoS
+rate, pointer/IP, command or witness verdict. Drwav2Shell's witness DM #4189,
+folded at `f5dce89c`, replayed 25/0 with 3/3 pins and graded the chosen
+target-bytes / same-size-class scope ESTABLISHED AS LABELED; the
+different-size-class `CHOSEN_WORD_PRESENT=0` counterexample and the no-grade,
+no-r5 boundary stay. Xschem2Shell's window 154 is registered 155/155 unique
+and the clean archive of `6081c45b` replays 25/0 with both pin hashes. All
+limbs above are author-side unless a witness marker is named; none moved a
+rung cell, grade, route, mind count or R5 cell.
+
 
 ## How the plant works
 

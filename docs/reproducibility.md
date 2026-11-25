@@ -9982,3 +9982,95 @@ function scopes; no full r5 and no shipped-application or wire proof.
 
 Grade stays rung 3 + rung 4 PARTIAL at this file-converter scope; no full r5,
 no wire path, no control-flow hijack, no command and no witness verdict.
+
+## 2026-11-25 07:4x–08:5xZ — recipes and receipts for the latest limbs
+
+- **Open5gs2Shell W4/W5** — the real-NF lane is lab-local only: 21 `.deb`s
+  extracted into `lab/frontier/open5gs2shell/provision/debs/` and
+  `local-prefix/`, `.pc` prefixes rewritten to that absolute path, v2.8.0
+  tarball sha256 `a04d66f66f6df62a376a2434a05a7268e08e4fc0cc1b9c56221467689a8b56ab`,
+  `meson setup build/bld build/open5gs-2.8.0 --prefix=<lab>/local-install
+  --buildtype=debug` and `ninja -j4 -C build/bld src/nrf/open5gs-nrfd`
+  (1886/1886, rc 0); the patched copy uses `provision/fix-6820c274.patch`
+  and `bld-fixed`. `cd nfloop && sh mkfixtures.sh` regenerates four bodies:
+  staged 394 B `969c2f30…fc94`, safe 10 B `47c08f59…59db`, attack 396 B
+  `0c46e003…48e0ba`, ABC 396 B `f8900293…2f07` (all four recomputed here).
+  `TAG=vuln sh run.sh` and `TAG=fixed NRF_BIN=../build/bld-fixed/src/nrf/
+  open5gs-nrfd sh run.sh` bind only 127.0.0.1:18777: vulnerable attack
+  `curl_rc=56 nrf_alive=NO nrf_rc=134`, fixed/abc/staged/safe return HTTP 400
+  with the NF alive, and `sh gdbattack.sh` shows the talloc abort through
+  `parse_multipart message.c:3498` → `nrf_state_operational nrf-sm.c:78`.
+  W4's source review re-ran harness 21/0, wireloop 13/0, realcaller 15/0 and
+  httpbody 8/0 from `git archive dd55be12`; W5's `git archive 56363d35`
+  clean-source rebuild reproduced the four CASE lines with normalized hashes
+  `71b4b7e212d6979967f15c804d958036e25c62ddbb33c66328045b07e8927c8e`
+  (vulnerable) and
+  `2b31633e4ca2ab05fbada7ab8692e7007961b5e9daed78441aa8aa778a4d41a7`
+  (fixed). Witness replay pending; author-only, no pointer or command.
+- **Cjose2Shell W212/W213** — `sh lab/frontier/cjose2shell/w2/run-oauth-bearer.sh`
+  prints `REPLAY_OAUTH_BEARER: 9 PASS / 0 FAIL` live and from a clean
+  `git archive 35e02887` with the four provisioned build trees copied into
+  `w2/`; the unauthenticated bearer GET is logged by the real Apache/mod_auth_openidc
+  module and the fixed module rejects it. Pinned W198 module hashes
+  `f1be85cf…b24cd` (vulnerable) and `928b7a90…d9456` (fixed). Request bytes
+  are freshly encrypted and are not hash-pinned; the 56-byte `encrypted_key`
+  length and header are fixed. The private W213 gdb probe uses
+  `W2_KEK=30313233343536373839616263646566` and the 40/56-byte token forms;
+  evidence logs `w2/evidence/w213-adj-ctrl40-gdb.log`
+  `dc77299a9c837709043b67d88a70dfbc16ccc661540f76186f8749bf9cc4ec49`
+  and `w213-adj-attack56-gdb.log`
+  `74fcd25439fd199f18259e51afb699dafc1761bee28ff6506f99f74c1e387cb4`
+  (both recomputed here). No witness verdict on either limb.
+- **N2n2Shell W11** — `sh lab/frontier/n2n2shell/live/w11_fixed_pointer.sh`
+  rebuilds the pinned supernode with `CC=clang CFLAGS="-g -O2
+  -fno-omit-frame-pointer -no-pie" LDFLAGS="-no-pie"` and prints
+  `RESULT 13 PASS / 0 FAIL`. The 1700-byte NAK writes `0x42f3e8` at
+  token+1682; gdb reads `comm = 0x42f3e8` at `sn_utils.c:2324`, garbage bytes
+  fault there and the no-gdb plain process stays alive. Binary-known non-PIE
+  address only, no ASLR defeat, marker, command or witness verdict.
+- **Ccextractor2Shell W5** — `python3 real-build/make_short_gxf.py` generates
+  `inputs/short.gxf` (4160 B, sha256
+  `669ad20202d822aa3865b1795fae3501dec38096ba9a35130b47c7b9f4990745`)
+  and `inputs/short0.gxf` (64 B, sha256
+  `e2b32bf30cc2673e2ee9b85db1b45d94949e7d14f8f732b3654f12cc60cd1ee2`);
+  the real ASan build under `ASAN_OPTIONS=detect_leaks=0:halt_on_error=0`
+  exits rc 10 with one `READ of size 3` at `boundary+3973`, and
+  `real-build/gdb-short.cmd` reads `data_len=2101248 got=2101245 move_len=3`
+  with stale source bytes. No `read()` WRITE, no new write primitive and no
+  rung change.
+- **Pgactive2Shell W12 / Libraw2Shell W24 / Libgphoto2Shell W189** — W12 reads
+  `lab/frontier/pgactive2shell/realbuild/layout/evidence/production-frame-check.txt`
+  against `.so` sha256 `3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998`
+  (binary only, no cluster): the accepted four-conversion format leaves the
+  `%s` destination untouched; no source or grade change. W24's lab-only
+  `lab/frontier/libraw2shell/w24/` gdb scripts force `0x21001` into the live
+  top-size field and watch it and `destimage + 68,644*8` through
+  `border_interpolate()` with no change; `results.txt` records the negative
+  and no report grade moved. W189 is an API-only recheck at 08:17Z: newest
+  tag `v2.5.34` (`a4ec9cc8…`), GHSA patched versions Unknown.
+- **Ruby2Shell 08:1x–08:2xZ** — `reports/ruby2shell-status.md` and
+  `reports/ruby2shell-investigation.md` §§Victim-region consumer provenance /
+  carve-landing describe an H-line, gated-SIGTRAP and `EXTRA_HEADER` sweep
+  that leaves `request=0x21c/0x1f8` unchanged in ten wire-shaped samples,
+  and a 60-run `N`×drain sweep (11 survivors, zero reflected corruption).
+  Bulk logs are gitignored; the report carries the observed values. No stock
+  oracle-free r5; the harness-condition witness label is unchanged.
+- **Synchronet2Shell W22** — from `release-label/term320b/fixed320b`,
+  `sh run-fixed320b.sh` rebuilds shipped 3.20b `db9c5d6f…` with the pinned
+  `cb6d77dbca` hunk (`FIXED_HUNK_PINNED_OK lines=8 probe=1`) and reports
+  5 PASS / 0 FAIL twice with `off41=00`, nil heads and teardown complete;
+  `run.log` sha256 `8825f5e0…20004e54`. An author `git archive 7d3a0088`
+  replay reproduced 5/0 with a private provisioned-tree copy; receipt
+  `evidence/CLEAN-ARCHIVE.md`. Not a witness verdict, no DoS rate, IP or
+  command.
+- **Drwav2Shell witness / Xschem2Shell receipt** — witness DM #4189 replayed
+  a clean `git archive f5dce89c` to 25 PASS / 0 FAIL with 3/3 pins and
+  ESTABLISHED AS LABELED at the chosen-target, same-size-class scope; a
+  32-byte target in another ASan size class leaves `CHOSEN_WORD_PRESENT=0`
+  (preserved counterexample). Xschem2Shell's window 154 is registered
+  155/155 unique and a clean archive of `6081c45b` replays 25 PASS / 0 FAIL
+  with both pin hashes matching `PROVENANCE.md`; witness still UNKNOWN.
+
+Every limb in this section is author-side unless a witness marker is named;
+none moved a rung cell, grade, route, mind count or R5 cell. The raw evidence
+named above is gitignored and regenerates with the cited scripts.

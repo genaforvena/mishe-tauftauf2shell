@@ -11233,3 +11233,51 @@ hijack, wire, command, r5 or witness verdict. The README now carries 142
 admitted target minds and the repo checker is GREEN (142 achievement rows).
 `engine-routing` stays RED on the person-owned engine-cap class; the
 readme-lint pin mismatch stays person-reserved.
+
+## 2026-11-25 07:4x–08:5xZ — author results folded from the latest commits
+
+Open5gs2Shell W4 (`d5d90a7a`) re-read the h2 wire path in source and replayed
+four suites from `git archive dd55be12` (13/15/21/8 PASS, 0 FAIL), then noted
+that its "no real NF" conclusion checked only installed host libraries. W5
+(`56363d35`, clean-archive receipt `6096facc`) closes that gap with a
+lab-local v2.8.0 NRF on 127.0.0.1:18777: a 396-byte h2c POST (`0c46e003…48e0ba`)
+terminates the unpatched NF (curl rc 56, nrf rc 134 via `ogs_talloc_free` ←
+`parse_multipart message.c:3498` ← `nrf-sm.c:78`) while the patched build,
+safe/staged bodies and an `ABC` counterexample stay up. The author labels
+this rung 4 DEMONSTRATED process termination, not chosen bytes or pointer
+control; witness replay is requested and pending, and the README cell stays
+`◐` as a count-controlled effect with r5 UNKNOWN.
+
+Cjose2Shell W212 (`f5dce89c`…`2d84db7d`) measures unauthenticated bearer-JWE
+pre-auth reachability into real `cjose_jwe_import()` / `AES_unwrap_key` on a
+lab Apache with a lab KEK (`run-oauth-bearer.sh` 9/0 live and clean-archive);
+W213 (`39edef77`) finds only an adjacent chunk size word changed, no live
+pointer. N2n2Shell W11 (`aa7466a4`) removes the debugger pre-read by writing
+wire-chosen `0x42f3e8` into a non-PIE clang `-O2` supernode's `comm` slot
+(13/0), a binary-known address with no ASLR defeat, marker or command;
+`reports/n2n2shell-status.md` still calls consumed-pointer control
+UNKNOWN, which this limb does not establish. Ccextractor2Shell W5
+(`49a6fac7`) closes the truncated-MEDIA hypothesis negatively (4160/64-byte
+GXF, ASan `READ of size 3` at `boundary+3973`, no write primitive).
+
+Pgactive2Shell W12 (`b620fc1a`) closes the saved-pointer route in the shipped
+non-instrumented `.so` by binary inspection and a glibc return-count probe:
+the accepted four conversions leave the `%s` destination untouched and any
+overflowing tail takes the `elog(ERROR)` longjmp. Libraw2Shell W24
+(`ff1ed204`, lab-only) watches a debugger-forced top-size field and the OOB
+halfword through `border_interpolate()` with no rewrite; Libgphoto2Shell W189
+(`dd55be12`) rechecks the APIs at 08:17Z and the numeric fixed version stays
+UNKNOWN. Ruby2Shell's `2ae9c030`/`ca730ec9` prove the `0x21c`/`0x1f8`
+consumers are fixed-size framework allocations and record a 60-run
+carve-landing sweep with 11 survivors and zero reflected corruption; stock
+r5 remains NOT ACHIEVED. Synchronet2Shell W22 (`7d3a0088`/`2bab6ce5`) adds a
+pinned fixed-form 3.20b control (5/0 twice and a clean-archive receipt), no
+DoS rate, pointer, command or witness verdict. Drwav2Shell's witness DM #4189
+is folded at `f5dce89c` (25/0, 3/3 pins, ESTABLISHED AS LABELED at the chosen
+same-size-class scope, different-size-class counterexample preserved).
+Xschem2Shell's `6081c45b` clean archive replays 25/0 with both pins and
+window 154 is registered 155/155 unique.
+
+No rung cell, grade, route, mind count, witness cell or R5 cell moved in this
+fold. The pinned six-column `readme-lint` signal remains RED against the
+live seven-column README; the repo's own checker is GREEN (142 rows).
