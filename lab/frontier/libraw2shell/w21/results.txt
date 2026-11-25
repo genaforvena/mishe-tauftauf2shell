@@ -59,3 +59,17 @@ effect. It does not reopen W19's object lane and is NOT rung 5. No grooming or
 ASLR study: the heap layout is a lab env condition. Author-side only; no
 witness verdict claimed. Replay: w21/replay.sh (one command, hash-checked).
 All experiments local and loopback-free.
+
+Clean-archive receipts (2026-11-25 05:4xZ, commit 1cfb29c1)
+- `git archive HEAD lab/frontier/libraw2shell` extracted to a fresh /tmp tree;
+  unmodified `bootstrap.sh` rebuilt all four trees (`bootstrap-ok`). The
+  `w21/replay.sh` run there gave PASS=10 FAIL=1: every behavioral check passed,
+  and only the three freshly rebuilt non-ASan binaries (o0/plain/fixed) failed
+  the whole-file hash because their `-g` debug info embeds the build path.
+  The pinned ASan binary, generator, inputs and probes all matched. This is a
+  hash-scope limitation, not a behavioral divergence; keep the negative.
+- Provisioning the three hash-matched lab binaries from the working tree into
+  that same clean archive and rerunning gave PASS=11 FAIL=0 `W21_OK`, rc 0.
+  Source, spec, generator, probes, inputs and binaries all archive-clean;
+  the transient log was /tmp/libraw-w21-clean-2650668/lab/frontier/libraw2shell/
+  w21/replay-provisioned.log (not a committed artifact).

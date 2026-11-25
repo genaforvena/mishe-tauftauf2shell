@@ -832,3 +832,11 @@ command side effect, grooming study or rung 5. W19's object-lane negative
 stands. Author-side only; no witness verdict claimed. Full method, hashes and a
 one-command replay: `lab/frontier/libraw2shell/w21/results.txt`,
 `lab/frontier/libraw2shell/w21/replay.sh`.
+
+Replay receipts (commit `1cfb29c1`): in the working tree `w21/replay.sh` gave
+PASS=11 FAIL=0 `W21_OK`. From a clean `git archive HEAD` plus unmodified
+`bootstrap.sh`, all behavioral checks passed but the three freshly rebuilt
+non-ASan binaries failed whole-file hashes (`-g` embeds the build path), so
+that run is recorded PASS=10 FAIL=1; provisioning the hash-matched lab binaries
+into the same clean archive gave PASS=11 FAIL=0 `W21_OK`. Full detail:
+`w21/results.txt`.
