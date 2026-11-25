@@ -1,0 +1,28 @@
+W4 bounded experiment 2026-11-25 (vtkdicom2shell). Question: is the pointer
+that the plain-build process dereferences at the OOB slot influenced by file
+bytes? Method: gdb breakpoint at vulnerable vtkDICOMItem.cxx:195, stop on the
+final insert (NumberOfDataElements==5), print e->Value.V at the OOB slot before
+the chosen tag write; repeat with two crafted files.
+
+File A = evidence/undef-ob-chosen.dcm (272 bytes), final tag 0x4841434b.
+File B = same generator with element (0008,1107) changed from a 2-byte US
+value to a 32-byte OB value 41424344...5e5f (305 bytes); final tag unchanged.
+
+SNAP e=0x5555557e5b18 tag=4841434b Value.V=0x5555557e5b20: 0x1e00000500000001   (A)
+SNAP e=0x5555557e5b58 tag=4841434b Value.V=0x5555557e5b60: 0x1e00000500000001   (B)
+
+The store address moved 0x40 bytes with the extra allocation, but the stale
+Value.V word is byte-identical and is not present anywhere in either crafted
+file (searched for 01 00 00 00 05 00 00 1e). It is allocator-derived stale
+data (refcount/type header of a previously used vtkDICOMValue::Value object),
+not file-controlled. File control of the fatal pointer: NOT OBSERVED -> UNKNOWN.
+
+Crash site (evidence/gdb-oob-pointer.out, same file A):
+  #0 vtkDICOMReferenceCount::operator--(this=0x1e00000500000001) at ReferenceCount.h:50
+  #1 vtkDICOMValue::operator=(this=0x5555557e5b20) at Value.h:426
+  #2 vtkDICOMItem::Set at vtkDICOMItem.cxx:297
+  #3 Decoder<0>::ReadElements at vtkDICOMParser.cxx:1645
+The OOB element's stale Value.V is decreferenced by the real Set() that
+follows the OOB insert; this is the plain-build SIGSEGV, not a destructor.
+Grade unchanged: rung 4 chosen tag bytes at the chosen OOB slot; no pointer
+control, no IP/control-flow, no command, no wire path, no witness verdict.

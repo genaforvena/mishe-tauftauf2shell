@@ -1,5 +1,25 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 11:42Z — W4 plain-build crash site; stale OOB pointer not file-controlled
+
+- The plain-build SIGSEGV after the chosen-byte OOB write was localized. gdb
+  (`evidence/gdb-oob-pointer.out`): the final insert at slot 5 leaves a stale
+  `Value.V` word `0x1e00000500000001` in the OOB element; the very next real
+  `vtkDICOMItem::Set` dereferences it in `vtkDICOMValue::operator=`
+  (`Value.h:426`) via `vtkDICOMReferenceCount::operator--` (`ReferenceCount.h:50`,
+  `this=0x1e00000500000001`, unmapped). Stack: `Set` `Item.cxx:297` ←
+  `ReadElements` `Parser.cxx:1645`. The crash is the stale-pointer decref in
+  `Set`, not a later destructor.
+- Bounded control test (`evidence/oob-pointer-invariance.txt`): a variant file
+  replaces a 2-byte US element with a 32-byte OB value of distinct bytes
+  (272 → 305 bytes). The store moved 0x40 bytes, but the stale `Value.V` word
+  stayed byte-identical `0x1e00000500000001`, and those bytes do not occur in
+  either crafted file. The fatal pointer is allocator-derived stale data, not
+  file-chosen. Pointer control through this OOB element: NOT OBSERVED (UNKNOWN).
+- Grade unchanged: rung 3 from crafted file bytes in the real reader, rung 4
+  chosen tag bytes at the chosen OOB slot with a plain crash. No file control
+  of the dereferenced pointer, no IP/control flow, no command, no wire path,
+  no witness verdict (witness wake still RED, replay offer #4276 unanswered).
 
 ## 2026-11-25 10:14Z — W2 broad file-lane negative (no invalid value source)
 

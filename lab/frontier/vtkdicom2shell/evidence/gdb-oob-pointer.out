@@ -1,0 +1,32 @@
+Breakpoint 1 at 0xd9005: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 195.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+2026-11-25 11:40:30.432 (   0.049s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 204 in file "evidence/undef-ob-chosen.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 204 in file "evidence/undef-ob-chosen.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+2026-11-25 11:40:30.433 (   0.050s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 226 in file "evidence/undef-ob-chosen.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 226 in file "evidence/undef-ob-chosen.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+
+=== OOB SLOT BEFORE TAG WRITE: n=5 e=0x5555557e5b18 store=0x5555557e5a78 slot=5 ===
+0x5555557e5b18:	0x0000000000000021	0x1e00000500000001
+0x5555557e5b28:	0x0000000100000002	0x0000000000000106
+tptr=0x5555557e5ad8 tptr->Next=0x5555557e5ab8 tag=4841434b
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555e6fe0 in vtkDICOMReferenceCount::operator-- (this=0x1e00000500000001) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMReferenceCount.h:50
+50	  return --this->Counter;
+
+=== CRASH BACKTRACE ===
+#0  0x00005555555e6fe0 in vtkDICOMReferenceCount::operator-- (this=0x1e00000500000001) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMReferenceCount.h:50
+#1  0x00005555555e7269 in vtkDICOMValue::operator= (this=0x5555557e5b20, o=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMValue.h:426
+#2  0x000055555562d615 in vtkDICOMItem::Set (this=0x7fffffffd9a0, tag=..., v=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:297
+#3  0x000055555562485e in (anonymous namespace)::Decoder<0>::ReadElements (this=0x7fffffffdc50, cp=@0x7fffffffdec0: 0x5555557e3ae0 "\376\377", <incomplete sequence \340>, ep=@0x7fffffffdef0: 0x5555557e3af0 "", l=112, delimiter=..., bytesRead=@0x7fffffffd990: 8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1645
+#4  0x0000555555625f7c in (anonymous namespace)::Decoder<0>::ReadElementValue (this=0x7fffffffdc50, cp=@0x7fffffffdec0: 0x5555557e3ae0 "\376\377", <incomplete sequence \340>, ep=@0x7fffffffdef0: 0x5555557e3af0 "", vr=..., vl=128, v=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1464
+#5  0x00005555556247a9 in (anonymous namespace)::Decoder<0>::ReadElements (this=0x7fffffffdc50, cp=@0x7fffffffdec0: 0x5555557e3ae0 "\376\377", <incomplete sequence \340>, ep=@0x7fffffffdef0: 0x5555557e3af0 "", l=4294967295, delimiter=..., bytesRead=@0x7fffffffdb40: 34359738368) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1620
+#6  0x000055555562435e in (anonymous namespace)::Decoder<0>::ReadElements (this=0x7fffffffdc50, cp=@0x7fffffffdec0: 0x5555557e3ae0 "\376\377", <incomplete sequence \340>, ep=@0x7fffffffdef0: 0x5555557e3af0 "", l=4294967295, delimiter=...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:493
+#7  0x0000555555622ecb in vtkDICOMParser::ReadMetaData (this=0x5555557e2620, cp=@0x7fffffffdec0: 0x5555557e3ae0 "\376\377", <incomplete sequence \340>, ep=@0x7fffffffdef0: 0x5555557e3af0 "", meta=0x5555557e26f0, idx=-1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:2292
