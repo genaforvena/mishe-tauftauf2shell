@@ -325,3 +325,12 @@ a packed pointer field, which the real consumer does not provide. This closes
 the partial-pointer route without a new build.
 
 W209 is an author claim until independently replayed.
+
+Commit `1b70a07a` carries W209 (five scoped paths). A clean `git archive`
+of that commit into `/tmp/w209-stbvorbis-1b70a07a`, with the SDL_mixer
+dependency symlinked to the live lab, replayed `run-canonical.sh` at
+20:12Z: 14 PASS / 0 FAIL, rc 0, including 17 PASS / 0 FAIL for the W208
+controls. The clean replay observed the same canonical
+`save_base=0x7f4100007f41`, the `CANON_OK` marker read through that pointer,
+mapped rc 134 / unmapped rc 139, and fixed/safe rc 0. Live tree untouched.
+Independent witness replay is owed; no verdict yet.
