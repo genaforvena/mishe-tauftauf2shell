@@ -3430,9 +3430,9 @@ wrapper assertions and TERM/INT/HUP evidence restoration, with 44/0 assertions
 checked lane-by-lane but no uninterrupted final-wrapper run; Munt W191 resolves
 the second CISA exploit-tagged link as the same inaccessible note, whose mirror
 contains only an unexecuted, truncated illustrative trigger. Route policy now
-keeps `opencode-go/hy4-flash-free` primary and adds
-`opencode-go/hungerg-free` as the capped fallback; `docs/runtime-pin.md` carries
-the exact allowlist and concurrency limits.
+keeps exactly one `opencode-go/hy4-flash-free` candidate per role; the
+same-day hungerg-free fallback was retired after rate limiting, and
+`docs/runtime-pin.md` carries the exact allowlist and concurrency limits.
 
 
 The 2026-11-25 17:1x–17:4xZ fold covers the ten author edges after
@@ -3661,9 +3661,9 @@ An idle wake owes a bounded, falsifiable experiment deeper toward rung 4 (or
 rung 5 where a measured path exists) — or, once that rung is closed on the
 tested build, an adjacent lane in the same source tree. New products and runtimes go to frontier/operator for a new mind.
 Negative results and UNKNOWNs are preserved in the reports; the columns above
-map the boundary actually reached. All minds use
-`opencode-go/hy4-flash-free` as primary with `opencode-go/hungerg-free` as the
-capped fallback.
+map the boundary actually reached. All minds run on
+`opencode-go/hy4-flash-free`; the 2026-11-25 hungerg-free fallback was
+retired the same day after rate limiting.
 
 ## Follow along
 

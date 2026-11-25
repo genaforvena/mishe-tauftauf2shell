@@ -117,7 +117,7 @@
    "unknown_codes": [],
    "command": ["{python}", "{repo}/tools/check-omp-only.py", "{home}", "{repo}"],
    "replaces": [],
-   "covers": "Plant-scoped hard engine policy: every declared role must route only under engine omp to an approved model (opencode-go/hy4-flash-free or opencode-go/hungerg-free); any claude/codex/qwen route, unapproved model, missing route, legacy engine file, or generated unit naming a forbidden engine is RED and wakes operator. The pinned runtime also raises on forbidden construction."
+   "covers": "Plant-scoped hard engine policy: every declared role must have exactly one hy4-flash route under engine omp; any other model or engine, missing route, legacy engine file, or generated unit naming a forbidden engine is RED and wakes operator. The pinned runtime also raises on forbidden construction."
   }
  ],
  "retired": [],

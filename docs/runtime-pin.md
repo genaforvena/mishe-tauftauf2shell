@@ -37,19 +37,21 @@ and two System 0 duties (`readme-lint` → docs, `omp-only` → operator).
 These are site-local runtime changes until a future release pin includes
 them; re-apply on upgrade.
 
-- 2026-11-25 owner-directed model addition: every route present at the
-  change (149 roles) keeps `opencode-go/hy4-flash-free` as its tier-0
-  primary and adds `opencode-go/hungerg-free` as a tier-1 fallback. Both
-  are account-less free OMP candidates with `thinking: high`. The primary
-  has `max_parallel: 3` and the fallback `max_parallel: 2`; the site wake
-  cap remains 5, so up to three hy4-flash engines and two HungerG engines
-  may run concurrently.
-  The pinned `engine_router.py` hard guard and `tools/check-omp-only.py`
-  allow exactly these two models; all other engines/models remain
-  forbidden. No unit or resolver names a model, so
-  no unit regeneration or service restart is required. Future role
-  admissions must copy both candidates in this order. Re-apply this
-  allowlist change on upgrade.
+- 2026-11-25 owner-directed model addition, reversed the same day: commit
+  `09c39109` first added `opencode-go/hungerg-free` as a tier-1 fallback to
+  all 149 routes and widened the repo's allowlist. That fallback then
+  accumulated two timeouts and a cooling entry in
+  `engine/routing-state.json` (the owner reported it rate-limited), while the
+  pinned omp-only checker had never been widened and read RED. The owner
+  directed hy4-flash-only: each of the 149 routes again has exactly one
+  `opencode-go/hy4-flash-free` candidate (`max_parallel: 3`, site wake cap 5),
+  hungerg-free is recorded under `routes.json`'s `retired` key, its
+  cooling/timeout entries were cleared, and both `tools/check-omp-only.py`
+  copies plus the pinned `engine_router.py` guard again allow exactly
+  `opencode-go/hy4-flash-free`; `duties.json` says so too. No unit or resolver
+  names a model, so no unit regeneration or service restart was required.
+  Future role admissions must copy the single hy4-flash candidate. Re-apply
+  this allowlist state on upgrade.
 
 The 2026-11-21 owner-directed self-healing patch also updates the pinned
 `duties.json` and six `checks/*.py`: no-force autonomous publication and

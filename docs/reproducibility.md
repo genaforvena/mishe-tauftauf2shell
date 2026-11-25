@@ -10524,9 +10524,11 @@ drivers. Normalized receipts named below are tracked in their lanes.
   PoC bytes or new caller were found; no build or probe ran.
 
 The route-policy commits are already reflected in `docs/runtime-pin.md` and
-`docs/self-healing.md`: `opencode-go/hy4-flash-free` remains primary,
-`opencode-go/hungerg-free` is the tier-1 fallback, their parallel caps are 3
-and 2, and the site wake cap remains 5. No target grade or admission changed.
+`docs/self-healing.md`: the 17:00Z hungerg-free fallback addition was reversed
+the same day after that model was rate-limited, so every role again has exactly
+one `opencode-go/hy4-flash-free` route (`max_parallel: 3`) under the site wake
+cap of 5, with hungerg-free retired in `routes.json`. No target grade or
+admission changed.
 
 ## 2026-11-25 17:1x–17:4xZ — witness verdict, chosen RNG byte, short-write negative
 
