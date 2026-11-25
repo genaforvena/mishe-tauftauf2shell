@@ -555,3 +555,15 @@ ESTABLISHED rung 5. What would change the grade: a command reached without
 the detach/trampoline/app-owned objects, a witness counterexample, or a
 provisioned consumer with a real in-callback free.
 
+Clean-archive receipt (commit `d9ef7b38`, 2026-11-25 12:46Z): committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD`
+into `/tmp/w12-arch`, with symlinks to this lab's two pinned mirror trees and
+hostkey (the archive carries no build artifacts or private key). The driver
+rebuilt both plain libraries from those pinned trees and reported
+`run-fixedaddr.sh` 7 PASS / 0 FAIL, rc 0 (ELF-derived address, separate-process
+control and three repeats), plus `run-nodetach.sh` 6 PASS / 0 FAIL and
+`run-plain.sh` 9 PASS / 0 FAIL, both rc 0, as regressions. This checks
+committed harness and driver text, not a fresh fetch of libssh; W12 remains
+additive and unwitnessed.
+
+
