@@ -1,0 +1,56 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 02:33:22 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+25/Nov/2026 02:33:22 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 02:33:22 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 02:33:22 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 02:33:22 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 02:33:22 [supernode.c:660] supernode is listening on UDP 18760 (main)
+25/Nov/2026 02:33:22 [supernode.c:669] supernode opened TCP 18760 (aux)
+25/Nov/2026 02:33:22 [supernode.c:676] supernode is listening on TCP 18760 (aux)
+25/Nov/2026 02:33:22 [supernode.c:685] supernode is listening on UDP 18761 (management)
+25/Nov/2026 02:33:22 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 02:33:22 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 02:33:22 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=86, now=1795574005) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+HIT_AFTER_DECODE
+$1 = 0x7fffffffc850
+Stack level 0, frame at 0x7fffffffd650:
+ rip = 0x555555564335 in process_udp (src/sn_utils.c:2331); saved rip = 0x5555555658aa
+ called by frame at 0x7fffffffe050
+ source language c.
+ Arglist at 0x7fffffffd640, args: sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=86, now=1795574005
+ Locals at 0x7fffffffd640, Previous frame's sp is 0x7fffffffd650
+ Saved registers:
+  rbx at 0x7fffffffd618, rbp at 0x7fffffffd640, r12 at 0x7fffffffd620, r13 at 0x7fffffffd628, r14 at 0x7fffffffd630, r15 at 0x7fffffffd638, rip at 0x7fffffffd648
+encx = 0
+peer = <optimized out>
+sockbuf = "\300\236XUUU\000\000 \000\000\000\000\000\000\000\200\251XUUU\000\000\037\000\000\000\000\000\000\000\000\312\377\377\377\177\000\000>\031\375\367\377\177\000\000\000\000\000\000UU\000\0008\256XUUU\000"
+mac_buf = "\001\000\000\000\000\000\000\000\300\377\377\377\377\377\377\377/", '\000' <repeats 14 times>
+nak = {cookie = 287454020, srcMac = "\002\000\000\000\000\001", auth = {scheme = 0, token_size = 48, token = "HZMIHZMIHZMIHZMIHZMIHZMIHZMIHZMIHZMIHZMIHZMIHZMI"}}
+nakbuf = "\b\000\000\000\000\000\000\000P\345td\004\000\000\000\240\322\r\000\000\000\000\000\240\322\r\000\000\000\000\000\240\322\r\000\000\000\000\000|\033\000\000\000\000\000\000|\033\000\000\000\000\000\000\004\000\000\000\000\000\000\000Q\345td\006", '\000' <repeats 43 times>, "\020\000\000\000\000\000\000\000R\345td\004\000\000\000\000|\016\000\000\000\000\000\000|\016\000\000\000\000\000\000|\016\000\000\000\000\000\210\r\306\367\377\177\000\000P\332\377\377\377\177\000\000\034\267WUUU\000\0000\324\377\377\377\177\000\0000\325\377\377\377\177\000\000\360\323\377\377\377\177\000\000"...
+cmn = {ttl = 2 '\002', pc = 8 '\b', flags = 0, community = "mynetwork\000\000\000\000\000\000\000\000\000\000"}
+rem = 0
+idx = 86
+msg_type = 8
+from_supernode = <optimized out>
+sn = 0x0
+sender = {family = 2 '\002', type = 0 '\000', port = 39208, addr = {v6 = "\177\000\000\001", '\000' <repeats 11 times>, v4 = "\177\000\000\001"}}
+orig_sender = 0x7fffffffc740
+mac_buf = "\001\000\000\000\000\000\000\000\300\377\377\377\377\377\377\377/", '\000' <repeats 14 times>
+mac_buf2 = "\300\236XUUU\000\000 \000\000\000\000\000\000\000\200\251XUUU\000\000\037\000\000\000\000\000\000"
+sockbuf = "127.0.0.1:39208", '\000' <repeats 48 times>
+hash_buf = '\000' <repeats 15 times>
+comm = <optimized out>
+tmp = <optimized out>
+header_enc = <optimized out>
+stamp = 0
+skip_add = 0
+any_time = 0
+#0  process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=86, now=1795574005) at src/sn_utils.c:2331
+#1  0x00005555555658aa in run_sn_loop (sss=sss@entry=0x5555555800c0 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000555555558422 in main (argc=<optimized out>, argv=0x7fffffffe1b8) at src/supernode.c:741
+[Inferior 1 (process 4101290) killed]

@@ -245,3 +245,52 @@ loud line), break the plain supernode just after decode at
 inspection. It still does not replay the W3 peer-forwarding addendum, which
 keeps its own recipe (`live/w3_peer_forward.py` with
 `live/gdb-cmds-w3.txt`).
+
+## W5: pointer-shaped frame slots have no consumer read (2026-11-25 02:3xZ)
+
+One bounded question left open by W2/W3: does any other pointer-shaped slot
+in the live `process_udp` frame get read after the NAK decode? Source check
+of the pinned case (`sn_utils.c:2306-2363`) shows only `nak`, `nakbuf`,
+`encx`, `peer`, `sockbuf`, `mac_buf` as case locals; `peer` is
+register-resident (W2), `mac_buf`/`sockbuf`/`nakbuf` are string or packet
+buffers, and the function returns immediately after the switch
+(`sn_utils.c:2560`). No post-switch code dereferences a frame slot.
+
+Measured layout in the running plain build, relative to `&nak`:
+`hash_buf +112`, `mac_buf +224`, `sockbuf +288`, `nakbuf +432`; `cmn` and
+`sender` sit below `nak`. A safe-input (48-byte token) 2048-byte dump of
+the frame and the classified pointer-shaped words are in
+`live/evidence/w5-safe-frame-dump.log`, `w5-frame-object-addrs.log` and
+`w5-safe-pointer-words.txt`. Inside the 96-byte attack write
+(`nak+14..+109`) the only pointer-shaped words are the two already tested
+slots at `+96` (stack address) and `+104` (libc `_int_malloc+3173`).
+
+Four batches of four hardware read watchpoints were installed at the
+post-decode breakpoint (`sn_utils.c:2331`) on further pointer-shaped words,
+then a registered peer and the 134-byte attack NAK were sent with
+`live/w3_peer_forward.py`:
+
+- batch 2: `+128`, `+136`, `+344`, `+432`;
+- batch 3: `+368`, `+392`, `+400`, `+424`;
+- batch 4: `+464`, `+488`, `+504`, `+536`;
+- batch 5: `+1608`, `+1616`, `+1632`, `+1640`.
+
+No watchpoint hit in any batch. All four runs forwarded the 134-byte NAK
+with `beyond48=485a4d49485a4d49`; raw GDB and sender logs are
+`live/evidence/w5-watch-batch{2,3,4,5}.log` and
+`w5-watch-batch{2,3,4,5}-sender.log`. Recipe: break at `sn_utils.c:2331`
+in the plain build, set `rwatch *(unsigned long *)($base + OFF)` with
+`$base = (char *)&nak`, continue, and run the W3 sender against the same
+port.
+
+One excluded first attempt put a read watchpoint on `+288`; it fired with
+`Value = 0` and RIP in `__vsnprintf_internal` under `sock_to_cstr` — a
+store into `sockbuf`, not a consumer read (the same GDB false-positive
+class recorded in W2). That run stopped before forwarding and is not part
+of the four negative batches.
+
+Ceiling unchanged: no measured consumed pointer, benign marker, control
+flow or rung 5. These 16 slots add to the W1/W2 negative; other frame
+words not covered by a watchpoint remain UNKNOWN. The W3 forwarding
+encoder's data copy is still the only measured consumer of the overflowed
+bytes.
