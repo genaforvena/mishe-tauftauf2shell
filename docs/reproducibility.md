@@ -9739,3 +9739,69 @@ the hy4-flash route, both resolver keys and three wake units with the EXACT
 full-flag sync (`written 3, removed 0`, doctor GREEN), and adopted window 150.
 Grade rung 3 / rung 4 PARTIAL, no r5, witness UNKNOWN.
 `reports/frontier-ccextractor2shell.md`, `reports/ccextractor2shell-status.md`.
+
+## 2026-11-25 05:5x–06:2xZ — staged MCUboot, real-build CCExtractor/libsshch, corrigenda
+
+- **Mcuboot2Shell FRONTIER-STAGED (CVE-2026-16663)** — provision both verbatim
+  `boot_serial_encryption.c` versions into `lab/frontier/mcuboot2shell/src/`
+  (hashes in `pins.sha256` and `PROVENANCE.md`), then
+  `cd lab/frontier/mcuboot2shell/harness && sh run.sh`: expect **22 PASS / 0 FAIL**
+  with gcc and clang ASan `dynamic-stack-buffer-overflow WRITE of size 1` 8 bytes
+  past the 4096-byte VLA at `ih_hdr_size=4104`, local guard and `ih_hdr_size=0`
+  controls clean, and chosen `4d495348452d4d4355424f4f542121` read back at
+  `buf+6144` in the plain build. The deep `6144` case is a Valgrind invalid
+  write but no ASan report — preserved negative. A clean `git archive HEAD
+  lab/frontier/mcuboot2shell` replay scored 22/0. No real MCUboot build or
+  serial wire, witness UNKNOWN; no charter, route or mind-count change.
+  `reports/frontier-mcuboot2shell.md` §Lab evidence.
+- **Ccextractor2Shell W1/W2 real build** — the admission recipe above is
+  superseded at the real-build scope. Regenerate `inputs/attack.gxf` and
+  `inputs/readback.gxf` with `real-build/make_gxf.py` and
+  `real-build/make_readback_gxf.py`, configure and build the pinned tree with
+  the exact cmake commands in `reports/frontier-ccextractor2shell.md` §Real
+  build (logs `real-build/evidence/{cmake,build,guard-build}.log`), then run
+  the ASan binary with `ASAN_OPTIONS=detect_leaks=0` on each GXF: expect
+  `WRITE of size 1052736` 0 bytes after a 2097272-byte region through
+  `read` → `buffered_read_opt` → `parse_mpeg_packet` for `attack.gxf`, clean
+  local-guard and safe exits, and on `readback.gxf` the program's own
+  `got=2097348` (76 past) with `00 00 01 B3` at `buffer+2097272`; with
+  `halt_on_error=0`, a `READ of size 3900` at `boundary+76` via `memmove`
+  → `process_data`. GDB transcripts use the committed `gdb-consumed-*.cmd`,
+  `gdb-pageread.cmd` and `gdb-readback-slice.cmd`. Raw evidence is gitignored
+  and regenerates from these commands. No pointer/IP/command, no r5, witness
+  UNKNOWN; the brief's "rung 4 CONFIRMED" is an evidence-level label, not a
+  table-cell or grade move.
+- **Libsshch2Shell W2/W3/W4 clean-exit and trampoline lanes** — from
+  `lab/frontier/libsshch2shell`, `sh real/run-survive.sh` (7 PASS / 0 FAIL),
+  `sh real/run-call.sh` (9/0) and `sh real/run-exec.sh` (8/0). Expect
+  `SERVER target_after=0x41414141414141c1 ... survive=1` with `CLIENT rc=0
+  SERVER status=0x0` and no ASan for W3; a wire offset 112 selects
+  `fn=0x61fe9f9fbd10` for `SERVER MARKER called`; the W4 wire string
+  `touch evidence-wire-vuln-groom-exec.marker` runs through a lab trampoline
+  (`SERVER EXEC rc=0`). The pure-rebuild allocation variant is a measured
+  negative (`buf_match=0 it_match=0`); clean-archive replays were 5/0, 8/0
+  and 7/0. Rung-5 mechanics are lab-only and NOT ESTABLISHED, witness UNKNOWN.
+- **FontForge2Shell W16** — from `lab/frontier/fontforge2shell`,
+  `sh replay-negdiv.sh` scores 20/20 rc 0 with `make-negdiv-case.py` generating
+  the PCF cases; clean archives scored 17/17, 15/15 and 20/20. A negative
+  divisor moves byte 3 to `0xff` and `BDFChar.bitmap` to
+  `0x00005555ff0105fe` (PIE) / `0x00000000ff0105fe` (non-PIE), both unmapped;
+  the nonnegative-RHS ceiling `0x01FFFE00` stands. Author-side, no grade or
+  witness move. `NEGDIV.md`, `reports/frontier-fontforge2shell.md` §W16.
+- **Corrigenda recipes (no grade move)** — n2n2shell W7 reruns
+  `sh lab/frontier/n2n2shell/live/w7_large_token.sh` with `PLAIN=` overriding
+  the tree (token_size=600, no watchpoint read in 22 s) and W8 uses
+  `w8_fixed_large.py` (201/600 nonzero fixed-token bytes from wire offset 115);
+  pgactive W11's disassembly is `realbuild/layout/evidence/disassembly-correction.txt`
+  (saved RA at `rbp+8`, canary at `rbp-0x28`); synchronet W20 reruns
+  `lab/frontier/synchronet2shell/release-label/term320b/consumer320b/run-consumer320b.sh`
+  for 17/0, clean-archive normalized hash `e74779de…`; Ruby's corrected
+  consumer probe uses `lab/repro/ruby2shell-cons-vis-tabulate.py` with
+  `process_vm_readv` window lines (Q=0/49, structurally inert forged qword);
+  OpenEXR W197 runs unmodified `exrcheck -c` on the crafted file for a
+  file-chosen `destroy_unpacked_func_ptr` and plain rc 139. Other edges are
+  receipts or bounded negatives with no row change (libgphoto2 W185, yojimbo
+  W6, munt W187, gpgme W10/W11 (real `read_status` EOF early return,
+  `realbuild/run-eof.sh`, clean-archive receipt), libraw W21, open5gs W2, awslc
+  W216,
+  knotresolver W21, cjose W209, cicap W9).

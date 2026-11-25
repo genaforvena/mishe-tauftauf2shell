@@ -11100,3 +11100,27 @@ R5 cell moved.
   active, existing window 150 adopted with no duplicate. Grade unchanged:
   rung 3 at pinned-function scope, rung 4 PARTIAL in a stand-in layout, no
   real build/GXF/wire/pointer/IP/command, no r5, witness UNKNOWN.
+
+### 2026-11-25 05:5x–06:2xZ — 51 commits folded (docs lane)
+
+- **New staged target**: Mcuboot2Shell (CVE-2026-16663) gets a FRONTIER-STAGED
+  README row and reproducibility recipe; 22/0 harness and clean archive. No
+  admission, charter, route, wake unit or mind-count change; witness UNKNOWN.
+- **Corrected stale rows**: Ccextractor2Shell (W1 real pinned-tree GXF write
+  and W2 in-program readback supersede "no real build/GXF/wire" and the
+  stand-in-only rung 4); Libsshch2Shell (W3 clean-exit chosen-pointer write and
+  W4 wire-chosen indirect call/lab-trampoline marker supersede "no pointer
+  control or command"); N2n2Shell (W7 pointer-shaped frame words and W8's
+  fixed-build stale-word disclosure qualify W6's zero-token result).
+- **Corrigenda**: Ruby's forged 0x251 qword is structurally inert (Q=0/49)
+  while corrected victim-region pops are measured; pgactive W11 relocates the
+  saved RA to `rbp+8`; synchronet W20 traces the shipped 3.20b source-bound
+  teardown chain; OpenEXR W197 reaches a file-chosen function pointer in
+  `exrcheck`; FontForge W16 drives byte 3 to `0xff`, still unmapped.
+- **Receipts/negatives folded without a grade move**: ccextractor W1/W2,
+  libsshch W3/W4, fontforge W16, mcuboot staging, libraw W21, open5gs W2,
+  gpgme W10/W11,
+  openexr W197, libgphoto2 W185, yojimbo W6, munt W187, cjose
+  W209, knotresolver W21, awslc W216 and cicap W9's earlier witness verdict.
+  No rung cell, grade cell, route, mind count, witness verdict or R5 cell
+  moved by this fold.
