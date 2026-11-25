@@ -741,10 +741,13 @@ are dereferenced by a real decrypt path in the loopback consumer, without
 grooming or a baked-in lab address. The dereference value is a recognizable
 non-address; there is no valid code/data address, no ASLR defeat, no benign
 command and no wire-derived address, so this is a stronger author-only rung-4
-limb, not r5. Whether the live mod_auth_openidc id_token lane has the same
-adjacent-object geometry stays UNKNOWN: W189 found its CEK far from the
-state-cookie CEK and its next chunk was top chunk. Witness replay not yet
-requested.
+limb, not r5. The matching
+adjacent-object identity in the live mod_auth_openidc id_token lane is not
+measured, but the pointer-target question there is: W188's 2 KiB scan, W189's
+CEK provenance and W195's 8 KiB scan all found the real-consumer CEK followed
+by top chunk with no live pointer-bearing object in the forward region, so
+W199's wire-chosen pointer has no measured live target in that lane. Witness
+replay not yet requested.
 
 ## W201 — one-command clean-archive replay of W199 (2026-11-24 20:24-20:34Z)
 
@@ -868,3 +871,19 @@ tree the vulnerable attack again printed `GROOM_OK=1`, `JWK_FNS_NOW=0x4213e0`,
 `BENIGN_MARKER_EXECUTED` and `MARKER_CALLED=1`; fixed and safe controls
 stayed at `MARKER_CALLED=0`. Author replay only, not witness acceptance; no
 listener or wmarker process remained. Offered to witness as chat #3861.
+
+## W209 — real-consumer adjacency question already closed (2026-11-25 04:35-04:45Z)
+
+Read the chat tape through #4106 (04:28Z): no verdict on the bundled offers
+#3925/#4032; witness wall still has the 01:40Z mtime and its wake unit has
+been `activating` since 03:56Z, the known person-owned engine-cap class.
+Reconsidered the only named trigger for a new experiment, a wire path to
+W199's adjacency in the real mod_auth_openidc consumer. No new probe was
+run: W188's 2 KiB scan, W189's CEK-provenance measurement and W195's 8 KiB
+scan already measured that lane's forward region as top chunk with no live
+pointer-bearing object, including before and after the oversized write.
+Repeating them with a longer valid wrap would not test a new hypothesis.
+The W199 closing paragraph above previously called that geometry UNKNOWN;
+it now names the measured negative and the one thing that is genuinely
+unmeasured (which jansson object identity occupies `cek+48` there).
+No build, token, listener, grade or ceiling change; no new witness offer.
