@@ -91,6 +91,20 @@ return-code/report checks, then prints `REPLAY_NEGDIV_OK: 20 checks, 0 failed`
 with script rc 0. Prerequisites: `sh replay-real.sh` and
 `sh replay-nonpie.sh` (builds the six local trees).
 
+## Clean-archive receipt (commit `c9c5b891`, 2026-11-25 06:0xZ)
+
+`git archive c9c5b891 | tar -x -C "$TMP"` with the local pinned tarball
+supplied by `FF2S_TARBALL`, then `sh replay-real.sh`, `sh replay-nonpie.sh`
+and `sh replay-negdiv.sh` in `$TMP/lab/frontier/fontforge2shell` rebuilt
+all six trees and returned `REPLAY_REAL_OK: 17/17 stable-lane checks
+passed`, `REPLAY_NONPIE_OK: 15 checks, 0 failed` and
+`REPLAY_NEGDIV_OK: 20 checks, 0 failed`, all with script rc 0. The four
+PCF hashes and `replay-negdiv-mapping.out` hash
+(`070fcf9a9de051aaa00976fb47e15ff3bd4e768c4d4990d6a0f8a97c5a9d26a7`)
+are byte-identical between the live tree and the clean archive. This is an
+author-side clean-archive replay on this host, not an independent witness
+verdict; grade unchanged.
+
 ## Disposition
 
 W12's numeric maximum (`0x01FFFE00`) stands; the byte-3 statement is

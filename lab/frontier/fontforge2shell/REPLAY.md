@@ -240,3 +240,9 @@ final line `REPLAY_NEGDIV_OK: 20 checks, 0 failed` with rc 0. The huge
 in-bounds variant faults in patched builds too and is not a control.
 Full arithmetic, hashes and disposition in `NEGDIV.md`. Author-side
 negative for mapped-target reach, not a witness verdict; grade unchanged.
+
+Clean-archive receipt: commit `c9c5b891`, rebuilt all six trees with
+`FF2S_TARBALL=<local pinned tarball>`; `replay-real.sh` 17/17,
+`replay-nonpie.sh` 15/15 and `replay-negdiv.sh` 20/20, each rc 0. The four
+PCF hashes and `replay-negdiv-mapping.out` hash are byte-identical to the
+live tree (`070fcf9a…c5a9d26a7`). Author-side replay, not a witness verdict.

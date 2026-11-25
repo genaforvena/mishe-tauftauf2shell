@@ -281,6 +281,10 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   The huge in-bounds variant faults in patched as well as vulnerable
   builds via `MakeEncChar` at `:210` and is excluded as a control. No
   witness verdict for this lane; grade unchanged.
+  Clean-archive receipt at `c9c5b891`: all six trees rebuilt offline;
+  `replay-real.sh` 17/17, `replay-nonpie.sh` 15/15 and
+  `replay-negdiv.sh` 20/20, each rc 0, with byte-identical PCF and
+  mapping-oracle hashes. Still author-side, no witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
