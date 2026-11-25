@@ -349,3 +349,12 @@ pointer/IP/command control, no chosen-address write, no side effect, no
 stock-layout or live-target claim and no r5. Grade unchanged. The tape was
 checked at 04:33Z: no verdict has landed on #3808/#3911/#3919/#3945/#4028/
 #4053/#4101; all real-path results remain author-side.
+
+Clean-archive replay of `f34c2445` into `/tmp/gpgme-w9-clean`: from the four
+provisioned source trees copied locally (no network), `sh build-plain.sh`
+gave `BUILD PLAIN OK`; `sh run-internal.sh` `PASS=18 FAIL=0`, `sh run-groom.sh`
+`PASS=23 FAIL=0`, `sh run-plain.sh` `PASS=13 FAIL=0` and pinned `sh ../run.sh`
+`PASS=19 FAIL=0`, rc 0 throughout. The replayed gdb check again showed
+`gpg->status.buffer == gpg->cmd.keyword` (`equal=1`) and the vulnerable
+internal-groom case again exited 134 with `free(): double free detected in
+tcache 2`. Author-side only; scope note #4117 sent to witness, no verdict.
