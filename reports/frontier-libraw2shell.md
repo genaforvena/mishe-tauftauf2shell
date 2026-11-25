@@ -764,3 +764,42 @@ all three lanes (`attack rc=1`, `no-option rc=0`, `fixed rc=0`,
 `WIRE_OOB_OK`); an earlier attempt from `eaee49cf` failed only because the
 runner resolved a caller-relative input path against `wire/`, corrected at
 `c5657a2a`.
+
+## Live-object lane closed by direct heap walk (W19, 2026-11-25 04:2xZ; author-side)
+
+The only route from chosen-byte rung 4 to a pointer/IP or marker is a live,
+later-read object allocated inside the OOB span. W9 inferred this was closed;
+W19 measures it directly on the input with the most unpack-time allocations in
+this lab, `w13/dead-target.input` (uncompressed DNG, 4096-entry
+LinearizationTable, 393,216 bytes of packed 12-bit raw samples; sha256
+`18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78`).
+
+An unmodified `-O0` `dcraw_emu` (`ca941dae5...b28fffd`) was stopped at the
+first OOB store (`xtrans_demosaic.cpp:427`, index 68,644) and every chunk from
+`destimage` to heap top was walked with the glibc size field at `user-8`,
+using `main_arena.top` as the stop condition (`w19/heapwalk-extra.gdb`,
+`w19/heapwalk-extra.txt`):
+
+```
+IDX=68644 destimage=0x55555572aba0 allocate_sz=549152
+malloc_usable_size=550184  main_arena.top=0x5555557b10c0
+chunk 00 user=0x55555572aba0 size=550192 flags=1 is_top=0
+chunk 01 user=0x5555557b10d0 size=134976 flags=1 is_top=1
+heap mapping 0x555555716000-0x5555557d2000
+```
+
+There is exactly one chunk after `destimage` and it is the top chunk; its end
+(`0x5555557b10c0 + 134976 = 0x5555557d2000`) is the heap end. No allocated
+chunk, object, vtable or pointer occupies the OOB span. Source corroboration
+in the pinned tree: `xtrans_demosaic.cpp` allocates only the OMP buffers at
+:175 and `destimage` at :177; its frees are at :436-437, after the loops. The
+store loop at :399-428 contains no allocator call, so nothing can be placed
+after `destimage` between allocation and the OOB stores.
+
+Disposition: negative KEPT. The live-object route out of rung 4 is closed for
+this consumer and build, both measured and source-bound. Synthesizing a
+caller-owned buffer to overwrite would be a harness marker, not a target
+object, and would not move the grade. Grade unchanged: rungs 1-3 ESTABLISHED
+by witness, rung 4 author-side (including wire-visible), NO chosen pointer/IP,
+marker, command side effect or r5. Author-side only; no witness verdict is
+claimed. Full method and hashes: `lab/frontier/libraw2shell/w19/results.txt`.

@@ -1,0 +1,54 @@
+W19 — live-object lane closed by direct heap walk (2026-11-25 04:2xZ, author-side)
+
+Question left open by W9/W18: the OOB store writes file-chosen halfwords into
+memory past the scratch buffer. Could a live, later-read object be allocated
+into that span, which is the only route from rung 4 to a pointer/marker/IP
+control? W9 inferred "no" from a chunk-header walk whose header offset was not
+usable, plus reasoning about call order. This wake measures it directly.
+
+Prediction (wall, before the run): on an input that unpacks extra buffers, the
+chunk following `destimage` is the glibc top chunk, so every byte from the
+scratch buffer to heap top is unallocated; no live object is reachable.
+
+Input: `w13/dead-target.input` (sha256
+18b012c98809a9f4822a173ee591b046db3b6eb612326e30e259984467149e78), the
+uncompressed DNG with a 4096-entry LinearizationTable and 393,216 bytes of
+packed 12-bit raw samples — the input with the most unpack-time allocations in
+this lab. Binary: unmodified `-O0` `o0/LibRaw-0.22.3/bin/dcraw_emu` (sha256
+ca941dae5fb86793d4235b8577136ce70c41d9f3c59e865d5590baa37b28fffd).
+Probe: `w19/heapwalk-extra.gdb` (sha256
+3feb2a0c157b3b31250c8a012d1145ba39d038344778018679eee82d86cf0b06),
+a breakpoint at the FIRST OOB store `xtrans_demosaic.cpp:427` with index
+>= 68,644, then a chunk walk from `destimage` using the glibc size field at
+`user-8` and `main_arena.top` as the stop condition. Full output:
+`w19/heapwalk-extra.txt` (sha256
+ee563c2d39f0671ce1e88f06820b3a7824dcc421bb762c6ac1806c8a33e60238).
+
+Measured at the first store:
+  IDX=68644 w=512 h=512 destimage=0x55555572aba0 allocate_sz=549152
+  malloc_usable_size=550184  size field=0x86531 (550193, PREV_INUSE)
+  main_arena.top=0x5555557b10c0
+  chunk 00 user=0x55555572aba0 size=550192 flags=1 is_top=0
+  chunk 01 user=0x5555557b10d0 size=134976 flags=1 is_top=1
+  STOP: chunk 01 user == main_arena.top + 16
+  heap mapping 0x555555716000-0x5555557d2000
+Top chunk end = 0x5555557b10c0 + 134976 = 0x5555557d2000, the heap end.
+There is exactly one chunk after `destimage`, and it is the top chunk. The
+requested end (0x5555557b0cc0) lies 0x410 bytes before the top user pointer
+because of allocator slack. No allocated or free-but-live chunk, no object,
+no vtable or pointer lies in the OOB span.
+
+Source corroboration from the pinned -O0 tree: `xtrans_demosaic.cpp` contains
+only two allocations, `malloc_omp_buffers` at :175 and the `calloc` for
+`destimage` at :177; the frees are at :436-437, after the interpolation
+loops. The store loop at :399-428 contains no allocator call, so no object can
+be placed after `destimage` between its allocation and the OOB stores. The
+structural closure is now both measured and source-bound, not inference alone.
+
+Disposition: KEEP the negative. The live-object route out of rung 4 is closed
+for this consumer and build. Do not synthesize a caller-owned buffer to
+overwrite: that is a harness marker, not a target object, and would not move
+the grade. Do not retry this walk on other inputs unless a consumer is found
+that allocates inside `xtrans_interpolate()` after line 177. No chosen
+pointer/IP, marker execution, command side effect or r5 is claimed. Author-side
+observation; hand any future positive to witness.

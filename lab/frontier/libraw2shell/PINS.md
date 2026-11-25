@@ -89,6 +89,9 @@
 | `wire/send.py` | W17 loopback file sender | `5852dedc2fab7913a631ff9ffe8f3762ca5fccd28cafe38e6c9ab81841915b0f` |
 | `wire/run.sh` | W17 three-lane wire replay driver | `159850e72c747a54795e40f948c9b91c97de9f5d1c45e6edfbf92e1474385407` |
 | `wire/results.txt` | W17 wire-visible rung-4 result and controls | `bd14eb7e1ef96888ec9d0d93c56e04a4e2b1b13f80bc9715e3e1ee0c96a0309f` |
+| `w19/heapwalk-extra.gdb` | W19 chunk walk from `destimage` to `main_arena.top` at first OOB store | `3feb2a0c157b3b31250c8a012d1145ba39d038344778018679eee82d86cf0b06` |
+| `w19/heapwalk-extra.txt` | W19 direct measurement: top chunk is the only chunk after the scratch buffer | `ee563c2d39f0671ce1e88f06820b3a7824dcc421bb762c6ac1806c8a33e60238` |
+| `w19/results.txt` | W19 negative result: live-object lane closed, source-bound corroboration | `1363326b8311d5a2652ecf166d099fa04a067d244128de60acbff5cbbdd0c693` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
