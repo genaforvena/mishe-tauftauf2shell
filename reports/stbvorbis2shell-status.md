@@ -281,3 +281,47 @@ and reports. A clean `git archive` of that commit into
 live lab, replayed `run-consumer-preload.sh` 17 PASS / 0 FAIL, rc 0, with the
 same `FILE = multiplicands+32` layout and chosen `free()` argument. Independent
 witness replay was offered at chat event 4511; no verdict yet.
+
+## W209 (2026-11-25) — canonical pointer value in the live consumer
+
+`gen_poc.py`'s fourth argument can encode the subnormal float word
+`0x00007f41`: gdb on the guarded harness shows eight consecutive `0x7f41`
+words. Repeating that word across the 8-byte `FILE` field gives
+`0x00007f4100007f41`, a CANONICAL userspace address instead of W208's
+noncanonical `0x4b4341484b434148`. Under the valid-audio preload and the
+real `MIX_LoadAudio_IO()` path, gdb observes `_IO_save_base`,
+`_IO_backup_base` and `_IO_save_end` all holding that canonical value.
+
+The new `consumer/canon-map.c` is a lab-only `LD_PRELOAD` constructor that
+`mmap`s the deterministic page `0x00007f4100007000` and writes `CANON_OK` at
+`0x00007f4100007f41`. With that groom, gdb reads `CANON_OK` through the
+file-chosen pointer and the plain consumer reports `free(): invalid pointer`
+(rc 134) rather than W208's SIGSEGV. Without the groom, the same file gives
+rc 139. Fixed build: rc 0, `MIX_LoadAudio_IO=(nil)`. Safe input: rc 0.
+The W208 replay still gives 17 PASS / 0 FAIL.
+
+One-command replay: `sh lab/frontier/stbvorbis2shell/run-canonical.sh` ->
+14 PASS / 0 FAIL, rc 0. The fixture `evidence/chosen-canonical.ogg` is 205
+bytes, sha256
+`6d14dc9491706f86389534600e76d84fa1b33d48888b10784f8d5eb9f7cb71f2`.
+
+Two structural limits were established, not resolved: (1) `setup_malloc`
+rounds to a multiple of 8 and ordinary pointer fields are 8-byte aligned, so
+a pointer can never straddle either OOB-window edge with only one half
+written; the allocation-size knob does not change that. (2) In `sequence_p`
+mode the cancel residual after a large word is at least the float ULP (~64
+at 1e9), so a tiny canonical high half cannot follow a chosen low half; a
+repeated subnormal word lands below `mmap_min_addr` (64 KiB). The mapped
+page in W209 is harness-supplied, NOT attacker-controlled input, so NO valid
+arbitrary pointer, IP/command, wire or r5 follows. Grade stays rung 4 PARTIAL.
+
+A read-only survey of the real consumer confirmed the alignment negative:
+`SDL_mixer_internal.h` (`MIX_Audio`, `MIX_Track`, `MIX_AudioDecoder`,
+`MIX_IoClamp`), `decoder_stb_vorbis.c` (`STBVORBIS_AudioData/TrackData`),
+SDL's `SDL_IOStream`, `SDL_IOStreamInterface`, `SDL_AudioStream` and
+`SDL_Property` have no pointer at a 4-mod-8 offset in the live load path;
+SDL packs structs to 8-byte alignment. Low-half-only overwrite would require
+a packed pointer field, which the real consumer does not provide. This closes
+the partial-pointer route without a new build.
+
+W209 is an author claim until independently replayed.
