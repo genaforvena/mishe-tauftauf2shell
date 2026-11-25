@@ -1,0 +1,26 @@
+Breakpoint 1 at 0xd9005: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 195.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+OOBWRITE tag=0008,0005 key=00080005 n=0 store=0x5555557e24b8 e=0x5555557e24b8 slot=0
+OOBWRITE tag=0008,0001 key=00080001 n=0 store=0x5555557e5a78 e=0x5555557e5a78 slot=0
+OOBWRITE tag=0008,0002 key=00080002 n=1 store=0x5555557e5a78 e=0x5555557e5a98 slot=1
+OOBWRITE tag=0008,0003 key=00080003 n=2 store=0x5555557e5a78 e=0x5555557e5ab8 slot=2
+OOBWRITE tag=0008,0004 key=00080004 n=3 store=0x5555557e5a78 e=0x5555557e5ad8 slot=3
+2026-11-25 10:53:23.162 (   0.175s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 204 in file "evidence/undef-ob-chosen.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 204 in file "evidence/undef-ob-chosen.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+OOBWRITE tag=0008,0005 key=00080005 n=3 store=0x5555557e5a78 e=0x5555557e5ad8 slot=3
+2026-11-25 10:53:23.167 (   0.180s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 226 in file "evidence/undef-ob-chosen.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 226 in file "evidence/undef-ob-chosen.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+OOBWRITE tag=0008,0006 key=00080006 n=3 store=0x5555557e5a78 e=0x5555557e5ad8 slot=3
+OOBWRITE tag=0008,0007 key=00080007 n=4 store=0x5555557e5a78 e=0x5555557e5ab8 slot=2
+OOBWRITE tag=4841,434b key=4841434b n=5 store=0x5555557e5a78 e=0x5555557e5b18 slot=5
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555e6fe0 in vtkDICOMReferenceCount::operator-- (this=0x1e00000500000001) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMReferenceCount.h:50
+50	  return --this->Counter;

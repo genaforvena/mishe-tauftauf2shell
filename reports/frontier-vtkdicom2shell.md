@@ -157,3 +157,35 @@ read-only provisioning and no external system was contacted with a probe.
   Replay still owed (tape #4256, material update #4262).
 
 
+
+## W3 — crafted DICOM file drives real-reader heap OOB (2026-11-25 10:55Z)
+
+The W1/W2 file-lane negatives were corpus-scoped. In the real pinned parser,
+`Decoder::ReadElementValue` (:1291-1303) returns 0 with its local
+`vtkDICOMValue` still invalid when an OB/OW element with vl==0xffffffff is
+not followed by `(FFFE,E000)` or `(FFFE,E0DD)`. `ReadElements` skips the
+short-read check for undefined length (:1624) and calls `Item->Set(tag,v)`
+at :1645, i.e. the delete precondition. The earlier 163-file corpus always
+placed the delimiter there, so it never hit this path.
+
+`tools/make-undef-ob-dos.py` writes a 272-byte file whose sequence item
+repeats that malformed construct twice in the exact order of the real-object
+probe: fill tags 1..4, delete 3, insert 5, delete 5, insert 6,7,8. Results:
+
+- ASan `vtkDICOMReader` on `evidence/undef-ob-chosen.dcm`: heap-buffer-
+  overflow `WRITE of size 4`, 32 bytes past a 136-byte store from
+  `vtkDICOMItem.cxx:70`, top frame `FindDataElementOrInsert` :195 via `Set`
+  :295 via `ReadElements` `vtkDICOMParser.cxx:1645` via
+  `vtkDICOMReader::RequestInformation` :741
+  (`evidence/asan-file-reader-chosen.out`, rc 1). Real `dicomdump` faults too.
+- Plain gdb: final `Set` writes chosen key `0x4841434b` at slot 5 of the
+  four-slot store (`evidence/gdb-file-chosen.out`), after which the process
+  SIGSEGVs. Identical bytes on the real fix `bcc8b26` reader are clean
+  (rc 0); a benign corpus file on the vulnerable reader is clean (rc 0).
+- `sh tools/replay-file-path.sh` = `REPLAY_FILE_PATH_OK`.
+
+Grade: rung 3 in the real reader from crafted file bytes; rung 4 chosen bytes
+at a chosen offset from file bytes, with a plain process crash. No wire or
+request path, no pointer/IP/control-flow hijack, no command, no rung 5, no
+witness verdict. Advisory 9.5.2 vs pinned standalone 0.8.17-53 version gap
+remains UNKNOWN; the construct above is demonstrated on the pinned build.

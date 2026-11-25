@@ -1,0 +1,19 @@
+2026-11-25 10:52:21.241 (   0.125s) [        3C2037C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x516000000080): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/fixed-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x510000000140): At byte offset 204 in file "evidence/undef-ob-dos.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+2026-11-25 10:52:21.241 (   0.125s) [        3C2037C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x516000000080): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/fixed-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x510000000140): At byte offset 226 in file "evidence/undef-ob-dos.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+2026-11-25 10:52:21.243 (   0.127s) [        3C2037C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x511000000180): Algorithm vtkDICOMReader(0x516000000080) returned failure for request: vtkInformation (0x506000005000)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/undef-ob-dos.dcm

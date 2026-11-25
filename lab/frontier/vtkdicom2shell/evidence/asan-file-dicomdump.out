@@ -1,0 +1,78 @@
+2026-11-25 10:50:25.989 (   0.013s) [        97DB5500]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x510000000040): At byte offset 204 in file "evidence/undef-ob-dos.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x510000000040): At byte offset 204 in file "evidence/undef-ob-dos.dcm": In Element (0008,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+2026-11-25 10:50:25.989 (   0.013s) [        97DB5500]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x510000000040): At byte offset 226 in file "evidence/undef-ob-dos.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x510000000040): At byte offset 226 in file "evidence/undef-ob-dos.dcm": In SpecificCharacterSet (0008,0005), in ReferencedStudySequence (0008,1110) [Item 1]: Encapsulated object is missing (FFFE,E000) tag.
+
+
+=================================================================
+==1189299==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50d0000001b8 at pc 0x5c0e9fb7b352 bp 0x7ffe739ab2c0 sp 0x7ffe739ab2b0
+WRITE of size 4 at 0x50d0000001b8 thread T0
+    #0 0x5c0e9fb7b351 in vtkDICOMItem::FindDataElementOrInsert(vtkDICOMTag) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:195
+    #1 0x5c0e9fb7b3d3 in vtkDICOMItem::Set(vtkDICOMTag, vtkDICOMValue const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:295
+    #2 0x5c0e9fb64768 in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1645
+    #3 0x5c0e9fb63241 in ReadElementValue /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1464
+    #4 0x5c0e9fb65174 in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1620
+    #5 0x5c0e9fb6528d in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:493
+    #6 0x5c0e9fb72ffd in vtkDICOMParser::ReadMetaData(unsigned char const*&, unsigned char const*&, vtkDICOMMetaData*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:2292
+    #7 0x5c0e9fb751dd in vtkDICOMParser::ReadFile(vtkDICOMMetaData*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:2036
+    #8 0x5c0e9fb559ea in vtkDICOMParser::Update() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1969
+    #9 0x5c0e9faea766 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Programs/dicomdump.cxx:744
+    #10 0x7aa896c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7aa896c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x5c0e9fae29c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/build-asan/bin/dicomdump+0x1e69c4) (BuildId: 68fc7f756e5bb2fc85a3261712bbed09d1d21cc6)
+
+0x50d0000001b8 is located 32 bytes after 136-byte region [0x50d000000110,0x50d000000198)
+allocated by thread T0 here:
+    #0 0x7aa8990fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x5c0e9fb7a1ba in vtkDICOMItem::NewDataElement(vtkDICOMDataElement**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:70
+    #2 0x5c0e9fb7b25c in vtkDICOMItem::FindDataElementOrInsert(vtkDICOMTag) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:194
+    #3 0x5c0e9fb7b3d3 in vtkDICOMItem::Set(vtkDICOMTag, vtkDICOMValue const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:295
+    #4 0x5c0e9fb64768 in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1645
+    #5 0x5c0e9fb63241 in ReadElementValue /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1464
+    #6 0x5c0e9fb65174 in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1620
+    #7 0x5c0e9fb6528d in ReadElements /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:493
+    #8 0x5c0e9fb72ffd in vtkDICOMParser::ReadMetaData(unsigned char const*&, unsigned char const*&, vtkDICOMMetaData*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:2292
+    #9 0x5c0e9fb751dd in vtkDICOMParser::ReadFile(vtkDICOMMetaData*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:2036
+    #10 0x5c0e9fb559ea in vtkDICOMParser::Update() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx:1969
+    #11 0x5c0e9faea766 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Programs/dicomdump.cxx:744
+    #12 0x7aa896c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7aa896c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x5c0e9fae29c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/build-asan/bin/dicomdump+0x1e69c4) (BuildId: 68fc7f756e5bb2fc85a3261712bbed09d1d21cc6)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx:195 in vtkDICOMItem::FindDataElementOrInsert(vtkDICOMTag)
+Shadow bytes around the buggy address:
+  0x50cfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50cfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50d000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50d000000080: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa
+  0x50d000000100: fa fa 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50d000000180: 00 00 00 fa fa fa fa[fa]fa fa fa fa fd fd fd fd
+  0x50d000000200: fd fd fd fd fd fd fd fd fd fd fd fd fd fa fa fa
+  0x50d000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50d000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50d000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50d000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1189299==ABORTING

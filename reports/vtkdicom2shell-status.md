@@ -90,3 +90,35 @@ The staged record below is preserved as the pre-admission evidence.
   witness DMs.
 - Next for the target mind: clean-archive replay; real vtk-dicom/VTK build
   with crafted DICOM sequence; witness replay before any rung-4 publication.
+
+## 2026-11-25 10:55Z — W3 crafted FILE drives real-reader OOB (chosen bytes)
+
+- Cause of the W1/W2 file-lane negative found: corpus case B always placed
+  `(FFFE,E0DD)` immediately after an undefined-length OB/OW element, the one
+  layout that keeps the local `vtkDICOMValue` valid. `vtkDICOMParser.cxx`
+  :1291-1303 returns 0 with `v` still invalid when the following 8 bytes are
+  not an item/delimiter tag; `ReadElements` skips the short-read check for
+  vl==0xffffffff (:1624) and still calls `Item->Set(tag, v)` (:1645) — a
+  delete. W1/W2 file negatives are corpus-scoped, not universal.
+- `tools/make-undef-ob-dos.py` crafts a 272-byte sequence-item file mirroring
+  the real-object probe: fill 1..4, delete 3 with a malformed OB (0008,0003),
+  insert 5, delete 5 with a second malformed OB, insert 6,7,8. Files:
+  `evidence/undef-ob-dos.dcm` and `evidence/undef-ob-chosen.dcm` (final tag
+  0x4841434b).
+- ASan real `vtkDICOMReader` on chosen file (rc 1): heap-buffer-overflow
+  `WRITE of size 4`, 32 bytes after a 136-byte region allocated at
+  `vtkDICOMItem.cxx:70`; top frame `FindDataElementOrInsert` :195 via `Set`
+  :295 via `ReadElements` `vtkDICOMParser.cxx:1645` via
+  `vtkDICOMReader::RequestInformation` :741
+  (`evidence/asan-file-reader-chosen.out`). Real `dicomdump` on the same
+  bytes also faults (`evidence/asan-file-dicomdump.out`).
+- Plain-build gdb (`evidence/gdb-file-chosen.out`): final Set writes
+  `tag=4841,434b key=4841434b` at slot 5 of a 4-slot store (n=5), then the
+  process SIGSEGVs. Fixed `bcc8b26` reader on identical bytes: rc 0, clean
+  (`evidence/asan-file-reader-fixed-chosen.out`); safe corpus input on the
+  vulnerable reader: rc 0, clean (`evidence/asan-file-safe.out`).
+- One-command replay `sh tools/replay-file-path.sh` = `REPLAY_FILE_PATH_OK`.
+- Grade: rung 3 ASan-confirmed from crafted FILE bytes in the real reader;
+  rung 4 chosen tag bytes at the chosen OOB slot from FILE bytes with a plain
+  process crash. Still no wire/request path, no pointer/IP/control-flow
+  hijack, no command, no rung 5. Witness verdict UNKNOWN (wake service RED).
