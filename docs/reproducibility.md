@@ -9615,3 +9615,109 @@ reply yields verbatim `W read(7, 0x512000000045, -1): Bad address`, exit 255,
 returns EFAULT before a store on this host. Reproduce only on loopback;
 expect a connection abort, not corruption. Grade rungs 1/2 only, rung 3/4/5
 not established, witness UNKNOWN. `reports/frontier-socat2shell.md` §real-build.
+
+## 2026-11-25 03:3x–03:5xZ — six author edges after the socat admission
+
+All six are author-side and unwitnessed; none moves a rung cell, grade cell,
+mind count or witness verdict. Raw logs are gitignored and regenerate from the
+commands below; no new route, charter or window was created.
+
+- **Yojimbo2Shell W2** (`f25517f8`). From `lab/frontier/yojimbo2shell`, keep
+  the pinned parent channel source and add `vtable-test.cpp` (the W1 loopback
+  test plus a lab-only `mishe_vtable_marker()` and a static fake vtable).
+  Configure with
+  `-DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address -no-pie'`; non-PIE is required
+  for the chosen absolute address. Seed 1795576058, authenticated netcode UDP
+  pair on 127.0.0.1, non-default `maxBlockSize=1100`/`blockFragmentSize=500`:
+  the encrypted final fragment writes the fake-vtable address at
+  `blockData+1152` and `MISHE-LOOP` at +1200. Expect `MISHE-VTABLE-CALL` twice
+  then a later `tlsf.c:583 remove_free_block` crash (rc 1) in the vulnerable
+  binary; the fixed-channel control runs `*** ALL TESTS PASS ***` rc 0.
+  Evidence hashes recomputed here and matching the report:
+  `fbc6c526…56a77d` (layout), `5664351a…c0ec5` (channel state),
+  `49fea203…42de89` (fault instruction), `466f3181…45a` (vuln call),
+  `a9a03eed…d27e` (fixed control). Both binaries are kept as
+  `w2-vtable-{vuln,fixed}-binary`; `upstream/` was restored to the pinned
+  parent plus the fix commit's `test.cpp`/`yojimbo_address.cpp` after the run.
+  `reports/frontier-yojimbo2shell.md` §W2.
+
+- **Hping3Shell W8** (`bea93e82`, replay `90d635d6`). Rebuild the unmodified
+  pinned tree (`display_ipopt.c` `e8ef2dd6…dcbb5e7b`) with GCC 13.3.0 and
+  `CCOPT='-O2 -g -fcommon -Wall -Wno-unused -I../compat'`; Ubuntu defaults
+  `_FORTIFY_SOURCE 3` at `-O2`, and `objdump -d` shows `__memcpy_chk@plt`
+  bounded to the real 40 bytes. From `lab/frontier/hping3shell`,
+  `wire/inject_rr_o2.py` crafts three loopback ICMP RR replies and
+  `sh wire/o2-index-proof.sh` runs `hping3 -D -1 -G --rand-dest -I lo -c 24
+  -i 1 127.0.0.x`, reading `i`/`j`/`sbox` read-only at the `hp_rand`
+  breakpoint. Expect vulnerable 3 PASS / 0 FAIL with
+  `*** buffer overflow detected ***` and no crafted state, baseline 4 PASS /
+  0 FAIL and patched 4 PASS / 0 FAIL. A clean-archive replay (`git archive
+  90d635d6` plus the gitignored `provision/` tree, `wire/replay-o2.sh`)
+  printed `STAGE OK baseline 4 / attack 3 / fixed 4` and
+  `REPLAY_O2_OK: 11 checks`, rc 0; raw `wire/evidence/o2-{attack,baseline,
+  fixed}-*` regenerate with that script. Build-dependent DoS negative only.
+  `reports/hping3shell-status.md` §W8.
+
+- **Socat2Shell W2** (`1a34d2de`). From `lab/frontier/socat2shell/real`,
+  `sh run-count-probe.sh` scores 8 PASS / 0 FAIL using loopback-only AF_UNIX
+  socketpairs (`evidence-count-probe.out` is gitignored). Expect `rc=-1
+  errno=14` (EFAULT) and zero canary stores for counts `SIZE_MAX`,
+  `SIZE_MAX-3`, `SIZE_MAX-126` and `SIZE_MAX/2`; the `0x80000000` control
+  stores 600 bytes; an empty socket with `2^62` gives EAGAIN while
+  `2^63-1` and `SIZE_MAX-126` give EFAULT. Pinned source census:
+  `sycls.c:539-558`, `sysutils.c:101-141`, `xio-socks5.c:419-427,467-470`.
+  The real-build replay `sh run-real.sh` (9 PASS / 0 FAIL) still expects
+  `W read(7, ..., -1): Bad address`, no ASan report. 32-bit `size_t` is
+  UNKNOWN: this host lacks multilib. `reports/frontier-socat2shell.md` §W2.
+
+- **AwsLc2Shell W215** (`93b61d8d`, source-bound, no harness). Provision the
+  pinned s2n-tls v1.5.16 tarball
+  `lab/frontier/awslc2shell/out-of-tree/s2n-tls-v1.5.16.tar.gz` (sha256
+  `ab3e19f899e9b76cf7141f3b287e865db628f9e024360d7086c7f9c901909214`,
+  recomputed locally) and read `crypto/s2n_cbc_cipher_aes.c:48-58`,
+  `tls/s2n_record_read_cbc.c:55,70,77`, `crypto/s2n_cbc_cipher_3des.c:47-52`
+  and `crypto/s2n_composite_cipher_aes_sha.c:182-187`: one in-place update
+  per re-init, no `in_len+b-1` buffer. Check pinned `cipher.c:190` and `:131`
+  in the AWS-LC tree. No build, ASan run or new artifact; grade unchanged.
+  `reports/awslc2shell-status.md` §W215.
+
+- **Synchronet2Shell W18** (`b60fd1b4`/`b67db0dc`, source-level). From
+  `lab/frontier/synchronet2shell`, `sh release-label/run-release321e.sh`
+  provisions four raw files from mirror tag `sbbs321e` (`d2a6dcb2`) and
+  asserts `VERSION "3.21"/REVISION 'e'`, the same no-size getter plus NUL
+  clamp at `answer.cpp:513`, a byte-identical `terminal[41]` field block and
+  `TELNET_TERM_MAXLEN 40`: 11 PASS / 0 FAIL live and from a clean
+  `git archive b60fd1b4`, normalized digest
+  `bb9067cf9bed5859e016f83175d8de91b2e1502a5a3df816e04cdbe73a3fbda9`
+  (read from `release-label/REPLAY.md`). Two wrong observations are preserved
+  in `evidence/negatives.txt`; no build, wire session or runtime bytes.
+
+- **Pgactive2Shell W9** (`6fb104bb`). Commands, rc values and negatives are in
+  `lab/frontier/pgactive2shell/realbuild/originpath/FINDINGS.md` and its
+  gitignored `evidence/`, against a loopback PostgreSQL 16.15 cluster with
+  the pinned 2.1.9 extension. Expect 66/67/99/275-byte
+  `pg_replication_origin_create()` names stored, a 96→63-byte slot-name
+  truncation, no origin-create or parser EXECUTE for a plain `LOGIN` role,
+  and a failed `pgactive_get_global_locks_info()` route (state `b`,
+  not-configured error) left UNKNOWN. No wire trigger or grade change.
+  `reports/frontier-pgactive2shell.md` §catalog-derived origin-name reachability.
+
+### 2026-11-25 03:5x–04:0xZ — n2n2shell W6 and one-command W3 replay
+
+`sh lab/frontier/n2n2shell/live/replay-live.sh` now builds the pinned tarball
+three ways, runs checks 1-19 as before and adds W3's peer-forwarding lane as
+checks 20-22: a registered loopback peer receives the safe 86-byte NAK and the
+attack 134-byte NAK with `beyond48=485a4d49485a4d49`. Observed 22 PASS / 0 FAIL
+rc 0 here; `NO_GDB=1` still skips checks 16-19 and raw logs stay under the
+temporary directory the script prints (`KEEP=1` retains it). The
+watchpoint-level backtrace and fixed-build ASan READ keep the separate
+`live/w3_peer_forward.py` recipe with `live/gdb-cmds-w3.txt`. W6
+(`ac451b00`) fresh-extracts the pinned tarball, builds gcc `-g -O1
+-fno-omit-frame-pointer` with the one-line NAK guard and runs the safe/attack
+datagrams against a 127.0.0.1 supernode: expect the attack peer to receive a
+134-byte NAK whose 96 token bytes are all ZERO (`first=0000…`,
+`beyond48=0000…`) while `token_size=0x0060` survives the rejected decode.
+Evidence `live/evidence/fixed-plain-safe{,-sender}.log` and
+`fixed-plain-attack{,-sender}.log` are gitignored and regenerate with that
+recipe; no disclosure claim, no rung move, witness #3909 still owed.
+`reports/n2n2shell-live.md` §§W6, clean-room replay entry point.

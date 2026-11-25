@@ -11026,3 +11026,59 @@ labels stay as recorded below.
   storing. Rungs 1/2 (connection abort) only; rung 3 corruption, rung 4
   chosen bytes, rung 5 NOT established. Witness UNKNOWN.
   `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
+
+### 2026-11-25 03:3x–03:5xZ — six author limbs folded (no grade moves)
+
+- `f25517f8` **Yojimbo W2**: wire-borne vptr control. Gdb places the 1100-byte
+  receive block inside a 10 MiB TLSF arena, shows the 0xAB-filler-vptr fault
+  and writes a chosen fake-vtable address at `blockData+1152` through the same
+  encrypted fragment; the vulnerable non-PIE ASan binary prints
+  `MISHE-VTABLE-CALL` twice before a TLSF crash, fixed control clean. This
+  supersedes W1b's "no pointer control or marker execution" boundary; it is
+  still post-auth, one-process, non-default config with a pre-placed marker,
+  not remote command execution, no ASLR-realistic derivation and no r5.
+- `bea93e82`/`90d635d6`/`bb01e9c5` **Hping W8**: the pinned source rebuilt at
+  `-O2` hits Ubuntu's default `_FORTIFY_SOURCE 3` and aborts in
+  `__memcpy_chk` before any crafted global write (attack 3 PASS / 0 FAIL;
+  baseline and patched controls 4/0 each). Clean replay from `90d635d6` gave
+  `REPLAY_O2_OK: 11 checks`, rc 0. Build-dependent DoS negative; distribution
+  builds and other fortify settings UNKNOWN, no grade change.
+- `1a34d2de` **Socat W2**: dispositioned as a remote connection-abort bug,
+  not a memory-safety find. Source census finds no cap/alternate read and
+  length bytes `0xf9..0xff` produce counts `-1..-5` passed as `size_t`;
+  `sh real/run-count-probe.sh` (8 PASS / 0 FAIL) shows EFAULT with zero stores
+  for every count this bug generates on this host. 32-bit `size_t` UNKNOWN;
+  rung 1/2 only, witness UNKNOWN.
+- `93b61d8d` **AwsLc W215**: pinned s2n-tls v1.5.16 source census is a
+  SOURCE-BOUND NEGATIVE — in-place, one-update decrypts, no `in_len+b-1`
+  buffer, `final_used` cleared on every re-init; no build, ASan or witness
+  replay, grade unchanged.
+- `b60fd1b4`/`b67db0dc` **Synchronet W18**: shipped 3.21e source-level check,
+  `release-label/run-release321e.sh` 11 PASS / 0 FAIL live and from a clean
+  archive, normalized `bb9067cf…2a5a3fbda9`; no build, wire or runtime bytes,
+  no rung change, no claim about 3.20b or other releases.
+- `6fb104bb` **Pgactive W9**: catalog-origin names of 66–275 bytes are stored,
+  but the `pgactive_get_global_locks_info()` route failed (UNKNOWN); slot
+  names truncate 96→63 bytes and a plain `LOGIN` role lacks the required
+  privileges. No wire trigger, no grade change.
+
+Recipes, pins and expected bytes are in `docs/reproducibility.md` under the
+03:3x–03:5xZ lane. README rows and the Yojimbo supersession narrative were
+updated in the same docs fold; no route, rung cell, grade cell, mind count or
+R5 cell moved.
+
+### 2026-11-25 03:5x–04:0xZ — n2n2shell W6 and W3 replay folded
+
+- `ac451b00` **N2n W6**: a fresh plain gcc `-O1` fixed-build supernode still
+  lets the forwarding encoder read 96 bytes from `nak+14` after the rejected
+  oversized decode, but emits 96 ZERO bytes, not stack data. The fixed ASan
+  build still aborts on that read with a peer (W3); adjacent bytes in other
+  builds or after other traffic stay UNKNOWN. No disclosure claim or grade
+  move. The one-line control matches the vendor NAK guard byte-for-byte but
+  is not a full fixed-tree build.
+- `58ceee1c` **n2n2 one-command replay**: `sh live/replay-live.sh` now includes
+  W3's peer-forwarding lane as checks 20-22; observed 22 PASS / 0 FAIL here.
+  The watchpoint backtrace and fixed ASan READ keep their separate recipe.
+  README's n2n row and W4 narrative were corrected from 19 to 22 checks;
+  witness #3909 remains owed.
+  `reports/n2n2shell-live.md` §§W6, clean-room replay entry point.
