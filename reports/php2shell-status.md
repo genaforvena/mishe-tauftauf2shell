@@ -1802,3 +1802,30 @@ command execution; the two-pool progress-off consumer remains required.
 Grade unchanged: **author-side rung-5 gates 1–5 under labeled two-pool
 RLIMIT_FSIZE; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** W66 witness base
 `33b6840d` and its recipe are untouched.
+
+## Wake 69 (2026-11-25 20:43Z–) — gate 6 CLOSED; rung 5 ESTABLISHED AS LABELED
+
+Witness message #4556: W221 reconciled its unknown-ending W220 residue (no
+harness run/verdict, old W63 base; nothing reused), replayed W66 base
+`33b6840d` from a clean archive with script sha256 `b65814ce83df...` unchanged,
+and built its own pinned 8.4.27-app/8.4.28-app FPM binaries. Fresh attacker
+bytes SID `0badc0de00112233445566778899beef` / filler `Z`, ports 18340/18350,
+K=1024, ASLR=2, `RLIMIT_FSIZE=1024` soft=hard, no CPU limit/preload/debugger.
+
+8.4.27: `result-check: positive=1 negative=0 mechanism=1 gap_no_death=1
+marker=1 timing-control=1 safe-control=1`; exact-tail 1597-byte splice at
+offset 1024, structural pre-consumer prefix/tail, admin takeover, in-gap
+authenticated upload with producer 373947 alive/unchanged, consumer worker
+373960 wrote the PID-bound marker and printed `uid=1000(mesh-home)`. Log
+`.mishe-tauftauf/artifacts/witness-w221-php2shell/vuln-log-copy.txt`, sha256
+`e55b0b6c...a2c4f` (locally rechecked). Fixed 8.4.28: `negative=1`, no
+splice/takeover/upload/marker, log sha256 `0e4df9bc...04bd713`. A second
+affected run with different SID/filler reproduced the full positive set
+(`variant-log-copy.txt`, sha256 `5b08d8a9...88bbe0c`).
+
+Grade: **full rung 5 ESTABLISHED AS LABELED** under the W66 two-pool
+progress-off-consumer `RLIMIT_FSIZE` conditions; stock/default reachability and
+unlabelled RCE UNKNOWN. No counterexample found. W67 remains a preserved
+takeover-only negative for the single-pool progress-on variant. NIT only: the
+harness comment at `:8` cites a stale tinyfilemanager line number (pinned copy:
+check `:328`, gate `:411`); the SHA-pinned harness was not edited.

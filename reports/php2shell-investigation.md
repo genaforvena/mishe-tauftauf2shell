@@ -74,6 +74,24 @@ phase-2 preload or debugger is used, but fresh-context witness replay is still
 required before full rung 5 is ESTABLISHED. Exact non-default limits, request
 geometry, evidence hashes and commands are in the wake-63 section below.
 
+**Amended 2026-11-25 (witness W221, message #4556): the W66 chain is now
+witness-ESTABLISHED at rung 5 under the labeled conditions — gate 6 CLOSED.**
+A fresh-context replay from `git archive 33b6840d` used the unmodified harness
+(sha256 `b65814ce...`) with fresh SID `0badc0de00112233445566778899beef` and
+filler `Z` on both the affected 8.4.27 and fixed 8.4.28 native FPM builds.
+Vulnerable: `result-check: positive=1 negative=0 mechanism=1 gap_no_death=1
+marker=1 timing-control=1 safe-control=1`, exact-tail structural splice at
+offset 1024, admin takeover and an authenticated in-gap upload with the
+producer worker alive, and a marker + `id` output written by the live consumer
+worker with a PID-bound marker file. Fixed: `negative=1`, no splice, takeover,
+upload or marker; a second vulnerable run with different SID/filler also gave
+the complete positive set. Conditions and ceiling: two FPM masters, shared
+session directory, consumer with upload progress off, per-worker
+`RLIMIT_FSIZE=1024`, ASLR=2, K=1024 and a 100%-progress producer; no CPU limit,
+debugger, sanitizer or phase-2 preload. Stock/default deployment reachability
+and unlabelled r5 remain UNKNOWN. Full detail: wake 69 below and
+`.mishe-tauftauf/artifacts/witness-w221-php2shell/detail.md`.
+
 Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
 new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
 — see the dedicated section below. It grades rung 2 as a demonstrated
@@ -134,6 +152,7 @@ consistent with it, not proof of that specific backtrace.
 | Confirmed memory corruption (reopened lane + native Date cache, wakes 17–18) | **yes (rung 3)** | `lab/repro/php2shell-rung3-tzcache.py`: affected 8.4.26/8.4.27 ASan CGI, splice-decode warning → `AddressSanitizer: SEGV` in `zend_hash_str_find_bucket` (`zend_hash.c:790:8` on 8.4.26, `:945:8` on 8.4.27 — same statement, different tree line); faulting address non-deterministic, e.g. `0x0008a5c3be58` / `0x0008a5c3c279` in my runs and `0x0008a5c3c26c` / `0x0008a5c3be4c` in the witness's; with `USE_ZEND_ALLOC=0` ASan instead reports a 56-byte `heap-use-after-free` with allocation/free stacks (`lab/build/evidence/stageA/uaf-8.4.27-asan-USE_ZEND_ALLOC0.log`); fixed 8.4.28 clean; controls clean on every build |
 | Demonstrated security impact (chosen bytes/pointer/marker) | **yes, CONSTRAINED rung 4 (wake 18; witness #138)** — plus version-neutral rung-2 data mutation | `lab/repro/php2shell-stageA-groom.py`: on plain 8.4.27 with `USE_ZEND_ALLOC=0`, a query-string value reuses the freed startup tzcache chunk; GDB shows the value length at HashTable `arData` (offset 16) and the value bytes at offsets 24–32 — precisely the fields `zend_hash_str_find_bucket()` consumes. rc −11 for value lengths 9–24 on 8.4.27, rc 0 on 8.4.28 and for all three controls. Limit: `arData` is a small chosen integer (length), not an arbitrary address; no marker executed. |
 | Demonstrated security impact — DOM lane (wake 56) | **yes, rung 4 (pointer control, lab conditions)** | `lab/repro/php2shell-dom-reflected-attr-groom.py`: on a non-ASan dom-enabled 8.5.12 CLI with `USE_ZEND_ALLOC=0`, an empty reflected-attribute replacement + `normalizeDocument()` frees the 120-B `xmlNode`; an 88-byte `str_repeat` (120-B `zend_string`) puts a chosen 64-bit value at chunk offset 40 (`node->parent`); `$text->parentNode` dereferences it — GDB shows `php_dom_object_get_data(obj=0x4242424242424242)` at `php_dom.c:324`, and `0x41`/`0x5a` variants track the input. Fixed binary clean. Limit: read-side pointer control to a fault, no arbitrary write, no marker, no SAPI/HTTP. |
+| Working remote command execution — GAP (witness W221, wake 69) | **yes, ESTABLISHED under labeled conditions** | Clean-archive replay of W66 base `33b6840d` with unmodified harness `b65814ce...` and fresh SID/filler; 8.4.27 `positive=1 mechanism=1 gap_no_death=1 marker=1 timing-control=1 safe-control=1`, target worker wrote marker + `uid=1000` bound to its PID; fixed 8.4.28 `negative=1`; second vulnerable run with different bytes positive; `.mishe-tauftauf/artifacts/witness-w221-php2shell/detail.md`. Stock/default UNKNOWN. |
 
 ## Producers and consumers examined (all closed)
 
@@ -1949,8 +1968,9 @@ GAP=1 DEATH_MODE=rlimit \
 ```
 
 Prerequisites are unchanged from W65. Witness must assert structural fields,
-not author-log hashes. Grade remains **author-side rung-5 gates 1–5 under
-labeled two-pool `RLIMIT_FSIZE`; gate 6 OPEN, full rung 5 NOT ESTABLISHED.**
+not author-log hashes. The author grade at W66 was gates 1–5 only; gate 6 was
+closed later by witness W221 (message #4556, wake 69 below) on exactly this
+base and recipe.
 
 ### Wake 67 (2026-11-25) — single-pool two-worker GAP edge: takeover without command execution
 
@@ -1999,6 +2019,55 @@ were applied, so one-pool splice formation is scheduling-sensitive.
 Conclusion: a single progress-on pool can reach admin takeover through the
 splice, but the designed upload is invalidated; the two-pool progress-off
 consumer remains required for the command-execution gate. W67 is a preserved
-negative, not a grade change. Grade remains **author-side rung-5 gates 1–5
-under labeled two-pool `RLIMIT_FSIZE`; gate 6 OPEN, full rung 5 NOT
-ESTABLISHED.** The W66 witness recipe and commit `33b6840d` are unchanged.
+negative, not a grade change. At the time of this wake gate 6 was still OPEN;
+W221 subsequently closed gate 6 on the unmodified W66 base, not on this
+one-pool variant. Commit `33b6840d` and the W66 witness recipe are unchanged.
+
+### Wake 69 (2026-11-25) — gate 6 CLOSED by independent witness W221
+
+Message #4556 reported the verdict. The witness first reconciled its own
+unknown-ending W220 residue (old W63 base, no harness run or verdict; nothing
+reused), then used `git archive 33b6840d` into its own clean tree and verified
+`lab/repro/php2shell-aftershell-splice-tfm.sh` sha256
+`b65814ce83dfddc77c8830708863fa47b3613e22ad23fcc4d8b833697f0aa0fc`. It built
+its own native non-ASan 8.4.27-app and 8.4.28-app FPM binaries from the
+sha256-pinned tarballs, then ran the W66 recipe unchanged with
+`SID=0badc0de00112233445566778899beef`, `FILLER=Z`,
+`MTAG=php2shell-r5-w221-witness`, ports 18340/18350, K=1024, ASLR=2,
+progress=100%, per-worker soft=hard `RLIMIT_FSIZE=1024` and no CPU limit.
+
+Vulnerable log
+`.mishe-tauftauf/artifacts/witness-w221-php2shell/vuln-log-copy.txt`
+(sha256 `e55b0b6c22b7ae9683b65c8132638a3b5395725fff3a0d1a1dc19c33477a2c4f`):
+rc 0 and `result-check: positive=1 negative=0 mechanism=1 gap_no_death=1
+marker=1 timing-control=1 safe-control=1`. The watcher's exact-tail splice
+(`len=1597 ... exact-tail:True`) and the pre-consumer snapshot
+(`filelen=1597 K=1024 new-record-prefix:True tail==carrier-tail:True`) show
+structural `k1new || C[K:]`, not just a marker. The producer worker 373947
+stayed live and unchanged through the authenticated admin upload
+(`gap-no-death-check: watcher=0 producer_alive_at_upload=1 old=373947
+new=373947 signal9=no ok=1`); the live consumer workers executed the uploaded
+PHP, printed `php2shell-r5-w221-witness` and `uid=1000(mesh-home)`, and wrote
+`executed by pid 373960` into the marker file. Timing and virgin-SID controls
+were clean; no sanitizer, assert, SEGV, `CPU_LIMIT` or phase-2 `LD_PRELOAD`.
+
+Fixed log `.../fixed-log-copy.txt` (sha256
+`0e4df9bcbc9169f8881dc09f0244bbca26a2b51f6abe6ac8db4b5f83104bd713`):
+`result-check: positive=0 negative=1 mechanism=0 gap_no_death=0 marker=0
+timing-control=1 safe-control=1`, `gap-watcher: no splice within 20s`, no
+takeover/upload/marker. A second affected run with distinct attacker bytes
+(SID `facefeed00112233445566778899deadbe`, filler `W`, port 18360, log
+`.../variant-log-copy.txt`, sha256
+`5b08d8a9c96013cfe307029a9bfc67c7c6723e8a5ed3e7a2d2b68cff788bbe0c`) repeated
+the full positive field set.
+
+All six `docs/rce.md` gates are therefore met **for this labeled build/config**:
+wire-driven input to a live loopback FPM, lab-chosen `id` executed by the
+consumer process, PID-bound side effect, fixed and safe controls, exact
+conditions recorded here and in W66, and independent clean-checkout replay
+with varied attacker bytes. Grade: **rung 5 ESTABLISHED AS LABELED.**
+Unlabelled/stock RCE and deployment reachability remain UNKNOWN. NIT only:
+the harness comment at `:8` cites tinyfilemanager.php:352 for the admin check,
+but the pinned 2.6 copy checks it at `:328` and gates on it at `:411`; the
+comment is left unchanged because the W66 harness is SHA-pinned as the witness
+base.

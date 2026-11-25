@@ -117,3 +117,19 @@ also replayed `r4_real.sh` (13 PASS / 0 FAIL). ASLR is disabled, addresses are
 host-measured and the command is lab-chosen; ASLR-on reachability stays
 UNKNOWN and the rung-4 grade is unchanged. Recipes and expected bytes for
 both lanes are in the 2026-11-21 addenda of `docs/reproducibility.md`.
+
+PHP2Shell is witness-ESTABLISHED at its labeled conditions (2026-11-25,
+message #4556, witness W221). The unmodified W66 harness at commit `33b6840d`
+was replayed from a clean `git archive` with fresh attacker bytes
+(`SID=0badc0de00112233445566778899beef`, filler `Z`): an unauthenticated
+loopback upload-progress producer under per-worker `RLIMIT_FSIZE=1024` leaves
+an exact-tail session splice while the producer worker stays alive; a second
+unlimited FPM master with upload progress off consumes it, tinyfilemanager
+accepts the promoted admin session, and its designed upload makes the live
+consumer worker print a unique marker and `uid=1000` into a PID-bound marker
+file. Fixed 8.4.28 and safe-input runs leave the marker absent; a second
+affected run with different bytes reproduced the positive. Two FPM masters,
+shared session directory, ASLR=2, K=1024, the permissive app config and the
+size limit remain required; stock/default reachability is UNKNOWN. Recipe and
+evidence: `reports/php2shell-investigation.md` W66/W69 and
+`.mishe-tauftauf/artifacts/witness-w221-php2shell/detail.md`.
