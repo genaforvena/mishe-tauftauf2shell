@@ -1,0 +1,96 @@
+codebasememory2shell W14 far-stride bound, 2026-11-25T01:16:03Z
+binary: /tmp/cbm-w14-far, pinned vulnerable cypher.c, same plain flags as build.sh
+SP is a main-stack local; STACK_TOP is the [stack] mapping end from /proc/self/maps.
+
+=== build ===
+build RC=0
+
+=== 15 passive ASLR placements (N=40, empty item 38 and 39) ===
+STACK_TOP=0x7ffe8d749000 SP=0x7ffe8d746458 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7fff89e89000 SP=0x7fff89e874b8 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffc17eab000 SP=0x7ffc17ea8e18 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffe0234f000 SP=0x7ffe0234bfb8 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffe5146c000 SP=0x7ffe5146aef8 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffdbf4b9000 SP=0x7ffdbf4b6178 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffe9631e000 SP=0x7ffe9631ccc8 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffecf939000 SP=0x7ffecf937168 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffdbc22f000 SP=0x7ffdbc22cdb8 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffd28002000 SP=0x7ffd28000008 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffc18428000 SP=0x7ffc18425588 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffff519e000 SP=0x7ffff519b328 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffd06c77000 SP=0x7ffd06c74818 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7ffc4c37c000 SP=0x7ffc4c379908 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+STACK_TOP=0x7fffc0f30000 SP=0x7fffc0f2d288 ACTIVE=39 ITEMS=40 VLEN=2 RC=0 ROWS=1 COLS=40 ERR=(none)
+The ancestor RIP slot measured in this build is SP+0x40a0 below; compare
+STACK_TOP-SP in each row with 0x40a0 (16544 decimal).
+
+minimum sampled STACK_TOP-SP = 0x1108 (4360); ancestor RIP needs SP+0x40a0
+
+=== live-ASLR gdb snapshot at the projection sink ===
+Breakpoint 1 at 0x17c97: file src/cypher/cypher.c, line 4118.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+STACK_TOP=0x7ffe9d291000 SP=0x7ffe9d28f9b8 
+Breakpoint 1, execute_return_simple (rb=0x7ffe9d28f900, max_rows=100000, bind_count=1, bindings=<optimized out>, ret=0x57fa2b1ae350) at src/cypher/cypher.c:4118
+4118	        rb_add_row(rb, vals);
+
+=== frame and mapping at end of projection loop ===
+callee_rbp=0x7ffe9d28f8c0 item39_base=0x7ffe9d28fa80 ancestor_rip_est=0x7ffe9d293a58
+process 3384086
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x57fa1abb7000     0x57fa1abc6000     0xf000        0x0  r--p   /tmp/cbm-w14-far
+      0x57fa1abc6000     0x57fa1ad11000   0x14b000     0xf000  r-xp   /tmp/cbm-w14-far
+      0x57fa1ad11000     0x57fa1ad5a000    0x49000   0x15a000  r--p   /tmp/cbm-w14-far
+      0x57fa1ad5a000     0x57fa1ad62000     0x8000   0x1a2000  r--p   /tmp/cbm-w14-far
+      0x57fa1ad62000     0x57fa1ad69000     0x7000   0x1aa000  rw-p   /tmp/cbm-w14-far
+      0x57fa1ad69000     0x57fa1ad98000    0x2f000        0x0  rw-p   
+      0x57fa2b179000     0x57fa2b1bb000    0x42000        0x0  rw-p   [heap]
+      0x7047666df000     0x7047701c0000  0x9ae1000        0x0  rw-p   
+      0x7047701c0000     0x704770400000   0x240000        0x0  rw-p   [anon:mimalloc]
+      0x704770400000     0x704770428000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x704770428000     0x7047705b1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7047705b1000     0x704770600000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x704770600000     0x704770604000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x704770604000     0x704770606000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x704770606000     0x704770613000     0xd000        0x0  rw-p   
+      0x7047706ed000     0x7047706f1000     0x4000        0x0  rw-p   
+      0x7047706f1000     0x704770701000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x704770701000     0x704770780000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x704770780000     0x7047707d8000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7047707d8000     0x7047707d9000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7047707d9000     0x7047707da000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7047707ef000     0x7047707f1000     0x2000        0x0  rw-p   
+      0x7047707f1000     0x7047707f2000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7047707f2000     0x70477081d000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x70477081d000     0x704770827000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x704770827000     0x704770829000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x704770829000     0x70477082b000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffe9d270000     0x7ffe9d291000    0x21000        0x0  rw-p   [stack]
+      0x7ffe9d2a7000     0x7ffe9d2ab000     0x4000        0x0  r--p   [vvar]
+      0x7ffe9d2ab000     0x7ffe9d2ad000     0x2000        0x0  r-xp   [vdso]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+
+=== 12 live-ASLR runs of the 71-item / 478-byte ancestor attempt ===
+run 1: RC=139 STACK_TOP=0x7ffc2fc48000 SP=0x7ffc2fc45068  
+run 2: RC=139 STACK_TOP=0x7ffed80a3000 SP=0x7ffed80a18f8  
+run 3: RC=139 STACK_TOP=0x7ffc6e9ed000 SP=0x7ffc6e9ebaa8  
+run 4: RC=139 STACK_TOP=0x7fffaf303000 SP=0x7fffaf301388  
+run 5: RC=139 STACK_TOP=0x7ffe03592000 SP=0x7ffe0358f3c8  
+run 6: RC=139 STACK_TOP=0x7ffd5c019000 SP=0x7ffd5c016bc8  
+run 7: RC=139 STACK_TOP=0x7ffe8a80f000 SP=0x7ffe8a80d758  
+run 8: RC=139 STACK_TOP=0x7ffe5acf3000 SP=0x7ffe5acf1908  
+run 9: RC=139 STACK_TOP=0x7fff72038000 SP=0x7fff72036c28  
+run 10: RC=139 STACK_TOP=0x7fff2c442000 SP=0x7fff2c440428  
+run 11: RC=139 STACK_TOP=0x7ffd768c2000 SP=0x7ffd768bf568  
+run 12: RC=139 STACK_TOP=0x7ffd61bed000 SP=0x7ffd61beb638  
+
+Conclusion: the OOB destination walks upward by 512 bytes per projection item.
+Items 39..54 can land chosen bytes past the canary in caller-owned stack storage
+(W12). Beyond that the destination passes the top of the [stack] mapping: the
+measured ancestor saved-RIP slot (callee rbp+0x4198 = SP+0x40a0) is above
+STACK_TOP in every sampled placement, and 71-item/478-byte attempts fault in
+memcpy before reaching it. W12's separate rb_set_columns() fault at N=1135
+also blocks huge counts, but is not the nearest bound at N~71. No pointer use,
+IP control, command or rung 5.

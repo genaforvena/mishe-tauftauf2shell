@@ -275,3 +275,41 @@ This corrects W8's "register-byte control at higher strides" and narrows
 W10's canary bound: the canary blocks a *populated* item-38 write, not every
 later write. Grade unchanged: rungs 1-4; chosen bytes reach caller-frame
 storage but no live pointer, IP, command, witness verdict or rung 5.
+
+## W14 — stack-mapping bound on far strides (read-only, no grade change)
+
+`lab/frontier/codebasememory2shell/far-stride-bound.sh` builds a throwaway
+harness from the pinned vulnerable `cypher.c` (same plain flags as
+`build.sh`) and captures `evidence/far-stride-bound.txt`, sha256
+`d93ab7b2894421428c024a3d026d0242ff3c8c2fbf89d3bcf672baba5a95b2f3`.
+The probe prints one main-stack local (`SP`) and the `[stack]` mapping end
+from `/proc/self/maps`; gdb reads frame and mapping state only.
+
+- The OOB destination advances 512 bytes per projection item. After the empty
+  item 38 preserves the canary (W12), items 39 onward can place chosen bytes
+  in caller-owned storage; item 39 succeeds in every sample, and items 54/55
+  become placement-dependent because the walk approaches the stack mapping
+  top. This is an ASLR/layout-dependent bound, not a fixed item index.
+- The ancestor frame is out of reach for a stronger reason than W12's
+  `rb_set_columns()` fault at N=1135. Stride arithmetic puts main's saved
+  RIP near item 70 (`callee_rbp+0x4198`), not item ~1134. In a live-ASLR gdb
+  snapshot, `callee_rbp=0x7ffe9d28f8c0`, the estimated RIP slot
+  `0x7ffe9d293a58` lay **above** the `[stack]` end `0x7ffe9d291000`. Across
+  16 sampled placements the smallest `STACK_TOP-SP` was `0x1108` (4360
+  bytes) versus the `SP+0x40a0` (16544 bytes) needed for that slot. Twelve
+  71-item / 478-byte attempts all exited 139 in `memcpy` before reaching it.
+  W12's column-array fault at N=1135 remains a separate, earlier blocker for
+  huge counts; it is not the nearest bound at N~71.
+- The result-builder pointer `rb` and main's result/store locals sit below
+  the first post-canary stride (items 39+) and above the last pre-canary
+  copy, so no live pointer slot is in the writable window. W12's observed
+  caller-frame words at `+0x1d0/+0x1d8` remain dead in this build.
+- W12's sentence "a C string cannot carry the zero bytes needed for a
+  canonical pointer in any case" is too broad: a C string *can* overwrite
+  the low six bytes of a little-endian user pointer whose top two bytes are
+  already zero. No live-pointer use was observed here, so the conclusion is
+  unchanged; only that absolute phrasing is retracted.
+
+Grade unchanged: rungs 1-4, chosen bytes in caller-frame storage but no live
+pointer, IP, command, witness verdict or rung 5. No pin, harness, matrix row
+or witness request changed.
