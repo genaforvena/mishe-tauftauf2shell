@@ -112,3 +112,34 @@ float-representable word repeated, the victim is harness-placed, the pointer
 is never dereferenced, and there is no real consumer, arbitrary 64-bit
 value, wire, IP hijack, command or r5. W204 is author-only and unwitnessed;
 the earlier replay offer at event 4336 has no verdict yet.
+
+## W205 (2026-11-25) — unwrapped glibc heap: no live object in the OOB range
+
+W204's adjacent victim was harness-placed. To test the real-consumer question
+without building an app, `harness-neighbor.c` wraps only malloc/free to
+record live allocations and adds a 3-line hook to the pinned `setup_malloc()`
+that calls `w205_watch8()` on every 8-byte allocation. The fourth 8-byte
+allocation in this PoC is `c->multiplicands`; at that instant the harness
+dumps all live allocations and any overlap with the 30-word OOB run
+`[p+8, p+128)`. No victim is planted, no allocator layout is forced, and no
+wrapped pointer is called.
+
+Result (vulnerable v1.22, `evidence/chosen.ogg`): 11 live allocations; the
+setup allocations sit at deltas -128, -96, -64, -32, 0 relative to
+`c->multiplicands`; the input buffer and three `mults` arrays are thousands of
+bytes away. **Zero live allocations overlap `[+8,+128)`** — the file-chosen
+words land in free heap space/metadata, consistent with the plain libc abort
+(`malloc(): invalid size (unsorted)`, rc 134) already recorded in W203. The
+fixed dev branch and a non-OGG input remain clean (`err=20`/`err=30`).
+One-command replay: `sh lab/frontier/stbvorbis2shell/run-neighbor.sh` ->
+9 PASS / 0 FAIL, rc 0.
+
+This is a NEGATIVE RESULT for the unassisted real-consumer path: on the
+lab's glibc a consumer has no live object placed in the OOB path, so the
+W204 pointer-field overwrite requires harness placement. Grade stays
+rung 4 PARTIAL; no r5. W205 is author-only and unwitnessed.
+
+## Replay receipt (2026-11-25 14:05Z)
+
+In-tree: `run-all.sh` 9/0, `run-seq.sh` 4/0, `run-guard.sh` 12/0,
+`run-object.sh` 9/0, `run-neighbor.sh` 9/0, all rc 0.

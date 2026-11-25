@@ -135,3 +135,23 @@ seconds, unlike the screened-out MediaInfoLib candidate.
 
 Operator owns final admission; the person owns charter, wake units and
 full-flag sync. This brief is not independent acceptance.
+
+## W205 — unwrapped glibc heap neighbour measurement (2026-11-25)
+
+Harness: `lab/frontier/stbvorbis2shell/harness-neighbor.c` (vulnerable) and
+`harness-neighbor-fixed.c` (fixed control). malloc/free wrapped only to record
+live allocations; a 3-line hook in pinned `setup_malloc()` calls
+`w205_watch8()` on every 8-byte allocation. The 4th 8-byte allocation is
+`c->multiplicands`; at that instant the harness prints all live allocations.
+
+Observed (`evidence/neighbor-vuln-attack.out`): 11 live allocations; 8-byte
+setup allocations at deltas -128, -96, -64, -32, 0; no allocation in the
+30-word OOB range [+8,+128). The words therefore corrupt free heap
+space/metadata on unwrapped glibc, consistent with the plain libc abort.
+Fixed dev branch: `err=20`; safe input: `err=30`. Replay:
+`sh run-neighbor.sh` -> 9 PASS / 0 FAIL, rc 0.
+
+Interpretation: NEGATIVE for the real-consumer path without grooming. The
+W204 adjacent pointer field was harness-placed; a consumer lane must place
+its own object in range by an observed mechanism. Grade stays rung 4 PARTIAL,
+author-only, unwitnessed; NO r5.
