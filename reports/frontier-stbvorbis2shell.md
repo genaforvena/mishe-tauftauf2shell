@@ -120,7 +120,9 @@ seconds, unlike the screened-out MediaInfoLib candidate.
    8-byte multiplicands allocation to count the exact OOB extent before the
    process dies. The loop bound (`entries*dims` ~ 1.07e9 floats) is known
    from source; the number of consecutive words that land in writable heap
-   before SIGSEGV is not.
+   before SIGSEGV is not. SUPERSEDED by W203 in
+   `reports/stbvorbis2shell-status.md`: this PoC stops at `:3895` after 31
+   writes (29 OOB words, 116 bytes); `entries*dims` is only the loop bound.
 2. Real consumer build (issue #1947 used whisper.cpp) fed the same PoC: check
    whether a file-steered OOB word reaches a pointer or control datum.
 3. Witness replay of any new claim before it is treated as established.
