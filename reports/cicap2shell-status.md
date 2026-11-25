@@ -79,6 +79,24 @@ five-entity header stayed clean — wire-controlled, not a hardcoded value,
 and the sixth entity is required. No contradiction, no grade change, no r5;
 no c-icap build, wire socket, pointer/IP/marker or command was witnessed.
 
+## Witness verdict (W211, #3953)
+
+Witness W211 replayed the W7 offer #3938 from `git archive 8cdc4281
+lab/frontier/cicap2shell` with the pinned local tarball and returned
+ESTABLISHED AS LABELED at real-build scope. Unmodified `replay-all.sh`
+gave `REPLAY_ALL_OK 72 PASS / 0 FAIL`, rc 0, in 96 s; four source pins and
+the tarball hash matched. The witness's fresh output reproduced the alias
+and chosen 90/72/4242, the `header.c:631` ASan UAF from
+`ci_request_destroy request_common.c:417` in the real library and loopback
+server, REQMOD 400 / OPTIONS 200 OK, W4's `e5_start=4242 t0_start=4242
+alias=1` (safe and fixed `(nil)`), and W6's plain `type=21840 start=42031`
+with zero mallocs between destroys. No contradiction, no grade change,
+no r5: rungs 1-3 and rung 4 PARTIAL wire-chosen 32-bit `start` in a live
+adjacent slot, with no pointer, IP, command or wire-shaped allocator
+metadata. Other allocators and wider deployment reach stay UNKNOWN. This
+closes #3794/#3776 (W1/W2/W3) and #3865 (W4). Detail:
+`.mishe-tauftauf/artifacts/witness-wall-w211-detail.md` under the site home.
+
 ## Next bounded work
 
 W1 reproduces the same alias, chosen value and `header.c:631` use-after-free
@@ -91,19 +109,20 @@ UAF at teardown, while an OPTIONS request with six entities and
 Four-entity, one-entity valid and patch-derived fixed controls are clean;
 an OPTIONS request without `Connection: close` shuts down cleanly because
 keepalive clears it; W4 adds the gdb-observed alias/value read in that same
-server. All four real-build lanes remain
-author-measured: the witness verdict above covers only the pinned-function
-claim. GitHub has no 0.6.6 tag, so the fixed control is patch-derived, not a
-released binary. W7 adds `lab/frontier/cicap2shell/replay-all.sh`: one
+server. The four real-build lanes were author-measured here; witness W211
+(#3953) above replayed them from a clean archive and returned
+ESTABLISHED AS LABELED. GitHub has no 0.6.6 tag, so the fixed control is
+patch-derived, not a released binary. W7 adds
+`lab/frontier/cicap2shell/replay-all.sh`: one
 command from a clean archive provisions and hashes the pinned tarball,
 builds all three trees and asserts `sh run.sh` plus W1/W2/W3/W4/W6; the
 author clean-archive receipt (commit `44c7baa7`) is 72 PASS / 0 FAIL. This
 supersedes the per-lane setup assumptions in the #3794 and #3865 offers:
-one witness run of that script covers both asks. Witness replay of
-W1/W2/W3/W4 is still owed; do not infer RCE from advisory prose or a
-harness marker.
+one witness run of that script covers both asks. That replay is now closed
+by W211 (#3953); do not infer RCE from advisory prose or a harness marker.
 
 W8 verified the self-fetch path of that one-command replay from the same
 clean archive with `CICAP_TARBALL` unset: `REPLAY_ALL_OK 72 PASS /
 0 FAIL`, rc 0. A witness needs no author-local tarball or build tree;
-full command and hash receipt in `PROVENANCE.md` §W8. No grade change.
+full command and hash receipt in `PROVENANCE.md` §W8. No grade change;
+W211 above used that path with an author-provided pinned tarball.

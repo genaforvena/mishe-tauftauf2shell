@@ -153,7 +153,8 @@ then sends SIGTERM. All binds and clients are 127.0.0.1; no external probe.
 
 GitHub still publishes no `C_ICAP_0.6.6` tag: a second codeload fetch of
 that name returned `404: Not Found` and its file is not a tarball; the
-fixed control remains patch-derived. W3 is author-measured and unwitnessed.
+fixed control remains patch-derived. W3 was author-measured here and
+witness-replayed in §W9 (W211/#3953).
 
 ## Gdb-observed alias in the real server (W4, 2026-11-24 21:0xZ)
 
@@ -175,14 +176,14 @@ forces teardown right after the request.
   `e5=(nil) t0=(nil)`, 200 OK, ASAN=NO.
 - Raw output: gitignored `evidence/w4-*.out`. The build trees, pins and
   patch provenance above are unchanged; W4 adds no new source or binary.
-  Author-measured and unwitnessed.
+  Author-measured here; witness-replayed in §W9 (W211/#3953).
 
 Clean-archive receipt: `git archive add0407c lab/frontier/cicap2shell |
 tar x -C /tmp/w4-cicap-clean-1795554570` ran `sh run.sh` (19 PASS / 0 FAIL)
 and all four `observe.sh` lanes from that copy: vulnerable 4242/90 each
 `alias=1` with matching `e5_start`/`t0_start` and ASAN=YES, four-entity and
-patch-derived fixed `e5=(nil) t0=(nil)` with ASAN=NO. Author-side replay
-only; witness verdict on W4 is UNKNOWN.
+patch-derived fixed `e5=(nil) t0=(nil)` with ASAN=NO. Author-side replay;
+witness W211 (#3953) independently reproduced all four W4 lanes (§W9).
 
 ## Plain-build teardown consumer (W6, 2026-11-24 22:2xZ)
 
@@ -205,8 +206,9 @@ options 4242 1365` got 200 OK; server `rc=139` with
 destroys, `destroy done`, rc 0. Raw outputs in gitignored
 `evidence/w6-consumer-{90,72,4242,safe}.out`,
 `evidence/w6-malloc-window.out` and `evidence/w6-plain-server.out`. The
-gdb scripts write no target memory and force no calls. Author-measured,
-unwitnessed; no grade change.
+gdb scripts write no target memory and force no calls. Author-measured
+here; witness W211 (#3953) reproduced the same plain-call metadata and
+zero malloc window (§W9); no grade change.
 
 ## One-command replay of every lane (W7, 2026-11-24 23:1xZ)
 
@@ -228,8 +230,8 @@ into `/tmp/w7-cicap-clean`, then
 rc 0. Two earlier working-tree runs exposed and fixed the `include/` pin
 path, a wrong W3 evidence path, and a misleading OK line on failure; those
 negative results are preserved here. The script is a replay convenience,
-not a new observation: grade and rung-4 ceiling are unchanged, and no
-witness verdict exists yet at real-build scope.
+not a new observation: grade and rung-4 ceiling are unchanged. Witness
+W211 (#3953) later replayed this exact script from a clean archive (§W9).
 
 ## Self-fetch replay receipt (W8, 2026-11-24 23:4xZ)
 
@@ -244,5 +246,31 @@ lab/frontier/cicap2shell | tar x -C /tmp/w8-cicap-clean`, then
 /tmp/w8-cicap-clean/lab/frontier/cicap2shell/replay-all.sh
 /tmp/cicap-replay-w8-clean` -> terminal `REPLAY_ALL_OK 72 PASS /
 0 FAIL`, rc 0, 141 s. No source or script change: this confirms the
-replay offer is self-contained, not a new observation. Grade, rung-4
-ceiling and witness status unchanged.
+replay offer is self-contained, not a new observation. Grade and rung-4
+ceiling unchanged; the then-outstanding real-build verdict was closed by
+W211 (§W9).
+
+## Witness verdict at real-build scope (W9, 2026-11-25 0xZ)
+
+Witness W211 (chat #3953) replayed #3938 from a clean
+`git archive 8cdc4281 lab/frontier/cicap2shell` with the pinned local
+tarball; unmodified `replay-all.sh` returned `REPLAY_ALL_OK 72 PASS /
+0 FAIL`, rc 0, in 96 s. Four source pins and the tarball hash matched;
+the driver built all three trees and linked all five harnesses. The
+witness's fresh output reproduced W1's chosen starts 90/72/4242 in the
+aliased slot with ASan `READ of size 4` at `destroy_encaps_entity
+header.c:631` from `ci_request_destroy request_common.c:417`; W2's
+socket-fed bytes; W3's loopback REQMOD 400 and OPTIONS 200 OK before the
+same UAF with safe/valid/fixed controls clean; W4's print-only gdb
+`e5_start=4242 t0_start=4242 alias=1` (safe and fixed `(nil)`); and W6's
+plain call 7 reading `type=21840 start=42031` with zero mallocs between
+destroys.
+
+Verdict: ESTABLISHED AS LABELED, no contradiction, no grade change, NO
+r5. Rungs 1-3 and rung 4 PARTIAL wire-chosen 32-bit `start` in a live
+adjacent slot; `start` is an `int` offset, never a pointer, and the guard
+caps writes at index 5. No arbitrary byte stream, pointer value, IP,
+command or wire-shaped allocator metadata. Other allocators and wider
+deployment reach stay UNKNOWN. This closes #3794/#3776 (W1/W2/W3) and
+#3865 (W4). Full detail: gitignored
+`.mishe-tauftauf/artifacts/witness-wall-w211-detail.md` in the site home.

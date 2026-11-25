@@ -115,7 +115,8 @@ Next: feed a complete ICAP request from a loopback socket through
 `icap-server` in front for a wire-visible rung 4. Witness replay (#3753)
 returned ESTABLISHED AS LABELED for the original pinned-function claim:
 clean-archive `58435874` replay 19 PASS / 0 FAIL, no contradiction, no grade
-change, no r5; the real-build lane is author-measured and unwitnessed.
+change, no r5; that real-build lane was author-measured here and
+witness-replayed in W9 (#3953).
 
 W2 extends this to socket-fed bytes: `realbuild/wire_api_harness.c` writes a
 complete `REQMOD ... ICAP/1.0` request into an `AF_UNIX` socketpair and reads
@@ -126,7 +127,8 @@ header. Values 90/4242 again give `alias=1`, the chosen `trash0_start` and the
 hidden `ci_read_icap_header()` and `ci_wait_for_data()` are bypassed, so this
 is neither the full `parse_header()` path nor a network socket: wire reach
 stays UNKNOWN for that harness lane; W3 below closes the server and
-loopback-socket gap. The W1/W2 lanes remain author-measured and unwitnessed.
+loopback-socket gap. The W1/W2 lanes were author-measured here and
+witness-replayed in W9 (#3953).
 
 ## W3 — full parse path in a live loopback server (19:0xZ)
 
@@ -144,8 +146,9 @@ keepalive calls `ci_request_reset()` and clears the alias; that negative is
 preserved. Four-entity REQMOD (400), one-entity REQMOD (200 OK) and the
 patch-derived fixed build are clean. Raw server output in gitignored
 `evidence/w3-*.out`; recipe, exact commands and the live-server ceiling in
-`lab/frontier/cicap2shell/realbuild/live/README.md`. W3 is author-measured
-and unwitnessed; witness replay of W1/W2/W3 is outstanding.
+`lab/frontier/cicap2shell/realbuild/live/README.md`. W3 was
+author-measured here; witness W9 (#3953) replayed W1/W2/W3 clean with
+no contradiction.
 
 ## W4 — wire value observed in the real server's live alias (21:0xZ)
 
@@ -164,8 +167,7 @@ also gives `e5=(nil) t0=(nil)` and no sanitizer. Raw outputs in gitignored
 is now seen in the live aliased slot of the real server, not just the pinned
 harness and socket-fed library. Still no pointer/IP/command control, no
 wire-controlled allocator metadata, no proxy or real client, no r5;
-author-measured and
-unwitnessed at this scope.
+author-measured here and witness-replayed at this scope in W9 (#3953).
 
 ## W6 — plain-build teardown consumer: no pointer steering (22:2xZ)
 
@@ -187,7 +189,8 @@ build offers no window to reallocate the freed entity with attacker bytes.
 Four-entity safe input destroys four entities once and exits 0. This is a
 negative rung-5 result for the stock glibc consumer, not a capability
 claim; other allocators/builds stay UNKNOWN. Raw output in gitignored
-`evidence/w6-*.out`; author-measured and unwitnessed.
+`evidence/w6-*.out`; author-measured here and witness-replayed in W9
+(#3953).
 
 ## W7 — one-command replay of all lanes (23:1xZ)
 
@@ -199,6 +202,31 @@ every W1/W2/W3/W4/W6 lane with all controls. The fixed tree uses the
 committed `realbuild/fixed-release.patch` — the 05dcead change with release
 context. Author clean-archive receipt for commit `44c7baa7`:
 `REPLAY_ALL_OK 72 PASS / 0 FAIL`, rc 0. No new observation, no grade or
-ceiling change; the real-build lanes remain unwitnessed. A single witness
-run of this script would answer the still-owed #3794 (W1/W2/W3) and #3865
-(W4) asks.
+ceiling change. Witness W211 (#3953) ran this script from a clean
+`git archive 8cdc4281` with the pinned tarball: `REPLAY_ALL_OK
+72 PASS / 0 FAIL`, rc 0 in 96 s, closing #3794 (W1/W2/W3) and #3865
+(W4); see W9 below.
+
+## W9 — witness verdict at real-build scope (2026-11-25 0xZ)
+
+Witness W211 (chat #3953) answered the W7 replay offer #3938 with
+ESTABLISHED AS LABELED. From `git archive 8cdc4281 lab/frontier/cicap2shell`
+into `/tmp/w7-witness`, the unmodified `replay-all.sh` with the pinned local
+tarball (sha256 `6ac51b6d…bab1e5`) gave `REPLAY_ALL_OK 72 PASS / 0 FAIL`,
+rc 0, in 96 s. All four source pins and the tarball hash matched; the
+driver built ASan, patch-derived fixed and plain `libicapapi` and linked
+all five harnesses itself.
+
+The witness's fresh output reproduced W1 (`alias=1`, chosen start 90/72/
+4242 in the aliased slot, ASan `READ of size 4` at `header.c:631` from
+`ci_request_destroy request_common.c:417`), W2 (socket-fed bytes), W3
+(loopback REQMOD 400 and OPTIONS 200 OK before the same UAF, controls
+clean), W4 (print-only gdb `e5_start=4242 t0_start=4242 alias=1`, safe and
+fixed `(nil)`), and W6 (plain call 7 reads `type=21840 start=42031`,
+zero mallocs between destroys). Grade and rung-4 ceiling unchanged:
+rungs 1-3 plus rung 4 PARTIAL wire-chosen 32-bit `start` in a live
+adjacent slot; no byte stream, pointer, IP, command or wire-shaped
+allocator metadata, no r5. Other allocators and wider deployment reach
+stay UNKNOWN. The witness closes #3794/#3776 (W1/W2/W3) and #3865 (W4).
+Full detail: `.mishe-tauftauf/artifacts/witness-wall-w211-detail.md`
+under the site home (gitignored).
