@@ -1,6 +1,6 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W11: independent witness verdict #4161 (W214) is ESTABLISHED
+Status 2026-11-25 W12: independent witness verdict #4161 (W214) remains ESTABLISHED
 AS LABELED for the five unmodified real-build suites replayed from a clean
 archive of `c5ece2a9` — rung 3 on a real authenticated loopback wire, rung 4
 mechanics, and rung 5 MECHANICS only, NOT ESTABLISHED as remote execution.
@@ -13,6 +13,10 @@ W11 adds an unwitnessed no-detach plain lane (6 PASS / 0 FAIL) in which the
 app-owned fake callback objects are reached without nulling the channel's
 stdout buffer or callback list; address-directed reclamation of both freed
 objects replaces the detach. No grade change.
+W12 adds an unwitnessed non-PIE lane (7 PASS / 0 FAIL) that takes the callee
+address from the compiled ELF symbol table and drives the same benign command
+from a separately compiled client process; no grade change. A source-level
+negative closes the library-internal close-free shortcut.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -481,3 +485,73 @@ command intact in the five witness-replayed suites. An ASan compile of the
 changed `real_wire.c` against the existing `build-asan` library also
 succeeded. This checks committed harness and driver text, not a fresh fetch
 of libssh; W11 remains additive and unwitnessed.
+
+## W12: ELF-derived callee address and separate-process client (2026-11-25 12:38Z)
+
+New additive evidence, not witness-replayed; no claim or grade change. Two
+bounded checks: a source-level negative on a library-internal free, and a new
+command lane that removes the "address chosen by a forked peer" condition.
+
+**Bounded negative — library-internal close free.** `channel_rcv_close()` in
+the pinned vulnerable tree sets `SSH_CHANNEL_FLAG_CLOSED_REMOTE` at
+`src/channels.c.vuln:807` and, if the application earlier called an ordinary
+`ssh_channel_free()` so `FREED_LOCAL` is set, calls `ssh_channel_do_free()`
+at :808-809. That looks like a wire-triggered free which could remove the
+in-callback app free. It cannot: `ssh_channel_do_free()` first removes the
+channel from `session->channels` (:1345-1348), and `channel_from_msg()`
+(:510-532) resolves every later `SSH2_MSG_CHANNEL_DATA` through that list, so
+the freed channel is unreachable. No wire lane was built on this path;
+recorded as a negative, not an assumed pass.
+
+**Fixed-address lane.** `real/real_wire.c` gains `groom-fixedaddr`,
+`client-only` and `server-fixedaddr` modes. The harness is compiled with
+`-no-pie`; `readelf -h` confirms `Type: EXEC (Executable file)`. The driver
+reads `exec_trampoline`'s address from the compiled binary with `nm` and
+passes it to the client as an argument; the client no longer evaluates
+`&exec_trampoline` in this mode. Wire offset 112 carries the ELF-derived
+address and offset 0 the command. Vulnerable evidence
+`real/evidence-fixedaddr-vuln-fixedaddr.out`: `CLIENT sent exec
+cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x407430 fixedaddr=1`,
+`SERVER nodetach reclaim it=0x... want=0x... buf=0x... want=0x...`,
+`SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+`SERVER EXEC rc=0`, `SERVER target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`, no detach line. Three independent launches
+print the same fixed fn (`0x407430`) while the heap addresses differ.
+Fixed lane `real/evidence-fixedaddr-fixed-fixedaddr.out`: no data #2, no
+call, no file, `SERVER target_after=0x4141414141414141`, client rc 0.
+
+**Separate-process control.** The driver also builds a distinct client binary
+with `-Dexec_trampoline=client_trampoline`, so its own image has no
+`exec_trampoline` symbol to borrow (`nm` shows only `client_trampoline`). It
+starts the server from the vulnerable ELF with `server-fixedaddr` and the
+client as a separate process with `client-only`, both on 127.0.0.1. Server
+evidence `real/evidence-fixedaddr-vuln-separate-server.out`: `SERVER EXEC
+trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`, `SERVER EXEC
+rc=0`, `SERVER target_after=0x41414141414141c1`; the client returned 0 and
+created the marker, kept as `real/evidence-fixedaddr-separate-sideeffect.kept`.
+The fixed server under the same client prints no call and leaves no file.
+
+`sh lab/frontier/libsshch2shell/real/run-fixedaddr.sh`: **7 PASS / 0 FAIL**,
+rc 0. Quotes and per-lane outputs are in `real/evidence-fixedaddr-*.out`; five
+touch markers are kept as `real/evidence-fixedaddr-*.kept`.
+
+All W12 additions in `real_wire.c` are behind `#ifdef W12_FIXEDADDR`; with the
+flag undefined, the preprocessed source is byte-identical to the pre-W12 HEAD
+harness (`clang -E -P` diff empty), so the W10/W11 lanes are unchanged. An
+earlier ungated draft accidentally dropped
+`memcpy(payload + 112, &fn, sizeof(fn))` and broke W10 (7 PASS / 2 FAIL, server
+status `0x8b`, no call); the wire write was restored, after which all three
+suites pass again. ASan compiles of the changed harness both with and without
+the W12 flag succeed.
+
+Ceiling discipline: additive and unwitnessed; no grade change. W12 removes
+one lab condition (a process-local address from a forked peer) but replaces
+it with another (a non-PIE target whose symbol table is readable). Still
+required: PR:L authenticated peer; the application frees a remotely closed
+channel inside its data callback; application-directed reclamation of freed
+objects; app-owned fake callback objects; a benign fixed command through an
+in-harness `system()`; no persistent shell or remote command service. Not
+ESTABLISHED rung 5. What would change the grade: a command reached without
+the detach/trampoline/app-owned objects, a witness counterexample, or a
+provisioned consumer with a real in-callback free.
+

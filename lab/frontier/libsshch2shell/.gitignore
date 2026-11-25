@@ -18,3 +18,5 @@ real/real_wire-plain-*
 real/plain-run/
 real/*.marker
 real/nodetach-run/
+real/fixedaddr-run/
+real/separate-run/

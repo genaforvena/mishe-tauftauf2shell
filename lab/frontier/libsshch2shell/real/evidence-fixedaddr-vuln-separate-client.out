@@ -1,0 +1,6 @@
+[2026/11/25 12:43:38.969693, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+CLIENT auth rc=0
+CLIENT channel local=43 remote=43
+CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x407430 fixedaddr=1
+CLIENT sent groom wire pointer=0x4838a0 survive=0
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE

