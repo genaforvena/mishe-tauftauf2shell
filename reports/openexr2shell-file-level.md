@@ -2361,3 +2361,10 @@ primitive. It does not close byte-granular partial overwrites, a heap/address
 leak, a longer gadget chain, another build or a wire-fed consumer.
 Grade unchanged: rung 4 author-only with a benign command and controls,
 no witness verdict and no wire input; rung 5 remains UNKNOWN.
+
+W203 clean-archive receipt (16:54Z): `git archive c2932e44
+lab/openexr2shell-real` into `/tmp/w203-clean`, with the gitignored `src/`,
+`build-vuln-plain/` and the gitignored W202 PoC symlinked from the live
+checkout; `sh harness/w203-aslr-on-negative.sh` returned `RESULT PASS` rc 0
+with all six evidence hashes matching the working tree byte-for-byte.
+Author replay, not a witness verdict; grade and rung-5 status unchanged.
