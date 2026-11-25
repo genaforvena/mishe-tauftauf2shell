@@ -23,8 +23,8 @@ if [ -z "$UP" ]; then
     }
 fi
 UP=$(cd "$UP" && pwd -P) || exit 2
-if [ ! -e ../../upstream-parent ]; then
-    ln -s "$UP" ../../upstream-parent || exit 1
+if [ ! -e upstream-parent ]; then
+    ln -s "$UP" upstream-parent || exit 1
 fi
 
 mkdir -p evidence/replay
@@ -55,22 +55,26 @@ expect_rc() {
 }
 
 E=real/smp/evidence
+CLEAN_OK=0
 if sh real/smp/serial-clean.sh >evidence/replay/serial-clean.out 2>&1; then
+    CLEAN_OK=1
     expect_text clean-run evidence/replay/serial-clean.out CLEAN_RUN_DONE
 else
     fail clean-run "serial-clean.sh exited non-zero (see evidence/replay/serial-clean.out)"
 fi
 
-expect_rc parent-4104   "$E/clean-smp-serial-nogroom-4104.log" 139
-expect_rc parent-2048   "$E/clean-smp-serial-nogroom-2048.log" 0
-expect_rc parent-5000   "$E/clean-smp-serial-nogroom-5000.log" 139
-expect_rc parent-6000   "$E/clean-smp-serial-nogroom-6000.log" 139
-expect_rc parent-7000   "$E/clean-smp-serial-nogroom-7000.log" 0
-expect_rc fixed-4104    "$E/clean-smp-serial-fixed-4104.log" 0
-expect_text parent-oob  "$E/clean-smp-serial-nogroom-4104.log" 'dst_delta=4104'
-expect_text fixed-inb   "$E/clean-smp-serial-fixed-4104.log" 'dst_delta=8'
+if [ "$CLEAN_OK" -eq 1 ]; then
+    expect_rc parent-4104  "$E/clean-smp-serial-nogroom-4104.log" 139
+    expect_rc parent-2048  "$E/clean-smp-serial-nogroom-2048.log" 0
+    expect_rc parent-5000  "$E/clean-smp-serial-nogroom-5000.log" 139
+    expect_rc parent-6000  "$E/clean-smp-serial-nogroom-6000.log" 139
+    expect_rc parent-7000  "$E/clean-smp-serial-nogroom-7000.log" 0
+    expect_rc fixed-4104   "$E/clean-smp-serial-fixed-4104.log" 0
+    expect_text parent-oob "$E/clean-smp-serial-nogroom-4104.log" 'dst_delta=4104'
+    expect_text fixed-inb  "$E/clean-smp-serial-fixed-4104.log" 'dst_delta=8'
+fi
 
-if (cd real/smp && python3 clean-layout.py 4104) >evidence/replay/clean-layout.out 2>&1; then
+if sh -c 'cd real/smp && python3 clean-layout.py 4104' >evidence/replay/clean-layout.out 2>&1; then
     expect_text layout-done evidence/replay/clean-layout.out CLEAN_LAYOUT_DONE
     expect_text layout-magic "$E/clean-layout.txt" 96f3b83d
 else
