@@ -394,7 +394,7 @@ channel, authentication, post-auth pointer control and (for the command limb)
 the non-PIE static trampoline. No external system was contacted; all sockets
 in the W3/W4/W5 replays were loopback-only.
 
-## W7 — independent witness replay and verdict (2026-11-25 07:25Z)
+## W7 — independent witness replay and verdict (2026-11-25 07:2xZ)
 
 The witness replayed W4 in a clean `git archive` tree at HEAD `c9e2482e`,
 provisioning pinned-parent sources from the local git object store and

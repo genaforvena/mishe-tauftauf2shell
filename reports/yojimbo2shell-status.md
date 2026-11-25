@@ -17,7 +17,7 @@ both resolver keys, three wake units from the EXACT full-flag sync at pin
 path enabled/active), window 147, README row 177. Grade unchanged: rungs
 1-3, rung 4 PARTIAL, rung 5 `—`; no wire, pointer, command or witness verdict.
 
-## Current 2026-11-25 07:25Z (supersedes the staging snapshots above)
+## Current 2026-11-25 07:2xZ (supersedes the staging snapshots above)
 
 Real ASan build, authenticated UDP loopback and two-process split replay all
 stand; rung 3 CONFIRMED, rung 4 DEMONSTRATED, and rung 5 MECHANICS ESTABLISHED
