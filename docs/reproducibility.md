@@ -9960,3 +9960,25 @@ Grade rung 3 / rung 4 PARTIAL, no r5, witness UNKNOWN.
 
 All three grades stay rung 3 + rung 4 PARTIAL at the named harness/pinned
 function scopes; no full r5 and no shipped-application or wire proof.
+
+## 2026-11-25 08:4xZ — admitted recipe for xschem2shell
+
+- From `lab/frontier/xschem2shell`, `sh harness/run-all.sh` printed 25 PASS /
+  0 FAIL under GCC and Clang, ASan/plain with indices 2/16/64/-2 and fixed /
+  safe controls. Both versions of the whole `src/rawtovcd.c` are pinned
+  byte-identically (sha256 in `PROVENANCE.md`), and the probe calls the real
+  `read_dataset()` on a crafted in-memory `.raw` header.
+- ASan reports `heap-buffer-overflow WRITE of size 8` at
+  `rawtovcd-vuln.c:130` (`names[i] = malloc(...)`); index -2 writes 16 bytes
+  before the region. The fixed pin rejects `bad variable record, index out
+  of range` and stays clean. The plain build reads back an allocator-derived
+  pointer from the chosen slot, not file-chosen stored bytes; the
+  tcache-grooming negative is preserved rather than retried into existence.
+- Admission commands are the EXACT full-flag sync in
+  `docs/runtime-pin.md:96-102` at pin `0d686bba…d528a` (`written 3, removed
+  0`), followed by daemon-reload, the pinned full-flag doctor (rc 0, `PASS`
+  / `GREEN`), `for_role` → `RoutedEngine`, and
+  `python3 tools/check-readme.py .` (GREEN, 142 achievement rows).
+
+Grade stays rung 3 + rung 4 PARTIAL at this file-converter scope; no full r5,
+no wire path, no control-flow hijack, no command and no witness verdict.

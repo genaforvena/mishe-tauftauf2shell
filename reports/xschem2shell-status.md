@@ -1,4 +1,24 @@
-# xschem2shell — lab status
+# xschem2shell — admitted status (2026-11-25 08:43Z)
+
+## 2026-11-25 08:43Z — ADMITTED under standing #6 (146th route)
+
+- Verified staged claim, charter, wall, lab and pre-existing window 154
+  (panes %310/%311); no second window created.
+- The first wake at 08:41:27Z failed with `OMP-ONLY POLICY VIOLATION: role
+  'xschem2shell' has no hy4-flash route`; repaired by adding the route and
+  both resolver keys, then re-reading and JSON-parsing both files.
+- EXACT full-flag sync from `docs/runtime-pin.md:96-102` at pin
+  `0d686bba…d528a`: `written 3, removed 0`, daemon-reload, slice/debounce/
+  path present, path enabled and active. Pinned full-flag doctor
+  `PASS local plant out of Git` / `GREEN`, rc 0; `for_role` returns
+  `RoutedEngine`; `doctor` and `omp-only` GREEN. The wake-failure signal was
+  re-observed GREEN with that repair evidence.
+- Grade unchanged: rung 3 real upstream parser function / rung 4 PARTIAL
+  file-chosen signed index with allocator-derived pointer, harness 25 PASS /
+  0 FAIL; no chosen stored bytes, function pointer, control flow, command,
+  r5 or witness verdict.
+
+The staged record below is preserved as the pre-admission evidence.
 
 ## 2026-11-25 08:40Z — STAGED + HANDED OFF
 

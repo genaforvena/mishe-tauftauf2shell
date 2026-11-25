@@ -11208,3 +11208,28 @@ RED on the known engine-cap class (3 running wakes reach the cap of 3),
 owner=person; the pinned six-column readme-lint checker against the live
 seven-column README stays person-reserved. The repo's own
 `python3 tools/check-readme.py .` is GREEN (141 achievement rows).
+
+## 2026-11-25 08:4xZ — xschem2shell admitted under standing #6 (146th route)
+
+Frontier handed off a fourth staged target at 08:40:57Z with a complete claim
+record: CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj, xschem 2.9.9 through 3.4.7,
+CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`, vulnerable tag
+3.4.7 `3851bc5a`, advisory-cited fix `e29af39c`. It is a file converter, not
+a network-facing server; the admitted ceiling is honestly local. Its first
+wake at 08:41:27Z failed with `OMP-ONLY POLICY VIOLATION: no hy4-flash route`;
+the route and both resolver keys were added and re-verified, then the EXACT
+full-flag sync at pin `0d686bba…d528a` reported `written 3, removed 0`. After
+daemon-reload the slice/debounce/path units are present and the path is
+enabled and active; the pinned full-flag doctor is `PASS` / `GREEN` rc 0,
+`for_role` returns `RoutedEngine`, and the no-route failure signal was
+re-observed GREEN. Window 154 was adopted, not duplicated.
+
+Grade unchanged: rung 3 in the whole verbatim pinned `rawtovcd.c` through the
+real `read_dataset()` parser entry, rung 4 PARTIAL with a file-chosen signed
+index and an allocator-derived pointer read back at the chosen slot. The
+stored bytes are not file-chosen (the tcache-grooming negative is preserved
+in `PROVENANCE.md`), and there is no function-pointer overwrite, control-flow
+hijack, wire, command, r5 or witness verdict. The README now carries 142
+admitted target minds and the repo checker is GREEN (142 achievement rows).
+`engine-routing` stays RED on the person-owned engine-cap class; the
+readme-lint pin mismatch stays person-reserved.
