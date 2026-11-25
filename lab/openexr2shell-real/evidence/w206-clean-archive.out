@@ -1,0 +1,12 @@
+Commit: 7c5778e7 (openexr2shell W206)
+Command: git archive 7c5778e7 lab/openexr2shell-real | tar -x -C /tmp/w206-clean
+Gitignored symlinks from the live checkout: src, build-vuln-plain,
+build-fixed-plain, build-vuln-asan, build-fixed-asan, plus the gitignored
+cases/p202-memcpy-system.exr.
+Replay: cd /tmp/w206-clean/lab/openexr2shell-real &&
+  sh harness/w206-ctxt-pointer-negative.sh
+RESULT PASS rc 0
+evidence/w206-ctxt-pointer-negative.out sha256:
+6f9b5993506999d7d60fdb32b440a0252f84e409099f32940953a47677aa4948
+Matches the working-tree replay three times. No addresses are normalized in
+this evidence; this run is byte-identical with ASLR off in the debuggee.
