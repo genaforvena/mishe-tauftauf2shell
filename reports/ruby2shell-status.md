@@ -28,7 +28,10 @@ byte; attacker controls buffer size via input length). Affected
   dated trigger (stamp 2026-11-21T03:52Z, PoC still unpublished); the
   durendal.sh disclosure confirms RCE on a plain `rails new` app but
   publishes no mechanics; the three fetched public PoC repos remain
-  sanitizer/crash-level.
+  sanitizer/crash-level. Persistence was measured directly on the harness
+  chain too: keeping the server alive after a successful attack still could
+  not serve a later `GET /health` or second `POST /trigger` (both `HTTP 000`,
+  log ends `corrupted size vs. prev_size`) — no second command.
 - **2026-11-25 (second push) — wire-shaped victim grooming closed: six
   measured blockers; rung 5 stock remains NOT ACHIEVED.** Targeting the
   only oracle-free channel (dev error page reflects params verbatim),
