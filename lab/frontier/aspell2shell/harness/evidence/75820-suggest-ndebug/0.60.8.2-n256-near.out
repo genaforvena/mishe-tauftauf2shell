@@ -1,0 +1,64 @@
+WARNING: Unable to enter Nroff mode: Unknown mode: "nroff".
+@(#) International Ispell Version 3.1.20 (but really Aspell 0.60.8.2 NDEBUG)
+=================================================================
+==604444==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x57d0695668cf bp 0x7ffc8bafad90 sp 0x7ffc8bafa558
+READ of size 2 at 0x519000007c80 thread T0
+    #0 0x57d0695668ce in strlen (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/aspell+0x738ce) (BuildId: d850caabcab517dd22a4b1cd5fee0c054cea8338)
+    #1 0x57d069759d41 in (anonymous namespace)::Working::score_list() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/suggest.cpp:1334:74
+    #2 0x57d069755e09 in (anonymous namespace)::Working::suggestions() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/suggest.cpp:529:7
+    #3 0x57d06974ed2a in (anonymous namespace)::SuggestImpl::suggest(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/suggest.cpp:1642:24
+    #4 0x57d0696daf6e in aspeller::SpellerImpl::suggest(acommon::MutableString) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x57d06972688e in aspell_speller_suggest /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/lib/speller-c.cpp:202:41
+    #6 0x57d069634dc4 in pipe() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/prog/aspell.cpp:895:25
+    #7 0x57d06962d3ab in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/prog/aspell.cpp:419:5
+    #8 0x79865762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x79865762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x57d06954f044 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/aspell+0x5c044) (BuildId: d850caabcab517dd22a4b1cd5fee0c054cea8338)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x57d0695e9e93 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/aspell+0xf6e93) (BuildId: d850caabcab517dd22a4b1cd5fee0c054cea8338)
+    #1 0x57d0696aa8fd in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/common/objstack.cpp:18:32
+    #2 0x57d069753b4c in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/suggest.cpp:379:5
+    #3 0x57d06974ed02 in (anonymous namespace)::SuggestImpl::suggest(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/suggest.cpp:1641:25
+    #4 0x57d0696daf6e in aspeller::SpellerImpl::suggest(acommon::MutableString) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x57d06972688e in aspell_speller_suggest /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/lib/speller-c.cpp:202:41
+    #6 0x57d069634dc4 in pipe() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/prog/aspell.cpp:895:25
+    #7 0x57d06962d3ab in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/../aspell-0.60.8.2/prog/aspell.cpp:419:5
+    #8 0x79865762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x79865762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x57d06954f044 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/aspell+0x5c044) (BuildId: d850caabcab517dd22a4b1cd5fee0c054cea8338)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/real-build/build-asan-ndebug-0.60.8.2/aspell+0x738ce) (BuildId: d850caabcab517dd22a4b1cd5fee0c054cea8338) in strlen
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==604444==ABORTING

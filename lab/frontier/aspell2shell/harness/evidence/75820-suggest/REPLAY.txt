@@ -1,0 +1,39 @@
+CVE-2026-75820 real-consumer replay (2026-11-25)
+
+All paths below are relative to lab/frontier/aspell2shell/real-build/.
+Build artifacts, tarballs and the installed dictionary are gitignored/untracked
+provisioning; only the harness and evidence logs are committed.
+
+1. Fetch (public provisioning, not a probe) and hash-check:
+   curl -fsSL -o aspell-0.60.8.2.tar.gz https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.2.tar.gz
+   curl -fsSL -o aspell-0.60.8.3.tar.gz https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.3.tar.gz
+   curl -fsSL -o aspell6-en.tar.bz2 https://ftp.gnu.org/gnu/aspell/dict/en/aspell6-en-2016.11.20-0.tar.bz2
+   sha256sum: 57fe4863... (0.60.8.2), 0534eae1... (0.60.8.3),
+              5ca6da8b850c36c2f718d51c653e2f8f68b612f29b5c20d99f704b01a1952691 (en dict)
+2. Extract. For v in 0.60.8.2 0.60.8.3 build in build-asan-$v:
+   ../aspell-$v/configure --disable-shared CC=clang CXX=clang++
+     CFLAGS=CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer -g -O1'
+     LDFLAGS='-fsanitize=address'
+   make -j4
+   Also build build-asan-ndebug-0.60.8.2 the same way with -DNDEBUG added
+   to CFLAGS and CXXFLAGS.
+3. Install en dictionary locally: create en-install/{dict,data}; copy en.dat,
+   en_affix.dat, en_phonet.dat from the dictionary archive plus *.cset/*.cmap/
+   *.kbd/*.multi from aspell-0.60.8.2/data into en-install/data. Write
+   en-install/aspell-wrapper.sh exec'ing build-asan-0.60.8.2/aspell with
+   --dict-dir=<abs en-install/dict> --data-dir=<abs en-install/data>.
+   In the extracted dictionary tree:
+     ./configure --vars ASPELL=<abs wrapper> PREZIP=<abs build-asan-0.60.8.2/prezip-bin>
+     ASAN_OPTIONS=detect_leaks=0 make -j4
+     cp *.rws *.multi *.alias <abs en-install/dict>/
+   Confirm: printf 'helo\n' | <wrapper> -a yields a suggestion line.
+4. From lab/frontier/aspell2shell run:
+     sh harness/75820-suggest-probe.sh "$PWD/harness/evidence/75820-suggest"
+     ASPELL_VULN="$PWD/real-build/build-asan-ndebug-0.60.8.2/aspell" \
+       sh harness/75820-suggest-probe.sh "$PWD/harness/evidence/75820-suggest-ndebug"
+   The output directory argument MUST be absolute: Aspell does not resolve a
+   relative --personal path to the caller's cwd, which produces a false
+   all-rc-0 negative (preserved in the wall).
+5. Expected: asserts-on 0.60.8.2 rc 134 at suggest.cpp:763 for n=256/260
+   near/short; NDEBUG 0.60.8.2 ASan READ of size 2/6 at suggest.cpp:1334
+   for n=256/260 near; 0.60.8.3 rc 1 for n>=251; n=250 rc 0 on both.

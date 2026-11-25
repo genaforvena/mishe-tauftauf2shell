@@ -1,0 +1,3 @@
+WARNING: Unable to enter Nroff mode: Unknown mode: "nroff".
+@(#) International Ispell Version 3.1.20 (but really Aspell 0.60.8.2)
+aspell: ../aspell-0.60.8.2/modules/speller/default/suggest.cpp:763: void (anonymous namespace)::Working::add_nearmiss_w(SpellerImpl::WS::const_iterator, const WordEntry &, const ScoreInfo &): Assertion `w.word_size == strlen(w.word)' failed.
