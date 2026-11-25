@@ -1,10 +1,12 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W2: real ASan build + authenticated loopback wire replay
+Status 2026-11-25 W3: real ASan build + authenticated loopback wire replay
 confirmed; rung 3 real-build, rung 4 MECHANICS with wire-chosen pointer
 consumption from a recycled freed channel object under stated lab conditions.
-No rung 5. Original staged harness 24 PASS / 0 FAIL; base real replay 5 PASS /
-0 FAIL; extra controls 8 PASS / 0 FAIL.
+The W3 lane shows that write in a run that exits cleanly. No rung 5. Original
+staged harness 24 PASS / 0 FAIL; base real replay 5 PASS / 0 FAIL; extra
+controls 8 PASS / 0 FAIL; survive controls 7 PASS / 0 FAIL. Witness verdict
+UNKNOWN.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -97,17 +99,54 @@ controls; it reports **8 PASS / 0 FAIL**, rc 0. Evidence:
 - **Fixed build** (`groom` mode): the new guard suppresses data #2 entirely;
   no ASan report and the target stays `0x4141414141414141`.
 
+## W3: chosen write in a run that exits cleanly (2026-11-25)
+
+`real/run-survive.sh` builds the same two pinned trees and reports **7 PASS /
+0 FAIL**, rc 0. Evidence: `real/evidence-wire-{vuln,fixed}-groom-survive.out`.
+The new `groom-survive` lane keeps the two objects that
+`channel_rcv_data()` touches *after* the data callback alive: before
+`ssh_channel_free()` the lab app detaches `channel->stdout_buffer` and
+`channel->callbacks`, and the client sets wire offsets 56 and 64 to zero so
+the groomed channel's `stdout_buffer`/`stderr_buffer` are wire-chosen NULL.
+No library source is modified.
+
+Vulnerable lane (`real/evidence-wire-vuln-groom-survive.out`):
+`SERVER groom-survive saved_buf=0x... saved_cbs=0x...`,
+`SERVER groom alloc=0x50c00001c3c0 wire_off120=0x... target=0x... survive=1`,
+`SERVER done data_packets=2`,
+`SERVER target_after=0x41414141414141c1 groom_ptr=0x50c00001c3c0`,
+`SERVER survive buf_len=0 saved=0x...`, `CLIENT rc=0 SERVER status=0x0`,
+no ASan report. The wire-chosen pointer write at pinned `channels.c:706`
+therefore completes in a process that returns normally; the plain groom
+lane's later faults at `:708` (`ssh_buffer_pass_bytes`) and, in the first
+failed iteration of this lane, at `:691` (freed callback-list iterator) come
+from those other freed fields, not from the counter write. The first
+iteration's ASan trace was observed before the callback-list detach was
+added; its evidence file was overwritten by the passing rerun, so that
+negative is transcript-only, not a preserved file. Fixed `groom-survive`
+control: data #2 suppressed, target unchanged, no ASan.
+
+The detach is explicitly lab-only, not a realistic application pattern:
+it isolates the chosen-pointer write from unrelated UAF faults. Base
+`run-all.sh` (5 PASS / 0 FAIL) and W2 `run-extra.sh` (8 PASS / 0 FAIL) still
+pass after the harness change.
+
+
 Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
 loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
 at a chosen offset of a recycled freed channel object drive a write to a chosen
-address. Required lab conditions remain explicit: authenticated peer (PR:L),
-application frees a remotely closed channel from inside its data callback,
-application reuses the freed 128-byte chunk for wire bytes, and ASan quarantine
-disabled to make reuse deterministic. There is no instruction-pointer control,
-no benign marker execution and no rung 5; the extra fault at line 708 currently
-stops this path before anything beyond the counter write. Independent witness
-verdict remains UNKNOWN: both suites have been replayed by the author only.
+address, and the W3 lane shows that write in a run that exits cleanly. Required
+lab conditions remain explicit: authenticated peer (PR:L), application frees a
+remotely closed channel from inside its data callback, application reuses the
+freed 128-byte chunk for wire bytes, ASan quarantine disabled to make reuse
+deterministic, and (for the clean-exit lane only) lab detachment of the channel's
+stdout buffer and callback list. No instruction-pointer control, no benign
+marker execution, no rung 5. Without that detachment the unrelated freed
+fields still fault at `:691`/`:708`; a realistic allocation sequence that
+avoids them without app intervention is not established. Independent witness
+verdict remains UNKNOWN: all three suites have been replayed by the author only.
 
-Next: ask witness for an independent replay of `real/run-all.sh` and
-`real/run-extra.sh`; investigate whether the line-708 follow-on fault can be
-avoided by a realistic allocation sequence, without claiming r5.
+Next: ask witness for an independent replay of `real/run-all.sh`,
+`real/run-extra.sh` and `real/run-survive.sh`; do not claim r5. What would
+change the grade: a witness counterexample, or measured IP/marker control on
+the same real authenticated build.

