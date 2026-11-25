@@ -1,5 +1,20 @@
 # frontier brief — libraw2shell (admitted 2026-11-24; rung 4 nonzero bytes)
 
+## Replay from a clean archive
+
+One command covers the author-side W13/W14/W15, W17 wire, W21 and W23
+claims, including the build:
+
+```sh
+git archive HEAD lab/frontier/libraw2shell | tar x -C /tmp/lr-frontier
+cd /tmp/lr-frontier/lab/frontier/libraw2shell && sh replay-frontier.sh
+```
+
+Expected receipts: `REPLAY_W13_W14_W15_OK`, `WIRE_OOB_OK`, `W21_OK`,
+`W23_NEGATIVE_OK` and `REPLAY_FRONTIER_OK`. Full detail in W26 below and
+`lab/frontier/libraw2shell/w26/results.txt`. This is an author-side receipt,
+not a witness verdict.
+
 ## Ground truth (provisioning only; no external probes)
 
 - Claim: VulnCheck advisory dated 2026-11-23,
@@ -903,3 +918,62 @@ One-command receipt: `sh lab/frontier/libraw2shell/w23/replay.sh` gave
 `PASS=7 FAIL=0 W23_NEGATIVE_OK` rc 0 in the working tree at 07:2xZ. It checks
 hashes, byte-exact regeneration of the representative input, both gdb field
 values, and the plain/fixed/no-option controls.
+
+## Border phase is not a second write phase (W24, 2026-11-25 08:2xZ; author-side negative)
+
+W22's debugger-forced valid top size and W23's bounded negative left one
+feasibility question: could the later `border_interpolate(8)` call at
+`xtrans_demosaic.cpp:440` rewrite the corrupted top size field or the first
+OOB halfword with file-derived bytes? The probe uses the unmodified `-O0`
+`dcraw_emu`, lab-only `MALLOC_TOP_PAD_` 16 MiB, `w13/dead-target.input`,
+breaks at the first OOB store (`:427`, IDX 68,644), computes the live field as
+`(char*)main_arena.top + 8`, forces `0x21001` at `:436` exactly as in W22, then
+watches that 64-bit field and a 16-bit halfword at index 68,644 through the
+border call to its return at `:441`.
+
+The field sits at destimage offset 550,184 (pixel index 68,773): before the
+store loop it held `0xc0b641`, after it `0xbedbbeef4d03` (W21/W22 up to the
+ASLR-dependent original value). With the debugger-forced value,
+`BORDERENTRY val=0x21001` and `BORDEREXIT val=0x21001`; the hardware watchpoint
+on the 64-bit field never fired. At border entry `image == destimage` with
+`w=512 h=512`, so this call does use the full-size pointer and dimensions;
+a watchpoint on the first OOB halfword also never fired, the `:441` breakpoint
+was reached and the inferior exited normally (`abort()` never hit). The setup
+is debugger-forced, so nothing here is file-chosen. No second write phase, no
+reopening of W22's file-chosen-size lane, no chosen pointer/IP, marker, live
+object, rung 5 or witness verdict. Evidence:
+`lab/frontier/libraw2shell/w24/results.txt`.
+
+## Clean-archive replayability of outstanding claims (W26, 2026-11-25 10:0x–10:3xZ; author-side receipt)
+
+A clean `git archive HEAD` replay found two real gaps in the published
+recipes, both repaired without changing any behavioral check:
+
+- `w21/replay.sh` hash-checked three `-g` binaries; a rebuild embeds its own
+  build path, so only those three whole-file hashes failed while all ten
+  behavioral checks passed. New `w21/hashes-clean.sha256` pins source, probes
+  and inputs; `w21/hashes.sha256` remains the author-local binary pin.
+- `w23/replay.sh` hashed `w23/greenzero1.input`, which is gitignored and
+  absent from a clean archive; it now derives that input from
+  `w11/targetbeef.input` plus the committed `w23/greenzero1.json` before
+  hashing, as the other generated inputs already did.
+
+New `replay-frontier.sh` runs bootstrap, `replay-all.sh` (W13/W14/W15),
+`wire/run.sh` (W17), `w21/replay.sh` and `w23/replay.sh` in one command. A
+fresh `git archive HEAD` of commit `ba544c32`, built with that command, gave
+PASS for bootstrap/w13-w14-w15/wire/w21/w23 and receipts
+`REPLAY_W13_W14_W15_OK`, `WIRE_OOB_OK`, `W21_OK`, `W23_NEGATIVE_OK`,
+`REPLAY_FRONTIER_OK`; the working tree gave W21 11 PASS / 0 FAIL and W23
+7 PASS / 0 FAIL. Source pins are unchanged; all experiments are local and the
+wire decoder uses loopback only. Commits `ba544c32` and `253e4a12`; full trace
+`lab/frontier/libraw2shell/w26/results.txt`.
+
+W26 also re-read pinned `xtrans_demosaic.cpp:168-190,405-440`: the OpenMP
+buffers at `:175` are per-thread and allocated before `destimage` at `:177`,
+the `:427` store writes only `destimage`, and no allocation follows `:177`,
+so W25's reopen condition remains unmet even in the OpenMP build. GitHub API
+at 10:2xZ and again at 13:17Z: issue #894 is still open with 0 comments and
+`updated_at` 2026-11-17T11:50:30Z; no merged fix, fixed status UNKNOWN.
+No new rung and no witness verdict: this is replayability only. The corrected
+one-command recipe was sent once to the witness (chat 4271); older asks were
+not re-sent.
