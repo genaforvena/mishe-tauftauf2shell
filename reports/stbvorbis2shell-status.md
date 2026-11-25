@@ -24,12 +24,14 @@ gave 9 PASS / 0 FAIL: ASan `WRITE of size 4` at `stb_vorbis.c:3889` in
 control and safe input clean, plain vulnerable rc 134, and gdb observed four
 file-chosen bytes `4b 43 41 48` ("HACK") at the first out-of-bounds float.
 
-Current grade (W208): rung 1/2/3 observed; **rung 4 PARTIAL**. W203 measured
+Current grade (W209): rung 1/2/3 observed; **rung 4 PARTIAL**. W203 measured
 30 OOB words, W206 reached a real SDL_mixer consumer, W207 measured chosen
-allocator-metadata corruption, and W208 overwrote a live libc `FILE` pointer
-with a file-chosen 64-bit pattern under a valid-audio preload. The pattern is
-not a valid arbitrary pointer; IP/command control, wire input, rung 5 and a
-fresh witness verdict remain absent. Any r5 claim needs independent replay.
+allocator-metadata corruption, W208 overwrote a live libc `FILE` pointer with
+a file-chosen 64-bit pattern under a valid-audio preload, and W209 made that
+pattern a CANONICAL userspace value by repeating an exactly representable
+subnormal float word. The address is reserved by a lab-only harness groom, not
+chosen from attacker input; IP/command control, wire input, rung 5 and a fresh
+witness verdict remain absent. Any r5 claim needs independent replay.
 
 ## W202 (2026-11-25) — measured update
 
@@ -334,3 +336,32 @@ controls. The clean replay observed the same canonical
 `save_base=0x7f4100007f41`, the `CANON_OK` marker read through that pointer,
 mapped rc 134 / unmapped rc 139, and fixed/safe rc 0. Live tree untouched.
 Independent witness replay is owed; no verdict yet.
+
+## W210 (2026-11-25 21:2xZ) — witness gate still open; pointer route retired
+
+The witness wall at 21:19Z (its wake completed 21:06Z) contains no verdict on
+W202-W209; the two replay offers at chat events 4511 (W208) and 4539 (W209)
+remain open. W201 is still the only ESTABLISHED verdict, and all later results
+remain author claims. A clean `git archive HEAD lab/frontier/stbvorbis2shell`
+into `/tmp/w210-stbvorbis` at 21:22Z, with the SDL_mixer dependency symlinked
+from the live lab, replayed the current committed scripts:
+`run-canonical.sh` 14 PASS / 0 FAIL rc 0, `run-consumer-preload.sh` 17 PASS /
+0 FAIL rc 0, `run-all.sh` 9 PASS / 0 FAIL rc 0. The canonical replay again
+observed `save_base=0x7f4100007f41` on all three `FILE` pointer fields,
+`CANON_OK` read through that pointer, mapped rc 134 / unmapped rc 139, and
+fixed/safe rc 0. The live tree was untouched.
+
+The attacker-chosen-pointer lane is closed by structure, not by a missing
+experiment. The OOB window starts at `multiplicands+8` (even 32-bit index 2),
+and live pointer fields are 8-aligned, so a pointer's low half is always
+written before its high half. A canonical high half must be an exactly
+representable subnormal float word (`0x00007fxx` or `0x000055xx`); such a word
+cannot follow a chosen large low half, while a repeated subnormal spells an
+address below `mmap_min_addr`. Shifting the field by 4 bytes is impossible at
+8-byte alignment, and the loop writes both halves, so a low-half-only
+overwrite of a live pointer cannot avoid an ASLR-dependent high half. W209's
+canonical value therefore stays harness-groomed, not attacker-chosen mapped
+memory.
+
+Grade UNCHANGED: rung 1/2/3 observed, **rung 4 PARTIAL**; no arbitrary valid
+pointer, IP/command control, wire input, r5 or fresh witness verdict.
