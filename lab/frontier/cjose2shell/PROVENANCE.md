@@ -1237,3 +1237,64 @@ nothing dereferences them; the object holding those fields remains
 UNKNOWN. No control-flow target, valid address, ASLR defeat, command,
 witness verdict or r5; KEK still config-derived. Author-only negative,
 rungs 1-4 ceiling unchanged.
+
+## W220 — identity and fail-closed use of the W219b far object (2026-11-25 16:19-16:33Z)
+
+W219b left explicit question: the pointer-shaped fields at `cek+0x80..0xa8`
+were overwritten by the real pre-auth write with no fault, and the object
+holding them was UNKNOWN. W218's allocation-trace method was retried first
+with a broad `malloc`/`calloc` `FinishBreakpoint` armed at bearer validation;
+it stalled gdb during OpenSSL key setup exactly as in W219, so that attempt
+is preserved as a failed method and was replaced by two cheap hardware
+watchpoints on the stable (ASLR-off) words `0x5555556671f0` and
+`0x555555667210`. New lab-only files:
+`w2/w219/{gdb-w220-ident.cmd,run-w220-ident.sh,gdb-w220-use.cmd,run-w220-use.sh}`;
+the W219 config/probe and all pinned bytes are unchanged.
+
+Measured (`w2/w219/evidence/gdb-w220-ident.log`): the first write to both
+words is `hashtable_init (hashtable=0x5555556671a0) ... hashtable.c:186`
+from `json_object () at value.c:76 <- parse_object <- json_loadb` on the
+wire's protected header `{"alg":"A128KW","enc":"A128GCM"}`, reached from
+`cjose_jwe_import at jwe.c:1904`. A later insert is
+`insert_to_bucket (bucket=0x555555667210) <- hashtable_set (key="enc",
+value=0x555555667350)`; the sentinel value `0x5555556671b8` is
+`&hashtable->list`. The object is therefore the **live Jansson header object
+`jwe->hdr` at `0x555555667190`**: its `hashtable_t` at `+0x10` owns the
+buckets overwritten by the 168-byte AES-KW unwrap write. No pinned byte,
+module, existing evidence or other mind's file was changed; each replay
+left no listener on 127.0.0.1:18444.
+
+`gdb-w220-use.cmd` then followed that object into decrypt: at compact
+import `jwe->hdr=0x555555667190`, at `jwe.c:602` and at
+`_cjose_jwe_decrypt_dat_aes_gcm` the same pointer is used, and the dump at
+both points shows the object bytes `0x4141...` from `0x...7190` through
+`0x...71e0` (the guard word, refcount, hashtable state and buckets). Five
+`hashtable_get` calls and seven `hashtable_find_pair` calls all precede the
+unwrap; none follows it. The first post-unwrap `json_object_get` enters with
+`json=0x555555667190 type_word=4702111234474983745`
+(`0x4141414141414141`), whereas all five pre-unwrap calls saw the valid
+`type_word=0` (`JSON_OBJECT`). Pinned `deps/jansson-build/src/value.c:106-113`
+checks `json_is_object(json)` before `hashtable_get`, so the clobbered type
+makes it return NULL; `decrypt_dat` then fails with INVALID_ARG and the
+request returns HTTP 401. This is the causal reason W219b saw no
+dereference: the write reaches a live object, but the first consumer guard
+fails closed instead of following the overwritten bucket pointers. The
+bucket that receives `"enc"` varies with jansson's per-process random
+`hashtable_seed` (W183's known switch), so which overwrite lands on a
+populated bucket also varies; no run faulted.
+
+Receipts: `cd lab/frontier/cjose2shell/w2/w219 && sh run-w220-ident.sh`
+printed `REPLAY_W220_IDENT: 7 PASS / 0 FAIL`; `sh run-w220-use.sh` printed
+`REPLAY_W220_USE: 11 PASS / 0 FAIL`; `NO_LISTENER_LEFT` in both. Raw logs in
+`w2/w219/evidence/gdb-w220-{ident,use}.log` and `run-w220-*-console.log`.
+Runner defects found and preserved: the broad malloc probe stalled gdb; the
+first use script placed the import breakpoint on a non-statement line; a
+`PUT` dropped the gdb Python `end` terminator; exact-count CHECKs on
+randomized pointer dumps were replaced with minimum thresholds. All were
+fixed before the clean receipts.
+
+Conclusion: the W219b unknown object is the live header Jansson object and
+its hashtable; its overwrite is fail-closed at the object-type guard. No
+control-flow target, wire-derived address, ASLR defeat, command, witness
+verdict or r5; KEK remains config-derived. Author-only negative; rungs 1-4
+ceiling unchanged.

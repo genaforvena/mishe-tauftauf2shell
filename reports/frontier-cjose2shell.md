@@ -561,9 +561,31 @@ pointer source; no new experiment or rung.
   write to 168 bytes and replaced those fields with `0x4141...`, with a
   far-zero control, a 144-byte control and a genuine 32-byte-write safe
   token. No vulnerable case faulted or dereferenced the written value; all
-  returned HTTP 401. The object holding those fields is UNKNOWN. No
+  returned HTTP 401; the object was left UNKNOWN here and identified in W220
+  below. No
   control-flow target, valid address, ASLR defeat, command, witness verdict
   or r5; grade unchanged. Evidence: `w2/w219/{probe-w219.py,probe-w219b.py,
   gdb-w219.cmd,run-w219.sh,run-w219b.sh}` and `w2/w219/evidence/`;
   `REPLAY_W219: 18 PASS / 0 FAIL`, `REPLAY_W219B: 11 PASS / 0 FAIL`, both
   with no listener left; PROVENANCE W219/W219b.
+- W220 identified that object and explained the no-fault result in the same
+  real pre-auth bearer lane. Hardware watchpoints on the stable words show
+  they are initialized by `hashtable_init (hashtable=0x5555556671a0)` from
+  `json_object () <- parse_object <- json_loadb` on the wire's protected
+  header in `cjose_jwe_import (jwe.c:1904)`, with a later `hashtable_set`
+  for key `enc`; the object is the live Jansson header object `jwe->hdr` at
+  `0x555555667190`. Following it through decrypt shows the same pointer at
+  compact import, `jwe.c:602` and `_cjose_jwe_decrypt_dat_aes_gcm`, with the
+  object bytes `0x4141...` from type/refcount through the bucket array. All
+  six `hashtable_get` calls precede the unwrap; the first post-unwrap
+  `json_object_get` sees `type_word=0x4141414141414141` instead of the valid
+  `0` (`JSON_OBJECT`). Pinned `value.c:106-113` checks `json_is_object()`
+  before `hashtable_get`, so it returns NULL, `decrypt_dat` fails and the
+  request returns HTTP 401: the live object is overwritten, but its first
+  use fails closed rather than dereferencing the poisoned buckets. No
+  control-flow target, valid address, ASLR defeat, command, witness verdict
+  or r5; grade unchanged. Evidence:
+  `w2/w219/{gdb-w220-ident.cmd,run-w220-ident.sh,gdb-w220-use.cmd,run-w220-use.sh}`
+  and `w2/w219/evidence/gdb-w220-*.log`;
+  `REPLAY_W220_IDENT: 7 PASS / 0 FAIL`, `REPLAY_W220_USE: 11 PASS / 0 FAIL`,
+  both with `NO_LISTENER_LEFT`; PROVENANCE W220.

@@ -1,0 +1,19 @@
+CHECK KW_REACHED                 observed=1 expected=1
+CHECK POST_UNWRAP                observed=1 expected=1
+CHECK IMPORT_HDR                 observed=1 minimum=1
+CHECK DECRYPT_DAT                observed=1 minimum=1
+CHECK HASHTABLE_GET              observed=5 minimum=1
+CHECK FIND_PAIR                  observed=7 minimum=1
+CHECK HTTP401                    observed=1 expected=1
+CHECK JSON_GET                   observed=6 minimum=1
+CHECK CLOBBERED_TYPE             observed=1 expected=1
+CHECK NO_SIGNAL                  observed=0 expected=0
+W220 header identity: import=0x555555667190 decrypt_dat=0x555555667190
+W220 hashtable lookups:
+W220_HASHTABLE_GET ht=0x5555556671a0 key=alg
+W220_HASHTABLE_GET ht=0x5555556671a0 key=enc
+W220_HASHTABLE_GET ht=0x5555556671a0 key=kid
+W220_HASHTABLE_GET ht=0x5555556671a0 key=alg
+W220_HASHTABLE_GET ht=0x5555556671a0 key=enc
+REPLAY_W220_USE: 11 PASS / 0 FAIL
+NO_LISTENER_LEFT

@@ -1,0 +1,32 @@
+CHECK KW_REACHED                 observed=1 expected=1
+CHECK PRE_UNWRAP                 observed=1 expected=1
+CHECK POST_UNWRAP                observed=1 expected=1
+CHECK FAR_POINTERS               observed=7 minimum=5
+CHECK WATCH_TRACE                observed=12 minimum=8
+CHECK HTTP401                    observed=1 expected=1
+CHECK NO_SIGNAL                  observed=0 expected=0
+W220 watchpoint trace:
+W220_WATCH addr=0x5555556671f0 n=1 val=0x5555556671b8
+W220_WATCH addr=0x555555667210 n=1 val=0x5555556671b8
+W220_WATCH addr=0x555555667210 n=2 val=0xd1ea2eb7005da219
+W220_WATCH addr=0x5555556671f0 n=2 val=0x19dfe6e01e7ad11f
+W220_WATCH addr=0x555555667210 n=3 val=0x25c4e2c11dce38d
+W220_WATCH addr=0x5555556671f0 n=3 val=0xe454bf4123b2a219
+W220_WATCH addr=0x555555667210 n=4 val=0xa54d7e9c856807b2
+W220_WATCH addr=0x5555556671f0 n=4 val=0x11d1d6ffbf4c541a
+W220_WATCH addr=0x555555667210 n=5 val=0xe7aab62a84cd23f3
+W220_WATCH addr=0x5555556671f0 n=5 val=0xf940a185b592b728
+W220_WATCH addr=0x555555667210 n=6 val=0xfa8a8a30858d70d5
+W220_WATCH addr=0x5555556671f0 n=6 val=0xf82756ac658f011
+W220 first watchpoint backtrace:
+W220_WATCH addr=0x5555556671f0 n=1 val=0x5555556671b8
+#0  hashtable_init (hashtable=0x5555556671a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/hashtable.c:186
+#1  0x00007ffff7b9ea3e in json_object () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:76
+#2  0x00007ffff7b99ef7 in parse_object (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:663
+#3  0x00007ffff7b9a4bf in parse_value (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:827
+#4  0x00007ffff7b9a600 in parse_json (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:863
+#5  0x00007ffff7b9a962 in json_loadb (buffer=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", buflen=32, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:962
+#6  0x00007ffff7b8b627 in _cjose_parse_json_object (str=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", len=32, err=0x7fffffffd890) at jwe.c:107
+#7  0x00007ffff7b90b7d in cjose_jwe_import (cser=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", cser_len=411, err=0x7fffffffd890) at jwe.c:1904
+REPLAY_W220_IDENT: 7 PASS / 0 FAIL
+NO_LISTENER_LEFT

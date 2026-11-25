@@ -1,0 +1,144 @@
+W220_IDENT_ARMED targets=0x5555556671f0,0x555555667210
+Function "oidc_oauth_validate_jwt_access_token" not defined.
+Breakpoint 1 (oidc_oauth_validate_jwt_access_token) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 2 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 3 (jwe.c:595) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 4 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W220_VALIDATE_REACHED
+W220_WATCH addr=0x5555556671f0 n=1 val=0x5555556671b8
+#0  hashtable_init (hashtable=0x5555556671a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/hashtable.c:186
+#1  0x00007ffff7b9ea3e in json_object () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:76
+#2  0x00007ffff7b99ef7 in parse_object (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:663
+#3  0x00007ffff7b9a4bf in parse_value (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:827
+#4  0x00007ffff7b9a600 in parse_json (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:863
+#5  0x00007ffff7b9a962 in json_loadb (buffer=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", buflen=32, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:962
+#6  0x00007ffff7b8b627 in _cjose_parse_json_object (str=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", len=32, err=0x7fffffffd890) at jwe.c:107
+#7  0x00007ffff7b90b7d in cjose_jwe_import (cser=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", cser_len=411, err=0x7fffffffd890) at jwe.c:1904
+W220_WATCH addr=0x555555667210 n=1 val=0x5555556671b8
+#0  hashtable_init (hashtable=0x5555556671a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/hashtable.c:186
+#1  0x00007ffff7b9ea3e in json_object () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/value.c:76
+#2  0x00007ffff7b99ef7 in parse_object (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:663
+#3  0x00007ffff7b9a4bf in parse_value (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:827
+#4  0x00007ffff7b9a600 in parse_json (lex=0x7fffffffd5c0, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:863
+#5  0x00007ffff7b9a962 in json_loadb (buffer=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", buflen=32, flags=0, error=0x7fffffffd680) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/deps/jansson-build/src/load.c:962
+#6  0x00007ffff7b8b627 in _cjose_parse_json_object (str=0x5555556573f0 "{\"alg\":\"A128KW\",\"enc\":\"A128GCM\"}", len=32, err=0x7fffffffd890) at jwe.c:107
+#7  0x00007ffff7b90b7d in cjose_jwe_import (cser=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", cser_len=411, err=0x7fffffffd890) at jwe.c:1904
+W220_KW_DECRYPT raw_len=176 cek_len=0 jwk_kty=3
+W220_PRE_UNWRAP cek=0x555555667170 target=0x5555556671f0
+0x5555556671c0:	0x00005555556672e0	0x0000555555667390
+0x5555556671d0:	0x00005555556672f0	0x0000000000000091
+0x5555556671e0:	0x00005555556671b8	0x00005555556671b8
+0x5555556671f0:	0x00005555556671b8	0x00005555556671b8
+0x555555667200:	0x00005555556671b8	0x00005555556671b8
+0x555555667210:	0x00005555556671b8	0x00005555556671b8
+0x555555667220:	0x00005555556672e0	0x00005555556672e0
+0x555555667230:	0x0000555555667380	0x0000555555667380
+W220_WATCH addr=0x555555667210 n=2 val=0xd1ea2eb7005da219
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:410
+#1  0x00007ffff76e56b3 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#4  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#5  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#6  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#7  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+W220_WATCH addr=0x5555556671f0 n=2 val=0x19dfe6e01e7ad11f
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:411
+#1  0x00007ffff76e56b3 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#4  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#5  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#6  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#7  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+W220_WATCH addr=0x555555667210 n=3 val=0x25c4e2c11dce38d
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x5555556671f0 n=3 val=0xe454bf4123b2a219
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x555555667210 n=4 val=0xa54d7e9c856807b2
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x5555556671f0 n=4 val=0x11d1d6ffbf4c541a
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x555555667210 n=5 val=0xe7aab62a84cd23f3
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x5555556671f0 n=5 val=0xf940a185b592b728
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x555555667210 n=6 val=0xfa8a8a30858d70d5
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_WATCH addr=0x5555556671f0 n=6 val=0xf82756ac658f011
+#0  0x00007ffff76e5786 in ?? () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#1  0x00007ffff76e59a4 in CRYPTO_128_unwrap () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#2  0x00007ffff74b8837 in AES_unwrap_key () from /lib/x86_64-linux-gnu/libcrypto.so.3
+#3  0x00007ffff7b8cdb7 in _cjose_jwe_decrypt_ek_aes_kw (recipient=0x555555666f30, jwe=0x555555666e40, jwk=0x55555565c720, err=0x7fffffffd7e0) at jwe.c:595
+#4  0x00007ffff7b9177f in cjose_jwe_decrypt (jwe=0x555555666e40, jwk=0x55555565c720, content_len=0x7fffffffd878, err=0x7fffffffd7e0) at jwe.c:2151
+#5  0x00007ffff7b7d6cb in oidc_jwe_decrypt_impl (pool=0x7ffff7ae7028, jwe=0x555555666e40, keys=0x7ffff7ae4058, content_len=0x7fffffffd878, err=0x7fffffffda00) at src/jose.c:747
+#6  0x00007ffff7b7d83f in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4058, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:771
+#7  0x00007ffff7b7df70 in oidc_jwt_parse (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b48 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMTI4R0NNIn0.1O9_kMbmqTmpX84ICAu4XkGxdefaagltF4BtalFjefd20GkQEOckR30yU9_MFi37YdAkVKN8LOymJ8h1TZYjlWpavLdbXW3rvNDCMmj5ahpYKF2qS9X4Rbq1QT9Q7VD3jB2XHNy9v4zRRB8Yf4inKbWO3EdHSXh1p5i-7tRy5wZOKbhFCkCa_x_Reh7g5t8ZZPfAtwaZTppq65EtE52FgC2gGYRhRI1VGaJdALcu6tE.sG_cIUmFpMM9QL4P0EZUxQ.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", j_jwt=0x7fffffffd9d0, keys=0x7ffff7ae4058, compress=0 '\000', err=0x7fffffffda00) at src/jose.c:936
+W220_POST_UNWRAP cek=0x555555667170 cek_len_before=16
+0x5555556671d0:	0x4141414141414141	0x4141414141414141
+0x5555556671e0:	0x4141414141414141	0x4141414141414141
+0x5555556671f0:	0x4141414141414141	0x4141414141414141
+0x555555667200:	0x4141414141414141	0x4141414141414141
+0x555555667210:	0x4141414141414141	0x00005555556671b8
+0x555555667220:	0x00005555556672e0	0x00005555556672e0
+0x555555667230:	0x0000555555667380	0x0000555555667380
+0x555555667240:	0x00005555556671b8	0x00005555556671b8
+0x555555667250:	0x00005555556671b8	0x00005555556671b8
+0x555555667260:	0x0000000000000000	0x0000000000000021
+0x555555667270:	0x0000000555555667	0xb66e3537476ae2d8
+0x555555667280:	0x0000000000000000	0x0000000000000021
