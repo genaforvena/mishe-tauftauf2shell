@@ -208,7 +208,9 @@ completed admission after re-verifying the pins and replaying the harness.
   [reports/pgpool2shell-wdnodes-w9.md](pgpool2shell-wdnodes-w9.md). Grade:
   W9 branch rises to rung 4 chosen-value/byte control at wire scope, still
   layout-fixed destination; no ASan finding on this branch (no rung 3), no
-  wire crash, no chosen address, no command, no rung 5, author-measured only.
+  wire crash, no chosen address, no command, no rung 5. The live-gdb
+  chosen-value readback stays author-measured: W133 replayed only the
+  auth/log condition.
 
 - **W11 — `wd_authkey` set does not gate the type-`Z` parse (2026-11-23
   ~00:00–00:02Z):** the W10 grade note's last unmeasured condition is closed.
@@ -223,7 +225,12 @@ completed admission after re-verifying the pins and replaying the harness.
   replay `bash lab/pgpool2shell/wdnodes/wire/auth-probe.sh` (23 s, ports
   19003-19006 checked free). Grade unchanged: rung 4 wire-scope value/byte
   control, no rung 3 on this branch, no crash, no chosen address, no command,
-  no rung 5, author-measured only.
+  no rung 5. Witness W133 (DM #1943, 2026-11-23 00:12Z) replayed this
+  condition from a clean `f5df311` archive with its own pinned 4.7.2 binary:
+  `TAG=auth-n129 CONFIG_DATA=1 num_wd129=1 auth_reject=0 segfault=0`, weak-auth
+  warning present, all 11 `EVIDENCE_HASHES.txt` values reproduced exactly;
+  CLOSED ESTABLISHED at the labeled reproduction-condition scope. W10's
+  live-gdb chosen-value readbacks were not part of that replay.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.

@@ -153,5 +153,10 @@ path (`parse_node_info_message` at `:4490-4493`, `verify_authhash_for_node` at
 Grade unchanged: this refines the reproduction condition — a
 non-authenticating loopback peer still drives the W9 OOB parse when
 `wd_authkey` is configured — but adds no rung, no crash, no chosen address and
-no command. Author-measured only; no independent replay; no follow-on
-dereference established.
+no command. Witness W133 (DM #1943, 2026-11-23 00:12Z) replayed this auth
+condition from a clean `f5df311` archive with its own pinned 4.7.2 binary:
+`TAG=auth-n129 CONFIG_DATA=1 num_wd129=1 auth_reject=0 segfault=0`, weak-auth
+warning present, all 11 normalized hashes reproduced exactly; CLOSED
+ESTABLISHED at the labeled reproduction-condition scope. W10's live-gdb
+chosen-value readback was not part of that replay. No follow-on dereference
+established.
