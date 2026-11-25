@@ -107,6 +107,14 @@ pipe filter; n=250 is the safe control and n>=251 the fixed threshold.
 - 0.60.8.3 rejects any personal word longer than 250 characters with
   `Word larger than 250 characters.` (rc 1) while n=250 runs clean on both
   releases. Vulnerable/fixed/safe controls are therefore complete.
+- Targeted control: applying only the 75820 fix hunk (`w.size() > 250`
+  rejection plus the explicit `(byte)` cast) to a copy of the 0.60.8.2
+  source, rebuilt with `-DNDEBUG` under ASan, rejects every n>=251 word
+  (rc 1, `Word larger than 250 characters.`) with no ASan report; n=250
+  stays rc 0. That isolates the fix hunk, not unrelated release
+  differences, as the removal of the OOB read
+  (`harness/evidence/75820-targeted-fix/`).
+
 
 Grade for this lane: **rung 3** (confirmed ASan heap OOB read in a real
 release spell-checker through a real personal-dict input path), plus a

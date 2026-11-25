@@ -1,0 +1,23 @@
+Targeted-fix control, 2026-11-25 (CVE-2026-75820)
+
+Source: copy of real-build/aspell-0.60.8.2 (gitignored provisioning) with
+exactly the 75820 fix hunk applied in modules/speller/default/writable.cpp,
+WritableDict::add(), at the site of the truncating store:
+
+  if (w.size() > 250)
+    return make_err(invalid_word, MsgConv(*lang())(w),
+                    "Word larger than 250 characters.");
+  ...
+  *w2++ = (byte)w.size();
+
+The literal replaces `_("...")` because this release's writable.cpp does not
+include the gettext macro header; the message text is otherwise identical to
+0.60.8.3. No other source file was changed. Built under Clang ASan with
+`-DNDEBUG` and `--disable-shared`, exactly like the vulnerable NDEBUG build.
+
+Result (`summary.txt`, full logs beside it): n=250 rc 0; every n>=251 personal
+word is rejected with `Word larger than 250 characters.` rc 1, no ASan report;
+the 0.60.8.3 rows in this run are the unmodified fixed release control.
+The n=256/n=260 `READ of size 2/6` at suggest.cpp:1334 seen in the vulnerable
+NDEBUG build is absent. This isolates the fix hunk, rather than unrelated
+0.60.8.2-vs-0.60.8.3 differences, as the removal of the OOB read.
