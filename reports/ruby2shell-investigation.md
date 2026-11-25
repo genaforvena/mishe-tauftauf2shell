@@ -3433,3 +3433,98 @@ mtrace/ObjectSpace/maps/debugger in the request path, then run
 vulnerable/safe/fixed controls. First commands:
 `RUBY2SHELL_LEAKCLASS_COUNT=24 bash lab/repro/ruby2shell-stock-leakclass.sh`
 and `python3 lab/repro/ruby2shell-reflect-scan.py stock-rails-leakclass --pattern 250,90`.
+
+### Adjacent-consumer type/code-pointer sweep — bounded NEGATIVE (2026-11-25, direct session)
+
+The wall's named sweep was run to completion on the pinned plain build
+(`ruby 3.4.12 (2026-10-23 revision 366f5fdc00)`, stock glibc 2.39,
+`LD_PRELOAD=jemtrace.so:libjemalloc.so.2`) against the unmodified classic
+Sinatra app. Each run is one fresh process and one multipart POST;
+`JEM_CLASS=C JEM_BT_SIZE=<exact-request-size> JEM_BT_DEPTH=24`
+`bash lab/repro/ruby2shell-jemalloc-wire.sh attack <tag>`. Every arm
+returned `TRIGGER_HTTP=404`, `ALIVE_HTTP=404`, `process-alive=YES` and one
+capa-paired adjacent-first-qword `0x53` hit; no crash, disclosure or command.
+
+Consumers resolved by `addr2line` against the pinned build, subtracting the
+per-run Ruby load base from `lab/build/evidence/<tag>.maps`:
+
+- C=112 (`jemwire-type112`, `jemwire-type112bt`): adjacent region is a
+  `realloc(0x64)`; q0 `0xffffffff00000053`, q2/q4 `0xffffffff00000000`,
+  q5 `0x16303`, q6 `0x0000029900000002`. No backtrace was captured (the
+  exact request size never matched `JEM_BT_SIZE`); no code- or type-tag
+  interpretation is supported by the bytes.
+- C=192 (`jemwire-type192`): adjacent `calloc(0xc0)` at
+  `0x00007b5b08a2c240`; q0 `0x0000024700010053`. Its 24-frame stack resolves
+  to `pm_node_alloc` (`prism/prism.c:1923`) via `parse_statements`
+  (`:13981`) and `pm_state_stack_pop` (`:8113`) — a Prism AST node header,
+  same type-confusion family already closed at C=96. The node is not
+  re-traversed after the parse.
+- C=640 (`jemwire-type640`, `jemwire-type640bt`): adjacent `malloc(0x210)`;
+  q0 `0x00007b011588a253` (a heap pointer whose low byte became `0x53`).
+  Backtrace resolves to `rb_gc_impl_malloc` (`gc/default/default.c:8195`)
+  from `new_arena` (`iseq.c:617`) inside `pm_iseq_new_with_opt` — an iseq
+  constant-body arena allocated during autoload, already compiled before the
+  request. The flipped pointer is not dereferenced on either request.
+- C=448 (`jemwire-type448`): adjacent q0 `0x53`, all seven following qwords
+  zero; the address never appears as an M/C/R line, so the region is either
+  pre-tracer or statically zeroed. No consumer and no pointer to flip.
+
+A cheap full-class first-qword tabulation (`jemwire-qw<C>` for
+C=64,80,96,112,128,160,192,224,256,320,384,448,512,576,640,768,896,1024;
+`lab/build/evidence/jemwire-qw<C>.trace`) found exactly one capa-paired hit
+in every class except C=64, and **no hit whose first qword lies in the Ruby
+binary's executable mapping, libc, or any shared-library text segment**.
+Values are Prism headers (`0xa500000053`), small integers (`0x53`,
+`0x2b53`, `0x1053`), value-packed words (`0x38500000053`,
+`0xffffffff00000053`, `0x0000024700010053`), heap pointers with the low byte
+flipped (`0x...a553`, `0x...a453`, `0x...a253`), or the upcase result string
+itself (`0x5353535353535353` at C=768/896/1024). C=128's adjacent
+`calloc(0x78)` is a stable boot-time `(length, pointer)` table with q0
+`0x0000000000002b53`; its length field changes but no consumer was observed.
+
+Structural conclusion for this lane: the write reaches only **offset 0 of
+the physically adjacent object**, and its value is fixed at `0x53` (odd,
+`0x...53`), so a flipped pointer is unaligned and a flipped Ruby `VALUE`
+decodes as an immediate integer. Across 18 size classes there is no
+function-pointer, code-pointer or consumed type-tag target. This closes the
+jemalloc first-qword lane as a bounded negative for full rung 5; it does not
+change the witness-ESTABLISHED harness-condition rung 5 or the rung-4 grade.
+
+The vendor page was re-read at this push: `dateModified` is still
+`2026-11-21T03:52:00.000Z` and the "Proof of concept" section still promises
+25 November without publishing mechanics. Nothing was adopted as fact.
+
+**Named next (new lane):** the capa-corruption idea was checked on paper and
+closed — for buffer *i+1*, remaining source always produces exactly
+`capa_{i+1} - 20` output bytes, so flipping `capa_{i+1}`'s low byte either
+truncates the buffer (harmless, the OOB byte stays inside the original
+allocation) or leaves it unfilled; it cannot widen the overflow. The next
+falsifiable experiment is therefore the glibc tcache-`next` offset: sweep
+`lab/repro/ruby2shell-rung3-mixed.rb` at N values where the overflow offset
+`R ≡ 0 (mod 16)` — i.e. `N ≡ 3 (mod 16)` for the parity-flipped
+`R = N + 45` — so the byte lands on the next chunk's *user-data* q0
+(tcache `next`) instead of its size field, and check with a post-hoc maps
+snapshot whether any reflected 404 body carries the resulting safe-link
+decoded pointer. First command:
+`for n in 515 531 547 563 579; do lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-rung3-mixed.rb $n; done`.
+If no wire-visible pointer appears, the glibc lane is also bounded-negative
+and full stock/oracle-free/persistent rung 5 must be reported as structurally
+unreachable on this build.
+
+**Result of the named next experiment (same push):** all five `N ≡ 3 (mod 16)`
+runs completed cleanly (`out len` 1031/1063/1095/1127/1159, `churn ok`,
+`rc=0` for N=515/531/547/563/579). No `corrupted size vs. prev_size`, no
+`munmap_chunk(): invalid pointer`, no abort — unlike the `N ≡ 11 (mod 16)`
+size-field family, which aborts layout-dependently. The overflow offset
+`R ≡ 0 (mod 16)` therefore does not reach a consumed tcache `next` q0 in
+this in-process geometry, and no wire-visible safe-link pointer was
+produced. The glibc tcache-`next` offset lane is a bounded NEGATIVE.
+
+**Overall grade after this push:** full stock/oracle-free/persistent rung 5
+remains **NOT ACHIEVED**. Four independent lanes are now bounded negatives
+(glibc size-field/pop chain, jemalloc first-qword consumers, wire-only
+code-pointer reflection, and the tcache-`next` offset). The primitive is a
+single fixed odd byte at offset 0 of the adjacent allocation; no tested
+stock build exposes a consumed function/code pointer there, and no wire
+channel yields a libc or Ruby-code base. The witness-ESTABLISHED
+harness-condition rung 5 and the witness-COMPLETE rung 4 are unchanged.
