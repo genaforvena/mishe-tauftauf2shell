@@ -27,6 +27,25 @@ file-chosen bytes `4b 43 41 48` ("HACK") at the first out-of-bounds float.
 Grade stays rung 1/2/3 observed and **rung 4 PARTIAL** at the repeating-word,
 single-offset scope: a minimal harness, not a real consumer build; per-offset
 arbitrary bytes, exact OOB extent, pointer/IP, command, wire and witness
-verdict are UNKNOWN. NO rung 5. Cheapest next experiment: guard-page
-allocator to count the OOB extent and steer distinct per-offset values, then
-a real consumer build from source. Any r5 claim needs an independent replay.
+verdict are UNKNOWN. NO rung 5. W202 below refines the per-offset scope;
+the remaining experiments are a guard-page extent count and a real consumer
+build from source. Any r5 claim needs an independent replay.
+
+## W202 (2026-11-25) — measured update
+
+Added an optional `sequence_p` bit to `gen_poc.py` (default 0, so the 9
+PASS / 0 FAIL `run-all.sh` is unchanged). With `sequence_p=1`, pinned
+`:3890-3891` accumulates `last` into each write, so the OOB floats become
+distinct file-derived values instead of one repeating word. gdb on the new
+205-byte `evidence/chosen-seq.ogg` observed `0x4c1270f6`, `0x4c434148`,
+`0x4c74119a`, `0x4c9270f6` at `multiplicands[2..5]` (offsets +8..+20), each
+matching an independent float32 prediction. ASan on that PoC: `WRITE of
+size 4` at `:3889` rc 1; fixed dev branch rc 0. Full table and logs in
+`reports/frontier-stbvorbis2shell.md` and `lab/frontier/stbvorbis2shell/evidence/`.
+
+Grade unchanged: rung 1/2/3 observed, **rung 4 PARTIAL** — now four distinct
+file-chosen words at consecutive offsets, but still float-representable
+values in an arithmetic progression, not arbitrary per-offset bytes. Exact
+OOB extent, real consumer build, pointer/IP, wire, command and fresh witness
+verdict on this new claim remain UNKNOWN. NO rung 5. Next: guard-page
+allocator, then a real consumer build.

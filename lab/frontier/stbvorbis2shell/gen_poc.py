@@ -12,6 +12,7 @@ import sys
 ENTRIES = int(sys.argv[2]) if len(sys.argv) > 2 else 16519105
 DIMS = int(sys.argv[3]) if len(sys.argv) > 3 else 65
 TARGET_IEEE = int(sys.argv[4], 0) if len(sys.argv) > 4 else 0  # desired float bits in memory
+SEQP = int(sys.argv[5]) if len(sys.argv) > 5 else 0  # sequence_p: feed `last` into successive floats
 # stb_vorbis reads this field through float32_unpack(), not raw IEEE bits.
 _mant = TARGET_IEEE & 0x7fffff
 _exp = (TARGET_IEEE >> 23) & 0xff
@@ -91,7 +92,7 @@ bw.write(22, 5)  # initial codeword length 23
 bw.write(258111, 24)
 bw.write(16260994, 24)
 bw.write(1, 4)   # lookup_type=1
-bw.write(VORBIS_MIN & 0xffffffff, 32); bw.write(0, 32); bw.write(0, 4); bw.write(0, 1)
+bw.write(VORBIS_MIN & 0xffffffff, 32); bw.write(0, 32); bw.write(0, 4); bw.write(SEQP, 1)
 bw.write(0, 1); bw.write(0, 1)  # two multiplicands
 
 # Minimal floor / residue / mapping / mode

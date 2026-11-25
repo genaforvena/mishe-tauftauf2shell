@@ -69,28 +69,59 @@ Harness calls `stb_vorbis_open_memory()` on a crafted 205-byte OGG.
   value produced zero-valued writes; `float32_unpack()` at line 1057 converts
   the file field. Total number of OOB writes before death: UNKNOWN.
 
+### W202 (2026-11-25) — distinct file-derived words at consecutive OOB offsets
+
+The W201 PoC set `sequence_p=0` (pinned `:3854`). At `j=0`, `off` is
+`(z/div) % lookup_values`, which is 0 for every `k`, so
+`val = mults[0]*delta + minimum + last` is constant (`last` stays 0):
+hence the single repeating "HACK" word.
+`gen_poc.py` now takes an optional 5th argument setting the `sequence_p`
+header bit (default 0, so `run-all.sh` is unchanged). With `sequence_p=1`,
+pinned `:3890-3891` sets `last = val` after each store, so successive floats
+are `minimum, 2*minimum, 3*minimum, …`. A 205-byte PoC
+(`evidence/chosen-seq.ogg`, `sequence_p=1`, `minimum_value` encoding IEEE
+`0x4b434148`) was replayed under gdb (break `:3890`, `ignore 1 2`):
+
+| OOB index | observed word | predicted |
+|-----------|---------------|-----------|
+| `multiplicands[2]` | `0x4c1270f6` | `0x4c1270f6` |
+| `multiplicands[3]` | `0x4c434148` | `0x4c434148` |
+| `multiplicands[4]` | `0x4c74119a` | `0x4c74119a` |
+| `multiplicands[5]` | `0x4c9270f6` | `0x4c9270f6` |
+
+Four distinct file-derived words at four consecutive OOB offsets, each
+matching an independent float32 model. ASan on this PoC: `WRITE of size 4`
+at `:3889`, rc 1; fixed dev-branch build rc 0. `run-all.sh` still 9 PASS /
+0 FAIL. Logs in `lab/frontier/stbvorbis2shell/evidence/gdb-chosen-seq.out`
+and `asan-{vuln,fixed}-chosen-seq.out`.
+
 ## Rung-4 feasibility and ceiling
 
 **Rung 1** (deterministic trigger) and **rung 2** (undersized allocation with
 oversized write loop) are observed. **Rung 3** is ASan-confirmed in the
 unmodified upstream source through the real public entry point. **Rung 4 is
-partial**: four file-chosen bytes (`HACK`) land at a chosen offset (first OOB
-float, +8) in the harness driving the real upstream library through its
-public API. That harness is a minimal driver, not a real application build;
-the alphabet is a single repeating 4-byte word, not per-offset arbitrary
-bytes; the write count past the allocation is not measured. No
+partial**: file-chosen float words land at chosen consecutive OOB offsets in
+the harness driving the real upstream library through its public API. W201
+showed one repeating word (`HACK`) at the first OOB float (+8); W202 shows
+four distinct file-derived words at offsets +8..+20 via `sequence_p=1`.
+That harness is a minimal driver, not a real application build; the words
+remain float-representable values in an arithmetic progression, not arbitrary
+per-offset bytes; the write count past the allocation is not measured. No
 pointer/IP/command control, no network/wire input, no rung 5. Build cost is
 seconds, unlike the screened-out MediaInfoLib candidate.
 
-## Cheapest next experiment
+## Remaining experiments (in priority order)
 
-Instrument the vulnerable build with a custom allocator that places a guard
-page immediately after the 8-byte multiplicands allocation, then count the
-exact OOB extent and test whether distinct per-offset 32-bit values can be
-steered through `minimum_value`, `delta_value` and the multiplicand table.
-Then reproduce the same PoC through a real consumer built from source
-(issue #1947 used whisper.cpp) to see whether the overwritten word reaches a
-pointer or control datum. Any r5 claim requires an independent witness replay.
+1. Guard-page allocator: place a `PROT_NONE` page immediately after the
+   8-byte multiplicands allocation to count the exact OOB extent before the
+   process dies. The loop bound (`entries*dims` ~ 1.07e9 floats) is known
+   from source; the number of consecutive words that land in writable heap
+   before SIGSEGV is not.
+2. Real consumer build (issue #1947 used whisper.cpp) fed the same PoC: check
+   whether a file-steered OOB word reaches a pointer or control datum.
+3. Witness replay of any new claim before it is treated as established.
+   Per-offset steering via `sequence_p` (W202) is DONE above; it is not
+   arbitrary bytes and does not by itself raise the rung-4 grade.
 
 ## Handoff
 
