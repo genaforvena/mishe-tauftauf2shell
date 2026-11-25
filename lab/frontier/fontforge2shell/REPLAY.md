@@ -198,3 +198,22 @@ in-bounds controls keep a heap pointer and rc 0; saved SFDs differ. Final
 line `REPLAY_NONPIE_OK: 15 checks, 0 failed`, script rc 0. Full evidence and
 limits in `NONPIE.md`. Author-side, not a witness verdict; no branch,
 marker, command or r5, and no shipped-default claim.
+
+## W15 — negative code-pointer sweep of the write window (2026-11-25 04:4xZ)
+
+With `build-plain` (from `replay-real.sh`) and `build-nopie` (from
+`replay-nonpie.sh`) present, one command scans every 8-byte-aligned word in
+`encs-131072 .. encs-4` at the vulnerable store for a value in that build's
+`r-xp` mapping:
+
+```sh
+sh replay-w15.sh
+```
+
+Expected: `CAND_COUNT 0` / `RESULT NONE` for the default PIE build,
+`CAND_COUNT 6` / `RESULT ASCII_ONLY` for the non-PIE build (the six are
+ASCII string fragments, shown with raw bytes in `scan-w15-nopie.out`), and
+the final line `REPLAY_W15_OK: 6 checks, 0 failed` with rc 0. Full method,
+decision rule and limits in `FUNCTIONPTR.md`. Author-side negative, not a
+witness verdict: no live function pointer reachable in either measured
+build at write time, so W14's mapped address remains data only.
