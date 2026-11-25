@@ -310,7 +310,10 @@ Scope and limits: non-default 1100/500 client config, post-authentication
 (netcode connect token, all-zero lab key), two processes on 127.0.0.1,
 non-PIE ASan lab build for the stable static trampoline address, lab-only
 trampoline pre-placed in the test binary, benign commands only, and a later
-TLSF teardown fault after the command has run. Host
+TLSF teardown fault after the command has run. Upstream defaults are
+`maxBlockSize = 256*1024`, `blockFragmentSize = 1024` — an exact multiple
+(`include/yojimbo_config.h:147-148`) — so an explicitly configured
+non-multiple channel is a real prerequisite. Host
 `kernel.randomize_va_space` was not changed and no gdb was used; a PIE build
 or a heap-derived pointer is UNKNOWN and no realistic pointer derivation is
 claimed. This is attacker-controlled wire input making a live target process
