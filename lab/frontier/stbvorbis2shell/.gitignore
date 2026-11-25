@@ -1,3 +1,9 @@
 build/
 *.out
 *.bin
+consumer/mix-*-stb-asan/
+consumer/mix-fixed-src/
+consumer/mix-stb-vuln
+consumer/mix-stb-fixed
+consumer/*.log
+consumer/mix-driver-asan

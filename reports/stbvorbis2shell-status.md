@@ -143,3 +143,37 @@ rung 4 PARTIAL; no r5. W205 is author-only and unwitnessed.
 
 In-tree: `run-all.sh` 9/0, `run-seq.sh` 4/0, `run-guard.sh` 12/0,
 `run-object.sh` 9/0, `run-neighbor.sh` 9/0, all rc 0.
+
+## W206 (2026-11-25) — real consumer: SDL_mixer public API faults on the PoC
+
+For the first time the crafted OGG was driven through a real application's
+**public** decoding API, not a purpose-built harness. `consumer/mix-driver.c`
+calls `MIX_LoadAudio_IO(NULL, io, 1, 1)` on SDL_mixer 3.x built from the
+in-tree `lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src` with
+`SDLMIXER_VORBIS_STB=ON` (other Vorbis backends OFF) and ASan. SDL_mixer's
+own vendored `src/stb_vorbis/stb_vorbis.h` is unmodified v1.22; its line
+4040/4049 is the same truncation and OOB store as pinned `:3880/:3889`.
+
+Observed with the 205-byte `evidence/chosen.ogg` (sha256
+`31c4686a65b13f2303f6d0e39020c8390fda1a5f81c2d4e997ddaae3aa86050d`):
+
+    ASan: heap-buffer-overflow, WRITE of size 4, 0 bytes after an 8-byte
+    region allocated at stb_vorbis.h:4040, write at :4049 in start_decoder.
+    Call chain: main -> MIX_LoadAudio_IO -> MIX_LoadAudioWithProperties ->
+    PrepareDecoder -> STBVORBIS_init_audio (decoder_stb_vorbis.c:158) ->
+    stb_vorbis_open_io -> start_decoder. rc 134.
+
+Controls: same consumer with a one-line `CODEBOOK_LIMIT` check added to its
+vendored header rejects the file cleanly (rc 0, no ASan report); the same
+vulnerable consumer on `evidence/safe-input.bin` is also clean (rc 0).
+One-command replay: `sh lab/frontier/stbvorbis2shell/run-consumer.sh` ->
+12 PASS / 0 FAIL, rc 0. Evidence: `lab/frontier/stbvorbis2shell/consumer/
+evidence/{vuln-attack,fixed-attack,vuln-safe,replay}.out`.
+
+Interpretation: rung 3 now includes a real consumer's public API path, and
+rung 4 includes **confirmed memory corruption in that real consumer**,
+not only in a minimal harness. ASan stops at the first OOB store, so this
+does NOT show a chosen word surviving into a consumer-owned object, pointer
+control or command execution. Grade stays **rung 4 PARTIAL**, NO r5; W206 is
+author-only and unwitnessed. Wire/network input (the PoC is delivered as a
+local file here) and consumer-object landing remain UNKNOWN.

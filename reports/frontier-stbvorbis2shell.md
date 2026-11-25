@@ -155,3 +155,27 @@ Interpretation: NEGATIVE for the real-consumer path without grooming. The
 W204 adjacent pointer field was harness-placed; a consumer lane must place
 its own object in range by an observed mechanism. Grade stays rung 4 PARTIAL,
 author-only, unwitnessed; NO r5.
+
+## W206 (2026-11-25) — real consumer: SDL_mixer public API path
+
+`consumer/mix-driver.c` drives the crafted OGG through SDL_mixer 3.x's
+public `MIX_LoadAudio_IO()` API. The consumer is built from the in-tree
+`lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src` with
+`SDLMIXER_VORBIS_STB=ON`, other Vorbis backends OFF and ASan; its vendored
+v1.22 header is unmodified. Full call chain observed on
+`evidence/chosen.ogg`:
+
+    main -> MIX_LoadAudio_IO -> MIX_LoadAudioWithProperties ->
+    PrepareDecoder -> STBVORBIS_init_audio (decoder_stb_vorbis.c:158) ->
+    stb_vorbis_open_io -> start_decoder (stb_vorbis.h:4049)
+
+ASan reports `WRITE of size 4`, 0 bytes after the 8-byte region from
+`:4040`, rc 134. Fixed control (one-line `CODEBOOK_LIMIT` check added to
+the consumer's vendored header) and safe input both rc 0 with no ASan
+report. Replay: `sh lab/frontier/stbvorbis2shell/run-consumer.sh` ->
+12 PASS / 0 FAIL, rc 0.
+
+This upgrades rung 3 to a real application's public API and adds confirmed
+memory corruption in a real consumer to rung 4. It does not show a chosen
+word in a consumer-owned field, pointer/IP control or command execution;
+ASan stops at the first store. Grade stays rung 4 PARTIAL, NO r5.
