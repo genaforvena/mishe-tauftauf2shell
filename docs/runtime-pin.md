@@ -27,15 +27,27 @@ not the main plant's `mishe-`), per-pane window restoration in
 `tools/tmux_restore.py` (upstream commit `8a076db`, so the explicit
 `panes` registry entries recreate both panes; a bottom pane must run
 `plant_view --output --log --follow`, never a bare `tail -F` of a log
-with no writer), the hy4-flash-only route policy in `engine/routes.json`
-for all 18 declared roles, a `docs` role whose hy4-flash window is
-subscribed only to `repo-change`, a bounded `repo_change` builtin in the
-pinned `producers.py`, a site-local hard guard in the pinned
+with no writer), the OMP-only route policy in `engine/routes.json` for all
+18 declared roles (hy4-flash-only at birth), a `docs` role whose hy4-flash
+window is subscribed only to `repo-change`, a bounded `repo_change` builtin
+in the pinned `producers.py`, a site-local hard guard in the pinned
 `engine_router.py` and `engines.py` that raises `OMP-ONLY POLICY
 VIOLATION` before any Claude/Codex/Qwen construction or legacy fallback,
 and two System 0 duties (`readme-lint` → docs, `omp-only` → operator).
 These are site-local runtime changes until a future release pin includes
 them; re-apply on upgrade.
+
+- 2026-11-25 owner-directed model addition: every route present at the
+  change (149 roles) keeps `opencode-go/hy4-flash-free` as its tier-0
+  primary and adds `opencode-go/hungerg-free` as a tier-1 fallback. Both
+  are account-less free OMP candidates with `thinking: high` and
+  `max_parallel: 3`; the site wake cap remains 5, so up to five engines
+  may run concurrently. The pinned `engine_router.py` hard guard and
+  `tools/check-omp-only.py` allow exactly these two models; all other
+  engines/models remain forbidden. No unit or resolver names a model, so
+  no unit regeneration or service restart is required. Future role
+  admissions must copy both candidates in this order. Re-apply this
+  allowlist change on upgrade.
 
 The 2026-11-21 owner-directed self-healing patch also updates the pinned
 `duties.json` and six `checks/*.py`: no-force autonomous publication and

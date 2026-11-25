@@ -20,7 +20,7 @@ resolver is automatically subscribed to its signal.
 | `signal-coverage` | `operator` | Registered signals have producers and subscribers, declared producers run, and faults receive attention or a recorded disposition. |
 | `repo-change` | `docs` | A changed HEAD produces one docs wake with the new commit as evidence. |
 | `readme-lint` | `docs` | The landing-page structure and evidence table still parse and link to real reports. |
-| `omp-only` | `operator` | Every declared role has the approved OMP-only route. |
+| `omp-only` | `operator` | Every declared role routes only to an approved OMP model; forbidden engines/models, missing routes and stale engine files are RED. |
 
 The ordinary `failed-m2shell-*.service` signals continue to route a failed
 unit to its resolver. The `doctor` and `engine-routing` signals also wake
