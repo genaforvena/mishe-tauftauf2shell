@@ -329,3 +329,31 @@ conflict; no live trigger was exercised. This is rung 3 in a standalone
 probe only: no chosen bytes in a live process, no pointer/IP control, no
 command side effect and no change to the rung ceiling. Details and limits
 in `realbuild/conflictpath/FINDINGS.md`.
+
+## Live two-node conflict: apply-worker crash and ASan write (2026-11-25 13:58Z)
+
+The preceding paragraph is superseded by a real replication experiment.
+`realbuild/twonode/run-two.sh` builds two loopback PostgreSQL 16.15
+clusters (ports 58431/58432) with the full pinned 2.1.9 extension, joins
+them into a pgactive group, configures an `insert_insert` conflict handler
+and races the same primary key on both nodes. Each node's apply worker
+then dies with `signal 11: Segmentation fault`, repeatedly, and the two
+tables diverge. With no handler, or with a handler but no conflicting
+second insert, neither worker dies. A genuine 2.1.10 shared-library run
+(sha256 `986917a8...2885a`, control SQL at 2.1.10, same handler, same race)
+has **zero** terminations. An earlier apparent 2.1.10 crash was a harness
+bug: a lost variable block left the 2.1.9 library installed; the script now
+records the used and restored library hashes on every run.
+
+An ASan build of the same pinned 2.1.9 library, preloaded into both live
+postmasters, reports `stack-buffer-overflow` and `WRITE of size 8` in
+`pgactive_conflict_handlers_resolve src/pgactive_conflict_handlers.c:759`,
+called from `check_apply_update src/pgactive_apply.c:1605` and
+`process_remote_insert src/pgactive_apply.c:788` — the real remote-change
+path, not a probe. This is confirmed memory corruption (rung 3) in a live
+process plus a deterministic remote-triggered denial of service with a
+vulnerable/fixed differential. It is not rung 5: the overwritten words are
+the fixed enum OID and pointer values, no command side effect and no
+saved instruction pointer. The CVE's `%s` parser primitive retains its
+separate rung-4-as-labeled status. Recipe, controls, binaries, hashes and
+limits are in `realbuild/twonode/FINDINGS.md` and `runs/`.

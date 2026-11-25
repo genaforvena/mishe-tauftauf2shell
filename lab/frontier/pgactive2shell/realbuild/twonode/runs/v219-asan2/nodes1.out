@@ -1,0 +1,6 @@
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
