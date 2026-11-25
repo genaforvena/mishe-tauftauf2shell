@@ -46,14 +46,14 @@ predicts, and still is not an arbitrary pointer byte. `value-ptrlow.pcf`
 sets `min2=0x4882, min1=0x43` (RHS `0x00488240`) — three chosen bytes,
 byte 3 zero. `value-complete.pcf` is the in-bounds control.
 
-## 2. A chosen write into a live heap pointer, and the no-dereference result
+## 2. A chosen write into a live heap pointer (BDFChar.bitmap), and the no-dereference-on-Import result
 
 The same real-process heap dump shows a pointer-shaped word at byte offset
-`encs-200`, inside a live 0x70-byte chunk, with value
-`0x0000555555c227f0`; a recon gdb (`gdb-ptr-ident.out`, sha256
-`c308e768ddd4bc0914eabf7904230795677e68711705c28c2692c43ea92784b4`)
-shows the target is the empty C string (`x/s 0x…227f0 -> ""`), i.e. a real
-`char*` field, not incidental integer data.
+`encs-200`, inside a live 0x70-byte chunk. W10 called it a `char*` because
+`x/s` of its target printed `""`; W11 corrected the identification: the
+chunk is a `calloc(104)` `BDFChar` (`chunkalloc` at `splinefont.h:1425`,
+`PcfParse:1809`) and offset `0x18` is `BDFChar.bitmap`, pointing at a
+one-byte zero bitmap buffer. See `DEREF.md` section 1.
 
 The file-chosen negative-glyph range from a one-byte-truncated index is
 `-256..-1` (`STEERING.md`), so `glyph=-50` writes at `encs[-50]` =
@@ -72,16 +72,18 @@ x/4xb (char*)encs-200 -> 0x43 0x42 0x41 0x00
 ```
 
 Three of the pointer's low bytes are file-chosen; bits 32..47 keep the
-host's `0x00005555` and only the low 4 bytes are reachable by one 32-bit
-store, so this is NOT a full pointer/address primitive. `x/s` of the
-original target proves it was a `char*`.
+host's `0x00005555`, so this is NOT a full pointer primitive. `DEREF.md`
+identifies the object and shows that a later `Save()` does dereference the
+changed pointer (plain rc 139 at the file-chosen address).
 
-Negative result, preserved: the corrupted `char*` is not dereferenced on
+Negative result preserved: the corrupted pointer is NOT dereferenced on
 this one-`Import()` path. The plain process continued through `PcfParse`
 to normal exit (rc 0) and ASan's only finding is the `WRITE of size 4` at
 `:1751` (`atk50-build-asan.out`, sha256
 `b57e48b79b7a3c360eb26f72e413523a701428b17656d54f018ece1dbff7d8cb`).
-No chosen-address SIGSEGV, benign marker execution or command is claimed.
+No chosen-address fault was claimed in W10; `DEREF.md` now measures one
+on the `Import()`-then-`Save()` path. No marker execution or command is
+claimed anywhere.
 
 ## 3. The real post-overflow consumer bounds-checks file ints
 
@@ -118,8 +120,10 @@ cases corrupt live heap data instead and need no glibc detection.
 ## 5. Grade statement
 
 Rung 4, real headless build, author-side and unwitnessed: three chosen bytes
-at a chosen offset inside a real `char*` field (pointer-bearing object),
-plus the exact arithmetic ceiling of the primitive (byte 3 is 0/1 only).
-NO full pointer control, no dereference of the changed pointer, no marker
-execution, no command, no ASLR/grooming study, no GUI, no r5. No witness
-verdict is implied and the existing #3309 grade is unchanged.
+at a chosen offset inside a live `BDFChar.bitmap` field (pointer-bearing
+object; W10's `char*` label was corrected in W11), plus the exact arithmetic
+ceiling of the primitive (byte 3 is 0/1 only). W11 adds a measured
+dereference at a file-chosen address during `Save()` (`DEREF.md`). NO full
+pointer control, no marker execution, no command, no ASLR/grooming study,
+no GUI, no r5. No witness verdict is implied and the existing #3309 grade
+is unchanged.

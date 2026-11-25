@@ -1,0 +1,29 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-plain
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-24 07:43 UTC-NoPython-D.
+ Based on source from git with hash: be36decc7391431319d9baa2429cc6d441a62e4c
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555556d1883 in SFDDumpBitmapChar (sfd=0x555555c21c60, bfc=0x555555c48170, enc=261, newgids=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:1671
+1671		    SFDEnc85(&encrypt,*pt);
+pc=0x5555556d1883
+$1 = 0x555500414243
+$2 = 0x555500414243
+#0  0x00005555556d1883 in SFDDumpBitmapChar (sfd=0x555555c21c60, bfc=0x555555c48170, enc=261, newgids=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:1671
+#1  0x00005555556d207d in SFDDumpBitmapFont (sfd=0x555555c21c60, bdf=0x555555c47fd0, encm=0x555555c35c30, newgids=0x0, todir=0, dirname=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:1769
+#2  0x00005555556d8569 in SFD_Dump (sfd=0x555555c21c60, sf=0x555555c33800, map=0x555555c35c30, normal=0x0, todir=0, dirname=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:2834
+#3  0x00005555556d9006 in SFDDump (sfd=0x555555c21c60, sf=0x555555c33800, map=0x555555c35c30, normal=0x0, todir=0, dirname=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:2956
+#4  0x00005555556d9611 in SFDWrite (filename=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd", sf=0x555555c33800, map=0x555555c35c30, normal=0x0, todir=0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:3061
+#5  0x00005555556d9c16 in SFDWriteBak (filename=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd", sf=0x555555c33800, map=0x555555c35c30, normal=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:3186
+#6  0x00005555556d97e5 in SFDWriteBakExtended (locfilename=0x555555c49440 "/tmp/ff2s-w11-atk50.sfd", sf=0x555555c33800, map=0x555555c35c30, normal=0x0, s2d=0, localRevisionsToRetain=-1) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/sfd.c:3124
+#7  0x000055555567b840 in bSave (c=0x7fffffffd580) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/scripting.c:1891
+A debugging session is active.
+
+	Inferior 1 [process 3469562] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

@@ -169,8 +169,10 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   parse). GUI open, pointer/IP, command and ASLR remain UNKNOWN; NO r5.
 
 - No external probing; all evidence is local. No loopback server involved.
-- No control-flow diversion, pointer/IP, command execution, ASLR/grooming
-  study or real-process marker; no rung 5.
+- No control-flow diversion, full pointer/IP, command execution, chosen
+  mapped target, ASLR/grooming study or real-process marker; no rung 5.
+  W11 measured a real dereference at a file-chosen address, but only in
+  the unmapped window described below.
 - Author-side clean-archive replay from `e5e4a65` repeated 5/5 expected
   RCs and the same chosen bytes; normalized hash `56fd8ada…5633bb`
   (`lab/frontier/fontforge2shell/REPLAY.md`).
@@ -189,17 +191,33 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   `getformint16()` values, so the write value is at most `0x0100FEFF` —
   byte 3 is only 0 or 1, never an arbitrary address byte. The real plain
   build measured `0x21 -> 0x0100feff00000021` and bytes `ff fe 00 01`
-  at `encs-4` on `value-ceiling.pcf`. A live `char*` to `""` sits at byte
-  offset `encs-200`, inside the file-chosen `-256..-1` glyph range;
-  `glyph=-50` with RHS `0x00414243` changed it from
-  `0x0000555555c227f0` to `0x0000555500414243` — three file-chosen bytes
-  inside a real pointer field (gdb hardware watchpoint). Negative: the
-  changed pointer is not dereferenced on this one-`Import()` path (plain
-  rc 0); ASan reports only the `WRITE of size 4` at :1751. Source-bound,
-  the real post-overflow consumer `figureProperEncoding` (:198-279)
-  bounds-checks `enc` before `map->map[enc]` and recomputes `i` elsewhere.
-  Both patched builds and both in-bounds controls are clean. No full
-  pointer control, marker, command or r5, and no witness verdict.
+  at `encs-4` on `value-ceiling.pcf`. A live pointer at byte offset
+  `encs-200`, inside the file-chosen `-256..-1` glyph range, was changed by
+  `glyph=-50` with RHS `0x00414243` from `0x0000555555c227f0` to
+  `0x0000555500414243` (gdb hardware watchpoint). W11 corrected the W10
+  object label: it is `BDFChar.bitmap` (`chunkalloc` = `calloc(104)`), not
+  a `char*` string; `x/s` had printed `""` from a one-byte zero bitmap.
+  On this one-`Import()` path the changed pointer is not dereferenced
+  (plain rc 0); ASan reports only the `WRITE of size 4` at :1751.
+  Source-bound, the real post-overflow consumer `figureProperEncoding`
+  (:198-279) bounds-checks `enc` before `map->map[enc]` and recomputes `i`
+  elsewhere. Both patched builds and both in-bounds controls are clean.
+  No full pointer control at the write, marker, command or r5, no witness.
+- W11 (`DEREF.md`, author-side, no grade change): adding `Save()` to the
+  poisoned `Import()` makes the real plain process dereference the
+  file-chosen pointer. `bSave:1891 -> SFDWriteBakExtended -> SFDDump ->
+  SFDDumpBitmapFont -> SFDDumpBitmapChar` reads `bfc->bitmap[i]` at
+  `sfd.c:1671`; gdb sees `SIGSEGV` with `pt = bfc->bitmap =
+  0x0000555500414243` (three file-chosen bytes), plain rc 139.
+  `value-atkceiling.pcf` faults at `0x000055550100FEFF`, the exact
+  arithmetic ceiling. In-bounds control exits 0 on plain and ASan; both
+  patched builds exit 0; vulnerable ASan halts at the original WRITE-4
+  before `Save()`. The reachable window is
+  `0x0000555500000000..0x000055550100FEFF` — below the lowest PIE mapping
+  (`0x555555554000`), hence unmapped in this build: no chosen mapped
+  target, no full pointer control, no marker, no command, no r5. A second
+  import without `Save()` still exits 0. Author-side replay receipt in
+  `REPLAY.md`; no witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
@@ -208,8 +226,8 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   real-build path, including W2's real-process chosen bytes, is author-side
   with no witness verdict. GUI `Import()`, pointer/IP, command and ASLR
   remain UNKNOWN.
-  The W3, W5, W6, W7, W8 and W9 allocator/consumer, Open-path and replay
-  measurements are author-side as well; no claim beyond rungs 1-4 is made
-  from them.
+  The W3-W11 allocator/consumer, Open-path, value-ceiling, dereference and
+  replay measurements are author-side as well; no claim beyond rungs 1-4 is
+  made from them.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.

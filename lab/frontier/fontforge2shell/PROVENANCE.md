@@ -104,10 +104,23 @@ source tree. Both PCF families were derived locally from the already-pinned
 `truncated.pcf` by the two new local generators; the same four local trees
 and gdb were used. `make-value-ceiling.py` sets full 16-bit min/max fields
 and a one-byte-truncated index to measure the arithmetic maximum;
-`make-ptr-target.py` chooses `glyph=-50` to reach a real `char*` observed in
+`make-ptr-target.py` chooses `glyph=-50` to reach a pointer-shaped word in
 the heap with a hardware watchpoint. `VALUE-CEILING.md` holds the input,
-command, transcript and control hashes and the no-dereference negative.
-The pointer's target was read locally with gdb (`x/s`) and is an empty
-string; no file supplied an address. Author-side and unwitnessed, with no
-grade change and no r5.
+command, transcript and control hashes and the no-dereference-on-Import
+negative. W11 corrected W10's object label: gdb debug offsets and
+`chunkalloc` (`splinefont.h:1425`) identify that word as `BDFChar.bitmap`,
+pointing at a one-byte zero bitmap buffer that `x/s` had rendered as `""`.
+No file supplied a full address. Author-side and unwitnessed, no grade
+change and no r5.
+
+W11 (2026-11-25 01:2xZ): no external reads, probes, loopback service or new
+source tree. The already-pinned `value-atk50.pcf`, `value-atkceiling.pcf`
+and `value-probe.pcf` were reused; three new local `Save()` scripts and two
+gdb command files drive the same four local builds. `DEREF.md` records the
+input/script/transcript hashes, the seven-case control matrix and the
+mapping bound; `replay-real.sh` regenerates the scripts from `$PWD` and
+replays them, with the receipt in `REPLAY.md`. The dereference path is
+`Save() -> SFDWrite -> SFDDumpBitmapChar` at `sfd.c:1671`. All runs were
+local and loopback-free; author-side, unwitnessed, no grade change and no
+r5.
 

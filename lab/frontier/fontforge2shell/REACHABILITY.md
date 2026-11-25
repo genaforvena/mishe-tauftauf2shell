@@ -225,21 +225,39 @@ scope. (1) The written int is `(min2*256 + min1)` for this single-iteration
 input, and both fields are 16-bit `getformint16()` values, so the maximum
 is `0x0100FEFF`: byte 3 is 0 or 1, never a chosen address byte. The real
 plain build with `value-ceiling.pcf` measured the size word go `0x21` ->
-`0x0100feff00000021`, bytes `ff fe 00 01` at `encs-4`. (2) A live `char*`
-to `""` sits at byte offset `encs-200`, inside the file-chosen `-256..-1`
-glyph range; `value-atk50.pcf` (`glyph=-50`, RHS `0x00414243`) changed it
-from `0x0000555555c227f0` to `0x0000555500414243` — three file-chosen
-bytes inside a real pointer field. Negative: no dereference followed on
-this one-`Import()` path (plain rc 0); ASan's only finding is the
+`0x0100feff00000021`, bytes `ff fe 00 01` at `encs-4`. (2) A live pointer
+at byte offset `encs-200`, inside the file-chosen `-256..-1` glyph range,
+was changed by `value-atk50.pcf` (`glyph=-50`, RHS `0x00414243`) from
+`0x0000555555c227f0` to `0x0000555500414243` — three file-chosen bytes
+inside a real pointer field. W11 corrected W10's label: gdb debug offsets
+and `chunkalloc` (`splinefont.h:1425`) identify the word as
+`BDFChar.bitmap`, whose one-byte zero bitmap buffer had looked like a
+`char*` to `""` under `x/s`. Negative on this one-`Import()` path: no
+dereference followed (plain rc 0); ASan's only finding is the
 `WRITE of size 4` at :1751. Source-bound: `figureProperEncoding` (:198-279)
 bounds-checks `enc` before `map->map[enc]` in the `.notdef` branch and
 recomputes `i` elsewhere, so file ints are not raw pointer indexes. Both
 patched builds and both in-bounds controls are clean. Author-side,
 unwitnessed, NO r5 and no grade change.
 
+## W11 (2026-11-25 01:2xZ) — dereference of the file-chosen pointer
+
+`DEREF.md` adds `Save()` after the poisoned `Import()`. `bSave:1891` runs
+`SFDWriteBakExtended -> SFDWrite -> SFDDump -> SFDDumpBitmapFont ->
+SFDDumpBitmapChar`, which reads `bfc->bitmap[i]` at `sfd.c:1671`. The real
+plain process faults at `pt = bfc->bitmap = 0x0000555500414243` (gdb,
+`gdb-deref.out`), rc 139; `value-atkceiling.pcf` faults at
+`0x000055550100FEFF`, the exact RHS ceiling. In-bounds control and both
+patched builds exit 0; vulnerable ASan halts at the original WRITE-4
+before `Save()`. A second import without `Save()` still exits 0.
+The reachable window is `0x0000555500000000..0x000055550100FEFF`;
+the lowest PIE mapping is `0x555555554000`, so the chosen addresses are
+unmapped. No mapped target, full pointer control, marker, command or r5.
+Author-side, unwitnessed, no grade change.
+
 ## Scope
 
-Headless CLI scripting on this host: both `Import()` (W1-W7, W10) and,
+Headless CLI scripting on this host: both `Import()` (W1-W7, W10-W11) and,
 from W8, `Open()` of a `.pcf` file. Chosen bytes at a file-chosen offset
 before `encs` are measured (W2/W4), as are the plain-build abort, the
 high-half glibc metadata consumer (W2/W3), a low-half chunk-size rewrite
@@ -249,8 +267,9 @@ that entry that writes past the physical chunk on a second `Import()`
 that chunk's usable area by `pcf_properties` (W7), the same overflow
 through file OPEN (W8), and a clean-tree one-command replay receipt (W9).
 W10 measures the write-value ceiling (byte 3 is only 0/1) and a chosen
-write of three bytes into a live `char*` at `encs-200`, with no observed
-dereference. Full pointer control, marker execution, command execution,
+write of three bytes into a live `BDFChar.bitmap` at `encs-200`. W11
+adds a measured dereference at the file-chosen address through `Save()`,
+still inside an unmapped window. Full pointer control, marker execution,
 the GUI `Import()`/File-Open menus (GTK-3 dev packages absent,
 `ENABLE_GUI=OFF` builds), bare command-line file open (W8 negative),
 other loaders, ASLR/grooming, and independent witness replay of the

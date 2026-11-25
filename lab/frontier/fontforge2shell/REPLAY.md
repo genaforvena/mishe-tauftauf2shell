@@ -81,3 +81,36 @@ or rung-5 claim is made from either outcome. Author-side receipt, not an
 independent witness verdict.
 
 
+## W11 — file-chosen pointer dereference in the same replay driver (2026-11-25 01:2xZ)
+
+`replay-real.sh` now appends a W11 section after the W9 hashes; it does not
+change the W2-W9 lanes above. From this lab directory, with the four builds
+already present (or after the script builds them from the pinned tarball):
+
+```sh
+FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-real.sh
+```
+
+The appended section regenerates `replay-value-atk50-save.ff`,
+`replay-value-probe-save.ff`, `replay-value-atkceiling-save.ff` and
+`replay-gdb-deref.cmd` from `$PWD`, then runs the seven cases in
+`DEREF.md` section 3. Author-side receipt at 01:24Z, replay rc 0 overall:
+
+| case | observed rc |
+|---|---|
+| atk50 + Save, plain | 139 |
+| in-bounds probe + Save, plain | 0 |
+| ceiling + Save, plain | 139 |
+| atk50 + Save, fixed plain | 0 |
+| atk50 + Save, ASan | 1 (original WRITE-4 at :1751) |
+| probe + Save, ASan | 0 |
+| atk50 + Save, patched ASan | 0 |
+
+gdb in the same driver: `SIGSEGV` at `SFDDumpBitmapChar sfd.c:1671`,
+`pc=0x5555556d1883`, `pt = bfc->bitmap = 0x0000555500414243`. PCF hashes
+printed by the replay match `DEREF.md`: atk50
+`8f0da475…4fd67`, atkceiling `54408140…8bbdb`, probe `4b37ed44…67d7b6`.
+
+This is another author-side replay on the same host, not an independent
+witness verdict. No full pointer control, chosen mapped target, marker
+execution, command or r5 is claimed.
