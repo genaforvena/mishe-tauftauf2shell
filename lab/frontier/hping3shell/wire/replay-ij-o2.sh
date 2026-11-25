@@ -2,8 +2,7 @@
 # One-command replay of the clang -O2 extension of the hp_rand.i/j write.
 # Builds both binaries from the provisioned pinned source; loopback only.
 set -u
-cd "$(dirname "$0")" || exit 1
-PATCH=$PWD/../../pinned/fix.patch
+PATCH=$PWD/../pinned/fix.patch
 SRC=${HPING_SRC:-../provision/hping-src}
 PIN=e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b
 FIX=70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7
