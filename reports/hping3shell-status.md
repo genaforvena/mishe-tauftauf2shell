@@ -629,6 +629,13 @@ no pinned source was edited and GDB only read live state.
   accidentally removed `ident = pid & 0xFFFF` and `--gap`, so the first
   attack run died with `NameError: ident` before injecting and its checker
   reported no filled state. Both were restored before the passing runs.
+- clang `-O2` extension (17:41Z): the same target-byte frames against
+  the existing W11 `-O2` trees from `evidence/w11-clang-o2/` gave attack
+  **8 PASS / 0 FAIL** (`sbox[0]=0x7e`, `i=0x20`, `j=0x10`, 16/16 low
+  bytes `7e`, counterfactual `e5`) and locally patched **4 PASS / 0 FAIL**
+  (no filled state, zero chosen-byte destinations). Raw output:
+  `wire/evidence/ij-w14-o2-*` and `ij-w14-o2-fixed-*`. The `-O2` replay
+  driver was not rebuilt for W14; this extension is author-side.
 - Grade unchanged: this extends W9/W11 from a chosen zero byte to two
   measured chosen nonzero bytes of `127.0.0.x`; it is still one octet,
   one rebuild class, no pointer, no full IP, no command and no r5. The
