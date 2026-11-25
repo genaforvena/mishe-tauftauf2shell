@@ -368,3 +368,13 @@ hash `6d3399d2c9d19b36d616325913399fc55a61deeb07d60e09e04d79f418c326be`
 negative, no witness verdict, no grade change, no r5. No replay demand is
 added; #4165 remains the single bundled offer.
 
+Clean-archive receipt at `115ae976` (18:04Z): archive
+`/tmp/ff2s-w24-clean.ex9aFH`, pinned tarball hash
+`6134240…d68e9b9ad7eb0` verified, source extracted from the tarball and
+`build-rel` rebuilt offline with the same cmake flags. `sh replay-w24.sh`
+3/3 PASS, rc 0, `REPLAY_W24_OK: 3 checks, 0 failed`. `encs` is
+`0x555555b2f430` (build-path sensitivity, live `0x555555b2f240`), same
+`glyph=-1 i=3` store; the normalized scan hash
+`6d3399d2c9d19b36d616325913399fc55a61deeb07d60e09e04d79f418c326be`
+is byte-identical to the live tree, with `CAND_COUNT 0` / `RESULT NONE`.
+Author-side replay, not a witness verdict.
