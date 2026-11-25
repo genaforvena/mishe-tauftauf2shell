@@ -294,3 +294,40 @@ flow or rung 5. These 16 slots add to the W1/W2 negative; other frame
 words not covered by a watchpoint remain UNKNOWN. The W3 forwarding
 encoder's data copy is still the only measured consumer of the overflowed
 bytes.
+
+## W6: fixed build's surviving encoder read leaks no chosen data (2026-11-25 03:5xZ)
+
+The one-line fixed control used in the replay was checked against the pinned
+vendor patch source: `diff -u provision/wire-vuln.c provision/wire-fixed.c`
+adds four independent guards, and the NAK guard is byte-identical to the one
+inserted into the control (decode `token_size`, reject `> N2N_AUTH_MAX_TOKEN_SIZE`
+before `decode_buf`). The other three guards (REGISTER_SUPER,
+UNREGISTER_SUPER, REGISTER_SUPER_ACK token/num_sn) do not act on this path.
+So the control is faithful for the tested NAK decode, though it is not the
+full fixed tree build.
+
+Bounded question left by W3: the fixed decoder memsets `nak`, stores the
+oversized wire `token_size=96`, then returns -1; `process_udp` still calls the
+forwarding encoder, which reads 96 bytes from `nak+14`. Does a non-ASan fixed
+build put non-zero stack bytes on the wire? Prediction: no visible disclosure,
+because the memset clears the struct and this plain layout's adjacent bytes
+are also clear. Test: fresh extraction of the pinned tarball, gcc `-g -O1
+-fno-omit-frame-pointer`, the same one-line NAK bound, supernode on
+127.0.0.1:18740/18750, `live/w3_peer_forward.py` with `safe` and `attack`.
+
+- Safe: registered peer got a 58-byte REGISTER_SUPER ACK, then an 86-byte
+  forwarded NAK with 48 chosen token bytes (`485a4d49...`).
+- Attack: peer got a 134-byte forwarded NAK whose wire token is 96 bytes of
+  ZERO (`first=0000000000000000 beyond48=0000000000000000`). The oversized
+  `token_size` survives the rejected decode (wire field `0x0060`), so the
+  encoder's out-of-bounds read is still exercised, but it emits no stack
+  data on this plain build/path. The fixed ASan build still aborts on that
+  read with a peer (W3), so a patched process remains vulnerable to a
+  peer-triggered abort; this experiment does not add a disclosure claim.
+- Raw: `live/evidence/fixed-plain-safe{,-sender}.log`,
+  `fixed-plain-attack{,-sender}.log`. Adjacent bytes in other builds or
+  after different preceding traffic remain UNKNOWN.
+
+Ceiling unchanged: rung 4 data-only consumer effect in the vulnerable build,
+no consumed pointer, marker, control flow, command or rung 5. Independent
+verdict on #3909 is still owed.
