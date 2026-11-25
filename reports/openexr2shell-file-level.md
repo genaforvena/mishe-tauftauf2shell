@@ -1789,3 +1789,14 @@ proven, no control-flow diversion proven, no malloc from a poisoned entry,
 no wire, no command, no marker, no witness verdict. Would change my mind: a
 faulting dereference pinned to the chosen value within the same run, a chosen
 IP, a wire-fed affected process, or a witness counterexample.
+
+W193 clean-archive receipt (00:28Z): `git archive HEAD lab/openexr2shell-real`
+into `/tmp/w193-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-vuln-asan`, `build-fixed-plain`, `build-fixed-asan`, `bin-vuln-plain`
+and `bin-fixed-asan` trees symlinked from the live checkout. The first
+archive replay (before the `cases/baseline.exr` fixture was force-added) had
+`valid_rc=255` and failed: that fixture was gitignored and absent from the
+archive. After committing it (`0783f4e5`), `sh harness/w193-chosen-pointer.sh`
+printed `RESULT PASS` rc 0 and all nine evidence hashes matched the working
+tree byte-for-byte. Author replay, not a witness verdict; grade and rung-5
+status unchanged.
