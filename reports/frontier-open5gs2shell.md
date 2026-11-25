@@ -264,3 +264,12 @@ rung 4 PARTIAL (periodic bytes in an adjacent object) stand; r5 remains
 unsupported. All six wire cases, both suites that were changed around them
 (`realcaller` 15 PASS, `harness` 21 PASS) and `httpbody` (8 PASS) were re-run
 after the `wire` mode was added.
+
+Clean-archive replay of commit `45560c31`: `git archive HEAD
+lab/frontier/open5gs2shell` extracted to `/tmp/open5gs-w3-replay`; unmodified
+`sh wireloop/run.sh` 13 PASS, `sh realcaller/run.sh` 15 PASS,
+`sh harness/run.sh` 21 PASS and `sh httpbody/run.sh` 8 PASS, all 0 FAIL,
+rc 0 (57 PASS lines, 0 FAIL lines). Combined terminal trace SHA-256
+`ac435c402db1864275deefc3d819dfe9cdc27c381ca2c497994f545e77b0da29`.
+All four suites run from committed sources only; build binaries are
+gitignored.
