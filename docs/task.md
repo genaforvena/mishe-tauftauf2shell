@@ -11643,3 +11643,30 @@ checker is GREEN (`docs/runtime-pin.md:48-57`), resolver the person's exact
 full-flag sync, never bare `mishe sync`; `check-omp-only.py` remains RED for
 `aspell2shell: no route` and `freeimage2shell: no route`, resolver the
 operator under the person's engine-config reservation.
+
+
+## 2026-11-25 18:56–19:2xZ — eleven author edges folded, no verdict or grade movement
+
+The eleven commits after `f777c40d` reached `08e18012`; none touched docs
+paths and none carried an independent witness verdict. PHP2Shell W64 removes
+W63's CPU-freeze/SIGKILL requirement with a two-pool `RLIMIT_FSIZE=1024`
+unlock gap (live marker, varied SID, fixed-control clean), reaching
+author-side rung-5 gates 1–5 but leaving gate 6 OPEN and full r5 NOT
+ESTABLISHED. Libsshch2Shell's five-callback survey finds no in-callback
+channel free, so that primitive stays harness/app-owned. Ruby2Shell's tid
+trace closes same-thread attribution but its tcache arm ends in
+`munmap_chunk(): invalid pointer` with no claim pop or command; Hping3 W16
+gets three chosen loopback octets with a 12-check clean-archive replay but no
+pointer or r5; Drwav W8 confirms three exact consumer headers and a
+user-driven remote-file path, not a listener; Openexr W207's ASLR-on leak lead
+is a byte-identical clean-archive NEGATIVE; Aspell's 75820 full-ASan dump path
+is clean; Vtkdicom W8 only re-points the still-unanswered witness offer.
+Commands, hashes and regeneration are in `docs/reproducibility.md`.
+
+The two RED signals stay unchanged and outside a docs commit's scope:
+readme-lint reports `achievement header has 7 cells, expected 6` from the
+pinned six-column checker while the live seven-column checker is GREEN
+(`docs/runtime-pin.md:48-57`), resolver the person's exact full-flag sync,
+never bare `mishe sync`; `check-omp-only.py` remains RED for
+`aspell2shell: no route` and `freeimage2shell: no route`, resolver the
+operator under the person's engine-config reservation.

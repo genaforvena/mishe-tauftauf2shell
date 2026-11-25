@@ -10745,6 +10745,68 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   poisoned `next` and no command; `MTRACE_FREE_DUMP` was restored in
   `lab/preload/mtrace.c` and rebuilt with
   `gcc -shared -fPIC -O2 lab/preload/mtrace.c -o lab/preload/mtrace.so`.
+
+## 2026-11-25 18:56–19:2xZ — two-pool PHP chain, consumer and tid limbs, negatives
+
+- **PHP2Shell W64 — two-pool `RLIMIT_FSIZE` gap** — `KEEP_TMP=1 GAP=1
+  DEATH_MODE=rlimit MTAG=php2shell-r5-w64-replay PORT=18340 bash
+  lab/repro/php2shell-aftershell-splice-tfm.sh
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm lab/src/php2shell-r5-app/tfm-app/web
+  lab/build/evidence/w64-replay-vuln 18340`, with the matching 8.4.28-app
+  fixed run at `PORT=18350`, expects a new session prefix and carrier tail,
+  `evil.php` executed by the live FPM worker and
+  `php2shell-r5-w64-gap-chain` under `uid=1000(mesh-home)` (evidence
+  `91a18f97ceb89752c61409d484b3c5ac13024a378fdf651bc7087bb1e85ba6ee`), while
+  fixed 8.4.28 leaves a 78-byte session without a marker
+  (`2a38515de212b29e5b0362fbe240cfabd11c110687080ad07d1d49ffa5111971`). A
+  varied SID `cafebabe00112233445566778899babe`/`Y` gives marker
+  `php2shell-r5-w64-gap-varying`
+  (`6bd15181f35b619e085b772db6eb5e92779dcc0cfadc5b6fd71b96b2509fd025`).
+  Producer survives; no `RLIMIT_CPU`, SIGKILL or phase-2 `LD_PRELOAD`.
+  Gates 1–5 only; gate 6 and full r5 remain OPEN/NOT ESTABLISHED.
+- **Hping3Shell W16 — three chosen destination octets** — `HPING_SRC=$PWD/
+  lab/frontier/hping3shell/provision/hping-src sh
+  lab/frontier/hping3shell/wire/replay-multioctet.sh` expects baseline 4,
+  attack 4, fixed 4 PASS and `REPLAY_MULTIOCTET_OK: 12 checks, fill=0x01`,
+  rc 0; `git archive c3996959 lab/frontier/hping3shell` plus the gitignored
+  `provision/` tree reproduces it with all 20 destinations predicted and
+  15/16 `127.1.1.1`. `wire/rng-ij-proof.sh` refuses non-127/8 templates with
+  exit 2 and `check_multioctet.py` predicts the address from `i`, `j` and the
+  256-byte sbox. The legacy one-wildcard `check_ij` still exits 1, preserved.
+  No pointer, command or witness verdict.
+- **Openexr2Shell W207 — ASLR-on address-leak negative** — `cd
+  lab/openexr2shell-real && sh harness/w207-leak-negative.sh` expects
+  `RESULT PASS`, rc 0, `CASES_WITH_HEX_OUTPUT=0` over 12 cases (2 baselines
+  rc 0, 7 rc 139, 3 rc 134), evidence hash
+  `d5d7b448cbd14293b6f834102e574c23be5c7b412477d39c5ac0bcb05e031ae5`.
+  `git archive 2f12c2e5 lab/openexr2shell-real | tar -x -C /tmp/w207-clean2`,
+  symlinking gitignored `src/`, `build-vuln-plain/` and `cases/*.exr`,
+  reproduces the same hash. The script counts `find cases/ -maxdepth 1` so a
+  symlinked cases dir is traversed; `-s` on a FIFO timed out at 40 s
+  (UNKNOWN). No witness verdict.
+- **Drwav2Shell W8 — exact consumer headers** — each pinned header is linked
+  into `/tmp/drwav-<consumer>-pin/dr_wav.h` and compiled with
+  `gcc -O0 -g -fsanitize=address -I /tmp/drwav-<consumer>-pin -o
+  /tmp/drwav-<consumer>-asan lab/frontier/drwav2shell/harness/harness.c`;
+  chosen arms for Moondust (`5e60ebb4…c848c4`), Sphaira (`a4bd7d50…6674ce`)
+  and Yup (`3d1b2f61…329fd9`) expect `metadataCount=1`,
+  `CHOSEN_WORD_PRESENT=1`, `target_after=5a5a5a5a000000004b43414842424242
+  6461746100000000` and rc 0, bad arms ASan SEGV at
+  `drwav__read_cue_to_metadata_obj:2281`, safe arms `metadataCount=2` and chosen
+  word 0 at rc 0. Raw outputs are in `consumer/evidence/w8-{moondust,sphaira,
+  yup}-{chosen,bad,safe}.out`; Sphaira's remote-file playback is user-driven,
+  not a listener, and the build is switch-only.
+- **Other author receipts and negatives** — `MTRACE_TID=1` is opt-in in
+  `lab/preload/mtrace.c`, rebuilt with `gcc -shared -fPIC -O2
+  lab/preload/mtrace.c -o lab/preload/mtrace.so`; seven of eight N=972 Ruby
+  processes survived with same-tid plant/upcase traces and no claim pop.
+  Libsshch's five pinned callback registrations have no in-callback channel
+  free in either pinned tree. Aspell 0.60.8.2 built with clang ASan
+  (`configure --disable-shared`, `-fsanitize=address`) dumps 255-, 256-, 257-,
+  260- and 511-byte personal-dict words at rc 0 with complete NUL-terminated
+  bytes, no ASan report and no crash; the `aspell -a` probe stays UNKNOWN.
+  Vtkdicom2Shell's exact-source replay remains DM #4503, unanswered.
+
 - **Gitignored evidence** — ASan/gdb outputs, clean-archive scratch trees
   and preload binaries are intentionally gitignored; regenerate each by the
   command quoted above from the named commit or pinned source. Addresses

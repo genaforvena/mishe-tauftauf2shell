@@ -3544,6 +3544,52 @@ bounded negatives: no claim/pop, command or persistence, and stock RCE
 stays NOT ACHIEVED. No rung cell, grade, route, mind count or R5 cell moved
 by any of these limbs.
 
+The 2026-11-25 18:56–19:2xZ fold covers the eleven author edges after
+`f777c40d` (through `08e18012`); none touched docs paths and none carried an
+independent witness verdict. Vtkdicom2Shell W8 only re-points both reports at
+the exact-source replay material in DM #4503 (unanswered; #4276 is the earlier
+W3 offer), leaving its witness UNKNOWN. PHP2Shell W64 extends W63's native
+`RLIMIT` chain with a two-pool `RLIMIT_FSIZE=1024` unlock gap: a size-limited
+FPM producer stays alive while a second, unlimited pool consumes the session,
+so no CPU freeze, SIGKILL or phase-2 `LD_PRELOAD` is needed. The armed wire
+request creates `php2shell-r5-w64-gap-chain` under `uid=1000(mesh-home)`
+(hash `91a18f97…`); a varied SID creates `php2shell-r5-w64-gap-varying`
+(`6bd15181…`); fixed 8.4.28 leaves a 78-byte session and no marker
+(`2a38515d…`). Author-side rung-5 gates 1–5 are reached, gate 6 stays OPEN
+and full r5 is NOT ESTABLISHED.
+
+Libsshch2Shell's pinned-tree survey finds five callback registrations and no
+in-callback channel free in any of them; `ssh_channel_close()` itself does not
+free, so the in-callback free remains harness/app-owned. Ruby2Shell adds opt-in
+`MTRACE_TID=1` tracing: in seven surviving N=972 processes all 22 planted
+`0x3f1` allocations and frees, the last `0x400` free and the `0x3f8` upcase
+allocation carry one worker tid, closing same-thread attribution; the tcache
+arm's upcase took a newer planted slice, wrote `0x53` and aborted in
+`munmap_chunk(): invalid pointer`, with no claim pop or command. Hping3Shell
+W16 makes `--rand-dest 127.T.T.T` emit three chosen octets (the first fixed by
+the template): T=1 predicted 20/20 destinations and got 15/16 `127.1.1.1`,
+T=`0x2a` got 10/16 `127.42.42.42`, and a clean-archive replay scored
+`REPLAY_MULTIOCTET_OK: 12 checks`; no pointer, command or witness.
+
+Openexr2Shell W207 tests the file-to-argv address-leak lead and returns
+NEGATIVE: all 12 ASLR-on `exrcheck -c` cases have `CASES_WITH_HEX_OUTPUT=0`,
+`sh lab/openexr2shell-real/harness/w207-leak-negative.sh` gives `RESULT PASS`
+with hash `d5d7b448…`, and a clean `git archive 2f12c2e5` replay with the
+gitignored cases symlinked is byte-identical; `-s` on a FIFO timed out at 40 s
+and stays UNKNOWN. Drwav2Shell W8 replays three exact consumer headers:
+Moondust, Sphaira and Yup each keep `CHOSEN_WORD_PRESENT=1` and rc 0 for the
+chosen metadata, fault the bad arm at `drwav__read_cue_to_metadata_obj:2281`
+and leave the safe arm clean. Sphaira's mount-to-browser-to-audio path is
+user-driven remote-file playback, not a listener, and its build is
+switch-only; no exactly-0.14.5 consumer was found (absence unproved), so no
+r5. This supersedes the Drwav2Shell row's earlier no-application boundary at
+the exact-source-header level only; no running Linux application or listener
+was exercised. Aspell2Shell's full release ASan build dumps 255–511-byte
+words at rc 0, with complete NUL-terminated bytes and no ASan report or
+crash; the `aspell -a` suggestion probe is UNKNOWN.
+No rung cell, grade, route, mind count or R5 cell moved by any of these
+limbs; all offers remain unanswered.
+
 
 ## How the plant works
 
