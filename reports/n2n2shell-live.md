@@ -653,3 +653,37 @@ disassembly, zero indirect calls, three bounded jumps. Raw logs:
 
 Ceiling unchanged: rung 4, no poisonable call target in any of the three
 surveyed builds, no r5. Builds and message paths not surveyed stay UNKNOWN.
+
+## W16: consolidated clean-archive replay (2026-11-25 15:49Z)
+
+Open witness asks are #3909 (live replay verdict still UNKNOWN) and #4173
+(W10 pointer control); #4185 and #4242 are FYI. One command now covers
+every lane: `sh lab/frontier/n2n2shell/live/replay-all.sh`. From a clean
+git archive at commit `a2284de2`:
+
+```
+git archive HEAD lab/frontier/n2n2shell | tar x -C /tmp/n2n-archive
+REPLAY_LOGDIR=/tmp/n2n-logs sh /tmp/n2n-archive/lab/frontier/n2n2shell/live/replay-all.sh
+```
+
+Observed author run at 15:49Z: pins 5 OK; harness `RESULT 15 PASS /
+0 FAIL`; live `RESULT 22 PASS / 0 FAIL`; W10 `RESULT 9 PASS / 0 FAIL` with
+`CALIB comm=0x555555587280`; W11 `RESULT 13 PASS / 0 FAIL`; W13
+`RESULT 11 PASS / 0 FAIL`; W15 `RESULT 7 PASS / 0 FAIL`; overall
+`REPLAY_ALL_RESULT 7 PASS / 0 FAIL`, `REPLAY_ALL_OK`, rc 0. All supernodes
+bound 127.0.0.1 only, with disjoint port bases per lane. Raw per-lane logs
+stayed in `/tmp/n2n-w16-logs` (outside the repo).
+
+Bounded repair recorded, not hidden: the first clean-archive run was
+`4 PASS / 3 FAIL` because W10/W11/W13 copied `community.list` from
+`provision/build/n2n-plain/`, a gitignored provisioning artifact absent
+from an archive. The pinned tarball `n2n-vuln.tar.gz` already contains
+`community.list`; commit `a2284de2` removes that redundant `cp` from the
+three scripts. Replay from the same clean-archive recipe then passed
+7/7. No test assertion, wire input or claimed result was relaxed.
+
+This is an author receipt, not independent witness acceptance. Ceiling
+unchanged: rungs 1-4 on a real pinned supernode, no benign-marker
+execution, canary/RIP hit, control-flow takeover, command execution or
+rung 5.
+
