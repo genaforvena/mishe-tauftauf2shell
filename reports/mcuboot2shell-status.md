@@ -213,3 +213,27 @@ this native host build/frame geometry; grade unchanged (rung 4 DEMONSTRATED,
 rung 5 UNKNOWN). Not a universal closure: a Zephyr/real-MCU frame layout was
 not tested. Evidence `real/smp/evidence/stack-layout.txt`, recipe
 `real/smp/stack-layout.sh`. W3/W4 witness verdicts remain UNKNOWN.
+
+## 2026-11-25 19:56Z — W6 fragmented real UART loop + W7 fixed-control repair (target mind)
+
+- Reconciled the unknown wake attempt 13: its W6 edits were all unstaged and
+  its last action was a source edit, not a committed result. Its fixed-4104
+  logs had no decrypt call and a smashed gdb frame. Cause was the lab groom
+  shim writing `memcpy(buf+4104, g_groom_ct, 2048)` at sector 0, not the
+  pinned fixed function. `real/smp/smp-shims.c` now compiles the groom out
+  under `M2S_FIXED_CONTROL`; the pre-repair `-fixed-o0-4104.log` is a kept
+  negative and `debug-fixed-*` files were removed.
+- Rebuilt parent/fixed and replayed all eight cases with
+  `sh real/smp/serial-run.sh`. Parent unchanged: 6144/7168 read back
+  `574952452d43484f4943452d31323334` at `dst_delta=6144/7168`, 2048 in
+  bounds, 4104 SIGSEGV 139. All four fixed cases now rc 0; fixed 4104 has
+  in-bounds decrypts (`dst_delta=8/0/0`). Raw logs
+  `real/smp/evidence/serial-smp-serial-*.log`.
+- The client drives MCUboot's real `boot_serial_start_inactivity()` →
+  `boot_serial_read_console()` → `boot_serial_input_raw()` → `bs_upload()`
+  loop over a socket-backed `boot_uart_funcs`, with 400-byte image chunks
+  split into ≤97-byte UART fragments. This closes W4's direct-call gap.
+- Grade unchanged: rung 4 DEMONSTRATED through a real fragmented SMP upload;
+  rung 5 UNKNOWN (no Zephyr/real MCU, real key TLV, pointer/IP/command
+  control, benign command execution or witness replay). W3/W4/W6 witness
+  verdicts remain UNKNOWN; author evidence only.

@@ -6,6 +6,8 @@
 #include <bootutil/image.h>
 #include <bootutil/bootutil.h>
 #include <bootutil_priv.h>
+#include <time.h>
+#include <stdio.h>
 
 extern uint8_t g_image[];
 extern uint32_t g_idx;
@@ -37,7 +39,13 @@ int flash_area_read(const struct flash_area *fa, uint32_t off, void *dst, uint32
         g_idx = (uint32_t)((uint8_t *)dst)[8] |
                 ((uint32_t)((uint8_t *)dst)[9] << 8);
     }
+#if defined(M2S_FIXED_CONTROL)
+    if (0) {
+#elif defined(M2S_SOCKET_UART)
+    if (g_groom && off == SECT_SZ && g_idx > SECT_SZ && len >= 512 && g_idx < GROOM_CT_SZ) {
+#else
     if (g_groom && len >= 512 && g_idx < GROOM_CT_SZ) {
+#endif
         uint32_t glen = g_groom_len;
         if (g_idx + glen > GROOM_CT_SZ) { glen = GROOM_CT_SZ - g_idx; }
         if (glen > len) { glen = len; }
@@ -96,7 +104,14 @@ uint32_t boot_status_off(const struct flash_area *fa) { (void)fa; return FLASH_S
 uint32_t boot_swap_info_off(const struct flash_area *fa) { (void)fa; return FLASH_SZ - 256; }
 void *os_malloc(size_t size) { return malloc(size); }
 void os_free(void *p) { free(p); }
-uint32_t os_uptime_get_ms_32(void) { return 0; }
+uint32_t k_uptime_get_ms_32(void)
+{
+    struct timespec ts;
+    if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0) { return 0; }
+    return (uint32_t)ts.tv_sec * 1000u + (uint32_t)ts.tv_nsec / 1000000u;
+}
+uint32_t os_uptime_get_ms_32(void) { return k_uptime_get_ms_32(); }
+uint32_t k_uptime_get_32(void) { return k_uptime_get_ms_32(); }
 void mcuboot_watchdog_feed(void) { }
 
 uint16_t crc16_ccitt(uint16_t crc, const void *buf, size_t len)

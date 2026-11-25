@@ -4,8 +4,10 @@
 set -eu
 cd "$(dirname "$0")"
 UP=../../upstream-parent
+OUT=${OUT:-smp-host}
+ENC_INC=${ENC_INC:-encryption-host.inc}
 mkdir -p evidence
-DEFS="-D__BOOTSIM__ -DMCUBOOT_HAVE_ASSERT_H -DMCUBOOT_USE_FLASH_AREA_GET_SECTORS -DMCUBOOT_MAX_IMG_SECTORS=128 -DMCUBOOT_BOOT_MAX_ALIGN=8 -DMCUBOOT_IMAGE_NUMBER=1 -DMCUBOOT_ENC_IMAGES -DMCUBOOT_ENCRYPT_KW -DMCUBOOT_USE_TINYCRYPT -DMCUBOOT_ENC_BUILTIN_KEY -DMCUBOOT_FIH_PROFILE_OFF -DMCUBOOT_SERIAL_RAW_PROTOCOL -DMCUBOOT_USE_SNPRINTF -DMCUBOOT_PERUSER_MGMT_GROUP_ENABLED=0"
+DEFS="-D__BOOTSIM__ -DMCUBOOT_HAVE_ASSERT_H -DMCUBOOT_USE_FLASH_AREA_GET_SECTORS -DMCUBOOT_MAX_IMG_SECTORS=128 -DMCUBOOT_BOOT_MAX_ALIGN=8 -DMCUBOOT_IMAGE_NUMBER=1 -DMCUBOOT_ENC_IMAGES -DMCUBOOT_ENCRYPT_KW -DMCUBOOT_USE_TINYCRYPT -DMCUBOOT_ENC_BUILTIN_KEY -DMCUBOOT_FIH_PROFILE_OFF -DMCUBOOT_SERIAL_RAW_PROTOCOL -DMCUBOOT_USE_SNPRINTF -DMCUBOOT_PERUSER_MGMT_GROUP_ENABLED=0 ${EXTRA_DEFS:-}"
 INCS="-I shiminc -I . -I $UP/sim/mcuboot-sys/csupport -I $UP/boot/bootutil/include -I $UP/boot/bootutil/src -I $UP/boot/boot_serial/include -I $UP/boot/boot_serial/src -I $UP/boot/zcbor/include -I $UP/ext/tinycrypt/lib/include"
 # shellcheck disable=SC2086
 gcc -c -O1 -g $DEFS $INCS -Dboot_enc_decrypt=real_boot_enc_decrypt \
@@ -14,7 +16,8 @@ gcc -c -O1 -g $DEFS $INCS -Dboot_enc_decrypt=real_boot_enc_decrypt \
         cat evidence/encrypted-build.err; exit 1;
     }
 # shellcheck disable=SC2086
-gcc -std=gnu11 -O1 -g -fno-stack-protector $DEFS $INCS -o smp-host smp-host.c \
+gcc -std=gnu11 -O1 -g -fno-stack-protector ${CFLAGS:-} $DEFS $INCS \
+    -DM2S_ENC_INC=\"$ENC_INC\" -o "$OUT" smp-host.c \
     smp-shims.c \
     boot_serial-host.c \
     "$UP/boot/boot_serial/src/zcbor_bulk.c" \
@@ -28,4 +31,4 @@ gcc -std=gnu11 -O1 -g -fno-stack-protector $DEFS $INCS -o smp-host smp-host.c \
     "$UP/ext/tinycrypt/lib/source/ctr_mode.c" 2>evidence/build.err || {
         cat evidence/build.err; exit 1;
     }
-echo "BUILT smp-host"
+echo "BUILT $OUT"

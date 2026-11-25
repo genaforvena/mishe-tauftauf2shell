@@ -1,11 +1,12 @@
 # Frontier brief — mcuboot2shell (CVE-2026-16663)
 
-Status 2026-11-25 10:59Z: **rung 4 DEMONSTRATED**, extended to a live
-loopback process where client-supplied bytes select the OOB destination and
-client-supplied plaintext is read back there (W1/W2/W3 sections below).
-Rung 3 real-source ASan OOB access confirmed. Rung 5 remains UNKNOWN: no
-MCUboot SMP/UART parser, no real encrypted image or key TLV, no pointer, IP
-or command control, no witness verdict. Fix merged on `main`; patched 2.5.1
+Status 2026-11-25 19:56Z: **rung 4 DEMONSTRATED**, including a real
+loopback SMP upload path (W6) where client-supplied bytes select the OOB
+destination and client-supplied plaintext is read back there. Rung 3
+real-source ASan OOB access confirmed. Rung 5 remains UNKNOWN: no
+Zephyr/real MCU, real encrypted image or key TLV, pointer, IP or command
+control, no witness verdict. Fixed-source controls pass all four header
+sizes after a harness-only groom defect was removed (W7). Patched 2.5.1
 release projected by the advisory, not observed.
 
 ## Verified ground truth (read-only provisioning)
@@ -271,3 +272,48 @@ different frame layout and was not tested. Witness verdict on W4/W3 still
 UNKNOWN. Reproduce with `sh real/smp/stack-layout.sh` →
 `real/smp/evidence/stack-layout.txt`; raw words and frame map are in that
 file. Negative preserved; do not re-claim W4 as rung 5.
+
+## W6/W7 real UART receive loop and fixed-control repair (2026-11-25 19:56Z, target mind)
+
+W4 handed the SMP packet directly to `boot_serial_input()`. W6 closes that
+gap: `boot_uart_funcs.read`/`write` are backed by a 127.0.0.1 socket and the
+server enters MCUboot's real `boot_serial_start_inactivity()` →
+`boot_serial_read_console()` → `boot_serial_input_raw()` → `bs_upload()` loop.
+The client sends bounded 400-byte image chunks (each SMP packet ≤ 513 bytes,
+the real receive-buffer size), split into 5- and 97-byte UART fragments.
+Recipe: `sh real/smp/serial-run.sh` (rebuilds parent and fixed, then runs all
+eight cases); logs `real/smp/evidence/serial-smp-serial-*.log`.
+
+| build | wire `ih_hdr_size` | packets / UART fragments | real decrypt at OOB sector | readback | process |
+| --- | --- | --- | --- | --- | --- |
+| parent | 6144 | 36 / 359 | `off=4096 len=2048 dst_delta=6144` | `574952452d43484f4943452d31323334` | rc 0 |
+| parent | 7168 | 39 / 388 | `off=4096 len=1024 dst_delta=7168` | same 16 bytes | rc 0 |
+| parent | 2048 | 26 / 258 | in-bounds `dst_delta=2048` | not chosen string | rc 0 |
+| parent | 4104 | 31 / 309 | first `len=0 dst_delta=4104`, then garbage `len=1929023784 dst_delta=40415` | none | SIGSEGV 139, negative preserved |
+| fixed | 6144 | 36 / 359 | `dst_delta=2048`, then 0/0 | in-bounds AES output | rc 0 |
+| fixed | 7168 | 39 / 388 | `dst_delta=3072`, then 0/0 | in-bounds AES output | rc 0 |
+| fixed | 2048 | 26 / 258 | `dst_delta=2048`, then 0/0 | in-bounds AES output | rc 0 |
+| fixed | 4104 | 31 / 309 | `len=4088 dst_delta=8`, then `dst_delta=0/0` | in-bounds AES output | rc 0 |
+
+The parent rows extend rung 4 through MCUboot's real fragmented-UART receive
+path; the 16 chosen bytes are a separate lab grooming condition, not an SMP
+upload field. Grade is unchanged: rung 4 DEMONSTRATED, rung 5 UNKNOWN. Still
+no physical serial, Zephyr/real MCU, real key TLV, pointer/IP/command control,
+benign command execution or witness verdict.
+
+W7 closes the open fixed-4104 anomaly from the previous wake. Its logs had
+**no `REAL_DECRYPT` line** and a fully smashed gdb frame inside the pinned
+fixed function, which suggested a fixed-path defect. The cause was the lab
+groom shim, not the pinned source: at sector 0 the header bytes make
+`g_idx=4104`, and the then-active groom executed
+`memcpy(g_buf_base + 4104, g_groom_ct, 2048)` — 2048 bytes past the 4096-byte
+VLA — before any decrypt call. The fixed function itself computes
+`idx = ih_hdr_size - abs_off` and rejects `idx > chunk_sz`; for 4104 it sets
+`blk_sz=0` on sector 0 and decrypts only in-bounds on later sectors.
+`real/smp/smp-shims.c` now compiles the groom out under
+`M2S_FIXED_CONTROL` (`if (0)` branch). A clean rebuild and replay of all
+eight cases on 2026-11-25 19:54Z gives the fixed table above: fixed 4104 ends
+`SERVER_RC=0` with `dst_delta=8/0/0`. The pre-repair `-fixed-o0-4104.log` is
+kept as a negative record; the temporary `debug-fixed-*` files were removed.
+Do not re-enable the groom in the fixed build and mistake its OOB for the
+vulnerability.

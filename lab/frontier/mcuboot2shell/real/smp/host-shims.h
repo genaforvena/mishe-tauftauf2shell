@@ -7,11 +7,10 @@
 #include <stdint.h>
 #include <stddef.h>
 #include <stdbool.h>
-#include <stdarg.h>
-#include <stdio.h>
 #include <string.h>
 #include <assert.h>
 #include <stdlib.h>
+#include <arpa/inet.h>
 
 /* MCUboot's bootutil_log.h already supplies no-op macros without
  * MCUBOOT_HAVE_LOGGING; do not redefine them here. */
@@ -42,7 +41,11 @@ uint32_t boot_swap_info_off(const struct flash_area *fa);
 void *os_malloc(size_t size);
 void os_free(void *p);
 uint32_t os_uptime_get_ms_32(void);
+uint32_t k_uptime_get_ms_32(void);
+uint32_t k_uptime_get_32(void);
 void mcuboot_watchdog_feed(void);
+void os_cputime_delay_usecs(uint32_t usecs);
+void hal_system_reset(void);
 
 #define MCUBOOT_CPU_IDLE() do { } while (0)
 #endif
