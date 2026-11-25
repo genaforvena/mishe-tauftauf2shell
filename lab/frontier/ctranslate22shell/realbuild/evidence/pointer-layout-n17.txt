@@ -1,0 +1,27 @@
+Breakpoint 1 at 0x15a32: file src/CTranslate2-4.8.0/src/models/model.cc, line 657.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CT2 payload consumer: num_bytes=17
+
+Breakpoint 1, ctranslate2::models::Model::load (model_reader=..., device=ctranslate2::Device::CPU, device_index=0, compute_type=ctranslate2::ComputeType::DEFAULT, use_flash_attention=false, tensor_parallel=false) at src/CTranslate2-4.8.0/src/models/model.cc:657
+657	        consume<char>(model_file, num_bytes, static_cast<char*>(variable.buffer()));
+FIRST=0x555555615740
+0x555555615740:	0x0000000000000000	0x0000000000000000
+0x555555615750:	0x0000000000000000	0x000000000000d8b1
+0x555555615760:	0x0000000000000000	0x0000000000000000
+0x555555615770:	0x0000000000000000	0x0000000000000000
+0x555555615780:	0x0000000000000000	0x0000000000000000
+0x555555615790:	0x0000000000000000	0x0000000000000000
+
+Breakpoint 1, ctranslate2::models::Model::load (model_reader=..., device=ctranslate2::Device::CPU, device_index=0, compute_type=ctranslate2::ComputeType::DEFAULT, use_flash_attention=false, tensor_parallel=false) at src/CTranslate2-4.8.0/src/models/model.cc:657
+657	        consume<char>(model_file, num_bytes, static_cast<char*>(variable.buffer()));
+SECOND=0x5555556157c0 delta=128
+0x555555615740:	0x4141414141414141	0x4141414141414141
+0x555555615750:	0x0000000000000041	0x0000000000000061
+0x555555615760:	0x00005555556001f8	0x0000000100000001
+0x555555615770:	0x0000000000000000	0x0000000000000000
+0x555555615780:	0x0000555555601680	0x0000555555615740
+0x555555615790:	0x0000000000000004	0x0000000000000004
+0x5555556157a0:	0x0000555555615700	0x0000555555615710
+0x5555556157b0:	0x0000555555615710	0x0000000000000021
+$1 = std::unordered_map with 1 element = {["origin"] = std::shared_ptr<ctranslate2::StorageView> (use count 1, weak count 0) = {get() = 0x555555615770}}

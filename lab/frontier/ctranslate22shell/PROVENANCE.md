@@ -93,3 +93,36 @@ allocation and `Model::load` call. Grade: rung 3 confirmed corrupted state in
 a real consumer; rung 4 PARTIAL (file-chosen length and bytes past a real
 16-byte `StorageView` allocation, no pointer control); AV:L/UI:P ceiling
 unchanged; no wire, no command, rung 5 NOT CLAIMED. Witness replay still owed.
+
+## Pointer-control probe (W2, 2026-11-25 12:5xZ) — negative result
+
+`realbuild/pointer-probe.sh` compiles `harness/driver-ptr.cpp` (hex-controlled
+file payload) against the same verbatim vulnerable `model.cc` (sha256
+`05ab59bb…`, rechecked in `evidence/pointer-probe.sha256`) with the real
+allocator. Raw gdb output: `realbuild/evidence/pointer-layout-n17.txt` and
+`pointer-chosen-80.txt`.
+
+At the instant of the vulnerable store (`model.cc:657`) the 16-byte
+`posix_memalign` buffer is followed by zeros and the top-chunk size field at
+buffer+0x18 (`0xd8b1` in the 17-byte case): **no already-constructed object
+with a pointer field follows the buffer**. After `register_variable`, the
+`shared_ptr` control block is constructed at buffer+0x20 (vptr
+`0x5555556001f8`) and the `StorageView` at buffer+0x30, with `_data` at
+buffer+0x48 pointing back to the buffer — both allocated and constructed
+after the store, so chosen bytes written there are overwritten by their
+constructors. File-chosen bytes first touch allocator metadata: offset 16
+overwrites the top chunk's `prev_size` (tolerated); offsets 24+ overwrite a
+top-chunk size field (plain `malloc(): corrupted top size`).
+
+An 80-byte chosen payload that preserved the initial top size and supplied
+candidate sizes at later top positions kept `Model::load` alive through the
+second variable, but the constructed control-block vptr and `StorageView`
+fields replaced the chosen `0x4141…/0x4242…` values at +0x40/+0x48; the run
+then aborted in `sysmalloc` (`old_end` misalignment) from the crafted top
+sizes. No chosen pointer value was observed in a dereference. Therefore:
+direct pointer control is not available in this consumer layout at the
+vulnerable store; rung 4 remains PARTIAL (file-chosen length and bytes, real
+heap corruption, no pointer target or control flow). Any future rung-4 upgrade
+needs either a layout where a pointer-bearing object already sits after the
+buffer at store time or a measured allocator-metadata technique; neither is in
+evidence. Witness replay of `build.sh` remains owed and UNKNOWN.

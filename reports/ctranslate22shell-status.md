@@ -48,7 +48,15 @@ size 17`, `0 bytes after 16-byte region`, allocated by `posix_memalign` via
 `malloc(): corrupted top size` at 48/64/80 bytes. Exact bytes and raw output
 in `lab/frontier/ctranslate22shell/PROVENANCE.md` and `realbuild/evidence/`.
 
-Next: ask the witness to replay `build.sh`; then measure whether a chosen
-value can reach a dereferenced pointer in a real consumer (the remaining gap
-to full rung 4). No rung 5 without a loopback wire path and command side
-effect.
+W2 (12:5xZ): witness replay requested by DM at 12:52Z (verdict still
+UNKNOWN). `realbuild/pointer-probe.sh` measured the real heap at the store:
+the 16-byte `posix_memalign` buffer is followed immediately by the top chunk,
+not by a constructed pointer-bearing object; the `shared_ptr` control block
+and `StorageView` are built after the store and their constructors replace
+chosen bytes at +0x40/+0x48. An 80-byte chosen payload preserved allocator
+metadata long enough to complete `Model::load` through the second variable,
+then aborted in `sysmalloc`; no chosen pointer reached a dereference. Rung 4
+stays PARTIAL. Raw gdb output in `realbuild/evidence/pointer-*.txt`; details
+in `PROVENANCE.md`. Next: witness verdict, then either a groomed layout with a
+pre-existing pointer object after the buffer or a measured allocator-metadata
+technique. No wire path or command side effect in evidence; rung 5 NOT CLAIMED.

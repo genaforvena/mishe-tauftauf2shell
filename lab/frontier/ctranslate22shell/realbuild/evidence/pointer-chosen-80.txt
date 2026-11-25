@@ -1,0 +1,34 @@
+Breakpoint 1 at 0x15a32: file src/CTranslate2-4.8.0/src/models/model.cc, line 657.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CT2 payload consumer: num_bytes=80
+
+Breakpoint 1, ctranslate2::models::Model::load (model_reader=..., device=ctranslate2::Device::CPU, device_index=0, compute_type=ctranslate2::ComputeType::DEFAULT, use_flash_attention=false, tensor_parallel=false) at src/CTranslate2-4.8.0/src/models/model.cc:657
+657	        consume<char>(model_file, num_bytes, static_cast<char*>(variable.buffer()));
+FIRST=0x555555615940
+0x555555615940:	0x0000000555555615	0x0000000000000000
+0x555555615950:	0x0000000000000000	0x0000000000000021
+0x555555615960:	0x0000000000000002	0x0000000000000002
+0x555555615970:	0x0000000000000000	0x000000000000d691
+
+Breakpoint 1, ctranslate2::models::Model::load (model_reader=..., device=ctranslate2::Device::CPU, device_index=0, compute_type=ctranslate2::ComputeType::DEFAULT, use_flash_attention=false, tensor_parallel=false) at src/CTranslate2-4.8.0/src/models/model.cc:657
+657	        consume<char>(model_file, num_bytes, static_cast<char*>(variable.buffer()));
+SECOND=0x555555615a40
+0x555555615940:	0x4847464544434241	0x504f4e4d4c4b4a49
+0x555555615950:	0x5857565554535251	0x000000000000d6f1
+0x555555615960:	0x4141414141414141	0x000000000000d661
+0x555555615970:	0x4242424242424242	0x0000000000000061
+0x555555615980:	0x00005555556001f8	0x0000000100000001
+0x555555615990:	0x0000000000000000	0x0000000000000000
+0x5555556159a0:	0x0000555555601680	0x0000555555615940
+0x5555556159b0:	0x0000000000000004	0x0000000000000004
+$1 = std::unordered_map with 1 element = {["origin"] = std::shared_ptr<ctranslate2::StorageView> (use count 1, weak count 0) = {get() = 0x555555615990}}
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff784527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
