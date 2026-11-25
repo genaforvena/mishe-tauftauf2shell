@@ -6,10 +6,38 @@ byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
 
+- **2026-11-25 (eleventh push, direct session) — the poison chain's
+  first half measured live (planted-chunk growth 0x415→0x453 with a
+  chosen scan forgery); its binding blocker named with bytes: sweep
+  persistence; two law corrections; stock/oracle-free/persistent
+  remains NOT ACHIEVED.** The committed `poison` mode of
+  `lab/repro/ruby2shell-shrink-claim.sh` ran 48 more fresh processes:
+  the plant/attack thread split measured 12/12 unpinned (per-thread
+  arenas make planted chunks invisible) and is pinned with
+  `RAILS_MAX_THREADS=1` (labeled deployment condition); the parse
+  slice law is corrected to content-sized `max(1024, content+9)`
+  class (1816B parts make 0x730-class slices — invisible to an
+  0x410-class buffer1; 1008B plants give slice AND value both
+  0x410-class); planted-chunk adjacency then measured (buffer1 from
+  the planted pool, victim `0x415→0x453`, chosen `[0x450][0x91]`
+  forgery at the neighbor's content +0x40, 3/12). The binding
+  blocker: planted chunks are NOT swept at request end — only ~8 of
+  129 free early, the rest stay LIVE through attack, claim and 30
+  benign churn requests, then die at a later major GC with the
+  corrupted sizefield (`munmap_chunk(): invalid pointer`, measured
+  end to end). A freed unsorted victim therefore never exists at the
+  upcase; the 0x450-class exact-fit claim never fires (0 matched
+  claims in every arm). One driver defect found and fixed (the
+  shared case-arm file disarmed later parallel runs; now per-run,
+  plus body-builder existence guards). Named next: free the plant
+  population pre-upcase against sweep persistence (young-death
+  request shapes, pool-safe GC pressure, or in-request plants). No
+  command, no persistence, no grade change.
 - **2026-11-25 (tenth push, direct session) — the shrink-family claim
   question ANSWERED (bounded NEGATIVE, structural closure on
-  IS_MMAPPED); a live corrupted-binned-chunk substrate measured;
-  stock/oracle-free/persistent remains NOT ACHIEVED.** The committed
+  IS_MMAPPED); a live process carrying an untriggered corrupted
+  in-use chunk measured (pairing-corrected); stock/oracle-free/
+  persistent remains NOT ACHIEVED.** The committed
   `lab/repro/ruby2shell-shrink-claim.sh` ran 48 fresh processes in
   four arms (N=588 planted/unplanted, N=892 planted, N=988 planted
   with 40×920B chosen-strip plants; optional benign plant, consH20
@@ -18,20 +46,18 @@ byte; attacker controls buffer size via input length). Affected
   churn moves victims to tiny/fresh classes; big unplanted binned
   victims abort during the attack at the request's own unsorted
   consumers (7/7); survivors' corrupted classes sit below the 809B
-  plant floor; the planted-band grown victims (0x411/0x415→0x453)
-  sit in their original 0x410-band bin where matched claims fit
-  without overshoot. N=988 runs sc988-3/sc988-11 complete attack,
-  claim AND `/up` 200 with the corrupted 0x453-class chunk still
-  binned — a live stock process carrying a corrupted chunk across two
-  later requests, the measured Einherjar input condition. Structural
-  closure: 0x53 always sets IS_MMAPPED, so every consumer that
-  `free()`s the corrupted chunk aborts in `munmap_chunk` (measured);
-  only neighbor-consolidations survive — Einherjar is structurally
-  the only surviving consumer. Named next: Einherjar on the
-  fresh-region pairing family (chosen `_method` tail forging
-  `prev_size` plus a PREV_INUSE-clear successor size, consumed by the
-  request's own teardown consolidation). No command, no persistence,
-  no grade change.
+  plant floor; the big planted-band victims (0x411/0x471/0x601→
+  0x453/0x653) all abort during the attack. N=988 runs sc988-3/
+  sc988-11 complete attack, claim AND `/up` 200 carrying an
+  untriggered corrupted IN-USE small chunk (real pairs
+  `0x95→0x53`/`0x35→0x53` after a B/A pairing correction — the
+  earlier "binned 0x453" reading spliced pairs from different phases
+  and is corrected in the report). Structural closure: 0x53 always
+  sets IS_MMAPPED, so every consumer that `free()`s the corrupted
+  chunk aborts in `munmap_chunk` (measured); only
+  neighbor-consolidations survive — Einherjar is structurally the
+  only surviving consumer. No command, no persistence, no grade
+  change.
 - **2026-11-25 (ninth push, direct session) — N=588 dual-instrument
   timelines on record; a SECOND corruption family (unsorted-victim
   SHRINK) measured; stock/oracle-free/persistent remains NOT

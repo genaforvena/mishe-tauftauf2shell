@@ -291,17 +291,39 @@ big unplanted binned victims abort during the attack at the request's
 own unsorted consumers (7/7); surviving corrupted classes sit below
 the ~809B plant floor; planted-band grown victims (0x411/0x415→0x453)
 rest in their original 0x410-band bin where matched claims fit
-without overshoot. Two N=988 runs complete attack, claim AND `/up` 200
-with the corrupted 0x453-class chunk still binned — a live stock
-process carrying a corrupted chunk across two later requests, the
-measured Einherjar input condition. Structural closure: the 0x53 byte
+without overshoot, and the big planted-band victims (0x411/0x471/
+0x601→0x453/0x653) all abort during the attack. Two N=988 runs
+complete attack, claim AND `/up` 200 carrying an untriggered corrupted
+IN-USE small chunk (real pairs `0x95→0x53`/`0x35→0x53` after a B/A
+pairing correction — the earlier "binned 0x453" reading spliced pairs
+from different phases). Structural closure: the 0x53 byte
 always sets IS_MMAPPED, so every consumer that `free()`s the
 corrupted chunk aborts in `munmap_chunk` (measured); only
 neighbor-consolidations survive, making Einherjar structurally the
-only surviving consumer. Named next: Einherjar on the fresh-region
-pairing family — the `_method` tail forging `prev_size` plus a
-PREV_INUSE-clear successor size inside the upcase output span,
-consumed by the request's own teardown consolidation.
+only surviving consumer.
+Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+
+The 2026-11-25 eleventh push engineers the Einherjar-input poison
+chain and names its binding blocker with bytes (the committed
+`poison` mode of `ruby2shell-shrink-claim.sh`, 48 more fresh
+processes). The plant/attack thread split measured 12/12 unpinned
+(per-thread arenas make planted chunks invisible) is pinned with
+`RAILS_MAX_THREADS=1` — a labeled deployment condition, app code
+untouched; the multipart parse-slice law is corrected to
+content-sized `max(1024, content+9)`-class (the "fixed 0x400" was a
+~1KB-part artifact; 1816B parts make 0x730-class slices invisible to
+an 0x410-class buffer1); and with 1008B-content plants the chain's
+first half is measured live: buffer1 pops from the planted pool and
+the 0x53 grows the adjacent planted chunk `0x415→0x453` with the
+chosen `[0x450][0x91]` unsorted-scan forgery in place (3/12). The
+binding blocker is sweep persistence: planted chunks are NOT swept at
+request end — only ~8 of 129 free early; the rest stay live through
+attack, claim and 30 benign churn requests, then die at a later major
+GC still carrying the corrupted sizefield
+(`munmap_chunk(): invalid pointer`, measured end to end) — so a freed
+unsorted victim never exists at the upcase and the 0x450-class
+exact-fit claim never fires. One driver defect (a shared case-arm
+file disarming later parallel runs) was found and fixed.
 Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows

