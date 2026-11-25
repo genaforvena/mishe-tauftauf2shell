@@ -350,3 +350,39 @@ out-of-tree application source provisioned in this plant lacks the vulnerable
 caller shape. Unprovisioned third-party applications remain UNKNOWN. No build,
 no ASan run, no new lab artifact and no witness replay; grade unchanged:
 rungs 1-4, r5 UNKNOWN.
+
+## Pinned s2n-tls caller census (W215, 2026-11-25T03:4xZ, source-bound)
+
+s2n-tls is AWS-LC's primary real consumer, so this wake provisioned one pinned
+release from upstream (tarball `lab/frontier/awslc2shell/out-of-tree/s2n-tls-v1.5.16.tar.gz`,
+sha256 `ab3e19f899e9b76cf7141f3b287e865db628f9e024360d7086c7f9c901909214`;
+extracted tree `s2n-tls-1.5.16/`; both gitignored) and read every non-test
+decrypt site. SOURCE-BOUND NEGATIVE for the CVE precondition.
+
+Directly verified: `crypto/s2n_cbc_cipher_aes.c:48-58`
+(`s2n_cbc_cipher_aes_decrypt`) checks `out->size >= in->size`, calls
+`EVP_DecryptInit_ex(ctx, NULL, NULL, NULL, iv->data)`, then exactly ONE
+`EVP_DecryptUpdate`; there is no second update or `EVP_DecryptFinal_ex` in
+that function. `tls/s2n_record_read_cbc.c:55` builds an in-place blob
+`struct s2n_blob en = { .size = encrypted_length, .data = ... }`, enforces
+block alignment (`en.size % iv.size == 0` at :70) and calls
+`cipher->io.cbc.decrypt(session_key, &iv, &en, &en)` at :77. The 3DES
+(`crypto/s2n_cbc_cipher_3des.c:47-52`) and composite AES-SHA
+(`crypto/s2n_composite_cipher_aes_sha.c:182-187`) paths have the same
+re-init-plus-single-update shape. Stream ciphers have block size 1, so
+`cipher.c:405` does not withhold a block; AEAD paths use `EVP_AEAD_CTX_open`
+or an AAD update with `out=NULL`; session-ticket decryption
+(`tls/s2n_resume.c:946`) is AEAD.
+
+Two pinned-library facts close the cross-record route. `cipher.c:190` clears
+`ctx->final_used = 0` on every `EVP_CipherInit_ex`, including s2n's
+NULL-cipher per-record re-init, so the withheld-block carry at `cipher.c:405`
+cannot survive into the next record. `cipher.c:131` resets `ctx->flags = 0`
+when a cipher is selected, so s2n's `EVP_CIPHER_CTX_set_padding(ctx, 0)`
+before that init (`s2n_cbc_cipher_aes.c:67`) does not persist. The latter is
+recorded as a near-miss, not a claim about s2n's functional behavior: with no
+second update there is no carry-plus-bulk span either way.
+
+No buffer in this application is sized to `in_len + b - 1`, so there is no
+adjacent control datum to corrupt. No build, ASan run or witness replay for
+W215; grade unchanged: rungs 1-4, r5 UNKNOWN.

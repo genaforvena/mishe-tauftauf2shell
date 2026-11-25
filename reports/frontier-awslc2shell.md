@@ -232,3 +232,21 @@ EVP_MAX_BLOCK_LENGTH` (17 bytes of slack) before one update; cjose
 no adjacent control datum. Unprovisioned third-party applications remain
 UNKNOWN. No build, no ASan, no witness replay; grade unchanged: rungs 1-4,
 r5 UNKNOWN.
+
+W215 (2026-11-25T03:4xZ, source-bound) tests the highest-value unprovisioned
+consumer, s2n-tls: pinned v1.5.16 tarball sha256 `ab3e19f8…909214`, extracted
+under gitignored `lab/frontier/awslc2shell/out-of-tree/`. Every CBC/ECB-capable
+decrypt site is in-place and called exactly once per EVP context. Directly
+read: `crypto/s2n_cbc_cipher_aes.c:48-58` checks `out->size >= in->size`,
+re-inits with `EVP_DecryptInit_ex(ctx, NULL, NULL, NULL, iv)` and makes one
+`EVP_DecryptUpdate`; `tls/s2n_record_read_cbc.c:55,70,77` decrypts an in-place,
+block-aligned `en` blob. The 3DES and composite AES-SHA paths share that shape;
+stream ciphers have `b=1` and AEAD uses `EVP_AEAD_CTX_open` or an `out=NULL`
+AAD update. Pinned `cipher.c:190` clears `final_used` on every
+`EVP_CipherInit_ex`, including s2n's per-record re-init, so the withheld-block
+carry at `cipher.c:405` cannot cross records; no buffer is sized to
+`in_len + b - 1`, hence no adjacent control datum. Near-miss: s2n's
+`set_padding(0)` precedes a cipher-selecting init and `cipher.c:131` resets
+`flags` to 0, but with one update there is no carry-plus-bulk span either way.
+SOURCE-BOUND NEGATIVE; no build, ASan or witness replay; grade unchanged:
+rungs 1-4, r5 UNKNOWN.
