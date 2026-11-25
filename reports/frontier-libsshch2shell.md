@@ -30,6 +30,8 @@ string executed by real libc `system()` is carried in the wire bytes of the
 recycled channel itself, with the client pointing `channel->session` at a
 deterministic ASan heap address; no app-owned static command string remains.
 No grade change.
+A consumer survey found no in-callback channel free in either pinned tree;
+the in-callback free remains harness/app-owned. No grade change.
 
 ## W16: wire-resident command string for real system() (2026-11-25 18:27Z)
 
@@ -98,6 +100,34 @@ are still forked-peer ASLR-local; app-owned fake callback objects, the
 in-callback free, the W3 detach, ASan quarantine tuning and the authenticated
 peer (PR:L) remain. No persistent shell or remote command service.
 NOT ESTABLISHED rung 5; additive and unwitnessed.
+
+## Consumer survey negative: no in-callback channel free in the pinned trees (2026-11-25 19:09Z)
+
+Not a new lane or replay; no grade change. The open prerequisite from W16 is a
+real consumer that frees the channel from inside a `channel_data_function`
+callback. A source survey of both pinned mirror trees (vulnerable `7dfabb1f`,
+fixed parent `a540e276`) found five callback registrations and no such free:
+`examples/sshd_direct-tcpip.c:548` (`my_channel_data_function` at :323-355
+calls `send()` and, on failure, `stack_socket_close()` at :232-242, which only
+pushes a cleanup node; the `ssh_channel_free(gone->data->channel)` at :134 is
+in `do_cleanup()` at :115, reached from :737, outside the callback);
+`examples/sample_sftpserver.c:336` (the library's
+`sftp_channel_default_data_callback`, `src/sftpserver.c:2107-2149`, calls
+`ssh_channel_close(sftp->channel)` at :2139 with the explicit comment at :2140,
+"Leave freeing resources on caller"); `src/connector.c:120`
+(`ssh_connector_channel_data_cb` at :589-660 writes to the out channel/fd and
+never frees; `ssh_connector_free` at :138-167 is caller-driven);
+`examples/ssh_server.c:768` (`data_function` at :281-299 only writes to a child
+stdin); `examples/ssh_X11_client.c:170` (`copy_channel_to_fd_callback` at
+:643-664 only calls `write()`). `ssh_channel_close` itself
+(`src/channels.c:1459-1510`) sends EOF/close, sets `SSH_CHANNEL_STATE_CLOSED`
+and flushes; it does not free the channel. The cited line numbers are identical
+in both pinned trees.
+
+Disposition: the in-callback free in all real-build lanes remains
+harness/app-owned. No libssh-provided consumer in the pinned trees supplies
+one; removing that condition needs a provisioned external consumer. No harness
+change, no replay, no witness result. Grade unchanged.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
