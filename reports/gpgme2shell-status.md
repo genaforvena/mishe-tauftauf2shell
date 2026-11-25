@@ -308,3 +308,11 @@ or IP control, no chosen-address write, no benign command side effect, no
 stock-layout or live-target claim and no r5. It narrows W6's plain-glibc
 negative to the *ungroomed* case; it does not turn the earlier abort into an
 attacker primitive. No witness verdict has landed on any real path.
+
+Clean-archive replay of `c9b0ce6c` into `/tmp/gpgme-w8-clean`: `sh
+build-plain.sh` rc 0 `BUILD PLAIN OK` from the four provisioned source trees
+copied locally (no network); `sh run-groom.sh` `PASS=23 FAIL=0`, `sh
+run-plain.sh` `PASS=13 FAIL=0` and `sh ../run.sh` `PASS=19 FAIL=0`, rc 0
+throughout. The replayed vulnerable groomed case again prints `aliased=1`
+and `groom_buf byte[1000]=0x41 after byte[1000]=0x41`; `groom-vuln-0.rc`
+is 134. Author-side only; scope note #4101 sent to witness, no verdict.
