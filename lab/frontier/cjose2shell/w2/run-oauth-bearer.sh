@@ -33,6 +33,7 @@ start() {
     while [ "$i" -lt 100 ]; do
         if ss -ltn "sport = :$port" | grep -q ":$port"; then return 0; fi
         i=$((i + 1))
+        sleep 0.2
     done
     echo "LISTENER_NOT_READY=$port" >&2
     exit 2
