@@ -591,3 +591,38 @@ and message paths remain UNKNOWN.
 Replay after the control fix: `sh lab/frontier/n2n2shell/live/w13_spill_read.sh`
 — 11 PASS / 0 FAIL, rc 0 (author run 10:02:30Z). Raw logs:
 `live/evidence/w13-{watch,control}{,-sender}.log`, `w13-build.log`.
+
+## W14: the chosen-pointer object graph carries no function pointer (2026-11-25 11:2xZ)
+
+W12 counted zero indirect calls in the exact W11 `process_udp`; W13 showed
+`comm` is its only wire-controlled pointer. This is a source-level check of
+the objects reachable through that pointer: if `comm` were aimed at a
+forged static object, could any field be used as a call target?
+
+Pinned tree: `provision/n2n-vuln.tar.gz`, sha256
+`d3b5465090ac13aca2186c9d7e24cea4d9d450eb11586ef05b919c39d1f12b43`
+(matches `pins.sha256`), extracted read-only from the same archive the live
+replays use.
+
+- `include/n2n_typedefs.h:791-808` `struct sn_community` holds only bytes,
+  four `he_context_t *` cipher contexts, `peer_info *edges`,
+  `node_supernode_association_t *assoc`, `sn_user_t *allowed_users`,
+  counters, a subnet and `UT_hash_handle`. No function-pointer member.
+- `include/speck.h:49-53` (and the AVX2/SSE/scalar variants at `:65-69`,
+  `:86`, `:100`, `:109`) define `speck_context_t` as round keys, key words
+  and `keysize` only. The cipher contexts reached through `comm` carry no
+  callback.
+- `include/n2n_typedefs.h:450-472` `struct peer_info`, reachable via
+  `comm->edges`, is data plus `UT_hash_handle`; `include/uthash.h:1238-1247`
+  `UT_hash_handle` is table/prev/next/key/keylen/hashv pointers only.
+- The NAK path's consumer of a found peer, `sendto_peer`
+  (`src/sn_utils.c:584-609`), ends in `sendto_sock(...)` — a direct call,
+  not an indirect one. `sn_utils.c:2305-2356` shows `comm` used for
+  `header_encryption`, `edges`, `is_federation` and `allowed_users` only.
+
+So a wire-chosen `comm` can select data objects and steer which peer gets a
+forwarded NAK, but the forged object graph supplies no function pointer to
+call and W12 supplies no indirect call instruction to poison. This corroborates
+W12/W13 at source level; it is not a runtime marker attempt. Scope: this
+pinned build and the REGISTER_SUPER_NAK path. Other builds, messages and
+allocator-controlled objects remain UNKNOWN. Ceiling unchanged (rung 4, no r5).
