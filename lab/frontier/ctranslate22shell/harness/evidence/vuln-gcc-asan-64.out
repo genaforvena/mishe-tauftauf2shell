@@ -1,0 +1,56 @@
+=================================================================
+==1476854==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000060 at pc 0x732eb5cfb303 bp 0x7ffea61307b0 sp 0x7ffea612ff58
+WRITE of size 64 at 0x502000000060 thread T0
+    #0 0x732eb5cfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x732eb59670bf in std::basic_streambuf<char, std::char_traits<char> >::xsgetn(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x1670bf) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 0x732eb5938140 in std::istream::read(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x138140) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #3 0x5e526a3715f8 in char* ctranslate2::consume<char>(std::istream&, unsigned long, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/pinned_consume.h:38
+    #4 0x5e526a36ec89 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:85
+    #5 0x5e526a36f0a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
+    #6 0x732eb542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x732eb542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5e526a36d9f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
+
+0x502000000060 is located 0 bytes after 16-byte region [0x502000000050,0x502000000060)
+allocated by thread T0 here:
+    #0 0x732eb5cfe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x5e526a36fd1d in StorageView::StorageView(Shape, DataType) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:31
+    #2 0x5e526a36ec38 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:84
+    #3 0x5e526a36f0a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
+    #4 0x732eb542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x732eb542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5e526a36d9f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa fd fa fa fa 00 fa fa fa 00 00[fa]fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1476854==ABORTING
