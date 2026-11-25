@@ -318,3 +318,26 @@ execute a lab-chosen benign command with an observed side effect and clean
 vulnerable/fixed/safe controls — author-only rung 5 mechanics. Witness replay
 has not happened; ESTABLISHED requires it. `upstream/` was restored to the
 pinned parent channel and fix-commit `test.cpp` after the run.
+
+## W5 — PIE control closes the command limb (2026-11-25 04:29Z)
+
+The same `r5-test.cpp` payload was rebuilt as a PIE ASan binary
+(`build-pie-vuln`, no `-no-pie`). The two processes now print different
+trampoline addresses: client `fake_vtable=0x5e085e7e90c0`, server
+`fake_vtable=0x645bfc54a0c0`; the server sends its own address in the crafted
+fragment. The vulnerable client still faults in
+`Connection::Reset()` (`yojimbo_connection.cpp:172`) at the wire-borne
+address, but no `MISHE-R5-CALL` line appears and the benign marker file
+`/tmp/yojimbo-r5-pie` is absent (rc 1 client, rc 0 server). Evidence
+`harness/evidence/w5-client-pie.log` sha256
+`64c2b6d7d85a213616e0f29fb4cca0b0a9d576e2e3f790f393a8335de1bd4fdb`,
+`w5-server-pie.log` sha256
+`947760d92c29fe6138d0c309aef0796e17cc2876e85865538c6e227303ffc37d`;
+config/build logs `w5-pie-{config,build}.log` sha256
+`bc7d67d8…` / `a77a0c2f…`.
+
+This is a preserved negative, not a downgrade of W4: memory corruption still
+occurs, but the command limb needs the non-PIE static trampoline address.
+Host `kernel.randomize_va_space` was not changed; no leak, no gdb-forced
+pointer and no ASLR-realistic derivation is claimed. Realistic PIE/ASLR
+exploitability stays UNKNOWN.

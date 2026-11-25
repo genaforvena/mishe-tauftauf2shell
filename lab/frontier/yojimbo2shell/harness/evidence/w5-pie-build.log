@@ -1,0 +1,26 @@
+[0/2] Re-checking globbed directories...
+[1/26] Building C object CMakeFiles/sodium-builtin.dir/sodium/sodium.c.o
+[2/26] Building C object CMakeFiles/netcode.dir/netcode/netcode.c.o
+[3/26] Building C object CMakeFiles/reliable.dir/reliable/reliable.c.o
+[4/26] Building C object CMakeFiles/tlsf.dir/tlsf/tlsf.c.o
+[5/26] Linking C static library libreliable.a
+[6/26] Linking C static library libsodium-builtin.a
+[7/26] Linking C static library libtlsf.a
+[8/26] Linking C static library libnetcode.a
+[9/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_address.cpp.o
+[10/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo.cpp.o
+[11/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_allocator.cpp.o
+[12/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_base_client.cpp.o
+[13/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_base_server.cpp.o
+[14/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_channel.cpp.o
+[15/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_client.cpp.o
+[16/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_network_simulator.cpp.o
+[17/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_connection.cpp.o
+[18/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_platform.cpp.o
+[19/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_reliable_ordered_channel.cpp.o
+[20/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_server.cpp.o
+[21/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_utils.cpp.o
+[22/26] Building CXX object CMakeFiles/yojimbo.dir/source/yojimbo_unreliable_unordered_channel.cpp.o
+[23/26] Linking CXX static library libyojimbo.a
+[24/26] Building CXX object CMakeFiles/test.dir/test.cpp.o
+[25/26] Linking CXX executable /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test

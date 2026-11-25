@@ -1,0 +1,5 @@
+mode=server variant=attack fake_vtable=0x645bfc54a0c0
+server listening on 127.0.0.1:40000
+server client connected
+server chosen vptr 0000645bfc54a0c0 command=[touch /tmp/yojimbo-r5-pie]
+server done

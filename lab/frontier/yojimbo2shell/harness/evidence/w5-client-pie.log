@@ -1,0 +1,22 @@
+mode=client variant=attack fake_vtable=0x5e085e7e90c0
+client connecting to 127.0.0.1:40000
+client connected
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1112164==ERROR: AddressSanitizer: SEGV on unknown address 0x645bfc54a0d0 (pc 0x5e085e6ffc67 bp 0x7ffea45e2510 sp 0x7ffea45e24f0 T0)
+==1112164==The signal is caused by a READ memory access.
+    #0 0x5e085e6ffc67 in yojimbo::Connection::Reset() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+    #1 0x5e085e71e73f in yojimbo::BaseClient::Reset() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:309
+    #2 0x5e085e71acfe in yojimbo::BaseClient::Disconnect() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:63
+    #3 0x5e085e6fd175 in yojimbo::Client::Disconnect() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:103
+    #4 0x5e085e71af2c in yojimbo::BaseClient::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:75
+    #5 0x5e085e6fd8a3 in yojimbo::Client::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:142
+    #6 0x5e085e6de26f in run_client /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:189
+    #7 0x5e085e6de592 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:222
+    #8 0x77b51ca2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x77b51ca2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5e085e6dbc04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x2ac04) (BuildId: d22d157284ffb64f45054afa0112fa58f5bff9dd)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172 in yojimbo::Connection::Reset()
+==1112164==ABORTING
