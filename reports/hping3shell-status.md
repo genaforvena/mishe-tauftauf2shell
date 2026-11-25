@@ -880,3 +880,41 @@ no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
   live non-loopback target or wire-to-shell path. No byte-identical evidence
   claim (the W18 status receipt is author-side).
 
+
+## Header-valid RR cannot reach the overflow (W20, 2026-11-25 23:1xZ, author-side)
+
+New bounded question: is the `display_ipopt()` overflow reachable with a
+spec-valid IP header, or only with a malformed option length? The
+`IPOPT_RR` length byte `j` is attacker-supplied but a maximum-size IP header
+(ihl 15, 60 bytes) has only 40 bytes of option space. With `i = j - 4`
+clamped to `j`, the copy exceeds `old_rr[40]` only when `j >= 45`, i.e. when
+the declared option length is at least five bytes larger than the whole
+option space can hold. The embedded length byte is never checked against
+`hlen` in the pinned source; Linux still accepts such a frame, so this does
+not erase the loopback wire evidence (W6/W18), but it states the exact packet
+condition the advisory's `AV:N` prose leaves out.
+
+Measured against the verbatim pinned function with a throwaway ASan caller
+(`/tmp/hp3-validrr.c`, linked to the existing ASan-instrumented
+`asan/display_ipopt.o`; no tracked source edited), 60-byte header, option
+at byte 20, data filled `0x5a`:
+
+- `optlen=40 ptr=40` (`i=36`, header-valid): rc 0, ASan CLEAN, all nine RR
+  addresses printed, `RETURNED_CLEAN`.
+- `optlen=44 ptr=44` (`i=40`, exactly the buffer size): rc 0, CLEAN.
+- `optlen=45 ptr=45` (`i=41`): rc 1, `global-buffer-overflow` at one byte
+  past `old_rr[40]`.
+- `optlen=255 ptr=72` (`i=68`): rc 1, `WRITE of size 68`, 0 bytes after the
+  40-byte `old_rr`, the same signature as the admission replay.
+- Fixed source (`asan/display_ipopt_fixed.o`) with `optlen=255 ptr=255`:
+  rc 0, CLEAN — the patch's `hlen` clamp closes the malformed-length path
+  as well as the in-header path.
+
+Disposition: grade UNCHANGED. Rung 1-3 and the wire rung-4 result stand; the
+new datum narrows the reachable packet class to malformed RR lengths
+(`>= 45`) and gives a direct control for the fix. No pointer, full IP,
+command or r5. A second bounded check rebuilt the pinned tree with GCC
+`-O0` and confirmed its `.bss` matches W2's already-surveyed plain build
+(`old_rr@+0x00`, `rc4_sbox@+0x40` with 187 bytes reachable,
+`hp_rand.i/j@+0x144/+0x148` outside the 251-byte span); no new build class,
+no contradiction with W11. Author-side; witness verdict UNKNOWN for W20.
