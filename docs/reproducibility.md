@@ -10113,3 +10113,99 @@ named above is gitignored and regenerates with the cited scripts.
   and path are present, path enabled/active, pinned full-flag doctor PASS /
   GREEN rc 0. Window 155 was already registered with two live panes and was
   adopted. Grade stays rung 4 PARTIAL, NO r5, witness UNKNOWN.
+
+## 2026-11-25 08:5x–13:0xZ — staged lane and one-command replay receipts
+
+- **Solanum2Shell (STAGED, not admitted)** — frontier W230 committed the lane
+  at `805732b5`/`5f191420`; `reports/solanum2shell-status.md` and
+  `reports/frontier-solanum2shell.md` carry the claim. CVE-2026-121603 /
+  GHSA-6cq2-4j8w-7hvj, Solanum IRCd before fix `2ea1382`, needs an
+  authenticated linked server (`PR:H`). Pins: vulnerable parent
+  `7bc7e34c04711247b932666e19ae900cba884540` with `m_kill.c` sha256
+  `f4af269d…`, fixed `2ea1382e…` with sha256 `b1408e51…`; both full files and
+  `SHA256SUMS` are under `lab/frontier/solanum2shell/pins/`. Replay with
+  `bash lab/frontier/solanum2shell/harness/run-all.sh` (18 PASS / 0 FAIL):
+  verbatim `ms_kill()` bodies at `:170-280` with stand-in client structs,
+  Clang and GCC ASan `global-buffer-overflow` / `WRITE of size 533` at pinned
+  `m_kill.c:277` for reason 510 and 700, reason 480 clean, fixed pin clean,
+  and plain readback `buf_len=532` with chosen bytes past the 512-byte static
+  `buf`. A clean `git archive HEAD` replay at 12:42Z reproduced 18/0 with the
+  same pin hashes. Grade at staging: rung 3 pinned verbatim function, rung 4
+  PARTIAL input-chosen length and bytes at a known offset; no real ircd, no
+  linked-server wire, no pointer/command/R5, witness UNKNOWN. No charter,
+  route or trigger unit exists for it, so it is absent from the README table.
+- **Xschem2Shell witness verdict** — W216 replayed a clean
+  `git archive 42e0f33f`: `sh lab/frontier/xschem2shell/harness/run-all.sh`
+  25 PASS / 0 FAIL and `harness/real-bin.sh` 3 PASS / 0 FAIL, pins hash-match,
+  same ASan `WRITE of size 8` at pinned `:130` through the real unrenamed
+  `main` on a crafted `.raw`, fixed pin rejecting, and allocator-derived
+  readback `slot_bytes=c034f2404e640000`. Verdict ESTABLISHED AS LABELED,
+  grade unchanged; detail in the witness wall under
+  `.mishe-tauftauf/artifacts/` (gitignored).
+- **StbVorbis2Shell extent and replay** — `sh
+  lab/frontier/stbvorbis2shell/run-seq.sh` (4 PASS / 0 FAIL) rebuilds the plain
+  harness and checks four distinct file-derived OOB words; `sh
+  lab/frontier/stbvorbis2shell/run-guard.sh` (11 PASS / 0 FAIL) routes the
+  8-byte `c->multiplicands` allocation to a RW page with a `PROT_NONE` page
+  behind it and observes `j=0`, `k=31`, `div=0x80000000` at `stb_vorbis.c:3895`
+  with file-derived words at indices 2..30 — 29 words / 116 bytes past the
+  region. The guard page is never reached; the plain libc build instead
+  aborts in `malloc(): invalid size (unsorted)`. This supersedes the staged
+  loop-bound description; grade stays rung 4 PARTIAL, witness UNKNOWN.
+- **Ctranslate22Shell real source and pointer gap** — from
+  `lab/frontier/ctranslate22shell/realbuild`, `sh build.sh` builds verbatim
+  upstream `model.cc` (`05ab59bb…`) and fixed `d9b991e` (`5dcc3f1d…`) against
+  the real `StorageView`/`posix_memalign` allocator under ASan: a crafted
+  109-byte file sets `num_bytes=17` and ASan reports `WRITE of size 17`, 0
+  bytes after a real 16-byte region, with fixed rejecting and 16-byte safe
+  clean. `sh pointer-probe.sh` measures the real heap at the store: the top
+  chunk follows the buffer, and the later `shared_ptr`/`StorageView`
+  constructors overwrite chosen bytes at +0x40/+0x48, so no chosen pointer
+  reached a dereference (an 80-byte payload completed `Model::load` then
+  aborted in `sysmalloc`). Bounded negative; witness replay requested, no
+  verdict, grade unchanged.
+- **Real-process lanes with one-command drivers** — Drwav2Shell W4:
+  `sh lab/frontier/drwav2shell/consumer/run-marker.sh` (14 PASS / 0 FAIL)
+  uses attacker-side `make_marker_wav.py` and a committed `marker.c` to take
+  three adjacent `libsndfile` function pointers at `0x41e118..0x41e130` in a
+  `-no-pie` consumer and call an `LD_PRELOAD` benign marker at `0x50000000`;
+  fixed 0.14.6 and safe loop count write no marker. Libsshch2Shell W12:
+  `sh lab/frontier/libsshch2shell/real/run-fixedaddr.sh` (7 PASS / 0 FAIL)
+  derives the callee from the compiled ELF with `nm` and uses a separate
+  client process; the library-internal close-free shortcut is a source-level
+  negative. Synchronet2Shell W24:
+  `bash lab/frontier/synchronet2shell/release-label/term320b/real320b/run-faultaddr320b.sh`
+  (7 PASS / 0 FAIL, clean `git archive 3e681d41` receipt) shows
+  `mov 0x20(%rax),%rax` at `listFreeNodes+67` with `rax` and `list->first`
+  equal to the wire-chosen `0x465541544f4f2d45`; the direct `si_addr`
+  cross-check returned `(nil)` and is preserved as a negative. Open5GS W6:
+  `sh nfloop/run.sh` under `lab/frontier/open5gs2shell` replays the
+  ASan-confirmed `WRITE of size 1` at `multipart_parser.c:260` inside the
+  live v2.8.0 NRF with four byte-identical `CASE=` lines and a clean
+  `git archive 11bf8130` receipt. Mcuboot W3:
+  `sh lab/frontier/mcuboot2shell/real/wire-groom-run.sh` drives wire-supplied
+  header and plaintext through the real pinned decryptor to an OOB
+  destination on 127.0.0.1. Hping3 W11:
+  `sh lab/frontier/hping3shell/wire/replay-ij-o2.sh` replays chosen `i`/`j`
+  bytes under clang `-O2` from the pinned source; its layout survey found no
+  pointer or GOT entry in the 251-byte span.
+- **Bounded negatives** — Vtkdicom2Shell W3/W4: the plain-build SIGSEGV is a
+  stale OOB `Value.V` decref at `ReferenceCount.h:50` after `Set`, and a
+  nine-size OB sweep leaves the same stale word at the same offset, so no
+  file bytes or file-influenced pointer reach it. OpenEXR W200:
+  `sh harness/w200-command-gadget.sh` under `lab/openexr2shell-real`
+  disassembles every module loaded by pinned `exrcheck` and finds no `rsi`
+  to `rdi` one-gadget route to an `exec*` call from the W197 shape (clean
+  `git archive 548692e2` receipt, same evidence hash). Ruby2Shell's stock
+  leads are closed by the committed drivers `ruby2shell-keepalive-thread.sh`,
+  `ruby2shell-consH20-retarget.sh`, `ruby2shell-mainarena-leak.sh` and
+  `ruby2shell-errorpage-oracle.sh`; chosen-header coverage is pinned to
+  `N ∈ [540,588]` by the boundary arms at N=508 and N=604. Stock,
+  oracle-free and persistent R5 stays NOT ACHIEVED.
+
+Raw evidence for every bullet above is gitignored under its lane's
+`evidence/` directory and regenerates with the named script; the reports carry
+the observed hashes and counts. Gpgme2Shell W15's #4333 W11 replay offer is
+UNKNOWN (no settled witness output at 12:49Z), not a pass; Cjose2Shell W216
+only re-verified queued offers. No lane in this section moved a rung cell,
+grade, route, mind count or R5 cell.

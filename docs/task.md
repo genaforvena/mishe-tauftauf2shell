@@ -11320,3 +11320,59 @@ The grade is unchanged: rung 3 ASan `WRITE` in verbatim pinned
 `StorageView`, rung 4 PARTIAL file-chosen bytes at one known offset, no real
 library build, pointer-IP, wire, command, r5 or witness verdict. The new
 mind owns the real-library and offset-extent experiment; witness owns replay.
+
+## 2026-11-25 12:4xZ — Solanum2Shell staged (NOT admitted)
+
+Frontier W230 staged `solanum2shell` at commits `805732b5` / `5f191420`
+with brief `reports/frontier-solanum2shell.md` and status
+`reports/solanum2shell-status.md`. No admission is claimed: the operator owns
+final admission, so this fold created no charter, route, resolver key or
+trigger unit. Window 156 is live on the inner tmux socket and registered, but
+there is not yet a target mind; the README table and the 148-route count are
+unchanged. CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj affects Solanum IRCd before
+fix `2ea1382` (CWE-120, CVSS4 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`);
+an authenticated linked server (`PR:H`) is required. Vulnerable pin parent
+`7bc7e34c04711247b932666e19ae900cba884540` and fixed `2ea1382e…`, both with
+full files and SHA256SUMS under `lab/frontier/solanum2shell/pins/`.
+`ms_kill()` omits the KILLLEN truncation applied by client-side `mo_kill()`;
+pinned `m_kill.c:277` `sprintf(buf, "Killed (%s %s)", source_p->name, reason)`
+writes into a 512-byte static buffer, and the fix truncates reason to 200 at
+fixed `:200-203`. Verbatim pinned bodies with stand-in client structs:
+`bash lab/frontier/solanum2shell/harness/run-all.sh` = 18 PASS / 0 FAIL, GCC
+and Clang ASan `global-buffer-overflow` / `WRITE of size 533` for reason
+510/700, reason 480 clean, fixed pin clean, and plain readback `buf_len=532`
+with chosen bytes past `buf+512`. A clean `git archive HEAD` replay at 12:42Z
+reproduced 18/0 with the same pin hashes. Grade at staging: rung 3 on the
+verbatim pinned function, rung 4 PARTIAL for input-chosen length and bytes at
+a known offset; no real ircd build, no linked-server wire, no pointer,
+command or R5, and witness UNKNOWN. Independent replay is owed before any
+rung-4 publication.
+
+## 2026-11-25 08:5x–13:0xZ — author limbs folded (no cell moved)
+
+Gpgme2Shell W15 (`34bc5d14`) corrected a stale admission line that still
+called the W210 replay #3763 UNKNOWN after its ESTABLISHED verdict, and left
+the new W11 EOF replay offer #4333 UNKNOWN (wake started 12:33:50Z, no settled
+output at 12:49Z); Cjose2Shell W216 (`dcc24144`) only verified two queued
+offers. Ruby2Shell closed its named stock leads as measured negatives:
+keep-alive same-thread pairing at Puma `min=3/max=3` (`ac4e3986`), T-header
+repair (`e90b0a87`), consH-20 tcache retarget (`ee9cc066`), main-arena libc
+oracle and 48-part/filler-first (`7d881ed5`, `a3fd8b6e`), and a stock Sinatra
+500-page GC-address oracle (`5e5ad53b`); the multi-request substrate is
+usable after a surviving attack (`1f85543c`) and wire-only chosen-header
+coverage is pinned to `N ∈ [540,588]` (`878f7360`). Stock, oracle-free and
+persistent R5 stays NOT ACHIEVED; the labelled harness-condition R5 cell is
+unchanged. Vtkdicom2Shell W3/W4 (`03bda383`, `39d0d9e7`) localize the
+plain-build SIGSEGV to a stale OOB `Value.V` decref and a nine-size OB sweep
+leaves that invariant unchanged, not file bytes or a file-influenced pointer.
+OpenEXR W200 (`548692e2`) found no one-gadget command route in the modules
+loaded by the pinned `exrcheck`; Hping3 W11 (`38558228`) surveyed six more
+layouts and extended chosen `i`/`j` replay to clang `-O2` without finding a
+pointer or GOT entry. Ctranslate22Shell W2 (`d39dc5de`) measured the real-heap
+pointer gap and requested a witness replay without moving the grade.
+Drwav2Shell W4 and Libsshch2Shell W12 add author-only control-flow and ELF
+address lanes recorded in the README fold; Synchronet2Shell W24 shows the
+faulting load uses the wire-chosen pointer. The rest are clean-archive
+receipts (Libraw W26, Munt W189, OpenEXR W200, Libsshch W10–W12, Open5GS W6,
+Mcuboot W1–W3, Synchronet W24) with no witness verdict. No rung cell, grade,
+route, mind count or R5 cell moved by any of these limbs.
