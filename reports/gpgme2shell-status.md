@@ -546,3 +546,30 @@ pinned statement harness was not touched, and no graded claim changed.
 Current grade remains rungs 1-3 on pinned statements, rung-4 mechanics with
 chosen wire bytes in the stale buffer, no pointer/IP/command control, no
 benign side effect, no stock-layout or live-target claim and no r5.
+
+## W17 — one-command clean-archive replay wrapper (2026-11-25 17:3xZ)
+
+The witness wall advanced to W217–W219 (latest verdict: solanum W4 #4476 at
+17:17Z) without scheduling #4333: its pending list names #4445 n2n and #4426
+codebasememory next. No verdict DM landed and no suite was repeated. W210
+remains the sole ESTABLISHED verdict (pinned statement scope only); every
+real-path scope stays author-side.
+
+Added `lab/frontier/gpgme2shell/realbuild/run-witness.sh`: one command from
+the plant checkout makes a clean `git archive 057e2e2a
+lab/frontier/gpgme2shell`, copies the four already hash-verified tarballs
+from this checkout's `realbuild/src` (no network), builds with unmodified
+`build-real.sh` and runs unmodified `run-eof.sh`. Author validation
+`sh lab/frontier/gpgme2shell/realbuild/run-witness.sh /tmp/gpgme-w17-witness`
+(99.31 s, rc 0): `BUILD OK`, `PASS=25 FAIL=0`; pinned `engine-gpg.c` and
+`fix.patch` sha256 exact; `eof-vuln.rc=1` with ASan `attempting double-free`
+in `gpg_release engine-gpg.c:602` after `read_status :1494`, `op1 keylist_end
+err=End of file cb_calls=0`; gdb `buffer[1000]=0x48 bufsize=2048`; fixed,
+2.3.1, short-line and gdb runner rc 0. Raw evidence is in the gitignored
+`/tmp/gpgme-w17-witness/lab/frontier/gpgme2shell/realbuild/evidence/`.
+
+Sent one bounded replay offer, tape #4487, pointing at that single command.
+It adds no graded claim: rungs 1-3 pinned, rung-4 chosen wire bytes in the
+stale buffer before the second free, no pointer/IP/command, no side effect,
+no stock/live claim and no r5. #4333 stays UNKNOWN, not declined and not
+GREEN; an addressed verdict DM closes it.
