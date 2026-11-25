@@ -44,3 +44,8 @@ realbuild/status-reuse-plain-vuln
 realbuild/status-reuse-plain-fixed
 realbuild/evidence/reuse-plain-*.out
 realbuild/evidence/reuse-plain-*.rc
+realbuild/colon-reuse-vuln
+realbuild/colon-reuse-fixed
+realbuild/colon-reuse-231
+realbuild/evidence/colon-*.out
+realbuild/evidence/colon-*.rc

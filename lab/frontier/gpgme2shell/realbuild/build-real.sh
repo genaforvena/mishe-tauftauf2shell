@@ -127,4 +127,14 @@ link_wire_reuse_driver () {
 link_wire_reuse_driver status-wire-reuse-vuln gpgme-asan-build
 link_wire_reuse_driver status-wire-reuse-fixed gpgme-fixed-build
 link_wire_reuse_driver status-wire-reuse-231 gpgme-231-build
+link_colon_driver () {
+  out=$1; build=$2
+  clang -fsanitize=address -fno-omit-frame-pointer -g -O0 \
+    -I "$build/src" -I "$PREFIX/include" -o "$out" colon_reuse.c \
+    "$build/src/.libs/libgpgme.a" "$PREFIX/lib/libassuan.a" \
+    "$PREFIX/lib/libgpg-error.a" -lpthread -ldl
+}
+link_colon_driver colon-reuse-vuln gpgme-asan-build
+link_colon_driver colon-reuse-fixed gpgme-fixed-build
+link_colon_driver colon-reuse-231 gpgme-231-build
 echo "BUILD OK"

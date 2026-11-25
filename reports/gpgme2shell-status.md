@@ -235,3 +235,33 @@ Clean-archive replay of `3aaa3f07` into `/tmp/gpgme-w6-clean`: the committed
 network); vulnerable rc 134 with the same tcache message and `byte[1000]=0x48`,
 patched rc 0, and `sh run-plain.sh` `PASS=13 FAIL=0`, rc 0. Author-side only;
 the witness scope note is on the tape at #4039, with no verdict.
+
+## W7 — the second affected reader, `read_colon_line()` (2026-11-25 02:5xZ)
+
+The advisory names two affected readers; all prior wakes used the status
+path. `realbuild/colon_reuse.c` now drives the colon path with public APIs
+only. Its fake engine (`fake-colongpg.py`, the child's stdout is GPGME's
+colon pipe) writes exactly 1024 bytes with no LF. `read_colon_line()`
+consumes them to `readpos=1024`; its next call takes the `realloc()` at
+`engine-gpg.c:1647`, reads EOF, and returns at `:1707` without the pointer
+writeback at `:1728-1730`. No callback error is used on either pipe; the
+status callback only logs `arglen=1200 byte[1000]=0x48` as chosen-byte
+evidence from the same engine.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-colon.sh` gives
+`PASS=26 FAIL=0`, rc 0. Raw evidence is in
+`realbuild/evidence/colon-*.out` / `.rc` (gitignored). The vulnerable 2.2.0
+driver exits 1 with ASan `attempting double-free`: second free in real
+`gpg_release engine-gpg.c:604` via `_gpgme_engine_release →
+_gpgme_op_reset → gpgme_op_keylist_start keylist.c:1295`, first free by
+`realloc read_colon_line engine-gpg.c:1647`, allocation by
+`gpg_set_colon_line_handler engine-gpg.c:909`; op2 never starts. The
+fix-patched 2.2.0 and stock 2.3.1 drivers exit 0, sanitizer-clean, start
+op2 and log `byte[1000]=0x5a`; the vulnerable short-colon-line control also
+exits 0 and starts op2.
+
+Grade unchanged: this is the same rung-4 double-free shape in the advisory's
+second reader, with no pointer/IP/command control, no allocator-metadata
+claim, no benign side effect, no stock or live-target claim and no r5. All
+real-path results remain author-side; no witness verdict has landed on any
+of them.

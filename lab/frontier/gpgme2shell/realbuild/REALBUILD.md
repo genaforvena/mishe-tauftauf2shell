@@ -35,7 +35,7 @@ GPGME trees with `CC=clang CFLAGS='-fsanitize=address -fno-omit-frame-pointer
 -g -O0' LDFLAGS='-fsanitize=address'`, static only, prefix
 `realbuild/prefix`. It builds/installs the two dependencies and the three
 GPGME static libraries with `ASAN_OPTIONS=detect_leaks=0`, then links the
-nine drivers against `libgpgme.a`, `libassuan.a` and `libgpg-error.a`.
+twelve drivers against `libgpgme.a`, `libassuan.a` and `libgpg-error.a`.
 `ASAN_OPTIONS=detect_leaks=0` is needed only while building: libgpg-error's
 `yat2m` doc tool leaks under LeakSanitizer. Each GPGME `make` ends with a
 tests-directory link error; the static library is complete before that point.
@@ -48,6 +48,7 @@ sh run-real-gpg.sh
 sh run-wire.sh
 sh run-wire-reuse.sh
 sh run-reuse.sh
+sh run-colon.sh
 sh build-plain.sh
 sh run-plain.sh
 ```
@@ -57,6 +58,8 @@ network contact and writes raw output to `evidence/real-*.out` / `.rc`.
 `sh run-reuse.sh` adds 24 assertions on the second-operation path below.
 `sh run-wire-reuse.sh` adds 55 assertions on the wire-fed second-operation
 path; raw output is in `realgpg/evidence/wire-reuse-*.out` / `.rc` (gitignored).
+`sh run-colon.sh` adds 26 assertions on the colon-line path below; raw
+output is in `evidence/colon-*.out` / `.rc` (gitignored).
 `sh build-plain.sh` reuses the provisioned trees to build libgpg-error,
 libassuan and GPGME 2.2.0 plus the patched copy with plain `CFLAGS='-g -O0'`
 and no sanitizer, into a separate `prefix-plain`; `sh run-plain.sh` adds 13
@@ -165,3 +168,22 @@ callback, and short-wire-key controls stay sanitizer-clean.
 This is earlier rung-4 mechanics driven by attacker-chosen loopback bytes;
 it adds no allocator-metadata, pointer, IP or command control and no r5.
 Witness replay of this path is pending.
+
+## Colon-line path (the advisory's second reader)
+
+`colon_reuse.c` uses public APIs only: `gpgme_set_engine_info()` points at
+`fake-colongpg.py`, whose stdout is GPGME's `--with-colons` pipe. It answers
+`--version`, writes a 1200-byte `[GNUPG:] GOOD` status line with a chosen
+byte at offset 1000 (logged by a non-failing status callback), then writes
+exactly 1024 bytes with no LF to stdout and exits. `read_colon_line()`
+consumes all 1024 bytes to `readpos=1024`; its next call takes the
+`realloc()` at `engine-gpg.c:1647`, reads EOF and returns at `:1707` without
+the pointer writeback at `:1728-1730`. No callback error is used on either
+pipe. A second keylist on the same context fault in 2.2.0: ASan reports the
+second free in `gpg_release engine-gpg.c:604` via `_gpgme_op_reset →
+gpgme_op_keylist_start keylist.c:1295`, first free by `realloc
+read_colon_line engine-gpg.c:1647`, allocation by `gpg_set_colon_line_handler
+engine-gpg.c:909`. `COLON_SAFE=1` shortens the colon line to 20 bytes and
+stays clean. Patched 2.2.0 and stock 2.3.1 start op2 and log marker `Z`.
+`sh run-colon.sh` gives `PASS=26 FAIL=0`. Grade unchanged: rung-4 mechanics,
+no pointer/IP/command control and no r5.
