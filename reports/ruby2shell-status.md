@@ -6,6 +6,21 @@ byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
 
+- **2026-11-25 (thirteenth push, direct session) — corrected plant identity;
+  stock Sinatra reached the exact `[A 0x400][V 0x401→0x453 unsorted][T 0x414
+  tcache]` geometry, but the claim still could not pop V;
+  stock/oracle-free/persistent remains NOT ACHIEVED.** The old free-order map
+  split phases by allocation rank and misclassified drain bytes as plant;
+  item 29 retracts item 28's tcache-head identification. Direct TLS tcache
+  dumps show Rails' `0x410` bin is already full at the plant sweep, while
+  stock Sinatra keeps planted values in tcache. With drain `984x7`, plant
+  `1000x6`, filler `1x1200`, `POISON_NEXT=0x91`, a `0x3f0` shield absorbed the
+  upcase's second mapping buffer and B showed the intended A/V/T state. The
+  later `0x43f` claim allocated elsewhere; bin dumps show V left unsorted
+  before the claim, and the probe popped T with no forged bytes. Leading
+  hypothesis: large-request `malloc_consolidate`; not yet byte-confirmed.
+  No command, no persistence, no grade change.
+
 - **2026-11-25 (twelfth push, direct session) — the frees-timing
   barrier PARTIALLY broken: freed victims measured for the first
   time; the sweep's class/order dependence named;

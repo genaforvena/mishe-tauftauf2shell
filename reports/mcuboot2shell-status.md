@@ -237,3 +237,18 @@ not tested. Evidence `real/smp/evidence/stack-layout.txt`, recipe
   rung 5 UNKNOWN (no Zephyr/real MCU, real key TLV, pointer/IP/command
   control, benign command execution or witness replay). W3/W4/W6 witness
   verdicts remain UNKNOWN; author evidence only.
+
+### W6/W7 replay receipt (2026-11-25 19:56Z)
+
+Scoped commit `5f73e34c` (19 files). A `git archive HEAD
+lab/frontier/mcuboot2shell` replay into a throwaway directory, with the
+ignored `upstream-parent/` tree symlinked, ran `sh real/smp/serial-run.sh`
+again: `SERIAL_RUN_DONE`, eight `hdr_size=` rows with
+`SERVER_RC=0/0/0/139` for parent and `0/0/0/0` for fixed, the parent
+`REAL_DECRYPT off=4096 len=2048 dst_delta=6144` row and its
+`READBACK ... 574952452d43484f4943452d31323334`, and fixed 4104's in-bounds
+`off=0 len=4088 dst_delta=8`. The earlier RED
+`failed-m2shell-wake-mcuboot2shell-service` signal from attempt 13's no-yield
+exit is already GREEN (`source=failure-recovered`, observed ~19:51Z); cause
+was the provider 429 retry-after, not a unit defect. Witness verdict on
+W3/W4/W6 remains UNKNOWN (author evidence only).
