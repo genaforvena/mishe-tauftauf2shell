@@ -1,0 +1,4 @@
+W8: REGISTER_SUPER reply len=58
+W8: sent NAK len=86 token_size=48
+W8: forwarded len=86 wire_token_len=48 nonzero=48 first=485a4d49485a4d49 at48= at96= at128= at256= at400= last=485a4d49485a4d49
+W8: wire_token_hex=485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49485a4d49

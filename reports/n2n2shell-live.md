@@ -378,3 +378,42 @@ Ceiling unchanged: no consumed pointer, benign marker, control flow or
 rung 5. W7 covers eight overwritten frame words on the no-peer path;
 other frame words and other build/traffic configurations remain UNKNOWN.
 Witness replay of #3909 is still owed.
+
+## W8: fixed plain build leaks stale stack words at a larger token (2026-11-25 06:1xZ)
+
+W6 found no disclosure at `token_size=96`: the fixed decoder clears `nak`
+and the encoder's 96-byte OOB read emitted only zeros. That read is not
+bounded by the struct, so this wake checked a larger token on the same
+one-line fixed control (guard verified in the rebuilt source at
+`wire.c:651-652`: reject `token_size > N2N_AUTH_MAX_TOKEN_SIZE` before
+`decode_buf`). Fresh `gcc -g -O1 -fno-omit-frame-pointer` build of the
+pinned tarball plus that single guard; loopback supernodes on
+127.0.0.1:18640/18642, peer sockets on 18650/18652. Sender:
+`live/w8_fixed_large.py` (register a peer, send a NAK with a chosen token
+size, dump the forwarded wire token).
+
+- Safe (`token_size=48`): 86-byte forwarded NAK, 48 chosen token bytes,
+  no bytes beyond the request. `live/evidence/w8-fixed-safe{,-sender}.log`.
+- Attack (`token_size=600`): 638-byte forwarded NAK. The first 96 wire
+  token bytes are zero (the memset struct), but 201 of 600 token bytes are
+  nonzero, starting at wire offset 115 (= `nak+129`); full hex is in
+  `live/evidence/w8-fixed-attack-sender.log`. A second run gave 205
+  nonzero bytes, i.e. the count varies with the process's stack content.
+- Seventeen unaligned eight-byte windows in the leaked token are
+  user-space stack/libc-shaped values, e.g. wire offset 114 =
+  `0x7fffed9a7300`, offset 122 = `0x7785206ac295`, offset 242 =
+  `0x7fffed9a7330`, offset 378 = `0x778520a04627`. Because the token
+  starts at `nak+14`, those windows correspond to the pointer-shaped frame
+  words classified in W5's safe baseline (e.g. `nak+128`, `nak+136`,
+  `nak+256`, `nak+392`). These are stale stack words, not proven live
+  pointers; the address bytes changed between runs, so ASLR is not
+  defeated. No canary or return address is within wire reach (W3 addendum).
+
+W6's "fixed leaks no stack data" is therefore qualified by token size:
+it holds at 96, not at 600. Conditions: registered peer, unencrypted
+headers, no user/password auth, loopback lab process, and the one-line
+control rather than a full fixed-tree build. Ceiling unchanged as to
+control: no consumed pointer, marker, control-flow takeover or rung 5.
+The newly observed effect is stack-data disclosure from the patched
+decoder's surviving encoder read; independent verdict on #3909 is still
+owed.
