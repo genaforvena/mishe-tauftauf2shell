@@ -141,3 +141,27 @@ not a pointer consumed by `ms_kill`. `layout-probe.sh` prints
 output: `live/probe-layout-final.out`, `live/layout-final-stdout.log`.
 Ceiling unchanged: rung 4 PARTIAL — live chosen bytes at a known global
 offset in a real plain process — no pointer target, no command, no R5.
+
+## Post-`buf` adjacency and consumer ceiling (2026-11-25 15:4xZ)
+
+The live plain-build probe was repeated with a read to `buf+0x1e0..0x25f`
+after the same authenticated S2S KILL (reason 490).
+`buf+0x200..0x232` holds 50 chosen `A`s plus the terminating NUL, then the
+mapping contains ordinary ELF data (`01 d6 08 00 00 08 e4 09 ac 01 ...`
+at `buf+0x234`; no chosen bytes beyond the NUL). Runtime
+`/proc/$PID/maps` shows the RW segment `...7c000-...7d000` with file offset
+`0x4000`, i.e. `m_kill.so` vaddr `0x5000..0x6000`; `buf` is vaddr `0x5220`
+(`objdump -t`: `.bss`, size `0x200`) and the `.bss` ends at `0x5420`.
+No writable module object follows `buf` in that ELF: the nearest globals
+are `h_can_kill` at `0x5200` (before `buf`) and `kill_hlist` at `0x51c0`
+in `.data` (before `buf`). Disassembly of `ms_kill` shows the only uses of
+`buf` are `lea` at `0x1eeb` (clear) and `0x1f27`/`0x1f50` (sprintf destination
+and `exit_client` comment argument); `ms_kill` never dereferences memory
+past the 512-byte object. `exit_client` passes the comment to format
+strings (`ircd/client.c:1379`, `:1426`, :1655, :1662, :1673, :1679),
+all byte-consumers of the NUL-terminated string. Structural ceiling holds:
+rung 4 PARTIAL — chosen length and bytes at a known global offset — with
+no pointer target reachable through this overflow; no command, no R5.
+This is a bounded live check on the verbatim plain build, not a claim that
+all adjacent ELF layouts are safe in every build. No tracked evidence file
+was overwritten by this probe.
