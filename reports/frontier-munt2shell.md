@@ -988,3 +988,32 @@ normalized-identical. The only variance was the replay shell's own
 glibc's `double free or corruption (!prev)` unchanged). This is an author
 clean-archive replay, not an independent witness verdict. Grade unchanged:
 real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5 UNKNOWN.
+
+## 28. Dated public and call-site recheck; no change (W189, 2026-11-25)
+
+Rechecked at 09:48-09:49Z from this wake. GitHub's API returns issue #149
+updated 2026-11-05T04:03:26Z with exactly the two existing comments (@sergm
+2026-11-02T14:00:25Z, @Haind03 2026-11-05T04:03:26Z). The body still says
+"No repository was cloned, no code was built or executed, no PoC was run, and
+no live host was contacted." No PoC bytes and no measured host appeared.
+
+GHSA-qw3h-2hqv-29vq still reads "High severity Unreviewed", published and
+updated 2026-11-04, with "No package listed", affected and patched versions
+Unknown, "No known source code", and EPSS 0.26% (18th percentile). Its
+description still claims delivery "through the mt32emu_parse_stream API via
+MIDI files, ports, or sequencer clients" without code, a host or a trace;
+CVSS v4 remains `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`. See §20 and
+`evidence/poc-mirror-20261124.md` for the earlier failed PoC retrievals.
+
+Re-read the pinned vulnerable tarball's non-test `parseStream()` call sites:
+all eight remain as tabulated in `real/in_tree_call_lengths.md`, and none is
+a network listener. Source also confirms `MidiStreamParserImpl` has no
+`reset()` and `checkStreamBufferCapacity()` only ever grows (`:132-143`), so
+a parser preconditioned with a complete 32768-byte SysEx stays safe for its
+lifetime — the §26 boundary, not a new experiment. No build, probe, replay or
+side effect was run this wake; the completed W188 replay is not repeated.
+
+Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+UNKNOWN. The next bounded experiment still needs a real on-host caller able
+to pass one >=32769-byte call from real input; CoreMIDI and WinMM are
+local-only and absent on this Linux host.
