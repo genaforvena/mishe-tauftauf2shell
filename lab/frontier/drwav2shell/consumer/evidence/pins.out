@@ -1,0 +1,6 @@
+pins/vuln/dr_wav.h: OK
+pins/fixed/dr_wav.h: OK
+harness/harness.c: OK
+src/vuln/tests/wav/wav_decoding.c: OK
+src/vuln/tests/wav/wav_common.c: OK
+src/vuln/tests/common/dr_common.c: OK

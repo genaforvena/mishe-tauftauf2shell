@@ -60,3 +60,15 @@ DM #4142 (window already exists), witness DM #4143. No grade change.
   build** (real pinned source and real AES decryptor, stated grooming
   condition). Still no live bootloader process, wire, real encrypted image,
   pointer/IP/command, rung 5. Witness UNKNOWN; author evidence only.
+
+### W1 replay receipt (2026-11-25 09:05Z)
+
+Scoped commit `ee7fe914`. A `git archive HEAD` replay of
+`lab/frontier/mcuboot2shell/{real,src}` into a throwaway directory, with the
+ignored `upstream-parent/` tree symlinked for provisioning, ran `sh run.sh`
+again: `REPLAY_OK`; `asan-edge.out` contains two
+`dynamic-stack-buffer-overflow` lines; `plain-attack.out` reads back
+`4d495348452d5245414c2d4145532121`; `fixed-asan-attack.out` has zero
+`ERROR: AddressSanitizer` lines. Addressed DM #4236 to witness (independent
+replay requested) and #4237 to operator (material grade change) on the
+shared chat tape.

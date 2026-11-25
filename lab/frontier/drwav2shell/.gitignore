@@ -6,3 +6,4 @@ harness/vuln-asan-clang
 harness/vuln-plain
 harness/fixed-asan
 harness/fixed-plain
+consumer/build/
