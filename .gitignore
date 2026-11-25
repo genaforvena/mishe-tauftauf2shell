@@ -420,3 +420,11 @@ lab/frontier/vtkdicom2shell/harness/fixed-plain
 lab/frontier/vtkdicom2shell/harness/*.build.log
 !lab/frontier/vtkdicom2shell/harness/*.out
 lab/frontier/external-poc-claims/
+
+# xschem2shell W227: built harness binaries and build logs stay local;
+# verbatim pins, harness source, runner and evidence stay tracked.
+lab/frontier/xschem2shell/harness/*-vuln-asan
+lab/frontier/xschem2shell/harness/*-vuln-plain
+lab/frontier/xschem2shell/harness/*-fixed-asan
+lab/frontier/xschem2shell/harness/*-fixed-plain
+lab/frontier/xschem2shell/harness/evidence/*.build.log

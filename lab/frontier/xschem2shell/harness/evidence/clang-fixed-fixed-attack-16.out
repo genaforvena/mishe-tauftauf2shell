@@ -1,0 +1,2 @@
+rawtovcd: bad variable record, index out of range: 16 HHHHHHHHHHHHHHHHHHHH
+mode=attack idx=16 res=1 nvars=2 names=0x502000000010
