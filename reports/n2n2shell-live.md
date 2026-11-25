@@ -709,3 +709,47 @@ the replay path, not the witness verdict: #4445 and #4173 remain without
 a verdict and #3909 remains UNKNOWN. Ceiling unchanged: rungs 1-4, no
 marker, canary/RIP hit, control-flow takeover, command execution or r5.
 
+## W18: second in-tree caller (edge) survey (2026-11-25 18:4xZ)
+
+All earlier live work used the supernode caller at `sn_utils.c:2322`.
+The pinned tree has exactly one other caller of the vulnerable decoder:
+`edge_utils.c:2622`, in the edge's `process_udp`. This is a different
+threat model (a NAK received by an edge from a supernode, gated by
+`eee->sn_wait` and cookie match), but it is a second live stack frame
+that could in principle expose a poisonable callback. Surveyed from the
+pinned tarball only; no edge process was started and no packet was sent.
+
+Clean build of the pinned vulnerable tarball with
+`CC=gcc CFLAGS='-g -O1 -fno-omit-frame-pointer'`, `make -j4 edge`,
+then `objdump -d` and `addr2line` on that binary. Observed in the edge
+`process_udp` frame:
+
+- `nak` is at `-0x1180(%rbp)`; the canary is loaded from `%fs:0x28` and
+  stored at `-0x38(%rbp)` — 0x1148 = 4424 bytes above `nak`. With the
+  edge's `N2N_PKT_BUF_SIZE` of 2048 the decoder write ends at about
+  `nak+2024`, 2400 bytes short of the canary. Same unreachable-RIP
+  result as the three surveyed supernode builds.
+- Unlike the supernode build, the edge `process_udp` **does** contain five
+  indirect calls: `c132`, `c17e`, `c238`, `c267`, `e03f`. `addr2line`
+  maps them to `edge_utils.c:1730`, `:1743`, `:1816`, `:1824` and `:2607`.
+  The first four are `handle_PACKET` peer/transform callbacks whose
+  targets are loaded from the `eee` heap object (e.g. `call *0x198(%rbx)`),
+  not from a stack slot. The fifth is `eee->cb.sn_registration_updated`
+  in the `REGISTER_SUPER_ACK` case (`:2606-2607`); the NAK case begins at
+  `:2613`. There is one `notrack jmp *` bounded switch-table jump.
+- In the NAK case after `decode_REGISTER_SUPER_NAK`, the only stack reads
+  are `nak` fields (cookie at `nak+4`, srcMac at `nak+6`) plus `-0x1220`
+  and `-0x1260`, which are *below* `nak` and therefore outside the
+  upward write. No indirect call occurs on that path; no overwritten
+  spill slot is consumed.
+
+Replayable as `sh lab/frontier/n2n2shell/live/w18_edge_caller_survey.sh`
+with cwd `/` and `REPLAY_LOGDIR` outside the repo. Author run at 18:4xZ:
+`RESULT 10 PASS / 0 FAIL`, rc 0; raw disassembly and line map in
+`/tmp/n2n-w18-edge-out`. This is a build-and-disassembly survey, not a
+live edge reproduction and not witness acceptance. Only this gcc -O1
+edge build was surveyed; other edge builds and the simulated-supernode
+wire path stay UNKNOWN. Ceiling unchanged: rungs 1-4 on the live
+supernode, no marker execution, canary/RIP hit, control-flow takeover,
+command execution or r5.
+
