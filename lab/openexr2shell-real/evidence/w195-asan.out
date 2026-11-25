@@ -1,0 +1,74 @@
+ file cases/p195-chosen-deref.exr =================================================================
+==PID==ERROR: AddressSanitizer: heap-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+READ of size 3072 at ADDR thread T0
+    #0 ADDR in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 ADDR in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 ADDR in sort2_4ByteChannels_tiled LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:472
+    #3 ADDR in exr_undo_zstd_v1 LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1373
+    #4 ADDR in internal_exr_undo_zstd LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 ADDR in decompress_data LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 ADDR in exr_uncompress_chunk LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 ADDR in exr_decoding_run LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 ADDR in readCoreScanlinePart LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 ADDR in checkCoreFile LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 ADDR in runCoreChecks LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1768
+    #11 ADDR in Imf_3_5::checkOpenEXRFile(char const*, bool, bool, bool) LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1867
+    #12 ADDR in exrCheck(char const*, bool, bool, bool, bool) LAB/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:98
+    #13 ADDR in main LAB/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 ADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 ADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 ADDR in _start (LAB/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: ID)
+
+ADDR is located 0 bytes after 3072-byte region [ADDR,ADDR)
+allocated by thread T0 here:
+    #0 ADDR in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 ADDR in internal_exr_alloc LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/memory.c:39
+    #2 ADDR in internal_decode_alloc_buffer LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/coding.c:256
+    #3 ADDR in exr_undo_zstd_v1 LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1335
+    #4 ADDR in internal_exr_undo_zstd LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:1416
+    #5 ADDR in decompress_data LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:706
+    #6 ADDR in exr_uncompress_chunk LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/compression.c:786
+    #7 ADDR in exr_decoding_run LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/decoding.c:602
+    #8 ADDR in readCoreScanlinePart LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1467
+    #9 ADDR in checkCoreFile LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1709
+    #10 ADDR in runCoreChecks LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1768
+    #11 ADDR in Imf_3_5::checkOpenEXRFile(char const*, bool, bool, bool) LAB/src/openexr-3.5.2/src/lib/OpenEXRUtil/ImfCheckFile.cpp:1867
+    #12 ADDR in exrCheck(char const*, bool, bool, bool, bool) LAB/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:98
+    #13 ADDR in main LAB/src/openexr-3.5.2/src/bin/exrcheck/main.cpp:166
+    #14 ADDR in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 ADDR in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 ADDR in _start (LAB/build-vuln-asan/bin/exrcheck+0x47e64) (BuildId: ID)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  ADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  ADDR: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>ADDR:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  ADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  ADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  ADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  ADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  ADDR: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==PID==ABORTING

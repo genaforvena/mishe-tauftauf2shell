@@ -1872,3 +1872,51 @@ With randomization disabled the dump's absolute pointers happen to land on
 valid objects, so the W193 crash is an ASLR-on layout artifact of a stale
 pointer, not a reproducible chosen-pointer dereference. No chosen code pointer
 or IP was observed in this control either.
+
+## W195: chosen pointer pinned to the dereferenced slot (2026-11-25)
+
+Prediction from W194: the consumer's SIGSEGV dereferenced a stale pointer at
+the slot the loop actually reads. If eight file-chosen bytes are placed in
+THAT slot instead of the neighbouring array W193 patched, the faulting
+register should equal the chosen value in the same run. **Positive for pinned
+chosen-value attribution; rung 5 still UNKNOWN.**
+
+Method: at the pinned inverse-sort sink in the UNMODIFIED 3.5.2 `exrcheck -c`
+reading `cases/p193-e0-4141.exr`, dump the 1536-byte pre-COPY2 source at
+`inPtr`. Direct inspection at `attributes.c:305` shows the loop reads
+`list->entries[0]`, whose address is `outPtr+4176` (`SLOT0_DELTA=4176`), not
+the secondary array at `outPtr+4320` that W193/W194's python probe read via
+the guessed `list+16` offset. Since COPY2 starts at `outPtr+3072`, the source
+dump offset for the dereferenced slot is `4176-3072=1104`. Set those eight
+bytes to `0x4141414141414141`, inverse-shuffle for 2-byte elements
+(`seg1 = dump[0::2] + dump[1::2]`) and regenerate with
+`cases/make_poc_mixed_full.py work-w192/baseline.exr` at `N=768 BYTE=0x5a
+U=3072`; frame 459, slot delta unchanged in one pass. The earlier
+`cases/baseline.exr` fixture has a different header (`off0=356` vs 374) and
+produces `bad` — the W193-family PoCs use `work-w192/baseline.exr`.
+
+Result under gdb with `set disable-randomization off` (ASLR ON in debuggee):
+`SLOT0_DELTA=4176`, `SLOT0=0x4141414141414141 I=0 NUM=11`, and after the
+inferior receives SIGSEGV at `exr_attr_list_destroy()` `attributes.c:305`,
+`FAULT_R13=0x4141414141414141` at `mov 0x14(%r13),%eax`. The chosen word is
+the register the consumer dereferences, pinned in one run. Three raw probes
+gave the same delta, slot and R13; two full replays produced byte-identical
+evidence. Plain rc 139; valid control rc 0 `OK`; fixed 3.5.3 rc 1 `bad`;
+ASan `READ of size 3072` at pinned `internal_zstd.c:472`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w195-chosen-deref.sh` -> `RESULT PASS` rc 0. Evidence hashes:
+deref `4cf037d2ac146de68632b086029a8fca5a067ef29f7fd109accb342a4e53a87d`,
+plain `8a1ab80ba09eac2065a1761c1852ce84e745ebcebd3c544d133bac34795cdbe6`,
+valid `043d72d916be8948cd85f6937306e63355be57f21ad76fe7bc3c950b16286835`,
+fixed `b1c19c3f22b08029cb9e00326865eb8b2c98f6326ee1638e6602d0cca8424a49`,
+ASan `3a10b1d3436b744d6018a8259ae685c8011f55a3c4ee4d994fa107fd55d114fd`.
+
+Disposition: rung-4 mechanics strengthened from "chosen bytes in a live
+pointer field" (W193) to "the faulting dereference's pointer is the chosen
+value, pinned in one run". The chosen value `0x4141...` is unmapped; no
+valid chosen pointer, chosen data read, chosen IP, control-flow diversion,
+malloc from a poisoned entry, wire, command, marker or witness verdict was
+observed. No rung-5 change. Would change my mind: a witness verdict, a chosen
+mapped pointer whose dereference returns file-chosen data, a chosen IP, or a
+wire-fed affected process.
