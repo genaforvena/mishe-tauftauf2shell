@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -17,7 +17,9 @@ no-size getter and field layout in the shipped 3.21e release; W19 finds that
 the earliest affected shipped release 3.20b instead places two `link_list_t`
 pointers in the 64-byte reach, measured only at source-bound harness scope;
 W20 traces those pointers through pinned 3.20b source to a teardown free
-loop, still source-bound.
+loop, still source-bound; W21 builds the **shipped 3.20b release**, sends the
+64-byte TERM over loopback SSH, observes the chosen bytes in
+`savedlines.first/.last` and a gdb-confirmed SIGSEGV at `listFreeNodes`.
 None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
@@ -730,3 +732,36 @@ blocked on local provisioning of `zip`, autoconf-2.13 and UNIX libarchive/NSPR
 headers before any real `answer()` call. This is a tooling negative, not a
 claim about the vulnerability; the witness-established rungs above are
 unchanged.
+
+
+## W21 — shipped 3.20b real build, wire TERM, live chosen-pointer free (author)
+
+Source commit `db9c5d6fd37ef74b6e6ca647308d351e656de18d` (its own headers:
+`VERSION "3.20"`, `REVISION 'b'`) was provisioned as a detached worktree of
+the ignored lab clone and built with the existing prefix tooling; build rc 0.
+`run-real320b.sh` patches an instrumentation-only `lprintf` after the verbatim
+no-size copy, then runs two loopback-only SSH pty-req TERM cases on separate
+per-run ports. Result **4 PASS / 0 FAIL**, rc 0, at 07:29:32Z:
+
+- 40-byte control: `REAL_320B_PROBE sizeof=41 l=40 off41=00 cv=00000000
+  first=(nil) last=(nil)`.
+- 64-byte chosen TERM (41 x A, 3 x B, `MISHE-OOTAUFTAUF`, 4 x Z):
+  `off41=42 cv=4853494d first=0x465541544f4f2d45
+  last=0x5a5a5a5a46554154`. The clamp writes index 40, so byte 41 stays `B`;
+  `MISH` lands in `cterm_version`, `E-OO/TAUF` in `savedlines.first` and
+  `TAUF/ZZZZ` in `savedlines.last`.
+- The chosen session reaches `Node 1 destructor begin` and faults. A separate
+  gdb replay places frame #0 at `listFreeNodes` `link_list.c:78` (the
+  `node->flags` read from the chosen `list->first`), frame #1 `listFree`
+  `link_list.c:107`, frame #2 `sbbs_t::~sbbs_t` `main.cpp:3922`, frame #3
+  `node_thread` `main.cpp:4625`.
+
+Evidence: `release-label/term320b/real320b/REPLAY.md`,
+`evidence/run-final.log` (sha256 `462a36a1…639a0546`),
+`server-vuln.log` (`4b2dc43e…a261d11652`), `server-control40.log`
+(`8d575a11…e7072c0c`), `gdb-vuln-final.log` (`d8da2690…7df5f24`). Failed
+expectations, port collisions and an interrupted gdb retry are in
+`evidence/negatives.txt`. This is an author replay, not a witness verdict.
+It is a live chosen-pointer dereference with availability impact in the lab
+build: no chosen instruction pointer, shell, command, ASLR-defeat, fixed-form
+3.20b control or rung 5. The advisory's availability ceiling is unchanged.

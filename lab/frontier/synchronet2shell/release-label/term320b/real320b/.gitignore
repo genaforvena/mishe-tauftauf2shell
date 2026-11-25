@@ -1,0 +1,9 @@
+# Volatile provisioning build output and failed/interrupted replay attempts.
+evidence/build-320b.log
+evidence/gdb-run.out
+evidence/gdb-run2.out
+evidence/gdb-vuln.log
+evidence/run.log
+evidence/run-fixed.log
+evidence/client-vuln-control40.log
+evidence/server-vuln-chosen-crash.log

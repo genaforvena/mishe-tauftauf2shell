@@ -1,0 +1,52 @@
+
+Synchronet Console for Linux-x64  Version 3.20b  Copyright 2025 Rob Swindell
+
+Reading /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/ctrl/sbbs.mesh-home.ini
+Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/ctrl
+!Started as non-root user (id 1000): May fail to bind TCP/UDP ports below 1024
+11/25 07:29:28 term Synchronet Terminal Server Version 3.20b Debug
+11/25 07:29:28 term Compiled HEAD/db9c5d6f Jan 05 2025 00:18 with GCC 13.3.0
+11/25 07:29:28 term sizeof: int=4, long=8, off_t=8, time_t=8
+11/25 07:29:28 term Initializing on Wed Nov 25 07:29:28 2026 with options: 20029a02
+11/25 07:29:28 term Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/ctrl
+11/25 07:29:28 term Verifying/creating data directories
+11/25 07:29:28 term Verifying/creating node directories
+11/25 07:29:28 term SSH Server listening on socket 127.0.0.1 port 23072
+11/25 07:29:28 term Terminal Server constructor using socket 3 (settings=0)
+11/25 07:29:28 term Terminal Server temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/temp/
+11/25 07:29:28 term Terminal Server output thread started
+11/25 07:29:28 term Terminal Server outbuf highwater mark tuned to 536 based on MSS
+11/25 07:29:28 term Node 1 local spy using socket localspy1.sock
+11/25 07:29:28 term Node 2 local spy using socket localspy2.sock
+11/25 07:29:28 term Node 3 local spy using socket localspy3.sock
+11/25 07:29:28 term Node 4 local spy using socket localspy4.sock
+11/25 07:29:28 term Terminal Server thread started for nodes 1 through 4
+11/25 07:29:28 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 23072 from port 60614
+11/25 07:29:28 term 0010 SSH Cryptlib Session: 15686 created
+11/25 07:29:28 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/25 07:29:28 term Node 1 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/ctrl
+11/25 07:29:28 term Node 1 constructor using socket 10 (settings=0)
+11/25 07:29:28 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/320b/node1/temp/
+11/25 07:29:28 term Node 1 passthru listen socket 13 opened
+11/25 07:29:28 term Node 1 passthru socket listening on port 46085
+11/25 07:29:28 term Node 1 passthru connect socket 14 opened
+11/25 07:29:28 term Node 1 input thread started
+11/25 07:29:28 term Node 1 output thread started
+11/25 07:29:28 term Node 1 thread started
+11/25 07:29:28 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/25 07:29:28 term Node 1 07:29a  Wed Nov 25 2026            Node   1
+11/25 07:29:28 term Node 1 SSH  <no name> [127.0.0.1]
+11/25 07:29:28 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 07:29:29 term Node 1 0010 SSH SSH_ANYAUTH allowed with no credential
+11/25 07:29:29 term Node 1 0010 SSH [127.0.0.1] waiting for channel type.
+11/25 07:29:29 term Node 1 0010 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 07:29:29 term Node 1 0010 SSH REAL_320B_PROBE sizeof=41 l=40 off41=00 cv=00000000 first=(nil) last=(nil)
+11/25 07:29:29 term Node 1 auto-detected terminal type: 80x24 AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 07:29:29 term Node 1 input thread terminated (received 4 bytes in 2 blocks)
+11/25 07:29:29 term Node 1 passthru socket disconnected
+11/25 07:29:30 term Node 1 output thread terminated (sent 132 bytes in 1 blocks, 132 average, 0 short)
+11/25 07:29:30 term 0010 SSH Cryptlib Session: 15686 destroyed from line 4080 (0 remain)
+11/25 07:29:30 term Node 1 thread terminated (0 node threads remain, 1 clients served)
+11/25 07:29:30 term Node 1 destructor begin
+11/25 07:29:30 term Node 1 destructor end
+

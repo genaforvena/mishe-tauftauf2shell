@@ -1,0 +1,36 @@
+# W21 negatives and failed hypotheses (kept, not retried into existence)
+
+1. First live run (07:20:34Z, `run.log`): expectation used `off41=00`, but the
+   verbatim 3.20b code clamps `terminal[sizeof(terminal)-1]` = index 40, so
+   byte 41 remains `0x42` ('B'). Observed live:
+   `REAL_320B_PROBE sizeof=41 l=64 off41=42 cv=4853494d first=0x465541544f4f2d45 last=0x5a5a5a5a46554154`.
+   Expectation corrected to the observed byte, not the other way round.
+
+2. Same first run: the 40-byte control was sent to a server that had already
+   crashed at teardown, so no control probe line existed. The control now runs
+   first, in its own server. No claim changed.
+
+3. Server startup after a prior connection on the same port fails with
+   `!ERROR 98 binding SSH Server socket to port 22234: Address already in use`
+   and `Will retry in 15 seconds`. This is TCP TIME_WAIT in the lab, not a
+   vulnerability result. Ports are now derived per run
+   (`23000 + $$ % 1000`, then +1); failed runs are preserved in `run.log` and
+   `run-fixed.log`.
+
+4. First gdb replay (`gdb-vuln.log` first version, 07:21Z) hit the same port
+   collision and yielded no client connection or backtrace. Second gdb replay
+   (07:26Z) hung in `wait` after the client did not crash the process; it was
+   interrupted at the tool deadline and produced no backtrace. The successful
+   backtrace is the 07:25Z run preserved in `gdb-vuln-final.log` (a copy of
+   that run's tee output `gdb-run.out`). The attempted extra `frame 0` pointer
+   print never ran; the chosen pointer value comes from the live probe line.
+
+5. No fixed-form 3.20b control was built this wake. The upstream fix needs the
+   pinned `get_binary_crypt_attribute`/`free_crypt_attrstr` helpers from
+   `ssl.c`; W16's fixed control was on the dev-parent tree. The 40-byte TERM
+   control is the only 3.20b control here.
+
+6. No command, no shell, no chosen instruction pointer, no ASLR-defeat, and no
+   witness replay. The observed dereference is a read of `node->flags` from
+   the chosen `list->first` value; it faults. That is availability impact in
+   the lab build, not rung 5.
