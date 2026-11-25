@@ -5,9 +5,10 @@
 The official KiCad AppImage mirror was used only to provision a local binary:
 `https://mirrors.mit.edu/kicad/appimage/stable/kicad-10.0.6-x86_64-lite.AppImage.tar`
 (HTTP 200, `content-length: 302243840`, `last-modified: 2026-08-28T20:54:51Z`).
-It is kept uncommitted under `lab/frontier/kicad2shell/provisioned/`:
+The extracted AppImage is kept uncommitted under
+`lab/frontier/kicad2shell/provisioned/`; the redundant 302243840-byte tar was
+removed after its hash and the extracted hash were verified:
 
-- tar sha256 `8c789e36644856cff30a66801692881582b9ca7c7475699494e614ce1bcb1f9c` (302243840 bytes)
 - extracted AppImage sha256 `806e949cb357f9f0a05c3298c36eecb2b06d79c0a36e12c99f75aad9c89f0792`
 - `kicad-cli version` through the runtime prints `10.0.6` — the first stable
   release without the `if( ind < 1 ) continue;` guard (`FIXED-RELEASE.md`).
