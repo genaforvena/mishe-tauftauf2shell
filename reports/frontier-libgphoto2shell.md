@@ -544,8 +544,12 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   vusb patches, builds the full clang 18 library, compiles the probe, derives
   the marker and sink addresses from the safe count-100 run, then checks the
   attack, the no-`RET` fault, the upstream-fixed camlib and the fix reversal.
-  Author run: 12 PASS / 0 FAIL; exact addresses and all raw output in
-  `lab/frontier/libgphoto2shell/evidence/w192-control-flow-replay.out`. This
-  makes the replay self-contained but changes no grade: still author-side
-  rung 4, unwitnessed, lab-assisted, synthetic vusb, no wire or command, rung
-  5 UNKNOWN.
+  Author in-tree run and a second run from a clean `git archive f1459319`
+  (tarball supplied externally, 4/4 pins OK) both gave 12 PASS / 0 FAIL;
+  exact addresses and all raw output in
+  `lab/frontier/libgphoto2shell/evidence/w192-control-flow-replay.out` and
+  `evidence/w192-clean-archive.out`. The compiled camlib hash differs between
+  the two builds because the debug build embeds its source path, not because
+  of a source change. This makes the replay self-contained but changes no
+  grade: still author-side rung 4, unwitnessed, lab-assisted, synthetic vusb,
+  no wire or command, rung 5 UNKNOWN.

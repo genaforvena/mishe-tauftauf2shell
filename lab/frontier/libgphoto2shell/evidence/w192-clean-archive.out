@@ -1,0 +1,26 @@
+== pins ==
+lab/frontier/libgphoto2shell/pins/fix-6a3393d.patch: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.c.fixed: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.c.vuln: OK
+lab/frontier/libgphoto2shell/pins/jl2005c.h.vuln: OK
+== clean source and lab patches ==
+vulnerable jl2005c.c sha256 0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185 OK
+== full clang 18 build, no stack canary ==
+jl2005c.so sha256 345a6083d363bbd434106f49c5ae9ddd053acbc4c58c843a8f7a69f7cda43f08
+== probe ==
+derived MARKER=0x401520 SINK=0x4040c0 TOP=0x4040f0
+== fixed control: upstream 6a3393d, camlib rebuilt in place ==
+== fix reversed, identical attack again ==
+PASS COUNT100 rc=0
+PASS COUNT100 no marker
+PASS ATTACK marker executed
+PASS ATTACK rc=42
+PASS NORET device-chosen write observed
+PASS NORET no marker
+PASS NORET rc=139
+PASS FIXED no marker
+PASS FIXED rc=0
+PASS FIXED no device-chosen write
+PASS RESTORED marker executed
+PASS RESTORED rc=42
+RESULT: 12 PASS / 0 FAIL
