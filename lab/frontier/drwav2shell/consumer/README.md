@@ -87,3 +87,17 @@ when the corrupted global is used. Raw output in `evidence/nopie-*.out`.
 This is rung 4 at a fixed application address in a non-PIE build, not a
 control-flow hijack or rung 5; no witness verdict.
 
+## File-chosen control-flow diversion (W4, 2026-11-25 12:53Z)
+
+`run-marker.sh` (14 PASS / 0 FAIL) uses `make_marker_wav.py` to set six cue
+fields that, through the same desync, overwrite `libsndfile__sf_close`
+(0x41e118), `libsndfile__sf_readf_short` (0x41e120) and
+`libsndfile__sf_readf_int` (0x41e128) in the -no-pie consumer. The file names
+a lab-only benign marker object built at fixed text segment 0x50000000 and
+loaded with `LD_PRELOAD`; the vulnerable consumer calls it from
+`libsndfile_uninit` and the marker writes an observed file, confirmed by gdb
+backtrace. Fixed 0.14.6 and safe-loop controls leave no marker file. Raw
+output in `evidence/marker-*.out`. This is rung-4 mechanics — the marker is
+lab-injected, with no wire/request input, command, shell or r5 — and remains
+author replay with no witness verdict.
+

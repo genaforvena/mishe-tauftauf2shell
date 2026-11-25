@@ -1,0 +1,21 @@
+Function "drwav_marker" not defined.
+Breakpoint 1 (drwav_marker) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, 0x0000000050001161 in drwav_marker () from /tmp/drwav-marker/marker.so
+#0  0x0000000050001161 in drwav_marker () from /tmp/drwav-marker/marker.so
+#1  0x0000000000415f1b in libsndfile_uninit (pSndFile=0x7fffffffdb80) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/marker-vuln/tests/wav/wav_common.c:178
+#2  0x000000000041714f in decode_test_file (pFilePath=0x7fffffffdf90 "tests/testvectors/wav/tests/attack.wav") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/marker-vuln/tests/wav/wav_decoding.c:329
+#3  0x0000000000417308 in decode_test_directory (pDirectoryPath=0x41900e "tests/testvectors/wav/tests") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/marker-vuln/tests/wav/wav_decoding.c:374
+=======================================================================
+DECODE TESTING
+=======================================================================
+tests/testvectors/wav/tests               RESULT  
+  attack.wav                              Decoded frame counts differ: pcmFrameCount=1, libsndfile=0, dr_wav=1
+
+=======================================================================
+DECODE PROFILING (LOWER IS BETTER)
+=======================================================================
+
+[Inferior 1 (process 4111090) exited normally]

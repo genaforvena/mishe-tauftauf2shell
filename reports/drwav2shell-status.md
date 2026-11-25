@@ -114,3 +114,23 @@ makes the low-half pointer land on a useful object without harness grooming.
   verdict; the earlier ASan-region and size-class negatives are preserved
   and scoped to their builds.
 
+
+## W4 — file-chosen control-flow divergence (2026-11-25 12:53Z)
+
+- New durable lane `lab/frontier/drwav2shell/consumer/run-marker.sh`
+  (14 PASS / 0 FAIL) with attacker-side `make_marker_wav.py` and committed
+  `marker/marker.c`. The six consecutive cue-desync u32 writes cover
+  `libsndfile__sf_close` (0x41e118), `libsndfile__sf_readf_short` (0x41e120)
+  and `libsndfile__sf_readf_int` (0x41e128) in the -no-pie consumer.
+- The crafted file names a lab-only marker object built at fixed text segment
+  0x50000000 and injected with `LD_PRELOAD`. gdb backtraces the chosen call:
+  marker ← `libsndfile_uninit` (`wav_common.c:178`) ← `decode_test_file`
+  (`wav_decoding.c:329`); the marker writes an observed file. Fixed 0.14.6 and
+  safe `smpl` loop count on the same file produce no marker side effect.
+- Grade: rung 4 now includes a measured file-chosen control-flow diversion
+  with a benign marker in a real consumer call path. Still rung-4 mechanics:
+  no wire/request input, command, shell, live service or r5. A self-authored
+  loopback file-upload wrapper is a synthetic consumer and NOT an r5 lane;
+  no such wrapper was built or claimed. W4 is author replay, no witness
+  verdict; W1/W2/W3 verdicts still outstanding at 12:50Z.
+

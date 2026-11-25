@@ -174,5 +174,30 @@ function-pointer write is an observation at a breakpoint, not a control-flow
 hijack claim. All three consumer lanes remain author replay with no witness
 verdict.
 
+## File-chosen control-flow divergence (W4, 2026-11-25 12:53Z)
+
+`lab/frontier/drwav2shell/consumer/run-marker.sh` extends the non-PIE lane with
+attacker-side WAV fields only (`consumer/make_marker_wav.py`, built on the
+committed `make_wav.build()`). The cue desync writes six consecutive u32s at
+`0x41e118..0x41e130`, taking over `libsndfile__sf_close`,
+`libsndfile__sf_readf_short` and `libsndfile__sf_readf_int`. The file names a
+lab-only benign marker object linked at a fixed text segment (`0x50000000`),
+loaded with `LD_PRELOAD`; no consumer source or pinned header is patched.
+`sh consumer/run-marker.sh` → 14 PASS / 0 FAIL: the vulnerable build reaches
+`libsndfile_uninit()` (`wav_common.c:178`), calls the file-chosen address and
+the marker writes an observed file; gdb backtraces the call site. The fixed
+0.14.6 header and a safe `smpl` loop count produce no marker file on the same
+crafted bytes. Raw output in `consumer/evidence/marker-*.out`.
+
+This closes W3's "breakpoint only" gap: file bytes now cause a measured
+control-flow divergence with a benign side effect in a real application-owned
+call path. It remains rung-4 mechanics. The marker library is injected by the
+lab, and no wire/request input, shell, command, live service or rung 5 is
+observed. A self-authored loopback upload wrapper would be a synthetic
+consumer and is therefore not a legitimate r5 lane under this plant's
+evidence ladder; a real network-facing consumer of the metadata API would be
+required. W4 is author replay with no witness verdict.
+
+
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
