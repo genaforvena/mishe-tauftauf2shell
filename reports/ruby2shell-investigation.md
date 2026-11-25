@@ -1564,6 +1564,64 @@ Rack parser performs no frees during parse, and GC frees primer strings only
 after the attack's upcase window. No cross-request plant transfer is measured.
 Stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 
+## Metadata-repair persistence attempt plus wire-oracle survey — two bounded NEGATIVEs (2026-11-25, direct-session push)
+
+Owner asked again for full rung-5 (wire-only, unmodified app, no oracles,
+second distinct command). Two named leads were executed; both are bounded
+negatives. No grade or label changes.
+
+**A. Restoring T's malloc header does not restore persistence.** The abort
+signature was isolated first: every affected run ends with
+`F <heap_base+0x1980> 2015` in the mtrace trace immediately after
+`corrupted size vs. prev_size` in the server log
+(`lab/build/evidence/rung5-http-survive-1.trace:1805655`,
+`rung5-http-repair-base-3.server.log`). The harness forges T's malloc header
+from `$ov[1056,16]`, replacing T's measured size field `0x405` with `0x3f1`;
+the new instrumentation logs `T-hdr-prev=0x0 size=0x405` before poisoning.
+A repair path gated on `RUBY2SHELL_R5_REPAIR=1` captures T's original qwords
+while T is live, then restores them and zeroes T's tcache `next` plus the
+forged object's `dfree`, using `/proc/self/mem` `pread`/`pwrite` (Fiddle is
+absent from the pinned plain build). `ruby2shell-rung5-http.sh survive` issues
+a first POST with marker1, `GET /health`, and a second POST with a distinct
+marker2; it requires one unchanged PID, two `rce=OBSERVED` responses, two
+markers and no abort line. Observed (`survive-1`): HTTP 200 and `rce=OBSERVED`
+with marker1, `repair=T-header-restored dfree-cleared` in the server log, then
+both follow-up requests `HTTP 000`, the process aborted with
+`corrupted size vs. prev_size`, and marker2 absent. Header restoration is
+therefore necessary but not sufficient — the fatal free is a boot-time
+0x2010-class chunk at heap offset 0x1980, downstream of the poisoned state,
+not T itself. A gdb diagnosis is preserved as a tooling negative: Ruby's
+`IO.for_fd` rejects the fd gdb leaves open ("The given fd is not accessible
+because RubyVM reserves it"); with `ptrace_scope=1` gdb must launch the
+inferior, whose fd-2 mtrace stream then overwhelms the captured log. No
+second command was executed; persistence remains NOT ACHIEVED at harness
+scope.
+
+**B. No wire-only glibc-heap or libc-base oracle exists on the default
+stacks.** A read-only survey of the pinned Sinatra 4.2.2 / Rack 3.2.8-3.2.9 /
+WEBrick 1.9.2 / Puma 8.1.2 / Rails 8.1.4.1 stacks checked the remaining
+default surfaces: `Object#to_s`/`inspect` pointer rendering
+(`object.c:727-736`, reachable only on the already-measured Sinatra dev 500
+page), `rb_gc_impl_object_id` monotonic-counter semantics
+(`gc/default/default.c:1586-1615`), `IO#inspect` (`io.c:3058-3083`),
+IPSocket/Tempfile inspect, Rack `ShowExceptions` env and param rendering,
+Rails `DebugView` filtered env, `Rack::MethodOverride`'s static rescue, and
+Puma's static malformed-request responses. The only address class any default
+surface emits is Ruby GC-anon `VALUE` pointers; no glibc `[heap]` chunk
+address, libc/Ruby code base or stack address is exposed. The labelled gap
+stays closed: the harness needs mtrace for glibc-heap addresses and
+`/proc/self/maps` for libc base, with no wire-only substitute on an unmodified
+app. Veria's advisory was re-fetched at the dated 25 Nov trigger:
+`dateModified` is still `2026-11-21T03:52Z` and the PoC section still promises
+publication "on 25 November 2026, or later"; no external mechanics were
+adopted.
+
+The harness-condition matrix was re-verified after instrumentation: `attack`
+PASS (HTTP 200, `rce=OBSERVED`, unique marker, one target pop), `control`
+PASS (safe `0xDF` input: `rce=ABSENT`, no marker/pop) and `fixed` PASS
+(identical malicious `_method` on plain 3.4.13: `rce=ABSENT`, no marker/pop).
+Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class

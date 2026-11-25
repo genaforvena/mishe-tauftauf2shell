@@ -218,6 +218,21 @@ default `min=0/max=5` pool did share one thread for sequential requests, a
 configuration property that leaves the no-parse-free and post-upcase-GC
 blockers intact. Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
+The 2026-11-25 direct-session push records two more bounded negatives for
+Ruby2Shell. Restoring the forged T-chunk malloc header via
+`/proc/self/mem` (`RUBY2SHELL_R5_REPAIR=1` in
+`lab/repro/ruby2shell-rung5-http.ru`) did **not** restore process
+survival: the new `ruby2shell-rung5-http.sh survive` mode got a first
+`rce=OBSERVED` plus marker, but `GET /health` and a second distinct-marker
+POST both returned `HTTP 000` and the process aborted on a boot-time
+0x2010-class chunk at heap offset 0x1980. A systematic survey of remaining
+default Sinatra/Rack/Puma/Rails surfaces found no wire-only glibc-heap or
+libc/code-base disclosure — only Ruby GC-anon `VALUE` pointers on the
+already-measured Sinatra dev 500 page — so the harness oracles still have no
+wire substitute on an unmodified app. The harness matrix re-verified (attack
+marker + pop, safe-input and fixed 3.4.13 controls clean). Stock/oracle-free/
+persistent R5 stays NOT ACHIEVED.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed
