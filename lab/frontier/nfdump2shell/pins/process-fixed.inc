@@ -1,0 +1,190 @@
+static inline EXgenericFlow_t *ScanExtensions(recordHeaderV3_t *recordHeader, int *hasIpReceived) {
+    EXgenericFlow_t *genericFlow = NULL;
+    *hasIpReceived = 0;
+    elementHeader_t *elementHeader = (elementHeader_t *)((void *)recordHeader + sizeof(recordHeaderV3_t));
+    for (int i = 0; i < recordHeader->numElements; i++) {
+        dbg_printf("Next extension: %u, size: %u\n", elementHeader->type, elementHeader->length);
+        switch (elementHeader->type) {
+            case EXgenericFlowID:
+                if (genericFlow == NULL) genericFlow = (EXgenericFlow_t *)((void *)elementHeader + sizeof(elementHeader_t));
+                break;
+            case EXipReceivedV4ID:
+            case EXipReceivedV6ID:
+                *hasIpReceived = 1;
+                break;
+        }
+        elementHeader = (elementHeader_t *)((void *)elementHeader + elementHeader->length);
+    }
+    return genericFlow;
+
+}  // End of ScanExtensions
+
+void Process_nfd(void *in_buff, ssize_t in_buff_cnt, FlowSource_t *fs) {
+    if (in_buff_cnt < (ssize_t)sizeof(nfd_header_t)) {
+        LogError("Process_nfd: Too little data for nfd header: '%lli'", (long long)in_buff_cnt);
+        return;
+    }
+
+    // map pacpd data structure to input buffer
+    nfd_header_t *pcapd_header = (nfd_header_t *)in_buff;
+    if (ntohs(pcapd_header->version) != VERSION_NFDUMP || ntohs(pcapd_header->length) != (uint16_t)in_buff_cnt) {
+        LogError("Process_nfd: invalid nfd header version or length");
+        fs->bad_packets++;
+        return;
+    }
+
+    exporter_entry_t *exporter = getExporter(fs, pcapd_header);
+    if (!exporter) {
+        LogError("Process_nfd: NULL Exporter: Skip pcapd record processing");
+        return;
+    }
+    exporter->packets++;
+
+    // reserve space in output stream for EXipReceivedVx
+    uint32_t receivedSize = 0;
+    if (fs->sa_family == PF_INET6)
+        receivedSize = EXipReceivedV6Size;
+    else
+        receivedSize = EXipReceivedV4Size;
+
+    // this many data to process
+    ssize_t size_left = in_buff_cnt;
+
+    // time received for this packet
+    uint64_t msecReceived = ((uint64_t)fs->received.tv_sec * 1000LL) + (uint64_t)((uint64_t)fs->received.tv_usec / 1000LL);
+
+    uint16_t count = ntohl(pcapd_header->numRecord);
+    uint32_t numRecords = 0;
+    dbg_printf("Process nfd packet: %" PRIu64 ", size: %zd, recordCnt: %u\n", exporter->packets, in_buff_cnt, count);
+
+    if ((sizeof(nfd_header_t) + sizeof(recordHeaderV3_t)) > size_left) {
+        LogError("Process_nfd: Not enough data.");
+        return;
+    }
+
+    // 1st record
+    recordHeaderV3_t *recordHeaderV3 = in_buff + sizeof(nfd_header_t);
+    size_left -= sizeof(nfd_header_t);
+    do {
+        // output buffer size check
+        dbg_printf("Next record - type: %u, size: %u\n", recordHeaderV3->type, recordHeaderV3->size);
+
+        // bounds-check
+        if (recordHeaderV3->size > size_left) {
+            LogError("Process_nfd: record size error. Size v3header: %u > size left: %zd", recordHeaderV3->size, size_left);
+            LogError("Process_nfd: expected %u records, processd: %u", count, numRecords);
+            return;
+        }
+
+        // verify received record.
+        if (VerifyV3Record(recordHeaderV3) == 0) {
+            LogError("Process_nfd: Corrupt nfd record: expected %u records, processd: %u", count, numRecords);
+            return;
+        }
+
+        if (!IsAvailable(fs->dataBlock, recordHeaderV3->size + receivedSize)) {
+            // flush block - get an empty one
+            fs->dataBlock = WriteBlock(fs->nffile, fs->dataBlock);
+        }
+
+        // copy record
+        void *buffPtr = GetCurrentCursor(fs->dataBlock);
+        memcpy(buffPtr, (void *)recordHeaderV3, recordHeaderV3->size);
+
+        // work on the copied record - all changes must go into the output block
+        recordHeaderV3_t *copiedV3 = buffPtr;
+
+        // the copied record is verified - scan its extensions in a single pass. genericFlow
+        // stays valid, as the IP received extension below is appended at the end of the record
+        int hasIpReceived;
+        EXgenericFlow_t *genericFlow = ScanExtensions(copiedV3, &hasIpReceived);
+
+        // add router IP at the end of copied record
+        if (!hasIpReceived) {
+            // no ip received extension
+            // push IP received
+            if (fs->sa_family == PF_INET6) {
+                PushExtension(copiedV3, EXipReceivedV6, ipReceivedV6);
+                uint64_t *ipv6 = (uint64_t *)fs->ipAddr.bytes;
+                ipReceivedV6->ip[0] = ntohll(ipv6[0]);
+                ipReceivedV6->ip[1] = ntohll(ipv6[1]);
+                dbg_printf("Add IPv6 router IP extension\n");
+            } else {
+                PushExtension(copiedV3, EXipReceivedV4, ipReceivedV4);
+                uint32_t ipv4;
+                memcpy(&ipv4, fs->ipAddr.bytes + 12, 4);
+                ipReceivedV4->ip = ntohl(ipv4);
+                dbg_printf("Add IPv4 router IP extension\n");
+            }
+        } else {
+            dbg_printf("Found existing IP received extension\n");
+        }
+
+        dbg_printf("Record: %u elements, size: %u\n\n", copiedV3->numElements, copiedV3->size);
+
+        if (genericFlow) {
+            genericFlow->msecReceived = msecReceived;
+
+            // Update stats
+            switch (genericFlow->proto) {
+                case IPPROTO_ICMP:
+                    fs->nffile->stat_record->numflows_icmp++;
+                    fs->nffile->stat_record->numpackets_icmp += genericFlow->inPackets;
+                    fs->nffile->stat_record->numbytes_icmp += genericFlow->inBytes;
+                    // fix odd CISCO behaviour for ICMP port/type in src port
+                    if (genericFlow->srcPort != 0) {
+                        uint8_t *s1 = (uint8_t *)&(genericFlow->srcPort);
+                        uint8_t *s2 = (uint8_t *)&(genericFlow->dstPort);
+                        s2[0] = s1[1];
+                        s2[1] = s1[0];
+                        genericFlow->srcPort = 0;
+                    }
+                    break;
+                case IPPROTO_TCP:
+                    fs->nffile->stat_record->numflows_tcp++;
+                    fs->nffile->stat_record->numpackets_tcp += genericFlow->inPackets;
+                    fs->nffile->stat_record->numbytes_tcp += genericFlow->inBytes;
+                    break;
+                case IPPROTO_UDP:
+                    fs->nffile->stat_record->numflows_udp++;
+                    fs->nffile->stat_record->numpackets_udp += genericFlow->inPackets;
+                    fs->nffile->stat_record->numbytes_udp += genericFlow->inBytes;
+                    break;
+                default:
+                    fs->nffile->stat_record->numflows_other++;
+                    fs->nffile->stat_record->numpackets_other += genericFlow->inPackets;
+                    fs->nffile->stat_record->numbytes_other += genericFlow->inBytes;
+            }
+            fs->nffile->stat_record->numflows++;
+            fs->nffile->stat_record->numpackets += genericFlow->inPackets;
+            fs->nffile->stat_record->numbytes += genericFlow->inBytes;
+
+            uint32_t exporterIdent = MetricExporterID(recordHeaderV3);
+            UpdateMetric(fs->nffile->ident, exporterIdent, genericFlow);
+        }
+
+        numRecords++;
+        exporter->flows++;
+
+        if (printRecord) {
+            flow_record_short(stdout, copiedV3);
+        }
+
+        // update size_left
+        size_left -= recordHeaderV3->size;
+
+        // update record block
+        fs->dataBlock->size += copiedV3->size;
+        fs->dataBlock->NumRecords++;
+
+        // advance input buffer to next flow record
+        recordHeaderV3 = (recordHeaderV3_t *)((void *)recordHeaderV3 + recordHeaderV3->size);
+    } while (size_left > sizeof(recordHeaderV3_t));
+
+    if (size_left) LogInfo("Process_nfd(): bytes left in buffer: %zu", size_left);
+
+    if (numRecords != count) LogInfo("Process_nfd(): expected %u records, processd: %u", count, numRecords);
+
+    return;
+
+} /* End of Process_nfd */
