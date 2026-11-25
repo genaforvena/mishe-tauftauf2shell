@@ -14,11 +14,11 @@ Method: unmodified -O0 dcraw_emu (o0/, non-ASan), lab-only
 MALLOC_TOP_PAD_=16777216, W29's red18.input. w31/headers.gdb stops at the
 first OOB store (index >= 68644), then at LibRaw::recycle's image free
 (init_close_utils.cpp:141) and at __libc_free with p == destimage.
-/tmp/w31-watch.gdb is the same setup with hardware watchpoints on
+w31/watch.gdb is the same setup with hardware watchpoints on
 (char*)main_arena.top+8 and (char*)destimage-8 placed after the first OOB
-store; it is a throwaway variant of the committed probe.
+store; it is committed and was smoke-run with the pinned red18.input.
 
-Observed (live tree, gdb -q -batch, byte-exact across three probes):
+Observed (live tree, gdb -q -batch; the low word varies with heap layout):
 
   First OOB store at xtrans_demosaic.cpp:427:
     dest=0x555555a854e0 cs=0x86531 top=0x555555b0ba00
@@ -38,8 +38,8 @@ Observed (live tree, gdb -q -batch, byte-exact across three probes):
   LibRaw::~LibRaw has imgdata.image == 0, inferior exits normally.
 
 Hardware watchpoint on the field (first hit, in the OOB store loop):
-  Old value = 12629505 (0xc0b601)
-  New value = 12582929 (0xc00011)
+  Old value = 12629505 (0xc0b601) in one run, 12629489 (0xc0b5f1) in another
+  New value = 12582929 (0xc00011) in both
   #0 LibRaw::xtrans_interpolate at xtrans_demosaic.cpp:427
   #1 LibRaw::dcraw_process at dcraw_process.cpp:184
   #2 main at dcraw_emu.cpp:598
