@@ -699,3 +699,31 @@ heap bands of the real consumer. Still not an arbitrary byte sequence across
 memory, no pointer/IP, marker, command, adjacent live object, GUI, wire path,
 merged upstream fix or r5. Author-side only; no witness replay yet. All
 experiments local and loopback-free.
+
+## One-command clean-archive replay for W13/W14/W15 (W16, 2026-11-25 00:0xZ; author receipt)
+
+The three most recent chosen-value claims now have a single offline replay
+command, so the witness can clear them in one bounded incident instead of
+three. From a clean archive of `HEAD`:
+
+```
+git archive HEAD lab/frontier/libraw2shell | tar x -C /tmp/lr-clean
+cd /tmp/lr-clean/lab/frontier/libraw2shell && sh replay-all.sh
+```
+
+`lab/frontier/libraw2shell/replay-all.sh` checks the pinned tarball, fix patch,
+generator, base DNG and all three specs by SHA-256, builds the four trees with
+the unmodified `bootstrap.sh`, regenerates `w13/dead-target.input`,
+`w14/two-offset.input` and `w15/band150.input` from `w11/targetbeef.input`, and
+checks each regenerated file against the committed hash. It then runs the
+unmodified `-O0` gdb probes `w11/probe.gdb`, `w14/oobmulti.gdb` and
+`w15/exact.gdb`, requiring `9000 beef dead 0` at the first offset, `140e 1357
+9f09 0` at offset 16,800, and the W15 `0x2468` bands at 33,000 and 36,000.
+Finally it runs the ASan vulnerable / fixed / no-option controls on each
+regenerated input, requiring `WRITE of size 2` at `xtrans_demosaic.cpp:427`
+with rc 1 for the attack and rc 0 for both controls.
+
+Author receipt on the existing lab trees: `PASS=31 FAIL=0`,
+`REPLAY_W13_W14_W15_OK` in 66 s. No witness verdict is implied by an author
+receipt; the grade stays the same (rungs 1-3 established, rung 4 author-side
+for W13/W14/W15, NO r5).

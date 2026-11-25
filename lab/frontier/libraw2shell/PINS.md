@@ -84,6 +84,7 @@
 | `w15/results.txt` | W15 third-offset result, negatives, controls and limits | `73118f309920675c105b2599361de62d6c393bc73937d051dba6a84f1ff7183a` |
 | `w15/three-offset.json` | W15 preserved negative: rows 250..259 -> sample 0 | `1c6486e9566cc4c35db4fea9d2991f728b534a0dea249585a28e3452f11e09a2` |
 | `w15/rows90.json` | W15 preserved negative: rows 90..99 -> sample 0 | `efad91dbe45180b17a7de09b8841ad2e3f2086098947c6b3350a124f1706c051` |
+| `replay-all.sh` | W16 one-command clean-archive replay for W13/W14/W15 | `c53ed205d02c251516076f4d57c7af40f755fbb4d5bce04e7f79a126aec87828` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
