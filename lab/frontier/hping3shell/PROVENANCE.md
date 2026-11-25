@@ -232,3 +232,8 @@ source was edited; all traffic stayed in 127/8 on `lo`.
   `wire/nocommon-negative.txt` keeps the failure. `-fcommon` is mandatory.
 - Ceiling: low byte only; 69 sbox bytes beyond reach, i/j hidden, no pointer,
   command or r5. Author-side; witness replay OWED.
+- One-command replay: `wire/replay-rngctl.sh` builds both trees from
+  `HPING_SRC` and runs baseline/fill32/fill64/fixed with exact pass-count
+  asserts (`REPLAY_RNGCTL_OK: 20 checks`). From clean `git archive bac9ab25`
+  plus the gitignored `provision/` copy, expect `STAGE OK baseline 4`,
+  `fill32 6`, `fill64 6`, `fixed 4`, rc 0.

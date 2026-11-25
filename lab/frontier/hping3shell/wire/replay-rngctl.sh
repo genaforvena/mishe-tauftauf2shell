@@ -49,6 +49,6 @@ assert 6 evidence/rngctl-replay-64-proof.out fill64
 
 FILL=32 BIN=replay-fixed-src/hping3 EXPECT_SHA="$FIXED" \
     RUN_TAG=replay-fixed EXPECT=baseline sh rngctl-proof.sh
-assert 4 evidence/rngctl-replay-fixed-proof.out fixed
+assert 4 evidence/rngctl-replay-fixed-32-proof.out fixed
 
 echo "REPLAY_RNGCTL_OK: 20 checks"

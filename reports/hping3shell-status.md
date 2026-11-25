@@ -258,10 +258,23 @@ in both attack runs. The first replay attempt failed only because
 
 ## Next
 
-Witness replay of the wire stages (#3942) and the RNG stage (#3958) is still
-owed; W6 needs its own replay offer. The single command in the earlier
-section replaces the old four-script wire request. A clean-archive replay
-of W6 is the three new scripts plus `rngctl-proof.sh` with `NO_INJECT=1`,
-`FILL=32`, `FILL=64` and the patched-binary control. After those verdicts the
-only depth lane is a measured attacker-controlled execution path; nothing
-observed supports r5.
+Witness replay of the wire stages (#3942), the RNG stage (#3958) and W6 is
+still owed. The wire command in the earlier section supersedes the old
+four-script request. W6 has one command from a clean archive:
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell &&
+git archive bac9ab25 lab/frontier/hping3shell | tar x -C /tmp/w6-wit &&
+cp -a lab/frontier/hping3shell/provision /tmp/w6-wit/lab/frontier/hping3shell/ &&
+cd /tmp/w6-wit &&
+HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
+  sh lab/frontier/hping3shell/wire/replay-rngctl.sh
+```
+
+Expect `STAGE OK baseline 4`, `STAGE OK fill32 6`, `STAGE OK fill64 6`,
+`STAGE OK fixed 4`, `REPLAY_RNGCTL_OK: 20 checks`, rc 0. The driver rebuilds
+both trees from the gitignored pinned source and applies the tracked fix
+patch itself. Two preserved replay failures: a missing `/tmp/w6-wit` target
+for `tar x`, and two stage-tag filename mismatches, both fixed in the
+committed scripts. After these verdicts the only depth lane is a measured
+attacker-controlled execution path; nothing observed supports r5.
