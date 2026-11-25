@@ -223,3 +223,9 @@ of four dependencies plus NF configuration is beyond one incident. Details
 and limits are in `httpbody/PROVENANCE.md`. A loopback SBI NF replay with
 benign and well-formed controls, or evidence that the periodic bytes steer a
 consumer into a chosen pointer, is what would change this assessment.
+
+Clean-archive replay of commit `679de99b`: `git archive HEAD
+lab/frontier/open5gs2shell` extracted to `/tmp/open5gs-w2-replay`; unmodified
+`sh httpbody/run.sh` 8 PASS / 0 FAIL, `sh realcaller/run.sh` 15 PASS / 0 FAIL,
+`sh harness/run.sh` 21 PASS / 0 FAIL. All results come from committed sources
+only; local build binaries are gitignored.
