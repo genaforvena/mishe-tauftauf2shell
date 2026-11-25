@@ -223,3 +223,12 @@ metadata is corrupted by 30 file-chosen words over 120 bytes. There is still
 no chosen word in a live consumer-owned field, no pointer/IP control, no
 command, no wire input (local file), no r5, and no independent verdict on
 W202-W207 (W201 remains the only ESTABLISHED verdict).
+
+Clean archive of HEAD `624df6c1` into `/tmp/w207-stbvorbis2` (SDL_mixer
+dependencies symlinked read-only from the live lab) replayed every committed
+script at 16:27Z: `run-consumer-heap.sh` 11/0 plus 14/0 heap-word checks,
+`run-consumer.sh` 12/0, `run-all.sh` 9/0, `run-seq.sh` 4/0, `run-guard.sh`
+12/0, `run-object.sh` 9/0, `run-neighbor.sh` 9/0 — all rc 0. The earlier
+archive of `0c8b7c75` had one FAIL because the gitignored safe input was
+absent; `624df6c1` fixes that by regenerating it inside the replay. Live
+tree untouched.
