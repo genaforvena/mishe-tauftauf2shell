@@ -1,0 +1,20 @@
+target_ptr=(nil)
+mode=bad wav_bytes=150 ptr_low=0x41414141 value=0x4841434b
+DRWAV_VERSION_STRING=0.14.5
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==306018==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x61e8f75d0849 bp 0x7ffdf62630b0 sp 0x7ffdf6262e60 T0)
+==306018==The signal is caused by a WRITE memory access.
+    #0 0x61e8f75d0849 in drwav__read_cue_to_metadata_obj /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/../pins/vuln/dr_wav.h:2306:85
+    #1 0x61e8f75cc4b1 in drwav__metadata_process_chunk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/../pins/vuln/dr_wav.h:2825:29
+    #2 0x61e8f75ab913 in drwav_init__internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/../pins/vuln/dr_wav.h:3724:33
+    #3 0x61e8f75b0c8e in drwav_init_memory_with_metadata /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/../pins/vuln/dr_wav.h:5664:12
+    #4 0x61e8f75c9ce5 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/harness.c:122:10
+    #5 0x7ac3fbc2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7ac3fbc2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x61e8f74ca374 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/vuln-asan-clang+0x2f374) (BuildId: b0339c747b2f13e5e279788581eed24d8cdc07eb)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/../pins/vuln/dr_wav.h:2306:85 in drwav__read_cue_to_metadata_obj
+==306018==ABORTING
+rc=1

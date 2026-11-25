@@ -1,0 +1,20 @@
+target_ptr=(nil)
+mode=bad wav_bytes=150 ptr_low=0x41414141 value=0x4841434b
+DRWAV_VERSION_STRING=0.14.5
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==305898==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x598aae0e1724 bp 0x7ffd03319450 sp 0x7ffd03319330 T0)
+==305898==The signal is caused by a WRITE memory access.
+    #0 0x598aae0e1724 in drwav__read_cue_to_metadata_obj ../pins/vuln/dr_wav.h:2306
+    #1 0x598aae0e59a8 in drwav__metadata_process_chunk ../pins/vuln/dr_wav.h:2825
+    #2 0x598aae0edc08 in drwav_init__internal ../pins/vuln/dr_wav.h:3724
+    #3 0x598aae0f72ff in drwav_init_memory_with_metadata ../pins/vuln/dr_wav.h:5664
+    #4 0x598aae10a46e in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/harness.c:122
+    #5 0x74992d82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x74992d82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x598aae0de604 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/harness/vuln-asan+0x6604) (BuildId: c265d9ab4579e47cb92c06256dfb1699bc613a79)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV ../pins/vuln/dr_wav.h:2306 in drwav__read_cue_to_metadata_obj
+==305898==ABORTING
+rc=1

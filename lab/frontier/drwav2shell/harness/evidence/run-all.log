@@ -1,0 +1,26 @@
+PASS vuln header is 0.14.5
+PASS fixed header is 0.14.6
+PASS vuln ASan chosen write completes
+PASS vuln ASan metadata count desync
+PASS vuln ASan CHOSEN_WORD_PRESENT
+PASS vuln ASan bad pointer faults on WRITE
+PASS vuln ASan bad pointer fault address from file low bits
+PASS vuln ASan chosen bytes at chosen destination
+PASS vuln ASan bad pointer nonzero exit
+PASS vuln ASan safe control clean
+PASS vuln ASan safe control no sanitizer error
+PASS vuln ASan safe control no chosen word
+PASS fixed ASan chosen clean
+PASS fixed ASan chosen no sanitizer error
+PASS fixed ASan chosen no chosen word
+PASS fixed ASan bad-pointer control clean
+PASS fixed ASan bad-pointer no sanitizer error
+PASS fixed ASan safe control clean
+PASS vuln plain chosen word present
+PASS vuln plain chosen bytes
+PASS vuln plain safe no chosen word
+PASS fixed plain chosen no chosen word
+PASS fixed plain bad-pointer control clean
+PASS clang ASan chosen word present
+PASS clang ASan bad pointer WRITE fault
+TOTAL PASS=25 FAIL=0
