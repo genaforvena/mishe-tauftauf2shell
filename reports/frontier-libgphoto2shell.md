@@ -403,3 +403,20 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   (`a4ec9cc8b799d3e620c89feeaeb3ec86f362a12f`) as the newest release tag,
   so the numeric fixed version stays UNKNOWN as of that observation.
   Evidence: `evidence/real-plain-stack-leak-clean-replay.out`.
+
+- One-command clean-archive replay (W180, 2026-11-25): the W175/W177 real-API
+  disclosure limb is now `lab/frontier/libgphoto2shell/live/replay-real-w177.sh`:
+  from a clean `git archive` it verifies the pinned release tarball and 4/4
+  source pins, applies the five committed vusb patches, builds the plain
+  2.5.34 library, compiles the committed probe and checks nine cases. The
+  heap-drain value is selected at run time because a fixed value is layout
+  sensitive (28 corrupted the top chunk in two fresh trees, 30 failed in a
+  third; 20 worked in the final tree); the criterion is the victim chunk at
+  `priv+0x4050`, not the number. Observed from a clean archive of commit
+  `97c61c79`: `RESULT: 20 PASS / 0 FAIL`, three canary records at k=1023,
+  three saved-rbp/RIP records at k=1024, a read-only gdb match, a `rc=-108`
+  count-100 control and a stack-smashing full-reply control. The failed fixed
+  drain runs are preserved rather than erased. This is an author replay of
+  an unwitnessed rung-4 scope; the disclosure still goes to a HOST consumer
+  through `gp_camera_file_get()`, W176 still holds, and rung 5 stays UNKNOWN.
+  Evidence: `evidence/real-plain-w180-one-command.out`, `REPLAY.md`.
