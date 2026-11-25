@@ -1,0 +1,11 @@
+Commit: 38996495 (openexr2shell W205)
+Command: git archive 38996495 lab/openexr2shell-real | tar -x -C /tmp/w205-clean
+Gitignored symlinks from the live checkout: src, build-vuln-plain,
+build-fixed-plain, build-vuln-asan, build-fixed-asan.
+Replay: cd /tmp/w205-clean/lab/openexr2shell-real &&
+  sh harness/w205-partial-pointer-negative.sh
+RESULT PASS rc 0
+evidence/w205-partial-pointer-negative.out sha256:
+dc3ac7dffa162bba97f73c36c78f3e0fdbbd2054d28c59f035e97e521f3dc9ae
+Matches the working-tree replay three times. Raw mapping addresses in
+evidence/w205-aslr-maps.out vary by design and are not hash-compared.
