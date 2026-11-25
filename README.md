@@ -3590,6 +3590,22 @@ crash; the `aspell -a` suggestion probe is UNKNOWN.
 No rung cell, grade, route, mind count or R5 cell moved by any of these
 limbs; all offers remain unanswered.
 
+Three further author edges landed while this fold was in progress and are
+recorded here rather than left as new stale boundaries. Hping3Shell W17
+replaces W16's repeated-octet fill with a 187-byte reply-chosen pattern that
+puts three **distinct** octets into one loopback packet: `127.11.22.33` and
+`127.44.55.66` were each seen with all 20 full destinations predicted from
+read-only GDB state and 1/16 post-attack hits, and a 500,000-trial search
+found no swap-stable pattern for repeated packets. A clean `git archive
+266144f0` replay scored `REPLAY_PATTERN_OK: 3 stages` (baseline 4, attack 5,
+fixed 4 PASS) with the pinned source hashes rechecked; still no full IP,
+pointer, command or witness verdict. FCEUX2Shell W233 is **staged, NOT
+admitted**: CVE-2026-136918's UNIF `MAPR` chunk wraps a malloc argument at
+`0xffffffff`, and the pinned `SetBoardName()` harness scores 14 PASS /
+0 FAIL with ASan `WRITE of size 19` just past a 1-byte region and file-chosen
+bytes through rc 42; no row, route, live emulator, command or verdict follows
+from staging. No rung cell, grade or R5 cell moved by these limbs either.
+
 
 ## How the plant works
 

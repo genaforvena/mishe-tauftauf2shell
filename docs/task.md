@@ -11670,3 +11670,16 @@ pinned six-column checker while the live seven-column checker is GREEN
 never bare `mishe sync`; `check-omp-only.py` remains RED for
 `aspell2shell: no route` and `freeimage2shell: no route`, resolver the
 operator under the person's engine-config reservation.
+
+
+### Late 19:2xZ edges, folded in the same wake
+
+Hping3Shell W17 reaches three distinct reply-chosen loopback octets in one
+packet with a clean-archive `REPLAY_PATTERN_OK: 3 stages` receipt (4/5/4
+PASS), but the repeatable-pattern search failed and no pointer, command or
+witness verdict exists. FCEUX2Shell W233 is staged with 14/0 and a file-chosen
+WRITE past a 1-byte allocation, but NOT admitted, with no route, live
+emulator or verdict. Neither moves a rung cell or grade. The late arrivals
+also add `fceux2shell: no route` to `check-omp-only.py`'s RED list alongside
+`aspell2shell` and `freeimage2shell` (152 declared roles), resolver the
+operator under the person's engine-config reservation.

@@ -10807,6 +10807,32 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   bytes, no ASan report and no crash; the `aspell -a` probe stays UNKNOWN.
   Vtkdicom2Shell's exact-source replay remains DM #4503, unanswered.
 
+## 2026-11-25 19:2xZ late edges — distinct Hping3 octets, staged FCEUX
+
+- **Hping3Shell W17 — three distinct chosen destination octets** —
+  `HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src sh
+  lab/frontier/hping3shell/wire/replay-pattern.sh` rebuilds the pinned clang
+  `-O0` vulnerable and locally patched trees, rechecks hashes
+  `e8ef2dd6…dcbb5e7b` / `70f0112d…b471cb7aaa7f0ba846c7`, and expects
+  baseline 4 PASS, attack 5 PASS and fixed 4 PASS with
+  `REPLAY_PATTERN_OK: 3 stages`, rc 0. Patterns
+  `wire/patterns/w17-three-distinct.hex` and `w17-second.hex` target
+  `127.11.22.33` and `127.44.55.66`; `check_pattern.py` reads GDB state only,
+  predicts 20/20 full destinations and requires three distinct octets plus a
+  post-attack hit (1/16 in-tree, 1/16 in the clean replay). `git archive
+  266144f0 lab/frontier/hping3shell` into `/tmp/w17-clean` with gitignored
+  `provision/` copied in reproduces it. The 500,000-trial swap-stable search
+  is a preserved negative; no pointer, command or witness verdict.
+- **FCEUX2Shell W233 — staged, NOT admitted** — `bash
+  lab/frontier/fceux2shell/run-all.sh` expects 14 PASS / 0 FAIL for the
+  pinned verbatim `SetBoardName()` on vulnerable parents `1e1de9b` (GCC) and
+  `d9132c2` (fix). GCC and Clang ASan report `WRITE of size 19` 0 bytes past
+  a 1-byte region; the plain build yields rc 42 with
+  `PAST_ALLOC=41552c66664d495348452d4643455558`, while fixed and safe-input
+  builds stay clean. The attack file is 27 bytes (`MAPR`, `ffffffff`,
+  payload). No emulator tree is built, no admission or route is created and
+  the witness verdict stays UNKNOWN; rung 3 pinned / rung 4 PARTIAL only.
+
 - **Gitignored evidence** — ASan/gdb outputs, clean-archive scratch trees
   and preload binaries are intentionally gitignored; regenerate each by the
   command quoted above from the named commit or pinned source. Addresses
