@@ -1,0 +1,148 @@
+test random seed 1795576058
+
+[serialize]
+
+test_endian
+test_bitpacker
+test_bits_required
+test_zigzag
+test_serialize
+test_read_write
+test_serialize_integer_validation
+test_serialize_integer_full_range
+test_serialize_bytes_validation
+test_int_relative_validation
+test_compressed_float_validation
+
+[netcode]
+
+test_queue
+test_endian
+test_address
+test_sequence
+test_connect_token
+test_challenge_token
+test_connection_request_packet
+test_connection_denied_packet
+test_connection_challenge_packet
+test_connection_response_packet
+test_connection_keep_alive_packet
+test_connection_payload_packet
+test_connection_disconnect_packet
+test_connect_token_public
+test_encryption_manager
+test_replay_protection
+test_client_create
+test_server_create
+test_client_server_connect
+test_client_server_ipv4_socket_connect
+test_client_server_ipv6_socket_connect
+test_client_server_dual_socket_connect
+test_client_server_keep_alive
+test_client_server_multiple_clients
+test_client_server_multiple_servers
+test_client_error_connect_token_expired
+test_client_error_invalid_connect_token
+test_client_error_connection_timed_out
+test_client_error_connection_response_timeout
+test_client_error_connection_request_timeout
+test_client_error_connection_denied
+test_client_side_disconnect
+test_server_side_disconnect
+test_client_reconnect
+test_disable_timeout
+test_loopback
+test_packet_tagging
+
+[reliable]
+
+test_endian
+test_sequence_buffer
+test_generate_ack_bits
+test_packet_header
+test_acks
+test_acks_packet_loss
+test_packets
+test_large_packets
+test_sequence_buffer_rollover
+test_fragment_cleanup
+
+[yojimbo]
+
+test_crypto_aead_vectors
+test_queue
+test_address
+test_bit_array
+test_sequence_buffer
+test_allocator_tlsf
+test_connection_reliable_ordered_messages
+test_connection_reliable_ordered_blocks
+test_connection_reliable_ordered_blocks_max_size
+test_connection_reliable_ordered_messages_and_blocks
+test_connection_reliable_ordered_messages_and_blocks_multiple_channels
+test_connection_unreliable_unordered_messages
+test_connection_unreliable_unordered_blocks
+test_connection_reject_empty_packet
+test_connection_unreliable_rejects_block_fragment
+test_connection_reliable_block_fragment_on_disabled_blocks
+test_connection_reliable_block_fragment_default_config
+MISHE-DEFAULT-CFG accepted maxBlockSize=262144 fragmentSize=1024 fragmentId=255 packetBytes=1030
+=================================================================
+==2019232==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5190001f17cc at pc 0x77c0bdafb303 bp 0x7ffce5922d70 sp 0x7ffce5922518
+WRITE of size 500 at 0x5190001f17cc thread T0
+    #0 0x77c0bdafb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5ea7890479db in yojimbo::ReliableOrderedChannel::ProcessPacketFragment(int, unsigned short, int, unsigned short, unsigned char const*, int, yojimbo::BlockMessage*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_reliable_ordered_channel.cpp:716
+    #2 0x5ea789045149 in yojimbo::ReliableOrderedChannel::ProcessPacketData(yojimbo::ChannelPacketData const&, unsigned short) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_reliable_ordered_channel.cpp:441
+    #3 0x5ea78903c2ae in yojimbo::Connection::ProcessPacket(void*, unsigned short, unsigned char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_connection.cpp:340
+    #4 0x5ea788ffa3f8 in test_connection_reliable_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/test.cpp:1500
+    #5 0x5ea7890076eb in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/test.cpp:2995
+    #6 0x77c0bd22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x77c0bd22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5ea788fe9ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/bin/test+0x32ca4) (BuildId: ec149acf8dad578da235337ef7160f487e54ce81)
+
+0x5190001f17cc is located 0 bytes after 1100-byte region [0x5190001f1380,0x5190001f17cc)
+allocated by thread T0 here:
+    #0 0x77c0bdafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5ea7890265ee in yojimbo::DefaultAllocator::Allocate(unsigned long, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_allocator.cpp:106
+    #2 0x5ea789048fc0 in yojimbo::ReliableOrderedChannel::ReceiveBlockData::ReceiveBlockData(yojimbo::Allocator&, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/include/yojimbo_reliable_ordered_channel.h:321
+    #3 0x5ea7890410ac in yojimbo::ReliableOrderedChannel::ReliableOrderedChannel(yojimbo::Allocator&, yojimbo::MessageFactory&, yojimbo::ChannelConfig const&, int, int, double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_reliable_ordered_channel.cpp:47
+    #4 0x5ea78903a266 in yojimbo::Connection::Connection(yojimbo::Allocator&, yojimbo::MessageFactory&, yojimbo::ConnectionConfig const&, double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/source/yojimbo_connection.cpp:126
+    #5 0x5ea788ffa25b in test_connection_reliable_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/test.cpp:1480
+    #6 0x5ea7890076eb in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/test.cpp:2995
+    #7 0x77c0bd22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x77c0bd22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x5ea788fe9ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream-defaultcfg/bin/test+0x32ca4) (BuildId: ec149acf8dad578da235337ef7160f487e54ce81)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x5190001f1500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5190001f1580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5190001f1600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5190001f1680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x5190001f1700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x5190001f1780: 00 00 00 00 00 00 00 00 00[04]fa fa fa fa fa fa
+  0x5190001f1800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5190001f1880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5190001f1900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5190001f1980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x5190001f1a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2019232==ABORTING
