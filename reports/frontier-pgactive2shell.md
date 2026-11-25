@@ -299,3 +299,33 @@ caller `pgactive_fetch_sysid_via_node_id_ifexists()`
 `replorigin_by_oid()`; a hand-crafted name must already be in the catalog,
 matching the advisory's "use only pgactive-generated names" workaround.
 This narrows the trigger without supplying one. Rung ceiling unchanged.
+
+## Separate conflict-handler stack object (2026-11-25 09:05Z)
+
+Checking the advisory's second workaround ("keep
+`pgactive.pgactive_conflict_handlers` empty") against the pinned diff found
+a **separate** stack-object defect in the same releases, not the `%s`
+parser bug. Pinned 2.1.9 `src/pgactive_conflict_handlers.c:716` declares
+`FunctionCallInfoBaseData fcinfo;` with no `args[]` storage and `:751-791`
+writes five 16-byte `NullableDatum` slots through it; 2.1.10 uses
+`LOCAL_FCINFO(fcinfo, 5)`. A standalone probe built with real PostgreSQL
+16.15 server headers (`realbuild/conflictpath/fcinfo-probe.c`) measures
+`sizeof(FunctionCallInfoBaseData)=32`, `offsetof(args)=32` and ASan reports
+`WRITE of size 8` one byte past the 32-byte object
+(`realbuild/conflictpath/evidence/asan-fcinfo-probe.out`).
+
+Disassembly of the shipped 2.1.9 library (sha256 `3177a37c...162998`)
+places `fcinfo` at `rbp-0x60`: `args[0].isnull` lands on the stack canary
+at `rbp-0x38` and `args[4].value` on saved RBP at `rbp+0x00`; the saved
+return address at `rbp+0x08` is not written. This host's canary low byte is
+`00`, so a `local == NULL` conflict writes `01` there and the canary check
+fails, while a `local != NULL` conflict preserves the canary but returns
+with a corrupted frame pointer. Both outcomes are inferred from the binary
+and the canary probe, not observed in a live conflict.
+
+All three callers are in the apply worker (`src/pgactive_apply.c:1185`,
+`:1405`, `:1605`), which needs a configured conflict handler and a remote
+conflict; no live trigger was exercised. This is rung 3 in a standalone
+probe only: no chosen bytes in a live process, no pointer/IP control, no
+command side effect and no change to the rung ceiling. Details and limits
+in `realbuild/conflictpath/FINDINGS.md`.
