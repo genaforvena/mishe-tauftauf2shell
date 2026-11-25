@@ -834,3 +834,23 @@ no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
   consecutive loopback probes, not a full IP (the `127.x.x.x` template
   fixes octet 0; `x.x.x.x` would leave loopback), no pointer, command, or
   r5. Author-side; witness verdict UNKNOWN.
+
+### Clean-archive W18 receipt (2026-11-25 21:30:46Z, author-side)
+
+- From `git archive ad1965d0 lab/frontier/hping3shell` into `/tmp/w18-clean`
+  (gitignored `provision/` copied in), ran
+  `HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src sh
+  lab/frontier/hping3shell/wire/replay-pattern-repeat.sh`. Both clang
+  `-O0` trees were rebuilt from the pinned source and both hashes rechecked
+  by the driver: vulnerable `e8ef2dd6…dcbb5e7b`, patched
+  `70f0112d…b471cb7aaa7f0ba846c7`. No pinned source was hand-edited.
+- Observed: baseline 4 PASS (23 states, 24 destinations, no pattern, zero
+  chosen), attack 5 PASS (13 states, 14 destinations, all full
+  destinations predicted, pattern in states 4-12, `127.11.22.33` 9/9,
+  counterfactual `127.181.149.250`), fixed 4 PASS (13 states, 14
+  destinations, no pattern, zero chosen).
+  `REPLAY_PATTERN_REPEAT_OK: 3 stages`, rc 0. Probes stayed in 127/8 on
+  `lo`; GDB only read live state. Grade unchanged: rung 4 extends from one
+  packet to nine consecutive reply-driven packets with three distinct
+  chosen octets; still no full IP, pointer, command or r5. Witness verdict
+  UNKNOWN.
