@@ -1072,3 +1072,20 @@ no subsequent allocation overlapping the written span, chosen pointer/IP,
 live-object overwrite, marker, command, stock consumer, ASLR study, witness
 verdict or r5. Grade unchanged. Evidence, specs and raw traces:
 `lab/frontier/libraw2shell/w29/results.txt`.
+
+## One-command W29 replay lane (W30, 2026-11-25 20:0xZ; author-side)
+
+W29 had a hand-written reproduction recipe but no clean-archive one-command
+replay and no replay request to the witness. `lab/frontier/libraw2shell/w29/
+replay.sh` now derives both DNGs from the committed specs, checks a hash
+manifest over the generator, base input, specs, probe and derived inputs, and
+asserts only the build-stable facts: `c1=0x00c0`, `c2=c3=0`, odd `c0`
+(PREV_INUSE), `sysmem=16781312`, a continued/gdb normal exit, red18 clean
+rc 0 in vulnerable `-n 1`, fixed and no-option builds, and red11 aborting
+with `corrupted size vs. prev_size`. The build-specific low word is
+deliberately not pinned. The lane is also wired into `replay-frontier.sh`
+as `W29_OK`.
+
+Live-tree run: `PASS=6 FAIL=0 W29_OK`. Clean-archive result is recorded in
+`lab/frontier/libraw2shell/w29/results.txt`. This is replayability work only:
+no new exploit primitive, no witness verdict, no grade change.

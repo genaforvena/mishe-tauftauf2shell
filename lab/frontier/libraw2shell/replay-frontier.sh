@@ -31,10 +31,11 @@ run w13-w14-w15      sh replay-all.sh "$WORK/all"
 run wire             sh wire/run.sh w15/band150.input "$WORK/wire-out"
 run w21              sh w21/replay.sh
 run w23              sh w23/replay.sh
+run w29              sh w29/replay.sh
 
 printf 'RECEIPTS\n'
-grep -h -E '^(REPLAY_W13_W14_W15_OK|WIRE_OOB_OK|W21_OK|W23_NEGATIVE_OK)$' \
-    "$WORK/w13-w14-w15.log" "$WORK/wire.log" "$WORK/w21.log" "$WORK/w23.log"
+grep -h -E '^(REPLAY_W13_W14_W15_OK|WIRE_OOB_OK|W21_OK|W23_NEGATIVE_OK|W29_OK)$' \
+    "$WORK/w13-w14-w15.log" "$WORK/wire.log" "$WORK/w21.log" "$WORK/w23.log" "$WORK/w29.log"
 
 if [ "$fail" = 0 ]; then
     echo REPLAY_FRONTIER_OK
