@@ -2,3 +2,13 @@ harness/vuln-asan
 harness/fixed-asan
 harness/vuln-plain
 harness/fixed-plain
+real/build-asan/
+real/build-fixed/
+real/libssh-mirror-*/
+real/*.tar.gz
+real/hostkey
+real/hostkey.pub
+real/real_wire
+real/real_wire-vuln
+real/real_wire-fixed
+real/*.log
