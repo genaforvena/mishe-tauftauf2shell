@@ -535,3 +535,17 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   rung 5 stays UNKNOWN. Evidence, patch and probe:
   `lab/frontier/libgphoto2shell/evidence/w191-control-flow.out`,
   `replay-vusb-ret.patch`, `replay-clang-control-flow-probe.c`.
+
+- One-command clean-archive replay (W192, 2026-11-25): W191's chosen saved-RIP
+  result is now replayable with
+  `sh lab/frontier/libgphoto2shell/live/replay-clang-control-flow.sh` from a
+  clean `git archive`, given the pinned 2.5.34 tarball (`TARBALL=/path`, sha256
+  `5df9e774…7f28`). The script checks 4/4 pins, applies the three committed
+  vusb patches, builds the full clang 18 library, compiles the probe, derives
+  the marker and sink addresses from the safe count-100 run, then checks the
+  attack, the no-`RET` fault, the upstream-fixed camlib and the fix reversal.
+  Author run: 12 PASS / 0 FAIL; exact addresses and all raw output in
+  `lab/frontier/libgphoto2shell/evidence/w192-control-flow-replay.out`. This
+  makes the replay self-contained but changes no grade: still author-side
+  rung 4, unwitnessed, lab-assisted, synthetic vusb, no wire or command, rung
+  5 UNKNOWN.
