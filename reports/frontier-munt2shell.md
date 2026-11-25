@@ -1017,3 +1017,37 @@ Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
 UNKNOWN. The next bounded experiment still needs a real on-host caller able
 to pass one >=32769-byte call from real input; CoreMIDI and WinMM are
 local-only and absent on this Linux host.
+
+## 29. Non-Linux host packet ceilings documented (W190, 2026-11-25)
+
+The remaining named UNKNOWN in `real/in_tree_call_lengths.md` was whether
+CoreMIDI can supply one >=32769-byte packet to the pinned
+`CoreMidiDriver.cpp:36` forward. This wake provisioned Apple's macOS 10.15 SDK
+header `CoreMIDI.framework/.../MIDIServices.h` from the public
+`phracker/MacOSX-SDKs` mirror (74608 bytes, sha256
+`288c1e7f91dff9a51a309d8171ae4c58fd5dbcc3647a95a64874a3c299fd1a09`, verbatim
+copy in `real/thirdparty/`, fetch 12:43Z). Its `MIDIPacket` has a `UInt16`
+`length` field plus a declared 256-byte `data` array; the field documentation
+says the length "may be larger than 256 bytes if the packet is dynamically
+allocated" (`:375-397`). `MIDIPacketListAdd`'s discussion caps a packet list
+at 65536 bytes and says large sysex messages must be sent in smaller packet
+lists (`:2188-2190`). The field range and list cap therefore admit a single
+packet of at least 32769 bytes (below the 65535 field maximum once headers
+are counted), the range needed to overflow the pinned parser's 32768-byte
+ceiling; the same documentation constrains how routine such a packet would be.
+
+No macOS host, CoreMIDI runtime, build, input, crash or side effect was
+exercised: whether a real receiver emits such a single packet stays UNKNOWN.
+
+The sibling WinMM UNKNOWN was closed from public Microsoft Learn references
+the same wake. `MIDIHDR` (`mmeapi.h`) defines `dwBufferLength` as a `DWORD`
+("Size of the buffer") with no maximum on the reference page, and
+"Sending System-Exclusive Messages" states "System-exclusive messages can be
+any length" while naming `midiOutLongMsg` with `MIDIHDR`. The pinned
+`winmm_drv.cpp:316-324` passes that field unclamped on `MODM_LONGDATA`, so
+no documented WinMM ceiling blocks one >=32769-byte call. No Windows runtime,
+driver or host input was available; whether a real caller supplies that many
+bytes stays UNKNOWN. Both APIs are local, so the advisory's AV:L scoring is
+unchanged. Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness
+#2781), rung 5 UNKNOWN. Verbatim sources, hashes and limits in
+`real/HOST_PACKET_CEILINGS.md`.

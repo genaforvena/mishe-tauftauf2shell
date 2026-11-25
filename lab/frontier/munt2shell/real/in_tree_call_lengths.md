@@ -78,10 +78,21 @@ Both parsers are the vulnerable library class, not a lookalike:
 - Source-level reachability only. No macOS or Windows host exists on this
   Linux workstation (Qt5 absent; no CoreMIDI, no Win32 MM). Neither path was
   built, run or driven with input; there is no crash, trace or side effect.
-- Whether CoreMIDI itself ever emits a single packet >32768 bytes, and the
-  maximum `MIDIHDR.dwBufferLength` Windows accepts, are **UNKNOWN** here: no
-  Apple or Microsoft SDK headers/runtime were consulted. The Munt-side fact is
-  that neither path bounds the value before the copy.
+- CoreMIDI: Apple's macOS 10.15 SDK header was consulted in W190 (verbatim
+  copy and hashes in `HOST_PACKET_CEILINGS.md`). `MIDIPacket.length` is
+  `UInt16` and is documented to exceed the declared 256-byte `data` array
+  when dynamically allocated; packet lists are capped at 65536 bytes
+  including headers. The documented contract admits a single packet of at
+  least 32769 bytes, but the same documentation says large SysEx messages
+  must be split across lists.
+  Whether a real receiver ever emits such a single packet remains UNKNOWN.
+- WinMM: Microsoft Learn's `MIDIHDR` reference defines `dwBufferLength` as a
+  `DWORD` ("Size of the buffer") with no stated maximum, and its
+  "Sending System-Exclusive Messages" page says "System-exclusive messages
+  can be any length" (`HOST_PACKET_CEILINGS.md`). No Windows runtime was
+  consulted, so whether a real `MODM_LONGDATA` caller supplies >=32769 bytes
+  remains UNKNOWN. The Munt-side fact is that neither path bounds the value
+  before the copy.
 - These are local host APIs, not remote listeners. The advisory scores AV:L;
   this audit does not change that. Rung 5 still requires a measured live
   process, attacker-controlled input, a chosen command side effect and a
