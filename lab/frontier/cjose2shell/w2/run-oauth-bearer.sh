@@ -57,6 +57,7 @@ rm -rf /tmp/w2-apache-oauth-bearer-run /tmp/w2-oidc-cache-oauth-bearer \
        /tmp/w2-apache-oauth-bearer-fixed-run /tmp/w2-oidc-cache-oauth-bearer-fixed
 mkdir -p /tmp/w2-apache-oauth-bearer-run /tmp/w2-oidc-cache-oauth-bearer \
          /tmp/w2-apache-oauth-bearer-fixed-run /tmp/w2-oidc-cache-oauth-bearer-fixed
+mkdir -p "$HERE/html"
 : > "$E/oauth-bearer-fixed-apache_error.log"
 RUN=$(mktemp -d /tmp/w212-oauth-bearer-XXXXXX)
 for t in apache-oauth-bearer.conf apache-oauth-bearer-fixed.conf \
