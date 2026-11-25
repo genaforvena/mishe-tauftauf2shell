@@ -21,6 +21,10 @@ W13 adds an unwitnessed no-app-allocated-callbacks lane (6 PASS / 0 FAIL):
 the fake callback's size, userdata and callee come from wire bytes in the
 recycled channel, with only one app-owned iterator node remaining; no grade
 change.
+W14 adds an unwitnessed plain lane (6 PASS / 0 FAIL) in which the indirect call
+from `channel_rcv_data()` targets real libc `system()` with a wire-chosen
+`channel->session` argument, so no harness trampoline is in the path; the
+command string is still an app-chosen static global. No grade change.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -630,3 +634,45 @@ This checks committed harness and driver text; W13 remains additive and
 unwitnessed. Regression evidence overwritten by the in-tree reruns was
 restored from HEAD, so the pinned W10/W11/W12 evidence files are unchanged by
 this wake.
+
+## W14: real libc `system()` as the wire-chosen callee (2026-11-25 17:14Z)
+
+`real/run-realsystem.sh` adds an unwitnessed plain Release lane behind
+`-DW14_REALSYSTEM`, built against the same two pinned commits with no library
+source change. **6 PASS / 0 FAIL**, rc 0.
+
+Prediction and result: `ssh_callbacks_iterate_exec` passes `channel->session`
+as the callback's first argument (pinned `channels.c.vuln:697-702`), and
+`session` is the first field of `struct ssh_channel_struct`. In a W3-survive
+groom, the authenticated client's wire bytes occupy the recycled 128-byte
+channel: offset 0 sets that `session` pointer and offset 112 sets the fake
+callback's `channel_data_function` to `&system` from libc. The indirect call at
+`channels.c:697` therefore enters real `system()` with a wire-chosen argument;
+the harness `exec_trampoline` is not in this path. Evidence
+(`real/evidence-rs-vuln-rs.out`):
+`CLIENT realsystem fn=0x7dc9b7a58750 sess=0x5bdfbc67edd0 cmd=touch evidence-wire-vuln-groom-realsystem.marker bad=0`,
+`SERVER call fake_cbs=... fn=0x7dc9b7a58750`,
+`SERVER REALSYS armed fn=0x7dc9b7a58750 sess=0x5bdfbc67edd0 cmd=...`,
+`SERVER done data_packets=2 marker_hits=0`,
+`SERVER target_after=0x41414141414141c1`, `CLIENT rc=0 SERVER status=0x0`;
+no `SERVER EXEC trampoline` line. The marker file was renamed to
+`real/evidence-rs-sideeffect.kept`; three repeats identical in substance.
+Fixed lane: no data #2, no REALSYS line, no file. Invalid-callee control
+`fn=0x4141414141414141`: `CLIENT rc=0 SERVER status=0x8b` (rc 1), no file, no
+`SERVER done` — the call faults at the library indirect call.
+
+The `target_after` write survives because the first callback (the real
+`on_data`) returns `len`=128, so the counter write at `:706` runs before the
+loop's next step invokes `system()`. Both primitives share the same recycled
+chunk.
+
+With `W14_REALSYSTEM` undefined the preprocessed harness is byte-identical to
+pre-W14 HEAD (`clang -E -P`, `cmp` clean); compiling with the flag succeeds.
+Regressions: `run-inline.sh` 6 PASS / 0 FAIL, `run-plain.sh` 9 PASS / 0 FAIL,
+rc 0; incidental evidence overwrites restored from HEAD.
+
+Ceiling: no trampoline, but the command string is still an app-chosen static
+global whose address the client sends; callee/session addresses are
+forked-peer ASLR-local; app-owned fake callback objects, in-callback free,
+authenticated peer (PR:L) and the W3 detach remain. No persistent shell or
+remote command service. NOT ESTABLISHED rung 5; additive and unwitnessed.

