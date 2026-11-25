@@ -27,6 +27,8 @@ byte; attacker controls buffer size via input length). Affected
   closed by the concurrent wake: `libc+0x203b20` in victim fd/bk never
   reaches the wire) remain the named blockers. No command, no
   persistence, no grade change.
+  Boundary arms pin the band: N=508 (5 survivors, window short) and
+  N=604 (22/24 benign-land survivors, 0 coverage).
 - **2026-11-25 (sixth push, direct session) — the first missing oracle is
   now measured wire-only: the dev 404 params reflection leaks the
   request-thread arena region base and Ruby GC-page pointers; libc has no

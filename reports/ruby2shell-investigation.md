@@ -1877,6 +1877,15 @@ the libc/code oracle (no wire channel; the main-arena variant is closed
 above), and a second COMMAND. Full rung 5 remains **NOT ACHIEVED**; no
 grade change.
 
+The coverage band is bounded by two further arms (24 runs each): N=508
+produced 5 survivors and zero covered boundaries (the `remaining×2+20`
+window is too short), and N=604 produced 22/24 survivors with zero
+covered boundaries — its B/A lines show the 0x53 byte landing in
+live-object slack (garbage fd/bk reads like `0x66000010062`, sizes
+`0x35→0x53` inside object data), a benign-land class rather than a
+corruption. Wire-only chosen-header coverage is therefore pinned to the
+N ∈ [540, 588] band at this geometry.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -2021,3 +2030,6 @@ grade change.
     `PROTECT_PTR` page ambiguity (±0x8000) and the libc oracle remain the
     named blockers after that. Stock/oracle-free/persistent rung 5 stays
     NOT ACHIEVED.
+    Boundary arms: N=508 (5 survivors, window short of the boundary) and
+    N=604 (22/24 survive because the byte lands in live-object slack,
+    zero coverage) pin the chosen-header band to N ∈ [540, 588].
