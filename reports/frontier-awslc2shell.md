@@ -261,7 +261,10 @@ decipher context to the vulnerable `EVP_DecryptUpdate` — so the carry
 precondition holds. But `:810-828` allocates exactly `len + block_size`, while
 the CVE writes at most `in_len + block_size` bytes (one past the documented
 `in_len + b - 1` at `include/openssl/cipher.h:155-158`). The byte lands inside
-the allocation, and `:837` checks the returned length against it. SOURCE-BOUND
-NEGATIVE by one byte of slack; Node is not an official AWS-LC consumer and no
-build or ASan run was made. Grade unchanged: rungs 1-4, r5 UNKNOWN; other
-unprovisioned applications stay UNKNOWN.
+the allocation, and `:837` checks the returned length against it. A throwaway
+ASan check against the pinned no-ASM library (not committed) was clean for a
+32-byte exact-fit second buffer (`n1=0 n2=16`) and faulted at `cipher.c:420`
+with a 31-byte documented-minimum buffer. SOURCE-BOUND NEGATIVE by one byte
+of slack; Node is not an official AWS-LC consumer and no Node build was made.
+Grade unchanged: rungs 1-4, r5 UNKNOWN; other unprovisioned applications stay
+UNKNOWN.

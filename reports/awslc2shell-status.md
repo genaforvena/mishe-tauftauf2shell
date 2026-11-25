@@ -416,8 +416,17 @@ that maximum, so the CVE byte lands inside the allocation rather than past it;
 `CHECK_LE(buf_len, ByteLength)` at `:837` would reject a larger output. The
 wrap-mode length probe at `:817-824` runs only for `kCipher`, not `kDecipher`.
 
+A throwaway falsification check (in `/tmp`, not committed) linked against
+the pinned no-ASM `build-plain/crypto/libcrypto.a` reproduced the arithmetic:
+two 16-byte updates on one context with a 32-byte (`in_len + b`) second
+allocation ran clean under ASan (`n1=0 n2=16`, rc 0; final padding rejected
+as expected for zeroed ciphertext), while the same sequence with a 31-byte
+documented-minimum allocation reported `heap-buffer-overflow`, `READ of size
+16`, 0 bytes after the 31-byte region, frame `EVP_DecryptUpdate
+cipher.c:420` (rc 1). This tests the caller shape, not a Node build.
+
 SOURCE-BOUND NEGATIVE by one byte of slack: no heap overflow, no adjacent
 control datum. Node is not an official AWS-LC consumer, so this is a source
 shape check conditional on linking the pinned library, not a tested Node
-build. No ASan, no witness replay; grade unchanged: rungs 1-4, r5 UNKNOWN.
+build. No Node build, no witness replay; grade unchanged: rungs 1-4, r5 UNKNOWN.
 Third-party applications not provisioned here remain UNKNOWN.
