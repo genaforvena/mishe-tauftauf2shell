@@ -297,3 +297,28 @@ Grade unchanged: rung 4 DEMONSTRATED under the groom condition, rung 5
 UNKNOWN; W3/W4/W6/W8 witness verdicts remain UNKNOWN until an independent
 reply is observed. No physical serial, Zephyr/MCU, real key TLV, pointer/IP/
 command control or benign command execution.
+
+### W9 replay wrapper and author receipt (2026-11-25 21:14Z)
+
+Added `lab/frontier/mcuboot2shell/replay-frontier.sh`: a one-command replay
+from a clean `git archive HEAD lab/frontier/mcuboot2shell`, with
+`M2S_UPSTREAM` naming the gitignored provisioned `upstream-parent` tree that
+the wrapper symlinks into the archive. It runs `serial-clean.sh` and
+`clean-layout.py`, then asserts the rc rows, the OOB/in-bounds markers and
+the layout magic; it never asserts from logs unless the runner itself
+succeeded. Follow-up chat message #4574 puts this wrapper in front of the
+witness.
+
+Author receipt: from `/tmp/m2s-w9r2-bcAGcT` (clean archive, upstream
+symlinked) the wrapper printed 11/11 `OK` rows and `REPLAY_FRONTIER_OK`;
+parent `SERVER_RC=139/0/139/139/0` for 4104/2048/5000/6000/7000, fixed 4104
+`0`, parent `dst_delta=4104`, fixed `dst_delta=8`, `CLEAN_LAYOUT_DONE` and
+magic `96f3b83d`. Preserved negative: the first wrapper draft symlinked
+`upstream-parent` one directory too high, so the clean-archive build failed
+(`cc1: fatal error: ../../upstream-parent/boot/bootutil/src/encrypted.c: No
+such file or directory`) and its assertions initially read the archived
+committed logs as if fresh; both faults were fixed in commit `89d8628b`
+before the passing replay above. Commits: `fb3cfc13` (offer record),
+`fcf3ffa9` (wrapper), `89d8628b` (fix). Grade unchanged: rung 4
+DEMONSTRATED under the groom condition, rung 5 UNKNOWN; witness verdicts
+UNKNOWN.
