@@ -1,0 +1,69 @@
+W27 — small-WhiteLevel knobs do not yield a file-chosen valid top size
+(2026-11-25 13:20–13:30Z, author-side bounded negative; NO new rung)
+
+Question. W23 left small DNG WhiteLevel untested while searching for a
+crafted image whose OOB writes put a plausible size into the live top chunk's
+size field at destimage pixel index 68,773 (offset 550,184). W22's valid
+0x21001 remains debugger-forced.
+
+Prediction recorded in SITE/walls/libraw2shell.md before the first run:
+generate specs from w11/targetbeef.input with the pinned, unmodified
+craft_uncompressed_poc.py, vary WhiteLevel 1..255 with uniform curve values
+and green-zero / red-blue-zero colour maps, and read the field with the
+unmodified w23/sizefield.gdb under the unmodified -O0 dcraw_emu at lab-only
+MALLOC_TOP_PAD_=16777216. Fixed success criterion: c2=0, c3=0, c1 <= 0xff,
+c0 nonzero and c0 == 1 (mod 16), i.e. a plausible 16-byte-aligned size below
+sysmem 16,781,312 written by the image alone. Any hit would still need a
+measured later allocator/consumer read before a grade change.
+
+Observations (seven completed probes; field words c0 c1 c2 c3):
+  uni1-wl1       sf=0xfffffffdfffa  fffa fffd ffff 0000
+  uni1-wl2       sf=0x95547fff7ffd  7ffd 7fff 9554 0000
+  green1-wl255   sf=0x101000000ff   00ff 0000 0101 0000
+  green1-wl1023  sf=0x400000003f    003f 0000 0040 0000
+  green1-wl65535 sf=0x100000000     0000 0000 0001 0000
+  rb1-wl255      sf=0x5201010039    0039 0101 0052 0000
+  rb1-wl1023     sf=0x140040000e    000e 0040 0014 0000
+Every nonzero field has c2 >= 1, so the high 32 bits are nonzero and glibc
+rejects it; the green-zero family reaches c1=0 but still c2=1 even at three
+WhiteLevel settings. WhiteLevel 1 and 2 saturate to near-0xffff words. No
+field met the pre-registered success criterion; no debugger wrote to the
+inferior.
+
+Hashes (sha256, spec / derived input):
+  9f8357fda9bbbea6db54770df3f8ade2fde96d5e5f9decae5722a0bc767ea513
+    8e14bc9da556d3ca92b56a6dea08a4fb21ad83b7e805cda555c51e2581805982
+    uni1-wl1.json / uni1-wl1.input
+  42a665e16d69e36039683ec9b27ffb9a350a8d1e1121a317031a083f21df9c7f
+    f9e39c457d8ee884a34af32976c7c3cbf4bfbe6672680d79c9fbcc3f7ea8c3ed
+    uni1-wl2.json / uni1-wl2.input
+  8b49545676a8434d0b6c2320ad63d45c97c6ae45421f4d14c84547635eafc1b7
+    b9204b8d2740691970385a9ad818e401883679e7fa6aedbecd120d8da4fd0fd3
+    green1-wl255.json / green1-wl255.input
+  eea3af42b44980e84886b38ee77787b302e23f8dc6a2c23db1f66b232993ebb4
+    7d75253841297cd3e6090756447ffd9dde3ee230e2cdb078d57d9ed9cd80d34f
+    green1-wl1023.json / green1-wl1023.input
+  2c7b0d8250e9e27dec0b993a47dbbde3d4afb340c829a5172c85da8e7ae2a9d6
+    988bc4f039f8caac3e3e67245d9d081ba1dd46aaaf248eb4717163bb7b70d5be
+    green1-wl65535.json / green1-wl65535.input (same field as W23 greenzero1)
+  8bda6b08934b92723e015d5d5b6fa3c85594dac786cfaa15d4538a50df3a089b
+    aa2eb48f64852a497666fa9a683f22a0a0ff59912c2cb99bb8c6de3d3cf01027
+    rb1-wl255.json / rb1-wl255.input
+  bf5ccb2105ffa66dbae67b3ba9f08bb8d236604fd4685194c07d89ee047c0856
+    79a29d1058c5be6b3154e6fc7e22178bb6d4e0c536d9ae620475c2e4988d9ff3
+    rb1-wl1023.json / rb1-wl1023.input
+
+Limits preserved. Many candidate probes used a 10-second tool timeout and
+only reached gdb's breakpoint registration; with a 60-second timeout one
+of them (rb1-wl255) did hit and produced a field, so those short-timeout
+traces are UNKNOWN, not negative observations. Several other candidate
+specs were never generated after the search cell was interrupted, so their
+inputs are absent; they were not probed. No plain/fixed/no-option control
+was run for the absent cases. This is a bounded negative over the tested
+knobs, not a proof over all images.
+
+Grade unchanged: rungs 1-3 witness-established, rung 4 author-side including
+wire, W22's valid size debugger-forced, NO chosen pointer/IP, marker, live
+object overwrite, command side effect, rung 5 or witness verdict. All runs
+local and loopback-free. Specs and raw traces live in the gitignored site
+tmp/w27-size directory; this file is the durable summary.

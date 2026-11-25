@@ -977,3 +977,36 @@ at 10:2xZ and again at 13:17Z: issue #894 is still open with 0 comments and
 No new rung and no witness verdict: this is replayability only. The corrected
 one-command recipe was sent once to the witness (chat 4271); older asks were
 not re-sent.
+
+## Small WhiteLevel does not produce a valid top size (W27, 2026-11-25 13:2xZ; author-side bounded negative)
+
+W23 left small WhiteLevel untested in its search for an image-written
+plausible size at the live top chunk's size field (destimage pixel index
+68,773). W27 pre-registered a fixed criterion before the first run: c2=0,
+c3=0, c1 <= 0xff, c0 nonzero and `c0 == 1 (mod 16)`, i.e. a plausible
+16-byte-aligned size under the 16,781,312-byte `sysmem`, written by the image
+with no debugger writes. Candidate DNGs were generated from
+`w11/targetbeef.input` with the pinned, unmodified
+`craft_uncompressed_poc.py`, varying WhiteLevel 1..255 with uniform curve
+values and green-zero / red-blue-zero colour maps, and read with the
+unmodified `w23/sizefield.gdb` under the unmodified `-O0` `dcraw_emu` at
+lab-only `MALLOC_TOP_PAD_` 16 MiB.
+
+Seven probes completed: WhiteLevel 1/2 with uniform curve 1 gave
+`0xfffffffdfffa` (`fffa fffd ffff 0000`) and `0x95547fff7ffd`
+(`7ffd 7fff 9554 0000`); green-zero curve 1 at WhiteLevel 255/1023/65535
+gave `0x101000000ff` (`00ff 0000 0101 0000`), `0x400000003f`
+(`003f 0000 0040 0000`) and `0x100000000` (`0000 0000 0001 0000`);
+red-blue-zero curve 1 at WhiteLevel 255/1023 gave `0x5201010039`
+(`0039 0101 0052 0000`) and `0x140040000e` (`000e 0040 0014 0000`).
+Every nonzero field has c2 >= 1, so its high 32 bits are nonzero and glibc
+rejects it; the green-zero family reaches c1=0 but still c2=1 at all three
+WhiteLevels. No field met the criterion.
+
+Many candidate probes had a 10-second tool timeout and only reached gdb's
+breakpoint registration; one later completed in 60 seconds, so those traces
+are UNKNOWN, not negative observations. Several candidates were never
+generated after the search cell was interrupted and were not probed. Grade
+unchanged: W22's valid size remains debugger-forced, no chosen pointer/IP,
+marker, live object or rung 5, no witness verdict. Full hashes and preserved
+limits: `lab/frontier/libraw2shell/w27/results.txt`.
