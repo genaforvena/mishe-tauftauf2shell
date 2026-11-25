@@ -1,0 +1,71 @@
+From d9132c2a37bf05e31b8a09f9ad938d46ff193bf1 Mon Sep 17 00:00:00 2001
+From: harry <hrosen2016@gmail.com>
+Date: Mon, 16 Nov 2026 20:11:36 -0500
+Subject: [PATCH] Fix heap overflow in UNIF MAPR chunks
+
+Reject chunks whose declared size exceeds the remaining file data.
+Use overflow-safe sizing and verify the full board name is read before
+terminating it. Add a diagnostic for malformed chunks and regression
+coverage for invalid and valid chunk data.
+---
+ src/unif.cpp | 30 ++++++++++++++++++++++++++----
+ 1 file changed, 26 insertions(+), 4 deletions(-)
+
+diff --git a/src/unif.cpp b/src/unif.cpp
+index 36702e3d0..2eadba5fa 100644
+--- a/src/unif.cpp
++++ b/src/unif.cpp
+@@ -38,6 +38,7 @@
+ #include <cstdio>
+ #include <cstdlib>
+ #include <cstring>
++#include <limits>
+ 
+ typedef struct {
+ 	char ID[4];
+@@ -278,13 +279,26 @@ static int LoadPRG(FCEUFILE *fp) {
+ }
+ 
+ static int SetBoardName(FCEUFILE *fp) {
+-	if (!(boardname = (uint8*)FCEU_malloc(uchead.info + 1)))
++	const size_t info = uchead.info;
++	constexpr size_t maxSize = std::numeric_limits<size_t>::max() - 1;
++	if (info > maxSize)
++	{
++		return(0);
++	}
++	boardname = (uint8*)FCEU_malloc(static_cast<size_t>(info) + 1);
++	if (boardname == nullptr)
++	{
+ 		return(0);
+-	FCEU_fread(boardname, 1, uchead.info, fp);
+-	boardname[uchead.info] = 0;
++	}
++	if (FCEU_fread(boardname, 1, info, fp) != info)
++	{
++		return(0);
++	}
++	boardname[info] = 0;
+ 	FCEU_printf(" Board name: %s\n", boardname);
+ 	sboardname = boardname;
+-	if (!memcmp(boardname, "NES-", 4) || !memcmp(boardname, "UNL-", 4) || !memcmp(boardname, "HVC-", 4) || !memcmp(boardname, "BTL-", 4) || !memcmp(boardname, "BMC-", 4))
++	if (info >= 4 &&
++		(!memcmp(boardname, "NES-", 4) || !memcmp(boardname, "UNL-", 4) || !memcmp(boardname, "HVC-", 4) || !memcmp(boardname, "BTL-", 4) || !memcmp(boardname, "BMC-", 4)))
+ 		sboardname += 4;
+ 	return(1);
+ }
+@@ -506,6 +520,14 @@ int LoadUNIFChunks(FCEUFILE *fp) {
+ 		}
+ 		if (!(FCEU_read32le(&uchead.info, fp)))
+ 			return 0;
++		const uint64 position = FCEU_ftell(fp);
++		const uint64 size = FCEU_fgetsize(fp);
++		if (position > size || uchead.info > size - position)
++		{
++			FCEU_printf("Invalid UNIF chunk %.4s: data extends beyond end of file.\n",
++				uchead.ID);
++			return 0;
++		}
+ 		t = 0;
+ 		x = 0;
+ 		while (bfunc[x].name) {

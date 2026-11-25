@@ -1,0 +1,6 @@
+# Generated binaries, crafted inputs and replay outputs.
+harness/vuln-*
+harness/fixed-*
+harness/*.unf
+harness/*.o
+evidence/
