@@ -1,0 +1,15 @@
+  40cde4:	66 83 f8 0b          	cmp    $0xb,%ax
+  40ce18:	83 f8 0b             	cmp    $0xb,%eax
+  40cf2b:	41 83 f8 0b          	cmp    $0xb,%r8d
+  40cf38:	41 83 f8 0b          	cmp    $0xb,%r8d
+  40cf42:	48 8d 35 0b 85 01 00 	lea    0x1850b(%rip),%rsi        # 425454 <ftbl+0xb4>
+  40cf50:	3e 41 ff e0          	notrack jmp *%r8
+  40d037:	80 fb 0b             	cmp    $0xb,%bl
+  40d040:	48 8d 15 3d 84 01 00 	lea    0x1843d(%rip),%rdx        # 425484 <ftbl+0xe4>
+  40d04e:	3e ff e0             	notrack jmp *%rax
+  40d066:	48 8d 15 77 84 01 00 	lea    0x18477(%rip),%rdx        # 4254e4 <null_mac>
+  40ff0f:	83 f8 0b             	cmp    $0xb,%eax
+  41001e:	41 83 f8 0b          	cmp    $0xb,%r8d
+  41002b:	41 83 f8 0b          	cmp    $0xb,%r8d
+  410035:	4c 8d 1d 78 54 01 00 	lea    0x15478(%rip),%r11        # 4254b4 <ftbl+0x114>
+  410043:	3e ff e0             	notrack jmp *%rax

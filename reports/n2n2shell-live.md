@@ -626,3 +626,30 @@ call and W12 supplies no indirect call instruction to poison. This corroborates
 W12/W13 at source level; it is not a runtime marker attempt. Scope: this
 pinned build and the REGISTER_SUPER_NAK path. Other builds, messages and
 allocator-controlled objects remain UNKNOWN. Ceiling unchanged (rung 4, no r5).
+
+## W15: a third build also has no indirect call in process_udp (2026-11-25 11:2xZ)
+
+W12 surveyed the exact W11 clang -O2 non-PIE supernode and a gcc -O1 PIE
+build. This adds the pinned vulnerable tree built with `gcc -g -O2
+-fno-omit-frame-pointer -no-pie` / `-no-pie`, from the same archive
+(`n2n-vuln.tar.gz`, sha256 `d3b54650...`). Build ID varies with build
+timestamps; the replay records it in `evidence/w15-readelf.log` rather than
+treating it as a stable pin.
+
+`objdump -d` over the exact symbol extent of `process_udp.isra.0`
+(`0x40cbc0`, size 17633 bytes) gives **0 indirect calls** and 3
+`notrack jmp *` instructions, all at `0x40cf50`, `0x40d04e`, `0x410043`.
+Each is preceded by `cmp $0xb; ja` and an `lea` of a `.rodata` table at
+`0x425454`, `0x425484`, `0x4254b4` respectively, with a 32-bit signed
+offset loaded from that table. They are bounded message-type switch
+tables, not wire-controlled call targets. As in W12, canary and saved RIP
+remain out of the 2048-byte receive window.
+
+`sh lab/frontier/n2n2shell/live/w15_indirect_sweep.sh` — clean archive,
+7 PASS / 0 FAIL, rc 0 (author run 11:28:53Z): build, symbol extent,
+disassembly, zero indirect calls, three bounded jumps. Raw logs:
+`live/evidence/w15-build.log`, `w15-readelf.log`, `w15-sections.log`,
+`w15-process-udp.asm`, `w15-switch-tables.txt`.
+
+Ceiling unchanged: rung 4, no poisonable call target in any of the three
+surveyed builds, no r5. Builds and message paths not surveyed stay UNKNOWN.
