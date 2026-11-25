@@ -5,9 +5,9 @@ staging at 04:1xZ). Claim: CCExtractor issue
 #2500 (https://github.com/CCExtractor/ccextractor/issues/2500), opened
 `2026-11-24T13:58:29Z`. Pinned master commit
 `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`
-(`2026-11-24T07:50:42-0800`). Issue rechecked 2026-11-25T08:54Z via the
-GitHub issue API: still open, no update since creation; no CVE/GHSA found;
-no upstream fix PR found, fix status UNKNOWN.
+Issue rechecked 2026-11-25T12:17Z via the GitHub issue API: still open,
+created `2026-11-24T13:58:29Z`, unchanged since creation, status "Backlog",
+0 comments. No CVE/GHSA found; no upstream fix PR found, fix status UNKNOWN.
 
 - Brief: `reports/frontier-ccextractor2shell.md`.
 - Pinned tree and harness: `lab/frontier/ccextractor2shell/` (`PROVENANCE.md`,
