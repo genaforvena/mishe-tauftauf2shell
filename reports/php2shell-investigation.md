@@ -2071,3 +2071,47 @@ the harness comment at `:8` cites tinyfilemanager.php:352 for the admin check,
 but the pinned 2.6 copy checks it at `:328` and gates on it at `:411`; the
 comment is left unchanged because the W66 harness is SHA-pinned as the witness
 base.
+
+### Wake 69 experiment — one-pool token refresh stays "Invalid Token" (negative)
+
+W67 left a single progress-on pool at admin takeover with the designed upload
+rejected as `Invalid Token`. The candidate cause was that tinyfilemanager
+generates `$_SESSION['token']` on the takeover GET
+(`tfm-app/web/index.php:248`) while the producer keeps rewriting the same
+session file. `TOKEN_REFRESH=1` (opt-in, requires `ONE_POOL=1`) re-issues a
+consumer GET and re-scrapes the token immediately before the in-gap upload.
+New harness SHA-256
+`dd7e195a3bc7106c76f3e4bb544a661ff7610755338bbcb4b21494ef4be92ae0`; the
+default GAP behavior and the SHA-pinned W66 witness-base harness are unchanged.
+
+```sh
+KEEP_TMP=1 GAP=1 ONE_POOL=1 TOKEN_REFRESH=1 DEATH_MODE=rlimit \
+  SID=0badc0de00112233445566778899beef FILLER=Z \
+  MTAG=php2shell-r5-w69-tokenrefresh PORT=18360 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w69-tokenrefresh 18360
+```
+
+Three affected runs (SID/filler `0badc0de00112233445566778899beef`/`Z`,
+`facefeed00112233445566778899deadbe`/`W`,
+`c0ffee00112233445566778899aabbccdd`/`X`; ports 18360/18370/18380, K=1024,
+ASLR=2) all produced the splice, admin takeover, a refreshed token used by the
+in-gap upload, and `{"status":"error","info":"Invalid Token."}` with
+`result-check: positive=0 negative=0 mechanism=1 gap_no_death=1 marker=0
+timing-control=1 safe-control=1`. Logs and SHA-256:
+`lab/build/evidence/w69-tokenrefresh/aftershell-tfm-8.4.27-app-tfm.log`
+(`d3c46809209bb6927b809001582cb1e1ccc731bba942a0967e9e6954c5c25cd6`),
+`w69-tokenrefresh-b/...log`
+(`4d5745e1de63b7d642659eb570bf5595092269c237bb31645b91ee07ead6c66e`),
+`w69-tokenrefresh-c/...log`
+(`6341ab3f2cb1be5a742d4700c06f6fe62bbadd185a06c1103dc4505a70b4959d`).
+In the first run's retained tmpdir the takeover GET token was `41d4...`, the
+refresh GET token `6abd...`, and the upload still rejected the latter; the FPM
+error log contains only normal start/stop notices. Working hypothesis: the
+progress-on producer's competing session writes do not let a freshly scraped
+token survive to the upload request (not instrumented mid-request). Grade
+unchanged; the negative is preserved. A chosen `token` key in the promoted
+session record, so `index.php:248` skips generation, would be a new variant
+needing re-armed geometry and its own replay.

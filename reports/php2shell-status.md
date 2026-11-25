@@ -1829,3 +1829,25 @@ unlabelled RCE UNKNOWN. No counterexample found. W67 remains a preserved
 takeover-only negative for the single-pool progress-on variant. NIT only: the
 harness comment at `:8` cites a stale tinyfilemanager line number (pinned copy:
 check `:328`, gate `:411`); the SHA-pinned harness was not edited.
+
+## Wake 69 experiment — TOKEN_REFRESH=1 on ONE_POOL: preserved negative
+
+Added opt-in `TOKEN_REFRESH=1` to
+`lab/repro/php2shell-aftershell-splice-tfm.sh` (requires `ONE_POOL=1`; W66
+default unchanged); script SHA-256
+`dd7e195a3bc7106c76f3e4bb544a661ff7610755338bbcb4b21494ef4be92ae0`. It
+re-scrapes the tinyfilemanager CSRF token from a fresh consumer GET immediately
+before the in-gap upload. Three 8.4.27 runs with varied SID/filler
+(`0badc0de...`/`Z`, `facefeed...`/`W`, `c0ffee...`/`X`; ports
+18360/18370/18380) all reached splice + admin takeover, used the refreshed
+token in the live-producer upload, and still got
+`{"status":"error","info":"Invalid Token."}`; marker absent,
+`result-check: positive=0 negative=0 mechanism=1 gap_no_death=1 marker=0
+timing-control=1 safe-control=1`. Log SHA-256s:
+`d3c46809209bb6927b809001582cb1e1ccc731bba942a0967e9e6954c5c25cd6`,
+`4d5745e1de63b7d642659eb570bf5595092269c237bb31645b91ee07ead6c66e`,
+`6341ab3f2cb1be5a742d4700c06f6fe62bbadd185a06c1103dc4505a70b4959d`
+(under `lab/build/evidence/w69-tokenrefresh/`, `w69-tokenrefresh-b/` and `w69-tokenrefresh-c/`). No grade change;
+one-pool progress-on remains takeover-only. Next variant idea: put a chosen
+`token` key in the promoted record so app token generation is skipped — new
+geometry and fresh replay required. Full recipe: report W69 experiment.

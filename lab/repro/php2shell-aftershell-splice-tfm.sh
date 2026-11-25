@@ -42,6 +42,9 @@ GAP=${GAP:-0}
 ONE_POOL=${ONE_POOL:-0}
 [ "$ONE_POOL" = 0 ] || [ "$ONE_POOL" = 1 ] || { echo "ONE_POOL must be 0 or 1"; exit 2; }
 [ "$ONE_POOL" = 0 ] || [ "$GAP" = 1 ] || { echo "ONE_POOL=1 requires GAP=1"; exit 2; }
+TOKEN_REFRESH=${TOKEN_REFRESH:-0}
+[ "$TOKEN_REFRESH" = 0 ] || [ "$TOKEN_REFRESH" = 1 ] || { echo "TOKEN_REFRESH must be 0 or 1"; exit 2; }
+[ "$TOKEN_REFRESH" = 0 ] || [ "$ONE_POOL" = 1 ] || { echo "TOKEN_REFRESH=1 requires ONE_POOL=1"; exit 2; }
 PM_MAX_CHILDREN=1
 [ "$ONE_POOL" = 0 ] || PM_MAX_CHILDREN=2
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
@@ -483,6 +486,14 @@ m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"", d)
 print(m.group(1) if m else "")' "$D/consumerA.out")
     if [ -n "$GAP_TOKEN" ] && ! grep -q 'name="fm_usr"' "$D/consumerA.out" && [ "$GAP_FOUND" = 0 ] && kill -0 "$OLDCHILD" 2>/dev/null && kill -0 "$PRODPID" 2>/dev/null; then
         GAP_PRODUCER_ALIVE_AT_UPLOAD=1
+        if [ "$TOKEN_REFRESH" = 1 ]; then
+            consumer refresh > "$D/consumerR.out" 2>&1
+            GAP_TOKEN=$(python3 -c 'import re,sys
+d=open(sys.argv[1],"r",errors="replace").read()
+m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"", d)
+print(m.group(1) if m else "")' "$D/consumerR.out")
+            echo "gap: refreshed token $GAP_TOKEN from a live consumer GET immediately before upload" | tee -a "$LOG"
+        fi
         upload "$GAP_TOKEN" > "$D/upload.out" 2>&1
         GAP_UPLOAD_DONE=1
         echo "gap: authenticated admin upload fired with token $GAP_TOKEN while producer worker $OLDCHILD and request $PRODPID were live" | tee -a "$LOG"
