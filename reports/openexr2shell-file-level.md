@@ -1860,3 +1860,15 @@ and `bin-fixed-plain` trees symlinked from the live checkout. From the archive,
 `sh harness/w194-fault-attribution.sh` printed `RESULT PASS` rc 0 and all five
 evidence hashes matched the working tree byte-for-byte. Author replay, not a
 witness verdict; grade and rung-5 status unchanged.
+
+ASLR-off control (01:32Z): `setarch "$(uname -m)" -R
+./build-vuln-plain/bin/exrcheck -c cases/p193-e0-{4141,4242,3131}.exr` exits
+rc 1 printing `bad` for all three, with no SIGSEGV
+(`evidence/w194-setarch-{4141,4242,3131}.out`, hashes
+`458fbb6e540a2905792366420810504cd72a35b05c68af839c8312259c6a7499`,
+`1e0018a14a04a99e35b275d4f75ea1c07ca2862014a33ca82270ae38b9e91b25`,
+`6c0da03db97a8314f29e823e5b7008027b0870e64f531803c011572f0850bbfb`).
+With randomization disabled the dump's absolute pointers happen to land on
+valid objects, so the W193 crash is an ASLR-on layout artifact of a stale
+pointer, not a reproducible chosen-pointer dereference. No chosen code pointer
+or IP was observed in this control either.
