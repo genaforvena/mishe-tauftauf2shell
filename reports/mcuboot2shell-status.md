@@ -267,3 +267,12 @@ offsets are **not** demonstrated without the lab groom; rung 4 stands with
 that condition, rung 5 remains UNKNOWN. Host load 8–11 made the old 2 ms
 fragment sleeps flaky, so the clean runner sends fragments contiguously.
 Witness verdicts on all earlier rows remain UNKNOWN.
+
+### W8 replay receipt (2026-11-25 20:38Z)
+
+Scoped commit `6dade634` (15 files). A `git archive HEAD
+lab/frontier/mcuboot2shell` replay into `/tmp/m2s-w8-replay-fHEf5y`, with the
+ignored `upstream-parent/` tree symlinked, ran `sh real/smp/serial-clean.sh`
+to `CLEAN_RUN_DONE`: parent rows 4104/2048/5000/6000/7000 gave
+`SERVER_RC=139/0/139/139/0` and the fixed 4104 control gave 0. Witness
+verdicts remain UNKNOWN; no command execution or witness replay observed.
