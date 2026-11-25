@@ -7,7 +7,7 @@
 set -u
 HERE=$(cd "$(dirname "$0")" || exit 1; pwd)
 N2N=$(cd "$HERE/.." || exit 1; pwd)
-PLAIN=$N2N/provision/build/n2n-plain
+PLAIN=${PLAIN:-$N2N/provision/build/n2n-plain}
 EVID=$HERE/evidence
 PORT_BASE=${PORT_BASE:-18600}
 TOKEN=${TOKEN:-600}

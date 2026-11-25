@@ -350,6 +350,10 @@ plain pinned vulnerable build, no registered peer so the W3 forwarding
 hardware read watchpoints on byte-offset expressions
 `*(unsigned long *)((char *)&nak + OFF)`, dumps the watched words, then
 continues for 22 s.
+The script defaults to the already-built plain tree at
+`lab/frontier/n2n2shell/provision/build/n2n-plain`, which is gitignored;
+from a clean archive, build the plain branch of `replay-live.sh` first and
+pass its tree path as `PLAIN=/path/to/plain-tree`.
 
 - Batch A watched `+128`, `+136`, `+344`, `+432`; batch B watched `+368`,
   `+400`, `+424`, `+464`. In both runs GDB reported `udp_size=638`, and

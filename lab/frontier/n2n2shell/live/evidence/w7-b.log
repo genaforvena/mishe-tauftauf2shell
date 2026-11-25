@@ -1,27 +1,27 @@
 Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-25/Nov/2026 06:15:14 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
-25/Nov/2026 06:15:14 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
-25/Nov/2026 06:15:14 [sn_utils.c:164] calculated shared secrets for edge authentication
-25/Nov/2026 06:15:14 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
-25/Nov/2026 06:15:14 [sn_utils.c:164] calculated shared secrets for edge authentication
-25/Nov/2026 06:15:14 [supernode.c:660] supernode is listening on UDP 18610 (main)
-25/Nov/2026 06:15:14 [supernode.c:669] supernode opened TCP 18610 (aux)
-25/Nov/2026 06:15:14 [supernode.c:676] supernode is listening on TCP 18610 (aux)
-25/Nov/2026 06:15:14 [supernode.c:685] supernode is listening on UDP 18611 (management)
-25/Nov/2026 06:15:14 [supernode.c:711] dropping privileges to uid=65534, gid=65534
-25/Nov/2026 06:15:14 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
-25/Nov/2026 06:15:14 [supernode.c:728] supernode started
+25/Nov/2026 06:17:55 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+25/Nov/2026 06:17:55 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 06:17:55 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:17:55 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 06:17:55 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:17:55 [supernode.c:660] supernode is listening on UDP 18610 (main)
+25/Nov/2026 06:17:55 [supernode.c:669] supernode opened TCP 18610 (aux)
+25/Nov/2026 06:17:55 [supernode.c:676] supernode is listening on TCP 18610 (aux)
+25/Nov/2026 06:17:55 [supernode.c:685] supernode is listening on UDP 18611 (management)
+25/Nov/2026 06:17:55 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 06:17:55 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 06:17:55 [supernode.c:728] supernode started
 
-Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd740, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd800 "\003\003", udp_size=638, now=1795587319) at src/sn_utils.c:2331
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffd6f0, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffd7b0 "\003\003", udp_size=638, now=1795587480) at src/sn_utils.c:2331
 2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
 Hardware read watchpoint 2: -location *(unsigned long *)((char *)&nak + 368)
 Hardware read watchpoint 3: -location *(unsigned long *)((char *)&nak + 400)
 Hardware read watchpoint 4: -location *(unsigned long *)((char *)&nak + 424)
 Hardware read watchpoint 5: -location *(unsigned long *)((char *)&nak + 464)
 W7_AFTER_DECODE
-0x7fffffffc9c0:	0x5a48494d5a48494d
-0x7fffffffc9e0:	0x5a48494d5a48494d
-0x7fffffffc9f8:	0x5a48494d5a48494d
-0x7fffffffca20:	0x5a48494d5a48494d
+0x7fffffffc970:	0x5a48494d5a48494d
+0x7fffffffc990:	0x5a48494d5a48494d
+0x7fffffffc9a8:	0x5a48494d5a48494d
+0x7fffffffc9d0:	0x5a48494d5a48494d
