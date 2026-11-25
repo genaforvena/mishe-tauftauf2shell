@@ -1,0 +1,9 @@
+-- Commit : 2c1c1c6f0602563d2064f2b0c36f13b3c7a09489
+-- Compilation Date: 2026-11-25
+-- Rust Toolchain: 1.99.1-x86_64-unknown-linux-gnu
+-- Rust Target: x86_64-unknown-linux-gnu
+-- Using Corrosion as a subdirectory
+-- rustc >= MSRV(1.87.0)
+-- Configuring done (1.9s)
+-- Generating done (0.2s)
+-- Build files have been written to: /tmp/ccx2shell-asan

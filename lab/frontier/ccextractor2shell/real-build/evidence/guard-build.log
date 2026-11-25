@@ -1,0 +1,601 @@
+[  0%] Built target cargo-prebuild_ccx_rust
+[  0%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/lib_hash/sha2.c.o
+[  1%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/png.c.o
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:567:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+  567 | void CC_SHA256_Final(sha2_byte digest[], SHA256_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+In file included from /tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:36:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:153:22: note: previously declared as ‘u_int8_t[32]’ {aka ‘unsigned char[32]’}
+  153 | void CC_SHA256_Final(u_int8_t[SHA256_DIGEST_LENGTH], SHA256_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:630:44: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+  630 | char *SHA256_End(SHA256_CTX* context, char buffer[]) {
+      |                                       ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:154:31: note: previously declared as ‘char[65]’
+  154 | char* SHA256_End(SHA256_CTX*, char[SHA256_DIGEST_STRING_LENGTH]);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:930:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+  930 | void CC_SHA512_Final(sha2_byte digest[], SHA512_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:165:22: note: previously declared as ‘u_int8_t[64]’ {aka ‘unsigned char[64]’}
+  165 | void CC_SHA512_Final(u_int8_t[SHA512_DIGEST_LENGTH], SHA512_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:959:47: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+  959 | char *CC_SHA512_End(SHA512_CTX* context, char buffer[]) {
+      |                                          ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:166:34: note: previously declared as ‘char[129]’
+  166 | char* CC_SHA512_End(SHA512_CTX*, char[SHA512_DIGEST_STRING_LENGTH]);
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:1005:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+ 1005 | void CC_SHA384_Final(sha2_byte digest[], SHA384_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:159:22: note: previously declared as ‘u_int8_t[48]’ {aka ‘unsigned char[48]’}
+  159 | void CC_SHA384_Final(u_int8_t[SHA384_DIGEST_LENGTH], SHA384_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:1034:44: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+ 1034 | char *SHA384_End(SHA384_CTX* context, char buffer[]) {
+      |                                       ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:160:31: note: previously declared as ‘char[97]’
+  160 | char* SHA384_End(SHA384_CTX*, char[SHA384_DIGEST_STRING_LENGTH]);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+[  1%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngerror.c.o
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c: In function ‘png_convert_to_rfc1123_buffer’:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1755:4: warning: ‘number_buf’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1755 |    png_format_number(buffer, buffer + (sizeof buffer), format, number)
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:757:69: note: in definition of macro ‘APPEND_STRING’
+  757 | #     define APPEND_STRING(string) pos = png_safecat(out, 29, pos, (string))
+      |                                                                     ^~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:759:24: note: in expansion of macro ‘PNG_FORMAT_NUMBER’
+  759 |          APPEND_STRING(PNG_FORMAT_NUMBER(number_buf, format, (value)))
+      |                        ^~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:762:7: note: in expansion of macro ‘APPEND_NUMBER’
+  762 |       APPEND_NUMBER(PNG_NUMBER_FORMAT_u, (unsigned)ptime->day);
+      |       ^~~~~~~~~~~~~
+In file included from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.h:335,
+                 from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:386,
+                 from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:14:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1750:33: note: by argument 1 of type ‘png_const_charp’ {aka ‘const char *’} to ‘png_format_number’ declared here
+ 1750 | PNG_INTERNAL_FUNCTION(png_charp,png_format_number,(png_const_charp start,
+      |                                 ^~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngconf.h:287:70: note: in definition of macro ‘PNG_FUNCTION’
+  287 | #  define PNG_FUNCTION(type, name, args, attributes) attributes type name args
+      |                                                                      ^~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1750:1: note: in expansion of macro ‘PNG_INTERNAL_FUNCTION’
+ 1750 | PNG_INTERNAL_FUNCTION(png_charp,png_format_number,(png_const_charp start,
+      | ^~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:755:12: note: ‘number_buf’ declared here
+  755 |       char number_buf[5]; /* enough for a four-digit year */
+      |            ^~~~~~~~~~
+[  2%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngget.c.o
+[  2%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngmem.c.o
+[  3%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngpread.c.o
+[  3%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngread.c.o
+[  4%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngrio.c.o
+warning: failed to connect to jobserver from environment variable `MAKEFLAGS="s -j2 --jobserver-auth=3,4"`: cannot open file descriptor 3 from the jobserver environment variable value: Bad file descriptor (os error 9)
+   Compiling proc-macro2 v1.0.103
+   Compiling quote v1.0.42
+[  5%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngrtran.c.o
+   Compiling unicode-ident v1.0.22
+   Compiling libc v0.2.178
+   Compiling stable_deref_trait v1.2.1
+   Compiling writeable v0.6.2
+   Compiling syn v2.0.111
+   Compiling memchr v2.7.6
+[  5%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngrutil.c.o
+   Compiling smallvec v1.15.1
+[  6%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngset.c.o
+   Compiling litemap v0.8.1
+[  6%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngtrans.c.o
+[  7%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngwio.c.o
+[  7%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngwrite.c.o
+   Compiling glob v0.3.3
+[  8%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngwtran.c.o
+[  8%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/libpng/pngwutil.c.o
+   Compiling icu_normalizer_data v2.1.1
+   Compiling icu_properties_data v2.1.2
+   Compiling clang-sys v1.8.1
+   Compiling synstructure v0.13.2
+[  9%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/adler32.c.o
+[ 10%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/compress.c.o
+[ 10%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/crc32.c.o
+[ 11%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/deflate.c.o
+   Compiling rustversion v1.0.22
+   Compiling cfg-if v1.0.4
+   Compiling autocfg v1.5.0
+[ 11%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/gzclose.c.o
+[ 12%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/gzlib.c.o
+[ 12%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/gzread.c.o
+   Compiling hashbrown v0.16.1
+[ 13%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/gzwrite.c.o
+[ 13%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/infback.c.o
+   Compiling prettyplease v0.2.37
+   Compiling winnow v0.7.14
+[ 14%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/inffast.c.o
+[ 14%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/inflate.c.o
+   Compiling zerofrom-derive v0.1.6
+[ 15%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/inftrees.c.o
+[ 16%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/trees.c.o
+[ 16%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/uncompr.c.o
+[ 17%] Building C object lib_ccx/CMakeFiles/ccx.dir/__/thirdparty/zlib/zutil.c.o
+[ 17%] Building C object lib_ccx/CMakeFiles/ccx.dir/zvbi/bit_slicer.c.o
+   Compiling yoke-derive v0.8.1
+   Compiling zerofrom v0.1.6
+   Compiling zerovec-derive v0.11.2
+[ 18%] Building C object lib_ccx/CMakeFiles/ccx.dir/zvbi/decoder.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c: In function ‘vbi_raw_decoder_resize’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:551:25: warning: variable ‘service_set’ set but not used [-Wunused-but-set-variable]
+  551 |         vbi_service_set service_set;
+      |                         ^~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c: In function ‘bit_slicer_tmpl’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:121:30: warning: ‘mask’ may be used uninitialized [-Wmaybe-uninitialized]
+  121 |                         raw1 = (raw[2 + endian] + raw[3 - endian] * 256) & mask;
+      |                         ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:105:25: note: ‘mask’ was declared here
+  105 |         int raw0, raw1, mask;
+      |                         ^~~~
+[ 18%] Building C object lib_ccx/CMakeFiles/ccx.dir/zvbi/raw_decoder.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/raw_decoder.c: In function ‘vbi3_raw_decoder_debug’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/raw_decoder.c:1287:36: warning: variable ‘sp_lines’ set but not used [-Wunused-but-set-variable]
+ 1287 |         _vbi3_raw_decoder_sp_line *sp_lines;
+      |                                    ^~~~~~~~
+[ 19%] Building C object lib_ccx/CMakeFiles/ccx.dir/zvbi/sampling_par.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/sampling_par.c: In function ‘_vbi_sampling_par_from_services_log’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/sampling_par.c:437:24: warning: variable ‘margin’ set but not used [-Wunused-but-set-variable]
+  437 |                 double margin;
+      |                        ^~~~~~
+   Compiling yoke v0.8.1
+[ 19%] Building C object lib_ccx/CMakeFiles/ccx.dir/activity.c.o
+   Compiling displaydoc v0.2.5
+   Compiling zerovec v0.11.5
+[ 20%] Building C object lib_ccx/CMakeFiles/ccx.dir/asf_functions.c.o
+[ 20%] Building C object lib_ccx/CMakeFiles/ccx.dir/avc_functions.c.o
+   Compiling potential_utf v0.1.4
+   Compiling equivalent v1.0.2
+   Compiling indexmap v2.12.1
+   Compiling tinystr v0.8.2
+   Compiling icu_locale_core v2.1.1
+[ 21%] Building C object lib_ccx/CMakeFiles/ccx.dir/cc_bitstream.c.o
+[ 22%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_common_char_encoding.c.o
+[ 22%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_common_common.c.o
+[ 23%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_common_constants.c.o
+[ 23%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_common_option.c.o
+   Compiling zerotrie v0.2.3
+[ 24%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_common_timing.c.o
+[ 24%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_608.c.o
+   Compiling icu_provider v2.1.1
+   Compiling icu_collections v2.1.1
+   Compiling toml_parser v1.0.4
+[ 25%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_708.c.o
+   Compiling num-traits v0.2.19
+   Compiling aho-corasick v1.1.4
+   Compiling minimal-lexical v0.2.1
+[ 25%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_708_encoding.c.o
+[ 26%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_708_output.c.o
+   Compiling futures-core v0.3.31
+   Compiling regex-syntax v0.8.8
+[ 26%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_common.c.o
+[ 27%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_isdb.c.o
+In function ‘parse_statement’,
+    inlined from ‘parse_data_unit’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_decoders_isdb.c:1292:4,
+    inlined from ‘parse_caption_statement_data’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_decoders_isdb.c:1312:8:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_decoders_isdb.c:1273:21: warning: ‘ret’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1273 |                 buf += ret;
+      |                     ^~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_decoders_isdb.c: In function ‘parse_caption_statement_data’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_decoders_isdb.c:1244:13: note: ‘ret’ was declared here
+ 1244 |         int ret;
+      |             ^~~
+[ 28%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_vbi.c.o
+[ 28%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_decoders_xds.c.o
+[ 29%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_demuxer.c.o
+[ 29%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_demuxer_mxf.c.o
+   Compiling futures-sink v0.3.31
+   Compiling serde_core v1.0.228
+   Compiling rand_core v0.6.4
+[ 30%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_dtvcc.c.o
+   Compiling siphasher v1.0.1
+[ 30%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_common.c.o
+   Compiling toml_datetime v0.7.3
+   Compiling phf_shared v0.11.3
+   Compiling toml_edit v0.23.9
+   Compiling libloading v0.8.9
+   Compiling rand v0.8.6
+[ 31%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_curl.c.o
+[ 31%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_g608.c.o
+[ 32%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_helpers.c.o
+   Compiling futures-channel v0.3.31
+   Compiling regex-automata v0.4.13
+[ 32%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_mcc.c.o
+[ 33%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_sami.c.o
+   Compiling nom v7.1.3
+[ 34%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_scc.c.o
+[ 34%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_smptett.c.o
+[ 35%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_splitbysentence.c.o
+[ 35%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_spupng.c.o
+[ 36%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_srt.c.o
+[ 36%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_ssa.c.o
+[ 37%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_transcript.c.o
+[ 37%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_webvtt.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_encoders_webvtt.c: In function ‘write_cc_buffer_as_webvtt’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_encoders_webvtt.c:526:70: warning: ‘color_events’ may be used uninitialized [-Wmaybe-uninitialized]
+  526 |                                         int open_color = color_events[j] & 0xFF; // Last 16 bytes
+      |                                                          ~~~~~~~~~~~~^~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_encoders_webvtt.c:492:30: note: ‘color_events’ was declared here
+  492 |                         int *color_events;
+      |                              ^~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_encoders_webvtt.c:516:68: warning: ‘font_events’ may be used uninitialized [-Wmaybe-uninitialized]
+  516 |                                         int open_font = font_events[j] & 0xFF; // Last 16 bytes
+      |                                                         ~~~~~~~~~~~^~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_encoders_webvtt.c:493:30: note: ‘font_events’ was declared here
+  493 |                         int *font_events;
+      |                              ^~~~~~~~~~~
+[ 38%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_encoders_xds.c.o
+[ 38%] Building C object lib_ccx/CMakeFiles/ccx.dir/ccx_gxf.c.o
+   Compiling icu_properties v2.1.2
+In function ‘read_packet’,
+    inlined from ‘ccx_gxf_get_more_data’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1406:8:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1331:9: warning: ‘type’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1331 |         switch (type)
+      |         ^~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c: In function ‘ccx_gxf_get_more_data’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1327:20: note: ‘type’ was declared here
+ 1327 |         GXFPktType type;
+      |                    ^~~~
+In function ‘parse_media’,
+    inlined from ‘read_packet’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1338:10,
+    inlined from ‘ccx_gxf_get_more_data’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1406:8:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1222:17: warning: ‘mpeg_pic_size’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1222 |                 parse_mpeg_packet(demux, mpeg_pic_size, data);
+      |                 ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c: In function ‘ccx_gxf_get_more_data’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1116:22: note: ‘mpeg_pic_size’ was declared here
+ 1116 |         unsigned int mpeg_pic_size;
+      |                      ^~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ccx_gxf.c:1117:22: warning: ‘mpeg_frame_desc_flag’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1117 |         unsigned int mpeg_frame_desc_flag;
+      |                      ^~~~~~~~~~~~~~~~~~~~
+[ 39%] Building C object lib_ccx/CMakeFiles/ccx.dir/dvb_subtitle_decoder.c.o
+   Compiling icu_normalizer v2.1.1
+[ 40%] Building C object lib_ccx/CMakeFiles/ccx.dir/dvd_subtitle_decoder.c.o
+[ 40%] Building C object lib_ccx/CMakeFiles/ccx.dir/es_functions.c.o
+[ 41%] Building C object lib_ccx/CMakeFiles/ccx.dir/es_userdata.c.o
+   Compiling bindgen v0.72.1
+   Compiling parking_lot_core v0.9.12
+[ 41%] Building C object lib_ccx/CMakeFiles/ccx.dir/ffmpeg_intgr.c.o
+[ 42%] Building C object lib_ccx/CMakeFiles/ccx.dir/file_functions.c.o
+   Compiling heck v0.5.0
+   Compiling either v1.15.0
+   Compiling serde v1.0.228
+   Compiling pin-utils v0.1.0
+[ 42%] Building C object lib_ccx/CMakeFiles/ccx.dir/general_loop.c.o
+   Compiling pin-project-lite v0.2.16
+   Compiling futures-task v0.3.31
+   Compiling utf8parse v0.2.2
+   Compiling slab v0.4.11
+   Compiling futures-io v0.3.31
+   Compiling futures-util v0.3.31
+   Compiling anstyle-parse v0.2.7
+   Compiling itertools v0.13.0
+[ 43%] Building C object lib_ccx/CMakeFiles/ccx.dir/hardsubx.c.o
+[ 43%] Building C object lib_ccx/CMakeFiles/ccx.dir/hardsubx_classifier.c.o
+[ 44%] Building C object lib_ccx/CMakeFiles/ccx.dir/hardsubx_decoder.c.o
+[ 44%] Building C object lib_ccx/CMakeFiles/ccx.dir/hardsubx_imgops.c.o
+[ 45%] Building C object lib_ccx/CMakeFiles/ccx.dir/hardsubx_utility.c.o
+[ 46%] Building C object lib_ccx/CMakeFiles/ccx.dir/lib_ccx.c.o
+[ 46%] Building C object lib_ccx/CMakeFiles/ccx.dir/matroska.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/matroska.c:738:13: warning: ‘bswap32’ defined but not used [-Wunused-function]
+  738 | static long bswap32(long v)
+      |             ^~~~~~~
+   Compiling idna_adapter v1.2.1
+[ 47%] Building C object lib_ccx/CMakeFiles/ccx.dir/mp4.c.o
+In file included from /tmp/ccx2shell-deps/root/usr/include/gpac/setup.h:59,
+                 from /tmp/ccx2shell-deps/root/usr/include/gpac/tools.h:33,
+                 from /tmp/ccx2shell-deps/root/usr/include/gpac/isomedia.h:74,
+                 from /tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:5:
+/tmp/ccx2shell-deps/root/usr/include/gpac/configuration.h:23: warning: "GPAC_64_BITS" redefined
+   23 | #define GPAC_64_BITS
+      | 
+<command-line>: note: this is the location of the previous definition
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c: In function ‘process_tx3g’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:808:35: warning: unused variable ‘last_sub’ [-Wunused-variable]
+  808 |         static struct cc_subtitle last_sub;
+      |                                   ^~~~~~~~
+In function ‘process_avc_sample’,
+    inlined from ‘process_avc_track’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:296:13,
+    inlined from ‘processmp4’ at /tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:1009:9:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:83:33: warning: ‘nal_length’ may be used uninitialized [-Wmaybe-uninitialized]
+   83 |                 if ((uint64_t)i + nal_length <= previous_index || (uint64_t)i + nal_length > s->dataLength)
+      |                     ~~~~~~~~~~~~^~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c: In function ‘processmp4’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:57:21: note: ‘nal_length’ was declared here
+   57 |                 u32 nal_length;
+      |                     ^~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c: In function ‘dumpchapters’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:1302:17: warning: ‘t’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1302 |                 gf_fclose(t);
+      |                 ^~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/mp4.c:1267:15: note: ‘t’ was declared here
+ 1267 |         FILE *t;
+      |               ^
+[ 47%] Building C object lib_ccx/CMakeFiles/ccx.dir/mp4_rust_bridge.c.o
+[ 48%] Building C object lib_ccx/CMakeFiles/ccx.dir/myth.c.o
+[ 48%] Building C object lib_ccx/CMakeFiles/ccx.dir/networking.c.o
+   Compiling regex v1.12.2
+[ 49%] Building C object lib_ccx/CMakeFiles/ccx.dir/ocr.c.o
+[ 49%] Building C object lib_ccx/CMakeFiles/ccx.dir/output.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/output.c: In function ‘writeDVDraw’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/output.c:142:20: warning: variable ‘waiting_for_field2’ set but not used [-Wunused-but-set-variable]
+  142 |         static int waiting_for_field2 = 0; /* track if we're waiting for field 2 data */
+      |                    ^~~~~~~~~~~~~~~~~~
+   Compiling cexpr v0.6.0
+[ 50%] Building C object lib_ccx/CMakeFiles/ccx.dir/params.c.o
+In file included from /tmp/ccx2shell-deps/root/usr/include/gpac/setup.h:59,
+                 from /tmp/ccx2shell-upstream-guard/src/lib_ccx/params.c:3:
+/tmp/ccx2shell-deps/root/usr/include/gpac/configuration.h:23: warning: "GPAC_64_BITS" redefined
+   23 | #define GPAC_64_BITS
+      | 
+<command-line>: note: this is the location of the previous definition
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/params.c:43:12: warning: ‘inputfile_capacity’ defined but not used [-Wunused-variable]
+   43 | static int inputfile_capacity = 0;
+      |            ^~~~~~~~~~~~~~~~~~
+[ 50%] Building C object lib_ccx/CMakeFiles/ccx.dir/params_dump.c.o
+[ 51%] Building C object lib_ccx/CMakeFiles/ccx.dir/sequencing.c.o
+[ 52%] Building C object lib_ccx/CMakeFiles/ccx.dir/stream_functions.c.o
+[ 52%] Building C object lib_ccx/CMakeFiles/ccx.dir/telxcc.c.o
+[ 53%] Building C object lib_ccx/CMakeFiles/ccx.dir/ts_functions.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ts_functions.c: In function ‘ts_readstream’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ts_functions.c:921:55: warning: ‘pid_index’ may be used uninitialized [-Wmaybe-uninitialized]
+  921 |                                 if (pts < ctx->min_pts[pid_index])
+      |                                           ~~~~~~~~~~~~^~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/ts_functions.c:916:37: note: ‘pid_index’ was declared here
+  916 |                                 int pid_index;
+      |                                     ^~~~~~~~~
+[ 53%] Building C object lib_ccx/CMakeFiles/ccx.dir/ts_info.c.o
+[ 54%] Building C object lib_ccx/CMakeFiles/ccx.dir/ts_tables.c.o
+   Compiling proc-macro-crate v3.4.0
+[ 54%] Building C object lib_ccx/CMakeFiles/ccx.dir/ts_tables_epg.c.o
+   Compiling phf_generator v0.11.3
+[ 55%] Building C object lib_ccx/CMakeFiles/ccx.dir/utility.c.o
+   Compiling serde_derive v1.0.228
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/utility.c:20:17: warning: ‘crc32_table’ defined but not used [-Wunused-variable]
+   20 | static uint32_t crc32_table[] = {
+      |                 ^~~~~~~~~~~
+[ 55%] Building C object lib_ccx/CMakeFiles/ccx.dir/vobsub_decoder.c.o
+[ 56%] Building C object lib_ccx/CMakeFiles/ccx.dir/wtv_functions.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/wtv_functions.c: In function ‘get_data’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/wtv_functions.c:437:20: warning: variable ‘has_teletext’ set but not used [-Wunused-but-set-variable]
+  437 |         static int has_teletext = 0; // Flag to indicate we found teletext streams
+      |                    ^~~~~~~~~~~~
+[ 57%] Linking C static library libccx.a
+[ 57%] Built target ccx
+   Compiling bitflags v2.10.0
+   Compiling is_terminal_polyfill v1.70.2
+   Compiling colorchoice v1.0.4
+   Compiling scopeguard v1.2.0
+   Compiling percent-encoding v2.3.2
+   Compiling powerfmt v0.2.0
+   Compiling anstyle-query v1.1.5
+   Compiling anstyle v1.0.13
+   Compiling log v0.4.29
+   Compiling rustc-hash v2.1.1
+   Compiling crc32fast v1.5.0
+   Compiling thiserror v1.0.69
+   Compiling shlex v1.3.0
+   Compiling utf8_iter v1.0.4
+   Compiling time-core v0.1.8
+   Compiling num-conv v0.2.0
+   Compiling idna v1.1.0
+   Compiling time-macros v0.2.27
+   Compiling anstream v0.6.21
+   Compiling deranged v0.5.5
+   Compiling form_urlencoded v1.2.2
+   Compiling lock_api v0.4.14
+   Compiling num_enum_derive v0.7.5
+   Compiling phf_macros v0.11.3
+   Compiling futures-executor v0.3.31
+   Compiling thiserror-impl v1.0.69
+   Compiling pkg-config v0.3.32
+   Compiling itoa v1.0.15
+   Compiling strsim v0.11.1
+   Compiling clap_lex v0.7.6
+   Compiling sdd v3.0.10
+   Compiling convert_case v0.4.0
+   Compiling by_address v1.2.1
+   Compiling palette v0.7.6
+   Compiling derive_more v0.99.20
+   Compiling time v0.3.47
+   Compiling palette_derive v0.7.6
+   Compiling scc v2.4.0
+   Compiling clap_builder v4.5.53
+   Compiling ccx_rust v0.1.0 (/tmp/ccx2shell-upstream-guard/src/rust)
+   Compiling phf v0.11.3
+   Compiling parking_lot v0.12.5
+   Compiling futures v0.3.31
+   Compiling num_enum v0.7.5
+   Compiling url v2.5.7
+   Compiling approx v0.5.1
+   Compiling strum_macros v0.26.4
+   Compiling clap_derive v4.5.49
+   Compiling serial_test_derive v3.2.0
+   Compiling atty v0.2.14
+   Compiling socket2 v0.5.10
+   Compiling once_cell v1.21.3
+   Compiling fast-srgb8 v1.0.0
+   Compiling humantime v2.3.0
+   Compiling heck v0.4.1
+   Compiling termcolor v1.4.1
+   Compiling strum v0.26.3
+   Compiling env_logger v0.8.4
+   Compiling lib_ccxr v0.1.0 (/tmp/ccx2shell-upstream-guard/src/rust/lib_ccxr)
+   Compiling strum_macros v0.25.3
+   Compiling serial_test v3.2.0
+   Compiling clap v4.5.53
+   Compiling num-integer v0.1.46
+   Compiling encoding_rs v0.8.35
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1m 48s
+Copying byproducts `libccx_rust.a` to /tmp/ccx2shell-guard-build/rust
+[ 57%] Built target _cargo-build_ccx_rust
+[ 57%] Built target cargo-build_ccx_rust
+[ 58%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/png.c.o
+[ 58%] Building C object CMakeFiles/ccextractor.dir/thirdparty/lib_hash/sha2.c.o
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:567:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+  567 | void CC_SHA256_Final(sha2_byte digest[], SHA256_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+In file included from /tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:36:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:153:22: note: previously declared as ‘u_int8_t[32]’ {aka ‘unsigned char[32]’}
+  153 | void CC_SHA256_Final(u_int8_t[SHA256_DIGEST_LENGTH], SHA256_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:630:44: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+  630 | char *SHA256_End(SHA256_CTX* context, char buffer[]) {
+      |                                       ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:154:31: note: previously declared as ‘char[65]’
+  154 | char* SHA256_End(SHA256_CTX*, char[SHA256_DIGEST_STRING_LENGTH]);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:930:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+  930 | void CC_SHA512_Final(sha2_byte digest[], SHA512_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:165:22: note: previously declared as ‘u_int8_t[64]’ {aka ‘unsigned char[64]’}
+  165 | void CC_SHA512_Final(u_int8_t[SHA512_DIGEST_LENGTH], SHA512_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:959:47: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+  959 | char *CC_SHA512_End(SHA512_CTX* context, char buffer[]) {
+      |                                          ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:166:34: note: previously declared as ‘char[129]’
+  166 | char* CC_SHA512_End(SHA512_CTX*, char[SHA512_DIGEST_STRING_LENGTH]);
+      |                                  ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:1005:32: warning: argument 1 of type ‘sha2_byte[]’ {aka ‘unsigned char[]’} with mismatched bound [-Warray-parameter=]
+ 1005 | void CC_SHA384_Final(sha2_byte digest[], SHA384_CTX* context) {
+      |                      ~~~~~~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:159:22: note: previously declared as ‘u_int8_t[48]’ {aka ‘unsigned char[48]’}
+  159 | void CC_SHA384_Final(u_int8_t[SHA384_DIGEST_LENGTH], SHA384_CTX*);
+      |                      ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.c:1034:44: warning: argument 2 of type ‘char[]’ with mismatched bound [-Warray-parameter=]
+ 1034 | char *SHA384_End(SHA384_CTX* context, char buffer[]) {
+      |                                       ~~~~~^~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/lib_hash/sha2.h:160:31: note: previously declared as ‘char[97]’
+  160 | char* SHA384_End(SHA384_CTX*, char[SHA384_DIGEST_STRING_LENGTH]);
+      |                               ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c: In function ‘png_convert_to_rfc1123_buffer’:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1755:4: warning: ‘number_buf’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1755 |    png_format_number(buffer, buffer + (sizeof buffer), format, number)
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:757:69: note: in definition of macro ‘APPEND_STRING’
+  757 | #     define APPEND_STRING(string) pos = png_safecat(out, 29, pos, (string))
+      |                                                                     ^~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:759:24: note: in expansion of macro ‘PNG_FORMAT_NUMBER’
+  759 |          APPEND_STRING(PNG_FORMAT_NUMBER(number_buf, format, (value)))
+      |                        ^~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:762:7: note: in expansion of macro ‘APPEND_NUMBER’
+  762 |       APPEND_NUMBER(PNG_NUMBER_FORMAT_u, (unsigned)ptime->day);
+      |       ^~~~~~~~~~~~~
+In file included from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.h:335,
+                 from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:386,
+                 from /tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:14:
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1750:33: note: by argument 1 of type ‘png_const_charp’ {aka ‘const char *’} to ‘png_format_number’ declared here
+ 1750 | PNG_INTERNAL_FUNCTION(png_charp,png_format_number,(png_const_charp start,
+      |                                 ^~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngconf.h:287:70: note: in definition of macro ‘PNG_FUNCTION’
+  287 | #  define PNG_FUNCTION(type, name, args, attributes) attributes type name args
+      |                                                                      ^~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/pngpriv.h:1750:1: note: in expansion of macro ‘PNG_INTERNAL_FUNCTION’
+ 1750 | PNG_INTERNAL_FUNCTION(png_charp,png_format_number,(png_const_charp start,
+      | ^~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/thirdparty/libpng/png.c:755:12: note: ‘number_buf’ declared here
+  755 |       char number_buf[5]; /* enough for a four-digit year */
+      |            ^~~~~~~~~~
+[ 58%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngerror.c.o
+[ 59%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngget.c.o
+[ 59%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngmem.c.o
+[ 60%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngpread.c.o
+[ 60%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngread.c.o
+[ 61%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngrio.c.o
+[ 61%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngrtran.c.o
+[ 62%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngrutil.c.o
+[ 63%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngset.c.o
+[ 63%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngtrans.c.o
+[ 64%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngwio.c.o
+[ 64%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngwrite.c.o
+[ 65%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngwtran.c.o
+[ 65%] Building C object CMakeFiles/ccextractor.dir/thirdparty/libpng/pngwutil.c.o
+[ 66%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/adler32.c.o
+[ 66%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/compress.c.o
+[ 67%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/crc32.c.o
+[ 67%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/deflate.c.o
+[ 68%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/gzclose.c.o
+[ 69%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/gzlib.c.o
+[ 69%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/gzread.c.o
+[ 70%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/gzwrite.c.o
+[ 70%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/infback.c.o
+[ 71%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/inffast.c.o
+[ 71%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/inflate.c.o
+[ 72%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/inftrees.c.o
+[ 72%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/trees.c.o
+[ 73%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/uncompr.c.o
+[ 73%] Building C object CMakeFiles/ccextractor.dir/thirdparty/zlib/zutil.c.o
+[ 74%] Building C object CMakeFiles/ccextractor.dir/lib_ccx/zvbi/bit_slicer.c.o
+[ 75%] Building C object CMakeFiles/ccextractor.dir/lib_ccx/zvbi/decoder.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c: In function ‘vbi_raw_decoder_resize’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:551:25: warning: variable ‘service_set’ set but not used [-Wunused-but-set-variable]
+  551 |         vbi_service_set service_set;
+      |                         ^~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c: In function ‘bit_slicer_tmpl’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:121:30: warning: ‘mask’ may be used uninitialized [-Wmaybe-uninitialized]
+  121 |                         raw1 = (raw[2 + endian] + raw[3 - endian] * 256) & mask;
+      |                         ~~~~~^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/decoder.c:105:25: note: ‘mask’ was declared here
+  105 |         int raw0, raw1, mask;
+      |                         ^~~~
+[ 75%] Building C object CMakeFiles/ccextractor.dir/lib_ccx/zvbi/raw_decoder.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/raw_decoder.c: In function ‘vbi3_raw_decoder_debug’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/raw_decoder.c:1287:36: warning: variable ‘sp_lines’ set but not used [-Wunused-but-set-variable]
+ 1287 |         _vbi3_raw_decoder_sp_line *sp_lines;
+      |                                    ^~~~~~~~
+[ 76%] Building C object CMakeFiles/ccextractor.dir/lib_ccx/zvbi/sampling_par.c.o
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/sampling_par.c: In function ‘_vbi_sampling_par_from_services_log’:
+/tmp/ccx2shell-upstream-guard/src/lib_ccx/zvbi/sampling_par.c:437:24: warning: variable ‘margin’ set but not used [-Wunused-but-set-variable]
+  437 |                 double margin;
+      |                        ^~~~~~
+[ 76%] Building C object CMakeFiles/ccextractor.dir/ccextractor.c.o
+[ 77%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/autofit/autofit.c.o
+[ 77%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftbase.c.o
+[ 78%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftbbox.c.o
+[ 78%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftbdf.c.o
+[ 79%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftbitmap.c.o
+[ 79%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftcid.c.o
+[ 80%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftfntfmt.c.o
+[ 81%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftfstype.c.o
+[ 81%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftgasp.c.o
+[ 82%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftglyph.c.o
+[ 82%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftgxval.c.o
+[ 83%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftinit.c.o
+[ 83%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftlcdfil.c.o
+[ 84%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftmm.c.o
+[ 84%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftotval.c.o
+[ 85%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftpatent.c.o
+[ 85%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftpfr.c.o
+[ 86%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftstroke.c.o
+[ 87%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftsynth.c.o
+[ 87%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftsystem.c.o
+[ 88%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/fttype1.c.o
+[ 88%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/base/ftwinfnt.c.o
+[ 89%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/bdf/bdf.c.o
+[ 89%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/bzip2/ftbzip2.c.o
+[ 90%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/cache/ftcache.c.o
+[ 90%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/cff/cff.c.o
+[ 91%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/cid/type1cid.c.o
+[ 91%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/gzip/ftgzip.c.o
+[ 92%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/lzw/ftlzw.c.o
+[ 93%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/pcf/pcf.c.o
+[ 93%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/pfr/pfr.c.o
+[ 94%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/psaux/psaux.c.o
+[ 94%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/pshinter/pshinter.c.o
+[ 95%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/psnames/psnames.c.o
+[ 95%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/raster/raster.c.o
+[ 96%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/sfnt/sfnt.c.o
+[ 96%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/smooth/smooth.c.o
+[ 97%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/truetype/truetype.c.o
+[ 97%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/type1/type1.c.o
+[ 98%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/type42/type42.c.o
+[ 99%] Building C object CMakeFiles/ccextractor.dir/thirdparty/freetype/winfonts/winfnt.c.o
+[ 99%] Building C object CMakeFiles/ccextractor.dir/thirdparty/utf8proc/utf8proc.c.o
+[100%] Linking C executable ccextractor
+[100%] Built target ccextractor

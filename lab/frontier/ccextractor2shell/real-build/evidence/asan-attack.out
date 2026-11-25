@@ -1,0 +1,87 @@
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: lab/frontier/ccextractor2shell/real-build/inputs/attack.gxf
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: No]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+
+-----------------------------------------------------------------
+[KOpening file: lab/frontier/ccextractor2shell/real-build/inputs/attack.gxf
+File seems to be a GXF[KAnalyzing data in general mode
+  0%  |  00:00=================================================================
+==2825984==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x7aa4760d0878 at pc 0x7aa48ba79d69 bp 0x7ffd2b7a7490 sp 0x7ffd2b7a6c48
+WRITE of size 1052736 at 0x7aa4760d0878 thread T0
+    #0 0x7aa48ba79d68 in read ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:978
+    #1 0x62733dd5944d in read /usr/include/x86_64-linux-gnu/bits/unistd.h:28
+    #2 0x62733dd5944d in buffered_read_opt /tmp/ccx2shell-upstream-asan/src/lib_ccx/file_functions.c:376
+    #3 0x62733ddd6f9c in buffered_read /tmp/ccx2shell-upstream-asan/src/lib_ccx/file_buffer.h:72
+    #4 0x62733ddd6f9c in parse_mpeg_packet /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:943
+    #5 0x62733ddd6f9c in parse_media /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1219
+    #6 0x62733ddd6f9c in read_packet /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1335
+    #7 0x62733ddd6f9c in ccx_gxf_get_more_data /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1403
+    #8 0x62733dd63218 in general_loop /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1447
+    #9 0x62733dbc680c in start_ccx /tmp/ccx2shell-upstream-asan/src/ccextractor.c:200
+    #10 0x62733dbc823c in main /tmp/ccx2shell-upstream-asan/src/ccextractor.c:508
+    #11 0x7aa48ac2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x7aa48ac2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x62733db38fd4 in _start (/tmp/ccx2shell-asan/ccextractor+0x153fd4) (BuildId: 837bfd84638ca6e07f717bbeb0caee85a983c708)
+
+0x7aa4760d0878 is located 0 bytes after 2097272-byte region [0x7aa475ed0800,0x7aa4760d0878)
+allocated by thread T0 here:
+    #0 0x7aa48bafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x62733ddcb886 in alloc_demuxer_data /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_demuxer.c:452
+    #2 0x62733ddd1053 in ccx_gxf_get_more_data /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1387
+    #3 0x62733dd63218 in general_loop /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:1447
+    #4 0x62733dbc680c in start_ccx /tmp/ccx2shell-upstream-asan/src/ccextractor.c:200
+    #5 0x62733dbc823c in main /tmp/ccx2shell-upstream-asan/src/ccextractor.c:508
+    #6 0x7aa48ac2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7aa48ac2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x62733db38fd4 in _start (/tmp/ccx2shell-asan/ccextractor+0x153fd4) (BuildId: 837bfd84638ca6e07f717bbeb0caee85a983c708)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:978 in read
+Shadow bytes around the buggy address:
+  0x7aa4760d0580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7aa4760d0600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7aa4760d0680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7aa4760d0700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7aa4760d0780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7aa4760d0800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]
+  0x7aa4760d0880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7aa4760d0900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7aa4760d0980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7aa4760d0a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x7aa4760d0a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2825984==ABORTING

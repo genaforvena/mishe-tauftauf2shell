@@ -1,13 +1,16 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 (staging): **STAGED**, rung 3 in the pinned verbatim
-`parse_mpeg_packet()` under ASan with a stand-in `buffered_read` (`memcpy`) and
-stand-in structs; rung 4 PARTIAL (chosen bytes readable at the nominal
-`BUFSIZE` boundary in a slack-allocated stand-in layout). No CVE/GHSA found,
-no upstream fix PR found (fix status UNKNOWN; the guard in the harness is a
-local hunk only), no real ccextractor build, no GXF file or wire path, no
-pointer/IP/command control and no rung 5. Witness verdict UNKNOWN. No
-admission, window, registry or resolver action is claimed by this brief.
+Status 2026-11-25 05:4xZ: **real pinned-tree build executed**. Rung 3 is
+CONFIRMED through the real `buffered_read`/`read(2)` consumer into a real
+`malloc(BUFSIZE)` region: an ASan `WRITE` from a locally crafted `.gxf` MEDIA
+packet, with the full call stack through `parse_mpeg_packet`. Rung 4 is
+CONFIRMED with the condition that chosen bytes were observed by debugger
+inspection of the live buffer after the read (no in-program consumer readback,
+no pointer/IP/command control). Rung 5 and witness verdict remain UNKNOWN.
+No CVE/GHSA and no upstream fix PR were observed; the guard is a local hunk,
+not a vendor patch. All input files, logs and generators live in
+`lab/frontier/ccextractor2shell/real-build/`; the harness source and its
+evidence were not edited.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -114,41 +117,116 @@ results: `harness/evidence/*.out`.
   zero bytes). Safe mode (`derived_len=4096`, `ret=0`) is clean in every
   build, including both ASan compilers.
 
-## Honest rung assessment and ceiling
+## Honest rung assessment and ceiling (updated after real build)
 
-Rung 3 is confirmed on the verbatim pinned function under gcc ASan and clang
-ASan with `-fno-builtin-memcpy`; the store is executed by a stand-in
-`buffered_read` that copies attacker-supplied bytes with `memcpy`. Rung 4 is
-PARTIAL: attacker-chosen bytes are readable at a chosen offset (the nominal
-`BUFSIZE` boundary) in a stand-in allocation layout; ASan redzones poison
-that region in the instrumented build, and the real `read(2)` consumer plus
-real struct/allocator layout were never exercised. There is no real
-ccextractor executable, no GXF file or wire delivery, no live process, no
-pointer/IP/command control, no rung 5, and no witness replay. Fix status and
-witness verdict are UNKNOWN; the clang-default ASan negative above is part of
-the record.
+Rung 3 is now confirmed twice: in the verbatim pinned function under gcc/clang
+ASan with a memcpy stand-in (earlier), and in a real ASan build of the pinned
+tree through `read(2)` from a local `.gxf` into `malloc(BUFSIZE)` (below). The
+clang-default-ASan negative and the stand-in build remain part of the record.
 
-## Cheapest local experiment to move up a rung
+Rung 4 is confirmed for chosen bytes at a chosen offset in the real process:
+the plain build stopped after `parse_mpeg_packet` with `data->len=2101248` and
+`data->buffer+BUFSIZE` containing the attacker-chosen repeating pattern
+`53 48 45 2d 43 43 45 58 4d 49 53 48 45 2d 43 43` ("SHE-CCEXMISHE-CC").
+Condition: the bytes were inspected in the live process with gdb; no program
+consumer read them back, and no pointer or instruction pointer was controlled.
+The earlier stand-in rung-4 PARTIAL result is retained as history, not as the
+basis for this grade.
 
-Build the pinned upstream tree locally under ASan (`src/CMakeLists.txt`,
-`linux/autogen.sh`; defaults `WITH_FFMPEG=OFF`, `WITH_OCR=OFF`) and feed it a
-locally crafted minimal `.gxf` whose MPEG2 MEDIA packet carries the 4-byte
-field `00 20 10 00` followed by at least 2101248 payload bytes. Observe
-whether ASan reports a WRITE through the real `buffered_read`/`read(2)` path
-into the `malloc(BUFSIZE)` destination; repeat with the local bounds guard.
-This would test the two stand-ins at once (real consumer and real layout) and
-is entirely local-file work. It may fail earlier at GXF header validation, at
-a length bound in the real caller, or via a short `read(2)` returning less
-than `len` (which yields `CCX_EOF` after the partial store); any such outcome
-is a measured result, not a rung upgrade. No external system is involved.
+There is no live process beyond these local lab runs, no pointer/IP/command
+control, no rung 5, no independent witness replay, and no observed upstream
+fix. Fix status and witness verdict are UNKNOWN.
+
+## Executed local experiment: real pinned tree + crafted GXF
+
+The previously planned cheapest experiment was executed on 2026-11-25
+05:37-05:46Z. A clean copy of the pinned tree at
+`/tmp/ccx2shell-upstream-asan` (HEAD `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`)
+was configured and built under ASan:
+
+```
+cmake -S /tmp/ccx2shell-upstream-asan/src -B /tmp/ccx2shell-asan \
+  -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_C_FLAGS='-O1 -g -fsanitize=address -fno-omit-frame-pointer' \
+  -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address -L/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu -Wl,-rpath-link,/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu -Wl,-rpath,/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu' \
+  -DWITH_FFMPEG=OFF -DWITH_OCR=OFF -DWITH_HARDSUBX=OFF
+cmake --build /tmp/ccx2shell-asan -j2
+```
+
+gpac development files were absent on the host. Ubuntu `libgpac-dev`,
+`libgpac12t64`, `libmad0` and `liba52-0.7.4` `.deb` files were downloaded and
+extracted under `/tmp/ccx2shell-deps/` (provisioning only, no host install or
+package changes); a corrected `gpac.pc` there supplies local include and
+library paths. Rust/corrosion dependencies were provisioned during configure.
+No pinned source file was edited: `ccx_gxf.c` in the committed lab tree still
+has sha256 `519b5fd0672c949ec12cc811038e148e51260c3ef3796afb3cd704bf2693d14f`,
+matching `pins.sha256`. The ASan executable is
+`/tmp/ccx2shell-asan/ccextractor`, sha256
+`c401190479cd2e6fdf71093e512f3ebcd1138d3856aaf68d0c33741631899ad1`. The
+final ASan link log is `real-build/evidence/build.log` and the configure log
+is `real-build/evidence/cmake.log`; the control build log is
+`real-build/evidence/guard-build.log`.
+
+GXF inputs: `real-build/make_gxf.py` generates `inputs/attack.gxf` (sha256
+`4b5841e2be606f3a4ffcc699e417789d088915b735cf48f0f53dad8c74aa13b3`,
+2101312 bytes) and `inputs/safe.gxf` (sha256
+`22fd3523538ef937ebc3fc2d90f4d5f62d612f118a21786141fceccfc1c6a2bb`,
+4160 bytes). Both start with the GXF probe sequence `00 00 00 00 01 BC`,
+carry a MAP packet that creates an MPEG2-525 video track (type `0x8B`, id
+`0xC0`, 25 fps tag), then a MEDIA packet of type `0xBF`. The MEDIA body
+carries media type `0x0B`, the 4-byte big-endian `mpeg_pic_size` field
+`00 20 10 00` (2101248) for attack / `00 00 10 00` (4096) for safe, and a
+payload of repeating `MISHE-CCEX`. The program autodetected GXF and reached
+the sink; no early validation rejection, length bound or short-read EOF
+blocked the attack.
+
+```
+ASAN_OPTIONS=detect_leaks=0 /tmp/ccx2shell-asan/ccextractor \
+  lab/frontier/ccextractor2shell/real-build/inputs/attack.gxf \
+  -o /tmp/ccx2shell-attack.scc
+```
+
+Attack rc 1 with `ERROR: AddressSanitizer: heap-buffer-overflow`,
+**`WRITE of size 1052736`** at `0x7aa4760d0878`, `0 bytes after 2097272-byte
+region`, frames `read (ASan interceptor)` → `read /usr/include/.../unistd.h:28`
+→ `buffered_read_opt file_functions.c:376` → `buffered_read file_buffer.h:72`
+→ `parse_mpeg_packet ccx_gxf.c:943` → `parse_media ccx_gxf.c:1219` →
+`read_packet ccx_gxf.c:1335` → `ccx_gxf_get_more_data ccx_gxf.c:1403` →
+`general_loop.c:1447` → `start_ccx` → `main`; allocation stack `malloc` →
+`alloc_demuxer_data ccx_demuxer.c:452` → `ccx_gxf_get_more_data ccx_gxf.c:1387`.
+The 1052736-byte WRITE is one real `read(2)` chunk that crossed the boundary;
+the wire-derived requested length is 2101248. Safe rc 10, no ASan report,
+"No captions were found in input". Raw logs:
+`real-build/evidence/{asan-attack,asan-safe}.out`.
+
+A plain `-O0 -g` build (`/tmp/ccx2shell-plain/ccextractor`) stopped at
+`ccx_gxf.c:1220` with gdb. At that point `data->len=2101248` and the real
+buffer at `data->buffer+2097272` held
+`53 48 45 2d 43 43 45 58 4d 49 53 48 45 2d 43 43`; the first bytes of the
+buffer were `4d 49 53 48 45 2d 43 43 45 58` ("MISHE-CCEX"), and the eight
+bytes eight positions before the computed write end were again
+"MISHE-CCEX". Full transcript: `real-build/evidence/gdb-plain-attack.out`.
+
+A real-tree negative control was also built: a copy at
+`/tmp/ccx2shell-upstream-guard` with the local hunk
+`if (data->len + (size_t)len > BUFSIZE) return CCX_EOF;` inserted immediately
+before the `buffered_read` call in `parse_mpeg_packet`, built under the same
+ASan flags as `/tmp/ccx2shell-guard-build/ccextractor` (sha256
+`a246eda46a8d5ee53987e098f7abcfafc3d44ef30e26a87264c5aba0956226c2`). This
+hunk is a locally written control, not an upstream patch. On the attack GXF
+it exits rc 10 with no ASan report and logs
+`Processing ... attack.gxf 0 ended prematurely 80 < 2101312`; on the safe GXF
+it is also rc 10 with no ASan report. Logs:
+`real-build/evidence/{guard-asan-attack,guard-asan-safe}.out`, build log
+`real-build/evidence/guard-build.log`. The committed pinned tree was not
+edited; the temporary guarded source copy lives in the gitignored site.
 
 ## Explicit unknowns
 
-- No CVE/GHSA and no upstream fix PR observed; local guard is not a vendor
-  patch and no fixed release/version is known.
-- Whether a real GXF demux accepts a 24-bit `mpeg_pic_size` of 0x201000, whether
-  any earlier length bound exists, and how much a real `read(2)` stores in one
-  call: UNKNOWN.
-- Real `struct demuxer_data` layout, allocator neighbors, any live field after
-  `buffer`, and chosen-byte readback in a real process: UNKNOWN.
-- Witness replay, operator admission and any rung-5 path: UNKNOWN.
+- No CVE/GHSA and no upstream fix PR observed; the local guard is not a
+  vendor patch and no fixed release/version is known.
+- Whether the real write can be followed by a controlled indirect call or
+  command execution: UNKNOWN; nothing measured supports a rung-5 claim.
+- No in-program consumer readback of the chosen bytes (the rung-4 observation
+  used a debugger on the live buffer): UNKNOWN.
+- Independent witness replay and operator-visible acceptance: UNKNOWN.

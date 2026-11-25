@@ -1,0 +1,9 @@
+[  0%] Built target cargo-prebuild_ccx_rust
+warning: failed to connect to jobserver from environment variable `MAKEFLAGS="s -j2 --jobserver-auth=3,4"`: cannot open file descriptor 3 from the jobserver environment variable value: Bad file descriptor (os error 9)
+[ 57%] Built target ccx
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 1.19s
+Copying byproducts `libccx_rust.a` to /tmp/ccx2shell-asan/rust
+[ 57%] Built target _cargo-build_ccx_rust
+[ 57%] Built target cargo-build_ccx_rust
+[ 58%] Linking C executable ccextractor
+[100%] Built target ccextractor
