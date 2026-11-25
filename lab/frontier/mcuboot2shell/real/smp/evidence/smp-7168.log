@@ -1,0 +1,33 @@
+PORT=37151
+SMP op=2 len=15396 group=1 id=1
+SMP wire_plaintext=WIRE-CHOICE-1234
+BS_UPLOAD len=15396 ok=1 decoded=4 img_size=15364 off=0 chunk_len=15364
+SHIM flash_area_open id=0
+BS_UPLOAD setup off=0 img_num=0 area_size=32768
+SHIM flash_area_erase off=0 len=32768
+SHIM flash_area_write off=0 len=15360 first=3d
+SHIM flash_area_write off=15360 len=8 first=07
+BS_UPLOAD write_done rc=0 curr_off=0 img_size=15364
+BS_UPLOAD out rc=0 curr_off=15364 img_size=15364 fap=0x5ee0c3fe1020
+BS_UPLOAD calling boot_handle_enc_fw
+PIN TLV at off=15360 magic=6907 tot=8
+PIN read_image_size rc=0 src_size=15368 hdr_size=7168 img_size=8192
+REAL_DECRYPT off=0 len=0 blk_off=0 dst_delta=7168
+READBACK delta=7168 first16=
+SHIM flash_area_erase off=0 len=4096
+SHIM flash_area_write off=0 len=4096 first=3d
+REAL_DECRYPT off=4096 len=1024 blk_off=0 dst_delta=7168
+READBACK delta=7168 first16=574952452d43484f4943452d31323334
+SHIM flash_area_erase off=4096 len=4096
+SHIM flash_area_write off=4096 len=4096 first=cc
+REAL_DECRYPT off=1024 len=4096 blk_off=0 dst_delta=0
+READBACK delta=0 first16=5c3bf29e4ea63ce62276654326488019
+SHIM flash_area_erase off=8192 len=4096
+SHIM flash_area_write off=8192 len=4096 first=5c
+REAL_DECRYPT off=5120 len=3072 blk_off=0 dst_delta=0
+READBACK delta=0 first16=3def1899fbb5692e3fc18f0124ff0c69
+SHIM flash_area_erase off=12288 len=4096
+SHIM flash_area_write off=12288 len=4096 first=3d
+SMP image[0..7]=3db8f39600000000 ih_hdr_size=7168 flags=00000004
+SMP_DONE readback_len=64 readback=3def1899fbb5692e3fc18f0124ff0c69
+hdr_size=7168 SERVER_RC=0

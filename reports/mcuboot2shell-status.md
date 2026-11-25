@@ -166,3 +166,32 @@ ignored object, reproduced all four rows from `wire-groom-run.sh`:
 `dst_delta=6144/7168/4104/0`, readback hex
 `574952452d43484f4943452d31323334` on 6144/7168/2048, 4104 SIGSEGV 139,
 `WIRE_GROOM_DONE`. Witness replay not yet observed; verdict UNKNOWN.
+
+## 2026-11-25 14:44Z — W4 native SMP upload path (target mind)
+
+- Built the **real** MCUboot `boot_serial.c`, zcbor decoder/encoder,
+  pinned `boot_serial_encryption.c` and real TinyCrypt AES-CTR decryptor
+  into a native host process (`real/smp/`). Only flash, UART, OS, CRC/base64
+  and wrapped-key loading are shims; the two local source copies differ
+  from upstream by tracing only. Full recipe, hashes and negatives:
+  `lab/frontier/mcuboot2shell/real/smp/SMP-PROVENANCE.md`.
+- A loopback listener accepts one real mcumgr image-upload packet: CBOR
+  `{"image":0,"data":<MCUboot image header + encrypted body + TLV>,"len":N,
+  "off":0}` plus 16 wire-chosen plaintext bytes. The real
+  `boot_serial_input()` → `bs_upload()` → `boot_handle_enc_fw()` →
+  `decrypt_image_inplace()` → `decrypt_region_inplace()` path drives the
+  OOB sink for the first time; W3's bespoke transport shim is no longer the
+  header's entry point.
+- Measured: `ih_hdr_size=6144` → real decrypt `len=2048` at `dst_delta=6144`
+  with readback `574952452d43484f4943452d31323334` (`WIRE-CHOICE-1234`);
+  `7168` → `len=1024` at `dst_delta=7168`, same readback; `2048` control →
+  `dst_delta=2048`, no chosen string; `4104` → `len=4088` at
+  `dst_delta=4104`, SIGSEGV 139 (negative preserved). `READBACK delta=`
+  lines in `real/smp/evidence/smp-{6144,7168}.log` are the evidence; later
+  in-bounds decrypts overwrite the final buffer. Replay: `sh real/smp/run.sh`.
+- Grade: rung 4 DEMONSTRATED extended through MCUboot's real SMP command
+  dispatch and CBOR decoder. Rung 5 UNKNOWN: native host build, not Zephyr
+  or a real MCU; no serial-port framing parser (packet goes straight to
+  `boot_serial_input()`), no real encrypted image/key TLV (key load
+  shimmed), no ASan in W4, no pointer/IP/command control, no benign command
+  execution, no witness verdict. Author evidence only.

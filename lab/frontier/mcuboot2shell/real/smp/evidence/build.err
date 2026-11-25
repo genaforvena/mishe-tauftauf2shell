@@ -1,0 +1,15 @@
+boot_serial-host.c: In function ‘bs_reset’:
+boot_serial-host.c:1628:9: warning: implicit declaration of function ‘os_cputime_delay_usecs’ [-Wimplicit-function-declaration]
+ 1628 |         os_cputime_delay_usecs(250000);
+      |         ^~~~~~~~~~~~~~~~~~~~~~
+boot_serial-host.c:1629:9: warning: implicit declaration of function ‘hal_system_reset’ [-Wimplicit-function-declaration]
+ 1629 |         hal_system_reset();
+      |         ^~~~~~~~~~~~~~~~
+boot_serial-host.c: In function ‘boot_serial_input’:
+boot_serial-host.c:1646:8: warning: implicit declaration of function ‘ntohs’ [-Wimplicit-function-declaration]
+ 1646 |       (ntohs(hdr->nh_len) < len - sizeof(*hdr))) {
+      |        ^~~~~
+boot_serial-host.c: In function ‘boot_serial_output’:
+boot_serial-host.c:1742:22: warning: implicit declaration of function ‘htons’ [-Wimplicit-function-declaration]
+ 1742 |     bs_hdr->nh_len = htons(len);
+      |                      ^~~~~

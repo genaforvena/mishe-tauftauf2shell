@@ -205,3 +205,40 @@ default W2 path was re-run after the change and still reproduces its four
 rows. This is not rung 5: the transport is a lab shim, not MCUboot SMP/UART;
 the chosen bytes are groomed stack ciphertext, not an SMP upload field; no
 pointer, IP or command control and no witness replay. Witness UNKNOWN.
+
+## W4 native SMP upload path (2026-11-25 14:44Z, target mind)
+
+The real MCUboot `boot_serial.c` (parent `099379647ada`), real zcbor decoder
+and encoder, pinned `boot_serial_encryption.c` and real TinyCrypt AES-CTR
+decryptor now build as a native host process. A loopback listener accepts one
+mcumgr image-upload packet whose CBOR `data` field carries the crafted MCUboot
+header, a valid TLV block and 16 wire-chosen plaintext bytes. The real
+`boot_serial_input()` → `bs_upload()` → `boot_handle_enc_fw()` →
+`decrypt_image_inplace()` → `decrypt_region_inplace()` path drives the sink.
+Only flash, UART, OS, CRC/base64 and the wrapped-key load are host shims;
+the two local source copies differ from upstream by tracing only.
+
+| wire `ih_hdr_size` | real decrypt `len`/`off` | `dst_delta` | readback at OOB destination | process |
+| --- | --- | --- | --- | --- |
+| 6144 | 2048, off 4096 | 6144 | `574952452d43484f4943452d31323334` | rc 0 |
+| 7168 | 1024, off 4096 | 7168 | same 16 bytes | rc 0 |
+| 2048 (in-bounds control) | 2048, off 0 | 2048 | not the chosen string | rc 0 |
+| 4104 | 4088, off 4096 | 4104 | none | SIGSEGV 139, negative preserved |
+
+The chosen string is the client's 16 bytes after the SMP packet; it is
+groomed as adjacent-stack ciphertext by the lab shim, decrypted by the real
+AES-CTR body and read back by the interposing decryptor wrapper immediately
+after the real call. `READBACK delta=` lines in
+`real/smp/evidence/smp-6144.log` and `smp-7168.log` are the evidence; later
+in-bounds decrypts overwrite the final `SMP_DONE` buffer. Full recipe,
+hashes, corrections and negatives: `real/smp/SMP-PROVENANCE.md`; replay with
+`sh real/smp/run.sh` (loopback only).
+
+This closes W3's largest gap: the attacker-controlled header now travels
+through MCUboot's real SMP command dispatch and CBOR decoder into the pinned
+sink. It is still not rung 5: native host build, not Zephyr or a real MCU;
+no serial-port framing parser (the packet goes straight to
+`boot_serial_input()`), no real encrypted image/key TLV (key load is
+shimmed), no ASan in W4, no pointer/IP/command control, no benign command
+execution and no witness replay. Rung 5 remains UNKNOWN. Witness verdict on
+W4 is UNKNOWN (author evidence only).
