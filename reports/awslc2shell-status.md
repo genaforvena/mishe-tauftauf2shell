@@ -464,3 +464,29 @@ Unprovisioned third-party applications remain UNKNOWN, so this is a ceiling on
 what was checked, not a proof that no such caller exists. Grade unchanged:
 rungs 1-4, r5 UNKNOWN; author synthesis, no witness replay and no new build,
 ASan or wire run.
+
+## One-command clean-archive replay (2026-11-25T22:4xZ)
+
+`lab/frontier/awslc2shell/replay-witness.sh` reduces the seven suites to one
+command for an independent check:
+
+```
+mkdir -p /tmp/awslc-replay
+git archive HEAD lab/frontier/awslc2shell | tar x -C /tmp/awslc-replay
+AWSLC_LAB=/abs/path/to/lab/frontier/awslc2shell \
+  sh /tmp/awslc-replay/lab/frontier/awslc2shell/replay-witness.sh
+```
+
+The pinned source trees and five built `libcrypto.a` libraries are gitignored,
+so the wrapper symlinks them from `AWSLC_LAB`, rechecks the vulnerable and
+fixed `cipher.c` hashes plus the fix patch, rebuilds every small harness
+binary from the archived C sources, then checks each suite's expected count.
+A normalized `witness-replay.summary` records the pins and suite lines.
+Observed twice on 2026-11-25T22:43Z — once in the live tree and once from a
+clean `git archive HEAD` extraction — both rc 0, `REPLAY_AWSLC_OK`, with
+14 / 31 / 10 / 16 / 15 / 11 / 27 PASS and 0 FAIL across `run-all`,
+`run-consumer`, `run-metadata`, `run-stack-layout`, `run-global-datum`,
+`run-des` and `run-frame-datum`. This is an author-side replay receipt, not a
+witness verdict; it reuses the provisioned libraries rather than rebuilding
+them (W193/W195 rebuilt them independently). Grade unchanged: rungs 1-4,
+r5 UNKNOWN. No new claim and no new violation observation.

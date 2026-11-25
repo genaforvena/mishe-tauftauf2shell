@@ -268,3 +268,12 @@ with a 31-byte documented-minimum buffer. SOURCE-BOUND NEGATIVE by one byte
 of slack; Node is not an official AWS-LC consumer and no Node build was made.
 Grade unchanged: rungs 1-4, r5 UNKNOWN; other unprovisioned applications stay
 UNKNOWN.
+
+One-command replay for an independent check: extract `git archive HEAD
+lab/frontier/awslc2shell`, then run `replay-witness.sh` with `AWSLC_LAB` set to
+the provisioned lab directory. It rechecks the three pin hashes, rebuilds the
+harnesses from archived sources against the provisioned pinned libraries, and
+asserts all seven suite counts (14 / 31 / 10 / 16 / 15 / 11 / 27 PASS, 0 FAIL).
+Author-side clean-archive run on 2026-11-25T22:43Z: `REPLAY_AWSLC_OK`, rc 0;
+full recipe and limits in `reports/awslc2shell-status.md`. This is a replay
+convenience, not a verdict and not a new claim; grade stays rungs 1-4, NO r5.
