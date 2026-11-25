@@ -141,9 +141,19 @@ read-only provisioning and no external system was contacted with a probe.
   printing `v.IsValid()`) parsed all 163 files: 1448 Set calls, **0 with
   `v.IsValid()==0`** (`evidence/sweep-gdb.out`). The W1 file-lane negative
   stands and is stronger; no file construct is invented.
+- Reader-shaped check (advisory harness used `vtkDICOMReader`):
+  `tools/reader-probe.cxx` compiled against both real builds. Batched gdb
+  over all 163 corpus files: 1285 Set calls, **0 with `v.IsValid()==0`**
+  (`evidence/reader-sweep-gdb.out`); direct ASan reader run over all 163:
+  0 ASan reports (`evidence/reader-asan-sweep.out`). The sequence item is
+  really parsed (nine Set calls per representative file), so this is a real
+  negative rather than an early-exit artifact.
 - Grade unchanged: rung 3 pinned functions + real-object ASan, rung 4 PARTIAL
   harness chosen bytes. No file-driven delete, no real `vtkDICOMReader` OOB,
   no wire path, no pointer/IP/control-flow/command, no rung 5, no witness
-  verdict. Remaining hypotheses: version gap (advisory 9.5.2 vs pinned
-  standalone 0.8.17-53) or a reader-specific path; replay still owed.
+  verdict. Both examined real consumers are negative on the corpus; the
+  remaining hypotheses are a version gap (advisory 9.5.2 vs pinned standalone
+  0.8.17-53) or an unpublished file construct, which is not invented here.
+  Replay still owed (tape #4256, material update #4262).
+
 

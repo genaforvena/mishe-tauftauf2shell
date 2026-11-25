@@ -18,11 +18,20 @@
   `v.IsValid()`) parsed all 163: 1448 Set calls, **0 with `v.IsValid()==0`**
   (`evidence/sweep-gdb.out`). Advisory confirms a delete is required but
   publishes no file construct; none is claimed here.
+- Reader-shaped check (the advisory harness used `vtkDICOMReader`):
+  `tools/reader-probe.cxx` compiled against both real builds; batched gdb
+  over all 163 files found 1285 Set calls, **0 with `v.IsValid()==0`**
+  (`evidence/reader-sweep-gdb.out`), and a direct ASan reader run over all
+  163 files found 0 ASan reports (`evidence/reader-asan-sweep.out`). The
+  sequence item is really parsed (nine Set calls per representative file),
+  so this is a real negative, not an early-exit artifact.
 - Grade unchanged: rung 3 pinned functions + real-object ASan; rung 4 PARTIAL
   harness chosen bytes. No file-driven delete, no real-reader OOB, no wire
-  path, no pointer/IP/command, no witness verdict. Remaining hypotheses:
-  version gap (advisory 9.5.2 vs pinned standalone 0.8.17-53) or a
-  reader-specific path; witness replay still owed (tape #4256).
+  path, no pointer/IP/command, no witness verdict. Both examined real
+  consumers are negative on the corpus; remaining hypotheses are a version
+  gap (advisory 9.5.2 vs pinned standalone 0.8.17-53) or an unpublished file
+  construct. Witness replay still owed (tape #4256, material update #4262).
+
 
 ## 2026-11-25 09:48Z — W1 real build, real-object ASan, file-lane negative
 

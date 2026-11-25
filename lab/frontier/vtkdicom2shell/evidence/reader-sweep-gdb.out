@@ -1,0 +1,3818 @@
+Breakpoint 1 at 0xacb93: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 295.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:33.892 (   0.102s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AE-0.dcm
+2026-11-25 10:17:33.893 (   0.102s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AE-0.dcm
+[Inferior 1 (process 431533) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:34.279 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AE-1.dcm
+2026-11-25 10:17:34.280 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AE-1.dcm
+[Inferior 1 (process 431847) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:34.786 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AE-2.dcm
+2026-11-25 10:17:34.786 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AE-2.dcm
+[Inferior 1 (process 431893) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:35.293 (   0.027s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AS-0.dcm
+2026-11-25 10:17:35.293 (   0.028s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AS-0.dcm
+[Inferior 1 (process 432191) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:35.898 (   0.110s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AS-1.dcm
+2026-11-25 10:17:35.898 (   0.110s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AS-1.dcm
+[Inferior 1 (process 432244) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:36.471 (   0.077s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AS-2.dcm
+2026-11-25 10:17:36.471 (   0.078s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AS-2.dcm
+[Inferior 1 (process 432579) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:36.970 (   0.083s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AT-0.dcm
+2026-11-25 10:17:36.970 (   0.083s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AT-0.dcm
+[Inferior 1 (process 432850) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:37.388 (   0.018s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AT-1.dcm
+2026-11-25 10:17:37.388 (   0.018s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AT-1.dcm
+[Inferior 1 (process 433234) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:37.683 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-AT-2.dcm
+2026-11-25 10:17:37.683 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-AT-2.dcm
+[Inferior 1 (process 433468) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:38.089 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-CS-0.dcm
+2026-11-25 10:17:38.089 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-CS-0.dcm
+[Inferior 1 (process 433626) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:38.592 (   0.019s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-CS-1.dcm
+2026-11-25 10:17:38.592 (   0.019s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-CS-1.dcm
+[Inferior 1 (process 433871) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:39.163 (   0.079s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-CS-2.dcm
+2026-11-25 10:17:39.163 (   0.079s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-CS-2.dcm
+[Inferior 1 (process 434250) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:39.586 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DA-0.dcm
+2026-11-25 10:17:39.586 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DA-0.dcm
+[Inferior 1 (process 434408) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:40.088 (   0.018s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DA-1.dcm
+2026-11-25 10:17:40.088 (   0.018s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DA-1.dcm
+[Inferior 1 (process 434530) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:40.584 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DA-2.dcm
+2026-11-25 10:17:40.584 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DA-2.dcm
+[Inferior 1 (process 434765) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:40.998 (   0.016s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DS-0.dcm
+2026-11-25 10:17:40.998 (   0.016s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DS-0.dcm
+[Inferior 1 (process 434960) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:41.492 (   0.015s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DS-1.dcm
+2026-11-25 10:17:41.492 (   0.015s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DS-1.dcm
+[Inferior 1 (process 435279) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:41.985 (   0.016s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DS-2.dcm
+2026-11-25 10:17:41.986 (   0.016s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DS-2.dcm
+[Inferior 1 (process 435598) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:42.473 (   0.082s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DT-0.dcm
+2026-11-25 10:17:42.473 (   0.082s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DT-0.dcm
+[Inferior 1 (process 435824) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:42.984 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DT-1.dcm
+2026-11-25 10:17:42.984 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DT-1.dcm
+[Inferior 1 (process 436137) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:43.479 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-DT-2.dcm
+2026-11-25 10:17:43.479 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-DT-2.dcm
+[Inferior 1 (process 436453) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:43.986 (   0.015s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FD-0.dcm
+2026-11-25 10:17:43.986 (   0.015s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FD-0.dcm
+[Inferior 1 (process 436705) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:44.489 (   0.019s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FD-1.dcm
+2026-11-25 10:17:44.489 (   0.019s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FD-1.dcm
+[Inferior 1 (process 436768) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:45.181 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FD-2.dcm
+2026-11-25 10:17:45.181 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FD-2.dcm
+[Inferior 1 (process 437060) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:45.876 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FL-0.dcm
+2026-11-25 10:17:45.876 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FL-0.dcm
+[Inferior 1 (process 437202) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:46.486 (   0.015s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FL-1.dcm
+2026-11-25 10:17:46.486 (   0.015s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FL-1.dcm
+[Inferior 1 (process 438075) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:46.988 (   0.016s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-FL-2.dcm
+2026-11-25 10:17:46.988 (   0.016s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-FL-2.dcm
+[Inferior 1 (process 438541) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:47.491 (   0.015s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-IS-0.dcm
+2026-11-25 10:17:47.491 (   0.015s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-IS-0.dcm
+[Inferior 1 (process 438974) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:48.184 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-IS-1.dcm
+2026-11-25 10:17:48.184 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-IS-1.dcm
+[Inferior 1 (process 439447) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:48.871 (   0.091s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-IS-2.dcm
+2026-11-25 10:17:48.872 (   0.091s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-IS-2.dcm
+[Inferior 1 (process 439854) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:49.482 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LO-0.dcm
+2026-11-25 10:17:49.482 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LO-0.dcm
+[Inferior 1 (process 440203) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:50.170 (   0.086s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LO-1.dcm
+2026-11-25 10:17:50.170 (   0.086s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LO-1.dcm
+[Inferior 1 (process 440256) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:50.689 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LO-2.dcm
+2026-11-25 10:17:50.689 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LO-2.dcm
+[Inferior 1 (process 440543) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:51.474 (   0.089s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LT-0.dcm
+2026-11-25 10:17:51.474 (   0.089s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LT-0.dcm
+[Inferior 1 (process 440607) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:52.562 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LT-1.dcm
+2026-11-25 10:17:52.563 (   0.091s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LT-1.dcm
+[Inferior 1 (process 440859) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:53.371 (   0.087s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-LT-2.dcm
+2026-11-25 10:17:53.371 (   0.087s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-LT-2.dcm
+[Inferior 1 (process 441192) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:54.065 (   0.092s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OB-0.dcm
+2026-11-25 10:17:54.065 (   0.092s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OB-0.dcm
+[Inferior 1 (process 441274) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:54.787 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OB-1.dcm
+2026-11-25 10:17:54.787 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OB-1.dcm
+[Inferior 1 (process 441638) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:55.575 (   0.089s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OB-2.dcm
+2026-11-25 10:17:55.575 (   0.089s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OB-2.dcm
+[Inferior 1 (process 442366) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:56.362 (   0.092s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OD-0.dcm
+2026-11-25 10:17:56.362 (   0.092s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OD-0.dcm
+[Inferior 1 (process 442979) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:56.890 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OD-1.dcm
+2026-11-25 10:17:56.890 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OD-1.dcm
+[Inferior 1 (process 443206) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:57.486 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OD-2.dcm
+2026-11-25 10:17:57.487 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OD-2.dcm
+[Inferior 1 (process 443362) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:58.167 (   0.088s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OF-0.dcm
+2026-11-25 10:17:58.167 (   0.088s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OF-0.dcm
+[Inferior 1 (process 443572) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:58.781 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OF-1.dcm
+2026-11-25 10:17:58.781 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OF-1.dcm
+[Inferior 1 (process 444035) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:17:59.489 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OF-2.dcm
+2026-11-25 10:17:59.489 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OF-2.dcm
+[Inferior 1 (process 444592) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:00.084 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OL-0.dcm
+2026-11-25 10:18:00.084 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OL-0.dcm
+[Inferior 1 (process 445124) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:00.770 (   0.091s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OL-1.dcm
+2026-11-25 10:18:00.770 (   0.091s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OL-1.dcm
+[Inferior 1 (process 445405) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:01.390 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OL-2.dcm
+2026-11-25 10:18:01.390 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OL-2.dcm
+[Inferior 1 (process 446071) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:01.980 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OV-0.dcm
+2026-11-25 10:18:01.980 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OV-0.dcm
+[Inferior 1 (process 446436) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:02.567 (   0.083s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OV-1.dcm
+2026-11-25 10:18:02.567 (   0.083s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OV-1.dcm
+[Inferior 1 (process 446824) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:03.170 (   0.092s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OV-2.dcm
+2026-11-25 10:18:03.170 (   0.092s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OV-2.dcm
+[Inferior 1 (process 447268) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:03.785 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OW-0.dcm
+2026-11-25 10:18:03.785 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OW-0.dcm
+[Inferior 1 (process 447789) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:04.602 (   0.117s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OW-1.dcm
+2026-11-25 10:18:04.602 (   0.117s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OW-1.dcm
+[Inferior 1 (process 448311) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:04.990 (   0.017s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OW-2.dcm
+2026-11-25 10:18:04.990 (   0.017s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OW-2.dcm
+[Inferior 1 (process 448776) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:05.483 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-OX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:05.483 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OX-0.dcm
+[Inferior 1 (process 449017) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:05.979 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-OX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:05.979 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OX-1.dcm
+[Inferior 1 (process 449092) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:06.472 (   0.085s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-OX-2.dcm
+2026-11-25 10:18:06.472 (   0.085s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-OX-2.dcm
+[Inferior 1 (process 449321) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:06.800 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-PN-0.dcm
+2026-11-25 10:18:06.800 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-PN-0.dcm
+[Inferior 1 (process 449478) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:07.187 (   0.015s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-PN-1.dcm
+2026-11-25 10:18:07.187 (   0.015s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-PN-1.dcm
+[Inferior 1 (process 449546) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:07.862 (   0.081s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-PN-2.dcm
+2026-11-25 10:18:07.862 (   0.081s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-PN-2.dcm
+[Inferior 1 (process 449804) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:08.279 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SH-0.dcm
+2026-11-25 10:18:08.280 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SH-0.dcm
+[Inferior 1 (process 450233) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:08.768 (   0.087s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SH-1.dcm
+2026-11-25 10:18:08.768 (   0.087s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SH-1.dcm
+[Inferior 1 (process 450520) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:09.184 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SH-2.dcm
+2026-11-25 10:18:09.185 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SH-2.dcm
+[Inferior 1 (process 450652) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:09.675 (   0.086s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SL-0.dcm
+2026-11-25 10:18:09.675 (   0.086s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SL-0.dcm
+[Inferior 1 (process 450745) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:10.067 (   0.075s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SL-1.dcm
+2026-11-25 10:18:10.068 (   0.075s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SL-1.dcm
+[Inferior 1 (process 450981) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:10.371 (   0.085s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SL-2.dcm
+2026-11-25 10:18:10.371 (   0.085s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SL-2.dcm
+[Inferior 1 (process 451056) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:10.876 (   0.096s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SQ-0.dcm
+2026-11-25 10:18:10.876 (   0.096s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SQ-0.dcm
+[Inferior 1 (process 451190) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:11.670 (   0.098s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SQ-1.dcm
+2026-11-25 10:18:11.671 (   0.098s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SQ-1.dcm
+[Inferior 1 (process 451531) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:12.082 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SQ-2.dcm
+2026-11-25 10:18:12.082 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SQ-2.dcm
+[Inferior 1 (process 451860) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:12.475 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SS-0.dcm
+2026-11-25 10:18:12.475 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SS-0.dcm
+[Inferior 1 (process 452123) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:12.887 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SS-1.dcm
+2026-11-25 10:18:12.887 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SS-1.dcm
+[Inferior 1 (process 452396) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:13.375 (   0.088s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SS-2.dcm
+2026-11-25 10:18:13.375 (   0.088s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SS-2.dcm
+[Inferior 1 (process 452679) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:13.784 (   0.018s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-ST-0.dcm
+2026-11-25 10:18:13.784 (   0.018s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ST-0.dcm
+[Inferior 1 (process 452869) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:14.273 (   0.079s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-ST-1.dcm
+2026-11-25 10:18:14.273 (   0.079s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ST-1.dcm
+[Inferior 1 (process 453064) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:14.682 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-ST-2.dcm
+2026-11-25 10:18:14.682 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ST-2.dcm
+[Inferior 1 (process 453362) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:15.188 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SV-0.dcm
+2026-11-25 10:18:15.188 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SV-0.dcm
+[Inferior 1 (process 453627) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:15.772 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SV-1.dcm
+2026-11-25 10:18:15.772 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SV-1.dcm
+[Inferior 1 (process 453935) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:16.278 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-SV-2.dcm
+2026-11-25 10:18:16.278 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-SV-2.dcm
+[Inferior 1 (process 454262) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:16.788 (   0.017s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-TM-0.dcm
+2026-11-25 10:18:16.788 (   0.017s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-TM-0.dcm
+[Inferior 1 (process 454340) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:17.373 (   0.082s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-TM-1.dcm
+2026-11-25 10:18:17.373 (   0.083s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-TM-1.dcm
+[Inferior 1 (process 454646) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:17.877 (   0.087s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-TM-2.dcm
+2026-11-25 10:18:17.877 (   0.087s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-TM-2.dcm
+[Inferior 1 (process 454796) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:18.299 (   0.020s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UC-0.dcm
+2026-11-25 10:18:18.299 (   0.020s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UC-0.dcm
+[Inferior 1 (process 455047) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:18.869 (   0.073s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UC-1.dcm
+2026-11-25 10:18:18.869 (   0.074s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UC-1.dcm
+[Inferior 1 (process 455094) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:19.209 (   0.016s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UC-2.dcm
+2026-11-25 10:18:19.209 (   0.017s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UC-2.dcm
+[Inferior 1 (process 455406) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:19.688 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UI-0.dcm
+2026-11-25 10:18:19.688 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UI-0.dcm
+[Inferior 1 (process 455562) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:20.067 (   0.067s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UI-1.dcm
+2026-11-25 10:18:20.067 (   0.067s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UI-1.dcm
+[Inferior 1 (process 455953) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:20.469 (   0.077s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UI-2.dcm
+2026-11-25 10:18:20.470 (   0.077s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UI-2.dcm
+[Inferior 1 (process 456107) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:20.798 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UL-0.dcm
+2026-11-25 10:18:20.798 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UL-0.dcm
+[Inferior 1 (process 456355) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:21.270 (   0.084s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UL-1.dcm
+2026-11-25 10:18:21.270 (   0.084s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UL-1.dcm
+[Inferior 1 (process 456586) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:21.687 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UL-2.dcm
+2026-11-25 10:18:21.687 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UL-2.dcm
+[Inferior 1 (process 456921) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:22.183 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UN-0.dcm
+2026-11-25 10:18:22.183 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UN-0.dcm
+[Inferior 1 (process 457317) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:22.803 (   0.022s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UN-1.dcm
+2026-11-25 10:18:22.803 (   0.022s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UN-1.dcm
+[Inferior 1 (process 457377) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:23.391 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UN-2.dcm
+2026-11-25 10:18:23.391 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UN-2.dcm
+[Inferior 1 (process 457677) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:24.090 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UR-0.dcm
+2026-11-25 10:18:24.090 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UR-0.dcm
+[Inferior 1 (process 457903) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:24.586 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UR-1.dcm
+2026-11-25 10:18:24.586 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UR-1.dcm
+[Inferior 1 (process 458118) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:24.980 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UR-2.dcm
+2026-11-25 10:18:24.980 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UR-2.dcm
+[Inferior 1 (process 458404) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:25.588 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-US-0.dcm
+2026-11-25 10:18:25.588 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-US-0.dcm
+[Inferior 1 (process 458438) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:26.364 (   0.095s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-US-1.dcm
+2026-11-25 10:18:26.364 (   0.096s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-US-1.dcm
+[Inferior 1 (process 458740) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:26.990 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-US-2.dcm
+2026-11-25 10:18:26.990 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-US-2.dcm
+[Inferior 1 (process 459104) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:27.766 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UT-0.dcm
+2026-11-25 10:18:27.766 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UT-0.dcm
+[Inferior 1 (process 459449) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:28.574 (   0.093s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UT-1.dcm
+2026-11-25 10:18:28.574 (   0.093s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UT-1.dcm
+[Inferior 1 (process 459781) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:29.466 (   0.089s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UT-2.dcm
+2026-11-25 10:18:29.466 (   0.089s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UT-2.dcm
+[Inferior 1 (process 460226) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:30.364 (   0.087s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UV-0.dcm
+2026-11-25 10:18:30.364 (   0.087s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UV-0.dcm
+[Inferior 1 (process 460816) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:31.065 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UV-1.dcm
+2026-11-25 10:18:31.065 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UV-1.dcm
+[Inferior 1 (process 461398) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:31.777 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-UV-2.dcm
+2026-11-25 10:18:31.777 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-UV-2.dcm
+[Inferior 1 (process 461659) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:32.782 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-XS-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:32.782 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XS-0.dcm
+[Inferior 1 (process 461970) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:33.481 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-XS-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:33.481 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XS-1.dcm
+[Inferior 1 (process 462259) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:34.266 (   0.088s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-XS-2.dcm
+2026-11-25 10:18:34.266 (   0.088s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XS-2.dcm
+[Inferior 1 (process 462354) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:35.080 (   0.007s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-XX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:35.080 (   0.007s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XX-0.dcm
+[Inferior 1 (process 462663) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:35.875 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-XX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:35.876 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XX-1.dcm
+[Inferior 1 (process 463528) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:36.667 (   0.097s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-XX-2.dcm
+2026-11-25 10:18:36.668 (   0.097s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-XX-2.dcm
+[Inferior 1 (process 464192) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:37.683 (   0.008s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:37.683 (   0.008s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ZZ-0.dcm
+[Inferior 1 (process 464417) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:38.277 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:38.277 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ZZ-1.dcm
+[Inferior 1 (process 464825) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:38.884 (   0.012s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/a-exp-ZZ-2.dcm
+2026-11-25 10:18:38.884 (   0.012s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/a-exp-ZZ-2.dcm
+[Inferior 1 (process 464963) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:39.763 (   0.082s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-AE.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:39.763 (   0.083s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-AE.dcm
+[Inferior 1 (process 465246) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:40.394 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-AS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:40.394 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-AS.dcm
+[Inferior 1 (process 465462) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:40.896 (   0.006s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-AT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:40.896 (   0.006s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-AT.dcm
+[Inferior 1 (process 466133) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:41.478 (   0.006s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-CS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:41.478 (   0.007s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-CS.dcm
+[Inferior 1 (process 466528) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:42.178 (   0.007s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-DA.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:42.178 (   0.007s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-DA.dcm
+[Inferior 1 (process 466933) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:42.788 (   0.007s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-DS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:42.788 (   0.007s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-DS.dcm
+[Inferior 1 (process 467712) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:43.473 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-DT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:43.474 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-DT.dcm
+[Inferior 1 (process 468203) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:44.171 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-FD.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:44.171 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-FD.dcm
+[Inferior 1 (process 468250) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:44.879 (   0.007s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-FL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:44.879 (   0.007s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-FL.dcm
+[Inferior 1 (process 468512) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:45.569 (   0.087s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-IS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:45.569 (   0.087s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-IS.dcm
+[Inferior 1 (process 468742) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:46.466 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-LO.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:46.466 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-LO.dcm
+[Inferior 1 (process 468789) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:47.465 (   0.085s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-LT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:47.466 (   0.085s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-LT.dcm
+[Inferior 1 (process 469110) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:48.362 (   0.088s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OB.dcm
+2026-11-25 10:18:48.362 (   0.089s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OB.dcm
+[Inferior 1 (process 469691) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:49.270 (   0.098s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OD.dcm
+2026-11-25 10:18:49.270 (   0.098s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OD.dcm
+[Inferior 1 (process 469841) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:50.181 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OF.dcm
+2026-11-25 10:18:50.181 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OF.dcm
+[Inferior 1 (process 470211) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:50.973 (   0.090s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OL.dcm
+2026-11-25 10:18:50.973 (   0.090s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OL.dcm
+[Inferior 1 (process 470523) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:51.872 (   0.092s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OV.dcm
+2026-11-25 10:18:51.872 (   0.092s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OV.dcm
+[Inferior 1 (process 470792) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:52.771 (   0.092s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OW.dcm
+2026-11-25 10:18:52.771 (   0.092s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OW.dcm
+[Inferior 1 (process 471110) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:53.587 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-OX.dcm
+2026-11-25 10:18:53.587 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-OX.dcm
+[Inferior 1 (process 471891) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:54.164 (   0.077s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-PN.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:54.164 (   0.077s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-PN.dcm
+[Inferior 1 (process 472706) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:54.576 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-SH.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:54.576 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-SH.dcm
+[Inferior 1 (process 473233) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:54.972 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-SL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:54.972 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-SL.dcm
+[Inferior 1 (process 473377) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:55.288 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-SQ.dcm
+2026-11-25 10:18:55.288 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-SQ.dcm
+[Inferior 1 (process 473406) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:55.666 (   0.075s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-SS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:55.666 (   0.075s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-SS.dcm
+[Inferior 1 (process 473630) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:56.074 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-ST.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:56.074 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-ST.dcm
+[Inferior 1 (process 473689) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:56.394 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-SV.dcm
+2026-11-25 10:18:56.394 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-SV.dcm
+[Inferior 1 (process 473789) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:56.779 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-TM.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:56.779 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-TM.dcm
+[Inferior 1 (process 473880) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:57.277 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-UC.dcm
+2026-11-25 10:18:57.277 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UC.dcm
+[Inferior 1 (process 473900) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:57.672 (   0.005s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-UI.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:57.672 (   0.005s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UI.dcm
+[Inferior 1 (process 474265) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:57.985 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-UL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:57.985 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UL.dcm
+[Inferior 1 (process 474279) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:58.380 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-UN.dcm
+2026-11-25 10:18:58.380 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UN.dcm
+[Inferior 1 (process 474420) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:58.694 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-UR.dcm
+2026-11-25 10:18:58.694 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UR.dcm
+[Inferior 1 (process 474483) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:59.090 (   0.004s) [        F68140C0]     vtkDICOMReader.cxx:2415   ERR| vtkDICOMReader (0x5555557b6f00): ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557bb5f0): At byte offset 188 in file "evidence/corpus/b-undef-US.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+2026-11-25 10:18:59.090 (   0.004s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-US.dcm
+[Inferior 1 (process 474555) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:59.569 (   0.082s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-UT.dcm
+2026-11-25 10:18:59.569 (   0.082s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UT.dcm
+[Inferior 1 (process 474807) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:18:59.981 (   0.013s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-UV.dcm
+2026-11-25 10:18:59.981 (   0.013s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-UV.dcm
+[Inferior 1 (process 474932) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:00.290 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-XS.dcm
+2026-11-25 10:19:00.290 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-XS.dcm
+[Inferior 1 (process 475075) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:00.669 (   0.073s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-XX.dcm
+2026-11-25 10:19:00.669 (   0.073s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-XX.dcm
+[Inferior 1 (process 475108) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:01.067 (   0.082s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/b-undef-ZZ.dcm
+2026-11-25 10:19:01.068 (   0.082s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/b-undef-ZZ.dcm
+[Inferior 1 (process 475144) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:01.583 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/c-impl-0008-0003.dcm
+2026-11-25 10:19:01.583 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/c-impl-0008-0003.dcm
+[Inferior 1 (process 475412) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:02.083 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/c-impl-0008-1110.dcm
+2026-11-25 10:19:02.084 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/c-impl-0008-1110.dcm
+[Inferior 1 (process 475466) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:02.492 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/c-impl-0009-0001.dcm
+2026-11-25 10:19:02.492 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/c-impl-0009-0001.dcm
+[Inferior 1 (process 475711) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:02.883 (   0.014s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/c-impl-0009-0003.dcm
+2026-11-25 10:19:02.883 (   0.014s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/c-impl-0009-0003.dcm
+[Inferior 1 (process 475724) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:03.292 (   0.011s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/c-impl-0009-0010.dcm
+2026-11-25 10:19:03.292 (   0.011s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/c-impl-0009-0010.dcm
+[Inferior 1 (process 475973) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:03.690 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/d-privcr-LO.dcm
+2026-11-25 10:19:03.690 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/d-privcr-LO.dcm
+[Inferior 1 (process 475992) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:03.994 (   0.010s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/d-privcr-SQ.dcm
+2026-11-25 10:19:03.994 (   0.010s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/d-privcr-SQ.dcm
+[Inferior 1 (process 476086) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:04.291 (   0.008s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/d-privcr-UN.dcm
+2026-11-25 10:19:04.291 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/d-privcr-UN.dcm
+[Inferior 1 (process 476093) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:04.663 (   0.077s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/d-privcr-US.dcm
+2026-11-25 10:19:04.663 (   0.077s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/d-privcr-US.dcm
+[Inferior 1 (process 476108) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:05.064 (   0.074s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/d-privcr-ZZ.dcm
+2026-11-25 10:19:05.064 (   0.074s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/d-privcr-ZZ.dcm
+[Inferior 1 (process 476121) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:19:05.479 (   0.009s) [        F68140C0]     vtkDICOMReader.cxx:546    ERR| vtkDICOMReader (0x5555557b6f00): Missing pixel info for (0028,0010) "Rows" inevidence/corpus/e-zero-sq.dcm
+2026-11-25 10:19:05.479 (   0.009s) [        F68140C0]       vtkExecutive.cxx:752    ERR| vtkCompositeDataPipeline (0x5555557b7da0): Algorithm vtkDICOMReader(0x5555557b6f00) returned failure for request: vtkInformation (0x5555557bb370)
+  Debug: Off
+  Modified Time: 154
+  Reference Count: 1
+  Registered Events: (none)
+  Request: REQUEST_INFORMATION
+  ALGORITHM_AFTER_FORWARD: 1
+  FORWARD_DIRECTION: 0
+
+
+reader Update completed: evidence/corpus/e-zero-sq.dcm
+[Inferior 1 (process 476172) exited normally]
