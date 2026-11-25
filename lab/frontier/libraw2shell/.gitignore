@@ -30,6 +30,7 @@
 # W21: replay outputs are regenerable; keep the pinned evidence and probes.
 /w21/*
 !/w21/hashes.sha256
+!/w21/hashes-clean.sha256
 !/w21/results.txt
 !/w21/replay.sh
 !/w21/zero.json

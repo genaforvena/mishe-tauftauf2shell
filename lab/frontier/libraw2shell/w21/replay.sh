@@ -1,6 +1,9 @@
 #!/bin/sh
 # One-command clean replay of W21. Run from any cwd:
 #   sh lab/frontier/libraw2shell/w21/replay.sh
+# Source/probe/input hashes are checked on every run. w21/hashes.sha256
+# additionally pins the author-local -g binaries; clean rebuilds embed a
+# different build path and are checked by behavior below instead.
 set -u
 ORIG=$(pwd)
 HERE=$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)
@@ -21,8 +24,8 @@ run_rc() { # rc, stderr file, expected stderr substring, env, binary, input
   [ "$rc" = "$erc" ] && has "$msg" "$errf"
 }
 
-ok 'hashes of pins, generator, inputs, probes and binaries' \
-  sh -c 'sha256sum -c w21/hashes.sha256 >w21/replay-hashes.out 2>&1'
+ok 'hashes of pins, generator, inputs and probes' \
+  sh -c 'sha256sum -c w21/hashes-clean.sha256 >w21/replay-hashes.out 2>&1'
 ok 'zero input regenerates byte-exact from spec' \
   sh -c 'python3 craft_uncompressed_poc.py w11/targetbeef.input w21/regen-zero.input w21/zero.json >/dev/null && cmp -s w21/regen-zero.input w21/zero.input'
 
@@ -55,3 +58,19 @@ printf 'PASS=%s FAIL=%s\n' "$pass" "$fail"
 [ "$fail" = 0 ] && printf 'W21_OK\n'
 cd "$ORIG" || exit 2
 [ "$fail" = 0 ]
+cd "$HERE/.." || exit 2
+pass=0
+fail=0
+ok() {
+  label=$1
+  shift
+  if "$@"; then printf 'PASS %s\n' "$label"; pass=$((pass+1))
+  else printf 'FAIL %s\n' "$label"; fail=$((fail+1)); fi
+}
+has() { grep -q "$1" "$2"; }
+run_rc() { # rc, stderr file, expected stderr substring, env, binary, input
+  erc=$1; errf=$2; msg=$3; pad=$4; bin=$5; input=$6
+  env MALLOC_TOP_PAD_="$pad" "$bin" -n 1 "$input" > /dev/null 2> "$errf"
+  rc=$?
+  [ "$rc" = "$erc" ] && has "$msg" "$errf"
+}

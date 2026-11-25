@@ -15,6 +15,9 @@ ok() {
 }
 has() { grep -q "$1" "$2"; }
 
+# The generated DNG is gitignored and absent from a clean archive. Derive it
+# from the committed spec before hashing, as with the other checked inputs.
+python3 craft_uncompressed_poc.py w11/targetbeef.input w23/greenzero1.input w23/greenzero1.json >/dev/null || exit 2
 ok 'hashes of pins, generator, specs, probe and inputs' \
   sh -c 'sha256sum -c w23/hashes.sha256 >w23/replay-hashes.out 2>&1'
 ok 'greenzero1 input regenerates byte-exact from spec' \
