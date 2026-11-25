@@ -538,3 +538,12 @@ the chosen bytes reach a data pointer and a forwarded wire copy, not a
 benign marker or a control-flow target. Ceiling stays rung 4; no r5. The
 same 1700-byte wire against gcc -O1/-O2 and default-PIE clang builds is
 UNKNOWN; independent verdict on #3909/#4173 is still owed.
+
+The same check on the pinned plain gcc -O1 PIE build
+(`provision/build/n2n-plain/supernode`, BuildID sha1
+`27a6f088a7c7f21b587e054d2d44e818c388fd8a`) also gives zero indirect calls:
+three `notrack jmp *` at `0xd381`, `0xd6b5`, `0xe2b2`, each a switch table
+with a `.rodata` base (`ftbl+0xb4`, `ftbl+0xe4`, `ftbl+0x114`) and an index
+bounded by `cmp $0xb; ja`. The negative is therefore not an artifact of the
+clang non-PIE build: the gcc -O1 build used for W3/W5/W7 has no poisonable
+call target in `process_udp` either.
