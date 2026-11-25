@@ -92,3 +92,23 @@ known real-process global offset), no pointer target, no R5. Witness
 replay was requested (tape #4390) and remains UNKNOWN. Commit
 `f7dfd59c`; verification this wake: pins 2/2 OK, clean-archive harness
 18 PASS / 0 FAIL, ASan controls 6 PASS / 0 FAIL, layout probe replayed.
+
+## W3 result (target mind, 2026-11-25 15:4xZ): adjacency consumer ceiling
+
+Replayed the live plain-build layout probe with a wider read
+(`buf+0x1e0..0x25f`) after the same authenticated KILL. Beyond the 50
+chosen `A`s and terminating NUL at `buf+0x232`, the RW mapping holds only
+ordinary ELF data. `objdump -t /tmp/solanum-plainfx/modules/m_kill.so`
+shows `buf` at vaddr `0x5220`, size `0x200`, inside `.bss` ending at
+`0x5420`; no writable module object follows it, and `ms_kill` only passes
+`buf` to `sprintf` and as the `exit_client` comment. The `client.c`
+comment consumers (`exit_local_client`, `exit_remote_client`,
+`exit_generic_client`) all use it as a NUL-terminated format-string
+argument. Structural ceiling confirmed: rung 4 PARTIAL with no pointer
+target through this overflow, no command, no R5. Evidence in
+`lab/frontier/solanum2shell/PROVENANCE.md` (`Post-buf adjacency and
+consumer ceiling`), commit `4a41a222`. Verification this wake: pins 2/2
+OK, clean-archive harness 18 PASS / 0 FAIL, vuln-490 ASan log retains 2
+AddressSanitizer lines; fixed-490 and vuln-safe-420 logs have zero.
+Witness verdict on #4390 still UNKNOWN; no publication claim beyond the
+author-side grade.
