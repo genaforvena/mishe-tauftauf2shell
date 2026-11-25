@@ -1,0 +1,31 @@
+Breakpoint 1 at 0xc5f4: file src/sn_utils.c, line 2322.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 07:00:55 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+25/Nov/2026 07:00:55 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 07:00:55 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 07:00:55 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 07:00:55 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 07:00:55 [supernode.c:660] supernode is listening on UDP 18970 (main)
+25/Nov/2026 07:00:55 [supernode.c:669] supernode opened TCP 18970 (aux)
+25/Nov/2026 07:00:55 [supernode.c:676] supernode is listening on TCP 18970 (aux)
+25/Nov/2026 07:00:55 [supernode.c:685] supernode is listening on UDP 18971 (management)
+25/Nov/2026 07:00:55 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 07:00:55 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 07:00:55 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x555555583288 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffce90, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffc650 "\003\003", udp_size=1738, now=1795590065) at src/sn_utils.c:2322
+2322	            decode_REGISTER_SUPER_NAK(&nak, &cmn, udp_buf, &rem, &idx);
+W10_PREDECODE_COMM $1 = (struct sn_community *) 0x555555587280
+
+Program received signal SIGSEGV, Segmentation fault.
+process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce90, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795590065) at src/sn_utils.c:2324
+2324	            if(comm->header_encryption == HEADER_ENCRYPTION_ENABLED) {
+W10_STOP
+rip            0x5555555605fd      0x5555555605fd <process_udp+2845>
+=> 0x5555555605fd <process_udp+2845>:	cmpb   $0x2,0x16(%rax)
+#0  process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce90, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795590065) at src/sn_utils.c:2324
+#1  0x000055555555ea86 in run_sn_loop (sss=sss@entry=0x555555583288 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000555555557044 in main (argc=11, argv=0x7fffffffe1c8) at src/supernode.c:741
+W10_DONE
+[Inferior 1 (process 291111) killed]

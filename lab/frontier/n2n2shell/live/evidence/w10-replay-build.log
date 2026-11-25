@@ -1,0 +1,55 @@
+Wait please...
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking for gcc... clang
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether the compiler supports GNU C... yes
+checking whether clang accepts -g... yes
+checking for clang option to enable C11 features... none needed
+checking for ar... ar
+checking for windres... no
+configure: creating ./config.status
+config.status: creating config.mak
+config.status: creating include/config.h
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/supernode.o src/supernode.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/aes.o src/aes.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/auth.o src/auth.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/cc20.o src/cc20.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/curve25519.o src/curve25519.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/edge_management.o src/edge_management.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/edge_utils.o src/edge_utils.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/header_encryption.o src/header_encryption.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/hexdump.o src/hexdump.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/json.o src/json.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/management.o src/management.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/minilzo.o src/minilzo.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/n2n.o src/n2n.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/n2n_port_mapping.o src/n2n_port_mapping.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/n2n_regex.o src/n2n_regex.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/network_traffic_filter.o src/network_traffic_filter.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/pearson.o src/pearson.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/random_numbers.o src/random_numbers.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/sn_management.o src/sn_management.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/sn_selection.o src/sn_selection.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/sn_utils.o src/sn_utils.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/speck.o src/speck.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/tf.o src/tf.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_aes.o src/transform_aes.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_cc20.o src/transform_cc20.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_lzo.o src/transform_lzo.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_null.o src/transform_null.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_speck.o src/transform_speck.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_tf.o src/transform_tf.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/transform_zstd.o src/transform_zstd.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/tuntap_freebsd.o src/tuntap_freebsd.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/tuntap_linux.o src/tuntap_linux.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/tuntap_netbsd.o src/tuntap_netbsd.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/tuntap_osx.o src/tuntap_osx.c
+clang -g -O2 -fno-omit-frame-pointer -I./include    -Wall   -MMD -MP -c -o src/wire.o src/wire.c
+ar rcs libn2n.a src/aes.o src/auth.o src/cc20.o src/curve25519.o src/edge_management.o src/edge_utils.o src/header_encryption.o src/hexdump.o src/json.o src/management.o src/minilzo.o src/n2n.o src/n2n_port_mapping.o src/n2n_regex.o src/network_traffic_filter.o src/pearson.o src/random_numbers.o src/sn_management.o src/sn_selection.o src/sn_utils.o src/speck.o src/tf.o src/transform_aes.o src/transform_cc20.o src/transform_lzo.o src/transform_null.o src/transform_speck.o src/transform_tf.o src/transform_zstd.o src/tuntap_freebsd.o src/tuntap_linux.o src/tuntap_netbsd.o src/tuntap_osx.o src/wire.o 
+clang -L.  src/supernode.o libn2n.a  -ln2n -o src/supernode
+cp src/supernode supernode

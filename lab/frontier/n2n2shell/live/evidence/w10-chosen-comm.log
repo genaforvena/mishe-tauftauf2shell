@@ -1,0 +1,34 @@
+Breakpoint 1 at 0xc5f4: file src/sn_utils.c, line 2322.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 06:58:34 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+25/Nov/2026 06:58:34 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 06:58:34 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:58:34 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 06:58:34 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:58:34 [supernode.c:660] supernode is listening on UDP 18930 (main)
+25/Nov/2026 06:58:34 [supernode.c:669] supernode opened TCP 18930 (aux)
+25/Nov/2026 06:58:34 [supernode.c:676] supernode is listening on TCP 18930 (aux)
+25/Nov/2026 06:58:34 [supernode.c:685] supernode is listening on UDP 18931 (management)
+25/Nov/2026 06:58:34 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 06:58:34 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 06:58:34 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x555555583288 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffcec0, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffc680 "\003\003", udp_size=1738, now=1795589924) at src/sn_utils.c:2322
+2322	            decode_REGISTER_SUPER_NAK(&nak, &cmn, udp_buf, &rem, &idx);
+W10B_COMMVAL $1 = (struct sn_community *) 0x555555587280
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555557114d in encode_uint8 (base=0x7fffffffb750 "\003\002", base@entry=0x7fffffffa810 "", idx=0x7fffffffc4d0, idx@entry=0x7fffffffb590, v=3 '\003') at src/wire.c:49
+49	    *(base + (*idx)) = (v & 0xff);
+W10B_AFTER_CONTINUE
+rip            0x55555557114d      0x55555557114d <encode_REGISTER_SUPER_NAK+13>
+=> 0x55555557114d <encode_REGISTER_SUPER_NAK+13>:	movb   $0x3,(%rdi,%rax,1)
+#0  0x000055555557114d in encode_uint8 (base=0x7fffffffb750 "\003\002", base@entry=0x7fffffffa810 "", idx=0x7fffffffc4d0, idx@entry=0x7fffffffb590, v=3 '\003') at src/wire.c:49
+#1  encode_common (base=0x7fffffffb750 "\003\002", base@entry=0x7fffffffa810 "", idx=0x7fffffffc4d0, idx@entry=0x7fffffffb590, common=0x7fffffffc5d8, common@entry=0x7fffffffb698) at src/wire.c:224
+#2  encode_REGISTER_SUPER_NAK (base=base@entry=0x7fffffffb750 "\003\002", idx=idx@entry=0x7fffffffc4d0, common=common@entry=0x7fffffffc5d8, nak=nak@entry=0x7fffffffbf90) at src/wire.c:625
+#3  0x00005555555607d1 in process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffcec0, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795589924) at src/sn_utils.c:2344
+#4  0x000055555555ea86 in run_sn_loop (sss=sss@entry=0x555555583288 <sss_node>) at src/sn_utils.c:2664
+#5  0x0000555555557044 in main (argc=11, argv=0x7fffffffe1f8) at src/supernode.c:741
+W10B_DONE
+[Inferior 1 (process 251424) killed]

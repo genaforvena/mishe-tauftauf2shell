@@ -1,0 +1,33 @@
+Breakpoint 1 at 0xc5f4: file src/sn_utils.c, line 2322.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 06:56:38 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+25/Nov/2026 06:56:38 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 06:56:38 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:56:38 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 06:56:38 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 06:56:38 [supernode.c:660] supernode is listening on UDP 18920 (main)
+25/Nov/2026 06:56:38 [supernode.c:669] supernode opened TCP 18920 (aux)
+25/Nov/2026 06:56:38 [supernode.c:676] supernode is listening on TCP 18920 (aux)
+25/Nov/2026 06:56:38 [supernode.c:685] supernode is listening on UDP 18921 (management)
+25/Nov/2026 06:56:38 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 06:56:38 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 06:56:38 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x555555583288 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffcea0, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffc660 "\003\003", udp_size=86, now=1795589808) at src/sn_utils.c:2322
+2322	            decode_REGISTER_SUPER_NAK(&nak, &cmn, udp_buf, &rem, &idx);
+W10B_BEFORE_DECODE
+VAR nak 140737488338800
+VAR comm 140737488340496
+VAR sss 140737488340472
+VAR sender_sock 140737488340376
+VAR udp_buf 140737488340480
+VAR peer UNAVAILABLE
+VAR encx 140737488340144
+VAR sock_size 140737488340324
+VAR socket_fd 140737488340404
+VAR udp_size 140737488340448
+COMMVAL 93824992440960
+SSSSZ 16
+W10B_END
+[Inferior 1 (process 241315) killed]

@@ -417,3 +417,59 @@ control: no consumed pointer, marker, control-flow takeover or rung 5.
 The newly observed effect is stack-data disclosure from the patched
 decoder's surviving encoder read; independent verdict on #3909 is still
 owed.
+
+## W10: wire-chosen bytes consumed as a live pointer (clang -O2, 2026-11-25 06:5xZ)
+
+W2/W5/W7 found no consumer read on the pinned **gcc -O1** plain build,
+where `peer` and the forwarding arguments stay in registers. That result is
+build-specific. `live/w9_spill_layout.sh` rebuilds the pinned tarball four
+ways (gcc/clang at -O0/-O2) and reads the live stack addresses at
+`sn_utils.c:2331` with gdb; raw offsets from `&nak` are in
+`live/evidence/w9-layout-*.log`:
+
+- gcc -O0: `peer` at `-480`, `encx` `-280`, `nakbuf` `+1456` — no pointer
+  slot in the forward window; gcc -O2: `peer` optimized out.
+- clang -O0: `peer` at `-2068`; the named argument slots are beyond the
+  wire-reachable `+2024` end of the write.
+- clang -O2: argument spill slots lie **inside** the reachable window:
+  `encx +1344`, `sock_size +1524`, `sender_sock +1576`,
+  `socket_fd +1604`, `udp_size +1648`, `sss +1672`, `udp_buf +1680`,
+  `comm +1696`. The 2048-byte receive cap permits `token_size=1700`, whose
+  write ends at `nak+1713`, covering all of them.
+
+`live/w10_large_peer.py` registers a loopback peer and sends that NAK.
+Both cases bind only 127.0.0.1 (18900/18910 and 18930/18940 in the author
+runs) and use `gcc`-independent pinned source:
+
+- **Garbage chosen pointer.** With the repeating chosen token
+  (`48 5a 4d 49`), the clang -O2 supernode takes SIGSEGV at
+  `sn_utils.c:2324` (`if(comm->header_encryption ...)`). gdb's stopped
+  frame shows `sss`, `sender_sock`, `udp_buf` =
+  `0x5a48494d5a48494d` and `sock_size`, `socket_fd` = `0x5a48494d`:
+  wire bytes occupy the spilled argument slots that the decoder path
+  then uses as pointers/scalars. `live/evidence/w10-clang-o2.log`.
+- **Wire-chosen valid pointer.** Calibration at `sn_utils.c:2322` (before
+  decode, gdb `set disable-randomization on`) read the live
+  `comm = 0x555555587280` (`live/evidence/w10-calibration.log`). Replaying
+  the same 1700-byte wire with eight chosen bytes at token offset 1682
+  (= `nak+1696`) set to that value moved the fault to
+  `sn_utils.c:2344`, in `encode_REGISTER_SUPER_NAK` ->
+  `encode_common` -> `encode_uint8` at `wire.c:49`; gdb's RIP is
+  `movb $0x3,(%rdi,%rax,1)`, with `idx` and `base` now holding corrupted
+  stack addresses. `live/evidence/w10-chosen-comm{,-sender}.log`.
+
+Therefore the overflow reaches a **consumed pointer** on this build:
+wire-chosen bytes at a chosen offset are dereferenced in the live process,
+and substituting a valid pointer changes which pointer is consumed.
+Honest limits: the valid pointer value came from a debugger pre-read with
+ASLR disabled, not from a wire leak or an ASLR-defeating primitive; both
+outcomes are crashes, with no benign marker at a chosen target, no
+control-flow takeover and no command side effect. This raises the rung-4
+mechanism from chosen data re-emission to chosen-pointer dereference; the
+ceiling stays rung 4 and there is no r5.
+
+One-command replay: `sh lab/frontier/n2n2shell/live/w10_pointer_control.sh`
+(build once, then the calibration, garbage and chosen-pointer cases;
+all instances loopback only). Author clean run: `RESULT 9 PASS / 0 FAIL`,
+raw logs `live/evidence/w10-replay-*.log`. Independent verdict on #3909 is
+still owed.
