@@ -14,6 +14,13 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#ifdef WIRE_GROOM
+/* Keep the listener's per-connection state out of the frame the OOB write
+ * walks through, so the W1 groom path cannot corrupt server locals. */
+#define WIRE_LOCAL static
+#else
+#define WIRE_LOCAL /* empty */
+#endif
 #include <unistd.h>
 
 static int read_exact(int fd, uint8_t *p, size_t n)
@@ -46,13 +53,13 @@ int main(void)
     for (int conn = 0; conn < 1; conn++) {
         int fd = accept(srv, NULL, NULL);
         if (fd < 0) { break; }
-        struct image_header hdr;
-        struct flash_area fa;
-        struct enc_key_data enc;
+        WIRE_LOCAL struct image_header hdr;
+        WIRE_LOCAL struct flash_area fa;
+        WIRE_LOCAL struct enc_key_data enc;
         static uint8_t ct[8192];
         static uint8_t zeros[8192];
-        uint32_t off = SECT_SZ;
-        uint32_t idx, dec_off, dec_len;
+        WIRE_LOCAL uint32_t off = SECT_SZ;
+        WIRE_LOCAL uint32_t idx, dec_off, dec_len;
 
         if (read_exact(fd, (uint8_t *)&hdr, sizeof(hdr)) != 0) {
             printf("WIRE conn=%d REJECT short-header\n", conn);
@@ -85,7 +92,16 @@ int main(void)
         if (boot_enc_set_key(&enc, g_key) != 0) { printf("KEY FAIL\n"); close(fd); continue; }
 
         memset(g_groom_pt, 0, sizeof(g_groom_pt));
+#ifdef WIRE_GROOM
+        if (read_exact(fd, g_groom_pt, 16) != 0) {
+            printf("WIRE conn=%d REJECT short-plaintext\n", conn);
+            close(fd);
+            continue;
+        }
+        printf("WIRE conn=%d wire_plaintext=%.*s\n", conn, 16, g_groom_pt);
+#else
         memcpy(g_groom_pt, "MISHE-REAL-AES!!", 16);
+#endif
         memset(zeros, 0, dec_len);
         memset(ct, 0, sizeof(ct));
         boot_enc_encrypt(&enc, dec_off, dec_len, 0, ct);
@@ -96,16 +112,25 @@ int main(void)
         g_readback_len = 0;
 
         g_buf_base = NULL;
-        /* No stack grooming here: writing past the 4096-byte VLA in this
-         * server frame corrupts its own locals. The wire result is the
-         * OOB destination logged by the wrapper, not chosen plaintext. */
+        /* Default W2: no grooming, because writes past the 4096-byte VLA
+         * corrupt this server frame's locals; the result is the real
+         * decryptor's OOB destination. WIRE_GROOM moves server locals to
+         * static storage and enables the W1 groom/readback path. */
+#ifdef WIRE_GROOM
+        g_groom = 1;
+#else
         g_groom = 0;
+#endif
         int rc = harness_decrypt_region(&enc, &fa, &hdr, off, SECT_SZ);
         printf("WIRE conn=%d RESULT rc=%d idx=%u dec_off=%u dec_len=%u readback=",
                conn, rc, idx, dec_off, dec_len);
         if (g_readback_len) { hex(g_readback, g_readback_len < 16 ? g_readback_len : 16); }
         else { printf("(none)"); }
+#ifdef WIRE_GROOM
+        printf(" expected=%.*s\n", 16, g_groom_pt);
+#else
         printf(" expected=MISHE-REAL-AES!!\n");
+#endif
         fflush(stdout);
         boot_enc_drop(&enc);
         close(fd);

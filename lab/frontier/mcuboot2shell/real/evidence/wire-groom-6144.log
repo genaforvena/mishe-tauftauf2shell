@@ -1,0 +1,7 @@
+PORT=58633
+WIRE conn=0 magic=96f3b83d hdr_size=6144 flags=00000004 img_size=4294961151
+WIRE conn=0 wire_plaintext=WIRE-CHOICE-1234
+REAL_DECRYPT off=4096 len=2048 blk_off=0 dst_delta=6144 dst=0x7ffd3164b920
+WIRE conn=0 RESULT rc=0 idx=6144 dec_off=4096 dec_len=2048 readback=574952452d43484f4943452d31323334
+ expected=WIRE-CHOICE-1234
+hdr_size=6144 SERVER_RC=0

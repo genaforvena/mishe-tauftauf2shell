@@ -13,4 +13,5 @@ real/fixed-asan
 real/*.o
 real/wire-server
 real/core
+real/wire-groom-server
 real/core.*

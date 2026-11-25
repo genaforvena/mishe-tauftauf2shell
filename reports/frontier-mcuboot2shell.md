@@ -1,18 +1,12 @@
 # Frontier brief — mcuboot2shell (CVE-2026-16663)
 
-Status 2026-11-25 05:5xZ: **staged, handed off, no real build**. Rung 3 is
-CONFIRMED in the verbatim pinned `decrypt_region_inplace()` function with
-local stand-ins: gcc ASan reports `dynamic-stack-buffer-overflow`, `WRITE of
-size 1` at the first poisoned byte 8 bytes past the 4096-byte VLA (mode
-`edge`, `ih_hdr_size=4104`); clang ASan agrees; Valgrind reports an invalid
-write past the VLA for the advisory's deep case (`ih_hdr_size=6144`, 2048
-bytes past the 4096-byte buffer). Rung 4 is PARTIAL: chosen plaintext bytes
-were read back at `buf+6144` in a plain build (16 bytes
-`4d495348452d4d4355424f4f542121`, and a caller-chosen
-`414243442d4d4355424f4f542d58595a`). No real MCUboot build, no serial/USB
-wire, no real AES image, no pointer/IP/command control and no rung 5.
-Witness verdict UNKNOWN. AV:L (serial recovery), pre-authentication but not
-remote. Fix is merged on `main`; the projected 2.5.1 release was not observed.
+Status 2026-11-25 10:59Z: **rung 4 DEMONSTRATED**, extended to a live
+loopback process where client-supplied bytes select the OOB destination and
+client-supplied plaintext is read back there (W1/W2/W3 sections below).
+Rung 3 real-source ASan OOB access confirmed. Rung 5 remains UNKNOWN: no
+MCUboot SMP/UART parser, no real encrypted image or key TLV, no pointer, IP
+or command control, no witness verdict. Fix merged on `main`; patched 2.5.1
+release projected by the advisory, not observed.
 
 ## Verified ground truth (read-only provisioning)
 
@@ -187,3 +181,27 @@ rung 5: the transport is a lab shim, not MCUboot's SMP/UART parser; no real
 encrypted image, key TLV, chosen plaintext (grooming disabled here), pointer,
 IP or command control was observed. W1's chosen-byte readback and ASan report
 remain the rung-4 memory-corruption evidence. Witness verdict UNKNOWN.
+
+## W3 wire-to-chosen-bytes result (2026-11-25 10:59Z, target mind)
+
+The W2 listener now has a `WIRE_GROOM` variant
+(`real/wire-groom-harness.c`, `real/wire-groom-run.sh`) that keeps its
+per-connection locals in static storage and accepts a 16-byte chosen
+plaintext after the header. The same real pinned function and real
+TinyCrypt AES-CTR decryptor run; the wire string is groomed as adjacent
+stack ciphertext and read back from the real destination. Full hashes,
+table and negatives: `real/WIRE-GROOM-PROVENANCE.md`.
+
+| wire `ih_hdr_size` | real destination | readback | process |
+| --- | --- | --- | --- |
+| 6144 | `buf+6144` | `WIRE-CHOICE-1234` | rc 0 |
+| 7168 | `buf+7168` | `WIRE-CHOICE-1234` | rc 0 |
+| 4104 | `buf+4104` | none | SIGSEGV (139), negative preserved |
+| 2048 (control) | `buf+0` | `WIRE-CHOICE-1234` | rc 0 |
+
+Rung 4 is extended from wire-to-sink to **wire-to-chosen-bytes** in a live
+loopback process, under the stated adjacent-stack grooming condition. The
+default W2 path was re-run after the change and still reproduces its four
+rows. This is not rung 5: the transport is a lab shim, not MCUboot SMP/UART;
+the chosen bytes are groomed stack ciphertext, not an SMP upload field; no
+pointer, IP or command control and no witness replay. Witness UNKNOWN.
