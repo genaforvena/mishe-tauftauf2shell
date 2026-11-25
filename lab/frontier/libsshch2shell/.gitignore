@@ -22,3 +22,5 @@ real/fixedaddr-run/
 real/separate-run/
 real/inline-run/
 real/rs-run/
+real/real_wire-wc-*
+real/wc-run/
