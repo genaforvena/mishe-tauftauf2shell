@@ -5,6 +5,30 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (third push) — harness rung 5 re-smoked PASS; new stock
+  Sinatra 500-page oracle measured but insufficient; stock/oracle-free/
+  persistent remains NOT ACHIEVED.** Re-ran the committed
+  `ruby2shell-rung5-http` chain: attack returned HTTP 200 with
+  `rce=OBSERVED`, a target-created marker and one independently counted pop
+  at the nominated address; safe affected input and the identical malicious
+  `_method` on fixed 3.4.13 both returned `rce=ABSENT` with no marker and no
+  pop. New analysis-only repro `lab/repro/ruby2shell-errorpage-oracle.sh`
+  measures a previously untested framework surface: stock Sinatra 4.2.2's
+  dev 500 page renders Rack env values with `to_s`/`inspect`, so non-string
+  env objects leak default `#<Class:0x...>` identities. Observed 20 distinct
+  `0x...` tokens per 500 response, 12 boot-stable across three requests in
+  one process, zero low-12-bit overlap across fresh processes, and 20/20
+  classified in `[anon:Ruby:GC:default:heap_page_body_allocate]` — none in
+  glibc `[heap]`, libc or Ruby code. Eight wire-only malformed requests on
+  a truly route-less stock app all returned 404 with no tokens; the stock
+  Rails dev page has zero address tokens. This can replace
+  `ObjectSpace.dump` but not mtrace (glibc-heap chunk addresses for the
+  tcache safe-link key / command string) or `/proc/self/maps` (libc base),
+  so no grade change and no relabel. Veria's page was unchanged at the
+  dated trigger (stamp 2026-11-21T03:52Z, PoC still unpublished); the
+  durendal.sh disclosure confirms RCE on a plain `rails new` app but
+  publishes no mechanics; the three fetched public PoC repos remain
+  sanitizer/crash-level.
 - **2026-11-25 (second push) — wire-shaped victim grooming closed: six
   measured blockers; rung 5 stock remains NOT ACHIEVED.** Targeting the
   only oracle-free channel (dev error page reflects params verbatim),

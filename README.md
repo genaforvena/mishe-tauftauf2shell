@@ -197,6 +197,17 @@ probe measured post-attack C `request=0x21c/0x1f8` pops at the victim user
 pointer in two live survivors; stock/oracle-free/persistent R5 stays NOT
 ACHIEVED and the harness-condition witness-ESTABLISHED R5 stays as labelled.
 
+The 2026-11-25 third push re-smoked Ruby2Shell's harness rung-5 chain
+(attack marker + `rce=OBSERVED` + target pop; safe and fixed clean) and
+measured one new stock surface: a stock Sinatra dev 500 page leaks 20
+GC-heap object addresses via env `to_s`/`inspect`
+(`lab/repro/ruby2shell-errorpage-oracle.sh`), 12 boot-stable in-process but
+0/20 low-bit overlap across fresh processes and all 20 in Ruby GC pages,
+none in glibc heap, libc or code. It is not wire-reachable on a route-less
+app and Rails filters it; it replaces only `ObjectSpace.dump`, not mtrace
+or maps. Stock/oracle-free/persistent R5 stays NOT ACHIEVED, and the
+labelled harness-condition R5 cell is unchanged.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed

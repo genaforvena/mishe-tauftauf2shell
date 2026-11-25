@@ -1459,6 +1459,68 @@ Remaining unexplored (named for the next wake): a stock route that runs
 stock Puma), and Veria's unpublished PoC mechanics. Boundary unchanged:
 no command, no disclosure, no persistence; stock/oracle-free/persistent
 RCE remains **NOT ACHIEVED**.
+## Stock Sinatra 500-page address oracle — measured, insufficient (2026-11-25, third push)
+
+New claim, measured this wake: a stock Sinatra 4.2.2 development 500 page
+discloses Ruby **GC-heap object addresses** without `ObjectSpace.dump`,
+`/proc/self/maps`, mtrace, a preload or a debugger. Cause is framework code,
+not app code: `sinatra-4.2.2/lib/sinatra/show_exceptions.rb:347-350` renders
+every Rack env value with `val` (`Object#to_s`), and
+`rack-3.2.8/lib/rack/show_exceptions.rb:389-392` renders them with
+`val.inspect`; non-string env objects therefore print their default
+`#<Class:0x...>` identity. Prior stock work tested only the **handled**
+empty-multipart 400 and unknown-charset 404 paths, so this data class had
+not been measured.
+
+Repro (analysis-only, committed): `bash
+lab/repro/ruby2shell-errorpage-oracle.sh 4611 verify-oracle-1`. The app is
+one plain classic-Sinatra route (`get('/x') { params.fetch('required') }`)
+with no groom/marker middleware and no exploit code; the script's post-response
+`/proc/PID/maps` read only classifies the leaked values and feeds nothing.
+Observed: three HTTP 500 responses of ~141,682 bytes, each with **20 distinct
+`0x...` tokens**. Twelve are boot-stable across three requests in one
+process (`puma.config`, `rack.logger`, `rack.errors`, two request Procs);
+eight are request-scoped (`rack.input` `#<StringIO:0x...>`,
+`sinatra.accept` `#<Sinatra::Request::AcceptEntry:0x...>`, and two
+Puma response Procs). Fresh-process comparison of the sorted address sets
+showed **zero low-12-bit overlap**, so page offsets are not portable across
+processes.
+
+Classification against the live `/proc/PID/maps` snapshot: **20/20** leaked
+addresses fall in `[anon:Ruby:GC:default:heap_page_body_allocate]`;
+**zero** in glibc `[heap]`, **zero** in libc and **zero** in the Ruby text
+mapping. Ruby is PIE (`Type: DYN`; `system@plt` at `0x37650`, only a relative
+offset), so a GC pointer does not yield a code base either.
+
+Wire reachability is narrower than the page's existence: eight malformed
+wire-only requests against a truly route-less stock classic Sinatra app
+(NUL `X-HTTP-Method-Override`, invalid `%-` path, missing multipart
+boundary, bad base64 transfer-encoding, NUL form value, 8 KB header, bad
+`Accept` q-value, unknown multipart charset) **all returned 404 with no
+address tokens**. The oracle needs an app-level exception; a bare app does
+not provide one. The stock Rails dev error page is also closed as a channel:
+`lab/build/evidence/stock-rails-consH-20.html` (169,434 bytes) contains
+**zero** `0x...` tokens — Rails filters the env dump.
+
+**Boundary — no grade change.** This oracle can substitute for
+`ObjectSpace.dump` when discovering GC-heap VWA slots, but the harness chain
+still needs two oracles it does not supply: glibc-heap chunk addresses
+(mtrace `M … 419` / `M … fa1` lines, for the tcache safe-linking key and the
+command-string address) and libc base (`/proc/self/maps`, for
+`system`). It therefore does not unlock stock/oracle-free/persistent rung 5,
+which remains **NOT ACHIEVED**. The harness-condition witness-ESTABLISHED
+rung 5 was re-smoked this wake: attack `rce=OBSERVED` + target-created
+marker + one poisoned target pop; safe affected input and the identical
+malicious `_method` on fixed 3.4.13 both `rce=ABSENT`, no marker, no pop.
+
+Disclosure landscape at the dated trigger (checked 2026-11-25): Veria's
+page still carries `dateModified 2026-11-21T03:52Z` and still says the PoC
+will be published "on 25 November 2026, or later"; Moritz Sanft's
+`durendal.sh/blog/ruby-case-mapping-bugs` confirms pre-auth RCE on a plain
+`rails new` app (first with jemalloc, then glibc) but publishes **no
+mechanics**; the three fetched public PoC repos are sanitizer/crash-level
+only. No external mechanics were adopted as fact.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1517,3 +1579,15 @@ RCE remains **NOT ACHIEVED**.
    stock route running MethodOverride without the debug-page render,
    same-thread pacing, or Veria's PoC mechanics when published. Rung 5
    stock/oracle-free/persistent: still NOT ACHIEVED.
+
+7. **Done this wake (2026-11-25, third push):** the harness rung-5 chain
+   was re-smoked end to end (attack marker + `rce=OBSERVED` + target pop;
+   safe affected and fixed 3.4.13 both clean). The new measurement is that
+   a stock Sinatra 500 page leaks 20 GC-heap object addresses via env
+   `to_s`/`inspect` (12 boot-stable in-process; 0/20 low-bit overlap across
+   fresh processes; 20/20 in Ruby GC pages, none in glibc heap or code),
+   but it is not wire-reachable on a route-less app and Rails filters it;
+   it replaces only `ObjectSpace.dump`, not mtrace or maps. Stock/oracle-
+   free/persistent rung 5 stays NOT ACHIEVED. Veria's PoC remained
+   unpublished at the dated trigger; the disclosure writeup confirms RCE
+   but gives no mechanics.
