@@ -421,3 +421,24 @@ talloc-free SIGABRT is a separate stock-allocator observation, and neither
 provides a chosen pointer, instruction pointer or command. Witness replay
 of the real-NF claim (#4225) is still pending, so the new ASan evidence is
 author-reported, not independent acceptance.
+
+## Clean-archive ASan receipt (2026-11-25 10:19Z)
+
+`git archive 11bf8130 lab/frontier/open5gs2shell` was extracted into
+`/tmp/open5gs-w6-replay`. The pinned `.deb`s, v2.8.0 tarball and the
+lab-extracted dependency prefix from W5 were reused (no new network
+fetch); both source trees came from the committed tree / pinned tarball,
+with parser SHA-256
+`dd49438c0792b6746b3b7eddd2820f1b17d06db5c68ff8a656931556f39da092`.
+Both ASan NRF targets rebuilt 1886/1886 RC 0, and the unmodified
+`nfloop/run.sh` replay reproduced the four `CASE=` lines byte-for-byte:
+SHA-256
+`62075f6ede67f614a430d149e45bfa15fe1c0fe2f561cdd60c29881494754bfb`
+for the vulnerable build and
+`2b31633e4ca2ab05fbada7ab8692e7007961b5e9daed78441aa8aa778a4d41a7`
+for the patched build, both identical to the committed
+`nfloop/evidence/asan{noleak,fixed-noleak}-run.out` traces. The replayed
+attack fault has the same address `0x507000003a91`, `WRITE of size 1`,
+`0 bytes after 65-byte region`, and the same `multipart_parser.c:260` /
+`init:82` / `message.c:3380` frames. This is an author-side clean-source
+receipt; witness replay of #4225 is still pending.
