@@ -265,3 +265,9 @@ second reader, with no pointer/IP/command control, no allocator-metadata
 claim, no benign side effect, no stock or live-target claim and no r5. All
 real-path results remain author-side; no witness verdict has landed on any
 of them.
+
+Clean-archive replay of `9633cfc8` into `/tmp/gpgme-w7-clean`: `sh
+build-real.sh` gave `BUILD OK`, rc 0, from the four provisioned tarballs
+copied locally (no network); `sh run-colon.sh` gave `PASS=26 FAIL=0`, rc 0,
+and the pinned `sh ../run.sh` gave `PASS=19 FAIL=0`. Author-side only; no
+witness verdict has landed on this or the earlier real paths.
