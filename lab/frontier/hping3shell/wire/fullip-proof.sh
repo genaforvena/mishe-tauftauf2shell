@@ -41,9 +41,12 @@ pid=$(cat "$pidf" 2>/dev/null || echo 0)
 [ "$pid" -gt 0 ] || { echo "no hping pid"; kill "$hp" 2>/dev/null; exit 2; }
 mapline=$(sudo -n awk '$3=="00000000" {print $1; exit}' "/proc/$pid/maps")
 base="0x${mapline%%-*}"
-sb=$(printf '0x%x' $((base + 0x29e00)))
-ii=$(printf '0x%x' $((base + 0x29f04)))
-jj=$(printf '0x%x' $((base + 0x29f08)))
+sym() { nm -n -S --defined-only "$BIN" | awk -v s="$1" '$4==s {print $1; exit}'; }
+sl=$(sym rc4_sbox); il=$(sym i.1); jl=$(sym j.0)
+[ -n "$sl" ] && [ -n "$il" ] && [ -n "$jl" ] || { echo "no rng symbols"; exit 2; }
+sb=$(printf '0x%x' $((base + 0x$sl)))
+ii=$(printf '0x%x' $((base + 0x$il)))
+jj=$(printf '0x%x' $((base + 0x$jl)))
 cat > "$cfg" <<EOF
 set pagination off
 set confirm off
