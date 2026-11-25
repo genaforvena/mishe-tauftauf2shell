@@ -37,7 +37,11 @@ owns no further work on this target.
   this wake, so the numeric fixed version is **UNKNOWN**. Rechecked
   2026-11-23: `git ls-remote --tags` still ends at v2.5.34 and the GHSA is
   unchanged since 2026-11-02; advisory commit `af3b8e9` is the merge of the
-  two already-tracked fixes.
+  two already-tracked fixes. Rechecked 2026-11-25T08:17Z via the GitHub tags
+  API and the advisory/issue APIs: newest tag is still `v2.5.34`
+  (`a4ec9cc8b799d3e620c89feeaeb3ec86f362a12f`), the GHSA still says patched
+  versions Unknown, and issue #1326 is closed with `updated_at`
+  2026-11-09T02:01:01Z. No numeric fixed version has appeared.
 - Fix: commit `6a3393dd996502457ab965432cf0b2035278825e` (2026-10-28,
   "jl2005c: reject an allocation table that does not fit the buffers"), with a
   separate commit `30bf7ace6d47cfe1232ea73bde2aceb95aba4bfb` for issue
