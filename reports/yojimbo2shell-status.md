@@ -8,4 +8,11 @@ panes 296/297, dead=0, both captures non-empty; registry entry written at
 Rungs 1-3 confirmed at the pinned verbatim `ProcessPacketFragment` sink; rung 4
 PARTIAL (chosen `MISHE-OO` at plain-build canary offset 300). No real yojimbo
 build, live UDP wire, pointer/IP control, command or r5; the upstream packet
-path is post-authentication. Witness replay UNKNOWN; operator admission pending.
+path is post-authentication. Witness replay UNKNOWN.
+
+## Admission 2026-11-25 02:0xZ
+ADMITTED under standing #6 as the 139th route (hy4-flash `max_parallel: 3`),
+both resolver keys, three wake units from the EXACT full-flag sync at pin
+`0d686bba…d528a` (`written 9, removed 0` across all three new targets;
+path enabled/active), window 147, README row 177. Grade unchanged: rungs
+1-3, rung 4 PARTIAL, rung 5 `—`; no wire, pointer, command or witness verdict.

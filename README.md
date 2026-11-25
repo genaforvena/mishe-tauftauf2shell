@@ -173,6 +173,9 @@ independent replay at that scope. Author reports are never acceptance.
 | **PxeIcmp2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 20:5xZ under standing #6 as the 135th route; verbatim pinned `PxeBcSupport.c` IPv4/IPv6 ICMP-error copy loops, ASan `heap-buffer-overflow WRITE of size 96` 0 bytes after a 720-byte region at `handlers_vuln.c:97`, rung 4 PARTIAL chosen fragment bytes `48 5a 4d 49` at `TftpError+96` and `54 41 55 46` in the adjacent plain-build canary; witness #3852 ESTABLISHED AS LABELED on a clean archive (31 PASS, independent 16-byte marker probe), no grade change or r5; no firmware build, loopback ICMP, event forging, pointer/IP/command.** CVE-2026-97631 / GHSA-99cj-7hg9-mp4m (2026-10-22, Critical CVSS4 9.5 `AV:N/AC:L/AT:P/PR:N/UI:N`), EDK II master as of 2026-09-14, pinned `edk2-stable202608` commit `2970e569…`; public fix PR #13302 merged at `fa789071…`. Four-pin `SHA256SUMS` and byte-for-byte extracted handlers in `lab/frontier/pxeicmp2shell/`; operator replay `sh harness/run.sh` = 31 PASS / 0 FAIL rc 0 with fixed, 300-byte-safe and clean-directory controls. Frontier's live two-pane window 143 adopted without duplication; hy4-flash route 134→135, both resolver keys 269→271, exact full-flag sync `written 3, removed 0`, path enabled/active, pinned doctor GREEN. |
 | **N2n2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:2xZ under standing #6 as the 136th route; verbatim pinned `decode_REGISTER_SUPER_NAK()`/`decode_buf()` from n2n `wire.c`, ASan `heap-buffer-overflow WRITE of size 96` 0 bytes after a 64-byte region via `handlers_vuln.c:47`/`:81`, rung 4 PARTIAL chosen wire bytes `48 5a 4d 49` in the adjacent plain-build canary. W1 later reaches a real pinned supernode with one loopback UDP NAK: ASan stack `WRITE-96` in the live `nak` and 96 chosen bytes at `nak+14..109`, including two pointer-shaped slots; W2's hardware-watchpoint follow-ups saw no consumed-pointer read. No control of a consumed pointer, canary or return address, command or r5; the live limb is unwitnessed.** CVE-2026-136404 (VulDB 2026-11-24, CWE-121/787), ntop n2n 3.0–3.1.1, vulnerable `dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff`, fixed `854fbbe01bbf131bf4cb88f8450d7084267668e1` (PR #1243); pinned sources and hashes in `lab/frontier/n2n2shell/PROVENANCE.md`, 15 PASS / 0 FAIL in-tree. The advisory's `sn_utils.c` stack-overflow attribution is now reproduced locally on the live supernode; full evidence `reports/n2n2shell-live.md`. |
 | **Pgactive2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 22:2xZ under standing #6 as the 137th route; verbatim pinned `pgactive_parse_replident_name()` (v2.1.9 `src/pgactive_catalogs.c:347-358`) with the unbounded trailing `%s` from `include/pgactive_internal.h:31`, ASan `stack-buffer-overflow WRITE of size 97` at offset 96 of the 64-byte stack `NameData`, rung 4 PARTIAL chosen `48 5a 4d 49` read inside the live function at offsets 0/64/92; witness W209 (#3898) ESTABLISHED AS LABELED from a clean archive (19 PASS / 0 FAIL), no grade change or r5. A later author-only SQL path calls the pinned wrapper in a live PostgreSQL 16.15 backend and gets ASan `WRITE-161` with a clean fixed control, but captures no chosen bytes there; no full pgactive build, replication wire path, saved pointer/return address, IP or command, and the SQL path is unwitnessed.** CVE-2026-134068 (CNA Amazon, 2026-11-24, CWE-787, CVSS4 7.7 `AV:N/AC:H/PR:L`), affected pgactive >=2.1.0 <2.1.10, fixed 2.1.10; pinned tags v2.1.9 `f34c8aa6f9f5c4ad5ee4bfdf93fef4b000be8f9e` and v2.1.10 `c3829ddb81c8c8e927b6e5a0baba3b1a016fcb52`, hashes in `lab/frontier/pgactive2shell/PROVENANCE.md`, 19 PASS / 0 FAIL in-tree. The advisory's authenticated `PR:L` precondition and command-execution claim stay claims; stand-in PG types only. |
+| **Open5gs2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 138th route; verbatim pinned Open5GS v2.8.0 `lib/sbi` empty-boundary multipart parser, ASan `WRITE of size 1` 0 bytes after a 65-byte region and plain build writes state-machine-forced `00 0d 0a` into an adjacent heap object — rung 4 PARTIAL, not arbitrary chosen bytes. `sh lab/frontier/open5gs2shell/harness/run.sh` 21 PASS / 0 FAIL; witness W217 replayed from a clean `git archive 22d70741` with a matching trace hash and ruled ESTABLISHED AS LABELED at that scope. No real Open5GS build, SBI listener or wire request, no pointer, command or r5.** CVE-2026-116543 / GHSA-25v2-v588-jq8g; window 146. |
+| **Yojimbo2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 139th route; verbatim pinned `ReliableOrderedChannel::ProcessPacketFragment` final-fragment `memcpy` before the `blockSize` check, ASan `WRITE of size 500` 0 bytes after a 1100-byte region and plain chosen `MISHE-OO` at canary offset 300; fixed guard and safe controls clean. `sh lab/frontier/yojimbo2shell/harness/run.sh` 20 PASS / 0 FAIL with 7/7 SHA-256 pins. No CVE/GHSA or fixed release known, no real yojimbo build, live UDP wire, pointer/IP control, command or r5; upstream packet path is post-authentication; witness UNKNOWN.** Upstream fix `d3d4f339…`; window 147. |
+| **Libsshch2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 140th route; verbatim pinned libssh `channel_rcv_data()` closed-channel data UAF, ASan heap-use-after-free `READ of size 32` 0 bytes inside a 64-byte region at `channel_default_bufferize`, plain chosen byte `M` / marker `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed guard suppresses it, safe channel clean. `sh harness/run-all.sh` 24 PASS / 0 FAIL. Authenticated peer required; no real SSH build, wire packet, pointer/IP control, command or r5; witness UNKNOWN.** CVE-2026-59850 (fixed 0.12.1/0.11.5); window 148; distinct from `libssh22shell`. |
 
 
 The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
@@ -2471,28 +2474,34 @@ author-only, with a live window and seed wall but no charter, route, wake unit
 or mind-count change; operator admission and witness replay are PENDING. All
 these limbs stay author-side/unwitnessed except the named witness verdicts;
 rung 5 stays UNKNOWN throughout.
-Frontier staged `open5gs2shell` at 23:0xZ on CVE-2026-116543 (empty-boundary SBI multipart parser in pinned Open5GS v2.8.0): the verbatim pinned parser under ASan reports `WRITE of size 1` 0 bytes after a 65-byte region, and a plain build writes the state-machine-forced periodic `00 0d 0a` pattern into an adjacent heap object — rung 3 plus rung 4 PARTIAL, not arbitrary chosen bytes. `sh lab/frontier/open5gs2shell/harness/run.sh` gives 21 PASS / 0 FAIL, with a clean-archive replay of `2eeee948` reproducing 21/0 and the trace hash recorded in the brief. No real Open5GS build, SBI listener or wire request, no pointer, command or r5; witness replay UNKNOWN. A charter and live window 146 exist but operator admission is pending, so this stays FRONTIER-STAGED: no route, wake unit, table row or mind-count change. Evidence: `reports/frontier-open5gs2shell.md`, `reports/open5gs2shell-status.md`.
-Frontier staged `yojimbo2shell` at 01:1xZ in `aaa7dc7a` on a CVE/GHSA-UNKNOWN
-remote block-fragment heap overflow fixed upstream by
-`d3d4f3398cee5d154d22011ff7099a5d8a87d324` (vulnerable parent
-`3c6b5e85fe8da778e0ace3526e725844bb7286bf`): the verbatim pinned
-`ReliableOrderedChannel::ProcessPacketFragment` runs its final-fragment
-`memcpy` before the `blockSize` check, so with `maxBlockSize=1100` and
-`blockFragmentSize=500` ASan reports `WRITE of size 500` 0 bytes after a
-1100-byte region and a plain build puts chosen `MISHE-OO` at canary offset
-300; the fixed guard fires and safe/fixed controls are clean.
-`sh lab/frontier/yojimbo2shell/harness/run.sh` gives 20 PASS / 0 FAIL with
-7/7 SHA-256 pins (also observed locally at this wake). No real yojimbo build,
-live UDP wire, pointer/IP control, command or r5; the upstream packet path is
-post-authentication. A gitignored site charter and window 147 exist but
-operator admission and witness replay are pending, so this stays
-FRONTIER-STAGED: no route, wake unit, table row or mind-count change.
-Evidence: `reports/frontier-yojimbo2shell.md`,
-`reports/yojimbo2shell-status.md`, `lab/frontier/yojimbo2shell/PROVENANCE.md`.
+The 02:0xZ operator wake admitted the three frontier-staged families under
+standing #6 as routes 138–140 (`open5gs2shell`, `yojimbo2shell`,
+`libsshch2shell`), each with a hy4-flash route, both resolver entries, three
+wake units from the EXACT full-flag sync at pin `0d686bba…d528a`
+(`written 9, removed 0`), its existing two-pane window (146/147/148), and a
+row above. The trace below is the staged evidence the admissions were checked
+against; the new rows are the current record.
+`open5gs2shell`: CVE-2026-116543 / GHSA-25v2-v588-jq8g, pinned Open5GS v2.8.0
+empty-boundary SBI multipart parser, ASan `WRITE of size 1` 0 bytes after a
+65-byte region, plain state-machine-forced `00 0d 0a` in an adjacent object,
+21 PASS / 0 FAIL; witness W217 replayed from clean `git archive 22d70741`
+with a matching trace hash, ESTABLISHED AS LABELED, no grade change or r5.
+`yojimbo2shell`: CVE/GHSA-UNKNOWN, upstream fix `d3d4f339…`, pinned
+`ProcessPacketFragment` final-fragment `memcpy` before the `blockSize` check,
+ASan `WRITE of size 500` 0 bytes after a 1100-byte region, chosen `MISHE-OO`
+at canary offset 300, 20 PASS / 0 FAIL with 7/7 pins, post-authentication,
+witness UNKNOWN. `libsshch2shell`: CVE-2026-59850 (fixed 0.12.1/0.11.5),
+pinned `channel_rcv_data()` closed-channel UAF, ASan heap-use-after-free
+`READ of size 32` 0 bytes inside a 64-byte region, chosen `M` /
+`MISHE-LIBSSH-UAF` at freed offset 16, 24 PASS / 0 FAIL, authenticated peer
+required, witness UNKNOWN. No real builds, listeners, wire paths, pointer/IP
+control, commands or r5 in any of the three. Evidence:
+`reports/frontier-open5gs2shell.md`, `reports/frontier-yojimbo2shell.md`,
+`reports/frontier-libsshch2shell.md` and each `-status.md`.
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 133 target
+Each admitted family is its own mind with its own tmux window: 136 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -2525,8 +2534,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `kicad2shell`, `ndpi2shell`, `n2n2shell`, `synchronet2shell`,
 `sdlmixer2shell`, `cjose2shell`, `thorvg2shell`, `busybox2shell`,
 `fontforge2shell`, `fltk2shell`, `contiki2shell`, `libraw2shell`,
-`gpgme2shell`, `imagemagick2shell`, `codebasememory2shell` and
-`assimp2shell`. Each builds affected and fixed versions locally, writes
+`gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
+`open5gs2shell`, `yojimbo2shell` and `libsshch2shell`. Each builds affected
 harnesses, drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a

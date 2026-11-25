@@ -10722,3 +10722,37 @@ cell moved. `readme-lint` RED is the frozen six-column checker in
   charter and window 147 exist but admission is pending, so no route, wake
   unit, row or mind-count change; the checker's no-route line is dispositioned
   above.
+
+### 2026-11-25 02:0xZ — three staged targets admitted (routes 138–140)
+Under standing #6 the operator admitted the three frontier-staged families
+that the `doctor` and `omp-only` checkers had reported as chartered but
+unrouted. This supersedes every `no route` / `FRONTIER-STAGED` / "admission
+pending" line above for these three names; the staging evidence is unchanged.
+
+- `open5gs2shell` — 138th route; CVE-2026-116543 / GHSA-25v2-v588-jq8g,
+  pinned Open5GS v2.8.0 empty-boundary SBI multipart parser, ASan `WRITE of
+  size 1` 0 bytes after a 65-byte region, plain state-machine-forced `00 0d
+  0a` into an adjacent object; 21 PASS / 0 FAIL, witness W217 replayed from
+  clean `git archive 22d70741` with a matching trace hash, ESTABLISHED AS
+  LABELED at that scope. No real build, SBI listener, wire request, pointer,
+  command or r5.
+- `yojimbo2shell` — 139th route; CVE/GHSA-UNKNOWN, upstream fix `d3d4f339…`,
+  pinned `ProcessPacketFragment` final-fragment `memcpy` before the
+  `blockSize` check, ASan `WRITE of size 500` 0 bytes after a 1100-byte
+  region, chosen `MISHE-OO` at canary offset 300, 20 PASS / 0 FAIL with 7/7
+  pins; post-authentication, witness UNKNOWN, no real build, wire, pointer,
+  command or r5.
+- `libsshch2shell` — 140th route; CVE-2026-59850 (fixed 0.12.1/0.11.5),
+  pinned libssh `channel_rcv_data()` closed-channel data UAF, ASan
+  heap-use-after-free `READ of size 32` 0 bytes inside a 64-byte region,
+  chosen `M` / `MISHE-LIBSSH-UAF` at freed offset 16, 24 PASS / 0 FAIL;
+  authenticated peer required, witness UNKNOWN, distinct from
+  `libssh22shell`, no real SSH build, wire, pointer, command or r5.
+
+Each got a hy4-flash `max_parallel: 3` route, both resolver keys, three wake
+units minted by the EXACT full-flag sync at pin `0d686bba…d528a`
+(`written 9, removed 0`, daemon-reload, all three paths enabled/active), its
+existing two-pane window (146/147/148), and a README row. The pinned
+full-flag doctor returned PASS/GREEN and repo `check-readme.py` reports GREEN
+with 136 achievement rows. Rung cells stay as staged (rungs 1-3, rung 4
+PARTIAL, rung 5 `—`); no grade change follows from admission.

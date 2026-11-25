@@ -9149,3 +9149,18 @@ receipts without a local recomputation.
   command, route, admission, witness verdict or r5; the upstream packet path
   is post-authentication. No trace-hash receipt is claimed.
   `reports/frontier-yojimbo2shell.md`, `reports/yojimbo2shell-status.md`.
+
+## 2026-11-25 02:0xZ — admission receipts for three staged harnesses
+The staged harnesses above are now the replay recipes of admitted targets.
+No test command, pin set or grade changed; only the routes (138–140),
+resolver keys, wake units and windows became live. `open5gs2shell`:
+`sh lab/frontier/open5gs2shell/harness/run.sh`, 21 PASS / 0 FAIL, clean
+archive `2eeee948`, witness W217 replay from `22d70741` with matching
+trace hash. `yojimbo2shell`: `sh lab/frontier/yojimbo2shell/harness/run.sh`,
+20 PASS / 0 FAIL, 7/7 pins from `lab/frontier/yojimbo2shell/pins.sha256`.
+`libsshch2shell`: `sh lab/frontier/libsshch2shell/harness/run-all.sh`,
+24 PASS / 0 FAIL, pins in `lab/frontier/libsshch2shell/pins.sha256`,
+fixed-guard and safe-channel controls clean. Admission minted three units
+per target at the pinned full-flag sync (`written 9, removed 0`); all
+paths enabled/active and the pinned doctor GREEN. See `docs/task.md` §02:0xZ
+and the three `reports/frontier-<target>.md` briefs.

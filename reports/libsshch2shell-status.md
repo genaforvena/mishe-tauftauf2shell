@@ -13,3 +13,11 @@ is removed). ASan: heap-use-after-free, READ of size 32, 0 bytes inside a
 `channel_rcv_data.inc:85`. Plain chosen byte `M` / marker
 `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed attack rc 0 with
 error=2 and callback_bytes=0, safe channel consumes 32 bytes.
+
+## Admission 2026-11-25 02:0xZ
+ADMITTED under standing #6 as the 140th route (hy4-flash `max_parallel: 3`),
+both resolver keys, three wake units from the EXACT full-flag sync at pin
+`0d686bba…d528a` (`written 9, removed 0` across all three new targets;
+path enabled/active), window 148, README row 178. Grade unchanged: rungs
+1-3, rung 4 PARTIAL, rung 5 `—`; authenticated peer required, no real SSH
+build, wire packet, pointer, command or witness verdict.
