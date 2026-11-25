@@ -845,4 +845,7 @@ cross-check is a preserved negative: gdb reports `(nil)` for `$_siginfo` at
 this threaded stop, so the instruction and register are the evidence
 (`real320b/evidence/REPLAY-FAULTADDR.md`). No rung change: pointer/IP control
 of a useful target, command execution and r5 remain absent; author replay,
-witness verdict still owed.
+witness verdict still owed. A clean `git archive 3e681d41` replay with a
+private copy of the provisioned build tree reproduced 7 PASS / 0 FAIL and
+byte-identical probe/instruction/register lines (receipt:
+`real320b/evidence/CLEAN-ARCHIVE-FAULTADDR.md`).
