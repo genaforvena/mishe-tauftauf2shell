@@ -2076,3 +2076,42 @@ and the four `bin-*` trees symlinked from the live checkout. From the archive,
 evidence hashes matched the working tree byte-for-byte. Author replay, not a
 witness verdict; grade and rung-5 status unchanged from the W197 disposition.
 
+
+## W198: two bounded negatives on the route past W197 (2026-11-25 06:35Z)
+
+Prediction and result: two cheap routes from W197's file-chosen indirect call
+to a stronger grade were tested, and both are negatives in the pinned build.
+Grade unchanged (rung 4 author-only); both are preserved so a later wake does
+not re-spend time on them.
+
+**Partial overwrite at the copy-window tail.** The low 12 bits of a PIE code
+pointer are ASLR-invariant, so a partial overwrite of a live function pointer
+would survive ASLR without knowing the base. At `opaque.c:79` in the W197 PoC
+(ASLR off, fixed point `dest=0x5555558280a0`), `x/18gx 0x555555828c80`
+examines `dest+3040` through `dest+3176`: the last 32 bytes of the 3072-byte
+COPY2 window plus 104 bytes past it. All nine 8-byte words are
+`0x0000000000000000`; there is no live pointer at the tail to partially
+overwrite. Normalized `evidence/w198-tail.out` sha256
+`111771e0c65284d7d36e1142f596ad8362ccb470a8475e1d91a175bb2d70d3c9`.
+This rules out the boundary-partial route at this geometry, not every
+possible geometry; a different grid/frame layout could place a pointer there.
+
+**One-gadget command route.** The pinned `exrcheck` imports no
+`system`/`popen`/`exec*` symbol (`nm -D`). Reading the system libc's ELF
+program headers, its `PT_LOAD PF_X` segment is `0x28000+0x188039` and
+`system` is at offset `0x58750`. Scanning every `48 89 f7`
+(`mov %rsi,%rdi`) and the following 12 bytes for an `e9`/`e8` rel32 to
+`system` yields zero gadgets. The opaque destructor's argument shape is
+`(ctxt, file-chosen ptr, file-chosen int)`; with no `system` import and no
+single gadget moving `rsi` into `rdi` before `system`, this build/libc pair
+has no one-gadget benign-command route. Evidence
+`evidence/w198-gadgets.out` sha256
+`1b0b683760f1fa9035956297617978abd27b9bda94c050d25a6a5e363de786dc`.
+The search is bounded (13-byte lookahead, direct rel32 branches only); it is
+not a proof that no longer chain exists.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w198-negatives.sh` -> `RESULT PASS` rc 0, both hashes identical on
+two consecutive runs. The W197 replay was also re-run at 06:31Z and produced
+its five committed evidence hashes unchanged; its one-command offer went to
+the witness on tape #4160. No witness verdict; rung 5 remains UNKNOWN.
