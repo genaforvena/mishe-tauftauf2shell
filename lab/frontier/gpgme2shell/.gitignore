@@ -49,3 +49,7 @@ realbuild/colon-reuse-fixed
 realbuild/colon-reuse-231
 realbuild/evidence/colon-*.out
 realbuild/evidence/colon-*.rc
+realbuild/status-groom-plain-vuln
+realbuild/status-groom-plain-fixed
+realbuild/evidence/groom-*.out
+realbuild/evidence/groom-*.rc

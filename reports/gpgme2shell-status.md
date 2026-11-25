@@ -271,3 +271,40 @@ build-real.sh` gave `BUILD OK`, rc 0, from the four provisioned tarballs
 copied locally (no network); `sh run-colon.sh` gave `PASS=26 FAIL=0`, rc 0,
 and the pinned `sh ../run.sh` gave `PASS=19 FAIL=0`. Author-side only; no
 witness verdict has landed on this or the earlier real paths.
+
+## W8 — plain-glibc tcache drain yields aliasing (2026-11-25 04:1xZ)
+
+W6 showed that a plain glibc 2.39 build aborts on the stale free when nothing
+changes the tcache between the realloc and the second free. `read_status()`
+reallocs at `engine-gpg.c:1494` (freeing the original 0x410 chunk into
+tcache) *before* it calls the monitor callback at `:1549`. W8 measures what
+happens if that callback allocates a chunk of the same size and keeps it:
+`realbuild/status_groom.c` uses public APIs only, allocates `malloc(1024)`
+inside the failing callback, fills it with `0x47`, returns
+`GPG_ERR_GENERAL`, and after op2 and `gpgme_release()` allocates a second
+`malloc(1024)`, fills it with `0x41`, and compares the two pointers.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-groom.sh` gives
+`PASS=23 FAIL=0`, rc 0. Raw evidence is in
+`realbuild/evidence/groom-*.out` / `.rc` (gitignored).
+
+- Vulnerable 2.2.0 with the callback allocation: rc 0, no tcache-abort
+  message, `op2 keylist_start err=Success`, `groom_calls=1`,
+  `aliased=1` (`groom_buf` and `after` are the same address), and
+  `groom_buf byte[1000]=0x41 after byte[1000]=0x41` — the later write is
+  visible through the callback's retained pointer. The callback first logged
+  `status_cb call=1 op_marker=H keyword=GOOD arglen=1200 byte[1000]=0x48`.
+- Vulnerable 2.2.0 with `GROOM_ALLOC=0`: rc 134 with `free(): double free
+  detected in tcache 2` and no op2 start, reproducing W6 in the same driver.
+- Fix-patched 2.2.0 with the allocation: rc 0, op2 starts, `aliased=0`, and
+  the callback's buffer still holds `0x47` after the later `0x41` write.
+  Patched `GROOM_ALLOC=0` is also rc 0.
+
+This is a harness-driven rung-4 heap-aliasing observation on plain glibc:
+the long-running double free is silent once the tcache entry is drained, and
+a later allocation aliases the retained buffer. The allocating callback is
+lab code, not attacker-controlled wire or request input; there is no pointer
+or IP control, no chosen-address write, no benign command side effect, no
+stock-layout or live-target claim and no r5. It narrows W6's plain-glibc
+negative to the *ungroomed* case; it does not turn the earlier abort into an
+attacker primitive. No witness verdict has landed on any real path.

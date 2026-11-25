@@ -51,6 +51,7 @@ sh run-reuse.sh
 sh run-colon.sh
 sh build-plain.sh
 sh run-plain.sh
+sh run-groom.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
@@ -90,9 +91,11 @@ visible in the real `IMPORTED` status callback before the early return;
 `run-real-gpg.sh` uses local key material; the wire section below adds a
 loopback-only HKP response. There is no allocator-metadata claim, no
 pointer/IP/command control and no rung 5. The real-build plain-glibc outcome
-is now measured below (glibc 2.39 aborts on the second free); only the ASan
-builds are asserted for the deeper call-site evidence. Witness replay of the
-real paths is pending; an author transcript is not acceptance.
+is measured below: an un-groomed second free aborts on glibc 2.39; a
+lab-allocated same-size buffer in the failing callback drains tcache and
+yields a rung-4 alias instead. Only the ASan builds are asserted for the
+deeper call-site evidence. Witness replay of the real paths is pending; an
+author transcript is not acceptance.
 
 ## Fake-engine trigger (pinned control)
 
@@ -126,10 +129,35 @@ ASan (plain `CFLAGS='-g -O0'`, separate `prefix-plain`) and links
 detected in tcache 2` after its callback printed `arglen=1200
 byte[1000]=0x48`, and op2 never starts; the patched driver rc 0, starts op2
 and receives `op_marker=Z arglen=20` before a clean release. Raw output is
-in `evidence/reuse-plain-{vuln,fixed}.out` / `.rc`. The allocator's detector
-aborts before any metadata or control-flow use: this is a negative result
-for a plain-glibc control path, not an exploit. The parent statement
-harness's contradictory plain revisions remain recorded separately.
+in `evidence/reuse-plain-{vuln,fixed}.out` / `.rc`. With no intervening
+same-size allocation the allocator's detector aborts before any metadata or
+control-flow use: a negative result for the ungroomed plain-glibc path, not
+an exploit. The W8 section below shows that a same-size allocation in the
+failing callback changes this outcome. The parent statement harness's
+contradictory plain revisions remain recorded separately.
+
+## Plain-glibc tcache drain (no sanitizer)
+
+`status_groom.c` uses public APIs only. The realloc at
+`engine-gpg.c:1494` frees the original 1024-byte status buffer into glibc's
+tcache before the monitor callback runs at `:1549`. The failing callback
+allocates and retains `malloc(1024)` (filled with `0x47`); after op2 and
+`gpgme_release()` a second `malloc(1024)` (filled with `0x41`) compares its
+address with the callback's buffer. `build-plain.sh` links the driver
+against both plain builds; `sh run-groom.sh` gives `PASS=23 FAIL=0`.
+
+Vulnerable 2.2.0 with the callback allocation exits 0, no tcache-abort
+message, op2 starts, `aliased=1` and `groom_buf byte[1000]=0x41` — the later
+write is visible through the retained pointer. With `GROOM_ALLOC=0` the same
+driver exits 134 with `free(): double free detected in tcache 2`, matching
+`run-plain.sh`. Fix-patched 2.2.0 exits 0 with `aliased=0` and the callback's
+buffer unchanged (`0x47`). Raw output is in
+`evidence/groom-*.out` / `.rc` (gitignored).
+
+This is harness-driven rung-4 heap aliasing: the groom allocation is lab
+code, not attacker-controlled wire or request input. There is no
+pointer/IP/command control, no chosen-address write, no benign side effect
+and no rung 5. Witness replay of all real paths remains pending.
 
 ## Loopback wire path
 
