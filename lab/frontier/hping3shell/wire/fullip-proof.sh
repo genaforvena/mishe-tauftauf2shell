@@ -78,7 +78,7 @@ wait "$gp"
 kill "$hp" 2>/dev/null
 wait "$hp" 2>/dev/null
 
-python3 check_fullip.py "$gd" "$run" --mode "$MODE" --expect "$EXPECT" \
+python3 check_perm.py "$gd" "$run" --mode "$MODE" --expect "$EXPECT" \
     > "evidence/fullip-$tag-proof.out"
 cat "evidence/fullip-$tag-proof.out"
-grep -q 'FULLIP SUMMARY: .* PASS' "evidence/fullip-$tag-proof.out" && exit 0 || exit 1
+grep -q 'PERM SUMMARY: .* PASS' "evidence/fullip-$tag-proof.out" && exit 0 || exit 1
