@@ -150,6 +150,13 @@ and a known 2.1.10 `pg_dump` header incompatibility are recorded in
   `pgactive_parse_replident_name_sql src/pgactive.c:1531`. The postmaster log
   names the exact statement; the normal library was restored after the run.
   `realbuild/evidence/real-asan-server.log`, `real-asan-attack.out`.
+- Clean-archive receipt: `git archive 20123ce2 lab/frontier/pgactive2shell/realbuild
+  | tar x -C /tmp/pgactive-real-clean` followed by `sh run-real.sh`,
+  `VERSION=2.1.10 LABEL=fixed sh run-real.sh` and `sh run-real-asan.sh`
+  reproduced all three lanes: `vuln_SAFE=0`, `vuln_ATTACK_RC=1`,
+  `fixed_SAFE=0`, `fixed_ATTACK_RC=1`, `ASAN_ATTACK_RC=2`, `PGSTOP=0`,
+  `ASAN_STOP=0`, and the same `WRITE of size 161` frames. Author replay,
+  not an independent witness verdict.
 
 
 ## Rung-4 feasibility and ceiling
