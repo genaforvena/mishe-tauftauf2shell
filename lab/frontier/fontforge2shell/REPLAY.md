@@ -402,3 +402,17 @@ line `REPLAY_W25_OK: 8 checks, 0 failed`. Method, hashes and limits in
 `LATESTATE.md`. Author-side negative, no witness verdict, no grade change,
 no r5; a PCF/grooming variant that survives the free, a GUI callback or a
 deliberately planted called function pointer remains UNKNOWN.
+
+Clean-archive receipt at `96ee8154` (18:45Z): archive
+`/tmp/ff2s-w25-clean.GNE18I`, pinned tarball hash
+`613424039e0e1b6bb106f8f0df287e1d249ac285d854f4e1964d68e9b9ad7eb0`
+verified, `build-plain` and `build-nopie` rebuilt offline with the same
+cmake flags; `sh replay-w25.sh` 8/8 PASS, rc 0. Both lanes again hit
+`glyph=-1 i=3` and abort at the corrupted free before the later
+breakpoint; `encs` moved (`0x555555c48460` PIE, `0xa92250` non-PIE).
+PIE scan hash
+`313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76`
+is byte-identical to the live tree; non-PIE is `CAND_COUNT 4` /
+`RESULT ASCII_ONLY` (build-path sensitive count), hash
+`457b05b47f43feb767d332c40bd504bd5fbdd5987387e353a8ca68e8bcb87ae5`.
+Author-side replay, not a witness verdict; no grade change.

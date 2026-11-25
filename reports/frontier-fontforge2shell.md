@@ -336,6 +336,10 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   command or r5; this trigger never reaches a later-created object,
   and a surviving variant or deliberate groom stays UNKNOWN. No witness
   verdict.
+  Clean-archive receipt at `96ee8154`: both builds rebuilt offline from
+  the pinned tarball, 8/8 PASS rc 0, same store-and-abort sequence, PIE
+  scan hash byte-identical and non-PIE path-sensitive ASCII-only count
+  of 4. Author-side, not a witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
