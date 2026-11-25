@@ -2514,3 +2514,58 @@ because `find` does not descend a symlink; commit `2f12c2e5` fixed the
 harness to use `find cases/`. Receipt:
 `lab/openexr2shell-real/evidence/w207-clean-archive.out`. Author replay,
 not a witness verdict.
+
+## W208: exrinfo's opaque-handler `%p` diagnostic leaks no address — negative (2026-11-25 21:5xZ)
+
+Prediction: W207 closed an address leak in `exrcheck` but explicitly named
+"an address leak in a different consumer" as grade-changing. Source sweep
+found a second, real `%p` printer that W207 missed:
+`src/lib/OpenEXRCore/debug.c:245-253` prints three opaque-attribute handler
+pointers with `%p`, and `src/bin/exrinfo/main.c:316,342` calls
+`exr_print_context_info(e, verbose || allmeta)` for every input, including
+the stdin path at `main.c:302-324`. Prediction: `exrinfo -v -a` on a file
+carrying a custom-type attribute prints a live PIE/libc address that a
+second crafted input could consume with ASLR on.
+
+Result: NEGATIVE, source-bound and measured on pinned 3.5.2. The pointers
+printed are *application-registered* handlers only: `attributes.c:644-654`
+copies them from `ctxt->custom_handlers`, and the only setter is
+`exr_register_attr_type_handler()` at `context.c:474`, which no shipped
+tool calls. `exrinfo` builds its context with only an error handler and a
+stdin reader (`main.c:306-311`), so a file-supplied custom type is parsed as
+`EXR_ATTR_OPAQUE` with NULL handlers. The other `%p` diagnostics,
+`chunk.c:1715,1734,2166,2185`, sit in write-data APIs guarded by
+`ctxt->mode != EXR_CONTEXT_WRITING_DATA`, unreachable from a read-only
+consumer. `internal_structs.c:62` still requires `filename.str == NULL`,
+which no decode context permits (W207).
+
+A 573-byte EXR forged from `cases/baseline.exr` by
+`harness/w208-opaque-forge.py` with attribute `w208custom` of custom type
+`w208type` is accepted by pinned plain `exrinfo -v -a`. Both the file path
+and the stdin (`-`) path print
+`w208custom: w208type (size 4 unp size 0 hdlrs (nil) (nil) (nil))` with
+ASLR left enabled. The only `0x`-prefixed token in the whole verbose output
+is the compression enum `0x0D`; zero address-like tokens remain after
+excluding it. `nm -D` of the pinned plain `exrinfo` shows zero imports of
+`system`, `popen`, `exec*`, `fork` or `posix_spawn`. `exrinfo` never calls
+`exr_decoding_run`, so even a leak there could not drive the vulnerable
+`opaque.c:79` copy in the same process.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w208-exrinfo-leak-negative.sh` -> `RESULT PASS` rc 0 three times;
+stable normalized evidence hash
+`f3f6031a168a0b7cd6a7c7c954cc78dfa0ae11eaaa1cae1247d5026e17c613d5` in
+`evidence/w208-exrinfo-leak-negative.out`. The harness pins five source
+files, the baseline case and the forger by sha256, checks the handler
+assignment, the absence of tool-side registrations, command imports and
+decode calls, then asserts both diagnostics and the token count.
+
+Disposition: keep the negative. This closes the particular "different
+consumer" leak that the source sweep surfaced: `exrinfo`'s pointer print is
+fixed to NULL for every file-controlled input, and the consumer cannot
+decode chunks at all. It does not prove the absence of every leak in every
+OpenEXR tool, nor close a wire-fed affected process. Grade and rung-5 status
+are unchanged: W202 remains witness-confirmed ESTABLISHED AS LABELED at its
+ASLR-off local-file scope; W203-W208 are author-only negatives without a
+witness verdict.
+
