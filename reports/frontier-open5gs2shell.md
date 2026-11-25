@@ -173,3 +173,53 @@ the real caller derives from that body. `sh realcaller/run.sh`: 15 PASS /
 0 FAIL, rc 0 and `sh realcaller/run.sh` gives 15 PASS / 0 FAIL, rc 0. Both
 results come from committed sources only; the local build outputs are
 gitignored.
+
+## Source-bound HTTP framing check (2026-11-25 05:24Z)
+
+The W1 open question — would a live SBI HTTP layer preserve the leading CRLF
+that the real caller needs — is now answered from the real v2.8.0 tag, not
+from the synthetic harness. Network provisioning worked this wake:
+`curl -fsSL` on the codeload v2.8.0 tarball returned 27 MB, SHA-256
+`a04d66f66f6df62a376a2434a05a7268e08e4fc0cc1b9c56221467689a8b56ab`. The
+tarball's `lib/sbi/message.c` hashes to
+`a9678094c367e10c6ef4213b645ef23d55986616ad4ffd0af96e021687fcf64d`, exactly
+the existing pinned `provision/message-v2.8.0.c`, so the tag is cross-checked.
+
+New source pins under `lab/frontier/open5gs2shell/httpbody/provision/`
+(SHA-256 recorded in `pins.sha256`): `nghttp2-server-v2.8.0.c`
+`09093ac0…c76bfb` and `mhd-server-v2.8.0.c` `3c4bc060…6da066f`.
+`sh httpbody/run.sh`: 8 PASS / 0 FAIL; `sh realcaller/run.sh`: 15 PASS / 0 FAIL;
+`sh harness/run.sh`: 21 PASS / 0 FAIL. The new check is offline and prints the
+exact source excerpts to `httpbody/evidence/source-excerpts.out`.
+
+- Default nghttp2 backend, `on_data_chunk_recv()` at
+  `nghttp2-server-v2.8.0.c:1538-1611`, copies the DATA-frame payload with
+  `memcpy(request->http.content + offset, data, len)` at `:1607` and NUL-
+  terminates at `:1608`; no trim, skip or canonicalization. On END_STREAM
+  (`:1302-1323`) the same request goes to `server->cb`.
+- Optional MHD backend does the same at `mhd-server-v2.8.0.c:677-678`.
+- `ogs_sbi_parse_request()` (`message.c:933-1314`) hands `request->http`
+  directly to `parse_content()` (`:3111-3124`), which dispatches multipart
+  at `:3120`; no body rewrite on that path.
+- `parse_multipart()` (`message.c:3356-3381`) consumes **exactly one** leading
+  CRLF as preamble (`:3357-3358`), takes the boundary from the next CRLF
+  (`:3360-3372`), and executes the parser on `http->content+preamble` with
+  `http->content_length-preamble` (`:3380-3381`).
+
+Consequence: the staged 394-byte harness body is the *post-preamble* slice.
+A wire body beginning `\r\n\r\n` (396 bytes total) makes the real caller
+derive an empty boundary and hand the parser the byte-identical staged
+remainder. The `realcaller/` harness already confirms that chain: attack mode
+prints `BOUNDARY_LEN=0`, faults ASan at `multipart_parser-v2.8.0.c:260` from
+`init:82`, and writes the periodic bytes into the adjacent plain-build canary;
+the 394-byte staged body derives `BOUNDARY_LEN=2 BOUNDARY=a:` and is clean.
+This resolves the framing objection without changing the grade: rung 3 on the
+pinned parser, rung 4 PARTIAL, no live NF, no wire replay, no pointer control
+and no r5.
+
+Full-NF provisioning is still bounded out: mongoc, nghttp2, talloc and c-ares
+dev packages are absent and the session is uid 1000, so a local-prefix build
+of four dependencies plus NF configuration is beyond one incident. Details
+and limits are in `httpbody/PROVENANCE.md`. A loopback SBI NF replay with
+benign and well-formed controls, or evidence that the periodic bytes steer a
+consumer into a chosen pointer, is what would change this assessment.

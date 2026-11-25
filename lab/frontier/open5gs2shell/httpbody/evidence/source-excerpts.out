@@ -1,0 +1,146 @@
+=== nghttp2-server-v2.8.0.c:1538-1611
+ 1538 static int on_data_chunk_recv(nghttp2_session *session, uint8_t flags,
+ 1539                               int32_t stream_id, const uint8_t *data,
+ 1540                               size_t len, void *user_data)
+ 1541 {
+ 1542     ogs_sbi_stream_t *stream = NULL;
+ 1543     ogs_sbi_request_t *request = NULL;
+ 1544     char *content = NULL;
+ 1545 
+ 1546     size_t offset = 0;
+ 1547 
+ 1548     ogs_assert(session);
+ 1549 
+ 1550     stream = nghttp2_session_get_stream_user_data(session, stream_id);
+ 1551     if (!stream) {
+ 1552         ogs_error("no stream [%d]", stream_id);
+ 1553         return 0;
+ 1554     }
+ 1555 
+ 1556     request = stream->request;
+ 1557     ogs_assert(request);
+ 1558 
+ 1559     ogs_assert(data);
+ 1560     ogs_assert(len);
+ 1561 
+ 1562 #define MAX_HTTP_CONTENT_LEN (256 * 1024 * 1024) /* 256MB */
+ 1563     if (request->http.content_length + len > MAX_HTTP_CONTENT_LEN) {
+ 1564         stream->memory_overflow = true;
+ 1565 
+ 1566         ogs_error("Payload too large : Content-Length[%d], len[%d]",
+ 1567                     (int)request->http.content_length, (int)len);
+ 1568 
+ 1569         ogs_sbi_server_send_error(stream,
+ 1570                 OGS_SBI_HTTP_STATUS_PAYLOAD_TOO_LARGE,
+ 1571                 NULL, "Payload too large", NULL, NULL);
+ 1572 
+ 1573         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+ 1574     }
+ 1575 
+ 1576     if (request->http.content == NULL) {
+ 1577         ogs_assert(request->http.content_length == 0);
+ 1578         ogs_assert(offset == 0);
+ 1579 
+ 1580         content = (char*)ogs_malloc(len + 1);
+ 1581     } else {
+ 1582         ogs_assert(request->http.content_length != 0);
+ 1583 
+ 1584         content = (char*)ogs_realloc(
+ 1585                 request->http.content, request->http.content_length + len + 1);
+ 1586     }
+ 1587 
+ 1588     if (!content) {
+ 1589         stream->memory_overflow = true;
+ 1590 
+ 1591         ogs_error("Memory Overflow : Content-Length[%d], len[%d]",
+ 1592                     (int)request->http.content_length, (int)len);
+ 1593         ogs_log_hexdump(OGS_LOG_ERROR, data, len);
+ 1594 
+ 1595         ogs_sbi_server_send_error(stream,
+ 1596                 OGS_SBI_HTTP_STATUS_SERVICE_UNAVAILABLE,
+ 1597                 NULL, "Memory Overflow", NULL, NULL);
+ 1598 
+ 1599         return NGHTTP2_ERR_TEMPORAL_CALLBACK_FAILURE;
+ 1600     }
+ 1601 
+ 1602     request->http.content = content;
+ 1603 
+ 1604     offset = request->http.content_length;
+ 1605     request->http.content_length += len;
+ 1606 
+ 1607     memcpy(request->http.content + offset, data, len);
+ 1608     request->http.content[request->http.content_length] = '\0';
+ 1609 
+ 1610     return 0;
+ 1611 }
+=== mhd-server-v2.8.0.c:639-681
+  639     if (*upload_data_size != 0) {
+  640         char *content = NULL;
+  641         size_t offset = 0;
+  642         size_t new_length = 0;
+  643 
+  644         if (*upload_data_size > OGS_MAX_SDU_LEN -
+  645                 request->http.content_length) {
+  646             ogs_error("Payload too large : Content-Length[%d], "
+  647                     "upload_data_size[%d]",
+  648                     (int)request->http.content_length,
+  649                     (int)*upload_data_size);
+  650             *upload_data_size = 0;
+  651             return MHD_NO;
+  652         }
+  653 
+  654         new_length = request->http.content_length + *upload_data_size;
+  655         offset = request->http.content_length;
+  656 
+  657         if (request->http.content == NULL) {
+  658             ogs_assert(request->http.content_length == 0);
+  659 
+  660             content = ogs_malloc(new_length + 1);
+  661         } else {
+  662             content = ogs_realloc(request->http.content, new_length + 1);
+  663         }
+  664 
+  665         if (!content) {
+  666             ogs_error("Memory allocation failed : Content-Length[%d], "
+  667                     "upload_data_size[%d]",
+  668                     (int)request->http.content_length,
+  669                     (int)*upload_data_size);
+  670             *upload_data_size = 0;
+  671             return MHD_NO;
+  672         }
+  673 
+  674         request->http.content = content;
+  675         request->http.content_length = new_length;
+  676 
+  677         memcpy(request->http.content + offset, upload_data, *upload_data_size);
+  678         request->http.content[request->http.content_length] = '\0';
+  679         *upload_data_size = 0;
+  680 
+  681         return MHD_YES;
+=== message-v2.8.0.c:3356-3381
+ 3356     preamble = 0;
+ 3357     if (http->content[0] == '\r' && http->content[1] == '\n')
+ 3358         preamble = 2;
+ 3359 
+ 3360     for (i = preamble; i < (http->content_length-preamble); i++) {
+ 3361         if (http->content[i] == '\r' && http->content[i+1] == '\n')
+ 3362             break;
+ 3363     }
+ 3364 
+ 3365     if (i >= (http->content_length-preamble)) {
+ 3366         ogs_error("Invalid HTTP content [%d]", i);
+ 3367         ogs_log_hexdump(OGS_LOG_ERROR,
+ 3368                 (unsigned char *)http->content, http->content_length);
+ 3369         return OGS_ERROR;
+ 3370     }
+ 3371 
+ 3372     boundary = ogs_strndup(http->content+preamble, i-preamble);
+ 3373     ogs_assert(boundary);
+ 3374 
+ 3375     parser = multipart_parser_init(boundary, &settings);
+ 3376     ogs_assert(parser);
+ 3377 
+ 3378     memset(&data, 0, sizeof(data));
+ 3379     multipart_parser_set_data(parser, &data);
+ 3380     parsed = multipart_parser_execute(parser,
+ 3381             http->content+preamble, http->content_length-preamble);

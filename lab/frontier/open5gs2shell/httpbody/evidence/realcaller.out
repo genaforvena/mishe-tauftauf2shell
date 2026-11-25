@@ -1,0 +1,16 @@
+PASS-01-three-builds-ok
+PASS-02-real-caller-attack-faults
+PASS-03-asan-report-present
+PASS-04-asan-write-1
+PASS-05-write-at-pinned-sink
+PASS-06-zero-bytes-past-65-byte-region
+PASS-07-real-body-length-396
+PASS-08-staged-body-through-real-caller-clean
+PASS-09-safe-body-clean
+PASS-10-fixed-rejects-empty-boundary
+PASS-11-fixed-guard-fires
+PASS-12-plain-attack-runs
+PASS-13-periodic-bytes-in-adjacent-heap
+PASS-14-plain-staged-runs
+PASS-15-staged-body-canary-intact
+RESULT 15 PASS / 0 FAIL
