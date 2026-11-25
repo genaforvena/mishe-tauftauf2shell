@@ -199,3 +199,10 @@ Grade unchanged: attacker-chosen loopback bytes now reach an earlier free in
 the real library, but there is still no pointer/IP/command control, no benign
 side effect, no stock-layout or live-target claim and no r5. Witness verdicts
 on W1-W4 and this W5 path remain UNKNOWN; all results are author-side.
+
+Clean-archive replay of `72f3b6ad` into `/tmp/gpgme-w5-clean`: `sh
+build-real.sh` gave `BUILD OK`; after `sh make-realkeys.sh`, the six suites
+`run-wire-reuse.sh` 55, `run-wire.sh` 32, `run-reuse.sh` 24, `run-real.sh`
+21, `run-real-gpg.sh` 36 and `sh ../run.sh` 19 PASS / 0 FAIL, rc 0
+throughout. Author-side only. Witness replay requested on the tape at
+02:0xZ (#4028, receipt #4029); no verdict yet.
