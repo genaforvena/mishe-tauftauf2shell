@@ -32,6 +32,9 @@ deterministic ASan heap address; no app-owned static command string remains.
 No grade change.
 A consumer survey found no in-callback channel free in either pinned tree;
 the in-callback free remains harness/app-owned. No grade change.
+A W18 source check found only one `SSH_CHANNEL_FLAG_FREED_LOCAL` write site
+(inside `ssh_channel_free()`) in each pinned tree, so no remote-only or
+library-only path supplies the app-owned free. No grade change.
 
 ## W16: wire-resident command string for real system() (2026-11-25 18:27Z)
 
@@ -128,6 +131,18 @@ Disposition: the in-callback free in all real-build lanes remains
 harness/app-owned. No libssh-provided consumer in the pinned trees supplies
 one; removing that condition needs a provisioned external consumer. No harness
 change, no replay, no witness result. Grade unchanged.
+
+Follow-up source check (W18, 2026-11-25 19:45Z): the only library-internal
+channel free during packet handling is in `channel_rcv_close()`
+(`src/channels.c:814-816` vulnerable, `:807-809` fixed), gated on
+`SSH_CHANNEL_FLAG_FREED_LOCAL`. That flag has exactly one write site in each
+tree — `ssh_channel_free()` at `:1324` vulnerable / `:1317` fixed — and is
+defined in `include/libssh/channels.h:60-61` as "The channel has been freed by
+the calling program". Every other `ssh_channel_free()` call site is application
+code or session/sftp/scp teardown, not a library callback reached from
+`channel_rcv_data()`. No remote-only or library-only path sets the flag, so the
+free prerequisite in every real-build lane remains app-owned. No harness
+change, no replay, no witness result; grade unchanged.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
