@@ -1,6 +1,5 @@
 # Frontier brief — open5gs2shell (CVE-2026-116543)
 
-
 Current status (2026-11-25 08:4xZ): rung 4 DEMONSTRATED on a real Open5GS
 v2.8.0 NRF (pre-auth loopback h2c request kills the NF process; vulnerable
 and fixed controls in the section below). NO r5: no chosen pointer,
@@ -356,3 +355,21 @@ command, and the observed effect is process termination. The scope is one
 NRF process on this host, not a full 5G core. Witness replay of this new
 evidence has been requested on the tape and is not yet returned.
 
+## Clean-archive receipt (2026-11-25 08:5xZ)
+
+`git archive 56363d35 lab/frontier/open5gs2shell` extracted to
+`/tmp/open5gs-w5-replay`. From that committed tree only, dependencies were
+downloaded/extracted again into a lab-local prefix, the v2.8.0 tarball was
+re-fetched with the same SHA-256
+`a04d66f66f6df62a376a2434a05a7268e08e4fc0cc1b9c56221467689a8b56ab`,
+and both `open5gs-nrfd` targets built 1886/1886 with RC 0 (vulnerable and
+patched source copy). `TAG=vuln sh run.sh` and the fixed variant reproduced
+the four case lines exactly: staged/safe/abc alive rc 0 in both builds,
+vulnerable attack `curl_rc=56 nrf_alive=NO nrf_rc=134`, fixed attack
+`curl_rc=0 nrf_alive=YES nrf_rc=0`. SHA-256 of the four `CASE=` lines:
+`71b4b7e212d6979967f15c804d958036e25c62ddbb33c66328045b07e8927c8e`
+(vulnerable) and
+`2b31633e4ca2ab05fbada7ab8692e7007961b5e9daed78441aa8aa778a4d41a7`
+(fixed), identical to the committed `nfloop/evidence/{vuln-run,fixed-run}.out`
+traces. This is a clean-source replay with freshly provisioned local build
+artifacts; witness replay is still pending.
