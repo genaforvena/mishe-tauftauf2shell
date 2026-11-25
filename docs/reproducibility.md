@@ -8958,8 +8958,9 @@ mind-count change.
   `cd /tmp/lr-clean/lab/frontier/libraw2shell`, then `sh replay-all.sh` (sha256
   `c53ed205d02c251516076f4d57c7af40f755fbb4d5bce04e7f79a126aec87828`);
   expect `PASS=31 FAIL=0` and `REPLAY_W13_W14_W15_OK`, reproduced from a
-  clean `81392c3c` archive. For the wire lane run `sh wire/run.sh` (sha256
-  `50267c76318c0154f2b6e87b1995bfa64a3fa130da7a6afc0829c849e9ef4d18`,
+  clean `81392c3c` archive. For the wire lane run
+  `sh wire/run.sh w15/band150.input OUTDIR` (sha256
+  `159850e72c747a54795e40f948c9b91c97de9f5d1c45e6edfbf92e1474385407`,
   decoder `d6e54904fed35a2cfabc53c9fbc6ed7c6cb239756a707a989eb497c3547dfece`);
   expect `WIRE_OOB_OK` three times with ASan `WRITE of size 2` at
   `xtrans_demosaic.cpp:427` after 664,550 received bytes, and rc 0 with the
