@@ -1,0 +1,78 @@
+W29 — file-chosen VALID top-chunk size, from crafted image bytes alone
+(2026-11-25 17:22–17:3xZ, author-side; NO grade change, NO replay requested)
+
+Question. W22's valid top-chunk size (0x21001) was debugger-forced. W27 left
+untried candidate specs when its search cell was interrupted. One narrow lane
+was reopened: can the crafted X-Trans image alone write a glibc-plausible size
+into the live top chunk's size field at destimage index 68,773 (offset
+550,184), so that the later free() succeeds instead of aborting?
+
+Pre-registered in SITE/walls/libraw2shell.md before generating any input:
+asymmetric per-channel curve maps not in W27's seven probes (red odd/near-odd,
+green 0, blue 0; WL 65535 and 1023), unmodified pinned
+craft_uncompressed_poc.py from w11/targetbeef.input, unmodified -O0 dcraw_emu,
+unmodified w23/sizefield.gdb, lab-only MALLOC_TOP_PAD_=16777216. Success:
+c2=0, c3=0, c0 >= 0x21 and c0 == 1 (mod 16), size <= system_mem. A hit only
+upgrades the debugger-forced datum; NO grade change without a measured later
+allocator/consumer read. Tool timeouts stay UNKNOWN, not negatives.
+
+Observations (field words are c0 c1 c2 c3 at (char*)main_arena.top + 8):
+  red=17  (0x11): after sf=0x10  hw=0010 0000 0000 0000
+                  "corrupted size vs. prev_size", SIGABRT (PREV_INUSE clear)
+  red=33  (0x21): after sf=0x20  hw=0020 0000 0000 0000
+                  "corrupted size vs. prev_size", SIGABRT (PREV_INUSE clear)
+  red=18  (0x12): BEFORE sf=0xc0b5e1 hw=b5e1 00c0 0000 0000
+                  sysmem=16781312, 2/2 byte-identical gdb runs;
+                  inferior exited normally both times. Size 0xc0b5e1 =
+                  12,641,249 passes glibc's MINSIZE/system_mem checks and
+                  has PREV_INUSE set; free() consolidated without a printerr.
+  red=49  (0x31): input generated, NOT probed. UNKNOWN, not a negative.
+
+Controls for the red=18 input, pad 16 MiB:
+  vulnerable -O0 -n 1, no gdb: rc 0, 0-byte stderr (no malloc_printerr)
+  fixed tree -n 1: rc 0, 0-byte stderr
+  vulnerable no-option: rc 0, 0-byte stderr
+Contrast with W21's w13/dead-target.input: same unmodified -O0 binary and pad
+aborts with "free(): invalid next size (normal)"; here it exits cleanly.
+
+First red=18 run with the AFTER-only script printed "Cannot access memory at
+address 0x555555b0ba28" when reading the field after a SUCCESSFUL free — the
+arena top had been consolidated/trimmed, so that post-free read is not a
+target fault. w29/sizefield-before.gdb records the authoritative pre-free
+field, then continues to process exit.
+
+What this does and does not establish. The image alone now chooses a valid
+live allocator size field and changes the process outcome from allocator
+abort to normal exit. That upgrades W22's debugger-forced valid size to a
+file-chosen one. No chosen pointer/IP, no live-object overwrite, no marker or
+command side effect, no stock consumer beyond the lab decoder, no grooming or
+ASLR study, no witness verdict and NO r5. The only measured later reader is
+free()'s successful consolidation; no subsequent allocation overlapping the
+written span was measured. Grade unchanged: rungs 1-3 witness-established;
+rung 4 file-chosen bytes at chosen offsets, including the live top size.
+
+Reproduce (all artifacts pinned and committed except the derived input):
+  cd lab/frontier/libraw2shell
+  python3 craft_uncompressed_poc.py w11/targetbeef.input \
+      /tmp/w29.input w29/specs/red18-g0-b0-wl65535.json
+  cd w23 && W23_INPUT=/tmp/w29.input \
+      gdb -q -batch -x ../w29/sizefield-before.gdb \
+      ../o0/LibRaw-0.22.3/bin/dcraw_emu
+
+sha256 (spec / derived input):
+  3c097d64...34032 / 8acd69ad...e6eeb8  red11 (abort)
+  a497c66d...aa1f94 / 875055ae...f2bad  red18 (valid size, clean exit)
+  03867f4a...92965 / 85180cbf...57d5c  red21 (abort)
+  4ab6def8...c85c9c / b8f1fd7b...39cbad  red31 (generated, unprobed)
+Full hashes:
+  3c097d64635840e3c28395388b4f0e6d85385df4bd496ccb102f873550a34032
+    8acd69adae85b71bd99c1ca121b6982685a2ea832c92802142bdf45d03e6eeb8
+  a497c66d4c0f3d62c2037f2c16c5ed27ade835eccf5fb7833f215acb9caa1f94
+    875055ae8385a2c180b7e1adee6e55443d828c726b00619d868eadd0195f2bad
+  03867f4a7e46baab9eee74d66acbd855d7872563f483bda7bccf4b2de9293265
+    85180cbfd531c447362f80487a8e92e6a89b33636f551c2beff1b2000e257d5c
+  4ab6def8a7bec2c31e52428bf6f82fceded7576d54ff72757275db241c85c9c9c
+    b8f1fd7b6dfbe8da926e95e442ccbd23db68e42a92bf0ccc710e81b0039cbadb
+Pinned helpers: craft_uncompressed_poc.py 0d91b5a8...d1749c, base
+w11/targetbeef.input cf5030eb...33d33b, w23/sizefield.gdb 77c39094...da404a,
+new w29/sizefield-before.gdb 7718a4c4...1a63.

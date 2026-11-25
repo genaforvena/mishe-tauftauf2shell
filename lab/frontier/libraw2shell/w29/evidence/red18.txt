@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff42200, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+[Inferior 1 (process 508065) exited normally]
+W23 AFTER sf=sizefield.gdb:13: Error in sourced command file:
+Cannot access memory at address 0x555555b0ba28

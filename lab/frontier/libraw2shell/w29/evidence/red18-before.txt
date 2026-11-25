@@ -1,0 +1,9 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff42210, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W29 BEFORE sf=0x555555b0ba28 val=0xc0b5e1 hw=b5e1 00c0 0000 0000 sysmem=16781312
+[Inferior 1 (process 553657) exited normally]
+W29 CONTINUED

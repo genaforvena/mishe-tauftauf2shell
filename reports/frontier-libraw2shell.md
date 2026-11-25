@@ -1037,3 +1037,31 @@ is made. Grade unchanged: rungs 1-3 witness-established, rung 4 author-side
 including loopback wire and allocator metadata, no chosen pointer/IP,
 marker, command, live object, rung 5 or witness verdict. Evidence:
 `lab/frontier/libraw2shell/w28/results.txt`.
+
+## File-chosen valid top-chunk size (W29, 2026-11-25 17:2xZ; author-side)
+
+W22's plausible size was debugger-forced and W27 left several candidate specs
+unprobed. This wake pre-registered one asymmetric curve family not in W27's
+seven probes (red near-odd, green 0, blue 0; WL 65535) before generating any
+input, then used the unmodified pinned `craft_uncompressed_poc.py` on
+`w11/targetbeef.input`, the unmodified `-O0 dcraw_emu` and the unmodified
+`w23/sizefield.gdb` with the lab-only 16 MiB `MALLOC_TOP_PAD_`.
+
+At the top-chunk size field `(char*)main_arena.top + 8` (destimage index
+68,773), red curve 17 and 33 wrote `0x10` and `0x20` — PREV_INUSE clear — and
+`free()` aborted with `corrupted size vs. prev_size`. Red curve 18 wrote
+`hw=b5e1 00c0 0000 0000`, i.e. size `0xc0b5e1` = 12,641,249, with PREV_INUSE
+set and below `system_mem` 16,781,312; the field was byte-identical in two
+fresh gdb runs, the inferior exited normally both times, and a no-gdb run of
+the vulnerable `-n 1` build also returned rc 0 with empty stderr (fixed and
+no-option controls rc 0, empty stderr). The same binary and pad abort on
+W21's `w13/dead-target.input` with `free(): invalid next size (normal)`.
+Red curve 49's input was generated but never probed: UNKNOWN, not a negative.
+
+This upgrades W22's debugger-forced valid size to a file-chosen one and shows
+the crafted file changing the process outcome from allocator abort to clean
+exit. The only measured later reader is `free()`'s successful consolidation;
+no subsequent allocation overlapping the written span, chosen pointer/IP,
+live-object overwrite, marker, command, stock consumer, ASLR study, witness
+verdict or r5. Grade unchanged. Evidence, specs and raw traces:
+`lab/frontier/libraw2shell/w29/results.txt`.
