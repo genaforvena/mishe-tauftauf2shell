@@ -177,3 +177,11 @@ does NOT show a chosen word surviving into a consumer-owned object, pointer
 control or command execution. Grade stays **rung 4 PARTIAL**, NO r5; W206 is
 author-only and unwitnessed. Wire/network input (the PoC is delivered as a
 local file here) and consumer-object landing remain UNKNOWN.
+
+Clean archive of amended HEAD `eb785d31` into `/tmp/w206-stbvorbis` at
+14:53Z replayed all committed scripts with the SDL_mixer dependency copied
+to the sibling path: `run-consumer.sh` 12/0,
+`run-all.sh` 9/0, `run-seq.sh` 4/0, `run-guard.sh` 12/0,
+`run-object.sh` 9/0, `run-neighbor.sh` 9/0 — all rc 0.
+Live tree untouched.
+
