@@ -1,9 +1,11 @@
 # frontier brief — yojimbo2shell (remote block-fragment heap overflow)
 
-Status 2026-11-25 03:07Z: real yojimbo ASan build confirms the write through
-`Connection::ProcessPacket`; authenticated UDP loopback pair shows downstream
-corruption with a clean fixed control. Rung 3 CONFIRMED in a real build, rung 4
-PARTIAL, no rung 5. Witness verdict UNKNOWN (independent replay outstanding).
+Status 2026-11-25 03:08Z: real yojimbo ASan build confirms the write through
+`Connection::ProcessPacket`; authenticated UDP loopback pair shows a
+reproducible downstream crash, and gdb reads the chosen marker back at its
+chosen offset after netcode decrypt. Rung 3 CONFIRMED in a real build, rung 4
+DEMONSTRATED with conditions (non-default config, post-auth, in-process pair,
+gdb-assisted readback), no rung 5. Witness verdict UNKNOWN.
 
 ## Verified ground truth (claim source)
 
@@ -148,10 +150,41 @@ the server as vulnerable receiver also crashed in
 negative. The client and server run in one process; no external system was
 contacted.
 
-Rung assessment: rung 3 is now CONFIRMED in a real library build, through the
-real `Connection::ProcessPacket`. Rung 4 remains PARTIAL: chosen bytes at a
-chosen offset are observed only in the pinned-function harness; the real
-authenticated wire path shows a reproducible crash and clean fixed control,
-but no pointer control or chosen-byte readback from the receive buffer. No
-rung 5 — post-authentication, in-process pair, no separate remote process,
-no command execution or benign marker execution. Witness replay required.
+Rung assessment at W1: rung 3 CONFIRMED in a real library build, through the
+real `Connection::ProcessPacket`; rung 4 at that point PARTIAL (reproducible
+crash plus clean fixed control, no chosen-byte readback from the real receive
+buffer). W1b below closes that gap with conditions. No rung 5 —
+post-authentication, in-process pair, no separate remote process, no command
+execution or benign marker execution. Witness replay required.
+
+## W1b — chosen-byte readback after decrypt (2026-11-25 03:08Z)
+
+With the vulnerable loopback binary under gdb (`loopback-test.cpp` copied over
+`upstream/test.cpp`, parent channel source, same ASan build), a breakpoint at
+`source/yojimbo_reliable_ordered_channel.cpp:716` conditioned on
+`fragmentId == 2 && fragmentBytes == 500` fires on the encrypted packet path;
+`next` executes the `memcpy`. Dumping the destination then reads:
+
+```
+0x7ffff1e8d810: 77 'M' 73 'I' 83 'S' 72 'H' 69 'E' 45 '-' 76 'L' 79 'O'
+0x7ffff1e8d818: 79 'O' 80 'P' 0 '\000' -85 '\253' ...
+```
+
+That is the chosen `MISHE-LOOP` marker at
+`m_receiveBlock->blockData + 1200`, i.e. 100 bytes past the 1100-byte
+receive buffer; `x/8xb blockData+1100` shows the 0xab filler in between. The
+breakpoint frame chain is `ProcessPacketFragment` ← `ProcessPacketData` ←
+`Connection::ProcessPacket(packetSequence=3, packetBytes=505)` ←
+`Client::ProcessPacketFunction` (`yojimbo_client.cpp:274`), so the bytes
+arrived in a netcode-encrypted UDP payload on the loopback pair and were
+copied by the pinned sink. Evidence
+`harness/evidence/real-loopback-gdb-readback.log`, sha256
+`1ec758585f3503a6e2f3aa48d9ffa4c36105bac1a7f4f91053e943c74cbf4b9a`
+(test random seed 1795576058).
+
+This upgrades rung 4 to DEMONSTRATED with explicit conditions: non-default
+1100/500 server config, post-authentication, client and server in one
+process, and debugger-assisted readback of the copied bytes. Without gdb the
+same path produces the reproducible `Connection::Reset()` SEGV recorded in W1;
+the fixed control stays clean. No pointer/IP control, no separate remote
+process and no command execution: rung 5 remains unclaimed.
