@@ -176,6 +176,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Open5gs2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 138th route; verbatim pinned Open5GS v2.8.0 `lib/sbi` empty-boundary multipart parser, ASan `WRITE of size 1` 0 bytes after a 65-byte region and plain build writes state-machine-forced `00 0d 0a` into an adjacent heap object — rung 4 PARTIAL, not arbitrary chosen bytes. `sh lab/frontier/open5gs2shell/harness/run.sh` 21 PASS / 0 FAIL; witness W217 replayed from a clean `git archive 22d70741` with a matching trace hash and ruled ESTABLISHED AS LABELED at that scope. No real Open5GS build, SBI listener or wire request, no pointer, command or r5.** CVE-2026-116543 / GHSA-25v2-v588-jq8g; window 146. |
 | **Yojimbo2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 139th route; verbatim pinned `ReliableOrderedChannel::ProcessPacketFragment` final-fragment `memcpy` before the `blockSize` check, ASan `WRITE of size 500` 0 bytes after a 1100-byte region and plain chosen `MISHE-OO` at canary offset 300; fixed guard and safe controls clean. `sh lab/frontier/yojimbo2shell/harness/run.sh` 20 PASS / 0 FAIL with 7/7 SHA-256 pins. No CVE/GHSA or fixed release known.** W1 (`28d3c8c5`) builds the real pinned parent under ASan and drives the fix commit's regression through real `Connection::ProcessPacket` (`yojimbo_reliable_ordered_channel.cpp:716`, allocation at `yojimbo_reliable_ordered_channel.h:321`, fixed control clean), then an authenticated netcode UDP pair on 127.0.0.1 with a chosen `MISHE-LOOP` marker and a clean fixed control. W1b (`ff6c5e02`, report `30f77300`) reads the chosen marker back at `blockData+1200` under gdb after decrypt: rung 4 DEMONSTRATED only at the non-default 1100/500 config, post-auth, client and server in one process, with gdb-assisted readback — hence the `◐` cell. No separate remote process, pointer/IP control, command or r5; production use of a non-multiple block config stays UNKNOWN; witness UNKNOWN. Upstream fix `d3d4f339…`; window 147. |
 | **Libsshch2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 140th route; verbatim pinned libssh `channel_rcv_data()` closed-channel data UAF, ASan heap-use-after-free `READ of size 32` 0 bytes inside a 64-byte region at `channel_default_bufferize`, plain chosen byte `M` / marker `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed guard suppresses it, safe channel clean. `sh harness/run-all.sh` 24 PASS / 0 FAIL. Authenticated peer required; no real SSH build, wire packet, pointer/IP control, command or r5; witness UNKNOWN.** CVE-2026-59850 (fixed 0.12.1/0.11.5); window 148; distinct from `libssh22shell`. |
+| **Socat2Shell** | ✓ | ✓ | — | — | — | **ADMITTED 03:3xZ under standing #6 as the 141st route; real unmodified socat 1.8.1.1/1.8.1.2 ASan builds over a 127.0.0.1-only SOCKS5 listener show `W read(7, ..., -1): Bad address`, exit 255 and NO ASan report — deterministic connection abort only. Real `readfull()` passes SIZE_MAX to `read(2)`, which returns EFAULT before storing any byte; the harness's `WRITE of size 600` is a `memcpy` stand-in artifact. Harness 15 PASS / 0 FAIL, real replay 9 PASS / 0 FAIL. Rung 3 corruption and rung 4 chosen bytes NOT established, rung 5 not attempted, witness UNKNOWN.** CVE-2026-56123 / Socat advisory 10 (fixed 1.8.1.2); window 149 adopted. |
 
 
 The 01:5x–02:1xZ limbs supersede the Munt2Shell row's blanket "no pointer
@@ -423,32 +424,31 @@ witness verdict stay UNKNOWN. The raw logs and `upstream/` tree are gitignored
 and regenerate from the pinned clone and commands above; a staged-harness
 smoke here scored 20 PASS / 0 FAIL with 7/7 pins.
 
-Socat2Shell is FRONTIER-STAGED (`4f3b7916`, W221; rung corrected by
-`d7ea43d1`): CVE-2026-56123 (Socat security advisory 10, CWE-122, CVSS4 9.2
-`AV:N/AC:H`), affected 1.8.0.0–1.8.1.1, fixed in 1.8.1.2 by making
-`dstdata[]` unsigned in `xio-socks5.h`; source URLs, tarball and patch pins
-are in `lab/frontier/socat2shell/PROVENANCE.md` and `src/pins.sha256`. A
-signed `char` length byte 0xfb promotes to -5, so `bytes_to_read=2` while
-`bytes_read=5`; the negative count reaches `readfull()` as SIZE_MAX. The
-pinned-function harness still prints `TOTAL pass=15 fail=0` from
+Socat2Shell is ADMITTED at 03:3xZ under standing #6 as the 141st route
+(staged by `4f3b7916`/W221; real-build correction `d7ea43d1`): CVE-2026-56123
+(Socat security advisory 10, CWE-122, CVSS4 9.2 `AV:N/AC:H`), affected
+1.8.0.0–1.8.1.1, fixed in 1.8.1.2 by making `dstdata[]` unsigned in
+`xio-socks5.h`; source URLs, tarball and patch pins are in
+`lab/frontier/socat2shell/PROVENANCE.md` and `src/pins.sha256`. A signed
+`char` length byte 0xfb promotes to -5, so `bytes_to_read=2` while
+`bytes_read=5`, and the negative count reaches real `readfull()` as SIZE_MAX.
+The pinned-function harness prints `TOTAL pass=15 fail=0` from
 `sh harness/run-all.sh`, but its ASan `WRITE of size 600` past a 262-byte
-reply comes from a `memcpy` stand-in for `readfull()`, not from the shipped
-consumer. A real-build loopback replay corrects the earlier rung-3/rung-4
-claim: both releases were built unmodified under clang ASan with
-`--disable-openssl`, and a 127.0.0.1-only SOCKS5 server sends
-`05 00 00 03 fd` plus 600 chosen bytes. From
-`lab/frontier/socat2shell/real`, `sh run-real.sh` scored 9 PASS / 0 FAIL
-here: the vulnerable build logs `W read(7, 0x512000000045, -1): Bad address`
-and exits 255 with no ASan report, while fixed and safe replies exit 0.
-The real `readfull()` (`sysutils.c:101-141`) passes SIZE_MAX to `read(2)`,
-which returns EFAULT before storing any byte. Grade is corrected to rung 1/2
-on a real build (deterministic connection abort); rung 3 memory corruption
-and rung 4 chosen bytes are NOT established on the real consumer, rung 5 is
-not attempted, and the witness verdict is UNKNOWN. No pointer/IP, marker,
-command or r5. A charter, window 149 and seed wall exist but no route, so
-omp-only is RED with 141 roles and `socat2shell: no route`; admission belongs
-to the operator, and no README row, rung cell or mind-count change is made
-here. `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
+reply is a `memcpy` stand-in, not the shipped consumer. A real-build loopback
+replay (`sh real/run-real.sh`, 9 PASS / 0 FAIL) builds unmodified socat
+1.8.1.1 and 1.8.1.2 under clang ASan with `--disable-openssl`; a
+127.0.0.1-only SOCKS5 server sends `05 00 00 03 fd` plus 600 chosen bytes.
+The vulnerable build logs `W read(7, 0x512000000045, -1): Bad address`, exits
+255 with **no ASan report**, while fixed and safe replies exit 0; real
+`readfull()` (`sysutils.c:101-141`) passes SIZE_MAX to `read(2)`, which
+returns EFAULT before storing any byte. Grade: rungs 1/2 only (deterministic
+connection abort on a real build); rung 3 memory corruption and rung 4
+chosen bytes are NOT established on the real consumer, rung 5 not attempted,
+witness UNKNOWN. No pointer/IP, marker, command or r5. Route, both resolver
+keys and the three wake units are minted (EXACT full-flag sync `written 3,
+removed 0`), doctor GREEN; the existing handoff window 149 was adopted with
+no duplicate. `reports/frontier-socat2shell.md`,
+`reports/socat2shell-status.md`.
 
 AwsLc W214 (`c8026e5a`, source-bound, author-side) narrows the row's
 "out-of-tree application as the only real-consumer path" boundary: a read-only
@@ -2806,7 +2806,7 @@ and the later open5gs/libsshch lanes supersede it for those two. Evidence:
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 136 target
+Each admitted family is its own mind with its own tmux window: 137 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -2840,7 +2840,7 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `sdlmixer2shell`, `cjose2shell`, `thorvg2shell`, `busybox2shell`,
 `fontforge2shell`, `fltk2shell`, `contiki2shell`, `libraw2shell`,
 `gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
-`open5gs2shell`, `yojimbo2shell` and `libsshch2shell`. Each builds affected
+`open5gs2shell`, `yojimbo2shell`, `libsshch2shell` and `socat2shell`. Each builds affected
 harnesses, drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a

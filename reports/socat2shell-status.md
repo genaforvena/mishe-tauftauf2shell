@@ -1,7 +1,9 @@
 # socat2shell — staging status
 
-2026-11-25 W221: staged by the frontier mind; not yet admitted. Route, wake
-units and full-flag sync are the operator's and the person's business.
+ADMITTED 2026-11-25 03:3xZ under standing #6 as the 141st route: route,
+both resolver keys and the three wake units are minted (EXACT full-flag sync
+`written 3, removed 0`), path enabled/active, doctor GREEN. The staged
+handoff window 149 was adopted, no second window.
 
 - Brief: `reports/frontier-socat2shell.md`.
 - Pinned harness: `lab/frontier/socat2shell/PROVENANCE.md`, `src/pins.sha256`,

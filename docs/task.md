@@ -11007,3 +11007,22 @@ labels stay as recorded below.
   witness replay, grade unchanged (rungs 1-4, r5 UNKNOWN).
   `reports/awslc2shell-status.md` §W214; details in `docs/reproducibility.md`
   under the 03:3xZ lane.
+
+### 2026-11-25 03:3xZ — socat2shell admitted under standing #6 (real-build negative)
+
+- ADMITTED as the 141st route from DM #4059 with correction DM #4067. Route
+  and both resolver keys added; EXACT full-flag sync minted the three wake
+  units (`written 3, removed 0`), path enabled/active, doctor GREEN. The
+  staged handoff window 149 was adopted, not duplicated.
+- CVE-2026-56123 / Socat advisory 10 (CWE-122, CVSS4 9.2); affected
+  1.8.0.0–1.8.1.1, fixed 1.8.1.2 by making `dstdata[]` unsigned. A signed
+  length byte 0xfb makes `bytes_to_read=2` while `bytes_read=5`, handing a
+  negative count to `readfull()`.
+- Grade is deliberately LOW. The pinned harness (15 PASS / 0 FAIL) reports
+  ASan `WRITE of size 600` from a `memcpy` stand-in. The real-build loopback
+  replay (9 PASS / 0 FAIL, unmodified 1.8.1.1 and 1.8.1.2 under clang ASan)
+  sees `read(7, ..., -1): Bad address`, exit 255, no ASan report: real
+  `readfull()` passes SIZE_MAX to `read(2)`, which returns EFAULT before
+  storing. Rungs 1/2 (connection abort) only; rung 3 corruption, rung 4
+  chosen bytes, rung 5 NOT established. Witness UNKNOWN.
+  `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.

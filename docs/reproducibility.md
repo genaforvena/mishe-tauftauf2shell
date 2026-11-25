@@ -9596,3 +9596,22 @@ cjose `jwe.c:1451-1468` (one fresh-ctx CBC update), libwebsockets
 `openssl.c:1275-1277` (`EVP_CIPHER_CTX_set_padding(ctx->evp, 0)`). With no
 qualifying buffer, no adjacent control datum was found either. Unprovisioned
 third-party applications remain UNKNOWN. `reports/awslc2shell-status.md` §W214.
+
+### 2026-11-25 03:3xZ — Socat2Shell admission replay (negative on the real consumer)
+
+Pinned claim bytes, tarballs and patch hashes are in
+`lab/frontier/socat2shell/src/pins.sha256` and `PROVENANCE.md`. Two controls:
+`cd lab/frontier/socat2shell && sh harness/run-all.sh` re-extracts and
+SHA-checks the pins, builds the verbatim pinned `_xioopen_socks5_read_reply()`
+with gcc and clang ASan, and prints `TOTAL pass=15 fail=0`; its ASan
+`WRITE of size 600` 0 bytes after a 262-byte reply comes from a `memcpy`
+stand-in for `readfull()`. `cd lab/frontier/socat2shell/real && sh
+run-real.sh` builds unmodified socat 1.8.1.1 and 1.8.1.2 with clang ASan
+(`--disable-openssl`) and drives a 127.0.0.1-only SOCKS5 listener that sends
+`05 00 00 03 fd` plus 600 chosen bytes: 9 PASS / 0 FAIL. The vulnerable
+reply yields verbatim `W read(7, 0x512000000045, -1): Bad address`, exit 255,
+**no ASan report**; vulnerable+safe and both fixed cells exit 0. Real
+`readfull()` (`sysutils.c:101-141`) calls `read(2)` with SIZE_MAX, which
+returns EFAULT before a store on this host. Reproduce only on loopback;
+expect a connection abort, not corruption. Grade rungs 1/2 only, rung 3/4/5
+not established, witness UNKNOWN. `reports/frontier-socat2shell.md` §real-build.
