@@ -2604,3 +2604,44 @@ stays **NOT ACHIEVED**.
     the corrected model and the measured arena-region-base reflection
     oracle (Stage-C-style readback of chosen bytes at a nominated
     address on the unmodified app). Stock rung 5 stays **NOT ACHIEVED**.
+
+21. **Done this wake (2026-11-25, honeypot-parity arms): the pair-parity
+    knob is a bounded negative for the grown-victim claim; the
+    0x648 claim pops that do occur are benign exact-fits of merged
+    value chunks, not the upcase victim.** Two 12-process arms at the
+    exact poSAC wire geometry (reconstructed from the surviving
+    `lab/build/evidence/stock-rails-poSAC.*.body` because its server
+    logs were gone): plant `1527x40,1517x6,1521x3,1529x1`, filler
+    `400x200`, claim
+    `1599@0x610:0x815,1599@0x620:0x815,1599@0x61f:0x815,1607@0x618:0x825`,
+    probe `1527x5,1535x1`, churn `400x20`, N=1500, grown `0x650`,
+    next `0x90`, `RAILS_MAX_THREADS=1`; only `HONEYPOT_SPEC` changed
+    (`1527x3` vs `1527x5`, baseline `1527x4`). Driver:
+    `lab/repro/ruby2shell-shrink-claim.sh`; raw logs/summaries
+    `lab/build/evidence/{poPAC3,poPAC5}.run.txt` and
+    `stock-rails-poPAC{3,5}.summary`; tabulations
+    `lab/build/evidence/poPAC{3,5}.tab.txt` via
+    `ruby2shell-sweep-order.py --plant-spec
+    1527x40,1517x6,1521x3,1529x1`.
+    - Survival (full `attack=404 claim=404 probe=404 up=200
+      alive=YES`): poPAC3 8/12, poPAC5 7/12, baseline poSAC 6/12 —
+      no parity-driven step change; all arms retain the stochastic
+      ~50-65% survival seen with sacrificial shields.
+    - `0x648` claim pops of planted addresses: poPAC3 1 (run 9),
+      poPAC5 3 (runs 2 and 4); each pop address was a MERGED VALUE
+      chunk (original plant `0x800` value, freed `0x815`, then `C`
+      `0x9e0`/`0xc00`/`0xed0`), never the B snapshot's grown victim
+      (e.g. poPAC3-9 B victim `0x7d8bdcc23af0 size=0x25` grew to
+      `0x53`, while the pop address was `0x7d8bdca49310`). The
+      0x648 allocation exact-fits a re-binned split front; no chosen
+      byte crossed into a live value and the process survived in
+      poPAC3-9 and poPAC5-2.
+    - Both arms show 12/12 growth at the A snapshot and 0/12
+      address-matched pre-B frees of the B victim; aborts 4/12
+      (poPAC3) and 5/12 (poPAC5), mostly `corrupted size vs.
+      prev_size`, plus one value-adjacent `0x815->0x853` family
+      (poPAC3-10). Conclusion: neither honeypot parity nor the
+      0x648 pops reopen the grown-victim claim path; the exact-fit
+      claim pop of the grown victim itself remains UNOBSERVED and
+      item 20's structural closure stands. Boundary unchanged:
+      no command, no persistence, no grade change.
