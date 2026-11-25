@@ -333,3 +333,14 @@ and W18's PIE scans), `scan-w23-nopie.out`
 `249952b3…de64637a743d6`. Full method, gdb transcripts and limitations in
 `ALLOCSTATE-TCACHE.md`. Author-side negative, no witness verdict, no grade
 change, no r5.
+
+Clean-archive receipt at `f2dd5a78` (15:2xZ): archive
+`/tmp/ff2s-w23-clean.V2F1KD`, pinned tarball hash
+`6134240…d68e9b9ad7eb0` verified, both offline builds rebuilt;
+`replay-real.sh` 17/17, `replay-nonpie.sh` 15/15 and `replay-w23.sh` 12/12,
+each rc 0. The PIE scan hash `313c4ce4…6a2176094` is byte-identical to the
+live tree (and W15/W18). The non-PIE scan is `RESULT ASCII_ONLY` with a
+different build-path-sensitive count (4 vs 7), like W9/W15/W18; no code
+pointer in either. `encs` moves again in the clean tree (non-PIE `0xa92220
+-> 0xa91b70`; PIE `0x555555c48430 -> 0x555555c47c80`). Author-side replay,
+not a witness verdict.

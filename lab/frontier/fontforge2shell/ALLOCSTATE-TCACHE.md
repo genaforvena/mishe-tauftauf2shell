@@ -84,3 +84,24 @@ FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-real.sh
 FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-nonpie.sh
 sh replay-w23.sh
 ```
+
+## Clean-archive receipt (15:2xZ)
+
+`git archive f2dd5a78 lab/frontier/fontforge2shell` into
+`/tmp/ff2s-w23-clean.V2F1KD`, pinned tarball copied in (sha256
+`613424039e0e1b6bb106f8f0df287e1d249ac285d854f4e1964d68e9b9ad7eb0`
+verified) and both offline builds rebuilt from source. Chain:
+`replay-real.sh` 17/17 rc 0, `replay-nonpie.sh` 15/15 rc 0,
+`replay-w23.sh` 12/12 rc 0, final `REPLAY_W23_OK: 12 checks, 0 failed`.
+Same `glyph=-1 i=3` store in all four lanes.
+
+The PIE scan hash is byte-identical to the live tree
+(`313c4ce4…6a2176094`, `CAND_COUNT 0` / `RESULT NONE`). The non-PIE scan
+differs (`57038a05…c28912f781`, `CAND_COUNT 4` in the clean tree) from the
+live `249952b3…de64637a743d6` (`CAND_COUNT 7`): the same W9/W15/W18
+build-path sensitivity in gettext string fragments — both are
+`RESULT ASCII_ONLY`, no code pointer. `encs` moves again in the clean tree
+(non-PIE `0xa92220 -> 0xa91b70`, `-0x4b0`; PIE `0x555555c48430 ->
+0x555555c47c80`, `-0x7b0`), confirming the allocator-state change
+independently of build path. Author-side clean-archive replay, not a
+witness verdict.
