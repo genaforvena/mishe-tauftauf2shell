@@ -1,12 +1,12 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W4: real ASan build + authenticated loopback wire replay
-confirm rung 3; rung 4 MECHANICS now include wire-chosen indirect-call control
-and a benign in-process marker. A wire-borne command string is executed by the
-live server process through a lab trampoline: rung 5 MECHANICS, author-only,
-NOT ESTABLISHED (PR:L, lab-only app objects and trampoline, no witness verdict).
-Staged harness 24 PASS / 0 FAIL; real suites base 5/0, extra 8/0, survive 7/0,
-call 9/0, exec 8/0.
+Status 2026-11-25 W5: independent witness verdict #4161 (W214) is ESTABLISHED
+AS LABELED for the five unmodified real-build suites replayed from a clean
+archive of `c5ece2a9` — rung 3 on a real authenticated loopback wire, rung 4
+mechanics, and rung 5 MECHANICS only, NOT ESTABLISHED as remote execution.
+No contradiction, no grade change, no NIT; PR:L and the lab-only detach, malloc
+reuse and trampoline conditions stand. Staged harness 24 PASS / 0 FAIL; real
+suites base 5/0, extra 8/0, survive 7/0, call 9/0, exec 8/0, all rc 0.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -216,9 +216,37 @@ the client chose current process addresses in the forked peer. No persistent
 shell, no remote command service, no IP hijack beyond the chosen callback
 slot. Without the detachment the unrelated freed fields still fault at
 `:691`/`:708`; a realistic allocation sequence that avoids them without app
-intervention is not established. Independent witness verdict remains UNKNOWN:
-all suites have been replayed by the author only.
+intervention is not established.
 
-Next: independent witness replay of all five real suites is owed. Do not
-claim ESTABLISHED rung 5. What would change the grade: a witness counterexample,
-or a benign command reached without the lab detach/trampoline.
+## Witness verdict (2026-11-25 06:41Z, tape #4161 / W214)
+
+Independent replay of the W4 offer (#4157, covering W2 #4127 and W3 #4145):
+**ESTABLISHED AS LABELED**, no contradiction, no grade change, NO full r5.
+The witness replayed the five unmodified real-build suites from a clean git
+archive of `c5ece2a9`: `run-all.sh` 5 PASS / 0 FAIL, `run-extra.sh` 8/0,
+`run-survive.sh` 7/0, `run-call.sh` 9/0, `run-exec.sh` 8/0, all rc 0. It checked
+the pins (vulnerable `channels.c` b015a334..., fixed b320a326...), the three
+sinks verbatim (`channels.c:697` indirect call, `:705` counter read, `:706`
+`in_bytes += rest`) and that the fixed delta is the single vendor
+`CLOSED_REMOTE` guard at `:653-660`.
+
+In the raw `groom-exec` evidence the witness confirmed the touch command at
+wire offset 0, the trampoline address at offset 112,
+`SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+`SERVER EXEC rc=0`, `target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`, no ASan, and a created 0600 zero-byte marker
+file. The fixed lane made no call, created no file and left the target intact.
+Its bad-pointer counterexample (`fn=0x4141414141414141`) faulted at
+`channels.c:697:16` with no marker, confirming the callee is wire-supplied.
+
+Accepted ceiling, exactly as reported above: PR:L authenticated; the app frees
+a remotely closed channel in its data callback; lab-only detachment of stdout
+buffer and callback list; lab-only malloc reuse with `quarantine_size_mb=0`;
+client and server forked from one binary, so the trampoline address is locally
+known rather than an ASLR-independent leak; benign fixed command through an
+in-harness `system()`; no persistent shell, IP hijack or remote command
+service. No NIT: the ceiling section already discloses every condition.
+
+Next: no replay is owed. Do not claim ESTABLISHED rung 5. What would change the
+grade: a witness counterexample, or a benign command reached without the lab
+detach/trampoline.
