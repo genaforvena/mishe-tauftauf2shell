@@ -161,14 +161,16 @@ an app-owned fake `ssh_iterator` whose `data` is a fake
 `channel_data_function`; the pinned iterator at `channels.c:691-697` then
 calls the chosen address with the session, channel, buffer and userdata.
 Vulnerable evidence `real/evidence-wire-vuln-groom-call.out`:
-`CLIENT sent call fn=0x61fe9f9fbd10 bad=0`,
+`CLIENT sent call fn=0x... bad=0`,
 `SERVER call fake_cbs=0x50e0000003c0 node=0x502000006f50
-fn=0x61fe9f9fbd10 first=0x502000006f70`,
+fn=0x... first=0x502000006f70`,
 `SERVER MARKER called len=0 hits=1`, `SERVER done data_packets=2
 marker_hits=1`, `SERVER target_after=0x41414141414141c1`,
 `CLIENT rc=0 SERVER status=0x0`, no ASan. The marker sees `len=0` because the
 first callback's 128-byte return was consumed from the detached buffer by
 `ssh_buffer_pass_bytes` at `channels.c:708` before the second callback ran.
+The chosen code address is ASLR-dependent; reruns of the same lane print
+different values, so it is redacted here as elsewhere in this report.
 Invalid-pointer control `real/evidence-wire-vuln-groom-call-bad.out` sends
 `fn=0x4141414141414141` and faults exactly at the indirect call:
 `ERROR: AddressSanitizer: SEGV ... channels.c:697:16 in channel_rcv_data`,
@@ -251,3 +253,30 @@ service. No NIT: the ceiling section already discloses every condition.
 Next: no replay is owed. Do not claim ESTABLISHED rung 5. What would change the
 grade: a witness counterexample, or a benign command reached without the lab
 detach/trampoline.
+
+## W7: bounded negatives on the two grade-changing threads (2026-11-25 09:20Z)
+
+No new claim, no replay, no grade change. Both checks close obvious shortcuts
+in the two threads that could change the accepted ceiling.
+
+- **No ASLR-independent code address in the pinned build.**
+  `file real/real_wire-vuln` reports "ELF 64-bit LSB pie executable" and
+  `readelf -h` reports `Type: DYN (Position-Independent Executable file)`.
+  The trampoline address is therefore a run-local value obtained from the
+  forked peer, exactly as the accepted ceiling already states. A `-no-pie`
+  rebuild would add a lab-only build condition rather than remove one; not
+  attempted.
+- **No in-callback channel free in the pinned examples.** In the vulnerable
+  parent tree's `examples/sshd_direct-tcpip.c`, `do_cleanup()` frees closed
+  channels at lines 121-140 (`ssh_channel_free(gone->data->channel)` at 134),
+  but its only call is line 737, after `ssh_event_dopoll()` returns at 732:
+  main-loop cleanup, not a reentrant free inside `channel_rcv_data()`.
+  `examples/sshnetcat.c` frees channels in its own `select_loop()` (lines
+  133-184), also outside a libssh data callback. Neither supplies the
+  reentrant application free the lab models.
+
+The W4 call-lane quote above now redacts its ASLR-dependent code address,
+which changes on every rerun; the deterministic ASan allocator addresses stay.
+W6's `run-exec.sh` smoke regenerated three committed `real/evidence-*.out`
+files with new timestamps and addresses; those incidental changes were
+restored from HEAD, so the pinned evidence is unchanged.
