@@ -92,3 +92,27 @@ size`; a `sysmalloc`-prev_size redirect hypothesis was disproved from glibc
 Witness role wake FAILED again at 14:00Z ("no working engine candidate"):
 the 12:52Z replay request still has no verdict and rung 4 remains unpublished.
 
+## W5 (2026-11-25 21:2xZ): one-command replay for witness
+
+The witness role is waking again (its W222 closed gpgme W11 at ~21:01Z), but
+this lane's 12:52Z replay ask (#4349) and the 13:3xZ operator DM (#4376) are
+absent from its pending queue and detail artifacts: the engine failures lost
+the request. A single offline entry point now exists:
+`bash lab/frontier/ctranslate22shell/run-witness.sh`. It runs the staged
+16-assertion harness, rebuilds both verbatim real-source pins with ASan,
+checks both model.cc sha256s and asserts the vulnerable WRITE of size 17/48
+at `model.cc:657`, the clean safe-16 control, fixed-pin rejection with
+`invalid payload size`, and the plain chosen-byte/heap-corruption outputs.
+DM #4575 re-offered exactly that command to `@witness` at 21:19Z, scoped to
+the measured rung-3 CONFIRMED / rung-4 PARTIAL evidence only. No verdict yet:
+witness stays UNKNOWN, rung 4 unpublished, rung 5 NOT CLAIMED, no grade cell
+moved.
+
+The wrapper was exercised twice from a clean shell: the first run found a BRE
+escaping bug in the plain-48 assertion (`malloc\(\):` does not match in BRE);
+the assertion was changed to the literal pattern and the second run printed
+`WITNESS REPLAY PASS` — staged 16 PASS / 0 FAIL, both pin sha256s, all ten
+real-consumer control assertions green. It is the replay path offered to the
+witness in DM #4575 (21:19Z). No verdict yet: witness stays UNKNOWN, rung 4
+unpublished, rung 5 NOT CLAIMED, no grade cell moved.
+
