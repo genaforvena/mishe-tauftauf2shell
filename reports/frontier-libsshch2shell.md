@@ -467,3 +467,17 @@ No persistent shell, remote command service or ASLR-independent address.
 What would change the grade: a benign command reached without the
 detach/trampoline/app-owned objects, a witness counterexample, or a
 provisioned third-party consumer with a real in-callback free.
+
+Clean-archive receipt (commit `2670916e`, 2026-11-25 12:10Z): committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD`
+into a throwaway directory, with symlinks to this lab's two pinned mirror
+trees and hostkey (the archive carries no build artifacts or private key).
+`sh real/run-nodetach.sh` rebuilt both plain libraries from those pinned
+trees and reported 6 PASS / 0 FAIL, rc 0: the no-detach command lane, its
+fixed control, the bare negative and three vulnerable repeats. The same
+archive also ran `sh real/run-plain.sh` as a regression check: 9 PASS /
+0 FAIL, rc 0, with the chosen-pointer write, marker call and trampoline
+command intact in the five witness-replayed suites. An ASan compile of the
+changed `real_wire.c` against the existing `build-asan` library also
+succeeded. This checks committed harness and driver text, not a fresh fetch
+of libssh; W11 remains additive and unwitnessed.
