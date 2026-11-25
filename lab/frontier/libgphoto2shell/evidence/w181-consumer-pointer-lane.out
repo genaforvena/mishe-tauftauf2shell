@@ -1,0 +1,64 @@
+W181 (2026-11-25, wake started 02:11:22Z; observation 02:36-02:40Z)
+Scope: source-bounded check of the last author-side lane in the W180 wall —
+"a real consumer steering the chosen pointer WITHOUT the probe supplying
+the address". No new exploit mechanics, no new witness ask, no pin change.
+All paths below are relative to the repository root.
+
+1. `table` is the LAST member of the private struct; no in-struct pointer
+   lies downstream of the corrupt write.
+   lab/frontier/libgphoto2shell/pins/jl2005c.h.vuln:31-44:
+     struct _CameraPrivateLibrary { ... unsigned char *data_cache; (line 40)
+       unsigned long bytes_read_from_camera; (41)
+       unsigned long bytes_put_away; (42)
+       Info table[0x4000]; (43) };
+   `Info` is `unsigned char` (`:29`). With model/init_done at 0/1, two ints
+   at 4/8, two more at 12/16, nb_entries at 20, data_reg_opened at 24,
+   the three unsigned longs at 32/40/48 and data_cache at 56, `table`
+   starts at offset 0x40 and the struct is 0x4040 (16448) bytes. The
+   pinned memmove at pins/jl2005c.c.vuln:154 writes from `priv->table`
+   forward, so it cannot overwrite `data_cache` (offset 0x38) or any
+   earlier pointer. Consequence: no real API can read a device-steered
+   pointer out of a field AFTER the table, because no such field exists.
+
+2. Real consumers use table bytes as DATA (sizes, offsets, file contents),
+   never as a pointer.
+   camlibs/jl2005c/library.c:156-164 `file_list_func` only calls
+   `gp_list_populate(list, "jl_%03i.ppm", n)` from `nb_entries`.
+   library.c:197-213 `get_file_func` takes k from `gp_filesystem_number`,
+   reads `table[16*k+4/5]` for h/w, obtains b and start_of_photo from
+   `jl2005c_get_pic_data_size` / `jl2005c_get_start_of_photo`, allocates
+   `pic_buffer = malloc(b + HEADERSIZE)` (`:208`) and copies the 16
+   device-derived bytes with `memcpy(pic_buffer, ... table + 16*k, 16)`
+   (`:213`). The pointer handed to the public API is that library-owned
+   malloc: library.c:338-341
+   `gp_file_set_data_and_size(file, (char *)pic_buffer, b + 16);`.
+   libgphoto2/gphoto2-file.c:315-325 stores the supplied data pointer in
+   `file->data`; the pointer value comes from the malloc, not from table
+   bytes. `data_cache` is likewise allocated by the library at
+   library.c:224-225. The decompressor (jl2005bcd_decompress.c:70-150,
+   217-298) turns device bytes into dimensions and loop counts, not
+   pointer values.
+
+3. k is non-negative, so no table-underflow read reaches pre-table bytes.
+   libgphoto2/gphoto2-filesys.c:1365-1400: `gp_filesystem_number` walks
+   the folder list from `num = 0`, returns that non-negative number on a
+   name match, or `GP_ERROR_FILE_NOT_FOUND` (-108) when the folder is
+   clean and no name matches. There is no negative-index return. Combined
+   with (1), W175/W177's canary/saved-rbp/RIP words are returned to the
+   host as byte DATA at k=1023/1024, not dereferenced by the camlib.
+
+Disposition: the in-struct natural-consumer-pointer lane is CLOSED at the
+pinned source level. The remaining theoretical lane is a pointer in a
+HEAP NEIGHBOUR of `priv` (the overflow writes past the 16448-byte struct
+into allocator metadata/neighbouring chunks); W168 already measured that
+outside-grooming layouts fail and W170-W172 only reached a chosen pointer
+when the lab probe supplied its address. This wake did NOT measure a
+natural heap-neighbour pointer overwrite: that stays UNKNOWN, not failed
+and not established. No physical USB/wire path, no command, no rung 5.
+Grade unchanged: author-side unwitnessed rung 4; rung 5 UNKNOWN.
+
+Regression check after these read-only observations:
+  cd lab/frontier/libgphoto2shell && sh harness/check.sh
+Observed at 02:42Z: `PASS=146 FAIL=0
+TRACE=e364f756f482157bf25e852f98673131a94c4977d688bf691475024f286c6c98`
+(unchanged). No source, pin or harness file was modified this wake.

@@ -420,3 +420,23 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   an unwitnessed rung-4 scope; the disclosure still goes to a HOST consumer
   through `gp_camera_file_get()`, W176 still holds, and rung 5 stays UNKNOWN.
   Evidence: `evidence/real-plain-w180-one-command.out`, `REPLAY.md`.
+
+- Natural consumer-pointer lane closed at source level (W181, 2026-11-25):
+  of the two remaining lanes in the W180 wall, the "real consumer steers a
+  chosen pointer without the probe supplying the address" lane has no
+  in-struct path in v2.5.34. `pins/jl2005c.h.vuln:31-44` puts `table` last
+  (offset 0x40, struct 0x4040 bytes); the only struct pointer, `data_cache`
+  (`:40`), precedes it and the pinned `:154` memmove writes forward. Real
+  consumers treat table bytes as data: `library.c:197-213` builds h/w,
+  size and start offset from them and copies 16 bytes into a library
+  `malloc`; `library.c:338-341` hands that malloc to
+  `gp_file_set_data_and_size`, whose pointer assignment is at
+  `gphoto2-file.c:315-325`. `gp_filesystem_number`
+  (`gphoto2-filesys.c:1365-1400`) returns only non-negative indices, so
+  W177's saved rbp/RIP words are consumer DATA, not dereferenced pointers.
+  A pointer in a HEAP NEIGHBOUR of `priv` remains theoretically possible
+  but was NOT measured here: W168's outside-grooming layouts failed and
+  W170-W172 needed a probe-supplied address. Grade unchanged: author-side
+  unwitnessed rung 4, rung 5 UNKNOWN; no new witness ask, no re-send.
+  Citations and disposition:
+  `lab/frontier/libgphoto2shell/evidence/w181-consumer-pointer-lane.out`.
