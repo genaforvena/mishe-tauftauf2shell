@@ -1,0 +1,13 @@
+W210 stream-mode fixed-point iteration from the file-path starting values
+(dest=0x555555828090 slot=1104, 10 iterations, no convergence):
+iter 0: dest 0x555555828090/0x55555582a6f0 slot 1104/1088 frame=485
+iter 1: dest 0x55555582a6f0/0x55555582a700 slot 1088/1088 frame=488
+iter 2: dest 0x55555582a700/0x55555582a710 slot 1088/1072 frame=490
+iter 3: dest 0x55555582a710/0x55555582a6f0 slot 1072/1088 frame=481
+iter 4: dest 0x55555582a6f0/0x55555582a700 slot 1088/1088 frame=488
+iter 5: dest 0x55555582a700/0x55555582a710 slot 1088/1072 frame=490
+iter 6: dest 0x55555582a710/0x55555582a6f0 slot 1072/1088 frame=481
+iter 7: dest 0x55555582a6f0/0x55555582a700 slot 1088/1088 frame=488
+iter 8: dest 0x55555582a700/0x55555582a710 slot 1088/1072 frame=490
+iter 9: dest 0x55555582a710/0x55555582a6f0 slot 1072/1088 frame=481
+no fixed point in 10 iterations

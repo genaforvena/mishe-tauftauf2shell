@@ -2646,10 +2646,11 @@ measurement command line with `exrcheck -s -c` on a separate output
 (`cases/p209-stream-chain.exr`), and keeps the W202 dump, chunk mutator, libc
 addresses and command bytes unchanged. Iteration from the file-path fixed
 point cycles `0x55555582a6f0 -> ...a700 -> ...a710 -> ...a6f0` without
-converging; a bounded sweep of `dest = 0x55555582a6c0..0x...a770` (step
-`0x10`) times slots 1072/1088/1104 finds exactly one fixed point:
-`dest=0x55555582a6f0 slot=1088`, 36 measurements, preserved in
-`evidence/w210-sweep.log`. The regenerated 1140-byte EXR has sha256
+converging (`evidence/w210-iteration.log`). A bounded sweep of
+`dest = 0x55555582a6c0..0x...a770` (step `0x10`) over slots 1072 and 1088
+stops at its first fixed point `dest=0x55555582a6f0 slot=1088`; all 16
+measurements are in `evidence/w210-sweep.log`. The regenerated 1140-byte EXR
+has sha256
 `2e6d246c7842c87d6038917b26452ee7c96849906021cc557eba6c2708e2da19`; it still
 reaches `heap-buffer-overflow READ of size 3072` at pinned
 `internal_zstd.c:472` under ASan.
