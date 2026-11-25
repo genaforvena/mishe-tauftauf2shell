@@ -1,0 +1,63 @@
+W201 non-PIE heap base with ASLR ON (5 runs)
+PoC sha256 c75957f1e36ae3e03df6e79aaf5070164e0f2afe081c44bbd59542c0c16ec45a
+DISTINCT_HEAP_BASES=5  (all different; none 0x6c6f00)
+--- run 1 ---
+Breakpoint 1 at 0x4ff900: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+Breakpoint 2 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+$1 = 0xHEAP
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0xHEAP, cur=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
+--- run 2 ---
+Breakpoint 1 at 0x4ff900: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+Breakpoint 2 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+$1 = 0xHEAP
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0xHEAP, cur=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
+--- run 3 ---
+Breakpoint 1 at 0x4ff900: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+Breakpoint 2 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+$1 = 0xHEAP
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0xHEAP, cur=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
+--- run 4 ---
+Breakpoint 1 at 0x4ff900: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+Breakpoint 2 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+$1 = 0xHEAP
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0xHEAP, cur=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177
+--- run 5 ---
+Breakpoint 1 at 0x4ff900: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+Breakpoint 2 at 0x502f4e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p197-chosen-ip.exr 
+Breakpoint 1, exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+$1 = 0xHEAP
+#0  exr_attr_list_destroy (ctxt=ctxt@entry=0xHEAP, list=list@entry=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+#1  0x00000000004ba1b7 in internal_exr_destroy_part (ctxt=0xHEAP, cur=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:151
+#2  0x00000000004bac47 in internal_exr_destroy_parts (ctxt=0xHEAP) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_structs.c:177

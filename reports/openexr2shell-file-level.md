@@ -2204,3 +2204,40 @@ lab/openexr2shell-real` into `/tmp/w200-clean`, with the gitignored `src/` and
 harness/w200-command-gadget.sh` returned `RESULT PASS` rc 0 with the same
 `6c971988...` evidence hash. Author replay, not a witness verdict.
 
+
+## W201: non-PIE heap base is not ASLR-invariant — negative (2026-11-25 13:03Z)
+
+W199 left one follow-up open: it tested the PIE-generated W197 PoC against a
+`-no-pie` relink and found a stale `list->entries[0]` pointer, but only with
+gdb ASLR OFF and only for the PIE heap geometry. Since non-PIE *code*
+addresses are fixed, a PoC regenerated for the non-PIE heap geometry might
+still have carried a file-chosen IP without an ASLR-off lab condition if the
+non-PIE heap base were itself stable. Prediction: that heap base is not
+stable. Result: NEGATIVE, observed.
+
+Method: `harness/w201-nopie-aslr-on.sh` relinks the pinned 3.5.2 `exrcheck`
+with `-no-pie` from the committed pinned objects (the same link as W199),
+then runs the committed W197 PoC five times under gdb with
+`set disable-randomization off` (ASLR LEFT ENABLED), breaking at
+`attributes.c:305` and at `opaque.c:79`. It asserts five distinct `ctxt`
+values, none equal to W199's ASLR-OFF value `0x6c6f00`, no hit at
+`opaque.c:79`, and a stop at `attributes.c:305` in every run. Observed
+examples from the raw runs before normalization: `0xa29bf00`, `0x3b3f5f00`,
+`0x1bb65f00`, `0x3bbaf00`, `0x7fa7f00` — the non-PIE code breakpoints stay at
+`0x4ff900` / `0x502f4e` in all runs while the heap moves. The low 12 bits
+are page-aligned (`0xf00`), but a full 8-byte file-carried pointer needs the
+randomized upper bytes, so the partial invariance does not rescue the forge.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w201-nopie-aslr-on.sh` -> `RESULT PASS` rc 0 three times, normalized
+`evidence/w201-nopie-aslr-on.out` sha256
+`0a6b8367409f86d592d5d8892f7bbb12310ce923b4e9a20c9ace3c1c92e9fd50` each
+time. The normalization replaces only ASLR-varying heap pointers with
+`0xHEAP` and keeps the fixed non-PIE code addresses; the distinctness
+assertions run on the raw values before normalization.
+
+This closes only W199's regenerated-fixed-point idea. It is not a proof for
+other link modes, a byte-granular overwrite, a heap leak or a longer chain.
+No grade change: rung 4 author-only, no witness verdict, no r5. At 13:00Z
+the witness queue still had no verdict on any openexr offer, including W197's
+#4160, and the witness wake service was RED repeatedly (operator/mishe lane).
