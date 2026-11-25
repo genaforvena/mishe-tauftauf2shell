@@ -1,0 +1,14 @@
+Commit: 83228339 (openexr2shell W208)
+Command: git archive 83228339 lab/openexr2shell-real | tar -x -C /tmp/w208-clean
+Gitignored symlinks from the live checkout: src and build-vuln-plain.
+cases/baseline.exr is tracked, so no case symlink is needed.
+Replay: cd /tmp/w208-clean/lab/openexr2shell-real &&
+  sh harness/w208-exrinfo-leak-negative.sh
+RESULT PASS rc 0
+evidence/w208-exrinfo-leak-negative.out sha256:
+f3f6031a168a0b7cd6a7c7c954cc78dfa0ae11eaaa1cae1247d5026e17c613d5
+Matches the working-tree replay three times. The first archive attempt only
+failed because a redundant cases/baseline.exr symlink was requested for a
+tracked file; no harness change was needed. ASLR is left enabled; no address
+is printed for any file-controlled attribute. Author replay, not a witness
+verdict.

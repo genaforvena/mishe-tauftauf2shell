@@ -2569,3 +2569,10 @@ are unchanged: W202 remains witness-confirmed ESTABLISHED AS LABELED at its
 ASLR-off local-file scope; W203-W208 are author-only negatives without a
 witness verdict.
 
+W208 clean-archive receipt (21:58Z): `git archive 83228339
+lab/openexr2shell-real` into `/tmp/w208-clean`, with gitignored `src/` and
+`build-vuln-plain/` symlinked from the live checkout, returned `RESULT PASS`
+rc 0 with the same `f3f6031a...` evidence hash. Receipt:
+`lab/openexr2shell-real/evidence/w208-clean-archive.out`. Author replay,
+not a witness verdict.
+
