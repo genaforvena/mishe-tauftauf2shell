@@ -427,3 +427,11 @@ the stale buffer before the second free. No pointer/IP/command control, no
 chosen-address write, no benign command side effect, no stock-layout or
 live-target claim and no r5. Every real path remains author-side: no
 witness verdict has landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101.
+
+Clean-archive replay of `057e2e2a` into `/tmp/gpgme-w11-clean` VERIFIED at
+06:28Z: `git archive` of the commit plus the four provisioned source trees
+and tarballs copied locally (no network), `sh build-real.sh` `BUILD OK`,
+`sh run-eof.sh` `PASS=25 FAIL=0` and pinned `sh ../run.sh` `PASS=19 FAIL=0`,
+rc 0 throughout. The replayed vulnerable build again gave the ASan
+double-free with `buffer[1000]=0x48` at the realloc site; fixed, 2.3.1 and
+short-line controls stayed clean. Author-side only.
