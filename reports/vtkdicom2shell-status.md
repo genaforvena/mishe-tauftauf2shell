@@ -17,7 +17,8 @@
   proven impossible.
 - Grade unchanged: rung 3 from crafted FILE bytes in the real reader, rung 4
   chosen tag bytes at the chosen OOB slot with a plain crash. No pointer/IP
-  control, no command, no wire path, no witness verdict.
+  control, no command, no wire path, no witness verdict. Latest exact-source
+  replay update #4503 remains unanswered; #4276 is the earlier W3 offer.
 
 ## 2026-11-25 18:03Z — W6 advisory version gap closed at exact 9.5.2 source
 

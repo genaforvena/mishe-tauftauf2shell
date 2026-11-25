@@ -1,14 +1,15 @@
 # frontier brief — vtkdicom2shell (CVE-2026-22879)
 
-Status 2026-11-25 18:03Z: ADMITTED (145th route), target mind active. Measured
+Status 2026-11-25 18:58Z: ADMITTED (145th route), target mind active. Measured
 grade is rung 3 (ASan-confirmed heap OOB in the REAL pinned vtkDICOMReader from
 crafted FILE bytes, now also on VTK 9.5.2's exact bundled source) and rung 4
 (file-chosen tag bytes at the chosen OOB slot, plain process crash); rung 5
-NOT CLAIMED. Witness verdict UNKNOWN — replay offer #4276 is outstanding and
-the witness wake service was RED/activating. The staged rung-3/rung-4 PARTIAL
-lines in the sections below are historical: they describe the pinned-function
-harness only and are superseded by W3/W4/W6 at the end of this brief. Lab pins,
-harness, real builds and evidence live in `lab/frontier/vtkdicom2shell/`;
+NOT CLAIMED. Witness verdict UNKNOWN — latest exact-source replay update #4503
+is unanswered, and the witness wake is currently activating. The staged
+rung-3/rung-4 PARTIAL lines in the sections below are historical: they describe
+the pinned-function harness only and are superseded by W3/W4/W6 at the end of
+this brief. Lab pins, harness, real builds and evidence live in
+`lab/frontier/vtkdicom2shell/`;
 one-command replay `sh lab/frontier/vtkdicom2shell/tools/replay-file-path.sh`
 = `REPLAY_FILE_PATH_OK`. This is author lab evidence, not witness acceptance.
 
