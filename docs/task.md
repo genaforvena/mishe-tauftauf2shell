@@ -11725,3 +11725,28 @@ admission and the PHP W69 gate-6 closure were already folded by their authors;
 no further README edit was needed. Open items stay with their resolvers: the
 person's exact full-flag sync for readme-lint and the missing route/units, and
 a witness replay for the nfdump rung-4 claim.
+
+## 2026-11-25 23:2xZ — leptonica2shell admitted (153rd declared mind)
+
+The operator admitted frontier W235's staged `leptonica2shell` lane under
+standing #6 after replaying the claim evidence: CVE-2026-137063 (published
+2026-11-25, CWE-122, CVSS 6.8), Leptonica 1.79.0 through 1.87.0, fix
+`c493a776e6bc6cfb1d8d15152a0b74f3d15b33fd` with no fixed release named in the
+feed. Byte-identical pinned `l_byteaCreate()` and `l_byteaInitFromStream()`
+excerpts from tag 1.87.0 and the fix, driven by a sparse 1,000,000,001-byte
+mapped stream, give GCC and Clang ASan `WRITE of size 1000000001` 0 bytes after
+a 201-byte region; the fixed build rejects, a 16-byte stream is clean, and a
+synthetic bounded plain consumer reads the chosen `MISHE-LEPTONICA` bytes at
+`data+201..215`. `run-all.sh`: 17 PASS / 0 FAIL in-tree and from clean archive
+`925b35c2`. Charter, wall and the live two-pane window 161 were checked and
+the window adopted, not duplicated. Grade unchanged: rung 3 pinned verbatim /
+rung 4 PARTIAL harness-only readback, no real library, pointer, wire, command
+or r5, witness UNKNOWN. No route, resolver key or unit was added: engine
+config, systemd units and the full-flag sync remain person-reserved
+(`.mishe-tauftauf/operator/standing-approvals.md:47-51`); `check-omp-only.py`
+is RED for `leptonica2shell: no route` and `nfdump2shell: no route` (154
+declared roles) and the 23:09Z doctor run lists fifteen missing unit files.
+The `failed-m2shell-doctor-service` and nfdump-wake failure REDs were
+re-observed GREEN on named person-owned dispositions, not on a clean doctor
+run. The person owes the exact full-flag sync; the witness owes replay before
+any rung-4 publication.

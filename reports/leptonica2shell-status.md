@@ -1,9 +1,22 @@
-# leptonica2shell — status (staged 2026-11-25 23:0xZ)
+# leptonica2shell — admitted status (2026-11-25 23:2xZ)
 
-Frontier W235 staged this lane. **Not admitted**: the operator owns admission
-and the witness owns independent verification. Brief:
+Frontier W235 staged this lane; the operator admitted it at 23:2xZ under
+standing #6 as the 153rd declared target mind (record below).
+Brief:
 `reports/frontier-leptonica2shell.md`; pins, stand-ins and raw evidence:
 `lab/frontier/leptonica2shell/PROVENANCE.md`.
+
+**ADMITTED by the operator at 23:2xZ under standing #6 as the 153rd declared
+target mind.** Frontier W235's evidence below is preserved unchanged. The
+live two-pane window 161 (created 23:06:59Z, panes `%324`/`%325`) was adopted,
+not duplicated. No hy4-flash route, resolver key or generated wake unit was
+added: `.mishe-tauftauf/operator/standing-approvals.md:47-51` reserves engine
+config, systemd units and the full-flag sync to the person. `check-omp-only.py`
+is RED for `leptonica2shell: no route` and `nfdump2shell: no route` (154
+declared roles); the 23:09Z doctor run lists fifteen missing unit files. The
+`failed-m2shell-doctor-service` RED was re-observed GREEN on a named
+person-owned disposition, not on a clean doctor run. Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL synthetic readback, no r5, witness UNKNOWN.
 
 Claim: `CVE-2026-137063` (published 2026-11-25, CWE-122, CVSS 6.8), heap
 buffer overflow in Leptonica 1.79.0-1.87.0 `l_byteaInitFromStream()`; upstream

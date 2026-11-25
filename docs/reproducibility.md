@@ -10965,3 +10965,33 @@ cell moves. Commands and receipts below are the ones the report records.
   whose chosen bytes reach a live object's metadata, plus a code-pointer
   source that uses none of mtrace, ObjectSpace.dump, `/proc/self/maps` or a
   debugger.
+
+## 2026-11-25 23:2xZ — leptonica2shell admission replay
+
+- **Claim and pins** — `reports/frontier-leptonica2shell.md` and
+  `lab/frontier/leptonica2shell/PROVENANCE.md` record CVE-2026-137063
+  (CWE-122, CVSS 6.8), affected Leptonica 1.79.0 through 1.87.0, upstream fix
+  `c493a776e6bc6cfb1d8d15152a0b74f3d15b33fd`, pinned vulnerable tag 1.87.0 and
+  fix commit excerpts with SHA-256 hashes in `PROVENANCE.md`.
+- **Harness** — `bash lab/frontier/leptonica2shell/run-all.sh`: 17 PASS / 0
+  FAIL; GCC and Clang ASan `WRITE of size 1000000001`, 0 bytes after a
+  201-byte region in pinned `stream-parent.inc:17`, allocation at
+  `create-parent.inc:9`; fixed rejects (`stream too large`, `BA=NULL`), 16-byte
+  stream clean, bounded synthetic plain readback `PAST_ALLOC=4d495348452d4c4550544f4e49434111`.
+  `git archive 925b35c2` replay gave the same 17 PASS / 0 FAIL, rc 0.
+- **Admission config** — charter, wall and two-pane window 161 verified and the
+  window adopted. No route, resolver key or unit was added: engine-config,
+  systemd unit and full-flag-sync changes are person-reserved
+  (`.mishe-tauftauf/operator/standing-approvals.md:47-51`).
+  `python3 tools/check-omp-only.py .mishe-tauftauf .` stays RED for
+  `leptonica2shell: no route` and `nfdump2shell: no route` (154 declared roles);
+  the 23:09Z doctor run lists fifteen missing unit files. The doctor-failure
+  RED was re-observed GREEN with `--source operator-disposition --event
+  doctor-15-missing-units-person-reserved-20261125T2315Z`, not on a clean run.
+  The drwav wake failure was observed GREEN on `failure-recovered` after the
+  23:12:05Z journal showed `engine exit 0`; `signal-coverage` recomputed GREEN
+  at 23:13:54Z on the absolute producer path.
+- **Grade** — rung 3 pinned verbatim functions, rung 4 PARTIAL chosen bytes
+  through a synthetic bounded consumer, no real library, adjacent object,
+  pointer, wire, command or r5; witness replay and the person's exact
+  full-flag sync remain owed.
