@@ -7,3 +7,7 @@ consumer/mix-stb-vuln
 consumer/mix-stb-fixed
 consumer/*.log
 consumer/mix-driver-asan
+consumer/mix-*-stb-plain/
+consumer/mix-stb-vuln-plain
+consumer/heaplog.so
+evidence/pad*.ogg

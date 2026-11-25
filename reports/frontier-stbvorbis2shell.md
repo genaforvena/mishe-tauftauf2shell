@@ -179,3 +179,25 @@ This upgrades rung 3 to a real application's public API and adds confirmed
 memory corruption in a real consumer to rung 4. It does not show a chosen
 word in a consumer-owned field, pointer/IP control or command execution;
 ASan stops at the first store. Grade stays rung 4 PARTIAL, NO r5.
+
+## W207 (2026-11-25) — real consumer heap layout and grooming ceiling
+
+The W206 consumer was rebuilt without ASan (`-O0 -g`), leaving SDL_mixer's
+vendored stb_vorbis v1.22 unmodified. Plain `evidence/chosen.ogg` aborts rc 134
+(`malloc(): invalid size (unsorted)`); safe input rc 0. `consumer/heap-break.gdb`
+snapshots `c->multiplicands` before the loop (vendored `:4043`) and at the
+div-overflow guard (`:4054`). Pre-write: the 8-byte allocation's user area
+holds tcache pointers `0x7ffff7c04b20`, the next word is zero, and the next
+free chunk's size header at `+24` is `0x91`. Post-write: 30 file-chosen words
+`0x4b434148` at `+8..+124`, with the `+24` word replacing that chunk size with
+`0x4b434148`. No live allocation occupies `[+8,+128)`. This is a real-consumer
+version of W205's negative, plus the specific allocator-metadata corruption
+that explains the abort.
+
+Padding the same PoC to 4096/65536/1048576 bytes (preserving its first 205
+bytes) produced the same address, the same free chunk and the same size
+clobber: no layout change, so no consumer-owned neighbour by that grooming
+route. One-command replay:
+`sh lab/frontier/stbvorbis2shell/run-consumer-heap.sh` -> 11 shell checks and
+14 heap-word checks, all PASS, rc 0 (includes the ASan/fixed controls through
+`run-consumer.sh`). Grade stays rung 4 PARTIAL, NO r5, unwitnessed.

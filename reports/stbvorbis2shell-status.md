@@ -185,3 +185,41 @@ to the sibling path: `run-consumer.sh` 12/0,
 `run-object.sh` 9/0, `run-neighbor.sh` 9/0 — all rc 0.
 Live tree untouched.
 
+## W207 (2026-11-25) — real consumer heap: chosen word clobbers a free chunk size
+
+W206's ASan build stops at the first store, so a plain (-O0 -g, no ASan) build
+of the same unmodified SDL_mixer consumer was used to observe the full 30-word
+OOB run in the real application. On `evidence/chosen.ogg` the plain consumer
+aborts rc 134 with `malloc(): invalid size (unsorted)`; the safe input exits 0.
+`consumer/heap-break.gdb` stops at vendored `stb_vorbis.h:4043` (before the
+expansion loop) and `:4054` (the source div-overflow guard, after all 30
+stores), then dumps the chunk around `c->multiplicands`.
+
+Observed at `c->multiplicands = 0x5555555f3c50` (chunk header `0x21`, 24 usable
+bytes): before the stores, the 8-byte user area held tcache pointers
+`0x7ffff7c04b20`, the following word was zero, and the next free chunk's size
+header at `+24` was `0x91`; no live allocation overlapped `[+8,+128)`. After
+the stores, all 30 file-chosen words `0x4b434148` ("HACK") filled offsets
+`+8..+124`, and the word at `+24` changed the next chunk's size from `0x91`
+to `0x4b434148`. This is the measured mechanism behind the plain-libc abort:
+the chosen bytes corrupt allocator metadata belonging to the consumer's heap,
+not a consumer-owned data field.
+
+A bounded grooming attempt padded the PoC to 4096, 65536 and 1048576 bytes
+(first 205 bytes unchanged, so parsing is identical). The multiplicands
+address, the free chunk and the resulting size clobber were identical in every
+run: padding gives no consumer-owned neighbour (negative result, preserved).
+An LD_PRELOAD malloc logger tried first perturbed the allocator and crashed
+before the guard; it was discarded and is not part of the claim.
+
+One-command replay: `sh lab/frontier/stbvorbis2shell/run-consumer-heap.sh` ->
+11 PASS / 0 FAIL shell checks plus 14 PASS / 0 FAIL heap-word checks, rc 0;
+it also replays `run-consumer.sh` (12 PASS / 0 FAIL) for the ASan and fixed
+controls. Raw snapshots in `lab/frontier/stbvorbis2shell/consumer/evidence/
+{heap-gdb-snapshots,plain-attack,plain-safe,sweep-*}.out` (gitignored).
+
+Grade UNCHANGED: rung 1/2/3 observed, rung 4 PARTIAL — a real consumer's heap
+metadata is corrupted by 30 file-chosen words over 120 bytes. There is still
+no chosen word in a live consumer-owned field, no pointer/IP control, no
+command, no wire input (local file), no r5, and no independent verdict on
+W202-W207 (W201 remains the only ESTABLISHED verdict).
