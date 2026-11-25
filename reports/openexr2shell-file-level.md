@@ -1733,3 +1733,59 @@ trees symlinked from the live checkout. `sh harness/w192-inbounds-check.sh`
 printed `RESULT PASS` rc 0 and all seven evidence hashes matched the working
 tree byte-for-byte. Author replay, not a witness verdict; grade and rung-5
 status unchanged.
+
+## W193: file-chosen pointer in a live attribute-list slot (2026-11-25)
+
+Prediction from W192's rc-139 teardown crash: the file-chosen COPY2 source
+might place a chosen value into a live `exr_attribute_t*` that the unmodified
+consumer dereferences during `exr_attr_list_destroy()`. **Positive for chosen
+bytes in a live pointer field**; the crash is NOT attributed to that pointer.
+
+Method: the W192 six-pass forge left a 1536-byte pre-COPY2 source dump at
+N=768, U=4N. Three PoCs change only eight bytes of that dump, at COPY2
+destination offset 1264, to `0x4141414141414141`, `0x4242424242424242` and
+`0x3131313131313131`; inverse-shuffling for 2-byte elements
+(`seg1 = dump[0::2] + dump[1::2]`) and `cases/make_poc_mixed_full.py` at
+`N=768 BYTE=0x5a U=3072` produced the same 447-byte ZSTD frame as the seed.
+Under the UNMODIFIED pinned 3.5.2 `exrcheck -c` with **ASLR left enabled** and
+a breakpoint at the pinned inverse-sort sink, the part's attribute list has
+`num_attributes=11`, `entries[]` at `outPtr+4320`, and slot `E[2]` at
+`outPtr+4336` — inside COPY2's fully chosen `outPtr+3072..+4608` window.
+`E[2]` equals each of the three chosen values; `E[0]`, `E[1]` and `E[3]` stay
+`0x0000555555828210`, `0x0000555555828280` and `0x0000555555828330` in all
+three runs. File bytes therefore choose a live pointer field in a code path
+the consumer actually takes, not just dead heap metadata.
+
+Plain unmodified runs exit 139 (SIGSEGV) at
+`attributes.c:305 exr_attr_list_destroy` for all three files. The faulting
+instruction sequence is `mov (%rdi,%r15,8),%r13` then `mov 0x14(%r13),%eax`:
+the loop reads `attr->type` through an `entries[]` pointer. The faulting slot
+was **not** pinned to `E[2]` in the same run — `entries[]`'s offset from
+`outPtr` and the heap base vary between ASLR-on runs — so attribution of this
+crash to the chosen value is UNKNOWN. A throwaway fixed-point attempt at
+ASLR-off regenerated six times with frame sizes 447/447/458/442/446/454 and
+`entries[]` offsets 4304/4320; the chosen word hit `E[2]` or `E[4]`, but no
+run showed a faulting `r13` equal to the chosen value. Kept as a negative,
+not a claim of steering.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w193-chosen-pointer.sh` -> `RESULT PASS` rc 0, byte-identical twice.
+It pins the three PoCs, the generator and the gdb probe, asserts the three
+chosen `E[2]` values with unchanged neighbours, asserts plain rc 139 for all
+three, a valid-file rc-0 `OK` control, a fixed 3.5.3 rc-1 `bad` control and an
+ASan `READ of size 3072` at pinned `internal_zstd.c:472`. Evidence hashes:
+slot `4141` `67472534594a3a193a74357a612f1b578a07b52851a5b934d8c121ad38319ae9`,
+`4242` `22d4688d56a35988ebe96c5bedd026d4333992196954934cd99bbddbbd317905`,
+`3131` `576cbcfc45e381dd416134ab14b519cd11de63468a9e0aa67c2ad5969da2e1bc`,
+plain `4141` `960530f68d5577c9c666512067eb8ee4dca152feb645dcfa2775ee9e3d2fd7a1`,
+valid `043d72d916be8948cd85f6937306e63355be57f21ad76fe7bc3c950b16286835`,
+fixed `458fbb6e540a2905792366420810504cd72a35b05c68af839c8312259c6a7499`,
+ASan `cb3a20987fe88b88d19ad7f1f68631bb3047bd9559c1d6ed02d66fad8aac9318`.
+
+Disposition: keep as rung-4 mechanics — chosen bytes at chosen offsets in a
+live pointer field of an unmodified, file-fed consumer, with three distinct
+chosen values and ASLR on. Still not rung 5: no chosen code pointer or IP
+proven, no control-flow diversion proven, no malloc from a poisoned entry,
+no wire, no command, no marker, no witness verdict. Would change my mind: a
+faulting dereference pinned to the chosen value within the same run, a chosen
+IP, a wire-fed affected process, or a witness counterexample.
