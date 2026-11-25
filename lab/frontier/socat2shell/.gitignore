@@ -4,3 +4,7 @@ harness/vuln-plain
 harness/fixed-plain
 harness/vuln-asan-clang
 harness/fixed-asan-clang
+real/socat-1.8.1.1/
+real/socat-1.8.1.2/
+real/socat-1.8.1.2.tar.gz
+real/*.log

@@ -56,3 +56,34 @@ through `readfull` at `harness.c:42` and `_xioopen_socks5_read_reply` at
 `xio-socks5.inc:12`. Safe reply and fixed header are ASan-clean with rc 0 in
 both compilers. Plain vulnerable build reads back
 `canary=4d495348452d534f434b53`; plain fixed build reads back zeros.
+
+## Real-build loopback replay (W221) — negative result
+
+Both pinned tarballs were built unmodified under clang ASan:
+
+```
+for v in 1.8.1.1 1.8.1.2; do
+  tar xzf src/socat-$v.tar.gz -C real
+  (cd real/socat-$v && ./configure CC=clang \
+    CFLAGS='-g -O1 -fsanitize=address -fno-omit-frame-pointer -D_FORTIFY_SOURCE=0 -U_FORTIFY_SOURCE' \
+    --disable-openssl && make -j4)
+done
+sh real/run-real.sh
+```
+
+`real/evil_socks5.py` binds 127.0.0.1 only, sends `05 00`, then either
+`05 00 00 03 fd` plus 600 chosen bytes or a well-formed IPv4 reply. The
+matrix is **9 PASS / 0 FAIL**:
+
+- 1.8.1.1 + attack: exit 255, verbatim
+  `2026/11/25 03:18:01 socat[321607] W read(7, 0x512000000045, -1): Bad address`,
+  zero ASan lines.
+- 1.8.1.1 + safe, 1.8.1.2 + attack, 1.8.1.2 + safe: exit 0, no ASan.
+
+Real `readfull()` is `sysutils.c:101-141`; it calls `Read(fd, buff, exptg)`
+with the huge count, and this host's `read(2)` returns `-EFAULT` before any
+store. The pinned-function harness's `memcpy` stand-in therefore overstates
+the primitive: its ASan WRITE is not evidence of corruption in the shipped
+consumer. The advisory's write claim is preserved verbatim as a claim, with
+this contradictory measurement; rung 3 on a real build is UNKNOWN/NOT
+ESTABLISHED and the observed effect is a connection abort.

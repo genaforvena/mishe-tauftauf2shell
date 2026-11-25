@@ -1,8 +1,11 @@
 # frontier brief — socat2shell (SOCKS5 reply DOMAINNAME length sign extension)
 
-Status 2026-11-25 W221: staged at rung 3 with a scoped, partial rung 4.
-Pinned-function harness replays 15 PASS / 0 FAIL. No real socat build, no loopback
-wire, no pointer/IP control, no marker execution and no rung 5. Witness UNKNOWN;
+Status 2026-11-25 W221: real-build loopback replay is NEGATIVE for the
+advisory's write claim — the negative count reaches `read(2)` as SIZE_MAX, the
+kernel returns EFAULT, and no ASan report or corruption occurs on this host.
+The pinned-function harness still replays 15 PASS / 0 FAIL, but its `memcpy`
+stand-in is not the real consumer. Rung 3 on a real build is NOT established;
+the observed effect is a deterministic connection failure. Witness UNKNOWN;
 the operator owns admission.
 
 ## Verified ground truth
@@ -37,8 +40,9 @@ the operator owns admission.
 `dstdata[]` is `char` (signed on x86-64). A length byte 0xfb therefore promotes
 to -5, making `bytes_to_read = 2` while `bytes_read = 5`. The next call passes
 `bytes_to_read-bytes_read` (-3, implicitly `size_t`) as the read count to
-`readfull()`, so all bytes the proxy sends are written at `reply+5`. The real
-caller allocates exactly 262 bytes at `xio-socks5.c:551`
+`readfull()`. Whether bytes are stored depends on that consumer; the real one
+is measured below.
+The real caller allocates exactly 262 bytes at `xio-socks5.c:551`
 (`Malloc(SOCKS5_MAX_REPLY_SIZE)`). The 1.8.1.2 header makes the length
 unsigned, giving 258 for 0xfb and keeping the write in bounds.
 
@@ -62,30 +66,53 @@ header are both ASan-clean with rc 0; the fixed plain build leaves the canary
 zeroed. Harness detail, stand-in scope and the fortify caveat are in
 `lab/frontier/socat2shell/PROVENANCE.md`.
 
+## Real-build loopback replay (W221) — negative result
+
+Both releases were built unmodified under clang ASan from pinned tarballs
+(`src/socat-1.8.1.1.tar.gz` and `src/socat-1.8.1.2.tar.gz`, SHA-256 in
+`src/pins.sha256`) with `--disable-openssl`. `real/evil_socks5.py` binds only
+127.0.0.1 and sends `05 00`, then either `05 00 00 03 fd` plus 600 chosen bytes
+or a well-formed IPv4 reply. `sh real/run-real.sh`: **9 PASS / 0 FAIL**.
+
+| build / reply | observed | exit |
+| --- | --- | --- |
+| 1.8.1.1, DOMAINNAME 0xfd | `W read(7, 0x512000000045, -1): Bad address`, no ASan | 255 |
+| 1.8.1.1, IPv4 reply | clean | 0 |
+| 1.8.1.2, DOMAINNAME 0xfd | clean | 0 |
+| 1.8.1.2, IPv4 reply | clean | 0 |
+
+Verbatim line from `real/evidence-real-vuln-attack.out`:
+`2026/11/25 03:18:01 socat[321607] W read(7, 0x512000000045, -1): Bad address`.
+
+The real `readfull()` (`sysutils.c:101-141`) loops `Read(fd, buff, exptg)`.
+With `exptg = SIZE_MAX`, this host's `read(2)` returns `-EFAULT` before writing
+any byte; `readfull()` returns -1 and the caller closes the socket. The
+advisory's claimed unbounded heap write is therefore NOT reproducible in the
+shipped consumer on this host. The ASan WRITE in the pinned-function harness
+comes from its `memcpy` stand-in, which assumes the malicious server's bytes
+are copied; that assumption is false for the real `readfull()` here.
+
 ## Rung assessment and honest ceiling
 
-- **Rung 1/2** — met: deterministic trigger from a five-byte SOCKS5 reply and a
-  sign-extending length byte; the negative-to-`size_t` transition is observed
-  as an unbounded write.
-- **Rung 3** — met on the verbatim pinned function: gcc and clang ASan report
-  a heap out-of-bounds WRITE immediately after the 262-byte reply allocation.
-- **Rung 4** — PARTIAL: the proxy chooses the length byte (0xF9-0xFD), the write
-  extent (bytes actually sent) and the bytes at chosen offsets past the reply.
-  Costs: no real socat build or wire replay, the harness stand-in models the
-  bytes a malicious server sends, glibc fortify aborts before ASan at default
-  `-O1` so the harness explicitly disables it, and the upstream advisory notes
-  the attack needs knowledge of client binary details. No pointer/IP control.
-- **Rung 5** — not attempted; no process, pointer, command or side effect.
+- **Rung 1/2** — met on a real build: a five-byte SOCKS5 reply with a
+  sign-extending length byte deterministically aborts the SOCKS5 connection
+  (`read(..., -1): Bad address`), while the fixed build and safe reply succeed.
+- **Rung 3** — NOT established. The harness's ASan heap WRITE is a
+  synthetic-consumer result; the real ASan build produced no report. An
+  earlier status in this wake claimed rung 3 on the pinned function; it is
+  corrected here and the correction is the durable result.
+- **Rung 4** — not established: no bytes are stored past the reply on the real
+  path, so there is no chosen-byte primitive, pointer/IP control or marker.
+- **Rung 5** — not attempted; no command or side effect.
 
 ## Cheapest next experiment
 
-Build socat 1.8.1.1 with clang ASan, run the upstream `SOCKS5_OVERFL` test or a
-loopback-only malicious SOCKS5 listener that sends
-`05 00 00 03 fd` followed by the payload, and drive a real
-`socat /dev/null SOCKS5:127.0.0.1:...` client against it. Expect the same ASan
-write at the real `_xioopen_socks5_read_reply()`; repeat with 1.8.1.2 as the
-clean control. Preserve a negative result if the surrounding read loop or a
-build flag prevents reaching the write.
+Determine whether any socat build option or consumer path converts the huge
+count into a bounded positive read that stores bytes; if none does, disposition
+the candidate as a remote connection-abort bug rather than a memory-safety
+find. The reproducible controls are `sh real/run-real.sh` (9 PASS / 0 FAIL)
+and `sh harness/run-all.sh` (15 PASS / 0 FAIL); any future claim of a write must
+show it on the real `readfull()` path, not in the stand-in.
 
 Staged as `socat2shell` with a live two-pane inner window, charter at
 `.mishe-tauftauf/charters/socat2shell.md`, seed wall at
