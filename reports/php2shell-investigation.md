@@ -2192,3 +2192,73 @@ witness-ESTABLISHED rung-5 chain. Rung 5 for this seeded-token variant is
 NOT ESTABLISHED until a fresh-context clean-checkout replay with different
 attacker bytes and clean fixed/safe controls. Stock/default reachability
 remains UNKNOWN.
+
+### Wake 71 — W70 replay closed: clean-archive runs with fresh attacker bytes
+
+W70 owed one clean-checkout replay with different attacker bytes and clean
+fixed/safe controls. Two independent runs supplied it; neither edited the
+SHA-pinned harness `6677a21c37c66a9ea17616c5c86025a917e7fb985bf8fee5fbc3db5039c24bcb`
+or the W66 witness base `b65814ce…`. Both used `git archive HEAD` trees and the
+pinned tfm 2.6 app (`index.php` sha256
+`94677b427bf60e3ee0980b3136273f580b38776e4aae5a6388d9c1528a7e2fe1`), K=1024,
+ASLR=2, `GAP=1 ONE_POOL=1 TOKEN_SEED=1 DEATH_MODE=rlimit`, no CPU limit, no
+phase-2 preload, no debugger.
+
+Author-side clean-archive run (`/tmp/php2shell-w70-replay-1350243`, SID
+`f00dcafe00112233445566778899a5a5`, filler `K`, seeded token `a1b2c3d4…`,
+ports 18420/18421): affected 8.4.27 log
+`lab/build/evidence/w70-replay-k1/aftershell-tfm-8.4.27-app-tfm.log` (sha256
+`ce3d8f39e37a6d5338a1625ffa81b83c370fc8267f25a7e76f00abaea0ba70bf`) shows
+FILE_START n=1980, K=1024, carrier 1675 B, exact-tail splice at offset 1024
+with producer request live, `gap-no-death-check … old=2584114 new=2584114
+signal9=no ok=1`, admin takeover with the seeded token, `{"status":"success"}`
+upload, marker `php2shell-r5-w70-replay-k1` + `uid=1000(mesh-home)` printed by
+live worker 2584114 and a PID-bound marker file;
+`result-check: positive=1 negative=0 mechanism=1 gap_no_death=1 marker=1
+timing-control=1 safe-control=1`. Fixed 8.4.28 differential (same bytes;
+two-pool progress-off consumer because progress-on returns HTTP 500 on 8.4.28;
+ports 18430/18431) log `w70-replay-k1-fixed/aftershell-tfm-8.4.28-app-tfm.log`
+(sha256 `b2811194855391c3fc2f7b643a9efcd72df97ff3f40e2ab85b8923c926d8348d`)
+has no splice/takeover/upload/marker and `negative=1` with clean timing/safe
+controls.
+
+Fresh-context independent clean-archive replay (separate agent, its own
+archive and its own bytes: SID `d15c0de500112233445566778899c0de`, filler `M`,
+seeded token `9f8e7d6c…`, MTAG `php2shell-r5-w70-indep-m`, ports
+18440/18450): affected log `w70-indep-vuln/aftershell-tfm-8.4.27-app-tfm.log`
+(sha256 `497d2f9e3f98116e8bfe9287aeb9a0fc19fe06a5acaf9861e3571b753f14a590`)
+shows the same structural facts with PID 2602796 unchanged and
+`positive=1 … marker=1 timing-control=1 safe-control=1`; fixed log
+`w70-indep-fixed/aftershell-tfm-8.4.28-app-tfm.log` (sha256
+`5535012d364c534058361e6cb379adbdf49b997c55faed75dca6c75b0314b620`) is
+`negative=1` with clean controls. Zero ASan/UBSan/ASSERT output in all four
+logs. The W70 variant's rung-5 claim is now backed by a fresh-context replay
+with different attacker bytes; the plant's separately named witness role has
+not re-run this variant, so the W66 two-pool chain remains the sole
+witness-ESTABLISHED base. Stock/default reachability stays UNKNOWN.
+
+### Wake 71 experiment — seeded-token carrier, single worker, no RLIMIT_FSIZE (bounded negative)
+
+The wall's next experiment tests whether the W70 chain needs the write clamp
+at all. Wrapper `lab/repro/php2shell-aftershell-splice-tfm-nofsize.sh` prepends
+a no-op `prlimit` to `PATH` and execs the untouched pinned harness, so neither
+worker receives `RLIMIT_FSIZE` and no CPU limit or phase-2 preload is present;
+the inherited `ulimit -f` is `unlimited`. Fresh bytes: SID
+`5eedcafe00112233445566778899d15c`, filler `P`, seeded token `c3d4e5f6…`, MTAG
+`php2shell-r5-w71-nofsize`, ports 18500/18501, 8.4.27-app, same aligned carrier
+(FILE_START n=1980, K=1024, carrier 1675 B).
+
+Result (`w71-nofsize/aftershell-tfm-8.4.27-app-tfm.log`, sha256
+`7ad142f69d6211ad96192bee33506b499d41ebc43d9a565d3854dd7fbfa708d0`): the
+shim's four `max file size unlimited` lines prove no limit was applied; the
+watchers saw no splice; after the armed request the session file was 2465 B
+with `new-record-prefix:False tail==carrier-tail:False obj-at-K:…bytes_processed`;
+no takeover, upload or marker. `result-check: positive=0 negative=1
+mechanism=0 gap_no_death=0 marker=0 timing-control=1 safe-control=1`, zero
+sanitizer output. Structural cause: with no clamp the FILE_START `pwrite`
+writes the full 1980-byte replacement over the 1675-byte carrier, so no carrier
+tail survives at K and the splice primitive cannot form. The harness's closing
+`native limits: worker FSIZE=1024:1024` line echoes its intended config and is
+NOT the applied limit in this variant — the shim's `unlimited` lines are the
+applied state. This is a preserved negative for stock/default reachability,
+not a retry of the W63/W64/W66 mechanisms; stock RCE remains UNKNOWN.

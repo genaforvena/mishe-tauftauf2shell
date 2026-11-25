@@ -1879,3 +1879,31 @@ on a reduced labeled configuration; this variant's rung 5 NOT ESTABLISHED
 pending independent clean-checkout replay with different attacker bytes.
 W66 two-pool remains the sole witness-ESTABLISHED chain. Stock/default
 reachability UNKNOWN. Full recipe and all hashes: report W70.
+
+## Wake 71 (2026-11-25) — W70 replay closed; stock write-path control negative
+
+W70's owed replay is closed. Two clean-archive runs with fresh bytes and the
+unmodified pinned harness (`6677a21c…`) reproduced the single-pool seeded-token
+chain: author run SID `f00dcafe…`/filler `K`, log sha256
+`ce3d8f39…0bf`; independent fresh-context run SID `d15c0de5…`/filler `M`, log
+sha256 `497d2f9e…590`. Both affected 8.4.27 runs: exact-tail splice at K=1024,
+live producer, admin takeover with the promoted seeded token, designed upload
+accepted, live worker printed marker + `uid=1000` and wrote a PID-bound marker,
+`positive=1 mechanism=1 gap_no_death=1 marker=1 timing-control=1
+safe-control=1`. Fixed 8.4.28 differentials (two-pool progress-off consumer):
+`negative=1`, clean timing/safe controls, log sha256 `b2811194…8d` and
+`5535012d…620`. Zero sanitizer/ASSERT output in all four logs. Full hashes,
+conditions and file paths: `reports/php2shell-investigation.md` W71.
+
+W70 variant's rung 5 is now backed by an independent fresh-context replay with
+different attacker bytes; the plant's separately named witness role has not
+re-run this variant, so W66 two-pool remains the sole witness-ESTABLISHED
+chain. The named next experiment also ran: `TOKEN_SEED=1` single-pool with no
+RLIMIT_FSIZE at all via `lab/repro/php2shell-aftershell-splice-tfm-nofsize.sh`
+(no-op `prlimit`, inherited `ulimit -f=unlimited`, pinned harness untouched).
+Affected 8.4.27 log `w71-nofsize/aftershell-tfm-8.4.27-app-tfm.log` (sha256
+`7ad142f69d6211ad96192bee33506b499d41ebc43d9a565d3854dd7fbfa708d0`): the full
+1980-byte FILE_START pwrite overwrote the 1675-byte carrier, no tail survived
+at K, no splice/takeover/upload/marker, `negative=1` with clean timing/safe
+controls. Stock/default reachability remains UNKNOWN with this structural
+blocker; do not repeat unchanged. Full detail: report W71 no-FSIZE section.
