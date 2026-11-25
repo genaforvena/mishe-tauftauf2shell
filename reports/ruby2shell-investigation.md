@@ -2645,3 +2645,41 @@ stays **NOT ACHIEVED**.
       claim pop of the grown victim itself remains UNOBSERVED and
       item 20's structural closure stands. Boundary unchanged:
       no command, no persistence, no grade change.
+
+22. **Done this wake (2026-11-25, corrected-model tcache consumer): the
+    corrected class model restores the tcache consumer but not the stock
+    chain.** The named experiment replayed the tcache poison on the class
+    that genuinely has glibc tcache (<=0x420) with both threads and their
+    no-overflow controls, loopback only, analysis instrumentation only:
+    - `bash lab/repro/ruby2shell-stageC.sh` (`stageC-correctedmodel-
+      20261125.run.txt`): 5/5 attack runs `verdict=poisoned` with an mtrace
+      `M … 3e9 <target>` pop at the forged target; 3/3 controls
+      `verdict=clean`, `NO-ABORT`, zero pop at target.
+    - `bash lab/repro/ruby2shell-stageC-http.sh 3 2`
+      (`stageC-http-correctedmodel-20261125.run.txt`): 3/3 request-thread
+      attacks returned HTTP 200 with
+      `F-readback-hex=7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a` (16 chosen bytes
+      at the nominated address), `f-pre=4646…` unchanged, forged-size
+      field intact, and a pop line at the nominated target; 2/2 controls
+      clean, alive. All three attack processes ABORTED at teardown
+      (`alive=NO`) — the known harness-condition fingerprint, not a
+      wire-only success. Grade unchanged.
+    - Why this does not reopen stock rung 5: Stage C needs four things the
+      unmodified app does not supply together — (a) a tcache-member chunk
+      physically adjacent to the grown victim (`[V][T tcache][A
+      tcache]`), (b) an 8-byte marker overlap that reaches T's
+      safe-linked `next` field, (c) a fake `malloc_usable_size`-safe
+      header at the nominated target, and (d) both forged qwords computed
+      in-request. The wire-only reflection oracle does supply the arena
+      region base, hence the tcache key, but the consH-20 one-byte
+      overflow writes `0x53` onto the victim *size* field (q38 never
+      `0x251` in the 144-process retarget batch), not onto a tcache
+      `next`. A corrected class alone therefore cannot steer a stock
+      claim: the missing ingredient is a wire geometry that puts a
+      tcache-class neighbor under an 8-byte chosen-byte overlap, not the
+      consumer itself. Stock/oracle-free/persistent rung 5 stays **NOT
+      ACHIEVED**.
+    - Named next: parameterize Stage C across the tcache cutoff (0x400 /
+      0x410 vs 0x430 victim) and record the class boundary with bytes,
+      then search the stock multipart geometry for a tcache-class
+      neighbor plus an 8-byte overlap; control pairs stay mandatory.
