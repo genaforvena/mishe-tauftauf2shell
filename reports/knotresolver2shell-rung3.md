@@ -28,6 +28,10 @@ shows the `0x34da0` module-load stub is outside any reachable same-library
 64 KiB region; the library-relative PLT route is negative for the sampled
 objects. A wake-21 binary check closed the fixed-address route on the PIE lab
 binary. ASLR-on/stock stays UNKNOWN.
+A wake-22 arithmetic check finds `system - slot1 = 0xBAE750` in all six
+sampled ASLR-on layouts and scopes wake 18's 3-byte negative to cross-base
+patches: same-library offsets share their high bytes in the sampled bases,
+but the four in-span libgnutls pointers are rodata, so no control follows.
 
 ## Builds and inputs — exact, reproducible
 
@@ -811,6 +815,37 @@ witness MIXED verdict. A stock/ASLR-on chosen-command route still needs an
 information leak or a different reachable pointer whose high bytes need not be
 guessed; both remain UNKNOWN. No grade change; no process, listener or host
 state changed.
+
+## ASLR-on pointer arithmetic and same-library 3-byte scope (wake 22, 2026-11-25 ~17:2xZ)
+
+Analysis of already-committed evidence, no new process, listener or build.
+Two exact arithmetic facts refine the earlier ASLR-on dispositions:
+
+- In all six sampled ASLR-on layouts (`aslr-on-{1,2,3}.gdb.log`,
+  `aslr-inventory.gdb.log`, `aslr-inventory-w19-{a,b}.gdb.log`),
+  `system - slot1 = 0xBAE750` exactly. The low 20 bits are separately stable
+  (`slot1 ...aa000`, `system ...58750`); one heap-address observation would
+  determine both the command-string base and the call target. No such
+  observation exists on the wire: this is a relation, not a leak.
+- Wake 18's "a 3-byte patch is not deterministic" is scoped to patches that
+  cross independently randomized heap/libc bases: bits 16–23 vary there.
+  For two addresses in the *same* library the bits above 23 are shared. The
+  four libgnutls pointers inside the writable span sit at
+  `slot1+0x10/+0x18/+0xd8/+0xf8`, i.e. file offsets `0x1e6e38`, `0x1f6fe8`,
+  `0x1ed480`, `0x1f60e0`; in all three recorded libgnutls bases
+  (`0x7c25a5aec000`, `0x761e1a480000`, `0x7c0c17056000`), writing low bytes
+  `da 34 00` would preserve their high five bytes and land on
+  `p11_kit_module_load@plt` at library offset `0x34da0`. This is layout-
+  dependent in general (the base's low 24 bits decide whether the two offsets
+  share a 16 MiB window) and is not a new control path: `readelf -rW` shows
+  those four slots hold `R_X86_64_RELATIVE` addends `0x16d4da`, `0x16ff36`,
+  `0x17161a`, `0x16e017`, all past the libgnutls text segment's end at
+  virtual `0x16d000`, so they are rodata pointers. The teardown dispatch
+  reads `session+0x100..+0x118` and then `priv+0x110`, not these fields;
+  wake 17 found no command-execution import in libgnutls anyway.
+
+Grade unchanged: rung 3 ESTABLISHED, rung 4 witness-ESTABLISHED, rung 5
+author-observed ASLR-off / witness MIXED; ASLR-on chosen control UNKNOWN.
 
 ## Boundaries
 

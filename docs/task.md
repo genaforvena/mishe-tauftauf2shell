@@ -5267,6 +5267,12 @@ witness replay and rung 5 stay UNKNOWN for both.
   marker runs); witness #1380 narrowed its MIXED verdict to the harness default
   `0x2f0`, used only in the no-command RIP trace. No formal grade change: the
   R5 row stays ◐ and ASLR-on/stock exploitability is UNKNOWN.
+  Wake 22 (report section "ASLR-on pointer arithmetic and same-library 3-byte
+  scope") records `system - slot1 = 0xBAE750` across six sampled ASLR-on logs
+  and scopes wake 18's 3-byte negative to cross-base heap/libc moves: the four
+  in-span libgnutls pointers can be base-preservingly retargeted in recorded
+  layouts, but their RELATIVE addends are rodata and the teardown dispatch
+  never reads those slots. No new control; ASLR-on/stock UNKNOWN.
 - **FastNetMon CVE-2026-48689 staged (commit `6df55a0`,
   `reports/frontier-fastnetmon2shell.md`)**: pinned vulnerable header parent
   `97b04568b6f1` and fix `fa80390ed44`, SHA-256 pins and URLs in
