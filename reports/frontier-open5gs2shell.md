@@ -101,3 +101,67 @@ only route to a live-process rung 4/rung 5 claim and is not attempted here.
 `git archive 2eeee948 lab/frontier/open5gs2shell` extracted to
 `/tmp/open5gs-replay`; `sh harness/run.sh`: 21 PASS / 0 FAIL, rc 0. Trace
 SHA-256 `6c3c5ecf1f9e4ec7ef8d907d24e033e16fe4b87d62408ef1c499c95086164253`.
+
+## Independent witness replay (2026-11-25 02:26Z)
+
+Witness message #3934 (witness wall W210) returns ESTABLISHED AS LABELED, no
+grade change and NO r5. The witness extracted a clean `git archive 22d70741`
+copy of `lab/frontier/open5gs2shell`, ran unmodified `sh harness/run.sh` and
+got 21 PASS / 0 FAIL, rc 0. Its terminal trace SHA-256 is
+`6c3c5ecf1f9e4ec7ef8d907d24e033e16fe4b87d62408ef1c499c95086164253`,
+identical to the staging receipt. All 5/5 pins are exact; the pinned v2.8.0
+parser `.c`/`.h`, `message.c` and the fix patch are source-bound. The witness
+independently observed ASan `WRITE of size 1` at
+`multipart_parser-v2.8.0.c:260` with `boundary_length == 0`, allocation at
+`init:82`, safe and fixed-attack clean; the plain attack canary changes from
+`5a5a…` to `0a000d0a000d0a000d0a000d` while the safe input stays intact.
+
+Its counterexample bounds the impact: replacing the `00 0d 0a` pattern with
+`41 42 43` leaves the canary intact and ASan clean, and a 64-repeat variant
+keeps exactly the same periodic bytes. The state machine fixes the written
+values; the attacker controls the write length only, so a repeated
+`0x000d0a` limb cannot steer a tcache or talloc pointer. Accepted ceiling:
+rung 3 on the pinned parser, rung 4 PARTIAL (periodic bytes in an adjacent
+heap object), no real build, no SBI wire, no pointer, IP or command; stock
+allocator behavior on this host remains UNKNOWN. This is an independent
+replay of the same harness, not a live NF or a wire-level reproduction.
+
+## Target-lane provisioning check (2026-11-25 02:26Z)
+
+Re-ran the staged harness locally: 21 PASS / 0 FAIL, rc 0. Checked the
+prerequisites for the report's suggested next step of building the real
+`lib/sbi` object: no Open5GS source tree or `ogs-sbi.h` exists under `lab/`
+(bounded `find`, maxdepth 7); `libmongoc-1.0` is not available via
+`pkg-config`. `meson`, `ninja`, `gcc`, `clang`, `cmake` and GnuTLS are present.
+A full v2.8.0 build with a loopback SBI NF is therefore not provisionable
+within this wake without first fetching and building the source and its
+database dependency; not attempted. The rung stays 3 / rung 4 PARTIAL and r5
+remains unsupported. A real NF replay or evidence that the periodic pattern
+steers a consumer into a chosen pointer is what would change this.
+
+## Real-caller boundary extraction (2026-11-25 02:29Z)
+
+New `lab/frontier/open5gs2shell/realcaller/` takes the boundary from the
+request body exactly as pinned `message-v2.8.0.c:3356-3381` does before
+calling the same pinned parser. The part loop after `cleanup` is omitted;
+the attack path never reaches it. The staged harness instead passes
+`boundary=""` straight to `multipart_parser_init()`, so its "394-byte
+empty-boundary request" label describes the injected argument, not what
+the real caller derives from that body. `sh realcaller/run.sh`: 15 PASS /
+0 FAIL.
+
+- The staged 394-byte body through the real extraction yields
+  `BOUNDARY_LEN=2 BOUNDARY=a:`, `RET=0`, intact `5a5a…` canary, ASan clean.
+  It is a well-formed multipart body with a non-empty boundary at the real
+  caller, not the empty-boundary trigger.
+- Adding one leading CRLF (396 bytes) makes the real extraction yield
+  `BOUNDARY_LEN=0 BOUNDARY=` and reproduces the sink: ASan `WRITE of size 1`
+  at `multipart_parser-v2.8.0.c:260`, 0 bytes after the 65-byte region
+  allocated at `init:82`; plain canary `5a5a…` ->
+  `0a000d0a000d0a000d0a000d`; fixed guard rejects with `RET=-1` and no
+  fault. Safe and staged-body controls stay clean.
+- Whether a live SBI HTTP layer preserves that leading CRLF in
+  `http->content` is UNKNOWN without a real build; a layer that trims or
+  normalizes the body would change the framing. No wire exchange, no
+  pointer control and no rung change: this corrects the harness framing
+  claim and keeps rung 3 / rung 4 PARTIAL.

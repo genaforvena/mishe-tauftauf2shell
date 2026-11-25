@@ -2,3 +2,6 @@ harness/asan-vuln
 harness/asan-fixed
 harness/plain-vuln
 harness/plain-fixed
+realcaller/asan-real
+realcaller/asan-fixed
+realcaller/plain-real

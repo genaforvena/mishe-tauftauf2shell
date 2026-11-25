@@ -1,0 +1,4 @@
+MODE=attack BODY_LEN=396
+BOUNDARY_LEN=0 BOUNDARY=
+ERROR=Empty multipart boundary
+RET=-1

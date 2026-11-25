@@ -1,0 +1,56 @@
+MODE=attack BODY_LEN=396
+BOUNDARY_LEN=0 BOUNDARY=
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+=================================================================
+==3951587==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5070000000d1 at pc 0x5cef8115da68 bp 0x7ffcddb38e90 sp 0x7ffcddb38e80
+WRITE of size 1 at 0x5070000000d1 thread T0
+    #0 0x5cef8115da67 in multipart_parser_execute provision/multipart_parser-v2.8.0.c:260
+    #1 0x5cef8115bda8 in parse_multipart_real realcaller/realcaller.c:126
+    #2 0x5cef8115c392 in main realcaller/realcaller.c:176
+    #3 0x7bf98342a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7bf98342a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5cef8115b3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/realcaller/asan-real+0x23c4) (BuildId: b79557b454e154064a4b4f315ebbe8883fdeb771)
+
+0x5070000000d1 is located 0 bytes after 65-byte region [0x507000000090,0x5070000000d1)
+allocated by thread T0 here:
+    #0 0x7bf9838fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5cef8115c6e4 in multipart_parser_init provision/multipart_parser-v2.8.0.c:82
+    #2 0x5cef8115bcb3 in parse_multipart_real realcaller/realcaller.c:119
+    #3 0x5cef8115c392 in main realcaller/realcaller.c:176
+    #4 0x7bf98342a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7bf98342a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5cef8115b3c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/realcaller/asan-real+0x23c4) (BuildId: b79557b454e154064a4b4f315ebbe8883fdeb771)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow provision/multipart_parser-v2.8.0.c:260 in multipart_parser_execute
+Shadow bytes around the buggy address:
+  0x506ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x507000000000: fa fa fa fa 00 00 00 00 00 00 00 00 04 fa fa fa
+=>0x507000000080: fa fa 00 00 00 00 00 00 00 00[01]fa fa fa fa fa
+  0x507000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3951587==ABORTING
