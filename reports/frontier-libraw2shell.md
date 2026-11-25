@@ -1138,3 +1138,13 @@ with no chosen pointer/IP, live-object overwrite, marker, command,
 allocation shown consuming the corrupted span, witness verdict or r5.
 Evidence, pins, raw traces and the preserved pointer-arithmetic error:
 `lab/frontier/libraw2shell/w31/results.txt`.
+
+Replay recipe from committed bytes (the derived input is gitignored and must
+be regenerated): `git archive 1e624a5a lab/frontier/libraw2shell | tar x -C
+/tmp/lr-w31`, then in that tree `sh bootstrap.sh`,
+`python3 craft_uncompressed_poc.py w11/targetbeef.input w29/red18.input
+w29/specs/red18-g0-b0-wl65535.json`, and with
+`W31_INPUT=$PWD/w29/red18.input` run `gdb -q -batch -x w31/watch.gdb`
+and `gdb -q -batch -x w31/headers.gdb` against
+`o0/LibRaw-0.22.3/bin/dcraw_emu`; compile `w31/glibc-nextsize.c` with
+`gcc -O0 -g` and run it twice (no argument and any argument).
