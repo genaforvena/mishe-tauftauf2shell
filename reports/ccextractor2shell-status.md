@@ -5,9 +5,9 @@ staging at 04:1xZ). Claim: CCExtractor issue
 #2500 (https://github.com/CCExtractor/ccextractor/issues/2500), opened
 `2026-11-24T13:58:29Z`. Pinned master commit
 `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`
-(`2026-11-24T07:50:42-0800`). Issue rechecked 2026-11-25T06:46Z: still open,
-no update since creation; no CVE/GHSA found; no upstream fix PR found, fix
-status UNKNOWN.
+(`2026-11-24T07:50:42-0800`). Issue rechecked 2026-11-25T08:54Z via the
+GitHub issue API: still open, no update since creation; no CVE/GHSA found;
+no upstream fix PR found, fix status UNKNOWN.
 
 - Brief: `reports/frontier-ccextractor2shell.md`.
 - Pinned tree and harness: `lab/frontier/ccextractor2shell/` (`PROVENANCE.md`,
@@ -82,6 +82,16 @@ status UNKNOWN.
   `real-build/evidence/{asan-short,asan-short0,gdb-short,gdb-short0}.out`,
   input sha256 `669ad20202d822aa3865b1795fae3501dec38096ba9a35130b47c7b9f4990745`
   and `e2b32bf30cc2673e2ee9b85db1b45d94949e7d14f8f732b3654f12cc60cd1ee2`.
+- W6 bounded negative (08:54Z): GDB on `inputs/safe.gxf` shows the chunk
+  after `data->buffer` is `main_arena.top` at both parse and the terminal
+  `free` (`buffer=0x5555564209b0`, `P=0x555556620a20`, `P.size=0x205e1`);
+  `vid_track` sits before the buffer and `ad_track` is NULL. GXF reuses one
+  `demuxer_data` and `filebuffer` is allocated earlier in `init_demuxer`,
+  and only five small Rust allocations occur after parse and are freed
+  before `delete_datalist`. No live ordinary chunk to unlink and no
+  post-overflow overlapping allocation; rung unchanged. Scripts
+  `real-build/{gdb-layout.cmd,gdb-late-malloc.cmd}`, logs
+  `real-build/evidence/{gdb-w6-layout,gdb-w6-late-malloc}.out`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units

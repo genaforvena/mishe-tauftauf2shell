@@ -1,0 +1,23 @@
+W6 late-allocation negative, 2026-11-25 08:53Z. Pinned plain build, GDB
+disables ASLR, stdout redirected. Input: inputs/safe.gxf. Script:
+../gdb-late-malloc.cmd. Break at ccx_gxf.c:1220, then trace the first 24
+__libc_malloc calls until the terminal free of data->buffer.
+
+Verbatim GDB lines (sizes only; all backtraces start in Rust alloc::alloc or
+alloc::raw_vec::RawVecInner, none in GXF/CCExtractor C code):
+
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=4096, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+W6LATE buf=0x5555564209b0 P=0x555556620a20 top=0x555556620a20
+W6LATE malloc#1 size=8 top=0x555556620a20
+W6LATE malloc#2 size=8 top=0x555556620a20
+W6LATE malloc#3 size=32 top=0x555556620a20
+W6LATE malloc#4 size=8 top=0x555556620a20
+W6LATE malloc#5 size=8 top=0x555556620a20
+Breakpoint 3.1, __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3359
+W6LATE FREE top=0x555556620a20 Psize=0x205e1 mallocs=5
+
+Conclusion: only five small Rust allocations occur after the MEDIA parse;
+all are released before the terminal free and main_arena.top remains P. No
+post-overflow allocation becomes a live ordinary chunk adjacent to the
+overflowed buffer, so there is no house-of-force overlap or second-chunk
+unlink in this build/layout.

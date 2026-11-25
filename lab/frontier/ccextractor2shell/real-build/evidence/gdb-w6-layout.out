@@ -1,0 +1,26 @@
+W6 heap-layout negative, 2026-11-25 08:53Z. Pinned plain build
+/tmp/ccx2shell-plain/ccextractor, GDB disables ASLR, stdout redirected.
+Input: inputs/safe.gxf (no overflow). Script: ../gdb-layout.cmd.
+
+Question: is the chunk immediately after data->buffer an ordinary live
+chunk at terminal free (which would reopen glibc unlink), or still top?
+
+Verbatim GDB lines:
+
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=4096, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+W6LAYOUT AT_PARSE buf=0x5555564209b0 P=0x555556620a20 top=0x555556620a20 vid=0x5555563d7f20 ad=0x0
+W6LAYOUT HDR prev=0x0 size=0x205e1 fd=0x0 bk=0x0
+Breakpoint 2.1, __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3359
+W6LAYOUT AT_FREE buf=0x5555564209b0 P=0x555556620a20 top=0x555556620a20 vid=0x5555563d7f20 ad=0x0
+W6LAYOUT HDR_FREE prev=0x0 size=0x205e1 fd=0x0 bk=0x0
+#0  __GI___libc_free (mem=0x5555564209b0) at ./malloc/malloc.c:3359
+#1  0x00005555557a2de8 in delete_demuxer_data (data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_demuxer.c:440
+#2  0x000055555576294d in delete_datalist (list=0x0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:866
+
+Conclusion: P == main_arena.top at both parse and free; P.size=0x205e1 is
+the live top chunk. ctx->vid_track (0x5555563d7f20) and ctx->ad_track (NULL)
+are not chunks after the buffer. Source reason: GXF reuses one demuxer_data
+(ccx_gxf.c:1385-1401) and filebuffer is allocated in init_demuxer before it
+(ccx_demuxer.c:83, file_functions.c:231), so the buffer is the last live
+allocation at delete_datalist. No ordinary chunk exists for a forged
+fd/bk unlink in this layout.

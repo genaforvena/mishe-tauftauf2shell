@@ -1,8 +1,9 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 07:41Z (W5): rung 3 and rung 4 CONFIRMED; three bounded
+Status 2026-11-25 08:54Z (W6): rung 3 and rung 4 CONFIRMED; four bounded
 negatives recorded (W3 no code pointer, W4 forged chunk metadata merges with
-top, W5 truncated MEDIA payload produces no write primitive). Rung 3 remains
+top, W5 truncated MEDIA payload produces no write primitive, W6 no live
+ordinary chunk after `data->buffer`). Rung 3 remains
 CONFIRMED through the real `buffered_read`/`read(2)` consumer into a real
 `malloc(BUFSIZE)` region. Rung 4 is CONFIRMED without the earlier
 debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
@@ -11,8 +12,10 @@ debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
 `READ of size 3900` at `boundary+76` in `memmove` called by `process_data`
 (`general_loop.c:1041`). Rung 5 and witness verdict remain UNKNOWN: no
 controlled indirect call, pointer or command was observed. Issue #2500 was
-last rechecked 06:46Z (open, no fix PR or CVE observed). No CVE/GHSA and no
-upstream fix PR were observed; the guard is a local hunk, not a vendor patch.
+rechecked 08:54Z via the GitHub issue API: still open, created
+`2026-11-24T13:58:29Z`, last updated at creation, no fix PR or CVE observed.
+No CVE/GHSA and no upstream fix PR were observed; the guard is a local hunk,
+not a vendor patch.
 All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
@@ -407,3 +410,32 @@ could place `got` elsewhere and change the tiny read size, but the truncated
 file supplies no bytes past `BUFSIZE` to write with, so this path cannot
 restore the W1/W2 write primitive. Rung 3 and rung 4 are unchanged; rung 5
 and the witness verdict remain UNKNOWN.
+
+## W6 bounded negative 2026-11-25 08:53-08:54Z: no live ordinary chunk after the buffer
+
+W4 left one structural idea open: forge the nextchunk header so glibc unlink,
+rather than top merge, consumes attacker-controlled `fd`/`bk`. GDB on the
+pinned plain build with `inputs/safe.gxf` (`gdb-layout.cmd`) measures at
+`ccx_gxf.c:1220` and again at the terminal `free`:
+`buffer=0x5555564209b0`, `P=buffer+2097264=0x555556620a20`,
+`main_arena.top=P`, `P.size=0x205e1`, `ctx->vid_track=0x5555563d7f20`
+(before the buffer), `ctx->ad_track=NULL`. The free stack is
+`delete_demuxer_data ccx_demuxer.c:440` → `delete_datalist general_loop.c:866`.
+So the chunk after the overflowed buffer is the live top chunk, not an
+ordinary allocated chunk.
+
+Source reason: GXF reuses one `demuxer_data` (`ccx_gxf.c:1385-1401`), and the
+16 MiB `filebuffer` is allocated in `init_demuxer` (`ccx_demuxer.c:83`,
+`file_functions.c:231`) before that buffer, so no earlier object can sit
+above it. A trace of the first 24 `malloc` calls after the MEDIA parse
+(`gdb-late-malloc.cmd`) found only five small Rust allocations (8, 8, 32, 8, 8
+bytes); all were released before the terminal free and `main_arena.top`
+stayed at P. There is therefore no live adjacent chunk to unlink and no
+post-overflow allocation overlapping the corrupted top.
+
+Logs: `real-build/evidence/gdb-w6-layout.out`,
+`real-build/evidence/gdb-w6-late-malloc.out`. No GXF input, pinned source,
+harness source or prior evidence was changed. Rung 3 and rung 4 are
+unchanged; rung 5 and the witness verdict remain UNKNOWN. All four
+rung-5-adjacent structural ideas are now measured negatives in this build and
+layout.
