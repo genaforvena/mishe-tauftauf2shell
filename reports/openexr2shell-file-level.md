@@ -1802,3 +1802,53 @@ archive. After committing it (`0783f4e5`), `sh harness/w193-chosen-pointer.sh`
 printed `RESULT PASS` rc 0 and all nine evidence hashes matched the working
 tree byte-for-byte. Author replay, not a witness verdict; grade and rung-5
 status unchanged.
+
+## W194: fault attribution — stale dump pointer, not the chosen word (2026-11-25)
+
+Prediction from W193: with ASLR left ON in the debuggee, pin the `entries[]`
+slot dereferenced at `attributes.c:305` in the same run and check whether the
+file-chosen `E[2]` is that slot. **Result: negative for attribution.** The
+chosen word is a live pointer field, but the consumer's SIGSEGV dereferences a
+stale pointer from the W192 source dump instead.
+
+Correction to W193's wording: gdb's `disable-randomization` defaults to ON, so
+W193's gdb slot probe actually ran with ASLR disabled; only its plain runs left
+ASLR enabled. Its phrase "ASLR left enabled" therefore overstates that probe.
+W194's new `harness/w194-fault.cmd` explicitly issues
+`set disable-randomization off` (`show` confirms it) before `run`.
+
+Method: stop at the pinned inverse-sort sink, record `outPtr` and the live
+attribute list, then break at `attributes.c:305`, the first iteration of
+`exr_attr_list_destroy`. For each of the three W193 PoCs (which differ only in
+the eight chosen bytes at COPY2 offset 1264), the SAME run printed:
+
+- `LOOP i=0 entry=0x555555828210`, `ENTRIES_DELTA=4320 NUM=11`;
+- `E[2]=0x4141414141414141` / `0x4242424242424242` /
+  `0x3131313131313131` respectively, with `E[0]=0x0000555555828210`,
+  `E[1]=0x0000555555828280`, `E[3]=0x0000555555828330` unchanged;
+- disassembly at the loop: `mov (%rdi,%r15,8),%r13` then
+  `mov 0x14(%r13),%eax` — the dereference uses `E[0]`, at loop index 0;
+- `x/gx 0x555555828210` -> `Cannot access memory at address 0x555555828210`.
+
+`0x555555828210` is an absolute heap address captured into W192's forged COPY2
+source under an ASLR-off gdb session. In an ASLR-on process that address is
+unmapped, so the first `attr_destroy` argument faults before the loop reaches
+`E[2]`; changing the chosen `E[2]` value never changes the faulting address.
+This is a counterexample to attributing the observed SIGSEGV to file-chosen
+bytes, not a retraction of W193's narrower observation that the file writes a
+chosen value into a live pointer field. No chosen IP, pointer steering, malloc
+from a poisoned slot, wire, command or marker; rung 5 stays UNKNOWN.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w194-fault-attribution.sh` -> `RESULT PASS` rc 0, byte-identical twice.
+Evidence hashes: `w194-fault-4141.out`
+`3710194e779f6a2538e26a38e643a667701a9e2fd0f719d5c455c12ac57d48bc`,
+`w194-fault-4242.out`
+`e87593d40f9fde46e0778c382bf305035217aee0644ba06d614d2da4c3a1e769`,
+`w194-fault-3131.out`
+`9de9ad7b29e8b6122820081d8bbd50c598d62f4ed89655a0b90f20b367fdec60`;
+valid-file `043d72d916be8948cd85f6937306e63355be57f21ad76fe7bc3c950b16286835`,
+fixed 3.5.3 `bad`
+`458fbb6e540a2905792366420810504cd72a35b05c68af839c8312259c6a7499`.
+Author observation under one pinned build and one forged geometry; not a
+witness verdict.
