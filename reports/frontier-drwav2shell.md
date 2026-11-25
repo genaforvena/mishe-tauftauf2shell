@@ -1,11 +1,14 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 19:10Z: rung 3 real consumer/public API; rung 4
+Status 2026-11-25 20:18Z: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
-runtime-confirmed the exact sphaira, Moondust and yup dependency headers.
-The Switch-only app was not executed, so no live wire-triggered corruption,
-command, shell or r5 is claimed. W1-W4 witness verdicts remain UNKNOWN.
+replayed the exact sphaira, Moondust and yup dependency headers. The
+Switch-only app was not executed, so no live wire-triggered corruption,
+command, shell or r5 is claimed. W10 confined the reachable API to the
+metadata family (`init_ex()` does not set `DRWAV_WITH_METADATA`) and found no
+caller at all in the Debian corpus. W1-W4, W9 and W10 witness verdicts remain
+UNKNOWN.
 
 ## Verified ground truth
 

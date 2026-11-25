@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 19:48Z)
+# drwav2shell — status (updated 2026-11-25 20:18Z)
 
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
@@ -261,3 +261,40 @@ makes the low-half pointer land on a useful object without harness grooming.
   service, W1-W4 witness verdict or r5. W1-W4 offers not re-queued. Source
   fetches only, no external probe.
 
+## W10 — Debian corpus negative, flag-caller search, one-command replay (2026-11-25 20:18Z)
+
+- Fourth index angle used a different corpus: Debian Code Search's plain-text
+  `/grep` endpoint, not Sourcegraph. Exact counts:
+  `drwav_init_with_metadata` 21 hits/7 packages,
+  `drwav_init_file_with_metadata` 28/7,
+  `drwav_init_memory_with_metadata` 14/7, `DRWAV_WITH_METADATA` 24/4. Adding
+  `-path:dr_wav.h` returned 0 results for every query: every Debian hit is a
+  vendored header declaration/definition, with no packaged caller. The seven
+  packages are qt6-multimedia, roc-toolkit, dosbox-x, mlpack, raylib, qtads
+  and qblike. Raw queries and hits:
+  `consumer/evidence/w10-debian-codesearch.txt`. Index coverage is not proof
+  of absence.
+- Root cause confined to the metadata API by pinned bytes: in vulnerable
+  `dr_wav.h:3897`, `drwav_init_ex()` calls
+  `drwav_init__internal(..., flags)` with no `DRWAV_WITH_METADATA` bit; only
+  `drwav_init_with_metadata()` at `:3906` ORs that bit in at `:3912`.
+  `drwav_init()`, `init_file*()` and `init_memory*()` wrappers all route
+  through `init_ex()` or the plain internal path and cannot reach the
+  smpl/cue cursor desync. This closes the hypothesis that the many
+  network-facing non-metadata consumers found in W6/W9 widen the reachable
+  set.
+- A Sourcegraph literal search for `DRWAV_WITH_METADATA -file:dr_wav.h`
+  returned a single caller, yup
+  `modules/yup_audio_formats/formats/yup_WaveAudioFormat.cpp:78-85`, already
+  measured in W8 (generic caller-supplied `InputStream`, no in-repo network
+  origin, vulnerable 0.14.3 header). No new native remote-input caller.
+- New `lab/frontier/drwav2shell/replay-frontier.sh` runs every lane with one
+  command. From a clean `git archive 1ac6b479 lab/frontier/drwav2shell` at
+  20:17Z: harness 25/0, consumer 18/0, appdest 11/0, nopie 11/0, marker 14/0,
+  `REPLAY_FRONTIER_OK`, rc 0 in 24 s; pins 6/6 OK including the three upstream
+  consumer sources, gdb chosen-pointer readback `META_COUNT=1` present,
+  reproducibility GREEN (29 files). Author replay, not a witness verdict.
+- Grade unchanged: rung 3 real consumer/public API; rung 4 file-chosen
+  control flow to a lab marker; no live wire-triggered corruption, command,
+  shell, service, W1-W4/W9/W10 witness verdict or r5. W1-W4 offers not
+  re-queued. Source fetches and local replay only; no external probe.

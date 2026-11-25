@@ -119,3 +119,37 @@ Nintendo Switch/Switch 2 application with no native Linux target. No live
 wire-triggered corruption or r5 was observed. Moondust is local-file-only and
 yup's stream origin is caller-supplied.
 
+## One-command replay and indexed-caller negatives (W10, 2026-11-25 20:18Z)
+
+From a clean archive of this lane, the whole lab replays with one command:
+
+```
+git archive HEAD lab/frontier/drwav2shell | tar x -C /tmp/drwav-replay
+cd /tmp/drwav-replay/lab/frontier/drwav2shell
+sh replay-frontier.sh
+```
+
+At commit `1ac6b479` this produced harness 25 PASS / 0 FAIL, consumer 18/0,
+appdest 11/0, nopie 11/0, marker 14/0 and `REPLAY_FRONTIER_OK` (rc 0, 24 s).
+The summary and raw per-lane output land in `evidence/replay/`. This is an
+author replay, not a witness verdict.
+
+Two source-index angles bound the remaining r5 prerequisite:
+
+- Debian Code Search's `/grep` endpoint returned only vendored `dr_wav.h`
+  definitions: 21 hits for `drwav_init_with_metadata`, 28 for
+  `drwav_init_file_with_metadata`, 14 for `drwav_init_memory_with_metadata`
+  and 24 for `DRWAV_WITH_METADATA`; adding `-path:dr_wav.h` gave 0 results for
+  each. Raw queries and hits: `evidence/w10-debian-codesearch.txt`.
+- Vulnerable `dr_wav.h:3897` shows `drwav_init_ex()` does not set
+  `DRWAV_WITH_METADATA`; only `drwav_init_with_metadata()` (`:3906`, bit OR
+  at `:3912`) does. Consumers using `init`, `init_ex`, `init_file` or
+  `init_memory` therefore cannot reach the desync even on vulnerable bytes.
+- A Sourcegraph literal search for `DRWAV_WITH_METADATA -file:dr_wav.h` found
+  one caller, yup's `WaveAudioFormatReader` at
+  `modules/yup_audio_formats/formats/yup_WaveAudioFormat.cpp:78-85`, already
+  known from W8 and without an in-repo network stream origin.
+
+No native remote-input metadata-API caller was measured. Index coverage is
+not proof of absence, and no wire-driven corruption, command, shell or r5 is
+claimed.

@@ -1,0 +1,234 @@
+W10 Debian Code Search corpus, 2026-11-25 20:15Z
+Endpoint: https://codesearch.debian.net/grep (plain-text /grep API)
+
+===== q=drwav_init_with_metadata perpackage =====
+# 21 results in 7 packages (searched 0.00 GB in 0.01s)
+
+# package qt6-multimedia (results: 4)
+
+qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h
+998- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, drwav_chunk_proc onChunk, void* pReadSeekTellUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+999: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3940: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3941- {
+
+# package roc-toolkit (results: 3)
+
+roc-toolkit_0.4.0+dfsg-6/3rdparty/dr_wav/dr_wav.h
+972- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk, void* pReadSeekUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+973: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3775: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3776- {
+
+# package dosbox-x (results: 2)
+
+dosbox-x_2026.10.01+dfsg-1/src/libs/decoders/dr_wav.h
+935- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk, void* pReadSeekUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+936: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3457: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3458- {
+
+# package mlpack (results: 4)
+
+mlpack_4.8.0-1/src/mlpack/core/audio/bundled/dr_wav.h
+996- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, drwav_chunk_proc onChunk, void* pReadSeekTellUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+997: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3906: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3907- {
+
+# package raylib (results: 4)
+
+raylib_6.2+ds-1/src/external/dr_wav.h
+996- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, drwav_chunk_proc onChunk, void* pReadSeekTellUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+997: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3932: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_tell_proc onTell, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3933- {
+
+# package qtads (results: 2)
+
+qtads_3.4.0+dfsg-2/SDL_audiolib/3rdparty/dr_libs/dr_wav.h
+935- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk, void* pReadSeekUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+936: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3457: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3458- {
+
+# package qblike (results: 2)
+
+qblike_0+git20261111+ds-1/src/doslike/libs/dr_wav.h
+935- DRWAV_API drwav_bool32 drwav_init_ex(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, drwav_chunk_proc onChunk, void* pReadSeekUserData, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+936: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+3286: DRWAV_API drwav_bool32 drwav_init_with_metadata(drwav* pWav, drwav_read_proc onRead, drwav_seek_proc onSeek, void* pUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+3287- {
+# To narrow, add package:REGEXP, path:REGEXP or filetype:c to q.
+# (Prefix - to negate, e.g. -package:linux)
+# To read around a result: /show/qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h?line=999
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
+
+===== q=drwav_init_with_metadata -path:dr_wav.h =====
+# 0 results in 0 packages (searched 0.00 GB in 0.00s)
+# Try broadening your query, or use ?regexp=1&q=(?i)... for case-insensitive search.
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
+
+===== q=drwav_init_file_with_metadata perpackage =====
+# 28 results in 7 packages (searched 0.00 GB in 0.00s)
+
+# package qt6-multimedia (results: 4)
+
+qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h
+1251- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1252: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1253- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5416: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5417- {
+
+# package roc-toolkit (results: 4)
+
+roc-toolkit_0.4.0+dfsg-6/3rdparty/dr_wav/dr_wav.h
+1225- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1226: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1227- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5215: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5216- {
+
+# package dosbox-x (results: 4)
+
+dosbox-x_2026.10.01+dfsg-1/src/libs/decoders/dr_wav.h
+1188- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1189: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1190- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+4876: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+4877- {
+
+# package mlpack (results: 4)
+
+mlpack_4.8.0-1/src/mlpack/core/audio/bundled/dr_wav.h
+1249- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1250: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1251- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5382: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5383- {
+
+# package raylib (results: 4)
+
+raylib_6.2+ds-1/src/external/dr_wav.h
+1249- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1250: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1251- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5408: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5409- {
+
+# package qtads (results: 4)
+
+qtads_3.4.0+dfsg-2/SDL_audiolib/3rdparty/dr_libs/dr_wav.h
+1188- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1189: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1190- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+4876: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+4877- {
+
+# package qblike (results: 4)
+
+qblike_0+git20261111+ds-1/src/doslike/libs/dr_wav.h
+1188- DRWAV_API drwav_bool32 drwav_init_file_ex_w(drwav* pWav, const wchar_t* filename, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1189: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1190- DRWAV_API drwav_bool32 drwav_init_file_with_metadata_w(drwav* pWav, const wchar_t* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+4705: DRWAV_API drwav_bool32 drwav_init_file_with_metadata(drwav* pWav, const char* filename, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+4706- {
+# To narrow, add package:REGEXP, path:REGEXP or filetype:c to q.
+# (Prefix - to negate, e.g. -package:linux)
+# To read around a result: /show/qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h?line=1252
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
+
+===== q=drwav_init_file_with_metadata -path:dr_wav.h =====
+# 0 results in 0 packages (searched 0.00 GB in 0.00s)
+# Try broadening your query, or use ?regexp=1&q=(?i)... for case-insensitive search.
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
+
+===== q=drwav_init_memory_with_metadata perpackage =====
+# 14 results in 7 packages (searched 0.00 GB in 0.01s)
+
+# package qt6-multimedia (results: 2)
+
+qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h
+1280- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1281: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5684: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5685- {
+
+# package roc-toolkit (results: 2)
+
+roc-toolkit_0.4.0+dfsg-6/3rdparty/dr_wav/dr_wav.h
+1254- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1255: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5466: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5467- {
+
+# package dosbox-x (results: 2)
+
+dosbox-x_2026.10.01+dfsg-1/src/libs/decoders/dr_wav.h
+1217- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1218: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5121: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5122- {
+
+# package mlpack (results: 2)
+
+mlpack_4.8.0-1/src/mlpack/core/audio/bundled/dr_wav.h
+1278- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1279: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5650: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5651- {
+
+# package raylib (results: 2)
+
+raylib_6.2+ds-1/src/external/dr_wav.h
+1278- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1279: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5676: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5677- {
+
+# package qtads (results: 2)
+
+qtads_3.4.0+dfsg-2/SDL_audiolib/3rdparty/dr_libs/dr_wav.h
+1217- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1218: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+5121: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+5122- {
+
+# package qblike (results: 2)
+
+qblike_0+git20261111+ds-1/src/doslike/libs/dr_wav.h
+1217- DRWAV_API drwav_bool32 drwav_init_memory_ex(drwav* pWav, const void* data, size_t dataSize, drwav_chunk_proc onChunk, void* pChunkUserData, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+1218: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks);
+--
+4950: DRWAV_API drwav_bool32 drwav_init_memory_with_metadata(drwav* pWav, const void* data, size_t dataSize, drwav_uint32 flags, const drwav_allocation_callbacks* pAllocationCallbacks)
+4951- {
+# To narrow, add package:REGEXP, path:REGEXP or filetype:c to q.
+# (Prefix - to negate, e.g. -package:linux)
+# To read around a result: /show/qt6-multimedia_6.11.2-3/src/3rdparty/dr_libs/dr_wav.h?line=1281
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
+
+===== q=drwav_init_memory_with_metadata -path:dr_wav.h =====
+# 0 results in 0 packages (searched 0.00 GB in 0.00s)
+# Try broadening your query, or use ?regexp=1&q=(?i)... for case-insensitive search.
+# Options: &regexp=1 &perpackage=1 &context=2 &limit=0 (usage: /grep)
