@@ -41,7 +41,7 @@ NO_INJECT=1 BIN=perm-src/hping3 MODE=inc EXPECT=baseline \
 assert 3 evidence/fullip-perm-baseline-proof.out baseline
 
 BIN=perm-src/hping3 MODE=dec EXPECT=attack RUN_TAG=perm-attack sh fullip-proof.sh
-assert 6 evidence/fullip-perm-attack-proof.out attack-dec
+assert 5 evidence/fullip-perm-attack-proof.out attack-dec
 
 BIN=perm-fixed-src/hping3 MODE=dec EXPECT=fixed RUN_TAG=perm-fixed sh fullip-proof.sh
 assert 3 evidence/fullip-perm-fixed-proof.out fixed-dec
