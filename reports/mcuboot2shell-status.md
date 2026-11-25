@@ -408,3 +408,10 @@ so the W9 canonical replay is unchanged. Grade unchanged: rung 4
 DEMONSTRATED only with the documented groom; rung 5 UNKNOWN. All witness
 verdicts on this lane remain UNKNOWN (author evidence only). Chat #4573/#4574
 stay the standing replay offer; no new demand was sent.
+
+Clean-archive receipt at 23:30Z after commit `3ac0636e`: `git archive HEAD
+lab/frontier/mcuboot2shell` extracted to `/tmp/m2s-w11-5AnE9g` with
+`M2S_UPSTREAM` pointed at the provisioned `upstream-parent` tree. Both
+`replay-frontier.sh` (11/11 `OK`, `REPLAY_FRONTIER_OK`) and the new
+`real/smp/wire-differential.sh` (`WIRE_DIFFERENTIAL_OK`) passed from that
+committed snapshot. No grade or witness-state change.
