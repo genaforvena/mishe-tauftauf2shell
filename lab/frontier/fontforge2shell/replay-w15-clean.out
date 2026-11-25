@@ -1,0 +1,12 @@
+PASS nopie breakpoint reached with negative glyph
+PASS pie breakpoint reached with negative glyph
+PASS nopie window has no code-pointer candidates
+PASS nopie candidate count bounded (path-sensitive)
+PASS pie window has no candidates at all
+PASS pie candidate count zero
+=== W15 pins ===
+d7722478e10b0b0d6182ec8146c2bf2a0fe02112829c563820acd09bc585f0e5  /tmp/ff2s-w15-nopie.bin
+6aa9c6cb5436308af5dd768b64602cddcb8418336f7731ca8d52719548f19298  /tmp/ff2s-w15-pie.bin
+9042720820e44f8837a86afdff7a3b26d31f05e4592c11f3e03ad4d6a2176094  scan-w15-nopie.out
+313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76  scan-w15-pie.out
+REPLAY_W15_OK: 6 checks, 0 failed

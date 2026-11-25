@@ -210,10 +210,13 @@ With `build-plain` (from `replay-real.sh`) and `build-nopie` (from
 sh replay-w15.sh
 ```
 
-Expected: `CAND_COUNT 0` / `RESULT NONE` for the default PIE build,
-`CAND_COUNT 6` / `RESULT ASCII_ONLY` for the non-PIE build (the six are
-ASCII string fragments, shown with raw bytes in `scan-w15-nopie.out`), and
-the final line `REPLAY_W15_OK: 6 checks, 0 failed` with rc 0. Full method,
-decision rule and limits in `FUNCTIONPTR.md`. Author-side negative, not a
-witness verdict: no live function pointer reachable in either measured
-build at write time, so W14's mapped address remains data only.
+Expected: `CAND_COUNT 0` / `RESULT NONE` for the default PIE build;
+`RESULT ASCII_ONLY` for the non-PIE build with a bounded count (0..8),
+the final line `REPLAY_W15_OK: 6 checks, 0 failed` and rc 0. The exact
+non-PIE count is build-path sensitive: 6 ASCII fragments in the live tree,
+5 in a clean archive, all short strings (`nis`, `ell`, `ENT`, ...), never
+code pointers. An earlier oracle asserted exactly 6 and failed on the
+clean archive; the check now asserts the path-independent invariant.
+Full method, decision rule and limits in `FUNCTIONPTR.md`. Author-side
+negative, not a witness verdict: no live function pointer reachable in
+either measured build at write time, so W14's mapped address remains data.

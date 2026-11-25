@@ -39,28 +39,32 @@ indices are `-1` and hit the `encs` chunk header). W14's `-50` write is
    Each candidate is printed with its raw bytes so ASCII fragments can be
    separated from pointers.
 
-- Default PIE build (`build-plain`, r-xp mapping observed in this run
-  `0x5555555bc000..0x55555593c000`): `CAND_COUNT 0`, `RESULT NONE`.
-- Local non-PIE build (`build-nopie`, r-xp mapping observed in this run
-  `0x405000..0x785000`, `.text` section `0x407010..0x7847c6`):
-  `CAND_COUNT 6`, `RESULT ASCII_ONLY`. All six are ASCII string fragments,
-  not code pointers — raw bytes at the candidate offsets read
-  `.mo\0`, `nis\0`, `ENT\0`, `ell\0`, `DESC\0`, `ASCE\0` (from
-  `FontForge.mo`, gettext strings, `FONT_DESCENT`, `truncated.pcf` and
-  `FONT_ASCENT`). gdb's `info symbol` resolves their numeric values to
-  arbitrary nearby `.text` symbols, which is why the byte context matters.
+- Default PIE build (r-xp mapping in this run
+  `0x5555555bc000..0x55555593c000`): `CAND_COUNT 0`, `RESULT NONE` in
+  both the live tree and the clean archive.
+- Local non-PIE build (r-xp `0x405000..0x785000`, `.text`
+  `0x407010..0x7847c6`): `RESULT ASCII_ONLY` in both trees. Live:
+  `CAND_COUNT 6` (`.mo`, `nis`, `ENT`, `ell`, `DESC`, `ASCE`); clean
+  archive: `CAND_COUNT 5` (`nis`, `ell`, `ENT`, `ENT`, `ENT`). The exact
+  count is build-path sensitive, like W9's consumer rc, because gettext
+  string fragments move with the build path. No candidate in either tree
+  is a code pointer: every one is a short printable string fragment.
+  gdb's `info symbol` on those numeric values resolves to unrelated
+  nearby `.text` symbols, so byte context is decisive.
 
-`sh replay-w15.sh` asserts 6/6 PASS and ends `REPLAY_W15_OK: 6 checks, 0
-failed` with rc 0. Receipt on this host (2026-11-25 04:4xZ):
-
-The two raw dumps contain heap addresses and are not byte-stable across
-runs (first receipt: `cc9560da…d42d86` non-PIE, `934edf76…31fad00e` PIE;
-after rerun: `ecfeaacc…651766`, `802f76d1…48ed4a75`). The normalized scan
-outputs are stable across both runs:
+`sh replay-w15.sh` asserts the invariant that survives that layout
+change: both breakpoints reached, PIE `CAND_COUNT 0` / `RESULT NONE`,
+non-PIE `RESULT ASCII_ONLY` with a bounded count (0..8), script rc 0 and
+`REPLAY_W15_OK: 6 checks, 0 failed`. It first ran with an exact-count
+assertion, which failed on the clean archive at 5 vs 6 (negative
+preserved); the assertion now checks the path-independent invariant and
+both trees pass 6/6. Raw dumps contain heap addresses and are not
+byte-stable; the normalized scans are stable within each tree:
 
 ```
-a5f2d77ad9364a7761aa4fe2a25888110b8479be89395e065a3330622fb8d270  scan-w15-nopie.out
-313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76  scan-w15-pie.out
+a5f2d77ad9364a7761aa4fe2a25888110b8479be89395e065a3330622fb8d270  scan-w15-nopie.out (live, 6 hits)
+313c4ce473482b43b8e7d2e0dadc4c6a6d28896b3c36de94a7efde1f9e75db76  scan-w15-pie.out (both trees)
+9042720820e44f8837a86afdff7a3b26d31f05e4592c11f3e03ad4d6a2176094  scan-w15-nopie.out (clean, 5 hits)
 ```
 
 Build prerequisites: `sh replay-real.sh` (PIE tree) and

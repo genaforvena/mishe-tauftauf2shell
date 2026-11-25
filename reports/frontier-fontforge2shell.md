@@ -257,12 +257,14 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   scanned every aligned 8-byte word in the whole negative-glyph write
   window (`encs-131072 .. encs-4`, the full signed-16-bit index range) for
   a value in each build's `r-xp` mapping at the vulnerable store. The
-  default PIE build has zero candidates; the non-PIE lab build has six,
-  all ASCII string fragments (`.mo`, `nis`, `ENT`, `ell`, `DESC`, `ASCE`)
-  rather than code pointers. `replay-w15.sh` asserts 6/6 PASS
-  (`REPLAY_W15_OK`). No function pointer is reachable in either measured
-  build at write time; W14's mapped address stays data only. No branch,
-  marker, command or r5; limited to these builds and this import state.
+  default PIE build has zero candidates; the non-PIE lab build has only
+  ASCII string fragments (6 in the live tree, 5 in a clean archive — the
+  count is build-path sensitive, like W9's consumer rc), never code
+  pointers. `replay-w15.sh` asserts the path-independent invariant and
+  passes 6/6 (`REPLAY_W15_OK`) in both trees. No function pointer is
+  reachable in either measured build at write time; W14's mapped address
+  stays data only. No branch, marker, command or r5; limited to these
+  builds and this import state.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
