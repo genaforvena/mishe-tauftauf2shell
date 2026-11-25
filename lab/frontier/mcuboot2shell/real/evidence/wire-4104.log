@@ -1,0 +1,4 @@
+PORT=50385
+WIRE conn=0 magic=96f3b83d hdr_size=4104 flags=00000004 img_size=4294963191
+REAL_DECRYPT off=4096 len=4088 blk_off=0 dst_delta=4104 dst=0x7ffe46ef7208
+hdr_size=4104 SERVER_RC=139

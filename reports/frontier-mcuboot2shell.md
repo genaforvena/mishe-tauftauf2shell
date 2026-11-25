@@ -163,3 +163,27 @@ with the stack-grooming condition stated; rung 3 real-source ASan OOB access
 confirmed. Still no live bootloader process, serial/USB wire, real encrypted
 image/key TLV, pointer/IP/command control or rung 5. Witness verdict remains
 UNKNOWN; this is an author report, not independent acceptance.
+
+## W2 live loopback wire-to-sink result (2026-11-25 09:49Z, target mind)
+
+The W1 "no loopback path" negative covers the *in-tree* MCUboot serial
+transport; it does not prevent a lab-built process from carrying client
+bytes to the same real sink. `real/wire-harness.c` binds an ephemeral port
+on `127.0.0.1`, accepts one 32-byte MCUboot image header per connection,
+and calls the verbatim pinned `decrypt_region_inplace()` and real
+`boot_enc_decrypt()` with the **wire-supplied** `ih_hdr_size`. Full recipe,
+hashes, table and negatives: `real/WIRE-PROVENANCE.md`.
+
+| wire `ih_hdr_size` | real decrypt `len` | real destination | process |
+| --- | --- | --- | --- |
+| 4104 | 4088 | `buf+4104` | SIGSEGV (139) |
+| 6144 | 2048 | `buf+6144` | rc 0 |
+| 7168 | 1024 | `buf+7168` | rc 0 |
+| 2048 (control) | 2048 | `buf+0` | rc 0 |
+
+This extends rung 4 to a live loopback wire-to-sink path: client-controlled
+header bytes select the OOB destination in the real decryptor. It is not
+rung 5: the transport is a lab shim, not MCUboot's SMP/UART parser; no real
+encrypted image, key TLV, chosen plaintext (grooming disabled here), pointer,
+IP or command control was observed. W1's chosen-byte readback and ASan report
+remain the rung-4 memory-corruption evidence. Witness verdict UNKNOWN.

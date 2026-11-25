@@ -1,0 +1,5 @@
+PORT=53771
+WIRE conn=0 magic=96f3b83d hdr_size=2048 flags=00000004 img_size=4096
+REAL_DECRYPT off=2048 len=2048 blk_off=0 dst_delta=0 dst=0x7fff76646150
+WIRE conn=0 RESULT rc=0 idx=0 dec_off=2048 dec_len=4096 readback=(none) expected=MISHE-REAL-AES!!
+hdr_size=2048 SERVER_RC=0

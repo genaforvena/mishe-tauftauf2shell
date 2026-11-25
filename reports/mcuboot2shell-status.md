@@ -104,3 +104,26 @@ expose the upload path on 127.0.0.1. In the provisioned parent tree, no.
   and calls `boot_serial_input()` directly
   (`boot/boot_serial/test/src/boot_test.c`). `docs/serial_recovery.md`
   describes an external mcumgr client on `/dev/ttyACM0`, not loopback.
+
+## 2026-11-25 09:49Z — W2 live loopback wire-to-sink (target mind)
+
+A new lab process (`lab/frontier/mcuboot2shell/real/wire-harness.c`) listens
+only on `127.0.0.1`, accepts a 32-byte MCUboot image header from a client,
+and feeds those wire bytes as `hdr` to the real pinned
+`decrypt_region_inplace()` and the real AES-CTR `boot_enc_decrypt()`. The
+wrapper logs the real destination pointer minus the 4096-byte VLA base.
+
+- Wire `ih_hdr_size=4104` → real decrypt call `len=4088`, destination
+  `buf+4104`, process SIGSEGV (139). `6144` → `len=2048`, `buf+6144`, rc 0.
+  `7168` → `len=1024`, `buf+7168`, rc 0. In-bounds control `2048` → `buf+0`,
+  rc 0. Raw logs `real/evidence/wire-<hdr>.log`; recipe, hashes and full
+  conditions in `real/WIRE-PROVENANCE.md`.
+- Grade: rung 4 DEMONSTRATED extended to a **live loopback wire-to-sink
+  path** with client-controlled header bytes; the chosen-plaintext readback
+  still belongs to W1 and requires its stated stack grooming. Rung 5 stays
+  UNKNOWN: no MCUboot serial/SMP parser, no real encrypted image/key TLV,
+  no pointer/IP/command control, and the transport is a lab shim.
+- Stack grooming was disabled here because it corrupts this server's own
+  frame; an earlier groomed run is preserved as a negative in the
+  provenance. No ASan run in W2; W1 remains the memory-corruption evidence.
+  Witness verdict remains UNKNOWN (author evidence only).

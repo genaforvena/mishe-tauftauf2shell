@@ -11,3 +11,6 @@ real/real-asan
 real/fixed-plain
 real/fixed-asan
 real/*.o
+real/wire-server
+real/core
+real/core.*

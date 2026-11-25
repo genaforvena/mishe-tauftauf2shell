@@ -1,0 +1,25 @@
+Segmentation fault (core dumped)
+hdr_size=4104 SERVER_RC=139
+PORT=50385
+WIRE conn=0 magic=96f3b83d hdr_size=4104 flags=00000004 img_size=4294963191
+REAL_DECRYPT off=4096 len=4088 blk_off=0 dst_delta=4104 dst=0x7ffe46ef7208
+hdr_size=4104 SERVER_RC=139
+hdr_size=6144 SERVER_RC=0
+PORT=58485
+WIRE conn=0 magic=96f3b83d hdr_size=6144 flags=00000004 img_size=4294961151
+REAL_DECRYPT off=4096 len=2048 blk_off=0 dst_delta=6144 dst=0x7ffdbcee5b50
+WIRE conn=0 RESULT rc=0 idx=6144 dec_off=4096 dec_len=2048 readback=(none) expected=MISHE-REAL-AES!!
+hdr_size=6144 SERVER_RC=0
+hdr_size=7168 SERVER_RC=0
+PORT=52225
+WIRE conn=0 magic=96f3b83d hdr_size=7168 flags=00000004 img_size=4294960127
+REAL_DECRYPT off=4096 len=1024 blk_off=0 dst_delta=7168 dst=0x7fff5b5d66a0
+WIRE conn=0 RESULT rc=0 idx=7168 dec_off=4096 dec_len=1024 readback=(none) expected=MISHE-REAL-AES!!
+hdr_size=7168 SERVER_RC=0
+hdr_size=2048 SERVER_RC=0
+PORT=53771
+WIRE conn=0 magic=96f3b83d hdr_size=2048 flags=00000004 img_size=4096
+REAL_DECRYPT off=2048 len=2048 blk_off=0 dst_delta=0 dst=0x7fff76646150
+WIRE conn=0 RESULT rc=0 idx=0 dec_off=2048 dec_len=4096 readback=(none) expected=MISHE-REAL-AES!!
+hdr_size=2048 SERVER_RC=0
+WIRE_DONE
