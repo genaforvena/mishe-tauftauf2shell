@@ -516,3 +516,22 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   probe and controls:
   `lab/frontier/libgphoto2shell/evidence/w190-clang-arg-spill.out` and
   `evidence/replay-clang-wwhere-probe.c`.
+
+- Chosen control-flow target on a canary-free clang build (W191,
+  2026-11-25): the W190 frame has no stack protector and the oversized `:152`
+  reply reaches both the spilled `priv` pointer (reply offset `0x3E30` ->
+  `rbp-0x20`) and `jl2005c_init`'s saved RIP (`rbp+8`, reply offset
+  `0x3E58`), measured with gdb at the installed `:154` memmove. A lab-only
+  vusb `RET` knob writes device bytes at that offset; from a full clean clang
+  2.5.34 build, a reply with count 1022 set the saved RIP to a probe function,
+  which printed `M2SHELL_W191_BENIGN_MARKER` and exited 42 through
+  `gp_camera_init`. The same reply also redirected the real `:154` memmove
+  into the probe's sink. Controls: reply without `RET` faults at `rc=139`
+  with `0x5a...` in saved RIP; count 100 and the upstream-fixed camlib do not
+  execute the marker; reversing the fix restores it. No gdb injection,
+  canary disclosure or host-supplied canary is involved, but the target
+  address comes from the host environment and the transport is synthetic
+  vusb — author-side rung 4 only, unwitnessed, no command and no wire, so
+  rung 5 stays UNKNOWN. Evidence, patch and probe:
+  `lab/frontier/libgphoto2shell/evidence/w191-control-flow.out`,
+  `replay-vusb-ret.patch`, `replay-clang-control-flow-probe.c`.

