@@ -1735,3 +1735,75 @@ has fixed/no-death/safe controls plus repeats. A fresh-context witness must
 still replay from a clean checkout and vary the command or an attacker byte.
 Until that verdict, full rung 5 is not ESTABLISHED and the back-to-back chain
 continues.
+
+### Wake 64 (2026-11-25) — two-pool RLIMIT_FSIZE consumer in the session-unlock gap
+
+Prediction: wake 62's bare `RLIMIT_FSIZE` short write failed only because the
+same worker stayed alive and erased the splice before a consumer could use it;
+wake 63 froze it with a CPU-limit SIGKILL. A second, unlimited FPM pool that
+shares the session directory should be able to consume the spliced record in
+an unlock gap between progress flushes, with **no worker death at all**.
+
+Mechanism, read from the 8.4.27 tree: `ext/session/mod_files.c:227-278` calls
+`ps_files_open()` (`flock(LOCK_EX)` at :210, fd cached on the module data),
+skips `ftruncate` when the new data is longer (:239-242), then `pwrite()`s the
+serialized session (:245). Each progress flush closes that fd, briefly
+unlocking the file before the next flush. `prlimit --fsize=K:K` on the single
+producer worker makes that `pwrite` return exactly K bytes (probe
+`lab/repro/php2shell-rlimit-fsize-probe.py`, wake 62), leaving new prefix plus
+old carrier tail. The consumer pool sees the same file without any limit.
+
+Harness: `GAP=1 DEATH_MODE=rlimit bash
+lab/repro/php2shell-aftershell-splice-tfm.sh <php-fpm> <tfm-web> <outdir> <port>`.
+It starts a second master on `<port>+1` with `upload_progress.enabled=0`
+(needed by 8.4.28's `SESSION_CHECK_UPLOAD_PROGRESS_STATE` guard) and no limits.
+The armed request is the wire-only 8 MiB upload-progress file part at
+`freq=100%` plus a 128 MiB ordinary trailing field; the latter keeps the
+worker busy after the last progress write so the gap stays open. A Python
+watcher polls the attacker session file and fires the consumer only when it
+sees the *armed* splice: filler run inside a prefix ending `}`, boundary
+`filemanager|a:1:{...}` at K, and exact carrier tail. The admin upload is
+fired immediately after the consumer response, also before the producer
+finishes: in a delayed run the producer's later write erased the promoted
+session and the upload saw a login form.
+
+Positive (`lab/build/evidence/w64-gap-chain/`, SHA-256
+`91a18f97ceb89752c61409d484b3c5ac13024a378fdf651bc7087bb1e85ba6ee`): K=1024;
+`new-record-prefix:True tail==carrier-tail:True`; admin token accepted;
+`evil.php` uploaded through the app's own form; the live consumer worker
+printed `PHP2SHELL-R5-MARKER:php2shell-r5-w64-gap-chain` and `uid=1000(mesh-home)`
+and wrote `executed by pid <consumer-worker-pid>` plus `id` output to the
+marker file. Producer worker stayed alive; no CPU limit, no SIGKILL, no
+phase-2 preload. ASLR unchanged; no debugger. Varied SID/filler repeated it
+(`w64-gap-varied/`, SHA-256
+`6bd15181f35b619e085b772db6eb5e92779dcc0cfadc5b6fd71b96b2509fd025`).
+
+Fixed control (`w64-gap-fixed/`, SHA-256
+`2a38515de212b29e5b0362fbe240cfabd11c110687080ad07d1d49ffa5111971`): with
+the same limits and attacker bytes, 8.4.28's unconditional `ftruncate(0)`
+leaves a 78-byte file, no splice, login form, no upload, no marker.
+No-death and virgin-SID controls were clean in both builds.
+
+Replay commands (loopback only; 8.4.27-app/8.4.28-app pins are in
+`lab/php2shell/provision.sh`):
+
+```sh
+KEEP_TMP=1 GAP=1 DEATH_MODE=rlimit MTAG=php2shell-r5-w64-replay PORT=18340 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w64-replay-vuln 18340
+
+GAP=1 DEATH_MODE=rlimit MTAG=php2shell-r5-w64-fixed PORT=18350 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.28-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w64-replay-fixed 18350
+```
+
+Honest grade: **author-side rung-5 gates 1–5 under labeled per-worker
+`RLIMIT_FSIZE` plus a second unlimited pool; no attacker-caused death, gate 6
+still OPEN.** The deployment limit is lab setup, not wire input; the producer
+and consumer traffic is wire-only. A fresh-context witness must replay from a
+clean checkout, vary the command or attacker byte, and see fixed/no-death/safe
+controls absent before full rung 5 can be claimed.

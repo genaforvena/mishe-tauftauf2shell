@@ -1668,3 +1668,48 @@ Exact build/config/ASLR/survival facts and replay commands are in
 replays the committed native harness from clean checkout, varies command or
 attacker byte, and reruns fixed/no-death/safe controls. Keep the back-to-back
 chain until that verdict; do not repeat closed wake-59/62 mechanisms unchanged.
+
+## Wake 64 (2026-11-25) — two-pool RLIMIT_FSIZE consumer-in-unlock-gap: author-side gates 1–5, no worker death
+
+The wall-named lane is now measured. New `GAP=1 DEATH_MODE=rlimit` branch of
+`lab/repro/php2shell-aftershell-splice-tfm.sh` runs two loopback FPM masters
+with one shared `session.save_path`: the producer pool's worker gets soft=hard
+`RLIMIT_FSIZE=K` via `prlimit`, while a second, unlimited pool (port+1,
+`session.upload_progress.enabled=0`) serves the real tinyfilemanager consumer.
+No `RLIMIT_CPU`, no SIGKILL, no `LD_PRELOAD` in phase 2. The armed wire request
+has an 8 MiB file part at `freq=100%` and a 128 MiB ordinary trailing field;
+the latter holds the session-unlock gap open after the last progress write.
+A watcher requires the *armed* shape (filler run in a record ending `}` before
+K, then the promoted `filemanager` boundary and exact carrier tail) before
+firing the consumer, so the pre-existing carrier cannot satisfy it.
+
+Positive 8.4.27-app (`lab/build/evidence/w64-gap-chain/`, SHA-256
+`91a18f97ceb89752c61409d484b3c5ac13024a378fdf651bc7087bb1e85ba6ee`): splice
+K=1024 (prefix complete, tail==carrier tail), tinyfilemanager admin token,
+designed upload accepted, and the live FPM worker printed marker
+`php2shell-r5-w64-gap-chain` plus `uid=1000(mesh-home)` and wrote a pid-bound
+marker file. The producer worker stayed alive; the consumer and its admin
+upload both had to run inside the unlock gap, because a delayed upload saw the
+producer's later write erase the promotion. Varied SID/filler
+(`cafebabe00112233445566778899babe`/`Y`, marker
+`php2shell-r5-w64-gap-varying`) repeated the full chain
+(`w64-gap-varied/`, SHA-256
+`6bd15181f35b619e085b772db6eb5e92779dcc0cfadc5b6fd71b96b2509fd025`).
+
+Fixed 8.4.28-app under the same limits/bytes (`w64-gap-fixed/`, SHA-256
+`2a38515de212b29e5b0362fbe240cfabd11c110687080ad07d1d49ffa5111971`): 78-byte
+session file, no splice, login form, no upload, no marker; negative-check ok=1.
+No-death and virgin-SID controls were clean in both builds.
+
+Preserved negatives: the first watcher matched the pre-existing carrier (OBJ at
+K by design) and produced no takeover; without the trailing burn field the
+consumer lost the splice to the producer's next write; the first fixed-build
+run showed a login-form CSRF token, not an app-regenerated session cookie, so
+the cookie-rewrite branch was unnecessary. None of those runs is counted as a
+pass.
+
+Grade: **author-side rung-5 gates 1–5 observed under labeled two-pool
+RLIMIT_FSIZE conditions, with no worker death; gate 6 OPEN, full rung 5 NOT
+ESTABLISHED.** Exact replay commands and conditions are in
+`reports/php2shell-investigation.md` wake 64. Witness replay requested on the
+chat tape; keep the back-to-back chain until its verdict.
