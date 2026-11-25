@@ -1,0 +1,14 @@
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2888853==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x58b86bcef00b bp 0x7ffee5a60bc0 sp 0x7ffee5a60b18 T0)
+==2888853==The signal is caused by a READ memory access.
+==2888853==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x58b86bcef00b in __asan_stack_free_7 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/harness/vuln-asan-clang+0x3e00b) (BuildId: 0368a833385f015e5a623515bd8be84832200cd8)
+    #1 0x58b86bdb6ad5 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/harness/harness.c:139:5
+    #2 0x7d8994a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7d8994a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x58b86bcdd344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/harness/vuln-asan-clang+0x2c344) (BuildId: 0368a833385f015e5a623515bd8be84832200cd8)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/harness/vuln-asan-clang+0x3e00b) (BuildId: 0368a833385f015e5a623515bd8be84832200cd8) in __asan_stack_free_7
+==2888853==ABORTING

@@ -1,0 +1,6 @@
+src/.git/
+harness/vuln-asan
+harness/vuln-asan-clang
+harness/vuln-plain
+harness/fixed-asan
+harness/fixed-plain
