@@ -41,7 +41,13 @@ if [ "${1:-}" = "--one" ]; then
   rm -f "$ARM"
   THREAD_ENV=()
   [ "${RUBY2SHELL_CLAIM_THREADS:-0}" = 1 ] && THREAD_ENV=(RAILS_MAX_THREADS=1)
-  env "${THREAD_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
+  # RUBY2SHELL_CLAIM_GDB=1: SIGTRAP at the upcase's A snapshot;
+  # RUBY2SHELL_CLAIM_BINDUMPS=1: in-process L-line bin chain dump at A
+  # (analysis-only knobs, no request-path behavior change)
+  GDB_ENV=()
+  [ -n "${RUBY2SHELL_CLAIM_GDB:-}" ] && GDB_ENV=(MTRACE_CASE_STOP=1)
+  [ -n "${RUBY2SHELL_CLAIM_BINDUMPS:-}" ] && GDB_ENV+=(MTRACE_DUMP_BINS=1)
+  env "${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
     MTRACE_CASE_REQUEST=$((N + 44)) \
     MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
     LD_PRELOAD="$PWD/lab/preload/mtrace.so" \

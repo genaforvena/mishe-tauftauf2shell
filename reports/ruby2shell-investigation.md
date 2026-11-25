@@ -2242,7 +2242,45 @@ request, `ATTACK_CHAIN`, `POISON_NEXT`, and a four-offset plant forge.
   observed; the binmap first-binned pick rule and the pair parity are
   the named open mechanics.
 
-1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
+### In-process bin-chain dump closes the 0x650-band claim path — the
+### upcase's own result allocation always splits the grown victim
+### (2026-11-25, direct session, seventeenth push)
+
+The analysis-only preload gained `MTRACE_DUMP_BINS` (driver knob
+`RUBY2SHELL_CLAIM_BINDUMPS=1`): at the upcase's A snapshot it walks the
+worker arena's unsorted list and largebins 71/72/73/96 and emits `L`
+lines (bin index, chunk address, sizefield). The arena head is captured
+from any large free's post-`__libc_free` fd. A debugger route was tried
+and abandoned (the preload's SIGSTOP was swallowed by gdb; SIGTRAP went
+to a forked Puma child — the throwaway script was removed); the
+in-process dump gives the same evidence without a tracer.
+
+Measured on poBD3/poF3/poF3H{4,6,8,10} (~90 fresh processes): at every
+upcase the arena holds ONE unsorted chunk (the grown victim), one 0x5c0
+chunk in bin71, one 0xc20 merged-pair giant in bin96 — **bin72 and
+bin73 are empty** in the great majority of runs. poF3H10-6 is the
+decisive run: the victim is the planted slice remainder
+(`size=0x611 -> 0x653`, `fd=bk=arena`, forged
+`next_prev=0x650 next_size=0x90` in place — the checks are satisfied),
+the L lines show exactly `[unsorted: victim 0x653] [bin71: 0x5c1]
+[bin96: 0xc21]` with bin72/73 empty. The upcase's own result allocation
+(req 0x5f2, nb 0x600) scans the unsorted victim (checks pass — no
+abort), re-bins it at 0x650/bin73, then its search finds bin72 empty,
+bin73 non-empty: `last(bin73)` is the victim, so the result splits it
+(the M line returns the victim's address). The claim POST never sees
+the grown chunk.
+
+Boundary: the poison chain's claim step is STRUCTURALLY CLOSED at this
+geometry — the grown class (0x650 from a 0x610 victim), the result's
+nb (0x600 from N=1500), and the empty bin72 combine deterministically.
+Shifting N to put the result into the reliable 0x5c0 band makes the
+pool class 0x5f0, where the 0x53 byte SHRINKS the victim (0x5f5->0x553)
+and no phantom extent exists for an overshoot. Value-adjacent victims
+remain fatal. No command, no persistence, no grade change; the earlier
+stock-app segfaults (corruption consumed by prettyprint) stand as the
+strongest demonstrated impact, and stock/oracle-free/persistent rung 5
+stays **NOT ACHIEVED**.
+
    poisoning from the Stage B overlap: the second same-class
    allocation returns an attacker-nominated address (chosen bytes
    written there, read back through the live host string), 5/5 +
@@ -2524,3 +2562,23 @@ request, `ATTACK_CHAIN`, `POISON_NEXT`, and a four-offset plant forge.
     (gdb, one process) to settle the binmap pick rule with bytes, then
     the honeypot-count parity knob at the N=1500 geometry.
     Stock/oracle-free/persistent rung 5 stays **NOT ACHIEVED**.
+
+19. **Done this direct-session push (2026-11-25, seventeenth batch): the
+    binmap pick rule is settled WITH BYTES and the 0x650-band claim path
+    is closed.** The analysis-only in-process L-line bin dump
+    (MTRACE_DUMP_BINS) shows at every upcase one unsorted grown victim,
+    one 0x5c0 chunk in bin71, one 0xc20 merged-pair giant in bin96, and
+    EMPTY bins 72/73. poF3H10-6 gave the exact intended victim (planted
+    slice remainder, 0x611->0x653, fd=bk=arena, forge
+    [0x650][0x90] in place, checks PASS) — yet the upcase's own 0x600
+    result allocation re-binned it at bin73 and then split it there,
+    because bin72 was empty (binmap best-fit takes last(bin73)). Shifting
+    N to the 0x5c0 result band makes the pool 0x5f0-class, where the
+    0x53 byte shrinks rather than grows the victim (no phantom extent).
+    Named next: the GIANT-POP claim — a 3095B claim part (slice req
+    0xc20) exact-fits the bin96 merged-pair giant in the separate claim
+    POST; its raw bytes write over both slices and across the live
+    value's header at giant+0xc20, with chosen forgery qwords. Observe
+    the value's mid-attack free and the C/P window lines. This route
+    avoids the 0x650-band closure entirely. Stock/oracle-free/persistent
+    rung 5 stays **NOT ACHIEVED**.

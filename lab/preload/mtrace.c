@@ -33,6 +33,8 @@ static unsigned long seq = 0;
 static int case_only = 0;
 static int case_stop_c = 0;
 static int case_stop = 0;
+static int dump_bins = 0;
+static unsigned long arena_head = 0;
 static size_t case_first_request = 0;
 static const char *case_arm_file = 0;
 static const char *emit_arm_file = 0;
@@ -62,6 +64,32 @@ static void mtrace_init(void)
     emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
     case_stop_c = getenv("MTRACE_CASE_STOP_C") != NULL;
     free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
+    dump_bins = getenv("MTRACE_DUMP_BINS") != NULL;
+}
+
+/* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
+ * at the upcase. H = the unsorted pseudo-chunk (a freed victim's fd/bk
+ * at the B snapshot); bin_at(av,i) = H + (i-1)*0x10. Emits L lines
+ * "L seq binidx chunk_addr sizefield"; MTRACE_DUMP_BINS-gated only. */
+static unsigned long case_read(void *p);
+static void emit(const char *tag, unsigned long a, unsigned long b,
+                 unsigned long c);
+static void bin_dump(unsigned long head)
+{
+    static const int bins[] = {1, 71, 72, 73, 96};
+    for (unsigned k = 0; k < sizeof bins / sizeof bins[0]; k++) {
+        int idx = bins[k];
+        unsigned long bin = head + (unsigned long)(idx - 1) * 0x10;
+        unsigned long p = case_read((void *)(bin + 0x18));  /* bk = oldest */
+        for (int n = 0; n < 120 && p != bin && p >= 0x1000; n++) {
+            unsigned long sz = case_read((void *)(p + 8));
+            emit("L", (unsigned long)idx, p, sz);
+            unsigned long next = case_read((void *)(p + 0x10));
+            if (next == p)
+                break;
+            p = next;
+        }
+    }
 }
 
 static void emit(const char *tag, unsigned long a, unsigned long b,
@@ -217,8 +245,10 @@ void *malloc(size_t size)
         case_snapshot("A", *(size_t *)case_end);
         case_waiting_second = 0;
         case_overflow_seen = 1;
+        if (dump_bins && arena_head)
+            bin_dump(arena_head);   /* first upcase of each request */
         if (case_stop)
-            kill(getpid(), SIGSTOP);
+            kill(getpid(), SIGTRAP);
     }
     void *p = __libc_malloc(size);
     case_allocation(size, p);
@@ -250,8 +280,8 @@ void *realloc(void *old, size_t size)
 
 void free(void *p)
 {
+    size_t sizefield = p ? *(size_t *)((char *)p - 8) : 0;
     if (p) {
-        size_t sizefield = *(size_t *)((char *)p - 8);
         if (p == case_victim)
             case_snapshot("V", sizefield);
         case_window_free(p);
@@ -266,4 +296,9 @@ void free(void *p)
         emit("F", (unsigned long)(uintptr_t)p, sizefield, 0);
     }
     __libc_free(p);
+    if (dump_bins && p && (sizefield & ~(size_t)7) >= 0x600) {
+        unsigned long fd = case_read(p);
+        if (fd > 0x10000 && (fd & 0xffff) < 0x400)
+            arena_head = fd;      /* unsorted pseudo-chunk of this arena */
+    }
 }
