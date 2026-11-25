@@ -929,3 +929,8 @@ observation, not a new W26 claim. Availability impact on this build is
 whole-process SIGSEGV under concurrent load, not the advisory's thread-park
 path; it does not change the grade. No pointer/IP target, command, measured
 DoS rate, ASLR defeat or r5. Author replay, not independent acceptance.
+
+Clean-archive replay from commit `79f3710b` with a private copy of the pinned
+`db9c5d6f` tree returned 13 PASS / 0 FAIL at 16:43:28Z–16:44:05Z; seven
+normalized key-line digests matched the live run byte-for-byte
+(`availability320b/evidence/CLEAN-ARCHIVE.md`). Author replay, still unwitnessed.
