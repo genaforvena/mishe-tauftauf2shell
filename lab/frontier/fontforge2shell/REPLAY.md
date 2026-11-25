@@ -281,3 +281,23 @@ archive, all six trees rebuilt offline from the pinned tarball,
 `REPLAY_ALL_OK: 3 suites (17 + 15 + 20 = 52 checks), 0 failed`, rc 0.
 All twelve hashes are byte-identical to the live tree, including
 `070fcf9a…c5a9d26a7`. Author-side replay, not a witness verdict.
+
+## W18 — changed-allocation-state sweep (2026-11-25 09:2xZ)
+
+`replay-w18.sh` imports `complete.pcf` before the pinned `truncated.pcf`,
+proving `encs` moved (`+0x730` in both builds versus W15's single-import
+baseline), then repeats W15's full-window code-pointer scan. Prerequisites:
+`replay-real.sh`, `replay-nonpie.sh` and `replay-w15.sh` in the same tree.
+
+```sh
+cd lab/frontier/fontforge2shell && sh replay-w18.sh
+```
+
+Expected: 7/7 checks, rc 0, final line `REPLAY_W18_OK: 7 checks, 0 failed`.
+PIE `CAND_COUNT 0` / `RESULT NONE`; non-PIE `RESULT ASCII_ONLY` with a
+bounded path-sensitive count (6 in the live tree). Normalized hashes:
+`alloc-w18.out` `fb1b4ea8…94e4f7c4b381af2fdc48290bebf5bd6df7a`,
+`scan-w18-nopie.out` `971214f7…cad14adafafc7b8e4d`, and
+`scan-w18-pie.out` `313c4ce4…6a2176094` (byte-identical to W15's PIE scan).
+Full method, raw dump hashes and limitations in `ALLOCSTATE.md`. Author-side
+negative, no witness verdict, no grade change, no r5.

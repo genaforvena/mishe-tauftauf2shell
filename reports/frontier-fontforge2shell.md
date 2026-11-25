@@ -297,6 +297,16 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   Live-tree receipt 06:47Z and clean-archive receipt 06:49Z from `efdb6d31`
   (six trees rebuilt offline): both 3/3 suites, 52/52 checks, rc 0, all
   twelve normalized hashes byte-identical. Still an author-side replay.
+- W18 (`ALLOCSTATE.md`, `replay-w18.sh`, author-side, no grade change): the
+  W15 code-pointer negative now covers a changed allocation state. Importing
+  in-bounds `complete.pcf` before the pinned `truncated.pcf` moved `encs`
+  by `+0x730` in both real headless builds (PIE `0x555555c48240` ->
+  `0x555555c48970`; non-PIE `0xa92030` -> `0xa92760`), with the same
+  `glyph=-1, i=3` store. The full 128 KiB negative-glyph window still has
+  no code pointer: PIE `CAND_COUNT 0` / `RESULT NONE`, non-PIE six printable
+  string fragments (`RESULT ASCII_ONLY`). `replay-w18.sh` passes 7/7, rc 0.
+  No branch, marker, command or r5; other heap states, later-created
+  objects, other builds and GUI remain UNKNOWN. No witness verdict.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
