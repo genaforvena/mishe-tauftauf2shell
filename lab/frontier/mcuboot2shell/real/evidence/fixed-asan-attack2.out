@@ -1,0 +1,2 @@
+REAL_DECRYPT off=0 len=1976 blk_off=0 dst_delta=1024 dst=0x7ffccc4583a0
+mode=attack2 rc=0 dec_off=0 dec_len=1976 idx=1024

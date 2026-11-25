@@ -129,3 +129,37 @@ Inner tmux window 151 (`%304`/`%305`, both alive) and registry 152/152 unique
 names were verified after creation; operator DM #4142 states the window
 already exists, witness replay DM #4143. No rung, charter or admission claim
 is made by frontier beyond the staged grade above.
+
+## W1 real-source result (2026-11-25 09:03Z, target mind)
+
+The cheapest experiment is done. A scoped upstream provisioning fetched the
+parent (`099379647ada`) and fixed (`6e1465c38e3d`) MCUboot trees into
+`lab/frontier/mcuboot2shell/upstream-parent/` and `upstream/`. The pinned
+whole-file hashes match the upstream files byte-for-byte
+(`a77260e4…` parent, `3825b917…` fixed). A host build compiled the *real*
+pinned source and the *real* `boot/bootutil/src/encrypted.c` with
+TinyCrypt AES-CTR under `MCUBOOT_ENC_IMAGES`; only flash/state/key stubs and
+the caller are local. Full recipe, hashes, evidence and negatives:
+`lab/frontier/mcuboot2shell/real/PROVENANCE.md`; outputs under `real/evidence/`.
+
+- Real ASan `edge` (`ih_hdr_size=4104`, `off=4096`, `len=4088`):
+  `dynamic-stack-buffer-overflow`, `READ of size 1` at `tc_ctr_mode.c:81` →
+  `encrypted.c:722` → pinned `boot_serial_encryption.c:175`, destination
+  `buf+4104`. The report is an OOB **read** (AES-CTR reads OOB ciphertext
+  before writing plaintext), not a WRITE; the earlier stub WRITE claim stays
+  with the stub.
+- Real plain `attack` (`ih_hdr_size=6144`): real `boot_enc_decrypt()` was
+  called with `len=2048`, `blk_off=0`, destination `buf+6144`; readback was
+  `MISHE-REAL-AES!!` (`4d495348452d5245414c2d4145532121`). `attack2` gave
+  the same chosen bytes at `buf+1024` with `len=3000`. Chosen plaintext
+  required deliberate adjacent-stack grooming with the real AES-CTR
+  keystream; that condition is part of the result, not an omitted detail.
+- Real fixed-source control: destinations `buf+8`, `buf+2048`, `buf+1024`,
+  `buf+0`; rc 0 and no ASan error in all four modes.
+
+Grade revision: **rung 4 DEMONSTRATED in a lab host build** (chosen bytes at
+the chosen OOB offsets through the real pinned function and real decryptor),
+with the stack-grooming condition stated; rung 3 real-source ASan OOB access
+confirmed. Still no live bootloader process, serial/USB wire, real encrypted
+image/key TLV, pointer/IP/command control or rung 5. Witness verdict remains
+UNKNOWN; this is an author report, not independent acceptance.

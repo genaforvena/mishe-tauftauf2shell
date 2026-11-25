@@ -1,0 +1,23 @@
+PASS vuln ASan edge-mode dynamic stack overflow
+PASS vuln ASan edge-mode WRITE at poisoned byte
+PASS vuln ASan safe control clean
+PASS vuln ASan safe has no sanitizer error
+PASS fixed ASan edge-mode clean
+PASS fixed ASan edge-mode no sanitizer error
+PASS fixed ASan second-sector clean
+PASS fixed ASan second-sector no sanitizer error
+PASS fixed ASan TLV-clamp clean
+PASS fixed ASan TLV-clamp no sanitizer error
+PASS vuln plain chosen bytes at OOB destination
+PASS vuln plain deep destination buf+6144
+PASS vuln plain TLV-clamp destination buf+1024
+PASS vuln plain TLV-clamp length 3000
+PASS vuln plain safe destination buf+0
+PASS fixed plain edge destination buf+8
+PASS fixed plain deep destination buf+2048
+PASS fixed plain TLV-clamp destination buf+1024
+PASS fixed plain TLV-clamp length 1976
+PASS caller-chosen bytes flow to OOB destination
+PASS valgrind sees invalid write past VLA
+PASS clang ASan agrees on overflow
+TOTAL PASS=22 FAIL=0

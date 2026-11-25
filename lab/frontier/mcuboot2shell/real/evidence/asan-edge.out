@@ -1,0 +1,50 @@
+REAL_DECRYPT off=4096 len=4088 blk_off=0 dst_delta=4104 dst=0x7ffe93f15c68
+=================================================================
+==2591301==ERROR: AddressSanitizer: dynamic-stack-buffer-overflow on address 0x7ffe93f15c68 at pc 0x5fd32d3fd9ed bp 0x7ffe93f149e0 sp 0x7ffe93f149d0
+READ of size 1 at 0x7ffe93f15c68 thread T0
+    #0 0x5fd32d3fd9ec in tc_ctr_mode ../upstream-parent/ext/tinycrypt/lib/source/ctr_mode.c:81
+    #1 0x5fd32d3f7f00 in common_bootutil_aes_ctr_crypt ../upstream-parent/boot/bootutil/include/bootutil/crypto/aes_ctr_tinycrypt.h:60
+    #2 0x5fd32d3f7f00 in bootutil_aes_ctr_decrypt ../upstream-parent/boot/bootutil/include/bootutil/crypto/aes_ctr_tinycrypt.h:74
+    #3 0x5fd32d3f7f00 in real_boot_enc_decrypt ../upstream-parent/boot/bootutil/src/encrypted.c:722
+    #4 0x5fd32d3f58e1 in boot_enc_decrypt /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/real-harness.c:129
+    #5 0x5fd32d3f5aa3 in decrypt_region_inplace ../src/mcuboot-parent-boot_serial_encryption.c:175
+    #6 0x5fd32d3f6e1d in harness_decrypt_region /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/real-harness.c:148
+    #7 0x5fd32d3f6e1d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/real-harness.c:211
+    #8 0x76c3f662a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x76c3f662a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5fd32d3f5464 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/real/real-asan+0x2464) (BuildId: 000557059bd966162e44c596604255436f528f26)
+
+Address 0x7ffe93f15c68 is located in stack of thread T0
+SUMMARY: AddressSanitizer: dynamic-stack-buffer-overflow ../upstream-parent/ext/tinycrypt/lib/source/ctr_mode.c:81 in tc_ctr_mode
+Shadow bytes around the buggy address:
+  0x7ffe93f15980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ffe93f15c00: 00 00 00 00 00 00 00 00 00 00 00 00 cb[cb]cb cb
+  0x7ffe93f15c80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15d00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ffe93f15e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2591301==ABORTING

@@ -1,0 +1,4 @@
+REAL_DECRYPT off=0 len=4088 blk_off=0 dst_delta=8 dst=0x7ffc34fe54c8
+mode=edge rc=0 dec_off=0 dec_len=4088 idx=8
+readback_len=64 readback=4d495348452d5245414c2d4145532121
+expected=MISHE-REAL-AES!!

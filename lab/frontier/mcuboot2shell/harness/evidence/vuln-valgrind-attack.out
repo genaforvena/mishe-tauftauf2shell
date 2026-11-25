@@ -1,32 +1,32 @@
-==2916435== Memcheck, a memory error detector
-==2916435== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
-==2916435== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
-==2916435== Command: ./vuln-plain attack
-==2916435== 
-==2916435== Invalid write of size 1
-==2916435==    at 0x10937B: boot_enc_decrypt (harness.c:78)
-==2916435==    by 0x10937B: decrypt_region_inplace (decrypt_region_inplace_vuln.inc:61)
-==2916435==    by 0x10937B: main (harness.c:123)
-==2916435==  Address 0x1fff001000 is not stack'd, malloc'd or (recently) free'd
-==2916435== 
-==2916435== 
-==2916435== Process terminating with default action of signal 11 (SIGSEGV)
-==2916435==  Access not within mapped region at address 0x1FFF001000
-==2916435==    at 0x10937B: boot_enc_decrypt (harness.c:78)
-==2916435==    by 0x10937B: decrypt_region_inplace (decrypt_region_inplace_vuln.inc:61)
-==2916435==    by 0x10937B: main (harness.c:123)
-==2916435==  If you believe this happened as a result of a stack
-==2916435==  overflow in your program's main thread (unlikely but
-==2916435==  possible), you can try to increase the size of the
-==2916435==  main thread stack using the --main-stacksize= flag.
-==2916435==  The main thread stack size used in this run was 8388608.
-==2916435== 
-==2916435== HEAP SUMMARY:
-==2916435==     in use at exit: 0 bytes in 0 blocks
-==2916435==   total heap usage: 0 allocs, 0 frees, 0 bytes allocated
-==2916435== 
-==2916435== All heap blocks were freed -- no leaks are possible
-==2916435== 
-==2916435== For lists of detected and suppressed errors, rerun with: -s
-==2916435== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
+==2322196== Memcheck, a memory error detector
+==2322196== Copyright (C) 2002-2022, and GNU GPL'd, by Julian Seward et al.
+==2322196== Using Valgrind-3.22.0 and LibVEX; rerun with -h for copyright info
+==2322196== Command: ./vuln-plain attack
+==2322196== 
+==2322196== Invalid write of size 1
+==2322196==    at 0x10937B: boot_enc_decrypt (harness.c:78)
+==2322196==    by 0x10937B: decrypt_region_inplace (decrypt_region_inplace_vuln.inc:61)
+==2322196==    by 0x10937B: main (harness.c:123)
+==2322196==  Address 0x1fff001000 is not stack'd, malloc'd or (recently) free'd
+==2322196== 
+==2322196== 
+==2322196== Process terminating with default action of signal 11 (SIGSEGV)
+==2322196==  Access not within mapped region at address 0x1FFF001000
+==2322196==    at 0x10937B: boot_enc_decrypt (harness.c:78)
+==2322196==    by 0x10937B: decrypt_region_inplace (decrypt_region_inplace_vuln.inc:61)
+==2322196==    by 0x10937B: main (harness.c:123)
+==2322196==  If you believe this happened as a result of a stack
+==2322196==  overflow in your program's main thread (unlikely but
+==2322196==  possible), you can try to increase the size of the
+==2322196==  main thread stack using the --main-stacksize= flag.
+==2322196==  The main thread stack size used in this run was 8388608.
+==2322196== 
+==2322196== HEAP SUMMARY:
+==2322196==     in use at exit: 0 bytes in 0 blocks
+==2322196==   total heap usage: 0 allocs, 0 frees, 0 bytes allocated
+==2322196== 
+==2322196== All heap blocks were freed -- no leaks are possible
+==2322196== 
+==2322196== For lists of detected and suppressed errors, rerun with: -s
+==2322196== ERROR SUMMARY: 1 errors from 1 contexts (suppressed: 0 from 0)
 Segmentation fault (core dumped)

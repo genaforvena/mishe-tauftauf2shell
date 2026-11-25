@@ -1,0 +1,2 @@
+REAL_DECRYPT off=0 len=4096 blk_off=0 dst_delta=0 dst=0x7ffc5e5f4540
+mode=safe rc=0 dec_off=0 dec_len=4096 idx=0

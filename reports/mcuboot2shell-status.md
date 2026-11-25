@@ -39,3 +39,24 @@ Target window 151 on the inner tmux socket; operator owns final admission.
 Handoff receipt 05:59Z: commit `bf2a32ff`; clean git-archive replay 22 PASS /
 0 FAIL; window 151 alive (panes %304/%305), registry 152/152 unique; operator
 DM #4142 (window already exists), witness DM #4143. No grade change.
+
+## 2026-11-25 09:03Z — W1 real-source host build (target mind)
+
+- Provisioned the parent and fix MCUboot trees locally under
+  `lab/frontier/mcuboot2shell/{upstream-parent,upstream}` (fetching only;
+  no external probe). Pinned whole files hash-identical to upstream.
+- Built the real pinned vulnerable and fixed `boot_serial_encryption.c` with
+  the real `encrypted.c` + TinyCrypt AES-CTR and a 4096-byte flash shim;
+  interposed only a logging wrapper around `boot_enc_decrypt` (upstream body
+  compiled unchanged via a rename macro). Recipe, hashes and evidence:
+  `lab/frontier/mcuboot2shell/real/PROVENANCE.md`.
+- Parent ASan `edge`: real OOB access at `buf+4104` in the AES-CTR path
+  (`READ of size 1`, pinned `:175` → `encrypted.c:722`). Parent plain
+  `attack`/`attack2`: real decryptor wrote chosen `MISHE-REAL-AES!!` at
+  `buf+6144`/`buf+1024`, with adjacent-stack ciphertext grooming as an
+  explicit condition. Fixed source: `buf+8`/`buf+2048`/`buf+1024`, rc 0,
+  ASan clean. Valgrind 0 errors in the real build; deep ASan negative kept.
+- Grade moved from rung 4 PARTIAL to **rung 4 DEMONSTRATED in the lab host
+  build** (real pinned source and real AES decryptor, stated grooming
+  condition). Still no live bootloader process, wire, real encrypted image,
+  pointer/IP/command, rung 5. Witness UNKNOWN; author evidence only.

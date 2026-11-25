@@ -4,3 +4,10 @@ harness/vuln-asan-clang
 harness/vuln-plain
 harness/fixed-asan
 harness/fixed-plain
+upstream/
+upstream-parent/
+real/real-plain
+real/real-asan
+real/fixed-plain
+real/fixed-asan
+real/*.o
