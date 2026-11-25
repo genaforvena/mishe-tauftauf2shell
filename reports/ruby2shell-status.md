@@ -5,6 +5,32 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (second push) — wire-shaped victim grooming closed: six
+  measured blockers; rung 5 stock remains NOT ACHIEVED.** Targeting the
+  only oracle-free channel (dev error page reflects params verbatim),
+  the required arrangement — upcase pops a free chunk directly below a
+  LIVE wire-chosen string — is now closed with bytes: (1) the victim is
+  a boot-recycled chunk (armed-emit trace: no in-window allocation
+  history; N=1004/drain-count sweeps produced 74 B-lines, zero live
+  drain-string victims, and N=1024 lands off the size field, N≡12 mod 16
+  reconfirmed); (2) Rack 3.2.8 allocates two live 0x409-class buffers per
+  1024-byte part (content slice + growing body) and 225 pre-upcase
+  allocations at 112 parts produced ZERO in-request frees — no GC runs
+  during parse; (3) benign multipart primers never transfer (24 grid
+  runs, all pops boot-unsorted; Ruby GC frees primer strings only after
+  the attack's upcase window); (4) Puma serves the pair on different
+  worker threads with separate tcaches, and the primer's own error-page
+  render allocates 1048-class buffers that eat same-thread plants;
+  (5) the deterministic casemap-buffer plant (safe pure-ß primer at
+  N=1004) demonstrably reaches the attack's region — the attack landed
+  a real 0x4f0→0x4f50 expansion (abort) — but never a live reflected
+  neighbor; (6) the upcase's pop is the first free chunk past the live
+  parse frontier, so its successor is free by construction without an
+  in-request free, which (2) rules out. Remaining named leads: a stock
+  route running MethodOverride without the debug-page render (absent
+  from rails new --minimal), same-thread pacing (not wire-exposed), and
+  Veria's unpublished PoC. No relabel; harness rung 5 unchanged.
+
 - **2026-11-25 (later wake) — consumer provenance closed: the 0x21c/0x1f8
   pops are fixed-size, not wire-shaped; surviving unsorted-split overlap
   measured; rung 5 stock remains NOT ACHIEVED.** The named experiment

@@ -1404,6 +1404,61 @@ additional geometry knobs (drain part count, filler shape, part order) or
 the forged region's position to move relative to the reflected chunks.
 Preserved as a negative result, not retried into existence.
 
+### Wire-shaped victim grooming — bounded NEGATIVE, six measured blockers
+### (2026-11-25, later the same day)
+
+A reflected-region landing needs the upcase's first case buffer to pop a
+FREE chunk directly below a LIVE, wire-chosen request string (the error page
+reflects params verbatim, so a forged or split region inside such a string
+is wire-visible). Every measured route to that arrangement is closed:
+
+1. **The victim is boot-recycled; parse shaping cannot move it.** The
+   armed-emit trace (`stock-rails-diag1.server.log`) shows the attack's
+   first case buffer popping a chunk with no in-window allocation history
+   (boot-era), its neighbor a C-internal 0x20 churn site. Sweeps over
+   attack size (N=1004 aligned to nb 0x420, the drain part class; tags
+   `consU-*`) and drain part counts 32–126 (tags `consV-*`) produced 74
+   B-lines and zero live-drain-string victims (0x421-class with the
+   planted window). N=1024 (misaligned, N≢12 mod 16) lands the byte off
+   the size field entirely — B reads garbage (tags `consT-*`) —
+   reconfirming the alignment law.
+2. **No in-request parse frees.** Rack 3.2.8's parser allocates TWO
+   live 0x409-class buffers per 1024-byte part (`on_mime_body`'s content
+   slice plus the growing body; 65 allocations for 32 parts, some
+   adjacent live pairs measured). An armed-emit trace at 112 parts shows
+   225 pre-upcase 0x409-class allocations and **zero frees** before the
+   upcase (`stock-rails-diag2.server.log`): the slice-strings become
+   garbage but no GC pass runs during parse.
+3. **Cross-request string plants do not transfer.** Benign multipart
+   primers (4–6 pattern parts, no `_method`) before the attack never
+   changed the pop: 24 grid runs (`tw-*` logs) all popped boot-unsorted
+   chunks — Ruby GC frees the primer's strings only after the attack's
+   upcase window.
+4. **Puma's thread pool splits the tcaches.** In every paired run the
+   primer and the attack were served by different worker threads
+   (different tids on the probe lines) — per-thread tcaches make plants
+   non-transferable, and the primer's own error-page render allocates
+   1048-class buffers (three armed 1048-pops per primer, measured) that
+   consume any same-thread plant immediately.
+5. **The deterministic casemap plant reaches the attack's region but
+   not a live neighbor.** A primer whose `_method` is pure `ß`×1004 (same
+   geometry, no corruption) deterministically frees its first (nb 0x420)
+   and second (nb 0x410) case buffers mid-request. The following attack
+   still overflowed a boot-region chunk — a real `0x4f0 → 0x4f50`
+   expansion, abort (`tw4-*`: victim `0x4f01 → 0x4f53`) — proving the
+   attack's pop reaches primer-influenced memory, but the
+   `[free pop][live reflected neighbor]` arrangement was never observed.
+6. **Monotone-consumption frontier.** Within one request the upcase's
+   pop is the first free chunk past the live parse frontier, so the chunk
+   after the pop is free by construction; an in-request free is needed to
+   break this, and (2) shows none exists pre-upcase.
+
+Remaining unexplored (named for the next wake): a stock route that runs
+`Rack::MethodOverride` without the debug-page render (not present in
+`rails new --minimal`), same-thread request pacing (not wire-exposed on
+stock Puma), and Veria's unpublished PoC mechanics. Boundary unchanged:
+no command, no disclosure, no persistence; stock/oracle-free/persistent
+RCE remains **NOT ACHIEVED**.
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1448,18 +1503,17 @@ Preserved as a negative result, not retried into existence.
    owed. Broader request-shaped grooming, oracle-free ASLR reach and process
    survival remain explicit UNKNOWNs, not silently included in the grade.
 
-6. **Done this wake (2026-11-25):** the victim-region consumer provenance
-   experiment is closed as a bounded negative — the 0x21c/0x1f8 pops are
-   fixed-size framework allocations, invariant under attacker header and
-   route shaping, so they stay allocator mechanics. The carve-landing
-   pass (60-run N/drain-size sweep) found no reflected-value corruption
-   in 11 surviving runs. New measured levers for the stock path: the
-   surviving unsorted-split overlap (fake remainder carved into the
-   neighbor region and recycled by real request-thread allocations with
-   an on-thread free), the result-string victim pop in unsorted
-   geometries, and the verbatim params reflection of the dev error page.
-   Named next: shape the carve position into a reflected drain-string
-   body via the remaining knobs (drain part count, filler shape, part
-   order) for a wire-visible disclosure + readback channel. Veria's PoC
-   remains unpublished at the dated trigger; reopen on its mechanics when
-   it drops. Rung 5 stock/oracle-free/persistent: still NOT ACHIEVED.
+6. **Done this wake (2026-11-25, second push):** the victim-region
+   consumer provenance is closed (0x21c/0x1f8 fixed-size, not
+   wire-shaped); the carve-landing sweep found no reflected corruption in
+   11 survivors; and wire-shaped victim grooming is closed as a bounded
+   negative with six measured blockers — boot-recycled victim identity,
+   zero in-request parse frees (225 allocs / 0 frees at 112 parts),
+   cross-request GC timing, Puma's per-thread tcaches plus render churn
+   eating deterministic casemap plants, the monotone-consumption
+   frontier, and the aligned-size sweep (N≡12 mod 16 reconfirmed, N=1024
+   lands off the size field). The strongest measured stock lever remains
+   the surviving unsorted-split overlap (consH-20 class). Named next: a
+   stock route running MethodOverride without the debug-page render,
+   same-thread pacing, or Veria's PoC mechanics when published. Rung 5
+   stock/oracle-free/persistent: still NOT ACHIEVED.
