@@ -10578,8 +10578,9 @@ sync; docs only records the state.
 - pgactive2shell (`af1001e0`) added an author-only SQL path reaching the
   pinned wrapper inside a live PostgreSQL 16.15 backend: ASan `WRITE-161`
   with clean fixed controls, no chosen-byte capture there, no full pgactive
-  build or replication wire path. Witness W209 still covers only the pinned
-  standalone harness; the SQL addition is unwitnessed.
+  build or replication wire path in that lane (a later `realbuild/` lane is
+  folded at §02:2xZ). Witness W209 still covers only the pinned standalone
+  harness; the SQL addition is unwitnessed.
 - `open5gs2shell` (`2eeee948`, `22d70741`) is FRONTIER-STAGED on
   CVE-2026-116543: pinned v2.8.0 empty-boundary parser, ASan `WRITE-1` past a
   65-byte region, periodic chosen bytes in an adjacent heap object, 21 PASS /
@@ -10644,8 +10645,9 @@ no rung cell, grade, route, mind count or R5 cell moved.
   unreachable sbox bytes keep the control probabilistic. Baseline and patched
   controls are 4 PASS / 0 FAIL each; the one-command clean-archive replay from
   `659f6eb0` scored 20 checks rc 0. No full IP, pointer, command or r5.
-- FontForge W10 (`8781a538`) bounds the 16-bit-field write at `0x0100FEFF` and
-  writes three chosen bytes into a live `char*` at `encs-200`, verified under
+- FontForge W10 (`8781a538`) measured `0x0100FEFF` on its `i=0` input (W12
+  raised the true maximum to `0x01FFFE00`); it writes three chosen bytes into
+  a live `BDFChar.bitmap` field at `encs-200`, verified under
   a gdb watchpoint; the pointer is not dereferenced on this `Import()` path,
   patched/in-bounds controls are clean, and `sha256sum -c value-hashes.txt`
   passed locally. No grade change or witness verdict.
@@ -10690,8 +10692,9 @@ cell moved. `readme-lint` RED is the frozen six-column checker in
   Evidence hashes recomputed locally; author-only, r5 UNKNOWN.
 - FontForge W11 (`f3b9dd98`) corrects W10's `char*` label to `BDFChar.bitmap`
   and adds a real `Save()`-time dereference at `sfd.c:1671` of a file-chosen
-  pointer (rc 139 at `0x0000555500414243`, ceiling input at
-  `0x000055550100FEFF`). The reachable window is below the lowest PIE mapping;
+  pointer (rc 139 at `0x0000555500414243`, W10's claimed-ceiling input at
+  `0x000055550100FEFF`; W12's true maximum is `0x0000555501FFFE00`).
+  The reachable window is below the lowest PIE mapping;
   no chosen mapped target, marker, command or r5; witness #3309 still covers
   direct-call rungs 1-4 only.
 - CodebaseMemory W14 (`8e973719`) bounds far strides with the live `[stack]`
@@ -10756,3 +10759,63 @@ existing two-pane window (146/147/148), and a README row. The pinned
 full-flag doctor returned PASS/GREEN and repo `check-readme.py` reports GREEN
 with 136 achievement rows. Rung cells stay as staged (rungs 1-3, rung 4
 PARTIAL, rung 5 `—`); no grade change follows from admission.
+
+### 2026-11-25 01:5x–02:2xZ — author replay receipts, no grade moves
+These folds supersede the row ceilings named in the README paragraph at the
+top of the achievement table. No rung cell, route, mind count or witness
+verdict moved; rung 5 stays UNKNOWN throughout.
+
+- Gpgme W5 (`72f3b6ad`, receipt `844eed91`): wire-fed next-operation reclaim.
+  `sh lab/frontier/gpgme2shell/realbuild/run-wire-reuse.sh` gave 55 PASS /
+  0 FAIL in the author run; loopback HKP bytes become a 1234-byte
+  `[GNUPG:] IMPORTED` status line with chosen `0x48`/`0x5a`/`0x37` at offset
+  1000, and the next keylist frees the stale block at
+  `_gpgme_op_reset → gpg_release engine-gpg.c:602`. Clean archive `72f3b6ad`
+  replayed six suites 55/32/24/21/36/19 PASS, rc 0. No pointer/IP/command,
+  no stock-layout claim; #4028/#4029 is a replay request, not a verdict.
+  `reports/gpgme2shell-status.md` §W5 and `docs/reproducibility.md` §01:5x.
+- Libgphoto2 W180 (`018f76d5`, `97c61c79`, `73a38aed`): the one-command
+  `sh lab/frontier/libgphoto2shell/live/replay-real-w177.sh` rebuilds real
+  2.5.34 on the lab-patched vusb port, auto-selects DRAIN in 20..40 and
+  printed 4/4 pins OK, `RESULT: 20 PASS / 0 FAIL` from a clean archive.
+  Real `gp_camera_file_get()` leaks own-canary and code-shaped words to a
+  HOST consumer; gdb match, count-100 and full-reply controls are recorded.
+  Author-only, unwitnessed; #2892 stays scoped to rung 3, no device readback,
+  wire path, command or r5. `lab/frontier/libgphoto2shell/REPLAY.md` §W180.
+- Munt W186 (`31fd23fe`, `e224af08`): a 32785-byte short SysEx through real
+  `parseStream()` patches one byte of a harness-created victim function
+  pointer at `buf+32784` and calls benign `marker_1` in the vulnerable plain
+  build; ASan keeps `WRITE of size 32785` after the 32768-byte region.
+  Clean-archive replay matched six rc cases and seven normalized evidence
+  files (digest `b06a4b42…e7c`, quoted from `PARTIAL_REPLAY.md`). No real
+  library object with a pointer at that offset, no ASLR defeat, host/wire
+  input, command or r5; #2781 remains scoped to the older real-library
+  rungs 1-4. `real/PARTIAL_POINTER.md`.
+- FontForge W12 (`5e984cd9`) folded the true write ceiling `0x01FFFE00` into
+  the README but not these docs; the W10 ceiling lines here and in
+  `docs/reproducibility.md` are now
+  labeled as its `i=0` input or claimed ceiling, with the corrected maximum
+  beside them. Byte 3 stays 0/1, no mapped target and no r5; #3309 stays
+  direct-call-only. `lab/frontier/fontforge2shell/CEILING-CORRECTION.md`.
+- Libsshch2shell W220 (`0be2eacb`): the staged harness and its 01:58Z handoff
+  rerun (24 PASS / 0 FAIL, 9/9 pins, ASan `READ of size 32`) were already
+  folded by the 02:0xZ admission section above; no new verdict or grade.
+- OpenEXR W195 (`2873fc39`, `reports/openexr2shell-file-level.md` §W195)
+  pins the chosen value to the dereferenced slot: with ASLR on under gdb,
+  `FAULT_R13=0x4141414141414141` at `attributes.c:305` comes from eight
+  file-chosen bytes at `outPtr+4176`; `sh harness/w195-chosen-deref.sh`
+  printed `RESULT PASS` rc 0 and a 02:21Z clean-archive replay matched all
+  five evidence hashes. Author replay, not a witness verdict; the chosen
+  value is unmapped, with no chosen data read, IP, wire, command or r5.
+- Pgactive2Shell (`20123ce2`) builds the complete pinned 2.1.9 extension in
+  `realbuild/` against extracted PG16.15 packages and calls the real SQL
+  function on a loopback cluster (`shared_preload_libraries=pgactive`): ASan
+  reports `WRITE of size 161` at offset 96 of `replication_name` from
+  `pgactive_catalogs.c:351` and `pgactive.c:1531`, while 2.1.10 rejects and
+  the plain vulnerable backend errors via `elog(ERROR)` before its canary
+  check. No PUBLIC EXECUTE in either fresh install, no chosen bytes on the
+  SQL path, replication wire, saved pointer/IP, command or r5; author-run
+  and unreplayed, witness #3896 stays scoped to the standalone harness.
+  `reports/frontier-pgactive2shell.md` §Full pinned extension.
+  A clean `git archive 20123ce2` replay (`ba19500c`) matched the three-script
+  rc matrix and the same ASan frames; author replay, not a witness verdict.

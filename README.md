@@ -178,6 +178,62 @@ independent replay at that scope. Author reports are never acceptance.
 | **Libsshch2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 02:0xZ under standing #6 as the 140th route; verbatim pinned libssh `channel_rcv_data()` closed-channel data UAF, ASan heap-use-after-free `READ of size 32` 0 bytes inside a 64-byte region at `channel_default_bufferize`, plain chosen byte `M` / marker `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed guard suppresses it, safe channel clean. `sh harness/run-all.sh` 24 PASS / 0 FAIL. Authenticated peer required; no real SSH build, wire packet, pointer/IP control, command or r5; witness UNKNOWN.** CVE-2026-59850 (fixed 0.12.1/0.11.5); window 148; distinct from `libssh22shell`. |
 
 
+The 01:5x–02:1xZ limbs supersede the Munt2Shell row's blanket "no pointer
+control, marker" and the Libgphoto2Shell/Gpgme2Shell rows' scope lists below.
+Gpgme W5 (`72f3b6ad`, replay receipt `844eed91`) combines W3's loopback HKP
+key fetch with W4's next-operation reclaim in real GPGME 2.2.0 under ASan:
+`sh run-wire-reuse.sh` printed 55 PASS / 0 FAIL, chosen `0x48`/`0x5a`/`0x37`
+at offset 1000 of the wire-supplied `[GNUPG:] IMPORTED` status line, and the
+second `gpgme_op_keylist_start()` frees the stale block in
+`_gpgme_op_reset → gpg_release engine-gpg.c:602` after the first free by
+`realloc` at `read_status engine-gpg.c:1494`; a clean archive of `72f3b6ad`
+replayed six suites 55/32/24/21/36/19 PASS, all rc 0. Author-side only;
+witness request #4028 with receipt #4029 has no verdict, no pointer/IP/command
+and no r5. Libgphoto2 W180 (`018f76d5`, `97c61c79`, `73a38aed`) gives a
+one-command replay, `sh lab/frontier/libgphoto2shell/live/replay-real-w177.sh`
+(DRAIN auto-sweep 20..40, DRAIN=20 observed), from a clean archive of
+`97c61c79`: 4/4 pins OK, tarball `5df9e774…f28`, patched vusb
+`2b744f67…e57dde6`, `RESULT: 20 PASS / 0 FAIL`. Three own-canary records at
+k=1023 (`OWN_CANARY=8a17bc30d6578900` etc.), three code/stack-shaped words at
+k=1024 matched by read-only gdb, count=100 rc=-108 and the full reply aborted
+with stack smashing; the disclosure still reaches a HOST consumer through
+real `gp_camera_file_get()` on a lab-patched vusb reply, with no device
+readback, wire path, command or r5, author-only and unwitnessed. Munt W186
+(`31fd23fe`, `e224af08`) uses a 32785-byte short SysEx through real
+`DefaultMidiStreamParser::parseStream()` and a harness-created `Victim` next
+to the 32768-byte buffer: one input byte at index 32784 changes the low byte
+of its function pointer (`0x67…` to `0x49…`, attack byte `0x49`) and calls
+benign `marker_1` in the vulnerable plain build, while fixed and safe cases
+do not; vulnerable ASan reports `WRITE of size 32785` 0 bytes past the real
+32768-byte region. Clean-archive replay matched all six rc cases and seven
+normalized evidence files (digest `b06a4b42…e7c`, quoted from
+`PARTIAL_REPLAY.md`); the pointer and victim are harness-created, no real
+library object with a function pointer at that offset was found, no ASLR
+defeat, host/wire input, command or witness verdict, so witness #2781's
+ESTABLISHED label stays scoped to the older real-library rungs 1-4 and rung 5
+stays `—`. FontForge W12's corrected ceiling `0x01FFFE00` (not `0x0100FEFF`;
+byte 3 still only 0/1), recomputed locally as `value-ceiling-high.pcf`
+`9a6b2603…f6b82` and `gdb-value-ceiling-high.out` `540d9b0b…091a0`, is folded
+below; libsshch's 01:58Z handoff reran `sh harness/run-all.sh` 24 PASS /
+0 FAIL with 9/9 pins and ASan `READ of size 32` at
+`channel_default_bufferize`, with no new verdict. No rung cell, route, mind
+count or R5 cell moved by any edge here.
+
+The Pgactive2Shell row's "no full pgactive build" boundary applies to the
+`sqlpath/` 16.15 harness, not to commit `20123ce2`: the author then built the
+complete pinned 2.1.9 extension, loaded it into a loopback cluster with
+`shared_preload_libraries=pgactive`, and the real SQL call gives ASan
+`stack-buffer-overflow WRITE of size 161` at offset 96 of the 64-byte
+`replication_name` region, frames `:351` and `pgactive.c:1531`; 2.1.10 rejects
+and the plain 2.1.9 backend errors without crashing because `elog(ERROR)`
+longjmps before the canary check. No chosen bytes on that SQL path, no
+PUBLIC EXECUTE in either version, no replication wire, saved-pointer/IP,
+command or r5; witness #3896 still covers only the original pinned harness.
+Author-run; a clean `git archive 20123ce2` replay of all three `realbuild/`
+scripts matched the rc matrix and the same `WRITE of size 161` frames
+(`ba19500c`), still not an independent witness verdict. No grade change.
+
+
 The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
 "no measured DoS", N2n2Shell has "no control of a consumed pointer" without
 the W3 forwarding consumer, FontForge's overwritten word is a live `char*`
@@ -198,6 +254,20 @@ ASLR-off `setarch -R` control exits rc 1 printing `bad` for all three PoCs
 with no SIGSEGV. Clean-archive receipt at `1d68f9d8`; evidence hashes in
 `reports/openexr2shell-file-level.md` §W194. Still no chosen code pointer/IP,
 wire, command or r5.
+
+OpenEXR W195 (`reports/openexr2shell-file-level.md` §W195) finds the slot the
+consumer actually dereferences: with ASLR on in the debuggee the loop at
+`attributes.c:305` reads `list->entries[0]` at `outPtr+4176` (not W193/W194's
+guessed `list+16`), and eight file-chosen bytes `0x4141414141414141` placed
+there are the faulting register (`FAULT_R13=0x4141414141414141` at
+`mov 0x14(%r13),%eax`). `cd lab/openexr2shell-real && sh
+harness/w195-chosen-deref.sh` printed `RESULT PASS` rc 0, with three raw
+probes and two byte-identical replays; plain rc 139, valid rc 0 `OK`, fixed
+3.5.3 rc 1 `bad`, and a 02:21Z clean-archive receipt from `git archive HEAD
+lab/openexr2shell-real` matched all five evidence hashes. Author replay, not
+a witness verdict: the chosen value is unmapped, no chosen data read, IP,
+command, wire or r5 follows; the row's rung 4 stays PARTIAL.
+
 
 FontForge W11 (`f3b9dd98`) corrects W10's object label: the word at `encs-200`
 is `BDFChar.bitmap` (`chunkalloc` = `calloc(104)`, `bitmap` at +24), not a
@@ -2470,9 +2540,10 @@ and confirm the OOB with 3DES-EDE-CBC (`b=8`) into `malloc(15)`, 11 PASS /
 0 FAIL. Frontier staged Gpgme2Shell on CVE-2026-129975 (GPGME status `realloc`
 double free): 19 PASS / 0 FAIL from the pinned-statement harness with chosen
 `0x48`/`0x5a` in the stale allocation; rung 3 confirmed, rung 4 PARTIAL,
-author-only, with a live window and seed wall but no charter, route, wake unit
-or mind-count change; operator admission and witness replay are PENDING. All
-these limbs stay author-side/unwitnessed except the named witness verdicts;
+author-only at staging. The operator later admitted it as the 133rd route, and
+witness #3796 later ESTABLISHED the pinned-statement scope with its bounds NIT
+fixed; the W1-W5 real-build and wire limbs stay author-side, no grade change.
+All other limbs stay author-side/unwitnessed except the named witness verdicts;
 rung 5 stays UNKNOWN throughout.
 The 02:0xZ operator wake admitted the three frontier-staged families under
 standing #6 as routes 138–140 (`open5gs2shell`, `yojimbo2shell`,
