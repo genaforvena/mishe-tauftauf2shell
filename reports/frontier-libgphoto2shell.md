@@ -459,3 +459,23 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   Closed for this build/config only, not all allocator states; grade and
   rung 5 UNKNOWN unchanged. Evidence:
   `lab/frontier/libgphoto2shell/evidence/w182-natural-heap-ceiling.out`.
+
+- Stack-argument-spill lane closed on the measured real builds (W185,
+  2026-11-25): the remaining device-only pointer idea was that the `:152`
+  forward write could reach a spilled `priv` pointer and turn `:154` into a
+  write-what-where with a pointer chosen by the device. Disassembly of the
+  exact lab `jl2005c.so` builds shows the opposite ordering: in the plain
+  build `info` is `rbp-0x4030..-0x11` while `camera`/`port`/`priv` are spilled
+  at `rbp-0x4058/-0x4060/-0x4068`, with `camera_id` and the other non-buffer
+  locals also below `info`; the canary (`rbp-8`), saved rbp/RIP (`rbp+0/+8`)
+  and caller frames are above it. The `:152` write starts at
+  `rbp-0x3E30` and runs to `rbp+0x1CF` at count 1022 (or `rbp+0xFC1D0` at
+  0xffff), so no argument slot is reachable. The ASan build has the same
+  ordering (`priv` at `rbp-0x41e8`, `info` base `rbp-0x41c0`). `priv` is
+  reloaded from its slot on each use, so this is a genuine write-what-where
+  primitive if reachable — it is not, on these builds. The pin-based harness
+  differs (its argument slots are above the buffer) but it uses stubbed
+  plumbing. Combined with W181 (in-struct consumer bytes) and W182 (heap
+  neighbour), all three natural-pointer variants are closed at measured
+  scopes; no device-only pointer chain, command or rung 5. Evidence:
+  `lab/frontier/libgphoto2shell/evidence/w185-stack-arg-spill-lane.out`.

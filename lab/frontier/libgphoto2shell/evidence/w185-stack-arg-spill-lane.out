@@ -1,0 +1,80 @@
+# W185 (2026-11-25, 05:08Z) — device-only stack-argument-spill lane CLOSED
+
+Question: W181 closed the in-struct consumer pointer lane and W182 the natural
+heap-neighbour lane. Can the pinned `:152` forward stack write reach a spilled
+argument pointer (`priv`, `port`, `camera`) and turn `:154`'s
+`memmove(priv->table, info + 0x30, alloc_table_size - 0x30)` into a
+write-what-where with a pointer chosen by the DEVICE (no probe-supplied
+address)? Answer on the measured builds: NO. All spilled pointers and all other
+non-buffer locals sit BELOW `info`; the overflow runs only forward.
+
+## Measurement (static disassembly of the exact committed lab builds)
+
+Command:
+  gdb -q -batch -ex 'set pagination off' \
+    -ex 'file <path>' -ex 'disassemble jl2005c_init'
+
+Plain (no ASan, the W167/W171/W175/W177 build):
+  <path> = lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34-plain/
+           installdir-plain/lib/libgphoto2/2.5.34/jl2005c.so
+Observed at jl2005c_init+37..+142:
+   0x3ac4 <+37>:  mov    %rdi,-0x4058(%rbp)      # camera
+   0x3acb <+44>:  mov    %rsi,-0x4060(%rbp)      # port
+   0x3ad2 <+51>:  mov    %rdx,-0x4068(%rbp)      # priv
+   0x3ae2 <+67>:  mov    %rax,-0x8(%rbp)         # stack canary
+   0x3ae8 <+73>:  movl   $0x0,-0x403c(%rbp)      # attempts/init state
+   0x3af2 <+83>:  movl   $0x30324c4a,-0x4036(%rbp)  # camera_id[0..3]
+   0x3afc <+93>:  movw   $0x3530,-0x4032(%rbp)      # camera_id[4..5]
+   0x3b05 <+102>: movl   $0x0,-0x4040(%rbp)
+   0x3b0f <+112>: movl   $0x0,-0x4044(%rbp)      # alloc_table_size
+   0x3b19 <+122>: lea    -0x4030(%rbp),%rax      # info
+   0x3b20 <+129>: mov    $0x4020,%edx            # sizeof(info)
+   0x3b2a <+139>: mov    %rax,%rdi
+   0x3b2d <+142>: call   <memset@plt>            # memset(info, 0, 0x4020)
+At +189: `mov -0x4068(%rbp),%rax; movzbl 0x1(%rax),%eax` — `priv` is reloaded
+from its stack slot on every use, so overwriting that slot WOULD redirect
+`:154`; the slot is simply not in the write path.
+
+ASan build (W162/W165 rung-3 verdict build):
+  <path> = lab/frontier/libgphoto2shell/src/libgphoto2-2.5.34/
+           installdir/lib/libgphoto2/2.5.34/jl2005c.so
+Same ordering with ASan's larger frame:
+   0x74fb <+47>: mov %rdi,-0x41d8(%rbp)   # camera
+   0x7502 <+54>: mov %rsi,-0x41e0(%rbp)   # port
+   0x7509 <+61>: mov %rdx,-0x41e8(%rbp)   # priv
+   0x7510 <+68>: lea -0x41c0(%rbp),%r13   # info base
+   0x75f4 <+296>:mov %rax,-0x28(%rbp)     # canary
+   0x75fa <+302>:movl $0x0,-0x41c4(%rbp)  # init state
+   0x7538 <+108>:lea 0x41a0(%r13),%rax   # ASan frame end
+
+## Arithmetic
+
+Plain: info spans rbp-0x4030 .. rbp-0x11 (0x4020 bytes). The pinned `:152`
+read starts at info+0x200 = rbp-0x3E30; at count 1022
+(alloc_table_size 0x4200) it ends at rbp+0x1CF; at 0xffff
+(0x100020 rounded up to 0x100200) it ends at rbp+0xFC1D0. In both cases
+all argument spills (rbp-0x4058/-0x4060/-0x4068) and every other non-buffer
+local (`camera_id` rbp-0x4036..-0x4031, `response`/`model_string`/
+`alloc_table_size`/`attempts` around rbp-0x4045..-0x403c) are at strictly
+LOWER addresses than the first written byte; the initial `memset(info, 0,
+0x4020)` range is below it too.
+The forward write cannot reach them. Only the canary (rbp-8), saved rbp (rbp+0),
+saved RIP (rbp+8) and caller frames are in range — exactly the bytes W167,
+W171 and W177 already studied.
+
+ASan: info base -0x41c0, `priv` spill -0x41e8, i.e. 0x28 below info base;
+same conclusion.
+
+Scope note: the direct-call pin harness has a DIFFERENT frame (W162 found
+the argument slots at `info+16432/16440/16448`, above the buffer). That
+harness calls the pinned source with stubbed gphoto plumbing; this result is
+only about the real `jl2005c.so` builds, the ones used for W162-W180.
+
+## Disposition and limits
+
+CLOSED: the stack-argument-spill variant of a device-only write-what-where on
+the measured plain and ASan 2.5.34 camlibs. This does NOT close a pointer in a
+live heap neighbour (W182 measured the plain-build destination window as
+wilderness), nor does it invalidate W167/W171/W177: those still need a
+probe-supplied canary/address or a host-side consumer. No device-only pointer
+chain, no command and no rung 5. No source, pin, harness or vusb change.
