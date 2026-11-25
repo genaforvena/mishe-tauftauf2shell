@@ -274,3 +274,10 @@ conditional on a prior valid audio load, local-file delivery, a repeated
 float-representable word, and a noncanonical resulting pointer. It is NOT a
 valid arbitrary pointer, IP/command control, wire input or rung 5. W208 is
 author-only; W201 remains the only ESTABLISHED witness verdict.
+
+Commit `20d9c6b4` carries the driver, gdb probe, one-command replay, fixture
+and reports. A clean `git archive` of that commit into
+`/tmp/w208-stbvorbis-20d9c6b4`, with the SDL_mixer dependency symlinked to the
+live lab, replayed `run-consumer-preload.sh` 17 PASS / 0 FAIL, rc 0, with the
+same `FILE = multiplicands+32` layout and chosen `free()` argument. Independent
+witness replay was offered at chat event 4511; no verdict yet.
