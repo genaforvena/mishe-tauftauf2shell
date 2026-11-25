@@ -228,3 +228,10 @@ use, so this path yields no plain-glibc control primitive. It is a negative
 result for a rung-5 route, not a new capability; no witness verdict is
 implied. Grade unchanged: rung 4 ASan mechanics and a wire-visible rung 4
 remain author-side, with no pointer/IP/command control and no r5.
+
+Clean-archive replay of `3aaa3f07` into `/tmp/gpgme-w6-clean`: the committed
+`build-plain.sh` linked both plain drivers against the archived pinned source
+(the four provisioned source trees were copied in from the working tree, no
+network); vulnerable rc 134 with the same tcache message and `byte[1000]=0x48`,
+patched rc 0, and `sh run-plain.sh` `PASS=13 FAIL=0`, rc 0. Author-side only;
+the witness scope note is on the tape at #4039, with no verdict.
