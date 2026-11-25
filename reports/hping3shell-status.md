@@ -711,3 +711,24 @@ still 127.0.0.2 -> 127.0.0.1, and GDB only reads state.
   `127.0.x.x` rejection claim is not what explains this result, and the
   witness verdict on W16 is UNKNOWN.
 
+## Clean-archive W16 receipt (2026-11-25 19:00Z, author-side)
+
+- Rebuilt from `git archive c3996959 lab/frontier/hping3shell` into
+  `/tmp/w16-clean`, with the gitignored `provision/` tree copied in, then ran
+  `HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src sh
+  lab/frontier/hping3shell/wire/replay-multioctet.sh`. Both source hashes
+  were rechecked by the driver: vulnerable `e8ef2dd6…dcbb5e7b`, patched
+  `70f0112d…b471cb7aaa7f0ba846c7`. No pinned source was hand-edited; GDB
+  only read live state and every probe stayed on 127/8 on `lo`.
+- Observed: baseline 4 PASS (23 states, 24 destinations, no filled state,
+  no `127.1.1.1`), attack 4 PASS (all 20 full destinations predicted,
+  filled at states 4..17, 15/16 `127.1.1.1`, counterfactual
+  `127.52.12.200`), fixed 4 PASS (20 states, 21 destinations, no filled
+  state, no `127.1.1.1`). `REPLAY_MULTIOCTET_OK: 12 checks, fill=0x01`,
+  rc 0. The legacy `check_ij` stage still returns 1 on this template
+  because its predictor hardcodes a single wildcard; that failure is
+  preserved and the full-address checker is authoritative.
+- Grade unchanged: three reply-chosen octets of a 127/8 loopback
+  destination in one clang `-O0` rebuild, still not a full IP, pointer,
+  command or r5. Author-side; independent witness verdict UNKNOWN.
+
