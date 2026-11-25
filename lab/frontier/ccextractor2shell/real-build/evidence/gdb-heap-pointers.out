@@ -1,0 +1,37 @@
+W3 2026-11-25 06:46Z. Plain pinned build /tmp/ccx2shell-plain/ccextractor,
+LD_LIBRARY_PATH=/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu,
+script real-build/gdb-heap-pointers.cmd, breakpoint ccx_gxf.c:1220
+(after parse_mpeg_packet). For each input the script reads 65536 bytes at
+buffer+BUFSIZE (BUFSIZE=2097272), scans every aligned 8-byte word whose value
+looks like a code/data address, and asks GDB `info symbol` to resolve it.
+Observed output (verbatim filtered lines):
+
+=== safe.gxf ===
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=4096, data=0x555556392cf0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+HEAPSCAN buffer=55555641c990 usable=2097272 boundary=55555661ca08
+HEAPSCAN codeptr_hits=0
+=== attack.gxf ===
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556392cf0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+HEAPSCAN buffer=55555641c990 usable=2097272 boundary=55555661ca08
+HEAPSCAN codeptr_hits=0
+=== readback.gxf ===
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556392cf0) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+HEAPSCAN buffer=55555641c990 usable=0 boundary=55555661ca08
+HEAPSCAN codeptr_hits=0
+
+Untouched next-chunk header on safe.gxf (same breakpoint, x/4gx
+data->buffer+2097272):
+0x55555661ca08:	0x0000000000020601	0x0000000000000000
+0x55555661ca18:	0x0000000000000000	0x0000000000000000
+
+Interpretation and limits: the safe-input scan is the meaningful control —
+in this build/heap layout the 64 KiB after the 2097272-byte allocation
+contains no resolvable code pointer, so the 3976-byte overflow reaches no
+function pointer to overwrite directly. The attack/readback scans are taken
+after our own payload has filled that region and are not independent
+evidence of the pre-write layout. `malloc_usable_size` returned 0 for
+readback.gxf, consistent with corrupted malloc metadata at that point; that
+value is not used as a bound in the scan. `info symbol` resolves symbols in
+the loaded main binary and shared libraries; an opaque or unloaded code
+address would not be counted. This is one build and one heap layout, not a
+proof for all layouts. No rung claim rests on this negative.

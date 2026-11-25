@@ -1,16 +1,19 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 06:09Z: **in-program consumer readback measured**. Rung 3
-remains CONFIRMED through the real `buffered_read`/`read(2)` consumer into a
-real `malloc(BUFSIZE)` region. Rung 4 is now CONFIRMED without the earlier
-debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
-`00 00 01 B3` changes the program's own MPEG-2 parser consumed length from
-2101248 to 2097348, and ASan (`halt_on_error=0`) reports a subsequent
-`READ of size 3900` from `boundary+76` in `memmove` called by `process_data`
-(`general_loop.c:1041`). Rung 5 and witness verdict remain UNKNOWN: no
-controlled indirect call, pointer or command was observed. No CVE/GHSA and no
-upstream fix PR were observed; the guard is a local hunk, not a vendor patch.
-All input files, logs and generators live in
+Status 2026-11-25 06:46Z (W3): rung 3 and rung 4 CONFIRMED, plus a new
+bounded negative — no code pointer found in overflow reach in this build's
+heap layout. Rung 3 remains CONFIRMED through the real
+`buffered_read`/`read(2)` consumer into a real `malloc(BUFSIZE)` region.
+Rung 4 is CONFIRMED without the earlier debugger-only condition: a crafted
+GXF whose first bytes past `BUFSIZE` are `00 00 01 B3` changes the program's
+own MPEG-2 parser consumed length from 2101248 to 2097348, and ASan
+(`halt_on_error=0`) reports a subsequent `READ of size 3900` at
+`boundary+76` in `memmove` called by `process_data` (`general_loop.c:1041`).
+Rung 5 and witness verdict remain UNKNOWN: no controlled indirect call,
+pointer or command was observed. Issue #2500 rechecked at 06:46Z: still
+open, created/updated `2026-11-24T13:58:29Z`; no fix PR or CVE observed.
+No CVE/GHSA and no upstream fix PR were observed; the guard is a local
+hunk, not a vendor patch. All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
 
@@ -282,6 +285,27 @@ not boundary-isolated proof. Transcript: `real-build/evidence/gdb-pageguard.out`
 A separate slice inspection (`real-build/evidence/gdb-readback-slice.out`)
 shows the next general-loop iteration calling `process_m2v` with `length=3900`
 on bytes left by that shift, further downstream program use of the region.
+
+## W3 bounded negative 2026-11-25 06:46Z: no function pointer in overflow reach
+
+Question: can chosen bytes directly overwrite a code pointer in the heap
+region reached by the 3976-byte overflow? In this build and heap layout,
+none was found. `real-build/gdb-heap-pointers.cmd` breaks at
+`ccx_gxf.c:1220`, reads 64 KiB from `buffer+BUFSIZE`, tests every aligned
+8-byte word that looks like an address with GDB `info symbol`, and reports
+resolvable code pointers. On `safe.gxf` (untouched heap after the
+allocation) `codeptr_hits=0`; the next chunk header is
+`0x2061` (size 0x20600, PREV_INUSE) followed by zeros. The post-write
+`attack.gxf` and `readback.gxf` scans also report `codeptr_hits=0`, but
+their region already contains our own payload, so only the safe-input scan
+describes the pre-write layout. For `readback.gxf`,
+`malloc_usable_size(data->buffer)` returned 0 at that breakpoint,
+consistent with corrupted chunk metadata; that value is not used as a scan
+bound. `info symbol` would miss an opaque or unloaded code address, and one
+build/layout is not proof for all layouts. Log:
+`real-build/evidence/gdb-heap-pointers.out`. This negative closes the
+direct function-pointer-overwrite hypothesis for this layout; it does not
+alter the rung 3/4 grades or establish rung 5.
 
 ## Explicit unknowns
 

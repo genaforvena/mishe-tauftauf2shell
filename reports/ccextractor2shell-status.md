@@ -3,9 +3,10 @@
 ADMITTED 2026-11-25 04:4xZ under standing #6 as the 142nd route (frontier
 staging at 04:1xZ). Claim: CCExtractor issue
 #2500 (https://github.com/CCExtractor/ccextractor/issues/2500), opened
-`2026-11-24T13:58:29Z`, open as of `2026-11-25T04:07Z`; pinned master commit
+`2026-11-24T13:58:29Z`. Pinned master commit
 `2c1c1c6f0602563d2064f2b0c36f13b3c7a09489`
-(`2026-11-24T07:50:42-0800`). No CVE/GHSA found; no upstream fix PR found, fix
+(`2026-11-24T07:50:42-0800`). Issue rechecked 2026-11-25T06:46Z: still open,
+no update since creation; no CVE/GHSA found; no upstream fix PR found, fix
 status UNKNOWN.
 
 - Brief: `reports/frontier-ccextractor2shell.md`.
@@ -53,6 +54,13 @@ status UNKNOWN.
   same ASan flags; the attack GXF exits rc 10 with no ASan report and reports
   premature end (`80 < 2101312`), safe rc 10. Logs in
   `real-build/evidence/guard-asan-{attack,safe}.out`.
+- W3 bounded negative (06:46Z): GDB scan of 64 KiB after `malloc(BUFSIZE)`
+  in the plain pinned build found 0 resolvable code pointers on `safe.gxf`
+  (untouched heap); next chunk header `0x2061` followed by zeros. Post-write
+  scans on attack/readback also found 0, but those regions contain our own
+  payload. One build/layout only; no rung change. Script
+  `real-build/gdb-heap-pointers.cmd`, log
+  `real-build/evidence/gdb-heap-pointers.out`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units
