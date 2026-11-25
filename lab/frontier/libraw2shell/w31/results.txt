@@ -70,3 +70,13 @@ Interpretation and disposition:
   allocation shown consuming the corrupted span, no r5, no witness verdict.
 - Measurement error preserved: gdb's `main_arena.top + 8` scales by
   sizeof(malloc_chunk); every address in this file uses `(char*)top + 8`.
+Preserved residual: in the same process the gdb stop at recycle line 141
+showed the field still at its pre-loop-looking value (0xc0b5f1 / 0xc0b601),
+while the later `__libc_free` entry stop showed 0x11. The exact ordering of
+the final OOB stores relative to that source line is UNKNOWN; the watchpoint
+proves the loop wrote the field, and the free-entry value is the one the
+allocator consumed. The committed `w31/headers.gdb` masks PREV_INUSE when
+computing the next chunk and always casts to `char*` for the size field;
+the first draft of the probe printed an odd, miscomputed next pointer and a
+scaled `main_arena.top+8` read, and those draft failures are preserved here
+rather than hidden.
