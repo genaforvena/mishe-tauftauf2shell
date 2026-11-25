@@ -1,0 +1,33 @@
+Breakpoint 1 at 0x40c5ed: file src/sn_utils.c, line 2324.
+Breakpoint 2 at 0x40ccfd: file src/sn_utils.c, line 2374.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 07:44:36 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+25/Nov/2026 07:44:36 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 07:44:36 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 07:44:36 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 07:44:36 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 07:44:36 [supernode.c:660] supernode is listening on UDP 19120 (main)
+25/Nov/2026 07:44:36 [supernode.c:669] supernode opened TCP 19120 (aux)
+25/Nov/2026 07:44:36 [supernode.c:676] supernode is listening on TCP 19120 (aux)
+25/Nov/2026 07:44:36 [supernode.c:685] supernode is listening on UDP 19121 (management)
+25/Nov/2026 07:44:36 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 07:44:36 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 07:44:36 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=0x5a48494d5a48494d, sss@entry=0x42f288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce90, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795592686) at src/sn_utils.c:2324
+2324	            if(comm->header_encryption == HEADER_ENCRYPTION_ENABLED) {
+W11_AT_DEREF comm=$1 = (struct sn_community *) 0x5a48494d5a48494d
+W11_TARGET_FIELDS
+0x42f3fc <mgmt_event_subscribers+12>:	0x00	0x00	0x00
+0x42f430 <mgmt_event_subscribers+64>:	0x0000000000000000
+
+Program received signal SIGSEGV, Segmentation fault.
+process_udp (sss=0x5a48494d5a48494d, sss@entry=0x42f288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce90, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795592686) at src/sn_utils.c:2324
+2324	            if(comm->header_encryption == HEADER_ENCRYPTION_ENABLED) {
+W11_AFTER_CONTINUE
+#0  process_udp (sss=0x5a48494d5a48494d, sss@entry=0x42f288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce90, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795592686) at src/sn_utils.c:2324
+#1  0x000000000040aa76 in run_sn_loop (sss=sss@entry=0x42f288 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000000000403034 in main (argc=11, argv=0x7fffffffe1c8) at src/supernode.c:741
+W11_DONE
+[Inferior 1 (process 978522) killed]

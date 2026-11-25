@@ -473,3 +473,36 @@ One-command replay: `sh lab/frontier/n2n2shell/live/w10_pointer_control.sh`
 all instances loopback only). Author clean run: `RESULT 9 PASS / 0 FAIL`,
 raw logs `live/evidence/w10-replay-*.log`. Independent verdict on #3909 is
 still owed.
+
+## W11: wire-only chosen pointer at a binary-known address (non-PIE clang -O2, 2026-11-25 07:4xZ)
+
+W10's valid `comm` value came from a debugger pre-read with ASLR disabled.
+W11 removes that dependency. The pinned tarball rebuilt with
+`CC=clang CFLAGS="-g -O2 -fno-omit-frame-pointer -no-pie" LDFLAGS="-no-pie"`
+has a 632-byte zero run in `.bss` starting at the fixed address `0x42f3e8`
+(`mgmt_event_subscribers+8`). A fake `struct sn_community` there has
+`is_federation = 0`, `header_encryption = 0` and `edges = NULL`.
+
+`live/w11_fixed_pointer.sh` writes that address, little-endian, at token+1682
+(= `nak+1696`, the clang-O2 `comm` spill slot from W9) of the same 1700-byte
+NAK as W10. Three loopback cases:
+
+- Garbage chosen bytes: SIGSEGV at `sn_utils.c:2324`, with
+  `comm = 0x5a48494d5a48494d` in the stopped frame.
+- Wire-chosen fixed address: gdb stopped at `:2324` reads
+  `comm = 0x42f3e8`, the three bytes at `comm+20` are zero and
+  `*(comm+72) = 0`; no SIGSEGV. The pointer value came from the wire plus the
+  binary's symbols, not from a read of the live process.
+- Plain build, no gdb: after that same attack datagram a fresh
+  REGISTER_SUPER gets a 58-byte reply, a following safe 48-byte NAK is
+  forwarded with the chosen bytes intact, and the process is still alive.
+
+One-command replay `sh lab/frontier/n2n2shell/live/w11_fixed_pointer.sh`:
+`RESULT 13 PASS / 0 FAIL`, rc 0; raw logs `live/evidence/w11-replay-*`.
+
+Honest limits: the address is fixed only in this non-PIE lab build; this is
+not a remote ASLR-defeating leak. The chosen pointer selects a zeroed data
+area, i.e. a safe control path, not a benign marker or a function. No
+control-flow takeover, command side effect or r5. The default-PIE and
+fixed-build variants of this exact wire are UNKNOWN; independent verdict on
+#3909 is still owed.
