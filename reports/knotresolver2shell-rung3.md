@@ -26,7 +26,8 @@ libgnutls mapping bases identifies the live cleanup call target at file offset
 `0x137e70`, finds no libgnutls text pointer in the 814-byte writable span, and
 shows the `0x34da0` module-load stub is outside any reachable same-library
 64 KiB region; the library-relative PLT route is negative for the sampled
-objects. ASLR-on/stock stays UNKNOWN.
+objects. A wake-21 binary check closed the fixed-address route on the PIE lab
+binary. ASLR-on/stock stays UNKNOWN.
 
 ## Builds and inputs — exact, reproducible
 
@@ -788,6 +789,28 @@ author-observed ASLR-off / witness MIXED; ASLR-on chosen control UNKNOWN.
 Wake 14's earlier `0x…490` sample remains unidentifiable (base unrecorded) but
 no longer supports a claim: both fresh samples of the same object have the
 identified `0x137e70` target and no text pointer in the writable span.
+
+## Fixed-address route closed on the PIE lab binary (wake 21, 2026-11-25 ~04:2xZ)
+
+Question: could ASLR-on chosen control avoid a pointer leak by dispatching to a
+command stub at a fixed address in the main binary? Answer: **no** for this
+build, before any question of a fixed-address command string arises. The
+pinned 6.4.0 jemalloc/debug binary
+`lab/frontier/knotresolver2shell/build/knot-resolver-6.4.0-jemalloc/jemalloc-build/daemon/kresd`
+is `Type: DYN (Position-Independent Executable file)`, `Entry point address:
+0xd870`, and `FLAGS_1 ... NOW PIE`. Its 456 undefined dynamic symbols contain
+no `system`, `popen`, `exec*`, `posix_spawn`, `dlopen` or `fork`, and its `.plt`
+contains no such command-execution entry. Reproduce with
+`sh harness/check_fixed_address_route.sh`; committed output is
+`harness/fixed-route-w21.out`.
+
+So the chosen `call *0x110(%rbx)` has no fixed-address main-binary target on
+this build. This does not change the wake-12 result, which used the runtime
+`system` address obtained under the labeled gdb/ASLR-off condition, nor the
+witness MIXED verdict. A stock/ASLR-on chosen-command route still needs an
+information leak or a different reachable pointer whose high bytes need not be
+guessed; both remain UNKNOWN. No grade change; no process, listener or host
+state changed.
 
 ## Boundaries
 

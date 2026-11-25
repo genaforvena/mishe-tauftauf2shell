@@ -1,0 +1,9 @@
+== ELF type ==
+  Type:                              DYN (Position-Independent Executable file)
+  Entry point address:               0xd870
+== PIE flag ==
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE
+== command-execution imports in kresd dynamic symbols ==
+NONE: no system/popen/exec*/posix_spawn/dlopen/fork import
+== named command PLT entries ==
+NONE: no command-execution PLT entry
