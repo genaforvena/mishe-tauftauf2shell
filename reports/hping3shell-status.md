@@ -542,3 +542,50 @@ grade, witness verdict UNKNOWN.
 
 After the owed verdicts the only depth lane is a measured
 attacker-controlled execution path; nothing observed supports r5.
+
+## Permutation RR write: conditional byte control, no reliable full-IP (W13, 2026-11-25 16:0xZ, author-side)
+
+A bounded experiment tested whether writing a **linear permutation** to all
+187 reachable sbox bytes (instead of W6's constant) removes the hidden-`j`
+ceiling and exposes more than the low byte of the probe destination. It did
+not produce reliable additional control; the result is conditional on the
+hidden RC4 index `j`. This is a negative on the stronger hypothesis and a
+grade-preserving author-side experiment.
+
+- New tracked scripts in `lab/frontier/hping3shell/wire/`:
+  `inject_rr_perm.py` writes a 187-byte schedule (`inc`: `S[n]=n+1`, `dec`:
+  `S[n]=n-1`) to `rc4_sbox[0..186]` through the same crafted RR reply as W6
+  (rr_len=255, ptr=255, 205-byte ICMP payload, 3 frames, loopback
+  127.0.0.2 -> 127.0.0.1 on `lo`). `fullip-proof.sh` runs a real plain
+  hping3 `127.0.0.x` target, reads `i`/`j`/`sbox` read-only in GDB, and
+  `check_perm.py` asserts all observed probe destinations against
+  `check_rng.py`'s established four-calls-per-packet model. No pinned source
+  is hand-edited.
+- Physics: the first `hp_rand()` output index is `S[(i+1)+(j+S[i+1])]`.
+  With `i=20` fixed by the 187-byte reach and `j` hidden, the index can land
+  anywhere. When `j` placed it in the reachable span, the output byte was
+  the reply-chosen permutation value: one in-tree `dec` run had `j=222`,
+  index 5, `S[5]=4` and the observed destination low byte was 4, with an
+  unattacked counterfactual of 22. A clean replay had `j=92`, index 131,
+  `S[131]=130`, observed low byte 130, counterfactual 237. In another
+  clean run `j=156` sent the first output to index 195 — beyond the 187-byte
+  reach — so no permutation value was controlled. The schedule write is
+  deterministic; **which byte it controls is not**.
+- The `--rand-dest 127.0.0.x` template hardcodes the first three octets, so
+  only the fourth was ever wire-visible. A `127.0.x.x` template was tried:
+  the destination moved off 127.0.0.1, so `waitpacket.c:94` rejected the
+  crafted reply and only the kernel's own RR reply reached
+  `display_ipopt()`. It is a preserved negative, not a route to two chosen
+  octets. `x.x.x.x` would leave loopback and is out of scope.
+- One-command replay from committed `feb3f33f` (clean `git archive`, the
+  gitignored `provision/` tree copied in,
+  `HPING_SRC=$PWD/.../provision/hping-src sh replay-perm.sh`):
+  `STAGE OK baseline 3`, `STAGE OK attack-dec 5`, `STAGE OK fixed-dec 3`,
+  `REPLAY_PERM_OK: 3 stages`, rc 0. A no-inject baseline had no
+  permutation-filled sbox state; the locally patched build with the same
+  crafted frames also had none. Four intermediate script bugs are preserved:
+  a stale checker name, a lost `observed`/`pv` assignment, a wrong default
+  `--prefix` and an expected-check-count mismatch, each fixed before the
+  final clean replay. Author-side; witness verdict UNKNOWN.
+- Ceiling unchanged: no reliable chosen byte beyond W6's constant-fill,
+  no full IP, no pointer, no command, no r5. The earlier grade stands.
