@@ -1,0 +1,27 @@
+Breakpoint 1 at 0x10335: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 01:21:50 [sn_utils.c:473] loaded 3 fixed-name communities from community.list
+25/Nov/2026 01:21:50 [sn_utils.c:476] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 01:21:50 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 01:21:50 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 01:21:50 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 01:21:50 [supernode.c:660] supernode is listening on UDP 18714 (main)
+25/Nov/2026 01:21:50 [supernode.c:669] supernode opened TCP 18714 (aux)
+25/Nov/2026 01:21:50 [supernode.c:676] supernode is listening on TCP 18714 (aux)
+25/Nov/2026 01:21:50 [supernode.c:685] supernode is listening on UDP 18715 (management)
+25/Nov/2026 01:21:50 [supernode.c:711] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 01:21:50 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 01:21:50 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffde60, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffdf20 "\003\003", udp_size=2038, now=1795569716) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+CANARY PROBE &nak=0x7fffffffcf70
+canary slot at &nak+3512 = 0x7fffffffdd28
+0x7fffffffdd28:	0x00	0x49	0x8d	0x86	0xa7	0xb2	0xad	0xc4
+last written bytes at &nak+2000
+0x7fffffffd740:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x48	0x5a
+0x7fffffffd748:	0x4d	0x49	0x48	0x5a	0x4d	0x49	0x00	0x00
+#0  process_udp (sss=sss@entry=0x5555555800c0 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffde60, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffdf20 "\003\003", udp_size=2038, now=1795569716) at src/sn_utils.c:2331
+#1  0x00005555555658aa in run_sn_loop (sss=sss@entry=0x5555555800c0 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000555555558422 in main (argc=<optimized out>, argv=0x7fffffffe8d8) at src/supernode.c:741

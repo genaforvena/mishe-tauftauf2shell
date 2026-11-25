@@ -1,0 +1,11 @@
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:18714 -t 18715 -c community.list -F labfed -M
+printf "CANARY PROBE &nak=%p\n", &nak
+printf "canary slot at &nak+3512 = %p\n", (char *)&nak + 3512
+x/8bx (char *)&nak + 3512
+printf "last written bytes at &nak+2000\n"
+x/16bx (char *)&nak + 2000
+bt 3
+quit

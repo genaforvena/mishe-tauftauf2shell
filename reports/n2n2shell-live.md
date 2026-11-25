@@ -197,3 +197,31 @@ consumer read and wire re-emission of chosen bytes, not only a stack write.
 Still no consumed pointer, benign-marker execution, control-flow takeover
 or rung 5; witness replay of #3909 remains owed and is required before this
 live experiment is ESTABLISHED.
+
+## W3 addendum: canary and saved RIP are out of wire reach (2026-11-25 01:22Z)
+
+This is the consumer/constraint check before any exploitation mechanics.
+
+- The plain gcc `-O1` `process_udp` loads the stack canary from `%fs:0x28`
+  at `0xd0df` into `-0x38(%rbp)` and calls `__stack_chk_fail` at `0x11705`.
+  `nak` is at `rbp-0xdf0`, so the canary slot is `nak+3512` and the saved
+  return address is `nak+3576`. The original `token_size=96` write ends at
+  `nak+109`.
+- `run_sn_loop` receives into `pktbuf[N2N_SN_PKTBUF_SIZE]` with a 2048-byte
+  `recvfrom` (`sn_utils.c:2585`, `:2643`). A larger datagram is truncated,
+  and `decode_buf` (`wire.c:169-184`) returns 0 without copying when
+  `*rem < bufsize`. The largest wire-reachable `token_size` is therefore
+  2048-38 = 2010, ending the write at `nak+2024` — 1488 bytes short of the
+  canary and 1552 short of the saved RIP.
+- Measured with `live/send_big_nak.py` under `live/gdb-cmds-canary.txt`:
+  `token_size=2000` (2038-byte datagram) put chosen bytes at
+  `nak+2000..+2013`, while the canary slot at `nak+3512` still held its
+  random value `00 49 8d 86 a7 b2 ad c4`. A 3550-byte datagram
+  (`token_size=3512`) produced no stack-smashing abort.
+
+Control-flow takeover through this stack's canary or return address is
+structurally closed for this wire path and build, independently of grooming.
+The demonstrated consumer effect remains the W3 data copy into the forwarded
+NAK; no consumed pointer or command execution. Evidence:
+`live/evidence/gdb-canary-2000.out`, `canary-sender.out`,
+`canary-plain-3512.log`.
