@@ -214,8 +214,13 @@ PostgreSQL 16.15 cluster with the full pinned 2.1.9 library loaded:
 - Driving the catalog-derived route through
   `pgactive_get_global_locks_info()` was attempted and failed: a single-node
   group stayed in state `b`, and lock acquisition reported "database ... is
-  not configured for pgactive or pgactive is still starting up". That route
-  is UNKNOWN, not demonstrated and not ruled out.
+  not configured for pgactive or pgactive is still starting up". On
+  2026-11-25 21:53Z the same call sequence was retried in the ready two-node
+  group at 21:53Z: both nodes reached `r`, a 99-byte origin and session setup
+  succeeded, but the diagnostic returned `owner_replorigin` NULL with
+  `lock_mode=nolock`, no parse error and no termination, so the crafted name
+  never reached the parser. The route is UNKNOWN, not demonstrated and not
+  ruled out; evidence in `realbuild/twonode/catalogprobe/FINDINGS.md`.
 
 Exact commands, rc values and preserved negatives are in
 `realbuild/originpath/FINDINGS.md` and `realbuild/originpath/evidence/`.

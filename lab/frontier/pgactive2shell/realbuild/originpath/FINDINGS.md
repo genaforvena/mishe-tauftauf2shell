@@ -62,7 +62,12 @@ pgactive is still starting up`, and `pgactive_get_global_locks_info()` failed
 with the same error (`evidence/locks-after.out`). `pgactive_create_group`
 returned success but `pgactive_wait_for_node_ready(5)` reported current
 state `b` (`evidence/ready.out`). A ready multi-node pgactive group is a
-prerequisite not met in this single-node cluster. This route remains
+prerequisite not met in this single-node cluster. On 2026-11-25 21:53Z the
+same call sequence was retried in the ready two-node group
+(`../twonode/catalogprobe/FINDINGS.md`): both nodes reached `r`, the 99-byte
+origin and session setup succeeded, but the diagnostic returned a NULL
+`owner_replorigin` and `lock_mode=nolock`, with no parse error and no
+termination. The parser was not reached there either. This route remains
 UNKNOWN, not demonstrated and not ruled out.
 
 ## Provisioning negatives

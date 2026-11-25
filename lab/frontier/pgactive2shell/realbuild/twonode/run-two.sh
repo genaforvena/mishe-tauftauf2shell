@@ -13,6 +13,7 @@ SHARE=/tmp/pgactive-build/pg16root/usr/share/postgresql/16/extension
 VERSION=${VERSION:-2.1.9}
 NO_CONFLICT=${NO_CONFLICT:-0}
 CONFLICT_TYPE=${CONFLICT_TYPE:-insert_insert}
+CATALOG_PROBE=${CATALOG_PROBE:-0}
 LIBDIR=/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib
 V219SO=/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so.v219-installed
 V2210SO=/tmp/pgactive-full-2210/pgactive-2.1.10/pgactive.so
@@ -111,6 +112,20 @@ done
 status "NODE2_READY" "$S2"
 psql1 -c "SELECT node_name, node_status FROM pgactive.pgactive_nodes;" >evidence/nodes1.out 2>&1
 psql2 -c "SELECT node_name, node_status FROM pgactive.pgactive_nodes;" >evidence/nodes2.out 2>&1
+if [ "$CATALOG_PROBE" = 1 ]; then
+  # Session origin and lock_holder must live in ONE backend. Separate
+  # psql -c calls each open a fresh session and lose the origin setting.
+  LONG="pgactive_123_1_2_3_$(printf 'AZ%.0s' $(seq 1 80))"
+  printf '%s\n' "$LONG" >evidence/catalog-name.txt
+  psql1 <<SQL >evidence/catalog-session.out 2>&1
+SELECT pg_replication_origin_create('$LONG');
+SELECT pg_replication_origin_session_setup('$LONG');
+SELECT pgactive.pgactive_acquire_global_lock('ddl_lock');
+SELECT * FROM pgactive.pgactive_get_global_locks_info();
+SQL
+  status CATALOG_SESSION $?
+  echo '--- catalog probe ---'; cat evidence/catalog-session.out
+fi
 
 # Replicated table with a primary key. DDL replication is on; node 2 should
 # receive it automatically.
