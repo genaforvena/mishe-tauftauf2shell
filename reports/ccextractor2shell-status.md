@@ -102,6 +102,27 @@ no upstream fix PR found, fix status UNKNOWN.
   carved from the corrupted-top region. No new write primitive or pointer
   control; rung unchanged. Scripts `real-build/gdb-w7-malloc-ret.{py,cmd}`,
   log `real-build/evidence/gdb-w7-malloc-ret.out`.
+- W8 bounded negative (10:00Z): `inputs/topsize-{21,41}.gxf` forge a small
+  top-chunk size (`0x21`/`0x41`) at `buffer+BUFSIZE`. In the plain pinned
+  build the five post-parse mallocs (8, 8, 32, 8, 8 bytes) still come from
+  tcache, `main_arena.top` is untouched until the terminal free, and the six
+  8-byte allocations before exit all return `0x5555563ca520`; free merges the
+  buffer chunk with top identically on safe input. No carved object, no
+  pointer control, rung unchanged. Scripts
+  `real-build/{make_topsize_gxf.py,gdb-w8-postfree.py,gdb-w8-postfree.cmd}`,
+  log `real-build/evidence/gdb-w8-postfree.out`.
+- W9 wire path measured (10:03Z): the pinned ASan build's `--udp
+  127.0.0.1:PORT` listener, fed 257 paced 8192-byte datagrams from
+  `attack.gxf`, reports ASan `WRITE of size 4160` at `buffer+BUFSIZE` through
+  `buffered_read_opt file_functions.c:463` → `parse_mpeg_packet ccx_gxf.c:943`
+  → `parse_media ccx_gxf.c:1219`; `readback.gxf` adds the program-consumed
+  `READ of size 3900` at `boundary+76` in `memmove`/`process_data`. `safe.gxf`
+  has no sink report (killed in live read loop at 30 s). All UDP runs also
+  show an independent `strlen` OOB READ in `ccxr_start_udp_srv` from the
+  non-NUL-terminated `127.0.0.1` address string, a separate setup-path
+  observation. Rung 3/4 confirmed with a loopback wire delivery; rung 5 and
+  witness still UNKNOWN. Driver `real-build/udp_wire_replay.py`, captures
+  `real-build/evidence/udp-{attack,readback,safe}.out`.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units

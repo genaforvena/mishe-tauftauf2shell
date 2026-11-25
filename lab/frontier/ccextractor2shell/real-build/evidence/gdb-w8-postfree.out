@@ -1,0 +1,46 @@
+W8 bounded negative, 2026-11-25 09:59-10:00Z. Pinned plain build
+/tmp/ccx2shell-plain/ccextractor, GDB disables ASLR. Scripts
+real-build/gdb-w8-postfree.{py,cmd}; inputs real-build/inputs/topsize-{21,41}.gxf
+and safe.gxf. LD_LIBRARY_PATH=/tmp/ccx2shell-deps/root/usr/lib/x86_64-linux-gnu.
+Each run exited rc 0. Verbatim W8PY lines (the "0x%s" format prints a decimal
+value after an "0x" prefix: 0x21 -> "0x33", 0x41 -> "0x65",
+0x205e1 -> "0x132577"). No pinned or harness source was edited.
+
+=== topsize-21.gxf ===
+W8PY parse top=0x555556620a20 boundary=0x33 buf=93825007749552
+W8PY free-entry top=0x555556620a20 boundary=0x33 buf=93825007749552
+W8PY free-return top=0x5555564209a0 boundary=0x33 buf=93825007749552
+W8PY after enter n=1 size=8 top=0x5555564209a0
+W8PY after ret n=1 ptr=0x5555563ca520 top=0x5555564209a0
+W8PY after enter n=2 size=8 top=0x5555564209a0
+W8PY after ret n=2 ptr=0x5555563ca520 top=0x5555564209a0
+W8PY after enter n=3 size=8 top=0x5555564209a0
+W8PY after ret n=3 ptr=0x5555563ca520 top=0x5555564209a0
+W8PY exit top=0x5555564209a0 boundary=0x33 buf=93825007749552
+All six after-free 8-byte mallocs returned 0x5555563ca520 (tcache).
+
+=== topsize-41.gxf ===
+W8PY parse top=0x555556620a20 boundary=0x65 buf=93825007749552
+W8PY free-entry top=0x555556620a20 boundary=0x65 buf=93825007749552
+W8PY free-return top=0x5555564209a0 boundary=0x65 buf=93825007749552
+W8PY after enter n=1 size=8 top=0x5555564209a0
+W8PY after ret n=1 ptr=0x5555563ca520 top=0x5555564209a0
+W8PY exit top=0x5555564209a0 boundary=0x65 buf=93825007749552
+All six after-free 8-byte mallocs returned 0x5555563ca520 (tcache).
+
+=== safe.gxf (control) ===
+W8PY parse top=0x555556620a20 boundary=0x132577 buf=93825007749552
+W8PY free-entry top=0x555556620a20 boundary=0x132577 buf=93825007749552
+W8PY free-return top=0x5555564209a0 boundary=0x132577 buf=93825007749552
+W8PY after enter n=1 size=8 top=0x5555564209a0
+W8PY after ret n=1 ptr=0x5555563ca520 top=0x5555564209a0
+W8PY exit top=0x5555564209a0 boundary=0x132577 buf=93825007749552
+All six after-free 8-byte mallocs returned 0x5555563ca520 (tcache).
+
+A separate W7-script replay of topsize-{21,41}.gxf logged five post-parse
+mallocs (8, 8, 32, 8, 8 bytes) all returning tcache pointers; top stayed
+0x55555661ca50 at every entry. The small forged size therefore did not force
+a sysmalloc or carve any object from attacker-controlled bytes. Terminal free
+consolidated the buffer chunk into top identically on attack and safe inputs:
+top moved from buffer+BUFSIZE-8 to buffer-16 in all three runs. No pointer or
+rung-5 claim. Rung 3 and rung 4 unchanged.

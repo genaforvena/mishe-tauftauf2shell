@@ -1,0 +1,82 @@
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: Network, 127.0.0.1:45153
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: Yes]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+=================================================================
+==25546==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5020000130b9 at pc 0x7120a987d96f bp 0x7ffd81edd3b0 sp 0x7ffd81edcb58
+READ of size 10 at 0x5020000130b9 thread T0
+    #0 0x7120a987d96e in strlen ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:391
+    #1 0x6307ecc71183 in _RNvNvNtNtCskADBYZwJmSU_4core3ffi5c_str6strlen7runtimeCs6VtRwjnDGU7_8ccx_rust /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/core/src/ffi/c_str.rs:772
+    #2 0x6307ecc71183 in _RNvNtNtCskADBYZwJmSU_4core3ffi5c_str6strlenCs6VtRwjnDGU7_8ccx_rust /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/core/src/intrinsics/mod.rs:2636
+    #3 0x6307ecc71183 in _RNvMs3_NtNtCskADBYZwJmSU_4core3ffi5c_strNtB5_4CStr8from_ptrCs6VtRwjnDGU7_8ccx_rust /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/core/src/ffi/c_str.rs:257
+    #4 0x6307ecc6ca53 in ccxr_start_udp_srv src/libccxr_exports/net.rs:243
+    #5 0x6307ecb6840c in start_upd_srv /tmp/ccx2shell-upstream-asan/src/lib_ccx/networking.c:1028
+    #6 0x6307ed278d84 in _RNvMNtNtCs6VtRwjnDGU7_8ccx_rust7demuxer5demuxNtNtB4_12common_types10CcxDemuxer4open src/demuxer/demux.rs:195
+    #7 0x6307ecbe5ae4 in ccxr_demuxer_open src/libccxr_exports/demuxer.rs:516
+    #8 0x6307ecbb8a74 in ccx_demuxer_open /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_demuxer.c:62
+    #9 0x6307ecb45989 in switch_to_next_file /tmp/ccx2shell-upstream-asan/src/lib_ccx/file_functions.c:132
+    #10 0x6307ec9b5e6c in start_ccx /tmp/ccx2shell-upstream-asan/src/ccextractor.c:149
+    #11 0x6307ec9b623c in main /tmp/ccx2shell-upstream-asan/src/ccextractor.c:508
+    #12 0x7120a8a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #13 0x7120a8a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #14 0x6307ec926fd4 in _start (/tmp/ccx2shell-asan/ccextractor+0x153fd4) (BuildId: 837bfd84638ca6e07f717bbeb0caee85a983c708)
+
+0x5020000130b9 is located 0 bytes after 9-byte region [0x5020000130b0,0x5020000130b9)
+allocated by thread T0 here:
+    #0 0x7120a98fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x6307ed1c8b43 in _RNvMs5_NtCsgFX3jaOk65H_5alloc7raw_vecNtB5_11RawVecInner15try_allocate_inCsgp3pjtoUw1n_5gimli (/tmp/ccx2shell-asan/ccextractor+0x9f5b43) (BuildId: 837bfd84638ca6e07f717bbeb0caee85a983c708)
+    #2 0x6307ecca08d7 in _RNvMs5_NtCsgFX3jaOk65H_5alloc7raw_vecNtB5_11RawVecInner16with_capacity_inCs3pU5dngQyIi_9termcolor /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/raw_vec/mod.rs:435
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:391 in strlen
+Shadow bytes around the buggy address:
+  0x502000012e00: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000012e80: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000012f00: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000012f80: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fd
+  0x502000013000: fa fa fd fd fa fa 00 02 fa fa fd fa fa fa fd fa
+=>0x502000013080: fa fa 05 fa fa fa 00[01]fa fa fa fa fa fa fa fa
+  0x502000013100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000013300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+Source: None
+Source port: 45153
+
+----------------------------------------------------------------------
+Reading from UDP socket 127.0.0.1:45153
