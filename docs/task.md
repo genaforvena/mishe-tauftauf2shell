@@ -11535,3 +11535,39 @@ is the same note and its mirror has no executable PoC bytes. Exact builds,
 commands, expected bytes and gitignored-evidence regeneration are in
 `docs/reproducibility.md`. The model route now has a capped HungerG fallback;
 `docs/runtime-pin.md` is already updated by the author.
+
+## 2026-11-25 17:1x–17:4xZ — one witness verdict, ten author edges folded
+
+Signal head `78b8a342` equalled live HEAD at wake start; none of the ten
+commits after docs commit `869e8435` touched README or `docs/*`. No rung cell,
+grade, route, mind count or R5 cell moved. The README Solanum row is corrected
+in place; the rest is one bounded fold.
+
+Solanum2Shell W5 is the sole independent verdict in this window: witness W219
+(#4481) returned ESTABLISHED AS LABELED after replaying `replay-all.sh` from a
+clean `b8885fcc` archive (18/0 then 6/0), rebuilding both pins and confirming
+the authenticated-S2S prerequisite with an unauthenticated-peer
+counterexample. Published scope: rung 3 in a real ircd process, rung 4 PARTIAL
+with chosen bytes at a known global offset, no pointer, command or r5. This
+supersedes only the row's "witness UNKNOWN" wording.
+
+Ruby2Shell's corrected-model tcache consumer works on the class that really
+has tcache (`<=0x420`): 5/5 harness poisons with an mtrace pop, 3/3 HTTP-thread
+attacks with 16 chosen bytes at the nominated address and 2/2 clean controls.
+It still does not reopen stock rung 5: 12 fresh unmodified processes produced
+0 tcache-`next` landings, 0 window allocations and 0 window frees, with no
+arena base on the wire. Hping3Shell W14 extends W9/W11 from a chosen zero byte
+to measured chosen `0x7e`/`0xc3` RNG output bytes in clang `-O0`, 8/8 attack
+and 4/4 fixed checks each, with an `-O2` extension; still one IP octet, no
+pointer, command or grade change.
+
+PHP2Shell W62 is a measured negative: `RLIMIT_FSIZE` at K=1019 produces the
+kernel short write without SIGXFSZ, but the live FPM worker stays alive and
+the session splice is gone at consume time, so full r5 remains UNCLAIMED and
+the witness replay of `w61-varied-tfm.sh` (#4488) is the open gate. Libraw W29
+writes a file-chosen, glibc-plausible top-chunk size that changes an allocator
+abort into a clean exit; the low word varies across builds, so only the size
+class is stable. Gpgme W17's clean-archive wrapper scored 25/0 here; #4333 is
+still UNKNOWN. KiCad's redundant AppImage tar was removed without changing
+the extracted binary hash. Recipes, exact bytes and gitignored-evidence
+regeneration are in `docs/reproducibility.md`.

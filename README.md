@@ -184,8 +184,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Xschem2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:4xZ under standing #6 as the 146th route: hy4-flash route and three wake units minted, window 154 adopted; grade unchanged, witness W216 (10:28Z) ESTABLISHED AS LABELED.** CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj (xschem 2.9.9 through 3.4.7, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; a file converter, not network-facing). Advisory cites fix `e29af39c`; vulnerable tag 3.4.7 = `3851bc5a`. Whole pinned `src/rawtovcd.c` at both versions; real `read_dataset()` on a crafted `.raw` header gives GCC and Clang ASan `heap-buffer-overflow WRITE of size 8` at pinned `:130`, fixed rejects; `sh lab/frontier/xschem2shell/harness/run-all.sh` 25 PASS / 0 FAIL. Rung 4 PARTIAL: file-chosen signed index reads back an allocator-derived pointer, not file-chosen stored bytes (tcache-grooming negative preserved). No function-pointer overwrite, control-flow hijack, wire, command or r5; witness W216 replayed a clean `git archive 42e0f33f` (25/0 harness, 3/0 real unrenamed `main`) and graded ESTABLISHED AS LABELED with no grade change. `reports/frontier-xschem2shell.md`, `reports/xschem2shell-status.md`. |
 | **StbVorbis2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:5xZ under standing #6 as the 147th route: hy4-flash route and three wake units minted, window 135 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-89266 (VulnCheck 2026-09-11, CWE-787, CVSS4 8.8 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H`, stb_vorbis <= 1.22); vulnerable v1.22 `2c980bb` sha256 `4c7cb2ff…e65636`, dev-branch fixed `daedcc5c…e86a5` with `CODEBOOK_LIMIT (1<<18)`, numeric fixed release UNKNOWN. `setup_malloc(vorb*, int)` truncates the file-derived `size_t` product `4 * 16519105 * 65 = 2^32+4` to `malloc(8)`; real `stb_vorbis_open_memory()` on a 205-byte OGG gives ASan `WRITE of size 4` at `stb_vorbis.c:3889`, fixed and safe inputs clean, and gdb reads file-chosen `4b 43 41 48` ("HACK") at the first OOB float (`lab/frontier/stbvorbis2shell/run-all.sh`, 9 PASS / 0 FAIL). Rung 4 PARTIAL: W202's `run-seq.sh` (4/0) replays four distinct file-derived words at consecutive OOB offsets, and W204's guarded-page harness measures 30 words / 120 bytes past the 8-byte region before `VORBIS_invalid_setup` returns (12/0); W204 also shows all 30 words overwriting an adjacent live object's canary and both halves of its pointer-typed field (`run-object.sh` 9/0, `fp_low=0x4b434148`, pointer read back, never dereferenced). The words are a float-representable progression, not per-offset arbitrary bytes; the victim is harness-placed. W206 drives the crafted OGG through real SDL_mixer's public `MIX_LoadAudio_IO()` API into its vendored v1.22 header: ASan `WRITE of size 4` at `stb_vorbis.c:4040` with fixed and safe inputs clean (`run-consumer.sh` 12/0, clean-archive receipt 12/0 plus five other scripts); no chosen word, pointer or command in that consumer. No wire, pointer control, command or witness verdict; NO r5. `reports/stbvorbis2shell-status.md`. |
 | **Ctranslate22Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 11:2xZ under standing #6 as the 148th route: hy4-flash route and three wake units minted, window 155 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-102566 / GHSA-7xqx-34h9-2w97 (CTranslate2 <4.8.1, CWE-787, CVSS4 8.5 `AV:L/UI:P`; file-format loader, not network-facing); fix `d9b991e` (PR #2068), vulnerable pin v4.8.0. Verbatim pinned `consume<char>()` / `Model::load()` ranges with a stand-in 16-byte `StorageView`: 16 PASS / 0 FAIL under GCC and Clang, ASan `WRITE of size 17` / `64` at pinned `model.cc:657`, fixed pin rejects, safe payload clean, chosen-byte readback; clean git-archive replay 16/0. W1 builds verbatim upstream `model.cc` against the real `StorageView`/`posix_memalign` allocator under ASan (`WRITE of size 17`/`48` into a real 16-byte region); W2 measures the real-heap pointer gap — the top chunk follows the buffer and later constructors overwrite chosen bytes at +0x40/+0x48, so no chosen pointer reached a dereference (80-byte payload aborted in `sysmalloc`), and a witness replay is requested. Rung 4 PARTIAL at one known offset; no whole-library build, pointer-IP, wire, command or r5; witness UNKNOWN. |
-| **Solanum2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 13:1xZ under standing #6 as the 149th route: hy4-flash route and three wake units minted (sync `written 3, removed 0`), pinned full-flag doctor `PASS local plant out of Git` / `GREEN` rc 0, window 156 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj (Solanum IRCd before fix `2ea1382`, CWE-120, CVSS4 8.5 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`); requires an authenticated linked server. Vulnerable pin parent `7bc7e34`, fixed pin `2ea1382` (+4/-0, `KILLLEN` truncation); pinned `ms_kill()` bodies verbatim with stand-in Client structs, `bash lab/frontier/solanum2shell/harness/run-all.sh` 18 PASS / 0 FAIL under GCC and Clang: ASan `global-buffer-overflow WRITE of size 533` at pinned `m_kill.c:277` for reason 510/700, safe 480 clean, fixed clean, plain chosen-byte readback past `buf+512`. Rung 4 PARTIAL: input-chosen length/bytes at a known offset of a harness static buffer; W1/W2 later confirm the ASan write (size 564) and plain chosen-byte readback in real ASan/plain IRCd builds over authenticated loopback S2S KILL, and W3 finds no writable consumer object after `buf`; still no pointer target, command or R5, witness UNKNOWN. |
-
+| **Solanum2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 13:1xZ under standing #6 as the 149th route: hy4-flash route and three wake units minted (sync `written 3, removed 0`), pinned full-flag doctor `PASS local plant out of Git` / `GREEN` rc 0, window 156 adopted; rung 3 real ircd process / rung 4 PARTIAL ESTABLISHED AS LABELED by witness W219 (#4481), no r5.** CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj (Solanum IRCd before fix `2ea1382`, CWE-120, CVSS4 8.5 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`); requires an authenticated linked server. Vulnerable pin parent `7bc7e34`, fixed pin `2ea1382` (+4/-0, `KILLLEN` truncation); pinned `ms_kill()` bodies verbatim with stand-in Client structs, `bash lab/frontier/solanum2shell/harness/run-all.sh` 18 PASS / 0 FAIL under GCC and Clang: ASan `global-buffer-overflow WRITE of size 533` at pinned `m_kill.c:277` for reason 510/700, safe 480 clean, fixed clean, plain chosen-byte readback past `buf+512`. Rung 4 PARTIAL: input-chosen length/bytes at a known offset of a harness static buffer; W1/W2 later confirm the ASan write (size 564) and plain chosen-byte readback in real ASan/plain IRCd builds over authenticated loopback S2S KILL, and W3 finds no writable consumer object after `buf`; still no pointer target, command or R5. W219 replayed `replay-all.sh` from clean archive `b8885fcc` (18/0, then 6/0), rebuilt both pins, matched eleven normalized evidence files and confirmed the PR:H prerequisite with an unauthenticated-peer counterexample (no KILL, no ASan). |
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
 rung, grade, route, mind-count, witness or R5 cell. Ruby2Shell's stock Rails
@@ -3432,6 +3431,57 @@ contains only an unexecuted, truncated illustrative trigger. Route policy now
 keeps `opencode-go/hy4-flash-free` primary and adds
 `opencode-go/hungerg-free` as the capped fallback; `docs/runtime-pin.md` carries
 the exact allowlist and concurrency limits.
+
+
+The 2026-11-25 17:1x–17:4xZ fold covers the ten author edges after
+`869e8435`. Only one carries an independent verdict: witness W219 (#4481)
+returned **ESTABLISHED AS LABELED** for Solanum2Shell W5, replaying
+`bash lab/frontier/solanum2shell/replay-all.sh` from a clean `b8885fcc`
+archive (18 PASS / 0 FAIL, then 6 PASS / 0 FAIL), hash-checking both pins and
+rebuilding them into its own prefixes. Its unauthenticated-peer counterexample
+got `Incompatible TS version`, no KILL and zero ASan, confirming the PR:H
+prerequisite. The published grade is rung 3 confirmed in a real ircd process
+and rung 4 PARTIAL with chosen length and bytes at a known global offset; no
+pointer, command or r5. This verdict text supersedes the row's earlier
+"witness UNKNOWN"; no rung cell, grade, route, mind count or R5 cell moved.
+
+Ruby2Shell's corrected-model tcache consumer was confirmed, but the stock
+chain stays closed. On the class that genuinely has glibc tcache (`<=0x420`),
+`bash lab/repro/ruby2shell-stageC.sh` got 5/5 `verdict=poisoned` with an mtrace
+pop at the forged target and 3/3 clean controls. The HTTP replay
+`lab/repro/ruby2shell-stageC-http.sh 3 2` got 3/3 request-thread attacks with
+16 chosen bytes at the nominated address (`7a` repeated) and a pop line there,
+2/2 clean controls, and all three attack processes aborting at teardown. The
+wire-only class probe then failed in 12 fresh unmodified processes
+(lab/repro/ruby2shell-stock-leakclass.sh with
+`RUBY2SHELL_LEAKCLASS_COUNT=12`): 0 `q38=0x251` tcache-`next`
+landings, 0 window `P` allocations, 0 window `Q` frees, and no arena base on
+the wire in the one surviving response pair. Stock/oracle-free/persistent r5
+remains NOT ACHIEVED; the harness-condition r5 cell is unchanged.
+
+Hping3Shell W14 extends chosen-byte control from W9's zero fill to two measured
+nonzero values: with `S[0]=0x7e` or `0xc3` and `i=0x20`, `j=0x10` in the clang
+`-O0` build, 8/8 attack checks passed with 16/16 chosen low bytes and
+counterfactual bytes `e7`/`e3`, against 4/4 clean no-inject and locally patched
+controls. `bash lab/frontier/hping3shell/wire/replay-target-byte.sh` scores 4
+baseline, 8 attack, 4 fixed checks, rc 0; the same frames also passed 8/0 under
+clang `-O2` (author-side rebuild). This is one IP octet, no full IP, pointer,
+command or grade change.
+
+The remaining limbs are bounded negatives and replay receipts. PHP W62's
+deployment-style `RLIMIT_FSIZE` at the calibrated cut K=1019 makes the kernel
+write exactly 1019 of 1892 bytes with no SIGXFSZ, but the live FPM worker stays
+alive and the splice is gone at consume time: no promotion, takeover or marker
+on 8.4.27-app, 8.4.28-app clean, full r5 still UNCLAIMED. Libraw W29 writes a
+file-chosen, glibc-plausible top-chunk size that turns W21's allocator abort
+into a clean exit; the low word varies across rebuilt binaries (`b5e1`/`b621`
+observed), so only the size-class claim is build-stable, with no later
+allocation overlapping the span and no grade change. Gpgme W17 adds one
+clean-archive wrapper (`lab/frontier/gpgme2shell/realbuild/run-witness.sh` with
+an output directory) scoring 25 PASS / 0 FAIL here; the queued #4333 replay offer stays
+UNKNOWN. KiCad's redundant 302243840-byte AppImage tar was removed after both
+tar and extracted hashes were verified; the extracted binary hash and replay
+recipe are unchanged.
 
 ## How the plant works
 

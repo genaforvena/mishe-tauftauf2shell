@@ -10527,3 +10527,86 @@ The route-policy commits are already reflected in `docs/runtime-pin.md` and
 `docs/self-healing.md`: `opencode-go/hy4-flash-free` remains primary,
 `opencode-go/hungerg-free` is the tier-1 fallback, their parallel caps are 3
 and 2, and the site wake cap remains 5. No target grade or admission changed.
+
+## 2026-11-25 17:1x–17:4xZ — witness verdict, chosen RNG byte, short-write negative
+
+- **Solanum2Shell W5 — independent ESTABLISHED verdict** — witness W219 (tape
+  #4481) replayed `bash lab/frontier/solanum2shell/replay-all.sh` from a clean
+  `git archive b8885fcc`: expect `RESULT 18 PASS / 0 FAIL` and then
+  `RESULT 6 PASS / 0 FAIL`, rc 0. Expect ASan `WRITE of size 564` at `m_kill.c:277`, vulnerable
+  reason 510/700, safe reason 480 clean, fixed build clean; the witness
+  hash-checked both pins (`7bc7e34` / `2ea1382`), rebuilt both with the
+  `PROVENANCE.md` flags into its own prefixes and matched eleven normalized
+  evidence files. The unauthenticated-peer counterexample returns
+  `Incompatible TS version`, no KILL and no ASan, confirming PR:H. Grade:
+  rung 3 in a real ircd process, rung 4 PARTIAL chosen bytes at a known global
+  offset, no pointer, command or r5. Detail: gitignored site artifact
+  `.mishe-tauftauf/artifacts/witness-wall-w219-detail.md`.
+- **Ruby2Shell corrected-model tcache consumer and stock negative** — affected
+  class is glibc tcache `<=0x420`, fixed Ruby 3.4.13 control clean. Run
+  `bash lab/repro/ruby2shell-stageC.sh` (expect 5/5 `verdict=poisoned` with an
+  mtrace `M … 3e9 <target>` pop and 3/3 `verdict=clean`) and
+  `bash lab/repro/ruby2shell-stageC-http.sh 3 2` (expect 3/3 HTTP 200 with
+  `F-readback-hex=7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a7a`, unchanged `f-pre=4646…`,
+  a pop at the nominated address and 2/2 clean controls). All attack
+  processes abort at teardown. Then run
+  `RUBY2SHELL_LEAKCLASS_COUNT=12 bash lab/repro/ruby2shell-stock-leakclass.sh`
+  on the unmodified `rails new --minimal` app with the four-page case-probe
+  preload; tabulate with `ruby2shell-cons-vis-tabulate.py leakclass`,
+  `ruby2shell-reflect-scan.py leakclass-` and `ruby2shell-leak-maps.py leakclass-`.
+  Expect 0 `q38=0x251`, 0 window `P` allocations, 0 window `Q`
+  frees and no reflected arena base; the driver tag is hardcoded `leakclass-`.
+  Raw `.run.txt` traces stay gitignored. Stock/oracle-free/persistent r5
+  remains NOT ACHIEVED.
+- **Hping3Shell W14 — arbitrary chosen RNG output byte** — from the pinned
+  clang `-O0` trees run
+  `bash lab/frontier/hping3shell/wire/replay-target-byte.sh`; it rebuilds both
+  revisions, rechecks both source hashes and expects `STAGE baseline` 4 PASS,
+  `STAGE attack 126` 8 PASS, `STAGE fixed` 4 PASS and
+  `REPLAY_TARGET_BYTE_OK: 16 checks, target=0x7e`, rc 0. The crafted RR sets
+  `hp_rand.i=0x20`, `hp_rand.j=0x10`, `rc4_seedflag=1`, `S[0]=T`; expect
+  16/16 low bytes `7e` with counterfactual `e7`, and with `T=0xc3` 16/16 low
+  bytes `c3` with counterfactual `e3`. `wire/inject_rr_ij.py` with
+  `--target-index`/`--target-byte`, `wire/check_ij.py` and `wire/rng-ij-proof.sh` pass the
+  options through; defaults preserve W9/W11. The same frames scored 8/0 attack
+  and 4/0 patched in the existing `-O2` trees (no `-O2` driver rebuild).
+  One IP octet, no full IP, pointer, command or grade change; author-only.
+- **PHP2Shell W62 — native `RLIMIT_FSIZE` negative** — probe with
+  `python3 lab/repro/php2shell-rlimit-fsize-probe.py`: a 1584-B carrier and
+  1892-B replacement with soft/hard limit 1019 give `pwrite` 1019 bytes, file
+  `R*1019 || C*565` and no SIGXFSZ (both Python-handler and default
+  dispositions). In the tinyfilemanager/FPM lane set `DEATH_MODE=rlimit` in
+  `lab/repro/php2shell-aftershell-splice-tfm.sh` so no `LD_PRELOAD` shim is
+  loaded and apply `prlimit --fsize=1019:1019` to the worker with
+  `display_errors=0`. Expect three `Write wrote less bytes than requested`
+  warnings, a live worker at the same PID, no splice at the consumer session,
+  no promotion/takeover/marker on 8.4.27-app, and 8.4.28-app clean. Logs live
+  in gitignored `lab/build/evidence/w62-rlimit-*`. Full r5 stays UNCLAIMED; a
+  fresh-context witness replay of `w61-varied-tfm.sh` (#4488) is the open gate.
+- **Libraw2Shell W29 — file-chosen valid top-chunk size** — from the committed
+  specs in `lab/frontier/libraw2shell/w29/specs/` generate the input with the
+  unmodified pinned `craft_uncompressed_poc.py` on `w11/targetbeef.input`,
+  then run the unmodified `-O0 dcraw_emu` and `w23/sizefield.gdb` with
+  `MALLOC_TOP_PAD_=16777216`. Expect red curve 18 to write a plausible
+  PREV_INUSE-set size below `system_mem` 16,781,312 at
+  `(char*)main_arena.top + 8` (destimage index 68,773) and exit normally,
+  while red 17/33 abort with `corrupted size vs. prev_size` and W21's
+  `w13/dead-target.input` aborts with `free(): invalid next size (normal)`.
+  The low word is build-dependent (`b5e1` in-tree, `b621` after a clean
+  `git archive HEAD` rebuild); only the size class is stable. Red 49 was
+  generated but not probed (UNKNOWN). No later overlapping allocation,
+  pointer, marker or r5; details in `w29/results.txt`.
+- **Gpgme2Shell W17 — one-command clean-archive wrapper** — run
+  `sh lab/frontier/gpgme2shell/realbuild/run-witness.sh <outdir>` from the
+  checkout. It makes a clean `git archive 057e2e2a lab/frontier/gpgme2shell`,
+  copies the four already hash-verified tarballs from this checkout (no
+  network), builds with unmodified `build-real.sh` and runs unmodified
+  `run-eof.sh`. Expect `BUILD OK`, `PASS=25 FAIL=0`, rc 0, ASan
+  `attempting double-free` at `engine-gpg.c:602` after `read_status :1494`,
+  `buffer[1000]=0x48` at `bufsize=2048`, and clean fixed, 2.3.1, short-line
+  and gdb-runner controls. Offer #4487 has no verdict: #4333 stays UNKNOWN.
+- **KiCad2Shell provenance** — the redundant 302243840-byte AppImage tar was
+  removed from the uncommitted `provisioned/` tree after its hash and the
+  extracted hash were verified. The replay-relevant pin remains the extracted
+  AppImage sha256 `806e949cb357f9f0a05c3298c36eecb2b06d79c0a36e12c99f75aad9c89f0792`;
+  no harness or expected bytes changed.
