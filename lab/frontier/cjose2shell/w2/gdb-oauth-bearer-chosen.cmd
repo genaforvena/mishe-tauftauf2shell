@@ -2,7 +2,7 @@ set pagination off
 set confirm off
 set print elements 0
 set breakpoint pending on
-set logging file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/evidence/oauth-bearer-chosen-gdb.log
+set logging file @HERE@/evidence/oauth-bearer-chosen-gdb.log
 set logging overwrite on
 set logging enabled on
 break oidc_oauth_validate_jwt_access_token
