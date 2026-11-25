@@ -1,0 +1,8 @@
+First run of run-consumer320b.sh at 2026-11-25T06:11:56Z scored 16 PASS /
+1 FAIL: "terminal field at sbbs.h:644 expected=[644] actual=[538]". Cause was
+my grep needle `terminal[TELNET_TERM_MAXLEN+1]`, which also matches an earlier
+field of that name in the pinned 3.20b sbbs.h; the lane was not re-provisioned
+and no source claim changed. Replaced the needle with
+`char<TAB>terminal[TELNET_TERM_MAXLEN+1]{};` and restored the `saved=` line
+that my first edit accidentally replaced. Rerun at 06:12:19Z: 17 PASS / 0 FAIL,
+rc 0. Not retried into existence: no evidence was discarded.

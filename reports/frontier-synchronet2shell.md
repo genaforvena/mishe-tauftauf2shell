@@ -9,13 +9,15 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
 no-size getter and field layout in the shipped 3.21e release; W19 finds that
 the earliest affected shipped release 3.20b instead places two `link_list_t`
-pointers in the 64-byte reach, measured only at source-bound harness scope.
+pointers in the 64-byte reach, measured only at source-bound harness scope;
+W20 traces those pointers through pinned 3.20b source to a teardown free
+loop, still source-bound.
 None changes the rung or the availability ceiling.
 Lab: `lab/frontier/synchronet2shell/`.
 
@@ -626,6 +628,42 @@ second shipped release. Source consumers of the overwritten list exist in
 `main.cpp:3922` `listFree(&savedlines)` at teardown), but no 3.20b build,
 wire session, runtime dereference, control-flow target, command, witness
 verdict or rung change was measured; the advisory remains availability-only.
+
+## W20 shipped 3.20b: source-bound consumer chain to a chosen-pointer free (2026-11-25, author source audit)
+
+W19 measured chosen pointer bytes in a modeled 3.20b `sbbs_t` prefix. This
+wake traced the same shipped commit `db9c5d6f` through eight pinned raw
+files to ask what the real source does with those pointers. No 3.20b build,
+wire session or live object was involved.
+
+- `main.cpp:5818` allocates the connection's `sbbs_t` on the heap:
+  `sbbs_t* new_node = new sbbs_t(...)`; `node_thread` calls
+  `sbbs->answer()` at `main.cpp:4425` and `delete sbbs` at `main.cpp:4625`.
+- `main.cpp:3564` runs `listInit(&savedlines, 0)` in the constructor,
+  before the overflow; `answer.cpp:520` then copies up to 64 bytes into
+  `terminal[41]`, reaching `savedlines.first/.last` at `sbbs_t+48/+56`.
+  `sbbs.h:644-646` and `link_list.h:68-69` pin those offsets.
+- `con_out.cpp:1519/1524` push and pop nodes through `&savedlines` in
+  `saveline()`/`restoreline()`.
+- `main.cpp:3922` calls `listFree(&savedlines)` in the destructor, which
+  runs before the `delete sbbs` at 4625. Pinned `link_list.c:76/87/107`
+  starts `listFreeNodes` at `list->first`, reads each node's flags and
+  calls `free(node)`; `listFree` invokes it.
+
+An empty `listInit` list has `first == NULL`, so a 40-byte TERM leaves a
+no-op teardown. W19's chosen non-NULL bytes at +48/+56 would instead make
+the teardown loop start at a chosen pointer and dereference/free it. That is
+a **source-bound chosen-pointer consumer chain**, consistent with the
+advisory's availability-only impact; no dereference was observed in a real
+process, no control-flow target or command is claimed, and the grade does
+not change. Whether a live 3.20b wire TERM actually reaches this loop stays
+UNKNOWN until a shipped-release build replay.
+
+`lab/frontier/synchronet2shell/release-label/term320b/consumer320b/run-consumer320b.sh`
+provisions all eight files, checks their SHA-256 pins and the exact source
+lines above: **17 PASS / 0 FAIL**, rc 0, live at 06:12:19Z. The first run
+was 16 PASS / 1 FAIL from an ambiguous grep needle, preserved in
+`consumer320b/evidence/negatives.txt`; no source claim changed.
 
 ## Ceiling and cheapest next experiment
 

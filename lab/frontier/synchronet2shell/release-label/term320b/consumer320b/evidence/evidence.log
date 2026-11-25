@@ -1,0 +1,29 @@
+run 2026-11-25T06:12:19Z shipped-3.20b commit=db9c5d6fd37ef74b6e6ca647308d351e656de18d source-bound consumer chain
+evidence/answer-320b.cpp: OK
+evidence/sbbs-320b.h: OK
+evidence/telnet-320b.h: OK
+evidence/sbbsdefs-320b.h: OK
+evidence/link_list-320b.h: OK
+evidence/main-320b.cpp: OK
+evidence/con_out-320b.cpp: OK
+evidence/link_list-320b.c: OK
+PASS 8 pinned 3.20b source hashes
+PASS no-size getter at answer.cpp:520
+PASS terminal field at sbbs.h:644
+PASS savedlines immediately after terminal+cterm_version
+PASS savedlines.first is first link_list_t member
+PASS savedlines.last is second link_list_t member
+PASS savedlines initialized in sbbs_t ctor at main.cpp:3564
+PASS answer() called in node_thread at main.cpp:4425
+PASS savedlines freed in destructor at main.cpp:3922
+PASS heap sbbs_t allocated at main.cpp:5818
+PASS node_thread deletes heap sbbs at main.cpp:4625
+PASS init precedes answer, answer precedes teardown
+PASS saveline pushes to corrupted list at con_out.cpp:1519
+PASS restoreline pops from corrupted list at con_out.cpp:1524
+PASS listFreeNodes starts at list->first at link_list.c:76
+PASS listFreeNodes frees each node at link_list.c:87
+PASS listFree calls listFreeNodes at link_list.c:107
+RESULT 17 PASS / 0 FAIL
+scope: pinned source chain only. No 3.20b build, wire TERM, live sbbs_t object,
+corrupted pointer dereference, control-flow target, command, rung change or witness verdict.
