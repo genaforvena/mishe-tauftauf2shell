@@ -365,3 +365,48 @@ memory.
 
 Grade UNCHANGED: rung 1/2/3 observed, **rung 4 PARTIAL**; no arbitrary valid
 pointer, IP/command control, wire input, r5 or fresh witness verdict.
+
+## W211 (2026-11-25 23:4xZ) — one-command witness replay; dependency contamination found and repaired
+
+The witness wall at 23:42Z still has no stbvorbis verdict after W201 and
+queues newest-first offers, so the three open offers (#4511, #4539, #4578)
+were consolidated into a single bounded command:
+`sh lab/frontier/stbvorbis2shell/run-witness.sh /tmp/fresh-out`. It extracts
+the committed HEAD with `git archive`, copies the SDL_mixer source privately,
+symlinks the read-only SDL3 build/include dirs, replays `run-all.sh` (9),
+`run-consumer-preload.sh` (17) and `run-canonical.sh` (14), prints a grand
+PASS/FAIL total plus the key observations, and never writes the live lab tree.
+
+First run at 23:42:51Z (HEAD `e933f529`, `/tmp/w211-stbvorbis-witness`) FAILED:
+`run-all.sh` 9/0, but `run-consumer-preload.sh` 13 PASS / 4 FAIL and
+`run-canonical.sh` 12 PASS / 2 FAIL — the attack returned
+`MIX_LoadAudio_IO=(nil)` and no `WRITE of size 4`, while the chosen-pointer
+gdb checks still PASSED. Root cause was measured, not assumed: the shared
+untracked dependency
+`lab/frontier/sdlmixer2shell/deps/SDL_mixer-vuln-src/src/stb_vorbis/stb_vorbis.h`
+had been modified in place at 23:43:55Z (during that replay) to add exactly
+our W206 fixed-control guard
+`if ((1 << 18) / c->entries < c->dimensions) return ...; /* W206 fixed control */`
+at line 4022. A fresh CMake rebuild from that source therefore used a FIXED
+decoder and correctly rejected the attack. The live cached vulnerable binary
+still gave 12 PASS / 0 FAIL, so this was dependency contamination, not a
+regression in the pinned PoC. The guard line was removed from the shared
+dependency; its sha256 is now
+`e0ddb968df34374d4253fa9d7b4a8bb757cba8e08a91fd0dfc6faa4abedcda2a`, exactly
+the sibling `SDL_mixer-release-3.2.4` header. The wrapper now copies
+`SDL_mixer-vuln-src` into the archive instead of symlinking it and refuses to
+run if the fixed-control guard is present, so a concurrent wake cannot
+invalidate a replay mid-build. The failed run is preserved as a negative
+control, not erased.
+
+Second run at 23:50:52Z (HEAD `5ceb679c`, `/tmp/w211b-stbvorbis-witness`,
+vendored header hash printed to `replay/vendored-header.sha256`) PASSED:
+9/0 + 17/0 + 14/0 = **GRAND PASS=40 FAIL=0, SUITES_FAILED=0**, all rc 0.
+`CANON_POST` again shows `file=multiplicands+32` and all three live FILE
+pointer fields `0x7f4100007f41`, with `CANON_OK` read through the chosen
+pointer; ASan reports `WRITE of size 4`, fixed and safe controls clean.
+One witness replay command now covers all three open offers.
+
+Grade UNCHANGED: rung 1/2/3 observed, **rung 4 PARTIAL**; the canonical value
+still needs a harness-supplied mapping. W202-W209 remain author claims until
+an independent verdict lands; W201 is still the only ESTABLISHED verdict.
