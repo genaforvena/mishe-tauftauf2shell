@@ -1,6 +1,6 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W10: independent witness verdict #4161 (W214) is ESTABLISHED
+Status 2026-11-25 W11: independent witness verdict #4161 (W214) is ESTABLISHED
 AS LABELED for the five unmodified real-build suites replayed from a clean
 archive of `c5ece2a9` — rung 3 on a real authenticated loopback wire, rung 4
 mechanics, and rung 5 MECHANICS only, NOT ESTABLISHED as remote execution.
@@ -9,6 +9,10 @@ malloc reuse and trampoline conditions stand. Staged harness 24 PASS / 0 FAIL;
 real suites base 5/0, extra 8/0, survive 7/0, call 9/0, exec 8/0, all rc 0.
 W10 adds an unwitnessed plain non-ASan replay (9 PASS / 0 FAIL) that removes
 the `quarantine_size_mb=0` condition from these mechanics; no grade change.
+W11 adds an unwitnessed no-detach plain lane (6 PASS / 0 FAIL) in which the
+app-owned fake callback objects are reached without nulling the channel's
+stdout buffer or callback list; address-directed reclamation of both freed
+objects replaces the detach. No grade change.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -406,3 +410,60 @@ suites remain the accepted evidence; W10 is additive and awaits any future
 independent replay. What would change the grade: a benign command reached
 without the lab detach/trampoline, or a provisioned consumer with a real
 in-callback free.
+
+## W11: benign command without the W3/W4 detach (2026-11-25 12:07Z)
+
+New additive evidence, not witness-replayed; no claim or grade change. The
+accepted ceiling lists the W3/W4 detach of `channel->stdout_buffer` and
+`channel->callbacks` as a required lab condition. This lane removes that
+detach in a plain non-ASan build and reaches the same benign command. The
+replacement is still lab-only allocator manipulation, so this is not a
+realistic consumer and no rung changes.
+
+`real/real_wire.c` gains two modes. `groom-nodetach-exec` saves the stdout
+buffer and first callback-iterator addresses before `ssh_channel_free()`,
+does **not** null either channel field (`survive=0`, no `SERVER groom-survive
+saved` line), then after the free allocates raw 16-byte nodes until the two
+saved addresses come back from the same glibc tcache bin. The reclaimed
+iterator is given `next` pointing at an app-owned fake iterator whose `data`
+is a fake `ssh_channel_callbacks_struct` with `channel_data_function` set by
+wire offset 112; the reclaimed buffer chunk is initialised as a live
+`ssh_buffer` with 128 bytes of static data. Offsets measured in the pinned
+header: `stdout_buffer=56`, `stderr_buffer=64`, `callbacks=112`, `counter=120`,
+`sizeof(channel)=128`, `sizeof(ssh_iterator)=16`, `sizeof(ssh_buffer_struct)=24`.
+No library source, pinned commit or allocator environment was changed.
+
+`sh lab/frontier/libsshch2shell/real/run-nodetach.sh`: **6 PASS / 0 FAIL**,
+rc 0, on 127.0.0.1, with evidence `real/evidence-nodetach-*.out` and four
+zero-byte touch markers kept as `real/evidence-nodetach-*.kept`. Vulnerable
+`real/evidence-nodetach-vuln-nodetach.out`: `SERVER data #2 len=128
+first=t off16=i`, `SERVER nodetach saved_buf=0x...fb50 saved_it=0x...f690`,
+`SERVER groom alloc=0x...fac0 wire_off120=0x... target=0x... survive=0`,
+`SERVER nodetach reclaim it=0x...f690 want=0x...f690 buf=0x...fb50
+want=0x...fb50`, `SERVER EXEC trampoline
+cmd=touch evidence-wire-vuln-groom-exec.marker`, `SERVER EXEC rc=0`,
+`SERVER done data_packets=2`, `SERVER target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`. No detach line appears. Three independent
+vulnerable repeats show the same command, reclamation and chosen write.
+
+Fixed control `real/evidence-nodetach-fixed-nodetach.out`: data #2 absent
+(`SERVER done data_packets=1`), no trampoline, no marker file,
+`SERVER target_after=0x4141414141414141`, `CLIENT rc=0 SERVER status=0x0`.
+Negative control `groom-nodetach-bare` (`real/evidence-nodetach-vuln-bare.out`)
+skips the reclamation: the server faults before finishing
+(`CLIENT rc=0 SERVER status=0x8b`), no `SERVER EXEC trampoline`, no
+`SERVER done` line. Address-directed reclamation is therefore required in
+this lane; the detach alone was not.
+
+Ceiling discipline: the accepted witness verdict is unchanged. W11 removes
+one lab condition (the W3/W4 detach) for this unwitnessed lane but replaces
+it with an equally artificial one (choosing freed-object addresses from the
+application and reinitialising them). Still required: PR:L authenticated
+peer; the application frees a remotely closed channel inside its data
+callback; the freed 128-byte channel reused for wire bytes; app-owned fake
+callback objects; an ASLR-local trampoline address chosen by a client forked
+from the same binary; a benign fixed command through an in-harness `system()`.
+No persistent shell, remote command service or ASLR-independent address.
+What would change the grade: a benign command reached without the
+detach/trampoline/app-owned objects, a witness counterexample, or a
+provisioned third-party consumer with a real in-callback free.

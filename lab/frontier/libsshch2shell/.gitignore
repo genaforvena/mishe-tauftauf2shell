@@ -17,3 +17,4 @@ real/build-plain-fixed/
 real/real_wire-plain-*
 real/plain-run/
 real/*.marker
+real/nodetach-run/

