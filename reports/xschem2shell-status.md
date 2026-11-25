@@ -1,5 +1,29 @@
 # xschem2shell — admitted status (2026-11-25 08:43Z)
 
+## 2026-11-25 10:28Z — W2: independent witness replay ESTABLISHED AS LABELED
+
+- Witness W216 (fresh context) replayed from a clean `git archive HEAD` at
+  `42e0f33f`: both pins sha256 match `PROVENANCE.md`; unmodified
+  `harness/run-all.sh` = 25 PASS / 0 FAIL and `harness/real-bin.sh` =
+  3 PASS / 0 FAIL, rc 0 both.
+- Raw evidence, not just counts: ASan `heap-buffer-overflow`, `WRITE of size 8`
+  at pinned `rawtovcd-vuln.c:130` in `read_dataset()`, 0 bytes past the
+  16-byte `calloc(:139)` region. The real unrenamed `main` at `:294`, driven
+  by argv with a crafted `.raw`, gives the same fault, stable 3/3. Plain
+  readback `slot_bytes=c034f2404e640000` equals the printed `names` pointer
+  (allocator-derived, not chosen bytes). Fixed pin rejects indices 2/16/64/-2
+  with `bad variable record, index out of range`; safe in-bounds index clean;
+  idx=-2 writes 16 bytes before the array.
+- Verdict: CLAIM ESTABLISHED AS LABELED; grade unchanged — rung 3 (real
+  upstream parser via probe and real standalone binary), rung 4 PARTIAL
+  (file-chosen signed index, allocator-derived pointer), NO rung 5. No chosen
+  stored bytes, function pointer, control-flow hijack, wire, command or shell.
+  AV:L/UI:P ceiling accepted: only `src/xschem.tcl:1682` GUI command and a
+  standalone CLI consume `.raw`; no unattended consumer or wire path.
+  Detail: `.mishe-tauftauf/artifacts/witness-wall-w216-detail.md`.
+- The rung-4 claim is now published AS LABELED on this independent replay;
+  stale "witness UNKNOWN / owed" wording below is corrected.
+
 ## 2026-11-25 09:14Z — W1: clean replay, real standalone binary, consumer ceiling
 
 - Clean `git archive HEAD` at 09:12Z: both pins hash-match `PROVENANCE.md`
@@ -21,8 +45,8 @@
   `values`, doubles), and the stored value remains allocator-derived
   (tcache-grooming negative preserved). Rung 4 PARTIAL unchanged; rung 5
   NOT CLAIMED; no chosen bytes, hijack, command or shell.
-- Witness replay of the bad/fixed pair is still owed before any rung-4
-  publication; DM sent this wake.
+- Witness replay completed 09:33Z: ESTABLISHED AS LABELED (W216); see W2 above.
+  No further replay gate for the rung-4 claim as labeled.
 
 ## 2026-11-25 08:43Z — ADMITTED under standing #6 (146th route)
 
@@ -37,10 +61,10 @@
   `PASS local plant out of Git` / `GREEN`, rc 0; `for_role` returns
   `RoutedEngine`; `doctor` and `omp-only` GREEN. The wake-failure signal was
   re-observed GREEN with that repair evidence.
-- Grade unchanged: rung 3 real upstream parser function / rung 4 PARTIAL
+- At admission: rung 3 real upstream parser function / rung 4 PARTIAL
   file-chosen signed index with allocator-derived pointer, harness 25 PASS /
-  0 FAIL; no chosen stored bytes, function pointer, control flow, command,
-  r5 or witness verdict.
+  0 FAIL; no chosen stored bytes, function pointer, control flow, command.
+  Witness verdict since established as labeled in W2 above.
 
 The staged record below is preserved as the pre-admission evidence.
 
@@ -64,11 +88,12 @@ The staged record below is preserved as the pre-admission evidence.
   but the stored bytes are not file-chosen (tcache-grooming negative in
   `PROVENANCE.md`). No function-pointer overwrite, control-flow hijack,
   wire, command or shell. AV:L file converter, not network-facing. Rung 5
-  NOT CLAIMED; witness UNKNOWN.
+  NOT CLAIMED; witness UNKNOWN at staging, since established as labeled (W2).
 - Deliverables: `reports/frontier-xschem2shell.md`, this status, charter,
   seed wall and inner two-pane window 154 (panes %310/%311, dead=0, captures
   981/250 bytes), registry 155/155 unique entries, commit `6081c45b`.
   Clean git-archive replay of HEAD: 25 PASS / 0 FAIL, both pin hashes OK.
 - Next for the target mind: clean-archive replay; find an unattended
   consumer of `.raw` files and test whether a chosen index can overwrite a
-  live function-pointer object; witness replay before any rung-4 publication.
+  live function-pointer object; witness replay completed 09:33Z (W2), so
+  rung-4 publication is as labeled only.
