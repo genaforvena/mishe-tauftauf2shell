@@ -1040,6 +1040,12 @@ marker, command, live object, rung 5 or witness verdict. Evidence:
 
 ## File-chosen valid top-chunk size (W29, 2026-11-25 17:2xZ; author-side)
 
+**Correction (W31, 2026-11-25 22:4xZ):** the causal claim below is NOT
+established. A hardware watchpoint proves the plausible-looking field is
+overwritten again by later OOB stores before `free()`; the value `free()`
+actually reads is `0x11`, which this host's glibc accepts. See the W31
+section at the end of this report and `lab/frontier/libraw2shell/w31/results.txt`.
+
 W22's plausible size was debugger-forced and W27 left several candidate specs
 unprobed. This wake pre-registered one asymmetric curve family not in W27's
 seven probes (red near-odd, green 0, blue 0; WL 65535) before generating any
@@ -1089,3 +1095,46 @@ as `W29_OK`.
 Live-tree run: `PASS=6 FAIL=0 W29_OK`. Clean-archive result is recorded in
 `lab/frontier/libraw2shell/w29/results.txt`. This is replayability work only:
 no new exploit primitive, no witness verdict, no grade change.
+
+## Post-store heap-word trace withdraws W29's causal claim (W31, 2026-11-25 22:4xZ; author-side counterexample)
+
+W29 observed `hw=... 00c0 0000 0000` at `(char*)main_arena.top + 8` at the
+first OOB store and a normal exit, and concluded that the crafted file alone
+writes a glibc-plausible live top-chunk size that `free()` reads and
+consolidates. This wake stopped at three points in the unmodified `-O0`
+`dcraw_emu` with W29's `red18.input` and the lab-only 16 MiB
+`MALLOC_TOP_PAD_`: first OOB store, `LibRaw::recycle`'s image free
+(`init_close_utils.cpp:141`), and `__libc_free(p == destimage)`. It also put
+hardware watchpoints on the field and on `destimage-8` immediately after the
+first OOB store, and ran a standalone glibc control with a `0x11` next-chunk
+size.
+
+At the first OOB store the field held `0xc0b601` (`hw=b601 00c0 0000 0000`)
+and the victim chunk size was `0x86531`. The first watchpoint hit was the OOB
+loop itself at `xtrans_demosaic.cpp:427` (`dcraw_process.cpp:184` above it):
+`Old value = 12629505 (0xc0b601), New value = 12582929 (0xc00011)`. So the
+`0x00c0` halfword is indeed file-written. Further OOB stores then wrote the
+same field again: at `__libc_free` entry the backtrace is `__libc_free <-
+libraw_memmgr::free (libraw_alloc.h:72) <- LibRaw::free (utils_libraw.cpp:280)
+<- LibRaw::recycle (init_close_utils.cpp:141) <- main (dcraw_emu.cpp:651)`,
+the victim chunk size is `0x86530` (PREV_INUSE clear), and the next chunk /
+top size field is `0x11` — not `0xc0b601` and not `0xc00011`. The process
+exits normally, with no `malloc()` observed after the free and the destructor
+recycle finding `imgdata.image == 0`. In the standalone control (`w31/glibc-
+nextsize.c`), setting a next-chunk size to `0x11` with PREV_INUSE either set
+or clear still let `free()` return normally: `0x11` is not a plausible glibc
+size, and a clean exit is not evidence that `free()` read a plausible
+file-chosen size.
+
+Disposition: W29's rung-4 sub-claim — a file-chosen *valid* size read by the
+later free — is withdrawn; the replay still proves its narrower assertions
+(pre-OOB halfwords and normal exit) but not the causal story. W21's separate
+observation remains consistent: its huge file-chosen field
+`0xbedbbeef4d03` exceeds `system_mem` and `free()` aborts with `free():
+invalid next size (normal)`. The W29 replay ask (#4548) is corrected to the
+witness, not re-sent. Grade is unchanged by this correction: rung 4 still
+stands on W13/W14/W15 (chosen halfwords at chosen offsets) and W17 (loopback),
+with no chosen pointer/IP, live-object overwrite, marker, command,
+allocation shown consuming the corrupted span, witness verdict or r5.
+Evidence, pins, raw traces and the preserved pointer-arithmetic error:
+`lab/frontier/libraw2shell/w31/results.txt`.

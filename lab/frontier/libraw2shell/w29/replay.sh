@@ -1,6 +1,8 @@
 #!/bin/sh
-# One-command author-side replay of W29: a crafted image alone writes a
-# glibc-plausible size into the live top chunk, so free() succeeds.
+# One-command author-side replay of W29's ASSERTIONS only (see W31 for the
+# counterexample that withdraws W29's causal interpretation). At the first
+# OOB store the field shows a 0x00c0 halfword and the process exits normally;
+# a watchpoint later shows that the value free() reads is instead 0x11.
 # Run from any cwd after bootstrap.sh (or via replay-frontier.sh):
 #   sh lab/frontier/libraw2shell/w29/replay.sh
 #
