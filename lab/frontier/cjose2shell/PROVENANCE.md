@@ -1055,3 +1055,30 @@ Earlier attempts in this wake are preserved in the same evidence directory:
 the first run used wrong response paths and the second accumulated a stale
 fixed error line; both were runner-check defects, not measurement changes,
 and were fixed before the clean receipt. No external target was contacted.
+
+## W216 — queued-offer health replay at current HEAD (2026-11-25 12:20-12:26Z)
+
+No new build, measurement, claim or grade change: both witness offers were
+replayed from one clean `git archive 4f35c3f4 lab/frontier/cjose2shell` to
+check that the published one-command receipts still work at current HEAD.
+Extraction and logs are in the gitignored site temp
+`.mishe-tauftauf/tmp/cjose-w216-VZ9Xr3/`; no tracked source was edited.
+
+- `sh replay-all-offers.sh` (W199, W202, W203) printed `REPLAY_W199_OK`,
+  `REPLAY_W202_OK`, `REPLAY_W203_OK`, `REPLAY_ALL_OFFERS_OK`, rc 0. Each limb
+  built 8 binaries and rechecked pins; `harness/evidence/summary.txt` and
+  `harness/evidence/replay-w181.log` each carried
+  `PASS=223 FAIL=0 trace=455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`.
+  W202 logged `LITERAL_ADDR=0x41bd2e PTR_HEX=2ebd410000000000`; W203 logged
+  `GROOM_OK=1 JWK_FNS_NOW=0x4213e0 FAKE_FNS=0x4213e0`, `MARKER_CALLED=1` for
+  attack and `0` for fixed and safe inputs.
+- `sh w2/run-oauth-bearer.sh` (W212, #4194), with the four gitignored build
+  directories copied from the working tree into the clean archive, printed
+  `REPLAY_OAUTH_BEARER: 9 PASS / 0 FAIL`, rc 0. All nine `CHECK` lines matched:
+  two helper and two unwrap hits, oversized first, post-unwrap chosen bytes,
+  fixed `jwe.c:599` rejection, fixed no-unwrap and two fixed helper hits.
+- `ss -ltn` showed no loopback listener on either offer's ports afterwards.
+
+This is an author replay of committed bytes, not a witness verdict. The two
+offers (#3925, #4194) remain queued and unreplayed by the witness as of chat
+#4331 (12:17:58Z); grades and the rung-5 ceiling are unchanged.
