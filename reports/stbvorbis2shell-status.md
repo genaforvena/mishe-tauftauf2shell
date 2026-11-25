@@ -24,12 +24,12 @@ gave 9 PASS / 0 FAIL: ASan `WRITE of size 4` at `stb_vorbis.c:3889` in
 control and safe input clean, plain vulnerable rc 134, and gdb observed four
 file-chosen bytes `4b 43 41 48` ("HACK") at the first out-of-bounds float.
 
-Grade stays rung 1/2/3 observed and **rung 4 PARTIAL** at the repeating-word,
-single-offset scope: a minimal harness, not a real consumer build; per-offset
-arbitrary bytes, exact OOB extent, pointer/IP, command, wire and witness
-verdict are UNKNOWN. NO rung 5. W202 below refines the per-offset scope;
-the remaining experiments are a guard-page extent count and a real consumer
-build from source. Any r5 claim needs an independent replay.
+Current grade (W208): rung 1/2/3 observed; **rung 4 PARTIAL**. W203 measured
+30 OOB words, W206 reached a real SDL_mixer consumer, W207 measured chosen
+allocator-metadata corruption, and W208 overwrote a live libc `FILE` pointer
+with a file-chosen 64-bit pattern under a valid-audio preload. The pattern is
+not a valid arbitrary pointer; IP/command control, wire input, rung 5 and a
+fresh witness verdict remain absent. Any r5 claim needs independent replay.
 
 ## W202 (2026-11-25) — measured update
 
@@ -232,3 +232,45 @@ script at 16:27Z: `run-consumer-heap.sh` 11/0 plus 14/0 heap-word checks,
 archive of `0c8b7c75` had one FAIL because the gitignored safe input was
 absent; `624df6c1` fixes that by regenerating it inside the replay. Live
 tree untouched.
+
+## W208 (2026-11-25) — live consumer FILE pointer receives chosen bytes
+
+The plain SDL_mixer driver now optionally keeps one valid decoded audio object
+alive, then loads the attack through the same public `MIX_LoadAudio_IO()` API.
+The valid preload is `evidence/preload-safe.ogg` (2673 bytes, sha256
+`3a619dff0ccaacd6b7fc0f52bde37d4fd20b767b34407924eb4377358da87992`), a
+locally generated 0.1-second mono Vorbis silence fixture. The attack remains
+the 205-byte `evidence/chosen.ogg`.
+
+On glibc 2.39, this preload leaves the attack file's live `FILE` object exactly
+32 bytes after `c->multiplicands`. OOB words at `+32..+124` (indices 8..31)
+overwrite 96 bytes of that `FILE` object. A hardware watchpoint on
+`_IO_save_base` observed the low chosen half at `j=0,k=26` and the high half at
+`k=27`; after the loop, `_IO_save_base`, `_IO_backup_base` and `_IO_save_end`
+all equal `0x4b4341484b434148`. The later decoder-failure seek path calls
+`free()` with that chosen value and SIGSEGVs (plain rc 139):
+
+    MIX_IoClamp_seek -> SDL stdio_seek -> fseeko ->
+    _IO_free_backup_area -> __GI___libc_free(mem=0x4b4341484b434148)
+
+Controls: vulnerable ASan with the same preload reports `heap-buffer-overflow`,
+`WRITE of size 4`, rc 134; the fixed vendored header with preload rejects the
+attack rc 0; safe input with preload exits 0. One-command replay:
+`sh lab/frontier/stbvorbis2shell/run-consumer-preload.sh` -> 17 PASS / 0 FAIL,
+rc 0. It also replays `run-consumer.sh` (12 PASS / 0 FAIL).
+
+Two alternative allocator routes were measured and rejected. A repeated exact
+IEEE subnormal `0x1011` cannot forge a `0x1010` chunk size because the adjacent
+high half is also written, producing `0x0000101100001011`; `sequence_p` is a
+monotonic arithmetic progression and cannot supply the required zero high
+half. File-driven lead codebooks of 2..1024 entries left the successor in the
+unsorted bin, tcache, or top; the 256-entry arm put `multiplicands` before top
+and produced `malloc(): corrupted top size`. No lead arm produced a live
+successor. Raw negatives are gitignored under `consumer/evidence/w208-*`.
+
+Grade remains **rung 4 PARTIAL**: this is chosen pointer-value corruption and
+use in a live real-consumer object, beyond W207's metadata-only landing. It is
+conditional on a prior valid audio load, local-file delivery, a repeated
+float-representable word, and a noncanonical resulting pointer. It is NOT a
+valid arbitrary pointer, IP/command control, wire input or rung 5. W208 is
+author-only; W201 remains the only ESTABLISHED witness verdict.

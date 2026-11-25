@@ -14,10 +14,23 @@ DIMS = int(sys.argv[3]) if len(sys.argv) > 3 else 65
 TARGET_IEEE = int(sys.argv[4], 0) if len(sys.argv) > 4 else 0  # desired float bits in memory
 SEQP = int(sys.argv[5]) if len(sys.argv) > 5 else 0  # sequence_p: feed `last` into successive floats
 # stb_vorbis reads this field through float32_unpack(), not raw IEEE bits.
-_mant = TARGET_IEEE & 0x7fffff
-_exp = (TARGET_IEEE >> 23) & 0xff
-assert TARGET_IEEE == 0 or (1 <= _exp <= 254 and (_mant & 7) == 0), "marker not exactly representable"
-VORBIS_MIN = ((TARGET_IEEE >> 31) << 31) | ((_exp + 641) << 21) | (0x100000 | (_mant >> 3)) if TARGET_IEEE else 0
+def ieee_to_vorbis(bits):
+    if bits == 0:
+        return 0
+    sign = (bits >> 31) << 31
+    mant = bits & 0x7fffff
+    exp = (bits >> 23) & 0xff
+    if exp == 0:
+        if mant == 0:
+            return sign | (639 << 21)  # negative zero
+        shift = (mant & -mant).bit_length() - 1
+        sig = mant >> shift
+        assert sig <= 0x1fffff, "subnormal not exactly representable"
+        return sign | ((639 - shift) << 21) | sig
+    assert 1 <= exp <= 254 and (mant & 7) == 0, "marker not exactly representable"
+    return sign | ((exp + 641) << 21) | (0x100000 | (mant >> 3))
+
+VORBIS_MIN = ieee_to_vorbis(TARGET_IEEE)
 
 class BitWriter:
     def __init__(self):

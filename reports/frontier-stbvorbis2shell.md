@@ -101,35 +101,28 @@ checks all four words; it leaves `run-all.sh` and its 9 PASS baseline intact.
 
 ## Rung-4 feasibility and ceiling
 
-**Rung 1** (deterministic trigger) and **rung 2** (undersized allocation with
-oversized write loop) are observed. **Rung 3** is ASan-confirmed in the
-unmodified upstream source through the real public entry point. **Rung 4 is
-partial**: file-chosen float words land at chosen consecutive OOB offsets in
-the harness driving the real upstream library through its public API. W201
-showed one repeating word (`HACK`) at the first OOB float (+8); W202 shows
-four distinct file-derived words at offsets +8..+20 via `sequence_p=1`.
-That harness is a minimal driver, not a real application build; the words
-remain float-representable values in an arithmetic progression, not arbitrary
-per-offset bytes; the write count past the allocation is not measured. No
-pointer/IP/command control, no network/wire input, no rung 5. Build cost is
-seconds, unlike the screened-out MediaInfoLib candidate.
+**Rung 1/2/3 are observed. Rung 4 is PARTIAL.** W203 measured 30 OOB words
+(120 bytes). W206 reached SDL_mixer's public API; W207 measured chosen
+allocator-metadata corruption in that real consumer. W208 then used a valid
+audio preload to place the attack `FILE` at `multiplicands+32`, overwrote its
+live `_IO_save_base`/`_IO_backup_base`/`_IO_save_end` pointers with
+`0x4b4341484b434148`, and observed libc `free()` receive that chosen value.
+
+The value is a repeated float-representable word, not a valid arbitrary
+pointer. The result is conditional on prior consumer state and local-file
+delivery. No IP/command control, wire input, rung 5 or fresh witness verdict
+exists. Full controls and replay are in `reports/stbvorbis2shell-status.md`.
 
 ## Remaining experiments (in priority order)
 
-1. Guard-page allocator: place a `PROT_NONE` page immediately after the
-   8-byte multiplicands allocation to count the exact OOB extent before the
-   process dies. The loop bound (`entries*dims` ~ 1.07e9 floats) is known
-   from source; the number of consecutive words that land in writable heap
-   before SIGSEGV is not. SUPERSEDED by W203 in
-   `reports/stbvorbis2shell-status.md`: this PoC stops at `:3895` after 31
-   writes (30 OOB words, 120 bytes); `entries*dims` is only the loop bound.
-   W204 then showed those same 30 words overwriting an adjacent object's
-   pointer field (`reports/stbvorbis2shell-status.md`).
-2. Real consumer build (issue #1947 used whisper.cpp) fed the same PoC: check
-   whether a file-steered OOB word reaches a pointer or control datum.
-3. Witness replay of any new claim before it is treated as established.
-   Per-offset steering via `sequence_p` (W202) is DONE above; it is not
-   arbitrary bytes and does not by itself raise the rung-4 grade.
+1. Independent witness replay of W202-W208.
+2. A canonical chosen pointer or control-flow target. The current repeated
+   word forms a noncanonical 64-bit pointer; `sequence_p` supplies a monotonic
+   progression and cannot place a zero/small high half after a low userspace
+   address half.
+3. A different live consumer field or consumer layout. Padding and file-driven
+   lead-codebook allocation sizes 2..1024 are measured negatives; do not retry
+   them unchanged.
 
 ## Handoff
 
@@ -201,3 +194,22 @@ route. One-command replay:
 `sh lab/frontier/stbvorbis2shell/run-consumer-heap.sh` -> 11 shell checks and
 14 heap-word checks, all PASS, rc 0 (includes the ASan/fixed controls through
 `run-consumer.sh`). Grade stays rung 4 PARTIAL, NO r5, unwitnessed.
+
+## W208 (2026-11-25) — real consumer live FILE pointer overwrite
+
+`consumer/mix-driver.c` optionally keeps a valid decoded audio object alive and
+then calls `MIX_LoadAudio_IO()` on `evidence/chosen.ogg`. The valid preload is
+`evidence/preload-safe.ogg`, 2673 bytes, sha256
+`3a619dff0ccaacd6b7fc0f52bde37d4fd20b767b34407924eb4377358da87992`.
+
+In the plain glibc 2.39 consumer, the attack `FILE` lands at
+`c->multiplicands+32`. OOB indices 8..31 overwrite its first 96 bytes. gdb
+watchpoints observed `_IO_save_base` become `0x4b434148` at `k=26`, then
+`0x4b4341484b434148` at `k=27`; `_IO_backup_base` and `_IO_save_end` receive
+the same 64-bit pattern. The failure seek passes that pointer to libc `free()`
+and SIGSEGVs. Vulnerable ASan rc 134, fixed rc 0, safe rc 0.
+
+Replay: `sh lab/frontier/stbvorbis2shell/run-consumer-preload.sh` -> 17 PASS /
+0 FAIL, rc 0. Grade stays rung 4 PARTIAL: chosen pointer-value corruption and
+use in a live real-consumer object, but no valid arbitrary pointer, IP/command,
+wire or r5. Author-only and unwitnessed.

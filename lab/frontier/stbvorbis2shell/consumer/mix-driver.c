@@ -10,10 +10,11 @@
 
 int main(int argc, char **argv)
 {
-    if (argc != 2) {
-        fprintf(stderr, "usage: %s file.ogg\n", argv[0]);
+    if (argc < 2 || argc > 3) {
+        fprintf(stderr, "usage: %s file.ogg [preload.ogg]\n", argv[0]);
         return 2;
     }
+    MIX_Audio *preload = NULL;
     if (!SDL_Init(SDL_INIT_AUDIO)) {
         fprintf(stderr, "SDL_Init failed: %s\n", SDL_GetError());
         return 2;
@@ -21,6 +22,16 @@ int main(int argc, char **argv)
     if (!MIX_Init()) {
         fprintf(stderr, "MIX_Init failed: %s\n", SDL_GetError());
         return 2;
+    }
+    if (argc == 3) {
+        SDL_IOStream *preio = SDL_IOFromFile(argv[2], "rb");
+        if (!preio) {
+            fprintf(stderr, "SDL_IOFromFile failed: %s\n", SDL_GetError());
+            return 2;
+        }
+        preload = MIX_LoadAudio_IO(NULL, preio, 1, 1);
+        fprintf(stderr, "MIX_PRELOAD=%p err=%s\n", (void *)preload, SDL_GetError());
+        if (!preload) return 2;
     }
     SDL_IOStream *io = SDL_IOFromFile(argv[1], "rb");
     if (!io) {
@@ -32,6 +43,7 @@ int main(int argc, char **argv)
     MIX_Audio *audio = MIX_LoadAudio_IO(NULL, io, 1, 1);
     fprintf(stderr, "MIX_LoadAudio_IO=%p err=%s\n", (void *)audio, SDL_GetError());
     if (audio) MIX_DestroyAudio(audio);
+    if (preload) MIX_DestroyAudio(preload);
     MIX_Quit();
     SDL_Quit();
     return 0;

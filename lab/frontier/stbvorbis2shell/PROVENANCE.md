@@ -52,9 +52,10 @@ writes logs under `evidence/`. Final clean run 2026-11-24T09:17Z: 9 PASS /
   codebook `minimum_value` wrote zeros: stb_vorbis reads that field through
   `float32_unpack()`, not as raw IEEE bits. Corrected by encoding the Vorbis
   float32 form; the earlier failed output is superseded, not hidden.
-- Exact total number of OOB floats actually executed before the process dies
-  is not measured; issue #1947 argues 31 from its loop bound. UNKNOWN here.
-- No network/wire replay, no real consumer build, no pointer/IP/command path.
+- W203 measured the exact OOB extent: 30 words / 120 bytes for this PoC.
+- W206 reached a real SDL_mixer consumer; W208 overwrote a live FILE pointer
+  under a valid-audio preload. No valid arbitrary pointer, IP/command path,
+  network/wire replay or rung 5 has been observed.
 
 ## W202 (2026-11-25) — sequence_p per-offset PoC
 
@@ -80,3 +81,19 @@ writes logs under `evidence/`. Final clean run 2026-11-24T09:17Z: 9 PASS /
   PASS=4 FAIL=0 in the extracted tree; regenerated PoC sha256
   `a3acf2d286d36b6f09945ad5fae0d52a1992e8af6cee44b810e6de297e1a76ba`
   matches the committed file. Source tree untouched.
+
+## W208 (2026-11-25) — valid-audio preload and live FILE pointer
+
+- `evidence/preload-safe.ogg`: locally generated with
+  `ffmpeg -f lavfi -i anullsrc=r=8000:cl=mono -t 0.1 -c:a libvorbis`,
+  2673 bytes, sha256
+  `3a619dff0ccaacd6b7fc0f52bde37d4fd20b767b34407924eb4377358da87992`.
+- `consumer/mix-driver.c` optionally keeps that decoded audio alive before
+  loading the attack through `MIX_LoadAudio_IO()`.
+- `consumer/preload-break.gdb` watches the live FILE `_IO_save_base` field.
+  OOB `k=26/27` write `0x4b434148` / `0x4b4341484b434148`; the failure seek
+  later passes `0x4b4341484b434148` to libc `free()`.
+- One-command replay: `sh run-consumer-preload.sh` -> 17 PASS / 0 FAIL, rc 0.
+- `gen_poc.py` now also encodes exactly representable IEEE subnormals. This
+  supported a negative forged-size test: repeated `0x1011` writes both halves
+  of the adjacent 64-bit size and cannot produce `0x1010`.
