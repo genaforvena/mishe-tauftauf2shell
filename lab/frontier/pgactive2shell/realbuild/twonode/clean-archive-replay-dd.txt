@@ -1,0 +1,26 @@
+Author clean-archive replay of commit e00ea425, 2026-11-25 17:55Z-17:56Z.
+Command: git archive e00ea425 lab/frontier/pgactive2shell/realbuild/twonode
+         | tar x -C /tmp/pgactive-two-dd-clean
+Then, in /tmp/pgactive-two-dd-clean/lab/frontier/pgactive2shell/realbuild/twonode:
+  ACTION=SKIP CONFLICT_TYPE=delete_delete VERSION=2.1.9 sh run-two.sh
+  ACTION=SKIP CONFLICT_TYPE=delete_delete VERSION=2.1.10 sh run-two.sh
+
+Vulnerable arm (library 3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998):
+  CREATE_GROUP=0 NODE1_READY=r JOIN_GROUP=0 NODE2_READY=r TABLE_ON_NODE2=t
+  HANDLER_REG1=0 HANDLER_REG2=0
+  SEED=0 SEED_ON_NODE2=1 DELETE1=0 DELETE2=0
+  TERMINATIONS1=1 TERMINATIONS2=1
+  server1.log: *** stack smashing detected ***: terminated
+  server1.log: background worker "pgactive apply worker" (PID 1009067) was terminated by signal 6: Aborted
+  server2.log: *** stack smashing detected ***: terminated
+  server2.log: background worker "pgactive apply worker" (PID 1009066) was terminated by signal 6: Aborted
+
+Fixed arm (library 986917a8656c4d099659a148cb077570e233b8d358273354f06b06f57ab2885a):
+  SEED=0 SEED_ON_NODE2=1 DELETE1=0 DELETE2=0
+  TERMINATIONS1=0 TERMINATIONS2=0
+  zero 'was terminated by signal' / 'stack smashing' lines
+
+Library restored after both runs to
+3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998.
+Both clusters stopped by the script. This is an author replay, not an
+independent witness verdict; rung ceiling unchanged.
