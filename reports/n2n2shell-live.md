@@ -233,10 +233,15 @@ from scratch in a fresh temporary directory three ways (gcc `-O1` plain,
 clang ASan vulnerable, clang ASan plus the single fixed bound), starts each
 supernode on 127.0.0.1 ports starting at `PORT_BASE` (default 18700), sends
 the committed safe and attack datagrams, and prints `RESULT <n> PASS / <m>
-FAIL`. Author run: 15 PASS / 0 FAIL, rc 0. Pins verify before any build;
+FAIL`. Author run: 19 PASS / 0 FAIL, rc 0. Pins verify before any build;
 raw logs stay under the temporary directory printed at the end (`KEEP=1`
-retains it). Scope: this covers the ASan stack write, its three pinned
-frames, the safe and fixed controls, and the exact chosen wire bytes. It
-does not replace the gdb chosen-byte inspection or the W3 peer-forwarding
-addendum; those keep their own recipes (`live/gdb-cmds2.txt`, and
-`live/w3_peer_forward.py` with `live/gdb-cmds-w3.txt`).
+retains it). Checks 1-15 cover the ASan stack write, its three pinned
+frames, the safe and fixed controls, and the exact chosen wire bytes.
+Checks 16-19, run when `gdb` is available (`NO_GDB=1` skips them with a
+loud line), break the plain supernode just after decode at
+`sn_utils.c:2331` and read the chosen words from the live process:
+`SLOT14=0x494d5a48494d5a48`, `SLOT96=0x5a48494d5a48494d`,
+`SLOT104=0x494d5a48494d`. This replaces the manual gdb chosen-byte
+inspection. It still does not replay the W3 peer-forwarding addendum, which
+keeps its own recipe (`live/w3_peer_forward.py` with
+`live/gdb-cmds-w3.txt`).
