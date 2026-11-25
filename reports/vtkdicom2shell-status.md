@@ -1,5 +1,20 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 09:48Z — W1 real build, real-object ASan, file-lane negative
+
+- Clean-archive replay 14 PASS / 0 FAIL; three pin hashes match provenance.
+- Real vulnerable vtk-dicom built against lab-local VTK 9.1 debs: real
+  `libvtkDICOM-9.1.a`, real `dicomdump`, ASan build. Crafted sequence-item
+  files reached real `vtkDICOMItem::Set`, but gdb showed `v.IsValid()==1`
+  for every attempted delete element (empty SQ, invalid VR, private tag):
+  no file-driven count decrement and no ASan report. File trigger OPEN.
+- Real-object API probe: ASan `WRITE of size 4` one past the real 4-slot
+  store at `vtkDICOMItem.cxx:195` via `Set` →
+  `FindDataElementOrInsert`; the same probe on the real `bcc8b26` build is
+  clean (count 6, no ASan). Rung 4 mechanics on real objects, NOT a file or
+  wire trigger. No pointer/IP/control-flow/command, no rung 5, no witness
+  replay. Evidence: `lab/frontier/vtkdicom2shell/evidence/`.
+
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (145th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 153; no

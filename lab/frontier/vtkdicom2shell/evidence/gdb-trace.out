@@ -1,0 +1,40 @@
+Breakpoint 1 at 0xd893b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 65.
+Breakpoint 2 at 0xd95e9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 295.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Set tag=0008,0005 valid=1 n=-1
+NewDataElement n=0 ptr=(nil)
+Set tag=0008,0001 valid=1 n=0
+NewDataElement n=0 ptr=(nil)
+Set tag=0008,0002 valid=1 n=1
+NewDataElement n=1 ptr=0x5555557e5a78
+Set tag=0008,0003 valid=1 n=2
+NewDataElement n=2 ptr=0x5555557e5a78
+Set tag=0008,0004 valid=1 n=3
+NewDataElement n=3 ptr=0x5555557e5a78
+Set tag=0008,0003 valid=1 n=4
+Set tag=0008,0005 valid=1 n=4
+NewDataElement n=4 ptr=0x5555557e5a78
+Set tag=0008,0005 valid=1 n=5
+Set tag=0008,0006 valid=1 n=5
+NewDataElement n=5 ptr=0x5555557cf628
+Set tag=0008,0007 valid=1 n=6
+NewDataElement n=6 ptr=0x5555557cf628
+Set tag=0008,0008 valid=1 n=7
+NewDataElement n=7 ptr=0x5555557cf628
+==== evidence/desync-undef.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) SQ "" : (0 items, delimited)
+  (0008,0004) US "" : [260] (2 bytes)
+  #(0008,0005) SQ/CS explicit/dictionary VR mismatch
+  (0008,0005) SQ "SpecificCharacterSet" : (0 items, delimited)
+  #(0008,0006) US/SQ explicit/dictionary VR mismatch
+  (0008,0006) US "LanguageCodeSequence" : [262] (2 bytes)
+  (0008,0007) US "" : [263] (2 bytes)
+  #(0008,0008) US/CS explicit/dictionary VR mismatch
+  (0008,0008) US "ImageType" : [264] (2 bytes)
+[Inferior 1 (process 3634722) exited normally]

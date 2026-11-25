@@ -1,0 +1,8 @@
+# Lab-local provisioning and builds (hundreds of MB); keep evidence/scripts.
+deps/
+build-vuln/
+build-asan/
+build-fixed/
+vuln-src/
+fixed-src/
+probe.o

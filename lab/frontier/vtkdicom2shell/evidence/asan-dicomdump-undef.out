@@ -1,0 +1,15 @@
+==== evidence/desync-undef.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) SQ "" : (0 items, delimited)
+  (0008,0004) US "" : [260] (2 bytes)
+  #(0008,0005) SQ/CS explicit/dictionary VR mismatch
+  (0008,0005) SQ "SpecificCharacterSet" : (0 items, delimited)
+  #(0008,0006) US/SQ explicit/dictionary VR mismatch
+  (0008,0006) US "LanguageCodeSequence" : [262] (2 bytes)
+  (0008,0007) US "" : [263] (2 bytes)
+  #(0008,0008) US/CS explicit/dictionary VR mismatch
+  (0008,0008) US "ImageType" : [264] (2 bytes)

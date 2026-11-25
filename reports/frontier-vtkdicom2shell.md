@@ -88,3 +88,37 @@ past the 4-element array. `sh harness/run-all.sh` builds GCC and Clang lanes:
 
 All local work stayed in `lab/frontier/vtkdicom2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
+
+## W1 — real vtk-dicom build and real-object control (2026-11-25 09:48Z)
+
+- Clean-archive replay: pins 3/3 sha256 match `PROVENANCE.md`; extracted
+  pins + harness in a fresh `/tmp` tree gave 14 PASS / 0 FAIL on GCC/Clang.
+- Real build: Ubuntu noble VTK 9.1 dev/runtime and Qt5 debs downloaded with
+  `apt-get download` and extracted *only* inside
+  `lab/frontier/vtkdicom2shell/deps/root/` (no system install). Vulnerable
+  parent `2dd74234` worktree built `libvtkDICOM-9.1.a` and the real
+  `dicomdump` program; clean ASan build of the same library and program also
+  built. A lab-local one-line VTK CMake-config edit makes unrelated VTK
+  build dependencies non-fatal; it does not touch DICOM source.
+- File lane (NEGATIVE so far): crafted explicit-VR-LE sequence items
+  (`tools/make-desync-dcm.py`) reached `vtkDICOMItem::Set` in the real
+  `dicomdump` parser, but gdb traces show every attempted "delete" element
+  produced `v.IsValid()==1`; the empty-SQ, invalid-VR and private-tag variants
+  did not decrement `NumberOfDataElements` and ASan stayed clean. No
+  file-driven delete → OOB has been observed. The advisory confirms an
+  invalid value is required; finding a wire-only source for it remains OPEN.
+- Real-object control (not a file/wire path): `tools/realitem-probe.cxx`
+  drives the *real* `vtkDICOMItem` from the vulnerable build with two direct
+  `Set(tag, invalid)` deletes at the two boundary points. ASan reports
+  `heap-buffer-overflow WRITE of size 4` at
+  `vuln-src/Source/vtkDICOMItem.cxx:195` (`e->Tag = tag;`), one past the
+  4-element store allocated at `:70` in `NewDataElement()`. The same probe
+  against the real fix `bcc8b26` build exits 0 with count 6 and no ASan
+  report (`evidence/asan-realitem-fixed.out`). This is rung 4 mechanics on
+  real objects, NOT a real-reader trigger: the deletes are API calls.
+- Grade unchanged in kind, stronger in substance: rung 3 pinned functions +
+  real-library ASan; rung 4 PARTIAL chosen bytes at a groomed offset (harness)
+  and OOB in a real object via API-driven deletes. No file-driven delete, no
+  real `vtkDICOMReader` OOB, no pointer/IP/control-flow/command, no rung 5,
+  no witness replay. Witness replay still owed.
+
