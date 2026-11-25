@@ -417,6 +417,7 @@ for logf in sorted(glob.glob(f'lab/build/evidence/{os.environ["LABEL"]}-{tag}-*.
         size_a = re.search(r'size=(0x[0-9a-f]+)', as_[-1]).group(1)
     # claim pops at the victim: M or C lines with matching ptr + request
     claimed = []
+    other_pops = []
     bpos = max((i for i, l in enumerate(lines)
                 if l.startswith('B ')), default=-1)
     for k, l in enumerate(lines):

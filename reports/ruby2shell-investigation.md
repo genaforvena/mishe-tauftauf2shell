@@ -3176,3 +3176,59 @@ bytes `0x5151...` in V's links after it was reused; no command or persistence.
 Grade unchanged. Next: correct the bin-slot offset against glibc's
 `bin_at()` definition, or abandon D2 bin occupancy as an oracle and test a
 different consumer of the measured `0x400` overlap pop.
+
+### Framework `0x3c0` consumer identified; production config gives a surviving `0x400` overlap pop but no command (2026-11-25, twenty-third push)
+
+The D2 range gate was rerun on the exact `d2exact` geometry
+(`vtransition2/3`, 16 fresh stock-Sinatra processes, one connection,
+`N=972`, `POISON_NEXT=0x90`, claim `0x43f,0x400`), with the bin view corrected
+to V's arena and request→chunk-size rounding. No `0x43f` claim returned V.
+The transition is now pinned to a specific consumer in
+`stock-sinatra-vtransition3-7.server.log`: V `0x74a4ec0a3f20` grows
+`0x401→0x453` at A (line 43984); `C 0 3c0 74a4ec0a3f20` at line 44241 —
+a framework `calloc` request `0x3c0` — allocates V *inside the attack
+request*, before the claim POST (first POST completes line 44413). At the
+claim D2 lines V reads `vsize=0x3d0 vfd=0x26 vbk=0`: the framework split it.
+The exact-fit claim therefore never sees an intact grown V. A tcache
+snapshot arm (`tcsnap`, 3 usable processes) found bin 61 full (7 entries),
+bins 62/63 empty at B, so the upcase's own `0x410`-class buffer cannot
+provide an unsorted shield via tcache overflow in this geometry.
+
+A deployment-config arm removed that consumer. With `RACK_ENV=production`
+and otherwise byte-identical wire inputs, `prodenv` (8 processes) and
+`overlap1` (8 processes) produced two surviving instances where the growth
+overlap was claimed:
+
+- `stock-sinatra-prodenv-2.server.log`: B `size=0x415`, A `size=0x453`
+  (physical next chunk at V+`0x400` was live, `sizefield=0x121`);
+  `C tid=... request=0x400 ptr=0x70734c05f160 size=0x453` at line 46008 and
+  `M 0 400 70734c05f160` at 46009: the claim's `0x400` allocation popped the
+  corrupted V. The later D2 shows V's user qwords
+  `0x4141414141414141 / 0x4242424242424242 / 0x5a5a…` — the claim part's
+  own chosen bytes. All POSTs and `GET /up` returned 404/200 with the
+  process alive. No `C 0 3c0` calloc appears anywhere in that log.
+- `stock-sinatra-overlap1-1.server.log` reproduces the same family:
+  B `0x415` → A `0x453`, `C tid request=0x400 ptr=0x74da1406fdd0 size=0x453`
+  at line 46183, process alive after claim/probe/`/up`.
+
+The mechanism by which production mode removes the `0x3c0` consumer is
+UNKNOWN (candidate: the dev 404-page render); this is an association across
+arms, not a controlled differential of only that variable. The write is
+chosen bytes into the *popped free chunk's own user area*, not into a live
+object's metadata: the claim's 0x400-byte write ends at V+0x3ff, while the
+glibc-created 0x40 remainder header sits at V+0x400 and is glibc-written.
+Three `0x43f` claim parts (`overlap3`, production config, 7 completed
+processes) produced **zero** exact-fit `0x43f` pops; run 5 had the exact
+`0x401→0x453` geometry and still missed, and one process hung to the tool
+timeout. A repeated-claim arm therefore does not yield a full-extent chosen
+write over the overwritten neighbor header.
+
+Verdict: stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED** — no
+command, no chosen-byte write into a live object, no second distinct
+command. The measured `0x400` pop plus process survival is a new rung-4-class
+mechanic under a labeled `RACK_ENV=production` condition, not an impact
+grade change. No safe/fixed control was run for these analysis arms; any
+later impact claim needs the full control pair. Named next: test the `0x400`
+pop without mtrace in the request path and whether a wire-shaped allocation
+can consume the `0x40` remainder at V+`0x400`; otherwise close this lane as
+bounded negative and open the jemalloc allocation lane noted by durendal.sh.
