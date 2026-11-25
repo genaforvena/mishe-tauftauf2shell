@@ -1773,3 +1773,32 @@ RLIMIT_FSIZE; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** Final clean-checkout
 recipe uses fresh SID `0badc0de00112233445566778899beef`/filler `Z`, distinct
 from all author positives, for both vulnerable and fixed runs. MTAG may vary
 but is not the required attacker-byte variation.
+
+## Wake 67 (2026-11-25) — single-pool progress-on GAP: takeover, no upload (negative)
+
+Opt-in `ONE_POOL=1` runs the producer and consumer as two workers of one FPM
+master on one port with `session.upload_progress=1`; default W66 behavior is
+unchanged. Harness SHA-256
+`f37bdf02c83d06e942a3a8179051ea8255239fc54b4e19c3308e3fbd67b5701f`.
+
+On 8.4.27 (SID `0badc0de00112233445566778899beef`, filler `Z`, K=1024, ASLR=2)
+the watcher saw the exact-tail armed splice at offset 1024 and tinyfilemanager
+accepted the promoted admin session. The authenticated in-gap upload fired
+with the producer request live and no worker death, but the app rejected it
+with `{"status":"error","info":"Invalid Token."}`; no `evil.php`, no marker,
+`positive=0 negative=0 mechanism=1 gap_no_death=1 marker=0 timing-control=1
+safe-control=1`. Evidence
+`lab/build/evidence/w67-onepool-final/aftershell-tfm-8.4.27-app-tfm.log`,
+SHA-256 `dc7028282d7a171c1f471ca32420ae0cf411de2f103afd7a91ef4520a07f986d`.
+The same variant on 8.4.28 saw no splice/takeover/upload, but its controls
+were invalid under progress-on, so it is not counted as a clean fixed control.
+An earlier one-pool run saw no splice because the producer landed on the
+unlimited worker; only the first worker was limited, so formation is
+scheduling-sensitive. Full detail and preserved hashes in
+`reports/php2shell-investigation.md` W67.
+
+Conclusion: single progress-on pool reaches takeover but not the designed
+command execution; the two-pool progress-off consumer remains required.
+Grade unchanged: **author-side rung-5 gates 1–5 under labeled two-pool
+RLIMIT_FSIZE; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** W66 witness base
+`33b6840d` and its recipe are untouched.

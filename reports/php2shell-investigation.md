@@ -1951,3 +1951,54 @@ GAP=1 DEATH_MODE=rlimit \
 Prerequisites are unchanged from W65. Witness must assert structural fields,
 not author-log hashes. Grade remains **author-side rung-5 gates 1–5 under
 labeled two-pool `RLIMIT_FSIZE`; gate 6 OPEN, full rung 5 NOT ESTABLISHED.**
+
+### Wake 67 (2026-11-25) — single-pool two-worker GAP edge: takeover without command execution
+
+W66 left the two-master configuration as a labeled condition. This wake tests
+whether it is necessary: `ONE_POOL=1` is an opt-in branch of
+`lab/repro/php2shell-aftershell-splice-tfm.sh` that keeps both workers in one
+FPM master on one port with `session.upload_progress=1`, instead of a second
+master on port+1 with progress off. Default W66 behavior is unchanged. Harness
+SHA-256: `f37bdf02c83d06e942a3a8179051ea8255239fc54b4e19c3308e3fbd67b5701f`.
+
+Run with SID `0badc0de00112233445566778899beef`, filler `Z`, `K=1024`,
+`ASLR=2`, MTAG `php2shell-r5-w67-onepool-final`:
+
+```sh
+KEEP_TMP=1 GAP=1 ONE_POOL=1 DEATH_MODE=rlimit \
+  SID=0badc0de00112233445566778899beef FILLER=Z \
+  MTAG=php2shell-r5-w67-onepool-final PORT=18360 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w67-onepool-final 18360
+```
+
+Observed (`lab/build/evidence/w67-onepool-final/aftershell-tfm-8.4.27-app-tfm.log`,
+SHA-256 `dc7028282d7a171c1f471ca32420ae0cf411de2f103afd7a91ef4520a07f986d`):
+watcher saw the armed 1597-byte splice with exact carrier tail at offset 1024;
+tinyfilemanager accepted the promoted session as admin; the authenticated
+in-gap upload fired while the producer request was live, no worker death and
+no signal 9. The app then answered `{"status":"error","info":"Invalid Token."}`:
+no `evil.php`, no marker, `result-check: positive=0 negative=0 mechanism=1
+gap_no_death=1 marker=0 timing-control=1 safe-control=1`. The post-completion
+timing and safe-input controls stayed clean.
+
+The same variant on fixed 8.4.28 had no watcher splice, no takeover and no
+upload (`lab/build/evidence/w67-onepool-fixed/`, SHA-256
+`1e4111d78a5e65f8e825a117757735f766bbc3718ce604d64bd372a757e555b3`). Its
+timing/safe assertions are INVALID under progress-on (`positive=0 negative=0
+mechanism=0 gap_no_death=0 marker=0 timing-control=0 safe-control=0`), so it is
+not a clean fixed control. An earlier identical run
+(`w67-onepool/...log`, SHA-256
+`1f8e4e15fbe12d13f2e66c51a61ea78b06b1495d227e9064d02cc2d7e72fa310`)
+saw no splice at all: the producer request landed on the unlimited worker.
+Despite the wait loop, only the first worker was a direct child when limits
+were applied, so one-pool splice formation is scheduling-sensitive.
+
+Conclusion: a single progress-on pool can reach admin takeover through the
+splice, but the designed upload is invalidated; the two-pool progress-off
+consumer remains required for the command-execution gate. W67 is a preserved
+negative, not a grade change. Grade remains **author-side rung-5 gates 1–5
+under labeled two-pool `RLIMIT_FSIZE`; gate 6 OPEN, full rung 5 NOT
+ESTABLISHED.** The W66 witness recipe and commit `33b6840d` are unchanged.

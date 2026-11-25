@@ -39,6 +39,11 @@ NATIVE_ATTACK=0
 GAP=${GAP:-0}
 [ "$GAP" = 0 ] || [ "$DEATH_MODE" = rlimit ] || { echo "GAP=1 requires DEATH_MODE=rlimit"; exit 2; }
 [ "$GAP" = 1 ] && [ -n "${CPU_LIMIT:-}" ] && { echo "GAP=1 forbids CPU_LIMIT"; exit 2; }
+ONE_POOL=${ONE_POOL:-0}
+[ "$ONE_POOL" = 0 ] || [ "$ONE_POOL" = 1 ] || { echo "ONE_POOL must be 0 or 1"; exit 2; }
+[ "$ONE_POOL" = 0 ] || [ "$GAP" = 1 ] || { echo "ONE_POOL=1 requires GAP=1"; exit 2; }
+PM_MAX_CHILDREN=1
+[ "$ONE_POOL" = 0 ] || PM_MAX_CHILDREN=2
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
 if [ "$GAP" = 1 ]; then
     PROGRESS_FREQ=${PROGRESS_FREQ:-100%}
@@ -128,7 +133,7 @@ pid = $D/fpm.pid
 [www]
 listen = 127.0.0.1:$PORT
 pm = static
-pm.max_children = 1
+pm.max_children = $PM_MAX_CHILDREN
 pm.max_requests = 0
 catch_workers_output = yes
 clear_env = no
@@ -242,6 +247,7 @@ wait_child() {
     local i c
     for i in $(seq 1 100); do
         c=$(child_pids)
+        if [ "$ONE_POOL" = 1 ] && [ -n "$c" ]; then echo "$c" | head -n 1; return 0; fi
         if [ "$(echo "$c" | grep -c .)" = 1 ]; then echo "$c"; return 0; fi
         sleep 0.1
     done
@@ -400,9 +406,20 @@ if [ "$DEATH_MODE" = rlimit ]; then
         CPU_LIMIT=$((CPU_SEC + 1))
         echo "preburn: coarse_requests=$COARSE_N fine_requests=$FINE_N cpu_ticks=$TICKS hz=$HZ armed_RLIMIT_CPU=$CPU_LIMIT" >> "$LOG"
     fi
-    prlimit --pid "$OLDCHILD" --fsize="$K:$K" >> "$LOG" 2>&1 || {
-        echo "failed to set worker RLIMIT_FSIZE" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
-    prlimit --pid "$OLDCHILD" --fsize >> "$LOG" 2>&1
+    LIMIT_PIDS=$OLDCHILD
+    if [ "$ONE_POOL" = 1 ]; then
+        for LW in $(seq 1 40); do
+            [ "$(child_pids | grep -c .)" -ge 2 ] && break
+            sleep 0.1
+        done
+        LIMIT_PIDS=$(child_pids)
+        echo "one-pool fsize targets: $LIMIT_PIDS" >> "$LOG"
+    fi
+    for LP in $LIMIT_PIDS; do
+        prlimit --pid "$LP" --fsize="$K:$K" >> "$LOG" 2>&1 || {
+            echo "failed to set worker RLIMIT_FSIZE on $LP" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
+        prlimit --pid "$LP" --fsize >> "$LOG" 2>&1
+    done
     if [ -n "${CPU_LIMIT:-}" ]; then
         prlimit --pid "$OLDCHILD" --cpu="$CPU_LIMIT:$CPU_LIMIT" >> "$LOG" 2>&1 || {
             echo "failed to set worker RLIMIT_CPU" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
@@ -413,10 +430,17 @@ else
 fi
 TRAIL_BYTES=$ARMED_TRAIL_BYTES
 if [ "$GAP" = 1 ]; then
+if [ "$ONE_POOL" = 1 ]; then
+    MARKPID=$(child_pids | grep -v "^$OLDCHILD$" | head -n 1)
+    [ -n "$MARKPID" ] || { echo "one-pool consumer worker missing" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
+    echo "one-pool consumer worker pid=$MARKPID (same pool, upload_progress=1, port $PORT)" >> "$LOG"
+    export CF_PORT=$PORT
+else
     start_consumer_fpm
     MARKPID=$(pgrep -P "$MPID2" | head -n 1)
-    echo "gap consumer worker pid=$MARKPID" >> "$LOG"
+    echo "gap consumer worker pid=$MARKPID (second master, upload_progress=0)" >> "$LOG"
     export CF_PORT=$CPORT
+fi
     rm -f "$D/splice-seen" "$D/gap-found"
     (
     python3 - "$SESS/sess_$SID" "$K" "$D/splice-seen" "$D/gap-found" "$FILLER" "$CARRIER" <<'PY' >> "$LOG" 2>&1
