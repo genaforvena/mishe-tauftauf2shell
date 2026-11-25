@@ -279,6 +279,31 @@ route. The same arm with 48 drain parts and filler-first order aborted 11/12
 pre-response; its one survivor was byte-clean too, closing the count/order
 knobs on both geometries. Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
 
+The 2026-11-25 tenth push answers Ruby2Shell's shrink-family claim
+question (`lab/repro/ruby2shell-shrink-claim.sh`, 48 fresh `rails new
+--minimal` processes in four arms: N=588 planted/unplanted, N=892
+planted, N=988 planted with 40×920B chosen-strip plants; each run
+sends an optional benign plant, the consH20-tail attack body
+(byte-verified against the cov-n588 geometry), a benign
+matched-class claim, then `/up`). No matched-class claim ever popped
+a corrupted chunk: plant churn moves victims to tiny/fresh classes;
+big unplanted binned victims abort during the attack at the request's
+own unsorted consumers (7/7); surviving corrupted classes sit below
+the ~809B plant floor; planted-band grown victims (0x411/0x415→0x453)
+rest in their original 0x410-band bin where matched claims fit
+without overshoot. Two N=988 runs complete attack, claim AND `/up` 200
+with the corrupted 0x453-class chunk still binned — a live stock
+process carrying a corrupted chunk across two later requests, the
+measured Einherjar input condition. Structural closure: the 0x53 byte
+always sets IS_MMAPPED, so every consumer that `free()`s the
+corrupted chunk aborts in `munmap_chunk` (measured); only
+neighbor-consolidations survive, making Einherjar structurally the
+only surviving consumer. Named next: Einherjar on the fresh-region
+pairing family — the `_method` tail forging `prev_size` plus a
+PREV_INUSE-clear successor size inside the upcase output span,
+consumed by the request's own teardown consolidation.
+Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed

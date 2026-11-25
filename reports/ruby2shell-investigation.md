@@ -1971,6 +1971,77 @@ consumption on the shrink family) is the next work package. No command,
 no persistence, no grade change; stock/oracle-free/persistent rung 5
 remains **NOT ACHIEVED**.
 
+
+### Shrink-family claim experiment — bounded NEGATIVE; a live
+### corrupted-binned-chunk substrate measured; the claim lane closes
+### STRUCTURALLY on IS_MMAPPED (2026-11-25, direct session, fifth batch)
+
+The named work package — claim the 0x53-corrupted chunk with a
+matched-class benign request — ran as the committed driver
+`lab/repro/ruby2shell-shrink-claim.sh`: per fresh process on the
+unmodified `rails new --minimal` app, an optional benign PLANT
+multipart (parts ≥809B), the consH20-tail ATTACK body (byte-identical
+to the cov-n588 geometry at N=588), a benign CLAIM multipart with
+matched-class parts, then `/up`; case probe and full M/F stream live
+together; 48 runs in four arms (`stock-rails-sc{588,588np,892,988}-*`,
+excerpts preserved, bulk trimmed):
+
+- **N=588 + plant (24×946B):** plant value/slice frees land before the
+  upcase, but the plant churn moves buffer1's pop into the fresh
+  frontier — victims are tiny (0x25–0x55) or fresh-region chunks
+  (`fd=bk=nil`), 9/12 survive all three requests, 0 claims. One run
+  shows the pairing family live end to end: buffer2 (0x262) pops the
+  fresh victim itself, the upcase output `SS…` plus the planted
+  `00005102` tail lands interior to buffer2 (V line:
+  `next_prev=0x535353535353`, `next_size=0x251`), and the 0x30 growth
+  overshoots into more top memory.
+- **N=588 unplanted:** the big binned victims return
+  (0x991/0xe71/0xdd1/0xa81/0x1571 → 0x953/0xe53/0xd53/0xa53/0x1553),
+  but 7/7 big-victim runs abort DURING the attack at the request's own
+  unsorted consumers (`malloc(): invalid next size (unsorted)`,
+  `mismatching next->prev_size`); the five survivors' corrupted
+  classes are all below the ~809B plant floor (0x50/0x150/0x250) —
+  structurally unclaimable. 0 claims.
+- **N=892 + plant:** victims tiny again (0x10–0x155), 8/12 survive
+  (matching the third batch's 8/18), 0 claims.
+- **N=988 + plant (40×920B with a chosen `[0][0x91]` strip qword at
+  content offset 848):** buffer1's class now equals the parser-slice
+  class (0x410), and the victims land in the planted/adjacent band —
+  0x411/0x415/0x471/0x601, grown to 0x453/0x453/0x653 — in 5/12.
+  **Runs sc988-3 and sc988-11 complete attack, claim AND `/up` 200
+  with the corrupted 0x453-class chunk still binned: a live stock
+  process carrying a corrupted chunk across two subsequent requests —
+  the first measured instance of the Einherjar input condition.**
+  Four runs die inside the CLAIM request (its own churn consumes the
+  corrupted small chunks first). 0 matched-class claims: the surviving
+  corrupted chunks sit in their ORIGINAL 0x410-band bin, poppable only
+  by 0x410-class requests whose value writes fit the grown usable size
+  (0x448) — no overshoot, no overlap write.
+
+**Structural closure of the claim lane.** The 0x53 byte always sets
+IS_MMAPPED (0x53 = 0x50|0x3), so ANY consumer that `free()`s the
+corrupted chunk — including every claimed value buffer at request-end
+GC — takes the `munmap_chunk` path and aborts
+(`munmap_chunk(): invalid pointer`, measured). A matched-class claim
+can therefore never be a surviving consumer on this allocator: it is
+either aborted earlier by the request's own bin scans (big unplanted
+victims, 7/7), sub-floor and unclaimable (small victims), or
+claimable only into a teardown abort (grown planted-band victims).
+The only consumers that survive are consolidations in which the
+corrupted chunk participates as a NEIGHBOR — backward consolidation
+reads `prev_size` from the freed chunk's own header and unlinks the
+corrupted chunk through its intact bin links; the corrupted chunk's
+own header is never passed to `free()`. **The Einherjar family is
+therefore structurally the only surviving consumer of a
+0x53-corrupted chunk here, not merely the next idea.**
+
+Boundary: the claim question is answered as a bounded negative with
+the consumer measured; the sc988-3/11 state (live process, binned
+corrupted chunk, two requests served after the corruption) is the
+measured input condition for it. No command, no persistence, no
+grade change; stock/oracle-free/persistent rung 5 remains
+**NOT ACHIEVED**.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -2156,3 +2227,31 @@ remains **NOT ACHIEVED**.
     on the shrink family (claim the shrunk chunk with a matching-class
     request and observe the overlap against the original successor).
     Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
+
+15. **Done this direct-session push (2026-11-25, fifth batch): the
+    shrink-family claim question is ANSWERED — bounded NEGATIVE with a
+    structural closure, and the Einherjar input condition is measured
+    live.** The committed `lab/repro/ruby2shell-shrink-claim.sh` ran 48
+    fresh processes in four arms (N=588 planted/unplanted, N=892
+    planted, N=988 planted with 40×920B chosen-strip plants). No
+    matched-class claim ever popped a corrupted chunk: the plant
+    churn moves victims to tiny/fresh classes (unplanted: 0 claims),
+    big unplanted binned victims abort during the attack at the
+    request's own unsorted consumers (7/7), survivors' corrupted
+    classes are below the 809B plant floor, and the planted-band
+    grown victims (0x453) sit in their original 0x410-band bin where
+    matched claims fit without overshoot. Two N=988 runs
+    (sc988-3, sc988-11) complete attack, claim AND `/up` 200 with the
+    corrupted 0x453-class chunk still binned — a live stock process
+    carrying a corrupted chunk across two later requests. Structural
+    closure: 0x53 always sets IS_MMAPPED, so every consumer that
+    `free()`s the corrupted chunk aborts in `munmap_chunk` (measured);
+    only neighbor-consolidations survive — Einherjar is structurally
+    the only surviving consumer, and the sc988-3/11 state is its
+    measured input condition. Named next: Einherjar on the
+    fresh-region pairing family — craft the `_method` tail so the
+    chosen boundary qwords forge `prev_size` plus a PREV_INUSE-clear
+    successor size inside the upcase output span, and let the
+    request's own teardown consolidation consume the corrupted chunk
+    as a neighbor. Stock/oracle-free/persistent rung 5 stays NOT
+    ACHIEVED.
