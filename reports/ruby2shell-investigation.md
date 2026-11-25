@@ -2842,3 +2842,47 @@ stays **NOT ACHIEVED**.
     change. This closes the churn-count lever; the next arm must change the
     attack body's own part sizes or ordering so the mapping buffer is the
     tcache head over a planted slice.
+
+28. **Thread attribution and live tcache head — same-thread result, planted
+    slice REACHED by the upcase, successor still wrong (2026-11-25, this
+    wake).** The named experiment took the "same tid" branch of item 27.
+    `lab/preload/mtrace.c` gained an opt-in `MTRACE_TID=1` field on M/F/C/R/D
+    lines (no field without the env, so all earlier traces stay parseable);
+    rebuilt with `gcc -shared -fPIC -O2 lab/preload/mtrace.c -o
+    lab/preload/mtrace.so`. Eight fresh N=972 full-trace processes reused the
+    exact `n972nochurn` wire bodies (drain `1000x7` and plant `1000x4` routed
+    `GET /up`, filler `1x1200`, claim `1039@0x400:0x411,1015`, CHURN=0,
+    `RAILS_MAX_THREADS=1`, `MTRACE_FREE_DUMP=1`, `MTRACE_TID=1`), tags
+    `n972tid4-1..8`; logs under `lab/build/evidence/`.
+    - Seven processes survived (`drain=200 plant=200 attack=404 ... up=200
+      alive=YES`). In `stock-rails-n972tid4-3.server.log` (205,024 lines) all
+      22 planted `0x3f1` slice allocations, all 22 of their frees, the last
+      `0x400`-class free before the upcase (L168061), and the `0x3f8` upcase
+      allocation (L171242) all carry tid `2783247`. The 271 boot-era D lines
+      of size `0x411` carry the main-thread tid `2777216`; no request-path
+      free is on a different thread. Thread attribution is CLOSED: forcing
+      old-gen frees onto the request thread would not change this arm.
+    - A `MTRACE_DUMP_BINS=1` replay (`n972tidb-1..4`) was unusable: all four
+      processes returned `attack=000` with no B snapshot and no L lines;
+      preserved as a bounded negative, not retried unchanged.
+    - The live-tcache probe `MTRACE_DUMP_TCACHE=1` (same wire geometry, tags
+      `n972tc-1..4`) read the real tcache at the B snapshot. In
+      `stock-rails-n972tc-3.server.log` tcache bin 62 (`0x400`) held five
+      planted-size slices; head `0x7b0d2c9e5b10` was a planted slice freed at
+      L76757. The upcase's `0x3f8` mapping buffer at L183068 was **another
+      planted slice**, `0x7b0d2c9e5f10` (allocated L17091, freed L76759) —
+      the one LIFO rank newer than the head, exactly the "later-freed wins"
+      prediction. The earlier-freed slice stayed at the head after the pop.
+    - Payoff still blocked: the popped slice's physical successor
+      `0x7b0d2c9e6310` had been reused as a `0x35` chunk by B time (it had
+      freed as `0x415` at L161423); the upcase wrote `0x53` onto it
+      (H/A lines), then `munmap_chunk(): invalid pointer` aborted with
+      `attack=000`. No claim pop, no command, no grade change. Stock/oracle-
+      free/persistent rung 5 stays **NOT ACHIEVED**; the blocker is now the
+      successor's identity at B time, not thread attribution or tcache depth.
+    - Named next: keep the tcache-head arm and vary only the plant geometry so
+      the slice the upcase pops has a *live planted 0x410 value* as its
+      physical successor at B (candidate: pair-edge slices whose value was
+      not consumed by the 1,200-part filler); verify with `S`/`E` lines and
+      the B physical pointer before spending on claim forging. Safe/fixed
+      controls remain mandatory for any impact claim.

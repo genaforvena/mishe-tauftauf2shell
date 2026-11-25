@@ -40,6 +40,7 @@ static const char *case_arm_file = 0;
 static const char *emit_arm_file = 0;
 static int emit_armed = 0;
 static int free_dump = 0;
+static int emit_tid = 0;
 static __thread size_t case_second_request = 0;
 static __thread char *case_end = 0;
 static __thread void *case_victim = 0;
@@ -49,6 +50,7 @@ static __thread char *case_win_hi = 0;
 static __thread int case_waiting_second = 0;
 static __thread int case_overflow_seen = 0;
 static int case_wide = 0;
+static int dump_tcache = 0;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -67,6 +69,8 @@ static void mtrace_init(void)
     case_stop_c = getenv("MTRACE_CASE_STOP_C") != NULL;
     dump_bins = getenv("MTRACE_DUMP_BINS") != NULL;
     case_wide = getenv("MTRACE_CASE_WIDE") != NULL;
+    dump_tcache = getenv("MTRACE_DUMP_TCACHE") != NULL;
+    emit_tid = getenv("MTRACE_TID") != NULL;
 }
 
 /* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
@@ -104,7 +108,14 @@ static void emit(const char *tag, unsigned long a, unsigned long b,
             return;
         emit_armed = 1;
     }
-    char buf[128];
+    char buf[160];
+    if (emit_tid) {
+        int len = snprintf(buf, sizeof buf, "%s %lu %lx %lx %lx %ld\n",
+                           tag, seq, a, b, c, (long)syscall(SYS_gettid));
+        if (len > 0)
+            write(out_fd, buf, (size_t)len);
+        return;
+    }
     int len = snprintf(buf, sizeof buf, "%s %lu %lx %lx %lx\n",
                        tag, seq, a, b, c);
     if (len > 0)
@@ -124,6 +135,83 @@ static unsigned long case_read(void *p)
         (ssize_t)sizeof value)
         return 0;
     return value;
+}
+
+struct mtrace_tcache_layout {
+    unsigned short counts[64];
+    void *entries[64];
+};
+static __thread void *cached_tcache;
+
+static int valid_tcache_pointer(unsigned long p)
+{
+    if (p < 0x10000 || (p & 0xf))
+        return 0;
+    struct mtrace_tcache_layout tc;
+    struct iovec local = { .iov_base = &tc, .iov_len = sizeof tc };
+    struct iovec remote = { .iov_base = (void *)p, .iov_len = sizeof tc };
+    if (syscall(SYS_process_vm_readv, getpid(), &local, 1, &remote, 1, 0) !=
+        (ssize_t)sizeof tc)
+        return 0;
+    unsigned nonzero = 0;
+    for (unsigned i = 0; i < 64; i++) {
+        if (tc.counts[i] > 7 || ((unsigned long)(uintptr_t)tc.entries[i] & 0xf))
+            return 0;
+        if (!!tc.counts[i] != !!tc.entries[i])
+            return 0;
+        nonzero += tc.counts[i];
+    }
+    return nonzero != 0;
+}
+
+static void *current_tcache(void)
+{
+    if (cached_tcache)
+        return cached_tcache;
+#if defined(__x86_64__)
+    unsigned long fs_base;
+    __asm__ __volatile__("mov %%fs:0,%0" : "=r"(fs_base));
+    for (long off = -0x4000; off <= 0x4000; off += 8) {
+        unsigned long p = case_read((void *)(fs_base + off));
+        if (valid_tcache_pointer(p)) {
+            cached_tcache = (void *)p;
+            return cached_tcache;
+        }
+    }
+#endif
+    return NULL;
+}
+
+static void tcache_dump(void)
+{
+    unsigned short *counts = current_tcache();
+    emit("T", 0, 0, (unsigned long)(uintptr_t)counts);
+    if (!counts) {
+        emit("S", 0, 0, 0);
+        return;
+    }
+    void **entries = (void **)(counts + 64);
+    unsigned long key = 0;
+    for (unsigned idx = 62; idx <= 63; idx++) {
+        if (counts[idx] && entries[idx]) {
+            key = case_read((char *)entries[idx] + 8);
+            if (key)
+                break;
+        }
+    }
+    for (unsigned idx = 62; idx <= 63; idx++) {
+        unsigned count = counts[idx];
+        unsigned long head = (unsigned long)(uintptr_t)entries[idx];
+        emit("S", idx, count, head);
+        if (!head || !key)
+            continue;
+        unsigned long p = head;
+        for (unsigned n = 0; n < count && n < 8 && p; n++) {
+            unsigned long next = case_read((void *)p) ^ (p >> 12);
+            emit("E", idx, p, next);
+            p = next;
+        }
+    }
 }
 
 static void case_snapshot(const char *tag, size_t sizefield)
@@ -166,6 +254,8 @@ static void case_snapshot(const char *tag, size_t sizefield)
         if (glen > 0)
             write(out_fd, gbuf, (size_t)glen);
     }
+    if (tag[0] == 'B' && dump_tcache)
+        tcache_dump();
     if (tag[0] == 'V') {
         char hbuf[288];
         int hlen = snprintf(hbuf, sizeof hbuf,
@@ -292,10 +382,20 @@ void free(void *p)
         if (free_dump && (sizefield & ~(size_t)7) >= 0x300 &&
             (sizefield & ~(size_t)7) <= 0x500) {
             char buf[160];
-            int len = snprintf(buf, sizeof buf, "D %p %#lx %#lx %#lx\n", p,
-                               sizefield, case_read(p), case_read((char *)p + 8));
-            if (len > 0)
-                write(out_fd, buf, (size_t)len);
+            if (emit_tid) {
+                int len = snprintf(buf, sizeof buf,
+                                   "D %p %#lx %#lx %#lx %ld\n", p, sizefield,
+                                   case_read(p), case_read((char *)p + 8),
+                                   (long)syscall(SYS_gettid));
+                if (len > 0)
+                    write(out_fd, buf, (size_t)len);
+            } else {
+                int len = snprintf(buf, sizeof buf,
+                                   "D %p %#lx %#lx %#lx\n", p, sizefield,
+                                   case_read(p), case_read((char *)p + 8));
+                if (len > 0)
+                    write(out_fd, buf, (size_t)len);
+            }
         }
         emit("F", (unsigned long)(uintptr_t)p, sizefield, 0);
     }
