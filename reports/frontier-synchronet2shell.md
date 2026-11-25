@@ -572,7 +572,9 @@ and the adjacent `sbbs_t` field block (`terminal[41]`, `line_delay`,
 `console`, `wordwrap`) are byte-identical to the pinned parent; `telnet.h`
 gives `TELNET_TERM_MAXLEN 40`, so the 64-byte wire cap still reaches 23 bytes
 past the 41-byte field. `lab/frontier/synchronet2shell/release-label/run-release321e.sh`
-is **11 PASS / 0 FAIL**; hashes and limits are in its `REPLAY.md`. Two wrong
+is **11 PASS / 0 FAIL** live and from a clean `git archive b60fd1b4` replay,
+with the same normalized digest `bb9067cf…2a5a3fbda9`; hashes and limits
+are in its `REPLAY.md`. Two wrong
 observations are preserved in `evidence/negatives.txt`: the mirror's `start`
 tag (a 2000 cvs2svn import with VERSION "3.00" and no SSH getter) is not the
 peeled `sbbs321e` tag, and the first assertion run failed only on leading

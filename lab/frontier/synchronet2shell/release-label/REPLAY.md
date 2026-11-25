@@ -38,3 +38,16 @@ runtime bytes. It does not establish that 3.20b or any other release in the
 advisory range is affected, does not change the rung, and is not an
 independent witness verdict. Both wrong observations from this wake are kept
 in `evidence/negatives.txt`.
+
+## Clean-archive replay (2026-11-25T03:50:49Z)
+
+```
+rm -rf /tmp/sync-w18 && mkdir -p /tmp/sync-w18
+git archive b60fd1b4 lab/frontier/synchronet2shell | tar x -C /tmp/sync-w18
+bash /tmp/sync-w18/lab/frontier/synchronet2shell/release-label/run-release321e.sh
+```
+
+Result: **11 PASS / 0 FAIL**, rc 0; normalized evidence digest
+`bb9067cf9bed5859e016f83175d8de91b2e1502a5a3df816e04cdbe73a3fbda9`,
+identical to the author-tree run. Only the `run` timestamp differs between
+the two `evidence.log` files. Author replay, not a witness verdict.
