@@ -1,0 +1,118 @@
+Breakpoint 1 at 0x90bf0: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp, line 716.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+test random seed 1795576058
+
+Breakpoint 1, yojimbo::ReliableOrderedChannel::ProcessPacketFragment (this=0x7ffff1dfbf30, messageType=0, messageId=0, numFragments=3, fragmentId=2, fragmentData=0x7ffff1f6a2f0 '\253' <repeats 200 times>..., fragmentBytes=500, blockMessage=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:716
+716	                memcpy( m_receiveBlock->blockData + fragmentId * m_config.blockFragmentSize, fragmentData, fragmentBytes );
+HIT blockData=0x7ffff1e8d360
+BEFORE-COPY words from blockData+1080 to +1560
+0x7ffff1e8d798:	0x0000000000000000	0x0000000000000000
+0x7ffff1e8d7a8:	0x00007ffff1e8d350	0x0000000000000021
+0x7ffff1e8d7b8:	0x00007ffff1e8d248	0x00007ffff1e8d8a8
+0x7ffff1e8d7c8:	0x0000000000000000	0x00007ffff1e8d7a8
+0x7ffff1e8d7d8:	0x00000000000000aa	0x00005555556c6268
+0x7ffff1e8d7e8:	0x0000000000000000	0x0000040000000400
+0x7ffff1e8d7f8:	0x0000010000000400	0x00040000ffffffff
+0x7ffff1e8d808:	0x3dcccccd00000400	0x000020003e800000
+0x7ffff1e8d818:	0x0000507000000330	0x0000000000000001
+0x7ffff1e8d828:	0x4059266666700000	0x0000000000000000
+0x7ffff1e8d838:	0x00007ffff1dfb190	0x0000000000000000
+0x7ffff1e8d848:	0x0000000000000000	0x0000000000000000
+0x7ffff1e8d858:	0x00007ffff1e8d890	0x00007ffff1e94940
+0x7ffff1e8d868:	0x00007ffff1e9b9f0	0x00007ffff1e9eaa0
+0x7ffff1e8d878:	0x00007ffff1f1ead0	0x00007ffff1f1f3d0
+0x7ffff1e8d888:	0x0000000000000020	0x0000507000000330
+0x7ffff1e8d898:	0x0000000000000400	0x00007ffff1e8d8e0
+0x7ffff1e8d8a8:	0x00007ffff1e8e910	0x0000000000000021
+0x7ffff1e8d8b8:	0x00007ffff1e8d7a8	0x00007ffff1e8e8d8
+0x7ffff1e8d8c8:	0x0000000000000000	0x00007ffff1e8d8a8
+0x7ffff1e8d8d8:	0x0000000000001002	0xffffffffffffffff
+0x7ffff1e8d8e8:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d8f8:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d908:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d918:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d928:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d938:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d948:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d958:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d968:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d978:	0xffffffffffffffff
+ASAN blockData
+warning: Using non-standard conversion to match function __asan_describe_address to supplied arguments
+0x7ffff1e8d360 is located 605024 bytes inside of 10485760-byte region [0x7ffff1df9800,0x7ffff27f9800)
+allocated by thread T0 here:
+    #0 0x7ffff78fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5555555c38b8 in yojimbo::DefaultAllocator::Allocate(unsigned long, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:106
+    #2 0x5555555ca16d in yojimbo::BaseClient::CreateInternal() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:140
+    #3 0x5555555d4c60 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:35
+    #4 0x5555555d49f7 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:26
+    #5 0x5555555a3f59 in test_loopback_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2912
+    #6 0x5555555a4cd9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:3031
+    #7 0x7ffff702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7ffff702a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x555555586ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: 65ca8387773c9b0ad2e98592c88943df7f8805f8)
+
+ASAN blockData+1100
+warning: Using non-standard conversion to match function __asan_describe_address to supplied arguments
+0x7ffff1e8d7ac is located 606124 bytes inside of 10485760-byte region [0x7ffff1df9800,0x7ffff27f9800)
+allocated by thread T0 here:
+    #0 0x7ffff78fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5555555c38b8 in yojimbo::DefaultAllocator::Allocate(unsigned long, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:106
+    #2 0x5555555ca16d in yojimbo::BaseClient::CreateInternal() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:140
+    #3 0x5555555d4c60 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:35
+    #4 0x5555555d49f7 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:26
+    #5 0x5555555a3f59 in test_loopback_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2912
+    #6 0x5555555a4cd9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:3031
+    #7 0x7ffff702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7ffff702a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x555555586ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: 65ca8387773c9b0ad2e98592c88943df7f8805f8)
+
+ASAN blockData+1500
+warning: Using non-standard conversion to match function __asan_describe_address to supplied arguments
+0x7ffff1e8d93c is located 606524 bytes inside of 10485760-byte region [0x7ffff1df9800,0x7ffff27f9800)
+allocated by thread T0 here:
+    #0 0x7ffff78fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5555555c38b8 in yojimbo::DefaultAllocator::Allocate(unsigned long, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:106
+    #2 0x5555555ca16d in yojimbo::BaseClient::CreateInternal() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:140
+    #3 0x5555555d4c60 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:35
+    #4 0x5555555d49f7 in yojimbo::Client::InsecureConnect(unsigned char const*, unsigned long, yojimbo::Address const&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:26
+    #5 0x5555555a3f59 in test_loopback_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2912
+    #6 0x5555555a4cd9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:3031
+    #7 0x7ffff702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7ffff702a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x555555586ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: 65ca8387773c9b0ad2e98592c88943df7f8805f8)
+
+718	                if ( fragmentId == 0 )
+AFTER-COPY words from blockData+1080 to +1560
+0x7ffff1e8d798:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7a8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7b8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7c8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7d8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7e8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7f8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d808:	0xabababababababab	0x4f4c2d454853494d
+0x7ffff1e8d818:	0xababababab00504f	0xabababababababab
+0x7ffff1e8d828:	0xabababababababab	0xabababababababab
+0x7ffff1e8d838:	0xabababababababab	0xabababababababab
+0x7ffff1e8d848:	0xabababababababab	0xabababababababab
+0x7ffff1e8d858:	0xabababababababab	0xabababababababab
+0x7ffff1e8d868:	0xabababababababab	0xabababababababab
+0x7ffff1e8d878:	0xabababababababab	0xabababababababab
+0x7ffff1e8d888:	0xabababababababab	0xabababababababab
+0x7ffff1e8d898:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8a8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8b8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8c8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8d8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8e8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8f8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d908:	0xabababababababab	0xabababababababab
+0x7ffff1e8d918:	0xabababababababab	0xabababababababab
+0x7ffff1e8d928:	0xabababababababab	0xabababababababab
+0x7ffff1e8d938:	0xffffffffabababab	0xffffffffffffffff
+0x7ffff1e8d948:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d958:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d968:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d978:	0xffffffffffffffff

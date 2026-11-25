@@ -1,21 +1,21 @@
 =================================================================
-==3361784==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5190000004cc at pc 0x598242c810f8 bp 0x7ffcdf74a000 sp 0x7ffcdf7497c0
+==277327==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5190000004cc at pc 0x5b0d6f0000f8 bp 0x7ffca0652760 sp 0x7ffca0651f20
 WRITE of size 500 at 0x5190000004cc thread T0
-    #0 0x598242c810f7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0xc50f7) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
-    #1 0x598242cc4ec0 in ReliableOrderedChannel::ProcessPacketFragment(int, unsigned short, int, unsigned short, unsigned char const*, int, BlockMessage*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:213:17
-    #2 0x598242cc3eeb in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:303:13
-    #3 0x72f239c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #4 0x72f239c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #5 0x598242be8364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0x2c364) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
+    #0 0x5b0d6f0000f7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0xc50f7) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
+    #1 0x5b0d6f043ec0 in ReliableOrderedChannel::ProcessPacketFragment(int, unsigned short, int, unsigned short, unsigned char const*, int, BlockMessage*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:213:17
+    #2 0x5b0d6f042eeb in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:303:13
+    #3 0x715542e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x715542e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5b0d6ef67364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0x2c364) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
 
 0x5190000004cc is located 0 bytes after 1100-byte region [0x519000000080,0x5190000004cc)
 allocated by thread T0 here:
-    #0 0x598242c831b3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0xc71b3) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
-    #1 0x598242cc45d8 in ReceiveBlockData::ReceiveBlockData(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:107:33
-    #2 0x598242cc3dfc in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:293:34
-    #3 0x72f239c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #4 0x72f239c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #5 0x598242be8364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0x2c364) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
+    #0 0x5b0d6f0021b3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0xc71b3) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
+    #1 0x5b0d6f0435d8 in ReceiveBlockData::ReceiveBlockData(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:107:33
+    #2 0x5b0d6f042dfc in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/harness.cpp:293:34
+    #3 0x715542e2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x715542e2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5b0d6ef67364 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0x2c364) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/harness/vuln-asan+0xc50f7) (BuildId: f80d55109f54432e45ec5ad9b5fdf20e938e2120) in __asan_memcpy
 Shadow bytes around the buggy address:
@@ -49,4 +49,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3361784==ABORTING
+==277327==ABORTING

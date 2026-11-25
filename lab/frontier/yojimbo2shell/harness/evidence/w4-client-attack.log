@@ -1,0 +1,33 @@
+mode=client variant=attack fake_vtable=0x5103c0
+client connecting to 127.0.0.1:40000
+client connected
+MISHE-R5-CALL command=[touch /tmp/yojimbo-r5-established]
+MISHE-R5-RC 0
+MISHE-R5-CALL command=[touch /tmp/yojimbo-r5-established]
+MISHE-R5-RC 0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==1091878==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000004a3a6f bp 0x7fffb8390eb0 sp 0x7fffb8390e80 T0)
+==1091878==The signal is caused by a READ memory access.
+==1091878==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x4a3a6f in remove_free_block /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:583
+    #1 0x4a408b in block_remove /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:630
+    #2 0x4a46b4 in block_merge_next /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:702
+    #3 0x4a63e9 in tlsf_free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:1190
+    #4 0x414374 in yojimbo::TLSF_Allocator::Free(void*, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:190
+    #5 0x439517 in yojimbo::ReliableOrderedChannel::ReceiveBlockData::~ReceiveBlockData() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/include/yojimbo_reliable_ordered_channel.h:330
+    #6 0x430950 in yojimbo::ReliableOrderedChannel::~ReliableOrderedChannel() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:63
+    #7 0x4279b1 in yojimbo::Connection::~Connection() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:162
+    #8 0x444b1c in yojimbo::BaseClient::DestroyInternal() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:184
+    #9 0x425179 in yojimbo::Client::Disconnect() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:105
+    #10 0x442f18 in yojimbo::BaseClient::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:75
+    #11 0x42588f in yojimbo::Client::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:142
+    #12 0x40625c in run_client /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:189
+    #13 0x40657f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:222
+    #14 0x7ee482c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #15 0x7ee482c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #16 0x403bf4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x403bf4) (BuildId: e70530aafc5873240d7c7de1c1071c346409ba5a)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:583 in remove_free_block
+==1091878==ABORTING

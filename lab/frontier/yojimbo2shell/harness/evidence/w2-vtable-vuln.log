@@ -1,0 +1,128 @@
+test random seed 1795576058
+
+[serialize]
+
+test_endian
+test_bitpacker
+test_bits_required
+test_zigzag
+test_serialize
+test_read_write
+test_serialize_integer_validation
+test_serialize_integer_full_range
+test_serialize_bytes_validation
+test_int_relative_validation
+test_compressed_float_validation
+
+[netcode]
+
+test_queue
+test_endian
+test_address
+test_sequence
+test_connect_token
+test_challenge_token
+test_connection_request_packet
+test_connection_denied_packet
+test_connection_challenge_packet
+test_connection_response_packet
+test_connection_keep_alive_packet
+test_connection_payload_packet
+test_connection_disconnect_packet
+test_connect_token_public
+test_encryption_manager
+test_replay_protection
+test_client_create
+test_server_create
+test_client_server_connect
+test_client_server_ipv4_socket_connect
+test_client_server_ipv6_socket_connect
+test_client_server_dual_socket_connect
+test_client_server_keep_alive
+test_client_server_multiple_clients
+test_client_server_multiple_servers
+test_client_error_connect_token_expired
+test_client_error_invalid_connect_token
+test_client_error_connection_timed_out
+test_client_error_connection_response_timeout
+test_client_error_connection_request_timeout
+test_client_error_connection_denied
+test_client_side_disconnect
+test_server_side_disconnect
+test_client_reconnect
+test_disable_timeout
+test_loopback
+test_packet_tagging
+
+[reliable]
+
+test_endian
+test_sequence_buffer
+test_generate_ack_bits
+test_packet_header
+test_acks
+test_acks_packet_loss
+test_packets
+test_large_packets
+test_sequence_buffer_rollover
+test_fragment_cleanup
+
+[yojimbo]
+
+test_crypto_aead_vectors
+test_queue
+test_address
+test_bit_array
+test_sequence_buffer
+test_allocator_tlsf
+test_connection_reliable_ordered_messages
+test_connection_reliable_ordered_blocks
+test_connection_reliable_ordered_blocks_max_size
+test_connection_reliable_ordered_messages_and_blocks
+test_connection_reliable_ordered_messages_and_blocks_multiple_channels
+test_connection_unreliable_unordered_messages
+test_connection_unreliable_unordered_blocks
+test_connection_reject_empty_packet
+test_connection_unreliable_rejects_block_fragment
+test_connection_reliable_block_fragment_on_disabled_blocks
+test_connection_reliable_over_budget_packet
+test_client_server_messages
+test_client_server_start_stop_restart
+test_client_server_message_failed_to_serialize_reliable_ordered
+test_client_server_message_failed_to_serialize_unreliable_unordered
+test_client_server_message_exhaust_stream_allocator
+test_client_server_message_receive_queue_overflow
+test_reliable_outbound_sequence_outdated
+test_single_message_type_reliable
+test_single_message_type_reliable_blocks
+test_single_message_type_unreliable
+test_loopback_block_fragment_overflow
+MISHE-VTABLE-CALL
+MISHE-VTABLE-CALL
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==607056==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x0000004c8fb2 bp 0x7ffe6113fb60 sp 0x7ffe6113fb30 T0)
+==607056==The signal is caused by a READ memory access.
+==607056==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x4c8fb2 in remove_free_block /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:583
+    #1 0x4c95ce in block_remove /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:630
+    #2 0x4c9bf7 in block_merge_next /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:702
+    #3 0x4cb92c in tlsf_free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:1190
+    #4 0x440f16 in yojimbo::TLSF_Allocator::Free(void*, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:190
+    #5 0x4636e3 in yojimbo::ReliableOrderedChannel::ReceiveBlockData::~ReceiveBlockData() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/include/yojimbo_reliable_ordered_channel.h:330
+    #6 0x45b7d2 in yojimbo::ReliableOrderedChannel::~ReliableOrderedChannel() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:63
+    #7 0x454ac1 in yojimbo::Connection::~Connection() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:162
+    #8 0x44838e in yojimbo::BaseClient::DestroyInternal() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:184
+    #9 0x452559 in yojimbo::Client::Disconnect() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:105
+    #10 0x44678a in yojimbo::BaseClient::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:75
+    #11 0x452c6f in yojimbo::Client::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:142
+    #12 0x414df6 in PumpClientServerUpdate(double&, yojimbo::Client**, int, yojimbo::Server**, int, float) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:1554
+    #13 0x42135a in test_loopback_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2958
+    #14 0x421de9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:3050
+    #15 0x753f4822a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x753f4822a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x403c94 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x403c94) (BuildId: 7bde3f1c791e8f65590ba496ca3c56dff7e89346)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/tlsf/tlsf.c:583 in remove_free_block
+==607056==ABORTING

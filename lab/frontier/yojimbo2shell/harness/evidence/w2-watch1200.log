@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x90bf0: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp, line 716.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+test random seed 1795576058
+
+Breakpoint 1, yojimbo::ReliableOrderedChannel::ProcessPacketFragment (this=0x7ffff1dfbf30, messageType=0, messageId=0, numFragments=3, fragmentId=2, fragmentData=0x7ffff1f6a2f0 '\253' <repeats 200 times>..., fragmentBytes=500, blockMessage=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:716
+716	                memcpy( m_receiveBlock->blockData + fragmentId * m_config.blockFragmentSize, fragmentData, fragmentBytes );
+blockData=0x7ffff1e8d360
+718	                if ( fragmentId == 0 )
+POST value at +1200 = 0x4f4c2d454853494d
+Hardware read watchpoint 2: *(unsigned long long*)($bd+1200)
+CONTINUING TO READ WATCHPOINT
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555d7c44 in yojimbo::Connection::Reset (this=0x7ffff1dfb1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+172	            m_channel[i]->Reset();
+WATCHPOINT HIT PC
+#0  0x00005555555d7c44 in yojimbo::Connection::Reset (this=0x7ffff1dfb1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+#1  0x00005555555cce8e in yojimbo::BaseClient::Reset (this=0x7ffff58318a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:309
+#2  0x00005555555c944d in yojimbo::BaseClient::Disconnect (this=0x7ffff58318a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:63
+#3  0x00005555555d5432 in yojimbo::Client::Disconnect (this=0x7ffff58318a0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:103
+#4  0x00005555555c967b in yojimbo::BaseClient::AdvanceTime (this=0x7ffff58318a0, time=100.70000001043081) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:75
+#5  0x00005555555d5b60 in yojimbo::Client::AdvanceTime (this=0x7ffff58318a0, time=100.70000001043081) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:142
+#6  0x0000555555597db5 in PumpClientServerUpdate (time=@0x7ffff5830020: 100.70000001043081, client=0x7ffff5830040, numClients=1, server=0x7ffff5830060, numServers=1, deltaTime=0.100000001) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:1539
+#7  0x00005555555a4255 in test_loopback_block_fragment_overflow () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2939

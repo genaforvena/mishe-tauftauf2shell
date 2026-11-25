@@ -1,0 +1,24 @@
+test random seed 1795575860
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==195232==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x6108a8f10c0e bp 0x7ffc8dcf5f90 sp 0x7ffc8dcf5f70 T0)
+==195232==The signal is caused by a READ memory access.
+==195232==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x6108a8f10c0e in yojimbo::Connection::Reset() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+    #1 0x6108a8f24fc0 in yojimbo::Server::ConnectDisconnectCallbackFunction(int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_server.cpp:248
+    #2 0x6108a8f25131 in yojimbo::Server::StaticConnectDisconnectCallbackFunction(void*, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_server.cpp:269
+    #3 0x6108a8f4d174 in netcode_server_disconnect_client_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/netcode/netcode.c:4109
+    #4 0x6108a8f4dba8 in netcode_server_disconnect_client /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/netcode/netcode.c:4176
+    #5 0x6108a8f23be6 in yojimbo::Server::DisconnectClient(int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_server.cpp:99
+    #6 0x6108a8f09dc8 in yojimbo::BaseServer::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_server.cpp:157
+    #7 0x6108a8f24578 in yojimbo::Server::AdvanceTime(double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_server.cpp:162
+    #8 0x6108a8ed0eed in PumpClientServerUpdate(double&, yojimbo::Client**, int, yojimbo::Server**, int, float) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:1542
+    #9 0x6108a8edd23c in test_loopback_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2936
+    #10 0x6108a8eddca3 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:3025
+    #11 0x722fe302a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x722fe302a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x6108a8ebfca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: 84b41878215923bc3fcf65237b0ed16436a76503)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172 in yojimbo::Connection::Reset()
+==195232==ABORTING

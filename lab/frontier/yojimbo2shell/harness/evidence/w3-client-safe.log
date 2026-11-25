@@ -1,0 +1,4 @@
+mode=client variant=safe fake_vtable=0x5103a0
+client connecting to 127.0.0.1:40000
+client connected
+client done

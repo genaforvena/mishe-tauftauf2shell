@@ -1,11 +1,16 @@
 # frontier brief — yojimbo2shell (remote block-fragment heap overflow)
 
-Status 2026-11-25 03:41Z: real yojimbo ASan build confirms the write through
-`Connection::ProcessPacket`; the authenticated UDP loopback pair carries a
+Status 2026-11-25 04:27Z: real yojimbo ASan build confirms the write through
+`Connection::ProcessPacket`; an authenticated UDP loopback pair carries a
 chosen 8-byte vtable pointer that redirects a live virtual call to a benign
 lab marker. Rung 3 CONFIRMED in a real build, rung 4 DEMONSTRATED with
-conditions (non-default config, post-auth, in-process pair, non-PIE lab build),
-no rung 5. Witness verdict UNKNOWN.
+conditions (non-default config, post-auth, non-PIE lab build). W3 removes the
+"one process" condition: attacker server and victim client are separate
+processes and the marker executes in the victim. W4 carries a lab-chosen
+benign `touch` command in the wire input and observes the marker file in the
+victim, with fixed-channel and safe-input controls marker-absent. Author-only
+rung 5 MECHANICS at the labeled scope; independent witness replay is required
+for ESTABLISHED and has not happened.
 
 ## Verified ground truth (claim source)
 
@@ -235,3 +240,81 @@ command, no separate target process, no ASLR-realistic pointer derivation:
 rung 5 remains unclaimed. Witness UNKNOWN. All traffic stayed on
 127.0.0.1; `upstream/` was restored to the pinned parent channel plus the
 fix-commit `test.cpp`/`yojimbo_address.cpp` after the run.
+
+## W3 — split-process wire-borne pointer replay (2026-11-25 04:23-04:25Z)
+
+`lab/frontier/yojimbo2shell/split-test.cpp` keeps the W2 payload but runs the
+two real endpoints in **separate processes** of the same non-PIE ASan binary:
+`./bin/test server attack` is a netcode server (1500/500) on 127.0.0.1:40000
+and `./bin/test client attack` is the vulnerable netcode client (1100/500) on
+127.0.0.1:30000. The crafted 1500-byte block carries the chosen fake-vtable
+address at block offset 1152 and `MISHE-LOOP` at 1200. Both processes print
+the same `fake_vtable=0x5103a0`, so the wire-borne pointer is a valid absolute
+address in the victim's own image. No gdb, no ASLR change, no shared address
+space.
+
+Vulnerable parent channel, two processes: server rc 0, victim client prints
+`MISHE-VTABLE-CALL` twice then faults later in
+`tlsf.c:583 remove_free_block` (rc 1). Evidence
+`harness/evidence/w3-client-attack.log` sha256
+`e7ef2f38b1b136c2bce55ddd7308c6ff7a01d27efd5b490a7b206617da6f2c4e`,
+`w3-server-attack.log` sha256
+`1e9af658420769ca900dc7ab2cc895c6ae017d322e621ac55b443c0df1bbd70f`.
+Fixed-channel control with the identical payload: both rc 0, no marker,
+`w3-client-fixed.log` sha256
+`4c260dee51d1e1c70eebeccec495d317e71f3e6ff72476681a96e35a76cca5f7`.
+Safe-input control (legitimate exact-fit 1000-byte block): both rc 0, no
+marker, `w3-client-safe.log` sha256
+`cae0ed0ba228c2b94836988e84752f9f1efe95760eb6260e3d5d0ca3142af296`.
+The server logs are byte-identical across vuln/fixed builds because the fix
+guard affects receive only; the difference is entirely in the victim client.
+This removes the W1/W2 "client and server in one process" condition.
+
+## W4 — wire-borne benign command in the victim process (2026-11-25 04:26Z)
+
+`lab/frontier/yojimbo2shell/r5-test.cpp` replaces the fake vtable entries with
+a lab trampoline `mishe_exec_from_this(void* p)` that runs
+`system((const char*) p + 8)`. The virtual call passes the corrupted channel
+object as `this` (blockData+1152), so `this+8` is blockData+1160, where the
+crafted final fragment places a NUL-terminated command string. The command is
+therefore carried in the authenticated wire payload; only the trampoline is
+pre-placed in the binary. Trampoline address is the non-PIE static
+`0x5103c0`, printed identically by both processes. All commands are benign
+lab marker-file creations; no external system was contacted.
+
+Vulnerable parent channel, two processes, command
+`touch /tmp/yojimbo-r5-established`: victim client prints
+`MISHE-R5-CALL command=[touch /tmp/yojimbo-r5-established]` and
+`MISHE-R5-RC 0` twice, then the usual later TLSF fault; the marker file
+`/tmp/yojimbo-r5-established` exists with mode 0600 in the victim's namespace.
+Evidence `harness/evidence/w4-client-attack.log` sha256
+`460b42aac229b0aa521c9259c74736612521ef6bc884441acb0b5b276af624fb`,
+`w4-server-attack.log` sha256
+`28d76c0dd48ef98132661b28a8fd9c887be41963778ea1af7e8cbd9854252645`.
+A second, distinct wire command `touch /tmp/yojimbo-r5-established-2`
+produces its own marker and its own command line;
+`w4-client-attack2.log` sha256
+`41af902f1ed103b9b99d76c9e58af4434999ac84f6366a9f86de39695abe7add`,
+`w4-server-attack2.log` sha256
+`82c4cb0f86be9e899a199a00e5b7ee77cbed7d3bbf5aff1aca75ec18e3f2ad0c`.
+Fixed-channel control with the same payload and command
+`touch /tmp/yojimbo-r5-fixed`: both rc 0, marker file absent;
+`w4-client-fixed.log` sha256
+`6d5b3900a9a3501ca438e86d28f419938501b2f839b1c579288f7fc16f38037d`.
+Safe-input control on the vulnerable build: both rc 0, marker absent;
+`w4-client-safe.log` sha256
+`ff57198e67c781497eb0e95cd52363510e377352d23ad018458487905aa21dda`.
+The vulnerable binary is preserved as `harness/evidence/w4-r5-vuln-binary`.
+
+Scope and limits: non-default 1100/500 client config, post-authentication
+(netcode connect token, all-zero lab key), two processes on 127.0.0.1,
+non-PIE ASan lab build for the stable static trampoline address, lab-only
+trampoline pre-placed in the test binary, benign commands only, and a later
+TLSF teardown fault after the command has run. Host
+`kernel.randomize_va_space` was not changed and no gdb was used; a PIE build
+or a heap-derived pointer is UNKNOWN and no realistic pointer derivation is
+claimed. This is attacker-controlled wire input making a live target process
+execute a lab-chosen benign command with an observed side effect and clean
+vulnerable/fixed/safe controls — author-only rung 5 mechanics. Witness replay
+has not happened; ESTABLISHED requires it. `upstream/` was restored to the
+pinned parent channel and fix-commit `test.cpp` after the run.

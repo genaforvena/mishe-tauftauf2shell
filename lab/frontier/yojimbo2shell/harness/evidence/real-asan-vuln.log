@@ -1,0 +1,60 @@
+test random seed 1795575699
+=================================================================
+==176620==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5190002336cc at pc 0x7b874f6fb303 bp 0x7ffc9edf1990 sp 0x7ffc9edf1138
+WRITE of size 500 at 0x5190002336cc thread T0
+    #0 0x7b874f6fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x564e7dec1255 in yojimbo::ReliableOrderedChannel::ProcessPacketFragment(int, unsigned short, int, unsigned short, unsigned char const*, int, yojimbo::BlockMessage*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:716
+    #2 0x564e7debe9c3 in yojimbo::ReliableOrderedChannel::ProcessPacketData(yojimbo::ChannelPacketData const&, unsigned short) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:441
+    #3 0x564e7deb5b28 in yojimbo::Connection::ProcessPacket(void*, unsigned short, unsigned char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:340
+    #4 0x564e7de73cb4 in test_connection_reliable_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:1455
+    #5 0x564e7de80f64 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2949
+    #6 0x7b874ee2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7b874ee2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x564e7de63ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: a01e4e56a0171824b2c38075376367ce3a99b2a7)
+
+0x5190002336cc is located 0 bytes after 1100-byte region [0x519000233280,0x5190002336cc)
+allocated by thread T0 here:
+    #0 0x7b874f6fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x564e7de9fe68 in yojimbo::DefaultAllocator::Allocate(unsigned long, char const*, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_allocator.cpp:106
+    #2 0x564e7dec283a in yojimbo::ReliableOrderedChannel::ReceiveBlockData::ReceiveBlockData(yojimbo::Allocator&, int, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/include/yojimbo_reliable_ordered_channel.h:321
+    #3 0x564e7deba926 in yojimbo::ReliableOrderedChannel::ReliableOrderedChannel(yojimbo::Allocator&, yojimbo::MessageFactory&, yojimbo::ChannelConfig const&, int, int, double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:47
+    #4 0x564e7deb3ae0 in yojimbo::Connection::Connection(yojimbo::Allocator&, yojimbo::MessageFactory&, yojimbo::ConnectionConfig const&, double) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:126
+    #5 0x564e7de73b17 in test_connection_reliable_block_fragment_overflow() /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:1435
+    #6 0x564e7de80f64 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/test.cpp:2949
+    #7 0x7b874ee2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7b874ee2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x564e7de63ca4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test+0x32ca4) (BuildId: a01e4e56a0171824b2c38075376367ce3a99b2a7)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x519000233400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000233480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000233500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000233580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000233600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000233680: 00 00 00 00 00 00 00 00 00[04]fa fa fa fa fa fa
+  0x519000233700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000233780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000233800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000233880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000233900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==176620==ABORTING

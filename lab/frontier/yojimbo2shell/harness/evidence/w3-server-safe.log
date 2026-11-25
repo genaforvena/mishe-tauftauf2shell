@@ -1,0 +1,4 @@
+mode=server variant=safe fake_vtable=0x5103a0
+server listening on 127.0.0.1:40000
+server client connected
+server done

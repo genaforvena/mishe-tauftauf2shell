@@ -1,0 +1,24 @@
+Breakpoint 1 at 0x90bf0: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp, line 716.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+test random seed 1795576058
+
+Breakpoint 1, yojimbo::ReliableOrderedChannel::ProcessPacketFragment (this=0x7ffff1dfbf30, messageType=0, messageId=0, numFragments=3, fragmentId=2, fragmentData=0x7ffff1f6a2f0 '\253' <repeats 200 times>..., fragmentBytes=500, blockMessage=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:716
+716	                memcpy( m_receiveBlock->blockData + fragmentId * m_config.blockFragmentSize, fragmentData, fragmentBytes );
+718	                if ( fragmentId == 0 )
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00005555555d7c44 in yojimbo::Connection::Reset (this=0x7ffff1dfb1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+172	            m_channel[i]->Reset();
+#0  0x00005555555d7c44 in yojimbo::Connection::Reset (this=0x7ffff1dfb1e0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:172
+172	            m_channel[i]->Reset();
+FAULT INSTRUCTION: => 0x5555555d7c44 <_ZN7yojimbo10Connection5ResetEv+232>:	movzbl (%rcx),%ecx
+rax            0xabababababababbb  -6076574518398440517
+rbx            0x7ffff4f99800      140737303386112
+rcx            0x15757575f574f577  1546271196561339767
+rdx            0xabababababababbb  -6076574518398440517
+rsi            0x0                 0
+rdi            0x7ffff1dfbf90      140737251360656
+r8             0x28ecdd            2682077
+r9             0xc3c8              50120
+SYM at 0x5555556c6268: vtable for yojimbo::ReliableOrderedChannel + 16 in section .data.rel.ro of /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/bin/test

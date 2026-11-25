@@ -2,3 +2,4 @@ harness/vuln-asan
 harness/fixed-asan
 harness/vuln-plain
 harness/fixed-plain
+upstream/

@@ -1,0 +1,49 @@
+Breakpoint 1 at 0x90bf0: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp, line 716.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+test random seed 1795576058
+
+Breakpoint 1, yojimbo::ReliableOrderedChannel::ProcessPacketFragment (this=0x7ffff1dfbf30, messageType=0, messageId=0, numFragments=3, fragmentId=2, fragmentData=0x7ffff1f6a2f0 '\253' <repeats 200 times>..., fragmentBytes=500, blockMessage=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:716
+716	                memcpy( m_receiveBlock->blockData + fragmentId * m_config.blockFragmentSize, fragmentData, fragmentBytes );
+HIT blockData=0x7ffff1e8d360 channel=0x7ffff1dfbf30 receiveBlock=0x7ffff1e8d2e0
+CONFIG maxBlockSize=1100 fragmentSize=500
+718	                if ( fragmentId == 0 )
+POST-COPY: words from blockData+1080 to +1560
+0x7ffff1e8d798:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7a8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7b8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7c8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7d8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7e8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d7f8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d808:	0xabababababababab	0x4f4c2d454853494d
+0x7ffff1e8d818:	0xababababab00504f	0xabababababababab
+0x7ffff1e8d828:	0xabababababababab	0xabababababababab
+0x7ffff1e8d838:	0xabababababababab	0xabababababababab
+0x7ffff1e8d848:	0xabababababababab	0xabababababababab
+0x7ffff1e8d858:	0xabababababababab	0xabababababababab
+0x7ffff1e8d868:	0xabababababababab	0xabababababababab
+0x7ffff1e8d878:	0xabababababababab	0xabababababababab
+0x7ffff1e8d888:	0xabababababababab	0xabababababababab
+0x7ffff1e8d898:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8a8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8b8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8c8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8d8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8e8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d8f8:	0xabababababababab	0xabababababababab
+0x7ffff1e8d908:	0xabababababababab	0xabababababababab
+0x7ffff1e8d918:	0xabababababababab	0xabababababababab
+0x7ffff1e8d928:	0xabababababababab	0xabababababababab
+0x7ffff1e8d938:	0xffffffffabababab	0xffffffffffffffff
+0x7ffff1e8d948:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d958:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d968:	0xffffffffffffffff	0xffffffffffffffff
+0x7ffff1e8d978:	0xffffffffffffffff
+FRAMES
+#0  yojimbo::ReliableOrderedChannel::ProcessPacketFragment (this=0x7ffff1dfbf30, messageType=0, messageId=0, numFragments=3, fragmentId=2, fragmentData=0x7ffff1f6a2f0 '\253' <repeats 200 times>..., fragmentBytes=500, blockMessage=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:718
+#1  0x00005555555e2414 in yojimbo::ReliableOrderedChannel::ProcessPacketData (this=0x7ffff1dfbf30, packetData=..., packetSequence=3) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_reliable_ordered_channel.cpp:441
+#2  0x00005555555d9579 in yojimbo::Connection::ProcessPacket (this=0x7ffff1dfb1e0, context=0x0, packetSequence=3, packetData=0x7ffff1f69e50 "\t", packetBytes=505) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_connection.cpp:340
+#3  0x00005555555d6b09 in yojimbo::Client::ProcessPacketFunction (this=0x7ffff58318a0, packetSequence=3, packetData=0x7ffff1f69e50 "\t", packetBytes=505) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_client.cpp:274
+#4  0x00005555555cb8fa in yojimbo::BaseClient::StaticProcessPacketFunction (context=0x7ffff58318a0, index=0, packetSequence=3, packetData=0x7ffff1f69e50 "\t", packetBytes=505) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/yojimbo2shell/upstream/source/yojimbo_base_client.cpp:201
+SEND/RECV allocator=0x507000000330
