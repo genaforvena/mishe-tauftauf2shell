@@ -506,3 +506,35 @@ area, i.e. a safe control path, not a benign marker or a function. No
 control-flow takeover, command side effect or r5. The default-PIE and
 fixed-build variants of this exact wire are UNKNOWN; independent verdict on
 #3909 is still owed.
+
+## W12: no poisonable indirect call in process_udp (2026-11-25 09:1xZ)
+
+W10/W11 showed chosen bytes consumed as `comm`, a data pointer. To test
+whether the same overwrite can redirect execution, I disassembled the exact
+non-PIE clang -O2 `supernode` used by W11 (BuildID sha1
+`31518559217dab425de97d65e475951084eea218`; `file` reports "ELF 64-bit LSB
+executable ... not stripped"). Reproduce that binary with the build block at
+`lab/frontier/n2n2shell/live/w11_fixed_pointer.sh:29-35`, then:
+
+    objdump -d --disassemble=process_udp <supernode> | grep -E 'call[[:space:]]*\*|jmp[[:space:]]*\*'
+      40be35: 41 ff e0   jmp    *%r8
+      40c090: ff e1      jmp    *%rcx
+      40dd9d: 41 ff e0   jmp    *%r8
+
+Observed: **zero** indirect calls (`call *`) in the whole function. All three
+indirect jumps are compiler switch tables: the bases are `.rodata` at
+`0x42b35c` (`ftbl2+0x13c`), `0x42b388` (`ftbl2+0x168`) and `0x42b3b4`
+(`ftbl2+0x194`), and each index is a register bounded by `cmp $0xa; ja`
+before the table lookup. No jump or call target in `process_udp` is loaded
+from the overwritten stack range (`nak+14..+1713` at token_size=1700), and
+the canary and saved RIP stay at `nak+3512/+3576` (W3 addendum), beyond the
+2048-byte receive cap's 2010-byte token bound. The NAK case's
+`packet_header_encrypt` calls (`sn_utils.c:2347`) carry no function pointer
+either: `he_context_t` is `speck_context_t`, a round-key array
+(`include/n2n_typedefs.h:251`).
+
+This is a bounded structural negative, not a witness verdict: in this build
+the chosen bytes reach a data pointer and a forwarded wire copy, not a
+benign marker or a control-flow target. Ceiling stays rung 4; no r5. The
+same 1700-byte wire against gcc -O1/-O2 and default-PIE clang builds is
+UNKNOWN; independent verdict on #3909/#4173 is still owed.
