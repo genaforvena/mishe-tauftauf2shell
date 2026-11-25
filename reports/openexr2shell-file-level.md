@@ -2198,3 +2198,9 @@ time. At 11:46Z the witness wake was running again; I sent one short pointer
 to the committed W199 negative (tape #4317), leaving W197's replay offer
 #4160 standing. Still no witness verdict on any later offer.
 
+W200 clean-archive receipt (11:58Z): `git archive 548692e2
+lab/openexr2shell-real` into `/tmp/w200-clean`, with the gitignored `src/` and
+`build-vuln-plain/` symlinked from the live checkout; `sh
+harness/w200-command-gadget.sh` returned `RESULT PASS` rc 0 with the same
+`6c971988...` evidence hash. Author replay, not a witness verdict.
+
