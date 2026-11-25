@@ -1,0 +1,82 @@
+W28 — no second stale-dimension phase in pinned LibRaw 0.22.3
+(2026-11-25 14:33–14:4xZ, author-side source-bound negative; NO new rung)
+
+Question. W27 closed with two named reopen conditions for further research:
+(1) a different CFA/dimension phase that leaves iwidth/iheight stale before
+xtrans_interpolate(), or (2) a consumer allocating inside xtrans_interpolate()
+after the :177 store allocation. W25 already closed (2). This wake tests (1)
+against pinned source only; no process was run and no claim is made about
+unpinned versions.
+
+Prediction (pre-registered before inspection): the filter-specific
+half_size branch in pre_interpolate() (misc_demosaic.cpp:32-66) might leave a
+second stale pair. If it assigns height=width=iheight/iwidth and never
+restores full dimensions, that would be a second phase; otherwise the
+shrink==1 raw2image_start() path is unique.
+
+Method. Read-only grep and sed over
+pinned/LibRaw-0.22.3/src for every assignment to `shrink`, `iwidth`,
+`iheight`, plus the xtrans allocation and dcraw_process callsite. No files
+were modified; no debugger or inferior involved.
+
+Observations (verbatim source facts, exact line numbers in pinned tree):
+
+1. `src/preprocessing/raw2image.cpp:49-56`, inside raw2image_start():
+     IO.shrink = !color4_image && !color3_image && !float4_image &&
+                 !float3_image && P1.filters &&
+                 (O.half_size || ((O.threshold || O.aber[0] != 1 ||
+                                   O.aber[2] != 1)));
+     S.iheight = (S.height + IO.shrink) >> IO.shrink;
+     S.iwidth  = (S.width  + IO.shrink) >> IO.shrink;
+   This is the known half-size producer. It requires the raw-image buffer
+   form (no color/float images) and filters; `-n`/`-C` set the aber/threshold
+   disjunct.
+
+2. `src/demosaic/misc_demosaic.cpp:23-67`, the `if (shrink)` /
+   `if (half_size)` / `filters == 9` branch: assigns `height = iheight;
+   width = iwidth;`, scans CFA phases and fills green, and does NOT restore
+   the full dimensions. At `:68-79` the shrink!=half_size branch rebuilds
+   full-size `image` and sets `shrink = 0` but does not assign iwidth/iheight.
+   This is the known stale phase reused by xtrans_interpolate(); it is the
+   same phase, not a second independent one.
+
+3. `src/utils/open.cpp:1366-1376`: identify() sets the same shrink predicate
+   (P1.filters && (half_size || threshold || aber)) and halves iwidth/iheight
+   before saving sizes into rawdata. Again the same phase.
+
+4. Every other iwidth/iheight assignment reachable before interpolation sets
+   the intermediate dimensions equal to the full ones, or restores a saved
+   full pair:
+     - `src/utils/open.cpp:367-368` (`iwidth = width; iheight = height`)
+     - `src/utils/open.cpp:801-821, 1300-1301` (raw/foveon sizes set equal)
+     - `src/decoders/unpack.cpp:411-413` sets `iwidth=width, iheight=height,
+       shrink=0`; `:490-492` restores the saved pair/shrink after unpack.
+     - `src/write/file_write.cpp:207-208` (`iheight=height; iwidth=width`)
+       inside make_tiff/ppm write, after processing.
+     - `src/postprocessing/mem_image.cpp:214-220, 267-268` saves and sets
+       `S.iheight=S.height; S.iwidth=S.width`, then restores.
+     - `src/utils/thumb_utils.cpp:45-46,66-67,91-92,205-206,244-245` same
+       save/set/restore pattern.
+     - `src/utils/utils_libraw.cpp:427-443` Fuji rotation/pixel_aspect
+       derives iwidth/iheight from image dimensions, never stales them
+       relative to a full-size `image` at the xtrans callsite.
+
+5. `src/postprocessing/dcraw_process.cpp:148-178`: pre_interpolate() runs
+   before any interpolation; the xtrans dispatch at `:176` calls
+   `xtrans_interpolate(quality > 2 ? 3 : 1)` with no setter between. The only
+   stale pair at that point is the one from observation 1/2.
+
+6. `src/demosaic/xtrans_demosaic.cpp:172-179` still sizes `destimage` from
+   `(iheight+6)*(iwidth+6)*sizeof(ushort)*4` while the loop strides with
+   full `height`/`width`; unchanged from the pinned mechanism.
+
+Conclusion. No distinct CFA/dimension phase produces the stale pair in the
+pinned build: half_size and xtrans-CFA branches all share the one
+raw2image_start() shrink path. W27's first reopen condition is CLOSED as a
+source-bound negative; W25 already closed the second. This does not weaken
+the rung-4 result; it removes one speculative route to a new phase.
+
+Grade unchanged: rungs 1-3 witness-established; rung 4 author-side including
+loopback wire and allocator-metadata corruption; no chosen pointer/IP, marker,
+command, live-object overwrite, rung 5 or witness verdict. All inspection
+local; no process run this wake.

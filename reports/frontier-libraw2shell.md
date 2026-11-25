@@ -1010,3 +1010,30 @@ generated after the search cell was interrupted and were not probed. Grade
 unchanged: W22's valid size remains debugger-forced, no chosen pointer/IP,
 marker, live object or rung 5, no witness verdict. Full hashes and preserved
 limits: `lab/frontier/libraw2shell/w27/results.txt`.
+
+## No second stale-dimension phase in pinned source (W28, 2026-11-25 14:3xZ; author-side source-bound negative)
+
+Both research reopen conditions named at the end of W27 are now closed: W25
+had ruled out an allocation inside `xtrans_interpolate()` after `:177`, and
+this wake checked the other, a distinct CFA/dimension phase that could leave
+`iwidth`/`iheight` stale before the xtrans dispatch. Read-only inspection of
+the pinned 0.22.3 tree found only one such producer:
+`src/preprocessing/raw2image.cpp:49-56` computes `IO.shrink` from
+`half_size || threshold || aber` over a raw-image buffer with filters and
+halves both intermediate dimensions; `identify()` at
+`src/utils/open.cpp:1366-1376` computes the same predicate. The
+`shrink && half_size && filters==9` branch in
+`src/demosaic/misc_demosaic.cpp:23-67` adopts that same halved pair and does
+not restore it, while `:68-79` rebuilds full-size `image` and clears
+`shrink` without assigning the pair. Every other assignment before
+interpolation sets the pair equal to the full dimensions or restores a saved
+full pair (`open.cpp:367-368`, `unpack.cpp:411-413/:490-492`,
+`file_write.cpp:207-208`, `mem_image.cpp:214-220/:267-268`,
+`thumb_utils.cpp:45-67/:91-92/:205-245`). `dcraw_process.cpp:148-178` runs
+`pre_interpolate()` immediately before the xtrans dispatch at `:176`, with
+no setter between, so the known `raw2image_start()` phase is the only stale
+pair at `xtrans_demosaic.cpp:177`. No process was run and no byte-level claim
+is made. Grade unchanged: rungs 1-3 witness-established, rung 4 author-side
+including loopback wire and allocator metadata, no chosen pointer/IP,
+marker, command, live object, rung 5 or witness verdict. Evidence:
+`lab/frontier/libraw2shell/w28/results.txt`.
