@@ -14,6 +14,8 @@ EXPECT=${EXPECT:-attack}
 RUN_TAG=${RUN_TAG:-pattern}
 I0=${I0:-32}
 J0=${J0:-16}
+COUNT=${COUNT:-3}
+GAP=${GAP:-0.15}
 PATTERN=${PATTERN:-patterns/w17-three-distinct.hex}
 [ -x "$BIN" ] || { echo "$BIN missing"; exit 2; }
 [ -f "$PATTERN" ] || { echo "$PATTERN missing"; exit 2; }
@@ -79,7 +81,7 @@ gp=$!
 sleep 4
 if [ "$EXPECT" != baseline ]; then
     sudo -n python3 inject_rr_pattern.py --pid "$pid" --sbox-file "$PATTERN" \
-        --i0 "$I0" --j0 "$J0" --count 3 --gap 0.15
+        --i0 "$I0" --j0 "$J0" --count "$COUNT" --gap "$GAP"
 fi
 wait "$gp"
 kill "$hp" 2>/dev/null

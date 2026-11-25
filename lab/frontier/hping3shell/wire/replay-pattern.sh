@@ -14,7 +14,8 @@ PATTERN=${PATTERN:-patterns/w17-three-distinct.hex}
 [ "$(sha256sum "$SRC/display_ipopt.c" | cut -d' ' -f1)" = "$PIN" ] || {
     echo "provisioned source is not the pinned bytes"; exit 2; }
 
-D=evidence/w17-pattern
+D=${D:-evidence/w17-pattern}
+TAGPREFIX=${TAGPREFIX:-w17-replay}
 mkdir -p "$D/compat/net"
 : > "$D/compat/net/bpf.h"
 
@@ -37,10 +38,11 @@ build "$D/fixed" 1 || { echo "clang -O0 fixed build failed"; exit 2; }
 
 run_stage() {
     label=$1; expect=$2; bin=$3
-    EXPECT=$expect BIN=$bin RUN_TAG="w17-replay-$label" PATTERN=$PATTERN \
+    EXPECT=$expect BIN=$bin RUN_TAG="${TAGPREFIX}-$label" PATTERN=$PATTERN \
+        COUNT=${COUNT:-3} GAP=${GAP:-0.15} MIN_HITS=${MIN_HITS:-1} \
         sh rng-pattern-proof.sh > "$D/$label.out" 2>&1
     rc=$?
-    cat "evidence/pt-w17-replay-$label-proof.out" 2>/dev/null
+    cat "evidence/pt-${TAGPREFIX}-$label-proof.out" 2>/dev/null
     echo "STAGE $label rc=$rc"
     [ "$rc" -eq 0 ] || exit 1
 }

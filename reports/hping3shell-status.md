@@ -800,3 +800,37 @@ no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
   of one 127/8 loopback packet in a clang `-O0` rebuild, still not a full
   IP, pointer, command or r5. Author-side; witness verdict UNKNOWN.
 
+
+## Sustained three chosen octets by repeated RR writes (W18, 2026-11-25 21:28Z, author-side)
+
+- W17's arbitrary 187-byte `rc4_sbox` pattern produced one chosen probe: the
+  RC4 swaps degraded the pattern on later `hp_rand()` calls (1/16). W18
+  re-injects the same crafted RR frame at the `-i 1` probe cadence
+  (`--count 14 --gap 1.0`); each reply restores the pattern plus
+  `hp_rand.i=32`, `j=16`, `rc4_seedflag=1`, so the degradation is reset
+  before the next address choice. No debugger steering: GDB only reads
+  live `i/j/sbox` at `select_next_random_dest`.
+- Direct in-tree clang `-O0` run at 21:26Z (`RUN_TAG=w18-repeat2`): 13 GDB
+  states / 14 hping destinations, all 13 full destinations predicted from
+  read-only state, injected pattern in states 4-12, chosen address
+  `127.11.22.33` in 9/9 post-attack probes, unattacked counterfactual
+  `127.149.232.15`. Patched clang build with the same 14 injected frames
+  (`RUN_TAG=w18-repeat2-fixed`, 21:27Z): 4 PASS, no injected pattern, zero
+  chosen addresses; all full destinations still predicted.
+- `wire/replay-pattern-repeat.sh` is the one-command wrapper. It delegates
+  to `wire/replay-pattern.sh` with its own evidence directory and tag
+  prefix; both source hashes are rechecked and both clang `-O0` trees are
+  rebuilt from the pinned source. `wire/rng-pattern-proof.sh` now accepts
+  `COUNT`/`GAP`; `wire/replay-pattern.sh` accepts `D`/`TAGPREFIX`/
+  `COUNT`/`GAP`/`MIN_HITS`, all with the W17 defaults, so W17's canonical
+  replay is unchanged.
+- In-tree replay at 21:28:58Z: baseline 4 PASS (23 states, 24 destinations,
+  no pattern, no chosen address), attack 5 PASS (13 states, 14
+  destinations, all predicted, pattern at states 4-12, 9/9
+  `127.11.22.33`, counterfactual `127.23.85.78`), fixed 4 PASS;
+  `REPLAY_PATTERN_OK: 3 stages` and `REPLAY_PATTERN_REPEAT_OK: 3 stages`,
+  rc 0. All probes stayed in 127/8 on `lo`.
+- Ceiling: three independently reply-chosen octets held across nine
+  consecutive loopback probes, not a full IP (the `127.x.x.x` template
+  fixes octet 0; `x.x.x.x` would leave loopback), no pointer, command, or
+  r5. Author-side; witness verdict UNKNOWN.
