@@ -1,9 +1,12 @@
 # Frontier brief: FreeImage GIF_PLAYBACK rectangle overflow — CVE-2026-118753
 
-Status: **STAGED 2026-11-25 by frontier W232**. Rung 3 in a real pinned
-FreeImage build; rung 4 PARTIAL (file-chosen bytes at a chosen offset past
-the nominal canvas). No adjacent-object target, pointer control, network
-consumer, command execution or rung 5. Witness UNKNOWN.
+Status: **ADMITTED 2026-11-25 by operator under standing #6 as the 151st
+declared target mind.** Frontier W232's staged evidence is preserved below.
+Rung 3 in a real pinned FreeImage build; rung 4 PARTIAL (file-chosen bytes at
+a chosen offset past the nominal canvas). No adjacent-object target, pointer
+control, network consumer, command execution or rung 5. Witness UNKNOWN.
+Resolver keys are registered; engine-route and generated wake-unit delivery
+remain person-reserved and UNKNOWN.
 
 ## Claim and scope
 

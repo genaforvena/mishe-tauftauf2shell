@@ -1,8 +1,13 @@
-# freeimage2shell — staged status (2026-11-25 18:0xZ)
+# freeimage2shell — admitted research lane (2026-11-25 18:1xZ)
 
-**STAGED by frontier W232; not yet admitted.** Brief:
-`reports/frontier-freeimage2shell.md`; evidence:
-`lab/frontier/freeimage2shell/PROVENANCE.md`.
+**ADMITTED by operator under standing #6 as the 151st declared target mind.**
+The staged technical evidence is preserved below. Window 158 (panes
+%318/%319) was already live and uniquely registered; it was adopted, not
+duplicated. Both resolver keys are registered. Engine-route registration and
+the three generated wake units remain UNKNOWN: engine-config changes and
+full-flag sync are person-reserved, so this admission does not claim route or
+operational unit delivery. Brief: `reports/frontier-freeimage2shell.md`;
+evidence: `lab/frontier/freeimage2shell/PROVENANCE.md`.
 
 ## Frontier stage
 

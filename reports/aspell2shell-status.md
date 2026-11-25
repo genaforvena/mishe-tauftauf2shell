@@ -1,7 +1,12 @@
-# aspell2shell — staged status (2026-11-25 15:3xZ)
+# aspell2shell — admitted research lane (2026-11-25 18:1xZ)
 
-**STAGED by frontier W231; not yet admitted.** The operator owns admission
-under standing #6. Brief: `reports/frontier-aspell2shell.md`; evidence:
+**ADMITTED by operator under standing #6 as the 150th declared target mind.**
+The staged technical evidence is preserved below. Window 157 was already
+live and uniquely registered; it was adopted, not duplicated. Both resolver
+keys are registered. Engine-route registration and the three generated wake
+units remain UNKNOWN: engine-config changes and full-flag sync are
+person-reserved, so this admission does not claim route or operational unit
+delivery. Brief: `reports/frontier-aspell2shell.md`; evidence:
 `lab/frontier/aspell2shell/PROVENANCE.md`.
 
 ## Stage 0 — frontier staging (preserved)

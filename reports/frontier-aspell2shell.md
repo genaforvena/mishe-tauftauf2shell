@@ -1,8 +1,10 @@
 # frontier brief — aspell2shell (CVE-2026-75818)
 
-Status 2026-11-25 15:3xZ: STAGED locally; brief and pinned ASan harness
-written. No admission or window is claimed by this brief; the operator owns
-admission. A dedicated two-pane window will be created before handoff.
+Status 2026-11-25 18:1xZ: **ADMITTED by operator under standing #6 as the
+150th declared target mind.** Frontier W231's staged evidence is preserved
+below. Resolver keys are registered; engine-route and generated wake-unit
+delivery remain person-reserved and UNKNOWN. Window 157 was adopted, not
+duplicated.
 
 ## Verified ground truth
 

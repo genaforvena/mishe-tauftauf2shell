@@ -185,6 +185,8 @@ independent replay at that scope. Author reports are never acceptance.
 | **StbVorbis2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:5xZ under standing #6 as the 147th route: hy4-flash route and three wake units minted, window 135 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-89266 (VulnCheck 2026-09-11, CWE-787, CVSS4 8.8 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H`, stb_vorbis <= 1.22); vulnerable v1.22 `2c980bb` sha256 `4c7cb2ff…e65636`, dev-branch fixed `daedcc5c…e86a5` with `CODEBOOK_LIMIT (1<<18)`, numeric fixed release UNKNOWN. `setup_malloc(vorb*, int)` truncates the file-derived `size_t` product `4 * 16519105 * 65 = 2^32+4` to `malloc(8)`; real `stb_vorbis_open_memory()` on a 205-byte OGG gives ASan `WRITE of size 4` at `stb_vorbis.c:3889`, fixed and safe inputs clean, and gdb reads file-chosen `4b 43 41 48` ("HACK") at the first OOB float (`lab/frontier/stbvorbis2shell/run-all.sh`, 9 PASS / 0 FAIL). Rung 4 PARTIAL: W202's `run-seq.sh` (4/0) replays four distinct file-derived words at consecutive OOB offsets, and W204's guarded-page harness measures 30 words / 120 bytes past the 8-byte region before `VORBIS_invalid_setup` returns (12/0); W204 also shows all 30 words overwriting an adjacent live object's canary and both halves of its pointer-typed field (`run-object.sh` 9/0, `fp_low=0x4b434148`, pointer read back, never dereferenced). The words are a float-representable progression, not per-offset arbitrary bytes; the victim is harness-placed. W206 drives the crafted OGG through real SDL_mixer's public `MIX_LoadAudio_IO()` API into its vendored v1.22 header: ASan `WRITE of size 4` at `stb_vorbis.c:4040` with fixed and safe inputs clean (`run-consumer.sh` 12/0, clean-archive receipt 12/0 plus five other scripts); no chosen word, pointer or command in that consumer. No wire, pointer control, command or witness verdict; NO r5. `reports/stbvorbis2shell-status.md`. |
 | **Ctranslate22Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 11:2xZ under standing #6 as the 148th route: hy4-flash route and three wake units minted, window 155 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-102566 / GHSA-7xqx-34h9-2w97 (CTranslate2 <4.8.1, CWE-787, CVSS4 8.5 `AV:L/UI:P`; file-format loader, not network-facing); fix `d9b991e` (PR #2068), vulnerable pin v4.8.0. Verbatim pinned `consume<char>()` / `Model::load()` ranges with a stand-in 16-byte `StorageView`: 16 PASS / 0 FAIL under GCC and Clang, ASan `WRITE of size 17` / `64` at pinned `model.cc:657`, fixed pin rejects, safe payload clean, chosen-byte readback; clean git-archive replay 16/0. W1 builds verbatim upstream `model.cc` against the real `StorageView`/`posix_memalign` allocator under ASan (`WRITE of size 17`/`48` into a real 16-byte region); W2 measures the real-heap pointer gap — the top chunk follows the buffer and later constructors overwrite chosen bytes at +0x40/+0x48, so no chosen pointer reached a dereference (80-byte payload aborted in `sysmalloc`), and a witness replay is requested. Rung 4 PARTIAL at one known offset; no whole-library build, pointer-IP, wire, command or r5; witness UNKNOWN. |
 | **Solanum2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 13:1xZ under standing #6 as the 149th route: hy4-flash route and three wake units minted (sync `written 3, removed 0`), pinned full-flag doctor `PASS local plant out of Git` / `GREEN` rc 0, window 156 adopted; rung 3 real ircd process / rung 4 PARTIAL ESTABLISHED AS LABELED by witness W219 (#4481), no r5.** CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj (Solanum IRCd before fix `2ea1382`, CWE-120, CVSS4 8.5 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`); requires an authenticated linked server. Vulnerable pin parent `7bc7e34`, fixed pin `2ea1382` (+4/-0, `KILLLEN` truncation); pinned `ms_kill()` bodies verbatim with stand-in Client structs, `bash lab/frontier/solanum2shell/harness/run-all.sh` 18 PASS / 0 FAIL under GCC and Clang: ASan `global-buffer-overflow WRITE of size 533` at pinned `m_kill.c:277` for reason 510/700, safe 480 clean, fixed clean, plain chosen-byte readback past `buf+512`. Rung 4 PARTIAL: input-chosen length/bytes at a known offset of a harness static buffer; W1/W2 later confirm the ASan write (size 564) and plain chosen-byte readback in real ASan/plain IRCd builds over authenticated loopback S2S KILL, and W3 finds no writable consumer object after `buf`; still no pointer target, command or R5. W219 replayed `replay-all.sh` from clean archive `b8885fcc` (18/0, then 6/0), rebuilt both pins, matched eleven normalized evidence files and confirmed the PR:H prerequisite with an unauthenticated-peer counterexample (no KILL, no ASan). |
+| **Aspell2Shell** | ✓ | ✓ | ✓ | — | — | **ADMITTED 18:1xZ under standing #6 as the 150th declared target mind; window 157 adopted; engine-route and generated wake-unit delivery UNKNOWN/person-reserved.** CVE-2026-75818 / CERT Polska 2026-10-06, GNU Aspell before 0.60.8.3, CWE-122, CVSS4 1.8 `AV:L/AC:H/PR:N/UI:A`; fix `15b18843`, vulnerable parent `bc7ffcb`. Full pinned `prog/prezip.c` program: crafted 22-byte stream walks 605 bytes from a 256-byte heap allocation; GCC and Clang ASan report `READ of size 1` at pinned `:173`, 0 bytes after the region, fixed rejects and encoder-round-trip safe input decodes cleanly. `bash lab/frontier/aspell2shell/harness/run-all.sh` = 14 PASS / 0 FAIL. Rung 4 NOT CLAIMED: no chosen-byte store, real dictionary consumer, pointer target, command or r5; witness UNKNOWN. [Status](reports/aspell2shell-status.md) |
+| **FreeImage2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:1xZ under standing #6 as the 151st declared target mind; window 158 adopted; engine-route and generated wake-unit delivery UNKNOWN/person-reserved.** CVE-2026-118753 / GHSA-wr69-568q-rrqg, Danoli3 FreeImage before 3.19.25, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; fix `0da5ddb4`, vulnerable `3.19.24` `4916e0ec`, fixed `3.19.25` `363311f1`. Real static library through public `GIF_PLAYBACK` APIs: GCC ASan heap-buffer-overflow `WRITE of size 4` at `PluginGIF.cpp:743`, 0 bytes after an 816-byte region; fixed and safe controls clean. Vulnerable plain chosen-palette runs put `TAU,ff` at `bits+400/+404/+408` past the nominal 400-byte canvas, then the far frame segfaults; `SKIP_BUILD=1 bash lab/frontier/freeimage2shell/run-all.sh` = 9 PASS / 0 FAIL. Rung 4 PARTIAL at those fixed offsets only; no adjacent-object target, pointer, remote consumer, command or r5; witness UNKNOWN. [Status](reports/freeimage2shell-status.md) |
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
 rung, grade, route, mind-count, witness or R5 cell. Ruby2Shell's stock Rails
@@ -3258,9 +3260,9 @@ and pins wire-only chosen-header coverage to `N ∈ [540,588]`; stock,
 oracle-free and persistent r5 stays NOT ACHIEVED and the labelled
 harness-condition R5 cell is unchanged. Libraw W26, Munt W189, OpenEXR W200,
 Libsshch W10–W12, Open5GS W6, Mcuboot W1–W3 and Synchronet W24 add
-clean-archive receipts. Solanum2Shell is staged by frontier W230 with a
-clean-archive 18/0 receipt and is NOT an admitted route; see
-`docs/task.md` and `docs/reproducibility.md`. No grade, rung, route, mind
+clean-archive receipts. Solanum2Shell was staged by frontier W230 with a
+clean-archive 18/0 receipt and was subsequently admitted as the 149th route;
+see `docs/task.md` and `docs/reproducibility.md`. No grade, rung, route, mind
 count, witness cell (except Xschem's verdict text) or R5 cell moved by this
 fold.
 
@@ -3483,9 +3485,23 @@ UNKNOWN. KiCad's redundant 302243840-byte AppImage tar was removed after both
 tar and extracted hashes were verified; the extracted binary hash and replay
 recipe are unchanged.
 
+The 2026-11-25 18:1xZ operator wake admits Aspell2Shell and FreeImage2Shell
+as declared target minds under standing #6 after replaying both staged
+harnesses: Aspell 14 PASS / 0 FAIL and FreeImage 9 PASS / 0 FAIL, with the
+primary advisories, pins, fixes, charters, walls and live two-pane windows
+157/158 checked. Both lanes keep their staged grade and witness UNKNOWN.
+Both resolver-key pairs are registered. Engine-route registration and the
+generated path, debounce and per-role slice units remain missing because
+engine-config changes and full-flag sync are person-reserved. The route
+registry therefore remains at 149 roles while 151 target minds are declared;
+the repository OMP-only checker is RED for exactly those two missing routes,
+and doctor is RED for the six missing unit files. No route or operational
+unit delivery is claimed. The pinned single-model OMP checker also remains
+stale against the owner-directed two-model routes; it is not hand-greened.
+
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 149 target
+Each admitted family is its own mind with its own tmux window: 151 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -3521,7 +3537,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
 `open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell`,
 `ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell`,
-`xschem2shell`, `stbvorbis2shell`, `ctranslate22shell` and `solanum2shell`. Each builds
+`xschem2shell`, `stbvorbis2shell`, `ctranslate22shell`, `solanum2shell`,
+`aspell2shell` and `freeimage2shell`. Each builds
 affected harnesses, drives toward rung 4 and authors its report under
 `reports/`.
 

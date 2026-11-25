@@ -10610,3 +10610,43 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   extracted hash were verified. The replay-relevant pin remains the extracted
   AppImage sha256 `806e949cb357f9f0a05c3298c36eecb2b06d79c0a36e12c99f75aad9c89f0792`;
   no harness or expected bytes changed.
+
+## 2026-11-25 18:1xZ — aspell2shell and freeimage2shell admission replay
+
+- **Aspell2Shell** — CVE-2026-75818 / CERT Polska 2026-10-06, GNU Aspell
+  before 0.60.8.3. Vulnerable parent `bc7ffcb1473578fbaa95653c08e6f1237decd568`,
+  fix `15b188437f9e0192d4ac4472ad66a4e2f62a782f`. Run
+  `bash lab/frontier/aspell2shell/harness/run-all.sh`; expect four pin hashes
+  OK, the fix hunk present, seven build/input checks and six runtime checks:
+  `RESULT 14 PASS / 0 FAIL`, rc 0. GCC and Clang vulnerable ASan runs report
+  `heap-buffer-overflow READ of size 1` at pinned `prezip.vuln.c:173`, 0 bytes
+  after the 256-byte allocation at `:154`; fixed rejects the crafted stream
+  and both safe controls decode cleanly. Grade: rung 3 only; no chosen-byte
+  store, pointer, consumer, command, r5 or independent verdict.
+- **FreeImage2Shell** — CVE-2026-118753 / GHSA-wr69-568q-rrqg, Danoli3
+  FreeImage before 3.19.25. Vulnerable `3.19.24` `4916e0ec`, fixed `3.19.25`
+  `363311f1`, fix `0da5ddb4`. Pin sha256 values are
+  `b6d9ffb11d8b819e7015536158a0e65b4baa2d4287c8b1e1949ce8c59e112299`
+  and `b3cc4407576ecb9d12ee08b9cc1c36172ab73868f6acc64416459db93dcac9f2`.
+  On the staged builds run
+  `SKIP_BUILD=1 bash lab/frontier/freeimage2shell/run-all.sh`; expect
+  `RESULT 9 PASS / 0 FAIL`, rc 0. The vulnerable ASan attack is an expected
+  rc 134 with `WRITE of size 4` at `PluginGIF.cpp:743`, 0 bytes after an
+  816-byte region; fixed attack, both safe controls and fixed chosen input
+  exit 0. Three vulnerable plain chosen runs are expected rc 139 and each
+  prints `PAST_PIXELS=554154ff554154ff554154ff` at `bits+400/+404/+408`.
+  Grade: rung 3 real library / rung 4 PARTIAL at those fixed offsets only;
+  no adjacent-object target, pointer, remote consumer, command, r5 or
+  independent verdict. For a clean build use `bash bootstrap.sh` followed
+  by `bash run-all.sh`; that full clean-archive replay was not run here.
+- **Admission and activation boundary** — charters, seed walls and live
+  two-pane windows 157/158 were verified before admission. Both resolver-key
+  pairs are registered. Engine-route registration is person-reserved, so the
+  route registry remains at 149 roles and the repository OMP-only checker is
+  RED for exactly `aspell2shell: no route` and `freeimage2shell: no route`.
+  The person-owned route shape, copied from the current neighboring entries,
+  is hy4-flash `max_parallel: 3` primary followed by HungerG `max_parallel: 2`
+  tier-1 fallback for each role. Generated path/debounce/slice units also
+  remain missing; full-flag sync is person-reserved. No route or live unit
+  delivery is claimed. The pinned single-model OMP checker remains stale
+  against the directed two-model routes and is not an acceptance signal.

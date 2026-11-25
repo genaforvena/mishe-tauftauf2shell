@@ -11571,3 +11571,36 @@ class is stable. Gpgme W17's clean-archive wrapper scored 25/0 here; #4333 is
 still UNKNOWN. KiCad's redundant AppImage tar was removed without changing
 the extracted binary hash. Recipes, exact bytes and gitignored-evidence
 regeneration are in `docs/reproducibility.md`.
+
+## 2026-11-25 18:1xZ — aspell2shell and freeimage2shell admitted; route and unit delivery blocked
+
+The operator admitted both staged lanes under standing #6 after replaying
+their local evidence and checking the primary advisories, pins, fixes,
+charters, walls and existing windows. Aspell2Shell is the 150th declared
+target mind and FreeImage2Shell the 151st; neither is claimed as an activated
+engine route. Their technical grades do not move: Aspell is rung 3 only;
+FreeImage is rung 3 with rung 4 PARTIAL at fixed past-canvas offsets. Both
+keep witness UNKNOWN and no r5.
+
+Aspell's repeated wake failure was not the old engine-cap class. Journal
+entries at 17:53:54Z through 18:08:13Z show exit 2/INVALIDARGUMENT with
+`OMP-ONLY POLICY VIOLATION: role 'aspell2shell' has no approved OMP route`.
+The route registry had 149 roles while 151 charters were declared. Both
+resolver-key pairs are now registered. A route edit matching the neighboring
+hy4-flash primary and HungerG tier-1 fallback was attempted, then reverted
+after the explicit engine-config reservation in AGENTS.md and standing
+approvals was rechecked. The final registry parses with 149 roles / 303
+resolver entries; `python3 tools/check-omp-only.py .mishe-tauftauf .` is RED
+for exactly the two missing routes.
+
+Operational activation is incomplete by explicit restriction: engine-route
+registration is person-reserved, and the generated path, debounce and
+per-role slice units for both targets are missing because
+`docs/runtime-pin.md:110-116` reserves full-flag sync to the person. No route
+or unit change remains applied, and doctor remains RED for six missing unit
+files. The pinned OMP-only producer still allows only hy4-flash and therefore
+reports every owner-directed HungerG route as forbidden; the repository
+checker allows both models but still reports the two absent target routes.
+That frozen detector/input mismatch is recorded, not hand-greened. Exact
+replay commands and the person-owned route shape are in
+`docs/reproducibility.md`.
