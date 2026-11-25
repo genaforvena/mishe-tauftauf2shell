@@ -123,6 +123,17 @@ no upstream fix PR found, fix status UNKNOWN.
   observation. Rung 3/4 confirmed with a loopback wire delivery; rung 5 and
   witness still UNKNOWN. Driver `real-build/udp_wire_replay.py`, captures
   `real-build/evidence/udp-{attack,readback,safe}.out`.
+- W10 bounded negative (10:36Z): the loopback UDP delivery does not change
+  the post-overflow heap layout. The plain pinned build under GDB, fed
+  `attack.gxf` as 257 paced datagrams on 127.0.0.1:45172, breaks at
+  `ccx_gxf.c:1220` with `buffer=0x555556420870`,
+  `top=0x5555566208e0`, top size field `0x584543432d454853`, and zero
+  resolvable code pointers in 64 KiB past the boundary. All five post-parse
+  mallocs (8, 8, 32, 8, 8 bytes) return tcache pointers below the buffer and
+  `main_arena.top` is unchanged until terminal `free`; no carved object or
+  pointer control. Scripts `real-build/{udp_send_only.py,gdb-w10-udp.py,
+  gdb-w10-udp.cmd}`, log `real-build/evidence/gdb-w10-udp.out`. Rung 3/4 and
+  the rung 5 UNKNOWN status are unchanged.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units

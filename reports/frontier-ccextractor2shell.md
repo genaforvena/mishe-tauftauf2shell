@@ -1,22 +1,24 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 10:03Z (W8/W9): rung 3 and rung 4 CONFIRMED. W9 measured a
-loopback wire-to-sink path in a live CCExtractor process: `--udp
-127.0.0.1:PORT` fed 257 paced 8192-byte datagrams from `inputs/attack.gxf`
-reaches `parse_mpeg_packet`, where ASan reports `WRITE of size 4160` at
-`buffer+BUFSIZE`; `readback.gxf` also reproduces the program-consumed
-`READ of size 3900` at `boundary+76`. This is still rung 4: chosen wire bytes
-at a chosen offset change a program-consumed value, but no pointer, IP or
-command was controlled. W8 closed a sixth rung-5-adjacent idea negatively:
-forging a small top-chunk size (`0x21`, `0x41`) does not make post-parse
-allocations carve from the overflow region, and terminal `free` consolidates
-the same way on safe input. The earlier bounded negatives (W3-W7) are
-preserved. Rung 5 and the witness verdict remain UNKNOWN: no controlled
-indirect call, pointer or command was observed. Issue #2500 was rechecked
-08:54Z via the GitHub issue API: still open, created
-`2026-11-24T13:58:29Z`, last updated at creation, no fix PR or CVE observed.
-No CVE/GHSA and no upstream fix PR were observed; the guard is a local hunk,
-not a vendor patch.
+Status 2026-11-25 10:37Z (W10): rung 3 and rung 4 CONFIRMED; rung 5 and the
+witness verdict remain UNKNOWN. W9 measured a loopback wire-to-sink path in a
+live CCExtractor process: `--udp 127.0.0.1:PORT` fed 257 paced 8192-byte
+datagrams from `inputs/attack.gxf` reaches `parse_mpeg_packet`, where ASan
+reports `WRITE of size 4160` at `buffer+BUFSIZE`; `readback.gxf` also
+reproduces the program-consumed `READ of size 3900` at `boundary+76`. W10
+then measured the heap layout on that same wire path under the plain pinned
+build: the bytes after `data->buffer` are still bare top, no resolvable code
+pointer exists in 64 KiB past the boundary, and the five post-parse mallocs
+come from tcache below the buffer, so the wire path does not change the
+structural ceiling for pointer control. W8 closed a sixth rung-5-adjacent
+idea negatively: forging a small top-chunk size (`0x21`, `0x41`) does not
+make post-parse allocations carve from the overflow region, and terminal
+`free` consolidates the same way on safe input. The earlier bounded negatives
+(W3-W7) are preserved. No controlled indirect call, pointer or command was
+observed. Issue #2500 was rechecked 08:54Z via the GitHub issue API: still
+open, created `2026-11-24T13:58:29Z`, last updated at creation, no fix PR or
+CVE observed. No CVE/GHSA and no upstream fix PR were observed; the guard is
+a local hunk, not a vendor patch.
 All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
@@ -535,3 +537,29 @@ Rung 3 and rung 4 remain CONFIRMED with a stronger delivery path; rung 5
 remains UNKNOWN (no controlled indirect call, pointer or command), and the
 witness verdict is unchanged. No pinned source, harness source or earlier
 evidence was edited; all testing stayed on 127.0.0.1.
+
+## W10 bounded negative 2026-11-25 10:36Z: wire path keeps the same heap ceiling
+
+Prediction: `--udp` delivery could place a live object after `data->buffer`
+or make a post-parse allocation come from the corrupted top, opening a
+pointer target absent from the file path (W3/W6/W7/W8). Test: the plain
+pinned build (`/tmp/ccx2shell-plain/ccextractor`) under GDB with `--udp
+127.0.0.1:45172`, broken at `ccx_gxf.c:1220` just after
+`parse_mpeg_packet(demux, 2101248, data)`, while
+`real-build/udp_send_only.py` fed 257 paced 8192-byte datagrams from the
+unchanged `inputs/attack.gxf` to loopback only. Scanner
+`real-build/gdb-w10-udp.py`/`.cmd` reuses the W3 code-pointer test and the
+W7 malloc-return tracer.
+
+Measured: `data->buffer=0x555556420870`, `boundary=0x5555566208e8`,
+`main_arena.top=0x5555566208e0` (the chunk header sits 8 bytes before the
+nominal boundary), and the top size field at the boundary is the attacker
+pattern `0x584543432d454853` ("SHE-CCEX..." rotated). `codeptr_hits=0` in
+64 KiB past the boundary. `main_arena.top` stayed `0x5555566208e0` at all
+five post-parse mallocs (8, 8, 32, 8, 8 bytes), whose returns
+(`0x5555563ca420`, `0x55555640cdb0`, `0x5555564047d0`, ...) are all below
+the buffer; the terminal `free(data->buffer)` merged with the same top. No
+carved object, no pointer or command control, rung grades unchanged. Raw
+transcript `real-build/evidence/gdb-w10-udp.out`. One glibc build and heap
+layout only; this is a bounded negative, not a proof for other builds.
+No pinned source, harness source or earlier evidence was edited.

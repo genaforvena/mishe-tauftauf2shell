@@ -1,0 +1,63 @@
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /tmp/ccx2shell-plain/ccextractor.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+Breakpoint 1 at 0x253723: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c, line 1220.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: Network, 127.0.0.1:45172
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: Yes]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+Source: None
+Source port: 45172
+
+----------------------------------------------------------------------
+Reading from UDP socket 127.0.0.1:45172
+File seems to be a GXF[KAnalyzing data in general mode
+
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x5555563d7900) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+1220			len -= mpeg_pic_size;
+W10PY buf=0x555556420870 usable=2097272 boundary=0x5555566208e8 nextsize=0x584543432d454853 top=0x5555566208e0
+W10PY codeptr_hits=0
+Breakpoint 2 at 0x7ffff72ad730: file ./malloc/malloc.c, line 3294.
+Breakpoint 3 at 0x7ffff72ade10: free. (57 locations)
+W10PY enter n=1 size=8 top=0x5555566208e0
+Temporary breakpoint 4 at 0x555555bbe1e7: file /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/alloc.rs, line 130.
+W10PY ret n=1 ptr=0x5555563ca420
+W10PY enter n=2 size=8 top=0x5555566208e0
+Temporary breakpoint 5 at 0x555555bbe1e7: file /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/alloc.rs, line 130.
+W10PY ret n=2 ptr=0x55555640cdb0
+W10PY enter n=3 size=32 top=0x5555566208e0
+Temporary breakpoint 6 at 0x555555da0684
+W10PY ret n=3 ptr=0x5555564047d0
+W10PY enter n=4 size=8 top=0x5555566208e0
+Temporary breakpoint 7 at 0x555555bbe1e7: file /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/alloc.rs, line 130.
+W10PY ret n=4 ptr=0x5555563ca420
+W10PY enter n=5 size=8 top=0x5555566208e0
+Temporary breakpoint 8 at 0x555555bbe1e7: file /rustc/58cf8f9c35b355199727627d07ae34a4e2846d67/library/alloc/src/alloc.rs, line 130.
+W10PY ret n=5 ptr=0x55555640cdb0
+
+Number of NAL_type_7: 0
+Number of VCL_HRD: 0
+Number of NAL HRD: 0
+Number of jump-in-frames: 0
+Number of num_unexpected_sei_length: 0
+Breakpoint 3.1, __GI___libc_free (mem=0x555556420870) at ./malloc/malloc.c:3359
+warning: 3359	./malloc/malloc.c: No such file or directory
+W10PY FREE top=0x5555566208e0 nextsize=0x584543432d454853
