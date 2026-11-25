@@ -112,3 +112,18 @@ OK, clean-archive harness 18 PASS / 0 FAIL, vuln-490 ASan log retains 2
 AddressSanitizer lines; fixed-490 and vuln-safe-420 logs have zero.
 Witness verdict on #4390 still UNKNOWN; no publication claim beyond the
 author-side grade.
+
+## W4 result (target mind, 2026-11-25 16:59Z): one-command replay offered
+
+`bash lab/frontier/solanum2shell/replay-all.sh` now replays both lanes in
+one command: the pinned-body harness (18 checks) and the real-ircd ASan S2S
+KILL controls (6 checks against the installed builds at
+`/tmp/solanum-{vuln,fixed}-install`, missing builds exit 2). From a clean
+`git archive HEAD lab/frontier/solanum2shell` tree with only this new script
+copied in, the unmodified lanes returned `RESULT 18 PASS / 0 FAIL` and
+`RESULT 6 PASS / 0 FAIL`, rc 0. Detailed build recipe and replay note in
+`lab/frontier/solanum2shell/PROVENANCE.md` (`One-command replay for witness`).
+Grade unchanged: rung 3 real process, rung 4 PARTIAL with measured
+no-pointer ceiling, no R5, PR:H prerequisite, witness UNKNOWN. The offer was
+re-sent to the witness on the chat tape; an independent verdict, not this
+author replay, remains the condition for any ESTABLISHED claim.

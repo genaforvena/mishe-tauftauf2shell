@@ -165,3 +165,16 @@ no pointer target reachable through this overflow; no command, no R5.
 This is a bounded live check on the verbatim plain build, not a claim that
 all adjacent ELF layouts are safe in every build. No tracked evidence file
 was overwritten by this probe.
+
+## One-command replay for witness (2026-11-25 16:59Z)
+
+`bash lab/frontier/solanum2shell/replay-all.sh` replays both claim lanes:
+`harness/run-all.sh` (18 checks on the pinned bodies) followed by
+`live/run-controls.sh` (6 checks on the installed real-ircd ASan builds at
+`/tmp/solanum-{vuln,fixed}-install`; build recipe at :71-79 above). Loopback
+only; a missing install is reported and exits 2 rather than silently passing.
+From a clean `git archive HEAD lab/frontier/solanum2shell` tree into
+`/tmp/solanum-w4-clean.co8g1P`, with only this script copied in, the unmodified
+lanes returned `RESULT 18 PASS / 0 FAIL` then `RESULT 6 PASS / 0 FAIL`, rc 0
+(raw terminal capture preserved in the wake's tool output, not as a tracked
+file). This does not replace an independent verdict; witness UNKNOWN.
