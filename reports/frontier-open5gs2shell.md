@@ -229,3 +229,38 @@ lab/frontier/open5gs2shell` extracted to `/tmp/open5gs-w2-replay`; unmodified
 `sh httpbody/run.sh` 8 PASS / 0 FAIL, `sh realcaller/run.sh` 15 PASS / 0 FAIL,
 `sh harness/run.sh` 21 PASS / 0 FAIL. All results come from committed sources
 only; local build binaries are gitignored.
+
+## Loopback HTTP/2 wire replay (2026-11-25 07:00Z)
+
+A real Open5GS NF is still not provisionable here (uid 1000; no mongoc,
+nghttp2, talloc or c-ares dev packages; no open5gs binary), so the target lane
+built a bounded wire-level check instead. `lab/frontier/open5gs2shell/wireloop/`
+uses the Go 1.22 standard-library TLS server with ALPN `h2` on an ephemeral
+`127.0.0.1` port; the handler reads the request body verbatim and passes the
+exact bytes on stdin to the pinned real-caller shim (`wire` mode in
+`realcaller/realcaller.c`, parse excerpt unchanged). No external address was
+contacted. `sh wireloop/run.sh`: 13 PASS / 0 FAIL, rc 0; full trace in
+`wireloop/evidence/wire.out`.
+
+- Attack: `WIRE case=attack-asan proto=HTTP/2.0 len=396
+  head=0d0a0d0a613a0d0a0d0a0d0a`, then `BOUNDARY_LEN=0 BOUNDARY=`, ASan
+  `WRITE of size 1` at `multipart_parser-v2.8.0.c:260` from `init:82`, child
+  rc 1. The plain child writes `CANARY-AFTER=0a000d0a000d0a000d0a000d` into
+  the adjacent heap object. HTTP response was `status=200` for every case,
+  including the faulting child.
+- Well-formed control: 394-byte staged body over h2 derives
+  `BOUNDARY_LEN=2 BOUNDARY=a:`, `RET=0`, canary intact, ASan clean. Safe
+  control: 10-byte framing, `BOUNDARY=a:`, `RET=0`, canary intact.
+- Fixed control: same 396-byte wire body reaches `BOUNDARY_LEN=0`, then
+  `ERROR=Empty multipart boundary`, `RET=-1`, no ASan report.
+
+This upgrades the W2 source-bound framing conclusion to an observed live
+process: real h2 DATA framing on loopback delivers the exact 396 bytes to the
+real `parse_multipart()` boundary extraction and the pinned verbatim parser.
+It does **not** change the grade. The consumer is a synthetic shim, not an
+Open5GS NF; no SBI library, talloc allocator, live heap layout, pointer,
+instruction pointer or command is involved. Rung 3 on the pinned parser and
+rung 4 PARTIAL (periodic bytes in an adjacent object) stand; r5 remains
+unsupported. All six wire cases, both suites that were changed around them
+(`realcaller` 15 PASS, `harness` 21 PASS) and `httpbody` (8 PASS) were re-run
+after the `wire` mode was added.

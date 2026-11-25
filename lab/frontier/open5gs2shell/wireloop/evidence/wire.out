@@ -1,0 +1,106 @@
+LISTENER addr=https://127.0.0.1:34009
+WIRE case=attack-asan proto=HTTP/2.0 len=396 head=0d0a0d0a613a0d0a0d0a0d0a
+CHILD case=attack-asan rc=1
+MODE=wire BODY_LEN=396
+BOUNDARY_LEN=0 BOUNDARY=
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+=================================================================
+==257663==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5070000000d1 at pc 0x582b8e9a1b37 bp 0x7ffd3b6fa390 sp 0x7ffd3b6fa380
+WRITE of size 1 at 0x5070000000d1 thread T0
+    #0 0x582b8e9a1b36 in multipart_parser_execute provision/multipart_parser-v2.8.0.c:260
+    #1 0x582b8e99fdc8 in parse_multipart_real realcaller/realcaller.c:126
+    #2 0x582b8e9a0461 in main realcaller/realcaller.c:184
+    #3 0x7cb1ae42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cb1ae42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x582b8e99f3e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/wireloop/asan-wire+0x23e4) (BuildId: 701b7092a3bbcc68c1eb5c0281e89fc4e1f7bfed)
+
+0x5070000000d1 is located 0 bytes after 65-byte region [0x507000000090,0x5070000000d1)
+allocated by thread T0 here:
+    #0 0x7cb1ae8fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x582b8e9a07b3 in multipart_parser_init provision/multipart_parser-v2.8.0.c:82
+    #2 0x582b8e99fcd3 in parse_multipart_real realcaller/realcaller.c:119
+    #3 0x582b8e9a0461 in main realcaller/realcaller.c:184
+    #4 0x7cb1ae42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7cb1ae42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x582b8e99f3e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/open5gs2shell/wireloop/asan-wire+0x23e4) (BuildId: 701b7092a3bbcc68c1eb5c0281e89fc4e1f7bfed)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow provision/multipart_parser-v2.8.0.c:260 in multipart_parser_execute
+Shadow bytes around the buggy address:
+  0x506ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x507000000000: fa fa fa fa 00 00 00 00 00 00 00 00 04 fa fa fa
+=>0x507000000080: fa fa 00 00 00 00 00 00 00 00[01]fa fa fa fa fa
+  0x507000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==257663==ABORTING
+
+RESP case=attack-asan proto=HTTP/2.0 status=200 body="case=attack-asan proto=HTTP/2.0 len=396\n"
+WIRE case=staged-asan proto=HTTP/2.0 len=394 head=0d0a613a0d0a0d0a0d0a000d
+CHILD case=staged-asan rc=0
+MODE=wire BODY_LEN=394
+BOUNDARY_LEN=2 BOUNDARY=a:
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+RET=0
+CANARY-AFTER=5a5a5a5a5a5a5a5a5a5a5a5a
+
+RESP case=staged-asan proto=HTTP/2.0 status=200 body="case=staged-asan proto=HTTP/2.0 len=394\n"
+WIRE case=safe-asan proto=HTTP/2.0 len=10 head=0d0a613a0d0a0d0a0d0a
+CHILD case=safe-asan rc=0
+MODE=wire BODY_LEN=10
+BOUNDARY_LEN=2 BOUNDARY=a:
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+RET=0
+CANARY-AFTER=5a5a5a5a5a5a5a5a5a5a5a5a
+
+RESP case=safe-asan proto=HTTP/2.0 status=200 body="case=safe-asan proto=HTTP/2.0 len=10\n"
+WIRE case=fixed-attack-asan proto=HTTP/2.0 len=396 head=0d0a0d0a613a0d0a0d0a0d0a
+CHILD case=fixed-attack-asan rc=0
+MODE=wire BODY_LEN=396
+BOUNDARY_LEN=0 BOUNDARY=
+ERROR=Empty multipart boundary
+RET=-1
+
+RESP case=fixed-attack-asan proto=HTTP/2.0 status=200 body="case=fixed-attack-asan proto=HTTP/2.0 len=396\n"
+WIRE case=attack-plain proto=HTTP/2.0 len=396 head=0d0a0d0a613a0d0a0d0a0d0a
+CHILD case=attack-plain rc=0
+MODE=wire BODY_LEN=396
+BOUNDARY_LEN=0 BOUNDARY=
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+RET=0
+CANARY-AFTER=0a000d0a000d0a000d0a000d
+
+RESP case=attack-plain proto=HTTP/2.0 status=200 body="case=attack-plain proto=HTTP/2.0 len=396\n"
+WIRE case=staged-plain proto=HTTP/2.0 len=394 head=0d0a613a0d0a0d0a0d0a000d
+CHILD case=staged-plain rc=0
+MODE=wire BODY_LEN=394
+BOUNDARY_LEN=2 BOUNDARY=a:
+CANARY-BEFORE=5a5a5a5a5a5a5a5a5a5a5a5a
+RET=0
+CANARY-AFTER=5a5a5a5a5a5a5a5a5a5a5a5a
+
+RESP case=staged-plain proto=HTTP/2.0 status=200 body="case=staged-plain proto=HTTP/2.0 len=394\n"
+RESULT wire-failures=0

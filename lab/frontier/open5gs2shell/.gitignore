@@ -5,3 +5,6 @@ harness/plain-fixed
 realcaller/asan-real
 realcaller/asan-fixed
 realcaller/plain-real
+wireloop/asan-wire
+wireloop/fixed-wire
+wireloop/plain-wire
