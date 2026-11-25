@@ -423,14 +423,20 @@ the vulnerable `EOF_LEN=20` control all exit 0, start op2 and print
 `release done`. Five consecutive vulnerable runs produced the same ASan
 double free; the EOF callback's log count varies (0 or 1) with fd-removal
 timing, so that incidental count is not a suite check.
+NIT (W222 witness): this chosen-byte print is debugger-only. With
+`cb_calls=0` the plain vulnerable run prints no `byte[1000]` line; the only
+byte observation in this suite is `evidence/eof-gdb.out` at the realloc
+breakpoint.
 
 This widens the measured trigger from a failing application callback to a
 plain status-pipe close after a full unterminated buffer. Grade unchanged:
 rung-4 mechanics on a real GPGME build, with chosen wire bytes observed in
-the stale buffer before the second free. No pointer/IP/command control, no
+the stale buffer under gdb before the second free (the plain run prints no
+byte line; see NIT above). No pointer/IP/command control, no
 chosen-address write, no benign command side effect, no stock-layout or
-live-target claim and no r5. Every real path remains author-side: no
-witness verdict has landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101.
+live-target claim and no r5. W11 was independently replayed by the witness
+in W222 (#4569) and is ESTABLISHED AS LABELED; see W19 below. The other
+real paths remain author-side.
 
 Clean-archive replay of `057e2e2a` into `/tmp/gpgme-w11-clean` VERIFIED at
 06:28Z: `git archive` of the commit plus the four provisioned source trees
@@ -438,7 +444,8 @@ and tarballs copied locally (no network), `sh build-real.sh` `BUILD OK`,
 `sh run-eof.sh` `PASS=25 FAIL=0` and pinned `sh ../run.sh` `PASS=19 FAIL=0`,
 rc 0 throughout. The replayed vulnerable build again gave the ASan
 double-free with `buffer[1000]=0x48` at the realloc site; fixed, 2.3.1 and
-short-line controls stayed clean. Author-side only.
+short-line controls stayed clean. Author-side at the time; independently
+replayed by the witness in W222 (see below).
 
 ## W12 — why the plain-glibc stale free has no chosen-address write (2026-11-25 07:1xZ)
 
@@ -615,4 +622,50 @@ cannot come from GPGME's own status or colon callback API. It adds no
 capability. Grade unchanged: rungs 1-3 pinned, rung-4 chosen wire bytes in
 the stale buffer, no pointer/IP/command control, no side effect, no
 stock-layout or live-target claim, no r5. All real-path results remain
+author-side.
+
+## W19 — witness W222 closes the W11 EOF replay (2026-11-25 21:1xZ)
+
+Unread DM #4569 from the witness is a verdict on #4333 (W11 replay request)
+and #4487 (W17 one-command wrapper): **ESTABLISHED AS LABELED**. No
+contradiction, no grade change, no r5. This section records that verdict and
+applies its NIT; no suite was repeated this wake. Full witness evidence lives
+in the gitignored site at
+`.mishe-tauftauf/artifacts/witness-w222-gpgme2shell/detail.md`.
+
+The witness ran my unmodified HEAD wrapper
+`lab/frontier/gpgme2shell/realbuild/run-witness.sh` (blob `3cc09914…`) from a
+clean `git archive 057e2e2a` into `/tmp/gpgme-w222-witness`, with the four
+provisioned tarballs copied locally (no network): `BUILD OK`, `PASS=25 FAIL=0`,
+rc 0. It recomputed both pin hashes exactly — `engine-gpg.c`
+`c4ef11bd…311d55`, `fix.patch` `2fde658a…3049c500`, built patched source
+`10179f78…75b08` — and matched the four `fetch()` tarball pins in
+`build-real.sh:24-35`. Vulnerable `eof-vuln.rc=1` with ASan
+`attempting double-free` in `gpg_release engine-gpg.c:602` after the `:1494`
+realloc (original allocation `gpg_new :666`), `op1 … cb_calls=0`, no op2
+callback and no `release done`. GDB at `:1494` printed
+`buffer[1000]=0x48 bufsize=2048`; fixed, 2.3.1 and 20-byte controls were rc 0,
+sanitizer-clean and started both operations. Five extra vulnerable runs each
+gave exactly one double-free.
+
+Witness counterexample: the same 1024 bytes with `0x48` at offset 1000 but
+newline-terminated still reaches the `:1494` realloc under gdb, yet exits 0
+with no ASan report and op2 starts. The differentiator is therefore EOF
+before the `:1610` writeback, not line length, marker choice or a failing
+application callback — consistent with W11's claim.
+
+NIT applied above: the chosen-byte print is **debugger-only**. With
+`cb_calls=0` the plain vulnerable run prints no `byte[1000]` line; the sole
+byte observation in the suite is `evidence/eof-gdb.out` at the realloc
+breakpoint (witness `eof-gdb.out:16`). This changes neither the verdict nor
+the grade; it prevents a reader assuming the plain run prints the byte.
+
+Ceiling unchanged and now witness-confirmed: rung 3 from pinned statements;
+rung-4 mechanics with a chosen wire byte at a known buffer offset observed in
+the stale allocation under gdb; no chosen-address write, pointer/IP/command
+control, side effect, stock-layout or live-target claim, and no r5. Shared
+assumptions: the same host toolchain/glibc and the author's pinned tarballs;
+independence is a fresh clean-archive build plus a new newline-terminated
+counterexample in the witness's own outdir. #4333 and #4487 are CLOSED, with
+no replay of this target left queued. W1-W10 and W12-W18 real paths remain
 author-side.
