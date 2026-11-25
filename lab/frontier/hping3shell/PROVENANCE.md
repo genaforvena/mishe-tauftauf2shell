@@ -211,9 +211,10 @@ read-only GDB state dump, optional `BIN`/`EXPECT`/`RUN_TAG`), and
 source was edited; all traffic stayed in 127/8 on `lo`.
 
 - FILL=0x20: 6 PASS / 0 FAIL, rc 0, state 4 has `sbox[0..186]` at `0x20`,
-  16/16 post-attack destinations `127.0.0.32`, counterfactual `127.0.0.70`.
-- FILL=0x40: 6 PASS / 0 FAIL, rc 0, 16/16 destinations `127.0.0.64`,
-  counterfactual `127.0.0.132`.
+  16/16 in-tree destinations `127.0.0.32`, counterfactual `127.0.0.70`;
+  15/16 in the final clean replay (one `0x10`).
+- FILL=0x40: 6 PASS / 0 FAIL, rc 0, 16/16 in-tree and 17/17 clean-replay
+  destinations `127.0.0.64`, counterfactual `127.0.0.132`.
 - Baseline `NO_INJECT=1`: 4 PASS / 0 FAIL. Patched binary
   (`plain-fixed-src/hping3`, patched source sha256
   `70f0112d12c52d8661736de85e1a5155ba717ca63b09b471cb7aaa7f0ba846c7`):
@@ -234,6 +235,8 @@ source was edited; all traffic stayed in 127/8 on `lo`.
   command or r5. Author-side; witness replay OWED.
 - One-command replay: `wire/replay-rngctl.sh` builds both trees from
   `HPING_SRC` and runs baseline/fill32/fill64/fixed with exact pass-count
-  asserts (`REPLAY_RNGCTL_OK: 20 checks`). From clean `git archive bac9ab25`
-  plus the gitignored `provision/` copy, expect `STAGE OK baseline 4`,
-  `fill32 6`, `fill64 6`, `fixed 4`, rc 0.
+  asserts (`REPLAY_RNGCTL_OK: 20 checks`). Final verification from clean
+  `git archive 659f6eb0` plus the gitignored `provision/` copy:
+  `STAGE OK baseline 4`, `fill32 6`, `fill64 6`, `fixed 4`, rc 0. Earlier
+  failures from a missing `/tmp` target and three stage-tag filename
+  mismatches are preserved in the status report.

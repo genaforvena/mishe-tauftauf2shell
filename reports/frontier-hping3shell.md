@@ -133,12 +133,14 @@ negative `--rand-source` attempt are in `reports/hping3shell-status.md`.
 A 205-byte crafted ICMP RR reply fills all 187 attacker-reachable bytes of
 `rc4_sbox` with one chosen value (`sbox[n] == payload[18+n]`, memcpy cap 251).
 `wire/rngctl-proof.sh` with `FILL=0x20` and `FILL=0x40` each gave 6 PASS /
-0 FAIL: all 16 post-attack probe destinations equal the chosen byte
-(`127.0.0.32` / `127.0.0.64`) with different unattacked counterfactuals;
-stdout alone shows the same trailing run without GDB steering. Baseline and
-patched-build controls are 4 PASS / 0 FAIL with no filled state. Clean-archive
-replay reproduced all four counts, rc 0. Only the low byte is controllable;
-no pointer, command or r5. Full receipt and preserved negatives in
+0 FAIL: the chosen byte (`127.0.0.32` / `127.0.0.64`) dominates post-attack
+destinations (16/16 in-tree, 15/16 and 17/17 in the final clean replay),
+with different unattacked counterfactuals; stdout alone shows the same run
+without GDB steering. Baseline and patched-build controls are 4 PASS /
+0 FAIL with no filled state. The final one-command clean-archive replay of
+`659f6eb0` gave 20 checks, rc 0. Only the low byte is controllable and the
+control is probabilistic: hidden j can index the 69 unreachable sbox bytes.
+No pointer, command or r5. Full receipt and preserved negatives in
 `reports/hping3shell-status.md`.
 
 ## Witness disposition (W207, #3820)

@@ -131,8 +131,9 @@ global of the **real plain hping3 build**: a crafted loopback RR reply reaches
 `old_rr[40]`, and the plain build lets 251 attacker-chosen bytes land at
 chosen offsets in `rc4_sbox` (GDB + zero baseline + patched control). W5
 measured changed RNG output; W6 measures **attacker-chosen output** — all 187
-reachable sbox bytes become a reply-chosen constant and all 16 subsequent
-probe destinations equal that chosen byte, with no debugger steering.
+reachable sbox bytes become a reply-chosen constant, and the chosen byte
+dominates subsequent probe destinations (15/16 to 17/17 across measured
+runs), with no debugger steering.
 A valid RR reply and the locally patched build stay clean. Only the low byte
 of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. Stock
 glibc distribution build and `IPOPT_LSRR` stay UNKNOWN. All wire/RNG stages
@@ -223,17 +224,19 @@ build with `--rand-dest 127.0.0.x` and reads RC4 state read-only in GDB;
 `wire/check_rngctl.py` checks the observed probe destinations.
 
 - `FILL=0x20`: **6 PASS / 0 FAIL, rc 0** — state 4 has `sbox[0..186]` filled
-  with `0x20`, all 16 subsequent probe destinations are `127.0.0.32`, and
-  the unattacked counterfactual is `127.0.0.70`.
-- `FILL=0x40`: **6 PASS / 0 FAIL, rc 0** — same shape, all 16 destinations
-  `127.0.0.64`, counterfactual `127.0.0.132`. Two different chosen values
-  show the output byte is selected by the reply, not a stable PRNG run.
+  with `0x20`, 16/16 in-tree post-attack destinations are `127.0.0.32` and
+  the unattacked counterfactual is `127.0.0.70`; the final clean replay gave
+  15/16 (one `0x10`).
+- `FILL=0x40`: **6 PASS / 0 FAIL, rc 0** — same shape, 16/16 in-tree and
+  17/17 clean-replay destinations `127.0.0.64`, counterfactual `127.0.0.132`.
+  Two different chosen values show the byte is selected by the reply, not a
+  stable PRNG run.
 - Baseline (`NO_INJECT=1`): **4 PASS / 0 FAIL**; no filled state in 23 GDB
   samples. Patched-build control (`BIN=plain-fixed-src/hping3`, source sha256
   `70f0112d…b471cb7aaa7f0ba846c7`): **4 PASS / 0 FAIL**; the same crafted
   reply leaves the sbox unfilled, tying the effect to the unclamped memcpy.
-- Stdout-only check: the trailing runs of `0x20`/`0x40` are 16 probes long
-  with no GDB involved, so GDB is observation/counterfactual only, never
+- Stdout-only check: in-tree, the trailing runs of `0x20`/`0x40` are 16 probes
+  long with no GDB involved, so GDB is observation/counterfactual only, never
   part of steering. Raw evidence: `wire/evidence/rngctl-*-{gdb,run,proof}.out`.
 - Negative preserved: `-fno-common` (GCC 13 default) cannot link the pinned
   tree — `hping2.h:360` tentatively defines `delaytable` in every TU; see
@@ -246,15 +249,18 @@ build with `--rand-dest 127.0.0.x` and reads RC4 state read-only in GDB;
   command, shell or r5. Stock-glibc distribution build and `IPOPT_LSRR` stay
   UNKNOWN. Author-side; witness replay of W6 is OWED.
 
-Clean-archive replay (00:5xZ) from `git archive HEAD lab/frontier/hping3shell`
-with the gitignored `provision/` tree and the three new scripts copied in:
-plain source sha256 `e8ef2dd6…dcbb5e7b` and patched source sha256
-`70f0112d…b471cb7aaa7f0ba846c7` exact; baseline 4 PASS, FILL=0x20 6 PASS,
-FILL=0x40 6 PASS, fixed control 4 PASS, rc 0 throughout, `CLEAN_REPLAY_W6_OK`.
-Counterfactuals vary with `/dev/urandom` seeding (`127.0.0.140` and
-`127.0.0.156` in the clean replay), while all 16 chosen destinations matched
-in both attack runs. The first replay attempt failed only because
-`/tmp/w6-hping-clean` was not created before `tar x`; fixed with `mkdir -p`.
+Two clean replays were run. The first (00:5xZ, `git archive HEAD`, the three
+new scripts copied in) gave baseline 4 PASS, FILL=0x20 6 PASS, FILL=0x40
+6 PASS, fixed control 4 PASS, rc 0, `CLEAN_REPLAY_W6_OK`, with plain/patched
+source hashes exact and counterfactuals `127.0.0.140`/`127.0.0.156`. The final
+one-command replay from committed `659f6eb0` (`wire/replay-rngctl.sh`, clean
+archive, gitignored `provision/` copied in) gave `STAGE OK baseline 4`,
+`STAGE OK fill32 6`, `STAGE OK fill64 6`, `STAGE OK fixed 4`,
+`REPLAY_RNGCTL_OK: 20 checks`, rc 0; 15/16 fill32 and 17/17 fill64
+destinations equalled the chosen byte. Counterfactuals vary with
+`/dev/urandom` seeding. Preserved replay failures: a missing `/tmp` target
+for `tar x`, stage-tag filename mismatches and a fixed-control assert path,
+each fixed and re-verified from a fresh clean archive.
 
 ## Next
 
@@ -264,7 +270,7 @@ four-script request. W6 has one command from a clean archive:
 
 ```
 cd /home/mesh-home/mishe-tauftauf2shell &&
-git archive bac9ab25 lab/frontier/hping3shell | tar x -C /tmp/w6-wit &&
+git archive 659f6eb0 lab/frontier/hping3shell | tar x -C /tmp/w6-wit &&
 cp -a lab/frontier/hping3shell/provision /tmp/w6-wit/lab/frontier/hping3shell/ &&
 cd /tmp/w6-wit &&
 HPING_SRC=$PWD/lab/frontier/hping3shell/provision/hping-src \
