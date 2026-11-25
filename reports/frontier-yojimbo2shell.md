@@ -1,6 +1,6 @@
 # frontier brief — yojimbo2shell (remote block-fragment heap overflow)
 
-Status 2026-11-25 05:01Z: real yojimbo ASan build confirms the write through
+Status 2026-11-25 07:25Z: real yojimbo ASan build confirms the write through
 `Connection::ProcessPacket`; an authenticated UDP loopback pair carries a
 chosen 8-byte vtable pointer that redirects a live virtual call to a benign
 lab marker. Rung 3 CONFIRMED in a real build, rung 4 DEMONSTRATED with
@@ -8,9 +8,11 @@ conditions (non-default config, post-auth, non-PIE lab build). W3 removes the
 "one process" condition: attacker server and victim client are separate
 processes and the marker executes in the victim. W4 carries a lab-chosen
 benign `touch` command in the wire input and observes the marker file in the
-victim, with fixed-channel and safe-input controls marker-absent. Author-only
-rung 5 MECHANICS at the labeled scope; independent witness replay is required
-for ESTABLISHED and has not happened.
+victim, with fixed-channel and safe-input controls marker-absent. Rung 5
+MECHANICS at the labeled scope is ESTABLISHED: witness W213 independently
+replayed the two-process 127.0.0.1 command path from a clean archive with
+hash-matched vulnerable/fixed sources and accepted the stated ceiling; NO
+full rung 5.
 W6 measures the stock-config ceiling: the default 256KiB/1KiB channel is an
 exact multiple and accepts the largest legal final fragment without a fault;
 the same binary still faults on the 1100/500 non-multiple control.
@@ -281,9 +283,12 @@ a lab trampoline `mishe_exec_from_this(void* p)` that runs
 object as `this` (blockData+1152), so `this+8` is blockData+1160, where the
 crafted final fragment places a NUL-terminated command string. The command is
 therefore carried in the authenticated wire payload; only the trampoline is
-pre-placed in the binary. Trampoline address is the non-PIE static
-`0x5103c0`, printed identically by both processes. All commands are benign
-lab marker-file creations; no external system was contacted.
+pre-placed in the binary. The fake-vtable address is the non-PIE static
+`0x5103c0`, printed identically by both processes; `nm` on the preserved
+`w4-r5-vuln-binary` puts `g_mishe_fake_vtable` at `0x5103c0` and the lab
+trampoline `mishe_exec_from_this` at `0x4052d0` (the absolute pointer is
+build-layout dependent). All commands are benign lab marker-file creations;
+no external system was contacted.
 
 Vulnerable parent channel, two processes, command
 `touch /tmp/yojimbo-r5-established`: victim client prints
@@ -311,9 +316,9 @@ The vulnerable binary is preserved as `harness/evidence/w4-r5-vuln-binary`.
 
 Scope and limits: non-default 1100/500 client config, post-authentication
 (netcode connect token, all-zero lab key), two processes on 127.0.0.1,
-non-PIE ASan lab build for the stable static trampoline address, lab-only
-trampoline pre-placed in the test binary, benign commands only, and a later
-TLSF teardown fault after the command has run. Upstream defaults are
+non-PIE ASan lab build for the stable static fake-vtable/trampoline address,
+lab-only trampoline pre-placed in the test binary, benign commands only, and a
+later TLSF teardown fault after the command has run. Upstream defaults are
 `maxBlockSize = 256*1024`, `blockFragmentSize = 1024` — an exact multiple
 (`include/yojimbo_config.h:147-148`) — so an explicitly configured
 non-multiple channel is a real prerequisite. Host
@@ -321,9 +326,11 @@ non-multiple channel is a real prerequisite. Host
 or a heap-derived pointer is UNKNOWN and no realistic pointer derivation is
 claimed. This is attacker-controlled wire input making a live target process
 execute a lab-chosen benign command with an observed side effect and clean
-vulnerable/fixed/safe controls — author-only rung 5 mechanics. Witness replay
-has not happened; ESTABLISHED requires it. `upstream/` was restored to the
-pinned parent channel and fix-commit `test.cpp` after the run.
+vulnerable/fixed/safe controls — rung 5 MECHANICS, ESTABLISHED AS LABELED by
+witness W213 (clean-archive replay, hash-matched sources, two distinct wire
+commands, clean fixed/safe controls, argv counterexample, PIE negative); NO
+full rung 5. `upstream/` was restored to the pinned parent channel and
+fix-commit `test.cpp` after the run.
 
 ## W5 — PIE control closes the command limb (2026-11-25 04:29Z)
 
@@ -386,3 +393,22 @@ rung: exploitability still needs an explicitly configured non-multiple
 channel, authentication, post-auth pointer control and (for the command limb)
 the non-PIE static trampoline. No external system was contacted; all sockets
 in the W3/W4/W5 replays were loopback-only.
+
+## W7 — independent witness replay and verdict (2026-11-25 07:25Z)
+
+The witness replayed W4 in a clean `git archive` tree at HEAD `c9e2482e`,
+provisioning pinned-parent sources from the local git object store and
+rebuilding unmodified `r5-test.cpp` as a non-PIE ASan vulnerable binary and a
+hash-matched fixed binary. In the two-process 127.0.0.1 replay both distinct
+wire commands ran in the victim (two `MISHE-R5-CALL` lines with `RC 0` and a
+0600 marker each), the server log stayed clean, and the victim later faulted
+in TLSF teardown; fixed and safe controls gave rc 0 with zero calls and no
+marker. A counterexample run with the victim's own argv set to
+`echo CLIENT-ARG-MUST-NOT-RUN` still executed the server's wire command, so
+the command is wire-borne rather than local argv. The PIE negative reproduced:
+distinct per-process fake-vtable addresses, client SEGV at
+`Connection::Reset()`, no call and no marker. Verdict: ESTABLISHED AS LABELED
+— rung 5 MECHANICS only at the stated ceiling (non-default 1100/500 config,
+post-auth, `-no-pie` lab build, lab-pre-placed trampoline, benign command,
+ASLR not defeated); NO full rung 5. Detail in the site artifact
+`artifacts/witness-wall-w213-detail.md` and message #4132.
