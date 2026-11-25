@@ -1,0 +1,50 @@
+W17 results — crafted X-Trans file received over loopback and decoded in a
+live in-process LibRaw consumer (2026-11-25 00:0xZ, author-side)
+
+Question left open by W13-W16: every chosen-value result so far used the
+dcraw_emu CLI with a file path as argv. Does attacker-supplied wire input drive
+the same OOB store in a live consumer process, without a debugger-forced call
+or an author-local file path being handed to the decoder?
+
+Prediction recorded in the wall before the run (00:0xZ): a single TCP
+connection bound to 127.0.0.1 carrying the W15 DNG into a minimal LibRaw
+consumer that calls open_buffer()/unpack()/dcraw_process() with threshold=1.0
+(the same condition as dcraw_emu -n 1) should reproduce the ASan WRITE of size
+2 at xtrans_demosaic.cpp:427. Keep/revise/revert by observed rc and ASan site.
+
+Consumer: wire/wire_decoder.cpp (sha256
+d6e54904fed35a2cfabc53c9fbc6ed7c6cb239756a707a989eb497c3547dfece) binds
+127.0.0.1 on an ephemeral port, accepts one connection, reads all bytes into a
+std::vector, closes the socket, then calls LibRaw::open_buffer()/unpack()/
+dcraw_process() on those bytes. It is linked against the UNMODIFIED pinned
+LibRaw 0.22.3 ASan library built by bootstrap.sh. An optional second argv
+"safe" omits threshold, giving the no-option control. Sender: wire/send.py
+(sha256 5852dedc2fab7913a631ff9ffe8f3762ca5fccd28cafe38e6c9ab81841915b0f).
+Driver: wire/run.sh (sha256
+50267c76318c0154f2b6e87b1995bfa64a3fa130da7a6afc0829c849e9ef4d18) builds two
+decoders (pinned and patch-derived fixed trees), picks a free loopback port,
+sends wire/w15/band150.input and checks rc plus ASan site. Runner:
+`cd lab/frontier/libraw2shell/wire && sh run.sh ../w15/band150.input OUTDIR`.
+
+Observed in three fresh runs (3/3 identical):
+  attack:  SENT bytes=664550, RECV bytes=664550 option=1, OPEN rc=0,
+           UNPACK rc=0 w=512 h=512, ASan `WRITE of size 2` at
+           src/demosaic/xtrans_demosaic.cpp:427 via dcraw_process():184,
+           0 bytes after a 550,176-byte region allocated at :177, rc 1.
+  no-option: same wire bytes, decoder argv "safe", rc 0, no ASan report.
+  fixed:   same wire bytes and option into the patch-derived fixed decoder,
+           rc 0, no ASan report.
+  Driver printed WIRE_OOB_OK in all three runs; no FAIL lines.
+
+Controls are part of the claim: the wire bytes are identical in all three
+lanes; only the decoder binary (vulnerable vs fixed) and the option flag
+change. The consumer is a lab program, not a stock GUI or server; the wire is
+a loopback TCP connection started by this plant. No debugger is attached, no
+memory is written by the harness, and no external address is contacted.
+
+Grade: wire-visible rung 4 — attacker-supplied loopback bytes reach the live
+decode path and trigger the OOB store with a file-chosen value pattern. This
+is NOT rung 5: no chosen pointer/IP, no benign marker, no command side effect,
+no ASLR study, no live object identified at the written offsets, no stock
+consumer, no upstream merged fix. Author-side only; witness replay owed.
+Every experiment was local and loopback-free.

@@ -723,7 +723,39 @@ Finally it runs the ASan vulnerable / fixed / no-option controls on each
 regenerated input, requiring `WRITE of size 2` at `xtrans_demosaic.cpp:427`
 with rc 1 for the attack and rc 0 for both controls.
 
-Author receipt on the existing lab trees: `PASS=31 FAIL=0`,
-`REPLAY_W13_W14_W15_OK` in 66 s. No witness verdict is implied by an author
-receipt; the grade stays the same (rungs 1-3 established, rung 4 author-side
-for W13/W14/W15, NO r5).
+Author receipts: on the existing lab trees, `PASS=31 FAIL=0` /
+`REPLAY_W13_W14_W15_OK` in 66 s; from a clean `git archive 81392c3c` in
+`/tmp/lr-clean-81392c3c`, a fresh build of all four trees gave the same
+`PASS=31 FAIL=0` / `REPLAY_W13_W14_W15_OK`. No witness verdict is implied by
+an author receipt; the grade stays the same (rungs 1-3 established, rung 4
+author-side for W13/W14/W15, NO r5).
+
+## Wire-visible rung 4 in a live LibRaw consumer (W17, 2026-11-25 00:0xZ; author-side)
+
+W13-W16 all drove the OOB store through `dcraw_emu` with a file path as an
+argument. W17 asks whether attacker-supplied *wire* bytes reach the same store
+in a live process, without a debugger-forced call or an author-local path.
+
+`lab/frontier/libraw2shell/wire/wire_decoder.cpp` binds 127.0.0.1 on an
+ephemeral port, accepts one TCP connection, reads all bytes into a vector,
+closes the socket and calls `LibRaw::open_buffer()` / `unpack()` /
+`dcraw_process()` on those bytes. It is linked to the unmodified pinned
+LibRaw 0.22.3 ASan library; an optional `safe` argument omits `threshold`,
+giving the no-option control. `wire/run.sh` builds both a vulnerable and a
+patch-derived fixed decoder, sends the W15 DNG (`w15/band150.input`) over the
+loopback connection, and checks rc and ASan site in three lanes.
+
+Three fresh runs were identical (`WIRE_OOB_OK` each time): attack received
+664,550 bytes, `OPEN rc=0`, `UNPACK rc=0 w=512 h=512`, then ASan `WRITE of
+size 2` at `src/demosaic/xtrans_demosaic.cpp:427` via `dcraw_process():184`,
+0 bytes after the 550,176-byte region allocated at `:177`, rc 1. The same
+wire bytes with the option omitted gave rc 0, and the same bytes into the
+fixed decoder gave rc 0; neither control reported ASan. Full method and
+hashes are in `lab/frontier/libraw2shell/wire/results.txt`.
+
+Grade: wire-visible rung 4 — attacker-controlled loopback bytes reach the
+live decode path and trigger the file-chosen OOB store. NOT rung 5: no chosen
+pointer/IP, benign marker, command side effect, ASLR study or live object at
+the written offsets; the consumer is a lab program, not a stock GUI or
+server, and no upstream merged fix exists. Author-side only; witness replay
+owed. All experiments were local and loopback-free.

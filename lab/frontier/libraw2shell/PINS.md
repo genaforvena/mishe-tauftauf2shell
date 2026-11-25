@@ -85,6 +85,10 @@
 | `w15/three-offset.json` | W15 preserved negative: rows 250..259 -> sample 0 | `1c6486e9566cc4c35db4fea9d2991f728b534a0dea249585a28e3452f11e09a2` |
 | `w15/rows90.json` | W15 preserved negative: rows 90..99 -> sample 0 | `efad91dbe45180b17a7de09b8841ad2e3f2086098947c6b3350a124f1706c051` |
 | `replay-all.sh` | W16 one-command clean-archive replay for W13/W14/W15 | `c53ed205d02c251516076f4d57c7af40f755fbb4d5bce04e7f79a126aec87828` |
+| `wire/wire_decoder.cpp` | W17 loopback in-process LibRaw consumer | `d6e54904fed35a2cfabc53c9fbc6ed7c6cb239756a707a989eb497c3547dfece` |
+| `wire/send.py` | W17 loopback file sender | `5852dedc2fab7913a631ff9ffe8f3762ca5fccd28cafe38e6c9ab81841915b0f` |
+| `wire/run.sh` | W17 three-lane wire replay driver | `50267c76318c0154f2b6e87b1995bfa64a3fa130da7a6afc0829c849e9ef4d18` |
+| `wire/results.txt` | W17 wire-visible rung-4 result and controls | `d7bbb4089ad8dcaa9df3ee2450496e922633fba59432115f839c0070bcfa01f1` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`
