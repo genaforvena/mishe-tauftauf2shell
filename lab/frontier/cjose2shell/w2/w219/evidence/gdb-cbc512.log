@@ -1,0 +1,46 @@
+Function "oidc_oauth_validate_jwt_access_token" not defined.
+Breakpoint 1 (oidc_oauth_validate_jwt_access_token) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 3 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 4 (AES_unwrap_key) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 5 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W219_OAUTH_VALIDATE_REACHED
+W219_JWE_DECRYPT_IMPL_REACHED
+W219_KW_DECRYPT raw_len=152 cek_len=0 jwk_kty=3
+W219_UNWRAP_KEY_REACHED
+W219_POST_UNWRAP cek=0x5555556672e0 cek_len_before=64
+0x5555556672d0:	0x0000000000000000	0x0000000000000051
+0x5555556672e0:	0x32572d454853494d	0x212d434e452d3931
+0x5555556672f0:	0x4141414141414141	0x4141414141414141
+0x555555667300:	0x4141414141414141	0x4141414141414141
+0x555555667310:	0x4141414141414141	0x4141414141414141
+0x555555667320:	0x4141414141414141	0x4141414141414141
+0x555555667330:	0x4141414141414141	0x4141414141414141
+0x555555667340:	0x4141414141414141	0x4141414141414141
+0x555555667350:	0x4141414141414141	0x4141414141414141
+0x555555667360:	0x4141414141414141	0x4141414141414141
+0x555555667370:	0x0000000000000001	0x0000000000000001
+0x555555667380:	0x0000000000000000	0x0000000000000000
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory
+#0  __pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+#1  __pthread_kill_internal (signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:78
+#2  __GI___pthread_kill (threadid=<optimized out>, signo=signo@entry=6) at ./nptl/pthread_kill.c:89
+#3  0x00007ffff7c4527e in __GI_raise (sig=sig@entry=6) at ../sysdeps/posix/raise.c:26
+#4  0x00007ffff7c288ff in __GI_abort () at ./stdlib/abort.c:79
+#5  0x00007ffff7c297b6 in __libc_message_impl (fmt=fmt@entry=0x7ffff7dcf8f0 "%s\n") at ../sysdeps/posix/libc_fatal.c:134
+#6  0x00007ffff7ca90b5 in malloc_printerr (str=str@entry=0x7ffff7dd2c40 "free(): invalid next size (fast)") at ./malloc/malloc.c:5775
+#7  0x00007ffff7cab4ac in _int_free (av=0x7ffff7e04ac0 <main_arena>, p=<optimized out>, have_lock=0) at ./malloc/malloc.c:4590
+#8  0x00007ffff7cade8e in __GI___libc_free (mem=0x5555556672e0) at ./malloc/malloc.c:3398
+#9  0x00007ffff7b8b52d in _cjose_release_cek (cek=0x555555666ef0, cek_len=144) at jwe.c:81
+#10 0x00007ffff7b8ff79 in cjose_jwe_release (jwe=0x555555666e40) at jwe.c:1665
+#11 0x00007ffff7b7d8e2 in oidc_jwe_decrypt (pool=0x7ffff7ae7028, input_json=0x7ffff7ae3b30 "eyJhbGciOiJBMTI4S1ciLCJlbmMiOiJBMjU2Q0JDLUhTNTEyIn0.QrWtDx-Q1pTOUwAsGt2E09u8U5AguARf63YzHPI75130f2O0A4MBz6IjqzFvphvnE3jBbLIyF96gwzGat5GIVbzab5cd5rlY3WfEzNAmrFDQa5vQYi_cNBfCR7MSG4rwmsf4XdbaFBVk-5BsI3tDzWAjm8FD8W0c_gctra_jEyVZuVzLd2tWQCpWEUk_Ojv0-IbYqVWpPTs.4tewhIg6TmddODez5AnoRw.ERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERERER.IiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiIiI", keys=0x7ffff7ae4030, plaintext=0x7fffffffd938, plaintext_len=0x0, err=0x7fffffffda00, import_must_succeed=0 '\000') at src/jose.c:780

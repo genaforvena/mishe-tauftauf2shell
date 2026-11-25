@@ -1,0 +1,1 @@
+W219_ENC=A128GCM EK_RAW_LEN=152 RESPONSE=b'HTTP/1.1 401 Unauthorized\r\nDate: Wed, 25 Nov 2026 16:00:27 GMT\r\nServer: Apache/2.4.58 (Ubuntu)\r\nWWW-Authenticate: Bearer'

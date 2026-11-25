@@ -1,0 +1,36 @@
+Function "oidc_oauth_validate_jwt_access_token" not defined.
+Breakpoint 1 (oidc_oauth_validate_jwt_access_token) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 3 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 4 (AES_unwrap_key) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 5 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W219_OAUTH_VALIDATE_REACHED
+W219_JWE_DECRYPT_IMPL_REACHED
+W219_KW_DECRYPT raw_len=152 cek_len=0 jwk_kty=3
+W219_UNWRAP_KEY_REACHED
+W219_POST_UNWRAP cek=0x5555556672e0 cek_len_before=32
+0x5555556672d0:	0x0000000000000000	0x0000000000000031
+0x5555556672e0:	0x32572d454853494d	0x212d434e452d3931
+0x5555556672f0:	0x4141414141414141	0x4141414141414141
+0x555555667300:	0x4141414141414141	0x4141414141414141
+0x555555667310:	0x4141414141414141	0x4141414141414141
+0x555555667320:	0x4141414141414141	0x4141414141414141
+0x555555667330:	0x4141414141414141	0x4141414141414141
+0x555555667340:	0x4141414141414141	0x4141414141414141
+0x555555667350:	0x4141414141414141	0x4141414141414141
+0x555555667360:	0x4141414141414141	0x4141414141414141
+0x555555667370:	0x0000000000000000	0x0000000000000000
+0x555555667380:	0x0000000000000000	0x0000000000000041
+Exception ignored in: <module 'threading' from '/usr/lib/python3.12/threading.py'>
+Traceback (most recent call last):
+  File "/usr/lib/python3.12/threading.py", line 1573, in _shutdown
+    def _shutdown():
+    
+KeyboardInterrupt: 

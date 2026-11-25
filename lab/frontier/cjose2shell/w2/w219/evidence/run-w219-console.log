@@ -1,0 +1,25 @@
+CHECK gcm128_KW152                 observed=1 expected=1
+CHECK gcm128_UNWRAP                observed=1 expected=1
+CHECK gcm128_DUMP                  observed=1 expected=1
+CHECK gcm256_KW152                 observed=1 expected=1
+CHECK gcm256_UNWRAP                observed=1 expected=1
+CHECK gcm256_DUMP                  observed=1 expected=1
+CHECK cbc384_KW152                 observed=1 expected=1
+CHECK cbc384_UNWRAP                observed=1 expected=1
+CHECK cbc384_DUMP                  observed=1 expected=1
+CHECK cbc512_KW152                 observed=1 expected=1
+CHECK cbc512_UNWRAP                observed=1 expected=1
+CHECK cbc512_DUMP                  observed=1 expected=1
+CHECK base_KW152                   observed=1 expected=1
+CHECK base_UNWRAP                  observed=1 expected=1
+CHECK base_DUMP                    observed=1 expected=1
+CHECK FIXED_KW152                  observed=1 expected=1
+CHECK FIXED_NO_UNWRAP              observed=0 expected=0
+CHECK FIXED_REJECT599              observed=1 expected=1
+gcm128: W219_POST_UNWRAP cek=0x555555667070 cek_len_before=16
+gcm256: W219_POST_UNWRAP cek=0x5555556672d0 cek_len_before=32
+cbc384: W219_POST_UNWRAP cek=0x5555556672e0 cek_len_before=48
+cbc512: W219_POST_UNWRAP cek=0x5555556672e0 cek_len_before=64
+base: W219_POST_UNWRAP cek=0x5555556672e0 cek_len_before=32
+REPLAY_W219: 18 PASS / 0 FAIL
+NO_LISTENER_LEFT

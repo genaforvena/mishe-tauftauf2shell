@@ -1,0 +1,37 @@
+Function "oidc_oauth_validate_jwt_access_token" not defined.
+Breakpoint 1 (oidc_oauth_validate_jwt_access_token) pending.
+Function "oidc_jwe_decrypt_impl" not defined.
+Breakpoint 2 (oidc_jwe_decrypt_impl) pending.
+Function "_cjose_jwe_decrypt_ek_aes_kw" not defined.
+Breakpoint 3 (_cjose_jwe_decrypt_ek_aes_kw) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 4 (jwe.c:595) pending.
+Function "AES_unwrap_key" not defined.
+Breakpoint 5 (AES_unwrap_key) pending.
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 6 (jwe.c:602) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/cjose2shell/w2/mod_auth_openidc/.libs/mod_auth_openidc.so"
+W219_OAUTH_VALIDATE_REACHED
+W219_JWE_DECRYPT_IMPL_REACHED
+W219_KW_DECRYPT raw_len=176 cek_len=0 jwk_kty=3
+W219_PRE_UNWRAP cek=0x555555667170
+0x5555556671f0:	0x00005555556671b8	0x00005555556671b8
+0x555555667200:	0x00005555556671b8	0x00005555556671b8
+0x555555667210:	0x00005555556671b8	0x00005555556671b8
+0x555555667220:	0x00005555556671b8	0x00005555556671b8
+W219_UNWRAP_KEY_REACHED
+W219_POST_UNWRAP cek=0x555555667170 cek_len_before=16
+0x555555667160:	0x0000000000000000	0x0000000000000021
+0x555555667170:	0x32572d454853494d	0x2d434e452d423931
+0x555555667180:	0x4141414141414141	0x4141414141414141
+0x555555667190:	0x4141414141414141	0x4141414141414141
+0x5555556671a0:	0x4141414141414141	0x4141414141414141
+0x5555556671b0:	0x4141414141414141	0x4141414141414141
+0x5555556671c0:	0x4141414141414141	0x4141414141414141
+0x5555556671d0:	0x4141414141414141	0x4141414141414141
+0x5555556671e0:	0x4141414141414141	0x4141414141414141
+0x5555556671f0:	0x4141414141414141	0x4141414141414141
+0x555555667200:	0x0000000000000000	0x0000000000000000
+0x555555667210:	0x0000000000000000	0x00005555556671b8

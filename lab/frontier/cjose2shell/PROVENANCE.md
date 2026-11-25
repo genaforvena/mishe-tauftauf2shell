@@ -1174,3 +1174,66 @@ fails authentication; this names the object and closes the "is it live and
 relevant?" question with a negative. Not a pointer/IP control, valid
 address, ASLR defeat, command, witness verdict or r5; grade and ceiling
 unchanged. Preserve as a bounded rung-4/negative result, not a new limb.
+
+## W219/W219b — `enc`-selected CEK size sweep in the real pre-auth bearer lane (2026-11-25 15:55-16:05Z)
+
+W197 swept the attacker-controlled `enc` header only in the lab-only direct
+call harness; every real-consumer bearer probe (W212/W215/W217/W218) used
+`enc=A128CBC-HS256`, a 32-byte CEK. Question: does a different wire-selected
+CEK size (16/24/32/48/64 bytes via pinned `src/jwe.c:158-188`) put a live
+control datum adjacent to the CEK, or expose a new fault site?
+
+Method: new `w2/w219/{probe-w219.py,gdb-w219.cmd,apache-w219.conf,run-w219.sh}`.
+One unauthenticated `GET /private` with the config-derived 16-byte lab KEK,
+a 152-byte raw `encrypted_key` (144 chosen bytes) and only `enc` varied;
+fresh gdb-started Apache on 127.0.0.1:18444 per case, fixed module on
+127.0.0.1:18445. Breakpoints at `jwe.c:595` (pre-unwrap dump), `jwe.c:602`
+(post-unwrap dump) and the KW helper record the layout. No pinned byte,
+module, existing evidence or other mind's file changed; no listener left.
+
+Measured (`w2/w219/evidence/gdb-{gcm128,gcm256,cbc384,cbc512,base}.log`):
+all five cases reached `_cjose_jwe_decrypt_ek_aes_kw` with
+`raw_len=152 cek_len=0 jwk_kty=3` and `AES_unwrap_key`; `cek_len_before` at
+`jwe.c:602` was 16 (A128GCM), 32 (A256GCM), 48 (A192CBC-HS384), 64
+(A256CBC-HS512) and 32 (baseline). The fixed module reached the KW helper
+with `raw_len=152` and was rejected at `jwe.c:599` before unwrap. Two new
+plain-build fault sites appeared with the uniform `0x4141...` pattern:
+A256GCM aborted in `malloc(): corrupted top size` from `OPENSSL_sk_dup`,
+and A256CBC-HS512 aborted in `free(): invalid next size (fast)` from
+`_cjose_release_cek (jwe.c:81)`. A128GCM, A192CBC-HS384 and the baseline
+returned HTTP 401 with no signal. In every case the chosen bytes stopped at
+`cek+0x8f`; no live pointer inside the written range was observed.
+
+W219b followed the one pointer-shaped observation in the A128GCM dump: with
+`cek=0x555555667070` the pre-unwrap words at `cek+0x80..0xa8` were repeated
+`0x00005555556670b8` (which equals `cek+0x48`) and `0x00005555556671e0`.
+`probe-w219b.py` pushed the same lane to a 176-byte write (`raw_len=176`)
+with a far-zero control, the 144-byte `base`, and a genuinely safe
+`raw_len=24` token. Pre/post dumps
+(`w2/w219/evidence/gdb-b-{long,zero,base,safe}.log`) show `long` replacing
+all those fields with `0x4141414141414141`, `zero` replacing them with
+zeros, `base` stopping just before them, and `safe` leaving them intact.
+All four vulnerable cases returned HTTP 401 with zero `Program received
+signal` lines; no conditional dereference of the written value occurred.
+The fixed module reached the helper with `raw_len=176` and rejected at
+`jwe.c:599`.
+
+Three runner defects were found and preserved: a broad `malloc`+
+`FinishBreakpoint` probe stalled gdb during OpenSSL key setup (probe
+timeout, no unwrap marker), so it was removed from the sweep gdb script;
+a 17-byte label assigned into a 16-byte slice extended the bytearray and
+made the first W219b write 176 bytes with a nominally "safe" 48-byte token,
+so the label was shortened to 16 bytes and the safe case to `raw_len=24`;
+and `set -e` aborted the whole runner on one probe timeout, so probe calls
+now record `PROBE_FAILED`. Clean receipts:
+`cd lab/frontier/cjose2shell/w2/w219 && sh run-w219.sh` printed
+`REPLAY_W219: 18 PASS / 0 FAIL` at 16:00Z, and `sh run-w219b.sh` printed
+`REPLAY_W219B: 11 PASS / 0 FAIL` at 16:04Z, both `NO_LISTENER_LEFT`.
+
+Conclusion: the wire-selected CEK size changes glibc fault sites and heap
+addresses but not the grade. A 168-byte chosen write can overwrite live
+pointer-shaped fields at `cek+0x80..0xa8` in the real pre-auth lane, yet
+nothing dereferences them; the object holding those fields remains
+UNKNOWN. No control-flow target, valid address, ASLR defeat, command,
+witness verdict or r5; KEK still config-derived. Author-only negative,
+rungs 1-4 ceiling unchanged.

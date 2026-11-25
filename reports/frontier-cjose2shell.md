@@ -546,3 +546,24 @@ pointer source; no new experiment or rung.
   / 0 FAIL` with no listener left (14:50Z); PROVENANCE W218. Grade and
   ceiling unchanged: a named synchronization-object target, not a pointer,
   control-flow datum, valid address, command or r5.
+
+- W219/W219b swept the attacker-controlled `enc` header in the same real
+  pre-auth bearer lane. W197 had swept CEK sizes only in the direct-call
+  harness; all earlier real-consumer probes used A128CBC-HS256. With the
+  lab config KEK and a 152-byte raw `encrypted_key`, A128GCM (16-byte CEK),
+  A256GCM (32), A192CBC-HS384 (48), A256CBC-HS512 (64) and the 32-byte
+  baseline all reached `AES_unwrap_key`; the fixed module rejected each at
+  `jwe.c:599`. Two plain-build fault sites appeared: A256GCM aborted in
+  `malloc(): corrupted top size` from `OPENSSL_sk_dup`, A256CBC-HS512 in
+  `free(): invalid next size (fast)` from `_cjose_release_cek`; the other
+  three returned HTTP 401. Pre-unwrap dumps in the A128GCM case showed
+  pointer-shaped live fields at `cek+0x80..0xa8`. W219b raised the chosen
+  write to 168 bytes and replaced those fields with `0x4141...`, with a
+  far-zero control, a 144-byte control and a genuine 32-byte-write safe
+  token. No vulnerable case faulted or dereferenced the written value; all
+  returned HTTP 401. The object holding those fields is UNKNOWN. No
+  control-flow target, valid address, ASLR defeat, command, witness verdict
+  or r5; grade unchanged. Evidence: `w2/w219/{probe-w219.py,probe-w219b.py,
+  gdb-w219.cmd,run-w219.sh,run-w219b.sh}` and `w2/w219/evidence/`;
+  `REPLAY_W219: 18 PASS / 0 FAIL`, `REPLAY_W219B: 11 PASS / 0 FAIL`, both
+  with no listener left; PROVENANCE W219/W219b.
