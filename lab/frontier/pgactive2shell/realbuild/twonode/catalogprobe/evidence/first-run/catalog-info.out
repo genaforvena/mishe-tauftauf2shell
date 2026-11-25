@@ -1,0 +1,5 @@
+ owner_replorigin | owner_sysid | owner_timeline | owner_dboid | lock_mode | lock_state | owner_local_pid | lockcount | npeers | npeers_confirmed | npeers_declined | npeers_replayed | replay_upto 
+------------------+-------------+----------------+-------------+-----------+------------+-----------------+-----------+--------+------------------+-----------------+-----------------+-------------
+                  |             |                |             |           | nolock     |               0 |         0 |      1 |                0 |               0 |               0 | 
+(1 row)
+

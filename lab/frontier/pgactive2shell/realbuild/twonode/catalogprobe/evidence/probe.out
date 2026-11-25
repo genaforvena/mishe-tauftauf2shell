@@ -1,0 +1,104 @@
+INITDB1=0
+INITDB2=0
+PGSTART1=0
+PGSTART2=0
+CREATE1=0
+GUC1=0
+CREATE2=0
+GUC2=0
+CREATE_GROUP=0
+NODE1_READY=r
+JOIN_GROUP=0
+NODE2_READY=r
+CATALOG_SESSION=0
+--- catalog probe ---
+ pg_replication_origin_create 
+------------------------------
+                            2
+(1 row)
+
+ pg_replication_origin_session_setup 
+-------------------------------------
+ 
+(1 row)
+
+ pgactive_acquire_global_lock 
+------------------------------
+ 
+(1 row)
+
+ owner_replorigin | owner_sysid | owner_timeline | owner_dboid | lock_mode | lock_state | owner_local_pid | lockcount | npeers | npeers_confirmed | npeers_declined | npeers_replayed | replay_upto 
+------------------+-------------+----------------+-------------+-----------+------------+-----------------+-----------+--------+------------------+-----------------+-----------------+-------------
+                  |             |                |             |           | nolock     |               0 |         0 |      1 |                0 |               0 |               0 | 
+(1 row)
+
+TABLE1=0
+TABLE_ON_NODE2=t
+INSERT1=0
+--- handlers ---
+cat: evidence/handler-fn1.out: No such file or directory
+cat: evidence/handler-reg1.out: No such file or directory
+cat: evidence/handler-fn2.out: No such file or directory
+cat: evidence/handler-reg2.out: No such file or directory
+--- rows ---
+ id |  val  
+----+-------
+  1 | node1
+(1 row)
+
+ id |  val  
+----+-------
+  1 | node1
+(1 row)
+
+--- conflict log ---
+--- create group ---
+ pgactive_create_group 
+-----------------------
+ 
+(1 row)
+
+--- join group ---
+ pgactive_join_group 
+---------------------
+ 
+(1 row)
+
+--- nodes ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+--- table ---
+cat: evidence/table2.out: No such file or directory
+--- GUC ---
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+--- node status ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+PGSTOP1=0
+PGSTOP2=0
+TERMINATIONS1=0
+TERMINATIONS2=0

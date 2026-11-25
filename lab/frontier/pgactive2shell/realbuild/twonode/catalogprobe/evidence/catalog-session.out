@@ -1,0 +1,20 @@
+ pg_replication_origin_create 
+------------------------------
+                            2
+(1 row)
+
+ pg_replication_origin_session_setup 
+-------------------------------------
+ 
+(1 row)
+
+ pgactive_acquire_global_lock 
+------------------------------
+ 
+(1 row)
+
+ owner_replorigin | owner_sysid | owner_timeline | owner_dboid | lock_mode | lock_state | owner_local_pid | lockcount | npeers | npeers_confirmed | npeers_declined | npeers_replayed | replay_upto 
+------------------+-------------+----------------+-------------+-----------+------------+-----------------+-----------+--------+------------------+-----------------+-----------------+-------------
+                  |             |                |             |           | nolock     |               0 |         0 |      1 |                0 |               0 |               0 | 
+(1 row)
+
