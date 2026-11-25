@@ -88,3 +88,29 @@ makes the low-half pointer land on a useful object without harness grooming.
   diversion, command, shell or rung 5. W2 is author replay with no witness
   verdict; the earlier ASan-region negative is preserved and scoped to that
   build.
+
+## W3 — leak-free fixed-address write in a non-PIE consumer (2026-11-25 12:16Z)
+
+- New durable lane `lab/frontier/drwav2shell/consumer/run-nopie.sh` builds the
+  SAME unmodified upstream consumer with `-no-pie` against the pinned 0.14.5
+  and 0.14.6 headers. In a non-PIE build the brk heap and the binary's
+  `.data`/`.bss` share the below-4-GiB window: measured `wav.pMetadata=0x42d850`,
+  `libsndfile.pFileData=0x42da40`, globals `0x41e108`/`0x41e118`. The
+  allocator-derived high half of the hijacked cue pointer is therefore zero,
+  so the file's low-32 field is the full write address. `sh consumer/run-nopie.sh`
+  → 11 PASS / 0 FAIL; pins 3/3 OK.
+- File low pointer `0x41e0f0` puts the chosen words `0x4841434b`/`0x42424242`
+  in `g_libsndfile` at fixed `0x41e108`; `0x41e100` retargets them to the
+  function-pointer global `libsndfile__sf_close` at `0x41e118`. No address
+  leak, no `setarch -R`, no gdb write, no source patch. Fixed 0.14.6 and
+  matching-`smpl` controls leave both globals untouched. Uninstrumented
+  replay of the attack file faults later (rc 139) when the corrupted global
+  is used. Raw output in `consumer/evidence/nopie-*.out`.
+- Grade: rung 4 strengthens to 8 chosen bytes at an attacker-chosen FIXED
+  application address in a non-PIE build, without W2's fixed-ASLR-leak
+  dependency. Still no wire/request input, pointer-to-IP overwrite, marker
+  execution, command, shell, live service or rung 5; the function-pointer
+  write is observed at a breakpoint only. W3 is author replay, no witness
+  verdict; the earlier ASan-region and size-class negatives are preserved
+  and scoped to their builds.
+

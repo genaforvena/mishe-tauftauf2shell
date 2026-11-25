@@ -70,3 +70,20 @@ not from the file. No wire, pointer-IP, control flow, command, shell, rung 5
 or witness verdict.
 
 All runs are local; no probe left the host.
+
+## Leak-free fixed-address write (W3, 2026-11-25 12:16Z)
+
+`run-nopie.sh` builds the same unmodified consumer with `-no-pie`. The brk
+heap and the binary's globals then both sit below 4 GiB (measured
+`wav.pMetadata=0x42d850`, `libsndfile.pFileData=0x42da40`, globals at
+`0x41e108`/`0x41e118`), so the high 32 bits of the hijacked cue pointer are
+zero. The RIFF's pointer-low field is the full write address: a file with
+`0x41e0f0` puts the chosen words in `g_libsndfile` at `0x41e108`, and
+`0x41e100` puts them in the function-pointer global `libsndfile__sf_close`
+at `0x41e118` — no address leak, no `setarch -R`, no debugger write, no
+source patch. `sh consumer/run-nopie.sh` → 11 PASS / 0 FAIL; fixed-header
+and safe-loop controls clean; uninstrumented replay faults later (rc 139)
+when the corrupted global is used. Raw output in `evidence/nopie-*.out`.
+This is rung 4 at a fixed application address in a non-PIE build, not a
+control-flow hijack or rung 5; no witness verdict.
+

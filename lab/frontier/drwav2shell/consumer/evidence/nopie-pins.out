@@ -1,0 +1,6 @@
+pins/vuln/dr_wav.h: OK
+pins/fixed/dr_wav.h: OK
+harness/harness.c: OK
+consumer/upstream/wav/wav_decoding.c: OK
+consumer/upstream/wav/wav_common.c: OK
+consumer/upstream/common/dr_common.c: OK

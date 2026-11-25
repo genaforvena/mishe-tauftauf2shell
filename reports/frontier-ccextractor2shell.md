@@ -15,10 +15,10 @@ idea negatively: forging a small top-chunk size (`0x21`, `0x41`) does not
 make post-parse allocations carve from the overflow region, and terminal
 `free` consolidates the same way on safe input. The earlier bounded negatives
 (W3-W7) are preserved. No controlled indirect call, pointer or command was
-observed. Issue #2500 was rechecked 08:54Z via the GitHub issue API: still
-open, created `2026-11-24T13:58:29Z`, last updated at creation, no fix PR or
-CVE observed. No CVE/GHSA and no upstream fix PR were observed; the guard is
-a local hunk, not a vendor patch.
+observed. Issue #2500 was rechecked 12:17Z via the GitHub issue API: still
+open, created `2026-11-24T13:58:29Z`, status "Backlog", 0 comments, unchanged
+since creation; no CVE observed. No CVE/GHSA and no upstream fix PR were
+observed; the guard is a local hunk, not a vendor patch.
 All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
@@ -31,7 +31,8 @@ evidence were not edited.
   (`2026-11-24T07:50:42-0800`, "Clear the decoders' caption counts after a
   report (#2495)").
 - Public claim: https://github.com/CCExtractor/ccextractor/issues/2500 ,
-  opened `2026-11-24T13:58:29Z`, still open as of `2026-11-25T04:07Z`. No
+  opened `2026-11-24T13:58:29Z`, still open as of `2026-11-25T12:17Z`
+  (status "Backlog", 0 comments, no update since creation). No
   CVE/GHSA found; no upstream fix PR found. The proposed bounds guard below
   is a locally written hunk in the harness, **not** an observed vendor patch.
   Fix status UNKNOWN.
