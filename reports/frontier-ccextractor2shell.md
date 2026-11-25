@@ -1,6 +1,6 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 10:37Z (W10): rung 3 and rung 4 CONFIRMED; rung 5 and the
+Status 2026-11-25 12:16Z (W11): rung 3 and rung 4 CONFIRMED; rung 5 and the
 witness verdict remain UNKNOWN. W9 measured a loopback wire-to-sink path in a
 live CCExtractor process: `--udp 127.0.0.1:PORT` fed 257 paced 8192-byte
 datagrams from `inputs/attack.gxf` reaches `parse_mpeg_packet`, where ASan
@@ -563,3 +563,29 @@ carved object, no pointer or command control, rung grades unchanged. Raw
 transcript `real-build/evidence/gdb-w10-udp.out`. One glibc build and heap
 layout only; this is a bounded negative, not a proof for other builds.
 No pinned source, harness source or earlier evidence was edited.
+
+## W11 bounded negative 2026-11-25 12:16Z: no cumulative MEDIA overflow
+
+Prediction: because `parse_mpeg_packet` only does `data->len += len`, a
+second MEDIA packet in one GXF could write at
+`data->buffer + first_len`, 3976 bytes past `malloc(BUFSIZE)`, giving a
+second attacker-controlled write deeper into the corrupted top region.
+Test: new `real-build/make_double_media_gxf.py` emitted
+`inputs/double-attack.gxf` (0x201000 MEDIA then 0x1000 MEDIA, sha256
+`761d572d6611cc9226e81fdbb3f9b49dc986283b5d751b2f9bf4dc291810d291`) and
+`inputs/double-safe.gxf` (two 0x1000 MEDIA, sha256
+`53d5eac1d91b98ea1f4c2ae35deded60045d5ea808cd60f0d77644a95f933585`).
+
+Measured: the plain pinned build under GDB hit `ccx_gxf.c:1219` twice,
+`HIT1 len_arg=2101248 data_len=0` and `HIT2 len_arg=4096 data_len=0`
+(`real-build/evidence/gdb-w11-double-media.out`). `general_loop.c:790`
+resets `data->len = 0` after each processing iteration, so the second
+MEDIA write starts at buffer+0 and stays in bounds. ASan
+`halt_on_error=0` (`real-build/evidence/double-attack.out`) reports exactly
+one `WRITE of size 1052736` at the boundary with the same
+`parse_mpeg_packet`/`parse_media` stack as W1; `double-safe.out` reports
+none. The plain build then aborts in `free(): invalid next size (normal)`
+after the second packet — glibc detecting the already-corrupted top
+metadata, not a pointer write or command control. Rung 3/4 and the rung 5
+UNKNOWN verdict are unchanged. One glibc build and layout only. No pinned,
+harness or earlier evidence file was edited; all inputs are local files.

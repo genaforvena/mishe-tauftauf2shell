@@ -1,0 +1,48 @@
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /tmp/ccx2shell-plain/ccextractor.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+Breakpoint 1 at 0x25370e: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c, line 1219.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: lab/frontier/ccextractor2shell/real-build/inputs/double-attack.gxf
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: No]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+
+-----------------------------------------------------------------
+[KOpening file: lab/frontier/ccextractor2shell/real-build/inputs/double-attack.gxf
+File seems to be a GXF[KAnalyzing data in general mode
+  0%  |  00:00
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1219
+1219			parse_mpeg_packet(demux, mpeg_pic_size, data);
+HIT1 len_arg=2101248 data_len=0
+ 99%  |  00:00
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=4096, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1219
+1219			parse_mpeg_packet(demux, mpeg_pic_size, data);
+HIT2 len_arg=4096 data_len=0
+100%  |  00:00
+Number of NAL_type_7: 0
+Number of VCL_HRD: 0
+Number of NAL HRD: 0
+Number of jump-in-frames: 0
+Number of num_unexpected_sei_length: 0free(): invalid next size (normal)
+
+Program received signal SIGABRT, Aborted.
+__pthread_kill_implementation (no_tid=0, signo=6, threadid=<optimized out>) at ./nptl/pthread_kill.c:44
+warning: 44	./nptl/pthread_kill.c: No such file or directory

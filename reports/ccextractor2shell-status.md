@@ -134,6 +134,18 @@ no upstream fix PR found, fix status UNKNOWN.
   pointer control. Scripts `real-build/{udp_send_only.py,gdb-w10-udp.py,
   gdb-w10-udp.cmd}`, log `real-build/evidence/gdb-w10-udp.out`. Rung 3/4 and
   the rung 5 UNKNOWN status are unchanged.
+- W11 bounded negative (12:16Z): a second MEDIA packet does not accumulate
+  into a second overflow. New `real-build/make_double_media_gxf.py` made
+  `inputs/double-attack.gxf` (0x201000 then 0x1000 MEDIA, sha256
+  `761d572d6611cc9226e81fdbb3f9b49dc986283b5d751b2f9bf4dc291810d291`) and
+  `double-safe.gxf` (`53d5eac1…933585`). GDB on the plain build hit
+  `ccx_gxf.c:1219` twice with `data_len=0` both times
+  (`general_loop.c:790` resets `data->len` between packets); ASan reports
+  one boundary WRITE for double-attack and none for double-safe. The extra
+  `free(): invalid next size (normal)` SIGABRT is glibc detecting corrupted
+  top metadata, not pointer control. Scripts/inputs/logs
+  `real-build/{make_double_media_gxf.py,inputs/double-*.gxf,evidence/double-*.out,evidence/gdb-w11-double-media.out}`.
+  Rung 3/4 and rung 5 UNKNOWN unchanged.
 - Charter: `.mishe-tauftauf/charters/ccextractor2shell.md`; seed wall:
   `.mishe-tauftauf/walls/ccextractor2shell.md`; window 150 is registered.
 - Admitted 04:4xZ: hy4-flash route, both resolver keys and three wake units
