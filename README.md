@@ -182,6 +182,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Drwav2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:3xZ under standing #6 as the 144th route: hy4-flash route and three wake units minted, window 152 adopted; witness W215 replayed 07:52Z ESTABLISHED AS LABELED at this scope, no grade change.** CVE-2026-11316 / Talos TALOS-2026-2442 (2026-11-24, CWE-787, CVSS3.1 8.8 `AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H`), dr_libs 0.14.5; no vendor fix commit in the advisory. Later tag `wav-0.14.6` (`35b5c392…ffe0`) adds a `metadataCursor` bound and result propagation — a source-bound control, not an advisory-confirmed fix. Verbatim pinned `dr_wav.h` 0.14.5 through real public `drwav_init_memory_with_metadata()`: a 150-byte RIFF desynchronises `smpl` pass 1/pass 2, so the next `cue` chunk writes past the reserved metadata slots; ASan WRITE through a file-low-half pointer `0x41414141` at `0x50f041414155` in `drwav__read_cue_to_metadata_obj()`. Rung 4 PARTIAL: file-chosen `0x4841434b`/`0x42424242` read back at a lab-groomed heap destination with `metadataCount=1`; the pointer's high half comes from the allocator. `sh lab/frontier/drwav2shell/harness/run-all.sh` 25 PASS / 0 FAIL under GCC and Clang, 25/0 with three pins from a clean archive (`d591751b`). Fixed 0.14.6 and matching-loop `safe` lanes clean; a global-destination variant in another allocator region was a preserved negative. No application, real wire input, vptr/return address, command or full r5; W215's ESTABLISHED verdict is scoped to the graded run (chosen target bytes, same-size-class condition), not a command-execution claim. `reports/frontier-drwav2shell.md`, `reports/drwav2shell-status.md`. |
 | **Vtkdicom2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:3xZ under standing #6 as the 145th route: hy4-flash route and three wake units minted, window 153 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-22879 / TALOS-2026-2366 (vtk-dicom 9.5.2, CWE-129, CVSS3.1 8.1 `AV:N/AC:H/PR:N/UI:N/S:U/C:H/I:H/A:H`); vendor patch 2026-06-01, source-bound fix `bcc8b26` citing the CVE, vulnerable parent `2dd74234`. `sh lab/frontier/vtkdicom2shell/harness/run-all.sh` 14 PASS / 0 FAIL under GCC and Clang: ASan heap-buffer-overflow `WRITE of size 4` at pinned `e->Tag = tag` in `vtkDICOMItem::FindDataElementOrInsert()` via `Set()`; plain build writes chosen `0x4841434b` / `0x42424242` at harness-groomed store+160/+168, fixed and no-delete controls clean. Stand-in dependency classes; no real vtk-dicom build, DICOM file/wire through a real reader, pointer/IP/control-flow hijack, command, rung 5 or witness verdict. `reports/frontier-vtkdicom2shell.md`, `reports/vtkdicom2shell-status.md`. |
 | **Xschem2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:4xZ under standing #6 as the 146th route: hy4-flash route and three wake units minted, window 154 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj (xschem 2.9.9 through 3.4.7, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; a file converter, not network-facing). Advisory cites fix `e29af39c`; vulnerable tag 3.4.7 = `3851bc5a`. Whole pinned `src/rawtovcd.c` at both versions; real `read_dataset()` on a crafted `.raw` header gives GCC and Clang ASan `heap-buffer-overflow WRITE of size 8` at pinned `:130`, fixed rejects; `sh lab/frontier/xschem2shell/harness/run-all.sh` 25 PASS / 0 FAIL. Rung 4 PARTIAL: file-chosen signed index reads back an allocator-derived pointer, not file-chosen stored bytes (tcache-grooming negative preserved). No function-pointer overwrite, control-flow hijack, wire, command, r5 or witness verdict. `reports/frontier-xschem2shell.md`, `reports/xschem2shell-status.md`. |
+| **StbVorbis2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:5xZ under standing #6 as the 147th route: hy4-flash route and three wake units minted, window 135 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-89266 (VulnCheck 2026-09-11, CWE-787, CVSS4 8.8 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H`, stb_vorbis <= 1.22); vulnerable v1.22 `2c980bb` sha256 `4c7cb2ff…e65636`, dev-branch fixed `daedcc5c…e86a5` with `CODEBOOK_LIMIT (1<<18)`, numeric fixed release UNKNOWN. `setup_malloc(vorb*, int)` truncates the file-derived `size_t` product `4 * 16519105 * 65 = 2^32+4` to `malloc(8)`; real `stb_vorbis_open_memory()` on a 205-byte OGG gives ASan `WRITE of size 4` at `stb_vorbis.c:3889`, fixed and safe inputs clean, and gdb reads file-chosen `4b 43 41 48` ("HACK") at the first OOB float (`lab/frontier/stbvorbis2shell/run-all.sh`, 9 PASS / 0 FAIL). Rung 4 PARTIAL at a repeating 4-byte word and one offset: no per-offset bytes, measured OOB extent, real consumer, wire, pointer, command or witness verdict; NO r5. `reports/stbvorbis2shell-status.md`. |
 
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
@@ -3094,9 +3095,18 @@ limbs above are author-side unless a witness marker is named; none moved a
 rung cell, grade, route, mind count or R5 cell.
 
 
+The 2026-11-25 10:5xZ fold admits StbVorbis2Shell as the 147th route and
+supersedes its earlier FRONTIER-STAGED note above: the charter, hy4-flash
+route, both resolver keys and three wake units now exist, and window 135 was
+adopted without duplication. The exact full-flag sync reported `written 3,
+removed 0` and the pinned full-flag doctor returned PASS / GREEN rc 0. The
+staged real-library grade is unchanged: rung 3 ASan and rung 4 PARTIAL at a
+repeating file-chosen word written past an 8-byte allocation, with NO r5 and
+no witness verdict. No grade, rung, witness or R5 cell moved by admission.
+
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 142 target
+Each admitted family is its own mind with its own tmux window: 147 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -3131,9 +3141,9 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `fontforge2shell`, `fltk2shell`, `contiki2shell`, `libraw2shell`,
 `gpgme2shell`, `imagemagick2shell`, `codebasememory2shell`, `assimp2shell`,
 `open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell`,
-`ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell` and
-`xschem2shell`. Each builds affected harnesses, drives toward rung 4 and
-authors its report under `reports/`.
+`ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell`,
+`xschem2shell` and `stbvorbis2shell`. Each builds affected harnesses,
+drives toward rung 4 and authors its report under `reports/`.
 
 Four cross-cutting minds: **frontier** hunts public advisories and hands a
 reproducible harness to the operator; **docs** keeps this README and `docs/`

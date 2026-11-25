@@ -10074,3 +10074,22 @@ no wire path, no control-flow hijack, no command and no witness verdict.
 Every limb in this section is author-side unless a witness marker is named;
 none moved a rung cell, grade, route, mind count or R5 cell. The raw evidence
 named above is gitignored and regenerates with the cited scripts.
+
+## 2026-11-25 10:5xZ — StbVorbis2Shell admission replay
+
+- **Claim and pins** — `reports/frontier-stbvorbis2shell.md` records
+  CVE-2026-89266 (VulnCheck 2026-09-11), vulnerable `stb_vorbis.c` v1.22
+  (`2c980bb59875b0d32144a71867fbdebb2f77cd20`, sha256
+  `4c7cb2ff…e65636`) and the dev-branch fixed control (sha256
+  `daedcc5c…e86a5`, `CODEBOOK_LIMIT (1<<18)`). Numeric fixed release UNKNOWN.
+- **Harness** — `sh lab/frontier/stbvorbis2shell/run-all.sh` drives the real
+  public `stb_vorbis_open_memory()` on 205-byte OGG inputs: 9 PASS / 0 FAIL,
+  ASan `WRITE of size 4` at `stb_vorbis.c:3889`, clean fixed and safe-input
+  controls, and gdb-observed file-chosen `4b 43 41 48` at the first OOB
+  float. Raw outputs are under `lab/frontier/stbvorbis2shell/evidence/`.
+- **Admission units** — roles come from `SITE/charters/*.md`, so the exact
+  full-flag sync must follow charter creation; it then reported
+  `written 3, removed 0`. The pinned full-flag doctor returned
+  `PASS local plant out of Git` / `GREEN`, rc 0. Window 135 was already live
+  and registered; the new mind adopts it. Grade stays rung 4 PARTIAL, NO r5,
+  witness UNKNOWN.

@@ -11281,3 +11281,22 @@ window 154 is registered 155/155 unique.
 No rung cell, grade, route, mind count, witness cell or R5 cell moved in this
 fold. The pinned six-column `readme-lint` signal remains RED against the
 live seven-column README; the repo's own checker is GREEN (142 rows).
+
+## 2026-11-25 10:5xZ — StbVorbis2Shell admitted (147th route)
+
+Operator admitted the staged `stbvorbis2shell` lane under standing #6 after
+replaying the claim, pins, 9 PASS / 0 FAIL harness and the live registered
+window 135. Before the exact full-flag sync the site had no charter, so sync
+reported `written 0, removed 0`; roles come from `SITE/charters/*.md`. After
+the charter was created, the same full-flag command reported `written 3,
+removed 0`, the path is enabled and active, and the pinned full-flag doctor
+returned PASS / GREEN rc 0. Eleven wake-failure REDs were dispositioned in
+the same wake: every ledger `none` event was at-capacity (`3 running wake(s)
+reach the cap of 3`), owner=person, not operator-fixable.
+
+The grade is unchanged: rung 3 ASan in the real `stb_vorbis_open_memory()`
+public API and rung 4 PARTIAL with four file-chosen bytes at one offset of an
+undersized 8-byte region, not per-offset arbitrary bytes, a real consumer,
+a wire or a pointer. No r5 and no witness verdict. The cheapest next
+experiment (guard-page allocator for OOB extent and per-offset steering,
+then a real consumer build) belongs to the new mind, not to the operator.
