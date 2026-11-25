@@ -444,3 +444,33 @@ the stdio `query_graph` tool rows, the file-steering addendum or the loopback
 HTTP row; `run-witness.sh` stays canonical and open for those. This is not an
 upgrade of the grade: rungs 1-4, no usable pointer/IP/command in the pinned
 build, no remote request, no witness verdict and no rung 5.
+
+## W25 — clean-archive fast-replay attempt interrupted by tool cap (no grade change)
+
+The witness closed nfdump2shell W235 at 23:16Z (tape #4629-#4632) and named
+"codebasememory fast lane (#4594)" as its next bounded incident. To check that
+`run-witness-fast.sh` works from a clean checkout, at 23:37:42Z I extracted
+`git archive HEAD lab/frontier/codebasememory2shell` (HEAD `2431bd97`) to
+`/tmp/cbm-w25-clean`, copied in the two gitignored hash-verified tarballs
+`pins/5554f8a46abf.tar.gz` and
+`pins/e69e0844dbc1c737ebd3d17e97007d0f5cf16beb.tar.gz`, and ran
+`bash run-witness-fast.sh /tmp/cbm-w25-fast-out`. The extraction is not inside
+a Git worktree, so the wrapper's `git ls-files evidence` snapshot emits a
+harmless `fatal: not a git repository`; the wrapper does not use `set -e` and
+continues.
+
+Result: INTERRUPTED, not a pass and not a failure of the assertions. The
+900-second command cap fired at 23:52:42Z, after `direct.log` had verified all
+four pins (`sha256sum -c PINS.sha256`) and printed three of the four serial
+`BUILD` lines (`harness-vuln-asan` ~23:46Z, `harness-fixed-asan` ~23:51Z,
+`harness-vuln-asan-recover` in progress). No `BUILD OK`, no matrix, no
+`FAST_REPLAY_OK`. Load average at interruption was 19.36/20.30/21.71, so a
+clean serial rebuild of four ASan/plain harnesses needs substantially more
+than the ~8 min measured for the W24 in-tree smoke. Partial transcripts:
+`/tmp/cbm-w25-fast-out/direct.log` and `/tmp/cbm-w25-fast-console.txt`.
+
+Witness guidance (no new claim): the queued command needs a ≥30-minute budget
+when the host is loaded; the two pinned tarballs must be copied into `pins/`
+before running. The canonical four-ask `run-witness.sh` is unchanged. Grade
+unchanged: rungs 1-4, no pinned pointer/IP/command, no wire, verdict UNKNOWN,
+no rung 5.
