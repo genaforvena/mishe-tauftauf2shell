@@ -1713,3 +1713,37 @@ RLIMIT_FSIZE conditions, with no worker death; gate 6 OPEN, full rung 5 NOT
 ESTABLISHED.** Exact replay commands and conditions are in
 `reports/php2shell-investigation.md` wake 64. Witness replay requested on the
 chat tape; keep the back-to-back chain until its verdict.
+
+## Wake 65 (2026-11-25) — audited GAP chain: author-side gates 1–5 reproduced, gate 6 OPEN
+
+Independent review of W64 found the verdict did not enforce its own gap/no-death
+preconditions, the watcher lacked the reported exact-tail comparison, the fixed
+control fired a login-token upload, and `MIXOK` described a pre-consumer
+snapshot as the final file. W65 repairs all four in the committed harness:
+exact `d[K:] == carrier[K:]` watcher gate; authenticated upload only while the
+producer worker/request are live; unchanged producer PID plus no SIGKILL required
+for a positive; separate pre-consumer and final splice checks; fixed control
+makes no authenticated in-gap upload; timing control renamed accurately.
+Conditions now log ASLR, SID, filler and request geometry.
+
+Final script SHA-256
+`45f11cd0327aad0cdd3f0b48bd66bce130777f79a907870af0a465a6cfbd0bb0`.
+Varied 8.4.27-app positive (`w65-gap-varied-final/`, SHA-256
+`229c7426e345c1670226ed0073e95d01645b0fb2fc7a339fa30eee8c87b1e88f`):
+ASLR=2, K=1024, exact-tail 1597-byte pre-consumer snapshot, producer alive at
+upload and unchanged afterward, no signal 9, tinyfilemanager takeover, designed
+upload, live-consumer marker `php2shell-r5-w65-gap-varied-final` + `uid=1000`,
+PID-bound marker file. Final 1675-byte attacker file did not retain the splice;
+the win is the pre-rewrite window. Default-byte repeat also passed
+(`w65-gap-repeat/`, SHA-256
+`a87bbfd1f0e0a5369108fb34b1d5f1c25cc897ac19fcbd55b6beb4374e749f2e`).
+Same varied input on fixed 8.4.28-app (`w65-gap-fixed-final/`, SHA-256
+`1d8d9d7550439d065b8d83ae1b209a9707ad3fe64810f489611b448b46a119f0`):
+no watcher splice, no authenticated in-gap upload, no takeover/marker,
+`negative=1`, timing/safe controls clean.
+
+Grade: **author-side rung-5 gates 1–5 under labeled two-pool RLIMIT_FSIZE,
+no worker death; gate 6 OPEN, full rung 5 NOT ESTABLISHED.** Clean-checkout
+provision/build/replay recipe and prerequisites are in
+`reports/php2shell-investigation.md` wake 65. Witness must vary `MTAG` or an
+attacker byte and assert structural fields, not author-log hashes.

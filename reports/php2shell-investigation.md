@@ -1807,3 +1807,89 @@ still OPEN.** The deployment limit is lab setup, not wire input; the producer
 and consumer traffic is wire-only. A fresh-context witness must replay from a
 clean checkout, vary the command or attacker byte, and see fixed/no-death/safe
 controls absent before full rung 5 can be claimed.
+
+### Wake 65 (2026-11-25) — audited GAP verdict: exact-tail watcher, live-producer binding, snapshot/final split
+
+An independent read-only audit of W64 found four reproducibility/wording
+defects: the GAP verdict did not require the watcher to find the armed splice;
+it did not require the producer to be alive during the authenticated upload;
+the watcher did not actually compare the exact carrier tail; and `MIXOK` read
+the watcher's pre-consumer snapshot while the report called it the post-run
+file. The fixed control also fired an upload using a login-form CSRF token,
+contradicting the report's "no upload" wording.
+
+W65 repairs those defects in `lab/repro/php2shell-aftershell-splice-tfm.sh`:
+the watcher now compares `d[K:] == carrier[K:]` before firing; an in-gap upload
+requires an authenticated admin page, `GAP_FOUND=0`, a live producer worker and
+a live producer request; the final verdict requires the same producer PID, no
+SIGKILL log and a target marker PID-bound to the consumer worker. The harness
+reports the pre-consumer snapshot and final attacker file separately, logs
+ASLR/SID/filler/request geometry, and treats the completed-request control as a
+timing control rather than a death differential. The final script SHA-256 is
+`45f11cd0327aad0cdd3f0b48bd66bce130777f79a907870af0a465a6cfbd0bb0`.
+
+Final varied positive on 8.4.27-app:
+`KEEP_TMP=1 GAP=1 DEATH_MODE=rlimit SID=cafebabe00112233445566778899babe FILLER=Y MTAG=php2shell-r5-w65-gap-varied-final PORT=18360 bash lab/repro/php2shell-aftershell-splice-tfm.sh lab/build/php-8.4.27-app/sapi/fpm/php-fpm lab/src/php2shell-r5-app/tfm-app/web lab/build/evidence/w65-gap-varied-final 18360`.
+Observed: ASLR=2; K=1024; exact-tail armed snapshot 1597 bytes; producer worker
+3260643 and request 3260758 live at authenticated upload; producer PID unchanged
+and no signal 9; tinyfilemanager admin takeover; designed upload accepted; live
+consumer worker printed `php2shell-r5-w65-gap-varied-final` plus
+`uid=1000(mesh-home)` and wrote the marker from its own PID. The final attacker
+file was 1675 bytes and did **not** retain the splice, confirming the mechanism
+depends on winning the pre-rewrite window rather than persisting the file.
+Timing and virgin-SID controls were clean. Evidence SHA-256:
+`229c7426e345c1670226ed0073e95d01645b0fb2fc7a339fa30eee8c87b1e88f`.
+
+A second final-harness positive with default SID/filler repeated the full
+chain (`lab/build/evidence/w65-gap-repeat/`, marker
+`php2shell-r5-w65-gap-repeat`, SHA-256
+`a87bbfd1f0e0a5369108fb34b1d5f1c25cc897ac19fcbd55b6beb4374e749f2e`).
+The same varied SID/filler on fixed 8.4.28-app produced no watcher splice, no
+authenticated in-gap upload, no takeover and no marker; `negative=1`,
+`timing-control=1`, `safe-control=1`
+(`lab/build/evidence/w65-gap-fixed-final/`, SHA-256
+`1d8d9d7550439d065b8d83ae1b209a9707ad3fe64810f489611b448b46a119f0`).
+
+Clean-checkout witness recipe (run from the W65 checkout; all traffic remains
+on loopback):
+
+```sh
+W=$(mktemp -d)
+git archive HEAD | tar -x -C "$W"
+cd "$W"
+mkdir -p lab/src lab/build lab/tmp
+sh lab/php2shell/provision.sh
+bash lab/php2shell/provision-tfm-app.sh
+bash lab/php2shell/build-app.sh 8.4.27
+bash lab/php2shell/build-app.sh 8.4.28
+
+KEEP_TMP=1 GAP=1 DEATH_MODE=rlimit \
+  SID=cafebabe00112233445566778899babe FILLER=Y \
+  MTAG=php2shell-r5-w65-witness PORT=18340 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w65-witness-vuln 18340
+
+GAP=1 DEATH_MODE=rlimit \
+  SID=cafebabe00112233445566778899babe FILLER=Y \
+  MTAG=php2shell-r5-w65-witness PORT=18350 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.28-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w65-witness-fixed 18350
+```
+
+Prerequisites: bash, python3, clang/cc, make/autotools, curl/tar/sha256sum,
+util-linux `prlimit`, psmisc `fuser`, procps `pgrep`, and development headers
+for gd/freetype/jpeg/webp, openssl, libxml2, sqlite3, curl and zlib. The witness
+must vary `MTAG` or another attacker byte and assert the structural log fields;
+the hashes above identify author receipts only and are not expected hashes for
+a fresh run.
+
+Grade: **author-side rung-5 gates 1–5 reproduced by the audited W65 harness
+under labeled two-pool `RLIMIT_FSIZE` conditions; gate 6 OPEN, full rung 5 NOT
+ESTABLISHED.** No worker death, `RLIMIT_CPU`, debugger or phase-2 preload is
+used. The two FPM masters, shared session directory, upload-progress-off
+consumer, timing window and permissive tinyfilemanager upload configuration
+remain required conditions; stock/default-deployment reachability is UNKNOWN.

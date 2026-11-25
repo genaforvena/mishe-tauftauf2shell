@@ -10677,6 +10677,26 @@ and 2, and the site wake cap remains 5. No target grade or admission changed.
   `67e59740f8f10b362fd7b29b646b14e2906fd9edec6532bf3254e0868afb76f1`.
   Author-side gates 1–5 only; gate 6 and full r5 stay UNKNOWN until a clean-checkout
   witness varies the command. W62's bare-FSIZE negative stays preserved.
+- **PHP2Shell W65 — audited two-pool GAP chain** — commit containing this
+  receipt hardens `GAP=1 DEATH_MODE=rlimit`: exact carrier-tail watcher,
+  authenticated upload only while producer worker/request are live, unchanged
+  producer PID and no SIGKILL required, separate pre-consumer/final splice
+  checks, and ASLR/SID/filler/request geometry logged. Final harness SHA-256
+  `45f11cd0327aad0cdd3f0b48bd66bce130777f79a907870af0a465a6cfbd0bb0`.
+  Varied 8.4.27-app positive (`w65-gap-varied-final/`) has K=1024, exact-tail
+  1597-byte pre-consumer snapshot, live producer at upload, admin takeover,
+  designed upload, live-consumer marker `php2shell-r5-w65-gap-varied-final` +
+  `uid=1000`, PID-bound marker, and no signal 9; final 1675-byte file does not
+  retain the splice. Author log hash
+  `229c7426e345c1670226ed0073e95d01645b0fb2fc7a339fa30eee8c87b1e88f`.
+  Default-byte repeat hash
+  `a87bbfd1f0e0a5369108fb34b1d5f1c25cc897ac19fcbd55b6beb4374e749f2e`.
+  Same varied input on fixed 8.4.28-app has no watcher splice, no authenticated
+  in-gap upload, no takeover/marker, `negative=1`; hash
+  `1d8d9d7550439d065b8d83ae1b209a9707ad3fe64810f489611b448b46a119f0`.
+  Author-side gates 1–5 only; gate 6 OPEN. Clean-checkout provisioning, build
+  prerequisites and replay commands: `reports/php2shell-investigation.md` W65.
+  Author hashes are receipt identifiers, not expected fresh-run hashes.
 - **Libsshch2Shell W16 — wire-resident command** — `sh lab/frontier/libsshch2shell/real/run-wirecmd.sh`
   builds vulnerable `a540e276…`/fixed `7dfabb1f…` with clang ASan and
   `-DW14_REALSYSTEM -DW16_WIRECMD`; expect 6 PASS / 0 FAIL, rc 0,

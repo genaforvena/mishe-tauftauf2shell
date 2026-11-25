@@ -65,6 +65,7 @@ def main(argv):
     rate = 0.0  # unlimited
     hold = 0.0
     slow_after = None
+    timeout = 30.0
     rate2 = None
     i = 4
     while i < len(argv):
@@ -168,7 +169,7 @@ def main(argv):
     verdict["stderr_head"] = err[:200].decode("latin1")
     verdict["total"] = round(time.time() - t0, 3)
     print(json.dumps(verdict))
-    return 0
+    return 1 if verdict["status"] == "error" else 0
 
 
 if __name__ == "__main__":
