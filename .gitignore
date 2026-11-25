@@ -407,3 +407,15 @@ lab/frontier/fontforge2shell/plain-fixed
 lab/frontier/contiki2shell/contiki-ng-release-v5.2.tar.gz
 lab/frontier/contiki2shell/contiki-ng-release-v5.2/
 lab/frontier/contiki2shell/*.out
+
+# vtkdicom2shell W226: local upstream clone, built binaries and build logs.
+# Pinned sources, verbatim extracts, harness, scripts and evidence stay tracked.
+lab/frontier/vtkdicom2shell/upstream/
+lab/frontier/vtkdicom2shell/harness/g++-*
+lab/frontier/vtkdicom2shell/harness/clang++-*
+lab/frontier/vtkdicom2shell/harness/vuln-asan
+lab/frontier/vtkdicom2shell/harness/vuln-plain
+lab/frontier/vtkdicom2shell/harness/fixed-asan
+lab/frontier/vtkdicom2shell/harness/fixed-plain
+lab/frontier/vtkdicom2shell/harness/*.build.log
+!lab/frontier/vtkdicom2shell/harness/*.out

@@ -1,0 +1,7 @@
+STORE 0x59f2075a0320
+count_before=5 cap=4
+count_after=6
+CHOSEN guard1 word[4]=4841434b at 0x59f2075a03c0
+CHOSEN guard1 word[6]=42424242 at 0x59f2075a03c8
+REGION guard1 0x59f2075a03b0..0x59f2075a0430
+REGION guard2 0x59f2075a0440..0x59f2075a04c0
