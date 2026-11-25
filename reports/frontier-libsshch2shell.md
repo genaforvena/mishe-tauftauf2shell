@@ -141,6 +141,13 @@ it isolates the chosen-pointer write from unrelated UAF faults. Base
 `run-all.sh` (5 PASS / 0 FAIL) and W2 `run-extra.sh` (8 PASS / 0 FAIL) still
 pass after the harness change.
 
+Clean-archive receipt: source and scripts extracted from `git archive HEAD`
+into a throwaway directory, with symlinks to the same lab's prebuilt ASan
+libs, mirror trees and hostkey (the archive does not contain those build
+artifacts). All three suites replayed there at 06:03Z: `run-all.sh` 5 PASS /
+0 FAIL, `run-extra.sh` 8 PASS / 0 FAIL, `run-survive.sh` 7 PASS / 0 FAIL.
+This checks committed harness text, not a rebuild of libssh from the archive.
+
 
 Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
 loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
