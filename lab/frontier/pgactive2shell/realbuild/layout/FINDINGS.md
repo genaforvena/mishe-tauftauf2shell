@@ -98,3 +98,34 @@ exact instruction addresses in `evidence/production-frame-check.txt`.
 The saved-pointer/IP route stays closed in the production build too; no
 cluster was started and no source was changed. Author observation, not a
 witness verdict.
+
+## Clean-archive replay and generated-name bound (2026-11-25 08:59Z)
+
+The negative was replayed from committed bytes, not the working tree:
+`git archive b620fc1a lab/frontier/pgactive2shell/realbuild/layout |
+tar x -C /tmp/pgactive-layout-clean`, then `LABEL=opt sh run-layout.sh`
+with the installed normal library verified at sha256
+`3177a37c...162998` before the run. All 15 lengths returned RC=1,
+`LIVENESS_RC=0`, `BACKEND_TERMINATIONS=0`, `LAYOUT_STOP=0`,
+`NORMAL_SO_RESTORED=yes`, `SRC_RESTORED=yes`; the first downward RA-value
+match is again `RAOFF=-32`. At N=256 the canary slot (+72) and the saved
+RA slot (+120) both hold chosen `41 5a` bytes, and the backend still lives.
+The saved-pointer negative is therefore not a working-tree artifact.
+Commands, hashes and decoded offsets: `evidence/clean-archive-replay.txt`.
+Author replay, not an independent witness verdict.
+
+A source-only bound on the wire path: in the pinned 2.1.9 tree both name
+builders pass the empty tail constant — `pgactive_replident_name()`
+(`src/pgactive_catalogs.c:386-398`) and `pgactive_slot_name()`
+(`src/pgactive_common.c:40-45`) format `pgactive_REPORIGIN_ID_FORMAT` /
+`pgactive_SLOT_NAME_FORMAT` with `EMPTY_REPLICATION_NAME`. Names the
+extension generates itself therefore have an empty `%s` tail and cannot
+overflow. The vulnerable caller
+`pgactive_fetch_sysid_via_node_id_ifexists()`
+(`src/pgactive_catalogs.c:303-333`) obtains `riname` from
+`replorigin_by_oid()`, so reaching the overflow needs a hand-crafted name
+already stored in the replication-origin catalog — consistent with the
+advisory's "use only pgactive-generated names" workaround. This narrows
+the trigger but does not supply one; the two SQL entry points remain
+owner-only and the single-node group stayed in state `b`. Rung ceiling
+unchanged.

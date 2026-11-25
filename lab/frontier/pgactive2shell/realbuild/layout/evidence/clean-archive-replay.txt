@@ -1,0 +1,40 @@
+Clean-archive replay of the saved-pointer negative (2026-11-25 08:59Z)
+
+Command (run from the repository root):
+
+  rm -rf /tmp/pgactive-layout-clean && mkdir -p /tmp/pgactive-layout-clean
+  git archive b620fc1a lab/frontier/pgactive2shell/realbuild/layout \
+    | tar x -C /tmp/pgactive-layout-clean
+  cd /tmp/pgactive-layout-clean/lab/frontier/pgactive2shell/realbuild/layout
+  LABEL=opt sh run-layout.sh
+
+Precondition checked before the run:
+  sha256 /tmp/pgactive-build/pg16root/.../lib/pgactive.so
+    = 3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998
+  sha256 lab/.../layout/evidence/pgactive.so.normal-backup = same value
+  so the installed library the script backs up and restores is the normal,
+  non-instrumented 2.1.9 build (the hash quoted in production-frame-check.txt).
+
+Replay rc lines:
+  LAYOUT_BUILD=0, LAYOUT_INITDB=0, LAYOUT_PGSTART=0, LAYOUT_CREATE=0
+  LIVENESS_RC=0, BACKEND_TERMINATIONS=0, LAYOUT_STOP=0
+  NORMAL_SO_RESTORED=yes, SRC_RESTORED=yes
+All 15 payload lengths N=0..256 returned RC=1 (the expected
+"could not parse slot name: ..." error), as in the working-tree run.
+The first downward RA-value match is RAOFF=-32 at every length, identical
+to the original opt run; BASE varies with ASLR.
+
+At N=256 the full LAYOUTWIN line (320 bytes starting at &replication_name-64)
+was decoded; the eight bytes at each offset relative to replication_name:
+  +  0: 41 5a 41 5a 41 5a 41 5a   (buffer start, chosen AZ)
+  + 64: 41 5a 41 5a 41 5a 41 5a   (one past the 64-byte object)
+  + 72: 41 5a 41 5a 41 5a 41 5a   (stack canary slot, overwritten)
+  + 92: 41 5a 41 5a 41 5a 41 5a
+  + 96: 41 5a 41 5a 41 5a 41 5a
+  +120: 41 5a 41 5a 41 5a 41 5a   (saved return-address slot, overwritten)
+
+Interpretation: the clean archive reproduces the negative. Both the canary
+and the saved RA are overwritten with chosen bytes, yet the backend survives
+and stays live because every overflowing input leaves through the pinned
+!= 4 check and elog(ERROR) longjmp. No pointer/IP control from a clean tree.
+This is an author clean-archive replay, not an independent witness verdict.

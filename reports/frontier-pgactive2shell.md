@@ -275,3 +275,27 @@ neither is established here. Witness replay of the commit containing
 `sh run-real-asan.sh` with the provisioning in `realbuild/PROVISION.md`;
 SQL-path, live-capture, full-extension and layout evidence stays unreplayed
 until that happens.
+
+## Clean-archive replay and generated-name bound (2026-11-25 08:59Z)
+
+The saved-pointer negative was replayed from committed bytes:
+`git archive b620fc1a lab/frontier/pgactive2shell/realbuild/layout |
+tar x -C /tmp/pgactive-layout-clean`, then `LABEL=opt sh run-layout.sh`
+against the normal 2.1.9 library (sha256 `3177a37c...162998` checked before
+the run). All 15 payload lengths returned RC=1 with `LIVENESS_RC=0`,
+`BACKEND_TERMINATIONS=0` and both source and library restored. At N=256 the
+canary slot (+72) and saved RA slot (+120) again hold chosen `41 5a` bytes,
+and the backend stays alive. The closure is not a working-tree artifact;
+details in `realbuild/layout/evidence/clean-archive-replay.txt`. Author
+replay, not an independent witness verdict.
+
+Source-only bound on the wire path: the pinned builders
+`pgactive_replident_name()` (`src/pgactive_catalogs.c:386-398`) and
+`pgactive_slot_name()` (`src/pgactive_common.c:40-45`) both pass
+`EMPTY_REPLICATION_NAME` as the trailing `%s` argument, so names generated
+by the extension have an empty tail and cannot overflow. The vulnerable
+caller `pgactive_fetch_sysid_via_node_id_ifexists()`
+(`src/pgactive_catalogs.c:303-333`) reads its name from
+`replorigin_by_oid()`; a hand-crafted name must already be in the catalog,
+matching the advisory's "use only pgactive-generated names" workaround.
+This narrows the trigger without supplying one. Rung ceiling unchanged.
