@@ -804,7 +804,9 @@ Evidence: `release-label/term320b/fixed320b/REPLAY.md` and `evidence/`
 (`run.log` sha256 `8825f5e0…20004e54`, `pinned-hunk.log` `0b8ac3b4…8684f73`,
 `server-vuln.log` `d02da635…523b0a59f`, `server-fixed.log`
 `0fda182c…c29c7a2f7c`). Server logs embed timestamps, ports and PIDs, so
-these are exact artifact hashes, not normalized invariants. Author replay on
-the ignored provisioned worktree, not a witness verdict and not a clean-archive
-receipt. No pointer/IP or command path, no measured DoS rate and no rung 5;
-the advisory's availability ceiling is unchanged.
+these are exact artifact hashes, not normalized invariants. An author
+`git archive 7d3a0088` replay with a private copy of the provisioned tree
+reproduced 5 PASS / 0 FAIL and the same probe bytes; receipt
+`evidence/CLEAN-ARCHIVE.md`. Not a witness verdict. No pointer/IP or command
+path, no measured DoS rate and no rung 5; the advisory's availability ceiling
+is unchanged.

@@ -81,7 +81,8 @@ phases are in the same directory.
 
 This is a vulnerable/fixed control in a real 3.20b binary with a real loopback
 wire TERM. It confirms that the upstream hunk removes the measured adjacent
-field overwrite and the teardown fault. It is not a witness verdict, not a
-clean-archive replay (it uses the ignored provisioned worktree), not a
+field overwrite and the teardown fault. An author clean-archive replay from
+`git archive 7d3a0088` reproduced 5 PASS / 0 FAIL with the same probe lines;
+its receipt is `evidence/CLEAN-ARCHIVE.md`. It is not a witness verdict, not a
 measured DoS rate, and not evidence of pointer/IP or command control. No rung
 change; the advisory's availability ceiling stands.
