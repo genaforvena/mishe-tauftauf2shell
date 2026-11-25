@@ -122,3 +122,28 @@ read-only provisioning and no external system was contacted with a probe.
   real `vtkDICOMReader` OOB, no pointer/IP/control-flow/command, no rung 5,
   no witness replay. Witness replay still owed.
 
+
+## W2 — broad parser input sweep, no invalid-value source (2026-11-25 10:14Z)
+
+- Source walk of the pinned vulnerable parser: `vtkDICOMItem::Set` deletes
+  only when `!v.IsValid()`; `Decoder::ReadElements` (Parser.cxx:1560) starts
+  with a default-invalid `vtkDICOMValue v` and passes it to
+  `ReadElementValue` (Parser.cxx:1269). Every valid VR type has a switch case
+  there and even a zero-length allocation makes the value valid. The sole
+  unhandled type is `VTK_VOID` (enum XX/OX/XS), but unrecognised explicit VR
+  strings decode to XX and are replaced via `FindDictVR`, which resolves
+  XS->US/SS and OX->OB/OW; empty SQ and undefined-length paths also yield
+  valid values. No invalid-value source found in the ordinary parse path.
+- `tools/make-corpus.py` generated 163 crafted sequence-item files
+  (`evidence/corpus/`): every VR string, VL 0/2/4 and 0xffffffff, implicit
+  VR LE with transfer syntax, private creators, zero-length SQ. A batched
+  gdb sweep over the real `dicomdump` (breakpoint on `vtkDICOMItem::Set`,
+  printing `v.IsValid()`) parsed all 163 files: 1448 Set calls, **0 with
+  `v.IsValid()==0`** (`evidence/sweep-gdb.out`). The W1 file-lane negative
+  stands and is stronger; no file construct is invented.
+- Grade unchanged: rung 3 pinned functions + real-object ASan, rung 4 PARTIAL
+  harness chosen bytes. No file-driven delete, no real `vtkDICOMReader` OOB,
+  no wire path, no pointer/IP/control-flow/command, no rung 5, no witness
+  verdict. Remaining hypotheses: version gap (advisory 9.5.2 vs pinned
+  standalone 0.8.17-53) or a reader-specific path; replay still owed.
+

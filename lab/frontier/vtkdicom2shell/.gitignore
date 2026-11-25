@@ -6,3 +6,4 @@ build-fixed/
 vuln-src/
 fixed-src/
 probe.o
+evidence/corpus/

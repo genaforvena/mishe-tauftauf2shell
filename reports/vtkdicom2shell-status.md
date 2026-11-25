@@ -1,5 +1,29 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+
+## 2026-11-25 10:14Z — W2 broad file-lane negative (no invalid value source)
+
+- Source walk of the real vulnerable parser (`vuln-src/Source/`, `:raw`):
+  `vtkDICOMItem::Set` deletes iff `!v.IsValid()`; `ReadElements` passes a
+  default-invalid `vtkDICOMValue v` to `ReadElementValue`, which has a case
+  for every valid VR type (even zero-length allocations are valid). The
+  only unhandled type is `VTK_VOID` (XX/OX/XS), but unrecognised explicit VR
+  strings decode to XX and are replaced by `FindDictVR`, which resolves
+  XS->US/SS and OX->OB/OW. Empty SQ and undefined-length paths also produce
+  valid values. No invalid-value source found in the ordinary parse path.
+- `tools/make-corpus.py` generated 163 crafted sequence-item files
+  (`evidence/corpus/`): all VR strings, VL 0/2/4 and 0xffffffff, implicit
+  VR LE with transfer syntax, private creators, zero-length SQ. Batched gdb
+  over the real `dicomdump` (breakpoint on `vtkDICOMItem::Set`, printing
+  `v.IsValid()`) parsed all 163: 1448 Set calls, **0 with `v.IsValid()==0`**
+  (`evidence/sweep-gdb.out`). Advisory confirms a delete is required but
+  publishes no file construct; none is claimed here.
+- Grade unchanged: rung 3 pinned functions + real-object ASan; rung 4 PARTIAL
+  harness chosen bytes. No file-driven delete, no real-reader OOB, no wire
+  path, no pointer/IP/command, no witness verdict. Remaining hypotheses:
+  version gap (advisory 9.5.2 vs pinned standalone 0.8.17-53) or a
+  reader-specific path; witness replay still owed (tape #4256).
+
 ## 2026-11-25 09:48Z — W1 real build, real-object ASan, file-lane negative
 
 - Clean-archive replay 14 PASS / 0 FAIL; three pin hashes match provenance.

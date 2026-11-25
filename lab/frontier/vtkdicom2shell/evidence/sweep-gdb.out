@@ -1,0 +1,3858 @@
+Breakpoint 1 at 0xd95e9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMItem.cxx, line 295.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AE-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AE "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 287350) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AE-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AE "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 287699) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AE-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AE "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 287923) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AS-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AS "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 287973) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AS-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AS "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288025) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AS "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288065) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AT-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288117) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AT-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288230) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-AT-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) AT "PrivateCreator" : [(0000,0000)] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288279) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-CS-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) CS "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288580) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-CS-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) CS "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288782) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-CS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) CS "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 288845) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DA-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DA "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 289300) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DA-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DA "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290092) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DA-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DA "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290547) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DS-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DS "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290582) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DS-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DS "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290656) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DS "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290765) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DT-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290817) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DT-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DT "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290917) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-DT-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) DT "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 290980) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FD-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 291033) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FD-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 291309) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FD-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 291488) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FL-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 291747) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FL-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 291960) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-FL-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) FL "PrivateCreator" : [0.0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 292152) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-IS-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) IS "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 292375) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-IS-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) IS "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 292638) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-IS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) IS "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 292850) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LO-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LO "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 293112) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LO-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LO "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 293225) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LO-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LO "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 293386) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LT-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 293702) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LT-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LT "PrivateCreator" : [\000\000] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 293980) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-LT-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) LT "PrivateCreator" : [\000\000\000\000] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 294241) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OB-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OB "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 294488) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OB-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OB "PrivateCreator" : [...] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 294783) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OB-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OB "PrivateCreator" : [...] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 294901) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OD-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 294975) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OD-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 295295) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OD-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 295366) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OF-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OF "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 295650) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OF-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OF "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 295726) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OF-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OF "PrivateCreator" : [...] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 296064) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OL-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 296219) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OL-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 296579) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OL-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OL "PrivateCreator" : [0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 297062) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OV-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 297321) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OV-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 297661) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OV-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 297897) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OW-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OW "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 297958) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OW-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OW "PrivateCreator" : [...] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 298117) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OW-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OW "PrivateCreator" : [...] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 298290) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:12:51.162 (   0.084s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-OX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-OX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-OX-0.dcm ====
+[Inferior 1 (process 298349) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:12:51.667 (   0.087s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-OX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-OX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-OX-1.dcm ====
+[Inferior 1 (process 298580) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-OX-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 298681) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-PN-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) PN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 299010) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-PN-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) PN "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 299272) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-PN-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) PN "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 299949) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SH-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SH "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 300609) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SH-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SH "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 300760) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SH-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SH "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 301043) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SL-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 301214) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SL-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 301455) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SL-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SL "PrivateCreator" : [0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 301669) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SQ-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SQ "PrivateCreator" : (0 items)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 302095) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SQ-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SQ "PrivateCreator" : (0 items)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 302713) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SQ-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SQ "PrivateCreator" : (0 items)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 303298) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SS-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SS "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 303562) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SS-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SS "PrivateCreator" : [0] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 303910) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SS "PrivateCreator" : [0\0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 304119) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-ST-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) ST "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 304310) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-ST-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) ST "PrivateCreator" : [\000\000] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 304430) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-ST-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) ST "PrivateCreator" : [\000\000\000\000] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 304750) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SV-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 304930) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SV-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 305118) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-SV-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 305464) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-TM-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) TM "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 306246) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-TM-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) TM "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 306967) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-TM-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) TM "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 307142) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UC-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UC "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 307210) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UC-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UC "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 307367) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UC-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UC "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 307701) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UI-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UI "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 308144) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UI-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UI "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 308882) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UI-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UI "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 309483) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UL-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 310082) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UL-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 310537) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UL-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UL "PrivateCreator" : [0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 310848) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UN-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 310957) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UN-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 311285) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UN-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 311597) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UR-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UR "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 312145) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UR-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UR "PrivateCreator" : [] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 312777) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UR-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UR "PrivateCreator" : [] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 312945) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-US-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) US "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 313164) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-US-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) US "PrivateCreator" : [0] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 313303) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-US-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) US "PrivateCreator" : [0\0] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 313646) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UT-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 314073) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UT-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UT "PrivateCreator" : [\000\000] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 314599) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UT-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UT "PrivateCreator" : [\000\000\000\000] (4 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 314924) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UV-0.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 315269) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UV-1.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 315696) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-UV-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 316644) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:26.984 (   0.014s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XS-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XS-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-XS-0.dcm ====
+[Inferior 1 (process 317035) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:27.681 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XS-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XS-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-XS-1.dcm ====
+[Inferior 1 (process 317773) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-XS-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 318359) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:28.981 (   0.012s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XX-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-XX-0.dcm ====
+[Inferior 1 (process 318433) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:29.679 (   0.010s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-XX-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-XX-1.dcm ====
+[Inferior 1 (process 318751) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-XX-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 319044) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:31.280 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-0.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-ZZ-0.dcm ====
+[Inferior 1 (process 319650) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:32.081 (   0.013s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 184 in file "evidence/corpus/a-exp-ZZ-1.dcm": In Element (0009,0003), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/a-exp-ZZ-1.dcm ====
+[Inferior 1 (process 320271) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/a-exp-ZZ-2.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 320663) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:33.275 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AE.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AE.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-AE.dcm ====
+[Inferior 1 (process 320974) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:34.165 (   0.092s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-AS.dcm ====
+[Inferior 1 (process 321249) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:35.168 (   0.095s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-AT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-AT.dcm ====
+[Inferior 1 (process 321701) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:36.164 (   0.087s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-CS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-CS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-CS.dcm ====
+[Inferior 1 (process 322115) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:36.864 (   0.089s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DA.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DA.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-DA.dcm ====
+[Inferior 1 (process 322325) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:37.679 (   0.096s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-DS.dcm ====
+[Inferior 1 (process 322490) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:38.384 (   0.015s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-DT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-DT.dcm ====
+[Inferior 1 (process 322946) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:39.174 (   0.096s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-FD.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-FD.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-FD.dcm ====
+[Inferior 1 (process 323405) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:39.771 (   0.088s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-FL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-FL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-FL.dcm ====
+[Inferior 1 (process 323802) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:40.482 (   0.012s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-IS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-IS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-IS.dcm ====
+[Inferior 1 (process 324041) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:41.370 (   0.088s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-LO.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-LO.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-LO.dcm ====
+[Inferior 1 (process 324408) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:42.083 (   0.012s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-LT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-LT.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-LT.dcm ====
+[Inferior 1 (process 324813) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OB.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OB "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 324971) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OD.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OD "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 325278) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OF.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OF "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 325518) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OL.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OL "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 325668) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OV.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 325860) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OW.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) OB "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 326032) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-OX.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 326372) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:46.305 (   0.013s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-PN.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-PN.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-PN.dcm ====
+[Inferior 1 (process 326693) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:46.599 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SH.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SH.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-SH.dcm ====
+[Inferior 1 (process 327102) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:46.884 (   0.012s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-SL.dcm ====
+[Inferior 1 (process 327309) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-SQ.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SQ "PrivateCreator" : (0 items, delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 327353) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:47.401 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-SS.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-SS.dcm ====
+[Inferior 1 (process 327365) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:47.676 (   0.010s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-ST.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-ST.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-ST.dcm ====
+[Inferior 1 (process 327452) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-SV.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 327654) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:48.204 (   0.010s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-TM.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-TM.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-TM.dcm ====
+[Inferior 1 (process 327677) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-UC.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UC "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 327718) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:48.699 (   0.010s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-UI.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-UI.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-UI.dcm ====
+[Inferior 1 (process 327787) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:48.906 (   0.011s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-UL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-UL.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-UL.dcm ====
+[Inferior 1 (process 327864) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-UN.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 327866) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-UR.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UR "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 327880) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+2026-11-25 10:13:49.500 (   0.010s) [        F7CC4040]     vtkDICOMParser.cxx:2501   ERR| vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-US.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+ERROR: In /home/mesh-home/mishe-tauftauf2shell/lab/frontier/vtkdicom2shell/vuln-src/Source/vtkDICOMParser.cxx, line 2501
+vtkDICOMParser (0x5555557e2620): At byte offset 188 in file "evidence/corpus/b-undef-US.dcm": In Element (FFFF,FFFF), in ReferencedStudySequence (0008,1110) [Item 1]: Item length exceeds the bytes remaining in file.
+
+
+==== evidence/corpus/b-undef-US.dcm ====
+[Inferior 1 (process 327881) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-UT.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UT "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 328050) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-UV.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UV "PrivateCreator" : [] (0 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 328154) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-XS.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 328178) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-XX.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 328223) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/b-undef-ZZ.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [...] (delimited)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 328368) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/c-impl-0008-0003.dcm ====
+(0002,0000) UL "FileMetaInformationGroupLength" : [26] (4 bytes)
+(0002,0010) UI "TransferSyntaxUID" : [1.2.840.10008.1.2] {Implicit VR Little Endian} (18 bytes)
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 178 ----
+  (0008,0001) UL "LengthToEnd" : [] (0 bytes)
+  (0008,0002) UN "" : [...] (2 bytes)
+  (0008,0003) UN "" : [] (0 bytes)
+  (0008,0004) UN "" : [...] (2 bytes)
+  (0009,0005) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0006) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0007) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0008) UN "PrivateCreator" : [...] (2 bytes)
+[Inferior 1 (process 328518) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/c-impl-0008-1110.dcm ====
+(0002,0000) UL "FileMetaInformationGroupLength" : [26] (4 bytes)
+(0002,0010) UI "TransferSyntaxUID" : [1.2.840.10008.1.2] {Implicit VR Little Endian} (18 bytes)
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 178 ----
+  (0008,0001) UL "LengthToEnd" : [] (0 bytes)
+  (0008,0002) UN "" : [...] (2 bytes)
+  (0008,0003) UN "" : [...] (2 bytes)
+  (0008,0004) UN "" : [...] (2 bytes)
+  (0008,1110) SQ "ReferencedStudySequence" : (0 items)
+  (0009,0005) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0006) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0007) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0008) UN "PrivateCreator" : [...] (2 bytes)
+[Inferior 1 (process 328704) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/c-impl-0009-0001.dcm ====
+(0002,0000) UL "FileMetaInformationGroupLength" : [26] (4 bytes)
+(0002,0010) UI "TransferSyntaxUID" : [1.2.840.10008.1.2] {Implicit VR Little Endian} (18 bytes)
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 178 ----
+  (0008,0001) UL "LengthToEnd" : [] (0 bytes)
+  (0008,0002) UN "" : [...] (2 bytes)
+  (0008,0003) UN "" : [...] (2 bytes)
+  (0008,0004) UN "" : [...] (2 bytes)
+  (0009,0001) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0006) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0007) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0008) UN "PrivateCreator" : [...] (2 bytes)
+[Inferior 1 (process 328832) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/c-impl-0009-0003.dcm ====
+(0002,0000) UL "FileMetaInformationGroupLength" : [26] (4 bytes)
+(0002,0010) UI "TransferSyntaxUID" : [1.2.840.10008.1.2] {Implicit VR Little Endian} (18 bytes)
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 178 ----
+  (0008,0001) UL "LengthToEnd" : [] (0 bytes)
+  (0008,0002) UN "" : [...] (2 bytes)
+  (0008,0003) UN "" : [...] (2 bytes)
+  (0008,0004) UN "" : [...] (2 bytes)
+  (0009,0003) UN "PrivateCreator" : [] (0 bytes)
+  (0009,0005) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0006) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0007) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0008) UN "PrivateCreator" : [...] (2 bytes)
+[Inferior 1 (process 329036) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/c-impl-0009-0010.dcm ====
+(0002,0000) UL "FileMetaInformationGroupLength" : [26] (4 bytes)
+(0002,0010) UI "TransferSyntaxUID" : [1.2.840.10008.1.2] {Implicit VR Little Endian} (18 bytes)
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 178 ----
+  (0008,0001) UL "LengthToEnd" : [] (0 bytes)
+  (0008,0002) UN "" : [...] (2 bytes)
+  (0008,0003) UN "" : [...] (2 bytes)
+  (0008,0004) UN "" : [...] (2 bytes)
+  (0009,0005) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0006) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0007) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0008) UN "PrivateCreator" : [...] (2 bytes)
+  (0009,0010) LO "PrivateCreator" : [] (0 bytes)
+[Inferior 1 (process 329164) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/d-privcr-LO.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+  (0009,0010) LO "PrivateCreator" : [] (0 bytes)
+[Inferior 1 (process 329336) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/d-privcr-SQ.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+  (0009,0010) SQ "PrivateCreator" : (0 items)
+[Inferior 1 (process 329467) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/d-privcr-UN.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+  (0009,0010) LO "PrivateCreator" : [] (0 bytes)
+[Inferior 1 (process 329655) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/d-privcr-US.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+  (0009,0010) US "PrivateCreator" : [] (0 bytes)
+[Inferior 1 (process 329711) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/d-privcr-ZZ.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+  (0009,0010) LO "PrivateCreator" : [] (0 bytes)
+[Inferior 1 (process 329725) exited normally]
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+SETVALID v=1
+==== evidence/corpus/e-zero-sq.dcm ====
+(0008,1110) SQ "ReferencedStudySequence" : (1 item)
+  ---- SQ Item 0001 at offset 144 ----
+  #(0008,0001) US/UL explicit/dictionary VR mismatch
+  (0008,0001) US "LengthToEnd" : [257] (2 bytes)
+  (0008,0002) US "" : [258] (2 bytes)
+  (0008,0003) US "" : [259] (2 bytes)
+  (0008,0004) US "" : [260] (2 bytes)
+  (0009,0003) SQ "PrivateCreator" : (0 items)
+  (0009,0005) US "PrivateCreator" : [517] (2 bytes)
+  (0009,0006) US "PrivateCreator" : [518] (2 bytes)
+  (0009,0007) US "PrivateCreator" : [519] (2 bytes)
+  (0009,0008) US "PrivateCreator" : [520] (2 bytes)
+[Inferior 1 (process 329919) exited normally]
