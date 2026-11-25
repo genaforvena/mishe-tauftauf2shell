@@ -2936,3 +2936,96 @@ stays **NOT ACHIEVED**.
       Named next: identify the exact post-upcase large allocation that removes
       V (dump bins at `0xc00` and other intermediate large requests in the
       same geometry), then shield that class before repeating the claim.
+
+### Named "what removes V" arm: exact stock-Sinatra A/V/T reached; V still
+### binned at the last pre-claim dump; claim allocation still misses
+### (2026-11-25, twentieth-plus push)
+
+The wall's named experiment was rerun on stock Sinatra with the exact
+geometry from item 29 (`N=972`, drain `984x7`, plant `1000x6`, filler
+`1x1200`, `CHURN=0`, one thread, `POISON_NEXT=0x91`,
+`MTRACE_DUMP_TCACHE=1`, `RUBY2SHELL_CLAIM_BINDUMPS=1`,
+`MTRACE_DUMP_REQUEST=0xc00`). Evidence: `stock-sinatra-victimstep-*.server.log`,
+`stock-sinatra-victimstep.summary`. A concurrent same-role process used the
+same tag with `COUNT=6`; the logs and summary hold six runs from both
+invocations, so tag `victimstep` is not a clean single-process sample.
+
+Run 6 (`stock-sinatra-victimstep-6.server.log`) reproduces the exact state:
+```
+43977:B ... victim=0x78ce8c0a6740 size=0x401 ... physical=0x78ce8c0a6b30
+       physical_prev=0x400 physical_size=0x414
+44004:A ... victim=0x78ce8c0a6740 size=0x453 ...
+44006:L 0 1 78ce8c0a6730 453
+44272:L 0 1 78ce8c0a6730 453
+44424:L 0 1 78ce8c0a6730 453
+44940:M 0 43f 78ce8c02cee0 0
+44943:M 0 43f 78ce8c0695e0 0
+```
+The `L 0 1` lines are the worker arena's unsorted bin: the grown V is still
+there at the last `0xc00`-triggered dump (44424), 516 lines before the
+claim's first `0x43f` allocation. Those exact-fit claim allocations take
+other chunks. The probe eventually pops the planted successor T:
+`P tid=3575983 request=0x401 ptr=0x78ce8c0a6b40 size=0x414
+next=0x78c900e2b7f6 key=0` — its old `fd` and `key=0`, not the claim's
+forged bytes — and the process aborts with `corrupted size vs. prev_size`.
+
+Boundary: in this run no observed M/F line between A and the claim names V;
+the interval 44424..44940 was not dumping at the claim size, so the exact
+consumer that stops the `0x43f` request from taking V stays UNKNOWN. The
+earlier `stock-sinatra-allbin-1` trace is different (V absent from all its
+pre-claim `L` dumps). Next arm repeats with `MTRACE_DUMP_REQUEST=0x43f` and
+`MTRACE_TID=1` under tag `vstepfine` to place a bin dump immediately before
+each claim-size allocation and to label threads. No command, no persistence,
+grade unchanged.
+
+### B/A/claim bin dumps identify the real claim blocker: a competing exact-fit
+### 0x450-class chunk, not removal of V (2026-11-25, this wake)
+
+`lab/preload/mtrace.c` now emits a bin dump immediately after the B snapshot
+when `MTRACE_DUMP_BINS=1` (new `L` group between B and its `M` line), so the
+same trace shows V's bin at B, at A and immediately before each claim-size
+malloc. Rebuild: `gcc -shared -fPIC -O2 lab/preload/mtrace.c -o
+lab/preload/mtrace.so` (atomic rename; `mtrace.so` is untracked).
+
+Exact-geometry arm (`N=972`, drain `984x7`, plant `1000x6`, filler `1x1200`,
+`CHURN=0`, `POISON_NEXT=0x91`, `MTRACE_DUMP_REQUEST=0x43f`, `MTRACE_TID=1`,
+tag `vstepfine2`) produced three exact A/V/T processes. In run 2
+(`stock-sinatra-vstepfine2-2.server.log`) V was already absent from the A
+dump; in run 3 (`stock-sinatra-vstepfine2-3.server.log`) V is present and
+grown, and every dump including the two immediately before the claim shows
+it:
+```
+43987:B ... victim=0x730a8c0a5bb0 size=0x401 ... physical_size=0x414
+44013:L 0 1 730a8c0a5ba0 401 3719069        (B bin dump)
+44118:A ... victim=0x730a8c0a5bb0 size=0x453
+44120:L 0 1 730a8c0a5ba0 453 3719069        (A bin dump)
+44833:L 0 1 730a8c0a5ba0 453 3719069        (pre-claim dump)
+44927:M 0 43f 730a8c0776b0 0 3719069        (claim allocation)
+```
+The bin dump at 44834 also contains `L 0 2 730a8c0776a0 451`: a *different*
+0x450-class exact-fit chunk. The claim's returned pointer `0x730a8c0776b0`
+is that chunk's user address. V was never removed — the allocator preferred
+an exact-fit chunk in the other 0x450 bin while V stayed in unsorted. This
+revises item 29's "large-request malloc_consolidate removes V" hypothesis:
+it fits some runs (`vstepfine2-2`, `allbin-1`) but is falsified as a universal
+step by `vstepfine2-3`.
+
+Arm `vstepB` (same geometry, B bin dumps enabled,
+`stock-sinatra-vstepB-3.server.log`) independently reproduces the same
+competition: `L 0 1 730a8c0a5ba0 401` at B, `453` at A and at both pre-claim
+dumps, plus `L 0 2 730a8c0776a0 451`; the first `M 0 43f` again returns
+`0x730a8c0776b0`, not V.
+
+A bounded repair attempt consumed a 0x400-class part before `_method`
+(`CONSUMER_SPEC=1078x1`, tag `vstepcons`, 4 processes). In the one exact
+geometry survivor (`stock-sinatra-vstepcons-2.server.log`) the consumer's
+allocation is `M 0 400 70e2ec07a520` (43997); V is unlinked at B, the
+competing 0x450 chunk still occupies the other bin, and the claim still
+returns `0x70e2ec06c3f0` / `0x70e2ec02bc50`, never V. Bounded NEGATIVE: this
+consumer neither shields the competing class nor preserves V.
+
+Next named experiment: consume the *specific* competing 0x450-class chunk
+before the claim without taking V — the pre-claim `L 0 2` address identifies
+it — or arrange V to be the first-binned chunk of that bin. Safe/fixed
+controls remain mandatory for any impact claim. No command, no persistence,
+grade unchanged.

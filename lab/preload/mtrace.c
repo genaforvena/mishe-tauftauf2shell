@@ -386,6 +386,8 @@ void *malloc(size_t size)
         case_end = (char *)p + size;
         case_victim = case_end + 8;
         case_snapshot("B", *(size_t *)case_end);
+        if (dump_bins && arena_head)
+            bin_dump(arena_head);   /* bins immediately after buffer1 */
     }
     emit("M", size, (unsigned long)(uintptr_t)p, 0);
     return p;
