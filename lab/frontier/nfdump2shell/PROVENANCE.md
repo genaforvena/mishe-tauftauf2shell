@@ -50,6 +50,21 @@ bash lab/frontier/nfdump2shell/run-all.sh
 TOTAL: 10 PASS / 0 FAIL
 ```
 
+W235 added `run-witness.sh` (commit `4545c7ef`), a one-command offline
+replay that rehashes eight pins, reruns `run-all.sh` and checks the ASan,
+fixed, safe and canary evidence:
+
+```
+bash lab/frontier/nfdump2shell/run-witness.sh
+22 PASS lines / 0 FAIL, rc 0, WITNESS REPLAY PASS
+git archive 4545c7ef lab/frontier/nfdump2shell | tar -x -C /tmp/w235-nfdump-clean
+bash /tmp/w235-nfdump-clean/lab/frontier/nfdump2shell/run-witness.sh
+22 PASS lines / 0 FAIL, rc 0, WITNESS REPLAY PASS
+```
+
+The clean-archive run rebuilt every binary from the pinned bytes in a
+directory with no prior `harness/out/`; no generated evidence was copied.
+
 GCC ASan (`harness/out/vuln-asan-attack.log`):
 
 ```

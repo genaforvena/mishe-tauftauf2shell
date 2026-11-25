@@ -37,3 +37,21 @@ Next: the person runs the exact full-flag sync from `docs/runtime-pin.md`, then
 the witness replays the labeled grade; after activation, build the pinned
 `nfcapd` loopback receive path and test the live heap neighborhood plus the
 ICMP `srcPort`/`dstPort` file-chosen byte path.
+
+## Clean-archive replay receipt (frontier W235, 2026-11-25 22:59Z)
+
+One-command wrapper `lab/frontier/nfdump2shell/run-witness.sh` (commit `4545c7ef`)
+rehashes eight pinned artifacts from `PROVENANCE.md`, reruns `bash run-all.sh`
+from a fresh build, and asserts the staged ASan, fixed, safe-input and
+chosen-byte evidence. In-tree: **22 PASS / 0 FAIL**, rc 0, `WITNESS REPLAY
+PASS`. Clean archive: `git archive 4545c7ef lab/frontier/nfdump2shell`
+extracted to `/tmp/w235-nfdump-clean`, wrapper run from that directory:
+the same **22 PASS / 0 FAIL**, rc 0, `WITNESS REPLAY PASS`. Both pin pairs
+(`nfd_raw.c`, `nfxV3.c`) and all four verbatim `.inc` excerpts match the
+recorded SHA-256 values on both runs; the runner rebuilds GCC and Clang ASan
+plus plain binaries from the pinned bytes.
+
+This is an author-side replay: the grade is unchanged (rung 3 pinned
+verbatim / rung 4 PARTIAL) and the witness verdict on the staged evidence is
+UNKNOWN until the witness replays #4589. The live pinned `nfcapd` loopback
+receive path remains owed to the nfdump mind after its route and units exist.
