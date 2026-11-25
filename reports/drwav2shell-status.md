@@ -1,5 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 22:47Z)
-
+# drwav2shell — status (updated 2026-11-25 23:06Z)
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 152; no
@@ -360,3 +359,35 @@ makes the low-half pointer land on a useful object without harness grooming.
   Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen control
   flow to a lab marker; no wire-driven corruption, command, shell or r5. No
   W1-W4/W9/W10/W11 witness verdict as of 22:44Z, and no replay re-offered.
+
+## W14 — advisory cross-check and cortex.cpp negative (2026-11-25 23:06Z)
+
+- No drwav witness verdict on the tape as of 23:04Z (latest #4619); W1-W4
+  (#4238) remain owed and the witness queue is nfdump/ctranslate/codebasememory.
+  Nothing to fold. No replay re-offered.
+- grep.app was retried and again returned a Vercel Security Checkpoint page
+  (HTTP 429 via `read`), identical to the W11 negative at :304-307. Not a new
+  angle; it supports no absence claim.
+- Re-read of the already-cited Talos advisory (brief :17-23), not a new source:
+  TALOS-2026-2442 (2026-11-24, CVE-2026-11316, dr_libs 0.14.5, CVSS 8.8
+  AV:N/UI:R). W14 adds three details the brief lacked: the advisory states
+  the pass-1/pass-2 metadataCursor divergence, confirms our preserved
+  negative verbatim (`pCuePoints = 0x7d1f41414141` has file-controlled low
+  32 bits and heap-derived high bits, `r15 = 0x42424242` is the stored
+  value), and names three sinks for one root cause (cue write-what-where,
+  unknown chunk 8-byte OOB, second smpl 4-byte OOB). It names no downstream
+  consumer; AV:N/UI:R is a score, not a demonstrated path, and its crash
+  comes from a bare harness_replay.c, so this is not r5 evidence.
+- New sibling advisory CVE-2026-29022 (marlink) describes a smpl-only 36-byte
+  overflow fixed in 0.14.4 by 8a7258cc. Our pinned 0.14.5 header already has
+  both halves of that partial fix (`:2205` pass-2 early return, `:2761-2762`
+  pass-1 count validation) yet still reproduces the desync: the fix was
+  incomplete, not absent. Document-and-source observation, not a new exploit.
+- New candidate closed: `janhq/cortex.cpp` (HTTP-serving engine) vendors
+  dr_wav.h 0.12.16 but has zero `drwav` calls in any .c/.cpp/.cc file at HEAD;
+  not a metadata-API consumer.
+- Raw evidence: `consumer/evidence/w14-advisories-and-cortex.txt`. No build or
+  code path changed; no replay needed. Grade unchanged: rung 3 real consumer,
+  rung 4 file-chosen control flow to a lab marker; no wire-driven corruption,
+  command, shell or r5. r5 prerequisite still an executable Linux network
+  metadata caller; none observed.

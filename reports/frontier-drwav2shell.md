@@ -1,6 +1,6 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 20:52Z: rung 3 real consumer/public API; rung 4
+Status 2026-11-25 23:06Z: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
 replayed the exact sphaira, Moondust and yup dependency headers. The
@@ -8,9 +8,11 @@ Switch-only app was not executed, so no live wire-triggered corruption,
 command, shell or r5 is claimed. W10 confined the reachable API to the
 metadata family (`init_ex()` does not set `DRWAV_WITH_METADATA`) and found no
 caller at all in the Debian corpus. W11 triaged three new vendor candidates
-and the `drwav_open_*_with_metadata` spelling; no native network caller on
-vulnerable bytes was measured. W1-W4, W9, W10 and W11 witness verdicts remain
-UNKNOWN.
+and the `drwav_open_*_with_metadata` spelling; W13 closed Moondust's
+downloader at the call-graph level (local SDL_RWFromFile only). W14 re-read
+the Talos advisory and closed one new candidate, cortex.cpp (vendored 0.12.16
+header, zero drwav calls). No native network caller on vulnerable bytes was
+measured. W1-W4, W9, W10 and W11 witness verdicts remain UNKNOWN.
 
 ## Verified ground truth
 
@@ -29,6 +31,23 @@ UNKNOWN.
   bound check and threads a `drwav_result` through the `smpl`/`cue` readers so
   a failed/unscheduled parse does not advance the cursor. This is a
   source-bound patched control, not an advisory-confirmed fix statement.
+- Talos names three sinks for the one pass-1/pass-2 root cause: a following
+  `cue` chunk reaches the write-what-where at `drwav__read_cue_to_metadata_obj`,
+  a following unknown chunk is an 8-byte OOB write in
+  `drwav__metadata_process_unknown_chunk`, and a second `smpl` is a 4-byte OOB
+  write in `drwav__read_smpl_to_metadata_obj`. All are removed by the single
+  pass-2 `metadataCursor` fix. Our harness exercises the cue sink. The crash
+  in the advisory comes from a bare `harness_replay.c`, so it is not r5
+  evidence and the CVSS AV:N/UI:R is a score, not a measured remote path.
+- A sibling advisory, CVE-2026-29022 (marlink, MCSAID-2026-001), reports a
+  smpl-only 36-byte heap overflow reachable via
+  `drwav_init_file_with_metadata` in dr_libs <= 0.14.4 and names fix commit
+  `8a7258cc66b49387ad58cc5b81568982a3560d49` (2026-02-28). Our pinned 0.14.5
+  header already contains both halves of that partial fix (`:2205` pass-2
+  early return, `:2761-2762` pass-1 count validation) yet still reproduces
+  the desync: the fix was incomplete, not absent. Document/source observation
+  only; no new exploit result. Raw evidence in
+  `lab/frontier/drwav2shell/consumer/evidence/w14-advisories-and-cortex.txt`.
 
 ## Source-bound mechanism (pinned 0.14.5 bytes)
 

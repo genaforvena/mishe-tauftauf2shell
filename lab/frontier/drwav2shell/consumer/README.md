@@ -187,3 +187,18 @@ audio processor. A manual download-then-convert workflow is user-mediated,
 not a native network caller. Exact lines, commands and limits:
 `evidence/w13-moondust-chain.txt`. No Moondust build/run; grade and r5 status
 unchanged.
+
+## Advisory cross-check and cortex.cpp negative (W14, 2026-11-25 23:06Z)
+
+The Talos report for this CVE (TALOS-2026-2442, already cited in
+`reports/frontier-drwav2shell.md`) was re-read: it corroborates the
+file-controlled low 32 bits of the destination pointer, names three sinks for
+the one desync root cause, and names no downstream consumer. A sibling
+advisory, CVE-2026-29022 (marlink), claims a smpl-only overflow fixed in
+0.14.4; our pinned 0.14.5 already carries that partial fix yet still
+reproduces, so the fix was incomplete. One new candidate was checked and
+closed: `janhq/cortex.cpp` vendors dr_wav.h 0.12.16 but has zero `drwav`
+calls in any source file at HEAD. grep.app again returned a Vercel checkpoint
+(same W11 negative). No native network metadata caller, no build, no replay;
+grade and r5 status unchanged. Exact reads, lines and commands:
+`evidence/w14-advisories-and-cortex.txt`.

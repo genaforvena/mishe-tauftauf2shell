@@ -1,0 +1,89 @@
+W14 — advisory cross-check and one new consumer candidate (2026-11-25 23:06Z)
+==============================================================================
+Scope: source/advisory provisioning and call-graph checks only. No build, no
+run, no off-loopback probe, no other target's files touched. Every item below
+is a claim from an external document or a negative from a local grep, not a
+new lab result. Grade unchanged: rung 3 real consumer/public API, rung 4
+file-chosen control flow to a lab marker; no wire-driven corruption, command,
+shell or r5.
+
+(1) grep.app corpus — REPEAT of the W11 negative, not new
+--------------------------------------------------------
+`curl -sS -A 'Mozilla/5.0' https://grep.app/api/search?q=drwav_init_with_metadata`
+returned a Vercel Security Checkpoint HTML page, matching W11
+(status :304-307, evidence/w11-index-angles.txt). No results; supports no
+absence claim. `read` of the same URL returned HTTP 429. Recorded here only to
+show it was not treated as a new angle.
+
+(2) Advisory re-read — TALOS-2026-2442 (already cited in the brief :17-23)
+----------------------------------------------------------
+Already in reports/frontier-drwav2shell.md :17-23 (CVE, CVSS, low-32-bit
+limit). Not a new source. Read again 2026-11-25 23:05Z; W14 adds the details
+below, which the brief does not yet carry.
+Advisory header: "mackron dr_libs dr_wav
+drwav__read_cue_to_metadata_obj out-of-bounds write vulnerability", dated
+November 24, 2026, CVE-2026-11316 (this lane's CVE). Confirmed vulnerable
+version: dr_libs 0.14.5 — the exact pin. CVSSv3 8.8
+CVSS:3.1/AV:N/AC:L/PR:N/UI:R/S:U/C:H/I:H/A:H, CWE-787. Credit Ankur Tyagi,
+Cisco Talos. Vendor had not replied.
+
+Independent corroboration of already-measured mechanics (not new lab facts):
+- Root cause stated as the pass-1 / pass-2 divergence in
+  drwav__metadata_process_chunk: pass 1 withholds the smpl slot on a
+  loopCount/size mismatch, pass 2 still increments metadataCursor [2] in the
+  advisory code, then the bump allocator drwav__metadata_get_memory [3] hands
+  out out-of-bounds storage.
+- "The fault is the store at [5] through pCuePoints = 0x7d1f41414141, whose
+  low 32 bits (0x41414141) are the id marker bytes from the crafted cue point"
+  and "Register r15 = 0x42424242 is the playOrderPosition value drawn straight
+  from the file". This independently confirms our preserved negative: only the
+  pointer LOW half is file-controlled; the high half is heap-derived. The
+  advisory's own AV:N/UI:R score is a scoring judgement, not a demonstrated
+  remote path, and names no downstream consumer product.
+- Three sinks for one root cause: following cue = write-what-where
+  (drwav__read_cue_to_metadata_obj), following unknown chunk = 8-byte OOB
+  write, following second smpl = 4-byte OOB write. All eliminated by the
+  single pass-2 cursor fix. Our harness exercises the cue sink.
+- Advisory crash builds from an out-of-tree path
+  (/run/media/shiv/.../harness_replay.c:44) and uses a bare harness, so it is
+  rung-1/2-level evidence on its own; it does not change our grade.
+
+(3) Sibling advisory and incomplete-fix narrative — new, verified locally
+-------------------------------------------------------------------------
+URL: https://github.com/marlinkcyber/advisories/blob/main/advisories/MCSAID-2026-001-dr-libs-heap-overflow.md
+Read 2026-11-25 23:05Z. Different CVE: CVE-2026-29022, dr_libs <= 0.14.4,
+"fixed in commit 8a7258cc66b49387ad58cc5b81568982a3560d49" (2026-02-28),
+described as a 36-byte heap overflow in drwav__read_smpl_to_metadata_obj (DoS
+severity), reachable via drwav_init_file_with_metadata. Its crash uses a bare
+repro_file.c with `drwav_init_file_with_metadata(&wav, argv[1], 0, NULL)`.
+
+The narrative this suggests — that the Feb-2026 fix added the pass-1/pass-2
+loopCount validation but left the pass-2 cursor desync, which Talos later
+reported in 0.14.5 as CVE-2026-11316 — is CONSISTENT with our pinned bytes:
+  pins/vuln/dr_wav.h version macros :148-151 = 0.14.5; sha256
+  c69816d0e0ac6cab3df8bf2f42df451d4531c2bfa34f7d7a69e959e6ed399038.
+  :2204 calculatedLoopCount = (sizeInBytes - DRWAV_SMPL_BYTES) / LOOP_BYTES
+  :2205 if (loopCount != calculatedLoopCount)   <- early return in pass 2
+  :2761-2762 pass-1 count stage checks calculatedLoopCount == loopCount and
+         withholds the slot on mismatch.
+Both halves of the partial fix are present in 0.14.5, and the desync still
+reproduces under our harness: the fix was incomplete, not absent. This is a
+document-and-source observation, not a new exploit result and not proof of the
+advisory's chronology beyond what the text states.
+
+(4) New consumer candidate — janhq/cortex.cpp: NEGATIVE
+-------------------------------------------------------
+Not previously checked in W6/W8/W9/W10/W11/W13. `git clone --depth 1
+https://github.com/janhq/cortex.cpp.git /tmp/cortex-probe` (38 MB, provisioning)
+at 23:05Z. It vendors engine/utils/dr_wav.h with version macros :145-147 =
+0.12.16. `grep -rn -i drwav --include=*.c --include=*.cpp --include=*.cc .`
+outside dr_wav.h returned 0 lines, and a targeted search for
+drwav_init*_with_metadata / DRWAV_WITH_METADATA / drwav_init(_file|\() outside
+the header returned 0 lines. cortex.cpp is an HTTP-serving local engine, but
+it has no drwav caller at all in this checkout, so it is not a metadata-API
+consumer. Negative for one HEAD snapshot only.
+
+Disposition: fourth/fifth corpus angles again produced no native network
+metadata caller. The r5 prerequisite remains an executable Linux network-backed
+caller feeding the metadata API on vulnerable bytes; no such caller observed.
+Do not re-offer W1-W4 replays; witness backlog is nfdump/ctranslate/codebasememory.
