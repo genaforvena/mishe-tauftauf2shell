@@ -435,3 +435,35 @@ and tarballs copied locally (no network), `sh build-real.sh` `BUILD OK`,
 rc 0 throughout. The replayed vulnerable build again gave the ASan
 double-free with `buffer[1000]=0x48` at the realloc site; fixed, 2.3.1 and
 short-line controls stayed clean. Author-side only.
+
+## W12 — why the plain-glibc stale free has no chosen-address write (2026-11-25 07:1xZ)
+
+No witness verdict landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101;
+the witness wake service failed again, so no new replay was demanded. The
+nine real-path suites were not repeated. One bounded check was made: the
+W8 groom suite was rerun live (`sh run-groom.sh`, `PASS=23 FAIL=0`, rc 0)
+and its evidence re-read (`evidence/groom-vuln-1.out`: `aliased=1`,
+`groom_buf=after=0x5bd554abf5c0`, `byte[1000]=0x41` after the `memset`).
+
+This closes the last plain-glibc route toward r5 as a structural ceiling,
+not an untried opportunity. The host allocator is glibc 2.39
+(`ldd (Ubuntu GLIBC 2.39-0ubuntu8.12) 2.39`), which has used tcache
+safe-linking since 2.32: a free chunk's `next` is stored as
+`chunk_addr >> 12` XOR the target pointer, so poisoning it into a chosen
+absolute address needs a heap address. No status or colon callback in any
+suite has exposed a heap pointer in `args` — those bytes are entirely
+status-line text. In the only non-abort plain-glibc path (W8), the
+attacker's chosen bytes sit at status offset 1000; on the stale free at
+`gpg_release engine-gpg.c:602` glibc overwrites only the first 16 bytes of
+that chunk with tcache `next` and `key`, and there is no attacker write in
+the window between that free and the aliasing `malloc(1024)`. W9 and W10
+measured the other two dispatch branches (tcache dup detection and
+unsorted-bin `!prev` abort), both rc 134. So every observed plain-glibc
+outcome is either an abort or a silent alias of the same chunk; none is a
+write-what-where or pointer control. ASan builds detect the double free but
+do not yield attacker-controlled memory control either.
+
+Grade unchanged: rungs 1-3 on pinned statements, rung-4 mechanics with
+chosen wire bytes in the stale buffer, no pointer/IP/command control, no
+benign command side effect, no stock-layout or live-target claim, no r5.
+All real-path results remain author-side; no witness verdict has landed.
