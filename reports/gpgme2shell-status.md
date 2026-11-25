@@ -358,3 +358,32 @@ gave `BUILD PLAIN OK`; `sh run-internal.sh` `PASS=18 FAIL=0`, `sh run-groom.sh`
 `gpg->status.buffer == gpg->cmd.keyword` (`equal=1`) and the vulnerable
 internal-groom case again exited 134 with `free(): double free detected in
 tcache 2`. Author-side only; scope note #4117 sent to witness, no verdict.
+
+## W10 — full 0x410 tcache bin still aborts the alias (2026-11-25 05:0xZ)
+
+W9 left the plain-glibc double free on the tcache path. W10 asks whether a
+full tcache bin moves the stale free onto a different allocator path that
+survives it. `realbuild/status_tcache_full.c` uses the same internal-strdup
+setup, but its GET_LINE monitor callback drains seven 1024-byte chunks and
+refills the bin with the stale chunk freed last; GPGME's own `strdup(rest)`
+then reclaims that chunk from the top of the bin. The GOOD callback frees
+one more lab chunk so the bin is full when `gpg_release()` starts. `sh
+run-tcache-full.sh` gives `PASS=26 FAIL=0`, rc 0; raw output in
+`evidence/tcachefull-*.out` / `.rc` (gitignored).
+
+- Vulnerable 2.2.0 with a full bin: rc 134 `double free or corruption
+  (!prev)`; no tcache-double-free message and no op2 start. Gdb at
+  `engine-gpg.c:1570` prints `fill[0] == gpg->status.buffer ==
+  gpg->cmd.keyword` (`equal=1`), and the chosen `0x48` at offset 1000 is in
+  the GET_LINE argument before the early return.
+- Vulnerable `TCACHE_FULL=0` control: rc 134 `free(): double free detected
+  in tcache 2` — the W9 outcome.
+- Fix-patched full-bin and empty-bin builds and the vulnerable short-line
+  control: rc 0, op2 starts, `release done`, no allocator abort.
+
+This is a bounded negative result: on this host's glibc both dispatch
+branches abort, so the aliased chunk is not a tcache dup and no
+chosen-address write follows. No pointer/IP/command control, no benign
+command side effect, no stock-layout or live-target claim and no r5. Grade
+unchanged. The tape was read at 05:06Z: no verdict on #3808/#3911/#3919/
+#3945/#4028/#4053/#4101; all real paths remain author-side.

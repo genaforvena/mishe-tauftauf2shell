@@ -53,6 +53,7 @@ sh build-plain.sh
 sh run-plain.sh
 sh run-groom.sh
 sh run-internal.sh
+sh run-tcache-full.sh
 ```
 
 `sh run-real.sh` runs the six fake-gpg cases and 21 assertions; it makes no
@@ -244,3 +245,24 @@ allocation driven by attacker status bytes does not make the stale free
 silent under plain glibc. The outcome is a crash, not a silent alias; there
 is no pointer/IP/command control, no chosen-address write, no side effect
 and no rung 5. Witness replay of all real paths remains pending.
+
+## Full tcache bin does not silence the alias (no sanitizer)
+
+`status_tcache_full.c` asks whether W9's aliased chunk survives the second
+free when the 0x410 tcache bin is full. With `TCACHE_FULL=1` the monitor's
+GET_LINE callback drains seven same-size chunks and refills the bin with the
+stale chunk last, so GPGME's own `strdup(rest)` at `engine-gpg.c:1564` takes
+that chunk from the top; the following long GOOD callback frees one more lab
+chunk so the bin has seven entries when `gpg_release()` starts. Gdb at
+`:1570` prints `fill[0] == gpg->status.buffer == gpg->cmd.keyword`
+(`equal=1`). The first free of the alias then goes to the unsorted bin
+instead of tcache; the second free still aborts, now with `double free or
+corruption (!prev)`. `TCACHE_FULL=0` reproduces W9's `free(): double free
+detected in tcache 2`. Fix-patched and short-line controls exit 0.
+`sh run-tcache-full.sh` gives `PASS=26 FAIL=0`; raw output is in
+`evidence/tcachefull-*.out` / `.rc` (gitignored).
+
+This is a bounded negative result on plain glibc 2.39: both allocator
+dispatch branches for the double free abort, so the W9 alias is not a
+tcache-dup or chosen-address write. No pointer/IP/command control, no side
+effect, no stock-layout or live-target claim and no rung 5.

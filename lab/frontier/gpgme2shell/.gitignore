@@ -58,3 +58,8 @@ realbuild/status-internal-plain-fixed
 realbuild/evidence/internal-*.out
 realbuild/evidence/internal-*.rc
 realbuild/evidence/internal-*.cmd
+realbuild/status-tcache-full-plain-vuln
+realbuild/status-tcache-full-plain-fixed
+realbuild/evidence/tcachefull-*.out
+realbuild/evidence/tcachefull-*.rc
+realbuild/evidence/tcachefull-*.cmd

@@ -68,4 +68,14 @@ link_internal_driver() {
 }
 link_internal_driver status-internal-plain-vuln gpgme-plain-build
 link_internal_driver status-internal-plain-fixed gpgme-plain-fixed-build
+
+link_full_driver() {
+  out=$1; build=$2
+  clang -g -O0 -I "$build/src" -I "$PREFIX/include" -o "$out" \
+    status_tcache_full.c \
+    "$build/src/.libs/libgpgme.a" "$PREFIX/lib/libassuan.a" \
+    "$PREFIX/lib/libgpg-error.a" -lpthread -ldl
+}
+link_full_driver status-tcache-full-plain-vuln gpgme-plain-build
+link_full_driver status-tcache-full-plain-fixed gpgme-plain-fixed-build
 echo "BUILD PLAIN OK"
