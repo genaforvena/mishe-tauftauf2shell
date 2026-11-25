@@ -2305,3 +2305,10 @@ local path with no wire/request, the command is a benign local `touch`, the
 process then faults, and there is no witness verdict. Rung 5 remains UNKNOWN.
 Would change the grade: an ASLR-on partial-overwrite or heap leak, a
 wire-fed affected process, or an independent witness replay and verdict.
+
+W202 clean-archive receipt (16:24Z): `git archive 043a0d41
+lab/openexr2shell-real` into `/tmp/w202-clean`, with the gitignored `src/`,
+four `build-*` trees and the gitignored PoC symlinked from the live checkout;
+`sh harness/w202-benign-command.sh` returned `RESULT PASS` rc 0 with all five
+evidence hashes matching the working tree byte-for-byte. Author replay, not
+a witness verdict; grade and rung-5 status unchanged.
