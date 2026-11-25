@@ -9,7 +9,7 @@ SHA=e8ef2dd63b3f7b5e5d87d14a50bdc64c6befc94a8e21801f060708f2dcbb5e7b
 BIN=${BIN:-opt-src/hping3}
 EXPECT_SHA=${EXPECT_SHA:-$SHA}
 tag=${RUN_TAG:-attack}
-[ "${NO_INJECT:-0}" = 1 ] && tag=baseline
+[ "${NO_INJECT:-0}" = 1 ] && [ -z "${RUN_TAG:-}" ] && tag=baseline
 run="evidence/o2-$tag-run.out"
 gd="evidence/o2-$tag-gdb.out"
 cfg="evidence/o2-$tag.gdb"
