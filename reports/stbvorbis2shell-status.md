@@ -60,17 +60,17 @@ each 8-byte setup allocation is placed at the start of a RW page followed by
 a `PROT_NONE` page. `c->multiplicands` was that guarded allocation
 (`guarded_pages[4]`, page start `0x7ffff7fb3000` in the replay). At the
 source's own div-overflow guard `stb_vorbis.c:3895`, gdb observed `j=0`,
-`k=31`, `div=0x80000000`, `lookup_values=2`; indices `2..30` — 29 four-byte
-words, 116 bytes past the 8-byte region — hold distinct file-derived words
-from `0x4c1270f6` through `0x4dbd2739` (all 29 in
+`k=31`, `div=0x80000000`, `lookup_values=2`; indices `2..31` — 30 four-byte
+words, 120 bytes past the 8-byte region — hold distinct file-derived words
+from `0x4c1270f6` through `0x4dc34143` (all 30 in
 `lab/frontier/stbvorbis2shell/evidence/gdb-guard-extent.out`). The guard page
 is never reached: `VORBIS_invalid_setup` returns first. The plain libc build
 of the same input instead aborts with `malloc(): invalid size (unsorted)`
-(rc 134) from those 29 words; the guarded and fixed builds exit 0.
+(rc 134) from those 30 words; the guarded and fixed builds exit 0.
 
 This corrects the staged "~1.07e9 writes execute" description: that is the
 source loop bound, not what this PoC performs. `sh
-lab/frontier/stbvorbis2shell/run-guard.sh` gives 11 PASS / 0 FAIL, rc 0.
+lab/frontier/stbvorbis2shell/run-guard.sh` gives 12 PASS / 0 FAIL, rc 0.
 
 Grade UNCHANGED: rung 1/2/3 observed, **rung 4 PARTIAL** — distinct
 file-chosen words at consecutive offsets with a measured extent for this
@@ -78,3 +78,37 @@ PoC, but float-representable arithmetic progression only, no real consumer,
 pointer/IP, wire, command or independent verdict on W202/W203. NO rung 5.
 Replay offered to the witness at chat event 4336; both new claims stay
 UNVERIFIED until that verdict lands.
+
+## W204 (2026-11-25) — file-chosen words reach an adjacent object's pointer field
+
+`harness-object.c` keeps the pinned source verbatim and wraps only
+malloc/free: every 8-byte setup allocation starts a RW page followed by
+`PROT_NONE`, and a distinct live `struct victim { canary[64]; void (*fp)(void);
+tail[64]; }` is memset to `0x5a` immediately after the allocation. The
+pointer is only read back, never called. With `evidence/chosen.ogg`
+(`sequence_p=0`) the vulnerable build stops at `:3895` with `err=20`, and
+`victim[4] changed=120 sizeof=136 fp=0x4b4341484b434148
+fp_low=0x4b434148`: all 30 file-chosen OOB words overwrite the adjacent
+object's canary, both halves of its pointer field and 44 bytes of its tail.
+The other four guarded victims stay untouched. Fixed dev branch rejects the
+same file before any guarded allocation (`err=20`, `guarded=0`); a
+non-OGG input also stays clean (`err=30`, `guarded=0`). One-command replay:
+`sh lab/frontier/stbvorbis2shell/run-object.sh` -> 9 PASS / 0 FAIL, rc 0.
+
+Two ways to remove the source-level `div` stop were measured and REJECTED,
+not assumed: (a) dims=260 with the same wrapped product still gives
+`lookup_values=2` — `lookup1_values()` casts `pow(2,260)` to `int` before
+comparison, so the guard still fires at `k=31`; (b) `lookup_type=2` has no
+`div` guard, but its `mults` allocation is `2 * entries * dimensions` and
+exceeds `INT_MAX` for every wrapped `4 * entries * dimensions` under the
+24-bit `entries` header field, so parsing fails with out-of-memory first.
+The guarded dims=260 file `evidence/nodiv-seq.ogg` (sha256
+`26306dfa5e5c9d1f3d24163c8a0d048d45de614fb86e748b10d555c52d254ea6`)
+is kept as a negative-result artifact only; it is not a new trigger.
+
+Grade UNCHANGED at rung 4 PARTIAL: file-chosen 32-bit words now reach a
+pointer-typed field in an adjacent live object, but the value is the same
+float-representable word repeated, the victim is harness-placed, the pointer
+is never dereferenced, and there is no real consumer, arbitrary 64-bit
+value, wire, IP hijack, command or r5. W204 is author-only and unwitnessed;
+the earlier replay offer at event 4336 has no verdict yet.

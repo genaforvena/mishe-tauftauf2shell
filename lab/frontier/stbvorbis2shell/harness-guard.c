@@ -15,18 +15,31 @@ static int guarded_index = 0;
 void *guarded_malloc(size_t sz)
 {
     void *p = malloc(sz);
-    if (sz == 8 && guarded_index < MAX_GUARDED) {
+    /* Default: W203's 8-byte single RW page. Env knobs let W204 measure a
+     * longer run of file-derived words before the PROT_NONE page. */
+    size_t want = 8;
+    long pages = 1;
+    const char *s = getenv("MISHE_GUARD_SZ");
+    if (s) want = (size_t) strtoul(s, NULL, 0);
+    s = getenv("MISHE_GUARD_RW_PAGES");
+    if (s) {
+        pages = strtol(s, NULL, 0);
+        if (pages < 1) pages = 1;
+        if (pages > 64) pages = 64;
+    }
+    if (sz == want && guarded_index < MAX_GUARDED) {
         size_t ps = (size_t) sysconf(_SC_PAGESIZE);
-        void *m = mmap(NULL, 2 * ps, PROT_READ | PROT_WRITE,
+        size_t bytes = (size_t) pages * ps;
+        void *m = mmap(NULL, bytes + ps, PROT_READ | PROT_WRITE,
                        MAP_PRIVATE | MAP_ANONYMOUS, -1, 0);
         if (m != MAP_FAILED) {
-            if (mprotect((char *) m + ps, ps, PROT_NONE) == 0) {
+            if (mprotect((char *) m + bytes, ps, PROT_NONE) == 0) {
                 guarded_pages[guarded_index] = m;
                 guarded_lens[guarded_index] = sz;
                 ++guarded_index;
                 return m;
             }
-            munmap(m, 2 * ps);
+            munmap(m, bytes + ps);
         }
     }
     return p;

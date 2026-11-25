@@ -122,7 +122,9 @@ seconds, unlike the screened-out MediaInfoLib candidate.
    from source; the number of consecutive words that land in writable heap
    before SIGSEGV is not. SUPERSEDED by W203 in
    `reports/stbvorbis2shell-status.md`: this PoC stops at `:3895` after 31
-   writes (29 OOB words, 116 bytes); `entries*dims` is only the loop bound.
+   writes (30 OOB words, 120 bytes); `entries*dims` is only the loop bound.
+   W204 then showed those same 30 words overwriting an adjacent object's
+   pointer field (`reports/stbvorbis2shell-status.md`).
 2. Real consumer build (issue #1947 used whisper.cpp) fed the same PoC: check
    whether a file-steered OOB word reaches a pointer or control datum.
 3. Witness replay of any new claim before it is treated as established.

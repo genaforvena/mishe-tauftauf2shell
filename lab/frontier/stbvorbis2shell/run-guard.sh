@@ -26,7 +26,7 @@ gdb -q -batch \
   -ex 'p c->lookup_values' \
   -ex 'p/x c->multiplicands' \
   -ex 'p/x guarded_pages@5' \
-  -ex 'p/x *(unsigned int (*)[29])&c->multiplicands[2]' \
+  -ex 'p/x *(unsigned int (*)[30])&c->multiplicands[2]' \
   ./build/guard/vuln/harness-guard > evidence/gdb-guard-extent.out 2>&1
 ./build/guard/fixed/harness-guard evidence/chosen-seq.ogg > evidence/guard-fixed.out 2>&1
 FIXED_RC=$?
@@ -47,6 +47,12 @@ check chosen_2 '0x4c1270f6'
 check chosen_3 '0x4c434148'
 check chosen_4 '0x4c74119a'
 check chosen_5 '0x4c9270f6'
+WORDS=$(sed -n 's/^\$7 = {//p' evidence/gdb-guard-extent.out | tr ',' '\n' | wc -l)
+if [ "$WORDS" -eq 30 ]; then
+  PASS=$((PASS+1)); echo "PASS extent_words count=30"
+else
+  FAIL=$((FAIL+1)); echo "FAIL extent_words count=$WORDS"
+fi
 PTR=$(sed -n 's/^\$5 = \(0x[0-9a-f]*\)$/\1/p' evidence/gdb-guard-extent.out)
 if [ -n "$PTR" ] && grep -F '$6 = ' evidence/gdb-guard-extent.out | grep -qF "$PTR"; then
   PASS=$((PASS+1)); echo "PASS multiplicands_on_guarded_page $PTR"
