@@ -5,6 +5,23 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (fourth push) — keep-alive same-thread pairing closed at the
+  Rails configuration; stock/oracle-free/persistent remains NOT ACHIEVED.**
+  New analysis-only repro `lab/repro/ruby2shell-keepalive-thread.sh` measures
+  whether HTTP keep-alive pins sequential requests to one Puma worker thread
+  (the last named lead for cross-request grooming). With the fixed
+  `min=3/max=3` pool used by `rails new`, five GETs on one reused connection
+  rotated across all three threads (`704,728,688,704,728` and
+  `712,736,736,688,712`) in 3/3 fresh processes; separate and concurrent
+  connections also used multiple threads. The default `min=0/max=5` classic
+  Sinatra pool did share one thread for sequential requests, which is a
+  configuration property rather than an opening. Blocker #4's thread-split
+  part therefore stands on the relevant target, and blockers #2/#3 (no
+  in-request parse frees; GC frees primer strings only after the attack's
+  upcase window) still prevent a plant transfer. Corroborating prior bytes:
+  `stock-rails-tw4-1.server.log` primer `tid=3823467` vs attack
+  `tid=3823468` at `Min threads: 3`. No grade change, no relabel.
+
 - **2026-11-25 (third push) — harness rung 5 re-smoked PASS; new stock
   Sinatra 500-page oracle measured but insufficient; stock/oracle-free/
   persistent remains NOT ACHIEVED.** Re-ran the committed

@@ -1530,6 +1530,40 @@ the process was still in teardown, and the server log ended with
 abort boundary with bytes: the harness rung-5 command executes, but the
 exploited process does not remain usable for a second command.
 
+## Keep-alive same-thread pairing — measured, closed at the Rails configuration (2026-11-25)
+
+The last named lead for cross-request heap plants was HTTP keep-alive as a
+wire-only way to keep a primer and the attack on one Puma worker thread,
+thereby sharing a per-thread tcache. New analysis-only repro
+`lab/repro/ruby2shell-keepalive-thread.sh [port] [tag]` measures this directly:
+a stock classic-Sinatra route echoes `Thread.current.object_id`; three arms
+send five GETs on one connection (`num_connects=1,0,0,0,0` proves reuse), five
+GETs on separate connections, and two concurrent connections. The optional
+`KA_THREADS=3:3` launcher runs the same app under the fixed thread pool used
+by the earlier Rails paired runs. No groom, marker, ObjectSpace, mtrace, maps
+or debugger is in the request path.
+
+**Default pool (Puma `min=0/max=5`), 3/3 fresh processes:** arm A returned one
+thread id for all five requests (`344`), arm B also returned `344` for all
+five separate connections, arm C split (`344` plus a second id). This shows the
+earlier "different threads on every paired run" observation is not universal,
+but it is a property of the pool configuration, not a usable opening.
+
+**Fixed pool (Puma `min=3/max=3`, the `rails new`-relevant shape), 3/3 fresh
+processes:** arm A rotated `704, 728, 688, 704, 728` (runs 1–2) and
+`712, 736, 736, 688, 712` (run 3) despite confirmed connection reuse; arm B
+rotated similarly; arm C used two distinct threads. The earlier paired-run
+evidence corroborates this shape: `stock-rails-tw4-1.server.log` shows the
+primer's B lines at `tid=3823467` and the attack's B/A lines at
+`tid=3823468`, with Puma `Min threads: 3`.
+
+**Boundary — no grade change.** Keep-alive does not pin worker threads on the
+configuration that matters, so the per-thread-tcache blocker #4 stands. Even
+where a thread is shared (default pool), blockers #2 and #3 still apply: the
+Rack parser performs no frees during parse, and GC frees primer strings only
+after the attack's upcase window. No cross-request plant transfer is measured.
+Stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1600,3 +1634,11 @@ exploited process does not remain usable for a second command.
    free/persistent rung 5 stays NOT ACHIEVED. Veria's PoC remained
    unpublished at the dated trigger; the disclosure writeup confirms RCE
    but gives no mechanics.
+8. **Done this wake (2026-11-25): keep-alive same-thread pairing closed at
+   the Rails configuration.** With Puma `min=3/max=3` (the `rails new`-relevant
+   pool), five GETs on one reused connection rotated across all three worker
+   threads in 3/3 fresh processes; the default `min=0/max=5` pool did share a
+   thread for sequential requests, which is a configuration property, not a
+   usable opening. Per-thread-tcache blocker #4 stands, and blockers #2/#3
+   (no in-request parse frees; post-upcase GC frees) still prevent a plant
+   transfer. Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.

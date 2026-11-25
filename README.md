@@ -208,6 +208,15 @@ app and Rails filters it; it replaces only `ObjectSpace.dump`, not mtrace
 or maps. Stock/oracle-free/persistent R5 stays NOT ACHIEVED, and the
 labelled harness-condition R5 cell is unchanged.
 
+The 2026-11-25 fourth push closes Ruby2Shell's keep-alive same-thread lead
+(`lab/repro/ruby2shell-keepalive-thread.sh`): with Puma `min=3/max=3`, the
+fixed pool used by `rails new`, five GETs on one reused connection rotated
+across all three worker threads in 3/3 fresh processes, so HTTP keep-alive
+does not enable same-thread tcache grooming on the relevant target. The
+default `min=0/max=5` pool did share one thread for sequential requests, a
+configuration property that leaves the no-parse-free and post-upcase-GC
+blockers intact. Stock/oracle-free/persistent R5 stays NOT ACHIEVED.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed
