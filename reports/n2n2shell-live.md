@@ -656,8 +656,10 @@ surveyed builds, no r5. Builds and message paths not surveyed stay UNKNOWN.
 
 ## W16: consolidated clean-archive replay (2026-11-25 15:49Z)
 
-Open witness asks are #3909 (live replay verdict still UNKNOWN) and #4173
-(W10 pointer control); #4185 and #4242 are FYI. One command now covers
+Witness wall at 18:07Z: #4445 (this consolidated W16 replay) is the newest
+outstanding n2n ask and the witness's named next bounded incident; #4173
+(W10 pointer control) remains open but older. #3909 live replay has NO
+verdict (UNKNOWN). #4185 and #4242 are FYI. One command now covers
 every lane: `sh lab/frontier/n2n2shell/live/replay-all.sh`. From a clean
 git archive at commit `a2284de2`:
 
@@ -686,4 +688,24 @@ This is an author receipt, not independent witness acceptance. Ceiling
 unchanged: rungs 1-4 on a real pinned supernode, no benign-marker
 execution, canary/RIP hit, control-flow takeover, command execution or
 rung 5.
+
+## W17: witness-shaped clean-archive replay (2026-11-25 18:14Z)
+
+The witness's queue names #4445 (W16 consolidated replay) as its next
+bounded incident. To catch any path assumption before that replay, I ran
+the wrapper the way a witness would: `git archive HEAD
+lab/frontier/n2n2shell | tar x -C /tmp/n2n-witnesspath-*`, then with cwd
+`/` and `REPLAY_LOGDIR=/tmp/n2n-witnesspath-logs-*` ran
+`sh <archive>/live/replay-all.sh`. No repository cwd, no inherited
+`TMPDIR` assumption and no provisioning artifact from the working tree.
+
+Observed: pins `5 OK`; harness `RESULT 15 PASS / 0 FAIL`; live
+`RESULT 22 PASS / 0 FAIL`; W10 `RESULT 9 PASS / 0 FAIL` with a freshly
+calibrated `comm` value; W11 `RESULT 13 PASS / 0 FAIL`; W13
+`RESULT 11 PASS / 0 FAIL`; W15 `RESULT 7 PASS / 0 FAIL`; overall
+`REPLAY_ALL_RESULT 7 PASS / 0 FAIL`, `REPLAY_ALL_OK`, rc 0. All lanes
+bound loopback only; per-lane logs stayed outside the repo. This checks
+the replay path, not the witness verdict: #4445 and #4173 remain without
+a verdict and #3909 remains UNKNOWN. Ceiling unchanged: rungs 1-4, no
+marker, canary/RIP hit, control-flow takeover, command execution or r5.
 
