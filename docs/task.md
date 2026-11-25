@@ -10919,3 +10919,71 @@ labels stay as recorded below.
   or r5; mapped only while gdb's `disable-randomization` is on, so the
   rung-4 chosen-pointer claim stays scoped to that condition.
   `reports/openexr2shell-file-level.md` §W196.
+
+### 2026-11-25 03:0x–03:1xZ — gpgme W7, yojimbo W1/W1b (author-only)
+
+- Gpgme W7 (`9633cfc8`, clean-archive replay `a1ecd700`) reaches the
+  advisory's second affected reader in real GPGME 2.2.0 under ASan:
+  `realbuild/colon_reuse.c` uses public APIs and a fake engine writes 1024
+  bytes with no LF, so `read_colon_line()` reallocs at `engine-gpg.c:1647`
+  and EOF-returns at `:1707` without the `:1728-1730` writeback. The next
+  keylist frees `gpg->colon.buffer` at `gpg_release :604`; `sh run-colon.sh`
+  scored 26 PASS / 0 FAIL here and 26/0 plus pinned 19/0 from a clean
+  `git archive 9633cfc8`. Fixed 2.2.0 and stock 2.3.1 are clean with
+  `byte[1000]=0x5a`; the short-colon control is clean. Synthetic engine and
+  local pipes, no wire, pointer/IP, command or r5, no witness verdict.
+  `reports/gpgme2shell-status.md` §W7.
+- Yojimbo W1 (`28d3c8c5`) builds the real pinned parent `3c6b5e85…` under
+  ASan with bundled sodium and drives the fix commit's regression through
+  real `Connection::ProcessPacket` to ASan `WRITE of size 500` at
+  `yojimbo_reliable_ordered_channel.cpp:716`, fixed control clean. An
+  authenticated netcode UDP 127.0.0.1 pair (client 1100/500, server
+  1500/500) with chosen `MISHE-LOOP` at block offset 1200 faults in
+  `Connection::Reset()` without gdb; W1b (`ff6c5e02`) reads the chosen
+  marker back at `blockData+1200` under gdb after decrypt, and `30f77300`
+  marks the original staging plan complete. Five evidence log hashes were
+  recomputed locally and match the report. Rung 4 DEMONSTRATED only at the
+  non-default-config, post-auth, one-process, gdb-assisted scope; no
+  separate remote process, pointer/IP, command, marker execution or r5;
+  production non-multiple block config and witness verdict UNKNOWN.
+  `reports/frontier-yojimbo2shell.md` §§W1/W1b.
+- No rung cell, grade, route, mind count, witness verdict or R5 cell moved;
+  both lanes stay author-side and unwitnessed. Commands, pins, expected
+  bytes and gitignored-regeneration notes are in `docs/reproducibility.md`
+  under the 03:0x–03:1xZ lane.
+
+### 2026-11-25 03:1xZ — pgactive W8 and hping W212 (mid-fold peer edges)
+
+- Pgactive W8 (`3c6304ba`) measures the real non-ASan 2.1.9 stack layout in
+  `realbuild/layout/` under both `-O1 -g` and production PGXS flags: the
+  parser's saved return address sits 40/32 bytes BELOW `replication_name`,
+  while the upward `%s` store overwrites only a second, unconsumed copy at
+  +104/+120. Control exits by `elog(ERROR)` longjmp, so no input length can
+  redirect `ret`; no backend terminated at any N and `SELECT 1` succeeded.
+  Saved-pointer/RA route CLOSED at this build; gdb attach blocked by
+  `ptrace_scope=1`. Author-side, unwitnessed, no grade change.
+- Hping W212 (#4000) is an independent **ESTABLISHED AS LABELED** verdict for
+  W6's probabilistic low-byte RNG-control lane: unmodified `replay-rngctl.sh`
+  on a clean `git archive 659f6eb0` gave 20 checks rc 0 with exact pins and
+  16/16 chosen-byte destinations. Wire stages #3942 and W5 #3958 remain
+  OWED. No grade change or r5.
+- No rung cell, route, mind count or R5 cell moved by either edge; recipes,
+  expected bytes and gitignored-regeneration notes are in
+  `docs/reproducibility.md` under the 03:1xZ lane.
+
+### 2026-11-25 03:2xZ — socat2shell staged (FRONTIER-STAGED, no route)
+
+- Frontier W221 (`4f3b7916`) staged CVE-2026-56123 (Socat advisory 10,
+  CWE-122, CVSS4 9.2 `AV:N/AC:H`; affected 1.8.0.0–1.8.1.1, fixed 1.8.1.2
+  by an unsigned `dstdata[]`) from a pinned tarball, patch and advisory.
+  Signed-char sign extension of SOCKS5 DOMAINNAME length 0xfb makes the
+  `readfull()` count a huge `size_t`; the verbatim pinned-function harness
+  scores 15 PASS / 0 FAIL here, with gcc/clang ASan `WRITE of size 600`
+  after a 262-byte reply and plain `MISHE-SOCKS` at reply+262, safe and fixed
+  controls clean. Rung 3 CONFIRMED, rung 4 PARTIAL at the chosen-scope;
+  stand-ins, no real build/wire, fortify disabled in the harness, no
+  pointer/IP, marker, witness or r5.
+- Charter, window and seed wall exist but no route: operator owns admission;
+  omp-only is RED with 141 roles and `socat2shell: no route`. No README row,
+  rung cell, grade or mind-count change. Recipe and pins are in
+  `docs/reproducibility.md` under the 03:2xZ lane.
