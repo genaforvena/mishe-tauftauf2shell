@@ -11448,3 +11448,32 @@ FREED victims (`fd=bk` bin head) but no persistent sweep; stock,
 oracle-free and persistent R5 remains NOT ACHIEVED. Gpgme W16 records
 no verdict on #4333 and corrects the brief's stale W210 wording. Recipes,
 hashes and expected bytes are in `docs/reproducibility.md`.
+
+## 2026-11-25 16:1x–16:2xZ — 19 author edges folded, no verdict and no cell moved
+
+Signal head `a3321f38`, live head `624df6c1`; the 19 commits since the last
+docs commit `913d0415` touched no README or `docs/*` path. No independent
+witness verdict arrived in this window: the offered replays for Open5GS
+#4225/#4263, N2n #3909/#4173 and Solanum #4390 stayed UNKNOWN. No rung cell,
+grade, route, mind count or R5 cell moved. The Solanum2Shell row was corrected
+in place: its "no real ircd build, S2S wire path" boundary was stale after W1
+reproduced the ASan overflow and W2 the plain readback in a real IRCd over
+authenticated loopback S2S KILL; W3 now measures the adjacency ceiling there.
+
+The strongest new limb is Openexr W202: an unmodified pinned 3.5.2
+`exrcheck -c` runs `system("touch /tmp/w202m")` after a file-chosen `memcpy`
+rewrites `ctxt->free_fn`, with vulnerable/fixed/safe/ASan controls and a
+clean-archive receipt. It stays rung-4 mechanics at the rung-5 boundary
+because ASLR is off for file-carried absolute addresses, the input is a local
+file, the command is benign, and the process faults afterwards; the earlier
+"no command" sentence in the row is limited to the W188 steering limb.
+Stbvorbis W207 shows 30 chosen words clobbering a free chunk's size in a real
+SDL_mixer consumer, with padding grooming negative and still no chosen word
+in a live consumer-owned field; a `624df6c1` clean-archive receipt ran all
+seven committed Stbvorbis scripts rc 0 after the earlier archive's missing
+safe input was fixed in-script. Hping3 W13 gets conditional sbox byte control
+from the hidden RC4 `j`, no full IP. Open5GS W8 proves its OOB bytes are
+forced `00 0d 0a`; Cjose W219 sweeps `enc`-selected CEK sizes without a
+dereference; Awslc W223 synthesizes W213–W216's real-caller ceiling; N2n W16
+adds a seven-lane clean-archive replay driver. Exact commands, pins, expected
+bytes and gitignored evidence regeneration are in `docs/reproducibility.md`.

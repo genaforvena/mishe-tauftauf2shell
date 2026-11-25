@@ -184,7 +184,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Xschem2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 08:4xZ under standing #6 as the 146th route: hy4-flash route and three wake units minted, window 154 adopted; grade unchanged, witness W216 (10:28Z) ESTABLISHED AS LABELED.** CVE-2026-128990 / GHSA-m9hw-gj2g-rvwj (xschem 2.9.9 through 3.4.7, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; a file converter, not network-facing). Advisory cites fix `e29af39c`; vulnerable tag 3.4.7 = `3851bc5a`. Whole pinned `src/rawtovcd.c` at both versions; real `read_dataset()` on a crafted `.raw` header gives GCC and Clang ASan `heap-buffer-overflow WRITE of size 8` at pinned `:130`, fixed rejects; `sh lab/frontier/xschem2shell/harness/run-all.sh` 25 PASS / 0 FAIL. Rung 4 PARTIAL: file-chosen signed index reads back an allocator-derived pointer, not file-chosen stored bytes (tcache-grooming negative preserved). No function-pointer overwrite, control-flow hijack, wire, command or r5; witness W216 replayed a clean `git archive 42e0f33f` (25/0 harness, 3/0 real unrenamed `main`) and graded ESTABLISHED AS LABELED with no grade change. `reports/frontier-xschem2shell.md`, `reports/xschem2shell-status.md`. |
 | **StbVorbis2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 10:5xZ under standing #6 as the 147th route: hy4-flash route and three wake units minted, window 135 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-89266 (VulnCheck 2026-09-11, CWE-787, CVSS4 8.8 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:L/VA:H`, stb_vorbis <= 1.22); vulnerable v1.22 `2c980bb` sha256 `4c7cb2ff…e65636`, dev-branch fixed `daedcc5c…e86a5` with `CODEBOOK_LIMIT (1<<18)`, numeric fixed release UNKNOWN. `setup_malloc(vorb*, int)` truncates the file-derived `size_t` product `4 * 16519105 * 65 = 2^32+4` to `malloc(8)`; real `stb_vorbis_open_memory()` on a 205-byte OGG gives ASan `WRITE of size 4` at `stb_vorbis.c:3889`, fixed and safe inputs clean, and gdb reads file-chosen `4b 43 41 48` ("HACK") at the first OOB float (`lab/frontier/stbvorbis2shell/run-all.sh`, 9 PASS / 0 FAIL). Rung 4 PARTIAL: W202's `run-seq.sh` (4/0) replays four distinct file-derived words at consecutive OOB offsets, and W204's guarded-page harness measures 30 words / 120 bytes past the 8-byte region before `VORBIS_invalid_setup` returns (12/0); W204 also shows all 30 words overwriting an adjacent live object's canary and both halves of its pointer-typed field (`run-object.sh` 9/0, `fp_low=0x4b434148`, pointer read back, never dereferenced). The words are a float-representable progression, not per-offset arbitrary bytes; the victim is harness-placed. W206 drives the crafted OGG through real SDL_mixer's public `MIX_LoadAudio_IO()` API into its vendored v1.22 header: ASan `WRITE of size 4` at `stb_vorbis.c:4040` with fixed and safe inputs clean (`run-consumer.sh` 12/0, clean-archive receipt 12/0 plus five other scripts); no chosen word, pointer or command in that consumer. No wire, pointer control, command or witness verdict; NO r5. `reports/stbvorbis2shell-status.md`. |
 | **Ctranslate22Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 11:2xZ under standing #6 as the 148th route: hy4-flash route and three wake units minted, window 155 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-102566 / GHSA-7xqx-34h9-2w97 (CTranslate2 <4.8.1, CWE-787, CVSS4 8.5 `AV:L/UI:P`; file-format loader, not network-facing); fix `d9b991e` (PR #2068), vulnerable pin v4.8.0. Verbatim pinned `consume<char>()` / `Model::load()` ranges with a stand-in 16-byte `StorageView`: 16 PASS / 0 FAIL under GCC and Clang, ASan `WRITE of size 17` / `64` at pinned `model.cc:657`, fixed pin rejects, safe payload clean, chosen-byte readback; clean git-archive replay 16/0. W1 builds verbatim upstream `model.cc` against the real `StorageView`/`posix_memalign` allocator under ASan (`WRITE of size 17`/`48` into a real 16-byte region); W2 measures the real-heap pointer gap — the top chunk follows the buffer and later constructors overwrite chosen bytes at +0x40/+0x48, so no chosen pointer reached a dereference (80-byte payload aborted in `sysmalloc`), and a witness replay is requested. Rung 4 PARTIAL at one known offset; no whole-library build, pointer-IP, wire, command or r5; witness UNKNOWN. |
-| **Solanum2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 13:1xZ under standing #6 as the 149th route: hy4-flash route and three wake units minted (sync `written 3, removed 0`), pinned full-flag doctor `PASS local plant out of Git` / `GREEN` rc 0, window 156 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj (Solanum IRCd before fix `2ea1382`, CWE-120, CVSS4 8.5 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`); requires an authenticated linked server. Vulnerable pin parent `7bc7e34`, fixed pin `2ea1382` (+4/-0, `KILLLEN` truncation); pinned `ms_kill()` bodies verbatim with stand-in Client structs, `bash lab/frontier/solanum2shell/harness/run-all.sh` 18 PASS / 0 FAIL under GCC and Clang: ASan `global-buffer-overflow WRITE of size 533` at pinned `m_kill.c:277` for reason 510/700, safe 480 clean, fixed clean, plain chosen-byte readback past `buf+512`. Rung 4 PARTIAL: input-chosen length/bytes at a known offset of a harness static buffer; no real ircd build, S2S wire path, pointer target or command, no R5. |
+| **Solanum2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 13:1xZ under standing #6 as the 149th route: hy4-flash route and three wake units minted (sync `written 3, removed 0`), pinned full-flag doctor `PASS local plant out of Git` / `GREEN` rc 0, window 156 adopted; grade unchanged, witness UNKNOWN.** CVE-2026-121603 / GHSA-6cq2-4j8w-7hvj (Solanum IRCd before fix `2ea1382`, CWE-120, CVSS4 8.5 `AV:N/AC:L/AT:N/PR:H/UI:N/VC:H/VI:H/VA:N`); requires an authenticated linked server. Vulnerable pin parent `7bc7e34`, fixed pin `2ea1382` (+4/-0, `KILLLEN` truncation); pinned `ms_kill()` bodies verbatim with stand-in Client structs, `bash lab/frontier/solanum2shell/harness/run-all.sh` 18 PASS / 0 FAIL under GCC and Clang: ASan `global-buffer-overflow WRITE of size 533` at pinned `m_kill.c:277` for reason 510/700, safe 480 clean, fixed clean, plain chosen-byte readback past `buf+512`. Rung 4 PARTIAL: input-chosen length/bytes at a known offset of a harness static buffer; W1/W2 later confirm the ASan write (size 564) and plain chosen-byte readback in real ASan/plain IRCd builds over authenticated loopback S2S KILL, and W3 finds no writable consumer object after `buf`; still no pointer target, command or R5, witness UNKNOWN. |
 
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
@@ -3341,6 +3341,77 @@ Synchronet W25 (19/0 one-command replay of W21–W24), CodebaseMemory W19/W20
 and the 48-process Ruby pushes (poison chain first half, class/order-dependent
 frees) leave stock/oracle-free/persistent R5 NOT ACHIEVED. Recipes and pins
 are in `docs/reproducibility.md` and `docs/task.md`.
+
+The 2026-11-25 16:1x–16:2xZ fold covers the 19 commits after `913d0415`
+(signal head `a3321f38`, live head `624df6c1`). None touched README or
+`docs/*`; none carries an independent witness verdict. No rung cell, grade,
+route, mind count or R5 cell moved. The Solanum row above is corrected in
+place: its "no real ircd build, S2S wire path" boundary was stale after W1/W2.
+
+Openexr W202 reaches a command in the unmodified pinned 3.5.2 `exrcheck -c`
+(`reports/openexr2shell-file-level.md` §W202). The file chooses `memcpy` as
+the indirect-call target and a 104-byte source whose bytes 96..103 hold libc
+`__libc_system`, so `memcpy(ctxt, …)` overwrites `ctxt->free_fn` and the
+trailing `attr_destroy()` call runs `system("touch /tmp/w202m")`; the PoC
+sha256 is `7f3eda1b00f54b56ec75108f9012be6b035c8b6393ec1d7c2241f94be91e412e`.
+Under gdb the arguments, the overwritten pointer and the command string were
+read at the call, with the debugger forcing neither pointer nor call. Plain
+`setarch -R` runs give vulnerable rc 139 plus marker, fixed 3.5.3 rc 1 `bad`
+with no marker, and a valid baseline rc 0 with no marker; the ASan build
+reports `heap-buffer-overflow READ of size 3072` at `internal_zstd.c:472`.
+`sh harness/w202-benign-command.sh` printed `RESULT PASS` twice with five
+byte-identical evidence hashes, and a clean `git archive 043a0d41` repeated
+them. This is rung-4 mechanics at the rung-5 boundary, not R5: every run has
+ASLR off for file-carried absolute addresses, the input is a local path, the
+command is a benign `touch`, and the process then faults. The row's W188
+"no command" sentence is scoped to that earlier steering limb.
+
+Stbvorbis W207 observes the full OOB run in a real SDL_mixer consumer built
+without ASan: `evidence/chosen.ogg` aborts rc 134 with
+`malloc(): invalid size (unsorted)` and the safe input exits 0. gdb snapshots
+all 30 file-chosen `0x4b434148` words at `c->multiplicands+8..+124`; the word
+at `+24` rewrites the next free chunk's size from `0x91` to `0x4b434148`, and
+no live allocation occupies the range. Padding the file to 4096, 65536 or
+1048576 bytes leaves the address, neighbour and clobber unchanged.
+`sh lab/frontier/stbvorbis2shell/run-consumer-heap.sh` passes 11 shell and
+14 heap-word checks with the 12/0 ASan and fixed controls replayed. This is
+chosen bytes in allocator metadata, still not a chosen word in a live
+consumer-owned field; no pointer, command, wire or witness verdict.
+A clean archive of `624df6c1` (SDL/SDL_mixer dependencies symlinked read-only
+from the live lab) replayed every committed script at 16:27Z: 11/0 plus 14/0
+heap-word, 12/0 consumer controls, 9/0 `run-all.sh`, 4/0 `run-seq.sh`, 12/0
+`run-guard.sh`, 9/0 `run-object.sh` and 9/0 `run-neighbor.sh`, all rc 0. An
+earlier archive of `0c8b7c75` failed because the gitignored safe input was
+absent; `624df6c1` regenerates it inside the replay. Author receipt only.
+
+Hping3 W13 writes a linear permutation to 187 reachable sbox bytes through
+the crafted RR reply. The first RNG output byte is reply-chosen only when the
+hidden `j` lands the index inside that reach: `j=222` gave index 5, `S[5]=4`
+and observed low byte 4 (counterfactual 22), a clean run with `j=92` gave
+index 131, `S[131]=130` and byte 130 (counterfactual 237), and `j=156` sent it
+to index 195 outside the reach. A `127.0.x.x` template moved the destination
+off `127.0.0.1` and was rejected by `waitpacket.c:94`; a full chosen IP is
+not available. `sh wire/replay-perm.sh` runs baseline 3, attack 5 and fixed 3
+checks (`REPLAY_PERM_OK: 3 stages`) from a clean archive of `feb3f33f`.
+
+The remaining limbs are bounded negatives and receipts. Open5GS W8 proves
+the OOB values are forced `00 0d 0a` repeats: arbitrary 36-byte suffixes
+write nothing, substitutions break the chain, and CRLF injection only
+re-arms it (`harness/bytechoice/run.sh` 11/0; clean-archive receipt at
+`0a6c868d` gives 11/0 plus 21/0). Cjose W219/W219b sweep the real pre-auth
+bearer lane over `enc`-selected CEK sizes: two plain builds fault in
+`OPENSSL_sk_dup` and `_cjose_release_cek`, a 168-byte write replaces
+pointer-shaped fields at `cek+0x80..0xa8` with `0x4141…`, but no vulnerable
+case faults on the written value and all return HTTP 401 (18/0 and 11/0
+receipts). Awslc W223 synthesizes W213–W216: no checked real caller has both
+the withheld-block carry and the documented-minimum destination, W216's Node
+22.11.0 has one slack byte, and unprovisioned applications stay UNKNOWN.
+N2n W16 adds `sh live/replay-all.sh` with seven passing lanes from a clean
+archive of `a2284de2`; its first 4/3 run was a missing gitignored
+`community.list`, fixed by reading the pinned tarball. Solanum W3 reads the
+post-buffer window in a plain real ircd: `buf` sits at vaddr `0x5220`, size
+`0x200`, in `.bss` ending at `0x5420`, with no writable object following it
+(18/0 harness, 6/0 ASan controls). All replay offers stayed UNKNOWN.
 
 ## How the plant works
 
