@@ -732,3 +732,53 @@ still 127.0.0.2 -> 127.0.0.1, and GDB only reads state.
   destination in one clang `-O0` rebuild, still not a full IP, pointer,
   command or r5. Author-side; independent witness verdict UNKNOWN.
 
+## Three DISTINCT chosen destination octets in one loopback packet (W17, 2026-11-25 19:2xZ, author-side)
+
+A bounded extension of W16's repeated-octet fill: instead of filling all
+187 reachable `rc4_sbox` bytes with one constant, a crafted RR reply writes
+an arbitrary 187-byte pattern plus `hp_rand.i=32`, `hp_rand.j=16` and
+`rc4_seedflag=1`. The pattern is chosen so the first output byte of the
+first three `hp_rand()` calls lands on three reply-chosen, distinct values;
+`--rand-dest 127.x.x.x` therefore emits a probe whose last three octets are
+those values. Input data is `wire/patterns/w17-three-distinct.hex` (target
+`127.11.22.33`) and `wire/patterns/w17-second.hex` (target `127.44.55.66`);
+no pinned source was hand-edited and all traffic stays on `lo` in 127/8.
+
+- `wire/inject_rr_pattern.py` passes a 187-byte pattern to the existing
+  `frame()` builder; `wire/check_pattern.py` predicts each full destination
+  from read-only GDB state with `check_rng.sequence()`, checks that the
+  injected pattern appears in the live sbox, asserts the three chosen
+  octets are distinct, and requires at least one post-attack probe equal
+  to the chosen address (RC4 swaps destroy this fragile pattern after the
+  first call, so W16's multi-packet requirement does not apply).
+- First pattern: attack on the clang `-O0` pinned tree gave 20 GDB states /
+  21 destinations, all 20 full destinations predicted from live state, the
+  injected pattern visible at state 4, chosen `127.11.22.33` with distinct
+  octets, **1/16** post-attack probes equal to it, and counterfactual
+  `127.100.58.205` (a repeat gave 1/15 and counterfactual
+  `127.214.230.120`). The first checker run FAILed only because it demanded
+  two hits; the single-hit claim is now explicit via `--min-hits`.
+- Second arbitrary pattern: attack gave `127.44.55.66`, 1/16 hits, all 20
+  full destinations predicted, counterfactual `127.225.189.244`.
+- Controls with the same frames: no-inject baseline 4 PASS (23 states, 24
+  destinations, no pattern, zero chosen addresses) and locally patched
+  clang build with injection 4 PASS (20 states, 21 destinations, no pattern,
+  zero chosen addresses). No debugger steering; GDB only read state.
+- One-command `wire/replay-pattern.sh` rebuilds vulnerable and locally
+  patched clang `-O0` trees from the pinned source, rechecks both hashes
+  (`e8ef2dd6…dcbb5e7b`, `70f0112d…b471cb7aaa7f0ba846c7`) and runs all three
+  stages. In-tree at 19:24Z: baseline 4 PASS, attack 5 PASS (1/16
+  `127.11.22.33`, counterfactual `127.115.37.147`), fixed 4 PASS;
+  `REPLAY_PATTERN_OK: 3 stages`, rc 0.
+- Preserved negative: a search for a swap-stable pattern that would repeat
+  the same three distinct octets across many packets found no solution in
+  500,000 random trials under the constraints tried; the observed pattern
+  yields one chosen packet and then degrades. Two intermediate edit errors
+  in the new checker/driver (a replaced `parse_args()` line and a lost
+  `src=` line) were caught by `py_compile`/`sh -n` and an early `parameter
+  not set` failure, then repaired before the passing runs.
+- Ceiling: three independently chosen octets of a **127/8 loopback
+  destination in one packet**, not a full IP; octet 1 is fixed by the
+  template and `x.x.x.x` would leave loopback. No pointer, command or r5.
+  Author-side; witness verdict UNKNOWN.
+

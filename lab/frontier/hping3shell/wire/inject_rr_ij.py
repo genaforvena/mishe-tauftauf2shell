@@ -21,7 +21,7 @@ import time
 from inject_rr import csum
 
 
-def frame(pid, rr_len, ptr, i0, j0, seedflag, fill, target_index=-1, target_byte=0):
+def frame(pid, rr_len, ptr, i0, j0, seedflag, fill, target_index=-1, target_byte=0, pattern=None):
     ident = pid & 0xFFFF
     # payload[0..17]: marker, i0, j0, seedflag, marker
     lead = bytes([0xA0, 0xA1])
@@ -30,7 +30,9 @@ def frame(pid, rr_len, ptr, i0, j0, seedflag, fill, target_index=-1, target_byte
     lead += struct.pack("<i", seedflag)
     lead += bytes([0xB0, 0xB1, 0xB2, 0xB3])
     assert len(lead) == 18
-    tail = [fill] * 187
+    tail = list(pattern) if pattern is not None else [fill] * 187
+    if pattern is not None and len(tail) != 187:
+        raise ValueError("pattern must be exactly 187 sbox bytes")
     if target_index >= 0:
         tail[target_index] = target_byte
     payload = lead + bytes(tail)
