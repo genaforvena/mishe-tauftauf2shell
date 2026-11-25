@@ -1,0 +1,49 @@
+=================================================================
+==3011579==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x511000000140 at pc 0x5e0f548d88f5 bp 0x7ffe8b927f30 sp 0x7ffe8b927f28
+READ of size 1 at 0x511000000140 thread T0
+    #0 0x5e0f548d88f4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/../pins/prezip.vuln.c:173:47
+    #1 0x7967f042a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #2 0x7967f042a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #3 0x5e0f547fe374 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/vuln-clang-asan+0x2c374) (BuildId: b1b412f8be751dc2b2584cc4badf235487fd5fcb)
+
+0x511000000140 is located 0 bytes after 256-byte region [0x511000000040,0x511000000140)
+allocated by thread T0 here:
+    #0 0x5e0f548991c3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/vuln-clang-asan+0xc71c3) (BuildId: b1b412f8be751dc2b2584cc4badf235487fd5fcb)
+    #1 0x5e0f548d8604 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/../pins/prezip.vuln.c:154:23
+    #2 0x7967f042a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7967f042a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5e0f547fe374 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/vuln-clang-asan+0x2c374) (BuildId: b1b412f8be751dc2b2584cc4badf235487fd5fcb)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/aspell2shell/harness/../pins/prezip.vuln.c:173:47 in main
+Shadow bytes around the buggy address:
+  0x510ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x510fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x510fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x511000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x511000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x511000000100: 00 00 00 00 00 00 00 00[fa]fa fa fa fa fa fa fa
+  0x511000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3011579==ABORTING
