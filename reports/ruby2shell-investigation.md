@@ -1622,6 +1622,75 @@ PASS (safe `0xDF` input: `rce=ABSENT`, no marker/pop) and `fixed` PASS
 (identical malicious `_method` on plain 3.4.13: `rce=ABSENT`, no marker/pop).
 Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
 
+### consH-20 low-byte tcache retarget — bounded NEGATIVE (2026-11-25)
+
+Named lead: the surviving consH-20 class carves a fake `0x20` chunk into the
+neighbor region; could the single `0x53` overflow byte overwrite that fake
+chunk's tcache `next` low byte and redirect a real request-thread allocation
+into a chosen nearby region, without an absolute address oracle? The
+`lab/preload/mtrace.so` case probe answers this directly: `P` lines print any
+malloc return inside the forged window `[physical+0x10, +0x78)` (headers read
+with `process_vm_readv`, so a bad header cannot crash the tracer), `Q` lines
+print any free of a window user pointer *before* `__libc_free`, `H` lines dump
+victim content at free, and `G` lines dump eight window qwords at every
+snapshot.
+
+Batch: **144 fresh processes** on the unmodified `rails new --minimal` app with
+the documented N=524 / 32×1024-byte `/ [prev_size=0x250, size=0x90]`
+geometry — 24 runs without the four-byte tail and 120 with
+`RUBY2SHELL_STOCK_TAIL_HEX=00005102`, 6-way parallel on ports 4560–4565.
+Totals from `ruby2shell-cons-vis-tabulate.py`: 11 survivors (404 + later
+`/up` 200 + graceful teardown), 52 real expansions, 30 runs with a second
+buffer consumption at the victim, **one run with a window `P` and one with a
+window `Q`**, 23 with victim-content `H` lines. The tail qword was never
+observed at window q38: `q38=0x251` in 0/144 runs; that qword stayed the drain
+pattern `0x90`.
+
+The single window-consuming survivor (`stock-rails-consH20-tail-79.server.log`,
+gitignored bulk) is the historical consH-20 shape:
+
+```
+B ... size=0x201 ... next_prev=0x250 next_size=0x90 physical=...b000
+A ... size=0x253 ... physical=...b050 physical_prev=0x250 physical_size=0x90
+C request=0x222 ptr=<victim> size=0x235
+H ... q0=0x20a q8=0x1f2 q10=0 q18=0x5353535353535353 ... q38=0x5353535353535353
+P request=0x3  ptr=...b040 size=0x25
+Q          ptr=...b040 size=0x25 fd=0 bk=0
+P request=0x10 ptr=...b040 size=0x25
+P request=0x28 ptr=...b010 size=0x35
+```
+
+This is the second predicted branch, not the first. The overflow byte lands on
+the **victim size field** (`0x201` → `0x253`), not on the fake `0x20` chunk's
+tcache `next`; the forged window recycles three tiny C-internal allocations
+(requests `0x3`, `0x10`, `0x28` bytes) and one is freed on the request thread.
+Their content is not attacker-shaped: the only wire-derived bytes at the
+victim are the fixed `0x53` upcase byte (`q18`–`q38` all `0x5353…`), and the
+victim header `q0/q8 = 0x20a/0x1f2` is the mapping-buffer `capa/used`. No
+steered allocation carrying attacker-chosen bytes was observed, so no
+oracle-free Stage-B analog exists on this stock app. Rung 4 and the labelled
+harness-condition rung 5 are unchanged; stock/oracle-free/persistent rung 5
+remains **NOT ACHIEVED**. The rare survivor is preserved as a measured positive
+for allocator control, not upgraded.
+
+Reproduce (analysis-only, loopback; new committed driver, 24 runs by default):
+
+```
+bash lab/repro/ruby2shell-consH20-retarget.sh
+# equivalent single probe, then tabulate:
+RUBY2SHELL_STOCK_CASE_PROBE=1 RUBY2SHELL_STOCK_N=524 \
+RUBY2SHELL_STOCK_DRAIN=1024:32 RUBY2SHELL_STOCK_DRAIN_FAKE=1 \
+RUBY2SHELL_STOCK_FILL=256 RUBY2SHELL_STOCK_FILL_PREV=0x250 \
+RUBY2SHELL_STOCK_FILL_SIZE=0x90 RUBY2SHELL_STOCK_PART_CHARSET=1 \
+RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+bash lab/repro/ruby2shell-stock-rails.sh attack consH20-tail-79
+python3 lab/repro/ruby2shell-cons-vis-tabulate.py consH20-tail
+```
+
+The driver was smoke-tested (`RUBY2SHELL_RETARGET_COUNT=2
+RUBY2SHELL_RETARGET_TAIL=0`); `xargs` exit 123 from pre-response SIGABRTs is
+expected and recorded, not a driver failure.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -1700,3 +1769,18 @@ Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
    usable opening. Per-thread-tcache blocker #4 stands, and blockers #2/#3
    (no in-request parse frees; post-upcase GC frees) still prevent a plant
    transfer. Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
+9. **Done this wake (2026-11-25): consH-20 low-byte tcache retarget closed —
+   bounded NEGATIVE.** The committed case probe
+   `lab/repro/ruby2shell-consH20-retarget.sh` ran 144 fresh processes (24
+   without the tail qword, 120 with it) on the unmodified `rails new --minimal`
+   app: 11 survivors, 52 expansions, but only ONE window `P`/`Q` survivor.
+   In that survivor the overflow byte changed the victim size `0x201`→`0x253`
+   (not the fake `0x20` chunk's tcache `next`), and the three window pops were
+   C-internal fixed-size allocations (`0x3`, `0x10`, `0x28` requests) carrying
+   no attacker-shaped bytes; victim content was the fixed `0x53` byte. No
+   steered allocation with attacker bytes, so no oracle-free Stage-B analog.
+   Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED. Named next: shape
+   the carve into a reflected drain-string body — vary drain part count and
+   part order (the untried knobs of the closed 60-run sweep), then scan the
+   dev 404 response for forged-window qwords; a wire-visible glibc-heap
+   pointer is the first oracle still missing.

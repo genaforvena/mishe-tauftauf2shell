@@ -233,6 +233,19 @@ wire substitute on an unmodified app. The harness matrix re-verified (attack
 marker + pop, safe-input and fixed 3.4.13 controls clean). Stock/oracle-free/
 persistent R5 stays NOT ACHIEVED.
 
+The 2026-11-25 fifth push closes Ruby2Shell's consH-20 low-byte tcache
+retarget lead as a bounded negative
+(`lab/repro/ruby2shell-consH20-retarget.sh`, 144 fresh processes of the
+N=524 case probe on the unmodified `rails new --minimal` app). Eleven runs
+survived and 52 showed a real unsorted expansion, but only one ever returned
+an allocation into the forged window: its three pops were C-internal
+fixed-size requests (`0x3`, `0x10`, `0x28` bytes) with one on-thread free,
+and the victim content was the fixed `0x53` upcase byte, not attacker-shaped
+input. The overflow byte changed the victim's size field (`0x201`→`0x253`),
+not the fake `0x20` chunk's tcache `next`, so no oracle-free Stage-B analog
+was steered. Stock/oracle-free/persistent R5 stays NOT ACHIEVED; the
+witness-ESTABLISHED harness-condition R5 cell is unchanged.
+
 Pgactive2Shell W11 (`e8dd96f6`) corrects W8's saved-RA layout: objdump shows
 `lea -0x70(%rbp),%r12`, canary at `rbp-0x28` (+72) and the real saved RA at
 `rbp+8` (+120), overwritten from N>=128 with `41 5a` but never consumed

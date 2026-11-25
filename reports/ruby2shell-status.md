@@ -5,6 +5,25 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (fifth push) — consH-20 low-byte tcache retarget closed:
+  bounded NEGATIVE; stock/oracle-free/persistent remains NOT ACHIEVED.**
+  New committed driver `lab/repro/ruby2shell-consH20-retarget.sh` ran 144
+  fresh processes of the N=524 / 32×1024-byte `[0x250,0x90]` case probe on
+  the unmodified `rails new --minimal` app (24 without the tail qword, 120
+  with it). `ruby2shell-cons-vis-tabulate.py` counted 11 survivors, 52
+  expansions, but only ONE run with a forged-window `P` and `Q`.
+  `consH20-tail-79` is the historical consH-20 shape: B `0x201`→A `0x253`,
+  then `P request=0x3/0x10/0x28` at the fake window and one on-thread
+  `Q`, with victim content qwords `q18`–`q38` all the fixed `0x53` byte.
+  The overflow therefore lands on the victim size field, not on the fake
+  `0x20` chunk's tcache `next`; the pops are tiny C-internal allocations
+  with no attacker-shaped bytes, so no oracle-free Stage-B analog exists.
+  `q38=0x251` appeared in 0/144 runs (the tail never occupied that window
+  qword). Driver `bash -n` and a 2-run smoke pass; rung 4 and the labelled
+  harness-condition rung 5 are unchanged. Named next: shape the carve into
+  a reflected drain-string body (drain count and part order are the untried
+  knobs) and scan the dev 404 response for a wire-visible glibc-heap pointer.
+
 - **2026-11-25 (direct-session push) — T-header metadata repair does not restore persistence; wire-oracle survey closed; stock/oracle-free/persistent remains NOT ACHIEVED.** Isolated the abort signature (`F <heap+0x1980> 2015` then `corrupted size vs. prev_size`) and added an env-gated repair restoring T's original malloc header plus zeroing the forged `dfree` via `/proc/self/mem` (Fiddle is absent from the pinned build). New `ruby2shell-rung5-http.sh survive` mode issues a first POST, `GET /health` and a second POST with a distinct marker: the first POST returned 200 + `rce=OBSERVED` and logged `repair=T-header-restored dfree-cleared`, but both follow-ups returned `HTTP 000`, the process aborted, and marker2 was absent — header restoration is necessary but insufficient; the fatal free is a boot-time 0x2010-class chunk downstream of the poisoned state. A systematic survey of remaining default Sinatra/Rack/Puma/Rails surfaces found no wire-only glibc-heap or libc/code-base disclosure (only Ruby GC-anon `VALUE` pointers on the already-measured Sinatra dev 500 page); Veria's page is unchanged since 21 Nov and its PoC remains unpublished at the 25 Nov trigger. Harness matrix re-verified: attack PASS (marker + `rce=OBSERVED` + target pop), safe-input and identical-payload fixed 3.4.13 controls both PASS with `rce=ABSENT`, no marker/pop. No relabel.
 
 - **2026-11-25 (fourth push) — keep-alive same-thread pairing closed at the
