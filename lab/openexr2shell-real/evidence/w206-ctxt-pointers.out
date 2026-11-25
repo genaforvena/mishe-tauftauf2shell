@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x10ef5e: file LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/p202-memcpy-system.exr 
+Breakpoint 1, exr_attr_opaquedata_destroy (ctxt=ctxt@entry=0x555555826f00, ud=0x555555828560) at LAB/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c:79
+79	            ud->destroy_unpacked_func_ptr (
+CTXT=0x555555826f00
+0x555555826f00:	0x0000000100ff0200	0x0000000000000000
+0x555555826f10:	0x0000000000000000	0x0000000000000000
+0x555555826f20:	0x0000000000000000	0x0000555555618350
+0x555555826f30:	0x0000000000000000	0x000055555561a2d0
+0x555555826f40:	0x000055555561a250	0x000055555561a360
+0x555555826f50:	0x00005555555c59f0	0x0000555555663db0
+0x555555826f60:	0x0000555555663e50
+P0=0x555555618350 P1=(nil) P2=0x55555561a2d0 P3=0x55555561a250
+P4=0x55555561a360 P5=0x5555555c59f0 P6=0x555555663db0 P7=0x555555663e50
+dispatch_read in section .text of LAB/build-vuln-plain/bin/exrcheck
+No symbol matches *(void**)((char*)ctxt+48).
+dispatch_standard_error in section .text of LAB/build-vuln-plain/bin/exrcheck
+dispatch_error in section .text of LAB/build-vuln-plain/bin/exrcheck
+dispatch_print_error in section .text of LAB/build-vuln-plain/bin/exrcheck
+Imf_3_5::(anonymous namespace)::core_error_handler_cb(_priv_exr_context_t const*, int, char const*) in section .text of LAB/build-vuln-plain/bin/exrcheck
+internal_exr_alloc in section .text of LAB/build-vuln-plain/bin/exrcheck
+internal_exr_free in section .text of LAB/build-vuln-plain/bin/exrcheck
+FILENAME_PTR=(nil) TMP_PTR=(nil)

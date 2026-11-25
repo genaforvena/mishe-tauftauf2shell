@@ -2425,3 +2425,40 @@ heap/address leak that supplies full libc addresses, a different live
 victim pointer, or a wire-fed consumer. Grade unchanged. W203's stale
 file-carried heap pointers still stop the chain at `attributes.c:305`
 before `opaque.c:79` is reached, so an ASLR-on command remains UNKNOWN.
+
+## W206: no libc-resident alternate victim in the 104-byte ctxt window — negative (2026-11-25 18:4xZ)
+
+Prediction: W205 closed a partial retarget of the single victim
+`ctxt->free_fn`; another function pointer in the same 104-byte copy window
+might be libc-resident and therefore partially retargetable to `system`
+under ASLR on. Measured NEGATIVE at the pinned `opaque.c:79` call with the
+committed W202 PoC (ASLR off): the copy covers `_priv_exr_context_t` bytes
+0..103, which hold eight function-pointer slots at offsets 40, 48, 56, 64,
+72, 80, 88 and 96. GDB resolves seven of them (`do_write` at +48 is NULL):
+`dispatch_read` (+40), `dispatch_standard_error` (+56), `dispatch_error`
+(+64), `dispatch_print_error` (+72), the in-binary C++
+`core_error_handler_cb` (+80), `internal_exr_alloc` (+88) and
+`internal_exr_free` (+96). All seven resolve to `.text` of the PIE
+`build-vuln-plain/bin/exrcheck` itself; no libc-mapped address appears in
+the ctxt window. The pinned binary defines no `system`, `popen`,
+`exec*`-family or `posix_spawn` symbol and imports none (it imports only
+`fopen64`, `open64` and `unlink` among file/process operations). Source
+order check: after the chosen `opaque.c:79` call returns, the only ctxt
+function pointer invoked in the attribute destroy path is
+`ctxt->free_fn(attr)` at `attributes.c:271`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w206-ctxt-pointer-negative.sh` -> `RESULT PASS` rc 0 three times,
+stable evidence hash
+`6f9b5993506999d7d60fdb32b440a0252f84e409099f32940953a47677aa4948`.
+The script hashes the PoC, generator, pre-COPY2 dump and both gdb scripts,
+asserts the eight pointer values and seven symbol resolutions, rejects any
+resolution outside the PIE binary, checks the two source lines and the
+absence of command symbols/imports before emitting the normalized evidence.
+
+Disposition: keep the negative. This closes the "different ctxt victim
+pointer" route for ASLR-on command execution: every candidate is in the same
+PIE mapping as W205's victim and the PIE binary has no command call to
+retarget to. It does not close a heap/address leak supplying full libc
+addresses, a wire-fed consumer, or a non-ctxt victim pointer. Grade and
+rung-5 status unchanged.
