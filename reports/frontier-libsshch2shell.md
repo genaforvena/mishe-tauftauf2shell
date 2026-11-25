@@ -1,8 +1,10 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25: real ASan build + authenticated loopback wire replay
-confirmed; rung 3 real-build, rung 4 PARTIAL (chosen wire bytes, no pointer/IP
-control). No rung 5. Original staged harness remains 24 PASS / 0 FAIL.
+Status 2026-11-25 W2: real ASan build + authenticated loopback wire replay
+confirmed; rung 3 real-build, rung 4 MECHANICS with wire-chosen pointer
+consumption from a recycled freed channel object under stated lab conditions.
+No rung 5. Original staged harness 24 PASS / 0 FAIL; base real replay 5 PASS /
+0 FAIL; extra controls 8 PASS / 0 FAIL.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -54,8 +56,9 @@ Control matrix (evidence under `real/evidence-wire-*.out`):
 
 Vulnerable ASan report (`real/evidence-wire-vuln-close-data.out`):
 `READ of size 8` in `channel_rcv_data` at pinned
-`src/channels.c:705:26` (`channel->local_window -= len`), 120 bytes inside a
-128-byte region; freed by `on_data` at `real_wire.c:52` via
+`src/channels.c:705:26` (`if (channel->counter != NULL)`); the following
+line 706 is `channel->counter->in_bytes += rest`. The read is 120 bytes
+inside a 128-byte region; freed by the app's `on_data` callback via
 `ssh_channel_free()` from `channel_rcv_data` at `channels.c:697`; allocated by
 `ssh_channel_new()` at `channels.c:103` during the real channel-open request.
 Frames run through `ssh_packet_process` -> `ssh_packet_socket_callback` ->
@@ -63,16 +66,48 @@ Frames run through `ssh_packet_process` -> `ssh_packet_socket_callback` ->
 `SSH_CHANNEL_FLAG_CLOSED_REMOTE` guard suppresses the callback entirely
 (`SERVER data #2` absent), so no reentrant free occurs.
 
-Honest ceiling: the attacker controls authenticated wire bytes and packet
-ordering; the additional condition is an application that frees the remotely
-closed channel from inside its data callback. The UAF read is of freed channel
-metadata, not of attacker-supplied bytes at an attacker-chosen freed offset;
-there is no pointer/IP control, no benign marker execution and no rung 5. The
-peer must authenticate (CVSS PR:L), which caps any remote claim. Rung 3 is now
-confirmed in a real build on a real loopback wire; rung 4 stays PARTIAL for
-chosen bytes at a chosen offset under a stated application condition. Witness
-verdict remains UNKNOWN (no independent replay yet).
+## W2 controls and chosen-pointer mechanics (2026-11-25)
 
-Next: independent witness replay of `real/run-all.sh`; then investigate
-whether a payload-byte read from freed channel buffers (rather than channel
-metadata) is reachable without an application callback free.
+`real/run-extra.sh` builds the same two pinned trees and runs three new
+controls; it reports **8 PASS / 0 FAIL**, rc 0. Evidence:
+`real/evidence-wire-{vuln-close-no-free,vuln-groom,fixed-groom}.out`.
+
+- **No application free** (`vuln`, close+data, `no-free` mode): data #2 is
+  delivered with chosen bytes and no ASan report. The remote close marks
+  `CLOSED_REMOTE` but does not free the channel; `ssh_channel_do_free()` only
+  removes the channel from `session->channels` when the application has called
+  `ssh_channel_free()`. Without that app call, this lane has no UAF.
+- **Wire-chosen pointer from the freed object** (`vuln`, `groom` mode): the
+  authenticated client sends a 128-byte data packet with offset 120 set to the
+  little-endian address of a benign 8-byte global in the server process. The
+  data callback frees the channel, then the application allocates a 128-byte
+  buffer and copies the wire payload into it. With
+  `ASAN_OPTIONS=quarantine_size_mb=0` (lab-only, to force allocator reuse) that
+  allocation recycles the freed channel: `SERVER groom alloc=0x50c00001c3c0
+  wire_off120=0x... target=0x...`, with the same address printed by the client.
+  Pinned `channels.c:705` then reads `channel->counter` from that recycled
+  chunk and `channels.c:706` performs `counter->in_bytes += rest`; the ASan
+  death callback prints `SERVER death target=0x41414141414141c1` from the
+  initial `0x4141414141414141` (+128, the packet length). That is an
+  attacker-wire-chosen address receiving a read-modify-write from the UAF,
+  observed in a real authenticated libssh build. ASan then reports a separate
+  heap-buffer-overflow at pinned `channels.c:708` in `ssh_buffer_pass_bytes`,
+  because the channel's stdout buffer was also freed by the same app call;
+  that later fault does not create the pointer write.
+- **Fixed build** (`groom` mode): the new guard suppresses data #2 entirely;
+  no ASan report and the target stays `0x4141414141414141`.
+
+Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
+loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
+at a chosen offset of a recycled freed channel object drive a write to a chosen
+address. Required lab conditions remain explicit: authenticated peer (PR:L),
+application frees a remotely closed channel from inside its data callback,
+application reuses the freed 128-byte chunk for wire bytes, and ASan quarantine
+disabled to make reuse deterministic. There is no instruction-pointer control,
+no benign marker execution and no rung 5; the extra fault at line 708 currently
+stops this path before anything beyond the counter write. Independent witness
+verdict remains UNKNOWN: both suites have been replayed by the author only.
+
+Next: ask witness for an independent replay of `real/run-all.sh` and
+`real/run-extra.sh`; investigate whether the line-708 follow-on fault can be
+avoided by a realistic allocation sequence, without claiming r5.

