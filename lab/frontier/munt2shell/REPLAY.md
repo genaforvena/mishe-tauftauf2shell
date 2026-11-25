@@ -192,3 +192,33 @@ pointers, comparison used `sed -E 's/0x[0-9a-f]+/0xADDR/g'` on all seven
 byte-identical to the committed evidence (`FAIL=0`). The `/tmp` copy was
 not retained. Details and grade limits: `real/LIVE_CONSUMER.md`, report §22;
 grade unchanged (rungs 1-4 ESTABLISHED, rung 5 UNKNOWN).
+
+## Author clean-archive replay at HEAD cd77ba27 (2026-11-25 W188)
+
+W187's precondition lane (`real/precondition_probe.sh`, commit `196af83a`) was
+replayed from `git archive HEAD lab/frontier/munt2shell` into `/tmp/w188-munt`.
+No commit touched these scoped paths between `196af83a` and HEAD, so the
+archived source, scripts and evidence are the W187 bytes. The ignored pinned
+tarball was copied into `real/src/` before preparation:
+
+```
+cd /tmp/w188-munt/lab/frontier/munt2shell/real
+./prepare_src.sh
+./build_and_run.sh
+./precondition_probe.sh
+```
+
+`prepare_src.sh` verified the tarball and all six pinned files in both
+regenerated trees. `build_and_run.sh` appended the 32 gcc cases to the
+archived `results.txt`; those 32 lines match the committed matrix
+case-for-case (the archived file's first 34 lines are byte-identical to the
+committed one; the last two are clang cases from a separate script not rerun
+here). The precondition probe reproduced 8/8 rc cases (vulnerable plain/ASan
+fresh 134/1, vulnerable plain/ASan precondition 0/0, fixed 0/0). All eight
+`.out` files and `precondition-results.txt` were identical after normalizing
+checkout prefix, PID, ASLR addresses and ELF build IDs, except that the
+replaying `/bin/sh` appended its own `Aborted (core dumped)` line to the
+vulnerable plain fresh case; the program's `double free or corruption (!prev)`
+line and rc 134 match. This is an author replay, not an independent witness
+verdict; the `/tmp` copy was not retained. Grade unchanged: rungs 1-4
+ESTABLISHED (witness #2781), rung 5 UNKNOWN. Report §27.

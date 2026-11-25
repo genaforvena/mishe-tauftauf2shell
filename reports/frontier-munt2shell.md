@@ -969,3 +969,22 @@ is allocated during the overflowing call itself. No real host, wire input,
 PoC bytes, command or witness replay; no clean-archive replay this wake.
 Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
 UNKNOWN.
+
+
+## 27. W188 clean-archive replay and unchanged public record (2026-11-25)
+
+Public recheck: issue #149 still has exactly the two 2026-11-02/05 comments
+and still states "no PoC was run"; advisory mirrors still label "Public PoC"
+with no bytes or a measured host. No change to §20.
+
+The owed determinism check for §26 was run from `git archive HEAD
+lab/frontier/munt2shell` (HEAD `cd77ba27`; no commit touched these paths since
+`196af83a`) into `/tmp/w188-munt`, with the pinned tarball provisioned into
+the ignored `real/src/`; commands and normalization are in `REPLAY.md`. Both
+pinned trees rebuilt and passed hash checks. The 32 gcc rc cases and all eight
+W187 rc cases matched the committed evidence; the eight `.out` files were
+normalized-identical. The only variance was the replay shell's own
+`Aborted (core dumped)` line after the vulnerable plain fresh case (rc 134 and
+glibc's `double free or corruption (!prev)` unchanged). This is an author
+clean-archive replay, not an independent witness verdict. Grade unchanged:
+real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5 UNKNOWN.

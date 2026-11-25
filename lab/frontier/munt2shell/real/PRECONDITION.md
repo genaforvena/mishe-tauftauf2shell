@@ -46,6 +46,9 @@ call, so the overwritten neighbour is freshly placed heap, not an object the
 host allocated before the parser existed.
 
 No real host, wire input, actual PoC bytes, known ABI, pointer control,
-command, side effect or witness replay. No clean-archive replay in this wake;
-this is the author's direct run over the existing pinned libraries. Grade
-unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5 UNKNOWN.
+command, side effect or witness replay. Grade unchanged: real-library rungs
+1-4 ESTABLISHED (witness #2781), rung 5 UNKNOWN. The author's clean-archive
+replay of this lane was completed in W188 at HEAD `cd77ba27`: 8/8 rc cases and
+all eight `.out` files matched after normalization, with one shell-generated
+`Aborted (core dumped)` line as the only variance; see `../REPLAY.md` and
+report §27.
