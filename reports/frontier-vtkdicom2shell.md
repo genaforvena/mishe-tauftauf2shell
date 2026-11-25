@@ -314,3 +314,32 @@ prints slot 5 at `Item.cxx:195` (`evidence/predecessor-item-groom-negative.txt`)
 - Grade unchanged: rung 3 from crafted FILE bytes in the real reader, rung 4
   chosen tag bytes at the chosen OOB slot with a plain crash. No pointer/IP
   control, no command, no wire path, no witness verdict.
+
+## W11 — stale OOB header decoded: structural pointer-control negative (2026-11-25 22:05Z)
+
+W4/W5 tracked one stale OOB `Value.V` word, W7 refined it to two states. A
+bounded VR sweep closes the question for this allocation class: with one
+well-formed sibling item before the crafted item, PLEN 4/5 and VR in
+US/SS/UL/FL/FD/OB/OW/UN, 15 completed runs produced a VR-dependent family of
+words (e.g. US `1e00000500000001`, SS `1600000400000001`, UL
+`1b00000700000001`, FL `0900000a00000001`, FD `0800000b00000001`, OB
+`0d00000300000001`, OW `1100000500000001`), all with the same chosen key at
+slot 5 and the same SIGSEGV in `ReferenceCount::operator--`. The command was
+capped at 300 s during UN PLEN=5; that run and seven string VRs are UNKNOWN.
+
+The words are exactly a stale `vtkDICOMValue::Value` header from the
+preceding element: `low32` is `ReferenceCount=1`, byte 4 the VTK scalar type,
+bytes 5/6 zero (character set, overflow), byte 7 the file-chosen VR enum
+(`vtkDICOMValue.h:54-66`, `vtkDICOMVR.h:36-66`). Every observed value matches
+that decode. VR is at most 0x24 and the type at most 0x0b, so the high half of
+the dereferenced address cannot be mapped: pointer control through this stale
+header is structurally closed for the observed allocation class, not merely
+unseen. A different object type reusing that chunk was not observed and is
+not excluded; see `lab/frontier/vtkdicom2shell/evidence/
+vr-groom-header-negative.txt` for observations, decode and limits.
+
+Grade unchanged: rung 3 (real-reader ASan OOB from crafted FILE bytes, also on
+VTK 9.5.2's exact bundled source) and rung 4 PARTIAL (file-chosen tag bytes at
+the chosen OOB slot, plain crash). No pointer/IP/control-flow, no command, no
+wire path, no rung 5. Witness verdict UNKNOWN — W223 closed ctranslate2, no
+vtkdicom replay; #4276/#4503 remain queued and the wake unit is inactive.

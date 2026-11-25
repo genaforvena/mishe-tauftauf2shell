@@ -1,0 +1,77 @@
+W11 2026-11-25 22:05Z — preceding-element VR sweep: bounded structural negative
+
+Question (open from W4/W5, refined by W7): can the stale 8 bytes at the OOB
+DataElements[5].Value.V — the word dereferenced by vtkDICOMValue::operator=
+at Value.h:426, causing the plain-build SIGSEGV in
+vtkDICOMReferenceCount::operator-- — be made a mapped, attacker-chosen
+pointer by changing the preceding sibling item's element type? W4/W5 varied
+value lengths; W7 varied sibling count and found two words. This wake varies
+VR at fixed count.
+
+Build: lab build-vuln/bin/dicomdump (real vulnerable vtk-dicom against
+lab-local VTK 9.1). Env LD_LIBRARY_PATH=deps/root/usr/lib/x86_64-linux-gnu.
+Builder: python3 tools/make-preceding-item-variant.py FILE 1 PLEN VR
+(one well-formed preceding item with PLEN 8-byte 0x4a-filled elements;
+crafted item byte-identical to make-undef-ob-dos.py with final tag 4841434b).
+Probe: gdb -q -batch -x tools/oob-word.gdb -ex 'run FILE' -ex 'bt 2' -ex quit
+./build-vuln/bin/dicomdump ; oob-word.gdb prints slot 5 at
+vtkDICOMItem.cxx:195 before the tag write.
+
+Observed (VR, PLEN, e+8(V), frame):
+
+  US 4 1e00000500000001 ReferenceCount::operator--
+  US 5 1e00000500000001 ReferenceCount::operator--
+  SS 4 1e00000500000001 ReferenceCount::operator--
+  SS 5 1600000400000001 ReferenceCount::operator--
+  UL 4 1e00000500000001 ReferenceCount::operator--
+  UL 5 1b00000700000001 ReferenceCount::operator--
+  FL 4 1e00000500000001 ReferenceCount::operator--
+  FL 5 0900000a00000001 ReferenceCount::operator--
+  FD 4 1e00000500000001 ReferenceCount::operator--
+  FD 5 0800000b00000001 ReferenceCount::operator--
+  OB 4 1e00000500000001 ReferenceCount::operator--
+  OB 5 0d00000300000001 ReferenceCount::operator--
+  OW 4 1e00000500000001 ReferenceCount::operator--
+  OW 5 1100000500000001 ReferenceCount::operator--
+  UN 4 1e00000500000001 ReferenceCount::operator--
+
+Every completed variant wrote the chosen final key at slot 5 and then
+SIGSEGVed at the same frame. The sweep was cut by a 300 s command cap during
+UN PLEN=5; UT/LO/PN/SH/CS/DA/UI were not run. The interrupted run is UNKNOWN,
+not a pass and not a counterexample. Files generated under /tmp/vtk-vr-sweep
+are throwaway; no repo evidence files were changed by the sweep.
+
+Decode (source, this exact source tree):
+  vuln-src/Source/vtkDICOMValue.h:54-66 defines
+    struct Value { vtkDICOMReferenceCount ReferenceCount;
+      unsigned char Type, CharacterSet, Overflow; vtkDICOMVR VR;
+      unsigned int VL, NumberOfValues; Value() : ReferenceCount(1) {} };
+  vuln-src/Source/vtkDICOMVR.h:36-66 gives VR enum values
+    FD 0x08, FL 0x09, OB 0x0d, OW 0x11, SQ 0x15, SS 0x16, UL 0x1b,
+    UN 0x1c, UR 0x1d, US 0x1e, UT 0x1f, ... UV 0x24.
+
+The observed word is exactly a stale Value header, little-endian:
+  low32 = ReferenceCount = 1
+  byte4 = Type  (VTK scalar type id: 3=uchar/OB, 4=short/SS, 5=ushort/US/OW,
+                 7=uint/UL, 10=float/FL, 11=double/FD)
+  byte5 = CharacterSet = 0
+  byte6 = Overflow = 0
+  byte7 = VR enum chosen by the preceding element's DICOM VR
+Check: US -> 1e 00 00 05 (VR 0x1e, type 5); OB -> 0d 00 00 03;
+SS -> 16 00 00 04; UL -> 1b 00 00 07; FL -> 09 00 00 0a;
+FD -> 08 00 00 0b; OW -> 11 00 00 05. All seven match.
+
+Consequence: in this observed allocation-reuse class, the stale word's high
+half is bounded by the VR enum (<= 0x24) and the scalar type id (<= 0x0b);
+low half is the reference count initialised to 1 by Value(). It cannot be a
+mapped address from any file-chosen VR/type in this enum, so the fatal
+dereference target cannot be steered through this stale header. This upgrades
+W7's empirical "two-state" negative to a structural one for this class, and
+corrects the older phrasing "not impossible" for this specific route.
+
+Limits preserved: this is one allocation class under one glibc and one probe
+process; a different object type reusing the OOB chunk was not observed but
+not exhaustively excluded. No pointer/IP/control-flow control, no command,
+no wire/request path, no witness verdict. Grade unchanged: rung 3 real-reader
+ASan OOB from crafted FILE bytes; rung 4 PARTIAL chosen tag bytes at slot 5
+with a plain crash. Vendor June-patch bytes UNKNOWN.

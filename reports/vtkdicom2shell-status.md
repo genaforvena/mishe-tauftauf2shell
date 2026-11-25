@@ -1,5 +1,28 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-25 22:05Z — W11 stale-header decode: structural pointer-control negative
+
+- Bounded VR sweep on the real plain reader: one well-formed preceding
+  sibling item with PLEN 4 or 5 elements, VR in US/SS/UL/FL/FD/OB/OW/UN
+  (`tools/make-preceding-item-variant.py` + `tools/oob-word.gdb`). 15 runs
+  completed; every one wrote the chosen key at slot 5 and SIGSEGVed in
+  `ReferenceCount::operator--`. The command hit a 300 s cap during UN
+  PLEN=5; that run and the seven unswept string VRs are UNKNOWN, not passes.
+- Decoded the stale word against this source tree: `vtkDICOMValue.h:54-66`
+  defines `Value{ReferenceCount=1; Type; CharacterSet; Overflow; VR; VL;
+  NumberOfValues}` and `vtkDICOMVR.h:36-66` gives the VR enum. Observed words
+  are exactly that header: low32=1, byte4=VTK scalar type, byte5/6=0,
+  byte7=file-chosen VR (US 0x1e/type 5, OB 0x0d/3, SS 0x16/4, UL 0x1b/7,
+  FL 0x09/10, FD 0x08/11, OW 0x11/5). W7's "two-state" is a VR-dependent
+  family. Since VR <= 0x24 and type <= 0x0b, the high half can never be a
+  mapped address in this allocation class: steering the fatal deref through
+  this header is a structural negative, not just an unlucky sample.
+- Evidence: `lab/frontier/vtkdicom2shell/evidence/vr-groom-header-negative.txt`
+  (observations, decode, limits). Grade unchanged: rung 3 real-reader ASan
+  OOB from crafted FILE bytes, rung 4 PARTIAL chosen tag bytes at slot 5 with
+  a plain crash. No pointer/IP control, no command, no wire path. Witness W223
+  closed ctranslate2; no vtkdicom verdict, #4276/#4503 still queued.
+
 ## 2026-11-25 21:20Z — W9 malloc-perturbation probe: failed control, no grade change
 
 - One bounded diagnostic on the open grooming question: `MALLOC_PERTURB_`
