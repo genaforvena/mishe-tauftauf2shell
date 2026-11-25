@@ -48,9 +48,13 @@ for f in evidence/replay-mcp-tool-vuln-asan.log \
          evidence/replay-mcp-tool-vuln-recover.log \
          evidence/replay-mcp-tool-fixed-asan.log \
          evidence/replay-mcp-tool-vuln-asan-Q33.err \
+         evidence/replay-mcp-tool-vuln-asan-Q48.err \
+         evidence/replay-mcp-tool-vuln-recover-Q32.err \
          evidence/replay-mcp-tool-vuln-recover-Q33.err \
          evidence/replay-mcp-tool-vuln-recover-Q48.err \
-         evidence/replay-mcp-tool-fixed-asan-Q33.err; do
+         evidence/replay-mcp-tool-fixed-asan-Q32.err \
+         evidence/replay-mcp-tool-fixed-asan-Q33.err \
+         evidence/replay-mcp-tool-fixed-asan-Q48.err; do
     [ -f "$f" ] && cp -p "$f" "$SNAP/tool/$(basename "$f")"
 done
 for f in evidence/http-replay-all.log evidence/http-vuln-asan-stderr.log \
@@ -65,18 +69,23 @@ restore() {
     echo "RESULT: PASS=$pass FAIL=$fail (raw transcripts in $OUT)"
 }
 trap restore EXIT
+trap 'exit 130' TERM INT HUP
 
+echo "=== direct-call matrix $(date -u +%FT%TZ) ==="
+bash bootstrap.sh > "$OUT/direct.log" 2>&1
+rc=$?
+ck $([ "$rc" -eq 0 ] && echo 0 || echo 1) "bootstrap.sh rc=0 (4 pins, 4 builds, matrix)"
 need "$OUT/direct.log" 'harness-vuln-asan              N=33' "vuln ASan 33-item row present"
 need "$OUT/direct.log" 'harness-fixed-asan             N=33' "fixed ASan 33-item row present"
 need "$OUT/direct.log" 'harness-vuln-plain             N=48' "plain 48-item row present"
 
 # --- #3228: direct calls into the real pinned Cypher engine -------------
-need "$OUT/direct.log" 'WRITE of size 70' "recover-mode WRITE of 70 bytes"
+need evidence/recover-48.out 'WRITE of size 70' "recover-mode WRITE of 70 bytes"
 need evidence/recover-48.out '#2 0x' "recover WRITE stack has a project_item frame"
 need evidence/recover-48.out 'project_item src/cypher/cypher.c:3379' "fault at pinned project_item:3379"
 need evidence/recover-48.out 'execute_return_simple src/cypher/cypher.c:4116' "fault via execute_return_simple:4116"
 need evidence/recover-48.out 'offset 51840 in frame' "write at func_bufs[32] (offset 51840)"
-need evidence/gdb-chosen-bytes.out 'MISHE-OO' "chosen MISHE-OO bytes at the OOB destination"
+need evidence/gdb-chosen-bytes.out '0x4d	0x49	0x53	0x48	0x45	0x2d	0x4f	0x4f' "chosen MISHE-OO bytes at func_bufs[32]"
 # Fixed ASan rows must be clean; the plain 48-item control intentionally
 # aborts in __stack_chk_fail, so its signature is the stack-smash message.
 fixed_asan=$(grep -E '^harness-fixed-asan ' "$OUT/direct.log" | grep -vc 'clean$')
@@ -119,9 +128,9 @@ echo "=== HTTP /rpc rows $(date -u +%FT%TZ) ==="
 bash http-tool/replay.sh all > "$OUT/http.log" 2>&1
 rc=$?
 ck $([ "$rc" -eq 0 ] && echo 0 || echo 1) "http-tool/replay.sh all rc=0"
-need "$OUT/http.log" 'vuln-asan' "HTTP vuln-asan row ran"
-need "$OUT/http.log" 'vuln-recover' "HTTP vuln-recover row ran"
-need "$OUT/http.log" 'fixed-asan' "HTTP fixed-asan row ran"
+need "$OUT/http.log" 'ROOT=/tmp/cbm-http-vuln-asan' "HTTP vuln-asan row ran"
+need "$OUT/http.log" 'ROOT=/tmp/cbm-http-vuln-recover' "HTTP vuln-recover row ran"
+need "$OUT/http.log" 'ROOT=/tmp/cbm-http-fixed-asan' "HTTP fixed-asan row ran"
 need evidence/http-vuln-asan-stderr.log 'READ of size 8' "HTTP ASan column READ"
 need evidence/http-vuln-asan-stderr.log 'rb_set_columns src/cypher/cypher.c:2568' "HTTP READ at pinned :2568"
 need evidence/http-vuln-recover-stderr.log 'WRITE of size 68' "HTTP recover OOB WRITE"

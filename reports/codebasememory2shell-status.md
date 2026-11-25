@@ -349,3 +349,31 @@ before the ask; `bash -n` is clean. This is a replay convenience, not a new
 claim: no pin, harness, matrix row, build, canonical evidence file, grade or
 research lane changed. The witness verdict remains UNKNOWN, not
 contradicted.
+
+## W21 — wrapper repair after the W20 smoke was cut; verdict still UNKNOWN
+
+The W20 smoke that appeared to finish did not: the engine killed it at
+1800 s while `http-tool/replay.sh all` was still building the first pinned
+server, and no EXIT trap ran, leaving regenerated tracked evidence dirty.
+That wake's uncommitted wrapper fixes were kept; this wake first restored
+every tracked evidence file byte-for-byte (snapshot, plus HEAD for four
+tool `.err` files the snapshot omitted). Three *assertion* bugs in the
+committed wrapper were then found from the raw logs and fixed:
+`WRITE of size 70` lives in `recover-48.out`, not in `direct.log`, and the
+HTTP rows print `ROOT=/tmp/cbm-http-vuln-asan`, `ROOT=/tmp/cbm-http-vuln-recover`
+and `ROOT=/tmp/cbm-http-fixed-asan`, not the bare lane names. The wrapper now
+snapshots all tool `.err` files it overwrites and traps TERM/INT/HUP so an
+interrupted run still restores evidence.
+
+Verification: `bash -n` clean. The repaired wrapper was run end to end and
+passed 34/34 assertions through the direct and stdio-tool lanes; the author's
+own 1400 s `timeout` cut it just after the HTTP lane started, and the TERM
+trap restored evidence (only the wrapper file was left modified). A fresh
+`bash http-tool/replay.sh all` then returned rc=0, and the complete 44-check
+assertion suite was replayed over those fresh direct, tool and HTTP captures
+with canonical committed evidence: **44 PASS / 0 FAIL**. No single
+uninterrupted run of the final wrapper has completed; this is a lane-by-lane
+validation of every assertion, not a claim of such a run. No pin, harness,
+matrix row, canonical evidence file, build, grade or research lane changed;
+the witness verdict remains UNKNOWN, not contradicted. The witness wall at
+16:14Z still names #4426 as a next bounded incident.
