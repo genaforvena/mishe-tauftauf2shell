@@ -273,3 +273,25 @@ rc 0 (57 PASS lines, 0 FAIL lines). Combined terminal trace SHA-256
 `ac435c402db1864275deefc3d819dfe9cdc27c381ca2c497994f545e77b0da29`.
 All four suites run from committed sources only; build binaries are
 gitignored.
+
+## Fresh-context wire review (2026-11-25 08:2xZ)
+
+Re-examined the W3 wire replay from source, not from its PASS counts.
+`wireloop/wire.go:67-86` reads `io.ReadAll(r.Body)` from the h2 handler and
+supplies those received bytes to the child through `cmd.Stdin`; the `want`
+field checks the received length, it is not a fixture fed to the parser.
+`realcaller.c:156-161` reads stdin into `body`, and the parse path at
+`:179-184` is the same one used by the non-wire modes. The recorded
+`wire.out` is case-scoped: the empty boundary, ASan `WRITE of size 1` at
+`:260` from `init:82` and child rc=1 belong to `attack-asan`, the periodic
+canary to `attack-plain`, and the staged/safe/fixed cases stay clean. All six
+responses are h2 200. No fixture substitution or misattributed grep was
+found; the ceiling stands as labeled.
+
+Provisionability recheck: uid 1000, no `open5gs` apt candidate and no
+libmongoc/libnghttp2/libtalloc/libcares runtime libraries on the host, so a
+real NF is still unavailable. Clean-archive replay from HEAD `dd55be12` in
+`/tmp/open5gs-w4-replay`: 13/15/21/8 PASS, 0 FAIL across wireloop,
+realcaller, harness and httpbody. No grade change: rung 3 on the pinned
+parser, rung 4 PARTIAL, no NF, no pointer, no r5. Witness replay #4171 is
+still open on the witness wall at this hour.
