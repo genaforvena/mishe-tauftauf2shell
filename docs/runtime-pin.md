@@ -40,11 +40,13 @@ them; re-apply on upgrade.
 - 2026-11-25 owner-directed model addition: every route present at the
   change (149 roles) keeps `opencode-go/hy4-flash-free` as its tier-0
   primary and adds `opencode-go/hungerg-free` as a tier-1 fallback. Both
-  are account-less free OMP candidates with `thinking: high` and
-  `max_parallel: 3`; the site wake cap remains 5, so up to five engines
-  may run concurrently. The pinned `engine_router.py` hard guard and
-  `tools/check-omp-only.py` allow exactly these two models; all other
-  engines/models remain forbidden. No unit or resolver names a model, so
+  are account-less free OMP candidates with `thinking: high`. The primary
+  has `max_parallel: 3` and the fallback `max_parallel: 2`; the site wake
+  cap remains 5, so up to three hy4-flash engines and two HungerG engines
+  may run concurrently.
+  The pinned `engine_router.py` hard guard and `tools/check-omp-only.py`
+  allow exactly these two models; all other engines/models remain
+  forbidden. No unit or resolver names a model, so
   no unit regeneration or service restart is required. Future role
   admissions must copy both candidates in this order. Re-apply this
   allowlist change on upgrade.
