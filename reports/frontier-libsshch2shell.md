@@ -74,6 +74,25 @@ attacker-needs-the-slot condition. No grade change from either negative.
 With `W16_WIRECMD`/`W14_REALSYSTEM` undefined the preprocessed harness is
 byte-identical to pre-W16 HEAD (`clang -E -P`, `cmp` clean).
 
+Clean-archive receipt (commit `4b8a257b`, 2026-11-25 18:33Z): committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD` into
+`/tmp/w16-arch2`, with symlinks to this lab's two pinned mirror trees, their
+build-asan/build-fixed directories and hostkey (the archive carries no build
+artifacts or private key). `sh real/run-wirecmd.sh` there rebuilt both ASan
+libraries from the pinned trees and reported **6 PASS / 0 FAIL**, rc 0. Its
+probe found a different slot, `SERVER groom alloc=0x50c00001c3c0`, and the
+fresh replay printed `CLIENT wirecmd fn=0x719f3be58750
+sess=0x50c00001c3c8 cmd=touch evidence-wire-wirecmd.marker bad=0`,
+`SERVER WIRECMD armed fn=0x719f3be58750 sess=0x50c00001c3c8 cmd=touch
+evidence-wire-wirecmd.marker`, `SERVER done data_packets=2`,
+`SERVER target_after=0x41414141414141c1 groom_ptr=0x50c00001c3c0`,
+`CLIENT rc=0 SERVER status=0x0`; the marker was created and renamed in the
+archive. Distinct addresses from the in-tree run confirm an independently
+rebuilt replay, and the slot change confirms the probe (not a constant) is
+what makes it reproducible. This checks committed harness and driver text;
+W16 remains additive and unwitnessed. The archive wrote only under
+`/tmp/w16-arch2`; the pinned in-tree evidence is unchanged.
+
 Ceiling unchanged: the callee `&system` and the counter target `&g_target`
 are still forked-peer ASLR-local; app-owned fake callback objects, the
 in-callback free, the W3 detach, ASan quarantine tuning and the authenticated
