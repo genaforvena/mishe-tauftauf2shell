@@ -34,10 +34,15 @@ static int case_only = 0;
 static int case_stop = 0;
 static size_t case_first_request = 0;
 static const char *case_arm_file = 0;
+static const char *emit_arm_file = 0;
+static int emit_armed = 0;
+static int free_dump = 0;
 static __thread size_t case_second_request = 0;
 static __thread char *case_end = 0;
 static __thread void *case_victim = 0;
 static __thread void *case_physical = 0;
+static __thread char *case_win_lo = 0;
+static __thread char *case_win_hi = 0;
 static __thread int case_waiting_second = 0;
 static __thread int case_overflow_seen = 0;
 
@@ -53,6 +58,8 @@ static void mtrace_init(void)
                                           getenv("MTRACE_CASE_REQUEST") : "0",
                                           NULL, 0);
     case_arm_file = getenv("MTRACE_CASE_ARM_FILE");
+    emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
+    free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
 }
 
 static void emit(const char *tag, unsigned long a, unsigned long b,
@@ -60,6 +67,11 @@ static void emit(const char *tag, unsigned long a, unsigned long b,
 {
     if (case_only)
         return;
+    if (emit_arm_file && !emit_armed) {
+        if (access(emit_arm_file, F_OK) != 0)
+            return;
+        emit_armed = 1;
+    }
     char buf[128];
     int len = snprintf(buf, sizeof buf, "%s %lu %lx %lx %lx\n",
                        tag, seq, a, b, c);
@@ -88,8 +100,11 @@ static void case_snapshot(const char *tag, size_t sizefield)
     char *victim_header = case_end - 8;
     char *next = victim_header + (grown & ~(size_t)7);
     char *physical = victim_header + (sizefield & ~(size_t)7);
-    if (tag[0] == 'B')
+    if (tag[0] == 'B') {
         case_physical = physical;
+        case_win_lo = physical + 0x10;
+        case_win_hi = physical + 0x78;
+    }
     char buf[512];
     int len = snprintf(buf, sizeof buf,
                        "%s tid=%ld first_request=%#lx end=%p victim=%p size=%#lx "
@@ -106,6 +121,19 @@ static void case_snapshot(const char *tag, size_t sizefield)
                        (void *)case_read(physical + 24));
     if (len > 0)
         write(out_fd, buf, (size_t)len);
+    {
+        char gbuf[288];
+        int glen = snprintf(gbuf, sizeof gbuf,
+                           "G tag=%c tid=%ld phys=%p q10=%#lx q18=%#lx q20=%#lx "
+                           "q28=%#lx q30=%#lx q38=%#lx q40=%#lx q48=%#lx\n",
+                           tag[0], syscall(SYS_gettid), physical,
+                           case_read(physical + 0x10), case_read(physical + 0x18),
+                           case_read(physical + 0x20), case_read(physical + 0x28),
+                           case_read(physical + 0x30), case_read(physical + 0x38),
+                           case_read(physical + 0x40), case_read(physical + 0x48));
+        if (glen > 0)
+            write(out_fd, gbuf, (size_t)glen);
+    }
 }
 
 static void case_allocation(size_t size, void *p)
@@ -118,10 +146,11 @@ static void case_allocation(size_t size, void *p)
         len = snprintf(buf, sizeof buf,
                        "C tid=%ld request=%#lx ptr=%p size=%#lx\n",
                        syscall(SYS_gettid), size, p, *(size_t *)case_end);
-    } else if (p == case_physical) {
+    } else if (case_win_lo && (char *)p >= case_win_lo &&
+               (char *)p < case_win_hi) {
         len = snprintf(buf, sizeof buf,
                        "P tid=%ld request=%#lx ptr=%p size=%#lx\n",
-                       syscall(SYS_gettid), size, p, case_read(case_physical + 8));
+                       syscall(SYS_gettid), size, p, case_read((char *)p - 8));
     } else {
         return;
     }
@@ -129,6 +158,23 @@ static void case_allocation(size_t size, void *p)
         write(out_fd, buf, (size_t)len);
 }
 
+
+/* Free of a user pointer inside the forged window: printed before
+ * __libc_free so an aborting free still records the header it saw. */
+static void case_window_free(void *p)
+{
+    if (!case_overflow_seen || !case_win_lo)
+        return;
+    if ((char *)p < case_win_lo || (char *)p >= case_win_hi)
+        return;
+    char qbuf[160];
+    int qlen = snprintf(qbuf, sizeof qbuf,
+                        "Q tid=%ld ptr=%p size=%#lx fd=%#lx bk=%#lx\n",
+                        syscall(SYS_gettid), p, case_read((char *)p - 8),
+                        case_read(p), case_read((char *)p + 8));
+    if (qlen > 0)
+        write(out_fd, qbuf, (size_t)qlen);
+}
 void *malloc(size_t size)
 {
     if (case_waiting_second && size != case_second_request) {
@@ -188,6 +234,15 @@ void free(void *p)
         size_t sizefield = *(size_t *)((char *)p - 8);
         if (p == case_victim)
             case_snapshot("V", sizefield);
+        case_window_free(p);
+        if (free_dump && (sizefield & ~(size_t)7) >= 0x300 &&
+            (sizefield & ~(size_t)7) <= 0x500) {
+            char buf[160];
+            int len = snprintf(buf, sizeof buf, "D %p %#lx %#lx %#lx\n", p,
+                               sizefield, case_read(p), case_read((char *)p + 8));
+            if (len > 0)
+                write(out_fd, buf, (size_t)len);
+        }
         emit("F", (unsigned long)(uintptr_t)p, sizefield, 0);
     }
     __libc_free(p);

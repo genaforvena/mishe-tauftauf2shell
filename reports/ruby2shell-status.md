@@ -5,6 +5,24 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+
+- **2026-11-25 — consumer-visibility correction: the forged `0x251` qword
+  is structurally inert; Veria PoC still unpublished.** The committed case
+  probe compared malloc user pointers against the forged chunk-start
+  address, so its "no consumer" P-line check could never fire. Fixed probe
+  (window P/Q/G lines, `process_vm_readv` reads) + committed tabulator
+  `ruby2shell-cons-vis-tabulate.py`; 49-run batch of the N=524 stock-Rails
+  attack: 5 survivors, zero window frees (Q=0/49) — the real neighbor is
+  never freed on the request thread, so the tail-forged `0x251` qword (which
+  lands in the live neighbor's user area) can never enter any free list.
+  New measured fact: post-attack `0x21c`/`0x1f8` request-thread allocations
+  return at the victim and would cover the live neighbor in expansion
+  geometries — their content provenance is the next named experiment. Veria's
+  page (checked on the dated 25 Nov trigger, twice): stamp unchanged since
+  21 Nov 03:52Z, PoC still "25 November, or later" — unpublished. Rung 5
+  remains NOT ACHIEVED for stock/oracle-free/persistent; the
+  witness-ESTABLISHED harness-condition rung 5 is unchanged.
+
 - **2026-11-24 — stock Rails follow-up: true allocator split, rung 5 NOT
   ACHIEVED.** New `ruby2shell-stock-rails{,-setup}.sh` runs an unmodified
   `rails new --minimal` app (optional full `rails new`). With N=524 and 32

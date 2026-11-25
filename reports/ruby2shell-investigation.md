@@ -1242,6 +1242,72 @@ matrix, not RCE. Reopen on Veria's published stock-Rails mechanics (still
 unpublished at 2026-11-24T04:11Z) or a measured pointer-bearing `0x3f0`
 physical consumer followed by a wire-visible disclosure and a second command.
 
+### Consumer-visibility correction — the forged qword is structurally inert (2026-11-25)
+
+The committed case probe's consumer check (`p == case_physical`) compared a
+malloc **user pointer** against the forged **chunk-start** address, so a P
+line could never fire for a real chunk allocation: the 2026-11-24 "no
+result-allocation return of the forged physical chunk" was measured with a
+structurally blind instrument. `lab/preload/mtrace.c` now tracks the forged
+window `[case_physical+0x10, +0x78)` instead: `G` lines dump eight window
+qwords at every B/A/V snapshot, `P` lines print any malloc return inside the
+window (headers read via `process_vm_readv`, so a bad header cannot crash
+the tracer), and `Q` lines print any free of a window user pointer BEFORE
+`__libc_free`, so an aborting free still records the header it saw.
+Committed tabulator: `lab/repro/ruby2shell-cons-vis-tabulate.py`.
+
+Batch: 49 fresh processes, the 2026-11-24 N=524 environment plus
+`RUBY2SHELL_STOCK_CASE_PROBE=1`, 6-way parallel on ports 4560–4565.
+Representative evidence `lab/build/evidence/stock-rails-cons-vis-*.server.log`
+(gitignored bulk). Observed:
+
+- 5/49 runs complete the attack and survive. Victim geometries vary per
+  boot (B size fields from `0x81` to `0xb51`); the expansion class
+  (`B=0x231 → 0x250`) recurred twice (runs 4 and 11, alive, both WITHOUT
+  the second mapping buffer returning at the victim). The r498 shape
+  (B=0x201, C consumption, tail qword) did not recur in 49 runs.
+- **Zero Q lines in 49 runs:** no free of any window user pointer happens on
+  the request thread. The real neighbor's corrupted header is never
+  validated, and the tail-forged `0x251` qword — which lands at
+  `case_physical+0x18`, the live neighbor's second user qword, not at any
+  chunk-header position malloc can walk — forms a pseudo-chunk at
+  `case_physical+0x10` whose user pointer (`+0x20`) nothing ever frees, so
+  no free list can ever contain it. In the tested geometry the forged qword
+  is structurally inert, not merely unobserved. The 11-24 negative stands,
+  now with a corrected instrument.
+- **New measured consumer fact:** post-attack request-thread allocations
+  return at the victim: run 12 (`B=0x251`, alive) and run 34 (`B=0xb51`,
+  alive) print `C request=0x21c`/`0x1f8` pops at the victim user pointer,
+  matching the preserved `stock-rails-rails-stage2d-n524-r498.server.log`;
+  run 34 additionally carves three `0x20` chunks (`P request=0x10/0x18/0x10`)
+  from the real remainder beyond the fake next position. In an expansion
+  geometry such consumers' write spans cover the live neighbor. The next
+  named experiment is the content provenance of the `0x21c`/`0x1f8`
+  consumers: attacker-derived bytes would make this a request-shaped
+  Stage-B analog on the unmodified app.
+
+Boundary unchanged: no command, no disclosure, no persistence;
+stock/oracle-free/persistent RCE remains NOT ACHIEVED. Veria's page was
+re-checked on the 2026-11-25 dated trigger (twice this wake): stamp still
+"Updated 21 November 2026 at 03:52 UTC", PoC still scheduled and
+unpublished; the day's secondary coverage adds no mechanics.
+
+Reproduce (single probe run, then tabulate):
+
+```
+RUBY2SHELL_STOCK_N=524 RUBY2SHELL_STOCK_DRAIN=1024:32 \
+RUBY2SHELL_STOCK_DRAIN_FAKE=1 RUBY2SHELL_STOCK_FILL=256 \
+RUBY2SHELL_STOCK_FILL_PREV=0x250 RUBY2SHELL_STOCK_FILL_SIZE=0x90 \
+RUBY2SHELL_STOCK_PART_CHARSET=1 RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+RUBY2SHELL_STOCK_CASE_PROBE=1 \
+bash lab/repro/ruby2shell-stock-rails.sh attack cons-vis-1
+python3 lab/repro/ruby2shell-cons-vis-tabulate.py
+```
+
+The batch loop ran the same environment 48 more times via
+`xargs -P6` with `RUBY2SHELL_STOCK_PORT=$((4560 + i % 6))` and tags
+`cons-vis-<i>`.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
