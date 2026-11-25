@@ -87,3 +87,28 @@ Full hashes:
 Pinned helpers: craft_uncompressed_poc.py 0d91b5a8...d1749c, base
 w11/targetbeef.input cf5030eb...33d33b, w23/sizefield.gdb 77c39094...da404a,
 new w29/sizefield-before.gdb 7718a4c4...1a63.
+
+W30 one-command replay lane (2026-11-25 20:01–20:1xZ, author-side). Commit
+`58125c4a` adds `w29/replay.sh` and `w29/hashes-clean.sha256` (generator,
+`w11/targetbeef.input`, the red18/red11 specs, `w29/sizefield-before.gdb`
+and both derived inputs) plus a `W29_OK` lane in `replay-frontier.sh`.
+Assertions are build-stable only: odd c0 (PREV_INUSE), c1=00c0, c2=c3=0,
+sysmem 16781312, W29 CONTINUED with normal inferior exit; red18 rc0 with
+empty stderr in vulnerable -n 1, fixed and no-option builds; red11 rc134
+with "corrupted size vs. prev_size". The build-dependent low word is not
+pinned.
+
+Live tree: `sh w29/replay.sh` -> PASS=6 FAIL=0 W29_OK.
+Clean archive: `git archive HEAD lab/frontier/libraw2shell | tar x -C
+/tmp/w30-clean`; `cd /tmp/w30-clean/lab/frontier/libraw2shell &&
+sh replay-frontier.sh /tmp/w30-replay-out` -> PASS bootstrap, w13-w14-w15,
+wire, w21, w23, w29; receipts REPLAY_W13_W14_W15_OK / WIRE_OOB_OK /
+W21_OK / W23_NEGATIVE_OK / W29_OK; `REPLAY_FRONTIER_OK`, rc 0 (442 s).
+Clean gdb line: `W29 BEFORE sf=0x555555b0b9d8 val=0xc0b631 hw=b631 00c0
+0000 0000 sysmem=16781312`, `[Inferior 1 ... exited normally]`,
+`W29 CONTINUED`. Low word b631 differs from the live tree's b5e1 as W29
+already predicted; no byte-stability claim.
+
+No new exploit datum, no witness verdict and NO grade change from W30. This
+is replayability work: the one-command recipe is now ready for a NEW witness
+ask scoped to W29 only; the older #4271 ask is not re-sent.
