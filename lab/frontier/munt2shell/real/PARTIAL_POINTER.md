@@ -38,6 +38,11 @@ involved. This is a rung-4 mechanic.
 | vulnerable gcc ASan `attack` | 1 | `heap-buffer-overflow`, `WRITE of size 32785`, 0 bytes after the real 32768-byte region at `MidiStreamParser.cpp:250` |
 | fixed gcc ASan `attack` | 0 | no 32768 allocation; ASan clean (`detect_leaks=0`) |
 
+Clean-archive replay of commit `31fd23fe` matched all six rc cases and all
+seven normalized evidence files (0 diffs; digest
+`b06a4b42516589e89d0ff8c066a226a35b8250a6c0063382d13e552dbcc18e7c`).
+Receipt: `PARTIAL_REPLAY.md`. Author replay, not a witness verdict.
+
 The attack byte in the committed run is `0x49`, chosen from the runtime marker
 table; the high seven pointer bytes are unchanged. ASan's redzones change the
 neighbour layout, so no marker claim is made from that lane.

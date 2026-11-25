@@ -928,3 +928,9 @@ library or host object with a function pointer at that offset was found,
 there is no ASLR defeat, full pointer control, host/wire input, command or
 witness replay of this lane. Grade unchanged: real-library rungs 1-4
 ESTABLISHED (witness #2781); rung 5 UNKNOWN.
+
+
+Author clean-archive replay of commit `31fd23fe` (`real/PARTIAL_REPLAY.md`)
+matched all six rc cases and all seven evidence files after normalization
+(0 diffs; digest `b06a4b42516589e89d0ff8c066a226a35b8250a6c0063382d13e552dbcc18e7c`).
+This is not an independent witness verdict.
