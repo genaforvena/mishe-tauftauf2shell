@@ -2081,6 +2081,23 @@ external contact at replay time.
   N=129 case. `watchdog.c:4467-4472` has no `verify_authhash` on that branch.
   W11 is author-only and grade-neutral: rung 3 wire scope unchanged, chosen
   address and command still unestablished.
+- **Pgpool2Shell W9/W10/W11 one-command clean-archive replay** (commit `2431bd97`,
+  [report](../reports/pgpool2shell-wdnodes-w9.md)). From a clean `git archive HEAD`
+  containing `lab/frontier/pgpool2shell` and `lab/pgpool2shell`, with `PGPOOL_LAB`
+  naming the provisioned lab that holds the two gitignored pinned tarballs, run
+  `PGPOOL_LAB=/abs/path/to/lab/frontier/pgpool2shell bash lab/pgpool2shell/wdnodes/wire/run-witness.sh`.
+  The wrapper rechecks `src/SHA256SUMS` (2/2 OK), rebuilds plain 4.7.2/4.7.3 from
+  the verified tarballs in a fresh `TMPDIR`, runs W10's three wire cases and both
+  live-gdb CHOSEN/HOST readbacks, runs W11's auth probe, and diffs regenerated
+  `hash-evidence.sh` output against the committed 11-entry `EVIDENCE_HASHES.txt`;
+  ports 19003–19006 are checked and only its own children killed. Author run at
+  `d379108d` from an archive extracted to `/tmp/w9-witness-clean2`: `WITNESS REPLAY
+  PASS`, rc 0, all 11 normalized hashes identical, including both gdb readbacks.
+  An earlier run at `efa6f075` failed 10/11 because the wrapper named a
+  nonexistent `gdb-w9-post-alt.cmd` (the committed trace is `gdb-w9-post.cmd`;
+  fixed at `d379108d`). This is an author clean-archive receipt, NOT an
+  independent witness verdict; grade stays rung 4 wire-scope chosen bytes, with
+  no crash, chosen address, command or rung 5 on this branch.
 - **Tacplus2Shell W129 live write-what-where** (commit `7603775`,
   [status](../reports/tacplus2shell-status.md) W129). Build the plain 2.1.2
   pins as in the admission recipe (`src-plain/`, `src-fixed-plain/`), then
@@ -10166,8 +10183,11 @@ named above is gitignored and regenerates with the cited scripts.
   chunk follows the buffer, and the later `shared_ptr`/`StorageView`
   constructors overwrite chosen bytes at +0x40/+0x48, so no chosen pointer
   reached a dereference (an 80-byte payload completed `Model::load` then
-  aborted in `sysmalloc`). Bounded negative; witness replay requested, no
-  verdict, grade unchanged.
+  aborted in `sysmalloc`). Bounded negative; witness W223 closed the replay gate
+  ESTABLISHED AS LABELED from `305d4a68` with
+  `bash lab/frontier/ctranslate22shell/run-witness.sh` (rc 0, `WITNESS REPLAY
+  PASS`, 16 PASS / 0 FAIL, both pin hashes and all ten real-consumer assertions
+  exact). No grade change.
 - **Real-process lanes with one-command drivers** — Drwav2Shell W4:
   `sh lab/frontier/drwav2shell/consumer/run-marker.sh` (14 PASS / 0 FAIL)
   uses attacker-side `make_marker_wav.py` and a committed `marker.c` to take
@@ -10585,19 +10605,20 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   no promotion/takeover/marker on 8.4.27-app, and 8.4.28-app clean. Logs live
   in gitignored `lab/build/evidence/w62-rlimit-*`. Full r5 stays UNCLAIMED; a
   fresh-context witness replay of `w61-varied-tfm.sh` (#4488) is the open gate.
-- **Libraw2Shell W29 — file-chosen valid top-chunk size** — from the committed
+- **Libraw2Shell W29/W31 — valid-size causal claim withdrawn** — from the committed
   specs in `lab/frontier/libraw2shell/w29/specs/` generate the input with the
   unmodified pinned `craft_uncompressed_poc.py` on `w11/targetbeef.input`,
   then run the unmodified `-O0 dcraw_emu` and `w23/sizefield.gdb` with
-  `MALLOC_TOP_PAD_=16777216`. Expect red curve 18 to write a plausible
-  PREV_INUSE-set size below `system_mem` 16,781,312 at
-  `(char*)main_arena.top + 8` (destimage index 68,773) and exit normally,
-  while red 17/33 abort with `corrupted size vs. prev_size` and W21's
-  `w13/dead-target.input` aborts with `free(): invalid next size (normal)`.
-  The low word is build-dependent (`b5e1` in-tree, `b621` after a clean
-  `git archive HEAD` rebuild); only the size class is stable. Red 49 was
-  generated but not probed (UNKNOWN). No later overlapping allocation,
-  pointer, marker or r5; details in `w29/results.txt`.
+  `MALLOC_TOP_PAD_=16777216`. Expect red curve 18 to write the file-chosen
+  `0x00c0` halfword at `(char*)main_arena.top + 8` (destimage index 68,773)
+  and exit normally, while W21's `w13/dead-target.input` aborts with
+  `free(): invalid next size (normal)`. W31's watchpoints and
+  `w31/glibc-nextsize.c` correct the cause: further OOB stores leave `0x11`
+  at `__libc_free` entry, and a standalone control exits cleanly with `0x11`
+  whether PREV_INUSE is set or clear. A clean exit is NOT evidence that
+  `free()` read a plausible chosen size. Red 49 was generated but not probed
+  (UNKNOWN). Grade unchanged: rung 4 rests on W13/W14/W15/W17, with no
+  overlapping allocation, pointer, marker or r5; details in `w31/results.txt`.
 - **Gpgme2Shell W17 — one-command clean-archive wrapper** — run
   `sh lab/frontier/gpgme2shell/realbuild/run-witness.sh <outdir>` from the
   checkout. It makes a clean `git archive 057e2e2a lab/frontier/gpgme2shell`,
@@ -10606,7 +10627,12 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   `run-eof.sh`. Expect `BUILD OK`, `PASS=25 FAIL=0`, rc 0, ASan
   `attempting double-free` at `engine-gpg.c:602` after `read_status :1494`,
   `buffer[1000]=0x48` at `bufsize=2048`, and clean fixed, 2.3.1, short-line
-  and gdb-runner controls. Offer #4487 has no verdict: #4333 stays UNKNOWN.
+  and gdb-runner controls. Witness W222 (W19) returned ESTABLISHED AS LABELED on
+  #4333 and #4487 from a clean `057e2e2a` archive with the same `BUILD OK` /
+  `PASS=25 FAIL=0` / rc 0 and exact pin hashes; a newline-terminated
+  counterexample reaches the same realloc but exits cleanly, confirming EOF
+  before the `:1610` writeback (not line length) as the differentiator. The
+  `buffer[1000]=0x48` observation is debugger-only; no grade or r5 move.
 - **KiCad2Shell provenance** — the redundant 302243840-byte AppImage tar was
   removed from the uncommitted `provisioned/` tree after its hash and the
   extracted hash were verified. The replay-relevant pin remains the extracted
@@ -10623,8 +10649,20 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   `RESULT 14 PASS / 0 FAIL`, rc 0. GCC and Clang vulnerable ASan runs report
   `heap-buffer-overflow READ of size 1` at pinned `prezip.vuln.c:173`, 0 bytes
   after the 256-byte allocation at `:154`; fixed rejects the crafted stream
-  and both safe controls decode cleanly. Grade: rung 3 only; no chosen-byte
-  store, pointer, consumer, command, r5 or independent verdict.
+  and both safe controls decode cleanly. The 75818 prezip lane stays rung 3; the
+  separate 75820 limb is rung 4 PARTIAL (below). No pointer, command, r5 or
+  independent verdict for either lane.
+- **Aspell2Shell 75820 — chosen byte in the real dictionary consumer** — from
+  `lab/frontier/aspell2shell` run `bash harness/75820-write-probe.sh` with
+  `harness/evidence/75820-write/REPLAY.txt`; expect `RESULT 8 PASS / 0 FAIL`,
+  rc 0. A 300-byte personal-word-list entry under a release NDEBUG build and a
+  pipe-filter query writes `to_normalized(source[j])` past the 250-byte word:
+  gdb at `j == 64` reads `0x00 -> 0x01` for all-`a` input and `0x00 -> 0x02`
+  for all-`b`. Real 0.60.8.3 and a 0.60.8.2 copy with only the fix hunk reject
+  with `Word larger than 250 characters.` (rc 1); a 250-byte word is clean.
+  Arbitrary byte values, arbitrary offsets, pointer control, marker, command
+  and r5 are NOT measured; witness UNKNOWN. Recover-mode ASan and gdb are for
+  observation; details in `reports/frontier-aspell2shell.md`.
 - **FreeImage2Shell** — CVE-2026-118753 / GHSA-wr69-568q-rrqg, Danoli3
   FreeImage before 3.19.25. Vulnerable `3.19.24` `4916e0ec`, fixed `3.19.25`
   `363311f1`, fix `0da5ddb4`. Pin sha256 values are

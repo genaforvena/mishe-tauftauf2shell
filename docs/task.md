@@ -6693,6 +6693,14 @@ no peer key, the N=129 packet is still parsed with hashes identical to W10's
 vulnerable case (`watchdog.c:4467-4472`); a dereference path and follow-on
 impact remain unestablished, and W11 is author-only.
 
+Commit `2431bd97` adds one clean-archive driver for both limbs:
+`PGPOOL_LAB=<provisioned lab> bash lab/pgpool2shell/wdnodes/wire/run-witness.sh`
+from a `git archive HEAD` checkout. The author run at `d379108d` printed
+`WITNESS REPLAY PASS` rc 0 with all 11 normalized hashes and both gdb readbacks
+identical; the earlier `efa6f075` 10/11 failure was a wrong alt-gdb command
+name, fixed at `d379108d`. It is an author receipt, not an independent verdict;
+no grade moves.
+
 Pppd2Shell W131 (`f95ddc9`, `reports/pppd2shell-live.md` W131) tries the
 SIGHUP/SIGTERM `sigreceived` notifier to bypass the `the_channel` dereference
 that stopped W125. The callback is reached and pppd forks a child, but the NAK
@@ -11564,11 +11572,12 @@ pointer, command or grade change.
 PHP2Shell W62 is a measured negative: `RLIMIT_FSIZE` at K=1019 produces the
 kernel short write without SIGXFSZ, but the live FPM worker stays alive and
 the session splice is gone at consume time, so full r5 remains UNCLAIMED and
-the witness replay of `w61-varied-tfm.sh` (#4488) is the open gate. Libraw W29
-writes a file-chosen, glibc-plausible top-chunk size that changes an allocator
-abort into a clean exit; the low word varies across builds, so only the size
-class is stable. Gpgme W17's clean-archive wrapper scored 25/0 here; #4333 is
-still UNKNOWN. KiCad's redundant AppImage tar was removed without changing
+the witness replay of `w61-varied-tfm.sh` (#4488) is the open gate. Libraw W31
+withdraws W29's plausible-size story: the size field reads `0x11` at free time
+and a standalone glibc control exits cleanly with `0x11` with PREV_INUSE either
+way; the grade stays rung 4 on other limbs. Gpgme W19's witness W222 returned
+ESTABLISHED AS LABELED on #4333 and #4487, with the chosen-byte print
+debugger-only and no grade move. KiCad's redundant AppImage tar was removed without changing
 the extracted binary hash. Recipes, exact bytes and gitignored-evidence
 regeneration are in `docs/reproducibility.md`.
 
@@ -11578,7 +11587,8 @@ The operator admitted both staged lanes under standing #6 after replaying
 their local evidence and checking the primary advisories, pins, fixes,
 charters, walls and existing windows. Aspell2Shell is the 150th declared
 target mind and FreeImage2Shell the 151st; neither is claimed as an activated
-engine route. Their technical grades do not move: Aspell is rung 3 only;
+engine route. At admission Aspell was rung 3-only; its later 75820 limb adds
+rung 4 PARTIAL at chosen offsets in the real dictionary consumer, while
 FreeImage is rung 3 with rung 4 PARTIAL at fixed past-canvas offsets. Both
 keep witness UNKNOWN and no r5.
 
@@ -11750,3 +11760,26 @@ The `failed-m2shell-doctor-service` and nfdump-wake failure REDs were
 re-observed GREEN on named person-owned dispositions, not on a clean doctor
 run. The person owes the exact full-flag sync; the witness owes replay before
 any rung-4 publication.
+
+## 2026-11-25 21:1x–23:3xZ — three verdict/claim folds and one clean-archive receipt
+
+Witness W223 (ctranslate W6) replayed `bash lab/frontier/ctranslate22shell/run-witness.sh`
+from a clean archive at `305d4a68`: rc 0, `WITNESS REPLAY PASS`, 16 PASS / 0
+FAIL, both pin hashes and all ten real-consumer assertions exact; the rung-4
+PARTIAL boundary and `AV:L/UI:P` ceiling are unchanged. Witness W222 (gpgme W19)
+closed #4333 and #4487 ESTABLISHED AS LABELED from a clean `057e2e2a` archive
+(`BUILD OK`, 25 PASS / 0 FAIL, rc 0, exact pins, fixed/2.3.1/short-line controls
+clean); its newline-terminated counterexample confirms EOF, not line length, as
+the differentiator, and the chosen-byte print is debugger-only. No grade moves.
+
+Aspell's separate 75820 limb adds rung 4 PARTIAL in the real 0.60.8.2 consumer:
+`harness/75820-write-probe.sh` (8 PASS / 0 FAIL) puts input-chosen `0x01`/`0x02`
+bytes at the same OOB offset under gdb, with fixed-build and 250-byte-word
+controls clean; conditions are a release NDEBUG build, personal word list and
+pipe-filter query, with witness UNKNOWN and r5 NOT CLAIMED. Libraw W31 withdraws
+W29's valid-size cause (the field reads `0x11` at free and a standalone glibc
+control exits cleanly at `0x11`): the narrower halfword and normal-exit
+observations remain, and rung 4 still rests on W13/W14/W15/W17. Pgpool's
+`run-witness.sh` receipt is folded in its W10/W11 limb above; it is an author
+clean-archive receipt, not a witness verdict. No route, mind count, R5 cell or
+other grade moved.
