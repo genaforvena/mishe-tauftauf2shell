@@ -5,6 +5,23 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+- **2026-11-25 (ninth push, direct session) — N=588 dual-instrument
+  timelines on record; a SECOND corruption family (unsorted-victim
+  SHRINK) measured; stock/oracle-free/persistent remains NOT
+  ACHIEVED.** Running the same N=588 wire input with the case snapshots
+  and the full M/F stream live (`MTRACE_CASE_REQUEST=0x278` + arm file,
+  `case_only` unset): 5/6 runs show the 0x53 SHRINKING binned unsorted
+  victims (`0x171→0x153`, `0xbf1→0xb53`, `0xf31→0xf53`, `0xaa1→0xa53`)
+  — buffer2 skips the too-small chunk, it re-bins at the smaller class,
+  and tiny pops plus a 0x409-class allocation recycle victim+0x170 —
+  overlapping chunk records, the shrink-free-chunk overlap family. The
+  pure-trace runs confirm the sibling pairing family (buffer1 →
+  buffer1+0x280 victim → +0x270 result) that yielded the surviving
+  chosen-header forge. Same request bytes, two families,
+  frontier-dependent. Excerpts: `stock-rails-td588-*.excerpt.txt`.
+  Named next: a controlled allocation from either family — Einherjar
+  backward-consolidation on the pairing family, or re-bin consumption
+  on the shrink family. No command, no persistence, no grade change.
 - **2026-11-25 (eighth push, direct session) — cross-request plants
   measured, the planted-victim pairing closed STRUCTURALLY, Einherjar
   named next; stock/oracle-free/persistent remains NOT ACHIEVED.**

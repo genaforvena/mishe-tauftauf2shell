@@ -1934,6 +1934,43 @@ poison stage, with the leak (item 10) supplying the arena base. The
 Boundary unchanged: no command, no persistence, no grade change;
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 
+### Dual-instrument N=588 timelines — a second corruption family measured (2026-11-25, direct session, fourth batch)
+
+Running the same N=588 consH20-tail wire input with BOTH instruments
+live (`MTRACE_CASE_REQUEST=0x278` plus the arm file, `case_only` unset —
+the case snapshots write directly, so the B/A/V lines and the full M/F
+stream coexist; 6 fresh processes, excerpts preserved as
+`lab/build/evidence/stock-rails-td588-*.excerpt.txt`) resolves the
+internal bookkeeping and finds a SECOND corruption family:
+
+- **Shrink family (5/6 dual runs):** the tracked upcase hits a BINNED
+  UNSORTED victim (`fd=bk=region+0x90`) of class 0x171/0xbf1/0x191/
+  0xf31/0xaa1, and the 0x53 byte SHRINKS it — `0x171→0x153`,
+  `0xf31→0xf53`, `0xaa1→0xa53` (LSB 0x?1→0x53). Buffer2 (nb 0x270)
+  then SKIPS the too-small chunk (no pairing; the case-C never fires),
+  the shrunk chunk re-bins at the smaller class, and the victim's tail
+  region is recycled by tiny pops (`M 0x3`/`M 0x10` at victim+0x170)
+  plus a 0x409-class allocation at victim+0x190. A shrunk free chunk
+  re-binned small leaves overlapping chunk records against the original
+  successor at +0x170 — the classic shrink-free-chunk overlap, now
+  measured wire-only on the stock app.
+- **Pairing family (pure-trace runs, e.g. `tr588-6`):** when the
+  frontier instead hands buffer1 a chunk followed by a 0x270-class
+  tcache entry, buffer2 = buffer1+0x280 pops it and the result string
+  lands at buffer2+0x270 — the ideal Stage-A pairing that produced the
+  surviving chosen-header forge (`cov-n588-18`).
+- Both families arise from the SAME request bytes at N=588; which one
+  fires depends on the frontier population (boot/thread timing), not
+  on any knob.
+
+Boundary: two measured corruption families (pairing/forge and
+shrink/overlap), exact timelines on record, reproduction command above.
+Neither family yet yields a controlled allocation — that engineering
+(Einherjar backward-consolidation on the pairing family; re-bin
+consumption on the shrink family) is the next work package. No command,
+no persistence, no grade change; stock/oracle-free/persistent rung 5
+remains **NOT ACHIEVED**.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
@@ -2101,3 +2138,21 @@ stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
     successor) is the named next experiment, with the arena-base leak
     feeding any address stage. Stock/oracle-free/persistent rung 5
     stays NOT ACHIEVED.
+
+14. **Done this direct-session push (2026-11-25, fourth batch): the
+    N=588 dual-instrument timelines are on record and a SECOND
+    corruption family is measured.** With the case snapshots and the
+    full M/F stream live together, 5/6 runs show the 0x53 byte SHRINKING
+    binned unsorted victims (`0x171→0x153`, `0xf31→0xf53`) — buffer2
+    skips the too-small chunk, it re-bins small, and the tail region is
+    recycled (tiny pops + a 0x409-class allocation), leaving overlapping
+    chunk records — the shrink-free-chunk overlap family. The pure-trace
+    runs confirm the sibling pairing family (buffer1 → victim at +0x280
+    → result at +0x270) that produced the surviving chosen-header forge.
+    Same wire bytes, two families, frontier-dependent. Named next: turn
+    either family into a controlled allocation — Einherjar
+    backward-consolidation on the pairing family (content-planted fake
+    chunk, forged prev_size, cleared PREV_INUSE), or re-bin consumption
+    on the shrink family (claim the shrunk chunk with a matching-class
+    request and observe the overlap against the original successor).
+    Stock/oracle-free/persistent rung 5 stays NOT ACHIEVED.
