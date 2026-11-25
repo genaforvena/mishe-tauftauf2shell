@@ -23,20 +23,28 @@ status UNKNOWN.
   ("SHE-CCEXMISHE-CC", pattern rotated by `2097272 % 10 == 2`). Local-guard
   FIXED_BUILD rejects the attack (`ret=1 past=0`, boundary bytes zero); safe
   derived length 4096 is clean in all builds.
-- Grade updated 2026-11-25 05:4xZ: rung 3 CONFIRMED in a real ASan build of
+- Grade updated 2026-11-25 06:09Z: rung 3 CONFIRMED in a real ASan build of
   the pinned tree, with `WRITE of size 1052736`, `0 bytes after 2097272-byte
   region`, frames `read(2)` → `buffered_read_opt file_functions.c:376` →
   `parse_mpeg_packet ccx_gxf.c:943` → `parse_media ccx_gxf.c:1219`, allocation
-  `malloc(BUFSIZE)` at `ccx_demuxer.c:452`. Rung 4 CONFIRMED in the real build
-  with the condition that chosen bytes (`53 48 45 2d 43 43 45 58 4d 49 53 48
-  45 2d 43 43` at `buffer+BUFSIZE`) were inspected with gdb after the write;
-  `data->len=2101248`. No in-program consumer readback, pointer/IP/command
-  control, rung 5 or witness replay. Fix status UNKNOWN; local guard remains
-  a local hunk, not a vendor patch.
+  `malloc(BUFSIZE)` at `ccx_demuxer.c:452`. Rung 4 CONFIRMED without the old
+  debugger-only condition: new `inputs/readback.gxf` places `00 00 01 B3` at
+  `buffer+BUFSIZE`; the plain build's program-consumed `got` is 2097348
+  (76 bytes past BUFSIZE) versus 2101248 for the original attack payload, and
+  ASan `halt_on_error=0` reports a second heap-buffer-overflow, `READ of size
+  3900` at `boundary+76`, stack `memmove` → `process_data general_loop.c:1041`.
+  The 3900 bytes equal `2101248-2097348`. No pointer/IP/command control, rung
+  5 or witness replay. Fix status UNKNOWN; local guard remains a local hunk,
+  not a vendor patch.
 - Real-build artifacts: `lab/frontier/ccextractor2shell/real-build/` with
-  `make_gxf.py`, `inputs/{attack,safe}.gxf`, `gdb-inspect.cmd` and `evidence/`
-  (`asan-attack.out`, `asan-safe.out`, `gdb-plain-attack.out`, `build.log`,
-  `cmake.log`). ASan binary sha256
+  `make_gxf.py`, `make_readback_gxf.py`, `inputs/{attack,safe,readback}.gxf`,
+  `gdb-inspect.cmd`, `gdb-consumed-generic.cmd` and `evidence/` (W1
+  `asan-attack.out`, `asan-safe.out`, `gdb-plain-attack.out`, `build.log`,
+  `cmake.log`; W2 `asan-readback.out`, `asan-halt0-{attack,safe}.out`,
+  `gdb-consumed-{attack,readback}.out`, `gdb-pageguard.out`,
+  `gdb-readback-slice.out`). `readback.gxf` sha256
+  `fc2faead02480aa92a240df5e63c0787e0acb88633e52bb7c7d64a5ee734a1d4`.
+  ASan binary sha256
   `c401190479cd2e6fdf71093e512f3ebcd1138d3856aaf68d0c33741631899ad1`; pinned
   tree source hash unchanged. Safe GXF rc 10 with no ASan report. Details in
   `reports/frontier-ccextractor2shell.md`.

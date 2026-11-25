@@ -1,14 +1,16 @@
 # Frontier brief — ccextractor2shell (CCExtractor issue #2500, no CVE)
 
-Status 2026-11-25 05:4xZ: **real pinned-tree build executed**. Rung 3 is
-CONFIRMED through the real `buffered_read`/`read(2)` consumer into a real
-`malloc(BUFSIZE)` region: an ASan `WRITE` from a locally crafted `.gxf` MEDIA
-packet, with the full call stack through `parse_mpeg_packet`. Rung 4 is
-CONFIRMED with the condition that chosen bytes were observed by debugger
-inspection of the live buffer after the read (no in-program consumer readback,
-no pointer/IP/command control). Rung 5 and witness verdict remain UNKNOWN.
-No CVE/GHSA and no upstream fix PR were observed; the guard is a local hunk,
-not a vendor patch. All input files, logs and generators live in
+Status 2026-11-25 06:09Z: **in-program consumer readback measured**. Rung 3
+remains CONFIRMED through the real `buffered_read`/`read(2)` consumer into a
+real `malloc(BUFSIZE)` region. Rung 4 is now CONFIRMED without the earlier
+debugger-only condition: a crafted GXF whose first bytes past `BUFSIZE` are
+`00 00 01 B3` changes the program's own MPEG-2 parser consumed length from
+2101248 to 2097348, and ASan (`halt_on_error=0`) reports a subsequent
+`READ of size 3900` from `boundary+76` in `memmove` called by `process_data`
+(`general_loop.c:1041`). Rung 5 and witness verdict remain UNKNOWN: no
+controlled indirect call, pointer or command was observed. No CVE/GHSA and no
+upstream fix PR were observed; the guard is a local hunk, not a vendor patch.
+All input files, logs and generators live in
 `lab/frontier/ccextractor2shell/real-build/`; the harness source and its
 evidence were not edited.
 
@@ -124,14 +126,20 @@ ASan with a memcpy stand-in (earlier), and in a real ASan build of the pinned
 tree through `read(2)` from a local `.gxf` into `malloc(BUFSIZE)` (below). The
 clang-default-ASan negative and the stand-in build remain part of the record.
 
-Rung 4 is confirmed for chosen bytes at a chosen offset in the real process:
-the plain build stopped after `parse_mpeg_packet` with `data->len=2101248` and
-`data->buffer+BUFSIZE` containing the attacker-chosen repeating pattern
-`53 48 45 2d 43 43 45 58 4d 49 53 48 45 2d 43 43` ("SHE-CCEXMISHE-CC").
-Condition: the bytes were inspected in the live process with gdb; no program
-consumer read them back, and no pointer or instruction pointer was controlled.
-The earlier stand-in rung-4 PARTIAL result is retained as history, not as the
-basis for this grade.
+Rung 4 is now CONFIRMED for chosen bytes at a chosen offset past the real
+allocation, read back by the program's own consumer. The earlier debugger-only
+observation is retained as history but is no longer the basis for the grade:
+`real-build/inputs/readback.gxf` places `00 00 01 B3` as the first four bytes
+past `BUFSIZE`. In the plain build the conditional `process_m2v` breakpoint
+shows `length=2101248`, and `finish` shows the program's own consumed count
+`got=2097348` (76 bytes past `BUFSIZE`), versus `got=2101248` for the original
+attack payload with no start code. With ASan `halt_on_error=0` the same input
+reports the original WRITE and then a second heap-buffer-overflow,
+**`READ of size 3900` at `boundary+76`**, stack `memmove` interceptor →
+`process_data general_loop.c:1041` → `process_non_multiprogram_general_loop
+general_loop.c:1298`. The 3900 bytes are exactly
+`2101248 - 2097348`, the unprocessed remainder the program shifts with
+`memmove`. No pointer, instruction pointer or command was controlled.
 
 There is no live process beyond these local lab runs, no pointer/IP/command
 control, no rung 5, no independent witness replay, and no observed upstream
@@ -221,12 +229,64 @@ it is also rc 10 with no ASan report. Logs:
 `real-build/evidence/guard-build.log`. The committed pinned tree was not
 edited; the temporary guarded source copy lives in the gitignored site.
 
+## Measured 2026-11-25 06:08-06:09Z: in-program readback of chosen bytes
+
+Question for this wake: does any program consumer, not just the debugger,
+read the bytes written past `malloc(BUFSIZE)`? Answer: yes, measured in two
+independent builds of the pinned tree.
+
+`real-build/make_readback_gxf.py` writes
+`real-build/inputs/readback.gxf` (sha256
+`fc2faead02480aa92a240df5e63c0787e0acb88633e52bb7c7d64a5ee734a1d4`,
+2101312 bytes). It keeps the W1 MAP packet, MEDIA packet and size field
+`00 20 10 00`, but makes the payload zero-free `"MISHE-CCEX"` for the first
+BUFSIZE bytes and then places `00 00 01 B3` (MPEG sequence_header_code),
+12 bytes of `0x41`, `00 00 01 B7` (sequence_end_code) and `0x41` padding to
+2101248 bytes. The first four attacker-chosen bytes past the allocation are
+therefore a start code, and the program's own start-code scanner must walk
+to them because nothing before them is zero. No pinned source file was
+edited; only new files were added under `real-build/`.
+
+Plain `-O0 -g` build (`/tmp/ccx2shell-plain/ccextractor`), script
+`real-build/gdb-consumed-generic.cmd`: at `ccx_gxf.c:1220` the bytes at
+`buffer+2097272` are `00 00 01 b3 41 41 41 41 41 41 41 41 41 41 41 41`;
+conditional breakpoint at `process_m2v` shows `length=2101248`; `finish`
+shows the program's own `got=2097348` (76 bytes past `BUFSIZE`). The same
+measurement on the original attack payload gives `got=2101248` (3976 bytes
+past `BUFSIZE`) with overflow bytes `53 48 45 2d 43 43 45 58 4d 49 53 48`.
+Chosen bytes in the overflow region therefore change a program-computed
+value. Transcripts: `real-build/evidence/gdb-consumed-{attack,readback}.out`.
+
+Real ASan build (`/tmp/ccx2shell-asan/ccextractor`, sha256
+`c401190479cd2e6fdf71093e512f3ebcd1138d3856aaf68d0c33741631899ad1`) with
+`ASAN_OPTIONS=detect_leaks=0:halt_on_error=0` on `readback.gxf` exits rc 10
+and reports two heap-buffer-overflows: the W1 `WRITE of size 1052736` from
+`read`, then **`READ of size 3900` at `boundary+76`** with stack
+`memmove (ASan interceptor)` → `memmove string_fortified.h:36` →
+`process_data general_loop.c:1041` →
+`process_non_multiprogram_general_loop general_loop.c:1298`. The read address
+and size match the plain build exactly: `buffer+got = boundary+76` and
+`data->len-got = 2101248-2097348 = 3900`, the remainder the program shifts
+out of the overflowed region. Controls under the same options: `attack.gxf`
+reports only the WRITE (its `got == data->len`, so the memmove length is 0);
+`safe.gxf` reports nothing. Logs: `real-build/evidence/asan-readback.out`,
+`real-build/evidence/asan-halt0-{attack,safe}.out`.
+
+Preserved negative: GDB hardware watchpoints on an overflow byte did not
+stop the program (both 8-byte and 1-byte `-location` watchpoints); that
+instrumentation is not part of the evidence. A `PROT_NONE` page spanning the
+boundary did fault inside the Rust start-code scanner
+(`bitstream.rs:372`), but the page begins 120 bytes before the boundary and
+also overlaps the malloc chunk metadata, so it is supporting context only,
+not boundary-isolated proof. Transcript: `real-build/evidence/gdb-pageguard.out`.
+A separate slice inspection (`real-build/evidence/gdb-readback-slice.out`)
+shows the next general-loop iteration calling `process_m2v` with `length=3900`
+on bytes left by that shift, further downstream program use of the region.
+
 ## Explicit unknowns
 
 - No CVE/GHSA and no upstream fix PR observed; the local guard is not a
   vendor patch and no fixed release/version is known.
 - Whether the real write can be followed by a controlled indirect call or
   command execution: UNKNOWN; nothing measured supports a rung-5 claim.
-- No in-program consumer readback of the chosen bytes (the rung-4 observation
-  used a debugger on the live buffer): UNKNOWN.
 - Independent witness replay and operator-visible acceptance: UNKNOWN.

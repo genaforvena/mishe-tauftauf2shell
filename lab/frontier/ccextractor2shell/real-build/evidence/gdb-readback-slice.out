@@ -1,0 +1,49 @@
+warning: Missing auto-load script at offset 0 in section .debug_gdb_scripts
+of file /tmp/ccx2shell-plain/ccextractor.
+Use `info auto-load python-scripts [REGEXP]' to list them.
+Breakpoint 1 at 0x253723: file /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c, line 1220.
+Breakpoint 2 at 0x5cee83: file lib_ccxr/src/common/bitstream.rs, line 397.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CCExtractor 0.96.5, Carlos Fernandez Sanz, Volker Quetschke.
+Teletext portions taken from Petr Kutalek's telxcc
+--------------------------------------------------------------------------
+Input: lab/frontier/ccextractor2shell/real-build/inputs/readback.gxf
+[Extract: 1] [Stream mode: Autodetect]
+[Program : Auto ] [Hauppage mode: No] [Use MythTV code: Auto]
+[CEA-708: 63 decoders active]
+[CEA-708: using charset "none" for all services]
+[Timing mode: Auto] [Debug: No] [Buffer input: No]
+[Use pic_order_cnt_lsb for H.264: No] [Print CC decoder traces: No]
+[Target format: .srt] [Encoding: UTF-8] [Delay: 0] [Trim lines: No]
+[Add font color data: Yes] [Add font typesetting: Yes]
+[Convert case: No][Filter profanity: No] [Video-edit join: No]
+[Extraction start time: not set (from start)]
+[Extraction end time: not set (to end)]
+[Live stream: No] [Clock frequency: 90000]
+[Teletext page: Autodetect]
+[Start credits text: None]
+[Quantisation-mode: None]
+[Tesseract PSM: 3]
+
+-----------------------------------------------------------------
+[KOpening file: lab/frontier/ccextractor2shell/real-build/inputs/readback.gxf
+File seems to be a GXF[KAnalyzing data in general mode
+  0%  |  00:00
+Breakpoint 1, parse_media (demux=0x7fffe63ef010, len=2101248, data=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/ccx_gxf.c:1220
+1220			len -= mpeg_pic_size;
+SLICE_1 data_len=2101248 buffer=0x5555564209b0
+100%  |  00:00
+Skip forward to the next Sequence or GOP start.
+
+Breakpoint 2, lib_ccxr::common::bitstream::BitStreamRust::search_start_code (self=0x7fffffffdd18) at lib_ccxr/src/common/bitstream.rs:397
+397	            Ok(0xB4)
+SLICE_2 pos=3900 bits_left=-32
+$1 = &[u8] [65 <repeats 3900 times>]
+$2 = (*mut lib_ccxr::common::bitstream::BitStreamRust) 0x7fffffffdd18
+#0  lib_ccxr::common::bitstream::BitStreamRust::search_start_code (self=0x7fffffffdd18) at lib_ccxr/src/common/bitstream.rs:397
+#1  0x0000555555819976 in ccx_rust::es::ccxr_search_start_code (esstream=0x7fffffffde10) at src/es/mod.rs:30
+#2  0x00005555557ad220 in search_start_code (esstream=0x7fffffffde10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/es_functions.c:56
+#3  0x00005555557ad2cc in es_video_sequence (enc_ctx=0x555556409810, dec_ctx=0x5555563dc7a0, esstream=0x7fffffffde10, sub=0x5555563dc828) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/es_functions.c:104
+#4  0x00005555557ad1e6 in process_m2v (enc_ctx=0x555556409810, dec_ctx=0x5555563dc7a0, data=0x5555564209b0 'A' <repeats 200 times>..., length=3900, sub=0x5555563dc828) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/es_functions.c:39
+#5  0x0000555555762aaa in process_data (enc_ctx=0x555556409810, dec_ctx=0x5555563dc7a0, data_node=0x555556396d10) at /tmp/ccx2shell-upstream-asan/src/lib_ccx/general_loop.c:893
