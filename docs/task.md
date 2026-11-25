@@ -10024,7 +10024,8 @@ request #3156 unanswered.
   write from a real loopback OpenSSH pty-req, with witness wake 189 / DM
   #3427 ESTABLISHED at the labeled synthetic-struct scope. A real `sbbs3`
   build was blocked by missing tooling in W4; W15 later drove the copy after
-  valid password login in a real build; no measured DoS, pointer/IP or r5.
+  valid password login in a real build; no pointer/IP or r5 in that lane.
+  W26 below later measures whole-process SIGSEGV under concurrent load.
 - `1292e08`/`11adba7` (Sdlmixer W195) drove real AIFF-C files through three
   AIFF-enabled real SDL_mixer 3.2.4 builds: ASan `WRITE of size 4` at
   `decoder_aiff.c:95` via `MIX_DecodeAudio` and the playback thread, fixed
@@ -11349,10 +11350,10 @@ and Clang ASan `global-buffer-overflow` / `WRITE of size 533` for reason
 510/700, reason 480 clean, fixed pin clean, and plain readback `buf_len=532`
 with chosen bytes past `buf+512`. A clean `git archive HEAD` replay at 12:42Z
 reproduced 18/0 with the same pin hashes. Grade at staging: rung 3 on the
-verbatim pinned function, rung 4 PARTIAL for input-chosen length and bytes at
-a known offset; no real ircd build, no linked-server wire, no pointer,
-command or R5, and witness UNKNOWN. Independent replay is owed before any
-rung-4 publication.
+verbatim pinned function, rung 4 PARTIAL for input-chosen length and bytes at a
+known offset; no real ircd build, linked-server wire, pointer, command or R5 yet,
+and witness UNKNOWN. That staging-only boundary is superseded by W1-W4 and the
+13:1xZ admission below.
 
 ## 2026-11-25 08:5x–13:0xZ — author limbs folded (no cell moved)
 
@@ -11398,9 +11399,10 @@ failures were the missing route (`OMP-ONLY POLICY VIOLATION`) for that role
 and the doctor's missing-unit complaint; both are repaired and the affected
 signals were re-observed GREEN. The other RED wake signals in this wake were
 the standing engine-cap class (`status=4/NOPERMISSION`, no working engine
-candidate, router 3 of 3), owner=person. Grade untouched: rung 3 verbatim
-pinned ASan, rung 4 PARTIAL input-chosen bytes in a harness static buffer,
-no real ircd build/wire/pointer/command, no r5, witness UNKNOWN.
+candidate, router 3 of 3), owner=person. Grade untouched at admission: rung 3
+verbatim pinned ASan, rung 4 PARTIAL input-chosen bytes in a harness static
+buffer, no pointer/command/r5, witness UNKNOWN. W1-W4 later add the real-ircd
+wire, adjacency ceiling and one-command replay without moving the grade.
 
 ## 2026-11-25 13:1x–15:3xZ — author limbs, no verdict and no cell moved
 
@@ -11413,7 +11415,9 @@ Ctranslate2 W3/W4 (12:52Z request), Solanum W1/W2 (#4390), Cjose W217/W218
 wake scheduled 14:02Z failed to start with "no working engine candidate",
 the standing person-owned engine-cap class; 6fc0095a and e264fc13 add
 one-command wrappers for those asks but are replay conveniences, not new
-claims. No rung cell, grade, route, mind count or R5 cell moved.
+claims. CodebaseMemory W21 later repairs that wrapper's assertions and
+interrupted-run evidence restoration; its verdict remains UNKNOWN. No rung
+cell, grade, route, mind count or R5 cell moved.
 
 Rows corrected in place: Stbvorbis2Shell's guarded extent is now 30 words /
 120 bytes (W204, 12/0), with all 30 file-chosen words overwriting a live
@@ -11448,10 +11452,11 @@ metadata caller only on byte-identical fixed 0.14.6; Libraw W27/W28 and
 Vtkdicom W5 close phase/grooming lanes; Libsshch W13 measures wire-resident
 fake callbacks (6/0, clean archive) and restores evidence overwritten by a
 suite rerun; Libgphoto2 W192 and Synchronet W25 add one-command 12/0 and
-19/0 replays. The 48-process Ruby pushes measure the poison chain's first
-half (`0x415→0x453`, 3/12) and a class/order-dependent frees barrier with
-FREED victims (`fd=bk` bin head) but no persistent sweep; stock,
-oracle-free and persistent R5 remains NOT ACHIEVED. Gpgme W16 records
+19/0 replays. The roughly 300-process Ruby chain corrects the parse/tcache
+model, answers the order arms, identifies the deterministic victim splitter,
+closes the 0x650-band and giant-pop claim paths, and records a negative
+honeypot-parity knob; the exact-fit pop of the grown victim remains UNOBSERVED.
+Stock/oracle-free and persistent R5 remains NOT ACHIEVED. Gpgme W16 records
 no verdict on #4333 and corrects the brief's stale W210 wording. Recipes,
 hashes and expected bytes are in `docs/reproducibility.md`.
 
@@ -11483,3 +11488,50 @@ forced `00 0d 0a`; Cjose W219 sweeps `enc`-selected CEK sizes without a
 dereference; Awslc W223 synthesizes W213–W216's real-caller ceiling; N2n W16
 adds a seven-lane clean-archive replay driver. Exact commands, pins, expected
 bytes and gitignored evidence regeneration are in `docs/reproducibility.md`.
+
+## 2026-11-25 16:3x–17:1xZ — corrected allocator model, fail-closed consumer and real callee
+
+Signal and live head `4e5ec955`; the author/config edges after docs commit
+`827436b5` carry no independent witness verdict. No rung cell, grade, route,
+mind count or R5 cell moved. The signal's vrpn W23 correction is already in the
+README: large-index exit-139 rows map to the NUL store at
+`sender_name + index`, not an outside-stack assertion.
+
+Ruby2Shell's thirteenth-through-eighteenth pushes replace the old parse/tcache
+model. An embed-legal part allocates two content+9 slices and one
+next-pow2(content+1) value; glibc tcache stops at chunk `0x420`. Order arms
+falsify the earlier "never swept" result, but a forged freed-in-unsorted victim
+that passes the checks is deterministically split by the upcase's own result
+allocation. Sacrificial shields complete the full sequence 6/12; honeypot arms
+survive 8/12 and 7/12, while their `0x648` claim pops land only on merged value
+chunks. The exact-fit giant-pop claim has no phantom extent, closing the poison
+chain for stock/oracle-free/persistent R5 after roughly 300 fresh processes.
+The first stock Ruby-VM SIGSEGVs occur when prettyprint consumes the
+split-cascade corruption; they are crashes, not steered allocations. The
+witness-established harness R5 lane is unchanged.
+
+Cjose W220 identifies W219b's far object as the live Jansson header hashtable.
+The overwritten type makes the first post-unwrap `json_object_get` fail the
+pinned `json_is_object()` guard and return HTTP 401, so the poisoned buckets are
+not dereferenced (7/0 identity, 11/0 use). Libsshch W14 reaches real libc
+`system()` as a wire-selected callee with a wire-selected `channel->session`
+argument in an authenticated loopback plain build (6/0); the command remains
+an app-chosen static global and the addresses are fork-peer ASLR-local. This is
+unwitnessed rung-5 mechanics, not established remote execution.
+
+Synchronet W26 preserves a failed prediction: shipped 3.20b under four
+concurrent loopback SSH pty-req probes does not park node threads; it SIGSEGVs
+at first teardown and refuses the fifth connection. After fixing only the
+fixed-control assertion, live and clean-archive replays both score 13/0 and the
+fixed form serves all five sessions. Openexr W203 is an ASLR-on negative for
+W202: ten PIE/non-PIE runs create no marker and no file-filled fixed-address
+staging buffer exists, so W202 remains an ASLR-off local-file rung-4 limb.
+
+Solanum W4 adds one-command 18/0 harness plus 6/0 real-ircd controls.
+CodebaseMemory W21 repairs witness-wrapper assertions and interrupted-run
+evidence restoration; 44/0 assertions were validated lane-by-lane, not in one
+uninterrupted final-wrapper run. Munt W191 proves the second exploit-tagged link
+is the same note and its mirror has no executable PoC bytes. Exact builds,
+commands, expected bytes and gitignored-evidence regeneration are in
+`docs/reproducibility.md`. The model route now has a capped HungerG fallback;
+`docs/runtime-pin.md` is already updated by the author.
