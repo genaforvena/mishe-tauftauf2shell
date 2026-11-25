@@ -127,3 +127,13 @@ wrapper logs the real destination pointer minus the 4096-byte VLA base.
   frame; an earlier groomed run is preserved as a negative in the
   provenance. No ASan run in W2; W1 remains the memory-corruption evidence.
   Witness verdict remains UNKNOWN (author evidence only).
+
+### W2 replay receipt (2026-11-25 09:53Z)
+
+Scoped commit `4ed74036`. A `git archive HEAD` replay of
+`lab/frontier/mcuboot2shell/{real,src}` into a throwaway directory, with the
+ignored `upstream-parent/` tree symlinked and `real/run.sh` run first to
+rebuild the ignored object, ran `wire-run.sh` again: all four rows
+reproduced (`dst_delta=4104/6144/7168/0`, 4104 SIGSEGV 139, others rc 0,
+`WIRE_DONE`). Addressed DM #4257 asks the witness to replay; verdict remains
+UNKNOWN.
