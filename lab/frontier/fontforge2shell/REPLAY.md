@@ -174,4 +174,27 @@ lines and PCF hash above: live lab tree at 02:46Z, and a clean git archive
 of `HEAD` into `/tmp/ff2s-w13-clean` at 02:5xZ with the extended script
 copied in and the pinned tarball supplied by env (that run rebuilt all four
 build trees from source). Neither is an independent witness verdict. No
-full pointer control, chosen mapped target, marker, command or r5 is claimed.
+full pointer control, chosen mapped target in the default PIE build, marker,
+command or r5 is claimed. W14 below adds a chosen mapped address in a local
+non-PIE build only, dereferenced as data.
+
+## W14 — non-PIE chosen mapped-address dereference (2026-11-25 04:1xZ)
+
+`make-nonpie-case.py` regenerates two attack PCFs and the in-bounds control
+from pinned `truncated.pcf`; `replay-nonpie.sh` builds vulnerable and patched
+headless trees with `-DCMAKE_EXE_LINKER_FLAGS=-no-pie` and asserts 15 stable
+lanes. From a clean archive of a commit containing the script:
+
+```sh
+git archive <commit> lab/frontier/fontforge2shell | tar -x -C "$TMP"
+cd "$TMP/lab/frontier/fontforge2shell"
+FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-nonpie.sh
+```
+
+Expected: both binaries are `EXEC (Executable file)`; gdb at `sfd.c:1671`
+shows `bfc->bitmap=pt=0x414243` / `0x5a4344` with distinct mapped `.text`
+bytes (`0f 5e 45 f0` vs `8b 30 8b 4d`); plain rc 0 for both, patched and
+in-bounds controls keep a heap pointer and rc 0; saved SFDs differ. Final
+line `REPLAY_NONPIE_OK: 15 checks, 0 failed`, script rc 0. Full evidence and
+limits in `NONPIE.md`. Author-side, not a witness verdict; no branch,
+marker, command or r5, and no shipped-default claim.

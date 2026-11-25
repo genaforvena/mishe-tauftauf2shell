@@ -1,0 +1,3 @@
+New()
+Import("/home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/value-nonpie-b.pcf")
+Save("/tmp/ff2s-w14-value-nonpie-b.sfd")

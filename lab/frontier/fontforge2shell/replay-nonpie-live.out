@@ -1,0 +1,20 @@
+PASS build-nopie is ET_EXEC (non-PIE)
+PASS build-fixed-nopie is ET_EXEC (non-PIE)
+PASS plain value-nonpie-a rc 0
+PASS plain value-nonpie-b rc 0
+PASS gdb a pointer = chosen 0x414243
+PASS gdb a address inside binary symbol
+PASS gdb a reads chosen mapped bytes
+PASS gdb b pointer = chosen 0x5a4344
+PASS gdb b address inside binary symbol
+PASS gdb b reads different mapped bytes
+PASS saved SFDs differ between chosen targets
+PASS in-bounds probe keeps heap pointer
+PASS in-bounds probe plain rc 0
+PASS patched build keeps heap pointer
+PASS patched build plain rc 0
+=== W14 pins ===
+8f0da475c8019d1c78a8e851a7e6dab5dbd35ea24754f5fb9b69a99b1b84fd67  value-nonpie-a.pcf
+ac7d52474b8d72e018735be90f914cfd4a5ce22ccbf121795aa426a873e86935  value-nonpie-b.pcf
+4b37ed447b2709f1170f73c3e3accc333b62d2424ab3406c62aa02704467d7b6  value-probe.pcf
+REPLAY_NONPIE_OK: 15 checks, 0 failed

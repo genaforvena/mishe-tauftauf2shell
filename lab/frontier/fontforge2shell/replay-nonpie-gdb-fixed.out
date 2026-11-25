@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x51a86c: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-fixed/fontforge/sfd.c, line 1671.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+Program root: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/build-fixed-nopie
+Copyright (c) 2000-2026. See AUTHORS for Contributors.
+ License GPLv3+: GNU GPL version 3 or later <http://gnu.org/licenses/gpl.html>
+ with many parts BSD <http://fontforge.org/license.html>. Please read LICENSE.
+ Version: 20251009
+ Based on sources from 2026-11-25 04:08 UTC-NoPython-D.
+ Based on source from git with hash: c13188a4e17f912f2e20a264981b3c4746c71439
+
+Breakpoint 1, SFDDumpBitmapChar (sfd=0xa6ba50, bfc=0xa91e10, enc=257, newgids=0x0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-fixed/fontforge/sfd.c:1671
+1671		    SFDEnc85(&encrypt,*pt);
+FIXED enc=257 i=0 bfc->bitmap=0xa91dc0
+0xa91dc0:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+A debugging session is active.
+
+	Inferior 1 [process 901458] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]

@@ -170,7 +170,8 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
 
 - No external probing; all evidence is local. No loopback server involved.
 - No control-flow diversion, full pointer/IP, command execution, chosen
-  mapped target, ASLR/grooming study or real-process marker; no rung 5.
+  mapped target in the default PIE build, ASLR/grooming study or real-process
+  marker; no rung 5.
   W11 measured a real dereference at a file-chosen address, but only in
   the unmapped window described below.
 - Author-side clean-archive replay from `e5e4a65` repeated 5/5 expected
@@ -240,6 +241,18 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   W6/W7 post-overflow consumer rc stays informational because it is
   build-path sensitive (W9). Both are author replays on this host, not a
   witness verdict; no grade or r5 change.
+- W14 (`NONPIE.md`, `replay-nonpie.sh`, author-side, no grade change): a
+  locally built non-PIE headless build (`-no-pie`, not a shipped default)
+  makes the same `glyph=-50` overwrite of `BDFChar.bitmap` land at a fully
+  file-chosen low address inside that binary's `.text`. `Save()` dereferences
+  it as data at `sfd.c:1671`: gdb shows `pt = bfc->bitmap = 0x414243` and
+  `0x5a4344`, with distinct mapped bytes (`0f 5e 45 f0` vs `8b 30 8b 4d`),
+  and the two saved SFDs differ; plain rc 0 for both. Patched non-PIE and
+  in-bounds controls keep heap pointers and rc 0. `replay-nonpie.sh` asserts
+  15 stable lanes (`REPLAY_NONPIE_OK`). The pointer is data, not a function
+  pointer: no branch, marker, command or r5; the high dword is inherited
+  (zero here, `0x00005555` in PIE) and W12's byte-3 ceiling is unchanged.
+  Author-side replay, no witness verdict for this lane.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
