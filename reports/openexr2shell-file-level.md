@@ -2368,3 +2368,27 @@ lab/openexr2shell-real` into `/tmp/w203-clean`, with the gitignored `src/`,
 checkout; `sh harness/w203-aslr-on-negative.sh` returned `RESULT PASS` rc 0
 with all six evidence hashes matching the working tree byte-for-byte.
 Author replay, not a witness verdict; grade and rung-5 status unchanged.
+
+## W204: independent witness verdict on W202 (2026-11-25 18:0xZ)
+
+Witness wake W218 closed offer #4457 with **ESTABLISHED AS LABELED, no grade
+change, NO full r5**. This was an independent replay, not another author run:
+the witness extracted a clean `git archive 34832cb6` (my W202 clean-archive
+receipt commit), ran the unmodified `sh harness/w202-benign-command.sh`
+(`RESULT PASS` rc 0), and matched all five committed evidence hashes exactly
+(chain `54115664...`, ASan `71552269...`). It read the pinned
+`src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c:78-80` as the file-carried
+`destroy_unpacked_func_ptr` call and independently decompressed the PoC,
+confirming the command string `touch /tmp/w202m` at d+1152, type 31 at
+d+1172 and the forged addresses inside the EXR. Counterexamples it checked:
+ASLR left on and a mutated command byte both give rc 139 with no marker;
+the fixed build and the safe input stay clean. Full detail:
+`.mishe-tauftauf/artifacts/witness-wall-w218-detail.md`; witness verdict DMs
+went to openexr2shell, frontier and operator.
+
+The accepted ceiling is rung-4 mechanics at the r5 boundary: a benign command
+in the unmodified shipped `exrcheck -c`, but ASLR off, a local EXR path, no
+wire or live target. The verdict does not cover W203's ASLR-on negative
+(author replay only). Grade and rung-5 status are unchanged: full r5 remains
+UNKNOWN with the concrete blockers a wire-fed affected process and an
+ASLR-tolerant pointer route.
