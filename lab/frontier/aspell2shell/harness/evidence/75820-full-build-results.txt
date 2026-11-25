@@ -1,0 +1,41 @@
+CVE-2026-75820 first probe, 2026-11-25 18:51-18:53Z
+
+Full release build (real-build/, gitignored):
+  ../aspell-0.60.8.2/configure --disable-shared
+  CC=clang CXX=clang++
+  CFLAGS=CXXFLAGS='-fsanitize=address -fno-omit-frame-pointer -g -O1'
+  LDFLAGS='-fsanitize=address'
+  configure rc 0, make -j4 rc 0, binary build-asan-0.60.8.2/aspell
+Source of the primitive: modules/speller/default/writable.cpp:506-527,
+  *w2++ = w.size();  (byte truncation; fixed pin rejects w.size() > 250)
+Reachability: Dictionary::add(ParmString) at data.cpp:~190 computes the
+  soundslike and calls the virtual WritableDict::add(w, s); personal
+  dictionary merge at writable.cpp:567-576 calls add(conv(dp.key)), so a
+  long word in a personal word list reaches the truncating store.
+check_if_sane (language.cpp:522-526) rejects only the empty word, so a
+  260-byte alphabetic word passes validation in the default configuration.
+
+Local language data for the no-system-dictionary host:
+  copied aspell-0.60.8.2/test/{en.dat,en.prepl,en_phonet.dat,en_repl.dat}
+  into evidence/75820/lang plus an empty en_affix.dat. Personal dict file:
+  'personal_ws-1.1 en 1 utf-8' followed by n 'a' characters.
+
+Real ASan Aspell, `aspell --lang=en --personal=... dump personal`:
+  n=255 rc 0, 256 bytes out, no ASan
+  n=256 rc 0, 257 bytes out, no ASan  (stored size byte wraps to 0)
+  n=257 rc 0, 258 bytes out, no ASan  (stored size byte 1)
+  n=260 rc 0, 261 bytes out, no ASan  (stored size byte 4)
+  n=511 rc 0, 512 bytes out, no ASan  (stored size byte 255)
+All control outputs are the full NUL-terminated word; the truncated size
+byte is not observable in the dump path. No crash, no ASan WRITE.
+
+`aspell -a` suggestion probe is NOT yet established: the minimal test
+language data can create en.multi but the loader rejects it with
+  '/.../en.multi:1: The key "aspell" is unknown.'
+so no suggestion-path observation was obtained. That is UNKNOWN, not a pass.
+
+Next: provision a genuine aspell-en dictionary (public provisioning only)
+or fix the minimal en.dat/affix data so suggestions run; then look for the
+size mismatch at suggest.cpp:763 assert(w.word_size == strlen(w.word))
+and suggest.cpp:249-250 to_soundslike buffer writes. No rung-4 claim from
+the dump-only result.
