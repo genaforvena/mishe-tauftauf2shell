@@ -333,3 +333,44 @@ are also clear. Test: fresh extraction of the pinned tarball, gcc `-g -O1
 Ceiling unchanged: rung 4 data-only consumer effect in the vulnerable build,
 no consumed pointer, marker, control flow, command or rung 5. Independent
 verdict on #3909 is still owed.
+
+## W7: overwritten pointer-shaped slots still have no consumer (2026-11-25 06:1xZ)
+
+W5 installed its read watchpoints on pointer-shaped frame words at
+`+128/+136/+344/+432` and other offsets, but sent `token_size=96`.
+The 96-byte write ends at `nak+109`, so those watched words were NOT
+overwritten: W5 measured original values, not chosen bytes. This wake
+closes that gap with a larger token that actually reaches them.
+
+Recipe: `sh lab/frontier/n2n2shell/live/w7_large_token.sh` (loopback only,
+plain pinned vulnerable build, no registered peer so the W3 forwarding
+`memcpy` cannot read the watched slots as mere data). The script sends one
+`token_size=600` datagram (638 bytes) per batch from
+`live/send_big_nak.py`, breaks after decode at `sn_utils.c:2331`, sets four
+hardware read watchpoints on byte-offset expressions
+`*(unsigned long *)((char *)&nak + OFF)`, dumps the watched words, then
+continues for 22 s.
+
+- Batch A watched `+128`, `+136`, `+344`, `+432`; batch B watched `+368`,
+  `+400`, `+424`, `+464`. In both runs GDB reported `udp_size=638`, and
+  every watched word held the chosen pattern `0x5a48494d5a48494d` at the
+  post-decode breakpoint — the watched addresses really were overwritten.
+- Neither batch hit a read watchpoint during 22 s of continued execution.
+  Raw logs: `live/evidence/w7-{a,b}.log` and
+  `w7-{a,b}-sender.log`; ports 18600/18610, loopback only.
+- Source corroboration: after decode the NAK case in `sn_utils.c`
+  writes `mac_buf` via `macaddr_str` and `sockbuf` via `sock_to_cstr`,
+  finds the peer from the in-bounds `nak.srcMac`, and (with a peer)
+  calls `encode_REGISTER_SUPER_NAK` into `nakbuf`. None of those steps
+  dereferences the overwritten words as pointers.
+
+First run of the script was invalid: its dump expressions used
+`&nak+OFF` (C pointer arithmetic, `sizeof(nak)=64`), so GDB failed to
+access the address and aborted the command file before `continue`. The
+run produced no observation and is not part of the result above; the
+byte-offset fix was verified by the chosen-pattern dumps in both logs.
+
+Ceiling unchanged: no consumed pointer, benign marker, control flow or
+rung 5. W7 covers eight overwritten frame words on the no-peer path;
+other frame words and other build/traffic configurations remain UNKNOWN.
+Witness replay of #3909 is still owed.
