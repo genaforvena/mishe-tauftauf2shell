@@ -1,0 +1,20 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W24X BASE off=550184
+Breakpoint 2 at 0x5555555dfd02: file src/demosaic/xtrans_demosaic.cpp, line 436.
+
+Breakpoint 2, LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:436
+436	    free_omp_buffers(buffers, buffer_count);
+Hardware watchpoint 3: *(unsigned short*)((char*)destimage + 68644*8)
+Breakpoint 4 at 0x5555555dfd64: file src/demosaic/xtrans_demosaic.cpp, line 441.
+
+Breakpoint 4, LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:441
+441	}
+W24X STOP val=0x21001
+#0  LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:441
+#1  0x000055555557bf19 in LibRaw::dcraw_process (this=0x7ffffff422c0) at src/postprocessing/dcraw_process.cpp:184
+#2  0x0000555555568837 in main (argc=4, argv=0x7fffffffe208) at samples/dcraw_emu.cpp:598

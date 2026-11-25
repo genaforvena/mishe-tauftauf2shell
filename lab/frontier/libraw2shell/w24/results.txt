@@ -1,0 +1,48 @@
+W24 — border_interpolate() is not a second write phase at the OOB target
+(2026-11-25 08:2xZ, author-side, debugger-forced setup; NO new rung)
+
+Question: W22 showed a debugger-forced valid top size (0x21001) survives to
+normal exit. Could the later border_interpolate(8) call at
+xtrans_demosaic.cpp:440 write file-derived bytes over that field (or other OOB
+halfwords) and give a second, differently-steered write phase after W23 closed
+the :427 knob families?
+
+Method: unmodified -O0 dcraw_emu, lab-only env MALLOC_TOP_PAD_=16777216,
+input ../w13/dead-target.input, break at first OOB store (:427, IDX 68,644),
+compute the live top size field as (char*)main_arena.top + 8, break at :436,
+force *(unsigned long*)$sf = 0x21001 as in W22, then watch that 64-bit field and
+a 16-bit halfword at the first OOB pixel (destimage + 68,644*8) through
+border_interpolate() to its return at :441. Probes: dead.gdb and watch2.gdb.
+
+Observed (dead2.raw / watch2.raw):
+- size field at destimage offset 550,184 (index 68,773); before the loop
+  0xc0b641, after the :427 loop 0xbedbbeef4d03 (matches W21/W22 up to the
+  ASLR-dependent original value).
+- After forcing 0x21001: BORDERENTRY val=0x21001, BORDEREXIT val=0x21001;
+  hardware watchpoint on that 64-bit field never fired.
+- At border_interpolate() entry: image == destimage == 0x555555a854a0,
+  w=512 h=512, so the call does use the full-size pointer and dimensions.
+  A hardware watchpoint on the halfword at index 68,644 also never fired;
+  execution reached the :441 breakpoint with val still 0x21001, then the
+  inferior exited normally (abort() never hit).
+  therefore a real observation, not a missing breakpoint.
+
+Interpretation and grade: the post-loop border phase does not rewrite the
+corrupted top size field or the first OOB halfword in this configuration. It
+does not reopen W22's file-chosen-size lane (W23 already closed the tested :427
+knob families), and it is not a new chosen-byte write phase. The setup requires
+a debugger-forced valid size, so nothing here is file-chosen. No chosen
+pointer/IP, marker, command, live object overwrite, rung 5 or witness verdict.
+Fixed/no-option clean controls remain those of W21/W22; no new behavioral
+claim is made. All experiments local and loopback-free.
+
+sha256 (sha256sum w24/*):
+1e60834cba5f254dc9d8ca25939ce9b49e74b8fd1d0ede8ca03b8eca4c90983c  w24/borderfield.gdb
+87a66ead8abba0157e539af6b8e2886aee90e5f864f922ace7d3b17cc91bbb0d  w24/dead.gdb
+074d7df97f032c5a5806a90aeb77d55d609f944c3006b9371365fa7d3dd5fc7f  w24/dead.txt
+1bbc4613a189a9146c2e5f2b1ad0bb3f5d5507564af24205fa977cd8e4f52122  w24/dead2.raw
+000805a353cf63a997c399bb647ef63468f390e8446e9158acbb7c9a3af7a208  w24/results.txt (before this hash list)
+87d2fd65b35e21e31a1c0dc3cc2388c2dc5ff4041406f113b581dd5acd8701f6  w24/watch.gdb
+163b10320280ffdd6ea3aac6666088d95035ea266634dad4eee2f487a153191f  w24/watch.txt
+d3304b401cb971365fb77bf1ab371f859dc6f7a4a70509d660843bb059a92c65  w24/watch2.gdb
+8b2d075dcccd168cc04b0db39b68290a823d0c232879ea4f1a6e42f29d5d1a88  w24/watch2.raw
