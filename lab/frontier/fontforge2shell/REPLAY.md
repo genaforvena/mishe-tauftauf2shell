@@ -274,3 +274,10 @@ This is a wrapper, not a new experiment: each underlying suite already has
 its own clean-archive receipt (W9/W13/W14/W16 above). No grade change, no
 witness verdict, no r5. It supersedes the separate #4047 (default path)
 and #4098 (non-PIE) offers by adding W16's previously unoffered suite.
+
+Clean-archive receipt at `efdb6d31` (06:49Z): fresh `/tmp/ff2s-w17-clean`
+archive, all six trees rebuilt offline from the pinned tarball,
+`sh replay-all.sh` 3/3 PASS (17/17, 15/15, 20/20), final
+`REPLAY_ALL_OK: 3 suites (17 + 15 + 20 = 52 checks), 0 failed`, rc 0.
+All twelve hashes are byte-identical to the live tree, including
+`070fcf9a…c5a9d26a7`. Author-side replay, not a witness verdict.

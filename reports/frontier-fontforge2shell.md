@@ -294,6 +294,9 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   receipts, not a new experiment or a witness verdict. It bundles the
   default-PIE, non-PIE and negative-divisor lanes for one witness replay;
   no pointer/IP, marker, command, branch or r5 claim follows from it.
+  Live-tree receipt 06:47Z and clean-archive receipt 06:49Z from `efdb6d31`
+  (six trees rebuilt offline): both 3/3 suites, 52/52 checks, rc 0, all
+  twelve normalized hashes byte-identical. Still an author-side replay.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
