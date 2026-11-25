@@ -10017,7 +10017,8 @@ request #3156 unanswered.
   W3 (`fe8cb5c`) later found the `-43` was a probe artefact and reached the
   write from a real loopback OpenSSH pty-req, with witness wake 189 / DM
   #3427 ESTABLISHED at the labeled synthetic-struct scope. A real `sbbs3`
-  build is blocked by missing tooling; no measured DoS, pointer/IP or r5.
+  build was blocked by missing tooling in W4; W15 later drove the copy after
+  valid password login in a real build; no measured DoS, pointer/IP or r5.
 - `1292e08`/`11adba7` (Sdlmixer W195) drove real AIFF-C files through three
   AIFF-enabled real SDL_mixer 3.2.4 builds: ASan `WRITE of size 4` at
   `decoder_aiff.c:95` via `MIX_DecodeAudio` and the playback thread, fixed
@@ -10087,9 +10088,10 @@ request #3156 unanswered.
   `MISH`/`E-OO`/`TAUFTAUF` placement, ESTABLISHED rungs 1-4 at the labeled
   synthetic-struct scope, NO r5. NITs: `CRYPT_SSHOPTION_NONE_AUTH` forced,
   fixed-form control covers only the patched copy in a padded struct.
-- `0e66d24` (Synchronet W4) bounded a real `sbbs3` build negatively: direct
+- `0e66d24` (Synchronet W4) bounded an unprovisioned `sbbs3` build negatively:
   `g++ -fsyntax-only` fails on auto-generated `jscpucfg.h` and MSVC-only mozjs
-  types, and `make -C src/sbbs3` fails on missing `autoconf-2.13` and `zip`.
+  types, and `make -C src/sbbs3` fails on missing `autoconf-2.13` and `zip`;
+  W15 later rebuilt it with a lab-local deb prefix.
   Tooling negative only, no host package change; the witness-established
   rungs and ceiling are unchanged.
 - `4a66f9f`/`2f1554d`/`40aeb08` (OpenEXR W177) measured the partial-overwrite
@@ -10625,3 +10627,45 @@ rung cell, grade, route or mind-count moved.
   marker; no-kill, virgin-sid and 8.4.28-app controls are clean. Death is the
   committed shim (rung-4 mechanics) and attacker-caused death is stage 2, so
   no report verdict, witness replay or rung-5 claim exists; R5 stays `—`.
+
+### 2026-11-25 01:0x–01:1xZ — docs fold of post-`d3700a07` author edges
+
+Signal detail `659f6eb0`, baseline HEAD `b595e239`; checkers GREEN 133 rows /
+29 repro files at baseline. omp-only stayed RED at 138 declared roles with
+`open5gs2shell: no route`, resolver the person's full-flag sync (never a bare
+`mishe sync`); readme-lint RED is the frozen six-column checker dispositioned
+in `docs/runtime-pin.md`. All additions below are author-side and unwitnessed;
+no rung cell, grade, route, mind count or R5 cell moved.
+
+- Hping W6 (`650f9517`, `dcffdeee`, `6c218afa`, `bac9ab25`, `659f6eb0`,
+  `bf1360dd`) fills all 187 reply-reachable `rc4_sbox` bytes with a chosen
+  constant and steers the low byte of later probe destinations with no GDB
+  steering (15/16 and 17/17 in the final clean replay); hidden `i`/`j` and 69
+  unreachable sbox bytes keep the control probabilistic. Baseline and patched
+  controls are 4 PASS / 0 FAIL each; the one-command clean-archive replay from
+  `659f6eb0` scored 20 checks rc 0. No full IP, pointer, command or r5.
+- FontForge W10 (`8781a538`) bounds the 16-bit-field write at `0x0100FEFF` and
+  writes three chosen bytes into a live `char*` at `encs-200`, verified under
+  a gdb watchpoint; the pointer is not dereferenced on this `Import()` path,
+  patched/in-bounds controls are clean, and `sha256sum -c value-hashes.txt`
+  passed locally. No grade change or witness verdict.
+- Assimp W25 (`aa2aedc7`, clean replay `fda2b66c`) narrows the index copy to
+  16 VEC4 bytes: the default `-O0` canary at `dest+4` aborts rc 134 and with
+  `-fno-stack-protector` only the low half of saved RIP at `dest+12` is
+  writable (high half `0x7fff`), rc 139, while the 64-byte MAT4 still calls
+  the marker. 8 PASS / 0 FAIL, trace sha256 `5532748382…e5d6fa5f864`
+  recomputed from the committed trace and byte-identical from a clean archive;
+  preserved negative, author-only.
+- Synchronet W15 (`e0f11cd4`, clean replay `b595e239`) provisions the tooling
+  that blocked W4's unprovisioned build, builds a real `sbbs3` and reaches the
+  copy after valid password login under the default config (4 PASS / 0 FAIL,
+  `PROBE_COUNT=2`, `ANYAUTH_LOG_COUNT=0`, no `SSH_ANYAUTH`). Pre-auth pty-req
+  stays W9's negative; no grade change, witness verdict, pointer/IP or r5.
+- PHP wake 59 (`d7dae529`) takes the unauth 126714 splice through tinyfilemanager
+  2.6's promoted admin session and DESIGNED upload so `/evil.php` executes in
+  the live FPM worker (unique marker plus `id`), with fixed/no-kill/virgin-sid
+  controls clean. Death is still the shim; every stock attacker-reachable
+  death mechanism was measured NEGATIVE (SIGTERM handled mid-pwrite, cgroup
+  OOM only on truncate-first writes, page-quantized partials, io.max/PHP
+  fatals ineffective). Rung 5 stays UNCLAIMED; the gap is now measured and
+  structural, not merely unattempted.
