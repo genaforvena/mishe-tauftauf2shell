@@ -789,3 +789,43 @@ upstream fixed tree, the default-PIE build with this wire and ASan on this
 1700-byte wire remain UNKNOWN. Ceiling unchanged: rungs 1-4 on the vulnerable
 build, no marker execution, canary/RIP hit, control-flow takeover, command
 execution or r5. Author experiment only; no witness verdict.
+
+## W20: the W11 wire against the pinned upstream fixed decoder (2026-11-25 22:4xZ)
+
+Correction to the W19 heading: that build did NOT use the full upstream
+fixed tree. Its script inserted one guard into `decode_REGISTER_SUPER_NAK`;
+the pinned fixed `provision/wire-fixed.c` (commit 854fbbe0) in fact adds
+five guards across four decoders — `token_size` bounds in
+`decode_REGISTER_SUPER`, `decode_UNREGISTER_SUPER`,
+`decode_REGISTER_SUPER_ACK` and `decode_REGISTER_SUPER_NAK`, plus a `num_sn`
+bound in `decode_REGISTER_SUPER_ACK`. W20 closes that specific gap: it
+replaces `src/wire.c` in the pinned vulnerable tarball with the exact bytes
+of the pinned fixed file, then builds `gcc -g -O2 -fno-omit-frame-pointer
+-no-pie`. The rest of the tree stays at the vulnerable commit; a build of
+the complete fixed commit tree remains UNKNOWN.
+
+A loopback supernode registered a peer (58-byte reply), received W11's
+exact wire (`token_size=1700`, 1738-byte datagram, chosen bytes at
+`token+1682 = e8f3420000000000` carrying the vulnerable build's fixed
+address `0x42f3e8`), and forwarded 1738 bytes with
+`first=0000000000000000 beyond48=0000000000000000`. No chosen address or
+chosen token byte returned on the wire. The process stayed alive with no
+SIGSEGV or sanitizer report; a fresh peer then registered and a safe
+48-byte NAK forwarded 86 bytes with `first=485a4d49485a4d49`. Behaviour is
+identical to W19: the fixed decoder rejects the oversized token before
+`decode_buf`, while the surviving forwarding encoder re-emits the zeroed
+`nak`. Raw logs: `live/evidence/w20-{pins,build,supernode,attack-sender,
+safe-sender}.log`.
+
+`sh lab/frontier/n2n2shell/live/w20_upstream_fixed_wire.sh` verifies pins,
+the five fixed guards, the exact fixed file in place, the build, the wire,
+both forwarded tokens and liveness: `RESULT 14 PASS / 0 FAIL`, rc 0 from
+the working tree (`/tmp/n2n-w20-out`) and from `git archive HEAD` with cwd
+`/`, `REPLAY_LOGDIR=/tmp/n2n-w20-archive-out`, `PORT_BASE=19570`.
+
+This closes the pinned-fixed-decoder variant of W11's wire as a negative.
+Still UNKNOWN: a build of the complete upstream fixed tree, the default-PIE
+build with this wire, and ASan on this 1700-byte wire. Ceiling unchanged:
+rungs 1-4 on the vulnerable build, no marker execution, canary/RIP hit,
+control-flow takeover, command execution or r5. Author experiment only;
+no witness verdict.

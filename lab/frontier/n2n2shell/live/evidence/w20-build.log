@@ -1,0 +1,107 @@
+Wait please...
+checking build system type... x86_64-pc-linux-gnu
+checking host system type... x86_64-pc-linux-gnu
+checking for gcc... gcc
+checking whether the C compiler works... yes
+checking for C compiler default output file name... a.out
+checking for suffix of executables... 
+checking whether we are cross compiling... no
+checking for suffix of object files... o
+checking whether the compiler supports GNU C... yes
+checking whether gcc accepts -g... yes
+checking for gcc option to enable C11 features... none needed
+checking for ar... ar
+checking for windres... no
+configure: creating ./config.status
+config.status: creating config.mak
+config.status: creating include/config.h
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/supernode.o src/supernode.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/aes.o src/aes.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/auth.o src/auth.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/cc20.o src/cc20.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/curve25519.o src/curve25519.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/edge_management.o src/edge_management.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/edge_utils.o src/edge_utils.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/header_encryption.o src/header_encryption.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/hexdump.o src/hexdump.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/json.o src/json.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/management.o src/management.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/minilzo.o src/minilzo.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/n2n.o src/n2n.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/n2n_port_mapping.o src/n2n_port_mapping.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/n2n_regex.o src/n2n_regex.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/network_traffic_filter.o src/network_traffic_filter.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/pearson.o src/pearson.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/random_numbers.o src/random_numbers.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/sn_management.o src/sn_management.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/sn_selection.o src/sn_selection.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/sn_utils.o src/sn_utils.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/speck.o src/speck.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/tf.o src/tf.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_aes.o src/transform_aes.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_cc20.o src/transform_cc20.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_lzo.o src/transform_lzo.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_null.o src/transform_null.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_speck.o src/transform_speck.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_tf.o src/transform_tf.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/transform_zstd.o src/transform_zstd.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/tuntap_freebsd.o src/tuntap_freebsd.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/tuntap_linux.o src/tuntap_linux.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/tuntap_netbsd.o src/tuntap_netbsd.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/tuntap_osx.o src/tuntap_osx.c
+gcc -g -O2 -fno-omit-frame-pointer -no-pie -I./include    -Wall   -MMD -MP -c -o src/wire.o src/wire.c
+In file included from /usr/lib/gcc/x86_64-linux-gnu/13/include/xmmintrin.h:1322,
+                 from /usr/lib/gcc/x86_64-linux-gnu/13/include/immintrin.h:31,
+                 from ./include/speck.h:75,
+                 from src/speck.c:25:
+In function ‘_mm_unpackhi_epi64’,
+    inlined from ‘speck_encrypt_xor.isra’ at src/speck.c:587:9:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/emmintrin.h:1030:19: warning: ‘X[2]’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1030 |   return (__m128i)__builtin_ia32_punpckhqdq128 ((__v2di)__A, (__v2di)__B);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/speck.c: In function ‘speck_encrypt_xor.isra’:
+src/speck.c:540:10: note: ‘X[2]’ was declared here
+  540 |     u128 X[4], Y[4], Z[4];                                 \
+      |          ^
+src/speck.c:587:9: note: in expansion of macro ‘Encrypt_Dispatcher’
+  587 |         Encrypt_Dispatcher(128);
+      |         ^~~~~~~~~~~~~~~~~~
+In function ‘_mm_unpackhi_epi64’,
+    inlined from ‘speck_encrypt_xor.isra’ at src/speck.c:587:9:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/emmintrin.h:1030:19: warning: ‘Y[2]’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1030 |   return (__m128i)__builtin_ia32_punpckhqdq128 ((__v2di)__A, (__v2di)__B);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/speck.c: In function ‘speck_encrypt_xor.isra’:
+src/speck.c:540:16: note: ‘Y[2]’ was declared here
+  540 |     u128 X[4], Y[4], Z[4];                                 \
+      |                ^
+src/speck.c:587:9: note: in expansion of macro ‘Encrypt_Dispatcher’
+  587 |         Encrypt_Dispatcher(128);
+      |         ^~~~~~~~~~~~~~~~~~
+In function ‘_mm_unpackhi_epi64’,
+    inlined from ‘speck_encrypt_xor.isra’ at src/speck.c:585:9:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/emmintrin.h:1030:19: warning: ‘X[2]’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1030 |   return (__m128i)__builtin_ia32_punpckhqdq128 ((__v2di)__A, (__v2di)__B);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/speck.c: In function ‘speck_encrypt_xor.isra’:
+src/speck.c:540:10: note: ‘X[2]’ was declared here
+  540 |     u128 X[4], Y[4], Z[4];                                 \
+      |          ^
+src/speck.c:585:9: note: in expansion of macro ‘Encrypt_Dispatcher’
+  585 |         Encrypt_Dispatcher(256);
+      |         ^~~~~~~~~~~~~~~~~~
+In function ‘_mm_unpackhi_epi64’,
+    inlined from ‘speck_encrypt_xor.isra’ at src/speck.c:585:9:
+/usr/lib/gcc/x86_64-linux-gnu/13/include/emmintrin.h:1030:19: warning: ‘Y[2]’ may be used uninitialized [-Wmaybe-uninitialized]
+ 1030 |   return (__m128i)__builtin_ia32_punpckhqdq128 ((__v2di)__A, (__v2di)__B);
+      |                   ^~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+src/speck.c: In function ‘speck_encrypt_xor.isra’:
+src/speck.c:540:16: note: ‘Y[2]’ was declared here
+  540 |     u128 X[4], Y[4], Z[4];                                 \
+      |                ^
+src/speck.c:585:9: note: in expansion of macro ‘Encrypt_Dispatcher’
+  585 |         Encrypt_Dispatcher(256);
+      |         ^~~~~~~~~~~~~~~~~~
+ar rcs libn2n.a src/aes.o src/auth.o src/cc20.o src/curve25519.o src/edge_management.o src/edge_utils.o src/header_encryption.o src/hexdump.o src/json.o src/management.o src/minilzo.o src/n2n.o src/n2n_port_mapping.o src/n2n_regex.o src/network_traffic_filter.o src/pearson.o src/random_numbers.o src/sn_management.o src/sn_selection.o src/sn_utils.o src/speck.o src/tf.o src/transform_aes.o src/transform_cc20.o src/transform_lzo.o src/transform_null.o src/transform_speck.o src/transform_tf.o src/transform_zstd.o src/tuntap_freebsd.o src/tuntap_linux.o src/tuntap_netbsd.o src/tuntap_osx.o src/wire.o 
+gcc -no-pie -L.  src/supernode.o libn2n.a  -ln2n -o src/supernode
+cp src/supernode supernode
