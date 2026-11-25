@@ -1614,3 +1614,57 @@ the existing rung-4 exec chain; the attacker-caused-death gap remains closed
 for SIGTERM, cgroup OOM, io.max, PHP fatals (wake 59) and now RLIMIT_FSIZE.
 New vendor payload class or an attacker-reachable mid-write death on a
 no-truncate write would reopen it.
+
+## Wake 63 (2026-11-25) — native RLIMIT_CPU + RLIMIT_FSIZE: author-side gates 1–5 PASS, witness gate OPEN
+
+Reconciled and finished the unyielded PREBURN edits in
+`lab/repro/php2shell-aftershell-splice-tfm.sh`. Prediction: a deployment-style
+CPU limit could freeze the worker after the FSIZE short write, preventing later
+progress/app writes from erasing the splice and forcing a fresh-worker decode.
+Observation: confirmed on live 8.4.27-app FPM with no phase-2 LD_PRELOAD.
+
+Final mechanism: preburn the single worker to 98/100 CPU ticks using wire POSTs;
+apply soft=hard `RLIMIT_CPU=1s` and `RLIMIT_FSIZE=K` with `prlimit`; send the
+armed unauthenticated multipart request with `upload_progress.freq=100%`, an
+8 MiB file part and a 128 MiB trailing ordinary form field. FSIZE clamps the
+FILE_START session pwrite to K; the trailing field supplies post-write CPU;
+the kernel sends SIGKILL; FPM respawns a fresh worker. This is a post-short-write
+state freeze, not a claim that SIGKILL interrupted pwrite.
+
+Affected final (`lab/build/evidence/w63-native-final/`): K=1024, carrier 1597 B,
+replacement 1902 B, preburn 79 coarse + 18 fine requests, 98 ticks. File check:
+`new-record-prefix:True tail==carrier-tail:True`; FPM logged signal 9; respawned
+worker authenticated tinyfilemanager admin, accepted the designed evil.php
+upload, printed `php2shell-r5-w63-final-1837` + `uid=1000(mesh-home)`, and wrote
+the marker from PID 2113918. No-death and virgin-SID controls then had no upload
+and a fresh marker absent. SHA-256
+`7df36e9a43417600d7c44b356195671df63e17c12f378fe8ffc5ab4b10d7c1ab`.
+
+Fixed 8.4.28 (`lab/build/evidence/w63-native-fixed2/`): identical varied SID
+`cafebabe00112233445566778899babe`/filler `Y` and limits; producer SIGKILL, but
+unconditional ftruncate left exactly 1024 B, no tail, no takeover, no upload,
+no marker. Consumer checks used the known upload_progress-off app-health pool.
+SHA-256 `67e59740f8f10b362fd7b29b646b14e2906fd9edec6532bf3254e0868afb76f1`.
+The native mechanism also reached execution with those varied bytes in
+`w63-native-varied5/` (SHA-256
+`d3cf9df0ebd39854dfa25bf8add955a7138879f7eb9a6a2d9d92abf161176be1`).
+Shim regression after harness changes remained positive
+(`w63-shim-regression/`, SHA-256
+`fe3503b50d6ce873eaebb69f051a7842aca7816f01f10b7eb138e20e83c2e20e`).
+
+Preserved intermediate negatives: 97–98 ticks with only the original 8 KiB
+file part survived the armed request and killed during a later request
+(`w63-native-varied/`, `w63-native-varied2/`); FSIZE also caps the temporary
+upload file, so file bytes did not provide the needed CPU. Adding the 128 MiB
+ordinary field produced SIGKILL and a tail match, but the first check compared
+dynamic prefix bytes too strictly (`w63-native-varied3/4`); the final check
+requires a structurally complete new carr record, exact carrier tail and the
+promoted-record boundary. No failed run is counted as a pass.
+
+Grade: **author-side rung-5 gates 1–5 observed under labeled non-default
+RLIMIT_CPU/RLIMIT_FSIZE conditions; gate 6 OPEN, full rung 5 not ESTABLISHED.**
+Exact build/config/ASLR/survival facts and replay commands are in
+`reports/php2shell-investigation.md` wake 63. Next action: fresh-context witness
+replays the committed native harness from clean checkout, varies command or
+attacker byte, and reruns fixed/no-death/safe controls. Keep the back-to-back
+chain until that verdict; do not repeat closed wake-59/62 mechanisms unchanged.

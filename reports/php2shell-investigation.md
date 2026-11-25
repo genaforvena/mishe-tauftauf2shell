@@ -59,6 +59,21 @@ bailouts. Full rung 5 (attacker-caused mid-write death) stays UNCLAIMED
 with two structurally closed mechanisms; details, evidence logs and
 reopen conditions in `reports/php2shell-status.md` wake 59.
 
+**Amended 2026-11-25 (wake 63): the tinyfilemanager chain now executes a
+lab-chosen command without the LD_PRELOAD kill shim.** Under explicitly
+labeled per-worker `RLIMIT_FSIZE=K` and `RLIMIT_CPU=1s` conditions, wire-driven
+preburn requests bring the worker to 98/100 CPU ticks; an unauthenticated
+multipart request then performs the kernel-clamped session short write and a
+128 MiB trailing form field supplies enough post-write CPU to trigger SIGKILL.
+FPM respawns a fresh worker, which decodes the spliced session, authenticates
+the attacker as tinyfilemanager admin, accepts the app's designed PHP upload,
+and executes the benign marker/`id` payload. The fixed 8.4.28 build leaves a
+K-byte ftruncate-first file and no marker; no-death and virgin-SID controls are
+clean. This is **author-side gates 1–5 observed, gate 6 still open**: no
+phase-2 preload or debugger is used, but fresh-context witness replay is still
+required before full rung 5 is ESTABLISHED. Exact non-default limits, request
+geometry, evidence hashes and commands are in the wake-63 section below.
+
 Amended 2026-11-20 (wakes 8–9): the 2026-11-19 vendor release named a
 new payload class and reopened one lane, CVE-2026-126714 "phpAfterShell"
 — see the dedicated section below. It grades rung 2 as a demonstrated
@@ -1628,3 +1643,95 @@ admin takeover or marker on 8.4.27-app; 8.4.28-app is clean. Full rung 5 stays
 UNCLAIMED. Exact logs and replay commands are in
 `reports/php2shell-status.md` wake 62. Fresh-context witness replay of the
 shim-driven rung-4 chain has been requested (tape message #4488).
+
+### Wake 63 (2026-11-25) — native RLIMIT short-write + CPU state-freeze reaches author-side rung-5 gates 1–5
+
+The wake-62 bare `RLIMIT_FSIZE` negative left the worker alive long enough to
+overwrite/consume the short-written session. Wake 63 adds a second deployment
+limit, `RLIMIT_CPU`, and makes the armed request spend CPU **after** the
+FILE_START session write. The resulting kernel SIGKILL freezes the on-disk
+splice until FPM respawns a fresh worker. This is not a claim that SIGKILL
+interrupted `pwrite`: `RLIMIT_FSIZE` clamps the write to K, and the later CPU
+death prevents subsequent progress/app writes from erasing it.
+
+Committed driver: `lab/repro/php2shell-aftershell-splice-tfm.sh` with
+`DEATH_MODE=rlimit PREBURN=1`. Phase 1 still uses the shim only in LOG_ONLY
+mode to calibrate K; phase 2 explicitly unsets `LD_PRELOAD`. The external
+`prlimit` calls are lab setup for the labeled deployment limits, not the
+triggering request. All preburn, carrier, armed and control traffic is
+unauthenticated loopback FastCGI input.
+
+Exact conditions:
+
+- PHP 8.4.27-app affected / 8.4.28-app fixed, NTS FPM, built by
+  `lab/php2shell/build-app.sh`; kernel `6.8.0-149-generic`, `CLK_TCK=100`.
+- Static FPM pool, one child, `pm.max_requests=0`, `display_errors=0`; session
+  save handler `files`, handler `php`, strict mode off, cookies on,
+  use-only-cookies off, upload progress on with cleanup off.
+- Native mode uses `session.upload_progress.freq=100%`. After FILE_START writes
+  the session, no intermediate progress update fires while the parser consumes
+  the trailing field. The armed body has an 8 MiB file part plus a 128 MiB
+  ordinary `burn` form field; the latter is memory parsing, unaffected by
+  FSIZE, and supplies the post-write CPU death window.
+- Preburn uses a decoy SID and 4 MiB requests until 90 ticks, then 64 KiB
+  requests to 98 ticks. The harness applies soft=hard `RLIMIT_CPU=1s` and
+  soft=hard `RLIMIT_FSIZE=K` to that worker. K was 1024 in the final runs.
+- ASLR remains enabled; no debugger, address disclosure or pointer overwrite
+  is involved. The producer dies with signal 9; the replacement worker survives
+  and performs consumer, upload and payload execution.
+
+Final affected replay (`lab/build/evidence/w63-native-final/`): 79 coarse +
+18 fine preburn requests, 98 ticks, K=1024, carrier 1597 bytes, replacement
+1902 bytes. The attack returned FastCGI reset; FPM logged SIGKILL; the file
+check reported `new-record-prefix:True tail==carrier-tail:True`; the respawned
+worker accepted the promoted admin session, uploaded evil.php through the app,
+printed `php2shell-r5-w63-final-1837` plus `uid=1000(mesh-home)`, and wrote the
+marker file from PID 2113918. No-death and virgin-SID controls then left the
+login form, no upload and a fresh marker absent. Evidence SHA-256:
+`7df36e9a43417600d7c44b356195671df63e17c12f378fe8ffc5ab4b10d7c1ab`.
+
+The same native mechanism repeated with SID
+`cafebabe00112233445566778899babe` and filler `Y`
+(`lab/build/evidence/w63-native-varied5/`, marker
+`php2shell-r5-w63v5-1834`, SHA-256
+`d3cf9df0ebd39854dfa25bf8add955a7138879f7eb9a6a2d9d92abf161176be1`).
+That run predates the final structural-prefix verdict wording but exercised
+the same request/limit geometry and reached takeover/upload/execution.
+
+Fixed control (`lab/build/evidence/w63-native-fixed2/`): identical varied
+bytes and limits, 82 coarse + 21 fine preburn requests, K=1024. The producer
+also died with SIGKILL, but 8.4.28's unconditional `ftruncate(0)` left exactly
+1024 bytes, `tail==carrier-tail:False`, no admin page, no upload and no marker.
+Because 8.4.28 rejects tinyfilemanager's runtime session-ini change while
+upload progress is on, consumer checks used an upload_progress-off app-health
+pool with the same save path. Evidence SHA-256:
+`67e59740f8f10b362fd7b29b646b14e2906fd9edec6532bf3254e0868afb76f1`.
+The shim path was regression-smoked after the harness changes and still
+reached the rung-4 marker (`lab/build/evidence/w63-shim-regression/`, SHA-256
+`fe3503b50d6ce873eaebb69f051a7842aca7816f01f10b7eb138e20e83c2e20e`).
+
+Replay commands:
+
+```sh
+DEATH_MODE=rlimit PREBURN=1 MTAG=php2shell-r5-w63-final-1837 PORT=18134 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.27-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w63-native-final 18134
+
+DEATH_MODE=rlimit PREBURN=1 SID=cafebabe00112233445566778899babe FILLER=Y \
+  MTAG=php2shell-r5-w63-fixed-1836 PORT=18140 \
+  bash lab/repro/php2shell-aftershell-splice-tfm.sh \
+  lab/build/php-8.4.28-app/sapi/fpm/php-fpm \
+  lab/src/php2shell-r5-app/tfm-app/web \
+  lab/build/evidence/w63-native-fixed2 18140
+```
+
+Honest grade: **author-side rung-5 chain under labeled non-default
+RLIMIT_CPU/RLIMIT_FSIZE conditions; gates 1–5 observed, gate 6 OPEN.** The
+wire input reaches a live affected loopback target without the kill shim,
+executes a lab-chosen benign command with an observed target-side marker, and
+has fixed/no-death/safe controls plus repeats. A fresh-context witness must
+still replay from a clean checkout and vary the command or an attacker byte.
+Until that verdict, full rung 5 is not ESTABLISHED and the back-to-back chain
+continues.
