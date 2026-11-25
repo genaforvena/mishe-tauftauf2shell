@@ -81,6 +81,12 @@ FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-nonpie.sh
 The script builds both non-PIE trees, regenerates the cases, and asserts 15
 stable-lane checks, ending `REPLAY_NONPIE_OK: 15 checks, 0 failed` with rc 0.
 
+Author-side receipts: live lab tree at 04:10Z and a clean `git archive
+d00bfda4 lab/frontier/fontforge2shell` into `/tmp/ff2s-w14-clean` at 04:12Z
+with the pinned tarball supplied by env (both non-PIE trees rebuilt from
+source) each gave 15/15 `PASS`, script rc 0, the three PCF hashes above and
+the same gdb pointer values and mapped bytes. Neither is a witness verdict.
+
 ## Ceiling of this result
 
 - The pointer written is data (`BDFChar.bitmap`), consumed as data at
