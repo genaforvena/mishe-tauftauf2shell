@@ -1,0 +1,47 @@
+CVE-2026-75820 chosen-byte OOB WRITE replay (2026-11-25)
+
+One command from the repo root, after the release sources and en dictionary
+are provisioned under lab/frontier/aspell2shell/real-build/ as described in
+harness/evidence/75820-suggest/REPLAY.txt:
+
+  sh lab/frontier/aspell2shell/harness/75820-write-probe.sh \
+    "$PWD/lab/frontier/aspell2shell/harness/evidence/75820-write" \
+    /tmp/aspell-75820-write-work
+
+Expected: 8 PASS / 0 FAIL. The second argument is a gitignored work dir;
+all untracked build trees stay there, not in the repository. On first run
+the script copies aspell-0.60.8.2, aspell-0.60.8.3 and
+aspell-0.60.8.2-targeted-fix from real-build/ and configures/makes each with
+Clang recover-mode ASan:
+
+  CC=clang CXX=clang++ \
+  CFLAGS=CXXFLAGS='-fsanitize=address -fsanitize-recover=address -fno-omit-frame-pointer -g -O1 -DNDEBUG' \
+  LDFLAGS=-fsanitize=address ./configure --disable-shared && make -j4
+
+Recover mode is observation only: it lets the program continue after the
+first OOB read at language.hpp:272 so the later OOB write at suggest.cpp:1484
+is observable. The control reads/writes are the same instructions in a
+plain -DNDEBUG build, where nothing aborts.
+
+Input: a real personal_ws-1.1 word of 300 bytes (257 'a' + '!' + 42 'a',
+so the one-byte length stored at writable.cpp:517 is 44), queried with 299
+'a' characters through a real `aspell -a` pipe. The counterfactual replaces
+every 'a' with 'b'. Safe control: a 250-byte word. Fixed controls: real
+0.60.8.3 and a copy of 0.60.8.2 with ONLY the 75820 fix hunk; both reject
+the long word with "Word larger than 250 characters."
+
+Evidence in this directory:
+- summary.txt: 8 assertions, including two GDB memory dumps.
+- vuln-a.out / vuln-b.out: recover-ASan reports. WRITE of size 1 at
+  suggest.cpp:1484, 0 bytes after a 64-byte region allocated at :1469;
+  second WRITE of size 1 at :1485. ASan report counts can vary by one
+  (rc 0 or 1); the two WRITEs are stable.
+- gdb-a.out / gdb-b.out: conditional breakpoint at j == 64; the byte at
+  0x50600000e880 changes 0x00 -> 0x01 for 'a' input and 0x00 -> 0x02 for
+  'b' input. The value is to_normalized(source[j]) from a 90-byte
+  attacker-derived near-miss word; the offset is the first byte past the
+  String allocation. No pointer/IP/marker/command side effect.
+- fixed.out / targeted-fix.out / safe.out: no ASan report.
+
+Raw process output is from an ASan-instrumented lab build on loopback-less
+local files only; no network probe of any kind.

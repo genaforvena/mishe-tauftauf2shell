@@ -131,3 +131,42 @@ victim is the offline `prezip-bin` utility.
 
 All local work stayed in `lab/frontier/aspell2shell/`; advisory and commit
 fetches were read-only provisioning; no external system was probed.
+
+## Chosen-byte OOB WRITE in the real 0.60.8.2 consumer (2026-11-25)
+
+The previous paragraph described an OOB read only. A second experiment
+shows the wrapped length byte also drives a chosen-byte write in the real
+spell-checker. Release 0.60.8.2 was rebuilt with `-DNDEBUG` and Clang
+`-fsanitize=address -fsanitize-recover=address`. Recover mode is observation
+only: it lets execution continue past the first OOB read so the subsequent
+store is observable; the same store executes in a plain NDEBUG build.
+
+Input: a real `personal_ws-1.1` word of 300 bytes (`'a'*257 + '!' +
+'a'*42`), so `*w2++ = w.size()` at `writable.cpp:517` stores 44; the query
+is 299 `a` characters through `aspell -a`. `String::resize(max_word_length +
+1)` at `suggest.cpp:1469` sizes the destination from the wrapped byte (45),
+but `fine_tune_score` copies a 90-byte attacker-derived near-miss word until
+NUL at `:1483-1485`. Recover-mode ASan reports `WRITE of size 1` at
+`suggest.cpp:1484`, 0 bytes after the 64-byte region allocated at `:1469`,
+plus a second write at `:1485`.
+
+GDB at the `j == 64` store gives direct memory proof: the byte at
+`0x50600000e880` changes `0x00 -> 0x01` for all-`a` input and `0x00 -> 0x02`
+when every `a` is replaced by `b`. The written value is
+`to_normalized(source[j])` from the attacker-derived word, so two distinct
+input-chosen bytes land at the same OOB offset. Arbitrary byte values,
+arbitrary offsets, pointer control, marker execution and command side
+effects are NOT measured.
+
+Controls: real 0.60.8.3 and a 0.60.8.2 copy with only the 75820 fix hunk
+reject the 300-byte word (`Word larger than 250 characters.`, rc 1, no
+ASan); a 250-byte word is clean on the vulnerable build.
+`harness/75820-write-probe.sh` with `harness/evidence/75820-write/REPLAY.txt`
+is the one-command replay: **8 PASS / 0 FAIL**.
+
+Grade for this lane: **rung 4 PARTIAL** (chosen-byte store at a chosen
+offset in a real consumer, with fixed/safe controls; conditions: release
+NDEBUG build, personal word list, pipe-filter query, recover-mode ASan and
+GDB for observation). Rung 5 NOT CLAIMED. Witness replay of this new claim
+is still UNKNOWN; the earlier rung-3 read claim was offered in #4566/#4568
+and also awaits a verdict. The 75818 prezip lane remains rung 3.
