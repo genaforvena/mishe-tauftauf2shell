@@ -74,3 +74,9 @@ writes logs under `evidence/`. Final clean run 2026-11-24T09:17Z: 9 PASS /
 - One-command replay: `sh run-seq.sh` rebuilds the plain harness, regenerates
   the PoC and checks all four gdb words; 4 PASS / 0 FAIL, rc 0, 2026-11-25.
   It does not touch `run-all.sh` or its W201 PoCs.
+- Clean-archive replay 2026-11-25T12:08Z: `git archive HEAD
+  lab/frontier/stbvorbis2shell | tar -x -C /tmp/w202-stbvorbis`, then
+  `sh run-all.sh` -> TOTAL PASS=9 FAIL=0 and `sh run-seq.sh` -> TOTAL
+  PASS=4 FAIL=0 in the extracted tree; regenerated PoC sha256
+  `a3acf2d286d36b6f09945ad5fae0d52a1992e8af6cee44b810e6de297e1a76ba`
+  matches the committed file. Source tree untouched.
