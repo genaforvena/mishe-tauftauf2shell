@@ -217,3 +217,18 @@ control datum is reachable from any real caller's output buffer in this tree.
 This closes the in-tree consumer lane for the pinned library; an out-of-tree
 application remains the only real-consumer path and is still unknown. Grade
 unchanged: rungs 1-4, r5 UNKNOWN.
+
+W214 (2026-11-25T03:2xZ, source-bound) narrows the remaining real-consumer
+gap: a read-only census of out-of-tree application sources already provisioned
+in this plant found no caller with two or more padded decryption updates into
+a documented-minimum buffer. The ten named projects and roughly fifty other
+provisioned roots were searched; four representative hits were re-read:
+apr-util `apr_crypto_openssl.c:887-902` allocates `inlen +
+EVP_MAX_BLOCK_LENGTH` (17 bytes of slack) before one update; cjose
+`jwe.c:1451-1468` allocates `raw_len + AES_BLOCK_SIZE` for a single CBC update
+(the two-update path is GCM AAD with `out=NULL`); libwebsockets
+`aescbc.c:239-249` disables padding and calls the cipher once; picotls
+`openssl.c:1275-1277` disables padding on decrypt. No qualifying buffer means
+no adjacent control datum. Unprovisioned third-party applications remain
+UNKNOWN. No build, no ASan, no witness replay; grade unchanged: rungs 1-4,
+r5 UNKNOWN.

@@ -318,3 +318,35 @@ output buffer in this tree. This closes the in-tree consumer lane for the
 pinned library; it says nothing about out-of-tree applications linked against
 it. No new lab artifact, no witness replay, grade unchanged: rungs 1-4, r5
 UNKNOWN.
+
+## Provisioned out-of-tree census (W214, 2026-11-25T03:2xZ, source-bound)
+
+A read-only search of out-of-tree application sources already present in this
+plant found no candidate that meets the CVE precondition. The ten named
+projects were inspected individually (cjose, GPGME, Open5GS, libssh/libssh2,
+libwebsockets, Synchronet, PostgreSQL/pgactive, nginx, mod_auth_openidc,
+apr-util), plus roughly fifty other provisioned project roots were swept for
+`EVP_(Decrypt|Cipher)Update` hits. No qualifying site: every genuine decrypt
+call is single-call on a fresh ctx, padding-disabled, GCM with `out=NULL` for
+the AAD update, or has at least 17 bytes of slack past the documented minimum.
+Because no qualifying buffer exists, no adjacent attacker-relevant datum was
+found either.
+
+Four representative hit sites were re-read directly to check the sweep:
+- `lab/frontier/apache2shell/build/apr-util-1.6.3/crypto/apr_crypto_openssl.c:887-902`:
+  `apr_palloc(ctx->pool, inlen + EVP_MAX_BLOCK_LENGTH)` (17 bytes of slack),
+  then one `EVP_DecryptUpdate` at :902.
+- `lab/frontier/cjose2shell/src/vulnerable/src/jwe.c:1451-1468`: CBC allocates
+  `raw_len + AES_BLOCK_SIZE` and makes one update at :1461 on a fresh ctx;
+  the two-update path at :1353 is GCM AAD with `out=NULL`.
+- `lab/libwebsockets2shell-src/v4.3.10/lib/jose/jwe/enc/aescbc.c:239-249`:
+  `LWS_GAESP_NO_PADDING`, one `lws_genaes_crypt` call; PKCS#7 padding is
+  stripped manually at :251.
+- `lab/frontier/h2o2shell/src/h2o/deps/picotls/lib/openssl.c:1275-1277`:
+  decrypt path calls `EVP_CIPHER_CTX_set_padding(ctx->evp, 0)`.
+
+This narrows the W213 statement: not only the pinned AWS-LC tree but every
+out-of-tree application source provisioned in this plant lacks the vulnerable
+caller shape. Unprovisioned third-party applications remain UNKNOWN. No build,
+no ASan run, no new lab artifact and no witness replay; grade unchanged:
+rungs 1-4, r5 UNKNOWN.
