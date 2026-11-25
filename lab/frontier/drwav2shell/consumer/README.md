@@ -42,13 +42,31 @@ consumer from the crafted-file directory and records raw output in
   `setarch -R gdb` in this build. It is not attacker-known without an address
   leak or a matching deterministic layout; this is an instrumented observation,
   not an RCE claim.
-- The application-owned 150-byte buffer `libsndfile.pFileData` sits at
-  `0x50e000000040` in this build, while the metadata array sits at
-  `0x50f000000040`. Because only the low 32 bits are file-controlled, the
-  high half inherited from the parser's allocator keeps that application
-  buffer out of reach here. No application-owned object was observed receiving
-  the chosen word.
+- In the ASan build, the application-owned 150-byte buffer
+  `libsndfile.pFileData` sits at `0x50e000000040` while the metadata array sits
+  at `0x50f000000040`. Because only the low 32 bits are file-controlled, that
+  particular buffer is out of reach in that allocator layout. W2 below shows
+  a different, plain-build layout where a same-heap application buffer is
+  reachable.
 - No wire input, pointer-to-IP overwrite, control-flow diversion, command,
   shell, live service or witness verdict for this lane. Rung 5 is not claimed.
+
+## Application-owned destination (W2, 2026-11-25 11:13Z)
+
+`run-appdest.sh` builds the unmodified consumer without ASan against both
+pinned headers. Under `setarch -R gdb` it measures the live
+`libsndfile.pFileData` address (the consumer's own whole-file buffer) and
+writes a 150-byte file whose pointer low half is `pFileData - 24`. No source
+is patched and no address is put into the file by any harness hook: the file
+bytes alone retarget the cue write. At `wav_decoding.c:326` the file words
+`0x4841434b`/`0x42424242` are read back at `libsndfile.pFileData`; the
+uninstrumented consumer then passes with rc 0. Same-file fixed-header and
+matching-`smpl` controls leave the buffer unchanged.
+
+`sh consumer/run-appdest.sh` → 11 PASS / 0 FAIL; raw output is in
+`evidence/appdest-*.out`. This is rung 4 with an application-owned destination,
+still leak-dependent: the low pointer came from a fixed-ASLR lab measurement,
+not from the file. No wire, pointer-IP, control flow, command, shell, rung 5
+or witness verdict.
 
 All runs are local; no probe left the host.

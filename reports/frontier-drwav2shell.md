@@ -70,9 +70,10 @@ headers. `sh harness/run-all.sh` → 25 PASS / 0 FAIL, GCC and Clang:
 - Rung 3: ASan/Clang WRITE fault in the real library through the public API.
 - Rung 4: PARTIAL — chosen bytes and file-carried low-half pointer control.
   The high pointer half and the concrete destination address depend on heap
-  layout; the harness grooms a same-size-class heap buffer. No application,
-  real wire input, virtual-function/return-address overwrite or control-flow
-  hijack has been demonstrated.
+  layout. In a plain build under fixed ASLR the file-chosen word was written
+  into the consumer's own whole-file buffer with a debugger-measured low
+  pointer; no wire input, virtual-function/return-address overwrite,
+  control-flow hijack or command has been demonstrated.
 - Rung 5: NOT CLAIMED. No command execution, no shell, no IP, no live server.
 - Caveat preserved: an earlier attempt using a global destination in a
   different ASan allocator region produced a heap-buffer-overflow before the
@@ -97,7 +98,8 @@ headers. `sh harness/run-all.sh` → 25 PASS / 0 FAIL, GCC and Clang:
    ASan WRITE fault through the public file API, fixed and safe controls
    clean, 18 PASS / 0 FAIL. See `lab/frontier/drwav2shell/consumer/README.md`.
    The chosen word reaches the live metadata array only with a debugger-
-   measured low half; no application-owned object is reachable in this build.
+   measured low half; in the ASan build no application-owned object is
+   reachable. W2 adds a plain-build measurement below.
 3. Done: witness replay completed 07:52Z (ESTABLISHED AS LABELED for the
    in-memory harness grade). W1 adds the real-consumer measurement below;
    its new lane has no witness verdict.
@@ -127,6 +129,24 @@ from file-supplied fields; no consumer or library source is patched.
   `0x50f000000040`; only the low 32 bits are file-controlled, so the app-owned
   buffer is out of reach. No application-owned object, wire input, pointer-IP,
   command, shell or rung 5 observed. No witness verdict for this lane.
+
+## Application-owned destination (W2, 2026-11-25 11:13Z)
+
+`lab/frontier/drwav2shell/consumer/run-appdest.sh` builds the same unmodified
+consumer without ASan against the pinned 0.14.5 and 0.14.6 headers and runs it
+under `setarch -R gdb`. The consumer's own 150-byte `libsndfile.pFileData`
+buffer is measured from the live process (`0x555555581a40` in this run), and
+the file alone carries the pointer low half (`0x555581a28 = pFileData - 24`).
+At `wav_decoding.c:326` the file words `0x4841434b`/`0x42424242` are read back
+at `libsndfile.pFileData`; the uninstrumented consumer then passes with rc 0.
+Same-file fixed-header and matching-`smpl` controls leave the application
+buffer untouched. `sh consumer/run-appdest.sh` → 11 PASS / 0 FAIL; raw output
+is in `consumer/evidence/appdest-*.out`.
+
+This strengthens rung 4 to an application-owned destination in a real
+consumer, but the low pointer was measured in a fixed-ASLR lab process, not
+leaked by the file. No wire, pointer-IP, control-flow diversion, command,
+shell or rung 5. The W2 lane is author replay with no witness verdict.
 
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.

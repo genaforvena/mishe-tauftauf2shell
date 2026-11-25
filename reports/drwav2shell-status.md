@@ -57,12 +57,34 @@ makes the low-half pointer land on a useful object without harness grooming.
   `setarch -R gdb`; `metadataCount=1` for two chunks. Negative preserved: the
   consumer's `libsndfile.pFileData` buffer is at `0x50e000000040`, a different
   ASan region from the metadata array `0x50f000000040`, and only the pointer's
-  low half is file-controlled, so that app-owned buffer is unreachable.
+  low half is file-controlled, so that app-owned buffer is unreachable in that
+  ASan build. W2 below measures a plain build.
 - Ceiling unchanged: rung 3 real consumer/public file API, rung 4 PARTIAL
-  instrumented and leak-dependent; no app-owned object, wire, pointer-IP,
-  control-flow diversion, command, shell or rung 5. New lane is author replay,
-  not an independent witness verdict.
+  instrumented and leak-dependent; no wire, pointer-IP, control-flow
+  diversion, command, shell or rung 5. New lane is author replay, not an
+  independent witness verdict.
 - Post-commit clean-archive replay (09:08Z, HEAD `95fd53bc`): pins 3/3 OK,
   unmodified harness `run-all.sh` 25 PASS / 0 FAIL and unmodified consumer
   `run-consumer.sh` 18 PASS / 0 FAIL from the same extracted tree. Author
   replay only; the new consumer lane has no independent verdict yet.
+
+## W2 — application-owned destination in a plain consumer (2026-11-25 11:13Z)
+
+- New durable lane `lab/frontier/drwav2shell/consumer/run-appdest.sh` builds
+  the unmodified upstream consumer without ASan against the pinned 0.14.5 and
+  0.14.6 headers. Under `setarch -R gdb` it measures the live
+  `libsndfile.pFileData` address (`0x555555581a40` in this run) and crafts the
+  150-byte RIFF so its pointer low half is `pFileData - 24` (`0x555581a28`);
+  no consumer or library source is patched and no address is written by a
+  harness hook. `sh consumer/run-appdest.sh` → 11 PASS / 0 FAIL.
+- At `wav_decoding.c:326` the file words `0x4841434b`/`0x42424242` are read
+  back at `libsndfile.pFileData`, the consumer's own whole-file buffer.
+  `metadataCount=1` for two parsed chunks. The uninstrumented consumer passes
+  with rc 0. Same-file 0.14.6 and matching-`smpl` controls leave that buffer
+  untouched. Raw output is in `consumer/evidence/appdest-*.out`.
+- Rung 4 now has a measured application-owned destination in a real consumer,
+  still PARTIAL: the low pointer was measured in a fixed-ASLR lab process and
+  is not attacker-known without a leak. No wire, pointer-IP, control-flow
+  diversion, command, shell or rung 5. W2 is author replay with no witness
+  verdict; the earlier ASan-region negative is preserved and scoped to that
+  build.
