@@ -35,3 +35,15 @@ verdict UNKNOWN.
 3. Enumerate real callers of `l_byteaInitFromStream()` and look for a live
    consumer whose heap neighborhood can be measured. Keep the no-pointer,
    no-command ceiling until then.
+
+
+## Clean-archive replay receipt (frontier W235, 2026-11-25 23:08Z)
+
+`git archive 925b35c2 lab/frontier/leptonica2shell` extracted to
+`/tmp/w235-lept-clean2`, `bash .../run-all.sh` from that directory:
+**17 PASS / 0 FAIL**, rc 0. In-tree run from the same commit gave the same
+result. The first clean replay from commit `ae82b2e7` failed one control
+(LeakSanitizer on the undestroyed stand-in bytea); the harness was repaired
+with `l_byteaDestroy(&ba)` and the failure preserved in `PROVENANCE.md`.
+No pinned upstream byte changed. This is an author-side replay; witness
+verdict on the staged grade stays UNKNOWN.
