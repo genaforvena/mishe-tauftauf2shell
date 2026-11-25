@@ -159,6 +159,21 @@ and a known 2.1.10 `pg_dump` header incompatibility are recorded in
   not an independent witness verdict.
 
 
+## Saved-return-address layout (negative, 2026-11-25 03:09Z)
+
+`realbuild/layout/` instruments the complete pinned 2.1.9 library without
+ASan to emit the parser's stack window after the overflow, at payload lengths
+0..256. Both `-O1` and PGXS default flags place the parser's saved return
+address **below** `replication_name` (offset -40 and -32 respectively), while
+a second copy of the same code address sits above it (offset +104 and +120).
+Chosen `41 5a` bytes overwrite the upper copy but never the saved slot; the
+function always exits through the `elog(ERROR)` longjmp, so the overwritten
+caller-frame words are abandoned, not dereferenced. No backend terminated at
+any length. Exact offsets, commands and logs are in
+`realbuild/layout/FINDINGS.md`. This closes the saved-pointer/return-address
+route toward a stronger rung 4 on this host; it does not alter the earlier
+marker-based rung-4 evidence.
+
 ## Rung-4 feasibility and ceiling
 
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)
@@ -171,7 +186,8 @@ the `LIVE_CAPTURE` marker before the error longjmp. The marker is
 instrumentation, not a saved pointer or an IP; the ASan build confirms the
 same write independently, now also in the complete pinned 2.1.9 extension via
 the real SQL function. Not established: a replication wire path, control of a
-saved pointer/return address, an IP, a command side effect, or rung 5. The
+saved pointer/return address (structurally blocked in this build layout, see
+above), an IP, a command side effect, or rung 5. The
 advisory's command-execution claim remains a claim. The authenticated
 `PR:L` precondition and the need for a writable replication-origin name are
 part of it, not hidden. The original
@@ -181,12 +197,12 @@ live-capture and full-extension evidence has not been independently replayed.
 
 ## Cheapest next experiment
 
-The full pinned extension now builds, loads and reaches the vulnerable parser;
-its ASan fault is the strongest rung-3 evidence here. Next, measure whether a
-crafted write reaches a saved pointer or return address without ASan, using
-the real extension layout; a trigger through an actual replication connection
-would be the next rung, not assumed here. Witness replay of commit containing
-`realbuild/` should run `sh run-real.sh`, `VERSION=2.1.10 LABEL=fixed sh
-run-real.sh` and `sh run-real-asan.sh` with the provisioning in
-`realbuild/PROVISION.md`; SQL-path and full-extension evidence remains
-unreplayed until that happens.
+The saved-pointer route in the real extension is now measured and closed:
+the saved return address sits below the buffer and the error longjmp
+abandons every overwritten word above it. Any further rung-4 attempt needs a
+different consumer or a real replication wire path; neither is established
+here. Witness replay of the commit containing `realbuild/` should run
+`sh run-real.sh`, `VERSION=2.1.10 LABEL=fixed sh run-real.sh` and
+`sh run-real-asan.sh` with the provisioning in `realbuild/PROVISION.md`;
+SQL-path, live-capture, full-extension and layout evidence stays unreplayed
+until that happens.
