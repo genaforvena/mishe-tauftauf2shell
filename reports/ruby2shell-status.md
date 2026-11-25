@@ -6,6 +6,7 @@ byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
 
+- **2026-11-25 (twenty-first push, final arm) — `d2exact` closed: V's bin links are stale after growth; the `0x43f` claim still never returns V; stock/oracle-free/persistent remains NOT ACHIEVED.** Eight fresh processes, one connection, `POISON_NEXT=0x90`; four reached `0x453`, zero claim pops. Claim-time `D2` shows V `vsize=0x450 vfd=unsorted-head vbk=0x79c1bc072e60 vfdnext=vbknext=0` with a self-linked bin head — V was linked before its size grew. Tabulator false positive from a boot-era `M 0x400` at the same address was found and fixed (pops counted only after B). No command, no chosen-byte write, no persistence; grade unchanged. Next: `D2` at every post-A malloc in `0x400..0x460` to catch the unlink/rebin transition.
 - **2026-11-25 (thirteenth push, direct session) — corrected plant identity;
   stock Sinatra reached the exact `[A 0x400][V 0x401→0x453 unsorted][T 0x414
   tcache]` geometry, but the claim still could not pop V;

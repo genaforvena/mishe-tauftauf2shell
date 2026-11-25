@@ -54,6 +54,7 @@ static __thread int case_overflow_seen = 0;
 static int case_wide = 0;
 static int dump_tcache = 0;
 static int tcache_free_dump = 0;
+static int detail_bins = 0;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -78,6 +79,7 @@ static void mtrace_init(void)
     dump_fastbins = getenv("MTRACE_DUMP_FASTBINS") != NULL;
     tcache_free_dump = getenv("MTRACE_TCACHE_FREE_DUMP") != NULL;
     emit_tid = getenv("MTRACE_TID") != NULL;
+    detail_bins = getenv("MTRACE_LARGEBIN_DETAIL") != NULL;
 }
 
 /* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
@@ -101,6 +103,32 @@ static void bin_dump(unsigned long head)
             p = next;
         }
     }
+}
+
+/* Analysis-only: at a chosen request size, record the largebin head links
+ * and the case victim's own links immediately before malloc. Uses the
+ * CURRENT thread's tcache-derived arena head, not the B-time cache. */
+static void *current_tcache(void);
+static void bin_detail(unsigned long head, size_t nb)
+{
+    if (!detail_bins || !head || !case_victim)
+        return;
+    unsigned long idx = nb >= 0x400 ? 48 + (nb >> 6) : 0;
+    unsigned long bin = head + idx * 0x10;   /* head = bin_at(1) - 0x10 */
+    unsigned long vhdr = (unsigned long)case_victim - 0x10;
+    unsigned long vsz = case_read((void *)(vhdr + 8)) & ~(unsigned long)7;
+    char buf[640];
+    int n = snprintf(buf, sizeof buf,
+        "D2 %lu idx=%#lx bin=%#lx fd=%#lx bk=%#lx vhdr=%#lx vsize=%#lx "
+        "vfd=%#lx vbk=%#lx vfdnext=%#lx vbknext=%#lx nextprev=%#lx "
+        "nextsize=%#lx\n",
+        seq, idx, bin, case_read((void *)bin),
+        case_read((void *)(bin + 8)), vhdr, vsz,
+        case_read((void *)(vhdr + 0x10)), case_read((void *)(vhdr + 0x18)),
+        case_read((void *)(vhdr + 0x20)), case_read((void *)(vhdr + 0x28)),
+        case_read((void *)(vhdr + vsz - 8)), case_read((void *)(vhdr + vsz)));
+    if (n > 0)
+        write(out_fd, buf, (size_t)n);
 }
 
 static void fastbin_dump(unsigned long unsorted_head)
@@ -380,6 +408,11 @@ void *malloc(size_t size)
     }
     if (dump_request && size == dump_request && dump_bins && arena_head)
         bin_dump(arena_head);
+    if (dump_request && size == dump_request && detail_bins) {
+        void *tc_now = current_tcache();
+        if (tc_now)
+            bin_detail((unsigned long)(uintptr_t)tc_now - 0x460, size);
+    }
     void *p = __libc_malloc(size);
     case_allocation(size, p);
     if (case_waiting_second && size == case_first_request) {

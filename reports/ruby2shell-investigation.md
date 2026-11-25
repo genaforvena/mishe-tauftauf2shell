@@ -3029,3 +3029,89 @@ before the claim without taking V — the pre-claim `L 0 2` address identifies
 it — or arrange V to be the first-binned chunk of that bin. Safe/fixed
 controls remain mandatory for any impact claim. No command, no persistence,
 grade unchanged.
+
+### Stock-Sinatra claim sweep: keep-alive, bin-class and forge levers all
+### bounded NEGATIVE (2026-11-25, direct session, twenty-first push)
+
+About 60 fresh loopback processes on the unmodified stock Sinatra app,
+analysis instrumentation only. New tooling:
+`lab/repro/ruby2shell-keepalive-post.py` sends the whole chain on ONE TCP
+connection; `lab/repro/ruby2shell-shrink-claim.sh` gained
+`RUBY2SHELL_CLAIM_KEEPALIVE=1`. `lab/preload/mtrace.c` gained opt-in
+`MTRACE_LARGEBIN_DETAIL=1` (`D2` lines: bin head and V's fd/bk/nextsize
+links immediately before a chosen request size); rebuilt with
+`gcc -shared -fPIC -O2 lab/preload/mtrace.c -o lab/preload/mtrace.so`.
+
+- `stock-sinatra-victimstep-6`: V's header `0x78ce8c0a6730` was in unsorted
+  at A (`size=0x453`) and at both `0xc00`-triggered dumps, 516 lines before
+  the claim's two `0x43f` allocations; those allocations returned other
+  chunks. Probe popped T with its old `fd` and `key=0`; process aborted.
+  "V removed by a large allocation" is therefore not universal.
+- `stock-sinatra-claimdump-2`: V (`0x7a7a500a5310`, `size=0x453`) was the
+  ONLY unsorted chunk immediately before both `0x43f` allocations
+  (`L 0 1 ... 453` at lines 44713 and 44811), yet malloc returned
+  `0x7a7a500eb840` / `0x7a7a5001888c0`.
+- `stock-sinatra-tidsplit-2` with `MTRACE_TID=1`: B, A and both `0x43f`
+  allocations all carry tid `3881676`; the thread/arena split does not
+  explain that arm. Its V was already absent from unsorted at A, so the
+  exact A/V/T state is geometry-dependent between processes.
+- `kachain` (one connection, six processes): runs 2 and 5 reproduce B
+  `0x401` → A `0x453` with the same tid across all requests; at both claim
+  dumps V is listed in bin `0x40`, and neither claim nor probe takes it
+  with chosen bytes. One-connection pacing alone is not the blocker.
+- glibc 2.39 source (`lab/build/glibc-2.39-src/malloc.c`) constrains the
+  mechanics: tcache covers `nb <= 0x410`, so a `0x401` claim is served from
+  tcache bin 63; `largebin_index_64(0x430)` is 64 and
+  `largebin_index_64(0x450)` is 65; the unsorted loop checks
+  `prev_inuse(next)` before exact fit (line 4087); `unlink_chunk` checks
+  `chunksize(p) == prev_size(next_chunk(p))` (line 1610).
+- `bin40claim` (claim `0x401`): V sat in bin `0x40` at claim in the exact
+  geometry, but both claim allocations came from tcache bin 63.
+  `bin40split` (claim `0x421`, `nb=0x430`, bin 64, forge at content offset
+  `0x410`): three exact-geometry survivors (`bin40split-{3,6,7}`) still
+  showed V in bin `0x40` at both pre-claim dumps and never returned it.
+- `prevclear` (`POISON_NEXT=0x90` clears the neighbour's PREV_INUSE, removing
+  the `invalid next->prev_inuse (unsorted)` abort seen with `0x91`): in
+  `prevclear-7` V was consumed by a framework `calloc` request `0x3c0`, and
+  T's tcache entry was corrupted with framework bytes
+  (`P request=0x401 ptr=...a4090 size=0x35 next=0x4b key=0`), ending in
+  `malloc(): unaligned tcache chunk detected`. No chosen claim byte crossed
+  into T.
+- `inchain` (`ATTACK_CHAIN=1`, claim parts appended after `_method`): the
+  exact-geometry run aborted in the attack's unsorted scan before any
+  `0x43f` claim allocation; no in-request pop.
+- `prevclear430` (`POISON_NEXT=0x90` + `0x430` claim): exact run 2 had V in
+  bin `0x40` at claim and the claim allocated elsewhere; T was corrupted by
+  framework traffic, not by the claim.
+- `linkdiag` (`MTRACE_LARGEBIN_DETAIL=1`): exact runs 2 and 6 show stale
+  links — run 2's V has `vsize=0x453`, `vfd=0x77b014000480` (the unsorted
+  head), `vbk=0x77b014086bb0`, `vfdnext=vbknext=0x77b014087d00`, while the
+  bin-`0x40` head is self-linked; run 6's V had already been downgraded to
+  `0x3d5`. A chosen-byte write into T was never observed.
+
+Verdict: stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. No
+command, no chosen-byte write, no surviving second command; the witness-
+ESTABLISHED harness-condition rung 5 and rung 4 grades are unchanged.
+The remaining UNKNOWN is the exact bin-transition that keeps a grown V
+unavailable to a matching claim; the new `D2` trace constrains it but does
+not resolve it. Next: replay `MTRACE_LARGEBIN_DETAIL=1` at
+`MTRACE_DUMP_REQUEST=0x43f` (rather than `0x421`) with `POISON_NEXT=0x90` and
+compare V's links with the bin-`0x41` head at the exact-fit claim; only a
+measured pop at V justifies another impact arm. Safe/fixed controls remain
+mandatory for any impact claim.
+
+- `d2exact` (`MTRACE_DUMP_REQUEST=0x43f`, `POISON_NEXT=0x90`, one connection,
+  eight processes) ran the wall's named follow-up. Four runs reached
+  `0x401/0x411 → 0x453`; none returned V to the `0x43f` claim. In
+  `stock-sinatra-d2exact-1.server.log` the claim-time `D2` reads
+  `vsize=0x450 vfd=0x79c1bc000480 vbk=0x79c1bc072e60
+  vfdnext=vbknext=0`, while the bin head `0x79c1bc000880` is self-linked at
+  `0x79c1bc000870`: V's size grew after it was linked, so its bin identity
+  is stale and the claim's bin-`0x41` search cannot see it. The tabulator
+  initially reported one false `claim 1` for that run: a boot-era
+  `M 0 400 79c1bc08a7e0` at line 16118, long before the B snapshot at
+  41797. `lab/repro/ruby2shell-shrink-claim.sh` now counts pops only after
+  the last B line; re-checking the log yields zero post-B claim-size hits
+  at V. No chosen-byte write, no command, no persistence; grade unchanged.
+  Next: emit `D2` at every post-A malloc in `0x400..0x460` to catch the
+  exact unlink/rebin transition of V, then forge only that transition.
