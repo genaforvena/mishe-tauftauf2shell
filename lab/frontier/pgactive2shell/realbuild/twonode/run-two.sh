@@ -12,6 +12,7 @@ ACTION=${ACTION:-ROW}
 SHARE=/tmp/pgactive-build/pg16root/usr/share/postgresql/16/extension
 VERSION=${VERSION:-2.1.9}
 NO_CONFLICT=${NO_CONFLICT:-0}
+CONFLICT_TYPE=${CONFLICT_TYPE:-insert_insert}
 LIBDIR=/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib
 V219SO=/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so.v219-installed
 V2210SO=/tmp/pgactive-full-2210/pgactive-2.1.10/pgactive.so
@@ -132,7 +133,7 @@ if [ "$NO_HANDLER" != 1 ]; then
     status "HANDLER_FN$N" $?
     # pgactive_create_conflict_handler() is a hard stub in 2.1.9; configure
     # the handler with a direct row in the extension table instead.
-    $Q -c "INSERT INTO pgactive.pgactive_conflict_handlers (ch_name, ch_type, ch_reloid, ch_fun) VALUES ('h', 'insert_insert', 'public.t'::regclass, '$HANDLER');" >"evidence/handler-reg$N.out" 2>&1
+    $Q -c "INSERT INTO pgactive.pgactive_conflict_handlers (ch_name, ch_type, ch_reloid, ch_fun) VALUES ('h', '$CONFLICT_TYPE', 'public.t'::regclass, '$HANDLER');" >"evidence/handler-reg$N.out" 2>&1
     status "HANDLER_REG$N" $?
     $Q -c "SELECT ch_name, ch_type, ch_fun FROM pgactive.pgactive_conflict_handlers;" >"evidence/handler-list$N.out" 2>&1
   done
@@ -145,6 +146,23 @@ if [ "$NO_CONFLICT" = 1 ]; then
     # so the resolver must not be called.
     psql1 -c "INSERT INTO public.t VALUES (1, 'node1');" >evidence/insert1.out 2>&1
     status INSERT1 $?
+elif [ "$CONFLICT_TYPE" = "delete_delete" ]; then
+    # local == NULL path: seed one row on node 1, wait for it on node 2,
+    # then race DELETEs. Both apply workers resolve a DeleteDelete conflict
+    # with local=NULL, which the vulnerable frame writes 01 into the canary.
+    psql1 -c "INSERT INTO public.t VALUES (1, 'seed');" >evidence/seed.out 2>&1
+    status SEED $?
+    I=0; S=0
+    while [ "$I" -lt 30 ]; do
+        S=$(psql2 -Atc "SELECT count(*) FROM public.t WHERE id=1;" 2>/dev/null || echo 0)
+        [ "$S" = "1" ] && break
+        I=$((I+1)); sleep 0.2
+    done
+    status "SEED_ON_NODE2" "$S"
+    psql1 -c "DELETE FROM public.t WHERE id=1;" >evidence/delete1.out 2>&1 & J1=$!
+    psql2 -c "DELETE FROM public.t WHERE id=1;" >evidence/delete2.out 2>&1 & J2=$!
+    wait $J1; status DELETE1 $?
+    wait $J2; status DELETE2 $?
 else
     # Race the two inserts so both commit before either apply worker
     # delivers the other's row; that yields an insert_insert conflict.

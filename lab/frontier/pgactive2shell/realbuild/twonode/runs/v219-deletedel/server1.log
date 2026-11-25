@@ -1,0 +1,96 @@
+2026-11-25 17:53:20.190 UTC [947850] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 17:53:20.190 UTC [947850] LOG:  listening on IPv4 address "127.0.0.1", port 58431
+2026-11-25 17:53:20.203 UTC [947850] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/realbuild/twonode/s1/.s.PGSQL.58431"
+2026-11-25 17:53:20.214 UTC [947927] LOG:  database system was shut down at 2026-11-25 17:53:19 UTC
+2026-11-25 17:53:20.251 UTC [947850] LOG:  database system is ready to accept connections
+2026-11-25 17:53:20.792 UTC [947949] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 17:53:20.805 UTC [947949] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 17:53:20.821 UTC [947850] LOG:  background worker "pgactive supervisor" (PID 947949) exited with exit code 1
+2026-11-25 17:53:21.066 UTC [947850] LOG:  received SIGHUP, reloading configuration files
+2026-11-25 17:53:21.067 UTC [947850] LOG:  parameter "pgactive.skip_ddl_replication" changed to "off"
+2026-11-25 17:53:21.733 UTC [948703] LOG:  node identity of node being created is (7712168697009252831,0,5)
+2026-11-25 17:53:21.733 UTC [948703] CONTEXT:  PL/pgSQL function _pgactive_begin_join_private(text,text,text,text,boolean,boolean,boolean,boolean) line 40 at RAISE
+	SQL statement "SELECT pgactive._pgactive_begin_join_private(
+	        caller := '',
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        remote_dsn := join_using_dsn,
+	        bypass_collation_check := bypass_collation_check,
+	        bypass_node_identifier_creation := bypass_node_identifier_creation,
+	        bypass_user_tables_check := bypass_user_tables_check,
+	        data_only_node_init := data_only_node_init)"
+	PL/pgSQL function pgactive_join_group(text,text,text,integer,text[],boolean,boolean,boolean,boolean) line 71 at PERFORM
+	SQL statement "SELECT pgactive.pgactive_join_group(
+	        node_name := node_name,
+	        node_dsn := node_dsn,
+	        join_using_dsn := null,
+	        apply_delay := apply_delay,
+	        replication_sets := replication_sets,
+	        bypass_user_tables_check := true)"
+	PL/pgSQL function pgactive_create_group(text,text,integer,text[]) line 84 at PERFORM
+2026-11-25 17:53:21.733 UTC [948703] STATEMENT:  SELECT pgactive.pgactive_create_group('node1', 'host=127.0.0.1 port=58431 dbname=postgres user=mesh-home');
+2026-11-25 17:53:21.838 UTC [948773] LOG:  pgactive supervisor restarted and connected to DB pgactive_supervisordb
+2026-11-25 17:53:21.838 UTC [948773] LOG:  registering pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 17:53:21.838 UTC [948773] LOG:  successfully registered pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 17:53:21.939 UTC [948773] LOG:  successfully started pgactive per-db worker for database "postgres" with OID 5
+2026-11-25 17:53:23.144 UTC [949468] LOG:  logical decoding found consistent point at 0/1A44EB8
+2026-11-25 17:53:23.144 UTC [949468] DETAIL:  There are no running transactions.
+2026-11-25 17:53:23.144 UTC [949468] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL pgactive
+2026-11-25 17:53:23.144 UTC [949468] LOG:  exported logical decoding snapshot: "00000006-0000000D-1" with 0 transaction IDs
+2026-11-25 17:53:23.144 UTC [949468] STATEMENT:  CREATE_REPLICATION_SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL pgactive
+2026-11-25 17:53:25.282 UTC [949465] LOG:  DDL LOCK TRACE: acquiring in mode <ddl_lock> from <0> nodes for node1 (7712168697009252831,0,5,) [tracelevel=statement]
+2026-11-25 17:53:25.282 UTC [949465] CONTEXT:  SQL statement "SELECT pgactive.pgactive_acquire_global_lock('ddl_lock')"
+	PL/pgSQL function inline_code_block line 4 at PERFORM
+2026-11-25 17:53:25.282 UTC [949465] STATEMENT:  DO LANGUAGE plpgsql $$
+	BEGIN
+		IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'pgactive_acquire_global_lock' AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'pgactive')) THEN
+			PERFORM pgactive.pgactive_acquire_global_lock('ddl_lock');
+		END IF;
+	END; $$;
+	
+2026-11-25 17:53:25.378 UTC [950455] LOG:  starting logical decoding for slot "pgactive_5_7712168702025014351_0_5__"
+2026-11-25 17:53:25.378 UTC [950455] DETAIL:  Streaming transactions committing after 0/1A44EF0, reading WAL from 0/1A44EB8.
+2026-11-25 17:53:25.378 UTC [950455] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"', forward_changesets 't')
+2026-11-25 17:53:25.379 UTC [950455] LOG:  logical decoding found consistent point at 0/1A44EB8
+2026-11-25 17:53:25.379 UTC [950455] DETAIL:  There are no running transactions.
+2026-11-25 17:53:25.379 UTC [950455] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"', forward_changesets 't')
+2026-11-25 17:53:25.416 UTC [950455] LOG:  could not receive data from client: Connection reset by peer
+2026-11-25 17:53:25.416 UTC [950455] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"', forward_changesets 't')
+2026-11-25 17:53:25.416 UTC [950455] LOG:  unexpected EOF on standby connection
+2026-11-25 17:53:25.416 UTC [950455] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"', forward_changesets 't')
+2026-11-25 17:53:25.429 UTC [950466] LOG:  starting logical decoding for slot "pgactive_5_7712168702025014351_0_5__"
+2026-11-25 17:53:25.429 UTC [950466] DETAIL:  Streaming transactions committing after 0/1A45450, reading WAL from 0/1A44EB8.
+2026-11-25 17:53:25.429 UTC [950466] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/1A456B0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 17:53:25.429 UTC [950466] LOG:  logical decoding found consistent point at 0/1A44EB8
+2026-11-25 17:53:25.429 UTC [950466] DETAIL:  There are no running transactions.
+2026-11-25 17:53:25.429 UTC [950466] STATEMENT:  START_REPLICATION SLOT "pgactive_5_7712168702025014351_0_5__" LOGICAL 0/1A456B0 (pg_version '160015', pg_catversion '202307071', pgactive_version '20109',pgactive_variant 'pgactive', min_pgactive_version '20100', sizeof_int '4',sizeof_long '8', sizeof_datum '8', maxalign '8',float4_byval '0', float8_byval '1', integer_datetimes '1',bigendian '0', db_encoding 'UTF8', replication_sets '"default"')
+2026-11-25 17:53:25.525 UTC [949465] LOG:  DDL LOCK TRACE: acquiring in mode <ddl_lock> from <0> nodes for node1 (7712168697009252831,0,5,) [tracelevel=statement]
+2026-11-25 17:53:25.525 UTC [949465] CONTEXT:  SQL statement "SELECT pgactive.pgactive_acquire_global_lock('ddl_lock')"
+	PL/pgSQL function inline_code_block line 4 at PERFORM
+2026-11-25 17:53:25.525 UTC [949465] STATEMENT:  DO LANGUAGE plpgsql $$
+	BEGIN
+		IF EXISTS (SELECT 1 FROM pg_proc WHERE proname = 'pgactive_acquire_global_lock' AND pronamespace = (SELECT oid FROM pg_namespace WHERE nspname = 'pgactive')) THEN
+			PERFORM pgactive.pgactive_acquire_global_lock('ddl_lock');
+		END IF;
+	END; $$;
+	
+2026-11-25 17:53:25.544 UTC [950468] WARNING:  DDL LOCK TRACE: received global lock confirmation with unexpected lock type (1), waiting for (0)
+2026-11-25 17:53:26.140 UTC [950839] LOG:  DDL LOCK TRACE: acquiring in mode <ddl_lock> from <1> nodes for node1 (7712168697009252831,0,5,) [tracelevel=statement]
+2026-11-25 17:53:26.140 UTC [950839] STATEMENT:  CREATE TABLE public.t (id int PRIMARY KEY, val text);
+2026-11-25 17:53:26.193 UTC [950839] LOG:  DDL LOCK TRACE: acquiring in mode <write_lock> (upgrading from <ddl_lock>) from <1> peer nodes for node1 (7712168697009252831,0,5,) [tracelevel=statement]
+2026-11-25 17:53:26.193 UTC [950839] STATEMENT:  CREATE TABLE public.t (id int PRIMARY KEY, val text);
+2026-11-25 17:53:27.401 UTC [951431] LOG:  DDL LOCK TRACE: acquiring in mode <ddl_lock> from <1> nodes for node1 (7712168697009252831,0,5,) [tracelevel=statement]
+2026-11-25 17:53:27.401 UTC [951431] STATEMENT:  CREATE OR REPLACE FUNCTION public.resolve_conflict(a public.t, b public.t, cmd text, rel regclass, typ pgactive.pgactive_conflict_type, OUT c public.t, OUT action pgactive.pgactive_conflict_handler_action) LANGUAGE plpgsql AS $$ BEGIN c := a; action := 'SKIP'; END $$;
+*** stack smashing detected ***: terminated
+2026-11-25 17:53:27.967 UTC [947850] LOG:  received fast shutdown request
+2026-11-25 17:53:27.971 UTC [947850] LOG:  aborting any active transactions
+2026-11-25 17:53:27.972 UTC [948773] FATAL:  terminating background worker "pgactive supervisor" due to administrator command
+2026-11-25 17:53:27.972 UTC [948783] FATAL:  terminating background worker "pgactive per-db worker" due to administrator command
+2026-11-25 17:53:27.974 UTC [947850] LOG:  background worker "logical replication launcher" (PID 947950) exited with exit code 1
+2026-11-25 17:53:27.975 UTC [947850] LOG:  background worker "pgactive per-db worker" (PID 948783) exited with exit code 1
+2026-11-25 17:53:28.049 UTC [947850] LOG:  background worker "pgactive supervisor" (PID 948773) exited with exit code 1
+2026-11-25 17:53:28.405 UTC [947850] LOG:  background worker "pgactive apply worker" (PID 950468) was terminated by signal 6: Aborted
+2026-11-25 17:53:28.405 UTC [947850] DETAIL:  Failed process was running: pgactive_apply: BEGIN origin(orig_lsn, timestamp): 0/1A533B0, 2026-11-25 17:53:27.872857+00
+2026-11-25 17:53:28.405 UTC [947850] LOG:  terminating any other active server processes
+2026-11-25 17:53:28.407 UTC [947850] LOG:  abnormal database system shutdown
+2026-11-25 17:53:28.433 UTC [947850] LOG:  database system is shut down

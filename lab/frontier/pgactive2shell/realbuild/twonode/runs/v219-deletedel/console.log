@@ -1,0 +1,87 @@
+INITDB1=0
+INITDB2=0
+PGSTART1=0
+PGSTART2=0
+CREATE1=0
+GUC1=0
+CREATE2=0
+GUC2=0
+CREATE_GROUP=0
+NODE1_READY=r
+JOIN_GROUP=0
+NODE2_READY=r
+TABLE1=0
+TABLE_ON_NODE2=t
+HANDLER_FN1=0
+HANDLER_REG1=0
+HANDLER_FN2=0
+HANDLER_REG2=0
+SEED=0
+SEED_ON_NODE2=1
+DELETE1=0
+DELETE2=0
+--- handlers ---
+--- rows ---
+ id | val 
+----+-----
+(0 rows)
+
+ id | val 
+----+-----
+(0 rows)
+
+--- conflict log ---
+evidence/server1.log:2026-11-25 17:53:27.401 UTC [951431] STATEMENT:  CREATE OR REPLACE FUNCTION public.resolve_conflict(a public.t, b public.t, cmd text, rel regclass, typ pgactive.pgactive_conflict_type, OUT c public.t, OUT action pgactive.pgactive_conflict_handler_action) LANGUAGE plpgsql AS $$ BEGIN c := a; action := 'SKIP'; END $$;
+evidence/server1.log:*** stack smashing detected ***: terminated
+evidence/server2.log:2026-11-25 17:53:27.619 UTC [951510] STATEMENT:  CREATE OR REPLACE FUNCTION public.resolve_conflict(a public.t, b public.t, cmd text, rel regclass, typ pgactive.pgactive_conflict_type, OUT c public.t, OUT action pgactive.pgactive_conflict_handler_action) LANGUAGE plpgsql AS $$ BEGIN c := a; action := 'SKIP'; END $$;
+evidence/server2.log:*** stack smashing detected ***: terminated
+--- create group ---
+ pgactive_create_group 
+-----------------------
+ 
+(1 row)
+
+--- join group ---
+ pgactive_join_group 
+---------------------
+ 
+(1 row)
+
+--- nodes ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+--- table ---
+cat: evidence/table2.out: No such file or directory
+--- GUC ---
+ pg_reload_conf 
+----------------
+ t
+(1 row)
+
+--- node status ---
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+ node_name | node_status 
+-----------+-------------
+ node1     | r
+ node2     | r
+(2 rows)
+
+PGSTOP1=0
+PGSTOP2=0
+TERMINATIONS1=1
+TERMINATIONS2=1

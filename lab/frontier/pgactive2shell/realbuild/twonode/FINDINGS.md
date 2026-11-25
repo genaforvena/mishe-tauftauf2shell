@@ -146,3 +146,36 @@ in each server log. The first attempt hit a stale cluster left on port
 replayed cleanly. Exact statuses, hashes and log lines are in
 `clean-archive-replay.txt`. This is an author replay, not an independent
 witness verdict.
+
+## local == NULL canary abort, live (2026-11-25 17:53Z)
+
+`run-two.sh` gained `CONFLICT_TYPE` (default `insert_insert`). The
+`delete_delete` arm seeds one row on node 1, waits for `SEED_ON_NODE2=1`,
+then races DELETEs on both nodes. The handler is registered as
+`delete_delete` and returns `SKIP` (the caller rejects a returned row for
+this conflict type).
+
+This exercises the second caller family, `pgactive_apply.c:1185`
+(`UpdateDelete`) / `:1405` (`DeleteDelete`), which passes `local = NULL`.
+The pinned disassembly says `fcinfo.args[0].isnull = true` becomes `01` in
+the canary low byte at `rbp-0x38`; this host's canary low byte is `00`, so
+the check fails at return.
+
+| Run | Library sha256 prefix | Conflict | Handler | Terminations |
+| --- | --- | --- | --- | --- |
+| `runs/v219-deletedel` | `3177a37c` (vulnerable) | seed + raced DELETE | `delete_delete`, SKIP | 1 each, signal 6 |
+| `runs/v2210-deletedel` | `986917a8` (fixed) | seed + raced DELETE | `delete_delete`, SKIP | 0 |
+
+The vulnerable logs contain `*** stack smashing detected ***: terminated`
+and `background worker "pgactive apply worker" ... was terminated by
+signal 6: Aborted`; the fixed logs have no such line. Contrast with the
+`insert_insert` arm above: `local != NULL` writes `00` into the canary so
+it survives, and the corrupted saved RBP produces signal 11 instead. Both
+outcomes come from the same out-of-object `fcinfo.args[0].isnull` store;
+the observed signal is a function of the canary byte, as predicted.
+
+This closes the "no `local == NULL` conflict has run" gap in the earlier
+causal reading. It does not add attacker byte control: the stored value is
+the fixed boolean `true`. The vulnerable library is restored after both
+runs (verified `3177a37c...162998`), both clusters are stopped by the
+script and no process remains on ports 58431/58432. Rung ceiling unchanged.

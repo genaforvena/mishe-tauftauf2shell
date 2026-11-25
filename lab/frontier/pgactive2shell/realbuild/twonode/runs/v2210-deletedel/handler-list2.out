@@ -1,0 +1,5 @@
+ ch_name |    ch_type    |                                          ch_fun                                          
+---------+---------------+------------------------------------------------------------------------------------------
+ h       | delete_delete | public.resolve_conflict(public.t,public.t,text,regclass,pgactive.pgactive_conflict_type)
+(1 row)
+

@@ -360,3 +360,28 @@ limits are in `realbuild/twonode/FINDINGS.md` and `runs/`. An author
 clean-archive replay of commit `52473a73` reproduced both signal-11
 terminations (`realbuild/twonode/clean-archive-replay.txt`); an independent
 witness verdict is still owed.
+
+## local == NULL conflict: canary abort confirmed live (2026-11-25 17:53Z)
+
+The disassembly model in `realbuild/conflictpath/FINDINGS.md` predicted a
+second, distinct live outcome for the two resolver callers that pass
+`local == NULL` (`pgactive_apply.c:1185` `UpdateDelete` and `:1405`
+`DeleteDelete`): `fcinfo.args[0].isnull = true` writes `01` into the canary
+low byte on this host, so the return-time check aborts, whereas the
+`insert_insert` caller writes `00` there and dies later with a corrupted
+saved RBP. `run-two.sh` now takes `CONFLICT_TYPE` (default
+`insert_insert`) and a `delete_delete` arm that seeds one row on node 1,
+waits for it on node 2, then races DELETEs on both.
+
+With the pinned 2.1.9 library (sha256 `3177a37c...162998`) and a
+`delete_delete` handler returning `SKIP`, both apply workers log
+`*** stack smashing detected ***: terminated` and
+`was terminated by signal 6: Aborted`; `TERMINATIONS1=1`,
+`TERMINATIONS2=1`. The genuine 2.1.10 library (sha256 `986917a8...2885a`,
+same handler and conflict) has `TERMINATIONS1=0`, `TERMINATIONS2=0`.
+The vulnerable library is restored after each run. This is a live
+confirmation of the source/disassembly reading and a second remote-triggered
+DoS differential, not a new primitive: the overwritten word is still the
+fixed canary byte, no chosen bytes, no saved IP and no command side effect.
+Rung ceiling unchanged. Evidence: `realbuild/twonode/runs/v219-deletedel/`
+and `runs/v2210-deletedel/`.
