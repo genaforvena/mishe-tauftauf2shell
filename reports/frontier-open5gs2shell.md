@@ -1,4 +1,11 @@
 # Frontier brief — open5gs2shell (CVE-2026-116543)
+Current status addendum (2026-11-25 16:0xZ): the OOB-written values are
+provably not attacker-chosen. A bounded byte-choice experiment
+(`harness/bytechoice/run.sh`, 11 PASS / 0 FAIL) shows that arbitrary suffixes
+write nothing out of bounds and that injecting CR LF only restarts the same
+forced chain. Rung 3 ASan corruption and rung 4 DEMONSTRATED process kill are
+unchanged; NO r5. Witness replay of the live-NRF claim (#4225/#4263) is still
+pending, so all grades remain author-reported.
 
 Current status (2026-11-25 10:1xZ): rung 3 ASan-confirmed inside the live
 Open5GS v2.8.0 NRF (WRITE of size 1 at `multipart_parser.c:260`, 0 bytes
@@ -442,3 +449,36 @@ attack fault has the same address `0x507000003a91`, `WRITE of size 1`,
 `0 bytes after 65-byte region`, and the same `multipart_parser.c:260` /
 `init:82` / `message.c:3380` frames. This is an author-side clean-source
 receipt; witness replay of #4225 is still pending.
+
+## Byte-choice ceiling (2026-11-25 16:0xZ)
+
+CVE-2026-116543's sink is self-referential, not a chosen-value write. In
+`multipart_parser_init() pinned :89`, `lookbehind = multipart_boundary +
+boundary_length + 1`; with an empty boundary, `multipart_boundary[j]` aliases
+`lookbehind[j-1]`. At pinned :254-260 the byte accepted into
+`lookbehind[2 + index] = c` must equal `multipart_boundary[index]`. Index 0
+is the empty string's NUL; indices 1 and 2 alias `lookbehind[0]` and
+`lookbehind[1]`, which the state machine sets to CR (:232) and LF (:243);
+every later index aliases a byte this same sink already wrote. The accepted
+byte stream is therefore forced to `00 0d 0a` repeating, regardless of
+what the attacker sends.
+
+Measured, with the pinned parser compiled verbatim and a 32-byte adjacent
+heap canary (`harness/bytechoice.c`, `harness/bytechoice/run.sh`, evidence in
+`harness/bytechoice/evidence/bytechoice.txt`; `sha256sum -c pins.sha256`
+still exact):
+
+- Canonical `00 0d 0a` x36: `CANARY_CHANGED=7`,
+  `CANARY=0a000d0a000d0a5a5a5a5a5a5a`.
+- Arbitrary 36-byte `41…` suffix and `41 42 43` x12:
+  `CANARY_CHANGED=0`, canary stays `5a5a…` — no out-of-bounds write at all.
+- Replacing any of the first six pattern bytes with `41`: at most four
+  forced bytes reach the canary and no `41` ever does; the chain breaks at
+  the substituted byte.
+- Injecting `0d 0a` mid-chain: `CANARY_CHANGED=7` with the same pattern —
+  the injected pair only arms `s_part_data_boundary` again.
+
+This closes the one route on this target from the periodic write to a chosen
+pointer, IP or command. The grade stays rung 3 / rung 4 DEMONSTRATED, NO r5.
+This is an author-side negative; it needs no witness replay to narrow a
+claim, and the pending #4225/#4263 live-NRF verdict is unaffected.
