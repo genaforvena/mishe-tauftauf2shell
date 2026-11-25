@@ -170,6 +170,34 @@ This is a build-dependent negative, not a grade change.
   successful replay; author-side, witness verdict UNKNOWN.
 
 
+
+## Clang rebuild: written RNG indices give deterministic chosen-byte control (W9, 2026-11-25 10:06Z, author-side)
+
+A bounded layout probe closed the "other build" UNKNOWN without changing the
+primitive. Rebuilding the same pinned source with clang 18 at `-O0 -g
+-fcommon` changes `.bss` order: `nm` puts
+`display_ipopt.old_rr@0x28f90` (40), then `hp_rand.i@+0x30`,
+`hp_rand.j@+0x34`, `rc4_seedflag@+0x38`, `rc4_sbox@+0x40`. The same 251-byte
+`memcpy` therefore reaches two more live globals, the RC4 indices `i` and
+`j`, which gcc's layout places outside the span.
+
+`wire/inject_rr_ij.py` writes `i0=0x20`, `j0=0x80`, `rc4_seedflag=1` and
+`sbox[0..186]=0x00` from a crafted RR reply. Against a real clang-built
+`hping3 -D -1 -G --rand-dest -I lo -c 24 -i 1 127.0.0.x` on loopback, GDB
+read-only state showed `hp_rand.i=0x20` and `hp_rand.j=0x80` at the first
+filled state (then `i` advancing by 4 per packet, `j` pinned at `0x80`), and
+16/16 subsequent probe destination low bytes were `0x00`, the chosen byte.
+The oracle predicted all 20 low bytes from logged live `i`/`j`/`sbox`; the
+unattacked counterfactual was `0x3b`. Attack: 7 PASS / 0 FAIL. No-injection
+baseline: 4 PASS / 0 FAIL (no filled state, zero chosen-byte destinations).
+Locally patched clang build with the same frames: 4 PASS / 0 FAIL. All probes
+stayed on `127.0.0.x` on `lo`; the raw socket sends 127.0.0.2 -> 127.0.0.1.
+
+Scope: deterministic chosen-byte control in a **specific rebuild**, not the
+gcc build of W2/W6 and not a distribution package. No full IP, pointer,
+command or r5. Full 4-byte address control was deliberately not attempted:
+an `x.x.x.x` probe would leave loopback. Witness verdict UNKNOWN.
+
 ## Current grade (2026-11-25 00:49Z)
 
 Rungs 1-3 on the verbatim pinned upstream function under ASan. Rung 4 is
@@ -185,11 +213,13 @@ runs), with no debugger steering.
 A valid RR reply and the locally patched build stay clean. Only the low byte
 of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. The
 `-O2` rebuild on this host detects the copy in `__memcpy_chk` and aborts
-before any write (W8); an actual distribution build, other fortify settings
-and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
+before any write (W8). The clang `-O0` rebuild (W9) additionally reaches
+`hp_rand.i`/`hp_rand.j`, giving 16/16 deterministic chosen-byte control in
+that build; it is author-side and still only the low byte. An actual
+distribution build and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
 pinned-function stage W207 ESTABLISHED; W6 W212 ESTABLISHED, both with no
-grade change. The two wire stages (#3942) and W5 (#3958) remain author-side
-and their replay verdicts are OWED.
+grade change. The two wire stages (#3942), W5 (#3958) and W9 remain
+author-side with verdicts UNKNOWN.
 
 
 ## Witness verdict (W207, #3822)
