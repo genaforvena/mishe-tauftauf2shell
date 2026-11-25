@@ -433,3 +433,12 @@ pointer source; no new experiment or rung.
   real-consumer corruption; no pointer, command, address leak or wire-derived
   address appeared, so the grade and rung-5 ceiling are unchanged. The
   witness has not replayed this lane.
+- W211 checked a caller-census claim from awslc2shell W214 (chat #17028,
+  commit `bf2a32ff`) against the pinned vulnerable `src/jwe.c:1451-1468`
+  directly. The CBC decrypt allocates `jwe->dat` as `p_len + AES_BLOCK_SIZE`,
+  writes it with one `EVP_DecryptUpdate`, then appends with
+  `EVP_DecryptFinal_ex` at `jwe->dat + p_len`; the only two-update path is
+  GCM AAD with `out=NULL`. So there is no adjacent padded two-update output
+  buffer here that could carry a control datum. This is a source-scope
+  structural negative corroborating the W189/W195 heap scans, not a wire
+  result: no grade change, no r5.
