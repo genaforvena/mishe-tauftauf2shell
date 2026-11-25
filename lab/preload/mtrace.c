@@ -63,6 +63,7 @@ static void mtrace_init(void)
                                           NULL, 0);
     case_arm_file = getenv("MTRACE_CASE_ARM_FILE");
     emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
+    free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
     case_stop_c = getenv("MTRACE_CASE_STOP_C") != NULL;
     dump_bins = getenv("MTRACE_DUMP_BINS") != NULL;
     case_wide = getenv("MTRACE_CASE_WIDE") != NULL;

@@ -2776,3 +2776,69 @@ stays **NOT ACHIEVED**.
       then choose dummy/plant counts that leave the single unsorted V
       immediately after the tcache A. Do not rerun the closed count or
       escaped-name arms unchanged.
+
+26. **Full free-order map of routed `1000`-byte plants — geometry measured,
+    immediate payoff still NEGATIVE (2026-11-25, this wake).** The named
+    experiment was one full-trace process at N=972 with drain `1000x7` and
+    plant `1000x4` both routed through `GET /up`, filler `1x1200`, claim
+    `1039@0x400:0x411,1015`, 20 benign `400x20` churn requests, one thread:
+    tag `n972map2`, log `lab/build/evidence/stock-rails-n972map2-1.server.log`
+    (483,759 lines, M=173146, F=223762, D=5499).
+    - A tracer regression was found and repaired first: commit `c7beffe5`
+      dropped `free_dump = getenv("MTRACE_FREE_DUMP")` while adding
+      `case_wide`, so `MTRACE_FREE_DUMP=1` silently emitted no D lines
+      (`n972map`, 463,477-line log, D=0). The line is restored in
+      `lab/preload/mtrace.c`; the tracer is rebuilt with the documented
+      `gcc -shared -fPIC -O2 lab/preload/mtrace.c -o lab/preload/mtrace.so`.
+      D lines print the chunk's user qwords immediately BEFORE free, so they
+      carry content patterns, not post-free tcache links; tcache vs unsorted
+      is read from free rank and later reuse, not from D directly.
+    - `lab/repro/ruby2shell-freeorder-map.py` tabulates the trace into
+      `lab/build/evidence/n972map2.freeorder.txt`: all 22 slice allocations
+      (`0x3f1` requests, `0x400`-class chunks) and 11 value allocations
+      (`0x400` requests, `0x410`-class chunks) appear, split 14+7 drain and
+      8+4 plant. Drain frees run 113586..113626, plant frees 113994..114017;
+      both classes free last-allocated-first, so tcache capacity 7 puts drain
+      slices ranks 1-7 in tcache and ranks 8-14 in unsorted, while all four
+      plant values fit tcache `0x410`.
+    - Physical successors of the eight planted slices were measured. Three
+      slices sit immediately before a planted value (`0x945f40→0x946340`,
+      `0x946be0→0x946fe0`, `0x947970→0x947d70`), i.e. the wanted
+      `[V 0x400][T 0x410]` adjacency exists. But two of those slices were
+      consumed before the attack by the churn requests (`0x946bf0` reused at
+      L115269 as request `0x78d`; `0x947980` at L132698 as `0xa7e`), and the
+      attack's `0x3f8` mapping buffer allocated fresh at `0x7f7520c00b60`
+      (L430945), not on any planted slice. Its physical neighbor was `0x35`,
+      so the upcase wrote `0x53` onto a small in-use chunk (B L467634 `0x35`
+      → A L467637 `0x53`) and the process aborted with
+      `munmap_chunk(): invalid pointer`: `drain=200 plant=200 attack=000`,
+      zero claim pops at the victim.
+    - Interpretation: the blocker is not adjacency but tcache depth. The 20
+      post-plant churn requests free/reuse `0x400`-class chunks after the
+      plant, leaving a render chunk at the head of tcache `0x400` when the
+      attack parses. Plant chunks are already free before churn (113994..
+      114017), so churn is not needed to release them. Named next: rerun the
+      same full-trace geometry with `RUBY2SHELL_CLAIM_CHURN=0`, and check
+      whether the attack's `0x3f8` buffer lands on a planted slice whose
+      physical successor is a planted `0x410` value. No command, persistence
+      or grade change: stock/oracle-free/persistent rung 5 stays
+      **NOT ACHIEVED**.
+
+27. **Churn-free arm — bounded NEGATIVE on tcache depth (2026-11-25, same
+    wake).** The item-26 prediction was tested directly: identical full-trace
+    geometry with `RUBY2SHELL_CLAIM_CHURN=0` (no 20 post-plant churn requests),
+    tag `n972nochurn`, log `lab/build/evidence/stock-rails-n972nochurn-1.server.log`
+    (203,951 lines, M=70205, F=103339, D=3546; tabulation
+    `lab/build/evidence/n972nochurn.freeorder.txt`). The process survived all
+    requests (`drain=200 plant=200 attack=404 claim=404 probe=404 up=200
+    alive=YES`) and the upcase still expanded a small chunk
+    (B L171136 size `0x95` → A `0x1253`), but the attack's `0x3f8` mapping
+    buffer allocated at `0x7b336c722ff0` (M L171138) — that chunk was freed
+    earlier in the SAME attack request (F L63899, sizefield `0x405`), not on
+    any planted slice (plant slices live at `0x7b336c970b60`..`0x7b336c9737c0`).
+    The 1,200 tiny filler parts themselves recycle `0x400`-class chunks ahead
+    of the upcase, so removing churn does not put a plant slice at tcache
+    `0x400` head. No claim/pop at a planted address, no command or grade
+    change. This closes the churn-count lever; the next arm must change the
+    attack body's own part sizes or ordering so the mapping buffer is the
+    tcache head over a planted slice.
