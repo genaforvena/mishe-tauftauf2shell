@@ -1,0 +1,17 @@
+2026-11-25 02:20:38.800 UTC [3885265] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 02:20:38.800 UTC [3885265] LOG:  listening on IPv4 address "127.0.0.1", port 58421
+2026-11-25 02:20:38.807 UTC [3885265] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/realbuild/sock/.s.PGSQL.58421"
+2026-11-25 02:20:38.816 UTC [3885271] LOG:  database system was shut down at 2026-11-25 02:20:38 UTC
+2026-11-25 02:20:38.912 UTC [3885265] LOG:  database system is ready to accept connections
+2026-11-25 02:20:39.037 UTC [3885286] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 02:20:39.078 UTC [3885286] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 02:20:39.090 UTC [3885265] LOG:  background worker "pgactive supervisor" (PID 3885286) exited with exit code 1
+2026-11-25 02:20:39.375 UTC [3885327] ERROR:  could not parse slot name: pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ
+2026-11-25 02:20:39.375 UTC [3885327] STATEMENT:  SELECT * FROM pgactive.pgactive_parse_replident_name('pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ'::text);
+2026-11-25 02:20:39.435 UTC [3885265] LOG:  received fast shutdown request
+2026-11-25 02:20:39.447 UTC [3885265] LOG:  aborting any active transactions
+2026-11-25 02:20:39.449 UTC [3885265] LOG:  background worker "logical replication launcher" (PID 3885287) exited with exit code 1
+2026-11-25 02:20:39.449 UTC [3885269] LOG:  shutting down
+2026-11-25 02:20:39.452 UTC [3885269] LOG:  checkpoint starting: shutdown immediate
+2026-11-25 02:20:40.318 UTC [3885269] LOG:  checkpoint complete: wrote 1141 buffers (7.0%); 0 WAL file(s) added, 0 removed, 0 recycled; write=0.158 s, sync=0.691 s, total=0.869 s; sync files=417, longest=0.059 s, average=0.002 s; distance=5456 kB, estimate=5456 kB; lsn=0/1A43750, redo lsn=0/1A43750
+2026-11-25 02:20:40.326 UTC [3885265] LOG:  database system is shut down

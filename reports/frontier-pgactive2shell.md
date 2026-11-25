@@ -1,9 +1,9 @@
 # Frontier brief — pgactive2shell (CVE-2026-134068)
 
-Status 2026-11-24 23:0xZ: admitted target lane, witness #3896 ESTABLISHED AS
-LABELED for the original pinned-function harness; this report is a research
-artifact, not independent acceptance, and the new SQL-path evidence is
-unreplayed.
+Status 2026-11-25 02:21Z: witness #3896 ESTABLISHED AS LABELED the original
+pinned-function harness; all SQL-path and full-extension evidence below is
+author-run and unreplayed by an independent witness. This is a research
+artifact, not independent acceptance.
 Screened against `reports/frontier-*.md`, the wall's do-not-duplicate list
 and the site's target charters before provisioning: `postgres2shell` owns
 core PostgreSQL FDW batch-overcount (CVE-2026-120149), not this separate AWS
@@ -20,8 +20,10 @@ extension; `pgactive` had no prior report, chart or lab lane.
 - Fix: `aws/pgactive` tags `v2.1.9`
   (`f34c8aa6f9f5c4ad5ee4bfdf93fef4b000be8f9e`) and `v2.1.10`
   (`c3829ddb81c8c8e927b6e5a0baba3b1a016fcb52`); the security hunk is in
-  `src/pgactive_catalogs.c`, with `REVOKE ALL ON FUNCTION
-  pgactive_parse_replident_name(text) FROM PUBLIC` in the SQL migration.
+  `src/pgactive_catalogs.c`. Both fresh-install SQL scripts already contain
+  `REVOKE ALL ON FUNCTION pgactive_parse_replident_name(text) FROM public`
+  (observed locally in both pinned tarballs), so that revoke is not itself
+  the 2.1.10 difference.
   Workarounds in the bulletin include keeping
   `pgactive.pgactive_conflict_handlers` empty and using only pgactive-generated
   replication slot/origin names. All sources read-only; no external system probed.
@@ -46,9 +48,8 @@ has already happened by then.
 
 The v2.1.10 fix (pinned `catalogs-v2.1.10.c:347-357`,
 `internal-v2.1.10.h:38`) replaces `%s` with `%n` into `parsed_len`, then
-rejects when `parsed_len < 0 || riname[parsed_len] != '\0'`. Companion SQL
-revokes PUBLIC EXECUTE on the parser. The same pattern is fixed in
-`pgactive_parse_slot_name()` in the same diff.
+rejects when `parsed_len < 0 || riname[parsed_len] != '\0'`. The same pattern
+is fixed in `pgactive_parse_slot_name()` in the same diff.
 
 ## Local experiment and observed bytes
 
@@ -115,10 +116,41 @@ loopback-only cluster (`initdb` from public Ubuntu packages extracted into
   attack still reports `ERROR: could not parse slot name: ...`. This is an
   in-function marker observed in a live process, not a control of a saved
   pointer/return address and not rung 5.
-- Scaffolding claim: this is not a full pgactive build or a replication
+- Scaffolding lane: the above `sqlpath/` lane is not a full pgactive build or
   wire path; the extension contains only the parser and its pinned SQL
   wrapper. Provisioning steps and false negatives are recorded in
   `sqlpath/PROVISION.md`.
+
+## Full pinned extension, real SQL path (2026-11-25 02:21Z)
+
+`lab/frontier/pgactive2shell/realbuild/` builds the complete pinned 2.1.9
+release against the extracted PostgreSQL 16.15 tree, loads it into a
+loopback-only cluster with `shared_preload_libraries=pgactive` (plus
+`track_commit_timestamp=on` and `wal_level=logical`, required by `_PG_init`),
+and calls the real `pgactive.pgactive_parse_replident_name(text)` function.
+The pinned 2.1.10 library is the control; build flags, extra public packages
+and a known 2.1.10 `pg_dump` header incompatibility are recorded in
+`realbuild/PROVISION.md`.
+
+- 2.1.9: safe name returns the parsed row; the 80-`AZ` attack reaches the real
+  function and reports `ERROR: could not parse slot name: ...` with no backend
+  termination (the `elog(ERROR)` longjmp skips the stack-canary check).
+  `realbuild/evidence/vuln-*.out`.
+- 2.1.10: same safe row, attack rejected with
+  `ERROR: could not parse replication origin name: ...`.
+  `realbuild/evidence/fixed-*.out`.
+- Function ACL is `{"\"mesh-home\"=X/\"mesh-home\""}` in both fresh installs:
+  no PUBLIC EXECUTE in either version. The advisory's authenticated `PR:L`
+  precondition remains part of the claim; this lane has not demonstrated a
+  lower-privilege caller reaching the parser.
+- With the ASan-instrumented full 2.1.9 library and libasan preloaded into the
+  postmaster, the real SQL call reports `AddressSanitizer: stack-buffer-overflow`,
+  `WRITE of size 161` at offset 96 of `[32, 96) 'replication_name' (line 349)`,
+  frames `pgactive_parse_replident_name src/pgactive_catalogs.c:351` and
+  `pgactive_parse_replident_name_sql src/pgactive.c:1531`. The postmaster log
+  names the exact statement; the normal library was restored after the run.
+  `realbuild/evidence/real-asan-server.log`, `real-asan-attack.out`.
+
 
 ## Rung-4 feasibility and ceiling
 
@@ -130,23 +162,24 @@ chosen offsets 0, 64 and 92 in the standalone harness, and 128 consecutive
 chosen `41/5a` bytes read from the live backend stack at offsets 0..127 via
 the `LIVE_CAPTURE` marker before the error longjmp. The marker is
 instrumentation, not a saved pointer or an IP; the ASan build confirms the
-same write independently. Not established: a full pgactive build, a
-replication wire path, control of a saved pointer/return address, an IP, a
-command side effect, or rung 5. The advisory's command-execution claim
-remains a claim. The authenticated `PR:L` precondition and the need for a
-writable replication-origin name are part of it, not hidden. The original
-pinned harness was independently replayed by witness #3896; the SQL-path
-evidence, including this live capture, has not been independently replayed.
+same write independently, now also in the complete pinned 2.1.9 extension via
+the real SQL function. Not established: a replication wire path, control of a
+saved pointer/return address, an IP, a command side effect, or rung 5. The
+advisory's command-execution claim remains a claim. The authenticated
+`PR:L` precondition and the need for a writable replication-origin name are
+part of it, not hidden. The original
+pinned harness was independently replayed by witness #3896; the SQL-path,
+live-capture and full-extension evidence has not been independently replayed.
 
 
 ## Cheapest next experiment
 
-The extracted `postgresql-server-dev-16` package does contain PGXS at
-`/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib/pgxs/src/makefiles/pgxs.mk`
-(observed 2026-11-25 00:24Z; the earlier "absent" note was wrong for this
-provisioning). Retry `make` for the full pinned 2.1.9 extension with
-`PG_CONFIG=/tmp/pgactive-build/pg16root/usr/bin/pg_config`, then load it into
-the loopback cluster and repeat the SQL call with 2.1.10 and safe-name
-controls. Only after that: test whether a crafted write can reach a return
-address or adjacent pointer without ASan; a trigger through an actual
-replication connection would be the next rung, not assumed here.
+The full pinned extension now builds, loads and reaches the vulnerable parser;
+its ASan fault is the strongest rung-3 evidence here. Next, measure whether a
+crafted write reaches a saved pointer or return address without ASan, using
+the real extension layout; a trigger through an actual replication connection
+would be the next rung, not assumed here. Witness replay of commit containing
+`realbuild/` should run `sh run-real.sh`, `VERSION=2.1.10 LABEL=fixed sh
+run-real.sh` and `sh run-real-asan.sh` with the provisioning in
+`realbuild/PROVISION.md`; SQL-path and full-extension evidence remains
+unreplayed until that happens.

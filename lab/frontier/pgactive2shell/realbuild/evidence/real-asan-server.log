@@ -1,0 +1,76 @@
+2026-11-25 02:21:09.143 UTC [3887581] LOG:  starting PostgreSQL 16.15 (Ubuntu 16.15-0ubuntu0.24.04.1) on x86_64-pc-linux-gnu, compiled by gcc (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0, 64-bit
+2026-11-25 02:21:09.143 UTC [3887581] LOG:  listening on IPv4 address "127.0.0.1", port 58422
+2026-11-25 02:21:09.150 UTC [3887581] LOG:  listening on Unix socket "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pgactive2shell/realbuild/sock-asan/.s.PGSQL.58422"
+2026-11-25 02:21:09.166 UTC [3887590] LOG:  database system was shut down at 2026-11-25 02:21:09 UTC
+2026-11-25 02:21:09.194 UTC [3887581] LOG:  database system is ready to accept connections
+2026-11-25 02:21:09.297 UTC [3887594] LOG:  created database pgactive_supervisordb (oid=16384) during pgactive startup
+2026-11-25 02:21:09.306 UTC [3887594] LOG:  pgactive supervisor restarting to connect to 'pgactive_supervisordb' DB for shared catalog access
+2026-11-25 02:21:09.322 UTC [3887581] LOG:  background worker "pgactive supervisor" (PID 3887594) exited with exit code 1
+=================================================================
+==3887612==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x73417b8000e0 at pc 0x734181491ad0 bp 0x7ffdd847edc0 sp 0x7ffdd847e548
+WRITE of size 161 at 0x73417b8000e0 thread T0
+    #0 0x734181491acf in scanf_common ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342
+    #1 0x7341814cd662 in __isoc23_vsscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1503
+    #2 0x7341814ce23b in __isoc23_sscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1535
+    #3 0x73417d2a9495 in pgactive_parse_replident_name src/pgactive_catalogs.c:351
+    #4 0x73417d28c746 in pgactive_parse_replident_name_sql src/pgactive.c:1531
+    #5 0x63eff6a94f8b in ExecMakeTableFunctionResult (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x361f8b) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #6 0x63eff6aa92f9  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x3762f9) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #7 0x63eff6a89842 in standard_ExecutorRun (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x356842) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #8 0x63eff6c64794  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x531794) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #9 0x63eff6c662e7 in PortalRun (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x5332e7) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #10 0x63eff6c60390  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x52d390) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #11 0x63eff6c6768a in PostgresMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x53468a) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #12 0x63eff6e473d2  (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x7143d2) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #13 0x63eff6bcf7a8 in PostmasterMain (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x49c7a8) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #14 0x63eff6894296 in main (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161296) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+    #15 0x73417fe2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x73417fe2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x63eff6894854 in _start (/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/bin/postgres+0x161854) (BuildId: d12c3ee7733f93c45a2171eed9ac4471edbd01b1)
+
+Address 0x73417b8000e0 is located in stack of thread T0 at offset 96 in frame
+    #0 0x73417d2a93ec in pgactive_parse_replident_name src/pgactive_catalogs.c:348
+
+  This frame has 1 object(s):
+    [32, 96) 'replication_name' (line 349) <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+Shadow bytes around the buggy address:
+  0x73417b7ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b7ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b7fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b7fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b800000: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+=>0x73417b800080: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x73417b800100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b800180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b800200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b800280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73417b800300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3887612==ABORTING
+2026-11-25 02:21:09.818 UTC [3887581] LOG:  server process (PID 3887612) exited with exit code 1
+2026-11-25 02:21:09.818 UTC [3887581] DETAIL:  Failed process was running: SELECT * FROM pgactive.pgactive_parse_replident_name('pgactive_123_1_2_3_AZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZAZ'::text);
+2026-11-25 02:21:09.818 UTC [3887581] LOG:  terminating any other active server processes
+2026-11-25 02:21:09.820 UTC [3887581] LOG:  received immediate shutdown request
+2026-11-25 02:21:09.827 UTC [3887581] LOG:  abnormal database system shutdown
+2026-11-25 02:21:09.832 UTC [3887581] LOG:  database system is shut down
