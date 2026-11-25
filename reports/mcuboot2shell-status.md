@@ -93,3 +93,14 @@ expose the upload path on 127.0.0.1. In the provisioned parent tree, no.
   process; that is a separate bounded experiment, not a claim here. No
   external probe was made. Rung 5 remains UNKNOWN; all wire/process/r5
   negatives from the staged grade still stand.
+
+- Independent read-only source trace confirms the same conclusion: platform
+  byte sources are Zephyr UART/CDC-ACM (`boot/zephyr/serial_adapter.c`),
+  Mynewt hardware UART (`boot/mynewt/src/main.c`), ESP32 UART/USB-JTAG
+  (`boot/espressif/port/serial_adapter.c`); all feed `boot_serial_input()`
+  in-process. The host simulator compiles bootutil + `csupport/run.c` but
+  **not** `boot_serial.c` (`sim/mcuboot-sys/build.rs:604-643`); its CLI has
+  only `run`/`runall`/`sizes`. The Mynewt test builds SMP frames in memory
+  and calls `boot_serial_input()` directly
+  (`boot/boot_serial/test/src/boot_test.c`). `docs/serial_recovery.md`
+  describes an external mcumgr client on `/dev/ttyACM0`, not loopback.
