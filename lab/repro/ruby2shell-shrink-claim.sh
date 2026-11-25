@@ -59,10 +59,17 @@ if [ "${1:-}" = "--one" ]; then
   GDB_ENV=()
   [ -n "${RUBY2SHELL_CLAIM_GDB:-}" ] && GDB_ENV=(MTRACE_CASE_STOP=1)
   [ -n "${RUBY2SHELL_CLAIM_BINDUMPS:-}" ] && GDB_ENV+=(MTRACE_DUMP_BINS=1)
-  SERVER_ENV=("${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
-    MTRACE_CASE_REQUEST=$((N + 44)) \
-    MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
-    LD_PRELOAD="$PWD/lab/preload/mtrace.so")
+  # NO_MTRACE: wire-only condition check — no LD_PRELOAD or MTRACE_* reaches
+  # the server; the tracer cannot confirm a pop in this mode, so only HTTP
+  # codes and process survival are observable.
+  if [ "${RUBY2SHELL_CLAIM_NO_MTRACE:-0}" = 1 ]; then
+    SERVER_ENV=("${THREAD_ENV[@]}")
+  else
+    SERVER_ENV=("${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
+      MTRACE_CASE_REQUEST=$((N + 44)) \
+      MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
+      LD_PRELOAD="$PWD/lab/preload/mtrace.so")
+  fi
   if [ "$STACK" = sinatra ]; then
     env "${SERVER_ENV[@]}" RUBY2SHELL_STOCK_PORT="$PORT" "$RB" "$APP" \
       > "$LOG" 2>&1 &

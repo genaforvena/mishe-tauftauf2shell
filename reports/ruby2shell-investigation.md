@@ -3241,3 +3241,18 @@ after the pop window. The extra small parts change the request shape enough
 that only one run reached a `0x43`-class growth (`0x431→0x453`, run 6) and
 it still missed the claim. The D2 lower/upper bounds are now env-configurable
 (`MTRACE_DUMP_RANGE_LOW`/`_HIGH`, default `0x400`/`0x460`).
+
+`untrace1` checks the no-instrumentation condition: the same production-config
+wire chain with `RUBY2SHELL_CLAIM_NO_MTRACE=1`, so the server starts with
+no `LD_PRELOAD` and no `MTRACE_*` variable in its environment. Eight fresh
+processes: 2/8 (`untrace1-6`, `untrace1-8`) served drain, plant, attack,
+claim, probe and `/up` with 404/404/404/404/404/200 and stayed alive; 6/8
+aborted (`corrupted size vs. prev_size` in five). Without the tracer the pop
+is not directly observable, so survival is only consistent with, not proof
+of, the measured `0x400` pop path. No command side effect exists in this
+arm and no safe/fixed control was run; stock/oracle-free/persistent rung 5
+remains NOT ACHIEVED. The remaining prerequisite for any full-rung-5 claim
+is a wire-observable target action (a request-carried marker) driven by a
+pop whose chosen bytes reach a live object's metadata, plus a code-pointer
+source that does not use mtrace, ObjectSpace.dump, /proc/self/maps or a
+debugger.
