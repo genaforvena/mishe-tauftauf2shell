@@ -1,0 +1,39 @@
+Breakpoint 1 at 0x40c618: file src/sn_utils.c, line 2331.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+25/Nov/2026 10:03:16 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+25/Nov/2026 10:03:16 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+25/Nov/2026 10:03:16 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 10:03:16 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+25/Nov/2026 10:03:16 [sn_utils.c:164] calculated shared secrets for edge authentication
+25/Nov/2026 10:03:16 [supernode.c:660] supernode is listening on UDP 19220 (main)
+25/Nov/2026 10:03:16 [supernode.c:669] supernode opened TCP 19220 (aux)
+25/Nov/2026 10:03:16 [supernode.c:676] supernode is listening on TCP 19220 (aux)
+25/Nov/2026 10:03:16 [supernode.c:685] supernode is listening on UDP 19221 (management)
+25/Nov/2026 10:03:16 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+25/Nov/2026 10:03:16 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+25/Nov/2026 10:03:16 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=sss@entry=0x42f288 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffce90, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffc650 "\003\003", udp_size=86, now=1795601005) at src/sn_utils.c:2331
+2331	            traceEvent(TRACE_INFO, "Rx REGISTER_SUPER_NAK from %s [%s]",
+W13_POST_DECODE
+$1 = (n2n_REGISTER_SUPER_NAK_t *) 0x7fffffffbf60
+W13_SLOT_1672_RAW
+0x7fffffffc5e8:	0x000000000042f288
+W13_SLOT_1696_RAW
+0x7fffffffc600:	0x0000000000433280
+Hardware read watchpoint 2: *(void **)((char *)&nak+14)
+W13_WATCH_ARMED
+
+Hardware read watchpoint 2: *(void **)((char *)&nak+14)
+
+Value = (void *) 0x494d5a48494d5a48
+__memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:266
+warning: 266	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+W13_AFTER_CONTINUE
+#0  __memcpy_avx_unaligned_erms () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:266
+#1  0x000000000041d232 in encode_buf (base=<optimized out>, idx=0x7fffffffc4a0, p=0x7fffffffbf6e, s=48) at src/wire.c:162
+#2  encode_REGISTER_SUPER_NAK (base=base@entry=0x7fffffffb720 "\003\002", idx=idx@entry=0x7fffffffc4a0, common=common@entry=0x7fffffffc5a8, nak=nak@entry=0x7fffffffbf60) at src/wire.c:631
+#3  0x000000000040c7c1 in process_udp (sss=sss@entry=0x42f288 <sss_node>, sender_sock=sender_sock@entry=0x7fffffffce90, sock_size=16, socket_fd=3, udp_buf=udp_buf@entry=0x7fffffffc650 "\003\003", udp_size=86, now=1795601005) at src/sn_utils.c:2344
+W13_DONE
+[Inferior 1 (process 59435) killed]

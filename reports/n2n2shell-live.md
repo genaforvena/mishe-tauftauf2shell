@@ -547,3 +547,47 @@ with a `.rodata` base (`ftbl+0xb4`, `ftbl+0xe4`, `ftbl+0x114`) and an index
 bounded by `cmp $0xb; ja`. The negative is therefore not an artifact of the
 clang non-PIE build: the gcc -O1 build used for W3/W5/W7 has no poisonable
 call target in `process_udp` either.
+
+## W13: the overwritten `sss` spill slot is not consumed (2026-11-25 10:0xZ)
+
+W9 placed `sss` at `nak+1672` in the clang -O2 layout, inside the
+1700-byte token write. W11 fixed only `comm` (+1696) to a valid object;
+this experiment asks whether the remaining corrupted argument slot is
+also consumed after decode.
+
+`live/w13_spill_read.sh` builds the exact W11 non-PIE clang -O2 tree and
+runs two gdb cases against 127.0.0.1. The attack wire is `token_size=1700`
+with the 8-byte override `1682:0x42f3e8` (comm valid, so the run survives
+past the `sn_utils.c:2324` dereference from W10).
+
+- At the post-decode breakpoint (`sn_utils.c:2331`) gdb displays the
+  function arguments as garbage chosen from the wire:
+  `sss=0x5a48494d5a48494d`, `sender_sock=0x5a48494d5a48494d`,
+  `sock_size=1514686797`, `socket_fd=1514686797`,
+  `udp_buf=0x5a48494d5a48494d`, `udp_size=6505530258312677709`.
+  Direct reads confirm `*(uint64_t *)(&nak+1672) = 0x5a48494d5a48494d`
+  and `*(uint64_t *)(&nak+1696) = 0x42f3e8`. The corrupted argument
+  display is therefore the overwritten spill slots, not a register value.
+- A hardware READ watchpoint on `*(void **)((char *)&nak+1672)`, armed
+  after decode and continued through the end of the NAK case, never
+  fired: no `Value =` line, and `process_udp` returned normally to
+  `run_sn_loop` (`sn_utils.c:2664`). No forwarded NAK appeared with the
+  fake `comm`; W11's liveness result used the same wire and remains the
+  liveness evidence.
+- Control: a gdb `p` of the watched address is NOT a valid control —
+  gdb reads memory through ptrace, which cannot trip a hardware
+  watchpoint; that first attempt was rejected. The working control is a
+  safe `token_size=48` NAK with a registered peer and a read watchpoint
+  on `nak+14`: the W3 forwarding encoder reads those bytes and the
+  watchpoint fires. Read watchpoints are live in this build and path.
+
+Interpretation: in this build the overwritten argument slots other than
+`comm` are dead in the NAK path; a corrupted DWARF argument display is
+not evidence of consumption. Combined with W12's zero indirect calls,
+there is no second wire-controlled pointer and no poisonable call target
+in this `process_udp`. Ceiling unchanged (rung 4, no r5). Other builds
+and message paths remain UNKNOWN.
+
+Replay after the control fix: `sh lab/frontier/n2n2shell/live/w13_spill_read.sh`
+— 11 PASS / 0 FAIL, rc 0 (author run 10:02:30Z). Raw logs:
+`live/evidence/w13-{watch,control}{,-sender}.log`, `w13-build.log`.

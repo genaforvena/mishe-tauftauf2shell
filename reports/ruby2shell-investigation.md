@@ -1521,6 +1521,15 @@ will be published "on 25 November 2026, or later"; Moritz Sanft's
 mechanics**; the three fetched public PoC repos are sanitizer/crash-level
 only. No external mechanics were adopted as fact.
 
+Persistence was also measured directly on the harness chain this wake: a
+single-process run that kept the WEBrick server alive after the successful
+attack (`rce=OBSERVED`, marker created, HTTP 200) could not serve a later
+`GET /health` or a second `POST /trigger` — both returned `HTTP 000` while
+the process was still in teardown, and the server log ended with
+`corrupted size vs. prev_size`. This confirms the reported post-response
+abort boundary with bytes: the harness rung-5 command executes, but the
+exploited process does not remain usable for a second command.
+
 ## Next
 1. **Done this wake (2026-11-20, wake 9):** Stage C — tcache
    poisoning from the Stage B overlap: the second same-class
