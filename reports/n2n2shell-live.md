@@ -226,25 +226,27 @@ NAK; no consumed pointer or command execution. Evidence:
 `live/evidence/gdb-canary-2000.out`, `canary-sender.out`,
 `canary-plain-3512.log`.
 
-## Clean-room replay entry point (2026-11-25 01:4xZ)
+## Clean-room replay entry point (2026-11-25 01:4xZ; W3 added 04:0xZ)
 
 `sh lab/frontier/n2n2shell/live/replay-live.sh` builds the pinned tarball
 from scratch in a fresh temporary directory three ways (gcc `-O1` plain,
 clang ASan vulnerable, clang ASan plus the single fixed bound), starts each
 supernode on 127.0.0.1 ports starting at `PORT_BASE` (default 18700), sends
 the committed safe and attack datagrams, and prints `RESULT <n> PASS / <m>
-FAIL`. Author run: 19 PASS / 0 FAIL, rc 0. Pins verify before any build;
-raw logs stay under the temporary directory printed at the end (`KEEP=1`
-retains it). Checks 1-15 cover the ASan stack write, its three pinned
-frames, the safe and fixed controls, and the exact chosen wire bytes.
+FAIL`. Author run after W3 was added: 22 PASS / 0 FAIL, rc 0. Pins verify
+before any build; raw logs stay under the temporary directory printed at the
+end (`KEEP=1` retains it). Checks 1-15 cover the ASan stack write, its three
+pinned frames, the safe and fixed controls, and the exact chosen wire bytes.
 Checks 16-19, run when `gdb` is available (`NO_GDB=1` skips them with a
 loud line), break the plain supernode just after decode at
 `sn_utils.c:2331` and read the chosen words from the live process:
 `SLOT14=0x494d5a48494d5a48`, `SLOT96=0x5a48494d5a48494d`,
-`SLOT104=0x494d5a48494d`. This replaces the manual gdb chosen-byte
-inspection. It still does not replay the W3 peer-forwarding addendum, which
-keeps its own recipe (`live/w3_peer_forward.py` with
-`live/gdb-cmds-w3.txt`).
+`SLOT104=0x494d5a48494d`. Checks 20-22 now replay the W3 peer-forwarding
+path inside the same command: a registered peer receives the safe 86-byte
+NAK and the attack 134-byte NAK with `beyond48=485a4d49485a4d49`. The
+watchpoint-level backtrace and the fixed-build ASan READ still keep their
+separate recipe (`live/w3_peer_forward.py` with `live/gdb-cmds-w3.txt`,
+`live/evidence/w3-gdb.out`, `w3-attack-fixed.log`).
 
 ## W5: pointer-shaped frame slots have no consumer read (2026-11-25 02:3xZ)
 

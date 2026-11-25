@@ -1,9 +1,10 @@
 #!/bin/sh
 # One-command clean-room replay of the n2n2shell live loopback experiment.
 # Builds the pinned vulnerable tree three ways (plain, ASan, fixed+ASan),
-# starts each supernode on 127.0.0.1, sends the safe (token_size=48) and
-# attack (token_size=96) REGISTER_SUPER_NAK datagrams, and checks the
-# observed bytes/reports. No external network contact.
+# starts supernodes on 127.0.0.1, sends the safe and attack REGISTER_SUPER_NAK
+# datagrams, checks the observed bytes/reports, and (checks 20-22) registers a
+# peer and checks the forwarded NAK's chosen bytes. No external network
+# contact.
 #
 #   sh lab/frontier/n2n2shell/live/replay-live.sh
 #
@@ -13,6 +14,7 @@ set -u
 HERE=$(cd "$(dirname "$0")" || exit 1; pwd)
 N2N=$(cd "$HERE/.." || exit 1; pwd)
 SEND=$HERE/send_nak.py
+W3=$HERE/w3_peer_forward.py
 TARBALL=$N2N/provision/n2n-vuln.tar.gz
 WORK=${TMPDIR:-/tmp}/n2n2shell-live-replay.$$
 BASE=${PORT_BASE:-18700}
@@ -174,6 +176,34 @@ EOF
 else
     echo "SKIP gdb chosen-byte checks (gdb absent or NO_GDB=1)"
 fi
+
+# W3 consumer/re-emission: register a peer, send a safe or oversized NAK,
+# and check what the forwarding encoder emits. The plain build and the
+# committed W3 sender are reused; ports +40/+44 avoid the gdb case's +30.
+run_w3_case() {
+    mode=$1 port=$2
+    "$PLAIN/supernode" -f -v \
+        -p "127.0.0.1:$port" -t "$((port+1))" \
+        -c "$PLAIN/community.list" -F labfed -M \
+        >"$WORK/w3-$mode.log" 2>&1 &
+    SN_PID=$!
+    sleep 1
+    python3 "$W3" "$port" "$((port+2))" "$mode" >"$WORK/w3-$mode-sender.log" 2>&1
+    sleep 1
+    kill "$SN_PID" 2>/dev/null
+    wait "$SN_PID" 2>/dev/null
+    SN_PID=
+}
+run_w3_case safe "$((BASE+40))"
+run_w3_case attack "$((BASE+44))"
+grep -q 'REGISTER_SUPER reply from' "$WORK/w3-safe-sender.log" &&
+    grep -q 'REGISTER_SUPER reply from' "$WORK/w3-attack-sender.log"
+check 20-w3-peer-registered "$?"
+grep -q 'mode=safe wire token len=48 first=485a4d49485a4d49' "$WORK/w3-safe-sender.log"
+check 21-w3-safe-forward "$?"
+grep -q 'mode=attack wire token len=96' "$WORK/w3-attack-sender.log" &&
+    grep -q 'beyond48=485a4d49485a4d49' "$WORK/w3-attack-sender.log"
+check 22-w3-attack-forward-beyond48 "$?"
 echo "RESULT $PASS PASS / $FAIL FAIL"
 echo "RAW $WORK"
 [ "$FAIL" -eq 0 ]
