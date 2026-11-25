@@ -1,0 +1,6 @@
+upstream/
+fixed/
+build-*/
+harness/*-asan
+harness/*-plain
+evidence/*.out
