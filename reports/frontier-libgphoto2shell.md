@@ -440,3 +440,22 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   unwitnessed rung 4, rung 5 UNKNOWN; no new witness ask, no re-send.
   Citations and disposition:
   `lab/frontier/libgphoto2shell/evidence/w181-consumer-pointer-lane.out`.
+
+- Natural heap-neighbour pointer lane closed on the measured real build
+  (W182, 2026-11-25): with the W180 plain 2.5.34 replay tree and no lab
+  drain/guard objects, the 464-byte `:154` destination window past `priv`
+  contains no live allocation or pointer at the write moment; gdb at real
+  `jl2005c.c:154` shows 56 zero qwords at `priv+0x4050`, and the chunk
+  immediately after `priv` is the top chunk (size `0x14cb1` at
+  `priv+0x4048`). The first objects carved from that window are 15
+  `malloc(11)` filename strings allocated after `jl2005c_init` returns,
+  which reinitialize it. With the lab `GUARDS=4/DRAIN=20` layout the window
+  instead holds two zeroed `malloc(0x180)` drain/guard buffers from
+  `gp_port_read`/vusb, again with no pointer. COUNT=1053 in the natural
+  layout overwrites the top size and aborts in `malloc(): corrupted top
+  size`; COUNT=100 is clean. So device bytes can corrupt allocator
+  metadata, but a pointer still needs a probe-supplied address or a
+  lab-placed victim (W170-W172), consistent with W168's grooming failures.
+  Closed for this build/config only, not all allocator states; grade and
+  rung 5 UNKNOWN unchanged. Evidence:
+  `lab/frontier/libgphoto2shell/evidence/w182-natural-heap-ceiling.out`.

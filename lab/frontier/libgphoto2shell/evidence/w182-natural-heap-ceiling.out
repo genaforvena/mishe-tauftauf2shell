@@ -1,0 +1,57 @@
+W182 2026-11-25 04:0xZ -- natural heap-neighbour pointer lane, measured on the
+committed W180 plain real 2.5.34 build (lab clean-archive replay tree
+/tmp/w180-final; tarball/patch/source pins as in REPLAY.md). No new source,
+pin, harness or victim object; no probe-supplied address.
+
+Observers, both read-only against the real gp_camera_init() path:
+
+1. LD_PRELOAD lab logger (all malloc/calloc/realloc/free sizes), driver
+   evidence/replay-stack-leak-probe.c, safe input
+   M2SHELL_JL2005_COUNT=100 M2SHELL_JL2005_LEN=0x3E28
+   M2SHELL_VUSB_GUARDS=0 M2SHELL_VUSB_DRAIN=0 M2SHELL_JL2005_FILL=0
+   M2SHELL_JL2005_TOTAL=1:
+
+   MALLOC 441 16448 0x...310   <- priv (CameraPrivateLibrary)
+   window priv+0x4040 .. priv+0x41d8 (464 bytes) has NO live allocation
+   MALLOC 483..497 11 0x...360 .. 0x...520  <- 15 filename strings,
+       allocated at priv+0x4050..+0x4210 AFTER jl2005c_init returns
+
+2. gdb -batch, breakpoint at real jl2005c/jl2005c.c:154, same natural env:
+
+   Breakpoint 1, jl2005c_init (camera=0x..., port=0x..., priv=0x...) at jl2005c/jl2005c.c:154
+   154  memmove(priv->table, info + 0x30, alloc_table_size - 0x30);
+   PRIV=0x555555561310 ALLOC_TABLE_SIZE=2048
+   NEIGHBOUR_A (priv+0x4050):
+   0x555555565360: 0x0000000000000000  0x0000000000000000
+   ... 56 consecutive qwords, all zero ...
+   NEIGHBOUR_B (priv+0x41e0): 8 qwords, all zero
+
+   Header dump at priv+0x4030:
+   0x555555565350: 0x0000000000000000  0x0000000000014cb1
+   -> the chunk after priv is the TOP CHUNK; its size field at priv+0x4048
+      is 0x14cb1 and the rest of the 464-byte destination is wilderness.
+
+With the W180 lab layout instead (GUARDS=4, DRAIN=20) the same window holds
+two all-zero malloc(0x180) chunks at priv+0x4050 and priv+0x41e0. Their
+allocation sites resolved via return addresses to libgphoto2_port
+gp_port_read -> jl2005c.c+0x4346 -> vusb.so+0x3288/+0x339e, i.e. the lab
+drain/guard buffers, not natural consumer objects; no pointer either.
+
+Attack in the natural layout (guards/drain disabled), COUNT=1053:
+   BEFORE PRIV=0x555555561310 SIZE=16896
+   0x555555565350: 0x0000000000000000  0x0000000000014cb1
+   malloc(): corrupted top size
+   Program received signal SIGABRT, Aborted.
+Safe control, COUNT=100: gp_camera_init rc=0, list_files rc=0 count=100.
+Fixed control remains the committed harness result (fixed pin returns -3,
+no oversized read); no fixed rebuild was needed for this layout claim.
+
+Disposition: the measured real build has NO natural pointer in the 464-byte
+:154 destination window at the moment of the write -- only the top-chunk
+size field and zeroed wilderness. Later allocations carve that memory and
+write their own metadata/data, and free() writes tcache links after the
+overflow. Device bytes can therefore corrupt the top size (an availability
+abort), but steering a pointer still needs a probe-supplied address or a
+lab-placed victim (W170-W172); W168's outside-grooming failures agree.
+Lane CLOSED for this build/config, not generalized to every allocator state.
+Grade unchanged: author-side unwitnessed rung 4 scopes, rung 5 UNKNOWN.
