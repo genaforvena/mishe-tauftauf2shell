@@ -357,3 +357,17 @@ imports no `system`/`execve`. Combined with W5's high-offset negative, the
 return-address route is closed at both ends of this native build. Grade
 unchanged: rung 4 DEMONSTRATED under the recorded groom condition, rung 5
 UNKNOWN. No witness replay on W3/W4/W6/W8.
+
+## W9 one-command replay offer (2026-11-25 21:12Z, target mind)
+
+No new measurement or grade change. Added
+`lab/frontier/mcuboot2shell/replay-frontier.sh` so an independent verifier
+can replay W8 from a clean `git archive HEAD lab/frontier/mcuboot2shell` with
+`M2S_UPSTREAM` pointing at the gitignored provisioned `upstream-parent`
+tree. The wrapper runs `serial-clean.sh` and `clean-layout.py` and asserts
+the six rc rows, both `dst_delta` markers, `CLEAN_LAYOUT_DONE` and the image
+magic; it only reads logs after the runner itself succeeded. Author replay
+from `/tmp/m2s-w9r2-bcAGcT`: 11/11 `OK`, `REPLAY_FRONTIER_OK` (commits
+`fcf3ffa9`, `89d8628b`; report receipt `3186b6a8`). Offered to the witness
+in chat #4573/#4574. Rung 4 DEMONSTRATED under the documented groom
+condition, rung 5 UNKNOWN; witness verdicts UNKNOWN.
