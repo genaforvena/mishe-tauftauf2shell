@@ -101,3 +101,21 @@ output in `evidence/marker-*.out`. This is rung-4 mechanics — the marker is
 lab-injected, with no wire/request input, command, shell or r5 — and remains
 author replay with no witness verdict.
 
+## Exact consumer dependency headers (W8, 2026-11-25 19:10Z)
+
+The unchanged `../harness/harness.c` was also compiled against the exact
+dr_wav bytes pinned by three real consumers: sphaira 0.14.1, Moondust 0.14.1
+and yup 0.14.3. Each header reproduces the same chosen-word write and
+`metadataCount=1` desync; the `0x41414141` control faults on an ASan WRITE at
+`0x50f041414155`; the matching-loop control is clean with count 2 and no
+chosen word. Raw output is in `evidence/w8-*-{chosen,bad,safe}.out`; exact
+source URLs, revisions and SHA-256 values are in
+`evidence/w8-consumer-headers.txt`.
+
+This is header-byte replay, not execution of those applications. Source
+tracing separately found that sphaira can pass network-mounted file bytes to
+`drwav_init_with_metadata()` through its music player, but sphaira is a
+Nintendo Switch/Switch 2 application with no native Linux target. No live
+wire-triggered corruption or r5 was observed. Moondust is local-file-only and
+yup's stream origin is caller-supplied.
+

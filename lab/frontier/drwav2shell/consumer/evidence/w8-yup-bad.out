@@ -1,0 +1,20 @@
+target_ptr=(nil)
+mode=bad wav_bytes=150 ptr_low=0x41414141 value=0x4841434b
+DRWAV_VERSION_STRING=0.14.3
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2877973==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x613b1e6466aa bp 0x7ffee8a468a0 sp 0x7ffee8a46780 T0)
+==2877973==The signal is caused by a WRITE memory access.
+    #0 0x613b1e6466aa in drwav__read_cue_to_metadata_obj /tmp/drwav-yup-pin/dr_wav.h:2281
+    #1 0x613b1e64a92e in drwav__metadata_process_chunk /tmp/drwav-yup-pin/dr_wav.h:2800
+    #2 0x613b1e652b8e in drwav_init__internal /tmp/drwav-yup-pin/dr_wav.h:3699
+    #3 0x613b1e65c2f1 in drwav_init_memory_with_metadata /tmp/drwav-yup-pin/dr_wav.h:5643
+    #4 0x613b1e66ef60 in main lab/frontier/drwav2shell/harness/harness.c:122
+    #5 0x737fb742a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x737fb742a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x613b1e643604 in _start (/tmp/drwav-yup-asan+0x6604) (BuildId: d16b89d9ba92daad36d3ff99bb17ff96c7cf7747)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /tmp/drwav-yup-pin/dr_wav.h:2281 in drwav__read_cue_to_metadata_obj
+==2877973==ABORTING
+rc=1

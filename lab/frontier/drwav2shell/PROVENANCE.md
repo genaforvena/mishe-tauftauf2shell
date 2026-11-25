@@ -66,3 +66,19 @@ then `sha256sum -c pins/pins.sha256` (3 files OK) and `sh harness/run-all.sh`
 in the extracted tree: 25 PASS / 0 FAIL in
 `harness/evidence/run-all-archive.log` (not committed; replay log lives in the
 throwaway tree). Commit that carried the archive: `0a0ec93f`.
+
+## W8 consumer dependency replay (2026-11-25 19:10Z)
+
+Public source indexes and raw GitHub reads identified three real consumers
+whose pinned dr_wav bytes contain the same `smpl`/`cue` desync: sphaira,
+Moondust and yup. The exact headers were fetched from the revisions recorded
+in `consumer/evidence/w8-consumer-headers.txt` and compiled unchanged with
+`harness/harness.c`. No consumer or library source was modified. The replay
+used the same in-memory 150-byte RIFF and ASan build flags as the primary
+0.14.5 lane; raw output is in `consumer/evidence/w8-*-{chosen,bad,safe}.out`.
+
+This proves the dependency bytes, not execution of the applications. Source
+tracing found sphaira's network-mount -> file browser -> music player ->
+`drwav_init_with_metadata()` path, but its Switch-only toolchain prevents a
+native loopback replay in this plant. All network access was source
+provisioning; no external target was probed.

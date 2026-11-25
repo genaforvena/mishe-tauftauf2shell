@@ -1,4 +1,4 @@
-# drwav2shell — admitted status (2026-11-25 08:35Z)
+# drwav2shell — status (updated 2026-11-25 19:10Z)
 
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
@@ -178,8 +178,8 @@ makes the low-half pointer land on a useful object without harness grooming.
 - Moondust (`fe246974754b09bf5716a93458583467037e8c64`) vendors 0.14.1, whose
   pass-1/pass-2 `smpl` cursor desync has the same shape
   (`wav/dr_wav.h:2208,2236,2751-2753`), and `MDAudioWAV::openRead()`
-  (`audio_wav.cpp:321-341`) calls `drwav_init_with_metadata()`. Its input is a
-  local `SDL_RWFromFile` path (`audio_processor.cpp:166`); no network source
+  (`audio_wav.cpp:327-343`) calls `drwav_init_with_metadata()`. Its input is a
+  local `SDL_RWFromFile` path (`audio_processor.cpp:171`); no network source
   was found, so it is not an r5 lane. GT3 is also on byte-identical 0.14.6.
 - Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen control
   flow to a lab marker; no wire-driven corruption, command, shell, live
@@ -193,4 +193,39 @@ makes the low-half pointer land on a useful object without harness grooming.
   14/0; `tools/check-reproducibility.py` GREEN (29 files). No W1-W4 replay was
   repeated to the witness.
 
+
+## W8 — real remote-file consumer on vulnerable 0.14.1; no live r5 execution (2026-11-25 19:10Z)
+
+- Broader public-source survey found sphaira and yup as new real
+  metadata-API callers on older vulnerable revisions. Exact dependency headers
+  were fetched and replayed with the unchanged harness: sphaira 0.14.1
+  (`b962384395249f54168d5f5f175c47bd7b39dc1d`, SHA-256
+  `a4bd7d50168b9f65e2106b341d94531d5a2283bc672a4ae184e311188f6674ce`),
+  Moondust 0.14.1 (byte-identical upstream tag, SHA-256
+  `5e60ebb49b738df317e45f955c5032bc7858540d0f90e426364c5f8dc9d848c4`),
+  and yup 0.14.3 (byte-identical upstream tag, SHA-256
+  `3d1b2f6152fe443a6d1273d9b0441b1b11ae1d71d07dbd682a0a014b3c329fd9`).
+  Each exact header gives chosen word present, `metadataCount=1`, ASan WRITE
+  SEGV at `0x50f041414155`, and a clean matching-loop control. Raw output:
+  `consumer/evidence/w8-{moondust,sphaira,yup}-{chosen,bad,safe}.out`; exact
+  URLs/hashes: `consumer/evidence/w8-consumer-headers.txt`.
+- Material positive: sphaira
+  `3e7a3a8b5f27987e907da97b037e6d7714d81553` mounts HTTP/WebDAV/FTP/NFS/SMB2
+  by default (`app.cpp:2158-2198`), exposes them in the file browser, and a
+  user-selected `.wav` passes the network-backed `FsStdio` and path to
+  `music::Menu` (`filebrowser.cpp:717-718`) -> `audio::OpenSong()` ->
+  `drwav_init_with_metadata()` (`audio.cpp:478-481`). `FsStdio` uses
+  `std::fopen` (`fs.cpp:484-502`), so remote file bytes reach the vulnerable
+  parser. This is user-driven remote-file playback, not a request listener.
+- Live r5 remains unexecuted: sphaira requires the Nintendo Switch/Switch 2
+  `DEVKITPRO` toolchain (`CMakeLists.txt:9-27`) and has no native/Linux target.
+  No Switch runtime is in scope. A Linux wrapper would be synthetic rung 4.
+  Moondust remains local-only (`SDL_RWFromFile`); yup's generic `InputStream`
+  has no network caller in-repo. G-Diffuser, OpenRBX and GT3 are fixed 0.14.6.
+- No exactly-0.14.5 real consumer was found; Sourcegraph broad queries were
+  capped and authenticated GitHub code search was unavailable, so absence is
+  not proved. Grade unchanged: rung 3 real consumer/public API; rung 4
+  file-chosen control flow to a lab marker; no live wire-triggered corruption,
+  command, shell, service, W1-W4 witness verdict or r5. No W1-W4 replay was
+  re-queued. Source provisioning only; no external probe.
 

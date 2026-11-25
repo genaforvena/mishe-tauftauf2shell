@@ -1,0 +1,8 @@
+target_ptr=0x50f000000040
+mode=chosen wav_bytes=150 ptr_low=0x00000040 value=0x4841434b
+DRWAV_VERSION_STRING=0.14.3
+target_before=5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a
+init=OK metadataCount=1
+target_after=5a5a5a5a000000004b434148424242426461746100000000
+CHOSEN_WORD_PRESENT=1
+rc=0

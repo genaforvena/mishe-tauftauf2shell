@@ -1,0 +1,62 @@
+W8 real-consumer dr_wav header pins
+===================================
+
+All three headers were fetched from the exact consumer/dependency revisions
+below and compiled unchanged with the lab's harness.c. Source fetching is
+provisioning only; no external system was probed.
+
+Moondust
+--------
+Repository: https://github.com/WohlSoft/Moondust-Project
+Commit: fe246974754b09bf5716a93458583467037e8c64
+Path: _common/AudioProcessor/codec/wav/dr_wav.h
+Raw source: https://raw.githubusercontent.com/WohlSoft/Moondust-Project/fe246974754b09bf5716a93458583467037e8c64/_common/AudioProcessor/codec/wav/dr_wav.h
+SHA-256: 5e60ebb49b738df317e45f955c5032bc7858540d0f90e426364c5f8dc9d848c4
+Identity: byte-identical to upstream wav-0.14.1
+          (3141b54b6b0067d15c4a3ec0877f2141a2a11347).
+Version: 0.14.1
+Evidence: w8-moondust-{chosen,bad,safe}.out
+
+sphaira
+-------
+Repository: https://github.com/NaGaa95/sphaira
+Commit: 3e7a3a8b5f27987e907da97b037e6d7714d81553
+Dependency pin: sphaira/CMakeLists.txt:300-305, mackron/dr_libs
+                 b962384395249f54168d5f5f175c47bd7b39dc1d
+Raw source: https://raw.githubusercontent.com/mackron/dr_libs/b962384395249f54168d5f5f175c47bd7b39dc1d/dr_wav.h
+SHA-256: a4bd7d50168b9f65e2106b341d94531d5a2283bc672a4ae184e311188f6674ce
+Version: 0.14.1
+Evidence: w8-sphaira-{chosen,bad,safe}.out
+
+yup
+---
+Repository: https://github.com/kunitoki/yup
+Commit: 541d48b331541ef37ea69b87a2100fda0cb2916c
+Dependency pin: thirdparty/dr_libs, mackron/dr_libs
+                 d6e1d922fb7f5c2e0052da566a8a30f0e6b8f613
+Raw source: https://raw.githubusercontent.com/mackron/dr_libs/d6e1d922fb7f5c2e0052da566a8a30f0e6b8f613/dr_wav.h
+SHA-256: 3d1b2f6152fe443a6d1273d9b0441b1b11ae1d71d07dbd682a0a014b3c329fd9
+Identity: byte-identical to upstream wav-0.14.3
+          (1d7bfaf0c3821c820164a7a6b2742523503a2ce3).
+Version: 0.14.3
+Evidence: w8-yup-{chosen,bad,safe}.out
+
+Runtime result for each exact header
+-----------------------------------
+chosen: DRWAV_VERSION_STRING matches above; init=OK metadataCount=1;
+         CHOSEN_WORD_PRESENT=1; rc=0.
+bad:    ASan SEGV on unknown address 0x50f041414155; WRITE memory access;
+         frame 0 drwav__read_cue_to_metadata_obj; rc=1.
+safe:   init=OK metadataCount=2; CHOSEN_WORD_PRESENT=0; rc=0.
+
+Replay shape used on this host
+------------------------------
+  mkdir -p /tmp/drwav-<consumer>-pin
+  ln -sf /tmp/<consumer>-dr_wav.h /tmp/drwav-<consumer>-pin/dr_wav.h
+  gcc -O0 -g -fsanitize=address -I /tmp/drwav-<consumer>-pin \
+      -o /tmp/drwav-<consumer>-asan lab/frontier/drwav2shell/harness/harness.c
+  /tmp/drwav-<consumer>-asan chosen
+  /tmp/drwav-<consumer>-asan bad
+  /tmp/drwav-<consumer>-asan safe
+
+The source URLs and SHA-256 values above are the reproduction prerequisites.

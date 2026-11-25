@@ -1,10 +1,11 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 07:52Z: STAGED and HANDED OFF. Brief, status, charter and
-seed wall are written; inner two-pane window 152 is live (panes %306/%307,
-dead=0, captures 902/248 bytes) and registered 153/153 unique entries.
-Commit `0a0ec93f`; clean git-archive replay gave 25 PASS / 0 FAIL with all
-three pinned hashes OK. Witness replay at 07:52Z: ESTABLISHED AS LABELED.
+Status 2026-11-25 19:10Z: rung 3 real consumer/public API; rung 4
+file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
+real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
+runtime-confirmed the exact sphaira, Moondust and yup dependency headers.
+The Switch-only app was not executed, so no live wire-triggered corruption,
+command, shell or r5 is claimed. W1-W4 witness verdicts remain UNKNOWN.
 
 ## Verified ground truth
 
@@ -68,13 +69,14 @@ headers. `sh harness/run-all.sh` → 25 PASS / 0 FAIL, GCC and Clang:
 - Rung 2 (state failure): observed cursor/capacity divergence
   (`metadataCount=1` after two metadata chunks) before the store.
 - Rung 3: ASan/Clang WRITE fault in the real library through the public API.
-- Rung 4: PARTIAL — chosen bytes and file-carried low-half pointer control.
-  The high pointer half and the concrete destination address depend on heap
-  layout. In a plain build under fixed ASLR the file-chosen word was written
-  into the consumer's own whole-file buffer with a debugger-measured low
-  pointer; no wire input, virtual-function/return-address overwrite,
-  control-flow hijack or command has been demonstrated.
-- Rung 5: NOT CLAIMED. No command execution, no shell, no IP, no live server.
+- Rung 4: chosen bytes at an application-owned destination, fixed-address
+  writes in a non-PIE consumer, and file-chosen control flow to a lab-injected
+  benign marker in a real consumer call path. The marker remains rung-4
+  mechanics; no command, shell or live service was observed.
+- Rung 5: NOT CLAIMED. W8 found sphaira's network-mount -> music player ->
+  vulnerable `drwav_init_with_metadata()` source path and confirmed its exact
+  0.14.1 header, but the Switch-only application was not executed. No live
+  wire-triggered corruption, pointer-to-IP, command, shell or r5 is observed.
 - Caveat preserved: an earlier attempt using a global destination in a
   different ASan allocator region produced a heap-buffer-overflow before the
   intended readback; only the pointer's low half is writable, so the high
@@ -267,9 +269,9 @@ vendors 0.14.1, whose `drwav__read_smpl_to_metadata_obj()` returns the full
 chunk read count on loop-count mismatch and whose pass-2 cursor still
 increments (`_common/AudioProcessor/codec/wav/dr_wav.h:2208,2236,2751-2753`),
 so the same desync shape is present there. Its
-`MDAudioWAV::openRead(SDL_RWops*)` (`audio_wav.cpp:321-341`) calls
+`MDAudioWAV::openRead(SDL_RWops*)` (`audio_wav.cpp:327-343`) calls
 `drwav_init_with_metadata()`, but the input comes from `SDL_RWFromFile`
-(`audio_processor.cpp:166`) on a local file path; no network source was found.
+(`audio_processor.cpp:171`) on a local file path; no network source was found.
 Moondust is a real metadata-API consumer of a vulnerable-shaped library but
 NOT a network-facing one, so it is not an r5 lane either.
 
@@ -285,5 +287,77 @@ Clean-archive replay at working HEAD (2026-11-25 15:13Z,
 3/3 OK, consumer hashes 3/3 OK, harness 25/0, consumer 18/0, appdest 11/0,
 nopie 11/0, marker 14/0; `tools/check-reproducibility.py` GREEN (29 files).
 W1-W4 replays were not repeated to the witness.
+
+
+## W8 — real remote-file consumer found on vulnerable 0.14.1; live r5 lane unexecuted (2026-11-25 19:10Z)
+
+W8 is a bounded source/provisioning incident, not another clean-archive
+replay. A broader Sourcegraph survey found two new real metadata-API callers
+on older dr_wav revisions, and direct header replay confirmed all three
+consumer headers below:
+
+- Moondust `fe246974754b09bf5716a93458583467037e8c64`,
+  `_common/AudioProcessor/codec/wav/dr_wav.h`: byte-identical to upstream
+  0.14.1, SHA-256 `5e60ebb49b738df317e45f955c5032bc7858540d0f90e426364c5f8dc9d848c4`.
+- sphaira `3e7a3a8b5f27987e907da97b037e6d7714d81553` pins dr_libs
+  `b962384395249f54168d5f5f175c47bd7b39dc1d`; its header reports 0.14.1,
+  SHA-256 `a4bd7d50168b9f65e2106b341d94531d5a2283bc672a4ae184e311188f6674ce`.
+- yup `541d48b331541ef37ea69b87a2100fda0cb2916c` pins dr_libs
+  `d6e1d922fb7f5c2e0052da566a8a30f0e6b8f613`; its header is byte-identical
+  to upstream 0.14.3, SHA-256
+  `3d1b2f6152fe443a6d1273d9b0441b1b11ae1d71d07dbd682a0a014b3c329fd9`.
+
+The unchanged `harness/harness.c` compiled against each exact header gives
+`CHOSEN_WORD_PRESENT=1`, `metadataCount=1`, and ASan WRITE SEGV at
+`0x50f041414155` in `drwav__read_cue_to_metadata_obj`; the matching-loop
+control gives `metadataCount=2`, no chosen word and rc 0. Raw output is in
+`consumer/evidence/w8-{moondust,sphaira,yup}-{chosen,bad,safe}.out`; exact
+source URLs and hashes are in `consumer/evidence/w8-consumer-headers.txt`.
+This upgrades W6's Moondust "vulnerable-shaped" source observation to
+runtime-confirmed bytes and shows that the same root cause is not limited to
+the advisory's tested 0.14.5 revision. Source inspection also found the same
+pass-1/pass-2 shape in upstream tags 0.13.17 and 0.14.0-0.14.4; those tags
+were not all runtime-replayed.
+
+Reachability produced one material positive and two negatives. Moondust's
+only metadata-API input is `XTConvert`/`AudioConverterTest` local path ->
+`SDL_RWFromFile` (`audio_processor.cpp:171`) -> `MDAudioWAV::openRead()`; no
+custom network `SDL_RWops`, HTTP downloader handoff or server packet path
+reaches it. yup's `WaveAudioFormat::createReaderFor(InputStream*)` calls
+`drwav_init_with_metadata()` (`yup_WaveAudioFormat.cpp:84`) and consumes the
+metadata, but its stream origin is caller-supplied and no network caller was
+found in-repo. G-Diffuser is a new caller on fixed 0.14.6; OpenRBX and GT3
+remain fixed as recorded in W6.
+
+sphaira is the first real consumer found where network-derived bytes can
+reach the vulnerable metadata API. At
+`3e7a3a8b5f27987e907da97b037e6d7714d81553`, startup mounts HTTP, WebDAV, FTP,
+NFS and SMB2 devoptabs by default (`app.cpp:2158-2198`; SFTP is optional).
+The file browser enumerates those mounts (`location.cpp:46-51`,
+`filebrowser.cpp:1638-1650`), creates an `FsStdio`, and a user opening a
+`.wav` passes that exact Fs and path to `music::Menu`
+(`filebrowser.cpp:717-718`) -> `audio::OpenSong()`
+(`music_player.cpp:70`) -> `DrWAV::LoadFile()` ->
+`drwav_init_with_metadata()` (`audio.cpp:478-481`). `FsStdio` reads through
+`std::fopen` (`fs.cpp:484-502`), so the devoptab fetches remote file bytes.
+This is user-driven remote-file playback, not a request-driven service or
+listener, but it is a genuine network-input path to vulnerable parser bytes.
+
+The live r5 step is blocked by target shape, not by missing source evidence:
+sphaira's root CMake requires `DEVKITPRO` and selects the Nintendo Switch or
+Switch 2 toolchain (`CMakeLists.txt:9-27`); no native/Linux target exists.
+This plant has no Switch runtime in scope, so the shipped app was not built
+or exercised and no wire-triggered crash/control flow was observed there.
+A Linux wrapper around `audio.cpp` would be synthetic and stay rung 4. The
+measured result is therefore exact vulnerable consumer bytes plus a complete
+source-bound remote-file input chain, not r5.
+
+No exactly-0.14.5 real consumer was found in the indexed sources. The survey
+hit Sourcegraph's broad-query cap and lacked authenticated GitHub code search,
+so this is not proof of absence. Grade unchanged: rung 3 real consumer/public
+API; rung 4 file-chosen control flow to a lab marker in a -no-pie consumer;
+no wire/request-driven corruption in a live target, command, shell, live
+service, witness verdict on W1-W4 or r5. No W1-W4 replay was re-queued. All
+fetches were source provisioning; no external system was probed.
 
 

@@ -1,0 +1,20 @@
+target_ptr=(nil)
+mode=bad wav_bytes=150 ptr_low=0x41414141 value=0x4841434b
+DRWAV_VERSION_STRING=0.14.1
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==2877845==ERROR: AddressSanitizer: SEGV on unknown address 0x50f041414155 (pc 0x59729a8896aa bp 0x7ffdf6d12cf0 sp 0x7ffdf6d12bd0 T0)
+==2877845==The signal is caused by a WRITE memory access.
+    #0 0x59729a8896aa in drwav__read_cue_to_metadata_obj /tmp/drwav-sphaira-pin/dr_wav.h:2281
+    #1 0x59729a88d92e in drwav__metadata_process_chunk /tmp/drwav-sphaira-pin/dr_wav.h:2800
+    #2 0x59729a895b8e in drwav_init__internal /tmp/drwav-sphaira-pin/dr_wav.h:3699
+    #3 0x59729a89f2f1 in drwav_init_memory_with_metadata /tmp/drwav-sphaira-pin/dr_wav.h:5643
+    #4 0x59729a8b1bbe in main lab/frontier/drwav2shell/harness/harness.c:122
+    #5 0x7da1c462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7da1c462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x59729a886604 in _start (/tmp/drwav-sphaira-asan+0x6604) (BuildId: 746885d18fff30e08d6cc2df2fb833217ce9b135)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /tmp/drwav-sphaira-pin/dr_wav.h:2281 in drwav__read_cue_to_metadata_obj
+==2877845==ABORTING
+rc=1
