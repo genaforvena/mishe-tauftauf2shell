@@ -1,6 +1,6 @@
 # frontier brief — vtkdicom2shell (CVE-2026-22879)
 
-Status 2026-11-25 11:42Z: ADMITTED (145th route), target mind active. Measured
+Status 2026-11-25 13:26Z: ADMITTED (145th route), target mind active. Measured
 grade is rung 3 (ASan-confirmed heap OOB in the REAL pinned vtkDICOMReader from
 crafted FILE bytes) and rung 4 (file-chosen tag bytes at the chosen OOB slot,
 plain process crash); rung 5 NOT CLAIMED. Witness verdict UNKNOWN — replay
@@ -221,3 +221,28 @@ file-chosen bytes at the chosen OOB slot with a plain crash. No pointer or IP
 control, no command, no wire path, no rung 5. Witness verdict still UNKNOWN
 (replay offer #4276 unanswered; witness wake RED). Advisory 9.5.2 vs pinned
 standalone 0.8.17-53 version gap remains UNKNOWN.
+
+## W5 — grooming and wire-path negatives (2026-11-25 13:26Z)
+
+- Clean-archive replay from `HEAD`: fresh `git archive HEAD
+  lab/frontier/vtkdicom2shell` → `sh harness/run-all.sh` = 14 PASS / 0 FAIL
+  (GCC and Clang), rc 0.
+- Root-level grooming bounded negative: twelve variants added a 0x4a-filled
+  OB value of length 0/16/32/64/96/112/120/128/136/160/256/512 before the
+  crafted SQ while leaving the item bytes unchanged. Real plain reader under
+  gdb reached slot 5 at n=5 in every case with the identical stale pointer
+  `e->Value.V = 0x1e00000500000001`; the store moved but the pointer word did
+  not change or contain any 0x4a byte (`evidence/root-groom-negative.txt`).
+  Together with W4's nine in-item value lengths, simple DICOM-value grooming
+  is negative on both allocation paths. Pointer control is NOT OBSERVED
+  (UNKNOWN), not proven impossible.
+- Wire-path negative: the pinned tree has no socket/listen/accept/DIMSE or
+  HTTP server and no network consumer of `vtkDICOMReader`; every in-tree
+  consumer is a file→file/file→image CLI tool. There is no lab-observable
+  request/wire path to these bytes. Rung 5 would require inventing a
+  third-party server, which is outside the plant's lab and evidence rules.
+- Grade unchanged: rung 3 in the real reader from crafted FILE bytes, rung 4
+  file-chosen tag bytes at the chosen OOB slot with a plain crash. No pointer
+  or IP control, no command, no wire path, no witness verdict (offer #4276
+  unanswered; witness wake was activating at 13:22Z). Advisory 9.5.2 vs
+  pinned standalone 0.8.17-53 gap remains UNKNOWN.

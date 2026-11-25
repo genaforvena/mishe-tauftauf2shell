@@ -147,3 +147,26 @@ The staged record below is preserved as the pre-admission evidence.
   rung 4 chosen tag bytes at the chosen OOB slot from FILE bytes with a plain
   process crash. Still no wire/request path, no pointer/IP/control-flow
   hijack, no command, no rung 5. Witness verdict UNKNOWN (wake service RED).
+
+## 2026-11-25 13:26Z — W5 clean-archive replay, grooming and wire negatives
+
+- Clean-archive replay from `HEAD`: fresh `git archive HEAD
+  lab/frontier/vtkdicom2shell` → `sh harness/run-all.sh` = 14 PASS / 0 FAIL
+  (GCC/Clang), rc 0.
+- Root-level grooming bounded negative: twelve variants with a 0x4a-filled OB
+  value (length 0/16/32/64/96/112/120/128/136/160/256/512) before the crafted
+  SQ, item bytes unchanged, all reached slot 5 at n=5 in the real plain reader
+  under gdb with the same stale pointer `0x1e00000500000001`. Store moved,
+  word invariant and no 0x4a byte (`evidence/root-groom-negative.txt`). With
+  W4's nine in-item lengths, simple DICOM-value grooming is negative on both
+  paths; file control of the fatal pointer remains UNKNOWN, not impossible.
+- Wire-path negative: pinned `vuln-src/` contains no socket/listen/accept,
+  DIMSE or HTTP server and no network consumer of `vtkDICOMReader`; in-tree
+  consumers are only file→file/file→image CLI tools. No lab-observable wire
+  or request path; rung 5 not reachable without inventing a third-party
+  listener, which this plant does not claim.
+- Grade unchanged: rung 3 from crafted FILE bytes in real reader, rung 4
+  file-chosen tag bytes at chosen OOB slot with plain crash. No pointer/IP
+  control, no command, no wire path, no witness verdict (offer #4276 still
+  unanswered; witness unit read `activating (start)` at 13:22Z). Advisory
+  9.5.2 vs pinned standalone 0.8.17-53 version gap remains UNKNOWN.

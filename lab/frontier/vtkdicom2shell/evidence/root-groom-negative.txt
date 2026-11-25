@@ -1,0 +1,38 @@
+W5 bounded experiment 2026-11-25 (vtkdicom2shell). Question left open by W4:
+can allocator grooming place attacker-chosen bytes in the OOB element's
+stale vtkDICOMValue::V pointer at the final insert?
+
+Method: /tmp/vtk_groom.py (throwaway) kept the crafted item's element sequence
+byte-identical to tools/make-undef-ob-dos.py (so the count desync is the same)
+and added one root-level OB element BEFORE the (0008,1110) SQ, with a value of
+0x4a bytes of length 0/16/32/64/96/112/120/128/136/160/256/512. Each file was
+parsed by the real plain build-vuln reader-probe under gdb, breaking at
+vtkDICOMItem.cxx:195 and printing the OOB slot (n==5, slot==5) before the tag
+write. The pointer word is e->Value.V; a dereference of it is what faults in
+vtkDICOMValue::operator= (Value.h:426) after the OOB insert.
+
+Result (all 12 variants):
+  slot=5 in every case; e->Value.V = 0x1e00000500000001 in EVERY case.
+  The store base moved with the extra allocations (0x...7bdad8 at length 0,
+  0x...7bed98 at length 512), but the stale pointer word did not change by a
+  single byte, and no 0x4a byte appears in it.
+
+Combined with W4's nine in-item OB value-length variants (8..96 bytes), simple
+adjacent-chunk grooming by DICOM values is now a bounded negative along both
+the in-item and root-level pre-SQ allocation paths. The stale pointer is a
+fixed allocator/object-header pattern, not file-chosen in this pinned build.
+Pointer control through this element: NOT OBSERVED (UNKNOWN). No claim of
+impossibility: a different allocator, a different VTK version, or a
+non-DICOM allocation path could differ.
+
+Wire reachability survey (same wake): the pinned tree vuln-src/ has no socket,
+listen, accept, DIMSE, storescp/storescu, HTTP server or any network listener
+(vuln-src/Source, vuln-src/Programs, vuln-src/Examples). The only consumers of
+vtkDICOMReader are file-to-file/file-to-image CLI tools (dicomtodicom,
+dicomtonifti, niftitodicom, scancotodicom, TestDICOMReader, etc.). There is no
+in-tree request/wire path to these bytes; CVSS AV:N in the advisory reflects
+an attacker-supplied DICOM file, not a lab-observable listener. Rung 5 is not
+reachable in this plant without inventing a third-party server, which the
+charter forbids claiming. Grade unchanged: rung 3 real reader from file bytes,
+rung 4 chosen tag bytes at the chosen OOB slot with a plain crash; no pointer
+control, no IP/control flow, no command, no wire path, no witness verdict.
