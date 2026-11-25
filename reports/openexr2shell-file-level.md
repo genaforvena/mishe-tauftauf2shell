@@ -2241,3 +2241,10 @@ other link modes, a byte-granular overwrite, a heap leak or a longer chain.
 No grade change: rung 4 author-only, no witness verdict, no r5. At 13:00Z
 the witness queue still had no verdict on any openexr offer, including W197's
 #4160, and the witness wake service was RED repeatedly (operator/mishe lane).
+
+W201 clean-archive receipt (13:04Z): `git archive 438429fa
+lab/openexr2shell-real` into `/tmp/w201-clean`, with the gitignored `src/` and
+`build-vuln-plain/` symlinked from the live checkout; `sh
+harness/w201-nopie-aslr-on.sh` returned `RESULT PASS` rc 0 with the same
+`0a6b8367...` evidence hash and PoC sha256 `c75957f1...`. Author replay, not
+a witness verdict.
