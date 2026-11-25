@@ -9,7 +9,7 @@ config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24/W26 updates 2026-11-25. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -25,6 +25,10 @@ hunk applied and observes clean fields and completed teardown; W24 shows the
 W21 faulting load reads `0x20(%rax)` with `rax` equal to the wire-chosen pointer.
 W25 puts all four shipped-3.20b lanes behind one command for the witness and
 discloses that those real-build servers use `SSH_ANYAUTH`.
+W26 measures concurrent-load availability on that same shipped build: the
+W6/W16 node-exhaustion prediction fails there (the process SIGSEGVs at first
+teardown), while the pinned fixed form serves all five sessions; the failed
+prediction is preserved.
 Lab: `lab/frontier/synchronet2shell/`.
 
 
@@ -887,4 +891,41 @@ This is a consolidation, not a new claim or a rung change. Ceiling
 unchanged: chosen bytes at chosen `sbbs_t` offsets and a faulting load of the
 wire-chosen pointer in a real shipped build over a loopback SSH wire, with a
 pinned fixed-form control; no useful pointer/IP target, command, measured
+DoS rate, ASLR defeat or r5. Author replay, not independent acceptance.
+
+## W26 — concurrent-load availability on shipped 3.20b (2026-11-25, author)
+
+W6/W16 measured the advisory's node-exhaustion impact on the dev parent
+42f586d7: four chosen 64-byte TERMs set `line_delay=0x4853494d`, parked four
+`termNode` threads in nanosleep and refused a fifth login. W21–W24 measured a
+chosen-pointer SIGSEGV on the shipped 3.20b release but only one session at a
+time. `release-label/term320b/availability320b/run-availability320b.sh`
+repeats the four-client burst against the real shipped `db9c5d6f` build, with
+the pinned fixed form as control.
+
+The imported prediction was **wrong** and is kept as a negative: the first run
+was 7 PASS / 3 FAIL. All four chosen probes landed, but there was no
+`!No nodes available for login.` and no parked `termNode` thread. Instead,
+the first session's teardown logged `Node 1 destructor begin` and the whole
+`sbbs` process died with SIGSEGV; the fifth client got `Connection refused`.
+`evidence/FAILED-PREDICTION.md` and `evidence/first-run/` preserve that run.
+A second run corrected one assertion (the fifth fixed-phase client sends a
+40-byte wire TERM, so its probe reads `wire=40`, not `wire=64`) and reached
+13 PASS / 0 FAIL; no input was changed to force a pass.
+
+Measured chain at 16:40:18Z–16:40:58Z: four
+`REAL_320B_PROBE ... l=64 ... cv=4853494d first=0x465541544f4f2d45
+last=0x5a5a5a5a46554154` lines; `Node 1 destructor begin` with no
+`destructor end`; process state gone/zombie before the fifth connection;
+fifth client refused. Fixed phase: byte-exact `cb6d77dbca` hunk, four
+`wire=64 len=40` probes plus one `wire=40 len=40` control, five
+`Attaching to Node`, four completed teardowns, live process. Result
+**13 PASS / 0 FAIL**, rc 0.
+
+Scope: real shipped build and verbatim pinned copy statement plus an
+instrumentation-only `lprintf`; unauthenticated loopback SSH pty-req TERM
+under `SSH_ANYAUTH`. The fault's load attribution remains W24's gdb
+observation, not a new W26 claim. Availability impact on this build is
+whole-process SIGSEGV under concurrent load, not the advisory's thread-park
+path; it does not change the grade. No pointer/IP target, command, measured
 DoS rate, ASLR defeat or r5. Author replay, not independent acceptance.
