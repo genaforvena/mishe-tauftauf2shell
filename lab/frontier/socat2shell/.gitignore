@@ -1,0 +1,6 @@
+harness/vuln-asan
+harness/fixed-asan
+harness/vuln-plain
+harness/fixed-plain
+harness/vuln-asan-clang
+harness/fixed-asan-clang

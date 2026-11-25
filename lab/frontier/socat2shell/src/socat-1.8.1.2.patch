@@ -1,0 +1,141 @@
+diff -r -N -U 3 --no-dereference socat-1.8.1.1/CHANGES socat-1.8.1.2/CHANGES
+--- socat-1.8.1.1/CHANGES	2026-02-12 14:37:55.000000000 +0100
++++ socat-1.8.1.2/CHANGES	2026-06-25 14:59:38.165611652 +0200
+@@ -1,4 +1,18 @@
+ ﻿
++####################### V 1.8.1.2:
++
++Security:
++	Socat security advisory 10
++	CVE-2026-56123
++	There was a possible heap overflow in the socks5 client code. It could
++	be triggered by connecting to a malicious socks5 server that expected
++	this connection and had knowledge about details of the client binary
++	code.
++	Only builds with C signed char (vs.unsigned char) are affected.
++	Thanks to Tristan Madani for finding and reporting this issue, and for
++	conveying the process.
++	Test: SOCKS5_OVERFL
++
+ ####################### V 1.8.1.1:
+ 
+ Corrections:
+Binary files socat-1.8.1.1/socat.tar and socat-1.8.1.2/socat.tar differ
+diff -r -N -U 3 --no-dereference socat-1.8.1.1/test.sh socat-1.8.1.2/test.sh
+--- socat-1.8.1.1/test.sh	2026-02-12 14:37:55.000000000 +0100
++++ socat-1.8.1.2/test.sh	2026-06-25 14:59:38.166611666 +0200
+@@ -649,6 +649,9 @@
+ mkdir -p "$TD"
+ #trap "rm -r $TD" 0 3
+ 
++BINDIR=$td/bin
++mkdir -p $BINDIR
++
+ echo "Using temp directory $TD"
+ 
+ RESULTS="$TD/results.txt" 	# file for list of results
+@@ -21129,6 +21132,77 @@
+ esac
+ N=$((N+1))
+ 
++
++# Above tests introduced with 1.8.1.0 (none with 1.8.1.1)
++#==============================================================================
++# Below tests introduced with 1.8.1.2
++
++
++# Test socks5 client buffer overflow (CVE-2026-56123)
++NAME=SOCKS5_OVERFL
++case "$TESTS" in
++*%$N%*|*%functions%*|*%bugs%*|*%security%*|*%socks5%*|*%socks%*|*%%*|*%%*|*%socket%*|*%$NAME%*)
++#*%internet%*|*%root%*|*%listen%*|*%fork%*|*%ip4%*|*%tcp4%*|*%bug%*|...
++TEST="$NAME: socks5 client buffer overflow"
++# Start a listener that emulates a malicious socks5 server, using a temporary
++# shell script;
++# connect using Socat with socks5 client;
++# when is terminates with rc=0 the test succeeded (not vulnerable)
++if ! eval $NUMCOND; then :
++# Check if this test can be performed meaningfully
++elif ! cond=$(checkconds \
++		  "" \
++		  "" \
++		  "" \
++		  "IP4 TCP LISTEN SHELL GOPEN SOCKS5" \
++		  "TCP4-LISTEN SHELL GOPEN SOCKS5" \
++		  "socksport" \
++		  "tcp4" ); then
++    $PRINTF "test $F_n $TEST... ${YELLOW}$cond${NORMAL}\n" $N
++    cant
++else
++    mkdir -p "$BINDIR"
++    tf="$td/test$N.stdout"
++    te="$td/test$N.stderr"
++    tdiff="$td/test$N.diff"
++    tsh="$BINDIR/test$N.sh"
++    cat >"$tsh" <<__EOF__
++$ECHO -n "\\x05\\x00"
++relsleep 1
++$ECHO -n "\\x05\\x00\\x00\\x03\\xfdAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"
++__EOF__
++    chmod a+x "$tsh"
++    newport tcp4 	# -> PORT
++    CMD0="$TRACE $SOCAT $opts TCP4-LISTEN:$PORT SHELL:$tsh"
++    CMD1="$TRACE $SOCAT $opts /dev/null SOCKS5:$LOCALHOST4:17.34.51.68:85,socksport=$PORT"
++    printf "test $F_n $TEST... " $N
++    $CMD0 >/dev/null 2>"${te}0" &
++    pid0=$!
++    waittcp4port $PORT 1
++    $CMD1 >"${tf}1" 2>"${te}1"
++    rc1=$?
++    kill $pid0 2>/dev/null; wait
++    if [ "$rc1" -ne 0 ]; then
++	$PRINTF "$FAILED (rc1=$rc1)\n"
++	echo "$CMD0 &"
++	cat "${te}0" >&2
++	echo "$CMD1"
++	cat "${te}1" >&2
++	failed
++    else
++	$PRINTF "$OK\n"
++	if [ "$VERBOSE" ]; then echo "$CMD0 &"; fi
++	if [ "$DEBUG" ];   then cat "${te}0" >&2; fi
++	if [ "$VERBOSE" ]; then echo "$CMD1"; fi
++	if [ "$DEBUG" ];   then cat "${te}1" >&2; fi
++	ok
++    fi
++fi # NUMCOND
++ ;;
++esac
++N=$((N+1))
++
++
+ # >>>
+ 
+ # end of common tests
+diff -r -N -U 3 --no-dereference socat-1.8.1.1/VERSION socat-1.8.1.2/VERSION
+--- socat-1.8.1.1/VERSION	2026-02-12 14:37:55.000000000 +0100
++++ socat-1.8.1.2/VERSION	2026-06-25 14:59:38.166244576 +0200
+@@ -1 +1 @@
+-"1.8.1.1"
++"1.8.1.2"
+diff -r -N -U 3 --no-dereference socat-1.8.1.1/xio-socks5.h socat-1.8.1.2/xio-socks5.h
+--- socat-1.8.1.1/xio-socks5.h	2023-11-13 20:31:08.000000000 +0100
++++ socat-1.8.1.2/xio-socks5.h	2026-06-25 14:59:38.167658254 +0200
+@@ -23,7 +23,7 @@
+ 	uint8_t command;
+ 	uint8_t reserved;
+ 	uint8_t	address_type;
+-	char	dstdata[];
++	unsigned char dstdata[];
+ };
+ 
+ struct socks5_reply {
+@@ -31,7 +31,7 @@
+ 	uint8_t reply;
+ 	uint8_t reserved;
+ 	uint8_t address_type;
+-	char	dstdata[];
++	unsigned char dstdata[];
+ };
+ 
+ extern const struct addrdesc xioaddr_socks5_connect;

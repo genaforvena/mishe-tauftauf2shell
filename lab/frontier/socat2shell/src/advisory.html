@@ -1,0 +1,38 @@
+<html><head><title>Socat security advisory 10 - Heap buffer overflow in socat SOCKS5 reply parser</title></head>
+  <body>
+<p><a href="../..">dest-unreach</a> / <a href="..">socat</a> / <a href=".">contrib</a> / <strong>security advisory 10</strong></p>
+
+    <h1>Socat security advisory 10 - Heap buffer overflow in socat SOCKS5 reply parser</h1>
+    <h2>Description</h2>
+<p>The SOCKS5 reply parser in Socat (xio-socks5.c, function _xioopen_socks5_read_reply()) contains a signed char integer promotion vulnerability that allows a malicious SOCKS5 proxy server to trigger a heap buffer overflow of attacker-controlled size and content. The socks5_reply struct declares its dstdata[] field as char which is signed in most C builds. When parsing a DOMAINNAME reply (address_type=0x03), the domain name length byte is read through this signed type at line 470: bytes_to_read = 7 + reply->dstdata[0]. On platforms where char is signed (x86, x86-64), a length byte in the range 0xF9-0xFD sign-extends to a negative value, producing a bytes_to_read smaller than bytes already read. The resulting negative difference is implicitly converted to size_t (SIZE_MAX) when passed to readfull(), causing an unbounded heap write. The reply buffer is 262 bytes (SOCKS5_MAX_REPLY_SIZE), so attacker-controlled data overwrites adjacent heap memory. This is exploitable by a malicious or compromised SOCKS5 proxy server during the connection setup phase. No authentication is required.</p> 
+
+    <h2>Vulnerability Ids</h2>
+
+    <p><tt>Socat security issue 10</tt></p>
+    <p><tt>CVE: 56123</tt></p>
+
+    <h2>Severity: High</h2>
+
+    <h2>Affected versions</h2>
+    <p>1.8.0.0 - 1.8.1.1</p>
+
+    <h2>Not affected or corrected versions</h2>
+    <p>Up to 1.7.4.5; 1.8.1.2 and later</p>
+
+    <h2>Workaround</h2>
+    <p>Use SOCKS5 client only with trusted socks servers</p>
+
+    <h2>Download</h2>
+    <p>The updated sources can be downloaded from:</p>
+    <ul>
+      <li><a href="http://www.dest-unreach.org/socat/download/socat-1.8.1.3.tar.gz">http://www.dest-unreach.org/socat/download/socat-1.8.1.3.tar.gz</a></li>
+    </ul>
+    <p>Patches to 1.8.1.1:</p>
+    <a href="http://www.dest-unreach.org/socat/download/socat-1.8.1.2.patch">http://www.dest-unreach.org/socat/download/socat-1.8.1.2.patch</a>
+    <a href="http://www.dest-unreach.org/socat/download/socat-1.8.1.3.patch">http://www.dest-unreach.org/socat/download/socat-1.8.1.3.patch</a>
+
+    <h2>Credits</h2>
+    <p>Thanks to Tristan Madani for finding and reporting this issue.</p>
+
+  </body>
+</html>
