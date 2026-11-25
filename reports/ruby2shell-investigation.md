@@ -3232,3 +3232,12 @@ later impact claim needs the full control pair. Named next: test the `0x400`
 pop without mtrace in the request path and whether a wire-shaped allocation
 can consume the `0x40` remainder at V+`0x400`; otherwise close this lane as
 bounded negative and open the jemalloc allocation lane noted by durendal.sh.
+
+`remainder1` (production config, 8 processes, ten extra 40-byte claim parts,
+`MTRACE_DUMP_RANGE_LOW=0x20` so the `0x31`-request allocations also emit D2)
+is a bounded NEGATIVE for remainder consumption: zero `0x400` pops, one
+survivor, and no allocation at the `0x40` remainder address (V+`0x400`)
+after the pop window. The extra small parts change the request shape enough
+that only one run reached a `0x43`-class growth (`0x431→0x453`, run 6) and
+it still missed the claim. The D2 lower/upper bounds are now env-configurable
+(`MTRACE_DUMP_RANGE_LOW`/`_HIGH`, default `0x400`/`0x460`).

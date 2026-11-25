@@ -56,6 +56,7 @@ static int dump_tcache = 0;
 static int tcache_free_dump = 0;
 static int detail_bins = 0;
 static int dump_range = 0;
+static size_t dump_range_lo = 0x400, dump_range_hi = 0x460;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -82,6 +83,12 @@ static void mtrace_init(void)
     emit_tid = getenv("MTRACE_TID") != NULL;
     detail_bins = getenv("MTRACE_LARGEBIN_DETAIL") != NULL;
     dump_range = getenv("MTRACE_DUMP_RANGE") != NULL;
+    dump_range_lo = (size_t)strtoull(getenv("MTRACE_DUMP_RANGE_LOW") ?
+                                     getenv("MTRACE_DUMP_RANGE_LOW") : "0x400",
+                                     NULL, 0);
+    dump_range_hi = (size_t)strtoull(getenv("MTRACE_DUMP_RANGE_HIGH") ?
+                                     getenv("MTRACE_DUMP_RANGE_HIGH") : "0x460",
+                                     NULL, 0);
 }
 
 /* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
@@ -419,7 +426,8 @@ void *malloc(size_t size)
     }
     if (dump_request && size == dump_request && dump_bins && arena_head)
         bin_dump(arena_head);
-    if (arena_head && ((dump_range && case_overflow_seen && size >= 0x400 && size <= 0x460) ||
+    if (arena_head && ((dump_range && case_overflow_seen &&
+                        size >= dump_range_lo && size <= dump_range_hi) ||
                        (detail_bins && dump_request && size == dump_request)))
         bin_detail(arena_head, size);
     void *p = __libc_malloc(size);
