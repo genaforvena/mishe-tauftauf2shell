@@ -238,6 +238,51 @@ PASS, `STAGE attack` 7 PASS, `STAGE fixed` 4 PASS,
 preserved: a wrong `fix.patch` relative path and a lost `cd` line in the new
 driver, both fixed before this replay. Still no full IP, pointer, command or
 r5; witness verdict UNKNOWN.
+## Distribution binary: fortified copy aborts before the write (W12, 2026-11-25 15:2xZ, author-side)
+
+The standing "actual distribution build UNKNOWN" is now narrowed for the
+host's Ubuntu 24.04 package. This is a bounded provisioning-and-execution
+experiment, not a grade change.
+
+- Provisioned Ubuntu 24.04 `hping3` binary package `3.a2.ds2-10build2` into
+  an ignored `/tmp` directory with `apt-get download` + `dpkg-deb -x`
+  (no install, no pinned source edit). Package sha256
+  `b98e33f9c3d0042aa416843fc85d3804d6985e943a05a1770cf88116bdd6e7c5`;
+  shipped `/usr/sbin/hping3` sha256
+  `d0181f16d8438771dc5570e9ed3f373c729f4508cd20012fcad270cec1edc9cd`.
+- The Ubuntu source tree (`.dsc` + orig tarball, provisioning only) contains
+  `display_ipopt.c` sha256
+  `e8ef2dd6…dcbb5e7b` — **byte-identical to the pinned function**. Its
+  `IPOPT_RR` block is the same unclamped `i -= IPOPT_MINOFF; memcpy(old_rr,
+  cp, i)`; no Debian patch touches `display_ipopt.c` (patch series 010-191
+  inspected). The build uses `dpkg-buildflags` via patch 180.
+- The shipped binary is stripped but imports `__memcpy_chk@GLIBC_2.3.4`.
+  Disassembly shows a copy with `mov ecx,0x28` (the real 40-byte `old_rr`
+  bound) immediately before a `__memcpy_chk@plt` call at `0x983f`, and the
+  surrounding code compares the length against `0x27` — the fortified
+  W8 consumer, not a silent 251-byte copy.
+- Live loopback test: real distro binary under `sudo -n` with
+  `hping3 -D -1 -G -I lo -c 6 -i 1 127.0.0.2`, PID captured from a wrapper
+  shell, and `wire/inject_rr_const.py` sending the same crafted long RR
+  reply as W6 (rr_len=255, ptr=255, 205-byte payload, fill `0x20`,
+  3 frames, 127.0.0.2 -> 127.0.0.1 on `lo`). Result: process exited **134**
+  with `*** buffer overflow detected ***: terminated`, a DoS before any
+  global write. A valid-RR control (`-c 3`, no injection) exited 0, printed
+  `RR:` and had no abort signature. No chosen byte, no corruption, no r5.
+- Tracked one-command driver `wire/replay-distro.sh` (commit `20a65c8f`)
+  provisions and hashes the package itself, needs no pinned source, and runs
+  both stages. From a clean `git archive 20a65c8f`:
+  `PASS deb hash exact`, `PASS binary hash exact`, `PASS injector sent 3
+  frames`, `PASS process aborted before write`, `PASS valid RR control
+  clean`, `REPLAY_DISTRO_OK: 5 checks`, rc 0. In-tree run gave the same 5
+  checks. Raw output in the ignored `/tmp/w12-distro/evidence/`.
+- Ceiling: this is a **build-dependent DoS**, the same class as W8's local
+  GCC `-O2` rebuild, now on a real shipped binary. It narrows
+  "stock-glibc outcome" only for Ubuntu 24.04 `3.a2.ds2-10build2` on this
+  host; other distributions, older packages and builds with fortify disabled
+  stay UNKNOWN. The vulnerable source is present in the package — the
+  abort is the consumer, not a fix. Author-side; witness verdict UNKNOWN.
+
 
 ## Current grade (2026-11-25 00:49Z)
 
@@ -258,11 +303,13 @@ W11 found the same fortified consumer at GCC `-O1`/`-Os` and plain `memcpy`
 at clang `-O1`/`-Os`/`-O2`. The clang `-O0` rebuild (W9) and clang `-O2`
 (W11) additionally reach `hp_rand.i`/`hp_rand.j`, giving 16/16 deterministic
 chosen-byte control in those builds; author-side and still only the low
-byte. No surveyed build puts a pointer in the 251-byte span. An actual
-distribution build and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
+byte. No surveyed build puts a pointer in the 251-byte span. The Ubuntu 24.04
+distribution binary `3.a2.ds2-10build2` carries the byte-identical vulnerable
+source but aborts in `__memcpy_chk` before the write (W12); other distribution
+builds and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
 pinned-function stage W207 ESTABLISHED; W6 W212 ESTABLISHED, both with no
-grade change. The two wire stages (#3942), W5 (#3958), W9 and W11's clang
-extension remain author-side with verdicts UNKNOWN.
+grade change. The two wire stages (#3942), W5 (#3958), W9, W11's clang
+extension and W12's distro-binary DoS remain author-side with verdicts UNKNOWN.
 
 
 ## Witness verdict (W207, #3822)
@@ -473,6 +520,25 @@ PASS, `REPLAY_IJ_O2_OK: 15 checks`, rc 0. The driver builds both clang -O2
 trees from the gitignored pinned source and applies the tracked fix patch
 itself. Two preserved clean-replay failures: a wrong `fix.patch` relative
 path and a lost `cd` line, both fixed before this replay. No new grade.
+
+W12's distro-binary receipt (commit `20a65c8f`, author-side):
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell &&
+rm -rf /tmp/w12-clean && mkdir -p /tmp/w12-clean &&
+git archive 20a65c8f lab/frontier/hping3shell | tar x -C /tmp/w12-clean &&
+cd /tmp/w12-clean &&
+sh lab/frontier/hping3shell/wire/replay-distro.sh
+```
+
+Observed from that clean archive: `PASS deb hash exact`, `PASS binary hash
+exact`, `PASS injector sent 3 frames`, `PASS process aborted before write`,
+`PASS valid RR control clean`, `REPLAY_DISTRO_OK: 5 checks`, rc 0. The driver
+downloads and hashes the Ubuntu package itself, so no gitignored source tree
+is needed. The first clean-replay attempt failed only because the then-untracked
+driver was absent from `git archive`; it succeeded after the commit. No new
+grade, witness verdict UNKNOWN.
+
 
 After the owed verdicts the only depth lane is a measured
 attacker-controlled execution path; nothing observed supports r5.
