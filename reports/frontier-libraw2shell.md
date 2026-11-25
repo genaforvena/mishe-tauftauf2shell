@@ -1058,6 +1058,13 @@ no-option controls rc 0, empty stderr). The same binary and pad abort on
 W21's `w13/dead-target.input` with `free(): invalid next size (normal)`.
 Red curve 49's input was generated but never probed: UNKNOWN, not a negative.
 
+A clean-archive rebuild of the same committed spec and generator reproduced
+the derived input hash and, in two fresh gdb runs, wrote `hw=b621 00c0 0000
+0000` with the same normal exit. The exact low word therefore varies with
+the rebuilt binary/heap layout; the stable claim is a file-chosen,
+glibc-plausible size (c2=c3=0, PREV_INUSE set, below `system_mem`), not a
+byte-stable whole field across builds.
+
 This upgrades W22's debugger-forced valid size to a file-chosen one and shows
 the crafted file changing the process outcome from allocator abort to clean
 exit. The only measured later reader is `free()`'s successful consolidation;

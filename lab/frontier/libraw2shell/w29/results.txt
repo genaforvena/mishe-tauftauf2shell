@@ -41,6 +41,17 @@ arena top had been consolidated/trimmed, so that post-free read is not a
 target fault. w29/sizefield-before.gdb records the authoritative pre-free
 field, then continues to process exit.
 
+Clean-archive check, 17:32Z: `git archive HEAD lab/frontier/libraw2shell`
+extracted to /tmp/w29-clean, `o0` rebuilt with the exact bootstrap flags,
+red18 input regenerated from the committed spec — derived input sha256
+`875055ae...f2bad` exact. Two fresh gdb runs in that tree gave
+`hw=b621 00c0 0000 0000` (`size 0xc0b621`), both with normal exit, i.e. the
+exact low word depends on the rebuilt binary/heap layout (the two `o0`
+binaries differ only in embedded build paths), while c1=0x00c0, c2=c3=0,
+PREV_INUSE set, sysmem 16,781,312 and the clean-exit outcome are stable.
+Do not claim byte-stability of the whole field across builds; claim a
+file-chosen glibc-plausible size.
+
 What this does and does not establish. The image alone now chooses a valid
 live allocator size field and changes the process outcome from allocator
 abort to normal exit. That upgrades W22's debugger-forced valid size to a
