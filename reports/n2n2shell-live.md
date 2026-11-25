@@ -225,3 +225,18 @@ The demonstrated consumer effect remains the W3 data copy into the forwarded
 NAK; no consumed pointer or command execution. Evidence:
 `live/evidence/gdb-canary-2000.out`, `canary-sender.out`,
 `canary-plain-3512.log`.
+
+## Clean-room replay entry point (2026-11-25 01:4xZ)
+
+`sh lab/frontier/n2n2shell/live/replay-live.sh` builds the pinned tarball
+from scratch in a fresh temporary directory three ways (gcc `-O1` plain,
+clang ASan vulnerable, clang ASan plus the single fixed bound), starts each
+supernode on 127.0.0.1 ports starting at `PORT_BASE` (default 18700), sends
+the committed safe and attack datagrams, and prints `RESULT <n> PASS / <m>
+FAIL`. Author run: 15 PASS / 0 FAIL, rc 0. Pins verify before any build;
+raw logs stay under the temporary directory printed at the end (`KEEP=1`
+retains it). Scope: this covers the ASan stack write, its three pinned
+frames, the safe and fixed controls, and the exact chosen wire bytes. It
+does not replace the gdb chosen-byte inspection or the W3 peer-forwarding
+addendum; those keep their own recipes (`live/gdb-cmds2.txt`, and
+`live/w3_peer_forward.py` with `live/gdb-cmds-w3.txt`).
