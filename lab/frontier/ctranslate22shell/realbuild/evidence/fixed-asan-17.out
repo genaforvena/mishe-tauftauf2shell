@@ -1,0 +1,4 @@
+CT2 real-source consumer: attack num_bytes=17
+terminate called after throwing an instance of 'std::runtime_error'
+  what():  Variable 'origin' has an invalid payload size
+Aborted (core dumped)

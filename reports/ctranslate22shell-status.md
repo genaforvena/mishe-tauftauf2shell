@@ -23,15 +23,32 @@ verdict stays UNKNOWN.
   `WRITE of size 17` / `WRITE of size 64`, fixed pin rejects both, safe
   payload 16 clean, plain readback shows file-chosen bytes past the region.
 - Clean `git archive HEAD` replay at 11:06Z: 16 PASS / 0 FAIL.
-- Grade: rung 3 pinned functions / rung 4 PARTIAL chosen file bytes at a
-  known offset; no real library build, no pointer-IP, no wire, no command,
-  rung 5 NOT CLAIMED. Witness UNKNOWN; replay owed before publication.
+- Grade: rung 3 confirmed in a real consumer (GCC ASan `WRITE of size 17`
+  and `48` at `model.cc:657`, 0 bytes after a real 16-byte `posix_memalign`
+  `StorageView` allocation); rung 4 PARTIAL file-chosen length and bytes.
+  Fixed pin rejects the same file; safe 16-byte input is clean. No pointer
+  control, wire, command or R5. Witness UNKNOWN; replay owed before any
+  rung-4 publication.
 - Brief: `reports/frontier-ctranslate22shell.md`; details and negatives in
   `lab/frontier/ctranslate22shell/PROVENANCE.md`.
 
-## Next bounded experiment
+## Real-source consumer — completed W1 (2026-11-25 12:05-12:08Z)
 
-Build real CTranslate2 v4.8.0 with ASan, craft a minimal real `.bin` model
-whose payload length exceeds the shape-derived buffer, drive `Model::load()`
-on it, and measure what object follows the variable allocation. Preserve
-the AV:L/UI:P ceiling and the stand-in-only boundary until then.
+`lab/frontier/ctranslate22shell/realbuild/build.sh` builds the verbatim
+upstream v4.8.0 `model.cc` (sha256 `05ab59bb…`) and fixed `d9b991e` model.cc
+(sha256 `5dcc3f1d…`) against the real `StorageView`/allocator under ASan,
+with only logging and unused quantization/tensor-parallel branches stubbed.
+Crafted 109-byte binary_version-6 file (`realbuild/evidence/crafted-n17.bin`)
+sets a shape-{2,2} FLOAT32 variable to `num_bytes=17`. ASan reports `WRITE of
+size 17`, `0 bytes after 16-byte region`, allocated by `posix_memalign` via
+`cpu::AlignedAllocator::allocate` ← `StorageView::reserve`; write stack
+`consume<char>` ← `Model::load model.cc:657`. `num_bytes=48` writes 48 bytes;
+`num_bytes=16` is clean; the fixed pin rejects the same file with
+`Variable 'origin' has an invalid payload size`; the plain build aborts with
+`malloc(): corrupted top size` at 48/64/80 bytes. Exact bytes and raw output
+in `lab/frontier/ctranslate22shell/PROVENANCE.md` and `realbuild/evidence/`.
+
+Next: ask the witness to replay `build.sh`; then measure whether a chosen
+value can reach a dereferenced pointer in a real consumer (the remaining gap
+to full rung 4). No rung 5 without a loopback wire path and command side
+effect.

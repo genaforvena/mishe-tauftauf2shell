@@ -1,0 +1,3 @@
+CT2 real-source consumer: attack num_bytes=16
+load returned; variables=2
+victim[0:16]=VVVVVVVVVVVVVVVV

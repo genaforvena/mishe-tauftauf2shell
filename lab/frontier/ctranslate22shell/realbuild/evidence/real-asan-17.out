@@ -1,0 +1,60 @@
+CT2 real-source consumer: attack num_bytes=17
+=================================================================
+==3020265==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x509000000050 at pc 0x7f22c5cfb303 bp 0x7ffcce999b90 sp 0x7ffcce999338
+WRITE of size 17 at 0x509000000050 thread T0
+    #0 0x7f22c5cfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7f22c59670bf in std::basic_streambuf<char, std::char_traits<char> >::xsgetn(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x1670bf) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 0x7f22c5938140 in std::istream::read(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x138140) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #3 0x62bc52471ec8 in char* ctranslate2::models::consume<char>(std::istream&, unsigned long, char*) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/realbuild/consumer-asan+0x3eec8) (BuildId: 02d22dfe578d62488cd602b755f8dd54d7a27762)
+    #4 0x62bc5246b699 in ctranslate2::models::Model::load(ctranslate2::models::ModelReader&, ctranslate2::Device, int, ctranslate2::ComputeType, bool, bool) src/CTranslate2-4.8.0/src/models/model.cc:657
+    #5 0x62bc52451d1d in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/realbuild/consumer-asan+0x1ed1d) (BuildId: 02d22dfe578d62488cd602b755f8dd54d7a27762)
+    #6 0x7f22c542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7f22c542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x62bc5244f604 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/realbuild/consumer-asan+0x1c604) (BuildId: 02d22dfe578d62488cd602b755f8dd54d7a27762)
+
+0x509000000050 is located 0 bytes after 16-byte region [0x509000000040,0x509000000050)
+allocated by thread T0 here:
+    #0 0x7f22c5cfcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x62bc5254466d in ctranslate2::cpu::AlignedAllocator::allocate(unsigned long, int) src/CTranslate2-4.8.0/src/cpu/allocator.cc:28
+    #2 0x62bc5252e572 in ctranslate2::StorageView::reserve(long) src/CTranslate2-4.8.0/src/storage_view.cc:166
+    #3 0x62bc52531a76 in ctranslate2::StorageView::resize(std::vector<long, std::allocator<long> >) src/CTranslate2-4.8.0/src/storage_view.cc:242
+    #4 0x62bc5252c186 in ctranslate2::StorageView::StorageView(std::vector<long, std::allocator<long> >, ctranslate2::DataType, ctranslate2::Device) src/CTranslate2-4.8.0/src/storage_view.cc:27
+    #5 0x62bc5246b645 in ctranslate2::models::Model::load(ctranslate2::models::ModelReader&, ctranslate2::Device, int, ctranslate2::ComputeType, bool, bool) src/CTranslate2-4.8.0/src/models/model.cc:656
+    #6 0x62bc52451d1d in main (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/realbuild/consumer-asan+0x1ed1d) (BuildId: 02d22dfe578d62488cd602b755f8dd54d7a27762)
+    #7 0x7f22c542a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7f22c542a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x62bc5244f604 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/realbuild/consumer-asan+0x1c604) (BuildId: 02d22dfe578d62488cd602b755f8dd54d7a27762)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x508ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x508ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x508ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x508fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x508fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x509000000000: fa fa fa fa fa fa fa fa 00 00[fa]fa fa fa fa fa
+  0x509000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x509000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x509000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x509000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x509000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3020265==ABORTING

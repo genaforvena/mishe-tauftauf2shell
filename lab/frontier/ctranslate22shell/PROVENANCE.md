@@ -41,5 +41,55 @@
   whole 48-byte fixture (`malloc(): corrupted top size`). All were repaired
   in the committed `run-all.sh`; the 64-byte case is retained as an ASan
   case only, with a 48-byte bounded case for plain readback.
-- No real CTranslate2 build, no real model file consumed by `Model::load`,
-  no wire, no pointer-IP, no command, no rung 5. Witness replay UNKNOWN.
+- The stand-in harness alone had no real build; see the real-source consumer
+  section below for the current boundary. Still no wire, pointer-IP or
+  command, and witness replay UNKNOWN.
+
+## Real-source consumer (W1, 2026-11-25 12:05-12:08Z) — NEW
+
+Provisioned (network = provisioning only, no probe off loopback):
+`realbuild/src/v4.8.0.tar.gz` sha256
+`cd142054c14aa7f7a4b20674d6b5e4bb7ff9c63b919e6491d3df261b214fcfa5`.
+Its `src/models/model.cc` hashes to `05ab59bb…` (identical to the vulnerable
+pin); the separately fetched `realbuild/src/model-fixed.cc` hashes to
+`5dcc3f1d…` (identical to the fixed pin). `build.sh` reproduces every binary
+and output below offline.
+
+Build: `realbuild/build.sh` compiles the **verbatim upstream `model.cc`**
+plus real `storage_view.cc`, `allocator.cc`, `cpu/allocator.cc`,
+`cpu/primitives.cc`, `cpu/backend.cc`, `cpu/cpu_isa.cc`, `cpu/kernels.cc`,
+`env.cc`, `types.cc`, `devices.cc`, `ops`-free throwing stubs for unused
+quantization/tensor-parallel branches, and a no-op spdlog shim. The exercised
+path is real: `Model::load(ModelReader&,...)` → `StorageView(shape, dtype)` →
+`cpu::AlignedAllocator::allocate` (`posix_memalign(ptr,64,size)`) →
+`consume<char>(model_file, num_bytes, variable.buffer())`.
+
+Input (`realbuild/evidence/crafted-n17.bin`, 109 bytes) is binary_version 6,
+spec `"Transformer\0"`, spec_revision 1, 2 variables: `origin` shape {2,2}
+FLOAT32 with file `num_bytes=17` and payload `A..Q`, then `victim` shape {2,2}
+FLOAT32 with `num_bytes=16` and payload `V`*16, then 0 aliases. Hex:
+`06 00 00 00 0c 00 54 72 61 6e 73 66 6f 72 6d 65 72 00 01 00 00 00
+02 00 00 00 07 00 6f 72 69 67 69 6e 00 02 02 00 00 00 02 00 00 00 00
+11 00 00 00 41 42 43 44 45 46 47 48 49 4a 4b 4c 4d 4e 4f 50 51 …`.
+
+Raw results (verbatim output in `realbuild/evidence/`):
+
+- `real-asan-17.out`: `ERROR: AddressSanitizer: heap-buffer-overflow`,
+  `WRITE of size 17`, `0 bytes after 16-byte region`, allocation stack
+  `posix_memalign` → `cpu::AlignedAllocator::allocate` →
+  `StorageView::reserve` → `StorageView::resize`; write stack `memcpy` ←
+  `istream::read` ← `consume<char>` ← `Model::load model.cc:657`.
+- `real-asan-48.out`: same stack, `WRITE of size 48`, 0 bytes after the same
+  16-byte region. `real-asan-16.out`: clean, `load returned; variables=2`.
+- `fixed-asan-17.out`: fixed pin rejects the same 17-byte file —
+  `what(): Variable 'origin' has an invalid payload size` (no ASan report).
+- Plain build: `plain-16.out` reads `victim[0:16]=VVVVVVVVVVVVVVVV`;
+  `plain-48.out`, `plain-64.out`, `plain-80.out` all abort with
+  `malloc(): corrupted top size` — the overlong store damages real heap
+  metadata. No chosen pointer value, no downstream dereference measured.
+
+This moves the evidence from a stand-in buffer to the real library's
+allocation and `Model::load` call. Grade: rung 3 confirmed corrupted state in
+a real consumer; rung 4 PARTIAL (file-chosen length and bytes past a real
+16-byte `StorageView` allocation, no pointer control); AV:L/UI:P ceiling
+unchanged; no wire, no command, rung 5 NOT CLAIMED. Witness replay still owed.
