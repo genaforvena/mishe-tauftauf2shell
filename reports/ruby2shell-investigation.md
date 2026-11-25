@@ -3390,3 +3390,46 @@ the attacker chooses the class via `_method` length — but no tested class
 produced a crash, a disclosure, a command or a code-pointer source. This is a
 bounded positive for corruption reachability and a bounded negative for
 impact through the first qword alone; rung 5 remains NOT ACHIEVED.
+
+### Adjacent consumer pinned to `StringScanner`; class sweep shows self-overwrite (2026-11-25, direct session)
+
+The jemtrace backtrace depth was made configurable (`JEMTRACE_BT_DEPTH`,
+`JEM_BT_DEPTH` in `ruby2shell-jemalloc-wire.sh`) and raised to 24 frames. In
+`lab/build/evidence/jemwire-btdeep3.trace` the adjacent `calloc(0x48)` at
+`0x717eaee0ae90` has a stack resolving through Ruby's `ruby_xcalloc`
+(`gc/default/default.c:1472`) and `class_call_alloc_func`
+(`object.c:2149`). `sizeof(struct strscanner)` is 72 bytes
+(`ext/strscan/strscan.c:37-56`): fields `flags`, `str`, `prev`, `curr`,
+`regs`, `regex`, `fixed_anchor_p`. The one-byte overflow lands on the
+`flags` low byte. This source reads only `FLAG_MATCHED` (bit 0) at
+`strscan.c:60-62`; the observed `0x01 → 0x53` transition keeps that bit
+set and makes no other field or pointer change. The process served both
+requests and `/up`, with no command, no disclosure and no control-flow
+effect. The consumer is therefore named and this particular first-qword
+hit is a bounded NEGATIVE for impact.
+
+A corrected 16-class sweep (`JEM_CLASS=C` exported per process, traces
+`lab/build/evidence/jemsw2-<C>.trace`, tags `jemsw2-*`) found two other
+outcomes. At C=96 the adjacent region is a `calloc(0x58)` whose first
+qword changes from `0x000000a500000000` to `0x000000a500000053`; its
+deep stack resolves through Prism node/encoding code, but the byte has
+no observed semantic effect and the process survives. At C=768 and C=1024
+the adjacent allocation is the upcase **result string itself**
+(`malloc(0x2ea)` / `malloc(0x3e8)`, filled with `S` and `A` bytes), so the
+`0x53` write is a self-overwrite of attacker output, not live metadata.
+No class in the sweep produced a crash, leak, command or code-pointer
+source; stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
+The tracer change was regression-checked: the standalone `/tmp/jt` probe
+emits 16 `W` lines, `jemwire-regress3` reports 252 capa dumps / 10 hits
+with the process alive, and `jemwire-btdeep3` produces 22 usable frames.
+An interim broken build (`real_calloc`/`free_q0` accidentally removed by
+edits) was found by a `[FATAL] failed to allocate memory` boot failure,
+corrected, and re-smoked; no broken artifact is committed.
+
+**Named next:** combine the wire-visible dev-404 arena-base reflection
+(`ruby2shell-reflect-scan.py`) with a Stage C safe-link claim that has no
+mtrace/ObjectSpace/maps/debugger in the request path, then run
+vulnerable/safe/fixed controls. First commands:
+`RUBY2SHELL_LEAKCLASS_COUNT=24 bash lab/repro/ruby2shell-stock-leakclass.sh`
+and `python3 lab/repro/ruby2shell-reflect-scan.py stock-rails-leakclass --pattern 250,90`.

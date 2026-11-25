@@ -41,6 +41,7 @@ JEMTRACE_FD=9 \
 JEMTRACE_WATCH_SIZE="$CLASS" \
 JEMTRACE_FREE_Q0="$CAPA" \
 JEMTRACE_BT_SIZE="${JEM_BT_SIZE:-}" \
+JEMTRACE_BT_DEPTH="${JEM_BT_DEPTH:-10}" \
   "$JEM_WIRE_RUBY" \
   lab/repro/ruby2shell-stock-baseline.ru > "$LOG" 2>&1 9>"$TRACE" &
 PID=$!

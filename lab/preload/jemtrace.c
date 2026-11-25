@@ -38,6 +38,7 @@ static size_t watch_sz;
 static size_t post_size;
 static size_t bt_size;
 static int want_bt;
+static int bt_depth = 10;
 static size_t free_q0;
 
 static const char hx[] = "0123456789abcdef";
@@ -104,8 +105,9 @@ static void dump_window(void *base, size_t sz, const char *which)
 
 static void emit_bt(void)
 {
-    void *bt[10];
-    int n = backtrace(bt, 10);
+    void *bt[24];
+    int depth = bt_depth > 24 ? 24 : bt_depth;
+    int n = backtrace(bt, depth);
     int k;
     for (k = 0; k < n; k++) {
         char buf[24];
@@ -125,6 +127,7 @@ __attribute__((constructor)) static void jemtrace_init(void)
     const char *btvar = getenv("JEMTRACE_BT_SIZE");
     const char *freevar = getenv("JEMTRACE_FREE_Q0");
     if (freevar) free_q0 = (size_t)strtoul(freevar, NULL, 0);
+    const char *depthvar = getenv("JEMTRACE_BT_DEPTH"); if (depthvar) bt_depth = atoi(depthvar);
     if (btvar) { bt_size = (size_t)strtoul(btvar, NULL, 0); want_bt = 1; }
     const char *armvar = getenv("JEMTRACE_ARM_SIZE");
     if (armvar) arm_size = (size_t)strtoul(armvar, NULL, 0);
