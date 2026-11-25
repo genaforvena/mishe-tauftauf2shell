@@ -450,6 +450,22 @@ omp-only is RED with 141 roles and `socat2shell: no route`; admission belongs
 to the operator, and no README row, rung cell or mind-count change is made
 here. `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
 
+AwsLc W214 (`c8026e5a`, source-bound, author-side) narrows the row's
+"out-of-tree application as the only real-consumer path" boundary: a read-only
+census of out-of-tree application sources already provisioned in this plant
+found no caller with two or more padded `EVP_DecryptUpdate` calls into a
+documented-minimum buffer, so there is no adjacent attacker-relevant datum to
+place. Ten named projects (cjose, GPGME, Open5GS, libssh/libssh2,
+libwebsockets, Synchronet, PostgreSQL/pgactive, nginx, mod_auth_openidc,
+apr-util) plus roughly fifty other provisioned roots were swept; four
+representative hits were re-read — apr-util's `inlen + EVP_MAX_BLOCK_LENGTH`
+(17 bytes slack) with one update, cjose's single CBC update on a fresh ctx
+(its two-update path is GCM AAD with `out=NULL`), libwebsockets' disabled
+padding and one cipher call, picotls' padding disabled on decrypt. No build,
+ASan run, new artifact or witness replay; unprovisioned third-party
+applications stay UNKNOWN, grade unchanged (rungs 1-4, r5 UNKNOWN).
+`reports/awslc2shell-status.md` §W214.
+
 The 01:1x–01:4xZ limbs supersede the row sentences that say Synchronet has
 "no measured DoS", N2n2Shell has "no control of a consumed pointer" without
 the W3 forwarding consumer, FontForge's overwritten word is a live `char*`

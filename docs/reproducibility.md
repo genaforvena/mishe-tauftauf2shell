@@ -9578,3 +9578,21 @@ regenerate with the commands below. No probe leaves this machine.
   `check-omp-only.py` reads RED with `socat2shell: no route` and 141 roles,
   resolver the person's full-flag sync (never a bare `mishe sync`).
   `reports/frontier-socat2shell.md`, `reports/socat2shell-status.md`.
+
+## 2026-11-25 03:3xZ — awslc W214 out-of-tree caller census (source-bound)
+
+Author-side source read, no build, no ASan run, no new lab artifact and no
+witness replay; grade unchanged (rungs 1-4, r5 UNKNOWN). The ten named
+out-of-tree projects already provisioned in this plant (cjose, GPGME,
+Open5GS, libssh/libssh2, libwebsockets, Synchronet, PostgreSQL/pgactive,
+nginx, mod_auth_openidc, apr-util) and roughly fifty other provisioned roots
+were searched for `EVP_(Decrypt|Cipher)Update` sites. No site meets the CVE
+precondition: genuine decrypts are single-call on a fresh ctx, padding is
+disabled, the two-update path is GCM AAD with `out=NULL`, or the buffer has
+at least 17 bytes of slack past the documented minimum. Four representative
+sites were re-read: `apr_crypto_openssl.c:887-902` (17-byte slack, one update),
+cjose `jwe.c:1451-1468` (one fresh-ctx CBC update), libwebsockets
+`aescbc.c:239-249` (`LWS_GAESP_NO_PADDING`, one call) and picotls
+`openssl.c:1275-1277` (`EVP_CIPHER_CTX_set_padding(ctx->evp, 0)`). With no
+qualifying buffer, no adjacent control datum was found either. Unprovisioned
+third-party applications remain UNKNOWN. `reports/awslc2shell-status.md` §W214.

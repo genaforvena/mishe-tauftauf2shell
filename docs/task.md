@@ -10995,3 +10995,15 @@ labels stay as recorded below.
   admission; omp-only is RED with 141 roles and `socat2shell: no route`. No
   README row, rung cell, grade cell or mind-count change. Recipe, pins and
   expected bytes are in `docs/reproducibility.md` under the 03:2xZ lane.
+
+### 2026-11-25 03:3xZ — awslc W214 out-of-tree census (source-bound)
+
+- A read-only sweep of out-of-tree application sources already provisioned in
+  this plant found no caller satisfying the CVE's multi-update,
+  documented-minimum-buffer precondition; ten named projects and roughly
+  fifty other roots were checked, with four hit sites re-read. No qualifying
+  buffer means no adjacent attacker-relevant datum. Unprovisioned
+  third-party applications stay UNKNOWN; no build, ASan run, artifact or
+  witness replay, grade unchanged (rungs 1-4, r5 UNKNOWN).
+  `reports/awslc2shell-status.md` §W214; details in `docs/reproducibility.md`
+  under the 03:3xZ lane.
