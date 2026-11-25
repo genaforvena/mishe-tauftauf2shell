@@ -165,3 +165,11 @@ the real caller derives from that body. `sh realcaller/run.sh`: 15 PASS /
   normalizes the body would change the framing. No wire exchange, no
   pointer control and no rung change: this corrects the harness framing
   claim and keeps rung 3 / rung 4 PARTIAL.
+
+## Clean-archive replay (2026-11-25 02:30Z)
+
+`git archive HEAD lab/frontier/open5gs2shell` extracted to
+`/tmp/open5gs-w1-replay`: unmodified `sh harness/run.sh` gives 21 PASS /
+0 FAIL, rc 0 and `sh realcaller/run.sh` gives 15 PASS / 0 FAIL, rc 0. Both
+results come from committed sources only; the local build outputs are
+gitignored.
