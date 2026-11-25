@@ -69,10 +69,12 @@ FPM respawns a fresh worker, which decodes the spliced session, authenticates
 the attacker as tinyfilemanager admin, accepts the app's designed PHP upload,
 and executes the benign marker/`id` payload. The fixed 8.4.28 build leaves a
 K-byte ftruncate-first file and no marker; no-death and virgin-SID controls are
-clean. This is **author-side gates 1–5 observed, gate 6 still open**: no
-phase-2 preload or debugger is used, but fresh-context witness replay is still
-required before full rung 5 is ESTABLISHED. Exact non-default limits, request
-geometry, evidence hashes and commands are in the wake-63 section below.
+clean. At wake 63 this was **author-side gates 1–5 observed, gate 6 still
+open** (no phase-2 preload or debugger), with witness replay still required
+before full rung 5 was ESTABLISHED. Witness W221 later supplied that replay on
+the refined no-CPU-limit two-pool base (amendment below). Exact non-default
+limits, request geometry, evidence hashes and commands are in the wake-63
+section below.
 
 **Amended 2026-11-25 (witness W221, message #4556): the W66 chain is now
 witness-ESTABLISHED at rung 5 under the labeled conditions — gate 6 CLOSED.**
