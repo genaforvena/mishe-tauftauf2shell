@@ -1,0 +1,5 @@
+mode=attack len=32785 grows=1 buf=0x60e05851f380 victim=0x60e058527390 delta=32784 pair_ok=1 target_index=1
+victim_base=67e70f2ee0600000
+target=49e70f2ee0600000
+victim_after=49e70f2ee0600000
+victim=marker_1

@@ -1,0 +1,76 @@
+partial-vuln-2_8_3-attack rc=0
+  mode=attack len=32785 grows=1 buf=0x60e05851f380 victim=0x60e058527390 delta=32784 pair_ok=1 target_index=1
+  victim_base=67e70f2ee0600000
+  target=49e70f2ee0600000
+  victim_after=49e70f2ee0600000
+  victim=marker_1
+partial-vuln-2_8_3-safe rc=0
+  mode=safe len=102 grows=0 buf=(nil) victim=(nil) delta=-1 pair_ok=1 target_index=1
+  result=no_overflow_or_no_victim
+partial-fixed-1749f7f-attack rc=0
+  mode=attack len=32785 grows=0 buf=(nil) victim=(nil) delta=-1 pair_ok=1 target_index=1
+  result=no_overflow_or_no_victim
+partial-fixed-1749f7f-safe rc=0
+  mode=safe len=102 grows=0 buf=(nil) victim=(nil) delta=-1 pair_ok=1 target_index=1
+  result=no_overflow_or_no_victim
+partial-vuln-2_8_3-asan-attack rc=1
+  =================================================================
+  ==3812647==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000012400 at pc 0x73813dafb303 bp 0x7ffe2000f210 sp 0x7ffe2000e9b8
+  WRITE of size 32785 at 0x52d000012400 thread T0
+      #0 0x73813dafb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+      #1 0x5ba09a22ab98 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+      #2 0x5ba09a22ab98 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:250
+      #3 0x5ba09a22b173 in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+      #4 0x5ba09a2290e4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/partial_driver.cpp:139
+      #5 0x73813d22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #6 0x73813d22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #7 0x5ba09a2286c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/partial-vuln-2_8_3-asan+0xf6c4) (BuildId: 08cc34cc77a12f821c838823df4bb962ea984414)
+  
+  0x52d000012400 is located 0 bytes after 32768-byte region [0x52d00000a400,0x52d000012400)
+  allocated by thread T0 here:
+      #0 0x73813dafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+      #1 0x5ba09a228d28 in operator new[](unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/partial_driver.cpp:100
+      #2 0x5ba09a229c06 in MT32Emu::MidiStreamParserImpl::checkStreamBufferCapacity(bool) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:137
+      #3 0x5ba09a22a9f6 in MT32Emu::MidiStreamParserImpl::parseSysex(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:249
+      #4 0x5ba09a22b173 in MT32Emu::MidiStreamParserImpl::parseStream(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/src/vuln-2_8_3/mt32emu/src/MidiStreamParser.cpp:106
+      #5 0x5ba09a2290e4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/partial_driver.cpp:139
+      #6 0x73813d22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+      #7 0x73813d22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+      #8 0x5ba09a2286c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/munt2shell/real/partial-vuln-2_8_3-asan+0xf6c4) (BuildId: 08cc34cc77a12f821c838823df4bb962ea984414)
+  
+  SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+  Shadow bytes around the buggy address:
+    0x52d000012180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    0x52d000012200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    0x52d000012280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    0x52d000012300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+    0x52d000012380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  =>0x52d000012400:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+    0x52d000012480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+    0x52d000012500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+    0x52d000012580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+    0x52d000012600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+    0x52d000012680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  Shadow byte legend (one shadow byte represents 8 application bytes):
+    Addressable:           00
+    Partially addressable: 01 02 03 04 05 06 07 
+    Heap left redzone:       fa
+    Freed heap region:       fd
+    Stack left redzone:      f1
+    Stack mid redzone:       f2
+    Stack right redzone:     f3
+    Stack after return:      f5
+    Stack use after scope:   f8
+    Global redzone:          f9
+    Global init order:       f6
+    Poisoned by user:        f7
+    Container overflow:      fc
+    Array cookie:            ac
+    Intra object redzone:    bb
+    ASan internal:           fe
+    Left alloca redzone:     ca
+    Right alloca redzone:    cb
+  ==3812647==ABORTING
+partial-fixed-1749f7f-asan-attack rc=0
+  mode=attack len=32785 grows=0 buf=(nil) victim=(nil) delta=-1 pair_ok=1 target_index=1
+  result=no_overflow_or_no_victim

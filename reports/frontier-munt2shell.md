@@ -887,3 +887,44 @@ UNKNOWN. One byte at one offset, one post-reset message sequence, four render
 calls, synthetic ROMs and a testing build variant: this does not rule out
 other offsets, message types, a real host or a different heap layout, and it
 adds no support to the claim that chosen overflow bytes reach a live consumer.
+
+
+## 25. Short overflow, one-byte partial pointer overwrite (W186, 2026-11-25)
+
+Public-source recheck first: the write-up URL named in issue #149
+(`hackmd.io/@haindpwn/munt-midistreamparser-oversized-sysex-heap-overflow`)
+returns 404; the issue itself still says "static source review only ... no
+PoC was run", with no new comment after 2026-11-05. Advisory mirrors repeat
+the "Public PoC" metadata but carry no bytes and no measured host. No change
+to W181's conclusion.
+
+New bounded experiment (`real/partial_driver.cpp`, `real/partial_probe.sh`,
+method and limits in `real/PARTIAL_POINTER.md`): W170's 7-bit write alphabet
+does not rule out a partial pointer overwrite. A single 32785-byte
+incomplete SysEx copies 17 bytes past the real 32768-byte allocation. The
+driver's `operator new[]` hook places a `malloc(64)` at the measured
+W179 offset `buf+32784`, holding a live function pointer; at runtime it
+selects two marker functions in one 256-byte block whose low bytes differ
+and whose target low byte is `< 0x80`, then patches one input byte at index
+32784 with that low byte. No parser source byte is changed.
+
+| variant / mode | rc | observation |
+| --- | --- | --- |
+| vulnerable plain `attack` | 0 | `grows=1`, `delta=32784`, victim pointer `67…` becomes `49…` in its low byte only; call reaches chosen `marker_1` |
+| vulnerable plain `safe` | 0 | no 32768 allocation or victim |
+| fixed `1749f7f` plain `attack` / `safe` | 0 | no 32768 allocation or victim |
+| vulnerable gcc ASan `attack` | 1 | `WRITE of size 32785`, 0 bytes after the real 32768-byte region at `MidiStreamParser.cpp:250` |
+| fixed gcc ASan `attack` | 0 | clean (leak detection off) |
+
+Raw evidence: `real/evidence/partial-results.txt` and six
+`real/evidence/partial-*.out` files. The chosen attack byte in the committed
+run is `0x49`; the other seven pointer bytes are unchanged. ASan redzones
+move the neighbour, so no marker claim comes from that lane.
+
+New measured fact: a 7-bit alphabet still permits control-flow redirection
+when a pointer sits at the first overwritten byte and the target shares its
+upper bytes. The victim pointer and markers are harness-created; no real
+library or host object with a function pointer at that offset was found,
+there is no ASLR defeat, full pointer control, host/wire input, command or
+witness replay of this lane. Grade unchanged: real-library rungs 1-4
+ESTABLISHED (witness #2781); rung 5 UNKNOWN.

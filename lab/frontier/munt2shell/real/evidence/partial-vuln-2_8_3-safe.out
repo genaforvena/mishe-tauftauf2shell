@@ -1,0 +1,2 @@
+mode=safe len=102 grows=0 buf=(nil) victim=(nil) delta=-1 pair_ok=1 target_index=1
+result=no_overflow_or_no_victim
