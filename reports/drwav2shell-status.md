@@ -134,3 +134,25 @@ makes the low-half pointer land on a useful object without harness grooming.
   no such wrapper was built or claimed. W4 is author replay, no witness
   verdict; W1/W2/W3 verdicts still outstanding at 12:50Z.
 
+## W5 — r5 reachability survey (2026-11-25 13:19Z)
+
+- No real network-facing consumer of `drwav_init_*_with_metadata` was found,
+  so no r5 lane exists to exercise. Two real consumers of request/network
+  audio were checked at source and both call the non-metadata API: Typesense
+  `src/aq_model.cpp` at `319f73eca231dccdd0d840ce984727aeed5dc2f1`
+  (`transcribe(audio_base64)` -> `read_wav()` -> `drwav_init_memory(...,
+  nullptr)`) and Qt multimedia `src/multimedia/audio/qdrawavaudiodecoder.cpp`
+  at `766f60872e63fe45029c6ffaa965b69b18fed2df` (QUrl fetched by
+  `QNetworkAccessManager` -> `loadWaveAndDecodeData()` ->
+  `drwav_init_memory(..., nullptr)`). Neither enters the affected parser.
+- GitHub code search outside `dr_wav.h` and exact-phrase web search returned
+  only this plant's lab, dr_libs header/tests and advisory pages. Bounded
+  survey, not a proof of absence: a real metadata-API consumer is an UNKNOWN
+  prerequisite for r5. No self-authored upload wrapper was built.
+- Clean-archive replay at HEAD `70ff8805`: pins 3/3 OK, consumer hashes 3/3
+  OK, harness 25/0, consumer 18/0, appdest 11/0, nopie 11/0, marker 14/0.
+  Witness verdict on W1-W4 still absent at 13:19Z; no replay repeated.
+- Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen
+  control flow to a lab marker in a -no-pie real consumer; no wire/request
+  input, command, shell, live service, witness verdict for W1-W4 or r5.
+

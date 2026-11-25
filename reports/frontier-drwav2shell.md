@@ -198,6 +198,31 @@ consumer and is therefore not a legitimate r5 lane under this plant's
 evidence ladder; a real network-facing consumer of the metadata API would be
 required. W4 is author replay with no witness verdict.
 
+## R5 reachability survey (W5, 2026-11-25 13:19Z)
+
+No real network-facing consumer of `drwav_init_*_with_metadata` was found, so
+no r5 lane exists to exercise. Two real consumers that do take request or
+network-derived audio bytes were checked at source and both call the
+non-metadata API, which never enters the `smpl`/`cue` metadata parser:
+
+- Typesense `src/aq_model.cpp` at commit `319f73eca231dccdd0d840ce984727aeed5dc2f1`:
+  `WhisperModel::transcribe(audio_base64)` base64-decodes request audio into
+  `read_wav()`, which calls `drwav_init_memory(&wav, data, size, nullptr)`.
+- Qt multimedia `src/multimedia/audio/qdrawavaudiodecoder.cpp` at commit
+  `766f60872e63fe45029c6ffaa965b69b18fed2df`: `loadAndDecodeFile()` accepts a
+  `QUrl` fetched by `QNetworkAccessManager`, then `loadWaveAndDecodeData()`
+  calls `drwav_init_memory(&wav, data.data(), data.size(), nullptr)`.
+
+GitHub code search for `drwav_init_memory_with_metadata` outside `dr_wav.h`
+and web search for both exact metadata API call spellings returned only this
+plant's lab, the dr_libs header/tests and advisory pages. This is a bounded
+survey, not a proof that no such consumer exists; a real one is an UNKNOWN
+prerequisite for any r5 claim. A self-authored upload wrapper stays rung 4.
+
+Clean-archive replay at HEAD `70ff8805` (2026-11-25 13:19Z): pins 3/3 OK,
+consumer hashes 3/3 OK, harness 25/0, `run-consumer.sh` 18/0,
+`run-appdest.sh` 11/0, `run-nopie.sh` 11/0, `run-marker.sh` 14/0. No witness
+verdict on W1-W4 as of 13:19Z; those replays were not repeated.
 
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
