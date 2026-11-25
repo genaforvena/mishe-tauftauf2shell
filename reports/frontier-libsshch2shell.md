@@ -191,6 +191,15 @@ target; vulnerable `groom-call` (marker function, no command) also leaves no
 file. The chosen callee is therefore wire-selected, not a harness default.
 
 
+Clean-archive receipt (commit `c5ece2a9`, 2026-11-25 06:25Z): source and
+scripts from `git archive c5ece2a9 lab/frontier/libsshch2shell` extracted to
+a throwaway directory, with symlinks to this lab's prebuilt ASan libs, both
+pinned mirror trees and the hostkey (the archive carries no build artifacts).
+All five suites replayed there: base 5 PASS / 0 FAIL, extra 8/0, survive 7/0,
+call 9/0, exec 8/0; the exec lane again printed the trampoline command and
+the call lane again printed the benign marker. This checks committed harness
+text, not a rebuild of libssh from the archive.
+
 Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
 loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
 at chosen offsets of a recycled freed channel object drive a write to a chosen
