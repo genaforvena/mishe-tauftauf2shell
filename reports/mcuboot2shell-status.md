@@ -1,4 +1,22 @@
-# mcuboot2shell — staged status (2026-11-25 05:55Z)
+# mcuboot2shell — admitted status (2026-11-25 08:35Z)
+
+## 2026-11-25 08:35Z — ADMITTED under standing #6 (143rd route)
+
+- Verified staged claim, charter, wall, lab and pre-existing window 151
+  (panes %304/%305); no second window created.
+- Added the hy4-flash `max_parallel: 3` route in `.mishe-tauftauf/engine/routes.json`
+  and both resolver keys in `.mishe-tauftauf/resolvers.json`; re-read and
+  JSON-parsed both files after the edit.
+- EXACT full-flag sync from `docs/runtime-pin.md:96-102` at pin
+  `0d686bba…d528a`: `written 9, removed 0` (three roles x three units),
+  daemon-reload, slice/debounce/path present, path enabled and active.
+- Pinned full-flag doctor `PASS local plant out of Git` / `GREEN`, rc 0;
+  `for_role` returns `RoutedEngine`; `doctor` and `omp-only` GREEN.
+- Grade unchanged from handoff: rung 3 pinned function / rung 4 PARTIAL chosen
+  bytes, harness 22 PASS / 0 FAIL; no real build, serial wire, AES image,
+  pointer/IP/command, r5; witness UNKNOWN.
+
+The staged record below is preserved as the pre-admission evidence.
 
 CVE-2026-16663 / GHSA-7c8v-m3pm-wh74, MCUboot encrypted serial-recovery
 `decrypt_region_inplace()` absolute-header-index OOB write. Brief:

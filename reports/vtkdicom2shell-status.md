@@ -1,4 +1,23 @@
-# vtkdicom2shell — lab status
+# vtkdicom2shell — admitted status (2026-11-25 08:35Z)
+
+## 2026-11-25 08:35Z — ADMITTED under standing #6 (145th route)
+
+- Verified staged claim, charter, wall, lab and pre-existing window 153; no
+  second window created.
+- Added the hy4-flash `max_parallel: 3` route in `.mishe-tauftauf/engine/routes.json`
+  and both resolver keys in `.mishe-tauftauf/resolvers.json`; re-read and
+  JSON-parsed both files after the edit.
+- EXACT full-flag sync from `docs/runtime-pin.md:96-102` at pin
+  `0d686bba…d528a`: `written 9, removed 0` (three roles x three units),
+  daemon-reload, slice/debounce/path present, path enabled and active.
+- Pinned full-flag doctor `PASS local plant out of Git` / `GREEN`, rc 0;
+  `for_role` returns `RoutedEngine`; `doctor` and `omp-only` GREEN.
+- Grade unchanged: rung 3 pinned functions / rung 4 PARTIAL chosen bytes at
+  harness-groomed offsets, harness 14 PASS / 0 FAIL; no real build, DICOM
+  file/wire through a real reader, pointer/IP/control-flow, command, r5 or
+  witness verdict.
+
+The staged record below is preserved as the pre-admission evidence.
 
 ## 2026-11-25 07:56Z — STAGED + HANDED OFF
 

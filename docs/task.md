@@ -11169,3 +11169,42 @@ R5 cell moved.
   (4/0, 40-byte control clean). Author-only live availability result at the
   labeled scope; no chosen IP, command, fixed-release control or r5, and no
   cell or verdict move.
+
+## 2026-11-25 08:3xZ — three admissions under standing #6
+
+Mcuboot2Shell, Drwav2Shell and Vtkdicom2Shell were admitted in one operator
+ wake after verifying each staged claim, charter, wall, lab and pre-existing
+ two-pane window (151, 152 and 153). No duplicate window was created. The
+ 143rd-145th hy4-flash routes (`max_parallel: 3`) and six resolver keys were
+ added to `.mishe-tauftauf/engine/routes.json` and
+ `.mishe-tauftauf/resolvers.json`, then re-read and JSON-parsed. The EXACT
+ full-flag sync from `docs/runtime-pin.md:96-102` at pin
+ `0d686bba…d528a` reported `written 9, removed 0` (three roles x three
+ units); after daemon-reload every slice/debounce/path unit is present and
+ each path is enabled and active. The pinned full-flag doctor printed
+ `PASS local plant out of Git` / `GREEN`, rc 0; `for_role` returned
+ `RoutedEngine` for all three; `doctor` and `omp-only` turned GREEN and the
+ stale doctor-service failure signal was re-observed GREEN.
+
+- **Mcuboot2Shell (143rd)**: CVE-2026-16663 / GHSA-7c8v-m3pm-wh74, MCUboot
+  encrypted serial-recovery `decrypt_region_inplace()` absolute header index
+  OOB write, AV:L pre-auth, affected >=1.9.0 <=2.5.0, fix `6e1465c3…` on main
+  (2.5.1 patch projected only). Rung 3 pinned function / rung 4 PARTIAL chosen
+  bytes, harness 22 PASS / 0 FAIL; no real build, serial wire, AES image,
+  pointer/IP/command, r5 or witness verdict.
+- **Drwav2Shell (144th)**: CVE-2026-11316 / TALOS-2026-2442, dr_libs 0.14.5
+  metadata count desync through the public `drwav_init_memory_with_metadata()`
+  API; harness 25 PASS / 0 FAIL, GCC and Clang. Witness W215 (DM #4190)
+  replayed ESTABLISHED AS LABELED at the graded scope: file low-half pointer,
+  lab-groomed same-size-class destination, no full r5. Older "witness UNKNOWN"
+  wording in its status is superseded only at that scope.
+- **Vtkdicom2Shell (145th)**: CVE-2026-22879 / TALOS-2026-2366, vtk-dicom 9.5.2
+  `vtkDICOMItem` count desync OOB write; harness 14 PASS / 0 FAIL, GCC and
+  Clang, chosen bytes at groomed offsets. No real DICOM reader/wire, pointer,
+  command, r5 or witness verdict.
+
+No rung, grade or R5 cell moved by these admissions. `engine-routing` stays
+RED on the known engine-cap class (3 running wakes reach the cap of 3),
+owner=person; the pinned six-column readme-lint checker against the live
+seven-column README stays person-reserved. The repo's own
+`python3 tools/check-readme.py .` is GREEN (141 achievement rows).

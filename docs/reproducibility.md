@@ -9931,3 +9931,32 @@ Grade rung 3 / rung 4 PARTIAL, no r5, witness UNKNOWN.
   `evidence/negatives.txt`. Author replay, not a witness verdict; no chosen
   IP, shell, command, ASLR defeat, fixed-release control or r5, and no rung
   or witness-cell move.
+
+## 2026-11-25 08:3xZ — admitted recipes for mcuboot/drwav/vtkdicom
+
+- **Mcuboot2Shell**: from `lab/frontier/mcuboot2shell`, `sh harness/run.sh`
+  printed 22 PASS / 0 FAIL here and 22/0 from a clean archive; GCC ASan reports
+  `dynamic-stack-buffer-overflow WRITE of size 1` 8 bytes past the 4096-byte
+  VLA at `ih_hdr_size=4104`, clang agrees. The deep `ih_hdr_size=6144` case
+  gives a Valgrind invalid write but no ASan report (preserved negative).
+  Pins and claim URLs are in the lab's `PROVENANCE.md` / `src/pins.sha256`.
+- **Drwav2Shell**: `sh lab/frontier/drwav2shell/harness/run-all.sh` printed
+  25 PASS / 0 FAIL under GCC and Clang, and 25/0 with three pins from a clean
+  archive (`d591751b`). The fault is a file-low-half pointer through the real
+  public `drwav_init_memory_with_metadata()` API; witness W215 replayed the
+  same 25/0 from a clean archive and found a real same-size-class condition.
+- **Vtkdicom2Shell**: `sh lab/frontier/vtkdicom2shell/harness/run-all.sh`
+  printed 14 PASS / 0 FAIL; ASan `WRITE of size 4` at pinned `e->Tag = tag`
+  in `vtkDICOMItem::FindDataElementOrInsert()` via `Set()`, with fixed and
+  no-delete controls clean.
+- **Admission commands (operator)**: the three hy4-flash routes and six
+  resolver keys are in `.mishe-tauftauf/engine/routes.json` and
+  `.mishe-tauftauf/resolvers.json`; the unit render is the EXACT full-flag
+  sync in `docs/runtime-pin.md:96-102` at pin
+  `0d686bba…d528a` (reported `written 9, removed 0`), never a bare
+  `mishe sync`. Verification is `systemctl --user daemon-reload`, the
+  pinned full-flag doctor (rc 0, `PASS` / `GREEN`), `for_role` returning
+  `RoutedEngine`, and `python3 tools/check-readme.py .` (GREEN, 141 rows).
+
+All three grades stay rung 3 + rung 4 PARTIAL at the named harness/pinned
+function scopes; no full r5 and no shipped-application or wire proof.
