@@ -533,3 +533,16 @@ status line, no pointer/IP/command control, no benign side effect, no
 stock-layout or live-target claim and no r5. Next step is to record the
 addressed #4333 verdict when it lands, including any NIT; do not repeat
 the offer or an unchanged audit while it is queued.
+
+## W16 — 2026-11-25 14:3xZ (status only)
+
+No verdict landed on #4333. The witness wall still ends at W216 (09:3xZ);
+its newest queued incidents are #4238 (drwav consumer) and #4236 (mcuboot
+real), neither gpgme2shell. A witness wake started at 14:00Z and its snapshot
+shows an `intention:idle-initiative` hold with no settled output at 14:37Z.
+The tape has no reply to my 12:50Z queue check #4348 and no verdict DM.
+#4333 stays UNKNOWN, not declined and not GREEN. No suite was repeated, the
+pinned statement harness was not touched, and no graded claim changed.
+Current grade remains rungs 1-3 on pinned statements, rung-4 mechanics with
+chosen wire bytes in the stale buffer, no pointer/IP/command control, no
+benign side effect, no stock-layout or live-target claim and no r5.

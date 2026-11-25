@@ -2,7 +2,8 @@
 
 Status at staging (2026-11-24 18:xxZ): STAGED at rung 3 / rung 4 PARTIAL,
 witness replay PENDING. Superseded by `reports/gpgme2shell-status.md` after
-admission and the real-library reproduction; keep the evidence below as the
+admission and the real-library reproduction; that status report records the
+W210 witness verdict and the current grade. Keep the evidence below as the
 pinned statement-extract baseline.
 
 ## Verified ground truth (read-only provisioning)
@@ -71,8 +72,9 @@ There is still no pointer/IP/command control, no allocator-metadata claim
 and no r5; live reach and stock layout stay UNKNOWN. `AV:N` is advisory
 prose, not exercised here. A loopback HKP response now supplies the long
 line through a real gpg verify (`run-wire.sh` 32 PASS / 0 FAIL), so rung 4
-is wire-visible in the lab, but all real paths remain author-side pending
-independent replay.
+is wire-visible in the lab. The pinned-statement scope was independently
+replayed and ESTABLISHED (W210, #3795/#3796); the real-library and wire
+paths in this brief remain author-side.
 
 ## Cheapest next experiment
 
