@@ -10881,3 +10881,29 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   in ASLR-on dumps are normalized before hash comparison. Every receipt in
   this section is author-side; only W204 above carries an independent
   verdict, and no rung cell or R5 claim moved.
+
+## 2026-11-25 21:4xZ — nfdump2shell admission replay
+
+- **Claim and pins** — `reports/frontier-nfdump2shell.md` and
+  `lab/frontier/nfdump2shell/PROVENANCE.md` record GHSA-gpgq-hv9x-7mqj (public
+  advisory endpoint HTTP 404 on 2026-11-25, no CVE/CVSS), vulnerable parent
+  `8a00543aa5c7b25b7d3f7642fdf306fd9979f237` and fix
+  `32b9cbe7f17e099d59fc5eac71c84c6c6f051fa5`.
+- **Harness** — `bash lab/frontier/nfdump2shell/run-all.sh`: 10 PASS / 0 FAIL;
+  GCC and Clang ASan heap `WRITE of size 8`, 0 bytes after a 48-byte region in
+  the pinned `Process_nfd()` store; fixed rejects the short element, safe-full
+  and no-element controls clean; plain `EXPECTED_BYTES=9b50351f49010000` equals
+  `CANARY_AFTER`.
+- **Admission config** — charter, wall and two-pane window 160 checked and the
+  window adopted. No route, resolver key or unit was added: engine-config,
+  systemd unit and full-flag-sync changes are person-reserved
+  (`.mishe-tauftauf/operator/standing-approvals.md:47-51`).
+  `python3 tools/check-omp-only.py .mishe-tauftauf .` remains RED for
+  `nfdump2shell: no route` (153 declared roles); the 21:29/21:34Z doctor runs
+  list twelve missing unit files. The `failed-m2shell-doctor-service` RED was
+  re-observed GREEN at 21:42Z with `--source operator-disposition --event
+  missing-units-person-reserved-20261125T2145Z` on a refreshed person-owned
+  disposition, not on a clean doctor run.
+- **Grade** — rung 3 pinned verbatim functions, rung 4 PARTIAL packet-chosen
+  offset with harness-chosen value, no adjacent object, pointer, wire, command
+  or r5; witness replay and the person's exact full-flag sync remain owed.

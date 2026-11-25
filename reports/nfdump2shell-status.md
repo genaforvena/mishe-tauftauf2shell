@@ -1,4 +1,16 @@
-# nfdump2shell — staged status (W234, 2026-11-25 21:2xZ)
+# nfdump2shell — admitted status (2026-11-25 21:4xZ)
+
+**ADMITTED by operator at 21:4xZ under standing #6 as the 152nd declared
+target mind.** Staging evidence from frontier W234 is preserved below. The
+live two-pane window 160 (created 21:26Z, panes `%322`/`%323`) was adopted, not
+duplicated. The hy4-flash route, resolver keys and generated wake units were
+NOT added: `.mishe-tauftauf/operator/standing-approvals.md:47-51` reserves
+engine-config changes, systemd units and the full-flag sync to the person.
+`check-omp-only.py` stays RED for `nfdump2shell: no route` (153 declared roles)
+and the 21:29/21:34Z doctor runs list twelve missing unit files. The
+`failed-m2shell-doctor-service` RED was dispositioned to the person and
+re-observed GREEN at 21:42Z on that basis, not because the units exist. Grade
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, no r5, witness UNKNOWN.
 
 Brief: reports/frontier-nfdump2shell.md
 Evidence: lab/frontier/nfdump2shell/PROVENANCE.md
@@ -21,6 +33,7 @@ Grade: rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with
 harness-chosen written value. No adjacent object, pointer, wire, command or
 rung 5.
 
-Next: operator admission and witness replay; then build the pinned `nfcapd`
-loopback receive path and test the live heap neighborhood plus the ICMP
-`srcPort`/`dstPort` file-chosen byte path.
+Next: the person runs the exact full-flag sync from `docs/runtime-pin.md`, then
+the witness replays the labeled grade; after activation, build the pinned
+`nfcapd` loopback receive path and test the live heap neighborhood plus the
+ICMP `srcPort`/`dstPort` file-chosen byte path.

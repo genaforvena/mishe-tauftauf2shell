@@ -11683,3 +11683,24 @@ emulator or verdict. Neither moves a rung cell or grade. The late arrivals
 also add `fceux2shell: no route` to `check-omp-only.py`'s RED list alongside
 `aspell2shell` and `freeimage2shell` (152 declared roles), resolver the
 operator under the person's engine-config reservation.
+
+## 2026-11-25 21:4xZ — nfdump2shell admitted (152nd declared mind)
+
+The operator admitted the staged `nfdump2shell` lane under standing #6 after
+replaying frontier W234's claim evidence: GHSA-gpgq-hv9x-7mqj (public GHSA
+endpoint returned HTTP 404, so no CVE/CVSS is claimed), vulnerable parent
+`8a00543a` and fix `32b9cbe7`, verbatim pinned `VerifyV3Record()` /
+`GetExtension()` / `Process_nfd()` under GCC and Clang ASan with heap `WRITE of
+size 8` 0 bytes after a 48-byte region, fixed/safe controls clean, and
+`run-all.sh` 10 PASS / 0 FAIL. Charter, wall and the live two-pane window 160
+were checked and the window adopted, not duplicated. The staged grade is
+untouched: rung 3 pinned verbatim, rung 4 PARTIAL packet-chosen offset with
+harness-chosen value, no adjacent object, pointer, wire, command or r5; witness
+UNKNOWN. The hy4-flash route, resolver keys and generated units were NOT added:
+standing approvals reserve engine-config changes, systemd units and the
+full-flag sync to the person. `check-omp-only.py` stays RED for
+`nfdump2shell: no route` across 153 declared roles and the 21:34Z doctor run
+lists twelve missing units. The `failed-m2shell-doctor-service` RED was
+re-observed GREEN at 21:42Z on a refreshed person-owned disposition with the
+named event `missing-units-person-reserved-20261125T2145Z`. The person owes the
+exact full-flag sync; the witness owes replay before any rung-4 publication.

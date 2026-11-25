@@ -188,6 +188,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Aspell2Shell** | ✓ | ✓ | ✓ | — | — | **ADMITTED 18:1xZ under standing #6 as the 150th declared target mind; window 157 adopted; engine route delivered in the 20:27Z 152-role config (omp-only GREEN); three generated wake units still missing (doctor RED, person-reserved).** CVE-2026-75818 / CERT Polska 2026-10-06, GNU Aspell before 0.60.8.3, CWE-122, CVSS4 1.8 `AV:L/AC:H/PR:N/UI:A`; fix `15b18843`, vulnerable parent `bc7ffcb`. Full pinned `prog/prezip.c` program: crafted 22-byte stream walks 605 bytes from a 256-byte heap allocation; GCC and Clang ASan report `READ of size 1` at pinned `:173`, 0 bytes after the region, fixed rejects and encoder-round-trip safe input decodes cleanly. `bash lab/frontier/aspell2shell/harness/run-all.sh` = 14 PASS / 0 FAIL. Rung 4 NOT CLAIMED: no chosen-byte store, real dictionary consumer, pointer target, command or r5; witness UNKNOWN. [Status](reports/aspell2shell-status.md) |
 | **FreeImage2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 18:1xZ under standing #6 as the 151st declared target mind; window 158 adopted; engine route delivered in the 20:27Z 152-role config (omp-only GREEN); three generated wake units still missing (doctor RED, person-reserved).** CVE-2026-118753 / GHSA-wr69-568q-rrqg, Danoli3 FreeImage before 3.19.25, CWE-787, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`; fix `0da5ddb4`, vulnerable `3.19.24` `4916e0ec`, fixed `3.19.25` `363311f1`. Real static library through public `GIF_PLAYBACK` APIs: GCC ASan heap-buffer-overflow `WRITE of size 4` at `PluginGIF.cpp:743`, 0 bytes after an 816-byte region; fixed and safe controls clean. Vulnerable plain chosen-palette runs put `TAU,ff` at `bits+400/+404/+408` past the nominal 400-byte canvas, then the far frame segfaults; `SKIP_BUILD=1 bash lab/frontier/freeimage2shell/run-all.sh` = 9 PASS / 0 FAIL. Rung 4 PARTIAL at those fixed offsets only; no adjacent-object target, pointer, remote consumer, command or r5; witness UNKNOWN. [Status](reports/freeimage2shell-status.md) |
 | **Fceux2Shell** | ✓ | ✓ | ✓ | ◐ | — | **STAGED 19:2xZ, NOT ADMITTED; declared in the 20:27Z 152-role engine config with no generated wake units (doctor RED, person-reserved), window 159 adopted, witness replay UNKNOWN.** CVE-2026-136918 (FCEUX < 2.8.0, UNIF MAPR declared size `0xffffffff` wraps the board-name allocation; CNA CWE-190, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`); fixed 2.8.0 (`c40fcf63`), vulnerable parent `1e1de9b`, fix `d9132c2`. Verbatim pinned `SetBoardName()` under GCC and Clang ASan: heap `WRITE of size 19`, 0 bytes after a 1-byte region; fixed and safe controls clean. Plain file-chosen bytes land at `boardname+1..+16` (`PAST_ALLOC=41552c66664d495348452d4643455558`) before the wild terminator faults; `bash lab/frontier/fceux2shell/run-all.sh` = 14 PASS / 0 FAIL. Rung 4 PARTIAL at chosen offsets only; no adjacent object, pointer control, live ROM consumer, wire path, command or r5. [Status](reports/fceux2shell-status.md) · [Brief](reports/frontier-fceux2shell.md) |
+| **Nfdump2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:4xZ under standing #6 as the 152nd declared target mind; window 160 adopted; hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** GHSA-gpgq-hv9x-7mqj (public GHSA endpoint returned HTTP 404 on 2026-11-25; no CVE/CVSS claimed); upstream fix `32b9cbe7`, vulnerable parent `8a00543a`. A truncated EXgenericFlow element passes `VerifyV3Record()` and reaches the `msecReceived` store past the element; verbatim pinned functions under GCC+Clang ASan give heap `WRITE of size 8` 0 bytes after a 48-byte region, fixed rejects and safe controls clean, plain canary `EXPECTED_BYTES=9b50351f49010000` = `CANARY_AFTER`; `bash lab/frontier/nfdump2shell/run-all.sh` 10 PASS / 0 FAIL. Rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with harness-chosen value; no adjacent object, pointer, wire, command or r5; witness UNKNOWN. |
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
 rung, grade, route, mind-count, witness or R5 cell. Ruby2Shell's stock Rails
@@ -3608,9 +3609,29 @@ bytes through rc 42; no row, route, live emulator, command or verdict follows
 from staging. No rung cell, grade or R5 cell moved by these limbs either.
 
 
+The 2026-11-25 21:4xZ operator wake admits Nfdump2Shell as the 152nd declared
+target mind under standing #6 after replaying the staged claim
+(GHSA-gpgq-hv9x-7mqj, public endpoint HTTP 404, no CVE/CVSS), both hash-pinned
+`nfdump` revisions (`8a00543a` / `32b9cbe7`), the 10 PASS / 0 FAIL GCC+Clang
+ASan harness and the live two-pane window 160 (frontier W234, 21:26Z, adopted
+without duplication). The grade is unchanged: rung 3 pinned verbatim, rung 4
+PARTIAL packet-chosen offset with harness-chosen value, no wire/pointer/command,
+no r5, witness UNKNOWN. No route, resolver key or unit was added: the owner's
+standing approvals reserve engine-config changes, systemd units and the
+full-flag sync to the person
+(`.mishe-tauftauf/operator/standing-approvals.md:47-51`). The route registry
+therefore stays at 152 roles while 153 roles are declared in the OMP checker
+(which also counts staged Fceux2Shell); `check-omp-only.py` is RED for
+`nfdump2shell: no route` and the 21:34Z doctor run lists twelve missing unit
+files (nine for aspell/fceux/freeimage, three for nfdump2shell). The
+`failed-m2shell-doctor-service` RED was re-observed GREEN on a refreshed
+person-owned disposition, not because the units exist. No operational delivery
+is claimed here; the person's exact full-flag sync and witness replay remain
+owed.
+
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 151 target
+Each admitted family is its own mind with its own tmux window: 152 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -3647,7 +3668,7 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell`,
 `ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell`,
 `xschem2shell`, `stbvorbis2shell`, `ctranslate22shell`, `solanum2shell`,
-`aspell2shell` and `freeimage2shell`. Each builds
+`aspell2shell`, `freeimage2shell` and `nfdump2shell`. Each builds
 affected harnesses, drives toward rung 4 and authors its report under
 `reports/`.
 
