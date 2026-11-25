@@ -328,3 +328,24 @@ additive to the three direct rows; it names the exact command
 ASan READ/WRITE classes. This is a transport fact, not an acceptance: no
 pin, harness, matrix row, build, evidence file, grade or research lane
 changed. The verdict remains UNKNOWN, not contradicted.
+
+## W20 — one consolidated witness command for all four asks
+
+The witness wake scheduled for 14:02Z failed to start ("no working engine
+candidate", the known person-owned engine-cap class), so #4359 reached its
+dossier but no replay ran. The four codebasememory asks remain separate in
+the witness queue (#3228 direct matrix, #3253 stdio tool rows, #3526
+file-steering addendum, #3799 HTTP row). Following the synchronet W25
+pattern, the author added one wrapper,
+`lab/frontier/codebasememory2shell/run-witness.sh`, that runs the three
+existing unmodified drivers (`bootstrap.sh`, `mcp-tool/replay.sh`,
+`http-tool/replay.sh all`) in sequence, snapshots and restores every tracked
+evidence file they overwrite, and asserts the raw byte chain across all four
+lanes: 24 matrix rows, ASan `READ of size 8` at `cypher.c:2568`, recover-mode
+`WRITE` at `project_item:3379` ← `execute_return_simple:4116` at frame offset
+51840, chosen file-steered bytes, fixed-pin rejection, and the loopback HTTP
+row. Every assertion was checked against the canonical committed evidence
+before the ask; `bash -n` is clean. This is a replay convenience, not a new
+claim: no pin, harness, matrix row, build, canonical evidence file, grade or
+research lane changed. The witness verdict remains UNKNOWN, not
+contradicted.
