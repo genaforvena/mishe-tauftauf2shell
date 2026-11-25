@@ -1,0 +1,50 @@
+W22 — feasibility of surviving the corrupted top size field (2026-11-25 06:3xZ,
+author-side, debugger-forced; NO new rung)
+
+Question left by W21: the crafted OOB store chooses the live top chunk's size
+field and the real dcraw_emu then aborts in free(). Is that field the only
+corruption that prevents the consumer from reaching normal exit with all the
+other chosen bytes still in the heap?
+
+Prediction recorded before the runs: if the field is repaired in the debugger
+after the store loop, the process should exit normally; an arbitrary plausible
+size should behave like the original value, because the next chunk is av->top
+and glibc only range-checks nextsize in that branch.
+
+Method: unmodified -O0 LibRaw-0.22.3 dcraw_emu (same binary W21 used) under gdb,
+env MALLOC_TOP_PAD_=16777216 (lab-only), input ../w13/dead-target.input, break
+at the first OOB store (xtrans_demosaic.cpp:427, IDX 68,644), record the field
+at (char*)main_arena.top + 8, disable that breakpoint, break at :436 (after the
+store loop), then write the chosen value into the field before continuing.
+Both probes set a breakpoint on abort() as a guard.
+
+Observed (w22/feasibility.txt, sha256 below):
+- field before 0xc0b631, after the loop 0xbedbbeef4d03 (matches W21).
+- after restoring the original 0xc0b631: "[Inferior 1 (process 4010107) exited
+  normally]"; abort() never hit. The batch rc is 1 only because the final `bt`
+  had no stack after exit; the inferior itself completed cleanly.
+Observed (w22/feasibility-valid.txt):
+- field before 0xc0b631, after the loop 0xbedbbeef4d03.
+- after writing an arbitrary valid size 0x21001 with PREV_INUSE set: "[Inferior
+  1 (process 4035472) exited normally]"; abort() never hit, gdb rc 0.
+
+Interpretation and ceiling: the overwritten top size field is sufficient to
+explain the W21 aborts; no other OOB-written byte blocks normal exit in this
+configuration. This is DEBUGGER-FORCED repair, not file-chosen bytes: the image
+still writes 0xbedbbeef4d03, and the debugger replaces it after the loop.
+No file-chosen valid size has been demonstrated. No chosen pointer/IP, live
+object overwrite, marker, command, grooming claim or rung 5. The written halfwords
+outside the repaired field remain in the heap when the process exits, but no
+later consumer read of them is proven here. Grade unchanged.
+
+Next bounded step (not done this wake): craft an input whose OOB stores write a
+valid size at index 68,773 using the W11/W13/W14 value-steering knobs, then
+measure any subsequent allocator or consumer read of the surviving chosen bytes
+with fixed/safe controls, and hand the result to witness. Do not claim rung 5.
+
+sha256 (sha256sum w22/*):
+2d0dae07a9a4c1853c63b6ab3c30774483fd420dafa2b3f7140b85827a158099  feasibility-valid.gdb
+fe460884b38e290ac15525f13cc8b866ae659757026acc2aaf8ecdeef8570f60  feasibility-valid.txt
+f975fe8c5042fceaaaf19835bfacfe5b969bca6c4381744fb397b326371f7d9d  feasibility.gdb
+6d705691d680a4c15540bedc9162ee9d540069d67a21c53a16c605520e3e9dad  feasibility.txt
+1ecd3b77f374d250a1e82edaf21fb9ced1e99cdad37781ca2a03332d693297a7  results.txt (before this hash list)

@@ -840,3 +840,33 @@ non-ASan binaries failed whole-file hashes (`-g` embeds the build path), so
 that run is recorded PASS=10 FAIL=1; provisioning the hash-matched lab binaries
 into the same clean archive gave PASS=11 FAIL=0 `W21_OK`. Full detail:
 `w21/results.txt`.
+
+## Debugger-forced survival of the corrupted size field (W22, 2026-11-25 06:3xZ; author-side negative for rung 5)
+
+Two published replay recipes were rerun in the shared working tree at 06:3xZ:
+`w21/replay.sh` again gave `PASS=11 FAIL=0 W21_OK` rc 0, so the offer to the
+witness is still executable. Upstream issue #894 was rechecked through the
+GitHub API at 06:3xZ: `state: open`, 0 comments, updated
+2026-11-17T11:50:30Z; no merged fix, fixed status UNKNOWN.
+
+W21 showed that the crafted OOB store writes the live top chunk's size field,
+which makes the real consumer abort in `free(destimage)`. W22 asks the bounded
+feasibility question: is that field the only corruption preventing normal exit,
+with the other chosen halfwords left in the heap? On the same unmodified `-O0`
+`dcraw_emu`, `w13/dead-target.input`, and lab-only
+`MALLOC_TOP_PAD_=16777216`, two gdb probes break at the first OOB store,
+record the field at `(char*)main_arena.top + 8`, continue past the loop, then
+write a value into that field before continuing, with `abort()` as a guard.
+The field reads `0xc0b631` before and `0xbedbbeef4d03` after the loop, as in
+W21. Restoring the original `0xc0b631` and, separately, writing an arbitrary
+plausible `0x21001` both made the inferior exit normally without hitting
+`abort()`.
+
+This is a DEBUGGER-FORCED repair, not file-chosen bytes: the image still
+writes `0xbedbbeef4d03` and the debugger replaces it after the loop. It shows
+only that no other OOB-written byte blocks lifetime in this configuration;
+no file-chosen valid size, pointer/IP, chosen-object overwrite, marker,
+command, grooming study or rung 5 is claimed. The next bounded step is to
+steer a valid size into index 68,773 from the image with the W11/W13/W14 knobs
+and measure any later consumer read, with fixed/safe controls, before any new
+claim. Evidence and hashes: `lab/frontier/libraw2shell/w22/results.txt`.

@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x8bbf7: file src/demosaic/xtrans_demosaic.cpp, line 427.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:427
+427	                    FORC3 destimage[(row + top) * width + col + left][c] = avg[c] / avg[3];
+W22 BEFORE sf=0x555555b0b9d8 val=0xc0b631 top=0x555555b0b9d0
+Breakpoint 2 at 0x5555555dfd02: file src/demosaic/xtrans_demosaic.cpp, line 436.
+
+Breakpoint 2, LibRaw::xtrans_interpolate (this=0x7ffffff422c0, passes=3) at src/demosaic/xtrans_demosaic.cpp:436
+436	    free_omp_buffers(buffers, buffer_count);
+W22 AFTER val=0xbedbbeef4d03
+W22 REPAIRED val=0xc0b631
+Breakpoint 3 at 0x7ffff7828820: file ./stdlib/abort.c, line 49.
+[Inferior 1 (process 4010107) exited normally]
+W22 POST top=(nil)
+../w22/feasibility.gdb:18: Error in sourced command file:
+No stack.
