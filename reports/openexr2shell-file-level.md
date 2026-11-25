@@ -1852,3 +1852,11 @@ fixed 3.5.3 `bad`
 `458fbb6e540a2905792366420810504cd72a35b05c68af839c8312259c6a7499`.
 Author observation under one pinned build and one forged geometry; not a
 witness verdict.
+
+W194 clean-archive receipt (01:30Z): `git archive HEAD lab/openexr2shell-real`
+into `/tmp/w194-clean`, with the gitignored `src/`, `build-vuln-plain`,
+`build-fixed-plain`, `build-vuln-asan`, `build-fixed-asan`, `bin-vuln-plain`
+and `bin-fixed-plain` trees symlinked from the live checkout. From the archive,
+`sh harness/w194-fault-attribution.sh` printed `RESULT PASS` rc 0 and all five
+evidence hashes matched the working tree byte-for-byte. Author replay, not a
+witness verdict; grade and rung-5 status unchanged.
