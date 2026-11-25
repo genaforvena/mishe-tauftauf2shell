@@ -1,0 +1,68 @@
+== W196 GCC no-canary device-only top-header test ==
+=== DEVICE_ONLY (mode=s count=1022 priv= top=) ===
+AFTER_INIT rc=0
+malloc(): corrupted top size
+RC=134
+=== CONST_REPAIR (mode=n count=1022 priv=0 top=0x12bb1) ===
+W195_NATURAL priv=0 top=12bb1 n=15936
+RC=139
+=== WRONG_TOP (mode=n count=1022 priv=0 top=0) ===
+W195_NATURAL priv=0 top=0 n=15936
+RC=139
+=== SAFE (mode=s count=100 priv= top=) ===
+AFTER_INIT rc=0
+LIST rc=0 count=100
+FIRST_NAME=jl_001.ppm
+RC=124
+
+== W196 GCC partial-priv16 + device-constant top-size sweep (ASLR off) ==
+--- guess=0x0410 rc=139 ---
+W196_Q priv16=0410 top=12bb1 n=15936
+--- guess=0x1410 rc=139 ---
+W196_Q priv16=1410 top=12bb1 n=15936
+--- guess=0x2410 rc=139 ---
+W196_Q priv16=2410 top=12bb1 n=15936
+--- guess=0x3410 rc=139 ---
+W196_Q priv16=3410 top=12bb1 n=15936
+--- guess=0x4410 rc=139 ---
+W196_Q priv16=4410 top=12bb1 n=15936
+--- guess=0x5410 rc=139 ---
+W196_Q priv16=5410 top=12bb1 n=15936
+--- guess=0x6410 rc=139 ---
+W196_Q priv16=6410 top=12bb1 n=15936
+--- guess=0x7410 rc=139 ---
+W196_Q priv16=7410 top=12bb1 n=15936
+--- guess=0x8410 rc=139 ---
+W196_Q priv16=8410 top=12bb1 n=15936
+--- guess=0x9410 rc=139 ---
+W196_Q priv16=9410 top=12bb1 n=15936
+--- guess=0xa410 rc=139 ---
+W196_Q priv16=a410 top=12bb1 n=15936
+--- guess=0xb410 rc=139 ---
+W196_Q priv16=b410 top=12bb1 n=15936
+--- guess=0xc410 rc=139 ---
+W196_Q priv16=c410 top=12bb1 n=15936
+--- guess=0xd410 rc=139 ---
+W196_Q priv16=d410 top=12bb1 n=15936
+--- guess=0xe410 rc=139 ---
+W196_Q priv16=e410 top=12bb1 n=15936
+--- guess=0xf410 rc=139 ---
+W196_Q priv16=f410 top=12bb1 n=15936
+
+== W196 disposition (negative) ==
+Build: GCC 2.5.34 from the pinned W195 tree, CFLAGS
+'-O0 -g -fPIC -fno-omit-frame-pointer -fno-stack-protector', installdir
+/tmp/w196-gcc-build/installdir; consumer-probe compiled from
+evidence/replay-file-consumer-probe.c. gdb at jl2005c.c:155, count 100,
+ASLR off: priv=0x555555563410, top prev_size=0 at priv+0x4040, top size
+0x12bb1 at priv+0x4048.
+Observed: count 1022 mode s (no pointer/header repair) -> init rc=0 then
+malloc(): corrupted top size (rc 134); safe count 100 -> LIST rc=0 count=100.
+Mode n with M2SHELL_W195_PRIV=0 (device constant, NOT a live address) and
+M2SHELL_W195_TOP=0x12bb1 -> SIGSEGV 139 inside memmove at :154; gdb:
+memmove destination priv+0x4070 (shifted by +0x4030 from priv->table) and
+saved RIP 0x12bb1, so reply 0x3E38 is top size AND saved-RIP slot here too.
+Mode q (lab-only, since reverted) sweep of 16 low-16-bit pointer candidates
+with device-constant top size 0x12bb1, ASLR off: 16/16 SIGSEGV 139 in
+memmove at :154, 0 LIST successes. No device-only top-header repair seen.
+Grade unchanged: author-side rung 4, unwitnessed, no wire/command or rung 5.

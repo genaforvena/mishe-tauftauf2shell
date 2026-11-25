@@ -643,3 +643,22 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   (9 PASS / 0 FAIL), `evidence/w195-device-only-negative.out`,
   `evidence/w195-top-header-map.out`,
   `evidence/w195-vusb-natural-repair.patch`.
+
+- GCC no-canary layout does not reopen the device-only lane (W196,
+  2026-11-25, negative): a GCC 2.5.34 build of the pinned tree with
+  `-fno-stack-protector` was driven with the same real `gp_camera_init()` /
+  vusb consumer probe. gdb at `jl2005c.c:155` with count 100 measured the
+  top header at `priv+0x4040/0x4048` (prev_size 0, size `0x12bb1`). Count
+  1022 with the reply capped at `0x3E20` still gives init rc=0 and then
+  `malloc(): corrupted top size` (rc 134); count 100 lists 100 files.
+  Supplying `M2SHELL_W195_PRIV=0` (a device constant, not a live address)
+  and the measured top size faults inside `memmove` at `:154` (rc 139),
+  with the destination shifted to `priv+0x4070` and the saved RIP equal to
+  `0x12bb1` — reply offset `0x3E38` is both the top-size source and the
+  saved-RIP slot here as well. A lab-only sweep of 16 low-16-bit pointer
+  candidates with the device-constant top size gave 16/16 SIGSEGV in
+  `memmove` and no consumer listing. No device-only top-header repair is
+  observed on either compiler; the W195 coupling is not clang-specific.
+  Grade unchanged: author-side rung 4, unwitnessed, no wire, command or
+  physical USB path, rung 5 UNKNOWN. Raw output (build, gdb map, controls
+  and sweep): `lab/frontier/libgphoto2shell/evidence/w196-gcc-device-only.out`.
