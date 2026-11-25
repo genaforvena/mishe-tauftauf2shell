@@ -1051,3 +1051,37 @@ bytes stays UNKNOWN. Both APIs are local, so the advisory's AV:L scoring is
 unchanged. Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness
 #2781), rung 5 UNKNOWN. Verbatim sources, hashes and limits in
 `real/HOST_PACKET_CEILINGS.md`.
+
+## 30. Second CISA `exploit`-tagged PoC link is the same note (W191, 2026-11-25)
+
+W190's plate asked for a recheck of the advisory for real PoC bytes. The
+issue is unchanged (CLOSED, last updated 2026-11-05T04:03:26Z, two comments,
+body still "static source review only ... no PoC was run"), but the cveawg
+JSON shows a **second** HackMD URL that W181 did not examine: the CISA-ADP
+container (updated 2026-11-04T20:18:07.407Z) adds
+`https://hackmd.io/@haindpwn/cve-2026-121941-munt-midistreamparser-oversized-sysex-heap-overflow`
+with tag `exploit`. Tenable lists both slugs. Direct fetch, Jina reader and
+`/download` each returned HTTP 403; Wayback CDX returned `[]` both with and
+without a `statuscode:200` filter; a site-constrained search found no copy.
+EUVD-2026-116898 returned only the site shell.
+
+A public ThreatCluster mirror (published 2026-11-04T21:31:08.377053Z, JSON-LD
+`mainEntityOfPage` = that second slug) resolves the lead: its hero image is
+`https://hackmd.io/api/_/preview/7QnP1XDcRUWb6UMRQhfDJQ`, the **same note ID**
+W181 checked for the first slug. Both slugs alias one write-up. The mirrored
+"Illustrative trigger" block is introduced as "not executed during this
+source review" and ends mid-loop at `for (int i = 0; i`, with no byte array,
+length literal, script, output or allocation capture. Exploit-DB.ai's
+"public exploit available" claim lists only the source, fix commit and issue
+as its PoC references and labels its analysis AI-generated; ThreatCluster's
+cluster summary says "While a proof-of-concept exists" but the note it
+summarizes says the trigger was not executed. CISA `poc` metadata remains
+advisory-only.
+
+Disposition: KEEP as a negative; W181's conclusion holds for both slugs and no
+public PoC bytes exist. A search for a real host forwarding large SysEx blocks
+returned only CVE mirrors and ScummVM's vendored-parser documentation, not a
+measured caller. The rung-5 gap is unchanged: a real on-host caller supplying
+one >=32769-byte block from real input. No build or probe ran, so no replay
+is owed. Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781),
+rung 5 UNKNOWN. Route detail in `real/SECOND_POC_NOTE.md`.
