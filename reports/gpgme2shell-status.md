@@ -467,3 +467,37 @@ Grade unchanged: rungs 1-3 on pinned statements, rung-4 mechanics with
 chosen wire bytes in the stale buffer, no pointer/IP/command control, no
 benign command side effect, no stock-layout or live-target claim, no r5.
 All real-path results remain author-side; no witness verdict has landed.
+
+## W13 — key-clobber branch closed in plain glibc (2026-11-25 09:4xZ)
+
+One bounded new experiment, no GPGME build and no network:
+`realbuild/plain-key-bypass.c` models the exact plain-glibc free order with
+standalone malloc/realloc/free on host glibc 2.39. A 64-byte guard after the
+1024-byte status-model buffer forces `realloc(2048)` to move and free the
+stale 0x410 chunk; a following `malloc(1024)` models GPGME's internal
+`strdup(rest)` at `engine-gpg.c:1564` reclaiming it and filling its first 16
+bytes with chosen `A` bytes (clobbering tcache `key`). Then `free(old)`
+models `gpg_release :602` and `free(alias)` models `:607-608`, with no
+allocation between them.
+
+`cd lab/frontier/gpgme2shell/realbuild && sh run-keybypass.sh` gives
+`PASS=9 FAIL=0`, rc 0; raw output is in `realbuild/evidence/keybypass-*.out`
+and `.rc` (gitignored). Observed: `CASE=key` rc 134 with `free(): double
+free detected in tcache 2` at the second free — overwriting the tcache key
+alone does not rescue this free order, because the first of the two release
+frees writes `key = tcache` back before the second one. `CASE=drain` rc 0
+with both frees completed when a held `malloc(1024)` takes the chunk out of
+tcache between them (the W8 callback-alias shape). `CASE=full` rc 0: with
+the 0x410 tcache bin filled before realloc, the internal strdup-model
+allocation did not alias the stale chunk, so this standalone shape exercises
+no double free; W10's full-bin abort remains a separate, real-GPGME result
+and is not restated here.
+
+This explains W9's `double free detected in tcache 2` causally and closes
+the "clobber the key to make the second release free silent" branch on plain
+glibc. It is allocator mechanics only, not a live path, not a chosen-address
+write and not a witness verdict. Grade unchanged: rungs 1-3 on pinned
+statements, rung-4 mechanics with chosen wire bytes in the stale buffer, no
+pointer/IP/command control, no benign side effect, no stock or live-target
+claim, no r5. All real-path results remain author-side; no witness verdict
+has landed on #3808/#3911/#3919/#3945/#4028/#4053/#4101.

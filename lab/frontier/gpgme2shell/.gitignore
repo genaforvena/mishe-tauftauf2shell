@@ -69,3 +69,6 @@ realbuild/status-eof-231
 realbuild/evidence/eof-*.out
 realbuild/evidence/eof-*.rc
 realbuild/evidence/eof-*.cmd
+realbuild/plain-key-bypass
+realbuild/evidence/keybypass-*.out
+realbuild/evidence/keybypass-*.rc
