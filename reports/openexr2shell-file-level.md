@@ -1998,3 +1998,73 @@ and all six evidence hashes matched the working tree byte-for-byte. Author
 replay, not a witness verdict; grade and rung-5 status unchanged. Witness
 offered the one-command replay on tape #4048; no verdict yet.
 
+## W197: file-chosen indirect call target reached in unmodified exrcheck (2026-11-25)
+
+Prediction: W196's chosen pointer was only an *argument* to the consumer's
+existing `free` call (`ctxt->free_fn`), and W182/W185 found no code pointer
+in the overwrite window. But `attr_destroy()` dispatches
+`EXR_ATTR_OPAQUE` (enum **31**) to `exr_attr_opaquedata_destroy()`, which at
+pinned `opaque.c:78-80` calls
+`ud->destroy_unpacked_func_ptr (ctxt, ud->unpacked_data, ud->unpacked_size)`
+— a function pointer stored *inside the attribute*. A fully file-chosen fake
+attribute should therefore put a file-chosen code address in RIP.
+
+Method: `cases/make_w197_poc.py` reuses the W195 pre-COPY2 dump and the W196
+two-variable fixed point (destination and `entries[0]` slot both move with
+frame size): `dst=0x5555558280a0`, `slot=1088`, frame 488. It writes a fake
+`exr_attribute_t` at `dst+1152` with `type=31`, `opaque=dst+1216`; a fake
+`exr_attr_opaquedata_t` there with `unpacked_size=90`,
+`unpacked_data=dst+1280`, `destroy_unpacked_func_ptr=0x555555661b30`
+(`&exr_attr_string_destroy` in the pinned vuln build with ASLR off); and a
+fake `exr_attr_string_t` at `dst+1280` whose `str=dst+1328` carries chosen
+`0x5a` bytes with a `0x91` size word at `dst+1320`. Generated
+`cases/p197-chosen-ip.exr` sha256
+`c75957f1e36ae3e03df6e79aaf5070164e0f2afe081c44bbd59542c0c16ec45a`;
+every code address and pointer comes from the EXR, the debugger only sets
+breakpoints. A first attempt put the fake string struct at `dst+1264`,
+overlapping `destroy_unpacked_func_ptr` at opaque+48, and produced RIP
+`0x10000005a` (SIGSEGV); the offset was moved to `dst+1280` and the pointer
+remeasured. That negative is preserved here, not a successful variant.
+
+Observations in the **UNMODIFIED pinned 3.5.2 `exrcheck -c`**, ASLR OFF in the
+debuggee: at `opaque.c:79`, `UD=0x555555828560 UNP=0x5555558285a0
+FN=0x555555661b30 UNPSIZE=90`. A breakpoint on the file-carried address was
+hit with `CHOICE_RIP=0x555555661b30 RDI=0x555555826f00
+RSI=0x5555558285a0 RDX=90`, and the backtrace frame above it is
+`exr_attr_opaquedata_destroy ... opaque.c:79` → `attr_destroy ...
+attributes.c:236`. Inside the chosen target,
+`S=0x5555558285a0 STR=0x5555558285d0 ALLOC=1 LEN=90`, memory at `STR-8` is
+`0x0000000000000091` and at `STR` is `0x5a5a5a5a5a5a5a5a`; a `free`
+breakpoint pins `FREE_RDI=0x5555558285d0`. The consumer's RIP, two of its
+arguments and the freed pointer are all file-chosen. Plain rc 139; valid
+control rc 0 `OK`; fixed 3.5.3 rc 1 `bad`; ASan `READ of size 3072` at pinned
+`internal_zstd.c:472`.
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w197-chosen-ip.sh` -> `RESULT PASS` rc 0, five evidence hashes
+byte-identical on two runs: ip
+`8dfdfc0452b45a5cb227310b44032f5e92942c35c6b7b5af7b72cd9f2e20f5b2`, plain
+`33c0fc4affa9ba5ac91ea868660e457d7cee4cff812c4bdd023153cefd25558a`, valid
+`043d72d916be8948cd85f6937306e63355be57f21ad76fe7bc3c950b16286835`, fixed
+`54f3959cf27727ac92b11efd75227a5acb76cf969c16ffb4533df2f308c04c7b`, ASan
+`8371c7cefff04bea1c0492275450f939c3eab1534529c78c1fbcfec75bfbceef`.
+
+Disposition: this closes W196's stated gap — a **chosen code pointer/IP
+reached from the file** — and raises the rung-4 primitive from a chosen call
+argument to a chosen indirect call target. It remains rung-4 mechanics: the
+target is an existing benign function address, not shellcode; ASLR OFF makes
+the absolute address meaningful; the input is a local file path; the process
+then aborts with glibc `double free or corruption (out)` from later frees of
+fake pointers. No chosen payload code, wire/request input, command, durable
+side effect or witness verdict. Rung 5 stays UNKNOWN. Would change the grade:
+a witness verdict, an ASLR-on chosen target, a benign command side effect
+with controls, or a wire-fed affected process.
+
+ASLR-on negative control (this wake): with gdb
+`set disable-randomization off`, four runs of W196's PoC show stable relative
+layout (`SINK=...4a0`, `SLOTADDR=SINK+0x1040`, `CTXT=SINK-0x5a0`) but
+`list->entries[0]` still holds the stale file value `0x555555828520`; the
+absolute pointer is not mapped to the crafted data under ASLR. `ctxt->free_fn`
+sits at `ctxt+96`, before the sink, so the forward copy cannot reach it.
+No ASLR-on chosen pointer is demonstrated by W196 or W197.
+
