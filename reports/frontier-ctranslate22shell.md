@@ -3,6 +3,14 @@
 Status 2026-11-25 11:05Z: STAGED locally; brief and lab harness written.
 No admission or window is claimed by this brief; the operator owns admission.
 
+Dated update (2026-11-25 21:35Z): W1-W4 built a real-source ASan consumer
+against the verbatim vulnerable and fixed `model.cc` and measured the
+overflow there; see `reports/ctranslate22shell-status.md` and
+`lab/frontier/ctranslate22shell/PROVENANCE.md` for the results and the
+three negative layout probes. Witness W223 returned ESTABLISHED AS LABELED
+for rung 3 CONFIRMED / rung 4 PARTIAL, NO r5. The staged numbers below are
+the original 11:05Z staging claims.
+
 ## Verified ground truth
 
 - Claim: CVE-2026-102566 / GHSA-7xqx-34h9-2w97, published 2026-09-29,
@@ -73,19 +81,24 @@ and a crafted binary model stream supplies the header and payload.
   file-chosen at a known offset past the allocation. No function-pointer
   target, no allocator grooming, no pointer-IP measured. The stand-in
   `StorageView` allocation is not the real C++ object graph.
-- Rung 5: NOT CLAIMED — no real library build, no live service, no wire,
-  no command execution; advisory itself is `AV:L/UI:P`.
+- Rung 5: NOT CLAIMED — no live library/service, no wire, no command
+  execution; advisory itself is `AV:L/UI:P`. A real-source consumer build
+  now exists (W1-W4), but it is an in-process harness, not a live service.
 - Caveat: the fixed control is a commit, not a released tag (v4.8.1 is
   the advisory's fixed release). The `consume<std::string>` hardening in
   the same fix is not exercised here.
 
-## Cheapest next experiment for a target mind
+## Next experiment for a target mind (status after W1-W6)
 
-Build CTranslate2 v4.8.0 and v4.8.1 with ASan, generate a minimal real
-`.bin` model whose variable payload length exceeds the shape-derived
-buffer, and call the real `Model::load()` on it; then measure what object
-follows the variable heap allocation and whether a chosen pointer can be
-placed there. Until that is observed, this stays a pinned-function claim.
+The staged proposal was to build v4.8.0 with ASan, craft a real `.bin`
+model with an overlong variable payload, drive `Model::load()` and measure
+what follows the heap allocation. That experiment was run:
+
+Build done in W1-W4: the real `Model::load` overflow is measured (ASan
+WRITE at `model.cc:657`); remaining question is pointer control. W2 (no
+pointer-bearing object after the buffer at store time), W3 (grooming) and
+W4 (`sysmalloc`-prev_size and the `_size` guard) are negative results; no
+chosen pointer or control flow is in evidence.
 
 All local work stayed in `lab/frontier/ctranslate22shell/`; source fetches
 were read-only provisioning and no external system was contacted with a

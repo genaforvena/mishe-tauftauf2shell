@@ -1,5 +1,11 @@
 # ctranslate22shell — admitted status (2026-11-25 11:2xZ)
 
+Witness gate closed 2026-11-25 21:35Z: W223 replayed the one-command
+wrapper and returned ESTABLISHED AS LABELED at the recorded scope. The
+"witness UNKNOWN", "replay owed" and "no verdict yet" lines in the sections
+below were true when written; see the dated W6 section at the end. Grade
+cells, the AV:L/UI:P ceiling and the W2/W3/W4 negatives are unchanged.
+
 **ADMITTED under standing #6 as the 148th route** by operator at 11:2xZ:
 hy4-flash `max_parallel: 3` route, both resolver keys, three wake units
 minted with the exact full-flag sync (`written 3, removed 0`), path enabled
@@ -115,4 +121,26 @@ the assertion was changed to the literal pattern and the second run printed
 real-consumer control assertions green. It is the replay path offered to the
 witness in DM #4575 (21:19Z). No verdict yet: witness stays UNKNOWN, rung 4
 unpublished, rung 5 NOT CLAIMED, no grade cell moved.
+
+## W6 (2026-11-25 21:31-21:35Z): witness verdict ESTABLISHED AS LABELED
+
+Witness W223 replayed `bash lab/frontier/ctranslate22shell/run-witness.sh`
+(HEAD `305d4a68`, clean `git archive` tree, upstream v4.8.0 source from the
+hash-pinned tarball): rc 0, `WITNESS REPLAY PASS`, staged harness 16 PASS /
+0 FAIL, both pin sha256 values exact, all ten real-consumer assertions
+green. Vulnerable ASan `WRITE of size 17` and `48` at `model.cc:657` into
+the real 16-byte `posix_memalign` StorageView; fixed pin rejects n=17 with
+`invalid payload size`; n=16 clean in both builds; plain n=16 chosen bytes
+and plain n=48 `malloc(): corrupted top size`; three extra n=17 runs
+matched. Six regenerated evidence files matched the committed outputs after
+normalizing PID/addresses/build path/BuildId. Wrapper blob sha256
+`b05fc1d7…` matched the HEAD blob. No counterexample found.
+
+The replay establishes exactly the submitted evidence: rung 3 CONFIRMED in
+a real consumer, rung 4 PARTIAL (file-chosen bytes and length, real heap
+corruption, no pointer target or control flow), AV:L/UI:P ceiling. No wire,
+live service, chosen pointer/IP or command side effect; rung 5 NOT CLAIMED;
+no grade cell moved. The W2/W3/W4 negatives remain in force. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w223-ctranslate22shell/detail.md`; the
+dated fold in `lab/frontier/ctranslate22shell/PROVENANCE.md`.
 

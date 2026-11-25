@@ -1,5 +1,12 @@
 # PROVENANCE — ctranslate22shell staged harness
 
+Witness gate closed 2026-11-25 21:35Z: W223 replayed the one-command wrapper
+from a clean `git archive` tree and returned ESTABLISHED AS LABELED at the
+recorded scope (rung 3 CONFIRMED in a real consumer, rung 4 PARTIAL, NO r5).
+The "witness replay UNKNOWN/owed/no verdict" lines in W1-W5 below were true
+when written and are superseded by the dated verdict section at the end;
+the W2/W3/W4 negative results are not affected by the replay.
+
 ## Source pins (read-only provisioning, 2026-11-25)
 
 - `pins/model-v4.8.0.cc` — https://raw.githubusercontent.com/OpenNMT/CTranslate2/v4.8.0/src/models/model.cc
@@ -197,3 +204,42 @@ hex-argv invocation) aborts earlier in `malloc`/`free`: the heap address of
 the overflow buffer shifts when argv holds the payload, so the downstream
 copy path is invocation-specific. Recorded as a layout dependency, not a
 second exploit primitive. Grade remains rung 4 PARTIAL; no wire, no rung 5.
+
+## Witness replay verdict (W6, 2026-11-25 21:31-21:35Z) — ESTABLISHED AS LABELED
+
+Witness W223 replayed `bash lab/frontier/ctranslate22shell/run-witness.sh`
+from a clean `git archive HEAD lab/frontier/ctranslate22shell` tree (HEAD
+`305d4a68`), with upstream v4.8.0 source from the hash-pinned tarball and
+the separately provisioned fixed pin. Verdict: ESTABLISHED AS LABELED, no
+counterexample, no grade change, NO r5. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w223-ctranslate22shell/detail.md`.
+
+- Wrapper blob check: `git show
+  70baf7e6:lab/frontier/ctranslate22shell/run-witness.sh | sha256sum` =
+  `b05fc1d721f41d87ea41c0245fc5b9d5b87e78c93da8d52319282572378fef7f`,
+  identical to the HEAD blob and the working tree file (unmodified).
+- Replay rc 0, `WITNESS REPLAY PASS`: staged harness 16 PASS / 0 FAIL, both
+  model.cc sha256 values exact (vulnerable `05ab59bb…`, fixed `5dcc3f1d…`),
+  all ten real-consumer assertions green. Vulnerable ASan reports
+  `WRITE of size 17` and `WRITE of size 48`, 0 bytes after the real
+  16-byte `posix_memalign` StorageView, write frame `Model::load
+  model.cc:657`; n=16 clean in both the vulnerable and fixed ASan builds;
+  fixed pin rejects n=17 with `Variable 'origin' has an invalid payload
+  size`; plain n=16 reads back the chosen `V` bytes and plain n=48 aborts
+  with `malloc(): corrupted top size`. Three extra vulnerable n=17 runs
+  reproduced the same single ASan error and frame.
+- Six regenerated real-consumer output files were byte-identical to the
+  committed evidence after normalizing PID, hex addresses, binary build
+  path and BuildId; the two ASan reports differed only in those volatile
+  tokens before normalization, with no frame, line number or byte count
+  changed.
+- Source-bound check: the vulnerable store is at pin `:657`; the fixed pin
+  adds the size check at `:659-660`; `realbuild/harness/stubs.cpp` contains
+  only throwing stubs for off-path quantization/tensor-parallel branches.
+  The model bytes are generated in-process by a `ModelReader` stand-in and
+  consumed by the real `Model::load`: no wire path, live service, chosen
+  pointer/IP, downstream control flow or command side effect. W2 (no
+  pointer-bearing object after the buffer at store time), W3 (grooming
+  negative) and W4 (`sysmalloc`-prev_size negative; `_size` guard blocks
+  `primitives::copy`) still hold. Grade stays rung 3 CONFIRMED / rung 4
+  PARTIAL with the AV:L/UI:P ceiling; rung 5 NOT CLAIMED.
