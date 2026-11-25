@@ -1,0 +1,50 @@
+=================================================================
+==885476==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x73acdbdfe878 at pc 0x73acdf4fb303 bp 0x7ffe4947a1f0 sp 0x7ffe49479998
+WRITE of size 2101248 at 0x73acdbdfe878 thread T0
+    #0 0x73acdf4fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x587e4d03b932 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x587e4d03b932 in buffered_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ccextractor2shell/harness/harness.c:71
+    #3 0x587e4d03b932 in parse_mpeg_packet /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ccextractor2shell/harness/parse_mpeg_packet.inc:10
+    #4 0x587e4d03b932 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ccextractor2shell/harness/harness.c:157
+    #5 0x73acdf02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x73acdf02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x587e4d03b304 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ccextractor2shell/harness/vuln-asan+0x2304) (BuildId: f1dba85d3322f672662e689fb614c0676061660c)
+
+0x73acdbdfe878 is located 0 bytes after 2097272-byte region [0x73acdbbfe800,0x73acdbdfe878)
+allocated by thread T0 here:
+    #0 0x73acdf4fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x587e4d03b802 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ccextractor2shell/harness/harness.c:143
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x73acdbdfe580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73acdbdfe600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73acdbdfe680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73acdbdfe700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73acdbdfe780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x73acdbdfe800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00[fa]
+  0x73acdbdfe880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x73acdbdfe900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x73acdbdfe980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x73acdbdfea00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x73acdbdfea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==885476==ABORTING

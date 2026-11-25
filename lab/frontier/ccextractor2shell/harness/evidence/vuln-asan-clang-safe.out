@@ -1,0 +1,1 @@
+mode=safe derived_len=4096 BUFSIZE=2097272 alloc=2097272 ret=0 past=4096
