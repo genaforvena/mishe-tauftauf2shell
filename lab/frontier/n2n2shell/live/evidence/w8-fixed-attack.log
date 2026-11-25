@@ -10,4 +10,3 @@
 25/Nov/2026 06:19:37 [supernode.c:711] dropping privileges to uid=65534, gid=65534
 25/Nov/2026 06:19:37 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
 25/Nov/2026 06:19:37 [supernode.c:728] supernode started
-25/Nov/2026 06:23:46 [supernode.c:582] shutting down...
