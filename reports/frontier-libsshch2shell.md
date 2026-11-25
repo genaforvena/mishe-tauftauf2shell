@@ -1,6 +1,6 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W12: independent witness verdict #4161 (W214) remains ESTABLISHED
+Status 2026-11-25 W13: independent witness verdict #4161 (W214) remains ESTABLISHED
 AS LABELED for the five unmodified real-build suites replayed from a clean
 archive of `c5ece2a9` — rung 3 on a real authenticated loopback wire, rung 4
 mechanics, and rung 5 MECHANICS only, NOT ESTABLISHED as remote execution.
@@ -17,6 +17,10 @@ W12 adds an unwitnessed non-PIE lane (7 PASS / 0 FAIL) that takes the callee
 address from the compiled ELF symbol table and drives the same benign command
 from a separately compiled client process; no grade change. A source-level
 negative closes the library-internal close-free shortcut.
+W13 adds an unwitnessed no-app-allocated-callbacks lane (6 PASS / 0 FAIL):
+the fake callback's size, userdata and callee come from wire bytes in the
+recycled channel, with only one app-owned iterator node remaining; no grade
+change.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -566,4 +570,51 @@ control and three repeats), plus `run-nodetach.sh` 6 PASS / 0 FAIL and
 committed harness and driver text, not a fresh fetch of libssh; W12 remains
 additive and unwitnessed.
 
+
+## W13: wire-resident fake callbacks in the recycled channel (2026-11-25 13:20Z)
+
+Additive and unwitnessed; no claim or grade change. New `real/run-inline.sh`
+builds both pinned commits as plain Release libraries with `-DW13_INLINE` and
+reports **6 PASS / 0 FAIL**, rc 0. The fake
+`ssh_channel_callbacks_struct` is no longer an application-allocated object:
+the 24-byte prefix (`size`, `userdata`, `channel_data_function`) is written by
+the authenticated client into offsets 72-95 of the 128-byte wire packet that
+recycles the freed channel. Pinned `ssh_callbacks_iterate` reads
+`size` at +0, `userdata` at +8 and the callee at +16 from that recycled
+chunk. The application's only remaining object is the 16-byte iterator node
+that continues the already-running iteration; it points at the wire-resident
+structure. Vulnerable evidence `real/evidence-inline-vuln-inline.out`:
+`CLIENT inline cbs_off=72 size=24 userdata=0x... fn=0x...`,
+`SERVER inline cbs=0x... off=72`,
+`SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+`SERVER EXEC rc=0`, `SERVER done data_packets=2 marker_hits=0`,
+`SERVER target_after=0x41414141414141c1 groom_ptr=0x...`,
+`CLIENT rc=0 SERVER status=0x0`; three repeats identical in substance, touch
+markers kept as `real/evidence-inline-repeat{1,2,3}.kept` and
+`real/evidence-inline-sideeffect.kept`. Fixed lane: no data #2, no inline
+call, no trampoline, no file, target unchanged. Invalid-callee control
+`real/evidence-inline-vuln-inline-bad.out` sends
+`fn=0x4141414141414141` and gives `CLIENT rc=0 SERVER status=0x8b`, no
+trampoline and no `SERVER done`, confirming the callee is wire-supplied.
+
+Two failed iterations are preserved, not retried into existence. At
+`INLINE_CBS_OFF=24`, the command string copied to wire offsets 0-40
+overwrote the embedded structure: inline print and chosen pointer write were
+present but no trampoline ran (1 PASS / 5 FAIL). At offset 72 with
+`it->next = NULL`, the iterate macro stopped before its next step, again no
+call (1 PASS / 5 FAIL). Restoring a single iterator node to continue the
+iteration produced 6 PASS / 0 FAIL.
+
+All W13 edits sit behind `#ifdef W13_INLINE`; with the flag undefined the
+preprocessed harness is byte-identical to the pre-W13 HEAD
+(`clang -E -P` comparison, `cmp` clean), and an ASan compile with the flag
+defined succeeds. Regressions after the final edit: `run-plain.sh`
+9 PASS / 0 FAIL, `run-nodetach.sh` 6 PASS / 0 FAIL, `run-fixedaddr.sh`
+7 PASS / 0 FAIL, all rc 0.
+
+Ceiling unchanged: the callee and userdata addresses still come from a
+forked peer's image, the command still runs through the in-harness
+`system()`, one app-owned iterator node remains, the app still frees a
+remotely closed channel in its data callback, and the peer is authenticated
+(PR:L). No persistent shell or remote command service. NOT ESTABLISHED rung 5.
 

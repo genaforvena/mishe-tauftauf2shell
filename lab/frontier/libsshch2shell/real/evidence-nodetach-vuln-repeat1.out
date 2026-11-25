@@ -1,21 +1,20 @@
-[2026/11/25 12:07:41.197199, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+[2026/11/25 13:15:59.771219, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
 SERVER auth len user=5 pass=9 success=0
 CLIENT auth rc=0
 SERVER registered callbacks on channel 43
 CLIENT channel local=43 remote=43
 SERVER data #1 len=12 first=f 
-CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x580be3da42d0
-CLIENT sent groom wire pointer=0x580be3e208a0 survive=0
+CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x575cd01ab2d0
+CLIENT sent groom wire pointer=0x575cd02278a0 survive=0
 CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
 SERVER close callback
 SERVER data #2 len=128 first=t off16=i
-SERVER nodetach saved_buf=0x580c12bbbb50 saved_it=0x580c12bbb690
-[2026/11/25 12:07:42.382109, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
-SERVER groom alloc=0x580c12bbbac0 wire_off120=0x580be3e208a0 target=0x580be3e208a0 survive=0
-SERVER nodetach reclaim it=0x580c12bbb690 want=0x580c12bbb690 buf=0x580c12bbbb50 want=0x580c12bbbb50
+SERVER nodetach saved_buf=0x575d07b1fb50 saved_it=0x575d07b1f690
+SERVER groom alloc=0x575d07b1fac0 wire_off120=0x575cd02278a0 target=0x575cd02278a0 survive=0
+SERVER nodetach reclaim it=0x575d07b1f690 want=0x575d07b1f690 buf=0x575d07b1fb50 want=0x575d07b1fb50
 SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker
 SERVER EXEC rc=0
 SERVER done data_packets=2 marker_hits=0
 SERVER exec rc=0
-SERVER target_after=0x41414141414141c1 groom_ptr=0x580c12bbbac0
+SERVER target_after=0x41414141414141c1 groom_ptr=0x575d07b1fac0
 CLIENT rc=0 SERVER status=0x0

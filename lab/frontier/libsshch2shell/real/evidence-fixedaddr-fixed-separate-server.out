@@ -2,9 +2,9 @@ SERVER auth len user=5 pass=9 success=0
 SERVER registered callbacks on channel 43
 SERVER data #1 len=12 first=f 
 SERVER close callback
-[2026/11/25 12:43:42.362798, 1] channel_rcv_data:  Received data on (remotely) closed channel
+[2026/11/25 13:16:18.600186, 1] channel_rcv_data:  Received data on (remotely) closed channel
 SERVER close callback
-[2026/11/25 12:43:42.362873, 1] ssh_socket_exception_callback:  Socket exception callback: 1 (0)
+[2026/11/25 13:16:18.600295, 1] ssh_socket_exception_callback:  Socket exception callback: 1 (0)
 SERVER done data_packets=1 marker_hits=0
 SERVER exec rc=-1
 SERVER target_after=0x4141414141414141 groom_ptr=(nil)

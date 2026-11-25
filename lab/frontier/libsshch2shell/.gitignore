@@ -20,3 +20,4 @@ real/*.marker
 real/nodetach-run/
 real/fixedaddr-run/
 real/separate-run/
+real/inline-run/

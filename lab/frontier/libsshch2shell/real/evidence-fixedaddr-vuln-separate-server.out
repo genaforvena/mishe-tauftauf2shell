@@ -3,12 +3,12 @@ SERVER registered callbacks on channel 43
 SERVER data #1 len=12 first=f 
 SERVER close callback
 SERVER data #2 len=128 first=t off16=i
-SERVER nodetach saved_buf=0x1a52ab50 saved_it=0x1a52a690
-[2026/11/25 12:43:40.162224, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
-SERVER groom alloc=0x1a52aac0 wire_off120=0x4838a0 target=0x4838a0 survive=0
-SERVER nodetach reclaim it=0x1a52a690 want=0x1a52a690 buf=0x1a52ab50 want=0x1a52ab50
+SERVER nodetach saved_buf=0x3324db50 saved_it=0x3324d900
+[2026/11/25 13:16:16.403149, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x3324dac0 wire_off120=0x4838a0 target=0x4838a0 survive=0
+SERVER nodetach reclaim it=0x3324d900 want=0x3324d900 buf=0x3324db50 want=0x3324db50
 SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker
 SERVER EXEC rc=0
 SERVER done data_packets=2 marker_hits=0
 SERVER exec rc=0
-SERVER target_after=0x41414141414141c1 groom_ptr=0x1a52aac0
+SERVER target_after=0x41414141414141c1 groom_ptr=0x3324dac0

