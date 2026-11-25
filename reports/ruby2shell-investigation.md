@@ -3269,3 +3269,60 @@ not an exploit result: no wire request, no corruption confirmation and no
 grade change. The rest of the jemalloc lane needs a new grooming study and
 an allocator-native observation channel (mtrace hooks `__libc_malloc` and
 would bypass jemalloc).
+
+### Jemalloc lane: exact-size-class overflow writes into an adjacent LIVE allocation (2026-11-25, direct session)
+
+The jemalloc lane's first blocker was observation: `lab/preload/mtrace.c`
+calls `__libc_malloc`/`__libc_free` directly, so it cannot see jemalloc at
+all. New allocator-native tracer `lab/preload/jemtrace.c` (build
+`lab/preload/build-jemtrace.sh`) interposes `malloc/calloc/realloc/free` and
+resolves the real allocator with `dlsym(RTLD_NEXT, ...)`. Preload order is
+`LD_PRELOAD="<abs>/lab/preload/jemtrace.so:libjemalloc.so.2"` — the tracer
+comes FIRST so `RTLD_NEXT` reaches jemalloc. It emits `M/C/R/F` lines,
+optional `W` qword windows around watched allocations, and optional `B`
+backtraces. All output is raw `write(2)`; no allocation inside the hooks.
+
+**Experiment `jemexact1`:** glibc's size-field lane needs the request size to
+land on a chunk header (`R ≡ 8 mod 16`); jemalloc has no inline chunk header,
+so the equivalent condition is that the mapping-buffer request `R = N + 44`
+equals a jemalloc small size class exactly. Using the measured expansion law
+`[0xDF × 20]['a' × m][0xDF]` (k=20 expansion bytes consume the +20 slack, so
+exactly one `S` byte is written out of bounds for any m), m=15 gives N=36,
+capa=56, **R=80=0x50**, a jemalloc size class. Repro
+`lab/repro/ruby2shell-jemalloc-exact.{rb,sh}`: arm on `malloc(79225)`, watch
+`malloc(80)`, dump again on `malloc(79227)`.
+
+Observed in the affected plain 3.4.12 build under jemalloc, one process:
+
+```
+M ... 0x...33e30 0x50                 # case buffer (mapping_buffer)
+W ... 0x...33e80 0x0000836100140001 a=...   # adjacent region, BEFORE
+W ... 0x...33e80 0x00005b8eb2fe3f40 a=...   # pointer into Ruby rodata
+...
+W ... 0x...33e80 0x0000836100140053 a=...   # adjacent region, AFTER upcase
+```
+A second run observed `W ... 0x...43d0 0x00007d08e2e4c650 →
+0x00007d08e2e4c653 a=...`: the adjacent region held pointers and the same
+single byte changed a pointer's low byte. The adjacent object's content is
+boot-dependent; the write itself is deterministic.
+
+The OOB byte lands on the **first qword of the next live 80-byte region**,
+changing its low byte `0x01 → 0x53`; the other seven qwords are unchanged.
+The adjacent address had a boot-time `calloc(0x50)` with no free before the
+trigger; its second qword points into the Ruby executable's read-only
+mapping (segment +0x6f40). This is the first measured jemalloc-lane instance
+of the one-byte write reaching a live adjacent allocation's first byte — the
+allocator-native equivalent of the glibc size-field hit, and a real new
+mechanic. It is an in-process observation: no wire request, no chosen-byte
+write into a live object's security-relevant metadata, no command, no
+vulnerable/fixed/safe control pair, and no grade change.
+
+**Boundary / named next:** the adjacent object's identity and whether a
+wire-shaped allocation can occupy that 80-byte slot with a useful first
+qword are UNKNOWN — the `B` backtrace resolves to Ruby boot parsing code and
+is not yet attributed to a named Ruby structure. Next: run the exact-size
+class `_method` (20 ß + 15 'a' + ß) through stock Sinatra under jemalloc with
+the tracer armed by the request itself, and identify the adjacent
+allocation's caller. If no wire-shaped consumer appears, close the
+exact-size jemalloc lane as a bounded negative and record it beside the
+glibc lane.
