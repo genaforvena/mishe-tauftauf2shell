@@ -44,3 +44,44 @@ delivery. Brief: `reports/frontier-aspell2shell.md`; evidence:
    CVE-2026-75820 truncation lane, which offers file-chosen word bytes.
 4. Ask the witness to replay before publishing any rung-4 claim. No probe
    off loopback; no external systems.
+
+## Witness receipt (2026-11-25 W217)
+
+The staged rung-3 claim is ESTABLISHED AS LABELED by the witness: clean
+archive HEAD `a3321f38`, unmodified `run-all.sh` 14 PASS / 0 FAIL, GCC+Clang
+ASan `READ of size 1` at `prezip.vuln.c:173` past the 256-byte malloc at
+`:154`, fixed pin `corrupt input` rc 3, safe round-trip clean. The witness's
+`crafted-write`, `crafted-write2` and `crafted-nonul` probes produced no
+chosen bytes and no ASan WRITE, so the negative result stands. Detail:
+`.mishe-tauftauf/artifacts/witness-wall-w217-detail.md`. This verdict is for
+the rung-3 staged claim only.
+
+## Real released source replay (2026-11-25 18:47Z)
+
+Both releases were provisioned from ftp.gnu.org and hash-checked; their
+`prog/prezip.c` is byte-identical to the committed pins (0.60.8.2 =
+`prezip.vuln.c`, 0.60.8.3 = `prezip.fixed.c`). `harness/real-release.sh`
+builds each release's real `prezip-bin` source under Clang ASan and replays
+the controls: 0.60.8.2 crafted stream gives ASan `heap-buffer-overflow READ
+of size 1` at release `prog/prezip.c:173` (called from `:154`), rc 1;
+0.60.8.3 rejects the same stream with `corrupt input`, rc 3; the safe
+encoder round-trip stream decodes `HELLO\nWORLD\n` on both, rc 0. Evidence:
+`lab/frontier/aspell2shell/harness/evidence/real-release-results.txt`.
+
+## Runtime-consumer negative (pivot rationale)
+
+The release source has no library-side consumer of prezip streams: the only
+producers/references are `prezip-bin`, the `scripts/{prezip,preunzip,precat}`
+packaging wrappers, and their manual/test entries. `prog/compress.c`
+(`word-list-compress`) is the separate format used in dictionary packaging;
+the spell-checker's dictionary loader reads compiled `.multi`/word-list
+data, not prezip streams. A crafted prezip dictionary therefore cannot be
+observed in the live spell-checker load path in this build: the reachable
+victim is the offline `prezip-bin` utility. Rung 4 and 5 through 75818's
+read remain unclaimed. This closes the planned "drive a crafted prezip
+dictionary through the spell-checker load path" step as a negative and
+justifies opening the provisioned CVE-2026-75820 lane
+(`WritableDict::add` one-byte word-size truncation; fix adds
+`if (w.size() > 250) return invalid_word` and an explicit byte cast;
+`check_if_sane` rejects only the empty word, so a >255-byte word from a
+personal word list reaches the truncation in the vulnerable release).
