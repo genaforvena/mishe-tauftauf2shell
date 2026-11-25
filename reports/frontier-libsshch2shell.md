@@ -1,12 +1,12 @@
 # frontier brief — libsshch2shell (closed-channel data UAF)
 
-Status 2026-11-25 W3: real ASan build + authenticated loopback wire replay
-confirmed; rung 3 real-build, rung 4 MECHANICS with wire-chosen pointer
-consumption from a recycled freed channel object under stated lab conditions.
-The W3 lane shows that write in a run that exits cleanly. No rung 5. Original
-staged harness 24 PASS / 0 FAIL; base real replay 5 PASS / 0 FAIL; extra
-controls 8 PASS / 0 FAIL; survive controls 7 PASS / 0 FAIL. Witness verdict
-UNKNOWN.
+Status 2026-11-25 W4: real ASan build + authenticated loopback wire replay
+confirm rung 3; rung 4 MECHANICS now include wire-chosen indirect-call control
+and a benign in-process marker. A wire-borne command string is executed by the
+live server process through a lab trampoline: rung 5 MECHANICS, author-only,
+NOT ESTABLISHED (PR:L, lab-only app objects and trampoline, no witness verdict).
+Staged harness 24 PASS / 0 FAIL; real suites base 5/0, extra 8/0, survive 7/0,
+call 9/0, exec 8/0.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
@@ -148,22 +148,68 @@ artifacts). All three suites replayed there at 06:03Z: `run-all.sh` 5 PASS /
 0 FAIL, `run-extra.sh` 8 PASS / 0 FAIL, `run-survive.sh` 7 PASS / 0 FAIL.
 This checks committed harness text, not a rebuild of libssh from the archive.
 
+## W4: wire-chosen indirect call and command execution (2026-11-25)
+
+`real/run-call.sh` reports **9 PASS / 0 FAIL**; `real/run-exec.sh` reports
+**8 PASS / 0 FAIL**. Neither library source nor the pinned commits were
+changed; the extra lanes extend only `real/real_wire.c`.
+
+**Indirect call.** With the W3 detaches in place, the lab app keeps the
+channel's first callback-list node alive and redirects its `next` pointer to
+an app-owned fake `ssh_iterator` whose `data` is a fake
+`ssh_channel_callbacks_struct`. Wire offset 112 chooses that structure's
+`channel_data_function`; the pinned iterator at `channels.c:691-697` then
+calls the chosen address with the session, channel, buffer and userdata.
+Vulnerable evidence `real/evidence-wire-vuln-groom-call.out`:
+`CLIENT sent call fn=0x61fe9f9fbd10 bad=0`,
+`SERVER call fake_cbs=0x50e0000003c0 node=0x502000006f50
+fn=0x61fe9f9fbd10 first=0x502000006f70`,
+`SERVER MARKER called len=0 hits=1`, `SERVER done data_packets=2
+marker_hits=1`, `SERVER target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`, no ASan. The marker sees `len=0` because the
+first callback's 128-byte return was consumed from the detached buffer by
+`ssh_buffer_pass_bytes` at `channels.c:708` before the second callback ran.
+Invalid-pointer control `real/evidence-wire-vuln-groom-call-bad.out` sends
+`fn=0x4141414141414141` and faults exactly at the indirect call:
+`ERROR: AddressSanitizer: SEGV ... channels.c:697:16 in channel_rcv_data`,
+no marker, `SERVER status=0x100`. Fixed `groom-call` suppresses data #2 and
+the call entirely.
+
+**Wire-borne command.** In `groom-exec` mode the wire carries
+`touch evidence-wire-vuln-groom-exec.marker` at offset 0 and the
+`exec_trampoline` address at offset 112; the fake callback's `userdata` points
+at the groomed chunk, so the command string is read from wire-carried bytes in
+the server process. Vulnerable evidence
+`real/evidence-wire-vuln-groom-exec.out`:
+`CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x...`,
+`SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+`SERVER EXEC rc=0`, `SERVER done data_packets=2`, the chosen-pointer write,
+clean exit and no ASan. The file existed and was renamed to
+`real/evidence-wire-exec-sideeffect.kept` before the controls ran. Fixed
+`groom-exec` has no data #2, no trampoline call, no file and an unchanged
+target; vulnerable `groom-call` (marker function, no command) also leaves no
+file. The chosen callee is therefore wire-selected, not a harness default.
+
 
 Honest ceiling: rung 3 is confirmed in a real build on a real authenticated
 loopback wire. Rung 4 mechanics are demonstrated — attacker-chosen wire bytes
-at a chosen offset of a recycled freed channel object drive a write to a chosen
-address, and the W3 lane shows that write in a run that exits cleanly. Required
-lab conditions remain explicit: authenticated peer (PR:L), application frees a
-remotely closed channel from inside its data callback, application reuses the
-freed 128-byte chunk for wire bytes, ASan quarantine disabled to make reuse
-deterministic, and (for the clean-exit lane only) lab detachment of the channel's
-stdout buffer and callback list. No instruction-pointer control, no benign
-marker execution, no rung 5. Without that detachment the unrelated freed
-fields still fault at `:691`/`:708`; a realistic allocation sequence that
-avoids them without app intervention is not established. Independent witness
-verdict remains UNKNOWN: all three suites have been replayed by the author only.
+at chosen offsets of a recycled freed channel object drive a write to a chosen
+address, select an indirect callee, and execute a benign in-process marker.
+The command lane is **rung 5 MECHANICS only**, author-reported and NOT
+ESTABLISHED: a wire-borne string is executed by a lab trampoline in the live
+server process, not by a real application callback pattern, with no witness
+replay. Required lab conditions remain explicit: authenticated peer (PR:L),
+application frees a remotely closed channel from inside its data callback,
+application reuses the freed 128-byte chunk for wire bytes, ASan quarantine
+disabled, W3/W4 detachment of the channel's stdout buffer and callback list,
+and app-owned fake callback objects for the call lanes. ASLR was not disabled;
+the client chose current process addresses in the forked peer. No persistent
+shell, no remote command service, no IP hijack beyond the chosen callback
+slot. Without the detachment the unrelated freed fields still fault at
+`:691`/`:708`; a realistic allocation sequence that avoids them without app
+intervention is not established. Independent witness verdict remains UNKNOWN:
+all suites have been replayed by the author only.
 
-Next: ask witness for an independent replay of `real/run-all.sh`,
-`real/run-extra.sh` and `real/run-survive.sh`; do not claim r5. What would
-change the grade: a witness counterexample, or measured IP/marker control on
-the same real authenticated build.
+Next: independent witness replay of all five real suites is owed. Do not
+claim ESTABLISHED rung 5. What would change the grade: a witness counterexample,
+or a benign command reached without the lab detach/trampoline.

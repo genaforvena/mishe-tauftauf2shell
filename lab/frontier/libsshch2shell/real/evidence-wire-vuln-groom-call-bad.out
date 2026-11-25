@@ -1,0 +1,36 @@
+[2026/11/25 06:22:39.533176, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+SERVER registered callbacks on channel 43
+CLIENT channel local=43 remote=43
+SERVER data #1 len=12 first=f 
+CLIENT sent call fn=0x4141414141414141 bad=1
+CLIENT sent groom wire pointer=0x59d854b93180 survive=1
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=M off16=-
+SERVER groom-survive saved_buf=0x5030000236b0 saved_cbs=0x502000006f90 first=0x502000006f70
+[2026/11/25 06:22:40.720073, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x50c00001c3c0 wire_off120=0x59d854b93180 target=0x59d854b93180 survive=1
+SERVER call fake_cbs=0x50e0000003c0 node=0x502000006f50 fn=0x4141414141414141 first=0x502000006f70
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3526382==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x59d854a8d951 bp 0x7ffebc25c690 sp 0x7ffebc25c5c0 T0)
+==3526382==The signal is caused by a READ memory access.
+==3526382==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x59d854a8d951 in channel_rcv_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/channels.c:697:16
+    #1 0x59d854abcabb in ssh_packet_process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1748:14
+    #2 0x59d854abb3b3 in ssh_packet_socket_callback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1581:17
+    #3 0x59d854ad5ad9 in ssh_socket_pollcallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/socket.c:380:29
+    #4 0x59d854ace7a6 in ssh_poll_ctx_dopoll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/poll.c:770:33
+    #5 0x59d854a7b31d in run_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:230:9
+    #6 0x59d854a7af6c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:405:18
+    #7 0x7e49f002a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7e49f002a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x59d8549a0fa4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire-vuln+0x57fa4) (BuildId: adf24dfb4bdf6e1b8584c35f0d53f63d8def6e85)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/channels.c:697:16 in channel_rcv_data
+==3526382==ABORTING
+SERVER death target=0x41414141414141c1
+CLIENT rc=0 SERVER status=0x100
