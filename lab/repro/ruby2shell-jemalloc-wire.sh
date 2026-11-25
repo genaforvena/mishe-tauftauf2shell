@@ -10,6 +10,7 @@ PORT="${JEM_WIRE_PORT:-4570}"
 CLASS="${JEM_CLASS:-80}"
 CAPA=$((CLASS - 24))                 # capa = N + 20 = (CLASS - 44) + 20
 export GEM_PATH="$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0${GEM_PATH:+:$GEM_PATH}"
+export RACK_ENV="${JEM_RACK_ENV:-development}"
 export RUBY2SHELL_STOCK_PORT="$PORT"
 EV=lab/build/evidence
 mkdir -p "$EV"
