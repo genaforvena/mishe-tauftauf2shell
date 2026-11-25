@@ -1,0 +1,42 @@
+CVE-2026-75820 — byte-value controllability of the real-consumer OOB store
+(2026-11-25 23:56Z, author run)
+
+Measured: the store at `Working::fine_tune_score` line 1484 in a real
+Aspell 0.60.8.2 `-DNDEBUG` recover-mode ASan build writes 26 distinct
+input-chosen bytes, 0x01..0x1a for personal-word-list letters a..z, at the
+same offset just past the 64-byte `String` allocation. GDB breaks at the
+store instruction (`mov %r12b,(%r14)`, `fine_tune_score+2220`), dumps the
+destination byte, single-steps, and dumps it again. Each case uses a
+300-byte personal word (letter*257 + '!' + letter*42) and a 299-letter
+query through real `aspell -a`, as in evidence/75820-write/REPLAY.txt.
+
+Summary (all 29 cases; 26 store hits):
+
+    a hit=2 addr=0x50600000e960: before=0xbe after=0x01
+    ...
+    z hit=2 addr=0x50600000e960: before=0xbe after=0x1a
+    0 hit=1 addr= before= after=
+    1 hit=1 addr= before= after=
+    ! hit=1 addr= before= after=
+
+`hit=2` counts the breakpoint-set line plus the hit. Non-alphabetic input
+produced no store hit at this breakpoint (the near miss did not score),
+so no byte is claimed for those cases. The destination address varies
+with ASan heap layout between runs; the offset, chosen values and
+before/after transition are stable. ASan's 0xbe malloc fill makes the
+store visible even when the byte was zero.
+
+Replay: first build the vulnerable binary with the recipe in
+`../75820-write/REPLAY.txt`; then, from the repo root,
+
+    EXE=/abs/work/build-vuln/aspell sh lab/frontier/aspell2shell/harness/75820-byte-sweep.sh \
+      /abs/work /tmp/aspell-byte-sweep-out
+
+The default `STORE_ADDR=0x5555557d0fac` is the store instruction in that
+recover-ASan build; confirm with `x/8i &fine_tune_score` if the compiler
+or build directory differs (`break *fine_tune_score+2220`).
+The script copies its own output, so point it at a scratch output dir for
+an independent replay. 26 distinct chosen bytes at one chosen offset
+extend the rung-4 primitive; they do NOT give arbitrary byte values,
+pointer bytes, a dereferenced pointer, a marker or a command side effect.
+All input is local files; no network probe.

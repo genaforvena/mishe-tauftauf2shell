@@ -85,3 +85,48 @@ justifies opening the provisioned CVE-2026-75820 lane
 `if (w.size() > 250) return invalid_word` and an explicit byte cast;
 `check_if_sane` rejects only the empty word, so a >255-byte word from a
 personal word list reaches the truncation in the vulnerable release).
+
+## CVE-2026-75820 in the real spell-checker (2026-11-25)
+
+The separate provisioned limb reached a real release consumer. Real Aspell
+0.60.8.2 built `-DNDEBUG` with Clang ASan and a genuine locally installed
+`aspell6-en-2016.11.20-0` dictionary loads a personal word list containing
+one 256..260-byte word and answers a query through the real `aspell -a`
+pipe filter. With assertions on the same input aborts at
+`suggest.cpp:763` (`w.word_size == strlen(w.word)`); with `-DNDEBUG` the
+wrapped length byte feeds `String::resize` and `strlen` reads OOB
+(`READ of size 2`/`6` at `suggest.cpp:1334`, 0 bytes past a 1024-byte
+ObjStack). Real 0.60.8.3 rejects every word >=251 bytes with `Word larger
+than 250 characters.` (rc 1); a 250-byte word runs clean. A copy of 0.60.8.2
+with ONLY the fix hunk (`w.size() > 250` plus the explicit byte cast in
+`WritableDict::add`) removes the READ, so the fix is causal. Evidence:
+`harness/evidence/75820-suggest/`, `...-ndebug/` and
+`...-targeted-fix/`.
+
+A 300-byte word (`'a'*257 + '!' + 'a'*42`, stored length byte 44) queried
+with 299 `a` characters reaches `Working::fine_tune_score` in the same
+release consumer: recover-mode ASan reports `WRITE of size 1` at
+`suggest.cpp:1484` and `:1485`, 0 bytes after a 64-byte `String` region
+allocated at `:1469`. GDB at the `j == 64` store reads the destination byte
+changing `0x00 -> 0x01` for all-`a` input and `0x00 -> 0x02` for all-`b`
+input. Fixed 0.60.8.3 and the targeted-fix build reject the word; a
+250-byte word is clean. `sh harness/75820-write-probe.sh` with
+`harness/evidence/75820-write/REPLAY.txt` is the one-command replay
+(8 PASS / 0 FAIL). Recover mode and GDB are observation only; the stores
+also execute in a plain `-DNDEBUG` build.
+
+Grade: CVE-2026-75818 stays **rung 3**; CVE-2026-75820 is **rung 4 PARTIAL**
+(input-chosen normalized bytes at a chosen offset in a real consumer, with
+vulnerable/fixed/safe controls). Arbitrary byte values, arbitrary offsets,
+dereferenced pointers, benign markers, commands and rung 5 are NOT measured.
+Witness replay was offered at #4566/#4568 (read) and #4611 (write); no
+verdict yet, so both claims remain verifier-UNKNOWN. Details in
+`reports/frontier-aspell2shell.md`.
+
+Byte-value sweep (23:56Z, `harness/75820-byte-sweep.sh`): breaking on the
+store instruction and single-stepping shows personal-word letters a..z
+write `0x01..0x1a` at the same OOB offset (26 distinct input-chosen
+normalized class codes; `harness/evidence/75820-byte-sweep/summary.txt`).
+Non-alpha input had no store hit. Arbitrary byte values, pointer bytes,
+arbitrary offsets and control flow are still not measured; grade and
+rung-5 ceiling unchanged.

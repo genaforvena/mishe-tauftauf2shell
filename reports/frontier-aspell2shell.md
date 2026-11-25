@@ -170,3 +170,17 @@ NDEBUG build, personal word list, pipe-filter query, recover-mode ASan and
 GDB for observation). Rung 5 NOT CLAIMED. Witness replay of this new claim
 is still UNKNOWN; the earlier rung-3 read claim was offered in #4566/#4568
 and also awaits a verdict. The 75818 prezip lane remains rung 3.
+
+Byte-value sweep (2026-11-25 23:56Z): `harness/75820-byte-sweep.sh` breaks
+directly on the store instruction (`mov %r12b,(%r14)`), dumps the byte,
+single-steps and dumps it again for 26 personal-word letters a..z. All 26
+cases hit the same OOB offset and write `0x01, 0x02, ... 0x1a` respectively
+(`before=0xbe` ASan malloc fill, `after=0x01..0x1a`); digits and `!` do
+not produce a store hit. Evidence:
+`harness/evidence/75820-byte-sweep/summary.txt` and `REPLAY.txt`. This
+widens the measured primitive from two chosen bytes to 26 input-chosen
+normalized class codes, still at one fixed offset. Those codes come from
+`typo_editdist.cpp:154-170`, which assigns small sequential values to
+alpha classes and one catch-all code to non-alpha; pointer bytes,
+arbitrary byte values, arbitrary offsets, dereference and commands remain
+NOT measured. No grade or rung-5 change.
