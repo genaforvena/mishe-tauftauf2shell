@@ -205,6 +205,26 @@ PostgreSQL 16.15 cluster with the full pinned 2.1.9 library loaded:
 Exact commands, rc values and preserved negatives are in
 `realbuild/originpath/FINDINGS.md` and `realbuild/originpath/evidence/`.
 
+### Parser caller map (2026-11-25 04:53Z)
+
+A source-only sweep of the pinned 2.1.9 tree enumerated every caller of
+`pgactive_fetch_sysid_via_node_id*` and
+`pgactive_parse_replident_name()` (`realbuild/originpath/CALLERS.md`).
+All call sites except the two SQL entry points run in background workers or
+internal lock handlers: apply-worker conflict logging
+(`pgactive_conflict_logging.c:688,716`), the logical output plugin's BEGIN
+callback (`pgactive_output.c:805`), and six lock paths in
+`pgactive_locks.c`. The two SQL entry points are
+`pgactive_parse_replident_name(text)` and
+`pgactive_get_global_locks_info()`; the fresh-install script revokes
+EXECUTE on both from PUBLIC (`pgactive--2.1.9.sql:2578,1848`), and the
+`pgactive_global_locks_info` view over the latter has no `GRANT SELECT`
+(`pgactive--2.1.9.sql:1853-1863`). No plain role reaches either without an
+explicit grant. This bounds, but does not close, the catalog-derived route:
+an overlong name still has to enter `pg_replication_origin`, and the
+single-node group never became ready (`FINDINGS.md`). No new trigger, no
+change to the rung ceiling.
+
 ## Rung-4 feasibility and ceiling
 
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)
