@@ -55,6 +55,7 @@ static int case_wide = 0;
 static int dump_tcache = 0;
 static int tcache_free_dump = 0;
 static int detail_bins = 0;
+static int dump_range = 0;
 
 __attribute__((constructor))
 static void mtrace_init(void)
@@ -80,6 +81,7 @@ static void mtrace_init(void)
     tcache_free_dump = getenv("MTRACE_TCACHE_FREE_DUMP") != NULL;
     emit_tid = getenv("MTRACE_TID") != NULL;
     detail_bins = getenv("MTRACE_LARGEBIN_DETAIL") != NULL;
+    dump_range = getenv("MTRACE_DUMP_RANGE") != NULL;
 }
 
 /* Analysis-only: walk the arena's unsorted list and largebins 72/73/96
@@ -111,18 +113,19 @@ static void bin_dump(unsigned long head)
 static void *current_tcache(void);
 static void bin_detail(unsigned long head, size_t nb)
 {
-    if (!detail_bins || !head || !case_victim)
+    if ((!detail_bins && !dump_range) || !head || !case_victim)
         return;
-    unsigned long idx = nb >= 0x400 ? 48 + (nb >> 6) : 0;
-    unsigned long bin = head + idx * 0x10;   /* head = bin_at(1) - 0x10 */
+    nb = (nb + 0x17) & ~(size_t)0xf;   /* request bytes -> malloc chunk size */
+    unsigned long idx = nb >= 0x400 ? 48 + (nb >> 6) : nb >> 4;
+    unsigned long bin = head + (idx - 1) * 0x10;   /* head = bin_at(1) */
     unsigned long vhdr = (unsigned long)case_victim - 0x10;
     unsigned long vsz = case_read((void *)(vhdr + 8)) & ~(unsigned long)7;
     char buf[640];
     int n = snprintf(buf, sizeof buf,
-        "D2 %lu idx=%#lx bin=%#lx fd=%#lx bk=%#lx vhdr=%#lx vsize=%#lx "
+        "D2 %lu nb=%#lx idx=%#lx bin=%#lx fd=%#lx bk=%#lx vhdr=%#lx vsize=%#lx "
         "vfd=%#lx vbk=%#lx vfdnext=%#lx vbknext=%#lx nextprev=%#lx "
         "nextsize=%#lx\n",
-        seq, idx, bin, case_read((void *)bin),
+        seq, nb, idx, bin, case_read((void *)bin),
         case_read((void *)(bin + 8)), vhdr, vsz,
         case_read((void *)(vhdr + 0x10)), case_read((void *)(vhdr + 0x18)),
         case_read((void *)(vhdr + 0x20)), case_read((void *)(vhdr + 0x28)),
@@ -307,14 +310,22 @@ static void case_snapshot(const char *tag, size_t sizefield)
             write(out_fd, gbuf, (size_t)glen);
     }
     if (tag[0] == 'B') {
-        void *tc = current_tcache();
-        if (tc)
-            arena_head = (unsigned long)(uintptr_t)tc - 0x460;
-        if (dump_fastbins) {
-            emit("Z", 0, 0, 0);
-            if (arena_head)
-                fastbin_dump(arena_head);
+        /* V is the newest unsorted chunk; V->fd is this arena's bin_at(1).
+         * A per-thread tcache can live in a DIFFERENT arena (measured in
+         * vtransition4/5: 0x75ac9c.. vs V's 0x75aca8..), so tcache-derived
+         * bin heads made every D2 bin link meaningless. */
+        if (case_victim)
+            arena_head = case_read(case_victim);
+        if (!arena_head) {
+            void *tc = current_tcache();
+            if (tc)
+                arena_head = (unsigned long)(uintptr_t)tc - 0x460;
         }
+    }
+    if (tag[0] == 'B' && dump_fastbins) {
+        emit("Z", 0, 0, 0);
+        if (arena_head)
+            fastbin_dump(arena_head);
     }
     if (tag[0] == 'B' && dump_tcache)
         tcache_dump();
@@ -408,11 +419,9 @@ void *malloc(size_t size)
     }
     if (dump_request && size == dump_request && dump_bins && arena_head)
         bin_dump(arena_head);
-    if (dump_request && size == dump_request && detail_bins) {
-        void *tc_now = current_tcache();
-        if (tc_now)
-            bin_detail((unsigned long)(uintptr_t)tc_now - 0x460, size);
-    }
+    if (arena_head && ((dump_range && case_overflow_seen && size >= 0x400 && size <= 0x460) ||
+                       (detail_bins && dump_request && size == dump_request)))
+        bin_detail(arena_head, size);
     void *p = __libc_malloc(size);
     case_allocation(size, p);
     if (case_waiting_second && size == case_first_request) {
@@ -483,9 +492,9 @@ void free(void *p)
         emit("F", (unsigned long)(uintptr_t)p, sizefield, 0);
     }
     __libc_free(p);
-    if (dump_bins && p && (sizefield & ~(size_t)7) >= 0x600) {
+    if (dump_bins && p && !case_victim && (sizefield & ~(size_t)7) >= 0x600) {
         unsigned long fd = case_read(p);
         if (fd > 0x10000 && (fd & 0xffff) < 0x400)
-            arena_head = fd;      /* unsorted pseudo-chunk of this arena */
+            arena_head = fd;      /* boot-time unsorted pseudo-chunk */
     }
 }

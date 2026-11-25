@@ -3115,3 +3115,64 @@ mandatory for any impact claim.
   at V. No chosen-byte write, no command, no persistence; grade unchanged.
   Next: emit `D2` at every post-A malloc in `0x400..0x460` to catch the
   exact unlink/rebin transition of V, then forge only that transition.
+
+### D2 range dumps expose a wrong-arena bin view — exact-fit claim still NEGATIVE (2026-11-25, twenty-second push)
+
+The named experiment extended `D2` to every post-A malloc in `0x400..0x460`
+(`MTRACE_DUMP_RANGE=1`, `lab/repro/ruby2shell-vtransition.py`), twice with
+eight fresh stock-Sinatra processes (`vtransition2`, `vtransition3`),
+one connection, geometry identical to `d2exact` (body SHA256 prefixes
+`attack 92a21cc4a514`, `plant f00612ae80df`, `claim fc4e8ed6412f`,
+`N=972`, drain `984x7`, plant `1000x6`, filler `1x1200`, claim
+`1078@0x400:0x414,1015`, `POISON_GROWN=0x450`, `POISON_NEXT=0x90`).
+Tabulations: `lab/build/evidence/vtransition{2,3}.states.txt`, summaries and
+logs alongside them.
+
+- V's own header fields changed in some runs at the claim: `vtransition3-7`
+  `vsize 0x450→0x3d0`, `vfd=0x26 vbk=0`; `vtransition3-4` likewise;
+  `vtransition3-8` `vbk 0x...7bfd0→0x...530` after the claim. No `0x43f`
+  claim returned V in any of the sixteen processes. Survivors
+  `vtransition2` 3/8, `vtransition3` 0/8 (one boot-fail each): stochastic.
+- **Instrumentation correction.** The old `bin_detail` read bin heads at
+  `current_tcache()-0x460`, but a per-thread tcache can belong to a different
+  arena than V: `vtransition4-3` has V's unsorted head at `0x75aca8000480`
+  but the D2 bin head at `0x75ac9c000480`; `vtransition5-8` with
+  `RAILS_MAX_THREADS=1` has V at `0x7d08cc..` but the D2 bin head at
+  `0x7d08c0..`. The self-linked "bin head" and the garbage-looking
+  `binfd/binbk` values in `d2exact`, `linkdiag` and `vtransition3` therefore
+  describe the WRONG arena. The earlier conclusion that V's bin identity is
+  stale because its links point into a self-linked head is **retracted as
+  instrumentation evidence**; V's freshly read `vsize/vfd/vbk` fields remain
+  valid. `lab/preload/mtrace.c` now derives the bin head from V's own `fd`
+  at B, uses the rounded malloc chunk size for the bin index, and
+  `build-mtrace.sh` builds `mtrace.so` atomically.
+- `vtransition4` (corrected size rounding, still wrong arena) and
+  `vtransition5` (one thread, still wrong arena), eight processes each,
+  confirmed the grade: no `0x43f` claim pop. Both produced one new
+  observation: an exact-geometry `0x400` claim DID pop V three times
+  (`vtransition4-3`, `vtransition5-8`, both survivors). In
+  `stock-sinatra-vtransition4-3.server.log`, V `0x75aca8073ea0` goes
+  `0x401→0x453` at A (line 43995), is allocated by `M 0 400` at line 44603,
+  then shows attacker-pattern qwords (`q0=0x4141414141414141`,
+  `q8=0x4242424242424242`, `q10=0x5a5a5a5a5a5a5a5a`) at line 45197, frees
+  at line 45199 with sizefield `0x415`, and is allocated again by
+  `M 0 400` at line 45326. Those bytes are the attacker's own multipart
+  content in a buffer that reused V after the overflow — an ordinary
+  allocator reuse, NOT a chosen-pointer write into a live object's metadata.
+  No command, no persistence; rung 4 and harness-condition rung 5 grades
+  unchanged, stock/oracle-free/persistent rung 5 remains NOT ACHIEVED.
+
+`vtransition6` (eight processes, same one-thread geometry, now with V's own
+`fd` as the bin head) is a bounded NEGATIVE: no `0x43f` claim returned V,
+three processes survived, one boot-fail. Logs/summary
+`lab/build/evidence/stock-sinatra-vtransition6-*` and
+`vtransition6.{states.txt,run.txt}`. In `vtransition6-8` the bin reads now
+land in V's arena (`0x772a5c000870` vs V `0x772a5c0a3f90`), confirming the
+arena fix; V still went `0x401→0x453` and its `0x43f` claim allocated
+`0x772a5c07adb0` instead. The D2 bin slot remains one entry off (a bin's
+`fd` self-link reads at `bin-0x10`), so exact bin occupancy is UNKNOWN, not
+a re-pinned "stale link" claim. `vtransition6-6` again shows chosen-pattern
+bytes `0x5151...` in V's links after it was reused; no command or persistence.
+Grade unchanged. Next: correct the bin-slot offset against glibc's
+`bin_at()` definition, or abandon D2 bin occupancy as an oracle and test a
+different consumer of the measured `0x400` overlap pop.
