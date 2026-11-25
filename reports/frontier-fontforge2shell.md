@@ -230,6 +230,16 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   fixed-plain 0, ASan 1 at `:1751`, patched 0. The true maximum is
   `0x01FFFE00`, not `0x0100FEFF`; byte 3 is still only `0/1`, the window
   stays unmapped, no r5, no witness.
+- W13 (`REPLAY.md`, `replay-real.sh`, author-side, no grade change): the
+  real-build offer is now one command with a self-checking oracle. It adds
+  the W12 high-ceiling lane and asserts 17 build-path-independent cases
+  (W8 `Open()` matrix, W11 dereference matrix, W12 ceiling matrix), ending
+  in `REPLAY_REAL_OK: 17/17 stable-lane checks passed` with script rc 0.
+  Live-tree (02:46Z) and clean-archive (02:5xZ) runs both matched at 17/17
+  with rc 0; the clean run rebuilt all four trees from the pinned source.
+  W6/W7 post-overflow consumer rc stays informational because it is
+  build-path sensitive (W9). Both are author replays on this host, not a
+  witness verdict; no grade or r5 change.
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,

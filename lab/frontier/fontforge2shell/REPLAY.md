@@ -136,3 +136,42 @@ Expected: gdb `HIT glyph=-1 i=65535`, `$1 = 0x1fffe00`, watchpoint word
 `0x0100FEFF` "hard ceiling" overclaim (`CEILING-CORRECTION.md`); byte 3 is
 still only `0/1`, no mapped target and no r5. Author-side replay on this
 host, not an independent witness verdict.
+
+
+## W13 — one-command real replay with a self-checking oracle (2026-11-25 02:4xZ)
+
+The real-path offer is now a single command with an explicit pass/fail
+oracle, so a replay does not have to interpret rc tables by hand. W13 adds
+the W12 high-ceiling lane to `replay-real.sh` and asserts 17
+build-path-independent cases. The W6/W7 post-overflow consumer lanes stay
+informational: W9 measured their rc as build-path sensitive on this host.
+
+From a clean archive, with the local source tarball supplied by env:
+
+```sh
+git archive <commit> lab/frontier/fontforge2shell | tar -x -C "$TMP"
+cd "$TMP/lab/frontier/fontforge2shell"
+FF2S_TARBALL=/path/to/fontforge-20251009.tar.gz sh replay-real.sh
+```
+
+Expected assert block:
+
+| lane | expected rc (plain / fixed-plain / ASan / fixed ASan) |
+|---|---|
+| W8 `Open()` truncated | 134 / 0 / 1 / 0 |
+| W8 `Open()` complete control | 0 / — / 0 / — |
+| W11 atk50+Save, probe+Save, ceiling+Save (plain) | 139 / 0 / 139 |
+| W11 atk50+Save fixed-plain / ASan / probe ASan / fixed ASan | 0 / 1 / 0 / 0 |
+| W12 high-ceiling | 134 / 0 / 1 / 0 |
+
+Script rc 0 and the final line `REPLAY_REAL_OK: 17/17 stable-lane checks
+passed`. The W12 gdb section prints `HIT glyph=-1 i=65535`, `$1 =
+0x1fffe00` and watchpoint word `0x01fffe0000000021`; the PCF hash is
+`9a6b2603a873afc55819734ef3dada52232e6a2647502fd06ab04764ec2f6b82`.
+
+Author-side receipts, both 17/17 `PASS` with script rc 0 and the W12 gdb
+lines and PCF hash above: live lab tree at 02:46Z, and a clean git archive
+of `HEAD` into `/tmp/ff2s-w13-clean` at 02:5xZ with the extended script
+copied in and the pinned tarball supplied by env (that run rebuilt all four
+build trees from source). Neither is an independent witness verdict. No
+full pointer control, chosen mapped target, marker, command or r5 is claimed.

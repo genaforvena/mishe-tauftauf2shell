@@ -71,3 +71,53 @@ run "probe+save build-asan"       env ASAN_OPTIONS=detect_leaks=0 ./build-asan/b
 run "atk50+save build-fixed"      env ASAN_OPTIONS=detect_leaks=0 ./build-fixed/bin/fontforge -script replay-value-atk50-save.ff
 gdb -q -batch -x replay-gdb-deref.cmd ./build-plain/bin/fontforge 2>&1 | grep -E 'SIGSEGV|pc=|^[$][12]|sfd.c:1671'
 sha256sum value-atk50.pcf value-atkceiling.pcf value-probe.pcf replay-value-atk50-save.ff
+
+echo "=== W12 true write-value ceiling 0x01FFFE00 ==="
+python3 make-value-ceiling-high.py || exit 2
+gdb -q -batch -x gdb-value-ceiling-high.cmd ./build-plain/bin/fontforge 2>&1 \
+    | grep -E 'HIT glyph=-1 i=65535|\$1 = 0x1fffe00|0x01fffe0000000021|00 0xfe 0xff 0x01'
+for b in build-plain build-fixed-plain build-asan build-fixed; do
+    run "ceiling-high $b" env ASAN_OPTIONS=detect_leaks=0 "./$b/bin/fontforge" -script import-value-ceiling-high.ff
+done
+sha256sum value-ceiling-high.pcf import-value-ceiling-high.ff
+
+echo "=== stable-lane oracle (build-path independent) ==="
+# W6/W7 post-overflow consumer rc and the exact PIE address are layout
+# sensitive (REPLAY.md W9); only the lanes below are asserted.
+oracle_fail=0
+erc() {
+    label=$1; want=$2; shift 2
+    "$@" >/dev/null 2>&1
+    got=$?
+    if [ "$want" = "$got" ]; then
+        printf 'PASS %-30s rc=%s\n' "$label" "$got"
+    else
+        printf 'FAIL %-30s want=%s got=%s\n' "$label" "$want" "$got"
+        oracle_fail=$((oracle_fail+1))
+    fi
+}
+for spec in 'build-plain 134' 'build-fixed-plain 0' 'build-asan 1' 'build-fixed 0'; do
+    set -- $spec
+    erc "open-path $1" "$2" env ASAN_OPTIONS=detect_leaks=0 "./$1/bin/fontforge" -script replay-open-path.ff
+done
+for spec in 'build-plain 0' 'build-asan 0'; do
+    set -- $spec
+    erc "open-complete $1" "$2" env ASAN_OPTIONS=detect_leaks=0 "./$1/bin/fontforge" -script replay-open-complete.ff
+done
+erc 'atk50+save plain'      139 ./build-plain/bin/fontforge -script replay-value-atk50-save.ff
+erc 'probe+save plain'        0 ./build-plain/bin/fontforge -script replay-value-probe-save.ff
+erc 'ceiling+save plain'    139 ./build-plain/bin/fontforge -script replay-value-atkceiling-save.ff
+erc 'atk50+save fixed-plain'  0 ./build-fixed-plain/bin/fontforge -script replay-value-atk50-save.ff
+erc 'atk50+save asan'         1 env ASAN_OPTIONS=detect_leaks=0 ./build-asan/bin/fontforge -script replay-value-atk50-save.ff
+erc 'probe+save asan'         0 env ASAN_OPTIONS=detect_leaks=0 ./build-asan/bin/fontforge -script replay-value-probe-save.ff
+erc 'atk50+save fixed-asan'   0 env ASAN_OPTIONS=detect_leaks=0 ./build-fixed/bin/fontforge -script replay-value-atk50-save.ff
+for spec in 'build-plain 134' 'build-fixed-plain 0' 'build-asan 1' 'build-fixed 0'; do
+    set -- $spec
+    erc "ceiling-high $1" "$2" env ASAN_OPTIONS=detect_leaks=0 "./$1/bin/fontforge" -script import-value-ceiling-high.ff
+done
+if [ "$oracle_fail" -eq 0 ]; then
+    echo 'REPLAY_REAL_OK: 17/17 stable-lane checks passed'
+else
+    echo "REPLAY_REAL_FAIL: $oracle_fail stable-lane check(s) failed"
+    exit 1
+fi
