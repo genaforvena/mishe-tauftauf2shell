@@ -1,0 +1,13 @@
+W16 first driver run, 2026-11-25T01:20Z: RESULT PASS=9 FAIL=1 (rc 1).
+The single FAIL was a driver assertion defect, not a target behavior: it
+searched client logs for "SSH login: 'lab'", a server-side log message.
+Observed before correcting the assertion:
+  vuln-server.log: grep -c "SSH login: 'lab'" = 4
+  fixed-server.log: grep -c "SSH login: 'lab'" = 5
+  vuln-client-{1,2,3,4}.log: no "SSH login" lines (clients show only the
+    OpenSSH transcript; "Connection closed" for the fifth client).
+All other nine checks passed, including vulnerable fifth-login refusal
+("!No nodes available for login." in vuln-server.log), parked nanosleep
+thread, four chosen probes, fixed five attaches and five password auths.
+The assertion was corrected to search vuln-server.log; the first-run result
+is kept as a negative and is not retried into existence.

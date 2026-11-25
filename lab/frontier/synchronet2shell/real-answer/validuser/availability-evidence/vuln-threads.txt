@@ -1,0 +1,8 @@
+3479501 sbbs do_select
+3479506 sbbs/sigHandler do_sigtimedwait.isra.0
+3479507 sbbs/termServer do_poll.constprop.0
+3479510 sbbs/termOutput futex_wait_queue
+3479550 sbbs/termNode hrtimer_nanosleep
+3479616 sbbs/termNode hrtimer_nanosleep
+3479650 sbbs/termNode hrtimer_nanosleep
+3479727 sbbs/termNode hrtimer_nanosleep

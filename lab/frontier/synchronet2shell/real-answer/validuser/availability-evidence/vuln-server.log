@@ -1,0 +1,179 @@
+
+Synchronet Console for Linux-x64  Version 3.22a  Copyright 2026 Rob Swindell
+
+Reading /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl/sbbs.mesh-home.ini
+Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+!Started as non-root user (id 1000): May fail to bind TCP/UDP ports below 1024
+11/25 01:26:02 term Synchronet Terminal Server Version 3.22a Debug
+11/25 01:26:02 term Compiled HEAD/~42f586d7 Nov 25 2026 01:25 with GCC 13.3.0
+11/25 01:26:02 term sizeof: int=4, long=8, off_t=8, time_t=8
+11/25 01:26:02 term Initializing on Wed Nov 25 01:26:02 2026 with options: 20009a02
+11/25 01:26:02 term Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/25 01:26:02 term Validating userbase: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/data/user/user.tab
+11/25 01:26:02 term Userbase has 1 total users, 1 active
+11/25 01:26:02 term Verifying/creating data directories
+11/25 01:26:02 term Verifying/creating node directories
+11/25 01:26:02 term SSH Server listening on socket 127.0.0.1 port 22230
+11/25 01:26:02 term Terminal Server constructor using socket 3 (settings=0)
+11/25 01:26:02 term Terminal Server temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/temp/
+11/25 01:26:02 term Terminal Server output thread started
+11/25 01:26:02 term Terminal Server outbuf highwater mark tuned to 536 based on MSS
+11/25 01:26:02 term Node 1 local spy using socket localspy1.sock
+11/25 01:26:02 term Node 2 local spy using socket localspy2.sock
+11/25 01:26:02 term Node 3 local spy using socket localspy3.sock
+11/25 01:26:02 term Node 4 local spy using socket localspy4.sock
+11/25 01:26:02 term Terminal Server thread started for nodes 1 through 4
+11/25 01:26:02 term 0010 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22230 from port 54566
+11/25 01:26:02 term 0010 SSH Cryptlib Session: 8499 created
+11/25 01:26:02 term 0010 SSH [127.0.0.1] Attaching to Node 1
+11/25 01:26:02 term Node 1 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/25 01:26:02 term Node 1 constructor using socket 10 (settings=0)
+11/25 01:26:02 term Node 1 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node1/temp/
+11/25 01:26:02 term Node 1 passthru listen socket 13 opened
+11/25 01:26:02 term Node 1 passthru socket listening on port 46705
+11/25 01:26:02 term Node 1 passthru connect socket 14 opened
+11/25 01:26:03 term Node 1 passthru thread started
+11/25 01:26:03 term Node 1 input thread started
+11/25 01:26:03 term Node 1 output thread started
+11/25 01:26:03 term Node 1 outbuf highwater mark tuned to 20000 based on MSS
+11/25 01:26:03 term Node 1 thread started
+11/25 01:26:03 term Node 1 01:26a  Wed Nov 25 2026            Node   1
+11/25 01:26:03 term Node 1 SSH  <no name> [127.0.0.1]
+11/25 01:26:03 term Node 1 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 1 0010 SSH dbg 'Need resource to proceed' (-50) setting session active
+11/25 01:26:03 term Node 1 0010 SSH login: 'lab'
+11/25 01:26:03 term Node 1 <lab> 0010 SSH Setting attribute: SESSINFO_AUTHRESPONSE
+11/25 01:26:03 term Node 1 <lab> 0010 SSH password authentication successful
+11/25 01:26:03 term Node 1 <lab> 0010 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 1 <lab> 0010 SSH [127.0.0.1] waiting for channel type.
+11/25 01:26:03 term Node 1 <lab> 0010 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 01:26:03 term Node 1 <lab> 0010 SSH REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45 off52=TAUFTAUF
+11/25 01:26:03 term 0013 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22230 from port 54580
+11/25 01:26:03 term 0013 SSH Cryptlib Session: 9772 created
+11/25 01:26:03 term 0013 SSH [127.0.0.1] Attaching to Node 2
+11/25 01:26:03 term Node 2 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/25 01:26:03 term Node 2 LOAD ERROR: ERROR 2 (No such file or directory) opening /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node2/node.ini, falling back to Node 1
+11/25 01:26:03 term Node 2 constructor using socket 13 (settings=0)
+11/25 01:26:03 term Node 2 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node2/temp/
+11/25 01:26:03 term Node 2 passthru listen socket 18 opened
+11/25 01:26:03 term Node 2 passthru socket listening on port 40997
+11/25 01:26:03 term Node 2 passthru connect socket 19 opened
+11/25 01:26:03 term Node 2 New active client highwater mark: 2
+11/25 01:26:03 term Node 2 passthru thread started
+11/25 01:26:03 term Node 2 input thread started
+11/25 01:26:03 term Node 2 output thread started
+11/25 01:26:03 term Node 2 outbuf highwater mark tuned to 20000 based on MSS
+11/25 01:26:03 term Node 2 thread started
+11/25 01:26:03 term Node 2 01:26a  Wed Nov 25 2026            Node   2
+11/25 01:26:03 term Node 2 SSH  <no name> [127.0.0.1]
+11/25 01:26:03 term Node 2 0013 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 2 0013 SSH dbg 'Need resource to proceed' (-50) setting session active
+11/25 01:26:03 term Node 2 0013 SSH login: 'lab'
+11/25 01:26:03 term Node 2 <lab> 0013 SSH Setting attribute: SESSINFO_AUTHRESPONSE
+11/25 01:26:03 term Node 2 <lab> 0013 SSH password authentication successful
+11/25 01:26:03 term Node 2 <lab> 0013 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 2 <lab> 0013 SSH [127.0.0.1] waiting for channel type.
+11/25 01:26:03 term Node 2 <lab> 0013 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 01:26:03 term Node 2 <lab> 0013 SSH REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45 off52=TAUFTAUF
+11/25 01:26:03 term 0018 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22230 from port 45912
+11/25 01:26:03 term 0018 SSH Cryptlib Session: 14952 created
+11/25 01:26:03 term 0018 SSH [127.0.0.1] Attaching to Node 3
+11/25 01:26:03 term Node 3 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/25 01:26:03 term Node 3 LOAD ERROR: ERROR 2 (No such file or directory) opening /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node3/node.ini, falling back to Node 1
+11/25 01:26:03 term Node 3 constructor using socket 18 (settings=0)
+11/25 01:26:03 term Node 3 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node3/temp/
+11/25 01:26:03 term Node 3 passthru listen socket 23 opened
+11/25 01:26:03 term Node 3 passthru socket listening on port 34457
+11/25 01:26:03 term Node 3 passthru connect socket 24 opened
+11/25 01:26:03 term Node 3 passthru thread started
+11/25 01:26:03 term Node 3 input thread started
+11/25 01:26:03 term Node 3 output thread started
+11/25 01:26:03 term Node 3 New active client highwater mark: 3
+11/25 01:26:03 term Node 3 outbuf highwater mark tuned to 20000 based on MSS
+11/25 01:26:03 term Node 3 thread started
+11/25 01:26:03 term Node 3 01:26a  Wed Nov 25 2026            Node   3
+11/25 01:26:03 term Node 3 SSH  <no name> [127.0.0.1]
+11/25 01:26:03 term Node 3 0018 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 3 0018 SSH dbg 'Need resource to proceed' (-50) setting session active
+11/25 01:26:03 term Node 3 0018 SSH login: 'lab'
+11/25 01:26:03 term Node 3 <lab> 0018 SSH Setting attribute: SESSINFO_AUTHRESPONSE
+11/25 01:26:03 term Node 3 <lab> 0018 SSH password authentication successful
+11/25 01:26:03 term Node 3 <lab> 0018 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:03 term Node 3 <lab> 0018 SSH [127.0.0.1] waiting for channel type.
+11/25 01:26:03 term Node 3 <lab> 0018 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 01:26:03 term Node 3 <lab> 0018 SSH REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45 off52=TAUFTAUF
+11/25 01:26:03 term Node 1 SSH Operation complete
+11/25 01:26:03 term Node 1 input thread terminated (received 8 bytes in 4 blocks)
+11/25 01:26:04 term Node 1 output thread terminated
+11/25 01:26:04 term Node 1 passthru thread terminated
+11/25 01:26:04 term 0014 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22230 from port 45918
+11/25 01:26:04 term 0014 SSH Cryptlib Session: 13139 created
+11/25 01:26:04 term 0014 SSH [127.0.0.1] Attaching to Node 4
+11/25 01:26:04 term Node 4 Loading configuration files from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/ctrl
+11/25 01:26:04 term Node 4 LOAD ERROR: ERROR 2 (No such file or directory) opening /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node4/node.ini, falling back to Node 1
+11/25 01:26:04 term Node 4 constructor using socket 14 (settings=0)
+11/25 01:26:04 term Node 4 temporary file directory: /home/mesh-home/mishe-tauftauf2shell/lab/frontier/synchronet2shell/src-tree/node4/temp/
+11/25 01:26:04 term Node 4 End of preexisting log entry (possible crash on Wed Nov 25 2026 01:26 am)
+11/25 01:26:04 term Node 4 passthru listen socket 27 opened
+11/25 01:26:04 term Node 4 passthru socket listening on port 36983
+11/25 01:26:04 term Node 4 passthru connect socket 28 opened
+11/25 01:26:04 term Node 4 input thread started
+11/25 01:26:04 term Node 4 New active client highwater mark: 4
+11/25 01:26:04 term Node 4 thread started
+11/25 01:26:04 term Node 4 output thread started
+11/25 01:26:04 term Node 4 outbuf highwater mark tuned to 20000 based on MSS
+11/25 01:26:04 term Node 4 01:26a  Wed Nov 25 2026            Node   4
+11/25 01:26:04 term Node 4 SSH  <no name> [127.0.0.1]
+11/25 01:26:04 term Node 4 0014 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:04 term Node 4 passthru thread started
+11/25 01:26:04 term Node 4 0014 SSH dbg 'Need resource to proceed' (-50) setting session active
+11/25 01:26:04 term Node 4 0014 SSH login: 'lab'
+11/25 01:26:04 term Node 4 <lab> 0014 SSH Setting attribute: SESSINFO_AUTHRESPONSE
+11/25 01:26:04 term Node 4 <lab> 0014 SSH password authentication successful
+11/25 01:26:04 term Node 4 <lab> 0014 SSH Setting attribute: SESSINFO_ACTIVE
+11/25 01:26:04 term Node 4 <lab> 0014 SSH [127.0.0.1] waiting for channel type.
+11/25 01:26:04 term Node 4 <lab> 0014 SSH [127.0.0.1] term: AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
+11/25 01:26:04 term Node 4 <lab> 0014 SSH REAL_ANSWER_PROBE sizeof=41 l=64 off41=42 off44=4853494d off48=4f4f2d45 off52=TAUFTAUF
+11/25 01:26:04 term Node 2 SSH Operation complete
+11/25 01:26:04 term Node 2 input thread terminated (received 8 bytes in 4 blocks)
+11/25 01:26:04 term Node 3 SSH Operation complete
+11/25 01:26:04 term Node 3 input thread terminated (received 8 bytes in 4 blocks)
+11/25 01:26:05 term Node 4 SSH Operation complete
+11/25 01:26:05 term Node 4 input thread terminated (received 8 bytes in 4 blocks)
+11/25 01:26:05 term Node 4 output thread terminated
+11/25 01:26:05 term Node 4 passthru thread terminated
+11/25 01:26:05 term Node 2 output thread terminated
+11/25 01:26:05 term Node 2 passthru thread terminated
+11/25 01:26:05 term Node 3 output thread terminated
+11/25 01:26:05 term Node 3 passthru thread terminated
+11/25 01:26:20 term 0019 SSH [127.0.0.1] Connection accepted on 127.0.0.1 port 22230 from port 51032
+11/25 01:26:20 term 0019 SSH Cryptlib Session: 3487 created
+11/25 01:26:20 term 0019 SSH [127.0.0.1] !No nodes available for login.
+11/25 01:26:20 term 0019 SSH Cryptlib Session: 3487 destroyed from line 6190 (4 remain)
+     Got signal (15)
+     Got quit signal (15)
+11/25 01:26:20 term BBS Server terminate
+[Threads: 8  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:20 term Terminal Server output thread terminated
+[Threads: 8  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term Shutting down node 1 socket 10
+[Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term Shutting down node 2 socket 13
+[Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term Shutting down node 3 socket 18
+[Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term Shutting down node 4 socket 14
+[Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term 0003 SSH Server closing socket 127.0.0.1 port 22230
+[Threads: 7  Sockets: 5  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 4  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term 0006 Spy Socket closing socket localspy1.sock port 0
+[Threads: 7  Sockets: 4  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 3  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term 0007 Spy Socket closing socket localspy2.sock port 0
+[Threads: 7  Sockets: 3  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 2  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term 0008 Spy Socket closing socket localspy3.sock port 0
+[Threads: 7  Sockets: 2  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 1  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term 0009 Spy Socket closing socket localspy4.sock port 0
+[Threads: 7  Sockets: 1  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           [Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:26:22 term Waiting for 4 node threads to terminate...
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           Terminal Server thread still running
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 0] Terminating...                                                                           11/25 01:27:23 term !TIMEOUT waiting for 4 node thread(s) to terminate
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           11/25 01:27:23 term Done waiting for node threads to terminate
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           11/25 01:27:23 term Terminal Server destructor begin
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           11/25 01:27:23 term Terminal Server destructor end
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           11/25 01:27:23 term Terminal Server thread terminating
+[Threads: 7  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           [Threads: 6  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating...                                                                           11/25 01:27:23 term Terminal Server thread terminated (4 clients served)
+[Threads: 6  Sockets: 0  Clients: 4  Served: 5  Errors: 1] Terminating... 

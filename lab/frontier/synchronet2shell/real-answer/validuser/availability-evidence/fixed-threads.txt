@@ -1,0 +1,4 @@
+3490627 sbbs do_select
+3490634 sbbs/sigHandler do_sigtimedwait.isra.0
+3490635 sbbs/termServer do_poll.constprop.0
+3490639 sbbs/termOutput futex_wait_queue

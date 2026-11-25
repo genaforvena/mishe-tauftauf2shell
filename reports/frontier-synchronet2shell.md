@@ -4,11 +4,13 @@ Status: **admitted 2026-11-24 as the 129th route; rungs 1–3 plus rung 4 at
 the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
 AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 `sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
-author-measured in W5/W6 and replay still owed; W7/W9 measure the
+author-measured in W5/W6 and, with valid credentials under the default
+config, W16; replay still owed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24. W10 source audit bounds this pinned build to one 64-byte remote
+2026-11-24; W15/W16 updates 2026-11-25. W10 source audit bounds this pinned
+build to one 64-byte remote
 TERM setter and finds no control-flow target in the overwritten span; W11
 measures the exact client pty-req TERM length and closes W8's client-truncation
 residual. Neither changes the rung or the availability ceiling.
@@ -513,14 +515,52 @@ This is an author replay, not a witness verdict.
 
 
 
+## W16 default-config node exhaustion with valid credentials (2026-11-25, author-measured)
+
+W15 established that a valid password login reaches the copy without
+`SSH_ANYAUTH`; W6's measured node-exhaustion impact still used that non-default
+token. `lab/frontier/synchronet2shell/real-answer/validuser/
+run-validuser-availability.sh` combines the W15 config and `sshpass` login with
+the W6 four-client burst: four chosen 64-byte TERMs set `line_delay` to
+`0x4853494d` (~14-day nanosleep) on a real pinned-parent `sbbs3`, then a fifth
+client sends a clean 40-byte TERM. Upstream `cb6d77dbca` fixed form is the
+control. Result at 2026-11-25T01:27Z: **10 PASS / 0 FAIL**, rc 0.
+
+Vulnerable form: four `REAL_ANSWER_PROBE sizeof=41 l=64 off41=42
+off44=4853494d off48=4f4f2d45 off52=TAUFTAUF` lines and four
+`SSH login: 'lab'` lines on nodes 1–4; four `sbbs/termNode hrtimer_nanosleep`
+threads in `/proc`; the fifth session got `!No nodes available for login.`
+Fixed form: four `REAL_FIXED_PROBE sizeof=41 len=64 off40=00 off44=00000000
+off48=00000000` lines, five `Attaching to Node` lines, five password
+successes, no refusal. Both server logs have zero `SSH_ANYAUTH` lines. Raw
+transcripts and thread snapshots: `real-answer/validuser/
+availability-evidence/`; replay recipe `REPLAY-W16.md`.
+
+Two pre-repair negatives are kept rather than erased: the first driver run
+scored 9 PASS / 1 FAIL because an assertion looked for a server-side login
+message in client logs (the server log had four such lines); the second scored
+2 PASS / 8 FAIL because port 22230 was still in TIME_WAIT, so Synchronet
+printed `SSH Server listening` before `!ERROR 98 binding SSH Server socket`
+and retried 15 s late, letting only the 40-byte control through. The driver
+now tests real bindability and waits for the four node threads before
+starting the burst. Neither failure was target behavior.
+
+This closes the measured availability gap under the pinned default config
+with valid credentials for this one offline-provisioned user and build. Grade
+unchanged (rungs 1–4): chosen field bytes and a thread-park/node-exhaustion
+effect, with a fixed control; no pointer/IP control, command or r5. Author
+evidence, not a witness verdict; no claim about other builds, configs or
+credentials.
+
 ## Ceiling and cheapest next experiment
 
 Not measured: pointer/IP control, command execution, rung 5, independent
-replay of W5/W6/W8/W9/W15. No-credential TERM reach at a config without
+replay of W5/W6/W8/W9/W15/W16. No-credential TERM reach at a config without
 `SSH_ANYAUTH` is now a measured negative for this pinned build (W7 stock
 client and W9 custom pre-auth client), not an open gap inside this build;
 the complementary valid-credential default-config reach is a measured positive
-in W15 for one provisioned user in this pinned build. Other builds,
+in W15 for one provisioned user in this pinned build, and W16 measures its
+node-exhaustion impact with a fixed control. Other builds,
 configurations and credentials stay UNKNOWN. Inside
 this pinned build W10 also closes the "other attribute sources" wording:
 the pty-req handler is the only remote terminal setter and every setter path
@@ -528,14 +568,15 @@ is capped at 64 bytes; offsets 44..63 hold scalar timing/flag data and string
 bytes, with no function pointer, vtable entry or computed call target. Those
 are source bounds, not a new probe measurement; other builds stay UNKNOWN.
 The advisory's claimed thread-block/socket-exhaustion DoS is measured at real
-`answer()` scope in W6 with a fixed control. The 64-byte TERM and the no-size
+`answer()` scope in W6 (SSH_ANYAUTH) and W16 (default config, valid password)
+with a fixed control. The 64-byte TERM and the no-size
 copy are measured at the real cryptlib API, from a network pty-req through the
 real vendored cryptlib getter, inside a real `sbbs3` build's
 `sbbs_t::answer()` on loopback; W8 pins the 64-byte maximum to the vendored
 pty-req parser and corroborates it on the wire, and W11 measures the client's
 exact pty-req TERM length to close W8's client-truncation residual. No claim
 that the adjacent-field overwrite yields code execution: the advisory's own impact
-vector is availability-only (`VC:N/VI:N`). W5 and W6 are author evidence with
+vector is availability-only (`VC:N/VI:N`). W5, W6, W15 and W16 are author evidence with
 one-command replays, not yet independently replayed.
 
 
