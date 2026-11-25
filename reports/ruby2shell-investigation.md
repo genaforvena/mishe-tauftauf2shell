@@ -2582,3 +2582,25 @@ stays **NOT ACHIEVED**.
     the value's mid-attack free and the C/P window lines. This route
     avoids the 0x650-band closure entirely. Stock/oracle-free/persistent
     rung 5 stays **NOT ACHIEVED**.
+
+20. **Done this direct-session push (2026-11-25, eighteenth batch): the
+    GIANT-POP claim route is closed on paper before another run.** The
+    3095B claim part (slice req 0xc20) does exact-fit the bin96 merged
+    giant, but its usable write is exactly 0xc18 bytes — the giant's
+    physical usable size — so NO chosen byte crosses into the live
+    value at giant+0xc20. The overshoot requires a sizefield that
+    claims more than its physical extent (the 0x53 poison), and every
+    such grown victim on this stock app is now accounted for: live or
+    value-adjacent victims abort at their own frees, and freed-in-
+    unsorted victims are re-binned then split by the upcase's own
+    result allocation (poF3H10-6, L-line dump, bin72 empty). The
+    12-run poGP arm confirmed the attack rarely even reaches the claim
+    POST (1/12) and produced no claim-overlap. Conclusion: the poison
+    chain is STRUCTURALLY CLOSED for stock/oracle-free/persistent rung
+    5 after ~300 fresh processes today. The earlier low-byte tcache
+    retarget negatives were run under the WRONG class model — glibc
+    tcache covers only <=0x420, so the small classes DO have tcache.
+    Named next: redo the tcache-poison consumer on a <=0x410 class with
+    the corrected model and the measured arena-region-base reflection
+    oracle (Stage-C-style readback of chosen bytes at a nominated
+    address on the unmodified app). Stock rung 5 stays **NOT ACHIEVED**.
