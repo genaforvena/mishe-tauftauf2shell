@@ -482,3 +482,11 @@ This closes the one route on this target from the periodic write to a chosen
 pointer, IP or command. The grade stays rung 3 / rung 4 DEMONSTRATED, NO r5.
 This is an author-side negative; it needs no witness replay to narrow a
 claim, and the pending #4225/#4263 live-NRF verdict is unaffected.
+
+Clean-archive receipt: `git archive 0a6c868d lab/frontier/open5gs2shell`
+extracted to `/tmp/open5gs-w8-replay`; `sh harness/bytechoice/run.sh` gives
+11 PASS / 0 FAIL and `sh harness/run.sh` gives 21 PASS / 0 FAIL, both rc 0.
+The replayed `bytechoice.txt` hashes to
+`7a23b925df8ff3b66e8401954356ebe6307edf9c5c54add4a7648780f79df689`,
+identical to the committed evidence. This is an author-side replay receipt;
+it does not replace a witness verdict on #4225/#4263.
