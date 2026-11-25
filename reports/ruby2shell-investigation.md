@@ -2683,3 +2683,27 @@ stays **NOT ACHIEVED**.
       0x410 vs 0x430 victim) and record the class boundary with bytes,
       then search the stock multipart geometry for a tcache-class
       neighbor plus an 8-byte overlap; control pairs stay mandatory.
+
+23. **Fresh stock reflection-classification batch — bounded NEGATIVE for a
+    wire-nominated tcache target (2026-11-25, this wake).** Twelve fresh
+    `rails new --minimal` processes, unmodified app, loopback only, replaying
+    the saved consH20-tail/stage2d wire body with the 4-page case-probe
+    preload (`RUBY2SHELL_LEAKCLASS_COUNT=12 bash
+    lab/repro/ruby2shell-stock-leakclass.sh`; the driver's tag is hardcoded
+    `leakclass-`, so `RUBY2SHELL_LEAKCLASS_TAG` has no effect). Tabulations:
+    `lab/repro/ruby2shell-cons-vis-tabulate.py leakclass` and
+    `ruby2shell-{reflect-scan,leak-maps}.py leakclass-`.
+    - 12 runs: 1 real expansion (leakclass-4, B `0xc31` → A `0xc53`),
+      2 with second-buffer consumption at the victim (leakclass-4,
+      leakclass-11), **0** with `q38=0x251` (the tcache-`next` byte never
+      landed), **0** window `P` allocations and **0** window `Q` frees.
+    - Only one survivor had both a maps snapshot and a response
+      (leakclass-11): `reflect-scan` reports 34 reflected parts with 0
+      deviations and 0 pointer-shaped qwords; `leak-maps` reports no
+      reflected pointers (victim in `[anon]`). No arena-region base, hence
+      no tcache key, crossed the wire in this batch.
+    - Combined with item 22: the corrected model restores the tcache
+      consumer on a real tcache class, but on the unmodified app neither the
+      8-byte `next` overlap nor the wire-nominated target is available in
+      12 fresh processes. Grade unchanged; stock/oracle-free/persistent
+      rung 5 remains **NOT ACHIEVED**.
