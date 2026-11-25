@@ -161,8 +161,13 @@ This is a build-dependent negative, not a grade change.
   not corruption, chosen-byte control or r5. It narrows the earlier
   "stock-glibc outcome UNKNOWN" only for this pinned source rebuilt with
   this host's GCC at `-O2`; an actual distribution `hping3` package build
-  and other fortify settings remain UNKNOWN. A clean-archive replay receipt
-  is recorded below once `wire/replay-o2.sh` has been run from a commit.
+  and other fortify settings remain UNKNOWN.
+  A clean-archive replay from commit `90d635d6` (`git archive` plus the
+  gitignored `provision/` tree, `wire/replay-o2.sh`) gave
+  `STAGE OK baseline 4` / `attack 3` / `fixed 4`,
+  `REPLAY_O2_OK: 11 checks`, rc 0. The first replay failed only on a runner
+  tag collision (`NO_INJECT=1` overwrote `RUN_TAG`), fixed before that
+  successful replay; author-side, witness verdict UNKNOWN.
 
 
 ## Current grade (2026-11-25 00:49Z)
@@ -178,8 +183,10 @@ reachable sbox bytes become a reply-chosen constant, and the chosen byte
 dominates subsequent probe destinations (15/16 to 17/17 across measured
 runs), with no debugger steering.
 A valid RR reply and the locally patched build stay clean. Only the low byte
-of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. Stock
-glibc distribution build and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
+of `127.0.0.x` is controlled; no pointer, full-IP, command or rung 5. The
+`-O2` rebuild on this host detects the copy in `__memcpy_chk` and aborts
+before any write (W8); an actual distribution build, other fortify settings
+and `IPOPT_LSRR` stay UNKNOWN. Witness replay:
 pinned-function stage W207 ESTABLISHED; W6 W212 ESTABLISHED, both with no
 grade change. The two wire stages (#3942) and W5 (#3958) remain author-side
 and their replay verdicts are OWED.
