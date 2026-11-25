@@ -226,3 +226,64 @@ verdict on W1-W4 as of 13:19Z; those replays were not repeated.
 
 All local work stayed in `lab/frontier/drwav2shell/`; source fetches were
 read-only provisioning and no external system was contacted with a probe.
+
+## W6 — real network-facing metadata-API consumer found, but patched (2026-11-25 15:11Z)
+
+W6 used a different code index (Sourcegraph public search, three exact API
+spellings) than W5's GitHub/web queries and found a genuine application that
+routes network-fetched bytes into the affected metadata parser: OpenRBX at
+commit `bedc4886548f66e873fb06232d6d778396522844`. The measured source chain:
+
+- `Client/App/util/Sound.cpp:419-429` — `Sound::get()` calls
+  `ContentProvider::singleton().requestContentString(id)` and passes the
+  returned bytes to `system->createSound(*content, is3D)`.
+- `Client/App/include/util/ContentProvider.h:48` — `ContentId::isHttp()` is
+  true for any id starting with `http`; `SoundId` derives from `ContentId` and
+  `Sound.cpp:198-200` constructs one from arbitrary text (the reflected
+  `SoundId` property can be set by script/serialized data).
+- `Client/App/util/ContentProvider.cpp:501-505,575-585` — HTTP ids are queued
+  for `Http(id.toString()).get(*response)`; fetched bytes are cached in
+  `contentCache[id].data` (`:512-513`). `requestContentString()` (`:665-679`)
+  returns those exact bytes.
+- `Client/App/util/AudioSystem.cpp:154-179` — `decodeWav()` calls
+  `drwav_init_memory_with_metadata(&wav, data.data(), data.size(), 0,
+  nullptr)` and consumes `wav.pMetadata[i].data.smpl.pLoops[0]`, so this is a
+  real application-level caller of the vulnerable API, not a harness.
+
+Causal gap: OpenRBX vendors `3rdparty/dr_libs/dr_wav.h` with
+`DRWAV_VERSION_REVISION 6`; its SHA-256
+`fad60f1e360d6de726efc1b9a7985610c89c551719e3f110e8b992f0e1f308cd` is
+byte-identical to this lab's pinned fixed 0.14.6 header. GitHub history shows
+the metadata-API audio path was introduced at `3bcb593f9388` (2026-11-21)
+already on 0.14.6. The vulnerable 0.14.5 desync is therefore not reachable in
+this consumer: no loopback instance was built or run because the fixed control
+is established by byte identity, not by assumption.
+
+Other real callers located by the same index were checked for version: GT3
+(`matt-pulsipher/GT3-revisited`, `third_party/dr_libs/dr_wav.h`) is also
+byte-identical to pinned 0.14.6; Moondust
+(`WohlSoft/Moondust-Project` HEAD `fe246974754b09bf5716a93458583467037e8c64`)
+vendors 0.14.1, whose `drwav__read_smpl_to_metadata_obj()` returns the full
+chunk read count on loop-count mismatch and whose pass-2 cursor still
+increments (`_common/AudioProcessor/codec/wav/dr_wav.h:2208,2236,2751-2753`),
+so the same desync shape is present there. Its
+`MDAudioWAV::openRead(SDL_RWops*)` (`audio_wav.cpp:321-341`) calls
+`drwav_init_with_metadata()`, but the input comes from `SDL_RWFromFile`
+(`audio_processor.cpp:166`) on a local file path; no network source was found.
+Moondust is a real metadata-API consumer of a vulnerable-shaped library but
+NOT a network-facing one, so it is not an r5 lane either.
+
+Grade unchanged: rung 3, rung 4 mechanics, no wire-driven corruption, command,
+shell, live service or r5. W6 is a source/provisioning survey only; no new
+replay was run and W1-W4 witness verdicts remain UNKNOWN. A real network-facing
+consumer that actually ships vulnerable 0.14.5 is still the UNKNOWN r5
+prerequisite; it was not found in this bounded survey, which is not proof of
+absence. All fetches were source provisioning; no external probe was sent.
+
+Clean-archive replay at working HEAD (2026-11-25 15:13Z,
+`git archive HEAD lab/frontier/drwav2shell` into `/tmp/drwav-w6-archive`): pins
+3/3 OK, consumer hashes 3/3 OK, harness 25/0, consumer 18/0, appdest 11/0,
+nopie 11/0, marker 14/0; `tools/check-reproducibility.py` GREEN (29 files).
+W1-W4 replays were not repeated to the witness.
+
+

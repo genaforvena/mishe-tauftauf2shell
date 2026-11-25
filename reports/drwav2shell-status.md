@@ -156,3 +156,41 @@ makes the low-half pointer land on a useful object without harness grooming.
   control flow to a lab marker in a -no-pie real consumer; no wire/request
   input, command, shell, live service, witness verdict for W1-W4 or r5.
 
+
+## W6 — real network-facing metadata-API consumer found, but patched (2026-11-25 15:11Z)
+
+- A different code index (Sourcegraph public search across all three exact
+  `drwav_init_*_with_metadata` spellings) found OpenRBX
+  (`bedc4886548f66e873fb06232d6d778396522844`) as a real network-facing
+  caller: `Sound::get()` (`Client/App/util/Sound.cpp:419-429`) fetches bytes
+  via `ContentProvider::requestContentString()`; `ContentId::isHttp()`
+  (`Client/App/include/util/ContentProvider.h:48`) accepts any `http*` id and
+  `ContentProvider.cpp:501-505,575-585,665-679` downloads it with
+  `Http(id.toString()).get()`; `decodeWav()`
+  (`Client/App/util/AudioSystem.cpp:154-179`) feeds those bytes to
+  `drwav_init_memory_with_metadata()`. This closes W5's "no real network-facing
+  metadata-API consumer found" observation at the API level.
+- Cause of no r5 lane in that consumer: its vendored
+  `3rdparty/dr_libs/dr_wav.h` is byte-identical (SHA-256
+  `fad60f1e...f308cd`) to the lab's pinned fixed 0.14.6 header; the metadata
+  path was introduced on 0.14.6 at commit `3bcb593f9388` (2026-11-21). No
+  loopback instance was built: the fixed control is byte identity.
+- Moondust (`fe246974754b09bf5716a93458583467037e8c64`) vendors 0.14.1, whose
+  pass-1/pass-2 `smpl` cursor desync has the same shape
+  (`wav/dr_wav.h:2208,2236,2751-2753`), and `MDAudioWAV::openRead()`
+  (`audio_wav.cpp:321-341`) calls `drwav_init_with_metadata()`. Its input is a
+  local `SDL_RWFromFile` path (`audio_processor.cpp:166`); no network source
+  was found, so it is not an r5 lane. GT3 is also on byte-identical 0.14.6.
+- Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen control
+  flow to a lab marker; no wire-driven corruption, command, shell, live
+  service or r5. No new replay; W1-W4 witness verdicts still UNKNOWN. A real
+  network-facing consumer on vulnerable 0.14.5 remains the UNKNOWN r5
+  prerequisite; this bounded index survey is not proof of absence. Source
+  fetches only, no external probe.
+
+- Clean-archive replay at working HEAD (2026-11-25 15:13Z): pins 3/3, consumer
+  hashes 3/3, harness 25/0, consumer 18/0, appdest 11/0, nopie 11/0, marker
+  14/0; `tools/check-reproducibility.py` GREEN (29 files). No W1-W4 replay was
+  repeated to the witness.
+
+
