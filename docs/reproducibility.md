@@ -10907,3 +10907,61 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
 - **Grade** — rung 3 pinned verbatim functions, rung 4 PARTIAL packet-chosen
   offset with harness-chosen value, no adjacent object, pointer, wire, command
   or r5; witness replay and the person's exact full-flag sync remain owed.
+
+## 2026-11-25 22:0xZ — Ruby2Shell D2 range sweep, wrong-arena correction, no-mtrace arm
+
+Signal head `6fef8e61` and the following `8be1feb8`, `cc10113d` and `690c8338`
+live in `reports/ruby2shell-investigation.md`; no rung cell, grade, route or R5
+cell moves. Commands and receipts below are the ones the report records.
+
+- **D2 range dumps** — with `MTRACE_DUMP_RANGE=1`,
+  `lab/repro/ruby2shell-vtransition.py` emits `D2` at every post-A malloc in
+  `0x400..0x460`; the bounds are env-configurable with
+  `MTRACE_DUMP_RANGE_LOW`/`_HIGH` (default `0x400`/`0x460`). Fixed geometry for
+  `vtransition2`/`vtransition3` (body SHA-256 prefixes `attack 92a21cc4a514`,
+  `plant f00612ae80df`, `claim fc4e8ed6412f`, `N=972`, drain `984x7`, plant
+  `1000x6`, filler `1x1200`, claim `1078@0x400:0x414,1015`,
+  `POISON_GROWN=0x450`, `POISON_NEXT=0x90`) is tabulated in
+  `lab/build/evidence/vtransition{2,3}.states.txt`. Across sixteen fresh
+  stock-Sinatra processes no `0x43f` claim ever returned V; V's own header
+  fields changed in some runs (e.g. `vtransition3-7` `vsize 0x450→0x3d0`,
+  `vfd=0x26 vbk=0`), which is a size change, not a chosen-pointer write.
+- **Retracted wrong-arena instrumentation** — `bin_detail` read bin heads at
+  `current_tcache()-0x460`, but a per-thread tcache can belong to a different
+  arena than V (`vtransition4-3`: V unsorted head `0x75aca8000480` vs D2 head
+  `0x75ac9c000480`; `vtransition5-8` with `RAILS_MAX_THREADS=1`: V `0x7d08cc..`
+  vs D2 head `0x7d08c0..`). The earlier conclusion that V's bin identity is
+  stale because its links point into a self-linked head is **retracted as
+  instrumentation evidence**; V's freshly read `vsize/vfd/vbk` fields remain
+  valid. `lab/preload/mtrace.c` now derives the bin head from V's own `fd` at
+  B, uses the rounded malloc chunk size for the bin index, and
+  `build-mtrace.sh` builds `mtrace.so` atomically. `vtransition6` (eight
+  processes, one thread, corrected arena) is a bounded NEGATIVE: no `0x43f`
+  claim pop, three survivors, one boot-fail; in `vtransition6-8` bin reads
+  land in V's arena (`0x772a5c000870` vs V `0x772a5c0a3f90`) while V still
+  goes `0x401→0x453` and its `0x43f` claim allocates `0x772a5c07adb0`. Exact
+  bin occupancy stays UNKNOWN because a bin's `fd` self-link reads at
+  `bin-0x10`.
+- **Attacker-pattern reuse is not pointer control** — in
+  `stock-sinatra-vtransition4-3.server.log` V (`0x75aca8073ea0`) goes
+  `0x401→0x453` at A (line 43995), is allocated by `M 0 400` at line 44603,
+  shows `q0=0x4141414141414141`, `q8=0x4242424242424242` and
+  `q10=0x5a5a5a5a5a5a5a5a` at line 45197, frees at 45199 with sizefield
+  `0x415`, and is reallocated by `M 0 400` at 45326. Those qwords are the
+  attacker's own multipart content in a buffer that reused V after the
+  overflow — ordinary allocator reuse, not chosen bytes in a live object's
+  metadata. No command, no persistence.
+- **No-mtrace condition arm** — the same production-config wire chain with
+  `RUBY2SHELL_CLAIM_NO_MTRACE=1` starts the server with no `LD_PRELOAD` and no
+  `MTRACE_*` variable. Eight fresh processes: 2/8 (`untrace1-6`,
+  `untrace1-8`) served drain, plant, attack, claim, probe and `/up` with
+  404/404/404/404/404/200 and stayed alive; 6/8 aborted (`corrupted size vs.
+  prev_size` in five). Without the tracer the pop is not observable, so
+  survival is consistent with, not proof of, the measured `0x400` pop path;
+  no command side effect and no safe/fixed control were run in this arm.
+  Grade unchanged: harness-condition rung 5 stays as labeled, while
+  stock/oracle-free/persistent rung 5 remains NOT ACHIEVED. The remaining
+  prerequisite is a wire-observable request-carried marker driven by a pop
+  whose chosen bytes reach a live object's metadata, plus a code-pointer
+  source that uses none of mtrace, ObjectSpace.dump, `/proc/self/maps` or a
+  debugger.

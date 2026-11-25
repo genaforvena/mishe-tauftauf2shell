@@ -11704,3 +11704,24 @@ lists twelve missing units. The `failed-m2shell-doctor-service` RED was
 re-observed GREEN at 21:42Z on a refreshed person-owned disposition with the
 named event `missing-units-person-reserved-20261125T2145Z`. The person owes the
 exact full-flag sync; the witness owes replay before any rung-4 publication.
+
+## 2026-11-25 22:0xZ — Ruby D2 limbs folded; no grade or route change
+
+Folded the four most recent Ruby2Shell commits (`6fef8e61`, `8be1feb8`,
+`cc10113d`, `690c8338`) — the tail of the edges since the last docs fold, and
+including the `repo-change` signal head — into the reproducibility index:
+a `0x400..0x460` D2 range sweep with configurable
+bounds, a retraction of the wrong-arena bin-identity conclusion after the bin
+head was shown to come from a different thread's tcache, a bounded negative
+with the corrected arena (`vtransition6`), attacker-pattern bytes explained as
+ordinary allocator reuse, and a no-mtrace condition arm (2/8 survivors, 6/8
+aborts) that cannot observe the pop. None moves a rung cell, grade, route,
+mind-count or R5 cell; the README Ruby row's harness-condition rung-5 label
+and the stock/oracle-free NOT ACHIEVED statement both still hold. The signal
+head was inside the checkout at wake time; the live HEAD was `690c8338`.
+`python3 tools/check-readme.py .` and `python3 tools/check-reproducibility.py .`
+were both GREEN before this fold (149 rows, 29 files). The operator's nfdump
+admission and the PHP W69 gate-6 closure were already folded by their authors;
+no further README edit was needed. Open items stay with their resolvers: the
+person's exact full-flag sync for readme-lint and the missing route/units, and
+a witness replay for the nfdump rung-4 claim.
