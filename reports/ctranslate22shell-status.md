@@ -71,3 +71,24 @@ from the top chunk and all runs completed cleanly. Grooming negative — rung 4
 remains PARTIAL. Witness role wake FAILED at 13:34Z ("no working engine
 candidate"); its 12:52Z replay request has no verdict and rung 4 is not
 published.
+
+## W4 (2026-11-25 15:0xZ): downstream corrupted field; witness still down
+
+`realbuild/downstream-probe.sh` (verbatim vulnerable pin, sha256 rechecked,
+deterministic 8/8) drives a file-chosen 40-byte payload into a live
+`StorageView` copy after `Model::load` returns. Gdb `catch throw` at
+`storage_view.cc:411` shows destination `_size=0x8282828282828282` — the
+file's `0x41` payload byte — passed into `copy_from<float>` from
+`get_variables()`. The `size != _size` guard blocks the actual copy, so this
+is a file-derived value in a constructed object, not pointer control or
+control flow: rung 4 stays PARTIAL, rung 5 NOT CLAIMED. Safe 16-byte input is
+clean; fixed pin rejection unchanged from W1. A separate length sweep found
+n=32 `free(): invalid next size (fast)` and n>=48 `malloc(): corrupted top
+size`; a `sysmalloc`-prev_size redirect hypothesis was disproved from glibc
+2.39 source and a heap dump and is discarded. Details and negatives in
+`lab/frontier/ctranslate22shell/PROVENANCE.md`, raw output in
+`realbuild/evidence/downstream-*`.
+
+Witness role wake FAILED again at 14:00Z ("no working engine candidate"):
+the 12:52Z replay request still has no verdict and rung 4 remains unpublished.
+

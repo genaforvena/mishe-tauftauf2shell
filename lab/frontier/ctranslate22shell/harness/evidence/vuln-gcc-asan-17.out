@@ -1,25 +1,25 @@
 =================================================================
-==1476851==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000060 at pc 0x7cb51eefb303 bp 0x7ffdd865a1e0 sp 0x7ffdd8659988
+==2357171==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000060 at pc 0x7e25b58fb303 bp 0x7ffffc8c5080 sp 0x7ffffc8c4828
 WRITE of size 17 at 0x502000000060 thread T0
-    #0 0x7cb51eefb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x7cb51eb670bf in std::basic_streambuf<char, std::char_traits<char> >::xsgetn(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x1670bf) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
-    #2 0x7cb51eb38140 in std::istream::read(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x138140) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
-    #3 0x654e60fc75f8 in char* ctranslate2::consume<char>(std::istream&, unsigned long, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/pinned_consume.h:38
-    #4 0x654e60fc4c89 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:85
-    #5 0x654e60fc50a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
-    #6 0x7cb51e62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #7 0x7cb51e62a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #8 0x654e60fc39f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
+    #0 0x7e25b58fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7e25b55670bf in std::basic_streambuf<char, std::char_traits<char> >::xsgetn(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x1670bf) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #2 0x7e25b5538140 in std::istream::read(char*, long) (/lib/x86_64-linux-gnu/libstdc++.so.6+0x138140) (BuildId: 753c6c8608b61d4e67be8f0c890e03e0aa046b8b)
+    #3 0x5f6a23cf05f8 in char* ctranslate2::consume<char>(std::istream&, unsigned long, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/pinned_consume.h:38
+    #4 0x5f6a23cedc89 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:85
+    #5 0x5f6a23cee0a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
+    #6 0x7e25b502a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7e25b502a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5f6a23cec9f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
 
 0x502000000060 is located 0 bytes after 16-byte region [0x502000000050,0x502000000060)
 allocated by thread T0 here:
-    #0 0x7cb51eefe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
-    #1 0x654e60fc5d1d in StorageView::StorageView(Shape, DataType) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:31
-    #2 0x654e60fc4c38 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:84
-    #3 0x654e60fc50a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
-    #4 0x7cb51e62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #5 0x7cb51e62a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #6 0x654e60fc39f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
+    #0 0x7e25b58fe6c8 in operator new[](unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:98
+    #1 0x5f6a23ceed1d in StorageView::StorageView(Shape, DataType) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:31
+    #2 0x5f6a23cedc38 in load_one /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:84
+    #3 0x5f6a23cee0a9 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/probe_vuln.cpp:92
+    #4 0x7e25b502a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7e25b502a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5f6a23cec9f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/ctranslate22shell/harness/vuln-gcc-asan+0x39f4) (BuildId: bb808e5eab97f9918c62c07394b229663a4fd136)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -53,4 +53,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1476851==ABORTING
+==2357171==ABORTING

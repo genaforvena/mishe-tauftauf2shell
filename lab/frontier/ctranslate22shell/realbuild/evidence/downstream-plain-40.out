@@ -1,0 +1,4 @@
+CT2 payload consumer: num_bytes=40
+terminate called after throwing an instance of 'std::invalid_argument'
+  what():  src/CTranslate2-4.8.0/src/storage_view.cc:411: buffer to copy is of size 4 but current storage size is -9042521604759584126
+Aborted (core dumped)

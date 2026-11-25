@@ -156,3 +156,44 @@ fresh `StorageView` buffer reach only free top-chunk space and allocator
 metadata, never a live pointer-bearing object. Rung 4 stays PARTIAL.
 Witness replay remains UNKNOWN: at 13:34Z the witness role's wake FAILED
 ("no working engine candidate"), so the 12:52Z replay request has no verdict.
+
+## W4 allocator and downstream-field probes (2026-11-25 15:0xZ)
+
+Two bounded probes, both offline against the verbatim vulnerable pin
+(sha256 `05ab59bb4413df14d36fbbb0d82ff6ce6fe0bee72245245f8ecec773d4cc2c65`,
+rechecked by each script).
+
+NEGATIVE — glibc 2.39 `sysmalloc` reads only the top chunk's own size at
+entry (`old_top = av->top; old_size = chunksize(old_top)`), never the top
+chunk's `prev_size`. A plain gdb dump at `model.cc:657` with a 17-byte
+payload shows the 16-byte `posix_memalign` buffer at `0x555555615740`
+followed by zeros and the top-chunk size word `0xd8b1` at buffer+0x18; the
+file-chosen bytes 16..23 overwrite that chunk's unused `prev_size` field.
+No chosen address can redirect a `sysmalloc` read via this field. Hypothesis
+discarded; not retried.
+
+NEW downstream-consumer evidence — `realbuild/downstream-probe.sh` builds
+`harness/driver-ptr.cpp` against the same verbatim pin and runs the
+file-chosen 40-byte payload with the default `'A'` padding (no hex argv, so
+the heap layout is deterministic). Result, 8/8 identical runs:
+`downstream-plain-40.out` reports
+`storage_view.cc:411: buffer to copy is of size 4 but current storage size
+is -9042521604759584126` (`0x8282828282828282`, the doubled 0x41 byte).
+`downstream-fields-40.txt` is a gdb `catch throw` capture: backtrace
+`StorageView::copy_from<float>` ← `copy_from` ← copy-constructor ←
+`unordered_map::emplace` in `get_variables()`; destination
+`this=0x555555615b08`, `other._size=4`, `this->_size=0x8282828282828282`,
+`this->_data=0x0`. The corrupted `_size` is a file-derived value in a live
+constructed `StorageView` consumed after `Model::load` returned — unlike W2,
+where chosen bytes landed only in free top-chunk space. It still fails the
+`size != _size` guard at `storage_view.cc:409`, so `primitives::copy` is not
+reached: no chosen pointer, no control flow, no command. Safe control
+`downstream-safe-16.out` (16-byte payload) is clean: `load returned;
+variables=2`, `victim[0:16]=VVVVVVVVVVVVVVVV`. Fixed pin still rejects the
+same malicious file (W1 evidence, unchanged).
+
+A uniform-byte sweep (40 bytes of 0x41/0x42/0x00/0x01/0x11/0x61/0xff,
+hex-argv invocation) aborts earlier in `malloc`/`free`: the heap address of
+the overflow buffer shifts when argv holds the payload, so the downstream
+copy path is invocation-specific. Recorded as a layout dependency, not a
+second exploit primitive. Grade remains rung 4 PARTIAL; no wire, no rung 5.

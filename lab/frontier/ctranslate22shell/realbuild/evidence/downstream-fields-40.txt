@@ -1,0 +1,22 @@
+Catchpoint 1 (throw)
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CT2 payload consumer: num_bytes=40
+
+Catchpoint 1 (exception thrown), 0x00007ffff7cbb35a in __cxa_throw () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#0  0x00007ffff7cbb35a in __cxa_throw () from /lib/x86_64-linux-gnu/libstdc++.so.6
+#1  0x00005555555c182e in ctranslate2::StorageView::copy_from<float> (this=0x555555615b08, data=0x555555615780, size=4, device=ctranslate2::Device::CPU, synchronous=false) at src/CTranslate2-4.8.0/src/storage_view.cc:411
+#2  0x00005555555c0a9a in ctranslate2::StorageView::copy_from (this=0x555555615b08, other=..., synchronous=false) at src/CTranslate2-4.8.0/src/storage_view.cc:371
+#3  0x00005555555be6f4 in ctranslate2::StorageView::StorageView (this=0x555555615b08, other=..., synchronous=false) at src/CTranslate2-4.8.0/src/storage_view.cc:70
+#4  0x000055555559931c in std::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const, ctranslate2::StorageView>::pair<std::__cxx11::basic_string<char, std::char_traits<char>, std::allocator<char> > const&, ctranslate2::StorageView&, true> (this=0x555555615ae8, __x="origin", __y=...) at /usr/include/c++/13/bits/stl_pair.h:688
+#2  0x00005555555c0a9a in ctranslate2::StorageView::copy_from (this=0x555555615b08, other=..., synchronous=false) at src/CTranslate2-4.8.0/src/storage_view.cc:371
+371	    TYPE_DISPATCH(other._dtype, copy_from(other.data<T>(), other._size, other._device, synchronous));
+DEST this=0x555555615b08 other=0x5555556157d0
+$1 = 4
+$2 = -9042521604759584126
+$3 = 0x0
+0x555555615b08:	0x0000000000000000	0x0000000000000000
+0x555555615b18:	0x0000000000000000	0x0000000000000000
+0x555555615b28:	0x0000000000000000	0x8282828282828282
+0x555555615b38:	0x0000555555615a70	0x0000555555615a80
+0x555555615b48:	0x0000555555615a80	0x0000000000000000
