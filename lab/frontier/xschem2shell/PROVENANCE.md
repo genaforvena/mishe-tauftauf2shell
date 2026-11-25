@@ -32,3 +32,21 @@
   `calloc(2, 8)` did not consume the primed chunks, so the stored value is an
   allocator-derived heap pointer. The claim below is chosen *index* and
   observed OOB pointer value, not file-chosen bytes.
+
+## W1 additions (2026-11-25 09:14Z)
+
+- `harness/real-bin.sh` compiles `pins/rawtovcd-vuln.c` and
+  `pins/rawtovcd-fixed.c` with GCC ASan as the real standalone `rawtovcd`
+  (unrenamed `main`) and feeds a crafted `.raw` file through argv.
+  3 PASS / 0 FAIL: vulnerable rc=1 with `heap-buffer-overflow`,
+  `WRITE of size 8`, `read_dataset ../pins/rawtovcd-vuln.c:130`; fixed rc=0
+  with `bad variable record, index out of range: 2 HHH…`, no sanitizer
+  error; safe in-bounds input clean. Outputs in `harness/evidence/realbin/`.
+- Consumer search in the read-only upstream checkout: `rawtovcd` appears in
+  `src/Makefile.in` (standalone CLI build/install), `src/rawtovcd.c` itself
+  and one GUI default at `src/xschem.tcl:1682`
+  (`rawtovcd -v 1.5 "$n.raw" > "$n.vcd" && gtkwave …`). No unattended
+  `.raw` consumer and no socket path were found; AV:L/UI:P ceiling stands.
+  The pinned globals (`FILE *fd`, `names`, `vcd_ids`, `values`, doubles)
+  place no function pointer adjacent to `names`; the stored pointer is
+  allocator-derived, so no function-pointer overwrite was observed.

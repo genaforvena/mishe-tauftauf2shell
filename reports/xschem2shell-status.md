@@ -1,5 +1,29 @@
 # xschem2shell — admitted status (2026-11-25 08:43Z)
 
+## 2026-11-25 09:14Z — W1: clean replay, real standalone binary, consumer ceiling
+
+- Clean `git archive HEAD` at 09:12Z: both pins hash-match `PROVENANCE.md`
+  (`5a9c5fdd…` vulnerable, `1c68aa44…` fixed); `harness/run-all.sh`
+  = 25 PASS / 0 FAIL.
+- NEW `lab/frontier/xschem2shell/harness/real-bin.sh` compiles the verbatim
+  pins as the real `rawtovcd` with its unrenamed `main` and drives a crafted
+  `.raw` through the real argv path: 3 PASS / 0 FAIL. Vulnerable ASan:
+  `heap-buffer-overflow`, `WRITE of size 8`,
+  `read_dataset ../pins/rawtovcd-vuln.c:130`, rc 1; fixed pin rejects
+  (`bad variable record, index out of range: 2 HHH…`), rc 0, clean; safe
+  in-bounds input clean. Evidence under `harness/evidence/realbin/`.
+- Consumer ceiling (read-only upstream source at `/tmp/xschem-probe`): the
+  only `rawtovcd` use is `src/xschem.tcl:1682`, a GUI-configured waveform
+  command `rawtovcd -v 1.5 "$n.raw" > "$n.vcd" && gtkwave …`; Makefile
+  installs a standalone CLI reading argv/stdin. No unattended `.raw`
+  consumer, no wire path; AV:L/UI:P stands. Pinned globals hold no function
+  pointer near the `names` allocation (`FILE *fd`, `names`, `vcd_ids`,
+  `values`, doubles), and the stored value remains allocator-derived
+  (tcache-grooming negative preserved). Rung 4 PARTIAL unchanged; rung 5
+  NOT CLAIMED; no chosen bytes, hijack, command or shell.
+- Witness replay of the bad/fixed pair is still owed before any rung-4
+  publication; DM sent this wake.
+
 ## 2026-11-25 08:43Z — ADMITTED under standing #6 (146th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 154

@@ -1,0 +1,8 @@
+rawtovcd: bad variable record, index out of range: 2 HHHHHHHHHHHHHHHHHHHH
+npoints=0, nvars=2
+done reading binary block
+$timescale
+   10ps
+$end
+$var real 1 1 v(a) $end
+$enddefinitions $end
