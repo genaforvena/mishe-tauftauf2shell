@@ -87,8 +87,8 @@
 | `replay-all.sh` | W16 one-command clean-archive replay for W13/W14/W15 | `c53ed205d02c251516076f4d57c7af40f755fbb4d5bce04e7f79a126aec87828` |
 | `wire/wire_decoder.cpp` | W17 loopback in-process LibRaw consumer | `d6e54904fed35a2cfabc53c9fbc6ed7c6cb239756a707a989eb497c3547dfece` |
 | `wire/send.py` | W17 loopback file sender | `5852dedc2fab7913a631ff9ffe8f3762ca5fccd28cafe38e6c9ab81841915b0f` |
-| `wire/run.sh` | W17 three-lane wire replay driver | `50267c76318c0154f2b6e87b1995bfa64a3fa130da7a6afc0829c849e9ef4d18` |
-| `wire/results.txt` | W17 wire-visible rung-4 result and controls | `d7bbb4089ad8dcaa9df3ee2450496e922633fba59432115f839c0070bcfa01f1` |
+| `wire/run.sh` | W17 three-lane wire replay driver | `159850e72c747a54795e40f948c9b91c97de9f5d1c45e6edfbf92e1474385407` |
+| `wire/results.txt` | W17 wire-visible rung-4 result and controls | `bd14eb7e1ef96888ec9d0d93c56e04a4e2b1b13f80bc9715e3e1ee0c96a0309f` |
 
 
 Advisory: `https://www.vulncheck.com/advisories/libraw-0.22.3-heap-out-of-bounds-write-via-xtrans-interpolate`

@@ -1,15 +1,18 @@
 #!/bin/sh
 # W17: one crafted X-Trans DNG delivered over a loopback TCP connection to a
 # live in-process LibRaw consumer under ASan. Three lanes: vulnerable attack
-# (rc 1, ASan WRITE-2 at xtrans_demosaic.cpp:427), vulnerable no-option control
-# (rc 0) and patch-derived fixed attack (rc 0). No debugger, no forced call.
 set -eu
+ORIG=$(pwd)
+IN_ARG=${1:-"$ORIG/../w15/band150.input"}
+OUTDIR_ARG=${2:-wire-out}
 cd "$(dirname "$0")"
 ROOT=$(cd .. && pwd)
 V_TREE="$ROOT/pinned/LibRaw-0.22.3"
 F_TREE="$ROOT/fixed/LibRaw-0.22.3"
-INPUT=${1:-"$ROOT/w15/band150.input"}
-OUTDIR=${2:-wire-out}
+INPUT=$IN_ARG
+case "$INPUT" in /*) ;; *) INPUT="$ORIG/$INPUT" ;; esac
+OUTDIR=$OUTDIR_ARG
+case "$OUTDIR" in /*) ;; *) OUTDIR="$ORIG/$OUTDIR" ;; esac
 
 [ -f "$V_TREE/lib/libraw.a" ] || { echo "run bootstrap.sh first"; exit 2; }
 [ -f "$F_TREE/lib/libraw.a" ] || { echo "run bootstrap.sh first"; exit 2; }

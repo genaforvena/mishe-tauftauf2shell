@@ -21,10 +21,10 @@ LibRaw 0.22.3 ASan library built by bootstrap.sh. An optional second argv
 "safe" omits threshold, giving the no-option control. Sender: wire/send.py
 (sha256 5852dedc2fab7913a631ff9ffe8f3762ca5fccd28cafe38e6c9ab81841915b0f).
 Driver: wire/run.sh (sha256
-50267c76318c0154f2b6e87b1995bfa64a3fa130da7a6afc0829c849e9ef4d18) builds two
+159850e72c747a54795e40f948c9b91c97de9f5d1c45e6edfbf92e1474385407) builds two
 decoders (pinned and patch-derived fixed trees), picks a free loopback port,
 sends wire/w15/band150.input and checks rc plus ASan site. Runner:
-`cd lab/frontier/libraw2shell/wire && sh run.sh ../w15/band150.input OUTDIR`.
+`cd lab/frontier/libraw2shell && sh wire/run.sh w15/band150.input OUTDIR`.
 
 Observed in three fresh runs (3/3 identical):
   attack:  SENT bytes=664550, RECV bytes=664550 option=1, OPEN rc=0,
