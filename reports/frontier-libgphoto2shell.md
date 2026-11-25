@@ -483,3 +483,36 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   neighbour), all three natural-pointer variants are closed at measured
   scopes; no device-only pointer chain, command or rung 5. Evidence:
   `lab/frontier/libgphoto2shell/evidence/w185-stack-arg-spill-lane.out`.
+
+- Compiler-dependent reopening of W185 (W190, 2026-11-25): W185's negative
+  was measured on gcc builds only. The exact vulnerable TU compiled with
+  clang 18 at the same plain flags puts `info` at `rbp-0x4050..-0x31`, spills
+  `priv`/`port`/`camera` at `rbp-0x20/-0x18/-0x10`, and emits NO stack
+  canary (`0` `%fs:0x28` references in 455 disassembly lines). Bulk offsets
+  `0x3E30`/`0x3E38`/`0x3E40` therefore reach the three pointer slots, and
+  saved RIP is at bulk `0x3E50`. A full clean-tarball 2.5.34 build with
+  `CC=clang`, the committed vusb patch and the committed `p`-mode patch
+  confirms the installed camlib has the same frame; at real
+  `jl2005c.c:154` the destination is the `priv` slot reloaded from
+  `rbp-0x20` plus `0x40`, source `rbp-0x4020`.
+
+  With the existing `M2SHELL_JL2005_TOP` device reply setting that slot to a
+  chosen address, the real `memmove` writes 15920 device-chosen `0x5a`
+  bytes into a lab probe's global sink while `gp_camera_init` returns
+  `rc=0`. No gdb injection and no host-supplied canary are involved; the
+  only lab-assisted parts are the vusb device model and the probe's
+  fixed-address sink (`-no-pie`). Shifting `DEV_TOP` by `0x40` shifts the
+  first written byte by exactly `0x40` (`FIRST_5A` 576 -> 640), so the
+  destination follows the device-supplied pointer. Safe count 100 and the
+  upstream-fixed camlib leave the sink at its `0x11` fill with no `0x5a`
+  bytes. This is a DEVICE-ONLY write-what-where at a real API in the clang
+  build; W181/W182 remain closed for the gcc builds they measured, and
+  W185 is now known to be compiler-specific, not a general ceiling.
+
+  Grade unchanged at author-side rung 4, unwitnessed: the bytes go to a
+  lab-chosen address (an attacker would need a known writable target), the
+  transport is the synthetic vusb port, there is no wire/USB path, no
+  control-flow target, no command and no rung 5. Evidence, build recipe,
+  probe and controls:
+  `lab/frontier/libgphoto2shell/evidence/w190-clang-arg-spill.out` and
+  `evidence/replay-clang-wwhere-probe.c`.
