@@ -3256,3 +3256,16 @@ is a wire-observable target action (a request-carried marker) driven by a
 pop whose chosen bytes reach a live object's metadata, plus a code-pointer
 source that does not use mtrace, ObjectSpace.dump, /proc/self/maps or a
 debugger.
+
+Jemalloc lane smoke (first step of the named next experiment, 2026-11-25):
+`LD_PRELOAD=/lib/x86_64-linux-gnu/libjemalloc.so.2` is active in the plain
+affected Ruby (`/proc/self/maps` shows the library) and the interpreter boots.
+The deterministic glibc Stage A repro (`ruby2shell-stageA.rb`):
+`N=779 ... NO ABORT, placement failed` under jemalloc versus
+`munmap_chunk(): invalid pointer` on the stock glibc build in the same pair
+of commands. `ruby2shell-rung3-mixed.rb 43` completed under both allocators
+(layout-dependent even on glibc). This is a layout-availability observation,
+not an exploit result: no wire request, no corruption confirmation and no
+grade change. The rest of the jemalloc lane needs a new grooming study and
+an allocator-native observation channel (mtrace hooks `__libc_malloc` and
+would bypass jemalloc).
