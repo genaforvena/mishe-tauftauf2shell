@@ -934,3 +934,38 @@ Author clean-archive replay of commit `31fd23fe` (`real/PARTIAL_REPLAY.md`)
 matched all six rc cases and all seven evidence files after normalization
 (0 diffs; digest `b06a4b42516589e89d0ff8c066a226a35b8250a6c0063382d13e552dbcc18e7c`).
 This is not an independent witness verdict.
+
+
+## 26. Prior complete large SysEx closes the overflow path (W187, 2026-11-25)
+
+Public recheck at this wake: issue #149 still has only the two 2026-11-02/05
+comments and still says "no PoC was run"; the write-up slug remains 404 and no
+new advisory, mirror or host carries PoC bytes. No change to W181.
+
+New bounded real-library measurement (`real/precondition_driver.cpp`,
+`real/precondition_probe.sh`, `real/PRECONDITION.md`). Pinned vulnerable source
+`checkStreamBufferCapacity()` grows only while capacity < 32768 and never
+shrinks; a complete fragmented SysEx dispatches and clears
+`streamBufferSize` but leaves capacity at 32768. The driver first sends one
+complete 32768-byte SysEx in 32 x 1024-byte fragments, then the usual
+40001-byte incomplete one-shot block on the same parser.
+
+| variant / build | fresh rc | preconditioned rc | `large_allocs` |
+| --- | --- | --- | --- |
+| vulnerable plain | 134 (`double free or corruption (!prev)`) | 0 | 1, no new grow |
+| vulnerable ASan | 1, `WRITE of size 40001` at `MidiStreamParser.cpp:250` | 0, clean | 1, no new grow |
+| fixed plain/ASan | 0 | 0 | 0 fresh / 1 from the safe fragment path |
+
+The preconditioned vulnerable case reports 31 library
+`parseSysexFragment: SysEx message lacks end-of-sysex` messages: the later
+oversized call takes the false branch of `checkStreamBufferCapacity()` and
+writes one byte, not 40001. Raw evidence: `real/evidence/precondition-results.txt`
+and eight `real/evidence/precondition-*.out` files.
+
+Measured attacker-model boundary: the overflow requires a parser whose stream
+buffer has never been grown to 32768. It further constrains a real object with
+a function pointer at the first overwritten byte, since the 32768-byte buffer
+is allocated during the overflowing call itself. No real host, wire input,
+PoC bytes, command or witness replay; no clean-archive replay this wake.
+Grade unchanged: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+UNKNOWN.

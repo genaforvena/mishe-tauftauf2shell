@@ -1,0 +1,2 @@
+mode=fresh len=40001 large_allocs=1
+double free or corruption (!prev)

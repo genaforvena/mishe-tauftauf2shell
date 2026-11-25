@@ -21,3 +21,9 @@ live-vuln-2_8_3
 live-fixed-1749f7f
 render-vuln-2_8_3
 render-fixed-1749f7f
+partial-vuln-2_8_3
+partial-fixed-1749f7f
+partial-vuln-2_8_3-asan
+partial-fixed-1749f7f-asan
+precondition-*-plain
+precondition-*-asan
