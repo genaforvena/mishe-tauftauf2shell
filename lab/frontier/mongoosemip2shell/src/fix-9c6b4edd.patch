@@ -1,0 +1,245 @@
+From 9c6b4edd37869816b186e16e7a6616229c49f9fc Mon Sep 17 00:00:00 2001
+From: "Sergio R. Caprile" <scaprile@cesanta.com>
+Date: Fri, 7 Aug 2026 11:49:28 -0300
+Subject: [PATCH] handle ACK in FIN, fix ACK to FIN + payload
+
+---
+ mongoose.c        | 34 ++++++++++++++------------
+ src/net_builtin.c | 34 ++++++++++++++------------
+ test/mip_test.c   | 61 +++++++++++++++++++++++++++++++++++++++++++++++
+ 3 files changed, 99 insertions(+), 30 deletions(-)
+
+diff --git a/mongoose.c b/mongoose.c
+index e0485eec07..6159cfc06c 100644
+--- a/mongoose.c
++++ b/mongoose.c
+@@ -9693,6 +9693,8 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+   struct connstate *s = (struct connstate *) (c + 1);
+   struct mg_iobuf *io = c->is_tls ? &c->rtls : &c->recv;
+   uint32_t seq = mg_ntohl(pkt->tcp->seq);
++  // Evaluation order is important: 1) process FIN, 2) process keep-alive,
++  // 3) discard invalid SEG.SEQ, 4) process ACK and payload.
+   if (pkt->tcp->flags & TH_FIN) {
+     uint8_t flags = TH_ACK;
+     if (mg_ntohl(pkt->tcp->seq) != s->ack) {
+@@ -9721,18 +9723,12 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+     }
+     tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, flags,
+            mg_htonl(s->seq), mg_htonl(s->ack), "", 0);
+-    if (pkt->pay.len == 0) return;  // if no data, we're done
+   } else if (pkt->pay.len <= 1 && mg_ntohl(pkt->tcp->seq) == s->ack - 1) {
+     // Keep-Alive (RFC-9293 3.8.4, allow erroneous implementations)
+     MG_VERBOSE(("%lu keepalive ACK", c->id));
+     tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, TH_ACK,
+            mg_htonl(s->seq), mg_htonl(s->ack), NULL, 0);
+-    return;                        // no data to process
+-  } else if (pkt->pay.len == 0) {  // this is an ACK
+-    if (pkt->tcp->flags & TH_ACK)
+-      handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
+-    if (s->fin_rcvd && s->ttype == MIP_TTYPE_FIN) s->twclosure = true;
+-    return;  // no data to process
++    return;  // RFC-9293 3.10.7.4 discard (incorrect) payload, ACK, window
+   } else if (seq != s->ack) {
+     uint32_t ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
+     if (s->ack == ack) {
+@@ -9742,14 +9738,20 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+       tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, TH_ACK,
+              mg_htonl(s->seq), mg_htonl(s->ack), "", 0);
+     }
+-    return;  // drop it
+-  } else if (io->size - io->len < pkt->pay.len &&
+-             !mg_iobuf_resize(io, io->len + pkt->pay.len)) {
++    return;  // drop it, RFC-9293 3.10.7.4: ignore ACKno
++  }
++  // Now process the segment for ACK and payload
++  if (pkt->tcp->flags & TH_ACK) {
++    handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
++    if (pkt->pay.len == 0 && s->fin_rcvd && s->ttype == MIP_TTYPE_FIN)
++      s->twclosure = true;
++  }
++  if (pkt->pay.len == 0) return;
++  if (io->size - io->len < pkt->pay.len &&
++      !mg_iobuf_resize(io, io->len + pkt->pay.len)) {
+     mg_error(c, "oom");
+     return;  // drop it
+   }
+-  if (pkt->tcp->flags & TH_ACK)
+-    handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
+   // Copy TCP payload into the IO buffer. If the connection is plain text,
+   // we copy to c->recv. If the connection is TLS, this data is encrypted,
+   // therefore we copy that encrypted data to the c->rtls iobuffer instead,
+@@ -9758,9 +9760,11 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+   memcpy(&io->buf[io->len], pkt->pay.buf, pkt->pay.len);
+   io->len += pkt->pay.len;
+   MG_VERBOSE(("%lu SEQ %x -> %x", c->id, mg_htonl(pkt->tcp->seq), s->ack));
+-  // Advance ACK counter
+-  s->ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
+-  s->unacked += pkt->pay.len;
++  if (!(pkt->tcp->flags & TH_FIN)) {  // FIN already advanced s->ack
++    // Advance ACK counter
++    s->ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
++    s->unacked += pkt->pay.len;
++  }
+   // size_t diff = s->acked <= s->ack ? s->ack - s->acked : s->ack;
+   if (s->unacked > MG_TCPIP_WIN / 2 && s->acked != s->ack) {
+     // Send ACK immediately
+diff --git a/src/net_builtin.c b/src/net_builtin.c
+index 6c72309022..45906b4fe8 100644
+--- a/src/net_builtin.c
++++ b/src/net_builtin.c
+@@ -1462,6 +1462,8 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+   struct connstate *s = (struct connstate *) (c + 1);
+   struct mg_iobuf *io = c->is_tls ? &c->rtls : &c->recv;
+   uint32_t seq = mg_ntohl(pkt->tcp->seq);
++  // Evaluation order is important: 1) process FIN, 2) process keep-alive,
++  // 3) discard invalid SEG.SEQ, 4) process ACK and payload.
+   if (pkt->tcp->flags & TH_FIN) {
+     uint8_t flags = TH_ACK;
+     if (mg_ntohl(pkt->tcp->seq) != s->ack) {
+@@ -1490,18 +1492,12 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+     }
+     tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, flags,
+            mg_htonl(s->seq), mg_htonl(s->ack), "", 0);
+-    if (pkt->pay.len == 0) return;  // if no data, we're done
+   } else if (pkt->pay.len <= 1 && mg_ntohl(pkt->tcp->seq) == s->ack - 1) {
+     // Keep-Alive (RFC-9293 3.8.4, allow erroneous implementations)
+     MG_VERBOSE(("%lu keepalive ACK", c->id));
+     tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, TH_ACK,
+            mg_htonl(s->seq), mg_htonl(s->ack), NULL, 0);
+-    return;                        // no data to process
+-  } else if (pkt->pay.len == 0) {  // this is an ACK
+-    if (pkt->tcp->flags & TH_ACK)
+-      handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
+-    if (s->fin_rcvd && s->ttype == MIP_TTYPE_FIN) s->twclosure = true;
+-    return;  // no data to process
++    return;  // RFC-9293 3.10.7.4 discard (incorrect) payload, ACK, window
+   } else if (seq != s->ack) {
+     uint32_t ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
+     if (s->ack == ack) {
+@@ -1511,14 +1507,20 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+       tx_tcp(c->mgr->ifp, s->mac, &c->loc, &c->rem, c->dscp, TH_ACK,
+              mg_htonl(s->seq), mg_htonl(s->ack), "", 0);
+     }
+-    return;  // drop it
+-  } else if (io->size - io->len < pkt->pay.len &&
+-             !mg_iobuf_resize(io, io->len + pkt->pay.len)) {
++    return;  // drop it, RFC-9293 3.10.7.4: ignore ACKno
++  }
++  // Now process the segment for ACK and payload
++  if (pkt->tcp->flags & TH_ACK) {
++    handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
++    if (pkt->pay.len == 0 && s->fin_rcvd && s->ttype == MIP_TTYPE_FIN)
++      s->twclosure = true;
++  }
++  if (pkt->pay.len == 0) return;
++  if (io->size - io->len < pkt->pay.len &&
++      !mg_iobuf_resize(io, io->len + pkt->pay.len)) {
+     mg_error(c, "oom");
+     return;  // drop it
+   }
+-  if (pkt->tcp->flags & TH_ACK)
+-    handle_ack(s, mg_ntohl(pkt->tcp->ack), mg_ntohs(pkt->tcp->win));
+   // Copy TCP payload into the IO buffer. If the connection is plain text,
+   // we copy to c->recv. If the connection is TLS, this data is encrypted,
+   // therefore we copy that encrypted data to the c->rtls iobuffer instead,
+@@ -1527,9 +1529,11 @@ static void read_conn(struct mg_connection *c, struct pkt *pkt) {
+   memcpy(&io->buf[io->len], pkt->pay.buf, pkt->pay.len);
+   io->len += pkt->pay.len;
+   MG_VERBOSE(("%lu SEQ %x -> %x", c->id, mg_htonl(pkt->tcp->seq), s->ack));
+-  // Advance ACK counter
+-  s->ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
+-  s->unacked += pkt->pay.len;
++  if (!(pkt->tcp->flags & TH_FIN)) {  // FIN already advanced s->ack
++    // Advance ACK counter
++    s->ack = (uint32_t) (mg_htonl(pkt->tcp->seq) + pkt->pay.len);
++    s->unacked += pkt->pay.len;
++  }
+   // size_t diff = s->acked <= s->ack ? s->ack - s->acked : s->ack;
+   if (s->unacked > MG_TCPIP_WIN / 2 && s->acked != s->ack) {
+     // Send ACK immediately
+diff --git a/test/mip_test.c b/test/mip_test.c
+index 077eac41e5..086363c4d7 100644
+--- a/test/mip_test.c
++++ b/test/mip_test.c
+@@ -536,6 +536,23 @@ static void test_tcp_basics(bool ipv6) {
+   s_driver_data.len = 0;
+   mg_mgr_free(&mgr);
+ 
++  // Initiate closure with FIN and payload
++  init_tcp_tests(&mgr, &e, &ipp, &driver, &mif, fn);
++  init_tcp_handshake(&e, &ipp, &mgr);  // starts with seq_no=1000, ackno=2
++  create_tcp_simpleseg(&e, &ipp, 1001, 2, TH_FIN | TH_ACK, 2);
++  mg_mgr_poll(&mgr, 0);
++  while (!received_response(&s_driver_data)) mg_mgr_poll(&mgr, 0);
++  ASSERT((t->flags == (TH_FIN | TH_ACK)));
++  ASSERT((t->seq == mg_htonl(2)));
++  ASSERT((t->ack == mg_htonl(1004)));
++  create_tcp_simpleseg(&e, &ipp, 1004, 3, TH_ACK, 0);
++  mg_mgr_poll(&mgr, 0);
++  ASSERT(!received_response(&s_driver_data));
++  ASSERT(mgr.conns->next == NULL);  // only one connection: the listener
++
++  s_driver_data.len = 0;
++  mg_mgr_free(&mgr);
++
+   // Test client-initiated closure timeout, do not ACK
+   init_tcp_tests(&mgr, &e, &ipp, &driver, &mif, fn);
+   init_tcp_handshake(&e, &ipp, &mgr);  // starts with seq_no=1000, ackno=2
+@@ -964,6 +981,49 @@ static void test_tcp_txwindow(void) {
+   mg_mgr_free(&mgr);
+ }
+ 
++static void test_tcp_ackseq(void) {
++  struct mg_mgr mgr;
++  struct eth e;
++  struct ip ip;
++  struct ipp ipp;
++  struct tcp *t = (struct tcp *) (s_driver_data.buf + sizeof(e) + sizeof(ip));
++  int count = 0, stallcount;
++  uint32_t seq;
++  struct mg_tcpip_driver driver;
++  struct mg_tcpip_if mif;
++
++  ipp.ip4 = &ip;
++  ipp.ip6 = NULL;
++  init_tcp_tests(&mgr, &e, &ipp, &driver, &mif, txwindow_fn);
++  mgr.conns->fn_data = &count;
++  init_tcp_handshake(&e, &ipp, &mgr);
++  do {
++    while (!received_response(&s_driver_data)) mg_mgr_poll(&mgr, 0);
++    seq = (uint32_t)(mg_htonl(t->seq) + s_driver_data.len - (size_t)((char *)((uint32_t *)t + (t->off >> 4)) - s_driver_data.buf));
++  } while (seq < (TCP_TEST_WIN + 2));
++  stallcount = count;
++  mg_mgr_poll(&mgr, 0), s_driver_data.len = 0;
++  ASSERT(stallcount == count);
++
++  // Keepalive probe
++  create_tcp_simpleseg(&e, &ipp, 1000, seq, TH_ACK, 0);
++  mg_mgr_poll(&mgr, 0);
++  ASSERT(stallcount == count);
++
++  // Invalid SEG.SEQ
++  create_tcp_simpleseg(&e, &ipp, 1002, seq, TH_ACK, 0);
++  mg_mgr_poll(&mgr, 0);
++  ASSERT(stallcount == count);
++
++  // Valid FIN+ACK
++  create_tcp_simpleseg(&e, &ipp, 1001, seq, TH_FIN | TH_ACK, 0);
++  mg_mgr_poll(&mgr, 0);
++  ASSERT(stallcount < count);
++
++  s_driver_data.len = 0;
++  mg_mgr_free(&mgr);
++}
++
+ static void test_frag_recv_path(void) {
+   struct mg_mgr mgr;
+   struct eth e;
+@@ -1125,6 +1185,7 @@ static void test_tcp(bool ipv6) {
+     test_tcp_backlog();
+     test_tcp_retransmit();
+     test_tcp_txwindow();
++    test_tcp_ackseq();
+   }
+ }
+ 

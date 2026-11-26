@@ -1,0 +1,2 @@
+1d7d23cb 2 mongoose.c:5690:mg_l2_eth_in MAC not set. Generated random: 02:2b:b5:c1:29:e6
+1d7d23cb 3 mongoose.c:8128:mg_listen    135914240081922 0 http://0.0.0.0:80

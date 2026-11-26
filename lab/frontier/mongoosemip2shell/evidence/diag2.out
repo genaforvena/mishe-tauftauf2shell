@@ -1,0 +1,23 @@
+IFRX len=64 ip_proto=06
+IFTX len=60 flags=12
+IFRX len=64 ip_proto=06
+IFRX len=454 ip_proto=06
+=================================================================
+==2493593==ERROR: AddressSanitizer: negative-size-param: (size=-89816356095472)
+    #0 0x7251212fafb6 in memmove ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98
+    #1 0x589f9fb7232f in noop_fn /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:86
+    #2 0x589f9fb17885 in mg_call src/mongoose-7.23/mongoose.c:2615
+    #3 0x589f9fb50d75 in read_conn src/mongoose-7.23/mongoose.c:9786
+    #4 0x589f9fb52373 in rx_tcp src/mongoose-7.23/mongoose.c:9895
+    #5 0x589f9fb541a6 in rx_ip src/mongoose-7.23/mongoose.c:10005
+    #6 0x589f9fb5475e in mg_tcpip_rx src/mongoose-7.23/mongoose.c:10131
+    #7 0x589f9fb5550a in mg_tcpip_poll src/mongoose-7.23/mongoose.c:10278
+    #8 0x589f9fb57df6 in mg_mgr_poll src/mongoose-7.23/mongoose.c:10506
+    #9 0x589f9fb72d69 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:145
+    #10 0x725120e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x725120e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x589f9fb03944 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-asan+0x10944) (BuildId: 588c9d105e2ca8c78bc5f95c11fdb2c1cd57962a)
+
+Address 0xa30000000d00 is a wild pointer inside of access range of size 0x000000000001.
+SUMMARY: AddressSanitizer: negative-size-param ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:98 in memmove
+==2493593==ABORTING

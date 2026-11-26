@@ -1,0 +1,10 @@
+1d7ffd6d 2 mongoose.c:6238:mg_l2_eth_in MAC not set. Generated random: 02:38:2b:9f:92:a2
+1d7ffd6d 3 mongoose.c:11981:mg_tcpip_in Builtin TCP/IP init done. Queue size: 1540, extra conn size: 112
+1d7ffd6d 3 mongoose.c:9559:mg_listen    1 0 http://0.0.0.0:80
+1d7ffd6d 3 mongoose.c:11066:accept_conn 2 accepted 2.0.0.0:1
+BEFORE_FIN recv_size=512 recv_len=400
+AFTER_FIN mode=attack recv_len=800
+OVF_BYTES off400=5a off520=5a off799=5a
+1d7ffd6d 3 mongoose.c:9495:mg_close_con 1 0 closed
+1d7ffd6e 3 mongoose.c:9609:mg_mgr_free  All connections closed
+1d7ffd6e 3 mongoose.c:9495:mg_close_con 2 0 closed

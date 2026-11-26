@@ -1,0 +1,4 @@
+1d764ba6 3 mongoose.c:8215:mg_mgr_init  MG_IO_SIZE: 512, TLS: none
+1d764ba6 2 mongoose.c:5690:mg_l2_eth_in MAC not set. Generated random: 02:10:42:fb:6f:62
+1d764ba7 3 mongoose.c:8128:mg_listen    1 0 http://0.0.0.0:80
+HANDSHAKE_FAIL flags=2 spins=1001

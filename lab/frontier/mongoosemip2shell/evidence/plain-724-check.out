@@ -1,0 +1,3 @@
+1d7d4599 2 mongoose.c:6237:mg_l2_eth_in MAC not set. Generated random: 02:78:43:1f:21:cf
+1d7d4599 3 mongoose.c:11980:mg_tcpip_in Builtin TCP/IP init done. Queue size: 1540, extra conn size: 112
+1d7d4599 3 mongoose.c:9559:mg_listen    128170414047233 0 http://0.0.0.0:80

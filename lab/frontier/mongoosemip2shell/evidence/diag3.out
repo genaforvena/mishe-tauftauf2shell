@@ -1,0 +1,70 @@
+IFRX len=64 ip_proto=06
+IFTX len=60 flags=12
+IFRX len=64 ip_proto=06
+IFRX len=454 ip_proto=06
+IFRX len=454 ip_proto=06
+IFTX len=60 flags=10
+=================================================================
+==2496789==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x515000000780 at pc 0x7f37656fb303 bp 0x7ffc7c306bf0 sp 0x7ffc7c306398
+WRITE of size 400 at 0x515000000780 thread T0
+    #0 0x7f37656fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5b0b87bf664f in read_conn src/mongoose-7.23/mongoose.c:9763
+    #2 0x5b0b87bf8373 in rx_tcp src/mongoose-7.23/mongoose.c:9895
+    #3 0x5b0b87bfa1a6 in rx_ip src/mongoose-7.23/mongoose.c:10005
+    #4 0x5b0b87bfa75e in mg_tcpip_rx src/mongoose-7.23/mongoose.c:10131
+    #5 0x5b0b87bfb50a in mg_tcpip_poll src/mongoose-7.23/mongoose.c:10278
+    #6 0x5b0b87bfddf6 in mg_mgr_poll src/mongoose-7.23/mongoose.c:10506
+    #7 0x5b0b87c18e02 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:154
+    #8 0x7f376522a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7f376522a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5b0b87ba9944 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-asan+0x10944) (BuildId: 91d070005d4001c11054ba58e9073578c1bf4ebf)
+
+0x515000000780 is located 0 bytes after 512-byte region [0x515000000580,0x515000000780)
+allocated by thread T0 here:
+    #0 0x7f37656fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x5b0b87c139ac in mg_calloc src/mongoose-7.23/mongoose.c:26346
+    #2 0x5b0b87bcf715 in mg_iobuf_resize src/mongoose-7.23/mongoose.c:4875
+    #3 0x5b0b87bf63b7 in read_conn src/mongoose-7.23/mongoose.c:9752
+    #4 0x5b0b87bf8373 in rx_tcp src/mongoose-7.23/mongoose.c:9895
+    #5 0x5b0b87bfa1a6 in rx_ip src/mongoose-7.23/mongoose.c:10005
+    #6 0x5b0b87bfa75e in mg_tcpip_rx src/mongoose-7.23/mongoose.c:10131
+    #7 0x5b0b87bfb50a in mg_tcpip_poll src/mongoose-7.23/mongoose.c:10278
+    #8 0x5b0b87bfddf6 in mg_mgr_poll src/mongoose-7.23/mongoose.c:10506
+    #9 0x5b0b87c18c98 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:140
+    #10 0x7f376522a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7f376522a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x5b0b87ba9944 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-asan+0x10944) (BuildId: 91d070005d4001c11054ba58e9073578c1bf4ebf)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x515000000500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x515000000780:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000800: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2496789==ABORTING
