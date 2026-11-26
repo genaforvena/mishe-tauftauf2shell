@@ -2524,9 +2524,12 @@ case conversion of user strings, whereas four of these five need the
 application to compile attacker-controlled regex patterns — a specific
 application behavior, not a default web-framework path. The fifth is a
 read-only disclosure/crash bug with no write/control primitive for rung 4.
-Repro sizes for the regexp bugs are UNKNOWN — not measured, so no budget
-claim is made. No new mind/charter/window/trigger is owed; ruby2shell owns
-any decision to open a secondary lane (noted to it on tape).
+Repro sizes for the regexp bugs were UNKNOWN at triage, not measured. W18
+(2026-11-26, dated section at the end of this file) has since reproduced
+GHSA-7x2q-68qv-6p8x and GHSA-7whj-cfh7-xgm4 with committed scripts as
+ruby2shell secondary lanes; the other three GHSAs stay UNKNOWN and
+unmeasured. No new mind/charter/window/trigger is owed by those two
+measurements; ruby2shell owns the secondary lanes (noted to it on tape).
 
 #### Examined 2026-11-20: NGINX HTTP/2 RCE cluster (CVE-2026-123007 / CVE-2026-123633)
 
@@ -12559,3 +12562,41 @@ moved no rung cell, grade, route or R5 cell.
   no grade change, NO r5. The independently established count moved 108→109 in
   the generated README, results page and SVG; all 162 rows and rung cells held.
   Detail: `.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`.
+
+## 2026-11-26 08:0x–08:2xZ — Ruby W18 secondary lanes, mongoosemip2shell admitted
+
+Five commits folded from live HEAD `43e3a514`; the wake-start signal named
+`05c7b6c4`. No rung cell, grade, witness verdict or R5 cell moved by docs,
+and no replay was rerun here. The operator's admission changed the generated
+counts; docs did not touch those files.
+
+- `516812e4` (Ruby2Shell W18) closes the transcode `max_output` lead: a
+  288-case length sweep and a 3000-case fuzz on both ASan builds found zero
+  ASan reports and byte-identical output because `transcode.c:1878` grows
+  the destination by `max_output`. It also measured two adjacent GHSAs from
+  the same fix series with a committed reproducer: 7x2q-68qv-6p8x gives an
+  observed heap-use-after-free in `bbuf_free` on 3.4.12 (rung 3) and
+  `RegexpError` on 3.4.13; 7whj-cfh7-xgm4 gives a rc 139 `Regexp#to_s`
+  segfault on 3.4.12 with no ASan heap report (rung 2) and the expected
+  string on 3.4.13. Both need attacker-controlled pattern compilation, so
+  both are secondary lanes with no stock-Rails/Sinatra path and no grade
+  change. This supersedes the 2026-11-20 triage note that their repro sizes
+  were UNKNOWN and no lane was opened; the other three GHSAs stay UNKNOWN.
+  The vendor PoC watch at 08:04Z found no new mechanics.
+- `3cd4f730` staged, `66833e50`/`dc86cae3` finalized and `43e3a514` admitted
+  **mongoosemip2shell** as the 166th declared mind / 163rd register row on
+  GHSA-4mgp-8m9m-q872 / ZDI-CAN-29386 (no CVE; Mongoose `<= 7.23`, fixed 7.24
+  by `9c6b4edd…`). A FIN carrying payload skips the resize check in
+  `read_conn()` and writes 288 bytes past a 512-byte heap buffer; the pinned
+  7.23/7.24 GCC+Clang ASan harness reported `RESULT PASS=8 FAIL=0` with
+  `WRITE of size 400` at pinned `src/net_builtin.c:1527` and clean fixed/safe
+  controls. The canonical runner hash after `66833e50` is `6f99384f…e393`
+  (staging hash `5d0e10f7…4620fa`); the operator's clean-archive replays of
+  both versions were 8 PASS / 0 FAIL. Grade rung 3 verbatim / rung 4 PARTIAL
+  (chosen length and `0x5a` bytes, no named adjacent object or pointer), no
+  wire path, command or r5. Window 174 adopted (panes %350/%351 live, no
+  duplicate); the hy4-flash route and three generated wake units remain
+  missing (person-reserved). Generated counts moved 165/162/162/109 →
+  166/163/163/109 by the operator, not by this fold. Independent witness
+  replay is owed and `established` stays false. Full pins, hashes and
+  expected bytes are in `docs/reproducibility.md`.

@@ -3759,3 +3759,70 @@ only replaces one it installed; `docs/operations.md` records the installer and
 check commands. No harness, pin, grade, rung cell or r5 moved with it. No
 replay was rerun in this fold; counts and bytes above are quoted from the
 committed receipts.
+
+## 2026-11-26 08:0x–08:2xZ — Ruby W18 adjacent lanes, mongoosemip2shell staged then admitted
+
+Signal head `05c7b6c4`, live HEAD `43e3a514`. Five commits folded. No rung
+cell, grade, witness verdict or R5 cell moved by docs, and no replay was
+rerun here; bytes and counts are quoted from the committed receipts. The
+operator's `43e3a514` changed the generated presentation and register count;
+docs did not touch those files.
+
+`516812e4` (Ruby2Shell W18) closes the transcode `max_output` lead as a
+bounded NEGATIVE and reproduces two adjacent GHSAs from the same 2026-11-18
+Ruby fix series. The write-bound changes (cp50220 5→9, to_utf_16 4→6,
+to_utf_32 4→8) are real in the abstract, but a 288-case length sweep and a
+3000-case mixed-character/option fuzz on both `ruby-3.4.12-asan` and
+`ruby-3.4.13-asan` gave zero ASan heap/stack reports and byte-identical
+marshalled output: `transcode.c:1878` grows the destination to `dlen + len +
+max_output`, so no 4-byte window opens for the 6/8-byte write. Lane CLOSED.
+The committed reproducer `lab/repro/ruby2shell-adjacent-ghsas.rb` with driver
+`lab/repro/ruby2shell-adjacent-ghsas.sh` then measured:
+GHSA-7x2q-68qv-6p8x gives ASan `heap-use-after-free ... READ of size 8 ...
+#0 bbuf_free regparse.c:145` on 3.4.12 (rc 1; allocation `regparse.c:1795`,
+free `:4977`, reread `:5072`) and `RegexpError` on 3.4.13 (rc 0) — confirmed
+corruption, rung 3. GHSA-7whj-cfh7-xgm4 gives the upstream regression pattern
+named in the committed script a rc 139 `[BUG] Segmentation fault` at `re.c:2`
+on 3.4.12 via `rb_reg_to_s → rb_reg_str_with_term (re.c:628) → onig_new →
+onig_parse_make_tree (regparse.c:6773)`, with no ASan heap report before the
+SIGSEGV, and the expected `(?-mix:...)` string on 3.4.13 (rc 0) — reproducible
+crash, rung 2. Both are secondary lanes: each needs an application that
+compiles attacker-controlled regex patterns, so neither is a stock-Rails/
+Sinatra rung-4/5 path. The 08:04Z trigger watch found the vendor page
+unchanged (stamped 2026-11-21T03:52Z, PoC promised 25 November "or later");
+no PoC yet. Primary grades unchanged: rung 4 witness-COMPLETE,
+harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent r5
+NOT ACHIEVED.
+
+`3cd4f730` staged **mongoosemip2shell** (GHSA-4mgp-8m9m-q872 /
+ZDI-CAN-29386, no CVE assigned), Mongoose `<= 7.23` fixed in 7.24 by
+`9c6b4edd37869816b186e16e7a6616229c49f9fc`. A TCP FIN carrying payload makes
+the FIN branch of `read_conn()` fall through the resize guard to the shared
+`memcpy` at pinned `src/net_builtin.c:1527`; a 400-byte data segment fills
+400 of a 512-byte `MG_IO_SIZE` buffer, so the FIN's 400 chosen bytes write
+288 bytes past it. The staging runner `run-all.sh` (SHA-256
+`5d0e10f7410649464861508563ae17b212bf357eaac2869f5e8981af2d4620fa`)
+verifies the tarball/patch/harness pins, builds both tags with GCC and Clang
+ASan and reported `RESULT PASS=8 FAIL=0` at 08:08Z: vulnerable 7.23 gives
+`WRITE of size 400` at `mongoose.c:9763` (pinned `src/net_builtin.c:1527`),
+0 bytes after a 512-byte `mg_iobuf_resize` region, under both compilers;
+7.24 grows the receive buffer 512→800 and is clean; both safe controls are
+clean. `66833e50` provisioned the tarballs before pin checks, making the
+canonical runner SHA-256
+`6f99384f721f8c1bd839c760f6c7d9a6e5c1ee6d35abd28e622f1dda4268e393`;
+`dc86cae3` committed the final traces and the plain-build backtrace. The
+operator's clean-archive replays of both runner versions returned
+`RESULT PASS=8 FAIL=0` rc 0, receipt
+`.mishe-tauftauf/replays/mongoosemip2shell-op-20261126T0819Z`. Grade: rung 3
+verbatim / rung 4 PARTIAL — attacker-chosen length and `0x5a` payload bytes,
+but no named adjacent object, pointer control, live wire path, command
+execution or r5. `43e3a514` admitted the target as the 166th declared mind
+and 163rd register row at 08:19Z under standing #6, window 174 adopted
+(panes %350/%351 live, no duplicate); the hy4-flash route and three generated
+wake units remain missing (person-reserved). Generated counts moved
+165/162/162/109 → 166/163/163/109 with that admission, not by this fold.
+Independent witness replay is still owed and `established` stays false; no
+rung cell moved with admission. Negatives preserved in `PROVENANCE.md`: the
+advisory's ZDI PoC link is a SharePoint HTML login page, non-ASan runs crash
+before the handshake on both tags in `mg_timer_poll`, and early checksum,
+driver-poll-gate and event-type mistakes were fixed.

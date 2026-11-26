@@ -12508,3 +12508,91 @@ from the committed receipts and the W17 report.
   re-renders and stages those files whenever the manifest is staged, without
   replacing a hook it did not install. A manifest edit without a re-render is
   a RED check, never a passing claim.
+
+## 2026-11-26 08:0x–08:2xZ — Ruby W18 adjacent-GHSA repros, mongoosemip2shell staging and admission
+
+Recipes for `516812e4`, `66833e50`, `dc86cae3` and `43e3a514`. No replay was
+rerun in this fold; bytes and hashes below are quoted from the committed
+receipts. Neither limb changes a grade or a rung cell. The operator's
+admission changed the generated register count and presentation; docs did
+not touch those files.
+
+- **Ruby2Shell W18 — transcode NEGATIVE and two secondary-lane GHSAs.** Use
+  the provisioned `lab/build/ruby-3.4.12-asan/bin/ruby` and
+  `lab/build/ruby-3.4.13-asan/bin/ruby` from the Ruby2Shell recipe above
+  (build pins in `reports/ruby2shell-investigation.md`). For the two measured
+  GHSAs:
+
+  ```sh
+  bash lab/repro/ruby2shell-adjacent-ghsas.sh
+  # or directly:
+  ruby lab/repro/ruby2shell-adjacent-ghsas.rb double-free
+  ruby lab/repro/ruby2shell-adjacent-ghsas.rb to-s
+  ```
+
+  Expect on 3.4.12 `double-free` (`[[:^ascii:][^9999 CJK]&&[^U+9FFF]&&x]`
+  with `Regexp::IGNORECASE`) rc 1 with `ERROR: AddressSanitizer:
+  heap-use-after-free ... READ of size 8 ... #0 bbuf_free regparse.c:145`,
+  allocated `regparse.c:1795`, freed `:4977`, reread `:5072`; 3.4.13 prints
+  `REGEXPERROR`, rc 0. Expect on 3.4.12 `to-s` with the upstream regression
+  pattern spelled in the committed script a rc 139 `[BUG] Segmentation fault`
+  at `re.c:2` through `rb_reg_to_s → rb_reg_str_with_term (re.c:628) →
+  onig_new → onig_parse_make_tree (regparse.c:6773)` and no ASan heap report;
+  3.4.13 prints the expected `(?-mix:...)` string, rc 0. Tracked scripts:
+  `lab/repro/ruby2shell-adjacent-ghsas.{rb,sh}`. Gitignored evidence under
+  `lab/build/evidence/adjacent-ghsas/3.4.{12,13}-{double-free,to-s}.out`
+  regenerates with the driver; those four `.out` files are not committed.
+  The transcode negative used two throwaway scripts (`/tmp/tc_sweep.rb`,
+  288 cases; `/tmp/tc_fuzz.rb`, 3000 cases over UTF-16/32/CP50220 with
+  invalid/undef replace options) on both ASan builds: zero heap/stack ASan
+  reports and byte-identical marshalled output. Those scripts are **not
+  committed**, so that negative cannot be replayed verbatim from the tree;
+  its structural reason is `transcode.c:1878` sizing the destination to
+  `dlen + len + max_output`. Lane closed; no chosen-byte write. Primary
+  grades unchanged (rung 4 witness-COMPLETE, harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED).
+
+- **Mongoosemip2Shell (frontier W250) — admitted 166th mind, MIP FIN+payload
+  heap OOB write; witness replay still owed.** GHSA-4mgp-8m9m-q872 /
+  ZDI-CAN-29386 (advisory says no CVE); affected `<= 7.23`, patched `7.24` by
+  `9c6b4edd37869816b186e16e7a6616229c49f9fc`. Tag refs `7.23 =
+  02bdbb9ed6f0a8f7c42228c6e7cb35d748b60551`, `7.24 =
+  66e877cd973881bca92809a4cf5563cdb7a0fe5e`; URLs and the fix patch source
+  in `lab/frontier/mongoosemip2shell/PROVENANCE.md`. SHA-256 pins verified by
+  the runner: 7.23 tarball
+  `93208f164038b05d156935b8b725063e1afb3984a362dbcf3a9ea37b6f1f2255`,
+  7.24 tarball `0b21cc2ac2a094600d58f2bd20d42aa21ce88375adefc32af481fe89997285fb`,
+  fix patch `70d3b17e9a3d429c7c5c3dcbbc22c54401e9181d2518c8a453901c91c862f822`,
+  local `poc.c` `50ebb930ac9fc2c84286bfa350243f243495aa1a0e38759b6a856219cfd1a6d9`;
+  the advisory's ZDI link (`b0928e05b029b38080fc323a080b515392cec1391baac0c1ced472973de59b33`)
+  is an HTML login page, not source. One command:
+
+  ```sh
+  sh lab/frontier/mongoosemip2shell/run-all.sh
+  ```
+
+  Canonical wrapper SHA-256 (after `66833e50`)
+  `6f99384f721f8c1bd839c760f6c7d9a6e5c1ee6d35abd28e622f1dda4268e393`; the
+  staging wrapper at `3cd4f730` was
+  `5d0e10f7410649464861508563ae17b212bf357eaac2869f5e8981af2d4620fa`.
+  Expect `RESULT PASS=8 FAIL=0`: a mock-L2 driver injects a full TCP
+  handshake, a 400-byte data segment and a FIN carrying 400 chosen `0x5a`
+  bytes; pinned 7.23 under GCC and Clang ASan reports
+  `heap-buffer-overflow`, `WRITE of size 400`, `0 bytes after 512-byte
+  region`, frame #1 `read_conn` at aggregate `mongoose.c:9763` (pinned
+  `src/net_builtin.c:1527`), allocation via `mg_iobuf_resize` at
+  `mongoose.c:9752`; 7.24 grows `recv_len` 512→800 with no ASan report in
+  either compiler; the fit-within-buffer safe FIN is clean on both tags.
+  Eight `evidence/7.{23,24}-{gcc,clang}-asan-{attack,safe}.out` files are
+  tracked; the two 7.23 attack traces carry the ASan report and the other
+  six are short controls. Gitignored `src/` tarballs/trees, `out/` builds and
+  the diagnostic `evidence/diag*.out` are labeled intermediate or regenerate
+  with the wrapper. The operator's clean-archive replays of both wrapper
+  versions returned `RESULT PASS=8 FAIL=0` rc 0 with the pinned tarballs and
+  patch copied in; receipt
+  `.mishe-tauftauf/replays/mongoosemip2shell-op-20261126T0819Z`. That is an
+  author-side receipt, not an independent verdict. Grade rung 3 verbatim /
+  rung 4 PARTIAL (chosen length and `0x5a` bytes, no named adjacent object or
+  pointer), no live wire path, command or r5. `43e3a514` admitted the target
+  as the 166th declared mind and 163rd register row, window 174 adopted;
+  `established` stays false and an independent witness replay is owed.
