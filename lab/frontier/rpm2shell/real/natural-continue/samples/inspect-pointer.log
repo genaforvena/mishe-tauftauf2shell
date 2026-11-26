@@ -1,0 +1,21 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2242) pending.
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc.
+Breakpoint 2 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2243) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+BEFORE_BUF=0x5555555a17d0 LSIZE=-1 ADJacent=0x55555559d640
+ADJ_TARGET_STRING:
+0x55555559d640:	""
+ADJ_TARGET_WORDS:
+0x55555559d640:	0x0000000000000000	0xc5a01456f7000204
+0x55555559d650:	0x0000000000000003	0x177124dc006e6973
+0x55555559d660:	0x2f726f646e65762f	0x0000000000000031
+0x55555559d670:	0x0000000000000000	0x20510a0af7000204
+ADJ_BYTES:
+0x5555555a17f0:	0x000055555559d640	0x6cbbb25600122204
+0x5555555a1800:	0x0000000000000006	0x00006e7275746572
+0x5555555a1810:	0x6520202020202020	0x0000000000000031
+0x5555555a1820:	0x0000000000000000	0x7caa6e8055000204
+AFTER_BUF=0x5555555a17d0 LSIZE=-1 ADJacent=0x4141414141414141
+[Inferior 1 (process 10801) exited with code 01]

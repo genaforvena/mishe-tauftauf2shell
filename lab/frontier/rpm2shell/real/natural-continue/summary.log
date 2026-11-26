@@ -1,0 +1,54 @@
+PASS continue-1 exits 1 without a fault
+PASS continue-2 exits 1 without a fault
+PASS continue-3 exits 1 without a fault
+PASS continue-4 exits 1 without a fault
+PASS continue-5 exits 1 without a fault
+PASS continue-6 exits 1 without a fault
+PASS continue-7 exits 1 without a fault
+PASS continue-8 exits 1 without a fault
+PASS continue-9 exits 1 without a fault
+PASS continue-10 exits 1 without a fault
+PASS continue-11 exits 1 without a fault
+PASS continue-12 exits 1 without a fault
+PASS continue-13 exits 1 without a fault
+PASS continue-14 exits 1 without a fault
+PASS continue-15 exits 1 without a fault
+PASS continue-16 exits 1 without a fault
+PASS continue-17 exits 1 without a fault
+PASS continue-18 exits 1 without a fault
+PASS continue-19 exits 1 without a fault
+PASS continue-20 exits 1 without a fault
+PASS rwatch-1 reached the copy
+PASS rwatch-2 reached the copy
+PASS rwatch-3 reached the copy
+PASS rwatch-4 reached the copy
+PASS rwatch-5 reached the copy
+PASS rwatch-6 reached the copy
+PASS rwatch-7 reached the copy
+PASS rwatch-8 reached the copy
+PASS rwatch-9 reached the copy
+PASS rwatch-10 reached the copy
+PASS rwatch-11 reached the copy
+PASS rwatch-12 reached the copy
+PASS rwatch-13 reached the copy
+PASS rwatch-14 reached the copy
+PASS rwatch-15 reached the copy
+PASS rwatch-16 reached the copy
+PASS rwatch-17 reached the copy
+PASS rwatch-18 reached the copy
+PASS rwatch-19 reached the copy
+PASS rwatch-20 reached the copy
+PASS inspect-1 reached the copy
+PASS inspect-2 reached the copy
+PASS inspect-3 reached the copy
+PASS inspect-4 reached the copy
+PASS inspect-5 reached the copy
+PASS inspect-6 reached the copy
+PASS inspect-7 reached the copy
+PASS inspect-8 reached the copy
+PASS inspect-9 reached the copy
+PASS inspect-10 reached the copy
+PASS inspect-11 reached the copy
+PASS inspect-12 reached the copy
+NATURAL_POINTER_ADJACENCY=4/20 READ_WATCHPOINT=20/20 INSPECT_POINTER=0/12
+NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0

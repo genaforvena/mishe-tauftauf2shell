@@ -107,6 +107,29 @@ pointer overwritten by chosen `A` bytes. Natural unmodified layout varied:
 `plain-layout-sweep.log` records a later 12-miss sweep. Raw logs and rc files
 are under `real/`.
 
+## Natural adjacency dereference probe (2026-11-26 16:32Z)
+
+    cd lab/frontier/rpm2shell
+    bash real/run-natural-deref.sh
+
+Verified `NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0`,
+`NATURAL_POINTER_ADJACENCY=4/20 READ_WATCHPOINT=20/20 INSPECT_POINTER=0/12`.
+All 20 plain continuations past the copy exit 1 with no `SIGSEGV`; pinned
+`rpmfi.cc:2242-2253` sets `RPMERR_READ_FAILED`, frees `buf` and returns, so
+no later consumer uses the adjacent object. The read watchpoint fires even
+when the adjacent qword was nil, at `rpmfi.cc:2245` one instruction before
+`call free@plt`; that read is not value-dependent and is not a semantic
+dereference. When pointer-bearing, the adjacent object is rpm header-import
+data with tag word `0x00122204`, count 6 and inline `return`. Details and
+sample logs: `real/natural-continue/README.md`.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-natural-deref.sh` | `a11612b9b7c08d710ab58d4033561230576df6e95a7f11ac7bfbeaf16bc192df` |
+| `real/layout-continue.gdb` | `55469d033eda7660112075f78fc6aea760b2ad2515bf9917bb1feb36ff3f3bd3` |
+| `real/rwatch-after.gdb` | `8af2955cae1f4f9521aaa9ce35996b855959416a32ed252ff258eddbec89eea0` |
+| `real/inspect-adjacent.gdb` | `91f749037e99aa6819e9889f6e3e543d1e8ff1067c29657fe24d6715df0455f3` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell

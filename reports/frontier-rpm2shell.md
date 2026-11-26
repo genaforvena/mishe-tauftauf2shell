@@ -132,6 +132,26 @@ libarchive reports `Size required (-1)`. Plain `rpm -qlvp --nodigest`
 returns 0 and lists the malicious size without entering the archive
 iterator. Do not claim the stripped-payload or query-only paths trigger.
 
+### Natural adjacency: downstream dereference negative (2026-11-26)
+
+`bash lab/frontier/rpm2shell/real/run-natural-deref.sh` replays 52 plain,
+no-`LD_PRELOAD` GDB runs against real `rpm2cpio`; verified
+`NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0`. All 20 continuations past the
+copy exit 1 without a fault: with `lsize = -1`, the actual 64-byte copy can
+never equal the declared `UINT64_MAX`, so pinned `lib/rpmfi.cc:2242` sets
+`RPMERR_READ_FAILED`, `:2245` frees `buf`, and `:2253` returns; no later code
+consumes the adjacent object on this path. Natural adjacency is intermittent:
+4/20 pointer-bearing qwords in the verified replay (e.g. before
+`ADJacent=0x5555555f3e20`, after `ADJacent=0x4141414141414141`; an earlier
+set measured 6/20). A hardware read watchpoint on `buf+0x20` fires in 20/20
+runs, including runs where that qword was nil before the copy, and stops at
+`rpmfi.cc:2245` one instruction before `call free@plt`; the trigger is not
+value-dependent and does not establish a semantic dereference. When
+pointer-bearing, the adjacent object is rpm header-import data (tag word
+`0x00122204`, count 6, inline `return`, pointer to a header-data region with
+strings `sin`, `/dev/n...`), not a vtable or callback slot. Full commands,
+samples and interpretation: `lab/frontier/rpm2shell/real/natural-continue/README.md`.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
@@ -158,15 +178,18 @@ above is later work and still lacks an independent witness. Full W238 detail:
 - **Rung 4 DEMONSTRATED:** 64 chosen bytes past a real 1-byte allocation;
   plain GDB observes the bytes and a lab-groomed live pointer-bearing
   allocation overwritten by chosen `A` bytes. Natural adjacent layout varies,
-  and pointer target control/downstream use remain UNKNOWN.
+  and pointer target control/downstream use remain UNKNOWN; no natural
+  semantic pointer dereference was observed in 52 plain GDB runs (see above).
 - **Not rung 5:** no loopback service or wire request, no controlled pointer
   hijack, no command and no observed command side effect.
 
-Next experiment: identify a naturally adjacent object and test whether a
-non-crashing chosen pointer value reaches a downstream dereference in the
-real consumer. Keep the allocator instrumentation and stripped/query
-negatives attached to any broader claim. No command execution without a live
-target and benign side effect.
+Next experiment: find a consumer or code path that continues past
+`RPMERR_READ_FAILED` and uses a naturally adjacent object after the copy; the
+real `rpm2cpio` path returns immediately, so it cannot show a downstream
+dereference. A non-crashing chosen pointer value must be observed reaching a
+dereference before any hijack claim. Keep the allocator instrumentation and
+stripped/query negatives attached to any broader claim. No command execution
+without a live target and benign side effect.
 
 ## Duplicate check
 
