@@ -4356,3 +4356,106 @@ regression shapes above; these were re-run here, not adopted as fact.
 
 Primary grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+## YARV threaded-handler lane — real pointer control, no stock disclosure shape (2026-11-26, direct session)
+
+This lane targeted the only same-thread native object family whose first qword
+is both a live code pointer and consumed by the VM: `iseq_encoded[0]`. On
+Ruby's direct-threaded build the encoded array holds instruction-handler
+addresses, not opcode numbers (`compile.c:977-990`). A one-byte change to the
+low byte preserves the ASLR-high bytes and redirects dispatch without a leak.
+
+### Candidate discovery
+
+`lab/preload/jemtrace.c` gained `JEMTRACE_FREE_ALL_Q0` (free-time first-qword
+logging; the feature is in the committed tracer). The stock survey was:
+
+```
+JEMTRACE_FREE_ALL_Q0=1 JEM_CLASS=80 JEM_WIRE_PORT=4588 \
+  bash lab/repro/ruby2shell-jemalloc-wire.sh control jemq0-survey
+```
+
+`Q total=552468`, of which 1,857 freed first qwords lay inside the main Ruby
+mapping and 1,854 inside `vm_exec_core`; 131 were on the request worker. The
+first analysis pass subtracted the `r-xp` mapping start instead of the ELF load
+base and reported `variable.c` callbacks. That mistake is preserved here; after
+subtracting the segment's `0x36000` file offset, the qwords resolve to the
+threaded handler table at ELF `0x552640`, as expected. This is a target survey,
+not a natural-adjacency or exploit claim. Evidence (gitignored):
+`lab/build/evidence/jemq0-survey.{trace,maps,out}` and `jemq0-fiber-survey.*`.
+
+### Effect probe and 3.4.12 result
+
+Committed analysis probe: `lab/repro/ruby2shell-iseq-lowbyte.{c,rb}`. It uses
+the internal iseq API to apply only byte `0x53` or `0x73` to a chosen handler
+on a compiled iseq; it is not a delivery harness. Build command for the pinned
+plain build:
+
+```
+gcc -shared -fPIC -O0 -g -Ilab/build/plain/ruby-3.4.12 \
+  -Ilab/build/plain/ruby-3.4.12/include \
+  -Ilab/build/plain/ruby-3.4.12-plain/include/ruby-3.4.0 \
+  -Ilab/build/plain/ruby-3.4.12-plain/include/ruby-3.4.0/x86_64-linux \
+  -o lab/repro/ruby2shell_iseq_lowbyte.so \
+  lab/repro/ruby2shell-iseq-lowbyte.c
+```
+
+The 220-case matrix (all 110 normal handler indices × `{0x53,0x73}`, one fresh
+process each, source `nil`) produced no completed evaluation, no marker and no
+command. Failures were `SIGILL`/`SIGSEGV`, fatal VM errors, NoMemory/TypeError,
+or timeout while the fatal handler dumped. On the common stock first handlers,
+`putself`/`putnil` land on an illegal instruction, `definemethod`/`putnil`
+on invalid opcodes, and `getlocal_WC_0` on privileged `cli`; `nop` reaches
+`vm_get_ep` with a null env and faults. Method-context tests of `nop` and
+`duparray` also fault. This is a 3.4.12-only crash family, not a cross-build
+conclusion.
+
+### 3.3.13 disclosure mechanic and the stock-shape closure
+
+Official Ruby 3.3.13 (`ruby 3.3.13 (2026-10-23 revision af48f08f21)`) was built
+from the tar.xz whose SHA-256 is
+`6bd764359992373a96556b45fb7dfe6b6170da34a0a2fd0b7e1be7932fea982b`.
+Its `putself` handler `0x264595` has low-`0x53` target `0x264553`, which enters
+the `putobject` body after a `vm_trace` call. With the ideal three-word sequence
+`[putself][putnil][leave]`, the substituted `putobject` consumes the second
+handler pointer as its literal. The probe's `disclosure` mode returned:
+
+```
+result=2.0061044785851125 class=Float
+identity=0x640409f875d2 recovered=0x640409f875d2
+```
+
+The identity is exactly the `putnil` handler; the rendered Float's raw IEEE
+bits are bit-rotated left by three from that handler, so a wire observer could
+recover the code pointer from the decimal value. This is a real code-pointer
+disclosure primitive at the labeled forged-iseq scope, not a stock path.
+
+No stock iseq has the required shape. The committed scanner
+`lab/repro/ruby2shell-iseq-shapes.rb` compiles every `.rb` file, recursively
+inspects each child iseq, and anchors instruction offsets to the parent
+disasm: **8,458 files / 182,906 iseqs / 0 matches** across the Ruby 3.3.13
+core tree and all installed 3.4.12 gems. The loaded stock Sinatra process gave
+3,493 (3.4.12) and 3,387 (3.3.13) iseqs, 0 matches; 42 Rails `.erb` templates
+compiled through both Erubi and ERB gave 118 iseqs, 0 matches. The common
+`putself; send/opt_send; leave` methods contain call-data at encoded offset 2,
+so the substituted `putobject` dispatches that heap pointer as a handler and
+faults before returning. The disclosure lane is therefore closed for
+stock/Rails code, despite the primitive being real.
+
+### Two structural closures
+
+- **ID-table key.** The production jemalloc C=128 hit changes an ID-table key
+  serial to `0x2b53`. An `IdProbe` against the same stock boot found no named
+  serial anywhere in `0x2b00..0x2bff`, so no legitimate lookup can consume the
+  corrupted entry; the previously UNKNOWN identity is now measured absent.
+- **glibc tcache-next.** The mapping write is at user offset `R` (the mapping
+  allocation request). The next user chunk is `align16(R + 8)` bytes away and
+  that distance is never equal to `R`; the write can reach the next header's
+  prev_size/size or chunk-local slack, but never the next chunk's user qword.
+  The `tcache next` interpretation is structurally impossible, independent of
+  the earlier N sweep.
+
+ASLR-off determinism was verified (`setarch -m -R` twice gives byte-identical
+maps for the pinned Ruby), but no new ASLR-dependent primitive was claimed.
+Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
