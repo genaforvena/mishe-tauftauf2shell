@@ -4,23 +4,23 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 187,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) and libtiffpixarlog2shell (21:0xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 188,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ) and inihlongline2shell (21:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 184,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ, libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ and libtiffpixarlog2shell admitted 21:0xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 185,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ, libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ and inihlongline2shell admitted 21:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 184,
+      "value": 185,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
     "independently_established_findings": {
       "value": 125,
-      "basis": "Register rows whose ESTABLISHED witness replay verdict was folded into the `established` flag at that verdict's exact scope; author-only verdicts and verdicts kept as boundary notes without a flag change are excluded; W287 libarchivezippath2shell and W288 pcre2jit2shell folded 20:4xZ and W291b gnutlsdtls2shell folded 21:0xZ and W292 libtiffpixarlog2shell folded 21:2xZ (both ESTABLISHED AS LABELED, no grade change).",
+      "basis": "Register rows whose ESTABLISHED witness replay verdict was folded into the `established` flag at that verdict's exact scope; author-only verdicts and verdicts kept as boundary notes without a flag change are excluded; W287 libarchivezippath2shell and W288 pcre2jit2shell folded 20:4xZ and W291b gnutlsdtls2shell folded 21:0xZ and W292 libtiffpixarlog2shell folded 21:2xZ (both ESTABLISHED AS LABELED, no grade change); W292b nfdump2shell verdict noted 21:4xZ (already established, ESTABLISHED AS LABELED, no grade or flag change).",
       "source": "docs/results.md"
     }
   },
@@ -2864,6 +2864,22 @@
         "reports/libtiffpixarlog2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "InihLongLine2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "—",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 21:4xZ under standing #6 as the 188th declared target mind; staged window 197 adopted as-is (panes %398/%399 live, dead=0, registry entry present, no duplicate); operator clean-archive replay from `git archive HEAD lab/frontier/inihlongline2shell` at 21:42Z, with all four prebuilt harness binaries removed to force rebuild, gives runner sha256 `f5ea71cf377576579923023ad2f27ca6020a0ab8ea4111cb4d46f4b58e1f7c5d`, all three `pins/PIN_HASHES.txt` entries OK, rc 0, `PASS=8 FAIL=0`, reobserving GCC ASan `stack-buffer-underflow` READ of size 1 at verbatim `ini.c:167` via `ini_parse_file` :268, one byte below the 16-byte `abyss` stack buffer.** CVE-2025-71450 / GHSA-gh7m-xpp3-w3vq (inih, Moderate CVSS 4.8, CWE-127 buffer under-read; affected release r62, fixed r63 by `8e06f6b77b5d4471bdc6d85ada81b67d37354a5c`): an overlong line of 199 bytes with no newline followed by an embedded NUL makes the shipped `fgets` reader return a non-NULL empty `abyss`, so the discard loop evaluates `abyss[strlen(abyss) - 1]` at index -1. Fixed r63 (guard `abyss_len > 0`), safe newline-terminated input on both pins and the plain r62 attack case are clean (plain rc 0 — no rung-2 crash; preserved negative). Grade R1 ✓ / R2 — / R3 ✓ / R4 — / R5 —: rung 3 ASan is the ceiling; no chosen offset, chosen bytes, pointer control, marker or command, so R4/R5 NOT CLAIMED. Independent witness clean-archive replay is owed.",
+      "reports": [
+        "reports/frontier-inihlongline2shell.md",
+        "reports/inihlongline2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
