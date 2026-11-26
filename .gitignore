@@ -199,6 +199,12 @@ lab/frontier/ud3tn2shell/src/nanopb-src/
 lab/frontier/ud3tn2shell/src/tinycbor-src/
 lab/frontier/ud3tn2shell/out-*/
 lab/frontier/ud3tn2shell/replay*/
+lab/frontier/ud3tn2shell/probe-w26/
+lab/frontier/ud3tn2shell/transport-w26/*
+!lab/frontier/ud3tn2shell/transport-w26/RESULTS.md
+!lab/frontier/ud3tn2shell/transport-w26/transport_probe.py
+!lab/frontier/ud3tn2shell/transport-w26/make_bpv7_admin.py
+lab/frontier/ud3tn2shell/harness/malloc_log.so
 
 # Bacnet2shell harness: pinned git clone/worktree, local binaries and raw logs.
 # Pin manifest, fix patch, harness sources, normalized evidence and hashes stay tracked.
