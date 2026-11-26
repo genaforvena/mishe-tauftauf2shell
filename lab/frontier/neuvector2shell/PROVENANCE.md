@@ -68,3 +68,36 @@ loopback target, pointer redirection, command or rung 5. The chosen
 marker is a repeated single byte (`'M'`), not a crafted return address;
 the observed 0x4d-filled saved return slot faults rather than executing
 a chosen address.
+
+## Real-object lane (W241, 2026-11-26)
+
+Provisioning: codeload tarball of the pinned vulnerable commit fetched to
+`src/real/neuvector-vuln.tar.gz` (SHA-256
+`8827c5f0de017392563119ac0f39429192c4233ccc150783e421f8c720148287`),
+extracted under `src/real/neuvector-48ae8b5c…/`. The extracted real
+`dp/dpi/sig/dpi_sig.c` is byte-identical to `src/dpi_sig-vulnerable.c`
+(SHA-256 `1fbf0ba4…33072b`). The build uses the real NeuVector headers from
+that tree plus `src/real/shim/` — third-party opaque types only (urcu
+list/rculfhash, hyperscan, jansson); none is used by the vulnerable
+`sprintf` path. `realcaller/driver.c` supplies stub collaborators and builds
+the real `dpi_dlpbld_t` (48 bytes) and `dpi_dlp_rule_entry_t` from `dp/apis.h`
+the way `dp/ctrl.c:2170-2198` builds them from controller JSON, with 8
+patterns of 511 bytes (real `MAX_DLP_RULE_PATTERN_LEN=512`).
+
+`bash lab/frontier/neuvector2shell/realcaller/run.sh` -> **22 PASS / 0 FAIL**,
+rc 0. The unmodified pinned real source compiles with GCC `-O0
+-fsanitize=address -fno-omit-frame-pointer -fno-stack-protector`. ASan
+reports `WRITE of size 518` at real `dpi_sig.c:658`; the address is at
+offset 2080 in `dlpsig_buf` (line 621), 0 bytes past the 2048-byte object.
+Fixed pinned source: ASan-clean, `REAL_DRIVER rc=0`. Safe input (one
+8-byte pattern): ASan-clean and `rc=0` in both bodies. Plain real-object
+build: gdb prints `BUF=…d610 RBP=…de30` (saved RBP at `BUF+2080`), sixteen
+bytes at `BUF+2048` include twelve `0x4d`, and the saved RBP slot reads
+`0x003b4d4d4d4d4d4d`; the plain process faults in the pattern loop after
+the overflow reaches its frame. At that breakpoint the return slot at
+`$rbp+8` still holds a valid code pointer: no chosen-address control.
+
+Limits: not a full enforcer `dp` binary, no controller REST/CRD wire, no
+real wildcard expansion (patterns are supplied in already-expanded form),
+no real hyperscan/urcu libraries, no chosen address, no command or side
+effect, no rung 5.

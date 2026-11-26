@@ -1,10 +1,12 @@
 # Frontier brief: NeuVector DLP/WAF rule stack overflow — CVE-2026-127182
 
 Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
-ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 pinned verbatim function;
-rung 4 PARTIAL (chosen bytes observed past the 2048-byte stack buffer and in
-frame control slots by gdb). No real NeuVector build, controller REST call,
-wire input, pointer redirection, command or rung 5.
+ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 confirmed in both the
+verbatim pinned function and the unmodified real `dpi_sig.c` object built
+against real NeuVector headers; rung 4 PARTIAL (chosen bytes past the
+2048-byte buffer and in the saved RBP slot of a real-object plain frame).
+Still no full enforcer binary, controller REST/CRD wire, real wildcard
+expansion, chosen-address control, command or rung 5.
 
 ## Claim and scope
 
@@ -96,25 +98,57 @@ saved RBP slot. No real enforcer, controller, wire, chosen-address pointer,
 command or r5; full detail:
 `.mishe-tauftauf/artifacts/witness-w240-neuvector2shell/detail.md`.
 
+## Real-object reproduction (W241, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/realcaller/run.sh` -> **22 PASS / 0 FAIL**,
+rc 0. The pinned vulnerable commit's full tree was provisioned under
+`lab/frontier/neuvector2shell/src/real/`; its `dp/dpi/sig/dpi_sig.c` is
+byte-identical to `src/dpi_sig-vulnerable.c` (SHA-256 `1fbf0ba4…3072b`),
+and it compiles unmodified with GCC `-O0 -fsanitize=address
+-fno-omit-frame-pointer -fno-stack-protector` against the real NeuVector
+headers. Only third-party opaque types (urcu list/rculfhash, hyperscan,
+jansson) are shimmed; collaborators are stubbed. `realcaller/driver.c`
+builds the real `dpi_dlpbld_t` and `dpi_dlp_rule_entry_t` from `dp/apis.h`
+the way `dp/ctrl.c:2170-2198` builds them from controller JSON, with
+eight 511-byte patterns (real `MAX_DLP_RULE_PATTERN_LEN=512`) and calls
+the real `dpi_sig_bld()`.
+
+ASan reports `stack-buffer-overflow`, `WRITE of size 518`, frame
+`dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`; the address is at offset 2080 in
+`dlpsig_buf` (real line 621), 0 bytes past the 2048-byte object. Fixed
+pinned source is ASan-clean and returns `rc=0`; one 8-byte pattern is
+ASan-clean and `rc=0` in both bodies. Plain real-object frame: saved RBP
+at `BUF+2080`, sixteen bytes at `BUF+2048` include twelve chosen `0x4d`
+bytes, and the saved RBP slot reads `0x003b4d4d4d4d4d4d`. At the
+breakpoint the return slot at `$rbp+8` still holds a valid code pointer —
+no chosen address. The plain process faults while formatting further
+patterns after the overflow reaches its frame. Commands, hashes, raw logs
+and limits: `lab/frontier/neuvector2shell/PROVENANCE.md`.
+
+This is a real-object reproduction, not a full enforcer binary: no
+controller wire, no real wildcard expansion (patterns are supplied
+already expanded), no hyperscan/urcu libraries, no chosen address, no
+command or side effect.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
-  pinned `dpi_sig_bld()`, with fixed and safe-input controls.
+  pinned `dpi_sig_bld()`, and an ASan-confirmed WRITE in the byte-identical
+  real `dpi_sig.c` object built with real NeuVector headers; both have
+  fixed and safe-input controls.
 - **Rung 4 PARTIAL:** chosen bytes observed at chosen offsets past the
-  logical buffer and in the saved return slot in a synthetic plain
-  process. No real enforcer, controller, REST/CRD wire, pointer
-  redirection to a chosen address, command or observed side effect.
+  logical buffer in a synthetic frame and in the saved RBP slot of a
+  real-object plain frame. No full enforcer binary, controller REST/CRD
+  wire, real wildcard expansion, pointer redirection to a chosen address,
+  command or observed side effect.
 - **Not rung 5:** no live loopback target and no benign command execution.
 
-Cheapest next experiment: provision the 5.5.6 and last vulnerable 5.5.x
-enforcer trees, build the C dataplane `dp` with ASan and
-`-fno-stack-protector`, and drive `dpi_sig_bld()` from its real message
-path (or a minimal DLP config replayer) with a pattern that expands past
-2048 after wildcard rewriting. Measure the real stack layout, whether a
-chosen 8-byte value can replace the saved return address with a benign
-in-process marker, and whether the fixed 5.5.6 build skips the same rule.
-Keep the no-command/no-rung-5 ceiling until a live target and a benign
-side effect are observed.
+Next experiment: build a full vulnerable 5.5.x enforcer `dp` with ASan and
+`-fno-stack-protector`, feed the DLP config through the controller JSON
+message path including wildcard expansion (or the real rule parser), and
+measure the live frame in that binary against 5.5.6. Only then consider a
+chosen-address in-process marker; keep the no-command/no-rung-5 ceiling
+until a live loopback target and a benign side effect are observed.
 
 ## Duplicate check
 
