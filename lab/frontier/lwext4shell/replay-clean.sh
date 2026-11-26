@@ -21,12 +21,16 @@ REPO="$(git -C "$HERE" rev-parse --show-toplevel)"
 VULN_PIN=890484c72dbb321535127625c3686e51f1f424b9
 FIX_PIN=b9c842f168e6044bd03fe34e1237eda33c299908
 
-echo "=== lwext4 clean-archive replay: REF=$REF DEST=$DEST ==="
 mkdir -p "$DEST"
+DEST="$(cd "$DEST" && pwd)"   # resolve before cd into the archive
+echo "=== lwext4 clean-archive replay: REF=$REF DEST=$DEST ==="
 git -C "$REPO" archive "$REF" lab/frontier/lwext4shell | tar -x -C "$DEST"
 cd "$DEST/lab/frontier/lwext4shell"
 LAB="$PWD"
 UP="$LAB/real/lwext4-upstream"
+
+echo "== runner hashes =="
+sha256sum run-all.sh run-real.sh run-victim.sh
 
 git clone -q https://github.com/gkostka/lwext4.git "$UP"
 git -C "$UP" worktree add -q --detach "$UP/vuln" "$VULN_PIN"

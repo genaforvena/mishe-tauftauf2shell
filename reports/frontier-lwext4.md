@@ -2,13 +2,16 @@
 
 Status: **ADMITTED 2026-11-26** (159th target, standing #6, window 167).
 Witness W242 replay ESTABLISHED AS LABELED for the earlier stand-in-harness
-grade only (no grade change, NO r5). Real-library lane staged 2026-11-26
-14:1xZ: `run-real.sh` 17 PASS / 0 FAIL through the real `ext4_fs_init()`
-mount path, and `run-victim.sh` 9 PASS / 0 FAIL showing image-chosen bytes
-overwriting an adjacent live `ext4_buf` in the real plain build. Grade:
-**rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the lab build
-(witness replay of the new evidence owed)**. No chosen-address pointer, no
-command and no rung 5. Both CVE-2025-71473 and CVE-2025-71474 are staged.
+grade only (no grade change, NO r5). Witness W273 independently replayed the
+real-mount and adjacent-object lanes from a clean `git archive cbadc189`:
+ESTABLISHED AS LABELED, no grade change, NO r5. Real-library lane staged
+2026-11-26 14:1xZ: `run-real.sh` 17 PASS / 0 FAIL through the real
+`ext4_fs_init()` mount path, and `run-victim.sh` 9 PASS / 0 FAIL showing
+image-chosen bytes overwriting an adjacent live `ext4_buf` in the real plain
+build. Grade: **rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the
+lab build, independently replayed as labeled by W273**. No chosen-address
+pointer, no command and no rung 5. Both CVE-2025-71473 and CVE-2025-71474
+are staged.
 
 ## Claims
 
@@ -142,9 +145,12 @@ store and at `:416` immediately after:
   bytes — `ext4_buf_alloc()` calls `malloc(itemsize)` then
   `calloc(sizeof(struct ext4_buf))`, so the real transaction-layer object is
   the next heap chunk;
-- after: `b.buf->bc = 0x0`, `x/8bx b.data+4096` all zero,
-  `x/8bx b.data+8192` starts `0xfe` — the bit byte chosen by the image's
-  `inodes_per_group` low bits;
+- after: the zero fill covers `b.data+4096` through `b.data+8191`; the live
+  `ext4_buf` begins at `b.data+4112` (`sizeof(struct ext4_buf)=144`, so it
+  spans to `b.data+4255`) and `b.buf->bc = 0x0`. `x/8bx b.data+8192` starts
+  `0xfe`, the bit byte chosen by the image's `inodes_per_group` low bits;
+  that byte is ~4 KiB past `ext4_buf`, not inside it — only the zero fill
+  hits the live object.
 - without gdb the same image crashes the plain process with SIGSEGV in
   `ext4_trans_set_block_dirty()` (rc=139), the natural consumer of the
   now-zeroed `bc` pointer.
@@ -155,21 +161,25 @@ zeros and a bit-set byte), and no command runs. `ext4_buf` is lwext4's own
 live heap object, not a driver-supplied stand-in. Raw records:
 `real/evidence/real-vuln-victim-gdb.out` and
 `real/evidence/real-vuln-victim-plain.out`. Witness verification of this
-new lane was requested in tape 5605 and is not yet received.
+new lane (tape 5605) was independently replayed by W273 from a clean archive
+(tape 5616): ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`.
 
 ## Grade and tractability
 
 - **Rung 3 CONFIRMED:** GCC/Clang ASan on verbatim pinned excerpts *and*
   GCC ASan on the full real library mount path, with real allocator frames,
   image-derived input, fixed and safe controls.
-- **Rung 4 DEMONSTRATED (author, lab build):** with a crafted image and a
-  plain full-library build, the image-derived store writes chosen bytes
-  (zeros, then a `0xfe` bit byte) at chosen offsets into the adjacent live
-  `ext4_buf`, zeroing its `bc` pointer; the natural consumer then faults.
-  Earlier stand-in canary observation (`0xfe`/`0xfc` at `block+4097`) stands
-  as the smaller 4098-byte case. Conditions: one-entry bcache, ipg=65537,
-  debugger readback; no chosen-address pointer control. Witness replay of
-  this new evidence is owed before calling it ESTABLISHED.
+- **Rung 4 DEMONSTRATED (author, lab build; independently replayed as
+  labeled by W273):** with a crafted image and a plain full-library build,
+  the image-derived zero fill overwrites the adjacent live `ext4_buf` at
+  `data+4112`, zeroing its `bc` pointer; the natural consumer then faults.
+  The image-chosen `0xfe` bit byte sits at `data+8192`, ~4 KiB past that
+  object — it is not written into `ext4_buf`. Earlier stand-in canary
+  observation (`0xfe`/`0xfc` at `block+4097`) stands as the smaller
+  4098-byte case. Conditions: one-entry bcache, ipg=65537, debugger
+  readback; no chosen-address pointer control. W273 replay confirmed the
+  adjacency and bit-byte provenance under ASLR; no grade change.
 - **Not rung 5:** no live network target, no benign command side effect and
   no attacker-chosen address; debugger-forced inspection stays rung-4
   mechanics.
@@ -184,3 +194,20 @@ CVEs are staged; do not collapse the two into one claim.
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`
 were checked before provisioning (W205 lesson): no lwext4 brief, lab or window
 existed. No external host was probed; only NVD and public raw-source fetches.
+
+## Witness W273 (independent replay, 2026-11-26 14:42Z)
+
+From `git archive cbadc189` with all staged evidence deleted, the unmodified
+`replay-clean.sh` reproduced runner hashes `fd9e7d3e…`, `e32862ed…`,
+`80587918…`, `TOTAL: 31 PASS / 0 FAIL`, `REAL_PASS=17 REAL_FAIL=0`,
+`VICTIM_PASS=9 VICTIM_FAIL=0`, `REPLAY_RC=0`. Fresh ASan again reported
+`WRITE of size 4098` at 0 bytes past the 4096-byte region, frames
+`ext4_fs.c:404` ← `:611`; fresh gdb again showed non-null `bc`, delta 4112
+before the store and `bc = 0x0` after it, with `0xfe` at `data+8192`.
+Counterexample hunt: three ASLR-on runs kept the delta and the live/zeroed
+`bc`; an image with `ipg=65539` produced `0xf8` instead, showing the bit byte
+is image-derived; no command, wire or pointer-control call exists in the
+driver. Verdict ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`. The two NITs in
+that detail (the byte-offset wording above and `replay-clean.sh` DEST/hash
+reporting) were repaired after the verdict; neither changed the evidence.

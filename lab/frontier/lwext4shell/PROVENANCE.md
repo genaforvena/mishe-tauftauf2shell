@@ -76,7 +76,7 @@ so the byte past the logical object tracks the image-derived field.
 `bash run-witness.sh` rehashes all five pins and the driver, deletes `out/`,
 rebuilds and re-asserts every staged observation.
 
-## Grade
+## Initial harness grade (superseded by the real-mount lanes below)
 
 Rung 3 pinned verbatim function with ASan-confirmed heap OOB WRITE and
 vulnerable/fixed/safe controls. Rung 4 PARTIAL: image-chosen bit byte observed
@@ -167,10 +167,12 @@ the driver mode and assertions are in `real/mount_driver.c` and
 `run-victim.sh`.
 
 Grade: rung 4 DEMONSTRATED in the author's lab build under stated conditions
-(plain build, one-entry bcache, ipg=65537, gdb readback), not ESTABLISHED
-until independent replay (requested in tape 5605) and not rung 5: the
-written values are zeros and a chosen bit byte, never a chosen address, and
-no command runs. The 4098-byte `ipg=32777` case with ASan and fixed/safe
+(plain build, one-entry bcache, ipg=65537, gdb readback), replayed
+independently by W273 as labeled with no grade change, and not rung 5: the
+zero fill hits the live `ext4_buf` at `data+4112`; the chosen bit byte at
+`data+8192` is ~4 KiB past that object, not inside it. No chosen address,
+no command runs.
+The 4098-byte `ipg=32777` case with ASan and fixed/safe
 controls remains the separately replayed rung-3 real-mount evidence.
 
 ## One-command clean-archive replay (2026-11-26 14:37Z)
@@ -178,11 +180,13 @@ controls remains the separately replayed rung-3 real-mount evidence.
 The three runners assume a provisioned `real/lwext4-upstream` clone, which a
 clean `git archive` does not contain (it is gitignored). To remove that
 witness-replay friction, `bash replay-clean.sh [REF] [DEST]` archives `REF`
-(use `352f77e9` for the recorded state), provisions the two pinned detached
-worktrees by public `git clone`/`git worktree add --detach` (no target probe),
-deletes every staged evidence output and build directory, then runs
-`run-all.sh`, `run-real.sh` and `run-victim.sh` unmodified and prints the
-runner hashes, the fresh evidence hashes and `REPLAY_RC`.
+(use `352f77e9` for the recorded state) and resolves `DEST` to an absolute
+path before `cd`, so relative destinations work. It provisions the two pinned
+detached worktrees by public `git clone`/`git worktree add --detach` (no
+target probe), deletes every staged evidence output and build directory, then
+runs `run-all.sh`, `run-real.sh` and `run-victim.sh` unmodified and prints the
+runner hashes (from the archived scripts), the fresh evidence hashes and
+`REPLAY_RC`.
 
 Verified at 14:36Z from `git archive 352f77e9` into
 `/tmp/lwext4-witness-test2`: runner hashes `fd9e7d3e…`, `e32862ed…` and
@@ -192,5 +196,17 @@ reproduced the exact claims: `b.buf->bc = 0x7fffffffdc70` and
 `b.buf - b.data = 4112` before the store, `bc = 0x0` after it, `0xfe` at
 `b.data+8192` (addresses differ under ASLR, delta and values do not). Fresh
 ASan evidence reproduced `WRITE of size 4098`, `0 bytes after 4096-byte
-region`, frames `ext4_fs.c:404` ← `:611`. This is an author reproducibility
-check, not independent acceptance; the witness verdict remains owed.
+region`, frames `ext4_fs.c:404` ← `:611`. That was an author reproducibility
+check, not independent acceptance; the independent verdict arrived from W273
+below.
+
+## Witness W273 (independent clean-archive replay, 14:42Z)
+
+From `git archive cbadc189` with staged evidence deleted, W273 ran the
+unmodified helper with an absolute DEST: runner hashes matched the three
+above, `31 PASS/0 FAIL`, `REAL 17/0`, `VICTIM 9/0`, `REPLAY_RC=0`. Fresh
+ASan/gdb bytes matched; three ASLR-on repeats held delta 4112 and live `bc`
+before / zero after; `ipg=65539` yielded `0xf8`, proving the bit byte is
+image-derived. No command, wire or pointer-control call in the driver.
+Verdict: ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`.
