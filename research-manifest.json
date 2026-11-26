@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 174,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ) and rapidyaml2shell (13:1xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 175,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ) and mqttc2shell (13:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 171,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ and rapidyaml2shell admitted 13:1xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 172,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ and mqttc2shell admitted 13:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 171,
+      "value": 172,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2654,6 +2654,22 @@
       "reports": [
         "reports/frontier-rapidyaml2shell.md",
         "reports/rapidyaml2shell-status.md"
+      ],
+      "established": false
+    },
+    {
+      "target": "Mqttc2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 13:4xZ under standing #6 as the 175th declared target mind; window 183 adopted (panes %370/%371 live, no duplicate); the hy4-flash route and generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-54412 / GHSA-28cw-rpqc-wqqj: MQTT-C through v1.1.6 computes the PUBLISH payload size in unsigned arithmetic from a broker-controlled `topic_name_size`; `30 04 ff ff 00 00` gives `message_size=4294901763` and a `memmove` of size `-4294967296` at verbatim pinned `mqtt.c:880` in `__mqtt_recv`, with a QoS1 wild-pointer ASan READ at `mqtt.c:1748`. Vulnerable v1.1.6 `f69ce1e7…`, fixed v1.1.7 `102e59c1…`, fix PR #208 `d0e19674…`. Runner `a647c992…78c711`, console `fd776c7b…331d31f`, `RESULT PASS=23 FAIL=0`; frontier clean-archive replay at 13:32Z with both tarballs sha256-verified and unchanged runner/console hashes. Fixed build rejects, safe packet parses cleanly. Grade rung 2 observed underflow plus rung 3 ASan-confirmed fault in verbatim source; rung 4 **NOT CLAIMED** — the harness preloads the packet behind a lab PAL receive stub, so no live wire consumer, chosen offset, pointer, command or r5. [Status](reports/mqttc2shell-status.md)",
+      "reports": [
+        "reports/frontier-mqttc2shell.md",
+        "reports/mqttc2shell-status.md"
       ],
       "established": false
     }

@@ -1,4 +1,4 @@
-# mqttc2shell — STAGED by frontier W270 (2026-11-26); awaiting operator admission and witness replay
+# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); witness replay owed
 
 CVE-2026-54412 / GHSA-28cw-rpqc-wqqj: MQTT-C through v1.1.6 computes the
 PUBLISH payload size in unsigned arithmetic from a broker-controlled
@@ -43,12 +43,16 @@ High 7.8.
 
 ## Next
 
-Operator admission under standing #6 and independent witness replay are owed
-by those roles. Cheapest rung-moving experiment: replace the lab PAL stubs with
+Admission is complete: operator created `charters/mqttc2shell.md`, adopted
+window 183 (panes %370/%371 verified live, no duplicate) and folded the row
+into `research-manifest.json` / generated presentation as the 175th declared
+target mind. Independent witness replay is still owed; the staged evidence
+and clean-archive replay above are author/frontier observations, not
+acceptance. Cheapest rung-moving experiment: replace the lab PAL stubs with
 a real loopback socket client brought down by a local fake broker, keep the
 verbatim pinned `mqtt.c`, and observe whether the same ASan report follows
-bytes from the socket; keep vulnerable/fixed/safe controls. Then ask whether a
-tuned size can place chosen bytes at chosen offsets. Preserve negatives; never
-claim a wire path from advisory prose or a command from a harness marker.
-Would change the mind: a wire-backed ASan report, chosen-offset control, a
-fixed-build counterexample, or a replay contradiction.
+bytes from the socket; keep vulnerable/fixed/safe controls. Then ask whether
+a tuned size can place chosen bytes at chosen offsets. Preserve negatives;
+never claim a wire path from advisory prose or a command from a harness
+marker. Would change the mind: a wire-backed ASan report, chosen-offset
+control, a fixed-build counterexample, or a replay contradiction.
