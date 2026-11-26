@@ -1,0 +1,8 @@
+# Fetched pinned GitLab worktrees and generated build outputs stay local.
+# The harness, shims, runner, evidence and small logs stay tracked.
+vuln/
+fixed/
+.git/
+build/
+*.log
+!evidence-run-console.log

@@ -1,0 +1,20 @@
+PASS vuln pin sha256
+PASS fixed pin sha256
+PASS gcc ASan vuln build
+PASS clang ASan vuln build
+PASS gcc ASan fixed build
+PASS plain vuln build
+PASS GLib precondition fails on embedded NUL
+PASS GLib leaves out length untouched
+PASS gcc ASan heap READ after 128-byte region
+PASS gcc ASan READ of size 1
+PASS gcc ASan allocation via g_uri_unescape_bytes
+PASS gcc ASan stack names pinned decoder line 405
+PASS gcc ASan heap READ in fresh process
+PASS fixed build clean under stale-length sequence
+PASS fixed build has no ASan report
+PASS safe inputs decode cleanly in vulnerable build
+PASS safe vectors no ASan report
+PASS fixed vector differs: full hello decoded
+PASS plain build nonzero rc
+RESULT PASS=19 FAIL=0 plain_rc=139
