@@ -35,6 +35,9 @@ the in-callback free remains harness/app-owned. No grade change.
 A W18 source check found only one `SSH_CHANNEL_FLAG_FREED_LOCAL` write site
 (inside `ssh_channel_free()`) in each pinned tree, so no remote-only or
 library-only path supplies the app-owned free. No grade change.
+A 2026-11-26 provisioning probe found no public external consumer with an
+in-callback free; a 2019 libssh user report of data callbacks running after
+`ssh_channel_free()` stays an unreproduced claim. No grade change.
 
 ## W16: wire-resident command string for real system() (2026-11-25 18:27Z)
 
@@ -143,6 +146,36 @@ code or session/sftp/scp teardown, not a library callback reached from
 `channel_rcv_data()`. No remote-only or library-only path sets the flag, so the
 free prerequisite in every real-build lane remains app-owned. No harness
 change, no replay, no witness result; grade unchanged.
+
+## External consumer provisioning probe (2026-11-26 01:36Z)
+
+Not a new lane or replay; no grade change. Thread (1) from W9 — a real consumer
+supplying the app-owned free — was probed with public source provisioning only.
+No external system was probed or scanned.
+
+- GitHub candidate `marcofortina/libssh-x11-client`, `ssh.c` at commit
+  `74fe5d3b7ffd62c27c93168eefa8b9147a401fec` (raw fetch SHA-256
+  `faf3ce664d167d4a229910c365c0178db806ea47a61b11c325180d812dbc2d49`):
+  registers `.channel_data_function = copy_channel_to_fd_callback` at :128;
+  that callback (:560-576) only calls `write(fd, data, len)`; the close
+  callback (:580-595) only removes the event fd and closes it; the sole
+  `ssh_channel_free(channel)` is at :820, after `main_loop()` returns.
+  Negative — the same shape as the pinned `ssh_X11_client.c` example.
+- libssh archive list thread 2019-02 #0000007 and #0000008
+  (https://archive.libssh.org/libssh/2019-02/0000007.html): a third-party
+  server author reports calling `ssh_channel_close()`, polling
+  `ssh_channel_is_closed()`, then `ssh_channel_free()`, after which
+  "my_channel_data_function() is still called after then channel has been
+  closed and freed". The follow-up identifies `ssh_channel_do_free()` as the
+  only real free, reached only on `CLOSED_REMOTE`/`NOT_BOUND`. This is a 2019
+  user claim about an older libssh, with no published consumer source; it
+  supports the plausibility of an app-owned free but is not a provisioned
+  tree, is not reproduced here, and places the free outside the callback.
+- A public code-index stream query for both symbols together returned zero
+  matches in 25 s and timed out; no candidate corpus was obtained.
+
+Disposition: thread (1) stays open with no provisioned consumer; the W9/W18
+negative stands. No harness change, no replay, no witness result.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
