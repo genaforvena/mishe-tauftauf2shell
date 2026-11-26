@@ -1,0 +1,103 @@
+cmake_minimum_required(VERSION 3.10)
+
+set(CMAKE_CXX_STANDARD 26)
+include(FetchContent)
+
+project(Weave)
+
+if (APPLE)
+    enable_language(OBJC)
+    enable_language(OBJCXX)
+endif()
+
+FetchContent_Declare(swl-variant
+  GIT_REPOSITORY https://github.com/groundswellaudio/swl-variant.git
+  GIT_TAG "origin/main")
+FetchContent_MakeAvailable(swl-variant)
+
+FetchContent_Declare(SDL3
+  GIT_REPOSITORY https://github.com/libsdl-org/SDL.git
+  GIT_TAG release-3.2.26)
+FetchContent_MakeAvailable(SDL3)
+
+FetchContent_Declare(nanovg
+  GIT_REPOSITORY https://github.com/memononen/nanovg.git)
+FetchContent_MakeAvailable(nanovg)
+
+FetchContent_Declare(nfd 
+  GIT_REPOSITORY https://github.com/btzy/nativefiledialog-extended.git)
+FetchContent_MakeAvailable(nfd)
+
+FetchContent_Declare(miniaudio 
+ GIT_REPOSITORY https://github.com/mackron/miniaudio.git)
+FetchContent_MakeAvailable(miniaudio)
+
+FetchContent_Declare(dr_libs
+ GIT_REPOSITORY https://github.com/mackron/dr_libs.git)
+FetchContent_MakeAvailable(dr_libs)
+
+FetchContent_Declare(stb
+  GIT_REPOSITORY https://github.com/nothings/stb.git)
+FetchContent_MakeAvailable(stb)
+
+FetchContent_Declare(
+  cpm
+  URL https://github.com/cpm-cmake/CPM.cmake/releases/latest/download/CPM.cmake
+  DOWNLOAD_NO_EXTRACT TRUE)
+
+FetchContent_MakeAvailable(cpm)
+include(${cpm_SOURCE_DIR}/CPM.cmake)
+
+FetchContent_Declare(kumi-tuple
+  GIT_REPOSITORY https://github.com/jfalcou/kumi.git
+  GIT_TAG "origin/main")
+
+set(KUMI_BUILD_TEST OFF)
+FetchContent_MakeAvailable(kumi-tuple)
+
+include_directories(./deps/glad/include)
+include_directories(./)
+include_directories(${SDL3_SOURCE_DIR}/include)
+include_directories(${nanovg_SOURCE_DIR}/src)
+include_directories(${nfd_SOURCE_DIR}/include)
+include_directories(${miniaudio_SOURCE_DIR})
+include_directories(${dr_libs_SOURCE_DIR})
+include_directories(${stb_SOURCE_DIR})
+include_directories(${kumi-tuple_SOURCE_DIR}/include)
+
+if (CMAKE_SOURCE_DIR STREQUAL PROJECT_SOURCE_DIR)
+  add_executable(Weave main.cpp misc/mini_audio_impl.cpp graphics/graphics.cpp)
+else()
+  add_library(Weave STATIC misc/mini_audio_impl.cpp graphics/graphics.cpp)
+endif()
+
+target_include_directories(Weave PUBLIC 
+  ./deps/glad/include
+  ${SDL3_SOURCE_DIR}/include 
+  ${nanovg_SOURCE_DIR}/src
+  ${nfd_SOURCE_DIR}/include
+  ${miniaudio_SOURCE_DIR}
+  ${dr_libs_SOURCE_DIR}
+  ${stb_SOURCE_DIR}
+  ${swl-variant_SOURCE_DIR}/include
+  ${kumi-tuple_SOURCE_DIR}/include)
+
+target_sources(Weave PRIVATE ./deps/glad/src/glad.c)
+target_sources(Weave PRIVATE ${nanovg_SOURCE_DIR}/src/nanovg.c)
+
+if(APPLE)
+    find_library(FOUNDATION_LIBRARY Foundation)
+    find_library(COCOA_LIBRARY Cocoa)
+    
+    target_link_libraries(Weave PRIVATE
+        ${FOUNDATION_LIBRARY}
+        ${COCOA_LIBRARY}
+        "-lobjc"
+    )
+    target_link_options(Weave PRIVATE
+        "-Wl,-ld_classic"
+    )
+endif()
+
+target_link_libraries(Weave PRIVATE SDL3::SDL3)
+target_link_libraries(Weave PUBLIC nfd)

@@ -1,6 +1,6 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-26 00:13Z: rung 3 real consumer/public API; rung 4
+Status 2026-11-26 00:4xZ: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
 replayed the exact sphaira, Moondust and yup dependency headers. The
@@ -13,9 +13,14 @@ downloader at the call-graph level (local SDL_RWFromFile only). W14 re-read
 the Talos advisory and closed one new candidate, cortex.cpp (vendored 0.12.16
 header, zero drwav calls). W15 searched the locally provisioned source-tree
 corpus: EasyRPG vendors a 0.14.5-shaped header with the desync code but calls
-only `drwav_init_ex()` with `DRWAV_SEQUENTIAL`, never the metadata bit.
-No native network caller on vulnerable bytes was measured. W1-W4, W9, W10
-and W11 witness verdicts remain UNKNOWN.
+only `drwav_init_ex()` with `DRWAV_SEQUENTIAL`, never the metadata bit. W16
+searched GitHub's own code index: GNUbase is a native Linux DAW whose
+`ext/dr_libs` submodule `fa931f32...` (header SHA-256 `c69816d0...` =
+pinned vulnerable 0.14.5 byte-for-byte) and
+calls `drwav_init_with_metadata()` through an HTTP-MCP-reachable
+`audioFile.import` command; the request names a local path, not WAV bytes,
+and no build/request/corruption was observed. No wire-byte caller on
+vulnerable bytes was measured. W1-W4, W9, W10 and W11 verdicts remain UNKNOWN.
 
 ## Verified ground truth
 
@@ -509,3 +514,26 @@ origin. Provisioned SDL_mixer trees carry `dr_flac.h`/`dr_mp3.h` but no
 leaving the r5 prerequisite unmet; it is a bounded corpus negative, not proof
 of absence. No build, no run, no grade change. Raw evidence:
 `consumer/evidence/w15-local-deps-callers.txt`.
+
+## W16 — GitHub code index: GNUbase request-reachable metadata call (2026-11-26 00:3xZ)
+
+- Sixth corpus, GitHub `search/code` via authenticated `gh api`; non-header
+  counts 46/86/55 for the three metadata init spellings, 22 for
+  `DRWAV_WITH_METADATA`. Raw fetched sources in `consumer/evidence/w16-github/`.
+- GNUbase/GNUbase: `ext/dr_libs` submodule `fa931f32...` = byte-identical to
+  the pinned vulnerable `wav-0.14.5`. `src/engine/audiofile/reader.cpp:76-77`
+  runs `drwav_init_with_metadata()` on a FILE opened by `AudioFileReader::
+  open(path)` (`:327-348`); `src/engine/document/audiofilecommands.cpp:108-143,
+  191` registers `audioFile.import(files)` and calls `readInfo(path)`.
+  `src/mcp/server.cpp:82-85,222-231` exposes each engine command as an MCP
+  tool; `src/mcp/transport.cpp:71-108` serves `POST /mcp` on loopback with a
+  Bearer token (`:42-50`). A loopback request can invoke the vulnerable
+  parser by naming a local WAV path.
+- Preserved limit: the wire supplies a path, not the WAV bytes; no upload or
+  download endpoint writes attacker-chosen WAV content. No build, process,
+  HTTP request, ASan report, marker or side effect. The r5 wire-BYTE half is
+  unmet; grade unchanged (rung 3 / rung 4 lab marker), r5 UNKNOWN.
+- Other candidates negative: sleeping-dogs-custom-radio pins 0.14.6 and its
+  ICY HTTP path feeds PCM, QVoiceBridge uses non-metadata init, weave has a
+  local-path call with no network origin. Full chain and disposition:
+  `consumer/evidence/w16-github-callers.txt`.

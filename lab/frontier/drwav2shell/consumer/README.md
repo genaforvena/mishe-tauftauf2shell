@@ -215,3 +215,19 @@ identity claim). Its only call is `drwav_init_ex()` with `DRWAV_SEQUENTIAL`
 trees have no `dr_wav.h`. No real Linux metadata-API caller in this corpus;
 bounded negative, not proof of absence. No build or run. Exact lines, hashes
 and commands: `evidence/w15-local-deps-callers.txt`.
+
+## GitHub code-index corpus (W16, 2026-11-26 00:3xZ)
+
+GitHub's own `search/code` index (authenticated `gh api`) is a sixth corpus:
+46/86/55 non-header hits for the three metadata init spellings. The radio,
+QVoiceBridge and weave candidates are negatives (patched 0.14.6, non-metadata
+init, local path). GNUbase is the first real native Linux consumer found on a
+byte-identical vulnerable 0.14.5: its `ext/dr_libs` submodule is `fa931f32...`
+and the fetched header hashes to `c69816d0...`, exactly the pinned vulnerable
+file.
+`reader.cpp:76-77` calls `drwav_init_with_metadata()` and its `audioFile.import`
+command is exposed as a tool on a loopback, token-gated HTTP MCP server.
+The request names a local WAV path; it does not supply WAV bytes. No build,
+process, request or corruption was observed, so r5 stays UNKNOWN. Full chain
+and raw fetched sources: `evidence/w16-github-callers.txt` and
+`evidence/w16-github/`.

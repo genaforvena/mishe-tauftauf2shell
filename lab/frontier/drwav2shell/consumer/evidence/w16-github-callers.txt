@@ -1,0 +1,80 @@
+W16 — sixth corpus: GitHub's own code-search index (2026-11-26 00:2x-00:3xZ)
+==========================================================================
+Read-only provisioning via authenticated `gh api -X GET search/code`.
+Distinct from the Sourcegraph (W6/W9), Debian Code Search (W10), grep.app
+(W11), web/advisory (W14) and locally provisioned trees (W15) corpora.
+Raw fetched files for every claim below live in ./w16-github/.
+
+Reproduce the index queries (gh auth already configured):
+  gh api -X GET search/code -f q='drwav_init_with_metadata -filename:dr_wav.h -filename:dr_wav.c' --jq '.total_count, (.items[]?|.repository.full_name+"\t"+.path)'
+  gh api -X GET search/code -f q='drwav_init_file_with_metadata -filename:dr_wav.h -filename:dr_wav.c' ...
+  gh api -X GET search/code -f q='drwav_init_memory_with_metadata -filename:dr_wav.h -filename:dr_wav.c' ...
+  gh api -X GET search/code -f q='DRWAV_WITH_METADATA -filename:dr_wav.h' ...
+
+Counts (non-header, non-library-source files): 46 / 86 / 55 / 22.
+Raw header-only counts before exclusion: 776 / 800 / 784. Known names
+(sphaira forks, Moondust, yup, OpenRBX, GT3, Signet, roc/typesense-shaped
+non-metadata callers, ossia test) recur; index coverage is not proof of
+absence, and a hit is a claim to reproduce, not a consumer.
+
+New native candidates triaged
+-----------------------------
+1. aUsernameWoW/sleeping-dogs-custom-radio (Windows game radio mod, runs
+   under Wine/Proton). `core/decoder.cc:116` calls
+   `drwav_init_file_with_metadata_w(path.c_str(), 0, nullptr)`. NEGATIVE on
+   both axes: `.github/reference.env:17-21` pins DR_LIBS_REF=
+   a466dbe88fe2576d46c43877d602f3d66b8561a7; dr_wav.h fetched at that ref
+   reports 0.14.6 (sha256 34109aa9...cc05cc1c), the patched control. `core/
+   icy.cc:32,104-133` parses http(s) ICY playlists, but it yields stream URLs
+   for the live PCM ring (`core/live.cc`), not a path into the WAV decoder.
+   Byte identity verified locally: `dr_wav.h` fetched at that submodule SHA
+   (`w16-github/gnubase-dr_wav-header`) hashes to
+   `c69816d0e0ac6cab3df8bf2f42df451d4531c2bfa34f7d7a69e959e6ed399038`,
+   exactly `pins/pins.sha256` for `pins/vuln/dr_wav.h`.
+
+2. mola/QVoiceBridge (whisper voice bridge). `common.cpp:663,671,676,682`
+   uses only `drwav_init_memory()` / `drwav_init_file()`, never a metadata
+   init. Its vendored header is 0.13.16 and carries metadataCursor code, but
+   the metadata flag is never set; no metadata parse on any input. Confirms
+   the W5/W9/W10 flag-gate negative in a sixth corpus.
+
+3. groundswellaudio/weave: `misc/mini_audio_impl.cpp:43`
+   `drwav_init_file_with_metadata(&wav, path.c_str(), 0, nullptr)` on a local
+   path; `CMakeLists.txt:35-37` FetchContent dr_libs with no ref pin. No
+
+   network origin observed in-repo.
+
+4. GNUbase/GNUbase — STRONGEST LEAD, source-level only, NOT executed:
+   - `ext/dr_libs` git submodule SHA = fa931f3285ced10ace628f7f1ac951e1951e7ea6,
+     byte-identical to this lane's pinned vulnerable 0.14.5 commit.
+   - `src/engine/audiofile/reader.cpp:76-77` calls
+     `drwav_init_with_metadata(&m_wav, readFile, seekFile, tellFile,
+     m_file.get(), 0, nullptr)`; `:327-348` `AudioFileReader::open(path)`
+     opens that FILE with `detail::openFile(path, "rb")`.
+   - `src/engine/document/audiofilecommands.cpp:108-143` registers engine
+     command `audioFile.import(files, ...)`; `:41` `readInfo(path)` ->
+     `AudioFileReader::open(path)->info()`; `:191` iterates caller-supplied
+     `files` paths. This is a real, native Linux C++ application calling the
+     public metadata API on byte-identical vulnerable bytes.
+   - `src/mcp/server.cpp:82-85` maps every engine command to an MCP tool;
+     `:222-231` "Every tool runs one engine command", tools/list and
+     tools/call. `src/mcp/transport.cpp:71-108` serves POST /mcp over
+     cpp-httplib; `:42-50` requires loopback remote_addr and a Bearer token.
+     Therefore a token-bearing loopback HTTP request can invoke the vulnerable
+     parser by naming a local WAV path.
+
+   Limit, preserved: the request supplies a PATH, not the WAV bytes. No
+   download/upload endpoint writes attacker-chosen WAV content; no GNUBase
+   build, process, request, ASan report, marker or side effect was observed.
+   This narrows the long-standing "executable Linux network metadata caller
+   on vulnerable bytes" prerequisite to "request-triggered local-path parse
+   on byte-identical vulnerable bytes" but does NOT satisfy the wire-input
+   half of r5. Grade unchanged; r5 remains UNKNOWN. Execution is a genuine
+   next-wake action, not a claim.
+
+Disposition: keep GNUBase as the first real native consumer found on
+byte-identical vulnerable 0.14.5 with a request-reachable metadata call;
+revise the six-corpora negative to say only that no WIRE-BYTE caller was
+found. Revert nothing. No replay demand; W1-W4 verdicts remain owed.
+Post-write verification (00:44Z): GNUBase header byte identity confirmed as
+above; no build or run was attempted in W16.

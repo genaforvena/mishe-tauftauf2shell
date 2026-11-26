@@ -1,0 +1,61 @@
+[submodule "ext/SDL"]
+	path = ext/SDL
+	url = https://github.com/GNUbase/SDL.git
+	branch = gnubase
+[submodule "ext/RmlUi"]
+	path = ext/RmlUi
+	url = https://github.com/GNUbase/RmlUi.git
+	branch = gnubase
+[submodule "ext/Catch2"]
+	path = ext/Catch2
+	url = https://github.com/catchorg/Catch2.git
+[submodule "ext/json"]
+	path = ext/json
+	url = https://github.com/nlohmann/json.git
+	shallow = true
+[submodule "ext/dr_libs"]
+	path = ext/dr_libs
+	url = https://github.com/mackron/dr_libs.git
+[submodule "ext/stb"]
+	path = ext/stb
+	url = https://github.com/nothings/stb.git
+[submodule "ext/flac"]
+	path = ext/flac
+	url = https://github.com/xiph/flac.git
+	shallow = true
+[submodule "ext/r8brain"]
+	path = ext/r8brain
+	url = https://github.com/avaneev/r8brain-free-src.git
+[submodule "ext/pugixml"]
+	path = ext/pugixml
+	url = https://github.com/zeux/pugixml.git
+[submodule "ext/miniz"]
+	path = ext/miniz
+	url = https://github.com/richgel999/miniz.git
+[submodule "ext/cpp-httplib"]
+	path = ext/cpp-httplib
+	url = https://github.com/yhirose/cpp-httplib.git
+	shallow = true
+[submodule "ext/lua"]
+	path = ext/lua
+	url = https://github.com/lua/lua.git
+	shallow = true
+[submodule "ext/rubberband"]
+	path = ext/rubberband
+	url = https://github.com/breakfastquay/rubberband.git
+[submodule "ext/clap"]
+	path = ext/clap
+	url = https://github.com/free-audio/clap.git
+[submodule "ext/vst3sdk"]
+	path = ext/vst3sdk
+	url = https://github.com/GNUbase/vst3sdk.git
+	update = none
+[submodule "ext/freetype"]
+	path = ext/freetype
+	url = https://github.com/freetype/freetype.git
+[submodule "ext/asio"]
+	path = ext/asio
+	url = https://github.com/GNUbase/asio.git
+[submodule "ext/lunasvg"]
+	path = ext/lunasvg
+	url = https://github.com/sammycage/lunasvg.git

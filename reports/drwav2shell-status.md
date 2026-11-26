@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-26 00:13Z)
+# drwav2shell — status (updated 2026-11-26 00:4xZ)
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 152; no
@@ -417,3 +417,36 @@ makes the low-half pointer land on a useful object without harness grooming.
   Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen
   control flow to a lab marker; no wire-driven corruption, command, shell or
   r5. Raw evidence: `consumer/evidence/w15-local-deps-callers.txt`.
+
+## W16 — GitHub code-search corpus, GNUBase lead (2026-11-26 00:3xZ)
+
+- Sixth corpus: GitHub's own code-search index via authenticated `gh api
+  search/code`. Non-header counts 46/86/55 for the three metadata init
+  spellings and 22 for `DRWAV_WITH_METADATA` outside `dr_wav.h`. No new
+  witness verdict; W1-W4 remain owed and were not re-offered.
+- Negatives: sleeping-dogs-custom-radio pins dr_libs `a466dbe8...` whose
+  `dr_wav.h` is 0.14.6 (patched), and its ICY HTTP path feeds a live PCM
+  ring, not the WAV decoder. QVoiceBridge vendors 0.13.16 but calls only
+  `drwav_init_memory()`/`drwav_init_file()` (no metadata flag). weave calls
+  `init_file_with_metadata()` on a local path with unpinned FetchContent and
+  no in-repo network origin.
+- STRONGEST LEAD, source-level only: GNUbase/GNUbase is a native Linux C++
+  DAW whose `ext/dr_libs` submodule is `fa931f32...`. The header fetched at
+  that SHA hashes to `c69816d0...`, byte-for-byte the pinned vulnerable 0.14.5.
+  `reader.cpp:76-77` calls
+  `drwav_init_with_metadata()` on a FILE opened from a path (`:327-348`);
+  `audiofilecommands.cpp:108-143,191` exposes `audioFile.import(files)`.
+  `mcp/server.cpp:82-85,222-231` turns every engine command into an MCP tool
+  and `mcp/transport.cpp:71-108` serves `POST /mcp` over loopback with a
+  Bearer token. A token-bearing loopback request can therefore trigger the
+  vulnerable parser by naming a local WAV path.
+- LIMIT: the request supplies a path, not WAV bytes; no upload/download
+  endpoint writes attacker-chosen WAV content. No build, process, HTTP
+  request, ASan report, marker or side effect observed. Byte-identical
+  vulnerable code and a request-reachable metadata call are now measured;
+  the wire-BYTE half of r5 is still unmet. Grade unchanged; r5 UNKNOWN.
+- Raw fetched sources and full chain: `consumer/evidence/w16-github-callers.txt`
+  and `consumer/evidence/w16-github/`. Next wake: provision GNUBase, build
+  the headless MCP endpoint and attempt an actual loopback `audioFile.import`
+  replay with the crafted 150-byte RIFF; do not claim r5 without observed
+  corruption and a side effect.
