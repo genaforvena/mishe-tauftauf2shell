@@ -126,3 +126,41 @@ adopted; the failed layout is not erased.
 Ceiling: this is a real allocator + real zlib + verbatim function result,
 still **not** a real GIMP plugin build, not a JIF PDB/file-load wire path,
 not a dereference of the chosen pointer and not rung 5.
+
+## W243 on-disk JIF file lane (2026-11-26)
+
+Source-bound reachability check against the pinned full file: the 16-bit
+frame descriptor at `file-gif-load-vulnerable.c:1366-1375` supplies
+`len`/`height`. The staged `len = 2`, `height = 1073741889` is not directly
+encodable, but `45771 * 46918 = 0x80000082` (both <= 65535) produces the
+same wrapped product and alpha-doubled `data_size = 260`. W243 uses
+`33025 * 65026 = 0x80000002`, alpha-doubled `data_size = 4`. The real
+plugin's `dest` allocation is `(gsize)len * (gsize)height * 2` (~4 GiB for
+either); the synthetic driver does not allocate it, so that consumer is
+UNKNOWN.
+
+`realglib/make-jif.py` writes a complete on-disk JIF99a file (magic, screen
+descriptor, graphics-control extension with transparent index, image
+descriptor, code-size byte, chunked zlib, trailer).
+`realglib/real-driver.c` parses it with real `fread()` through the pinned
+function's `ReadOK` and calls the verbatim pin. SHA-256:
+`real-driver.c` `75928b110690def8607c58bfcab4174d13c82aa10294cb12cfeab8be0df4f9cd`,
+`make-jif.py` `5cc53ae6c59d4887dd5cfd3b4ade29fe7dee7b6cb83639c4c91b2e8dedbaae9b`,
+`run-real.sh` `36b033c639fbf650243687e0c1900b6b17c784c902e9d63b056d1190274b5879`,
+`evidence/attack.jif` `7d84ec054520fdbc557250a5a96e3e646837980fdf94810b31efb41eadd4ebc4`,
+`evidence/ptr.jif` `27662b0087c9807afb49c4c53132a9fa918cbf241c62be8e66e5e8b2941a892e`,
+`evidence/safe.jif` `6dd6a44ff398388f46a44c756fb2277ebbba235d4c0e96dd064518275db9d191`.
+
+`bash run-real.sh`: 21 PASS / 0 FAIL. Fresh file-mode logs:
+`evidence/file-attack.log` (`FILE_FIELDS ... product=0x80000002 data_size=4`,
+`delta=32`, `RC=1`, eight chosen `0x4d` bytes in the live struct),
+`evidence/file-ptr.log` (`PTR_MATCH=1`, chosen
+`0x00007f0000414243`, never dereferenced), `evidence/file-safe.log`
+(live object unchanged), `evidence/file-fixed.log` (`RC=0 ERR=image data`,
+live object unchanged). Preserved negative: the first generator omitted
+the LZW code-size byte, so `bpp=12` and the pin rejected the file; the byte
+was restored before the final 21/0 run.
+
+Ceiling: on-disk bytes reaching the verbatim function through a real
+`FILE*`, still no GIMP plugin, no PDB call, no pointer dereference, no
+command and no rung 5.
