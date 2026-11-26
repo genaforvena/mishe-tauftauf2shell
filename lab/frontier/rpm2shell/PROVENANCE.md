@@ -660,17 +660,24 @@ built binaries used by the other grade runners. No external network is
 contacted; curl is invoked only by rpm's `%_urlhelper` macro and `NO_PROXY=*`
 is set for the child.
 
-First in-tree run: `WIRE_CONSUMER_PASS=12 WIRE_CONSUMER_FAIL=0`. The
+Final in-tree run: `WIRE_CONSUMER_PASS=11 WIRE_CONSUMER_FAIL=0`. The
 vulnerable ASan `rpm -i` aborts (rc 134) on `WRITE of size 64` in
 `iterReadArchiveNext` at `rpmfi.cc:2242` reached through
 `rpmcpioRead` (`lib/cpio.cc:444`), exactly as in the file-based consumer;
-the fixed ASan binary returns rc 1 with no ASan report; the safe fixture on
-the vulnerable ASan binary returns rc 1 clean; the plain vulnerable binary
-returns rc 139 on the attack fixture and rc 1 on the zero and short-read
-fixtures. A URL to a bound-then-released closed port returns rc 1 clean,
-so the fault follows the fetched bytes rather than the URL argument. The
-server log records `GET ... 200` for all four fixtures. The served fixture
-hashes match `install/*.rpm` recorded in `real/wire/fixtures.sha256`.
+the fixed ASan binary returns rc 1 with no ASan report. The safe fixture's
+rc is accepted as 0 or 1 (author layout 1, clean-archive layout 0) and
+must be ASan-clean: that exit code is an incidental install outcome, not a
+security assertion. The plain vulnerable attack rc is recorded as an
+observation (139 in author runs, 1 in one clean-archive run) because this
+plant's plain install fault is layout-sensitive; the zero and short-read
+fixtures rc 1 are asserted. A URL to a bound-then-released closed port
+returns rc 1 clean, so the fault follows the fetched bytes rather than the
+URL argument. The server log records `GET ... 200` for all four fixtures.
+The served fixture hashes match `install/*.rpm` in `real/wire/fixtures.sha256`.
+Preserved harness negative: two intermediate replays returned 11/1 and 9/2
+because an edit dropped the per-case `fresh()` rpmdb reset, so the database
+accumulated installs ("already installed"); with `fresh()` restored both
+layouts returned 11/0. This was a runner bug, not an rpm result.
 
 This adds a real wire input path for the same corruption, but no chosen
 pointer, benign command or ASLR-stable target; it does not change the grade
@@ -678,14 +685,25 @@ and is not r5.
 
 | artifact | sha256 |
 | --- | --- |
-| `real/run-wire-consumer.sh` | `e6ffe2adf9ad49311789966593fae3547bd9753a25d0804f8b32c61fafe164db` |
+| `real/run-wire-consumer.sh` | `3f2d441596da17b671f0cd77b66faf856900b95f31573c51506d1ee9c565af2a` |
 | `real/wire/http_server.py` | `a3b89c3bc9d7f22b29d038823993aa206eba62f2ab1aeb7a4f0a0990e6b2d998` |
-| `real/wire/asan-vuln-attack.log` | `b30746f71a2d6140af6185f50f5bada116d33e76e30819072d8f25a0ac8fba46` |
+| `real/wire/asan-vuln-attack.log` | `9d7df9225478bb11470c75f5b3138b1f9df66f14913e9a0491b04524a28dd377` |
 | `real/wire/server.log` | `d41dc44736acb14b8599c79be93456dcb38ccdfac0382f01ea82251287222693` |
 | `real/wire/fixtures.sha256` | `fd1175661bbcdf83a829b2af77158b06935b4bc115b8e018a3ce31b0940a9942` |
 | `real/wire/asan-fixed-attack.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
 | `real/wire/asan-vuln-safe.log` | `9e9557932d7b5ef764dc06be81bb703a88ba1d0da0d3c921ce75e7b711b5bed1` |
-| `real/wire/closed-port-attack.log` | `b1fefd83646c685fa636387cd45206eb7dc5030dd13fa5b2175ca050dfb23412` |
+| `real/wire/closed-port-attack.log` | `ab0dbc8337acee0f8a6090279882c7685004ab645a96dd39738c559f65cfd119` |
 
-First measurement is in-tree only; the build trees are untracked. A
-clean-archive replay result is appended below if one is measured.
+Clean-archive replay (23:03–23:07Z): from commit `e52dfe5e`, the output of
+`git archive HEAD lab/frontier/rpm2shell` was extracted into `/tmp/r2s-wire-witness.*`;
+pinned upstream sources and dev headers were symlinked as provisioning, and
+`run-real-witness.sh` rebuilt all three binaries from source (its own four
+runners returned RC=1 from the previously recorded layout-dependent
+failures; only the freshly built binaries were reused here). The final
+wire runner against those binaries returned
+`WIRE_CONSUMER_PASS=11 WIRE_CONSUMER_FAIL=0` with the same ASan WRITE at
+`rpmfi.cc:2242` and the same GET 200 log; the plain attack rc was observed
+at 1 in one pass and 139 in the final pass, consistent with the recorded
+layout sensitivity. Log: `real/wire/clean-archive-replay.log`, sha256
+`e60d7bf11f057d02f49e11c7922dd80734c54c8d8b76fee52943244347ce7be7`.
+This is an author replay of a clean archive, not an independent verdict.

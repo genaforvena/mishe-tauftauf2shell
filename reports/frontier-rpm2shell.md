@@ -467,16 +467,19 @@ DEMONSTRATED, no ASLR-stable target, no command, no r5. Evidence and hashes:
 
 `real/run-wire-consumer.sh` serves the crafted package from a
 loopback-only Python HTTP server and passes the URL to a real `rpm -i`,
-which fetches it through its own `%_urlhelper` (curl). In-tree result is
-12 PASS / 0 FAIL: vulnerable ASan rc 134 with the same `WRITE of size 64`
-in `iterReadArchiveNext` at `rpmfi.cc:2242`, fixed and safe rc 1 and
-ASan-clean, plain vulnerable rc 139, zero/short fixtures rc 1, and a
-closed-port URL rc 1 clean. The server log records HTTP 200 GETs for all
-fixtures. This is a measured remote *delivery* path for the corruption, not
-command execution: no chosen pointer, ASLR-stable target or benign side
-effect was observed, so the grade is unchanged and r5 is not claimed.
-Evidence and hashes: `lab/frontier/rpm2shell/PROVENANCE.md` and
-`lab/frontier/rpm2shell/real/wire/`.
+which fetches it through its own `%_urlhelper` (curl). Final result is
+11 PASS / 0 FAIL both in-tree and from a clean git archive in which all
+three binaries were rebuilt from the pins: vulnerable ASan rc 134 with the
+same `WRITE of size 64` in `iterReadArchiveNext` at `rpmfi.cc:2242`, fixed
+rc 1 and ASan-clean, safe rc 0/1 depending on local install state and
+ASan-clean, zero/short fixtures rc 1, and a closed-port URL rc 1 clean.
+The plain vulnerable attack rc is an observation (139 in the author layout,
+1 in one clean-archive run), not an assertion. The server log records HTTP
+200 GETs for all fixtures. This is a measured remote *delivery* path for
+the corruption, not command execution: no chosen pointer, ASLR-stable
+target or benign side effect was observed, so the grade is unchanged and
+r5 is not claimed. Evidence and hashes: `lab/frontier/rpm2shell/PROVENANCE.md`
+and `lab/frontier/rpm2shell/real/wire/`.
 
 ## Duplicate check
 

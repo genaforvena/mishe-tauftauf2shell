@@ -1,0 +1,16 @@
+SERVER http://127.0.0.1:42891/ pid=3264526
+real/run-wire-consumer.sh: line 77: 3264686 Aborted                 (core dumped) env "${envargs[@]}" "$bin" --dbpath "$work/db" -i --nodeps --noscripts --nodigest --nosignature --nofiledigest --ignoresize "$url" > "$work/$name.log" 2>&1
+PASS asan-vuln-attack rc=134
+PASS asan-fixed-attack rc=1
+PASS asan-vuln-safe rc=0
+real/run-wire-consumer.sh: line 77: 3265028 Segmentation fault      (core dumped) env "${envargs[@]}" "$bin" --dbpath "$work/db" -i --nodeps --noscripts --nodigest --nosignature --nofiledigest --ignoresize "$url" > "$work/$name.log" 2>&1
+OBSERVE plain-vuln-attack rc=139 (layout-dependent, not asserted)
+PASS plain-vuln-zero rc=1
+PASS plain-vuln-short rc=1
+PASS closed-port-attack rc=1
+PASS wire asan-vuln-attack: WRITE size 64 in iterReadArchiveNext at rpmfi.cc:2242
+PASS wire asan-fixed-attack ASan-clean
+PASS wire asan-vuln-safe ASan-clean
+PASS closed-port-attack ASan-clean (no bytes fetched)
+PASS server log records GET for all four fixtures
+WIRE_CONSUMER_PASS=11 WIRE_CONSUMER_FAIL=0

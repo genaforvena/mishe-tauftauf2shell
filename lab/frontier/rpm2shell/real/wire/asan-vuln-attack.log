@@ -1,49 +1,49 @@
 =================================================================
-==3092314==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000002231 at pc 0x7cc0a7cfb303 bp 0x7ffdae400e60 sp 0x7ffdae400608
+==3263860==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000002231 at pc 0x7d94692fb303 bp 0x7ffe1ebb4980 sp 0x7ffe1ebb4128
 WRITE of size 64 at 0x502000002231 thread T0
-    #0 0x7cc0a7cfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
-    #1 0x7cc0a82fb49c  (/lib/x86_64-linux-gnu/libz.so.1+0x1249c) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
-    #2 0x7cc0a82fb5e7 in gzread (/lib/x86_64-linux-gnu/libz.so.1+0x125e7) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
-    #3 0x7cc0a7b73c83 in gzdRead /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:582
-    #4 0x7cc0a7b77ed5 in Fread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:1337
-    #5 0x7cc0a78e32a0 in rpmcpioRead(rpmcpio_s*, void*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc:444
-    #6 0x7cc0a7967177 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2242
-    #7 0x7cc0a795bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
-    #8 0x7cc0a791ab06 in rpmPackageFilesInstall(rpmts_s*, rpmte_s*, rpmfiles_s*, rpmpsm_s*, char**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/fsm.cc:940
-    #9 0x7cc0a792646f in rpmpsmUnpack /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:787
-    #10 0x7cc0a7926c97 in rpmPackageInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:874
-    #11 0x7cc0a7927f06 in runGoal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1080
-    #12 0x7cc0a79281f3 in rpmpsmRun(rpmts_s*, rpmte_s*, pkgGoal_e) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1127
-    #13 0x7cc0a79aeb4e in rpmteProcess(rpmte_s*, pkgGoal_e, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmte.cc:834
-    #14 0x7cc0a79ce3f4 in rpmtsProcess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1652
-    #15 0x7cc0a79cf257 in rpmtsRun /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1881
-    #16 0x7cc0a79743a9 in rpmcliTransaction /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:287
-    #17 0x7cc0a7976b19 in rpmInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:589
-    #18 0x64c94b569b3b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:269
-    #19 0x7cc0a702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #20 0x7cc0a702a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #21 0x64c94b568724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm+0x3724) (BuildId: d9eb8f5e0d411e79071707b964a6089062a59235)
+    #0 0x7d94692fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7d94698eb49c  (/lib/x86_64-linux-gnu/libz.so.1+0x1249c) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
+    #2 0x7d94698eb5e7 in gzread (/lib/x86_64-linux-gnu/libz.so.1+0x125e7) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
+    #3 0x7d9469173c83 in gzdRead /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:582
+    #4 0x7d9469177ed5 in Fread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:1337
+    #5 0x7d9468ee32a0 in rpmcpioRead(rpmcpio_s*, void*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc:444
+    #6 0x7d9468f67177 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2242
+    #7 0x7d9468f5bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
+    #8 0x7d9468f1ab06 in rpmPackageFilesInstall(rpmts_s*, rpmte_s*, rpmfiles_s*, rpmpsm_s*, char**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/fsm.cc:940
+    #9 0x7d9468f2646f in rpmpsmUnpack /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:787
+    #10 0x7d9468f26c97 in rpmPackageInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:874
+    #11 0x7d9468f27f06 in runGoal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1080
+    #12 0x7d9468f281f3 in rpmpsmRun(rpmts_s*, rpmte_s*, pkgGoal_e) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1127
+    #13 0x7d9468faeb4e in rpmteProcess(rpmte_s*, pkgGoal_e, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmte.cc:834
+    #14 0x7d9468fce3f4 in rpmtsProcess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1652
+    #15 0x7d9468fcf257 in rpmtsRun /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1881
+    #16 0x7d9468f743a9 in rpmcliTransaction /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:287
+    #17 0x7d9468f76b19 in rpmInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:589
+    #18 0x5dc1a6143b3b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:269
+    #19 0x7d946862a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x7d946862a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x5dc1a6142724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm+0x3724) (BuildId: d9eb8f5e0d411e79071707b964a6089062a59235)
 
 0x502000002231 is located 0 bytes after 1-byte region [0x502000002230,0x502000002231)
 allocated by thread T0 here:
-    #0 0x7cc0a7cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x7cc0a7b88e34 in rmalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmmalloc.cc:45
-    #2 0x7cc0a7967124 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2241
-    #3 0x7cc0a795bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
-    #4 0x7cc0a791ab06 in rpmPackageFilesInstall(rpmts_s*, rpmte_s*, rpmfiles_s*, rpmpsm_s*, char**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/fsm.cc:940
-    #5 0x7cc0a792646f in rpmpsmUnpack /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:787
-    #6 0x7cc0a7926c97 in rpmPackageInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:874
-    #7 0x7cc0a7927f06 in runGoal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1080
-    #8 0x7cc0a79281f3 in rpmpsmRun(rpmts_s*, rpmte_s*, pkgGoal_e) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1127
-    #9 0x7cc0a79aeb4e in rpmteProcess(rpmte_s*, pkgGoal_e, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmte.cc:834
-    #10 0x7cc0a79ce3f4 in rpmtsProcess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1652
-    #11 0x7cc0a79cf257 in rpmtsRun /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1881
-    #12 0x7cc0a79743a9 in rpmcliTransaction /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:287
-    #13 0x7cc0a7976b19 in rpmInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:589
-    #14 0x64c94b569b3b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:269
-    #15 0x7cc0a702a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #16 0x7cc0a702a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #17 0x64c94b568724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm+0x3724) (BuildId: d9eb8f5e0d411e79071707b964a6089062a59235)
+    #0 0x7d94692fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x7d9469188e34 in rmalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmmalloc.cc:45
+    #2 0x7d9468f67124 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2241
+    #3 0x7d9468f5bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
+    #4 0x7d9468f1ab06 in rpmPackageFilesInstall(rpmts_s*, rpmte_s*, rpmfiles_s*, rpmpsm_s*, char**) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/fsm.cc:940
+    #5 0x7d9468f2646f in rpmpsmUnpack /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:787
+    #6 0x7d9468f26c97 in rpmPackageInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:874
+    #7 0x7d9468f27f06 in runGoal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1080
+    #8 0x7d9468f281f3 in rpmpsmRun(rpmts_s*, rpmte_s*, pkgGoal_e) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/psm.cc:1127
+    #9 0x7d9468faeb4e in rpmteProcess(rpmte_s*, pkgGoal_e, int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmte.cc:834
+    #10 0x7d9468fce3f4 in rpmtsProcess /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1652
+    #11 0x7d9468fcf257 in rpmtsRun /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/transaction.cc:1881
+    #12 0x7d9468f743a9 in rpmcliTransaction /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:287
+    #13 0x7d9468f76b19 in rpmInstall /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpminstall.cc:589
+    #14 0x5dc1a6143b3b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:269
+    #15 0x7d946862a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x7d946862a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x5dc1a6142724 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm+0x3724) (BuildId: d9eb8f5e0d411e79071707b964a6089062a59235)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
 Shadow bytes around the buggy address:
@@ -77,4 +77,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3092314==ABORTING
+==3263860==ABORTING
