@@ -72,3 +72,27 @@ and the HTTP-403 searches left UNKNOWN:
 No vendor fixed control exists; the lab's +1-byte control remains synthetic.
 Grade unchanged: rung 3 verbatim / rung 4 PARTIAL fixed NUL. Lane 3 (real
 network-boundary caller) remains UNKNOWN.
+
+## Update 2026-11-26 ~16:25Z — lane 3 bounded result; vendor changelog contradicts bytes
+
+The vendor's `v1.2.0/CHANGELOG.md` (quoted by FreeBSD vuxml commit
+`00464e86f937`) claims `tar: Fix off-by-1 heap overflow in tar_get_name`,
+but the full `v1.1.0...v1.2.0` diff changes only an unrelated PAX `max_size`
+line in `tar/parse-tar.c`; v1.2.0, v1.2.1 and master head keep
+`malloc(256 + 1)` and the overflowing `strcat`. The fixed control remains
+synthetic. This strengthens the lane-2 negative result.
+
+Lane 3: `gmelchett/jomics` is a real HTTP comic server using `go-unarr`
+(`NewArchive` + `List`), but `listComics` only admits local `.cbz`/`.cbr`
+files and no handler uploads archive bytes, so its listeners never reach the
+USTAR tar sink. GitHub code search returns HTTP 401 unauthenticated; no real
+network-boundary caller was identified, so that remains UNKNOWN, not a
+negative. `bash lab/frontier/unarr2shell/rung4/wire/run-wire-probe.sh` →
+**8 PASS / 0 FAIL**: 1536 crafted bytes over a 127.0.0.1 TCP body reach
+`ar_open_memory` → `ar_open_tar_archive` → `ar_parse_entry` →
+`ar_entry_get_name` and produce GCC ASan `WRITE of size 101` in
+`tar_get_name`; safe inputs and the synthetic fixed build are clean. This is
+a synthetic consumer and rung-4 wire mechanics only — no real caller, no
+command, no pointer, no r5. Grade unchanged: rung 3 verbatim / rung 4 PARTIAL
+fixed NUL. Evidence: `lab/frontier/unarr2shell/rung4/caller-search.md`,
+`rung4/wire/wire-evidence.md`, `rung4/wire/evidence/`.

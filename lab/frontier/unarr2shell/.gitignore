@@ -4,3 +4,5 @@ src-locally-fixed/
 evidence-replay/
 rung4/*.so
 rung4/*.out
+rung4/wire/build/
+rung4/wire/evidence/

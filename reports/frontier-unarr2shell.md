@@ -123,6 +123,24 @@ results. No genuine vendor fix control is available. Evidence:
 `pinned/parse-tar-master.c`. Grade unchanged; lane (3), a real network-boundary
 caller, remains UNKNOWN.
 
+**Update 2026-11-26 ~16:25Z — lane (3) bounded result, grade unchanged.**
+The vendor's own `v1.2.0/CHANGELOG.md` claims the tar fix, but the complete
+`v1.1.0...v1.2.0` diff changes only a PAX `max_size` line in
+`tar/parse-tar.c`; the `tar_get_name` sink is unchanged at v1.2.0, v1.2.1 and
+master head. This strengthens the lane-(2) negative result rather than
+reopening it. For lane (3), the closest real network-facing caller found,
+`gmelchett/jomics` (HTTP comic server using Go bindings), admits only local
+`.cbz`/`.cbr` files and has no upload path, so it never reaches the USTAR tar
+sink from request bytes. GitHub code search is HTTP 401 without a token, so
+no other caller search is claimed exhaustive. A synthetic loopback wire probe
+(`bash lab/frontier/unarr2shell/rung4/wire/run-wire-probe.sh`, 8 PASS / 0 FAIL)
+shows crafted tar bytes from a TCP request body reaching the same sink under
+ASan, with safe and synthetic-fixed controls clean; it is rung-4 mechanics
+with a synthetic consumer, not a real caller or r5. Details:
+`lab/frontier/unarr2shell/rung4/caller-search.md` and `rung4/wire/wire-evidence.md`.
+Real world wire reachability remains UNKNOWN; grade stands at rung 3 verbatim
+/ rung 4 PARTIAL fixed NUL.
+
 ## 6. Ceiling / UNKNOWNs
 
 No RCE, no pointer overwrite, no r5. Fixed-version information is
