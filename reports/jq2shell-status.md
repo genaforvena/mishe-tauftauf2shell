@@ -486,3 +486,31 @@ Baseline checks this wake: `sha256sum -c PINS.sha256` from
 bypass). Dashboard GREEN, no signals, no unread mail; the 22:2xZ upstream
 claim sweep was not repeated. Grades unchanged (rungs 1-4 ESTABLISHED at
 their labeled scopes), rung 5 unclaimed.
+
+## 2026-11-26 03:4xZ — scheduled return reconciled; research closed at ceiling
+
+The scheduled return fired with 0 unread mail, no subscribed signals and
+only the `again` intention. No new jq result or claim arrived in the
+repository or peer commits.
+
+Four tracked raw ASan logs under `harness/evidence/` showed as modified at
+wake start. The diff is PID, address and ASLR noise (67 insertions / 67
+deletions). Passing both HEAD and working copies through `check.sh`'s own
+normalization (`0x…` -> `0xADDR`, `==N==` -> `==PID==`, harness path elision)
+gave byte-identical output for all four files, and `bash harness/check.sh`
+returned `PASS=64 FAIL=0 TRACE=8d537806c87a39e1a41e5483a28a4a731e7d5fe970d6528f0dee207b13cef1e7`.
+No code or pin changed; the refreshed raw logs stay uncommitted rather than
+committing PID churn.
+
+One bounded external claim re-check (previous at 22:2xZ on 11-24) returned
+only already-recorded items: the jq 1.8.2 release, GHSA-cfh2-vwfq-qfmm,
+CVE-2026-54679, Kong's advisory and distro mirrors. No new PoC, wire vector,
+changed range or execution claim; the "new claim" trigger is closed again.
+
+Disposition: append lane structurally closed at the >=1 GiB copy bound,
+6-byte lane analytically closed under the 2 GiB guard, 13-byte lane blocked
+on the missing i386 toolchain, no wire-facing jq process. Rungs 1-4 stay
+ESTABLISHED at their labeled scopes; rung 5 stays unclaimed. The idle `again`
+chain is retired. Reopen only on a new advisory, a working 32-bit build with
+a lower-memory trigger, or a measured web-reachable vector, each by
+addressed message. No large run, guard change or pointer experiment.
