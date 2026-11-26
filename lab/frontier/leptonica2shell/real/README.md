@@ -20,6 +20,10 @@ copies in `../pins/` exactly:
 
 ## Build
 
+One-command clean-archive replay: `bash provision.sh` clones both pinned
+trees, builds them with ASan and runs `run-real.sh`. The manual equivalent is
+below.
+
 ```
 for pair in 'src build-vuln' 'src-fixed build-fixed'; do set -- $pair
   cmake -S "$1" -B "$2" -DCMAKE_BUILD_TYPE=Debug -DBUILD_PROG=OFF \
