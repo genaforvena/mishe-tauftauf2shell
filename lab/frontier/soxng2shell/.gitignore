@@ -1,0 +1,10 @@
+src/*.tar.gz
+src/vuln/
+src/fixed/
+src/*.log
+src/build_sox.sh
+build/
+out/
+*.wav
+vuln-*.log
+fixed-*.log

@@ -1,0 +1,60 @@
+=================================================================
+==669049==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x52d000008400 at pc 0x0000005d0233 bp 0x7ffe910e80d0 sp 0x7ffe910e80c0
+WRITE of size 4 at 0x52d000008400 thread T0
+    #0 0x5d0232 in read_samples_voc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/voc.c:415
+    #1 0x52c9bd in sox_read /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/formats.c:1414
+    #2 0x51c832 in sox_read_wide /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:520
+    #3 0x5221ac in combiner_drain /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:582
+    #4 0x540343 in drain_effect /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/effects.c:352
+    #5 0x540343 in sox_flow_effects /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/effects.c:444
+    #6 0x5298a0 in process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:1921
+    #7 0x5298a0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:3330
+    #8 0x7718f2a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7718f2a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x409334 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng+0x409334) (BuildId: 906c20cfcaecc463781a948a613691cd2a9caa06)
+
+0x52d000008400 is located 0 bytes after 32768-byte region [0x52d000000400,0x52d000008400)
+allocated by thread T0 here:
+    #0 0x4c01e0 in __interceptor_realloc.part.0 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng+0x4c01e0) (BuildId: 906c20cfcaecc463781a948a613691cd2a9caa06)
+    #1 0x537bd2 in lsx_realloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/xmalloc.c:46
+    #2 0x537c4a in lsx_realloc_array /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/xmalloc.c:66
+    #3 0x53e4d4 in sox_flow_effects /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/effects.c:412
+    #4 0x5298a0 in process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:1921
+    #5 0x5298a0 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng.c:3330
+    #6 0x7718f2a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7718f2a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x409334 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/sox_ng+0x409334) (BuildId: 906c20cfcaecc463781a948a613691cd2a9caa06)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/soxng2shell/build/vuln/src/voc.c:415 in read_samples_voc
+Shadow bytes around the buggy address:
+  0x52d000008180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x52d000008380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x52d000008400:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x52d000008680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==669049==ABORTING
