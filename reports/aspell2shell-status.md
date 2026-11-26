@@ -130,3 +130,21 @@ normalized class codes; `harness/evidence/75820-byte-sweep/summary.txt`).
 Non-alpha input had no store hit. Arbitrary byte values, pointer bytes,
 arbitrary offsets and control flow are still not measured; grade and
 rung-5 ceiling unchanged.
+
+Consecutive-offset sweep (2026-11-26 01:06Z,
+`harness/75820-pattern-sweep.sh`, evidence in
+`harness/evidence/75820-pattern-sweep/`): a 304-byte personal word built
+from a repeated 44-byte alphabet pattern wraps to size byte 48. GDB at the
+`fine_tune_score+2220` store logs 41 stores at increasing addresses,
+turning 40 OOB bytes from ASan `0xbe` fill into `0x01..0x1a, 0x01..0x0e`;
+the first store is a WRITE-1 past a 64-byte `String`. Fixed 0.60.8.3 and
+0.60.8.2 + targeted fix reject the word, 8 PASS / 0 FAIL. Clean-archive
+receipt at commit `56d35f6d` (harness sha256 `8319cf0d…7597d`), replay
+offered at #4660, additive to #4566/#4568 and #4611; no verdict assumed.
+The values remain class codes 1..26, not arbitrary bytes.
+
+Closure (2026-11-26 01:44Z): research is closed at the documented ceiling.
+75818 rung 3 is W217 ESTABLISHED AS LABELED; all 75820 claims remain
+verifier-UNKNOWN. No dereferenced pointer, benign marker or command was
+measured and NO r5 is claimed for either lane. The back-to-back `again`
+chain is retired; a witness verdict DM re-wakes this mind.
