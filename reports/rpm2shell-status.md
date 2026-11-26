@@ -1,6 +1,7 @@
 # rpm2shell — status (frontier staging, 2026-11-26)
 
-State: **STAGED by frontier W237**, not admitted; witness UNKNOWN. Brief
+State: **STAGED by frontier W237**, not admitted; witness replay ESTABLISHED
+AS LABELED (W238, 2026-11-26). Brief
 `reports/frontier-rpm2shell.md`, harness `lab/frontier/rpm2shell/`, seed wall
 `.mishe-tauftauf/walls/rpm2shell.md`, charter
 `.mishe-tauftauf/charters/rpm2shell.md`. The person owns wake units and
@@ -29,8 +30,8 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
 
 ## Next
 
-1. Replay `bash lab/frontier/rpm2shell/run-witness.sh` and ask the witness to
-   verify the labeled grade.
+1. Done: witness replay ESTABLISHED AS LABELED (W238). Next owner: operator
+   admission, then the real-rpm consumer lane below.
 2. Build real rpm at the vulnerable parent with ASan; drive `rpm2cpio` or
    `rpm -qlvp` on a synthesized package with a `UINT64_MAX` symlink size and
    a small controlled cpio payload; measure the real read length and whether
@@ -44,8 +45,14 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
   lab/frontier/rpm2shell` into `/tmp/w237-rpm-clean`; unmodified
   `run-witness.sh` returned `WITNESS REPLAY PASS`, four pins exact,
   `TOTAL: 28 PASS / 0 FAIL` in-tree and from the clean archive.
+- Witness W238 replay 2026-11-26 02:04Z: clean `git archive 815a1b0a`
+  (wrapper byte-identical) and in-tree `run-witness.sh` both `WITNESS REPLAY
+  PASS`, 28 PASS / 0 FAIL rc 0; raw upstream full-file and excerpt hashes
+  match all four pins; GCC 13.3.0 `-O1` ASan negative reproduced (no report,
+  `RET=-13`). Verdict ESTABLISHED AS LABELED, no grade change, NO r5;
+  detail in `.mishe-tauftauf/artifacts/witness-w238-rpm2shell/detail.md`.
 - Window created 2026-11-26T01:55:05Z on the inner tmux socket: index 163,
   session `mishe-tauftauf2shell-current`, panes `%328`/`%329`, `dead=0`,
   captures 700/244 bytes, both non-empty. Registered in
   `.mishe-tauftauf/operator/window-registry.json` (164 windows / 164 unique
-  names). Operator admission and witness replay owed.
+  names). Witness replay done (W238); operator admission still owed.

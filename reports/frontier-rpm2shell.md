@@ -1,10 +1,11 @@
 # Frontier brief: rpm iterReadArchiveNext symlink-size wrap — CVE-2026-95520
 
 Status: **STAGED 2026-11-26 by frontier W237**, awaiting operator admission;
-witness replay UNKNOWN. Rung 3 pinned verbatim function; rung 4 PARTIAL
-(chosen bytes observed past a one-byte allocation in a live plain process).
-No real rpm build, no crafted RPM file, no wire input, no pointer, no command
-and no rung 5.
+witness replay ESTABLISHED AS LABELED (W238, 2026-11-26). Rung 3 pinned
+verbatim function; rung 4 PARTIAL (chosen bytes observed past the requested
+1-byte region in a synthetic plain readback; the ASan build overwrites the
+real 1-byte allocation). No real rpm build, no crafted RPM file, no wire
+input, no pointer, no command and no rung 5.
 
 ## Claim and scope
 
@@ -41,7 +42,7 @@ and no rung 5.
   (`0c00ded194575ec9649e3532ff09713faa5e96b36acb10524fb5adc776b92721`).
   Both excerpts include `rpmfiSetFound`, `rpmfiFound` and the whole
   `iterReadArchiveNext()` definition.
-- Vulnerable body (excerpt lines 60-62):
+- Vulnerable body (excerpt lines 59-61, full file 2240-2242):
   `rpm_loff_t lsize = rpmfilesFSize(fi->files, fx);`
   `char *buf = (char *)xmalloc(lsize + 1);`
   `if (rpmcpioRead(fi->archive, buf, lsize) != lsize) rc = RPMERR_READ_FAILED;`
@@ -58,11 +59,12 @@ and no rung 5.
 GCC and Clang ASan on the verbatim vulnerable body:
 `heap-buffer-overflow`, `WRITE of size 64`, `0 bytes after 1-byte region`,
 write frame `pins/iter-vulnerable.inc:61` in `iterReadArchiveNext()`; the
-1-byte region comes from the stand-in `xmalloc(0)`. A plain build with 64
-readable bytes behind the allocation prints
-`CANARY_AFTER=495348452d52504d2121414141414141`: bytes 1..11 are the chosen
-`ISHE-RPM!!` tail of `MISHE-RPM!!` (byte 0 lands inside the allocation) and
-the rest are the chosen `A` filler. Fixed build on the same attack input is
+1-byte region comes from the stand-in `xmalloc(0)`. A plain build whose
+`xmalloc` stand-in allocates 64 physical bytes prints
+`CANARY_AFTER=495348452d52504d2121414141414141`: buf+1..buf+10 decode to the
+10-byte chosen `ISHE-RPM!!` tail of `MISHE-RPM!!` (byte 0 lands inside the
+logical 1-byte region) and buf+11..buf+16 to six chosen `A` filler bytes.
+Fixed build on the same attack input is
 ASan-clean and returns `RET=-15` (`RPMERR_BAD_HEADER`); safe input with
 `lsize = strlen("myscript.sh") = 11` returns `RET=0` and is ASan-clean in
 both bodies; the plain fixed build writes no canary.
@@ -77,14 +79,32 @@ edited. Exact hashes, commands and raw logs are in `PROVENANCE.md`.
 GCC and Clang both fire. This is an instrumentation limitation, not a claim
 that the vulnerable code is safe at `-O1`.
 
+## Witness replay (W238, 2026-11-26)
+
+ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
+worktree and from a clean `git archive 815a1b0a lab/frontier/rpm2shell` (wrapper
+byte-identical, sha256 `52340605…d49d8`) each returned `WITNESS REPLAY PASS`,
+four pins exact, `TOTAL: 28 PASS / 0 FAIL`, rc 0. Independently rehashed both
+raw upstream `lib/rpmfi.cc` blobs at `c36e85503` and `5bc8705e0` — full-file
+and `sed -n '2182,2254p'` / `'2182,2258p'` excerpt hashes all match the pins.
+GCC and Clang ASan -O0 logs show `WRITE of size 64`, 0 bytes after the
+1-byte region, write frame `iterReadArchiveNext pins/iter-vulnerable.inc:61`
+and allocation frame `:60`; fixed attack `RET=-15`, both safe runs `RET=0`,
+plain attack `RET=-13` with the canary hex above. The claim's `-O1` negative
+was reproduced independently: GCC 13.3.0 `-O1 -fsanitize=address` exits 0
+with `RET=-13` and no report. No real rpm build, crafted package, wire input,
+pointer, command or r5; operator admission still pending. Full detail:
+`.mishe-tauftauf/artifacts/witness-w238-rpm2shell/detail.md`.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in the verbatim
   pinned `iterReadArchiveNext()`, with fixed and safe-input controls.
 - **Rung 4 PARTIAL:** the bytes are chosen in the harness and observed past
-  the allocation in a live plain process; the offset is fixed by the
-  allocation layout, and the copy length is capped by the stand-in. No real
-  rpm build, crafted package, adjacent live object, pointer, wire or command.
+  the requested 1-byte region in a synthetic plain readback; the offset is
+  fixed by the allocation layout, and the copy length is capped by the
+  stand-in (64 bytes, not the declared `UINT64_MAX`). No real rpm build,
+  crafted package, adjacent live object, pointer, wire or command.
 - **Not rung 5:** no loopback target, no attacker-supplied package bytes
   through a real API, no pointer hijack, no command and no observed side
   effect.
