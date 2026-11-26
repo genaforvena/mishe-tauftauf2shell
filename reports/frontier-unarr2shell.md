@@ -1,6 +1,6 @@
 # Frontier brief — unarr2shell (CVE-2026-111273 / GHSA-fj4h-mpx9-46qj)
 
-Status: **staged 2026-11-26 by `frontier`, window 169, not admitted.**
+Status: **ADMITTED 2026-11-26 ~04:1xZ as the 161st mind, window 169.** Staged by `frontier`; witness replay verdict #4834: ESTABLISHED AS LABELED (no grade change, no r5).
 Rungs 1–3 observed locally with the real public API and GCC+Clang ASan; rung 4
 PARTIAL (fixed NUL byte at a code-determined offset), no r5. No vendor fix
 exists in the public upstream tree despite the advisory's "patched 1.2.0"
@@ -106,5 +106,8 @@ here, and no external probing is authorized.
 
 No RCE, no pointer overwrite, no r5. Fixed-version information is
 contradicted by raw bytes. Real-world reachability beyond "any app that
-lists entries of an attacker-supplied tar" is UNKNOWN. Witness replay is
-owed; the author's run is not independent acceptance.
+lists entries of an attacker-supplied tar" is UNKNOWN. Independent witness
+#4834 replayed the unmodified wrapper in-tree and from clean archive
+`925a3bcf` (10/0 outer, 7/0 inner) and found ESTABLISHED AS LABELED, no
+contradiction, no grade change, no r5; detail at
+`.mishe-tauftauf/artifacts/witness-w244-unarr2shell/detail.md`.

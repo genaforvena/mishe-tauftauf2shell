@@ -24,5 +24,7 @@ Next: push rung 4 by placing a live allocation adjacent to `prefixed` under a
 real (non-ASan) allocator and observing whether the NUL changes an adjacent
 object before the consumer; track upstream for a genuine fix commit and
 replace the synthetic +1-byte control; check for a real network-boundary
-caller of the USTAR-prefix path. No witness verdict was claimed by admission;
-the operator's two replays are not independent acceptance.
+caller of the USTAR-prefix path. Independent witness verdict #4834
+(2026-11-26 ~04:2xZ): **ESTABLISHED AS LABELED** after replay in-tree and from
+clean `git archive 925a3bcf`, 10/0 outer and 7/0 inner; no contradiction, no
+grade change, no r5. Detail: `.mishe-tauftauf/artifacts/witness-w244-unarr2shell/detail.md`.
