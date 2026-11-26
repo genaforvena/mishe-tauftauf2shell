@@ -251,6 +251,43 @@ completed load. Replay: `bash live/run-appimage.sh`.
 `bash live/run-appimage.sh` replayed cleanly at 17:31Z: `TOTAL: 9 PASS /
 0 FAIL`, rc 0, regenerating both logs in fresh profiles.
 
+## Post-WRITE stall locality in the real plugin (W247, 2026-11-26)
+
+`live/trace-shim.c` adds timestamped wrappers to the W246 shim: it still
+wraps the real `inflate()` and dumps the chosen bytes, then logs the pid,
+large (`>= 32 MiB`) `g_malloc`/`g_try_malloc` calls, `g_free` of the
+overflowed `indexes` pointer, and `gegl_buffer_set`. It was compiled over
+the ignored `live/inflate-shim.so` (the original binary was rebuilt
+afterwards, so the W246 runner is unchanged), and the same AppRun/PDB
+invocation as W246 was run on `published.jif` in a fresh `$HOME` with a
+130-second timeout. `live/evidence/plugin-stall-trace.log` records:
+
+- `SHIM_INFLATE pid=1099283 avail_out_before=2147483778 total_out=324
+  ret=1`, with the same 72-byte chosen `0x4d` prefix at `SHIM_EDGE`;
+- `TRACE 0.045 INFLATE done`, then `TRACE 0.054 FREE indexes` — the
+  overflowed region is released 9 ms after the WRITE;
+- the first large allocation starts at `TRACE 359.978`:
+  `ALLOC try_malloc enter size=33570880`, repeated 30 times through
+  `TRACE 1189.427` (each ~33.5 MiB; `4096*4096*2 + 16448`), then one more
+  at `5552.839` completed at `5734.041`;
+- no `GEGL_SET` line and no completed batch load before the process was
+  killed with rc 137 (SIGKILL) under host memory pressure.
+
+The measured post-WRITE work is repeated ~32 MiB allocation, consistent
+with GEGL tile setup for the advisory's `45771x46918` frame plus the
+~4 GiB `dest`; the caller's identity is UNKNOWN (no backtrace was
+obtained). No failure of the freed `indexes` chunk was observed, so the
+stall is not evidence of heap damage after the WRITE. Grade unchanged:
+real plugin, chosen bytes, still no named live victim, chosen address,
+dereference, command or rung 5.
+
+Preserved negatives: tracing from exec with `strace -f` spent its entire
+75-second budget in GIMP's plugin-query startup and reached no inflate;
+a second trace run with caller backtraces was killed by memory pressure
+before inflate (`live/evidence/plugin-stall-backtrace-failed.log`), so no
+backtrace claim is made. The committed shim is the executed version
+without backtrace instrumentation.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
@@ -268,16 +305,16 @@ completed load. Replay: `bash live/run-appimage.sh`.
   is no chosen address, dereference of a chosen pointer or command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
-Next experiment: finish the real-plugin load rather than stopping at the
-observed WRITE. The GIMP 3.2.8 AppImage now supplies a real vulnerable
-plugin and PDB wire; the JIF load stalls in the later large image/layer/
-`dest` work on this host. A bounded next step is to observe where it stalls
-(gegl tile allocation versus heap damage after the overwrite), and to add
-a fixed-plugin control from the fix commit `2b2bbb8ffa6a88e82c72fe1208adc275dddffcd7`
-once a fixed AppImage or a build against the AppImage's bundled libgimp is
-available. W242-W245 already measured the real allocator layout, a live
-GLib object pointer field, the caller guard and the instrumented real-zlib
-WRITE. No rung 5 without a benign command side effect on a live target.
+Next experiment: obtain a fixed-plugin control. The AppImage bundles
+`gimp-3.0.pc`, `gegl-0.4.pc` and the GIMP 3.2.8 headers, so
+`src/file-gif-load-fixed.c` can be built against them (a local `config.h`
+and `stdplugins-intl.h` shim are needed) and swapped into the extracted
+plugin directory; the vulnerable plugin and the pinned fixed harness remain
+controls. W247 has bounded the stall to repeated ~32 MiB allocations after
+the overflowed region was freed; further timeouts without a memory guard
+are not useful. The named-live-victim gap and the no-pointer/no-command
+ceiling remain; no rung 5 without a benign command side effect on a live
+target.
 
 ## Duplicate check and screened candidates
 

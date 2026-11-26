@@ -1,0 +1,84 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 17:45:32.680: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:45:32.680: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 17:45:43.155: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:45:43.155: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 17:45:43.157: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.159: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.160: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.162: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.162: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.163: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.163: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.164: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.172: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.178: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 17:45:43.178: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+SHIM_INFLATE pid=1099283 avail_out_before=2147483778 total_out=324 ret=1 out=0x5df15d833520
+SHIM_HEAD=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d
+SHIM_EDGE=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d0000000021000000000000003034835df15d00001034835d
+SHIM_FAR=710000000000000001000000fd7e00000037835df15d000070f57e5df15d0000
+TRACE 0.045 pid=1099283 INFLATE done ret=1
+TRACE 0.054 pid=1099283 FREE indexes=0x5df15d833520
+TRACE 359.978 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 360.012 pid=1099283 ALLOC try_malloc done ptr=0x7efc8f8ae010
+TRACE 383.274 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 383.312 pid=1099283 ALLOC try_malloc done ptr=0x7efc8d8a9010
+TRACE 407.624 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 407.672 pid=1099283 ALLOC try_malloc done ptr=0x7efc8b8a4010
+TRACE 433.841 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 433.872 pid=1099283 ALLOC try_malloc done ptr=0x7efc8989f010
+TRACE 458.521 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 458.549 pid=1099283 ALLOC try_malloc done ptr=0x7efc8789a010
+TRACE 481.615 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 481.640 pid=1099283 ALLOC try_malloc done ptr=0x7efc85895010
+TRACE 510.080 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 510.115 pid=1099283 ALLOC try_malloc done ptr=0x7efc83890010
+TRACE 535.119 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 535.139 pid=1099283 ALLOC try_malloc done ptr=0x7efc8188b010
+TRACE 557.670 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 557.702 pid=1099283 ALLOC try_malloc done ptr=0x7efc7f886010
+TRACE 583.197 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 583.236 pid=1099283 ALLOC try_malloc done ptr=0x7efc7d881010
+TRACE 609.858 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 609.889 pid=1099283 ALLOC try_malloc done ptr=0x7efc7b87c010
+TRACE 632.508 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 632.538 pid=1099283 ALLOC try_malloc done ptr=0x7efc79877010
+TRACE 655.088 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 655.114 pid=1099283 ALLOC try_malloc done ptr=0x7efc77872010
+TRACE 685.918 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 685.951 pid=1099283 ALLOC try_malloc done ptr=0x7efc7586d010
+TRACE 717.808 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 717.830 pid=1099283 ALLOC try_malloc done ptr=0x7efc73868010
+TRACE 744.102 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 744.131 pid=1099283 ALLOC try_malloc done ptr=0x7efc71863010
+TRACE 780.421 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 780.461 pid=1099283 ALLOC try_malloc done ptr=0x7efc6f85e010
+TRACE 814.485 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 814.523 pid=1099283 ALLOC try_malloc done ptr=0x7efc6d859010
+TRACE 851.978 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 852.008 pid=1099283 ALLOC try_malloc done ptr=0x7efc6b854010
+TRACE 883.976 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 884.000 pid=1099283 ALLOC try_malloc done ptr=0x7efc6984f010
+TRACE 912.043 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 912.072 pid=1099283 ALLOC try_malloc done ptr=0x7efc6784a010
+TRACE 944.130 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 944.167 pid=1099283 ALLOC try_malloc done ptr=0x7efc65845010
+TRACE 973.500 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 973.523 pid=1099283 ALLOC try_malloc done ptr=0x7efc63840010
+TRACE 1007.030 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1007.058 pid=1099283 ALLOC try_malloc done ptr=0x7efc6183b010
+TRACE 1035.967 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1035.988 pid=1099283 ALLOC try_malloc done ptr=0x7efc5f836010
+TRACE 1066.568 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1066.594 pid=1099283 ALLOC try_malloc done ptr=0x7efc5d831010
+TRACE 1100.188 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1100.213 pid=1099283 ALLOC try_malloc done ptr=0x7efc5b82c010
+TRACE 1133.283 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1133.306 pid=1099283 ALLOC try_malloc done ptr=0x7efc59827010
+TRACE 1160.416 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1160.435 pid=1099283 ALLOC try_malloc done ptr=0x7efc57822010
+TRACE 1189.427 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 1189.450 pid=1099283 ALLOC try_malloc done ptr=0x7efc5581d010
+TRACE 5552.839 pid=1099283 ALLOC try_malloc enter size=33570880
+TRACE 5734.041 pid=1099283 ALLOC try_malloc done ptr=0x7efc53818010

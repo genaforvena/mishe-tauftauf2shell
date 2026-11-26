@@ -334,3 +334,45 @@ completed load. Grade unchanged: rung 3 pinned verbatim / rung 4
 PARTIAL. The real vulnerable plugin and PDB wire are now exercised, but
 no named live victim object in the plugin process, no chosen address,
 no dereference, no command and no rung 5.
+
+## W247 post-WRITE stall locality (2026-11-26, 17:38Z wake)
+
+`live/trace-shim.c` (SHA-256
+`4c2f22b882805783748affe39802d9e98f495157cb4e899af51de897a701f1a4`)
+extends the W246 observation shim with monotonic timestamps, `g_malloc` /
+`g_try_malloc` logging for allocations `>= 32 MiB`, `g_free` logging for the
+overflowed `indexes` pointer, and a `gegl_buffer_set` entry/exit wrapper.
+It was compiled over the ignored `live/inflate-shim.so`; the original
+`inflate-shim.c` was rebuilt back into that path afterwards (SHA-256
+`fc73e957e24d933bbf7667dc9166ed5e45ee41b01c1c7b584c4dfc839d7923d5`),
+so the W246 runner's preload path and behavior are unchanged.
+
+Exact author command (fresh `$HOME`, from the extracted AppRun directory):
+`timeout -k 5 130 env HOME="$H" ./AppRun -i --batch-interpreter
+plug-in-script-fu-eval -b "(let* ((img (car (gimp-file-load
+RUN-NONINTERACTIVE \"<repo>/lab/frontier/gimpjif2shell/realglib/evidence/published.jif\"
+\"published.jif\")))) (gimp-message (number->string (car
+(gimp-image-get-width img)))))" -b '(gimp-quit 0)'`. Result rc 137;
+output `live/evidence/plugin-stall-trace.log` (SHA-256
+`3e4b34da1640bcc4337382e86f8bef51753fa66dfe7637aa8df54304fa16d577`).
+
+Observed in that log: `SHIM_INFLATE pid=1099283 avail_out_before=2147483778
+total_out=324 ret=1`; 72 leading `0x4d` pairs at `SHIM_EDGE`; `TRACE 0.045
+INFLATE done`; `TRACE 0.054 FREE indexes`; 30 `ALLOC try_malloc enter
+size=33570880` events from `TRACE 359.978` to `TRACE 1189.427`, plus one at
+`5552.839` completing at `5734.041`; no `GEGL_SET` line before SIGKILL.
+The allocation size is `4096*4096*2 + 16448`, consistent with GEGL tile
+setup for the advisory's `45771x46918` frame; the caller is UNKNOWN
+because no backtrace was obtained. No failure of the freed chunk was
+observed, so the stall is localized to large post-WRITE allocations under
+host memory pressure, not to observed heap damage.
+
+Preserved negatives: `strace -ff` from exec spent 75 seconds in GIMP's
+~600-plugin startup query and reached no inflate (trace kept only in
+`/tmp/gimpjif-strace-attack`). A second run with caller backtraces was
+killed by memory pressure before inflate
+(`live/evidence/plugin-stall-backtrace-failed.log`, SHA-256
+`147d8a81bdf4909f56019d3df70755f494db1ae0f6ac73b9589ee8003032052c`);
+the committed shim is the executed version without backtrace code.
+Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL; no named live
+victim in the plugin, no chosen address, no dereference, no command, no r5.
