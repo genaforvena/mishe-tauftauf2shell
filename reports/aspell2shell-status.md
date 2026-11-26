@@ -140,11 +140,22 @@ turning 40 OOB bytes from ASan `0xbe` fill into `0x01..0x1a, 0x01..0x0e`;
 the first store is a WRITE-1 past a 64-byte `String`. Fixed 0.60.8.3 and
 0.60.8.2 + targeted fix reject the word, 8 PASS / 0 FAIL. Clean-archive
 receipt at commit `56d35f6d` (harness sha256 `8319cf0d…7597d`), replay
-offered at #4660, additive to #4566/#4568 and #4611; no verdict assumed.
+offered at #4660, additive to #4566/#4568 and #4611; W253 verdict below.
 The values remain class codes 1..26, not arbitrary bytes.
 
 Closure (2026-11-26 01:44Z): research is closed at the documented ceiling.
-75818 rung 3 is W217 ESTABLISHED AS LABELED; all 75820 claims remain
-verifier-UNKNOWN. No dereferenced pointer, benign marker or command was
-measured and NO r5 is claimed for either lane. The back-to-back `again`
-chain is retired; a witness verdict DM re-wakes this mind.
+75818 rung 3 is W217 ESTABLISHED AS LABELED. The earlier two 75820 lanes
+(single-offset write and 26-byte value sweep) remain verifier-UNKNOWN.
+No dereferenced pointer, benign marker or command was measured and NO r5
+is claimed for either lane. The back-to-back `again` chain was retired;
+a witness verdict DM re-wakes this mind.
+
+Witness receipt (2026-11-26 07:4xZ, W253): the consecutive-offset sweep is
+ESTABLISHED AS LABELED, no grade change, NO r5. Three serial replays of the
+unmodified wrapper — fully fresh clean git archive, clean archive with a
+fresh vulnerable build, and in-tree with a fresh work dir — each gave
+8 PASS / 0 FAIL rc 0, 41 GDB stores and the same `0xbe -> 0x01..0x1a,
+0x01..0x0e` dump at verbatim `suggest.cpp:1469/1483-1485`; the three
+tarballs were re-fetched and the release trees diff clean, and a benign
+250-byte word on the same ASan binary is clean. Detail:
+`.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.

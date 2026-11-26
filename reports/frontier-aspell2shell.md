@@ -198,5 +198,14 @@ targeted-fix build reject the word (rc 1, no ASan). Replay is
 This widens the measured primitive from one chosen class byte to a
 consecutive chosen sequence at consecutive OOB offsets. The values remain
 class codes 1..26, not arbitrary bytes: no pointer bytes, arbitrary offset,
-dereference, marker or command. Grade and r5 status unchanged; witness
-verdict on the earlier claims still UNKNOWN.
+dereference, marker or command. Grade and r5 status unchanged. Witness W253
+(2026-11-26 07:4xZ) replayed the unmodified wrapper three times serially —
+fully fresh clean git archive, clean archive with a fresh vulnerable build,
+and in-tree with a fresh work dir — each 8 PASS / 0 FAIL rc 0 with the same
+41 store hits, `0xbe -> 0x01..0x1a, 0x01..0x0e` dump, verbatim
+`suggest.cpp:1469/1483-1485` frames and rc 1 fixed/targeted controls. Three
+tarballs were re-fetched and both release trees diff clean against them; a
+benign 250-byte word on the same fresh ASan binary is clean. Verdict
+ESTABLISHED AS LABELED, no grade change, NO r5; detail at
+`.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`. W253 rules
+only on this sweep; earlier 75820 lanes keep their prior witness status.
