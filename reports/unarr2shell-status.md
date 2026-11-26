@@ -56,3 +56,19 @@ allocator slack. **Grade unchanged: rung 3 verbatim / rung 4 PARTIAL fixed
 NUL; no pointer control, no chosen byte, no command, no r5.** Lanes 2
 (genuine upstream fix) and 3 (wire caller) remain UNKNOWN, not attempted
 this wake.
+## Negative result (2026-11-26 ~15:17Z): no upstream fix at master head
+
+Lane 2 of the admitted next list is also negative by measurement of public
+bytes. `tar/parse-tar.c` at the repository master head is SHA-256
+`bd9bf8d99e1274ba6a870c39ee694c80843dc3b7821fca7b219bef480f3a4482`,
+byte-identical to the pinned v1.2.1 file, and still reads
+`malloc(256 + 1)` / `strcat(prefixed, name)`. The file's commit history has no
+change to `tar_get_name` after 2020; the head commit is `704ea083` ("Release
+v1.2.1", 2026-11-22). Advisory-ID issue search returned zero results. Details
+and the HTTP-403 searches left UNKNOWN:
+`lab/frontier/unarr2shell/rung4/fix-search.md`; raw pin
+`lab/frontier/unarr2shell/pinned/parse-tar-master.c`.
+
+No vendor fixed control exists; the lab's +1-byte control remains synthetic.
+Grade unchanged: rung 3 verbatim / rung 4 PARTIAL fixed NUL. Lane 3 (real
+network-boundary caller) remains UNKNOWN.

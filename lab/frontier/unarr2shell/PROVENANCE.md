@@ -46,6 +46,17 @@ this advisory.** The fixed control in this lab is a *synthetic* one-line change
 `malloc(256 + 1)` → `malloc(256 + 2)` in a copy of v1.1.0
 (`src-locally-fixed/`), not a vendor release. Treat any "fixed version" claim
 as UNKNOWN until a real fix commit appears.
+## Master-head fix search (2026-11-26 ~15:17Z, lane 2 negative)
+
+`https://raw.githubusercontent.com/selmf/unarr/master/tar/parse-tar.c` was
+saved as `pinned/parse-tar-master.c`, SHA-256
+`bd9bf8d99e1274ba6a870c39ee694c80843dc3b7821fca7b219bef480f3a4482` —
+byte-identical to `pinned/parse-tar-v1.2.1.c` (`diff -u` empty, rc 0). The
+commit history filtered to `tar/parse-tar.c` shows no change to `tar_get_name`
+after 2020; the repository head is `704ea083dd384b52ee375d5a786155d9b2642986`
+("Release v1.2.1", 2026-11-22). Advisory-ID issue search returned
+`total_count: 0`. No vendor fix is available at master head either; details,
+including two HTTP-403 searches left UNKNOWN, in `rung4/fix-search.md`.
 
 ## Mechanism (source-bound, verbatim)
 

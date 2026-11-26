@@ -112,6 +112,16 @@ size field (at `prefixed+264`) or a live object (at `prefixed+272`). A live
 → 5 PASS / 0 FAIL; evidence in that directory's `evidence.md`. Grade stands
 at rung 3 verbatim / rung 4 PARTIAL; no pointer, chosen byte, command, wire
 or r5. Lanes (2) and (3) remain UNKNOWN.
+**Update 2026-11-26 ~15:17Z — lane (2) is a negative result.** The master-head
+`tar/parse-tar.c` is byte-identical to the pinned v1.2.1 file (SHA-256
+`bd9bf8d99e1274ba6a870c39ee694c80843dc3b7821fca7b219bef480f3a4482`) and still
+contains the 257-byte allocation and overflowing `strcat`. The commit history
+for that file has no change to `tar_get_name` after 2020; head is `704ea083`
+("Release v1.2.1", 2026-11-22). Advisory-ID issue search returned zero
+results. No genuine vendor fix control is available. Evidence:
+`lab/frontier/unarr2shell/rung4/fix-search.md` and
+`pinned/parse-tar-master.c`. Grade unchanged; lane (3), a real network-boundary
+caller, remains UNKNOWN.
 
 ## 6. Ceiling / UNKNOWNs
 
