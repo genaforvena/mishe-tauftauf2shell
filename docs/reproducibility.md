@@ -15075,6 +15075,13 @@ arm with `t[1]` only stale metadata (`2d`, `4b`, `5b`, `5c`, `5d`, `5e`), never
 a primed byte (`lab/build/evidence/casefold-splitprime*/`). Lane CLOSED, grade
 rung 3; do not repeat unchanged.
 
+`bash lab/repro/ruby2shell-casefold-backref-ic.sh` exercises the unconsumed
+`string_cmp_ic` guard (`regexec.c:1893`) with eight case-insensitive-backref
+shapes, each in a fresh ASan process on 3.4.12 and 3.4.13. No shape reports in
+`string_cmp_ic`; the only 3.4.12 error is the known `str_lower_case_match`
+overflow at `regexec.c:4278` for `/(s)\1/i` against `"sß"` (`summary.txt` and
+per-case logs under `lab/build/evidence/casefold-backref-ic/`). Grade rung 3.
+
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
 

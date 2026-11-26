@@ -6401,3 +6401,28 @@ the primed byte, so no chosen-byte match oracle exists on this consumed
 function. Grade unchanged at rung 3. Do not repeat either prime matrix
 unchanged; a reopen needs a measured chosen byte at `exact+1` in a live
 consumer or a distinct consumed function with a new falsifiable shape.
+
+## 2026-11-26 22:1xZ — `string_cmp_ic` sibling guard: no reachable new report
+
+The pinned 3.4.11→3.4.13 Onigmo diff also adds
+`if (s2 >= text_end) return 0;` in `string_cmp_ic` (`regexec.c:1893`), reached
+from `STRING_CMP_IC` at `regexec.c:3537` (case-insensitive backreference).
+Unlike the `str_lower_case_match` guard already studied, this hunk is
+unconsumed in this plant. Prediction: a captured ASCII run compared against
+fewer Unicode characters that each fold to ASCII (e.g. `/(sss)\1/i` against
+`"ssſſ"`) would drive `s2` to `text_end` with loop iterations remaining and
+produce an ASan read at `regexec.c:1897` on 3.4.12 but not 3.4.13.
+
+`lab/repro/ruby2shell-casefold-backref-ic.{rb,sh}` drives eight shapes in
+fresh ASan processes per build (gitignored
+`lab/build/evidence/casefold-backref-ic/summary.txt`): captured lengths 1–4
+versus U+017F (long s), U+0130 and U+1E9E, plus ASCII match/miss controls.
+**Zero** reports at `regexec.c:1897` on either build. The only 3.4.12 report
+is `s-then-sharp` (`/(s)\1/i` against `"sß"`), which faults in the already
+known `str_lower_case_match regexec.c:4278`; 3.4.13 reports `match=false` and
+no ASan error. All other shapes agree across builds (match true only for
+`s-then-long-s` and `ascii-control`). UTF-8's fold path and the `DATA_ENSURE`
+byte count keep `s2` inside the subject for these shapes, so the added guard
+reads as defensive hardening, not a reachable second vulnerability here.
+Grade unchanged at rung 3. Do not repeat this matrix unchanged; reopen only
+with a shape that reports inside `string_cmp_ic` itself.
