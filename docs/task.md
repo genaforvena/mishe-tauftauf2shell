@@ -15005,3 +15005,64 @@ Every count above is an operator, author, clean-archive or independent
 witness observation as labeled; none moves a generated grade cell here.
 What would change the fold: a later verdict contradicting one of these
 exact scopes, or a checker RED on committed HEAD.
+
+## 2026-11-26 23:1x–23:2xZ — oiiocineon 192nd, W298 pjproject verdict, staged sngrep, Ruby W299 variance
+
+This fold covers `33156c0b..7c16d030` and adds explanation only: no generated
+cell, register row, grade, report or lab evidence was moved. Reproduce from
+`docs/reproducibility.md` § 23:1x–23:2xZ.
+
+- `33156c0b` folded W298's **pjproject2shell W243** witness verdict:
+  ESTABLISHED AS LABELED at the exact shipped-sample `CLOCK_ALLOC delta=48
+  size=96` scope, from a clean `git archive a98128fc lab/frontier/pjproject2shell`
+  with driver sha256 `a6cd99f9…`, runner `403b3944…`, three AVI fixtures
+  hash-matched, unmodified `build-real.sh` rc 0 and `run-clock.sh` rc 0 with
+  `10 PASS / 0 FAIL`. The witness NIT is a field-label shift: the probe mirror
+  omits `max_jump`, so printed `cb`/`user`/`lock` are one word off; the real
+  fields are `cb` +56, `user_data` +64, `lock` +88 and the chosen bytes rest
+  on the 128-byte `CLOCK_BYTES_AFTER` dump. No grade change, no r5; W240,
+  W241 and W242 verdicts remain owed.
+- `8c53acca` **admitted oiiocineon2shell as the 192nd declared target mind**
+  under standing #6 (window 200, panes %406/%407). Counts 191/188/188/128 →
+  192/189/189/128, established count unchanged. The operator's clean-archive
+  replay had 37/37 pins OK, runner sha256 `79c81411016…`, rc 0, `PASS=13
+  FAIL=0`; fresh GCC `-O1` ASan `WRITE of size 8` at verbatim
+  `cineoninput.cpp:215` (`strings[8]`, `[32, 96) <== offset 96`), clang `-O0`
+  reproduces, fixed PR 5250's 1-8 guard rejects count 255, safe(8)/valid(1)
+  clean. Plain vulnerable rc 0 is a preserved negative. No full `iinfo`,
+  wire, chosen byte, command or r5; `established=false`, independent witness
+  replay still owed.
+- `743624ab` + `f6a50d2b` + `1ae76db6` **staged sngrepsip2shell (W298)** on
+  CVE-2026-121943 (affected `<= 1.9.0`, fix merge `d49c96c9…`, no numbered
+  fixed release). Four SHA-256-pinned upstream files, verbatim raw
+  `sip.c:316-341` slices, GCC and clang ASan `READ of size 10241` at
+  `sip.c:338` from the unterminated 10240-byte `payload` at `:320`; fixed,
+  safe 10239 and guard-rejected 10241 are clean, plain attack rc 0 is a
+  preserved rung-1/2 negative. Prebuilt binaries and probe scratch were
+  dropped (source-only harness); a clean `git archive HEAD
+  lab/frontier/sngrepsip2shell` replay gave `PASS=13 FAIL=0`, rc 0. Rung 3
+  only: no chosen byte, adjacent live object, pcap/socket/SIP wire or command.
+  No register row or admission; witness replay and the operator's standing-#6
+  decision are owed. The same commit marked the live555 frontier brief
+  admitted; that admission was already folded at `99ccbe07`.
+- `4f0028eb` + `7c16d030` recorded **Ruby2Shell W299 layout variance**: 15
+  fresh ASLR-off Onigmo wire attacks gave 12 HTTP 200/alive responses with
+  seven distinct response hashes and three SIGSEGV faults with no HTTP
+  response; the original 54,795-byte `c6be1419…` page recurred once.
+  `setarch -R` is effective, but Ruby's per-process hash seed stays random;
+  the causal link to allocation/GC layout is a **hypothesis, not a
+  measurement**. The acceptance invariant is HTTP 200, worker alive,
+  `verdict=CORRUPTED` and `shortened_by_one>0` with clean control/safe/fixed
+  legs, not a byte-exact hash; a fault with no response or a clean differ is
+  the contradiction. The driver's attack rc 0 after a faulted request must
+  not be trusted; read `http_status`, `health` and `exit_after_request`.
+  Its recipe in `docs/reproducibility.md` § 18:5x was updated by the author,
+  superseding the older "3/3 byte-identical" wording in this dated log.
+  Grade unchanged: stock-wire rung 4 remains unwitnessed, full rung 5 NOT
+  ACHIEVED.
+
+Every count above is an operator, author, clean-archive or independent
+witness observation as labeled; none moves a generated grade cell here.
+What would change this fold: a verdict contradicting one of these exact
+scopes, a report misquoting these receipts, or a checker RED on committed
+HEAD.

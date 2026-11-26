@@ -15908,7 +15908,7 @@ frontier-authored driver/decoder, R1/R2/R4/R5 NOT CLAIMED; detail in
 the gitignored site at
 `.mishe-tauftauf/artifacts/witness-w297-live555/detail.md`.
 
-### oiiocineon2shell — STAGED W297, rung 3 only, admission owed
+### oiiocineon2shell — staged W297 recipe; admitted 192nd at 23:1xZ
 
 CVE record `https://cveawg.mitre.org/api/cve/CVE-2026-59181` and GHSA
 `https://github.com/AcademySoftwareFoundation/OpenImageIO/security/advisories/GHSA-xh8r-vmqq-56pp`
@@ -15936,8 +15936,9 @@ advisory's adjacent `Reader cin` frame was not reproduced. The three
 OIIO; no full `iinfo` or wire path is claimed. `runs/` outputs are
 tracked, binaries gitignored and rebuilt; detail in
 `reports/frontier-oiiocineon2shell.md` and status in
-`reports/oiiocineon2shell-status.md`. Independent replay and the
-operator's standing-#6 admission are still owed.
+`reports/oiiocineon2shell-status.md`. The operator's clean-archive replay and
+standing-#6 admission at 23:1xZ are recorded in the 23:1x–23:2xZ section
+below; an independent witness verdict is still owed.
 
 ### rpm2shell — debugger-free pointer fault and loopback wire delivery
 
@@ -16016,4 +16017,96 @@ scope from `git archive a98128fc lab/frontier/pjproject2shell`, runner
 readback still holds, and leaves W240/W241/W242 owed. That artifact
 `.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md` did not
 change any register flag or grade in this docs fold.
+
+
+## 2026-11-26 23:1x–23:2xZ — W298 verdict, oiiocineon admission, staged sngrep, Ruby W299 invariance
+
+No replay was rerun for the pjproject, oiiocineon or Ruby limbs of this fold;
+their bytes and counts are quoted from committed reports, receipts and the
+W298 artifact. The staged sngrep recipe below was also replayed from a clean
+archive in this docs wake; see its receipt line.
+
+### pjproject2shell W243 — witness verdict and field-label correction
+
+From a clean `git archive a98128fc lab/frontier/pjproject2shell` extracted
+into an empty directory, run the unmodified
+`bash real/build-real.sh` (both pinned full tarballs hash-matched,
+`avi_get_frame_symbols=1` in each library) and then
+`bash lab/frontier/pjproject2shell/real/run-clock.sh` from the repository
+root. Expect rc 0 and `10 PASS / 0 FAIL` with `CLOCK_ALLOC delta=48 size=96`
+in all five runs; the 512-byte AVI writes chosen marker bytes through the
+128-byte `CLOCK_BYTES_AFTER` dump, while safe48 and both fixed cases are
+byte-identical and the fixed build logs the truncation clamp. Independent
+W298 replay: driver sha256 `a6cd99f9…dc3fd9b2a`, runner `403b3944…0e0d768f`,
+three AVI fixtures hash-matched; `.mishe-tauftauf/artifacts/
+witness-w298-pjproject/detail.md` is gitignored. W298's one NIT: the
+driver's printed `cb`/`user`/`lock` labels are one word short because the
+probe mirror omits `max_jump` (`clock_thread.c:119`); real fields are `cb`
++56, `user_data` +64, `lock` +88, and no grade or register flag moved.
+Verdict: ESTABLISHED AS LABELED at that exact shipped-sample scope; W240,
+W241 and W242 remain unwitnessed, no pointer call, wire or r5. Detail:
+`reports/frontier-pjproject2shell.md` § W298.
+
+### oiiocineon2shell — admitted 192nd, operator clean-archive replay
+
+Use the staged recipe above from `git archive HEAD
+lab/frontier/oiiocineon2shell` with `runs/` removed; the operator's 23:14Z
+replay found 37/37 pins sha256sum OK, runner sha256
+`79c81411016b3e6a29b11101c564873e19fc802041149e1e32300618a91933f3`,
+`sh run-all.sh` rc 0 and `PASS=13 FAIL=0`. Fresh GCC `-O1` ASan reports
+`stack-buffer-overflow`, `WRITE of size 8` at verbatim
+`cineoninput.cpp:215`, `[32, 96) 'strings' <== offset 96`; clang `-O0`
+reproduces at `:215:20`. The fixed 255 vector prints `open_like=0` with no
+ASan; safe(8)/valid(1) are clean on both pins; plain rc 0 (no rung-1 claim).
+`runs/` text outputs are tracked, the binaries are gitignored and rebuilt by
+`run-all.sh`; the admission status is in
+`reports/oiiocineon2shell-status.md`. Independent replay is still owed and
+the manifest keeps `established=false`: no rung 4/5 claim.
+
+### sngrepsip2shell — staged W298, rung 3 only, no admission
+
+CVE record `https://cveawg.mitre.org/api/cve/CVE-2026-121943`, upstream
+issue 589 and fix PR 591 merged as `d49c96c9…` (no numbered fixed release).
+Pins: `sip.c` at v1.9.0 `c195674a72b0223b669e8ef9b2fce0a01d6c4224dd6ea217acfb5cc757462b30`,
+fixed `8c1a6e151f6570e28cc4e2053a6470379b2563271032c0e055d81460e082c9a6`,
+`sip.h.vuln` `131d8d612fc4ffc42c05208a5c7b7968168f12592da787ce9b0bc54fae7c03b9`
+and `packet.h.vuln`
+`6732959b326327311466a7cf371ec115ce1b85d915bc65959917e3bf6cf470d0`.
+`gen_sink.py` sha256 `ad4e2cc7…`, `run-all.sh` sha256 `a4ebf8f6…`; both pin
+line assertions and raw `sip.c:316-341` slices are rechecked at replay.
+From a clean `git archive HEAD lab/frontier/sngrepsip2shell` into an empty
+directory, run `sh run-all.sh`: expect `RESULT PASS=13 FAIL=0`, rc 0, GCC and
+clang ASan `stack-buffer-overflow READ of size 10241` at verbatim
+`src/sip.c:338` (`strlen` scan of the unterminated 10240-byte `payload` at
+`:320`, object `[128, 10368)`, access at offset 10368). Fixed pin, safe
+10239 and guard-rejected 10241 are clean; plain attack rc 0 is a preserved
+rung-1/2 negative. The 10241-byte scan length is not a 10241-byte memcpy or
+a chosen byte; no full sngrep, libpcap, pcap, socket or wire path is built.
+Prebuilt binaries and probe scratch were removed after staging, so the
+harness is source-only; `runs/` text receipts are tracked and binaries are
+gitignored and rebuilt. Rung 3 only; no register row, witness verdict or
+standing-#6 admission yet. Detail: `reports/frontier-sngrepsip2shell.md`
+and `reports/sngrepsip2shell-status.md`.
+
+### Ruby2Shell W299 — ASLR-off echo is an invariant, not a byte-exact hash
+
+Reuse the exact four driver legs and differ command in § 18:5x (Ruby2Shell
+Onigmo repeat-ID stock-wire corruption); that recipe was updated by its
+author and is not re-pinned here. Expect control 200/alive and byte-identical
+(55,667 bytes, `56eb2e92…`), safe 200/alive at 3,079 bytes, fixed 3.4.13
+500/alive with `too many range repeat`, and an attack with HTTP 200, worker
+alive, differ `verdict=CORRUPTED`, `control_rows=306`, at least one missing
+row and `shortened_by_one>0`. The original 54,795-byte `c6be1419…` capture
+(306→302, 4 missing, 293 shortened) is one observed layout, not a
+guarantee: W299's 15 fresh ASLR-off attacks gave 12 alive responses with
+seven distinct hashes and three SIGSEGV faults with no HTTP response.
+`setarch -R` is effective, but Ruby's per-process hash seed stays random;
+its role in the layout change is a plausible, unmeasured hypothesis. A clean
+differ, a fault without HTTP response or a dirty control is the contradiction;
+a different hash is not. The driver returns rc 0 after a faulted request, so
+read `http_status`, `health` and `exit_after_request` from its JSON.
+Gitignored W299 evidence: `lab/build/evidence/w299-*.{json,html,server.log}`
+and `lab/build/evidence/w299-aslr-off-determinism/summary.txt`; see
+`reports/ruby2shell-investigation.md` § 23:2xZ. Grade unchanged, stock-wire
+rung 4 unwitnessed, no r5.
 

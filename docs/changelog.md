@@ -2,6 +2,39 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 23:1x–23:2xZ — oiiocineon 192nd, W298 verdict fold, sngrep staging, Ruby W299 variance
+
+This fold covers `33156c0b..7c16d030` and adds explanation only: no generated
+cell, register row, grade, report or lab evidence moved. Recipes are in
+`docs/reproducibility.md` § 23:1x–23:2xZ.
+
+- `33156c0b` folded pjproject2shell's W243 W298 verdict: ESTABLISHED AS
+  LABELED at the shipped-sample clock-adjacency scope only, from clean
+  `git archive a98128fc` with driver `a6cd99f9…`, runner `403b3944…` and
+  `10 PASS / 0 FAIL`. The witness field-label NIT is corrected: the probe
+  mirror omits `max_jump`, so real `cb` is +56, `user_data` +64, `lock` +88;
+  raw `CLOCK_BYTES_AFTER` still carries the chosen marker. W240–W242 remain
+  owed, no grade change and no r5.
+- `8c53acca` admitted oiiocineon2shell as the 192nd mind (window 200, panes
+  %406/%407); counts 191/188/188/128 → 192/189/189/128 with established
+  unchanged. 37/37 pins, runner `79c81411016…`, rc 0, 13/0, GCC ASan
+  `WRITE-8` at `cineoninput.cpp:215`, clang `-O0` reproduces, fixed guard
+  rejects 255 and safe/valid are clean. No full `iinfo`, wire, chosen byte
+  or r5; witness replay owed, `established=false`.
+- `743624ab` + `f6a50d2b` + `1ae76db6` staged sngrepsip2shell W298
+  (CVE-2026-121943, affected `<= 1.9.0`, fix `d49c96c9…`) from four pinned
+  upstream files: GCC/clang ASan `READ of size 10241` at verbatim
+  `sip.c:338` from the unterminated 10240-byte array at `:320`, fixed/safe/
+  guard clean, plain rc 0 negative, source-only harness and clean-archive
+  13/0 replay. Rung 3 only; no register row or admission, witness owed.
+- `4f0028eb` + `7c16d030` made Ruby W299's ASLR-off echo non-byte-exact:
+  12 alive/7 distinct hashes plus 3 faults with no HTTP response over 15
+  fresh attacks; original hash once. Hash-seed-driven layout is a hypothesis,
+  not measured; accept `CORRUPTED` plus `shortened_by_one>0` with clean
+  controls, not a fixed hash. Grade unchanged, rung 4 stock-wire unwitnessed,
+  no r5. The older byte-identical wording in the dated log is superseded.
+
+
 ## 2026-11-26 22:5x–23:0xZ — live555 191st, W296/W297 verdicts, staged W297 lanes
 
 This fold covers `a6ecf1cc..8d459d6b` and adds only explanation: no
