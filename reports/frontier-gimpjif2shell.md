@@ -596,9 +596,27 @@ gdb attached to that pid and set `awatch *(unsigned long long *)0x64964bd11338`
 shows `Hardware access (read/write) watchpoint 1` installed and **no hit**
 before the outer kill: no observed read or write of the chosen word after
 the decompression. The result is bounded: the attach happened after the
-call began, gdb reported no `libthread_db` and could not load dynamic
-linker symbols, and no positive control proved watchpoint insertion on
-every one of the process's 18 LWPs. It does not prove the word is never
-read later. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5: still no
-downstream consumer, chosen address or command.
+call began and gdb reported no `libthread_db` or dynamic linker symbols.
+It does not prove the word is never read later.
+
+A positive control then validated the detector in the **same** real plugin
+process. A second temporary shim variant (source SHA-256
+`0211a5851ba807dcc184b57db52071def2020a058a7b3377f53a53b915b34889`,
+built `.so` SHA-256
+`c4914213ba7d4e120ef87ecede094394bce49f476fa18f068e57e35f0b293840`)
+adds a thread that writes the *same* chosen value back to `out+280`
+12 s after arming. `live/evidence/awatchctl-run.log` (SHA-256
+`03ebc8e1a7e154d83c33e7295bb8dd8500a44f29a074dc35bd3c46583ae0b473`)
+records pid 1706897, `out=0x58d1073cf1d0` and the same chosen word at
+offset 280. `live/evidence/awatchctl-gdb.log` (SHA-256
+`a46332173ed227661902b3f24e8a022973118bc035f8cb3c1a23d95789a19092`)
+shows `Thread 2 "file-gif-load" hit Hardware access (read/write)
+watchpoint 1` at `poke_after_delay` with `Value = 139637981004355`
+(`0x7f0000414243`); after continuing, no second hit appeared in the
+remaining window. The detector therefore fires in this process; what
+remains unverified is watchpoint coverage on every one of the 18 LWPs,
+because gdb could not load `libthread_db` symbols. Grade unchanged rung 3
+/ rung 4 PARTIAL, NO r5: still no downstream consumer, chosen address or
+command.
+
 

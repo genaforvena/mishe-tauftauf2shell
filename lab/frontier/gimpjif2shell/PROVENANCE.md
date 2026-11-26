@@ -792,7 +792,23 @@ for up to 28 s. `live/evidence/awatch-ptr-gdb.log` (SHA-256
 `9802e7ad850cae7694ef4557d1959c32cc13d3028801d1b6730de2ff3610429e`)
 contains `Hardware access (read/write) watchpoint 1` and no hit; zero
 `AWATCH_HIT` lines in the captured output. Bounded negative: the attach
-occurred after inflate began, gdb warned that `libthread_db` and dynamic
-linker symbols were unavailable, and no positive control established
-insertion of the debug register on all 18 reported LWPs. It does not
-prove later non-use. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
+occurred after inflate began, and gdb warned that `libthread_db` and
+dynamic linker symbols were unavailable.
+
+Positive control in the same real plugin: temporary shim source
+`/tmp/awatchctl-shim.c` (SHA-256
+`0211a5851ba807dcc184b57db52071def2020a058a7b3377f53a53b915b34889`,
+built `.so` SHA-256
+`c4914213ba7d4e120ef87ecede094394bce49f476fa18f068e57e35f0b293840`)
+adds a thread that writes the same chosen value back to `out+280` 12 s
+after arming. `live/evidence/awatchctl-run.log` (SHA-256
+`03ebc8e1a7e154d83c33e7295bb8dd8500a44f29a074dc35bd3c46583ae0b473`)
+records pid 1706897, `out=0x58d1073cf1d0`, chosen word present;
+`live/evidence/awatchctl-gdb.log` (SHA-256
+`a46332173ed227661902b3f24e8a022973118bc035f8cb3c1a23d95789a19092`)
+shows `Thread 2 "file-gif-load" hit Hardware access (read/write)
+watchpoint 1` at `poke_after_delay` with `Value = 139637981004355`
+(`0x7f0000414243`), and no subsequent hit after continuing. The
+watchpoint is proven to fire in this process; per-LWP coverage of all 18
+threads remains unverified because `libthread_db` was unavailable. Does
+not prove later non-use. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.

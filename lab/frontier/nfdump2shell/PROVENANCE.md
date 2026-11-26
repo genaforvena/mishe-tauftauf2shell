@@ -664,7 +664,7 @@ New local file:
 
 | artifact | SHA-256 |
 | --- | --- |
-| `run-v6heap.sh` | `71c3c69d593620e18a49bd4b34870c40844d61f5a46da6f86bf26a0308b83fce` |
+| `run-v6heap.sh` | `0f49ceab245343242f2018696c6a67905a90e4d696c081f5b83231589a65b834` |
 
 The charter's open question — which live heap object the 8-byte store
 overlaps — is measured in the genuine uninstrumented plain collector, not
@@ -701,3 +701,13 @@ bytes into the next header, well short of any pointer-bearing field in the
 following chunks. Value remains collector-time derived; no pointer, marker
 or command. Grade unchanged: rung 3 live / rung 4 availability plus
 chosen-byte PARTIAL, NO r5.
+
+Clean-archive replay: `git archive 3d74e580 lab/frontier/nfdump2shell`
+into an empty `/tmp/w-nfdump-heap-clean` rebuilt all four collector pairs
+(`BUILD_INSTRUMENTATION_OK`, `BUILD_WIRE_OK`) from SHA-verified tarballs and
+returned **7 PASS / 0 FAIL**. That replay exposed a real runner defect: the
+evidence output directory was not created, so the `cp` of `gdb.log` and
+`sender.log` failed while the assertions still passed. Fixed by creating
+`$OUT` before the run; an in-tree replay then wrote both logs
+(`harness/out/v6heap/gdb.log`, `sender.log`) and returned 7 PASS / 0 FAIL.
+The hash above is the fixed runner.
