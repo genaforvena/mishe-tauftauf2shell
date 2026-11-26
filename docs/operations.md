@@ -23,4 +23,6 @@ Internal pointers for dashboards, ground-truth documents and the laboratory. Pre
 
 ## Presentation maintenance
 
-`research-manifest.json` is the single source for the front-page counts, the evidence-ladder graphic and the evidence register. Run `python3 tools/render-presentation.py` after editing it; the script rewrites `docs/results.md`, `docs/assets/evidence-ladder.svg` and the marked block in `README.md`. `python3 tools/check-readme.py .` lints the result.
+`research-manifest.json` is the single source for the front-page counts, the evidence-ladder graphic and the evidence register. `python3 tools/render-presentation.py` rewrites `README.md`, `docs/results.md` and `docs/assets/evidence-ladder.svg`; `python3 tools/render-presentation.py --check` verifies all three are current. `python3 tools/check-readme.py .` lints the result and goes RED when any generated file is stale.
+
+The checkout installs a pre-commit hook for the automatic path: `sh tools/install-pre-commit-presentation.sh` links `tools/pre-commit-presentation.sh` into `.git/hooks/pre-commit`. Whenever a commit stages `research-manifest.json`, the hook re-renders and stages all three generated files, so the published front page cannot lag the manifest. The hook refuses to replace a pre-commit hook it did not install. On a fresh checkout, run the installer once; the post-commit push hook is installed separately by `tools/install-post-commit-push.sh`.

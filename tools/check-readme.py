@@ -10,6 +10,7 @@ headings/generated markers, broken relative links and a stale manifest count.
 """
 from __future__ import annotations
 
+import importlib.util
 import json
 import re
 import sys
@@ -69,6 +70,39 @@ def check_links(path: Path, text: str, problems: list[str]) -> None:
         if target_path.is_file() or target_path.is_dir():
             continue
         problems.append(f"{path.relative_to(ROOT)}: link is missing: {target}")
+
+
+
+def check_rendered(data: dict, readme_text: str, problems: list[str]) -> None:
+    """Compare the checked-in presentation with the render of the manifest.
+
+    Same source of truth as render-presentation.py: a manifest edit without a
+    re-render leaves the front page quietly wrong while the table still parses.
+    """
+    path = Path(__file__).resolve().parent / "render-presentation.py"
+    spec = importlib.util.spec_from_file_location("render_presentation", path)
+    if spec is None or spec.loader is None:
+        problems.append(f"cannot load {path.name} for the generated-file check")
+        return
+    renderer = importlib.util.module_from_spec(spec)
+    spec.loader.exec_module(renderer)
+
+    overview = renderer.render_overview(data)
+    start = readme_text.find(renderer.BEGIN)
+    end = readme_text.find(renderer.END)
+    if start < 0 or end < start:
+        problems.append("README.md is missing the generated overview markers")
+    elif readme_text[start:end + len(renderer.END)] != overview:
+        problems.append("README.md generated overview is stale: run tools/render-presentation.py")
+
+    expected = {
+        RESULTS: renderer.render_results(data),
+        ROOT / "docs" / "assets" / "evidence-ladder.svg": renderer.render_svg(data),
+    }
+    for target, text in expected.items():
+        if not target.is_file() or target.read_text(encoding="utf-8") != text:
+            problems.append(
+                f"{target.relative_to(ROOT)} is stale: run tools/render-presentation.py")
 
 
 def main() -> int:
@@ -158,6 +192,7 @@ def main() -> int:
             problems.append(f"manifest reports {declared} findings, register has {row_count} rows")
         if [f["target"] for f in data["findings"]] != targets:
             problems.append("manifest findings[] does not match the register row order")
+        check_rendered(data, readme_text, problems)
 
     if problems:
         for problem in problems:

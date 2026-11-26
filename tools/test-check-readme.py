@@ -31,8 +31,9 @@ def run(root: Path) -> tuple[int, str]:
     return result.returncode, result.stdout + result.stderr
 
 
-def fixture(root: Path, results_text: str, manifest_text: str | None = None) -> None:
-    (root / "README.md").write_text(README.read_text(encoding="utf-8"), encoding="utf-8")
+def fixture(root: Path, results_text: str, manifest_text: str | None = None,
+            readme_text: str | None = None) -> None:
+    (root / "README.md").write_text(readme_text or README.read_text(encoding="utf-8"), encoding="utf-8")
     (root / "docs").mkdir(exist_ok=True)
     (root / "docs" / "results.md").write_text(results_text, encoding="utf-8")
     for rel in LINKED:
@@ -73,7 +74,20 @@ def main() -> int:
         print(f"stale manifest count should lint RED: rc={code}\n{output}")
         return 1
 
-    print("readme-lint regression: PASS (GREEN shipped, RED boundary and stale count)")
+    shipped = json.loads((ROOT / "research-manifest.json").read_text(encoding="utf-8"))
+    readme = README.read_text(encoding="utf-8")
+    begin = readme.index("<!-- BEGIN GENERATED: research overview -->")
+    end = readme.index("<!-- END GENERATED: research overview -->")
+    stale = readme[:begin] + readme[begin:end].replace(shipped["as_of"], "2000-01-01", 1) + readme[end:]
+    with tempfile.TemporaryDirectory() as tmp:
+        root = Path(tmp)
+        fixture(root, original, readme_text=stale)
+        code, output = run(root)
+    if code != 2 or "generated overview is stale" not in output:
+        print(f"stale overview should lint RED: rc={code}\n{output}")
+        return 1
+
+    print("readme-lint regression: PASS (GREEN shipped, RED boundary, stale count and overview)")
     return 0
 
 
