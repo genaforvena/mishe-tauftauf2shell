@@ -1,0 +1,32 @@
+PASS vulnerable tarball sha256
+PASS fixed tarball sha256
+PASS vulnerable smpp34_unpack.c verbatim sha256
+PASS fixed smpp34_unpack.c verbatim sha256
+PASS upstream diff changes exactly one line pair
+PASS vulnerable line is unbounded strlen
+PASS fixed line is bounded strnlen
+PASS gcc vuln ASan heap overflow
+PASS gcc vuln ASan READ size 2
+PASS gcc vuln ASan exact allocation boundary
+PASS gcc vuln ASan frame at verbatim bind frame
+PASS gcc vuln ASan exits 1
+PASS clang vuln ASan heap overflow
+PASS clang vuln ASan READ size 2
+PASS clang vuln ASan frame at verbatim bind frame
+PASS clang vuln ASan exits 1
+PASS fixed ASan clean exit
+PASS fixed rejects unterminated C-Octet
+PASS fixed strnlen length guard fires
+PASS fixed no ASan report
+PASS clang fixed attack clean
+PASS vuln ASan valid PDU clean exit
+PASS vuln valid PDU parsed
+PASS vuln chosen bytes read back
+PASS vuln valid PDU no ASan report
+PASS fixed ASan valid PDU clean exit
+PASS fixed valid PDU parsed
+PASS fixed chosen bytes read back
+PASS fixed valid PDU no ASan report
+PASS plain guard-page fault rc
+PASS guard-page input reached unpack
+RESULT PASS=31 FAIL=0
