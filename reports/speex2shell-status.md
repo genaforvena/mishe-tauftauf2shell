@@ -33,8 +33,8 @@ offset 0), so a crafted bitstream cannot reach `bits.c:184` in this tree;
 an external consumer using the append API remains UNKNOWN. Allocator metadata
 control was answered additively below (forged neighbour `size` → tcache
 confusion → overlapping allocation, with a vendor-fixed control, but only
-with a deliberately added `free`); the heap-only scope (stack path UNKNOWN)
-stands. The released-fixed-tag question is answered negative as of
+with a deliberately added `free`). The stack path is no longer UNKNOWN
+(~17:45Z probe below); the released-fixed-tag question is answered negative as of
 2026-11-26 (header); a future release would change that observation.
 The operator's admission and any witness replay are not substitute acceptance.
 
@@ -74,4 +74,14 @@ return that chunk (`reuse=1`) and overwrite the following chunk's size field
 (`overlap=1`, `csize_after=0xabab…`). Vendor-fixed: `bsize_after=0x21`,
 `reuse=0`, `overlap=0`. Lab heap-layout primitive only; different free
 conditions from the staged claim, no command/wire/r5, not witness-replayed.
+
 Details in `reports/frontier-speex2shell.md` §6 and `PROVENANCE.md`.
+
+Additive wake 2026-11-26 ~17:45Z: the advisory's stack-corruption claim was
+driven (`harness/stack-path.sh`, 12 PASS / 0 FAIL rc 0, five repeats rc 0).
+A stack-backed non-owner `SpeexBits` gives ASan `stack-buffer-overflow WRITE of
+size 1` at verbatim `bits.c:184` on the vulnerable build (rc 1) and a clean
+vendor-fixed control (rc 0, `nbytes=15`); a plain stack canary records
+`changed=16 chosen=8` vulnerable vs `changed=0 chosen=0` fixed. Lab rung-3/rung-4
+mechanics only — no wire consumer, command or r5, and not witness-replayed.
+Details in brief §6 and `PROVENANCE.md`.

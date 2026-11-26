@@ -1,0 +1,5 @@
+warning: Do not own input buffer: truncating oversize input
+warning: Do not own input buffer: truncating oversize input
+buf=0x7ffda80fe7b0 canary=0x7ffda80fe7c0 delta=16
+canary=505152535455565758595a5b5c5d5e5f
+changed=0 chosen=0

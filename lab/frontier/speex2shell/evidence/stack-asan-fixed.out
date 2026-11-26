@@ -1,0 +1,2 @@
+warning: Do not own input buffer: truncating oversize input
+mode=fixed nbytes=15 nbBits=120 owner=0 buf_size=16 buf=0x7c2b65500020

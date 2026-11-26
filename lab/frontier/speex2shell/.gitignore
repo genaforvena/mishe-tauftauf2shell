@@ -20,3 +20,7 @@ evidence/ptr-vuln-plain
 evidence/ptr-fixed-plain
 evidence/alloc-vuln-plain
 evidence/alloc-fixed-plain
+evidence/stack-asan-vuln
+evidence/stack-asan-fixed
+evidence/stack-canary-vuln
+evidence/stack-canary-fixed

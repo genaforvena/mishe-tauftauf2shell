@@ -25,6 +25,12 @@ control (§6). This probe deliberately adds a `free()` of the corrupted
 chunk, so its conditions differ from the staged rung-4 claim; no command,
 wire path or r5.
 
+Update 2026-11-26 ~17:45Z (speex2shell wake): the advisory's stack-corruption
+claim was driven with the pinned builds — ASan `stack-buffer-overflow` at
+verbatim `bits.c:184` and chosen bytes in an adjacent stack canary, both with
+clean vendor-fixed controls (§6). No wire consumer, command or r5; the two
+stack-related UNKNOWNs are now answered as lab observations.
+
 ## 1. Verified ground truth
 
 - Claim: https://github.com/advisories/GHSA-jmfj-jxhf-c4c3
@@ -118,8 +124,10 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
   r5. The underlying primitive remains chosen bytes at code-determined
   offsets in an adjacent live object under the stated allocator conditions.
 - No benign command, no live wire consumer and no r5.
-- The advisory also claims stack corruption; only the heap path was driven.
-  Stack reachability is **UNKNOWN**.
+- The advisory's stack-corruption claim is now driven (§6): a stack-backed
+  non-owner `SpeexBits` produces an ASan `stack-buffer-overflow WRITE of size
+  1` at verbatim `bits.c:184`, and the plain build lands chosen bytes in an
+  adjacent stack canary. Still no command, wire path or r5.
 - A later issue comment reports a negative truncated length / UBSan
   left-shift when the non-owned buffer is already full at the fix commit.
   That adjacent bug is preserved as a separate UNKNOWN and is not part of
@@ -229,3 +237,23 @@ wire path. **Condition change:** unlike the staged rung-4 claim and the
 pointer probe, this experiment *does* free the corrupted chunk; glibc
 tcache behaviour and the harness-seeded next-chunk size are part of the
 observation. Not replayed by the witness.
+
+### Stack path (~17:45Z)
+
+`harness/stack-asan.c` puts the non-owner 16-byte buffer on the **stack** and
+reuses the pinned clang ASan libs. Vulnerable run
+(`evidence/stack-asan-vuln.out`): `ERROR: AddressSanitizer:
+stack-buffer-overflow`, `WRITE of size 1`, frame
+`speex_bits_read_whole_bytes ... bits.c:184:25`, rc 1. Vendor-fixed
+(`evidence/stack-asan-fixed.out`): rc 0, `nbytes=15`, no ASan report.
+`harness/stack-canary.c` uses a stack struct
+`{ char buf[16]; char canary[16]; }` and the two sequential oversize reads
+with the plain gcc libs: `delta=16`,
+`canary=7172737475767778696a6b6c6d6e6f70` (payload[8..15] then
+payload[0..7]), `changed=16 chosen=8` vulnerable
+(`evidence/stack-canary-vuln.out`); `canary=5051…5f`, `changed=0 chosen=0`
+fixed (`evidence/stack-canary-fixed.out`). `bash harness/stack-path.sh` →
+12 PASS / 0 FAIL rc 0; five repeat runs also rc 0. The harnesses are unpinned
+and not replayed by the witness. This resolves the advisory's stack-corruption
+UNKNOWN as a lab rung-3/rung-4 observation under the same non-owner/oversize
+conditions; no pointer, command, wire path or r5.

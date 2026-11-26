@@ -118,3 +118,25 @@ six direct repeat runs rc 0. This probe **adds a `free()` of the corrupted
 chunk**, unlike the staged rung-4 claim; it is a lab heap-layout primitive,
 not a command, wire path or r5, and the witness has not replayed it.
 The binary outputs are gitignored like the other local probe binaries.
+
+## Stack-path probe 2026-11-26 ~17:45Z (author-observed, unpinned)
+
+`harness/stack-asan.c`, `harness/stack-canary.c` and `harness/stack-path.sh`
+are new and unpinned; the six pins, `run-all.sh`, `run-witness.sh`, the pinned
+trees and their libraries are unchanged. `stack-asan.c` backs the non-owner
+`SpeexBits` with a stack array and is compiled against the existing clang ASan
+libs (`src-vuln`, `src-fixed`). Vulnerable: ASan `stack-buffer-overflow`,
+`WRITE of size 1` at `bits.c:184:25`, rc 1; fixed: rc 0, `nbytes=15`.
+`stack-canary.c` uses the plain gcc libs and a stack struct with an adjacent
+canary: vulnerable `delta=16`,
+`canary=7172737475767778696a6b6c6d6e6f70`, `changed=16 chosen=8`; fixed
+`changed=0 chosen=0`. Raw outputs:
+`evidence/stack-asan-vuln.out`, `evidence/stack-asan-fixed.out`,
+`evidence/stack-canary-vuln.out`, `evidence/stack-canary-fixed.out`.
+`harness/stack-path.sh` reported 12 PASS / 0 FAIL rc 0 plus five repeats rc 0.
+This answers the advisory's stack-corruption claim (previously UNKNOWN) as a
+lab observation only: no wire consumer, command or r5, and the witness has not
+replayed it. The four new probe binaries are added to `.gitignore` beside the
+other local probe binaries; the new `evidence/stack-*.out` files are kept as
+tracked evidence, as with the earlier probes. A 2026-11-26 ~17:47Z retry of the
+reporter's hackmd write-up returned HTTP 404, so it remains unavailable.
