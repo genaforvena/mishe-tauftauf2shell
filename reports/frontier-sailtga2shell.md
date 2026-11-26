@@ -1,0 +1,103 @@
+# Frontier brief — sailtga2shell (CVE-2026-54626 / GHSA-744p-cqg2-m33h)
+
+Status: **staged 2026-11-26 by `frontier`, window 171, not admitted.**
+Rungs 1–3 observed locally with the real public `sail_load_from_file()` API and
+GCC+Clang ASan; rung 4 demonstrated in the lab under a plain allocator —
+attacker-chosen bytes `AA BB CC DD` land at offsets 256..263 past a 256-byte
+pixel allocation. No pointer control, no command execution, no wire path, no r5.
+Duplicate check before provisioning: no `sail` slug in the do-not-duplicate
+list, no `reports/frontier-*sail*`, no sail window/charter/mind on the tape.
+Admission is the operator's; wake units and full-flag sync stay with the person.
+
+## 1. Verified ground truth
+
+- Claim: `https://github.com/HappySeaFox/sail/security/advisories/GHSA-744p-cqg2-m33h`,
+  published 2026-06-07, Critical 9.8, CVE-2026-54626, affected `<= 0.9.10`,
+  patched `1.0.0`, CWE-122/787. Advisory claims heap OOB write of
+  attacker-controlled bytes through `sail_load_from_file()` in any application
+  loading an untrusted TGA; incomplete fix of CVE-2026-40494.
+- Advisory PoC: 28-byte 16×16 indexed-RLE TGA (`image_type=9`, header `bpp=32`)
+  with two `0xFF` RLE run packets carrying four-byte pixels; 256-byte pixel
+  buffer, 1024 bytes written. Advisory's pasted ASan log reports `WRITE of
+  size 4`, 0 bytes after a 256-byte region, at `tga.c:303`, with a `Version:
+  1.0.0` banner — see the discrepancy below.
+- Verified by my own fetches: vulnerable tag `v0.9.10` (`cdd9d5f20bd0bf83683637afee61dd7e954162b2`),
+  fixed tag `v1.0.0` (`0f969168b9d19d43f448d2237990ec247ba822ca`), fix commit
+  `fa24bceb93958ad665dbc3cf6b49a1079ab12559` with parent
+  `2a4c3b7af46af7e244155e305027507e9e7493bd`. Raw `tga.c` SHA-256 pins are in
+  `lab/frontier/sailtga2shell/PROVENANCE.md`.
+
+## 2. Source-bound mechanism
+
+`helpers.c`'s `tga_private_sail_pixel_format()` maps `image_type=9` to
+`SAIL_PIXEL_FORMAT_BPP8_INDEXED` regardless of header `bpp`, so
+`sail_load_next_frame()` allocates `width*height*1` bytes. The RLE decoder in
+`tga.c` nevertheless computes `pixel_size = (file_header.bpp + 7) / 8`
+(verbatim `tga.c:237` at v0.9.10), validates only `1..16` bytes, and then
+advances the pointer by `pixel_size` per pixel in both packet types:
+`memcpy(pixels, pixel, pixel_size)` at `tga.c:269` (run) and
+`strict_read(..., pixels, pixel_size)` at `tga.c:277` (raw). With `bpp=32`,
+four chosen bytes are written per one-byte pixel slot, so the second run packet
+lands past the 256-byte allocation. The earlier CVE-2026-40494 clamp bounds
+pixel *count*, not bytes per pixel.
+
+Vendor fix (commit `fa24bce…`, identical raw bytes at tag `v1.0.0`) adds
+`if (sail_bits_per_pixel(pixel_format) != (unsigned)file_header.bpp) return
+SAIL_ERROR_INVALID_IMAGE;` before allocation and replaces the header-derived
+stride with `sail_bits_per_pixel(image->pixel_format)`. Both hunks are present
+in the pinned fixed source; no local synthetic patch is used.
+
+## 3. Local result
+
+`lab/frontier/sailtga2shell/` builds five real static SAIL trees from the
+pinned tarballs with `-DSAIL_ONLY_CODECS=tga`: v0.9.10 with clang ASan, gcc
+ASan and gcc plain, plus v1.0.0 with clang ASan and gcc plain. The driver calls
+only `sail_load_from_file()` on three local 28-byte TGA files.
+
+- `bash harness/run-all.sh`: **38 PASS / 0 FAIL**, rc 0.
+- GCC+Clang ASan on the attack input: `heap-buffer-overflow`, `WRITE of size
+  4`, 0 bytes after a 256-byte region, frame
+  `sail_codec_load_frame_v8_tga` at verbatim `tga.c:269`, allocation through
+  `sail_malloc` via `sail_load_next_frame`, caller `sail_load_from_file`.
+- Plain vulnerable build, beyond-allocation probe: bytes at offsets 256..263
+  are `aa bb cc dd aa bb cc dd` — attacker-chosen bytes at chosen offsets.
+- Safe controls: `bpp=8` indexed-RLE with matching one-byte stride and
+  `bpp=32` truecolor-RLE with matching four-byte stride both stay clean under
+  ASan; in the plain build their bytes at 256..263 are either absent or
+  inside a 1024-byte allocation. Vendor-fixed v1.0.0 rejects the attack input
+  with `SAIL_ERROR_INVALID_IMAGE` (`rc=213`) under both compilers, no ASan
+  report.
+- `bash run-witness.sh`: `REPLAY_PASS=14/0`, inner `TOTAL: 38 PASS / 0 FAIL`,
+  in-tree and from a clean `git archive` (see wall for archive hash).
+
+## 4. Cheapest next experiment
+
+For a dedicated mind: drive the same 28-byte input through
+`sail_load_from_memory()` and through a real local image-decoding application
+to check whether the public junior API is the only consumer path; then place a
+live adjacent allocation under a plain allocator and test whether the four-byte
+stride can change a pointer-bearing field before the pixel buffer is freed.
+No external probing is authorized; all testing stays in the lab and on loopback.
+
+## 5. Negatives, discrepancies and UNKNOWNs
+
+- Advisory's ASan paste claims a `Version: 1.0.0` build still crashes at
+  `tga.c:303`; raw `v1.0.0` `tga.c` verifiably contains both guards and the
+  pinned v1.0.0 build rejects the input. The paste is likely a pre-release
+  master build; treat it as a claim, not the tag's behavior. Advisory's
+  `tga.c:303` line also differs from the v0.9.10 sink at `:269` because of
+  intervening changes; the raw tag bytes are authoritative.
+- v1.0.0 needs optional libswscale headers absent on this host. Empty stub
+  headers are supplied through `CMAKE_C_FLAGS` and libswscale is forced OFF;
+  only unused code behind `SAIL_MANIP_SWSCALE_ENABLED` sees them. No upstream
+  source byte is modified.
+- An early safe-8 body was misparsed as mixed RLE/raw packets and caused an
+  OOB write; it was replaced with two valid one-byte run packets plus padding.
+  An early `bpp=24` truecolor body returned `SAIL_ERROR_READ_IO`; replaced by
+  the valid `bpp=32` truecolor control. Both negatives are preserved here.
+- The driver's optional beyond-allocation read is gated behind the `probe`
+  argument; without it ASan controls stay clean, avoiding a false positive
+  from the measurement itself.
+- No RCE, no pointer overwrite, no r5. Real-world application reachability
+  beyond "any app that loads an untrusted TGA through SAIL" is UNKNOWN. Witness
+  replay verdict is not yet claimed by this mind.
