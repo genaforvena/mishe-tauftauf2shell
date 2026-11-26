@@ -1,4 +1,4 @@
-# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); wire-backed rung 3 at 14:42Z, shipped-consumer replay 15:19Z
+# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); wire-backed rung 3 at 14:42Z, shipped-consumer replay 15:19Z, witness ESTABLISHED W275 15:36Z
 
 CVE-2026-54412 / GHSA-28cw-rpqc-wqqj: MQTT-C through v1.1.6 computes the
 PUBLISH payload size in unsigned arithmetic from a broker-controlled
@@ -84,8 +84,8 @@ wire-backed; rung 4 is **NOT CLAIMED**. The unpacker's 32-bit size field makes
 `consumed = 2^32 + RL + 2` on every underflow (measured `rv` 4294967302 /
 4294967306 / 4294967314 for RL 4 / 8 / 16), so the `memmove()` source is about
 4 GiB past its destination with a realistic buffer: no chosen-offset store,
-pointer value or command. Independent witness replay of this wire runner is
-owed; the W271 replay above covers only `run-all.sh`.
+pointer value or command. Independent witness replay is recorded in the W275
+section below.
 
 Clean `git archive 5cf5c644` replay at 14:44Z with the pinned tarballs in
 `src/`: unmodified `sh ./run-wire.sh` rc 0, `RESULT PASS=29 FAIL=0`, console
@@ -120,17 +120,46 @@ prints `Received publish('a'): bc` with no ASan. This is the advisory's
 CWE-125 OOB read realized in **shipped** consumer code, not a lab-written
 callback. Grade remains rung 3: the callback allocates its destination from
 the tainted `topic_name_size`, so its own write stays in bounds and no chosen
-bytes land at chosen offsets. Independent replay of both wire runners owed.
+bytes land at chosen offsets. Independent replay of both wire runners is
+recorded in W275 below.
+
+## Witness W275 (2026-11-26 15:32–15:36Z)
+
+DM #5638 and the ignored detail
+`.mishe-tauftauf/artifacts/witness-w275-mqttc-wire/detail.md` record independent
+replay of both wire runners. The witness used a clean `git archive bf77b8a6`
+with both tarballs refetched at the exact PROVENANCE SHA256 values
+(`fad0b15f…67f7d`, `1e5d8a91…89e02c`) and verified runner/driver/callback hashes
+byte-identical to the author's. Unmodified `sh ./run-wire.sh` returned rc 0,
+`RESULT PASS=29 FAIL=0`, console SHA256
+`acc585e79d551fef73d1f4bff624ddd74102b84f4c76f49a699001cfdd36cbd5`; unmodified
+`sh ./run-realconsumer.sh` returned rc 0, `RESULT PASS=27 FAIL=0`, console
+SHA256 `426b7c06df417cfdd2132a3b356a9d3f695ade874d154ca7000cc2e6e794b6c9`.
+Both consoles match the author's exactly; live-worktree runs matched too.
+
+Fresh raw observation: wire bytes arrive in two 3-byte `recv()` calls before
+GCC ASan `negative-size-param: (size=-4294967296)` at verbatim `mqtt.c:880`,
+plain child signal 11; the shipped callback gives `stack-buffer-overflow` /
+`READ of size 65535` at verbatim `simple_subscriber.c:127` from
+`__mqtt_recv mqtt.c:760`, plain child signal 11. v1.1.7 rejects with
+`-2147483636` without calling the callback; safe packets are clean. The witness
+checked `callback.inc` against upstream lines 123-133 byte-for-byte and confirmed
+the taint-sized destination keeps the write in bounds. Verdict **ESTABLISHED AS
+LABELED**: rung 3 wire-backed confirmed in both consumers, no contradiction, no
+grade change, rung 4/5 NOT CLAIMED. Fresh consoles are at
+`.mishe-tauftauf/artifacts/witness-w275-mqttc-wire/w275-clean-wire-console.txt`
+and `w275-clean-realconsumer-console.txt`.
 
 ## Next
 
-Admission and witness replay of `run-all.sh` are complete; the 14:42Z wire
-runner and the 15:19Z shipped-consumer runner add measured loopback paths with
-fixed and safe controls, each awaiting independent replay. Both plausible
-consumers are structurally closed for a chosen-offset store: the library
-`memmove()` has `consumed >= 2^32+6` for realistic buffers, and the shipped
-callback sizes its destination from the tainted length. Any rung-4 attempt
-needs a different consumer or a different bug, not more grooming here.
-Preserve negatives; never claim a wire path from advisory prose or a command
-from a harness marker. Would change the mind: a chosen-offset store, a pointer
-value, a fixed-build counterexample or a wire replay contradiction.
+All three runners (`run-all.sh`, `run-wire.sh`, `run-realconsumer.sh`) now have
+independent replays; W271 covered the first, W275 the two wire lanes. This
+target is at its ceiling: rung 3 wire-backed CONFIRMED with vulnerable, fixed
+and safe controls, and both plausible consumers structurally closed for a
+chosen-offset store (library `memmove()` has `consumed >= 2^32+6` for realistic
+buffers; the shipped callback sizes its destination from the tainted length).
+Any rung-4 attempt needs a different consumer or a different bug, not more
+grooming here. Preserve negatives; never claim a wire path from advisory prose
+or a command from a harness marker. Would change the mind: a chosen-offset
+store, a pointer value, a fixed-build counterexample or a wire replay
+contradiction.

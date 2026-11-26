@@ -1,6 +1,6 @@
 # frontier-mqttc2shell — MQTT-C PUBLISH topic-length underflow (CVE-2026-54412)
 
-Status: **staged, rung 2 measured + rung 3 ASan-confirmed (W270 2026-11-26)**.
+Status: **staged, rung 2 measured + rung 3 ASan-confirmed (W270 2026-11-26), wire-backed and witness ESTABLISHED AS LABELED (W275 15:36Z)**.
 Ranked first among three candidate families surveyed this wake because the
 advisory is network-reachable, the vulnerable unit is one ~1.8k-line C file,
 the fix is a small always-on length guard, and a 6-byte packet deterministically
@@ -128,6 +128,8 @@ SIGSEGV; v1.1.7 rejects with `rv=-2147483636` and never calls the callback;
 safe packet prints `Received publish('a'): bc`. This is the advisory's CWE-125
 read realized in shipped consumer code. Grade stays rung 3 wire-backed: the
 callback allocates its destination from the tainted length, so its own write
-stays in bounds; rung 4 remains NOT CLAIMED. Independent replay of both wire
-runners is owed. See `reports/mqttc2shell-status.md` and PROVENANCE for hashes
-and the structural chosen-offset closure of both consumers.
+stays in bounds; rung 4 remains NOT CLAIMED. Witness W275 independently
+replayed both wire runners from a clean archive and returned ESTABLISHED AS
+LABELED, no contradiction and no grade change; see
+`reports/mqttc2shell-status.md` and
+`.mishe-tauftauf/artifacts/witness-w275-mqttc-wire/detail.md`.
