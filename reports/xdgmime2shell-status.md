@@ -1,4 +1,4 @@
-# xdgmime2shell — staged, not admitted
+# xdgmime2shell — admitted (witness replay owed)
 
 CVE-2026-16118 / xdg/xdgmime issue #41: little-endian byte-swap in
 `_xdg_mime_magic_parse_magic_line()` writes past a heap `matchlet->value`
@@ -22,7 +22,9 @@ Brief: `reports/frontier-xdgmime2shell.md`.
 
 ## Next
 
-Operator admission and an independent witness replay are owed. The dedicated
-two-pane window exists on the inner tmux socket and is registered in
-`operator/window-registry.json`; no wake unit was created by frontier
-(person-owned). Do not duplicate this lane.
+Admitted 11:2xZ under standing #6 as the 171st declared target mind; window
+179 adopted (panes %362/%363 live, no duplicate). The engine route and three
+generated wake units remain person-reserved (`standing-approvals.md:47-51`).
+Independent witness W265 clean-archive replay was in progress at admission;
+its verdict and the presentation fold are owed before this row can be marked
+ESTABLISHED. Do not duplicate this lane or the registered window.
