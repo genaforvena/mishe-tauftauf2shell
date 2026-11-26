@@ -4,8 +4,10 @@ Brief: `reports/frontier-speex2shell.md`. Lab: `lab/frontier/speex2shell/`.
 Claim: CVE-2026-116741 / GHSA-jmfj-jxhf-c4c3, `speex_bits_read_whole_bytes()`
 non-owner truncation writes caller-chosen bytes past a `SpeexBits` buffer.
 Affected "through 1.2.1"; vendor fix commit `09b569d1b437e5edccf3406a38714ad795e46d38`
-(GitLab MR !32), first released fixed tag UNKNOWN. State: **ADMITTED by the
-operator under standing #6 as the 162nd declared target mind; window 170 adopted.**
+(GitLab MR !32). A 2026-11-26 direct refs query found that commit on two
+branches and no tag, and both upstream mirrors' newest tag is `Speex-1.2.1`:
+no released fixed tag exists as of that query (`lab/frontier/speex2shell/evidence/released-tag-check.txt`).
+State: **ADMITTED by the operator under standing #6 as the 162nd declared target mind; window 170 adopted.**
 
 Evidence: `bash lab/frontier/speex2shell/harness/run-all.sh` → 28 PASS / 0 FAIL rc 0.
 Four real libspeex builds from the pinned tarball (ASan clang vulnerable and
@@ -29,9 +31,10 @@ Next: no bundled decoder reaches the vulnerable append API — every in-tree
 consumer uses `speex_bits_read_from` (which resets `nbBits` and writes at
 offset 0), so a crafted bitstream cannot reach `bits.c:184` in this tree;
 an external consumer using the append API remains UNKNOWN. Also open: allocator
-metadata control before any `free`, a released fixed tag, and the heap-only
-scope (stack path UNKNOWN). The operator's admission and any witness replay
-are not substitute acceptance.
+metadata control before any `free` and the heap-only scope (stack path
+UNKNOWN). The released-fixed-tag question is answered negative as of
+2026-11-26 (header); a future release would change that observation.
+The operator's admission and any witness replay are not substitute acceptance.
 
 Witness W245 (04:35Z, #4847): independent clean-archive and serial in-tree
 replays both `REPLAY_PASS=10/0`, inner `28/0`, rc 0; upstream hashes and MR !32

@@ -29,10 +29,12 @@ does not cover these additive observations.
   corrupting heap or stack memory and crashing applications.
 - Vendor fix: https://gitlab.xiph.org/xiph/speex/-/merge_requests/32,
   MR !32 head commit `09b569d1b437e5edccf3406a38714ad795e46d38`, one security
-  hunk plus an unrelated signed-shift cleanup. GitHub tag listing at
-  2026-11-26 shows no tag newer than `Speex-1.2.1`, so the fix commit is not
-  in any public release; first released fixed tag is **UNKNOWN/NONE** and
-  the fix commit is pinned as the fixed control.
+  hunk plus an unrelated signed-shift cleanup. A direct GitLab refs query
+  (2026-11-26 ~16:40Z) finds that commit on branches
+  `fix/read-whole-bytes-oob-write` and `main` and on **no tag**; GitHub and
+  GitLab tag lists both top out at `Speex-1.2.1`. No released fixed version
+  exists as of that query, so the fix commit is pinned as the fixed control.
+  Raw output: `lab/frontier/speex2shell/evidence/released-tag-check.txt`.
 - Source pins: tarball `beaf2642e81a822eaade4d9ebf92e1678f301abfc74a29159c4e721ee70fdce0`
   (tag `Speex-1.2.1`); raw `libspeex/bits.c` at that tag
   `bd36b8081282f5a6e9558b2ed8a0acace0a6c3c976587802b466ff8c628a335a`; at
@@ -133,8 +135,11 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
 2. Test whether the corrupted adjacent chunk metadata can be turned into a
    controlled allocation/layout primitive before any `free`, with safe
    controls; do not assume the current 8-byte data overwrite is enough.
-3. Check upstream for a released tag containing `09b569d1` and replace the
-   fix-commit control with the release if one exists.
+3. **Answered negative at query time.** GitLab's refs query lists the fix
+   commit on two branches and no tag, and both mirrors' newest tag is
+   `Speex-1.2.1`; there is no released fixed build to replace the pinned fix
+   commit control. Raw evidence:
+   `lab/frontier/speex2shell/evidence/released-tag-check.txt`.
 
 ## Witness verdict — W245 (tape #4847, 2026-11-26 04:35Z)
 
@@ -156,6 +161,10 @@ stay UNKNOWN. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w245-speex2shell/detail.md`.
 Two wording NITs are folded above and in `PROVENANCE.md`: the wrapper path
 and the "merge commit" label for the one-parent MR head commit.
+
+Later additive check (not part of the W245 verdict): the released-fixed-tag
+item above was resolved negative as of 2026-11-26 ~16:40Z by a direct GitLab
+refs query (§1 and §5.3); the witness's UNKNOWN stands as its own observation.
 
 ## 6. Additive wake 2026-11-26 (speex2shell, author-observed)
 

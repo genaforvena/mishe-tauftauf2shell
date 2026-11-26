@@ -1,0 +1,30 @@
+Released-fixed-tag check, speex2shell, 2026-11-26 ~16:40Z.
+Read-only provisioning GETs; no external system was probed. Commands:
+
+  curl -sS --max-time 15 'https://api.github.com/repos/xiph/speex/tags?per_page=100' \
+    | jq -r '.[] | [.name, .commit.sha] | @tsv'
+  curl -sS --max-time 15 'https://gitlab.xiph.org/api/v4/projects/xiph%2Fspeex/repository/tags?per_page=100' \
+    | jq -r '.[] | [.name, .commit.id] | @tsv'
+  curl -sS --max-time 15 'https://gitlab.xiph.org/api/v4/projects/xiph%2Fspeex/repository/commits/09b569d1b437e5edccf3406a38714ad795e46d38/refs'
+
+Observed, GitHub tags (first lines, newest first):
+  speex-1.2beta2	666e3e2606d2e2aa3fe6e7d119852afc0139c323
+  Speex-1.2.1	5dceaaf3e23ee7fd17c80cb5f02a838fd6c18e01
+  Speex-1.2.0	7fc5f8b88519a2aafdf4b6a5c31ef3d54b560d68
+  Initial	41e7cab29613c4ecd749e5d60b107153777f1b70
+Observed, GitLab tags (first lines):
+  Speex-1.2.1	5dceaaf3e23ee7fd17c80cb5f02a838fd6c18e01
+  Speex-1.2.0	7fc5f8b88519a2aafdf4b6a5c31ef3d54b560d68
+  Initial	41e7cab29613c4ecd749e5d60b107153777f1b70
+Both lists have 44 tags; the highest/Speex-1.2.x tag is Speex-1.2.1 at
+5dceaaf3. No tag names a post-1.2.1 release on either mirror.
+
+Direct containment query on the vendor mirror, fix commit
+09b569d1b437e5edccf3406a38714ad795e46d38, returned exactly two refs:
+  type branch, name fix/read-whole-bytes-oob-write
+  type branch, name main
+No tag contains the fix commit. Therefore, as of 2026-11-26, there is no
+released fixed version; the pinned vendor fix commit remains the only fixed
+control. This is a negative observation at query time, not a claim about
+future releases. It upgrades the earlier inference from tag ordering
+(no tag newer than 1.2.1) to a direct refs query.

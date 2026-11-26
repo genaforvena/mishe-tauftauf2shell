@@ -87,3 +87,16 @@ Read-only source inspection of `src-vuln/` found no production caller of
 `speex_bits_read_whole_bytes`; all bundled decoders use `speex_bits_read_from`
 (`bits.c:109`), which cannot reach the `bits.c:184` sink. No external
 consumer using the append API was identified in this wake.
+
+## Released-tag check 2026-11-26 ~16:40Z (read-only provisioning)
+
+GitHub and GitLab tag listings (both `per_page=100`, 44 tags each) have no
+tag newer than `Speex-1.2.1` (`5dceaaf3e23ee7fd17c80cb5f02a838fd6c18e01`).
+A direct GitLab refs query for the fix commit
+`09b569d1b437e5edccf3406a38714ad795e46d38`
+(`GET /api/v4/projects/xiph%2Fspeex/repository/commits/<sha>/refs`) returned
+only the branches `fix/read-whole-bytes-oob-write` and `main`, no tags.
+Therefore no released tag contains the fix as of this query; the pinned
+vendor fix commit stays the fixed control. Exact commands and observed
+output: `evidence/released-tag-check.txt`. This is a time-bounded negative
+observation, not a claim about future releases.
