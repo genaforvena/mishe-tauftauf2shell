@@ -5945,3 +5945,53 @@ a 0x20 BBuf can put its `next` word inside the reachable window.
 Grades unchanged: wire-only secondary rung 3; prior rung-4 scopes
 witness-COMPLETE; harness-condition rung 5 ESTABLISHED as labeled; full
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+## 2026-11-26 18:5xZ — Ruby-side consumer of the corrupted chunk size word: NEGATIVE
+
+The reachable byte from the primary overflow is the **low byte of the
+adjacent chunk's malloc size word**, never its user data (previous section).
+Before investing further in glibc-side mechanics, I checked whether this
+plant's Ruby build has any live consumer of that word **before** glibc
+malloc/free reads it.
+
+Source read (`lab/build/ruby-3.4.12`): the only in-tree reader of a malloc
+chunk's size word is `objspace_malloc_size()`
+(`gc/default/default.c:7943-7951`, `malloc_usable_size(ptr)`), called by
+`rb_gc_impl_free()` at `:8177` and by `rb_gc_impl_realloc()` at `:8284` and
+`:8287`. `ruby_xfree()` (`gc.c:4676-4696`) routes through
+`ruby_sized_xfree()` → `rb_gc_impl_free()`. The plain binary confirms the
+path: `ruby_sized_xfree` at `0x6cf30` calls `malloc_usable_size@plt` at
+`0x6cf5f`, then `free@plt` at `0x6cf71`; the value only adjusts GC malloc
+accounting counters. No other application-visible size-word reader was found
+in this tree; all remaining consumers of the word are glibc malloc/free
+internals already covered by the recorded abort lanes.
+
+Instrumented pass: `lab/preload/musize-consumer.c` (build command in its
+header) interposes `malloc` and `malloc_usable_size` read-only. It records
+every 65–80-byte allocation destination (`user + request`, the overflow
+address), logs the first 20 usable-size calls as an interposition control,
+and logs every usable-size call on a chunk whose header sits at one of those
+destinations (`kind=2` for the exact size word, `kind=1` for `prev_size`).
+`lab/repro/ruby2shell-musize-consumer.py` drives one keep-alive connection
+against the plain 3.4.12 stock Rails app (`RAILS_MAX_THREADS=1`): benign
+Regexp POST → wire-only mixed27 `_method.to_s.upcase` overflow → benign
+Regexp POST. The interposer writes no target memory.
+
+Evidence `lab/build/evidence/musize-keepalive-7.{trace,json}` (tags 1–6 are
+the same negative with progressively better instrumentation): statuses
+200 / 404 / 200, worker alive; 343 candidate destinations; 20 control `V`
+calls from the Ruby process (caller offsets `0x55810`, `0x67eef`, `0x69895`,
+etc., proving interposition was active); 209 usable-size calls on exact
+size-word overlaps and 226 on `prev_size` overlaps; **zero** calls with raw
+size low byte `0x53` (the byte written by all 14 affected single-byte
+encodings), zero `U` lines. Observed headers at the overlap sites were
+ordinary sizes such as `0x35`, `0x85`, `0xa5`, `0x225`. No Ruby-side consumer
+read an attacker-corrupted size value in this sequence; with glibc's own
+reads already closed by the recorded abort lanes, the wire-only rung-5 route
+through the primary overflow's size-word corruption is **closed on this
+build**.
+
+Grade unchanged: wire-only secondary rung 3; prior rung-4 scopes
+witness-COMPLETE; harness-condition rung 5 ESTABLISHED as labeled; full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Do not repeat this
+consumer pass unchanged.
