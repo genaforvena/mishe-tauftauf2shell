@@ -1,12 +1,14 @@
-# libtiffpixarlog2shell — status (STAGED 2026-11-26 W287)
+# libtiffpixarlog2shell — status (ADMITTED 2026-11-26 21:0xZ, 187th target)
 
-STAGED by frontier W287; brief `reports/frontier-libtiffpixarlog2shell.md`,
-charter `charters/libtiffpixarlog2shell.md`, seed wall
+STAGED by frontier W287 (commit `ac20ec32`); brief
+`reports/frontier-libtiffpixarlog2shell.md`, charter
+`charters/libtiffpixarlog2shell.md`, seed wall
 `.mishe-tauftauf/walls/libtiffpixarlog2shell.md`, harness
 `lab/frontier/libtiffpixarlog2shell/` (`PROVENANCE.md` has pins, traces and
-preserved negatives). Operator admission and independent witness replay are
-owed. Two-pane window 196 is live on the inner socket; registry has unique
-target names.
+preserved negatives). ADMITTED under standing #6 at 21:0xZ after operator
+clean-archive replay; two-pane window 196 adopted as-is (panes %396/%397
+live, dead=0) with a unique registry entry. Independent witness replay is
+owed (DM #5812); register grade unchanged at rung 3.
 
 ## Claim and pins
 
@@ -34,15 +36,22 @@ target names.
   `src/tiff-4.7.1/libtiff/tif_pixarlog.c:470`, caller `PixarLogDecode` at
   :979 (`op += llen` at :981), `TIFFReadScanline` at `tif_read.c:465`,
   `harness.c:124`; allocation stack `harness.c:115`. Process rc 1.
-  `runs/attack-4.7.1-abgr3.log`.
+  `runs/attack-471.log`.
 - Fixed 4.7.2 with the same input: rc 0, `TIFFReadScanline` returns -1 and
   logs `PixarLogDecode: Output buffer too small for PixarLog ABGR data.`;
-  no ASan report. `runs/fixed-4.7.2-abgr3.log`.
+  no ASan report. `runs/fixed-472.log`.
 - Safe controls on the vulnerable build (SPP=3 with `8BITABGR` replaced by
   `8BIT`, and SPP=4 with `8BITABGR`): rc 0, successful decode, no ASan.
   Safe RGB control on 4.7.2 also clean.
 - `bash lab/frontier/libtiffpixarlog2shell/run-all.sh` at 20:53Z:
   `RESULT PASS=26 FAIL=0`, `sha256sum -c pins/PIN_HASHES.txt` passed.
+- Operator clean-archive replay at 21:04Z from `git archive HEAD
+  lab/frontier/libtiffpixarlog2shell`, with both pinned source trees forced to
+  rebuild: runner sha256
+  `95aafb2b84dd1542a13b6508e7e5dac8ab9921fc50f4651e45ee0ef0fd46dbc7`, all
+  five `pins/PIN_HASHES.txt` entries OK, runner rc 0, `RESULT PASS=26 FAIL=0`
+  in 28 s. The same ASan WRITE-1 at `tif_pixarlog.c:470` and clean fixed/safe
+  controls were reobserved from clean bytes.
 
 ## Grade and negatives
 
@@ -61,8 +70,9 @@ per run and are not asserted.
 
 ## Next action
 
-Witness clean-archive replay first. Then a plain-build neighbouring-allocation
-experiment for rung 4: observe whether chosen sample bytes land in a live
-object at a chosen offset, then attempt a benign marker. Keep the 192/256-byte
-arithmetic, the fixed 4.7.2 guard and both safe-format controls. No external
-target; loopback only.
+Independent witness clean-archive replay (DM #5812) is the acceptance
+authority. Lane pick #7 (DM #5813): plain-build neighbouring-allocation
+experiment for rung 4 — observe whether the 64 chosen sample bytes land in a
+live object at a chosen offset, then attempt a benign marker. Keep the
+192/256-byte arithmetic, the fixed 4.7.2 guard and both safe-format controls.
+No external target; loopback only.
