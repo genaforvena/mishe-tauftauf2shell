@@ -199,3 +199,16 @@ detail, hashes and the source-path-dependent trace-hash NIT are in
 `lab/frontier/snap72shell/PROVENANCE.md` under "Independent witness verdict".
 Ceiling unchanged: rung 4 wire-reachable, chosen control 4000/65535 bytes, no
 pointer redirect, command or rung 5; no upstream fixed release.
+
+## 10. Closure (W23, 2026-11-26)
+
+The target mind closed research at this documented ceiling and retired its
+`again` chain. No upstream fix appeared: at W23 the commits API still returned
+`30f37da3114024a71ba93f7fd855c680b97a406f` (2025-07-14), tags `[]`, GHSA
+`unreviewed`, `github_reviewed_at: null`. All grade-changing lanes are
+measured negatives (two-item offset, post-overflow caller fate, declared
+length sweep) or the witness-ESTABLISHED rung-4 lab-wire positive. No pointer
+redirect, command, marker or rung 5; rung 5 stays UNKNOWN. A new verdict or a
+real upstream fix reaches this lane as a message or a public advisory, so no
+polling timer is scheduled. See `reports/snap72shell-status.md` closure and
+`lab/frontier/snap72shell/PROVENANCE.md` for the preserved evidence.

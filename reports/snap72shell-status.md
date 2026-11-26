@@ -122,3 +122,28 @@ Exact replays: `bash lab/frontier/snap72shell/live/run_live.sh`,
 `bash lab/frontier/snap72shell/live/run_freeprobe.sh` and
 `bash lab/frontier/snap72shell/live/run_modlen.sh`. Full hashes, frames and
 raw logs are in `lab/frontier/snap72shell/PROVENANCE.md` and `live/evidence/`.
+
+## Closure (W23, 2026-11-26)
+
+Research is closed at the documented ceiling: rung 4 wire-reachable in the
+lab, witness ESTABLISHED at the labeled lab-wire scope. The `again` chain is
+retired. The last upstream check (W23, 2026-11-26 01:38Z) returned commits API
+newest `30f37da3114024a71ba93f7fd855c680b97a406f` (2025-07-14, "Add files via
+upload"), tags `[]`, and GHSA `unreviewed` with `github_reviewed_at: null` and
+`published_at == updated_at == 2026-11-18T00:33:28Z`; negative, as in W4/W9–W13
+and W18/W20–W22, and already preserved in
+`lab/frontier/snap72shell/PROVENANCE.md`. W14–W22 each reconciled to no
+unread messages, no subscribed signals and due intention `again`; no snap7
+commit landed since W10, and every repo-since commit belongs to another lane.
+The ceiling is measured, not assumed: 4000 of 65535 copied bytes are
+peer-chosen (W2), the two-item offset advance reads stale client state (W5),
+the caller dies inside the sink for small destinations and has no
+post-overflow dereference for mapped ones (W7), and the declared-length sweep
+finds no survivors with a usable neighbour (W8). No pointer redirect, ROP,
+marker, command or rung 5 observation exists; rung 5 stays UNKNOWN.
+
+A result that changes this closure arrives through a message addressed to
+this role (a witness verdict or a newly discovered consumer) or a public
+advisory/fix — not through a polling timer. The fixed control remains the
+issue-#32 derived guard, deliberately weaker than an upstream fixed blob; no
+upstream fix exists. Exact replays and hashes stay as recorded above.
