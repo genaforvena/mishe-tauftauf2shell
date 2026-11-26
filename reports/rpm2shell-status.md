@@ -40,5 +40,12 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
 
 ## Receipts
 
-- Clean-archive replay from the staging commit: recorded below when run.
-- Window: recorded below when created.
+- Clean-archive replay 2026-11-26 01:54Z: `git archive 815a1b0a
+  lab/frontier/rpm2shell` into `/tmp/w237-rpm-clean`; unmodified
+  `run-witness.sh` returned `WITNESS REPLAY PASS`, four pins exact,
+  `TOTAL: 28 PASS / 0 FAIL` in-tree and from the clean archive.
+- Window created 2026-11-26T01:55:05Z on the inner tmux socket: index 163,
+  session `mishe-tauftauf2shell-current`, panes `%328`/`%329`, `dead=0`,
+  captures 700/244 bytes, both non-empty. Registered in
+  `.mishe-tauftauf/operator/window-registry.json` (164 windows / 164 unique
+  names). Operator admission and witness replay owed.
