@@ -8,7 +8,7 @@ writes past the 9-entry `server->key_acts` array. Fixed in 1.8.14 by
 `6d4432b13c0b3b6a644c13de9c793a14db48d545` (one bounds check before the
 loop). State: **ADMITTED 08:5xZ under standing #6**; window 175 adopted from
 frontier (panes %352/%353 live, no duplicate); operator clean-archive replay
-passed 12/0; independent witness replay owed.
+passed 12/0; independent witness W258 replay ESTABLISHED AS LABELED (below).
 
 Evidence: canonical `run-all.sh` sha256
 `2c7273f01d6a26b36c8aeecd94f1e9a9835d9ea81f7e3896072b9b9ee3532bc0`
@@ -19,8 +19,9 @@ and drives real `_XkbReadKeyActions()` with a synthetic reply
 `max_key_code=8`). `RESULT PASS=12 FAIL=0`: vulnerable 1.8.13 under both
 compilers gives `WRITE of size 2` at verbatim
 `src/xkb/XKBGetMap.c:277`, 0 bytes after an 18-byte `key_acts` allocation;
-1.8.14 returns `BadLength` (status 1) in all builds; safe inputs succeed;
-plain vulnerable build is silent. Author clean-archive replay of the unmodified
+1.8.14 returns `BadLength` (status=16, `/usr/include/X11/X.h:374`) in all
+builds; safe inputs succeed; plain vulnerable build is silent. Author
+clean-archive replay of the unmodified
 `run-all.sh` from staging commit `9b56c822` gave `RESULT PASS=12 FAIL=0`, rc 0;
 the console is the git-tracked
 `lab/frontier/libx11xkb2shell/evidence/run-all-console.log`. (An earlier draft
@@ -38,10 +39,24 @@ server-controlled index/length and a deterministic 2-byte zero write, but
 no named adjacent object, pointer control, live X wire, command execution or
 r5. The advisory's RCE framing remains a claim.
 
+Witness W258 independently replayed the unmodified `run-all.sh` from a clean
+`git archive 9b56c822` (wrapper sha256 `2c7273f0…e3532bc0` identical in
+worktree, commit, HEAD and archive), with both pinned tarballs re-fetched by
+the runner from the PROVENANCE x.org URLs and all five pins matched:
+12 PASS / 0 FAIL, rc 0 in 370.43 s. GCC+Clang ASan reproduce `WRITE of size
+2` at verbatim `XKBGetMap.c:277`, 0 bytes after the 18-byte `key_acts` region
+allocated at `poc.c:43`; all six 1.8.14 controls return `BadLength`
+(status=16) without ASan and the safe controls are clean. Verdict:
+ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no
+contradiction, no grade change, NO r5. The OOB value is zero, chosen `0x5a`
+bytes stay in bounds, and there is no named adjacent object, pointer, live
+X wire or command. Detail and raw evidence:
+`.mishe-tauftauf/artifacts/witness-w258-libx11xkb2shell/detail.md`.
+
 Negatives preserved in `PROVENANCE.md`: `firstKeyAct` is CARD8 (256 wraps to
 0); eight nonzero actions hit a NULL `acts` array/read-before-write before the
 intended sink; `key_sym_map` is deliberately over-allocated so the first ASan
-report is the WRITE. Next: independent witness replay; only a measured
-loopback mock-X-server path through public `XkbGetMap()` plus a named adjacent
-field with chosen bytes could advance rung 4. Route and generated wake units
-are person-reserved; do not add them here.
+report is the WRITE. Next: only a measured loopback mock-X-server path
+through public `XkbGetMap()` plus a named adjacent field with chosen bytes
+could advance rung 4. Route and generated wake units are person-reserved;
+do not add them here.

@@ -49,9 +49,9 @@ Observed on 1.8.13 under both compilers:
 `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 2`, at
 verbatim `src/xkb/XKBGetMap.c:277` in `_XkbReadKeyActions`, 0 bytes after the
 18-byte `key_acts` allocation. On 1.8.14 the same reply returns `BadLength`
-(status 1) with no ASan report; safe inputs (`firstKeyAct = 1`) succeed in
-both trees. Full pins, hashes, trace files and preserved negatives are in
-`lab/frontier/libx11xkb2shell/PROVENANCE.md`.
+(status=16, per `/usr/include/X11/X.h:374`) with no ASan report; safe inputs
+(`firstKeyAct = 1`) succeed in both trees. Full pins, hashes, trace files and
+preserved negatives are in `lab/frontier/libx11xkb2shell/PROVENANCE.md`.
 
 Grade: **rung 3 verbatim / rung 4 PARTIAL**. Server-controlled length and
 index produce a deterministic 2-byte OOB write, but the written value is
@@ -67,3 +67,20 @@ measure whether a nonzero acts offset can land in an adjacent heap object.
 Absent that measurement, keep the PARTIAL rung-4 label. Would change the
 assessment: a fixed-tag ASan WRITE, a witness counterexample, or a plain
 allocator layout showing chosen bytes in a named adjacent field.
+
+## Witness receipt (2026-11-26 09:0xZ–09:12Z, W258)
+
+Independent replay of the unmodified `run-all.sh` (sha256
+`2c7273f0…e3532bc0`, identical in worktree, at `9b56c822`, at HEAD and in the
+clean archive) from `git archive 9b56c822`, with both pinned tarballs
+re-fetched by the runner from the PROVENANCE x.org URLs and all five pins
+matched: 12 PASS / 0 FAIL, rc 0 in 370.43 s. GCC and Clang ASan both show
+`WRITE of size 2` at verbatim `src/xkb/XKBGetMap.c:277` in the real
+`_XkbReadKeyActions()`, 0 bytes after the 18-byte `key_acts` region allocated
+at `poc.c:43`; 1.8.14 returns `BadLength` (status=16) without ASan in all
+three builds and both safe controls are clean. Verdict: **ESTABLISHED AS
+LABELED** at rung 3 verbatim / rung 4 PARTIAL, no contradiction, no grade
+change, NO r5. The OOB value is zero and the chosen `0x5a` bytes stay in
+bounds; no named adjacent object, pointer, live X wire, command or r5.
+Detail and verbatim console/traces:
+`.mishe-tauftauf/artifacts/witness-w258-libx11xkb2shell/detail.md`.
