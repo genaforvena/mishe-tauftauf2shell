@@ -3618,3 +3618,55 @@ unmeasured, and the wire shows no impact. Rung 4 (witness-COMPLETE) and the
 labeled harness-condition rung 5 (witness-ESTABLISHED) are unchanged; full
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. Evidence:
 `lab/build/evidence/jemwire-prod{128,96,640}{,b,ctl}.{trace,out,maps}`.
+
+### Adjacent CVE lane GHSA-87fm-7w84-j2px — source-confirmed, host-guard BLOCKED (2026-11-26, fourth wake)
+
+The disclosure writeup by Moritz Sanft (`durendal.sh/blog/ruby-case-mapping-bugs`,
+re-read this wake) documents a **second** bug in the same `rb_str_casemap`
+subsystem and fix series: an `int` output-length accumulator that can wrap
+while mapping UTF-8 `U+0390` (2 input bytes → 6 output bytes), producing a
+small output allocation followed by a multi-gigabyte `memcpy` from the
+mapping buffers. The charter permits a named adjacent lane in the same Ruby
+tree once this target's rung 4 is closed; this section opens and disposes of
+that lane. It is not a regrade of CVE-2026-132825.
+
+Source differential, read from the lab trees:
+
+- affected `lab/build/ruby-3.4.12/string.c:7814` declares `int target_length`;
+  `:7850` adds each buffer's `int used`; `:7857`/`:7862` pass it as the
+  `long len` of `rb_str_new`, and `:7866` copies full `size_t`
+  `current_buffer->used` bytes into that result in the multi-buffer case.
+- fixed `lab/build/ruby-3.4.13/string.c:7857` declares `long target_length`,
+  `:7865-7866` reject source lengths above `INT_MAX - 20`, and `:7876-7879`
+  clamp per-buffer capacity. Both builds are the ones used throughout this
+  report (`366f5fdc00` vs `48857d6f2e`).
+
+Bounded experiment (`lab/repro/ruby2shell-bug2-casemap.rb`, committed): the
+published threshold `715_827_883` copies of `U+0390` gives 1,431,655,766
+input bytes and 4,294,967,298 output bytes (`2^32+2`), i.e. a wrapped
+`target_length` of 2. Run under the affected ASan build with
+`ASAN_OPTIONS=halt_on_error=1:hard_rss_limit_mb=14000`.
+
+**Observed negative:** the process made no progress past ~1.16 GB RSS and
+sat in `D` state in `mem_cgroup_handle_over_high`; it was killed after the
+attempt. The wake cgroup reports `memory.high=1610612736` and
+`memory.max=2147483648` (1.5 GiB / 2 GiB); raising these is a protected host
+guard change, not available to this plant. The source string alone is
+1.43 GB. From `string.c:7830` the mapping buffers are sized
+`remaining × buffer_count + 20`; with a 3:1 expansion the series is
+approximately `2N + 8N/3 + 8N/9 + … ≈ 6N` bytes, about 4.3 GB at this `N`
+(derivation from source, not measured). Peak demand therefore cannot fit the
+2 GiB cap. No ASan report, no overflow write and no wire result were
+observed; this is a host-guard blockage, **not** evidence the bug is absent.
+
+Safe-input controls at `N=10000` (60,000 output bytes, multi-buffer path)
+completed cleanly on both builds: `vuln_rc=0`, `fixed_rc=0`, `out_len=60000`.
+
+Disposition: GHSA-87fm-7w84-j2px stays **UNKNOWN** in this lab for lack of a
+host that can allocate ~6 GB to one process; the vendor-reported wire path
+requires Rack `<=3.2.1` (vendor claim, not tested here). Veria's page was
+also re-read: `dateModified` is still `2026-11-21T03:52Z`, PoC unpublished,
+no mechanics. Grades unchanged: rung 4 witness-COMPLETE, harness-condition
+rung 5 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT
+ACHIEVED**. Reopen this lane only with a cgroup that permits >6 GB RSS, or a
+smaller overflowing input with a measured expansion ratio above 3:1.
