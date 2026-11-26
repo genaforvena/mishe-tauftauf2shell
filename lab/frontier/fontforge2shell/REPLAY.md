@@ -552,3 +552,10 @@ asserted; its raw hash is provenance, not a stable oracle. Full decision and
 limits in `FROMPATH.md`. Author-side negative, not a witness verdict; no
 called chosen address, marker, command, r5 or grade change. No new replay
 demand; #4165 stays queued.
+
+Clean-archive receipt: `git archive 419a7353 lab/frontier/fontforge2shell`
+into `/tmp/ff2s-w30-clean.i71u5Z`, symlinking the gitignored `build-nopie`,
+`build-fixed-nopie` and `src/` provisions from the live lab, replayed 12/12
+PASS, rc 0, same PCF hash and marker lines. The raw gdb transcript hash
+varies with live heap addresses in every run (provenance only), as in W23.
+Author-side, same host; not a witness verdict.

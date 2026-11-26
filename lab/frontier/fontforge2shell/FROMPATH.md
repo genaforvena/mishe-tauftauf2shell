@@ -59,3 +59,15 @@ script or GUI consumer that actually invokes `EncFromUni` after the poisoned
 import; even then, W27's observation predicts a fault inside glibc `__gconv`
 before `__gconv_fct`, not a called chosen address. Do not infer code execution
 from a written pointer field.
+
+## Clean-archive receipt (2026-11-26 00:2xZ)
+
+`git archive 419a7353 lab/frontier/fontforge2shell` into
+`/tmp/ff2s-w30-clean.i71u5Z`, with the two gitignored provisions symlinked
+from the live lab (`build-nopie`, `build-fixed-nopie`, `src/`), gave
+`sh replay-w30.sh` = 12/12 PASS, rc 0, final line
+`REPLAY_W30_OK: 12 checks, 0 failed`; the regenerated PCF hash matches the
+committed case. The first clean-archive attempt without the `src/` symlink
+failed two source-fact checks (the source trees are untracked provisions),
+which is a replay prerequisite, not a behavioral contradiction. Author-side
+receipt on the same host, not an independent witness verdict.

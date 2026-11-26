@@ -9,9 +9,9 @@ Copyright (c) 2000-2026. See AUTHORS for Contributors.
  Based on sources from 2026-11-25 04:07 UTC-NoPython-D.
  Based on source from git with hash: c13188a4e17f912f2e20a264981b3c4746c71439
 
-Breakpoint 1, PcfReadEncodingsNames (file=0xa6bad0, toc=0xa81aa0, sf=0xa7d6a0, map=0xa7e5a0, b=0xa91e10, encname=0xa91d90) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
+Breakpoint 1, PcfReadEncodingsNames (file=0xa6b9f0, toc=0xa81a40, sf=0xa7d5d0, map=0xa7f9e0, b=0xa91db0, encname=0xa91d30) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/fvimportbdf.c:1751
 1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
-W30F before glyph=-172 fromunicode=0xa89d80 encname=0xa91d90 encs=0xa92090
+W30F before glyph=-172 fromunicode=0xa89d20 encname=0xa91d30 encs=0xa92030
 1752						(i%(max2-min2+1) + min1);
 1751			encs[glyph] = (i/(max2-min2+1) + min2)*256 +
 1748		for ( i=0; i<tot; ++i ) {
@@ -19,5 +19,5 @@ W30F after glyph=-172 fromunicode=0x414243
 Breakpoint 2 at 0x7ffff722a7b0: file ./iconv/iconv.c, line 32.
 Breakpoint 3 at 0x411f43: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/src/fontforge-20251009/fontforge/encoding.c, line 2598.
 W30F armed
-[Inferior 1 (process 2992207) exited normally]
+[Inferior 1 (process 2996445) exited normally]
 W30F exited

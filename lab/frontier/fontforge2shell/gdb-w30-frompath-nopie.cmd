@@ -1,6 +1,6 @@
 set pagination off
 break fvimportbdf.c:1751 if glyph < 0
-run -script /home/mesh-home/mishe-tauftauf2shell/lab/frontier/fontforge2shell/import-frompath-save.ff
+run -script import-frompath-save.ff
 printf "W30F before glyph=%d fromunicode=%p encname=%p encs=%p\n", glyph, encname->fromunicode, encname, encs
 next
 next
