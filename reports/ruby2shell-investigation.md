@@ -4988,3 +4988,50 @@ benign marker was observed. The wire-only rung-4 branch is therefore
 or wire-only base is named. Grade unchanged: rung 3 wire-only confirmed,
 rung 4 witness-COMPLETE only at the earlier harness-conditioned scope,
 full stock rung 5 NOT ACHIEVED.
+
+## Stale-BBuf chosen-pointer steering — bounded NEGATIVE (2026-11-26, 12:35Z)
+
+The 7x2q lane was only recorded at ASan rung 3. A plain-build consumer check
+asked whether the stale BBuf's first qword can be chosen from the pattern:
+`parse_char_class` frees `cc->mbuf` on `&&` (`regparse.c:4977`),
+`initialize_cclass` writes `cc->mbuf = NULL` (`:1272`), but the error path
+`bbuf_free(cc->mbuf)` (`:5072`) reads a live pointer from a reused chunk.
+Prediction: a pattern-derived allocation reusing that 16-byte chunk puts
+chosen bytes in `bbuf->p`, steering the `xfree(bbuf->p)` at `:145`.
+Falsifier: the consumed value varies with heap layout, not with pattern
+bytes.
+
+New evidence on stock glibc 2.39, plain 3.4.12 with debug symbols: the
+publishing pattern crashes deterministically in
+`__GI___libc_free` called from `bbuf_free` (`regparse.c:145`) at
+`parse_char_class:5072` (rc=139, `[BUG] Segmentation fault`); fixed plain
+3.4.13 raises `RegexpError`, rc=0. gdb at the second free showed the stale
+chunk still has a 0x21 size word and carries `p=0x55500097d00c`-shaped
+invalid pointers with unrelated second qwords (gitignored
+`lab/build/evidence/uaf-reuse/dump.out`). With tcache disabled
+(`glibc.malloc.tcache_count=0`) the fault address changes shape entirely
+(for example `0x000000063d9a718a`), so the consumed value is allocator
+metadata, not a pattern string.
+
+Steering sweep: `lab/repro/ruby2shell-uaf-steer.{rb,sh}` varies the last
+class character (`x`, `y`, `z`) over five fresh processes each, in default
+and tcache-disabled modes, with fixed-build controls. All 30 vulnerable
+runs crashed; all 6 fixed runs returned `REGEXPERROR`. Every one of the six
+arms produced **5/5 distinct low-12-bit fault offsets** with identical
+input — the pointer cannot be chosen from the tail byte. Evidence:
+`lab/build/evidence/uaf-steer/summary.txt` and per-run `.out` files.
+
+Disposition: the plain-build crash is a new consumer-visible effect in this
+secondary lane, but it remains **rung 3 CONFIRMED** (now also observed on
+the unsanitized build); chosen-pointer steering is **CLOSED** and no
+wire-only reachability was found. Primary grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Veria's page was
+re-read at 12:25Z (canonical `https://verialabs.com/ruby2shell/`, `www`
+redirects to the homepage): `dateModified` is still `2026-11-21T03:52Z`,
+the PoC is still unpublished, and its byte alphabet adds nothing measured
+here; no external mechanics were adopted.
+
+```
+bash lab/repro/ruby2shell-uaf-steer.sh
+```
