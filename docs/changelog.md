@@ -7,7 +7,7 @@ Nine K=12 pair-only stock-Rails runs gave one stochastic `smallbin double
 linked list corrupted` with no captured links (the tracer was edited
 concurrently mid-batch), five invalid-pointer/munmap aborts and three hangs;
 seven completed dump-on-malloc repeats produced no smallbin. The new
-`ruby2shell-regexp-link-audit.py` shows 88 observed heap mappings all have a
+`ruby2shell-regexp-link-audit.py` shows 89 observed heap mappings all have a
 low-32 above the Unicode code-point cap, while stale BBuf `fd/bk` words are
 32-bit code points: pattern-derived links cannot be valid heap pointers and
 cannot satisfy glibc's smallbin integrity check. Arm CLOSED, grades

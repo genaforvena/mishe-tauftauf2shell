@@ -5778,8 +5778,8 @@ second eight-run `REGTRACE_DUMP_*` repeat completed seven runs
 cap. The ~328 MB per-run debug logs were removed; compact JSON diagnostics
 and maps remain. No smallbin victim or chosen write was observed.
 
-The structural check is decisive for this arm. Across 88 heap rows in
-`regexp-*.maps`, the lowest heap-base low-32 is `0x55ac3000`, above the
+The structural check is decisive for this arm. Across 89 heap rows in
+`regexp-*.maps`, the lowest heap-base low-32 is `0xe71000`, above the
 Unicode code-point cap `0x10ffff`; no observed heap low-32 is under the cap
 and none is near the 4 GiB wrap. Stale BBuf link words in
 `regexp-smallbin-traced.server.log` classify as 272 one-codepoint, 1,124
