@@ -51,3 +51,29 @@ inside `dpi_sig_bld()` before returning, with ASCII regex bytes in the
 overwritten frame words (same bytes as W278/W280's measured real-object
 frame). There is no REST/CRD endpoint, no benign command and no rung-5
 side effect. Grade remains rung 3 confirmed / rung 4 PARTIAL as labeled.
+
+## W283 — plain optimized full-enforcer frame readback
+
+Command: `bash lab/frontier/neuvector2shell/fulldp/frame.sh` → **22 PASS /
+0 FAIL**, rc 0. The same pinned tree is rebuilt by its own `dp/Makefile`
+with `-O2 -g -fno-omit-frame-pointer -fno-stack-protector
+-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0`, with no ASan runtime (verified by
+`nm`: zero `__asan` symbols). Vulnerable binary SHA-256
+`8254649ba9d4ab315664c8d36caebb1dfb1c2f8e37a3075a40c5d792ba8c4a64` for
+this build. The same 2233-byte REST-valid datagram is delivered over the
+real AF_UNIX socket while the real enforcer runs under gdb.
+
+At the real in-loop SIGSEGV (`dpi_sig_bld`, `dpi_sig.c:657`) the live frame
+reads `BUF=0x7fffffffccc0`, `RBP=0x7fffffffd4f0`, `BUF→RBP=2096`,
+`LEN=2194`. Saved words are chosen wire bytes: `a*` gives saved RBP
+`0x2a2e612a2e612a2e` and return slot `0x2e612a2e612a2e61`; `B*` gives
+`0x2a2e422a2e422a2e` / `0x2e422a2e422a2e42`. The breakpoint at
+`dpi_sig.c:662` is installed but never reached; the fault happens inside
+the pattern loop. Controls without gdb: attack datagram faults with
+`RC=139`; safe 139-byte datagram and attack into the fixed-commit plain
+binary survive to timeout, and the fixed binary skips the rule.
+
+Ceiling unchanged: both saved words contain ASCII regex bytes, not a
+chosen address; the process faults before returning. No command, no
+side effect, no r5. W283 is the live full-enforcer realization of the
+W278/W280 measured frame, not a new primitive.
