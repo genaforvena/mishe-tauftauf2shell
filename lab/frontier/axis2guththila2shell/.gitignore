@@ -1,0 +1,4 @@
+src/*.tar.gz
+src/axis-axis2-c-core-*/
+axis2.log
+build/

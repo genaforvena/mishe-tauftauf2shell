@@ -1,0 +1,5 @@
+PASS vuln-attack-asan rc=1 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/evidence/vuln-asan-attack.out
+PASS fixed-attack-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/evidence/fixed-asan-attack.out
+PASS vuln-safe-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/evidence/vuln-asan-safe.out
+PASS fixed-safe-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/evidence/fixed-asan-safe.out
+RESULT PASS=4 FAIL=0
