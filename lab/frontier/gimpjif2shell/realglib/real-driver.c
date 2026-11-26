@@ -274,6 +274,11 @@ main (int argc, char **argv)
 
   printf ("MODE=%s PAYLOAD=%02x RC=%d ERR=%s\n",
           mode, payload_byte, rc ? 1 : 0, g_error_msg);
+  if (caller_mode)
+    {
+      printf ("DEST_HEX=");
+      hexdump (caller_dest, 320);
+    }
   printf ("LIVE_BEFORE=");
   hexdump (before, sizeof before);
   memcpy (after, live, sizeof after);

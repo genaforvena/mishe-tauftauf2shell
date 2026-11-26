@@ -595,3 +595,38 @@ Interpretation: caller and allocation-site identity for adjacent live
 objects are now measured in the real plugin; the `out+272` object type,
 a chosen address, a dereference and a command remain unobserved.
 Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
+
+## W288 mixed-marker consumer ceiling (2026-11-26, 19:54Z wake)
+
+Source check: the pinned post-inflate loop reads `indexes[i]` only while
+`pos < data_size`; with `bpp = 8`, `alpha_frame` and `data_size = 260` the
+loop stops at `i = 130`, so the OOB portion of a 448-byte payload cannot
+be consumed into `dest`. `realglib/make-jif.py` (SHA-256
+`976b56e1aef382672ce754fe4a69f62c0c1dc0ab431bda5267cd5c40de15cc11`)
+gained `published-mix IN OUT`; `realglib/real-driver.c` (SHA-256
+`40c1b86813b7fd72fa60c45146b0a4456edf2ea2db4879427cf134fefb59d2b3`)
+prints `DEST_HEX=` for 320 bytes after the call; `realglib/run-real.sh`
+(SHA-256 `7cf6c65bc3d98f69bf18aec2893f0517dfe7abcc51c1d40655c789c474128bf4`)
+reports **35 PASS / 0 FAIL** (30/0 before this extension).
+
+Artifacts: `realglib/evidence/published-mix.jif` (SHA-256
+`7d563886685411467c4ff28d06d84655826738de28fb43dbb83547c2ce6654ef`),
+`realglib/evidence/file-caller-mix.log` (SHA-256
+`698c0b11b8912896705250b57826c05281ff7053455e860e93a5468a4397f840`):
+`product=0x80000082 data_size=260`, `DEST_HEX=4dff4dff…` with no `41`,
+`LIVE_AFTER=` 48 `41` bytes, `LIVE_CHANGED_BYTES=48`; fixed control
+`realglib/evidence/file-fixed-mix.log` (SHA-256
+`f3faca87d51d047350973dc1c139f2b74d87de365952b566116fb83e49c05f01`)
+rejects with `RC=0 ERR=image data` and leaves the live object unchanged.
+
+Real-plugin run: canonical shim `live/inflate-shim.so` (SHA-256
+`fc73e957e24d933bbf7667dc9166ed5e45ee41b01c1c7b584c4dfc839d7923d5`,
+not swapped), `published-mix.jif` through the patched GIMP 3.2.8 AppRun
+under `timeout -k 5 90` in a fresh HOME. `live/evidence/appimage-mix-shim.log`
+(SHA-256 `91a672ef3c351769ed725d77ea9c83c21c9d2a5bf53f2a513b70692d3b894e6f`,
+rc 124): `avail_out_before=2147483778 total_out=448 ret=1`, `SHIM_HEAD`
+all `4d`, `SHIM_EDGE` eight `4d` then 88 `41`, `SHIM_FAR` 32 `41`. No
+batch success, fault, chosen-address dereference or command. Fixed-plugin
+control remains BLOCKED: `v3.2/linux/` and `v3.4/linux/` still publish no
+AppImage at or beyond the 3.2.10 fix milestone. Grade unchanged rung 3 /
+rung 4 PARTIAL, NO r5.

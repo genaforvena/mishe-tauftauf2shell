@@ -182,7 +182,9 @@ fixed build rejects with `RC=0 ERR=image data` and no live-object change;
 safe 4x4 no-alpha file leaves the object unchanged. The first generator
 attempt omitted the code-size byte, so the pin read `bpp=12` and rejected
 the file; the byte was restored and the failing logs are preserved in the
-transcript. `bash run-real.sh` now reports **30 PASS / 0 FAIL**.
+transcript. `bash run-real.sh` now reports **35 PASS / 0 FAIL** after the
+W288 mixed-marker extension (30/0 before it); clean-archive replay of the
+extended runner is owed.
 
 This is an on-disk file artifact reaching the pinned function through a
 real `FILE*`, still not a GIMP plugin or PDB `load_image()` call: the
@@ -218,8 +220,9 @@ Fresh logs under `realglib/evidence/`:
 - `file-caller-fixed.log`: same guard and allocation succeed, fixed pin
   rejects with `RC=0 ERR=image data`, live object byte-identical.
 
-`bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0; three clean-archive runs
-from commit `ee63e73c` reproduced it. The first clean replay (commit
+`bash run-real.sh`: **35 PASS / 0 FAIL** after W288 (30/0 at W244), rc 0; three clean-archive runs
+from commit `ee63e73c` reproduced the earlier 30/0 result.
+The first clean replay (commit
 `697f980d`) failed one changed-byte-count assertion because ASLR had made
 one original GArray byte already `0x4d` (count 47, after-dump still 48
 chosen bytes); assertions now check the exact after-dump content plus an
@@ -440,3 +443,38 @@ Grade stays rung 3 / rung 4 PARTIAL, NO r5. Allocation callers for
 adjacent live objects are now named in the real plugin, but the
 `out+272` object's type is still unknown, no chosen address was used,
 no chosen pointer was dereferenced and no command side effect was seen.
+
+## Mixed-marker consumer ceiling (W288, 2026-11-26)
+
+The pinned post-inflate loop `for (i = 0; i < zs.total_out; i++)` reads
+`indexes[i]` only while `pos < data_size` (260 with alpha doubling); with
+`bpp = 8` it advances `pos` twice per index byte, so it stops at `i = 130`.
+The 188 out-of-bounds bytes of a 448-byte payload therefore cannot reach
+`dest` through this consumer — their only observed effect is on allocator
+metadata and adjacent heap objects. `realglib/make-jif.py` gained a
+`published-mix IN OUT` mode writing 260 in-bounds bytes of `IN` followed
+by 188 bytes of `OUT`, and `real-driver.c` now prints `DEST_HEX=` for the
+first 320 bytes of the pinned caller's `dest` after the call.
+
+`evidence/published-mix.jif` (`4d` in bounds, `41` out of bounds) through
+the real-glib/real-zlib pinned caller gives
+`evidence/file-caller-mix.log`: `product=0x80000082 data_size=260`,
+`DEST_HEX=4dff4dff…` (no `41` in 320 bytes), `LIVE_AFTER=` 48 bytes of
+`41`, `LIVE_CHANGED_BYTES=48`. The fixed pin rejects the same file
+(`RC=0 ERR=image data`, live object unchanged). `bash run-real.sh` is
+**35 PASS / 0 FAIL**, rc 0. This separates the two effects: attacker data
+inside `indexes` is copied into `dest`, while the overflow bytes are
+distinct chosen bytes in a live neighbour but are not consumed by the
+pinned reader. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5: still no
+chosen address, dereference or command.
+
+The same on-disk file was driven through the real GIMP 3.2.8 AppImage
+`file-gif-load` PDB path with the canonical observation shim
+(`SHA-256 fc73e957…`, unchanged): `live/evidence/appimage-mix-shim.log`
+(SHA-256 `91a672ef…`) reports `avail_out_before=2147483778
+total_out=448 ret=1`, `SHIM_HEAD` all `4d`, `SHIM_EDGE` eight `4d` bytes
+then 88 `41` bytes, and `SHIM_FAR` 32 `41` bytes. The child ended at the
+90-second timeout (rc 124) without a batch success, fault, dereference or
+command. The two chosen markers are distinguishable at chosen offsets in
+the real plugin's heap, but the read-loop ceiling still holds and the
+grade stays rung 3 / rung 4 PARTIAL, NO r5.

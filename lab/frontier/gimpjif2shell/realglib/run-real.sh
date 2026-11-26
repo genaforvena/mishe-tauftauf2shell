@@ -79,5 +79,29 @@ has evidence/file-callerpub.log "LIVE_AFTER=$all_4d_48" && ok "published dims pu
 has evidence/file-caller-fixed.log "RC=0 ERR=image data" && ok "fixed pin rejects published dims after caller allocation" || bad "fixed pin rejects published dims after caller allocation"
 has evidence/file-caller-fixed.log "LIVE_CHANGED_BYTES=0" && ok "fixed caller leaves live object intact" || bad "fixed caller leaves live object intact"
 
+echo "== mixed-marker JIF: OOB bytes reach live object, not pinned dest =="
+python3 make-jif.py evidence/published-mix.jif published-mix 4d 41 \
+  > evidence/make-published-mix.log 2>&1
+evidence/real-vuln  callerpub evidence/published-mix.jif > evidence/file-caller-mix.log 2>&1
+evidence/real-fixed callerpub evidence/published-mix.jif > evidence/file-fixed-mix.log 2>&1
+all_41_48=$(printf '41%.0s' $(seq 1 48))
+has evidence/file-caller-mix.log "LIVE_AFTER=$all_41_48" \
+  && ok "chosen OOB marker 0x41 reaches all 48 live-neighbour bytes" \
+  || bad "chosen OOB marker 0x41 reaches all 48 live-neighbour bytes"
+has evidence/file-caller-mix.log "DEST_HEX=4dff" \
+  && ok "in-bounds index bytes reach pinned dest" \
+  || bad "in-bounds index bytes reach pinned dest"
+dest_hex=$(grep '^DEST_HEX=' evidence/file-caller-mix.log | cut -d= -f2)
+case "$dest_hex" in
+  *41*) bad "pinned dest consumed the OOB marker" ;;
+  *)    ok "pinned dest has no OOB marker (consumer capped at wrapped data_size)" ;;
+esac
+has evidence/file-fixed-mix.log "RC=0 ERR=image data" \
+  && ok "fixed pin rejects mixed-marker wrapped input" \
+  || bad "fixed pin rejects mixed-marker wrapped input"
+has evidence/file-fixed-mix.log "LIVE_CHANGED_BYTES=0" \
+  && ok "fixed pin leaves live neighbour intact for mixed marker" \
+  || bad "fixed pin leaves live neighbour intact for mixed marker"
+
 echo "TOTAL: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]
