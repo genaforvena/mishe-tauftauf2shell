@@ -2,6 +2,40 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 16:0xZ — tinyusb2shell staged, Ruby stock WEBrick lanes closed
+
+This fold covers `1995e07a..59c2e2e6`. Reproduce every claim in
+`docs/reproducibility.md` § 16:0xZ; no raw evidence is committed here.
+
+- `fc1e026f` (frontier W275) **staged tinyusb2shell** for CVE-2026-61497 /
+  GHSA-qf63-w79j-qw7p (HID report-descriptor `uint16_t` underflow, `AV:P`
+  physical device). Vulnerable fix-parent `5014146f…` / fixed `85047e1…`
+  (release 0.21.0). Verbatim parser slice, GCC 12 ASan, `run-all.sh` +
+  `verify.sh` → `RESULT PASS=6 FAIL=0`: 4-byte `05 01 07 DE` gives heap
+  `READ of size 4` 0 bytes past a 4-byte buffer, 5-byte `07 DE AD BE EF`
+  gives stack `WRITE of size 4` into the 4-byte `info` struct; fixed stops
+  at `report_num=0` / `usage_page=44510`; well-formed 13-byte descriptor
+  clean on both. Rung 3 only, rung 4 NOT CLAIMED: no chosen-offset readback,
+  pointer, USB stack/hardware, command or r5. Preserve the unreviewed
+  NVD-imported GHSA, the "0.20.1" vs CVE/NVD "0.21.0" discrepancy and the
+  zero published upstream advisories. STAGED, not admitted; no count or
+  grade cell moved; witness clean-archive replay and operator admission owed.
+- `68c4b04f` (ruby2shell) **CLOSED the stock WEBrick consumer lanes**.
+  `-s webrick` reaches a Host `downcase`, but the value is ASCII-8BIT so the
+  expanding byte is inert. Precise `jemtrace` before/after qwords prove
+  C=80's `0x53` was a natural-pointer false positive (real target a free
+  Ruby slot) and C=640 is reused by `compile_data_alloc_with_arena`, whose
+  `storage->next=0` erases the byte; attack/safe/fixed C=640 O=1/0/0. Plain
+  glibc Sinatra N=572 and Rails/WEBrick N=524 corrupt a next-chunk size and
+  later abort in `unlink_chunk` / `munmap_chunk`. No command, chosen-offset
+  write, pointer control, second request or persistence; full
+  stock/oracle-free/persistent r5 stays NOT ACHIEVED and primary grades are
+  unchanged. The author's own entry is preserved below.
+- `358c1b40` (mqttc2shell) committed the shipped `simple_subscriber.c`
+  callback result already folded at 1995e07a (`27 PASS / 0 FAIL`, console
+  `426b7c06…94b6c9`, rung 3 wire-backed, rung 4 NOT CLAIMED); no new claim.
+  `59c2e2e6` reconciles published and local main with no row or count moved.
+
 ## 2026-11-26 15:4xZ — Ruby2Shell stock WEBrick consumer screen
 
 The stock `-s webrick` surface reaches a new Host `downcase`, but WEBrick tags

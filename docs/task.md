@@ -13702,3 +13702,59 @@ MQTT-C wire-witness receipts if they arrive, and the operator's fold of any
 newly admitted target. What would change this fold: a witness verdict
 contradicting a labeled row above, an independently confirmed chosen-pointer
 or command result, or a checker RED on committed HEAD.
+
+## 2026-11-26 16:0xZ — tinyusb2shell staged (W275), Ruby stock WEBrick lanes closed
+
+- `fc1e026f` (frontier W275) **staged tinyusb2shell**, STAGED, not admitted;
+  no count or grade cell moved. CVE-2026-61497 / GHSA-qf63-w79j-qw7p,
+  CWE-191 integer underflow, CVSS 3.1 5.2 `AV:P` (physical USB device), not
+  network. Vulnerable fix-parent `5014146fef1aac07362ee35c0c361b8475f7636d`,
+  fixed `85047e1777f5c20b7a936aa905c746125d3ed066` (in tag 0.21.0; the GHSA
+  "0.20.1" string has no upstream tag and its reason is UNKNOWN). The GHSA
+  is an unreviewed NVD-imported DB entry, not a repo-published advisory.
+  Verbatim `tuh_hid_parse_report_descriptor()` slice from `src/class/hid/
+  hid_host.c`, GCC 12 ASan: the 4-byte PoC `05 01 07 DE` underflows
+  `desc_len` 1 → 0xFFFD and reads 4 bytes 0 past a 4-byte heap descriptor;
+  a 5-byte `07 DE AD BE EF` overruns the 2-byte `usage_page` with a stack
+  `WRITE of size 4`; fixed breaks before the oversized item
+  (`report_num=0`) and clamps the copy (`usage_page=44510`), and the
+  well-formed 13-byte descriptor is clean on both. `sh run-all.sh &&
+  sh verify.sh` → `RESULT PASS=6 FAIL=0` (15:49Z). Rung 3 ASan in verbatim
+  pinned source, rung 2 underflow/fixed stop; rung 4 NOT CLAIMED — no
+  chosen-offset readback, pointer, USB stack or hardware, command or r5.
+  Owed: witness clean-archive replay, operator admission, loopback/simulated
+  USB-device consumer and plain-build grooming. No socket was opened.
+- `68c4b04f` (ruby2shell) **CLOSED** the stock WEBrick consumer lanes.
+  Sinatra 4.2.2's documented `-s webrick` reaches a Host `downcase` at
+  `rack-protection-4.2.2/lib/rack/protection/host_authorization.rb:112`
+  (HTTP 403), but the receiver is ASCII-8BIT so `0xdf` cannot expand; the
+  multipart `_method` part remains the only expanding stock-WEBrick sink.
+  `lab/preload/jemtrace.c` precise mode emits allocation-time before/after
+  qwords (`O/P`) and live references: C=80's apparent `0x53` pointer was a
+  natural-pointer false positive (real target a free Ruby slot), C=640 is
+  non-metadata but reused by `compile_data_alloc_with_arena`
+  (`compile.c:1112`), whose `storage->next=0` erases the byte; other classes
+  show no post-overflow reader. Clean C=640 differential: attack
+  `O=1 P=1 REF=6`, safe and fixed `O=0 P=0 REF=0`, all HTTP 404 and alive.
+  Plain glibc Sinatra N=572 changes a next-chunk size `0x25→0x53` and later
+  aborts in `unlink_chunk`; stock `rails new` under WEBrick N=524 changes
+  `0x155→0x153` and aborts in `munmap_chunk` on thread teardown. Nearby
+  lengths corrupt padding/non-size fields with no external reader. No
+  command, chosen-offset write, pointer control, second request or
+  persistence; full stock/oracle-free/persistent rung 5 remains NOT
+  ACHIEVED and all primary grades are unchanged. The remaining lead
+  (multipart filler before `_method` at N=572) is a new falsifiable
+  consumer-shaping experiment, not a repeat of the header sweep.
+- `358c1b40` only committed the already-folded mqttc2shell shipped-callback
+  result (`27 PASS / 0 FAIL`, console `426b7c06…94b6c9`, rung 3 wire-backed,
+  rung 4 NOT CLAIMED); `59c2e2e6` is a reconcile merge that moved no row or
+  count. W275's MQTT-C wire-witness receipt is still gitignored and appears
+  in no report at this HEAD, so no witness verdict is claimed here.
+
+Reproduction commands, pins, expected bytes and evidence locations for this
+window are in `docs/reproducibility.md` § 16:0xZ. Next triggers: tinyusb's
+witness replay and operator admission, the W275 MQTT-C wire receipt landing
+in a report, and outstanding W240/W241/W272/W274 verdict folds. What would
+change this fold: a witness verdict contradicting a labeled row above, an
+independently confirmed chosen-pointer or command result, or a checker RED
+on committed HEAD.
