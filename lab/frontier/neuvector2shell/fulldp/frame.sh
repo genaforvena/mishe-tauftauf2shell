@@ -25,16 +25,18 @@ PATTACK=$(readlink -f ../wirepath/out/wire-B.json)
 SAFE=$(readlink -f ../wirepath/out/wire-safe.json)
 
 mkdir -p out "$DEPS/run" ../src/real
-if [ ! -f "$ROOT/dp/dpi/sig/dpi_sig.c" ] || [ ! -f "$RLIB/libhs.so" ]; then
-    echo "provisioning pinned tree and lab dev deps via fulldp/run.sh"
-    bash run.sh > out/provision-fulldp.log 2>&1 || die "fulldp/run.sh provisioning"
-fi
 if [ ! -f "$ATTACK" ] || [ ! -f "$PATTACK" ] || [ ! -f "$SAFE" ]; then
     echo "provisioning wire messages via realcaller/run.sh + wirepath/run.sh"
     bash ../realcaller/run.sh > out/provision-realcaller.log 2>&1 && \
         bash ../wirepath/run.sh > out/provision-wirepath.log 2>&1 || \
         die "wire message provisioning"
 fi
+if [ ! -f "$ROOT/dp/dpi/sig/dpi_sig.c" ] || [ ! -f "$RLIB/libhs.so" ]; then
+    echo "provisioning pinned tree and lab dev deps via fulldp/run.sh"
+    bash run.sh > out/provision-fulldp.log 2>&1 || die "fulldp/run.sh provisioning"
+fi
+[ -f "$ROOT/dp/dpi/sig/dpi_sig.c" ] || die "pinned tree missing"
+[ -f "$RLIB/libhs.so" ] || die "lab hyperscan/dev cache missing"
 
 echo "== provenance =="
 sha256sum "$ROOT/dp/dpi/sig/dpi_sig.c" "$FIXED" "$ATTACK" "$PATTACK" "$SAFE"
