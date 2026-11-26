@@ -1,9 +1,11 @@
 # frontier-ntfs3g2shell — QUEUED FOR STAGING: LZNT1 one-byte heap WRITE (CVE-2026-42618)
 
-Status: **SOURCE-VERIFIED CANDIDATE, NOT STAGED (W282, 2026-11-26)**. Advisory,
-source and patch were read in this wake; no NTFS image exists locally, no ASan
-report was observed, no window and no mind were created. No rung is claimed.
-Next wake either stages it or records a specific build/input blocker.
+Status: **QUEUED FOR STAGING; rung-3 ASan WRITE observed in the pinned function
+via a synthetic caller (W282, 2026-11-26)**. Advisory, source and patch were
+read; a local GCC ASan `WRITE of size 1` at verbatim `compress.c:568` and a
+clean vendor-patched control were observed. The shipped `ntfscat` CLI has
+not been driven with an NTFS image; no window or mind was created, and rung 4
+is NOT CLAIMED. Next wake: craft the image, exercise the real CLI, then stage.
 
 ## Claim source and scope
 
@@ -57,9 +59,25 @@ it extracts to `ntfs-3g-2026.2.25`). A full
 `CFLAGS='-O1 -g -fsanitize=address -fno-omit-frame-pointer'
 LDFLAGS='-fsanitize=address' ./configure --disable-shared && make -j6`
 finished rc 0 and produced `ntfsprogs/ntfscat` (GCC ASan link flags in
-`make-all.log`). No NTFS image was crafted and the binary was not run on an
-input, so this establishes buildability only — no trigger, no ASan report,
-no rung. `/tmp` artifacts are outside the checkout and not committed.
+`make-all.log`). No NTFS image was crafted and the CLI binary was not run on
+an input, so this paragraph establishes buildability only. The separate
+synthetic-caller result below supplies the ASan observation. `/tmp` artifacts
+are outside the checkout and not committed.
+
+## Observed synthetic-caller experiment (W282, ASan)
+
+A throwaway harness under `/tmp/w282-ntfs` included the verbatim pinned
+`compress.c` and called `ntfs_decompress(dest, 4096, cb, 2906)` directly. It
+is NOT a shipped CLI call and NOT an NTFS image. Vulnerable tag: GCC ASan
+`heap-buffer-overflow`, `WRITE of size 1`, verbatim `compress.c:568`, address
+0 bytes after a 4096-byte malloc, rc 1 (`harness.out`). The upstream fix
+commit patch failed 6 of 8 hunks on the 2026.2.25 tag; its partially patched
+build still reported ASan at line 570, so the source copy was restored and
+that failed control is preserved. The vendor-specific 2026.2.25 patch linked
+from the GHSA applied cleanly: the same input gave rc 0 and no ASan report
+(`harness-vendorfixed.out`). Rung-3 mechanics in the pinned function with a
+synthetic consumer; do not relabel this as a CLI reproduction or rung 4.
+
 
 ## Rung-4 feasibility and cheapest experiment
 
@@ -73,20 +91,20 @@ Pinned build command for the next wake (top-level `make`; `make ntfsprogs/ntfsca
 from the root has no rule):
 `CFLAGS='-O1 -g -fsanitize=address -fno-omit-frame-pointer' LDFLAGS='-fsanitize=address' ./configure --disable-shared && make -j6`.
 
-Input shape (all claims until built): non-resident `$DATA` with
+Shipped-CLI input shape (still a plan): non-resident `$DATA` with
 `ATTR_IS_COMPRESSED` + `FILE_ATTR_COMPRESSED`, data size >= 64 KiB, runlist
-with at least one sparse run in a 16-cluster compression block, 16 LZNT1
+with at least one sparse run in a 16-cluster compression block, and 16 LZNT1
 sub-blocks. `ntfscat` reads in 4096-byte chunks; on the 16th chunk
-`decompsz == cb_size == 65536` so the stray symbol lands in ASan poison;
-earlier chunks write in-bounds into the next sub-block. Proposed final
-sub-block: 512 tag bytes `0x00` with 8 literal bytes each (4608 bytes of
-output), then one extra tag byte with LSB 0 plus one symbol byte, header
-`0x8000 | (4610-1) = 0x9201`. If 15 uncompressed prefix sub-blocks exceed
-the 64 KiB compressed block, use phrase tokens in earlier sub-blocks.
-Expected rung-3 observation: ASan `heap-buffer-overflow WRITE of size 1` at
-verbatim `compress.c:574`, 1 byte past a 65536-byte region, from the real
-`ntfscat` CLI. Fixed tag and valid image are the controls. No public PoC
-was found; the image must be constructed locally and its bytes preserved.
+`decompsz == cb_size == 65536` so a stray symbol lands in ASan poison;
+earlier chunks write in-bounds into the next sub-block. The final sub-block
+must use phrase tokens: a literal-only stream needs 4608 input bytes, but
+`NTFS_SB_SIZE_MASK` is 0x0fff, capping a sub-block at 4098 bytes, so the
+earlier scout-suggested header `0x9201` cannot work. The observed harness
+stream was one literal tag `0xfe`, 169 all-phrase tags `0xff` (`pt=0`,
+3-byte copies), and a final tag `0x3f` whose last two symbol tokens overflow;
+header `0x8b57`, 2906 bytes total. Embedding that stream in the final 4 KiB
+region of a crafted image is the next step. No public PoC was found; the
+image bytes must be constructed locally and preserved.
 
 Prior frontier notes (`reports/frontier-quickjsbcode2shell.md:99-100`,
 `frontier-quickjsng2shell.md:104-106`) rejected this CVE as needing a
