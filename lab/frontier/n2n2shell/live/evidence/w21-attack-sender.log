@@ -1,0 +1,4 @@
+W10: REGISTER_SUPER reply len=58
+W10: override token+1682 = e8f3420000000000
+W10: sent NAK len=1738 token_size=1700
+W10: no forwarded NAK

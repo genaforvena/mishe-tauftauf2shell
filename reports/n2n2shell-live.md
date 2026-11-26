@@ -829,3 +829,42 @@ build with this wire, and ASan on this 1700-byte wire. Ceiling unchanged:
 rungs 1-4 on the vulnerable build, no marker execution, canary/RIP hit,
 control-flow takeover, command execution or r5. Author experiment only;
 no witness verdict.
+
+## W21: ASan on the exact 1700-byte W11 wire (2026-11-26 00:1xZ)
+
+W20 left ASan on the 1700-byte wire UNKNOWN. W21 rebuilds the pinned
+vulnerable tree with clang `-fsanitize=address -fno-omit-frame-pointer -g
+-O1`, starts a supernode on 127.0.0.1:19600, registers a peer and sends
+W11's exact 1738-byte NAK (`token_size=1700`, `token+1682 =
+e8f3420000000000` carrying the chosen `0x42f3e8` pointer). ASan reports
+`ERROR: AddressSanitizer: stack-buffer-overflow`, `WRITE of size 1700`
+at `wire.c:179` <- `decode_REGISTER_SUPER_NAK` (`wire.c:651`) <-
+`process_udp` (`sn_utils.c:2322`), and the process aborts. The frame
+listing places the write start at the end of `nak3533` (`[11136,11200)`,
+`sn_utils.c:2308`) and calls it a partial underflow of the following
+`nakbuf` at `[11232,13280)`. No `SEGV on unknown address` appears:
+ASan stops on the first out-of-bounds store, so the overwritten `comm`
+spill slot that the plain clang -O2 build dereferences in W11 is never
+reached under this build. This is sanitizer detection of the same wire
+that gave W11 live pointer control, not a new rung and not evidence of
+control-flow impact.
+
+A fresh process of the same ASan build received a safe 48-byte NAK from
+a registered peer, forwarded 86 bytes with
+`first=485a4d49485a4d49`, and produced no AddressSanitizer report
+(only LeakSanitizer's shutdown summary, unrelated to the wire). Raw
+logs: `live/evidence/w21-{pins,asan-build,asan-attack,attack-sender,
+asan-safe,safe-sender}.log`.
+
+`sh lab/frontier/n2n2shell/live/w21_asan_wire1700.sh` verifies pins, the
+instrumented binary, the exact wire and chosen pointer, the 1700-byte
+write and its three frames, abort without a deref SEGV, and the safe
+control: `RESULT 14 PASS / 0 FAIL`, rc 0 from the working tree with
+`REPLAY_LOGDIR=/tmp/n2n-w21-out`, `PORT_BASE=19600`.
+
+This closes the ASan-1700 UNKNOWN as a positive sanitizer detection.
+Still UNKNOWN: a build of the complete upstream fixed commit tree and a
+default-PIE build with this wire. Ceiling unchanged: rungs 1-4 on the
+vulnerable build, no marker execution, canary/RIP hit, control-flow
+takeover, command execution or r5. Author experiment only; no witness
+verdict.

@@ -1,0 +1,113 @@
+26/Nov/2026 00:12:11 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+26/Nov/2026 00:12:11 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+26/Nov/2026 00:12:11 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 00:12:11 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+26/Nov/2026 00:12:11 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 00:12:11 [supernode.c:660] supernode is listening on UDP 19600 (main)
+26/Nov/2026 00:12:11 [supernode.c:669] supernode opened TCP 19600 (aux)
+26/Nov/2026 00:12:11 [supernode.c:676] supernode is listening on TCP 19600 (aux)
+26/Nov/2026 00:12:11 [supernode.c:685] supernode is listening on UDP 19601 (management)
+26/Nov/2026 00:12:11 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+26/Nov/2026 00:12:11 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+26/Nov/2026 00:12:11 [supernode.c:728] supernode started
+=================================================================
+==2947583==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x79cc3f00abc0 at pc 0x5637dfb87288 bp 0x7fff52f4ec60 sp 0x7fff52f4e420
+WRITE of size 1700 at 0x79cc3f00abc0 thread T0
+    #0 0x5637dfb87287 in __asan_memcpy (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xce287) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5637dfc0a2db in decode_buf /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/wire.c:179:5
+    #2 0x5637dfc0a2db in decode_REGISTER_SUPER_NAK /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/wire.c:651:15
+    #3 0x5637dfbe53af in process_udp /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:2322:13
+    #4 0x5637dfbdf7a6 in run_sn_loop /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:2664:21
+    #5 0x5637dfbc8e2c in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:741:12
+    #6 0x79cc4062a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x79cc4062a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x5637dfaee4f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Address 0x79cc3f00abc0 is located in stack of thread T0 at offset 11200 in frame
+    #0 0x5637dfbe382f in process_udp /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:1555
+
+  This frame has 49 object(s):
+    [32, 56) 'cmn' (line 1557)
+    [96, 104) 'rem' (line 1558)
+    [128, 136) 'idx' (line 1559)
+    [160, 180) 'sender' (line 1563)
+    [224, 256) 'mac_buf' (line 1565)
+    [288, 320) 'mac_buf2' (line 1566)
+    [352, 416) 'sockbuf' (line 1567)
+    [448, 464) 'hash_buf' (line 1568)
+    [480, 488) 'stamp' (line 1572)
+    [512, 516) 'skip_add' (line 1573)
+    [528, 536) 'any_time' (line 1574)
+    [560, 594) 'pkt' (line 1721)
+    [640, 664) 'cmn2' (line 1722)
+    [704, 2752) 'encbuf' (line 1723)
+    [2880, 2888) 'encx' (line 1724)
+    [2912, 2972) 'reg' (line 1804)
+    [3008, 3032) 'cmn2548' (line 1805)
+    [3072, 5120) 'encbuf549' (line 1806)
+    [5248, 5256) 'encx550' (line 1807)
+    [5280, 5392) 'reg637' (line 1873)
+    [5424, 5524) 'ack' (line 1874)
+    [5568, 5632) 'nak' (line 1875)
+    [5664, 5688) 'cmn2638' (line 1876)
+    [5728, 7776) 'ackbuf' (line 1877)
+    [7904, 9070) 'payload_buf' (line 1878)
+    [9200, 9208) 'encx639' (line 1880)
+    [9232, 9236) 'match_length' (line 1885)
+    [9248, 9256) 'ipaddr' (line 1886)
+    [9280, 9338) 'unreg' (line 2173)
+    [9376, 9476) 'ack3425' (line 2219)
+    [9520, 9584) 'sockbuf1' (line 2221)
+    [9616, 9680) 'sockbuf2' (line 2222)
+    [9712, 9744) 'mac_buf1' (line 2223)
+    [9776, 10942) 'dec_tmpbuf' (line 2225)
+    [11072, 11092) 'payload_sock' (line 2227)
+    [11136, 11200) 'nak3533' (line 2308)
+    [11232, 13280) 'nakbuf' (line 2309) <== Memory access at offset 11200 partially underflows this variable
+    [13408, 13416) 'encx3534' (line 2310)
+    [13440, 13504) 'sockbuf3536' (line 2312)
+    [13536, 13568) 'mac_buf3537' (line 2313)
+    [13600, 13634) 'query' (line 2372)
+    [13680, 15728) 'encbuf4331' (line 2373)
+    [15856, 15864) 'encx4332' (line 2374)
+    [15888, 15912) 'cmn24333' (line 2375)
+    [15952, 16040) 'pi' (line 2376)
+    [16080, 16084) 'match_length4338' (line 2380)
+    [16096, 16184) 'pi4899' (line 2523)
+    [16224, 18272) 'encbuf4900' (line 2524)
+    [18400, 18408) 'encx4901' (line 2525)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xce287) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x79cc3f00a900: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x79cc3f00a980: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x79cc3f00aa00: f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8 f8
+  0x79cc3f00aa80: f8 f8 f8 f8 f8 f8 f8 f8 f2 f2 f2 f2 f2 f2 f2 f2
+  0x79cc3f00ab00: f2 f2 f2 f2 f2 f2 f2 f2 f8 f8 f8 f2 f2 f2 f2 f2
+=>0x79cc3f00ab80: 00 00 00 00 00 00 00 00[f2]f2 f2 f2 00 00 00 00
+  0x79cc3f00ac00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79cc3f00ac80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79cc3f00ad00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79cc3f00ad80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x79cc3f00ae00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2947583==ABORTING

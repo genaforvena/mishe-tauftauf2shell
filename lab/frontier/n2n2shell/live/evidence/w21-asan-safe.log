@@ -1,0 +1,150 @@
+26/Nov/2026 00:12:43 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+26/Nov/2026 00:12:43 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+26/Nov/2026 00:12:43 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 00:12:43 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+26/Nov/2026 00:12:43 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 00:12:43 [supernode.c:660] supernode is listening on UDP 19660 (main)
+26/Nov/2026 00:12:43 [supernode.c:669] supernode opened TCP 19660 (aux)
+26/Nov/2026 00:12:43 [supernode.c:676] supernode is listening on TCP 19660 (aux)
+26/Nov/2026 00:12:43 [supernode.c:685] supernode is listening on UDP 19661 (management)
+26/Nov/2026 00:12:43 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+26/Nov/2026 00:12:43 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+26/Nov/2026 00:12:43 [supernode.c:728] supernode started
+26/Nov/2026 00:13:00 [supernode.c:582] shutting down...
+
+=================================================================
+==2949147==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6f29 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:159:5
+    #3 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #4 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6e57 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:147:38
+    #2 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #3 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6f57 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:162:42
+    #2 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #3 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6f07 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:158:41
+    #2 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #3 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6ea7 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:151:39
+    #2 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #3 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 2496 byte(s) in 3 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6f79 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:163:5
+    #3 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #4 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6f79 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:163:5
+    #3 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #4 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6f57 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:162:42
+    #2 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #3 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6ea7 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:151:39
+    #2 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #3 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6ec9 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:152:5
+    #3 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #4 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6f29 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:159:5
+    #3 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #4 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115ce2b in posix_memalign (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd0e2b) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711c6cbf in speck_init /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/speck.c:958:30
+    #2 0x5a3e711e6e79 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:148:5
+    #3 0x5a3e711a9fb5 in load_allowed_sn_community /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:419:13
+    #4 0x5a3e7119b9b2 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:629:9
+    #5 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6f07 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:158:41
+    #2 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #3 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+Direct leak of 832 byte(s) in 1 object(s) allocated from:
+    #0 0x5a3e7115c52d in calloc (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0xd052d) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+    #1 0x5a3e711e6e57 in packet_header_setup_key /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/header_encryption.c:147:38
+    #2 0x5a3e711aeda4 in sn_init_defaults /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/sn_utils.c:807:9
+    #3 0x5a3e7119a9b9 in main /tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/src/supernode.c:605:5
+    #4 0x7b34e762a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7b34e762a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x5a3e710c14f4 in _start (/tmp/n2n2shell-w21.2946314/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode+0x354f4) (BuildId: c6fca31bd0ed20398b15a992d49bc5534fec4259)
+
+SUMMARY: AddressSanitizer: 21632 byte(s) leaked in 26 allocation(s).
