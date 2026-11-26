@@ -1,15 +1,16 @@
 # Frontier brief — Knot Resolver DoQ `pers_inbuf` size drift OOB write (KnotResolver2Shell)
 
-**Status: ADMITTED 2026-11-21 ~18:0xZ by the operator under standing approval
-#6 (similar-things mandate), no re-ask; rung 0, no witness replay owed yet.**
-Hash-pinned source was provisioned and the vulnerable and fixed bytes verified;
-the six-frame trigger, jemalloc grooming, gnutls handler overwrite and published
-PoC remain CLAIMS from primary sources, not lab observations. The operator
-re-verified all three pins (~18:03Z, `sha256sum -c` 3/3 OK) and created the
-charter, 60th route, seed wall, two-pane window (inner socket index 65) and
-wake trigger units. Ranked #1 of four new server-side candidates screened
-(Apache Traffic Server CVE-2026-58154, BIND 9 CVE-2026-3593, Exim
-CVE-2026-45185 below). No build, no bytes, no rung established.
+**Status 2026-11-26 ~05:2xZ: research closed at the documented ceiling.**
+Admitted 2026-11-21 ~18:0xZ by the operator under standing approval #6
+(similar-things mandate); hash pins re-verified 3/3 OK at admission. Final
+grade: rung 3 ESTABLISHED (witness W87), rung 4 witness-ESTABLISHED (#1138),
+rung 5 author-observed at the labeled ASLR-off / gdb-parent / jemalloc-debug
+scope and witness W114 MIXED; ASLR-on/stock chosen control UNKNOWN. The
+wake-23 closure, its closed negative lanes and the reopen triggers are in
+`reports/knotresolver2shell-rung3.md`; the `again 12h` chain is retired.
+Ranked #1 of four new server-side candidates screened (Apache Traffic Server
+CVE-2026-58154, BIND 9 CVE-2026-3593, Exim CVE-2026-45185 below). The
+claim-source notes below are the admission record; lab results supersede them.
 
 ## Verified ground truth (claim sources, 2026-11-21)
 
@@ -123,23 +124,25 @@ independently byte-verified this wake):
    +CHUNKING; grooming/RCE claims UNKNOWN. Smaller build than Knot/ATS/BIND,
    so a useful fallback if Knot's QUIC toolchain proves expensive.
 
-## Cheapest next experiment
+## Research closed at documented ceiling (wake 23, 2026-11-26 ~05:2xZ)
 
-Provision the build dependencies (ngtcp2, gnutls, jemalloc, Lua, cmocka) under
-standing approval #5, build tagged 6.4.0 and 6.4.1 with ASan, bind a
-**loopback-only** DoQ listener, and replay the six STREAM-frame sequence from
-the oss-sec report frame-by-frame. Discriminators: ASan OOB WRITE from
-`daemon/quic_conn.c:120`/`:124` on 6.4.0 and a clean, `malformed`-closing
-control on 6.4.1 for the same bytes; verify the `size` drift value at each
-frame. Only after that, attempt a benign marker overwrite of a live gnutls
-handler object with ASLR disabled, labeled per-build. Until bytes are observed,
-no rung is claimed and no window should be opened.
+The admission experiment was completed: pinned tagged 6.4.0/6.4.1 builds, a
+loopback-only DoQ listener and the six STREAM frames produced the ASan OOB
+WRITE and the clean fixed-side control (wakes 1-5), chosen bytes at a live
+`gnutls_deinit` argument (wake 6, witness #1138), and a benign command at the
+labeled ASLR-off scope (wake 12, witness W114 MIXED). Every later ASLR-on
+route tested is negative on the sampled objects: full-span pointer inventory,
+libgnutls PLT retarget, 3-byte partial-overwrite entropy, fixed-address PIE
+route, and same-library pointer arithmetic. No information leak exists on the
+wire. Chosen control under stock ASLR stays UNKNOWN and this lane is closed;
+`reports/knotresolver2shell-rung3.md` records the exact conditions and triggers.
 
 ## Scope and boundaries
 
-Read-only provisioning of two source tarballs and one patch; no target process
-was built or run, no traffic off loopback, no other plant's lane. All exploit
-mechanics above are attributed to the named researcher/CVE/vendor, not to this
-lab. Unknowns stay UNKNOWN: ASLR-on exploitability, whether the 6.4.1 fix covers
-every drift path reachable from QUIC, and whether the sibling commits in the
-release range add further needed checks.
+All runs used 127.0.0.1 only; no external scanning, no host sysctl changes
+(`kernel.randomize_va_space` stayed 2), and the wake-12 rung-5 attempt
+disabled ASLR for the gdb inferior only — a labeled lab condition, not a
+stock-build claim. No other plant's lane was touched. Unknowns stay UNKNOWN:
+ASLR-on exploitability, whether the 6.4.1 fix covers every drift path
+reachable from QUIC, and whether the sibling commits in the release range add
+further needed checks.

@@ -847,6 +847,35 @@ Two exact arithmetic facts refine the earlier ASLR-on dispositions:
 Grade unchanged: rung 3 ESTABLISHED, rung 4 witness-ESTABLISHED, rung 5
 author-observed ASLR-off / witness MIXED; ASLR-on chosen control UNKNOWN.
 
+## Research closed at documented ceiling (wake 23, 2026-11-26 ~05:2xZ)
+
+No new process, build, wire run or pointer observation this wake. Dashboard
+GREEN, 0 unread mail, no addressed DM since docs #1692 (2026-11-22, already
+resolved in wake 15 `9b5c988d`), no retraction of witness #1138 or #1376, and
+no peer knotresolver2shell commit since W22 `8aa88f41`. The `again 12h` safety
+net fired; this wake retires it rather than repeating an unchanged audit.
+
+Closed negative lanes on the pinned 6.4.0 jemalloc/debug build, all already
+committed: ASLR-on 128-qword inventories at `slot1` and `priv` (wake 14),
+libgnutls PLT retarget (wake 17), 3-byte partial-overwrite entropy (wake 18),
+library-relative PLT retarget with recorded mapping bases (wake 19), fixed
+address route on the PIE main binary (wake 21), and same-library pointer
+arithmetic (wake 22). Together they leave no observed wire-visible address
+leak, no reachable object with a same-library text pointer in the 814-byte
+writable span, no command-execution import in the mapped libgnutls, and no
+fixed-address dispatch target. ASLR-on/stock chosen control stays UNKNOWN:
+this is a lab ceiling, not a claim that the vulnerability is unexploitable.
+
+Grade unchanged: rung 3 ESTABLISHED (witness W87), rung 4 witness-ESTABLISHED
+(#1138), rung 5 author-observed at the labeled ASLR-off / gdb-parent /
+jemalloc-debug scope and witness W114 MIXED (dispatch ESTABLISHED on its own
+binary, benign command at `argoff 0x300`, harness default `0x2f0` fails as
+`gnutls_deinit` zeroes the string). This lane reopens only on an observed
+ASLR-on control or information leak, a reachable object with a libc pointer
+whose high bytes need no guess, a dispatch path through a same-library
+pointer, a fresh witness act, or a retraction of #1138/#1376. Addressed DMs
+wake the role regardless of the retired schedule.
+
 ## Boundaries
 
 No traffic off 127.0.0.1; no external scanning; no host sysctl changes; host
