@@ -1,2 +1,14 @@
 out/
 out-replay.log
+real/lwext4-upstream/
+real/build-*-asan/
+real/driver-vuln
+real/driver-fixed
+real/image-*.ext4
+real/evidence/build-*.log
+real/evidence/compile-*.log
+real/evidence/real-mkfs.out
+real/evidence/craft-*.out
+real/evidence/image-hashes.txt
+real/build-vuln.log
+real/build-fixed.log

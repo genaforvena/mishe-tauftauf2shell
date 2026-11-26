@@ -1,15 +1,14 @@
 # Frontier brief: lwext4 bitmap-init heap overflows — CVE-2025-71473 / 71474
 
-Status: **STAGED 2026-11-26 W242**; window 167 created and registered
-03:21:24Z (168 windows / 168 unique names), operator DM 4767 and witness DM
-4768 sent. Witness W242 replay: ESTABLISHED AS LABELED, no grade change,
-NO r5; operator admission remains owed.
-Rung 3 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
-(image-chosen bit byte past the logical 4096-byte block in a synthetic plain
-process). No real lwext4 build, no crafted ext4 image through the mount path,
-no chosen-address pointer, no command and no rung 5. Only CVE-2025-71473
-(`ext4_fs_init_inode_bitmap`) is staged; the sibling block-bitmap issue
-CVE-2025-71474 is claimed and source-read but NOT staged here.
+Status: **ADMITTED 2026-11-26** (159th target, standing #6, window 167);
+witness W242 replay ESTABLISHED AS LABELED (no grade change, NO r5).
+Real-library lane staged 2026-11-26 14:1xZ: `run-real.sh` 17 PASS / 0 FAIL
+replays both pinned full trees through the real `ext4_fs_init()` mount path,
+with images made by lwext4's own `ext4_mkfs()`. Rung 3 now includes an
+ASan-confirmed heap WRITE in the real library triggered by an image-derived
+field; rung 4 remains PARTIAL (image-chosen bit byte, no adjacent live-object
+control). No chosen-address pointer, no command and no rung 5. Both
+CVE-2025-71473 and CVE-2025-71474 are now staged locally.
 
 ## Claims
 
@@ -55,9 +54,10 @@ CVE-2025-71474 is claimed and source-read but NOT staged here.
   image field to 32778 yields bits 2..7 (`0xfc`).
 - Fix excerpt lines 23-26 (file lines 443-446) reject
   `inodes_per_group > block_size * 8` with `EIO` before the `memset()`. The
-  fix's block-bitmap function likewise computes `bitmap_bits = block_size * 8`
-  and rejects `bit_max > bitmap_bits` (file lines 331, 352-355), which is the
-  CVE-2025-71474 hunk; that function is not staged locally.
+  full fix also adds `ext4_sb_check_geometry()` at mount, which rejects the
+  crafted images before any bitmap write with `ENOTSUP` (95 in the system
+  errno build used here). Its block-bitmap guard bounds `bit_max` to
+  `block_size * 8`; the CVE-2025-71474 hunk is staged in the real lane below.
 
 ## Local evidence
 
@@ -86,21 +86,66 @@ controls and the `0xfe`/`0xfc` vs `0x4d` readback were reobserved. Verdict:
 ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.
 
+## Real mount-path evidence (2026-11-26 14:1xZ)
+
+Upstream clone fetched once for provisioning; two detached worktrees:
+`v1.0.0` = `890484c72dbb321535127625c3686e51f1f424b9` and fix
+`b9c842f168e6044bd03fe34e1237eda33c299908`. Both were built as the real
+lwext4 library with `cmake -DLIB_ONLY=1` and GCC ASan `-O0`; a small driver
+(`lab/frontier/lwext4shell/real/mount_driver.c`) opens a *file* block device
+via lwext4's own `ext4_filedev`/`file_dev`, calls the real `ext4_fs_init()`,
+binds a real 16-entry bcache, then calls the exported real
+`ext4_fs_get_block_group_ref(&fs, 0, &ref)`. No function body is copied and no
+struct is stubbed. The pristine image is created by the library's unmodified
+`ext4_mkfs()` (4 KiB blocks, 8192 inodes/group, 16 MiB file); the two patchers
+change only on-disk superblock/group-descriptor fields, never source bytes.
+
+`bash lab/frontier/lwext4shell/run-real.sh`: **17 PASS / 0 FAIL**, rc 0.
+Images (SHA-256): base
+`1a74665db6ce64cbd63ccf3aca0ffde501855651cf29983dfe7ccd305aaf8adb`,
+attack `965cacc7355656ffc86352d2ab73458444dfbef68780670ae2839dc3363a7445`
+(`s_inodes_per_group=32777`, group-0 `INODE_UNINIT`), safe
+`ad341307fd9733d0d799bf89cd97b0872c4c6b276f0dd3cfaf341933708e9d15`
+(`8192`, same group flag), 71474 image `real/evidence/image-hashes.txt`
+(`s_reserved_gdt_blocks=65535`, group-0 `BLOCK_UNINIT`).
+
+- Vulnerable + attack: ASan `heap-buffer-overflow`, `WRITE of size 4098`,
+  0 bytes after a 4096-byte region, from
+  `ext4_fs_init_inode_bitmap src/ext4_fs.c:404` called by
+  `ext4_fs_get_block_group_ref src/ext4_fs.c:611`; allocation trace
+  `ext4_buf_alloc`/`ext4_bcache_alloc`/`ext4_trans_block_get_noread`.
+  This is the image-derived field driving the real allocator's buffer.
+- Fixed + attack: `FS_INIT_RC=95` (`ENOTSUP`) from
+  `ext4_sb_check_geometry()` at mount, before any bitmap write; no ASan.
+- Vulnerable/fixed + safe: `BG_REF_RC=0`, `BG_FLAGS=4` after the UNINIT bit
+  is cleared, no ASan — the same group-ref path with sane geometry.
+- CVE-2025-71474 vulnerable: ASan `heap-buffer-overflow`, `READ of size 1`
+  (bit-set read-modify-write) at 0 bytes past the same 4096-byte region in
+  `ext4_bmap_bit_set` from `ext4_fs_init_block_bitmap src/ext4_fs.c:333`,
+  reached via `ext4_fs_get_block_group_ref src/ext4_fs.c:601`. Fixed + same
+  image: `FS_INIT_RC=95`, no ASan.
+- Raw logs: `lab/frontier/lwext4shell/real/evidence/real-*-asan.out`; build,
+  compile, mkfs, craft and image-hash records in the same directory. Neither
+  ASan report carries attacker-chosen pointer bits or a command side effect.
+
 ## Grade and tractability
 
-- **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
-  bytes, with fixed and safe-input controls.
-- **Rung 4 PARTIAL:** the byte past the logical block tracks the image-derived
-  superblock field (`0xfe` vs `0xfc` at `block+4097`) in a synthetic plain
-  process. No real lwext4 mount, no crafted ext4 image wire path, no
-  chosen-address pointer and no command.
-- **Not rung 5:** no live loopback target and no benign command side effect.
+- **Rung 3 CONFIRMED:** GCC/Clang ASan on verbatim pinned excerpts *and*
+  GCC ASan on the full real library mount path, with real allocator frames,
+  image-derived input, fixed and safe controls.
+- **Rung 4 PARTIAL:** the byte past the logical block tracks an image-derived
+  superblock field (`0xfe`/`0xfc` at `block+4097`) in the synthetic plain
+  process; the real path shows the OOB WRITE but no adjacent live object with
+  chosen bytes at chosen offsets. With glibc's 4096-byte request the two
+  extra bytes stay inside the same malloc chunk, so no pointer control is
+  demonstrated. No crafted wire path, chosen address or command.
+- **Not rung 5:** no live network target and no benign command side effect.
 
-Cheapest next experiment: build lwext4's real `ext4_fs_init()` mount path
-against a crafted ext4 image whose `s_inodes_per_group = 32777` and check the
-real allocator under ASan, then pin `ext4_fs_init_block_bitmap()` with
-`s_reserved_gdt_blocks` oversized to stage CVE-2025-71474. Keep the no-pointer,
-no-command ceiling until a real consumer is measured.
+Next bounded lane: measure a real consumer whose allocated object is adjacent
+to the bitmap block under the same crafted image (heap grooming or a caller
+that allocates immediately after the bcache buffer) before claiming full
+rung 4; only a benign command side effect on a live loopback target could
+open rung 5. Both CVEs are staged; do not collapse the two into one claim.
 
 ## Duplicate check
 

@@ -1,12 +1,16 @@
 # lwext4shell — status (admitted 2026-11-26)
 
 State: **ADMITTED 03:3xZ under standing #6 as the 159th declared target mind**;
-window 167 adopted (created 03:21Z, registry 168/168 unique at this wake);
-witness W242 replay ESTABLISHED AS LABELED, no grade change, NO r5.
-Grade: rung 3 pinned verbatim function / rung 4 PARTIAL image-chosen bit byte
-past a 4096-byte heap block.
-No real lwext4 build, no crafted ext4 image through the mount path, no
-chosen-address pointer, no command, no r5.
+window 167 adopted; witness W242 replay ESTABLISHED AS LABELED, no grade
+change, NO r5. Real-library mount lane staged 2026-11-26 14:1xZ:
+`run-real.sh` 17 PASS / 0 FAIL.
+Grade: **rung 3 CONFIRMED** (real lwext4 library mount path, image-derived
+`ipg=32777`, ASan `WRITE of size 4098` past the real 4096-byte bcache buffer,
+vulnerable/fixed/safe controls) / **rung 4 PARTIAL** (image-chosen bit byte,
+no adjacent live-object control). No chosen-address pointer, no command, no
+r5. CVE-2025-71474 is staged locally too: real ASan OOB bit-set in
+`ext4_fs_init_block_bitmap()` with `s_reserved_gdt_blocks=65535`; fixed build
+rejects both crafted images with `ENOTSUP=95`.
 Brief `reports/frontier-lwext4.md`, harness
 `lab/frontier/lwext4shell/`, seed wall `.mishe-tauftauf/walls/lwext4shell.md`,
 charter `.mishe-tauftauf/charters/lwext4shell.md`.
@@ -17,7 +21,7 @@ on a one-block buffer without checking the image-derived count against
 `block_size`. Fix `b9c842f168e6044bd03fe34e1237eda33c299908`, parent
 `a2dacdc14ea45745a3d65d2a1ea62d1b3681bfdc` (both pinned verbatim) rejects
 `inodes_per_group > block_size * 8` with `EIO`. The sibling CVE-2025-71474
-block-bitmap OOB is in the same fix but NOT staged locally.
+block-bitmap OOB is in the same fix and is now staged in the real lane.
 
 `run-all.sh`: 31 PASS / 0 FAIL. GCC and Clang ASan report
 `heap-buffer-overflow`, `WRITE of size 4098`, 0 bytes past a 4096-byte region;
@@ -29,14 +33,13 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 
 ## Next
 
-1. Window 167 is adopted and witness replay ESTABLISHED AS LABELED; no grade
-   change and no r5.
-2. Own the real-library lane: build lwext4 `ext4_fs_init()`,
-   deliver a crafted ext4 image with `s_inodes_per_group = 32777`, and measure
-   the real allocator under ASan against the fix.
-3. Pin `ext4_fs_init_block_bitmap()` with oversized `s_reserved_gdt_blocks` to
-   stage CVE-2025-71474. Keep the no-pointer/no-command ceiling until a real
-   consumer is observed; no rung 5 without a benign command side effect.
+1. Witness replay of `run-real.sh` is owed: it is new author evidence in the
+   real library, not covered by W242's verdict on the stand-in harness.
+2. Measure a real consumer whose allocation is adjacent to the bitmap block
+   under the crafted image; without chosen bytes at chosen offsets in a live
+   object, rung 4 stays PARTIAL.
+3. Keep the no-pointer/no-command ceiling until a consumer is observed; no
+   rung 5 without a benign command side effect on a live loopback target.
 
 ## Receipts
 
@@ -79,3 +82,22 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
   both `REPLAY_PASS=6 REPLAY_FAIL=0`, rc 0, no grade change. Window 167 adopted;
   no route, resolver, unit or sync edit (person-reserved). hy4-flash route and
   three generated wake units remain missing; omp-only and doctor stay RED.
+
+## Real mount lane receipt (2026-11-26 14:1xZ)
+
+Public `git clone` of lwext4, detached worktrees at
+`890484c72dbb321535127625c3686e51f1f424b9` (v1.0.0) and
+`b9c842f168e6044bd03fe34e1237eda33c299908` (fix); both full libraries built
+under GCC ASan `-O0`. `real/mount_driver.c` drives the library's own file
+block device, real `ext4_fs_init()`, real bcache and real
+`ext4_fs_get_block_group_ref()`. Base image comes from the library's
+unmodified `ext4_mkfs()`; two patch scripts edit only superblock and group
+descriptor bytes. `bash run-real.sh` returned `REAL_PASS=17 REAL_FAIL=0`,
+rc 0: vulnerable attack ASan `WRITE of size 4098` at 0 bytes past the
+4096-byte bcache buffer from `src/ext4_fs.c:404` via `:611`; fixed attack
+`FS_INIT_RC=95` from mount-time geometry validation; vulnerable/fixed safe
+`BG_REF_RC=0`; 71474 vulnerable ASan OOB bit-set from `src/ext4_fs.c:333`
+via `:601`; fixed 71474 `FS_INIT_RC=95`. Logs:
+`lab/frontier/lwext4shell/real/evidence/`; hashes and commands:
+`lab/frontier/lwext4shell/PROVENANCE.md`. Grade change is rung 3 harness →
+rung 3 real library; rung 4 and rung 5 unchanged.

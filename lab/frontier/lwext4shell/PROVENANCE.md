@@ -98,3 +98,51 @@ as already stated here. Chosen-byte readback (`0xfe`/`0xfc` vs `0x4d`)
 reproduced; the `ipg` values are harness constants, not bytes parsed from a
 real ext4 image. Verdict: ESTABLISHED AS LABELED, no grade change, NO r5.
 Detail: `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.
+
+## Real mount-path lane (2026-11-26 14:1xZ)
+
+Provisioning: plain `git clone https://github.com/gkostka/lwext4.git` into
+`real/lwext4-upstream/` (public source fetch, no probe of a target host), then
+two detached worktrees pinned by object id:
+
+- `real/lwext4-upstream/vuln` = `v1.0.0` =
+  `890484c72dbb321535127625c3686e51f1f424b9`;
+- `real/lwext4-upstream/fixed` =
+  `b9c842f168e6044bd03fe34e1237eda33c299908`.
+
+Both libraries were built with
+`cmake -S <tree> -B real/build-<variant>-asan -DLIB_ONLY=1
+-DCMAKE_C_FLAGS='-fsanitize=address -g -O0 -fno-omit-frame-pointer'`.
+`real/mount_driver.c` is compiled against the unmodified libraries plus the
+tree's own file block device (`ext4_filedev.c` on vulnerable, renamed
+`file_dev.c` on fixed). It calls real `ext4_block_init()`, `ext4_fs_init()`,
+`ext4_block_bind_bcache()` and `ext4_fs_get_block_group_ref()`; no stub
+structs or copied function bodies.
+
+`real/image-base.ext4` is written by the vulnerable library's unmodified
+`ext4_mkfs()` (16 MiB, 4 KiB blocks, safe `ipg=8192`, no feature flags forced
+by the patchers). `real/craft_image.py` and `real/craft_image_71474.py` edit
+only bytes in the on-disk superblock/group descriptor:
+
+| image | field changed | group-0 flags | SHA-256 |
+| --- | --- | --- | --- |
+| base | none | `0x0004` | `1a74665db6ce64cbd63ccf3aca0ffde501855651cf29983dfe7ccd305aaf8adb` |
+| attack-71473 | `s_inodes_per_group=32777` | `0x0005` | `965cacc7355656ffc86352d2ab73458444dfbef68780670ae2839dc3363a7445` |
+| safe | `s_inodes_per_group=8192` | `0x0005` | `ad341307fd9733d0d799bf89cd97b0872c4c6b276f0dd3cfaf341933708e9d15` |
+| attack-71474 | `s_reserved_gdt_blocks=65535` | `0x0006` | see `real/evidence/image-hashes.txt` |
+
+`bash run-real.sh` rebuilds everything and asserts 17 observations
+(17 PASS / 0 FAIL, rc 0 at this wake): the vulnerable attack image produces
+ASan `WRITE of size 4098` at 0 bytes past a 4096-byte region with frames
+`ext4_fs_init_inode_bitmap src/ext4_fs.c:404` →
+`ext4_fs_get_block_group_ref src/ext4_fs.c:611` and the real bcache allocator
+frames; the fixed build rejects the same image at `ext4_fs_init()` with
+`ENOTSUP=95` from `ext4_sb_check_geometry()`; safe geometry is clean in both.
+The 71474 image drives an ASan OOB bit-set in `ext4_fs_init_block_bitmap`
+(`src/ext4_fs.c:333`) in the vulnerable build and `ENOTSUP=95` in the fixed.
+Raw logs: `real/evidence/real-*-asan.out`; build/compile/mkfs/craft logs and
+image hashes in the same directory. The clone and build directories are
+gitignored; only scripts, evidence and this record are committed.
+
+Grade impact: rung 3 confirmed on the real library; rung 4 stays PARTIAL —
+no adjacent live object with chosen bytes, no pointer control and no command.
