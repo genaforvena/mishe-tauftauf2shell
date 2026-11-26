@@ -4,6 +4,20 @@ The staged harness (`../run-all.sh`) uses verbatim function excerpts. This
 lane builds **real upstream Leptonica** at both pins and calls the real
 `l_byteaInitFromFile()` API. No upstream source byte was edited.
 
+## One-command witness replay (2026-11-26 19:0xZ)
+
+`bash lab/frontier/leptonica2shell/run-witness.sh [OUTDIR]` archives the
+committed `lab/frontier/leptonica2shell` tree into a fresh directory (or the
+given `OUTDIR`), then checks every pin and script hash and runs the staged
+`run-all.sh` (17 PASS / 0 FAIL), the real ASan lane `provision.sh` (7 PASS /
+0 FAIL) and the plain neighbor lane `run-neighbor.sh` (5 PASS / 0 FAIL).
+It prints `WITNESS REPLAY PASS` only when all hash and control checks hold and
+leaves the evidence plus `out/witness-*.log` in the clean directory.
+Author validation at 19:0xZ from HEAD `ed0b8154` into
+`/tmp/lept-w2-20261126`: 37 PASS / 0 FAIL wrapper checks,
+`WITNESS REPLAY PASS`, rc 0, 82 seconds. Wrapper sha256:
+`71f1fedbeb89c2bf9e21c27b8b7db59994e53eaa04bf0a78930a0c6f83127727`.
+
 ## Provisioning and pins
 
 Fetched with `git clone --filter=blob:none --no-checkout

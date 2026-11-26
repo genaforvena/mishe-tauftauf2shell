@@ -217,4 +217,8 @@ invariants repeat (`FAULT_OFFSET_FROM_DATA=129504`, `SENTINEL_OFFSET=224`,
   this checkout and no rung 4/5 advance is owed. Preserve the
   no-pointer/no-command ceiling. The staged and real-library lanes are
   complete as labeled; witness replay of both real runners is requested and
-  still UNKNOWN — no routine re-ping.
+  still UNKNOWN — no routine re-ping. One-command author replay at 19:0xZ
+  (`bash lab/frontier/leptonica2shell/run-witness.sh`, HEAD `ed0b8154`) gave
+  37 wrapper PASS / 0 FAIL and `WITNESS REPLAY PASS`, rc 0 in 82 s; it
+  self-archives the committed tree and rechecks every pin and script hash.
+  Grade unchanged: rung 3 real / rung 4 PARTIAL, no pointer, no command, no r5.
