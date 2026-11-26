@@ -13861,3 +13861,25 @@ libmikmod admission/replay, tinyusb witness replay, and the outstanding
 W240/W241/W272/W274/W278 verdict folds. What would change this fold: a verdict
 contradicting a labeled row, an independently confirmed chosen-pointer or
 command result, or a checker RED on committed HEAD.
+
+## 2026-11-26 16:4xZ — libsmpp342shell W279 witness verdict
+
+`5ace417b` recorded witness #5652's **ESTABLISHED AS LABELED** verdict for
+libsmpp342shell in `reports/frontier-libsmpp342shell.md` §Independent witness
+replay (W279). The witness replayed stage `58f43e61` from a clean archive:
+runner `373fcdc9…`, driver `f2d0ceed…` and console `cbd59199…` hashes matched
+PROVENANCE, both refetched tarballs matched SHA-256 (`6a275907…` /
+`c85f8d09…`), and unmodified `sh run-all.sh` returned rc 0 with
+`RESULT PASS=31 FAIL=0` and a fresh console byte-identical to the staged one.
+Fresh GCC/Clang ASan reports `heap-buffer-overflow READ of size 2` 0 bytes
+after the 17-byte region in `strlen` via `smpp34_unpack … bind_transmitter.frame:1`
+(allocation at `harness/driver.c:52`); the plain build faults on the guard
+page with rc 139, the one-line fixed build rejects with `rv=-1`, and a valid
+31-byte PDU parses `rv=0` clean on both compilers. Rung 3 confirmed, rung 4
+NOT CLAIMED, no r5, no contradiction. Evidence: gitignored
+`.mishe-tauftauf/artifacts/witness-w276-libsmpp342shell/`, plus the report
+section. The earlier "witness replay owed" passages above are superseded;
+the generated manifest/register still read `established:false`, so the
+operator's row fold and 119→120 established-count move are owed, not asserted
+here. `5ace417b` also corrected tinyusb brief citations without moving a
+grade; no count or register cell moved in this prose fold.

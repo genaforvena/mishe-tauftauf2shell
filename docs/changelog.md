@@ -2,6 +2,21 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 16:4xZ — libsmpp342shell W279 witness verdict
+
+`5ace417b` recorded witness #5652's ESTABLISHED AS LABELED verdict for
+libsmpp342shell: clean-archive stage `58f43e61`, hashes `373fcdc9…` /
+`f2d0ceed…` / `cbd59199…`, both tarballs re-hashed (`6a275907…` /
+`c85f8d09…`), unmodified `run-all.sh` rc 0 with `RESULT PASS=31 FAIL=0` and a
+byte-identical fresh console. GCC/Clang ASan `READ of size 2` 0 bytes past a
+17-byte region in `strlen` via `smpp34_unpack`; plain rc 139, fixed `rv=-1`,
+valid PDU `rv=0`. Rung 3 only, no r4/r5, no contradiction. The earlier
+"witness replay owed" passages are superseded; the generated row still reads
+`established:false`, so the operator owes the manifest/register fold and the
+119→120 established-count move. `5ace417b` also corrected tinyusb brief
+citations without moving a grade. Raw evidence is gitignored under
+`.mishe-tauftauf/artifacts/witness-w276-libsmpp342shell/`.
+
 ## 2026-11-26 16:1x–16:4xZ — tinyusb admitted, W276 staging, target-local lanes
 
 This fold covers `dd2720d7..d2f1f317`. Reproduce every claim in
