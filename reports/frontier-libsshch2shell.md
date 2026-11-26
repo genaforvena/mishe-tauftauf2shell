@@ -24,6 +24,10 @@ change.
 W24 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) in which the second callback
 iterator and callbacks structure are wire bytes in the recycled channel; one
 app redirect of the in-flight iterator's `next` remains. No grade change.
+W25 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) joining W24's wire-resident
+callback iterator and callbacks structure to W16's wire-resident command and
+W14's direct libc `system()` callee; neither the harness trampoline nor an
+app-owned static command string is on the executed path. No grade change.
 W14 adds an unwitnessed plain lane (6 PASS / 0 FAIL) in which the indirect call
 from `channel_rcv_data()` targets real libc `system()` with a wire-chosen
 `channel->session` argument, so no harness trampoline is in the path; the
@@ -250,6 +254,51 @@ different slot confirms the probe, not a constant, supplies the address.
 This checks committed harness and driver text; W24 remains additive and
 unwitnessed. The archive wrote only under `/tmp/w24-arch`; the pinned
 in-tree evidence is unchanged.
+
+## W25: wire-resident iterator plus wire command into real system() (2026-11-26 02:34Z)
+
+Additive and unwitnessed; no claim or grade change. `real/run-syswire.sh`
+builds the two pinned commits under clang ASan (no library source change) and
+compiles `real_wire.c` with `-DW13_INLINE -DW14_REALSYSTEM -DW16_WIRECMD
+-DW24_WIRELIST -DW25_SYSWIRE`; loopback only. Result: **6 PASS / 0 FAIL**,
+rc 0. The authenticated client writes all callback-relevant fields of the
+128-byte packet that later recycles the freed channel: `channel->session`
+(the callee's first argument) at +0 points at slot+8, the command
+`touch evidence-wire-syswire.marker` sits at +8, the 24-byte callbacks struct
+at +72 carries `size=24`, `userdata=slot+8` and `fn=&system`, and the second
+iterator at +96 carries `next=0`, `data=slot+72`. After the in-callback free
+and reclaim, the only app action on the callback chain is redirecting the
+already-running iterator's `next` to `groom_ptr+96`. The loop then enters the
+wire-resident node and calls real `system()` directly: no `exec_trampoline`
+and no `g_exec_cmd` on the executed path. Both symbols remain in the shared
+harness for older modes; the command literal exists only so the client can
+put those bytes on the wire.
+
+Vulnerable evidence (`real/evidence-sw-vuln-syswire.out`):
+`CLIENT syswire fn=0x787545a58750 sess=0x50c00001c488 cmd=touch evidence-wire-syswire.marker bad=0`,
+`SERVER wirelist it=0x502000006f70 next=0x50c00001c4e0 data=0x50c00001c4c8`,
+`SERVER SYSWIRE armed fn=0x787545a58750 cmd=0x50c00001c488` — the callee and
+its command pointer were read back from the recycled channel's wire bytes —
+`SERVER done data_packets=2`, `SERVER target_after=0x41414141414141c1`,
+`CLIENT rc=0 SERVER status=0x0`, no `SERVER EXEC trampoline`, no ASan report.
+The command's side effect is kept as `real/evidence-sw-sideeffect.kept`;
+three repeats (`real/evidence-sw-vuln-repeat{1,2,3}.out`, markers
+`real/evidence-sw-repeat{1,2,3}.kept`) gave the same call and chosen write.
+Fixed lane (`real/evidence-sw-fixed-syswire.out`): no data #2, no wirelist or
+`SYSWIRE` line, no trampoline, no marker. Invalid-callee control
+(`real/evidence-sw-vuln-syswire-bad.out`) sent `fn=0x4141414141414141` and
+ASan reported `SEGV ... in channel_rcv_data ... src/channels.c:697:16`,
+`CLIENT rc=0 SERVER status=0x100`, no `SERVER done`, no marker — the wire
+callee is used at the library's indirect call, not by a harness wrapper.
+
+With all five W25 flags undefined, the preprocessed harness is byte-identical
+to pre-W25 HEAD (`clang -E -P`, `cmp` clean); the flagged ASan compile
+succeeds. Ceiling unchanged: the callee address is forked-peer PIE
+(ASLR-local), the slot is probed under this ASan build, the app still frees a
+remotely closed channel in its data callback and reclaims the freed objects,
+and the peer is authenticated (PR:L). No persistent shell or remote command
+service. NOT ESTABLISHED rung 5; additive and unwitnessed.
+
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.

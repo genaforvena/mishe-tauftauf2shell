@@ -26,3 +26,5 @@ real/real_wire-wc-*
 real/wc-run/
 real/real_wire-wl-*
 real/wirelist-run/
+real/real_wire-sw-*
+real/syswire-run/
