@@ -6154,3 +6154,17 @@ stock routes remain UNKNOWN, not established. No grade change: rung 4
 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED, full
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
 
+Source scan of the stock gem home
+(`lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0/gems`) found case-
+insensitive regexes applied to attacker-influenced strings: Rack multipart
+`boundary` on `Content-Type`, `Rack::Request` localhost/private-IPv6 on Host,
+`ActionDispatch::SSL` `secure` on Cookie, `XMLHttpRequest` on
+`HTTP_X_REQUESTED_WITH`, Journey's `(%[a-f0-9]{2})` on path, and Rack
+protection's `%2e`/`%2f`/`%5c` on path. All nine patterns were compiled and
+matched against ten crafted subjects (`ß`, `ẞ`, `İ`, `sß`, `iİ`, `xß`, …)
+under ASan 3.4.12 (`lab/build/evidence/casefold-wire-candidates.out`): no
+report. Only the injected one-byte-exact controls triggered. Their optimized
+exact strings are too long, or their folded subject prefix cannot match the
+exact buffer; no stock wire trigger was established.
+
+
