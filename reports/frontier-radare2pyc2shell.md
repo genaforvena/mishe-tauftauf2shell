@@ -101,12 +101,19 @@ hashes and logs: the lab `PROVENANCE.md`.
   control, no command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
-Cheapest next experiment: build radare2 6.1.8 with ASan, write a minimal `.pyc`
-with a valid CPython magic header and a `TYPE_ASCII` object whose length field
-is `0xffffffff`, and replay `rabin2 -s crafted.pyc` to see the real
-`r_buf_read()` sink under ASan; if reached, measure whether the adjacent heap
-chunk is a live object before claiming more than rung 4. Keep the no-pointer,
-no-command ceiling until a real consumer is measured.
+W244 real-consumer outcome (2026-11-26): built radare2 6.1.8 with ASan and
+drove `crafted-ascii.pyc` (magic `0x0a0d0d2c`, TYPE_ASCII length `0xffffffff`
+at parse offset `0x22`) through `rabin2 -s` and `radare2 -q -c 'is'`. Probes
+show `get_ascii_object n=4294967295`, `get_bytes alloc_arg=0 usable=1`, then
+`r_buf_read len=4294967295 r=-1`: the IO-backed reader's `r_io_fd_read()`
+takes `int len`, truncating the length to `-1`, so `buf.c:496`'s memset is
+skipped. No ASan report on the unmodified build; no out-of-bounds write on
+the real consumer. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL
+synthetic, no real-consumer rung 4 and no r5. This negative is preserved in
+`lab/frontier/radare2pyc2shell/PROVENANCE.md`; replay with `craft_pyc.py`,
+`instrument_real.py` and a fresh 6.1.8 ASan build. The no-pointer/no-command
+ceiling stands. Other RBuffer kinds (bytes/mmap/cache) were not driven by
+these two CLI paths and remain UNKNOWN, not a pass.
 
 ## Duplicate check
 

@@ -15,10 +15,18 @@ fault frame at the verbatim `buf.c:496` sink and allocation frame in the
 verbatim `get_bytes()`; fixed and safe-input controls clean. Grade: rung 3 pinned
 verbatim / rung 4 PARTIAL synthetic; rung 5 NOT claimed.
 
-Window 168 is adopted and witness replay ESTABLISHED AS LABELED; no grade
-change and no r5. Next research step: build radare2 6.1.8 with ASan and drive a
-crafted `.pyc` through `rabin2 -s`; preserve the no-pointer/no-command ceiling
-until a real consumer is measured.
+Real-consumer probe W244 (2026-11-26): a real radare2 6.1.8 ASan build was
+configured and built locally; a crafted `.pyc` with magic `0x0a0d0d2c` and a
+TYPE_ASCII length `0xffffffff` at parse offset `0x22` reaches
+`get_ascii_object()` and `get_bytes()` with `alloc_arg=0` (`usable=1`), but the
+real `r_buf_read()` returns `r=-1`: `buf_io_read()` → `r_io_fd_read()` takes
+`int len`, truncating `0xffffffff` to `-1`, so the `r >= 0` guard skips the
+`buf.c:496` memset. Both `rabin2 -s` and `radare2 -q -c 'is'` behaved the same;
+the unmodified ASan build reported no fault. This is a preserved negative: no
+out-of-bounds write on the real consumer, so no real-consumer rung 4. Grade
+stays rung 3 pinned verbatim / rung 4 PARTIAL synthetic, no r5; fixed control
+remains the pinned synthetic build. Exact inputs, hashes and probe logs are in
+`lab/frontier/radare2pyc2shell/PROVENANCE.md` (`out-real/`).
 
 - Operator admission 2026-11-26 03:5xZ under standing #6: unmodified
   `run-witness.sh` re-run in-tree and from a second clean `git archive cee3588b`,

@@ -88,3 +88,50 @@ in the worktree and from clean `git archive cee3588b`: both
 all four excerpt hashes; the fix-parent fetch at `838df53e` is byte-identical
 to 6.1.8. Verdict: ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w243-radare2pyc2shell/detail.md`.
+
+## Real radare2 6.1.8 consumer probe (2026-11-26 W244, local only)
+
+Provisioning was a read-only public tag fetch:
+`https://github.com/radareorg/radare2/archive/refs/tags/6.1.8.tar.gz` →
+`upstream/radare2-6.1.8.tar.gz`, SHA-256
+`84d0e32af697f720c9f480f6b3e56b08f64251d90cfe2d8f163431c006c0053e`.
+Configured with `meson setup build-asan --buildtype=debug
+-Db_sanitize=address -Denable_tests=false`; built with
+`ASAN_OPTIONS=detect_leaks=0 ninja -C build-asan -j2`. A first bare `ninja`
+failed only in a build-time `sdb` helper with LeakSanitizer output; no target
+bug. After restoring source backups, both source hashes again matched the
+pins (`41698e78…` marshal, `538a6784…` buf) and the clean rebuild succeeded.
+
+`craft_pyc.py` writes `crafted-ascii.pyc` (SHA-256
+`0f727b2673622df8c9872c6905a85688cd4485f227b71658056922c6c6714f8a`) and,
+with `--length 16`, `safe-ascii.pyc` (`f4567972663bc8a162397d11bec5c4067eb30a
+91ab182b5191713dda1c9e05d4`). Layout: magic `2c 0d 0d 0a` (`v3.6.0a2`),
+`0x63` code byte at `0x08`, 20 zeroed `ut32` header fields, five filler bytes,
+then `0x61` TYPE_ASCII and `ff ff ff ff` at `0x22`. The parser's own
+`get_code_object_addr()` returns `r_buf_tell()+5 == 0x22` for that header.
+
+Unmodified ASan build: `bash run-real.sh`, both files `RC=0`, no ASan report;
+`rabin2 -I` identifies a `pyc` for Python `v3.6.0a2`, `rabin2 -e` reports
+entrypoint `0x22`, `rabin2 -s` prints no symbols. `ASAN_OPTIONS` with
+`LD_PRELOAD=libasan.so.8` made no difference (`out-real/attack-preload.log`).
+Disassembly of the built `r_buf_read` shows `memset@plt`, not `__asan_memset`,
+so ASan is not a reliable detector for this particular sink in the library.
+
+The replayable exact-string helper `instrument_real.py` (smoke-tested on
+pristine file copies) added probes to the tagged tree. After rebuild, both
+`rabin2 -s crafted-ascii.pyc` (`out-real/sink-probe.log`) and
+`radare2 -q -c 'is' crafted-ascii.pyc` (`out-real/r2-probe.log`) logged:
+`PROBE get_ascii_object n=4294967295 error=0`,
+`PROBE get_bytes size=4294967295 alloc_arg=0 usable=1`, then
+`PROBE r_buf_read len=4294967295 r=-1 fill=4294967296`.
+
+Causal diagnosis: `buf_io_read()` (`buf_io.inc.c:52`) calls `iob->fd_read`;
+`r_io_fd_read()` takes `int len` (`r_io.h:614`), so the 64-bit `0xffffffff`
+truncates to `-1`. The real `r_buf_read()` guard `r >= 0 && r < len` at
+`buf.c:495` therefore fails and `buf.c:496`'s `memset` is **never executed**
+on this consumer path. The synthetic harness stand-in returned `r = 0`, which
+is why it wrote; the real IO-backed consumer is a zero-store path. Preserved
+negative: the vulnerable function and undersized allocation are reached, but
+no out-of-bounds write occurs. Grade unchanged (rung 3 pinned verbatim, rung 4
+PARTIAL synthetic only); no real-consumer rung 4, no pointer, no command, no
+rung 5. The fixed-control evidence remains the pinned synthetic fixed build.
