@@ -6093,3 +6093,64 @@ faulted without HTTP response; use both the shell and driver override as in
 was observed; this is replay of the rung-4 corruption only.
 
 
+
+## 2026-11-26 19:1xZ — UTF-8 shape of the optimizer case-fold OOB read: NEGATIVE for wire reach
+
+A source diff of the pinned 3.4.11 and 3.4.13 trees (Onigmo files extracted
+into the gitignored `lab/build/onigmo-diff/`) confirms the previously recorded
+`str_lower_case_match` fix is one line in the same 2026-11-18 series:
+3.4.13 adds `if (tend - t < lowlen) return 0;` at `regexec.c:4298`. The earlier
+report (:4645-4670) reached it only with a UTF-32LE pattern whose optimized
+exact string was four bytes and a UTF-32LE `U+1E98` subject. This wake tests
+whether the precondition collapses to ordinary UTF-8.
+
+It does. The smallest trigger is one line, with a one-byte ASCII exact string:
+
+```ruby
+Regexp.new("s", Regexp::IGNORECASE).match("\u00df")   # \u00df = ß, fold = "ss"
+```
+
+Under `lab/build/ruby-3.4.12-asan/bin/ruby`, `ASAN_OPTIONS=detect_leaks=0`,
+3/3 runs abort with `READ of size 1` and:
+
+```
+ERROR: AddressSanitizer: heap-buffer-overflow
+  #0 str_lower_case_match regexec.c:4278
+  #1 slow_search_ic regexec.c:4301
+  #2 forward_search_range regexec.c:4953
+  #3 onig_search_gpos regexec.c:5459
+  #5 reg_onig_search re.c:1782
+0x... is located 0 bytes after 1-byte region
+allocated by thread T0 here:
+  #1 set_optimize_exact_info regcomp.c:5367
+SUMMARY: AddressSanitizer: heap-buffer-overflow regexec.c:4278 in str_lower_case_match
+```
+
+The overflowed object is the compiled regexp's optimized `reg->exact` buffer,
+not the subject. Subject folds longer than that buffer walk one byte past it.
+`lab/repro/ruby2shell-casefold-utf8.{rb,sh}` runs the full matrix; evidence is
+gitignored under `lab/build/evidence/casefold-utf8/`:
+
+| case | pattern / subject | 3.4.12 ASan | 3.4.13 ASan |
+|---|---|---|---|
+| sharp-s | `s` / `ß` (fold `ss`) | rc=1, ASan READ 1 | rc=0, clean, `match=false` |
+| sharp-cap | `s` / `ẞ` | rc=1, ASan READ 1 | rc=0, clean, `match=false` |
+| dotted-i | `i` / `İ` (fold `i` + combining dot) | rc=1, ASan READ 1 | rc=0, clean, `match=false` |
+| ascii-match | `s` / `S` | rc=0, clean, `match=true` | rc=0, clean, `match=true` |
+| ascii-miss | `s` / `t` | rc=0, clean, `match=false` | rc=0, clean, `match=false` |
+
+Two safe-input controls and every fixed case are clean; all three patch-
+sensitive cases abort only on the affected build. Grade of this secondary
+lane stays **rung 3 — confirmed corruption**: a one-byte OOB read with no
+write, chosen pointer, disclosure or command.
+
+Wire reach checked and CLOSED for the stock notes route: its 306 reflected
+subject lines in `lab/build/evidence/onigmo-multipart-control.html` are
+306/306 ASCII (parsed from the `class="tag"` row's following `<td>`), so no
+source-line subject supplies a multi-character case fold; the routes route
+uses fixed ASCII route strings. No request path was found that feeds an
+attacker-chosen `ß`/`İ`-class subject to a case-insensitive match. Other
+stock routes remain UNKNOWN, not established. No grade change: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED, full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
