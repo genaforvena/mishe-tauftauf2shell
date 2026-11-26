@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 177,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ) and quickjsbcode2shell (15:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 178,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ) and tinyusb2shell (16:2xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 174,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ and quickjsbcode2shell admitted 15:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 175,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ and tinyusb2shell admitted 16:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 174,
+      "value": 175,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2702,6 +2702,22 @@
       "reports": [
         "reports/frontier-quickjsbcode2shell.md",
         "reports/quickjsbcode2shell-status.md"
+      ],
+      "established": false
+    },
+    {
+      "target": "Tinyusb2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 16:2xZ under standing #6 as the 178th declared target mind; window 188 adopted (panes %380/%381 live, dead=0, no duplicate); operator isolated-copy replay of run-all.sh + verify.sh gives RESULT PASS=6 FAIL=0; rung 4 NOT CLAIMED, witness clean-archive replay owed.** CVE-2026-61497 / GHSA-qf63-w79j-qw7p (VulnCheck CNA, 2026-11-03; GHSA is an unreviewed NVD import, upstream has no published security advisory). AV:P physical-device vector, not pre-auth network reachability: a malicious USB HID device supplies a short report descriptor to a TinyUSB host. Affected 0.17.0-0.20.0 per the researcher; CVE/NVD and the 0.21.0 release notes say before 0.21.0 while the GHSA title says before 0.20.1 (no such tag; discrepancy preserved). Pinned fix parent `5014146fef1aac07362ee35c0c361b8475f7636d` and fix `85047e1777f5c20b7a936aa905c746125d3ed066` (in 0.21.0). In verbatim `src/class/hid/hid_host.c`, `desc_len -= size` has no `size <= desc_len` guard, so the researcher's 4-byte `05 01 07 DE` descriptor wraps the counter and the unguarded `memcpy(&info->usage_page, ...)` gives GCC ASan `heap-buffer-overflow READ of size 4` 0 bytes past an exact 4-byte heap buffer; the 5-byte `07 DE AD BE EF` descriptor gives ASan `stack-buffer-overflow WRITE of size 4` into the 4-byte `info` struct. Fixed pin stops at `report_num=0` / clamps `usage_page=44510`; a well-formed 13-byte descriptor is clean on both pins; runner sha256 `e8ba3567…d90aa` / `890cc19b…5b94eaf`. Rung 3 ASan in verbatim pinned parser via a local driver; rung 4 NOT CLAIMED: no chosen offsets, pointer, live USB consumer, command or r5, and no physical hardware or socket. Cheapest next experiment: a pinned HID-host build with a loopback/simulated USB device so bytes arrive through `tuh_descriptor_get_hid_report()` and `tuh_hid_mount_cb()`, then plain-build grooming for a chosen-byte read-back with fixed and safe controls.",
+      "reports": [
+        "reports/frontier-tinyusb2shell.md",
+        "reports/tinyusb2shell-status.md"
       ],
       "established": false
     }
