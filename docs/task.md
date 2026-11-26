@@ -13228,15 +13228,15 @@ bytes, hashes and timings are quoted from committed reports, not rerun.
   (rc 0, `FAST_REPLAY_OK`, 15 PASS / 0 FAIL), with ASan READ-8 at
   `cypher.c:2568`, recover-mode WRITE-70 at `project_item:3379` (offset
   51840, `&func_bufs[32]`), a fresh MISHE-OO readback, fixed N=33/48
-  rejection and a plain N=48 stack-smash abort. The verdict does not cover
+  rejection and a plain N=48 stack-smash abort. The verdict did not cover
   the stdio `query_graph` tool rows (#3253) or the loopback HTTP `/rpc` row
-  (#3799); those stay verifier-UNKNOWN with the canonical four-ask #4426
-  standing. No grade or register cell moved; the generated register row keeps
-  its admission-time wording, and the operator owns that manifest.
+  (#3799); the consolidated four-ask #4426 was later disposed by witness
+  W270 (`74ff4fee`). No grade or register cell moved in W28; the generated
+  register row keeps its admission-time wording, and the operator owns it.
 
 That "Next" was overtaken: `66cc8797` folded W268's verdict and set the
-register row to `established:true`. The Ruby stale-BBuf steering lane stays
-closed; codebasememory's #4426 lanes stay verifier-UNKNOWN.
+register row to `established:true`; W270 later disposed #4426. The Ruby
+stale-BBuf steering lane stays closed.
 
 ## 2026-11-26 12:5x–13:0xZ — libsoup admitted; FreeRDP, uD3TN and Ruby limbs; W269
 
@@ -13371,8 +13371,68 @@ generated file.
   no grade cell moved.
 
 Reproduction commands, pins, expected bytes and gitignored evidence are in
-`docs/reproducibility.md` §§ 13:1x–13:2xZ. Next: rapidyaml's witness replay
-and loopback consumer, FreeRDP's deployment-audio question (UNKNOWN here),
-and Ruby's attempt to make `mbuf` non-NULL before the bit flip.
-What would change this fold: a counterexample in a quoted receipt, a witness
-verdict contradicting rung 3 only, or a checker RED on committed HEAD.
+`docs/reproducibility.md` §§ 13:1x–13:2xZ. At that fold the open items were
+rapidyaml's witness replay and loopback consumer, FreeRDP's deployment-audio
+question (UNKNOWN here) and Ruby's non-NULL `mbuf` attempt; the last of
+those is CLOSED in `7bf6d806` below. What would change the fold: a
+counterexample in a quoted receipt or a checker RED on committed HEAD.
+
+## 2026-11-26 13:3x–13:4xZ — MQTT-C admitted, MuJS screened, W270 #4426, Ruby mbuf lane closed
+
+Six peer commits since `a1222a37` are folded here. Docs reran no harness;
+every receipt is quoted from a committed report, generated file or named
+ignored artifact. The previous section's open Ruby `mbuf` experiment is now
+CLOSED, and codebasememory's four-ask #4426 lanes it left verifier-UNKNOWN
+were disposed by W270.
+
+- `814a568f` (frontier W270, staged): mqttc2shell for CVE-2026-54412 /
+  GHSA-28cw-rpqc-wqqj. MQTT-C through v1.1.6 computes the PUBLISH payload
+  size from a broker-controlled `topic_name_size`; vulnerable v1.1.6
+  `f69ce1e7…`, fixed v1.1.7 `102e59c1…`, PR #208 `d0e19674…`. With
+  `30 04 ff ff 00 00`, v1.1.6 gives `topic_size=65535`,
+  `message_size=4294901763` and ASan `negative-size-param: (size=-4294967296)`
+  at the `memmove` in `__mqtt_recv` (`mqtt.c:880`); plain rc 139, fixed
+  `rv=-2147483636 callbacks=0`, safe `30 06 00 01 61 62 63 00` parses in
+  both. QoS1 gives a wild-pointer ASan READ at `mqtt.c:1748`. Runner
+  `a647c992…78c711`, `RESULT PASS=23 FAIL=0` rc 0. Grade rung 2 underflow +
+  rung 3 verbatim-source fault; rung 4 **NOT CLAIMED** — the packet is
+  preloaded behind a lab PAL receive stub, so no live wire consumer, chosen
+  offset, pointer, command or r5.
+- `e79e791c`: frontier replayed the written procedure at 13:32Z from a clean
+  `git archive 814a568f` with freshly fetched sha256-matched tarballs;
+  runner/console hashes unchanged, `RESULT PASS=23 FAIL=0` rc 0. Preserved
+  negative: an early draft used `-Ibuild/$side` instead of `.../include` and
+  scored `PASS=6 FAIL=17`. Author replay, not witness acceptance.
+- `6f41929d`: MuJS CVE-2026-110715 / GHSA-45w2-9pc7-5crm **SCREENED, NOT
+  STAGED** — pins `307f18c4…` / `32064e10…`, fix hunk read in mirror diff
+  `12b33bf3…`; writeup HTTP 404 at 13:34Z, exact length-inflating JS
+  UNKNOWN, no build, no bytes, no window, no register row. `AV:L`; rung 4 and
+  r5 NOT CLAIMED.
+- `7bf6d806` (ruby2shell, CLOSED NEGATIVE): the non-NULL `mbuf` follow-up is
+  structurally closed: the script's `SHAPES` sweep x V=0x100/0x120/0x41 x
+  plain 3.4.12 / fixed 3.4.13 plus gdb at `regparse.c:4589` show `mbuf=(nil)`
+  at every hit, no semantic change; every direct `cc->mbuf` write needs
+  `CCV_CODE_POINT` or a multi-byte encoding, so V=0x100 is CCV_SB under
+  US-ASCII and no shape allocates `mbuf`. Grade stays narrow secondary-lane
+  rung 4 (one chosen bit in a NULL pointer); large-V steering stays CLOSED,
+  and there is no valid-pointer redirect, marker, wire-only reach or witness.
+- `74ff4fee` (codebasememory2shell W29): witness W270 / tape #5566 returned
+  **ESTABLISHED AS LABELED** for consolidated #4426. Clean `git archive HEAD
+  51bc2ce9`, 4/4 pins, unmodified `run-witness.sh` hash `63d8ca3e…c91c`,
+  28m36s, rc 0 `PASS=47 FAIL=0`; fresh direct ASan READ-8 at `cypher.c:2568`,
+  recover WRITE-70 at `project_item:3379` (offset 51840), stdio `query_graph`
+  UBSan + WRITE-68 and loopback HTTP POSTs on ports 19749–19751 returning the
+  chosen string; fixed lanes clean. Four #3526 assertions were only
+  transcript-checked (stated caveat, not a contradiction). Grade, remote
+  reach and r5 remain unchanged/UNKNOWN.
+- `9f038c8e` (operator, standing #6): mqttc2shell admitted as the 175th
+  declared target mind, window 183 (%370/%371); generated counts
+  174/171/171/117 → 175/172/172/117 with `established:false` and no witness
+  acceptance. Docs does not move generated files.
+
+Reproduction commands, pins, expected bytes and gitignored evidence are in
+`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: MQTT-C's witness replay and
+loopback socket client, MuJS's build-or-decline, rapidyaml's witness replay,
+and FreeRDP's deployment-audio question (UNKNOWN here). What would change
+this fold: a counterexample in a quoted receipt, a witness verdict
+contradicting W270's labeled scope, or a checker RED on committed HEAD.

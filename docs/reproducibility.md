@@ -13501,9 +13501,10 @@ offer #4594. Expect rc 0, `FAST_REPLAY_OK`, 15 PASS / 0 FAIL, including ASan
 `READ of size 8` at `cypher.c:2568`, recover-mode `WRITE of size 70` at
 `project_item:3379` with the store at `&func_bufs[32]` (offset 51840), a fresh
 MISHE-OO readback, fixed-arm rejection of N=33/48 and a plain N=48 abort.
-Witness verdict ESTABLISHED AS LABELED covers only this fast lane: the stdio
-`query_graph` rows (#3253) and loopback HTTP `/rpc` row (#3799) remain
-verifier-UNKNOWN under the canonical four-ask #4426. No grade cell moved.
+Witness verdict ESTABLISHED AS LABELED covered only this fast lane; the
+consolidated four-ask #4426 was later replayed by W270 and returned
+ESTABLISHED AS LABELED for the stdio and loopback HTTP lanes too (recipe
+below). No grade cell moved in either replay.
 
 ### libsoup2shell — W268/W269 verbatim-source OOB READ (12:45–13:0xZ)
 
@@ -13727,6 +13728,146 @@ logs are `gdb-small-100.out` and `gdb-small-10000.out`, and
 the script; no replay by witness. Grade stays narrow secondary-lane rung 4:
 one chosen bit in a pointer that is NULL here, no valid-pointer redirect,
 arbitrary byte, marker, wire-only reach or witness. Large-V absolute fault-
-address steering remains CLOSED; the next bounded experiment is to make
-`mbuf` non-NULL with a multi-byte codepoint in the same class before
-flipping a bit.
+address steering remains CLOSED. The proposed non-NULL `mbuf` experiment is
+CLOSED in `7bf6d806`: no tested single-byte class shape allocates `mbuf`
+(recipe below), so no redirect was available to flip.
+
+## 2026-11-26 13:3x–13:4xZ — MQTT-C runner, MuJS screen, W270 #4426 replay, Ruby mbuf-shape closure
+
+### Mqttc2Shell — staged then admitted 175th (CVE-2026-54412)
+
+Claim: CVE-2026-54412 / GHSA-28cw-rpqc-wqqj (NVD 2026-06-14, updated
+2026-11-05, High 7.8, `CVSS:4.0/AV:N/AC:L/AT:N/PR:N/UI:N/VC:L/VI:N/VA:H`,
+CWE-125/191) at `https://github.com/advisories/GHSA-28cw-rpqc-wqqj` and
+`https://www.cve.org/CVERecord?id=CVE-2026-54412`. Affected/patched versions
+are UNKNOWN in the advisory, which names v1.1.6 as the last affected release;
+the plant pins vulnerable v1.1.6 `f69ce1e7fd54f3b1834c9c9137ce0ec5d703cb4d`
+and fixed v1.1.7 `102e59c14dd0e01770b357a462bd462c83de62e2`, with fix PR
+`https://github.com/LiamBindle/MQTT-C/pull/208` merged as
+`d0e1967436e39578f52bdef4e4ea55c757259f00`.
+
+From `lab/frontier/mqttc2shell`, fetch both release tarballs from
+`https://codeload.github.com/LiamBindle/MQTT-C/tar.gz/refs/tags/v1.1.6` and
+`.../v1.1.7` and verify SHA-256
+`fad0b15f3f58317dd3b0399b37efab7c582074744871f093b9fdf28c74667f7d` and
+`1e5d8a91d312724ceea4fe183680cabfdd47a10b5cf28e3834a8bec66e89e02c`; the
+extracted `src/mqtt.c` files must hash to
+`34ee9f4d573b2ac8c627c966c0112eb54f8620023f25d9cbeebb92e713a8e741` and
+`d8f3f8cabe8ee5edcd80acfef75f7ee0f345751832a895d4cdc99dff6be1cfde`.
+Then `cd lab/frontier/mqttc2shell && ./run-all.sh`.
+
+Runner sha256 `a647c992864d6c407900893ee7e587f22d362e957af92a46bb99826afc78c711`,
+driver `aa3b326c9e7c0dbe6c6cfc2787190a2b1463a7fae7c99bdb8241f42eb3c87980`,
+console `fd776c7b3ba6e60d1e9db57b9ef82d8d4ed08adc7c9b685c6b3218b8d331d31f`.
+The runner compiles each verbatim `src/mqtt.c` with GCC 13.3.0 on Linux x64
+using `-std=c99 -O0 -g -fno-omit-frame-pointer -pthread`, plus
+`-fsanitize=address` for the ASan arm, and
+`ASAN_OPTIONS=detect_leaks=0:abort_on_error=0`; a 76-line local driver calls
+`mqtt_init`, `mqtt_unpack_response` and `__mqtt_recv`, with
+`mqtt_pal_recvall()` returning zero and the packet preloaded. Expected:
+
+```
+RESULT PASS=23 FAIL=0   (rc 0, 13:28Z)
+attack 30 04 ff ff 00 00
+  v1.1.6 UNPACK rv=4294967302 topic_size=65535 message_size=4294901763
+  v1.1.7 UNPACK rv=-2147483636 message_size=0
+  ASan: negative-size-param: (size=-4294967296) at memmove, mqtt.c:880
+  plain rc=139; fixed rv=-2147483636 error=-2147483636 callbacks=0
+safe 30 06 00 01 61 62 63 00 -> rv=8 topic_size=1 message_size=3 (both)
+qos1 32 04 ff ff 00 00 -> ASan READ at __mqtt_unpack_uint16, mqtt.c:1748
+```
+
+A failed early draft used `-Ibuild/$side` instead of `-Ibuild/$side/include`
+and scored `PASS=6 FAIL=17` rc 1; it is preserved in `PROVENANCE.md`. Frontier
+replayed the written procedure at 13:32Z from `git archive 814a568f` with
+fresh sha256-matched tarballs: runner and console hashes unchanged,
+`RESULT PASS=23 FAIL=0` rc 0; console in the gitignored artifact
+`.mishe-tauftauf/artifacts/frontier-w270-mqttc-cleanreplay/lab/frontier/
+mqttc2shell/cleanreplay-console.log`. That is a clean-archive author replay,
+not witness acceptance. Grade rung 2 observed underflow + rung 3 ASan fault
+in verbatim source; rung 4 NOT CLAIMED (no chosen offset, pointer, live wire
+consumer, command or r5). Tarballs, extracted trees, builds and logs are
+gitignored and regenerate with the commands above. Witness replay is owed.
+
+### MuJS — SCREENED, NOT STAGED (CVE-2026-110715)
+
+`https://github.com/advisories/GHSA-45w2-9pc7-5crm` claims heap OOB READ/WRITE
+in MuJS 1.3.6-before-1.3.9 `Array.prototype.sort` after JavaScript inflates a
+dense array's length; affected/patched versions are listed as UNKNOWN.
+Moderate 6.9, `CVSS:4.0/AV:L/AC:L/AT:N/PR:N/UI:P/VC:N/VI:L/VA:H`. Pins from
+the GitHub mirror: vulnerable v1.3.8 `307f18c4216420f2f56e22d8e7040baa39a6304a`
+(raw `jsarray.c` sha256
+`d3bf5010e0f73621b599fcc9cdd9e6888c9bff24589d65a313dc37b695892472`) and fix
+`32064e10caa45e68fc87331ca53d042049cc9396` (tag 1.3.9); mirror diff
+`https://github.com/ArtifexSoftware/mujs/commit/32064e10caa45e68fc87331ca53d042049cc9396.diff`
+has sha256 `12b33bf38cc60a64462c9eb794beb97389386475ec8a0f9d54853696baa8177a`
+and was read at 13:33Z; Codeberg pins in the advisory are not yet re-verified.
+Fix adds `&& idx_b < obj->u.a.flat_length` to both simple-array branches in
+`jsarray.c` and changes the heapsort comparison at `:357`. The advisory
+writeup `https://hackmd.io/@haind-pwn/mujs-array-length-flat-oob` returned
+HTTP 404 at 13:34Z; no local build, no JS trigger, no ASan bytes, no window
+and no register row. The next bounded action is to build both pins with
+`-fsanitize=address` and derive a minimal JS through the real CLI, or record
+a reasoned decline with the 404 preserved. No grade cell is moved.
+
+### CodebaseMemory2Shell — W29 / W270 consolidated #4426 witness replay
+
+Offer #4426 superseded #3228/#3253/#3526/#3799. From a clean
+`git archive HEAD 51bc2ce9` with two previously hash-verified tarballs copied
+into `pins/`, all 4/4 pins verified and the unmodified `run-witness.sh`
+(sha256 `63d8ca3e8edf04b1903e59c7d97bde3e47669e579a953b1f8b98c839856cc91c`,
+identical in HEAD and the clean tree) ran 13:05:28Z–13:34:04Z (28m36s):
+rc 0, `RESULT: PASS=47 FAIL=0`, console sha256
+`1bdc8d5eb29f119b9316d110ca98ff243e0b7df1a2af0bfd76bb7f2b602784bc`.
+Verbatim detail: gitignored
+`.mishe-tauftauf/artifacts/witness-w270-cbm/detail.md`.
+
+Expected chains, not just the count: direct ASan `READ of size 8` at
+`cypher.c:2568` and recover-mode `WRITE of size 70` at `project_item:3379`
+← `execute_return_simple:4116` with `func_bufs` offset 51840 and fresh
+MISHE-OO bytes at `&func_bufs[32]`; real pinned-server `query_graph` calls
+via `handle_query_graph src/mcp/mcp.c:2082`, UBSan `index 32 out of bounds`
+and `WRITE of size 68` with `CHOSEN_LEN=68`; loopback HTTP POSTs to `/rpc` on
+127.0.0.1 ports 19749/19750/19751 returning the chosen string. Fixed rows
+reject with `failed to parse query`/`isError:true` and zero ASan; plain N=48
+aborts with stack smashing. Scope caveat, explicitly not a contradiction:
+four #3526 wrapper assertions (`run-witness.sh:123-126`) read the committed
+`evidence/mcp-tool-steer-gdb.txt`, whose clean-tree mtime was archive
+extraction, so file steering was transcript-checked, not freshly replayed;
+the direct lane's `gdb-chosen-bytes.out` was regenerated by `bootstrap.sh:32`.
+Verdict ESTABLISHED AS LABELED; no off-loopback request, usable pointer/IP,
+command side effect, grade change or r5. Both replay asks are disposed.
+
+### Ruby2Shell — CCV_SB `mbuf` shape falsifier CLOSED (author-only)
+
+Run `bash lab/repro/ruby2shell-tos-mbuf-shapes.sh`; its `SHAPES` list (base,
+`neg_w`, `neg_d`, `word`, `posix_neg`, `charprop`, `intersect`, `negated`,
+`nested`, `range`, `two_vals`, `ascii_range`, `utf8`) x V=0x100/0x120/0x41 x
+plain 3.4.12 / fixed 3.4.13, with `timeout 20`/`timeout 90`. For a single
+case use `TOS_CODE=100 TOS_SHAPE=neg_w ruby lab/repro/ruby2shell-tos-mbuf-shapes.rb`;
+the gdb check is
+`gdb -batch -x lab/repro/ruby2shell-tos-mbuf-shapes.gdb` with breakpoint
+`regparse.c:4589 if *from >= 0x100`. Expected from gitignored
+`lab/build/evidence/tos-steer/mbuf-shapes/`:
+
+```
+gdb at regparse.c:4589: mbuf=(nil) at every hit
+  (base, neg_w, neg_d, word, posix_neg, intersect, nested, negated)
+V=0x100: eight hit shapes fault at 0x1
+V=0x120: seven fault at 0x100000000; negated at 0x100000008 (two ORs)
+V=0x41 and all matching fixed 3.4.13 arms exit 0
+charprop, ascii_range, utf8, range never hit :4589 (exit 0 both builds)
+range/two_vals rejected by first parse as invalid hex escape
+```
+
+Structural reason: every direct `cc->mbuf` write needs
+`in_type == CCV_CODE_POINT` (`regparse.c:4594/:4620/:4636`) or
+`ADD_ALL_MULTI_BYTE_RANGE` (`:176-181`, gated on
+`!ONIGENC_IS_SINGLEBYTE(enc)`); `onigenc_single_byte_code_to_mbclen`
+(`regenc.c:643-646`) returns 1 for every code point, so V=0x100 is CCV_SB
+under US-ASCII, `and_cclass`/`or_cclass` (`:2145/:2203`) skip the mbuf merge,
+and the ctype fallback only sets bits. Forcing UTF-8 makes V=0x100
+CCV_CODE_POINT so the bitset write disappears. No shape allocates `mbuf`;
+the proposed non-NULL redirect experiment is CLOSED. Grade stays narrow
+secondary-lane rung 4 and large-V absolute-address steering stays CLOSED;
+no witness replay.

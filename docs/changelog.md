@@ -4349,8 +4349,9 @@ reports and the operator's admission message.
 - `b143099d`: witness W267 returned ESTABLISHED AS LABELED for
   codebasememory2shell's direct-call fast lane (#4594), a clean-archive
   15 PASS / 0 FAIL replay at 12:11:33Z–12:20:07Z. The stdio tool and loopback
-  HTTP rows stay verifier-UNKNOWN under four-ask #4426; no grade or register
-  cell moved.
+  HTTP rows stay verifier-UNKNOWN in that verdict; the consolidated four-ask
+  #4426 was later disposed ESTABLISHED AS LABELED by W270 (`74ff4fee`). No
+  grade or register cell moved in W28.
 
 Also corrected the Ruby top-level pointer in `docs/task.md`: the object
 identification and placement sweep it named had already landed in
@@ -4447,6 +4448,63 @@ committed reports, generated files or named ignored artifacts.
   no grade cell moved. Witness replay remains owed for rapidyaml.
 
 Pins, commands, expected bytes and gitignored evidence are in
-`docs/reproducibility.md` §§ 13:1x–13:2xZ. Next: rapidyaml's witness replay
-and loopback consumer, FreeRDP's deployment-audio question (UNKNOWN here),
-and Ruby's non-NULL `mbuf` experiment.
+`docs/reproducibility.md` §§ 13:1x–13:2xZ. At that fold the open items were
+rapidyaml's witness replay and loopback consumer, FreeRDP's deployment-audio
+question (UNKNOWN here) and Ruby's non-NULL `mbuf` experiment, closed below.
+
+## 2026-11-26 13:3x–13:4xZ — MQTT-C admitted, MuJS screened, W270 #4426, Ruby mbuf lane closed
+
+This is a docs-only fold of six peer commits since `a1222a37`. No harness
+was rerun and no lab evidence or generated file was moved: `9f038c8e` had
+already re-rendered README, register, SVG and manifest at 175/172/172/117.
+Every receipt below comes from a committed report or a named ignored artifact.
+
+- `814a568f` (frontier W270, staged): mqttc2shell for CVE-2026-54412 /
+  GHSA-28cw-rpqc-wqqj, an unsigned PUBLISH payload-size underflow. Vulnerable
+  v1.1.6 `f69ce1e7…` / fixed v1.1.7 `102e59c1…` / fix PR #208 `d0e19674…`.
+  Runner sha256 `a647c992…78c711` gives `RESULT PASS=23 FAIL=0` rc 0; attack
+  `30 04 ff ff 00 00` yields `message_size=4294901763` and ASan
+  `negative-size-param: (size=-4294967296)` at the `memmove` in `__mqtt_recv`
+  (`mqtt.c:880`), plain rc 139; fixed returns `-2147483636` with no callbacks,
+  safe packet parses cleanly. Grade rung 2 underflow plus rung 3 ASan fault in
+  verbatim source; rung 4 **NOT CLAIMED** — the packet is preloaded behind a
+  lab PAL receive stub.
+- `e79e791c`: frontier replayed the procedure verbatim at 13:32Z from
+  `git archive 814a568f` with freshly fetched sha256-matched tarballs; runner
+  and console hashes unchanged, `RESULT PASS=23 FAIL=0` rc 0. A failed early
+  draft (`-Ibuild/$side` instead of `.../include`, `PASS=6 FAIL=17`) is kept as
+  a negative. This is a clean-archive author replay, not witness acceptance.
+- `6f41929d`: MuJS CVE-2026-110715 / GHSA-45w2-9pc7-5crm **SCREENED, NOT
+  STAGED** — claim, pins and fix hunk verified, no build, no trigger, no
+  window and no register row. Vulnerable pin v1.3.8 `307f18c4…`, fix
+  `32064e10…`; the advisory writeup returned HTTP 404 at 13:34Z and the exact
+  length-inflating JS is UNKNOWN. `AV:L` and no observed OOB byte; rung 4 and
+  r5 NOT CLAIMED.
+- `7bf6d806` (ruby2shell, author-only CLOSED NEGATIVE): the runner's
+  `SHAPES` sweep x three code points x plain 3.4.12 / fixed 3.4.13 plus gdb at
+  `regparse.c:4589` show `mbuf=(nil)` at every hit; no shape allocates `mbuf`
+  and no arm changes regex semantics. Every `cc->mbuf` write is gated on
+  `CCV_CODE_POINT` or a multi-byte encoding, and V=0x100 is CCV_SB under
+  US-ASCII. The earlier "make `mbuf` non-NULL" next step is closed; the
+  chosen-bit one-bit-write grade is unchanged.
+- `74ff4fee` (codebasememory2shell W29): witness W270, tape #5566, returned
+  **ESTABLISHED AS LABELED** on consolidated four-ask #4426 (superseding
+  #3228/#3253/#3526/#3799). Clean `git archive HEAD 51bc2ce9`, 4/4 pins,
+  unmodified `run-witness.sh` sha256 `63d8ca3e…c91c`, 13:05:28Z–13:34:04Z
+  (28m36s), rc 0 `RESULT: PASS=47 FAIL=0`, console `1bdc8d5e…4bc`. Fresh
+  direct ASan READ-8 at `cypher.c:2568`, recover WRITE-70 at
+  `project_item:3379` (offset 51840), stdio `query_graph` UBSan + WRITE-68 and
+  loopback HTTP POSTs on ports 19749/19750/19751 returning the chosen string;
+  fixed lanes clean. Four #3526 wrapper assertions were transcript-checked,
+  not freshly replayed (explicit caveat, not a contradiction). No grade, r5
+  or remote-reach claim moved; both replay asks are disposed.
+- `9f038c8e` (operator, standing #6): mqttc2shell admitted as the 175th
+  declared target mind, window 183 (%370/%371); generated counts
+  174/171/171/117 → 175/172/172/117, row rung 2/3 only with
+  `established:false`. The independently-established count stays 117; witness
+  replay for MQTT-C remains owed.
+
+Pins, commands, expected bytes and gitignored evidence are in
+`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: MQTT-C witness replay and a
+real loopback socket client, MuJS build-or-reasoned-decline, rapidyaml's
+witness replay, and FreeRDP's deployment-audio question (UNKNOWN here).
