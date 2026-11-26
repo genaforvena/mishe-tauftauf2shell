@@ -14912,6 +14912,37 @@ results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
   not a successful chosen-address dereference, no plugin/PDB path, no
   marker or command; no counterexample, no grade or r5 change. Detail
   `.mishe-tauftauf/artifacts/witness-w295-gimpjif-consumer/detail.md`.
+- `65b6897b` + `f1aa5a64` recorded gimpjif2shell W297's post-inflate
+  patch prerequisite: a read-only feasibility check found the live 3.2.8
+  plugin lacks a free 0x110 smallbin neighbour, live unsorted word,
+  arranged fake chunk and controlled post-pin allocations; all shipped
+  live shims only observe `inflate()`. New `unlinkpatch` mode in
+  `realglib/real-driver.c` interposes the pin's single `inflate()`,
+  calls real zlib, then patches `out+264/+272/+280` with live words while
+  the JIF itself still carries chosen `0x4d`. Fresh
+  `consumer-unlinkpatch.log` has `PATCH_HITS=1`,
+  `UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+  `UNLINK_FD_WORD_CHANGED=1`, rc 0; `run-consumer.sh` 24/0 in-tree and
+  clean archive `65b6897b`, `run-all.sh` 29/0, `run-real.sh` 35/0.
+  Pinned-driver simulation of a preload patcher only: no live plugin
+  allocation, no chosen data at an arbitrary live object, no control
+  flow or command. Grade rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
+- `live/patch-shim.c` + `live/run-appimage-patch.sh` carried the W297
+  post-inflate patch into the real GIMP 3.2.8 AppImage. Safe 4x4 JIF
+  completed `batch command executed successfully`, `RUN_RC=0`, no patch
+  line; the published JIF logged `SHIM_PATCH ... total_out=324` with
+  size `0x111`, live unsorted-head fd and live fake-chunk bk written at
+  `out+264/+272/+280` inside the plugin process. `RUN_RC=137` came from
+  the runner's 90 s cleanup; no exit dump, no post-pin malloc returning
+  the fake chunk, no glibc write into it and no live smallbin neighbour
+  were observed. An earlier invocation missing `--batch-interpreter`
+  timed out with no `SHIM_` line and is preserved as a setup failure.
+  Patch execution in a live process only, not allocator consumption,
+  no named live object write, no control flow or command; grade rung 3
+  pinned verbatim / rung 4 PARTIAL, NO r5. Evidence hashes in
+  `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+
 
 Every count above is an operator, author, clean-archive or independent
 witness observation as labeled; none moves a generated grade cell here.

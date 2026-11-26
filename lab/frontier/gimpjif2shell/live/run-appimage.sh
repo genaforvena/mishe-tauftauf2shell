@@ -48,7 +48,7 @@ INSERTED=0
 : > "$ARPATCH"
 while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in
-    *inflate-shim.so*) continue ;;
+    *inflate-shim.so*|*patch-shim.so*) continue ;;
     exec*org.gimp.GIMP.Stable*)
       if [ "$INSERTED" -eq 0 ]; then
         printf 'export LD_PRELOAD="$LD_PRELOAD:%s"\n' "$HERE/inflate-shim.so" >> "$ARPATCH"

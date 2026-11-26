@@ -1020,3 +1020,42 @@ had written the file-chosen payload. A clean `git archive` of commit
 Ceiling unchanged: this is a pinned real-glib driver simulating a
 preload patcher, not a live plugin allocation, not attacker-chosen data
 written to an arbitrary live object, no control flow, no command, NO r5.
+
+## W297 live-plugin post-inflate patch (2026-11-26, 22:59Z)
+
+`live/patch-shim.c` (SHA-256
+`e121647f80fac1c7fc25affe7a5db7b009b3da253e6624570498fe32572774d7`)
+and `live/run-appimage-patch.sh` (SHA-256
+`8bd9d056104f5cc313719126181e0c4a9988122fe800290eaf4525409a77a4bb`)
+preload the same post-inflate patch into the official, SHA-verified
+GIMP 3.2.8 AppImage through a locally patched AppRun. The canonical
+`live/run-appimage.sh` now filters both shim names when re-patching
+AppRun, so either runner remains independently replayable.
+
+Preserved setup failure: the first probe invocation omitted
+`--batch-interpreter plug-in-script-fu-eval`; GIMP printed "No batch
+interpreter specified", both children timed out `RUN_RC=124` and no
+`SHIM_` line was emitted. That is a runner-argument failure, not a
+result; the argument was restored before the recorded run.
+
+`live/evidence/appimage-patch-safe.log` (SHA-256
+`fc183d8a5749b3210925e40e0cfce2b9a744af1a31848557954f66333d70d4ff`):
+safe 4x4 reaches `batch command executed successfully`, `RUN_RC=0`, no
+`SHIM_PATCH` line. `live/evidence/appimage-patch-published.log`
+(SHA-256
+`c2c9cf79088b28d8c99bd886e819d4dc26453ca81f4fc1bbb779ba384ff28484`):
+`SHIM_PATCH pid=3102770 out=0x5bb6cb6b7530 unsorted=0x750c54b04e60
+fake=0x750b1630c080 chunkA=0x5bb6cb6b7628 total_out=324`, with
+`SHIM_PATCH_WORDS=1101000000000000604eb0540c75000080c030160b750000`
+(size word `0x111`, live unsorted-head fd, live fake-chunk bk) written
+into the real plugin's inflated buffer at `out+264/+272/+280`.
+`RUN_RC=137` after the runner's 90 s timeout cleanup. No
+`SHIM_FAKE_EXIT` destructor line was emitted, so no post-pin malloc
+returning the fake chunk and no glibc write into it was observed; the
+live plugin was not groomed into a free smallbin neighbour, and
+`chunkA=out+248` is only a computed address.
+
+Ceiling: the post-inflate patch runs inside a real GIMP plugin process,
+but no live allocator consumption, no chosen data written to a named
+live object, no control flow, no benign marker or command. Grade
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.

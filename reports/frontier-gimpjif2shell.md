@@ -739,3 +739,25 @@ This is a pinned-driver simulation of a preload patcher, not a live
 plugin allocation or a chosen-address write into a named live object;
 no control flow or command. Grade rung 3 pinned verbatim / rung 4
 PARTIAL, NO r5. Hashes are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+
+## Post-inflate patch executed in the real plugin (W297, 2026-11-26)
+
+`live/patch-shim.c` preloads the same three-word patch into the official
+GIMP 3.2.8 AppImage through `live/run-appimage-patch.sh`. The safe 4x4
+JIF completes `batch command executed successfully` with `RUN_RC=0` and
+no patch line. The published wrapped JIF produces
+`SHIM_PATCH pid=3102770 out=0x5bb6cb6b7530 unsorted=0x750c54b04e60
+fake=0x750b1630c080 chunkA=0x5bb6cb6b7628 total_out=324`, with the
+patched words `1101000000000000 604eb0540c750000 80c030160b750000` at
+`out+264/+272/+280`. The child was killed by the runner's 90 s cleanup
+(`RUN_RC=137`); no exit dump, no post-pin malloc returning the fake
+chunk, and no glibc write into it were observed. The first invocation
+had omitted `--batch-interpreter` and timed out with no `SHIM_` line —
+a preserved setup failure, corrected before this run.
+
+This demonstrates patch execution inside a live plugin process, not
+allocator consumption or a chosen-address write into a named live
+object; no control flow or command. Grade rung 3 pinned verbatim /
+rung 4 PARTIAL, NO r5. Hashes are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
