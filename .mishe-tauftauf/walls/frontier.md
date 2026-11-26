@@ -7,6 +7,20 @@ drive the best candidate locally, then hand it to its own mind and find the next
 A find is complete only with a report brief AND a live registered two-pane window;
 the operator owns admission, the person owns wake units and full-flag sync.
 Evidence: `reports/frontier-*.md`, harness `PROVENANCE.md`, seed walls, git, chat.
+## W299 (23:25Z–) — oiiocineon admission folded; screening next candidate
+
+Started 23:24:59Z; clock 23:31Z. DM #5907 folded: oiiocineon2shell ADMITTED
+192nd (`8c53acca`, window 200 adopted, counts 192/189/189/128); flipped
+`reports/frontier-oiiocineon2shell.md` STAGED → ADMITTED, grade unchanged
+(rung 3 only), witness ask #5903 stands, no duplicate DM. Three read-only
+scouts (GHSA / CNA feed / patch hunt) now screen fresh candidates against
+this wall's do-not-duplicate and screened-out lists plus `research-manifest.json`.
+Next: pick one unowned sink, extract verbatim vulnerable+fixed pins, run a
+bounded GCC+clang ASan harness with fixed/safe/plain controls, write the brief,
+open and register a two-pane window only if staged, commit, verify, yield.
+Change mind if no tractable unowned sink survives screening: preserve the
+negatives, write screened-out briefs, do not manufacture a stage.
+
 
 ## W298 (23:09Z–23:19Z) — live555 folded; sngrep staged + handed off
 
@@ -24,22 +38,19 @@ fixed/safe(10239)/guard(10241) clean, plain rc=0 negative. PASS=13 FAIL=0 at
 Rung 3 only; R1/R2/R4/R5 NOT CLAIMED (no wire, pcap, chosen byte or pointer).
 Artifacts commits `743624ab`/`1ae76db6`; window 201 (%408/%409, dead=0),
 registry 202/202 unique, created 23:18Z; DMs #5911/#5912 sent. Next: screen
-VVdeC if unowned or wait for receipts; oiiocineon still STAGED (window 200).
+VVerdeC if unowned or wait for receipts; oiiocineon admitted W299.
 Change mind if the CVE/sink becomes owned.
 
 
-## W297 — oiiocineon2shell staged + handed off (22:46Z–23:03Z)
+## W297 — oiiocineon2shell staged (22:46Z–23:03Z), admitted W299
 
-Three scouts found OpenImageIO tractable 5, VVdeC full decoder, sngrep backup.
-STAGED `oiiocineon2shell` CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA GitHub_M,
-v3.2.0.2-dev → v3.2.0.3-beta1, PR 5250 1-8 guard); verbatim `cineoninput.cpp`
-d64ac4ab…/6174e916… + libcineon, 37 pins. `.cin` byte 193=255 fills `strings[8]`
-unbounded: GCC -O1 ASan WRITE-8 at raw :215, clang -O0 reproduces (-O1 no trap,
-negative), fixed rejects 255, safe(8)/valid(1) clean, plain rc=0; three OIIO
-headers are shims. PASS=13 FAIL=0 at 23:00Z, clean replay from f1aa62e6, runner
-79c81411…, 37/37 pins, PASS=13 FAIL=0. Rung 3 only; R1/R2/R4/R5 NOT CLAIMED.
-Artifacts commit f1aa62e6; window 200 (%406/%407), registry 201/201. Admission
-and witness DMs owed; do not re-stage.
+Scouts found OpenImageIO tractable 5, VVdeC full decoder, sngrep backup.
+`oiiocineon2shell` CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA GitHub_M,
+v3.2.0.2-dev → v3.2.0.3-beta1, PR 5250 1-8 guard); 37 pins. `.cin` byte
+193=255 fills `strings[8]` unbounded: GCC -O1 ASan WRITE-8 at raw :215,
+clang -O0 reproduces, fixed rejects 255, safe/valid clean, plain rc=0;
+PASS=13 FAIL=0, runner 79c81411…, rung 3 only. Artifacts f1aa62e6,
+window 200; admission folded W299. Do not re-stage.
 
 
 ## W296 (compact) — openscap folded; live555 staged, admitted W298
