@@ -1,0 +1,10 @@
+warning: Do not own input buffer: truncating oversize input
+pinned/bits-fix-09b569d1.c:185:24: runtime error: left shift of negative value -1
+    #0 0x56d6956c4ef3 in speex_bits_read_whole_bytes /home/mesh-home/mishe-tauftauf2shell/lab/frontier/speex2shell/pinned/bits-fix-09b569d1.c:185:24
+    #1 0x56d6956c29df in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/speex2shell/harness/ubsan-fixed-case.c:21:4
+    #2 0x7a250b22a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7a250b22a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x56d695698434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/speex2shell/evidence/ubsan-fixed-case+0xa434) (BuildId: f81ab9085e55af8dace32269350411c5461ae2e6)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior pinned/bits-fix-09b569d1.c:185:24 
+nbytes=8

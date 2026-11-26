@@ -140,3 +140,19 @@ replayed it. The four new probe binaries are added to `.gitignore` beside the
 other local probe binaries; the new `evidence/stack-*.out` files are kept as
 tracked evidence, as with the earlier probes. A 2026-11-26 ~17:47Z retry of the
 reporter's hackmd write-up returned HTTP 404, so it remains unavailable.
+
+## Already-full-buffer UBSan case 2026-11-26 ~17:49Z (author-observed, unpinned)
+
+`harness/ubsan-fixed-case.c` and `.sh` are new and unpinned; the six pins,
+`run-all.sh`, `run-witness.sh`, the pinned trees and archives are unchanged.
+The driver is the exact C input from the issue #42 comment; the script
+recompiles the pinned `pinned/bits-fix-09b569d1.c` object with UBSan and the
+tree's config defines, then links it before the existing fixed libspeex
+archive. Observed: UBSan `left shift of negative value -1` at
+`bits-fix-09b569d1.c:185:24`, `nbytes=8`, rc 0;
+`harness/ubsan-fixed-case.sh` 5 PASS / 0 FAIL. Raw output
+`evidence/ubsan-fixed-case.out`. The comment's clamp control was verified
+only in a throwaway /tmp build (no UBSan report, `nbytes=9`) and is not a
+checked harness. This measures a separate UB at the fix commit, not the CVE
+OOB write; no wire consumer, command or r5, and not witness-replayed. The
+reporter's hackmd URL returned HTTP 404 on retry at ~17:47Z.

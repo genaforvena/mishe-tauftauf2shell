@@ -128,13 +128,13 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
   non-owner `SpeexBits` produces an ASan `stack-buffer-overflow WRITE of size
   1` at verbatim `bits.c:184`, and the plain build lands chosen bytes in an
   adjacent stack canary. Still no command, wire path or r5.
-- A later issue comment reports a negative truncated length / UBSan
-  left-shift when the non-owned buffer is already full at the fix commit.
-  That adjacent bug is preserved as a separate UNKNOWN and is not part of
-  this claim; the harness primes only 8 of 16 bytes.
-- The reporter's hackmd write-up was fetched but returned no text through
-  the reader; the mechanism above comes from raw pinned source and the
-  vendor diff, not from that page.
+- The later issue #42 comment's already-full-buffer case was measured at the
+  pinned fix commit (§6): UBSan `left shift of negative value -1` at
+  `bits-fix-09b569d1.c:185:24`, `nbytes=8`. That is a separate bug in the fix,
+  not part of this OOB claim; the main harness primes only 8 of 16 bytes.
+- The reporter's hackmd write-up returned no text when first fetched and
+  HTTP 404 on a 2026-11-26 ~17:47Z retry; the mechanism above comes from raw
+  pinned source and the vendor diff, not from that page.
 
 ## 5. Cheapest next experiments
 
@@ -257,3 +257,19 @@ fixed (`evidence/stack-canary-fixed.out`). `bash harness/stack-path.sh` →
 and not replayed by the witness. This resolves the advisory's stack-corruption
 UNKNOWN as a lab rung-3/rung-4 observation under the same non-owner/oversize
 conditions; no pointer, command, wire path or r5.
+
+### Already-full-buffer UBSan case at the pinned fix (~17:49Z)
+
+Issue #42 comment by @GeekQAQ (2026-11-20) supplies an exact reproducer and
+claims a negative truncated length at the vendor fix. `harness/ubsan-fixed-
+case.c` is that input verbatim; `harness/ubsan-fixed-case.sh` compiles the
+pinned `pinned/bits-fix-09b569d1.c` with `-fsanitize=undefined` and links it
+ahead of the pinned fixed libspeex archive so the library shift is
+instrumented. Result (`evidence/ubsan-fixed-case.out`):
+`UndefinedBehaviorSanitizer`, `left shift of negative value -1` at
+`bits-fix-09b569d1.c:185:24`, `nbytes=8`, rc 0; 5 PASS / 0 FAIL. The comment's
+two-line clamp (`if (nchars<0) nchars=0;`) was also checked in a throwaway
+build: no UBSan report, `nbytes=9`, matching the claim. This resolves the
+previously UNKNOWN follow-up observation as a measured, separate bug at the
+fix commit; it is not CVE-2026-116741's OOB write, not a wire path, command or
+r5, and not witness-replayed.

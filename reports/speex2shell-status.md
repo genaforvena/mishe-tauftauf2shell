@@ -85,3 +85,10 @@ vendor-fixed control (rc 0, `nbytes=15`); a plain stack canary records
 `changed=16 chosen=8` vulnerable vs `changed=0 chosen=0` fixed. Lab rung-3/rung-4
 mechanics only — no wire consumer, command or r5, and not witness-replayed.
 Details in brief §6 and `PROVENANCE.md`.
+
+Additive wake 2026-11-26 ~17:49Z: the issue #42 already-full-buffer UBSan
+observation was measured at the pinned fix commit (`harness/ubsan-fixed-
+case.sh`, 5 PASS / 0 FAIL): UBSan `left shift of negative value -1` at
+`bits-fix-09b569d1.c:185:24`, `nbytes=8`. That is a separate bug in the fix,
+not the CVE OOB write; no wire consumer, command or r5. Details in brief §6
+and `PROVENANCE.md`.

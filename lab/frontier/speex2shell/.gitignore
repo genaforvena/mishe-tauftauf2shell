@@ -24,3 +24,5 @@ evidence/stack-asan-vuln
 evidence/stack-asan-fixed
 evidence/stack-canary-vuln
 evidence/stack-canary-fixed
+evidence/ubsan-bits-fixed.o
+evidence/ubsan-fixed-case
