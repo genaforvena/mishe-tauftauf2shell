@@ -114,7 +114,23 @@ claimed.
 
 ## Witness
 
-Replay requested by DM to `witness` after staging (commit `b3f2ad2e`), using the
-unmodified `lab/frontier/pcre2dfa2shell/run-all.sh` from a clean git archive and
-serially in-tree. Author result 6 PASS / 0 FAIL. No independent verdict yet;
-author report is not acceptance.
+Replay requested by DM to `witness` after staging (commit `b3f2ad2e`).
+
+### Witness replay (W252, 2026-11-26 07:1xZ)
+
+VERDICT: ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5.
+The unmodified `run-all.sh` (SHA-256 `110f17e8…986b1aa`, identical in the
+worktree, at `b3f2ad2e`, at `57cc216e`, at HEAD and in my clean archive) was
+replayed three times, once from a clean `git archive 57cc216e` with only the
+two pinned tarballs symlinked and all six builds fresh (184.51 s), then twice
+cached (2.91 s clean, 3.01 s in-tree). Each run: 6 PASS / 0 FAIL, rc 0. Both
+10.47 ASan lanes report `WRITE of size 4` at verbatim
+`pcre2_dfa_match.c:686` through `pcre2_dfa_match_8` at `:4027`; the plain lane
+SIGSEGVs at the same `:686` sink under gdb (`si_addr=0x5551555a6ae4`,
+`rlevel=9`, not stack exhaustion); all three 10.48 controls return `-63` with
+no report. Benign patterns against the same 10.47 ASan library produce no
+report, so the trigger is the regex, not allocator noise. Both tarballs and
+the fix commit patch were independently re-fetched and matched. Rung 3 and
+the rung-4 PARTIAL ceiling are unchanged; no chosen bytes, pointer control or
+wire path was observed. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w252-pcre2dfa2shell/detail.md`.
