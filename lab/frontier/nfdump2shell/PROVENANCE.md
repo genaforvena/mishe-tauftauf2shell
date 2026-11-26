@@ -770,3 +770,14 @@ is observed, so this is preserved as a negative and the grade is unchanged.
 Regression after the sender change: `run-all.sh` 10 PASS / 0 FAIL and
 `run-v6edge.sh` 17 PASS / 0 FAIL, including the ASan WRITE-8, plain `rc=134`
 and clean safe/fixed controls.
+
+Clean-archive replay of commit `40924fb4` into an empty
+`/tmp/w-nfdump-value-clean-1795728872` rebuilt all four collector pairs from
+the SHA-verified tarballs (`BUILD_WIRE_OK`, `BUILD_INSTRUMENTATION_OK`).
+Both fresh `run-v6value.sh` modes returned **12 PASS / 0 FAIL** and
+**13 PASS / 0 FAIL** (fresh `MSEC=1795728995457`,
+`HDR_SIZE_AFTER=00000001a219c9f4`; marker `MSEC=1795728997854`,
+`HDR_SIZE_AFTER=00000001a219c9fd`), and `run-v6edge.sh` returned
+**17 PASS / 0 FAIL** with the ASan WRITE-8, plain `rc=134`, and clean
+safe/fixed controls. No built collector or generated evidence was copied
+into the archive. The lane stays a preserved negative; grade unchanged.
