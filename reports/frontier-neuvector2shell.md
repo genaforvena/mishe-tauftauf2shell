@@ -308,6 +308,25 @@ pointer. No benign marker, command or side effect; grade stays rung 3
 confirmed / rung 4 PARTIAL, witness replay pending. Facts and ceiling:
 `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`.
 
+## Chosen-tail ceiling (W287, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/chosen.sh` → **12 PASS / 0
+FAIL**, rc 0. W285's fixed suffix comes from the controller/agent wrapper,
+not from `dpi_sig_bld()`; a directly crafted dp-socket message can replace
+it. The 2148-B message puts chosen `ABCD` bytes in the low four return
+bytes: the live full enforcer reaches `dpi_sig.c:662` with `LEN=2109` and
+the return slot reads `41 42 43 44 3b 00 00 00`, then faults at
+`RIP=0x3b44434241`. Vulnerable/plain/safe/fixed controls behave as in
+W285. The `0x3b` is the inevitable `;` of `sprintf("pcre %s;")` and the
+following byte is its NUL. Moving that NUL across the return slot either
+truncates the pointer below this PIE binary's text at
+`0x555555558000..0x555555592000` (needs sixth byte 0x55), or leaves a
+0x3b in a high byte. jansson's embedded NUL does not help: `strlcpy` in
+`dp_ctrl_bld_dlp` stops there and `sprintf("%s")` stops at the same byte.
+No chosen executable address, marker, command or r5. Grade unchanged.
+Detail: `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`.
+
+
 
 ## Grade and tractability
 
@@ -332,12 +351,12 @@ confirmed / rung 4 PARTIAL, witness replay pending. Facts and ceiling:
   effect. The Go agent cannot be built here (host Go 1.22.2, `go.mod`
   requires 1.27.4).
 
-Next experiment: the live `-O2` frame is now measured, so the remaining
-gap is a non-ASCII chosen word that survives to a return, plus a reachable
-authenticated REST/CRD target with a benign command side effect. Any
-chosen-address marker stays an in-process rung-4 mechanic until then. Keep
-the no-command / no-rung-5 ceiling; the witness has not yet replayed W282
-or W283.
+Next experiment: the chosen-tail ceiling is now measured, so further
+pointer work on this consumer has no known route to a canonical address.
+The only remaining path past PARTIAL is a benign side effect on a live
+authenticated REST/CRD target with vulnerable/fixed/safe controls. Keep
+the no-command / no-rung-5 ceiling; the witness has not yet replayed
+W280/W282/W283/W285 or W287.
 
 ## Duplicate check
 

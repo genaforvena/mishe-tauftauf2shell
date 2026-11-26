@@ -118,3 +118,41 @@ post-overwrite control transfer to a wire-determined unmapped pointer in
 the live full enforcer — still rung-4 mechanics, not a chosen address, no
 benign marker, no command, no r5. Grade stays rung 3 confirmed / rung 4
 PARTIAL as labeled; witness replay is pending.
+
+## W287 — chosen wire tail cannot form an executable return address
+
+Command: `bash lab/frontier/neuvector2shell/fulldp/chosen.sh` → **12 PASS /
+0 FAIL**, rc 0. Hypothesis: W285's fixed `; context <allowed>` tail comes
+from the upstream controller/agent, not from `dpi_sig_bld()`; a directly
+crafted dp-socket message could replace it with chosen bytes. Only one
+caller exists in the pinned tree (`dp/ctrl.c:2191`), and
+`dpi_sig.c:651-662` writes only `sprintf(...)` strings plus one NUL.
+
+The last pattern was replaced with a 29-byte string ending in `ABCD`
+(2148-B datagram). Under gdb the live `-O2` full enforcer reaches
+`dpi_sig.c:662` with `BUF→RBP=2096`, `LEN=2109`. The saved return slot at
+`BUF+2104..2111` reads `41 42 43 44 3b 00 00 00`: bytes 0-3 are the
+chosen wire bytes, byte 4 is the fixed `;` from `sprintf("pcre %s;")`,
+byte 5 is its NUL, bytes 6-7 are untouched zero. Continuing faults at
+`RIP=0x3b44434241` — chosen low bytes, but a truncated unmapped pointer.
+Plain controls: vulnerable `RC=139`, safe survives, fixed survives and
+logs `exceeds max sig len(2048) … skip rule`.
+
+Byte algebra of this consumer, independent of the upstream wrapper: the
+final `sprintf` always terminates with `;` (0x3b) and a NUL. If that NUL
+lands at return byte 5, bytes 0-4 are wire bytes but byte 5 is zero, so
+the pointer cannot reach this PIE binary's text at
+`0x555555558000..0x555555592000` (which needs byte 5 = 0x55). If it
+lands at byte 6 (W285), byte 5 is 0x3b and byte 6 zero — still below the
+text range. If it lands at byte 7, byte 6 is 0x3b, producing a pointer
+far outside the mapped user range. A NUL inside a jansson string cannot
+help: `strlcpy` in `dp_ctrl_bld_dlp` copies only up to the first NUL, and
+`sprintf("%s")` stops there, so the `;`/NUL pair still caps the high
+bytes. Attempting a six-nonzero-byte PIE address (0x555555561120,
+0x555555561160) failed at the harness's own assertion before any run —
+preserved here as a negative, not retried into existence.
+
+Conclusion: no chosen executable address, benign marker, command or r5;
+the grade remains rung 3 confirmed / rung 4 PARTIAL as labeled. This does
+not weaken W285's live control transfer: the wire still determines the
+faulting RIP, only its low bytes are now attacker-chosen.
