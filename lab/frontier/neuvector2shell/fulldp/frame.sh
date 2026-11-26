@@ -20,9 +20,10 @@ DEPS=$(readlink -f ../src/deps)
 RLIB=$DEPS/root/usr/lib/x86_64-linux-gnu
 OUT=$(pwd)/out
 SOCK=/tmp/dp_listen.sock
-ATTACK=$(readlink -f ../wirepath/out/wire-attack.json)
-PATTACK=$(readlink -f ../wirepath/out/wire-B.json)
-SAFE=$(readlink -f ../wirepath/out/wire-safe.json)
+WIRE=$(cd ../wirepath && pwd)
+ATTACK=$WIRE/out/wire-attack.json
+PATTACK=$WIRE/out/wire-B.json
+SAFE=$WIRE/out/wire-safe.json
 
 mkdir -p out "$DEPS/run" ../src/real
 if [ ! -f "$ATTACK" ] || [ ! -f "$PATTACK" ] || [ ! -f "$SAFE" ]; then
