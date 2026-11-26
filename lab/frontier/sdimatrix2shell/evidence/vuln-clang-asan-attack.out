@@ -1,25 +1,25 @@
 =================================================================
-==3408360==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000034 at pc 0x5776451eba71 bp 0x7ffce921bcb0 sp 0x7ffce921bca8
+==3434508==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000034 at pc 0x567cc84dda71 bp 0x7ffdde908db0 sp 0x7ffdde908da8
 READ of size 4 at 0x502000000034 thread T0
-    #0 0x5776451eba70 in IMatrixCollector::load_imatrix(char const*) /home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:302:25
-    #1 0x5776451ec012 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/poc.cpp:39:31
-    #2 0x79843dc2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #3 0x79843dc2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #4 0x57764510f554 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x2d554) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
+    #0 0x567cc84dda70 in IMatrixCollector::load_imatrix(char const*) /home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:302:25
+    #1 0x567cc84de012 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/poc.cpp:39:31
+    #2 0x77051a62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x77051a62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x567cc8401554 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x2d554) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
 
 0x502000000034 is located 0 bytes after 4-byte region [0x502000000030,0x502000000034)
 allocated by thread T0 here:
-    #0 0x5776451e89c1 in operator new(unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x1069c1) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
-    #1 0x5776451f4f67 in std::__new_allocator<float>::allocate(unsigned long, void const*) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/new_allocator.h:151:27
-    #2 0x5776451f4ed3 in std::allocator_traits<std::allocator<float>>::allocate(std::allocator<float>&, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/alloc_traits.h:482:20
-    #3 0x5776451f4ed3 in std::_Vector_base<float, std::allocator<float>>::_M_allocate(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:381:20
-    #4 0x5776451f6aca in std::vector<float, std::allocator<float>>::_M_fill_insert(__gnu_cxx::__normal_iterator<float*, std::vector<float, std::allocator<float>>>, unsigned long, float const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/vector.tcc:587:34
-    #5 0x5776451eca0e in std::vector<float, std::allocator<float>>::resize(unsigned long, float const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1037:4
-    #6 0x5776451eb71d in IMatrixCollector::load_imatrix(char const*) /home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:288:22
-    #7 0x5776451ec012 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/poc.cpp:39:31
-    #8 0x79843dc2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #9 0x79843dc2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #10 0x57764510f554 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x2d554) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
+    #0 0x567cc84da9c1 in operator new(unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x1069c1) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
+    #1 0x567cc84e6f67 in std::__new_allocator<float>::allocate(unsigned long, void const*) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/new_allocator.h:151:27
+    #2 0x567cc84e6ed3 in std::allocator_traits<std::allocator<float>>::allocate(std::allocator<float>&, unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/alloc_traits.h:482:20
+    #3 0x567cc84e6ed3 in std::_Vector_base<float, std::allocator<float>>::_M_allocate(unsigned long) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:381:20
+    #4 0x567cc84e8aca in std::vector<float, std::allocator<float>>::_M_fill_insert(__gnu_cxx::__normal_iterator<float*, std::vector<float, std::allocator<float>>>, unsigned long, float const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/vector.tcc:587:34
+    #5 0x567cc84dea0e in std::vector<float, std::allocator<float>>::resize(unsigned long, float const&) /usr/bin/../lib/gcc/x86_64-linux-gnu/13/../../../../include/c++/13/bits/stl_vector.h:1037:4
+    #6 0x567cc84dd71d in IMatrixCollector::load_imatrix(char const*) /home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:288:22
+    #7 0x567cc84de012 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/poc.cpp:39:31
+    #8 0x77051a62a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x77051a62a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x567cc8401554 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdimatrix2shell/build/poc-vuln-clang-asan+0x2d554) (BuildId: c915639069f89048b29653eb428e87473ceefe29)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:302:25 in IMatrixCollector::load_imatrix(char const*)
 Shadow bytes around the buggy address:
@@ -53,4 +53,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3408360==ABORTING
+==3434508==ABORTING

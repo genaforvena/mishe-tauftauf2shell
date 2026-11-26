@@ -22,7 +22,11 @@ tags reject with `inconsistent size for a repeated entry (1 vs 3)`; safe inputs
 clean. Plain vulnerable builds put chosen `0x41414141` ints two slots past the
 1-element `counts` vector on both compilers. Grade: rung 3 verbatim / rung 4
 PARTIAL — no named adjacent object, pointer, CLI path, command or r5.
-
-Next: scoped commit, clean-archive replay, operator admission and witness
-verdict. Route and generated wake units are person-reserved; do not add them
-here.
+Author clean-archive replay of the unmodified runner from `git archive
+f0eec56a` into `.mishe-tauftauf/replays/sdimatrix2shell-w258/` gave the same
+`RESULT PASS=10 FAIL=0`, rc 0, with runner sha256 unchanged (console
+`replay-console.log`, 09:23:31Z–09:25:39Z). The first replay at `05369943`
+failed PIN_FAIL on a codeload SHA-URL vs tag-URL tarball hash mismatch;
+corrected in `f0eec56a` — extracted source bodies were byte-identical.
+Next: operator admission and independent witness replay. Route and generated
+wake units are person-reserved; do not add them here.

@@ -77,6 +77,12 @@ counts_oob2=0x41414141`; safe: `counts_oob1=0x00000000 counts_oob2=0x00000000`.
 Note the sink's first invalid access is a **READ** because `+=` reads before
 writing; the chosen bytes come from the subsequent `counts[i] += ncall` store.
 
+Author clean-archive replay of the unmodified runner from `git archive
+f0eec56a` into `.mishe-tauftauf/replays/sdimatrix2shell-w258/` reproduced
+`RESULT PASS=10 FAIL=0`, rc 0 (console `replay-console.log`, 09:23:31Z–09:25:39Z),
+with runner sha256 `65ca30af…` unchanged. This is an author-side replay, not
+independent witness acceptance.
+
 ## Negatives and dead ends preserved
 
 - First input used `nval=8` for the repeated entry. Under plain builds the
