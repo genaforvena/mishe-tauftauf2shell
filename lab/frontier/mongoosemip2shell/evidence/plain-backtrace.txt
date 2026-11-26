@@ -1,0 +1,9 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000055555557ebd2 in mg_timer_poll (head=0x7fffffffdce8, now_ms=494922545) at src/mongoose-7.24/mongoose.c:17247
+17247	    bool once = t->expire == 0 && (t->flags & MG_TIMER_RUN_NOW) &&
+#0  0x000055555557ebd2 in mg_timer_poll (head=0x7fffffffdce8, now_ms=494922545) at src/mongoose-7.24/mongoose.c:17247
+#1  0x00005555555773cc in mg_mgr_poll (mgr=0x7fffffffdc80, ms=0) at src/mongoose-7.24/mongoose.c:12110
+#2  0x0000555555581f19 in main (argc=2, argv=0x7fffffffe268) at poc.c:106

@@ -1,33 +1,33 @@
 =================================================================
-==2521817==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x515000000780 at pc 0x60d37ce27188 bp 0x7ffe17e030b0 sp 0x7ffe17e02870
+==2562374==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x515000000780 at pc 0x5adf17576188 bp 0x7ffea86610f0 sp 0x7ffea86608b0
 WRITE of size 400 at 0x515000000780 thread T0
-    #0 0x60d37ce27187 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0xd1187) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
-    #1 0x60d37cee2555 in read_conn /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9763:3
-    #2 0x60d37cedcdab in rx_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9895:5
-    #3 0x60d37ced743a in rx_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10005:5
-    #4 0x60d37ced3ff1 in mg_tcpip_rx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10131:5
-    #5 0x60d37ceabb5c in mg_tcpip_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10278:7
-    #6 0x60d37cea6376 in mg_mgr_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10506:3
-    #7 0x60d37cec2122 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:150:3
-    #8 0x7e5e7ac2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #9 0x7e5e7ac2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #10 0x60d37cd8e3f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0x383f4) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
+    #0 0x5adf17576187 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0xd1187) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
+    #1 0x5adf17631555 in read_conn /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9763:3
+    #2 0x5adf1762bdab in rx_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9895:5
+    #3 0x5adf1762643a in rx_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10005:5
+    #4 0x5adf17622ff1 in mg_tcpip_rx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10131:5
+    #5 0x5adf175fab5c in mg_tcpip_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10278:7
+    #6 0x5adf175f5376 in mg_mgr_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10506:3
+    #7 0x5adf17611122 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:150:3
+    #8 0x7253e6a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7253e6a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5adf174dd3f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0x383f4) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
 
 0x515000000780 is located 0 bytes after 512-byte region [0x515000000580,0x515000000780)
 allocated by thread T0 here:
-    #0 0x60d37ce2942d in calloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0xd342d) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
-    #1 0x60d37ce7f7ac in mg_calloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:26346:10
-    #2 0x60d37ce83255 in mg_iobuf_resize /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:4875:15
-    #3 0x60d37cee2189 in read_conn /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9752:15
-    #4 0x60d37cedcdab in rx_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9895:5
-    #5 0x60d37ced743a in rx_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10005:5
-    #6 0x60d37ced3ff1 in mg_tcpip_rx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10131:5
-    #7 0x60d37ceabb5c in mg_tcpip_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10278:7
-    #8 0x60d37cea6376 in mg_mgr_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10506:3
-    #9 0x60d37cec1fdd in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:136:3
-    #10 0x7e5e7ac2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
-    #11 0x7e5e7ac2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
-    #12 0x60d37cd8e3f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0x383f4) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
+    #0 0x5adf1757842d in calloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0xd342d) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
+    #1 0x5adf175ce7ac in mg_calloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:26346:10
+    #2 0x5adf175d2255 in mg_iobuf_resize /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:4875:15
+    #3 0x5adf17631189 in read_conn /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9752:15
+    #4 0x5adf1762bdab in rx_tcp /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:9895:5
+    #5 0x5adf1762643a in rx_ip /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10005:5
+    #6 0x5adf17622ff1 in mg_tcpip_rx /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10131:5
+    #7 0x5adf175fab5c in mg_tcpip_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10278:7
+    #8 0x5adf175f5376 in mg_mgr_poll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/src/mongoose-7.23/mongoose.c:10506:3
+    #9 0x5adf17610fdd in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/poc.c:136:3
+    #10 0x7253e6a2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #11 0x7253e6a2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #12 0x5adf174dd3f4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0x383f4) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mongoosemip2shell/out/poc-7.23-clang-asan+0xd1187) (BuildId: 4b0daec09261de39999c167d9e2c18941676d7a2) in __asan_memcpy
 Shadow bytes around the buggy address:
@@ -61,4 +61,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==2521817==ABORTING
+==2562374==ABORTING

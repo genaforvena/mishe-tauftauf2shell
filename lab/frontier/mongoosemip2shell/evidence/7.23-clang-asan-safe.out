@@ -1,8 +1,8 @@
-1d7ffd5e 2 mongoose.c:5691:mg_l2_eth_in MAC not set. Generated random: 02:97:61:1a:6a:37
-1d7ffd5e 3 mongoose.c:8128:mg_listen    1 0 http://0.0.0.0:80
-1d7ffd5e 3 mongoose.c:9577:accept_conn  2 accepted 2.0.0.0:1
+1d883b43 2 mongoose.c:5691:mg_l2_eth_in MAC not set. Generated random: 02:ee:a3:ed:98:0a
+1d883b43 3 mongoose.c:8128:mg_listen    1 0 http://0.0.0.0:80
+1d883b43 3 mongoose.c:9577:accept_conn  2 accepted 2.0.0.0:1
 BEFORE_FIN recv_size=512 recv_len=400
 AFTER_FIN mode=safe recv_len=512
-1d7ffd5e 3 mongoose.c:8064:mg_close_con 2 0 closed
-1d7ffd5e 3 mongoose.c:8064:mg_close_con 1 0 closed
-1d7ffd5e 3 mongoose.c:8175:mg_mgr_free  All connections closed
+1d883b43 3 mongoose.c:8064:mg_close_con 2 0 closed
+1d883b43 3 mongoose.c:8064:mg_close_con 1 0 closed
+1d883b43 3 mongoose.c:8175:mg_mgr_free  All connections closed
