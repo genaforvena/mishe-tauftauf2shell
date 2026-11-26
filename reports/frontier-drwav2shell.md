@@ -1,5 +1,13 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
+
+2026-11-26 06:55Z: research lane CLOSED at the documented ceiling (W21 below).
+Final grade: rung 3 staged harness ESTABLISHED AS LABELED by witness W215;
+rung 4 file-chosen lab marker author-observed in W1-W4, no independent verdict;
+r5 UNMET/UNKNOWN. GNUBase's MCP takes a local path, not wire WAV bytes, and
+six bounded corpora found no executable Linux wire-byte caller. The again
+chain is retired; no new replay offered, W1-W4 verdicts remain UNKNOWN.
+
 Status 2026-11-26 00:4xZ: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
@@ -568,3 +576,46 @@ of absence. No build, no run, no grade change. Raw evidence:
   ICY HTTP path feeds PCM, QVoiceBridge uses non-metadata init, weave has a
   local-path call with no network origin. Full chain and disposition:
   `consumer/evidence/w16-github-callers.txt`.
+
+## W21 — GNUBase wire-byte ceiling closed at source (2026-11-26 06:4xZ)
+
+- Reconciled the unknown-ending W20 wake (`...1795670126605932097`, attempt
+  37): it left 732 objects (one more than W20's 731), no `bin/gnubase`, no
+  running build, and no drwav/reports dirt. Its background ninja died with the
+  one-shot wake; nothing to undo. Tape 06:43Z: no W1-W4 verdict; not re-offered.
+- Bounded source check completes the r5 question for GNUBase: the only HTTP
+  route is `POST /mcp` with a JSON-RPC body and a Bearer token on loopback
+  (`mcp/transport.h:23-28`, `transport.cpp:93-115,143-145`). `base64()` in
+  `mcp/server.cpp:63-66` is used only for image OUTPUT (`:287-289`). A source
+  sweep for `multipart|form-data|upload|write_file|WriteFile|ofstream|fwrite`
+  found only engine-local writers (settings/JSON, audio export, peaks cache,
+  PNG save, generated Lua docs, pluginhost logs) — nothing writes request
+  bytes to a file that `audioFile.import` feeds to
+  `drwav_init_with_metadata()`. The request names an existing local path.
+- Consequence: even a linked GNUBase is a request-reachable *file-path*
+  caller, not a wire-byte caller. R5 stays UNMET. Source-level ceiling, not
+  an execution result: no process, request, ASan report, marker or side effect
+  was observed for this check. Evidence
+  `consumer/evidence/w21-wire-byte-ceiling.txt`. Grade unchanged: rung 3
+  public API / rung 4 lab marker; r5 UNKNOWN.
+
+### W21 — GNUBase build ceiling (2026-11-26 06:41-06:55Z)
+
+Reconciled W20's unknown-ending wake first: 732 objects, no `bin/gnubase`, no
+running build, no drwav/reports dirt; its background ninja died with the
+one-shot wake, so nothing was undone. Tape 06:43Z: no W1-W4 verdict.
+
+Two bounded build chunks (`06:44-06:47Z timeout 165 -j4`,
+`06:48-06:50Z timeout 105 -j4`) made ZERO compiles: `.ninja_log`'s newest
+entry remained W20's 05:25Z `recording.cpp.o`. The first cause was CMake's
+`VerifyGlobs.cmake_force` phony plus `RERUN_CMAKE` edge regenerating themselves
+in the gitignored build.ninja; both were removed at 06:48Z (grep count 0),
+leaving 179 steps in `ninja -n`. A 25s `-v` run then showed ninja starting
+`[1/179] clang++ ... projectmodel.cpp.o` without finishing it at load 8.4 with
+7 GiB swap used. No compiler error. With 179 steps and one compile exceeding
+105s, no link was possible inside this wake; `consumer/run-gnubase.sh` was
+never run, so no GNUBase process, HTTP request, ASan report, marker or side
+effect was observed. Combined with the source-level wire-byte ceiling above,
+the research lane is closed here. Grade unchanged and final: rung 3 / rung 4
+lab marker author-only / r5 UNKNOWN. W1-W4 verdicts remain UNKNOWN and are
+not re-offered.

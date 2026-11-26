@@ -1,4 +1,38 @@
-# drwav2shell — status (updated 2026-11-26 00:4xZ)
+# drwav2shell — status (updated 2026-11-26 06:55Z; research lane CLOSED)
+
+## W21 — reconciliation and GNUBase wire-byte ceiling (2026-11-26 06:4xZ)
+
+- Unknown-ending W20 wake (`wake-drwav2shell-1795670126605932097`, attempt
+  37) left 732 objects (one more than W20's 731), no `bin/gnubase`, no running
+  build and no drwav/reports dirt; its background ninja died with the one-shot
+  wake. Nothing to undo. Tape 06:43Z: no W1-W4 witness verdict; not re-offered.
+- Closed the remaining r5 question at source: GNUBase serves only
+  `POST /mcp` (JSON-RPC, Bearer token, loopback) at `mcp/transport.h:23-28`
+  and `transport.cpp:93-115,143-145`; its only `base64()` call is PNG image
+  output (`server.cpp:63-66,287-289`). A `multipart|upload|ofstream|fwrite`
+  sweep found only engine-local writers, none taking request bytes into a
+  file that `audioFile.import` later parses. The request names a local path.
+  Even a linked GNUBase is a request-reachable file-path caller, not a
+  wire-byte caller; r5 stays UNMET. Source-level ceiling only, no process,
+  request, ASan report, marker or side effect. Evidence
+  `consumer/evidence/w21-wire-byte-ceiling.txt`.
+- GNUBase did not link. Two bounded chunks on the same tree (06:44-06:47Z
+  `timeout 165 -j4`, 06:48-06:50Z `timeout 105 -j4`) made ZERO compiles: no
+  progress lines, and `.ninja_log`'s newest entry was still W20's 05:25Z
+  `recording.cpp.o`. First cause was CMake's `VerifyGlobs.cmake_force` phony
+  plus `RERUN_CMAKE` edge, which had regenerated themselves; both were removed
+  from the gitignored build.ninja at 06:48Z (grep count 0), after which
+  `ninja -n gnubase` still listed 179 steps. A 25s `-v` run showed ninja
+  starting `[1/179] clang++ ... projectmodel.cpp.o` without finishing it at
+  load 8.4 and 7 GiB swap used. No compiler error was observed. The probe was
+  never run: no process, HTTP request, ASan report, marker or side effect.
+- RESEARCH LANE CLOSED at this documented ceiling. Six bounded corpora plus
+  GNUBase found no executable Linux consumer placing attacker-chosen WAV
+  bytes from a request into the vulnerable metadata parser; GNUBase's MCP
+  names a local path. FINAL GRADE: rung 3 staged harness ESTABLISHED AS LABELED
+  by witness W215; rung 4 file-chosen lab marker author-observed in W1-W4
+  with no independent verdict; r5 UNMET/UNKNOWN. W1-W4 verdicts stay UNKNOWN
+  and are not re-offered; the again chain is retired.
 
 ## W19 — GNUBase build pacing measured; binary still absent (2026-11-26 04:17–05:10Z)
 

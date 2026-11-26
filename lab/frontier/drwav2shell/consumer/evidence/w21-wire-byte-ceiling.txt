@@ -1,0 +1,44 @@
+W21 — GNUBase has no wire-byte-to-file path into the drwav metadata parser
+2026-11-26 06:4xZ. Bounded source check on the provisioned, gitignored tree
+lab/frontier/drwav2shell/deps/gnubase (HEAD 125778191b5, ext/dr_libs fa931f32,
+dr_wav.h SHA-256 c69816d0... = pinned vulnerable 0.14.5 byte-for-byte).
+
+Question: can a loopback HTTP request place attacker-chosen WAV *bytes* in a
+local file which audioFile.import then hands to drwav_init_with_metadata()?
+Answer: NO in this build. The only route is JSON-RPC, and the import argument
+is a path string naming a file that already exists.
+
+Observed source lines:
+
+  src/mcp/transport.h:23-28
+    "The streamable HTTP transport on 127.0.0.1: POST /mcp with one JSON-RPC
+     message ... Every request needs Authorization: Bearer <token>. Requests
+     from other machines, from web pages of other origins (DNS rebinding) and
+     without the token are refused. ... GET answers 405."
+  src/mcp/transport.cpp:93-103
+    http.Post("/mcp", ...) -> server.handle(std::string_view(request.body),
+    session) -> JSON response; :109 GET 405; :115 DELETE ends session.
+  src/mcp/transport.cpp:143-145
+    returns "http://127.0.0.1:" + port + "/mcp" (loopback only).
+  src/mcp/server.cpp:63-66 base64() helper; :287-289 its ONLY call site is
+    Json{{"type", "image"}, {"data", base64(value.get_binary())},
+         {"mimeType", "image/png"}} — image OUTPUT, not input.
+  src/engine/audiofile/audiofilecommands.cpp:108-143,191 (W18 receipt)
+    audioFile.import(files) -> readInfo(path) -> AudioFileReader::open() ->
+    drwav_init_with_metadata() at src/engine/audiofile/reader.cpp:76-77.
+
+Search for any request-body byte sink (multipart|form-data|upload|write_file|
+WriteFile|ofstream|fwrite() across src/) found only engine-local writers:
+settings/JSON exports (document/markers.cpp:519, midi/*.cpp:434/319/151/449,
+dawproject.cpp:2499, platform/files.cpp:75), audio export (audiofile/writer.cpp
+:123/:132/:483), peaks cache (peaks.cpp:546), PNG save (ui/image.cpp:46),
+Lua API doc generated into a folder (app/appscripts.cpp:217) and pluginhost
+stderr logs (plugins/hostmanager.cpp:288). None takes bytes from an HTTP
+request and writes a file that the metadata parser later reads.
+
+Consequence: even a linked GNUBase gives a *request-reachable file-path*
+caller, not a wire-byte caller. R5 requires attacker-controlled WAV bytes
+arriving over the wire; that half stays UNMET and UNKNOWN here. No process,
+HTTP request, ASan report, marker or side effect was observed for this check;
+this is a source-level ceiling, not an execution result. Grade unchanged:
+rung 3 public API / rung 4 lab marker, no r5.
