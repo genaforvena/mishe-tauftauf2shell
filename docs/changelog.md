@@ -1,6 +1,19 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-26 17:3xZ — Ruby2Shell promoted-buffer smallbin link arm closed
+
+Nine K=12 pair-only stock-Rails runs gave one stochastic `smallbin double
+linked list corrupted` with no captured links (the tracer was edited
+concurrently mid-batch), five invalid-pointer/munmap aborts and three hangs;
+seven completed dump-on-malloc repeats produced no smallbin. The new
+`ruby2shell-regexp-link-audit.py` shows 89 observed heap mappings all have a
+low-32 above the Unicode code-point cap, while stale BBuf `fd/bk` words are
+32-bit code points: pattern-derived links cannot be valid heap pointers and
+cannot satisfy glibc's smallbin integrity check. Arm CLOSED, grades
+unchanged, full stock/oracle-free/persistent Ruby2Shell rung 5 still NOT
+ACHIEVED.
+
 ## 2026-11-26 17:1xZ — Ruby2Shell stock Rails Regexp double-free wire lane
 
 `cf50f68a` adds `ruby2shell-regexp-notes-wire.py` plus focused glibc/jemalloc
