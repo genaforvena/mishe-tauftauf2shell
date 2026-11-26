@@ -87,6 +87,11 @@ wire-backed; rung 4 is **NOT CLAIMED**. The unpacker's 32-bit size field makes
 pointer value or command. Independent witness replay of this wire runner is
 owed; the W271 replay above covers only `run-all.sh`.
 
+Clean `git archive 5cf5c644` replay at 14:47Z with the pinned tarballs in
+`src/`: unmodified `sh ./run-wire.sh` rc 0, `RESULT PASS=29 FAIL=0`, console
+sha256 `acc585e7...36cbd5`, identical to the author console; artifact
+`.mishe-tauftauf/artifacts/mqttc2shell-wire/cleanarchive-console.log`.
+
 ## Next
 
 Admission and witness replay of `run-all.sh` are complete; the 14:42Z wire

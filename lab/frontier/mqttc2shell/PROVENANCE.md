@@ -164,6 +164,13 @@ move; the plain build faults. No chosen bytes at chosen offsets, pointer
 value or command was observed. This is a structural limit of this consumer,
 not a failed grooming attempt.
 
+A clean `git archive 5cf5c644` replay at 14:47Z with the two sha256-matched
+tarballs copied into `src/` re-ran the unmodified `sh ./run-wire.sh`: rc 0,
+`RESULT PASS=29 FAIL=0`, console sha256
+`acc585e79d551fef73d1f4bff624ddd74102b84f4c76f49a699001cfdd36cbd5`
+(identical to the author console) at
+`.mishe-tauftauf/artifacts/mqttc2shell-wire/cleanarchive-console.log`.
+
 ## Grade
 
 Rung 2: observed unsigned payload-size underflow (`4294901763`) in verbatim
