@@ -3,3 +3,4 @@ out-replay.log
 out-replay-witness.log
 src/real/neuvector-*/
 src/real/*.tar.gz
+wirepath/gen/

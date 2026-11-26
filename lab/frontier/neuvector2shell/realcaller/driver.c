@@ -5,6 +5,9 @@
  * (hyperscan, urcu-map, logging, string helpers) are stubbed; the vulnerable
  * function, its real struct layout and its real consumer dpi_dlp_proc()
  * are the pinned upstream code.
+ *
+ * argv: npats [patlen] [namelen] — namelen defaults to 1 and is clamped to
+ * MAX_DLP_RULE_NAME_LEN-1, patlen to MAX_DLP_RULE_PATTERN_LEN-1.
  */
 #include <stdarg.h>
 #include <stdbool.h>
@@ -78,7 +81,10 @@ int main(int argc, char **argv)
 {
     int npats = (argc > 1) ? atoi(argv[1]) : 8;
     size_t patlen = (argc > 2) ? (size_t)atoi(argv[2]) : (MAX_DLP_RULE_PATTERN_LEN - 1);
+    size_t namelen = (argc > 3) ? (size_t)atoi(argv[3]) : 1;
     if (patlen > MAX_DLP_RULE_PATTERN_LEN - 1) patlen = MAX_DLP_RULE_PATTERN_LEN - 1;
+    if (namelen > MAX_DLP_RULE_NAME_LEN - 1) namelen = MAX_DLP_RULE_NAME_LEN - 1;
+    if (namelen < 1) namelen = 1;
 
     dpi_dlpbld_t b;
     memset(&b, 0, sizeof(b));
@@ -86,7 +92,7 @@ int main(int argc, char **argv)
     b.num_dlp_rules = 1;
     dpi_dlp_rule_entry_t rule;
     memset(&rule, 0, sizeof(rule));
-    snprintf(rule.rulename, sizeof(rule.rulename), "r");
+    for (size_t n = 0; n < namelen; n++) rule.rulename[n] = 'N';
     rule.sigid = 1001;
     rule.num_dlp_rule_pats = npats;
     rule.dlp_rule_pat_list = calloc(npats, sizeof(dpi_dlp_rule_pattern_t));
@@ -95,8 +101,8 @@ int main(int argc, char **argv)
         memset(rule.dlp_rule_pat_list[i].rule_pattern, 'M', patlen);
     b.dlp_rule_list = &rule;
 
-    printf("REAL_DRIVER npats=%d patlen=%zu pat_max=%d bld_size=%zu\n",
-           npats, patlen, MAX_DLP_RULE_PATTERN_LEN, sizeof(b));
+    printf("REAL_DRIVER npats=%d patlen=%zu namelen=%zu pat_max=%d name_max=%d bld_size=%zu\n",
+           npats, patlen, namelen, MAX_DLP_RULE_PATTERN_LEN, MAX_DLP_RULE_NAME_LEN, sizeof(b));
     fflush(stdout);
     dpi_dlp_init();
     int rc = dpi_sig_bld(&b, MSG_START | MSG_END);

@@ -105,3 +105,52 @@ effect, no rung 5.
 `run.sh` self-provisions the tree from the tarball when it is absent; the
 extraction path was verified with the tree removed (22 PASS / 0 FAIL), while
 the initial network-fetch path was not re-exercised after provisioning.
+
+## Wire-path lane (W274, 2026-11-26)
+
+Real source chain located in the pinned vulnerable tree (not reimplemented
+by guesswork):
+
+- `controller/api/apis.go:140-144`: `DlpRuleNameMaxLen=256`,
+  `DlpRulePatternMaxNum=16`, `DlpRulePatternMaxLen=512`,
+  `DlpRulePatternTotalMaxLen=1024`.
+- `controller/rest/dlp_rule.go:348-396` (`validateDlpRuleConfig`): the
+  limits are checked on the *input* value; `wildCardToRegexp()` (lines
+  300-346, SHA-256 of the verbatim slice
+  `567e27d1f1bbd999141049bc61fc0ae54896b48b2f4d7f73897568f77dfcf9da`)
+  runs at line 382 afterwards.
+- `agent/system.go:1007-1026` (`updateDlpDetectionRules`): each expanded
+  value is wrapped as `/<value>/is`, then `; context <context>` with
+  `share.DlpPatternContextDefault="body"`, then sorted.
+- `agent/dp/dp_apis.go:353-379` and `agent/dp/ctrl.go:891-947`: the
+  `ctrl_bld_dlp` JSON is marshalled with Go `encoding/json`.
+- `dp/ctrl.c:2098-2208` (`dp_ctrl_bld_dlp`, verbatim slice SHA-256
+  `bc3bf52669e16bf048cf2d1a6f47023cb946aaf9b7b75a4a1a351cb3b9fce424`):
+  real jansson parses the message into `dpi_dlpbld_t`, then calls
+  `dpi_sig_bld()` at line 2191.
+
+`wirepath/run.sh` slices both excerpts from the pinned tree at run time,
+compiles a Go generator (verbatim expander plus the two `agent/system.go`
+format expressions) and writes `out/wire-attack.json` /
+`out/wire-safe.json`. The C consumer includes the verbatim `dp_ctrl_bld_dlp`
+excerpt, uses the host's real `libjansson.so.4`
+(`jansson.h` fetched from upstream jansson v2.14, SHA-256
+`8945f933…ed11f2`) and links the byte-identical real vulnerable/fixed
+objects produced by `realcaller/run.sh`. Only logging, `ether_aton_r`,
+`strlcpy`, string helpers and sigopt registrations are stubbed.
+
+    bash lab/frontier/neuvector2shell/wirepath/run.sh -> 19 PASS / 0 FAIL, rc 0
+    WIREGEN mode=attack name_len=256 num=16 pre_total=1024 expanded_total=1536 wire_total=1824
+    WIREGEN mode=safe   name_len=1   num=1  pre_total=8    expanded_total=12   wire_total=30
+
+The attack rule is inside every documented REST limit. ASan on the real
+vulnerable object reports `stack-buffer-overflow`, `WRITE of size 121`,
+address at offset 2080 of the 2048-byte `dlpsig_buf` (line 621), write
+frame `dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`. Fixed pinned source on the
+same message: `WIRECALL rc=0`, no ASan report. Safe message: `rc=0`, no
+ASan report in the vulnerable object. Raw output in `wirepath/out/`.
+
+Limits preserved: this is not a full enforcer or controller binary and no
+HTTP/REST endpoint was contacted; the message is generated locally from
+verbatim excerpts plus the host JSON library. No chosen address, no benign
+command, no loopback live target, no rung 5.
