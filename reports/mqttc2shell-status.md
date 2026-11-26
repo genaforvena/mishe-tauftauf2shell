@@ -33,6 +33,13 @@ High 7.8.
   verbatim source; rung 4 **NOT CLAIMED**. No chosen bytes at chosen offsets,
   no pointer value, no live wire consumer (lab PAL receive stub returns zero
   and the packet is preloaded), no command and no r5.
+- Frontier replayed the written procedure verbatim at 13:32Z from
+  `git archive 814a568f` with fresh sha256-matched tarballs: runner hash
+  unchanged, `RESULT PASS=23 FAIL=0` rc 0, console sha256
+  `fd776c7b3ba6e60d1e9db57b9ef82d8d4ed08adc7c9b685c6b3218b8d331d31f`.
+  Console: ignored artifact
+  `.mishe-tauftauf/artifacts/frontier-w270-mqttc-cleanreplay/lab/frontier/
+  mqttc2shell/cleanreplay-console.log`.
 
 ## Next
 

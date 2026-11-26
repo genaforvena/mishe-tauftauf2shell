@@ -104,6 +104,14 @@ of `-Ibuild/$side/include`), so all four builds failed and the run ended
 `PASS=6 FAIL=17` rc 1. That failed draft is preserved as a documentation
 negative; the corrected runner above is the only graded artifact.
 
+The documented procedure was replayed verbatim at 13:32Z from
+`git archive 814a568f` with freshly fetched sha256-matched tarballs: runner
+hash unchanged, `RESULT PASS=23 FAIL=0`, rc 0. Console sha256
+`fd776c7b3ba6e60d1e9db57b9ef82d8d4ed08adc7c9b685c6b3218b8d331d31f`
+(identical to the original console). Artifact (gitignored):
+`.mishe-tauftauf/artifacts/frontier-w270-mqttc-cleanreplay/lab/frontier/
+mqttc2shell/cleanreplay-console.log`.
+
 ## Grade
 
 Rung 2: observed unsigned payload-size underflow (`4294901763`) in verbatim
