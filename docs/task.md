@@ -14942,7 +14942,64 @@ results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
   pinned verbatim / rung 4 PARTIAL, NO r5. Evidence hashes in
   `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+## 2026-11-26 22:5x–23:0xZ — live555 191st admitted, W296/W297 verdicts, staged W297 lanes
 
+- `27426079` + `8229ec57` staged and **admitted live555vorbis2shell** as
+  the 191st declared target mind under standing #6 (window 199, panes
+  %404/%405); counts 190/187/187/126 → 191/188/188/128, register row
+  R1 — / R2 — / R3 ✓ / R4 — / R5 —. CVE-2026-137587 / GHSA-h6r7-83p9-fpf5
+  affects `< 2026.08.25`; no upstream tag exists, so the pinned fix is
+  mirror commit `ef760df8569703b93f8df990a07086d7e760d171`. The operator's
+  clean-archive replay gave 3/3 pins, runner sha256 `9cd39b0a…`, rc 0,
+  `PASS=9 FAIL=0`, GCC/clang ASan OOB READ of 65535/65534/98 bytes at raw
+  `VorbisAudioRTPSource.cpp:186/:188/:190` and clean fixed/safe controls.
+  Plain vulnerable rc 0 is the preserved rung-1/2 negative; the harness
+  calls the sink directly, so no RTSP/SDP wire path, chosen byte,
+  neighbouring object, pointer or command: R4/R5 NOT CLAIMED.
+- Witness W296 (openscap) and W297 (live555) returned **ESTABLISHED AS
+  LABELED** at their exact scopes, no counterexample, no grade change.
+  Both `established` flags were already set by `8229ec57`; this fold
+  records the replay evidence only, in the gitignored site at
+  `.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md` and
+  `.mishe-tauftauf/artifacts/witness-w297-live555/detail.md`.
+- `f1aa62e6` **staged oiiocineon2shell** (W297, CVE-2026-59181 /
+  GHSA-xh8r-vmqq-56pp) from verbatim tagged `v3.2.0.2-dev` /
+  `v3.2.0.3-beta1` bytes, with 37 SHA-256 pins and fix PR 5250's 1-8
+  channel guard. GCC/clang `-O0` ASan reports `WRITE of size 8` at verbatim
+  `cineoninput.cpp:215`, the first store past `strings[8]`; `run-all.sh`
+  `PASS=13 FAIL=0`, fixed rejects 255, safe(8)/valid(1) clean. Plain rc 0
+  and clang `-O1` optimizing the store away are preserved negatives; the
+  advisory's adjacent `Reader cin` frame was not reproduced. No full
+  `iinfo` build, wire, chosen byte or control flow: rung 3 only, rungs
+  4/5 NOT CLAIMED. Independent clean-archive replay and standing-#6
+  admission are owed; this is not an admitted mind or count.
+- `35a64010` measured rpm2shell's debugger-free ASLR-off chosen-pointer
+  fault in-tree: 6 PASS / 0 FAIL, three wild-pointer rc 139, safe/fixed
+  clean, GDB confirming `buf+0x20` and a live liblua GC object at
+  `liblua5.2.so.0:0xe9a6`. Six attempts at a *valid* chosen target still
+  failed (rc 134/139), so no ASLR-stable target: author-layout rung 4
+  DEMONSTRATED, no command, no r5, grade unchanged.
+- `e52dfe5e` + `8d459d6b` added loopback HTTP delivery to the real
+  `rpm -i` through rpm's own `%_urlhelper`: 11/0 in-tree and from a clean
+  archive with all three binaries rebuilt, fresh ASan `WRITE of size 64`
+  in `iterReadArchiveNext` at `rpmfi.cc:2242`, HTTP 200 GETs for every
+  fixture and a closed-port URL clean. Safe rc 0/1, plain attack rc 1/139
+  and two intermediate 11/1 / 9/2 runner failures (missing `fresh()`
+  rpmdb reset) are preserved as layout/runner observations, not claims.
+  This is a measured wire *delivery* path for the corruption, not command
+  execution; no chosen pointer, ASLR-stable target or side effect.
+- `59a86335` carried gimpjif W297's post-inflate patch into the official
+  GIMP 3.2.8 AppImage: the published JIF logged `SHIM_PATCH ... total_out=324`
+  with `0x111`, the live unsorted fd and fake-chunk bk written at
+  `out+264/+272/+280`; the safe 4x4 JIF stayed clean. `RUN_RC=137` came
+  from the runner's 90 s cleanup, no `SHIM_FAKE_EXIT` or post-pin malloc
+  returning the fake chunk was observed, and the missing
+  `--batch-interpreter` timeout is preserved as a setup failure. Live
+  patch execution only: rung 3 pinned verbatim / rung 4 PARTIAL / NO r5.
+- The witness artifact `.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md`
+  (23:05Z) records W243 ESTABLISHED AS LABELED at its exact scope with a
+  field-label NIT and W240/W241/W242 still owed. This docs fold does not
+  touch the register flag; no grade or r5 moved.
 
 Every count above is an operator, author, clean-archive or independent
 witness observation as labeled; none moves a generated grade cell here.

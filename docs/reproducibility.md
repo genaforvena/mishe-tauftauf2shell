@@ -15861,3 +15861,147 @@ report §22:5xZ.
 
 ## 2026-11-26 22:5xZ — Ruby compile-time fold guards CLOSED
 
+## 2026-11-26 22:5x–23:0xZ — live555 admission, staged oiiocineon, rpm lanes, gimpjif live patch
+
+### live555vorbis2shell — admitted 191st, rung 3 only
+
+Claim sources read 2026-11-26: CVE-2026-137587 (`https://www.cve.org/
+CVERecord?id=CVE-2026-137587` and the canonical cveawg JSON, CNA
+VulnCheck), VulnCheck advisory, NVD record and GHSA-h6r7-83p9-fpf5;
+upstream's only note is the `2026.08.25` changelog entry. Affected
+`< 2026.08.25`; there is no upstream tag, so the fixed pin is mirror
+commit `ef760df8569703b93f8df990a07086d7e760d171` (second byte-identical
+mirror `03015a0ae5ab3a1c53106eb938213d0d05e16f1e`). From
+`lab/frontier/live555vorbis2shell`, `pins/PIN_HASHES.txt` pins
+`VorbisAudioRTPSource.cpp.vuln` `bf1e426a…` (blob SHA-1
+`bf1e426a3761642089a8dafff635cd24b0b4fc609e779202832d1cb4f5c11ddf`),
+the fixed file `6b80d6bd4be5eaf8923ddefb8501063cab74fa8918b67691dfd02ae3fa3c344d`
+and `fix-ef760df.patch` `7bbe420e…`. Run `sha256sum -c PIN_HASHES.txt`
+from `pins/`, then `sh run-all.sh`: runner sha256
+`9cd39b0a13dd6e1f0fde58e65de9bfce9ba18db0e22155afcc21b92ce8a67db8`,
+rc 0, `PASS=9 FAIL=0`. Expected GCC ASan `heap-buffer-overflow` READ of
+size 65535/65534/98 at verbatim raw `VorbisAudioRTPSource.cpp:186/:188/:190`
+in the three unchecked `memmove` calls, 0 bytes past a 12/12/15-byte
+`new[]` region; clang reproduces at raw `:186`. The patch hunk's
+`:183/:185/:187` are patch-relative, the raw pinned lines authoritative.
+Fixed pin and safe vector (`id=2 comment=6`) are ASan-clean; plain
+vulnerable exits 0 with `id=65535 comment=0 setup=0 ident=0`, the
+rung-1/2 negative. `runs/` traces are tracked but addresses and PIDs are
+run-specific; no full live555 build, RTSP server or SDP client exists.
+Operator clean-archive replay from `git archive HEAD lab/frontier/live555vorbis2shell`
+at 22:48Z (runner and five binaries rebuilt) gave the same 9/0. Witness
+W297 independently repeated from its own clean archive: ESTABLISHED AS
+LABELED at exactly rung 3 in the extracted verbatim function with a
+frontier-authored driver/decoder, R1/R2/R4/R5 NOT CLAIMED; detail in
+the gitignored site at
+`.mishe-tauftauf/artifacts/witness-w297-live555/detail.md`.
+
+### oiiocineon2shell — STAGED W297, rung 3 only, admission owed
+
+CVE record `https://cveawg.mitre.org/api/cve/CVE-2026-59181` and GHSA
+`https://github.com/AcademySoftwareFoundation/OpenImageIO/security/advisories/GHSA-xh8r-vmqq-56pp`
+(CNA `GitHub_M`, CVSS 6.1), fix PR
+`https://github.com/AcademySoftwareFoundation/OpenImageIO/pull/5250`;
+OSV lookup returned 404 (preserved negative). Vulnerable tag
+`v3.2.0.2-dev`, fixed `v3.2.0.3-beta1`; the pinned `cineoninput.cpp`
+blobs are `d64ac4ab3d67db003c70f04f8faaace3ada66356` (SHA-256
+`8e1b22819400e068963d56d60f2b6b5506376a28af189359a62fa6048f34a2a6`)
+and `6174e91630067d36562944144bf7dff2b62ac736` (SHA-256
+`866942554a2d8509081b29b152fd87e6ea87bd04ea165d6dd5d6c457817db0b6`).
+From `lab/frontier/oiiocineon2shell`, `sh run-all.sh` (runner sha256
+`79c81411016b3e6a29b11101c564873e19fc802041149e1e32300618a91933f3`)
+verifies all 37 entries in `pins/PIN_HASHES.txt`, regenerates the sink
+slices and three 2048-byte `.cin` headers, builds GCC ASan vulnerable
+and fixed, plain vulnerable and clang `-O0` ASan vulnerable, then expects
+`PASS=13 FAIL=0`. The 255-element file gives `stack-buffer-overflow`,
+`WRITE of size 8` at verbatim `cineoninput.cpp:215` (first store past
+`strings[8]`, `[32, 96) <== offset 96`) under GCC `-O1` and clang `-O0`;
+fixed rejects count 255 via PR 5250's 1-8 guard at raw `:96-101`, while
+safe(8) and valid(1) stay clean on both pins. Plain vulnerable rc 0 and
+clang `-O1` optimizing the store away are preserved negatives; the
+advisory's adjacent `Reader cin` frame was not reproduced. The three
+`h/shim/OpenImageIO/*.h` files are frontier build shims, not upstream
+OIIO; no full `iinfo` or wire path is claimed. `runs/` outputs are
+tracked, binaries gitignored and rebuilt; detail in
+`reports/frontier-oiiocineon2shell.md` and status in
+`reports/oiiocineon2shell-status.md`. Independent replay and the
+operator's standing-#6 admission are still owed.
+
+### rpm2shell — debugger-free pointer fault and loopback wire delivery
+
+From `lab/frontier/rpm2shell`, `bash real/run-setarch-nogdb.sh` (runner
+sha256 `e2ed234bd584cc2e870824c9c7e7788bf2022eefe4925b573d2a2119d8cfe8de`)
+needs the untracked vulnerable/fixed builds and gives 6 PASS / 0 FAIL
+in-tree: `setarch -R` disables ASLR with no debugger attached, three
+wild-chosen-pointer runs exit 139, two safe runs rc 1 and fixed ASan rc 1
+clean. GDB on the same fixture/binary/argument lengths shows `MATCH=1`
+for `buf+0x20` and the chosen qword visited as a live liblua GC object at
+`liblua5.2.so.0:0xe9a6`. Six attempts to use a *valid* chosen target
+failed (rc 134/139), so no ASLR-stable target; summary sha256
+`39161917b072ff25098c6e846944f86fa41e0c3bbfd78f67461f46e175077ba0`.
+Grade stays author-layout rung 4 DEMONSTRATED, no command, NO r5.
+
+`bash real/run-wire-consumer.sh` (runner sha256
+`3f2d441596da17b671f0cd77b66faf856900b95f31573c51506d1ee9c565af2a`,
+server `real/wire/http_server.py` sha256
+`a3b89c3bc9d7f22b29d038823993aa206eba62f2ab1aeb7a4f0a0990e6b2d998`)
+starts an HTTP server bound only to `127.0.0.1` on an ephemeral port and
+serves four `relocate-install.py` fixtures whose digests are in
+`real/wire/fixtures.sha256` (sha256
+`fd1175661bbcdf83a829b2af77158b06935b4bc115b8e018a3ce31b0940a9942`).
+Expect `WIRE_CONSUMER_PASS=11 WIRE_CONSUMER_FAIL=0`, HTTP 200 GET for
+every fixture, vulnerable ASan rc 134 with `WRITE of size 64` in
+`iterReadArchiveNext` at `rpmfi.cc:2242` via `rpmcpioRead`, fixed ASan
+rc 1 clean, closed-port URL rc 1 clean, zero/short fixtures rc 1, and
+`GET ... 200` in `real/wire/server.log`. Safe rc 0/1 and plain attack
+rc 1/139 are layout-dependent observations; two intermediate 11/1 and
+9/2 runs are preserved as a runner bug (a dropped `fresh()` rpmdb reset,
+restored before the recorded runs). Clean-archive replay from
+`git archive e52dfe5e lab/frontier/rpm2shell` rebuilt all three binaries
+and returned 11/0 with the same ASan frame; log
+`real/wire/clean-archive-replay.log` sha256
+`e60d7bf11f057d02f49e11c7922dd80734c54c8d8b76fee52943244347ce7be7`.
+No chosen pointer, ASLR-stable target or benign side effect reached the
+wire: this is delivery of the corruption, not r5.
+
+### gimpjif2shell W297 — post-inflate patch inside the live plugin
+
+`live/patch-shim.c` (sha256
+`e121647f80fac1c7fc25affe7a5db7b009b3da253e6624570498fe32572774d7`)
+and `live/run-appimage-patch.sh` (sha256
+`8bd9d056104f5cc313719126181e0c4a9988122fe800290eaf4525409a77a4bb`)
+preload the post-inflate patch into the SHA-verified GIMP 3.2.8 AppImage
+through a locally patched AppRun; the canonical `live/run-appimage.sh`
+filters both shim names so either runner replays independently. Safe
+`live/evidence/appimage-patch-safe.log` (sha256
+`fc183d8a5749b3210925e40e0cfce2b9a744af1a31848557954f66333d70d4ff`)
+reaches `batch command executed successfully`, `RUN_RC=0`, no `SHIM_`
+line; published `appimage-patch-published.log` (sha256
+`c2c9cf79088b28d8c99bd886e819d4dc26453ca81f4fc1bbb779ba384ff28484`)
+logs `SHIM_PATCH ... total_out=324` and
+`SHIM_PATCH_WORDS=1101000000000000604eb0540c75000080c030160b750000`
+at `out+264/+272/+280`. `RUN_RC=137` is the runner's 90 s cleanup; no
+`SHIM_FAKE_EXIT`, post-pin malloc returning the fake chunk or glibc write
+into it was observed. The first invocation without
+`--batch-interpreter plug-in-script-fu-eval` timed out with no `SHIM_`
+line and is preserved as a setup failure. The pinned-driver variant
+`realglib/run-consumer.sh unlinkpatch` gives 24/0 in-tree and from a
+clean `git archive 65b6897b`; `run-all.sh` 29/0 and `run-real.sh` 35/0.
+Rung 3 pinned verbatim / rung 4 PARTIAL / NO r5 throughout; full hashes
+in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+### Witness scope notes for this fold
+
+W296's openscap replay (runner `fc185b5f…`, 5/0, fresh WRITE-1 at
+`sds.c:884`) and W297's live555 replay (above) are ESTABLISHED AS
+LABELED at their exact scopes, with no counterexample or grade change;
+details are `.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md`
+and `.mishe-tauftauf/artifacts/witness-w297-live555/detail.md`. A W298
+artifact also records pjproject W243 ESTABLISHED AS LABELED at its exact
+scope from `git archive a98128fc lab/frontier/pjproject2shell`, runner
+`403b3944…`, driver `a6cd99f9…`, 10/0; it names a field-label NIT
+(true `cb` +56, `user_data` +64, `lock` +88) while the chosen-byte
+readback still holds, and leaves W240/W241/W242 owed. That artifact
+`.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md` did not
+change any register flag or grade in this docs fold.
+

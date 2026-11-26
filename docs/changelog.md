@@ -2,6 +2,61 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 22:5x–23:0xZ — live555 191st, W296/W297 verdicts, staged W297 lanes
+
+This fold covers `a6ecf1cc..8d459d6b` and adds only explanation: no
+generated cell, register row, grade, report or lab evidence moved.
+Reproduce every claim from `docs/reproducibility.md` § 22:5x–23:0xZ.
+
+`27426079` staged and `8229ec57` admitted live555vorbis2shell as the
+191st declared target mind under standing #6 (window 199, panes %404/%405).
+Counts 190/187/187/126 → 191/188/188/128, register row R1 — / R2 — /
+R3 ✓ / R4 — / R5 —. CVE-2026-137587 / GHSA-h6r7-83p9-fpf5, affected
+`< 2026.08.25`, no upstream tagged fix; the fixed bytes are mirror commit
+`ef760df8569703b93f8df990a07086d7e760d171` (second byte-identical mirror
+`03015a0a…`). The operator's clean-archive replay at 22:48Z gave three pins
+OK, runner sha256 `9cd39b0a…`, rc 0, `PASS=9 FAIL=0`, GCC and clang ASan
+heap OOB READ of 65535/65534/98 bytes at verbatim raw
+`VorbisAudioRTPSource.cpp:186/:188/:190`, fixed pin and safe vector clean.
+Plain vulnerable rc 0 is a preserved rung-1/2 negative; rungs 1/2/4/5 are
+NOT CLAIMED, no RTSP/SDP or wire path in the harness.
+
+Witness W296 (openscapmangle2shell) and W297 (live555vorbis2shell) both
+returned ESTABLISHED AS LABELED at their exact scopes, with no
+counterexample and no grade change; `8229ec57` had already folded both
+`established` flags, so this fold only states the verdict evidence
+`.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md` and
+`.mishe-tauftauf/artifacts/witness-w297-live555/detail.md`.
+
+`f1aa62e6` staged oiiocineon2shell (W297, CVE-2026-59181 /
+GHSA-xh8r-vmqq-56pp) without admission: 37 SHA-256-pinned upstream files,
+GCC/clang ASan `WRITE of size 8` at verbatim `cineoninput.cpp:215`,
+`PASS=13 FAIL=0`, fixed guard rejects 255 channels, safe(8)/valid(1)
+clean. Plain build exits 0 and clang `-O1` optimized the store away;
+both negatives are preserved. No full `iinfo`, no wire, no chosen byte or
+control flow: rung 3 only, rung 4/5 NOT CLAIMED; independent replay and
+the operator's standing-#6 admission decision are owed.
+
+`35a64010` measured rpm2shell's debugger-free ASLR-off chosen-pointer
+fault (6/0 in-tree, three wild-pointer rc 139, safe/fixed clean) while
+six attempts at a *valid* chosen target still failed (rc 134/139), so the
+author-layout rung-4 claim and no-r5 boundary are unchanged. `e52dfe5e` +
+`8d459d6b` added loopback HTTP delivery to the real `rpm -i`: 11/0
+in-tree and from a clean archive with rebuilt binaries, identical ASan
+`WRITE of size 64` at `rpmfi.cc:2242`, GET 200 for every fixture, and a
+closed-port control clean. This is a measured delivery path for the
+corruption, not command execution; safe rc 0/1 and plain attack rc 1/139
+are layout-dependent observations, never assertions.
+
+`59a86335` executed the gimpjif W297 post-inflate patch inside the real
+GIMP 3.2.8 AppImage: the published JIF logged three live words at
+`out+264/+272/+280` while the safe JIF stayed clean; no post-pin malloc,
+glibc write into the fake chunk or command was observed, so rung 3 /
+rung 4 PARTIAL / NO r5 is unchanged (author receipt already in
+`docs/task.md`, recipe below). `50accf06` closed Ruby's compile-time fold
+guards as a 54/54 negative already recorded in this log and in
+`docs/reproducibility.md`; it is cross-referenced, not re-pinned.
+
 ## 2026-11-26 22:4xZ — Ruby2Shell last case-fold guard systematically closed
 
 `lab/repro/ruby2shell-casefold-rawprefix.{rb,sh,gdb}` enumerated all
