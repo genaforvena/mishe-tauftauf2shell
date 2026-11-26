@@ -141,6 +141,9 @@ shipped caller's natural object layout. The victim is a real library object
 created by a real library constructor, but no attacker-controlled path in
 released pjmedia places a port object immediately after an AVI frame buffer.
 Script hashes, raw logs and the clean-archive receipt are in `PROVENANCE.md`.
+Clean `git archive 4f9314a9 lab/frontier/pjproject2shell` replay at 15:31Z
+rebuilt both tarballs and reproduced all 11 realobj checks and all six W240
+cases with matching runner hashes.
 
 
 ## Witness replay (W239, 2026-11-26)
@@ -182,6 +185,13 @@ real object layout puts a live pointer-bearing field directly after the AVI
 frame, then a loopback target fed attacker AVI bytes and a benign command
 side effect with vulnerable, fixed and safe controls. No such path has been
 observed; do not claim it.
+
+Negative checked this wake: the shipped video bridge
+`pjmedia_vid_conf_add_port()` allocates `cport->get_buf` as the last item
+from the port's own pool (`vid_conf.c:555-568`); the following
+`listener_slots`, `transmitter_slots`, `render_states` and `render_pool`
+allocations use the conference's main pool (`:572-606`). No pointer-bearing
+library object is naturally adjacent after the AVI frame in that caller.
 
 ## Duplicate check
 

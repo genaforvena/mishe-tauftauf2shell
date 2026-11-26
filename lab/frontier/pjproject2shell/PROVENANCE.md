@@ -182,3 +182,19 @@ overwrite of live library fields, not an ASan diagnostic.
 
 Regression at 15:27Z: `bash real/run-real.sh` still reproduces all six W240
 cases (ASan WRITE-64/WRITE-512, neighbor marker, fixed clamp, safe control).
+
+Clean-archive replay 2026-11-26 15:31Z: `git archive 4f9314a9
+lab/frontier/pjproject2shell` extracted into `/tmp/w241-pjproject-clean`.
+`bash real/build-real.sh` rc 0 (both tarballs re-fetched and hash-matched
+above, one `avi_get_frame` symbol in each built library), then
+`bash real/run-real.sh` reproduced all six W240 cases and
+`bash real/run-realobj.sh` returned `TOTAL: 11 PASS / 0 FAIL`, rc 0.
+Runner hashes matched the in-tree values above
+(`8304b76d…` for `real-driver.c`, `d6435096…` for `run-realobj.sh`).
+
+Natural-caller negative: `pjmedia_vid_conf_add_port()` in the pinned
+vulnerable tree allocates `cport->get_buf` as the last item from
+`cport->pool` (`pjmedia/src/pjmedia/vid_conf.c:555-568`); subsequent
+`listener_slots`, `transmitter_slots`, `render_states` and `render_pool`
+arrays come from the main pool (`:572-606`). No library object is naturally
+adjacent after the AVI frame buffer in that shipped caller.
