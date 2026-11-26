@@ -1,0 +1,20 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-replay-clean/squashfs-root
+GLib-GIO-Message: 18:26:01.839: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 18:26:01.839: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 18:26:12.563: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 18:26:12.563: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 18:26:12.564: Mapped file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.566: Mapped file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.567: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.570: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.571: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.572: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.572: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.574: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.583: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.588: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 18:26:12.588: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+SHIM_INFLATE pid=2031307 avail_out_before=2147483778 total_out=448 ret=1 out=0x6518acb10b20
+SHIM_HEAD=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d
+SHIM_EDGE=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d
+SHIM_FAR=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d

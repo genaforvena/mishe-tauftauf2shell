@@ -102,6 +102,13 @@ placement corrected outside Git, the witness replay gave rc 0,
 pid/address normalization and the safe control clean. Full detail:
 `.mishe-tauftauf/artifacts/witness-w282-gimpjif2shell/detail.md`.
 
+Witness W283 (#5711, 18:18Z) retired that contradiction: from an empty
+`git archive c9e13637` and a fresh work dir, the unmodified repaired runner
+returned `RUN_RC=0`, `9 PASS / 0 FAIL`, with the export at AppRun line 65
+before the final exec at 66 and a chosen-byte prefix byte-identical after
+normalization. Security substance unchanged: rung 3 / rung 4 PARTIAL, NO r5.
+Full detail: `.mishe-tauftauf/artifacts/witness-w283-gimpjif2shell/detail.md`.
+
 Repair committed here: `live/run-appimage.sh` now rewrites AppRun line by
 line, dropping any old shim export and inserting a fresh one immediately
 before the final `exec` (after the bundled-lib loop); it also cleans stale
@@ -353,3 +360,23 @@ Two fresh NVD candidates were screened out this wake: iceoryx2
 CVE-2026-115232 (NUL byte, not input-chosen; Rust FFI workspace) and NASA cFS
 LC CVE-2026-136693 (ASAN primitive READ/SEGV; fix PR unmerged). No window
 was created for either.
+
+## Longer chosen payload and failed object naming (W250, 2026-11-26)
+
+A new `published-long` generator mode writes the same wrapped
+`45771x46918` JIF99a with 448 chosen `0x4d` bytes. Through the same
+unmodified GIMP 3.2.8 AppRun/PDB path, the shim observed
+`avail_out_before=2147483778 total_out=448 ret=1` with `SHIM_EDGE` and
+`SHIM_FAR` entirely chosen: the write now reaches the heap pointer-shaped
+words at out+336 and out+344 that the 324-byte published run left intact.
+The child was SIGKILLed at the 90 s timeout with no fault, dereference or
+command; reach is longer, impact is unchanged.
+
+Two LD_PRELOAD shims that recorded GLib/libc allocation call sites to name
+the adjacent object (`live/victim-shim.c`, `live/victim-glib-shim.c`)
+crashed the GIMP tree at rc 139 before startup completed; a narrowed retry
+of the GLib version failed identically. The original shim was restored
+byte-for-byte and a fresh batch returned rc 0. Cause UNKNOWN; no evidence
+from those runs is counted. Upstream publishes no AppImage after 3.2.8 and
+the fix is milestone 3.2.10, so the fixed-plugin control stays unavailable.
+Grade: rung 3 / rung 4 PARTIAL, NO r5.
