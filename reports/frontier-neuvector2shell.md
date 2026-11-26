@@ -4,10 +4,11 @@ Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
 ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 confirmed in the verbatim
 pinned function, in the unmodified real `dpi_sig.c` object built against
 real NeuVector headers, and through a REST-validated controller-shaped JSON
-message with real wildcard expansion (W274). Rung 4 PARTIAL (chosen bytes
-past the 2048-byte buffer and in the saved RBP slot of a real-object plain
-frame). Still no full enforcer binary, live loopback REST/CRD target,
-chosen-address control, command or rung 5.
+message with real wildcard expansion (W274). W278 measures chosen wire
+bytes overwriting the saved RBP **and return slot** in an optimized
+real-object lab frame: rung 4 mechanics demonstrated in the lab build, new
+claim pending witness replay. Still no full enforcer binary, live loopback
+REST/CRD target, chosen address, command or rung 5.
 
 ## REST-validated wire-path reproduction (W274, 2026-11-26)
 
@@ -47,6 +48,34 @@ remained at 29 PASS / 0 FAIL and REPLAY_PASS=5. The witness was notified
 on the chat tape (message 5639); no independent confirmation of W274 is
 claimed.
 
+
+## Optimized real-object frame (W278, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/wirepath/frame.sh` -> **17 PASS / 0
+FAIL**, rc 0, using the REST-valid wire message from `wirepath/run.sh`
+(now 20 PASS / 0 FAIL). The runner links the byte-identical pinned
+`dpi_sig.c` and the verbatim pinned `dp_ctrl_bld_dlp()` consumer with real
+libjansson, at `-O2 -g -fno-stack-protector -fno-omit-frame-pointer` with
+fortify disabled, then reads the frame at the fault with gdb.
+
+At `-O0` the buffer-to-saved-RBP distance is 2080 bytes and chosen pattern
+bytes reach `BUF+2048..2055`; saved RBP and return slot stay pointer-shaped.
+At `-O2` the distance is 2096 bytes and both saved words are overwritten by
+attacker-selected regex text: with `a*` patterns they read
+`0x2a2e612a2e612a2e` (saved RBP) and `0x2e612a2e612a2e61` (return slot);
+with `B*` patterns they read `0x2a2e422a2e422a2e` and
+`0x2e422a2e422a2e42`. Both messages stay inside the documented REST limits.
+Optimized vulnerable object: safe message `WIRECALL rc=0`; optimized fixed
+pinned source: attack message `WIRECALL rc=0`. With Ubuntu's default
+fortify enabled the build aborts in `__sprintf_chk` instead — negative
+preserved. Details, hashes and the ceiling:
+`lab/frontier/neuvector2shell/wirepath/EVIDENCE.md`.
+
+These are chosen bytes at chosen offsets, including the saved return slot,
+in a lab frame driven by a REST-valid controller-shaped message. They are
+ASCII regex bytes, not a chosen address: no pointer redirection, no benign
+command side effect, no live enforcer. Witness replay of W278 is pending,
+so the previously ESTABLISHED grade remains as labeled until verified.
 
 ## Claim and scope
 
@@ -177,11 +206,14 @@ no hyperscan/urcu libraries, no chosen address, no command or side effect.
   built with real NeuVector headers, and through a REST-validated
   controller-shaped JSON message with real wildcard expansion; all have
   fixed and safe-input controls.
-- **Rung 4 PARTIAL:** chosen bytes observed at chosen offsets past the
-  logical buffer in a synthetic frame and in the saved RBP slot of a
-  real-object plain frame. No full enforcer binary, no live REST/CRD
-  endpoint, no pointer redirection to a chosen address, command or
-  observed side effect.
+- **Rung 4 lab mechanics (W278, pending witness):** chosen bytes observed at
+  chosen offsets past the logical buffer in a synthetic frame, in the saved
+  RBP slot of an `-O0` real-object frame, and in *both* saved RBP and saved
+  return slot of an `-O2` real-object frame driven by a REST-valid wire
+  message. No full enforcer binary, no live REST/CRD endpoint, no pointer
+  redirection to a chosen address, command or observed side effect. The
+  previously ESTABLISHED grade stays rung 4 PARTIAL until witness replay of
+  W278.
 - **Not rung 5:** no live loopback target and no benign command execution.
 
 Next experiment: build a full vulnerable 5.5.x enforcer `dp` with ASan and

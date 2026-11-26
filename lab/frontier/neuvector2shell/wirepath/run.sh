@@ -76,11 +76,13 @@ func main() {
     // PatternMaxLen=512 (controller/api/apis.go:140-144).
     attack := len(os.Args) > 2 && os.Args[2] == "attack"
     name, num := "r", 1
-    value := strings.Repeat("a*", 4) // 8 bytes, passes every limit
+    ch := "a"
+    if len(os.Args) > 3 { ch = os.Args[3] }
+    value := strings.Repeat(ch+"*", 4) // 8 bytes, passes every limit
     if attack {
         name = strings.Repeat("N", 256)
         num = 16
-        value = strings.Repeat("a*", 32) // 64 bytes; 16*64 = 1024 total limit
+        value = strings.Repeat(ch+"*", 32) // 64 bytes; 16*64 = 1024 total limit
     }
     preTotal, expandedTotal, wireTotal := 0, 0, 0
     rule := &entry{Name: name, ID: 1001, Patterns: []string{}}
@@ -106,9 +108,11 @@ GOEOF
 GO111MODULE=off go build -o gen/wiregen gen/main.go && ok "wire generator builds" || { bad "wire generator builds"; echo "TOTAL: $pass PASS / $((fail+1)) FAIL"; exit 1; }
 gen/wiregen "$OUT/wire-attack.json" attack > "$OUT/wiregen-attack.log" 2>&1 || true
 gen/wiregen "$OUT/wire-safe.json" safe > "$OUT/wiregen-safe.log" 2>&1 || true
-cat "$OUT/wiregen-attack.log" "$OUT/wiregen-safe.log"
+gen/wiregen "$OUT/wire-B.json" attack B > "$OUT/wiregen-B.log" 2>&1 || true
+cat "$OUT/wiregen-attack.log" "$OUT/wiregen-safe.log" "$OUT/wiregen-B.log"
 has "$OUT/wiregen-attack.log" 'pre_total=1024' && ok "attack input respects 1024-byte total limit" || bad "attack input respects 1024-byte total limit"
 has "$OUT/wiregen-attack.log" 'name_len=256' && ok "attack name respects 256-byte REST limit" || bad "attack name respects 256-byte REST limit"
+has "$OUT/wiregen-B.log" 'pre_total=1024' && ok "chosen-byte B variant respects 1024-byte total limit" || bad "chosen-byte B variant respects 1024-byte total limit"
 [ "$(stat -c %s "$OUT/wire-attack.json")" -gt 2048 ] && ok "encoded controller message itself exceeds 2048 bytes" || bad "encoded controller message itself exceeds 2048 bytes"
 
 echo "== build C consumer with real jansson + real pinned dpi_sig object =="

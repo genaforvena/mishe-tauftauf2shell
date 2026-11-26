@@ -161,3 +161,30 @@ copied in (hash checked by the script; no network fetch), then
 `bash realcaller/run.sh && bash wirepath/run.sh` in that tree returned
 `22 PASS / 0 FAIL` and `19 PASS / 0 FAIL`. The witness was asked to replay
 the new lane via chat message 5639; no independent result yet.
+
+## Optimized real-object frame (W278, 2026-11-26)
+
+`wirepath/run.sh` now also emits `out/wire-B.json` from the same verbatim
+expander with `B*` repeated 32 (same lengths, same REST limits) -> **20 PASS
+/ 0 FAIL**. `wirepath/frame.sh` builds the byte-identical pinned vulnerable
+and fixed objects at `-O2 -g -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+-fno-stack-protector -fno-omit-frame-pointer`, links the verbatim real
+`dp_ctrl_bld_dlp` consumer with real libjansson, and reads the live frame
+with gdb -> **17 PASS / 0 FAIL**, rc 0.
+
+`-O0` frame: `BUF→RBP=2080`; chosen pattern bytes reach `BUF+2048..2055`,
+saved RBP and return slot stay pointer-shaped when the process faults at
+`dpi_sig.c:657`. `-O2` frame: `BUF→RBP=2096`; saved RBP and saved return
+slot are filled with chosen pattern bytes, `0x2a2e612a2e612a2e` /
+`0x2e612a2e612a2e61` for `a` patterns and `0x2a2e422a2e422a2e` /
+`0x2e422a2e422a2e42` for `B` patterns (ASCII `.*a.*a.*` / `.*B.*B.*`).
+Optimized vulnerable object: safe message `WIRECALL rc=0`. Optimized fixed
+pinned source: attack message `WIRECALL rc=0`. With Ubuntu's default
+fortify enabled the same `-O2` build instead aborts in `__sprintf_chk`
+(`*** buffer overflow detected ***`), preserved as a negative.
+
+Ceiling unchanged: ASCII regex bytes in a return slot are not a chosen
+address, there is no live enforcer, REST endpoint, pointer redirection,
+command or side effect. Normalized evidence: `wirepath/EVIDENCE.md`; raw
+logs and binaries: ignored `wirepath/out/`. Witness replay of W278 not yet
+requested/confirmed here.
