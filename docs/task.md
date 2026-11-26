@@ -14130,3 +14130,131 @@ Every count above is an operator, witness or clean-archive replay as labeled;
 no raw evidence is committed. What would change this fold: a verdict
 contradicting a labeled row, a checker RED on committed HEAD, or a later
 report misquoting one of these receipts.
+
+## 2026-11-26 18:5x–19:2xZ — axis2 admission (183rd), W284 ntfs verdict, libarchive staging, bounded lanes
+
+This fold covers `80597400..c7f8e2b1`; reproduce from
+`docs/reproducibility.md` § 18:5x–19:2xZ. The generated overview at HEAD reads
+183 declared / 180 active / 180 rows / 121 independently established. No
+generated cell, register row, grade, report or lab evidence is moved here.
+
+- `6a1a0abb` (operator, standing #6) **admitted axis2guththila2shell as the
+  183rd declared target mind** at 19:0xZ, superseding the § 15:0x–15:4xZ
+  STAGED wording. Counts moved 182/179/179/120 → 183/180/180/120 (121 after
+  the verdict fold below); staged window 187 adopted (panes %378/%379 live,
+  dead=0, registry entry present, no duplicate). CVE-2026-124023 /
+  GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`. The 19-byte
+  `<!ENTITY x "y"><a/>` yields an ASan `READ of size 4` at verbatim
+  `guththila_xml_reader_wrapper.c:308`, 192 bytes past the 72-byte allocation
+  at line 218; fixed `event[0]=-1`, safe document clean; author replay
+  `RESULT PASS=4 FAIL=0`. The operator's 18:57Z clean archive (only the
+  ignored `src/{vuln,fixed}.tar.gz`, hashes `da9cf3c1…` / `3421cf3b…`, copied
+  in) gave the same 4/0 with runner `59da25bc…` and driver `7ada2943…`.
+  Rung 3 only, rung 4 NOT CLAIMED: no chosen-offset readback, pointer, wire
+  consumer, command or r5; the CNA-low vs CISA-ADP 9.1 AV:N disagreement is
+  preserved, and no socket was used in this run. Independent witness replay
+  and the named loopback HTTP/SOAP consumer plus plain-build grooming remain
+  owed.
+- `b3e7b50b` folded witness W284's **ESTABLISHED AS LABELED** verdict for
+  ntfs3g2shell (`#5739`) and clarified the generated count: 120 → 121
+  established. The witness replayed a clean archive of `546471a7` with the
+  pinned tarball `7754f3b3…` and runner `c30c9566…` matched; unmodified
+  `sh run-all.sh` rc 0, `RESULT PASS=31 FAIL=0` in 81.5 s, fresh ASan
+  WRITE-1 at `compress.c:568` via `compress.c:950 → attrib.c:1003/:1236 →
+  ntfscat.c:371/:452`; vulnerable rc 1, fixed, poc and both safe controls rc 0
+  with empty ASan logs. GDB found `dest == dest_end` and a chosen-byte
+  boundary store; rung 4 NOT CLAIMED, no r5, grade unchanged. The "witness
+  replay owed" wording in the 18:1x–18:4xZ fold is superseded. This also
+  supersedes the looser "boundary names a verdict" phrase in that fold's
+  generated-count description: the count requires the verdict folded into
+  the register's `established` flag, with verdicts kept only as boundary
+  notes excluded. Soxng2Shell W281 stays a rung-3 boundary note whose flag is
+  deliberately false; no new replay was done for it.
+- `631067a3` (frontier W284) **staged libarchivezippath2shell** (STAGED, not
+  admitted): CVE-2026-45308 / GHSA-xgqq-r5j8-3mch, vulnerable tarball 3.8.7
+  `4b787cca…b9166`, fixed 3.8.8 `038918ea…306c190`, fix
+  `a20f89eb9b6eed62ee691b4d36fdf4e1216e0ba1`, patch `cb9a18bb…a49bad`.
+  `cd_alloc()` always mallocs 64 KiB but advances its pointer by the
+  unchecked filename length; `copy_path()` memcpy's the PAX pathname at
+  verbatim `archive_write_set_format_zip.c:2328` via `:1193`. Re-packing a
+  crafted tar with the shipped `bsdtar --format=zip -cf OUT.zip @IN.tar`
+  gives GCC ASan `WRITE of size 65537` / `131072`, 0 bytes past the 65,536-byte
+  region; clean-archive `sh run-all.sh` `RESULT PASS=40 FAIL=0`. Fixed 3.8.8
+  rejects both with `Pathname too long for ZIP format` and a 22-byte empty
+  ZIP; 65535-byte paths are clean on both. Preserved negatives: a 65536-byte
+  path is ASan-clean on 3.8.7 but rejected by 3.8.8 (the real ZIP bound is
+  `0xffff`), and the fix patch was applied and immediately reverted during
+  provisioning while `1622582b` preserved that apply/revert pair. Rung 3 via
+  a shipped CLI / rung 4 NOT CLAIMED: chosen bytes land in ASan poison, no
+  adjacent live object, pointer, command, socket or r5; advisory is
+  AV:L/AC:H/UI:R and claims corruption only. Admission, witness and a
+  plain-build chosen-offset experiment are owed.
+- `8c845617` + `f620d6ae` opened a second Ruby lane: the stock-wire Onigmo
+  repeat-ID write on pinned 3.4.11 (`f79c6e78…`). A 393 KB `tag` through the
+  unmodified Rails `/rails/info/notes` route gives a repeat ID of 32,768 and
+  a stack integer written to `repeat_stk - 32767*8`; with the labeled
+  ASLR-off calibration, 3/3 attacks returned HTTP 200/alive with a byte-identical
+  54,795-byte page (`c6be1419…`) versus the 55,667-byte control (`56eb2e92…`):
+  306 → 302 rows, four missing and 293 one-byte-shortened, e.g.
+  `timeout: 5000 → timeout: 500`. A fresh-context independent replay (not a
+  plant witness verdict) matched with the driver's own
+  `RUBY2SHELL_ONIGMO_GEM_PATH`; a shell-only `GEM_PATH` is a preserved
+  negative. Fixed 3.4.13 returns 500/alive, safe 200/alive. No command,
+  chosen pointer, fixed-build positive or second command; full
+  stock/oracle-free/persistent Ruby r5 remains NOT ACHIEVED.
+- `d3a9efae` + `c7f8e2b1` reduced the separate optimizer case-fold OOB to
+  ordinary UTF-8 (`Regexp.new("s", IGNORECASE).match("ß")`: ASan `READ of
+  size 1` at `regexec.c:4278`, 0 bytes past the compiled regexp's one-byte
+  `exact` buffer, 3/3 on affected 3.4.12 ASan, clean on fixed 3.4.13), then
+  closed stock wire reach for the notes and routes routes: all 306 reflected
+  subjects were ASCII and nine stock case-insensitive regexes against ten
+  crafted subjects produced no ASan report. Grade of that lane stays rung 3;
+  other stock routes remain UNKNOWN, not failures hidden as passes.
+- `397cfe20` + `1b454673` (neuvector W285) reached the live full enforcer's
+  epilogue with a REST-valid 2149-byte tuned message: `return.sh` 18/0,
+  breakpoint `dpi_sig.c:662` hit with `BUF→RBP=2096`, saved return slot
+  `0x3b79646f6220` / `0x3b6c72752074` and a fault at exactly that RIP; plain
+  vulnerable `rc=139`, safe/fixed survive. The two high bytes come from the
+  `sprintf` NUL and an untouched slot byte, and the six low bytes are the
+  pinned controller's fixed `; context <allowed>;` suffix: wire-determined
+  control transfer, NOT a chosen executable address, benign marker or
+  command. Grade stays rung 3 confirmed / rung 4 PARTIAL; witness replay
+  asked on #5751 and still owed.
+- `1ac66c24` (gimpjif W251) named the real caller in the unmodified GIMP
+  3.2.8 plugin via `dladdr` in an inflate-only shim:
+  `file-gif-load+0x3778` → `ReadJeffsImage` at `file-gif-load.c:1614`; the
+  overflowed `indexes` chunk has `usable=264 chunksz=272`, and the immediately
+  following live chunk's size field reads `0x4d4d4d4d4d4d4d4d`. No ASan in
+  the real plugin, no named user object, chosen address, dereference or
+  command; grade stays rung 3 / rung 4 PARTIAL, NO r5.
+- `cd47299c` + `e370e71c` (nfdump) aimed the pinned swap at the next record's
+  element type: record 2 carries rejected type 43 and the crossing write
+  changes `nfversion` so `VerifyV3Record()` accepts type 1 (2 flows vs 1),
+  with bad, safe and fixed controls. `run-etype.sh` 17/0 in-tree and again
+  from a clean archive of `cd47299c`. Both source and target are wire fields,
+  so this is a parser decision, not a capability gain over setting the type
+  directly; no pointer, marker, command or r5. Witness replay of the live
+  lanes remains owed.
+- `ed0b8154` + `7613e8f9` (leptonica) added the one-command clean-archive
+  runner `bash lab/frontier/leptonica2shell/run-witness.sh`: 37 wrapper PASS /
+  0 FAIL and `WITNESS REPLAY PASS`, rc 0 in 82 s, self-archiving the committed
+  tree and rechecking every pin and script hash. Grade unchanged (rung 3 real
+  / rung 4 PARTIAL); a plant witness verdict is still UNKNOWN.
+- `6eb0bc67` + `54d94b6e` + `6d9b3be0` (rpm) bounded and repaired a replay
+  layout trap: the `RPM_CONFIGDIR` path length changes teardown heap
+  adjacency, so an 88-character checkout failed 8/8 while an 18-character
+  symlink to the same config passed. Both runners now create that symlink for
+  every vulnerable `rpm -i`; 18 consecutive replays gave 0 FAIL and a clean
+  archive of the repaired commit gave `GC_POINTER_PASS=8 FAIL=0` plus
+  `INSTALL_CONSUMER_PASS=14 FAIL=0`. The 88-character negative is preserved;
+  grade stays rung 4 author-DEMONSTRATED with the layout limitation attached,
+  independent witness replay pending.
+
+Other commits in the range (`c85ca8ee`, `fbe0be14`, `b3b10cf0`, `1463ac18`,
+`ef3acd44`, `e6695f4d`, `4b898a70`, `23f05566`) are target-local receipts,
+reconciles or earlier staging steps whose dated evidence stays in the
+reports; this fold moves no grade or generated cell for them. Every count
+above is an author, operator, independent-replay or clean-archive observation
+as labeled. What would change this fold: a verdict
+contradicting a labeled row, a checker RED on committed HEAD, or a later
+report misquoting one of these receipts.

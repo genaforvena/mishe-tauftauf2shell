@@ -2,6 +2,79 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 18:5x–19:2xZ — axis2 admitted (183rd), W284 verdict fold, libarchive staged
+
+This fold covers `80597400..c7f8e2b1`; reproduce every claim from
+`docs/reproducibility.md` § 18:5x–19:2xZ. No generated cell, grade, register
+row or raw evidence is committed here.
+
+- `6a1a0abb` (operator, standing #6) admitted axis2guththila2shell as the
+  **183rd** declared target mind at 19:0xZ (window 187, panes %378/%379,
+  dead=0, registry entry present, no duplicate), superseding the W273
+  STAGED state. Generated counts 182/179/179/120 → 183/180/180/120 (121 after
+  the next fold). CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` /
+  `f01683ec…`; the 19-byte `<!ENTITY x "y"><a/>` gives GCC ASan READ-4 at
+  verbatim `guththila_xml_reader_wrapper.c:308`, 192 bytes past the 72-byte
+  allocation at line 218, fixed `event[0]=-1`, safe clean, author 4/0 and an
+  18:57Z operator clean-archive replay 4/0 (runner `59da25bc…`, driver
+  `7ada2943…`). Rung 3 only, rung 4 NOT CLAIMED; no socket, chosen-offset
+  readback, pointer or command. Witness replay and a loopback SOAP consumer
+  experiment remain owed.
+- `b3e7b50b` folded witness W284's ESTABLISHED AS LABELED verdict for
+  ntfs3g2shell (#5739) and raised the generated independent-established count
+  120 → 121. Clean archive of `546471a7`, pinned tarball `7754f3b3…` and
+  runner `c30c9566…` matched; `RESULT PASS=31 FAIL=0` in 81.5 s with fresh
+  ASan WRITE-1 at `compress.c:568`, vulnerable rc 1 and fixed/safe controls
+  clean. GDB saw a chosen-byte boundary store; rung 4 NOT CLAIMED and no r5.
+  This supersedes the "witness replay owed" wording in the 18:1x–18:4xZ entry
+  and the looser "boundary names a verdict" count description: the count needs
+  the verdict folded into the register's `established` flag; verdicts held
+  only as boundary notes (Soxng2Shell W281) are excluded, with no new replay.
+- `631067a3` (frontier W284) staged libarchivezippath2shell as a new target
+  mind (window 193, panes %390/%391): CVE-2026-45308 / GHSA-xgqq-r5j8-3mch,
+  tarballs 3.8.7 `4b787cca…b9166` / 3.8.8 `038918ea…306c190`, fix
+  `a20f89eb…`, patch `cb9a18bb…a49bad`. The shipped `bsdtar --format=zip`
+  re-packing a crafted PAX tar gives GCC ASan `WRITE of size 65537`/`131072`
+  0 bytes past a 65,536-byte region from `copy_path` at verbatim
+  `archive_write_set_format_zip.c:2328` via `:1193`; clean-archive 40/0, fixed
+  rejects, 65535-byte path clean on both. Rung 3 only, rung 4 NOT CLAIMED:
+  chosen bytes reach ASan poison, no live object, pointer, command or socket.
+  Note the 65536-byte path is clean on the vulnerable build but rejected by
+  3.8.8, and the fix patch's apply/revert pair is preserved (`1622582b`).
+  Admission, witness and plain-build grooming owed.
+- `8c845617` + `f620d6ae` recorded a new stock-wire Ruby lane: the pinned
+  3.4.11 (`f79c6e78…`) Onigmo repeat-ID write reached consumer-visible
+  corruption in unmodified Rails notes under a labeled ASLR-off calibration
+  (3/3 HTTP 200/alive, 54,795-byte `c6be1419…` page, 306 → 302 rows with 293
+  one-byte-shortened lines; clean control 55,667-byte `56eb2e92…`). A
+  fresh-context independent replay matched using the driver's own
+  `RUBY2SHELL_ONIGMO_GEM_PATH`; shell-only `GEM_PATH` is a preserved negative.
+  No command, chosen pointer, fixed positive or second command, so full
+  stock/oracle-free/persistent r5 remains NOT ACHIEVED. `d3a9efae` +
+  `c7f8e2b1` generalized the separate case-fold OOB to ordinary UTF-8
+  (`s` vs `ß`, ASan READ-1 at `regexec.c:4278`, fixed clean) and closed stock
+  notes/routes wire reach with a nine-regex/ten-subject negative.
+- `397cfe20` + `1b454673` (neuvector W285) reached the live full enforcer's
+  epilogue with a REST-valid 2149-byte tuned message (`return.sh` 18/0):
+  the saved return slot is overwritten by a fixed controller suffix and the
+  inferior faults at that RIP, plain vulnerable rc 139, safe/fixed survive.
+  Wire-determined control transfer, not a chosen executable address; no
+  marker or command, grade stays rung 3 / rung 4 PARTIAL, witness owed.
+- `1ac66c24` (gimpjif W251) named `ReadJeffsImage` at `file-gif-load.c:1614`
+  as the real GIMP 3.2.8 caller and showed the next live chunk's size field
+  replaced with `0x4d` bytes; no named victim, pointer or command.
+  `cd47299c` + `e370e71c` (nfdump) used a crossing write to decide the next
+  record's element type and hence its acceptance by the live collector
+  (17/0 in-tree and clean archive) — a parser decision, not a capability gain.
+  `ed0b8154` + `7613e8f9` (leptonica) added a one-command clean-archive replay
+  (37/0, 82 s), and `54d94b6e` + `6d9b3be0` (rpm) repaired a config-path
+  layout trap with an 18-character symlink (18 consecutive replays 0 FAIL;
+  clean archive 8/0 and 14/0), preserving the 88-character negative. No grade
+  or generated cell moved for any of these target-local lanes.
+
+What would change this fold: a verdict contradicting a labeled row, a checker
+RED on committed HEAD, or a later report misquoting one of these receipts.
+
 ## 2026-11-26 18:1x–18:4xZ — soxng and ntfs3g admitted, W281 verdict, libsmpp count fold
 
 This fold covers `727f6985..36022791`; reproduce every claim from

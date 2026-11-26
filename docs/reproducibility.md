@@ -44,6 +44,8 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| Libarchivezippath2Shell W284 (newest, STAGED) | [status](../reports/libarchivezippath2shell-status.md), [brief](../reports/frontier-libarchivezippath2shell.md), [provenance](../lab/frontier/libarchivezippath2shell/PROVENANCE.md) | CVE-2026-45308 / GHSA-xgqq-r5j8-3mch, tarballs 3.8.7 `4b787cca…b9166` / 3.8.8 `038918ea…306c190`, fix `a20f89eb…`, patch `cb9a18bb…a49bad` | `sh run-all.sh` in `lab/frontier/libarchivezippath2shell` | `RESULT PASS=40 FAIL=0`; shipped `bsdtar --format=zip` re-packs a crafted PAX tar into GCC ASan `WRITE of size 65537`/`131072` 0 bytes past a 65,536-byte region at `archive_write_set_format_zip.c:2328` via `:1193`; fixed rejects, 65535-byte path clean; rung 3 only, rung 4 NOT CLAIMED, admission/witness owed; full procedure in § 18:5x–19:2xZ |
+| Supersession — axis2guththila2shell row below | [status](../reports/axis2guththila2shell-status.md) | Operator `6a1a0abb` admitted it as the 183rd mind; generated counts 183/180/180/120, then 121 after W284's ntfs3g verdict fold | no new harness | The row's STAGED / admission-owed wording is the pre-admission state; rung 3 only and `established:false` unchanged |
 | Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
 | Quickjsng2Shell W279 (newest, STAGED) | [status](../reports/quickjsng2shell-status.md), [brief](../reports/frontier-quickjsng2shell.md), [provenance](../lab/frontier/quickjsng2shell/PROVENANCE.md) | GHSA-r6vf-p8wr-4vg9 (no CVE, OSV 404), pins v0.14.0 `3c051980…` / v0.15.0 `433941b9…`, fix `da49a370…`; advisory "patched None" contradicted by tags | `sh run-all.sh && sh verify.sh` in `lab/frontier/quickjsng2shell` | `RESULT PASS=28 FAIL=0` and `PASS=11 FAIL=0`; GCC ASan `heap-use-after-free READ of size 4` at `quickjs.c:1546` via `:9478`, 0 bytes inside a 72-byte freed region; fixed prints `undefined`, safe clean; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness owed; full procedure in § 16:4x–17:1xZ |
 | Soxng2Shell W281 (newest, STAGED) | [status](../reports/soxng2shell-status.md), [brief](../reports/frontier-soxng2shell.md), [provenance](../lab/frontier/soxng2shell/PROVENANCE.md) | CVE-2026-129264 / GHSA-gwh5-2vhj-gvcc, vulnerable tag `sox_ng-14.8.1` `a4a14b4f…`, fix `0b40408b…`, fixed tag `sox_ng-14.9.0` `6edd3b3a…` | build both pinned trees with autoreconf + ASan; `sh run-all.sh` in `lab/frontier/soxng2shell` | `RESULT PASS=27 FAIL=0` full rebuild; shipped CLI ASan `WRITE of size 4` at `src/voc.c:415` 0 bytes past a 32,768-byte region from an 8,494-byte `.voc`; fixed/safe clean; rung 3, rung 4 NOT CLAIMED, no plain crash, admission and witness owed; full procedure in § 17:2x–17:5xZ |
@@ -14921,3 +14923,117 @@ varied attack: all returned 200/alive with the `c6be1419…` page and 306→302
 row diffs; control-vs-itself was CLEAN, safe 200/alive, fixed 500/alive.
 Evidence: `lab/build/evidence/wire-indep-*`. This is not a plant witness
 ESTABLISHED verdict.
+
+## 2026-11-26 18:5x–19:2xZ — axis2 admission, W284 verdict, libarchive staging, bounded lanes
+
+This section reproduces the matching `docs/task.md` fold. Raw logs and build
+trees are gitignored and regenerate with the commands below; no claim depends
+on an uncommitted artifact.
+
+### Axis2guththila admission (183rd) and W284 ntfs3g verdict fold
+
+`6a1a0abb` admitted axis2guththila2shell after the W273 staging. Verify pins
+`584ce5bd3c98fe51701285d0a62e9c5251f3da4f` /
+`f01683ec10e8fddb87279ec9351b3239021223e6` in
+`lab/frontier/axis2guththila2shell/PROVENANCE.md`, then from that directory
+run `sh run-all.sh && sh verify.sh`. Expect `RESULT PASS=4 FAIL=0`: the
+19-byte `<!ENTITY x "y"><a/>` makes the verbatim wrapper index `event_map[10]`
+with raw byte 60 and GCC ASan `READ of size 4` at verbatim
+`guththila_xml_reader_wrapper.c:308`, 192 bytes past the 72-byte allocation
+at line 218; fixed returns `event[0]=-1` and the safe document is clean on
+both pins. The operator's 18:57Z replay used `git archive HEAD
+lab/frontier/axis2guththila2shell` plus only the ignored pinned tarballs
+(`da9cf3c1…` / `3421cf3b…`), with runner `59da25bc…` and driver `7ada2943…`
+matching PROVENANCE. Rung 3 only; the advisory network vector is a claim, no
+socket was used, and rung 4 / witness replay are NOT CLAIMED / owed.
+
+`b3e7b50b` folded witness W284's (#5739) ESTABLISHED AS LABELED verdict for
+ntfs3g2shell. Replay `git archive 546471a7 lab/frontier/ntfs3g2shell` plus the
+pinned 2026.2.25 tarball `7754f3b3…` and run the unmodified `sh run-all.sh`
+(runner `c30c9566…`): expect rc 0, `RESULT PASS=31 FAIL=0` in ~82 s, fresh
+ASan WRITE-1 at verbatim `compress.c:568` via `compress.c:950 →
+attrib.c:1003/:1236 → ntfscat.c:371/:452`; vulnerable rc 1, fixed, poc and
+both safe controls rc 0 with empty ASan logs. GDB observed `dest == dest_end`
+and `*cb = 0x5a`, a chosen-byte boundary store, not rung 4. Detail lives in
+gitignored `.mishe-tauftauf/artifacts/witness-w284-ntfs3g/detail.md`. The
+generated count moved 120 → 121; Soxng2Shell's W281 verdict remains a
+boundary note with `established:false`, so no second replay is implied.
+
+### Libarchive ZIP writer staging (W284)
+
+From `lab/frontier/libarchivezippath2shell`, verify the three pins in
+`PROVENANCE.md` (vulnerable tarball 3.8.7
+`4b787cca6697a95c7725e45293c973c208cbdc71ae2279f30ef09f52472b9166`, fixed
+3.8.8 `038918ea315cdd446cc63acfe880d6011832bbe1711c887de5de5441b306c190`,
+fix patch `cb9a18bb9e733e6d4063b5f9d762401ce36dfd070b88827dc43774f832a49bad`),
+then run `sh run-all.sh`. The clean-archive runner re-extracts both tagged
+trees, applies the patch only to a copy and rechecks source hashes; expect
+`RESULT PASS=40 FAIL=0`. `src/gen_tar.py` produces PAX tars with paths of
+65535, 65537 and 131072 bytes; the shipped command
+`bsdtar --format=zip -cf OUT.zip @IN.tar` on the two oversized paths gives
+GCC ASan `WRITE of size 65537` / `131072`, 0 bytes past a 65,536-byte region,
+frames `copy_path ...:2328 ← archive_write_zip_header ...:1193`, rc 1.
+Fixed 3.8.8 prints `Pathname too long for ZIP format` and emits a 22-byte
+empty ZIP; the 65535-byte path is clean on both. Preserve the negatives: the
+65536-byte path is ASan-clean on 3.8.7 but rejected by 3.8.8 (real bound
+`0xffff`), the provisioning patch was applied then immediately reverted, and
+`1622582b` kept both logs. Rung 3 via shipped CLI, rung 4 NOT CLAIMED; no
+live adjacent object, pointer, command, socket or r5. Admission, witness and
+a plain-build chosen-offset experiment are owed.
+
+### Ruby Onigmo stock-wire write and case-fold negative
+
+Build pinned `ruby-3.4.11.tar.xz`
+(`f79c6e789ce4f30f77c88a40b23b93e2547c512a843dc17db27ab1f5cc66f4e4`) as in
+§ 18:5xZ above, then follow that section's loopback commands with the
+driver's own `RUBY2SHELL_ONIGMO_GEM_PATH` set. Expect 3/3 attacks HTTP
+200/alive with the 54,795-byte `c6be1419…` response and 306 → 302 rows (four
+missing, 293 shortened by one byte) versus the 55,667-byte `56eb2e92…`
+control; safe 200/alive, fixed 3.4.13 500/alive. ASLR-off is a labeled
+calibration; shell-only `GEM_PATH` faulted without an HTTP response in an
+independent replay. That replay (`f620d6ae`, not a plant witness verdict)
+matched with driver digests `01193fbe8f83…` / `779a615f527d…` and evidence
+`lab/build/evidence/wire-indep-*`. For the separate case-fold lane, replay
+`bash lab/repro/ruby2shell-casefold-utf8.sh`: `s` against `ß`, `ẞ` or `İ`
+gives ASan `READ of size 1` at `regexec.c:4278`, 0 bytes past the compiled
+regexp's one-byte `exact` buffer on 3.4.12 ASan, clean on 3.4.13; ASCII
+match/miss controls are clean. Stock wire reach is CLOSED for the notes and
+routes routes: 306/306 reflected subjects ASCII and nine stock regexes
+against ten crafted subjects (`lab/build/evidence/casefold-wire-candidates.out`)
+produced no report. Other stock routes stay UNKNOWN. No command, chosen
+pointer, fixed-build positive or full stock r5 in either lane.
+
+### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
+
+`bash lab/frontier/neuvector2shell/fulldp/return.sh` gives 18 PASS / 0 FAIL:
+a REST-valid 2149-byte message reaches breakpoint `dpi_sig.c:662` with
+`BUF→RBP=2096`, overwrites the saved return slot with the controller's fixed
+`; context <allowed>;` suffix plus a `sprintf` NUL, and faults at that RIP;
+plain vulnerable rc 139, safe and fixed survive. No chosen executable
+address, marker or command; witness asked on #5751, grade unchanged.
+
+For gimpjif, build the inflate-only `live/heapmeta-shim.c` over the ignored
+`live/inflate-shim.so` and run it through the unmodified GIMP 3.2.8 AppRun/PDB
+path on `long.jif`; `live/evidence/heapmeta-long.log` records caller
+`file-gif-load+0x3778` (`ReadJeffsImage`, `file-gif-load.c:1614`) and the next
+live chunk's size field `0x4d4d4d4d4d4d4d4d`. No ASan in the real plugin and
+no named victim, dereference or command. For nfdump, `bash run-etype.sh`
+from `lab/frontier/nfdump2shell` gives 17/0 in-tree and from a clean archive
+of `cd47299c`: a crossing-written byte flips record 2's element field so the
+live collector accepts it (2 flows vs 1), with bad/safe/fixed controls;
+both fields are wire bytes, so this is a parser decision, not a capability
+gain. For leptonica, `bash lab/frontier/leptonica2shell/run-witness.sh` gives
+37 wrapper PASS / 0 FAIL and `WITNESS REPLAY PASS`, rc 0 in ~82 s, self-
+archiving and rechecking all pins; a plant witness verdict remains UNKNOWN.
+
+For rpm, `real/run-gc-pointer.sh` and `real/run-install-consumer.sh` now
+create an 18-character config symlink because the `RPM_CONFIGDIR` string
+length changes plain-build teardown adjacency (the 88-character checkout
+failed 8/8 and is preserved as a negative). Replay from a clean archive of
+`54d94b6e` with workspace-only symlinks: expect `GC_POINTER_PASS=8
+GC_POINTER_FAIL=0` and `INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0`,
+rc 0. Grade stays rung 4 author-DEMONSTRATED with that layout limitation;
+independent witness replay is pending.
+
+Every count in this section is an author, operator, independent-replay or
+witness observation as labeled; no generated grade cell moved here.
