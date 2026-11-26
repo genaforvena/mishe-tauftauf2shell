@@ -11206,7 +11206,12 @@ cell moves. Commands and receipts below are the ones the report records.
   `/tmp/w239-pjproject-clean` ran the unmodified wrapper (sha256
   `28added488bf8fd11a1e896b933c28c2f686394d5ceca34fc232c3f994e2335f`) with
   `WITNESS REPLAY PASS`, 29 PASS / 0 FAIL rc 0 and four pins exact; in-tree
-  replay matched. That is an author replay, not a witness verdict.
+  replay matched. Witness W239 (#4716, commit `937f461a`) independently
+  fetched both raw upstream blobs by SHA: full-file and excerpt
+  `sed -n '1208,1228p'` / `'1208,1256p'` hashes match all four pins, and its
+  clean `git archive 814e9392` replay returned `WITNESS REPLAY PASS`, 29
+  PASS / 0 FAIL rc 0. Verdict ESTABLISHED AS LABELED; author wrappers at the
+  fold also returned 29 PASS / 0 FAIL rc 0.
 - **Expected bytes** — the file-supplied `ch.len` drives
   `file_read3(fd, frame->buf, ch.len, ...)` past the release-build no-op
   `pj_assert(frame->size >= ch.len)`. GCC and Clang ASan at `-O0` report
@@ -11222,8 +11227,9 @@ cell moves. Commands and receipts below are the ones the report records.
   a synthetic plain process: no real pjmedia build, crafted AVI, network
   wire, adjacent live object, pointer, command or r5. Window 164 was created
   (165 windows / 165 unique names); route and wake-unit generation are
-  person-reserved, witness replay is UNKNOWN and an independent verdict has
-  not arrived.
+  person-reserved. Witness replay is ESTABLISHED AS LABELED at this staged
+  synthetic-consumer scope, with no grade change and NO r5; detail in the
+  gitignored `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
 
 ## 2026-11-26 02:2xZ — rpm2shell and pjproject2shell admissions
 
@@ -11233,8 +11239,9 @@ cell moves. Commands and receipts below are the ones the report records.
   815a1b0a`, with all four pins and both raw upstream full/excerpt hashes
   exact. `bash lab/frontier/pjproject2shell/run-witness.sh` at HEAD returned
   `TOTAL: 29 PASS / 0 FAIL`, rc 0, `WITNESS REPLAY PASS`; its witness verdict
-  stays UNKNOWN (requested), author clean-archive replay from `814e9392` is
-  recorded in the section above. Both wrappers were unmodified.
+  was UNKNOWN when admitted; W239 later returned ESTABLISHED AS LABELED
+  (commit `937f461a`). Author clean-archive replay from `814e9392` is
+  recorded in the section above. Wrapper was unmodified.
 - **Admission** — the operator admitted both lanes under standing #6 as the
   155th and 156th declared target minds. Windows 163 and 164 were already
   live and were adopted, not duplicated; the registry holds 165 windows /
@@ -11250,3 +11257,129 @@ cell moves. Commands and receipts below are the ones the report records.
   chosen bytes in a synthetic plain readback. No real library build, crafted
   RPM or AVI input, wire path, pointer, command or r5. The real-consumer
   lanes stay with the newly admitted minds.
+
+## 2026-11-26 02:2xZ — ruby2shell production jemalloc consumer identity (bounded negative)
+
+`1604f532` extends `reports/ruby2shell-investigation.md` §"Production-mode
+consumer identity". On pinned Ruby 3.4.12 (`366f5fdc00`), unmodified classic
+Sinatra with `LD_PRELOAD=jemtrace.so:libjemalloc.so.2`:
+
+    JEM_RACK_ENV=production JEM_CLASS=<C> JEM_BT_SIZE=<size> \
+      JEM_BT_DEPTH=24 JEM_WIRE_PORT=<port> \
+      bash lab/repro/ruby2shell-jemalloc-wire.sh attack jemwire-prod<C>[b]
+
+Production changes the adjacent allocations from the dev-mode filters, so
+the first passes with sizes 120/88/528 captured no frames; re-runs with 128
+and 96 give 24-frame stacks. All six attack runs reported `TRIGGER_HTTP=404`,
+`ALIVE_HTTP=404`, `process-alive=YES` and one capa-paired adjacent q0 ending
+in the fixed odd `0x53`; the two safe controls gave zero hits and a live
+process. C=128 identifies an ID method-table key from `hash_table_extend`
+(`id_table.c:198`) under `method_added` (`vm_method.c:1234`), a table
+`rb_id_table_lookup` does consult, but only the key serial changes while
+`val` and q1/q3/q5 keep their pointers. C=96 is a boot-time Prism node;
+C=640's consumer stays UNKNOWN because the 528-byte filter missed the
+`0x270` allocation. A gdb `rb_id2name` serial check resolved `0x1b1` to
+`dump` but returned NULL for the flipped serials; live attach is blocked by
+`ptrace_scope`, so the method identity and dispatch effect stay UNKNOWN.
+Both HTTP requests completed normally, with no changed response, crash or
+command. Raw traces/out/maps are gitignored under
+`lab/build/evidence/jemwire-prod{128,96,640}{,b,ctl}.{trace,out,maps}`.
+Rung 4 (witness-COMPLETE) and the labeled harness-condition rung 5 are
+unchanged; full stock/oracle-free/persistent r5 remains NOT ACHIEVED.
+
+## 2026-11-26 02:3x–02:4xZ — neuvector2shell W240 staged lane and admission
+
+- **Claim and pins** — `reports/frontier-neuvector2shell.md` and
+  `lab/frontier/neuvector2shell/PROVENANCE.md` record CVE-2026-127182 /
+  GHSA-3x2m-c67v-vw77 (GitHub CNA, 2026-11-20, Critical 9.4, CWE-121/787).
+  Advisory affected `>=5.6.0 <5.6.5` and `<5.5.6`, patched 5.5.6/5.6.5/5.7.0;
+  fix `0a1dc965317581d2959ecc3d3d1f9cf87e6e1066` (parent
+  `48ae8b5cac5ec3a7e332e5272e9b3050f44396cb`), cherry-pick of
+  `229a57a06e8c8bab9a019c5790c402837794e4b3`; 5.6 branch carries
+  `c39c38c2812ce6c8cdb4597a6346905b777fdcc2`. Commit-level release
+  boundaries are UNKNOWN beyond the advisory lines. Full-file pins
+  `1fbf0ba4aa731f8a92801002d2fe39141c2a88ea9a96d18507af47ae3303072b`
+  (vulnerable, 731 lines) and
+  `cc9d9c48ea07b015c7254946ab1c630f3aea2ce3a80d0042880b5cedaa284b08` (fixed,
+  751 lines); verbatim excerpts (lines 618-705 / 618-725)
+  `a3f74b69151d28acd5cb80eeb1a79949016598f61e0213272648888bbdcea10f` and
+  `b08af876c7ac71f2f3416b6dc9ee9f0c27816742fc6aea71a4e68bad1431de59`.
+- **Replay** — from `lab/frontier/neuvector2shell`, `bash run-all.sh` prints
+  `TOTAL: 29 PASS / 0 FAIL`, rc 0. `bash run-witness.sh` rehashes the four
+  pins, deletes `out/` and rebuilds every binary; at this fold it returned
+  `REPLAY_PASS=5 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, rc 0. The author's
+  clean `git archive 7bf77c89 lab/frontier/neuvector2shell` into
+  `/tmp/w240-neuvector-clean` ran the unmodified wrapper (sha256
+  `007c507d18f242648d502c456f3797073e09acca7adc0d1547419e5f3d04a072`) with
+  four pins exact and 29 PASS / 0 FAIL; the operator's clean `git archive
+  HEAD` at `a1470d6a` into `/tmp/op-w240-neuvector` matched 29 PASS / 0 FAIL.
+  These are author/operator replays, not an independent witness verdict;
+  witness stays UNKNOWN and was requested at `reports/neuvector2shell-status.md`.
+- **Expected bytes** — GCC and Clang ASan on the verbatim vulnerable body with
+  a 2100-byte pattern of `0x4d` report `stack-buffer-overflow`, `WRITE of size
+  2107`, address at offset 2080 of `dlpsig_buf` (0 bytes past 2048), write
+  frame `dpi_sig_bld pins/dpi-vulnerable.inc:41`. Fixed attack prints
+  `MODE=attack PATLEN=2100 RC=0 SIG_LEN=0`; 8-byte safe input is clean in both
+  bodies with `SIG_LEN=35`. Plain `-fno-stack-protector` gdb
+  `x/16xb &dlpsig_buf[2048]` reads twelve chosen `0x4d` bytes, and
+  `*(void **)$rbp` prints `0x4d4d4d4d4d4d4d4d`; the process then faults and
+  the default stack protector aborts the same input. That negative is
+  preserved; no chosen-address pointer or command.
+- **Regeneration and boundary** — raw logs are gitignored under `out/`;
+  exact commands and hashes in `lab/frontier/neuvector2shell/PROVENANCE.md`.
+  Grade is rung 3 pinned verbatim / rung 4 PARTIAL synthetic chosen bytes,
+  no real enforcer, controller REST/CRD wire, pointer redirection, command
+  or r5. The lane was admitted as the 157th declared mind under standing #6
+  (window 165); route, resolver and wake units stay person-reserved.
+
+## 2026-11-26 02:3xZ — n2n2shell W22 default-PIE negative control
+
+`reports/n2n2shell-live.md` §W22 closes the default-PIE variant of W11's
+wire as a bounded negative. From the repo root,
+`sh lab/frontier/n2n2shell/live/w22_default_pie_wire1700.sh` rebuilds the
+pinned vulnerable tree with clang `-g -O2 -fno-omit-frame-pointer` and no
+`-no-pie`; `readelf -h` must report `Type: DYN` and BuildID
+`d451dcacd037ae046c135c449d7b5839cb09c85f` in-tree. The exact 1738-byte NAK
+(`token_size=1700`, `token+1682 = e8f3420000000000`) supplies `comm =
+0x42f3e8` at `sn_utils.c:2324`. With gdb randomization disabled the PIE image
+is `[0x555555554000,0x555555584000)` and heap
+`[0x555555584000,0x5555555a5000)`; no mapping covers the chosen address, so
+continuation reports SIGSEGV in `process_udp` and a plain process exits
+`rc=139`. A fresh process then forwards a safe 48-byte NAK and stays alive.
+The wrapper asserts pins, binary type, wire bytes, unmapped target, crash
+and safe control: `RESULT 18 PASS / 0 FAIL`, rc 0 in-tree with
+`REPLAY_LOGDIR=/tmp/n2n-w22-out2 PORT_BASE=19900`, and from a clean
+`git archive 963477d8` with `/tmp/n2n-w22-archive-out PORT_BASE=20000`;
+the archive replay's BuildID differs
+(`4870643e662335d117d96c35407bf334aef2f97b`) because debug paths embed the
+source tree, and it also reproduced `rc=139` and the safe forward. Raw logs
+are gitignored under `live/evidence/w22-*.log`. The chosen pointer is still
+consumed under PIE, but W11's survival depended on a fixed non-PIE address;
+no marker, canary/RIP hit, control-flow takeover, command or r5. Author
+experiment only, no witness verdict, no grade change; the complete upstream
+fixed-commit build stays UNKNOWN.
+
+## 2026-11-26 02:3xZ — libsshch2shell W25 wire command into real `system()`
+
+`reports/frontier-libsshch2shell.md` §W25 is additive and unwitnessed; no
+grade or rung-5 cell moved. From `lab/frontier/libsshch2shell`,
+`sh real/run-syswire.sh` compiles the two pinned libssh commits under clang
+ASan with `-DW13_INLINE -DW14_REALSYSTEM -DW16_WIRECMD -DW24_WIRELIST
+-DW25_SYSWIRE` and no library source change. At this fold it scored
+`syswire: 6 PASS / 0 FAIL`, rc 0: vulnerable lane
+`SERVER SYSWIRE armed fn=... cmd=...` reads the callee and command pointer
+from the recycled channel's wire bytes and calls real `system()` without a
+trampoline, creating `evidence-wire-syswire.marker`; fixed lane has no
+wirelist/`SYSWIRE` line or marker, and the invalid-callee lane faults at
+`channels.c:697` with no marker. Three repeats created three more markers,
+probe slot in this run `0x50c00001c480`. The clean-archive receipt
+(commit `d2c2432e`, `/tmp/w25-arch`) rebuilt both pinned ASan libraries and
+returned 6 PASS / 0 FAIL with a different probe-derived slot
+`0x50c00001c3c0`, confirming probed addresses rather than copied logs.
+With all five W25 flags undefined the preprocessed harness is byte-identical
+to pre-W25 HEAD (`clang -E -P`, `cmp` clean). Raw outputs are under
+`real/evidence-sw-*.out` and gitignored `.kept` markers. Ceiling: the callee
+is fork-peer PIE (ASLR-local), the slot is probe-derived under this ASan
+build, the peer is authenticated, the app still frees a remotely closed
+channel in its data callback, and there is no persistent shell or remote
+command service. NOT ESTABLISHED rung 5.

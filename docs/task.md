@@ -11928,10 +11928,13 @@ Doc-ok with no edit: `b401fcbd`/`9a46b9e2` add libsshch2shell W24's
 wire-resident second callback iterator (6 PASS / 0 FAIL, clean `git archive`
 receipt) while the first redirect stays app-owned and the README row's
 authenticated-peer/fake-callback ceiling still holds; `cfd49a4a` records
-open5gs2shell W12's witness-queue deferral with no verdict or grade change;
-`1604f532` names Ruby's jemalloc adjacent consumer without moving a grade.
-Post-fold smoke: both checkers, scoped `git diff --check` and the two
-one-command replays are re-run before the scoped commit.
+open5gs2shell W12's witness-queue deferral with no verdict or grade change.
+`1604f532` is a bounded negative, not a silent doc-ok: its command, geometry,
+flipped-ID-serial evidence and gitignored trace paths are now in
+`docs/reproducibility.md`. Rung 4 and the labeled harness-condition rung 5
+stay unchanged; stock r5 stays NOT ACHIEVED. Post-fold smoke: both checkers,
+scoped `git diff --check` and the two one-command replays were re-run before
+the scoped commit.
 
 ## 2026-11-26 02:17–02:3xZ — rpm2shell (155th) and pjproject2shell (156th) admitted
 
@@ -11953,3 +11956,47 @@ GREEN on named person-owned dispositions, not on clean runs. Grades are
 unchanged: rung 3 pinned verbatim / rung 4 PARTIAL synthetic chosen bytes,
 no real library/consumer, wire, pointer, command or r5. The newly admitted
 minds keep the real-rpm and real-pjproject consumer lanes.
+
+## 2026-11-26 02:34–02:5xZ — W239 witness fold, W240 staged lane, two author negatives
+
+Signal head `23b28829` was one commit past my last fold `d7b3a785`; the
+checkout was at `29e2380c`, eleven commits past the fold, when I started.
+Per unread #4708 the operator left my two uncommitted docs files from the
+last wake to me, so this scoped commit also carries the Ruby production-jemalloc
+ID-table negative and its corrected doc-ok paragraph.
+
+- `937f461a` + `29e2380c`: witness W239 returned ESTABLISHED AS LABELED for
+  pjproject2shell's staged replay, and the operator folded that verdict into
+  the README row. My reproducibility section still called the verdict
+  UNKNOWN; it now carries the independent raw-blob hash checks, clean
+  `git archive 814e9392` result, 29 PASS / 0 FAIL, and the no-grade/no-r5
+  scope. The admission section's stale "verdict stays UNKNOWN" was corrected.
+- `7bf77c89`, `da33019d`, `7e987e46`, `06626700`: neuvector2shell W240 stages
+  `dpi_sig_bld()` with four pins and 29 PASS / 0 FAIL, clean-archive and
+  operator replays; the operator admitted it as the 157th mind and folded the
+  README row. The reproducibility index now carries the advisory range, exact
+  pins, wrapper command, expected ASan/gdb bytes, the stack-protector
+  negative, gitignored log path and the still-UNKNOWN independent verdict.
+- `963477d8`, `a1470d6a`: n2n2shell W22 closes the default-PIE variant of
+  W11's wire as a bounded negative. The chosen pointer is still consumed at
+  `sn_utils.c:2324` but its fixed non-PIE value is unmapped under PIE, so the
+  same wire faults (`rc=139`) and a fresh safe NAK survives; 18 PASS / 0 FAIL
+  in-tree and from a clean `git archive 963477d8`, author-only and unwitnessed.
+- `d2c2432e`, `e713f820`: libsshch2shell W25 puts the command and callback
+  fields on the authenticated wire and calls real `system()` with no
+  trampoline, 6 PASS / 0 FAIL here and from a clean archive with a different
+  slot; fixed and bad-callee controls clean. The README row's blanket
+  "command is still an app-chosen static global" was corrected: W14 uses a
+  static command, W25 does not. W25 remains additive, unwitnessed, ASLR-local
+  and NOT ESTABLISHED rung 5; no cell, grade or mind count moved.
+
+No route, resolver, unit, pin or sync edit; readme-lint stays RED on the
+frozen six-column detector against the live seven-cell README and is
+person-reserved (exact full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`).
+
+Observed at the fold: neuvector and pjproject wrappers each returned
+`REPLAY_PASS=5 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, rc 0; n2n W22 returned
+`RESULT 18 PASS / 0 FAIL`, rc 0 with `plain_supernode_rc=139`; libsshch W25
+returned `syswire: 6 PASS / 0 FAIL`, rc 0. Both checkers are GREEN after the
+edits (154 rows, 29 files), and scoped `git diff --check` is clean.
