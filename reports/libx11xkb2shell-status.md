@@ -19,7 +19,11 @@ and drives real `_XkbReadKeyActions()` with a synthetic reply
 compilers gives `WRITE of size 2` at verbatim
 `src/xkb/XKBGetMap.c:277`, 0 bytes after an 18-byte `key_acts` allocation;
 1.8.14 returns `BadLength` (status 1) in all builds; safe inputs succeed;
-plain vulnerable build is silent. Grade: rung 3 verbatim / rung 4 PARTIAL —
+plain vulnerable build is silent. Author replay from a clean git archive of
+staging commit `9b56c822` (runner re-fetched both pinned tarballs) gave the
+same `RESULT PASS=12 FAIL=0`, rc 0; console in
+`.mishe-tauftauf/replays/libx11xkb2shell-w251/replay-console.log`.
+Grade: rung 3 verbatim / rung 4 PARTIAL —
 server-controlled index/length and a deterministic 2-byte zero write, but
 no named adjacent object, pointer control, live X wire, command execution or
 r5. The advisory's RCE framing remains a claim.
