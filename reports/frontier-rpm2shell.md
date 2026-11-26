@@ -254,6 +254,18 @@ shifts; A/B and the plain/fixed controls remain hard assertions (8 PASS /
 0 FAIL on every replay, 10 PASS when V aligns). The valid-target hit stays
 a lab-layout observation, not an ASLR-stable target.
 
+Clean-archive caveat (2026-11-26 18:48Z): replaying the runners from
+`git archive HEAD` into a long `/tmp` checkout path (with workspace-only
+builds, source tree and config symlinked in) returned `GC_POINTER_PASS=2 /
+FAIL=6` and `INSTALL_CONSUMER_PASS=13 / FAIL=1`: A/B lost `MATCH=1`, and
+plain install aborted in glibc (rc 134) instead of faulting in liblua.
+No clean-archive provisioning defect was found; the runners' heap layout
+depends on checkout path length, so these pointer and plain-fault checks
+must be replayed from the shared worktree path used in the replay request.
+The deterministic ASan evidence (`run-real.sh`, `run-scaled-payload.sh`)
+does not depend on that layout. Grade stays rung 4 author-DEMONSTRATED
+with this limitation attached.
+
 ### Measured ASLR ceiling (2026-11-26 18:04Z)
 
 `bash lab/frontier/rpm2shell/real/run-aslr-ceiling.sh` replays **8 PASS /

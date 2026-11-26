@@ -336,6 +336,15 @@ are unchanged hard assertions. Three consecutive runs returned 8 PASS /
 | `real/gc-pointer/discover.gdb` | `79e947240c48960c83f070338dd9060e8367b922736af553c41ebfe7fb0cf72c` |
 | `real/aslr-window/redirect-bound.md` | `20c5323ac6c97edaff31bf2db99f57004277f141e1b748ea1f655ebcbacbbcec` |
 
+Clean-archive caveat (18:48Z): `git archive HEAD lab/frontier/rpm2shell`
+into `/tmp/rpm2shell-clean-7dIe4e/lab/frontier/rpm2shell`, with workspace
+builds, `src/rpm` and `install-vuln` symlinked in, returned
+`GC_POINTER_PASS=2 FAIL=6` and `INSTALL_CONSUMER_PASS=13 FAIL=1`: A/B lost
+`MATCH=1`, plain install aborted rc 134, V discovered no live object. All
+fixtures and runner bytes were present; the pointer/plain-fault checks are
+checkout-path-layout sensitive. Replay those from the shared worktree path
+(the subject of DM #5729). The ASan WRITE checks are layout-independent.
+
 ## Verification
 
     cd lab/frontier/rpm2shell
