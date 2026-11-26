@@ -9,10 +9,10 @@ ESTABLISHED AS LABELED, no grade change, NO r5. Real-library lane staged
 `ext4_fs_init()` mount path, and `run-victim.sh` 9 PASS / 0 FAIL showing
 image-chosen bytes overwriting an adjacent live `ext4_buf` in the real plain
 build. Grade: **rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the
-lab build, independently replayed as labeled by W273**; the 71473 lanes and
-the 71474 chosen-bit lane (W294) were independently replayed. The new
-named-field / prefix-OR ceiling probe remains author-measured only. No
-chosen-address pointer, no command and no rung 5.
+lab build, independently replayed as labeled by W273**; the 71473 lanes,
+the 71474 chosen-bit lane (W294) and the named-field / prefix-OR ceiling
+probe (W295) were independently replayed as labeled. No chosen-address
+pointer, no command and no rung 5.
 
 ## Claims
 
@@ -230,7 +230,8 @@ untouched or `0xffffffffffffffff`; `bc` ranges from one prefix-masked low
 byte (`0x…dc41`) to all-ones. No chosen address and no benign marker
 execution. Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
 `real/evidence/real-vuln-71474-gdt-layout-summary.out`,
-`real/summarize_gdt_layout.py`. Author-measured; witness replay pending.
+`real/summarize_gdt_layout.py`. Independently replayed as labeled by W295
+from a clean archive; no grade change. Detail below.
 
 ## Grade and tractability
 
@@ -252,11 +253,11 @@ execution. Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
   bit-set loop ORs an image-selected mask (`0x01`..`0xff`) into the low byte
   of the adjacent live `ext4_buf.bc`; the in-bounds `gdt=8` control leaves
   it untouched. W294 confirmed chosen-offset / one-byte-mask control, not
-  chosen-address control. A follow-up author probe shows the same loop
-  reaches 13 named fields of that object, but the byte-level prefix-OR
-  model rules out a chosen address: covered bytes become `0xff`, the
-  boundary byte a low-bit prefix mask, and the `end_write` function pointer
-  only `2^k-1`. That probe is author-only; overall grade and r5 ceiling
+  chosen-address control. A follow-up probe shows the same loop reaches 13
+  named fields of that object (independently replayed as labeled by W295),
+  but the byte-level prefix-OR model rules out a chosen address: covered
+  bytes become `0xff`, the boundary byte a low-bit prefix mask, and the
+  `end_write` function pointer only `2^k-1`. Overall grade and r5 ceiling
   unchanged.
 - **Not rung 5:** no live network target, no benign command side effect and
   no attacker-chosen address; debugger-forced inspection stays rung-4
@@ -310,4 +311,23 @@ scope** — chosen-offset/partially-chosen-value, not chosen-address or
 full-pointer control; no benign marker, dereference-to-chosen-target or
 command; NO r5; overall grade unchanged. Detail:
 `.mishe-tauftauf/artifacts/witness-w294-lwext4/detail.md`. This replay
-predates the named-field probe above, which remains author-only.
+predates the named-field probe below, which W295 replayed as labeled.
+
+## Witness W295 (independent replay, 2026-11-26 22:19Z)
+
+From `git archive 8b608414` with staged evidence deleted, the unmodified
+`replay-clean.sh` returned `REPLAY_RC=0` on all five runners: `31 PASS /
+0 FAIL`, `REAL 17/0`, `VICTIM 9/0`, `GDT 11/0`, `LAYOUT_MATCHED=9/9`,
+`NO_CHOSEN_PTR_MATCHED=8/8`, `LAYOUT 5/0`. Fresh runner SHA-256:
+`fd9e7d3e…`, `e32862ed…`, `80587918…`, `c8efbeea…`, `a85e1a82…`; pins
+`890484c7`/`b9c842f1`. All nine GDB sections held `DELTA=4112`, `SIZEOF=144`,
+all 144 bytes matching the prefix-OR model with `bad_bytes=0`; control
+gdt=8 touched no field, while gdt=33215..34000 reached 7/12/13 of the 13
+named fields. `end_write` went from NULL only to `0x1`/`0xff`/all-ones and
+fully covered pointers became `0xffffffffffffffff` — no chosen address, no
+dereference, no marker or command. Source-bound check: vulnerable
+`src/ext4_fs.c:332-333` bare bit loop with bitwise OR at
+`include/ext4_bitmap.h:52-55`, fixed `:351-355` EIO guard. Verdict:
+**ESTABLISHED AS LABELED at exact scope**, no counterexample, no grade
+change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w295-lwext4-layout/detail.md`.

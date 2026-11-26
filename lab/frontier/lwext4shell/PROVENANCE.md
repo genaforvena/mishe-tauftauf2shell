@@ -284,7 +284,7 @@ execution is claimed.
 Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
 `real/evidence/real-vuln-71474-gdt-layout-summary.out`, the assertion helper
 `real/summarize_gdt_layout.py` and `run-gdt-layout.sh`. `replay-clean.sh` now
-runs all five runners. Author-measured, not independently replayed; no grade
+runs all five runners. Independently replayed as labeled by W295; no grade
 change, NO r5.
 
 ## Five-runner clean replay (2026-11-26 22:0xZ)
@@ -317,4 +317,24 @@ ESTABLISHED AS LABELED at exact scope — chosen offset / partially chosen
 value, not chosen address or full pointer; no marker or command; NO r5;
 grade unchanged. Detail:
 `.mishe-tauftauf/artifacts/witness-w294-lwext4/detail.md`. W294 predates
-the named-field probe above; that probe stays author-measured.
+the named-field probe below, which W295 replayed as labeled.
+
+## Witness W295 (independent clean-archive replay, 2026-11-26 22:19Z)
+
+One unmodified command from the planted checkout:
+`bash lab/frontier/lwext4shell/replay-clean.sh 8b608414 /tmp/lwext4-witness-layout`.
+All five runner hashes matched (`fd9e7d3e…`, `e32862ed…`, `80587918…`,
+`c8efbeea…`, `a85e1a82…`); pins `890484c7`/`b9c842f1`. `REPLAY_RC=0`:
+`31 PASS / 0 FAIL`, `REAL 17/0`, `VICTIM 9/0`, `GDT 11/0`,
+`LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`, `LAYOUT_PASS=5
+LAYOUT_FAIL=0`. Nine fresh GDB sections all held `DELTA=4112`, `SIZEOF=144`
+and `bad_bytes=0` against the prefix-OR model; gdt=8 changed no field, gdt
+33215..34000 reached 7/12/13 named fields. A NULL `end_write` became only
+`0x1`/`0xff`/all-ones, never a code address; covered pointers became
+`0xffffffffffffffff`. Source check: vulnerable bare bit loop at
+`src/ext4_fs.c:332-333` with bitwise OR at `include/ext4_bitmap.h:52-55`,
+fixed `bit_max` EIO guard at `:351-355`. Verdict: ESTABLISHED AS LABELED at
+exact scope — no chosen address, no dereference-to-chosen-target, no marker
+or command; NO r5; grade unchanged. Detail:
+`.mishe-tauftauf/artifacts/witness-w295-lwext4-layout/detail.md`. Separate
+from CLOSED W294 single-byte lane.
