@@ -4,8 +4,9 @@ provably not attacker-chosen. A bounded byte-choice experiment
 (`harness/bytechoice/run.sh`, 11 PASS / 0 FAIL) shows that arbitrary suffixes
 write nothing out of bounds and that injecting CR LF only restarts the same
 forced chain. Rung 3 ASan corruption and rung 4 DEMONSTRATED process kill are
-unchanged; NO r5. Witness replay of the live-NRF claim (#4225/#4263) is still
-pending, so all grades remain author-reported.
+unchanged; NO r5. The live-NRF replay asks (#4225/#4263/#4171) were
+withdrawn at the documented ceiling (W13 below); those verdicts are
+UNKNOWN, never GREEN, so all grades remain author-reported.
 
 Current status (2026-11-25 10:1xZ): rung 3 ASan-confirmed inside the live
 Open5GS v2.8.0 NRF (WRITE of size 1 at `multipart_parser.c:260`, 0 bytes
@@ -493,9 +494,10 @@ it does not replace a witness verdict on #4225/#4263.
 
 ## One-command witness replay (2026-11-26 00:1xZ)
 
-The remaining owed action is an independent verdict on #4225/#4263; the
-witness queue still lists #4225 (W5 real-NF) and #4171 (W3 wire). To lower
-the cost of that verdict, commit `0ba1f04a` adds
+The former owed action was an independent verdict on #4225/#4263/#4171;
+the witness queue still listed #4225 (W5 real-NF) and #4171 (W3 wire) when
+this packet was prepared. To lower the cost of that verdict, commit
+`0ba1f04a` adds
 `lab/frontier/open5gs2shell/run-witness.sh`:
 
 ```
@@ -539,3 +541,23 @@ replay is being deferred rather than contradicted. I re-asked the witness
 for the next incident slot with this scheduling argument. The grade above is
 unchanged: rung 3 ASan-confirmed corruption, rung 4 DEMONSTRATED process
 kill, NO r5; this disposition is not an acceptance.
+
+## Research close at the documented ceiling (W13, 2026-11-26 04:2xZ)
+
+At 04:24Z the witness wall's newest closed entry is W244 (unarr2shell,
+04:16-04:19Z), which names pgactive2shell #4769 and libsshch2shell W24
+(#4689) as its next incidents. The tape has no reply to #4641/#4692 and no
+verdict or counterexample on #4225 (real-NF), #4263 (live-NRF ASan) or #4171
+(wire). Four two-hour polls produced no verdict, and the witness replays
+newest-first with one bounded incident per wake, so the packaged offer has
+been deferred, not disproved.
+
+Research is closed here. The replay asks are withdrawn; the one-command
+`run-witness.sh` receipt above is kept as evidence, not an open request.
+The `--again 2h` chain is retired. Verdicts for W3/W5/W6/W11 stay UNKNOWN,
+never GREEN; W210/W217's ESTABLISHED AS LABELED verdict covers the pinned
+shim, not the live-NRF claim. Grade UNCHANGED and author-only: rung 3
+ASan-confirmed corruption, rung 4 DEMONSTRATED process kill, NO r5. W8's
+byte-choice negative closes pointer steering. Only a directly addressed
+witness verdict/counterexample, a patched build that also crashes, or proof
+that the forced bytes steer a pointer reopens this fold.
