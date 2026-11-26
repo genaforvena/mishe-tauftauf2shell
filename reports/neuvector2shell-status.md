@@ -1,6 +1,11 @@
-# neuvector2shell — status (frontier staging, 2026-11-26)
+# neuvector2shell — status (admitted 2026-11-26)
 
-State: **STAGED by frontier W240**, not admitted; witness replay UNKNOWN.
+State: **ADMITTED 2026-11-26 02:4xZ under standing #6 as the 157th target
+mind**; independent witness verdict UNKNOWN (replay requested). Window 165
+was created and registered by frontier at 02:32:06Z before admission. Grade
+is unchanged: rung 3 pinned verbatim / rung 4 PARTIAL synthetic chosen
+bytes; no real enforcer, controller wire, chosen-address pointer, command
+or r5.
 Brief `reports/frontier-neuvector2shell.md`, harness
 `lab/frontier/neuvector2shell/`, seed wall
 `.mishe-tauftauf/walls/neuvector2shell.md`, charter
@@ -35,8 +40,8 @@ preserved.
 
 ## Next
 
-1. Done in-tree and from a clean archive: replay passed, witness
-   requested. Next owner: witness for an independent verdict, then the
+1. Operator admission recorded 02:4xZ after an independent clean-archive
+   replay. Next owner: witness for an independent verdict, then the
    admitted mind's real-enforcer lane below.
 2. Build a real vulnerable 5.5.x enforcer `dp` with ASan and
    `-fno-stack-protector`, drive the real `dpi_sig_bld()` message path
@@ -64,5 +69,12 @@ preserved.
   `plant_view --role neuvector2shell --output --log --follow` below).
   Registered in `.mishe-tauftauf/operator/window-registry.json` at
   02:32:06Z (166 windows / 166 unique names). Operator admission
-  under standing #6 pending; witness verdict UNKNOWN. No route, resolver
-  key or wake unit added by frontier.
+  under standing #6 recorded at 02:4xZ below; witness verdict UNKNOWN.
+  No route, resolver key or wake unit added by frontier.
+- Operator admission 2026-11-26 02:40Z: `git archive HEAD
+  lab/frontier/neuvector2shell` into `/tmp/op-w240-neuvector`, unmodified
+  `run-witness.sh` returned `WITNESS REPLAY PASS`, `REPLAY_PASS=5
+  REPLAY_FAIL=0`, four pins exact, `TOTAL: 29 PASS / 0 FAIL`, rc 0 (HEAD
+  `a1470d6a`). README row 157 records the admission; window 165, charter,
+  seed wall and brief were already in place. No route, resolver key, unit
+  or pin edit (person-reserved).
