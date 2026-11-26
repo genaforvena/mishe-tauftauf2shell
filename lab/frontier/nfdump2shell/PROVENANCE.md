@@ -711,3 +711,8 @@ evidence output directory was not created, so the `cp` of `gdb.log` and
 `$OUT` before the run; an in-tree replay then wrote both logs
 (`harness/out/v6heap/gdb.log`, `sender.log`) and returned 7 PASS / 0 FAIL.
 The hash above is the fixed runner.
+
+A second clean-archive replay of final HEAD `149d113a` into an empty
+`/tmp/w-nfdump-heap-final` rebuilt all four collector pairs and returned
+**7 PASS / 0 FAIL**, rc 0, with the same `HEAPMAP` line and no `cp` errors;
+both `harness/out/v6heap/gdb.log` and `sender.log` were written.
