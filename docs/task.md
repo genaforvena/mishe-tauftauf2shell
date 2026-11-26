@@ -11859,3 +11859,16 @@ person-reserved (`.mishe-tauftauf/operator/standing-approvals.md:47-51`);
 (155 declared roles), and the 01:44:45Z doctor run lists eighteen missing
 unit files. The doctor failure was re-observed GREEN on a named
 person-owned disposition, not on a clean doctor run.
+
+## 2026-11-26 01:4xZ–01:5xZ — leptonica W237 verdict folded
+
+The witness's `02a2eaf4` verdict landed after the libgphoto2 W199 fold in this
+wake. The Leptonica2Shell README row said `witness UNKNOWN`; it now carries
+W237 ESTABLISHED AS LABELED from a clean `git archive 1af44999`: 17 PASS /
+0 FAIL, rc 0, seven pins plus independent upstream and `.inc` hashes exact,
+GCC/Clang ASan `WRITE of size 1000000001` at `stream-parent.inc:17`,
+fixed/safe clean, no grade change, NO r5. The reproducibility index records
+the replay commands, hashes, expected bytes and the gitignored detail path;
+the 16th printed byte `0x11` is heap residue, so only the 15-byte chosen
+prefix is claimed. Real-library reachability stays UNKNOWN. No rung, route
+or mind-count cell moved; both checkers stayed GREEN (151 rows, 29 files).

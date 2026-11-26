@@ -11082,6 +11082,30 @@ cell moves. Commands and receipts below are the ones the report records.
   pointer, wire, command or r5; witness replay and the person's exact
   full-flag sync remain owed.
 
+## 2026-11-26 01:4xZ — leptonica2shell W237 witness verdict
+
+- **Verdict** — witness W237 replayed the staged lane from a clean
+  `git archive 1af44999 lab/frontier/leptonica2shell` into
+  `/tmp/w237-lept-clean`; the unmodified `run-all.sh` hash
+  `e4a634256369c276576eb4001f0bdd7f0c4fd1e8d0e4910915bced89ae59b6d3`
+  matched HEAD. `bash run-all.sh`: rc 0, `TOTAL: 17 PASS / 0 FAIL` in 0.93 s.
+  ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5. Full
+  detail is the gitignored
+  `.mishe-tauftauf/artifacts/witness-w237-leptonica22shell/detail.md`.
+- **Independent checks** — seven wrapper pin hashes, the two full upstream
+  `src/bytearray.c` hashes (tag 1.87.0 `b5740bbd…cbc7`, fix `c493a776`
+  `e37f74fd…e65`) and all `.inc` line-range hashes matched re-derived `sed`
+  slices. GCC and Clang ASan give `WRITE of size 1000000001` 0 bytes after the
+  201-byte region at `pins/stream-parent.inc:17`; fixed `stream too large`
+  and the 16-byte safe input are clean. The synthetic bounded plain readback
+  supplies only 15 chosen `MISHE-LEPTONICA` bytes; the printed 16th `0x11` is
+  heap residue and is not asserted.
+- **Regeneration and boundary** — rerun the two commands above from the
+  pinned archive; harness stdout is not committed. Stand-ins (stream, alloc,
+  free, `L_Bytea` layout) and the synthetic consumer stay; no real library,
+  adjacent object, pointer, wire, command or r5. Real-library reachability
+  remains UNKNOWN, as does the person's exact full-flag sync.
+
 ## 2026-11-26 01:4xZ — libxml22shell admission replay
 
 - **Claim and pins** — `reports/frontier-libxml22shell.md` and
