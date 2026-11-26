@@ -21,6 +21,9 @@ W13 adds an unwitnessed no-app-allocated-callbacks lane (6 PASS / 0 FAIL):
 the fake callback's size, userdata and callee come from wire bytes in the
 recycled channel, with only one app-owned iterator node remaining; no grade
 change.
+W24 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) in which the second callback
+iterator and callbacks structure are wire bytes in the recycled channel; one
+app redirect of the in-flight iterator's `next` remains. No grade change.
 W14 adds an unwitnessed plain lane (6 PASS / 0 FAIL) in which the indirect call
 from `channel_rcv_data()` targets real libc `system()` with a wire-chosen
 `channel->session` argument, so no harness trampoline is in the path; the
@@ -176,6 +179,60 @@ No external system was probed or scanned.
 
 Disposition: thread (1) stays open with no provisioned consumer; the W9/W18
 negative stands. No harness change, no replay, no witness result.
+
+## W24: wire-resident callback iterator (2026-11-26 02:05Z)
+
+Additive and unwitnessed; no claim or grade change. `real/run-wirelist.sh`
+builds the two pinned commits under clang ASan (W16's `build-asan` /
+`build-fixed`, no library source change) and compiles `real_wire.c` with
+`-DW13_INLINE -DW24_WIRELIST`; loopback only. Result: **6 PASS / 0 FAIL**,
+rc 0. W13 left one app-owned 16-byte callback iterator node; here the second
+iterator and the callbacks structure are bytes in the recycled channel. The
+24-byte callbacks struct stays at wire offsets 72-95 (`size=24`, userdata,
+callee), and the second iterator occupies offsets 96-111 (`next=0` at +96,
+`data` = probed slot + 72 at +104). After the in-callback free and reclaim,
+the only app action on the callback chain is redirecting the already-running
+iterator's `next` to `groom_ptr + 96` — the loop then advances into the
+wire-resident node and calls the wire-chosen callee.
+
+Vulnerable evidence (`real/evidence-wl-vuln-wirelist.out`):
+`CLIENT wirelist cbs=0x50c00001c4c8 next=0x0`,
+`SERVER wirelist it=0x502000006f70 next=0x50c00001c4e0 data=0x50c00001c4c8`,
+`SERVER EXEC trampoline cmd=touch evidence-wire-vuln-groom-exec.marker`,
+`SERVER EXEC rc=0`, `SERVER done data_packets=2`,
+`SERVER target_after=0x41414141414141c1`, `CLIENT rc=0 SERVER status=0x0`,
+no ASan report; the marker was created and kept as
+`real/evidence-wl-sideeffect.kept`. Three repeats
+(`real/evidence-wl-vuln-repeat{1,2,3}.out`) gave the same call and chosen
+write with distinct ASLR-local code addresses; markers are
+`real/evidence-wl-repeat{1,2,3}.kept`. Fixed lane
+(`real/evidence-wl-fixed-wirelist.out`): no data #2, no wirelist line, no
+call, no file. Invalid-callee control
+(`real/evidence-wl-vuln-wirelist-bad.out`): ASan SEGV at the indirect call,
+no `SERVER done`, no file.
+
+Preserved negatives, not retried into existence. (1) The same lane in a plain
+Release build (`real/evidence-wl-plain-negative.out`) failed 2 PASS / 4 FAIL:
+the probe slot `0x5b697d4d5ac0` differed from the run's `0x5c6130435ac0`, so
+the wire pointer landed on the wrong fields; glibc heap bases vary per
+launch. (2) With `next`/`data` written in struct order
+(`real/evidence-wl-asan-swapped-negative.out`), `data=(nil)` and no call;
+the iterator layout is `next` first, `data` second. (3) ASan reclaim with
+`malloc(sizeof(struct ssh_iterator))` for both freed objects
+(`real/evidence-wl-asan-size-negative.out`) could not recover the 24-byte
+`ssh_buffer_struct` from the 16-byte size class and faulted at
+`ssh_buffer_pass_bytes`; W24 allocates 24 bytes for the buffer slot. (4)
+Setting the first iterator's `next` to NULL stops the loop before its second
+step (transcript-only, same stop W13 recorded at offset 72).
+
+With `W24_WIRELIST` undefined the preprocessed harness is byte-identical to
+pre-W24 HEAD (`clang -E -P`, `cmp` clean); an ASan compile with the flag
+defined succeeds. Ceiling unchanged: the app still frees a remotely closed
+channel inside its data callback, reclaims the freed objects, uses a probed
+ASan slot and a forked-peer callee/trampoline with an app-owned static
+command, and the peer is authenticated (PR:L). The recycled slot and the
+first iterator redirect remain lab conditions. No persistent shell or remote
+command service. NOT ESTABLISHED rung 5; additive and unwitnessed.
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.

@@ -24,3 +24,5 @@ real/inline-run/
 real/rs-run/
 real/real_wire-wc-*
 real/wc-run/
+real/real_wire-wl-*
+real/wirelist-run/
