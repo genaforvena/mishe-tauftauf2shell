@@ -2,3 +2,5 @@ build/
 unarr-1.1.0/
 src-locally-fixed/
 evidence-replay/
+rung4/*.so
+rung4/*.out

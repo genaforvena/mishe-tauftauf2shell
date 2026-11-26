@@ -27,4 +27,32 @@ replace the synthetic +1-byte control; check for a real network-boundary
 caller of the USTAR-prefix path. Independent witness verdict #4834
 (2026-11-26 ~04:2xZ): **ESTABLISHED AS LABELED** after replay in-tree and from
 clean `git archive 925a3bcf`, 10/0 outer and 7/0 inner; no contradiction, no
+
 grade change, no r5. Detail: `.mishe-tauftauf/artifacts/witness-w244-unarr2shell/detail.md`.
+
+## Negative result (2026-11-26 ~14:05Z): adjacent-live-object rung-4 path is structurally dead on this host
+
+Lane 1 of the admitted next list is closed by measurement, not by assumption.
+`bash lab/frontier/unarr2shell/rung4/run-consumer-probe.sh` → **5 PASS / 0
+FAIL, rc 0**. It builds the verbatim v1.1.0 sink without ASan so the real
+glibc 2.39 x86-64 allocator is in play, breaks at `parse-tar.c:254` (the byte
+is already written) and measures `malloc_usable_size(prefixed) == 264`,
+chunk size `0x111` (272 bytes), `prefixed[257] == 0x00`, and the next
+chunk's size field at `prefixed+264` unchanged. An LD_PRELOAD `strcat`
+interposer allocates a live 64-byte 0x5a canary immediately after `prefixed`
+(at `prefixed+272`) *before* the overflowing `strcat`, then checks all 64
+bytes: `canary_corrupted=0`. Evidence and replay:
+`lab/frontier/unarr2shell/rung4/evidence.md`, `gdb.out`, `canary.out`.
+
+Why this closes the lane: glibc `request2size(257)` rounds up to a 272-byte
+chunk whose usable area is 264 bytes, so the code-determined NUL at offset
+257 lands in the current chunk's borrowed-`prev_size` slack, 7 bytes before
+the next chunk's size field and 15 bytes before the next live object's first
+byte. Any glibc chunk that can satisfy a 257-byte request has usable size at
+least 264, so no allocator placement can put a live object at `prefixed+257`.
+This is the same class of structural consumer kill recorded for the sibling
+nginx2root plant: grooming cannot help a consumer whose write lands in
+allocator slack. **Grade unchanged: rung 3 verbatim / rung 4 PARTIAL fixed
+NUL; no pointer control, no chosen byte, no command, no r5.** Lanes 2
+(genuine upstream fix) and 3 (wire caller) remain UNKNOWN, not attempted
+this wake.

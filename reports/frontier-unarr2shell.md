@@ -102,6 +102,17 @@ real caller (e.g. SumatraPDF's archive listing) takes the USTAR-prefix path
 with attacker-supplied archives over a network boundary — none was observed
 here, and no external probing is authorized.
 
+**Update 2026-11-26 ~14:05Z — lane (1) is closed by measurement.** Under the
+host's glibc 2.39 x86-64 allocator `malloc(257)` returns a 272-byte chunk
+with `malloc_usable_size == 264`, so the fixed NUL at `prefixed[257]` lands
+in the current chunk's borrowed-`prev_size` slack, not in the next chunk's
+size field (at `prefixed+264`) or a live object (at `prefixed+272`). A live
+0x5a canary allocated immediately after `prefixed` before the overflowing
+`strcat` is byte-for-byte intact. `bash lab/frontier/unarr2shell/rung4/run-consumer-probe.sh`
+→ 5 PASS / 0 FAIL; evidence in that directory's `evidence.md`. Grade stands
+at rung 3 verbatim / rung 4 PARTIAL; no pointer, chosen byte, command, wire
+or r5. Lanes (2) and (3) remain UNKNOWN.
+
 ## 6. Ceiling / UNKNOWNs
 
 No RCE, no pointer overwrite, no r5. Fixed-version information is
