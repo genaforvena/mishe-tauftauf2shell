@@ -302,3 +302,21 @@ configuration; intermediate tags are source-bound only. Same mechanism,
 caller shape and grade: rungs 1–4, NO r5, no wire reach. Full hashes, build
 flags and frame line numbers are in `PROVENANCE.md` and
 `reports/awslc2shell-status.md`.
+
+## FIPS-mode build of the FIPS-labeled snapshots (W225, 2026-11-26)
+
+W224 left one explicit limit: the FIPS-labeled snapshots were built in
+default (non-FIPS-mode) configuration. FIPS 3.3.0 and patched FIPS 3.6.0
+were now rebuilt with `-DFIPS=1 -DASAN=1` under Clang, no-ASM, and verified
+to carry both `-DBORINGSSL_FIPS` and ASan instrumentation in the compiled
+library. FIPS 3.3.0 in FIPS mode reports `WRITE of size 16`,
+`0 bytes after 31-byte region`, in `EVP_DecryptUpdate (cipher.c:460)` for
+CBC and through `aes_nohw_decrypt (:1172)` for ECB; `byte2` prints
+`byte31=0x48 ... CHOSEN_BYTE_PRESENT`. FIPS 3.6.0 in FIPS mode is ASan-clean
+and leaves `byte31=0xab`. `replay-fips-mode.sh` gives `25 PASS / 0 FAIL`,
+rc 0, in-tree and from a clean archive; all seven earlier suites still pass.
+
+Limit: ASan disables the FIPS integrity check upstream, so this is not a
+CMVP boundary claim; still the minimal harness, no real caller, no wire and
+no rung change (rungs 1-4, NO r5). This is an author-side receipt, not a
+witness verdict. Exact flags, hashes and frames are in `PROVENANCE.md`.

@@ -7,7 +7,8 @@ Admitted 2026-11-24 10:2xZ under standing #6 as the 131st route. Claim:
 byte past a documented-minimum output buffer when decryption is split into
 two or more `EVP_DecryptUpdate` calls. Fixed in 5.7.0. Vendor-listed 4.x and
 FIPS 2.x/3.x ranges were checked in W224 below (source pattern plus ASan
-runtime on one representative per range). The advisory's network-reachability
+runtime on one representative per range); FIPS 3.3.0 and 3.6.0 were rebuilt
+in real FIPS mode in W225 below. The advisory's network-reachability
 prose and any RCE claim remain claims in this lab.
 
 ## Admission evidence
@@ -540,3 +541,35 @@ module-boundary claim. Intermediate tags in the ranges are source-bound by
 the shared code pattern, not individually built. The mechanism, caller shape
 and grade are unchanged: rungs 1–4, NO r5; no real application, wire path or
 command execution. Send any independent replay to `witness`.
+
+## Real FIPS-mode build (W225, 2026-11-26T03:3xZ)
+
+The W224 limits left the FIPS-labeled snapshots built only in default
+configuration. Both FIPS 3.3.0 (vulnerable) and FIPS 3.6.0 (patched) were
+configured with `-DFIPS=1 -DASAN=1` under Clang 18.1.3 with `OPENSSL_NO_ASM`;
+the GCC-only `-Wformat-signedness` under `-Werror` needed
+`-Wno-error=unknown-warning-option` for Clang. Mode was verified from
+`CMakeCache.txt` (`FIPS:UNINITIALIZED=1`, `ASAN:UNINITIALIZED=1`) and from
+`crypto/CMakeFiles/crypto_objects.dir/flags.make` (`-DBORINGSSL_FIPS` in
+`C_DEFINES`, `-fsanitize=address` in `C_FLAGS`).
+
+The existing `harness.c` was compiled against each FIPS-mode library.
+FIPS 3.3.0 `asan` rc 1: `WRITE of size 16`, `0 bytes after 31-byte region`,
+through `aes_nohw_uncompact_block (aes_nohw.c:388)` ->
+`aes_nohw_from_batch (:511)` -> `aes_nohw_cbc_encrypt (:1273)` ->
+`EVP_DecryptUpdate (cipher.c:460)`; `asan-ecb` through
+`aes_nohw_decrypt (:1172)`; `byte2` `byte31=0x48 chosen=0x48
+CHOSEN_BYTE_PRESENT`. FIPS 3.6.0 `asan` rc 0 with no ASan report and
+`byte31=0xab chosen=0x48 CHOSEN_BYTE_ABSENT`.
+
+`sh lab/frontier/awslc2shell/replay-fips-mode.sh` (`25 PASS / 0 FAIL`, rc 0)
+rechecks both tarball and `cipher.c` hashes, the mode flags and the outcomes;
+it passed in-tree and from a clean `git archive HEAD` extraction with
+`out-of-tree/versions` symlinked. `replay-witness.sh` still reports
+`REPLAY_AWSLC_OK` with all seven suites at 14 / 31 / 10 / 16 / 15 / 11 /
+27 PASS, 0 FAIL. Author-side receipts, not witness verdicts.
+
+Limits: ASan disables the FIPS integrity check upstream, so no CMVP
+module-boundary claim. Still a minimal harness with no real caller, no wire
+input and no command execution; grade remains rungs 1-4, NO r5. Send any
+independent replay to `witness`.

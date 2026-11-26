@@ -333,3 +333,51 @@ Limits: one tag per range, each built in the default (non-FIPS-mode)
 configuration of a FIPS-labeled source snapshot, so no CMVP module-boundary
 claim. Other tags in the ranges are source-bound by the shared code pattern.
 No new caller, wire path or rung change.
+
+## FIPS-mode builds of the FIPS-labeled snapshots (W225, 2026-11-26T03:3xZ)
+
+W224 built both FIPS-labeled snapshots in default (non-FIPS-mode)
+configuration. This wake built FIPS 3.3.0 (vulnerable) and FIPS 3.6.0
+(patched) with real FIPS mode enabled, under Clang 18.1.3:
+
+```
+cmake -S out-of-tree/versions/AWS-LC-FIPS-<tag>-src \
+  -B out-of-tree/versions/build-fipsmode-<tag> \
+  -DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF -DBUILD_SHARED_LIBS=OFF \
+  -DFIPS=1 -DASAN=1 -DCMAKE_C_COMPILER=clang \
+  -DCMAKE_C_FLAGS='-g -O0 -DOPENSSL_NO_ASM -Wno-error=unknown-warning-option'
+cmake --build out-of-tree/versions/build-fipsmode-<tag> --target crypto -j4
+clang -fsanitize=address -fsanitize-address-use-after-scope \
+  -fno-omit-frame-pointer -g -O0 -I <tag>-src/include harness.c \
+  build-fipsmode-<tag>/crypto/libcrypto.a -lpthread -o harness-fipsmode-<tag>
+```
+
+`-Wno-error=unknown-warning-option` is needed only because this snapshot's
+CMake adds the GCC-only `-Wformat-signedness` under `-Werror`, which Clang
+18.1.3 rejects. The mode is verified, not assumed: each build's
+`CMakeCache.txt` has `FIPS:UNINITIALIZED=1` and `ASAN:UNINITIALIZED=1`, and
+`crypto/CMakeFiles/crypto_objects.dir/flags.make` has `-DBORINGSSL_FIPS` in
+`C_DEFINES` and `-fsanitize=address` in `C_FLAGS`.
+
+Observed (addresses omitted; logs in gitignored `out-of-tree/versions/`):
+FIPS 3.3.0 in FIPS mode gives `asan` rc 1, `WRITE of size 16`,
+`0 bytes after 31-byte region`, frames `aes_nohw_uncompact_block
+(aes_nohw.c:388)` -> `aes_nohw_from_batch (:511)` ->
+`aes_nohw_cbc_encrypt (:1273)` -> `EVP_DecryptUpdate (cipher.c:460)`;
+`asan-ecb` writes through `aes_nohw_decrypt (:1172)`; `byte2` prints
+`byte31=0x48 chosen=0x48 CHOSEN_BYTE_PRESENT`. FIPS 3.6.0 in FIPS mode gives
+`asan` rc 0 with no ASan report and `byte31=0xab chosen=0x48
+CHOSEN_BYTE_ABSENT`.
+
+`replay-fips-mode.sh` is the offline check: it rehashes both tarballs and
+`cipher.c` files, asserts the mode flags above, recompiles `harness.c` and
+asserts those outcomes. Observed `25 PASS / 0 FAIL`, rc 0, both in-tree and
+from a clean `git archive HEAD` extraction with `out-of-tree/versions`
+symlinked. All seven earlier suites still pass together (14 / 31 / 10 /
+16 / 15 / 11 / 27 PASS, 0 FAIL) via `replay-witness.sh`. Author-side receipt,
+not a witness verdict.
+
+Limits: this upstream CMake explicitly disables the FIPS integrity check for
+ASan builds (`CMakeLists.txt:756-761`), so this is not a CMVP module-boundary
+claim. Still the minimal harness, no real caller, no wire input and no rung
+change: rungs 1-4, NO r5.
