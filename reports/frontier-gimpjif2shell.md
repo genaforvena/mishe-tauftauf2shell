@@ -305,14 +305,18 @@ without backtrace instrumentation.
   is no chosen address, dereference of a chosen pointer or command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
-Next experiment: obtain a fixed-plugin control. The AppImage bundles
-`gimp-3.0.pc`, `gegl-0.4.pc` and the GIMP 3.2.8 headers, so
-`src/file-gif-load-fixed.c` can be built against them (a local `config.h`
-and `stdplugins-intl.h` shim are needed) and swapped into the extracted
-plugin directory; the vulnerable plugin and the pinned fixed harness remain
-controls. W247 has bounded the stall to repeated ~32 MiB allocations after
-the overflowed region was freed; further timeouts without a memory guard
-are not useful. The named-live-victim gap and the no-pointer/no-command
+Next experiment: obtain a fixed-plugin control from a matching GIMP 3.2
+build toolchain or a published fixed AppImage. Building against the
+AppImage's bundled `gimp-3.0.pc` / headers was attempted this wake: the
+pinned fix, pinned vulnerable source and authentic 3.2.8 source all
+compiled warning-free with local header shims but died with
+`*** stack smashing detected ***` during plugin startup/query; both the
+advisory and safe files then failed with `Unknown file type`. The cause is
+a runtime/linker incompatibility with the bundled libraries, UNKNOWN in
+detail; the fix hunk is not implicated (all three failed identically).
+W247 bounds the stall to repeated ~32 MiB allocations after the
+overflowed region was freed; further timeouts without a memory guard
+are not useful. The named-live-victim gap and no-pointer/no-command
 ceiling remain; no rung 5 without a benign command side effect on a live
 target.
 

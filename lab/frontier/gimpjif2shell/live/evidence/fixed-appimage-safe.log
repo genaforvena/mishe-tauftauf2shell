@@ -1,0 +1,28 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixed-appdir
+*** stack smashing detected ***: terminated
+/tmp/gimpjif-fixed-appdir/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+GLib-GIO-Message: 17:56:55.508: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixed-appdir/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:56:55.508: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 17:56:55.683: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixed-appdir/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:56:55.683: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 17:56:55.683: Mapped file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.683: Mapped file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.684: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.684: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.685: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.685: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.685: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.686: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.689: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.692: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 17:56:55.692: Opened file '/tmp/gimpjif-fixed-appdir/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed: Unknown file type 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/realglib/evidence/safe.jif" "safe.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-fixed-appdir/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-fixed-appdir/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

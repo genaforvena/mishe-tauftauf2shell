@@ -376,3 +376,33 @@ killed by memory pressure before inflate
 the committed shim is the executed version without backtrace code.
 Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL; no named live
 victim in the plugin, no chosen address, no dereference, no command, no r5.
+
+## W248 fixed-plugin build attempt (2026-11-26, 17:38Z wake) — FAILED, negative
+
+The AppImage bundles `gimp-3.0.pc`, `gegl-0.4.pc` and GIMP 3.2.8 headers,
+so a fixed-plugin control was attempted. Minimal local `config.h` and
+`libgimp/stdplugins-intl.h` shims (not committed: they did not produce a
+working plugin) let `src/file-gif-load-fixed.c`, the pinned vulnerable
+source and the authentic 3.2.8 source
+(`https://gitlab.gnome.org/GNOME/gimp/-/raw/GIMP_3_2_8/plug-ins/common/file-gif-load.c`,
+SHA-256 `a016e3c1505fb7b9a68b77e27d474388ce7c30fcb223204e779f0a5de41fc159`,
+1646 lines) compile warning-free with `-Wall` against
+`pkg-config gimp-3.0` plus `-lz`.
+
+All three binaries, and the later fixed binary swapped into a hardlinked
+AppDir copy, die with `*** stack smashing detected ***` during plugin
+startup/query; under GIMP both the advisory JIF and the safe 4x4 JIF
+therefore fail with `Unknown file type`
+(`live/evidence/fixed-appimage-attack.log` SHA-256
+`144057100e2aa22d6fd633958aa09544405d747c6f7fca262d50a43ead5d7c2b`,
+`fixed-appimage-safe.log` SHA-256
+`2be4589c953609768a221564892f9c89e88b484401f0d62f9170b35e1301fd73`).
+The authentic shipped plugin was not modified. A direct `-query` run of
+the locally built plugin aborts before `main` under gdb
+(`During startup program terminated with signal SIGABRT`), so the cause is
+a runtime/linker incompatibility with the AppImage's bundled libraries,
+UNKNOWN in detail; the fix hunk is not implicated, since the unmodified
+3.2.8 and vulnerable pinned sources fail identically. No fixed-plugin
+control, no grade change. A matching GIMP 3.2 build toolchain or a
+published fixed AppImage is the prerequisite; do not reuse these shim
+headers.
