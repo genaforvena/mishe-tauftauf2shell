@@ -11438,8 +11438,9 @@ command service. NOT ESTABLISHED rung 5.
   `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`. Grade stays
   rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes past a synthetic heap
   object: no real GIMP/GEGL build, no JIF through the PDB, no chosen-address
-  pointer, no command, no r5. Window 166 is registered; the target is STAGED,
-  NOT ADMITTED — operator admission under standing #6 remains owed.
+  pointer, no command, no r5. Window 166 was registered at staging; the
+  operator admitted gimpjif2shell under standing #6 at 03:34Z as the 158th
+  mind, so the README row is now ADMITTED and the declared count is 159.
 
 ## 2026-11-26 03:1x–03:2xZ — lwext4shell W242 staged lane, witness verdict, and two author-only pointer lanes
 
@@ -11488,9 +11489,11 @@ command service. NOT ESTABLISHED rung 5.
   `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`. Grade stays
   rung 3 pinned verbatim / rung 4 PARTIAL image-chosen bit byte past a
   synthetic block: no real lwext4 build, no crafted ext4 image through the
-  mount path, no chosen-address pointer, no command, no r5. Window 167 is
-  registered; the target is STAGED, NOT ADMITTED — operator admission under
-  standing #6 remains owed, and the declared mind count/list is unchanged.
+  mount path, no chosen-address pointer, no command, no r5. Window 167 was
+  registered at staging; the operator admitted lwext4shell under standing #6
+  at 03:34Z as the 159th mind, so the README row is now ADMITTED and the
+  declared count/list includes `lwext4shell`; the grade and witness scope
+  did not move.
 - **Pgactive2Shell W10/W11 live error-callback pointer (author-only)** —
   from the repo root
   `sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh`

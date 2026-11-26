@@ -12049,10 +12049,12 @@ live seven-cell README and is person-reserved (exact full-flag sync in
   W242 returned ESTABLISHED AS LABELED in-tree and from clean
   `git archive b4a7acd4` (31 PASS / 0 FAIL, `REPLAY_PASS=6`, five pins exact,
   `0xfe`/`0xfc` versus `0x4d` readback). The README gained a
-  STAGED-NOT-ADMITTED row; reproducibility records the NVD/upstream URLs,
-  full and excerpt hashes, build and wrapper commands, expected ASan/canary
-  bytes, gitignored logs and the witness detail path. Operator admission is
-  still owed, so the 157-mind count and name list are unchanged.
+  STAGED-NOT-ADMITTED row at fold time; reproducibility records the
+  NVD/upstream URLs, full and excerpt hashes, build and wrapper commands,
+  expected ASan/canary bytes, gitignored logs and the witness detail path.
+  The operator admitted both gimpjif2shell (158th) and lwext4shell (159th)
+  at 03:34Z in `5bc2e169`, after these edits; the README rows and the
+  159-mind count/list are current, with no grade or witness change.
 - `9c36c294`, `570384a2`, `0f05163c`: pgactive2shell consumed a chosen
   (invalid) `ErrorContextCallback` pointer in a live apply worker via a
   616-byte origin name; the clean-archive author replay returned
