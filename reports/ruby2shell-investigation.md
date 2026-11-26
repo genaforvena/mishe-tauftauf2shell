@@ -4805,3 +4805,84 @@ header-derived string with a single-byte encoding whose case map expands
 (ISO-8859-9 / Windows-1252 / ISO-8859-3), instead of ASCII-8BIT. If the tag is
 fixed at the Puma boundary, no new consumer exists; a measured tagged receiver
 would reopen the branch with a different grooming shape.
+
+## Wire-only confirmed heap overflow through stock `Rack::MethodOverride` (2026-11-26, 11:42-11:45Z)
+
+**New grade on the primary CVE: rung 3 CONFIRMED on a wire-only, unmodified-app
+path.** The previous section closed the *header* branch but left one question:
+can Rack tag a wire-derived string with an expanding single-byte encoding? Yes
+— via a multipart part's own `Content-Type`, and the string is consumed by a
+default middleware case conversion. This is the first observation in this
+investigation where a stock wire request alone produces ASan-confirmed memory
+corruption for CVE-2026-132825, with no hook in the request path.
+
+Mechanism, entirely in stock gems (Rack 3.2.8):
+
+- `Rack::Multipart::Parser#tag_multipart_encoding`
+  (`rack/multipart/parser.rb:561`) reads the part's
+  `Content-Type: text/plain; charset=X`, resolves `X` with `Encoding.find`
+  (`find_encoding`, :595; unknown names fall back to BINARY) and calls
+  `body.force_encoding(X)` on the part body. The body is the raw part bytes
+  buffered by `Collector#on_mime_body` and yielded unmodified by
+  `MimePart#get_data` (`parser.rb:301-307`).
+- `Rack::MethodOverride#method_override`
+  (`rack/method_override.rb:36`) calls `req.POST["_method"].to_s.upcase`.
+  `Rack::MethodOverride` is default middleware in classic Sinatra and in
+  `rails new` (`bin/rails middleware` on the stock Rails 8.1.4.1 app lists
+  `use Rack::MethodOverride`).
+- Therefore a loopback `POST` with request header
+  `Content-Type: multipart/form-data; boundary=X2SMPBOUND`, one part
+  `Content-Disposition: form-data; name="_method"`, part header
+  `Content-Type: text/plain; charset=ISO-8859-1` and body 21 × `0xDF` makes
+  the unmodified app upcase an ISO-8859-1 string with 21 one-to-two-expanding
+  bytes. The vulnerable fix series (`d582f8f`, `lab/src/cmp/enc-diff.txt`)
+  covers ISO-8859-1/2/3/4/9/10/13/14/15/16 and Windows-1250/1252/1254/1257.
+
+Committed reproduction: `lab/repro/ruby2shell-mp-method-21.py` (wire client)
+and `ruby2shell-mp-method-21.sh` (harness). Evidence is gitignored under
+`lab/build/evidence/mp-method-21/`. Run with
+`bash lab/repro/ruby2shell-mp-method-21.sh plain` (reachability proof) and
+`bash lab/repro/ruby2shell-mp-method-21.sh asan` (vulnerable/fixed/controls;
+`APP_MODE=rails` repeats against `rails new`).
+
+Reachability proof on unmodified classic Sinatra under plain 3.4.12 with the
+observability-only `RUBYOPT` tracer of the previous section (no request-path
+change):
+
+```
+pid=121860 upcase enc=ISO-8859-1 len=21 suspect=true
+bytes=dfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdfdf
+where=gems/3.4.0/gems/rack-3.2.8/lib/rack/method_override.rb:36:in 'Rack::MethodOverride#method_override'
+     | gems/3.4.0/gems/rack-3.2.8/lib/rack/method_override.rb:21:in 'Rack::MethodOverride#call'
+     | gems/3.4.0/gems/sinatra-4.2.2/lib/sinatra/show_exceptions.rb:23:in 'Sinatra::ShowExceptions#call'
+```
+
+ASan matrix, one fresh server per arm, on both default stacks:
+
+| Ruby / wire shape | Sinatra 3.4.12 | Rails 3.4.12 | 3.4.13 (both) |
+| --- | --- | --- | --- |
+| `attack` (`_method`, ISO-8859-1, 21×`0xDF`) | died, `SUMMARY: AddressSanitizer: heap-buffer-overflow enc/iso_8859_1.c:293 in case_map` | same report, died | alive, 404, no report |
+| `safe-ascii` (`_method`, ISO-8859-1, 21×`A`) | alive, 404 | alive, 404 | alive, 404 |
+| `safe-utf8` (`_method`, charset UTF-8, 21×`0xDF`) | alive, 404 | alive, 404 | alive, 404 |
+| `canary` (`_method`, ISO-8859-1, `CASECANARY123`) | alive, 404 | alive, 404 | alive, 404 |
+| `other-field` (`q`, ISO-8859-1, 21×`0xDF`) | alive, 404 | alive, 404 | alive, 404 |
+
+The 3.4.12 report is a `WRITE of size 1` on thread T6 (the Puma request
+worker), `0 bytes after 65-byte region`, allocated in `rb_str_casemap`
+(`string.c:7834`) and written in `case_map` (`enc/iso_8859_1.c:293`) via
+`rb_str_upcase` (`string.c:8017`) — the same 24-byte header + capa 41 geometry
+as the in-process rung-1 observation, now reached from the wire. The Rails
+report is in `lab/build/evidence/mp-method-21/asan-rails-3.4.12-attack.server.log`.
+All vulnerable/fixed/safe-input controls behaved as predicted.
+
+**Grade:** rung 3 (confirmed memory corruption) on the primary CVE and on a
+stock wire path — stronger reachability than the earlier in-process
+ISO-8859-1 control, which needed a probe to set the encoding. It is **not**
+rung 4: the overflowed byte is the fixed second `S` of a ß expansion, written
+at the allocator-determined boundary; no chosen-offset write, pointer control
+or benign marker execution was observed here. Primary grades stay rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Next bounded experiment:
+on the stock glibc plain build, determine which object the one-byte write
+lands in and whether its effective offset/value can be steered into a live
+consumer without the harness.
