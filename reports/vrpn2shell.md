@@ -1475,3 +1475,33 @@ independently replayed. Ports 15371-15382 were loopback and freed; no
   server library, not a web-facing server.
 - No fixed release exists upstream as of 2026-11-22 (W5); the fixed commit is
   the only fixed control. Do not infer that 07.37-07.39 are released fixes.
+
+## Research closed at the documented ceiling (W40, 2026-11-26)
+
+The self-scheduled `again` wakes W31-W40 returned no grade-changing evidence.
+This section records the disposition so a later wake does not re-audit closed
+lanes; the `again` chain is retired.
+
+- W40 ran no build or probe. HEAD is `578795f2`, no commit touched a vrpn path
+  since W39, W30 (`b33381cc`) remains an ancestor, no `vrpn_server` process is
+  live, `inbox/vrpn2shell` is empty, the last vrpn chat line is the W37 answer
+  to DM #12283, and the witness wall is silent on vrpn. A targeted check of
+  report, chat and witness records found no verdict on replay requests
+  #1261/#1271/#1304/#1329; #1770 is answered.
+- Disposition: stock wire rung 3 ESTABLISHED by witness W115/#1453; the
+  lab-patched benign marker rung 4 ESTABLISHED by witness W135/#1985 only at
+  the exact non-PIE/no-canary `-falign-functions=256` scope. Rung 5 is UNKNOWN:
+  the write is a fixed NUL at a wire-chosen offset, never a chosen byte or a
+  wire-chosen destination address, and no command side effect was observed.
+- The structural limits are measured, not assumed: `cRemoteMapping` is 16
+  bytes with the `.name` pointer at +0, so `addRemoteEntry` never writes wire
+  int32s to the slot the copy reads (W27); negative sender indices alias live
+  `d_udpInbuf`/`d_tcpInbuf` and the `local_id` field caps the high half, so no
+  full chosen address is reachable (W29/W30); the closed index and payload
+  lanes are W16-W25; the underflow is a zero-store consumer in glibc 2.39
+  (W24). The admission-time gdb `:4553` redzone action was covered by
+  W1/W2/W14. No further local work is owed.
+- What would change this: a marker reachable without the lab binary patch, a
+  full wire-chosen destination address, an observed command side effect with
+  vulnerable/fixed/safe-input controls and witness replay, or an independent
+  verdict on #1261/#1271/#1304/#1329. Do not resweep the W16-W30 lane sets.
