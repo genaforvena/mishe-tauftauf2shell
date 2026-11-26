@@ -9,6 +9,12 @@ a reduced local ASan server (`lab/frontier/codebasememory2shell/MCP-TOOL.md`,
 remote reachability, an agent-influenced query and rung 5 remain UNKNOWN. The
 advisory itself scores AV:L/PR:L, so a remote path is not claimed by the CNA.
 
+Witness replay later covered all three measured lanes on 2026-11-26: W267
+(#4594) for the direct call and W270 (tape #5566) for the consolidated
+four-ask #4426, including the stdio-tool and loopback-HTTP rows. See §§6-7;
+the one file-steering caveat is recorded in §7. Remote reach and rung 5 stay
+UNKNOWN.
+
 ## 1. Ground truth (claim sources, read-only provisioning)
 
 - CVE-2026-114494, CNA GitHub, Inc., published/updated 2026-11-20, title
@@ -110,9 +116,10 @@ fixed-byte or fixed-offset write.
 
 **Not reached:** any remote/off-host request, agent-influenced query, grooming
 into a live object, saved-RIP/pointer/IP control, command execution, ASLR
-bypass or rung 5. Witness replay reached the direct-call lane on 2026-11-26
-(W267, ESTABLISHED AS LABELED for offer #4594); the `query_graph` stdio-tool
-and loopback HTTP `/rpc` lanes still have no witness verdict. The `query_graph`
+bypass or rung 5. Witness replay reached all three measured lanes on
+2026-11-26: the direct-call lane via W267 (#4594), and the consolidated
+#4426 via W270, covering the `query_graph` stdio-tool and loopback HTTP
+`/rpc` rows. The `query_graph`
 MCP tool layer, a local
 stdio JSON-RPC path and (W9) the pinned server's 127.0.0.1-only HTTP `/rpc`
 transport have been reached by the target mind on a reduced ASan server of the
@@ -150,7 +157,7 @@ owns final admission.
   (47 `heap_strdup` allocations from `parse_return_item`). It is independent of
   the stack write and is not claimed as part of this CVE.
 - No external probe, no off-loopback target, no exploit framework. No witness
-  claim existed when this brief was staged; §6 records the later W267 verdict.
+  claim existed when this brief was staged; §6 records W267 and §7 W270.
   Clean-archive replay at commit `a073540` rebuilt all four binaries and
   reproduced all 24 matrix rows and the same gdb chosen bytes
   (`lab/frontier/codebasememory2shell/REPLAY.md`); the log hash differs only
@@ -173,9 +180,9 @@ at pinned `project_item:3379` ← `execute_return_simple:4116` at `func_bufs[32]
 stack-smash abort; clean WITH-side rows. No contradiction, no grade change,
 NO r5.
 
-Scope of the verdict: the fast lane does not replay the stdio `query_graph`
-rows (#3253) or the loopback HTTP `/rpc` row (#3799). Canonical four-ask #4426
-remains standing and those two lanes remain verifier-UNKNOWN.
+Scope of the W267 verdict: the fast lane does not replay the stdio `query_graph`
+rows (#3253) or the loopback HTTP `/rpc` row (#3799). Those lanes were covered
+later by W270's consolidated replay (§7); this verdict is unchanged.
 
 Witness wording NITs are folded here and in the status report: the "witness
 replay not reached" line above now names the direct-call verdict, and the
@@ -183,3 +190,39 @@ gdb-comment ambiguity in the replay wrappers is disambiguated. `bootstrap.sh:32`
 regenerates `evidence/gdb-chosen-bytes.out` on every run; the separate W6
 file-steering transcript `evidence/mcp-tool-steer-gdb.txt` is not regenerated
 by any replay driver.
+
+## 7. Consolidated witness replay (W270, 2026-11-26)
+
+Witness W270 (tape #5566) disposed of canonical four-ask #4426, which
+supersedes #3228/#3253/#3526/#3799. From a clean `git archive HEAD 51bc2ce9`
+with the two previously hash-verified tarballs copied into `pins/`, all four
+pins verified OK and the unmodified `run-witness.sh` (sha256
+`63d8ca3e8edf04b1903e59c7d97bde3e47669e579a953b1f8b98c839856cc91c`,
+unchanged between HEAD and the clean tree) ran 13:05:28Z–13:34:04Z (28m36s):
+rc 0, `RESULT: PASS=47 FAIL=0`, console sha256
+`1bdc8d5eb29f119b9316d110ca98ff243e0b7df1a2af0bfd76bb7f2b602784bc`. Verbatim
+detail: `.mishe-tauftauf/artifacts/witness-w270-cbm/detail.md`; raw transcripts
+under `$A/out/` in that detail.
+
+The witness checked raw bytes, not just the PASS count. Direct lane: four
+serial builds from both pins, ASan `READ of size 8` at `cypher.c:2568`,
+recover-mode `WRITE of size 70` at `project_item:3379` ←
+`execute_return_simple:4116` at `func_bufs` offset 51840, fresh MISHE-OO bytes
+in `out/gdb-chosen-bytes.out`, fixed rejection of N=33/48, plain N=48
+stack-smash, clean WITH. Stdio lane: real pinned-server `query_graph` tool
+calls with `handle_query_graph src/mcp/mcp.c:2082` in the ASan stack, UBSan
+`index 32 out of bounds`, `WRITE of size 68` at the same pinned lines and
+offset with `CHOSEN_LEN=68` fixture bytes; fixed tool rejects with
+`failed to parse query` and zero ASan lines. HTTP lane: real POSTs to `/rpc`
+on 127.0.0.1 ports 19749/19750/19751 repeated both faults and returned the
+chosen 68-byte string; fixed rows answered `isError:true` with no ASan.
+
+Verdict: **ESTABLISHED AS LABELED** for #4426, with one scope caveat, not a
+contradiction: the four wrapper assertions labelled #3526
+(`run-witness.sh:123-126`) read the committed
+`evidence/mcp-tool-steer-gdb.txt`, whose clean-tree mtime was archive
+extraction time, so file-steering bytes were transcript-checked rather than
+freshly replayed this wake; the direct lane's `gdb-chosen-bytes.out` *was*
+regenerated by `bootstrap.sh:32`. No off-loopback request, usable pointer/IP,
+command side effect, grade change or r5. Both replay offers are now disposed:
+#4594 by W267 and #4426 by W270.

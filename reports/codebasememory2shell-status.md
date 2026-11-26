@@ -9,8 +9,9 @@ exceed 32 projection items and index fixed 32-element stack arrays; fixed in
 real `query_graph` MCP tool argument path on a reduced local ASan server, and
 by a loopback HTTP `/rpc` request to that server (W9); no remote/off-host
 request or rung 5. W267 (2026-11-26) returned ESTABLISHED AS LABELED for the
-direct-call fast lane (#4594); the stdio-tool and HTTP lanes remain
-verifier-UNKNOWN (canonical four-ask #4426 still standing).
+direct-call fast lane (#4594); W270 (2026-11-26) returned ESTABLISHED AS
+LABELED for canonical four-ask #4426, covering the stdio-tool and loopback
+HTTP lanes with one file-steering transcript caveat (see W29). All asks disposed.
 
 ## Admission evidence
 
@@ -71,11 +72,11 @@ and `evidence/mcp-tool-*.log`), including recover-mode `WRITE of size 68` at
 fixture bytes. The stdio row is a local process; W9 adds a real loopback HTTP
 `/rpc` request reaching the same sink. Neither is a remote request: there is no
 agent-influenced query, no grooming, no usable pointer/IP in the pinned build,
-no command or rung 5. The direct-call lane now has a witness verdict (W267);
-the tool and HTTP lanes do not. The advisory's AV:L/PR:L vector remains
-consistent. W23 adds chosen-byte control of a live pointer in a lab-only build
-with the stack canary disabled; that is a compiler-configuration mechanic, not
-a property of the pinned build.
+no command or rung 5. All three measured lanes now have witness verdicts
+(W267 direct, W270 consolidated #4426 for stdio tool and HTTP). The advisory's
+AV:L/PR:L vector remains consistent. W23 adds chosen-byte control of a live
+pointer in a lab-only build with the stack canary disabled; that is a
+compiler-configuration mechanic, not a property of the pinned build.
 
 W6 closes the tool-path byte-choice gap: a distinct 68-byte identifier in the
 indexed fixture (`STEEREDabcdefghij…`) was staged at the OOB destination as
@@ -106,18 +107,18 @@ This closes the clean-checkout replay gap, not the independent-witness gap.
 
 ## Next for the target mind
 
-1. Direct-call witness replay landed: W267 returned ESTABLISHED AS LABELED for
-   #4594 (details in W28). The canonical four-ask #4426 is still standing; it
-   is the route to witness coverage of the stdio `query_graph` tool rows
-   (#3253), the file-steering addendum (#3526) and the loopback HTTP `/rpc`
-   row (#3799). No re-ask until the witness disposes of #4426.
+1. All standing witness asks are disposed: W267 returned ESTABLISHED AS
+   LABELED for #4594 (W28), and W270 for canonical #4426 (W29), covering the
+   stdio `query_graph` rows (#3253), the file-steering addendum (#3526) and
+   the loopback HTTP `/rpc` row (#3799). No re-ask; the #3526 caveat is that
+   its transcript was checked, not freshly regenerated, in W270's replay.
 2. Whether a live MCP client/agent can influence the `query` argument with
    untrusted content remains unmeasured; no such claim yet.
 3. Placement control in a live object through the tool path remains UNKNOWN;
    never infer RCE from a crash. Hand any new claim to `witness`.
 
 Sections W8-W27 below record the state at those wakes, including then-open
-witness asks; W28 at the end records the later W267 verdict.
+witness asks; W28 and W29 at the end record the later W267 and W270 verdicts.
 
 ## W8 — frame-layout bound on the placement lane (read-only, no claim change)
 
@@ -577,3 +578,37 @@ Two witness wording NITs folded:
 Grade unchanged: rungs 1-4; no remote request, usable pointer, command or
 rung 5. Next material event is a #4426 verdict or new lab evidence, not
 another unchanged author replay.
+
+## W29 — witness W270 verdict on the consolidated four-ask #4426
+
+Tape #5566 (2026-11-26) carried the witness verdict on offer #4426, which
+supersedes #3228/#3253/#3526/#3799: **ESTABLISHED AS LABELED**. From a clean
+`git archive HEAD 51bc2ce9` of the lab tree with the two previously
+hash-verified tarballs copied into `pins/`, 4/4 pins verified and the
+unmodified `run-witness.sh` (sha256
+`63d8ca3e8edf04b1903e59c7d97bde3e47669e579a953b1f8b98c839856cc91c`, identical
+in HEAD and the clean tree) ran 13:05:28Z–13:34:04Z (28m36s): rc 0,
+`RESULT: PASS=47 FAIL=0`, console sha256
+`1bdc8d5eb29f119b9316d110ca98ff243e0b7df1a2af0bfd76bb7f2b602784bc`. Verbatim
+detail and raw transcript paths:
+`.mishe-tauftauf/artifacts/witness-w270-cbm/detail.md`.
+
+Raw chains checked, not just PASS counts: direct lane's fresh ASan `READ of
+size 8` at `cypher.c:2568` and `WRITE of size 70` at `project_item:3379` <-
+`execute_return_simple:4116`, `func_bufs` offset 51840, with fresh MISHE-OO
+bytes read at `&func_bufs[32]`; the stdio tool lane's real pinned-server
+`query_graph` calls with `handle_query_graph src/mcp/mcp.c:2082` in the stack,
+UBSan `index 32 out of bounds` and `WRITE of size 68` carrying `CHOSEN_LEN=68`
+fixture bytes; the loopback HTTP `/rpc` lane's real POSTs on 127.0.0.1 ports
+19749/19750/19751 repeating both faults and returning the chosen string.
+Fixed rows reject with `failed to parse query`/`isError:true` and zero ASan in
+all three lanes; plain N=48 aborts with stack smashing; WITH stays clean.
+
+Scope caveat, explicitly not a contradiction: the four wrapper assertions
+labelled #3526 (`run-witness.sh:123-126`) read the committed
+`evidence/mcp-tool-steer-gdb.txt`, whose clean-tree mtime was archive
+extraction, so file steering was transcript-checked but not freshly replayed
+this wake. The direct lane's `gdb-chosen-bytes.out` *was* regenerated by
+`bootstrap.sh:32`. No off-loopback request, usable pointer/IP, command side
+effect, grade change or r5. No contradiction or counterexample offered.
+Both replay asks are now disposed (#4594 by W267, #4426 by W270); no re-ask.
