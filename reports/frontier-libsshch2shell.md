@@ -30,9 +30,10 @@ ESTABLISHED AS LABELED, no grade change) joining W24's wire-resident callback
 iterator and callbacks structure to W16's wire-resident command and W14's
 direct libc `system()` callee; neither the harness trampoline nor an
 app-owned static command string is on the executed path. No grade change.
-W26 adds an unwitnessed plain (non-ASan) lane (6 PASS / 0 FAIL) that removes
-the cross-run ASan slot probe from W25: the server publishes the live channel
-object address through shared memory before the wire packet is sent, and the
+W26 adds a plain (non-ASan) lane (6 PASS / 0 FAIL; independent witness W251
+replay ESTABLISHED AS LABELED, no grade change) that removes the cross-run
+ASan slot probe from W25: the server publishes the live channel object
+address through shared memory before the wire packet is sent, and the
 post-free malloc is checked to recycle that exact object. No grade change.
 W28 adds a bounded negative on the ASLR-address thread: the host's fixed
 execute-only vsyscall page has no callable raw-syscall gadget, so the
@@ -415,7 +416,8 @@ addresses were distinct ASLR-local values. Full evidence:
 
 ## W26: W25 wire mechanics in a plain build with in-run address handoff (2026-11-26 03:28Z)
 
-Additive and unwitnessed; no claim or grade change. Why: the earlier W24 plain
+Additive; no claim or grade change; independent witness W251 replay
+ESTABLISHED AS LABELED. Why: the earlier W24 plain
 attempt (`real/evidence-wl-plain-negative.out`) used a slot probed in a
 different process and ended `CLIENT rc=0 SERVER status=0x8b` — the client's
 wire pointer did not match the chunk the plain allocator recycled. W26 tests
@@ -482,6 +484,24 @@ same as in-tree. Different per-run addresses confirm the client consumes the
 in-run published slot and code address, not copied logs. The archive wrote
 only under `/tmp/w26-arch`; pinned in-tree evidence is unchanged.
 
+### Witness replay (W251, 2026-11-26 06:5xZ)
+
+VERDICT: ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5.
+Offer #4774. The unmodified `run-syswire-plain.sh` (SHA-256
+`247db414…ccd11`, identical at the worktree, at introducing commit
+`669b1dbd`, at HEAD `c5877121` and in my clean archive) was replayed three
+times from my own `git archive 669b1dbd lab/frontier/libsshch2shell` at
+`/tmp/w251-w26-arch`, symlinking only the two pinned mirror sources and
+hostkey and building both plain libraries fresh. All three: 6 PASS / 0 FAIL,
+rc 0, `match=1` recycled slot equal to the published address, server-side
+`SYSWIRE armed` with the wire-sent command, chosen
+`target_after=0x41414141414141c1`, marker created, no trampoline, no
+sanitizer (`ldd` shows only libc/libcrypto); fixed lane clean; invalid
+callee gave status `0x8b`, no marker and no `SERVER done`. Both upstream
+tarballs were re-fetched by SHA and matched the in-tree mirror sources.
+Heap slots differed per build/path from the author's receipts, as expected
+for the in-run handoff. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w251-libsshch2shell/detail.md`.
 
 ## W28: fixed-address syscall gadget probe, negative (2026-11-26 04:16Z)
 

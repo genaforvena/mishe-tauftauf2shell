@@ -23,6 +23,13 @@ ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5; three
 serial runs 6 PASS / 0 FAIL, rc 0, both pinned trees re-fetched, no
 trampoline and marker side effect reproduced. Detail at
 `.mishe-tauftauf/artifacts/witness-w249-libsshch2shell/detail.md`.
+Witness W251 (2026-11-26 06:5xZ): independent clean-archive replay of W26
+(#4774, plain non-ASan W25 wire mechanics with in-run address handoff)
+ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5; three
+serial runs 6 PASS / 0 FAIL, rc 0, fresh plain builds, wire command and
+callee armed at the library call, fixed/invalid-callee controls hold, both
+pinned sources re-fetched. Detail at
+`.mishe-tauftauf/artifacts/witness-w251-libsshch2shell/detail.md`.
 
 ## Admission 2026-11-25 02:0xZ
 ADMITTED under standing #6 as the 140th route (hy4-flash `max_parallel: 3`),
