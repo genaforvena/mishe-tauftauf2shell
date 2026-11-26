@@ -6123,11 +6123,44 @@ legs, **not** a byte-exact response hash; the original hash is one observed
 layout, not a guarantee. The driver's attack mode returns rc 0 after a faulted
 request because it only asserts server readiness, so a replay must read
 `http_status`, `health` and `exit_after_request` from its JSON rather than rc.
-No command, pointer or second-request execution was observed. Grade unchanged:
-stock-wire rung 4 remains unwitnessed; full stock/oracle-free rung 5 remains
-NOT ACHIEVED. Gitignored evidence:
+No command, pointer or second-request execution was observed. The variance was
+later diagnosed as a VM-stack layout condition (23:4xZ below): with
+`RAILS_MAX_THREADS=1` the negative-index write hits an unmapped guard gap
+(SIGSEGV at `0x7fffbffc0048`), while threads=2 lands in a mapped live object.
+Grade: stock-wire rung 4 is now witness-ESTABLISHED at that labeled scope;
+full stock/oracle-free rung 5 remains NOT ACHIEVED. Gitignored evidence:
 `lab/build/evidence/w299-{replay,det*,orig*,aslr-*}.{json,html,server.log}` and
 `lab/build/evidence/w299-aslr-off-determinism/summary.txt`.
+
+## 2026-11-26 23:4xZ — witness verdict: stock-wire Onigmo rung 4 ESTABLISHED AS LABELED
+
+Witness message #5914 (detail
+`.mishe-tauftauf/artifacts/witness-w299-ruby/detail.md`) replayed the pinned
+§18:5x recipe: tarball `f79c6e78…`, driver `01193fbe…` and differ `779a615f…`
+digests exact, unmodified driver with both GEM_PATH overrides,
+`RUBY2SHELL_ONIGMO_LAYOUT=shallow`, `RUBY2SHELL_ONIGMO_ASLR_OFF=1`,
+`RAILS_MAX_THREADS=2`. Attack: 200/alive, 54,795 bytes, exact hash
+`c6be1419…`; differ: 306→302 rows, 4 missing, 293 one-byte-shortened,
+`verdict=CORRUPTED`. Control: 200/alive, 55,667 bytes, `56eb2e92…`. Safe:
+200/alive, 3,079 bytes. Fixed 3.4.13: 500/alive with `too many range repeat`.
+With ASLR on, 3 of 6 fresh attacks reproduced the exact page; the remainder
+are preserved layout variance, including 3,059-byte degenerate pages.
+
+All 20 attacks at the driver default `RAILS_MAX_THREADS=1` faulted without an
+HTTP response (`exit_after_request=-11`, fault `0x7fffbffc0048`). The witness
+mapped Ruby VM stack slots at 64 MB strides with guard gaps: the target is
+256 KB below the first slot, i.e. unmapped; threads=2/5 place the request
+stack in a mapped slot. The attack body SHA-256 was identical across arms, so
+this is a layout condition, not a different input or a contradiction. The
+earlier per-process hash-seed explanation stays a hypothesis, not a measured
+cause; `RAILS_MAX_THREADS` is the measured condition.
+
+Verdict **ESTABLISHED AS LABELED**: rung 4 stock-wire, consumer-visible
+corruption in unmodified Rails notes under a labeled layout/ASLR condition.
+No command, pointer, callback, second distinct command or r5 claim. Witness
+evidence `lab/build/evidence/witw299-*.{json,html,server.log}` (gitignored).
+Prior rung-4 and harness-condition rung-5 grades are unchanged; full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 
 
 
