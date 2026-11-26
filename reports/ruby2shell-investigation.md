@@ -4292,3 +4292,67 @@ would exercise the corrupted band never survives the request. Grades unchanged
 stock/oracle-free/persistent rung 5 NOT ACHIEVED). Evidence (gitignored):
 `lab/build/evidence/stock-rails-qgetv-*`, `qgets*`, `qget-fixed-*`,
 `qget-print*` `.out`/`.server.log`/`.html`.
+
+## Adjacent fix-series triage — transcode `max_output` NEGATIVE (2026-11-26, eighteenth wake)
+
+The prior wall's exact command extracted the staged `ruby-3.4.12` and
+`ruby-3.4.13` tarballs into `lab/src/cmp/` and diffed `enc/`, `string.c` and
+`regparse.c`: 71 / 140 / 55 changed lines (`lab/src/cmp/*-diff.txt`). The
+official primary fix (`lab/src/ruby-fix-d582f8f.patch`) touches only the 14
+single-byte case-map files; every other change in the release is a separate
+commit. The fresh write-bound changes are transcode-table `max_output`
+corrections: cp50220 5→9 (`enc/trans/iso2022.c/.trans`) and the BOM-emitting
+encoders to_utf_16 4→6 and to_utf_32 4→8 (`enc/trans/utf_16_32.c/.trans`).
+The mechanism is real in the abstract — `transcode.c:662/681/705/770` calls a
+FUNso writer with only `max_output` bytes guaranteed, while
+`fun_so_to_utf_16` writes a 2-byte BOM plus up to 4 bytes, `to_utf_32` a 4-byte
+BOM plus 4, and cp50220 up to 9.
+
+Tested rather than assumed. A 288-case length sweep (`/tmp/tc_sweep.rb`,
+UTF-16/32/CP50220 × 5 chars × 40 lengths) and a 3000-case mixed-character,
+mixed-option fuzz (`/tmp/tc_fuzz.rb`, five destination encodings, invalid/undef
+replace options, lengths 1–60) ran on both `lab/build/ruby-3.4.12-asan` and
+`ruby-3.4.13-asan`: **zero AddressSanitizer heap/stack reports in either
+build**, and the marshalled output sets compared byte-identical between the
+two builds. Structural reason: `transcode.c:1878` grows the destination to
+`dlen + len + max_output`, so at the BOM call the free space is at least the
+remaining input bytes plus `max_output` (8 bytes for a 4-byte UTF-8 char);
+the understated `max_output` never creates a 4-byte window for the 6/8-byte
+write. The slow-path writebuf is `ary[8]` and holds 6/8 bytes. No Ruby-reachable
+overflow and no behaviour change. **Lane closed.** The remaining `string.c` and
+`regparse.c` changes are the other six already-triaged GHSAs
+(`docs/task.md:2494-2525`); none adds a default-web-framework path.
+
+## Two adjacent GHSAs reproduced as secondary-lane evidence (2026-11-26, eighteenth wake)
+
+Both need an application that compiles attacker-controlled regexp patterns, so
+neither is a stock-Rails/Sinatra path and neither changes the primary grade.
+Committed reproducer: `lab/repro/ruby2shell-adjacent-ghsas.rb` with driver
+`lab/repro/ruby2shell-adjacent-ghsas.sh`; gitignored evidence
+`lab/build/evidence/adjacent-ghsas/3.4.{12,13}-{double-free,to-s}.out`.
+
+- **GHSA-7x2q-68qv-6p8x — confirmed corruption (rung 3), secondary lane.**
+  Publishing regression shape (`[[:^ascii:][^9999 CJK chars]&&[^U+9FFF]&&x]`
+  with `Regexp::IGNORECASE`) on 3.4.12 ASan gives
+  `ERROR: AddressSanitizer: heap-use-after-free ... READ of size 8 ... #0 bbuf_free regparse.c:145`,
+  allocated at `regparse.c:1795` (`or_cclass`), freed at `regparse.c:4977`
+  (`parse_char_class`) and read again at `:5072`. rc=1. The same input on
+  3.4.13 raises `RegexpError`, rc=0 — the `cc->mbuf = NULL` backport. This is
+  an independently observed use-after-free in the vulnerable build, not a
+  claim adopted from the advisory.
+- **GHSA-7whj-cfh7-xgm4 — reproducible crash (rung 2), secondary lane.**
+  Upstream regression pattern `Regexp.new('(?:[](?#\x{7FFFFFFF})])').to_s`
+  crashes 3.4.12 with rc=139 and `[BUG] Segmentation fault` at `re.c:2`,
+  C-level `rb_reg_to_s → rb_reg_str_with_term (re.c:628) → onig_new →
+  onig_parse_make_tree (regparse.c:6773)`. 3.4.13 returns
+  `"(?-mix:[](?#\\x{7FFFFFFF})])"`, rc=0. ASan emitted no heap report before
+  the SIGSEGV, so this stays rung 2, not rung 3.
+
+The external-trigger watch was rechecked at 08:04Z: Veria's page is still
+stamped `2026-11-21T03:52Z`, the PoC is still promised for 25 November "or
+later", and the 23 November FieldEffect brief adds no mechanics ("complex
+heap memory layout"). Corgea's 21 November roundup supplied the two upstream
+regression shapes above; these were re-run here, not adopted as fact.
+
+Primary grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
