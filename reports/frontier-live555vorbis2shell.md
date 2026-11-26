@@ -1,8 +1,10 @@
 # Frontier brief: live555vorbis2shell — CVE-2026-137587 (unchecked memmove reads in parseVorbisOrTheoraConfigStr)
 
-**Status: STAGED 2026-11-26 W296 — rung 3 ASan-confirmed heap-buffer-overflow
-READ of size 65535/65534/98 at three verbatim pinned sink lines; rung 1 and
-rung 2 NOT CLAIMED (plain build exits 0); rung 4 and rung 5 NOT CLAIMED.**
+**Status: ADMITTED 2026-11-26 W298 by the operator under standing #6 as the
+191st mind (commit `8229ec57`, `reports/live555vorbis2shell-status.md`);
+W296/W297 witness replay ESTABLISHED AS LABELED. Rung 3 ASan-confirmed heap
+buffer overflow READ of size 65535/65534/98 at three verbatim pinned sink
+lines; rung 1, rung 2, rung 4 and rung 5 NOT CLAIMED.**
 Everything in the claim section is attributed to the cited public pages; the
 pinned bytes and observations below are this plant's own. The witness re-runs
 any published claim. Operator owns admission under standing #6; frontier owns

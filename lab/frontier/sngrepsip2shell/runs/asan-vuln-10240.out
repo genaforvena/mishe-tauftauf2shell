@@ -1,0 +1,52 @@
+=================================================================
+==3358485==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x73ad31b02880 at pc 0x73ad33c9fbca bp 0x7ffdac3f96c0 sp 0x7ffdac3f8e68
+READ of size 10241 at 0x73ad31b02880 thread T0
+    #0 0x73ad33c9fbc9 in regexec ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:7918
+    #1 0x590dfe3b35fe in sip_validate_packet(packet*) src/sip.c:338
+    #2 0x590dfe3b37e5 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/frontier-driver.cpp:515
+    #3 0x73ad3342a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x73ad3342a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x590dfe3b3324 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/h/asan-vuln+0x1324) (BuildId: 0e30ade8e472350013c6083734984110e6c57c2b)
+
+Address 0x73ad31b02880 is located in stack of thread T0 at offset 10368 in frame
+    #0 0x590dfe3b33f8 in sip_validate_packet(packet*) src/sip.c:318
+
+  This frame has 3 object(s):
+    [32, 64) 'pmatch' (line 321)
+    [96, 106) 'cl_header' (line 322)
+    [128, 10368) 'payload' (line 320) <== Memory access at offset 10368 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:7918 in regexec
+Shadow bytes around the buggy address:
+  0x73ad31b02600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02800: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x73ad31b02880:[f3]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x73ad31b02900: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x73ad31b02980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73ad31b02b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3358485==ABORTING

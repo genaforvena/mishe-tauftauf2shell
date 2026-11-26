@@ -1,0 +1,51 @@
+=================================================================
+==3358515==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x747207d02820 at pc 0x5bc55f2a7d81 bp 0x7ffe0882be70 sp 0x7ffe0882b618
+READ of size 10241 at 0x747207d02820 thread T0
+    #0 0x5bc55f2a7d80 in regexec (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/h/clang-asan-vuln+0x9ad80) (BuildId: 9f2d215d877acd4e04ea65b3132b4bd05c296392)
+    #1 0x5bc55f311b51 in sip_validate_packet(packet*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/src/sip.c:338:9
+    #2 0x5bc55f311b51 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/frontier-driver.cpp:515:14
+    #3 0x74720962a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x74720962a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x5bc55f238354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/h/clang-asan-vuln+0x2b354) (BuildId: 9f2d215d877acd4e04ea65b3132b4bd05c296392)
+
+Address 0x747207d02820 is located in stack of thread T0 at offset 10272 in frame
+    #0 0x5bc55f31194f in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/frontier-driver.cpp:504
+
+  This frame has 2 object(s):
+    [32, 10272) 'payload.i' (line 501)
+    [10528, 10560) 'pmatch.i' (line 501) <== Memory access at offset 10272 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sngrepsip2shell/h/clang-asan-vuln+0x9ad80) (BuildId: 9f2d215d877acd4e04ea65b3132b4bd05c296392) in regexec
+Shadow bytes around the buggy address:
+  0x747207d02580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x747207d02800: 00 00 00 00[f2]f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x747207d02880: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x747207d02900: f2 f2 f2 f2 00 00 00 00 f3 f3 f3 f3 00 00 00 00
+  0x747207d02980: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x747207d02a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3358515==ABORTING
