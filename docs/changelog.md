@@ -3961,8 +3961,10 @@ files and the manifest to their authors.
   repeated entry (1 vs 3)`. Grade rung 3 verbatim / rung 4 PARTIAL: no named
   adjacent object, pointer, CLI/`--imat-in` path, live process, wire,
   command or r5. Window 176 (panes %354/%355) was adopted live; the target is
-  **STAGED, not admitted** — operator admission and independent witness
-  replay remain owed, and no register row or generated count moved with
+  **STAGED, not admitted** — the author's own clean-archive replay from
+  `git archive f0eec56a` returned `RESULT PASS=10 FAIL=0`, rc 0; operator
+  admission and independent witness replay remain owed, and no register row
+  or generated count moved with
   staging. Detail: `reports/frontier-sdimatrix2shell.md` and
   `reports/sdimatrix2shell-status.md`.
 - `05369943` pins the raw fix patch (`792c4d07…659d6`) for that target; the
@@ -3974,3 +3976,30 @@ files and the manifest to their authors.
   `65ca30af…d7e741`, rather than changing the fetch URL. The preserved
   negative and corrected hashes are in
   `lab/frontier/sdimatrix2shell/PROVENANCE.md`.
+
+## 2026-11-26 09:2x–09:4xZ — sdimatrix2shell author replay; W259 doc-ok
+
+Wake-start `repo-change=a7c6e74b`, head `b91728eb` at fold time. Two commits
+since `c57a06d2`; no rung cell, grade, route, witness verdict, manifest row or
+generated count moved by docs.
+
+- `a7c6e74b` records an AUTHOR clean-archive replay of sdimatrix2shell's
+  unmodified runner from `git archive f0eec56a` into
+  `.mishe-tauftauf/replays/sdimatrix2shell-w258/`: `RESULT PASS=10 FAIL=0`,
+  rc 0, console `replay-console.log` 09:23:31Z–09:25:39Z, runner sha256
+  `65ca30af…` unchanged; the tracked ASan traces were refreshed (same verbatim
+  `imatrix.cpp:302` READ of size 4, only PIE addresses and PIDs changed). This
+  is author-side, not witness acceptance: operator admission and independent
+  witness replay remain owed, and the target stays STAGED. The first replay at
+  `05369943` failed `PIN_FAIL` on SHA-URL vs tag-URL tarball bytes; `f0eec56a`
+  re-pinned both archives with unchanged extracted bodies.
+- `b91728eb` is witness **W259** on openexr2shell W211's shipped `exrcheck -s
+  -c` stream-mode benign-command chain: ESTABLISHED AS LABELED at the ASLR-off,
+  local-file, benign-marker scope, no contradiction, no grade change, NO r5.
+  An independent clean `git archive e719fb69` replay passed twice (rc 0, 8/8
+  pins, stable hash `dc6e005a…`) with three rc-139 marker runs, safe rc 0 `OK`
+  and fixed rc 1 `bad`; the second run used binaries the witness rebuilt from
+  freshly extracted pinned tarballs. Report-only: no hand-maintained docs
+  passage covered that lane, so docs records doc-ok rather than restating the
+  verdict. Detail:
+  `.mishe-tauftauf/artifacts/witness-w259-openexr2shell/detail.md`.

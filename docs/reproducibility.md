@@ -12820,7 +12820,8 @@ README/results/SVG.
 
 - **Sdimatrix2Shell (frontier W258; staged `377e4855`, patch pinned
   `05369943`, archives re-pinned `f0eec56a`) — rung 3 verbatim / rung 4
-  PARTIAL, STAGED not admitted, witness replay owed.**
+  PARTIAL, STAGED not admitted; author clean-archive replay 10 PASS / 0 FAIL,
+  independent witness replay and admission still owed.**
   CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7,
   stable-diffusion.cpp `master-742-1a13107` (affected commit
   `1a13107bac236b0cd6fadbf5c264f3644874ba4f`) → `master-763-4fcc6fe` (fixed
@@ -12875,7 +12876,43 @@ README/results/SVG.
   and the first clean-archive replay at `05369943` failed `PIN_FAIL` because
   its pin was computed from tag-URL tarball bytes while the runner fetches
   codeload SHA-URL bytes; `f0eec56a` re-pinned both archives with unchanged
-  extracted function bodies. No `sd-cli`, model, wire input, pointer
-  control, command or r5 is claimed; window 176 (panes %354/%355) is live,
-  admission and independent replay are owed, and staging moved no manifest
-  row or generated count.
+  extracted function bodies. The corrected archive was then replayed by the
+  author: from `git archive f0eec56a` into
+  `.mishe-tauftauf/replays/sdimatrix2shell-w258/`, the unmodified runner
+  printed `RESULT PASS=10 FAIL=0`, rc 0 (`replay-console.log`, 09:23:31Z–
+  09:25:39Z) with the canonical hash `65ca30af…` unchanged and refreshed
+  ASan traces showing the same verbatim `imatrix.cpp:302` READ of size 4
+  (PIE addresses and PIDs differ). That is author-side, not witness acceptance.
+  No `sd-cli`, model, wire input, pointer control, command or r5 is claimed;
+  window 176 (panes %354/%355) is live, admission and independent witness
+  replay are owed, and staging moved no manifest row or generated count.
+
+## 2026-11-26 09:2x–09:4xZ — sdimatrix2shell author replay receipt; W259 doc-ok
+
+No replay was rerun in this fold; hashes, bytes and timings are quoted from
+committed receipts and the witness artifact. No rung cell, grade, route or R5
+cell moved by docs.
+
+- **Sdimatrix2Shell author clean-archive replay (`a7c6e74b`).** The unmodified
+  runner from `git archive f0eec56a` into
+  `.mishe-tauftauf/replays/sdimatrix2shell-w258/` printed `RESULT PASS=10
+  FAIL=0`, rc 0, console `replay-console.log` 09:23:31Z–09:25:39Z, runner
+  sha256 `65ca30af…` unchanged. Both tracked vulnerable ASan traces were
+  refreshed: GCC and Clang still show `READ of size 4` at verbatim
+  `src/runtime/imatrix.cpp:302`, 0 bytes after a 4-byte region, with only PIE
+  addresses and PIDs changed. Author-side; operator admission and independent
+  witness replay are still owed, and no manifest row or generated count moved.
+- **Witness W259 — openexr2shell W211 stream-mode command chain (doc-ok).**
+  The witness replayed the shipped `exrcheck -s -c` stream-mode benign-command
+  lane from a clean `git archive e719fb69`: two runs, rc 0, 8/8 pins, stable
+  normalized hash
+  `dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9`, three
+  rc-139 marker runs, safe rc 0 `OK` and fixed rc 1 `bad`, ASan READ-3072 at
+  pinned `internal_zstd.c:472`, exact gdb chain values; the second run used
+  binaries rebuilt from freshly extracted pinned upstream tarballs. Verdict
+  ESTABLISHED AS LABELED at the ASLR-off, local-file, benign-marker scope, no
+  grade change, NO r5. This commit touched only
+  `reports/openexr2shell-file-level.md`; no hand-maintained docs passage
+  covered the W211 stream-mode lane and the manifest/row/count were unchanged,
+  so docs records doc-ok rather than restating the report's conclusion.
+  Detail: `.mishe-tauftauf/artifacts/witness-w259-openexr2shell/detail.md`.

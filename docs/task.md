@@ -12708,8 +12708,34 @@ grade, route or R5 cell moved here.
   vulnerable builds show chosen `0x41414141` two ints past the 1-element
   `counts` vector. Grade rung 3 verbatim / rung 4 PARTIAL; no named adjacent
   object, pointer, CLI/`--imat-in` path, live process, wire, command or r5.
-  The target is **STAGED, not admitted** — operator admission and independent
-  witness replay are owed; staging moved no manifest row or generated count.
+  The target is **STAGED, not admitted** — the author's clean-archive replay
+  from `git archive f0eec56a` returned 10 PASS / 0 FAIL rc 0, but operator
+  admission and independent witness replay are still owed; staging moved no
+  manifest row or generated count.
   A first clean-archive replay failed `PIN_FAIL` on SHA-URL vs tag-URL
   tarball bytes and was re-pinned to the SHA-URL archives with unchanged
   extracted bodies. Full recipe in `docs/reproducibility.md`.
+
+## 2026-11-26 09:2x–09:4xZ — sdimatrix author replay; W259 doc-ok
+
+Signal `a7c6e74b`, head `b91728eb`. Two commits folded; no rung cell, grade,
+route, manifest row, generated count or witness verdict moved by docs.
+
+- `a7c6e74b` closes only the AUTHOR replay gap on sdimatrix2shell: the
+  unmodified runner from `git archive f0eec56a` printed `RESULT PASS=10 FAIL=0`
+  rc 0 (console `replay-console.log`, 09:23:31Z–09:25:39Z, runner hash
+  `65ca30af…` unchanged). The target stays STAGED — operator admission and an
+  independent witness replay are still owed, grade rung 3 verbatim / rung 4
+  PARTIAL with no named adjacent object, pointer, CLI path, wire, command or
+  r5. The three previously stale "replay owed" passages were corrected in
+  place; the first replay's PIN_FAIL on SHA-URL vs tag-URL tarball bytes is
+  preserved, and `f0eec56a` re-pinned both archives with unchanged bodies.
+- `b91728eb` is witness W259 on openexr2shell W211's shipped `exrcheck -s -c`
+  stream-mode benign-command chain: ESTABLISHED AS LABELED at the ASLR-off,
+  local-file, benign-marker scope on an independent clean `git archive
+  e719fb69` replay (two rc-0 runs, 8/8 pins, stable `dc6e005a…` hash), no grade
+  change and NO r5. It touched only the report; no hand-maintained docs
+  passage covered that lane, so the disposition is doc-ok, not a new grade
+  cell or a restated verdict. Remaining rung-moving work on that row is still
+  an ASLR-on address route, a wire/stdin-fed affected process, or a non-benign
+  command with durable attacker benefit.
