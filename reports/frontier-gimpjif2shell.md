@@ -675,6 +675,14 @@ flow, and not a real-plugin observation. Grade stays rung 3 pinned verbatim
 / rung 4 PARTIAL chosen bytes, NO r5. Full hashes and the preserved
 `consume-ptr` negative are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+Witness verdict #5877: **ESTABLISHED AS LABELED** at this exact scope.
+From a clean `git archive 42b12707`, the unmodified `run-consumer.sh`
+returned 15/0 rc 0 and the fresh GDB log SHA-256 `dbb1b1c9…` matched the
+committed log; safe input stayed clean and the fixed pin rejected. The
+verdict is a real glibc *attempt* to dereference the JIF-chosen bk word,
+not a successful chosen-address dereference. No counterexample, grade
+unchanged, NO r5.
+
 
 
 ## Fake chunk at a chosen address accepted by real glibc (W294, 2026-11-26)

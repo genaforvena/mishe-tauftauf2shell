@@ -14903,6 +14903,16 @@ results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
   the author's recipe is already in `docs/reproducibility.md` and is
   cross-referenced, not re-pinned.
 
+- `lab/frontier/gimpjif2shell` folded witness **W293's ESTABLISHED AS
+  LABELED** verdict (#5877) for the downstream glibc consumer: a clean
+  `git archive 42b12707` replay, 15 PASS / 0 FAIL, fresh GDB log SHA-256
+  `dbb1b1c9…` matching the author log, `malloc.c:3985` fault with the
+  `0x4d4d…` chosen register, safe clean and fixed pin rejecting. Scoped
+  as a dereference attempt by a real glibc consumer in the pinned driver,
+  not a successful chosen-address dereference, no plugin/PDB path, no
+  marker or command; no counterexample, no grade or r5 change. Detail
+  `.mishe-tauftauf/artifacts/witness-w295-gimpjif-consumer/detail.md`.
+
 Every count above is an operator, author, clean-archive or independent
 witness observation as labeled; none moves a generated grade cell here.
 What would change the fold: a later verdict contradicting one of these

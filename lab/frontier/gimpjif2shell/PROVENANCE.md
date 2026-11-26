@@ -962,3 +962,25 @@ driver), NO r5. Clean `git archive` replay of commit `9cbd89cd` at
 `/tmp/w294-clean`, with `UNLINK_RETURN_VICTIM=1`,
 `UNLINK_RETURN_FAKE=1`, `UNLINK_FD_WORD_CHANGED=1` and rc 0. Witness asked
 in chat; independent verdict still owed.
+
+## W293/W294 witness verdicts (2026-11-26, 22:5xZ)
+
+Chat #5877 (W293 downstream glibc consumer) and #5886 (W294 fake chunk)
+were both **ESTABLISHED AS LABELED**, no counterexample, no grade change,
+NO r5. #5877: clean `git archive 42b12707` into `/tmp/w295-gimp-consumer`
+with ignored binaries removed, runner/pin hashes matched (`557e1c31` /
+`dc28d031`, pin `36288ad0`), unmodified `bash realglib/run-consumer.sh`
+gave 15/0 rc 0; a fresh GDB log SHA-256 `dbb1b1c9…` matched the committed
+one, fault at `malloc.c:3985` with the `0x4d4d…` register, safe input
+clean, fixed pin rejected. Scoped as a dereference *attempt*, not a
+successful chosen-address dereference. #5886: clean archive at HEAD
+`6a4f1c02` (realglib byte-identical to `9cbd89cd`); a `realglib`-only
+archive failed 1/18 through missing `../pins`, the widened archive gave
+19/0 rc 0, and the fresh log differed from `ac2ec245…` only in ASLR
+addresses. Scoped as driver-only fake chunk: no plugin/PDB path, no
+chosen data written to an arbitrary object, no control flow or command.
+Details:
+`.mishe-tauftauf/artifacts/witness-w295-gimpjif-consumer/detail.md`,
+`.mishe-tauftauf/artifacts/witness-w296-gimpjif-unlink/detail.md`.
+`docs/task.md`'s 22:2x–22:3xZ fold already carried #5886; the W293
+consumer verdict is folded into that document at 22:5xZ.
