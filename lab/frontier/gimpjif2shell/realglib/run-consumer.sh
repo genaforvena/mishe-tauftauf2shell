@@ -17,14 +17,14 @@ hasnt() { ! grep -q -- "$2" "$1" 2>/dev/null; }
 
 hasf() { grep -qF -- "$2" "$1" 2>/dev/null; }
 gcc -O0 -g -Wall -I. $GLIB_CFLAGS -o evidence/real-consumer-vuln \
-  real-driver.c $GLIB_LIBS -lz && ok "consumer vulnerable build" \
+  real-driver.c $GLIB_LIBS -lz -ldl && ok "consumer vulnerable build" \
   || bad "consumer vulnerable build"
 gcc -O0 -g -Wall -I. $GLIB_CFLAGS -DVARIANT_FIXED \
-  -o evidence/real-consumer-fixed real-driver.c $GLIB_LIBS -lz \
+  -o evidence/real-consumer-fixed real-driver.c $GLIB_LIBS -lz -ldl \
   && ok "consumer fixed build" || bad "consumer fixed build"
 
 echo "== runs =="
-for mode in consume consumesz consume-safe unlink; do
+for mode in consume consumesz consume-safe unlink unlinkpatch; do
   evidence/real-consumer-vuln "$mode" > "evidence/consumer-$mode.log" 2>&1
   echo "RC=$?" >> "evidence/consumer-$mode.log"
 done
@@ -75,6 +75,23 @@ has evidence/consumer-unlink.log "UNLINK_RETURN_FAKE=1" \
 has evidence/consumer-unlink.log "UNLINK_FD_WORD_CHANGED=1" \
   && ok "glibc writes the chosen fake chunk fd word" \
   || bad "glibc writes the chosen fake chunk fd word"
+
+echo "== post-inflate shim patch supplies the fake-chunk words =="
+has evidence/consumer-unlinkpatch.log "PATCH_HITS=1" \
+  && ok "simulated shim patched the inflated payload once" \
+  || bad "simulated shim patched the inflated payload once"
+has evidence/consumer-unlinkpatch.log "UNLINK_RETURN_FAKE=1" \
+  && ok "post-inflate patch still returns the lab-arranged fake chunk" \
+  || bad "post-inflate patch still returns the lab-arranged fake chunk"
+has evidence/consumer-unlinkpatch.log "UNLINK_FD_WORD_CHANGED=1" \
+  && ok "post-inflate patch still makes glibc write the fake fd word" \
+  || bad "post-inflate patch still makes glibc write the fake fd word"
+has evidence/consumer-unlinkpatch.log "RC=0" \
+  && ok "post-inflate patch completes all ten post-pin allocations" \
+  || bad "post-inflate patch completes all ten post-pin allocations"
+hasnt evidence/consumer-unlinkpatch.log "A_fd=4d4d" \
+  && ok "patched fd word replaced the file-chosen 0x4d bytes" \
+  || bad "patched fd word replaced the file-chosen 0x4d bytes"
 
 echo "== controls =="
 has evidence/consumer-consume-safe.log "RC=0" \
