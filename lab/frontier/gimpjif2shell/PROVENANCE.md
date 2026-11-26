@@ -183,7 +183,7 @@ pass the guard and need ~4 GiB for `dest`; the pin writes `dest` only while
 `realglib/real-driver.c`  SHA-256
 `b6a37c66cc9850e6990ba9d6c4b03a73d4f7470519d25b83b0b4f677fe10aeb8`,
 `make-jif.py` `53d10b79e0bea3ab70cd1d7346ca2258e489b2fea001f0fcbd67d2d9469e8d49`,
-`run-real.sh` `696eb28d97d97c421051d0470eb48880c4749f3826fdec78c372fdbd90394a42`.
+`run-real.sh` `277232dfdf17d77cf6620058ff80067d278997cbc7ac1879f4fe3d08881f771a`.
 New `published` generator mode writes `evidence/published.jif` SHA-256
 `fcc1f1ce0bee362fb2a7563cd07940b5c31c5e55a708c6083536004250d640e3`,
 dims `45771x46918`, product `0x80000082`, `data_size=260`, 324 chosen bytes.
@@ -192,16 +192,36 @@ New modes `caller` / `callerpub` parse the on-disk file, evaluate the exact
 guard, probe the allocation with `g_try_malloc` (the pinned caller uses
 `g_malloc`, which aborts on failure; success here means the real call would
 succeed), then call the verbatim pin with the real `dest` pointer. Fresh
-logs: `evidence/file-caller.log` (SHA-256
-`728636781f2870a7a7e70648a1ee6a49548279a4fcd0c028bc948ce972dbeef9`:
-`GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK`, `delta=32`, eight
-chosen `0x4d` bytes in the live `GArray`), `evidence/file-callerpub.log`
-(SHA-256 `e6b7be6be8cd3ab619ca151c3d18d38c3b0dd924c99157cc1866cfa0cea63fb1`:
+logs (committed run; pointers and changed-byte counts move with ASLR):
+`evidence/file-caller.log` (SHA-256
+`370a057d9f5816e5b88c7a4b8c37b3e1a3f11aa78376914066c79f99a209b3ec`:
+`GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK`, `delta=32`,
+`RC=1`, eight chosen `0x4d` bytes in the live `GArray`),
+`evidence/file-callerpub.log` (SHA-256
+`6ca4054edf2507a9e3ca4e7f41c9b16a0fc9b93a8432ceec16396a061efd8017`:
 `GUARD_PASSES=1 DEST_SIZE=4294967556`, `DEST_ALLOC=OK`, `delta=272`,
-`LIVE_CHANGED_BYTES=48`), `evidence/file-caller-fixed.log` (SHA-256
-`dc3dcd0713147080890eac4f286d345707bdeb79023af971b1791e1f55a08047`:
+`RC=1`, all 48 inspected live bytes `0x4d`), `evidence/file-caller-fixed.log`
+(SHA-256 `9f25a5f00870957468bea0c450428ca40aa1110b19e9a9384cee819821f928dc`:
 same guard and allocation, fixed `RC=0 ERR=image data`, live object intact).
 `bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0.
+
+Preserved negative: the first clean-archive replay of commit `697f980d`
+returned 29 PASS / 1 FAIL on the pre-existing
+`LIVE_CHANGED_BYTES=48` assertion. ASLR had made one of the 48 original
+GArray bytes already `0x4d`, so the count was 47 although the after-dump
+was 48 chosen bytes. The assertion was replaced by a generated exact
+`LIVE_AFTER` content check plus an ASLR-safe `(47|48)` count check
+(commit `ee63e73c`); five in-tree and three clean-archive runs then all
+returned 30 PASS / 0 FAIL. The failing replay log is preserved at
+`/tmp/w244-clean-replay.log` in the wake session.
+
+Author clean-archive replay from `HEAD` (`ee63e73c`, archive of
+`lab/frontier/gimpjif2shell/{realglib,pins}`): three consecutive runs
+`TOTAL: 30 PASS / 0 FAIL`, rc 0. Fresh toolchain check for the heavier
+plugin lane: meson and ninja are present, but `pkg-config` reports no
+`gtk+-3.0`, `babl`, `gegl-0.4` or `gimp-3.0`; apt offers GIMP 2.10 dev
+only. A real GIMP 3.2 plugin build still needs source-built babl/GEGL/GTK
+dependencies and cannot finish in one wake.
 
 Ceiling unchanged: no GIMP/GEGL build, no GIMP object construction before
 the guard, no PDB `load_image()` wire, no pointer dereference, no command,

@@ -175,17 +175,21 @@ then groom the heap and call the verbatim pin with the real `dest` pointer.
 
 Fresh logs under `realglib/evidence/`:
 - `file-caller.log`: `CALLER screen=33025x65026 ... limit=141841294818300`,
-  `GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK
-  DEST_PTR=0x776b1167c010`, `delta=32`, `RC=1`, eight chosen `0x4d` bytes
-  in the live `GArray`.
+  `GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK`, `delta=32`,
+  `RC=1`, eight chosen `0x4d` bytes in the live `GArray`.
 - `file-callerpub.log`: `GUARD_PASSES=1 DEST_SIZE=4294967556`,
   `DEST_ALLOC=OK`, `usable=264`, `delta=272`, `RC=1`, all 48 inspected
-  live-object bytes `0x4d` (`LIVE_CHANGED_BYTES=48`).
+  live-object bytes `0x4d`.
 - `file-caller-fixed.log`: same guard and allocation succeed, fixed pin
   rejects with `RC=0 ERR=image data`, live object byte-identical.
 
-`bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0. The GIMP object
-construction that precedes the guard in the real `ReadImage()`
+`bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0; three clean-archive runs
+from commit `ee63e73c` reproduced it. The first clean replay (commit
+`697f980d`) failed one changed-byte-count assertion because ASLR had made
+one original GArray byte already `0x4d` (count 47, after-dump still 48
+chosen bytes); assertions now check the exact after-dump content plus an
+ASLR-safe `(47|48)` count. The GIMP object construction that precedes the
+guard in the real `ReadImage()`
 (`gimp_image_new`, `gimp_layer_new`, `gimp_image_insert_layer`,
 `gimp_item_transform_translate`) is still omitted, as is the GIMP build,
 the PDB `load_image()` wire, any pointer dereference, a command and rung 5.
