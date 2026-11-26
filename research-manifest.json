@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 166,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ) and mongoosemip2shell (08:2xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 167,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ) and libx11xkb2shell (08:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 163,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ and mongoosemip2shell admitted 08:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 164,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ and libx11xkb2shell admitted 08:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 163,
+      "value": 164,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2528,6 +2528,22 @@
         "reports/mongoosemip2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Libx11xkb2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 08:5xZ under standing #6 as the 167th declared target mind; window 175 adopted (panes %352/%353 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-88806 / ZDI-CAN-32061 (SUSE CVE record 2026-09-21, X.Org advisory 2026-10-16, CVSS 7.5 and ZDI RCE framing are claims, CWE-122), libX11 before 1.8.14: `_XkbReadKeyActions()` writes a 2-byte zero past `server->key_acts` at verbatim `src/xkb/XKBGetMap.c:277` when a reply sets `firstKeyAct+nKeyActs` beyond `max_key_code+1`; fixed in 1.8.14 by `6d4432b13c0b3b6a644c13de9c793a14db48d545` (one bounds check before the loop). Pinned x.org 1.8.13/1.8.14 tarballs, `run-all.sh` sha256 `2c7273f01d6a26b36c8aeecd94f1e9a9835d9ea81f7e3896072b9b9ee3532bc0`; GCC+Clang ASan and GCC plain give vulnerable `WRITE of size 2`, 0 bytes after an 18-byte `key_acts` region, while 1.8.14 returns `BadLength` and safe/plain controls are clean. Author clean-archive replay console `lab/frontier/libx11xkb2shell/evidence/run-all-console.log` gives `RESULT PASS=12 FAIL=0`. Grade rung 3 verbatim / rung 4 PARTIAL — server-controlled index/length and a deterministic zero write, but no named adjacent object, pointer control, live X wire, command execution or r5.",
+      "reports": [
+        "reports/frontier-libx11xkb2shell.md",
+        "reports/libx11xkb2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
