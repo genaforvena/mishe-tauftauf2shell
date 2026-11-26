@@ -13456,5 +13456,38 @@ Generated trees, CLI binaries, run databases and `evidence/poc.db` are
 gitignored under `build/` and regenerate from the verified tarball; the
 console log is committed. No wire/request path, named neighbour, pointer or
 command: grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL, author-only
-and unwitnessed. Witness must re-fetch the pinned zip from the URL before an
-offline replay; admission and witness verdict are still owed.
+and unwitnessed. Admitted 12:3xZ as the 172nd declared target mind (window
+180) by `08ba0eea`; brief `reports/frontier-sqlitefts5shell.md`, charter
+`charters/sqlitefts5shell.md`, status `reports/sqlitefts5shell-status.md`.
+The register row stays `established:false`: a witness must re-fetch the pinned
+zip from the URL above, verify its sha256, then run the offline runner and
+check the GCC/Clang WRITE-1 and the fixed/safe controls.
+
+### Ruby2Shell — stale-BBuf chosen-pointer falsifier (12:35Z)
+
+From the repo root, `bash lab/repro/ruby2shell-uaf-steer.sh` varies the last
+class character (`x`/`y`/`z`) over five fresh processes per arm on plain Ruby
+3.4.12 / stock glibc 2.39 in default and tcache-disabled modes, with plain
+3.4.13 controls. Expect all 30 vulnerable runs to crash rc 139 in
+`bbuf_free` (`regparse.c:145`) from `parse_char_class:5072`, and all 6 fixed
+runs to raise `REGEXPERROR` rc 0. The steering result is negative: each arm
+gives 5/5 distinct low-12-bit fault offsets for identical input, gdb's stale
+0x21 chunk carries `p=0x55500097d00c`-shaped invalid pointers with unrelated
+second qwords, and tcache-off changes the fault-address shape entirely —
+allocator metadata, not pattern bytes. Gitignored evidence:
+`lab/build/evidence/uaf-steer/summary.txt` with per-run `.out` files and
+`lab/build/evidence/uaf-reuse/dump.out`; the same command regenerates it.
+Secondary 7x2q lane, rung 3 CONFIRMED only; no chosen pointer, wire path or
+grade change, and do not resweep pattern tail bytes.
+
+### CodebaseMemory2Shell — W267 direct-call witness replay
+
+From a clean `git archive HEAD` with the two hash-verified tarballs in
+`pins/`, `bash lab/frontier/codebasememory2shell/run-witness-fast.sh` replays
+offer #4594. Expect rc 0, `FAST_REPLAY_OK`, 15 PASS / 0 FAIL, including ASan
+`READ of size 8` at `cypher.c:2568`, recover-mode `WRITE of size 70` at
+`project_item:3379` with the store at `&func_bufs[32]` (offset 51840), a fresh
+MISHE-OO readback, fixed-arm rejection of N=33/48 and a plain N=48 abort.
+Witness verdict ESTABLISHED AS LABELED covers only this fast lane: the stdio
+`query_graph` rows (#3253) and loopback HTTP `/rpc` row (#3799) remain
+verifier-UNKNOWN under the canonical four-ask #4426. No grade cell moved.

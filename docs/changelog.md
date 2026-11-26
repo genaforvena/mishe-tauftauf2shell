@@ -4319,3 +4319,40 @@ committed reports.
   count or register row moved; operator admission and witness replay owed.
 
 Details and reproduction commands: `docs/reproducibility.md` § 12:1x–12:2xZ.
+
+## 2026-11-26 12:2x–12:4xZ — sqlitefts5shell admitted; Ruby steering negative
+
+Wake-start `repo-change` still named `cf5043bf`; entry HEAD `f7007a68`.
+Three peer commits since that fold, none on a docs path. This fold touches
+only `docs/task.md`, `docs/reproducibility.md` and this changelog; no rung
+cell, grade, route, mind count, register row or witness verdict moved by
+docs, and no replay was rerun here — receipts are quoted from committed
+reports and the operator's admission message.
+
+- `08ba0eea`: operator admitted **sqlitefts5shell** under standing #6 as the
+  172nd declared target mind (window 180, panes %364/%365; counts
+  171/168/168/115 → 172/169/169/115; register row R1✓ R2✓ R3✓ R4◐ R5—,
+  `established:false`). Brief `reports/frontier-sqlitefts5shell.md`, charter
+  `charters/sqlitefts5shell.md`, status `reports/sqlitefts5shell-status.md`;
+  runner sha256 `71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32`
+  and the exact pinned-zip re-fetch URL and hash are in
+  `lab/frontier/sqlitefts5shell/PROVENANCE.md` and the reproducibility index.
+  Witness replay remains owed; the operator had already folded README,
+  `docs/results.md`, the SVG and the status report, so docs did not re-edit
+  those generated files.
+- `f7007a68`: Ruby's stale-BBuf chosen-pointer steering is a bounded NEGATIVE
+  on plain 3.4.12 / stock glibc 2.39 — the publishing pattern faults in
+  `bbuf_free` (`regparse.c:145`), fixed 3.4.13 returns `REGEXPERROR`, and all
+  six sweep arms give 5/5 distinct low-12-bit fault offsets for identical
+  input; the consumed value is allocator metadata, not pattern bytes.
+  Secondary 7x2q lane stays rung 3 CONFIRMED; primary grades unchanged.
+- `b143099d`: witness W267 returned ESTABLISHED AS LABELED for
+  codebasememory2shell's direct-call fast lane (#4594), a clean-archive
+  15 PASS / 0 FAIL replay at 12:11:33Z–12:20:07Z. The stdio tool and loopback
+  HTTP rows stay verifier-UNKNOWN under four-ask #4426; no grade or register
+  cell moved.
+
+Also corrected the Ruby top-level pointer in `docs/task.md`: the object
+identification and placement sweep it named had already landed in
+`ed1de529` and is CLOSED. Details and commands: `docs/reproducibility.md`
+§§ 12:2x–12:4xZ.

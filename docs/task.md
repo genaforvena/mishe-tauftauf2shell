@@ -306,13 +306,16 @@ claims, not conclusions.
   metadata, and all 14 affected case-map encodings expand only
   `0xDF`→`0x53 0x53`, so byte-value steering through the charset is CLOSED.
   No chosen offset, pointer control, marker, oracle or surviving foothold.
-  **Remaining gaps (UNKNOWN):** which object the wire-only one-byte write
-  lands in and whether its effective offset reaches a live consumer without
-  harness grooming; control-flow hijack; the target nominated inside
-  attacker-controlled string content; GC disabled between frees and readback;
-  and the vendor PoC (promised 25 Nov, still unpublished at the 11:16Z
-  check). Next bounded experiment: the corrupted-metadata placement on the
-  wire path. A timestamp-only advisory re-check is a watch, not an experiment.
+  **Object identified (2026-11-26 12:1xZ):** gdb places the byte on the
+  successor chunk's size low byte (`buffer+72`, `0x35`→`0x53`, IS_MMAPPED),
+  not the casemap buffer or its prev_size; a READ watchpoint saw no consumer,
+  so consumer visibility stays UNKNOWN and the wire-only rung-4 branch is
+  CLOSED for this shape sweep. **Remaining gaps (UNKNOWN):** a consumed
+  function or code pointer reached without harness grooming; control-flow
+  hijack; the target nominated inside attacker-controlled string content;
+  GC disabled between frees and readback; and the vendor PoC (promised 25
+  Nov, still unpublished at the 12:25Z re-check). Reopening rung 4 needs a
+  new wire-only base or a measured consumer, not a repeat of this sweep.
 
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
@@ -13116,6 +13119,65 @@ receipts are quoted from committed reports and logs, not rerun here.
   owed, with the pinned zip re-fetched and hash-verified first.
 
 Next: a new wire-only base or a measured consumed chunk consumer would reopen
-the Ruby rung-4 branch; sqlitefts5shell advances only on admission plus a
-witness verdict. What would change this fold: a committed replay that
-contradicts the gdb shape findings or a witness verdict on the staged lane.
+the Ruby rung-4 branch; sqlitefts5shell was admitted at `08ba0eea` and now
+advances only on a witness verdict. What would change this fold: a committed
+replay that contradicts the gdb shape findings or a witness verdict.
+
+## 2026-11-26 12:2x–12:4xZ — sqlitefts5shell admitted; Ruby stale-BBuf steering closed
+
+Wake-start `repo-change` still named my last fold `cf5043bf`; entry HEAD
+`f7007a68`. Three peer commits since that fold, none on a docs path. Docs
+move no rung cell, grade, mind count, register row or witness verdict here;
+bytes, hashes and timings are quoted from committed reports, not rerun.
+
+- `08ba0eea` (operator, standing #6) **admitted sqlitefts5shell as the 172nd
+  declared target mind**: window 180 adopted (panes %364/%365 live, no
+  duplicate); the hy4-flash route and three generated wake units remain
+  person-reserved. Generated counts moved 171/168/168/115 → 172/169/169/115;
+  the manifest row is R1✓ R2✓ R3✓ R4◐ R5— with `established:false`. Brief
+  `reports/frontier-sqlitefts5shell.md`, charter
+  `charters/sqlitefts5shell.md`, status `reports/sqlitefts5shell-status.md`.
+  The charter's cheapest rung-moving experiment is an ASan-recover readback
+  of the varint bytes past `Fts5Data.nn + FTS5_DATA_PADDING` beside a named
+  heap object, then a loopback consumer that opens attacker-supplied `.db`
+  files; no wire path exists in the pinned library. Canonical
+  `lab/frontier/sqlitefts5shell/run-all.sh` sha256
+  `71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32`; a
+  witness must provision the 14.5-MB gitignored pin from
+  `https://www.sqlite.org/2026/sqlite-src-3530400.zip` and verify sha256
+  `d18fa15aec74d8c17e1463f861095adc01b5ad190256acb4f91d22f0368d232b`
+  before the offline runner. Independent witness replay is still owed; the
+  sibling CVE-2026-119373 (negative rowids) belongs to this mind if admitted.
+- `f7007a68` (Ruby2Shell) closes **stale-BBuf chosen-pointer steering** on
+  plain 3.4.12 / glibc 2.39 as a bounded NEGATIVE. The publishing pattern
+  crashes deterministically rc 139 in `bbuf_free` (`regparse.c:145`) from
+  `parse_char_class:5072`; fixed plain 3.4.13 raises `RegexpError`, rc 0.
+  gdb sees a stale 0x21 chunk carrying `p=0x55500097d00c`-shaped invalid
+  pointers; with tcache disabled the fault address changes shape entirely,
+  so the consumed value is allocator metadata, not pattern bytes.
+  `lab/repro/ruby2shell-uaf-steer.{rb,sh}` varies the last class character
+  over five fresh processes per arm in default and tcache-off modes: 30/30
+  vulnerable runs crash and 6/6 fixed runs return `REGEXPERROR`, but all six
+  arms give 5/5 distinct low-12-bit fault offsets for identical input.
+  Chosen-pointer steering is CLOSED; the secondary 7x2q lane is rung 3
+  CONFIRMED (now also unsanitized), with no wire-only reach. Primary grades
+  unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free r5 NOT ACHIEVED. The 12:25Z vendor
+  re-check found `dateModified` still `2026-11-21T03:52Z` and no PoC.
+- `b143099d` (codebasememory2shell W28) folds witness W267's
+  **ESTABLISHED AS LABELED** verdict for offer #4594, the direct-call fast
+  lane: a clean-archive replay of `run-witness-fast.sh` at 12:11:33Z–12:20:07Z
+  (rc 0, `FAST_REPLAY_OK`, 15 PASS / 0 FAIL), with ASan READ-8 at
+  `cypher.c:2568`, recover-mode WRITE-70 at `project_item:3379` (offset
+  51840, `&func_bufs[32]`), a fresh MISHE-OO readback, fixed N=33/48
+  rejection and a plain N=48 stack-smash abort. The verdict does not cover
+  the stdio `query_graph` tool rows (#3253) or the loopback HTTP `/rpc` row
+  (#3799); those stay verifier-UNKNOWN with the canonical four-ask #4426
+  standing. No grade or register cell moved; the generated register row keeps
+  its admission-time wording, and the operator owns that manifest.
+
+Next: sqlitefts5shell's witness verdict is the material event; a verdict or
+new lab evidence on codebasememory's #4426 lanes would be the next fold. The
+Ruby stale-BBuf steering lane is closed — do not resweep pattern bytes. What
+would change this fold: a committed witness verdict contradicting the sqlite
+WRITE-1 receipt or a new commit on a docs path.
