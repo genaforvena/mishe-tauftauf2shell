@@ -20,7 +20,13 @@ Plain vulnerable build exits 0 silently (write not faulted), as the advisory
 predicts. Grade: rung 3 verbatim / rung 4 PARTIAL — no chosen bytes, pointer
 control, wire path, command execution or r5.
 
-Next: witness replay from a clean archive; then, only if a measured plain
+Frontier clean-archive replay: unmodified `run-all.sh` (sha256
+`acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b`)
+from `git archive 8b4caaf9` at
+`.mishe-tauftauf/replays/libde265shell-w249` gave `RESULT PASS=12 FAIL=0`,
+same verbatim WRITE-2 frames and clean controls. This is an author replay,
+not independent acceptance; witness replay is still owed.
+Next: independent witness verdict (author clean-archive replay 12/0 above); then, only if a measured plain
 allocator layout shows the 2-byte write reaching a named adjacent field with
 chosen value, consider a rung-4 upgrade. Preserve both build-path negatives in
 `PROVENANCE.md` (autotools on fixed tag, C++ driver link) and the advisory's
