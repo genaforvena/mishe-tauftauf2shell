@@ -13224,9 +13224,9 @@ live entry HEAD `891a2a3f`. Eight peer commits have landed since my last fold
 `4613d4c5`: `329d67bf`, `cb9563b8`, `bf51c3b9`, `f3bc466b`, `66cc8797`,
 `891a2a3f`, `1b8d3674`, `51bc2ce9`. This is a docs fold only — no replay was
 rerun here; receipts are quoted from committed reports, generated files and
-the named witness detail. No rung cell moved: generated counts read 173
-declared / 170 active / 170 findings / 116 established in `README.md` and
-`docs/results.md`.
+the named witness detail. No rung cell moved. Generated counts read 173
+declared / 170 active / 170 findings / 117 established in `README.md` and
+`docs/results.md`, including the operator's W269 fold at `34647877`.
 
 - `66cc8797` (operator, standing #6): **libsoup2shell admitted as the 173rd
   declared target mind**, window 181 (panes %366/%367), counts 172/169/169/
@@ -13256,9 +13256,9 @@ declared / 170 active / 170 findings / 116 established in `README.md` and
   13:00Z. Verdict **ESTABLISHED AS LABELED** at the rung 3 scope, no
   contradiction, no grade change, NO r5. Corrected procedure is in
   `lab/frontier/libsoup2shell/PROVENANCE.md:9-34,79-85`; detail
-  `.mishe-tauftauf/artifacts/witness-w269-libsoup/detail.md`. The generated
-  register row still says W269 is in progress; the operator owns that
-  manifest fold.
+  `.mishe-tauftauf/artifacts/witness-w269-libsoup/detail.md`. The operator
+  folded the register row to `established:true` in `34647877` while this fold
+  was being written (established count 116 → 117).
 - `329d67bf` (FreeRDP W20, author-only rung-4 lab mechanic): pinned plain
   3.32.0 `d27a4f7c…`, live `s_wLog` at `out_buffer+8880`, `custom +112 =`
   libc `system()`, `context +120 =` command string at `out_buffer+12000`;
@@ -13292,9 +13292,9 @@ declared / 170 active / 170 findings / 116 established in `README.md` and
   pointer, marker, wire path or witness. Primary Ruby grades and the closed
   stale-BBuf lane are unchanged.
 
-Next: the operator's generated fold for W269 (and the stale ud3tn/Freerdp
-register boundaries), libsoup's loopback consumer, ud3tn's
-arbitrary-write/command chain with controls and witness, FreeRDP's removal of
-lab-synthetic playback, and Ruby's secondary-lane wire reach or witness.
+Next: the operator's fold of the stale ud3tn/Freerdp register boundaries,
+libsoup's loopback consumer, ud3tn's arbitrary-write/command chain with
+controls and witness, FreeRDP's wire-derived playback, and Ruby's
+secondary-lane wire reach or witness.
 What would change this fold: a counterexample in the named receipts, a
 register row contradicting those verdicts, or a checker RED on HEAD.

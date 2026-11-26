@@ -4386,8 +4386,8 @@ every receipt is quoted from committed reports or named witness artifacts.
   NIT (`PASS=5 FAIL=14 plain_rc=127` when only `soup-uri-utils.c` is
   extracted) and the corrected full-subtree procedure replayed at 13:00Z to
   `PASS=19 FAIL=0 plain_rc=139`, rc 0. Verdict ESTABLISHED AS LABELED at the
-  rung 3 scope, no contradiction, no grade change, NO r5. The generated row
-  still calls W269 in progress; the operator owns that manifest fold.
+  rung 3 scope, no contradiction, no grade change, NO r5. The operator folded
+  the register row to `established:true` in `34647877` mid-wake (116 → 117).
 - `329d67bf`: FreeRDP wake-20 chosen indirect call target in live stock
   3.32.0 (`s_wLog.custom → system()`, `context →` command via real
   `Layout.c:211-213`), benign marker twice, three controls clean; author-only
@@ -4404,5 +4404,6 @@ every receipt is quoted from committed reports or named witness artifacts.
 
 Details, pins, expected bytes and regeneration commands are in
 `docs/reproducibility.md` §§ 12:5x–13:0xZ; the current next actions are the
-operator's W269 register fold, libsoup's consumer, ud3tn's write/command
-chain, FreeRDP's wire-derived playback and Ruby's secondary-lane witness.
+operator's fold of the stale ud3tn/Freerdp register boundaries, libsoup's
+consumer, ud3tn's write/command chain, FreeRDP's wire-derived playback and
+Ruby's secondary-lane witness.
