@@ -1,10 +1,12 @@
 # Frontier brief: pjproject AVI video chunk length overflow — CVE-2026-77396
 
-Status: **ADMITTED 2026-11-26 by the operator** (156th target); witness replay
-ESTABLISHED AS LABELED (W239, 2026-11-26). Rung 3 pinned verbatim excerpt;
-rung 4 PARTIAL (chosen bytes observed past a 48-byte logical frame in a
-synthetic plain readback). No real pjmedia build, no crafted AVI file, no
-network wire, no pointer, no command and no rung 5.
+Status: **ADMITTED 2026-11-26 by the operator** (156th target). W239 witness
+replay ESTABLISHED AS LABELED for the staged excerpt evidence. W240 adds a
+real `pjmedia` build at both pins: ASan-confirmed OOB WRITE of 64 and 512
+bytes in real `avi_get_frame()` and chosen-marker overwrite of a live
+adjacent sentinel, with fixed and safe controls. Grade: **rung 3 confirmed in
+the real consumer / rung 4 with a driver-provided sentinel**. No library
+object overwrite, no pointer, no wire, no command and no rung 5.
 
 ## Claim and scope
 
@@ -27,7 +29,8 @@ network wire, no pointer, no command and no rung 5.
   writes file-chosen bytes past the frame buffer, with attacker-controlled
   length and contents; the advisory calls local playback a crash and
   attacker-supplied AVI to a parser a stronger memory-corruption exposure.
-  No real AVI, player or wire input is exercised here.
+  A real AVI file and real public-API frame pull are exercised below; no
+  network wire, pointer, command or rung 5.
 
 ## Pins and source-bound mechanism
 
@@ -69,12 +72,37 @@ the chosen `MISHE-PJPROJECT!` ASCII marker, while the vulnerable body also
 adopts `AVI_FRAME_SIZE=64`. The plain fixed build clamps to 48 and writes no
 marker; the safe input writes no marker.
 
-Stand-ins: `pjmedia_frame`, `avi_reader_port`, `pjmedia_avi_subchunk`, file
-positioning, `file_read3()` as a bounded `memcpy` of the present payload, and
-a caller. The release-build `pj_assert` is deliberately a no-op, matching the
-advisory. The stand-in caps the file at 64 present bytes, so the observed
-WRITE is 64 bytes, not the full 32-bit range an AVI chunk could declare.
-Exact commands, hashes and raw logs are in `lab/frontier/pjproject2shell/PROVENANCE.md`.
+For the staged excerpt, stand-ins are `pjmedia_frame`, `avi_reader_port`,
+`pjmedia_avi_subchunk`, file positioning, `file_read3()` as a bounded
+`memcpy` of the present payload, and a caller; the stand-in file caps the
+copy at 64 present bytes. The W240 real-consumer lane removes that cap.
+
+## Real-consumer lane (W240, 2026-11-26 15:00Z)
+
+`bash real/build-real.sh && bash real/run-real.sh` builds both pinned trees
+with `PJMEDIA_HAS_VIDEO=1` and ASan at `-O0`, release-style `-DNDEBUG`
+semantics, and replays a minimal 4x4 24-bpp DIB AVI through
+`pjmedia_avi_player_create_streams()` and `pjmedia_port_get_frame()`.
+`real/make_avi.py` creates 48-, 64- and 512-byte `00dc` chunks with
+`MISHE-PJPROJECT!` at payload offset 48; hashes and logs are in
+`PROVENANCE.md`.
+
+- Vulnerable `c1ea7648`, 64-byte chunk: ASan `heap-buffer-overflow`,
+  `WRITE of size 64`, 0 bytes after a 48-byte region, stack
+  `fread` → `pj_file_read` → `file_read3 (avi_player.c:158)` →
+  `avi_get_frame (avi_player.c:1222)` → `pjmedia_port_get_frame`.
+- Vulnerable, 512-byte chunk: same site, `WRITE of size 512` — the full
+  file-supplied length, no 64-byte stand-in cap.
+- Vulnerable, 64-byte chunk with a live 18-byte adjacent sentinel:
+  `NEIGHBOR_AFTER=4d495348452d504a50524f4a454354214a21` — 16 chosen marker
+  bytes at frame+48..+63, last two sentinel bytes intact. `frame.size` becomes
+  64. No library object or pointer was targeted.
+- Vulnerable safe input (48-byte chunk) and both fixed `7ecc6584` cases:
+  rc 0, `frame.size=48`, no ASan report; the fixed build logs the clamp.
+
+Exact commands, hashes, AVI bytes and raw logs:
+`lab/frontier/pjproject2shell/PROVENANCE.md`, `real/out-vuln/`,
+`real/out-fixed/`.
 
 ## Witness replay (W239, 2026-11-26)
 
@@ -88,30 +116,32 @@ the only upstream diff is the video-branch clamp at lines 1221-1255. GCC and
 Clang ASan -O0 logs show `WRITE of size 64`, 0 bytes after a 48-byte region,
 write frame `avi_get_frame pins/avi-vulnerable.inc:15`; fixed and safe inputs
 are ASan-clean at `AVI_FRAME_SIZE=48`, plain attack exposes the 16 chosen
-bytes `MISHE-PJPROJECT!` past the 48-byte logical frame. No real library,
-AVI, wire, pointer, command or r5; full detail:
+bytes `MISHE-PJPROJECT!` past the 48-byte logical frame. That verdict was
+limited to the staged excerpt evidence; the W240 real-consumer lane above
+supersedes it. Full detail:
 `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
 
 ## Grade and tractability
 
-- **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in the verbatim
-  pinned video branch of `avi_get_frame()`, with fixed and safe-input
-  controls.
-- **Rung 4 PARTIAL:** bytes are chosen in the harness and read back past the
-  48-byte logical frame in a synthetic plain process. No real library build,
-  crafted AVI, adjacent live object, pointer, network wire, command or
-  observed side effect.
-- **Not rung 5:** no loopback target, no attacker-supplied bytes through a
-  real API, no pointer hijack, no command.
+- **Rung 3 confirmed in a real consumer:** GCC and Clang ASan on the verbatim
+  pinned branch, plus a real `pjmedia` build at the vulnerable parent, show
+  heap OOB WRITEs of 64 and 512 bytes in `avi_get_frame()` on a real crafted
+  AVI, with fixed and safe-input controls.
+- **Rung 4 with a driver-provided live object:** chosen
+  `MISHE-PJPROJECT!` bytes land at frame+48..+63 and overwrite an adjacent
+  18-byte sentinel read back after the real `pjmedia_port_get_frame()` call.
+  The adjacent object is allocated by the driver, not a library object; no
+  pointer was corrupted and no command executed. Do not overstate as pointer
+  control.
+- **Not rung 5:** no live loopback service, no attacker-supplied bytes
+  through a network wire, no pointer hijack, no command side effect.
 
-Cheapest next experiment: build real pjproject at `c1ea7648` with
-`PJMEDIA_HAS_VIDEO=1` and ASan, synthesize a minimal AVI whose declared video
-dimensions produce a small frame and whose `00dc` chunk declares 64+ bytes of
-chosen payload, then call `pjmedia_avi_player_create_streams()` and pull a
-frame. Measure the real read length and whether the chosen bytes land in a
-live adjacent object; replay the same AVI against `7ecc6584` to confirm the
-clamp. Keep the no-pointer/no-command ceiling until a real consumer and
-vulnerable/fixed/safe controls are observed.
+Cheapest next experiment: place a real `pjmedia` object (e.g. a pool block
+or port struct) immediately after the frame buffer and see whether chosen
+bytes corrupt a field that changes a later library decision. That would
+upgrade rung 4 from a sentinel to a library-object overwrite. Rung 5 would
+additionally need a loopback target reachable by attacker-supplied AVI bytes
+and a benign command side effect with vulnerable, fixed and safe controls.
 
 ## Duplicate check
 

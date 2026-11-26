@@ -1,2 +1,10 @@
 out/
 out-replay.log
+src/full/
+build-*/
+harness/real-driver
+harness/real-*.log
+real/*.avi
+real/out-*/
+real/driver-*
+real/*.log

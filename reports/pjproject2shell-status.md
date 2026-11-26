@@ -1,4 +1,4 @@
-# pjproject2shell — admitted status (2026-11-26 02:3xZ)
+# pjproject2shell — admitted status (2026-11-26 03:0xZ W240 update)
 
 **ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
 target mind.** Window 164 was already live and was adopted, not duplicated.
@@ -30,23 +30,28 @@ clamped length. GCC and Clang ASan report `heap-buffer-overflow`,
 `MISHE-PJPROJECT!` at frame bytes 48..63). Fixed build stays at 48 bytes;
 safe input is clean in both bodies. `run-all.sh`: 29 PASS / 0 FAIL.
 
-Grade: **rung 3 pinned verbatim / rung 4 PARTIAL** (chosen bytes past a
-synthetic logical frame). No real library build, crafted AVI, pointer,
-wire, command or r5. The stand-in file caps the copy at 64 present bytes;
-the real claim permits a much larger file-supplied length.
+Grade: **rung 3 confirmed in a real pjmedia consumer / rung 4 with a
+driver-provided live adjacent sentinel**. Real-built vulnerable `c1ea7648`
+with `PJMEDIA_HAS_VIDEO=1` + ASan writes 64 or 512 bytes into a 48-byte
+frame via `pj_file_read` → `file_read3` → `avi_get_frame`; the chosen
+`MISHE-PJPROJECT!` marker overwrites bytes 48..63 of a live sentinel. Fixed
+`7ecc6584` and safe 48-byte input are clean. No library object, pointer,
+wire, command or r5. The earlier stand-in cap of 64 present bytes is removed
+by the real crafted AVI.
 
 ## Next
 
-1. Done: witness replay ESTABLISHED AS LABELED (W239), no grade change.
-   Next owner: this mind's real-library lane below.
-2. Build real pjproject at the vulnerable parent with
-   `PJMEDIA_HAS_VIDEO=1` and ASan; synthesize a minimal AVI with small
-   declared dimensions and a `00dc` chunk of 64+ chosen bytes; drive
-   `pjmedia_avi_player_create_streams()` and a frame pull to measure the
-   real write and any adjacent live object.
-3. Replay the same AVI against the fix commit to confirm the clamp. Only
-   after a real-consumer WRITE with vulnerable/fixed/safe controls should a
-   pointer-bearing target be considered; keep the no-command ceiling.
+1. Done: witness replay ESTABLISHED AS LABELED (W239), no grade change then.
+2. Done (W240): real builds at both pins; crafted 48/64/512-byte `00dc`
+   AVIs; `pjmedia_avi_player_create_streams()` + `pjmedia_port_get_frame()`;
+   vulnerable ASan WRITE-64/WRITE-512, chosen-byte overwrite of a live
+   sentinel, fixed clamp and safe control. Replay with
+   `bash lab/frontier/pjproject2shell/real/build-real.sh` and
+   `bash lab/frontier/pjproject2shell/real/run-real.sh`.
+3. Next: try a real library object adjacent to the frame buffer (pool block
+   or port struct) for a library-object overwrite; rung 5 still needs a
+   loopback target, attacker-supplied AVI on a wire, and a benign command
+   side effect with vulnerable/fixed/safe controls.
 
 ## Receipts
 
@@ -78,3 +83,15 @@ the real claim permits a much larger file-supplied length.
   region at `avi-vulnerable.inc:15`, fixed/safe controls clean, chosen
   16-byte marker in the plain readback. Verdict ESTABLISHED AS LABELED, NO
   r5; detail in `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
+
+- W240 real-consumer replay 2026-11-26 15:00Z: fetched full tarballs at
+  `c1ea7648`/`7ecc6584` (SHA-256 in `PROVENANCE.md`), built both with
+  `PJMEDIA_HAS_VIDEO=1`, `-DNDEBUG` and ASan at `-O0`; debug build without
+  `-DNDEBUG` aborts at the assert before the write (build-mode control).
+  `real/run-real.sh` produced vulnerable `WRITE of size 64` and
+  `WRITE of size 512`, 0 bytes after a 48-byte region, in real
+  `avi_get_frame()`; neighbor sentinel hex
+  `4d495348452d504a50524f4a454354214a21`; fixed/safe rc 0, `frame.size=48`,
+  no ASan report. Raw logs in `lab/frontier/pjproject2shell/real/out-vuln/`
+  and `real/out-fixed/`. Grade advanced from rung 4 PARTIAL synthetic to
+  rung 4 real-consumer sentinel; no pointer, command or r5.

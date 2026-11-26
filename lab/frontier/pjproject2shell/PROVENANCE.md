@@ -64,3 +64,64 @@ Author run 2026-11-26 02:1xZ: **29 PASS / 0 FAIL**, rc 0. Raw logs in
 `out/plain-safe.log`, `out/plain-fixed-attack.log`.
 `bash run-witness.sh` rehashes the four pins, deletes `out/`, rebuilds every
 binary and re-asserts the same evidence.
+
+## Real pjmedia consumer lane (W240, 2026-11-26 15:00Z)
+
+Provisioning is a read-only upstream fetch of two full source tarballs:
+
+    real/build-real.sh
+    curl -fsSL https://codeload.github.com/pjsip/pjproject/tar.gz/<sha>
+
+| tarball | sha256 |
+| --- | --- |
+| `src/full/vuln.tar.gz` (`c1ea7648`) | `5ebc89e088b6a9272d22e6fef955b77b41aff7c322ab4728109da27fd0fa0f03` |
+| `src/full/fixed.tar.gz` (`7ecc6584`) | `5f2984d84697f2b2fbad881d8fa69ca34f165219a646d2ce2b78f3aa2a8a88ca` |
+
+Both trees configure with `PJMEDIA_HAS_VIDEO=1`, release-style `pj_assert`
+semantics and `CFLAGS/CXXFLAGS='-fsanitize=address -g -O0
+-fno-omit-frame-pointer -DPJMEDIA_HAS_VIDEO=1 -DNDEBUG'`; configure disables
+sound, ffmpeg, SDL, SSL and v4l2. A debug build without `-DNDEBUG` aborts at
+`avi_player.c:1221` before any write; that is a build-mode control, not the
+production condition. With release flags the same source logs `Assert failed:
+frame->size >= ch.len` and continues into `file_read3()`.
+
+`real/make_avi.py` writes a minimal one-stream DIB AVI: 4x4, 24 bpp,
+`00dc` chunk length 48/64/512, `MISHE-PJPROJECT!` at payload offset 48.
+
+| AVI | sha256 |
+| --- | --- |
+| `real/attack64.avi` | `383683fca50d1fafaa8c5f50d2672bab6da8b3cbfa5cd088cbd4730890cce619` |
+| `real/attack512.avi` | `834cf4cb260224e6d8b0d84ad68900bcc6d8a45442247c799764ea6b2bdecac0` |
+| `real/safe48.avi` | `a21a70cfd5f43097dc875376881189c1d2a266a453ab7ad3a58f42b829bf67f7` |
+
+`real/real-driver.c` calls the real public API
+`pjmedia_avi_player_create_streams(..., PJMEDIA_AVI_FILE_NO_SYNC, ...)`,
+gets the real video port, derives 48 bytes with
+`pjmedia_get_video_format_info()->apply_fmt()`, allocates the frame buffer,
+and pulls one frame with `pjmedia_port_get_frame()`. `exact` mode puts an
+ASan redzone directly after the frame; `neighbor` mode places a live
+18-byte sentinel (`LIVE-ADJACENT-OBJ!`) there and reads it back.
+
+    bash lab/frontier/pjproject2shell/real/build-real.sh
+    bash lab/frontier/pjproject2shell/real/run-real.sh
+
+Observed (raw logs in `real/out-vuln/` and `real/out-fixed/`):
+
+- vulnerable `attack64 exact`: ASan `heap-buffer-overflow`, `WRITE of size
+  64`, 0 bytes after a 48-byte region; stack `fread` → `pj_file_read
+  (file_io_ansi.c:132)` → `file_read3 (avi_player.c:158)` → `avi_get_frame
+  (avi_player.c:1222)` → `pjmedia_port_get_frame (port.c:99)`.
+- vulnerable `attack512 exact`: same site, `WRITE of size 512` — the full
+  file-supplied chunk length, removing the 64-byte stand-in cap.
+- vulnerable `attack64 neighbor`: `PULL_DONE frame.size=64`,
+  `NEIGHBOR_AFTER=4d495348452d504a50524f4a454354214a21` — chosen
+  `MISHE-PJPROJECT!` occupies bytes +48..+63 of the live sentinel and its
+  last two bytes (`4a21`, "J!") remain.
+- vulnerable `safe48 exact` and both fixed cases: rc 0, `PULL_DONE
+  frame.size=48`, no ASan report. Fixed build logs `AVI video chunk (64)
+  exceeds frame buffer (48), truncating` from the source clamp.
+
+No pointer was corrupted, no command ran, and no external target was
+contacted. Grade after this lane: rung 3 confirmed in the real pjmedia
+consumer; rung 4 with a driver-provided live adjacent sentinel (no library
+object or pointer control); no rung 5.
