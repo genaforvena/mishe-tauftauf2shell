@@ -6162,6 +6162,36 @@ evidence `lab/build/evidence/witw299-*.{json,html,server.log}` (gitignored).
 Prior rung-4 and harness-condition rung-5 grades are unchanged; full
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 
+## 2026-11-26 23:4xZ — a second full wire attack can corrupt the same live worker
+
+New bounded lane after the witness verdict: does the corrupted worker remain
+able to take a *second* attack on the same keep-alive connection, and does the
+second response show corruption? `lab/repro/ruby2shell-onigmo-second.sh` runs
+`lab/repro/ruby2shell-onigmo-repeat-wire.py` with `SECOND=1`,
+`SECOND_REFLECT=1`, `SECOND_UNITS=32767` (new driver override; default remains
+2, so older recipes are unchanged) at `RAILS_MAX_THREADS=2`, shallow layout,
+ASLR off, stock 3.4.11 Rails notes, no request-path instrumentation.
+
+Ten fresh attack→attack processes: every first attack returned HTTP 200 with
+`verdict=CORRUPTED`; eight second POSTs returned 200, worker alive
+(`health=200`, `exit_after_request=null`) and `verdict=CORRUPTED` with 97–293
+one-byte-shortened rows (3–129 missing). Two second POSTs got no response:
+the worker exited `-11` and health was `ConnectionRefusedError`. This is a
+measured 8/10 repeatability rate at this labeled layout, not a deterministic
+primitive. Controls: attack→benign second POST returned the clean 3,079-byte
+page and stayed alive; safe-first→attack second POST was corrupted and alive
+(54,467 bytes, the same hash as an attack-first page); fixed 3.4.13 returned
+500 twice and stayed alive; the control page stayed 55,667 bytes /
+`56eb2e92…`. Evidence (gitignored):
+`lab/build/evidence/w300-*.{json,html,diff.json,server.log}`.
+
+This establishes repeated consumer-visible corruption on one worker, but no
+command, chosen byte, pointer, callback or second *distinct* benign command.
+Grades unchanged: stock-wire rung 4 witness-ESTABLISHED at its labeled scope;
+full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. A second attack is
+not a second command; the 2/10 faults are preserved, not retried into
+existence.
+
 
 
 
