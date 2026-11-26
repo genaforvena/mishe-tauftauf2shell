@@ -88,3 +88,37 @@ an uncorrupted callback (`delta=464`), long arm chosen
 `fn/arg/prev=0x5a415a415a415a41` plus three node-2 SIGSEGVs from restart
 retries (assert is at least one), fixed arm 0/0 with no probe and
 `could not parse replication origin name`. Author smoke, not a witness verdict.
+
+## Close at documented ceiling (2026-11-26 05:10Z)
+
+Research on this lane is closed. W247 independently replayed the callback arm
+(ESTABLISHED AS LABELED, NO r5; `.mishe-tauftauf/artifacts/witness-w247-pgactive2shell/detail.md`)
+and #3896 established the harness. The older catalog-arm offer #4657 has no
+witness verdict and is no longer demanded; its author smoke stays available.
+
+Rung 5 is structurally blocked on this build, not merely untried:
+
+- The overlong name is privileged local catalog state in
+  `pg_replication_origin.roname`; the remote insert only triggers the error
+  path. `pgactive.c:1581` rejects a non-empty generated `replication_name`, so
+  the generated-name path cannot carry it either.
+- `ErrorContextCallback.callback` at +464 is the only consumed overwritten
+  word, and its genuine value is the ASLR-randomized library base + `0x11aad`.
+  The partial-overwrite search above found no usable marker in the reachable
+  256-byte block. A sweep of the pinned tree found shell-out helpers only at
+  `popen` (`pgactive_common.c:118`) and `execv` (`pgactive_init_copy.c:2165`),
+  both inside the same randomized pgactive.so — neither supplies a fixed
+  target.
+- `arg` at +472 is itself overwritten with the chosen pattern, so it cannot
+  point at a lab-chosen command string. PostgreSQL `text` and `sscanf %s` both
+  forbid the embedded NUL needed to lay a terminated command string inside the
+  buffer.
+- No arm produced a valid target, command string or observed side effect. A
+  caller with the privileges this route needs can already run OS commands via
+  `COPY ... FROM PROGRAM` (standard PostgreSQL capability — reasoning, not
+  exercised in this lab), so the primitive adds no capability to the claim's
+  attacker model.
+
+Change mind only on a stable gadget reachable despite ASLR with controlled
+`arg`, a wire-carryable long name, or an observed command side effect. Do not
+rerun either replay unchanged.

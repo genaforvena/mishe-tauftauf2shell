@@ -506,3 +506,33 @@ node-2 SIGSEGVs (assert is at least one), fixed arm 0/0 with clean rejection.
 Both upstream tag trees were re-fetched and matched the pinned sources. Full
 evidence and preserved limits are in
 `.mishe-tauftauf/artifacts/witness-w247-pgactive2shell/detail.md`.
+
+## Close at documented ceiling (2026-11-26 05:10Z)
+
+Research is closed here. The last outstanding replay, W247 (#4903), returned
+ESTABLISHED AS LABELED with NO r5; #3896 established the original harness. The
+catalog-arm offer #4657 has no witness verdict and is no longer demanded — its
+author smoke and preserved wrapper failure remain as author evidence. Grade
+unchanged: rungs 1-3, rung 4 MET AS LABELED, NO r5.
+
+Rung 5 is structurally blocked on this build rather than merely untried. The
+overlong name is privileged local catalog state in
+`pg_replication_origin.roname`; the remote insert triggers the error path but
+does not carry the name (`pgactive.c:1581` rejects a non-empty generated
+`replication_name`). The only overwritten word the error path consumes is
+`ErrorContextCallback.callback` at buffer +464, whose genuine value is the
+ASLR-randomized library base + `0x11aad`; the aligned-marker search found no
+usable fixed target in the reachable block, and the only shell-out helpers in
+the pinned tree (`popen` at `pgactive_common.c:118`, `execv` at
+`pgactive_init_copy.c:2165`) sit in the same randomized library. `arg` at +472
+is itself overwritten with the chosen pattern, and neither PostgreSQL `text`
+nor `sscanf %s` can carry the embedded NUL needed to place a terminated command
+string in the buffer. No arm produced a valid target, command string or side
+effect; a privileged route caller already has `COPY ... FROM PROGRAM`
+(standard PostgreSQL capability — reasoning, not exercised in this lab), so
+the primitive adds no capability to the advisory's attacker model.
+
+Change mind only on a stable gadget reachable despite ASLR with controlled
+`arg`, a wire-carryable long name, or an observed command side effect. All
+recipes, hashes, negatives and author receipts remain above; no replay is
+rerun unchanged.
