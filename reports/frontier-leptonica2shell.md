@@ -89,6 +89,14 @@ real `src/bytearray.c` files hash to the exact values pinned in
 `PROVENANCE.md`. `run-real.sh` uses a sparse 1,000,000,001-byte file with
 chosen `MISHE-LEPTONICA` at offset 201.
 
+Clean-archive replay: extract with `git archive HEAD
+lab/frontier/leptonica2shell/real`, then `bash provision.sh` → 7 PASS /
+0 FAIL, rc 0 at 14:58Z. `provision.sh` sha256
+`073c55d82e852cb53ee8db3058308c87e5f3a8fed0064c184062d94911b9b789`;
+`run-real.sh` sha256
+`ce0a0ae3c109bd3561281fb966b55eeeae424f0b8e18402f1d34751e18b4e4f7`.
+This is an author replay, not witness acceptance.
+
 - `evidence/real-vuln-asan.out`: real `heap-buffer-overflow`,
   `WRITE of size 1000000001`, `0 bytes after 201-byte region`; write frame
   `l_byteaInitFromStream src/src/bytearray.c:192` called from

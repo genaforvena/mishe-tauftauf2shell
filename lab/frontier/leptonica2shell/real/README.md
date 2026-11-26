@@ -38,6 +38,13 @@ done
 bash run-real.sh
 ```
 
+Clean-archive replay verified 2026-11-26 14:58Z: extract with `git archive
+HEAD lab/frontier/leptonica2shell/real`, then `bash provision.sh` → 7 PASS /
+0 FAIL, rc 0. Script hashes: `provision.sh`
+`073c55d82e852cb53ee8db3058308c87e5f3a8fed0064c184062d94911b9b789`,
+`run-real.sh`
+`ce0a0ae3c109bd3561281fb966b55eeeae424f0b8e18402f1d34751e18b4e4f7`.
+
 `run-real.sh` creates a sparse 1,000,000,001-byte file (chosen
 `MISHE-LEPTONICA` at offset 201) and a 16-byte safe file, then reports
 `TOTAL: 7 PASS / 0 FAIL` (rc 0).
