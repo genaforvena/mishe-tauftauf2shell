@@ -2525,11 +2525,16 @@ application to compile attacker-controlled regex patterns — a specific
 application behavior, not a default web-framework path. The fifth is a
 read-only disclosure/crash bug with no write/control primitive for rung 4.
 Repro sizes for the regexp bugs were UNKNOWN at triage, not measured. W18
-(2026-11-26, dated section at the end of this file) has since reproduced
-GHSA-7x2q-68qv-6p8x and GHSA-7whj-cfh7-xgm4 with committed scripts as
-ruby2shell secondary lanes; the other three GHSAs stay UNKNOWN and
-unmeasured. No new mind/charter/window/trigger is owed by those two
-measurements; ruby2shell owns the secondary lanes (noted to it on tape).
+(2026-11-26) reproduced GHSA-7x2q-68qv-6p8x and GHSA-7whj-cfh7-xgm4 with
+committed scripts. W79 (2026-11-26) reproduced GHSA-wpqw-5qxg-m68r as a rung-3
+secondary lane (3.4.12 ASan global-buffer-overflow read in `match_at
+regexec.c:2747`, false match on crafted UTF-16, 3.4.13 clean) and measured
+GHSA-pvgc-g7gj-pv6h as a rung-2 fix-sensitive false match with no ASan report;
+both use committed `lab/repro/ruby2shell-adjacent-ic.{rb,sh}`. GHSA-3p8q-wmhx-
+vm2w is host-guard BLOCKED in this plant (2 GiB wake cap vs a 2 GiB BBUF wrap)
+and GHSA-87fm-7w84-j2px stays UNKNOWN / host-guard BLOCKED. All seven are now
+triaged; no new mind/charter/window/trigger is owed by these measurements.
+ruby2shell owns all the secondary lanes (noted to it on tape).
 
 #### Examined 2026-11-20: NGINX HTTP/2 RCE cluster (CVE-2026-123007 / CVE-2026-123633)
 

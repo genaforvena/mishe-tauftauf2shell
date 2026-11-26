@@ -4495,3 +4495,57 @@ change the grade; it is a per-build bounded negative.
 
 Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+## Adjacent case-insensitive Regexp lanes (2026-11-26, wake 79): wpqw reproduced, pvgc fix-sensitive
+
+Two more bugs in the same 2026-11-18 Ruby fix series as CVE-2026-132825
+were measured for the first time here. Both are **secondary lanes**: wpqw
+needs an attacker-chosen pattern, pvgc needs a crafted subject against a
+case-insensitive backreference; neither is a default Rails/Sinatra path and
+neither changes the primary grade. Repro: `lab/repro/ruby2shell-adjacent-ic.rb`
+with runner `lab/repro/ruby2shell-adjacent-ic.sh`; gitignored evidence
+`lab/build/evidence/adjacent-ic/3.4.{12,13}-{wpqw,pvgc}.out`.
+
+- **GHSA-wpqw-5qxg-m68r** (out-of-bounds read in case-insensitive Regexp
+  matching; upstream fix `e3591b3d5d`, "Fix an out-of-bounds read in the
+  case-insensitive exact match"). `OP_EXACT1_IC` advances the bytecode
+  pointer by the case-fold length without checking it against the operand;
+  U+1E98 folds to two characters in UTF-16 (`w` + U+030A). On affected
+  `ruby 3.4.12` (rev 366f5fdc00) ASan, the vendor-derived pattern
+  `Regexp.new("(?i:w)\u6203AB".encode("UTF-16LE"))` matched against
+  `"W\u6203AB".encode("UTF-16LE")` gives `rc=1` and
+  `ERROR: AddressSanitizer: global-buffer-overflow`, `READ of size 8`,
+  `#0 match_at regexec.c:2747`, `#1 onig_search_gpos regexec.c:5466`,
+  `#3 reg_onig_search re.c:1782`; the address is `0 bytes after global
+  variable 'oplabels' (regexec.c:2329) of size 784`. The longer vendor shapes
+  first report `ctrl-match=true` but also `crafted-nomatch=true` — the
+  affected matcher **accepts a non-matching subject** (`U+1E98` where only
+  `w/W` should match). Fixed `ruby 3.4.13` (rev 48857d6f2e) returns
+  `crafted-nomatch=false`, `short-nomatch=false`, `rc=0` for all shapes.
+  On the *plain* affected build the short shape segfaults (`rc=139` after
+  printing `short-match=true`); plain 3.4.13 is clean (`rc=0`). Grade
+  **rung 3 CONFIRMED — secondary lane**: ASan observed the OOB read and the
+  wrong match is patch-sensitive. No chosen-byte write, pointer control,
+  marker execution, wire-only reachability or RCE claim; the primary grade
+  is unchanged.
+- **GHSA-pvgc-g7gj-pv6h** (out-of-bounds read in case-insensitive backreference
+  matching; upstream fix `9a6ccf70d5`, "Check the end of the subject in
+  string_cmp_ic"). `/(k\0)\1/i.match?("k\0\u212a")` reports `true` on 3.4.12
+  (both ASan and plain builds) but `false` on fixed 3.4.13; the `k\0\u212a\0`
+  control and `/(k)\1/i` normal match hold on both. ASan emitted **no** report
+  in this shape, so grade is **rung 2 fix-sensitive false match only**; the
+  OOB read is the upstream diagnosis, not an independently observed sanitizer
+  finding here. No disclosure of read bytes or control-flow claim.
+
+Reconciliation of the previous wake (attempt 78, no yield): it left only
+`/tmp/ghsa3p8q-literal.rb` and `/tmp` outputs. Its 500 MB literal probe hit
+`timeout` at 213 s with `MAXRSS_KB=1792`; the scaled 45 KB repeat-pattern
+shape hit `timeout` at 293 s with `MAXRSS_KB=1169964`. GHSA-3p8q-wmhx-vm2w
+needs the `BBUF_WRITE` 2 GiB integer wrap and cannot be reached inside this
+wake's 2 GiB cgroup while compilation itself consumes >1 GB. That lane is
+**CLOSED — host-guard BLOCKED**, with no new grade. Veria's advisory was
+re-read at 09:40Z: `dateModified` is still `2026-11-21T03:52Z` and the PoC
+section still promises 25 November "or later"; no mechanics appeared.
+
+Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
