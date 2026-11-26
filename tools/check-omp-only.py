@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Hard plant-scoped engine guard: only engine=omp and model=hy4-flash-free.
+"""Hard plant-scoped engine guard: OMP with hy4-flash primary and one HungerG fallback.
 
 Exit 2 with exact offenders if any declared role, route, engine config, or
 generated wake unit can select claude, codex, qwen or any other engine/model.
@@ -14,7 +14,11 @@ import sys
 from pathlib import Path
 
 ALLOWED_ENGINE = "omp"
-ALLOWED_MODEL = "opencode-go/hy4-flash-free"
+PRIMARY_MODEL = "opencode-go/hy4-flash-free"
+FALLBACK_MODEL = "opencode-go/hungerg-free"
+ALLOWED_MODELS = frozenset({PRIMARY_MODEL, FALLBACK_MODEL})
+PRIMARY_MAX_PARALLEL = 5
+FALLBACK_MAX_PARALLEL = 1
 
 
 def main() -> int:
@@ -35,14 +39,23 @@ def main() -> int:
         if not candidates:
             problems.append(f"{role}: no route (legacy fallback can select claude/codex)")
             continue
+        if len(candidates) != 2:
+            problems.append(f"{role}: expected hy4-flash primary plus one HungerG fallback, got {len(candidates)}")
         for candidate in candidates:
-            if candidate.get("engine") != ALLOWED_ENGINE or candidate.get("model") != ALLOWED_MODEL:
+            if candidate.get("engine") != ALLOWED_ENGINE or candidate.get("model") not in ALLOWED_MODELS:
                 problems.append(f"{role}: forbidden candidate {candidate.get('engine')}/{candidate.get('model')}")
+        expected = ((PRIMARY_MODEL, 0, PRIMARY_MAX_PARALLEL), (FALLBACK_MODEL, 1, FALLBACK_MAX_PARALLEL))
+        for index, (model, tier, cap) in enumerate(expected):
+            if index >= len(candidates):
+                break
+            candidate = candidates[index]
+            if candidate.get("model") != model or candidate.get("tier") != tier or candidate.get("max_parallel") != cap:
+                problems.append(f"{role}: candidate {index + 1} must be {model} tier={tier} max_parallel={cap}")
     for role in sorted(set(routed) - set(roles)):
         problems.append(f"{role}: stale route for undeclared role")
     for path in sorted((home / "engines").glob("*.json")) if (home / "engines").is_dir() else []:
         data = json.loads(path.read_text(encoding="utf-8"))
-        if data.get("engine") != ALLOWED_ENGINE or data.get("model", ALLOWED_MODEL) != ALLOWED_MODEL:
+        if data.get("engine") != ALLOWED_ENGINE or data.get("model", PRIMARY_MODEL) not in ALLOWED_MODELS:
             problems.append(f"legacy engine file {path.name}: forbidden {data}")
 
     # Generated unit text is evidence, not authority, but a stale Claude unit is

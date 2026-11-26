@@ -54,6 +54,21 @@ them; re-apply on upgrade.
   Future role admissions must copy the single hy4-flash candidate. Re-apply
   this allowlist state on upgrade.
 
+- 2026-11-26 owner-directed model addition: every one of the 165 currently
+  declared roles has `opencode-go/hy4-flash-free` as its tier-0 primary
+  (`max_parallel: 5`) followed by one `opencode-go/hungerg-free` tier-1
+  fallback (`max_parallel: 1`). The cap is global to the candidate key, so
+  at most one HungerG wake runs at a time; HungerG is selected only when
+  hy4-flash is cooling, rate-limited, unavailable, or at capacity. This also
+  creates the missing route pairs for the 13 recent admissions. Stale
+  HungerG cooling entries were removed and its retired entry cleared. Both
+  `tools/check-omp-only.py` copies, both `duties.json` copies and the pinned
+  `engine_router.py` guard allow exactly these two OMP models; all other
+  engines/models remain forbidden. No unit or resolver names a model, so no
+  unit regeneration or service restart is required. Future role admissions
+  must copy both candidates in this order. Re-apply this allowlist and route
+  shape on upgrade.
+
 The 2026-11-21 owner-directed self-healing patch also updates the pinned
 `duties.json` and six `checks/*.py`: no-force autonomous publication and
 independent push-lag detection, m2shell next-due armed/churn checks, overdue

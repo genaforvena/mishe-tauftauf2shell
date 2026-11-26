@@ -117,7 +117,7 @@
    "unknown_codes": [],
    "command": ["{python}", "{repo}/tools/check-omp-only.py", "{home}", "{repo}"],
    "replaces": [],
-   "covers": "Plant-scoped hard engine policy: every declared role must have exactly one hy4-flash route under engine omp; any other model or engine, missing route, legacy engine file, or generated unit naming a forbidden engine is RED and wakes operator. The pinned runtime also raises on forbidden construction."
+   "covers": "Plant-scoped hard engine policy: every declared role must have the hy4-flash primary (tier 0, max_parallel 5) followed by one HungerG fallback (tier 1, max_parallel 1) under engine omp; any other model or engine, missing/extra route, wrong tier/cap, legacy engine file, or generated unit naming a forbidden engine is RED and wakes operator. The pinned runtime also raises on forbidden construction."
   }
  ],
  "retired": [],

@@ -20,7 +20,7 @@ resolver is automatically subscribed to its signal.
 | `signal-coverage` | `operator` | Registered signals have producers and subscribers, declared producers run, and faults receive attention or a recorded disposition. |
 | `repo-change` | `docs` | A changed HEAD produces one docs wake with the new commit as evidence. |
 | `readme-lint` | `docs` | The landing-page structure and evidence table still parse and link to real reports. |
-| `omp-only` | `operator` | Every declared role has exactly one hy4-flash route under engine omp; any other engine or model, missing route, stale engine file, or generated unit naming a forbidden engine is RED. |
+| `omp-only` | `operator` | Every declared role has the hy4-flash tier-0 primary (`max_parallel: 5`) followed by one HungerG tier-1 fallback (`max_parallel: 1`) under engine omp; any other engine or model, missing/extra route, wrong tier/cap, stale engine file, or generated unit naming a forbidden engine is RED. |
 
 The ordinary `failed-m2shell-*.service` signals continue to route a failed
 unit to its resolver. The `doctor` and `engine-routing` signals also wake
