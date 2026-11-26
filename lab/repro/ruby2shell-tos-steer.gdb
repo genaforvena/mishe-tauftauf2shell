@@ -3,9 +3,9 @@
 # file against lab/build/plain/ruby-3.4.12-plain/bin/ruby.
 set pagination off
 set confirm off
-break regparse.c:4589 if *from > 0x100000
+break regparse.c:4589 if *from >= 0x100
 run lab/repro/ruby2shell-tos-steer.rb
-printf "HIT code=%lu cc=%p bs=%p target=%p offset=%lu bit=%d\n", (unsigned long)*from, cc, cc->bs, (char *)cc->bs + ((int)(*from)/32)*4, ((char *)cc->bs + ((int)(*from)/32)*4) - (char *)cc->bs, (int)(*from)&31
+printf "HIT code=%lu cc=%p bs=%p mbuf=%p target=%p offset=%lu bit=%d\n", (unsigned long)*from, cc, cc->bs, cc->mbuf, (char *)cc->bs + ((int)(*from)/32)*4, ((char *)cc->bs + ((int)(*from)/32)*4) - (char *)cc->bs, (int)(*from)&31
 set $target = (char *)cc->bs + ((int)(*from)/32)*4
 x/1wx $target
 x/4gx $target - 16

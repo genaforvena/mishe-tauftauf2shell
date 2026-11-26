@@ -5098,8 +5098,68 @@ control, has no benign-marker execution, no wire-only reachability
 independent witness replay; primary grades are unchanged: rung 4
 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
-Plain fault-address steering is CLOSED for this lane, as in BBuf.
+For those large-V offsets, plain absolute fault-address steering is
+CLOSED, as in BBuf; the small-V pointer-field case is separate, below.
 
 ```
 bash lab/repro/ruby2shell-tos-steer.sh
 ```
+
+## Small-V extension: chosen bit in a live pointer (2026-11-26, 13:18Z)
+
+The earlier V≥0x110000 sweep put `bs+(V>>5)*4` far outside the 32-byte
+`BitSet`, so it hit layout-dependent heap words. `regint.h:830-836`
+gives `CClassNode` a 32-byte `bs` at `cc+8` and `BBuf *mbuf` at
+`cc+40`. Therefore V in `0x100..0x11f` (`bs+32`, bit `V&31`) ORs into
+the **low word of the live mbuf pointer**; V in `0x120..0x13f`
+(`bs+36`) ORs into its **high word**. That field is consumed later in
+the same reparse: `is_onechar_cclass` (`regparse.c:6200-6208`) reads
+`GET_CODE_POINT(n, bbuf->p)` from `cc->mbuf`.
+
+gdb on the unsanitized 3.4.12 build (hardware watchpoint on the target
+word; evidence `lab/build/evidence/tos-steer/gdb-small-100.out` and
+`gdb-small-10000.out`):
+
+```
+V=0x100   cc=0x555555d1e340  target=cc+40  mbuf=(nil)  0 -> 1   bit=0
+V=0x10000 target=cc+8+8192   word 0x10 -> 0x11  bit=0 (other heap data)
+```
+
+Consumer-visible result, one fresh plain process per arm, no debugger:
+
+```
+V=0x100   rc=139  [BUG] Segmentation fault at 0x0000000000000001
+V=0x101   rc=139  fault 0x0000000000000002   (low-word bit 1)
+V=0x10f   rc=139  fault 0x0000000000008000   (low-word bit 15)
+V=0x11f   rc=139  fault 0x0000000080000000   (low-word bit 31)
+V=0x120   rc=139  fault 0x0000000100000000   (high-word bit 0)
+V=0x12e   rc=139  fault 0x0000400000000000   (high-word bit 14)
+V=0x12f..0x13f rc=139, noncanonical pointer, fault reported at 0x0
+fixed 3.4.13 V=0x100 and V=0x120: rc=0; vulnerable ASCII V=0x41: rc=0
+V=0x10000: rc=0 on both builds (offset 8192 inert in this pattern shape)
+```
+
+All 32 low-word arms fault at exactly `1 << (V&31)` and high-word arms
+0..14 at `1 << (32+(V&31))`: a pattern-chosen one-bit OR into a live
+pointer becomes a pattern-chosen pointer value at the dereference. All
+64 arms returned 139. Full table in gitignored
+`lab/build/evidence/tos-steer/small-v-sweep.txt`; the V=0x100 native
+backtrace ends in `is_onechar_cclass+0x17` (`regparse.c:6207`) from
+`parse_exp` (`regparse.c:6467`) during `Regexp#to_s`
+(`plain12-100-full.out`).
+
+Grade: still **rung 4, narrow secondary-lane scope** — now chosen-bit
+control over a live pointer field with a deterministic, fix-sensitive
+consumer-visible fault, but only one bit (no arbitrary pointer or byte
+control), no benign marker, no wire-only reachability and no
+independent replay. The large-V absolute-address result above stays
+CLOSED. Next bounded experiment: make `mbuf` non-NULL before the flip
+with a multi-byte codepoint in the same class, then measure whether a
+bit flip in a valid pointer redirects `is_onechar_cclass` to
+attacker-influenced data and changes regex semantics rather than only
+faulting.
+
+```
+bash lab/repro/ruby2shell-tos-steer.sh
+```
+
