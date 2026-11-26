@@ -154,7 +154,7 @@ New local files, with SHA-256:
 
 | artifact | SHA-256 |
 | --- | --- |
-| `build-wire.sh` | `706b8a58695e639707c947be9a6cfbded8aefc36566accf9a9a6b69fba4e724b` |
+| `build-wire.sh` | `ce85d3f64832cafd3ef98f5e06288c69b27cedf5578ec34790fed082b332845b` |
 | `run-wire.sh` | `841565f6efa8a26adf7f4eed1e39746e9e3d04e21603e87ee28952b8cdbca18c` |
 | `harness/wire_send.py` | `c4dd969505eee3399928a11030c513f69cc0f76684c21b1be6eb12fdc0ff7ae2` |
 

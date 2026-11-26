@@ -3,6 +3,7 @@
 # Fetches only the two pinned source tarballs from GitHub (no probes); all
 # execution is local. Both ASan and plain builds are produced.
 set -u
+mkdir -p "$(dirname "$0")/src"
 cd "$(dirname "$0")/src"
 
 V_SHA=8a00543aa5c7b25b7d3f7642fdf306fd9979f237
@@ -53,3 +54,7 @@ build_one "$V_SHA" build-vuln-asan asan
 build_one "$F_SHA" build-fixed-asan asan
 build_one "$V_SHA" build-vuln-plain plain
 build_one "$F_SHA" build-fixed-plain plain
+for b in build-vuln-asan build-fixed-asan build-vuln-plain build-fixed-plain; do
+    [ -x "$b/src/nfcapd/nfcapd" ] && [ -x "$b/src/nfdump/nfdump" ] || exit 2
+done
+echo BUILD_WIRE_OK
