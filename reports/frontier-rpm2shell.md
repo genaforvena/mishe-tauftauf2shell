@@ -247,7 +247,9 @@ Evidence: `real/gc-pointer/{A,B,V}.log`, `real/gc-pointer.gdb`.
 ### Measured ASLR ceiling (2026-11-26 18:04Z)
 
 `bash lab/frontier/rpm2shell/real/run-aslr-ceiling.sh` replays **8 PASS /
-0 FAIL** and bounds the remaining pointer-redirection question. With
+0 FAIL** in the worktree and from a clean `git archive c2cc89b3` (prebuilt
+workspace trees and the install fixture symlinked in). It bounds the
+remaining pointer-redirection question. With
 GDB's `set disable-randomization off` (GDB only observes; no forced call),
 the qword at `buf+0x20` is `NEXT=(nil)` immediately before the real
 `rpmcpioRead()` copy and `0x4141414141414141` immediately after it

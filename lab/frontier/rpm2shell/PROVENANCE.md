@@ -225,9 +225,13 @@ controls return rc 1 without a fault; fixed ASan attack rc 1 ASan-clean.
 | `real/gc-pointer/plain-validtarget.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
 
 ## Measured ASLR ceiling (2026-11-26 18:04Z)
-
     cd lab/frontier/rpm2shell
     bash real/run-aslr-ceiling.sh
+
+Clean-archive replay from `git archive c2cc89b3 lab/frontier/rpm2shell` with
+the prebuilt vulnerable/fixed trees and the install fixture symlinked in
+(both are workspace-only artifacts) also returned 8 PASS / 0 FAIL at
+18:07Z; the temporary tree was removed afterwards.
 
 Verified **ASLR_CEILING_PASS=8 ASLR_CEILING_FAIL=0**, rc 0. The runner keeps
 the same private `--dbpath` and guarded `/tmp` names as the install runner.
