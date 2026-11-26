@@ -268,3 +268,35 @@ before the copy, confirming W4's layout dependency rather than providing a
 second value. No chosen pointer, control flow or command: rung 4 stays
 PARTIAL, rung 5 NOT CLAIMED. This closes the W4 question for this layout;
 do not retry the same probe.
+
+## W7 top-chunk size preservation (2026-11-26 00:0xZ) — negative result
+
+W2 preserved the original top size at store offsets 24..31 but also crafted
+candidate sizes at *later* top positions and aborted in `sysmalloc`. This
+probe tests the untried case: exact original size preserved, chosen bytes
+only in free top space. `realbuild/top-size-probe.sh` (offline; verbatim
+vulnerable pin sha256 `05ab59bb4413df14d36fbbb0d82ff6ce6fe0bee72245245f8ecec773d4cc2c65`
+rechecked) writes 48 bytes: 0..15 `0x41`, 16..23 zero (top `prev_size`),
+24..31 the measured original top size `0xd6f1` little-endian, 32..47 `0x41`.
+
+Result: plain `./consumer-payload 48 <hex>` prints `load returned;
+variables=2` and an intact `victim[0:16]=VVVV…` — the first n=48 chosen
+store in this lane that completes the real `Model::load`. gdb at the second
+variable's store (`realbuild/evidence/topsize-48-gdb.txt`) shows the chosen
+`0x4141…` words at buffer+0x20..+0x2f replaced by the `shared_ptr`
+control-block vptr `0x5555556001f8` and its counts; buffer+0x30 holds shape
+and storage pointers/sizes, all constructed after the store. No chosen byte
+survives in a live pointer field. Raw plain output:
+`realbuild/evidence/topsize-48-plain.out`.
+
+Why no larger allocator primitive: in the glibc 2.39 source fetched for this
+probe (`malloc.c`, tag `glibc-2.39`), `_int_malloc`'s top path checks only
+`chunksize(top) > av->system_mem` (the W1 `malloc(): corrupted top size`
+abort) and otherwise splits from the same top base with `av->top =
+chunk_at_offset(top, nb)` — forward only, so it cannot overlap an already
+live object. A size too small for the next request enters `sysmalloc`, whose
+main-arena path reanchors `av->top` at the real brk with fenceposts (or
+aborts `break adjusted to free malloc space` if the crafted end lies past
+brk). Neither outcome gives a file-chosen address in a dereference.
+Together with W2/W3/W4/W6 this closes the allocator-metadata route. Grade
+unchanged: rung 3 CONFIRMED / rung 4 PARTIAL, AV:L/UI:P, rung 5 NOT CLAIMED.

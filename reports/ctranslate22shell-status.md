@@ -155,3 +155,22 @@ aborted before the copy (layout shift). W4's open rung-4 question is
 negative for this layout; raw capture in
 `realbuild/evidence/downstream-shape-40.txt`, detail in `PROVENANCE.md`.
 
+## W7 (2026-11-26 00:0xZ): top-chunk size preservation — closed
+
+`realbuild/top-size-probe.sh` tested the untried allocator-metadata case:
+a 48-byte file-chosen store that preserves the exact original top-chunk
+size (`0xd6f1` at store offsets 24..31, measured at `model.cc:657`) and
+writes chosen `0x41` only into free top space. Unlike every earlier n=48
+attempt, the plain run completed `Model::load` (`load returned;
+variables=2`, victim bytes intact). gdb at the next variable's store shows
+the chosen words at buffer+0x20..+0x2f overwritten by the `shared_ptr`
+control block; no chosen byte survives in a live pointer field.
+
+The glibc 2.39 `malloc.c` top path accepts a crafted size only when it is
+not larger than `av->system_mem`, then splits forward from the same top
+base; a smaller size enters `sysmalloc`, which reanchors top at the real
+brk. Neither produces a file-chosen address in a dereference. With
+W2/W3/W4/W6, the allocator-metadata and direct-layout routes are closed.
+Grade unchanged: rung 3 CONFIRMED / rung 4 PARTIAL, AV:L/UI:P, rung 5 NOT
+CLAIMED. Canonical `bash harness/run-all.sh` remains 16 PASS / 0 FAIL.
+
