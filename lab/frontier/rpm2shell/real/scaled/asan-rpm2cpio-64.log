@@ -1,0 +1,62 @@
+=================================================================
+==98685==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000971 at pc 0x7b6252efb303 bp 0x7ffd8a93f9f0 sp 0x7ffd8a93f198
+WRITE of size 64 at 0x502000000971 thread T0
+    #0 0x7b6252efb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7b625245349c  (/lib/x86_64-linux-gnu/libz.so.1+0x1249c) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
+    #2 0x7b62524535e7 in gzread (/lib/x86_64-linux-gnu/libz.so.1+0x125e7) (BuildId: 2f47d490170763b8b8e0064675d234bfede6c1db)
+    #3 0x7b6252973c83 in gzdRead /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:582
+    #4 0x7b6252977ed5 in Fread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmio.cc:1337
+    #5 0x7b6252ae32a0 in rpmcpioRead(rpmcpio_s*, void*, unsigned long) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc:444
+    #6 0x7b6252b67177 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2242
+    #7 0x7b6252b5bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
+    #8 0x64121812ce7d in process_package /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm2archive.cc:249
+    #9 0x64121812d265 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm2archive.cc:338
+    #10 0x7b625222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7b625222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x64121812bb04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm2archive+0x3b04) (BuildId: fc482a5e9e01a6635573e4dce6d4533f4924513a)
+
+0x502000000971 is located 0 bytes after 1-byte region [0x502000000970,0x502000000971)
+allocated by thread T0 here:
+    #0 0x7b6252efd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x7b6252988e34 in rmalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmmalloc.cc:45
+    #2 0x7b6252b67124 in iterReadArchiveNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2241
+    #3 0x7b6252b5bad0 in rpmfiNext /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:867
+    #4 0x64121812ce7d in process_package /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm2archive.cc:249
+    #5 0x64121812d265 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm2archive.cc:338
+    #6 0x7b625222a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7b625222a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x64121812bb04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/build-vuln-asan/tools/rpm2archive+0x3b04) (BuildId: fc482a5e9e01a6635573e4dce6d4533f4924513a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x502000000680: fa fa fd fa fa fa fd fa fa fa fd fa fa fa fd fa
+  0x502000000700: fa fa fd fa fa fa fd fa fa fa 07 fa fa fa 04 fa
+  0x502000000780: fa fa fd fa fa fa 00 00 fa fa 00 00 fa fa 04 fa
+  0x502000000800: fa fa 00 00 fa fa 00 00 fa fa fd fd fa fa fd fa
+  0x502000000880: fa fa fd fa fa fa 00 00 fa fa 00 00 fa fa 01 fa
+=>0x502000000900: fa fa fd fd fa fa fd fd fa fa fd fd fa fa[01]fa
+  0x502000000980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000b00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000b80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==98685==ABORTING

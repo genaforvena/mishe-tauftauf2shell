@@ -152,6 +152,32 @@ pointer-bearing, the adjacent object is rpm header-import data (tag word
 strings `sin`, `/dev/n...`), not a vtable or callback slot. Full commands,
 samples and interpretation: `lab/frontier/rpm2shell/real/natural-continue/README.md`.
 
+### Controlled copy length scales with the crafted cpio field (2026-11-26 16:45Z)
+
+Pinned `lib/cpio.cc:434-445` computes `size = min((size_t)lsize,
+cpio->fileend - cpio->offset)`; with `lsize = -1` the first term is `SIZE_MAX`,
+so the cpio entry's declared data length sets the write size. `real/make-attack.py`
+now takes `RPM2SHELL_PAYLOAD_LEN` (default 64; CLI unchanged), and
+`bash lab/frontier/rpm2shell/real/run-scaled-payload.sh` verified **21 PASS /
+0 FAIL**: ASan `WRITE of size 64`, `512` and `4096`, each 0 bytes after the
+1-byte region with the write frame `iterReadArchiveNext` at `rpmfi.cc:2242`,
+through both `rpm2cpio` and `rpm2archive` invocations; the fixed build rejects
+the 4096-byte package with rc 1 and no ASan report; the safe control is rc 0
+and ASan-clean. In this build `tools/rpm2cpio` is a symlink to `rpm2archive`
+in both vulnerable builds, so those two invocations exercise the same consumer
+binary — not two independent implementations.
+
+Plain `rpm2cpio` still exits 1 without a fault at all three lengths, so a
+larger overwrite alone produces no semantic dereference on this path. Plain
+GDB (`real/scaled/readback-4096.gdb`) prints `LSIZE=-1`, `MISHE-RPM!!` at
+`buf` and `0x4141414141414141` at `buf+4088`: chosen bytes reach the end of
+the 4096-byte copy. An earlier GDB run with a wrong relative `RPM_CONFIGDIR`
+faulted in `tvsub` with `btv=0x4141414141414141`; rerunning with the absolute
+config exited 1 with no fault, so that crash is a bad-config artifact and is
+not claimed. Grade unchanged: rung 4 DEMONSTRATED with attacker-chosen length
+and bytes; natural pointer control and downstream dereference remain UNKNOWN;
+no r5.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the

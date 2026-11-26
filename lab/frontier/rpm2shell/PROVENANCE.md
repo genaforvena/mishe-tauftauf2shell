@@ -123,6 +123,34 @@ dereference. When pointer-bearing, the adjacent object is rpm header-import
 data with tag word `0x00122204`, count 6 and inline `return`. Details and
 sample logs: `real/natural-continue/README.md`.
 
+## Scaled controlled copy length (2026-11-26 16:45Z)
+
+    cd lab/frontier/rpm2shell
+    bash real/run-scaled-payload.sh
+
+Verified `SCALED_PAYLOAD_PASS=21 SCALED_PAYLOAD_FAIL=0`. `RPM2SHELL_PAYLOAD_LEN`
+in `real/make-attack.py` sets the chosen symlink payload length (default 64);
+the 64/512/4096-byte fixtures are `real/scaled/attack-{64,512,4096}.rpm`.
+ASan vulnerable runs report `WRITE of size 64`, `512`, `4096` respectively,
+0 bytes after the 1-byte region at `rpmfi.cc:2242`, rc 134. Fixed ASan
+`attack-4096.rpm` returns rc 1 ASan-clean; safe newc returns rc 0 ASan-clean.
+Plain vulnerable `rpm2cpio` returns rc 1 with no fault at all three lengths.
+`real/scaled/gdb-readback-4096.log` prints `SCALED_BUF=... LSIZE=-1`,
+`MISHE-RPM!!` at `buf`, and `0x4141414141414141` at `buf+4088`.
+`build-vuln-asan/tools/rpm2cpio` and `build-vuln-plain/tools/rpm2cpio` are
+symlinks to `rpm2archive` in these builds; the two CLI names are not
+independent consumers. A wrong-relative-`RPM_CONFIGDIR` GDB run faulted in
+`tvsub`; the absolute-config rerun (`real/scaled/gdb-bt-4096.log`) exited 1
+with no stack, so the earlier fault is not claimed.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-scaled-payload.sh` | `046cfc490a19e054a8bcb65f6f05e7b21bf89f321841f162ef24c7eeab8e80bb` |
+| `real/make-attack.py` | `71c99bfcff878f8bb731c981c616d478d37598aa12911aaefddc6bfe6a92784f` |
+| `real/scaled/readback-4096.gdb` | `8a28d0557fab7ca2fdfba439f26d8b63ecef3299024297ff4fe997472a214b07` |
+| `real/scaled/asan-rpm2cpio-4096.log` | `bd2c06db0ae738ab2766f6f4ef6419901a4bf808883d5ab7bd6269329c3ade35` |
+| `real/scaled/gdb-readback-4096.log` | `6a276e3ba49bbeb8ee1f1b4469b0b96ec9a9a8b0a4140766746f5b36047ddeee` |
+
 | artifact | sha256 |
 | --- | --- |
 | `real/run-natural-deref.sh` | `a11612b9b7c08d710ab58d4033561230576df6e95a7f11ac7bfbeaf16bc192df` |

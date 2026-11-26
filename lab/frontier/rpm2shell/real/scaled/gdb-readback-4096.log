@@ -1,0 +1,14 @@
+No source file named /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc.
+Breakpoint 1 (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc:2243) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+SCALED_BUF=0x5555555f0a40 LSIZE=-1
+0x5555555f0a40:	"MISHE-RPM!!", 'A' <repeats 189 times>...
+0x5555555f1a30:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x5555555f1a38:	0x41	0x41	0x41	0x41	0x41	0x41	0x41	0x41
+0x5555555f1a38:	0x4141414141414141	0x0000000000000000
+A debugging session is active.
+
+	Inferior 1 [process 99316] will be killed.
+
+Quit anyway? (y or n) [answered Y; input not from terminal]
