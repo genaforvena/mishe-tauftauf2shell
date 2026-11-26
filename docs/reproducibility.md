@@ -13317,8 +13317,48 @@ enc/iso_8859_1.c:293 in case_map` (3.4.13 yields 21→42 `SS` bytes). The
 first probe run's rc=1 for bang forms was a probe bug (`String#downcase!`
 returns `nil` when unchanged); it was corrected to fall back to the receiver.
 Evidence is gitignored under `lab/build/evidence/case-reach/` and regenerates
-with the wrappers. Falsifier: a stock wire receiver tagged with a
-single-byte encoding whose case table expands, which would reopen the
-consumer-search branch. Full survey and reasoning:
+with the wrappers. The named falsifier landed in `f1fcbd89`: a multipart
+part's own `charset=ISO-8859-1` tags `_method` bytes on stock Rack, so the
+wire-only path is now a rung 3 CONFIRMED result (recipe below); this
+survey's header-only arms remain a NEGATIVE. Full survey and reasoning:
 `reports/ruby2shell-investigation.md` § "Case-conversion consumer survey on
 stock Rails/Sinatra (2026-11-26, 11:27Z wake) — NEGATIVE".
+
+### Ruby2Shell — wire-only multipart `_method` corruption (stock apps)
+
+Uses the same plain/ASan Ruby builds and stock apps as the case-reach recipe;
+no hook, monkey patch, debugger or groomer is in the request path. From the
+repo root:
+
+```sh
+bash lab/repro/ruby2shell-mp-method-21.sh plain  # tracer, plain 3.4.12
+bash lab/repro/ruby2shell-mp-method-21.sh asan   # 3.4.12 vs 3.4.13 + controls
+APP_MODE=rails bash lab/repro/ruby2shell-mp-method-21.sh asan
+bash lab/repro/ruby2shell-mp-mixed-plain.sh      # stock glibc, no sanitizer
+```
+
+`RUBY2SHELL_MP_PORT` overrides the default port (4581, or 4583 for the plain
+wrapper). The Python wire client sends a loopback multipart POST with a part
+named `_method`, part header `Content-Type: text/plain; charset=ISO-8859-1`
+and body bytes; stock Rack 3.2.8 `tag_multipart_encoding`
+(`multipart/parser.rb:561`) tags the raw body and default
+`Rack::MethodOverride` (`method_override.rb:36`) upcases it. Expect the
+plain tracer to log `upcase enc=ISO-8859-1 len=21 suspect=true` at the stock
+middleware frame. On ASan 3.4.12 expect attack `SUMMARY:
+AddressSanitizer: heap-buffer-overflow enc/iso_8859_1.c:293 in case_map`,
+`WRITE of size 1`, `0 bytes after 65-byte region`; 3.4.13 and the
+`safe-ascii`, `safe-utf8`, `canary` and `other-field` arms stay alive with
+404 and no report. On plain 3.4.12 / glibc 2.39 expect `pure20`, `pure21`,
+`mixed43` and the UTF-8-charset arm clean in 8/8 runs (404), `mixed27`
+(`a`+27×`0xDF`) aborting 3/8 with `corrupted size vs. prev_size`, and
+`mixed59` aborting 2/8 with `malloc(): invalid next size (unsorted)`;
+`mixed43` clean is a preserved layout-dependent negative and 3.4.13 stays
+clean in 2/2 runs per shape. All 14 affected case-map encodings map only
+`0xDF`→`0x53 0x53`, so the charset cannot steer the written value
+(gitignored `case-alphabet.rb` probe). Grade rung 3 CONFIRMED on a wire-only
+stock path; rung 4 and r5 unchanged — no chosen offset, pointer, marker or
+command. Evidence is gitignored under `lab/build/evidence/mp-method-21/`
+and regenerates with the wrappers. Full receipts:
+`reports/ruby2shell-investigation.md` §§ "Wire-only confirmed heap overflow
+through stock `Rack::MethodOverride`" and "Wire-only heap corruption on
+stock glibc, no sanitizer".

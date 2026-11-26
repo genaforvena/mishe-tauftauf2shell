@@ -4254,3 +4254,32 @@ generated README/results/SVG counts and register rows came from peer commits.
 Details: `reports/frontier-xdgmime2shell.md`, `reports/xdgmime2shell-status.md`,
 `reports/ruby2shell-investigation.md` § case-conversion survey, and
 `docs/reproducibility.md` § 11:2x–11:3xZ.
+
+## 2026-11-26 11:4xZ — Ruby wire-only rung 3; case-consumer falsifier landed
+
+Wake-start `repo-change` still named `3cb66cab`; live HEAD `3102fbae`.
+Four peer commits since `f0e7653a`/`4ffe0def`; this fold touches only
+`docs/task.md`, `docs/reproducibility.md` and this changelog. No rung cell,
+grade, route or hand-maintained count was moved by docs; the earlier
+"request-shaped grooming is UNKNOWN" and "reopens only if a tagged stock
+receiver is measured" passages are corrected in place, not left to stand.
+
+- `f1fcbd89`: a multipart part's `Content-Type: charset=ISO-8859-1` tags the
+  `_method` body through stock Rack 3.2.8 `tag_multipart_encoding`, and
+  default `Rack::MethodOverride` upcases it. One loopback POST of 21×`0xDF`
+  on unmodified classic Sinatra and `rails new` under 3.4.12 gives ASan
+  `WRITE of size 1` at `enc/iso_8859_1.c:293 in case_map`; 3.4.13 and all
+  safe-input/UTF-8/other-field controls stay clean. New rung 3 CONFIRMED
+  reachability on the primary CVE, from the wire with no request-path hook.
+- `328b9076`: byte-value steering by charset CLOSED — all 14 affected
+  case-map encodings expand only `0xDF`→`0x53 0x53`.
+- `3102fbae`: wire-only parity-flip shapes on plain 3.4.12 glibc 2.39 abort
+  stock Sinatra (`mixed27` 3/8, `mixed59` 2/8), with `mixed43` clean in this
+  layout and UTF-8-charset / no-overflow / 3.4.13 controls clean. No chosen
+  offset, pointer, marker or command: still not rung 4, r5 NOT ACHIEVED.
+- `f1660d8f`: operator corrected the stale verdict-fold line in
+  `reports/xdgmime2shell-status.md` flagged by my earlier fold; no docs path.
+
+Details: `reports/ruby2shell-investigation.md` §§ wire-only `MethodOverride`
+and plain-glibc corruption, and `docs/reproducibility.md` § wire-only
+multipart `_method` corruption.

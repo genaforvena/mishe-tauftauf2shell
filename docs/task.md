@@ -288,13 +288,31 @@ claims, not conclusions.
   valgrind as a second observed invalid access (rung 3 class): the byte read
   back is the same `0x53` the overflow wrote and the returned string is
   correct, so it is not an information leak and not rung 4.
-- **Remaining gaps (UNKNOWN):** request-shaped grooming (the groom and
-  marker are lab middleware, not an attacker's request), control-flow
-  hijack, the target nominated inside attacker-controlled string content,
-  and GC disabled between frees and readback. Next trigger: the vendor's
-  PoC (dated 2026-11-25, or later while major vendors lag); compare its
-  mechanics against these honest gaps. A timestamp-only advisory re-check
-  is a watch, not an experiment.
+- **Wire-only reach, 2026-11-26 11:4xZ (ladder cells unchanged).** The
+  case-consumer branch's falsifier landed: a multipart part's own
+  `Content-Type: text/plain; charset=ISO-8859-1` tags the `_method` body
+  through stock Rack 3.2.8 `tag_multipart_encoding`
+  (`multipart/parser.rb:561`), and default `Rack::MethodOverride`
+  (`method_override.rb:36`) upcases it. One loopback POST of 21×`0xDF`
+  produces ASan `WRITE of size 1` in `case_map` (`enc/iso_8859_1.c:293`) on
+  unmodified classic Sinatra and `rails new` under 3.4.12, clean on 3.4.13
+  and on safe-input, UTF-8 and other-field controls. Parity-flipped
+  `a`+N×`0xDF` shapes on plain 3.4.12 / glibc 2.39 abort the stock server
+  (`mixed27` 3/8 `corrupted size vs. prev_size`, `mixed59` 2/8
+  `malloc(): invalid next size (unsorted)`); `mixed43` stays clean in this
+  server layout (a preserved negative) and all UTF-8 charset controls are
+  clean. This strengthens only the reachability of a **rung 3 CONFIRMED**
+  finding: the byte is the fixed second `S` of the ß expansion in heap
+  metadata, and all 14 affected case-map encodings expand only
+  `0xDF`→`0x53 0x53`, so byte-value steering through the charset is CLOSED.
+  No chosen offset, pointer control, marker, oracle or surviving foothold.
+  **Remaining gaps (UNKNOWN):** which object the wire-only one-byte write
+  lands in and whether its effective offset reaches a live consumer without
+  harness grooming; control-flow hijack; the target nominated inside
+  attacker-controlled string content; GC disabled between frees and readback;
+  and the vendor PoC (promised 25 Nov, still unpublished at the 11:16Z
+  check). Next bounded experiment: the corrupted-metadata placement on the
+  wire path. A timestamp-only advisory re-check is a watch, not an experiment.
 
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
@@ -12973,8 +12991,9 @@ corrected in place: that survey landed and closed below.
   wire bytes. Primary grades unchanged: rung 4 witness-COMPLETE,
   harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
   r5 NOT ACHIEVED. The branch reopens only if a tagged single-byte encoding
-  whose case map expands (ISO-8859-9 / Windows-1252 / ISO-8859-3) is measured
-  on a stock receiver.
+  whose case map expands is measured on a stock receiver; `3102fbae` below
+  finds that receiver in a multipart part's own `Content-Type`, so this
+  branch is no longer closed on that ground.
 - `a48bfdf5`: witness **W265** replayed xdgmime 11:34:45–11:35:00Z from
   `git archive dd4d47ab` with committed evidence deleted and both GitLab
   tarballs re-fetched hash-identical to the pins. The unmodified runner
@@ -12995,3 +13014,47 @@ corrected in place: that survey landed and closed below.
   and a new register row was added by that commit. The row and count were
   updated 11:40:12Z by `8b5e7b56` (established count 114 → 115 and
   `established=true` with W265 in the boundary); docs moved none of them.
+
+## 2026-11-26 11:4xZ — Ruby wire-only rung 3 on stock Sinatra/Rails
+
+Wake-start `repo-change` still named `3cb66cab`; live HEAD `3102fbae`.
+Four peer commits landed since the last fold `f0e7653a`/`4ffe0def`.
+No rung cell, grade, route or hand-maintained count was moved by docs; all
+receipts below are quoted from committed reports, not rerun here.
+
+- `f1fcbd89`: **new rung 3 CONFIRMED on the primary CVE through a wire-only,
+  unmodified-app path.** Stock Rack 3.2.8 `tag_multipart_encoding`
+  (`rack/multipart/parser.rb:561`) resolves a part's
+  `Content-Type: text/plain; charset=ISO-8859-1` and force-tags the raw
+  `_method` body; default `Rack::MethodOverride#method_override`
+  (`rack/method_override.rb:36`) calls `to_s.upcase` on it. A loopback POST
+  with 21×`0xDF` gives a `WRITE of size 1`, `0 bytes after 65-byte region`,
+  `SUMMARY: AddressSanitizer: heap-buffer-overflow enc/iso_8859_1.c:293 in
+  case_map` on 3.4.12 Sinatra and `rails new`; 3.4.13 and the `safe-ascii`,
+  `safe-utf8`, `canary` and `other-field` arms stay alive with 404. The
+  observability-only tracer logs the suspect upcase at the stock middleware
+  frame. Committed harness: `lab/repro/ruby2shell-mp-method-21.py` and
+  `ruby2shell-mp-method-21.sh`; gitignored evidence
+  `lab/build/evidence/mp-method-21/`.
+- `328b9076`: byte-value steering via the wire charset is **falsified**. A
+  probe of all 14 affected case-map encodings enumerated every expanding
+  1-byte character: each maps only `0xDF` → `0x53 0x53`. The remaining
+  rung-4 question is placement, not written value.
+- `3102fbae`: parity-flip shapes on the **plain** 3.4.12 build with stock
+  glibc 2.39, no sanitizer, hook or grooming, abort the same stock Sinatra
+  server from one wire request: `mixed27` 3/8 `corrupted size vs. prev_size`,
+  `mixed59` 2/8 `malloc(): invalid next size (unsorted)`; `pure20`,
+  `pure21`, `mixed43` and the UTF-8-charset control are 0/8, and 3.4.13 is
+  0/2 on every shape. `mixed43` staying clean in this layout matches the
+  in-process layout dependence and is preserved as a negative. Harness
+  `lab/repro/ruby2shell-mp-mixed-plain.sh`. Still **not rung 4**: one fixed
+  `0x53` byte into heap metadata, no chosen offset, pointer, marker or
+  command; full r5 remains NOT ACHIEVED and the witness-ESTABLISHED cells
+  keep their original harness-labeled scope.
+- `f1660d8f`: operator corrected the stale "can carry that verdict" line in
+  `reports/xdgmime2shell-status.md` that my previous fold flagged in #5384;
+  no docs path, manifest count or rung cell was touched.
+
+Next bounded experiment: identify the object hit by the wire-only one-byte
+write and test whether its effective offset can be steered to a live consumer
+without the earlier harness grooming; do not retry byte-value steering.
