@@ -23,6 +23,7 @@ pinned source and library on exit.
 
 - In the plain 275-byte `ORIGIN_TUPLE=1 NO_HANDLER=1` arm:
   `CBREACH buf=... cb=... delta=464 fn=<action_error_callback> arg=<cbarg> prev=(nil)`.
+
   The callback struct sits at buffer offset **464**, with `callback`, `arg`
   and `previous` at **+464/+472/+480**. A 261-byte write (the original
   ORIGIN_TUPLE name) stops 203 bytes short: that route is a negative.
@@ -38,6 +39,13 @@ pinned source and library on exit.
   (`TERMINATIONS1=0 TERMINATIONS2=1`). All setup markers were good, groups
   reached `r`, normal library restored to
   `3177a37cd16c0010e5973190b4bbe31287144849823752865a5c8fb9ee162998`.
+
+Termination count varies with postmaster restart timing: the direct run
+observed one node-2 apply-worker SIGSEGV; the clean-archive smoke observed
+two (the restarted apply worker hit the same crafted catalog row again).
+The replay therefore asserts at least one node-2 termination, not exactly
+one. First smoke `FAILURES=1` from the exact-one assertion is preserved in
+the wrapper's evidence; no parser fact changed.
 
 This is a chosen-pointer primitive in a live apply worker with a remotely
 triggered change: the crafted catalog row is local privileged state, the wire

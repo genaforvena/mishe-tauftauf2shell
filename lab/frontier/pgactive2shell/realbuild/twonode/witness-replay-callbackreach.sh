@@ -76,6 +76,15 @@ build_instrumented() {
   cp "$T/orig-catalogs.c" "$SRCFILE"
 }
 
+
+terms_ge() { # label expected1 min2
+  T1=$(cat "$D/evidence/TERMINATIONS1.txt" 2>/dev/null); T1=${T1#TERMINATIONS1=}
+  T2=$(cat "$D/evidence/TERMINATIONS2.txt" 2>/dev/null); T2=${T2#TERMINATIONS2=}
+  printf '  %s TERMINATIONS1=%s TERMINATIONS2=%s (min %s)\n' \
+    "$1" "${T1:-?}" "${T2:-?}" "$3"
+  { [ "${T1:-?}" = "$2" ] && [ "${T2:-?}" -ge "$3" ]; } 2>/dev/null ||
+    FAIL=$((FAIL + 1))
+}
 run_arm() { # label want-sha payload version
   L=$1; WANT=$2; PAYLOAD=$3; VERSION=$4
   OUT="$T/$L.out"
@@ -119,7 +128,7 @@ need v219-long "$T/v219-long-server.log" \
   'CBREACH' 'delta=464' 'fn=0x5a415a415a415a41' \
   'arg=0x5a415a415a415a41' 'prev=0x5a415a415a415a41' \
   'terminated by signal 11'
-terms v219-long 0 1
+terms_ge v219-long 0 1
 
 # 3. Restore pinned 2.1.9, then genuine fixed 2.1.10 with the same long name:
 #    parser rejects it cleanly and no callback is dereferenced.
