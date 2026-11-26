@@ -7,6 +7,11 @@
  * Logs compact M/C/R/F lines. When JEMTRACE_WATCH_SIZE is set, also dumps
  * eight qwords before and after the first eight allocations of that size.
  * No stdio/allocation inside the hooks: all output is raw write(2).
+ *
+ * JEMTRACE_TRACK_OVERFLOW=1 records the adjacent qword at allocation time and
+ * emits O/P lines only when the watched free proves it changed to low byte 0x53.
+ * JEMTRACE_SCAN_REFS=1 adds REF/D reference dumps; JEMTRACE_STOP_ON_OVERFLOW=1
+ * raises SIGSTOP at the proven overwrite for an external debugger.
  */
 #define _GNU_SOURCE
 #include <dlfcn.h>
@@ -16,6 +21,8 @@
 #include <string.h>
 #include <unistd.h>
 #include <sys/syscall.h>
+#include <fcntl.h>
+#include <signal.h>
 
 #include <execinfo.h>
 extern void *__libc_malloc(size_t);
@@ -44,6 +51,13 @@ static int want_bt_range;
 static int bt_depth = 10;
 static size_t free_q0;
 static int free_all_q0;
+static int track_overflow;
+static int scan_overflow_refs;
+static int stop_on_overflow;
+static __thread void *overflow_ring_ptr[1024];
+static __thread unsigned long overflow_ring_before[1024];
+static __thread int overflow_ring_next;
+unsigned long jemtrace_last_target;
 
 static int want_bt_for(size_t sz)
 {
@@ -112,6 +126,57 @@ static void dump_window(void *base, size_t sz, const char *which)
         rawex("W", (unsigned long)syscall(SYS_gettid), pbuf, sbuf, extra);
     }
 }
+static char overflow_mapbuf[262144];
+
+/* Analysis-only: locate live references to the overwritten adjacent qword.
+ * Called from free(2) after the write, with in_hook set; uses no allocation. */
+static void
+scan_overflow_references(unsigned long target)
+{
+    int fd = open("/proc/self/maps", O_RDONLY);
+    if (fd < 0) return;
+    ssize_t n = read(fd, overflow_mapbuf, sizeof(overflow_mapbuf) - 1);
+    close(fd);
+    if (n <= 0) return;
+    overflow_mapbuf[n] = 0;
+
+    char *line = overflow_mapbuf;
+    int found = 0;
+    while (*line && found < 40) {
+        char *next = strchr(line, '\n');
+        if (next) *next++ = 0;
+        unsigned long start, end;
+        char perms[8];
+        if (sscanf(line, "%lx-%lx %7s", &start, &end, perms) == 3 &&
+            perms[0] == 'r' && perms[1] == 'w' &&
+            end > start && end - start <= 512UL * 1024 * 1024) {
+            unsigned long pos = start;
+            while (pos < end && found < 40) {
+                unsigned long size = end - pos > 1048576 ? 1048576 : end - pos;
+                unsigned char *hit = (unsigned char *)memmem((void *)pos, size, &target, 8);
+                while (hit && found < 40) {
+                    unsigned long ref = pos + (hit - (unsigned char *)pos);
+                    char pbuf[17], sbuf[17];
+                    rawhex(ref, pbuf); rawhex(target, sbuf);
+                    rawex("REF", (unsigned long)syscall(SYS_gettid), pbuf, sbuf, NULL);
+                    for (int k = -8; k < 8; k++) {
+                        unsigned long at = ref + (long)k * 8;
+                        if (at < start || at + 8 > end) continue;
+                        unsigned long v = *(unsigned long *)at;
+                        rawhex(at, pbuf); rawhex(v, sbuf);
+                        rawex("D", (unsigned long)syscall(SYS_gettid), pbuf, sbuf, NULL);
+                    }
+                    found++;
+                    unsigned long rest = pos + size - (unsigned long)(hit + 1);
+                    hit = rest ? (unsigned char *)memmem(hit + 1, rest, &target, 8) : NULL;
+                }
+                pos += size;
+            }
+        }
+        if (!next) break;
+        line = next;
+    }
+}
 
 static void emit_bt(void)
 {
@@ -140,6 +205,9 @@ __attribute__((constructor)) static void jemtrace_init(void)
     const char *freevar = getenv("JEMTRACE_FREE_Q0");
     if (freevar) free_q0 = (size_t)strtoul(freevar, NULL, 0);
     free_all_q0 = getenv("JEMTRACE_FREE_ALL_Q0") != NULL;
+    track_overflow = getenv("JEMTRACE_TRACK_OVERFLOW") != NULL;
+    scan_overflow_refs = getenv("JEMTRACE_SCAN_REFS") != NULL;
+    stop_on_overflow = getenv("JEMTRACE_STOP_ON_OVERFLOW") != NULL;
     const char *depthvar = getenv("JEMTRACE_BT_DEPTH"); if (depthvar) bt_depth = atoi(depthvar);
     if (btvar) { bt_size = (size_t)strtoul(btvar, NULL, 0); want_bt = 1; }
     if (btminvar || btmaxvar) {
@@ -168,6 +236,12 @@ void *malloc(size_t sz)
     if (!ready || in_hook) return __libc_malloc(sz);
     in_hook = 1;
     p = real_malloc(sz);
+    if (p && track_overflow && watch_size && sz == watch_size) {
+        overflow_ring_ptr[overflow_ring_next] = p;
+        overflow_ring_before[overflow_ring_next] =
+            *(unsigned long *)((char *)p + sz);
+        overflow_ring_next = (overflow_ring_next + 1) % 1024;
+    }
     if (arm_size && sz == arm_size) armed = 1;
     if (armed && watch_size && sz == watch_size && watch_count < 8) {
         watch_count++;
@@ -224,6 +298,26 @@ void free(void *p)
     if (p && free_q0 && *(size_t *)p == free_q0 && watch_size) {
         dump_window(p, watch_size, "before");
         dump_window(p, watch_size, "after");
+        if (track_overflow) {
+            unsigned long now = *(unsigned long *)((char *)p + watch_size);
+            for (int i = 0; i < 1024; i++) {
+                if (overflow_ring_ptr[i] == p) {
+                    unsigned long before = overflow_ring_before[i];
+                    if (now != before && (now & 0xff) == 0x53) {
+                        unsigned long target = (unsigned long)p + watch_size;
+                        char pbuf[17], sbuf[17];
+                        jemtrace_last_target = target;
+                        rawhex(target, pbuf); rawhex(now, sbuf);
+                        rawex("O", (unsigned long)syscall(SYS_gettid), pbuf, sbuf, NULL);
+                        rawhex(target, pbuf); rawhex(before, sbuf);
+                        rawex("P", (unsigned long)syscall(SYS_gettid), pbuf, sbuf, NULL);
+                        if (scan_overflow_refs) scan_overflow_references(target);
+                        if (stop_on_overflow) raise(SIGSTOP);
+                    }
+                    break;
+                }
+            }
+        }
     }
     real_free(p);
     logline("F", 0, p);

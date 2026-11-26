@@ -36,6 +36,12 @@ sys.stdout.buffer.write(
 PY
 ROOT="$PWD"
 JEM_WIRE_RUBY="${JEM_WIRE_RUBY:-lab/build/plain/ruby-3.4.12-plain/bin/ruby}"
+SERVER_ARGS=()
+case "${JEM_WIRE_SERVER:-puma}" in
+  webrick) SERVER_ARGS=(-s webrick) ;;
+  puma) ;;
+  *) echo "unsupported JEM_WIRE_SERVER: ${JEM_WIRE_SERVER}" >&2; exit 2 ;;
+esac
 BTRANGE=()
 if [ -n "${JEM_BT_MIN:-}" ] && [ -n "${JEM_BT_MAX:-}" ]; then
   BTRANGE=("JEMTRACE_BT_MIN=$JEM_BT_MIN" "JEMTRACE_BT_MAX=$JEM_BT_MAX")
@@ -48,7 +54,7 @@ JEMTRACE_FREE_Q0="$CAPA" \
 JEMTRACE_BT_SIZE="${JEM_BT_SIZE:-}" \
 JEMTRACE_BT_DEPTH="${JEM_BT_DEPTH:-10}" \
   "$JEM_WIRE_RUBY" \
-  lab/repro/ruby2shell-stock-baseline.ru > "$LOG" 2>&1 9>"$TRACE" &
+  lab/repro/ruby2shell-stock-baseline.ru "${SERVER_ARGS[@]}" > "$LOG" 2>&1 9>"$TRACE" &
 PID=$!
 READY=NO
 for _ in $(seq 1 300); do

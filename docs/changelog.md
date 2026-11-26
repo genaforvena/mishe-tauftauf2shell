@@ -2,6 +2,20 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 15:4xZ — Ruby2Shell stock WEBrick consumer screen
+
+The stock `-s webrick` surface reaches a new Host `downcase`, but WEBrick tags
+the value ASCII-8BIT, so the expanding byte is inert. `jemtrace` now proves
+overflow writes with allocation-time before/after qwords (`O/P` records) and
+can dump live references. The precise C=80 pointer lead was a natural `0x53`
+false positive; C=640 is reused by `compile_data_alloc_with_arena` and erased.
+Plain glibc Sinatra N=572 later aborts in `unlink_chunk`; Rails/WEBrick N=524
+later aborts in `munmap_chunk`. Attack/safe/fixed C=640 controls are O=1/0/0.
+No command or persistent second request; full stock/oracle-free/persistent
+R5 remains NOT ACHIEVED. Reproducers:
+`lab/repro/ruby2shell-webrick-class-scan.sh` and
+`lab/repro/ruby2shell-webrick-case-watch.gdb`.
+
 ## 2026-11-26 15:0x–15:4xZ — quickjsbcode2shell 177th, W273 lwext4, real-consumer and wire lanes, closed negatives
 
 This fold covers `bf13ceab..81e3cd8e`. Reproduce every claim in
