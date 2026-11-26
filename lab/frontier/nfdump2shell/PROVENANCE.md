@@ -657,3 +657,47 @@ returned **17 PASS / 0 FAIL**, rc 0, with the same six cases: ASan WRITE-8
 with `free(): invalid next size (normal)`; safe and fixed `rc=0` with one
 flow and `Corrupt nfd record` respectively. No generated evidence, build
 directory or assertion was carried into the archive.
+
+## Live heap target of the IPv6 store (2026-11-26 21:06Z)
+
+New local file:
+
+| artifact | SHA-256 |
+| --- | --- |
+| `run-v6heap.sh` | `71c3c69d593620e18a49bd4b34870c40844d61f5a46da6f86bf26a0308b83fce` |
+
+The charter's open question — which live heap object the 8-byte store
+overlaps — is measured in the genuine uninstrumented plain collector, not
+in a harness. `run-v6heap.sh` starts `src/build-vuln-plain/src/nfcapd/.libs/nfcapd`
+under GDB with a breakpoint at `nfd_raw.c:256`, sends the same 65527-byte
+`v6edge` datagram on `::1`, and reads the malloc chunk metadata from the
+running process. No source, packet or build is synthetic.
+
+```
+bash lab/frontier/nfdump2shell/run-v6heap.sh
+TOTAL: 7 PASS / 0 FAIL
+
+HEAPMAP in_buff=0x5555555781c0 chunk_size=65552 hdr_off=65536
+        next_chunk=0x5555555881c0 target=0x5555555881c7
+        target_off=7 size_field=33
+0x5555555881d0:	"--1"
+```
+
+`in_buff` is the 65535-byte `malloc` at `nfcapd.c:273`, rounded to a 65552-byte
+chunk. The next chunk header is exactly 65536 bytes later; its user data holds
+the 32-byte source-ident chunk (`"--1"` here), followed by the `FlowSource_t`
+chunk that holds `fs->nffile` and other pointers. The maximum IPv6 store
+address is `in_buff+65543`, i.e. byte 7 of the next chunk header: it writes
+one byte into the high byte of `prev_size` and seven bytes into the low bytes
+of that chunk's `size` field (33, `0x21`, before the write). That is the
+direct cause of the observed `free(): invalid next size (normal)` / `double
+free or corruption (!prev)` abort. The abort message varies with the
+collector-timestamp-derived value; the target word does not.
+
+This measurement also closes the pointer-control route through this store:
+the write offset is bounded by `cnt+16`, and a UDP datagram on `::1` cannot
+exceed 65527 bytes, so the store cannot reach past `in_buff+65543` — seven
+bytes into the next header, well short of any pointer-bearing field in the
+following chunks. Value remains collector-time derived; no pointer, marker
+or command. Grade unchanged: rung 3 live / rung 4 availability plus
+chosen-byte PARTIAL, NO r5.

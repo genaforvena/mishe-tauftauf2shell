@@ -210,6 +210,19 @@ same-size safe and fixed cases exit `rc=0` with one flow and `Corrupt nfd
 record` respectively. The 8 bytes remain collector-timestamp derived; no
 chosen value, pointer, marker or command.
 
+### Live heap target and closure of pointer control (2026-11-26 21:06Z)
+
+`run-v6heap.sh` breaks at `nfd_raw.c:256` in the genuine plain collector and
+reads the live malloc metadata after the same 65527-byte datagram: **7 PASS /
+0 FAIL**. The 65535-byte `in_buff` request occupies a 65552-byte chunk; the
+next chunk header is at `in_buff+65536` and its 32-byte user chunk holds the
+source-ident string. The store address `in_buff+65543` is byte 7 of that
+header: one byte into `prev_size` and seven bytes into the next chunk's
+`size` field (33 before the write). That is the mechanism behind the
+SIGABRT. A UDP datagram on `::1` cannot exceed 65527 B, so the store offset
+`cnt+16` cannot reach any pointer-bearing field in the following chunks;
+the value is collector-timestamp derived. No pointer, marker or command.
+
 ### Packet-chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
 
 A third alias geometry targets the record header rather than flow data.
@@ -265,8 +278,9 @@ over setting the type directly. No pointer, marker, command or r5.
 - **Rung 4 DEMONSTRATED (availability):** a 65527 B loopback datagram writes
   8 bytes past the live 65535-byte receive allocation and corrupts glibc
   heap metadata; the genuine plain collector aborts with SIGABRT in 3/3
-  runs, with clean same-size safe and fixed controls. The written value is
-  collector-time derived, so the exact corrupted metadata word varies.
+  runs, with clean same-size safe and fixed controls. Live GDB shows the
+  store always lands at byte 7 of the next chunk header, crossing seven
+  bytes of its `size` field; only the timestamp-derived value varies.
 - **Rung 4 PARTIAL (chosen bytes):** the element length (hence the write
   offset) is packet-controlled. The 8-byte value clobbers the next V3
   record's header in a live IPv4 collector and drops that record (1 flow
@@ -281,9 +295,11 @@ over setting the type directly. No pointer, marker, command or r5.
   scalars, the 8-byte OOB value is collector-time derived, and there is no
   pointer hijack, benign command or command side effect. No rung 5 claim.
 
-Next experiment: no pointer-bearing object was found in the wire records or
-adjacent to `in_buff`, so pointer control is bounded by measurement; the
-IPv6 lane instead crosses the allocation itself and produces an abort.
+Pointer control through this store is closed by measurement: the write
+offset is bounded by `cnt+16` and a UDP datagram on `::1` cannot exceed
+65527 B, so the store stops seven bytes into the next chunk header, short
+of every pointer-bearing field in the following chunks. The IPv6 lane
+instead crosses the allocation itself and produces an abort.
 Six alias geometries are resolved: the first clobbered a header, the second
 writes chosen bytes to a processed record's timestamp field, the third to
 its `flags`/`nfversion` header field, the fourth to its element type (a
