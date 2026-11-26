@@ -7,7 +7,7 @@ No symbol table is loaded.  Use the "file" command.
 Breakpoint 1 (jl2005c.c:155) pending.
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
-process 2914714 is executing new program: /tmp/w197-o2/consumer-probe
+process 2932541 is executing new program: /tmp/w197-o2/consumer-probe
 [Thread debugging using libthread_db enabled]
 Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
 warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w197-o2/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
@@ -17,7 +17,7 @@ Breakpoint 1, jl2005c_init (camera=camera@entry=0x5555555592a0, port=0x55555555a
 $1 = 0x5555555633f0
 0x555555567430:	0x0000000000000000	0x0000000000012bd1
 Pattern not found.
-[Inferior 1 (process 2914714) killed]
+[Inferior 1 (process 2932541) killed]
 == device-only: full table write, no pointer/header repair ==
 === DEVICE_ONLY aslr=off rc=134 ===
 AFTER_INIT rc=0

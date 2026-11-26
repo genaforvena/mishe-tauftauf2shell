@@ -95,16 +95,16 @@ run WRONG_TOP off M2SHELL_JL2005_VUSB=n M2SHELL_JL2005_COUNT=1022 \
 echo "== safe count =="
 run SAFE off M2SHELL_JL2005_VUSB=s M2SHELL_JL2005_COUNT=100
 
-python3 - "$B" <<'PY'
+python3 - "$B" "$TOP" <<'PY'
 import os, sys
-b = sys.argv[1]
+b, top = sys.argv[1], int(sys.argv[2], 16)
 def text(n):
     try:
         return open(os.path.join(b, n + ".out"), encoding="utf-8", errors="replace").read()
     except OSError:
         return ""
 checks = [
-    ("gdb maps top size 0x12bd1", "0x0000000000012bd1" in text("gdb-map")),
+    ("gdb maps top size %#x" % top, ("0x%016x" % top) in text("gdb-map")),
     ("gdb finds no spilled priv on the frame", "Pattern not found." in text("gdb-map")),
     ("device-only init survives", "AFTER_INIT rc=0" in text("DEVICE_ONLY")),
     ("device-only first consumer allocation aborts",
