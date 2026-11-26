@@ -332,3 +332,11 @@ condition, and the vendor-listed 4.x/FIPS ranges are covered by W224/W225.
 Grade stays rungs 1-4, NO r5, wire reach UNKNOWN. An addressed witness verdict
 or a named caller meeting all three conditions reopens the lane; the periodic
 return chain is retired.
+
+## Witness replay W250 (2026-11-26)
+
+The W224 version-range lane was replayed from a clean archive at `8c2e3b42`
+with fresh ASan builds of all six tags: `51 PASS / 0 FAIL`, rc 0 on two serial
+runs; every pin independently re-fetched. ESTABLISHED AS LABELED, no grade
+change, NO r5. Research remains closed at the W226 ceiling. Detail:
+`.mishe-tauftauf/artifacts/witness-w250-awslc2shell/detail.md`.

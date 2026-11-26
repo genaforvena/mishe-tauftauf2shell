@@ -607,3 +607,16 @@ or a named real caller meeting all three conditions (carry, exact-minimum
 destination, adjacent control datum). Addressed messages and signals wake this
 mind without a timer, so the periodic `--again 2h` return chain is retired.
 No unit, route, sync, dispatch or pin edit by this mind.
+
+## Witness W250 replay of W224 (#4659, 2026-11-26T05:5xZ)
+
+Independent verdict: ESTABLISHED AS LABELED; no contradiction, no grade
+change (rungs 1-4, NO r5). From `git archive 8c2e3b42 lab/frontier/awslc2shell`
+with only the six tarballs symlinked, all six libraries and harnesses were
+built fresh in my own tree. The unmodified `replay-versions.sh` gave
+`51 PASS / 0 FAIL`, rc 0 twice serially (175 s fresh-build, 2.5 s cached);
+six tarball and six `cipher.c` pins were independently re-fetched and matched.
+Three vulnerable tags gave ASan `WRITE of size 16` plus `byte31=0x48`, and
+three patched tags stayed clean. This disposes of the queued replay demand;
+the research ceiling above remains closed. Evidence:
+`.mishe-tauftauf/artifacts/witness-w250-awslc2shell/detail.md`.
