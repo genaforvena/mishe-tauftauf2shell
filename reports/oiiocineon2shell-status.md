@@ -1,9 +1,16 @@
-# oiiocineon2shell — staged status (W297, 2026-11-26)
+# oiiocineon2shell — admitted status (W297/W298, 2026-11-26)
 
-Frontier STAGED this candidate on 2026-11-26 from verbatim upstream tags;
-the operator has NOT admitted it. Admission is a standing-#6 decision owned
-by the operator; an independent witness replay is owed after handoff and is
-not self-acceptance.
+Admitted by the operator at 23:1xZ under standing #6 as the 192nd declared
+target mind: claim source CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA `GitHub_M`,
+advisory 2026-07-10, CVE record 2026-09-18), affected
+`>= 3.2.0.0-dev, < 3.2.0.3-beta1` plus the 3.0.x/3.1.x branches, fixed
+`v3.2.0.3-beta1` by PR 5250's 1-8 `nchannels` guard. Claimed primitive: a
+crafted `.cin` `numberOfElements=255` at byte 193 drives unbounded `strings[8]`
+pointer stores; the advisory's adjacent `Reader cin` frame names the rung-4
+experiment. No duplicate CVE, GHSA or sink lane; the staged two-pane window 200
+was adopted as-is (panes %406/%407, dead=0, one registry entry). The
+independent witness replay was requested at chat #5903 and is still owed;
+author reports are not self-acceptance.
 
 Claim: CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA `GitHub_M`, advisory
 2026-07-10, CVE record 2026-09-18), CWE-121/CWE-787, CVSS 6.1. Vulnerable
@@ -34,5 +41,29 @@ three small OIIO helper headers are frontier-authored build shims, not
 upstream OIIO; no full `iinfo` consumer or wire path is built. OSV lookup for
 the GHSA returned 404 (negative preserved).
 
-Owed: independent clean-archive witness replay, then an operator admission
-decision. Registered grade R1 — / R2 — / R3 ✓ / R4 — / R5 —; R4/R5 NOT CLAIMED.
+Rung-4 feasibility / named depth experiment under standing #7: reproduce the
+advisory's frame layout with a live `cineon::Reader` local after `strings[8]`
+in the verbatim sink frame and print its fields after the 247 stores; a chosen
+byte at a chosen offset in that object is rung 4 in the extracted harness only.
+Then link the pinned vulnerable `iinfo` with ASan and replay the 255-element
+`.cin` through `ImageInput::open()` against the fixed tag for a rung-2
+functional differential; prior full-OIIO builds in this plant stalled on
+Imath and GCC `-Werror`, so budget accordingly. Keep the plain rc=0, clang
+`-O1` no-trap, fixed and safe controls; no r5 without a live-target benign
+command.
+Registered grade R1 — / R2 — / R3 ✓ / R4 — / R5 —; R4/R5 NOT CLAIMED.
+Witness verdict not yet folded; `established=false` in the manifest.
+
+## Operator clean-archive admission replay (23:14Z)
+
+From `git archive HEAD lab/frontier/oiiocineon2shell` with `runs/` removed:
+37/37 pins sha256sum OK, runner sha256
+`79c81411016b3e6a29b11101c564873e19fc802041149e1e32300618a91933f3`,
+`sh run-all.sh` rc 0, `PASS=13 FAIL=0`. Fresh GCC `-O1` ASan:
+`stack-buffer-overflow`, `WRITE of size 8` at verbatim raw
+`cineoninput.cpp:215`, `[32, 96) 'strings'` accessed at offset 96; clang
+`-O0` reproduces at `:215:20`. Fixed pin on the 255 vector prints
+`NumberOfElements=255`, `open_like=0` with no ASan; safe(8) and valid(1) are
+clean on both pins; plain vulnerable build prints `open_like=1` with rc 0
+(no rung-1 claim). The sink slices and `#line` mappings are asserted against
+the pinned raw lines by the runner.
