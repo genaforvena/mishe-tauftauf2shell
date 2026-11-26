@@ -4140,3 +4140,43 @@ and `stock-rails-ch588fix-{1,2}.{out,server.log}` (gitignored).
 Disposition: grades unchanged — rung 4 witness-COMPLETE, harness-condition
 rung 5 witness-ESTABLISHED, stock/oracle-free/persistent rung 5
 **NOT ACHIEVED**. No command, no second command.
+
+### Chunked fake-chunk size sweep — signature control confirmed, no primitive (2026-11-26, fifteenth wake)
+
+The prior wake closed the chunked N=588 wire lane but left the abort's glibc
+check unexamined. This wake swept the fake-chunk size qword directly. The
+driver writes `[prev=0x250, size=FILL_SIZE]` repeatedly into the drain/filler
+parts (`RUBY2SHELL_STOCK_DRAIN_FAKE=1`), so the vulnerable next-chunk field is
+attacker-supplied; `FILL_SIZE` had only ever been `0x90` (6/7 aborts).
+Prediction: a different size changes the glibc check or yields a survivor
+with a reflected deviation. Falsifier: all sizes abort identically to `0x90`.
+
+Nine fresh vulnerable-3.4.12 processes, three per `FILL_SIZE ∈ {0x91, 0x93,
+0x251}`, all with `Transfer-Encoding: chunked`, N=588, DRAIN=1024:32,
+FILL=256, PART_CHARSET=1, tail `00005102`:
+
+| size | clean 404 | abort(s) | observed glibc diagnostic |
+|------|-----------|----------|---------------------------|
+| `0x91` | 2/3 | 1/3 | `sysmalloc` assertion (`malloc.c:2599`) |
+| `0x93` | 1/3 | 2/3 | one `malloc(): mismatching next->prev_size (unsorted)`, one `sysmalloc` assertion |
+| `0x251` | 0/3 | 3/3 | two `malloc(): invalid next size (unsorted)`, one `sysmalloc` assertion |
+
+**The strict falsifier was not met:** the size qword changes *which* glibc
+check fires, so the attacker's fake-chunk bytes are consumed by the aborting
+consumer. Reflect scan on the three survivors (`--pattern` matched to each
+size): `0x91` 2 files/68 parts, `0x93` 1 file/34 parts, **0 deviations and 0
+leak-shaped qwords in every case**; `0x251` produced no HTML (all aborted).
+Fixed-3.4.13 controls with the identical chunked wire and fake pattern at
+`0x93` (2/2) and `0x251` (2/2) all returned clean 404 and stayed alive, so the
+aborts remain attributable to the vulnerable one-byte overflow, not the wire
+or the fake bytes.
+
+Disposition: signature control is a real observation, but it is not a
+primitive. No chosen-byte write into a live or reflected value, no claim pop,
+no libc/code pointer, no command, no second command. Grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
+`lab/build/evidence/chf-sweep-summary.txt` and `stock-rails-chf*` `.out`,
+`.server.log`, `.html` files (gitignored). Next bounded experiment: sweep
+`FILL_PREV` toward coherence with `FILL_SIZE` at `0x91`/`0x93` to test whether
+the `mismatching next->prev_size` check gates a deeper unlink path.
