@@ -3960,12 +3960,13 @@ files and the manifest to their authors.
   `counts` vector. The fixed tag rejects with `inconsistent size for a
   repeated entry (1 vs 3)`. Grade rung 3 verbatim / rung 4 PARTIAL: no named
   adjacent object, pointer, CLI/`--imat-in` path, live process, wire,
-  command or r5. Window 176 (panes %354/%355) was adopted live; the target is
-  **STAGED, not admitted** — the author's own clean-archive replay from
-  `git archive f0eec56a` returned `RESULT PASS=10 FAIL=0`, rc 0; operator
-  admission and independent witness replay remain owed, and no register row
-  or generated count moved with
-  staging. Detail: `reports/frontier-sdimatrix2shell.md` and
+  command or r5. Window 176 (panes %354/%355) was adopted live. True at
+  staging: the target was **STAGED, not admitted** then, and the author's own
+  clean-archive replay from `git archive f0eec56a` returned `RESULT PASS=10
+  FAIL=0`, rc 0, with no register row or generated count moved by staging.
+  Witness W260 later returned ESTABLISHED AS LABELED and the operator admitted
+  the 168th mind at 10:4xZ; see the 10:3x–10:4xZ section below. Detail:
+  `reports/frontier-sdimatrix2shell.md` and
   `reports/sdimatrix2shell-status.md`.
 - `05369943` pins the raw fix patch (`792c4d07…659d6`) for that target; the
   mid-fold `f0eec56a` repaired the pin set. A first clean-archive replay at
@@ -3988,10 +3989,10 @@ generated count moved by docs.
   `.mishe-tauftauf/replays/sdimatrix2shell-w258/`: `RESULT PASS=10 FAIL=0`,
   rc 0, console `replay-console.log` 09:23:31Z–09:25:39Z, runner sha256
   `65ca30af…` unchanged; the tracked ASan traces were refreshed (same verbatim
-  `imatrix.cpp:302` READ of size 4, only PIE addresses and PIDs changed). This
-  is author-side, not witness acceptance: operator admission and independent
-  witness replay remain owed, and the target stays STAGED. The first replay at
-  `05369943` failed `PIN_FAIL` on SHA-URL vs tag-URL tarball bytes; `f0eec56a`
+  `imatrix.cpp:302` READ of size 4, only PIE addresses and PIDs changed). It
+  was author-side then: witness W260 closed the independent replay and the
+  operator admitted the target at 10:4xZ (see below). The first replay at
+  `05369943` failed PIN_FAIL on SHA-URL vs tag-URL tarball bytes; `f0eec56a`
   re-pinned both archives with unchanged extracted bodies.
 - `b91728eb` is witness **W259** on openexr2shell W211's shipped `exrcheck -s
   -c` stream-mode benign-command chain: ESTABLISHED AS LABELED at the ASLR-off,
@@ -4003,3 +4004,76 @@ generated count moved by docs.
   passage covered that lane, so docs records doc-ok rather than restating the
   verdict. Detail:
   `.mishe-tauftauf/artifacts/witness-w259-openexr2shell/detail.md`.
+
+## 2026-11-26 10:3x–10:4xZ — sdimatrix admission, W260/W261 verdicts, wpqw rung 4
+
+Wake-start `repo-change=a6d617ee`; head `0430baa6` at fold time. Nine commits
+since `c891a9a6`: the eight listed below plus the report-only `97abef02`
+(openexr W213 folds W259's ESTABLISHED AS LABELED verdict into the final
+grade, no grade change, NO r5; doc-ok, no hand-maintained passage covered it).
+No rung cell, grade, route or R5 cell was moved by docs; the one grade change
+in this set belongs to the Ruby author's own report.
+
+- `9e0fca21` (Ruby W79) measured two adjacent bugs from the same 2026-11-18
+  fix series as CVE-2026-132825, both secondary lanes. GHSA-wpqw-5qxg-m68r on
+  affected 3.4.12 ASan gives `global-buffer-overflow` `READ of size 8` at
+  `match_at regexec.c:2747` from a crafted UTF-16LE case-insensitive pattern,
+  plus a wrong match on a non-matching subject; fixed 3.4.13 rejects all
+  shapes. Grade rung 3 CONFIRMED then. GHSA-pvgc-g7gj-pv6h produced only a
+  fix-sensitive false match (`/(k\0)\1/i` true on 3.4.12, false on 3.4.13)
+  with no ASan report: rung 2. GHSA-3p8q-wmhx-vm2w is CLOSED host-guard
+  BLOCKED — the 2 GiB integer-wrap shape cannot compile inside the wake's
+  2 GiB cgroup (500 MB literal timed out at 213 s, scaled 45 KB repeat at
+  293 s). Primary grades unchanged.
+- `9f1ae4bc` staged **ettercapgg2shell** under standing #6 for CVE-2026-125401
+  / GHSA-vrjv-f8gv-2h35 (Ettercap <=0.8.4.1, fixed 0.8.5.1; PR #1330 head
+  `a8c1a50`). The verbatim `gg_get_version` body writes a 44-byte version
+  string into a 30-byte `calloc` at `ec_gg.c:673`. Canonical runner
+  `35c3f7d5…458958c4` printed `RESULT PASS=25 FAIL=0`, rc 0. Grade rung 3
+  verbatim / rung 4 PARTIAL: chosen hex digits stay in bounds at offsets
+  11..18; only fixed suffix bytes cross offset 30, with no named adjacent
+  object, pointer, wire path, command or r5. Window 177 (panes %356/%357) is
+  live; STAGED, not admitted at that edge.
+- `30eb2847` tracked the pinned PR #1330 fix patch (`4ab380d9…58ee5c`); a
+  first clean-archive replay from `9f1ae4bc` correctly failed `PIN_FAIL`
+  because that patch was untracked. `a6d617ee` folds the repair: the
+  unmodified runner replayed from `git archive 30eb2847` into
+  `.mishe-tauftauf/replays/ettercapgg2shell-w260/` printed `RESULT PASS=25
+  FAIL=0`, rc 0, console finished 09:54:46Z, runner hash unchanged. Both the
+  PIN_FAIL negative and the repair are preserved in PROVENANCE.
+- `d497c09b` is witness **W260** on sdimatrix2shell: independent clean
+  `git archive f0eec56a` replay, 09:49:01Z–09:50:56Z (115.53 s), rc 0,
+  10 PASS / 0 FAIL, all seven pins re-fetched and matched. Vulnerable GCC and
+  Clang ASan both report `READ of size 4` at verbatim
+  `src/runtime/imatrix.cpp:302`; fixed rejects `inconsistent size for a
+  repeated entry (1 vs 3)`; safe inputs clean. Verdict ESTABLISHED AS LABELED
+  at rung 3 verbatim / rung 4 PARTIAL, no contradiction, no grade change,
+  NO r5. The earlier "witness replay owed" notes above are stale.
+- `b740dcb0` is witness **W261** on ettercapgg2shell: independent clean
+  `git archive a6d617ee` replay, 10:37:36Z–10:37:38Z (2.51 s), rc 0,
+  25 PASS / 0 FAIL, hash `35c3f7d5…` identical in worktree, commit and
+  archive. Both ASan compilers report `WRITE of size 13`, 0 bytes after the
+  30-byte region at verbatim `ec_gg.c:673`; fixed `len=29`, safe `len=3`.
+  Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade
+  change, NO r5; NIT: the allocation is at `poc.c:58`, not the earlier `:35`.
+- `67e79cae` admits sdimatrix2shell as the **168th** declared target mind
+  under standing #6 (window 176 adopted). The operator's generated counts
+  moved 167/164/164/111 → 168/165/165/112 in README, results, SVG and the
+  manifest; the hy4-flash route and generated wake units remain person-
+  reserved and omp-only RED. Docs touched none of those generated files.
+- `0430baa6` (Ruby W80) moves the wpqw secondary lane from rung 3 to **rung 4
+  — demonstrated security impact**, narrowly. A chosen tail high byte at a
+  chosen compiled-pattern offset is consumed as a live opcode dispatch:
+  index `0x01` (OP_END) turns a non-matching UTF-16LE subject into a false
+  match, `0x3d` (OP_JUMP) segfaults, and `0x62` (outside the 98-entry
+  `oplabels` table) gives the ASan read at `regexec.c:2747`; fixed 3.4.13
+  rejects every index. The UTF-8 analogue steers nothing (comparison fails
+  before `NEXT`), so the primitive is bounded to wide encodings. No arbitrary
+  PC control, write primitive, pointer disclosure or stock/wire reachability
+  follows; primary grades stay rung 4 witness-COMPLETE, harness-condition
+  rung 5 witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+
+Details: `.mishe-tauftauf/artifacts/witness-w260-sdimatrix2shell/detail.md`,
+`.mishe-tauftauf/artifacts/witness-w261-ettercapgg2shell/detail.md`,
+`reports/ruby2shell-investigation.md` §§wake 79 / W80, and the two
+ettercapgg2shell reports.

@@ -12818,10 +12818,11 @@ README/results/SVG.
   wire, file/socket side effect or command. Raw console, traces and detail:
   `.mishe-tauftauf/artifacts/witness-w258-libx11xkb2shell/`.
 
-- **Sdimatrix2Shell (frontier W258; staged `377e4855`, patch pinned
-  `05369943`, archives re-pinned `f0eec56a`) — rung 3 verbatim / rung 4
-  PARTIAL, STAGED not admitted; author clean-archive replay 10 PASS / 0 FAIL,
-  independent witness replay and admission still owed.**
+- **Sdimatrix2Shell (recipe; staged `377e4855`, patch pinned `05369943`,
+  archives re-pinned `f0eec56a`, admitted 10:4xZ and witnessed by W260) —
+  rung 3 verbatim / rung 4 PARTIAL.** The author replay 10 PASS / 0 FAIL and
+  the admission and witness verdicts once owed here are now recorded in the
+  10:3x–10:4xZ section below; the recipe itself is unchanged.
   CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7,
   stable-diffusion.cpp `master-742-1a13107` (affected commit
   `1a13107bac236b0cd6fadbf5c264f3644874ba4f`) → `master-763-4fcc6fe` (fixed
@@ -12882,10 +12883,11 @@ README/results/SVG.
   printed `RESULT PASS=10 FAIL=0`, rc 0 (`replay-console.log`, 09:23:31Z–
   09:25:39Z) with the canonical hash `65ca30af…` unchanged and refreshed
   ASan traces showing the same verbatim `imatrix.cpp:302` READ of size 4
-  (PIE addresses and PIDs differ). That is author-side, not witness acceptance.
-  No `sd-cli`, model, wire input, pointer control, command or r5 is claimed;
-  window 176 (panes %354/%355) is live, admission and independent witness
-  replay are owed, and staging moved no manifest row or generated count.
+  (PIE addresses and PIDs differ). That was author-side at the time; W260
+  later closed the independent-replay gap and the operator admitted the
+  target as the 168th mind at 10:4xZ (see below). No `sd-cli`, model, wire
+  input, pointer control, command or r5 is claimed; window 176 is live and
+  staging moved no manifest row or generated count.
 
 ## 2026-11-26 09:2x–09:4xZ — sdimatrix2shell author replay receipt; W259 doc-ok
 
@@ -12900,8 +12902,8 @@ cell moved by docs.
   sha256 `65ca30af…` unchanged. Both tracked vulnerable ASan traces were
   refreshed: GCC and Clang still show `READ of size 4` at verbatim
   `src/runtime/imatrix.cpp:302`, 0 bytes after a 4-byte region, with only PIE
-  addresses and PIDs changed. Author-side; operator admission and independent
-  witness replay are still owed, and no manifest row or generated count moved.
+  addresses and PIDs changed. It was author-side then: W260 replayed
+  independently and the operator admitted the target at 10:4xZ (see below).
 - **Witness W259 — openexr2shell W211 stream-mode command chain (doc-ok).**
   The witness replayed the shipped `exrcheck -s -c` stream-mode benign-command
   lane from a clean `git archive e719fb69`: two runs, rc 0, 8/8 pins, stable
@@ -12916,3 +12918,101 @@ cell moved by docs.
   covered the W211 stream-mode lane and the manifest/row/count were unchanged,
   so docs records doc-ok rather than restating the report's conclusion.
   Detail: `.mishe-tauftauf/artifacts/witness-w259-openexr2shell/detail.md`.
+
+## 2026-11-26 10:3x–10:4xZ — W260/W261 receipts, ettercapgg and Ruby steering recipes
+
+No replay was rerun in this fold. Hashes, bytes and timings below are quoted
+from committed receipts and the witness artifacts. No rung cell, grade,
+route, manifest row or generated count was moved by docs.
+
+### Witness W260 — sdimatrix2shell (`d497c09b`)
+
+From a clean `git archive f0eec56a lab/frontier/sdimatrix2shell` into a fresh
+directory, delete archived `build/`, evidence outputs, tarballs and fix
+patch, then run the unmodified `bash run-all.sh`. The witness ran
+09:49:01Z–09:50:56Z (115.53 s), rc 0, `RESULT PASS=10 FAIL=0`, with runner
+sha256 `65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741`
+and all seven pins matched: tarballs
+`863e674f…3315c00` (vulnerable) / `a070f629…579577d8` (fixed), patch
+`792c4d07…939f659d6`, generator `9d5ea511…`, driver `4a269672…`, and both
+extracted bodies `6d1a5fc1…362d1` / `b45cf140…8375a`. Expect vulnerable
+GCC+Clang ASan `READ of size 4` at verbatim `src/runtime/imatrix.cpp:302`,
+0 bytes after a 4-byte region, fixed
+`inconsistent size for a repeated entry (1 vs 3)` with `ok=0`, and plain
+`counts_oob1=counts_oob2=0x41414141` against zeroed safe controls. Verdict
+ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade change,
+NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w260-sdimatrix2shell/detail.md`. Operator
+`67e79cae` then admitted the target as the 168th mind; generated counts
+moved 167/164/164/111 → 168/165/165/112, with route and wake units remaining
+person-reserved.
+
+### Ettercapgg2shell — stage, PIN_FAIL repair, author replay and W261
+
+Claim: CVE-2026-125401 / GHSA-vrjv-f8gv-2h35, Ettercap <=0.8.4.1 fixed in
+0.8.5.1; vulnerable tag `0dc84097…`, fixed tag `832524f3…`, PR #1330 head
+`a8c1a5085791b38c234be0e4129302fdc36964e0`. All claim URLs and pins live in
+`lab/frontier/ettercapgg2shell/PROVENANCE.md`. From the repo root:
+
+```
+T=$(mktemp -d /tmp/docs-ettercapgg.XXXXXX)
+git archive 30eb2847 lab/frontier/ettercapgg2shell | tar x -C "$T"
+cd "$T/lab/frontier/ettercapgg2shell" && sh run-all.sh
+```
+
+The canonical runner sha256 is
+`35c3f7d532a62b107f806d7b126e4f76bead860d949ce7b57217e22f458958c4`; it
+fetches both codeload archives by commit SHA (vulnerable
+`f8fbcf0b…ef28fff`, fixed `f6318262…8c273`), verifies the tracked PR patch
+`4ab380d9…58ee5c` and `poc.c` `f839ae71…fb65e67`, extracts the verbatim
+`gg_get_version` bodies (`:599-678` / `:631-717`, hashes `bef7c986…def0cbf`
+and `9ec393ab…e3508`) and builds GCC+Clang ASan/plain variants. Expect
+`RESULT PASS=25 FAIL=0`, rc 0; vulnerable ASan `WRITE of size 13`, 0 bytes
+after a 30-byte region at `src/dissectors/ec_gg.c:673` with the allocation at
+`poc.c:58`; fixed `len=29` and no ASan; safe version `0x0000002a` `len=3`.
+Plain vulnerable output reads `b11=34` (chosen digit, in bounds) and fixed
+suffix bytes `b30=69`, `b42=78` past the allocation. The preserved negative:
+a replay from `9f1ae4bc` failed `PIN_FAIL` because PR #1330's patch was not
+tracked; `30eb2847` pins it, and the author replay from that commit returned
+25 PASS / 0 FAIL, rc 0 (console finished 09:54:46Z).
+
+Witness **W261** (`b740dcb0`) used the same runner hash from a clean
+`git archive a6d617ee` subtree with archived evidence and generated `.inc`
+files deleted and both tarballs re-fetched: 10:37:36Z–10:37:38Z, 2.51 s,
+rc 0, 25 PASS / 0 FAIL, all pins and start-line assertions held, same bytes
+and grades. NIT: the allocation line is `poc.c:58`, not the earlier `:35`.
+Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade
+change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w261-ettercapgg2shell/detail.md`.
+`src/*.tar.gz`, `src/out/`, `evidence/*.log` and generated includes are
+gitignored and regenerate with the wrapper above. Target remains STAGED with
+window 177 live; operator admission is owed.
+
+### Ruby2Shell W79/W80 — adjacent Regexp lanes
+
+With the Ruby 3.4.12 and 3.4.13 ASan builds from the main Ruby recipe:
+
+```
+bash lab/repro/ruby2shell-adjacent-ic.sh
+bash lab/repro/ruby2shell-wpqw-steer.sh
+```
+
+The first runner drives `ruby2shell-adjacent-ic.rb` with `wpqw` and `pvgc`
+cases; evidence is gitignored under `lab/build/evidence/adjacent-ic/`.
+Expect 3.4.12 wpqw rc=1 with `global-buffer-overflow`, `READ of size 8` at
+`match_at regexec.c:2747`, 0 bytes after the 784-byte `oplabels` global
+(`regexec.c:2329`), plain rc=139 and a false match on a crafted non-matching
+UTF-16LE subject; fixed 3.4.13 rc=0 on every shape. pvgc's
+`/(k\0)\1/i.match?("k\0\u212a")` is true on 3.4.12, false on 3.4.13, with no
+ASan report in either build.
+
+The steering runner drives `ruby2shell-wpqw-steer.rb` at indices
+0, 1, 2, 10, 14, 61, 98 on both builds, writing gitignored
+`lab/build/evidence/wpqw-steer/3.4.{12,13}-idx*.out`. At index 1 (OP_END)
+the vulnerable build returns a false match where fixed rejects; index 61
+(OP_JUMP) exits rc=139; index 98 (outside the 98-entry table) gives the ASan
+read; fixed rejects every index. This is a chosen byte at a chosen
+compiled-pattern offset consumed as a live opcode dispatch (rung 4, secondary
+wide-encoding lane only) — not arbitrary PC control, a write primitive or a
+stock/wire path. The UTF-8 analogue produces no dispatch; GHSA-3p8q-wmhx-vm2w
+stays host-guard BLOCKED under the 2 GiB cgroup.

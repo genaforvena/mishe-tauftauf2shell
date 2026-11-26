@@ -12713,10 +12713,10 @@ grade, route or R5 cell moved here.
   vulnerable builds show chosen `0x41414141` two ints past the 1-element
   `counts` vector. Grade rung 3 verbatim / rung 4 PARTIAL; no named adjacent
   object, pointer, CLI/`--imat-in` path, live process, wire, command or r5.
-  The target is **STAGED, not admitted** — the author's clean-archive replay
-  from `git archive f0eec56a` returned 10 PASS / 0 FAIL rc 0, but operator
-  admission and independent witness replay are still owed; staging moved no
-  manifest row or generated count.
+  The target was **STAGED, not admitted** at that edge: the author's clean-
+  archive replay from `git archive f0eec56a` returned 10 PASS / 0 FAIL rc 0,
+  and staging moved no manifest row or generated count. W260 and the operator
+  closed the witness and admission gaps at 10:4xZ (see below).
   A first clean-archive replay failed `PIN_FAIL` on SHA-URL vs tag-URL
   tarball bytes and was re-pinned to the SHA-URL archives with unchanged
   extracted bodies. Full recipe in `docs/reproducibility.md`.
@@ -12729,12 +12729,13 @@ route, manifest row, generated count or witness verdict moved by docs.
 - `a7c6e74b` closes only the AUTHOR replay gap on sdimatrix2shell: the
   unmodified runner from `git archive f0eec56a` printed `RESULT PASS=10 FAIL=0`
   rc 0 (console `replay-console.log`, 09:23:31Z–09:25:39Z, runner hash
-  `65ca30af…` unchanged). The target stays STAGED — operator admission and an
-  independent witness replay are still owed, grade rung 3 verbatim / rung 4
-  PARTIAL with no named adjacent object, pointer, CLI path, wire, command or
-  r5. The three previously stale "replay owed" passages were corrected in
-  place; the first replay's PIN_FAIL on SHA-URL vs tag-URL tarball bytes is
-  preserved, and `f0eec56a` re-pinned both archives with unchanged bodies.
+  `65ca30af…` unchanged). It was STAGED then; W260 replayed independently and
+  the operator admitted the target as the 168th mind at 10:4xZ (see below).
+  Grade rung 3 verbatim / rung 4 PARTIAL with no named adjacent object,
+  pointer, CLI path, wire, command or r5. The three previously stale
+  "replay owed" passages were corrected in place; the first replay's
+  PIN_FAIL on SHA-URL vs tag-URL tarball bytes is preserved, and `f0eec56a`
+  re-pinned both archives with unchanged bodies.
 - `b91728eb` is witness W259 on openexr2shell W211's shipped `exrcheck -s -c`
   stream-mode benign-command chain: ESTABLISHED AS LABELED at the ASLR-off,
   local-file, benign-marker scope on an independent clean `git archive
@@ -12744,3 +12745,52 @@ route, manifest row, generated count or witness verdict moved by docs.
   cell or a restated verdict. Remaining rung-moving work on that row is still
   an ASLR-on address route, a wire/stdin-fed affected process, or a non-benign
   command with durable attacker benefit.
+
+## 2026-11-26 10:3x–10:4xZ — W260/W261 close two gaps; wpqw reaches rung 4
+
+Signal `a6d617ee`, head `0430baa6` at fold time. Nine commits since
+`c891a9a6`, eight substantive plus the report-only `97abef02` (openexr W213
+folds W259 into the final grade, no grade change, NO r5; doc-ok). No rung
+cell, grade, route or R5 cell was moved by docs; the one grade change came
+from the Ruby author's own report.
+
+- `d497c09b` / `67e79cae`: witness **W260** replayed sdimatrix2shell from a
+  clean `git archive f0eec56a` in 115.53 s, rc 0, 10 PASS / 0 FAIL, all seven
+  pins held, with the same verbatim `imatrix.cpp:302` `READ of size 4` and
+  fixed rejection. Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4
+  PARTIAL, no grade change, NO r5. The operator then admitted the 168th mind
+  under standing #6 (window 176 adopted); generated counts moved
+  167/164/164/111 → 168/165/165/112 in README, results, SVG and the manifest.
+  Route and wake units remain person-reserved. The earlier "witness owed /
+  STAGED" passages above are stale. Remaining rung-moving work is a real
+  `sd-cli`/`--imat-in` path with a named adjacent object or pointer, not
+  another replay of the same harness; no admission work remains.
+- `9f1ae4bc` / `30eb2847` / `a6d617ee` / `b740dcb0`: ettercapgg2shell was
+  staged for CVE-2026-125401 (v0.8.4.1 → 0.8.5.1, PR #1330), its fix patch
+  was pinned after a `PIN_FAIL`, the author replayed 25 PASS / 0 FAIL from
+  `git archive 30eb2847`, and witness **W261** independently replayed
+  `35c3f7d5…` from a clean `git archive a6d617ee` in 2.51 s, rc 0,
+  25 PASS / 0 FAIL. Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4
+  PARTIAL: vulnerable ASan `WRITE of size 13` at `ec_gg.c:673` into a 30-byte
+  region, fixed `len=29`, safe `len=3`. Chosen version digits stay in bounds;
+  only fixed suffix bytes cross the allocation, with no named adjacent
+  object, pointer, wire path, command or r5. Target stays STAGED with window
+  177 live; operator admission is owed. Cheapest rung-moving next step: build
+  the pinned `dissector_gg()` path, feed a crafted Gadu-Gadu login packet from
+  a local pcap into a loopback-only instance, and measure the fixed tag's
+  separate `strncpy(tbuf2, …)` chosen-byte overflow toward a named field.
+- `9e0fca21` / `0430baa6`: Ruby's adjacent case-insensitive Regexp lanes.
+  W79 reproduced wpqw as rung 3 (3.4.12 ASan `READ of size 8` at
+  `regexec.c:2747` plus a false match; fixed 3.4.13 clean) and pvgc as a
+  rung-2 fix-sensitive false match with no ASan report; GHSA-3p8q-wmhx-vm2w
+  is CLOSED host-guard BLOCKED under the 2 GiB cgroup. W80 moved wpqw to
+  **rung 4, secondary lane only**: a chosen tail byte at a chosen compiled
+  pattern offset is consumed as a live opcode dispatch — index `0x01`
+  (OP_END) flips the verdict, `0x3d` (OP_JUMP) segfaults, `0x62` reads outside
+  the 98-entry `oplabels` table, while 3.4.13 rejects every index. The UTF-8
+  analogue never dispatches. No arbitrary PC control, write primitive,
+  pointer disclosure or stock/wire reachability; primary grades stay rung 4
+  witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED. Next bounded falsifier: the
+  UTF-32LE tail shape `U+XX03AB`; if the comparison fails before `NEXT` as in
+  UTF-8, the lane closes to UTF-16LE and no further encoding sweep is owed.
