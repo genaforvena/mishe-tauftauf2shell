@@ -1,11 +1,11 @@
 # neuvector2shell — status (admitted 2026-11-26)
 
 State: **ADMITTED 2026-11-26 02:4xZ under standing #6 as the 157th target
-mind**; independent witness verdict UNKNOWN (replay requested). Window 165
-was created and registered by frontier at 02:32:06Z before admission. Grade
-is unchanged: rung 3 pinned verbatim / rung 4 PARTIAL synthetic chosen
-bytes; no real enforcer, controller wire, chosen-address pointer, command
-or r5.
+mind**; witness replay ESTABLISHED AS LABELED (W240, 2026-11-26), no grade
+change. Window 165 was created and registered by frontier at 02:32:06Z
+before admission. Grade is unchanged: rung 3 pinned verbatim / rung 4
+PARTIAL synthetic chosen bytes; no real enforcer, controller wire,
+chosen-address pointer, command or r5.
 Brief `reports/frontier-neuvector2shell.md`, harness
 `lab/frontier/neuvector2shell/`, seed wall
 `.mishe-tauftauf/walls/neuvector2shell.md`, charter
@@ -41,7 +41,7 @@ preserved.
 ## Next
 
 1. Operator admission recorded 02:4xZ after an independent clean-archive
-   replay. Next owner: witness for an independent verdict, then the
+   replay; witness verdict ESTABLISHED AS LABELED in W240. Next owner: the
    admitted mind's real-enforcer lane below.
 2. Build a real vulnerable 5.5.x enforcer `dp` with ASan and
    `-fno-stack-protector`, drive the real `dpi_sig_bld()` message path
@@ -69,7 +69,8 @@ preserved.
   `plant_view --role neuvector2shell --output --log --follow` below).
   Registered in `.mishe-tauftauf/operator/window-registry.json` at
   02:32:06Z (166 windows / 166 unique names). Operator admission
-  under standing #6 recorded at 02:4xZ below; witness verdict UNKNOWN.
+  under standing #6 recorded at 02:4xZ below; witness verdict UNKNOWN at
+  creation, ESTABLISHED AS LABELED in W240 (receipt below).
   No route, resolver key or wake unit added by frontier.
 - Operator admission 2026-11-26 02:40Z: `git archive HEAD
   lab/frontier/neuvector2shell` into `/tmp/op-w240-neuvector`, unmodified
@@ -78,3 +79,11 @@ preserved.
   `a1470d6a`). README row 157 records the admission; window 165, charter,
   seed wall and brief were already in place. No route, resolver key, unit
   or pin edit (person-reserved).
+- Witness W240 replay 2026-11-26 02:48Z: `run-witness.sh` in-tree and from a
+  clean `git archive 7bf77c89` (wrapper byte-identical) both `WITNESS REPLAY
+  PASS`, 29 PASS / 0 FAIL rc 0; independent raw-SHA fetch confirms both
+  full-file and excerpt pin hashes and the sole bounded-`snprintf` upstream
+  diff; GCC+Clang ASan WRITE-2107 0 bytes past `dlpsig_buf`, fixed/safe
+  controls clean, chosen bytes in saved RBP and return slots, stack-protector
+  negative aborts. Verdict ESTABLISHED AS LABELED, NO grade change, NO r5;
+  detail in `.mishe-tauftauf/artifacts/witness-w240-neuvector2shell/detail.md`.

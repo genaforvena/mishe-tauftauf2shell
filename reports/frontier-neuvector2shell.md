@@ -1,9 +1,9 @@
 # Frontier brief: NeuVector DLP/WAF rule stack overflow — CVE-2026-127182
 
-Status: **STAGED 2026-11-26 by frontier W240**, awaiting operator
-admission; witness replay UNKNOWN. Rung 3 pinned verbatim function; rung 4
-PARTIAL (chosen bytes observed past the 2048-byte stack buffer and in the
-saved return slot by gdb). No real NeuVector build, controller REST call,
+Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
+ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 pinned verbatim function;
+rung 4 PARTIAL (chosen bytes observed past the 2048-byte stack buffer and in
+frame control slots by gdb). No real NeuVector build, controller REST call,
 wire input, pointer redirection, command or rung 5.
 
 ## Claim and scope
@@ -63,15 +63,38 @@ stack-buffer-overflow`, `WRITE of size 2107`, address at offset 2080 in
 `MODE=attack PATLEN=2100 RC=0 SIG_LEN=0`. Safe input (8-byte pattern):
 clean in both bodies, `SIG_LEN=35`.
 
-Plain build with `-fno-stack-protector`, gdb breakpoint at the pinned
-excerpt line 45 and `x/16xb &dlpsig_buf[2048]` reads twelve `0x4d` bytes
-at the first bytes past the buffer; `*(void **)$rbp` prints
-`0x4d4d4d4d4d4d4d4d`, i.e. the same chosen bytes reached the saved return
-slot. The process then faults (the chosen bytes do not form a valid
-address). With the default stack protector the same input aborts with
-`*** stack smashing detected ***`: that negative is preserved, not erased.
-Exact commands, hashes and logs are in
-`lab/frontier/neuvector2shell/PROVENANCE.md`.
+Plain build with `-fno-stack-protector`: the gdb script sets a breakpoint at
+the pinned excerpt line 45, but the run faults at excerpt line 40 before it
+is reached; `x/16xb &dlpsig_buf[2048]` at that fault reads twelve `0x4d`
+bytes at the first bytes past the buffer. The script's `RET=` print reads
+`*(void **)$rbp`, the saved frame-pointer slot; independent gdb also shows
+the return slot at `$rbp+8` filled with the same chosen bytes. The process
+then faults because that value is not a valid address. With the default
+stack protector the same input aborts with `*** stack smashing detected ***`:
+that negative is preserved, not erased. Exact commands, hashes and logs are
+in `lab/frontier/neuvector2shell/PROVENANCE.md`.
+
+## Witness replay (W240, 2026-11-26)
+
+ESTABLISHED AS LABELED. `bash lab/frontier/neuvector2shell/run-witness.sh`
+from the worktree and from a clean `git archive 7bf77c89
+lab/frontier/neuvector2shell` (wrapper byte-identical, sha256
+`007c507d…a072`) each returned `WITNESS REPLAY PASS`, four pins exact,
+`TOTAL: 29 PASS / 0 FAIL`, rc 0. Independently fetched both raw upstream
+`dpi_sig.c` blobs at `48ae8b5c` and `0a1dc965`: full-file and
+`sed -n '618,705p'` / `'618,725p'` excerpt hashes match all four pins; the
+only upstream diff is the bounded-`snprintf` hunk at full-file 648-683, and
+the earlier `strlen` check is at line 81 in a different routine. GCC and
+Clang ASan -O0 logs show `WRITE of size 2107`, 0 bytes past a 2048-byte
+`dlpsig_buf`, write frame `dpi_sig_bld pins/dpi-vulnerable.inc:41`; fixed
+and safe inputs are ASan-clean at `SIG_LEN=0` / `35`. Plain chosen-byte
+readback puts twelve `0x4d` bytes past the buffer and overwrites both saved
+RBP and the return slot; the default stack-protector negative aborts. Two
+documentation NITs above: the line-45 breakpoint is set but the readback
+happens at a SIGSEGV at line 40, and the script's `RET=` label names the
+saved RBP slot. No real enforcer, controller, wire, chosen-address pointer,
+command or r5; full detail:
+`.mishe-tauftauf/artifacts/witness-w240-neuvector2shell/detail.md`.
 
 ## Grade and tractability
 
