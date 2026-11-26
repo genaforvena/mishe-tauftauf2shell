@@ -11,10 +11,11 @@ replay owed. No wake unit, route or sync change by frontier (person/genome
 reserved).
 
 Evidence: `run-all.sh` sha256
-`5d0e10f7410649464861508563ae17b212bf357eaac2869f5e8981af2d4620fa`
-verifies tarball, patch and harness pins; builds pinned 7.23/7.24 with GCC and
-Clang ASan at `MG_IO_SIZE=512`; and drives a mock-L2, full-handshake harness
-with an attack FIN and a fit-within-buffer safe FIN. Result at 08:08Z:
+`6f99384f721f8c1bd839c760f6c7d9a6e5c1ee6d35abd28e622f1dda4268e393`
+verifies tarball, patch and harness pins (provisioning tarballs first), builds
+pinned 7.23/7.24 with GCC and Clang ASan at `MG_IO_SIZE=512`, and drives a
+mock-L2, full-handshake harness with an attack FIN and a fit-within-buffer
+safe FIN. Result at 08:17Z:
 `RESULT PASS=8 FAIL=0`. Vulnerable 7.23 under both compilers gives
 `WRITE of size 400` at `mongoose.c:9763` (pinned `src/net_builtin.c:1527`)
 from `read_conn`, 0 bytes after a 512-byte `mg_iobuf_resize` region; 7.24 grows

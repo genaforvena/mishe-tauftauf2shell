@@ -1,0 +1,9 @@
+PASS 7.23-gcc-asan-attack
+PASS 7.23-gcc-asan-safe
+PASS 7.23-clang-asan-attack
+PASS 7.23-clang-asan-safe
+PASS 7.24-gcc-asan-attack
+PASS 7.24-gcc-asan-safe
+PASS 7.24-clang-asan-attack
+PASS 7.24-clang-asan-safe
+RESULT PASS=8 FAIL=0

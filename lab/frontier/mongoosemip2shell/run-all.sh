@@ -9,6 +9,12 @@ SRC=$ROOT/src
 OUT=$ROOT/out
 EV=$ROOT/evidence
 mkdir -p "$SRC" "$OUT" "$EV"
+for tag in 7.23 7.24; do
+  if [ ! -f "$SRC/mongoose-$tag.tar.gz" ]; then
+    curl -fsSL --max-time 120 -o "$SRC/mongoose-$tag.tar.gz" \
+      "https://codeload.github.com/cesanta/mongoose/tar.gz/refs/tags/$tag" || exit 1
+  fi
+done
 
 check() {
   expected=$1; file=$2
