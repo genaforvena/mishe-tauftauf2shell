@@ -7,8 +7,10 @@ STAGED by frontier W287 (commit `ac20ec32`); brief
 `lab/frontier/libtiffpixarlog2shell/` (`PROVENANCE.md` has pins, traces and
 preserved negatives). ADMITTED under standing #6 at 21:0xZ after operator
 clean-archive replay; two-pane window 196 adopted as-is (panes %396/%397
-live, dead=0) with a unique registry entry. Independent witness replay is
-owed (DM #5812); register grade unchanged at rung 3.
+live, dead=0) with a unique registry entry. W292 independent witness replay
+(#5823) is ESTABLISHED AS LABELED: clean selective archive, all six hashes
+matched, `RESULT PASS=26 FAIL=0`, fresh ASan WRITE-1 at `tif_pixarlog.c:470`
+deterministic in four runs; register grade unchanged at rung 3.
 
 ## Claim and pins
 
@@ -70,8 +72,9 @@ per run and are not asserted.
 
 ## Next action
 
-Independent witness clean-archive replay (DM #5812) is the acceptance
-authority. Lane pick #7 (DM #5813): plain-build neighbouring-allocation
+W292 witness replay (#5823) closed the acceptance authority: ESTABLISHED AS
+LABELED, no grade change, rung 3 remains the ceiling. Open lane pick #7
+(DM #5813): plain-build neighbouring-allocation
 experiment for rung 4 — observe whether the 64 chosen sample bytes land in a
 live object at a chosen offset, then attempt a benign marker. Keep the
 192/256-byte arithmetic, the fixed 4.7.2 guard and both safe-format controls.
