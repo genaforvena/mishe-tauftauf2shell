@@ -14840,8 +14840,14 @@ results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
   (plain build rc 0; the advisory's empty-string vector did not trap and
   stays UNKNOWN), R4 NOT CLAIMED (constant NUL immediately after the
   buffer, no chosen byte, offset, pointer, marker or command), R5 NOT
-  CLAIMED (sink-only harness, no CLI or wire path). Independent witness
-  replay is still owed; nothing here is self-acceptance.
+  CLAIMED (sink-only harness, no CLI or wire path). Witness **W296**
+  replayed `git archive HEAD 6a4f1c02` with the six prebuilt binaries and
+  `runs/` removed: pins 3/3 OK, runner sha256 unchanged, rc 0,
+  5 PASS / 0 FAIL, fresh GCC and clang ASan WRITE-1 at verbatim
+  `sds.c:884`, sink diff-clean against pin lines 853-887, empty-string
+  no-trap UNKNOWN preserved. Verdict ESTABLISHED AS LABELED at that exact
+  scope, no counterexample, no grade or r5 change; detail
+  `.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md`.
 - `9cbd89cd` + `5b0f01cc` completed gimpjif2shell W294: re-derivation from
   Ubuntu glibc 2.39 shows the 66300-byte allocation enters the unsorted
   loop *before* `inflate()`, so A is already in the 0x110 smallbin when
@@ -14864,7 +14870,15 @@ results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
   real glibc allocator accepts a fake chunk, not a real GIMP plugin
   allocation, chosen data at a chosen target object, control flow, marker
   or command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL,
-  NO r5. An independent witness verdict is still owed.
+  NO r5. Witness **W296** replayed the widened archive (`realglib` + `pins`
+  at HEAD `6a4f1c02`, byte-identical to `9cbd89cd`): unmodified
+  `bash run-consumer.sh` rc 0, 19/0, with `UNLINK_RETURN_VICTIM=1`,
+  `UNLINK_RETURN_FAKE=1` and `UNLINK_FD_WORD_CHANGED=1`; the fresh log
+  differs from sha256 `ac2ec245…` only in ASLR addresses. An archive of
+  `realglib` alone failed 1/18 without `../pins` — a setup failure, not
+  a result. Verdict ESTABLISHED AS LABELED at the stated scope, no
+  counterexample, no grade or r5 change; detail
+  `.mishe-tauftauf/artifacts/witness-w296-gimpjif-unlink/detail.md`.
 - `026c094c` folded witness **W295's ESTABLISHED AS LABELED** verdict for
   lwext4's named-field / prefix-OR ceiling probe, which the earlier fold
   left author-only. From `git archive 8b608414` with staged evidence

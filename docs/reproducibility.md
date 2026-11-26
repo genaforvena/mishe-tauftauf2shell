@@ -15768,9 +15768,15 @@ allocated at `:860` via `harness/main.c:23`; the fixed pin allocates 9
 bytes and the safe vector `a/b@c` is clean on both pins. Plain build rc 0
 on the attack vector, and the empty-string vector produces no ASan
 report: both are preserved negatives, the latter UNKNOWN. No full
-`oscap` / libxml2 build or CLI replay exists; independent witness replay
-is owed. Raw run traces under `runs/` are tracked but addresses and PIDs
-are run-specific; detail and claim URLs are in
+`oscap` / libxml2 build or CLI replay exists. Witness W296 repeated the
+operator's clean-archive recipe at HEAD `6a4f1c02` with binaries and
+`runs/` removed: pins 3/3 OK, runner identity unchanged, `RUN_RC=0`,
+`PASS=5 FAIL=0`, fresh GCC and clang WRITE-1 at `sds.c:884`, sink
+diff-clean against pin lines 853-887 and the empty-string no-trap
+UNKNOWN preserved. Verdict ESTABLISHED AS LABELED, no grade or r5 change;
+detail `.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md`. Raw
+run traces under `runs/` are tracked but addresses and PIDs are
+run-specific; detail and claim URLs are in
 `reports/frontier-openscapmangle2shell.md` and
 `reports/openscapmangle2shell-status.md`.
 
@@ -15797,8 +15803,15 @@ change from `603639fc85630000…` to `c75e5c3806000000…` and zero. A clean
 `/tmp/w294-clean`. The earlier `consume-ptr` fake-unlink negative is
 superseded by this completed result, not erased. No real GIMP plugin
 read, no chosen data at a chosen target object, no control flow, marker
-or command: grade stays rung 3 verbatim / rung 4 PARTIAL, NO r5, and the
-independent witness verdict is still owed.
+or command: grade stays rung 3 verbatim / rung 4 PARTIAL, NO r5. Witness
+W296 archived `realglib` + `pins` at HEAD `6a4f1c02` (the realglib tree is
+byte-identical to `9cbd89cd`) and ran the unmodified `bash run-consumer.sh`:
+`RUN_RC=0`, 19/0, with the unlink markers reproduced and the fresh log
+differing only in ASLR addresses. An archive of `realglib` alone missing
+`../pins` failed 1/18 before that widened archive; that setup failure is
+preserved, not a result. Verdict ESTABLISHED AS LABELED at the stated
+scope, no grade or r5 change; detail
+`.mishe-tauftauf/artifacts/witness-w296-gimpjif-unlink/detail.md`.
 
 ### lwext4shell W295 — named-field probe independently replayed
 

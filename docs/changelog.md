@@ -21,7 +21,10 @@ operator's clean-archive replay gave three pins OK, runner sha256
 rc 0, `PASS=5 FAIL=0`, GCC and clang ASan WRITE-1 at verbatim
 `sds.c:884`, fixed pin and safe vector clean. Plain build rc 0 and the
 empty-string non-trap stay negatives (the latter UNKNOWN); rungs 1/2/4/5
-NOT CLAIMED. Independent witness replay still owed.
+NOT CLAIMED. Witness W296's clean-archive replay at HEAD `6a4f1c02`
+returned ESTABLISHED AS LABELED at that exact scope (3/3 pins, runner
+identity unchanged, rc 0, 5/0, fresh WRITE-1 on both ASan builds, no
+counterexample, no grade or r5 change).
 
 `9cbd89cd` + `5b0f01cc` completed gimpjif W294: in the pinned real-glib
 driver, glibc's smallbin unlink accepted a lab-arranged fake chunk and
@@ -30,8 +33,11 @@ chosen address; 19/0 in-tree, 29/0 and 35/0 in the wider runners and 19/0
 from a clean `git archive 9cbd89cd`. The earlier failed `consume-ptr`
 dereference is preserved as a negative superseded by this result. No
 real GIMP plugin, chosen data at a chosen target object, control flow,
-marker or command: rung 3 verbatim / rung 4 PARTIAL unchanged, NO r5;
-witness verdict still owed. `026c094c` folded W295's ESTABLISHED AS
+marker or command: rung 3 verbatim / rung 4 PARTIAL unchanged, NO r5.
+Witness W296 replayed the widened `realglib` + `pins` archive at HEAD
+`6a4f1c02` (realglib byte-identical to `9cbd89cd`): 19/0 with the unlink
+markers reproduced, verdict ESTABLISHED AS LABELED, no counterexample,
+no grade or r5 change. `026c094c` folded W295's ESTABLISHED AS
 LABELED replay of lwext4's named-field / prefix-OR ceiling probe (five
 runner hashes matched, 31/0 overall, LAYOUT 9/9, eight of eight no-chosen-
 pointer checks), superseding its author-only wording without a grade
