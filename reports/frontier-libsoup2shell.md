@@ -1,8 +1,10 @@
 # frontier-libsoup2shell — data-URI base64 uninitialized-length heap over-read (CVE-2026-102555)
 
-Status: **candidate brief only, no local lab yet**. Written 2026-11-26 W266
-from primary advisory text and the upstream patch; nothing here is an
-observed local result. Next wake decides whether to build it.
+Status: **staged, rung 3 measured (W268 2026-11-26)**. The brief below was
+written W266 from advisory text and the upstream patch; the operator's W268
+intake pick built the cheapest experiment, and its observed result is
+recorded in `lab/frontier/libsoup2shell/PROVENANCE.md` and at the end of this
+brief. No wire path is claimed.
 
 ## Claim source and scope
 
@@ -66,3 +68,36 @@ If that works, drive the same URI through a loopback `libsoup` server handler
 and name the consumer that calls the decoder. Would change the assessment:
 an ASan READ report with the real sink, a fixed-build counterexample, or a
 demonstrated request-to-decoder call path.
+
+## Measured W268 result (author, not independent acceptance)
+
+The fix parent `a4294044466df66ea98492d67bb74172ed3f8762` and fix
+`e4f032268fa18f691a6c34d6adcb5b666f3e3f77` were fetched from public GitLab;
+both pinned `soup-uri-utils.c` files are sha256-hashed by the runner. Full
+meson build is blocked on this host (missing `libnghttp2`/`libpsl`, no root),
+so the runner compiles the **verbatim** pinned source with lab-only shim
+headers for generated files and a lab-only driver. No source line was edited.
+
+`lab/frontier/libsoup2shell/run-all.sh` sha256
+`4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83`:
+`RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0, executed 12:45Z–12:46Z and
+repeated three times with the same result. GCC and Clang ASan builds succeed.
+GLib 2.80.0's `g_base64_decode_inplace()` fails the `input_length > 1`
+precondition on the embedded NUL and leaves the caller's length untouched
+(sentinel `4702111234474983745` survives a direct probe). The vulnerable
+decoder therefore publishes a stale `GBytes` length: GCC ASan reports a
+heap-buffer-overflow **READ of size 1**, `0 bytes after a 128-byte region`
+allocated through `g_uri_unescape_bytes` at pinned `soup-uri-utils.c:405`.
+A fresh process whose first URI is `data:;base64,%00%00%00` reproduces it;
+an explicit 1024-byte groom then `data:;base64,A%00B` also reproduces it,
+and the plain build rc 139. Fixed build is clean, reports size 0 for
+`A%00B`, and decodes `aGVs%00bG8=` to the full `hello` (vulnerable: 3 bytes);
+safe inputs are clean in both. Clang's stale values (7 and 4) stay inside
+the 128-byte allocation, so Clang ASan is a preserved negative.
+
+Grade: rung 3 real-source ASan OOB READ; rung 4 **NOT CLAIMED**. The consumer
+is a lab-only byte-sum loop in the driver: no named adjacent object, no
+chosen bytes at chosen offsets, no pointer control, no request-to-decoder
+path, no command or r5. The CVE's `AV:N` remains advisory prose. A
+request-to-decoder call path in a loopback consumer with an ASan report there
+would change the assessment; so would a fixed-build counterexample.
