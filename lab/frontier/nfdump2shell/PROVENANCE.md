@@ -377,3 +377,54 @@ tarballs verified against the pinned SHA-256 constants in `build-wire.sh`
 (`BUILD_WIRE_OK`): `run-hdr.sh` returned **12 PASS / 0 FAIL**. The clean
 readbacks and flow counts match the in-tree result above; no assertion was
 weakened and no generated evidence was copied into the archive.
+
+## Chosen byte decides record acceptance via the element type (2026-11-26 18:54Z)
+
+Additive modes in `harness/wire_send.py` (`etype`, `etype-bad`, `etype-safe`)
+and `harness/alias_readback.py` (`etype`); new runner `run-etype.sh`.
+Hashes:
+
+| artifact | SHA-256 |
+| --- | --- |
+| `run-etype.sh` | `c46660f65d5eb0c090467f8acf170a2719c735e54a2f241668ee2d6ec17c2ff3` |
+| `harness/wire_send.py` | `9ea501252bbd3d1bd5b6b7b258b48adedb54a9cd2c0d3f2dd944dccf30266682` |
+| `harness/alias_readback.py` | `542a34fb225936746662cdbbb14578c1911b1659c86fe78958c4cdb55fa3be07` |
+
+Geometry: record 1 is 46 bytes (12-byte header + 20-byte truncated
+EXgenericFlow + 14-byte dummy), so its 48-byte flow view starts at
+record1+16 and sees `srcPort` at record2+10 (record 2 `flags`/`nfversion`),
+`dstPort` at record2+12 (element type) and `proto` at record2+14 (element
+length low byte, 1 = ICMP). When `Process_nfd()` handles record 1 the
+pinned swap writes `nfversion`,`flags` byte-reversed into record 2's
+element type and zeroes the source. Record 2's wire element type is 43
+(`>= MAXEXTENSIONS`, rejected by `VerifyV3Record()`) in every case, so its
+acceptance is decided solely by that crossing write. The declared element
+length is 257 including its 4-byte header; record 2 size is 269.
+
+`run-etype.sh` ports 10131..10135, **17 PASS / 0 FAIL** in-tree:
+
+```
+etype      flags/nfversion=0001 -> REC2_TYPE=0100 REC2_LENGTH=0101  flows: 2
+etype-bad  flags/nfversion=002b -> REC2_FOUND=0, Corrupt nfd record    flows: 1
+etype-safe complete first element, no crossing write -> REC2_FOUND=0   flows: 1
+fixed      short element rejected -> Corrupt nfd record               flows: 0
+```
+
+The vulnerable ASan and plain collectors both write two flows with
+`REC2_FLAGS_NFVERSION=0000` in the captured element header: the source
+bytes were consumed by the crossing write. Changing the single chosen
+`nfversion` byte from `01` to `2b` makes the same wire element type 43 and
+the live collector rejects record 2 (`processd: 1`), leaving only record 1's
+flow. The safe control keeps the same rejected wire type without a crossing
+write and also yields one flow; the fixed build rejects the short element
+and writes none. No ASan report (the store is inside the 65535-byte receive
+buffer).
+
+Caveat preserved: both the source (`flags`/`nfversion`) and the target
+(element type) are fields on the attacker-supplied wire, so this shows a
+parser decision made on bytes written across the truncated element's
+boundary, **not** a capability gain over setting the element type directly.
+No pointer-bearing object, benign marker or command side effect; the grade
+stays rung 3 verbatim / rung 4 PARTIAL. An early shape with record size 273
+(4 bytes too many) failed `VerifyV3Record()` with a 4-byte leftover and was
+corrected; the failed intermediate is preserved here, not hidden.
