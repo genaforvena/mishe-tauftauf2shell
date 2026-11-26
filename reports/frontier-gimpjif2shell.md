@@ -1,7 +1,8 @@
 # Frontier brief: GIMP JIF `ReadJeffsImage()` heap overflow — CVE-2026-136329
 
 Status: **STAGED 2026-11-26 W241**; window 166 created and registered
-03:01Z; operator admission and witness replay owed. Rung 3 pinned verbatim
+03:01Z; operator admission owed, witness replay ESTABLISHED AS LABELED
+(W241, 2026-11-26; no grade change). Rung 3 pinned verbatim
 function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
 (chosen bytes past the 260-byte heap buffer in a synthetic plain process).
 No real GIMP/GEGL build, no JIF file through GIMP's PDB, no chosen-address
@@ -52,8 +53,9 @@ With `len = 2`, `height = 1073741889` and `alpha_frame = TRUE`,
 `len * height = 0x80000082`, the doubling wraps `data_size` to 260, while
 `zs.avail_out` stays `0x80000082`. GCC and Clang ASan `-O0` on the verbatim
 vulnerable excerpt report `AddressSanitizer: heap-buffer-overflow`,
-`WRITE of size 1`, 0 bytes after a 260-byte region, write frame
-`ReadJeffsImage pins/jif-vulnerable.inc:106`, allocation frame
+`WRITE of size 1`, 0 bytes after a 260-byte region. ASan frame #0 is the
+stand-in `inflate()` at `harness/driver.c:86`; frame #1 is the pinned call
+site `ReadJeffsImage pins/jif-vulnerable.inc:106`, with the allocation frame at
 `pins/jif-vulnerable.inc:40`. The fixed build rejects the input
 (`MODE=attack RC=0 ERR=image data`); safe input (`4x4`, no alpha) is
 ASan-clean in both bodies. The plain real-libz build reads sixteen chosen
@@ -62,6 +64,21 @@ ASan build using the uninstrumented system libz stays silent while the
 decompress completes — a preserved negative showing why the instrumented
 stand-in `inflate()` is required. Exact hashes, commands and logs are in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## Witness replay (W241, 2026-11-26)
+
+VERDICT: ESTABLISHED AS LABELED; no grade change, NO r5. Frontier asked in
+chat #4744. The unmodified `run-witness.sh` (sha256 `f562ad31…e58`,
+byte-identical in the worktree and in a clean `git archive 3982be4a` at
+`/tmp/w241-clean`) returned `REPLAY_PASS=6 REPLAY_FAIL=0`,
+`TOTAL: 29 PASS / 0 FAIL`, rc 0 in both trees. Independent raw fetches at
+`b5a3e0b6` and `2b2bbb8f` reproduce all four pin hashes exactly, including
+the verbatim excerpts; the sole upstream diff is the checked-mul fix hunk.
+GCC and Clang ASan confirm the 260-byte-region WRITE; fixed and safe controls
+are clean. A throwaway change of the payload byte from `0x4d` to `0x41` moved
+the plain readback to `FIRST=41414141414141414141414141414141`, so the chosen
+bytes are input-controlled, not heap residue. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`.
 
 ## Grade and tractability
 

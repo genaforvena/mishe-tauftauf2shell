@@ -1,8 +1,9 @@
 # gimpjif2shell — status (staged 2026-11-26)
 
 State: **STAGED by frontier W241, 2026-11-26**; window 166 created and
-registered 03:01Z, operator admission and witness replay owed. Grade: rung 3
-pinned verbatim function / rung 4 PARTIAL chosen bytes past a heap buffer.
+registered 03:01Z; operator admission owed, witness replay ESTABLISHED AS
+LABELED (W241, no grade change). Grade: rung 3 pinned verbatim function /
+rung 4 PARTIAL chosen bytes past a heap buffer.
 No real GIMP build, no JIF wire path through GIMP's PDB, no chosen-address
 pointer, no command, no r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
@@ -18,15 +19,17 @@ Fix `2b2bbb8ffa6a88e82c72fe1208adc275dddffcd7`, parent
 `b5a3e0b6df9986a1a8edbf8a43198187f18bbea6` (both pinned verbatim).
 
 `run-all.sh`: 29 PASS / 0 FAIL. GCC+Clang ASan report `heap-buffer-overflow`,
-`WRITE of size 1`, 0 bytes past a 260-byte region, frame
-`ReadJeffsImage pins/jif-vulnerable.inc:106`; fixed and safe controls are
+`WRITE of size 1`, 0 bytes past a 260-byte region. ASan frame #0 is the
+stand-in `inflate()` at `harness/driver.c:86`; frame #1 is the pinned call site
+`ReadJeffsImage pins/jif-vulnerable.inc:106`. Fixed and safe controls are
 clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
 260-byte buffer. The uninstrumented-libz ASan negative is preserved.
 
 ## Next
 
-1. Create and register the dedicated two-pane window, then DM the operator
-   that the window exists and request witness replay.
+1. Window 166 is created/registered and witness replay is closed ESTABLISHED
+   AS LABELED; operator admission under standing #6 remains owed to the
+   operator.
 2. After admission, own the real-plugin lane: reproduce the upstream JIF PoC
    through `load_image()` with `is_jeff_image = TRUE`, measure a real
    GEGL/glib heap layout against the 3.2.10 fix.
@@ -58,3 +61,12 @@ clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
 - Operator DM 4743 at 03:02:11Z states the window already exists and the
   target is staged, not admitted. Witness DM 4744 at 03:02:18Z requests
   independent replay and verification of the labeled grade.
+- Witness W241 (2026-11-26, chat #4744): ESTABLISHED AS LABELED, no grade
+  change, NO r5. Unmodified `run-witness.sh` from the worktree and from a
+  clean `git archive 3982be4a` into `/tmp/w241-clean` (sha256
+  `f562ad31…e58` in both): `REPLAY_PASS=6 REPLAY_FAIL=0`, `TOTAL: 29 PASS /
+  0 FAIL`, rc 0. Raw upstream at `b5a3e0b6` / `2b2bbb8f` rehashed here: all
+  four pins exact; the fixed excerpt is the checked-mul hunk. A `0x41`
+  payload probe in a throwaway copy moved the plain readback to
+  `FIRST=41414141414141414141414141414141`, confirming input-controlled bytes.
+  Detail: `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`.

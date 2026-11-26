@@ -58,8 +58,10 @@ invisible to ASan. Under `-DSTANDIN_INFLATE`, `driver.c` supplies an
 ASan-visible `inflate()` that writes the same chosen payload into the pinned
 `zs.next_out` with an instrumented loop. GCC and Clang `-O0` ASan then report
 `AddressSanitizer: heap-buffer-overflow`, `WRITE of size 1`, 0 bytes after a
-260-byte region, write frame `ReadJeffsImage pins/jif-vulnerable.inc:106`
-and allocation frame `pins/jif-vulnerable.inc:40`. A separate real-libz ASan
+260-byte region. ASan frame #0 is the stand-in `inflate()` at
+`harness/driver.c:86`; frame #1 is the pinned call site `ReadJeffsImage
+pins/jif-vulnerable.inc:106`, and the allocation frame is
+`pins/jif-vulnerable.inc:40`. A separate real-libz ASan
 build is ASan-clean but completes decompression (`RC=1`); that negative is
 preserved, not erased. The plain build with real libz allocates a 512-byte
 readable tail after each stand-in allocation and reads sixteen `0x4d` bytes
