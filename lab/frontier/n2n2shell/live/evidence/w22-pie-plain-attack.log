@@ -1,0 +1,13 @@
+26/Nov/2026 02:35:45 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+26/Nov/2026 02:35:45 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+26/Nov/2026 02:35:45 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 02:35:45 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+26/Nov/2026 02:35:45 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 02:35:45 [supernode.c:660] supernode is listening on UDP 19960 (main)
+26/Nov/2026 02:35:45 [supernode.c:669] supernode opened TCP 19960 (aux)
+26/Nov/2026 02:35:45 [supernode.c:676] supernode is listening on TCP 19960 (aux)
+26/Nov/2026 02:35:45 [supernode.c:685] supernode is listening on UDP 19961 (management)
+26/Nov/2026 02:35:45 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+26/Nov/2026 02:35:45 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+26/Nov/2026 02:35:45 [supernode.c:728] supernode started
+timeout: the monitored command dumped core

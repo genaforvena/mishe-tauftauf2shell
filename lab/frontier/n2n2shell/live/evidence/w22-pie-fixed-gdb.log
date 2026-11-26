@@ -1,0 +1,72 @@
+Breakpoint 1 at 0xc5fd: file src/sn_utils.c, line 2324.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+26/Nov/2026 02:35:10 [sn_utils.c:474] loaded 3 fixed-name communities from community.list
+26/Nov/2026 02:35:10 [sn_utils.c:477] loaded 1 regular expressions for community name matching from community.list
+26/Nov/2026 02:35:10 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 02:35:10 [supernode.c:648] WARNING: disabled MAC and IP address spoofing protection; FOR TESTING ONLY, usage of user-password authentication (-I, -J, -P) recommended instead!
+26/Nov/2026 02:35:10 [sn_utils.c:164] calculated shared secrets for edge authentication
+26/Nov/2026 02:35:10 [supernode.c:660] supernode is listening on UDP 19900 (main)
+26/Nov/2026 02:35:10 [supernode.c:669] supernode opened TCP 19900 (aux)
+26/Nov/2026 02:35:10 [supernode.c:676] supernode is listening on TCP 19900 (aux)
+26/Nov/2026 02:35:10 [supernode.c:685] supernode is listening on UDP 19901 (management)
+26/Nov/2026 02:35:10 [supernode.c:712] dropping privileges to uid=65534, gid=65534
+26/Nov/2026 02:35:10 [supernode.c:717] ERROR: unable to drop privileges [1/Operation not permitted]
+26/Nov/2026 02:35:10 [supernode.c:728] supernode started
+
+Breakpoint 1, process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce60, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795660520) at src/sn_utils.c:2324
+2324	            if(comm->header_encryption == HEADER_ENCRYPTION_ENABLED) {
+W22_AT_DEREF comm=$1 = (struct sn_community *) 0x42f3e8
+W22_MAPPINGS
+process 3843943
+Mapped address spaces:
+
+          Start Addr           End Addr       Size     Offset  Perms  objfile
+      0x555555554000     0x555555556000     0x2000        0x0  r--p   /tmp/n2n2shell-w22.3841561/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode
+      0x555555556000     0x55555557b000    0x25000     0x2000  r-xp   /tmp/n2n2shell-w22.3841561/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode
+      0x55555557b000     0x555555582000     0x7000    0x27000  r--p   /tmp/n2n2shell-w22.3841561/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode
+      0x555555582000     0x555555583000     0x1000    0x2e000  r--p   /tmp/n2n2shell-w22.3841561/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode
+      0x555555583000     0x555555584000     0x1000    0x2f000  rw-p   /tmp/n2n2shell-w22.3841561/src/n2n-dc7324af16b2ff3e2b22961e7d8dffcb14f3f6ff/supernode
+      0x555555584000     0x5555555a5000    0x21000        0x0  rw-p   [heap]
+      0x7ffff7c00000     0x7ffff7c28000    0x28000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7c28000     0x7ffff7db1000   0x189000    0x28000  r-xp   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7db1000     0x7ffff7e00000    0x4f000   0x1b1000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e00000     0x7ffff7e04000     0x4000   0x1ff000  r--p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e04000     0x7ffff7e06000     0x2000   0x203000  rw-p   /usr/lib/x86_64-linux-gnu/libc.so.6
+      0x7ffff7e06000     0x7ffff7e13000     0xd000        0x0  rw-p   
+      0x7ffff7e53000     0x7ffff7e63000    0x10000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7e63000     0x7ffff7ee2000    0x7f000    0x10000  r-xp   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7ee2000     0x7ffff7f3a000    0x58000    0x8f000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f3a000     0x7ffff7f3b000     0x1000    0xe7000  r--p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f3b000     0x7ffff7f3c000     0x1000    0xe8000  rw-p   /usr/lib/x86_64-linux-gnu/libm.so.6
+      0x7ffff7f3c000     0x7ffff7f3f000     0x3000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libcap.so.2.66
+      0x7ffff7f3f000     0x7ffff7f45000     0x6000     0x3000  r-xp   /usr/lib/x86_64-linux-gnu/libcap.so.2.66
+      0x7ffff7f45000     0x7ffff7f47000     0x2000     0x9000  r--p   /usr/lib/x86_64-linux-gnu/libcap.so.2.66
+      0x7ffff7f47000     0x7ffff7f48000     0x1000     0xb000  r--p   /usr/lib/x86_64-linux-gnu/libcap.so.2.66
+      0x7ffff7f48000     0x7ffff7f49000     0x1000     0xc000  rw-p   /usr/lib/x86_64-linux-gnu/libcap.so.2.66
+      0x7ffff7f49000     0x7ffff7f51000     0x8000        0x0  r--p   /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+      0x7ffff7f51000     0x7ffff7f90000    0x3f000     0x8000  r-xp   /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+      0x7ffff7f90000     0x7ffff7fa0000    0x10000    0x47000  r--p   /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+      0x7ffff7fa0000     0x7ffff7fa4000     0x4000    0x56000  r--p   /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+      0x7ffff7fa4000     0x7ffff7fa5000     0x1000    0x5a000  rw-p   /usr/lib/x86_64-linux-gnu/libnss_systemd.so.2
+      0x7ffff7fa5000     0x7ffff7fa8000     0x3000        0x0  rw-p   
+      0x7ffff7fbd000     0x7ffff7fbf000     0x2000        0x0  rw-p   
+      0x7ffff7fbf000     0x7ffff7fc3000     0x4000        0x0  r--p   [vvar]
+      0x7ffff7fc3000     0x7ffff7fc5000     0x2000        0x0  r-xp   [vdso]
+      0x7ffff7fc5000     0x7ffff7fc6000     0x1000        0x0  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7fc6000     0x7ffff7ff1000    0x2b000     0x1000  r-xp   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ff1000     0x7ffff7ffb000     0xa000    0x2c000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffb000     0x7ffff7ffd000     0x2000    0x36000  r--p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffff7ffd000     0x7ffff7fff000     0x2000    0x38000  rw-p   /usr/lib/x86_64-linux-gnu/ld-linux-x86-64.so.2
+      0x7ffffffde000     0x7ffffffff000    0x21000        0x0  rw-p   [stack]
+  0xffffffffff600000 0xffffffffff601000     0x1000        0x0  --xp   [vsyscall]
+
+Program received signal SIGSEGV, Segmentation fault.
+process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce60, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795660520) at src/sn_utils.c:2324
+2324	            if(comm->header_encryption == HEADER_ENCRYPTION_ENABLED) {
+W22_AFTER_CONTINUE
+#0  process_udp (sss=0x5a48494d5a48494d, sss@entry=0x555555583288 <sss_node>, sender_sock=0x5a48494d5a48494d, sender_sock@entry=0x7fffffffce60, sock_size=1514686797, socket_fd=1514686797, udp_buf=udp_buf@entry=0x5a48494d5a48494d <error: Cannot access memory at address 0x5a48494d5a48494d>, udp_size=6505530258312677709, now=1795660520) at src/sn_utils.c:2324
+#1  0x000055555555ea86 in run_sn_loop (sss=sss@entry=0x555555583288 <sss_node>) at src/sn_utils.c:2664
+#2  0x0000555555557044 in main (argc=11, argv=0x7fffffffe198) at src/supernode.c:741
+W22_DONE
+[Inferior 1 (process 3843943) killed]

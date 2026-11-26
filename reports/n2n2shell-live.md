@@ -870,3 +870,49 @@ default-PIE build with this wire. Ceiling unchanged: rungs 1-4 on the
 vulnerable build, no marker execution, canary/RIP hit, control-flow
 takeover, command execution or r5. Author experiment only; no witness
 verdict.
+
+## W22: the W11 wire on a default-PIE build (2026-11-26 02:3xZ)
+
+W21 left the default-PIE variant of W11's wire UNKNOWN. W22 rebuilds the
+same pinned vulnerable tree with clang `-g -O2 -fno-omit-frame-pointer`
+and no `-no-pie` in CFLAGS or LDFLAGS. `readelf -h` reports `Type: DYN
+(Position-Independent Executable file)`, and `file` reports `ELF 64-bit
+LSB pie executable`, BuildID
+`d451dcacd037ae046c135c449d7b5839cb09c85f`.
+
+Under gdb with `set disable-randomization on`, the exact 1738-byte W11
+NAK (`token_size=1700`, `token+1682 = e8f3420000000000`) reaches
+`sn_utils.c:2324` with `comm = 0x42f3e8`, exactly the wire-chosen value.
+`info proc mappings` places the PIE image in `[0x555555554000,
+0x555555584000)` and the heap in `[0x555555584000, 0x5555555a5000)`;
+no mapping covers `0x42f3e8`. Continuing from the breakpoint gives
+`Program received signal SIGSEGV, Segmentation fault.` in `process_udp`
+at `sn_utils.c:2324`, with backtrace frames `run_sn_loop`
+(`sn_utils.c:2664`) and `main` (`supernode.c:741`). The same wire sent to
+a plain (no gdb) supernode of this build exits with `rc=139`. A fresh
+process of the same build then registers a peer and forwards a safe
+48-byte NAK: 86 bytes with `first=485a4d49485a4d49`; the process is
+still alive. Raw logs: `live/evidence/w22-{pins,pie-build,readelf,file,
+pie-fixed-gdb,pie-fixed-sender,pie-plain-attack,pie-plain-attack-sender,
+pie-safe,pie-safe-sender}.log`.
+
+This bounds W11's pointer control: the overflow reaches and supplies
+`comm` in the PIE build too, but W11's benign survival depends on a
+binary-known fixed address from the non-PIE build. With default PIE the
+same chosen value is unmapped and the dereference faults. No marker,
+canary/RIP hit, control-flow takeover, command execution or r5.
+
+`sh lab/frontier/n2n2shell/live/w22_default_pie_wire1700.sh` verifies
+pins, the PIE binary type, the exact wire and chosen pointer, the
+unmapped target in the live mappings, the SIGSEGV at the dereference,
+the plain-process crash, and the fresh safe control: `RESULT 18 PASS /
+0 FAIL`, rc 0 from the working tree with `REPLAY_LOGDIR=/tmp/n2n-w22-out2`,
+`PORT_BASE=19900`, and from a clean `git archive HEAD` with cwd `/`,
+`REPLAY_LOGDIR=/tmp/n2n-w22-archive-out`, `PORT_BASE=20000`.
+
+This closes the default-PIE UNKNOWN as a negative control: the chosen
+pointer is still consumed, but its fixed non-PIE address does not
+translate to PIE. Still UNKNOWN: a build of the complete upstream fixed
+commit tree. Ceiling unchanged: rungs 1-4 on the vulnerable build, no
+marker execution, canary/RIP hit, control-flow takeover, command
+execution or r5. Author experiment only; no witness verdict.
