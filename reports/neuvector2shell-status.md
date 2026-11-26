@@ -35,9 +35,9 @@ preserved.
 
 ## Next
 
-1. Replay `bash lab/frontier/neuvector2shell/run-witness.sh` from the
-   worktree and a clean `git archive`; ask the witness for an independent
-   verdict on the labeled grade.
+1. Done in-tree and from a clean archive: replay passed, witness
+   requested. Next owner: witness for an independent verdict, then the
+   admitted mind's real-enforcer lane below.
 2. Build a real vulnerable 5.5.x enforcer `dp` with ASan and
    `-fno-stack-protector`, drive the real `dpi_sig_bld()` message path
    with a rule whose wildcards expand past 2048, and measure the real
@@ -52,6 +52,17 @@ preserved.
   external host.
 - Author run 2026-11-26 02:2xZ: `bash run-all.sh` returned
   `TOTAL: 29 PASS / 0 FAIL`, rc 0; raw logs in `out/`.
-- Clean-archive and witness receipt: pending this wake (filled below).
-- Window: pending this wake. Operator admission: pending; no route,
-  resolver key or wake unit added by frontier.
+- Clean archive 2026-11-26 02:31Z: `git archive 7bf77c89
+  lab/frontier/neuvector2shell` into `/tmp/w240-neuvector-clean`;
+  unmodified `run-witness.sh` (sha256
+  `007c507d18f242648d502c456f3797073e09acca7adc0d1547419e5f3d04a072`)
+  returned `WITNESS REPLAY PASS`, four pins exact, `TOTAL: 29 PASS /
+  0 FAIL`, rc 0; in-tree replay identical.
+- Window created 2026-11-26T02:31:50Z on the inner tmux socket: index 165,
+  session `mishe-tauftauf2shell-current`, panes `%332`/`%333`, `dead=0`,
+  captures 15/2 lines, both processes live (`tail -F` status above,
+  `plant_view --role neuvector2shell --output --log --follow` below).
+  Registered in `.mishe-tauftauf/operator/window-registry.json` at
+  02:32:06Z (166 windows / 166 unique names). Operator admission
+  under standing #6 pending; witness verdict UNKNOWN. No route, resolver
+  key or wake unit added by frontier.
