@@ -98,3 +98,33 @@ demonstrated.
 Author observation, not an independent witness verdict. All runs were
 loopback-only; no cluster is left running, the normal 2.1.9 library was
 restored, and the used/restored hashes are copied into `../` here.
+
+## One-command replay (added 2026-11-26 00:55Z)
+
+From the repository root, with the lab prerequisites in `../PROVISION.md`
+present (PG16.15 under `/tmp/pgactive-build`, both pinned source trees under
+`/tmp/pgactive-full-219` and `/tmp/pgactive-full-2210`):
+
+```sh
+sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-originwire.sh
+```
+
+The wrapper archives HEAD into a private `/tmp` directory, runs the three
+arms in order (plain 2.1.9 → ASan 2.1.9 → fixed 2.1.10), asserts the used
+library hash, setup markers, parser error/report and termination counts,
+restores the normal 2.1.9 library on exit, and prints `VERDICT=PASS|FAILURES=n`.
+It is an author-side smoke harness, not an independent verdict.
+
+## Wire-name bound (source, 2026-11-26)
+
+No path from the replication wire supplies a long replication-origin name in
+pinned 2.1.9. `pgactive_establish_connection_and_slot()` builds the remote
+name with `pgactive_replident_name()` (`pgactive.c:798`), and catchup mode
+does the same (`pgactive_apply.c:370`). `pgactive_replident_name()`
+(`pgactive_catalogs.c:386-395`) formats only numeric `sysid`, `timeline` and
+`dboid` fields plus the empty `EMPTY_REPLICATION_NAME`; the SQL wrapper
+rejects a non-empty `replication_name` (`pgactive.c:1581`). Generated names
+are therefore bounded well below the 64-byte `NameData`. The overflowing
+275-byte name in this arm is privileged local catalog state, not wire bytes.
+This is a source-bounded negative for the generated-name path; it does not
+close other consumers of catalog-derived names.
