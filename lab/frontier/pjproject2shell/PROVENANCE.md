@@ -1,0 +1,66 @@
+# PROVENANCE — pjproject2shell (frontier W239, 2026-11-26)
+
+## Provisioning (read-only fetch, no external probing)
+
+Advisory read from
+`https://github.com/pjsip/pjproject/security/advisories/GHSA-6p2p-5wf8-h5hr`
+and `https://api.github.com/repos/pjsip/pjproject/security-advisories/GHSA-6p2p-5wf8-h5hr`.
+Commit list read from
+`https://api.github.com/repos/pjsip/pjproject/commits?path=pjmedia/src/pjmedia/avi_player.c&per_page=15`.
+
+    mkdir -p lab/frontier/pjproject2shell/src
+    curl -fsSL -o src/avi_player-vuln.c \
+      https://raw.githubusercontent.com/pjsip/pjproject/c1ea7648fb53f945493972a23133b9e0d3e4a1fe/pjmedia/src/pjmedia/avi_player.c
+    curl -fsSL -o src/avi_player-fixed.c \
+      https://raw.githubusercontent.com/pjsip/pjproject/7ecc6584969a923c4190b6912afbf5952b5a4b9f/pjmedia/src/pjmedia/avi_player.c
+    sed -n '1208,1228p' src/avi_player-vuln.c > pins/avi-vulnerable.inc
+    sed -n '1208,1256p' src/avi_player-fixed.c > pins/avi-fixed.inc
+
+Fix `7ecc6584969a923c4190b6912afbf5952b5a4b9f` (2026-07-13T02:27:02Z),
+parent `c1ea7648fb53f945493972a23133b9e0d3e4a1fe`; advisory published
+2026-07-13, patched versions None ("fix in progress master"). The full diff
+between the two fetched blobs changes only the video branch at upstream lines
+1221-1255: clamp `ch.len` to `frame->size`, seek past the unread bytes and
+set `frame->size` from the clamped length.
+
+## Pins (SHA-256)
+
+| artifact | sha256 |
+| --- | --- |
+| `src/avi_player-vuln.c` | `1ccafcd255ad996e572753495191ff5347b2062c9152617458425f30c9446081` |
+| `src/avi_player-fixed.c` | `dae6aeee810d88173657cefb3486f89bdee77dbe87b2520a5ae784f854fc5042` |
+| `pins/avi-vulnerable.inc` | `45fe04f09520dfef6f2cc52f70d6293a4fdd96e7f76d6eb41a79e2586e710ba1` |
+| `pins/avi-fixed.inc` | `2cc1805d5dee8959837926dcb492ffb3b53de4b2a2b4e063f0afc4f3f11139de` |
+
+## Harness facts
+
+- `harness/driver.c` supplies stand-ins for `pjmedia_frame`,
+  `avi_reader_port`, `pjmedia_avi_subchunk`, constants, `pj_file_setpos`,
+  `file_read3()` and a caller. Both excerpts are `#include`d verbatim; no
+  pinned byte is edited.
+- `pj_assert` is defined as a no-op (release build), matching the advisory's
+  statement that the only guard is ineffective in production builds.
+- `file_read3()` stand-in copies the present payload bytes with `memcpy`
+  using the pinned `size` argument; the attack provides 64 present bytes.
+  The real read may use the full file-supplied length; the cap is a harness
+  limit, not a claim about pjproject.
+- Logical frame capacity is 48 bytes (stand-in for dimensions-derived
+  `frame->size`). Plain mode allocates 96 physical bytes and reads back
+  bytes 48..63 after the call; ASan mode allocates exactly 48 bytes.
+- Chosen marker is `MISHE-PJPROJECT!` at payload offset 48; copied bytes
+  48..63 read back as
+  `CANARY_AFTER=4d495348452d504a50524f4a45435421`.
+- ASan builds use `-O0` for consistent reporting; no `-O1` claim is made
+  for this candidate.
+
+## Verification
+
+    cd lab/frontier/pjproject2shell
+    bash run-all.sh
+
+Author run 2026-11-26 02:1xZ: **29 PASS / 0 FAIL**, rc 0. Raw logs in
+`out/gcc-attack.log`, `out/clang-attack.log`, `out/fixed-attack.log`,
+`out/vuln-safe.log`, `out/fixed-safe.log`, `out/plain-attack.log`,
+`out/plain-safe.log`, `out/plain-fixed-attack.log`.
+`bash run-witness.sh` rehashes the four pins, deletes `out/`, rebuilds every
+binary and re-asserts the same evidence.
