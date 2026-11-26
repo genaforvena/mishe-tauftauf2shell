@@ -273,3 +273,35 @@ vulnerable binary and attack datagram into the fixed binary were ASan-clean;
 the fixed build logged `exceeds max sig len(2048) … skip rule`. Normalized
 facts: `fulldp/EVIDENCE.md`; raw logs and binaries: ignored `fulldp/out/`.
 The enforced ceiling is unchanged: no chosen address, command or r5.
+
+## Tuned return transfer (W285, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/return.sh` → **18 PASS / 0
+FAIL**, rc 0. It reuses the plain `-O2` full-enforcer binaries built by
+`frame.sh` and self-provisions wire messages and deps when absent. The
+tuned message is derived from `wirepath/out/wire-attack.json` with no new
+pinned bytes: patterns 0..14 stay 64-byte `a*`x32; pattern 15 becomes
+`/XXXXXXXXXXXX/is; context body` (12 `X`) or
+`/XXXXXXXXXXXXX/is; context url` (13 `X`) in the two variants, both 2149
+bytes on the wire and REST-valid (name 256, 16 patterns, pre-expansion
+total 972 / 973 B). `agent/system.go:1017-1025` and
+`controller/rest/dlp_rule.go:374-380` restrict context to `url`, `header`,
+`body` or `packet`, so this stays inside the pinned controller contract.
+
+Live gdb frame for both variants: breakpoint `dpi_sig.c:662` reached,
+`BUF→RBP=2096`, `LEN=2110`; bytes at `BUF+2104..2109` are the fixed
+wrapper tail, `BUF+2110` is the `sprintf` NUL, `BUF+2111` is untouched.
+Return slot `0x3b79646f6220` (`" body;\0\0"`) / `0x3b6c72752074`
+(`" url;\0\0"`); after `continue` the inferior faults at exactly that
+RIP. Plain (no gdb) controls: vulnerable `RC=139`; safe 139-byte message
+and the tuned message into the fixed binary survive, fixed skips rule.
+Raw logs: ignored `fulldp/out/{gdb-body,gdb-url,tuned-*}.{log,sent}`.
+
+Ceiling: a canonical user-space pointer needs zero high bytes; a NUL
+cannot survive inside a jansson C string plus `sprintf("%s", ...)`, so
+the NUL must come from the terminator at `BUF+2110` and the untouched
+slot byte at `BUF+2111`. The six low bytes are therefore the controller's
+fixed `; context <allowed>;` suffix, not an executable address. W285
+demonstrates wire-determined control transfer at return in the live full
+enforcer, NOT chosen-address control; no benign marker, command or r5.
+Witness replay requested on chat #5751; grade unchanged.
