@@ -112,13 +112,67 @@ hash unchanged, `RESULT PASS=23 FAIL=0`, rc 0. Console sha256
 `.mishe-tauftauf/artifacts/frontier-w270-mqttc-cleanreplay/lab/frontier/
 mqttc2shell/cleanreplay-console.log`.
 
+## Wire-backed experiment (14:42Z, MQTT-C v1.1.6 pinned source unchanged)
+
+`harness/wire_driver.c` sha256
+`0c1744c7b13580fd0a4cc022ee737073dbcc137e1a881d02db0396995c1cfeb3` and
+`run-wire.sh` sha256
+`f929a0b120460d7fcb810e9c0add2456e9fcf5d90507dff981a87883ab61787a` add a
+real loopback path. One process forks: the parent binds 127.0.0.1:0, accepts
+the child's AF_INET/SOCK_STREAM connect, and writes the packet in two chunks
+50 ms apart; the child implements `mqtt_pal_recvall()` with `recv()` and calls
+`__mqtt_recv()` twice. No packet bytes are preloaded into `recv_buffer`; the
+only source of packet bytes is `recv()`. The parent prints the child's wait
+status. Build outputs go to gitignored `build-wire/`.
+
+Executed 14:42Z, rc 0, **RESULT PASS=29 FAIL=0**; console sha256
+`acc585e79d551fef73d1f4bff624ddd74102b84f4c76f49a699001cfdd36cbd5` at
+`.mishe-tauftauf/artifacts/mqttc2shell-wire/wire-console.log`. Verbatim
+`src/mqtt.c` hashes are unchanged; both tarballs were hash-checked by the
+runner. `ASAN_OPTIONS=detect_leaks=0:abort_on_error=0`, GCC 13.3.0, x64.
+
+Observed on `30 04 ff ff 00 00` arriving in two socket reads:
+
+```
+BROKER send1=3 / PAL_RECV fd=3 rv=3 calls=1 bytes=3
+BROKER send2=3 / PAL_RECV fd=3 rv=3 calls=2 bytes=6
+AddressSanitizer: negative-size-param: (size=-4294967296)
+  #1 __mqtt_recv build-wire/vuln/src/mqtt.c:880
+  #2 main harness/wire_driver.c:128
+WIRE_CHILD_STATUS exited=1 code=1 signal=-1
+```
+
+Controls: plain v1.1.6 wire child `signal=11` (SIGSEGV); v1.1.7 wire attack
+`RECV2 rv=-2147483636 error=-2147483636 callbacks=0`, clean child exit, no
+ASan; safe `30 06 00 01 61 62 63 00` gives 8 bytes from `recv()` and
+`RECV2 rv=1 error=-2147483633 callbacks=1 topic_size=1 message_size=3`, no
+ASan (`MQTT_OK=1`; the `error` field keeps `CONNECT_NOT_CALLED` because the
+driver skips CONNECT); QoS1 `32 04 ff ff 00 00` gives the wild READ at
+`mqtt.c:1748`, fixed QoS1 clean.
+
+### Chosen-offset boundary (measured negative)
+
+The unpacker stores `application_message_size` in 32 bits, so with topic size
+`T` and remaining length `RL < T + 2` the consumed count is
+`2^32 + RL + 2` (fixed-header 2 + topic-length field 2 + `T` + wrapped
+`(RL - T - 2)`). The pinned unpacker measured `rv=4294967302`, `...7306`,
+`...7314` for `RL=4, 8, 16` with `T=0xffff` and matching packet bodies. Thus
+`consumed >= 2^32 + 6` for every underflow; with the lab's 512-byte receive
+buffer the `memmove()` length is about `-2^32` and its source pointer is
+about 4 GiB past the destination. ASan stops in the interceptor before bytes
+move; the plain build faults. No chosen bytes at chosen offsets, pointer
+value or command was observed. This is a structural limit of this consumer,
+not a failed grooming attempt.
+
 ## Grade
 
 Rung 2: observed unsigned payload-size underflow (`4294901763`) in verbatim
 pinned source. Rung 3: ASan-confirmed fault in verbatim code —
 `negative-size-param` at the `memmove()` in `__mqtt_recv` and a wild-pointer
-READ in the QoS1 unpacker. Rung 4 **NOT CLAIMED**: no chosen bytes at chosen
-offsets, no pointer value, no live loopback consumer (the PAL receive stub
-returns zero and the packet is preloaded), no command and no r5. The advisory
-is `AV:N`; a real loopback broker-to-client packet reaching the same ASan
-report is the next rung-moving experiment, not a fact established here.
+READ in the QoS1 unpacker. The 14:42Z wire runner removes the earlier caveat:
+the same ASan report follows bytes read by `recv()` from a loopback socket,
+with v1.1.7 and safe-packet controls clean. Rung 4 **NOT CLAIMED**: no chosen
+bytes at chosen offsets, no pointer value, no command and no r5; the measured
+`consumed >= 2^32 + 6` makes a chosen-offset store impossible through this
+`memmove()` with a realistic receive buffer. Independent witness replay of
+`run-wire.sh` is owed (the W271 witness replay covered only `run-all.sh`).

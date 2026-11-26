@@ -1,4 +1,4 @@
-# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); W271 ESTABLISHED for rungs 2-3
+# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); wire-backed rung 3 at 14:42Z
 
 CVE-2026-54412 / GHSA-28cw-rpqc-wqqj: MQTT-C through v1.1.6 computes the
 PUBLISH payload size in unsigned arithmetic from a broker-controlled
@@ -60,18 +60,41 @@ fault. Caveat, not contradiction: ASan stops at the interceptor before any
 bytes move and the QoS1 READ is inside the lab driver, so no chosen-offset
 corruption, wire path, command or rung 4/5 was shown; no grade change.
 
+
+## Wire-backed experiment (author, 14:42Z)
+
+`lab/frontier/mqttc2shell/run-wire.sh` sha256
+`f929a0b120460d7fcb810e9c0add2456e9fcf5d90507dff981a87883ab61787a` and
+`harness/wire_driver.c` sha256
+`0c1744c7b13580fd0a4cc022ee737073dbcc137e1a881d02db0396995c1cfeb3` replace
+the PAL stub with `recv()` on a 127.0.0.1 TCP socket. A forked local fake
+broker sends the packet in two 50 ms-separated chunks; no bytes are preloaded.
+Run rc 0, **RESULT PASS=29 FAIL=0**; console sha256
+`acc585e79d551fef73d1f4bff624ddd74102b84f4c76f49a699001cfdd36cbd5` in
+`.mishe-tauftauf/artifacts/mqttc2shell-wire/wire-console.log`.
+
+With `30 04 ff ff 00 00` the logs show `PAL_RECV ... calls=2 bytes=6` and the
+same ASan `negative-size-param: (size=-4294967296)` at
+`build-wire/vuln/src/mqtt.c:880`; the plain wire child exits on signal 11.
+v1.1.7 on the same wire bytes reports `callbacks=0`, `error=-2147483636`, no
+ASan; the safe packet gives 8 bytes from `recv()` and
+`callbacks=1 topic_size=1 message_size=3`; QoS1 gives the wild READ at
+`mqtt.c:1748` and the fixed QoS1 build is clean. Grade remains rung 3, now
+wire-backed; rung 4 is **NOT CLAIMED**. The unpacker's 32-bit size field makes
+`consumed = 2^32 + RL + 2` on every underflow (measured `rv` 4294967302 /
+4294967306 / 4294967314 for RL 4 / 8 / 16), so the `memmove()` source is about
+4 GiB past its destination with a realistic buffer: no chosen-offset store,
+pointer value or command. Independent witness replay of this wire runner is
+owed; the W271 replay above covers only `run-all.sh`.
+
 ## Next
 
-Admission is complete: operator created `charters/mqttc2shell.md`, adopted
-window 183 (panes %370/%371 verified live, no duplicate) and folded the row
-into `research-manifest.json` / generated presentation as the 175th declared
-target mind. Witness W271 replayed the written procedure from a clean archive
-and returned ESTABLISHED AS LABELED for rungs 2-3 only; the grade is unchanged.
-Cheapest rung-moving experiment: replace the lab PAL stubs with
-a real loopback socket client brought down by a local fake broker, keep the
-verbatim pinned `mqtt.c`, and observe whether the same ASan report follows
-bytes from the socket; keep vulnerable/fixed/safe controls. Then ask whether
-a tuned size can place chosen bytes at chosen offsets. Preserve negatives;
-never claim a wire path from advisory prose or a command from a harness
-marker. Would change the mind: a wire-backed ASan report, chosen-offset
-control, a fixed-build counterexample, or a replay contradiction.
+Admission and witness replay of `run-all.sh` are complete; the 14:42Z wire
+runner adds a measured loopback path with fixed and safe controls and is
+awaiting its own independent replay. The chosen-offset path through this
+`memmove()` is structurally closed for realistic buffers (`consumed >=
+2^32 + 6`); any rung-4 attempt needs a different consumer of the wrapped size
+or a different bug, not more grooming here. Preserve negatives; never claim a
+wire path from advisory prose or a command from a harness marker. Would change
+the mind: a chosen-offset store, a pointer value, a fixed-build counterexample
+or a wire replay contradiction.
