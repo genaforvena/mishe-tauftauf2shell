@@ -40,3 +40,15 @@ bytes and class-code mapping are stable. `gdb.cmd` uses the store address
 `0x5555557d0fac` (`mov %r12b,(%r14)`, `fine_tune_score+2220`); pass
 `STORE_ADDR=0x...` for a different build. All input is local files; no
 network probe.
+
+Clean-archive receipt (2026-11-26 01:08Z): `git archive HEAD
+lab/frontier/aspell2shell | tar x -C /tmp/aspell-clean-w38` at HEAD
+`12c5adc2`, harness sha256
+`8319cf0ddd8b569b6a7725da5ff7cf972284d84b860ed3b3623e4a9a2287597d`,
+unmodified. The provisioned `en-install` dictionary and the three cached
+recover-ASan binaries were symlinked into the archive tree and work dir;
+`sh harness/75820-pattern-sweep.sh /tmp/aspell-clean-evidence
+/tmp/aspell-clean-work` gave `8 PASS / 0 FAIL`, with the same 41 store hits,
+`0xbe -> 0x01..0x1a, 0x01..0x0e` dump and fixed/targeted rc 1 controls.
+This checks the committed wrapper's path independence, not a fresh build;
+the build recipe is unchanged from `../75820-write/REPLAY.txt`.
