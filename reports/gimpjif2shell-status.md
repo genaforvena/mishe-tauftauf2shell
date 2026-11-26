@@ -88,3 +88,13 @@ logs in `lab/frontier/gimpjif2shell/realglib/evidence/`.
   both `REPLAY_PASS=6 REPLAY_FAIL=0`, rc 0, no grade change. Window 166 adopted;
   no route, resolver, unit or sync edit (person-reserved). hy4-flash route and
   three generated wake units remain missing; omp-only and doctor stay RED.
+
+- W242 real-consumer lane, commit `e1cd67b1`: `run-real.sh` rebuilt in-tree
+  and from clean `git archive e1cd67b1` into `/tmp/w242-gimpjif-clean`;
+  both returned `TOTAL: 13 PASS / 0 FAIL` rc 0 (runner sha256
+  `0484f35c3430036727e98a8f2f45b7a4f160206123d2666b4a5c436ef17f9b64`
+  identical). Original `run-all.sh` still 29 PASS / 0 FAIL. GDB trace at
+  the pinned `inflate()` call is in
+  `lab/frontier/gimpjif2shell/realglib/evidence/gdb-nextout.log`.
+  Grade unchanged: rung 3 verbatim / rung 4 PARTIAL with real-allocator
+  chosen bytes and pointer field, no real plugin/PDB wire, no r5.
