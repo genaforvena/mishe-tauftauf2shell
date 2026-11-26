@@ -1,0 +1,97 @@
+Breakpoint 1 at 0x26a9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc, line 66.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=11, argv=0x7ffcb56e7e38) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:66
+66	    rpmts ts = NULL;
+Breakpoint 2 at 0x7623cd887d4b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc, line 438.
+Breakpoint 3 at 0x7623cd76f9a6
+Breakpoint 4 at 0x7623cd8c4231: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc, line 2243.
+error: unpacking of archive failed: cpio: read failed - No such file or directory
+error: filetypes-1.0-1.noarch: install failed
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007623cd76f9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+WINDOW_BUF=0x5ff4a00b5600
+VISIT_COUNT=667
+WINDOW_VISIT_OFFSETS=78
+CAND off=0x20 pre=0x5ff4a010fb60 canonical=1
+CAND off=0x50 pre=0x5ff4a00b6500 canonical=1
+CAND off=0x80 pre=0x0 canonical=0
+CAND off=0xb0 pre=0x0 canonical=0
+CAND off=0xe0 pre=0x0 canonical=0
+CAND off=0x110 pre=0x5ff4a00f0120 canonical=1
+CAND off=0x140 pre=0x0 canonical=0
+CAND off=0x170 pre=0x5ff4a00fe350 canonical=1
+CAND off=0x1a0 pre=0x5ff4a010fe20 canonical=1
+CAND off=0x1d0 pre=0x0 canonical=0
+CAND off=0x200 pre=0x0 canonical=0
+CAND off=0x230 pre=0x0 canonical=0
+CAND off=0x260 pre=0x0 canonical=0
+CAND off=0x290 pre=0x5ff4a00b5380 canonical=1
+CAND off=0x2f0 pre=0x5ff4a0102380 canonical=1
+CAND off=0x320 pre=0x0 canonical=0
+CAND off=0x350 pre=0x5ff4a00b1960 canonical=1
+CAND off=0x380 pre=0x5ff4a01164d0 canonical=1
+CAND off=0x3b0 pre=0x5ff4a00f00f0 canonical=1
+CAND off=0x3e0 pre=0x5ff4a00b53e0 canonical=1
+CAND off=0x410 pre=0x0 canonical=0
+CAND off=0x440 pre=0x0 canonical=0
+CAND off=0x470 pre=0x0 canonical=0
+CAND off=0x4a0 pre=0x5ff4a00b2b10 canonical=1
+CAND off=0x4d0 pre=0x0 canonical=0
+CAND off=0x500 pre=0x5ff4a00ef970 canonical=1
+CAND off=0x530 pre=0x0 canonical=0
+CAND off=0x560 pre=0x5ff4a0094810 canonical=1
+CAND off=0x5c0 pre=0x0 canonical=0
+CAND off=0x5f0 pre=0x0 canonical=0
+CAND off=0x620 pre=0x0 canonical=0
+CAND off=0x650 pre=0x0 canonical=0
+CAND off=0x680 pre=0x5ff4a00b5890 canonical=1
+CAND off=0x6e0 pre=0x0 canonical=0
+CAND off=0x710 pre=0x5ff4a00efc40 canonical=1
+CAND off=0x740 pre=0x0 canonical=0
+CAND off=0x770 pre=0x0 canonical=0
+CAND off=0x7a0 pre=0x0 canonical=0
+CAND off=0x7d0 pre=0x5ff4a00f6d40 canonical=1
+CAND off=0x800 pre=0x5ff4a00b5290 canonical=1
+CAND off=0x830 pre=0x5ff4a010b430 canonical=1
+CAND off=0x870 pre=0x0 canonical=0
+CAND off=0x8a0 pre=0x0 canonical=0
+CAND off=0x8d0 pre=0x0 canonical=0
+CAND off=0x900 pre=0x0 canonical=0
+CAND off=0x940 pre=0x0 canonical=0
+CAND off=0x970 pre=0x5ff4a0102440 canonical=1
+CAND off=0x9a0 pre=0x5ff4a00b63e0 canonical=1
+CAND off=0x9d0 pre=0x0 canonical=0
+CAND off=0xa00 pre=0x0 canonical=0
+CAND off=0xa30 pre=0x0 canonical=0
+CAND off=0xa60 pre=0x0 canonical=0
+CAND off=0xa90 pre=0x0 canonical=0
+CAND off=0xac0 pre=0x0 canonical=0
+CAND off=0xb10 pre=0x5ff4a00b61a0 canonical=1
+CAND off=0xb40 pre=0x0 canonical=0
+CAND off=0xb70 pre=0x0 canonical=0
+CAND off=0xba0 pre=0x5ff4a00b2b90 canonical=1
+CAND off=0xbd0 pre=0x5ff4a00b5c80 canonical=1
+CAND off=0xc30 pre=0x0 canonical=0
+CAND off=0xc60 pre=0x5ff4a00b6380 canonical=1
+CAND off=0xcc0 pre=0x0 canonical=0
+CAND off=0xcf0 pre=0x5ff4a0116440 canonical=1
+CAND off=0xd20 pre=0x0 canonical=0
+CAND off=0xd50 pre=0x0 canonical=0
+CAND off=0xd80 pre=0x5ff4a00b5b60 canonical=1
+CAND off=0xde0 pre=0x0 canonical=0
+CAND off=0xe10 pre=0x5ff4a00a6ce0 canonical=1
+CAND off=0xe40 pre=0x0 canonical=0
+CAND off=0xe70 pre=0x0 canonical=0
+CAND off=0xea0 pre=0x0 canonical=0
+CAND off=0xed0 pre=0x0 canonical=0
+CAND off=0xf00 pre=0x0 canonical=0
+CAND off=0xf30 pre=0x0 canonical=0
+CAND off=0xf60 pre=0x5ff4a00fd290 canonical=1
+CAND off=0xf90 pre=0x5ff4a0096d30 canonical=1
+CAND off=0xfc0 pre=0x5ff4a00fe380 canonical=1
+CAND off=0xff0 pre=0x0 canonical=0
+CANONICAL_PRECOPY_POINTERS=31
+WINDOW_REPORT_DONE=1

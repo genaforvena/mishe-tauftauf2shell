@@ -260,6 +260,44 @@ runner captured the same result.
 | `real/aslr-ceiling/len33-1.log` | `1b413635732151aa41408fbee343b06720151cfb2d41b2698fc0386f07a54c93` |
 | `real/aslr-ceiling/fixed-len33.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
 
+
+## Live GC objects in the copy window (2026-11-26 18:24Z)
+
+`bash lab/frontier/rpm2shell/real/run-aslr-window.sh` returned
+**ASLR_WINDOW_PASS=9 ASLR_WINDOW_FAIL=0**, rc 0. The runner rebuilds no
+trees: it uses the same workspace prebuilt `build-vuln-plain/tools/rpm`
+and `build-fixed-asan/tools/rpm` as the ceiling runner, guarded `/tmp`
+names and a private `--dbpath`. Three ASLR-enabled GDB observations of
+the plain `rpm -i` install of `install/attack-reloc.rpm` snapshot the
+4096-byte window at `rpmcpioRead()` entry and log every visit at
+`lua_resume+0x206`. Each run reported `WINDOW_VISIT_OFFSETS=78` and
+`WINDOW_REPORT_DONE=1`; the qword at `buf+0x20` is chosen `A` filler after
+the copy and the walk ends in liblua with SIGSEGV. Disassembly of the
+host `liblua5.2.so.0` at the breakpoint confirms the GC-list step
+`mov (%r14),%r14; test %r14,%r14; ... movzbl 0x9(%r14),%r13d` at
+offset `0xe9a6` (`lua_resume+0x206`).
+
+Across the three runner layouts plus ten earlier sampled layouts (all
+ASLR on, same 64-byte fixture), zero visited offsets `K <= 0x121` held a
+canonical pre-copy pointer `buf + delta` with `0 < delta < K` and
+`(delta & ~0xff) + 0x10 <= K`, the shape a one-byte redirect onto
+controlled bytes needs. Most low-offset qwords were nil or pointed well
+outside the window; canonical pointers that do point back into the
+window start at offset `0x170` or higher and require writes of 1185
+bytes or more. Plain-install boundary probes: `RPM2SHELL_PAYLOAD_LEN=289`
+faulted 2/2 rc 139 in liblua; `1377` aborted 2/2 rc 134 with
+`double free or corruption (out)` before any GC walk; fixed ASan rc 1,
+no ASan report. No chosen ASLR-stable target, wire path, command or r5.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-aslr-window.sh` | `8a5e89cc9928d0f53aa4eaa0439231b01acc3130dc714e58818f4ec37693b61a` |
+| `real/aslr-window/probe.gdb` | `cfda607f2bb4426935128876c99ca8dd01558b729275751f9112281f2f354083` |
+| `real/aslr-window/probe-1.log` | `16a02e6b1b67cc585915133d310e71fd210c5302a525832040eb79dd20ec3cac` |
+| `real/aslr-window/len289-1.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+| `real/aslr-window/len1377-1.log` | `fe9f5b64e067733d78afc0ae4fee9840397006a25ca33c3fdb53769f2be7b1b4` |
+| `real/aslr-window/fixed-len1377.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell

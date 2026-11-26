@@ -9,3 +9,7 @@ real/natural-continue/rwatch-diag/
 real/gc-pointer/db/
 real/aslr-ceiling/db/
 real/aslr-ceiling/*.rpm
+real/aslr-window/db/
+real/aslr-window/sample/
+real/aslr-window/*.rpm
+real/aslr-window/make-*.log

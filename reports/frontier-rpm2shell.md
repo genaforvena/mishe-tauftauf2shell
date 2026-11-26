@@ -266,6 +266,31 @@ GCObject address in these runs. This is a measured negative, not a claim
 that no other consumer or layout could offer a target; grade stays rung 4
 DEMONSTRATED with no wire path, command or r5.
 
+### Live GCObjects in the copy window: partial-overwrite ceiling (2026-11-26 18:24Z)
+
+`bash lab/frontier/rpm2shell/real/run-aslr-window.sh` returned **9 PASS /
+0 FAIL**. With ASLR enabled (GDB only observes, no forced call), the probe
+snapshots the 4096-byte window at `rpmcpioRead()` entry and records every
+later visit at `lua_resume+0x206` — the list step `mov (%r14),%r14` followed
+by `movzbl 0x9(%r14),%r13d`. Each of three runs found 78 distinct visited
+qword offsets inside the window: live liblua objects *are* naturally
+adjacent under ASLR, so adjacency alone is not the missing piece.
+
+The partial-overwrite route is nevertheless closed on this host. For a
+low-byte write to redirect a live `next` pointer onto bytes the package
+controls, a visited offset `K` must hold a canonical pointer
+`buf + delta` with `0 < delta < K` and a reachable 256-byte block; across
+13 sampled ASLR layouts, **zero** candidates meet that condition. At
+safe lengths the canonical low-offset pointers point outside the window
+(or are nil), and the in-window pointers sit at offsets that require
+writes of 1185 bytes or more. A 289-byte package write still reaches the
+natural liblua teardown fault (2/2 rc 139), but a 1377-byte write aborts
+in glibc with `double free or corruption (out)` (2/2 rc 134) before any GC
+walk. The fixed build rejects the 1377-byte package with rc 1 and no ASan
+report. No chosen ASLR-stable target, wire path, command or r5; the grade
+stays rung 4 DEMONSTRATED with this ceiling attached. Artifacts:
+`lab/frontier/rpm2shell/real/aslr-window/{probe.gdb,probe-1.log,len289-1.log,len1377-1.log,fixed-len1377.log}`.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
