@@ -5571,3 +5571,51 @@ chosen-byte write, command, second command or persistence followed. Full
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. The next arm
 must make same-arena reuse deterministic or place attacker-shaped bytes in
 the successor before teardown; repeating the same filler list is closed.
+
+### Same-worker keep-alive reuse — earlier reader, no overlap (2026-11-26, 16:2xZ)
+
+The successor-shaping arm above used one curl connection per request, so the
+abort arrived in worker-thread teardown. WEBrick instead keeps a connection's
+worker thread (and its glibc arena) alive across HTTP/1.1 keep-alive
+requests. `lab/repro/ruby2shell-webrick-keepalive.sh` sends three requests on
+ONE socket with no middleware, oracle or debugger write in the request path:
+the N=572 multipart `_method` trigger with a 48-byte leading filler part, a
+48-byte benign multipart part, and a 512-byte query GET.
+
+Observed on the affected plain build: at filler 48 the process now aborts
+while serving request 1 with `malloc(): invalid next size (unsorted)` (rc
+134); the pure-sharp-s safe input and the fixed 3.4.13 build each served
+404/404/404 with no allocator diagnostic. A bounded filler-length screen under
+keep-alive found aborts at L=8/16/24 (`invalid next size (unsorted)`) and
+L=32/56 (`mismatching next->prev_size (unsorted)`), while L=40/64/80/96/128/
+192 served all three requests with unchanged 404 responses and no diagnostic.
+Thus keep-alive changes the geometry but gives no deterministic reclaim by a
+later request.
+The 300-second tool cap interrupted the length screen at L=256; only the
+L=8..192 arms above completed, and no claim is made for longer fillers.
+
+One new reader was observed under gdb, which perturbs the heap layout (L=40
+aborts there, though it survives without gdb). The committed
+`lab/repro/ruby2shell-webrick-keep-watch.gdb` recorded:
+
+```
+=== TARGET N=572 buf=0x7fffd401c7c0 target=0x7fffd401ca28 old=0x61 ===
+=== WRITE target=0x7fffd401ca28 old_byte=0x61 new_byte=0x53 ===
+=== READ #1 ... frames=_int_malloc,__GI___libc_malloc,rb_gc_impl_malloc,
+              ruby_xmalloc_body,ruby_xmalloc,rb_str_casemap,rb_str_upcase,... ===
+=== ABORT === malloc_printerr("malloc(): invalid next size (unsorted)")
+  _int_malloc (bytes=594) <- __GI___libc_malloc <- ruby_xmalloc(594)
+  <- rb_str_casemap (string.c:7834) <- rb_str_upcase
+```
+
+Evidence: `lab/build/evidence/stock-baseline-webrick-keep-watch-L40c.server.log`.
+This is a harness-observation of a consumer not seen in the earlier precise
+jemtrace census: the corrupted byte is read by the *same request's* second
+case-map buffer allocation, not only by thread teardown. It still terminates
+in a glibc metadata check; it is not a chosen-byte write, pointer control or
+command. Disposition: the same-worker reuse arm is a **bounded NEGATIVE**;
+full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. The next
+bounded arm is to choose N so the corrupted size class matches the next
+`rb_str_casemap` `xmalloc` and test whether that allocation returns the
+victim chunk (a live same-request overlap) before teardown.
+

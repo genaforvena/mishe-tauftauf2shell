@@ -2,6 +2,20 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 16:2xZ — Ruby2Shell same-worker keep-alive reuse
+
+Three requests on one WEBrick keep-alive socket changed the N=572 geometry:
+filler 48 aborted at request 1 with `malloc(): invalid next size (unsorted)`,
+safe-input and fixed controls served all three; a bounded L=8..192 screen
+found abort diagnostics for L=8/16/24/32/56 and unchanged 404s for
+L=40/64/80/96/128/192. A gdb byte watch (layout-perturbing) found the first
+post-overflow read is `_int_malloc` from the same request's second
+`rb_str_casemap` buffer allocation, not only thread teardown. No overlap,
+chosen-byte write, command or persistence; full stock/oracle-free/persistent
+R5 remains NOT ACHIEVED. Reproducers:
+`lab/repro/ruby2shell-webrick-keepalive.sh`,
+`ruby2shell-webrick-keep-client.py`, `ruby2shell-webrick-keep-watch.{gdb,sh}`.
+
 ## 2026-11-26 16:1xZ — Ruby2Shell WEBrick successor shaping
 
 The N=572 pre-`_method` filler sweep (22 lengths) found ten no-diagnostic
