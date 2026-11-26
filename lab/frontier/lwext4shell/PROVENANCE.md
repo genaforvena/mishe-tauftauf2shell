@@ -210,3 +210,11 @@ before / zero after; `ipg=65539` yielded `0xf8`, proving the bit byte is
 image-derived. No command, wire or pointer-control call in the driver.
 Verdict: ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`.
+
+Post-verdict repair (2026-11-26 15:1xZ): `replay-clean.sh` now resolves a
+relative DEST to an absolute path and prints the three runner hashes from the
+archived scripts. Smoke run from a fresh directory with relative
+`DEST=clean-rel` at commit `aa6afcd2` printed hashes `fd9e7d3e…`,
+`e32862ed…`, `80587918…`, `TOTAL: 31 PASS / 0 FAIL`,
+`REAL_PASS=17 REAL_FAIL=0`, `VICTIM_PASS=9 VICTIM_FAIL=0`,
+`REPLAY_RC=0`. Console: `/tmp/lwext4-rel-dest-test/clean-rel/console-*.log`.
