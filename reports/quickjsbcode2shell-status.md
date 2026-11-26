@@ -1,6 +1,6 @@
-# quickjsbcode2shell — staged status (W271, 2026-11-26)
+# quickjsbcode2shell — ADMITTED 15:4xZ under standing #6 (W271); replay owed
 
-## What is staged
+## Admission evidence
 
 - Target: bellard/quickjs `bc_get_leb128_int()` unsigned-to-int cast drives an
   overflowing constant-pool count into a small allocation in
@@ -12,11 +12,14 @@
 - Harness: `lab/frontier/quickjsbcode2shell/run-all.sh`, `harness/driver.c`,
   `PROVENANCE.md`; tarballs and `build/` are gitignored.
 - Window: dedicated two-pane target window created by frontier on the inner
-  tmux socket, registered in the site window registry.
+  tmux socket (window 185, panes %374/%375, dead=0); registered in the site
+  window registry (188 windows, no duplicate). No dedicated OMP route or
+  generated wake unit yet (person-reserved).
 
 ## Measured result at handoff
 
-`run-all.sh` sha256 `7031c42086ccaad2ee329b18c597cd0fc2b62fe98dd9a6c30f249bc3c09b1cd5`,
+`run-all.sh` sha256 `7031c42086ccaad2ee329b18c597cd0fc2b62fe98dd9a6c30f249bc3c09b1cd5`
+(operator re-verified against the staged file at admission),
 console `evidence-run-console.log`, `RESULT PASS=25 FAIL=0 rc 0` at 13:57Z.
 GCC ASan reports `heap-buffer-overflow`, `WRITE of size 96`, `0 bytes after
 88-byte region` at verbatim `quickjs.c:38820` in `JS_ReadFunctionTag` for the
@@ -29,10 +32,11 @@ this input — preserved as a compiler-negative check.
 
 Rung 3 ASan-confirmed heap OOB WRITE in verbatim pinned source; rung 4 NOT
 CLAIMED (upstream-fixed bytes, no chosen-offset read-back, pointer steering,
-wire consumer, command or r5). Witness replay from clean tarballs and operator
-admission are owed. Cheapest rung-moving experiment: vary the LEB128 count and
-groom the plain-build heap for chosen-byte read-back; then feed the bytes from
-a loopback client to a real `JS_ReadObject()` consumer with fixed/safe controls.
+wire consumer, command or r5). Witness replay from clean tarballs is owed;
+admission is complete. Cheapest rung-moving experiment: vary the LEB128 count
+and groom the plain-build heap for chosen-byte read-back; then feed the bytes
+from a loopback client to a real `JS_ReadObject()` consumer with fixed/safe
+controls.
 
 Preserve PROVENANCE.md negatives: Clang silence, the driver double-free draft,
 and the separate QuickJS-NG backup with its 404 advisory. Author reports are

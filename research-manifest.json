@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 176,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ) and libsmpp342shell (13:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 177,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ) and quickjsbcode2shell (15:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 173,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ and libsmpp342shell admitted 13:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 174,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ and quickjsbcode2shell admitted 15:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 173,
+      "value": 174,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2686,6 +2686,22 @@
       "reports": [
         "reports/frontier-libsmpp342shell.md",
         "reports/libsmpp342shell-status.md"
+      ],
+      "established": false
+    },
+    {
+      "target": "Quickjsbcode2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 15:4xZ under standing #6 as the 177th declared target mind; window 185 adopted (panes %374/%375 live, dead=0, no duplicate); runner sha256 `7031c420…c09b1cd5` staged `RESULT PASS=25 FAIL=0 rc 0`; rung 4 NOT CLAIMED, witness replay owed.** CVE-2026-88378 / GHSA-jww9-7qmq-6hv5 (GitHub Advisory Database, unreviewed, Critical 9.8 AV:N) claims untrusted compiled bytecode passed to `JS_ReadObject()` can drive a negative function count into an under-sized allocation and heap OOB write. bellard/quickjs has no release tags, so both pins are commits: vulnerable `04be246001599f5995fa2f2d8c91a0f198d3f34c`, fix `42526037cfc0b2a94a875c0de0f4bbeaf597a542` (parent of the fix, verified by GitHub commit API). In verbatim `quickjs.c`, `bc_get_leb128_int()` writes a decoded `0xFFFFFFFF` through a `uint32_t*` into an `int*`, becoming -1; `JS_ReadFunctionTag()` uses it in a 64-bit size product that wraps, so the 96-byte `memcpy` at `:38820` overruns the 88-byte allocation. The exact 21-byte upstream regression input gives GCC 12 ASan `heap-buffer-overflow WRITE of size 96, 0 bytes after 88-byte region` at `quickjs.c:38820`; the fixed build returns `SyntaxError: integer overflow while reading bytecode` and a real bytecode round-trip yields `value=2` in both builds. Clang 18 ASan silence on the attack input is preserved as a negative, not hidden. Rung 3 ASan-confirmed heap OOB WRITE in verbatim pinned source via a public single-call API; no chosen byte at a chosen offset, no pointer/control-flow steering, no live wire consumer, command or r5. Cheapest rung-moving experiment: vary the LEB128 count and groom a plain-build heap for chosen-byte read-back, then feed the 21 bytes from a loopback client to a real `JS_ReadObject()` consumer with fixed and safe controls.",
+      "reports": [
+        "reports/frontier-quickjsbcode2shell.md",
+        "reports/quickjsbcode2shell-status.md"
       ],
       "established": false
     }
