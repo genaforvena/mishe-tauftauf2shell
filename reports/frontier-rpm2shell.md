@@ -424,6 +424,14 @@ DEMONSTRATED**, not a layout-independent replay claim; the fresh-build
 negative is preserved in `lab/frontier/rpm2shell/PROVENANCE.md`. Grade is
 unchanged in the committed layout; independent witness verdict still UNKNOWN.
 
+A second end-to-end wrapper run at 20:57–20:59Z (fresh rebuild again)
+returned `WITNESS_REAL_TOTAL PASS=60 FAIL=4`: scaled payloads again 21 / 0,
+but the pointer/groom/control failures moved — A and B pointer chains then
+passed, while the lab-groomed adjacent-pointer check and the zero/safe
+control statuses failed. Across both fresh replays only the ASan WRITE and
+scaled-length checks were invariant; every pointer-chain, groom and
+zero/safe assertion varied with heap layout.
+
 ## Duplicate check
 
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`

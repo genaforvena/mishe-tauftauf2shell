@@ -535,3 +535,18 @@ verdict, no wire path, no command, no r5.
 | --- | --- |
 | `real/run-real-witness.sh` | `10efeadbe6374d523289c333b3927bb7c0ab9f46aa3ae9dd41bc00c9c99bd489` |
 | `real/run-scaled-payload.sh` (config override) | `d0540006339a7a6fe106730f5ebaf180e1bfe406298f30c1792a113e75054609` |
+
+### Second full-wrapper smoke (20:57–20:59Z)
+
+The committed wrapper was rerun end-to-end from a freshly rebuilt archive:
+`WRAPPER_RC=1`, `WITNESS_REAL_TOTAL PASS=60 FAIL=4`. `run-scaled-payload.sh`
+again 21 PASS / 0 FAIL. The other failures moved with the fresh heap layout
+and are NOT the same two as the first replay: `run-real.sh` 20 PASS / 1
+FAIL (`lab-groomed real-consumer adjacent pointer overwrite`),
+`run-install-consumer.sh` 11 PASS / 3 FAIL (`plain-vuln-zero-1/-2` rc 134
+instead of 1, plus `plain-vuln-safe` rc 0); `run-gc-pointer.sh` passed 8 /
+0 on this second layout, including both A and B chosen-pointer chains.
+Across the two fresh replays the invariant ASan WRITE and scaled-length
+checks passed every time, while every pointer-chain, lab-groom and
+zero/safe control assertion varied between layouts. Preserve both runs; do
+not select the favorable one as the grade claim.
