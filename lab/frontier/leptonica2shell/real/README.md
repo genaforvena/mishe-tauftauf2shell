@@ -123,6 +123,17 @@ no such consumer is present in this checkout (see caller enumeration below).
 This is a measured boundary for this plain real-library process, not a proof
 about every possible host allocator or future consumer.
 
+Clean-archive replay at 16:12Z from commit `401276e7`: `git archive HEAD
+lab/frontier/leptonica2shell/real | tar -x` into an empty directory, then
+`bash provision.sh` → 7 PASS / 0 FAIL (rc 0) and `bash run-neighbor.sh` →
+5 PASS / 0 FAIL (rc 0). ASLR changes absolute addresses between runs
+(clean run: `FAULT_ADDR=0x5ee5dbd1e000`, `DATA_ADDR=0x5ee5dbcfe620`,
+`SOURCE_DELTA=27772000225776`), but the invariants repeat:
+`FAULT_OFFSET_FROM_DATA=129504`, `SENTINEL_OFFSET=224`,
+`CHOSEN_AT_OFFSET=16`, a 135,168-byte heap mapping and a separate
+1,000,001,536-byte source mapping. In-tree and clean-archive output agree
+apart from those ASLR values.
+
 ## Caller enumeration and boundary
 
 `l_byteaInitFromStream()` is called only by `l_byteaInitFromFile()` inside

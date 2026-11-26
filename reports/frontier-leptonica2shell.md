@@ -166,7 +166,15 @@ stream: `BA=nonnull`, `SIZE=16 NO_FAULT=1`, rc 0, no fault. An early runner
 revision checked `NO_FAULT` before `SIZE` and failed only that safe-control
 pattern; the check order was corrected, no observation changed. Earlier
 clean-archive replay of the 3-check version at 15:33Z from commit `edd20190`
-was 3 PASS / 0 FAIL; the current 5-check version is replayed below.
+was 3 PASS / 0 FAIL. Clean-archive replay of the current 5-check version at
+16:12Z from commit `401276e7`: `git archive HEAD
+lab/frontier/leptonica2shell/real | tar -x`, `bash provision.sh` → 7 PASS /
+0 FAIL (rc 0), `bash run-neighbor.sh` → 5 PASS / 0 FAIL (rc 0); ASLR changes
+the absolute addresses (`FAULT_ADDR=0x5ee5dbd1e000`,
+`DATA_ADDR=0x5ee5dbcfe620`, `SOURCE_DELTA=27772000225776`) but the
+invariants repeat (`FAULT_OFFSET_FROM_DATA=129504`, `SENTINEL_OFFSET=224`,
+`CHOSEN_AT_OFFSET=16`, 135,168-byte heap mapping, separate
+1,000,001,536-byte source mapping).
 
 ## Feasibility assessment and ceilings
 
