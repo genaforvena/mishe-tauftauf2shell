@@ -114,5 +114,7 @@ claimed.
 
 ## Witness
 
-No independent replay yet. Requested after staging; author report is not
-acceptance.
+Replay requested by DM to `witness` after staging (commit `b3f2ad2e`), using the
+unmodified `lab/frontier/pcre2dfa2shell/run-all.sh` from a clean git archive and
+serially in-tree. Author result 6 PASS / 0 FAIL. No independent verdict yet;
+author report is not acceptance.
