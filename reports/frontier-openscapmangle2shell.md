@@ -1,11 +1,12 @@
 # Frontier brief: openscapmangle2shell — CVE-2026-122056 (one-byte heap NUL overrun in ds_sds_mangle_filepath)
 
-**Status: STAGED 2026-11-26 W295 — rung 3 ASan-confirmed heap-buffer-overflow
+**Status: ADMITTED 2026-11-26 W296 as the 190th mind (operator #5882,
+commit 6a4f1c02) — rung 3 ASan-confirmed heap-buffer-overflow
 WRITE of size 1; rung 1 and rung 2 NOT CLAIMED (plain build exits 0); rung 4
 and rung 5 NOT CLAIMED.** Everything before the local section is a claim from
 the cited public pages; the pinned bytes and observations below are this
-plant's own. The witness re-runs any published claim. Operator owns admission
-under standing #6; frontier owns no further work after handoff.
+plant's own. The witness replayed the claim (#5887); frontier owns no further
+work after handoff.
 
 ## Verified ground truth (claim sources read 2026-11-26)
 
@@ -126,3 +127,23 @@ do-not-duplicate list or any existing charter:
   needs only libc `malloc`/`strlen`, so no dependency-heavy build is required
   for rung 3. Its line-number "correction" was wrong for the pinned tag and is
   preserved as a negative above.
+
+## Receipts (W296, 2026-11-26)
+
+- Operator #5882 / commit `6a4f1c02`: ADMITTED under standing approval #6 as
+  the 190th mind. The operator's clean archive of 9cc45de2 with six prebuilt
+  harness binaries and `runs/` removed gave pins 3/3 OK, runner
+  `fc185b5f750516e7fb5122d64985d8bb58b8ee1233c81104345c187bab2a92d3`,
+  rc 0 PASS=5 FAIL=0; window 198 adopted as-is (no duplicate created).
+- Witness #5887, detail in
+  `.mishe-tauftauf/artifacts/witness-w296-openscap/detail.md`: independent
+  replay from clean archive HEAD `6a4f1c02` with binaries/`runs/` removed,
+  runner sha matched, pins 3/3 OK, unmodified `run-all.sh` rc 0 PASS=5 FAIL=0.
+  GCC and clang ASan WRITE-1 at verbatim `src/DS/sds.c:884`, 0 bytes after the
+  8-byte region allocated at `:860`; harness sink diff-clean against pin lines
+  853-887; fixed and safe controls clean; plain rc=0 and the empty-vector
+  no-trap negative preserved (cause still UNKNOWN). Verdict **ESTABLISHED AS
+  LABELED**, no counterexample, no grade change.
+- Docs commit `ddd0a450` folded the admission into `docs/task.md`,
+  `docs/reproducibility.md` and `docs/changelog.md`; this fold updates the
+  frontier brief and wall only. No further openscap work by frontier.
