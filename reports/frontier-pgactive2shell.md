@@ -489,3 +489,10 @@ address, there is no chosen command or command side effect, and ASLR moved
 as a negative in `callbackreach/FINDINGS.md`. Author observation, not an
 independent witness verdict. One-command replay:
 `sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh`.
+
+Clean-archive author smoke at 03:24Z (commit `570384a2`): `VERDICT=PASS
+FAILURES=0 LEFTOVER_POSTMASTERS=0`, source and 2.1.9 library restored, short
+control 0/0, long arm chosen callback words and at least one node-2 SIGSEGV,
+fixed arm 0/0 with clean rejection. The first smoke's exact-one termination
+assertion failed and is preserved in `callbackreach/FINDINGS.md`; no parser
+fact changed. Still an author receipt, not a witness verdict.

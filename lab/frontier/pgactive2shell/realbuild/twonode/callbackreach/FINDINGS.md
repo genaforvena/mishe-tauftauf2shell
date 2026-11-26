@@ -78,3 +78,13 @@ sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh
 The wrapper builds the instrumented library in a private `/tmp` tree, runs a
 short-name control, the long-name arm and the pinned 2.1.10 control, then
 restores the source and library. Prerequisites are in `../PROVISION.md`.
+
+Clean-archive author smoke at 03:24Z (commit `570384a2`):
+`VERDICT=PASS FAILURES=0 LEFTOVER_POSTMASTERS=0`,
+`RESTORED_LIB_OK=1 RESTORED_SRC_OK=1`, instrumented sha256
+`d88c97b4a0b3ff974ad9574dd9a9a390ccb980847b6aa91700cc828987656afa`. All three
+arms `RC=0 LIB_OK=1` with setup markers good; short arm 0/0 terminations and
+an uncorrupted callback (`delta=464`), long arm chosen
+`fn/arg/prev=0x5a415a415a415a41` plus three node-2 SIGSEGVs from restart
+retries (assert is at least one), fixed arm 0/0 with no probe and
+`could not parse replication origin name`. Author smoke, not a witness verdict.
