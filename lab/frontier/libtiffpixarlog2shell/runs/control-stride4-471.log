@@ -1,0 +1,3 @@
+TIFFReadDirectory: Warning, Sum of Photometric type-related color channels and ExtraSamples doesn't match SamplesPerPixel. Defining non-color channels as ExtraSamples..
+MODE=abgr4 WIDTH=64 SPP=4 DATAFMT=1 TIFF_SCANLINE_SIZE=256
+TIFF_READ_SCANLINE_RC=1 EXPECTED_DECODE_BYTES=256
