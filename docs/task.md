@@ -12468,3 +12468,53 @@ artifact, not a rerun in this wake. The live checkers read
 `reproducibility: GREEN (37 required files)` and
 `presentation: GREEN (3 generated files current)`; the RED readme-lint signal
 in the wake dossier is stale unit state, not a live-doc failure.
+
+## 2026-11-26 07:2x–07:4xZ — libde265shell staged, Ruby W35 closure, W253 verdict
+
+Five commits folded from the live HEAD (`9d1ff99a`); the wake-start signal
+named `8b4caaf9`. No rung cell, grade, route, witness verdict or R5 cell moved
+by this fold; the quoted bytes and counts come from the receipts, not a
+rerun here.
+
+- `8b4caaf9` + `4a9c64b9`: frontier staged **libde265shell** on
+  CVE-2026-33165 / GHSA-653q-9f73-8hvg (libde265 `<= 1.0.16`, fixed 1.0.17
+  by `c7891e412…`). A stale `ctb_info.log2unitSize` after an SPS change makes
+  `set_SliceHeaderIndex()` write 2 bytes past a 2496-byte heap array; the
+  advisory's 254-byte input and unmodified public-API `poc.c` give GCC and
+  Clang ASan `WRITE of size 2` at verbatim `libde265/image.h:741` from
+  `slice.cc:2866`, fixed and benign controls clean, plain vulnerable build
+  silent. `run-all.sh` SHA-256 `acf09b51…d62d19d1b` printed
+  `RESULT PASS=12 FAIL=0`; the author's clean-archive replay from
+  `git archive 8b4caaf9` matched. Grade: rung 3 verbatim / rung 4 PARTIAL,
+  no chosen bytes, pointer control, wire path, command or r5. The lane is
+  **STAGED, not admitted**: frontier created window 173; operator admission
+  and independent witness replay are owed. `docs/reproducibility.md` has
+  the pins, commands and expected bytes.
+- `df5d82ba`: Ruby2Shell W35 closes the fake-chunk `prev_size` coherence
+  lead. A 24-run sweep at chunked N=588 selects which glibc diagnostic fires
+  (`mismatching next->prev_size`, `invalid next size (unsorted)`,
+  `sysmalloc`) but the 9 survivors reflect 0 deviations and 0 leak-shaped
+  qwords in 306 parts; self-coherent `prev == size` gave 3/15 survivors with
+  0 deviations, and a second request on corrupted survivors was served in
+  4/12 with 0 deviations across 136 parts. Controlled heap corruption and
+  survival, not a write primitive: no `fd`/`bk` pointer, libc/code base or
+  second command. Grades unchanged (rung 4 witness-COMPLETE, harness-condition
+  rung 5 witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED);
+  the fake-chunk lane is closed. Reopening, if warranted, would target forged
+  chunks below the unsorted band (`FILL_SIZE ∈ {0x21,0x41,0x53}` with
+  `FILL_PREV=0x53`).
+- `9d1ff99a`: witness W253 returned ESTABLISHED AS LABELED for aspell2shell's
+  75820 consecutive-offset sweep. Three serial replays of the unmodified
+  wrapper (SHA-256 `8319cf0d…2287597d`) — fully fresh clean archive, clean
+  archive with a fresh vulnerable build, and in-tree with a fresh work dir —
+  each gave 8 PASS / 0 FAIL rc 0, 41 GDB stores and the same `0xbe →
+  0x01..0x1a, 0x01..0x0e` dump at verbatim `suggest.cpp:1469/1483-1485`, with
+  rc 1 fixed and targeted controls and a clean benign word. The verdict
+  covers this sweep only: earlier 75820 lanes keep their prior witness
+  status, rung 4 PARTIAL stays labeled, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.
+- `aa6ba868`: the operator folded W252 into the manifest, moving the
+  independently established count 107→108 in the generated README, results
+  page and ladder SVG. The 161 register rows and every rung cell stayed the
+  same; these files are generated from `research-manifest.json`, not edited
+  by this fold.

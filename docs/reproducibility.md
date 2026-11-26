@@ -12304,3 +12304,124 @@ quoted from `74e10bb9`, `56491145`, `76c5b864` and witness W252's artifact.
   Build outputs under the archive's gitignored `out/` regenerate with the
   wrapper. Rung 3 and rung-4 PARTIAL stand; no chosen bytes, pointer control,
   wire path or r5.
+
+## 2026-11-26 07:2x–07:4xZ — Ruby W35 negatives, libde265shell staging/replay, W253 aspell replay
+
+Recipes for `df5d82ba`, `8b4caaf9`, `4a9c64b9` and `9d1ff99a`, plus the
+generated count change in `aa6ba868`. No replay was rerun in this fold;
+counts and bytes below are quoted from the committed receipts and W253's
+artifact. None of these limbs moves a grade or a rung cell.
+
+- **Ruby2Shell W35 — fake-chunk `prev_size` coherence and second-request
+  survival (bounded NEGATIVEs, lane CLOSED).** Use the provisioned plain Ruby
+  3.4.12 and stock `rails new --minimal` app from the W34 bullet. Fix the
+  shared wire geometry and sweep the forged `prev_size` qword:
+
+  ```sh
+  export RUBY2SHELL_STOCK_N=588 RUBY2SHELL_STOCK_FILL=256 \
+    RUBY2SHELL_STOCK_DRAIN=1024:32 RUBY2SHELL_STOCK_DRAIN_FAKE=1 \
+    RUBY2SHELL_STOCK_PART_CHARSET=1 RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+    RUBY2SHELL_STOCK_CHUNKED=1
+  export RUBY2SHELL_STOCK_FILL_SIZE=0x91 RUBY2SHELL_STOCK_FILL_PREV=0x250
+  bash lab/repro/ruby2shell-stock-rails.sh attack chp0x91-p0x250-1
+  python3 lab/repro/ruby2shell-reflect-scan.py chp0x91-p0x250-1- \
+    --n 588 --fill-len 256 --drain-len 1024 --pattern 0x250,0x91
+  ```
+
+  (`--pattern` must match that arm's `FILL_PREV,FILL_SIZE`; three fresh
+  processes per arm.) Expect 9/24 survivors overall with clean 404 and 15
+  aborts: `0x90`/`0x251` give `mismatching next->prev_size (unsorted)`,
+  `0x91`/`0x250` give `invalid next size (unsorted)` or a `sysmalloc`
+  assertion. The nine survivor reflect scans read 306 parts with 0
+  deviations and 0 leak-shaped qwords; two survivors print `corrupted size
+  vs. prev_size` only at graceful shutdown. Fixed 3.4.13 controls with the
+  same chunked wire at `0x91/0x90` and `0x93/0x91` (2+2 runs) return clean
+  404 and stay alive. Self-coherent `prev == size` arms (`0x53/0x53`,
+  `0x93/0x93`, `0x250/0x250`, `0x251/0x251`, plus `0x91/0x91`) gave 3/15
+  survivors with 0 deviations; a second unchunked multipart POST on 12
+  survivors at `0x93/0x90` and `0x250/0x250` was served in 4/12 with 0
+  deviations across 136 parts. No chosen-byte write, `fd`/`bk` pointer,
+  libc/code base or command. Gitignored evidence under `lab/build/evidence/`:
+  `chp-sweep-summary.txt`, `chp-coherent-summary.txt`,
+  `chp-fixed-summary.txt`, `chp-second-summary.txt`, `stock-rails-chp*`
+  (`.out`/`.server.log`/`.html`/`.body`) and `second-fake-*.body`; the arms
+  above regenerate it. Grades unchanged; the lane is closed.
+- **Libde2652Shell (frontier W249) — staged 254-byte public-API OOB write,
+  NOT admitted, witness owed.** CVE-2026-33165 / GHSA-653q-9f73-8hvg affects
+  libde265 `<= 1.0.16`, fixed `>= 1.0.17` by
+  `c7891e412106130b83f8e8ea8b7f907e9449b658`; advisory URLs, tag refs and
+  the source-bound mechanism are in `reports/frontier-libde265shell.md`.
+  Pins verified by the runner (SHA-256):
+  v1.0.16 tarball `ed12c931759c1575848832f70db5071a001ac813db4e4f568ee08aef6e234d4e`,
+  v1.0.17 tarball `3a285024fa135fb962b4554e27ca54d7b0013d7084109a75cc9bef741ae57473`,
+  advisory `POC.zip` `b3b57b422acf96b9ce8c8d116453bbf330c8414d4d3b4947974e56882f5aa1b2`,
+  254-byte `reproducer.bin` `73afafa6dd3a1c8ecf403af746ed0e7e279b35c2ab9f4c5a953626fb5d8efa8b`
+  and unmodified `poc.c` `c5b05a8cf45902c5cf23d112edf0c02c417364fb4cfde06f1d396e4604eb26f2`;
+  tag commits `7ba65889d3d6d8a0d99b5360b028243ba843be3a` /
+  `f3d916c8e63e510bda1f9cf5e8710259c22afece`. `safe.bin` is 254 zero bytes
+  generated locally. One command verifies pins, builds both tags with CMake
+  (`BUILD_SHARED_LIBS=OFF`, `ENABLE_DECODER=OFF`, `ENABLE_SDL=OFF`,
+  `ENABLE_TOOLS=OFF`) under clang ASan, gcc ASan and gcc plain, links the
+  advisory `poc.c` with the C compiler plus `-lstdc++`, and runs both inputs:
+
+  ```sh
+  sh lab/frontier/libde265shell/run-all.sh
+  ```
+
+  The wrapper SHA-256 is
+  `acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b`.
+  Expect `RESULT PASS=12 FAIL=0`: vulnerable 1.0.16 under both ASan
+  compilers reports `AddressSanitizer: heap-buffer-overflow`, `WRITE of size
+  2`, `2 bytes after 2496-byte region`, frame #0 `de265_image::set_SliceHeaderIndex`
+  at verbatim `libde265/image.h:741:40` from `read_coding_tree_unit()` at
+  `slice.cc:2866:8`; the plain vulnerable build exits 0 silently (no fault
+  asserted); fixed 1.0.17 and benign controls are clean in all three modes.
+  Twelve `evidence/<tag>-<spec>-<input>.out` files are tracked; two carry the
+  ASan traces and ten are empty by design. Gitignored `src/` tarballs,
+  trees and `out/` builds regenerate with the wrapper. An author
+  clean-archive replay of the unmodified wrapper from `git archive 8b4caaf9`
+  at `.mishe-tauftauf/replays/libde265shell-w249` also printed 12 PASS /
+  0 FAIL; that is not an independent verdict. Negative build paths preserved
+  in `PROVENANCE.md`: v1.0.17 has no `autogen.sh` (CMake-only), and a C++
+  driver rejects the advisory's C source. Grade rung 3 verbatim / rung 4
+  PARTIAL (16-bit index, not chosen bytes or a pointer), no wire path,
+  command or r5. STAGED, not admitted: witness replay and operator admission
+  are owed; no evidence-register row or mind-count claim is made here.
+- **Aspell2Shell 75820 consecutive-offset sweep — witness W253 replay,
+  ESTABLISHED AS LABELED at that scope only.** The unmodified wrapper
+  SHA-256 `8319cf0ddd8b569b6a7725da5ff7cf972284d84b860ed3b3623e4a9a2287597d`
+  is identical at `aa6ba868`, `12c5adc2`, `56d35f6d` and in the worktree.
+  From a clean `git archive <commit> lab/frontier/aspell2shell` with only the
+  three pinned source trees and the provisioned `en-install` dictionary
+  symlinked and no build output copied, run each replay serially:
+
+  ```sh
+  sh harness/75820-pattern-sweep.sh <evidence-dir> <work-dir>
+  ```
+
+  Expect three runs (231.82 s fully fresh, 58.38 s clean archive with a
+  fresh vulnerable build, 91.18 s in-tree with a fresh work dir) each ending
+  `8 PASS / 0 FAIL`, rc 0: `plain_writes=2`, first `WRITE of size 1` 0 bytes
+  after a 64-byte region, `gdb_hits=41`, raw `a..z` mapped to `0x01..0x1a`,
+  `AFTER41` dump `0x01..0x1a, 0x01..0x0e`, and rc 1 with no write or ASan
+  report for both fixed 0.60.8.3 and the targeted-fix tree. Frames are at
+  verbatim `suggest.cpp:1484:23`/`:1485:21` with the allocation at `:1469`;
+  a benign 250-byte word on the same fresh ASan binary is clean. Tarball
+  pins re-fetched and matched: `aspell-0.60.8.2.tar.gz`
+  `57fe4863eae6048f72245a8575b44b718fb85ca14b9f8c0afc41b254dfd76919`,
+  `aspell-0.60.8.3.tar.gz`
+  `0534eae11132405120d11e46bf595bd5dd189bc124ba77a5dd6aae861b48a162`,
+  `aspell6-en.tar.bz2`
+  `5ca6da8b850c36c2f718d51c653e2f8f68b612f29b5c20d99f704b01a1952691`.
+  Full evidence:
+  `.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`. Rung 4
+  PARTIAL remains accurate: consecutive normalized class codes at
+  consecutive OOB offsets in a real consumer, not arbitrary bytes, a
+  pointer, a dereference, a wire path or a command. W253 rules only on this
+  sweep; the earlier two 75820 lanes keep their prior witness status.
+
+The operator's `aa6ba868` changed only the generated presentation: the
+independently established count is now 108 in `README.md`, `docs/results.md`
+and `research-manifest.json`. Do not hand-edit those files; re-render with
+`python3 tools/render-presentation.py` when the manifest changes and check
+with `--check`. No harness, pin, grade or rung cell moved with that count.

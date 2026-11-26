@@ -3646,3 +3646,69 @@ gdb (`si_addr=0x5551555a6ae4`, `rlevel=9`, not stack exhaustion); all three
 10.47 ASan library stay clean, so the regex is the trigger. Both tarballs and
 the fix patch were independently re-fetched. Rung 3 and the rung-4 PARTIAL
 ceiling stand; no chosen bytes, pointer control, wire path or r5.
+
+## 2026-11-26 07:2x–07:4xZ — register count, Ruby W35 negatives, libde265shell staging, W253 verdict
+
+Signal head `8b4caaf9`, live HEAD `9d1ff99a`. Five commits folded; no rung
+cell, grade, route, witness verdict or R5 cell moved by docs, and no replay
+was rerun in this wake.
+
+`aa6ba868` (operator) folded witness W252's pcre2dfa2shell verdict into
+`research-manifest.json` and the generated presentation: independently
+established findings moved 107→108 while the 161 register rows and the rung 3
+verbatim / rung 4 PARTIAL boundary stayed put. README, `docs/results.md` and
+the ladder SVG are generated artifacts, not edited by this fold; the W252
+replay recipe is already in `docs/reproducibility.md`.
+
+`df5d82ba` (Ruby W35) closes the fake-chunk `prev_size` coherence lead as a
+bounded NEGATIVE. At chunked N=588 with `FILL_PREV ∈ {0x90,0x91,0x250,0x251}`
+against `FILL_SIZE ∈ {0x91,0x93}` (three fresh vulnerable 3.4.12 processes
+each, 24 runs), 9 survived with HTTP 404 and 15 aborted: the `prev_size`
+qword selects whether glibc reports `mismatching next->prev_size`,
+`invalid next size (unsorted)` or a `sysmalloc` assertion, but the nine
+survivors' reflect scans found 0 deviations and 0 leak-shaped qwords in 306
+parts. Two survivors printed `corrupted size vs. prev_size` only at graceful
+shutdown, a corrupted-heap observation rather than a write primitive. Fixed
+3.4.13 controls (2+2 runs) stayed alive and clean. Self-coherent `prev ==
+size` (`0x53`, `0x93`, `0x250`, `0x251`, plus the existing `0x91/0x91`)
+produced 3/15 survivors with 0 deviations, and a second unchunked request on
+12 corrupted-survivor processes was served in 4/12 with 0 deviations across
+136 reflected parts. No `fd`/`bk` pointer, libc/code base, chosen-byte write
+or second command. The fake-chunk lane is CLOSED; grades stand at rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED and
+stock/oracle-free/persistent r5 NOT ACHIEVED. The next bounded experiment,
+only if reopened, is forged chunks below the unsorted band
+(`FILL_SIZE ∈ {0x21,0x41,0x53}`, `FILL_PREV=0x53`).
+
+`8b4caaf9` staged libde265shell as a new target mind (CVE-2026-33165 /
+GHSA-653q-9f73-8hvg, libde265 <=1.0.16, fixed 1.0.17 by `c7891e412…`): a
+stale `ctb_info.log2unitSize` after an SPS change makes
+`set_SliceHeaderIndex()` write 2 bytes past a 2496-byte heap array. The
+advisory's unmodified 254-byte reproducer and public-API `poc.c`, pinned
+alongside both tagged tarballs, give clang/gcc ASan `WRITE of size 2` at
+verbatim `libde265/image.h:741` from `slice.cc:2866`; fixed and benign
+controls are clean, and the plain vulnerable build exits 0 silently.
+`RESULT PASS=12 FAIL=0` at staging. `4a9c64b9` records an author
+clean-archive replay of the unmodified `run-all.sh` (SHA-256
+`acf09b51…d62d19d1b`) from `git archive 8b4caaf9` at
+`.mishe-tauftauf/replays/libde265shell-w249`, again 12 PASS / 0 FAIL with the
+same frames. That is an author receipt, not an independent verdict. Grade:
+rung 3 verbatim / rung 4 PARTIAL, no chosen bytes, pointer control, wire
+path, command or r5. The lane is STAGED, not admitted: window 173 exists;
+operator admission and an independent witness replay are owed. Both build
+path negatives (autotools absent on the CMake-only fixed tag; a C++ driver
+rejects the advisory's C source) are preserved in `PROVENANCE.md`.
+
+`9d1ff99a` (witness W253) returned ESTABLISHED AS LABELED for aspell2shell's
+75820 consecutive-offset sweep, no contradiction, no grade change and NO r5.
+Three serial replays of the unmodified `75820-pattern-sweep.sh` (SHA-256
+`8319cf0d…2287597d`) — fully fresh clean git archive, clean archive with a
+fresh vulnerable build, and in-tree with a fresh work dir — each gave
+8 PASS / 0 FAIL rc 0 with 41 GDB stores and the same `0xbe → 0x01..0x1a,
+0x01..0x0e` dump at verbatim `suggest.cpp:1469/1483-1485`; fixed and
+targeted-fix builds rejected the word (rc 1) and a benign 250-byte word was
+clean on the same fresh ASan binary. All three tarballs were re-fetched and
+the release trees diffed clean. This supersedes the status report's "all
+75820 claims verifier-UNKNOWN" wording only for this sweep; the earlier two
+75820 lanes keep their prior witness status. Full detail:
+`.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.
