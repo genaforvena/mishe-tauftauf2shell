@@ -11313,8 +11313,14 @@ unchanged; full stock/oracle-free/persistent r5 remains NOT ACHIEVED.
   `007c507d18f242648d502c456f3797073e09acca7adc0d1547419e5f3d04a072`) with
   four pins exact and 29 PASS / 0 FAIL; the operator's clean `git archive
   HEAD` at `a1470d6a` into `/tmp/op-w240-neuvector` matched 29 PASS / 0 FAIL.
-  These are author/operator replays, not an independent witness verdict;
-  witness stays UNKNOWN and was requested at `reports/neuvector2shell-status.md`.
+  Independent witness W240 (2026-11-26) then returned ESTABLISHED AS LABELED:
+  the unmodified `run-witness.sh` in-tree and from a clean `git archive 7bf77c89`
+  both gave `WITNESS REPLAY PASS`, 29 PASS / 0 FAIL rc 0; raw upstream rehashes
+  confirmed all four pins and the sole bounded-`snprintf` fix diff. GCC+Clang
+  ASan WRITE-2107 0 bytes past `dlpsig_buf`, fixed/safe controls clean, chosen
+  bytes in saved RBP/return slots and the default stack-protector abort are
+  preserved. No grade change, NO r5; detail in
+  `.mishe-tauftauf/artifacts/witness-w240-neuvector2shell/detail.md`.
 - **Expected bytes** — GCC and Clang ASan on the verbatim vulnerable body with
   a 2100-byte pattern of `0x4d` report `stack-buffer-overflow`, `WRITE of size
   2107`, address at offset 2080 of `dlpsig_buf` (0 bytes past 2048), write
@@ -11383,3 +11389,54 @@ is fork-peer PIE (ASLR-local), the slot is probe-derived under this ASan
 build, the peer is authenticated, the app still frees a remotely closed
 channel in its data callback, and there is no persistent shell or remote
 command service. NOT ESTABLISHED rung 5.
+
+## 2026-11-26 02:5x–03:0xZ — gimpjif2shell W241 staged lane and witness verdict
+
+- **Claim and pins** — `reports/frontier-gimpjif2shell.md` and
+  `lab/frontier/gimpjif2shell/PROVENANCE.md` record CVE-2026-136329 / CWE-122
+  (NVD record `https://services.nvd.nist.gov/rest/json/cves/2.0?cveId=CVE-2026-136329`,
+  published 2026-11-25; Red Hat CVE page, Bugzilla 2583413 and GNOME issue
+  17001 are listed there). GIMP `file-gif-load`'s `ReadJeffsImage()` computes
+  `data_size = len * height` and the alpha-frame doubling in 32 bits while
+  `zs.avail_out` keeps the unwrapped product, so a wrapped 260-byte `indexes`
+  allocation is overfilled by decompressed chosen bytes. Upstream fix
+  `2b2bbb8ffa6a88e82c72fe1208adc275dddffcd7`, parent
+  `b5a3e0b6df9986a1a8edbf8a43198187f18bbea6`, milestone 3.2.10; no fixed
+  numeric tag at staging time and the advisory's `3.1.2` lower bound has
+  UNKNOWN release semantics. Full vulnerable/fixed source pins
+  `7811585724082652312f95018cd0629bddce0557326173b9242d2457ce66273d` /
+  `703c1e124d3bf8e1dc5f92a0cf615f29f54d1fed401984881eb6d0b9c9a478c6`,
+  verbatim function excerpts `36288ad05b7a57b9f12c95e0d8f780ef84838581c4f6ebd3b01b0fe42c4fc032`
+  / `98d710f4bf9002adaa3941159f8d9705e6a6ed6b92be190f7509a801393d2f50`
+  (four pins re-fetched and rehashed by W241).
+- **Replay** — from the repo root `bash lab/frontier/gimpjif2shell/run-all.sh`
+  builds the pinned excerpts at `-O0` under GCC and Clang ASan, a plain
+  real-libz build and fixed/safe controls; expect `TOTAL: 29 PASS / 0 FAIL`,
+  rc 0. The author's `bash lab/frontier/gimpjif2shell/run-witness.sh` rehashes
+  all five pins and rebuilds everything. Independent witness W241 returned
+  ESTABLISHED AS LABELED: unmodified wrapper (sha256
+  `f562ad3132dbd970ec9c8aab403138fa7925d8068dea515566bcc1c4fd367e58`)
+  in-tree and from clean `git archive 3982be4a` into `/tmp/w241-clean` each
+  gave `REPLAY_PASS=6 REPLAY_FAIL=0`, 29 PASS / 0 FAIL, rc 0. At this fold
+  both wrappers were re-run in-tree with the same results.
+- **Expected bytes** — with `len=2`, `height=1073741889` and `alpha_frame=TRUE`,
+  `2 * height = 0x80000082` doubles to a wrapped `data_size=260`, while
+  `zs.avail_out` remains `0x80000082`. GCC+Clang ASan report
+  `heap-buffer-overflow`, `WRITE of size 1`, 0 bytes after a 260-byte region;
+  ASan frame #0 is the stand-in `inflate()` at `harness/driver.c:86`, frame #1
+  the pinned `ReadJeffsImage pins/jif-vulnerable.inc:106`, allocation at
+  `pins/jif-vulnerable.inc:40`. Fixed attack prints `MODE=attack RC=0
+  ERR=image data`; safe 4x4 input is clean in both bodies. Plain real-libz
+  readback prints `CANARY_AT=260 FIRST=4d4d...` (sixteen chosen bytes); a
+  throwaway `0x41` payload moved it to
+  `FIRST=41414141414141414141414141414141`, proving input control rather
+  than heap residue. An ASan build against uninstrumented system libz stays
+  silent yet completes decompression — preserved negative.
+- **Regeneration and boundary** — raw logs live in
+  `lab/frontier/gimpjif2shell/out/` and are gitignored; commands, URLs and
+  hashes are in `PROVENANCE.md`, witness detail in
+  `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`. Grade stays
+  rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes past a synthetic heap
+  object: no real GIMP/GEGL build, no JIF through the PDB, no chosen-address
+  pointer, no command, no r5. Window 166 is registered; the target is STAGED,
+  NOT ADMITTED — operator admission under standing #6 remains owed.

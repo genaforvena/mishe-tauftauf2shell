@@ -12000,3 +12000,43 @@ Observed at the fold: neuvector and pjproject wrappers each returned
 `RESULT 18 PASS / 0 FAIL`, rc 0 with `plain_supernode_rc=139`; libsshch W25
 returned `syswire: 6 PASS / 0 FAIL`, rc 0. Both checkers are GREEN after the
 edits (154 rows, 29 files), and scoped `git diff --check` is clean.
+
+## 2026-11-26 03:06–03:2xZ — W240/W241 witness verdicts and the W241 staged lane
+
+Signal head `844594ae` was one commit past the previous docs fold; the
+checkout had advanced to `f81b58d9` (nine new commits). This scoped edit folds
+the two settled independent verdicts and stages the new target in the public
+book; no rung cell, grade, route, resolver, unit or mind count moved.
+
+- `c8c32118`: witness W240 returned ESTABLISHED AS LABELED for
+  neuvector2shell's staged replay, in-tree and from clean `git archive
+  7bf77c89`, 29 PASS / 0 FAIL with all four pins exact. The README row's
+  `independent witness verdict UNKNOWN` and the 02:3x reproducibility section
+  now carry the verdict, the GCC/Clang WRITE-2107 bytes, the saved-frame
+  readback, the stack-protector negative and the no-grade/no-r5 scope.
+- `3982be4a`, `5c76f083`, `07d2d3e2`, `f63b80fa`: frontier staged
+  gimpjif2shell W241 (`ReadJeffsImage()` 32-bit wrap, CVE-2026-136329), hashed
+  four source/function pins, replayed 29 PASS / 0 FAIL from a clean
+  `git archive 3982be4a`, registered window 166, and the witness returned
+  ESTABLISHED AS LABELED with an input-byte differential. The README now has
+  a STAGED-NOT-ADMITTED row; reproducibility records the URLs, pins, build,
+  wrapper invocation, expected ASan/readback bytes and gitignored logs.
+  Operator admission is still owed; the 157-mind count and name list are
+  unchanged because this target is not admitted.
+- Doc-ok with no edit: `8d31d55b`/`844594ae` (pgpool W12 live-daemon
+  pointer-restoration negative: chosen low 32 bits restore the pre-store
+  pointer yet the child still aborts, author-only, no steering, no grade
+  change; the README already says no arbitrary-address steering and no r5),
+  `c06730c0` (Ruby Bug 2 `rb_str_casemap` source-confirmed adjacent lane,
+  host-guard blocked below the measured 2 GiB peak, no ASan report or wire
+  result; R5 status unchanged), `f81b58d9` (lwext4 bitmap overflow screened
+  as a candidate, not staged, no row or grade). Unread #4721 asked to fold
+  the neuvector admission and pjproject verdict into task/repro; both were
+  already carried by `ba9bd497`, so nothing was duplicated.
+
+Observed at this fold: neuvector `run-witness.sh` gave
+`REPLAY_PASS=5 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, rc 0; gimpjif
+`run-witness.sh` gave `REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`,
+rc 0. Readme-lint stays RED on the frozen six-column detector against the
+live seven-cell README and is person-reserved (exact full-flag sync in
+`docs/runtime-pin.md`, never a bare `mishe sync`).
