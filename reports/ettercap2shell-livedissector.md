@@ -14,7 +14,9 @@ makes an ASan-instrumented, unmodified ettercap `v0.8.4.1` write past the end
 of its 30-byte `tbuf3` allocation inside `gg_get_version()`, reached from
 `dissector_gg()` **before** the per-message length guard. The same packet sent
 as a live frame on loopback produces the same report. This upgrades the
-frontier's rung-3 result from a harness slice to the real parse stack. Rung 4
+frontier's rung-3 result from a harness slice to the real parse stack. A plain,
+non-ASan build of the same vulnerable tag aborts on the same packet
+(`malloc(): corrupted top size`, 3/3) while the fixed tag stays clean. Rung 4
 stays scoped and partial: packet bits choose the extent and which fixed suffix
 bytes cross the boundary; there is no arbitrary-byte write, no pointer control
 and no command execution. Rung 5 is not claimed. AV:A is not promoted.
@@ -144,6 +146,50 @@ during shutdown, and offline runs report `Joining already joined thread`.
 Neither is in the GG path and neither is a finding about this CVE; the control
 criterion used here is specifically `heap-buffer-overflow` in `gg_get_version`.
 
+## Experiment C — plain (non-ASan) build: allocator abort, no logger read-back
+
+Both trees were rebuilt without the sanitizer (`live/ettercap-0.8.4.1/build-plain`
+and `live/ettercap-0.8.5.1/build-plain`), same CMake switches and the same
+statically linked libnet 1.3 prefix, with only
+`-DCMAKE_C_FLAGS="-g -O1 -fno-omit-frame-pointer"` instead of the ASan flags.
+This asks what the real dissector does when the store is *not* trapped by ASan.
+
+`gg-vuln.pcap` makes the plain vulnerable binary exit 134 with
+`malloc(): corrupted top size`, deterministically in 3/3 replays
+(`live-evidence/plain-vuln.out`). The gdb batch backtrace
+(`live-evidence/plain-gdb.out`) places the abort in `_int_malloc` ->
+`__libc_calloc`, called from `top_half_queue_add` (`ec_dispatcher.c:160`) at the
+tail of `decode_data` (`ec_decode.c:328`) — the first allocation after the GG
+app decoder has run, not a shutdown artefact.
+
+Plain-build control matrix (one replay each, exit status and first fatal line):
+
+| Packet | version / change | Result |
+|---|---|---|
+| `gg-vuln` | `0x44000042`, both suffix flags | 134, `malloc(): corrupted top size` (3/3) |
+| `gg-long` | same version, 60-byte payload | 134, same abort |
+| `gg-safe` | `0x0000002a` -> `"7.7"` | 0, clean |
+| `gg-extent18` | `0x44000018`, short base | 0, clean |
+| `gg-extent40` | `0x04000042`, one flag | 0, clean |
+| `gg-wrongtype` | type `0x01` | 0, clean |
+| `gg-serverdir` | from :8074 toward :12345 | 0, clean |
+| fixed `v0.8.5.1` plain build | `gg-vuln` | 0, clean (`live-evidence/plain-fixed.out`) |
+
+The only difference between the aborting and clean inputs is the version bits
+that decide whether the 43-character composition crosses the 30-byte boundary;
+glibc's message identifies a corrupted top-chunk size as the detected symptom.
+The exact offset of the stray bytes inside the top-chunk header was not measured
+separately, so the claim is "this packet deterministically corrupts allocator
+state and aborts the plain dissector process", not a modelled heap layout.
+
+Bounded negative on the natural consumer: the `DISSECT_MSG` `VERSION: %s` call
+at `ec_gg.c:376` produces no line in text-mode stdout or in the `-m` message
+log for either the vulnerable or the safe pcap, so there is no logger read-back
+of the OOB bytes to report. On the vulnerable packet the allocator abort
+precedes any later consumer. A gdb attempt to dump `tbuf3` after the call
+failed because the process aborts before the memory could be read; the ASan
+write report in Experiment A remains the direct evidence of the bytes.
+
 ## Rung assessment
 
 - **Rung 1 (suspected):** yes, source and advisory agree.
@@ -154,14 +200,19 @@ criterion used here is specifically `heap-buffer-overflow` in `gg_get_version`.
   `gg_get_version`, on the shipped vulnerable source.
 - **Rung 4 (demonstrated impact):** scoped and partial. Input bits select
   whether and how far the write crosses, and which fixed suffix byte lands at
-  the boundary (WRITE 13 vs WRITE 12 at two source lines). The overwritten
-  bytes are constants from the helper; there is no arbitrary-byte write, no
-  pointer control, no benign marker execution. The natural consumer of
-  `tbuf3` is the `DISSECT_MSG` format call after the guard, which is not reached
-  in the short-packet case; no corruption-to-control path was measured.
+  the boundary (WRITE 13 vs WRITE 12 at two source lines). On a plain,
+  non-ASan build the same packet deterministically corrupts allocator state and
+  aborts the dissector process (`malloc(): corrupted top size`, 3/3), with a
+  fixed-build clean control — a real availability effect, not just a sanitizer
+  marker. The overwritten bytes are constants from the helper; there is no
+  arbitrary-byte write, no pointer control, no benign marker execution. The
+  `DISSECT_MSG` `VERSION: %s` call after the guard is not a usable consumer:
+  it emits no line in this text mode for either vulnerable or safe input, and
+  on the vulnerable packet the allocator abort precedes it. No
+  corruption-to-control path was measured.
 - **Rung 5 (remote command execution):** no. No attacker-controlled command,
-  no side effect beyond the ASan detection, and the injection was from the
-  same host on `lo`, not from an adjacent network peer.
+  no side effect beyond the deterministic abort / ASan detection, and the
+  injection was from the same host on `lo`, not from an adjacent network peer.
 
 The advisory's AV:A remains a constraint. Reaching the dissector from a real
 adjacent-network sender was not attempted; ettercap's normal deployment sees
@@ -189,7 +240,9 @@ Full cmake invocations are recorded in `live-evidence/README.md`.
 
 - `live-evidence/gg-*.pcap` — seven crafted captures (78/154 bytes each).
 - `live-evidence/live-*.out` — six live-loopback runs.
-- `live-evidence/replay-*.out` — vulnerable and fixed offline replay.
+- `live-evidence/replay-*.out` — vulnerable and fixed offline replay (ASan).
+- `live-evidence/plain-*.out` — plain-build abort, fixed control, safe control
+  and gdb abort backtrace (Experiment C, 2026-11-26).
 - `lab/frontier/ettercap2shell/PROVENANCE.md` — earlier pin/harness provenance.
 
 ## What would change the mind

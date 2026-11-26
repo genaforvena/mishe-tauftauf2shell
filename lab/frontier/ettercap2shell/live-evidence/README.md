@@ -63,6 +63,23 @@ socket as root and then drops to the lab owner; a second privileged helper
 sends the frame with `AF_PACKET` bound to `lo`. It terminates ettercap in its
 `finally` block. Only `lo` is used.
 
+## Plain (non-ASan) build — 2026-11-26
+
+Same CMake switches as above, with `-DCMAKE_C_FLAGS="-g -O1 -fno-omit-frame-pointer"`
+and the matching CXX flags and no linker sanitizer flag. Configure/build in
+`../ettercap-0.8.4.1/build-plain` (and `../ettercap-0.8.5.1/build-plain` for the
+fixed control), reusing the same libnet prefix. From `build-plain/`:
+
+
+```
+./src/ettercap -T -r ../../gg-vuln.pcap -i lo
+```
+
+Plain vulnerable: exit 134 `malloc(): corrupted top size`, 3/3; fixed plain,
+safe, extent18, extent40, wrongtype and serverdir all exit 0. The abort
+backtrace was captured with
+`gdb -q -batch -ex 'set pagination off' -ex run -ex 'bt 12' --args ...`.
+
 ## File map
 
 - `gg-vuln.pcap` — `version=0x44000042`, 24-byte TCP payload, client -> :8074.
@@ -72,6 +89,8 @@ sends the frame with `AF_PACKET` bound to `lo`. It terminates ettercap in its
 - `live-vuln.out`, `live-gg-extent18.out`, `live-gg-extent40.out`,
   `live-safe.out`, `live-wrongtype.out`, `live-fixed.out` — live runs.
 - `replay-vuln.out`, `replay-fixed.out` — offline runs.
+- `plain-vuln.out`, `plain-gdb.out`, `plain-safe.out`, `plain-fixed.out` —
+  plain-build abort, backtrace and controls (2026-11-26).
 
 `AddressSanitizer: attempting double-free` in `capture_getifs`/`pcap_freealldevs`
 on SIGTERM and `Joining already joined thread` at shutdown are incidental

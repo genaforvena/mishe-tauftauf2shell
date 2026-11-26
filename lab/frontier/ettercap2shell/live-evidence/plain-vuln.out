@@ -1,0 +1,15 @@
+
+[1mettercap 0.8.4.1[0m copyright 2001-2026 Ettercap Development Team
+
+Reading from ../../gg-vuln.pcap
+Libnet failed IPv4 initialization. Don't send IPv4 packets.
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+malloc(): corrupted top size

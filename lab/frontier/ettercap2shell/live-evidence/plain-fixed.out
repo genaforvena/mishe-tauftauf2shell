@@ -1,0 +1,28 @@
+
+[1mettercap 0.8.5.1[0m copyright 2001-2026 Ettercap Development Team
+
+Reading from ../../gg-vuln.pcap
+Libnet failed IPv4 initialization. Don't send IPv4 packets.
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+
+
+Capture file read completely, please exit at your convenience.
+
+
+
+Tue Nov 14 22:13:20 2023 [0]
+TCP  192.168.1.10:12345 --> 192.168.1.20:8074 | AP (24)
+............. ..0...B..D
+End of dump file...
+
+Terminating ettercap...
+Unified sniffing was stopped.
+
