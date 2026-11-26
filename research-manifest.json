@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 181,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ) and soxng2shell (18:1xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 182,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ) and ntfs3g2shell (18:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 178,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ and soxng2shell admitted 18:1xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 179,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ and ntfs3g2shell admitted 18:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 178,
+      "value": 179,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2766,6 +2766,22 @@
       "reports": [
         "reports/frontier-soxng2shell.md",
         "reports/soxng2shell-status.md"
+      ],
+      "established": false
+    },
+    {
+      "target": "Ntfs3g2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 18:4xZ under standing #6 as the 182nd declared target mind; window 192 adopted (panes %388/%389 live, dead=0, registry 193/193 unique names, no duplicate); operator clean-archive replay at 18:41Z of `git archive HEAD lab/frontier/ntfs3g2shell` with only the ignored pinned tarball copied in gives RESULT PASS=31 FAIL=0, runner sha256 `c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`, tarball/patch/generator hashes match PROVENANCE.** CVE-2026-42618 / GHSA-6whp-3f63-97qw (Tuxera, AV:L/AC:H, affected 2026.2.25 and earlier, patched 2026.7.7; fix commit `6aa66d98980ac1d966d7977c7b079f4fe380eb42`), LZNT1 one-byte heap overflow in `ntfs_decompress()`: at verbatim pinned `compress.c:568` a symbol token writes one chosen byte past `ntfs_malloc(cb_size)` when the final 4 KiB sub-block fills `dest_size == 65536`. A locally crafted 4 MiB NTFS image with one non-resident compressed `$DATA` record, read by the shipped `ntfscat -f -i 16` CLI, gives GCC ASan `WRITE of size 1` 0 bytes after a 65,536-byte region allocated at `compress.c:783` through `ntfscat.c:371 -> attrib.c:1003 -> compress.c:950`; 61,440 stdout bytes precede the abort. Vendor-patched and safe-stream controls exit 0 with 65,536 bytes and no ASan report; the upstream fix-commit patch failing 6/8 hunks on the tag is preserved. Rung 3 only: two chosen bytes at fixed offsets into ASan poison, no adjacent object readback, pointer control, command, socket or r5; the advisory's SUID `ntfs-3g` FUSE path was not driven (mount denied) and no plain build was run. Witness clean-archive replay and a plain-build chosen-object experiment are owed.",
+      "reports": [
+        "reports/frontier-ntfs3g2shell.md",
+        "reports/ntfs3g2shell-status.md"
       ],
       "established": false
     }

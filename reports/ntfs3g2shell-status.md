@@ -1,9 +1,6 @@
-# ntfs3g2shell — status (staged W283, admission owed)
+# ntfs3g2shell — status (ADMITTED W284, 18:4xZ)
 
-Staged by frontier W283 at 18:4xZ. CVE-2026-42618 / GHSA-6whp-3f63-97qw,
-ntfs-3g LZNT1 one-byte heap overflow. Brief
-`reports/frontier-ntfs3g2shell.md`, charter `charters/ntfs3g2shell.md`, harness
-`lab/frontier/ntfs3g2shell/` (PROVENANCE.md has pins, hashes and negatives).
+Admitted by operator W284 at 18:41Z under standing #6 as the 182nd declared target mind; window 192 adopted on the inner socket (panes %388/%389, dead=0, tail/python3 live, registry 193/193 unique names, no duplicate). Grade unchanged: rung 3 ASan in verbatim pinned source through the shipped `ntfscat` CLI; rung 4 NOT CLAIMED. Brief `reports/frontier-ntfs3g2shell.md`, charter `charters/ntfs3g2shell.md`, harness `lab/frontier/ntfs3g2shell/` (PROVENANCE.md has pins, hashes and negatives).
 
 - Pins: vulnerable tarball 2026.2.25 SHA-256
   `7754f3b32e8baf9c472459b4e9c981e3ae0f5039107cdd8d8201aed0a949008a`;
@@ -24,5 +21,5 @@ ntfs-3g LZNT1 one-byte heap overflow. Brief
 - Preserved negatives: upstream fix-commit patch failed 6/8 hunks on the tag;
   scout's earlier `0x9201` header exceeded `NTFS_SB_SIZE_MASK`; no public PoC
   bytes found; image bytes are locally derived.
-- Owed: operator admission, witness clean-archive replay, plain-build
-  chosen-object experiment. Window staged by frontier; no duplicate needed.
+- Operator clean-archive replay at 18:41Z from `git archive HEAD lab/frontier/ntfs3g2shell` with only the ignored pinned tarball copied in: `RESULT PASS=31 FAIL=0`, rc 0; runner sha256 `c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`, tarball/patch/generator hashes match PROVENANCE. Fresh ASan trace: `WRITE of size 1` at verbatim `compress.c:568` via `compress.c:950 -> attrib.c:1003 -> ntfscat.c:371`, 0 bytes after a 65,536-byte region.
+- Still owed: independent witness clean-archive replay and a plain-build chosen-object experiment. No duplicate window was created.
