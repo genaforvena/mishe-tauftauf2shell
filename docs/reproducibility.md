@@ -15174,3 +15174,119 @@ marker or command; grade unchanged.
 
 Every count in this section is an operator, witness, independent-replay or
 clean-archive observation as labeled; no generated grade cell moved here.
+
+## 2026-11-26 19:5x–20:2xZ — pcre2jit admission, gnutlsdtls staging, bounded lanes
+
+### Pcre2Jit2Shell admission replay
+
+From `lab/frontier/pcre2jit2shell`, `sh run-all.sh` re-extracts pinned 10.48
+`ebcc25aa…` and 10.49 `929f0b20…` into `replay-build/{vuln,fixed}`, asserts
+hashes and a `fix.patch` `38f740cb…` dry-run, configures each with
+`--enable-jit --disable-shared --enable-static` and builds `pcre2test`, then
+compiles the hash-matched advisory PoC `2bda01bc…` and a -DUNIQUE_CAPTURES=100
+variant. Expect shipped `pcre2test evidence/regression-input.txt` (`50be5b8e…`)
+to `Segmentation fault` with rc 139 on 10.48 and to report
+`Failed: error -46: JIT stack limit reached` with rc 0 on 10.49. The PoC places
+a 1 MiB victim below the 192 KiB JIT stack with `MAP_FIXED_NOREPLACE`, fills
+it with `0xa5`, and JIT-matches a 1,400-capture pattern against a 10-byte
+subject: expect 139,972–139,976 bytes clobbered, deepest write 139,976 bytes
+below the stack and 15 aligned subject-pointer words. Controls: --no-jit and
+100-capture match 2 and stay clean, 10.49 JIT match -46 with 0 pointers,
+10.49 interpreter match 2 clean. Author 19:31Z `RESULT PASS=46 FAIL=0`;
+operator 19:55Z clean archive (`git archive HEAD lab/frontier/pcre2jit2shell`
+with only the ignored pinned tarballs) gave runner sha256 `d9c5a6eb…c112e`,
+rc 0, `RESULT PASS=46 FAIL=0`. ASLR placement collisions are kept, two ASan
+builds were killed during `pcre2_match.lo` compile, so no ASan report, rung 3,
+chosen bytes, command, socket, live consumer or r5 is claimed. Build outputs
+under `replay-build/`, `evidence/replay/` and `out/` are gitignored; the runner
+recreates them. Witness clean-archive replay and the named loopback-consumer
+depth experiment are owed.
+
+### GnutlsDTLS staging replay
+
+From `lab/frontier/gnutlsdtls2shell`, `sh run-all.sh` runs `build.sh`: build
+local nettle 3.10 `b4c518ad…` into `opt/` with `--disable-documentation`, then
+GnuTLS 3.8.12 `a7b34142…` / 3.8.13 `ffed8ec1…` with `--disable-doc
+--disable-guile --disable-nls --without-tpm --without-tpm2
+--disable-full-test-suite --with-included-unistring` and
+`CFLAGS='-fsanitize=address -g -O1 -fno-omit-frame-pointer'`,
+`LDFLAGS='-fsanitize=address'`, running `make -C gl -j4` before `make -C lib
+-j4` (lib alone fails). Compile `poc_dtls_fragment_overflow.c` for each
+version with `-fsanitize=address ... -lgnutls -lpthread` and the local rpath;
+host nettle 3.9.1 is too old, so `LD_LIBRARY_PATH=<lab>/opt/lib64` is required
+(or a hogweed symbol mismatch). Expect four loopback UDP fragments
+(`msg_len=50,off=25,len=25`; 3000 at off=0/len=48, 40/1475, 1500/1475 — 927
+bytes past the 2048-byte region) to give ASan `heap-buffer-overflow`,
+`WRITE of size 1475` at `merge_handshake_packet` `lib/buffers.c:1035` ←
+`_gnutls_parse_record_buffered_msgs:1320` ←
+`_gnutls_handshake_io_recv_int:1414`, 0 bytes after a 2048-byte region with
+`E` filler. Safe variant rc 0, no ASan, handshake -319; fixed 3.8.13 rc 0, no
+ASan, handshake -9. `run-all.log`: `BUILD OK`, `RESULT PASS=12 FAIL=0`, runner
+rc 0. Staged only: no rung 4, plain-build live victim, pointer, command or
+witness acceptance; admission and witness replay owed.
+
+### Bounded lanes: rpm, nfdump, gimpjif, neuvector, ruby
+
+The rpm redirect-layout survey is in
+`lab/frontier/rpm2shell/real/aslr-window/` (`layout-sweep-32.txt
+9d41bb75…`, `window-sweep-32.txt df6acdcb…`, `redirect-trials-60.txt
+2b5eb095…`, `redirect-probe.gdb 52cac50c…`, `mkredirect.py 735f7e50…`,
+`redirect-trials.py fc94c8e0…`) hashed in `PROVENANCE.md`. With ASLR on and a
+GDB observer only (no forced call, no LD_PRELOAD, no debugger write), 32
+`RPM_CONFIGDIR` symlink lengths 12–200 gave `buf+0x20` nil 17/32 and outside
+the 4096-byte window 14/32; the single in-window delta (L=112, `0x5380`) had
+low byte `0x00`, and no layout met the canonical/in-window/`K <= 0x121`
+criterion. Six repeats at L=42/72 gave 0/6; exact chosen-byte candidates 0/60,
+GC visit 0/60, SIGABRT 51/60, SIGSEGV 9/60. The earlier
+`0x738500000001`/`0x735d00000001` are canonical, stale/unmapped — a wording
+correction, not a redirect. No clean-archive receipt in this commit; the prior
+`54d94b6e` receipt gave `GC_POINTER_PASS=8 FAIL=0`,
+`INSTALL_CONSUMER_PASS=14 FAIL=0`. No ASLR-stable target, redirect, wire path,
+command or r5.
+
+From `lab/frontier/nfdump2shell`, the throwaway `/tmp/nfdump-ctl-probe.py`
+(not shipped) drives genuine uninstrumented plain `nfcapd` on loopback ports
+10143/10142/10144 with a 1351-byte datagram aiming record2 size 1281
+(`0x0501`) and numElements 261: expect `Corrupt nfd record: expected 2
+records, processd: 1` and `Flows: 1, Packets: 0, Bytes: 3096224743817216`
+(attack), `Flows: 2` with no Corrupt line (safe), `processd: 0 / Flows: 0`
+(fixed). Pinned `recordHeaderV3_t` layout: type +0..1, size +2..3,
+numElements +4..5, engine +6..7, exporter +8..9, flags/nfversion +10..11.
+54/56-byte record sizes are bounded negatives (size 0 / type != 11). Staged
+`run-all.sh` 10/0, prior clean archive `ceb87a6e` 11/0, 17/0, 12/0, 13/0, 8/0.
+No crossing write into record size/count, pointer, marker or command; no
+witness verdict for this closure — UNKNOWN; the failed 58-byte framing
+hypothesis is preserved.
+
+For gimpjif, `python3 make-jif.py evidence/published-mix.jif published-mix 4d
+41` builds a 260-in-bounds `0x4d` / 188-OOB `0x41` JIF (`7d563886…`); run the
+patched GIMP 3.2.8 AppRun/PDB with the canonical shim (`fc73e957…`) and a
+fresh HOME via `bash run-real.sh`, expecting 35 PASS / 0 FAIL,
+`DEST_HEX=4dff4dff…` (no `41` in 320 bytes), `LIVE_CHANGED_BYTES=48`, RC=1;
+fixed RC=0 with 0 changed bytes. The real plugin shows
+`avail_out_before=2147483778`, `total_out=448`, SHIM_HEAD all `4d`, SHIM_EDGE
+eight `4d` then `88 41`, SHIM_FAR 32 `41`, then times out rc 124. The pinned
+loop reads `indexes[i]` only while `pos < data_size`, so the 188 OOB bytes
+cannot reach dest. A clean archive of `0344afe4` repeated 35/0 (runner
+`7cf6c65b…`). Fixed-plugin control BLOCKED (no AppImage at/beyond 3.2.10);
+no chosen address, dereference, command or W288 witness — UNKNOWN.
+
+The neuvector W288 check is reasoning from pinned `dpi-vulnerable.inc:34-48`
+only: every write is `sprintf(..., "pcre %s;")` plus NUL, so an eight-byte
+pattern can fill return bytes 0–7 but `;` (0x3b) and NUL land past the slot,
+leaving high bytes 6–7 non-canonical and a canonical-preserving partial
+overwrite impossible. The live REST chain (dlp_rule.go:461-540 → cache
+:748-827 → system.go:987-1112 → ctrl.go:891-963 → dp/ctrl.c:2098,2384-2491)
+is NO-GO in budget: no standalone controller mode, hard-coded
+`/usr/local/bin/consul`, mandatory cert dir, refuses zero containers, uid
+1000, REST binds all interfaces, Go 1.27.4 required. No new harness, no grade
+change, no canonical target, marker, command or live REST launch; witness
+verdicts W280/W282/W283/W285/W287 owed (#5770 first), UNKNOWN.
+
+The ruby ParamsWrapper replay recipe is already recorded at the end of
+§ 19:2x–19:5xZ (`python3 lab/repro/ruby2shell-casefold-params-wrapper.py`,
+one JSON POST to `/sink`, `READ of size 1` at `regexec.c:4278` on 3.4.12, all
+controls 200/clean; wire reach CLOSED, grade rung 3). Not repeated here.
+
+Every count in this section is an operator, author, staged or clean-archive
+observation as labeled; no generated grade cell moved here.

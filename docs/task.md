@@ -14364,3 +14364,107 @@ All counts above are operator, witness, independent-replay or clean-archive
 observations as labeled. What would change this fold: a verdict contradicting
 a labeled row, a checker RED on committed HEAD, or a later report misquoting
 one of these receipts.
+
+## 2026-11-26 19:5x–20:2xZ — pcre2jit admitted (185th), gnutlsdtls staged, bounded lanes
+
+This fold covers `6d9f3ed5..755e7f63`; replay recipes are in
+`docs/reproducibility.md` § 19:5x–20:2xZ. The generated overview at HEAD reads
+185 declared / 182 active / 182 rows / 121 independently established. No
+generated cell, register row, grade, report or lab evidence is moved here.
+
+- `062b4c4e` (operator, standing #6) **admitted pcre2jit2shell as the 185th
+  declared target mind** at 19:5xZ, superseding the STAGED wording in
+  § 19:2x–19:5xZ. Counts moved 184/181/181/121 → 185/182/182/121; staged
+  window 194 adopted (panes %392/%393 live, dead=0, registry 195/195 unique
+  names, no duplicate). The operator's 19:55Z clean archive of
+  `git archive HEAD lab/frontier/pcre2jit2shell` with only the ignored pinned
+  10.48/10.49 tarballs copied in gave runner sha256 `d9c5a6eb…c112e`, rc 0,
+  `RESULT PASS=46 FAIL=0`. Grade as registered: rung 2 shipped-CLI crash and
+  rung 4 physical separate-mapping control marked Limited (written words are
+  JIT frame state, not attacker-chosen bytes or a marker); rung 3 ASan NOT
+  CLAIMED and rung 5 NOT CLAIMED. Witness clean-archive replay and the named
+  loopback-consumer depth experiment remain owed.
+- `0e93dbbd` **staged gnutlsdtls2shell** (STAGED, not admitted): CVE-2026-33846
+  / GNUTLS-SA-2026-04-29-1, pinned 3.8.12 `a7b34142…` / 3.8.13 `ffed8ec1…`
+  with local nettle 3.10 `b4c518ad…` (host 3.9.1 too old), fix `65ab33fa…`.
+  Four loopback UDP ClientHello fragments drive an ASan `WRITE of size 1475`
+  in `merge_handshake_packet` (`lib/buffers.c:1035`) 0 bytes after a 2048-byte
+  region via `_gnutls_parse_record_buffered_msgs:1320` and
+  `_gnutls_handshake_io_recv_int:1414`; `run-all.sh` gave `RESULT PASS=12 FAIL=0`
+  at 20:05Z. Rung 3 ASan-confirmed attacker-controlled heap overwrite via the
+  shipped library API; rung 4 NOT CLAIMED (chosen bytes in ASan poison, no
+  adjacent live object, pointer, command buffer or socket shown changed in a
+  plain build) and rung 5 NOT CLAIMED. Charter and two-pane window 195
+  (%394/%395, dead=0), registry 196/196; operator admission and witness replay
+  owed. No generated count moved by this staging.
+- `7b7d84d7` (rpm) **closed the redirect-layout survey with an ASLR negative**:
+  32 `RPM_CONFIGDIR` symlink lengths 12–200 under ASLR-on GDB observation gave
+  `buf+0x20` nil 17/32 and far outside the 4096-byte window 14/32; the one
+  in-window delta (L=112, `0x5380`) left `0x00` as the low byte, and no layout
+  met the canonical/in-window/`K <= 0x121` criterion (lowest offsets `0x200`
+  at L=72 and `0x220` at L=42). Six repeats each at L=42/72 gave 0/6; exact
+  chosen-byte candidates 0/60, GC visit 0/60, SIGABRT 51/60, SIGSEGV 9/60.
+  Earlier `0x738500000001`/`0x735d00000001` are **canonical** (bit 47 clear,
+  stale/unmapped), not non-canonical — a wording correction only; the
+  redirect conclusion is unchanged. Grade unchanged: rung 3 pinned verbatim /
+  rung 4 author-DEMONSTRATED in real rpm consumers, no ASLR-stable chosen
+  target, no wire path, command or r5.
+- `c8c612f5` (nfdump) **closed swap-chosen record size and element count**:
+  a throwaway loopback probe against genuine uninstrumented plain `nfcapd`
+  (ports 10143/10142/10144) with a 1351-byte datagram aiming record2 size
+  1281 (`0x0501`) and numElements 261 produced `Corrupt nfd record: expected
+  2 records, processd: 1` and `Flows: 1, Packets: 0, Bytes: 3096224743817216`;
+  safe (complete record1) gave Flows: 2 with no Corrupt line, fixed gave
+  processd: 0 / Flows: 0. A 54-byte record size aims dstPort at record2's
+  numElements while srcPort aliases size and is zeroed → size 0 rejection;
+  56-byte aims dstPort at size while srcPort aliases type → type != 11.
+  Staged `run-all.sh` 10/0, prior clean archive `ceb87a6e` 11/0, 17/0, 12/0,
+  13/0, 8/0 plus `BUILD_INSTRUMENTATION_OK`. Grade unchanged rung 3 / rung 4
+  PARTIAL, NO r5; no crossing write into record size/count, no pointer,
+  marker or command. This closure has no witness verdict — UNKNOWN; failed
+  58-byte framing hypothesis preserved.
+- `0344afe4` + `691e8168` (gimpjif W288) **distinguished chosen OOB bytes in
+  the real plugin and bounded the consumer**: a mixed 260-in-bounds `0x4d` /
+  188-OOB `0x41` JIF (`published-mix.jif` `7d563886…`) under the patched GIMP
+  3.2.8 AppRun/PDB with the canonical shim shows `DEST_HEX=4dff4dff…` (no
+  `41` in 320 bytes), `LIVE_CHANGED_BYTES=48`, and RC=1; fixed RC=0 with 0
+  changed bytes. The real plugin reports `avail_out_before=2147483778`,
+  `total_out=448`, SHIM_HEAD all `4d`, SHIM_EDGE eight `4d` then `88 41`,
+  SHIM_FAR 32 `41`, then times out rc 124. The pinned loop reads `indexes[i]`
+  only while `pos < data_size` (bpp=8, data_size=260, stops at i=130), so the
+  188 OOB bytes cannot reach dest. `bash run-real.sh` 35/0, repeated 35/0 from
+  a clean archive of `0344afe4` (runner `7cf6c65b…` unchanged).
+  Grade unchanged rung 3 / rung 4 PARTIAL, NO r5; fixed-plugin control BLOCKED
+  (v3.2/linux/ and v3.4/linux/ publish no AppImage at/beyond 3.2.10), no
+  chosen address, dereference or command; W288 witness UNKNOWN (W241 stands
+  at staging).
+- `cf84a883` (neuvector W288) **closed pointer algebra and live-REST
+  feasibility**: every write is `sprintf(..., "pcre %s;")` plus final NUL
+  (`dpi-vulnerable.inc:45`); an eight-byte pattern can make return bytes 0–7
+  nonzero but `;` (0x3b) and NUL land past the slot, leaving high bytes
+  6–7 non-canonical, so partial overwrite preserving canonical high bytes is
+  impossible (W285/W287 ceiling stands). The live REST chain exists (dlp_rule
+  → cache → watcher → ctrl → dp/ctrl.c:2098,2384–2491) but is NO-GO in budget:
+  no standalone controller mode, hard-coded `/usr/local/bin/consul`, mandatory
+  `/etc/neuvector/certs/internal/`, refuses zero running containers, absent
+  paths, uid 1000, REST binds all interfaces, Go 1.27.4 required. No grade
+  change rung 3 confirmed / rung 4 PARTIAL, NO r5; no canonical executable
+  address, marker, command or live REST launch; W280/W282/W283/W285/W287
+  verdicts owed (#5770 first), UNKNOWN.
+- `755e7f63` (ruby) **probed the one request-reachable inflector sink** through
+  `ActiveSupport::ParamsWrapper` on a live ASan Rails server: on 3.4.12 a JSON
+  POST to `/sink` aborts with `READ of size 1` at `regexec.c:4278`, stack
+  `params_wrapper.rb:258 → :264 → :145 → :152` → `singularize` →
+  `apply_inflections`; GET `/sink`, JSON POST `/ascii` and all three 3.4.13
+  cases return 200 with no ASan. The sharp-s text is app-defined, not
+  wire-supplied — Rails' router rejects non-ASCII controller names
+  (`mapper.rb:332-337`) — so wire reach stays CLOSED and the grade stays rung
+  3. No write, pointer, command or chosen bytes; no witness verdict for this
+  lane, UNKNOWN; the report's separate rung-5 witness-ESTABLISHED finding is a
+  different T_DATA finalizer lane and is not transferred here. The replay
+  recipe is already recorded in `docs/reproducibility.md` § 19:2x–19:5xZ.
+
+All counts above are operator, author, clean-archive or staged observations as
+labeled. What would change this fold: a verdict contradicting a labeled row, a
+checker RED on committed HEAD, or a later report misquoting one of these
+receipts.

@@ -5194,3 +5194,46 @@ register fold landed in `e8fc7ab9` (section below).
 
 Exact pins, commands, expected bytes and gitignored evidence for each item
 are in `docs/reproducibility.md` § 19:2x–19:5xZ and the named reports.
+
+## 2026-11-26 19:5x–20:2xZ — pcre2jit admitted (185th), gnutlsdtls staged, bounded lanes
+
+- `062b4c4e` (operator, standing #6) admitted pcre2jit2shell as the 185th
+  declared target mind, moving generated counts to 185/182/182/121 and
+  superseding the § 19:2x–19:5xZ STAGED wording. Window 194 (panes
+  %392/%393) and a clean-archive 46/0 replay with runner sha256
+  `d9c5a6eb…c112e` are in `docs/results.md`; rung 2 + limited rung 4, no
+  rung 3/rung 5, witness replay and loopback consumer experiment owed.
+- `0e93dbbd` staged gnutlsdtls2shell (CVE-2026-33846 / GNUTLS-SA-2026-04-29-1,
+  fixed 3.8.13) with pinned 3.8.12/3.8.13 and local nettle 3.10. Four
+  loopback DTLS fragments give ASan `WRITE of size 1475` in
+  `merge_handshake_packet` (`buffers.c:1035`), `RESULT PASS=12 FAIL=0`;
+  rung 3 only, no rung 4/rung 5, admission and witness owed.
+- `7b7d84d7` (rpm) closed the 32-length redirect-layout survey with an ASLR
+  negative: no canonical in-window chosen target, chosen-byte candidates 0/60,
+  and a wording correction that `0x738500000001`/`0x735d00000001` are canonical
+  stale addresses, not non-canonical. Grade unchanged, no wire path or r5.
+- `c8c612f5` (nfdump) closed swap-chosen record size/count against genuine
+  plain `nfcapd` (1351-byte datagram, size 1281, numElements 261 →
+  `Corrupt nfd record`), staged 10/0 and prior clean-archive 11/0/17/0/12/0/
+  13/0/8/0. Grade unchanged rung 3 / rung 4 PARTIAL; no crossing write, no
+  witness verdict for this closure.
+- `0344afe4` + `691e8168` (gimpjif W288) distinguished chosen OOB bytes in the
+  real GIMP 3.2.8 plugin: mixed-marker JIF shows no chosen `41` in dest, 48
+  bytes changed after it, 35/0 in-tree and clean archive, but a pinned
+  `pos < data_size` loop keeps the 188 OOB bytes from dest and the plugin
+  times out. Fixed-plugin control BLOCKED; no chosen address, command or
+  witness; W288 UNKNOWN.
+- `cf84a883` (neuvector W288) closed pointer algebra (terminator bytes make a
+  canonical-preserving partial overwrite impossible) and marked the live REST
+  chain NO-GO in budget (no standalone controller, absent cert/path/container
+  prerequisites). Grade unchanged; witness verdicts W280/W282/W283/W285/W287
+  still owed.
+- `755e7f63` (ruby) routed the case-fold `READ of size 1` through
+  `ActiveSupport::ParamsWrapper` on a live ASan Rails request (3.4.12 JSON
+  POST `/sink` aborts at `regexec.c:4278`; all controls 200/clean). The
+  sharp-s text is app-defined, the router rejects non-ASCII controller names,
+  so wire reach is CLOSED and the grade stays rung 3; its replay recipe is in
+  § 19:2x–19:5xZ.
+
+Exact pins, commands, expected bytes and gitignored evidence for each item
+are in `docs/reproducibility.md` § 19:5x–20:2xZ and the named reports.
