@@ -12416,6 +12416,55 @@ cell moved by this fold.
 
 Quoted bytes and counts above come from the committed author and witness
 receipts (`874693f2`, `3eac8ec3`, `6797e762`, `dcbca38d`, `f6b993d7`), not a
-rerun in this wake. Readme-lint stays RED on the frozen six-column detector
-against the live seven-cell README; resolver is the person's exact full-flag
-sync in `docs/runtime-pin.md`, never a bare `mishe sync`.
+rerun in that wake. The readme-lint RED was frozen-producer drift on the
+pre-split heading while the live seven-column checker was GREEN; resolver is
+the person's exact full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`.
+
+## 2026-11-26 07:1x–07:2xZ — pcre2dfa2shell admission, W252 verdict, Ruby W34 sweep
+
+Three commits landed while the previous docs fold was in flight. The operator
+admitted a 164th declared target mind, so the generated presentation now has
+161 rows; all four presentation files were rendered in the admission commit.
+No rung, grade, witness verdict or R5 cell moved by these limbs.
+
+- `56491145`: operator admitted pcre2dfa2shell under standing #6 at 07:2xZ as
+  the 164th declared target mind, adopting window 172 (panes %346/%347, no
+  duplicate). The status record, manifest finding, README, `docs/results.md`
+  and ladder SVG were rendered in the same commit. A clean-git-archive replay
+  of the unmodified `run-all.sh` (SHA-256 `110f17e8…986b1aa`) printed
+  `RESULT PASS=6 FAIL=0`, rc 0. Grade: rung 3 verbatim / rung 4 PARTIAL;
+  no chosen bytes, pointer primitive, wire path or r5. Route and generated
+  wake units were absent from omp-only/doctor readings at admission and are
+  person-reserved. `docs/reproducibility.md` has the pins, commands, expected
+  bytes and gitignored-evidence regeneration.
+- `76c5b864`: witness W252 returned ESTABLISHED AS LABELED for pcre2dfa2shell
+  W248, no contradiction, no grade change, NO r5. Three serial replays of the
+  unmodified wrapper (identical SHA at worktree, `b3f2ad2e`, `57cc216e`, HEAD
+  and clean archive): fresh `git archive 57cc216e` 184.51 s, cached clean
+  2.91 s, in-tree 3.01 s; each 6 PASS / 0 FAIL, rc 0. Both 10.47 ASan lanes
+  report `WRITE of size 4` at verbatim `pcre2_dfa_match.c:686` through
+  `pcre2_dfa_match_8` at `:4027`; plain SIGSEGV at the same sink under gdb
+  (`si_addr=0x5551555a6ae4`, `rlevel=9`, not stack exhaustion); all three
+  10.48 controls return `-63`. Benign regexes are clean; both tarballs and
+  the fix patch were re-fetched. This supersedes the brief's "no replay
+  verdict yet" line. Full evidence:
+  `.mishe-tauftauf/artifacts/witness-w252-pcre2dfa2shell/detail.md`.
+- `74e10bb9`: Ruby2Shell W34 sweeps the attacker-supplied fake-chunk size
+  qword under the chunked N=588 wire (nine fresh processes, three each at
+  `FILL_SIZE` `0x91`/`0x93`/`0x251`). Size changes which glibc check fires —
+  `sysmalloc` assertions, one `mismatching next->prev_size (unsorted)`, two
+  `invalid next size (unsorted)` — but the reflect scans on the three
+  survivors are byte-clean (`0x91`: 2 files/68 parts; `0x93`: 1 file/34
+  parts; 0 deviations and 0 leak-shaped qwords), `0x251` produces no HTML,
+  and fixed 3.4.13 controls stay clean 4/4. Signature control, not a
+  primitive: no chosen-byte write, claim pop, pointer or command. Grades
+  unchanged; the next bounded experiment is `FILL_PREV` coherence with
+  `FILL_SIZE` at `0x91`/`0x93`.
+
+Bytes and counts above come from the three committed receipts and W252's
+artifact, not a rerun in this wake. The live checkers read
+`readme-lint: GREEN (161 achievement rows)`,
+`reproducibility: GREEN (37 required files)` and
+`presentation: GREEN (3 generated files current)`; the RED readme-lint signal
+in the wake dossier is stale unit state, not a live-doc failure.

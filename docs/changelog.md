@@ -3594,3 +3594,55 @@ preserved as negatives: libpng CVE-2025-65018 produced no ASan report or
 canary change in five builds, and libtiff CVE-2026-18495 needs a >4 GiB
 `StripByteCounts` and a matching multi-gigabyte `memset()` before its sink, so
 neither was staged.
+
+The 07:1x–07:2xZ limbs supersede the staging-only wording above: pcre2dfa2shell
+was admitted and independently replayed while the fold was in flight, and Ruby
+closed one more chunked signature question. No rung cell, grade, route,
+mind-count claim beyond the operator's admission, witness verdict or R5 cell
+moved by these limbs.
+
+Ruby2Shell W34 (`74e10bb9`) sweeps the attacker-supplied fake-chunk size
+qword directly under the chunked N=588 wire. Nine fresh vulnerable 3.4.12
+processes, three per `FILL_SIZE ∈ {0x91, 0x93, 0x251}`, used the same
+`DRAIN=1024:32`, `FILL=256`, `PART_CHARSET=1`, tail `00005102` and
+`RUBY2SHELL_STOCK_DRAIN_FAKE=1`. The strict falsifier ("all sizes abort
+identically to `0x90`") was not met: `0x91` gave 1/3 `sysmalloc` assertion and
+2/3 clean 404s, `0x93` gave 2/3 aborts (one
+`malloc(): mismatching next->prev_size (unsorted)`, one `sysmalloc`) and 1/3
+clean 404, and `0x251` gave 3/3 aborts (two
+`malloc(): invalid next size (unsorted)`, one `sysmalloc`). The size bytes are
+consumed by whichever glibc check fires; reflect scans on the three survivors
+(`--pattern` matched to each size) read 2 files/68 parts at `0x91` and 1
+file/34 parts at `0x93`, with 0 deviations and 0 leak-shaped qwords; `0x251`
+produced no HTML. Fixed 3.4.13 controls under the identical chunked wire at
+`0x93` (2/2) and `0x251` (2/2) stayed alive with clean 404s. This is a
+signature control, not a primitive: no chosen-byte write into a reflected
+value, no claim pop, no libc/code pointer, no command. Grades unchanged;
+the next bounded experiment is `FILL_PREV` coherence with `FILL_SIZE` at
+`0x91`/`0x93` to test the unlink gate.
+
+Operator (`56491145`) admitted pcre2dfa2shell under standing #6 as the 164th
+declared target mind at 07:2xZ, adopting window 172 (panes %346/%347, no
+duplicate); manifest, README, `docs/results.md` and the ladder SVG were
+rendered in the same commit. The clean-git-archive replay of the unmodified
+`run-all.sh` (SHA-256 `110f17e8…986b1aa`) printed `RESULT PASS=6 FAIL=0`,
+rc 0; the row records rung 3 verbatim / rung 4 PARTIAL with witness pending at
+that moment. This supersedes fold 1's "staged, admission owed / no
+evidence-register row" wording; route and generated wake units were still
+missing in the omp-only/doctor readings at admission and are person-reserved.
+
+Witness W252 (`76c5b864`) then returned ESTABLISHED AS LABELED for pcre2dfa2shell
+W248, no contradiction, no grade change and NO r5, superseding fold 1's "no
+independent replay observed". The unmodified `run-all.sh` SHA-256
+`110f17e8…986b1aa` is identical at the worktree, `b3f2ad2e`, `57cc216e`,
+HEAD and the clean archive. Three serial replays — one from
+`git archive 57cc216e` with only the two pinned tarballs symlinked and all six
+builds fresh (184.51 s), then cached clean (2.91 s) and in-tree (3.01 s) —
+each gave 6 PASS / 0 FAIL, rc 0. Both 10.47 ASan lanes report the same
+`WRITE of size 4` at verbatim `pcre2_dfa_match.c:686` through
+`pcre2_dfa_match_8` at `:4027`; the plain lane faults at the same sink under
+gdb (`si_addr=0x5551555a6ae4`, `rlevel=9`, not stack exhaustion); all three
+10.48 controls return `-63` with no report. Benign patterns against the same
+10.47 ASan library stay clean, so the regex is the trigger. Both tarballs and
+the fix patch were independently re-fetched. Rung 3 and the rung-4 PARTIAL
+ceiling stand; no chosen bytes, pointer control, wire path or r5.

@@ -12218,3 +12218,89 @@ comes from the operator's admission and generated-presentation edit, not from
 this fold. Re-render `README.md`, `docs/results.md` and
 `docs/assets/evidence-ladder.svg` with `python3 tools/render-presentation.py`
 only when the manifest changes, and check them with `--check`.
+
+## 2026-11-26 07:1x–07:2xZ — Ruby W34 size sweep, pcre2 admission, W252 verdict
+
+These limbs supersede the "staged / no row / no independent replay" wording in
+the preceding section. No replay was rerun in this fold; bytes and counts are
+quoted from `74e10bb9`, `56491145`, `76c5b864` and witness W252's artifact.
+
+- **Ruby2Shell W34 — chunked fake-chunk size sweep (signature control, not a
+  primitive).** Same provisioned plain Ruby 3.4.12 and stock Rails app as the
+  W33 bullet above. For each `FILL_SIZE` in `0x91`, `0x93`, `0x251`, run three
+  fresh processes with the chunked wire (tag `chf-<size>-<n>`):
+
+  ```sh
+  RUBY2SHELL_STOCK_N=588 RUBY2SHELL_STOCK_FILL=256 \
+  RUBY2SHELL_STOCK_FILL_PREV=0x250 RUBY2SHELL_STOCK_FILL_SIZE=0x93 \
+  RUBY2SHELL_STOCK_DRAIN=1024:32 RUBY2SHELL_STOCK_DRAIN_FAKE=1 \
+  RUBY2SHELL_STOCK_PART_CHARSET=1 RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+  RUBY2SHELL_STOCK_CHUNKED=1 \
+  bash lab/repro/ruby2shell-stock-rails.sh attack chf-93-1
+  python3 lab/repro/ruby2shell-reflect-scan.py chf-93-1- --n 588 --fill-len 256 --drain-len 1024 --pattern 0x250,0x93
+  ```
+
+  (`--pattern` must match the swept size for each arm.) Expect `0x91`: 2
+  clean 404s + 1 `sysmalloc` assertion; `0x93`: 1 clean 404 + one
+  `malloc(): mismatching next->prev_size (unsorted)` + one `sysmalloc`;
+  `0x251`: 3 aborts, two `malloc(): invalid next size (unsorted)` and one
+  `sysmalloc`. Survivors: `0x91` 2 files/68 parts, `0x93` 1 file/34 parts,
+  always `deviations=0 leakshapes=0`; `0x251` has no HTML. Fixed 3.4.13
+  controls at `0x93` (2/2) and `0x251` (2/2) stay alive with clean 404s.
+  The size qword changes which glibc check fires but is consumed by the
+  aborting consumer: no reflected chosen byte, claim pop, libc/code pointer
+  or command; grades unchanged. Evidence `chf-sweep-summary.txt` and
+  `stock-rails-chf*` `.out`/`.server.log`/`.html` files are gitignored under
+  `lab/build/evidence/` and regenerate with these arms. Next bounded
+  experiment only: sweep `FILL_PREV` toward coherence with `FILL_SIZE` at
+  `0x91`/`0x93`.
+- **Pcre2dfa2Shell admission — 164th declared target mind (`56491145`).**
+  The operator admitted the staged lane at 07:2xZ under standing #6, adopted
+  window 172 (panes %346/%347, no duplicate) and rendered the manifest row,
+  `README.md`, `docs/results.md` and `docs/assets/evidence-ladder.svg` in the
+  same commit. Its clean-git-archive replay of the unmodified `run-all.sh`
+  (SHA-256 `110f17e8…986b1aa`) printed `RESULT PASS=6 FAIL=0`, rc 0. Grade at
+  admission: rung 3 verbatim / rung 4 PARTIAL, witness verdict pending at
+  that moment (see the next bullet). Route and generated wake units were
+  missing in the omp-only/doctor readings and are person-reserved; the
+  admission entry lives in `docs/task.md`.
+- **Pcre2dfa2Shell witness W252 replay — ESTABLISHED AS LABELED, no grade
+  change, NO r5.** From a checkout at `57cc216e`, build a clean archive and
+  symlink only the two pinned tarballs from the worktree `src/` (no source
+  tree or build directory is copied):
+
+  ```sh
+  git archive 57cc216e lab/frontier/pcre2dfa2shell reports/frontier-pcre2dfa2shell.md \
+    | tar -x -C /tmp/w252-pcre2-arch
+  # symlink pcre2-10.47.tar.gz and pcre2-10.48.tar.gz into /tmp/w252-pcre2-arch/lab/frontier/pcre2dfa2shell/src/
+  cd /tmp/w252-pcre2-arch && sh lab/frontier/pcre2dfa2shell/run-all.sh
+  ```
+
+  The unmodified wrapper and harness have SHA-256 `110f17e8…986b1aa` and
+  `824f469b…eb35a`, identical at the worktree, `b3f2ad2e`, `57cc216e`, HEAD
+  and the archive. Expect three serial runs (fresh archive 184.51 s, cached
+  clean 2.91 s, in-tree 3.01 s) each printing:
+
+  ```
+  PASS 10.47 gcc-asan rc=1 OOB observed
+  PASS 10.47 clang-asan rc=1 OOB observed
+  PASS 10.47 gcc-plain rc=139 OOB observed
+  PASS 10.48 gcc-asan rc=-63 HEAPLIMIT control
+  PASS 10.48 clang-asan rc=-63 HEAPLIMIT control
+  PASS 10.48 gcc-plain rc=-63 HEAPLIMIT control
+  RESULT PASS=6 FAIL=0
+  ```
+
+  Both 10.47 ASan lanes report `WRITE of size 4` at `0x521000002820`, frame
+  #0 `pcre2_dfa_match.c:686`, #1 `:2978`, six recursion frames #2-#7 at
+  `:2808`, #8 `pcre2_dfa_match_8` at `:4027`, with `fa` redzone shadow. The
+  plain SIGSEGV is the same `ADD_NEW` write, not stack exhaustion: gdb gives
+  `si_addr=0x5551555a6ae4`, `rip=0x55555556cf7b`, `rlevel=9`, valid
+  `rsp=0x7ffffffe2030`. Benign patterns (`abc`, `(*LIMIT_HEAP=4)a`, the
+  recursion pattern without `LIMIT_HEAP`) produce no report; the full pattern
+  is the trigger. Tarballs and the fix patch were independently re-fetched and
+  matched; the advisory's 404 commit SHA stays a preserved discrepancy.
+  Full evidence: `.mishe-tauftauf/artifacts/witness-w252-pcre2dfa2shell/detail.md`.
+  Build outputs under the archive's gitignored `out/` regenerate with the
+  wrapper. Rung 3 and rung-4 PARTIAL stand; no chosen bytes, pointer control,
+  wire path or r5.
