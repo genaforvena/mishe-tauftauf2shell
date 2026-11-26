@@ -447,8 +447,10 @@ no chosen pointer was dereferenced and no command side effect was seen.
 ## Mixed-marker consumer ceiling (W288, 2026-11-26)
 
 The pinned post-inflate loop `for (i = 0; i < zs.total_out; i++)` reads
-`indexes[i]` only while `pos < data_size` (260 with alpha doubling); with
-`bpp = 8` it advances `pos` twice per index byte, so it stops at `i = 130`.
+every `indexes[i]`, including the out-of-bounds bytes, but its inner
+`for (j = 0; j < 8; j += bpp)` breaks at `pos >= data_size` (260 with alpha
+doubling) before `dest[pos++]`. With `bpp = 8` it advances `pos` twice per
+index byte, so `dest` writes stop at `i = 130`.
 The 188 out-of-bounds bytes of a 448-byte payload therefore cannot reach
 `dest` through this consumer — their only observed effect is on allocator
 metadata and adjacent heap objects. `realglib/make-jif.py` gained a
@@ -478,3 +480,46 @@ then 88 `41` bytes, and `SHIM_FAR` 32 `41` bytes. The child ended at the
 command. The two chosen markers are distinguishable at chosen offsets in
 the real plugin's heap, but the read-loop ceiling still holds and the
 grade stays rung 3 / rung 4 PARTIAL, NO r5.
+
+## Guard-page WRITE in the real plugin (W289, 2026-11-26)
+
+The earlier real-plugin runs inferred the overflow from allocator metadata
+and bytes visible past the allocation; the load never completed, so no
+direct fault or downstream use was observed. The new bounded detector
+`live/guard-shim.c` (SHA-256
+`83805a0bc23d1911dfdd16f51d29f3dd0440457cee535cdfc94721d9885a6299`)
+serves `g_try_malloc(260)` from a two-page mmap whose second page is
+`PROT_NONE`, placing the user pointer exactly 260 bytes before the guard.
+For an `inflate()` call whose `next_out` is that pointer, it installs a
+`SA_SIGINFO` handler, calls the real zlib, and logs `si_addr`, RIP and the
+readable tail bytes on a fault before `_exit(97)`.
+
+A local glib/zlib smoke test with 448 chosen `4d` bytes faults at
+`delta=+260` with `GUARD_TAIL16=4d4d…`, confirming the detector before
+touching the plugin. The published JIF then went through the real GIMP
+3.2.8 AppImage PDB `file-gif-load` path with the shim substituted into the
+extracted AppRun (outside Git), under `timeout -k 5 60` in a fresh HOME.
+`live/evidence/guard-published.log` (SHA-256
+`4e5118851308cdee1ffd63c2c61fff05f3c0a8dddb1d645a51252dbc71023b16`)
+records `GUARD_ARMED avail_out=2147483778`,
+`GUARD_FAULT sig=11 code=2 si_addr=guard delta=+260`,
+`GUARD_TAIL16` and `GUARD_TAIL4` all `4d`, followed by
+`GIMP-Error: Plug-in crashed: "file-gif-load"` and a failed batch load.
+A second replay (SHA-256
+`d0fab09f6baeb2723dae0398db340a77cd468305c94d692990f4b96bb5967419`)
+additionally names `GUARD_INFLATE_MODULE=.../libz.so.1 base=... sym=inflate`;
+the fault RIP is `base + 0xbeff` (2721 bytes below the `inflate` symbol),
+i.e. inside the real deflate decoder. The safe 4x4 JIF control through the
+same shim (`live/evidence/guard-safe.log`, SHA-256
+`e7fa67fd4d6c11b09cdc46859fa209d4a7d2951e44e5d65d4c0641581c2ed1dc`)
+arms no guard and reports `batch command executed successfully`.
+
+Interpretation: this is a guard-page instrumented allocation, not a
+natural heap neighbour — the detector deliberately faults on the first
+write past byte 260. It converts the previous metadata inference into a
+direct real-plugin observation of zlib writing attacker-chosen bytes past
+the 260-byte `indexes` object. The parent process still ended at the
+timeout (rc 124); no chosen address, dereference, downstream consumer or
+command side effect was observed. Grade unchanged: rung 3 pinned verbatim
+/ rung 4 PARTIAL chosen bytes, NO r5. The canonical preload line and
+`inflate-shim.so` (`fc73e957…`) were restored after each run.

@@ -598,10 +598,12 @@ Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
 
 ## W288 mixed-marker consumer ceiling (2026-11-26, 19:54Z wake)
 
-Source check: the pinned post-inflate loop reads `indexes[i]` only while
-`pos < data_size`; with `bpp = 8`, `alpha_frame` and `data_size = 260` the
-loop stops at `i = 130`, so the OOB portion of a 448-byte payload cannot
-be consumed into `dest`. `realglib/make-jif.py` (SHA-256
+Source check: the pinned post-inflate loop reads every `indexes[i]`,
+including out-of-bounds bytes, but the inner loop breaks at
+`pos >= data_size` before `dest[pos++]`. With `bpp = 8`, `alpha_frame` and
+`data_size = 260`, `dest` writes therefore stop at `i = 130`, so the OOB
+portion of a 448-byte payload cannot be consumed into `dest`.
+`realglib/make-jif.py` (SHA-256
 `976b56e1aef382672ce754fe4a69f62c0c1dc0ab431bda5267cd5c40de15cc11`)
 gained `published-mix IN OUT`; `realglib/real-driver.c` (SHA-256
 `40c1b86813b7fd72fa60c45146b0a4456edf2ea2db4879427cf134fefb59d2b3`)
@@ -636,3 +638,54 @@ into `/tmp/w288-replay`, then `run-real.sh` there: 35 PASS / 0 FAIL,
 rc 0, all logs regenerated inside the archive only. The shared AppRun
 preload line was untouched by this lane (canonical shim binary was never
 swapped).
+
+## W289 guard-page WRITE in the real plugin (2026-11-26, 20:17Z wake)
+
+New detector `live/guard-shim.c` (SHA-256
+`83805a0bc23d1911dfdd16f51d29f3dd0440457cee535cdfc94721d9885a6299`):
+`g_try_malloc(260)` is served from a two-page anonymous mmap with the
+second page `PROT_NONE` and user pointer placed `4096 - 260` bytes into
+the first page. `inflate()` with that pointer as `next_out` arms a
+`SA_SIGINFO` SIGSEGV handler, calls real zlib, and the handler writes
+`si_addr`, `si_addr - p`, RIP, the 16-byte tail and `total_out` to stderr
+before `_exit(97)`. Only `g_try_malloc`, `g_free` and `inflate` are
+interposed; the `indexes` pointer comes from the plugin's own call.
+
+Local smoke (throwaway `/tmp/guard-smoke.c`, glib 2.80 / zlib 1.3, 448
+chosen `4d` bytes) gave `GUARD_FAULT ... delta=+260`,
+`GUARD_TAIL16=4d4d…`, rc 97 — detector validated before the plugin run.
+
+Real-plugin runs used the SHA-256-verified GIMP 3.2.8 AppImage at
+`/tmp/gimpjif-appimage`, with only the preload line in the extracted
+AppRun changed to `/tmp/guard-shim.so` (outside Git) and restored to the
+canonical `live/inflate-shim.so` after each run. Each run used a fresh
+HOME, `timeout -k 5 60`, the PDB `gimp-file-load` batch script and the
+on-disk `realglib/evidence/published.jif` (SHA-256
+`fcc1f1ce0bee362fb2a7563cd07940b5c31c5e55a708c6083536004250d640e3`) or
+`safe.jif` (SHA-256
+`6dd6a44ff398388f46a44c756fb2277ebbba235d4c0e96dd064518275db9d191`).
+
+Artifacts:
+- `live/evidence/guard-published.log` (SHA-256
+  `4e5118851308cdee1ffd63c2c61fff05f3c0a8dddb1d645a51252dbc71023b16`,
+  rc 124): `GUARD_ARMED avail_out=2147483778`,
+  `GUARD_FAULT sig=11 code=2 si_addr=guard delta=+260`,
+  `GUARD_TAIL16`/`GUARD_TAIL4` all `4d`, then
+  `GIMP-Error: Plug-in crashed: "file-gif-load"` and a failed batch load.
+- `live/evidence/guard-published-module.log` (SHA-256
+  `d0fab09f6baeb2723dae0398db340a77cd468305c94d692990f4b96bb5967419`,
+  rc 124): same `delta=+260` and chosen tail; additionally
+  `GUARD_INFLATE_MODULE=.../libz.so.1 base=0x73f008a10000 sym=inflate`.
+  Fault RIP `0x73f008a1beff` is `libz.so.1 + 0xbeff`, 2721 bytes below
+  the `inflate` symbol — the write is in the real decoder.
+- `live/evidence/guard-safe.log` (SHA-256
+  `e7fa67fd4d6c11b09cdc46859fa209d4a7d2951e44e5d65d4c0641581c2ed1dc`,
+  rc 0): no `GUARD_` line, `batch command executed successfully`.
+
+Interpretation: a guard-page instrumented allocation, not a natural heap
+neighbour; the detector deliberately faults at the first byte past 260.
+It turns the earlier metadata inference into a direct real-plugin
+observation of zlib writing chosen bytes past `indexes`, but no chosen
+address, dereference, downstream consumer or command was observed. Grade
+unchanged rung 3 / rung 4 PARTIAL, NO r5. Canonical AppRun preload line
+and `inflate-shim.so` (`fc73e957…`) restored and verified after the runs.
