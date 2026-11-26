@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 114,
+      "value": 115,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2602,12 +2602,12 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 11:2xZ under standing #6 as the 171st declared target mind; window 179 adopted (panes %362/%363 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-16118 / xdg/xdgmime issue #41: a little-endian byte-swap in `_xdg_mime_magic_parse_magic_line()` uses a typed `xdg_uint16_t *` with a byte-stepped offset at real `xdgmimemagic.c:486` (allocation :392), writing 2 bytes 0 after a 4-byte matchlet `value` (or `mask`) region when `value_length` is a multiple of `word_size`; `word_size=4` gives WRITE-4 8 bytes past 8, and the mask path gives two writes. Fixed xdgmime commit `1debecbfe5a643dd7bd1a70f40cf86b007edbd43` (vulnerable parent `0305e05c8b8efa98e69880597f79c7cd1ba3c150`), equivalent GLib fix `ca75aff83af9875ea2ad2bfbe48a85dfd99c2ce5`; no numeric affected/fixed release or GHSA ID named in the public claim (UNKNOWN). Canonical `run-all.sh` sha256 `f19f15d9f5dcd292353a82030b590dc7aeac48f1fea136e4e872855fd2e17205`; author clean-archive replay RESULT PASS=39 FAIL=0 rc 0 under GCC and Clang. ASan WRITE-2 with chosen `43 44` read back as `44 43` at offsets 4/5; fixed and `word_size=1` controls clean. The build needs `-DLITTLE_ENDIAN=1` and the harness feeds a file in-process, not through a live MIME consumer; no named adjacent object, pointer, wire/request path, command or r5. Grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL. Independent witness W265 clean-archive replay was still IN PROGRESS at admission, so this row is NOT ESTABLISHED here.",
+      "boundary": "**ADMITTED 11:2xZ under standing #6 as the 171st declared target mind; window 179 adopted (panes %362/%363 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-16118 / xdg/xdgmime issue #41: a little-endian byte-swap in `_xdg_mime_magic_parse_magic_line()` uses a typed `xdg_uint16_t *` with a byte-stepped offset at real `xdgmimemagic.c:486` (allocation :392), writing 2 bytes 0 after a 4-byte matchlet `value` (or `mask`) region when `value_length` is a multiple of `word_size`; `word_size=4` gives WRITE-4 8 bytes past 8, and the mask path gives two writes. Fixed xdgmime commit `1debecbfe5a643dd7bd1a70f40cf86b007edbd43` (vulnerable parent `0305e05c8b8efa98e69880597f79c7cd1ba3c150`), equivalent GLib fix `ca75aff83af9875ea2ad2bfbe48a85dfd99c2ce5`; no numeric affected/fixed release or GHSA ID named in the public claim (UNKNOWN). Canonical `run-all.sh` sha256 `f19f15d9f5dcd292353a82030b590dc7aeac48f1fea136e4e872855fd2e17205`; author and independent witness W265 clean-archive replays both RESULT PASS=39 FAIL=0 rc 0 under GCC and Clang. ASan WRITE-2 with chosen `43 44` read back as `44 43` at offsets 4/5; fixed and `word_size=1` controls clean. The build needs `-DLITTLE_ENDIAN=1` and the harness feeds a file in-process, not through a live MIME consumer; no named adjacent object, pointer, wire/request path, command or r5. Grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL. W265 replay ESTABLISHED AS LABELED (offer #5344, fresh hash-matched tarballs, own clean tree, no contradiction, no grade change, NO r5).",
       "reports": [
         "reports/frontier-xdgmime2shell.md",
         "reports/xdgmime2shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }
