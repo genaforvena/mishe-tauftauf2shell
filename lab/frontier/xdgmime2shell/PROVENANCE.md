@@ -66,5 +66,10 @@ they are corruption evidence, not successful parsing.
 
 ## Author clean-archive replay
 
-Pending; add the receipt here after replaying the unmodified runner from the
-staging commit.
+Replayed at 11:28:03Z from `git archive 0856b508` into
+`.mishe-tauftauf/replays/xdgmime2shell-w264/`: unmodified runner SHA-256
+`f19f15d9f5dcd292353a82030b590dc7aeac48f1fea136e4e872855fd2e17205`,
+rc 0, RESULT PASS=39 FAIL=0 (11:28:03Z–11:28:19Z). All checks held with
+freshly extracted pinned sources and regenerated magic inputs; no generated
+evidence was copied from the author worktree. Author replay is not witness
+acceptance.

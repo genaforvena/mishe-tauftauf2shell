@@ -82,9 +82,12 @@ system. Canonical runner `run-all.sh` sha256
 
 ## Author clean-archive replay
 
-Pending at this wake's cutoff; the replay receipt is added to
-`lab/frontier/xdgmime2shell/PROVENANCE.md` when run. An author replay is not
-witness acceptance.
+Replayed the unmodified runner from `git archive 0856b508` (the staging
+commit) into `.mishe-tauftauf/replays/xdgmime2shell-w264/` at 11:28:03Z:
+rc 0, **RESULT PASS=39 FAIL=0**, runner SHA-256 unchanged
+`f19f15d9…e17205`. The pinned tarballs, patch and drivers came from the
+archive; no generated evidence was reused. Author replay is not witness
+acceptance; an independent replay is owed.
 
 ## Honest rung-4 feasibility assessment
 
