@@ -14915,9 +14915,9 @@ shortened_by_one=293` (`adapter: sqlite3 → adapter: sqlite`,
 `timeout: 5000 → timeout: 500`). W299 (23:2xZ) ran 15 fresh ASLR-off attacks
 at current HEAD: 12 alive with 7 distinct response hashes and 3 SIGSEGV faults
 with no HTTP response; the original hash recurred once. `setarch -R` really
-does disable ASLR here, but Ruby's per-process hash seed stays random, so the
-corruption extent varies even with ASLR off. A different hash is not a
-contradiction; a clean differ verdict, a fault with no HTTP response, or a
+does disable ASLR here, but Ruby's per-process hash seed stays random, a
+plausible contributor to the varying corruption extent. A different hash is not
+a contradiction; a clean differ verdict, a fault with no HTTP response, or a
 dirty control is. The driver's attack mode returns rc 0 even after a faulted
 request (it only asserts server readiness), so read `http_status`, `health`
 and `exit_after_request` from its JSON instead of trusting rc.

@@ -6112,9 +6112,10 @@ process each) gave 12 HTTP 200/alive responses with **7 distinct hashes**
 `verdict=CORRUPTED`, 195–293 shortened rows and 4–102 missing rows.
 `setarch x86_64 -R` is effective here (three consecutive binaries loaded at
 `0x5555…`), but Ruby's per-process hash seed is still random: four ASLR-off
-processes printed four different `"abc".hash` values. Residual per-process
-randomness changes allocation/GC layout, hence how many reflected lines the
-negative-index `repeat_stk` write truncates.
+processes printed four different `"abc".hash` values. That residual
+per-process randomness is a plausible cause of the varying allocation/GC
+layout and hence of how many reflected lines the negative-index `repeat_stk`
+write truncates; the causal link was not measured here.
 
 Consequence for this lane: the acceptance invariant is HTTP 200 + worker alive
 + `verdict=CORRUPTED` + `shortened_by_one>0` with clean safe/fixed/control
