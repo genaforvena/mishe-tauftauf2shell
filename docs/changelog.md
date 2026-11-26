@@ -5408,3 +5408,64 @@ DM #5830's Java4Shell, W292 and W292b items were already folded by
 `bd11795c`; this fold does not re-pin them. What would change it: a verdict
 contradicting a labeled row, a checker RED on committed HEAD, or a later
 report misquoting these receipts.
+
+## 2026-11-26 22:0x–22:1xZ — mujs 189th admission, sdcpp declined, W293/W294 verdicts
+
+This fold covers `a9c36a55..8b608414`; reproduce from
+`docs/reproducibility.md` § 22:0x–22:1xZ. No generated cell, register row,
+grade cell, report or lab evidence is committed here; the operator's own
+README/results/SVG regeneration in `396454aa` is explained, not re-pinned.
+
+- `396454aa` admitted mujs2shell under standing #6 as the **189th** declared
+  target mind, superseding the 13:3xZ STAGED entry. Window 186 adopted as-is
+  (panes %376/%377 live, dead=0, registry entry present, no duplicate);
+  generated counts 188/185/185/125 → 189/186/186/126. W272's clean-archive
+  replay was ESTABLISHED AS LABELED at the rung-3 scope and folded into the
+  `established` flag at admission (no grade change). Runner sha256
+  `5aca123ab59aae54f9bd9f96896b61ef290516d22867a6acfd655cf913f59e68`,
+  rc 0, `PASS=23 FAIL=0`, ASan `READ of size 1` at `jsarray.c:246` via the
+  real MuJS CLI, fixed/normal controls clean; rung 4/5 NOT CLAIMED.
+- `678c473a` **declined sdcppimatrix2shell as a DUPLICATE** of the
+  already-admitted sdimatrix2shell (168th, window 176, W260 ESTABLISHED AS
+  LABELED at rung 3 verbatim / rung 4 PARTIAL): same CVE-2026-70659 /
+  GHSA-6q7q-2v9c-x8m7, tag pair, `load_imatrix()` sink at `imatrix.cpp:302`
+  and fix `4fcc6fef10c6…`. The 21:3xZ STAGED and "admission owed" wording is
+  superseded. No mind, count, register row or witness obligation; window 198
+  retired and its registry entry removed. Operator replay at 21:56Z: 4/4
+  pins OK, runner `c31aaaea84ae7658f3eb2654e135d1d7c14e4504c1f5798f466b584d9f4faea1`,
+  rc 0, `PASS=17 FAIL=0`; reproducing the harness does not create a new
+  target. The frontier's duplicate-screen claim was wrong for the spelling
+  `sdimatrix2shell`. R4/R5 still NOT CLAIMED.
+- `15485ccc` + `22d93530` folded W293's **ESTABLISHED AS LABELED** nfdump
+  verdict for the chosen-byte heap-size negative: clean archive of
+  `40924fb4`, fresh builds, `run-v6value.sh` 12/0 baseline and 13/0 marker
+  at 21:50Z; the written word is epoch ms, never `0xA5`. No grade or flag
+  change; historical replay-owed status lines are superseded, while the
+  live-wire, IPv4/IPv6-boundary, header-control and element-type lanes stay
+  owed to a fresh witness wake.
+- `0f62e560` + `42b12707` (gimpjif W293) observed a real glibc allocator
+  consumer attempting to dereference the JIF-chosen bk word: 15/0 in-tree and
+  fresh-workdir, `POST_PIN A_size_word=A_fd=A_bk=0x4d4d…`, rc 139 at the
+  eighth post-pin allocation, gdb fault in `_int_malloc` (`malloc.c:3985`)
+  with `rcx=0x4d4d4d4d4d4d4d4d`. Failed dereference attempt only; no
+  successful chosen-address dereference, no control flow, no real plugin
+  read, NO r5; the `consume-ptr` fake-unlink variant is a preserved negative
+  removed from the canonical driver. Grade rung 3 pinned / rung 4 PARTIAL;
+  `run-all.sh` 29/0 and `run-real.sh` 35/0 remain green.
+- `9608163e` mapped 71474's bit-set to 13 named `ext4_buf` fields with
+  `run-gdt-layout.sh` 5/0 (`LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`);
+  the prefix-OR ceiling rules out a chosen address and that probe remains
+  author-only. `8b608414` folded W294's **ESTABLISHED AS LABELED** replay of
+  the chosen-bit lane from `git archive b189cf86`: `REPLAY_RC=0`, 31/0
+  (REAL 17/0, VICTIM 9/0, GDT 11/0), masks `0x00/01/03/07/0f/3f/ff` at
+  `DELTA=4112`, six crafted images rc 139. Exact scope is chosen offset and
+  partial value, not chosen address or marker; no command, NO r5, grade
+  unchanged.
+- `22234e61` + `ab8578be` closed two Ruby casefold negatives: split-remainder
+  128/128 and 48/48 `match=false` with stale `t[1]`, and zero
+  `string_cmp_ic` reports over eight backref shapes on both builds. Recipes
+  were committed directly to `docs/reproducibility.md`; grade rung 3
+  unchanged.
+
+What would change this fold: a verdict contradicting a labeled scope, a
+checker RED on committed HEAD, or a later report misquoting these receipts.

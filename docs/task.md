@@ -14729,3 +14729,83 @@ All counts above are operator, author or clean-archive observations as
 labeled; none is an independent witness verdict. What would change this
 fold: a verdict contradicting a labeled row, a checker RED on committed
 HEAD, or a later report misquoting one of these receipts.
+
+## 2026-11-26 22:0x–22:1xZ — mujs 189th admission, sdcpp declined, W293/W294 verdicts
+
+This fold covers `a9c36a55..8b608414`; reproduce every claim from
+`docs/reproducibility.md` § 22:0x–22:1xZ. No generated cell, grade cell,
+register row, report or lab evidence is committed here. `396454aa` already
+regenerated README.md, docs/results.md and the SVG; this fold explains those
+cells and does not re-pin them.
+
+- `396454aa` (operator, standing #6) **admitted mujs2shell as the 189th
+  declared target mind** at 22:1xZ, superseding the STAGED wording in the
+  13:3xZ entry. Window 186 was adopted as-is (panes %376/%377 live, dead=0,
+  registry entry present, no duplicate); generated counts
+  188/185/185/125 → 189/186/186/126. W272's independent clean-archive replay
+  was ESTABLISHED AS LABELED at the rung-3 scope and folded into the
+  `established` flag at admission (rung 3 only, no grade change). The replay
+  used runner sha256 `5aca123ab59aae54f9bd9f96896b61ef290516d22867a6acfd655cf913f59e68`,
+  rc 0, `PASS=23 FAIL=0`, with all pins asserted and ASan `READ of size 1`
+  at verbatim `jsarray.c:246` in `Ap_sort_cmp` through the real MuJS CLI;
+  fixed and normal-sort controls are clean. Rung 4/5 NOT CLAIMED (no observed
+  WRITE site, chosen readback, pointer, marker or command).
+- `678c473a` (operator) **declined sdcppimatrix2shell admission (DUPLICATE)**,
+  superseding the STAGED and "admission owed" wording of the 21:3xZ fold.
+  CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7, affected `master-742-1a13107`, first
+  fixed `master-763-4fcc6fe`, sink `IMatrixCollector::load_imatrix()` at
+  verbatim `imatrix.cpp:302` and fix `4fcc6fef10c6…` are the same claim, tag
+  pair, function and sink line as already-admitted sdimatrix2shell (168th
+  mind, window 176), closed W260 as ESTABLISHED AS LABELED at rung 3 verbatim
+  / rung 4 PARTIAL. No new mind, no count or register row change, no witness
+  owed; window 198 was retired and its registry entry removed. The frontier's
+  "none matched the do-not-duplicate list" was wrong because the existing
+  entry is spelled `sdimatrix2shell`. The operator's clean replay (4/4 pins
+  OK, runner sha256 `c31aaaea84ae7658f3eb2654e135d1d7c14e4504c1f5798f466b584d9f4faea1`,
+  rc 0, `PASS=17 FAIL=0`) reproduces the staged harness but adds no grade:
+  R4 NOT CLAIMED (ASan traps on the OOB read half), R5 NOT CLAIMED (local
+  file input only).
+- `15485ccc` + `22d93530` folded witness **W293's ESTABLISHED AS LABELED**
+  verdict for nfdump2shell's heap-size negative (clean archive of
+  `40924fb4`, fresh four-collector builds, `run-v6value.sh` 12 PASS / 0 FAIL
+  baseline and 13 PASS / 0 FAIL marker at 21:50Z); the written word is epoch
+  ms, never the packet's `0xA5`. Grade and `established` flag unchanged (the
+  row was already established). Historical "replay owed" lines in the status
+  report are marked superseded; the live-wire, IPv4/IPv6-boundary,
+  header-control and element-type lanes still await a fresh witness wake.
+- `0f62e560` + `42b12707` (gimpjif W293) measured a real glibc consumer of
+  chosen JIF heap words in the pinned real-glib/real-zlib driver:
+  `realglib/run-consumer.sh` 15 PASS / 0 FAIL in-tree and in a fresh workdir;
+  the 324-byte chosen write covers the adjacent chunk's size, fd and bk at
+  B+264/+272/+280, and the eighth post-pin allocation faults rc 139 with gdb
+  showing the chosen bk word `0x4d4d…` as the dereferenced pointer in
+  `_int_malloc` (`malloc.c:3985`). This is a failed dereference attempt in a
+  real allocator, not a successful chosen-address dereference, chosen data at
+  a chosen address or control flow; no real GIMP plugin read. A `consume-ptr`
+  fake-unlink variant is a preserved negative and was removed from the
+  canonical driver. Grade stays rung 3 pinned verbatim / rung 4 PARTIAL
+  chosen bytes, NO r5; `run-all.sh` 29/0 and `run-real.sh` 35/0 still pass.
+- `9608163e` mapped the lwext4 CVE-2025-71474 bit-set reach with
+  `run-gdt-layout.sh` (5 PASS / 0 FAIL): all 144 bytes of the adjacent live
+  `ext4_buf` follow `after = before | ((1<<n)-1)` in 9/9 cases, reaching 13
+  named fields. The byte-level prefix-OR ceiling (all covered bytes `0xff`,
+  boundary byte a low-bit prefix, `end_write` only `2^k-1`) rules out a chosen
+  address; that probe is author-only. `8b608414` folded witness **W294's
+  ESTABLISHED AS LABELED** verdict for the chosen-bit lane itself: from
+  `git archive b189cf86`, `REPLAY_RC=0`, 31/0 overall with REAL 17/0,
+  VICTIM 9/0 and GDT 11/0, fresh GDB masks `0x00/01/03/07/0f/3f/ff` OR-ed
+  into the live `ext4_buf.bc` low byte (`DELTA=4112`) and six crafted images
+  faulting plain rc 139. Exact scope: chosen offset and partial value, not
+  chosen address or full pointer; no marker, command or r5; overall grade
+  unchanged. The named-field probe predates W294 and stays unwitnessed.
+- `22234e61` + `ab8578be` closed two Ruby casefold lanes: split unsorted
+  remainders gave 128/128 and 48/48 `match=false` with `t[1]` only stale
+  allocator metadata, and the unconsumed `string_cmp_ic` sibling guard gave
+  zero reports at `regexec.c:1897` on 3.4.12 and 3.4.13. The author recipes
+  are already in `docs/reproducibility.md`; this fold cross-references them
+  only. Grade unchanged at rung 3.
+
+Every verdict above is labeled operator, author, clean-archive or independent
+witness as observed; none moves a generated grade cell here. What would
+change the fold: a later verdict contradicting one of these scopes, or a
+checker RED on committed HEAD.
