@@ -15,6 +15,15 @@ and `run-all.sh` is frontier-authored scaffolding: a driver that selects the
 advisory's href vectors and a PASS/FAIL script. No OpenSCAP build, no libxml2 and
 no CLI path is used; only the sink function's libc malloc/strlen surface.
 
+Pin identities: tag 1.4.6 = `af8cd99abf97f9f2c3b44378e144e88df634f56d`
+(2026-10-22, latest upstream tag, still vulnerable). First main fix =
+`5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163` (parent
+`099cd84a0fa23c0e5d748e4e577c900c9b280623`); identical maint-1.3 backport =
+`3aaf537c60277d7fb2130b90e6e1c3623ec03e3b`. No upstream tagged release
+contains the fix. `pins/PIN_HASHES.txt` is a plain three-line sha256sum
+manifest, so `sha256sum -c PIN_HASHES.txt` run from `pins/` checks all three
+with no format warnings.
+
 Correction to the read-only scout note: it reported the sink at sds.c:889 and
 malloc at :865 for "main/1.4.6" and called the advisory's :884 wrong. The pinned
 1.4.6 tag actually has the NUL at :884 and malloc at :860, matching the advisory;
