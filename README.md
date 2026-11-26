@@ -499,16 +499,14 @@ unmoved, author-only rung 4 and r5 UNKNOWN.
 
 Libgphoto2 W197/W199 (`8ca09205`, `12bba987`) gives a from-scratch replay of
 the device-only top-header lane: from a clean `git archive` of `8ca09205`,
-`TARBALL=<pinned 2.5.34 tarball> sh
-lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh` checks the
-tarball SHA-256 `5df9e774…ff7f28` and the six-patch chain, rebuilds GCC -O2
-from scratch and derives its own top size under gdb. Observed: 4/4 pins OK,
-`fresh TOP=0x0000000000012b71` (the author build used `0x12bd1`, so the word
-is build-specific, not device-observable), build-derived `jl2005c.so`
+`TARBALL=<pinned 2.5.34 tarball> sh lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh`
+checks the tarball SHA-256 `5df9e774…ff7f28` and the six-patch chain, rebuilds
+GCC -O2 from scratch and derives its own top size under gdb. Observed: 4/4
+pins OK, `fresh TOP=0x0000000000012b71` (the author build used `0x12bd1`, so
+the word is build-specific, not device-observable), build-derived `jl2005c.so`
 `55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. Author replay, not a
 witness verdict; grade unchanged, no wire, physical USB, command or r5. Raw
 outputs stay in `/tmp/w199-lgp-replay`, recreated by the wrapper on each run.
-
 
 Libsshch W1 (`a6893b10`, 02:4xZ) supersedes the row's "no real SSH build,
 wire packet" clause at the 01:58Z staged scope. Full pinned ASan libssh
