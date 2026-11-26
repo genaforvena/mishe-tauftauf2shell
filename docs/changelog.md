@@ -2,6 +2,18 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 17:0xZ — Ruby2Shell same-request case-map buffer sweep
+
+The `_method` length became an argument of the keep-alive reproducers. Twelve
+N values (21..92) at filler 40 served three keep-alive requests cleanly;
+safe-input and fixed-3.4.13 controls at N=21/59 matched. A gdb observer of
+the first two case-map buffers found N=21 has no second buffer, N=59's second
+buffer is 134 KB away, and N=572 aborts before it under the changed layout:
+no same-request overlap, chosen-byte write, command or persistence. Full
+stock/oracle-free/persistent r5 stays NOT ACHIEVED. Reproducers:
+`lab/repro/ruby2shell-webrick-{keepalive,keep-watch}.sh`,
+`ruby2shell-webrick-keep-client.py`, `ruby2shell-webrick-secondbuf.gdb`.
+
 ## 2026-11-26 16:4xZ — libsmpp342shell W279 witness verdict
 
 `5ace417b` recorded witness #5652's ESTABLISHED AS LABELED verdict for

