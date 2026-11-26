@@ -14807,3 +14807,75 @@ the GC walk reaching that chosen pointer, and a fault on a derived address
 in plain `rpm -i`; the live-target address match is GDB-layout-specific.
 All counts in this section are author or clean-archive replays except
 W280's witness verdict; no generated grade cell or register row moved here.
+
+## 2026-11-26 18:1x–18:4xZ — soxng and ntfs3g admissions, W281 verdict, libsmpp count fold
+
+This section reproduces the claims in the matching `docs/task.md` fold. Raw
+logs and gitignored build trees regenerate with the commands below; no claim
+depends on an uncommitted artifact.
+
+### SoX NG admission (181st) and W281 witness verdict
+
+`5a6572e6` + `c803e89a` staged soxng2shell and `727f6985` admitted it at
+18:1xZ (counts 181/178/178/119 at that commit; 182/179/179/120 at HEAD after
+the two folds below). Fetch the tag archives `sox_ng-14.8.1`
+(`a4a14b4f58ac2c08c4cc416a7cffe8a4c50a0b7d`) and `sox_ng-14.9.0`
+(`6edd3b3ae204908101a8c1bd54903971e0393b4d`), apply fix
+`0b40408b516a3628cfcfd83d32028cf361c8ac90` to the vulnerable tree, and run
+`sh lab/frontier/soxng2shell/run-all.sh` from the committed runner with the
+autoreconf/configure options in `lab/frontier/soxng2shell/PROVENANCE.md`
+(procedure in § 17:2x–17:5xZ). Expect a full rebuild of both ASan CLIs,
+`RESULT PASS=27 FAIL=0`, the generated 8,494-byte `.voc` producing ASan
+`WRITE of size 4` at verbatim `src/voc.c:415` via `sox_read` (`formats.c:1414`)
+and `sox_flow_effects` (`effects.c:444`), 0 bytes after a 32,768-byte region;
+the fixed and 8-bit-only controls are clean. The operator's isolated-copy
+replay matched 27/0 and the pinned tarball hash. Witness W281 (#5685) replayed
+from a clean archive and returned ESTABLISHED AS LABELED at that rung-3 scope;
+see `reports/soxng2shell-status.md`. The earlier STAGED wording in §
+17:2x–17:5xZ is superseded. No chosen-offset readback, pointer, listener,
+plain crash or command; rung 4 NOT CLAIMED.
+
+### Generated libsmpp count fold
+
+`59ceb714` / `c527b9a3` moved W279's ESTABLISHED AS LABELED libsmpp342shell
+row (recorded in `5ace417b`, recipe in § 16:4x–17:1xZ and
+`reports/frontier-libsmpp342shell.md` § Independent witness replay) into the
+manifest and raised the established count 119 → 120; `42533e6b` reconciled
+origin/main with local main without moving a claim. W279's raw evidence is
+gitignored under `.mishe-tauftauf/artifacts/witness-w276-libsmpp342shell/`
+and regenerates with the clean-archive procedure in that report section. The
+"operator owes the row fold and 119→120" wording in § 16:4x–17:1xZ is
+superseded. No new lab observation and no grade change: rung 3 only.
+
+### Ntfs-3g staging and admission (182nd)
+
+`4b898a70` + `23f05566` screened FRR out and queued ntfs-3g; `e6695f4d`
+staged it and `36022791` admitted it at 18:41Z. From
+`lab/frontier/ntfs3g2shell`, verify the pins in `PROVENANCE.md`: vulnerable
+2026.2.25 tarball SHA-256
+`7754f3b32e8baf9c472459b4e9c981e3ae0f5039107cdd8d8201aed0a949008a`, vendor
+patch `6a53ca72ae9275cb4dca0ee4b84a61ff299cbed1225dd582d9092070a358eb3f`,
+fixed release 2026.7.7 with fix commit
+`6aa66d98980ac1d966d7977c7b079f4fe380eb42`. Generate the deterministic 4 MiB
+NTFS image as recorded there (MFT record 16, one non-resident compressed
+`$DATA` with 16 clusters and one sparse run, final LZNT1 sub-block header
+`0x8b57` and two literal tokens after a full 4096-byte output), then run
+`sh run-all.sh`. Expect `RESULT PASS=31 FAIL=0`: GCC ASan
+`heap-buffer-overflow WRITE of size 1` at verbatim `compress.c:568`, 0 bytes
+after a 65,536-byte region allocated at `compress.c:783`, via the shipped CLI
+frames `ntfscat.c:371 → attrib.c:1003 → compress.c:950`; both the
+vendor-patched build and the safe-input control exit 0 with 65,536 bytes and
+no ASan report. One upstream fix-commit patch failed 6/8 hunks on the pinned
+tag and the earlier `0x9201` header exceeded `NTFS_SB_SIZE_MASK`; both are
+preserved negatives, and no public PoC bytes were found. The operator's
+18:41Z clean-archive replay (`git archive HEAD lab/frontier/ntfs3g2shell`
+plus only the ignored pinned tarball) reproduced 31/0 rc 0 with runner sha256
+`c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`; pinned
+hashes and the fresh trace are in `reports/ntfs3g2shell-status.md`. Rung 3
+only, rung 4 NOT CLAIMED: no chosen-offset readback, adjacent object, pointer,
+command or r5. The SUID `ntfs-3g` path was not driven (mount refused) and no
+plain build was run; witness replay and a plain-build chosen-object
+experiment are owed.
+
+Every count in this section is an operator, witness or clean-archive replay
+as labeled; no generated grade cell or register row moved here.

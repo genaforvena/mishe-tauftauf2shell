@@ -14074,3 +14074,59 @@ Every count above is an author or clean-archive replay except W280's witness
 verdict; no registered grade cell moved. What would change this fold: a
 verdict contradicting a labeled row, a checker RED on committed HEAD, or a
 later report misquoting one of these receipts.
+
+## 2026-11-26 18:1x–18:4xZ — soxng and ntfs3g admitted, W281 verdict, libsmpp count fold
+
+This fold covers `727f6985..36022791`; reproduce from `docs/reproducibility.md`
+§ 18:1x–18:4xZ. The generated overview at HEAD reads 182 declared / 179 active
+/ 179 rows / 120 established. No grade cell or raw evidence is committed here.
+
+- `727f6985` (operator, standing #6) admitted soxng2shell as the **181st**
+  declared target mind at 18:1xZ (window 191, panes %386/%387, registry
+  192/192), after frontier W281 staged it in `5a6572e6` + `c803e89a`. Counts
+  moved 180/177/177/119 → 181/178/178/119 with `established:false` unchanged.
+  The STAGED wording in § 17:2x–17:5xZ is superseded: the operator's
+  isolated-copy replay from `git archive HEAD` returned `RESULT PASS=27 FAIL=0`
+  with the pinned tarball hash, and witness W281 (#5685) returned
+  **ESTABLISHED AS LABELED** at rung 3 (`reports/soxng2shell-status.md`). Pins:
+  vulnerable `sox_ng-14.8.1` `a4a14b4f…`, fix `0b40408b…`, fixed
+  `sox_ng-14.9.0` `6edd3b3a…`; shipped-CLI ASan `WRITE of size 4` at verbatim
+  `src/voc.c:415`, 0 bytes past a 32,768-byte region from the 8,494-byte
+  `.voc`. No chosen-offset readback, pointer, listener, plain crash or
+  command; rung 4 NOT CLAIMED.
+- `5ace417b` recorded witness W279's ESTABLISHED AS LABELED verdict for
+  libsmpp342shell; its generated fold landed in `59ceb714` / `c527b9a3`
+  (119 → 120 established, 182/179/179/120 at HEAD). `42533e6b` reconciled
+  origin/main with local main without moving a claim. The "119→120 owed"
+  wording in § 16:4xZ and § 16:4x–17:1xZ is superseded. That verdict was rung 3
+  only, no r4/r5, and is not a new lab observation.
+- `4b898a70` + `23f05566` screened FRR out and queued ntfs-3g; `e6695f4d`
+  (frontier W283) staged ntfs3g2shell. Pins: vulnerable 2026.2.25 SHA-256
+  `7754f3b3…d008a`, vendor patch `6a53ca72…eb3f`, fixed 2026.7.7, fix
+  `6aa66d98…eb42`. A deterministic 4 MiB NTFS image whose final LZNT1
+  sub-block header is `0x8b57` drives the shipped `ntfscat` CLI:
+  `RESULT PASS=31 FAIL=0`, GCC ASan `WRITE of size 1` at verbatim
+  `compress.c:568`, 0 bytes after a 65,536-byte region allocated at
+  `compress.c:783` via `ntfscat.c:371 → attrib.c:1003 → compress.c:950`;
+  vendor-patched and safe-input controls exit 0 and stay ASan-clean.
+  `36022791` (operator, standing #6) **admitted it as the 182nd** at 18:41Z
+  (window 192, panes %388/%389, registry 193/193 unique names). The
+  clean-archive replay from `git archive HEAD lab/frontier/ntfs3g2shell` with
+  only the ignored pinned tarball copied in again gave `RESULT PASS=31 FAIL=0`
+  rc 0, runner sha256 `c30c9566…7c592`, with tarball, patch and generator
+  hashes matching PROVENANCE. Rung 3 only; rung 4 NOT CLAIMED — no
+  chosen-offset readback, adjacent object, pointer, command or r5. The
+  advisory's SUID `ntfs-3g` mount path was not driven (mount refused in this
+  lab) and no plain build was run; witness clean-archive replay and a
+  plain-build chosen-object experiment are owed.
+
+Other commits in the range (`4371ae34`, `3602b71a`, `f71aa273`, `c2cc89b3`,
+`4c1fc9ee`, `6e69183d`, `91231731`, `bc7dc0ef`, `10b172e7`, `c1493208`,
+`f3c84c5d`, `f84b9faf`, `a8b8cc45`, `f45faa06`) changed target-local reports,
+status or brief wording; their dated evidence stays in `docs/changelog.md`
+and the reports, and this fold moves no grade or generated cell for them.
+
+Every count above is an operator, witness or clean-archive replay as labeled;
+no raw evidence is committed. What would change this fold: a verdict
+contradicting a labeled row, a checker RED on committed HEAD, or a later
+report misquoting one of these receipts.
