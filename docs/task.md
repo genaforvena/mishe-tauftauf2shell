@@ -14551,6 +14551,20 @@ generated cell, register row, grade, report or lab evidence is moved here.
   neighbour, pointer, command buffer or socket) and rung 5 NOT CLAIMED (local
   vector, no wire path). Charter and window 196 exist; operator admission and
   witness replay owed. No generated count moved by this staging.
+- `W288` (frontier) **screened Java4Shell and staged inihlongline2shell**
+  (STAGED, not admitted). CVE-2026-114938: Red Hat's own detector prints
+  `bmi2 : Unaffected hardware!`, zero `avx512*`, no SDE, and the host JVM
+  17.0.21.1 is Oracle's first-fixed Java 17 line; fix commit `5177a70b`
+  adds a four-line tail guard. Brief `reports/frontier-java4shell.md`
+  preserves the claim and the version discrepancy; no lane or window.
+  CVE-2025-71450 / GHSA-gh7m-xpp3-w3vq: pinned inih r62 `9c15fa75…` /
+  r63 `5d7967de…`, fix `8e06f6b`; 199 `A` bytes plus a NUL make
+  `abyss[strlen(abyss)-1]` read `abyss[-1]`. GCC ASan READ-1 at verbatim
+  `ini.c:167` via `ini_parse_file:268`, one byte below the 16-byte stack
+  buffer; fixed and safe controls clean, plain r62 exits 0. `run-all.sh`
+  PASS=8 FAIL=0 at 21:21Z. Rung 3 only, rung 4 and rung 5 NOT CLAIMED;
+  window 197 exists, operator admission and witness replay owed. No
+  generated count moved by this staging.
 - `471c6167` (rpm) **added a fresh-build witness wrapper and preserved a
   layout-specific negative**: `real/run-real-witness.sh` (`10efeadb…d489`)
   hash-checks the pinned ignored trees and rebuilds vulnerable ASan, fixed

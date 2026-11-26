@@ -1,0 +1,32 @@
+From 8e06f6b77b5d4471bdc6d85ada81b67d37354a5c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Fatih=20=C3=87elik?= <fcelik.ft@gmail.com>
+Date: Fri, 24 Oct 2025 15:06:14 +0200
+Subject: [PATCH] Bug Fix: OOB Read in ini_parse_stream() (#206)
+
+Fix a stack-buffer underflow in ini_parse_stream() that was reported by AddressSanitizer. The underflow occurs when discarding the remainder of an overlong line: the code previously accessed abyss[strlen(abyss) - 1] without checking whether abyss is empty, which can produce an OOB read (abyss[-1]) and crash.
+---
+ ini.c | 4 +++-
+ 1 file changed, 3 insertions(+), 1 deletion(-)
+
+diff --git a/ini.c b/ini.c
+index ba758fa..08333cf 100644
+--- a/ini.c
++++ b/ini.c
+@@ -121,6 +121,7 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+     int lineno = 0;
+     int error = 0;
+     char abyss[16];  /* Used to consume input when a line is too long. */
++    size_t abyss_len;
+ 
+ #if !INI_USE_STACK
+     line = (char*)ini_malloc(INI_INITIAL_ALLOC);
+@@ -164,7 +165,8 @@ int ini_parse_stream(ini_reader reader, void* stream, ini_handler handler,
+             while (reader(abyss, sizeof(abyss), stream) != NULL) {
+                 if (!error)
+                     error = lineno;
+-                if (abyss[strlen(abyss) - 1] == '\n')
++                abyss_len = strlen(abyss);
++                if (abyss_len > 0 && abyss[abyss_len - 1] == '\n')
+                     break;
+             }
+         }
