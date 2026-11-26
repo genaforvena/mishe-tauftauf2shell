@@ -5147,3 +5147,50 @@ register fold landed in `e8fc7ab9` (section below).
   replay recipe are in `reports/ruby2shell-investigation.md` and
   `docs/reproducibility.md`.
 
+## 2026-11-26 19:2x–19:5xZ — libarchive admitted (184th), pcre2jit staged, bounded lanes
+
+- `047dd1b0` (operator, standing #6) admitted libarchivezippath2shell as the
+  184th declared target mind, moving the generated counts to 184/181/181/121
+  and superseding the § 18:5x–19:2xZ STAGED wording. Window 193 (panes
+  %390/%391) and a clean-archive 40/0 replay with runner sha256
+  `8bbd65aa…4c919` are recorded in `docs/results.md`; rung 3, no rung 4,
+  witness replay still owed.
+- `3d0b0edb` staged pcre2jit2shell (CVE-2026-103111 / GHSA-r9hj-j2rw-4q3m)
+  with pinned 10.48/10.49 and the hash-matched advisory PoC. A shipped-CLI
+  rc 139 on 10.48, fixed 10.49 error -46, 139,976 bytes written into a
+  separate victim mapping and 15 subject-pointer words were observed;
+  clean-archive `run-all.sh` gave 46/0. Rung 2 and lab-build rung 4 physical
+  victim control, rung 3 and rung 5 NOT claimed; admission and witness owed.
+- `d9de3eed` (ruby2shell) found `ActiveSupport::Inflector#pluralize` /
+  `#singularize` reaches the case-fold `READ of size 1` at `regexec.c:4278`
+  in 5/64 cases on 3.4.12 ASan, clean on 3.4.13; nine encoded stock
+  controller paths returned 404 before constantization with no ASan report,
+  so wire reach through that consumer is NEGATIVE and grade unchanged.
+- `9877257a` + `4cf28463` (neuvector W287) measured a chosen-tail return-slot
+  ceiling: 12/0 in-tree and clean archive, fault at `RIP=0x3b44434241` with
+  chosen `ABCD` low bytes, but the `sprintf` separator/NUL and PIE text range
+  block a canonical address. Grade stays rung 3 / rung 4 PARTIAL; witness
+  asked on #5770, UNKNOWN.
+- `91df6e22` (gimpjif W252) named the real-plugin `indexes` allocation
+  (`g_try_malloc` from `ReadJeffsImage:1547`) and a 96-byte adjacent
+  `g_malloc` object targeted by a pre-write pointer; W250's rc 139 is due to
+  an extra stack-frame read in the shim, not malloc interposition. No chosen
+  address, dereference or command; grade unchanged.
+- `97ab1756` (rpm) preserved a metadata-preservation negative: a 33-byte
+  payload kept `buf+0x18 == 0xa1` and avoided the abort without redirecting
+  the non-canonical adjacent qword; the first stack-buffer regex's `(nil)`
+  result is recorded as an analysis error. No wire path or command.
+- `399bbc97` folded witness W286's ESTABLISHED AS LABELED verdict for
+  leptonica's one-command wrapper (37 checks, wrapper sha256
+  `71f1feda…72727`) at HEAD `02746ce1`; the row was already established from
+  W237, so the count stays 121. Requests #5622/#5637/#5650/#5741 closed.
+- `ceb87a6e` + `3d0b0edb` + `7bd37097` (nfdump) corrected the false "plain"
+  build label (`--enable-devel` added ASan), rebuilt genuine plain
+  collectors with ELF assertions and 17/0, 11/0, 12/0, 13/0, 8/0 live runs
+  plus a clean archive of `ceb87a6e`. Pointer adjacency and valid-datagram
+  crossing writes are bounded negatives: no pointer-bearing object, store
+  ends at `E+27<=65530`, and forcing a crossing puts the trigger byte past
+  the packet. Grade unchanged, no r5.
+
+Exact pins, commands, expected bytes and gitignored evidence for each item
+are in `docs/reproducibility.md` § 19:2x–19:5xZ and the named reports.

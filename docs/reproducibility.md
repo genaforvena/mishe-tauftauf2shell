@@ -15051,3 +15051,113 @@ independent witness replay is pending.
 
 Every count in this section is an author, operator, independent-replay or
 witness observation as labeled; no generated grade cell moved here.
+
+## 2026-11-26 19:2x–19:5xZ — libarchive admission, pcre2jit staging, bounded lanes
+
+### Libarchive ZIP writer admission (184th)
+
+The pins, crafted PAX tars, shipped `bsdtar --format=zip -cf OUT.zip @IN.tar`
+command, expected ASan `WRITE of size 65537` / `131072` at
+`archive_write_set_format_zip.c:2328` ← `:1193`, fixed-build rejection and
+preserved 65,536-byte negative are in § 18:5x–19:2xZ above; do not repeat them
+here. For the admission receipt, archive `git archive HEAD
+lab/frontier/libarchivezippath2shell` at `047dd1b0`, copy in only the ignored
+`src/libarchive-3.8.7.tar.gz`, `src/libarchive-3.8.8.tar.gz` and `src/fix.patch`,
+then run `sh run-all.sh`. Expect the operator's runner sha256
+`8bbd65aa752ab4364ce50d4bf6b9975a4f1e648f53c277ca41b167313fc4c919`, all
+three source hashes matching `PROVENANCE.md`, and `RESULT PASS=40 FAIL=0`.
+Raw builds, tarballs and patch are intentionally gitignored; the runner
+re-extracts and rechecks them. Rung 3 only, witness replay still owed.
+
+### PCRE2 growable-JIT-stack staging
+
+From `lab/frontier/pcre2jit2shell`, verify pinned 10.48
+`ebcc25aadf2a51fa1fefa9b8bc9e7a79b3dae86870a0f1152a22e42befd46888`,
+10.49 `929f0b20e62879252a15886b06c89f1edef61a363cbd5826fb041080a5e557ae`,
+fix `38f740cb52919619945f3cf4b68a7c0892f68b564ef14879266781ee70b4165f` and
+hash-matched advisory PoC `2bda01bc0d70ac7888a8205aa9141e4bf8efcc0e7b48cc50eb23adca56756cd4`,
+then run `sh run-all.sh`. It re-extracts both tarballs, builds plain static
+JIT libraries with `./configure --enable-jit --disable-shared --enable-static
+&& make -j4 pcre2test`, compiles the PoC and the 100-capture small-frame
+variant, and expects `RESULT PASS=46 FAIL=0`. Shipped
+`pcre2test evidence/regression-input.txt` on plain 10.48 prints the pattern
+then segfaults (rc 139); on 10.49 it prints `Failed: error -46: JIT stack
+limit reached` and exits 0. The PoC's physical mode places a 1 MiB victim
+mapping directly below PCRE2's 192 KiB JIT stack with
+`MAP_FIXED_NOREPLACE`, fills it with `0xa5` and JIT-matches the 1,400-capture
+pattern against a 10-byte subject: expect 139,976 bytes clobbered, deepest
+write 139,976 bytes below the stack and 15 aligned subject-pointer words.
+`--no-jit`, 100-capture, fixed-JIT and fixed-interpreter controls keep the
+victim clean. ASLR can make the reservation collide: failed placements are
+preserved and retried, never counted as passes. Builds, traces and evidence
+are gitignored under `replay-build/`, `evidence/replay/` and `out/`; the
+runner recreates them. No ASan report, arbitrary written bytes, command,
+socket, live target or r5; rung 3 is not claimed.
+
+### Real Rails inflector, W287 ceiling and gimpjif W252
+
+`bash lab/repro/ruby2shell-casefold-inflector.sh` and the nine-path loopback
+probe are already recorded at the end of § 18:5x–19:2xZ; expect 5/64 ASan
+`READ of size 1` cases on 3.4.12, all clean on 3.4.13, and nine 404s with no
+new ASan report on both builds. Grade unchanged.
+
+`bash lab/frontier/neuvector2shell/fulldp/chosen.sh` gives 12 PASS / 0 FAIL,
+rc 0; a clean archive of `9877257a` with only the ignored pinned tarball
+repeated that at 19:48Z. At `dpi_sig.c:662` expect `LEN=2109` and a return
+slot `41 42 43 44 3b 00 00 00` with `RIP=0x3b44434241`; vulnerable and plain
+fault, safe and fixed survive. The two imposed high bytes are the
+`sprintf("pcre %s;")` separator and its NUL, so no canonical PIE address
+(`0x555555558000..0x555555592000`) is reachable by chosen tail bytes. No
+marker or command; witness asked on #5770, verdict UNKNOWN.
+
+For gimpjif, compile `live/allocsite-shim.c` over the ignored
+`live/inflate-shim.so` and run it through the unmodified GIMP 3.2.8
+AppRun/PDB on `long.jif`; `live/evidence/allocsite-long2.log` names the
+272-byte `indexes` chunk at `file-gif-load+0x3565` / `ReadJeffsImage:1547`
+and shows the following chunk's size word overwritten with
+`4d4d4d4d4d4d4d4d`. `live/galloc-shim.c` instead interposes `g_malloc` /
+`g_try_malloc`: `live/evidence/galloc-long.log` names `g_try_malloc` at
+`ReadJeffsImage:1547`, the 96-byte `g_malloc` at
+`libgobject-2.0.so.0+0x3f097` and a pre-write pointer at `out+280` aimed at
+that object. The extra-frame variant crashes before startup
+(`allocsite-long3.log`), reproducing W250's rc 139. Shim binaries are
+gitignored and the canonical `inflate-shim.so` was restored; no ASan in the
+real plugin, no named victim type, chosen address or command.
+
+### RPM metadata negative, W286 verdict and nfdump bounds
+
+The workspace-only rpm probe is in
+`lab/frontier/rpm2shell/real/aslr-window/metadata-probe.md` with the GDB
+script and two logs (`metadata-q00.log`, `metadata-q40.log`) hashed in
+`PROVENANCE.md`. Expect the first stack-buffer cpio regex's `(nil)` to be
+superseded by a heap-call analysis: 6 of 12 path lengths have unstable
+non-nil deltas; at length 48 the real qword at `buf+0x18` is `0xa1` and a
+33-byte metadata-preserving payload with chosen byte 32 avoids the abort
+while `buf+0x20` stays non-canonical (`0x7385…`/`0x735d…`) and unvisited.
+The raw-payload generator option was reverted; default output is unchanged.
+No redirect, dereference, wire path or command; grade unchanged.
+
+`bash lab/frontier/leptonica2shell/run-witness.sh` at HEAD `02746ce1` gave
+wrapper sha256
+`71f1fedbeb89c2bf9e21c27b8b7db59994e53eaa04bf0a78930a0c6f83127727`,
+`WITNESS REPLAY PASS` and 37 checks (staged 17/0, real 7/0, neighbor 5/0).
+W286 independently accepted that exact scope as ESTABLISHED AS LABELED; the
+register row was already established from W237, so the established count
+stays 121 and no replay is owed.
+
+From `lab/frontier/nfdump2shell`, `build-wire.sh` now builds plain collectors
+with `--disable-devel` and asserts `__asan_init` absent from the resolved
+ELF; ASan collectors must still assert it present. Rebuild and expect
+`run-alias.sh` 11/0, `run-etype.sh` 17/0, `run-hdr.sh` 12/0, `run-wire.sh`
+13/0 plain and `run-edge.sh` 8/0; the clean archive of `ceb87a6e` gave the
+same five counts plus `BUILD_INSTRUMENTATION_OK`. No pointer object is
+adjacent to `in_buff` and `GetExtension()`'s over-read is a read. For the
+bound from `7bd37097`, a valid 65,507-byte UDP datagram allows an element
+header only at `E<=65503`, so the 8-byte timestamp store ends at
+`E+27<=65530`; forcing the ICMP swap target past 65,504 puts its trigger
+byte at `>=65537`, past packet and allocation, and GDB at `nfd_raw.c:259`
+found heap residue there, not a wire-chosen byte. No crossing write, pointer,
+marker or command; grade unchanged.
+
+Every count in this section is an operator, witness, independent-replay or
+clean-archive observation as labeled; no generated grade cell moved here.

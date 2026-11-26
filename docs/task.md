@@ -14258,3 +14258,109 @@ above is an author, operator, independent-replay or clean-archive observation
 as labeled. What would change this fold: a verdict
 contradicting a labeled row, a checker RED on committed HEAD, or a later
 report misquoting one of these receipts.
+
+## 2026-11-26 19:2x–19:5xZ — libarchive admitted (184th), pcre2jit staged, bounded lanes
+
+This fold covers `047dd1b0..7bd37097`; replay recipes are in
+`docs/reproducibility.md` § 19:2x–19:5xZ. The generated overview at HEAD reads
+184 declared / 181 active / 181 rows / 121 independently established. No
+generated cell, register row, grade, report or lab evidence is moved here.
+
+- `047dd1b0` (operator, standing #6) **admitted libarchivezippath2shell as the
+  184th declared target mind** at 19:2xZ, superseding the STAGED wording in
+  § 18:5x–19:2xZ. Counts moved 183/180/180/121 → 184/181/181/121; staged
+  window 193 adopted (panes %390/%391 live, dead=0, registry 194/194 unique
+  names, no duplicate). The operator's 19:2xZ clean archive of
+  `git archive HEAD lab/frontier/libarchivezippath2shell` with only the ignored
+  pinned 3.8.7/3.8.8 tarballs and fix patch copied in gave runner sha256
+  `8bbd65aa…4c919` and `RESULT PASS=40 FAIL=0`; all three source hashes match
+  PROVENANCE. Rung 3 via the shipped `bsdtar --format=zip` writer, rung 4 NOT
+  CLAIMED; independent witness replay and a plain-build chosen-offset
+  experiment remain owed.
+- `3d0b0edb` **staged pcre2jit2shell** (STAGED, not admitted): CVE-2026-103111
+  / GHSA-r9hj-j2rw-4q3m, pinned 10.48 `ebcc25aa…d46888` / 10.49
+  `929f0b20…e557ae`, fix `2b403829…`, hash-matched advisory PoC `2bda01bc…`.
+  The advisory's 139,976-byte deepest write and 15 subject-pointer words were
+  reproduced against a separate 1 MiB victim mapping placed below PCRE2's
+  192 KiB JIT stack with `MAP_FIXED_NOREPLACE`; shipped plain 10.48
+  `pcre2test` exits rc 139, fixed 10.49 reports error -46 and exits 0.
+  Clean-archive `sh run-all.sh` gave `RESULT PASS=46 FAIL=0` at 19:31Z. Rung 2
+  shipped-CLI crash and rung 4 physical victim control in the lab build are
+  observed; **rung 3 is NOT claimed** (no ASan report) and rung 5 is NOT
+  CLAIMED: written words are JIT frame state, not arbitrary attacker-chosen
+  bytes, and no control-flow target, command, socket, live target or wire
+  request was exercised. Charter and two-pane window 194 (%392/%393) exist;
+  operator admission and witness replay owed. No generated count moved by
+  this staging.
+- `d9de3eed` (ruby2shell) named a **real Rails library consumer** of the
+  case-fold OOB read: `ActiveSupport::Inflector#pluralize`/`#singularize`
+  report ASan `READ of size 1` at `regexec.c:4278` in 5 of 64 cases on 3.4.12,
+  clean on 3.4.13 in all 32. Wire reach through that consumer is NEGATIVE:
+  nine encoded controller-shaped paths on the unmodified stock loopback app
+  return 404 before constantization with no new ASan report. Grade stays
+  rung 3; no write, pointer, command or fixed-build positive.
+- `9877257a` + `4cf28463` (neuvector W287) **measured the chosen-tail ceiling**
+  in the live full enforcer: a crafted 2148-byte dp-socket message puts chosen
+  `ABCD` in the low four return bytes (`41 42 43 44 3b 00 00 00`) and faults
+  at `RIP=0x3b44434241`; `chosen.sh` 12/0, repeated 12/0 from a clean archive
+  of `9877257a` at 19:48Z, author-tree regressions 29/0, witness 5/0 and
+  loopback 24/0. The `0x3b` is the `sprintf("pcre %s;")` separator and the next
+  byte is its NUL; moving it either truncates below this PIE binary's text
+  `0x555555558000..0x555555592000` or leaves `0x3b` high, and jansson's
+  embedded NUL is stopped by `strlcpy`. No chosen executable address, marker,
+  command or r5; grade stays rung 3 confirmed / rung 4 PARTIAL, witness asked
+  on #5770 and still UNKNOWN. The report's next-experiment text now names a
+  benign side effect on a live authenticated REST/CRD target as the only
+  remaining path past PARTIAL.
+- `91df6e22` (gimpjif W252) **named real-plugin allocation sites** with two
+  allocator-only shims over the unmodified GIMP 3.2.8 AppRun/PDB path on
+  `long.jif`: the 272-byte `indexes` chunk is `g_try_malloc` from
+  `ReadJeffsImage` (`file-gif-load.c:1547`, `file-gif-load+0x3565`); a live
+  96-byte object at `out+368` is `g_malloc` from
+  `g_type_module_register_type` (`libgobject-2.0.so.0+0x3f097`) with a pointer
+  at `out+280` aimed at it before the 448 chosen `0x4d` bytes write its size
+  word. W250's rc 139 is reproduced only when an extra stack-frame read is
+  added; the working shim was reverted byte-for-byte and the canonical binary
+  restored. The `out+272` object's type is still unknown; no chosen address,
+  dereference or command. Grade stays rung 3 / rung 4 PARTIAL, NO r5.
+- `97ab1756` (rpm) preserved a **metadata-preservation negative**: a first
+  regex read the stack-buffer cpio call and wrongly reported `NEXT=(nil)`;
+  re-parsing the heap call found non-nil adjacent qwords in 6 of 12 config
+  path lengths with unstable deltas. At the sampled length-48 layout, a
+  33-byte payload preserved the real size qword `0xa1` at `buf+0x18` and
+  chose byte 32 (`0x00`/`0x40`); the install no longer aborted
+  (`cpio: read failed`) and GDB showed no visit on the non-canonical
+  `buf+0x20` qword. The temporary raw-payload option was reverted and the
+  generator's default 64-byte output is byte-identical. No chosen redirect,
+  dereference, wire path or command; grade stays rung 4 author-DEMONSTRATED
+  with the layout limitation attached.
+- `399bbc97` folded witness **W286's ESTABLISHED AS LABELED** verdict for
+  leptonica2shell at the exact scope of the one-command wrapper: 37 checks
+  (staged 17/0, real 7/0, neighbor 5/0) at HEAD `02746ce1`, wrapper sha256
+  `71f1feda…72727`, no contradiction. The register row was already
+  `established: true` from W237, so no second count is implied and the
+  established total stays 121; replay requests #5622/#5637/#5650/#5741 are
+  closed. Grade stays rung 3 real / rung 4 PARTIAL, no pointer, no command,
+  NO r5.
+- `ceb87a6e` + `3d0b0edb` + `7bd37097` (nfdump) **corrected a build label and
+  closed two pointer/crossing lanes**: `configure.ac:27-36` adds
+  `-fsanitize=address` under `--enable-devel` even with empty `CFLAGS`, so
+  the collectors earlier called "plain" were ASan builds. `build-wire.sh` now
+  builds genuine plain collectors with `--disable-devel` and asserts
+  `__asan_init` present/absent in the resolved ELF; fresh live runners give
+  11/0 alias, 17/0 element type, 12/0 header, 13/0 wire and 8/0 edge, and a
+  clean archive of `ceb87a6e` reproduces all five with
+  `BUILD_INSTRUMENTATION_OK`. No pointer-bearing object exists in the V3
+  records or next to `in_buff` (GDB measured `fs`, `nffile` and `dataBlock`
+  in separate allocations; the adjacent chunk holds an ident string), and an
+  over-long element's `GetExtension()` read is not a write. The 8-byte
+  timestamp store cannot cross the 65,535-byte receive buffer from a valid
+  65,507-byte UDP datagram (store ends at `E+27<=65530`); making the ICMP
+  swap target cross puts its trigger byte past both packet and allocation,
+  and GDB found heap residue there, not attacker-chosen bytes. Grade
+  unchanged, no marker, command or r5.
+
+All counts above are operator, witness, independent-replay or clean-archive
+observations as labeled. What would change this fold: a verdict contradicting
+a labeled row, a checker RED on committed HEAD, or a later report misquoting
+one of these receipts.
