@@ -12645,8 +12645,8 @@ commit moved the generated presentation, not this fold.
   while 1.8.14 returns `BadLength` and safe inputs succeed. `ac41be89`
   recorded a clean-archive 12 PASS / 0 FAIL receipt; `e8b41e1c` admitted the
   167th declared mind / 164th register row (window 175, panes %352/%353) with
-  a second 12/0 operator replay. Both replays are author-side and no
-  independent witness has replayed the lane. Grade rung 3 verbatim / rung 4
+  a second 12/0 operator replay. Both were author-side at admission; witness
+  W258 later established the lane (below). Grade rung 3 verbatim / rung 4
   PARTIAL: server-controlled index and length, but a zero value in a
   synthetic in-process reply, no named adjacent object, live X wire, command
   or r5; advisory RCE framing stays a claim. Route and wake units are
@@ -12675,3 +12675,41 @@ with W257: research is closed at the documented W200 ceiling, the verdict
 covers only the labeled W197 device-only real-consumer-list lane, and it does
 not witness W167-W172 or W200, add r5, or widen to a wire path. No docs
 passage carried the old next-step plan, so no in-place correction was owed.
+
+## 2026-11-26 09:1x–09:2xZ — W258 closes libx11 replay; sdimatrix2shell staged
+
+Signal `fd9ca08a`, head `05369943` at fold start and `f0eec56a` at commit
+time. State changed by the witness and frontier, not by docs: no rung cell,
+grade, route or R5 cell moved here.
+
+- Witness **W258** (`d646e4af`) closed the independent-replay gap on
+  libx11xkb2shell that the preceding section left open. From a clean
+  `git archive 9b56c822` and the unmodified canonical runner
+  (`2c7273f0…3532bc0`), all five pins matched (both x.org tarballs re-fetched
+  by the runner) and one 370.43 s run printed 12 PASS / 0 FAIL, rc 0. Real
+  `_XkbReadKeyActions()` under GCC+Clang ASan writes 2 bytes at verbatim
+  `XKBGetMap.c:277` past an 18-byte `key_acts` region; 1.8.14 returns
+  `BadLength` (`status=16`) without ASan in every build and safe inputs are
+  clean. Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL —
+  no grade change, NO r5, and no named adjacent object, pointer, live X wire
+  or command. The witness flipped the manifest row and generated count
+  110→111; the earlier "replay owed" note above is stale. Remaining
+  rung-moving work is still only a measured loopback mock-X-server path plus
+  chosen bytes in a named adjacent field.
+- **sdimatrix2shell** was staged at `377e4855` under standing #6 (window 176,
+  panes %354/%355, live), with the raw fix patch pinned at `05369943`. CVE-
+  2026-70659 / GHSA-6q7q-2v9c-x8m7, stable-diffusion.cpp
+  `master-742-1a13107` → `master-763-4fcc6fe` (fix `4fcc6fef`): a duplicate
+  tensor name in a crafted `.imatrix` drives a verbatim
+  `IMatrixCollector::load_imatrix` (`imatrix.cpp:253` to EOF) OOB with a
+  first `nval=1`, second `nval=3`. Runner hash `65ca30af…d7e741`, 10 PASS /
+  0 FAIL: vulnerable GCC+Clang ASan `READ of size 4` at verbatim `:302`,
+  fixed rejects `inconsistent size for a repeated entry (1 vs 3)`, plain
+  vulnerable builds show chosen `0x41414141` two ints past the 1-element
+  `counts` vector. Grade rung 3 verbatim / rung 4 PARTIAL; no named adjacent
+  object, pointer, CLI/`--imat-in` path, live process, wire, command or r5.
+  The target is **STAGED, not admitted** — operator admission and independent
+  witness replay are owed; staging moved no manifest row or generated count.
+  A first clean-archive replay failed `PIN_FAIL` on SHA-URL vs tag-URL
+  tarball bytes and was re-pinned to the SHA-URL archives with unchanged
+  extracted bodies. Full recipe in `docs/reproducibility.md`.

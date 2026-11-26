@@ -3890,10 +3890,11 @@ operator moved the generated counts in the admission commit.
   `e8b41e1c` admitted the mind as the 167th declared target / 164th register
   row (window 175 adopted, panes %352/%353, route and wake units
   person-reserved) and re-rendered README/results/SVG/manifest, moving counts
-  166/163/163/110 → 167/164/164/110. Grade: rung 3 verbatim / rung 4 PARTIAL;
-  both 12 PASS / 0 FAIL clean-archive replays are author-side, no independent
-  witness, no named adjacent object, live X wire, pointer control, command or
-  r5. The CVSS 7.5 and RCE framing remain advisory claims.
+  166/163/163/110 → 167/164/164/110. Grade: rung 3 verbatim / rung 4
+  PARTIAL; both 12 PASS / 0 FAIL clean-archive replays were author-side at
+  admission; witness W258 later established this exact scope (below). No
+  named adjacent object, live X wire, pointer control, command or r5. The
+  CVSS 7.5 and RCE framing remain advisory claims.
 - `c249e3b5` records a bounded **Ruby 4.0.9** negative: two builds of the
   pinned 4.0.9 tar.xz (SHA-256
   `a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4`), one
@@ -3922,3 +3923,54 @@ operator moved the generated counts in the admission commit.
   the labeled W197 device-only real-consumer-list lane and does not witness
   W167-W172 or W200, add r5, or widen to a wire path. No docs passage named
   the old next-step plan, so no in-place correction was owed.
+
+## 2026-11-26 09:1x–09:2xZ — W258 libx11 verdict, sdimatrix2shell staged
+
+Wake-start signal `fd9ca08a` (my own prior fold); head `05369943` at fold
+start and `f0eec56a` at commit time, when the frontier repaired the pin set.
+Four new commits; no rung cell, grade, route or R5 cell moved by docs. The
+witness moved the generated count and presentation; docs left all generated
+files and the manifest to their authors.
+
+- `d646e4af` is witness **W258** on libx11xkb2shell: an independent replay of
+  the unmodified `run-all.sh` (`2c7273f0…3532bc0`, identical in worktree, at
+  `9b56c822`, at HEAD and inside `git archive 9b56c822`) with all five pins
+  matched, including both x.org tarballs re-fetched by the runner and checked
+  against their pinned hashes. One serial run, 12 PASS / 0 FAIL, rc 0, in
+  370.43 s. GCC and Clang ASan both print `WRITE of size 2` at verbatim
+  `src/xkb/XKBGetMap.c:277` in the real `_XkbReadKeyActions()`, 0 bytes past
+  the 18-byte `key_acts` region; all six 1.8.14 controls return `BadLength`
+  (`status=16`, `/usr/include/X11/X.h:374`; the runner's `status=1` pattern is
+  a prefix match) without ASan, and safe inputs stay clean. Verdict
+  ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no contradiction,
+  no grade change, NO r5: the written value is zero, chosen `0x5a` bytes stay
+  in bounds, no named adjacent object, pointer, live X wire or command. The
+  witness flipped the manifest row and moved the generated established count
+  110→111 and re-rendered README/results/SVG. Docs corrected the stale "no
+  independent witness / replay owed" passages and the old `status 1` wording
+  in place; detail is in
+  `.mishe-tauftauf/artifacts/witness-w258-libx11xkb2shell/detail.md`.
+- `377e4855` stages **sdimatrix2shell** under standing #6 (CVE-2026-70659 /
+  GHSA-6q7q-2v9c-x8m7): stable-diffusion.cpp `master-742-1a13107` (affected)
+  and `master-763-4fcc6fe` (fixed, commit `4fcc6fef`). The verbatim
+  `IMatrixCollector::load_imatrix` body (`src/runtime/imatrix.cpp:253` to EOF)
+  sizes `values`/`counts` only on the first entry; a duplicate `blk.0` with
+  `nval=1` then `3` gives an ASan `READ of size 4` at verbatim `:302` and
+  plain builds place chosen `0x41414141` ints two slots past the 1-element
+  `counts` vector. The fixed tag rejects with `inconsistent size for a
+  repeated entry (1 vs 3)`. Grade rung 3 verbatim / rung 4 PARTIAL: no named
+  adjacent object, pointer, CLI/`--imat-in` path, live process, wire,
+  command or r5. Window 176 (panes %354/%355) was adopted live; the target is
+  **STAGED, not admitted** — operator admission and independent witness
+  replay remain owed, and no register row or generated count moved with
+  staging. Detail: `reports/frontier-sdimatrix2shell.md` and
+  `reports/sdimatrix2shell-status.md`.
+- `05369943` pins the raw fix patch (`792c4d07…659d6`) for that target; the
+  mid-fold `f0eec56a` repaired the pin set. A first clean-archive replay at
+  `05369943` failed `PIN_FAIL` on the vulnerable tarball: the runner fetched
+  codeload by commit SHA while the pin had been computed from a tag-URL fetch.
+  Both archives were re-pinned to the SHA-URL bytes (extracted function bodies
+  unchanged), and the runner hash moved from `aea439ca…1bb77b9` to
+  `65ca30af…d7e741`, rather than changing the fetch URL. The preserved
+  negative and corrected hashes are in
+  `lab/frontier/sdimatrix2shell/PROVENANCE.md`.

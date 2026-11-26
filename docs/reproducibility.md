@@ -12678,8 +12678,9 @@ by docs; W257 touched only two reports, so its verdict did not change the
 generated manifest or the established count of 110.
 
 - **Libx11xkb2Shell (frontier W251; staged `9b56c822`, clean-archive receipt
-  `ac41be89`, admitted `e8b41e1c`) — rung 3 verbatim / rung 4 PARTIAL,
-  author-only.** CVE-2026-88806 / ZDI-CAN-32061: libX11 before 1.8.14 lets an
+  `ac41be89`, admitted `e8b41e1c`, witness W258 below) — rung 3 verbatim /
+  rung 4 PARTIAL, witness-ESTABLISHED at that exact scope.**
+  CVE-2026-88806 / ZDI-CAN-32061: libX11 before 1.8.14 lets an
   `XkbGetMap` reply drive `firstKeyAct + nKeyActs` past `max_key_code + 1`;
   `_XkbReadKeyActions()` writes past `server->key_acts`. Fixed in 1.8.14 by
   `6d4432b13c0b3b6a644c13de9c793a14db48d545` (one bounds check before the
@@ -12710,8 +12711,9 @@ generated manifest or the established count of 110.
   `firstKeyAct=8`, `nKeyActs=2`, descriptors `[1,0]`, `max_key_code=8`, and a
   9-entry `key_acts` array. The 1.8.13 ASan traces print `WRITE of size 2` at
   verbatim `src/xkb/XKBGetMap.c:277`, 0 bytes after the 18-byte allocation;
-  1.8.14 returns `BadLength` (status 1) in all builds; safe inputs succeed and
-  the plain vulnerable build is silent. `RESULT PASS=12 FAIL=0` is recorded in
+  1.8.14 returns `BadLength` (`status=16` per `/usr/include/X11/X.h:374`; the
+  runner's `status=1` pattern is a prefix match) in all builds; safe inputs
+  succeed and the plain vulnerable build is silent. `RESULT PASS=12 FAIL=0` is recorded in
   the tracked `evidence/run-all-console.log` and the twelve
   `evidence/{1.8.13,1.8.14}-{gcc-asan,clang-asan,gcc-plain}-{attack,safe}.out`
   files. Extracted trees `src/libX11-*/`, tarballs, `build/` and
@@ -12723,9 +12725,10 @@ generated manifest or the established count of 110.
   ran the unmodified runner from a clean `git archive 9b56c822` at
   `.mishe-tauftauf/replays/libx11xkb2shell-op-20261126T0856Z/` between
   08:54:32Z and 08:59:36Z with all pins re-verified and `RESULT PASS=12 FAIL=0`,
-  `RC=0`. Both are author-side, not independent witness acceptance; replay is
-  owed. Admission adopted window 175 (panes %352/%353) and moved generated
-  counts 166/163/163/110 → 167/164/164/110; route and wake units remain
+  `RC=0`. Both were author-side; witness W258 (receipt below) supplied
+  independent acceptance. Admission adopted window 175 (panes %352/%353) and
+  moved generated counts 166/163/163/110 → 167/164/164/110; the witness later
+  moved established 110→111. Route and wake units remain
   person-reserved. Preserved negatives: `firstKeyAct` is CARD8 (256 wraps to
   0); eight nonzero actions hit a NULL `acts` read at `XKBMAlloc.c:804` before
   the intended sink; `key_sym_map` is over-allocated so ASan reports the
@@ -12779,3 +12782,100 @@ generated manifest or the established count of 110.
   unwitnessed. Raw console, verbatim outputs and patch logs are gitignored in
   `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/`; detail is in that
   directory's `detail.md`.
+
+## 2026-11-26 09:1x–09:2xZ — W258 libX11 receipt, sdimatrix2shell recipe
+
+No replay was rerun in this fold: commands, hashes, bytes and timings below
+are quoted from the committed reports and receipts and from W258's artifact.
+In the worktree the libX11 runner, both sdimatrix tarballs, raw fix patch,
+generator, driver and canonical runner hashes matched their pins after
+`f0eec56a`. No rung cell,
+grade, route or R5 cell moved by docs; the witness, not docs, flipped the
+manifest row, moved the generated count 110→111 and re-rendered
+README/results/SVG.
+
+- **Witness W258 — libx11xkb2shell independent clean-archive replay.**
+  The witness extracted `git archive 9b56c822` and ran the unmodified wrapper
+  (`bash ./run-all.sh`) with wrapper SHA-256
+  `2c7273f01d6a26b36c8aeecd94f1e9a9835d9ea81f7e3896072b9b9ee3532bc0`,
+  identical in the worktree, at `9b56c822`, at HEAD and in the archive. All
+  five pins above matched, including both tarballs re-fetched by the runner
+  from the PROVENANCE x.org URLs into the clean archive; no X server, socket
+  or external probing. One serial run, 2026-11-26T09:06:36Z–09:12:46Z (370.43
+  s), rc 0, printed twelve `PASS` lines and `RESULT PASS=12 FAIL=0`. GCC and
+  Clang ASan both show `ERROR: AddressSanitizer: heap-buffer-overflow`,
+  `WRITE of size 2`, `#0 … _XkbReadKeyActions … XKBGetMap.c:277`, 0 bytes
+  after an 18-byte region allocated at `poc.c:43`; all four 1.8.13 safe
+  controls print `MODE=safe firstKeyAct=1 nKeyActs=2 status=0 acts=1`, the
+  plain vulnerable attack is silent, and all six 1.8.14 controls print
+  `status=16 acts=0` (attack) or `status=0 acts=1` (safe) with no ASan. The
+  16 is `BadLength` in `/usr/include/X11/X.h:374`; the runner's `status=1`
+  grep is a prefix match, so the older `status 1` prose was a labeling NIT,
+  not a behavioral contradiction. Verdict ESTABLISHED AS LABELED at rung 3
+  verbatim / rung 4 PARTIAL, no grade change, NO r5: the OOB value is the
+  constant zero from the `numDesc[1] == 0` branch, the chosen `0x5a` bytes
+  stay in bounds, and there is no named adjacent object, pointer, live X
+  wire, file/socket side effect or command. Raw console, traces and detail:
+  `.mishe-tauftauf/artifacts/witness-w258-libx11xkb2shell/`.
+
+- **Sdimatrix2Shell (frontier W258; staged `377e4855`, patch pinned
+  `05369943`, archives re-pinned `f0eec56a`) — rung 3 verbatim / rung 4
+  PARTIAL, STAGED not admitted, witness replay owed.**
+  CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7,
+  stable-diffusion.cpp `master-742-1a13107` (affected commit
+  `1a13107bac236b0cd6fadbf5c264f3644874ba4f`) → `master-763-4fcc6fe` (fixed
+  `4fcc6fef10c6f686801c6e257b22cd6a3deb906b`). Claim URLs, the advisory's
+  unverified RCE prose and the pinned source facts are in
+  `lab/frontier/sdimatrix2shell/PROVENANCE.md` and
+  `reports/frontier-sdimatrix2shell.md`. Pins from PROVENANCE: codeload
+  tarballs `863e674f6b8d00422e4a35d13b7ed91f2b76977f35d4499f9162a488c3315c00`
+  (vulnerable) and
+  `a070f629972355e936e5b4decbe12d91c179c1f412feac2915cd7dde799577d8`
+  (fixed), raw fix patch
+  `792c4d07666ad59720653345d0b68beded615a55b6e3dedf79e182d939f659d6`,
+  verbatim function bodies `6d1a5fc1…103362d1` (vulnerable, lines 253..308)
+  and `b45cf140…d5d8375a` (fixed, 253..312), `mkinput.cpp`
+  `9d5ea511cb942848b3fc6e5b51043dc7d7d029e3aec98a0fc7c4d43574e7450b`,
+  `poc.cpp` `4a26967209966ff9f209d0ff4f70bf84c22c978b25f370c2399b0c3f9845e19f`,
+  and canonical runner
+  `65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741`.
+
+  Rebuild both pinned function bodies verbatim (line 253 to EOF, with
+  `#line 253 "src/runtime/imatrix.cpp"` so sanitizer frames name upstream
+  lines) and drive the crafted local file entirely in process:
+
+  ```sh
+  T=$(mktemp -d /tmp/docs-sdimatrix.XXXXXX)
+  git archive f0eec56a lab/frontier/sdimatrix2shell | tar x -C "$T"
+  cd "$T/lab/frontier/sdimatrix2shell" && sh run-all.sh
+  ```
+
+  The runner curls each tarball from the codeload commit-SHA URL in
+  `run-all.sh` and the raw patch from the fix commit URL when absent,
+  rechecks every hash above, then builds GCC/Clang ASan and
+  plain drivers. `mkinput.cpp` writes two entries named `blk.0` (attack) or
+  `blk.0`/`blk.1` (safe): first `nval=1`, second `nval=3`, `ncall=0x41414141`
+  and a float payload carrying `tmp[1]=0x5a5a5a5a`. Expect `RESULT PASS=10
+  FAIL=0`, rc 0, in the tracked `evidence/run-all-console.log`. On both
+  vulnerable ASan builds the sink's first invalid access is a **`READ` of
+  size 4**, 0 bytes after the 4-byte `values` region, at verbatim
+  `src/runtime/imatrix.cpp:302` in `IMatrixCollector::load_imatrix`
+  (`+=` reads before writing); the fixed builds print
+  `inconsistent size for a repeated entry (1 vs 3)` and `ok=0` with no ASan.
+  Plain vulnerable builds print `ok=1 … counts_oob1=0x41414141
+  counts_oob2=0x41414141` on both compilers, while safe inputs print
+  `counts_oob1=0x00000000 counts_oob2=0x00000000`. The tracked small evidence
+  lives in `evidence/`; `src/*.tar.gz`, the extracted
+  `src/stable-diffusion.cpp-*/` trees and `build/` are gitignored and
+  regenerate with the same command. Preserved negatives: `nval=8` aborts in
+  `munmap_chunk()` before
+  readback, the chosen float lands in the 4-byte `values` chunk's padding
+  rather than the `counts` chunk, ASan container annotations made the plain
+  `counts` readback a harness-caused second report (gated to plain builds),
+  and the first clean-archive replay at `05369943` failed `PIN_FAIL` because
+  its pin was computed from tag-URL tarball bytes while the runner fetches
+  codeload SHA-URL bytes; `f0eec56a` re-pinned both archives with unchanged
+  extracted function bodies. No `sd-cli`, model, wire input, pointer
+  control, command or r5 is claimed; window 176 (panes %354/%355) is live,
+  admission and independent replay are owed, and staging moved no manifest
+  row or generated count.
