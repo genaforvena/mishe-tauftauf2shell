@@ -4932,3 +4932,59 @@ into heap metadata; no chosen-offset write, pointer control or benign marker
 execution was observed. Full rung 5 remains NOT ACHIEVED. The next bounded
 experiment is to determine whether the corrupted metadata can be turned into
 a steered allocation on the wire path without the prior harness grooming.
+
+## Corrupted-chunk identity on the wire path (2026-11-26, 12:0xZ)
+
+The previous section left one question open: which heap chunk does the
+wire-only overflow corrupt, and does any live consumer read the corrupted
+metadata? A first arithmetic pass this wake treated the whole expansion
+(27 or 39 bytes past `capa`) as the overflow. **That hypothesis is
+retracted**: `case_map` stops at `to_end`, the caller records `used`, and the
+next source byte is handled in a *new* buffer (`string.c:7828-7851`). The
+"Consumer reality" section above already states the resulting one-byte
+overflow; the retraction is preserved rather than silently dropped.
+
+gdb 15.1 was attached at launch to the plain 3.4.12 build (no sanitizer,
+stock glibc 2.39) with a breakpoint at `string.c:7839` conditioned on
+`current_buffer->capa == 48` (the wire `mixed27` part) and a second
+breakpoint at `string.c:7856` guarded on the first hit. Repro:
+`lab/repro/ruby2shell-mp-header.gdb`, with
+`python3 lab/repro/ruby2shell-mp-method-21.py PORT mixed27` from a second
+shell. Observed in gitignored `/tmp/gdb-mp-after.log` and
+`/tmp/gdb-mp-inspect2.log`:
+
+```
+buffer=0x7fffc809c250 capa=48 usable=72   size word at buffer-8 = 0x54
+BEFORE buffer=0x7fffc809c250 next_size_at=0x7fffc809c298
+0x7fffc809c298: 0x0000000000000035  0x0000000100000001
+AFTER case_map (line 7856)
+0x7fffc809c298: 0x0000000000000053  0x0000000100000001
+```
+
+A further run measured `0x45 -> 0x53`, and another `0x155 -> 0x53`. The
+72-byte usable size and the `0x54` size word (0x50 base, NON_MAIN_ARENA)
+place the next chunk's header at `buffer+64` (prev_size) and `buffer+72`
+(size). `space+capa == buffer+72`, so the single `0x53` byte lands on the
+**successor chunk's size low byte**, not on the casemap buffer and not on
+its prev_size. It changes the successor's size class (0x40/0x30/0x150 to
+0x50) and sets IS_MMAPPED while keeping PREV_INUSE; a later free of that
+successor takes munmap/consolidation checks, matching the no-debugger
+`corrupted size vs. prev_size` and `malloc(): invalid next size (unsorted)`
+diagnostics. For `mixed59` the byte lands at `buffer+104` (0x70 chunk);
+for `mixed43` it lands at `buffer+88`, inside the same chunk's 104-byte
+usable slack, which explains that shape's clean runs.
+
+**Consumer: UNKNOWN after a bounded attempt.** A temporary hardware READ
+watchpoint on that word (`lab/repro/ruby2shell-mp-watch.gdb`) was installed
+on the wire hit and produced no hit after the single request: no allocator
+or application code was observed reading the corrupted size word in that
+window. A conditional `break free` on the successor hung at boot, because
+GDB evaluated the condition on every `free`; that attempted lane was
+abandoned, not resolved. Four `mixed27` runs under gdb all served a 404 with
+no glibc abort (a debugger-perturbed layout; the plain runs abort 3/8),
+preserved as a negative. No steered allocation, chosen-offset write or
+benign marker was observed. The wire-only rung-4 branch is therefore
+**CLOSED for this shape sweep** unless a new consumed function/code pointer
+or wire-only base is named. Grade unchanged: rung 3 wire-only confirmed,
+rung 4 witness-COMPLETE only at the earlier harness-conditioned scope,
+full stock rung 5 NOT ACHIEVED.
