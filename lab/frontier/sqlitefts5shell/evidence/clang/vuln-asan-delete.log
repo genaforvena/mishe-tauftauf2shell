@@ -1,0 +1,93 @@
+=================================================================
+==966265==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x516000008100 at pc 0x5968e61ad0dd bp 0x7ffe17fd1a50 sp 0x7ffe17fd1a48
+WRITE of size 1 at 0x516000008100 thread T0
+    #0 0x5968e61ad0dc in fts5PutVarint64 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:268441:10
+    #1 0x5968e61acad2 in sqlite3Fts5PutVarint /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:268456:10
+    #2 0x5968e61e5225 in fts5DoSecureDelete /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256373:16
+    #3 0x5968e61de562 in fts5FlushSecureDelete /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256436:7
+    #4 0x5968e61da9ad in fts5FlushOneHash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256537:21
+    #5 0x5968e61d7e6a in fts5IndexFlush /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256670:5
+    #6 0x5968e6218cf4 in sqlite3Fts5IndexSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:257667:3
+    #7 0x5968e6218c79 in sqlite3Fts5StorageSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:265808:10
+    #8 0x5968e6210676 in sqlite3Fts5FlushToDisk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:263572:10
+    #9 0x5968e619ec14 in fts5SyncMethod /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:262536:8
+    #10 0x5968e5ebd4a3 in sqlite3VtabSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:162900:12
+    #11 0x5968e5eb47fb in vdbeCommit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:90814:8
+    #12 0x5968e5eb284e in sqlite3VdbeHalt /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:91295:16
+    #13 0x5968e5ec843c in sqlite3VdbeExec /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:97960:8
+    #14 0x5968e5e33df0 in sqlite3Step /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:94551:10
+    #15 0x5968e5e254e7 in sqlite3_step /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:94612:16
+    #16 0x5968e5d3dde4 in sqlite3_format_query_result /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:3877:37
+    #17 0x5968e5def0e7 in shell_exec /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:26714:9
+    #18 0x5968e5d7bc10 in runOneSqlLine /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:35904:8
+    #19 0x5968e5d61889 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:37147:14
+    #20 0x7d2094c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #21 0x7d2094c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #22 0x5968e5c636c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/sqlite3-vuln-asan-clang+0x8b6c4) (BuildId: 97a7983a173acc2b3656c12f3fcd0076f1cc5f88)
+
+0x516000008100 is located 0 bytes after 640-byte region [0x516000007e80,0x516000008100)
+allocated by thread T0 here:
+    #0 0x5968e5cfe513 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/sqlite3-vuln-asan-clang+0x126513) (BuildId: 97a7983a173acc2b3656c12f3fcd0076f1cc5f88)
+    #1 0x5968e61266f8 in sqlite3MemMalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:28035:7
+    #2 0x5968e5e62c15 in mallocWithAlarm /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:31754:7
+    #3 0x5968e5e147f1 in sqlite3Malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:31779:5
+    #4 0x5968e5e148bf in sqlite3_malloc64 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:31803:10
+    #5 0x5968e61c386f in fts5DataRead /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:251722:25
+    #6 0x5968e61c5e7f in fts5LeafRead /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:251765:20
+    #7 0x5968e61c4f09 in fts5SegIterNextPage /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:252677:20
+    #8 0x5968e61d8f67 in fts5SegIterSeekInit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:253577:3
+    #9 0x5968e61d6c41 in fts5MultiIterNew /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:254845:13
+    #10 0x5968e61de3b7 in fts5FlushSecureDelete /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256424:3
+    #11 0x5968e61da9ad in fts5FlushOneHash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256537:21
+    #12 0x5968e61d7e6a in fts5IndexFlush /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:256670:5
+    #13 0x5968e6218cf4 in sqlite3Fts5IndexSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:257667:3
+    #14 0x5968e6218c79 in sqlite3Fts5StorageSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:265808:10
+    #15 0x5968e6210676 in sqlite3Fts5FlushToDisk /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:263572:10
+    #16 0x5968e619ec14 in fts5SyncMethod /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:262536:8
+    #17 0x5968e5ebd4a3 in sqlite3VtabSync /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:162900:12
+    #18 0x5968e5eb47fb in vdbeCommit /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:90814:8
+    #19 0x5968e5eb284e in sqlite3VdbeHalt /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:91295:16
+    #20 0x5968e5ec843c in sqlite3VdbeExec /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:97960:8
+    #21 0x5968e5e33df0 in sqlite3Step /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:94551:10
+    #22 0x5968e5e254e7 in sqlite3_step /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:94612:16
+    #23 0x5968e5d3dde4 in sqlite3_format_query_result /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:3877:37
+    #24 0x5968e5def0e7 in shell_exec /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:26714:9
+    #25 0x5968e5d7bc10 in runOneSqlLine /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:35904:8
+    #26 0x5968e5d61889 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/shell.c:37147:14
+    #27 0x7d2094c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #28 0x7d2094c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #29 0x5968e5c636c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/sqlite3-vuln-asan-clang+0x8b6c4) (BuildId: 97a7983a173acc2b3656c12f3fcd0076f1cc5f88)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/sqlitefts5shell/build/tree-vuln-asan-clang/sqlite-src-3530400/sqlite3.c:268441:10 in fts5PutVarint64
+Shadow bytes around the buggy address:
+  0x516000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000007f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x516000008100:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x516000008180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x516000008380: 00 00 00 00 00 00 00 00 00 00 fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==966265==ABORTING

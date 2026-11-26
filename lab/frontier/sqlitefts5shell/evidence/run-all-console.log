@@ -1,0 +1,35 @@
+sqlitefts5shell runner started 2026-11-26T12:12:03Z
+runner sha256 71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32
+PASS pin vulnerable-source-zip
+PASS pin upstream-fix-patch
+PASS pin code-only-fix-patch
+PASS pin public-hexdb
+PASS pin hexdb-decoder
+PASS pin runner-self
+PASS hexdb decoded locally
+PASS pin crafted-database
+built build/sqlite3-vuln-asan-gcc
+PASS build vuln-gcc-asan
+built build/sqlite3-fixed-asan-gcc
+PASS build fixed-gcc-asan
+built build/sqlite3-vuln-plain-gcc
+PASS build vuln-gcc-plain
+built build/sqlite3-vuln-asan-clang
+PASS build vuln-clang-asan
+built build/sqlite3-fixed-asan-clang
+PASS build fixed-clang-asan
+PASS pin vulnerable-fts5-index-source
+PASS pin fixed-fts5-index-source
+PASS pin vulnerable-amalgamation
+PASS pin fixed-amalgamation
+PASS source markers vuln ext=5525 amal=256373 fixed ext=5525 guard=5532 amal=256378
+PASS crafted DB sanity: sqlite_version 3.53.4, count(t)=1
+PASS gcc vulnerable ASan WRITE-1 at sqlite3.c:256373 through fts5DoSecureDelete (rc=134)
+PASS clang vulnerable ASan WRITE-1 at sqlite3.c:256373 through fts5DoSecureDelete (rc=134)
+PASS plain vulnerable: count 1 -> DELETE rc=0 -> count 0 (silent in non-ASan build)
+PASS gcc fixed ASan: no report, rc=1 (corruption error is the expected stop)
+PASS clang fixed ASan: no report, rc=1 (corruption error is the expected stop)
+PASS safe crafted-DB read/MATCH: no ASan report, rc=0
+PASS safe clean FTS5 secure-delete table DELETE: no ASan report, rc=0
+console log evidence/run-all-console.log
+RESULT PASS=26 FAIL=0

@@ -1,0 +1,7 @@
+# Pinned upstream tarball: re-fetch from the URL in PROVENANCE.md and verify
+# sha256 d18fa15aec74d8c17e1463f861095adc01b5ad190256acb4f91d22f0368d232b.
+src/sqlite-src-3530400.zip
+# Generated source trees, amalgamations, CLI binaries and run databases.
+build/
+src/sqlite-src-3530400/
+evidence/poc.db
