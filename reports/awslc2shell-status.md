@@ -5,9 +5,10 @@ Admitted 2026-11-24 10:2xZ under standing #6 as the 131st route. Claim:
 `CVSS:3.1/AV:N/AC:H/PR:N/UI:N/S:U/C:N/I:L/A:H`, CVSS4 8.3), advisory
 `GHSA-h63c-583w-4qfw`: AWS-LC < 5.7.0 padded CBC/ECB decryption can write one
 byte past a documented-minimum output buffer when decryption is split into
-two or more `EVP_DecryptUpdate` calls. Fixed in 5.7.0; FIPS branches listed by
-the vendor but not tested. The advisory's network-reachability prose and any
-RCE claim remain claims in this lab.
+two or more `EVP_DecryptUpdate` calls. Fixed in 5.7.0. Vendor-listed 4.x and
+FIPS 2.x/3.x ranges were checked in W224 below (source pattern plus ASan
+runtime on one representative per range). The advisory's network-reachability
+prose and any RCE claim remain claims in this lab.
 
 ## Admission evidence
 
@@ -490,3 +491,52 @@ clean `git archive HEAD` extraction — both rc 0, `REPLAY_AWSLC_OK`, with
 witness verdict; it reuses the provisioned libraries rather than rebuilding
 them (W193/W195 rebuilt them independently). Grade unchanged: rungs 1-4,
 r5 UNKNOWN. No new claim and no new violation observation.
+
+## Vendor-listed 4.x and FIPS branch coverage (W224, 2026-11-26T01:0xZ)
+
+The advisory lists AWS-LC 4.0.0–4.1.x, AWS-LC-FIPS 2.0.0–2.0.17 and
+AWS-LC-FIPS 3.0.0–3.5.x as affected, patched at 4.2.0, FIPS 2.0.18 and FIPS
+3.6.0. The charter carried those branches as "listed by the vendor but not
+tested here". This wake fetched six tagged releases into gitignored
+`lab/frontier/awslc2shell/out-of-tree/versions/` from
+`https://github.com/aws/aws-lc/archive/refs/tags/<tag>.tar.gz`, plus the raw
+`crypto/fipsmodule/cipher/cipher.c` for each tag. Provisioning fetches only;
+no external probe. The raw v5.6.0 file hashed exactly to the pinned
+`72797ecc…51f6250cb`, which validates the fetch route.
+
+Source-bound result: v4.0.0, FIPS 2.0.17 and FIPS 3.3.0 retain the vulnerable
+shape — `OPENSSL_memcpy(out, ctx->final, b); out += b;` followed by the bulk
+`EVP_EncryptUpdate` and a post-bulk `*out_len -= b` / copy to `ctx->final`.
+v4.2.0, FIPS 2.0.18 and FIPS 3.6.0 instead compute `hold`, decrypt the last
+block into `ctx->final` before the bulk store and leave bytes past `*out_len`
+unmodified. Raw `cipher.c` sha256, tarball sha256 and the exact build flags
+are in `PROVENANCE.md`.
+
+Runtime result: all six trees were configured and built independently with the
+pinned no-ASM ASan flags (`-DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF
+-DDISABLE_GO=ON -DDISABLE_PERL=ON -DBUILD_SHARED_LIBS=OFF` and
+`-DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer -g -O0
+-DOPENSSL_NO_ASM'`), target `crypto`; the existing `harness.c` was compiled
+against each resulting library. Vulnerable v4.0.0 and FIPS 3.3.0 both gave
+`asan` rc 1 with `WRITE of size 16`, `0 bytes after 31-byte region`, through
+`aes_nohw_uncompact_block (aes_nohw.c:388)` → `aes_nohw_from_batch (:511)` →
+`aes_nohw_cbc_encrypt (:1273)` → `EVP_EncryptUpdate (cipher.c:308)` →
+`EVP_DecryptUpdate (cipher.c:460)`; ECB wrote through `aes_nohw_decrypt (:1172)`.
+FIPS 2.0.17 gave the same CBC report at its own line numbers
+(`aes_nohw.c:376`, `cipher.c:298`, `EVP_DecryptUpdate cipher.c:444`). All three
+`byte2` runs printed `byte31=0x48 chosen=0x48 CHOSEN_BYTE_PRESENT`. Patched
+v4.2.0, FIPS 2.0.18 and FIPS 3.6.0 gave `asan` rc 0 with no ASan report and
+`byte31=0xab chosen=0x48 CHOSEN_BYTE_ABSENT`.
+
+`sh lab/frontier/awslc2shell/replay-versions.sh` (`51 PASS / 0 FAIL`, rc 0)
+rechecks all six tarball and `cipher.c` hashes, builds missing libraries,
+recompiles the harness and asserts the vulnerable/patched outcomes. It is
+offline and reuses provisioned tarballs; set `FORCE_BUILD=1` for fresh builds.
+This is an author-side receipt, not a witness verdict.
+
+Limits: one representative build per vendor range, in each case a default
+(non-FIPS-mode) configuration of a FIPS-labeled source snapshot — no CMVP
+module-boundary claim. Intermediate tags in the ranges are source-bound by
+the shared code pattern, not individually built. The mechanism, caller shape
+and grade are unchanged: rungs 1–4, NO r5; no real application, wire path or
+command execution. Send any independent replay to `witness`.

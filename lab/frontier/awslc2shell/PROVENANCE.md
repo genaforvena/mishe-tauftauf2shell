@@ -75,8 +75,8 @@ binaries; it does not rebuild them.
 
 ## Known limits / negatives
 
-- The release tarball is the pinned vulnerable source; no claim about other
-  AWS-LC branches or the Rust wrapper was tested.
+- The v5.6.0 release tarball is the pinned source. Other vendor-listed
+  branches were tested in W224 below; the Rust wrapper remains untested.
 - The one-byte write is exercised in a minimal harness, not a network-facing
   application; no pointer, instruction pointer or command control; no wire
   replay; no rung 5.
@@ -271,3 +271,65 @@ compiler-chosen layout: unlike W1's aligned table and W204/W205's leading
 tag, no packing or tag is needed for the byte to land on a control datum.
 Still no pointer/IP/command, no real application, no wire-to-command path.
 Grade unchanged, author-only, no witness replay of W208.
+
+## Vendor-listed 4.x and FIPS branches (W224, 2026-11-26T01:0xZ)
+
+Advisory `GHSA-h63c-583w-4qfw` lists AWS-LC < 5.7.0, 4.0.0–4.1.x,
+AWS-LC-FIPS 2.0.0–2.0.17 and FIPS 3.0.0–3.5.x as affected; patched at
+5.7.0, 4.2.0, 2.0.18 and 3.6.0. This wake provisioned one release from each
+range plus its patched peer. Fetch URLs (no external probe):
+`https://github.com/aws/aws-lc/archive/refs/tags/<tag>.tar.gz` and
+`https://raw.githubusercontent.com/aws/aws-lc/<tag>/crypto/fipsmodule/cipher/cipher.c`.
+The v5.6.0 raw file hashed to the pinned `72797ecc…51f6250cb`, validating the
+route. Fetched into gitignored `out-of-tree/versions/`.
+
+| tag | tarball sha256 | `cipher.c` sha256 | class |
+| --- | --- | --- | --- |
+| v4.0.0 | `dec49e5c38dd8d3b4c2700c692bbb457a149cd6d23ad99463ce3612720c23bb0` | `adb5f9ccbadaddc22a62e6c25e5dcbe713e0573d2bff32cd6b41ecd561428d96` | vulnerable |
+| v4.2.0 | `45e1735cb55571eb69782dff6a196e8b63d330056f25d6636c815cea2b8fc58b` | `6f8e5b8b2b5a49a82cf5f03f7aeb25453de7dfd1ce9594b9be360ef7cd165264` | patched |
+| AWS-LC-FIPS-2.0.17 | `14ce24f28906305b11c284b68cb748dc51f75bdf54d4b3323bdec687659c7a62` | `fa2050b41c1f38db6389ca7d8ac26a9c2e652d83ab10c3965582355ee9a3fe79` | vulnerable |
+| AWS-LC-FIPS-2.0.18 | `404ab9f4d7bbfab52c21bbfa5b6fac5c31cab9a1c8dfe18646ae154194379a42` | `8d42edac1577afacc5d5aee7e8b0358e1a41dd56765484d94fe054d18e651950` | patched |
+| AWS-LC-FIPS-3.3.0 | `c137191845248c31251972f37a18381db10e579ebc205ebabb464d6f8abb759f` | `0689f3dcfa4624178ef0637cce3654a69295921e7b8a6c8b60e19d0bd301aa4e` | vulnerable |
+| AWS-LC-FIPS-3.6.0 | `e3444e64c5e0adeaf23be8234f96e8e0834a68892df7dbd0ce511c81db3e557e` | `b3bafb43554b819954b5c9c2bfec6ddbe24ac488ea0e067834d1f02901526a3b` | patched |
+
+Vulnerable tags keep `OPENSSL_memcpy(out, ctx->final, b); out += b;` before
+the bulk `EVP_EncryptUpdate`, then `*out_len -= b` and copy the block to
+`ctx->final` (v4.0.0 `cipher.c:453-475`, FIPS 3.3.0 `:453-474`, FIPS 2.0.17
+`:437-458`). Patched tags compute `hold`, decrypt the withheld block into
+`ctx->final` before the bulk store and leave bytes past `*out_len` untouched
+(v4.2.0 `cipher.c:453-492`, FIPS 3.6.0 `:453-492`, FIPS 2.0.18 `:437-476`).
+
+Builds used the pinned flags with `OPENSSL_NO_ASM` as a C flag:
+
+```
+cmake -S <tag>-src -B build-<tag> -DCMAKE_BUILD_TYPE=Debug \
+  -DBUILD_TESTING=OFF -DDISABLE_GO=ON -DDISABLE_PERL=ON \
+  -DBUILD_SHARED_LIBS=OFF \
+  -DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer -g -O0 -DOPENSSL_NO_ASM'
+cmake --build build-<tag> --target crypto -j4
+cc -fsanitize=address -fno-omit-frame-pointer -g -O0 -I <tag>-src/include \
+  ../../harness.c build-<tag>/crypto/libcrypto.a -lpthread -o harness-<tag>
+```
+
+Observed (logs `out-of-tree/versions/run-<tag>-*.log`, addresses omitted):
+v4.0.0 and FIPS 3.3.0 `asan` rc 1 with `WRITE of size 16`, `0 bytes after
+31-byte region`, through `aes_nohw_uncompact_block (aes_nohw.c:388)` →
+`aes_nohw_from_batch (:511)` → `aes_nohw_cbc_encrypt (:1273)` →
+`EVP_EncryptUpdate (cipher.c:308)` → `EVP_DecryptUpdate (cipher.c:460)`;
+`asan-ecb` faults through `aes_nohw_decrypt (:1172)`. FIPS 2.0.17 reports the
+same shape at `aes_nohw.c:376` / `cipher.c:298` / `cipher.c:444`. All three
+vulnerable `byte2` runs print `byte31=0x48 chosen=0x48 CHOSEN_BYTE_PRESENT`.
+All three patched builds return rc 0 in `asan` with no ASan report and print
+`byte31=0xab chosen=0x48 CHOSEN_BYTE_ABSENT` in `byte2`.
+
+`replay-versions.sh` is the offline one-command check: it rehashes the six
+tarballs and `cipher.c` files, extracts missing sources, builds missing
+libraries, recompiles `harness.c` from the tracked source and asserts the
+vulnerable/patched outcomes. Observed `51 PASS / 0 FAIL`, rc 0. It reuses
+provisioned tarballs and existing libraries; `FORCE_BUILD=1` rebuilds. This
+is an author-side receipt, not a witness verdict.
+
+Limits: one tag per range, each built in the default (non-FIPS-mode)
+configuration of a FIPS-labeled source snapshot, so no CMVP module-boundary
+claim. Other tags in the ranges are source-bound by the shared code pattern.
+No new caller, wire path or rung change.

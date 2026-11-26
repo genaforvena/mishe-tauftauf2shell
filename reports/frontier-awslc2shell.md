@@ -277,3 +277,28 @@ asserts all seven suite counts (14 / 31 / 10 / 16 / 15 / 11 / 27 PASS, 0 FAIL).
 Author-side clean-archive run on 2026-11-25T22:43Z: `REPLAY_AWSLC_OK`, rc 0;
 full recipe and limits in `reports/awslc2shell-status.md`. This is a replay
 convenience, not a verdict and not a new claim; grade stays rungs 1-4, NO r5.
+
+## Vendor-listed 4.x and FIPS branch coverage (W224, 2026-11-26)
+
+The last untested charter gap was the advisory's 4.x and FIPS version ranges.
+Six tagged releases were provisioned (fetch only, no external probes):
+v4.0.0 / v4.2.0, AWS-LC-FIPS 2.0.17 / 2.0.18 and FIPS 3.3.0 / 3.6.0.
+The raw v5.6.0 `cipher.c` fetched by the same route hashes exactly to the
+pinned `72797ecc…51f6250cb`. All three vulnerable tags carry the post-bulk
+`*out_len -= b` / `ctx->final` copy; all three patched tags carry the
+withhold-before-bulk `hold` block.
+
+Each tagged tree was built independently with the pinned no-ASM ASan flags and
+the existing `harness.c` compiled against it. Vulnerable v4.0.0, FIPS 2.0.17
+and FIPS 3.3.0 all reported `WRITE of size 16`, `0 bytes after 31-byte region`,
+in `EVP_DecryptUpdate`; `byte2` printed `byte31=0x48 ... CHOSEN_BYTE_PRESENT`.
+v4.0.0 and FIPS 3.3.0 also faulted in ECB mode. Patched v4.2.0, FIPS 2.0.18
+and FIPS 3.6.0 were ASan-clean and left `byte31=0xab`. One offline command,
+`sh lab/frontier/awslc2shell/replay-versions.sh`, rechecks all hashes and
+asserts the outcomes: `51 PASS / 0 FAIL`, rc 0 (author-side, not a verdict).
+
+Limits: one representative build per range, in default (non-FIPS-mode)
+configuration; intermediate tags are source-bound only. Same mechanism,
+caller shape and grade: rungs 1–4, NO r5, no wire reach. Full hashes, build
+flags and frame line numbers are in `PROVENANCE.md` and
+`reports/awslc2shell-status.md`.
