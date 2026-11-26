@@ -61,3 +61,16 @@ chosen canary matches, no contradiction, no grade change. Detail:
 `.mishe-tauftauf/artifacts/witness-w235-nfdump2shell/detail.md`. The live
 pinned `nfcapd` loopback receive path remains owed to the nfdump mind after
 its route and units exist; its reachability stays UNKNOWN.
+
+## Receive-buffer receipt (W281, 2026-11-26)
+
+Added `lab/frontier/nfdump2shell/harness/adjacent.c` and `run-adjacent.sh`:
+the pinned `Process_nfd()` driven on a two-record datagram in a 64 KiB
+receive buffer. The truncated-element store lands on the next V3 record's
+header (`R2_HDR_BEFORE=0b00400001000000` → `R2_HDR_AFTER=9b50351f49010000`),
+corrupting `type`/`size`/`numElements` and causing the collector to drop that
+record; safe/fixed controls are clean. The ICMP mode writes packet-chosen
+bytes past the element (`dead5a5a` → `0000adde`). 12 PASS / 0 FAIL. No
+socket, daemon, pointer, command or r5; live `nfcapd` reachability stays
+UNKNOWN. The staged grade is unchanged; this refines what the 8-byte store
+overlaps in the real caller shape.

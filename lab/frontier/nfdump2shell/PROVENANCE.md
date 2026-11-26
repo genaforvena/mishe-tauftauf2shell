@@ -71,7 +71,7 @@ GCC ASan (`harness/out/vuln-asan-attack.log`):
 ERROR: AddressSanitizer: heap-buffer-overflow
 WRITE of size 8 at 0x504000000040 thread T0
     #0 Process_nfd harness/../pins/process-parent.inc:121
-    #1 main harness/driver.c:211
+    #1 main harness/driver.c:214
 0x504000000040 is located 0 bytes after 48-byte region
 allocated by malloc at harness/driver.c:148
 SUMMARY: AddressSanitizer: heap-buffer-overflow ... Process_nfd
@@ -97,6 +97,52 @@ The written value is the harness-chosen `msecReceived` derived from
 `fs.received` (`tv_sec=0x54415554`, `tv_usec=123000`); it is not
 attacker-chosen on the wire. The fixed plain build leaves the canary at
 `5a5a5a5a5a5a5a5a`.
+
+## Receive-buffer shape: adjacent V3 record header (W281)
+
+`harness/adjacent.c` (local, new) includes `driver.c` with `main` renamed so
+it reuses the same stand-ins and verbatim pins, then calls pinned
+`Process_nfd()` on a two-record datagram held in a 64 KiB buffer — the real
+collector caller shape, not the exact 48-byte allocation. `run-adjacent.sh`
+rebuilds vulnerable and fixed binaries and asserts **12 PASS / 0 FAIL**.
+No socket, daemon or command is used; the no-wire/no-command ceiling stands.
+
+With a 20-byte truncated EXgenericFlow element, `STORE_OFF=48` equals
+`R2_OFF=48`: the 8-byte `msecReceived` store lands on the next record's
+12-byte header (`harness/out/adjacent-vuln-attack.log`):
+
+```
+R2_HDR_BEFORE=0b00400001000000
+R2_HDR_AFTER=9b50351f49010000
+R2_TYPE=20635 R2_SIZE=7989 R2_NUMELEM=329
+BLOCK_SIZE=40 NUM_RECORDS=1 FLOWS=1
+```
+
+The chosen header corrupts record 2's `type`/`size`/`numElements`, and
+pinned `Process_nfd()` then rejects it (`record size error`, 1 of 2 records
+processed). Safe full-element input leaves the header at
+`0b00400001000000` and processes both records; the fixed build rejects the
+short element and processes neither. ASan does not fire in this shape:
+the store stays inside the 64 KiB allocation — the ASan finding is specific
+to the exact-allocation harness, while the corruption of a live record
+header is visible in the faithful receive-buffer shape.
+
+`MODE=icmp` demonstrates charter action 3. The truncated element's
+`EXgenericFlow` view starts 32 bytes before record 2's payload, so its
+`srcPort` (offset 40), `dstPort` (42) and `proto` (44) alias record 2's
+chosen bytes at `p2+8`, `p2+10` and `p2+12`. With `proto=IPPROTO_ICMP`,
+the pinned swap copies chosen bytes past the element
+(`harness/out/adjacent-vuln-icmp.log`):
+
+```
+P2_BYTES_BEFORE=dead5a5a01000000
+P2_BYTES_AFTER=0000adde01000000
+```
+
+The 8-byte value remains collector-time-derived; only the 4 ICMP-swap bytes
+are packet-chosen. No pointer-bearing object, wire input or command is
+involved. Live `nfcapd` reachability stays UNKNOWN; this is a caller-shaped
+harness experiment, not a running daemon.
 
 Trace hashes that include PID/address/path are deliberately not used as
 evidence; line numbers in `.inc` excerpts are relative to the excerpt, the

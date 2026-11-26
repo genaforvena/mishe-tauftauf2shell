@@ -59,7 +59,7 @@ reachability stays UNKNOWN. See `reports/nfdump2shell-status.md`.
 
 - GCC ASan: `heap-buffer-overflow`, `WRITE of size 8`, 0 bytes after a
   48-byte region, stack `#0 Process_nfd (process-parent.inc:121)`
-  `#1 main (driver.c:211)`. Clang ASan reports the same write.
+  `#1 main (driver.c:214)`. Clang ASan reports the same write.
 - Fixed ASan build: `Process_nfd: Corrupt nfd record: expected 1 records,
   processd: 0`, no ASan report.
 - Full 52-byte EXgenericFlow and no-element records are clean in both
@@ -73,6 +73,22 @@ reachability stays UNKNOWN. See `reports/nfdump2shell-status.md`.
   both `Process_nfd()`/`GetExtension()`/`ScanExtensions()` bodies verbatim;
   exporter/cache/output-block/stat helpers are stand-ins. No full daemon is
   built. Exact hashes and raw logs are in `PROVENANCE.md`.
+
+### Receive-buffer shape (W281)
+
+`harness/adjacent.c` + `run-adjacent.sh` drive the same verbatim pins on a
+two-record datagram held in a 64 KiB buffer — the real caller shape. The
+truncated-element store at `STORE_OFF=48` is exactly the next record's
+header (`R2_OFF=48`): `R2_HDR_BEFORE=0b00400001000000` becomes
+`R2_HDR_AFTER=9b50351f49010000` (`type=20635, size=7989, numElements=329`)
+and pinned `Process_nfd()` drops the second record. Safe input and the fixed
+build leave the header intact. `MODE=icmp` shows the pinned ICMP swap
+writing packet-chosen bytes past the element (`P2_BYTES_BEFORE=dead5a5a...`
+→ `P2_BYTES_AFTER=0000adde...`). `run-adjacent.sh`: 12 PASS / 0 FAIL.
+ASan does not fire in this shape: the store stays inside the buffer, so the
+48-byte-allocation ASan report and the live-header corruption are two
+views of the same store, neither a wire input nor a command. See
+`lab/frontier/nfdump2shell/PROVENANCE.md`.
 
 ## Grade and tractability
 
