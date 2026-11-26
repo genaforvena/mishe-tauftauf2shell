@@ -32,14 +32,13 @@ safe-full and no-element inputs clean in both builds. Plain build:
 run-all.sh: 10 PASS / 0 FAIL.
 
 Grade: rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with
-harness-chosen written value. No adjacent object, pointer, wire, command or
-rung 5.
+collector-time-derived written value. Live pinned `nfcapd` on loopback is now
+measured (below); no pointer, command or rung 5.
 
-Next: the person runs the exact full-flag sync from `docs/runtime-pin.md` and
-activates the mind's units; after activation, build the pinned `nfcapd`
-loopback receive path and test the live heap neighborhood plus the ICMP
-`srcPort`/`dstPort` file-chosen byte path. Witness replay of the staged grade
-is complete (below).
+Next: witness replay of the live wire result; then look for a shape where
+packet-chosen ICMP-swap bytes reach a processed live record, or where a
+pointer-bearing object is adjacent to the short element. No rung 5 without
+a benign command side effect on a live loopback target.
 
 ## Clean-archive replay receipt (frontier W235, 2026-11-25 22:59Z)
 
@@ -74,3 +73,21 @@ bytes past the element (`dead5a5a` → `0000adde`). 12 PASS / 0 FAIL. No
 socket, daemon, pointer, command or r5; live `nfcapd` reachability stays
 UNKNOWN. The staged grade is unchanged; this refines what the 8-byte store
 overlaps in the real caller shape.
+
+## Live loopback receipt (2026-11-26)
+
+`build-wire.sh` fetches both pinned commit tarballs (SHA-256
+`970247fa1b7deae56ee9ff09ebe8ec5e6c86adef9b5f82c7f2fd67754c29c827` vuln,
+`61c92342d19469a4ee46810953741e48ebc4cce2ad3a5cb369feca2b1dbc81f2` fix)
+and builds full `nfcapd` + `nfdump` pairs in ASan and plain flavours.
+`run-wire.sh` binds a real collector to `127.0.0.1`, sends the pinned V3
+datagram with `wire_send.py`, stops the daemon and reads the capture. Both
+flavours: **13 PASS / 0 FAIL**. The vulnerable collector drops record 2
+(`record size error. Size v3header: 6270 > size left: 64`, 1 flow vs 2 in
+the safe control); the fixed collector rejects the short element
+(`Corrupt nfd record… processd: 0`, 0 flows). No ASan report in any live
+case: the real 65535-byte receive allocation keeps the store in-bounds.
+An alias experiment to put chosen bytes into a still-valid second record
+failed (record copied before mutation; `nfdump` time error) and is preserved
+as a negative result in `PROVENANCE.md`. Grade unchanged; witness replay of
+this live result is still owed.

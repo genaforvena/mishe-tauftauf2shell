@@ -140,10 +140,88 @@ P2_BYTES_AFTER=0000adde01000000
 ```
 
 The 8-byte value remains collector-time-derived; only the 4 ICMP-swap bytes
-are packet-chosen. No pointer-bearing object, wire input or command is
-involved. Live `nfcapd` reachability stays UNKNOWN; this is a caller-shaped
-harness experiment, not a running daemon.
+are packet-chosen. No pointer-bearing object or command is involved. A live
+loopback collector was later built and driven (section below); this harness
+result alone does not establish wire reachability.
 
 Trace hashes that include PID/address/path are deliberately not used as
 evidence; line numbers in `.inc` excerpts are relative to the excerpt, the
 pinned source line numbers are recorded in the excerpt commands above.
+
+## Live pinned collector on loopback (2026-11-26)
+
+New local files, with SHA-256:
+
+| artifact | SHA-256 |
+| --- | --- |
+| `build-wire.sh` | `706b8a58695e639707c947be9a6cfbded8aefc36566accf9a9a6b69fba4e724b` |
+| `run-wire.sh` | `841565f6efa8a26adf7f4eed1e39746e9e3d04e21603e87ee28952b8cdbca18c` |
+| `harness/wire_send.py` | `c4dd969505eee3399928a11030c513f69cc0f76684c21b1be6eb12fdc0ff7ae2` |
+
+`build-wire.sh` fetches two source tarballs from `github.com/phaag/nfdump`
+(provisioning only; no probes) and verifies the exact commit bytes:
+
+```
+nfdump-8a00543a.tar.gz
+  970247fa1b7deae56ee9ff09ebe8ec5e6c86adef9b5f82c7f2fd67754c29c827
+nfdump-32b9cbe7.tar.gz
+  61c92342d19469a4ee46810953741e48ebc4cce2ad3a5cb369feca2b1dbc81f2
+```
+
+It runs `autogen.sh`, then out-of-tree `configure --enable-devel` and `make`
+for four pairs: vulnerable/fixed × ASan/plain. VPATH builds need the generated
+`vcs_track.h`, `filter.h` and `ipconv.h` seeded into the build/source
+directories; `build-wire.sh` does that before the second `make`.
+
+`run-wire.sh` starts each collector as
+`nfcapd -4 -b 127.0.0.1 -p PORT -M DIR/flows -t 5 -v 3`, sends one datagram
+with `python3 harness/wire_send.py PORT MODE`, stops it with SIGTERM and
+reads the renamed capture with `nfdump -r CAP -o 'fmt:%ts|%sp|%dp|%pr|%pkt|%byt'`.
+Ports 10081–10086 are used sequentially on 127.0.0.1 only. Evidence lives in
+`harness/out/wire/` (ASan) and `harness/out/wire-plain/` (plain).
+
+```
+bash lab/frontier/nfdump2shell/run-wire.sh
+TOTAL: 13 PASS / 0 FAIL
+V_BUILD=src/build-vuln-plain/src F_BUILD=src/build-fixed-plain/src \
+  WIRE_OUT=harness/out/wire-plain bash run-wire.sh
+TOTAL: 13 PASS / 0 FAIL
+```
+
+Observed (values differ between runs because the store is wall-clock derived):
+
+```
+vuln-attack   Process_nfd: record size error. Size v3header: 6274 > size left: 64
+              Summary: total flows: 1, total bytes: 1
+vuln-safe     Summary: total flows: 2, total bytes: 680, total packets: 8
+vuln-icmp     Process_nfd: record size error …
+              Summary: total flows: 1
+vuln-single   Summary: total flows: 1 (fields read stale bytes past packet)
+fixed-attack  Process_nfd: Corrupt nfd record: expected 2 records, processd: 0
+              Summary: total flows: 0
+fixed-safe    Summary: total flows: 2, total bytes: 680
+```
+
+No `ERROR: AddressSanitizer` line appears in any live daemon log: `nfcapd`
+receives into `malloc(NETWORK_INPUT_BUFF_SIZE)` (65535 bytes,
+`src/collector/nfnet.h:49`), so the 8-byte store stays inside the allocation.
+The live object overlapped is the *next V3 record's 12-byte header* in the
+same datagram; `Process_nfd()` rejects the corrupted record and the final
+capture contains one flow instead of two. The written value comes from
+`fs.received` (`gettimeofday()` immediately before dispatch in
+`src/nfcapd/nfcapd.c:436-461`), not from the packet.
+
+Negative result (preserved): an alias shape with a 4-byte element in a
+16-byte record passes the pinned verifier and puts the store inside the
+following, still structurally valid record's payload; it was sent live in
+`alias-icmp`/`alias-tcp` variants with distinctive `inPackets` bytes. No
+chosen-byte write into a processed record was observed: `Process_nfd()`
+`memcpy`s each record to the output block *before* applying
+`msecReceived`/ICMP mutations, and `nfdump` rejects the aliased record with
+`Record: 2 Time error - last < first`. The csv line carried the pre-swap
+value. That experiment was removed from the shipped runner; it is recorded
+here only as a failed hypothesis, not evidence.
+
+Wire reachability is now ESTABLISHED at the harness level (real loopback
+socket, real pinned collector, vulnerable/fixed/safe controls). No pointer,
+command or r5 claim is made. The live result awaits independent witness replay.

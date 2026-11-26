@@ -1,2 +1,4 @@
 # Generated binaries and replay outputs.
 harness/out/
+src/
+__pycache__/
