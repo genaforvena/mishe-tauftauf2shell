@@ -183,8 +183,8 @@ safe 4x4 no-alpha file leaves the object unchanged. The first generator
 attempt omitted the code-size byte, so the pin read `bpp=12` and rejected
 the file; the byte was restored and the failing logs are preserved in the
 transcript. `bash run-real.sh` now reports **35 PASS / 0 FAIL** after the
-W288 mixed-marker extension (30/0 before it); clean-archive replay of the
-extended runner is owed.
+W288 mixed-marker extension (30/0 before it); a clean `git archive
+0344afe4` replay into `/tmp/w288-replay` returned the same 35/0, rc 0.
 
 This is an on-disk file artifact reaching the pinned function through a
 real `FILE*`, still not a GIMP plugin or PDB `load_image()` call: the

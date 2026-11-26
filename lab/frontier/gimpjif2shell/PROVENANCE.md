@@ -630,3 +630,9 @@ batch success, fault, chosen-address dereference or command. Fixed-plugin
 control remains BLOCKED: `v3.2/linux/` and `v3.4/linux/` still publish no
 AppImage at or beyond the 3.2.10 fix milestone. Grade unchanged rung 3 /
 rung 4 PARTIAL, NO r5.
+
+Smoke receipt at 20:14Z: `git archive 0344afe4 lab/frontier/gimpjif2shell`
+into `/tmp/w288-replay`, then `run-real.sh` there: 35 PASS / 0 FAIL,
+rc 0, all logs regenerated inside the archive only. The shared AppRun
+preload line was untouched by this lane (canonical shim binary was never
+swapped).
