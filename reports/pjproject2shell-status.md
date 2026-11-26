@@ -1,4 +1,4 @@
-# pjproject2shell — admitted status (2026-11-26 03:0xZ W240 update)
+# pjproject2shell — admitted status (2026-11-26 22:44Z W244 update)
 
 **ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
 target mind.** Window 164 was already live and was adopted, not duplicated.
@@ -30,28 +30,37 @@ clamped length. GCC and Clang ASan report `heap-buffer-overflow`,
 `MISHE-PJPROJECT!` at frame bytes 48..63). Fixed build stays at 48 bytes;
 safe input is clean in both bodies. `run-all.sh`: 29 PASS / 0 FAIL.
 
-Grade: **rung 3 confirmed in a real pjmedia consumer / rung 4 with a
-driver-provided live adjacent sentinel**. Real-built vulnerable `c1ea7648`
-with `PJMEDIA_HAS_VIDEO=1` + ASan writes 64 or 512 bytes into a 48-byte
-frame via `pj_file_read` → `file_read3` → `avi_get_frame`; the chosen
-`MISHE-PJPROJECT!` marker overwrites bytes 48..63 of a live sentinel. Fixed
-`7ecc6584` and safe 48-byte input are clean. No library object, pointer,
-wire, command or r5. The earlier stand-in cap of 64 present bytes is removed
-by the real crafted AVI.
+Grade: **rung 3 confirmed in a real pjmedia consumer / rung 4
+author-DEMONSTRATED with a real library object and natural shipped-caller
+adjacency**. Real-built vulnerable `c1ea7648` with `PJMEDIA_HAS_VIDEO=1` + ASan
+writes 64 or 512 bytes into a 48-byte frame via `pj_file_read` → `file_read3`
+→ `avi_get_frame`. W241 overwrites a live `pjmedia_port` created from the same
+pj pool; W242 overwrites a live `pj_mutex_t` at frame+48 through the SHIPPED
+`pjmedia_vid_port_create()` clock path with no driver-groomed victim; W243 puts
+a live pointer-bearing `pjmedia_clock` at frame+48 via a shipped-SAMPLE
+allocation order. Fixed `7ecc6584` and safe 48-byte input are clean in all
+lanes. No pointer called, no wire, command or r5. W240–W243 await witness
+verdict; W239 is ESTABLISHED AS LABELED for the staged excerpt only. The
+earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
 
 ## Next
 
 1. Done: witness replay ESTABLISHED AS LABELED (W239), no grade change then.
-2. Done (W240): real builds at both pins; crafted 48/64/512-byte `00dc`
-   AVIs; `pjmedia_avi_player_create_streams()` + `pjmedia_port_get_frame()`;
-   vulnerable ASan WRITE-64/WRITE-512, chosen-byte overwrite of a live
-   sentinel, fixed clamp and safe control. Replay with
-   `bash lab/frontier/pjproject2shell/real/build-real.sh` and
-   `bash lab/frontier/pjproject2shell/real/run-real.sh`.
-3. Next: try a real library object adjacent to the frame buffer (pool block
-   or port struct) for a library-object overwrite; rung 5 still needs a
-   loopback target, attacker-supplied AVI on a wire, and a benign command
-   side effect with vulnerable/fixed/safe controls.
+2. Done (W240–W243): real builds at both pins, crafted 48/64/512-byte `00dc`
+   AVIs, real `pjmedia_avi_player_create_streams()` + `pjmedia_port_get_frame()`
+   pulls; ASan WRITE-64/WRITE-512, chosen-byte overwrite of a live
+   `pjmedia_port`, the shipped vid-port mutex and a shipped-sample
+   pointer-bearing clock; fixed clamp and safe controls. Runners:
+   `real/run-real.sh`, `real/run-realobj.sh`, `real/run-vidport.sh`,
+   `real/run-clock.sh`. Clean-archive receipts in `PROVENANCE.md`.
+3. Done (W244): source-layout check. In production library code the natural
+   victim at frame+48 is `pj_mutex_t` (`vid_port.c:688` then `:701`), whose
+   glibc list pointers at +24/+32 are beyond a 64-byte write but inside a
+   512-byte one; no function-pointer/callback object follows the frame in
+   production. Grade unchanged; no witness replay repeated.
+4. Next: fold an actual W240–W243 witness verdict when one arrives; no r5
+   without a live loopback target, attacker AVI on a wire, a benign command
+   side effect and vulnerable/fixed/safe controls.
 
 ## Receipts
 
@@ -82,8 +91,7 @@ by the real crafted AVI.
   full-file and excerpt pin hashes; GCC+Clang ASan WRITE-64 past a 48-byte
   region at `avi-vulnerable.inc:15`, fixed/safe controls clean, chosen
   16-byte marker in the plain readback. Verdict ESTABLISHED AS LABELED, NO
-  r5; detail in `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
-
+  r5; detail in `.mishe-tauftauf/artifacts/witness-w239-pjprojectshell/detail.md`.
 - W240 real-consumer replay 2026-11-26 15:00Z: fetched full tarballs at
   `c1ea7648`/`7ecc6584` (SHA-256 in `PROVENANCE.md`), built both with
   `PJMEDIA_HAS_VIDEO=1`, `-DNDEBUG` and ASan at `-O0`; debug build without
@@ -95,10 +103,20 @@ by the real crafted AVI.
   no ASan report. Raw logs in `lab/frontier/pjproject2shell/real/out-vuln/`
   and `real/out-fixed/`. Grade advanced from rung 4 PARTIAL synthetic to
   rung 4 real-consumer sentinel; no pointer, command or r5.
-
 - Clean-archive replay 2026-11-26 15:05Z: `git archive 759825c1
   lab/frontier/pjproject2shell` into `/tmp/w240-pjproject-clean`;
   `real/build-real.sh` rc 0 with both tarball hashes exact and one
   `avi_get_frame` symbol per library; `real/run-real.sh` rc 0 with the same
   six-case transcript (WRITE-64/WRITE-512, neighbor hex, fixed/safe rc 0).
   In-tree `run-witness.sh` at `759825c1`: `WITNESS REPLAY PASS`.
+- W241/W242/W243 receipts (15:30Z/17:56Z/20:24Z): clean-archive replays of
+  `4f9314a9`, `79c1f673` and `a98128fc` reproduced 11/0 realobj checks, 16/0
+  vid-port checks and 10/0 clock checks with both pinned tarballs hash-matched;
+  raw logs in `real/out-vuln/`, `real/out-fixed/` and `PROVENANCE.md`.
+- W244 source-layout check 22:44Z: verified at the vulnerable pin that
+  `vid_port.c:688` frame and `:701` mutex are consecutive allocations from one
+  pool, `struct pj_mutex_t` (`os_core_unix.c:127-136`) embeds glibc list
+  pointers at +24/+32, `vidport-asan-attack64.log` MUTEX_AFTER is unchanged
+  from byte 16 onward while `vidport-asan-attack512.log` is repeated chosen
+  marker across all 88 bytes. No production callback-pointer victim; grade
+  unchanged, no replay repeated. Detail in `reports/frontier-pjproject2shell.md`.

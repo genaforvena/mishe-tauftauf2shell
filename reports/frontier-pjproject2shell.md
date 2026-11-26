@@ -227,6 +227,43 @@ checked above have a mutex or no adjacent object. No wire input reaches
 receipt and hashes are in `PROVENANCE.md`.
 
 
+## Production-library victim layout check (W244, 2026-11-26 22:44Z)
+
+A read-only source trace at the vulnerable pin answers the remaining scope
+question: is a pointer-bearing object naturally allocated after the AVI frame
+buffer in a PRODUCTION library caller? **Partly yes; no grade change.**
+
+- `pjmedia_vid_port_create()` creates a dedicated pool (`vid_port.c:543`),
+  then allocates the AVI-device stream (`:611`), the clock (`:653`), the
+  converter (`:214`/`:231`) and the passive port (`:665`) BEFORE the frame.
+  It then allocates `vp->frm_buf->buf = pj_pool_zalloc(pool, vafp.framebytes)`
+  at `:688` and `pj_mutex_create_simple(pool, ...)` at `:701`; the live
+  `pj_mutex_t` is the next and last allocation from that pool, at frame+48.
+  The clock thread passes `vp->frm_buf` unchanged through `videodev.c:679`
+  and `avi_dev.c:636` into `avi_get_frame()`. This is library-internal
+  production code, with no sample and no driver-supplied victim.
+- `struct pj_mutex_t` (`pjlib/src/pj/os_core_unix.c:127-136`) embeds glibc
+  `pthread_mutex_t` at +0; on x86_64 its `__pthread_list_t` at +24/+32 is two
+  raw pointers (`bits/struct_mutex.h:22-37`). The `pj_thread_t *owner` at +80
+  needs `PJ_DEBUG=1`, which is compiled out by the `-DNDEBUG` release build
+  (`pjlib/include/pj/config.h:361-367`).
+- **Correction to a plausible over-read:** a 64-byte `00dc` chunk is only
+  16 bytes past a 48-byte frame, so it reaches mutex bytes 0..15 only.
+  `real/out-vuln/vidport-asan-attack64.log` `MUTEX_AFTER` is byte-identical to
+  `MUTEX_BEFORE` from byte 16 onward; the pointer fields at +24/+32 are NOT
+  touched by that case. A 512-byte chunk does cover them:
+  `real/out-vuln/vidport-asan-attack512.log` `MUTEX_AFTER` is repeated
+  `MISHE-PJPROJECT!` across all 88 readback bytes, alongside ASan
+  `WRITE of size 512`. No pointer was dereferenced or called in either case.
+- Ceiling confirmed: no function-pointer/callback-bearing object is allocated
+  after the frame in production library code. `vid_conf.c:557` get_buf is
+  last in its own pool and later arrays use the conference pool;
+  `avi_dev.c:469` encoded buffer is followed only by a raw title string
+  (`:475`/`:487`). The pointer-bearing `pjmedia_clock` remains the W243
+  shipped-SAMPLE victim. Grade unchanged: rung 3 / rung 4
+  author-DEMONSTRATED, no wire, no pointer call, no command, no r5.
+
+
 ## Witness replay (W239, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/pjproject2shell/run-witness.sh` from
