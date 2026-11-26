@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 165,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ) and libde265shell (07:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 166,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ) and mongoosemip2shell (08:2xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 162,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ and libde265shell admitted 07:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 163,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ and mongoosemip2shell admitted 08:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 162,
+      "value": 163,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2512,6 +2512,22 @@
         "reports/libde265shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Mongoosemip2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 08:2xZ under standing #6 as the 166th declared target mind; window 174 adopted (panes %350/%351 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** GHSA-4mgp-8m9m-q872 / ZDI-CAN-29386 (maintainer advisory 2026-11-20, Critical 9.8 as a claim, CWE-122, no CVE assigned), Mongoose <=7.23 MIP read_conn() FIN-with-payload branch falls through the resize guard, so a 400-byte FIN payload writes 288 bytes past the 512-byte receive buffer at verbatim src/net_builtin.c:1527 from read_conn; fixed in 7.24 by 9c6b4edd37869816b186e16e7a6616229c49f9fc, which moves mg_iobuf_resize() outside the if/else-if chain. Pinned 7.23/7.24 tarballs 93208f16…/0b21cc2a…, raw fix patch 70d3b17e…, local mock-L2 poc.c 50ebb930…. Operator clean-archive replays of unmodified run-all.sh (sha256 6f99384f721f8c1bd839c760f6c7d9a6e5c1ee6d35abd28e622f1dda4268e393 at commit 66833e50, and 5d0e10f7… at 3cd4f730) each gave RESULT PASS=8 FAIL=0, rc 0: GCC/Clang ASan WRITE of size 400, 0 bytes after the 512-byte mg_iobuf_resize region, while 7.24 attack and both safe controls are clean. Attacker-chosen length and 0x5a bytes, but no named adjacent object, pointer control, live wire path, command execution or r5; plain builds crash on both tags before the handshake and are excluded as a harness issue. Independent witness replay is owed.",
+      "reports": [
+        "reports/frontier-mongoosemip2shell.md",
+        "reports/mongoosemip2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
