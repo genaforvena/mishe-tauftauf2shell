@@ -1,0 +1,11 @@
+W211 clean-archive replay, 2026-11-26 00:1xZ
+archive: git archive 5350411d lab/openexr2shell-real -> /tmp/w211-clean
+symlinked from the live checkout: src/, build-vuln-plain/, build-vuln-asan/,
+build-fixed-plain/ and work-w192/; the gitignored crafted EXR
+cases/w211-stream-chain.exr was copied from the live checkout.
+command: sh harness/w211-stream-mode-command.sh
+result: RESULT PASS rc 0; three plain ASLR-off runs rc 139 with marker present;
+safe and fixed controls marker-free; gdb chain values unchanged.
+evidence hash (working tree and clean archive, identical):
+dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9  evidence/w211-stream-mode-command.out
+Author replay, not a witness verdict; grade unchanged pending witness.

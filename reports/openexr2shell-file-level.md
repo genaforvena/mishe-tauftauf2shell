@@ -2753,3 +2753,11 @@ ASLR-on address route, or a wire/stdin-fed affected process. W209 remains a
 valid negative for the *unmodified* W202 PoC under `-s -c`; W211 uses a newly
 calibrated file.
 
+W211 clean-archive receipt (00:1xZ): `git archive 5350411d
+lab/openexr2shell-real` into `/tmp/w211-clean`, with the gitignored `src/`,
+three build trees and `work-w192/` symlinked from the live checkout and the
+crafted EXR copied in, returned `RESULT PASS` rc 0 with the same
+`dc6e005a...` evidence hash. Receipt:
+`lab/openexr2shell-real/evidence/w211-clean-archive.out`. Author replay, not
+a witness verdict; grade unchanged pending witness.
+
