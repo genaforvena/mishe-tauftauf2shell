@@ -15,7 +15,7 @@ call shows a non-nil adjacent qword in 6 of 12 config-path lengths (14, 18,
 22, 48, 72, 80, 96 sampled). The delta from `buf` to that qword was not
 stable: `-0x1210`, `+0x2c0`, `+0xe3e0`/`+0xe440`, `+0x1b520`, `+0x1f090`,
 and larger values across four repeats per sampled length; some qwords were
-non-canonical stale data (`...0695`). `layout-deltas.txt` has the parsed
+stale/unmapped data (`...0695`). `layout-deltas.txt` has the parsed
 results. No layout placed a live pointer into the controlled 256-byte window
 at a reachable low-byte boundary.
 
@@ -34,8 +34,8 @@ little-endian original size qword, and byte 32 = `0x00` or `0x40`.
   live liblua GC visits after the copy and the install ended with
   `error: unpacking of archive failed: cpio: read failed`.
 - Before the copy the qword at `buf+0x20` was `0x738500000001` (byte 32 =
-  `0x00` fixture) and `0x735d00000001` (byte 32 = `0x40` fixture): stale,
-  non-canonical values, not heap pointers. No `VISIT` landed on `buf+0x20`
+  `0x00` fixture) and `0x735d00000001` (byte 32 = `0x40` fixture):
+  stale/unmapped values, not heap pointers. No `VISIT` landed on `buf+0x20`
   in either run. The chosen low byte therefore redirected nothing.
 
 `metadata-probe.gdb` is the observer; `metadata-q00.log` and
@@ -43,6 +43,11 @@ little-endian original size qword, and byte 32 = `0x00` or `0x40`.
 in `make-attack.py` was used to build these fixtures and then reverted;
 `make-attack.py` is byte-identical to HEAD and its default 64-byte output
 matches the committed `attack.rpm` byte-for-byte.
+
+Correction (2026-11-26 20:02Z): both qwords above are canonical x86-64 user
+addresses (bit 47 clear, below `2^47`); they are stale/unmapped, not
+non-canonical. Earlier wording in this note and the wall was inaccurate;
+the redirect conclusion is unchanged.
 
 Conclusion: shortest-write metadata preservation removes the glibc abort but
 does not supply an ASLR-stable redirect here. No chosen dereference, no

@@ -1,0 +1,70 @@
+Breakpoint 1 at 0x26a9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc, line 66.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=11, argv=0x7fffa2b9a338) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:66
+66	    rpmts ts = NULL;
+Breakpoint 2 at 0x7aae3cb7ed4b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc, line 438.
+Breakpoint 3 at 0x7aae3ca669a6
+Breakpoint 4 at 0x7aae3cbbb231: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc, line 2243.
+error: unpacking of archive failed: cpio: read failed - No such file or directory
+error: filetypes-1.0-1.noarch: install failed
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007aae3ca669a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+WINDOW_BUF=0x63082ec22160
+VISIT_COUNT=666
+WINDOW_VISIT_OFFSETS=51
+CAND off=0x20 pre=0x0 canonical=0
+CAND off=0x50 pre=0x63082ec21920 canonical=1
+CAND off=0xb0 pre=0x0 canonical=0
+CAND off=0xe0 pre=0x0 canonical=0
+CAND off=0x110 pre=0x0 canonical=0
+CAND off=0x140 pre=0x0 canonical=0
+CAND off=0x170 pre=0x0 canonical=0
+CAND off=0x1a0 pre=0x0 canonical=0
+CAND off=0x1f0 pre=0x0 canonical=0
+CAND off=0x220 pre=0x63082ec221b0 canonical=1
+CAND off=0x280 pre=0x0 canonical=0
+CAND off=0x2b0 pre=0x0 canonical=0
+CAND off=0x2e0 pre=0x0 canonical=0
+CAND off=0x310 pre=0x63082ec76b20 canonical=1
+CAND off=0x340 pre=0x0 canonical=0
+CAND off=0x370 pre=0x0 canonical=0
+CAND off=0x3a0 pre=0x0 canonical=0
+CAND off=0x3d0 pre=0x0 canonical=0
+CAND off=0x400 pre=0x63082ec22e40 canonical=1
+CAND off=0x430 pre=0x0 canonical=0
+CAND off=0x460 pre=0x63082ec22800 canonical=1
+CAND off=0x490 pre=0x63082ec728d0 canonical=1
+CAND off=0x4c0 pre=0x0 canonical=0
+CAND off=0x4f0 pre=0x0 canonical=0
+CAND off=0x520 pre=0x0 canonical=0
+CAND off=0x550 pre=0x0 canonical=0
+CAND off=0x580 pre=0x0 canonical=0
+CAND off=0x5b0 pre=0x63082ec241c0 canonical=1
+CAND off=0x5e0 pre=0x0 canonical=0
+CAND off=0x610 pre=0x0 canonical=0
+CAND off=0x640 pre=0x0 canonical=0
+CAND off=0x670 pre=0x0 canonical=0
+CAND off=0x6a0 pre=0x0 canonical=0
+CAND off=0x6d0 pre=0x0 canonical=0
+CAND off=0x720 pre=0x0 canonical=0
+CAND off=0x750 pre=0x63082ec13370 canonical=1
+CAND off=0x780 pre=0x0 canonical=0
+CAND off=0x7b0 pre=0x63082ec5aee0 canonical=1
+CAND off=0x7e0 pre=0x0 canonical=0
+CAND off=0x810 pre=0x0 canonical=0
+CAND off=0x840 pre=0x63082ec241f0 canonical=1
+CAND off=0xb00 pre=0x0 canonical=0
+CAND off=0xb30 pre=0x0 canonical=0
+CAND off=0xb60 pre=0x0 canonical=0
+CAND off=0xb90 pre=0x0 canonical=0
+CAND off=0xbc0 pre=0x0 canonical=0
+CAND off=0xbf0 pre=0x0 canonical=0
+CAND off=0xc20 pre=0x0 canonical=0
+CAND off=0xc50 pre=0x0 canonical=0
+CAND off=0xc80 pre=0x0 canonical=0
+CAND off=0xce0 pre=0x63082ec22620 canonical=1
+CANONICAL_PRECOPY_POINTERS=11
+WINDOW_REPORT_DONE=1

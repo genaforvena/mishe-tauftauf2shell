@@ -398,7 +398,7 @@ The first cpio call uses a stack buffer; an earlier quick regex took that
 line and wrongly reported `NEXT=(nil)` for every layout. Re-parsing the
 second (heap) call found a non-nil adjacent qword in 6 of 12 config-path
 lengths, but with unstable deltas (`+0x2c0`, `+0xe3e0`/`+0xe440`,
-`+0x1b520`, `+0x1f090`, and stale non-canonical qwords).
+`+0x1b520`, `+0x1f090`, and stale/unmapped qwords).
 
 At the sampled length-48 layout the real size qword at `buf+0x18` was
 `0xa1`. A 33-byte payload preserving that qword and choosing byte 32
@@ -418,6 +418,62 @@ to HEAD. Full note and traces: `real/aslr-window/metadata-probe.md`.
 | `real/aslr-window/layout-deltas.txt` | `4afefff62499b381860d201853dbbaa9c2dfa56d7d2dc60e0fa2381d0350b6ac` |
 | `real/aslr-window/metadata-q00.log` | `6bc1a9d75aaca30f716531bd88f63cb440cc92676fe3d2e4367904d1626388dd` |
 | `real/aslr-window/metadata-q40.log` | `f8991e16586b63499da1b9820d7003d63be18a0907e4cc77f72b87e6c9b1e687` |
+
+## Wider redirect-layout survey (2026-11-26 19:56–20:03Z)
+
+One bounded workspace-only experiment asked whether earlier redirect
+candidates were layout flukes or an ASLR-stable path. The pinned vulnerable
+plain `build-vuln-plain/tools/rpm` ran with a private `--dbpath`, guarded
+`/tmp` install names, `RPM_CONFIGDIR` symlinks of 32 different lengths
+(12–200 characters), ASLR on (`set disable-randomization off`) and GDB
+observing only: no forced call, no `LD_PRELOAD`, no debugger write. Package
+bytes and the vulnerable/fixed builds were unchanged.
+
+First sweep (`aslr-window/metadata-probe.gdb`) read the adjacent qword at
+`buf+0x20` in 32 layouts: nil in 17/32, far outside the 4096-byte window in
+14/32, and one in-window delta (`L=112`, `delta=0x5380`) that lies beyond the
+controlled window. Zero low-byte redirect candidates.
+
+Second sweep (`aslr-window/probe.gdb` snapshot of all 4096 window qwords)
+applied the committed criterion to every GC-visited offset: canonical
+`buf+delta` with `0 < delta < K` and `(delta & ~0xff) + 0x10 <= K`.
+Candidates existed in 11/32 layouts but none at `K <= 0x121` (the earlier
+289-byte safe boundary). The two lowest were `off=0x200 pre=buf+0x50` at
+length 72 and `off=0x220 pre=buf+0x50` at length 42; all others started at
+`0x2f0`. Six fresh ASLR-on repeats at each of lengths 42 and 72 reproduced
+neither low candidate (0/6 each). Length 42 produced candidates only at
+`0x500`/`0x560` in 2/6 repeats, requiring writes of at least 1281/1377 bytes,
+inside the already-measured glibc abort range.
+
+Chosen-byte trials targeted the two low offsets directly:
+`aslr-window/mkredirect.py` built 513-byte and 545-byte payloads with their
+byte at offset `0x200`/`0x220` set to `0x00`, refreshing the payload size and
+digest tags before writing `UINT64_MAX` into the symlink size. Fifteen
+ASLR-on GDB trials per fixture per length (60 total) found the exact
+candidate at the targeted offset in 0/60 runs and a GC visit at `buf+0x00`
+in 0/60 runs. Termination was SIGABRT in 51/60 and SIGSEGV in 9/60; the long
+writes mostly abort inside glibc before any walk, consistent with the earlier
+512/1441-byte negatives. The plain binary is a PIE `DYN` ELF with
+`randomize_va_space=2`, so it supplies no fixed non-PIE code address for a
+chosen mapped target either.
+
+Correction to the preceding section: `0x738500000001` and `0x735d00000001`
+are canonical x86-64 user addresses (bit 47 clear, below `2^47`); they are
+stale/unmapped values, not non-canonical ones. The redirect conclusion is
+unchanged. Grade unchanged: rung 3 pinned verbatim / rung 4 author-DEMONSTRATED
+in real rpm consumers, no ASLR-stable chosen target, no wire path, no
+command, no r5.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/aslr-window/layout-sweep-32.txt` | `9d41bb752984c18aedea7e2cccd2906faadee68185767c98b6b625dc06d5c7bf` |
+| `real/aslr-window/window-sweep-32.txt` | `df6acdcb9432f80914178544dc7c55bceaa6a89860e47d788e54a8a81f62bec5` |
+| `real/aslr-window/redirect-trials-60.txt` | `2b5eb095fcd844f55ab9afc0d79b5903a92ac50e52e7e56ec215e6bc142feaea` |
+| `real/aslr-window/candidate-042.log` | `6703edd71607bd9e48755dcfeb78a802de843b4d652ffcf04b47ec953ef89285` |
+| `real/aslr-window/trial-201-72-03.log` | `cc8283d187a195a3942d1e610d3583b22b1690c22e4f5e66c0175f2f1eae5509` |
+| `real/aslr-window/redirect-probe.gdb` | `52cac50c0fc805bf67d5d0a87f96cbf6e904d45e5297d3f39a50e28721d34b24` |
+| `real/aslr-window/mkredirect.py` | `735f7e506bd4f8e052e195efe3240e8436ac41b8b5dfe63d8e7413730025f8d1` |
+| `real/aslr-window/redirect-trials.py` | `fc94c8e06e9ae5590a6ed84473515bc790d4c1567ad6a4d1a632e8eb593ac381` |
 
 ## Verification
 
