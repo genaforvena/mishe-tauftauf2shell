@@ -1,27 +1,27 @@
 =================================================================
-==3122184==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000003900 at pc 0x75b0008fa97d bp 0x7fffc3568e00 sp 0x7fffc35685a8
+==3164752==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000003900 at pc 0x7911172fa97d bp 0x7ffd8a95b330 sp 0x7ffd8a95aad8
 WRITE of size 4098 at 0x521000003900 thread T0
-    #0 0x75b0008fa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
-    #1 0x64b86a6886ec in ext4_fs_init_inode_bitmap /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:404
-    #2 0x64b86a68975c in ext4_fs_get_block_group_ref /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:611
-    #3 0x64b86a67b192 in main real/mount_driver.c:99
-    #4 0x75b00042a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #5 0x75b00042a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #6 0x64b86a67a5a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/driver-vuln+0x25a4) (BuildId: e22b034ce8185bf87dc5978509caa629ae2430bb)
+    #0 0x7911172fa97c in memset ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87
+    #1 0x5a6d1158a8ef in ext4_fs_init_inode_bitmap /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:404
+    #2 0x5a6d1158b95f in ext4_fs_get_block_group_ref /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:611
+    #3 0x5a6d1157d258 in main real/mount_driver.c:110
+    #4 0x791116e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x791116e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a6d1157c5a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/driver-vuln+0x35a4) (BuildId: d1751d4e023e0bc9845fe88ebe0c092ebae1e9bc)
 
 0x521000003900 is located 0 bytes after 4096-byte region [0x521000002900,0x521000003900)
 allocated by thread T0 here:
-    #0 0x75b0008fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0x64b86a6828eb in ext4_buf_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_bcache.c:123
-    #2 0x64b86a68322c in ext4_bcache_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_bcache.c:237
-    #3 0x64b86a684c1e in ext4_block_get_noread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_blockdev.c:229
-    #4 0x64b86a69aa07 in ext4_trans_block_get_noread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_trans.c:85
-    #5 0x64b86a6885f4 in ext4_fs_init_inode_bitmap /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:396
-    #6 0x64b86a68975c in ext4_fs_get_block_group_ref /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:611
-    #7 0x64b86a67b192 in main real/mount_driver.c:99
-    #8 0x75b00042a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #9 0x75b00042a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #10 0x64b86a67a5a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/driver-vuln+0x25a4) (BuildId: e22b034ce8185bf87dc5978509caa629ae2430bb)
+    #0 0x7911172fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5a6d11584aee in ext4_buf_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_bcache.c:123
+    #2 0x5a6d1158542f in ext4_bcache_alloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_bcache.c:237
+    #3 0x5a6d11586e21 in ext4_block_get_noread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_blockdev.c:229
+    #4 0x5a6d1159cc0a in ext4_trans_block_get_noread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_trans.c:85
+    #5 0x5a6d1158a7f7 in ext4_fs_init_inode_bitmap /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:396
+    #6 0x5a6d1158b95f in ext4_fs_get_block_group_ref /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:611
+    #7 0x5a6d1157d258 in main real/mount_driver.c:110
+    #8 0x791116e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x791116e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x5a6d1157c5a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/driver-vuln+0x35a4) (BuildId: d1751d4e023e0bc9845fe88ebe0c092ebae1e9bc)
 
 SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:87 in memset
 Shadow bytes around the buggy address:
@@ -55,4 +55,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==3122184==ABORTING
+==3164752==ABORTING
