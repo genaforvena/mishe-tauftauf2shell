@@ -39,12 +39,29 @@ ok "extracted runtime reports GIMP 3.2.8"
 gcc -shared -fPIC -O2 -o "$HERE/inflate-shim.so" "$HERE/inflate-shim.c" -ldl
 ok "inflate observation shim built"
 
-# AppRun resets LD_PRELOAD and rebuilds it from bundled libs; append the
-# shim after that loop so it is inherited by the file-gif-load child.
-if ! grep -q 'inflate-shim.so' "$ROOT/AppRun"; then
-  printf 'export LD_PRELOAD="$LD_PRELOAD:%s"\n' "$HERE/inflate-shim.so" >> "$ROOT/AppRun"
-fi
-ok "AppRun patched locally (outside Git) to preload shim"
+# AppRun resets LD_PRELOAD and rebuilds it from bundled libs; insert the
+# export AFTER that loop but BEFORE the final exec. Appending to a pristine
+# AppRun glues the export onto its final exec line (no trailing newline),
+# so GIMP receives LD_PRELOAD=... as a filename and no shim loads.
+ARPATCH="$ROOT/AppRun.new"
+INSERTED=0
+: > "$ARPATCH"
+while IFS= read -r line || [ -n "$line" ]; do
+  case "$line" in
+    *inflate-shim.so*) continue ;;
+    exec*org.gimp.GIMP.Stable*)
+      if [ "$INSERTED" -eq 0 ]; then
+        printf 'export LD_PRELOAD="$LD_PRELOAD:%s"\n' "$HERE/inflate-shim.so" >> "$ARPATCH"
+        INSERTED=1
+      fi
+      ;;
+  esac
+  printf '%s\n' "$line" >> "$ARPATCH"
+done < "$ROOT/AppRun"
+[ "$INSERTED" -eq 1 ] || { echo "AppRun exec line not found" >&2; exit 1; }
+mv "$ARPATCH" "$ROOT/AppRun"
+chmod +x "$ROOT/AppRun"
+ok "AppRun patched locally (outside Git) to preload shim before exec"
 
 run_jif () {
   local file="$1" out="$2"
@@ -55,8 +72,8 @@ run_jif () {
       --batch-interpreter plug-in-script-fu-eval \
       -b "(let* ((img (car (gimp-file-load RUN-NONINTERACTIVE \"$file\" \"$(basename "$file")\")))) (gimp-message (number->string (car (gimp-image-get-width img)))))" \
       -b '(gimp-quit 0)') > "$out" 2>&1 || true
-  ps -u "$(id -u)" -o pid,args | grep 'gimpjif-appimage.*org.gimp.GIMP.Stable -i' | grep -v grep \
-    | awk '{print $1}' | xargs -r kill -9 || true
+  ps -u "$(id -u)" -o pid,args | grep -F "$ROOT" | grep 'org.gimp.GIMP.Stable -i' \
+    | grep -v grep | awk '{print $1}' | xargs -r kill -9 || true
 }
 
 SAFE="$BASE/realglib/evidence/safe.jif"

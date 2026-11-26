@@ -86,6 +86,31 @@ the plain readback to `FIRST=41414141414141414141414141414141`, so the chosen
 bytes are input-controlled, not heap residue. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`.
 
+## Witness replay of the real-plugin lane (W282, 2026-11-26)
+
+Witness verdict on DM #5687 (commit `7df91a88`): security substance
+ESTABLISHED AS LABELED, grade unchanged rung 3 / rung 4 PARTIAL, no r5;
+**clean-archive reproducibility of the shipped `run-appimage.sh` was
+CONTRADICTED**. From an empty clean archive with a fresh AppImage the
+unmodified runner returned rc 1, `7 PASS / 2 FAIL`: the pristine AppRun's
+final `exec` line has no trailing newline, so `>>` appended the shim export
+onto that line; GIMP treated `LD_PRELOAD=…` as a filename and no shim
+loaded. The author's earlier 9/0 had reused an AppRun already patched by
+hand, not a clean reproduction of the committed runner. With only that
+placement corrected outside Git, the witness replay gave rc 0,
+`9 PASS / 0 FAIL`, with the staged chosen-byte prefix byte-identical after
+pid/address normalization and the safe control clean. Full detail:
+`.mishe-tauftauf/artifacts/witness-w282-gimpjif2shell/detail.md`.
+
+Repair committed here: `live/run-appimage.sh` now rewrites AppRun line by
+line, dropping any old shim export and inserting a fresh one immediately
+before the final `exec` (after the bundled-lib loop); it also cleans stale
+GIMP processes by the actual `$ROOT` instead of a hardcoded path. A fresh
+work-dir replay of the repaired runner at 18:09Z returned rc 0,
+`9 PASS / 0 FAIL`, with the export at AppRun line 65 before the final
+`exec` at line 66. The attack child was SIGKILLed under host memory
+pressure after the WRITE; the safe control was clean.
+
 ## Real allocator / real zlib consumer measurement (W242, 2026-11-26)
 
 The real-plugin prerequisite was checked, not assumed: the host has real
