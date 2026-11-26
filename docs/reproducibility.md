@@ -12019,3 +12019,78 @@ cell, grade or r5.
 No replay was rerun in this wake; quoted bytes and counts come from the
 committed receipts (`874693f2`, `3eac8ec3`, `6797e762`, `dcbca38d`,
 `f6b993d7`).
+
+## 2026-11-26 06:0x–06:5xZ — Ruby W32 negatives and drwav W21 source ceiling
+
+- **Ruby2Shell W32 coverage-band reflection (bounded NEGATIVE).** With the
+  plain Ruby 3.4.12 app from `bash lab/ruby2shell/provision.sh`, replay the
+  scan over the surviving coverage-band responses:
+
+  ```sh
+  for n in 540 556 572 588; do
+    python3 lab/repro/ruby2shell-reflect-scan.py cov-n$n- --n $n --fill-len 256 --drain-len 1024
+  done
+  ```
+
+  Expect `files=24 parts=816 deviations=0 leakshapes=0` (11 responses at
+  n=540, 6 at 556, 4 at 572, 3 at 588), including `cov-n588-18`: the chosen
+  `[0x5353…, 0x251]` successor header is not reflected. The first drain
+  qwords are `5002000000000000 9000000000000000`; an earlier
+  `--pattern 250,90` run scored 363/198/132/99 deviations because decimal
+  250 was compared with the bodies' `0x250`, not because of corruption.
+  The 24 HTML responses are gitignored under `lab/build/evidence/` and come
+  from the earlier `cov-n$n` arms; without them this scan has no input.
+- **Ruby2Shell W32 inter-request GAP and claim-size bin (bounded NEGATIVE).**
+  `lab/repro/ruby2shell-shrink-claim.sh` exposes `RUBY2SHELL_CLAIM_GAP`
+  (`lab/repro/ruby2shell-shrink-claim.sh:44,148`). A 12-fresh-process arm at
+  N=972, plant `1000x4`, claim `1039@0x400:0x411,1015`, `RAILS_MAX_THREADS=1`
+  and 5 s idle after the plant gives **12/12 aborted at the attack** (11
+  `corrupted size vs. prev_size`, 1 `munmap_chunk(): invalid pointer`), 0
+  claim pops and 0 survivors; B→A snapshots show `0x25/0x115/0x415 →
+  0x53/0x153/0x453`. Two smoke runs matched. The bin arm uses six fresh
+  processes at N=1500, `METHOD_LEAD_A=529`, planted `1008x40,976x9`,
+  `ATTACK_CHAIN=1`, `MTRACE_DUMP_TCACHE=1`,
+  `MTRACE_DUMP_RANGE=0x400..0x6a0`, `MTRACE_DUMP_BINS=1`: 2/6 survive,
+  `vhdr=0x…2c70`, `vsize=0x50`, `vfd=0x100000001`, sampled bins
+  (`nb=0x410/0x5d0/0x5e0/0x610/0x680`) read `fd=0 bk=0`, and no `M 63f`
+  claim allocation fires. The claim-size bin at the claim moment stays
+  UNKNOWN. Summaries (`covband-reflect-scan.txt`, `gap5-summary.txt`,
+  `gap5smoke-summary.txt`, `comp529tc-summary.txt` and the
+  `stock-rails-{gap5,comp529tc}-*.server.log` files) are gitignored under
+  `lab/build/evidence/` and regenerate with those arms. Grades unchanged:
+  rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED; no second command.
+- **Drwav2Shell W21 — GNUBase wire-byte ceiling (source check, no harness).**
+  Against the gitignored provisioned tree
+  `lab/frontier/drwav2shell/deps/gnubase` (HEAD `125778191b5`,
+  `ext/dr_libs fa931f32`, `dr_wav.h` SHA-256 `c69816d0…` = pinned vulnerable
+  0.14.5), read `src/mcp/transport.h:23-28`,
+  `src/mcp/transport.cpp:93-115,143-145` and
+  `src/mcp/server.cpp:63-66,287-289`; the only HTTP route is `POST /mcp`
+  with a JSON-RPC body and Bearer token on loopback, and the only `base64()`
+  call produces PNG output. Follow `audioFile.import` at
+  `src/engine/audiofile/audiofilecommands.cpp:108-143,191` to
+  `drwav_init_with_metadata()` at `reader.cpp:76-77`, and search `src/` for
+  `multipart|form-data|upload|write_file|WriteFile|ofstream|fwrite`: only
+  engine-local writers (settings/JSON, audio export, peaks cache, PNG save,
+  Lua docs, pluginhost logs) appear, none writing request bytes into a file
+  the parser later reads. The tracked receipt is
+  `lab/frontier/drwav2shell/consumer/evidence/w21-wire-byte-ceiling.txt`.
+  R5 needs attacker-chosen WAV bytes arriving over the wire; GNUBase names
+  a local path, so r5 stays UNMET/UNKNOWN. GNUBase did not link: two bounded
+  chunks (`timeout 165 -j4`, `timeout 105 -j4`) made ZERO compiles after the
+  `VerifyGlobs.cmake_force`/`RERUN_CMAKE` edges were removed from the
+  gitignored `build.ninja`; `ninja -n gnubase` still listed 179 steps and a
+  25 s `-v` run started `[1/179]` without finishing it. No compiler error,
+  no process, request, ASan report, marker or side effect was observed.
+  Research lane CLOSED at this documented ceiling; final grade unchanged:
+  rung 3 staged harness ESTABLISHED AS LABELED by W215, rung 4 file-chosen
+  lab marker author-observed in W1-W4 with no independent verdict, r5
+  UNMET/UNKNOWN. W1-W4 verdicts remain UNKNOWN and are not re-offered.
+
+No replay was rerun in this wake; quoted bytes and counts come from the
+committed receipts (`0631fcd6`, `c5877121`) and the tracked W21 evidence
+file. The front-page presentation changed in `8e35aa10`; re-render it with
+`python3 tools/render-presentation.py` and check with `--check` before
+editing `research-manifest.json`, since `README.md`, `docs/results.md` and
+`docs/assets/evidence-ladder.svg` are generated from it.

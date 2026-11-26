@@ -3480,3 +3480,45 @@ files (nine for aspell/fceux/freeimage, three for nfdump2shell). The
 person-owned disposition, not because the units exist. No operational delivery
 is claimed here; the person's exact full-flag sync and witness replay remain
 owed.
+
+The 2026-11-26 06:0x–06:5xZ limbs fold three commits. `8e35aa10` split the
+front page into a generated presentation: `README.md` now holds a manifest-
+rendered overview and short orientation, the seven-column evidence register
+is generated into [results.md](results.md), and
+`research-manifest.json` drives the counts, ladder graphic and register.
+`python3 tools/render-presentation.py --check` found all three generated
+files current; `python3 tools/check-readme.py .` stays GREEN.
+
+Ruby2Shell W32 (`0631fcd6`) closes three leads as bounded NEGATIVEs. A rescan
+of the four-arm chosen-header coverage band (N∈{540,556,572,588}, 24 surviving
+responses) gives `files=24 parts=816 deviations=0 leakshapes=0`: the chosen
+header is not reflected. An initial `0x250`-as-decimal pattern produced
+363/198/132/99 deviations that were a scanner-argument mismatch, not
+corruption; the bodies' first drain qwords are
+`5002000000000000 9000000000000000`. A 12-fresh-process inter-request GAP arm
+at N=972 (plant `1000x4`, claim `1039@0x400:0x411,1015`, 5 s idle) aborts
+12/12 at the attack with 0 claim pops and 0 survivors. Six processes at
+N=1500 with `METHOD_LEAD_A=529` leave 2 survivors whose claim-size bin is
+still unobserved: `fd=0 bk=0` at the sampled bins, no `M 63f` allocation, so
+bin residency stays UNKNOWN. Veria's promised 25 November stock-Rails RCE
+still has no mechanics or link. Grades unchanged: rung 4 witness-COMPLETE,
+harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+r5 NOT ACHIEVED.
+
+Drwav2Shell W21 (`c5877121`) reconciles W20's unknown-ending wake (732
+objects, no `bin/gnubase`, no drwav/reports dirt; its background ninja died
+with the one-shot wake) and closes the research lane at a documented source
+ceiling. GNUBase's only HTTP route is `POST /mcp`, JSON-RPC with a Bearer
+token on loopback (`mcp/transport.h:23-28`, `transport.cpp:93-115,143-145`);
+its only `base64()` call is PNG image output (`server.cpp:63-66,287-289`), and
+a request-byte file-sink sweep found only engine-local writers. Even a linked
+GNUBase is a request-reachable file-path caller, not a wire-byte caller, so
+r5 stays UNMET. Two bounded build chunks made zero compiles after the
+`VerifyGlobs.cmake_force`/`RERUN_CMAKE` regeneration was removed; 179 ninja
+steps remained and the probe was never run. This is a source-level ceiling,
+not an execution result: no process, request, ASan report, marker or side
+effect. Final grade: rung 3 staged harness ESTABLISHED AS LABELED by witness
+W215, rung 4 file-chosen lab marker author-observed in W1-W4 with no
+independent verdict, r5 UNMET/UNKNOWN; W1-W4 verdicts stay UNKNOWN and the
+again chain is retired. No rung cell, grade, route, mind count, witness
+verdict or R5 cell moved by any limb in this fold.
