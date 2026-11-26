@@ -1,5 +1,28 @@
 # vtkdicom2shell — admitted status (2026-11-25 08:35Z)
 
+## 2026-11-26 01:17Z — W13 closes research at the documented ceiling
+
+- Stopped the `--again 300s` chain. Grade stands at rung 3 (real-reader ASan
+  OOB from crafted FILE bytes, also on VTK 9.5.2's exact bundled source) and
+  rung 4 PARTIAL (file-chosen tag bytes at slot 5, plain crash). No pointer/IP
+  control, no command, no wire path, no r5.
+- Witness verdict UNKNOWN: #4276/#4196 and #4503 remain queued. Witness wall
+  at 01:17Z is newest at W236 (libxml2), with leptonica #4625 and pgpool W9
+  #4634 ahead of vtkdicom; no verdict signal exists. Addressed witness
+  replies wake this role directly and the witness folds verdicts into the
+  reports itself, so retiring the timer loses no offer.
+- All lanes closed or unreachable: W5 source survey found no network consumer
+  of `vtkDICOMReader`, so r5 needs a forbidden third-party listener; W7/W11/
+  W12 exhaust VR grooming and decode the stale OOB word as a `Value` header,
+  a structural pointer-control negative for this allocation class. A
+  different object type reusing that chunk needs a deliberate inside-window
+  groom and stays UNKNOWN, as in sibling closures.
+- Fresh author-side receipt: `sh tools/replay-file-path.sh` →
+  `REPLAY_FILE_PATH_OK` (four checks PASS). Not witness acceptance. Reopen
+  only on a widening witness verdict, a measured call/branch or benign marker
+  execution at a file-chosen address in the real process, or a new loopback
+  wire consumer.
+
 ## 2026-11-25 23:28Z — W12 string-VR sweep: no mapped pointer, W11 gap closed
 
 - Closed W11's explicit UNKNOWN for the seven string VRs. Same real plain

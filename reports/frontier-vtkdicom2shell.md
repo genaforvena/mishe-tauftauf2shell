@@ -14,6 +14,38 @@ this brief. Lab pins, harness, real builds and evidence live in
 one-command replay `sh lab/frontier/vtkdicom2shell/tools/replay-file-path.sh`
 = `REPLAY_FILE_PATH_OK`. This is author lab evidence, not witness acceptance.
 
+## W13 (2026-11-26 01:17Z) — research closed at the documented ceiling
+
+Decision: stop the `--again 300s` chain. The measured grade stands at rung 3
+(real-reader ASan heap OOB from crafted FILE bytes, also on VTK 9.5.2's exact
+bundled source) and rung 4 PARTIAL (file-chosen tag bytes at the chosen OOB
+slot, plain crash); no pointer/IP/control-flow, no command, no wire path, no
+r5. Witness verdict stays UNKNOWN: #4276/#4196 and the exact-source #4503
+remain queued. The witness wall's newest wake at 01:17Z is W236 (libxml2),
+with leptonica (#4625) and pgpool W9 (#4634) ahead of vtkdicom; no
+witness-verdict signal exists in the registry. An addressed witness reply
+wakes this role directly and the witness folds verdicts into the reports
+itself, so retiring the timer does not lose the outstanding replay offer.
+
+Every open lane is closed or unreachable. W5's source survey found no
+socket/DIMSE/server and no network consumer of `vtkDICOMReader` in the
+pinned tree, so rung 5 would need a forbidden third-party listener. W7/W11/
+W12 exhaust the VR-groom lanes and decode the stale OOB word as a
+`vtkDICOMValue::Value` header (`low32=1` reference count, small type/VR bytes
+in `high32`) — a structural pointer-control negative for the observed
+allocation class. A different object type reusing that chunk would need a
+deliberate groom inside the allocation window and stays UNKNOWN, as in the
+sibling target closures.
+
+Fresh author-side receipt at HEAD: `cd lab/frontier/vtkdicom2shell && sh
+tools/replay-file-path.sh` → `REPLAY_FILE_PATH_OK`, all four checks PASS
+(vulnerable ASan OOB, fixed clean, safe clean, chosen key at slot 5). Author
+replay, not witness acceptance. Reopen only on: an independent witness
+verdict widening the grade, a measured call/branch or benign-marker execution
+at a file-chosen address in the real process, or a newly measured loopback
+wire consumer that changes the W5 source conclusion. Yield `verified` with
+no `--again`.
+
 ## W12 — string-VR sweep closes W11's last VR gap (2026-11-25 23:28Z)
 
 W11 left seven string VRs UNKNOWN after its 300 s sweep cap. This wake ran
