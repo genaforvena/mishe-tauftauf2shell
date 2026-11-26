@@ -285,3 +285,11 @@ inside the 65535-byte receive allocation. This is a packet-chosen 2-byte
 write at a packet-chosen offset in a record the collector processed; it is
 not a pointer, a command or r5. The earlier alias attempt remains a failed
 hypothesis (header clobbered first), preserved above.
+
+Clean-archive replay of commit `ca2bb2b0` into
+`/tmp/w-nfdump-alias-clean` rebuilt all four collector pairs from the
+SHA-verified tarballs and returned **11 PASS / 0 FAIL** for `run-alias.sh`,
+**13 PASS / 0 FAIL** for `run-wire.sh` (ASan), **13 PASS / 0 FAIL** for the
+plain `run-wire.sh` overrides, and `WITNESS REPLAY PASS` for
+`run-witness.sh`. No generated evidence was copied into the archive and no
+assertion was weakened.

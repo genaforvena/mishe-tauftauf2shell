@@ -126,3 +126,12 @@ fixed            REC2_FOUND=0                     total flows: 0
 pointer, no command. Grade remains rung 3 verbatim / rung 4 PARTIAL with a
 chosen-byte write at a chosen offset in a processed live record. Witness
 replay owed.
+
+Clean-archive receipt: `git archive HEAD lab/frontier/nfdump2shell` (commit
+`ca2bb2b0`) extracted into `/tmp/w-nfdump-alias-clean`; `build-wire.sh`
+refetched and SHA-verified both tarballs and rebuilt all four collector
+pairs. `run-alias.sh` returned **11 PASS / 0 FAIL**; `run-wire.sh` returned
+**13 PASS / 0 FAIL** for ASan and **13 PASS / 0 FAIL** for the plain build
+overrides, and `run-witness.sh` returned `WITNESS REPLAY PASS`. No assertion
+was weakened for the sender change. Independent witness replay of the
+chosen-byte and live wire results is still owed.
