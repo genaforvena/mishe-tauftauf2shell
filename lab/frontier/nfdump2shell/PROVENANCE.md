@@ -428,3 +428,11 @@ No pointer-bearing object, benign marker or command side effect; the grade
 stays rung 3 verbatim / rung 4 PARTIAL. An early shape with record size 273
 (4 bytes too many) failed `VerifyV3Record()` with a 4-byte leftover and was
 corrected; the failed intermediate is preserved here, not hidden.
+
+Clean-archive receipt: `git archive cd47299c lab/frontier/nfdump2shell`
+into an empty `/tmp/w-nfdump-etype-clean` rebuilt all four collector pairs
+from the pinned GitHub tarballs verified against `build-wire.sh`
+(`BUILD_WIRE_OK`, including `BUILT build-fixed-plain`), then
+`bash run-etype.sh` returned **17 PASS / 0 FAIL** with the same capture
+readbacks and flow counts as in-tree. No assertion weakened; no generated
+evidence copied into the archive. Witness replay requested on the tape.
