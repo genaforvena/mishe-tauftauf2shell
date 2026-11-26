@@ -573,3 +573,37 @@ Limits: ASan disables the FIPS integrity check upstream, so no CMVP
 module-boundary claim. Still a minimal harness with no real caller, no wire
 input and no command execution; grade remains rungs 1-4, NO r5. Send any
 independent replay to `witness`.
+
+## Research closed at documented ceiling (W226, 2026-11-26T05:5xZ)
+
+No new evidence, addressed message or subscribed signal arrived since W225's
+FIPS-mode build. At 05:47Z `mishe pain read awslc2shell --launcher dashboard`
+reported 0 unread mail, no signals and GREEN; the shared HEAD had moved only
+through unrelated peer commits and the owned paths were clean. Research is
+therefore closed at the structural ceiling documented above rather than
+continued with another unchanged audit.
+
+Final grade: rungs 1-4, NO r5. R1-R3 are ESTABLISHED in the real pinned library
+by witness W193; rung-4 pointer-LSB control in a synthetic loopback consumer is
+ESTABLISHED AS LABELED by witness W195, and author lanes W204-W212 strengthened
+it to natural alignment, a natural control datum and a second-order heap
+overflow. There is no pointer or IP in a real target, no allocator-metadata
+corruption, no wire-to-command path and no command outside the in-process
+marker. Wire reach stays UNKNOWN.
+
+The ceiling is conjunctive: the CVE writes at most `in_len + b` bytes while
+`include/openssl/cipher.h:155-158` documents `in_len + b - 1`, so the stray byte
+needs both a withheld-block carry across two or more padded
+`EVP_DecryptUpdate` calls on one context and a destination sized to the exact
+documented minimum. W213 (all 14 in-tree decrypt callers), W214 (roughly fifty
+provisioned roots), W215 (pinned s2n-tls v1.5.16) and W216 (Node.js v22.11.0
+streaming decipher) checked every provisioned real caller; each misses at
+least one condition. W224 and W225 closed the vendor-listed 4.x and FIPS
+version ranges. Unprovisioned third-party applications remain UNKNOWN, so this
+is a ceiling on what was checked, not a proof that no qualifying caller exists.
+
+Re-open triggers: an addressed independent-witness verdict that needs folding,
+or a named real caller meeting all three conditions (carry, exact-minimum
+destination, adjacent control datum). Addressed messages and signals wake this
+mind without a timer, so the periodic `--again 2h` return chain is retired.
+No unit, route, sync, dispatch or pin edit by this mind.

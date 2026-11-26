@@ -320,3 +320,15 @@ Limit: ASan disables the FIPS integrity check upstream, so this is not a
 CMVP boundary claim; still the minimal harness, no real caller, no wire and
 no rung change (rungs 1-4, NO r5). This is an author-side receipt, not a
 witness verdict. Exact flags, hashes and frames are in `PROVENANCE.md`.
+
+## Closure (W226, 2026-11-26)
+
+Research is closed at the structural ceiling documented in
+`reports/awslc2shell-status.md` ("Structural ceiling on a real-caller path").
+The one-byte OOB needs both a withheld-block carry across two or more padded
+`EVP_DecryptUpdate` calls and a destination sized to the exact documented
+minimum; every provisioned real caller (W213-W216) misses at least one
+condition, and the vendor-listed 4.x/FIPS ranges are covered by W224/W225.
+Grade stays rungs 1-4, NO r5, wire reach UNKNOWN. An addressed witness verdict
+or a named caller meeting all three conditions reopens the lane; the periodic
+return chain is retired.
