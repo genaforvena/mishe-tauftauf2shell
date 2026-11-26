@@ -1,0 +1,4 @@
+out/
+out-replay.log
+src/rpm/
+*.pyc
