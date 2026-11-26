@@ -6455,3 +6455,38 @@ No second reachable vulnerability, no chosen byte and no grade move;
 rung 3 unchanged. Do not repeat this shape matrix unchanged; reopen
 only with a measured `OP_EXACTN_IC`/`OP_EXACT1_IC` hit whose fold
 length exceeds the exact operand.
+
+## 2026-11-26 22:4xZ — last unconsumed `OP_EXACTN_IC` guard: systematic NEGATIVE
+
+A fresh hunk audit of `lab/build/onigmo-diff/full.diff` found that the
+3.4.13-only guard `if (len > endp - p) goto fail;`
+(`regexec.c:2844`) had never actually been tripped. §22:2xZ reached
+`OP_EXACTN_IC` only with fold length equal to the operand length.
+Prediction: any codepoint pair with a shared raw UTF-8 prefix and a
+longer subject fold would reach the guard and yield an ASan read or a
+match differential on 3.4.12.
+
+`lab/repro/ruby2shell-casefold-rawprefix.{rb,sh,gdb}` enumerated all
+1,112,064 non-surrogate codepoints with `String#downcase(:fold)` on
+3.4.13 and found the ten pairs with a shared first raw UTF-8 byte and
+a strictly longer subject fold: U+0100/0130, U+017F/0149,
+U+01C0/01F0, U+0200/023A, U+0380/0390, U+0580/0587, U+1C80/1F52,
+U+212A/2000, U+A78D/A000, U+FB00/FB13 (fold lengths 2/3, 1/3, 2/3,
+2/3, 2/6, 2/4, 2/6, 1/3, 2/3, 2/4). Each anchored pattern
+`\A<shorter>` was matched against the longer subject in a fresh
+process on both ASan builds: **20/20 `match=false`, zero ASan
+reports**. GDB at the vulnerable `regexec.c:2830` compare loop saw
+**zero `OP_EXACTN_IC` hits** for all ten pairs on 3.4.12. Evidence is
+gitignored under `lab/build/evidence/casefold-rawprefix/`
+(`summary.txt`, per-pair logs).
+
+Structural reason: `set_optimize_exact_info` (`regcomp.c:5367`) stores
+the compiled pattern's raw bytes in `reg->exact`, and
+`str_lower_case_match` (`regexec.c:4267-4278`) compares folded subject
+bytes against that raw prefix. Two distinct same-length UTF-8
+codepoints cannot share the full raw prefix, so a subject whose fold
+exceeds the exact operand never survives the prefilter into
+`OP_EXACTN_IC`. The added guard is defensive hardening for plain UTF-8
+Ruby patterns. No second vulnerability, no chosen byte, no wire path;
+grade unchanged at rung 3. **Lane CLOSED** — do not repeat this pair
+list or the §22:2xZ 21-shape matrix unchanged.

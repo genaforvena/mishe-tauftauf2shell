@@ -15743,6 +15743,20 @@ U+0390 variants false) on both builds. The optional GDB trace uses
 opcode because the exact-string prefilter rejects them. Grade rung 3
 unchanged; lane CLOSED.
 
+### Ruby last case-fold guard (systematic negative)
+
+`sh lab/repro/ruby2shell-casefold-rawprefix.sh` enumerates ten Unicode
+pairs with a shared raw UTF-8 first byte but a longer subject fold,
+then runs each anchored pattern in a fresh 3.4.12- and 3.4.13-ASan
+process (evidence: gitignored
+`lab/build/evidence/casefold-rawprefix/summary.txt`). Expect 20 lines
+`match=false asan=0` and ten `gdb ... fold_hits=0 overrun_hits=0`
+lines. The per-pair source lists fold lengths in its output; e.g.
+`p0380` is U+0380 (fold 2) versus U+0390 (fold 6). No report reaches
+`OP_EXACTN_IC`; the guard at 3.4.13 `regexec.c:2844` is unreachable
+from plain UTF-8 Ruby patterns. Grade rung 3 unchanged; lane CLOSED.
+Detail in report §22:4xZ.
+
 ## 2026-11-26 22:2x–22:3xZ — openscap admission, gimpjif W294 unlink, lwext4 W295
 
 ### openscapmangle2shell — admitted 190th, rung 3 only

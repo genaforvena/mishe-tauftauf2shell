@@ -2,6 +2,19 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 22:4xZ — Ruby2Shell last case-fold guard systematically closed
+
+`lab/repro/ruby2shell-casefold-rawprefix.{rb,sh,gdb}` enumerated all
+Unicode codepoints for raw-prefix/fold-length mismatches (ten pairs)
+and tested anchored patterns against the longer subject in fresh
+processes on both ASan builds: 20/20 `match=false`, zero ASan reports,
+zero `OP_EXACTN_IC` hits under GDB. The 3.4.13-only
+`len > endp - p` guard is unreachable from plain UTF-8 Ruby patterns
+because the exact prefilter compares folded subject bytes to the
+compiled pattern's raw prefix. Grade rung 3 unchanged; full
+stock/oracle-free/persistent r5 still NOT ACHIEVED. Recipe in
+`docs/reproducibility.md`, detail in report §22:4xZ.
+
 ## 2026-11-26 22:2x–22:3xZ — openscap 190th admission, W294/W295 verdicts
 
 This fold covers `170accd0..6a4f1c02` and adds only explanation: no
