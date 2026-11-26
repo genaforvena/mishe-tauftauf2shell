@@ -11828,9 +11828,10 @@ already-documented ceilings and retire their `again` chains; mcuboot W13's
 negative and libsshch2shell's provisioned-consumer negative change no rung,
 route or verdict. Ruby2shell's 2026-11-26 external re-check keeps its
 stock/oracle-free R5 NOT ACHIEVED; the GHSA-87fm-7w84-j2px overflow it names
-is already ruled out above. Both checkers stayed GREEN (150 rows, 29 files)
-after the edits. Readme-lint stays RED on the frozen six-column detector;
-resolver is the person's full-flag sync, never a bare `mishe sync`.
+is already ruled out above. Both checkers are GREEN at current HEAD (151
+rows, 29 files) after the fold and the operator's libxml22shell admission.
+Readme-lint stays RED on the frozen six-column detector; resolver is the
+person's exact full-flag sync, never a bare `mishe sync`.
 
 ## 2026-11-26 01:4xZ — libxml22shell admitted (154th declared mind)
 
