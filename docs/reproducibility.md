@@ -9251,9 +9251,11 @@ recomputed here.
   `jl2005c.so` `55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. The
   in-tree author smoke and the clean-archive replay both matched; raw logs
   live in `/tmp/w199-lgp-replay` (`WORK` is recreated per run, nothing
-  committed). Author replay, not a witness verdict, no grade change:
-  unwitnessed lab rung 4 at the real consumer-list scope, no wire, physical
-  USB, command or r5. `reports/frontier-libgphoto2shell.md` §W197–W199.
+  committed). Those were author replays at the time; witness W257 below
+  replayed the same wrapper independently and returned ESTABLISHED AS LABELED
+  at the real consumer-list scope, with no grade change. W170/W171/W172
+  remain unwitnessed; no wire, physical USB, command or r5.
+  `reports/frontier-libgphoto2shell.md` §W197–W199.
 - Munt W186 (`31fd23fe`, `e224af08`): in `lab/frontier/munt2shell/real`,
   `./prepare_src.sh && ./build_and_run.sh && ./build_clang_asan.sh &&
   ./partial_probe.sh` runs the 32785-byte SysEx driver through real
@@ -12665,3 +12667,115 @@ limbs are bounded negatives; grades unchanged.
   grade change, NO r5. Detail:
   `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`;
   the manifest row is generated, not hand-edited by docs.
+
+## 2026-11-26 08:4x–09:0xZ — libx11xkb2shell recipe, Ruby 4.0.9 negatives, W257 receipt
+
+No replay was rerun in this fold: commands, pins, bytes and timings below are
+quoted from the committed reports and receipts and from W257's artifact. The
+two libgphoto2 wrapper/checker SHA-256s and the libX11 runner SHA-256 were
+re-verified in the worktree here. No rung cell, grade, route or R5 cell moved
+by docs; W257 touched only two reports, so its verdict did not change the
+generated manifest or the established count of 110.
+
+- **Libx11xkb2Shell (frontier W251; staged `9b56c822`, clean-archive receipt
+  `ac41be89`, admitted `e8b41e1c`) — rung 3 verbatim / rung 4 PARTIAL,
+  author-only.** CVE-2026-88806 / ZDI-CAN-32061: libX11 before 1.8.14 lets an
+  `XkbGetMap` reply drive `firstKeyAct + nKeyActs` past `max_key_code + 1`;
+  `_XkbReadKeyActions()` writes past `server->key_acts`. Fixed in 1.8.14 by
+  `6d4432b13c0b3b6a644c13de9c793a14db48d545` (one bounds check before the
+  loop). Claim URLs and the CVSS 7.5 / RCE framing (advisory claims) are in
+  `lab/frontier/libx11xkb2shell/PROVENANCE.md`. Pins from that file: tarballs
+  1.8.13 `69606f485c2c07c14ef64f75b7bb326d48587af33795d9ab3e607c0b5f94f11c`
+  and 1.8.14
+  `bbc78c46217174655c2b32b138ad119f3ac15f50808b4d0b3a2677a4b1afc950`, raw fix
+  patch `dd9ecf20d2ca40c7ec3d8cdf3727c729f9fae3b6cc010e9436f152ae7cd6da31`,
+  linkage-only `expose.patch`
+  `bdd621bf41ad6408d90440d507ab6d157746471905cf7ac1fc688bd4e10a4e18`, and
+  `poc.c` `6fb103171874e308a5da4609f566bc087e9f4dbff40ad85d03e3482cb859ad7d`.
+  The canonical runner is `2c7273f01d6a26b36c8aeecd94f1e9a9835d9ea81f7e3896072b9b9ee3532bc0`.
+
+  Rebuild and drive the real sink entirely in process (no X server or socket):
+
+  ```sh
+  T=$(mktemp -d /tmp/docs-libx11xkb.XXXXXX)
+  git archive 9b56c822 lab/frontier/libx11xkb2shell | tar x -C "$T"
+  # seed "$T/lab/frontier/libx11xkb2shell/src/" with both tarballs and the raw
+  # fix patch from the URLs in PROVENANCE.md (the runner curl-fetches if absent)
+  cd "$T/lab/frontier/libx11xkb2shell" && sh run-all.sh
+  ```
+
+  Expect the runner to re-check all five pins, build each tag under GCC ASan,
+  Clang ASan and GCC plain with `./configure --disable-shared --enable-static`,
+  then call `_XkbReadKeyActions()` through the linkage-only patch with
+  `firstKeyAct=8`, `nKeyActs=2`, descriptors `[1,0]`, `max_key_code=8`, and a
+  9-entry `key_acts` array. The 1.8.13 ASan traces print `WRITE of size 2` at
+  verbatim `src/xkb/XKBGetMap.c:277`, 0 bytes after the 18-byte allocation;
+  1.8.14 returns `BadLength` (status 1) in all builds; safe inputs succeed and
+  the plain vulnerable build is silent. `RESULT PASS=12 FAIL=0` is recorded in
+  the tracked `evidence/run-all-console.log` and the twelve
+  `evidence/{1.8.13,1.8.14}-{gcc-asan,clang-asan,gcc-plain}-{attack,safe}.out`
+  files. Extracted trees `src/libX11-*/`, tarballs, `build/` and
+  `evidence/{build,configure}-*.log` are gitignored and regenerate with the
+  same `sh run-all.sh`.
+
+  Author clean-archive replay from staging `9b56c822` re-fetched both tarballs
+  and printed 12 PASS / 0 FAIL, rc 0 (`ac41be89`); the operator's second replay
+  ran the unmodified runner from a clean `git archive 9b56c822` at
+  `.mishe-tauftauf/replays/libx11xkb2shell-op-20261126T0856Z/` between
+  08:54:32Z and 08:59:36Z with all pins re-verified and `RESULT PASS=12 FAIL=0`,
+  `RC=0`. Both are author-side, not independent witness acceptance; replay is
+  owed. Admission adopted window 175 (panes %352/%353) and moved generated
+  counts 166/163/163/110 → 167/164/164/110; route and wake units remain
+  person-reserved. Preserved negatives: `firstKeyAct` is CARD8 (256 wraps to
+  0); eight nonzero actions hit a NULL `acts` read at `XKBMAlloc.c:804` before
+  the intended sink; `key_sym_map` is over-allocated so ASan reports the
+  WRITE first. No named adjacent object, pointer control, live X wire,
+  command or r5; the advisory's RCE framing stays a claim.
+- **Ruby2Shell 4.0.9 per-build negative (`c249e3b5`).** Official Ruby 4.0.9
+  (`ruby 4.0.9 (2026-10-23 revision 3e93b23afc)`) tar.xz SHA-256
+  `a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4` was
+  built twice, once with `./configure --disable-yjit` and once with default
+  YJIT enabled. Expect 124 normal handler entries at ELF `0x6f0da0` and
+  `0x82e5a0` respectively, with no valid handler whose low byte is `0x53` or
+  `0x73`. Running the committed low-byte probe's 20-arm matrix per build
+  (nop, opt_getconstant_path, putnil/putself/putobject/putspecialobject,
+  duparray/duphash, definemethod, getlocal_WC_0 × `{0x53,0x73}`) in fresh
+  processes produces only `SIGSEGV`/`SIGILL`: no eval result, marker or
+  command. The ARGV-rooted shape scanner
+  `ruby lab/repro/ruby2shell-iseq-shapes.rb <ruby-4.0-core-tree> <gems-tree>`
+  covered 8,188 files / 178,920 iseqs and found 0 compatible shapes. This is a
+  bounded per-build negative; grades stay rung 4 witness-COMPLETE,
+  harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+  r5 NOT ACHIEVED.
+- **Witness W257 — libgphoto2shell W197 device-only top-header lane.** W257
+  replayed the canonical wrapper without edits from a clean tree:
+
+  ```sh
+  git archive 8ca09205 reports/frontier-libgphoto2shell.md lab/frontier/libgphoto2shell | tar x -C /tmp/w257-lgp-arch
+  TARBALL=/tmp/w257-lgp-fetch/libgphoto2-2.5.34.tar.bz2 WORK=/tmp/w257-lgp-work \
+    sh lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh .
+  ```
+
+  Wrapper SHA-256
+  `da8ef56f558d2b33469c1779151d520700e781831d9e92471fdad49308e706f6` and
+  inner checker SHA-256
+  `f4ee85ff11914f952c1454c3c858e0479e274381dee63ce67ebfd080e2f0a830` are
+  identical in the worktree, at staging `8ca09205` and in the clean archive
+  (157 committed files). The 2.5.34 tarball was re-fetched from the URL in
+  `REAL-BUILD.md` and matched
+  `5df9e774eb4ab6087a193afff84dcafe9f666e3443fe29e73e6779f659ff7f28`; all
+  4/4 pins passed. One unmodified 60.7 s run, rc 0, printed `RESULT: 12 PASS /
+  0 FAIL` with fresh `TOP=0x0000000000012b71` from its own gdb map. `gdb-map.out`
+  found no `priv` in the `jl2005c_init` frame; the repair cases supplied a
+  device pointer word of 0 and this build's top-size word and listed 1022 real
+  files through `gp_camera_folder_list_files()`/`gp_list_count()` with ASLR
+  off and on, while wrong-top and no-repair controls aborted and the safe
+  count 100 listed 100. The built `.so` digest differs from the author's
+  clean receipt by absolute build path, as `REPLAY.md` §W180 already records;
+  source hash, top constant and all 12 checks reproduced. Verdict:
+  ESTABLISHED AS LABELED at the claimed lab rung-4 real-consumer-list scope
+  only, no contradiction, no grade change, NO r5; no canary/RIP/live-pointer
+  supply, `file_get`, wire, USB hardware or command. W170/W171/W172 remain
+  unwitnessed. Raw console, verbatim outputs and patch logs are gitignored in
+  `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/`; detail is in that
+  directory's `detail.md`.

@@ -12630,3 +12630,48 @@ Three commits advanced HEAD from the previous fold's `43e3a514` to
   the generated count 109→110; docs corrected only prose and did not touch
   README/results/SVG/manifest. Detail:
   `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.
+
+## 2026-11-26 08:4x–09:0xZ — libx11xkb2shell admission, Ruby 4.0.9 negative, W257 verdict
+
+Signal head `04f32aa9`; checkout HEAD `62abd0a6` at the fold. Six commits,
+no rung cell, grade, route or R5 cell moved by docs; the operator's admission
+commit moved the generated presentation, not this fold.
+
+- `9b56c822` staged **libx11xkb2shell** under standing #6 from pinned x.org
+  libX11 1.8.13/1.8.14 sources: a linkage-only patch calls the real
+  `_XkbReadKeyActions()` with a synthetic `xkbGetMapReply`, and the 1.8.13 GCC
+  and Clang ASan builds report `WRITE of size 2` at verbatim
+  `src/xkb/XKBGetMap.c:277` 0 bytes past an 18-byte `key_acts` allocation,
+  while 1.8.14 returns `BadLength` and safe inputs succeed. `ac41be89`
+  recorded a clean-archive 12 PASS / 0 FAIL receipt; `e8b41e1c` admitted the
+  167th declared mind / 164th register row (window 175, panes %352/%353) with
+  a second 12/0 operator replay. Both replays are author-side and no
+  independent witness has replayed the lane. Grade rung 3 verbatim / rung 4
+  PARTIAL: server-controlled index and length, but a zero value in a
+  synthetic in-process reply, no named adjacent object, live X wire, command
+  or r5; advisory RCE framing stays a claim. Route and wake units are
+  person-reserved.
+- `c249e3b5` closes a **Ruby 4.0.9** per-build lane: the pinned tar.xz
+  (`a8057adb…7e51f4`) built with YJIT disabled and enabled has 124-entry
+  handler tables at ELF `0x6f0da0`/`0x82e5a0` with no low-`0x53`/`0x73`
+  handler; all 20 selected arms per build fault with `SIGSEGV`/`SIGILL`, and
+  8,188 files / 178,920 iseqs contain 0 compatible shapes. Grades stay rung 4
+  witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED.
+- `04f32aa9` is witness **W257** on libgphoto2shell's W197 device-only lane:
+  a clean `git archive 8ca09205` with the pinned 2.5.34 tarball re-fetched
+  gave 4/4 pins OK and 12 PASS / 0 FAIL, rc 0, in 60.7 s, with fresh
+  `TOP=0x12b71`, no `priv` in the frame, a real consumer list of 1022 with
+  ASLR off and on, and aborting wrong-top/no-repair controls. ESTABLISHED AS
+  LABELED at that lab rung-4 scope only; no grade change, NO r5, and W170/
+  W171/W172 remain unwitnessed. Two "author replay, not a witness verdict"
+  passages were corrected in place in `docs/changelog.md` and
+  `docs/reproducibility.md`; W257 touched no manifest, so the generated
+  established count stays 110. Exact commands, pins and expected bytes are
+  in `docs/reproducibility.md`.
+
+`62abd0a6` (libgphoto2shell W201) then aligned the report headline and status
+with W257: research is closed at the documented W200 ceiling, the verdict
+covers only the labeled W197 device-only real-consumer-list lane, and it does
+not witness W167-W172 or W200, add r5, or widen to a wire path. No docs
+passage carried the old next-step plan, so no in-place correction was owed.

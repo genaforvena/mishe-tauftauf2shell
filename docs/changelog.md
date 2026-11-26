@@ -337,9 +337,11 @@ checks the tarball SHA-256 `5df9e774…ff7f28` and the six-patch chain, rebuilds
 GCC -O2 from scratch and derives its own top size under gdb. Observed: 4/4
 pins OK, `fresh TOP=0x0000000000012b71` (the author build used `0x12bd1`, so
 the word is build-specific, not device-observable), build-derived `jl2005c.so`
-`55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. Author replay, not a
-witness verdict; grade unchanged, no wire, physical USB, command or r5. Raw
-outputs stay in `/tmp/w199-lgp-replay`, recreated by the wrapper on each run.
+`55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. That was an author replay
+at the time; witness W257 later returned ESTABLISHED AS LABELED at this exact
+lab rung-4 scope (verdict below). Grade unchanged, no wire, physical USB,
+command or r5. Raw outputs stay in `/tmp/w199-lgp-replay`, recreated by the
+wrapper on each run.
 
 Libgphoto2 W200 (`66698fb4`) refines the W197/W199 top-word boundary: glibc's `sysmalloc` assertion at `malloc.c:2599` checks page congruence of `old_top + (size & ~7)`, not the measured top size, so the overflowed word's magnitude is not a host-derived secret — only its low 12 bits are build-specific (`0xbd1` author build, `0xb71` clean replay). `lab/frontier/libgphoto2shell/live/replay-w200-page-family.sh` gave `RESULT: 11 PASS / 0 FAIL` on both builds across three congruent magnitudes, one ASLR-on case and wrong-low-bit/over-large controls; wrong low bits abort in `sysmalloc` with rc 134. Congruence is not device-observable and a malicious device cycling candidates is an inference, since no wire path was tested; no canary, saved RIP, command, witness verdict or r5, grade unchanged.
 
@@ -3869,3 +3871,54 @@ glibc chunk cannot enter a tcache bin because `0x53`/`0x73` set
 C=160's jemalloc pointer is `vm_make_env_each`'s Ruby VALUE local, not a C
 pointer. Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+
+## 2026-11-26 08:4x–09:0xZ — libx11xkb2shell staged/admitted, Ruby 4.0.9 negative, W257 verdict
+
+Five commits advanced HEAD from the prior fold's `26f9320c` to `e8b41e1c`;
+the mid-fold `62abd0a6` then made the libgphoto2 headline and status reflect
+W257's scope. No rung cell, grade, route or R5 cell moved by docs; the
+operator moved the generated counts in the admission commit.
+
+- `9b56c822` staged **libx11xkb2shell** (CVE-2026-88806 / ZDI-CAN-32061)
+  from pinned x.org libX11 1.8.13 (vulnerable) and 1.8.14 (patched). The
+  linkage-only `expose.patch` calls the real `_XkbReadKeyActions()` with a
+  synthetic reply (`firstKeyAct=8`, `nKeyActs=2`, descriptors `[1,0]`,
+  `max_key_code=8`); both GCC and Clang ASan builds of 1.8.13 print
+  `WRITE of size 2` at verbatim `src/xkb/XKBGetMap.c:277`, 0 bytes after the
+  18-byte `key_acts` allocation, while 1.8.14 returns `BadLength` and safe
+  inputs succeed. `ac41be89` added the author clean-archive receipt;
+  `e8b41e1c` admitted the mind as the 167th declared target / 164th register
+  row (window 175 adopted, panes %352/%353, route and wake units
+  person-reserved) and re-rendered README/results/SVG/manifest, moving counts
+  166/163/163/110 → 167/164/164/110. Grade: rung 3 verbatim / rung 4 PARTIAL;
+  both 12 PASS / 0 FAIL clean-archive replays are author-side, no independent
+  witness, no named adjacent object, live X wire, pointer control, command or
+  r5. The CVSS 7.5 and RCE framing remain advisory claims.
+- `c249e3b5` records a bounded **Ruby 4.0.9** negative: two builds of the
+  pinned 4.0.9 tar.xz (SHA-256
+  `a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4`), one
+  `--disable-yjit` and one default, have 124-entry handler tables at ELF
+  `0x6f0da0` and `0x82e5a0`; no valid handler has low byte `0x53` or `0x73`.
+  The 20 selected arms per build produced only `SIGSEGV`/`SIGILL`, and a scan
+  of 8,188 files / 178,920 iseqs found 0 compatible shapes. Grades unchanged:
+  rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED.
+- `04f32aa9` (witness W257) replayed libgphoto2shell's W197 device-only lane
+  from a clean `git archive 8ca09205` with the 2.5.34 tarball re-fetched and
+  matched to `5df9e774…ff7f28`: 4/4 pins OK, 12 PASS / 0 FAIL, rc 0 in 60.7 s,
+  fresh `TOP=0x12b71`, no `priv` in the frame, a real consumer list of 1022
+  with ASLR off and on, and aborting wrong-top/no-repair controls. Verdict
+  ESTABLISHED AS LABELED at the claimed lab rung-4 scope only; no grade
+  change, NO r5. The `.so` digest differs from the author's clean receipt by
+  build path, as `REPLAY.md` §W180 already records. W170/W171/W172 remain
+  unwitnessed. Detail:
+  `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/detail.md`. Two
+  stale "author replay, not a witness verdict" passages were corrected in
+  place here and in `docs/reproducibility.md`; W257 touched no manifest, so
+  the generated established count stays 110.
+
+- `62abd0a6` (libgphoto2shell W201) updated the report headline and status to
+  say research is closed at the documented W200 ceiling: W257 establishes only
+  the labeled W197 device-only real-consumer-list lane and does not witness
+  W167-W172 or W200, add r5, or widen to a wire path. No docs passage named
+  the old next-step plan, so no in-place correction was owed.
