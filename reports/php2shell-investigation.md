@@ -2344,3 +2344,11 @@ clamp; (2) a witness verdict that contradicts or upgrades a grade; (3) an
 observation of the splice on stock/default PHP configuration. Do not re-send
 the old offers, repeat W66/W70/W71 replays, or sweep closed mechanisms
 without one of those triggers.
+
+Clean-archive receipt at commit `5aa014e6` (2026-11-26 01:16Z):
+`git archive HEAD lab/repro/php2shell-write-cut-signal-probe.c lab/repro/php2shell-write-cut-signal-probe.sh | tar x -C /tmp/php2shell-w72-archive`,
+followed by `bash /tmp/php2shell-w72-archive/lab/repro/php2shell-write-cut-signal-probe.sh /tmp/php2shell-w72-archive/probe`
+printed `verdict=NO_SHORT_WRITE` again: all three signals produced full
+268435456-byte writes with 1239 / 909 / 3334 handler hits and child_exit 0.
+The committed replay contract works from a clean checkout; this re-run is
+author-side and adds no grade.
