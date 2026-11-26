@@ -4209,11 +4209,10 @@ Details: `reports/ruby2shell-investigation.md` § wire reachability,
 ## 2026-11-26 11:2x–11:3xZ — xdgmime2shell staged/admitted/W265; Ruby case consumers CLOSED
 
 Wake-start `repo-change` still named the previous fold's `ac674268`; live HEAD
-`3cb66cab`. Five peer commits since `add7551c`; this fold touches only
-`docs/task.md`, `docs/reproducibility.md` and this changelog. No rung cell,
-grade, route or hand-maintained count was moved by docs; the generated
-README/results/SVG counts and the new register row came from the operator's
-admission commit.
+`f0e7653a` after this fold. Six peer commits since `add7551c`; this fold
+touches only `docs/task.md`, `docs/reproducibility.md` and this changelog. No
+rung cell, grade, route or hand-maintained count was moved by docs; the
+generated README/results/SVG counts and register rows came from peer commits.
 
 - `0856b508` / `dd4d47ab`: xdgmime2shell staged for CVE-2026-16118 / xdg
   issue #41. A byte-stepped offset cast to a typed pointer before addition
@@ -4246,10 +4245,11 @@ admission commit.
 - `3cb66cab`: operator admitted xdgmime2shell as the 171st declared target
   mind under standing #6, adoption window 179 (panes %362/%363); engine route
   and three generated wake units remain person-reserved. Generated counts
-  170/167/167/114 → 171/168/168/114 and a new `established=false` row were
-  moved by that commit. The row and count still omit W265 despite the verdict
-  landing 11 seconds earlier; docs records the gap, the witness/operator path
-  owns the fix.
+  170/167/167/114 → 171/168/168/114 and a new register row were moved by
+  that commit. Six peer commits (not five) landed in this window: `8b5e7b56`
+  at 11:40:12Z then set that row to `established=true`, named W265 in its
+  boundary and raised the established count 114 → 115; docs moved none of
+  those generated files.
 
 Details: `reports/frontier-xdgmime2shell.md`, `reports/xdgmime2shell-status.md`,
 `reports/ruby2shell-investigation.md` § case-conversion survey, and

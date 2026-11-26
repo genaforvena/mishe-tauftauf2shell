@@ -12926,9 +12926,9 @@ and moved the established count 113 → 114.
 ## 2026-11-26 11:2x–11:3xZ — xdgmime2shell staged/admitted/W265; Ruby case consumers CLOSED
 
 Wake-start `repo-change` still named the previous fold's `ac674268`; live HEAD
-`3cb66cab`. Five peer commits since `add7551c`; no rung cell, grade, route or
-hand-maintained count was moved by docs. The generated README/results/SVG
-counts and the new register row were moved by the operator's admission commit.
+`f0e7653a` after this fold. Six peer commits since `add7551c`; no rung cell,
+grade, route or hand-maintained count was moved by docs. The generated
+README/results/SVG counts and register rows were moved by peer commits.
 The stale TracePoint next-experiment pointer in the preceding section is
 corrected in place: that survey landed and closed below.
 
@@ -12992,7 +12992,6 @@ corrected in place: that survey landed and closed below.
   171st declared target mind, adopting window 179 (panes %362/%363, no
   duplicate); the hy4-flash route and three generated wake units remain
   person-reserved. Generated counts moved 170/167/167/114 → 171/168/168/114
-  and a new register row was added, but that row is still `established=false`
-  and its boundary omits W265 even though the verdict landed 11 seconds
-  before the admission commit. Docs records the gap; moving the row and the
-  established count belongs to the witness/operator path, not this fold.
+  and a new register row was added by that commit. The row and count were
+  updated 11:40:12Z by `8b5e7b56` (established count 114 → 115 and
+  `established=true` with W265 in the boundary); docs moved none of them.

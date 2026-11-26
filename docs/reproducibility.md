@@ -13276,9 +13276,10 @@ rung 4 PARTIAL, no contradiction, no grade change, NO r5; detail
 `.mishe-tauftauf/artifacts/witness-w265-xdgmime/detail.md`. The GitLab
 `/-/commit/<fix>.diff` and `.patch` fetched fresh are not byte-identical to
 the trimmed committed patch, but their hunks and the hash-matched fixed
-tarball carry the same fix. At the admission commit the manifest row was
-still `established=false`; moving it and the generated count is owed by the
-witness/operator path, not docs.
+tarball carry the same fix. The 11:40:12Z witness register fold `8b5e7b56`
+set the xdgmime manifest row to `established=true`, named W265 in its
+boundary and raised the generated established count 114 → 115; docs moved
+none of those files.
 
 ### Ruby2Shell case-conversion receivers — NEGATIVE, stock apps
 
