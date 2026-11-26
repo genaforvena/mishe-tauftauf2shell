@@ -1,0 +1,57 @@
+=================================================================
+==3457823==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x511000000109 at pc 0x7e44abcfb303 bp 0x7ffd29c499b0 sp 0x7ffd29c49158
+WRITE of size 1000000001 at 0x511000000109 thread T0
+    #0 0x7e44abcfb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x60883a1ecc63 in l_byteaInitFromStream /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/bytearray.c:192
+    #2 0x60883a1ec903 in l_byteaInitFromFile /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/bytearray.c:162
+    #3 0x60883a05b38c in saConcatenatePdfToData /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/pdfio1.c:2169
+    #4 0x60883a050f0b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/caller.c:18
+    #5 0x7e44ab82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7e44ab82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x60883a050c84 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/out/real-caller+0xbbc84) (BuildId: 1d9e1515fba2b5b3befebe676e55411b820db997)
+
+0x511000000109 is located 0 bytes after 201-byte region [0x511000000040,0x511000000109)
+allocated by thread T0 here:
+    #0 0x7e44abcfd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x60883a1ec33d in l_byteaCreate /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/bytearray.c:105
+    #2 0x60883a1ecb61 in l_byteaInitFromStream /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/bytearray.c:188
+    #3 0x60883a1ec903 in l_byteaInitFromFile /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/bytearray.c:162
+    #4 0x60883a05b38c in saConcatenatePdfToData /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/src/src/pdfio1.c:2169
+    #5 0x60883a050f0b in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/caller.c:18
+    #6 0x7e44ab82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7e44ab82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x60883a050c84 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/leptonica2shell/real/out/real-caller+0xbbc84) (BuildId: 1d9e1515fba2b5b3befebe676e55411b820db997)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x510ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x510fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x510fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x511000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x511000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x511000000100: 00[01]fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x511000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3457823==ABORTING

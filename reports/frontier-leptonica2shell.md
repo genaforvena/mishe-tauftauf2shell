@@ -7,6 +7,12 @@ replays. Witness W237 (2026-11-26 01:48Z) replay verdict: ESTABLISHED AS
 LABELED, no contradiction, no grade change, NO r5; detail in
 `.mishe-tauftauf/artifacts/witness-w237-leptonica22shell/detail.md`.
 
+Real-library update 2026-11-26 14:55Z: both pinned trees were built with ASan
+and driven through the real `l_byteaInitFromFile()` API. `bash
+lab/frontier/leptonica2shell/real/run-real.sh` reports **7 PASS / 0 FAIL**,
+including an in-tree caller path. Grade stays rung 3 / rung 4 PARTIAL; no wire,
+pointer-bearing victim or command.
+
 ## Verified ground truth
 
 - Claim: `CVE-2026-137063`, published 2026-11-25, CWE-122, CVSS 6.8. Feed
@@ -74,24 +80,54 @@ verbatim upstream bytes.
   build's usable chunk size). No upstream byte was edited to make the suite
   pass.
 
+## Real-library replay (2026-11-26)
+
+`lab/frontier/leptonica2shell/real/` clones the pinned tag and fix commit,
+builds both with `CMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer
+-g -O0'` and the other image codecs disabled, and drives the real APIs. Both
+real `src/bytearray.c` files hash to the exact values pinned in
+`PROVENANCE.md`. `run-real.sh` uses a sparse 1,000,000,001-byte file with
+chosen `MISHE-LEPTONICA` at offset 201.
+
+- `evidence/real-vuln-asan.out`: real `heap-buffer-overflow`,
+  `WRITE of size 1000000001`, `0 bytes after 201-byte region`; write frame
+  `l_byteaInitFromStream src/src/bytearray.c:192` called from
+  `l_byteaInitFromFile :162`, allocation `l_byteaCreate :105`.
+- `evidence/real-caller-asan.out`: identical WRITE reached through the
+  in-tree caller `saConcatenatePdfToData src/src/pdfio1.c:2169`.
+- `evidence/real-fixed-asan.out`: `stream too large`, `BA=NULL`, no ASan.
+- `evidence/real-vuln-safe.out`: `SIZE=16 FIRST=4d`, no ASan.
+
+Caller enumeration: `l_byteaInitFromStream()` is called only from
+`l_byteaInitFromFile()` in `src/`. Its in-tree callers are
+`pdfio1.c:saConcatenatePdfToData()` and regression programs `bytea_reg.c`,
+`pdfio2_reg.c`, `xtractprotos.c`. No socket or request-dispatch caller exists
+in this tree; the PDF path takes a list of filenames, not attacker-controlled
+wire bytes. The first caller-stack assertion failed because ASan prints
+callee-first; the assertion order was corrected, the observed report was not.
+
 ## Feasibility assessment and ceilings
 
-- Rung 1 (trigger): deterministic, local, sparse-file-backed; no external
-  probe. The >1 GB logical size is unavoidable, but resident cost is one page
-  plus the mapped file.
+- Rung 1 (trigger): deterministic, local, sparse-file-backed in the staged
+  harness; the real-library replay allocates and reads the full 1,000,000,001
+  bytes into a heap buffer before the overflow, so it needs about a gigabyte
+  of resident memory. No external probe.
 - Rung 2 (state failure): the clamp to 201 bytes while `size` and the copy
   length use the unclamped stream size is directly observed.
-- Rung 3: GCC and Clang ASan WRITE on verbatim pinned functions.
+- Rung 3: GCC and Clang ASan WRITE on verbatim pinned functions **and in the
+  real 1.87.0 library**, with clean fixed and safe controls.
 - Rung 4: PARTIAL — bytes come from the input stream at chosen offsets past
   the declared 201-byte region, but the plain-build readback uses a synthetic
   bounded `memcpy`; no real Leptonica consumer, adjacent object or pointer is
   in evidence. The unbounded plain build runs off the heap into unmapped
-  memory, so it cannot serve as a readback oracle.
-- Rung 5: NOT CLAIMED — no real library build, no live process, no wire, no
-  command execution. The advisory is a local file/stream parser issue.
-- Next experiment for the target mind: build real Leptonica 1.87.0 and the
-  fixed commit under ASan, call `l_byteaInitFromFile()` on the same sparse
-  1,000,000,001-byte file, confirm the ASan WRITE inside the real library, and
-  enumerate which real callers feed `l_byteaInitFromStream` attacker-sized
-  input. Preserve any structural consumer boundary as a negative; do not
-  claim pointer or command control without a live readback.
+  memory, so it cannot serve as a readback oracle. The real-library caller
+  `saConcatenatePdfToData()` reaches the WRITE but offers no chosen-byte
+  readback.
+- Rung 5: NOT CLAIMED — real library and process, but no wire input, no live
+  server, no pointer-bearing victim object and no command execution. The
+  advisory is a local file/stream parser issue.
+- Next experiment: find an external consumer that feeds a >1 GB stream to a
+  Leptonica API reachable from request bytes and measure the live heap
+  neighborhood; preserve the no-pointer/no-command ceiling until then. The
+  staged and real-library lanes are complete as labeled; witness replay of
+  the real-library runner is requested separately.

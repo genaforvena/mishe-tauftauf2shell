@@ -1,0 +1,8 @@
+# Provisioned upstream trees, build dirs, binaries and fixtures.
+src/
+src-fixed/
+build-vuln/
+build-fixed/
+out/
+*.log
+evidence/*.bin

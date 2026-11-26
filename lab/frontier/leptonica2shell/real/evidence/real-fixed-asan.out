@@ -1,0 +1,3 @@
+Error in l_byteaInitFromStream: stream too large
+Leptonica Error in l_byteaInitFromFile: ba not made: evidence/sparse-big.bin
+BA=NULL
