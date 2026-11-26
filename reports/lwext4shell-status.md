@@ -1,7 +1,9 @@
 # lwext4shell — status (staged 2026-11-26)
 
-State: **STAGED by frontier W242, 2026-11-26**. Grade: rung 3 pinned verbatim
-function / rung 4 PARTIAL image-chosen bit byte past a 4096-byte heap block.
+State: **STAGED by frontier W242, 2026-11-26**; window 167 created and
+registered 03:21:24Z; operator admission owed, witness replay requested.
+Grade: rung 3 pinned verbatim function / rung 4 PARTIAL image-chosen bit byte
+past a 4096-byte heap block.
 No real lwext4 build, no crafted ext4 image through the mount path, no
 chosen-address pointer, no command, no r5.
 Brief `reports/frontier-lwext4.md`, harness
@@ -25,8 +27,8 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 
 ## Next
 
-1. Window registration, operator DM and witness replay receipt are recorded
-   below once created this wake; operator admission remains owed.
+1. Window 167 is created/registered and the witness replay is requested;
+   operator admission under standing #6 remains owed to the operator.
 2. After admission, own the real-library lane: build lwext4 `ext4_fs_init()`,
    deliver a crafted ext4 image with `s_inodes_per_group = 32777`, and measure
    the real allocator under ASan against the fix.
@@ -44,3 +46,19 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 - In-tree `run-witness.sh` 2026-11-26 03:16Z: all five pins exact,
   `REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`,
   `TOTAL: 31 PASS / 0 FAIL`, rc 0.
+- Clean archive 2026-11-26 03:18Z: `git archive b4a7acd4
+  lab/frontier/lwext4shell` into `/tmp/w242-lwext4-clean`; unmodified
+  `run-witness.sh` (sha256
+  `42d5b68df4e6c4d5ffc28011da2fd814fceeafeb636568f95a746d0bb30838f5`,
+  identical in-tree) returned `WITNESS REPLAY PASS`, five pins exact,
+  `REPLAY_PASS=6 REPLAY_FAIL=0`, `TOTAL: 31 PASS / 0 FAIL`, rc 0.
+- Window created 2026-11-26T03:21Z on the inner tmux socket: index 167,
+  session `mishe-tauftauf2shell-current`, panes `%336`/`%337`, `dead=0`,
+  captures 15/2 lines, both processes live (`tail -F` status above,
+  `plant_view --role lwext4shell --output --log --follow` below). Registered
+  in `.mishe-tauftauf/operator/window-registry.json` at 03:21:24Z (168
+  windows / 168 unique names). No route, resolver key or wake unit added by
+  frontier; no unit/sync edit (person-reserved).
+- Operator DM 4767 at 03:21Z states the window already exists and the target
+  is staged, not admitted. Witness DM 4768 at 03:21Z requests independent
+  replay and verification of the labeled grade.

@@ -1,6 +1,8 @@
 # Frontier brief: lwext4 bitmap-init heap overflows — CVE-2025-71473 / 71474
 
-Status: **STAGED 2026-11-26 W242** (window to be registered this wake).
+Status: **STAGED 2026-11-26 W242**; window 167 created and registered
+03:21:24Z (168 windows / 168 unique names), operator DM 4767 and witness DM
+4768 sent. Operator admission owed, witness replay requested.
 Rung 3 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
 (image-chosen bit byte past the logical 4096-byte block in a synthetic plain
 process). No real lwext4 build, no crafted ext4 image through the mount path,
