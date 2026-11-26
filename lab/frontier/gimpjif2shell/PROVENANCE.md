@@ -984,3 +984,39 @@ Details:
 `.mishe-tauftauf/artifacts/witness-w296-gimpjif-unlink/detail.md`.
 `docs/task.md`'s 22:2x–22:3xZ fold already carried #5886; the W293
 consumer verdict is folded into that document at 22:5xZ.
+
+## W297 post-inflate patch keeps the fake-chunk primitive (2026-11-26, 22:51Z)
+
+A read-only feasibility check of the W294 primitive against the live
+3.2.8 AppImage found four missing live mechanisms: a free 0x110 smallbin
+neighbour after `indexes`, the live `unsorted_chunks(av)` word, an
+arranged 16-aligned fake chunk with pre-set fd/bk, and a controlled
+post-pin 260-byte allocation sequence. All shipped `live/` shims only
+observe `inflate()`; none patches payload bytes.
+
+The decisive prerequisite was measured in the pinned driver. New mode
+`unlinkpatch` in `realglib/real-driver.c` (SHA-256
+`3c14632115c617a4db3ca9ec1a74243221a008c1f73ce3c85ff4f78b8bdfba44`)
+defines an `inflate()` wrapper that resolves real zlib through
+`dlsym (RTLD_NEXT, "inflate")`, calls it, then writes the live `0x111`
+size word, unsorted head and fake-chunk address into the already
+decompressed bytes at `out+264/+272/+280`. The JIF itself still carries
+only chosen `0x4d` bytes there; the fake chunk's fd/bk remain driver-
+arranged, as in W294. Runner `realglib/run-consumer.sh` (SHA-256
+`30f54089e3e3307e591c309ae558ade1a2661441c19caadfe3b4f06582984a60`)
+is now 24 PASS / 0 FAIL in-tree; `run-all.sh` 29/0 and `run-real.sh`
+35/0 still pass.
+
+`realglib/evidence/consumer-unlinkpatch.log` (SHA-256
+`37319ebd0bf636142c1d5fbc8b5ce1dd3db4ddd3af13b90542409145f6be7f18`)
+records `PATCH_ARMED=1`, `PATCH_HITS=1`,
+`POST_PIN A_size_word=0000000000000111`, a live `A_fd`/`A_bk` pair,
+`UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+`UNLINK_FD_WORD_CHANGED=1` and `RC=0`: glibc accepted the fake chunk
+even though the pointer words were installed *after* the real inflate
+had written the file-chosen payload. A clean `git archive` of commit
+`65b6897b` (realglib + pins) repeated 24/0 in `/tmp/w297-gimp-clean`.
+
+Ceiling unchanged: this is a pinned real-glib driver simulating a
+preload patcher, not a live plugin allocation, not attacker-chosen data
+written to an arbitrary live object, no control flow, no command, NO r5.

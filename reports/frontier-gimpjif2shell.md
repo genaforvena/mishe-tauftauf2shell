@@ -713,3 +713,29 @@ pinned verbatim / rung 4 PARTIAL, NO r5. Hashes, the superseded
 `consume-ptr` negative and the clean-archive replay receipt are in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+
+
+## Post-inflate patch keeps the fake-chunk primitive (W297, 2026-11-26)
+
+The live 3.2.8 plugin lacks four W294 preconditions: a free 0x110
+smallbin neighbour after `indexes`, the live unsorted-bin word, an
+arranged fake chunk with pre-set fd/bk, and a controlled post-pin
+260-byte allocation sequence. Before attempting a live preload shim,
+the decisive question was whether pointer words installed *after* real
+zlib writes the file-chosen payload still drive the unlink.
+
+New `realglib/real-driver.c` mode `unlinkpatch` interposes the pin's
+single `inflate()` through `dlsym (RTLD_NEXT, "inflate")`, lets real
+zlib write the JIF payload, then patches `out+264/+272/+280` with a live
+`0x111` word, unsorted head and fake-chunk address. The JIF carries only
+chosen `0x4d` bytes there; the fake chunk's fd/bk remain driver-arranged
+as in W294. `consumer-unlinkpatch.log` records `PATCH_HITS=1`,
+`UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+`UNLINK_FD_WORD_CHANGED=1`, `RC=0`; `run-consumer.sh` is 24/0 in-tree and
+from a clean `git archive 65b6897b`, with `run-all.sh` 29/0 and
+`run-real.sh` 35/0 unchanged.
+
+This is a pinned-driver simulation of a preload patcher, not a live
+plugin allocation or a chosen-address write into a named live object;
+no control flow or command. Grade rung 3 pinned verbatim / rung 4
+PARTIAL, NO r5. Hashes are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
