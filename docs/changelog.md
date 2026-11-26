@@ -1,6 +1,76 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-26 17:1xZ — Ruby2Shell stock Rails Regexp double-free wire lane
+
+`cf50f68a` adds `ruby2shell-regexp-notes-wire.py` plus focused glibc/jemalloc
+allocator tracers. The unmodified `rails new --minimal` development
+`/rails/info/notes` endpoint interpolates `params[:tag]` into Regexp literals;
+a form POST with `_method=GET` bypasses Puma's query-string limit and reaches
+GHSA-7x2q-68qv-6p8x. The 90,085-byte malicious body gives ASan
+`heap-use-after-free` in `bbuf_free regparse.c:145` and a plain-build
+`__libc_free` crash; safe affected input is 200/alive and fixed 3.4.13 is
+500/alive. This is wire-only unmodified-stock rung 3 for the secondary lane,
+not rung 4 or rung 5. Safe-link, tcache-disabled, named-group, jemalloc and
+ASLR-off calibration produced no stock controlled free, duplicate, overlap,
+command, persistence or second command. Full stock/oracle-free/persistent
+Ruby2Shell rung 5 remains NOT ACHIEVED.
+
+
+## 2026-11-26 16:4x–17:1xZ — libmikmod admitted (179th), quickjsng staged, W278 witness, bounded lanes
+
+This fold covers `c1a02981..17f9716f`; reproduce the claims in
+`docs/reproducibility.md` § 16:4x–17:1xZ. No raw evidence, generated file or
+grade cell is committed here.
+
+- `3a4f1115` (operator, standing #6) admitted libmikmod2shell as the 179th
+  declared target mind, window 189 (%382/%383); generated counts moved
+  178/175/175/119 → 179/176/176/119 with the row still `established:false`.
+  The isolated-copy replay matched all 12 checks: vulnerable GCC ASan
+  `WRITE of size 8` at `load_dsm.c:339` via `Player_Load()`, fixed `errno=9`,
+  safe input clean. Rung 2/3 only, rung 4 NOT CLAIMED; witness and plain
+  grooming owed. The older STAGED wording in the 16:1x–16:4xZ entry is
+  superseded by this admission.
+- `8d8d5fa0` + `2769b482` staged quickjsng2shell (GHSA-r6vf-p8wr-4vg9, no
+  CVE, OSV 404) for a fast-array UAF in the shipped `qjs` CLI. Pinned v0.14.0
+  `3c051980…` / v0.15.0 `433941b9…`, fix `da49a370…`; upstream PoC gave
+  28/0 and 11/0 with ASan `READ of size 4` at `quickjs.c:1546` via `:9478`,
+  fixed prints `undefined`, safe control clean. Rung 3 only, rung 4 NOT
+  CLAIMED; admission and witness owed; the advisory's "patched None" and
+  os-module command claims are preserved as claims, not lab findings.
+- `a630590d` folded witness W278's ESTABLISHED AS LABELED verdict for
+  neuvector2shell: clean archive of `d2f1f317`, three pins exact, 22/20/17
+  PASS, both traces faulting at `dpi_sig.c:657`. Rung 4 PARTIAL at the
+  earlier ESTABLISHED scope, no chosen address, command, grade change or r5.
+- `17f9716f` (W280) drove a 2233-byte REST-valid message over the real AF_UNIX
+  socket through a lab consumer (`loopback.sh` 17/0): ASan `WRITE of size
+  121` at offset 2080 of `dlpsig_buf`, safe 139-byte and fixed inputs clean.
+  Not a full enforcer; no REST/CRD endpoint, chosen address, command or r5.
+- `fdcb60c7` + `a6ea9e18` (rpm2shell) used the attacker-declared cpio length
+  for ASan WRITEs of 64/512/4096 (21/0) and a real `rpm -i` consumer (14/0)
+  where chosen filler faults unmodified plain install 3/3 rc 139 (GDB:
+  `rpmluaFree` teardown) while zero/short-read controls return 1. The
+  `rpm2cpio`/`rpm2archive` aliases are one binary; natural pointer control
+  and semantic dereference stay UNKNOWN.
+- `325ec0c9` (nfdump2shell) closed the live write-past-allocation route: a
+  65507-byte UDP datagram leaves the 65535-byte `in_buff` store four bytes
+  inside; `run-edge.sh` 8/0 with an ASan READ-1 at `nfd_raw.c:259`, safe and
+  fixed clean. Earlier chosen-byte live-record and W235 rows are unchanged.
+- `5e998ac4` + `1b32d2c6` (gimpjif2shell W245) confirmed the WRITE with
+  instrumented real zlib 1.3.2: `run-asan.sh` 18/0, `inflate_fast` WRITE-1 0
+  bytes after 260/4-byte regions, fixed/safe clean, clean-archive replay
+  18/0; witness asked, no verdict at yield. No plugin, PDB wire or r5.
+- `69a4e67f` (leptonica2shell) closed the external-consumer hunt with a
+  bounded no-request-consumer negative for this checkout; witness replay of
+  the two real runners stays UNKNOWN.
+- `9d48251d` (ruby2shell) closed the same-request second-buffer overlap:
+  12 N values at filler 40 served three keep-alive requests clean with
+  matching safe/fixed controls; gdb saw no second buffer at N=21, one 134 KB
+  away at N=59 and an abort before it at N=572. No chosen-byte write,
+  command or persistence; full stock/oracle-free/persistent r5 NOT ACHIEVED.
+
+Every count above is an author or clean-archive replay except W278's witness
+verdict; no register or generated grade cell moved.
 
 ## 2026-11-26 17:0xZ — Ruby2Shell same-request case-map buffer sweep
 

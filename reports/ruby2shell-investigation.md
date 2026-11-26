@@ -5660,3 +5660,76 @@ observed arm, so there is no same-request overlap, chosen-byte write,
 command or second command. Grade unchanged; full stock/oracle-free/persistent
 rung 5 remains NOT ACHIEVED. This arm is CLOSED; another must name a consumed
 function or a wire-only libc/Ruby-code base.
+
+## Stock Rails `/rails/info/notes`: wire-only Regexp double free (2026-11-26, direct session)
+
+A new stock application path reaches **GHSA-7x2q-68qv-6p8x** without changing
+the generated `rails new --minimal` application. In development,
+`Rails::InfoController#notes` passes `params[:tag]` to
+`Rails::SourceAnnotationExtractor`; the annotation regexps interpolate that
+attacker string into Regexp literals
+(`railties-8.1.4.1/lib/rails/source_annotation_extractor.rb:102-119`).
+Puma's 10 KiB query-string limit rejects a direct GET carrying the regression
+pattern, but a stock form POST with `_method=GET` reaches the same GET route
+through `Rack::MethodOverride` and carries the 90,085-byte body without an
+application or middleware change.
+
+Committed reproducer: `lab/repro/ruby2shell-regexp-notes-wire.py` (commit
+`cf50f68a`). It starts only the stock app on loopback and drives:
+
+```
+python3 lab/repro/ruby2shell-regexp-notes-wire.py attack regexp-notes-smoke-attack
+python3 lab/repro/ruby2shell-regexp-notes-wire.py safe regexp-notes-smoke-safe
+python3 lab/repro/ruby2shell-regexp-notes-wire.py fixed regexp-notes-smoke-fixed
+python3 lab/repro/ruby2shell-regexp-notes-wire.py asan regexp-notes-smoke-asan
+```
+
+Observed control matrix:
+
+| arm | result |
+| --- | --- |
+| affected plain 3.4.12, malicious tag | connection closed; SIGSEGV/SIGABRT in `__libc_free <- bbuf_free` |
+| affected ASan 3.4.12, same body | `heap-use-after-free`, READ 8 in `bbuf_free regparse.c:145`; first free `:4977`, second `:5072` |
+| affected plain 3.4.12, `tag=TODO` | HTTP 200; `/up` 200; process alive |
+| fixed plain 3.4.13, malicious body | HTTP 500 (`too many multibyte code ranges`); `/up` 200; process alive |
+
+Evidence: `lab/build/evidence/regexp-notes-smoke-*`. This promotes the
+secondary double-free lane from an in-process-only rung-3 result to a
+**wire-only, unmodified-stock-Rails rung-3 result**. It does not change the
+primary CVE's rung-4 grade or either rung-5 claim.
+
+### Exploitation measurements and bounded negatives
+
+- The stale object is the 16-byte `BBuf`, not its range-data buffer.
+  `bbuf_free` reads stale `BBuf->p` and passes it to `xfree`. On default glibc
+  2.39, the first free rewrites that qword with
+  `PROTECT_PTR(&B->next,H)`, so the second free normally consumes allocator
+  metadata rather than the original data pointer.
+- With `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`, the stale second free can
+  complete on a valid range-data chunk, but a later third free aborts. A
+  named-group count sweep (1..512, ASLR off) did not make the stale target a
+  named chunk: it remained an `onig_bbuf_init` data allocation in every trace.
+- Under jemalloc, standalone `Regexp.new` survives and raises RegexpError.
+  Focused tracing shows the same address returned while already active,
+  including 16-byte BBuf structs and 20-byte range buffers. The Rails request
+  still crashes/hangs at `0x30`; no second request or cross-type alias was
+  obtained.
+- ASLR-off standalone calibration found a 64 KiB-aligned stale BBuf at K=954
+  named groups (`B=0x555555d20000`), but the stock Rails request layout did
+  not reproduce that alignment. This is a calibration result, not a wire
+  exploit.
+- Adding two disjoint exclusions to the second nested class
+  (`[^\u9fff\u{A000}\u{A100}]`) promotes the stale data buffer from 20 to 40
+  bytes while the BBuf struct remains 16 bytes. This separates the data chunk
+  from the struct's 0x20 bin and is the next useful grooming lever.
+
+No valid controlled free, tcache/fastbin duplicate on the stock request,
+overlap, pointer disclosure, command, persistence or second command was
+observed. Full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
+Next falsifiable experiment: add a nested-exclusion count knob to the wire
+reproducer, promote the stale data chunk to 0x30, and sweep same-worker regexp
+primers so the stale 0x20 BBuf decodes to a valid chunk. Require a later
+duplicate/alias diagnostic or repeated live allocation; an invalid-pointer
+SIGSEGV closes the arm. Do not repeat the named-group-only sweep or direct
+tail-byte steering.
