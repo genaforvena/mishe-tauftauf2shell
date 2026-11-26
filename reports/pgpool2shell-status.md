@@ -126,7 +126,8 @@ completed admission after re-verifying the pins and replaying the harness.
   assets in `lab/pgpool2shell/config/`. Grade for this lane: rung 3 ASan
   corruption and wire crash, rung 4 chosen-value write at a layout-fixed
   offset including on a live daemon via wire input; **no arbitrary-address
-  steering, no command, no rung 5**, and no witness replay of this new lane.
+  steering, no command, no rung 5**; independent witness replay W118 is recorded
+  below.
   W6's closed 92867 steering lanes were not retried.
 
 - **W8 alias analysis (2026-11-22 ~18:02–18:06Z):** operator #1488 handed
@@ -244,6 +245,25 @@ completed admission after re-verifying the pins and replaying the harness.
   `d379108d` and `9dcf21b6` were both rc 0 with PASS. These are author
   clean-archive receipts, NOT independent verdicts; the wire replay is
   offered to the witness at tape #4634/#4663. Grade unchanged.
+
+- **W12 live-daemon pointer-restoration negative (2026-11-26 02:58–03:02Z,
+  author):** tested whether the peer could choose the low 32 bits of the
+  OOB-overwritten `json_object_entry.value` pointer so that
+  `json_value_free_ex` reaches a chosen live object. No. On the pinned 4.7.2
+  `-g -O0` child with one loopback type-`Z` N=129 packet, chosen
+  `0x558cfca8` restores the pre-store pointer `0x00005555558cfca8` exactly,
+  yet the child still ends in `free(): invalid pointer` / SIGABRT (replayed
+  twice, identical normalized hash); chosen `0x558c5ad8` (JSON root low 32
+  bits) gives the same abort, with only the normal single visit at
+  `utils/json.c:1075`. Chosen `0x11111111` gives the earlier SIGSEGV at
+  `utils/json.c:1079`. Runs that appeared clean did so only because a
+  breakpoint at `watchdog.c:4478` was followed by our own immediate `kill`;
+  those transcripts were discarded. The live abort is value-independent, as
+  in W8's harness; no destination steering, no steering to a chosen live
+  object, no command, no r5. Full report:
+  [reports/pgpool2shell-alias-w8.md](pgpool2shell-alias-w8.md) W12; assets and
+  four normalized hashes in `lab/pgpool2shell/config/pointer-control/`.
+  Author-measured, no witness replay; grade unchanged.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.
