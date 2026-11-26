@@ -6,8 +6,9 @@ of a real libsoup source file, **not** a live wire path.
 
 ## Pins (provisioning, public GitLab)
 
-The runner needs only two verbatim files; refetch from the public GitLab
-commit tarballs on a clean replay:
+The runner needs the **verbatim pinned `libsoup/` subtree** from each commit —
+the decoder source plus `soup-uri-utils.h` and `soup-uri-utils-private.h`,
+which it includes. Refetch both public GitLab commit tarballs on a clean replay:
 
 ```
 cd lab/frontier/libsoup2shell
@@ -17,13 +18,20 @@ for c in a4294044466df66ea98492d67bb74172ed3f8762 \
 done
 # tarball sha256: 2f0cd5f2441a104d24034e3be8bfafa8e52f5474c2f9e70d95cffaa63670f50f
 #                 88b0bb3ff19be196b80e60dfa263fbb4d246207f634e37616f86e716268cddaa
-mkdir -p vuln/libsoup fixed/libsoup
+mkdir -p vuln fixed
 tar xzf libsoup-a4294044466df66ea98492d67bb74172ed3f8762.tar.gz \
-  --strip-components=2 -C vuln/libsoup libsoup-a4294044466df66ea98492d67bb74172ed3f8762/libsoup/soup-uri-utils.c
+  --strip-components=1 -C vuln \
+  libsoup-a4294044466df66ea98492d67bb74172ed3f8762/libsoup
 tar xzf libsoup-e4f032268fa18f691a6c34d6adcb5b666f3e3f77.tar.gz \
-  --strip-components=2 -C fixed/libsoup libsoup-e4f032268fa18f691a6c34d6adcb5b666f3e3f77/libsoup/soup-uri-utils.c
+  --strip-components=1 -C fixed \
+  libsoup-e4f032268fa18f691a6c34d6adcb5b666f3e3f77/libsoup
 ./run-all.sh
 ```
+Extracting only `soup-uri-utils.c` is NOT enough: the lab shim's `soup.h`
+includes `soup-uri-utils-private.h`, which includes `soup-uri-utils.h`. On a
+clean archive that incomplete extraction fails to compile
+(`PASS=5 FAIL=14 plain_rc=127`, witness #5493). The full pinned subtree keeps
+the `.c` hashes below unchanged and reproduces the observed 19/0 result.
 
 - Vulnerable fix parent `a4294044466df66ea98492d67bb74172ed3f8762`
   (libsoup 3.7.2). Verbatim pinned
