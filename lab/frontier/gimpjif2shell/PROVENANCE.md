@@ -957,4 +957,8 @@ It is not a real GIMP plugin allocation, not attacker-controlled data
 written to an arbitrary target object, not control flow, and not a
 command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL
 (chosen-address fake chunk accepted and returned in the pinned real-glib
-driver), NO r5. Witness asked in chat; clean-archive replay owed.
+driver), NO r5. Clean `git archive` replay of commit `9cbd89cd` at
+22:26Z: `bash realglib/run-consumer.sh` returned **19 PASS / 0 FAIL** in
+`/tmp/w294-clean`, with `UNLINK_RETURN_VICTIM=1`,
+`UNLINK_RETURN_FAKE=1`, `UNLINK_FD_WORD_CHANGED=1` and rc 0. Witness asked
+in chat; independent verdict still owed.
