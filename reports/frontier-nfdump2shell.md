@@ -1,15 +1,13 @@
 # Frontier brief: nfdump nfcapd truncated EXgenericFlow heap write — GHSA-gpgq-hv9x-7mqj
 
 Status: **ADMITTED target mind; live loopback measured 2026-11-26**. Rung 3
-pinned verbatim; rung 4 PARTIAL with a live collector, a
-packet-chosen-byte write into a later processed record and a chosen byte
-deciding that record's parser acceptance.
-No pointer control, benign command or rung 5. Witness W235 (2026-11-25)
-verdict ESTABLISHED AS LABELED for the staged harness; witness W280
-(2026-11-26 16:59Z) independently replayed the chosen-byte result at
-`ca2bb2b0` and recorded ESTABLISHED AS LABELED. Live-wire and
-allocation-boundary replays are still owed. See
-`reports/nfdump2shell-status.md`.
+pinned verbatim and now also confirmed in the live collector; rung 4
+DEMONSTRATED for availability (live heap corruption and daemon abort from a
+wire datagram) and PARTIAL for packet-chosen field bytes. No pointer control,
+benign command or r5. Witness W235 (2026-11-25) staged harness verdict
+ESTABLISHED AS LABELED; W280 (2026-11-26 16:59Z) replayed the chosen-byte
+payload result. Live-wire, IPv4-boundary, IPv6-boundary, header-control and
+element-type replays are still owed. See `reports/nfdump2shell-status.md`.
 
 ## Claim and scope
 
@@ -192,6 +190,26 @@ This confirms the live ASan-clean result is structural, not incidental,
 and closes the direct write-past-allocation route. The crossing access is
 a read of packet-derived heap bytes, not a chosen-byte write or pointer.
 
+The IPv4-only wording above was corrected on 2026-11-26 20:31Z: the write can
+cross the allocation on IPv6. A `::1` UDP datagram carries 65527 B; the same
+terminal header-only element puts `msecReceived` at 65543..65550, eight bytes
+past the 65535-byte `in_buff`.
+
+### IPv6 allocation crossing: live OOB write (2026-11-26 20:31Z)
+
+`harness/wire_send.py` gained `v6edge` / `v6edge-safe` and `run-v6edge.sh`
+drives six live cases: **17 PASS / 0 FAIL**. On the vulnerable ASan collector
+the 65527 B datagram reports `heap-buffer-overflow`, `WRITE of size 8`,
+`0x...807 is located 8 bytes after 65535-byte region`, frame `#0 Process_nfd
+.../nfd_raw.c:256` and allocation `nfcapd.c:273`. The safe 65527 B complete
+element gives one flow with no report; the fixed collector rejects the short
+element with no report. On the genuine uninstrumented plain collector the
+attack aborts three times in three runs (`rc=134`, `double free or
+corruption (!prev)` / `free(): invalid next size (normal)`), while the
+same-size safe and fixed cases exit `rc=0` with one flow and `Corrupt nfd
+record` respectively. The 8 bytes remain collector-timestamp derived; no
+chosen value, pointer, marker or command.
+
 ### Packet-chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
 
 A third alias geometry targets the record header rather than flow data.
@@ -242,37 +260,39 @@ over setting the type directly. No pointer, marker, command or r5.
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the
-  verbatim pinned `Process_nfd()` path, with fixed and safe-input controls.
-- **Rung 4 PARTIAL:** the element length (hence the write offset) is
-  packet-controlled. The collector-time-derived 8-byte value clobbers the
-  next V3 record's header in a live `nfcapd` and drops that record (1 flow
+  verbatim pinned `Process_nfd()` path, with fixed and safe-input controls;
+  the same WRITE is now observed in the live ASan `nfcapd` on ::1.
+- **Rung 4 DEMONSTRATED (availability):** a 65527 B loopback datagram writes
+  8 bytes past the live 65535-byte receive allocation and corrupts glibc
+  heap metadata; the genuine plain collector aborts with SIGABRT in 3/3
+  runs, with clean same-size safe and fixed controls. The written value is
+  collector-time derived, so the exact corrupted metadata word varies.
+- **Rung 4 PARTIAL (chosen bytes):** the element length (hence the write
+  offset) is packet-controlled. The 8-byte value clobbers the next V3
+  record's header in a live IPv4 collector and drops that record (1 flow
   instead of 2). The pinned ICMP swap writes packet-chosen bytes at chosen
   offsets in a later, processed record's copied payload, V3 header
   (`flags`/`nfversion`) and — in a separate geometry — its **element type**,
   where the chosen byte decides `VerifyV3Record()` acceptance in the live
   collector (2 flows vs 1, with safe/fixed controls). Because both source
   and target fields are on the same wire, this is not a capability gain
-  over setting the type directly. No pointer-bearing object or command is
-  targeted.
-- **Not rung 5:** a live loopback `nfcapd` and a real request now exist, but
-  the attacker-controlled writes are two-byte flow/header scalars, the
-  8-byte OOB value is collector-time derived, and there is no pointer
-  hijack, benign command or command side effect. No rung 5 claim is made.
+  over setting the type directly. No pointer-bearing object is targeted.
+- **Not rung 5:** the attacker-controlled writes are two-byte flow/header
+  scalars, the 8-byte OOB value is collector-time derived, and there is no
+  pointer hijack, benign command or command side effect. No rung 5 claim.
 
 Next experiment: no pointer-bearing object was found in the wire records or
-adjacent to `in_buff`, so this lane is bounded by a measured structural
-boundary, not by an untested idea. Five alias geometries are resolved:
-the first clobbered a header, the second writes chosen bytes to a processed
-record's timestamp field, the third to its `flags`/`nfversion` header field,
-the fourth to its element type (a parser acceptance decision), and a
-2026-11-26 framing attempt aimed the swap at a later record's `size` field
-but did not trigger. With a 58-byte first record, the short flow view's
-`proto` byte aliases the second record's size low byte (`0x40`), not its
-`numElements`, so no ICMP swap ran; the 56-byte layout that does trigger
-it draws the would-be chosen bytes from the fixed V3 record type (`0b 00`).
-Direct record-size framing remains unproven. Witness replay of the live
-wire, allocation-boundary, header-control and element-type lanes is still
-owed; the chosen-byte payload replay is ESTABLISHED AS LABELED (W280).
+adjacent to `in_buff`, so pointer control is bounded by measurement; the
+IPv6 lane instead crosses the allocation itself and produces an abort.
+Six alias geometries are resolved: the first clobbered a header, the second
+writes chosen bytes to a processed record's timestamp field, the third to
+its `flags`/`nfversion` header field, the fourth to its element type (a
+parser acceptance decision), a 2026-11-26 framing attempt aimed at a later
+record's `size` field did not trigger, and the direct record-size/count lane
+was closed because the swap zeroes the source field needed for acceptance.
+Witness replay of the live-wire, IPv4-boundary, IPv6-boundary,
+header-control and element-type lanes is still owed; the chosen-byte payload
+replay is ESTABLISHED AS LABELED (W280).
 
 ### Build-label correction and pointer boundary (2026-11-26 19:29Z)
 

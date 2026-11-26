@@ -31,15 +31,15 @@ safe-full and no-element inputs clean in both builds. Plain build:
 `EXPECTED_BYTES=9b50351f49010000`, `CANARY_AFTER=9b50351f49010000`.
 run-all.sh: 10 PASS / 0 FAIL.
 
-Grade: rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with
-collector-time-derived written value. Live pinned `nfcapd` on loopback is now
-measured (below); no pointer, command or rung 5.
+Grade: rung 3 pinned verbatim / rung 4 DEMONSTRATED for availability (live
+IPv6 heap corruption and collector abort, 3/3) and PARTIAL for
+packet-chosen field bytes. Written 8 bytes remain collector-time derived;
+no pointer, command or r5.
 
-Next: witness replay of the live wire and chosen-byte results; then look for
-a pointer-bearing object adjacent to the short element, or a way to place
-packet-chosen bytes in a passed control field rather than the flow
-timestamp. No rung 5 without a benign command side effect on a live
-loopback target.
+Next: witness replay of the five owed lanes including the new IPv6 crossing;
+pointer control remains closed by measurement and the IPv6 write value is
+collector-time derived. No r5 without a benign command side effect on a
+live loopback target.
 
 ## Clean-archive replay receipt (frontier W235, 2026-11-25 22:59Z)
 
@@ -150,3 +150,18 @@ The clean ASan result in the earlier live-wire lanes is therefore
 structural: a maximum UDP payload cannot cross the 65535-byte buffer.
 Grade unchanged: rung 3 verbatim / rung 4 PARTIAL; the crossing access is
 a read, not a pointer or command.
+
+## IPv6 allocation crossing (2026-11-26 20:31Z)
+
+The earlier "maximum UDP payload cannot cross the 65535-byte buffer" was an
+IPv4 result (65507 B leaves the store at 65523..65530). On `::1` a UDP
+datagram carries 65527 B; the terminal header-only EXgenericFlow writes
+`msecReceived` at 65543..65550, eight bytes past the allocation.
+`harness/wire_send.py` gained `v6edge`/`v6edge-safe` and `run-v6edge.sh`
+drives six live cases: **17 PASS / 0 FAIL**. Vulnerable ASan collector:
+`heap-buffer-overflow`, `WRITE of size 8`, 8 bytes after a 65535-byte region,
+`nfd_raw.c:256` in `Process_nfd`, allocation `nfcapd.c:273`. Genuine plain
+collector: `rc=134` (SIGABRT) in 3/3 runs with glibc heap-corruption
+diagnostics; same-size safe case gives one clean flow and the fixed case
+rejects the short element, both `rc=0`. No chosen value, pointer, marker or
+command; no r5. Witness replay of this lane is owed.
