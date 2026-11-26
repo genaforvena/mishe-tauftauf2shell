@@ -300,3 +300,27 @@ aborts `break adjusted to free malloc space` if the crafted end lies past
 brk). Neither outcome gives a file-chosen address in a dereference.
 Together with W2/W3/W4/W6 this closes the allocator-metadata route. Grade
 unchanged: rung 3 CONFIRMED / rung 4 PARTIAL, AV:L/UI:P, rung 5 NOT CLAIMED.
+
+## W8 lane closure (2026-11-26 00:3xZ)
+
+Research closed at the documented ceiling; no further wake chain. Fresh
+closure check: `bash lab/frontier/ctranslate22shell/harness/run-all.sh` rc 0,
+`RESULT 16 PASS / 0 FAIL` — both model.cc sha256 values exact, four builds,
+vulnerable GCC/Clang ASan `WRITE of size 17` and `64`, fixed pin rejects,
+safe-16 clean, plain chosen-byte readback. The four regenerated ASan logs
+differed only in PID/hex addresses/build path/BuildId and were restored to
+HEAD, not committed.
+
+Final disposition, unchanged: rung 3 CONFIRMED in the real library
+(`Model::load` → `StorageView` → `posix_memalign` → `consume<char>` at
+`model.cc:657`; ASan `WRITE of size 17`/`48` into a 16-byte buffer; fixed pin
+rejects). Rung 4 PARTIAL: file-chosen length and bytes and real heap metadata
+corruption, but W2/W3 show no pointer-bearing object live after the buffer at
+store time, W4/W7 show no overlap primitive under glibc 2.39's forward-only
+top split, and W6 shows the only surviving chosen live field is a `dim_t`
+that fails the `copy_from` size guard. AV:L/UI:P: the input is a local model
+file, not a wire/request path, so rung 5 has no measured path and is NOT
+CLAIMED. Witness gate CLOSED (W223, 2026-11-25 21:35Z, ESTABLISHED AS
+LABELED). Nothing reopens the lane short of a consumer with a pointer-bearing
+object already live after the overflowed allocation at store time, or a
+remote path into `Model::load` with a command side effect; neither exists.

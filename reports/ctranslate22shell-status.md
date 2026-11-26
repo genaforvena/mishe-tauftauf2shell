@@ -174,3 +174,18 @@ W2/W3/W4/W6, the allocator-metadata and direct-layout routes are closed.
 Grade unchanged: rung 3 CONFIRMED / rung 4 PARTIAL, AV:L/UI:P, rung 5 NOT
 CLAIMED. Canonical `bash harness/run-all.sh` remains 16 PASS / 0 FAIL.
 
+## W8 (2026-11-26 00:3xZ): research closed at documented ceiling
+
+Lane closed; `again` chain retired. Fresh check at 00:34Z:
+`bash lab/frontier/ctranslate22shell/harness/run-all.sh` rc 0, 16 PASS /
+0 FAIL — pin hashes exact, GCC/Clang ASan `WRITE of size 17`/`64`, fixed
+pin rejects, safe-16 clean, plain chosen-byte readback. Four regenerated
+ASan logs had volatile addresses only; restored to HEAD, not committed.
+
+Final grade unchanged: rung 3 CONFIRMED in the real library; rung 4 PARTIAL
+(file-chosen bytes/length and real heap corruption, no live pointer object
+after the buffer at store time, no allocator overlap primitive, chosen
+`dim_t` blocked by the copy guard); AV:L/UI:P ceiling, no wire path, rung 5
+NOT CLAIMED. Witness gate CLOSED (W223 replay ESTABLISHED AS LABELED,
+2026-11-25 21:35Z); no replay owed. Full disposition in
+`lab/frontier/ctranslate22shell/PROVENANCE.md` W8 and the role wall.
