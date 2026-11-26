@@ -243,6 +243,15 @@ qword is its `next` pointer; chosen bytes therefore replace a live pointer
 that liblua dereferences during teardown. A second chosen dereference at a
 chosen valid target, a wire path and any command remain UNKNOWN/NO.
 Evidence: `real/gc-pointer/{A,B,V}.log`, `real/gc-pointer.gdb`.
+Replay note (2026-11-26 18:40Z): the V fixture's fixed address is
+layout-dependent. GDB's heap layout varies across runs even with ASLR
+disabled, so a replay saw `PREV_OBJ=0x5555555fd920 NEXT_ADDR=0x5555555a83e0
+MATCH=0` instead of the original hit. `run-gc-pointer.sh` now discovers a
+live GCObject in the current layout with `gc-pointer/discover.gdb`, writes
+that address into the same fixture, and reports V as `INFO` when the layout
+shifts; A/B and the plain/fixed controls remain hard assertions (8 PASS /
+0 FAIL on every replay, 10 PASS when V aligns). The valid-target hit stays
+a lab-layout observation, not an ASLR-stable target.
 
 ### Measured ASLR ceiling (2026-11-26 18:04Z)
 
@@ -290,6 +299,31 @@ walk. The fixed build rejects the 1377-byte package with rc 1 and no ASan
 report. No chosen ASLR-stable target, wire path, command or r5; the grade
 stays rung 4 DEMONSTRATED with this ceiling attached. Artifacts:
 `lab/frontier/rpm2shell/real/aslr-window/{probe.gdb,probe-1.log,len289-1.log,len1377-1.log,fixed-len1377.log}`.
+
+### Redirect candidates beyond the 289-byte bound (2026-11-26 18:43Z)
+
+The earlier survey called writes of 1185 bytes or more unreachable because
+`RPM2SHELL_PAYLOAD_LEN=1377` aborts in glibc. That bound was too coarse:
+plain vulnerable `rpm -i` sweeps show the abort is not monotonic — 289,
+768, 1024, 1152, 1216, 1248, 1280, 1300, 1320, 1344, 1352, 1360, 1376,
+1380, 1416, 1424 and 1448 bytes reach the natural liblua SIGSEGV, while
+512, 1368, 1384, 1392, 1400, 1432, 1440, 1441, 1456, 1472, 1500, 1552
+and 1664 abort with `double free or corruption (out)`. Ten repeats at 1201
+bytes gave 6 faults / 4 aborts; 1441 and 1448 bytes aborted 10/10 each.
+
+Ten fresh ASLR-enabled layout surveys (52 visited GC offsets each) found
+low-byte redirect candidates that the old `K <= 0x121` bound excluded:
+`buf+0x5a0` (1440) holds a `next` pointer to `buf+0x220` in **10/10**
+layouts, and `buf+0x750` (1872) to `buf+0x510` in 10/10; a candidate at
+`buf+0x4b0` (1200) → `buf+0x140` appeared in 1/10. A one-byte write at
+`buf+0x5a0` would preserve the pointer's high bytes and land on a
+controlled fake GCObject at `buf+0x200`. It is unreachable here: a 1441-byte
+write aborts in glibc 10/10 plain runs, and a GDB run with ASLR on logged
+`Program received signal SIGABRT`, `VISITS=589`, `IN_WINDOW=0` — no GC
+visit inside the controlled window before the abort. Rewriting the
+corrupted chunk-size qwords at `buf+0x18`, or every `buf+0x18+0x10k` size
+field up to `0x300`, with plausible values left 5/5 aborts at 1441 bytes.
+No chosen ASLR-stable target, wire path, command or r5; grade unchanged.
 
 ## Witness replay (W238, 2026-11-26)
 

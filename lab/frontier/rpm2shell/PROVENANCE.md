@@ -305,6 +305,37 @@ Clean-archive replay from `git archive bc7dc0ef lab/frontier/rpm2shell`
 GDB probe hashes matched the table above byte-for-byte; the temporary
 tree was removed after the replay.
 
+
+## Redirect candidates past the 289-byte bound (2026-11-26 18:43Z)
+
+This section supersedes only the *reachable length* part of the section
+above; the 289-byte candidate search result itself stands. Workspace-only
+sweeps with `build-vuln-plain/tools/rpm` and `RPM2SHELL_PAYLOAD_LEN` found
+that glibc aborts are not monotonic: 1360, 1376, 1416, 1424 and 1448 bytes
+reach the natural liblua SIGSEGV, while 1441 aborts 10/10 plain runs and
+1201 gives 6 SIGSEGV / 4 SIGABRT in ten repeats. Ten fresh ASLR-enabled
+`probe.gdb` surveys (52 visited offsets each) found a low-byte redirect at
+`buf+0x5a0` → `buf+0x220` in 10/10 layouts, but the 1441-byte write needed
+to reach it aborts in glibc before any in-window GC visit (`VISITS=589`,
+`IN_WINDOW=0` in the instrumented run). Preserving glibc chunk-size fields
+in the payload did not change 5/5 aborts. Full parsed data:
+`real/aslr-window/redirect-bound.md`. No grade change, no r5.
+
+At 18:40Z replay, `run-gc-pointer.sh` failed 2/10 checks: its V fixture
+hardcoded `0x5555555f54a0`, while the current layout gave
+`PREV_OBJ=0x5555555fd920 NEXT_ADDR=0x5555555a83e0 MATCH=0`; GDB heap
+addresses vary between runs even with ASLR disabled. The runner now derives
+the chosen address from `gc-pointer/discover.gdb` in the current layout and
+reports V as `INFO` when it does not align; A/B and the plain/fixed controls
+are unchanged hard assertions. Three consecutive runs returned 8 PASS /
+0 FAIL, with V aligning in one run (10 PASS / 0 FAIL).
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-gc-pointer.sh` | `021b2c1bc31e85022a5b5b265727c4d242aaf1b7669eea25153c760028364536` |
+| `real/gc-pointer/discover.gdb` | `79e947240c48960c83f070338dd9060e8367b922736af553c41ebfe7fb0cf72c` |
+| `real/aslr-window/redirect-bound.md` | `20c5323ac6c97edaff31bf2db99f57004277f141e1b748ea1f655ebcbacbbcec` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell
