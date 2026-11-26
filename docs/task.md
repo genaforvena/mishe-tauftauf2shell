@@ -14468,3 +14468,98 @@ All counts above are operator, author, clean-archive or staged observations as
 labeled. What would change this fold: a verdict contradicting a labeled row, a
 checker RED on committed HEAD, or a later report misquoting one of these
 receipts.
+
+## 2026-11-26 20:3x–21:0xZ — gnutlsdtls admitted (186th), verdict folds, bounded lanes
+
+This fold covers `f5d91d97..471c6167`; replay recipes are in
+`docs/reproducibility.md` § 20:3x–21:0xZ. The generated overview at HEAD reads
+186 declared / 183 active / 183 rows / 123 independently established. No
+generated cell, register row, grade, report or lab evidence is moved here.
+
+- `fc19c52b` (operator, standing #6) **admitted gnutlsdtls2shell as the 186th
+  declared target mind** at 20:4xZ, superseding the STAGED wording in
+  § 19:5x–20:2xZ. Counts moved 185/182/182/121 → 186/183/183/123; staged
+  window 195 adopted (panes %394/%395 live, dead=0, registry 196/196 unique
+  names, no duplicate). Frontier `sh lab/frontier/gnutlsdtls2shell/run-all.sh`
+  at 20:05Z gave `RESULT PASS=12 FAIL=0`, rc 0, runner sha256 `9bea83cb…c0fc7c`,
+  all three pins hash-reasserted (3.8.12 `a7b34142…`, 3.8.13 `ffed8ec1…`,
+  local nettle 3.10 `b4c518ad…`). The operator clean-archive replay was cut at
+  the 300 s engine cap during the pinned builds with only three hash PASS
+  lines observed: **UNKNOWN, NOT a pass**. Independent witness clean-archive
+  replay is owed. Grade as registered: rung 3 ASan `WRITE of size 1475` at
+  `lib/buffers.c:1035` via the shipped library API, safe input -319 and fixed
+  -9; rung 4 NOT CLAIMED (bytes in ASan poison, no plain-build live neighbour,
+  pointer, command buffer or socket changed at a chosen offset) and rung 5
+  NOT CLAIMED. The operator DM's "clean replay PASS=12 FAIL=0" names the
+  20:05Z frontier run; the committed register records the clean archive as
+  UNKNOWN and is the authority here.
+- The same commit **folded two witness verdicts** into the register's
+  `established` flag: W287 libarchivezippath2shell (#5773) and W288
+  pcre2jit2shell (#5783), both ESTABLISHED AS LABELED with no grade change,
+  moving the generated established count 121 → 123. W288b gimpjif (#5786)
+  was already flagged true and moved no count. This supersedes the
+  "witness replay owed" wording for libarchive in § 18:5x–19:2xZ and for
+  pcre2jit in § 19:5x–20:2xZ. Consistent with the W284 wording, the count
+  needs the verdict folded into `established`; verdicts kept only as
+  boundary notes are excluded. No new replay is implied by these folds.
+- `59f81481` + `03ca20a4` (nfdump) **crossed the live allocation over IPv6**:
+  a 65,527-byte `::1` UDP datagram with a terminal header-only element puts
+  `msecReceived` at 65543..65550, eight bytes past the 65,535-byte `in_buff`.
+  The live ASan collector reports `WRITE of size 8` at `nfd_raw.c:256`, 0
+  bytes after that region; the genuine uninstrumented plain collector aborts
+  3/3 (`rc=134`, glibc heap metadata), with same-size safe and fixed controls
+  clean. `run-v6edge.sh` gave 17 PASS / 0 FAIL in-tree and from a clean
+  archive of `59f81481` (`BUILD_WIRE_OK`, `BUILD_INSTRUMENTATION_OK`). Grade:
+  rung 3 confirmed in the live collector, rung 4 DEMONSTRATED for availability
+  and PARTIAL for packet-chosen field bytes; no pointer control, marker,
+  command or r5. Witness for this lane remains UNKNOWN.
+- `d0d096c7` (gimpjif W289) **observed the real-plugin WRITE at a guard
+  page**: `live/guard-shim.c` (`83805a0b…`) serves `g_try_malloc(260)` from a
+  two-page mmap with a `PROT_NONE` second page; the published JIF through the
+  real GIMP 3.2.8 PDB `file-gif-load` gives `GUARD_FAULT ... delta=+260` with
+  chosen `4d` tail bytes, RIP inside real zlib `inflate`, while the safe JIF
+  arms no guard. This is a deliberately instrumented allocation, not a
+  natural heap neighbour; the parent still hit the 60 s timeout (rc 124).
+  `7ee0b9ce` (W290) placed the unmapped word `0x00007f0000414243` at `out+280`:
+  the watcher logged it in the real plugin after `inflate` but saw no fault
+  before the timeout (rc 137). A negative for the observed window only, not
+  proof of non-use later. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5; no
+  dereference, downstream consumer or command.
+- `8f323d96` (ruby) **closed the case-fold match-oracle lane**: 256/256 bytes
+  on both 3.4.12 and 3.4.13 give identical negative match results with the
+  primed 0x20-chunk byte, and GDB shows `t[1]` is a stale pointer byte; ASLR-on
+  16-process sampling found 15 distinct values, so it is neither steered nor
+  predictable. Grade stays rung 3. The recipe was already added to
+  `docs/reproducibility.md` § 19:5x–20:2xZ; it is cross-referenced, not
+  duplicated here.
+- `ac20ec32` (frontier W287) **staged libtiffpixarlog2shell** (STAGED, not
+  admitted): CVE-2026-12912 / GHSA-cg4c-j43f-qcg7, pins 4.7.1 `f698d94f…`
+  / 4.7.2 `672bd7d1…`, fix `ba2b04b1…`. A 64x1 TIFF with `SamplesPerPixel=3`,
+  `COMPRESSION_PIXARLOG` and `8BITABGR` has `TIFFScanlineSize()=192` while the
+  decoder emits 256 bytes: ASan `WRITE of size 1` at verbatim
+  `libtiff/tif_pixarlog.c:470` via `PixarLogDecode:979` and
+  `TIFFReadScanline`. Fixed 4.7.2 rejects with the new guard; two safe-format
+  controls are clean; `run-all.sh` gave `RESULT PASS=26 FAIL=0` at 20:53Z.
+  Rung 3 only; rung 4 NOT CLAIMED (chosen bytes in ASan poison, no plain-build
+  neighbour, pointer, command buffer or socket) and rung 5 NOT CLAIMED (local
+  vector, no wire path). Charter and window 196 exist; operator admission and
+  witness replay owed. No generated count moved by this staging.
+- `471c6167` (rpm) **added a fresh-build witness wrapper and preserved a
+  layout-specific negative**: `real/run-real-witness.sh` (`10efeadb…d489`)
+  hash-checks the pinned ignored trees and rebuilds vulnerable ASan, fixed
+  ASan and plain rpm from source in a clean archive with a 52-character path.
+  `run-real.sh` 21 PASS / 0 FAIL and `run-scaled-payload.sh` 21 PASS / 0 FAIL
+  after a config-path override repair (`d0540006…54609`); the runner's earlier
+  wrong-config rc 139 and GDB hang are replay-condition failures, preserved.
+  `run-install-consumer.sh` returned 13 PASS / 1 FAIL (fresh safe control
+  rc 0 vs author-layout rc 1) and `run-gc-pointer.sh` 6 PASS / 2 FAIL (B's
+  chosen qword dereference and adjacency pass; A's `CHOSEN_PTR` chain does
+  not align). Fresh binaries embed different debug paths, so the heap layout
+  is a different lab condition: rung 4 stays author-layout DEMONSTRATED, not
+  a layout-independent replay claim; witness verdict UNKNOWN, no wire path or
+  command, no r5.
+
+All counts above are operator, author, witness, clean-archive or staged
+observations as labeled. What would change this fold: a verdict contradicting
+a labeled row, a checker RED on committed HEAD, or a later report misquoting
+one of these receipts.
