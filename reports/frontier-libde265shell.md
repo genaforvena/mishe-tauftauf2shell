@@ -96,3 +96,14 @@ from a request would be a separate consumer, not this library's boundary.
   `-lstdc++`, matching the advisory recipe.
 - Advisory reports further Valgrind OOB reads during deblocking after the
   write; those are not treated as the write primitive.
+
+## Witness receipt (2026-11-26 07:5xZ, W254)
+
+Independent replay of the unmodified `run-all.sh` from a clean
+`git archive 8b4caaf9`, with three inputs re-fetched independently, gave
+`RESULT PASS=12 FAIL=0` rc 0. Both vulnerable ASan traces match the frames
+quoted above verbatim; fixed/benign controls are clean, plain vulnerable is
+silent. Extra benign inputs were clean on the same ASan binary. Verdict:
+ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no contradiction,
+no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`.

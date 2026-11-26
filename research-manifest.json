@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 108,
+      "value": 109,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2506,12 +2506,12 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 07:5xZ under standing #6 as the 165th declared target mind; window 173 adopted (panes %348/%349 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-33165 / GHSA-653q-9f73-8hvg (maintainer advisory 2026-03-17, Moderate, CWE-787), libde265 <=1.0.16 stale `ctb_info.log2unitSize` after an SPS change with constant `PicWidthInCtbsY`/`PicHeightInCtbsY`: `set_SliceHeaderIndex()` writes a 16-bit index 2 bytes past a 2496-byte heap array at verbatim `libde265/image.h:741` from `slice.cc:2866`. Fixed in 1.0.17 by `c7891e412…`, which adds a log2unitSize reallocation guard. Pinned v1.0.16 `ed12c931…` / v1.0.17 `3a285024…` tarballs, advisory POC.zip `b3b57b42…` with 254-byte reproducer `73afafa6…` and public-API `poc.c` `c5b05a8c…`, all in `lab/frontier/libde265shell/PROVENANCE.md`. Six CMake builds (GCC/Clang ASan plus GCC plain on both tags) through `de265_new_decoder`/`push_data`/`decode`/`get_next_picture`: `RESULT PASS=12 FAIL=0`; vulnerable ASan WRITE-2 at the verbatim sink, fixed and benign controls clean, plain vulnerable exits 0 silently. Grade rung 3 verbatim / rung 4 PARTIAL — no chosen bytes, pointer control, wire path, command execution or r5. Independent witness replay owed; operator clean-archive replay recorded in the status report.",
+      "boundary": "**ADMITTED 07:5xZ under standing #6 as the 165th declared target mind; window 173 adopted (panes %348/%349 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-33165 / GHSA-653q-9f73-8hvg (maintainer advisory 2026-03-17, Moderate, CWE-787), libde265 <=1.0.16 stale `ctb_info.log2unitSize` after an SPS change with constant `PicWidthInCtbsY`/`PicHeightInCtbsY`: `set_SliceHeaderIndex()` writes a 16-bit index 2 bytes past a 2496-byte heap array at verbatim `libde265/image.h:741` from `slice.cc:2866`. Fixed in 1.0.17 by `c7891e412…`, which adds a log2unitSize reallocation guard. Pinned v1.0.16 `ed12c931…` / v1.0.17 `3a285024…` tarballs, advisory POC.zip `b3b57b42…` with 254-byte reproducer `73afafa6…` and public-API `poc.c` `c5b05a8c…`, all in `lab/frontier/libde265shell/PROVENANCE.md`. Six CMake builds (GCC/Clang ASan plus GCC plain on both tags) through `de265_new_decoder`/`push_data`/`decode`/`get_next_picture`: `RESULT PASS=12 FAIL=0`; vulnerable ASan WRITE-2 at the verbatim sink, fixed and benign controls clean, plain vulnerable exits 0 silently. Grade rung 3 verbatim / rung 4 PARTIAL — no chosen bytes, pointer control, wire path, command execution or r5. Independent witness W254 (2026-11-26): ESTABLISHED AS LABELED at that scope, no grade change, NO r5. The unmodified wrapper was replayed from a clean `git archive 8b4caaf9` with three independently re-fetched pins: 12 PASS / 0 FAIL rc 0, both vulnerable ASan traces WRITE-2 at verbatim `image.h:741` via `slice.cc:2866` 2 bytes after a 2496-byte region, fixed and benign controls clean, plain vulnerable silent; truncated and random benign inputs also clean on the same ASan binary. Detail: `.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`.",
       "reports": [
         "reports/frontier-libde265shell.md",
         "reports/libde265shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }
