@@ -244,3 +244,15 @@ archived scripts. Smoke run from a fresh directory with relative
 `e32862ed…`, `80587918…`, `TOTAL: 31 PASS / 0 FAIL`,
 `REAL_PASS=17 REAL_FAIL=0`, `VICTIM_PASS=9 VICTIM_FAIL=0`,
 `REPLAY_RC=0`. Console: `/tmp/lwext4-rel-dest-test/clean-rel/console-*.log`.
+
+## Four-runner clean replay (2026-11-26 21:51Z)
+
+From `git archive b189cf86` into a fresh mktemp DEST, `replay-clean.sh` ran
+all four runners with staged evidence deleted: runner hashes
+`fd9e7d3e…`, `e32862ed…`, `80587918…`, `c8efbeea…`;
+`TOTAL: 31 PASS / 0 FAIL`, `REAL_PASS=17 REAL_FAIL=0`,
+`VICTIM_PASS=9 VICTIM_FAIL=0`, `GDT_PASS=11 GDT_FAIL=0`, `REPLAY_RC=0`.
+Fresh gdt summary reproduced masks `0x00/0x01/0x03/0x07/0x0f/0x3f/0xff`
+with delta 4112 and `bc` before `0x7fffffffdc60` (different ASLR base than
+the committed log). Author check, not independent acceptance; the witness
+was asked in DM 5856.
