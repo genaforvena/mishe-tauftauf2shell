@@ -5153,13 +5153,52 @@ control over a live pointer field with a deterministic, fix-sensitive
 consumer-visible fault, but only one bit (no arbitrary pointer or byte
 control), no benign marker, no wire-only reachability and no
 independent replay. The large-V absolute-address result above stays
-CLOSED. Next bounded experiment: make `mbuf` non-NULL before the flip
-with a multi-byte codepoint in the same class, then measure whether a
-bit flip in a valid pointer redirects `is_onechar_cclass` to
-attacker-influenced data and changes regex semantics rather than only
-faulting.
+Further work in this lane is bounded by a structural result below: under
+the single-byte encodings that make V=0x100 a CCV_SB value, no
+`CClassNode.mbuf` allocation site is reachable, so there is no live
+pointer to steer at this offset. Absolute-address steering at large V
+remains CLOSED.
 
 ```
 bash lab/repro/ruby2shell-tos-steer.sh
 ```
 
+
+## mbuf-shape falsifier — CLOSED (2026-11-26, 13:40Z)
+
+The follow-up asked whether an ASCII/US-ASCII class shape could allocate a
+non-NULL `cc->mbuf` before the V=0x100 OR, turning the chosen bit into a
+redirect of a live pointer consumed by `is_onechar_cclass`. Twelve shapes
+were run on plain 3.4.12 and fixed 3.4.13 with V=0x100, V=0x120 and the
+vulnerable-ASCII V=0x41 control (`lab/repro/ruby2shell-tos-mbuf-shapes.{rb,sh}`);
+evidence is gitignored in `lab/build/evidence/tos-steer/mbuf-shapes/`.
+
+Result: **no shape allocates mbuf, and no arm changes regex semantics.**
+gdb at `regparse.c:4589` shows `mbuf=(nil)` at every hit (base, `neg_w`,
+`neg_d`, `word`, `posix_neg`, `intersect`, `nested`, `negated`). All eight
+hit shapes fault at `0x1` with V=0x100 (low-word bit 0); with V=0x120
+seven fault at `0x100000000` (high-word bit 0) and `negated` at
+`0x100000008` (two ORs, still from NULL). All matching fixed-build and
+V=0x41 arms exit 0. Four shapes (`charprop`, `ascii_range`, `utf8`,
+`range`) never hit :4589 and exit 0 on both builds; `range`/`two_vals`
+are rejected by the first parse as `invalid hex escape`, so they are not
+evidence of a successful redirect.
+
+The negative is structural, not only sampled. In
+`lab/build/ruby-3.4.12/regparse.c`, every direct `cc->mbuf` write needs
+either `in_type == CCV_CODE_POINT` (:4594/:4620/:4636) or the
+`ADD_ALL_MULTI_BYTE_RANGE` macro (:176-181), which is gated on
+`!ONIGENC_IS_SINGLEBYTE(enc)`. `onigenc_single_byte_code_to_mbclen`
+(`regenc.c:643-646`) returns 1 for every code point, so V=0x100 is CCV_SB
+under US-ASCII and no value or range can reach an mbuf allocation.
+`and_cclass`/`or_cclass` (:2145/:2203) skip the mbuf merge for single-byte
+encodings, and the ctype fallback (:4314-4380) only sets bits because
+every Ruby single-byte encoding uses
+`onigenc_not_support_get_ctype_code_range`. Forcing UTF-8 makes V=0x100
+CCV_CODE_POINT, so the bitset write disappears instead. This lane is
+CLOSED on both tested builds; the grade stays rung 4 narrow secondary
+one-bit-write scope.
+
+```
+bash lab/repro/ruby2shell-tos-mbuf-shapes.sh
+```
