@@ -320,6 +320,18 @@ past both packet and allocation. GDB at the live plain collector's
 attacker-chosen from the wire. No crossing write, no pointer control; grade
 unchanged, NO r5. Detail: `lab/frontier/nfdump2shell/PROVENANCE.md`.
 
+### Framing closure (2026-11-26 20:11Z)
+
+The pinned swap cannot set an accepted record `size` or `numElements`: to
+aim `dstPort` at those fields, `srcPort` must alias the adjacent `size` or
+record `type`, and the pinned code zeroes `srcPort` after copying. With a
+54-byte record1 the live plain collector rejected the otherwise-valid
+1281-byte / 261-element record2 (`processd: 1`, `Flows: 1`), while the same
+record2 after a complete record1 gave `Flows: 2` and the fixed build gave
+`processd: 0` / `Flows: 0`. This closes direct record-size framing as well as
+the earlier 58/56-byte attempts; the `exporterID`, flags and element-type
+chosen-byte lanes stand. No pointer or command; grade unchanged, NO r5.
+
 ## Duplicate check
 
 `reports/frontier-*.md` and the wall's do-not-duplicate list were checked

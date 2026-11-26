@@ -547,3 +547,41 @@ wire-chosen trigger; no chosen write crossed the allocation. The temporary
 GDB runner and log are under the ignored `harness/out/gdb-edge-swap*`;
 they are not part of the replay. Grade unchanged: rung 3 verbatim / rung 4
 PARTIAL, NO r5.
+
+## Closure: the swap cannot set an accepted record size or element count (2026-11-26 20:11Z)
+
+Pinned `recordHeaderV3_t` offsets are `type` +0..1, `size` +2..3,
+`numElements` +4..5, `engineType`/`engineID` +6..7, `exporterID` +8..9,
+`flags`/`nfversion` +10..11. From the truncated flow view (`srcPort` at
+record1+56, `dstPort` +58, `proto` +60) the two framing targets are
+structurally closed:
+
+- record1 size 54 aims `dstPort` at record2 `numElements` (+4..5); `srcPort`
+  then aliases record2 `size` (+2..3), and the pinned swap zeroes `srcPort`
+  after copying. `VerifyV3Record()` sees size 0 and rejects.
+- record1 size 56 aims `dstPort` at record2 `size` (+2..3); `srcPort` aliases
+  record2 `type` (+0..1) and is zeroed, so verification rejects type != 11.
+
+The already-shown `exporterID`, `flags`/`nfversion` and element-type lanes
+are unaffected: there the zeroed source field is not needed for acceptance.
+
+Live confirmation on the genuine uninstrumented plain collector, all on
+loopback, with a throwaway generator (`/tmp/nfdump-ctl-probe.py`; not shipped):
+
+```
+attack  port 10143, 1351-byte datagram:
+  record1 54 B (12 + truncated flow 20 + 22-byte dummy),
+  record2 size 1281 (0x0501), numElements 261, engineType 1 (ICMP trigger)
+  log: "Corrupt nfd record: expected 2 records, processd: 1"
+  summary: "Flows: 1, Packets: 0, Bytes: 3096224743817216"
+safe    port 10142, same valid record2 after a complete 52-byte record1:
+  daemon summary "Flows: 2", no Corrupt line
+fixed   port 10144, same attack datagram:
+  log: "Corrupt nfd record: expected 2 records, processd: 0"
+  summary: "Flows: 0"
+```
+
+The safe arm proves the 1281-byte / 261-element record2 is well formed; the
+attack arm therefore fails because the swap zeroes its size. No pointer,
+marker or command; grade unchanged: rung 3 verbatim / rung 4 PARTIAL, NO r5.
+No stale collectors remained after the three cases.
