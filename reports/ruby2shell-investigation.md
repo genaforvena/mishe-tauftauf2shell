@@ -4549,3 +4549,75 @@ section still promises 25 November "or later"; no mechanics appeared.
 
 Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+## wpqw chosen-byte opcode dispatch (2026-11-26, 10:33Z wake) — secondary lane rung 4
+
+The previous wall's gdb correlation was executed verbatim. Evidence is
+gitignored under `lab/build/evidence/adjacent-ic/gdb-wpqw-{firsthit,allhits,bytes}.{out,cmd,stderr}`
+and `lab/build/evidence/wpqw-steer/`; reproduction is
+`lab/repro/ruby2shell-wpqw-steer.{rb,sh}`.
+
+### What the over-advanced pointer consumes
+- The reported expression at `regexec.c:2747` is `goto *oplabels[*p++]`;
+  `oplabels` is a 98-entry computed-label table (`regexec.c:2329`, opcode
+  enum `regint.h:576-692`). The byte read is `*p`, an index selected from
+  the compiled pattern's bytecode buffer.
+- UTF-16LE shape for `(?i:w)` + tail: `0e 77 00 0a 03 01 42 30 ...`
+  (`0e`=OP_EXACT1_IC, `77 00`='w', `0a`=OP_EXACTMB2N3, `03 01`=U+0103).
+- Subject 'W' folds to 2 bytes: `p` stops at `...538` = `0x0a` (index 10,
+  OP_EXACTMB2N3), correct match. Subject U+1E98 folds to `77 00 0a 03`
+  (4 bytes): `p` advances to `...53a` = `0x01` (index 1, OP_END), and
+  `crafted-nomatch=true` is returned. The same false-match shape recurs at
+  `crafted2-nomatch`. For `(?i:w)\u6203AB`, 'W' gives index 10 and a
+  completed match; U+1E98 gives index `0x62` = 98, one past the table, and
+  ASan reports a `global-buffer-overflow` READ of size 8 in
+  `match_at regexec.c:2747`, rc=1.
+- The consumed index is attacker-chosen pattern bytecode, not a fixed global
+  or UBSan table: the earlier falsifier is rejected. The jump target is,
+  however, selected from a fixed table — only 0..97 are valid handlers;
+  larger indices read adjacent globals and crash. This is constrained opcode
+  dispatch, not arbitrary PC control.
+
+### Deliberate chosen-byte steering
+`ruby2shell-wpqw-steer.rb` encodes the pattern tail as `U+XX03`: low byte
+0x03 makes the four folded bytes compare equal, high byte XX is the
+dispatched opcode index at operand+4. Driver evidence is in
+`lab/build/evidence/wpqw-steer/3.4.{12,13}-idx*.out`:
+
+| index | opcode | 3.4.12 ASan | 3.4.13 fixed |
+| --- | --- | --- | --- |
+| 0x00 | OP_FINISH | good=true, bad=false, rc=0 | same |
+| 0x01 | OP_END | good=true, **bad=true**, rc=0 | good=true, bad=false, rc=0 |
+| 0x02 | OP_EXACT1 | bad=false, rc=0 | same |
+| 0x0a | OP_EXACTMB2N3 | bad=false, rc=0 | same |
+| 0x0e | OP_EXACT1_IC | bad=false, rc=0 | same |
+| 0x3d | OP_JUMP | no result, rc=139 (SIGSEGV) | bad=false, rc=0 |
+| 0x62 | outside table | ASan global-buffer-overflow at `regexec.c:2747`, rc=1 | bad=false, rc=0 |
+
+Changing only the chosen tail high byte from 0x00 to 0x01 turns the same
+non-matching UTF-16LE subject from no-match into a false match; the fixed
+build rejects the crafted subject for every index.
+
+### Boundary (negative result)
+The analogous UTF-8 pattern `(?i:w)\u0103\u3042\u3044` gave `bad=false` on
+both builds. Its compiled bytecode is `0e 77 08 c4 83 0c ...`; the
+three-byte U+1E98 fold places `0xcc` at the opcode position, the comparison
+loop fails before `NEXT`, and no dispatch occurs. The steering primitive is
+bounded to wide-encoding patterns whose 2-byte fold aligns with the
+opcode+operand layout; it is not a default-encoding web path.
+
+**Grade:** GHSA-wpqw-5qxg-m68r secondary lane moves from rung 3 to
+**rung 4 — demonstrated security impact**, narrowly: a chosen byte at a
+chosen compiled-pattern offset is consumed as a live opcode dispatch and
+changes the match verdict, reproducibly and patch-sensitively. No arbitrary
+PC control, write primitive, pointer disclosure, or wire-only/stock
+Rails/Sinatra reachability follows. Primary grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+Next bounded experiment: repeat the steering shape in UTF-32LE (tail
+`U+XX03AB`, subject U+1E98 + tail) to see whether the dispatched byte is
+again the chosen tail high byte at operand+8. Prediction: the primitive
+generalizes to the other 4-byte-unit encoding. Falsifier: the comparison
+loop fails before `NEXT`, as it did in UTF-8 — then the lane is closed to
+UTF-16LE only and no further encoding sweep is warranted.
