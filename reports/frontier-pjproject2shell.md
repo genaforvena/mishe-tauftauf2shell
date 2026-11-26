@@ -6,9 +6,14 @@ both pinned trees with real `pjmedia`: ASan-confirmed OOB WRITE of 64 and 512
 bytes in real `avi_get_frame()` and chosen-marker overwrite of a live
 adjacent sentinel. W241 moves the frame into the real pj pool and overwrites
 a live, library-created `pjmedia_port` object 48 bytes later, including its
-function-pointer fields. Grade: **rung 3 confirmed in the real consumer /
-rung 4 author-DEMONSTRATED with a real library object** (W240/W241 await
-witness verdict). No pointer was called, no wire, no command, no rung 5.
+function-pointer fields. W242 drives the same overflow through the SHIPPED
+`pjmedia_vid_port_create()` clock path: its own frame buffer is followed at
+exactly +48 by a live `pj_mutex_t` allocated by the library from the same
+pool, with no driver-groomed victim. Grade: **rung 3 confirmed in the real
+consumer / rung 4 author-DEMONSTRATED with a real library object and a
+natural shipped-caller adjacency** (W240/W241/W242 await witness verdict).
+No pointer was called, no wire, no command, no rung 5.
+
 
 
 ## Claim and scope
@@ -135,16 +140,57 @@ nothing; the proof is readback of the live object's fields before and after.
   bytes are byte-identical before and after, with
   `PULL_DONE frame.size=48`; the fixed build logs its truncation clamp.
 
-Caveat: the adjacency is produced by the driver's real allocation order
+Caveat: W241's adjacency is produced by the driver's real allocation order
 (`pj_pool_alloc` then a library constructor using that pool), not by a
 shipped caller's natural object layout. The victim is a real library object
-created by a real library constructor, but no attacker-controlled path in
-released pjmedia places a port object immediately after an AVI frame buffer.
+created by a real library constructor, but no shipped pjmedia path places a
+`pjmedia_port` immediately after an AVI frame buffer. W242 below finds a
+different natural victim, a live `pj_mutex_t`, in the shipped video port.
+
 Script hashes, raw logs and the clean-archive receipt are in `PROVENANCE.md`.
 Clean `git archive 4f9314a9 lab/frontier/pjproject2shell` replay at 15:31Z
 rebuilt both tarballs and reproduced all 11 realobj checks and all six W240
 cases with matching runner hashes.
 
+
+## Natural shipped-caller victim (W242, 2026-11-26 17:49Z)
+
+`bash lab/frontier/pjproject2shell/real/run-vidport.sh` builds a separate
+`real/vidport-driver.c` against both pinned trees (16 PASS / 0 FAIL, twice).
+It registers the shipped AVI virtual device with
+`pjmedia_avi_dev_create_factory()` / `pjmedia_avi_dev_alloc()`, creates a
+`pjmedia_vid_port` with the shipped `pjmedia_vid_port_create()`, connects a
+null sink and starts the port's active clock. No victim buffer or object is
+supplied by the driver. `vid_port.c:543` creates a fresh pool, `:688`
+allocates the frame buffer and `:701` allocates a live `pj_mutex_t` from
+that same pool; the clock calls
+`pjmedia_vid_dev_stream_get_frame(vp->strm, vp->frm_buf)` at `:1176` and the
+AVI device passes that buffer to `avi_get_frame()` at `avi_dev.c:636`.
+
+- Measured in all six runs: `frm_buf=0x515000001d70 size=48`,
+  `frm_mutex=0x515000001da0`, `delta=48`. A read-only shadow of the private
+  `struct pjmedia_vid_port` (source lines 74-115) is used only to print these
+  addresses and the 88 mutex bytes before and after the pull.
+- Vulnerable 64-byte chunk: `FRAME_SIZE_AFTER=64` and the live mutex bytes
+  at +4..+15 become the chosen marker (`MUTEX_AFTER:02000000
+  452d504a50524f4a45435421...`); the mutex state word at +0..+3 also
+  changes from the pre-pull value. The cause of that first-word change is
+  UNKNOWN (glibc mutex state is plausible); no pointer was called.
+- Vulnerable 512-byte chunk: ASan `WRITE of size 512`, 0 bytes after the
+  512-byte pool block, stack `fread` → `pj_file_read (file_io_ansi.c:132)`
+  → `file_read3 (avi_player.c:158)` → `avi_get_frame (avi_player.c:1222)`
+  → `pjmedia_port_get_frame (port.c:99)` → `avi_dev_strm_get_frame
+  (avi_dev.c:636)` → `enc_clock_cb (vid_port.c:1176)` → clock thread.
+  `MUTEX_AFTER` starts with repeated `MISHE-PJPROJECT!`.
+- Vulnerable safe48 and both fixed cases: frame size stays 48 and the live
+  mutex bytes are byte-identical before and after; fixed runs are ASan-clean.
+
+The driver skips library teardown (`_exit(0)`) after the readback: with a
+corrupted mutex, `pjmedia_vid_port_stop()` blocked on clock-thread join in
+an earlier 64-byte run. Logs: `real/out-vuln/vidport-asan-*.log` and
+`real/out-fixed/vidport-asan-*.log`. The fix changes only the reader clamp;
+`vid_port.c` and `avi_dev.c` allocation order is byte-identical at both
+pins. No wire or command path exists, so the grade stays rung 4.
 
 ## Witness replay (W239, 2026-11-26)
 
@@ -174,24 +220,32 @@ supersedes it. Full detail:
   `pjmedia_port` created by `pjmedia_bidirectional_port_create()` from the
   same pj pool, 48 bytes past the frame: a pointer-valued field at 64-byte
   length and signature, `get_frame`, `put_frame` and `pdata` at 512 bytes.
-  None of those pointers was called or dereferenced, and the adjacency is
+  None of those pointers was called or dereferenced, and that adjacency is
   driver-groomed through real allocator calls rather than a shipped caller
-  layout. Rung 4 is author evidence until the witness replays W240/W241.
+  layout. W242 adds a natural shipped-caller adjacency: a live `pj_mutex_t`
+  at frame+48, overwritten with chosen bytes without driver grooming.
+  Rung 4 is author evidence until the witness replays W240/W241/W242.
+
 - **Not rung 5:** no live loopback service, no attacker-supplied bytes
   through a network wire, no pointer hijack, no command side effect.
 
-The remaining work is scope, not mechanics: a shipped pjmedia caller whose
-real object layout puts a live pointer-bearing field directly after the AVI
-frame, then a loopback target fed attacker AVI bytes and a benign command
-side effect with vulnerable, fixed and safe controls. No such path has been
-observed; do not claim it.
+The remaining work is scope, not mechanics: control of a pointer-bearing
+value in a natural shipped layout, then a loopback target fed attacker AVI
+bytes and a benign command side effect with vulnerable, fixed and safe
+controls. W242 found natural adjacency to a live mutex but no attacker-chosen
+pointer value or call through it; no network wire into `avi_get_frame()`
+exists in the pinned source. Do not claim that path.
 
-Negative checked this wake: the shipped video bridge
+Negative checked: the shipped video bridge
 `pjmedia_vid_conf_add_port()` allocates `cport->get_buf` as the last item
 from the port's own pool (`vid_conf.c:555-568`); the following
 `listener_slots`, `transmitter_slots`, `render_states` and `render_pool`
 allocations use the conference's main pool (`:572-606`). No pointer-bearing
 library object is naturally adjacent after the AVI frame in that caller.
+Positive checked in W242: the shipped `pjmedia_vid_port_create()` allocates
+the frame from a fresh pool (`vid_port.c:688`) and a live mutex from that
+pool (`:701`), and the active clock passes that buffer into the AVI virtual
+device (`:1176` → `avi_dev.c:636`), so the mutex is a natural victim.
 
 ## Duplicate check
 

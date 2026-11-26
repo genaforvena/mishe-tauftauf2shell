@@ -8,3 +8,6 @@ real/*.avi
 real/out-*/
 real/driver-*
 real/*.log
+real/vidport-vuln
+real/vidport-asan-*
+real/vidport-plain-*
