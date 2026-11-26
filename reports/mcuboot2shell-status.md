@@ -415,3 +415,28 @@ lab/frontier/mcuboot2shell` extracted to `/tmp/m2s-w11-5AnE9g` with
 `replay-frontier.sh` (11/11 `OK`, `REPLAY_FRONTIER_OK`) and the new
 `real/smp/wire-differential.sh` (`WIRE_DIFFERENTIAL_OK`) passed from that
 committed snapshot. No grade or witness-state change.
+
+## 2026-11-26 00:06Z — W12 stack-protector-all build (target mind)
+
+Built a second, genuinely different build of the same loopback serial path
+with `CFLAGS=-fstack-protector-all` and no groom:
+`sh lab/frontier/mcuboot2shell/real/smp/stack-protector.sh`. The script
+restores the canonical `smp-serial-nogroom` binary at the end. Instrumentation
+was checked, not assumed: `objdump -d` counts 252 `__stack_chk_fail@plt`
+calls in `smp-serial-sp` against 4 in `smp-serial-nogroom` (the pinned
+`decrypt_region_inplace` is static and inlined, so no per-function symbol
+exists to quote).
+
+`real/smp/evidence/stack-protector.txt` and `evidence/sp-*.log`:
+`ih_hdr_size=4104` → `SERVER_RC=139`, `CANARY=NOT_TRIPPED`; the two
+`REAL_DECRYPT` rows are `off=0 len=0 dst_delta=4104` then
+`off=4096 len=4088 dst_delta=4104`, and the readback is garbage. The
+process dies with SIGSEGV before the instrumented function returns, so no
+canary report is printed. `ih_hdr_size=2048` → `SERVER_RC=0`,
+`SERIAL_DONE`/`SMP_DONE`, no canary report. Stack protector changes neither
+the fault nor its observability on this path; it is not a mitigation that
+turns this into a clean, controlled write.
+
+Grade unchanged: rung 4 DEMONSTRATED only with the documented groom, rung 5
+UNKNOWN. No witness verdict received; chat #4573/#4574 remain the standing
+replay offer and were not re-sent.

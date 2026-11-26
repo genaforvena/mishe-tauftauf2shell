@@ -397,3 +397,17 @@ AES input and output are OOB stack bytes, not the uploaded ciphertext.
 The canonical W9 replay still passes 11/11 `REPLAY_FRONTIER_OK` after the
 client change. Grade unchanged: rung 4 DEMONSTRATED only with the groom,
 rung 5 UNKNOWN; no witness verdict on any mcuboot stage.
+
+## W12 stack-protector-all negative (2026-11-26 00:06Z, target mind)
+
+One different build of the loopback serial path, not another replay of
+W8/W10/W11: `real/smp/stack-protector.sh` adds
+`-fstack-protector-all` to the nogroom build. Canary instrumentation is
+verified by call count (252 `stack_chk_fail` calls vs 4 in the canonical
+build). With `ih_hdr_size=4104` the server still faults (`SERVER_RC=139`)
+with no canary report — the OOB write kills the process before the
+instrumented function returns; the 2048 control returns 0 and completes the
+SMP upload. Evidence: `real/smp/evidence/stack-protector.txt`,
+`evidence/sp-4104.log`, `evidence/sp-2048.log`. No new control over the OOB
+bytes and no clean return, so rung 5 stays UNKNOWN and rung 4 stays
+groom-conditioned. No witness verdict on this lane.
