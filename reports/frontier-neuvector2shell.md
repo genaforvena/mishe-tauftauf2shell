@@ -283,6 +283,32 @@ enforcer**. Grade is unchanged: the bytes are ASCII regex text, not a
 chosen address, and the process faults before returning. No pointer
 redirection, command or side effect.
 
+## Tuned return transfer (W285, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/return.sh` → **18 PASS / 0
+FAIL**, rc 0. Gap from W283: `LEN=2194` also destroyed the caller's
+`dlpsig` argument at `BUF+2144`, so the loop faulted at `dpi_sig.c:657`
+before returning. A REST-valid 2149-byte message that keeps 15 full
+patterns and shortens the 16th (pre-expansion totals 972 / 973 B, contexts
+`body` / `url`, both allowed by the pinned REST validator) ends the final
+`sprintf` at `BUF+2110`. Under gdb the breakpoint at `dpi_sig.c:662` is now
+reached; the live frame reads `BUF→RBP=2096`, `LEN=2110`, and the saved
+return slot is `0x3b79646f6220` (`" body;\0\0"`) or `0x3b6c72752074`
+(`" url;\0\0"`). Continuing faults at exactly that RIP. Vulnerable plain
+binary without gdb faults (`RC=139`); safe and fixed-binary controls
+survive and the fixed build skips the rule.
+
+This is a measured post-overwrite control transfer in the live full
+enforcer, but **not a chosen executable address**: the two high bytes must
+come from the final `sprintf` NUL and the untouched slot byte, so the six
+low bytes are the pinned controller's fixed `; context <allowed>;` suffix.
+The REST validator permits only `url`, `header`, `body`, `packet`
+(`controller/rest/dlp_rule.go:374-380`), none of which encode a valid
+pointer. No benign marker, command or side effect; grade stays rung 3
+confirmed / rung 4 PARTIAL, witness replay pending. Facts and ceiling:
+`lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`.
+
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
@@ -296,9 +322,10 @@ redirection, command or side effect.
   frame, in the saved RBP slot of an `-O0` real-object frame, and in *both*
   saved RBP and saved return slot of an `-O2` real-object frame driven by a
   REST-valid wire message; W283 repeats that measurement in the live full
-  enforcer's `-O2` frame. Both attack traces fault inside `dpi_sig_bld()`
-  before returning: the overwritten words hold ASCII regex bytes, not a
-  chosen address. No pointer redirection, command or observed side effect.
+  enforcer's `-O2` frame. W278/W283 fault inside `dpi_sig_bld()` before
+  returning; W285 reaches the epilogue and then faults at a wire-determined
+  unmapped RIP. The overwritten words hold regex/context text, not a chosen
+  executable address. No benign marker, command or observed side effect.
   Grade stays rung 4 PARTIAL by label, not advanced.
 - **Not rung 5:** no REST/CRD endpoint is contacted, the enforcer is run in
   standalone loopback mode (ASan and plain builds), and there is no benign

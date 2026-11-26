@@ -77,3 +77,44 @@ Ceiling unchanged: both saved words contain ASCII regex bytes, not a
 chosen address; the process faults before returning. No command, no
 side effect, no r5. W283 is the live full-enforcer realization of the
 W278/W280 measured frame, not a new primitive.
+
+## W285 — tuned message reaches the epilogue; wire sets the faulting RIP
+
+Command: `bash lab/frontier/neuvector2shell/fulldp/return.sh` → **18 PASS /
+0 FAIL**, rc 0, using the same plain `-O2` full enforcer binaries built by
+`frame.sh`. The W283 message wrote `LEN=2194`: the caller's `dlpsig`
+argument lives at `BUF+2144` (gdb: `BUF=0x7fffffffcc70`,
+`dlpsig=0x7fffffffd490`), so that loop destroyed the argument and faulted
+at `dpi_sig.c:657` before returning. W285 instead keeps 15 full 120-byte
+patterns and shortens the 16th to a 36-byte `pcre` string, so the final
+`sprintf` content ends at `BUF+2110`: with `context body` the value is 12
+`X` bytes, with `context url` it is 13, both REST-valid (name 256, 16
+patterns, pre-expansion totals 972 / 973 B, each pattern <=512 B). The two
+datagrams are 2149 B each.
+
+Under gdb (`set disable-randomization` is on by default for the inferior),
+`break dpi_sig.c:662` **is reached** for both. Live frame:
+`BUF→RBP=2096`, `LEN=2110`; bytes `BUF+2104..2109` are the tail of the
+pinned controller wrapper, `BUF+2110` is the `sprintf` NUL and `BUF+2111`
+keeps its original zero. The saved return word is `0x3b79646f6220`
+(`" body;\0\0"`) for context `body` and `0x3b6c72752074`
+(`" url;\0\0"`) for context `url`; continuing from the breakpoint faults at
+exactly those RIPs. Plain non-gdb controls: tuned message faults the
+vulnerable binary (`RC=139`), the safe 139-B datagram and the tuned message
+into the fixed-commit binary survive, and the fixed binary logs
+`exceeds max sig len(2048) … skip rule`.
+
+Ceiling, with the causal reason: the last two bytes of any chosen wire
+string cannot contain NUL (jansson strings are C strings and `sprintf`
+stops at NUL), so a canonical user-space return address must take its
+high zero byte(s) from the terminating `sprintf` NUL and the untouched
+slot byte. The NUL therefore lands at `BUF+2110` (return byte 6), and the
+six bytes below it are the *fixed* `; context body;` / `; context url;`
+tail written after the attacker's value. `agent/system.go:1017-1025`
+restricts the context to four short constants (`url`, `header`, `body`,
+`packet`; `controller/rest/dlp_rule.go:374-380` rejects any other), so
+those tail bytes cannot encode an executable address. W285 is a measured
+post-overwrite control transfer to a wire-determined unmapped pointer in
+the live full enforcer — still rung-4 mechanics, not a chosen address, no
+benign marker, no command, no r5. Grade stays rung 3 confirmed / rung 4
+PARTIAL as labeled; witness replay is pending.
