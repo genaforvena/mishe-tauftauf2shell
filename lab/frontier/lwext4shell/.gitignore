@@ -12,3 +12,10 @@ real/evidence/craft-*.out
 real/evidence/image-hashes.txt
 real/build-vuln.log
 real/build-fixed.log
+real/build-vuln-plain/
+real/driver-vuln-plain
+real/image-victim*.ext4
+real/evidence/build-vuln-plain.log
+real/evidence/compile-vuln-plain.log
+real/evidence/craft-victim.out
+real/evidence/real-vuln-victim-plain.out

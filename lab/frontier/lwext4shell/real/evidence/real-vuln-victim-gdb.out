@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x5ee6: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 404.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_inode_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:404
+404		memset(b.data, 0, (inodes_per_group + 7) / 8);
+$1 = (struct ext4_bcache *) 0x7fffffffdc40
+$2 = 4112
+0x555555585560:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+ext4_fs_init_inode_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:416
+416		ext4_trans_set_block_dirty(b.buf);
+$3 = (struct ext4_bcache *) 0x0
+0x555555585550:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x555555586550:	0xfe	0x00	0x00	0x00	0x00	0x00	0x00	0x00

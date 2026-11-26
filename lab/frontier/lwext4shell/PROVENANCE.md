@@ -144,5 +144,31 @@ Raw logs: `real/evidence/real-*-asan.out`; build/compile/mkfs/craft logs and
 image hashes in the same directory. The clone and build directories are
 gitignored; only scripts, evidence and this record are committed.
 
-Grade impact: rung 3 confirmed on the real library; rung 4 stays PARTIAL —
-no adjacent live object with chosen bytes, no pointer control and no command.
+Grade impact of this lane: rung 3 confirmed on the real library. Rung 4 was
+still PARTIAL here; the adjacent-object lane below advances it.
+
+## Adjacent live-object lane (rung 4, 2026-11-26 14:1xZ)
+
+`bash run-victim.sh` (9 PASS / 0 FAIL, rc 0) rebuilds the vulnerable full
+library as a plain `-g -O0` build, patches only `s_inodes_per_group` to
+65537 in a fresh copy of the `ext4_mkfs()` image, and drives the real
+`ext4_fs_get_block_group_ref()` with a one-entry bcache. Gdb at
+`vuln/src/ext4_fs.c:404` (before the image-derived memset) records
+`b.buf->bc = 0x7fffffffdc60` and `b.buf - b.data = 4112`; at `:416`
+(after the store) `b.buf->bc = 0x0`, the eight bytes at `b.data+4096` are
+zero, and `b.data+8192` starts `0xfe`. `ext4_buf_alloc()` in
+`vuln/src/ext4_bcache.c:123` allocates `data = malloc(itemsize)` and then
+`buf = calloc(1, sizeof(struct ext4_buf))`, so `b.buf` is the next live heap
+chunk and is consumed immediately by `ext4_trans_set_block_dirty(b.buf)`.
+Without gdb the same image crashes the plain process with rc=139 in that
+function. Records: `real/evidence/real-vuln-victim-gdb.out`,
+`real/evidence/real-vuln-victim-plain.out`, `real/evidence/craft-victim.out`;
+the driver mode and assertions are in `real/mount_driver.c` and
+`run-victim.sh`.
+
+Grade: rung 4 DEMONSTRATED in the author's lab build under stated conditions
+(plain build, one-entry bcache, ipg=65537, gdb readback), not ESTABLISHED
+until independent replay (requested in tape 5605) and not rung 5: the
+written values are zeros and a chosen bit byte, never a chosen address, and
+no command runs. The 4098-byte `ipg=32777` case with ASan and fixed/safe
+controls remains the separately replayed rung-3 real-mount evidence.

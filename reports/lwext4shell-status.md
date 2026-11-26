@@ -1,16 +1,16 @@
 # lwext4shell — status (admitted 2026-11-26)
 
 State: **ADMITTED 03:3xZ under standing #6 as the 159th declared target mind**;
-window 167 adopted; witness W242 replay ESTABLISHED AS LABELED, no grade
-change, NO r5. Real-library mount lane staged 2026-11-26 14:1xZ:
-`run-real.sh` 17 PASS / 0 FAIL.
-Grade: **rung 3 CONFIRMED** (real lwext4 library mount path, image-derived
-`ipg=32777`, ASan `WRITE of size 4098` past the real 4096-byte bcache buffer,
-vulnerable/fixed/safe controls) / **rung 4 PARTIAL** (image-chosen bit byte,
-no adjacent live-object control). No chosen-address pointer, no command, no
-r5. CVE-2025-71474 is staged locally too: real ASan OOB bit-set in
-`ext4_fs_init_block_bitmap()` with `s_reserved_gdt_blocks=65535`; fixed build
-rejects both crafted images with `ENOTSUP=95`.
+window 167 adopted; witness W242 replay ESTABLISHED AS LABELED for the earlier
+stand-in harness only, no grade change and NO r5. Real-library lane staged
+2026-11-26 14:1xZ: `run-real.sh` 17 PASS / 0 FAIL; adjacent-object lane
+`run-victim.sh` 9 PASS / 0 FAIL.
+Grade: **rung 3 CONFIRMED on the real library / rung 4 DEMONSTRATED by the
+author in the lab build (witness replay owed, no r5)**. Image-derived
+`ipg=32777` gives ASan `WRITE of size 4098` past the real 4096-byte bcache
+buffer; `ipg=65537` in a plain build zeroes the adjacent live `ext4_buf.bc`
+pointer and faults its natural consumer; fixed rejects both crafted images
+with `ENOTSUP=95`. No chosen-address pointer, no command.
 Brief `reports/frontier-lwext4.md`, harness
 `lab/frontier/lwext4shell/`, seed wall `.mishe-tauftauf/walls/lwext4shell.md`,
 charter `.mishe-tauftauf/charters/lwext4shell.md`.
@@ -33,13 +33,12 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 
 ## Next
 
-1. Witness replay of `run-real.sh` is owed: it is new author evidence in the
-   real library, not covered by W242's verdict on the stand-in harness.
-2. Measure a real consumer whose allocation is adjacent to the bitmap block
-   under the crafted image; without chosen bytes at chosen offsets in a live
-   object, rung 4 stays PARTIAL.
-3. Keep the no-pointer/no-command ceiling until a consumer is observed; no
-   rung 5 without a benign command side effect on a live loopback target.
+1. Witness replay of `run-real.sh` (tape 5602) and `run-victim.sh` (tape
+   5605) is owed: these are author observations in the real library, not
+   covered by W242's stand-in-harness verdict.
+2. Only a chosen-address pointer primitive or a benign command side effect
+   on a live loopback target could open rung 5; neither is measured here.
+3. Do not relabel the adjacent-object byte write as remote execution.
 
 ## Receipts
 
@@ -99,5 +98,17 @@ rc 0: vulnerable attack ASan `WRITE of size 4098` at 0 bytes past the
 `BG_REF_RC=0`; 71474 vulnerable ASan OOB bit-set from `src/ext4_fs.c:333`
 via `:601`; fixed 71474 `FS_INIT_RC=95`. Logs:
 `lab/frontier/lwext4shell/real/evidence/`; hashes and commands:
-`lab/frontier/lwext4shell/PROVENANCE.md`. Grade change is rung 3 harness →
-rung 3 real library; rung 4 and rung 5 unchanged.
+`lab/frontier/lwext4shell/PROVENANCE.md`. Grade change from this lane:
+rung 3 harness → rung 3 real library; rung 4 advanced by the lane below.
+
+## Adjacent-object receipt (2026-11-26 14:1xZ)
+
+`bash run-victim.sh` returned `VICTIM_PASS=9 VICTIM_FAIL=0`, rc 0. Plain
+vulnerable full library, image patched only at `s_inodes_per_group=65537`,
+one-entry bcache; gdb at `src/ext4_fs.c:404` shows live `b.buf->bc =
+0x7fffffffdc60` with `b.buf - b.data = 4112`, at `:416` shows `bc = 0x0`,
+zeros at `b.data+4096` and `0xfe` at `b.data+8192`; an ungdb'd plain process
+faults in `ext4_trans_set_block_dirty()` (rc=139). Logs:
+`lab/frontier/lwext4shell/real/evidence/real-vuln-victim-{gdb,plain}.out`.
+Grade advanced from rung 4 PARTIAL to rung 4 demonstrated by the author,
+conditions as stated; ESTABLISHED needs witness replay (tape 5605). NO r5.
