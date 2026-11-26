@@ -7,6 +7,8 @@
 #include <pjmedia.h>
 #include <pjmedia/avi_stream.h>
 #include <pjmedia/format.h>
+#include <pjmedia/bidirectional.h>
+#include <pjmedia/null_port.h>
 #include <pjmedia/port.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -44,11 +46,15 @@ int main(int argc, char **argv)
     size_t framebytes;
     int neighbor;
     pj_status_t status;
+    pjmedia_port *victim = NULL, *nget = NULL, *nput = NULL;
+    long delta = -1;
+    int realobj;
 
     if (argc < 3) {
-        fprintf(stderr, "usage: %s AVI exact|neighbor\n", argv[0]);
+        fprintf(stderr, "usage: %s AVI exact|neighbor|realobj\n", argv[0]);
         return 2;
     }
+    realobj = (strcmp(argv[2], "realobj") == 0);
     neighbor = (strcmp(argv[2], "neighbor") == 0);
 
     CHECK(pj_init(), "pj_init");
@@ -61,7 +67,7 @@ int main(int argc, char **argv)
     /* DIB video needs only the format manager; AV sync is disabled by flag. */
     if (!pjmedia_video_format_mgr_instance())
         CHECK(pjmedia_video_format_mgr_create(pool, 64, 0, NULL), "vfmgr");
-    fprintf(stderr, "AVI=%s mode=%s\n", argv[1], neighbor ? "neighbor" : "exact");
+    fprintf(stderr, "AVI=%s mode=%s\n", argv[1], argv[2]);
     CHECK(pjmedia_avi_player_create_streams(pool, argv[1],
                                             PJMEDIA_AVI_FILE_NO_SYNC,
                                             &streams), "create_streams");
@@ -86,15 +92,41 @@ int main(int argc, char **argv)
             (unsigned)vafp.size.w, (unsigned)vafp.size.h,
             (unsigned)vfi->bpp, framebytes);
 
-    /* The real consumer allocates a frame buffer from declared dimensions. */
-    buf = (unsigned char *)malloc(framebytes + (neighbor ? 64 : 0));
-    if (!buf) {
-        fprintf(stderr, "FAIL malloc\n");
-        return 2;
+    /* exact|neighbor use a caller malloc buffer (W240).  realobj moves the
+     * frame into the REAL pj pool and creates a live library port object from
+     * that same pool immediately after it: the overflow victim is then a
+     * library-created object, not a driver-supplied sentinel. */
+    if (realobj) {
+        buf = (unsigned char *)pj_pool_alloc(pool, framebytes);
+        if (!buf) {
+            fprintf(stderr, "FAIL pool frame\n");
+            return 2;
+        }
+        memset(buf, 0x41, framebytes);
+        CHECK(pjmedia_null_port_create(pool, 8000, 1, 160, 16, &nget),
+              "null get port");
+        CHECK(pjmedia_null_port_create(pool, 8000, 1, 160, 16, &nput),
+              "null put port");
+        CHECK(pjmedia_bidirectional_port_create(pool, nget, nput, &victim),
+              "bidir victim");
+        delta = (long)(((unsigned char *)victim) - buf);
+        fprintf(stderr, "REALOBJ victim=pjmedia_port(bidir) delta=%ld size=%zu\n",
+                delta, sizeof(*victim));
+        fprintf(stderr, "VICTIM_BEFORE name=%p sig=%08x get=%p put=%p pdata=%p\n",
+                (void *)victim->info.name.ptr, (unsigned)victim->info.signature,
+                (void *)victim->get_frame, (void *)victim->put_frame,
+                victim->port_data.pdata);
+        hexdump("VICTIM_BYTES_BEFORE", (const unsigned char *)victim, 64);
+    } else {
+        buf = (unsigned char *)malloc(framebytes + (neighbor ? 64 : 0));
+        if (!buf) {
+            fprintf(stderr, "FAIL malloc\n");
+            return 2;
+        }
+        memset(buf, 0x41, framebytes + (neighbor ? 64 : 0));
+        if (neighbor)
+            memcpy(buf + framebytes, "LIVE-ADJACENT-OBJ!", 18);
     }
-    memset(buf, 0x41, framebytes + (neighbor ? 64 : 0));
-    if (neighbor)
-        memcpy(buf + framebytes, "LIVE-ADJACENT-OBJ!", 18);
 
     pj_bzero(&frame, sizeof(frame));
     frame.buf = buf;
@@ -107,11 +139,15 @@ int main(int argc, char **argv)
     status = pjmedia_port_get_frame(port, &frame);
     fprintf(stderr, "PULL_DONE status=%d frame.size=%u frame.type=%d\n",
             (int)status, (unsigned)frame.size, (int)frame.type);
-    hexdump("FRAME_TAIL", buf + (framebytes > 16 ? framebytes - 16 : 0), 16);
-    if (neighbor)
-        hexdump("NEIGHBOR_AFTER", buf + framebytes, 18);
-
-    free(buf);
+    if (realobj) {
+        fprintf(stderr, "VICTIM_AFTER name=%p sig=%08x get=%p put=%p pdata=%p\n",
+                (void *)victim->info.name.ptr, (unsigned)victim->info.signature,
+                (void *)victim->get_frame, (void *)victim->put_frame,
+                victim->port_data.pdata);
+        hexdump("VICTIM_BYTES_AFTER", (const unsigned char *)victim, 64);
+    }
+    if (!realobj)
+        free(buf);
     pjmedia_port_destroy(port);
     pj_caching_pool_destroy(&cp);
     pj_shutdown();

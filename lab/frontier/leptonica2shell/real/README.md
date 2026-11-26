@@ -63,6 +63,47 @@ HEAD lab/frontier/leptonica2shell/real`, then `bash provision.sh` → 7 PASS /
   `BA=NULL`, no sanitizer report.
 - `evidence/real-vuln-safe.out`: `BA=nonnull`, `SIZE=16 FIRST=4d`, clean.
 
+
+## Plain-build heap-neighborhood probe (rung-4 mechanics only)
+
+`bash run-neighbor.sh` builds a non-sanitized copy of the same pinned tree
+(`build-plain`) and compiles `neighbor.c` with `-Wl,--wrap=calloc`. The
+lab-only wrapper recognizes the vulnerable `calloc(201, 1)` in
+`l_byteaCreate()` and immediately allocates a live 512-byte sentinel filled
+with `0x5a`; the fixture plants `MISHE-LEPTONICA` at offsets 208..1024 (step
+32) so whichever small offset the sentinel occupies receives chosen stream
+bytes. A SIGSEGV observer prints the sentinel before exiting 77. No upstream
+byte is changed; the sentinel and observer are synthetic lab mechanics.
+
+Observed 2026-11-26 ~15:31Z, `TOTAL: 3 PASS / 0 FAIL`, rc 0:
+
+```
+SIGNAL=SIGSEGV SENTINEL_OFFSET=224
+SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e49434100
+CHOSEN_AT_OFFSET=16
+```
+
+
+Clean-archive replay at 15:33Z from commit `edd20190`: `git archive HEAD
+lab/frontier/leptonica2shell/real | tar -x` into an empty directory, then
+`bash provision.sh` (7 PASS / 0 FAIL, rc 0) and `bash run-neighbor.sh`
+(3 PASS / 0 FAIL, rc 0, output identical to the in-tree run above). Script
+hashes: `run-neighbor.sh`
+`2fa8c3cafda5122ae5f1d8847203633e04b2ec5124fbb2e8f6ee010440b20d3c`,
+`neighbor.c`
+`e37948b479b6240a9f9540b29c5cfb3d62e89fc99bdfb9fb7d1578c81d761652`.
+
+So in a plain real-library process the oversized `memcpy` writes chosen file
+bytes into a live adjacent heap object 224 bytes past `ba->data` before it
+faults on unmapped memory. The sentinel is lab-groomed and the readback is a
+fault handler, not a request-reachable consumer: this strengthens the rung-4
+PARTIAL label, it is **not** a live-consumer readback and no pointer or
+command is claimed. Safe 16-byte stream: `BA=nonnull`, `SIZE=16
+NO_FAULT=1`, rc 0, and no sentinel is created because the 201-byte allocation
+never occurs. A first runner revision checked `NO_FAULT` before `SIZE` and
+reported 2 PASS / 1 FAIL on that safe control; only the check pattern was
+reordered, no observation was changed.
+
 ## Caller enumeration and boundary
 
 `l_byteaInitFromStream()` is called only by `l_byteaInitFromFile()` inside
@@ -73,8 +114,9 @@ reached above) and test/regression programs `bytea_reg.c`, `pdfio2_reg.c`,
 `xtractprotos.c`. No socket, HTTP, or request-dispatch caller exists in this
 tree. This is still rung 3 in real bytes, not rung 5: no wire input, no
 live server, no pointer-bearing victim object and no command side effect.
-Chosen-byte readback remains the synthetic bounded consumer of the staged
-harness (rung 4 PARTIAL).
+Chosen-byte readback is held by the staged harness's synthetic bounded
+consumer and by the lab-groomed live neighbor in the plain real-library
+probe above (rung 4 PARTIAL in both cases).
 
 ## Preserved negative
 

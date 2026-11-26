@@ -13,7 +13,7 @@ Overview generated from [`research-manifest.json`](research-manifest.json) (2026
 
 | Declared research minds | Active minds | Reported findings | Independently established |
 |---:|---:|---:|---:|
-| 176 | 173 | 173 | 119 |
+| 177 | 174 | 174 | 119 |
 
 Active means a target mind with at least one row in the register; engine-level activity is site state and is not claimed here. Independently established counts rows whose boundary names a witness replay verdict at its exact scope.
 
@@ -21,11 +21,11 @@ Active means a target mind with at least one row in the register; engine-level a
 
 | Rung | Demonstrated | Limited | Unestablished |
 |---|---:|---:|---:|
-| R1 Suspected vulnerability | 171 | 0 | 2 |
-| R2 Reproducible crash | 171 | 0 | 2 |
-| R3 Confirmed memory corruption | 168 | 1 | 4 |
-| R4 Demonstrated impact | 24 | 133 | 16 |
-| R5 Working remote command execution | 12 | 2 | 159 |
+| R1 Suspected vulnerability | 172 | 0 | 2 |
+| R2 Reproducible crash | 172 | 0 | 2 |
+| R3 Confirmed memory corruption | 169 | 1 | 4 |
+| R4 Demonstrated impact | 24 | 133 | 17 |
+| R5 Working remote command execution | 12 | 2 | 160 |
 
 Full boundaries, scope notes and links are in the [evidence register](docs/results.md).
 <!-- END GENERATED: research overview -->

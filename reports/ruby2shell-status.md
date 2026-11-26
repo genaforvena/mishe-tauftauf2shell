@@ -18,6 +18,7 @@ byte; attacker controls buffer size via input length). Affected
   `R+0x1a8` was not a FILE. No consumer, pointer control, command or second
   command; full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
   Sections appended to the investigation report.
+- **2026-11-26 (direct session) — stock WEBrick consumer screen CLOSED; delayed glibc aborts measured; grade unchanged.** `-s webrick` reaches a Host `downcase`, but the receiver is ASCII-8BIT and cannot expand. Precise before/after jemalloc tracing (`O/P` records) shows C=80's apparent pointer was a natural `0x53` false positive; the real target is a free slot. C=640 is reused by `compile_data_alloc_with_arena`, which zeroes `next`; other classes have no post-overflow reader. C=640 attack/safe/fixed controls are O=1/0/0. Plain glibc Sinatra N=572 changes a next-chunk size `0x25→0x53` and later aborts in `unlink_chunk`; Rails/WEBrick N=524 changes `0x155→0x153` and later aborts in `munmap_chunk`. Nearby surviving lengths corrupt padding/non-size fields with no external reader. No command, pointer control or second command; full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. Committed `ruby2shell-webrick-class-scan.sh` and `ruby2shell-webrick-case-watch.gdb`; report appended.
 - **2026-11-26 (direct session) — YARV handler lane: real in-process code-pointer
   disclosure, no stock shape; grade unchanged.** A free-time Q-word survey found
   1,854 threaded handler pointers on the request worker. A committed probe showed

@@ -1,0 +1,29 @@
+== BUILD vuln parser_lines=131 sha=283b2ed7bf675e86ff27e94da25ae13b0e1b779bd1ef88ca73121bf24e2ba979 ==
+== RUN vuln input=attack ==
+RC vuln/attack=1
+==4029548==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000014 at pc 0x7f1ad6afb42e bp 0x7ffc90d11f80 sp 0x7ffc90d11728
+READ of size 4 at 0x502000000014 thread T0
+== RUN vuln input=width ==
+RC vuln/width=1
+==4029551==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x70a06f500024 at pc 0x70a071afb303 bp 0x7ffdef391420 sp 0x7ffdef390bc8
+WRITE of size 4 at 0x70a06f500024 thread T0
+== RUN vuln input=safe ==
+RC vuln/safe=0
+input=safe bytes=13 report_num=1 usage_page=1
+== BUILD fixed parser_lines=135 sha=47455541749e25fa6c2d685f1174fdb754c1b4973f0db37187689ff553d4369f ==
+== RUN fixed input=attack ==
+RC fixed/attack=0
+input=attack bytes=4 report_num=0 usage_page=1
+== RUN fixed input=width ==
+RC fixed/width=0
+input=width bytes=5 report_num=0 usage_page=44510
+== RUN fixed input=safe ==
+RC fixed/safe=0
+input=safe bytes=13 report_num=1 usage_page=1
+PASS vuln-attack-asan-read rc=1 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/vuln-asan-attack.out
+PASS fixed-attack-clean-zero rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/fixed-asan-attack.out
+PASS vuln-width-asan-write rc=1 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/vuln-asan-width.out
+PASS fixed-width-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/fixed-asan-width.out
+PASS vuln-safe-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/vuln-asan-safe.out
+PASS fixed-safe-clean rc=0 log=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tinyusb2shell/evidence/fixed-asan-safe.out
+RESULT PASS=6 FAIL=0

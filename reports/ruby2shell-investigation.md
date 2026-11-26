@@ -5402,3 +5402,136 @@ destination with a mismatched signature; a future C=112 lane needs a consumed
 owner for the `oldbt_bugreport` pointer. Evidence (gitignored):
 `lab/build/evidence/prodscan{112,128,160,192,224,256,320,384}.*`,
 `prod112r{1,2,3}.*` and `prodscan112ctl.*`.
+
+## C=112 code-pointer lane: no consumed owner — CLOSED (2026-11-26, 15:2xZ)
+
+The prior wake left one unresolved observation: four fresh production
+C=112 processes each had one adjacent qword whose value was
+`exec_base + 0x1e5553`, i.e. ELF `0x225553` = `oldbt_bugreport + 0x13`
+in `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (`oldbt_bugreport` is at
+`0x225540`). This wake tested whether that pointer has a consumer.
+
+Geometry confirmed from `lab/preload/jemtrace.c`: `dump_window` emits `b=`
+qwords at the allocation pointer and `a=` qwords at `ptr + sz`. At C=112
+the watched RString allocation is `0x70` bytes; its character data starts
+24 bytes into the allocation (`mapping_buffer` header), so capacity
+`0x58` ends at `0x18 + 0x58 = 0x70` — the first byte of the adjacent
+chunk's first qword. The overflow byte therefore can change that qword's
+low byte. The value is stable relative to the text base across
+`prod112r1`, `prod112r2`, `prod112r3` and `prodscan112`.
+
+Two falsifiers were run. First, a paired safe/attack comparison of every
+`capa=0x58` dump: 16 of the 18 adjacent qword sequences are byte-identical
+between the arms; the attack-only case buffer is the sole new adjacency
+carrying the code pointer. The safe arm has no such case-buffer dump. That
+confirms the observation is attack-path-specific but says nothing about a
+consumer. Second, a direct execution test: committed
+`lab/repro/ruby2shell-prod112-consumer.sh` starts the unchanged classic
+Sinatra app in production under jemalloc and GDB, with execute
+breakpoints at `oldbt_bugreport` (`0x225540`, `vm_backtrace.c:1115`) and
+at the corrupted address `oldbt_bugreport + 19` (`0x225553`), then drives
+one wire-only attack POST and a follow-up request. Breakpoints only
+observe; no hook, middleware, debugger write or marker is in the request
+path. Both arms returned `TRIGGER_HTTP=404` and `ALIVE_HTTP=404`, with
+`entry-hits=0 plus13-hits=0` for attack and safe
+(`lab/build/evidence/prod112cons-{attack2,safe1}.{gdb,out,body}`).
+
+Source audit agrees: the only reference to `oldbt_bugreport` in the
+affected tree is `vm_backtrace.c:1138` (`arg.func = oldbt_bugreport`),
+inside the fatal `rb_print_backtrace` path, which no request reaches.
+The adjacent chunk's eight qwords mix code and heap pointers in a Ruby
+heap page; its owning object remains UNKNOWN. No reader, call,
+disclosure, command or second command was observed.
+
+Disposition: the C=112 code-pointer lane is **CLOSED** for lack of a
+consumed owner. This is not pointer control and not demonstrated impact.
+Primary grades are unchanged: rung 4 witness-COMPLETE; harness-condition
+rung 5 witness-ESTABLISHED; full stock/oracle-free/persistent rung 5
+**NOT ACHIEVED**. A future C=112 lane must name a request-invoked
+consumer of that pointer; otherwise a new wire-only libc/Ruby-code base
+is required.
+
+## Stock WEBrick: new case sink, precise jemalloc census, delayed glibc consumers — bounded NEGATIVE (2026-11-26, 15:4xZ)
+
+The Puma-only surfaces did not exhaust the stock classic-Sinatra configuration.
+Sinatra 4.2.2 accepts its documented `-s webrick` option without changing the
+route-less app. A raw development-mode request with `Host: x\xdfy.localhost`
+reached `Rack::Protection::HostAuthorization#extract_host` and its `downcase`
+(HTTP 403, `rack-protection-4.2.2/lib/rack/protection/host_authorization.rb:112`).
+The case-reach trace showed the receiver is `ASCII-8BIT`, however, so `0xdf`
+is not case-mapped and no expansion occurs. The multipart `_method` part remains
+the only expanding stock-WEBrick sink.
+
+The old adjacency scan accepted any qword that already ended in `0x53`; that is
+not proof of a write. `lab/preload/jemtrace.c` now has opt-in precise mode:
+`JEMTRACE_TRACK_OVERFLOW=1` snapshots `ptr+watch_size` at allocation and emits
+`O <target> <new>` / `P <target> <old>` only when the watched free proves a
+change to low byte `0x53`. `JEMTRACE_SCAN_REFS=1` emits `REF`/`D` records for
+live references; `JEMTRACE_STOP_ON_OVERFLOW=1` raises SIGSTOP at the proven
+overwrite. `lab/repro/ruby2shell-jemalloc-wire.sh` accepts
+`JEM_WIRE_SERVER=webrick`, and `lab/repro/ruby2shell-webrick-class-scan.sh`
+runs the production stock app across classes 80..640.
+
+The C=80 apparent pointer was a false positive: six ordinary traces had a
+natural heap pointer ending in `0x53`, while six before/after traces proved the
+actual target was a free Ruby slot `1 -> 0x53`. Its only references were VM
+stack/allocator metadata and a GC-page free-list entry. C=640 was the one
+non-metadata reuse: `O ... 0x53`, `P ... 0x0`, six references. A post-overflow
+read/watch run identified the first consumer as
+`compile_data_alloc_with_arena` (`compile.c:1112`) during Sinatra autoload:
+the chunk is reused as `struct iseq_compile_data_storage` and `storage->next`
+is immediately set to zero, erasing the corrupted byte. Classes
+96/128/160/192/224/256/320/384/448/512 had no post-overflow qword access in the
+watch window; C=128 was self-overwrite. The clean C=640 differential was:
+
+```
+attack: O=1 P=1 REF=6, HTTP 404, alive
+safe:   O=0 P=0 REF=0, HTTP 404, alive
+fixed:  O=0 P=0 REF=0, HTTP 404, alive
+```
+
+Evidence: `lab/build/evidence/webrickscan640.trace`,
+`webrickscan640ctl.trace`, `webrickscan640fixed.trace`. Temporary diagnostics
+under `lab/tmp/ruby2shell-method-screen/` include `webrick-c640-auto2.log` and
+`webrick-c80-refs-repeat.json`. The committed smoke commands
+are `bash lab/repro/ruby2shell-webrick-class-scan.sh 640` plus the same
+`ruby2shell-jemalloc-wire.sh` driver in `safe` and `fixed` modes with
+`JEM_WIRE_SERVER=webrick JEMTRACE_TRACK_OVERFLOW=1`.
+
+Plain glibc under WEBrick has a different, delayed consumer. The committed
+`lab/repro/ruby2shell-webrick-case-watch.gdb` arms only on the exact request
+bytes, then watches the byte at `current_buffer + 24 + N + 20`. For stock
+Sinatra N=572 it observed a next-chunk size change (`0x25 -> 0x53` in one run,
+`0xa5 -> 0x53` in the committed replay). After the 404, thread teardown entered
+`tcache_thread_shutdown -> _int_free_merge_chunk`; continuing the watch run
+reached `unlink_chunk` and aborted with `corrupted size vs. prev_size` because
+the next chunk's `fd/bk` were zero. Nearby N=560/564/568/576/580/584/592/596/600
+served the attack and a later GET without an allocator diagnostic; their
+corrupted bytes were padding/non-size fields and had no external reader in the
+watch window. N=556/588 aborted in the trigger.
+
+Stock `rails new` can also use WEBrick when the globally installed handler is
+preloaded (`RUBYOPT=-rwebrick`); no Gemfile or application change is needed.
+At N=524 the same watch observed a chunk size `0x155 -> 0x153`. After the 404,
+`tcache_thread_shutdown -> free` consumed it as an mmapped chunk and aborted
+with `munmap_chunk(): invalid pointer`. N=540/560/564/568/576/580/584/592/596/600
+served the attack and `/up`; N=556/572/588 aborted with unsorted-bin diagnostics
+and N=604 reached the delayed `corrupted size vs. prev_size` path. Evidence:
+`lab/build/evidence/webrick-n572-committed.log`,
+`rails-webrick-n524-committed.log`, and the fine-matrix logs under
+`lab/tmp/ruby2shell-method-screen/`.
+
+Disposition: the WEBrick header branch is **CLOSED** (binary encoding), the
+precise jemalloc classes are **CLOSED** (free slot, self-overwrite, metadata,
+or initialization that erases the byte), and the two glibc size-field cases
+are **bounded NEGATIVE** because their first real consumers are structural
+`unlink_chunk`/`munmap_chunk` aborts. No command, chosen-offset write, pointer
+control, second command or persistence was observed. Full stock/oracle-free/
+persistent rung 5 remains **NOT ACHIEVED**; primary grades are unchanged.
+
+Next falsifiable lead: keep stock Sinatra/WEBrick N=572 and add multipart
+filler parts before `_method` to place a self-consistent free `0x50` chunk at
+the corrupted successor. Require `_int_free_merge_chunk` to pass `unlink_chunk`
+and a later request to return an overlapping allocation; zero `fd/bk` or an
+abort closes the arm. This is a new consumer-shaping experiment, not a repeat
+of the Puma fake-header sweep.

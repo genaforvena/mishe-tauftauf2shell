@@ -13,6 +13,15 @@ lab/frontier/leptonica2shell/real/run-real.sh` reports **7 PASS / 0 FAIL**,
 including an in-tree caller path. Grade stays rung 3 / rung 4 PARTIAL; no wire,
 pointer-bearing victim or command.
 
+Plain-build heap-neighborhood update 2026-11-26 15:33Z: a lab-only
+`--wrap=calloc` sentinel placed immediately after the vulnerable 201-byte
+allocation receives chosen `MISHE-LEPTONICA` bytes from the oversized stream
+before the plain process faults (`SENTINEL_OFFSET=224`,
+`CHOSEN_AT_OFFSET=16`; safe 16-byte input clean). Clean-archive replay of
+`real/run-neighbor.sh` from commit `edd20190`: 3 PASS / 0 FAIL, rc 0. The
+sentinel and fault observer are synthetic lab mechanics, so the grade stays
+rung 3 real / rung 4 PARTIAL.
+
 ## Verified ground truth
 
 - Claim: `CVE-2026-137063`, published 2026-11-25, CWE-122, CVSS 6.8. Feed
@@ -114,6 +123,26 @@ in this tree; the PDF path takes a list of filenames, not attacker-controlled
 wire bytes. The first caller-stack assertion failed because ASan prints
 callee-first; the assertion order was corrected, the observed report was not.
 
+### Plain-build live neighbor probe (2026-11-26 15:33Z)
+
+`real/run-neighbor.sh` builds the same pinned 1.87.0 tree without ASan and
+links `real/neighbor.c` with `-Wl,--wrap=calloc`. The wrapper recognizes the
+vulnerable `calloc(201, 1)` in `l_byteaCreate()`, allocates a live 512-byte
+sentinel right after it, and fills it with `0x5a`; the fixture plants the
+chosen marker at stream offsets 208..1024 (step 32). A SIGSEGV observer reads
+the sentinel before `_exit(77)`. Observed in-tree and from a clean archive at
+commit `edd20190`: `TOTAL: 3 PASS / 0 FAIL`, rc 0, with
+`SIGNAL=SIGSEGV SENTINEL_OFFSET=224`,
+`SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e49434100`
+and `CHOSEN_AT_OFFSET=16`. The chosen bytes reach a live adjacent heap object
+224 bytes past `ba->data` before the copy faults on unmapped memory. Safe
+16-byte stream: `BA=nonnull`, `SIZE=16 NO_FAULT=1`, rc 0, no fault. The
+sentinel is lab-groomed and the observer is a fault handler, not a
+request-reachable consumer; no pointer value or command is read or executed.
+An early runner revision checked `NO_FAULT` before `SIZE` and failed only
+that safe-control pattern; the check order was corrected, no observation
+changed.
+
 ## Feasibility assessment and ceilings
 
 - Rung 1 (trigger): deterministic, local, sparse-file-backed in the staged
@@ -125,17 +154,21 @@ callee-first; the assertion order was corrected, the observed report was not.
 - Rung 3: GCC and Clang ASan WRITE on verbatim pinned functions **and in the
   real 1.87.0 library**, with clean fixed and safe controls.
 - Rung 4: PARTIAL — bytes come from the input stream at chosen offsets past
-  the declared 201-byte region, but the plain-build readback uses a synthetic
-  bounded `memcpy`; no real Leptonica consumer, adjacent object or pointer is
-  in evidence. The unbounded plain build runs off the heap into unmapped
-  memory, so it cannot serve as a readback oracle. The real-library caller
+  the declared 201-byte region. The staged harness uses a synthetic bounded
+  `memcpy`; the plain real-library probe writes chosen bytes into a live
+  adjacent object 224 bytes past `ba->data` but that object is lab-groomed and
+  read by a fault handler, not by a request-reachable consumer. No pointer
+  value is consumed and no command executes. The unbounded plain process
+  faults on unmapped memory after those bytes. The real-library caller
   `saConcatenatePdfToData()` reaches the WRITE but offers no chosen-byte
   readback.
 - Rung 5: NOT CLAIMED — real library and process, but no wire input, no live
   server, no pointer-bearing victim object and no command execution. The
   advisory is a local file/stream parser issue.
 - Next experiment: find an external consumer that feeds a >1 GB stream to a
-  Leptonica API reachable from request bytes and measure the live heap
-  neighborhood; preserve the no-pointer/no-command ceiling until then. The
-  staged and real-library lanes are complete as labeled; witness replay of
-  the real-library runner is requested separately.
+  Leptonica API reachable from request bytes. The plain real-library process
+  now measured writes chosen bytes into a live adjacent object and then faults
+  on unmapped memory, so a live consumer would need a mapped destination past
+  that object; record that as a structural boundary if none exists. Preserve
+  the no-pointer/no-command ceiling. The staged and real-library lanes are
+  complete as labeled; witness replay of both real runners is requested.

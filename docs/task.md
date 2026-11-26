@@ -11902,6 +11902,9 @@ contradiction and no grade change. The row now carries that verdict and keeps
 live `nfcapd` loopback reachability UNKNOWN; the 21:4xZ reproducibility bullet
 no longer says the replay is owed, and a new section records the wrapper
 command, archive hash, expected bytes and gitignored witness detail.
+That reachability UNKNOWN was subsequently closed by `9fbeec88` / `81e3cd8e`
+(15:0x–15:4xZ fold below): a real 127.0.0.1 nfcapd collector now receives a
+V3 datagram in both ASan and plain builds, `13 PASS / 0 FAIL` each.
 
 Both checkers stayed GREEN after the edits (150 rows, 29 files) and
 `git diff --check` on the two edited docs paths returned rc 0. Readme-lint
@@ -13526,3 +13529,176 @@ QuickJS witness replays/admissions, MQTT-C wire-runner replay, and the
 operator's fold of any newly admitted target. What would change this fold:
 a witness verdict contradicting a labeled row above, a checker RED on
 committed HEAD, or a generated count that disagrees with `e8fc7ab9`.
+
+## 2026-11-26 15:0x–15:4xZ — quickjsbcode2shell admitted (177th), W273 lwext4, real-consumer and wire lanes, closed negatives
+
+- `4336a4d2` (operator, standing #6): **quickjsbcode2shell admitted as the
+  177th declared target mind**, window 185 (panes %374/%375, dead=0, no
+  duplicate). Generated counts 176/173/173/119 → **177/174/174/119** in
+  `README.md`, `docs/results.md` and `research-manifest.json`; the
+  independently-established count stays 119 and the row stays
+  `established:false`. This does not change the rung-3-only / no-witness /
+  rung-4-NOT-CLAIMED facts recorded above (CVE-2026-88378 /
+  GHSA-jww9-7qmq-6hv5, pins `04be2460…` / `42526037…`, runner sha256
+  `7031c420…c09b1cd5`, `PASS=25 FAIL=0`). `010f4cbb` is a reconcile edge and
+  moved no row or count.
+- `aa6afcd2` folds witness **W273's lwext4shell verdict: ESTABLISHED AS
+  LABELED** (14:42Z, clean `git archive cbadc189` with all staged evidence
+  removed; unmodified `replay-clean.sh`, runner hashes `fd9e7d3e…` /
+  `e32862ed…` / `80587918…`, `TOTAL 31 PASS / 0 FAIL`, `REAL_PASS=17
+  REAL_FAIL=0`, `VICTIM_PASS=9 VICTIM_FAIL=0`, `REPLAY_RC=0`). Fresh ASan
+  `WRITE of size 4098` 0 bytes past a 4096-byte region (`ext4_fs.c:404` ←
+  `:611`); fresh gdb non-null `bc`, delta 4112 before the store and `bc=0x0`
+  after it, `0xfe` at `data+8192` across three ASLR-on repeats;
+  `ipg=65539` yielded `0xf8`, so the bit byte is image-derived. No grade
+  change, NO r5, and no command, wire or pointer-control call in the driver;
+  the two post-verdict NITs (byte-offset wording, relative `DEST`) were
+  repaired in `94958123` with a relative-DEST smoke (`31/0`, same three
+  hashes, `REPLAY_RC=0`), neither changing the evidence. Detail: gitignored
+  `.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`.
+- `8ffb83b0` / `603e222d` (frontier W273) **staged axis2guththila2shell**,
+  STAGED, not admitted, no count or grade cell moved. CVE-2026-124023 /
+  GHSA-qv28-p6jq-5h3f; vulnerable pin `584ce5bd3c98fe51701285d0a62e9c5251f3da4f`,
+  fixed pin `f01683ec10e8fddb87279ec9351b3239021223e6` (wrapper fix
+  `2311028…`, parser fix `f01683ec…`); CNA git range before
+  `f2b30c15…`, semver 0–2.0.0. The 19-byte `<!ENTITY x "y"><a/>` makes the
+  wrapper index `event_map[10]` on `int event_map[10]` at `:145-153`; GCC
+  ASan `READ of size 4` at verbatim `guththila_xml_reader_wrapper.c:308`,
+  192 bytes past a 72-byte allocation from `:218`. `sh run-all.sh && sh
+  verify.sh` → `RESULT PASS=4 FAIL=0`; fixed `event[0]=-1`, safe
+  `<a>text</a>` clean on both. Rung 3 only, rung 4 NOT CLAIMED: no
+  chosen-offset readback, pointer, wire consumer, command or r5; witness
+  clean-archive replay, operator admission, loopback consumer and
+  plain-build grooming are owed. CISA CVSS 9.1 AV:N and CNA textual "low"
+  are both preserved, not re-scored.
+- `6d4d551b` + `f5741ac5` (neuvector2shell W274): a REST-validated,
+  controller-shaped JSON message stays inside the documented limits (256-byte
+  name, 16 × 64-byte `a*` patterns, 1024 bytes pre-expansion) but
+  `wildCardToRegexp()` expands after the check — `pre_total=1024
+  expanded_total=1536 wire_total=1824` — and the real `dpi_sig_bld()`
+  (`dp/dpi/sig/dpi_sig.c:658`) gives ASan `WRITE of size 121` at offset 2080
+  of the 2048-byte `dlpsig_buf`; `wirepath/run.sh` → `19 PASS / 0 FAIL`.
+  The fixed build is ASan-clean and the safe 8-byte-pattern message clean.
+  Grade rung 3 verbatim/real-object + rung 4 PARTIAL: the process is built
+  from verbatim excerpts, no REST endpoint was contacted, and there is no
+  full enforcer, chosen address, command or r5. `f5741ac5` is the author's
+  clean-archive receipt (`22/0` + `19/0` on `6d4d551b`, `29/0` `run-all.sh`,
+  `REPLAY_PASS=5`); witness DM 5639 notified, **no independent W274 verdict
+  claimed**. CVE-2026-127182 / GHSA-3x2m-c67v-vw77, affected `>=5.6.0,<5.6.5`
+  and `<5.5.6`, fixed `5.5.6/5.6.5/5.7.0`.
+- `4f9314a9` + `b76012a3` advance pjproject2shell W241 past the prior
+  driver-sentinel ceiling: `real/run-realobj.sh` (`11 PASS / 0 FAIL`) takes a
+  48-byte frame from real `pj_pool_alloc(pool,48)` and allocates a live
+  120-byte `struct bidir_port` in the same driver pool 48 bytes later;
+  `attack512` overwrites `info.name.ptr`, `sig`, `get_frame`, `put_frame` and
+  `port_data.pdata` with repeated chosen `MISHE-PJPROJECT!` bytes. ASan is
+  silent (one shared pj pool block), so the proof is before/after field
+  readback. `b76012a3` is the clean `git archive 4f9314a9` replay receipt
+  (runner hashes `8304b76d…` / `d6435096…` matched), and records the
+  natural-caller negative: `pjmedia_vid_conf_add_port()` allocates
+  `cport->get_buf` last, so no library object is naturally adjacent after
+  the AVI frame in that shipped caller. No pointer called, no wire, no
+  command, no r5; W240/W241 witness verdicts still awaited.
+- `edd20190` + `a23384e2` (leptonica2shell) put chosen bytes in a live heap
+  neighbor: pinned 1.87.0 plain with `--wrap=calloc` recognizes
+  `calloc(201,1)` in `l_byteaCreate()` and places a 512-byte sentinel after
+  it; the fixture plants `MISHE-LEPTONICA` at stream offsets 208..1024 and
+  an observer reads `SENTINEL_OFFSET=224`, `CHOSEN_AT_OFFSET=16` before the
+  copy faults — `3 PASS / 0 FAIL`, safe 16-byte stream clean. `a23384e2`
+  is the clean-archive replay of `edd20190` (`3/0`, rc 0). Grade stays rung 3
+  real / rung 4 PARTIAL: sentinel and fault observer are synthetic, no
+  pointer-bearing victim object is consumed and there is no wire or command.
+  CVE-2026-137063, affected 1.79.0–1.87.0, fix `c493a776…`, no fixed version
+  reported.
+- `cf956faf` + `d2252911` (gimpjif2shell W243): a complete on-disk JIF99a
+  file with 16-bit `len=33025`, `height=65026` (`product=0x80000002`,
+  doubled `data_size=4`, `avail_out=2147483650`) reaches the wrapped
+  arithmetic through a real `FILE*` header parse (`ReadOK`/`fread`), with
+  `delta=32` into a live 8-byte glib chunk neighbor; `fileptr` mode places
+  `0x00007f0000414243` at offset 32 (`PTR_MATCH=1`, never dereferenced),
+  fixed rejects, safe 4×4 no-alpha clean — `run-real.sh 21 PASS / 0 FAIL`.
+  `d2252911` is the clean-archive replay receipt (`21/0`, rc 0). The real
+  plugin would allocate ~4 GiB for `dest`; the synthetic driver omits it, so
+  that consumer stays UNMEASURED. Grade rung 3 verbatim / rung 4 PARTIAL; no
+  GIMP plugin, PDB `load_image()`, pointer deref, command or r5. This W243 is
+  gimpjif2shell's, distinct from the radare2pyc2shell W243 elsewhere.
+- `aaedfd2f` (rpm2shell) builds real rpm 6.1.90 from parent `c36e8550…` and
+  fix `5bc8705e…` with GCC 13.3.0 `-O0` ASan; `run-real.sh` → `21 PASS / 0
+  FAIL`. Both `rpm2cpio` and `rpm2archive` abort rc 134 with `WRITE of size
+  64`, 0 bytes after a 1-byte region (`lib/rpmfi.cc:2241`, `rpmcpioRead()`
+  `:2242`, caller `tools/rpm2archive.cc:249`); fixed returns 1 ASan-clean.
+  A plain `LD_PRELOAD` seam disables tcache and plants a live 64-byte guard
+  whose first qword is a marker: `real/plain-layout-groom.log` shows
+  `0x4141414141414141` at `buf+0x20`, but the sweep is variable and the
+  natural object's type/role is UNKNOWN. Negatives preserved: default
+  stripped v6 `07070X` produces no ASan write and plain
+  `rpm -qlvp --nodigest` never enters the iterator. Grade rung 3 real / rung
+  4 DEMONSTRATED instrumented; no controlled pointer hijack, wire, command
+  or r5; witness replay pending. CVE-2026-95520.
+- `bf77b8a6` + `6b1beb43` (mqttc2shell) drive the **shipped**
+  `simple_subscriber.c` callback from the loopback wire: only socket, PAL
+  and `main()` are lab-written; the callback is verbatim v1.1.6
+  `examples/simple_subscriber.c:123-133`. Bytes `30 04 ff ff 00 00` arrive
+  from a forked 127.0.0.1 broker in two `recv()` calls; GCC ASan stack
+  `READ of size 65535` in the shipped `memcpy(...topic_name...)` at
+  `simple_subscriber.c:127` from `__mqtt_recv mqtt.c:760`, plain child SIGSEGV,
+  v1.1.7 rejects before calling back, safe packet prints
+  `Received publish('a'): bc` — `run-realconsumer.sh` `27 PASS / 0 FAIL`.
+  `6b1beb43` is the clean `git archive bf77b8a6` replay (`27/0`, console
+  hash `426b7c06…94b6c9`). Grade stays rung 3 wire-backed, rung 4 NOT
+  CLAIMED (the callback's own destination is sized from the tainted length);
+  no chosen-offset store, pointer, command or r5.
+- `9fbeec88` + `81e3cd8e` (nfdump2shell) build full pinned nfcapd/nfdump
+  pairs in ASan and plain (tarballs `970247fa…` / `61c92342…`, fix
+  `32b9cbe7…`) and drive a V3 datagram from a real 127.0.0.1 collector:
+  `13 PASS / 0 FAIL` in both flavours. Vulnerable drops flow record 2
+  (`Size v3header: 6270 > size left: 64`, 1 flow vs 2 safe), fixed rejects
+  (`processd: 0`); no ASan in the live case because the real `in_buff` is a
+  65535-byte `malloc`. The chosen-byte alias shape (4-byte element / 16-byte
+  record) is a preserved negative: the record is copied before mutation and
+  `nfdump` rejects it. The first clean-archive attempt was `3 PASS / 10 FAIL`
+  (build `cd src` before creating it); `81e3cd8e` adds `mkdir -p` plus a
+  post-build binary check and the clean replay returns `13/0` in both
+  flavours. Grade unchanged rung 3 verbatim / rung 4 PARTIAL (packet-chosen
+  offset, collector-time-derived value); no pointer, command or r5; witness
+  replay of the live wire still owed. GHSA-gpgq-hv9x-7mqj, no CVE claimed.
+- `0c0a0021` (speex2shell, additive): `harness/ptr-control.sh` (`8 PASS / 0
+  FAIL`) uses `speex_bits_init_buffer`'s 16-byte heap buffer, two 16-byte
+  oversize reads (`delta=32`) and a 16-byte neighbor
+  `{ void (*fn)(void); unsigned long tag; }`; the runtime-resolved
+  `benign_marker` address is copied into `p2[8..15]` and
+  `BENIGN_MARKER_CALLED` observed, while vendor-fixed keeps `vfn=noop` and
+  `marker_called=0`. Caveat: rung-4 mechanics only, not a command, no wire
+  path, no r5, **not replayed by W245** (verdict unchanged). In-tree
+  bundled-decoder reachability is UNKNOWN — production callers use
+  `speex_bits_read_from`, which resets `nbBits`. CVE-2026-116741 /
+  GHSA-jmfj-jxhf-c4c3, affected through 1.2.1, fix `09b569d1…`, first
+  released fixed tag UNKNOWN.
+- `35081006` **CLOSES** ruby2shell's C=112 code-pointer lane: the corrupted
+  qword at `exec_base+0x1e5553` (`oldbt_bugreport+0x13`, `vm_backtrace.c:1115`)
+  is stable across four fresh production processes, but 16/18 adjacent-qword
+  sequences are byte-identical attack vs safe, GDB execute breakpoints at
+  `0x225540` and `0x225553` show `entry-hits=0` and `+13-hits=0` with both
+  runs returning HTTP 404, and the only source reference is inside fatal
+  `rb_print_backtrace`, unreachable by requests. Owning object UNKNOWN; no
+  consumed owner. Primary grades unchanged (rung 4 witness-COMPLETE,
+  harness-condition rung 5 witness-ESTABLISHED, full stock/oracle-free
+  persistent rung 5 NOT ACHIEVED).
+- `d5299c81` **CLOSES** unarr2shell's upstream-fix lane: `tar/parse-tar.c`
+  at master head `704ea083` (2026-11-22) is byte-identical to pinned v1.2.1
+  and still uses `malloc(256+1)` / `strcat`; no change to `tar_get_name`
+  since 2020 and the advisory-ID issue search returned zero results, so no
+  vendor fixed control exists. The earlier `run-consumer-probe.sh` (`5 PASS /
+  0 FAIL`) showed `malloc_usable_size(prefixed)==264` with `prefixed[257]==0`
+  and `canary_corrupted=0` — the NUL lands in glibc slack, structurally
+  dead. Grade unchanged rung 3 verbatim / rung 4 PARTIAL fixed NUL; lane 3
+  (real network-boundary caller) stays UNKNOWN.
+
+Reproduction commands, pins, expected bytes and evidence locations for this
+window are in `docs/reproducibility.md` § 15:0x–15:4xZ. Next triggers: the
+axis2guththila2shell admission and clean-archive replay, W240/W241/W272/W274
+verdict folds for pjproject/MuJS/NeuVector, the still-owed libsmpp34 and
+MQTT-C wire-witness receipts if they arrive, and the operator's fold of any
+newly admitted target. What would change this fold: a witness verdict
+contradicting a labeled row above, an independently confirmed chosen-pointer
+or command result, or a checker RED on committed HEAD.

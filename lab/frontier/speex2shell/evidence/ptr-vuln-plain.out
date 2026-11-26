@@ -1,0 +1,7 @@
+warning: Do not own input buffer: truncating oversize input
+warning: Do not own input buffer: truncating oversize input
+delta=32
+target=0x5c815d9b42a9 bytes=a9429b5d815c0000
+vfn=0x5c815d9b42a9 tag=5a5a5a5a5a5a5a5a
+BENIGN_MARKER_CALLED
+marker_called=1

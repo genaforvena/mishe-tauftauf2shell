@@ -1,12 +1,52 @@
 # Frontier brief: NeuVector DLP/WAF rule stack overflow — CVE-2026-127182
 
 Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
-ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 confirmed in both the
-verbatim pinned function and the unmodified real `dpi_sig.c` object built
-against real NeuVector headers; rung 4 PARTIAL (chosen bytes past the
-2048-byte buffer and in the saved RBP slot of a real-object plain frame).
-Still no full enforcer binary, controller REST/CRD wire, real wildcard
-expansion, chosen-address control, command or rung 5.
+ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 confirmed in the verbatim
+pinned function, in the unmodified real `dpi_sig.c` object built against
+real NeuVector headers, and through a REST-validated controller-shaped JSON
+message with real wildcard expansion (W274). Rung 4 PARTIAL (chosen bytes
+past the 2048-byte buffer and in the saved RBP slot of a real-object plain
+frame). Still no full enforcer binary, live loopback REST/CRD target,
+chosen-address control, command or rung 5.
+
+## REST-validated wire-path reproduction (W274, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/wirepath/run.sh` -> **19 PASS / 0 FAIL**,
+rc 0. Searching the pinned tree located the complete producer chain: the
+REST validator (`controller/rest/dlp_rule.go:348-396`) caps name at 256,
+16 patterns, 512 bytes each and 1024 bytes total, then calls
+`wildCardToRegexp()` (line 382) which expands `*` to `.*` *after* the
+check; `agent/system.go:1007-1026` wraps each expanded value as
+`/<value>/is; context body`; `agent/dp/ctrl.go:891-947` marshals the
+`ctrl_bld_dlp` message; `dp/ctrl.c:2098-2208` parses it with jansson and
+calls `dpi_sig_bld()`.
+
+The runner slices the verbatim expander and verbatim JSON consumer from
+the pinned tree at run time, generates the message with Go `encoding/json`,
+parses it with the host's real `libjansson.so.4`, and formats it with the
+byte-identical real vulnerable/fixed objects built by `realcaller/run.sh`.
+The attack rule is inside every documented REST limit: 256-byte name and
+16 patterns of 64 bytes (`a*` x32), 1024 bytes pre-expansion. Measured
+`pre_total=1024 expanded_total=1536 wire_total=1824`; ASan reports
+`WRITE of size 121` at offset 2080 of the 2048-byte `dlpsig_buf`, frame
+`dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`. Fixed source on the same message:
+`WIRECALL rc=0`, ASan-clean. Safe 8-byte-pattern message: `rc=0`,
+ASan-clean in the vulnerable object.
+
+This reproduces the advisory's "inside documented limits" claim
+mechanically: the per-pattern `/.../is; context body` wrapper plus
+wildcard growth push the signature past 2048 bytes. It is still a lab
+process built from verbatim excerpts, not a running controller or enforcer:
+no REST endpoint was contacted, no chosen address, command or r5. Full
+hashes and raw logs: `lab/frontier/neuvector2shell/PROVENANCE.md`.
+
+Clean-archive replay of commit `6d4d551b` (archive plus the ignored pinned
+tarball, no network fetch) reproduced 22 PASS / 0 FAIL and 19 PASS / 0 FAIL
+for the real-object and wire lanes; `run-all.sh` and `run-witness.sh`
+remained at 29 PASS / 0 FAIL and REPLAY_PASS=5. The witness was notified
+on the chat tape (message 5639); no independent confirmation of W274 is
+claimed.
+
 
 ## Claim and scope
 
@@ -126,29 +166,29 @@ patterns after the overflow reaches its frame. Commands, hashes, raw logs
 and limits: `lab/frontier/neuvector2shell/PROVENANCE.md`.
 
 This is a real-object reproduction, not a full enforcer binary: no
-controller wire, no real wildcard expansion (patterns are supplied
-already expanded), no hyperscan/urcu libraries, no chosen address, no
-command or side effect.
+controller wire of its own, no real wildcard expansion in that lane
+(patterns were supplied already expanded; W274 below closes this gap),
+no hyperscan/urcu libraries, no chosen address, no command or side effect.
 
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
-  pinned `dpi_sig_bld()`, and an ASan-confirmed WRITE in the byte-identical
-  real `dpi_sig.c` object built with real NeuVector headers; both have
+  pinned `dpi_sig_bld()`, in the byte-identical real `dpi_sig.c` object
+  built with real NeuVector headers, and through a REST-validated
+  controller-shaped JSON message with real wildcard expansion; all have
   fixed and safe-input controls.
 - **Rung 4 PARTIAL:** chosen bytes observed at chosen offsets past the
   logical buffer in a synthetic frame and in the saved RBP slot of a
-  real-object plain frame. No full enforcer binary, controller REST/CRD
-  wire, real wildcard expansion, pointer redirection to a chosen address,
-  command or observed side effect.
+  real-object plain frame. No full enforcer binary, no live REST/CRD
+  endpoint, no pointer redirection to a chosen address, command or
+  observed side effect.
 - **Not rung 5:** no live loopback target and no benign command execution.
 
 Next experiment: build a full vulnerable 5.5.x enforcer `dp` with ASan and
-`-fno-stack-protector`, feed the DLP config through the controller JSON
-message path including wildcard expansion (or the real rule parser), and
-measure the live frame in that binary against 5.5.6. Only then consider a
-chosen-address in-process marker; keep the no-command/no-rung-5 ceiling
-until a live loopback target and a benign side effect are observed.
+`-fno-stack-protector` and drive the W274 `ctrl_bld_dlp` message to a live
+loopback target, then measure the live frame and compare with 5.5.6. Only
+then consider a chosen-address in-process marker; keep the no-command /
+no-rung-5 ceiling until a benign side effect is observed.
 
 ## Duplicate check
 
