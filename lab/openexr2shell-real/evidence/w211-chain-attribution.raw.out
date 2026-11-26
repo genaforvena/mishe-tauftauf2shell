@@ -1,0 +1,32 @@
+Breakpoint 1 at 0x108450: file /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c, line 451.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+ file cases/w211-stream-chain.exr 
+Breakpoint 1, sort2_4ByteChannels_tiled (inPtr=0x555555844790 "", num_samples_grid=num_samples_grid@entry=0x555555843810, channels=channels@entry=0x7fffffffdb98, channelsSize=channelsSize@entry=2, forward=forward@entry=false, height=height@entry=1, outPtr=0x555555829b00 " Q\200\367\377\177", sorting_lookup=0x555555843820) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/internal_zstd.c:451
+451	{
+DEST=0x55555582a700
+Breakpoint 2 at 0x55555565f910: file /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c, line 305.
+
+Breakpoint 2, exr_attr_list_destroy (ctxt=ctxt@entry=0x555555829580, list=list@entry=0x555555829658) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);
+SLOT_ADDR=0x55555582ab40 SLOT=0x55555582ab70 REL=1088
+Breakpoint 3 at 0x555555662f5e: file /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c, line 79.
+
+Breakpoint 3, exr_attr_opaquedata_destroy (ctxt=ctxt@entry=0x555555829580, ud=0x55555582abb0) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/opaque.c:79
+79	            ud->destroy_unpacked_func_ptr (
+CTXT=0x555555829580 FREEFN_BEFORE=0x555555663e50 UNP=0x55555582ac68 SZ=104 TARGET=0x7ffff7feb900
+Breakpoint 4 at 0x7ffff7feb900: file ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S, line 210.
+
+Breakpoint 4, memcpy () at ../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S:210
+warning: 210	../sysdeps/x86_64/multiarch/memmove-vec-unaligned-erms.S: No such file or directory
+MEMCPY_RDI=0x555555829580 RSI=0x55555582ac68 RDX=104 SRC_FREEFN=0x7ffff7658750
+Breakpoint 5 at 0x7ffff7658750: __libc_system. (2 locations)
+
+Breakpoint 5.1, __libc_system (line=0x55555582ab70 "touch /tmp/w202m") at ../sysdeps/posix/system.c:202
+warning: 202	../sysdeps/posix/system.c: No such file or directory
+SYSTEM_RDI=0x55555582ab70
+0x55555582ab70:	"touch /tmp/w202m"
+[Detaching after vfork from child process 2948867]
+
+Breakpoint 2, exr_attr_list_destroy (ctxt=ctxt@entry=0x555555829580, list=list@entry=0x555555829658) at /home/mesh-home/mishe-tauftauf2shell/lab/openexr2shell-real/src/openexr-3.5.2/src/lib/OpenEXRCore/attributes.c:305
+305	                arv = attr_destroy (ctxt, list->entries[i]);

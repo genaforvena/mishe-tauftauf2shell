@@ -2689,3 +2689,67 @@ three build trees and `cases/p209-stream-chain.exr` symlinked from the live
 checkout, returned `RESULT PASS` rc 0 with the same `022e8bba...` evidence
 hash. Receipt: `lab/openexr2shell-real/evidence/w210-clean-archive.out`.
 Author replay, not a witness verdict; grade unchanged.
+
+## W211: shipped `-s -c` stream-mode benign command chain — POSITIVE (2026-11-26 00:1xZ)
+
+Prediction from W210: that negative was a calibration failure, not the absence
+of a stream-mode chain. W210 measured the live `entries[0]` slot at
+`dest+1088` (the W195 file-path dump used `dest+1104`) but built its final PoC
+with the old slot offset, so the forged pointer stayed at dump offset 1104 and
+the live slot held the untouched dump word `0x900000511`. A second feedback
+loop also shifts `dest` by one 16-byte heap chunk whenever the forged dump
+changes the ZSTD frame length.
+
+Method: `cases/make_w211_poc.py` keeps W202's absolute pointer values fixed
+(`P_ATTR=0x55555582ab70`, `P_OPAQUE=P_ATTR+64`,
+`P_PAYLOAD=P_ATTR+248`, `P_ATTR` written at the measured slot offset 1088) and
+writes the fake structures at dump offsets `0x470`, `0x4b0` and `0x598`. Only
+the second ZSTD segment is changed, from `0x5a` to `0x01`, so that the frame
+length puts the sink destination at `outPtr+3072 == 0x55555582a700`: the fake
+attribute then sits exactly at the file-carried address. A six-variant seg2
+sweep (`evidence/w211-seg2-sweep.log`) measured destinations `0x...a6f0`,
+`0x...a700` and `0x...a710` for frame lengths 477-491; the `ones` variant gives
+`dest=0x...a700` while leaving every forged pointer byte unchanged. Repeated
+fixed-point iterations with pointer values recomputed from `dest` did not
+converge (`evidence/w211-iteration.log`, `evidence/w211-fixedptr-iteration.log`)
+— this is the feedback the constant-pointer construction avoids.
+
+Observation in the UNMODIFIED pinned 3.5.2 `exrcheck -s -c
+cases/w211-stream-chain.exr` (1146 bytes, sha256
+`12a1f12092e1302b55d3cdf89c43837cf56faace8620b4a8c91ca393407f50bf`, regenerated
+byte-exact by the committed generator): under gdb with ASLR off,
+`DEST=0x55555582a700`, `SLOT_ADDR=0x55555582ab40`,
+`SLOT=0x55555582ab70` at relative offset 1088. The forged attribute's opaque
+callback at `opaque.c:79` is `TARGET=0x7ffff7feb900` (libc `memcpy`), called as
+`memcpy(ctxt=0x555555829580, src=0x55555582ac68, 104)`; the source's `+96`
+word is `__libc_system` (`0x7ffff7658750`), so the trailing
+`ctxt->free_fn(attr)` at `attributes.c:271` runs
+`system("touch /tmp/w202m")`. Raw attribution:
+`evidence/w211-chain-attribution.raw.out`. Three plain `setarch -R` runs each
+exit 139 with `/tmp/w202m` present. Controls: vulnerable build on
+`cases/baseline.exr` returns rc 0 `OK` with no marker; fixed 3.5.3 on the
+crafted file returns rc 1 `bad` with no marker; vulnerable ASan on the crafted
+file reports `heap-buffer-overflow READ of size 3072` at pinned
+`internal_zstd.c:472` (`evidence/w211-asan.out`).
+
+One-command replay: `cd lab/openexr2shell-real && sh
+harness/w211-stream-mode-command.sh` -> `RESULT PASS` rc 0 three times, stable
+normalized evidence hash
+`dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9` in
+`evidence/w211-stream-mode-command.out`. The harness pins nine source, script
+and PoC hashes, regenerates the EXR byte-exact from the committed generator,
+and checks the sink, both controls, three plain command runs and every gdb
+chain value.
+
+Disposition: keep the positive. This extends W202's demonstrated local-file
+command chain from the file API to the shipped in-memory stream API, using the
+same unmodified vulnerable build and a second calibrated file. It does NOT
+raise the grade by itself: ASLR is still explicitly off, the tool still needs
+a seekable filesystem path (`main.cpp:62-73`), the benign command is a local
+marker, there is no pointer/control-flow target beyond `system`, and no
+independent witness verdict. Rung 5 stays UNKNOWN for a wire-fed or ASLR-on
+process. Would change the grade: a witness verdict on this replay, an
+ASLR-on address route, or a wire/stdin-fed affected process. W209 remains a
+valid negative for the *unmodified* W202 PoC under `-s -c`; W211 uses a newly
+calibrated file.
+

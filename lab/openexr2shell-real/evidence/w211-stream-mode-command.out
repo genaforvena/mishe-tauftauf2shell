@@ -1,0 +1,10 @@
+MODE=exrcheck -s -c, shipped in-memory stream API, file path still required
+GEN=committed make_w211_poc.py reproduces the pinned EXR byte-exact
+ASAN_SINK_RC=1 heap-buffer-overflow READ=3072 internal_zstd.c:472=1
+SAFE_RC=0 marker=absent FIXED_RC=1 marker=absent
+ASLR=off in plain and gdb runs (setarch -R / disable-randomization on)
+DEST=0x55555582a700 SLOT_REL=1088 SLOT=0x55555582ab70
+TARGET=0x7ffff7feb900 SRC_FREEFN=0x7ffff7658750 SZ=104
+SYSTEM_RDI=0x55555582ab70 COMMAND=touch /tmp/w202m
+THREE_PLAIN_RUNS=rc139 marker=present
+RESULT PASS
