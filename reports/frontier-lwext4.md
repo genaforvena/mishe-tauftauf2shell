@@ -9,10 +9,10 @@ ESTABLISHED AS LABELED, no grade change, NO r5. Real-library lane staged
 `ext4_fs_init()` mount path, and `run-victim.sh` 9 PASS / 0 FAIL showing
 image-chosen bytes overwriting an adjacent live `ext4_buf` in the real plain
 build. Grade: **rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the
-lab build, independently replayed as labeled by W273**. No chosen-address
-pointer, no command and no rung 5. The 71473 lanes were independently
-replayed; the 71474 sibling bit-write lane and its named-field / prefix-OR
-ceiling probe are author-measured only.
+lab build, independently replayed as labeled by W273**; the 71473 lanes and
+the 71474 chosen-bit lane (W294) were independently replayed. The new
+named-field / prefix-OR ceiling probe remains author-measured only. No
+chosen-address pointer, no command and no rung 5.
 
 ## Claims
 
@@ -247,15 +247,17 @@ execution. Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
   4098-byte case. Conditions: one-entry bcache, ipg=65537, debugger
   readback; no chosen-address pointer control. W273 replay confirmed the
   adjacency and bit-byte provenance under ASLR; no grade change.
-- **Rung 4 DEMONSTRATED (CVE-2025-71474 sibling, author only):** the real
-  block-bitmap bit-set loop ORs an image-selected mask (`0x01`..`0xff`) into
-  the low byte of the adjacent live `ext4_buf.bc`; the in-bounds `gdt=8`
-  control leaves it untouched. A follow-up probe shows the same loop reaches
-  13 named fields of that object, but the byte-level prefix-OR model rules
-  out a chosen address: covered bytes become `0xff`, the boundary byte a
-  low-bit prefix mask, and the `end_write` function pointer only `2^k-1`.
-  Chosen bits, not a chosen address; not independently replayed, and the
-  overall grade and r5 ceiling are unchanged.
+- **Rung 4 DEMONSTRATED (CVE-2025-71474 sibling; chosen-bit lane
+  independently replayed as labeled by W294):** the real block-bitmap
+  bit-set loop ORs an image-selected mask (`0x01`..`0xff`) into the low byte
+  of the adjacent live `ext4_buf.bc`; the in-bounds `gdt=8` control leaves
+  it untouched. W294 confirmed chosen-offset / one-byte-mask control, not
+  chosen-address control. A follow-up author probe shows the same loop
+  reaches 13 named fields of that object, but the byte-level prefix-OR
+  model rules out a chosen address: covered bytes become `0xff`, the
+  boundary byte a low-bit prefix mask, and the `end_write` function pointer
+  only `2^k-1`. That probe is author-only; overall grade and r5 ceiling
+  unchanged.
 - **Not rung 5:** no live network target, no benign command side effect and
   no attacker-chosen address; debugger-forced inspection stays rung-4
   mechanics.
@@ -289,3 +291,23 @@ driver. Verdict ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`. The two NITs in
 that detail (the byte-offset wording above and `replay-clean.sh` DEST/hash
 reporting) were repaired after the verdict; neither changed the evidence.
+
+## Witness W294 (independent replay, 2026-11-26 22:05Z)
+
+From `git archive b189cf86` with staged evidence deleted, the unmodified
+`replay-clean.sh` reproduced all four runner hashes and returned
+`REPLAY_RC=0`: `31 PASS / 0 FAIL`, `REAL_PASS=17 REAL_FAIL=0`,
+`VICTIM_PASS=9 VICTIM_FAIL=0`, `GDT_PASS=11 GDT_FAIL=0`. Fresh GDB readbacks
+held `DELTA=4112` in seven sections: control `gdt=8` mask `0x00`, and
+`0x01/03/07/0f/3f/ff` masks OR-ed into the live `ext4_buf.bc` low byte with
+upper pointer bytes unchanged. Plain control rc 0 in four runs; six crafted
+images rc 139, with an independent backtrace through
+`ext4_trans_set_block_dirty` (`ext4_trans.c:65`) from
+`ext4_fs_init_block_bitmap :373`. Source-bound checks confirmed the bit-set
+is `*(bmap + (bit>>3)) |= (1 << (bit&7))` and the fixed tree bounds
+`bit_max` before the loop. Verdict: **ESTABLISHED AS LABELED at exact
+scope** — chosen-offset/partially-chosen-value, not chosen-address or
+full-pointer control; no benign marker, dereference-to-chosen-target or
+command; NO r5; overall grade unchanged. Detail:
+`.mishe-tauftauf/artifacts/witness-w294-lwext4/detail.md`. This replay
+predates the named-field probe above, which remains author-only.

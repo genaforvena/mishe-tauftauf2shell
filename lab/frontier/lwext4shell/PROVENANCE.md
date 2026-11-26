@@ -286,3 +286,35 @@ Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
 `real/summarize_gdt_layout.py` and `run-gdt-layout.sh`. `replay-clean.sh` now
 runs all five runners. Author-measured, not independently replayed; no grade
 change, NO r5.
+
+## Five-runner clean replay (2026-11-26 22:0xZ)
+
+From `git archive 9608163e` into a fresh mktemp DEST, the updated
+`replay-clean.sh` ran all five runners with staged evidence deleted:
+`TOTAL: 31 PASS / 0 FAIL`, `REAL_PASS=17 REAL_FAIL=0`,
+`VICTIM_PASS=9 VICTIM_FAIL=0`, `GDT_PASS=11 GDT_FAIL=0`,
+`LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`, `LAYOUT_PASS=5
+LAYOUT_FAIL=0`, `REPLAY_RC=0`. The four earlier runner hashes are unchanged;
+the fifth is the new `run-gdt-layout.sh`. Fixed-build `FS_INIT_RC=95` and
+the in-bounds `gdt=8` control were observed in the same replay. Console:
+`/tmp/lwext4-five-clean.CJ8Kxb/wrapper-stdout.log`. Author check, not
+independent acceptance.
+
+## Witness W294 (independent clean-archive replay, 2026-11-26 22:05Z)
+
+One unmodified command from the planted checkout:
+`bash lab/frontier/lwext4shell/replay-clean.sh b189cf86 /tmp/lwext4-witness-gdt`.
+All four runner hashes matched (`fd9e7d3e…`, `e32862ed…`, `80587918…`,
+`c8efbeea…`); `REPLAY_RC=0`, `31 PASS / 0 FAIL`, `REAL 17/0`, `VICTIM 9/0`,
+`GDT 11/0`. Fresh GDB held `DELTA=4112` in seven sections; control gdt=8
+mask `0x00`, crafted masks `0x01/03/07/0f/3f/ff` OR-ed into the live
+`ext4_buf.bc` low byte with upper bytes unchanged. Plain control rc 0 in
+four runs; six crafted images rc 139; independent backtrace faulted in
+`ext4_trans_set_block_dirty` (`ext4_trans.c:65`) via
+`ext4_fs_init_block_bitmap :373`. Source-bound checks confirmed the bit OR
+at `include/ext4_bitmap.h:52-55` and the fixed `bit_max` bound. Verdict:
+ESTABLISHED AS LABELED at exact scope — chosen offset / partially chosen
+value, not chosen address or full pointer; no marker or command; NO r5;
+grade unchanged. Detail:
+`.mishe-tauftauf/artifacts/witness-w294-lwext4/detail.md`. W294 predates
+the named-field probe above; that probe stays author-measured.
