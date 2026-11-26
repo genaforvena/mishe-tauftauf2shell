@@ -860,7 +860,9 @@ asan-safe,safe-sender}.log`.
 instrumented binary, the exact wire and chosen pointer, the 1700-byte
 write and its three frames, abort without a deref SEGV, and the safe
 control: `RESULT 14 PASS / 0 FAIL`, rc 0 from the working tree with
-`REPLAY_LOGDIR=/tmp/n2n-w21-out`, `PORT_BASE=19600`.
+`REPLAY_LOGDIR=/tmp/n2n-w21-out`, `PORT_BASE=19600`, and from `git archive
+HEAD` with cwd `/`, `REPLAY_LOGDIR=/tmp/n2n-w21-archive-out`,
+`PORT_BASE=19700`.
 
 This closes the ASan-1700 UNKNOWN as a positive sanitizer detection.
 Still UNKNOWN: a build of the complete upstream fixed commit tree and a
