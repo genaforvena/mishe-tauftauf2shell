@@ -14879,3 +14879,39 @@ experiment are owed.
 
 Every count in this section is an operator, witness or clean-archive replay
 as labeled; no generated grade cell or register row moved here.
+
+## 2026-11-26 18:5xZ — Ruby2Shell Onigmo repeat-ID stock-wire corruption
+
+Affected runtime: `ruby-3.4.11.tar.xz` SHA-256
+`f79c6e789ce4f30f77c88a40b23b93e2547c512a843dc17db27ab1f5cc66f4e4`.
+Build with `./configure --disable-install-doc --prefix=$PWD/../plain/ruby-3.4.11-plain`,
+then `make -j4 && make install`. Use the existing stock app's 3.4.0 GEM_PATH
+via `RUBY2SHELL_ONIGMO_GEM_PATH=lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0`;
+the 3.4.11 gem home is intentionally empty.
+
+From the repo root, with distinct ports:
+
+```sh
+export RUBY2SHELL_ONIGMO_GEM_PATH=lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0
+export RUBY2SHELL_ONIGMO_LAYOUT=shallow
+export RUBY2SHELL_ONIGMO_ASLR_OFF=1          # labeled calibration; omit for ASLR-on
+RUBY2SHELL_ONIGMO_PORT=4704 python3 lab/repro/ruby2shell-onigmo-repeat-wire.py attack onigmo-aslroff-1
+RUBY2SHELL_ONIGMO_PORT=4710 python3 lab/repro/ruby2shell-onigmo-repeat-wire.py control onigmo-shallow-control11
+RUBY2SHELL_ONIGMO_PORT=4711 python3 lab/repro/ruby2shell-onigmo-repeat-wire.py safe onigmo-safe11
+RUBY2SHELL_ONIGMO_PORT=4712 python3 lab/repro/ruby2shell-onigmo-repeat-wire.py fixed onigmo-shallow-fixed2
+python3 lab/repro/ruby2shell-onigmo-response.py \
+  lab/build/evidence/onigmo-shallow-control11.html \
+  lab/build/evidence/onigmo-aslroff-1.html \
+  --json lab/build/evidence/onigmo-aslroff-1.diff.json
+```
+
+Expected ASLR-off attack: HTTP 200, worker alive, 54,795-byte response SHA-256
+beginning `c6be1419`; differ reports `control_rows=306 attack_rows=302
+missing=4 added=0 changed=293 shortened_by_one=293 verdict=CORRUPTED`, including
+`adapter: sqlite3 → adapter: sqlite` and `timeout: 5000 → timeout: 500`.
+Expected control: 200/alive, 55,667 bytes, SHA-256 beginning `56eb2e92`; safe:
+200/alive, 3,079 bytes; fixed 3.4.13: 500/alive with
+`too many range repeat`. ASLR-on is layout-sensitive: corruption occurred in
+most fresh runs but not all, and one hash-seed arm faulted; do not report the
+echo as deterministic without ASLR off. No command, second command, pointer
+or witness replay is implied.

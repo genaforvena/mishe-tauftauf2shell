@@ -5055,3 +5055,22 @@ register fold landed in `e8fc7ab9` (section below).
   clean-room FreeRDP W21 replay recipe; W21 stays author-only CLOSED NEGATIVE.
   Exact pins, commands and gitignored evidence are in the named reports and
   in `docs/reproducibility.md` § 14:0x–15:0xZ.
+
+## 2026-11-26 18:5x–19:0xZ — stock-wire Onigmo repeat-ID corruption (rung 4, not RCE)
+
+- Provisioned Ruby 3.4.11 from SHA-256 `f79c6e78…` and built
+  `lab/build/plain/ruby-3.4.11-plain`. Added
+  `lab/repro/ruby2shell-onigmo-repeat-wire.py`,
+  `lab/repro/ruby2shell-onigmo-response.py` and
+  `lab/repro/ruby2shell-onigmo-stack.gdb`.
+- One wire POST to unmodified stock Rails `/rails/info/notes` with 32,767
+  range repeats produces a consumer-visible Onigmo `repeat_stk[-32767]` write.
+  With ASLR off, 3/3 attacks returned byte-identical 54,795-byte pages with
+  293 truncated reflected source lines and four missing rows; safe affected,
+  clean units-2 and fixed 3.4.13 controls behaved as expected.
+- The `-1` self-size, parser-double-free and Rapid7-subject escalation arms are
+  bounded negatives. No pointer, command, witness replay or second command:
+  full stock/oracle-free/persistent rung 5 remains NOT ACHIEVED. Evidence and
+  replay recipe are in `reports/ruby2shell-investigation.md` and
+  `docs/reproducibility.md`.
+

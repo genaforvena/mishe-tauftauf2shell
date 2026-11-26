@@ -5995,3 +5995,85 @@ Grade unchanged: wire-only secondary rung 3; prior rung-4 scopes
 witness-COMPLETE; harness-condition rung 5 ESTABLISHED as labeled; full
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Do not repeat this
 consumer pass unchanged.
+
+
+## 2026-11-26 18:5xZ — stock-wire Onigmo repeat-ID write: consumer-visible corruption, not RCE
+
+A second affected runtime was provisioned and pinned:
+`lab/src/ruby-3.4.11.tar.xz` SHA-256
+`f79c6e789ce4f30f77c88a40b23b93e2547c512a843dc17db27ab1f5cc66f4e4`, built as
+`lab/build/plain/ruby-3.4.11-plain` with
+`./configure --disable-install-doc --prefix=...; make -j4; make install`.
+Ruby 3.4.11 is affected by CVE-2026-110264 / Onigmo PR #16801: `num_repeat`
+is stored as signed 16-bit `MemNumType`, so the 32,768th range repeat wraps.
+Ruby 3.4.13 rejects the same pattern at compile time.
+
+`lab/repro/ruby2shell-onigmo-repeat-wire.py` drives the unmodified stock
+Rails 8.1.4.1 app through its development `/rails/info/notes` route. A form
+POST with `_method=GET` puts a 393 KB `tag` into Rails' interpolated regex
+literals; no application file, middleware, preload, ObjectSpace, maps read or
+debugger write is in the request path. The generated tag closes the wrapper's
+first capture and adds an all-lines branch:
+
+```
+x)|(.*)(?=(?:(?:x{0,100}){0,100}(?:x){1,100}*32767|(?:.){0,100}))(?:
+```
+
+The impossible nested pair disables the match-cache count walk; the last
+dummy repeat gets ID 32,768 (`-32767`), and `repeat_stk[-32767]` receives the
+live VM stack depth. With one keep-alive Puma worker, ASLR disabled, affected
+Ruby 3.4.11 and stock GEM_PATH from the 3.4.12 build: 3/3 attacks returned
+HTTP 200, worker alive, and a byte-identical 54,795-byte response
+(SHA-256 `c6be1419…`) that differs from the clean units-2 control
+(55,667 bytes, SHA-256 `56eb2e92…`). With ASLR enabled the echo occurred in
+several fresh runs but not all; exact layout dependence is preserved, not
+hidden. `RUBY2SHELL_ONIGMO_ASLR_OFF=1` is a labeled calibration condition.
+
+`lab/repro/ruby2shell-onigmo-response.py` parsed the stock HTML rows. The
+attack response has 302 rows versus 306 in the control: 293 reflected source
+lines lose exactly one trailing byte and four rows disappear. Examples include
+`adapter: sqlite3 → adapter: sqlite` and `timeout: 5000 → timeout: 500`.
+This is a wire-visible, consumer-visible effect from the Onigmo write, still
+below RCE: the value is a small stack integer, not a pointer or command.
+
+GDB at `regexec.c:3845` confirms the primitive: with the stock wrapper the
+first wrapped write has value 49 (`0x31`), each nested lookahead around the
+wrapped repeat adds one to the stack depth, and the destination is
+`repeat_stk - 32767*8`. The target allocation identity varies with layout;
+one allocation trace resolved it to `node_new_list` (`regparse.c:1313`), and
+another run showed the size field of a neighboring 0x30 chunk. No stable
+pointer-bearing consumer was established.
+
+Controls: safe affected `tag=TODO` returned 200/alive with a 3,079-byte page;
+fixed Ruby 3.4.13 with the byte-identical malicious body returned 500/alive
+with `too many range repeat`; the units-2 affected control returned 200/alive
+with the clean 55,667-byte page. A benign second notes request after the
+corruption returned the clean baseline and the worker stayed alive.
+
+Escalation arms are bounded negatives:
+
+- Compiling 65,533 dummy repeats makes the executed ID `-1`, moving the write
+  to `repeat_stk-8`, the match buffer's own malloc size field. The write is
+  confirmed (`free(): invalid size` / `munmap_chunk(): invalid pointer`), but
+  an ASLR-off sweep of 121 nested-lookahead stack depths found no value that
+  simultaneously satisfies glibc alignment, clears `IS_MMAPPED`, and leaves a
+  valid fake next-size. No tcache/unsorted pop, overlap or second command was
+  observed.
+- The adjacent CVE-2026-89078 parser double free is wire-only on 3.4.11
+  (`Regexp.new("|{1000000}")` aborts with `free(): double free detected in
+  tcache 2`; `glibc.malloc.tcache_count=0` gives `fasttop`). Primers and
+  pattern-shape sweeps did not bypass the detector; jemalloc survives without
+  an observed duplicate allocation. No controlled free followed.
+- The public Rapid7 CVE-2026-97229 chain needs an attacker-controlled UTF-8
+  match subject. Stock Rails supplies fixed source lines/comments to notes
+  and fixed route strings to `/rails/info/routes`; the pattern half fits but
+  the subject/command half does not. Redirecting its stack into the compiled
+  pattern instead of a subject remains unproven.
+
+Grade: a new **stock wire-only rung-4 consumer-visible write** on Ruby 3.4.11
+under a labeled ASLR-off deployment condition. It does not establish rung 5:
+no command, chosen pointer, fixed-build positive, witness replay, or second
+distinct command. Prior witness-ESTABLISHED harness rung 5 is unchanged; full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
+
