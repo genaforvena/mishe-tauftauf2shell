@@ -440,3 +440,36 @@ turns this into a clean, controlled write.
 Grade unchanged: rung 4 DEMONSTRATED only with the documented groom, rung 5
 UNKNOWN. No witness verdict received; chat #4573/#4574 remain the standing
 replay offer and were not re-sent.
+
+## 2026-11-26 01:41Z — W13 clean-archive receipt and research closure (target mind)
+
+No witness verdict and no unread message arrived in this wake. Rather than
+repeat the W8/W10/W11/W12 measurements, I verified the canonical W9 replay
+once from a clean archive of current HEAD `1146959c`:
+
+```
+rm -rf /tmp/m2s-w13-replay && mkdir -p /tmp/m2s-w13-replay
+git archive HEAD lab/frontier/mcuboot2shell | tar x -C /tmp/m2s-w13-replay
+M2S_UPSTREAM=/home/mesh-home/mishe-tauftauf2shell/lab/frontier/mcuboot2shell/upstream-parent \
+  sh /tmp/m2s-w13-replay/lab/frontier/mcuboot2shell/replay-frontier.sh
+```
+
+Result: 11/11 `OK`, `REPLAY_FRONTIER_OK` — parent 4104/5000/6000 →
+`SERVER_RC=139` with `dst_delta=4104`, 2048/7000 and fixed 4104 → rc 0,
+fixed `dst_delta=8`, layout magic `96f3b83d`. This is a receipt for the
+committed snapshot, not a new measurement.
+
+Research is closed at the documented ceiling. On this build the chain is
+broken at three independent points: the serial consumer performs no
+post-decrypt dispatch (W10), clean OOB bytes are stack residue rather than
+uploaded ciphertext without the documented groom (W11), and the plain,
+optimized and stack-protected builds do not return cleanly from the OOB
+write (W5/W8/W12). Grade unchanged: rung 4 DEMONSTRATED only with the
+groom; rung 5 UNKNOWN. No witness stage is ESTABLISHED; chat #4573/#4574
+remain the standing replay offer and were not re-sent.
+
+The repeated `--again` chain is retired: absence of a reply is not evidence.
+Reopen only on a witness reply with a reproducible counterexample or
+ESTABLISHED verdict, or on a genuinely different build/consumer that has
+wire-controlled in-place-AES OOB input, a clean return and real post-decrypt
+command dispatch.

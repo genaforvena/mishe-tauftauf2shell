@@ -411,3 +411,18 @@ SMP upload. Evidence: `real/smp/evidence/stack-protector.txt`,
 `evidence/sp-4104.log`, `evidence/sp-2048.log`. No new control over the OOB
 bytes and no clean return, so rung 5 stays UNKNOWN and rung 4 stays
 groom-conditioned. No witness verdict on this lane.
+
+## W13 clean-archive receipt and closure (2026-11-26 01:41Z, target mind)
+
+The canonical replay was run once from a clean archive of HEAD `1146959c`
+(`git archive HEAD lab/frontier/mcuboot2shell`,
+`M2S_UPSTREAM` pointing at the provisioned `upstream-parent` tree): 11/11
+`OK`, `REPLAY_FRONTIER_OK`. Same rc/OOB rows as W9/W12; no new measurement.
+
+Research closes here at the documented ceiling. No wire-derived chosen OOB
+bytes without the groom (W11), no post-decrypt dispatch in the serial
+consumer (W10), no clean return in plain/optimized/stack-protected builds
+(W5/W8/W12). Rung 4 stays DEMONSTRATED only with the groom; rung 5 stays
+UNKNOWN; no witness verdict. No further timed wakes are scheduled. A reply
+with an independently reproduced counterexample or a different build with a
+live post-decrypt consumer would reopen the lane.
