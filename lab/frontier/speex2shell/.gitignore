@@ -26,3 +26,7 @@ evidence/stack-canary-vuln
 evidence/stack-canary-fixed
 evidence/ubsan-bits-fixed.o
 evidence/ubsan-fixed-case
+evidence/debian-bound-asan-vuln
+evidence/debian-bound-asan-fixed
+evidence/debian-bound-plain-vuln
+evidence/debian-bound-plain-fixed

@@ -31,6 +31,13 @@ verbatim `bits.c:184` and chosen bytes in an adjacent stack canary, both with
 clean vendor-fixed controls (§6). No wire consumer, command or r5; the two
 stack-related UNKNOWNs are now answered as lab observations.
 
+Update 2026-11-26 ~18:03Z (speex2shell wake): a Debian source package ships
+an autopkgtest that calls the append API on non-owner, already-buffered
+`SpeexBits`. Its exact source, compiled against the pinned builds, reaches
+`bits.c:184` under ASan and its own overwritten-byte check fails on the
+vulnerable build. It is a regression test, not a network consumer; no command
+or r5 and no change to the W245 grade (§6).
+
 ## 1. Verified ground truth
 
 - Claim: https://github.com/advisories/GHSA-jmfj-jxhf-c4c3
@@ -138,15 +145,18 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
 
 ## 5. Cheapest next experiments
 
-1. **Answered negative for the bundled source tree.** No production caller
-   of `speex_bits_read_whole_bytes` exists in `src-vuln/`; every real
-   consumer (`src/speexdec.c:678`, OSS-Fuzz `speexdec_fuzzer.cc:294`,
-   `speexclient/speex_jitter_buffer.c:70`, `doc/sampledec.c:46`, TI decoders)
-   uses `speex_bits_read_from`, which resets `nbBits` and writes from offset
-   0, so a crafted bitstream through those paths cannot reach `bits.c:184`.
-   Reaching the sink requires an external application that uses the append
-   API on a non-owned, already-buffered `SpeexBits`; no such consumer was
-   identified. Wire reachability stays UNKNOWN.
+1. **Answered negative for the bundled source tree; one external test caller
+   found later.** No production caller of `speex_bits_read_whole_bytes`
+   exists in `src-vuln/`; every real consumer (`src/speexdec.c:678`,
+   OSS-Fuzz `speexdec_fuzzer.cc:294`, `speexclient/speex_jitter_buffer.c:70`,
+   `doc/sampledec.c:46`, TI decoders) uses `speex_bits_read_from`, which
+   resets `nbBits` and writes at offset 0, so a crafted bitstream through
+   those paths cannot reach `bits.c:184`. Reaching the sink requires an
+   application that deliberately uses the append API on a non-owned,
+   already-buffered `SpeexBits`. Debian Code Search found exactly one caller
+   outside this plant: the distribution's own regression test, not a live
+   network consumer (§6). Wire reachability stays UNKNOWN.
+
 2. **Answered additively (§6).** The corrupted neighbour chunk `size` field
    (`p2[0..7]` at `buf+24..31`) was forged to `0x31`; after a deliberately
    added `free(v)` the 0x20 chunk enters the 0x30 tcache bin, `malloc(32)`
@@ -273,3 +283,43 @@ build: no UBSan report, `nbytes=9`, matching the claim. This resolves the
 previously UNKNOWN follow-up observation as a measured, separate bug at the
 fix commit; it is not CVE-2026-116741's OOB write, not a wire path, command or
 r5, and not witness-replayed.
+
+### Debian autopkgtest external caller (~18:03Z)
+
+Debian Code Search
+(`https://codesearch.debian.net/grep?q=speex_bits_read_whole_bytes`) returned
+8 results in 3 packages; the only call site outside this plant's harnesses is
+`speex_1.2.1-4/debian/tests/bits-boundary.c:44`. The exact file is saved as
+`pinned/debian-bits-boundary-1.2.1-4.c` (sha256
+`a0161dcfdc27fe48563419d2c1f258b9a94abd859f6ed1a795b1b3b395cf6238`,
+byte-identical to the remote `/show/` response). Debian's shipped
+`debian/patches/0001-CVE-2026-116741.patch` is the pinned vendor fix commit
+`09b569d1`; the test was compiled against this lab's four pinned builds, not
+against a new upstream release.
+
+`harness/debian-boundary.sh` → **20 PASS / 0 FAIL, rc 0**; raw output in
+`evidence/debian-boundary-asan-vuln.out`, `...-asan-fixed.out`,
+`...-plain-vuln.out`, `...-plain-fixed.out`. In the ASan vulnerable build the
+test's `partial exact` mode (16-byte caller-owned storage, 8 bytes primed,
+16-byte append) reports `heap-buffer-overflow`, `WRITE of size 1`, 0 bytes
+after a 16-byte region, frame `speex_bits_read_whole_bytes` at verbatim
+`bits.c:184:25`, called from `debian-bits-boundary-1.2.1-4.c:44`; rc 1.
+`consumed`, `full` and `one` modes also fault (rc 1). The vendor-fixed ASan
+build gives rc 0 and `case=partial before=64 consumed=0 after=120
+capacity=16 overwritten=0`, with no ASan report in any mode. Its
+`consumed`/`full`/`one` runs return 1 under the test's own `nbBits` oracle
+(`after=88`, `120`, `0` respectively) because the fix computes a negative
+`nchars` for an already-full buffer; no overflow is reported. That is the
+separate negative-length observation already measured under UBSan, not this
+CVE's OOB write.
+
+With the plain builds and the test's in-struct storage, vulnerable `partial`
+prints `before=64 consumed=0 after=192 capacity=16 overwritten=8` and rc 1 —
+the external test's own canary scan detects the corruption — while fixed
+`partial` prints `overwritten=0` and rc 0. Owner-buffer (`owned`) and
+in-bounds (`fits`) controls are rc 0 on both builds.
+
+This is the first caller of the vulnerable append API found outside the
+plant's harnesses, but it is a Debian autopkgtest: no request or wire input,
+no command, no r5. The missing live consumer remains UNKNOWN. The probe is
+unpinned and not replayed by the W245 witness.

@@ -1,0 +1,12 @@
+warning: Do not own input buffer: truncating oversize input
+case=partial before=64 consumed=0 after=120 capacity=16 overwritten=0
+=== mode=partial exact rc=0
+warning: Do not own input buffer: truncating oversize input
+case=consumed before=128 consumed=4 after=88 capacity=16 overwritten=0
+=== mode=consumed exact rc=1
+warning: Do not own input buffer: truncating oversize input
+case=full before=128 consumed=0 after=120 capacity=16 overwritten=0
+=== mode=full exact rc=1
+warning: Do not own input buffer: truncating oversize input
+case=one before=8 consumed=0 after=0 capacity=1 overwritten=0
+=== mode=one exact rc=1

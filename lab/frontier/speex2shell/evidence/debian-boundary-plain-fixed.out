@@ -1,0 +1,7 @@
+warning: Do not own input buffer: truncating oversize input
+case=partial before=64 consumed=0 after=120 capacity=16 overwritten=0
+=== mode=partial rc=0
+case=owned before=64 consumed=0 after=192 capacity=2000 overwritten=0
+=== mode=owned rc=0
+case=fits before=64 consumed=0 after=96 capacity=16 overwritten=0
+=== mode=fits rc=0

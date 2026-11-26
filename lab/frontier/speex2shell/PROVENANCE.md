@@ -156,3 +156,46 @@ only in a throwaway /tmp build (no UBSan report, `nbytes=9`) and is not a
 checked harness. This measures a separate UB at the fix commit, not the CVE
 OOB write; no wire consumer, command or r5, and not witness-replayed. The
 reporter's hackmd URL returned HTTP 404 on retry at ~17:47Z.
+
+## Debian autopkgtest caller 2026-11-26 ~18:03Z (author-observed, unpinned)
+
+Read-only provisioning query
+`https://codesearch.debian.net/grep?q=speex_bits_read_whole_bytes` returned
+8 results in 3 packages (`speex_1.2.1-4` definitions plus its
+`debian/tests/bits-boundary.c:44` call site, two vendored copies in
+`flightgear_1:2024.1.5+dfsg-1/3rdparty/iaxclient/lib/libspeex/`, a header in
+`boca_1.0.7...`). Only the Debian test calls the append API. Its exact source
+was fetched from
+`https://codesearch.debian.net/show/speex_1.2.1-4/debian/tests/bits-boundary.c`
+and saved verbatim as `pinned/debian-bits-boundary-1.2.1-4.c` (sha256
+`a0161dcfdc27fe48563419d2c1f258b9a94abd859f6ed1a795b1b3b395cf6238`,
+identical to the remote response hash). Debian's patch
+`debian/patches/0001-CVE-2026-116741.patch` carries the pinned vendor commit
+`09b569d1` verbatim; no new upstream release was found or used.
+
+`harness/debian-boundary.sh` compiles that exact source against the four
+existing pinned libspeex builds (clang ASan vulnerable/fixed, gcc plain
+vulnerable/fixed) and runs modes `partial`, `consumed`, `full`, `one`
+(ASan, with `exact` heap storage) and `partial`, `owned`, `fits` (plain,
+in-struct storage). Observed 20 PASS / 0 FAIL rc 0. Vulnerable ASan `partial
+exact`: `heap-buffer-overflow`, `WRITE of size 1`, 0 bytes after a 16-byte
+region, frame `bits.c:184:25` called from
+`pinned/debian-bits-boundary-1.2.1-4.c:44`, rc 1; `consumed`/`full`/`one`
+also rc 1. Fixed ASan: rc 0 for `partial exact`
+(`after=120 capacity=16 overwritten=0`) and no ASan report in any mode; its
+other three modes return 1 under the Debian test's own `nbBits` oracle
+(`after=88`, `120`, `0`) because the fix's negative `nchars` reduces
+`nbBits`, the same separate negative-length observation as the UBSan case
+above. Plain vulnerable `partial`
+(`evidence/debian-boundary-plain-vuln.out`):
+`before=64 consumed=0 after=192 capacity=16 overwritten=8`, rc 1 from the
+external test's own canary scan; fixed `partial`: `overwritten=0`, rc 0;
+`owned` and `fits` rc 0 on both builds.
+
+The six original pins, `run-all.sh`, `run-witness.sh`, the pinned source trees
+and their archives are unchanged. The new probe source, script, four `.out`
+evidence files and four ignored binaries are additive. This is an external
+regression test, not a network consumer: no command, no wire path, no r5, and
+the W245 witness has not replayed it. Other public index query attempts in
+this wake: grep.app API returned HTTP 429 (unavailable), `web_search` results
+were advisories, docs and vendored source copies, not callers.

@@ -92,3 +92,15 @@ case.sh`, 5 PASS / 0 FAIL): UBSan `left shift of negative value -1` at
 `bits-fix-09b569d1.c:185:24`, `nbytes=8`. That is a separate bug in the fix,
 not the CVE OOB write; no wire consumer, command or r5. Details in brief §6
 and `PROVENANCE.md`.
+
+Additive wake 2026-11-26 ~18:03Z: Debian Code Search found one external
+caller, `speex_1.2.1-4/debian/tests/bits-boundary.c:44`. Its exact source
+(`pinned/debian-bits-boundary-1.2.1-4.c`, sha256 `a0161dcf…`) compiled against
+the pinned builds: `harness/debian-boundary.sh` → 20 PASS / 0 FAIL rc 0,
+ASan vulnerable `heap-buffer-overflow WRITE of size 1` at verbatim
+`bits.c:184:25` from that external file's line 44; the test's own canary scan
+reports `overwritten=8` and rc 1 on the vulnerable plain build versus
+`overwritten=0` rc 0 on the fixed build; no ASan report on the fixed build.
+This is a distribution regression test, not a live/network consumer, so the
+r5 precondition remains UNKNOWN and the grade is unchanged. Details in brief
+§6 and `PROVENANCE.md`.
