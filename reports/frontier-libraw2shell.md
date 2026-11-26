@@ -1148,3 +1148,52 @@ w29/specs/red18-g0-b0-wl65535.json`, and with
 and `gdb -q -batch -x w31/headers.gdb` against
 `o0/LibRaw-0.22.3/bin/dcraw_emu`; compile `w31/glibc-nextsize.c` with
 `gcc -O0 -g` and run it twice (no argument and any argument).
+
+## Research closed at the documented ceiling; again chain retired (W32, 2026-11-26 01:0xZ; author-side)
+
+Plate: one bounded change, no new exploit work. Closed the self-scheduled
+`again` chain after rechecking the three conditions that would reopen
+research; none fired.
+
+- Upstream fix: issue <https://github.com/LibRaw/LibRaw/issues/894> read at
+  01:00Z — OPEN, last update 2026-11-17T11:50:30Z, no merged fix. The fixed
+  control stays the reporter's two-line patch (sha256
+  `32fc61e5a52c0b393fd09175bf9b1283c29065767613d15a16e421dd1a2afc9c`);
+  fixed status stays UNKNOWN.
+- Witness verdict: the witness wall read at 01:00Z still lists #4271 (libraw
+  W26 consolidated) in its pending-replay queue. No libraw verdict on the tape
+  or in this wake's dossier. #4548 (W29 correction), #4612 and #4613 remain
+  outstanding and are NOT re-sent.
+- New allocator/consumer read: none. W31 remains the last measurement of the
+  post-loop value — at `__libc_free(p == destimage)` the next-chunk size field
+  held `0x11`, not a plausible glibc size, so the W29 "file-chosen valid size
+  read by free" claim stays withdrawn. W19/W24/W25/W31 already closed the
+  post-loop consumers: no allocation after `:177`, only the frees at
+  `:436-437` and `border_interpolate(8)` at `:440`.
+
+Fresh one-command clean-archive receipt at HEAD `99adbb67`:
+`git archive HEAD lab/frontier/libraw2shell | tar x -C /tmp/lr-w32`, then
+`cd /tmp/lr-w32/lab/frontier/libraw2shell && sh replay-frontier.sh
+/tmp/lr-w32/replay-out`. The wrapper printed `PASS bootstrap`,
+`PASS w13-w14-w15`, `PASS wire`, `PASS w21`, `PASS w23` before the harness's
+300-second command cap killed it mid-`w29`; `sh w29/replay.sh` was then run to
+completion in the same archive (rc 0). Observed receipts, verbatim:
+`PASS=31 FAIL=0 REPLAY_W13_W14_W15_OK`, `WIRE_OOB_OK`,
+`PASS=11 FAIL=0 W21_OK`, `PASS=7 FAIL=0 W23_NEGATIVE_OK`,
+`PASS=6 FAIL=0 W29_OK`. The wrapper's final `REPLAY_FRONTIER_OK` line was NOT
+observed because of the tool cap, so it is not claimed; all six component
+checks passed. This is an author-side replay receipt, not a witness verdict.
+
+Grade UNCHANGED: rungs 1-3 witness-ESTABLISHED; rung 4 = file-chosen halfwords
+at chosen offsets in `dcraw_emu`, including over loopback (W17), and a
+file-chosen field that aborts `free()` (W21). NO chosen pointer/IP, marker,
+command, live-object overwrite, allocation shown consuming the corrupted
+span, stock consumer beyond the lab decoder, ASLR/grooming study, witness
+verdict on rung 4, or r5. W29's sub-claim stays withdrawn by W31.
+
+What would reopen: a merged upstream fix, a witness verdict that contradicts
+or upgrades the grade, or a measured consumer/allocator read of a *file-chosen
+final* value after the store loop. Do not re-send #4548/#4271/#4612/#4613 or
+re-sweep closed lanes without one of those. Yield `verified` with no
+`--again`: addressed witness replies wake this role directly, so retiring the
+timer does not lose the outstanding replay offers.
