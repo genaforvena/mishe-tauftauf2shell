@@ -3556,3 +3556,65 @@ single fixed odd byte at offset 0 of the adjacent allocation; no tested
 stock build exposes a consumed function/code pointer there, and no wire
 channel yields a libc or Ruby-code base. The witness-ESTABLISHED
 harness-condition rung 5 and the witness-COMPLETE rung 4 are unchanged.
+
+### Production-mode consumer identity: a Ruby ID-hash-table key — bounded NEGATIVE (2026-11-26, third wake)
+
+A prior production-config check (2026-11-25, class 80) measured that the
+wire-only jemalloc corruption persists when `RACK_ENV=production`, but it
+did not identify the adjacent allocation. This wake targeted that gap with
+three size classes on the pinned affected build
+(`ruby 3.4.12 (2026-10-23 revision 366f5fdc00)`), unmodified classic Sinatra
+and `LD_PRELOAD=jemtrace.so:libjemalloc.so.2`:
+
+```
+JEM_RACK_ENV=production JEM_CLASS=<C> JEM_BT_SIZE=<adjacent-size> \
+JEM_BT_DEPTH=24 JEM_WIRE_PORT=<port> \
+bash lab/repro/ruby2shell-jemalloc-wire.sh attack jemwire-prod<C>[b]
+```
+
+The first passes reused development-mode backtrace filters (120/88/528) and
+captured no frames: production changes the adjacent allocations to
+`calloc(0x80)`, `calloc(0x60)` and `malloc(0x270)`. Re-runs with filters 128
+and 96 captured 24-frame stacks. All six attack runs gave `TRIGGER_HTTP=404`,
+`ALIVE_HTTP=404`, `process-alive=YES` and exactly one capa-paired adjacent
+q0 ending in `0x53`. Safe-input arms `jemwire-prod128ctl` and
+`jemwire-prod96ctl` (same length and encoding, no expansion) gave zero hits,
+404 and a live process, so the flips are attributable to the expansion.
+
+Symbolization used `addr2line` on frames minus the per-run Ruby load base
+from each `.maps` file:
+
+- **C=128** (`jemwire-prod128b`, q0 `0x0000000100002b53`): adjacent
+  `calloc(0x80)` from `hash_table_extend` (`id_table.c:198`) under
+  `method_added` (`vm_method.c:1234`), reached during boot
+  `load_iseq_eval`/`rb_require_string_internal`. This is a Ruby ID method
+  table — `item_t` is `{id_key_t key; int collision; VALUE val}` at
+  `id_table.c:33-39`, so q0's low 32 bits are an ID serial. The `0x53` byte
+  changes that key while q1/q3/q5 keep their method-entry heap pointers.
+  Unlike the Prism and iseq nodes of the closed dev-mode sweeps, this table
+  *is* consulted by `rb_id_table_lookup` on method dispatch. Both HTTP
+  requests still completed normally; no changed response, crash, command or
+  reflection was observed.
+- **C=96** (`jemwire-prod96b`, q0 `0x0000009200000053`): adjacent
+  `calloc(0x60)` from `pm_node_alloc` (`prism/prism.c:1923`) via
+  `parse_arguments_list` (`:15667`) — the same boot-time Prism node family as
+  the closed development-mode hits.
+- **C=640** (`jemwire-prod640b`, q0 `0x00005e2e43b53b53`): adjacent
+  `malloc(0x270)`, a heap-pointer low-byte flip; the 528-byte BT filter
+  missed the 0x270 request, so its consumer remains UNKNOWN.
+
+An ID-serial identity check was attempted: under gdb, stopped at an
+initialized VM breakpoint (`rb_f_sleep`), `rb_id2name((serial<<4)|0x0f)`
+resolved serial `0x1b1` to `dump` but returned NULL for `0x2b53` and
+`0x2b4b` in a bare Ruby process. Attaching to the live server is blocked by
+this host's ptrace scope, so the flipped method's identity is UNKNOWN and no
+claim about a dispatched method is made. No attacker-chosen byte reaches the
+entry's `val` pointer; the write value stays the fixed odd `0x53`.
+
+**Disposition:** the production jemalloc first-qword lane joins the other
+bounded negatives — a consumed lookup table is reached, but the only field
+changed is an ID serial whose live identity and dispatch effect are
+unmeasured, and the wire shows no impact. Rung 4 (witness-COMPLETE) and the
+labeled harness-condition rung 5 (witness-ESTABLISHED) are unchanged; full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. Evidence:
+`lab/build/evidence/jemwire-prod{128,96,640}{,b,ctl}.{trace,out,maps}`.
