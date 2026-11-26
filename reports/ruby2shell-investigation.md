@@ -5247,3 +5247,46 @@ bash lab/repro/ruby2shell-tos-multi.sh
 The relative-pointer sweep is reproduced by
 `bash lab/repro/ruby2shell-tos-relptr.sh` (evidence
 `lab/build/evidence/tos-steer/relptr/summary.txt`, gitignored).
+
+## Request-scoped FILE-vtable adjacency — bounded NEGATIVE (2026-11-26, 14:1xZ)
+
+The previous wake named one unconsumed adjacent-object hypothesis: a
+request-scoped glibc `FILE` might sit at the primary overflow boundary, where
+the fixed `0x53` byte could alter allocator-adjacent state before a later FILE
+consumer. Falsifier: no `fopen`/`fopen64`/`fdopen` allocation within 64 bytes of
+the case-buffer end `R = N + 44` in all three arms.
+
+Three fresh stock classic-Sinatra processes ran on plain Ruby 3.4.12 with the
+existing analysis-only malloc tracer:
+
+```
+for n in 524 588 1004; do
+  RUBY2SHELL_STOCK_N=$n RUBY2SHELL_STOCK_TRACE=1 \
+    bash lab/repro/ruby2shell-stock-baseline.sh attack filevtable-n$n
+done
+```
+
+Observed: N=524 and N=1004 aborted in the trigger with
+`malloc(): invalid next size (unsorted)`; N=588 returned 404 and served the
+later request. The last `M` record for request `N+44` gave case-buffer pointers
+`0x72584c078f00`, `0x76f7100659e0`, and `0x782aa0068250`; no `FILE`-sized
+allocation was within 64 bytes of `R`. The only nearby `0x1c8` request, at
+N=588, was `+0x1a8` from `R`, outside the falsifier window.
+
+A supplemental `fopen`/`fopen64`/`fdopen` return tracer resolved the remaining
+ambiguity. Each server made exactly one `fopen64("/usr/lib/ssl/openssl.cnf")`
+at boot, returning `0x63af118a2d00`, `0x62af17fcfd00`, and `0x5a2571382d00`
+respectively; no server opened a file during either HTTP request. Those
+pointers were more than 16 TB from their respective overflow targets. Later
+tracer records came from curl/OpenSSL child processes, not the Sinatra worker.
+The nearby `0x1c8` allocation therefore was not a `FILE`.
+
+Disposition: the FILE-vtable adjacency lane is **CLOSED** for these geometries.
+No request-scoped FILE exists to consume the corrupted boundary, and no
+pointer, chosen-offset write, command or second command was observed. Primary
+grades are unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Evidence (gitignored): `lab/build/evidence/stock-baseline-filevtable-n*.out`,
+`.server.log`, `.body`, `filevtable-n*.files`, and the temporary diagnostic
+`filetrace.c`/`filetrace.so`. A new lane still requires a named consumed
+function/code pointer or a wire-only libc/Ruby-code base.

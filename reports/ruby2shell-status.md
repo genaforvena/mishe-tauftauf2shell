@@ -5,6 +5,18 @@ overflow in single-byte-encoding case conversion; 21 `ß` overflow by one
 byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
+
+- **2026-11-26 (direct session) — request-scoped FILE-vtable adjacency CLOSED;
+  grade unchanged.** Three stock-Sinatra plain-3.4.12 traces at N=524/588/1004
+  found no FILE-sized allocation within 64 bytes of the primary overflow
+  boundary. A supplemental fopen/fopen64/fdopen return tracer found exactly one
+  boot-time server `fopen64("/usr/lib/ssl/openssl.cnf")` per process, no
+  request-scoped open, and every returned FILE pointer more than 16 TB from the
+  target. N=524/1004 aborted with `malloc(): invalid next size (unsorted)`;
+  N=588 returned 404 and remained alive. The nearby N=588 `0x1c8` allocation at
+  `R+0x1a8` was not a FILE. No consumer, pointer control, command or second
+  command; full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+  Sections appended to the investigation report.
 - **2026-11-26 (direct session) — YARV handler lane: real in-process code-pointer
   disclosure, no stock shape; grade unchanged.** A free-time Q-word survey found
   1,854 threaded handler pointers on the request worker. A committed probe showed
