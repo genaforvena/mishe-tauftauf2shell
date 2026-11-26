@@ -1,4 +1,4 @@
-# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); wire-backed rung 3 at 14:42Z
+# mqttc2shell — ADMITTED 13:4xZ under standing #6 (W270); wire-backed rung 3 at 14:42Z, shipped-consumer replay 15:19Z
 
 CVE-2026-54412 / GHSA-28cw-rpqc-wqqj: MQTT-C through v1.1.6 computes the
 PUBLISH payload size in unsigned arithmetic from a broker-controlled
@@ -92,14 +92,45 @@ Clean `git archive 5cf5c644` replay at 14:44Z with the pinned tarballs in
 sha256 `acc585e7...36cbd5`, identical to the author console; artifact
 `.mishe-tauftauf/artifacts/mqttc2shell-wire/cleanarchive-console.log`.
 
+## Shipped-consumer experiment (author, W274 15:19Z)
+
+`sh ./run-realconsumer.sh` (sha256
+`01df9585419357cc9b34cf48c164b114d5cd9a502b04746e4bdc314f9484aa90`) at
+15:19Z: rc 0, **RESULT PASS=27 FAIL=0**, console sha256
+`426b7c06df417cfdd2132a3b356a9d3f695ade874d154ca7000cc2e6e794b6c9` in
+`.mishe-tauftauf/artifacts/mqttc2shell-realconsumer/real-consumer-console.log`.
+The only lab-written code is socket/PAL/`main()` in
+`harness/real_callback_driver.c` (sha256
+`b52bc4832aded5be2899ecba9dbf2febfe4126f2feedb52a5cd94fd560282f34`): the
+publish callback is extracted, unedited, from the pinned v1.1.6
+`examples/simple_subscriber.c` (sha256 `4df4f527...1035eac`) into
+`callback.inc` (sha256 `ed395acf...20c60c`, verbatim lines 123-133). Same
+callback against both pinned `mqtt.c` builds; `recvbuf[1024]`/`sendbuf[2048]`
+match the shipped main.
+
+With `30 04 ff ff 00 00`, all six bytes arrive from the forked 127.0.0.1
+broker in two 3-byte `recv()` calls and GCC ASan reports
+`stack-buffer-overflow` / `READ of size 65535` in the shipped callback's
+`memcpy(published->topic_name, ..., topic_name_size)` — frame
+`publish_callback ... callback.inc:5` (verbatim `simple_subscriber.c:127`)
+called from `__mqtt_recv ... mqtt.c:760`; the access is the first byte past
+`recvbuf`. Plain child SIGSEGV (signal 11); v1.1.7 rejects the packet with
+`rv=-2147483636`, never calls the callback and is ASan-clean; the safe packet
+prints `Received publish('a'): bc` with no ASan. This is the advisory's
+CWE-125 OOB read realized in **shipped** consumer code, not a lab-written
+callback. Grade remains rung 3: the callback allocates its destination from
+the tainted `topic_name_size`, so its own write stays in bounds and no chosen
+bytes land at chosen offsets. Independent replay of both wire runners owed.
+
 ## Next
 
 Admission and witness replay of `run-all.sh` are complete; the 14:42Z wire
-runner adds a measured loopback path with fixed and safe controls and is
-awaiting its own independent replay. The chosen-offset path through this
-`memmove()` is structurally closed for realistic buffers (`consumed >=
-2^32 + 6`); any rung-4 attempt needs a different consumer of the wrapped size
-or a different bug, not more grooming here. Preserve negatives; never claim a
-wire path from advisory prose or a command from a harness marker. Would change
-the mind: a chosen-offset store, a pointer value, a fixed-build counterexample
-or a wire replay contradiction.
+runner and the 15:19Z shipped-consumer runner add measured loopback paths with
+fixed and safe controls, each awaiting independent replay. Both plausible
+consumers are structurally closed for a chosen-offset store: the library
+`memmove()` has `consumed >= 2^32+6` for realistic buffers, and the shipped
+callback sizes its destination from the tainted length. Any rung-4 attempt
+needs a different consumer or a different bug, not more grooming here.
+Preserve negatives; never claim a wire path from advisory prose or a command
+from a harness marker. Would change the mind: a chosen-offset store, a pointer
+value, a fixed-build counterexample or a wire replay contradiction.

@@ -109,3 +109,25 @@ report; the safe packet parses normally in both builds. QoS1 packet
 `32 04 ff ff 00 00` gives an ASan READ/SEGV at `__mqtt_unpack_uint16`
 (`mqtt.c:1748`) from the pinned unpacker (`mqtt.c:1360`); fixed QoS1 is clean.
 These are author observations, not independent witness acceptance.
+
+## Measured W274 shipped-consumer result (author, 15:19Z)
+
+`run-realconsumer.sh` at 15:19Z: rc 0, `RESULT PASS=27 FAIL=0`, console sha256
+`426b7c06...94b6c9`. Only the socket/PAL/`main()` are lab-written; the publish
+callback is extracted unedited from the pinned v1.1.6
+`examples/simple_subscriber.c` (verbatim lines 123-133, `callback.inc` sha256
+`ed395acf...20c60c`) and compiled against both verbatim `mqtt.c` builds with
+the shipped example's `recvbuf[1024]`/`sendbuf[2048]`.
+
+With `30 04 ff ff 00 00` delivered entirely by two 3-byte `recv()` calls from
+a forked 127.0.0.1 broker, GCC ASan reports `stack-buffer-overflow` /
+`READ of size 65535` in the shipped callback's
+`memcpy(published->topic_name, ..., topic_name_size)` at verbatim
+`simple_subscriber.c:127`, called from `__mqtt_recv mqtt.c:760`. Plain child
+SIGSEGV; v1.1.7 rejects with `rv=-2147483636` and never calls the callback;
+safe packet prints `Received publish('a'): bc`. This is the advisory's CWE-125
+read realized in shipped consumer code. Grade stays rung 3 wire-backed: the
+callback allocates its destination from the tainted length, so its own write
+stays in bounds; rung 4 remains NOT CLAIMED. Independent replay of both wire
+runners is owed. See `reports/mqttc2shell-status.md` and PROVENANCE for hashes
+and the structural chosen-offset closure of both consumers.
