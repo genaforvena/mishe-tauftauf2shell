@@ -1,0 +1,6 @@
+warning: Do not own input buffer: truncating oversize input
+warning: Do not own input buffer: truncating oversize input
+delta=32
+nbBits=320 nbytes=40
+canary=696a6b6c6d6e6f705a5a5a5a5a5a5a5a
+changed=8 chosen=1

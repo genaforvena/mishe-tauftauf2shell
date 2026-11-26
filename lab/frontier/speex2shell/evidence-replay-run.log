@@ -1,0 +1,34 @@
+== pin verification ==
+PASS pin src-Speex-1.2.1.tar.gz
+PASS pin pinned/bits-Speex-1.2.1.c
+PASS pin pinned/bits-fix-09b569d1.c
+PASS pin harness/driver.c
+PASS pin harness/adjacent.c
+PASS vendor fix hunk present in pinned fixed source
+== build real libspeex (autotools, pinned tarball) ==
+PASS build vulnerable ASan lib
+PASS build vendor-fixed ASan lib
+PASS build vulnerable plain lib
+PASS build vendor-fixed plain lib
+== compile drivers ==
+PASS compile clang ASan driver
+PASS compile gcc ASan driver
+PASS compile fixed ASan driver
+PASS compile plain vuln driver
+PASS compile plain fixed driver
+PASS compile adjacency probe
+PASS compile fixed adjacency probe
+== rung 3: ASan-confirmed corruption ==
+PASS GCC ASan attack rc=1
+PASS GCC ASan WRITE-1 at bits.c:184 past 16-byte region
+PASS Clang ASan attack rc=1
+PASS Clang ASan WRITE-1 at bits.c:184 past 16-byte region
+PASS Clang ASan safe control clean (nbytes=16)
+PASS vendor-fixed ASan attack clean (nbytes=15)
+== rung 4: chosen bytes and adjacent live object ==
+PASS plain vulnerable attack: 8 chosen bytes past 16
+PASS plain safe control clean
+PASS plain vendor-fixed attack clean
+PASS chosen i..p in adjacent live heap object
+PASS vendor-fixed adjacency control clean
+TOTAL: 28 PASS / 0 FAIL

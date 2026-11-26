@@ -1,0 +1,15 @@
+== pin verification ==
+PASS pin src-Speex-1.2.1.tar.gz
+PASS pin pinned/bits-Speex-1.2.1.c
+PASS pin pinned/bits-fix-09b569d1.c
+PASS pin harness/driver.c
+PASS pin harness/adjacent.c
+PASS pin harness/run-all.sh
+== clean rebuild and full replay ==
+PASS run-all.sh full replay
+TOTAL: 28 PASS / 0 FAIL
+PASS 28 inner checks pass after clean rebuild
+PASS GCC+Clang ASan WRITE-1 past 16-byte region
+PASS chosen bytes in adjacent live object, vendor fix clean
+REPLAY_PASS=10 REPLAY_FAIL=0
+WITNESS REPLAY PASS
