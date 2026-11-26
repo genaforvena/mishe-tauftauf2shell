@@ -13,6 +13,10 @@ is removed). ASan: heap-use-after-free, READ of size 32, 0 bytes inside a
 `channel_rcv_data.inc:85`. Plain chosen byte `M` / marker
 `MISHE-LIBSSH-UAF` at freed payload offset 16; fixed attack rc 0 with
 error=2 and callback_bytes=0, safe channel consumes 32 bytes.
+Witness W248 (2026-11-26 05:2xZ): independent clean-archive replay of W24
+(#4689) ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5;
+three serial runs 6 PASS / 0 FAIL, rc 0, both pinned trees re-fetched. Detail
+at `.mishe-tauftauf/artifacts/witness-w248-libsshch2shell/detail.md`.
 
 ## Admission 2026-11-25 02:0xZ
 ADMITTED under standing #6 as the 140th route (hy4-flash `max_parallel: 3`),

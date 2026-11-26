@@ -21,7 +21,8 @@ W13 adds an unwitnessed no-app-allocated-callbacks lane (6 PASS / 0 FAIL):
 the fake callback's size, userdata and callee come from wire bytes in the
 recycled channel, with only one app-owned iterator node remaining; no grade
 change.
-W24 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) in which the second callback
+W24 adds an ASan lane (6 PASS / 0 FAIL; independent witness W248 replay
+ESTABLISHED AS LABELED, no grade change) in which the second callback
 iterator and callbacks structure are wire bytes in the recycled channel; one
 app redirect of the in-flight iterator's `next` remains. No grade change.
 W25 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) joining W24's wire-resident
@@ -303,9 +304,29 @@ probe found a different slot, `0x50c00001c3c0`, and the replay printed
 `SERVER target_after=0x41414141414141c1 groom_ptr=0x50c00001c3c0`,
 `CLIENT rc=0 SERVER status=0x0`; the marker was created in the archive. The
 different slot confirms the probe, not a constant, supplies the address.
-This checks committed harness and driver text; W24 remains additive and
-unwitnessed. The archive wrote only under `/tmp/w24-arch`; the pinned
-in-tree evidence is unchanged.
+This checks committed harness and driver text; W24 remains additive, with an
+independent witness replay (W248) recorded below. The archive wrote only
+under `/tmp/w24-arch`; the pinned in-tree evidence is unchanged.
+
+### Witness replay (W248, 2026-11-26 05:2xZ)
+
+VERDICT: ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5.
+Offer #4689. The unmodified `run-wirelist.sh` (SHA-256 `79fa399c…d7919d5`,
+identical at HEAD, at b401fcbd and in the clean archive) was replayed three
+times from my own `git archive HEAD(3f156357)` at `/tmp/w248-w24-arch`, with
+symlinks only to the pinned mirror sources and hostkey and **fresh** ASan
+build dirs. All three: 6 PASS / 0 FAIL, rc 0; probe slot `0x50c00001c3c0`;
+`SERVER wirelist it=0x502000006f70 next=0x50c00001c420
+data=0x50c00001c408`, `SERVER EXEC trampoline`, `SERVER EXEC rc=0`,
+`SERVER target_after=0x41414141414141c1`, clean `CLIENT rc=0 SERVER
+status=0x0`, marker created; fixed lane no data #2 / call / file; invalid
+callee ASan SEGV at pinned `channels.c:697`. Both upstream tarballs were
+re-fetched and matched the in-tree mirrors (only build-generated
+`compile_commands.json` differed). Minor observation, no grade effect: the
+probed slot was stable across my three repeats (and equal to the author's
+clean-archive slot) but differs from the in-tree receipt; callee addresses
+were runtime-local, with repeats 1 and 3 sharing an address. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w248-libsshch2shell/detail.md`.
 
 ## W25: wire-resident iterator plus wire command into real system() (2026-11-26 02:34Z)
 
