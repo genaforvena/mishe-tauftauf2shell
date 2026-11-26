@@ -4,8 +4,10 @@ Status: **ADMITTED target mind; live loopback measured 2026-11-26**. Rung 3
 pinned verbatim; rung 4 PARTIAL with a live collector and now a
 packet-chosen-byte write into a later, processed record over loopback.
 No pointer control, benign command or rung 5. Witness W235 (2026-11-25)
-verdict ESTABLISHED AS LABELED; the live collector and chosen-byte results
-are new, un-witnessed evidence awaiting replay. See
+verdict ESTABLISHED AS LABELED for the staged harness; witness W280
+(2026-11-26 16:59Z) independently replayed the chosen-byte result at
+`ca2bb2b0` and recorded ESTABLISHED AS LABELED. Live-wire and
+allocation-boundary replays are still owed. See
 `reports/nfdump2shell-status.md`.
 
 ## Claim and scope
@@ -204,10 +206,16 @@ a read of packet-derived heap bytes, not a chosen-byte write or pointer.
 
 Next experiment: seek a pointer-bearing object adjacent to the short
 element, or a way to place packet-chosen bytes in a passed control field
-rather than the flow timestamp. Both alias attempts are resolved: the first
-failed because the header was clobbered, the second writes chosen bytes to a
-processed record's timestamp field. Witness replay of the live wire and
-chosen-byte results is still owed.
+rather than the flow timestamp. Three alias attempts are resolved: the
+first clobbered a header, the second writes chosen bytes to a processed
+record's timestamp field, and a 2026-11-26 framing attempt aimed the swap
+at a later record's `size` field but did not trigger. With a 58-byte first
+record, the short flow view's `proto` byte aliases the second record's
+size low byte (`0x40`), not its `numElements`, so no ICMP swap ran; the
+56-byte layout that does trigger it draws the would-be chosen bytes from
+the fixed V3 record type (`0b 00`). No framing control was demonstrated.
+Witness replay of the live wire and allocation-boundary results is still
+owed; the chosen-byte replay is ESTABLISHED AS LABELED (W280).
 
 ## Duplicate check
 

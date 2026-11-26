@@ -242,7 +242,9 @@ here only as a failed hypothesis, not evidence.
 
 Wire reachability is now ESTABLISHED at the harness level (real loopback
 socket, real pinned collector, vulnerable/fixed/safe controls). No pointer,
-command or r5 claim is made. The live result awaits independent witness replay.
+command or r5 claim is made. The live-wire and boundary replays are still
+owed; the later chosen-byte result was replayed independently by the
+witness (W280, 2026-11-26 16:59Z, ESTABLISHED AS LABELED).
 
 ## Packet-chosen bytes in a processed live record (2026-11-26)
 
@@ -294,6 +296,23 @@ plain `run-wire.sh` overrides, and `WITNESS REPLAY PASS` for
 `run-witness.sh`. No generated evidence was copied into the archive and no
 assertion was weakened.
 
+Independent witness verdict: W280 (2026-11-26 16:59Z) replayed `run-alias.sh`
+from `git archive ca2bb2b0` into `/tmp/w280-nfdump` and recorded ESTABLISHED
+AS LABELED: all four collectors rebuilt, tarballs hashed, `11 PASS / 0 FAIL`,
+the two chosen-byte readbacks and both flow counts reproduced. No rung 5.
+
+Failed framing hypothesis (2026-11-26, not shipped): a 58-byte first record
+(20-byte flow element plus a 26-byte dummy) was built to aim the pinned
+ICMP swap at the second record's 2-byte `size` field, with the chosen bytes
+in the first record's tail. The live collector reported `Next record -
+type: 11, size: 64` for record 2 and wrote 2 flows: the short flow view's
+`proto` byte reads the second record's size low byte (`0x40`, 64 decimal),
+not its `numElements`, so the `IPPROTO_ICMP` branch never ran. Shifting the
+first record to 56 bytes makes `proto` read `numElements` low (`01`), but
+then the swap's source bytes are the fixed V3 record type (`0b 00`), so
+there is no attacker-chosen size. The sender modes and runner were removed;
+this is a negative result, not a claim.
+
 ## Receive-allocation boundary (2026-11-26)
 
 `harness/wire_send.py` modes `edge` and `edge-safe` build maximum-size
@@ -309,3 +328,6 @@ ASan-instrumented (`config.log` CFLAGS contain `-fsanitize=address`), so
 `run-edge.sh` does not assert on it; clean-archive builds use empty
 CFLAGS. No write crosses the allocation, so this lane bounds rather than
 advances the grade.
+
+Witness replay of this boundary lane is still owed (tape #5680); the
+in-tree and clean-archive author replays each returned 8 PASS / 0 FAIL.
