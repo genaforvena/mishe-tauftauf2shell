@@ -802,3 +802,58 @@ is needed for a post-write log, and two log fields are preserved through the
 playback source so the real appender chain can be reached. The client chooses
 the wrap and the target offset, not the written bytes. No committed replay
 patch, digest or `verify_live.sh` changed; no off-loopback probe.
+
+## Wake 21 (2026-11-26): wire-byte path CLOSED NEGATIVE (DM #5495)
+
+Operator pick under standing #8 asked whether W20's chosen `custom`/`context`/
+command bytes can be moved off the lab synthetic playback buffer onto the
+attacker-controlled wire path on loopback, so a benign command executes without
+direct buffer patching (an R5 requirement). Answer: NO in pinned 3.32.0
+`d27a4f7c`. This closes the remaining byte-provenance gap at the source and
+measurement level; it is a negative result, not an RCE claim and not witness
+acceptance.
+
+Source trace: `rdpsnd_server_send_samples()` (`rdpsnd_main.c:747-801`) copies its
+`buf` argument; the only callers are server-local audio capture
+(`server/Windows/wf_directsound.c:181,183`, `wf_wasapi.c:290`,
+`server/Mac/mf_rdpsnd.c:171`) and the shadow audio-out message consumer
+(`server/shadow/shadow_client.c:2615-2617`). No rdpsnd client PDU handler calls
+it, and the client `audin` channel forwards data only to its own subsystem
+callback (`channels/audin/server/audin.c:232-251`), with no edge to rdpsnd OUT.
+The client `SNDC_FORMATS` PDU supplies scalars (tag, channels, nBlockAlign ->
+the wrap and, via record count, the 32-byte-per-record target shift) plus one
+byte array: the `cbSize` waveform extension, read by `audio_format_read()`
+(`libfreerdp/codec/audio.c:156-180`) into a separate `format->data` allocation.
+`compute_time_length()` (`audio.c:50-61`) is its only reader and has no callers;
+`dsp.c:1614` copies the struct by value without dereferencing `data`. The blob
+is therefore never copied into `out_buffer`.
+
+Measured byte range: `lab/freerdp2shell-src/PocWireByteRange.c` feeds the real
+parser a two-record PDU whose ADPCM record has `cbSize=256` filled with a wire
+marker `0x5A`, wraps `out_frames` via the real `SelectFormat`, and runs the real
+`SendSamples` with a server-capture stand-in of `0xDE`. Evidence
+`lab/freerdp2shell-src/wire_byte_range.txt` (13:07:32Z, gcc plain build of
+pinned source):
+
+```
+vuln    wire record cbsize=256 data[0]=5a data[255]=5a
+        SelectFormat rc=12 out_frames=0xfffffffffffffffc out_buffer_size=8820
+        wire_blob-out_buffer delta=-272 bytes (separate allocation)
+        W20 fields 8880=de 8888=de 8920=de 8928=de 8992=de 9000=de 12000=de
+        window [8820,25204): wire_0x5a=0 capture_0xde=16384
+        RESULT=WIRE_EXCLUDED wire_at_call_target=0
+nocall  same wrap; 8992=00 9000=00; wire_0x5a=0; RESULT=WIRE_EXCLUDED
+benign  one PCM record; out_frames=0x89d; in-bounds 400-byte copy; NO_WRAP
+fixed   upstream-style nBlockAlign/7<nChannels guard; SelectFormat rc=6,
+        out_frames=0x89d; in-bounds copy; NO_WRAP
+```
+
+The `fixed` control compiles the same PoC against a scratch copy of
+`rdpsnd_main.c` with the upstream-style guard inserted; no committed source,
+replay patch, digest or `verify_live.sh` was changed. No live session was rerun
+and no probe left loopback. Consequence: W20's benign-command execution remains
+a rung-4 lab mechanic requiring the lab playback source to carry the call
+target; the wire controls the wrap, the target offset and the write length, but
+not any byte value inside the written range. R5 on this target stays blocked at
+byte provenance. Deployment-specific influence on server-captured audio remains
+the only open question and is not measurable in this lab.

