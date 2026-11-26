@@ -216,7 +216,8 @@ filesystem location is written.
 
 ### Chosen bytes become a dereferenced liblua GC pointer (2026-11-26 17:30Z)
 
-`bash lab/frontier/rpm2shell/real/run-gc-pointer.sh` (10 PASS / 0 FAIL) runs
+`bash lab/frontier/rpm2shell/real/run-gc-pointer.sh` (8 hard PASS / 0 FAIL,
+plus the layout-dependent V case below) runs
 the plain vulnerable `rpm -i` under GDB with no `LD_PRELOAD` and no injected
 call. The pinned post-copy breakpoint at `lib/rpmfi.cc:2243` prints
 `COPY_BUF=0x5555555a8600 NEXT_ADDR=0x5555555a8620
