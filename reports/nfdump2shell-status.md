@@ -35,10 +35,11 @@ Grade: rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with
 collector-time-derived written value. Live pinned `nfcapd` on loopback is now
 measured (below); no pointer, command or rung 5.
 
-Next: witness replay of the live wire result; then look for a shape where
-packet-chosen ICMP-swap bytes reach a processed live record, or where a
-pointer-bearing object is adjacent to the short element. No rung 5 without
-a benign command side effect on a live loopback target.
+Next: witness replay of the live wire and chosen-byte results; then look for
+a pointer-bearing object adjacent to the short element, or a way to place
+packet-chosen bytes in a passed control field rather than the flow
+timestamp. No rung 5 without a benign command side effect on a live
+loopback target.
 
 ## Clean-archive replay receipt (frontier W235, 2026-11-25 22:59Z)
 
@@ -100,3 +101,28 @@ Commit `81e3cd8e` adds `mkdir -p` and a post-build binary check; replay from
 `git archive 81e3cd8e lab/frontier/nfdump2shell` into
 `/tmp/w-nfdump-wire-clean2` rebuilds all four collector pairs and returns
 **13 PASS / 0 FAIL** for ASan and **13 PASS / 0 FAIL** for plain.
+
+## Chosen-byte write into a processed live record (2026-11-26)
+
+`run-alias.sh` adds a 120-byte datagram whose first V3 record has a
+truncated EXgenericFlow element (length 20) plus one 8-byte dummy element
+(record size 40). `msecReceived` lands on the dummy element instead of the
+next record's header, so record 2 stays valid; the truncated element's
+`srcPort`/`dstPort`/`proto` view aliases record 2's payload at offsets
+0/2/4 and the pinned ICMP swap writes the packet-chosen `srcPort` bytes at
+record 2's payload offset 2. `harness/alias_readback.py` reads the copied
+record from the capture:
+
+```
+vuln ASan/plain  REC2_MSECFIRST=0000123401000000  total flows: 2
+safe control     REC2_MSECFIRST=3412000001000000  total flows: 2
+fixed            REC2_FOUND=0                     total flows: 0
+```
+
+`run-alias.sh`: **11 PASS / 0 FAIL** in-tree. Wire bytes `34 12` became
+`12 34` in a record that `Process_nfd()` copied and wrote to the capture;
+`nfdump` shows the flow timestamp shift from `1970-02-19 17:02:51.956` to
+`1970-03-01 19:42:42.176`. No ASan report (64 KiB receive buffer), no
+pointer, no command. Grade remains rung 3 verbatim / rung 4 PARTIAL with a
+chosen-byte write at a chosen offset in a processed live record. Witness
+replay owed.

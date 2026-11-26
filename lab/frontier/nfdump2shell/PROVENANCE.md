@@ -156,7 +156,7 @@ New local files, with SHA-256:
 | --- | --- |
 | `build-wire.sh` | `ce85d3f64832cafd3ef98f5e06288c69b27cedf5578ec34790fed082b332845b` |
 | `run-wire.sh` | `841565f6efa8a26adf7f4eed1e39746e9e3d04e21603e87ee28952b8cdbca18c` |
-| `harness/wire_send.py` | `c4dd969505eee3399928a11030c513f69cc0f76684c21b1be6eb12fdc0ff7ae2` |
+| `harness/wire_send.py` | `6db336c599ad49089819adb5f02c4a8c38de50591b40807e23e73d31ebd0fe0c` |
 
 `build-wire.sh` fetches two source tarballs from `github.com/phaag/nfdump`
 (provisioning only; no probes) and verifies the exact commit bytes:
@@ -243,3 +243,45 @@ here only as a failed hypothesis, not evidence.
 Wire reachability is now ESTABLISHED at the harness level (real loopback
 socket, real pinned collector, vulnerable/fixed/safe controls). No pointer,
 command or r5 claim is made. The live result awaits independent witness replay.
+
+## Packet-chosen bytes in a processed live record (2026-11-26)
+
+New local files, with SHA-256:
+
+| artifact | SHA-256 |
+| --- | --- |
+| `run-alias.sh` | `c5f34ad5143ef26f5ad0d6e67369922d5ac6b83175b4affa5b711d3e8658a501` |
+| `harness/alias_readback.py` | `65372e4da0df8d8737ee47b6e271b020f3e953f1537c26339dedb35ce20206b0` |
+| `harness/wire_send.py` (alias modes added) | `6db336c599ad49089819adb5f02c4a8c38de50591b40807e23e73d31ebd0fe0c` |
+
+`wire_send.py` gained `alias` and `alias-safe` modes. The alias datagram is
+120 bytes: record 1 has a truncated EXgenericFlow (length 20) plus an
+8-byte dummy element (type 42, below `MAXEXTENSIONS` 43), giving record 1
+size 40; record 2 is a complete 52-byte element whose payload starts
+`34 12 00 00 01` (chosen `srcPort`, zero `dstPort`, ICMP `proto` at offset 4
+as seen by record 1). Record 1's `msecReceived` store lands on its own
+dummy element, and the pinned ICMP swap writes `12 34` at record 2's
+payload offset 2, which is copied and processed later in the same loop.
+
+`run-alias.sh` starts `nfcapd -4 -b 127.0.0.1 -p 10101..10104 -M DIR/flows
+-t 5`, sends one datagram, SIGTERMs the daemon and reads the capture.
+`harness/alias_readback.py` finds record 2's
+`0b004800020000000000000301003400` header/element prefix in the capture
+(last match, to avoid a false match inside record 1) and prints the first
+8 payload bytes. In-tree result: **11 PASS / 0 FAIL**.
+
+```
+vuln-alias-asan    REC2_MSECFIRST=0000123401000000  total flows: 2
+vuln-alias-plain   REC2_MSECFIRST=0000123401000000  total flows: 2
+vuln-alias-safe    REC2_MSECFIRST=3412000001000000  total flows: 2
+fixed-alias        REC2_FOUND=0                     total flows: 0
+```
+
+With the ASan collector, `nfdump` shows the alias flow timestamp
+`1970-03-01 19:42:42.176`; the safe control shows `1970-02-19
+17:02:51.956`. The fixed collector logs `Corrupt nfd record: expected 2
+records, processd: 0`. No `ERROR: AddressSanitizer` appears: the store is
+inside the 65535-byte receive allocation. This is a packet-chosen 2-byte
+write at a packet-chosen offset in a record the collector processed; it is
+not a pointer, a command or r5. The earlier alias attempt remains a failed
+hypothesis (header clobbered first), preserved above.

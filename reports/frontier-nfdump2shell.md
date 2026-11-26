@@ -1,12 +1,12 @@
 # Frontier brief: nfdump nfcapd truncated EXgenericFlow heap write — GHSA-gpgq-hv9x-7mqj
 
 Status: **ADMITTED target mind; live loopback measured 2026-11-26**. Rung 3
-pinned verbatim; rung 4 PARTIAL (packet-chosen offset, collector-time-derived
-written value) now also demonstrated in the real pinned `nfcapd` on
-`127.0.0.1` with vulnerable/fixed/safe controls. No pointer control, benign
-command or rung 5. Witness W235 (2026-11-25) verdict ESTABLISHED AS LABELED;
-the live collector result is new, un-witnessed evidence awaiting replay.
-See `reports/nfdump2shell-status.md`.
+pinned verbatim; rung 4 PARTIAL with a live collector and now a
+packet-chosen-byte write into a later, processed record over loopback.
+No pointer control, benign command or rung 5. Witness W235 (2026-11-25)
+verdict ESTABLISHED AS LABELED; the live collector and chosen-byte results
+are new, un-witnessed evidence awaiting replay. See
+`reports/nfdump2shell-status.md`.
 
 ## Claim and scope
 
@@ -126,9 +126,35 @@ An attempted alias shape (4-byte element in a 16-byte record so the store
 lands inside a still-valid second record) was measured and discarded:
 `Process_nfd()` copies each record to the output block *before* mutating it,
 and `nfdump` rejects the aliased record (`Record: 2 Time error - last <
-first`). The resulting csv line carried the pre-swap value, so it proves no
-chosen-byte write into a processed record. Preserved as a negative result;
-no claim is made from it.
+first`). The resulting csv line carried the pre-swap value, so that shape
+proves no chosen-byte write into a processed record. Preserved here as a
+failed hypothesis only; no claim is made from that attempt.
+
+
+### Packet-chosen bytes in a processed live record (2026-11-26)
+
+A second alias geometry works. Record 1 carries a truncated EXgenericFlow
+(length 20) plus one 8-byte dummy element, giving it size 40. Its
+`msecReceived` store lands on record 1's own dummy element, so record 2's
+header survives; the truncated element's `srcPort`(40)/`dstPort`(42)/`proto`(44)
+view aliases record 2's payload at offsets 0/2/4, and the pinned ICMP swap
+writes the packet-chosen `srcPort` bytes at record 2's payload offset 2.
+`run-alias.sh` drives this over loopback: **11 PASS / 0 FAIL** for ASan and
+plain vulnerable collectors, with complete-element safe and fixed controls.
+`harness/alias_readback.py` reads record 2's copied payload from the capture:
+
+```
+vuln alias    REC2_MSECFIRST=0000123401000000   total flows: 2
+safe control  REC2_MSECFIRST=3412000001000000   total flows: 2
+fixed         REC2_FOUND=0                      total flows: 0
+```
+
+The chosen wire bytes `34 12` were swapped into `12 34` at payload offset 2
+of a record that `Process_nfd()` copied, verified and wrote to the capture;
+`nfdump` shows the resulting flow timestamp move from `1970-02-19
+17:02:51.956` to `1970-03-01 19:42:42.176`. No ASan report: the store is
+inside the 64 KiB receive buffer. This is a chosen-byte write at a chosen
+offset in a live processed record, still not a pointer or command.
 
 Clean-archive replay: the first attempt (commit `9fbeec88`) failed 3 PASS /
 10 FAIL because `build-wire.sh` did not create the ignored `src/` directory;
@@ -142,21 +168,22 @@ ASan and plain. No assertion was relaxed to obtain the pass.
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the
   verbatim pinned `Process_nfd()` path, with fixed and safe-input controls.
 - **Rung 4 PARTIAL:** the element length (hence the write offset) is
-  packet-controlled; the written 64-bit value is collector-time-derived, not
-  attacker-chosen. The write is observed in the harness canary, in a
-  caller-shaped 64 KiB buffer, and now in a live pinned `nfcapd`: the next
-  V3 record's header is clobbered and that record is dropped (1 flow instead
-  of 2), with fixed and safe-input controls. No pointer-bearing object is
-  targeted and no chosen byte is written into a processed record.
+  packet-controlled. The collector-time-derived 8-byte value clobbers the
+  next V3 record's header in a live `nfcapd` and drops that record (1 flow
+  instead of 2). Separately, the pinned ICMP swap writes packet-chosen bytes
+  at a chosen offset in a later, processed record's copied payload in ASan
+  and plain collectors, with complete-element safe and fixed controls.
+  No pointer-bearing object or command is targeted.
 - **Not rung 5:** a live loopback `nfcapd` and a real request now exist, but
   there is no attacker control of the written value, no pointer hijack, no
   benign command and no command side effect. No rung 5 claim is made.
 
-Next experiment: seek a shape where packet-chosen bytes (the ICMP swap)
-reach a *processed* live record, or a pointer-bearing object adjacent to the
-short element. The attempted alias shape failed for the reason recorded
-above; the direct next-record-header overwrite is structurally real but its
-value is time-derived. Witness replay of the live result is still owed.
+Next experiment: seek a pointer-bearing object adjacent to the short
+element, or a way to place packet-chosen bytes in a passed control field
+rather than the flow timestamp. Both alias attempts are resolved: the first
+failed because the header was clobbered, the second writes chosen bytes to a
+processed record's timestamp field. Witness replay of the live wire and
+chosen-byte results is still owed.
 
 ## Duplicate check
 
