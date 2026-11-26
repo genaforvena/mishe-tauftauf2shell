@@ -7,6 +7,9 @@ evidence/build-*.log
 evidence/compile-*.log
 evidence/vendor-fix.diff
 evidence/vuln-clang-asan
+evidence/
+evidence-*.log
+witness-*.log
 evidence/vuln-gcc-asan
 evidence/vuln-plain
 evidence/fixed-asan
