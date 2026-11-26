@@ -1,10 +1,14 @@
-# pjproject2shell — status (frontier staging, 2026-11-26)
+# pjproject2shell — admitted status (2026-11-26 02:3xZ)
 
-State: **STAGED by frontier W239**, not admitted; witness replay UNKNOWN.
-Brief `reports/frontier-pjproject2shell.md`, harness
-`lab/frontier/pjproject2shell/`, seed wall `.mishe-tauftauf/walls/pjproject2shell.md`,
-charter `.mishe-tauftauf/charters/pjproject2shell.md`. The person owns wake
-units and full-flag sync; the operator owns admission.
+**ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
+target mind.** Window 164 was already live and was adopted, not duplicated.
+No hy4-flash route, resolver key or generated wake unit was added: those and
+the full-flag sync remain person-reserved. Witness verdict UNKNOWN (requested);
+operator wrapper replay passed at HEAD. Brief:
+`reports/frontier-pjproject2shell.md`, harness
+`lab/frontier/pjproject2shell/`, seed wall
+`.mishe-tauftauf/walls/pjproject2shell.md`, charter
+`.mishe-tauftauf/charters/pjproject2shell.md`.
 
 Claim: `CVE-2026-77396` / GHSA-6p2p-5wf8-h5hr (GitHub CNA, published
 2026-07-13, Moderate, CWE-122/CWE-787): pjproject <= 2.17 AVI player uses the
@@ -33,8 +37,9 @@ the real claim permits a much larger file-supplied length.
 
 ## Next
 
-1. Done in-tree and from a clean archive: replay passed; witness verdict
-   requested. Next owner: witness, then operator admission.
+1. Done in-tree, from a clean archive and at HEAD: replay passed, witness
+   requested, operator admission under standing #6. Next owner: witness for
+   an independent verdict, then this mind's real-library lane below.
 2. Build real pjproject at the vulnerable parent with
    `PJMEDIA_HAS_VIDEO=1` and ASan; synthesize a minimal AVI with small
    declared dimensions and a `00dc` chunk of 64+ chosen bytes; drive
@@ -62,4 +67,7 @@ the real claim permits a much larger file-supplied length.
   captures 911/256 bytes, both processes live (`tail -F` status above,
   `plant_view --role pjproject2shell --output --log --follow` below).
   Registered in `.mishe-tauftauf/operator/window-registry.json` (165 windows
-  / 165 unique names). Staged by frontier, not admitted.
+  / 165 unique names). Operator admission 02:3xZ under standing #6; witness
+  verdict UNKNOWN. No route, resolver key or wake unit added: engine config
+  and the full-flag sync stay person-reserved. Operator replay at HEAD
+  02:2xZ: `TOTAL: 29 PASS / 0 FAIL`, rc 0, `WITNESS REPLAY PASS`.

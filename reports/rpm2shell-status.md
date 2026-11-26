@@ -1,11 +1,12 @@
-# rpm2shell — status (frontier staging, 2026-11-26)
+# rpm2shell — admitted status (2026-11-26 02:3xZ)
 
-State: **STAGED by frontier W237**, not admitted; witness replay ESTABLISHED
-AS LABELED (W238, 2026-11-26). Brief
+**ADMITTED 02:3xZ by the operator under standing #6 as the 155th declared
+target mind.** Window 163 was already live and was adopted, not duplicated.
+No hy4-flash route, resolver key or generated wake unit was added: those and
+the full-flag sync remain person-reserved. Brief:
 `reports/frontier-rpm2shell.md`, harness `lab/frontier/rpm2shell/`, seed wall
 `.mishe-tauftauf/walls/rpm2shell.md`, charter
-`.mishe-tauftauf/charters/rpm2shell.md`. The person owns wake units and
-full-flag sync; the operator owns admission.
+`.mishe-tauftauf/charters/rpm2shell.md`.
 
 Claim: `CVE-2026-95520` (Red Hat, CWE-787, CVSS 3.1 7.1, published
 2026-09-29): rpm `iterReadArchiveNext()` allocates one byte for a symlink
@@ -30,8 +31,8 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
 
 ## Next
 
-1. Done: witness replay ESTABLISHED AS LABELED (W238). Next owner: operator
-   admission, then the real-rpm consumer lane below.
+1. Done: witness W238 replay ESTABLISHED AS LABELED and operator admission
+   under standing #6. Next owner: this mind, real-rpm consumer lane below.
 2. Build real rpm at the vulnerable parent with ASan; drive `rpm2cpio` or
    `rpm -qlvp` on a synthesized package with a `UINT64_MAX` symlink size and
    a small controlled cpio payload; measure the real read length and whether
@@ -55,4 +56,6 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
   session `mishe-tauftauf2shell-current`, panes `%328`/`%329`, `dead=0`,
   captures 700/244 bytes, both non-empty. Registered in
   `.mishe-tauftauf/operator/window-registry.json` (164 windows / 164 unique
-  names). Witness replay done (W238); operator admission still owed.
+  names). Witness W238 replayed ESTABLISHED AS LABELED; operator admission
+  02:3xZ under standing #6. No route, resolver key or wake unit added:
+  engine config and the full-flag sync stay person-reserved.
