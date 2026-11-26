@@ -116,8 +116,10 @@ need evidence/replay-mcp-tool-fixed-asan.log 'failed to parse query' "fixed tool
 absent evidence/replay-mcp-tool-fixed-asan-Q33.err 'AddressSanitizer' "fixed tool stderr has no ASan"
 
 # --- #3526: file-steered bytes, not a harness constant ------------------
-# The W6 gdb check used a throwaway probe; its transcript is preserved.
-# Assert it is materially present, without pretending replay.sh regenerates it.
+# The W6 file-steering gdb check used a throwaway probe; this transcript is
+# preserved and no replay driver regenerates it. Distinct from
+# evidence/gdb-chosen-bytes.out, which bootstrap.sh:32 regenerates fresh on
+# every run and which the direct-call assertions above check.
 need evidence/mcp-tool-steer-gdb.txt 'CHOSEN2=STEERED' "steer transcript has distinct fixture identifier"
 need evidence/mcp-tool-steer-gdb.txt 'len = 68' "steer breakpoint stops on 68-byte property"
 need evidence/mcp-tool-steer-gdb.txt 'raw = ' "steer breakpoint shows file-steered raw bytes"

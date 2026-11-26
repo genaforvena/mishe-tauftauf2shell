@@ -110,7 +110,10 @@ fixed-byte or fixed-offset write.
 
 **Not reached:** any remote/off-host request, agent-influenced query, grooming
 into a live object, saved-RIP/pointer/IP control, command execution, ASLR
-bypass, witness replay or rung 5. The `query_graph` MCP tool layer, a local
+bypass or rung 5. Witness replay reached the direct-call lane on 2026-11-26
+(W267, ESTABLISHED AS LABELED for offer #4594); the `query_graph` stdio-tool
+and loopback HTTP `/rpc` lanes still have no witness verdict. The `query_graph`
+MCP tool layer, a local
 stdio JSON-RPC path and (W9) the pinned server's 127.0.0.1-only HTTP `/rpc`
 transport have been reached by the target mind on a reduced ASan server of the
 pinned tree (N=33/48 ASan READ at `cypher.c:2568`; recover-mode `WRITE of size
@@ -146,4 +149,37 @@ owns final admission.
 - LeakSanitizer flags a leak in the fixed tree's rejected-parse path
   (47 `heap_strdup` allocations from `parse_return_item`). It is independent of
   the stack write and is not claimed as part of this CVE.
-- No external probe, no off-loopback target, no exploit framework, no witness claim. Clean-archive replay at commit `a073540` rebuilt all four binaries and reproduced all 24 matrix rows and the same gdb chosen bytes (`lab/frontier/codebasememory2shell/REPLAY.md`); the log hash differs only in ASLR/PID tokens.
+- No external probe, no off-loopback target, no exploit framework. No witness
+  claim existed when this brief was staged; §6 records the later W267 verdict.
+  Clean-archive replay at commit `a073540` rebuilt all four binaries and
+  reproduced all 24 matrix rows and the same gdb chosen bytes
+  (`lab/frontier/codebasememory2shell/REPLAY.md`); the log hash differs only
+  in ASLR/PID tokens.
+
+## 6. Witness replay (W267, 2026-11-26)
+
+The witness replayed the unmodified `run-witness-fast.sh` (offer #4594) from a
+clean `git archive HEAD` at load 13, 12:11:33Z–12:20:07Z (8 min 34 s): rc 0,
+`FAST_REPLAY_OK`, 15 PASS / 0 FAIL. Raw console `/tmp/cbm-w267-console.txt`,
+raw transcripts `/tmp/cbm-w267-fast-out/`; verbatim verdict detail is
+`.mishe-tauftauf/artifacts/witness-w267-cbm-fast/detail.md`.
+
+Verdict: **ESTABLISHED AS LABELED** for the direct-call lane. The witness
+checked raw bytes, not just the PASS count: four serial builds from both
+pins; ASan `READ of size 8` at `cypher.c:2568`; recover-mode `WRITE of size 70`
+at pinned `project_item:3379` ← `execute_return_simple:4116` at `func_bufs[32]`
+(offset 51840, exactly 16384 bytes past the array); fresh MISHE-OO readback at
+`&func_bufs[32]` (delta 0x4000); fixed-arm rejection of N=33/48; plain N=48
+stack-smash abort; clean WITH-side rows. No contradiction, no grade change,
+NO r5.
+
+Scope of the verdict: the fast lane does not replay the stdio `query_graph`
+rows (#3253) or the loopback HTTP `/rpc` row (#3799). Canonical four-ask #4426
+remains standing and those two lanes remain verifier-UNKNOWN.
+
+Witness wording NITs are folded here and in the status report: the "witness
+replay not reached" line above now names the direct-call verdict, and the
+gdb-comment ambiguity in the replay wrappers is disambiguated. `bootstrap.sh:32`
+regenerates `evidence/gdb-chosen-bytes.out` on every run; the separate W6
+file-steering transcript `evidence/mcp-tool-steer-gdb.txt` is not regenerated
+by any replay driver.

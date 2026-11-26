@@ -58,6 +58,7 @@ need evidence/recover-48.out 'WRITE of size 70' "recover-mode WRITE of 70 bytes"
 need evidence/recover-48.out 'project_item src/cypher/cypher.c:3379' "fault at pinned project_item:3379"
 need evidence/recover-48.out 'execute_return_simple src/cypher/cypher.c:4116' "fault via execute_return_simple:4116"
 need evidence/recover-48.out 'offset 51840 in frame' "write at func_bufs[32] (offset 51840)"
+# bootstrap.sh:32 regenerates this gdb transcript fresh on every run.
 need evidence/gdb-chosen-bytes.out '0x4d	0x49	0x53	0x48	0x45	0x2d	0x4f	0x4f' "chosen MISHE-OO bytes at func_bufs[32]"
 fixed_asan=$(grep -E '^harness-fixed-asan ' "$OUT/direct.log" | grep -vc 'clean$')
 ck $([ "$fixed_asan" -eq 0 ] && echo 0 || echo 1) "all fixed ASan rows clean ($fixed_asan dirty)"
