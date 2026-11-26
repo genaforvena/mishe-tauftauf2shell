@@ -14907,15 +14907,27 @@ python3 lab/repro/ruby2shell-onigmo-response.py \
   --json lab/build/evidence/onigmo-aslroff-1.diff.json
 ```
 
-Expected ASLR-off attack: HTTP 200, worker alive, 54,795-byte response SHA-256
-beginning `c6be1419`; differ reports `control_rows=306 attack_rows=302
-missing=4 added=0 changed=293 shortened_by_one=293 verdict=CORRUPTED`, including
-`adapter: sqlite3 → adapter: sqlite` and `timeout: 5000 → timeout: 500`.
+Expected **invariant**, not a byte-exact hash: attack HTTP 200 and worker
+alive, differ `verdict=CORRUPTED` with `control_rows=306`, at least one missing
+row and `shortened_by_one>0`; the original capture was 54,795 bytes, SHA-256
+beginning `c6be1419`, with `attack_rows=302 missing=4 added=0 changed=293
+shortened_by_one=293` (`adapter: sqlite3 → adapter: sqlite`,
+`timeout: 5000 → timeout: 500`). W299 (23:2xZ) ran 15 fresh ASLR-off attacks
+at current HEAD: 12 alive with 7 distinct response hashes and 3 SIGSEGV faults
+with no HTTP response; the original hash recurred once. `setarch -R` really
+does disable ASLR here, but Ruby's per-process hash seed stays random, so the
+corruption extent varies even with ASLR off. A different hash is not a
+contradiction; a clean differ verdict, a fault with no HTTP response, or a
+dirty control is. The driver's attack mode returns rc 0 even after a faulted
+request (it only asserts server readiness), so read `http_status`, `health`
+and `exit_after_request` from its JSON instead of trusting rc.
 Expected control: 200/alive, 55,667 bytes, SHA-256 beginning `56eb2e92`; safe:
 200/alive, 3,079 bytes; fixed 3.4.13: 500/alive with
-`too many range repeat`. ASLR-on is layout-sensitive: corruption occurred in
-most fresh runs but not all, and one hash-seed arm faulted; do not report the
-echo as deterministic without ASLR off. The driver's own `RUBY2SHELL_ONIGMO_GEM_PATH` override is REQUIRED: setting only the shell's `GEM_PATH` leaves the derived 3.4.11 gem home and the default-units attack faulted without HTTP response in an independent replay. No command, second command or pointer is implied.
+`too many range repeat`. ASLR-on is additionally layout-sensitive. The
+driver's own `RUBY2SHELL_ONIGMO_GEM_PATH` override is REQUIRED: setting only
+the shell's `GEM_PATH` leaves the derived 3.4.11 gem home and the
+default-units attack faulted without HTTP response in an independent replay.
+No command, second command or pointer is implied.
 
 Fresh-context independent task replay verified the source pin, both script
 digests (`01193fbe8f83…`, `779a615f527d…`), two default attacks and a `PAD=8`

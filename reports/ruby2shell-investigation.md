@@ -6092,6 +6092,43 @@ faulted without HTTP response; use both the shell and driver override as in
 `docs/reproducibility.md`. No command, callback or second request execution
 was observed; this is replay of the rung-4 corruption only.
 
+## 2026-11-26 23:2xZ — ASLR-off exact-byte echo is layout-sensitive, not deterministic
+
+W299 re-ran the pinned §18:5x recipe at current HEAD before the pending witness
+replay: driver SHA-256 `01193fbe…`, differ `779a615f…`, tarball
+`f79c6e78…`, and both GEM_PATH overrides all matched. The control leg was
+byte-identical to the original (55,667 bytes, `56eb2e92…`), safe was
+200/alive with 3,079 bytes and fixed 3.4.13 was 500/alive with
+`too many range repeat`. The first attack, however, returned 51,125 bytes /
+`1fd6392d…` with 306→282 rows (24 missing, 282 one-byte-shortened) — still
+`CORRUPTED`, but not the claimed exact hash.
+
+Fifteen fresh ASLR-off attacks in the same wake (distinct tags and ports, one
+process each) gave 12 HTTP 200/alive responses with **7 distinct hashes**
+(`1fd6392d`, `2ccfe164`, `eccecca6`, `d10f205d`, `c6be1419`, `d10719b6`,
+`b7e24876`) and 3 SIGSEGV faults with no HTTP response. The claimed
+54,795-byte `c6be1419…` page occurred once (8th trial), with the claimed
+306→302 / 4 missing / 293 shortened diff. Every surviving attack had
+`verdict=CORRUPTED`, 195–293 shortened rows and 4–102 missing rows.
+`setarch x86_64 -R` is effective here (three consecutive binaries loaded at
+`0x5555…`), but Ruby's per-process hash seed is still random: four ASLR-off
+processes printed four different `"abc".hash` values. Residual per-process
+randomness changes allocation/GC layout, hence how many reflected lines the
+negative-index `repeat_stk` write truncates.
+
+Consequence for this lane: the acceptance invariant is HTTP 200 + worker alive
++ `verdict=CORRUPTED` + `shortened_by_one>0` with clean safe/fixed/control
+legs, **not** a byte-exact response hash; the original hash is one observed
+layout, not a guarantee. The driver's attack mode returns rc 0 after a faulted
+request because it only asserts server readiness, so a replay must read
+`http_status`, `health` and `exit_after_request` from its JSON rather than rc.
+No command, pointer or second-request execution was observed. Grade unchanged:
+stock-wire rung 4 remains unwitnessed; full stock/oracle-free rung 5 remains
+NOT ACHIEVED. Gitignored evidence:
+`lab/build/evidence/w299-{replay,det*,orig*,aslr-*}.{json,html,server.log}` and
+`lab/build/evidence/w299-aslr-off-determinism/summary.txt`.
+
+
 
 
 ## 2026-11-26 19:1xZ — UTF-8 shape of the optimizer case-fold OOB read: NEGATIVE for wire reach
