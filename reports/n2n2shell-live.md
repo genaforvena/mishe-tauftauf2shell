@@ -921,3 +921,47 @@ translate to PIE. Still UNKNOWN: a build of the complete upstream fixed
 commit tree. Ceiling unchanged: rungs 1-4 on the vulnerable build, no
 marker execution, canary/RIP hit, control-flow takeover, command
 execution or r5. Author experiment only; no witness verdict.
+
+## W23: the W11 wire against the complete upstream fixed tree (2026-11-26 04:4xZ)
+
+W22 left one UNKNOWN: the complete upstream fixed commit tree had never been
+built with W11's wire. W19 inserted one guard and W20 replaced `src/wire.c`
+inside the vulnerable tree; neither built the upstream fixed tree. W23
+provisions the codeload archive of fixed commit
+`854fbbe01bbf131bf4cb88f8450d7084267668e1` as
+`provision/n2n-fixed.tar.gz` (SHA-256
+`5ace427a0df8f9942756c8c7ffc8bdbcb36f96eb036b384a7e81b9e20668dbbb`,
+pinned in `pins.sha256`) and builds that tree unchanged with clang
+`-g -O2 -fno-omit-frame-pointer -no-pie`, i.e. the W11 non-PIE layout.
+`readelf -h` reports `Type: EXEC`. The replay also extracts the vulnerable
+archive and verifies the two `src/wire.c` files are byte-identical to
+`provision/wire-fixed.c` and `provision/wire-vuln.c` respectively, that they
+differ, and that the NAK guard `if(nak->auth.token_size >
+N2N_AUTH_MAX_TOKEN_SIZE)` is present in the fixed tree.
+
+The exact 1738-byte W11 NAK (`token_size=1700`, `token+1682 =
+e8f3420000000000`) reaches the fixed-tree supernode on loopback. The sender
+observes `REGISTER_SUPER reply len=58` (peer registered),
+`sent NAK len=1738 token_size=1700` and
+`FORWARDED len=1738 token_len=1700 first=0000000000000000
+beyond48=0000000000000000`: the oversized NAK is rejected at the decoder
+guard, so no chosen pointer is consumed and the forwarded token is zeroed.
+The process stays alive with no SIGSEGV/ASan report. A fresh safe 48-byte
+NAK on the same process is forwarded as
+`FORWARDED len=86 token_len=48 first=485a4d49485a4d49`, and the process is
+still alive. Raw logs: `live/evidence/w23-{pins,fixed-tree-build,readelf,
+fixed-tree-supernode,attack-sender,safe-sender}.log`.
+
+`sh lab/frontier/n2n2shell/live/w23_upstream_fixed_tree.sh` guards pins,
+both extracted tree versions, the non-PIE build, the exact wire and chosen
+address, zeroed forwarding, peer registration, liveness, absence of a
+crash report, and the safe control: `RESULT 16 PASS / 0 FAIL`, rc 0 with
+`REPLAY_LOGDIR=/tmp/n2n-w23-out`, `PORT_BASE=20120`. Clean-archive replay
+receipt follows.
+
+This closes W22's final UNKNOWN as a negative control: the upstream fix
+prevents the overflow before any wire-chosen pointer reaches `comm`. The
+ceiling is unchanged: rungs 1-4 on the vulnerable build, no marker
+execution, canary/RIP hit, control-flow takeover, command execution or
+r5. Author experiment only; no witness verdict.
+

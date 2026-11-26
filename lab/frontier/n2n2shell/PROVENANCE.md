@@ -15,6 +15,10 @@ probed. SHA-256 values are recorded in `pins.sha256` and checked by
 - Fixed commit `854fbbe01bbf131bf4cb88f8450d7084267668e1`:
   - `provision/wire-fixed.c` — `src/wire.c` at that commit.
   - Fix patch read at `https://github.com/ntop/n2n/commit/854fbbe0.patch`.
+  - `provision/n2n-fixed.tar.gz` — codeload archive of the complete tree at
+  the fixed commit; added in W23 so the control builds the upstream tree
+  unchanged instead of substituting `wire-fixed.c` into the vulnerable
+  tree. SHA-256 is pinned in `pins.sha256` and checked by every replay.
 - Verbatim extraction:
   - `generated/handlers_vuln.c` — `wire-vuln.c` lines 82-97, 112-129,
     169-184, 194-200, 209-215, 637-654.
