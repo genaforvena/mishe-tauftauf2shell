@@ -13883,3 +13883,108 @@ the generated manifest/register still read `established:false`, so the
 operator's row fold and 119→120 established-count move are owed, not asserted
 here. `5ace417b` also corrected tinyusb brief citations without moving a
 grade; no count or register cell moved in this prose fold.
+
+## 2026-11-26 16:4x–17:1xZ — libmikmod admitted (179th), quickjsng W279 staging, W278 witness, bounded lanes
+
+This fold covers `c1a02981..17f9716f`. Reproduction commands, pins and
+expected bytes are in `docs/reproducibility.md` § 16:4x–17:1xZ. The dated
+passages above stay verbatim; their older counts and the libmikmod STAGED
+wording in § 16:1x–16:4xZ are superseded by the admission below.
+- `3a4f1115` (operator, standing #6) **admitted libmikmod2shell as the 179th
+  declared target mind** at 16:5xZ, window 189 (panes %382/%383, dead=0).
+  Generated counts moved 178/175/175/119 → **179/176/176/119** in
+  `README.md`, `docs/results.md` and `research-manifest.json`; the row stays
+  `established:false` and the independent-established count stays 119. The
+  operator's isolated-copy replay matched all 12 checks of `sh run-all.sh &&
+  sh verify.sh` (`run-all.sh` sha256 `332485d1…30077c`, `verify.sh`
+  `40e841d7…4c1929`): vulnerable GCC ASan `WRITE of size 8` at verbatim
+  `load_dsm.c:339` during real `Player_Load()`, 0 bytes past a 16/128-byte
+  `AllocTracks()` region; fixed `errno=9`, well-formed input clean. Rung 2
+  wrap / rung 3 ASan only, rung 4 NOT CLAIMED; witness replay and plain-build
+  grooming still owed.
+- `8d8d5fa0` + `2769b482` (frontier W279) **staged quickjsng2shell**
+  (GHSA-r6vf-p8wr-4vg9, no CVE, OSV 404), **STAGED, not admitted**; no count
+  or grade cell moved. Advisory metadata ("affected <0.14.0", "patched
+  None") is contradicted by the pinned tags: vulnerable v0.14.0
+  `3c051980ab7e783dfbfb1c70c014ce5e05ecf24c`, fixed v0.15.0
+  `433941b99fb3c5e7f98b7ebd78727972bcf467ee`, one-line fix commit
+  `da49a37041e78ba7148b24bf6500c4c18c8ecbb0`. The six-line upstream PoC
+  through the unmodified `qjs` CLI gave `RESULT PASS=28 FAIL=0` and `PASS=11
+  FAIL=0`: GCC ASan `heap-use-after-free READ of size 4` at
+  `quickjs.c:1546` via `:9478`, 0 bytes inside a 72-byte freed region; fixed
+  prints `undefined`, safe control clean. Rung 3 only, rung 4 NOT CLAIMED;
+  the advisory's os-module command claim is untested. Window 190 live
+  (%384/%385); operator admission, witness replay and plain-build
+  chosen-object readback owed. Distinct from `quickjsbcode2shell`.
+- `a630590d` folds witness **W278's neuvector2shell verdict: ESTABLISHED AS
+  LABELED**. The witness replayed a clean archive of `d2f1f317` with three
+  pins exact and **22/20/17 PASS** across `run-all.sh`, `wirepath/run.sh`
+  and `frame.sh`; both traces fault at `dpi_sig.c:657` before returning.
+  Rung 4 PARTIAL stays at the earlier ESTABLISHED scope: chosen regex bytes
+  in a saved RBP and return slot, no chosen address, pointer redirection,
+  command or r5, no grade change. Raw evidence is gitignored under
+  `.mishe-tauftauf/artifacts/witness-w280-neuvector/`.
+- `17f9716f` (neuvector W280) exercised the pinned AF_UNIX datapath:
+  `bash lab/frontier/neuvector2shell/wirepath/loopback.sh` gives **17 PASS /
+  0 FAIL** rc 0. A lab consumer binds `/tmp/dp_listen.sock` (`dp/ctrl.c:45`),
+  receives one real `SOCK_DGRAM` datagram (`ctrl.c:2389-2396`), parses it
+  with real `libjansson.so.4`, takes `ctrl_bld_dlp` and calls the verbatim
+  pinned `dpi_sig_bld()` object. The 2233-byte REST-valid W274 message gives
+  ASan `WRITE of size 121` at offset 2080 of `dlpsig_buf`, write frame
+  `dpi_sig.c:658`; a 139-byte safe datagram and the fixed object are clean.
+  Closes the "locally generated JSON" gap but is one lab process, NOT a full
+  enforcer `dp` binary; no REST/CRD endpoint, chosen address, command or r5.
+  Full `dp` remains BLOCKED by missing hyperscan/vectorscan headers/libs.
+- `fdcb60c7` + `a6ea9e18` (rpm2shell) scaled and crossed consumers.
+  `RPM2SHELL_PAYLOAD_LEN` with `bash real/run-scaled-payload.sh` gave **21
+  PASS / 0 FAIL**: ASan `WRITE of size 64`, `512` and `4096`, each 0 bytes
+  past the 1-byte region at `rpmfi.cc:2242`, through both `rpm2cpio` and
+  `rpm2archive` (symlinks to the same binary in these builds, not two
+  implementations); plain `rpm2cpio` exits 1 with no fault. GDB shows
+  `0x4141414141414141` at `buf+4088`. An earlier wrong-`RPM_CONFIGDIR` crash
+  in `tvsub` is a bad-config artifact, not claimed. The new
+  `bash real/run-install-consumer.sh` gave **14 PASS / 0 FAIL** through
+  unmodified `rpm -i --dbpath`: vulnerable ASan rc 134 with `WRITE of size
+  64` via `rpmfiNext` (`rpmfi.cc:867`); vulnerable plain faults 3/3 rc 139
+  with `A` filler and 3/3 rc 139 with `B`, while zero filler and short-read
+  controls are rc 1. GDB places the plain fault in `liblua5.2.so.0` from
+  `rpmluaFree` during teardown — chosen bytes decide a fault, not a
+  controlled pointer dereference. Which object is corrupted and any chosen
+  value reaching a semantic dereference remain UNKNOWN; grade unchanged.
+- `325ec0c9` (nfdump2shell) closed the live write-past-allocation route:
+  `in_buff` is 65535 bytes (`nfcapd.c:273`, `nfnet.h:49`) and `recvfrom`
+  takes at most 65535, while IPv4 UDP carries at most 65507 payload bytes.
+  A 65507-byte datagram puts the `msecReceived` store at 65523..65530, four
+  bytes inside the buffer; `run-edge.sh` gives **8 PASS / 0 FAIL** with an
+  ASan `READ of size 1` at `nfd_raw.c:259` instead of a WRITE, safe and
+  fixed controls clean. Structural negative, no chosen-byte write or
+  pointer; earlier chosen-byte live-record and W235 rows are unchanged.
+- `5e998ac4` + `1b32d2c6` (gimpjif2shell W245) rebuilt real zlib 1.3.2 with
+  ASan: `bash realzlib/run-asan.sh` gives **18 PASS / 0 FAIL**, with
+  `inflate_fast inffast.c:252` → `inflate inflate.c:917` → `ReadJeffsImage`
+  performing `WRITE of size 1` 0 bytes past a 260-byte region (on-disk JIF:
+  0 bytes past a 4-byte region), fixed `RC=0 ERR=image data`, safe clean.
+  No stand-in `inflate()`; the earlier `realglib` ASan abort was a preserved
+  allocator-layout negative. An in-tree and a clean-archive replay at
+  16:48Z both gave 18/0. Witness asked in DM 5668, no verdict at yield.
+  Rung 3 pinned verbatim / rung 4 PARTIAL grade unchanged; no plugin, PDB
+  wire, chosen pointer dereference, command or r5.
+- `69a4e67f` (leptonica2shell) completed the external-consumer hunt with a
+  bounded negative for this checkout: fixed-depth enumeration finds only the
+  vendored vulnerable/fixed `bytearray.c` trees and local callers; no
+  `l_bytea*` caller outside the project and no request-reachable consumer
+  (`ghostscript2shell`'s `tessocr.cpp` uses in-memory `Pix` APIs only).
+  Witness replay of the two real runners remains UNKNOWN; no grade change.
+- `9d48251d` (ruby2shell) CLOSED the same-request second-buffer overlap:
+  N=21/23/27/31/35/43/51/59/67/75/80/92 at filler 40 served three
+  keep-alive requests 404/404/404 with live servers; safe-input and fixed
+  3.4.13 controls at N=21/59 matched. The layout-perturbing gdb observer
+  found no second buffer at N=21, a second buffer 134 KB away at N=59, and
+  an abort before the second buffer at N=572. No overlap, chosen-byte write,
+  command or persistence; full stock/oracle-free/persistent r5 stays NOT
+  ACHIEVED and the primary grades are unchanged.
+
+All counts above are author or clean-archive replays except the W278 witness
+verdict; the generated manifest/register is unchanged by this prose fold.
+What would change it: a verdict contradicting a labeled row, a checker RED
+on committed HEAD, or a later report showing a quoted result was misquoted.

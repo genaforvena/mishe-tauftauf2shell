@@ -45,7 +45,8 @@ containers whose host ports bind only to loopback.
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
 | Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
-| Libmikmod2Shell W276 (newest, STAGED) | [status](../reports/libmikmod2shell-status.md), [brief](../reports/frontier-libmikmod2shell.md) | CVE-2026-105837 / GHSA-rr6f-2vgw-5v76, pins `08d7d210…` / `a125eabb…`, `AV:L` | `sh run-all.sh && sh verify.sh` in `lab/frontier/libmikmod2shell` | `RESULT PASS=12 FAIL=0`; GCC ASan `WRITE of size 8` at `load_dsm.c:339` via `Player_Load()` 0 bytes past a 16/128-byte `AllocTracks` region; fixed `errno=9`, safe clean; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness owed; full procedure in § 16:1x–16:4xZ |
+| Quickjsng2Shell W279 (newest, STAGED) | [status](../reports/quickjsng2shell-status.md), [brief](../reports/frontier-quickjsng2shell.md), [provenance](../lab/frontier/quickjsng2shell/PROVENANCE.md) | GHSA-r6vf-p8wr-4vg9 (no CVE, OSV 404), pins v0.14.0 `3c051980…` / v0.15.0 `433941b9…`, fix `da49a370…`; advisory "patched None" contradicted by tags | `sh run-all.sh && sh verify.sh` in `lab/frontier/quickjsng2shell` | `RESULT PASS=28 FAIL=0` and `PASS=11 FAIL=0`; GCC ASan `heap-use-after-free READ of size 4` at `quickjs.c:1546` via `:9478`, 0 bytes inside a 72-byte freed region; fixed prints `undefined`, safe clean; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness owed; full procedure in § 16:4x–17:1xZ |
+| Libmikmod2Shell W276 (ADMITTED 16:5xZ, 179th) | [status](../reports/libmikmod2shell-status.md), [brief](../reports/frontier-libmikmod2shell.md) | CVE-2026-105837 / GHSA-rr6f-2vgw-5v76, pins `08d7d210…` / `a125eabb…`, `AV:L` | `sh run-all.sh && sh verify.sh` in `lab/frontier/libmikmod2shell` (runner `332485d1…30077c`, verify `40e841d7…4c1929`) | `RESULT PASS=12 FAIL=0`; GCC ASan `WRITE of size 8` at `load_dsm.c:339` via `Player_Load()` 0 bytes past a 16/128-byte `AllocTracks` region; fixed `errno=9`, safe clean; rung 3, rung 4 NOT CLAIMED, admitted as 179th at 16:5xZ with operator isolated-copy replay, witness owed; full procedure in § 16:1x–16:4xZ |
 | Quickjsbcode2Shell (newest) | [status](../reports/quickjsbcode2shell-status.md), [brief](../reports/frontier-quickjsbcode2shell.md) | CVE-2026-88378 / GHSA-jww9-7qmq-6hv5, pins `04be2460…` / `42526037…`, no release tags | `bash lab/frontier/quickjsbcode2shell/run-all.sh` (sha256 `7031c420…c09b1cd5`) | `RESULT PASS=25 FAIL=0 rc 0`; GCC ASan `WRITE of size 96` at `quickjs.c:38820` on the 21-byte upstream regression, fixed rejects, real bytecode round-trip `value=2` on both, Clang silent; rung 3, rung 4 NOT CLAIMED, witness replay owed. Admitted 177th by `4336a4d2`; full procedure in § 15:0x–15:4xZ |
 | Axis2guththila2Shell W273 (newest) | [status](../reports/axis2guththila2shell-status.md), [brief](../reports/frontier-axis2guththila2shell.md) | CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`, CNA range before `f2b30c15…` | `sh run-all.sh && sh verify.sh` in `lab/frontier/axis2guththila2shell` | `RESULT PASS=4 FAIL=0`; GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308` from the 19-byte `<!ENTITY x "y"><a/>`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 15:0x–15:4xZ |
 | Libsoup2Shell (newest) | [status](../reports/libsoup2shell-status.md), [brief](../reports/frontier-libsoup2shell.md), [provenance](../lab/frontier/libsoup2shell/PROVENANCE.md) | fix parent `a4294044…` and fix `e4f03226…`; both GitLab tarballs SHA-256-pinned; extract the **full** pinned `libsoup/` subtree | `cd lab/frontier/libsoup2shell && ./run-all.sh` (runner sha256 `4dadfa60…d83`) | `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0; ASan READ-1 at `soup-uri-utils.c:405`; rung 3, rung 4 NOT CLAIMED; W269 clean-archive ESTABLISHED AS LABELED at that scope, NIT fixed. Full procedure at the tail of this file |
@@ -14595,3 +14596,134 @@ clean-archive replay described there. This supersedes the older "witness
 replay owed" wording in § 14:0x–15:0xZ. The generated manifest/register still
 read `established:false`; the operator's row fold and 119→120 count move are
 owed, not asserted here.
+
+## 2026-11-26 16:4x–17:1xZ — libmikmod admission, quickjsng staging, W278 witness, bounded lanes
+
+### Libmikmod2Shell admitted 179th (`3a4f1115`)
+
+CVE-2026-105837 / GHSA-rr6f-2vgw-5v76, vulnerable fix-parent
+`08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2` and fixed
+`a125eabbd086f311496ae46d08aaebcad0a1c426`; tarballs SHA-256
+`dbe73e92…f56f42` / `a9d7cba3…f537f44`. From `lab/frontier/libmikmod2shell`,
+`sh run-all.sh && sh verify.sh` (runner sha256
+`332485d16ab6d811f00e582b8b789ab21047dcc5ddfdc926e4f0c5e43a30077c`, verifier
+`40e841d7e4a9e76f7f0a383a84338bfe707bdd4a9aa68a7cb1bf535fcfcd1929`) gives
+`RESULT PASS=12 FAIL=0`. The operator's isolated-copy replay at 16:55Z matched
+all 12 checks. Expect a GCC ASan `WRITE of size 8` at verbatim `load_dsm.c:339`
+from real `Player_Load()`, 0 bytes past a 16-byte / 128-byte `AllocTracks()`
+region for a crafted DSM (`numchn=2, numpat=32769` or `16`/`4097`); the fixed
+build rejects at the header with `errno=9`, and `numchn=2, numpat=2` loads
+cleanly on both pins. Rung 2 wrap / rung 3 ASan; rung 4 NOT CLAIMED. Generated
+counts moved to 179/176/176/119 with `established:false`; witness replay from
+a clean archive and plain-build grooming are still owed. Raw logs are
+gitignored; the two scripts regenerate them from the pinned sources.
+
+### Quickjsng2Shell W279 STAGED (`8d8d5fa0`, `2769b482`)
+
+GHSA-r6vf-p8wr-4vg9 (no CVE; OSV lookup 404), pinned vulnerable tag v0.14.0
+`3c051980ab7e783dfbfb1c70c014ce5e05ecf24c`, fixed v0.15.0
+`433941b99fb3c5e7f98b7ebd78727972bcf467ee`, one-line fix commit
+`da49a37041e78ba7148b24bf6500c4c18c8ecbb0` (patch sha256 `a19b577e…f5b38d`).
+From `lab/frontier/quickjsng2shell`, `sh run-all.sh && sh verify.sh` checks
+the pins, extracts the tarballs, verifies verbatim `quickjs.c` bytes and the
+one-line function diff, builds the ordinary `qjs` CLI with GCC 13.3 ASan and
+returns `RESULT PASS=28 FAIL=0` and `PASS=11 FAIL=0`. Expect, on the six-line
+upstream regression (shrink fast array to 2, regrow to 5, push, read `arr[3]`),
+`heap-use-after-free READ of size 4` at `quickjs.c:1546` via `:9478`, 0 bytes
+inside a 72-byte freed region, rc 1; fixed prints `undefined` rc 0; the safe
+shrink-to-2 control prints `2` and `[1,2]` on both pins. Advisory metadata
+("affected <0.14.0", "patched None") is contradicted by the tag bytes, and
+the os-module command claim was not tested. Rung 3 only, rung 4 NOT CLAIMED;
+STAGED, not admitted, operator admission and witness replay owed. Hashes and
+refetch URLs: `lab/frontier/quickjsng2shell/PROVENANCE.md`.
+
+### NeuVector W278 witness and W280 real AF_UNIX datapath (`a630590d`, `17f9716f`)
+
+CVE-2026-127182 / GHSA-3x2m-c67v-vw77 pins as in § 16:1x–16:4xZ. Witness W278
+replayed a clean `git archive d2f1f317` with all three pins exact and
+`run-all.sh` / `wirepath/run.sh` / `frame.sh` giving **22 / 20 / 17 PASS, 0
+FAIL**; both traces fault at `dpi_sig.c:657` before returning. Verdict
+ESTABLISHED AS LABELED, rung 4 PARTIAL at the earlier ESTABLISHED scope, no
+grade change and no r5. Raw evidence: gitignored
+`.mishe-tauftauf/artifacts/witness-w280-neuvector/detail.md`.
+`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` gives **17 PASS / 0
+FAIL** rc 0: a lab consumer binds the pinned `/tmp/dp_listen.sock`
+(`dp/ctrl.c:45`), receives a real `SOCK_DGRAM` datagram (`ctrl.c:2389-2396`),
+parses it with real `libjansson.so.4`, selects `ctrl_bld_dlp`
+(`ctrl.c:2405,2475-2476`) and calls the verbatim pinned `dpi_sig_bld()` ASan
+object. Expect the 2233-byte REST-valid W274 attack datagram to report
+`stack-buffer-overflow WRITE of size 121` at offset 2080 of `dlpsig_buf`
+(`dpi_sig.c:621`, write frame `:658`); the 139-byte safe datagram and the
+fixed pinned object return `LOOPBACK rc=0` ASan-clean. Not a full enforcer
+`dp` binary: no REST/CRD endpoint, hyperscan detector or chosen address;
+full `dp` is BLOCKED by absent `hs/hs.h` / `libhs` here.
+
+### RPM scaled copy length and real `rpm -i` consumer (`fdcb60c7`, `a6ea9e18`)
+
+Pinned `lib/cpio.cc:434-445` computes `size = min((size_t)lsize,
+cpio->fileend - cpio->offset)`, so `lsize=-1` makes the cpio field choose the
+copy length. `RPM2SHELL_PAYLOAD_LEN=64|512|4096 bash
+lab/frontier/rpm2shell/real/run-scaled-payload.sh` gives **21 PASS / 0 FAIL**:
+ASan `WRITE of size 64`, `512`, `4096`, each 0 bytes past a 1-byte region at
+`rpmfi.cc:2242` via both `rpm2cpio` and `rpm2archive` — symlinks to one binary
+in these builds. Plain `rpm2cpio` exits 1 without a fault; GDB
+`real/scaled/readback-4096.gdb` prints `LSIZE=-1` and
+`0x4141414141414141` at `buf+4088`. An earlier wrong-`RPM_CONFIGDIR` crash
+in `tvsub` was a bad-config artifact and is not claimed.
+`bash lab/frontier/rpm2shell/real/run-install-consumer.sh` gives **14 PASS /
+0 FAIL** with private `--dbpath` and guarded `/tmp` fixtures: vulnerable ASan
+`rpm -i` aborts rc 134 with `WRITE of size 64` via `rpmfiNext`
+(`rpmfi.cc:867`); unmodified plain `rpm -i` faults 3/3 rc 139 with `A` filler
+and 3/3 with `B`, while zero-filler and short-read controls return 1. GDB
+places the plain fault in `liblua5.2.so.0` from `rpmluaFree` during teardown.
+No chosen pointer, semantic dereference or r5; which object is corrupted is
+UNKNOWN.
+
+### nfdump live receive-allocation boundary (`325ec0c9`)
+
+`nfcapd.c:273` allocates 65535 bytes (`NETWORK_INPUT_BUFF_SIZE` in
+`src/collector/nfnet.h:49`) and `:319` receives with `recvfrom(..., 65535,
+...)`; IPv4 UDP payloads top out at 65507. `bash
+lab/frontier/nfdump2shell/run-edge.sh` sends a 65507-byte datagram ending in
+a header-only EXgenericFlow (length 4), so the `msecReceived` store lands at
+65523..65530, four bytes inside the buffer: **8 PASS / 0 FAIL** with no ASan
+WRITE, an ASan `READ of size 1` at `nfd_raw.c:259`, and safe/fixed controls
+clean. This makes the earlier ASan-clean live result structural; no
+chosen-byte write, pointer or command, and W235's row is unchanged.
+
+### GimpJIF W245 instrumented real zlib (`5e998ac4`, `1b32d2c6`)
+
+Real zlib 1.3.2 built locally with ASan and linked statically into a driver
+with the unmodified pin (no stand-in `inflate()`). `bash
+lab/frontier/gimpjif2shell/realzlib/run-asan.sh` gives **18 PASS / 0 FAIL**:
+staged `0x80000082` bytes (`DATA_SIZE=260`, `AVAIL_OUT=2147483778`) produce
+`heap-buffer-overflow WRITE of size 1` 0 bytes after a 260-byte region with
+frames `inflate_fast inffast.c:252` → `inflate inflate.c:917` →
+`ReadJeffsImage pins/jif-vulnerable.inc:106`; the on-disk JIF99a mode writes
+0 bytes past a 4-byte region; fixed `RC=0 ERR=image data`, safe file clean.
+An in-tree run and a clean `git archive` replay at 16:48Z both gave 18/0;
+the witness was asked in DM 5668 and no verdict had arrived at yield. The
+earlier ASan abort in `realglib/real-driver.c` is a preserved allocator-
+layout negative, not a counted case. Hashes in `PROVENANCE.md`.
+
+### Leptonica bounded consumer hunt (`69a4e67f`) and Ruby N sweep (`9d48251d`)
+
+For Leptonica, `find lab -maxdepth 6 \( -name bytearray.c -o -name
+allheaders.h \)` finds only the vulnerable and fixed vendored trees; their
+`l_bytea*` callers are library/regression/harness code with local data
+sources, and the only other `allheaders.h` consumer
+(`ghostscript2shell`'s gitignored `base/tessocr.cpp:60`) has no `l_bytea*` /
+`pixReadStream` / `pixReadMem` hits. Bounded negative for this checkout, not
+a production claim; witness replay of both real runners remains UNKNOWN.
+For Ruby, `lab/repro/ruby2shell-webrick-{keepalive,keep-watch}.sh`,
+`ruby2shell-webrick-keep-client.py` and the new
+`ruby2shell-webrick-secondbuf.gdb` observe the first two case-map buffers
+without hardware watchpoints. Twelve N values (21..92) at filler 40 served
+three keep-alive requests 404/404/404, with matching safe-input and fixed
+3.4.13 controls at N=21/59. GDB found no second buffer at N=21, a buffer
+134 KB away at N=59 (`delta=-0x20d97`), and an abort before it at N=572.
+The gdb pass is layout-perturbing; no overlap, chosen-byte write, command
+or persistence. Raw logs are gitignored under `lab/build/evidence/`.
+
+Every count in this section is an author or clean-archive replay except the
+W278 witness verdict; no generated grade cell or register row moved here.
