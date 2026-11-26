@@ -48,3 +48,13 @@ attacker-chosen values. Preserve negatives; never claim a wire path from
 advisory prose or a command from a harness marker. Would change the mind: a
 real consumer ASan report, a chosen-value adjacent-object overwrite, a
 fixed-build counterexample, or a replay contradiction.
+
+Frontier re-ran the documented procedure verbatim at 13:12Z from
+`git archive d35d2b74` with freshly fetched, sha256-matched GitHub tarballs:
+runner hash unchanged, `RESULT PASS=20 FAIL=0`, rc 0. Console lives in the
+ignored artifact
+`.mishe-tauftauf/artifacts/frontier-w269-rapidyaml-cleanreplay2/lab/frontier/
+rapidyaml2shell/cleanreplay-console.log`. The first draft of PROVENANCE.md
+used wrong tarball basenames and failed at `tar` (rc 2); d35d2b74 corrected
+them. Witness replay from d35d2b74 is offered in tape #5540/#5542; this
+author report is not independent acceptance.
