@@ -1,0 +1,67 @@
+W17 — GNUBase provisioning and build attempt (2026-11-26 01:18-01:2xZ)
+======================================================================
+Purpose: attempt the real-consumer execution left open by W16. All commands
+ran under lab/frontier/drwav2shell/deps/ (gitignored bulk). No GNUBase or
+dr_wav source was patched; only build configuration was supplied.
+
+1. Provisioning (measured)
+  git clone --depth 1 https://github.com/GNUbase/GNUbase.git
+    HEAD 125778191b5a466ba22aa576e4dc95884205289d
+  git ls-tree HEAD ext/dr_libs
+    160000 commit fa931f3285ced10ace628f7f1ac951e1951e7ea6  ext/dr_libs
+    (exactly this lane's pinned vulnerable wav-0.14.5 commit)
+  git submodule update --init --depth 1 -j 8          -> rc 0
+  git submodule update --init --checkout --depth 1 ext/vst3sdk
+  git -C ext/vst3sdk submodule update --init --depth 1 \
+      base cmake pluginterfaces public.sdk            -> rc 0
+  sha256sum ext/dr_libs/dr_wav.h
+    c69816d0e0ac6cab3df8bf2f42df451d4531c2bfa34f7d7a69e959e6ed399038
+    (byte-identical to pins/pins.sha256 pins/vuln/dr_wav.h)
+
+2. Call path confirmed in the provisioned source (read-only)
+  src/engine/audiofile/reader.cpp:76-77
+    drwav_init_with_metadata(&m_wav, readFile, seekFile, tellFile, m_file.get(), 0, nullptr)
+  reader.cpp:323-327 AudioFileReader::open() routes a "RIFF" magic file to WavReader
+  src/engine/document/audiofilecommands.cpp:109-143 registers "audioFile.import"
+    (required parameter: files, an array of strings); :191 calls readInfo(path)
+  docs/mcp.md:28-46: `gnubase --headless --mcp-http[=PORT]` prints the URL and a
+    fresh token; clients POST /mcp with Authorization: Bearer <token>.
+  docs/mcp.md:156: tools/call works without a session for engine commands.
+  Therefore an HTTP request naming a local path reaches the vulnerable parser.
+
+3. Build configuration (measured)
+  cmake -S . -B build/asan-clang -G Ninja \
+    -DCMAKE_BUILD_TYPE=Debug -DCMAKE_C_COMPILER=clang \
+    -DCMAKE_CXX_COMPILER=clang++ -DGNUBASE_SANITIZERS=address \
+    -DGNUBASE_WARNINGS_AS_ERRORS=OFF -DGNUBASE_LTO=OFF \
+    -DGNUBASE_TEST_PLUGINS=OFF -DSDL_X11=OFF -DSDL_WAYLAND=OFF \
+    -DSDL_VULKAN=OFF -DSDL_UNIX_CONSOLE_BUILD=ON
+  First configure failed: SDL missing XCURSOR dev; SDL_X11=OFF then failed its
+  "no X11 or Wayland" guard; SDL_UNIX_CONSOLE_BUILD=ON cleared that. Next
+  configure failed on required libpipewire-0.3 and jack pkg-config modules;
+  libpipewire-0.3-dev and libjack-jackd2-dev were installed as build-only
+  provisioning. Final configure: "Configuring done", "Generating done", rc 0.
+  ninja -C build/asan-clang -j 12 gnubase was cut by the 300 s command cap at
+  [702/931]; no source error. Resumed with -j 16; outcome recorded below.
+
+4. Crafted inputs (measured)
+  consumer/make_wav.py ../deps/gnubase/crafted/bad.wav 0x41414141
+    150 bytes, sha256 466cbaaf79498193950d9c1fb4131200172b485090d55785dc5bd5fbfac89239
+  consumer/make_wav.py ../deps/gnubase/crafted/safe.wav 0x51515151 0x4841434B 0
+    150 bytes, sha256 5878b566d4c8ecaefdd42dc30d98adf1aa8913f73b0b59f37098f73d4e0df026
+  The safe file sets smpl_loop_count=0, the W1 matching-loop-count control.
+
+5. Limit, preserved before any run
+  The MCP request supplies a PATH to a local file, not WAV bytes on the wire.
+  No upload/download endpoint writing attacker-chosen WAV content was found in
+  W16. Even a successful request-driven fault is request-triggered local-path
+  corruption, NOT the wire-byte half of r5.
+
+6. Build outcome (measured, 01:43:17Z)
+  `timeout 170 ninja -C build/asan-clang -j 8 gnubase` -> rc 124 (timeout).
+  Earlier runs: 300 s cap interrupted at [702/931]; a 600 s resume and this
+  170 s attempt also ended by timeout. `build/asan-clang/bin/` is empty;
+  682 object files exist. No compiler error was observed, only command-cap
+  interruptions under a host load average near 19. No GNUBase process or
+  HTTP request was started; `run-gnubase.sh` was not executed. The missing
+  binary is the binding constraint on this wake, not a vulnerability result.

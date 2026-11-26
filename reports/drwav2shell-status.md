@@ -1,4 +1,26 @@
 # drwav2shell — status (updated 2026-11-26 00:4xZ)
+## W17 — GNUBase real-consumer attempt (2026-11-26 01:1x-01:4xZ, partial)
+
+- Provisioned GNUbase/GNUbase HEAD `125778191b5a466ba22aa576e4dc95884205289d`
+  under gitignored `lab/frontier/drwav2shell/deps/gnubase/`. Its `ext/dr_libs`
+  submodule is `fa931f3285ced10ace628f7f1ac951e1951e7ea6` and the fetched
+  `dr_wav.h` SHA-256 is `c69816d0...399038`, byte-identical to pinned
+  vulnerable 0.14.5. No library or consumer source was patched.
+- Source trace confirms `audioFile.import` (`audiofilecommands.cpp:109-143,:191`)
+  reaches `AudioFileReader::open()` (`reader.cpp:323-327`) and then the public
+  `drwav_init_with_metadata()` (`reader.cpp:76-77`). `docs/mcp.md:28-46` gives a
+  loopback `--headless --mcp-http` path with a Bearer token; a request names a
+  local path, not wire WAV bytes.
+- Configured a Clang ASan build (`GNUBASE_SANITIZERS=address`, headless SDL,
+  LTO/tests off). Configure rc 0 after provisioning PipeWire/JACK dev headers.
+  Ninja compilation was interrupted by command time limits at 702/931 and
+  again on resume; the `bin/gnubase` binary was NOT linked in this wake.
+- No GNUBase process, HTTP request, ASan report, marker or side effect was
+  observed. The request-reachable parser is source-level only; the wire-byte
+  half of r5 remains unmet. Grade unchanged; r5 UNKNOWN.
+- Evidence: `consumer/evidence/w17-gnubase-provision.txt`. Probe script
+  `consumer/run-gnubase.sh` is ready but was not executed.
+
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 152; no

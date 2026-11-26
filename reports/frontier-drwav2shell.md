@@ -22,6 +22,14 @@ calls `drwav_init_with_metadata()` through an HTTP-MCP-reachable
 and no build/request/corruption was observed. No wire-byte caller on
 vulnerable bytes was measured. W1-W4, W9, W10 and W11 verdicts remain UNKNOWN.
 
+W17 provisioned the real GNUbase/GNUbase source (HEAD `125778191b5`) with the
+byte-identical vulnerable `ext/dr_libs` submodule and configured a Clang ASan
+headless build, but the 931-step build was cut by wake command time limits and
+no binary, process or request was observed. The MCP-reachable metadata call
+remains a source-level lead; the request names a local path, not wire bytes.
+`consumer/evidence/w17-gnubase-provision.txt` records the build inputs and
+`consumer/run-gnubase.sh` is the ready loopback probe.
+
 ## Verified ground truth
 
 - Claim: Cisco Talos report TALOS-2026-2442, published 2026-11-24,
