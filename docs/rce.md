@@ -48,11 +48,24 @@ payload, not debugger writes.
 The alternative Datasketches lane has a genuine indirect call, but only in a
 synthetic consumer, so it is not R5. Ruby's natural called target is the
 untyped CRuby `T_DATA` `dfree(data)` finalizer, used by the established lane
-below. FreeRDP still lacks attacker-chosen playback bytes
-and a call site. These remain lower-priority lanes until their named blocker
-changes. The libIEC61850 lane is different: a wire-supplied chain already calls
-real libc `system` in the live unsanitized server with a target-written marker
-(`3777729`), so it is a second witness-ESTABLISHED R5 lane (#1127), not a blocked one.
+below.
+
+FreeRDP's wake-20 result supplies a chosen indirect call target in a live
+stock 3.32.0 rdpsnd log path: `s_wLog` at `out_buffer+8880` has `custom +112`
+set to libc `system()` and `context +120` to a command string at
+`out_buffer+12000`, and real `WLog_Layout_GetMessagePrefix` code
+(`Layout.c:211-213`) calls `log->custom(log->context)`. Two benign marker
+touches were observed; no-call, upstream-style format-guard and safe-input
+controls leave the marker absent. This stays rung 4 lab mechanics, not R5:
+the pointer, argument and command are server-side synthetic playback bytes,
+the client chooses only the wrap and target offset, there is no wire-derived
+command and no witness replay (`lab/freerdp2shell-src/call_target_stock.txt`,
+`reports/freerdp2shell-status.md`).
+
+The libIEC61850 lane is different: a wire-supplied chain already calls real
+libc `system` in the live unsanitized server with a target-written marker
+(`3777729`), so it is a second witness-ESTABLISHED R5 lane (#1127), not a
+blocked one.
 
 Current status: **FreeSWITCH R5 ESTABLISHED, with labeled conditions.** Commit
 `462e887` connects a forged `SSL`/`SSL_METHOD` carried in the same WebSocket

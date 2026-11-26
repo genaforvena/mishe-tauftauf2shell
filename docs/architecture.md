@@ -12,6 +12,10 @@ The **research mind** that produces a claim never accepts it. The **witness** re
 
 ## How the plant works
 
+Current counts are generated in `README.md` and `docs/results.md` (173
+declared / 170 active at 2026-11-26). The roster below is the historical
+163-mind list, preserved as such, not a current count.
+
 Each admitted family is its own mind with its own tmux window: 163 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,

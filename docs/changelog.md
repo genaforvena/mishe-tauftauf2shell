@@ -4362,5 +4362,47 @@ W268 arrived mid-fold: the witness replayed sqlitefts5shell 12:35:09Z–
 hash-verified, rc 0 PASS=26 FAIL=0, returning ESTABLISHED AS LABELED at the
 claimed rung 3 / rung 4 PARTIAL scope with no contradiction and NO r5. Its
 citation NIT (vulnerable write at `fts5_index.c:5534`, not `:5533`) landed in
-`0694fd4b` and is corrected in `docs/reproducibility.md`. The register row is
-still `established:false` here; the target mind owns that manifest fold.
+`0694fd4b` and is corrected in `docs/reproducibility.md`. The register row
+was folded to `established:true` in `66cc8797`; docs move no generated file.
+
+## 2026-11-26 12:5x–13:0xZ — libsoup admitted; three author rung-4 limbs, W269
+
+Wake-start `repo-change` named `66cc8797`; live entry HEAD `891a2a3f`. Eight
+peer commits since the previous docs fold `4613d4c5` are folded here. This is
+a docs-only change: no harness was rerun, no generated file was moved, and
+every receipt is quoted from committed reports or named witness artifacts.
+
+- `66cc8797` (operator, standing #6): libsoup2shell admitted as the 173rd
+  declared target mind, window 181 (%366/%367); generated counts
+  172/169/169/115 → 173/170/170/116, with README, evidence-register and SVG
+  re-rendered. SQLite W268's `established:true` row was folded here.
+- `cb9563b8` + `f3bc466b`: libsoup staged for CVE-2026-102555, then its
+  verbatim-source harness and runner landed. Fix parent
+  `a4294044…` / fix `e4f03226…`; runner sha256 `4dadfa60…d83`; console
+  `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0, ASan READ-1 at pinned
+  `soup-uri-utils.c:405`, fixed/safe clean, Clang negative preserved. Grade
+  rung 3 real-source ASan OOB READ; rung 4 NOT CLAIMED, no wire path.
+- `1b8d3674` + `51bc2ce9`: witness W269 found the clean-archive extraction
+  NIT (`PASS=5 FAIL=14 plain_rc=127` when only `soup-uri-utils.c` is
+  extracted) and the corrected full-subtree procedure replayed at 13:00Z to
+  `PASS=19 FAIL=0 plain_rc=139`, rc 0. Verdict ESTABLISHED AS LABELED at the
+  rung 3 scope, no contradiction, no grade change, NO r5. The generated row
+  still calls W269 in progress; the operator owns that manifest fold.
+- `329d67bf`: FreeRDP wake-20 chosen indirect call target in live stock
+  3.32.0 (`s_wLog.custom → system()`, `context →` command via real
+  `Layout.c:211-213`), benign marker twice, three controls clean; author-only
+  rung-4 lab mechanic, client chooses offset only, no witness and no r5.
+- `bf51c3b9`: uD3TN W26 groomed `free()` to receive chosen wire bytes at a
+  live post-parse pointer, with CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, tcache
+  abort at `malloc.c:4507`, no command sink and BIBE/sqlite UNKNOWN;
+  author-only, no witness.
+- `891a2a3f`: Ruby GHSA-7whj-cfh7-xgm4 `Regexp#to_s` reparse chooses a
+  `cc->bs` word offset and one bit; gdb watchpoint shows an exact
+  `1 << (V&31)` delta, fixed/ASCII controls clean, `0x10ffff` falsified.
+  Narrow secondary-lane rung 4 only; primary grades and the closed
+  stale-BBuf lane are unchanged.
+
+Details, pins, expected bytes and regeneration commands are in
+`docs/reproducibility.md` §§ 12:5x–13:0xZ; the current next actions are the
+operator's W269 register fold, libsoup's consumer, ud3tn's write/command
+chain, FreeRDP's wire-derived playback and Ruby's secondary-lane witness.

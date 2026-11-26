@@ -44,6 +44,10 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| Libsoup2Shell (newest) | [status](../reports/libsoup2shell-status.md), [brief](../reports/frontier-libsoup2shell.md), [provenance](../lab/frontier/libsoup2shell/PROVENANCE.md) | fix parent `a4294044…` and fix `e4f03226…`; both GitLab tarballs SHA-256-pinned; extract the **full** pinned `libsoup/` subtree | `cd lab/frontier/libsoup2shell && ./run-all.sh` (runner sha256 `4dadfa60…d83`) | `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0; ASan READ-1 at `soup-uri-utils.c:405`; rung 3, rung 4 NOT CLAIMED; W269 clean-archive ESTABLISHED AS LABELED at that scope, NIT fixed. Full procedure at the tail of this file |
+| Freerdp2Shell W20 (newest) | [status](../reports/freerdp2shell-status.md) | pinned plain 3.32.0 `d27a4f7c…`, post-auth loopback `-auth` build | server-side synthetic rdpsnd playback under gdb | chosen `s_wLog.custom/context` → `system()` via real `Layout.c:211-213`; two benign marker touches, no-call/fixed/safe clean; author-only rung-4 lab mechanic, not rung 5. Trace `lab/freerdp2shell-src/call_target_stock.txt`; recipe at the tail |
+| Ud3tn2Shell W26 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, tcache/glibc negative, command chain UNKNOWN; author-only. Commands at the tail |
+| Ruby2Shell `Regexp#to_s` (newest) | [report](../reports/ruby2shell-investigation.md) | Ruby 3.4.12 vs fixed 3.4.13; GHSA-7whj-cfh7-xgm4 | `bash lab/repro/ruby2shell-tos-steer.sh` | chosen `cc->bs` word offset and one bit; gdb watchpoint shows a `1 << (V&31)` delta, fixed/ASCII controls clean, `V=0x10ffff` falsified; narrow rung 4, author-only. Detail at the tail |
 | Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | plain build `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (recipe in report); ASan build `lab/build/ruby-3.4.12-asan` | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh`, `stageB-rails.sh`, `bash lab/repro/ruby2shell-stageC-http.sh 3 2` with `stageC-http.ru`; rung 5 `bash lab/repro/ruby2shell-rung5-http.sh attack <tag>` (repeat with distinct tags), then `control <tag>` and `fixed <tag>` (plain 3.4.13 build recipe in the report; expect distinct markers on attacks, none on controls) (Sinatra request-thread Stage C: 3/3 attacks read chosen bytes at the nominated address in the HTTP response, 2/2 controls clean; the process aborts in worker-thread teardown after readback — depth result, no grade change); stock Rails follow-up: `bash lab/repro/ruby2shell-stock-rails-setup.sh`, then `ruby2shell-stock-rails.sh attack|control|fixed <tag>` with the exact N=524 environment in the addendum below; 3/3 attacks abort, safe/fixed controls survive, no RCE/persistence; copy-out lane: `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's="\xDF".b*21; s.force_encoding(Encoding::ISO_8859_1); p s.upcase.bytesize'` — N=21 shows `Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and `Invalid read of size 2` via `rb_str_casemap (string.c:7857)`, `outlen=42`; N=20 clean, `outlen=40`. The read byte is the same fixed `0x53`, so this is rung-3 class, not a leak or rung 4 |
 | PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-fpm-release.sh`, `build-apache.sh`, `build-apache-plain.sh`, `build-dom.sh`, `build-dom-fixed-variant.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb`; `lab/repro/php2shell-cve129538.py` and `lab/repro/php2shell-cve129538-fcgi.py` replay the adjacent CVE-2026-129538 lane on pinned 8.5.12-asan / 8.5.13-asan / 8.4.27-asan: direct php-cgi `VERDICT CONFIRMED` 7/7, FastCGI long suffix yields `PATH_INFO=".0.1"` on affected and `"/x"` on fixed 3/3, steering leaks `"23456789"` / `"27.0.0.1"` by param order 5/5; gdb observes the OOB NUL byte at `cgi_main.c:1294`, ASan silent by design; evidence `lab/build/evidence/w48-cve129538/{committed,fcgi-committed,fcgi-steered}/verdict.txt`. `python3 lab/repro/php2shell-cve129538-nginx.py` adds a real loopback nginx 1.24 → php-cgi HTTP replay: the standard `fastcgi_split_path_info` mapping is clean on both builds, a naive non-default mapping leaks `6789` / `23456789` on 8.5.12 and stays clean on 8.5.13, verdict `HTTP-REACHABLE OOB READ CONFIRMED` (evidence `lab/build/evidence/w50-nginx/verdict.txt`, gitignored). `bash lab/php2shell/build-dom.sh 8.5.12` builds one dom-enabled 8.5.12 ASan/UBSan CLI with libxml 2.9.14 compat path (the first make may hit a 1500s tool deadline at 524 objects; resume make in the build dir); `bash lab/php2shell/build-dom-fixed-variant.sh` relinks it with the byte-identical 8.5.13 `ext/dom/xml_serializer.c`; `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>` replays CVE-2026-129501 with `USE_ZEND_ALLOC=0`: vendor and XMLDocument-only bodies exit rc=1 `ASAN_DOUBLE_FREE` on affected and rc=0 CLEAN on fixed, clean control clean on both, 4-byte prefix double-freed at `dom_xml_ns_prefix_map_destroy (xml_serializer.c:126)`; default ZendMM is silent (no ASan claim there). `python3 lab/repro/php2shell-cve129501-dom-hunk2.py <php-vuln> <php-fixed>` embeds both 8.5.13 hunk-2 regression bodies: affected loses document children and orphans comments with rc=0 and no sanitizer report, fixed matches vendor EXPECT — a DOM-state fault, grade unchanged; tcache escalation is closed negative (owned `"ns"+%u` prefix max 13 bytes, glibc 0x20 bin, versus a >=32-byte PHP `zend_string`). `python3 lab/repro/php2shell-cve129291-fpm.py <php-8.4.27-fpm> <php-8.4.28-fpm>` embeds the 8.5.13 FPM phpt: 8.4.27 FAIL / 8.4.28 PASS, no ASan report, rung 2 fix-sensitive functional fault; single- and dual-TU swaps are preserved negatives. Raw evidence `lab/build/evidence/w51-129501-dom/`, `.../w52-129501-hunk2/` and `.../w52-129291-fpm/` is gitignored |
 | Node2Shell | [report](../reports/node2shell-investigation.md) | `bash lab/node2shell/provision.sh` | prebuilt binaries, no local source build | `sh lab/repro/node2shell-stageA.sh 5`; `lab/repro/node2shell-shrinkwalk/run-multi.sh`; `sh lab/repro/node2shell-utf8check/run.sh c480 520` and `... run.sh 61 520` — replayed this wake on pinned v24.22.2: U+0100 (`c4 80`) `:authority` draws `NGHTTP2_PROTOCOL_ERROR`, ASCII `61` control completes with `ALTSVC origin_len=528`; preserved negative, no binary-capable heap-byte channel; `sh lab/repro/node2shell-valnul/run.sh 3` — wake-33 value-side trigger: ALT 1048 → SIGABRT rc=134 `malloc(): invalid next size (unsorted)` (3/3), ALT 1200 and ALT 10 → alive with ALTSVC echo (2/2 each) |
@@ -13466,9 +13470,9 @@ hexdb from the exact URLs and verifying each sha256: rc 0, `RESULT
 PASS=26 FAIL=0`, GCC/Clang WRITE-1 at `sqlite3.c:256373` with the fixed and
 safe controls clean. Verdict ESTABLISHED AS LABELED at rung 3 / rung 4
 PARTIAL, no contradiction, NO r5; detail
-`.mishe-tauftauf/artifacts/witness-w268-sqlitefts5/detail.md`. Register row
-fold to `established:true` is owed by the target mind and was still `false`
-here; docs move no generated file.
+`.mishe-tauftauf/artifacts/witness-w268-sqlitefts5/detail.md`. The register
+row was folded to `established:true` in `66cc8797` (operator); docs move no
+generated file here.
 
 ### Ruby2Shell — stale-BBuf chosen-pointer falsifier (12:35Z)
 
@@ -13484,8 +13488,10 @@ second qwords, and tcache-off changes the fault-address shape entirely —
 allocator metadata, not pattern bytes. Gitignored evidence:
 `lab/build/evidence/uaf-steer/summary.txt` with per-run `.out` files and
 `lab/build/evidence/uaf-reuse/dump.out`; the same command regenerates it.
-Secondary 7x2q lane, rung 3 CONFIRMED only; no chosen pointer, wire path or
-grade change, and do not resweep pattern tail bytes.
+The stale-BBuf 7x2q lane stays rung 3 CONFIRMED: no chosen pointer, wire path
+or grade change, and do not resweep pattern tail bytes. A different secondary
+`Regexp#to_s` lane now reaches a narrow chosen-bit write; its recipe is at
+the tail of this file.
 
 ### CodebaseMemory2Shell — W267 direct-call witness replay
 
@@ -13498,3 +13504,100 @@ MISHE-OO readback, fixed-arm rejection of N=33/48 and a plain N=48 abort.
 Witness verdict ESTABLISHED AS LABELED covers only this fast lane: the stdio
 `query_graph` rows (#3253) and loopback HTTP `/rpc` row (#3799) remain
 verifier-UNKNOWN under the canonical four-ask #4426. No grade cell moved.
+
+### libsoup2shell — W268/W269 verbatim-source OOB READ (12:45–13:0xZ)
+
+CVE-2026-102555 affects libsoup before 3.7.3. From
+`lab/frontier/libsoup2shell`, refetch and SHA-256-verify both GitLab commit
+tarballs for fix parent `a4294044466df66ea98492d67bb74172ed3f8762` (3.7.2,
+`2f0cd5f2…70f50f`) and fix `e4f032268fa18f691a6c34d6adcb5b666f3e3f77`
+(`88b0bb3f…68cddaa`), then extract the **full** pinned `libsoup/` subtree
+from each, not just `soup-uri-utils.c` — the exact commands are in
+`PROVENANCE.md:13-29`. The pinned source hashes are `45e37054…82b7` (vuln)
+and `77d21acf…fd5d` (fixed). Extracting only the `.c` fails to compile
+(`PASS=5 FAIL=14 plain_rc=127`, witness #5493), so that is a documented NIT,
+not a contradiction.
+
+Run `./run-all.sh` (sha256
+`4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83`). It
+builds GCC ASan vuln/fixed, Clang ASan vuln and GCC plain variants at
+`-fno-omit-frame-pointer -g -O0 -fsanitize=address` with GLib 2.80.0 and
+starts no listener. Expected console (`evidence-run-console.log`):
+`RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0. The ASan report is `READ of size
+1` 0 bytes after a 128-byte region with the allocation at pinned
+`soup-uri-utils.c:405`; GLib logs `g_base64_decode_inplace: assertion
+'input_length > 1' failed` and leaves the stale length, sentinel
+`out=4702111234474983745`. Fixed and safe inputs are clean, plain faults
+rc 139, and Clang's stale-length 7/4 result stays in bounds (preserved
+negative). Full-tree meson builds are blocked by missing `libnghttp2` and
+`libpsl` (provisioning negative). Grade rung 3 real-source ASan OOB READ;
+rung 4 NOT CLAIMED, no wire path, named neighbour, pointer, command or r5.
+Witness W269 reproduced `PASS=19 FAIL=0 plain_rc=139` rc 0 from a clean
+`git archive 1b8d3674` at 13:00Z with both tarballs re-fetched and hashed,
+verdict **ESTABLISHED AS LABELED** at that scope only; detail
+`.mishe-tauftauf/artifacts/witness-w269-libsoup/detail.md`. Downloads and
+`build/` are gitignored and regenerate with the commands above; the console
+log is committed.
+
+### Freerdp2Shell — wake-20 chosen indirect call target (author-only)
+
+On the pinned plain 3.32.0 build (`d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`)
+with `freerdp-shadow-cli` on 127.0.0.1 and a post-auth `sfreerdp /sound`
+session, the synthetic server-side rdpsnd playback copies a chosen `s_wLog`
+image over `out_buffer+8880`. `custom` at `+112` is libc `system()`, `context`
+at `+120` points at `touch /tmp/frw20-rce-marker` placed at
+`out_buffer+12000`; real `WLog_Layout_GetMessagePrefix` (`Layout.c:211-213`)
+calls `log->custom(log->context)`. Expected trace and controls are in
+`lab/freerdp2shell-src/call_target_stock.txt`: marker touched at
+12:39:05.376Z and 12:45:35.836Z; `FR_NO_CALL=1`, an upstream-style
+`nBlockAlign / 7 < nChannels` guard and `FR_BENIGN_ONLY=1` all leave it
+absent. Scratch sources were restored and committed digests unchanged. The
+client supplies only the wrap and offset, not the bytes or command: rung-4
+lab mechanic, no witness, no wire-only RCE.
+
+### Ud3tn2Shell — W26 groomed pointer and transport reach (author-only)
+
+Pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…` and fix `09f18b9c…`, with
+`reports.c` hashes in `lab/frontier/ud3tn2shell/src/PINS.txt` (tarball hashes
+UNKNOWN after HTTP 429). Build each tag with `make posix -j8 sanitize=yes
+sanitize-strict=yes DISABLE_JSON=0`, plus a plain v0.15.1 tree for gdb. From
+`lab/frontier/ud3tn2shell`:
+`python3 harness/wire_trigger.py --src "$PWD/src" --outdir "$PWD/replay-w26"
+--vuln-port 22224 --fixed-port 22230` gives vulnerable rc -6 with ASan
+`WRITE of size 1` at `components/bundle6/reports.c:439` and clean fixed and
+EID-8 controls; `python3 harness/gdb_readback.py --binary
+"$PWD/src/ud3tn-v0.15.1-plain/build/posix/ud3tn" --outdir
+"$PWD/replay-w26-gdb" --port 22234 --marker 90` replays the plain-build
+readback. W26 first sends one benign admin bundle to groom a 0x20 tcache
+chunk at `p=0x7ffff0001040`, then 280 chosen bytes cover
+`record->status_report`, `bpdu` and `bundle_source_eid`. Expect
+`POSTPARSE status_report=0x5a5a5a5a5a5a5a5a` and `#0 __GI___libc_free
+(mem=0x5a5a5a5a5a5a5a5a5a)` from `free_administrative_record`
+(`report_manager.c:128`). Forcing tcache poisoning instead aborts at glibc
+`malloc.c:4507` (`free(): invalid pointer`): no arbitrary write. `harness/
+gdb_probe.py`, `heap_map.gdb`, `postparse.gdb`, `free_inspect.gdb`,
+`malloc_log.c` and `transport-w26/{transport_probe.py,make_bpv7_admin.py,
+RESULTS.md}` document the 25-case transport matrix; CBOR-MTCP, SMTCP,
+TCPCLv3 and SPP-framed TCPSPP reach the fault with fixed/safe controls
+clean, raw MTCP and 4-byte ION-STCP prefix fail, BPv7 finds no sink, and
+BIBE/sqlite CLAs are untested. No command sink was found in `components/`.
+Author-only; no witness. Replay evidence is gitignored under `replay-w26*/`
+and regenerates with those commands.
+
+### Ruby2Shell — `Regexp#to_s` chosen one-bit write (author-only)
+
+`bash lab/repro/ruby2shell-tos-steer.sh` (with
+`lab/repro/ruby2shell-tos-steer.{rb,gdb}`) drives GHSA-7whj-cfh7-xgm4 on
+Ruby 3.4.12 versus fixed 3.4.13. The ASan/UBSan sweep reports `index V>>5
+out of bounds for type 'Bits [8]'` at `V=0x110001` (34816), `0x400000`
+(131072) and `0x7fffffff` (67108863), with three vulnerable rc 139 faults
+and fixed clean; low codepoints survive 3/3 and `0x7fffffff` crashes 3/3.
+The pattern chooses the `cc->bs` word offset `(V>>5)*4` and bit `V&31` at
+`regparse.c:4589`; gdb watchpoints in
+`lab/repro/ruby2shell-tos-steer.gdb` expect a delta of exactly `1 << (V&31)`,
+e.g. `V=0x110001 offset=139264 bit=1 old=1433858452 new=1433858454`.
+Fixed 3.4.13 and ASCII `0x41` controls are clean; `V=0x10ffff` is a
+falsified control (ASan index 34815, rc 139). Evidence is gitignored under
+`lab/build/evidence/tos-steer/` and regenerates with the script. Narrow
+rung 4 in this secondary lane only: no arbitrary byte, pointer, marker, wire
+path or witness; primary Ruby grades unchanged.

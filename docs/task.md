@@ -317,6 +317,18 @@ claims, not conclusions.
   Nov, still unpublished at the 12:25Z re-check). Reopening rung 4 needs a
   new wire-only base or a measured consumer, not a repeat of this sweep.
 
+**Adjacent secondary lane (2026-11-26 13:0xZ, author-only):** GHSA-7whj-cfh7-xgm4
+in `Regexp#to_s` reparse (`re.c:628`) reaches `next_state_val`
+(`regparse.c:4589`), where a pattern chooses the `cc->bs` word offset
+`(V>>5)*4` and bit `V&31`. GDB watchpoints read back a single-bit OR change
+(for `V=0x110001`: `offset=139264 bit=1 old=1433858452 new=1433858454`), with
+3.4.13 and ASCII `0x41` controls clean; the naive `V=0x10ffff` "safe" control
+was falsified (ASan index 34815, rc 139). Grade is rung 4 at the narrow
+one-bit-write scope **in this secondary lane only**: not arbitrary bytes, not
+pointer control, no marker, no wire path and no witness. Primary grades and
+the closed stale-BBuf steering lane are unchanged. Recipe:
+`bash lab/repro/ruby2shell-tos-steer.sh`; details in the 13:0xZ fold below.
+
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
 - **Two one-byte heap overflows** in Node.js HTTP/2 `session.altsvc()`
@@ -666,6 +678,17 @@ and the wake-15 negative capture
 Wake 16's format-gate measurement and tag-2 wrap are in
 `lab/freerdp2shell-src/ffmpeg_adpcm_tag2.txt` with the driver
 `lab/freerdp2shell-src/PocAdpcmTag2.c`.
+Wake 20 (`lab/freerdp2shell-src/call_target_stock.txt`) demonstrates a chosen
+indirect call target in the live stock 3.32.0 build: the overwritten `s_wLog`
+at `out_buffer+8880` carries `custom +112 = system()`, `context +120 =` the
+command at `out_buffer+12000`, and real `WLog_Layout_GetMessagePrefix`
+(`Layout.c:211-213`) calls `log->custom(log->context)`. Benign
+`touch /tmp/frw20-rce-marker` was observed twice; `FR_NO_CALL=1`, the
+upstream-style `nBlockAlign / 7 < nChannels` guard and `FR_BENIGN_ONLY=1`
+produce no marker. This is an author-only rung-4 lab mechanic: the pointer,
+argument and command come from server-side synthetic playback, while the
+client supplies only the wrap and offset; no wire-only command and no witness
+replay.
 The dedicated
 mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
 Wake trigger units and the presentation.json entry are owed from the
@@ -5148,12 +5171,23 @@ sequential offsets. v0.15.2 rejects zero length before the copy. Frontier
 measured rung 3 on a live 127.0.0.1 MTCP daemon (ASan `WRITE of size 1` at
 `reports.c:439`, rc=-6, markers `41` and `5a`; length-8 and fixed-build
 controls clean) and rung 4 on a plain daemon under gdb (20 `5a` or `43` bytes
-at offsets 0..19, `index=20`, `bytes_remaining=65516`). No pointer control,
-command, witness replay or rung 5; the advisory's code-execution hedge is not
-a lab result. First step for the mind: replay `harness/wire_trigger.py` and
-`harness/gdb_readback.py` with fresh ports, then map the one-byte chunk's
-plain-daemon neighbours over repeated bundles; smtcp/TCPCLv3 and BPv7 are
-UNKNOWN. The published PoC's stale creation timestamp needs the harness's
+at offsets 0..19, `index=20`, `bytes_remaining=65516`). A 2026-11-26 12:5xZ
+limb (`reports/ud3tn2shell-pointer-control.md`) adds a groomed chosen pointer:
+one benign pre-bundle puts a 0x20 tcache chunk at `p=0x7ffff0001040` with the
+admin record at `p+0x100`; 280 chosen bytes cover `status_report`, `bpdu` and
+`bundle_source_eid`. Plain-build gdb shows
+`status_report=0x5a5a5a5a5a5a5a5a` and `free_administrative_record`
+(`report_manager.c:128`) calling `free()` with exactly those wire bytes at a
+live post-parse pointer. The zero-EID shape also faulted over CBOR-framed
+MTCP, passive SMTCP, TCPCLv3 and SPP-framed TCPSPP, each with fixed and
+safe-EID controls clean; raw unframed MTCP and the 4-byte ION-STCP prefix were
+negatives, and BPv7 reached admin dispatch with no analogous sink. Tcache
+poisoning aborted in glibc `malloc.c:4507` (`free(): invalid pointer`), so no
+arbitrary write; no `system`/`popen`/`exec` sink exists in `components/`, so a
+command chain stays UNKNOWN, and no witness replay exists. BIBE/sqlite CLAs
+were not exercised. Next: seek an arbitrary write or command chain with
+vulnerable, fixed and safe controls, then a witness replay.
+The published PoC's stale creation timestamp needs the harness's
 5-byte SDNV refresh; the earlier stale-CBOR/expiry failures are preserved as
 negatives in the brief.
 
@@ -13118,10 +13152,9 @@ receipts are quoted from committed reports and logs, not rerun here.
   register row moved; operator admission and independent witness replay are
   owed, with the pinned zip re-fetched and hash-verified first.
 
-Next: a new wire-only base or a measured consumed chunk consumer would reopen
-the Ruby rung-4 branch; sqlitefts5shell was admitted at `08ba0eea` and now
-advances only on a witness verdict. What would change this fold: a committed
-replay that contradicts the gdb shape findings or a witness verdict.
+That "Next" was overtaken: W268 returned ESTABLISHED AS LABELED and the
+register row was folded in `66cc8797`; the wire-only Ruby rung-4 branch stays
+closed for this shape sweep. The fold below records the result.
 
 ## 2026-11-26 12:2x–12:4xZ — sqlitefts5shell admitted; Ruby stale-BBuf steering closed
 
@@ -13180,8 +13213,88 @@ bytes, hashes and timings are quoted from committed reports, not rerun.
   standing. No grade or register cell moved; the generated register row keeps
   its admission-time wording, and the operator owns that manifest.
 
-Next: the sqlite register row is owed by the target mind (still
-`established:false` at this fold); codebasememory's #4426 lanes and any new
-witness verdict are the next material events. The Ruby stale-BBuf steering
-lane is closed — do not resweep pattern bytes. What would change this fold:
-a register fold contradicting W268 or a new commit on a docs path.
+That "Next" was overtaken: `66cc8797` folded W268's verdict and set the
+register row to `established:true`. The Ruby stale-BBuf steering lane stays
+closed; codebasememory's #4426 lanes stay verifier-UNKNOWN.
+
+## 2026-11-26 12:5x–13:0xZ — libsoup admitted; FreeRDP, uD3TN and Ruby limbs; W269
+
+Wake-start `repo-change` named `66cc8797` (W268 verdict + libsoup admission);
+live entry HEAD `891a2a3f`. Eight peer commits have landed since my last fold
+`4613d4c5`: `329d67bf`, `cb9563b8`, `bf51c3b9`, `f3bc466b`, `66cc8797`,
+`891a2a3f`, `1b8d3674`, `51bc2ce9`. This is a docs fold only — no replay was
+rerun here; receipts are quoted from committed reports, generated files and
+the named witness detail. No rung cell moved: generated counts read 173
+declared / 170 active / 170 findings / 116 established in `README.md` and
+`docs/results.md`.
+
+- `66cc8797` (operator, standing #6): **libsoup2shell admitted as the 173rd
+  declared target mind**, window 181 (panes %366/%367), counts 172/169/169/
+  115 → 173/170/170/116 and the ladder SVG re-rendered. SQLite W268's
+  `established:true` row was folded in the same commit. The hy4-flash route
+  and three generated wake units remain person-reserved.
+- `cb9563b8` + `f3bc466b` (libsoup W268 author receipt for
+  CVE-2026-102555): vulnerable fix parent
+  `a4294044466df66ea98492d67bb74172ed3f8762` (3.7.2) and fix
+  `e4f032268fa18f691a6c34d6adcb5b666f3e3f77`; verbatim pinned
+  `soup-uri-utils.c` hashes `45e37054…82b7` / `77d21acf…fd5d`; runner
+  `lab/frontier/libsoup2shell/run-all.sh` sha256
+  `4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83`.
+  Console: `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0 at 12:45Z–12:46Z;
+  ASan READ-1 0 bytes after a 128-byte region at pinned
+  `soup-uri-utils.c:405`, fixed and safe inputs clean, Clang stale-length
+  7/4 in-bounds negative preserved. Grade rung 3 real-source ASan OOB READ;
+  rung 4 NOT CLAIMED — no wire path, named object, chosen offset, pointer,
+  marker or r5. Full-tree meson build is blocked by missing `libnghttp2` and
+  `libpsl` (provisioning negative, not a vulnerability result).
+- `1b8d3674` + `51bc2ce9` (libsoup W269 witness): the first clean-archive
+  replay exposed a documentation gap — extracting only `soup-uri-utils.c`
+  fails to compile (`PASS=5 FAIL=14 plain_rc=127`, missing
+  `soup-uri-utils{,-private}.h`). Extracting the full pinned `libsoup/`
+  subtree from the hash-verified tarballs reproduced
+  `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0, from `git archive 1b8d3674` at
+  13:00Z. Verdict **ESTABLISHED AS LABELED** at the rung 3 scope, no
+  contradiction, no grade change, NO r5. Corrected procedure is in
+  `lab/frontier/libsoup2shell/PROVENANCE.md:9-34,79-85`; detail
+  `.mishe-tauftauf/artifacts/witness-w269-libsoup/detail.md`. The generated
+  register row still says W269 is in progress; the operator owns that
+  manifest fold.
+- `329d67bf` (FreeRDP W20, author-only rung-4 lab mechanic): pinned plain
+  3.32.0 `d27a4f7c…`, live `s_wLog` at `out_buffer+8880`, `custom +112 =`
+  libc `system()`, `context +120 =` command string at `out_buffer+12000`;
+  real `WLog_Layout_GetMessagePrefix` (`Layout.c:211-213`) calls
+  `log->custom(log->context)`. A benign marker was touched twice; no-call,
+  upstream-style `nBlockAlign / 7 < nChannels` guard and benign-only controls
+  left it absent. The pointer, argument and command are server-side
+  synthetic playback bytes, the client chooses only the wrap and offset, no
+  witness replay: not rung 5. Evidence `lab/freerdp2shell-src/
+  call_target_stock.txt` and `reports/freerdp2shell-status.md:775-804`.
+- `bf51c3b9` (uD3TN W26, author-only): pinned tag `00b2fbef…` / fixed
+  `6b18b267…` with fix `09f18b9c…` and `reports.c` hashes in
+  `lab/frontier/ud3tn2shell/src/PINS.txt` (archive tarball hashes UNKNOWN
+  after HTTP 429). One benign pre-bundle grooms a 0x20 tcache chunk at
+  `p=0x7ffff0001040`, the admin record at `p+0x100`; 280 chosen bytes cover
+  `status_report`, `bpdu` and `bundle_source_eid`, and gdb observes
+  `free_administrative_record` (`report_manager.c:128`) passing exactly the
+  chosen `0x5a5a5a5a5a5a5a5a` to `free()` at a live post-parse pointer.
+  Tcache poisoning aborted in glibc `malloc.c:4507`; no command sink exists
+  in `components/`. The same shape reached CBOR-MTCP, SMTCP, TCPCLv3 and
+  SPP-framed TCPSPP with fixed/safe controls clean; raw MTCP and ION-STCP
+  prefix were negatives, BPv7 had no analogous sink, and BIBE/sqlite CLAs
+  were not exercised. No arbitrary write, command or witness.
+- `891a2a3f` (Ruby GHSA-7whj-cfh7-xgm4, author-only): `Regexp#to_s` reparse
+  on 3.4.12 (`re.c:628`) reaches `next_state_val` (`regparse.c:4589`); the
+  pattern chooses the `cc->bs` word offset `(V>>5)*4` and bit `V&31`, with
+  GDB watchpoints showing a one-bit OR (`V=0x110001`: `offset=139264`,
+  `bit=1`, `old=1433858452`, `new=1433858454`). Fixed 3.4.13 and ASCII
+  `0x41` controls are clean; the naive `V=0x10ffff` safe assumption was
+  falsified. Narrow rung 4 in this secondary lane only — no arbitrary byte,
+  pointer, marker, wire path or witness. Primary Ruby grades and the closed
+  stale-BBuf lane are unchanged.
+
+Next: the operator's generated fold for W269 (and the stale ud3tn/Freerdp
+register boundaries), libsoup's loopback consumer, ud3tn's
+arbitrary-write/command chain with controls and witness, FreeRDP's removal of
+lab-synthetic playback, and Ruby's secondary-lane wire reach or witness.
+What would change this fold: a counterexample in the named receipts, a
+register row contradicting those verdicts, or a checker RED on HEAD.
