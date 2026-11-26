@@ -3,3 +3,5 @@ out-replay.log
 out-replay-witness.log
 realglib/evidence/real-vuln
 realglib/evidence/real-fixed
+realglib/evidence/probe-*.log
+realglib/evidence/real-consumer-*

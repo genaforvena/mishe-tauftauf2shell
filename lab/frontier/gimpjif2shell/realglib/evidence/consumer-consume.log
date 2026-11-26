@@ -1,0 +1,13 @@
+CONSUME_SIZE_WORD=4d4d4d4d4d4d4d4d PAYLOAD_OFFSET=264
+LAYOUT consume guard0=0x5c0ce265a450 B=0x5c0ce265a560 A=0x5c0ce265a670 guard1=0x5c0ce265a780 delta_BA=272 usable_B=264
+LAYOUT consume prepared B=0x5c0ce265a560 A=0x5c0ce265a670 drop=0x5c0ce265aef0
+MODE=consume PAYLOAD=4d RC=1 ERR=
+POST_PIN A_size_word=4d4d4d4d4d4d4d4d A_fd=4d4d4d4d4d4d4d4d A_bk=4d4d4d4d4d4d4d4d
+POST_PIN malloc260[0]=0x5c0ce265a560
+POST_PIN malloc260[1]=0x5c0ce265ade0
+POST_PIN malloc260[2]=0x5c0ce265acd0
+POST_PIN malloc260[3]=0x5c0ce265abc0
+POST_PIN malloc260[4]=0x5c0ce265aab0
+POST_PIN malloc260[5]=0x5c0ce265a9a0
+POST_PIN malloc260[6]=0x5c0ce265a890
+RC=139

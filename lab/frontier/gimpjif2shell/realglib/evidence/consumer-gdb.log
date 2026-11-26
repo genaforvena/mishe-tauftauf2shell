@@ -1,0 +1,21 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+CONSUME_SIZE_WORD=4d4d4d4d4d4d4d4d PAYLOAD_OFFSET=264
+LAYOUT consume guard0=0x555555560450 B=0x555555560560 A=0x555555560670 guard1=0x555555560780 delta_BA=272 usable_B=264
+LAYOUT consume prepared B=0x555555560560 A=0x555555560670 drop=0x555555560ef0
+MODE=consume PAYLOAD=4d RC=1 ERR=
+POST_PIN A_size_word=4d4d4d4d4d4d4d4d A_fd=4d4d4d4d4d4d4d4d A_bk=4d4d4d4d4d4d4d4d
+POST_PIN malloc260[0]=0x555555560560
+POST_PIN malloc260[1]=0x555555560de0
+POST_PIN malloc260[2]=0x555555560cd0
+POST_PIN malloc260[3]=0x555555560bc0
+POST_PIN malloc260[4]=0x555555560ab0
+POST_PIN malloc260[5]=0x5555555609a0
+POST_PIN malloc260[6]=0x555555560890
+
+Program received signal SIGSEGV, Segmentation fault.
+_int_malloc (av=av@entry=0x7ffff7e04ac0 <main_arena>, bytes=260) at ./malloc/malloc.c:3985
+warning: 3985	./malloc/malloc.c: No such file or directory
+#0  _int_malloc (av=av@entry=0x7ffff7e04ac0 <main_arena>, bytes=260) at ./malloc/malloc.c:3985
+#1  0x00007ffff7cad8d2 in __GI___libc_malloc (bytes=<optimized out>) at ./malloc/malloc.c:3328
+$1 = 0x4d4d4d4d4d4d4d4d
