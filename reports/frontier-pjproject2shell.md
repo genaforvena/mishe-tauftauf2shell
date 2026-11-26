@@ -191,6 +191,11 @@ an earlier 64-byte run. Logs: `real/out-vuln/vidport-asan-*.log` and
 `real/out-fixed/vidport-asan-*.log`. The fix changes only the reader clamp;
 `vid_port.c` and `avi_dev.c` allocation order is byte-identical at both
 pins. No wire or command path exists, so the grade stays rung 4.
+Clean `git archive 79c1f673 lab/frontier/pjproject2shell` replay at 17:55Z
+rebuilt both pinned trees and reproduced all 16 checks; the first attempt
+at 17:51Z had a transient `make -j6` provisioning failure, preserved in
+`PROVENANCE.md`.
+
 
 ## Witness replay (W239, 2026-11-26)
 

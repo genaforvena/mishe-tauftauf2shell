@@ -198,3 +198,78 @@ vulnerable tree allocates `cport->get_buf` as the last item from
 `listener_slots`, `transmitter_slots`, `render_states` and `render_pool`
 arrays come from the main pool (`:572-606`). No library object is naturally
 adjacent after the AVI frame buffer in that shipped caller.
+
+## Natural shipped-caller victim (W242, 2026-11-26 17:49Z)
+
+`real/vidport-driver.c` uses only shipped APIs:
+`pjmedia_vid_dev_subsys_init()`, `pjmedia_avi_dev_create_factory()`,
+`pjmedia_avi_dev_alloc()`, `pjmedia_vid_port_create()`,
+`pjmedia_vid_port_connect()` and `pjmedia_vid_port_start()`. It does not
+supply the victim buffer or object. In the pinned vulnerable source,
+`pjmedia/src/pjmedia/vid_port.c:543` creates a fresh pool, `:688` allocates
+`vp->frm_buf->buf` from it and `:701` allocates `vp->frm_mutex` from the
+same pool; the active clock passes that buffer to the device at `:1176`,
+`avi_dev.c:636` passes it to `avi_get_frame()`. A read-only shadow of the
+private `struct pjmedia_vid_port` (source lines 74-115) prints the two
+addresses and 88 mutex bytes before and after the pull.
+
+    bash lab/frontier/pjproject2shell/real/run-vidport.sh
+
+Result 17:49Z and repeat 17:50Z: **TOTAL: 16 PASS / 0 FAIL**, rc 0 each.
+All six runs print `frm_buf=0x515000001d70 size=48`,
+`frm_mutex=0x515000001da0`, `delta=48` (ASLR-independent readback).
+
+- Vulnerable 64-byte `00dc`: `FRAME_SIZE_AFTER=64`;
+  `MUTEX_AFTER:02000000452d504a50524f4a454354210002...` — 12 chosen marker
+  bytes at mutex+4..+15; the mutex word at +0..+3 also changed from
+  `00000000`. Cause of the first-word change is UNKNOWN; glibc mutex state
+  is plausible, but no pointer was called or dereferenced.
+- Vulnerable 512-byte `00dc`: ASan `heap-buffer-overflow`, `WRITE of size
+  512`, 0 bytes after the 512-byte pool block; stack `fread` →
+  `pj_file_read (file_io_ansi.c:132)` → `file_read3 (avi_player.c:158)` →
+  `avi_get_frame (avi_player.c:1222)` → `pjmedia_port_get_frame (port.c:99)`
+  → `avi_dev_strm_get_frame (avi_dev.c:636)` → `enc_clock_cb
+  (vid_port.c:1176)` → `clock_thread`. `MUTEX_AFTER` begins with repeated
+  `4d495348452d504a50524f4a45435421`.
+- Vulnerable safe48 and both fixed cases: `FRAME_SIZE_AFTER=48`, live mutex
+  bytes byte-identical before/after, no ASan report.
+
+The driver skips `pjmedia_vid_port_stop()` after readback: an earlier run
+with teardown hung on the clock-thread join (timeout 20, rc 124) after the
+64-byte overflow, consistent with a live mutex being corrupted. It prints
+and flushes the readback, sleeps 250 ms so an ASan report can complete,
+then calls `_exit(0)`. The 512-byte ASan abort is expected (rc 1).
+
+| artifact | sha256 |
+| --- | --- |
+| `real/vidport-driver.c` | `2539790c74a594f94b713e17e9a26d7f6c5b6871ca74334932d901eff57959e6` |
+| `real/run-vidport.sh` | `f9d77e62b213a004da6e4654c181dbbfdfc2c9b2f9256885e2e2bfed149973e4` |
+
+Raw logs: `real/out-vuln/vidport-asan-*.log` and
+`real/out-fixed/vidport-asan-*.log`. Fix commit changes only the reader
+clamp; the caller allocation sites are byte-identical at both pins.
+
+Wire path is a bounded negative: the only AVI constructor takes a filename
+(`avi_player.c:225` `pj_file_exists`, `:261` `pj_file_open`) and
+`pjsua_avi_player_create()` likewise takes a path; no shipped socket or
+RTP route feeds `00dc` bytes to `avi_get_frame()`. Grade stays rung 4:
+chosen bytes in a live mutex, no pointer control, command or network.
+
+First clean-archive attempt 17:51Z: `git archive 79c1f673
+lab/frontier/pjproject2shell` into `/tmp/w242-pjproject-clean`; unmodified
+`bash real/build-real.sh` returned rc 2 — `make -j6` failed creating
+`output/pjsip-x86_64-pc-linux-gnu/*.o` in the vulnerable tree even though
+the target directory exists afterward. That transient provisioning failure
+meant `real/vidport-asan-fixed` was never built, so the runner reported
+`11 PASS / 5 FAIL` with five "No such file or directory" cases. This is a
+failed replay, not a passing receipt.
+
+Clean-archive retry 17:55Z, same extracted tree and unmodified scripts:
+`bash real/build-real.sh` rc 0 (both tarballs re-fetched at the pinned
+commits with the hashes above, `avi_get_frame_symbols=1` in both libraries,
+`PROVISION_DONE`), then `bash real/run-vidport.sh` rc 0 with
+**TOTAL: 16 PASS / 0 FAIL**. Runner/driver hashes matched the in-tree
+values above; all six clean logs show `delta=48`, the vulnerable 64-byte
+chosen bytes in the live mutex, vulnerable 512-byte ASan `WRITE of size
+512` through `enc_clock_cb`, and fixed/safe byte-identical mutex state.
+No witness verdict for W240/W241/W242 as of chat event 5689 (17:35Z).
