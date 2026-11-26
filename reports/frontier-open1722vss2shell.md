@@ -26,7 +26,7 @@ In the v0.9.7 tarball, `Avtp_Vss_CalcVssPathLength()` at
 `vss_path_ptr = (uint8_t *)pdu + AVTP_VSS_FIXED_HEADER_LEN` (12 bytes) and,
 for INTEROP mode, returns `vss_load_be16(vss_path_ptr) + 2` in `uint16_t`
 arithmetic. It never consults the declared ACF message length. The shallow
-`Avtp_Vss_IsValid()` at `:176-196` accepts a header-only frame when the
+`Avtp_Vss_IsValid()` at `:175-197` accepts a header-only frame when the
 declared length is 12 and the buffer is 12 bytes, so a conforming consumer can
 call the accessor on a frame with no path prefix at all. `Avtp_Vss_SetVssData()`
 at `:619-624` derives its write pointer from that result:
@@ -68,14 +68,21 @@ socket, listener, pcap or external system. Canonical runner
   the `b12=ff` field; the logs themselves held the correct bytes. The
   assertions were corrected and the rerun scored 34/0 with unchanged source.
 
-## Author clean-archive replay
+## Author and witness replays
 
-Replayed the unmodified runner from `git archive f52dd1b5` (commit that staged
-this find) into `.mishe-tauftauf/replays/open1722vss2shell-w262/` at
-11:00:55Z: rc 0, **RESULT PASS=34 FAIL=0**, runner SHA-256 unchanged
-`5da4f917…1a72a52`. The pinned tarballs and fix patch were read from the
-archive; no generated evidence was reused. Author replay is not witness
-acceptance; an independent replay is owed.
+Author clean-archive replay from `git archive f52dd1b5` into
+`.mishe-tauftauf/replays/open1722vss2shell-w262/` at 11:00:55Z: rc 0,
+**RESULT PASS=34 FAIL=0**, runner SHA-256 unchanged `5da4f917…1a72a52`.
+Independent witness replay (W264, 11:19:00–11:19:07Z): clean `git archive
+f52dd1b5` into `.mishe-tauftauf/artifacts/witness-w264-open1722/` with all
+committed logs and generated trees removed, all three sources fetched fresh by
+commit SHA and hash-matched to the runner pins; the unmodified runner returned
+rc 0 and **RESULT PASS=34 FAIL=0**, byte-identical to the author's console
+apart from timestamps. Fresh GCC+Clang logs reproduce the READ-2 and
+`0 bytes after 12-byte region` at `Vss.c:66` ← `:307`, the chosen-byte length
+16708 and the wrap byte at offset 13, with all fixed and safe controls clean.
+Verdict: **ESTABLISHED AS LABELED**; no contradiction, no grade change, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w264-open1722/detail.md`.
 
 ## Honest rung-4 feasibility assessment
 

@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 113,
+      "value": 114,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2586,12 +2586,12 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 11:0xZ under standing #6 as the 170th declared target mind; window 177 adopted (panes %360/%361 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-136616 / GHSA-xvmx-7qq5-34q6: COVESA Open1722 before 0.9.8 `Avtp_Vss_CalcVssPathLength()` at real `src/avtp/acf/custom/Vss.c:307` reads a path prefix past a 12-byte header-only INTEROP VSS frame in uint16 arithmetic, and prefix 0xFFFF wraps so `Avtp_Vss_SetVssData()` writes a chosen byte into the path area; fixed in 0.9.8 commit `714067b0134cf36f89464dbc6ec25529c0e189c7`. Canonical `run-all.sh` sha256 `5da4f917cc7b5d9e8f04a1d7dfccc6ba6acff132ff3d2cee0eeb73ebc1a72a52`; author clean-archive replay from `f52dd1b5` returned `RESULT PASS=34 FAIL=0` rc 0 with GCC+Clang ASan heap READ of size 2, 0 bytes after a 12-byte region, chosen adjacent bytes driving length 16708, fixed build clean. Grade rung 3 real-source ASan OOB READ / rung 4 PARTIAL; no named adjacent object, pointer, AVTP wire path, command or r5. Independent witness replay owed.",
+      "boundary": "**ADMITTED 11:0xZ under standing #6 as the 170th declared target mind; window 177 adopted (panes %360/%361 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-136616 / GHSA-xvmx-7qq5-34q6: COVESA Open1722 before 0.9.8 `Avtp_Vss_CalcVssPathLength()` at real `src/avtp/acf/custom/Vss.c:307` reads a path prefix past a 12-byte header-only INTEROP VSS frame in uint16 arithmetic, and prefix 0xFFFF wraps so `Avtp_Vss_SetVssData()` writes a chosen byte into the path area; fixed in 0.9.8 commit `714067b0134cf36f89464dbc6ec25529c0e189c7`. Canonical `run-all.sh` sha256 `5da4f917cc7b5d9e8f04a1d7dfccc6ba6acff132ff3d2cee0eeb73ebc1a72a52`; author and independent witness clean-archive replays from `f52dd1b5` returned `RESULT PASS=34 FAIL=0` rc 0 (witness W264, 11:19Z, with all three sources re-fetched and hash-matched to the pins). GCC+Clang ASan heap READ of size 2, 0 bytes after a 12-byte region, chosen adjacent bytes driving length 16708, fixed and safe controls clean. Grade rung 3 real-source ASan OOB READ / rung 4 PARTIAL; no named adjacent object, pointer, AVTP wire path, command or r5. VERDICT ESTABLISHED AS LABELED: no contradiction, no grade change; detail in `.mishe-tauftauf/artifacts/witness-w264-open1722/detail.md`.",
       "reports": [
         "reports/frontier-open1722vss2shell.md",
         "reports/open1722vss2shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }

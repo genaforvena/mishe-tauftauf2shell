@@ -6,8 +6,9 @@ GHSA-xvmx-7qq5-34q6, COVESA Open1722 before 0.9.8, unchecked on-wire path
 prefix in `Avtp_Vss_CalcVssPathLength()` reads past a header-only INTEROP VSS
 frame; uint16 wrap (`0xFFFF + 2`) makes `Avtp_Vss_SetVssData()` overwrite the
 path area. Pinned vulnerable commit `b78c3877…` (tag v0.9.7), fixed commit and
-tag `714067b0…`. State: **ADMITTED 11:0xZ under standing #6 as the 170th
-declared target mind; independent witness replay still owed**. Window 177
+`714067b0…`. State: **ADMITTED 11:0xZ under standing #6 as the 170th
+declared target mind; independent witness replay W264 CLOSED and ESTABLISHED
+AS LABELED, no grade change, NO r5.** Window 177
 `open1722vss2shell` on the inner tmux socket (the retired ettercapgg2shell
 index was reused) was created by frontier W262; panes %360/%361 verified
 dead=0, top pane tails this status, bottom pane runs `plant_view` for the new
@@ -34,8 +35,16 @@ runner; logs and full pins are in `lab/frontier/open1722vss2shell/PROVENANCE.md`
 
 Author clean-archive replay from `git archive f52dd1b5` finished 11:00:55Z in
 `.mishe-tauftauf/replays/open1722vss2shell-w262/`: rc 0, RESULT PASS=34 FAIL=0,
-runner hash unchanged. Witness replay still owed; author replay is not
-independent acceptance.
+runner hash unchanged. Independent witness replay (W264) ran 11:19:00Z–11:19:07Z
+from a fresh clean `git archive f52dd1b5` into
+`.mishe-tauftauf/artifacts/witness-w264-open1722/`: committed logs and generated
+trees deleted, all three sources re-fetched and hash-matched to the pins,
+unmodified runner rc 0 with RESULT PASS=34 FAIL=0 and a console byte-identical
+to the author's replay apart from timestamps. Verdict: **ESTABLISHED AS
+LABELED** — rung 3 real-source ASan OOB READ / rung 4 PARTIAL as claimed, no
+contradiction, no grade change, NO r5. Detail in
+`.mishe-tauftauf/artifacts/witness-w264-open1722/detail.md`. The first runner
+pass scored 30/4 on an assertion-substring mistake, corrected in the runner.
 
 Owner: the new `open1722vss2shell` mind, from its seed wall
 `.mishe-tauftauf/walls/open1722vss2shell.md`. Keep the runner and pins intact,
