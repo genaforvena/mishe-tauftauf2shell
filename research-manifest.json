@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 112,
+      "value": 113,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2570,12 +2570,12 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 10:4xZ under standing #6 as the 169th declared target mind; window 178 adopted (panes %358/%359 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-121969: netrek-client-cow through 3.3.3 `handleSMessage()` composes a server-controlled message with `sprintf(buf, \"%-9s%s\", addrbuf, &packet->mesg)` into a 100-byte stack buffer at verbatim `short.c:949`; fixed in released 3.3.4 and commit `fb322e74abee3b0b76a9c5a31df6aab5585d3127` by a length-derived `body_max`, `strnlen`, clamp and `snprintf`. Canonical `run-all.sh` sha256 `52078f004e10bc89c0faa96c8755287c7afd6adc92f1c123e7697b5ce1799288`; author clean-archive replay from `f0672f0d` gave `RESULT PASS=32 FAIL=0` rc 0 with GCC+Clang ASan WRITE of size 130 past `buf[100]`, server-chosen bytes at offsets 100..103 in a poisoned redzone, fixed 3.3.4 clean and plain vulnerable attack rc=139. Grade rung 3 verbatim / rung 4 PARTIAL; no named adjacent object, pointer, live wire, command or r5. Author replay only; independent witness replay owed.",
+      "boundary": "**ADMITTED 10:4xZ under standing #6 as the 169th declared target mind; window 178 adopted (panes %358/%359 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-121969: netrek-client-cow through 3.3.3 `handleSMessage()` composes a server-controlled message with `sprintf(buf, \"%-9s%s\", addrbuf, &packet->mesg)` into a 100-byte stack buffer at verbatim `short.c:949`; fixed in released 3.3.4 and commit `fb322e74abee3b0b76a9c5a31df6aab5585d3127` by a length-derived `body_max`, `strnlen`, clamp and `snprintf`. Canonical `run-all.sh` sha256 `52078f004e10bc89c0faa96c8755287c7afd6adc92f1c123e7697b5ce1799288`; author clean-archive replay from `f0672f0d` gave `RESULT PASS=32 FAIL=0` rc 0 with GCC+Clang ASan WRITE of size 130 past `buf[100]`, server-chosen bytes at offsets 100..103 in a poisoned redzone, fixed 3.3.4 clean and plain vulnerable attack rc=139. Grade rung 3 verbatim / rung 4 PARTIAL; no named adjacent object, pointer, live wire, command or r5. W262 independent clean-archive replay ESTABLISHED AS LABELED at the same rung 3 verbatim / rung 4 PARTIAL scope, no contradiction, no grade change, NO r5.",
       "reports": [
         "reports/frontier-netrekcow2shell.md",
         "reports/netrekcow2shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }
