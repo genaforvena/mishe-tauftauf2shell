@@ -3670,3 +3670,40 @@ no mechanics. Grades unchanged: rung 4 witness-COMPLETE, harness-condition
 rung 5 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT
 ACHIEVED**. Reopen this lane only with a cgroup that permits >6 GB RSS, or a
 smaller overflowing input with a measured expansion ratio above 3:1.
+
+### C=640 adjacent consumer identified — boot-time Prism/ISEQ compile allocation (2026-11-26, fifth wake)
+
+The fourth wake left the C=640 wire-adjacent qword flip with consumer UNKNOWN:
+the adjacent allocation was `malloc(0x270)` (624 bytes) but the backtrace
+filter watched 528 bytes. A single-size filter cannot follow this lane —
+across ten production-mode C=640 trials the adjacent allocation was measured
+at 0x20, 0x20c, 0x208, 0x240, 0x250, 0x270 and 0x280 bytes, and the flips
+turned the low byte of a Ruby-heap pointer (`…b53`, `…d353`). This wake
+added a bounded size-range backtrace filter to the lab tracer
+(`JEMTRACE_BT_MIN`/`JEMTRACE_BT_MAX` in `lab/preload/jemtrace.c`, passed
+through by `lab/repro/ruby2shell-jemalloc-wire.sh`) and re-ran the attack
+four times with `JEM_BT_MIN=512 JEM_BT_MAX=640 JEM_BT_DEPTH=12`.
+
+In all four runs the adjacent chunk's allocation backtrace resolves (frame
+offsets from that run's Ruby load base in the `.maps` snapshot, `addr2line`
+against the pinned plain 3.4.12 build) to Ruby's **compile path**:
+`rb_gc_impl_malloc` (`gc/default/default.c:8195`) via
+`pm_iseq_new_with_opt_try` (`iseq.c:1046`), `pm_iseq_compile_node`
+(`prism_compile.c:10544`), `iseq_set_sequence` (`compile.c:2593`),
+`pm_new_child_iseq` and `pm_scope_node_destroy`; the 0x20 sample resolves to
+`compile_data_alloc_with_arena` / `ISEQ_COMPILE_DATA` (`new_insn_send`).
+These are boot-time bytecode and compile-data allocations — not
+request-time strings, function-pointer tables or wire-reflected objects.
+The safe-input control (`jemwire-prod640ctl2`) showed zero watched-buffer
+dumps, zero `53` hits, HTTP 404 and a live process, so the flips remain
+attributable to the expansion.
+
+Disposition: the last UNKNOWN consumer of the C=640 first-qword lane is
+closed as a bounded NEGATIVE. A stable compile-time structure is reached,
+but the value written stays the fixed odd `0x53`, the object is created
+during boot before any request, and no attacker-chosen byte, code pointer
+or wire-visible disclosure follows. Grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
+`lab/build/evidence/jemwire-prod640{,bt,bt1..bt4,range,range1..range3}.{trace,maps,summary}`
+and `jemwire-prod640ctl2.*`.

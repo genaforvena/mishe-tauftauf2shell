@@ -37,9 +37,19 @@ static void *watch_ptr;
 static size_t watch_sz;
 static size_t post_size;
 static size_t bt_size;
+static size_t bt_min;
+static size_t bt_max;
 static int want_bt;
+static int want_bt_range;
 static int bt_depth = 10;
 static size_t free_q0;
+static int free_all_q0;
+
+static int want_bt_for(size_t sz)
+{
+    return (want_bt && bt_size && sz == bt_size) ||
+           (want_bt_range && sz >= bt_min && sz <= bt_max);
+}
 
 static const char hx[] = "0123456789abcdef";
 
@@ -125,10 +135,18 @@ __attribute__((constructor)) static void jemtrace_init(void)
     if (fdvar) logfd = atoi(fdvar);
     if (szvar) watch_size = (size_t)strtoul(szvar, NULL, 0);
     const char *btvar = getenv("JEMTRACE_BT_SIZE");
+    const char *btminvar = getenv("JEMTRACE_BT_MIN");
+    const char *btmaxvar = getenv("JEMTRACE_BT_MAX");
     const char *freevar = getenv("JEMTRACE_FREE_Q0");
     if (freevar) free_q0 = (size_t)strtoul(freevar, NULL, 0);
+    free_all_q0 = getenv("JEMTRACE_FREE_ALL_Q0") != NULL;
     const char *depthvar = getenv("JEMTRACE_BT_DEPTH"); if (depthvar) bt_depth = atoi(depthvar);
     if (btvar) { bt_size = (size_t)strtoul(btvar, NULL, 0); want_bt = 1; }
+    if (btminvar || btmaxvar) {
+        bt_min = btminvar ? (size_t)strtoul(btminvar, NULL, 0) : 0;
+        bt_max = btmaxvar ? (size_t)strtoul(btmaxvar, NULL, 0) : (size_t)-1;
+        want_bt_range = 1;
+    }
     const char *armvar = getenv("JEMTRACE_ARM_SIZE");
     if (armvar) arm_size = (size_t)strtoul(armvar, NULL, 0);
     real_malloc = dlsym(RTLD_NEXT, "malloc");
@@ -163,7 +181,7 @@ void *malloc(size_t sz)
         dump_window(watch_ptr, watch_sz, "after");
         watch_ptr = NULL;
     }
-    if (want_bt && bt_size && sz == bt_size && p) emit_bt();
+    if (p && want_bt_for(sz)) emit_bt();
     logline("M", sz, p);
     in_hook = 0;
     return p;
@@ -177,7 +195,7 @@ void *calloc(size_t n, size_t sz)
     p = real_calloc ? real_calloc(n, sz) : NULL;
     if (p && !real_calloc) memset(p, 0, n * sz);
     logline("C", n * sz, p);
-    if (want_bt && bt_size && n * sz == bt_size && p) emit_bt();
+    if (p && want_bt_for(n * sz)) emit_bt();
     in_hook = 0;
     return p;
 }
@@ -197,6 +215,12 @@ void free(void *p)
 {
     if (!ready || in_hook) { __libc_free(p); return; }
     in_hook = 1;
+    if (p && free_all_q0) {
+        char pbuf[17], qbuf[17];
+        rawhex((unsigned long)p, pbuf);
+        rawhex(*(unsigned long *)p, qbuf);
+        rawex("Q", (unsigned long)syscall(SYS_gettid), pbuf, qbuf, NULL);
+    }
     if (p && free_q0 && *(size_t *)p == free_q0 && watch_size) {
         dump_window(p, watch_size, "before");
         dump_window(p, watch_size, "after");

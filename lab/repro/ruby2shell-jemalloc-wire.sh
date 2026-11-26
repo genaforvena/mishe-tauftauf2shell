@@ -36,6 +36,11 @@ sys.stdout.buffer.write(
 PY
 ROOT="$PWD"
 JEM_WIRE_RUBY="${JEM_WIRE_RUBY:-lab/build/plain/ruby-3.4.12-plain/bin/ruby}"
+BTRANGE=()
+if [ -n "${JEM_BT_MIN:-}" ] && [ -n "${JEM_BT_MAX:-}" ]; then
+  BTRANGE=("JEMTRACE_BT_MIN=$JEM_BT_MIN" "JEMTRACE_BT_MAX=$JEM_BT_MAX")
+fi
+env "${BTRANGE[@]}" \
 LD_PRELOAD="$ROOT/lab/preload/jemtrace.so:libjemalloc.so.2" \
 JEMTRACE_FD=9 \
 JEMTRACE_WATCH_SIZE="$CLASS" \
