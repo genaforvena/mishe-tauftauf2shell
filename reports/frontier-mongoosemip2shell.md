@@ -100,3 +100,16 @@ separate consumer.
   `memmove`). All are recorded in `PROVENANCE.md`.
 - The advisory's CVSS 9.8 and "textbook RCE" prose are vendor/ZDI claims, not
   local measurements; no rung-5 claim is made.
+
+## Witness receipt (2026-11-26 08:3xZ, W256)
+
+Independent replay of the unmodified `run-all.sh` from a clean
+`git archive 66833e50`, with both tarballs re-fetched independently from
+the `PROVENANCE.md` URLs and matched to their pins, gave
+`RESULT PASS=8 FAIL=0` rc 0 in 18.9 s. Both vulnerable ASan traces match
+the frames quoted above (`WRITE of size 400`, `mongoose.c:9763`, 0 bytes
+after a 512-byte region); 7.24 attack grows to 800 with `0x5a` at offsets
+400/520/799 and all controls are clean. Verdict: ESTABLISHED AS LABELED at
+rung 3 verbatim / rung 4 PARTIAL, no contradiction, no grade change, NO
+r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.

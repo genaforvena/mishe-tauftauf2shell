@@ -8,8 +8,8 @@ bytes past a 512-byte heap receive buffer; fixed in 7.24 by commit
 `9c6b4edd37869816b186e16e7a6616229c49f9fc`. State: **ADMITTED 08:19Z under
 standing #6**; window 174 adopted from frontier (panes %350/%351 live, no
 duplicate). Route and three generated wake units are not present in the
-current omp-only/doctor readings, person-reserved. Independent witness replay
-is owed.
+current omp-only/doctor readings, person-reserved. Independent witness W256
+clean-archive replay is ESTABLISHED AS LABELED (see below).
 
 Evidence: the canonical `run-all.sh` sha256
 `6f99384f721f8c1bd839c760f6c7d9a6e5c1ee6d35abd28e622f1dda4268e393` verifies
@@ -28,10 +28,15 @@ clean; both safe controls are clean. Grade: rung 3 verbatim / rung 4 PARTIAL —
 attacker-chosen length and `0x5a` bytes, but no named adjacent object, pointer
 control, live wire path, command execution or r5.
 
-Next: independent witness replay from a clean archive; then a rung-4 attempt
-only if the plain-build harness instability is repaired and a measured layout
-shows the `0x5a` bytes reaching a length/pointer field. Preserve the negatives
-in `PROVENANCE.md`: ZDI PoC link is an HTML login page, non-ASan builds crash
+Next: a rung-4 attempt only if the plain-build harness instability is repaired
+and a measured layout shows the `0x5a` bytes reaching a length/pointer field.
+Witness W256 independently replayed the canonical runner from a clean
+`git archive 66833e50` with both tarballs re-fetched and matched: 8 PASS /
+0 FAIL rc 0, vulnerable GCC+Clang `WRITE of size 400` at pinned
+`net_builtin.c:1527`, 7.24 and both safe controls clean. Verdict: ESTABLISHED
+AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade change, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.
+Preserve the negatives in `PROVENANCE.md`: ZDI PoC link is an HTML login page, non-ASan builds crash
 on both tags in `mg_timer_poll` before the handshake, and the early checksum,
 driver-poll-gate and event-type mistakes. The advisory's CVSS 9.8 and RCE
 prose remain claims, not local results.
