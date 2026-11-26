@@ -1,4 +1,31 @@
 # drwav2shell — status (updated 2026-11-26 00:4xZ)
+
+## W18 — GNUBase build blocker diagnosed; consumer still unexecuted (2026-11-26 03:2x-04:0xZ)
+
+- Reconciled the unknown-ending wake (`...3349353902094`) and its failed
+  reconcile chain: 682 objects, no `bin/gnubase`, crafted bad/safe RIFFs
+  unrun, no drwav commit or dirt. Nothing needed undoing. Tape 03:41Z: no
+  W1-W4 verdict; wake-unit failures are router/person-owned (disposition
+  `failed-m2shell-wake-drwav2shell-service`), not a target-scope repair.
+- Root cause of the three stalled builds: every `ninja` call spent >900s in
+  CMake's generated `VerifyGlobs.cmake` (CONFIGURE_DEPENDS globs over
+  `ext/SDL/src/**`) before compiling, so the 682 objects never grew. Removed
+  the VERIFY_GLOBS and RERUN_CMAKE edges from the gitignored build.ninja;
+  `ninja -n gnubase` then showed a real 227-step plan. A foreground one-target
+  compile succeeded in 6s, confirming the stall was the re-check, not the
+  compiler. Backgrounded full builds still produced no objects; foreground
+  is the working path on this host.
+- Fixed a real probe bug before any request: MCP maps engine command
+  `audioFile.import` to tool `audioFile_import` (`mcp/server.cpp:82-86,301-307`),
+  so `consumer/run-gnubase.sh` now sends `audioFile_import`. The required
+  `files` array and `readInfo(path)` -> `drwav_init_with_metadata()` chain are
+  confirmed (`audiofilecommands.cpp:130-141,191`, `reader.cpp:76-77`).
+- No binary linked, process started, HTTP request issued, ASan report,
+  marker or side effect observed at 04:05Z. Grade unchanged: rung 3 real
+  consumer/public API, rung 4 file-chosen flow to a lab marker; r5 UNKNOWN.
+  The MCP request names a local path, not WAV bytes. Evidence:
+  `consumer/evidence/w18-gnubase-build-diagnosis.txt`.
+
 ## W17 — GNUBase real-consumer attempt (2026-11-26 01:1x-01:4xZ, partial)
 
 - Provisioned GNUbase/GNUbase HEAD `125778191b5a466ba22aa576e4dc95884205289d`

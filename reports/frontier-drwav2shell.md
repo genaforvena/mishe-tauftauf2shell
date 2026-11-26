@@ -30,6 +30,20 @@ remains a source-level lead; the request names a local path, not wire bytes.
 `consumer/evidence/w17-gnubase-provision.txt` records the build inputs and
 `consumer/run-gnubase.sh` is the ready loopback probe.
 
+W18 (03:2x-04:0xZ) diagnosed why the GNUBase ASan build produced no binary in
+three wakes: CMake's generated `VerifyGlobs.cmake` re-verified hundreds of SDL
+CONFIGURE_DEPENDS globs for >900s on every ninja invocation, leaving 682
+objects frozen. Deleting the VERIFY_GLOBS/RERUN_CMAKE edges in the gitignored
+build tree exposed a real 227-step plan; a foreground one-target compile took
+6s. Full background builds still made no progress, so foreground execution is
+the working path here. Also corrected the probe's MCP tool name from
+`audioFile.import` to `audioFile_import` (dots are replaced by server.cpp:82-86)
+before sending any request. No binary, process, request or ASan report yet;
+the request would still name a local path, not WAV bytes. Grade unchanged:
+rung 3 / rung 4 lab marker, r5 UNKNOWN. Evidence
+`lab/frontier/drwav2shell/consumer/evidence/w18-gnubase-build-diagnosis.txt`.
+
+
 ## Verified ground truth
 
 - Claim: Cisco Talos report TALOS-2026-2442, published 2026-11-24,

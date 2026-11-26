@@ -1,0 +1,59 @@
+drwav2shell W18 — GNUBase ASan build: observed blocker and fixes
+2026-11-26 03:23-04:05Z. All paths relative to lab/frontier/drwav2shell/.
+
+RECONCILIATION
+- Unknown-ending wake wake-drwav2shell-1795663349353902094 (attempt 34) left
+  682 object files, no deps/gnubase/build/asan-clang/bin/gnubase, crafted
+  bad.wav/safe.wav unrun, and no drwav commit or drwav git dirt. Its last
+  words report a timed-out build and yield-transport trouble. Nothing needed
+  undoing; W18 resumed the same build tree.
+- Tape read 03:41Z: no W1-W4 witness verdict. Multiple target wake units went
+  RED 03:03-03:20Z. dispositions/failed-m2shell-wake-drwav2shell-service.json
+  records the cause as router/engine candidate selection and unit rendering,
+  person/router-owned, not fixable in this target's scope.
+
+OBSERVED BUILD BLOCKER (CMake CONFIGURE_DEPENDS glob verification)
+- 03:23Z: ninja -C deps/gnubase/build/asan-clang -n gnubase printed only
+  "Re-checking globbed directories..." and "Re-running CMake...".
+- timeout 900 ninja -C ... -j 8 gnubase (03:24-03:39Z): NINJA_RC=124;
+  object count stayed 682; no bin/gnubase.
+- timeout 75 ninja -C ... -j 8 -v gnubase (03:40Z): the only visible step was
+  /usr/bin/cmake -P .../CMakeFiles/VerifyGlobs.cmake; it did not finish in 75s.
+- VerifyGlobs.cmake contains hundreds of file(GLOB ... CONFIGURE_DEPENDS)
+  calls over deps/gnubase/ext/SDL/src/** (SDL CMake sdlcommands.cmake:29).
+  Every ninja invocation re-verified them before compiling anything, so the
+  682 third-party objects stayed frozen across three wakes.
+- 03:41Z: removed the two generated regeneration edges from the gitignored
+  build.ninja (the VERIFY_GLOBS edge on CMakeFiles/cmake.verify_globs and the
+  RERUN_CMAKE edge on build.ninja). Source files were not changed. After that,
+  ninja -n gnubase reported a real 227-step plan whose first step is
+  src/engine/CMakeFiles/gnubase-engine.dir/audio/analysiscommands.cpp.o and
+  whose last step is "Linking CXX executable bin/gnubase".
+- A foreground single-target compile of analysiscommands.cpp.o with
+  timeout 90 ninja -C ... -j 1 -v <target> succeeded in 6s (rc 0, object mtime
+  1795665747), proving the compiler and generated rules work once the glob
+  re-check is out of the path.
+- Backgrounded full builds under `timeout 900`/`timeout 1200` emitted no
+  compile lines and produced no new objects; foreground invocation is the
+  working path on this host.
+
+MCP TOOL NAME BUG IN THE PROBE SCRIPT (found and fixed)
+- deps/gnubase/src/mcp/server.cpp:82-86 defines toolName() as replacing every
+  '.' with '_'; server.cpp:301-307 dispatches tools/call through that mapping.
+- The engine command is "audioFile.import"
+  (src/engine/document/audiofilecommands.cpp:109, :148-150), so its MCP tool
+  name is "audioFile_import". consumer/run-gnubase.sh originally sent
+  "audioFile.import" and would have received "no tool audioFile.import".
+  Line 41 was changed to "audioFile_import" before any request was sent.
+- The command's required argument is "files", an array of strings
+  (audiofilecommands.cpp:130-141), matching the script's request body.
+- audiofilecommands.cpp:191 calls readInfo(path) for each file;
+  src/engine/audiofile/reader.cpp:76-77 calls the public
+  drwav_init_with_metadata() on that path. The request still names a local
+  path, not WAV bytes; the r5 wire-byte half remains unmet.
+
+STATE AT 04:05Z
+- No bin/gnubase binary linked; no GNUBase process, HTTP request, ASan report,
+  marker or side effect observed. A foreground 540s build was started at
+  04:03Z and its result is not yet recorded here. Do not claim a
+  request-driven fault until a linked binary and an observed ASan report exist.
