@@ -1,0 +1,16 @@
+Breakpoint 1 at 0x26a9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc, line 66.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=11, argv=0x7ffc34235018) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:66
+66	    rpmts ts = NULL;
+Breakpoint 2 at 0x71254f68bd4b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/cpio.cc, line 438.
+Breakpoint 3 at 0x71254f6c8231: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc, line 2243.
+ENTRY_BUF=0x7ffc3422c690 NEXT=(nil)
+ENTRY_BUF=0x5a0d977853c0 NEXT=(nil)
+AT_BUF=0x5a0d977853c0 NEXT=0x4141414141414141
+error: unpacking of archive failed: cpio: read failed - No such file or directory
+error: filetypes-1.0-1.noarch: install failed
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000071254f5739a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0

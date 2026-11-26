@@ -7,3 +7,5 @@ real/natural-continue/inspect/
 real/natural-continue/rwatch/
 real/natural-continue/rwatch-diag/
 real/gc-pointer/db/
+real/aslr-ceiling/db/
+real/aslr-ceiling/*.rpm

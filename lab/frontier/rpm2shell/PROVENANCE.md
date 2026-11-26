@@ -224,6 +224,38 @@ controls return rc 1 without a fault; fixed ASan attack rc 1 ASan-clean.
 | `real/gc-pointer/attack-validtarget.rpm` | `df41e11e5d0cb4258eb6ecba5805f073d18a19299d1e21cd6256719d79a5fbc3` |
 | `real/gc-pointer/plain-validtarget.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
 
+## Measured ASLR ceiling (2026-11-26 18:04Z)
+
+    cd lab/frontier/rpm2shell
+    bash real/run-aslr-ceiling.sh
+
+Verified **ASLR_CEILING_PASS=8 ASLR_CEILING_FAIL=0**, rc 0. The runner keeps
+the same private `--dbpath` and guarded `/tmp` names as the install runner.
+`real/aslr-ceiling/pre-copy.gdb` enables ASLR (`set disable-randomization
+off`) and only observes: at `rpmcpioRead()` entry the qword at `buf+0x20`
+is `0x7ffc7362ac70` stack-entry sample and `NEXT=(nil)` for the 1-byte
+heap buffer; at pinned `rpmfi.cc:2243` the same qword is
+`0x4141414141414141`. No high heap bytes exist to preserve with a short
+write. Fixture `attack-vsyscall.rpm` writes the fixed address
+`0xffffffffff600000` into that qword; three plain ASLR `rpm -i` runs
+faulted rc 139 (`/proc/self/maps` shows the page as `--xp` on kernel
+6.8.0-149-generic, so the read itself faults). Fixture
+`attack-len33-reloc.rpm` uses `RPM2SHELL_PAYLOAD_LEN=33` to write only the
+low byte; three plain runs aborted rc 134 with `double free or corruption
+(out)` before any GC walk; fixed ASan rc 1 ASan-clean. Earlier exploratory
+64-byte runs showed ASLR-random heap bases (e.g. `0x60d336d81600`) and a
+nil original qword in 3/3; those throwaway logs were removed after this
+runner captured the same result.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-aslr-ceiling.sh` | `8ac6fa5ef4a15239a9415a6e502bb1874463b9d1d5fa57475e2027e4c6188e09` |
+| `real/aslr-ceiling/pre-copy.gdb` | `c8f7b741196b0bd574a8163fb3ccdf25014c12cb9b2fe02abfeda5a6f3e8df15` |
+| `real/aslr-ceiling/pre-copy.log` | `542ef24d415bcbd8688fed8fda6fa2a637cc4c259121e57d597746199e6a3488` |
+| `real/aslr-ceiling/vsyscall-1.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+| `real/aslr-ceiling/len33-1.log` | `1b413635732151aa41408fbee343b06720151cfb2d41b2698fc0386f07a54c93` |
+| `real/aslr-ceiling/fixed-len33.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell

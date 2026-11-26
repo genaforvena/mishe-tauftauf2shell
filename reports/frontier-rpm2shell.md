@@ -244,6 +244,26 @@ that liblua dereferences during teardown. A second chosen dereference at a
 chosen valid target, a wire path and any command remain UNKNOWN/NO.
 Evidence: `real/gc-pointer/{A,B,V}.log`, `real/gc-pointer.gdb`.
 
+### Measured ASLR ceiling (2026-11-26 18:04Z)
+
+`bash lab/frontier/rpm2shell/real/run-aslr-ceiling.sh` replays **8 PASS /
+0 FAIL** and bounds the remaining pointer-redirection question. With
+GDB's `set disable-randomization off` (GDB only observes; no forced call),
+the qword at `buf+0x20` is `NEXT=(nil)` immediately before the real
+`rpmcpioRead()` copy and `0x4141414141414141` immediately after it
+(`real/aslr-ceiling/pre-copy.log`). There is therefore no ASLR-random
+heap pointer whose high bytes a short partial overwrite could preserve:
+writing only the low byte with `RPM2SHELL_PAYLOAD_LEN=33` instead aborts
+in glibc (`double free or corruption (out)`, rc 134, 3/3) before liblua
+walks the pointer; the fixed build rejects that package with rc 1 and no
+ASan report. A full eight-byte write of the fixed vsyscall address
+`0xffffffffff600000` faults in 3/3 plain ASLR runs (rc 139): on this
+6.8.0 kernel the page is `--xp`, so even the first `movzbl 0x9(%r14)`
+read faults. No package-controlled state supplies an ASLR-stable live
+GCObject address in these runs. This is a measured negative, not a claim
+that no other consumer or layout could offer a target; grade stays rung 4
+DEMONSTRATED with no wire path, command or r5.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
@@ -281,11 +301,12 @@ above is later work and still lacks an independent witness. Full W238 detail:
 - **Not rung 5:** no loopback service or wire request, no ASLR-stable target
   redirection, no command and no observed command side effect.
 
-Next experiment: find an ASLR-stable way to choose a valid GC target (or a
-pointer-free consumer) and measure whether the walk reaches a second chosen
-dereference; that is the remaining step toward a hijack claim. No command
-execution without a live target and benign side effect. Keep the allocator
-instrumentation and stripped/query negatives attached to any broader claim.
+Next experiment: a different consumer, allocator layout or an information
+leak would be needed for an ASLR-stable GC target; the package-only partial
+overwrite, fixed-address and short-write routes were measured and failed
+above. No command execution without a live target and benign side effect.
+Keep the allocator instrumentation and stripped/query negatives attached to
+any broader claim.
 
 ## Duplicate check
 
