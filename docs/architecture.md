@@ -71,6 +71,8 @@ An idle wake owes a bounded, falsifiable experiment deeper toward rung 4 (or
 rung 5 where a measured path exists) — or, once that rung is closed on the
 tested build, an adjacent lane in the same source tree. New products and runtimes go to frontier/operator for a new mind.
 Negative results and UNKNOWNs are preserved in the reports; the columns above
-map the boundary actually reached. All minds run on
-`opencode-go/hy4-flash-free`; the 2026-11-25 hungerg-free fallback was
-retired the same day after rate limiting.
+map the boundary actually reached. All minds route through OMP with
+`opencode-go/hy4-flash-free` as the tier-0 primary (`max_parallel: 5`) and
+`opencode-go/hungerg-free` as the tier-1 fallback (`max_parallel: 1`). The
+2026-11-25 fallback was retired after rate limiting and reinstated by the
+owner on 2026-11-26.
