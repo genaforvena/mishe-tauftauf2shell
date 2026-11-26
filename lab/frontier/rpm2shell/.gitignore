@@ -6,6 +6,7 @@ real/natural-continue/raw/
 real/natural-continue/inspect/
 real/natural-continue/rwatch/
 real/natural-continue/rwatch-diag/
+real/gc-pointer/db/
 real/gc-pointer/discover.log
 real/aslr-ceiling/db/
 real/aslr-ceiling/*.rpm
@@ -13,3 +14,4 @@ real/aslr-window/db/
 real/aslr-window/sample/
 real/aslr-window/*.rpm
 real/aslr-window/make-*.log
+real/install/db/
