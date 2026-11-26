@@ -1,0 +1,26 @@
+PASS vulnerable tarball sha256
+PASS fixed tarball sha256
+PASS vulnerable quickjs.c verbatim sha256
+PASS fixed quickjs.c verbatim sha256
+PASS upstream diff touches 13 lines in one function
+PASS vulnerable cast-through-int present
+PASS fixed INT_MAX guard present
+PASS fixed SyntaxError present
+PASS gcc vuln ASan heap overflow
+PASS gcc vuln ASan WRITE size 96
+PASS gcc vuln ASan frame at verbatim quickjs.c:38820
+PASS gcc vuln ASan exact allocation boundary
+PASS gcc vuln ASan exits 1
+PASS fixed ASan clean exit
+PASS fixed rejects overflowing count
+PASS fixed no ASan report
+PASS clang vuln silent (documented compiler-negative)
+PASS vuln ASan safe bytecode clean exit
+PASS vuln valid bytecode parsed
+PASS vuln valid bytecode evaluated
+PASS vuln valid bytecode no ASan report
+PASS fixed ASan safe bytecode clean exit
+PASS fixed valid bytecode parsed
+PASS fixed valid bytecode evaluated
+PASS fixed valid bytecode no ASan report
+RESULT PASS=25 FAIL=0
