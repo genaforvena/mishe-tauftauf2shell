@@ -16,6 +16,19 @@ ROOT=$(readlink -f ../src/real/neuvector-48ae8b5cac5ec3a7e332e5272e9b3050f44396c
 FIXED=$(readlink -f ../src/dpi_sig-fixed.c)
 DRIVER=$(pwd)/driver.c
 OUT=$(pwd)/out
+
+echo "== provisioning (if needed) =="
+if [ ! -f "$ROOT/dp/dpi/sig/dpi_sig.c" ]; then
+    mkdir -p ../src/real
+    if [ ! -f ../src/real/neuvector-vuln.tar.gz ]; then
+        curl -fsSL --max-time 180 \
+          https://codeload.github.com/neuvector/neuvector/tar.gz/48ae8b5cac5ec3a7e332e5272e9b3050f44396cb \
+          -o ../src/real/neuvector-vuln.tar.gz || {
+            echo "FAIL provisioning fetch"; echo "TOTAL: $pass PASS / $((fail+1)) FAIL"; exit 1; }
+    fi
+    tar xzf ../src/real/neuvector-vuln.tar.gz -C ../src/real || {
+        echo "FAIL provisioning extract"; echo "TOTAL: $pass PASS / $((fail+1)) FAIL"; exit 1; }
+fi
 mkdir -p out
 INC="-I$(dirname "$ROOT")/shim -I$ROOT -I$ROOT/dp -include stdio.h -include $ROOT/base.h -include $ROOT/defs.h"
 SAN="-g -O0 -fsanitize=address -fno-omit-frame-pointer -fno-stack-protector"

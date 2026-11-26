@@ -101,3 +101,7 @@ Limits: not a full enforcer `dp` binary, no controller REST/CRD wire, no
 real wildcard expansion (patterns are supplied in already-expanded form),
 no real hyperscan/urcu libraries, no chosen address, no command or side
 effect, no rung 5.
+
+`run.sh` self-provisions the tree from the tarball when it is absent; the
+extraction path was verified with the tree removed (22 PASS / 0 FAIL), while
+the initial network-fetch path was not re-exercised after provisioning.
