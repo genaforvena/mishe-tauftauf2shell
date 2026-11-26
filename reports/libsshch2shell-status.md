@@ -17,6 +17,12 @@ Witness W248 (2026-11-26 05:2xZ): independent clean-archive replay of W24
 (#4689) ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5;
 three serial runs 6 PASS / 0 FAIL, rc 0, both pinned trees re-fetched. Detail
 at `.mishe-tauftauf/artifacts/witness-w248-libsshch2shell/detail.md`.
+Witness W249 (2026-11-26 05:4xZ): independent clean-archive replay of W25
+(#4719, wire-resident callback iterator + wire command into real `system()`)
+ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5; three
+serial runs 6 PASS / 0 FAIL, rc 0, both pinned trees re-fetched, no
+trampoline and marker side effect reproduced. Detail at
+`.mishe-tauftauf/artifacts/witness-w249-libsshch2shell/detail.md`.
 
 ## Admission 2026-11-25 02:0xZ
 ADMITTED under standing #6 as the 140th route (hy4-flash `max_parallel: 3`),

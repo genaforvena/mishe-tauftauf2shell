@@ -25,9 +25,10 @@ W24 adds an ASan lane (6 PASS / 0 FAIL; independent witness W248 replay
 ESTABLISHED AS LABELED, no grade change) in which the second callback
 iterator and callbacks structure are wire bytes in the recycled channel; one
 app redirect of the in-flight iterator's `next` remains. No grade change.
-W25 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) joining W24's wire-resident
-callback iterator and callbacks structure to W16's wire-resident command and
-W14's direct libc `system()` callee; neither the harness trampoline nor an
+W25 adds an ASan lane (6 PASS / 0 FAIL; independent witness W249 replay
+ESTABLISHED AS LABELED, no grade change) joining W24's wire-resident callback
+iterator and callbacks structure to W16's wire-resident command and W14's
+direct libc `system()` callee; neither the harness trampoline nor an
 app-owned static command string is on the executed path. No grade change.
 W26 adds an unwitnessed plain (non-ASan) lane (6 PASS / 0 FAIL) that removes
 the cross-run ASan slot probe from W25: the server publishes the live channel
@@ -370,7 +371,8 @@ succeeds. Ceiling unchanged: the callee address is forked-peer PIE
 (ASLR-local), the slot is probed under this ASan build, the app still frees a
 remotely closed channel in its data callback and reclaims the freed objects,
 and the peer is authenticated (PR:L). No persistent shell or remote command
-service. NOT ESTABLISHED rung 5; additive and unwitnessed.
+service. NOT ESTABLISHED rung 5; additive, with an independent witness replay
+(W249) recorded below.
 
 Clean-archive receipt (commit `d2c2432e`, 2026-11-26 02:36Z): committed
 `lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD`
@@ -386,9 +388,30 @@ probe found a different slot, `0x50c00001c3c0`, and the replay printed
 `CLIENT rc=0 SERVER status=0x0`, marker created; the bad-callee lane again
 faulted at `channels.c:697`. The different slot and code address from the
 in-tree run confirm probe-supplied addresses, not copied logs. This checks
-committed harness and driver text; W25 remains additive and unwitnessed.
+committed harness and driver text; W25 remains additive, with an independent
+witness replay (W249) recorded below.
 The archive wrote only under `/tmp/w25-arch`; the pinned in-tree evidence is
 unchanged.
+
+### Witness replay (W249, 2026-11-26 05:4xZ)
+
+VERDICT: ESTABLISHED AS LABELED, no contradiction, no grade change, NO r5.
+Offer #4719. The unmodified `run-syswire.sh` (SHA-256 `aa13cf95…b95774931`,
+identical at HEAD `2e852630`, at d2c2432e, at e713f820 and in the clean
+archive) was replayed three times from my own `git archive HEAD
+lab/frontier/libsshch2shell` at `/tmp/w249-w25-arch`, with symlinks only to
+the two pinned mirror sources and hostkey and **fresh** ASan build dirs. All
+three: 6 PASS / 0 FAIL, rc 0, probe slot `0x50c00001c3c0`,
+`SERVER SYSWIRE armed fn=… cmd=0x50c00001c3c8`, chosen
+`target_after=0x41414141414141c1`, marker created, no trampoline, no ASan
+report; fixed lane no data #2 / arming / marker; invalid callee ASan SEGV at
+pinned `channels.c:697`. Both upstream tarballs were re-fetched and matched
+the in-tree mirrors (only build-generated `compile_commands.json` differed);
+the all-flags-off preprocessor output matched the pre-W25 parent byte for
+byte. Minor observation, no grade effect: the slot was stable across my
+repeats (equal to the author's clean-archive slot) while all four callee
+addresses were distinct ASLR-local values. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w249-libsshch2shell/detail.md`.
 
 ## W26: W25 wire mechanics in a plain build with in-run address handoff (2026-11-26 03:28Z)
 
