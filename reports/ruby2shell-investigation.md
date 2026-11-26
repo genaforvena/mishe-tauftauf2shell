@@ -5914,7 +5914,7 @@ smallbin sweep. Pass requires an address-matched overwrite of a freed BBuf
 tcache word before a later Regexp compile consumes it; no matched overwrite
 closes the combined lane.
 
-## Combined primary-overflow → Regexp BBuf tcache lane — CLOSED (2026-11-26 18:3xZ)
+## Combined primary-overflow → Regexp BBuf tcache lane — CLOSED (2026-11-26 18:19Z)
 
 One keep-alive connection to one stock Rails Puma worker
 (`RAILS_MAX_THREADS=1`, plain vulnerable 3.4.12) served a benign
