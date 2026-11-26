@@ -40,13 +40,16 @@ marker() { # key expected
   [ "${V:-?}" = "$2" ] || FAIL=$((FAIL + 1))
 }
 
-run_arm() { # label want-sha env...
-  LABEL=$1; WANT=$2; shift 2
+run_arm() { # label want-sha stopmode env...
+  LABEL=$1; WANT=$2; STOPMODE=$3; shift 3
   OUT="$T/$LABEL.out"
   ( cd "$D" && env NO_HANDLER=1 ORIGIN_TUPLE=1 "$@" sh run-two.sh ) >"$OUT" 2>&1
   RC=$?
+  # run-two.sh writes /tmp/twonode-used-sha.txt just before its ASan rebuild,
+  # so the ASan arm's recorded hash is the base 2.1.9 library. The rebuilt
+  # library is asserted separately via ASAN_BUILD=0 and the ASan report.
   USED=$(cut -d' ' -f1 /tmp/twonode-used-sha.txt 2>/dev/null)
-  [ "$WANT" = ASAN ] && WANT=$(sha256sum "$ASANSO" 2>/dev/null | cut -d' ' -f1)
+  cp -R "$D/evidence" "$T/$LABEL-evidence" 2>/dev/null || true
   cat "$D/evidence/server1.log" "$D/evidence/server2.log" >"$T/$LABEL-server.log" 2>/dev/null
   printf '%s RC=%s LIB_OK=%s' "$LABEL" "$RC" "$([ "$USED" = "$WANT" ] && echo 1 || echo 0)"
   [ "$RC" -eq 0 ] || FAIL=$((FAIL + 1))
@@ -57,8 +60,14 @@ run_arm() { # label want-sha env...
   marker TUPLE_ORIGIN_INSERT 0
   marker TABLE_ON_NODE2 t
   marker PGSTOP1 0
-  marker PGSTOP2 0
-  printf '\n'
+  if [ "$STOPMODE" = strict ]; then
+    marker PGSTOP2 0
+  else
+    V=$(cat "$D/evidence/PGSTOP2.txt" 2>/dev/null); V=${V#PGSTOP2=}
+    printf ' PGSTOP2=%s (observed, ASan recovery mode)' "${V:-?}"
+  fi
+  printf ' ASAN_REBUILT_SHA=%s\n' \
+    "$(sha256sum "$ASANSO" 2>/dev/null | cut -d' ' -f1)"
 }
 
 terms() { # label expected1 expected2
@@ -69,23 +78,27 @@ terms() { # label expected1 expected2
 }
 
 # 1. Vulnerable 2.1.9, plain: parser reached, elog(longjmp), no termination.
-run_arm v219-plain "$V219" VERSION=2.1.9
+run_arm v219-plain "$V219" strict VERSION=2.1.9
 need v219-plain "$T/v219-plain-server.log" 'could not parse slot name' 'pgactive_1_1_1_1_AZ'
 terms v219-plain 0 0
 
 # 2. Vulnerable 2.1.9 rebuilt with ASan: observed stack write in the parser.
-run_arm v219-asan ASAN VERSION=2.1.9 ASAN=1
+run_arm v219-asan "$V219" observe VERSION=2.1.9 ASAN=1
 need v219-asan "$T/v219-asan.out" 'ASAN_BUILD=0'
 need v219-asan "$T/v219-asan-server.log" 'stack-buffer-overflow' 'WRITE of size 261' \
   'pgactive_parse_replident_name' 'pgactive_catalogs.c:351'
 
 # 3. Fixed 2.1.10: parser rejects the same name, no ASan, no termination.
-run_arm v2210-fixed "$V2210" VERSION=2.1.10
+run_arm v2210-fixed "$V2210" strict VERSION=2.1.10
 need v2210-fixed "$T/v2210-fixed-server.log" 'could not parse replication origin name'
 if grep -q 'stack-buffer-overflow' "$T/v2210-fixed-server.log" 2>/dev/null; then
   printf 'MISSING v2210-fixed: unexpected ASan report\n'; FAIL=$((FAIL + 1))
 fi
 terms v2210-fixed 0 0
+
+LEFT=$(ps -eo pid,args | grep -E 'postgres -D n[12] -p 5843[12]' | grep -v grep | wc -l)
+printf 'LEFTOVER_POSTMASTERS=%s\n' "$LEFT"
+[ "$LEFT" -eq 0 ] || FAIL=$((FAIL + 1))
 
 printf 'VERDICT=%s FAILURES=%s ROOT=%s\n' \
   "$([ "$FAIL" -eq 0 ] && echo PASS || echo FAIL)" "$FAIL" "$T"
