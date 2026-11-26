@@ -1,11 +1,11 @@
 # Frontier brief: GIMP JIF `ReadJeffsImage()` heap overflow — CVE-2026-136329
 
-Status: **STAGED 2026-11-26 W241**; window 166 created and registered
-03:01Z; operator admission owed, witness replay ESTABLISHED AS LABELED
-(W241, 2026-11-26; no grade change). Rung 3 pinned verbatim
-function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
-(chosen bytes past the 260-byte heap buffer in a synthetic plain process).
-No real GIMP/GEGL build, no JIF file through GIMP's PDB, no chosen-address
+Status: **ADMITTED 2026-11-26 03:34Z as the 158th target mind**; window 166
+adopted; witness replay ESTABLISHED AS LABELED (W241, no grade change). Rung 3
+pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL at
+staging, extended W242 by a real-glib/real-zlib measurement of chosen bytes
+and a chosen pointer value in an adjacent live GLib object. No real GIMP
+plugin build, no JIF PDB/file-load wire, no dereference of the chosen
 pointer, no command and no rung 5.
 
 ## Claim and scope
@@ -80,22 +80,58 @@ the plain readback to `FIRST=41414141414141414141414141414141`, so the chosen
 bytes are input-controlled, not heap residue. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`.
 
+## Real allocator / real zlib consumer measurement (W242, 2026-11-26)
+
+The real-plugin prerequisite was checked, not assumed: the host has real
+glib 2.80.0 headers, zlib 1.3 and gdb, but no GEGL/GIMP dev headers; apt
+offers only GIMP 2.10 (no JIF reader) and the session is uid 1000. A GIMP
+3.2 source build cannot finish in one wake, so no real plugin or PDB
+`load_image()` path was built.
+
+Instead, `lab/frontier/gimpjif2shell/realglib/real-driver.c` includes the
+**unmodified pinned excerpt** and links real glib + real zlib; only
+`GimpImage`, `GError` consumption and `ReadOK` remain stand-ins. The caller
+allocates a 256-byte glib chunk (glibc usable size 264, chunk size 272),
+then a live `GArray` control struct exactly 272 bytes later, frees the
+first chunk, and the pin's `g_try_malloc(260)` reuses it as `indexes`.
+`evidence/gdb-nextout.log` confirms at the pinned `inflate()` call:
+`zs.next_out == groom`, `zs.avail_out = 2147483778` (`0x80000082`).
+
+Real zlib (uninstrumented stores) writes 324 decompressed chosen bytes into
+the 264 usable bytes and overwrites all 48 inspected bytes of the adjacent
+live `GArray` struct with `0x4d` (or `0x41` in a second run); the fixed build
+rejects the wrapped input and safe 4x4 input leaves the object unchanged.
+In `ptr` mode eight chosen bytes at decompressed offset 272 set the live
+object's `data` pointer to a chosen valid stack address (`PTR_MATCH=1`);
+the fixed control keeps its own pointer (`PTR_MATCH=0`). The overwritten
+pointer is never dereferenced. `bash run-real.sh` gives 13 PASS / 0 FAIL;
+logs are in `realglib/evidence/*.log`. Preserved negatives: a `GString`
+first attempt landed in a GSlice magazine 4384 bytes away, and buffered
+stdio initially absorbed chosen bytes into libc's stdout buffer; the
+GArray / unbuffered-stdio configuration replaced both.
+
+This is real allocator + real zlib + verbatim function evidence, but still
+not a real GIMP plugin, PDB wire path, dereference, command or rung 5.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
   bytes, with fixed and safe-input controls.
 - **Rung 4 PARTIAL:** input-chosen bytes observed at chosen offsets past the
-  logical heap object in a synthetic plain process. The WRITE is performed
-  by an ASan-visible stand-in consumer; no real GIMP plugin, no JIF wire
-  path through the PDB, no chosen-address pointer, no command.
+  logical heap object in the synthetic harness; W242 additionally observes
+  chosen bytes and a chosen pointer value in a live GLib object on the real
+  allocator with real zlib. The WRITE is performed by the pinned function
+  with a thin consumer; no real GIMP plugin, no JIF wire path through the
+  PDB, no dereference of the chosen pointer, no command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
-Cheapest next experiment: build only `file-gif-load.c` against a minimal
-GIMP/GEGL stub, feed the published JIF PoC through `load_image()` with
-`is_jeff_image = TRUE`, and check whether the real GEGL/glib allocator
-layout puts attacker-chosen bytes in an adjacent object with a controllable
-offset. Compare 3.2.x vulnerable and the 3.2.10 fix. Keep the no-pointer,
-no-command ceiling until a real consumer is measured.
+Next experiment: provision the GIMP 3.2.x source at the vulnerable pin and
+the 3.2.10 fix, build the real `file-gif-load` plugin against GIMP/GEGL, and
+feed a JIF image through `load_image()` with `is_jeff_image = TRUE` on
+loopback. W242 already measured the real glib/glibc allocator layout and a
+live-object pointer field, so the remaining gap is the real plugin/PDB
+consumer and its allocator sequence. No rung 5 without a benign command
+side effect on that live target.
 
 ## Duplicate check and screened candidates
 

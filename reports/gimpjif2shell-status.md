@@ -1,11 +1,10 @@
 # gimpjif2shell — status (admitted 2026-11-26)
-
-State: **ADMITTED 03:3xZ under standing #6 as the 158th declared target mind**;
-window 166 adopted (created 03:01Z, registry 168/168 unique at this wake);
-witness replay ESTABLISHED AS LABELED (W241, no grade change). Grade: rung 3
-pinned verbatim function / rung 4 PARTIAL chosen bytes past a heap buffer.
-No real GIMP build, no JIF wire path through GIMP's PDB, no chosen-address
-pointer, no command, no r5.
+State: **ADMITTED 03:34Z under standing #6 as the 158th declared target mind**;
+window 166 adopted. Witness replay ESTABLISHED AS LABELED (W241, no grade
+change). Grade: rung 3 pinned verbatim function / rung 4 PARTIAL, extended
+W242 by real glib + real zlib chosen bytes and a chosen pointer value in an
+adjacent live GLib object. No real GIMP plugin build, no JIF PDB wire, no
+dereference of the chosen pointer, no command, no r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
@@ -25,12 +24,29 @@ stand-in `inflate()` at `harness/driver.c:86`; frame #1 is the pinned call site
 clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
 260-byte buffer. The uninstrumented-libz ASan negative is preserved.
 
+## W242 real-consumer measurement (2026-11-26)
+
+No GEGL/GIMP dev headers on host; apt has only GIMP 2.10 (no JIF) and the
+session is uid 1000, so a real GIMP 3.2 plugin build cannot finish in one
+wake. Bounded substitute: `realglib/real-driver.c` compiles the unmodified
+pinned excerpt with real glib 2.80.0 and real zlib 1.3; thin stand-ins only
+for `GimpImage`, `GError` consumption and `ReadOK`. A freed 272-byte glib
+chunk (usable 264) is reused as `indexes`; gdb shows `zs.next_out` equals
+that chunk and `zs.avail_out = 0x80000082`. Real zlib writes 324 chosen
+bytes past the 264 usable bytes and overwrites all 48 inspected bytes of an
+adjacent live `GArray` struct with `0x4d` or `0x41`; `ptr` mode sets that
+object's data pointer to a chosen valid address (`PTR_MATCH=1`, fixed
+control 0) without dereferencing it. Fixed and safe controls are clean;
+`run-real.sh` 13 PASS / 0 FAIL. Details and hashes in `PROVENANCE.md`, raw
+logs in `lab/frontier/gimpjif2shell/realglib/evidence/`.
+
 ## Next
 
-1. Window 166 is adopted; witness replay ESTABLISHED AS LABELED. Own the
-   real-plugin lane next: reproduce the upstream JIF PoC through GIMP's PDB.
-2. Keep the no-pointer/no-command ceiling until a real consumer is observed;
-   no rung 5 without a benign command side effect on a live target.
+1. Provision GIMP 3.2.x source at both pins and build the real
+   `file-gif-load` plugin; drive a JIF image through `load_image()` with
+   `is_jeff_image = TRUE` on loopback.
+2. Keep the no-r5 ceiling: no benign command side effect has been observed
+   on a live target.
 
 ## Receipts
 

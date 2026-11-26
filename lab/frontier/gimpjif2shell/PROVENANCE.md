@@ -76,7 +76,53 @@ at `indexes + 260` (`CANARY_AT=260 FIRST=4d4d…`).
 ## Grade
 
 Rung 3 pinned verbatim function with ASan-confirmed heap OOB WRITE and
-vulnerable/fixed/safe controls. Rung 4 PARTIAL: chosen bytes observed at
-chosen offsets past the logical heap object in a synthetic plain process.
-No real GIMP/GEGL plugin build, no JIF file through GIMP's PDB, no
-chosen-address pointer, no command and no rung 5.
+vulnerable/fixed/safe controls. Rung 4 PARTIAL at staging: chosen bytes past
+a synthetic heap object. W242 adds a real glib + real zlib measurement with
+chosen bytes and a chosen pointer value in an adjacent live object; see the
+W242 section for the exact ceiling. No real GIMP/GEGL plugin build, no JIF
+file through GIMP's PDB, no dereference of the chosen pointer, no command,
+no rung 5.
+
+## W242 real-allocator / real-zlib consumer lane (2026-11-26)
+
+Real plugin build prerequisite checked, not assumed: host has real glib
+2.80.0 headers, real zlib 1.3 and gdb, but **no GEGL or GIMP development
+headers**; apt offers only GIMP 2.10 (no JIF reader), and the session is
+uid 1000. A GIMP 3.2 source build cannot complete in one 60-minute wake, so
+no real plugin or PDB `load_image()` path was built this wake.
+
+Bounded substitute: `realglib/real-driver.c` includes the **unmodified**
+pinned excerpt (`pins/jif-vulnerable.inc` / `pins/jif-fixed.inc`) and links
+real glib + real zlib; only `GimpImage`, `GError` consumption and `ReadOK`
+remain stand-ins. SHA-256:
+`realglib/real-driver.c`
+`12fa1960439f34c590cd4260603a08e4e4891984c63a06d65f4f3cb595ed8c6f`,
+`realglib/run-real.sh`
+`0484f35c3430036727e98a8f2f45b7a4f160206123d2666b4a5c436ef17f9b64`.
+
+Heap layout: caller allocates a 256-byte glib chunk (glibc usable size 264,
+272-byte chunk), then a live `GArray` control struct 272 bytes later, frees
+the first chunk, and the pin's `g_try_malloc(260)` reuses it as `indexes`.
+`evidence/gdb-nextout.log` breaks at the pinned `inflate()` call and shows
+`zs.next_out == groom == 0x55555555f450`, `zs.avail_out = 2147483778`
+(`0x80000082`), `live_struct = groom + 272`.
+
+Observed with real zlib (whose stores are not ASan-instrumented): 324
+decompressed chosen bytes fill 264 usable bytes of `indexes` and overwrite
+all 48 inspected bytes of the adjacent live `GArray` struct with `0x4d` (or
+`0x41` on a second run); fixed build rejects the wrapped input and safe
+4x4 input leaves the object unchanged. In `ptr` mode an eight-byte chosen
+value at decompressed offset 272 sets the live object's `data` pointer to a
+chosen valid stack address (`PTR_MATCH=1`), fixed control `PTR_MATCH=0`;
+the overwritten pointer is never dereferenced. `bash run-real.sh`:
+13 PASS / 0 FAIL. Raw logs: `realglib/evidence/*.log`.
+
+Preserved negatives: a first attempt used a live `GString`; its control
+struct came from a GSlice magazine 4384 bytes away (no corruption), and
+buffered stdio initially absorbed chosen bytes into libc's stdout buffer.
+Both were diagnosed, and the GArray/unbuffered-stdio configuration was
+adopted; the failed layout is not erased.
+
+Ceiling: this is a real allocator + real zlib + verbatim function result,
+still **not** a real GIMP plugin build, not a JIF PDB/file-load wire path,
+not a dereference of the chosen pointer and not rung 5.

