@@ -15,8 +15,9 @@ config, systemd units and the full-flag sync to the person. `check-omp-only.py`
 is RED for `leptonica2shell: no route` and `nfdump2shell: no route` (154
 declared roles); the 23:09Z doctor run lists fifteen missing unit files. The
 `failed-m2shell-doctor-service` RED was re-observed GREEN on a named
-person-owned disposition, not on a clean doctor run. Grade unchanged: rung 3
-pinned verbatim / rung 4 PARTIAL synthetic readback, no r5, witness UNKNOWN.
+person-owned disposition, not on a clean doctor run. Witness W237
+(2026-11-26 01:4xZ) verdict: ESTABLISHED AS LABELED. Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL synthetic readback, no r5.
 
 Claim: `CVE-2026-137063` (published 2026-11-25, CWE-122, CVSS 6.8), heap
 buffer overflow in Leptonica 1.79.0-1.87.0 `l_byteaInitFromStream()`; upstream
@@ -35,13 +36,14 @@ bounded plain consumer shows the chosen `MISHE-LEPTONICA` bytes at
 
 Grade: **rung 3 pinned verbatim / rung 4 PARTIAL** (file-chosen bytes at
 chosen offsets, but observed through a synthetic bounded consumer). No real
-library build, adjacent object, pointer, wire, command or r5. Witness
-verdict UNKNOWN.
+library build, adjacent object, pointer, wire, command or r5. Witness W237
+found no contradiction and did not change the grade; real-library
+reachability remains UNKNOWN.
 
 ## Next
 
-1. Replay `run-all.sh` from a clean archive and ask the witness to verify the
-   labeled grade.
+1. DONE in W237: clean-archive replay and independent witness verdict
+   ESTABLISHED AS LABELED; no grade change, no r5.
 2. Build real Leptonica 1.87.0 and the fixed commit with ASan; call
    `l_byteaInitFromFile()` on the same sparse file and confirm the write in
    the real library.
@@ -58,5 +60,22 @@ verdict UNKNOWN.
 result. The first clean replay from commit `ae82b2e7` failed one control
 (LeakSanitizer on the undestroyed stand-in bytea); the harness was repaired
 with `l_byteaDestroy(&ba)` and the failure preserved in `PROVENANCE.md`.
-No pinned upstream byte changed. This is an author-side replay; witness
-verdict on the staged grade stays UNKNOWN.
+No pinned upstream byte changed. This was an author-side replay; the witness
+verdict on the staged grade arrived in W237 (below).
+
+## Witness replay (W237, 2026-11-26 01:48Z)
+
+`git archive 1af44999 lab/frontier/leptonica2shell` into
+`/tmp/w237-lept-clean`, unmodified `run-all.sh` sha256
+`e4a634256369c276576eb4001f0bdd7f0c4fd1e8d0e4910915bced89ae59b6d3`:
+17 PASS / 0 FAIL, rc 0, in 0.93 s. Seven wrapper-checked pin hashes plus the
+`array_internal.h` header pin (checked against PROVENANCE) matched; raw
+`bytearray.c` from tag 1.87.0 and fix `c493a776` hashed exactly to the two
+full-file pins; `sed` of the claimed line ranges reproduced every `.inc`
+hash. GCC and Clang ASan recorded `WRITE of size 1000000001` 0 bytes after
+the 201-byte region from `pins/stream-parent.inc:17`, fixed and safe-input
+controls clean, and the synthetic bounded plain readback printed the chosen
+15-byte `MISHE-LEPTONICA` prefix (`0x11` after it is unwritten heap residue,
+not stream data). Rung 3 verbatim / rung 4 PARTIAL stands; no real library,
+pointer, wire, command or r5. Full detail:
+`.mishe-tauftauf/artifacts/witness-w237-leptonica22shell/detail.md`.

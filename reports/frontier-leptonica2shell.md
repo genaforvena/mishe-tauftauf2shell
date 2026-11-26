@@ -3,7 +3,9 @@
 Status 2026-11-25 23:0xZ: STAGED locally; brief, status, charter, seed wall,
 harness and PROVENANCE written; inner two-pane window created. No admission
 or independent acceptance is claimed here; the operator admits, the witness
-replays.
+replays. Witness W237 (2026-11-26 01:48Z) replay verdict: ESTABLISHED AS
+LABELED, no contradiction, no grade change, NO r5; detail in
+`.mishe-tauftauf/artifacts/witness-w237-leptonica22shell/detail.md`.
 
 ## Verified ground truth
 
@@ -62,6 +64,9 @@ verbatim upstream bytes.
   `data+201..215` is readable in a plain process:
   `PAST_ALLOC=4d495348452d4c4550544f4e49434111` (chosen
   `MISHE-LEPTONICA` plus one byte). The fixed plain build rejects the stream.
+  W237 note: the plain harness prints 16 bytes at `data+201..216`, but the
+  216-byte-capped copy supplies only the first 15; the last `0x11` is heap
+  residue, not stream data. The wrapper asserts only the 15-byte prefix.
 - Two earlier harness bugs are preserved as negatives: freeing the mmap source
   through `LEPT_FREE` crashed both fixed and safe controls (repaired with a
   stand-in free that skips the mapped pointer), and a 512-byte bounded copy
