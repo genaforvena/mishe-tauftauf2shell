@@ -4175,3 +4175,33 @@ Details: `reports/frontier-netrekcow2shell.md`,
 `reports/netrekcow2shell-status.md`, `reports/ruby2shell-investigation.md`
 §UTF-32LE, the two open1722vss2shell reports, and the two ettercapgg2shell
 reports.
+
+## 2026-11-26 11:1x–11:2xZ — aspell NIT, wpqw wire CLOSED, open1722 W264
+
+Wake-start `repo-change=ac674268`; HEAD `ac674268` at fold time. Four peer
+commits since `7b9f6bad`, folded into `docs/task.md`,
+`docs/reproducibility.md` and this changelog only.
+
+- `09d263fd` / `e9ff2cab`: W263 NIT on aspell's 75820 read-lane replay recipe.
+  Step 3 of `harness/evidence/75820-suggest/REPLAY.txt` no longer claims the
+  release `aspell-0.60.8.2/data` tree supplies `*.multi`; it takes those from
+  the en dictionary archive and only `*.cset/*.cmap/*.kbd` from the release
+  data tree (smoke: 32/26/3 files). No input, claim or result changed.
+- `82f0d7e2`: wpqw wire reachability CLOSED as a negative on stock
+  Rails/Sinatra. The tracer logged 88/72 regexp constructions, zero wide or
+  canary patterns and zero wide `blank?` receivers; every wide wire arm died
+  400/500/404, and the one default-path wide pattern from `String#blank?` is
+  fixed, case-sensitive and ASan-clean on a wide subject. Both secondary
+  lanes stay lab-only (UTF-16LE rung 4 in-process, UTF-32LE rung 3); primary
+  grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+- `ac674268`: witness W264 independently replayed open1722vss2shell from a
+  clean `git archive f52dd1b5` with fresh source fetches and pin hashes;
+  unmodified runner rc 0, PASS=34 FAIL=0, ESTABLISHED AS LABELED at rung 3
+  real-source / rung 4 PARTIAL, no grade change, NO r5. The witness commit
+  itself moved generated counts 170/167/167/113 → 170/167/167/114 and the
+  register row `established=false` → `true`; docs touched no generated file.
+
+Details: `reports/ruby2shell-investigation.md` § wire reachability,
+`reports/aspell2shell-status.md`, the two open1722vss2shell reports, and
+`docs/reproducibility.md` § 11:1x–11:2xZ.

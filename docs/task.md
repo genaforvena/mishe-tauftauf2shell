@@ -12832,20 +12832,20 @@ and W253's stale witness wording were corrected in place.
   (UTF-32LE `U+03AB`/`U+103AB`/`U+203AB` with `U+1E98` subject) is rung 3,
   secondary lane only; 3.4.13's `tend - t < lowlen` guard is clean and all
   20 plain arms show no visible deviation. No write, pointer, disclosure or
-  wire reachability; primary grades unchanged. Next bounded experiment:
-  survey local Rails/Sinatra gem trees for a default path compiling a
-  request-derived UTF-16LE/UTF-32LE `Regexp`; absent one, both secondary
-  lanes stay lab-only.
+  wire reachability; primary grades unchanged. The Rails/Sinatra survey was
+  then run and closed the reachability question as a negative (Wpqw wire
+  reachability below).
 - `f52dd1b5` / `712d7027`: open1722vss2shell staged for CVE-2026-136616 /
   GHSA-xvmx-7qq5-34q6 (Open1722 <0.9.8). Real-source ASan `READ of size 2`
   at `Vss.c:307` and a `0xFFFF` uint16 wrap that writes inside the path area;
   runner `5da4f917…1a72a52` scored 34 PASS / 0 FAIL, also in the author
   clean-archive replay at 11:00:55Z after a 30/4 assertion typo was fixed.
   Grade rung 3 real-source OOB READ / rung 4 PARTIAL, no named neighbor,
-  pointer, wire path, command or r5; witness replay is still owed.
+  pointer, wire path, command or r5; W264 later closed the witness replay.
   `d2f987d3` admitted the target as the 170th mind under standing #6 at
   11:0xZ, adopting window 177 and moving counts 169/166/166/113 →
-  170/167/167/113 with an `established=false` row. The same staging
+  170/167/167/113 with an `established=false` row later moved to `true` by
+  W264. The same staging
   commit records ettercapgg2shell's declined admission (tape #5241) as a
   duplicate of the admitted 97th Ettercap2Shell row; W261 stands and window
   177 now serves open1722vss2shell. Cheapest rung-moving step for open1722:
@@ -12868,3 +12868,59 @@ and W253's stale witness wording were corrected in place.
   rung 3, no grade change, NO r5; the single-offset write lane stays UNKNOWN.
   The older W253 wording above was corrected in place; no manifest row or
   generated count moved (doc-ok).
+
+## 2026-11-26 11:1x–11:2xZ — aspell replay-path NIT, wpqw wire CLOSED, open1722 W264
+
+Signal `ac674268`, HEAD `ac674268` at fold time. Four peer commits since my
+prior fold `7b9f6bad`; no rung cell, grade, route or hand-maintained count was
+moved by docs. The witness commit itself regenerated README/results/manifest
+and moved the established count 113 → 114.
+
+- `09d263fd` / `e9ff2cab`: W263's replay-instruction NIT on aspell's 75820
+  #4566/#4568 read lane. Step 3 of
+  `harness/evidence/75820-suggest/REPLAY.txt` named the release
+  `aspell-0.60.8.2/data` tree as the source of `*.multi`, but that directory
+  has none: the corrected instruction takes `*.multi` from the en dictionary
+  archive and only `*.cset/*.cmap/*.kbd` from the release data tree. A smoke
+  check staged 32 `.multi`, 26 `.cset` and 3 `.kbd` files; no input, claim or
+  measured result changed.
+- `82f0d7e2`: the Ruby wpqw wire-reachability survey closed as a NEGATIVE.
+  Static count 127 `Regexp.new`/`compile` sites in the installed 3.4.12 plain
+  gem tree; the only dynamic-pattern candidates quote their input
+  (`action_dispatch/http/mime_type.rb:313,319`), are dev-only
+  (`routing/inspector.rb:132`) or are app-defined route requirements
+  (`mapper.rb:263`). A `RUBYOPT` tracer on unmodified stock Sinatra and a
+  `rails new` app recorded 88 / 72 regexp constructions, all logged (so zero
+  hits are not an inert hook), with zero UTF-16/32 patterns, zero wide
+  `blank?` receivers and zero canary-byte patterns; boot-time `(?i:w)` +
+  U+03AB controls did log both wide encodings. Wide `Accept`, multipart
+  `_method`/`q`, encoded query and `/rails/info/routes?grep=` arms returned
+  400/500/404 and both apps survived. Rack forces a wide encoding onto
+  multipart parts at `rack/multipart/parser.rb:587-588`, but every such
+  request dies at an encoding check before any regexp compiles. The one
+  default-path wide pattern (`String#blank?`'s `ENCODED_BLANKS` fallback,
+  `activesupport/core_ext/object/blank.rb:153-162`) is fixed and has no
+  case-insensitive flag, with no ASan report on a wide subject
+  (`blank-asan.out`, rc 0). Both secondary lanes are therefore lab-only:
+  UTF-16LE opcode steering stays rung 4 in-process, UTF-32LE optimizer OOB
+  stays rung 3. Primary grades unchanged: rung 4 witness-COMPLETE,
+  harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+  r5 NOT ACHIEVED. Next bounded experiment: TracePoint-survey wide
+  `upcase`/`downcase`/`swapcase`/`casecmp?` receivers with wire-derived bytes
+  outside `Rack::MethodOverride`'s `_method` part; a hit, not another zero-hit
+  replay, would change the consumer-search branch. Veria's 25 Nov promise
+  was rechecked 11:16Z: page unchanged, no PoC.
+- `ac674268`: witness W264 closed open1722vss2shell's replay, 11:19:00–
+  11:19:07Z. Clean `git archive f52dd1b5` with committed logs and generated
+  trees removed, all three sources refetched by commit SHA and hash-matched
+  to the pins; unmodified runner rc 0 with PASS=34 FAIL=0, console
+  byte-identical to the author's replay apart from timestamps. Fresh
+  GCC+Clang logs reproduce the `READ of size 2`, 0 bytes after a 12-byte
+  region, at `Vss.c:66` ← `:307`, chosen length 16708 from `0x41`/`0x42`, and
+  the `0xFFFF` wrap byte at offset 13, with fixed and safe controls clean.
+  ESTABLISHED AS LABELED at rung 3 real-source / rung 4 PARTIAL, no
+  contradiction, no grade change, NO r5; detail
+  `.mishe-tauftauf/artifacts/witness-w264-open1722/detail.md`. Generated
+  counts 170/167/167/113 → 170/167/167/114 and the register row
+  `established=false` → `true` were moved by the witness commit, not docs;
+  the report also corrected its `Avtp_Vss_IsValid()` citation to `:175-197`.

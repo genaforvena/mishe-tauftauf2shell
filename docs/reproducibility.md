@@ -13124,10 +13124,11 @@ prefix `0x0004` gives length 6 and a write at offset 18 in both builds with
 no ASan. The initial 30 PASS / 4 FAIL was an assertion-substring mistake
 (`wrap b12=ff b13=…`), corrected in the runner without changing source or
 evidence. The author clean-archive replay from `git archive f52dd1b5` at
-11:00:55Z scored 34/0 with the hash unchanged. Witness replay is still owed;
-`d2f987d3` admitted the target as the 170th mind under standing #6, adopting
-window 177 (panes %360/%361) and moving counts 169/166/166/113 →
-170/167/167/113 with an `established=false` register row.
+11:00:55Z scored 34/0 with the hash unchanged. W264 later closed the witness
+replay (receipt below); `d2f987d3` admitted the target as the 170th mind under
+standing #6, adopting window 177 (panes %360/%361) and moving counts
+169/166/166/113 → 170/167/167/113 with an `established=false` register row
+that W264 moved to `true`, raising the established count to 114.
 
 Grade rung 3 real-source OOB READ / rung 4 PARTIAL — no named neighbor,
 pointer, AVTP wire path, loopback service, command or r5; the wrap overwrite
@@ -13138,3 +13139,73 @@ staging commit f52dd1b5 also
 records the operator's decline of ettercapgg2shell admission at tape #5241
 as a duplicate of the admitted 97th Ettercap2Shell row; the W261 verdict and
 its recipe above remain valid.
+
+## 2026-11-26 11:1x–11:2xZ — wpqw reachability recipe, aspell REPLAY NIT, W264 receipt
+
+No replay was rerun in this fold: commands, bytes and verdicts below are
+quoted from the committed report and witness receipt. No rung cell, grade,
+route or hand-maintained count moved by docs.
+
+### Ruby2Shell wpqw wire reachability — NEGATIVE, stock apps
+
+Requires the Ruby 3.4.12 plain build under `lab/build/plain/` plus the stock
+`ruby2shell-stock-baseline.ru` and `rails-stock-app` apps from the main Ruby
+recipe. From the repo root:
+
+```sh
+bash lab/repro/ruby2shell-wpqw-reach.sh sinatra
+bash lab/repro/ruby2shell-wpqw-reach.sh rails
+```
+
+Defaults are 127.0.0.1:4570 / :4572 (`RUBY2SHELL_REACH_PORT` overrides); each
+runner starts an unmodified app with a tracing preload, cleans its own
+evidence and kills the app on exit. Gitignored output:
+`lab/build/evidence/wpqw-reach/{sinatra,rails}.{server.log,trace,wire,out}`.
+Expect `ready=YES`, `process-alive-after-arms=YES`, `wide-patterns=0`,
+`wide-blank-receivers=0`, `canary-patterns=0`, and `exit ...` totals of 88
+regexp constructions for Sinatra and 72 for Rails (the tracer counts every
+construction, so zero hits are not an inert hook). A boot-time positive
+control logs `(?i:w)` + U+03AB in UTF-16LE and UTF-32LE. Wire arms: raw wide
+`Accept` returns 400 from Puma on both apps; multipart `_method`/`q` with a
+wide charset returns 500 `Encoding::CompatibilityError`; encoded wide query
+404; `/rails/info/routes?grep=` wide bytes 404 on Sinatra and 400
+`ActionController::BadRequest: Invalid encoding for parameter` on Rails.
+`blank-asan.out` under 3.4.12 ASan, using the fixed wide `blank?` pattern
+with a wide U+1E98+U+03AB subject, is rc 0 with no ASan report (only
+unrelated boot UBSan misaligned-load reports). Falsifier: any trace hit with
+wire-derived bytes on a stock arm. Full source survey and evidence:
+`reports/ruby2shell-investigation.md` § "Wire reachability of the
+wide-encoding regexp lanes".
+
+### Aspell2Shell 75820 — corrected dictionary source paths
+
+Step 3 of `harness/evidence/75820-suggest/REPLAY.txt` now takes `*.multi`
+from the en dictionary archive and only `*.cset/*.cmap/*.kbd` from the
+aspell-0.60.8.2 release `data/` tree; that release directory has no
+`*.multi` files (W263 NIT, `e9ff2cab`). A smoke copy staged 32 `.multi`, 26
+`.cset` and 3 `.kbd` files. No harness invocation, input bytes, claim or
+measured result changed; the W253 and W263 receipts above stand.
+
+### Open1722Vss2Shell — witness W264 receipt
+
+Replay the same canonical runner from a clean tree:
+
+```sh
+T=$(mktemp -d /tmp/docs-open1722-w264.XXXXXX)
+git archive f52dd1b5 lab/frontier/open1722vss2shell | tar x -C "$T"
+cd "$T/lab/frontier/open1722vss2shell" && bash run-all.sh
+```
+
+W264 did this 11:19:00–11:19:07Z after deleting committed logs and generated
+trees and refetching all three sources by commit SHA with pin hash checks;
+the unmodified runner (SHA-256 `5da4f917…1a72a52`) returned rc 0 with
+`RESULT PASS=34 FAIL=0`, byte-identical to the author's console apart from
+timestamps. Expect the GCC+Clang ASan `READ of size 2`, 0 bytes after a
+12-byte region, at `Vss.c:66` ← `:307`, the chosen length 16708, the
+`0xFFFF` wrap byte at offset 13, and clean fixed/safe controls. Verdict
+**ESTABLISHED AS LABELED** at rung 3 real-source / rung 4 PARTIAL, no
+contradiction, no grade change, NO r5; detail
+`.mishe-tauftauf/artifacts/witness-w264-open1722/detail.md`. The witness
+commit moved the generated established count 113 → 114 and the manifest row
+to `established=true`, and corrected the brief's `Avtp_Vss_IsValid()`
+citation to `:175-197`; docs moved none of those.
