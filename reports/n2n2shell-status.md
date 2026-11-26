@@ -42,26 +42,36 @@ system was probed.
   pin `0d686bbad55c849e88334da64efff9da88ad528a` (`written 3, removed 0`),
   daemon-reload, path enabled/active, pinned full-flag doctor GREEN rc 0.
 
-## Current grade
+## Current grade (closed W24, 2026-11-26 07:0xZ)
 
-Rungs 1-3 on the verbatim pinned decoder and, since 2026-11-24 22:1xZ, on a
-real pinned supernode process reached by one loopback UDP NAK datagram:
-ASan reports `stack-buffer-overflow`, `WRITE of size 96`, frames
-`wire.c:179` <- `wire.c:651` <- `sn_utils.c:2322`, in the stack `nak` at
-`sn_utils.c:2308`; safe and fixed-decoder controls are clean. Rung 4 is
-established for chosen bytes at chosen offsets in that live process's
-stack (gdb: 96 chosen bytes at `nak+14..109`, including two pointer-shaped
-slots whose safe-baseline values were a stack address and libc
-`_int_malloc+3173`; hardware read watchpoints did not fire on the NAK path
-after decode). Not established: control of a consumed pointer, canary or
-return address, command execution, or rung 5.
-The advisory's `sn_utils.c` stack attribution is now reproduced locally;
-witness replay of the live experiment is UNKNOWN. Full evidence
+Rungs 1-3 on the verbatim pinned decoder and on a real pinned supernode
+reached by one loopback UDP `REGISTER_SUPER_NAK` datagram: ASan reports
+`stack-buffer-overflow`, `WRITE of size 96`, frames `wire.c:179` <-
+`wire.c:651` <- `sn_utils.c:2322`, in the stack `nak` at `sn_utils.c:2308`;
+safe and fixed-decoder controls are clean. Rung 4 is established for chosen
+wire bytes at chosen stack offsets in that live process, for a wire-chosen
+value dereferenced as `comm` (W10), and for a wire-supplied fixed non-PIE
+address that keeps serving (W11). W22 bounds W11 under PIE: the same value
+is consumed but unmapped, so the process faults. W23 replays the exact wire
+against the complete upstream fixed tree: the decoder rejects it, forwards
+zeroed bytes and stays alive. Not established: marker execution, canary or
+RIP hit, control-flow takeover, command execution, stock-allocator behavior
+or r5. Loopback only; no external probes. Full evidence
 `reports/n2n2shell-live.md`.
 
-## Next
+## Research closure
 
-Witness replay of the live datagram and the stand-in harness, then a
-plain-build search for a live object at the overwritten offsets. A rung-5
-attempt needs a measured pointer/control path and an independently
-witnessed loopback benign-command side effect; none is measured here.
+No new evidence or addressed request arrived at W24. The witness has no
+verdict on live replay #3909 or the consolidated #4445 ask; those stay
+UNKNOWN, not passes. The structural ceiling is conjunctive: the 2048-byte
+receive cap bounds the token write to `nak+2024`, below the canary at
+`nak+3512` and saved RIP at `nak+3576`; three builds have zero indirect
+calls in `process_udp` and only bounded .rodata switch-table jumps (W12,
+W15); the other overwritten spill slots are dead in the NAK path (W13);
+and the consumed `comm` points to data with no function pointer (W14, plus
+W24's check of `mgmt_req_t`, the separate `mgmt_events[]` table and the
+pre-existing .bss zero run). Research is closed at that ceiling and the
+periodic `--again 2h` chain is retired. Neither witness replay is to be
+repeated without a verdict. Re-open on an addressed independent-witness
+verdict needing a fold, or a measured wire-to-callback / wire-to-command
+path.

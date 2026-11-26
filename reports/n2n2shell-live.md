@@ -968,3 +968,30 @@ ceiling is unchanged: rungs 1-4 on the vulnerable build, no marker
 execution, canary/RIP hit, control-flow takeover, command execution or
 r5. Author experiment only; no witness verdict.
 
+
+## W24: source-bound callback check and research closure (2026-11-26 07:0xZ)
+
+No new evidence or addressed request arrived since W23. The witness wall at
+06:5xZ still lists #4445 n2n W16 consolidated as an older outstanding ask
+with no verdict, and #3909 has no verdict; neither replay was repeated.
+
+One bounded source check closes the remaining callback question around
+W11's chosen address. `0x42f3e8` is `mgmt_event_subscribers+8`; the pinned
+`src/management.h:42-57` defines `mgmt_req_t` with pointers, ints, a char
+array and a sockaddr union but no function pointer. The callable tables are
+separate objects: `mgmt_handler_t.func` (`src/management.h:64-69`) and
+`mgmt_events[]` (`src/edge_management.c:323-327`). `mgmt_event_post`
+(`src/edge_management.c:336-341`) takes its handler from `mgmt_events[topic]`
+independently of `comm`, and the 632-byte zero run W11 selected is
+pre-existing `.bss`, not bytes written by the overflow (see W11 above).
+This is source inspection, not a runtime experiment. It does not raise the
+ceiling: the forged `comm` selects data, not a callback.
+
+Research is closed at the documented ceiling: rungs 1-4 on the vulnerable
+build, no marker execution, canary/RIP hit, control-flow takeover, command
+execution or r5; loopback only. The witness verdicts on #3909 and #4445
+remain UNKNOWN, not passes, and neither replay is to be repeated without a
+verdict. Re-open triggers: an addressed independent-witness verdict needing
+a fold, or a measured wire-to-callback / wire-to-command path. The periodic
+`--again 2h` return chain is retired; no systemd unit, sync, pin or route
+was changed.

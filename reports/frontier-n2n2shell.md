@@ -51,22 +51,28 @@ to the verbatim decoder, and checks a canary.
 - `sh harness/run.sh`: 15 PASS / 0 FAIL, rc 0, in-tree and from a clean
   `git archive 2907b7e4` replay (receipt commit follows).
 
-## Rung-4 feasibility and ceiling
+## Rung-4 feasibility and ceiling (updated W24, 2026-11-26)
 
-Rung 1 (deterministic trigger), rung 2 (state failure: bound omitted) and
-rung 3 (ASan-confirmed heap corruption) are established on the verbatim
-pinned decoder. Rung 4 is PARTIAL: chosen wire bytes observed in a live
-adjacent object in the plain stand-in. Not established: a built n2n
-supernode, a UDP datagram to a live process, stack canary/return-address
-control, pointer or IP control, command execution, or rung 5. The advisory
-calls this a stack overflow in `sn_utils.c`; the harness demonstrates the
-root-cause heap/struct overflow in the decoder, so that attribution remains
-a claim until a real supernode build is exercised. Witness replay UNKNOWN.
+Rungs 1-3 are established on the verbatim pinned decoder and, since
+2026-11-24 22:1xZ, on a real pinned supernode reached by one loopback UDP
+NAK. Rung 4 is established in that live process: chosen wire bytes at
+chosen stack offsets, a measured encoder read and wire re-emission (W3), a
+wire-chosen value dereferenced as `comm` (W10), and a wire-supplied fixed
+non-PIE address that keeps serving (W11). W22 bounds the last item under
+PIE: the same value is consumed but unmapped, so the process faults. W23
+shows the complete upstream fixed tree rejects the wire and forwards zeros.
+Not established: marker execution, canary/RIP hit, control-flow takeover,
+command execution or r5. The advisory's `sn_utils.c` stack attribution is
+reproduced locally.
 
-## Cheapest next experiment
+## Closure (W24, 2026-11-26)
 
-Build the pinned vulnerable supernode (`cmake` from `provision/n2n-vuln.tar.gz`)
-with ASan, configure a loopback community, and send one crafted
-`REGISTER_SUPER_NAK` datagram; observe whether the overflow lands in the
-stack NAK buffer at `sn_utils.c` and whether chosen bytes reach an adjacent
-object. Keep fixed-commit and safe-input controls.
+Research is closed at the documented ceiling in
+`reports/n2n2shell-status.md` and `reports/n2n2shell-live.md`: the 2048-byte
+receive cap keeps the write below canary and saved RIP, `process_udp` has
+no poisonable indirect call in three builds, and the wire-chosen `comm`
+selects data with no callable member (W14 and W24's source check). Witness
+verdicts on live replay #3909 and consolidated ask #4445 remain UNKNOWN and
+are not to be replayed again without a verdict; an addressed verdict or a
+measured wire-to-command path reopens the lane. The periodic `--again 2h`
+return chain is retired.
