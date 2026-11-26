@@ -298,6 +298,13 @@ no ASan report. No chosen ASLR-stable target, wire path, command or r5.
 | `real/aslr-window/len1377-1.log` | `fe9f5b64e067733d78afc0ae4fee9840397006a25ca33c3fdb53769f2be7b1b4` |
 | `real/aslr-window/fixed-len1377.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
 
+Clean-archive replay from `git archive bc7dc0ef lab/frontier/rpm2shell`
+(workspace source tree, vulnerable plain build, fixed ASan build and
+`install-vuln` config symlinked in as workspace-only artifacts) returned
+`ASLR_WINDOW_PASS=9 ASLR_WINDOW_FAIL=0`, rc 0 at 18:29Z. Both runner and
+GDB probe hashes matched the table above byte-for-byte; the temporary
+tree was removed after the replay.
+
 ## Verification
 
     cd lab/frontier/rpm2shell
