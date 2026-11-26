@@ -171,15 +171,66 @@ tarballs copied into `src/` re-ran the unmodified `sh ./run-wire.sh`: rc 0,
 (identical to the author console) at
 `.mishe-tauftauf/artifacts/mqttc2shell-wire/cleanarchive-console.log`.
 
+
+## Shipped-consumer experiment (W274, 15:19Z, verbatim simple_subscriber callback)
+
+`sh ./run-realconsumer.sh` (sha256
+`01df9585419357cc9b34cf48c164b114d5cd9a502b04746e4bdc314f9484aa90`) at
+15:19Z: rc 0, `RESULT PASS=27 FAIL=0`, console sha256
+`426b7c06df417cfdd2132a3b356a9d3f695ade874d154ca7000cc2e6e794b6c9` at
+`.mishe-tauftauf/artifacts/mqttc2shell-realconsumer/real-consumer-console.log`.
+`harness/real_callback_driver.c` (sha256
+`b52bc4832aded5be2899ecba9dbf2febfe4126f2feedb52a5cd94fd560282f34`) contains
+only lab-only socket/PAL/`main()` code: the callback is extracted at build time
+with awk, unedited, from the verbatim pinned v1.1.6
+`examples/simple_subscriber.c` (sha256
+`4df4f527d04e02f6d84b59084437e0dccba04770eeaa93424e0acf2fd1035eac`) into
+`callback.inc` (sha256
+`ed395acf8b86a7f02006bf3b8cf12442c1ad81b9fd569f2ae82197c4fe20c60c`,
+verbatim lines 123-133; its memcpy is `callback.inc:5` = verbatim
+`simple_subscriber.c:127`). The same `callback.inc` is compiled against both
+verbatim `mqtt.c` files, so the only variable is the library version.
+`recvbuf[1024]`/`sendbuf[2048]` match the shipped `main()`.
+
+On `30 04 ff ff 00 00`, with all 6 bytes arriving in two 3-byte `recv()` calls
+from a forked 127.0.0.1 broker, GCC ASan reports `stack-buffer-overflow` /
+`READ of size 65535` at the shipped callback's
+`memcpy(published->topic_name, ..., topic_name_size)`:
+
+```
+#1 publish_callback build-realconsumer/vuln/callback.inc:5  (verbatim simple_subscriber.c:127)
+#2 __mqtt_recv build-realconsumer/vuln/src/mqtt.c:760        (shipped callback dispatch)
+```
+
+The reported address is the first byte past `recvbuf` in the lab `main()` stack
+frame (`recvbuf` occupies `[608,1632)`, access at offset 1632). Plain child
+SIGSEGV (signal 11). v1.1.7 rejects the same wire packet with
+`rv=-2147483636`, never calls the callback (`Received publish` absent), clean
+exit, no ASan. Safe `30 06 00 01 61 62 63 00` prints
+`Received publish('a'): bc` with no ASan.
+
+This realizes the advisory's CWE-125 OOB READ in **shipped** subscriber code,
+not a lab-written callback. It is still rung 3, not rung 4: the callback sizes
+its own destination with the tainted `topic_name_size` (`malloc(size+1)`), so
+its 65535-byte write stays in bounds; the only OOB access is the READ past the
+receive buffer. No chosen bytes land at chosen offsets, no pointer value, no
+command. The library `memmove()` path remains structurally closed for a
+chosen-offset store (`consumed >= 2^32+6` above): both its source pointer and
+its length are dominated by the wrapped count, so neither is tunable with a
+realistic receive buffer. Independent replay of `run-wire.sh` and
+`run-realconsumer.sh` is owed.
+
 ## Grade
 
 Rung 2: observed unsigned payload-size underflow (`4294901763`) in verbatim
 pinned source. Rung 3: ASan-confirmed fault in verbatim code —
-`negative-size-param` at the `memmove()` in `__mqtt_recv` and a wild-pointer
-READ in the QoS1 unpacker. The 14:42Z wire runner removes the earlier caveat:
-the same ASan report follows bytes read by `recv()` from a loopback socket,
-with v1.1.7 and safe-packet controls clean. Rung 4 **NOT CLAIMED**: no chosen
-bytes at chosen offsets, no pointer value, no command and no r5; the measured
-`consumed >= 2^32 + 6` makes a chosen-offset store impossible through this
-`memmove()` with a realistic receive buffer. Independent witness replay of
-`run-wire.sh` is owed (the W271 witness replay covered only `run-all.sh`).
+`negative-size-param` at the `memmove()` in `__mqtt_recv`, a wild-pointer READ
+in the QoS1 unpacker, and a 65535-byte `stack-buffer-overflow` READ in the
+verbatim shipped `simple_subscriber.c` callback. Wire-backed at 14:42Z and
+15:19Z: all crafted bytes came from `recv()` on a loopback socket, with
+v1.1.7 and safe-packet controls clean. Rung 4 **NOT CLAIMED**: no chosen bytes
+at chosen offsets, no pointer value, no command and no r5. Both candidate
+consumers are structurally closed for a chosen-offset store: the library
+`memmove()` has `consumed >= 2^32+6` and the shipped callback mallocs its
+destination from the tainted length. Independent witness replay of
+`run-wire.sh` and `run-realconsumer.sh` is owed.
