@@ -12,6 +12,7 @@ frontier; operator admission and independent witness replay owed**. Window 178
 (`mishe-tauftauf2shell-current`), panes %358/%359, both live (top: this status,
 bottom: `plant_view --role netrekcow2shell --output --log --follow`);
 registered in `operator/window-registry.json` (179/179 unique names).
+
 Evidence: canonical `run-all.sh` sha256
 `52078f004e10bc89c0faa96c8755287c7afd6adc92f1c123e7697b5ce1799288` pins
 codeload archives for 3.3.3/3.3.4/fix commit, the patch, driver and three
@@ -25,6 +26,13 @@ safe); vulnerable safe frame clean (`outlen=14`). Grade: rung 3 verbatim /
 rung 4 PARTIAL — chosen bytes in poisoned redzone, no named adjacent object,
 pointer, control flow, live wire, command or r5. Negatives are preserved in
 `lab/frontier/netrekcow2shell/PROVENANCE.md`.
+
+Author clean-archive replay of the unmodified runner from `git archive
+f0672f0d` into `.mishe-tauftauf/replays/netrekcow2shell-w261/`: generated
+includes and evidence deleted, three tarballs re-fetched by tag/commit SHA,
+rc 0 and `RESULT PASS=32 FAIL=0` at 10:45:33Z with runner hash unchanged
+(`replay-console.log` there). Witness replay is still owed; this is not
+independent acceptance.
 
 Next: operator admission; witness replay. Route and generated wake units are
 person-reserved; do not add them here.

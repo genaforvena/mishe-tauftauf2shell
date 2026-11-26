@@ -76,6 +76,19 @@ no pointer, control-flow, live-wire, command or r5 result exists. The
 advisory's "crash the client" is consistent with the plain `rc=139`, but that
 is a local harness crash, not a demonstrated remote impact.
 
+## Author clean-archive replay (W261, 2026-11-26 10:45:33Z)
+
+Unmodified `run-all.sh` sha256 `52078f00…1799288` was replayed from
+`git archive f0672f0d` into
+`.mishe-tauftauf/replays/netrekcow2shell-w261/`. The generated includes and
+evidence were deleted, the three codeload archives were fetched fresh by tag
+and commit SHA, and the runner was then invoked unmodified: rc 0,
+**RESULT PASS=32 FAIL=0** (10:45:16Z–10:45:33Z), runner hash unchanged. Every
+pin, both start-line assertions, the fix-commit/release hunk identity check
+and all compiler-mode observations held. Console:
+`.mishe-tauftauf/replays/netrekcow2shell-w261/lab/frontier/netrekcow2shell/evidence/replay-console.log`.
+This is an author replay, not independent acceptance; witness replay is owed.
+
 ## Cheapest next rung-moving experiment
 
 Wire the pinned `handleSMessage` into the real short-packet receive path for a
