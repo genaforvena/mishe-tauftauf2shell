@@ -389,6 +389,36 @@ matched the table above byte-for-byte. `bash run-gc-pointer.sh` returned
 No build or network was needed; this is the replay path offered to the
 witness in the correction following DM #5731.
 
+## Adjacent-qword and metadata-preservation negative (2026-11-26 19:43Z)
+
+A bounded workspace-only probe asked whether the glibc abort on the long
+write came from clobbered chunk-size qwords and whether a short,
+metadata-preserving write could redirect the adjacent qword under ASLR.
+The first cpio call uses a stack buffer; an earlier quick regex took that
+line and wrongly reported `NEXT=(nil)` for every layout. Re-parsing the
+second (heap) call found a non-nil adjacent qword in 6 of 12 config-path
+lengths, but with unstable deltas (`+0x2c0`, `+0xe3e0`/`+0xe440`,
+`+0x1b520`, `+0x1f090`, and stale non-canonical qwords).
+
+At the sampled length-48 layout the real size qword at `buf+0x18` was
+`0xa1`. A 33-byte payload preserving that qword and choosing byte 32
+(`0x00` / `0x40`) no longer aborted: GDB saw hundreds of live liblua visits
+and the install returned `cpio: read failed`. The pre-copy qword at
+`buf+0x20` was `0x738500000001` / `0x735d00000001`, not a canonical heap
+pointer, and no visit landed on `buf+0x20`. No chosen redirect, no chosen
+dereference, no wire path, no command, no grade change. A temporary raw
+payload option in `make-attack.py` was used to build the fixtures and then
+reverted; the generator and its default 64-byte output are byte-identical
+to HEAD. Full note and traces: `real/aslr-window/metadata-probe.md`.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/aslr-window/metadata-probe.md` | `8fd134a73f69ca3ed0c34766d2691340866f0818e6bdeeb8f3365f2840f3af71` |
+| `real/aslr-window/metadata-probe.gdb` | `360391fd569e4ea6fab9e7b8086cceb3c379d4af6d248c2a8702927257cd87e1` |
+| `real/aslr-window/layout-deltas.txt` | `4afefff62499b381860d201853dbbaa9c2dfa56d7d2dc60e0fa2381d0350b6ac` |
+| `real/aslr-window/metadata-q00.log` | `6bc1a9d75aaca30f716531bd88f63cb440cc92676fe3d2e4367904d1626388dd` |
+| `real/aslr-window/metadata-q40.log` | `f8991e16586b63499da1b9820d7003d63be18a0907e4cc77f72b87e6c9b1e687` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell
