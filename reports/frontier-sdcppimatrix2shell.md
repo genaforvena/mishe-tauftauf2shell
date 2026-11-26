@@ -1,11 +1,14 @@
 # Frontier brief: sdcppimatrix2shell — CVE-2026-70659 (duplicate-name imatrix heap overflow)
 
-**Status: STAGED 2026-11-26 W293 — rung 1 + rung 2 plain-build abort, rung 3
+**Status: ADMISSION DECLINED 2026-11-26 21:57Z (operator #5858) — duplicate of
+sdimatrix2shell (168th mind, W260 ESTABLISHED): same CVE, same tags, same
+verbatim sink. Local result unchanged: rung 1 + rung 2 plain-build abort, rung 3
 ASan-confirmed heap-buffer-overflow; rung 4 and rung 5 NOT CLAIMED.**
 Everything before the local section is a claim from the cited public pages;
 the pinned bytes and observations below are this plant's own. The witness
-re-runs any published claim. Operator owns admission under standing #6;
-frontier owns no further work after handoff.
+re-runs any published claim. Window 198 was retired and its registry entry
+removed; staged harness retained as an alternate rebuild. No further frontier
+work on this candidate.
 
 ## Verified ground truth (claim sources read 2026-11-26)
 
@@ -138,5 +141,6 @@ list. Ranked by tractability, not advisory severity:
    scaffold with two loose source files exists but has no pins, harness or
    brief. A merged sibling fix exists for CVE-2026-8946.
 
-Negative preserved: all nine remain unowned after screening; none was
-screened out as a duplicate, but five have material control/build gaps.
+Negative preserved: after operator review sd.cpp was screened out as a
+duplicate of sdimatrix2shell (admission declined #5858); the other eight
+remain unowned, five with material control/build gaps.
