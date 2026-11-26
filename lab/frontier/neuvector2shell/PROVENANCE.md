@@ -235,11 +235,41 @@ give `0x2a2e422a2e422a2e` / `0x2e422a2e422a2e42`. Raw logs:
 `wirepath/out/loopback-o2-gdb-{a,B}.log`. Both attack processes fault at
 `dpi_sig.c:657` before returning: ASCII regex bytes, not a chosen address.
 
-Full-enforcer `dp` build remains BLOCKED (scout map, W280): `dp/Makefile:12`
-links `-lhs`; hyperscan/vectorscan headers and library are absent locally
-and absent from configured apt metadata (`package/Dockerfile.enforcer:22-26`
-uses SUSE `nv-deps`). `libjansson-dev` and `liburcu-dev` dev files are also
-absent (runtime `.so.4`/`.so.8` only); `go.mod:3` needs Go 1.27.4 while
-the host has 1.22.2 (agent build, not `dp`). W280 is the reachable
-socket-to-function lane under those blockers; grade unchanged, no chosen
-address, command or r5.
+At W280 the full-enforcer `dp` build was BLOCKED: `dp/Makefile:12` links
+`-lhs`; hyperscan/vectorscan dev files were absent locally and believed
+absent from apt metadata (upstream uses SUSE `nv-deps`). `libjansson-dev`
+and `liburcu-dev` dev files were also absent (runtime `.so.4`/`.so.8`
+only); `go.mod:3` needs Go 1.27.4 while the host has 1.22.2 (agent build,
+not `dp`). W282 below removes the `dp` blocker by provisioning the dev
+packages under `lab/`; the Go toolchain gap still blocks the agent build
+and is not needed for `dp`. Grade unchanged, no chosen address or r5.
+
+## Full enforcer `dp` build (W282, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/run.sh` → **19 PASS / 0 FAIL**,
+rc 0. The earlier `-lhs` blocker was removed by provisioning dev packages
+into `lab/frontier/neuvector2shell/src/deps/` (ignored): Ubuntu
+`libhyperscan-dev`/`libhyperscan5` debs for `hs/hs.h` and `libhs.so.5`,
+plus `libjansson-dev`, `liburcu-dev`, `libpcap-dev`, `libpcre2-dev`,
+`libjemalloc-dev`, `libnetfilter-queue-dev`, `libnfnetlink-dev`, all
+downloaded with `apt-get download` and extracted with `dpkg-deb -x` under
+`lab/`. Dev symlinks whose runtime packages were not extracted were pointed
+at host runtime libraries (lab-local symlink targets only); no host package
+was installed. `dp/Makefile` then built every real object with `-O2 -g
+-fsanitize=address -fno-omit-frame-pointer -fno-stack-protector
+-U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0` and linked `dp/dp` (2.8 MB) against
+real `libhs.so.5`. A fixed binary was built by substituting the pinned
+fixed `dpi_sig.c` (SHA-256 `cc9d9c48…4b08`) into the tree and rebuilding
+`sig.o`; the vulnerable source (SHA-256 `1fbf0ba4…3072b`) was restored and
+rebuilt afterwards.
+
+`dp -s -n 1` binds the pinned `/tmp/dp_listen.sock` (`dp/ctrl.c:45`). The
+REST-valid W274 datagram (2233 bytes) sent over a real `AF_UNIX SOCK_DGRAM`
+produced `AddressSanitizer: stack-buffer-overflow`, `WRITE of size 121`,
+address at offset 2080 of `dlpsig_buf` (line 621), write frame
+`dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`, reached from
+`dp_ctrl_bld_dlp dp/ctrl.c:2191`. Safe 139-byte datagram into the
+vulnerable binary and attack datagram into the fixed binary were ASan-clean;
+the fixed build logged `exceeds max sig len(2048) … skip rule`. Normalized
+facts: `fulldp/EVIDENCE.md`; raw logs and binaries: ignored `fulldp/out/`.
+The enforced ceiling is unchanged: no chosen address, command or r5.

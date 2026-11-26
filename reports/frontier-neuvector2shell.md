@@ -236,37 +236,57 @@ controller wire of its own, no real wildcard expansion in that lane
 (patterns were supplied already expanded; W274 below closes this gap),
 no hyperscan/urcu libraries, no chosen address, no command or side effect.
 
+## Full enforcer `dp` build and live control path (W282, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/run.sh` → **19 PASS / 0 FAIL**,
+rc 0. The earlier `-lhs` blocker was removed by provisioning hyperscan and
+the other dev packages under `lab/` only (Ubuntu `libhyperscan-dev` plus
+`apt-get download`/`dpkg-deb -x` for jansson, urcu, pcap, pcre2, jemalloc
+and netfilter); no host package was installed. The pinned tree's own
+`dp/Makefile` built the full dataplane with `-O2 -g -fsanitize=address
+-fno-omit-frame-pointer -fno-stack-protector -U_FORTIFY_SOURCE
+-D_FORTIFY_SOURCE=0` and linked real `libhs.so.5`.
+
+The running enforcer (`dp -s -n 1`) bound its pinned `/tmp/dp_listen.sock`
+and received the exact REST-valid 2233-byte W274 datagram over a real
+`AF_UNIX SOCK_DGRAM` client. ASan reported `stack-buffer-overflow`,
+`WRITE of size 121`, `[32, 2080) 'dlpsig_buf' (line 621) <== Memory access
+at offset 2080 overflows this variable`, write frame
+`dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`, reached from the real
+`dp_ctrl_bld_dlp dp/ctrl.c:2191`. Controls over the same socket: the
+139-byte safe datagram into the vulnerable binary and the attack datagram
+into the fixed-commit binary were ASan-clean, and the fixed binary logged
+`exceeds max sig len(2048) … skip rule`. Hashes, flags, normalized facts and
+raw logs: `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md` and
+`PROVENANCE.md`.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
-  pinned `dpi_sig_bld()`, in the byte-identical real `dpi_sig.c` object
-  built with real NeuVector headers, and through a REST-validated
-  controller-shaped JSON message with real wildcard expansion; all have
-  fixed and safe-input controls.
+  pinned `dpi_sig_bld()`, in the byte-identical real `dpi_sig.c` object,
+  through a REST-validated controller-shaped JSON message with real
+  wildcard expansion, and now in the **full pinned enforcer `dp` binary**
+  on its real AF_UNIX control socket. Every lane has vulnerable, fixed and
+  safe-input controls.
 - **Rung 4 lab mechanics (W278, witness ESTABLISHED AS LABELED):** chosen
   bytes observed at chosen offsets past the logical buffer in a synthetic
   frame, in the saved RBP slot of an `-O0` real-object frame, and in *both*
   saved RBP and saved return slot of an `-O2` real-object frame driven by a
-  REST-valid wire message. No full enforcer binary, no live REST/CRD
-  endpoint, no pointer redirection to a chosen address, command or
-  observed side effect. Grade stays rung 4 PARTIAL by label, not advanced.
-- **Not rung 5:** no live enforcer or REST/CRD target (W280 is one lab
-  consumer process on the real socket path) and no benign command side
-  effect.
+  REST-valid wire message. W282 advances the confirmed corruption to the
+  live enforcer binary, but still faults inside `dpi_sig_bld()` before
+  returning: the overwritten words hold ASCII regex bytes, not a chosen
+  address. No pointer redirection, command or observed side effect. Grade
+  stays rung 4 PARTIAL by label, not advanced.
+- **Not rung 5:** no REST/CRD endpoint is contacted, the enforcer is run in
+  standalone loopback mode under ASan, and there is no benign command side
+  effect. The Go agent cannot be built here (host Go 1.22.2, `go.mod`
+  requires 1.27.4).
 
-Next experiment: a full vulnerable 5.5.x enforcer `dp` binary with ASan and
-`-fno-stack-protector`, driven by the same W274 message over the real
-socket, then compare the live frame with 5.5.6. Full `dp` is currently
-BLOCKED by missing hyperscan/vectorscan development files: `dp/Makefile:12`
-links `-lhs` and the pinned sources need `hs/hs.h`; no `libhs`, header or
-apt metadata is present on this host (SUSE `nv-deps` is the upstream
-source). `libjansson-dev` and `liburcu-dev` are also absent, though apt
-metadata offers them; Go 1.22.2 cannot build the agent (`go.mod` needs
-1.27.4). W280 exercises the same socket -> jansson -> consumer -> pinned
-function path without those dependencies, but is not the full dataplane.
-Only with a measured live-consumer layout consider a chosen-address
-in-process marker; keep the no-command / no-rung-5 ceiling until a benign
-side effect is observed.
+Next experiment: read the full enforcer's `-O2` saved frame under gdb with
+the datagram sent after the breakpoint, and compare it with the patched
+5.5.6 frame; only a measured live-consumer layout would justify considering
+a chosen-address in-process marker. Keep the no-command / no-rung-5 ceiling
+until a benign side effect on a live target is observed.
 
 ## Duplicate check
 
