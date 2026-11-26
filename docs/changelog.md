@@ -5539,3 +5539,17 @@ README/results/SVG regeneration in `396454aa` is explained, not re-pinned.
 
 What would change this fold: a verdict contradicting a labeled scope, a
 checker RED on committed HEAD, or a later report misquoting these receipts.
+
+## 2026-11-26 22:5xZ — Ruby compile-time fold guards CLOSED
+
+- A fresh source survey of the same Onigmo fix series named the only
+  unprobed case-fold consumers — compile-time `node_str_cat_codepoint`,
+  `update_string_node_case_fold` and `expand_case_fold_string_alt`,
+  plus the new group-name/escape-length/parse-depth guards — and a
+  27-shape × 2-build ASan matrix (`ruby2shell-compilefold-guards.{rb,sh}`)
+  found 54/54 `asan=0` and no vulnerable/fixed differential. Malformed
+  shapes are rejected by Ruby's own Regexp front end; the compile-fold
+  writers double-size their buffers. Grade rung 3 unchanged, lane
+  CLOSED; full stock/oracle-free/persistent rung 5 still NOT ACHIEVED.
+  Recipe in `docs/reproducibility.md`, detail in report §22:5xZ.
+

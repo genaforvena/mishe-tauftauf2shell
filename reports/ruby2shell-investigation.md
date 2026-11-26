@@ -6490,3 +6490,37 @@ exceeds the exact operand never survives the prefilter into
 Ruby patterns. No second vulnerability, no chosen byte, no wire path;
 grade unchanged at rung 3. **Lane CLOSED** — do not repeat this pair
 list or the §22:2xZ 21-shape matrix unchanged.
+
+## 2026-11-26 22:5xZ — compile-time Onigmo fold/codepoint guards: CLOSED
+
+The match-time case-fold guards are systematically closed (§22:4xZ). A
+source survey of the same 3.4.11→3.4.13 fix series found a different
+consumed family that no prior probe had exercised: compile-time writers
+`regparse.c:1564 node_str_cat_codepoint` (newly guarded by
+`check_code_point` at 1569, called from 6329/6389), the invalid group-name
+error path (`regparse.c:4043`), the precise numeric-escape length check
+(`regparse.c:4779`), the parse-depth limit (6595), and the compile-fold
+buffer writers `regcomp.c:3426 update_string_node_case_fold` and 3507
+`expand_case_fold_string_alt`.
+
+Prediction: if any of these writers could be driven past its buffer by a
+pattern under attacker control, `/rails/info/notes` already supplies a
+wire-to-Regexp-source path (§18:5x), giving a new consumer-visible crash
+on 3.4.11 with a fixed/safe control.
+
+`lab/repro/ruby2shell-compilefold-guards.{rb,sh}` runs 27 pattern shapes
+in a fresh ASan process on both 3.4.12 and 3.4.13: out-of-range `\x{}`
+and `\u{}` code points, surrogates, invalid UTF-8 hex escapes, raw
+unpaired UTF-16/32 surrogates, ISO-8859-1 folded sharp-s, multi-codepoint
+compile folds (ß, ẞ, ﬀ, ΐ), invalid group names, and 2000/4000-deep
+nesting. All **54/54 arms agree** (evidence, gitignored:
+`lab/build/evidence/compilefold-guards/summary.txt`, 54 per-arm logs):
+zero ASan reports and no fixed/vulnerable differential. Every
+out-of-range or malformed shape is rejected by Ruby's own `Regexp`
+front end before Onigmo's new guard is reached; the remaining
+compile-fold writers size their buffers at twice the source length with
+a realloc escape, and the ASCII-only path has no multi-byte expansion.
+
+Grade unchanged at rung 3. **Lane CLOSED** — a new lane must still name
+a different consumed function or a wire-only libc/Ruby-code base.
+

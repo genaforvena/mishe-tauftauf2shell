@@ -15844,3 +15844,20 @@ Verdict: ESTABLISHED AS LABELED at the exact scope, no grade change, NO
 r5; detail in the gitignored site at
 `.mishe-tauftauf/artifacts/witness-w295-lwext4-layout/detail.md`.
 This supersedes the earlier "author-only" wording for that probe only.
+
+### Ruby compile-time Onigmo fold/codepoint guards (negative)
+
+`sh lab/repro/ruby2shell-compilefold-guards.sh` runs 27 pattern shapes,
+one per fresh 3.4.12- and 3.4.13-ASan process (54 runs, gitignored
+evidence `lab/build/evidence/compilefold-guards/summary.txt`). Expect
+54 lines with `asan=0` and no frame: out-of-range `\x{}`/`\u{}` code
+points, surrogates, invalid UTF-8 hex escapes, raw unpaired UTF-16/32
+surrogates, ISO-8859-1 sharp-s folds, multi-codepoint compile folds,
+bad group names and 2000/4000-deep nesting all behave identically on
+both builds. Ruby's `Regexp` front end rejects malformed shapes before
+Onigmo's new guards; the compile-fold writers double-size their buffers
+with a realloc escape. Grade rung 3 unchanged; lane CLOSED. Detail in
+report §22:5xZ.
+
+## 2026-11-26 22:5xZ — Ruby compile-time fold guards CLOSED
+
