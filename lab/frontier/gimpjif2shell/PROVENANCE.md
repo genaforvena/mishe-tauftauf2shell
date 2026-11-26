@@ -598,11 +598,11 @@ Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
 
 ## W288 mixed-marker consumer ceiling (2026-11-26, 19:54Z wake)
 
-Source check: the pinned post-inflate loop reads every `indexes[i]`,
-including out-of-bounds bytes, but the inner loop breaks at
-`pos >= data_size` before `dest[pos++]`. With `bpp = 8`, `alpha_frame` and
-`data_size = 260`, `dest` writes therefore stop at `i = 130`, so the OOB
-portion of a 448-byte payload cannot be consumed into `dest`.
+Source check (corrected in W292): the pinned loop evaluates `indexes[i]`
+only after the inner loop's `if (pos >= data_size) break`, so OOB bytes
+are not read at all, not merely left out of `dest`. With `bpp = 8`,
+`alpha_frame` and `data_size = 260`, `pos` reaches 260 at `i = 130`, the
+last index read is 129, and no OOB byte can reach `dest`.
 `realglib/make-jif.py` (SHA-256
 `976b56e1aef382672ce754fe4a69f62c0c1dc0ab431bda5267cd5c40de15cc11`)
 gained `published-mix IN OUT`; `realglib/real-driver.c` (SHA-256
@@ -812,3 +812,33 @@ watchpoint 1` at `poke_after_delay` with `Value = 139637981004355`
 watchpoint is proven to fire in this process; per-LWP coverage of all 18
 threads remains unverified because `libthread_db` was unavailable. Does
 not prove later non-use. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
+
+## W292 structural consumer ceiling (2026-11-26, 21:30Z)
+
+New hypothesis: W291's watchpoint negative was not just a late attach;
+the extraction loop may never read OOB indexes. Source check of
+`src/file-gif-load-vulnerable.c:1623-1637`,
+`pins/jif-vulnerable.inc:118-133` and the shipped 3.2.8 source confirms
+the `pos >= data_size` break precedes `indexes[i]` inside the `j` loop.
+
+Deterministic gdb run against the real-glib/real-zlib pinned caller
+`realglib/evidence/real-vuln` with `published-ptr.jif` (SHA-256
+`b3e3ab52de3a583fb0e57fb4097c60a60e24b464a8b60c9b7594fd788910a031`):
+command `timeout 90 gdb -q -batch -x /tmp/gimpjif-oob-read.gdb
+./evidence/real-vuln`, breakpoints at `jif-vulnerable.inc:125` conditioned
+`i == 129` and `i >= 130`, each printing and continuing. Evidence
+`realglib/evidence/gdb-oob-read.log` (SHA-256
+`72a865d4e2a0ab606f7d66ac3118f8d16d72b50c9a255674f434e8dcc2ca34f5`)
+prints `FILE_FIELDS len=45771 height=46918 bpp=8 alpha=1
+product=0x80000082 data_size=260`, `LAST_INBOUND i=129 pos=258 byte=4d`,
+`LIVE_AFTER=4d4d…43424100007f0000…`, `LIVE_CHANGED_BYTES=45`, then
+`Inferior 1 exited normally`; no `OOB_READ` line and no conditional
+breakpoint hit for `i >= 130`. Thus the chosen pointer at `out+280` is
+written but never read as `indexes[280]` by this consumer. This corrects
+the W288 source wording ("reads every `indexes[i]`") and explains W291's
+bounded negative without claiming anything about later, unrelated use.
+
+Fixed-plugin control recheck: `https://www.gimp.org/downloads` on
+2026-11-26 still lists 3.2.8 (2026-11-02) as current stable; no published
+fixed AppImage for the 3.2.10 milestone. Grade unchanged rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, NO r5.

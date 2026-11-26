@@ -446,17 +446,18 @@ no chosen pointer was dereferenced and no command side effect was seen.
 
 ## Mixed-marker consumer ceiling (W288, 2026-11-26)
 
-The pinned post-inflate loop `for (i = 0; i < zs.total_out; i++)` reads
-every `indexes[i]`, including the out-of-bounds bytes, but its inner
-`for (j = 0; j < 8; j += bpp)` breaks at `pos >= data_size` (260 with alpha
-doubling) before `dest[pos++]`. With `bpp = 8` it advances `pos` twice per
-index byte, so `dest` writes stop at `i = 130`.
-The 188 out-of-bounds bytes of a 448-byte payload therefore cannot reach
-`dest` through this consumer — their only observed effect is on allocator
-metadata and adjacent heap objects. `realglib/make-jif.py` gained a
-`published-mix IN OUT` mode writing 260 in-bounds bytes of `IN` followed
-by 188 bytes of `OUT`, and `real-driver.c` now prints `DEST_HEX=` for the
-first 320 bytes of the pinned caller's `dest` after the call.
+The pinned post-inflate loop `for (i = 0; i < zs.total_out; i++)` evaluates
+`indexes[i]` only inside `for (j = 0; j < 8; j += bpp)`, *after* the
+`if (pos >= data_size) break` at `pins/jif-vulnerable.inc:122`. With alpha
+doubling, `data_size = 260` and `bpp = 8`, `pos` advances twice per index
+byte, reaches 260 at `i = 130`, so the last index actually read is
+`indexes[129]`; W292's conditional breakpoints confirm no read at
+`i >= 130`. The 188 out-of-bounds bytes of a 448-byte payload therefore
+cannot reach `dest`, and are not even read by this consumer — their only
+observed effect is on allocator metadata and adjacent heap objects.
+`realglib/make-jif.py` gained a `published-mix IN OUT` mode writing 260
+in-bounds bytes of `IN` followed by 188 bytes of `OUT`; `real-driver.c`
+prints `DEST_HEX=` for the first 320 bytes of the pinned caller's `dest`.
 
 `evidence/published-mix.jif` (`4d` in bounds, `41` out of bounds) through
 the real-glib/real-zlib pinned caller gives
@@ -619,4 +620,34 @@ because gdb could not load `libthread_db` symbols. Grade unchanged rung 3
 / rung 4 PARTIAL, NO r5: still no downstream consumer, chosen address or
 command.
 
+
+## Structural consumer ceiling and fixed-build check (W292, 2026-11-26)
+
+W291's watchpoint negative was attributed to a late gdb attach. Source
+inspection shows a stronger reason: `pins/jif-vulnerable.inc:118-125` and
+the shipped 3.2.8 `ReadJeffsImage` both test `if (pos >= data_size) break`
+*before* evaluating `indexes[i]`, inside the `j` loop. OOB bytes are never
+read by the extraction loop at all, so no attach timing could have caught
+such a read. With the published JIF's `bpp=8, alpha=1, data_size=260`,
+`pos` advances twice per index byte and hits 260 at `i=130`.
+
+Deterministic check: `gdb -q -batch -x /tmp/gimpjif-oob-read.gdb`
+(`break jif-vulnerable.inc:125 if i == 129` and
+`... if i >= 130`, each printing `LAST_INBOUND`/`OOB_READ` then continuing)
+against `realglib/evidence/real-vuln` with `run file
+evidence/published-ptr.jif`. `realglib/evidence/gdb-oob-read.log`
+(SHA-256 `72a865d4e2a0ab606f7d66ac3118f8d16d72b50c9a255674f434e8dcc2ca34f5`)
+prints `FILE_FIELDS len=45771 height=46918 bpp=8 alpha=1
+product=0x80000082 data_size=260`, `LAST_INBOUND i=129 pos=258 byte=4d`,
+`LIVE_AFTER=4d4d…43424100007f0000…`, `LIVE_CHANGED_BYTES=45`, and exits
+normally with **no** `OOB_READ` line. This confirms the chosen pointer at
+`out+280` is written but never consumed as `indexes[280]` by the reader;
+the earlier W288 wording "reads every `indexes[i]`" was wrong and is
+corrected above. All other published attack JIFs use the same `bpp=8`
+alpha layout.
+
+Fixed-plugin control rechecked: `https://www.gimp.org/downloads` still
+names 3.2.8 (2026-11-02) as current stable on 2026-11-26; no published
+fixed AppImage exists for the 3.2.10 fix milestone. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 
