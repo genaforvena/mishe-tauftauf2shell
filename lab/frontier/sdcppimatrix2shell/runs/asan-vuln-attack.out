@@ -1,0 +1,58 @@
+=================================================================
+==2279921==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000034 at pc 0x5ba93eb7db12 bp 0x7ffef768fea0 sp 0x7ffef768fe90
+READ of size 4 at 0x502000000034 thread T0
+    #0 0x5ba93eb7db11 in IMatrixCollector::load_imatrix(char const*) src/imatrix.cpp.vuln:302
+    #1 0x5ba93eb7bb44 in load_imatrix(char const*) src/imatrix.cpp.vuln:168
+    #2 0x5ba93eb92097 in main harness/main.cpp:21
+    #3 0x7cfbfd22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7cfbfd22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5ba93eb79b04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdcppimatrix2shell/runs/asan-vuln+0x4b04) (BuildId: c65ab3d14d6c89c2496dc7f1f9b22fa89a50a478)
+
+0x502000000034 is located 0 bytes after 4-byte region [0x502000000030,0x502000000034)
+allocated by thread T0 here:
+    #0 0x7cfbfdafe548 in operator new(unsigned long) ../../../../src/libsanitizer/asan/asan_new_delete.cpp:95
+    #1 0x5ba93eb8bab1 in std::__new_allocator<float>::allocate(unsigned long, void const*) /usr/include/c++/13/bits/new_allocator.h:151
+    #2 0x5ba93eb86daa in std::allocator_traits<std::allocator<float> >::allocate(std::allocator<float>&, unsigned long) /usr/include/c++/13/bits/alloc_traits.h:482
+    #3 0x5ba93eb86daa in std::_Vector_base<float, std::allocator<float> >::_M_allocate(unsigned long) /usr/include/c++/13/bits/stl_vector.h:381
+    #4 0x5ba93eb83bb0 in std::vector<float, std::allocator<float> >::_M_fill_insert(__gnu_cxx::__normal_iterator<float*, std::vector<float, std::allocator<float> > >, unsigned long, float const&) /usr/include/c++/13/bits/vector.tcc:587
+    #5 0x5ba93eb8053a in std::vector<float, std::allocator<float> >::resize(unsigned long, float const&) /usr/include/c++/13/bits/stl_vector.h:1037
+    #6 0x5ba93eb7d766 in IMatrixCollector::load_imatrix(char const*) src/imatrix.cpp.vuln:288
+    #7 0x5ba93eb7bb44 in load_imatrix(char const*) src/imatrix.cpp.vuln:168
+    #8 0x5ba93eb92097 in main harness/main.cpp:21
+    #9 0x7cfbfd22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7cfbfd22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5ba93eb79b04 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/sdcppimatrix2shell/runs/asan-vuln+0x4b04) (BuildId: c65ab3d14d6c89c2496dc7f1f9b22fa89a50a478)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow src/imatrix.cpp.vuln:302 in IMatrixCollector::load_imatrix(char const*)
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa fd fa fa fa[04]fa fa fa 04 fa fa fa fd fa
+  0x502000000080: fa fa 06 fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2279921==ABORTING

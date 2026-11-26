@@ -1,0 +1,20 @@
+PASS asan-vuln-overflow: yes
+PASS asan-vuln-sink: yes
+PASS asan-vuln-allocation-site: yes
+PASS asan-vuln-4-byte-region: yes
+PASS asan-vuln-rc: 1
+PASS asan-fixed-rejects: yes
+PASS asan-fixed-no-asan: no
+PASS asan-fixed-rc: 3
+PASS asan-vuln-safe-clean: no
+PASS asan-vuln-safe-rc: 0
+PASS asan-fixed-safe-clean: no
+PASS asan-fixed-safe-rc: 0
+PASS plain-vuln-crash-diagnostic: yes
+PASS plain-vuln-rc-sigabrt: 134
+PASS plain-vuln-safe-rc: 0
+PASS plain-fixed-attack-reject-rc: 3
+PASS plain-fixed-safe-rc: 0
+NOTE: ASan traps on the OOB READ half of e.values[i] += tmp[i];
+the OOB WRITE half and the e.counts[i] write are not separately observed.
+RESULT PASS=17 FAIL=0

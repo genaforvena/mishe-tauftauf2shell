@@ -1,0 +1,25 @@
+From 4fcc6fef10c6f686801c6e257b22cd6a3deb906b Mon Sep 17 00:00:00 2001
+From: m00dy <professor.moody@pm.me>
+Date: Mon, 6 Jul 2026 07:11:27 -0700
+Subject: [PATCH] fix: reject a repeated entry with an inconsistent value count
+ in load_imatrix (#1749) (#1750)
+
+---
+ src/runtime/imatrix.cpp | 4 ++++
+ 1 file changed, 4 insertions(+)
+
+diff --git a/src/runtime/imatrix.cpp b/src/runtime/imatrix.cpp
+index 313eadc687..a6f3bca950 100644
+--- a/src/runtime/imatrix.cpp
++++ b/src/runtime/imatrix.cpp
+@@ -287,6 +287,10 @@ bool IMatrixCollector::load_imatrix(const char* fname) {
+         if (e.values.empty()) {
+             e.values.resize(nval, 0);
+             e.counts.resize(nval, 0);
++        } else if (e.values.size() != (size_t)nval) {
++            LOG_ERROR("inconsistent size for a repeated entry (%d vs %d)\n", (int)e.values.size(), nval);
++            stats_ = {};
++            return false;
+         }
+ 
+         std::vector<float> tmp(nval);

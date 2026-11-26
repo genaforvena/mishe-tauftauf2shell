@@ -1,0 +1,4 @@
+fb09b234ddce1b171fcb06a406ca9074b5366686ee9ddba371759ec49ceef4fa  src/imatrix.cpp.vuln
+73c5cbd449f1c4ad509c1c59ff49ffea1c07edaf768275da9db98e3ee38eaea4  src/imatrix.cpp.fixed
+464a0417fbdd91235f7d0fa2791473508e74657bb1a426d17afe95faa43940bc  src/imatrix.h.vuln
+792c4d07666ad59720653345d0b68beded615a55b6e3dedf79e182d939f659d6  pins/fix-4fcc6fef.patch
