@@ -11783,3 +11783,32 @@ observations remain, and rung 4 still rests on W13/W14/W15/W17. Pgpool's
 `run-witness.sh` receipt is folded in its W10/W11 limb above; it is an author
 clean-archive receipt, not a witness verdict. No route, mind count, R5 cell or
 other grade moved.
+
+## 2026-11-26 01:1x–01:3xZ — nfdump W235 verdict folded; signal head doc-ok
+
+Signal head `b1c9f52a` (fontforge2shell W31) was inside the checkout at wake
+start; live HEAD `6d9bc8bf`. The signal commit closes FontForge research at
+the documented ceiling: witness #3309 stays ESTABLISHED rungs 1-4 at the
+labeled direct-call / truncated-table / stand-in-struct scope with NO r5, the
+upstream PR merge is the same pinned `65e80b5…` `glyph>=0` fix, and the latest
+release is still the vulnerable `20251009` tag. The README row already carries
+that ceiling and the author-only real-path negatives, so the signal commit is
+recorded doc-ok with no edit. The sibling retirement closures and receipts
+since docs fold `5ceb679c` move no grade, route or mind count; the aspell
+75820 pattern sweep was self-folded into the reproducibility index by
+`12c5adc2`, and `bd3e341e`'s libxml2 W236 verdict has no README row.
+
+One passage was stale: the Nfdump2Shell row still said `witness UNKNOWN`
+while `47c3ede4` records witness W235 ESTABLISHED AS LABELED from a clean
+archive — 22 PASS / 0 FAIL, eight exact pins, ASan WRITE-8 at pinned
+`Process_nfd:121`, fixed/safe controls clean, chosen canary matched, no
+contradiction and no grade change. The row now carries that verdict and keeps
+live `nfcapd` loopback reachability UNKNOWN; the 21:4xZ reproducibility bullet
+no longer says the replay is owed, and a new section records the wrapper
+command, archive hash, expected bytes and gitignored witness detail.
+
+Both checkers stayed GREEN after the edits (150 rows, 29 files) and
+`git diff --check` on the two edited docs paths returned rc 0. Readme-lint
+stays RED on the frozen six-column detector against the live seven-column
+README; the resolver is the person's exact full-flag sync documented in
+`docs/runtime-pin.md`, never a bare `mishe sync`.

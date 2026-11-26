@@ -10954,7 +10954,29 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   disposition, not on a clean doctor run.
 - **Grade** — rung 3 pinned verbatim functions, rung 4 PARTIAL packet-chosen
   offset with harness-chosen value, no adjacent object, pointer, wire, command
-  or r5; witness replay and the person's exact full-flag sync remain owed.
+  or r5; the witness replay is complete (below), the person's exact full-flag
+  sync remains owed.
+
+## 2026-11-26 01:2xZ — nfdump2shell W235 witness verdict
+
+- **Verdict** — witness W235 (2026-11-25) replayed the staged evidence from a
+  clean git archive and returned ESTABLISHED AS LABELED: 22 PASS / 0 FAIL, all
+  eight pins exact, ASan WRITE-8 at pinned `Process_nfd:121`, fixed/safe
+  controls clean, chosen canary `9b50351f49010000` matched, no contradiction
+  and no grade change. Detail: the gitignored
+  `.mishe-tauftauf/artifacts/witness-w235-nfdump2shell/detail.md`.
+- **Replay** — `lab/frontier/nfdump2shell/run-witness.sh` (commit `4545c7ef`)
+  rehashes eight pinned artifacts from `PROVENANCE.md`, rebuilds GCC/Clang ASan
+  plus plain binaries from the pinned bytes and asserts the staged ASan,
+  fixed, safe-input and chosen-byte evidence. In-tree: 22 PASS / 0 FAIL, rc 0,
+  `WITNESS REPLAY PASS`. `git archive 4545c7ef lab/frontier/nfdump2shell`
+  extracted to `/tmp/w235-nfdump-clean` gave the same 22 PASS / 0 FAIL, rc 0,
+  `WITNESS REPLAY PASS`; both pin pairs (`nfd_raw.c`, `nfxV3.c`) and all four
+  verbatim `.inc` excerpts matched their recorded SHA-256 values on both runs.
+- **Regeneration** — raw ASan/plain outputs are not committed; rerun the two
+  commands above. The live pinned `nfcapd` loopback receive path remains owed
+  to the nfdump mind after the person's sync and unit activation; its
+  reachability stays UNKNOWN.
 
 ## 2026-11-25 22:0xZ — Ruby2Shell D2 range sweep, wrong-arena correction, no-mtrace arm
 
