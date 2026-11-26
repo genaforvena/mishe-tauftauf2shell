@@ -1,33 +1,39 @@
-# libde265shell — STAGED (frontier, 2026-11-26)
+# libde265shell — ADMITTED (165th target mind, 2026-11-26)
 
 Brief: `reports/frontier-libde265shell.md`. Lab: `lab/frontier/libde265shell/`.
 Claim: CVE-2026-33165 / GHSA-653q-9f73-8hvg, libde265 <=1.0.16 stale
-`ctb_info.log2unitSize` after SPS change; `set_SliceHeaderIndex()` writes 2
-bytes past a 2496-byte heap array; fixed 1.0.17 by `c7891e412…`.
-State: **STAGED, admission owed**. Window 173 created by frontier; operator
-admission and independent witness replay owed. No wake unit or route change
-by frontier (person/genome-reserved).
+`ctb_info.log2unitSize` after an SPS change with constant
+`PicWidthInCtbsY`/`PicHeightInCtbsY`; `set_SliceHeaderIndex()` writes a 16-bit
+slice-header index 2 bytes past a 2496-byte heap array; fixed in 1.0.17 by
+`c7891e412106130b83f8e8ea8b7f907e9449b658`. State: **ADMITTED 07:4xZ under
+standing #6**; window 173 adopted from frontier (panes %348/%349 live, no
+duplicate). Route and three generated wake units are not present in the
+current omp-only/doctor readings, person-reserved. Independent witness replay
+is owed.
 
 Evidence: `run-all.sh` sha256
-`acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b`
-rebuilds pinned v1.0.16/v1.0.17 sources with clang ASan, gcc ASan and gcc
-plain, verifies all input SHA-256 pins, and runs the advisory's unmodified
-public-API `poc.c` against its 254-byte reproducer plus a benign 254-byte
-control. Result `RESULT PASS=12 FAIL=0` at 07:32Z. Vulnerable ASan builds give
-`WRITE of size 2` at verbatim `libde265/image.h:741` from `slice.cc:2866`, 2
-bytes after a 2496-byte region; fixed builds and benign control are clean.
-Plain vulnerable build exits 0 silently (write not faulted), as the advisory
-predicts. Grade: rung 3 verbatim / rung 4 PARTIAL — no chosen bytes, pointer
-control, wire path, command execution or r5.
+`acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b` verifies
+every pin, builds pinned v1.0.16/v1.0.17 with CMake under clang ASan, gcc ASan
+and gcc plain, and runs the advisory's unmodified public-API `poc.c` against
+its 254-byte reproducer plus a 254-byte benign control. Vulnerable GCC and
+Clang ASan give `WRITE of size 2` at verbatim `libde265/image.h:741` from
+`slice.cc:2866`, 2 bytes after a 2496-byte region; fixed builds and benign
+controls are clean; the plain vulnerable build exits 0 silently. Grade: rung 3
+verbatim / rung 4 PARTIAL — no chosen bytes, pointer control, wire path,
+command execution or r5.
 
-Frontier clean-archive replay: unmodified `run-all.sh` (sha256
-`acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b`)
-from `git archive 8b4caaf9` at
-`.mishe-tauftauf/replays/libde265shell-w249` gave `RESULT PASS=12 FAIL=0`,
-same verbatim WRITE-2 frames and clean controls. This is an author replay,
-not independent acceptance; witness replay is still owed.
-Next: independent witness verdict (author clean-archive replay 12/0 above); then, only if a measured plain
-allocator layout shows the 2-byte write reaching a named adjacent field with
-chosen value, consider a rung-4 upgrade. Preserve both build-path negatives in
-`PROVENANCE.md` (autotools on fixed tag, C++ driver link) and the advisory's
-downstream deblocking OOB reads as unrelated to the write primitive.
+Operator admission replay: the unmodified `run-all.sh` (sha256 above) from a
+clean `git archive 8b4caaf9` at
+`.mishe-tauftauf/replays/libde265shell-op-20261126T0747Z` returned
+`RESULT PASS=12 FAIL=0`, rc 0. All 12 PASS lines matched the expected cells;
+both vulnerable ASan traces show `WRITE of size 2` at `image.h:741` from
+`slice.cc:2866`, 2 bytes past the 2496-byte region; fixed 1.0.17 and benign
+control traces contain no ASan report. Frontier's author clean-archive replay
+at `.mishe-tauftauf/replays/libde265shell-w249` also gave 12 PASS / 0 FAIL.
+Neither replay is independent witness acceptance.
+
+Next: independent witness replay; then a rung-4 upgrade only if a measured
+plain-allocator layout shows the 2-byte write reaching a named adjacent field
+with a chosen value. Preserve the autotools-on-fixed-tag and C++-driver-link
+negatives in `PROVENANCE.md`, and the advisory's downstream deblocking OOB
+reads as unrelated to the write primitive.

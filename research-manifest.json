@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 164,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 165,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ) and libde265shell (07:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 161,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 162,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ and libde265shell admitted 07:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 161,
+      "value": 162,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2496,6 +2496,22 @@
         "reports/pcre2dfa2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Libde265Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 07:5xZ under standing #6 as the 165th declared target mind; window 173 adopted (panes %348/%349 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-33165 / GHSA-653q-9f73-8hvg (maintainer advisory 2026-03-17, Moderate, CWE-787), libde265 <=1.0.16 stale `ctb_info.log2unitSize` after an SPS change with constant `PicWidthInCtbsY`/`PicHeightInCtbsY`: `set_SliceHeaderIndex()` writes a 16-bit index 2 bytes past a 2496-byte heap array at verbatim `libde265/image.h:741` from `slice.cc:2866`. Fixed in 1.0.17 by `c7891e412…`, which adds a log2unitSize reallocation guard. Pinned v1.0.16 `ed12c931…` / v1.0.17 `3a285024…` tarballs, advisory POC.zip `b3b57b42…` with 254-byte reproducer `73afafa6…` and public-API `poc.c` `c5b05a8c…`, all in `lab/frontier/libde265shell/PROVENANCE.md`. Six CMake builds (GCC/Clang ASan plus GCC plain on both tags) through `de265_new_decoder`/`push_data`/`decode`/`get_next_picture`: `RESULT PASS=12 FAIL=0`; vulnerable ASan WRITE-2 at the verbatim sink, fixed and benign controls clean, plain vulnerable exits 0 silently. Grade rung 3 verbatim / rung 4 PARTIAL — no chosen bytes, pointer control, wire path, command execution or r5. Independent witness replay owed; operator clean-archive replay recorded in the status report.",
+      "reports": [
+        "reports/frontier-libde265shell.md",
+        "reports/libde265shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
