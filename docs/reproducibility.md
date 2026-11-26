@@ -14725,5 +14725,11 @@ three keep-alive requests 404/404/404, with matching safe-input and fixed
 The gdb pass is layout-perturbing; no overlap, chosen-byte write, command
 or persistence. Raw logs are gitignored under `lab/build/evidence/`.
 
+Supersession landed mid-wake: `9b0ab258` extends `loopback.sh` to **24 PASS /
+0 FAIL** and reads the optimized saved RBP and return slot over the same
+socket (`BUF→RBP=2096`, chosen `a*` / `B*` bytes at `-O2` with fortify off and
+no stack protector). The dated 17/0 above is the `17f9716f` fold-window
+count; grade and the no-r5 ceiling are unchanged.
+
 Every count in this section is an author or clean-archive replay except the
 W278 witness verdict; no generated grade cell or register row moved here.

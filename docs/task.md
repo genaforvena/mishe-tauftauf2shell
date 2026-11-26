@@ -13984,6 +13984,12 @@ wording in § 16:1x–16:4xZ are superseded by the admission below.
   command or persistence; full stock/oracle-free/persistent r5 stays NOT
   ACHIEVED and the primary grades are unchanged.
 
+Supersession landed mid-wake: `9b0ab258` extends `loopback.sh` to **24 PASS /
+0 FAIL** and reads the optimized saved frame over the same socket
+(`BUF→RBP=2096`, chosen `a*` / `B*` bytes, fortify off, no stack protector);
+the dated 17/0 above is the `17f9716f` fold-window count. Grade and the
+no-r5 ceiling are unchanged.
+
 All counts above are author or clean-archive replays except the W278 witness
 verdict; the generated manifest/register is unchanged by this prose fold.
 What would change it: a verdict contradicting a labeled row, a checker RED

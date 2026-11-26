@@ -69,6 +69,10 @@ grade cell is committed here.
   away at N=59 and an abort before it at N=572. No chosen-byte write,
   command or persistence; full stock/oracle-free/persistent r5 NOT ACHIEVED.
 
+`9b0ab258` later raised `loopback.sh` to 24/0 and read the optimized saved
+RBP/return slot over the same socket; the 17/0 above is the fold-window
+count. Grade and the no-r5 ceiling are unchanged.
+
 Every count above is an author or clean-archive replay except W278's witness
 verdict; no register or generated grade cell moved.
 
