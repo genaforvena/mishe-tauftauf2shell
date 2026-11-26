@@ -495,3 +495,12 @@ lab/frontier/pcre2jit2shell/build-*/
 lab/frontier/pcre2jit2shell/replay-build/
 lab/frontier/pcre2jit2shell/out/
 lab/frontier/pcre2jit2shell/poc-plain-*
+
+# gnutlsdtls2shell: pinned tarballs, extracted trees, local builds, local
+# nettle install and compiled PoCs stay local; scripts, PoC source,
+# PROVENANCE and evidence traces stay tracked.
+lab/frontier/gnutlsdtls2shell/src/
+lab/frontier/gnutlsdtls2shell/build-*/
+lab/frontier/gnutlsdtls2shell/opt/
+lab/frontier/gnutlsdtls2shell/poc-3.8.*
+lab/frontier/gnutlsdtls2shell/*.err

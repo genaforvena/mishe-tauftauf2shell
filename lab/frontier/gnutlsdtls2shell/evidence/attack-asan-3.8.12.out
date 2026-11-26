@@ -1,0 +1,73 @@
+[CLIENT] four fragments sent
+[SERVER] starting handshake
+=================================================================
+==304438==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x51d000010280 at pc 0x7a25d62fb303 bp 0x7a25d29fd310 sp 0x7a25d29fcab8
+WRITE of size 1475 at 0x51d000010280 thread T1
+    #0 0x7a25d62fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7a25d5b082f0 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x7a25d5b082f0 in merge_handshake_packet ../../src/gnutls-3.8.12/lib/buffers.c:1035
+    #3 0x7a25d5b082f0 in _gnutls_parse_record_buffered_msgs ../../src/gnutls-3.8.12/lib/buffers.c:1320
+    #4 0x7a25d5b0916c in _gnutls_handshake_io_recv_int ../../src/gnutls-3.8.12/lib/buffers.c:1414
+    #5 0x7a25d5b1023c in _gnutls_recv_handshake ../../src/gnutls-3.8.12/lib/handshake.c:1608
+    #6 0x7a25d5b1e5ca in handshake_server ../../src/gnutls-3.8.12/lib/handshake.c:3528
+    #7 0x7a25d5b1e5ca in gnutls_handshake ../../src/gnutls-3.8.12/lib/handshake.c:2917
+    #8 0x55ff7e660d03 in server_thread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gnutlsdtls2shell/poc_dtls_fragment_overflow.c:94
+    #9 0x7a25d625ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #10 0x7a25d569cb63 in start_thread nptl/pthread_create.c:447
+    #11 0x7a25d5729e8b in clone3 ../sysdeps/unix/sysv/linux/x86_64/clone3.S:78
+
+0x51d000010280 is located 0 bytes after 2048-byte region [0x51d00000fa80,0x51d000010280)
+allocated by thread T1 here:
+    #0 0x7a25d62fc778 in realloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:85
+    #1 0x7a25d5b75cdf in gnutls_realloc_fast ../../src/gnutls-3.8.12/lib/mem.c:46
+    #2 0x7a25d5b80b58 in buffer_resize_reclaim ../../src/gnutls-3.8.12/lib/str.c:187
+    #3 0x7a25d5b8104d in gnutls_buffer_append_data ../../src/gnutls-3.8.12/lib/str.c:116
+    #4 0x7a25d5b07beb in _gnutls_parse_record_buffered_msgs ../../src/gnutls-3.8.12/lib/buffers.c:1309
+    #5 0x7a25d5b0916c in _gnutls_handshake_io_recv_int ../../src/gnutls-3.8.12/lib/buffers.c:1414
+    #6 0x7a25d5b1023c in _gnutls_recv_handshake ../../src/gnutls-3.8.12/lib/handshake.c:1608
+    #7 0x7a25d5b1e5ca in handshake_server ../../src/gnutls-3.8.12/lib/handshake.c:3528
+    #8 0x7a25d5b1e5ca in gnutls_handshake ../../src/gnutls-3.8.12/lib/handshake.c:2917
+    #9 0x55ff7e660d03 in server_thread /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gnutlsdtls2shell/poc_dtls_fragment_overflow.c:94
+    #10 0x7a25d625ea41 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #11 0x7a25d569cb63 in start_thread nptl/pthread_create.c:447
+
+Thread T1 created by T0 here:
+    #0 0x7a25d62f51f9 in pthread_create ../../../../src/libsanitizer/asan/asan_interceptors.cpp:245
+    #1 0x55ff7e6617bf in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gnutlsdtls2shell/poc_dtls_fragment_overflow.c:130
+    #2 0x7a25d562a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x7a25d562a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x55ff7e660804 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gnutlsdtls2shell/poc-3.8.12+0x2804) (BuildId: fa98e5ca6495f7de05a904396057c5be4bf593b3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x51d000010000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000010080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000010100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000010180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x51d000010200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x51d000010280:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000010300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000010380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000010400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x51d000010480: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x51d000010500: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==304438==ABORTING

@@ -1,0 +1,17 @@
+PASS tarball-3.8.12-sha256
+PASS tarball-3.8.13-sha256
+PASS nettle-3.10-sha256
+BUILD OK
+rc-vuln-attack=1
+PASS vuln-asan-heap-overflow
+PASS vuln-asan-write-1475
+PASS vuln-sink
+PASS vuln-alloc-2048
+PASS vuln-caller
+rc-vuln-safe=0
+PASS safe-no-asan
+PASS safe-handshake
+rc-fixed-attack=0
+PASS fixed-no-asan
+PASS fixed-handshake
+RESULT PASS=12 FAIL=0
