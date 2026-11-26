@@ -5761,3 +5761,41 @@ Next: run the K=12 promoted-buffer arm under the pair-only allocator tracer
 and inspect the smallbin failure's chunk links. The decisive result is whether
 any corrupted `fd/bk` value is pattern-derived; a generic glibc integrity abort
 closes this arm.
+
+### Smallbin link audit — bounded NEGATIVE (2026-11-26, 17:3xZ direct session)
+
+The K=12 nested-extras-2 arm was repeated under two focused tracer settings.
+Nine fresh stock Rails processes with `REGTRACE_PAIR_ONLY=1` produced one
+`malloc(): smallbin double linked list corrupted` (`regexp-paironly-k12-1`),
+five invalid-pointer/munmap aborts and three surviving/hung processes. No
+chunk links were captured for that smallbin run: `lab/preload/regtrace.{c,so}`
+were edited concurrently at 17:27Z during the batch, leaving runs 0..4 with
+no tracer records and runs 5..8 with full (not pair-filtered) traces. A
+second eight-run `REGTRACE_DUMP_*` repeat completed seven runs
+(`regexp-link-k12-0..6`); every terminal was `free(): invalid size`,
+`free(): invalid pointer`, `munmap_chunk(): invalid pointer` or
+`invalid next size (fast)`. No eighth result was observed before the tool
+cap. The ~328 MB per-run debug logs were removed; compact JSON diagnostics
+and maps remain. No smallbin victim or chosen write was observed.
+
+The structural check is decisive for this arm. Across 88 heap rows in
+`regexp-*.maps`, the lowest heap-base low-32 is `0x55ac3000`, above the
+Unicode code-point cap `0x10ffff`; no observed heap low-32 is under the cap
+and none is near the 4 GiB wrap. Stale BBuf link words in
+`regexp-smallbin-traced.server.log` classify as 272 one-codepoint, 1,124
+two-codepoint and 840 other words, with zero valid heap pointers; examples
+are `0x00004e0000000001`, `0x000070fd00004e00` and `0x00009fff00000002`.
+Each 32-bit half is bounded by `0x10ffff`, so pattern-derived `fd/bk` cannot
+equal any observed heap address. glibc's smallbin integrity check
+(`bck->fd == victim`) therefore cannot be satisfied by pattern-derived
+links; the smallbin abort is a generic integrity abort. `lab/repro/ruby2shell-regexp-link-audit.py`
+reproduces the classification from the gitignored evidence.
+
+**Conclusion:** the promoted-buffer smallbin link arm is CLOSED. Grades are
+unchanged: wire-only secondary rung 3, rung 4 witness-COMPLETE at its prior
+scopes, harness-condition rung 5 ESTABLISHED as labeled, full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Next lane: add a Ruby
+build override to the wire reproducer and measure the same notes Regexp
+double-free on the other affected builds (plain 3.3.13 and 4.0.9), with
+fixed 3.4.13 and safe-input controls, before investing further in glibc
+shaping on 3.4.12.
