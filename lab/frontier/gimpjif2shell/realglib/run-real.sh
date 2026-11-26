@@ -13,6 +13,8 @@ ok()  { echo "PASS $1"; pass=$((pass+1)); }
 bad() { echo "FAIL $1"; fail=$((fail+1)); }
 has() { grep -q -- "$2" "$1" 2>/dev/null; }
 hasnt() { ! grep -q -- "$2" "$1" 2>/dev/null; }
+hasre(){ grep -qE -- "$2" "$1" 2>/dev/null; }
+all_4d_48=$(printf '4d%.0s' $(seq 1 48))
 
 echo "== build (real glib $(pkg-config --modversion glib-2.0), real zlib $(dpkg-query -W -f='${Version}' zlib1g 2>/dev/null || echo unknown)) =="
 gcc -O0 -g -Wall -I. $GLIB_CFLAGS -o evidence/real-vuln real-driver.c $GLIB_LIBS -lz && ok "real glib vulnerable build" || bad "real glib vulnerable build"
@@ -31,9 +33,9 @@ has evidence/vuln-attack-4d.log "delta=272" && ok "live GArray control struct ex
 has evidence/vuln-attack-4d.log "usable=264" && ok "glibc usable size 264 for 260-byte request" || bad "glibc usable size 264 for 260-byte request"
 
 echo "== vulnerable: chosen bytes in adjacent live GLib object =="
-has evidence/vuln-attack-4d.log "LIVE_AFTER=4d4d4d4d" && ok "chosen 0x4d bytes in live object" || bad "chosen 0x4d bytes in live object"
+has evidence/vuln-attack-4d.log "LIVE_AFTER=$all_4d_48" && ok "all 48 live GArray control-struct bytes carry chosen 0x4d" || bad "all 48 live GArray control-struct bytes carry chosen 0x4d"
 has evidence/vuln-attack-41.log "LIVE_AFTER=41414141" && ok "chosen 0x41 bytes in live object" || bad "chosen 0x41 bytes in live object"
-has evidence/vuln-attack-4d.log "LIVE_CHANGED_BYTES=48" && ok "all 48 live GArray control-struct bytes overwritten" || bad "all 48 live GArray control-struct bytes overwritten"
+hasre evidence/vuln-attack-4d.log "LIVE_CHANGED_BYTES=(47|48)" && ok "live object overwritten (ASLR-safe changed-byte count)" || bad "live object overwritten (ASLR-safe changed-byte count)"
 
 echo "== chosen address in live object's pointer field (no dereference) =="
 has evidence/vuln-ptr.log "PTR_MATCH=1" && ok "live GArray data pointer set to chosen valid address" || bad "live GArray data pointer set to chosen valid address"
@@ -73,7 +75,7 @@ has evidence/file-caller.log "LIVE_AFTER=4d4d4d4d4d4d4d4d" && ok "chosen bytes r
 has evidence/file-callerpub.log "GUARD_PASSES=1 DEST_SIZE=4294967556" && ok "published 45771x46918 passes guard with ~4 GiB dest" || bad "published 45771x46918 passes guard with ~4 GiB dest"
 has evidence/file-callerpub.log "DEST_ALLOC=OK" && ok "published dims dest allocation succeeds" || bad "published dims dest allocation succeeds"
 has evidence/file-callerpub.log "delta=272" && ok "260-byte indexes chunk keeps live neighbour at +272" || bad "260-byte indexes chunk keeps live neighbour at +272"
-has evidence/file-callerpub.log "LIVE_CHANGED_BYTES=48" && ok "published dims overwrite all 48 inspected live bytes" || bad "published dims overwrite all 48 inspected live bytes"
+has evidence/file-callerpub.log "LIVE_AFTER=$all_4d_48" && ok "published dims put chosen bytes in all 48 inspected live bytes" || bad "published dims put chosen bytes in all 48 inspected live bytes"
 has evidence/file-caller-fixed.log "RC=0 ERR=image data" && ok "fixed pin rejects published dims after caller allocation" || bad "fixed pin rejects published dims after caller allocation"
 has evidence/file-caller-fixed.log "LIVE_CHANGED_BYTES=0" && ok "fixed caller leaves live object intact" || bad "fixed caller leaves live object intact"
 
