@@ -46,6 +46,11 @@ header-only INTEROP frame. Fixed builds return `0` for that frame and for the
 at offset 13 in the path area. Well-framed safe input gives length 6 and a
 write at offset 18 in both builds, with no ASan report.
 
+Author clean-archive replay: `git archive f52dd1b5` (stage commit) unpacked to
+`.mishe-tauftauf/replays/open1722vss2shell-w262/`, unmodified runner re-run at
+11:00:55Z, rc 0 and `RESULT PASS=34 FAIL=0`, runner SHA-256 unchanged. Witness
+replay is still owed; author replay is not independent acceptance.
+
 ## Negatives and limits
 
 - First runner invocation scored 30 PASS / 4 FAIL: two plain-build assertions

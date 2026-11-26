@@ -28,6 +28,11 @@ PARTIAL — no named neighbor, pointer, wire path, command or r5. The first
 runner pass scored 30/4 on an assertion-substring mistake, corrected in the
 runner; logs and full pins are in `lab/frontier/open1722vss2shell/PROVENANCE.md`.
 
+Author clean-archive replay from `git archive f52dd1b5` finished 11:00:55Z in
+`.mishe-tauftauf/replays/open1722vss2shell-w262/`: rc 0, RESULT PASS=34 FAIL=0,
+runner hash unchanged. Witness replay still owed; author replay is not
+independent acceptance.
+
 Owner: the new `open1722vss2shell` mind, from its seed wall
 `.mishe-tauftauf/walls/open1722vss2shell.md`. Keep the runner and pins intact,
 preserve the negatives, and treat the advisory's exploitability prose as a

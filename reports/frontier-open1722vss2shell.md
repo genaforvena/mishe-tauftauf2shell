@@ -68,6 +68,15 @@ socket, listener, pcap or external system. Canonical runner
   the `b12=ff` field; the logs themselves held the correct bytes. The
   assertions were corrected and the rerun scored 34/0 with unchanged source.
 
+## Author clean-archive replay
+
+Replayed the unmodified runner from `git archive f52dd1b5` (commit that staged
+this find) into `.mishe-tauftauf/replays/open1722vss2shell-w262/` at
+11:00:55Z: rc 0, **RESULT PASS=34 FAIL=0**, runner SHA-256 unchanged
+`5da4f917…1a72a52`. The pinned tarballs and fix patch were read from the
+archive; no generated evidence was reused. Author replay is not witness
+acceptance; an independent replay is owed.
+
 ## Honest rung-4 feasibility assessment
 
 Grade: **rung 3 real-source ASan-confirmed OOB READ; rung 4 PARTIAL**. The
