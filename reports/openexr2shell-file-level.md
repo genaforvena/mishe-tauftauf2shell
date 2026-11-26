@@ -2761,3 +2761,33 @@ crafted EXR copied in, returned `RESULT PASS` rc 0 with the same
 `lab/openexr2shell-real/evidence/w211-clean-archive.out`. Author replay, not
 a witness verdict; grade unchanged pending witness.
 
+
+## W212: research closed at the documented ceiling (2026-11-26 00:5xZ)
+
+The self-scheduled `again` wakes W203-W211 produced no grade-changing
+evidence after the W202 witness verdict. This section closes the lane so a
+later wake does not re-audit measured negatives; the `again` chain is retired.
+
+Fresh check at 00:48Z on current HEAD `e719fb69`: `cd lab/openexr2shell-real
+&& sh harness/w211-stream-mode-command.sh` -> `RESULT PASS` rc 0, three plain
+runs rc 139 with the marker present, stable hash
+`dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9`
+unchanged. The witness wall read at 00:5xZ lists W211 (#4646) as a queued
+replay offer, not a verdict; W202 (#4457) remains ESTABLISHED AS LABELED at
+its ASLR-off local-file scope. No new harness, file or probe was added.
+
+Final grade: file-level rungs 1-4 (W161, witness ESTABLISHED), with W202's
+benign command chain demonstrated at rung-4 mechanics for the local-file
+mode and W211 author-only for the shipped `-s -c` stream mode. Full rung 5
+is NOT CLAIMED: ASLR is off, a seekable local path is still required for
+both shipped-tool modes, the command is a benign local marker, and there is
+no live wire/stdin-fed process, chosen IP or arbitrary command. Measured
+blockers, not assumptions: W203/W205 ASLR-on, W199/W201 non-PIE,
+W198/W200/W206 live-pointer and gadget scans, W207/W208 leak routes,
+W183/W186 no wire-fed EXR consumer, W209 unmodified-PoC stream negative,
+W190 no malloc consumes the poisoned tcache.
+
+What would change this disposition: a verdict on the queued W211 replay, an
+ASLR-on full-address route, or an unmodified wire/stdin-fed application
+process reaching the pinned sink. Do not re-offer #4457 or #4160, and do
+not resweep the W183-W211 lane sets without new evidence.
