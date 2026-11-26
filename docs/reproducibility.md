@@ -15064,6 +15064,17 @@ give 96/96 `match=false` on plain 3.4.12 and 3.4.13; GDB at
 (`5b`, `f8`, `f9`, `22`, `2b`, `5c`, `5d`), never a primed byte
 (`lab/build/evidence/casefold-stringprime/`). Lane CLOSED, grade rung 3.
 
+`bash lab/repro/ruby2shell-casefold-splitprime.sh` and
+`bash lab/repro/ruby2shell-casefold-splitprime-tight.sh` test the split
+unsorted-remainder shape. Both analysis-only C extensions fill a large freed
+chunk with each fold's second byte, split it with a front allocation, and
+compile the one-byte-exact regex; the tight variant drains small bins and
+compiles inside C immediately after the split. Plain 3.4.12/3.4.13: 128/128
+and 48/48 `match=false` respectively; GDB at `regexec.c:4278` shows 8 hits per
+arm with `t[1]` only stale metadata (`2d`, `4b`, `5b`, `5c`, `5d`, `5e`), never
+a primed byte (`lab/build/evidence/casefold-splitprime*/`). Lane CLOSED, grade
+rung 3; do not repeat unchanged.
+
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
 

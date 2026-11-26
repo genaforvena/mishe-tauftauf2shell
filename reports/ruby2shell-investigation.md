@@ -6366,3 +6366,38 @@ Grade unchanged at rung 3. Do not repeat this prime matrix unchanged; a
 reopen needs a measured allocation that puts attacker bytes at `exact+1` in
 a live consumer, or a distinct consumed function with a new falsifiable
 shape.
+
+## 2026-11-26 22:3xZ — split unsorted remainder does not steer `exact+1`
+
+The §21:1xZ wall named one further allocation shape: make the one-byte
+`reg->exact` come from a split unsorted remainder whose user bytes were filled
+by a prime rather than by a Ruby String buffer. Two analysis-only probes test
+it. `lab/repro/ruby2shell-casefold-stringprime.{c,rb,sh,gdb}` fills a large
+malloc chunk with a fold's second byte, frees it into the unsorted bin, splits
+it with a front allocation and then lets Ruby compile the one-byte-exact
+regex. `lab/repro/ruby2shell-casefold-splitprime-tight.{c,rb,sh,gdb}` tightens
+the order: it drains the small bins first, splits the primed chunk, and calls
+`rb_reg_new_str` from inside C immediately after the split so the exact
+allocation has the shortest possible path to the primed remainder. `match?`
+is called on the corresponding fold character (ß, ẞ, Latin ligatures) on
+plain 3.4.12 and fixed 3.4.13; GDB at `regexec.c:4278` reads `t[0]`/`t[1]`
+only when `tend - t == 1`. Both drivers are in-process and analysis-only: no
+app, wire input, marker or debugger write.
+
+Observed (gitignored `lab/build/evidence/casefold-splitprime/` and
+`casefold-splitprime-tight/`): **128/128** plain trials `match=false` for the
+four-geometry sweep, and **48/48** for the tight driver's three allocator
+settings (default, `tcache_count=0`, `tcache_count=0:mxfast=0`). Every GDB arm
+reports 8 one-byte-exact hits (one per fold case) with `t[0]` equal to the
+pattern byte and `t[1]` only stale values (`2d`, `4b`, `5b`, `5c`, `5d`, `5e`),
+never a primed byte (`66`, `69`, `6c`, `73`, `74`). In the tight probe the
+exact pointer for six of eight cases is inside the primed chunk's original
+extent (`delta_big` 61520–62144) but its byte 1 is still allocator metadata;
+the first two cases come from older chunks. Disabling tcache and fastbins
+together only changes that metadata byte, not the outcome.
+
+Conclusion: the remainder shape is reachable but the byte at `exact+1` is not
+the primed byte, so no chosen-byte match oracle exists on this consumed
+function. Grade unchanged at rung 3. Do not repeat either prime matrix
+unchanged; a reopen needs a measured chosen byte at `exact+1` in a live
+consumer or a distinct consumed function with a new falsifiable shape.
