@@ -13055,6 +13055,67 @@ receipts below are quoted from committed reports, not rerun here.
   `reports/xdgmime2shell-status.md` that my previous fold flagged in #5384;
   no docs path, manifest count or rung cell was touched.
 
-Next bounded experiment: identify the object hit by the wire-only one-byte
-write and test whether its effective offset can be steered to a live consumer
-without the earlier harness grooming; do not retry byte-value steering.
+The next bounded experiment was to identify the object hit by the wire-only
+one-byte write and test whether its effective offset could be steered to a
+live consumer. `ed1de529` identifies the object and closes that branch for
+this shape sweep: the byte lands on the successor chunk's size low byte
+(`buffer+72`), not the casemap buffer or its prev_size, and sets IS_MMAPPED;
+a READ watchpoint saw no consumer, so consumer visibility stays UNKNOWN. Do
+not retry byte-value steering; reopening rung 4 needs a new wire-only base or
+a measured consumed function/pointer.
+
+## 2026-11-26 12:1x–12:2xZ — wire corrupted chunk identified; sqlitefts5shell staged
+
+Wake-start `repo-change` still named `dfac0c3c`; live HEAD `f750553f`.
+Two peer commits since that fold, neither on a docs path. No rung cell,
+grade, route, mind count, register row or witness verdict moved by docs;
+receipts are quoted from committed reports and logs, not rerun here.
+
+- `ed1de529`: **the wire-only corrupted object is identified**. gdb 15.1
+  attached at launch to the plain 3.4.12 server (stock glibc 2.39, no
+  sanitizer, hook or groomer), breakpoint at `string.c:7839` conditioned on
+  `current_buffer->capa == 48` (the `mixed27` part: `a` + 27×`0xDF`), second
+  breakpoint at `string.c:7856` after `case_map`. The 72-byte usable size and
+  `0x54` size word at `buffer-8` place the successor chunk's header at
+  `buffer+64` (prev_size) and `buffer+72` (size). `space+capa == buffer+72`,
+  so the single `0x53` byte lands on the **successor chunk's size low byte**:
+  `0x35 → 0x53` reported (also `0x45 → 0x53` and `0x155 → 0x53`), changing
+  the size class to `0x50` and setting IS_MMAPPED while keeping PREV_INUSE.
+  A later free of that successor takes munmap/consolidation checks, matching
+  the no-debugger `corrupted size vs. prev_size` and `malloc(): invalid next
+  size (unsorted)` diagnostics. `mixed59` lands at `buffer+104` (0x70 chunk);
+  `mixed43` lands at `buffer+88`, inside the same chunk's 104-byte usable
+  slack, explaining its clean runs. The earlier arithmetic treating the
+  whole 27/39-byte expansion as the overflow is **retracted**: `case_map`
+  stops at `to_end`, the caller records `used`, and the next source byte is
+  handled in a new buffer (`string.c:7828-7851`). **Consumer UNKNOWN after a
+  bounded attempt**: a hardware READ watchpoint on that word got no hit
+  after one request; a conditional `break free` hung at boot and was
+  abandoned; four `mixed27` runs under gdb served 404 with no glibc abort,
+  a debugger-perturbed-layout negative preserved against the plain 3/8
+  abort rate. No steered allocation, chosen-offset write, benign marker or
+  oracle. The wire-only rung-4 branch is **CLOSED for this shape sweep**
+  unless a new consumed function/code pointer or wire-only base is named.
+  Grades unchanged: rung 3 wire-only CONFIRMED, rung 4 witness-COMPLETE only
+  at the earlier harness-conditioned scope, full stock r5 NOT ACHIEVED.
+- `f750553f`: frontier staged **sqlitefts5shell** for CVE-2026-119374 with
+  registered window 180; brief `reports/frontier-sqlitefts5shell.md`, status
+  `reports/sqlitefts5shell-status.md`, harness
+  `lab/frontier/sqlitefts5shell/run-all.sh`. Vulnerable pin SQLite 3.53.4
+  (`version-3.53.4` = `b09c88c14082339b66c7b7158d609a771e64ca69`, official
+  `sqlite-src-3530400.zip`), fix `d9de6eedbe918c074c7556400fa21df5960704d9`.
+  On an attacker-supplied `.db` with `secure-delete` enabled,
+  `fts5DoSecureDelete()` rewrites a leaf footer with an uncapped write
+  cursor; `DELETE FROM t WHERE rowid = 1` gives ASan WRITE-1 on GCC and
+  Clang, while the fixed build and safe-input controls are clean. Author
+  replay PASS=26 FAIL=0 rc 0 (12:12:03Z–12:16:47Z). Grade rung 3 real-source
+  ASan OOB WRITE / rung 4 PARTIAL; the public research calls it a local
+  crash and disclaims RCE. No named adjacent object, pointer, wire path,
+  command or r5. **Staged, not admitted**: no manifest row, mind count or
+  register row moved; operator admission and independent witness replay are
+  owed, with the pinned zip re-fetched and hash-verified first.
+
+Next: a new wire-only base or a measured consumed chunk consumer would reopen
+the Ruby rung-4 branch; sqlitefts5shell advances only on admission plus a
+witness verdict. What would change this fold: a committed replay that
+contradicts the gdb shape findings or a witness verdict on the staged lane.

@@ -13362,3 +13362,99 @@ and regenerates with the wrappers. Full receipts:
 `reports/ruby2shell-investigation.md` §§ "Wire-only confirmed heap overflow
 through stock `Rack::MethodOverride`" and "Wire-only heap corruption on
 stock glibc, no sanitizer".
+
+## 2026-11-26 12:1x–12:2xZ — wire chunk identity and sqlitefts5shell offline runner
+
+These recipes are quoted from the receipts in commits `ed1de529` and
+`f750553f`; neither was rerun by this docs fold.
+
+### Ruby2Shell — successor chunk size word on the wire path (gdb, plain build)
+
+Attach gdb at launch to the unmodified plain Ruby 3.4.12 server (stock glibc
+2.39, no sanitizer, hook or groomer), then send one `mixed27` POST from a
+second shell. The port argument must be the port the server binds:
+
+```sh
+gdb -batch -x lab/repro/ruby2shell-mp-header.gdb --args \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-stock-baseline.ru
+# second shell
+python3 lab/repro/ruby2shell-mp-method-21.py PORT mixed27
+# consumer probe: same launch with the watch script instead
+gdb -batch -x lab/repro/ruby2shell-mp-watch.gdb --args \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-stock-baseline.ru
+```
+
+The header script breaks at `string.c:7839` conditioned on
+`current_buffer->capa == 48` (the wire `mixed27` part: `a` + 27×`0xDF`) and
+again at `string.c:7856` after `case_map`. Expect a 72-byte usable size, a
+`0x54` size word at `buffer-8`, the corrupted word at `buffer+72` (the
+successor chunk's size), and one low byte changed to `0x53`; the reported
+trace is:
+
+```
+buffer=0x7fffc809c250 capa=48 usable=72   size word at buffer-8 = 0x54
+BEFORE buffer=0x7fffc809c250 next_size_at=0x7fffc809c298
+0x7fffc809c298: 0x0000000000000035  0x0000000100000001
+AFTER case_map (line 7856)
+0x7fffc809c298: 0x0000000000000053  0x0000000100000001
+```
+
+Other measured shape values are `0x45 → 0x53` and `0x155 → 0x53`. The
+write is one byte: `case_map` stops at `to_end`, the caller records `used`,
+and the next source byte uses a fresh buffer (`string.c:7828-7851`), so the
+earlier "whole 27/39-byte expansion overflows" arithmetic is retracted.
+`mixed59` lands at `buffer+104` (0x70 chunk); `mixed43` lands at
+`buffer+88`, inside the same chunk's 104-byte usable slack, which explains
+its clean runs. The watchpoint variant installs a hardware READ watch on
+that word: expect **no hit** after a single POST — the consumer is UNKNOWN,
+not proven absent. A conditional `break free` hung at boot (gdb evaluated
+the condition on every `free`) and was abandoned. Four `mixed27` runs under
+gdb served 404 with no glibc abort, a debugger-perturbed-layout negative;
+plain no-debugger runs abort 3/8. Gdb logs are gitignored under
+`lab/build/evidence/mp-method-21/` (earlier ad-hoc traces in `/tmp` are not
+committed) and regenerate with these scripts. No steered allocation, chosen
+offset, pointer, marker or oracle: the wire-only rung-4 branch is CLOSED for
+this shape sweep, grades unchanged.
+
+### sqlitefts5shell — offline SQLite 3.53.4 FTS5 secure-delete replay
+
+Staged lane for CVE-2026-119374; brief `reports/frontier-sqlitefts5shell.md`,
+pin table and URLs `lab/frontier/sqlitefts5shell/PROVENANCE.md`. The runner
+is offline and never fetches; the 14.5-MB upstream tarball is intentionally
+gitignored. Provision once and verify before the first run:
+
+```sh
+cd lab/frontier/sqlitefts5shell
+curl -fsSL https://www.sqlite.org/2026/sqlite-src-3530400.zip -o src/sqlite-src-3530400.zip
+sha256sum src/sqlite-src-3530400.zip   # must be d18fa15aec74d8c17e1463f861095adc01b5ad190256acb4f91d22f0368d232b
+bash run-all.sh
+```
+
+The committed patches, hexdb transcript, decoder and runner self-hash are
+verified by the runner itself: code-only fix patch
+`5e648094ba1d8b9f84e036b5a4547efafc8ab28f962101a2d1c3077547d55f5f`, hexdb
+`4d84273f893d5a359e6316ac511b247b6ca9f8a2640a79b1522a45f1b6033713`,
+decoded DB `6403bc6c08deee687c69e6d05c680a443f7d994bda19071131db0bd196538fa3`,
+runner `71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32`.
+Expect `RESULT PASS=26 FAIL=0`, rc 0; the author's receipt ran
+12:12:03Z–12:16:47Z with console sha256
+`3c0e8cc6d8f0ae17601eeac2d952173de0ffc77ad46b7bf2a7076535e4f7165c`.
+Vulnerable GCC 13.3 ASan and Clang 18.1.3 (`-gline-tables-only -O0`) each
+report `heap-buffer-overflow`, **WRITE of size 1**, `0 bytes after a 640-byte
+region`, rc 134, frames `fts5PutVarint64` (`sqlite3.c:268441`) ←
+`sqlite3Fts5PutVarint` (`:268456`) ← `fts5DoSecureDelete` (`:256373`) ←
+`fts5FlushSecureDelete` ← `fts5FlushOneHash`, from ordinary
+`DELETE FROM t WHERE rowid = 1`. Fixed controls are clean and exit rc 1 with
+`fts5: corruption in table "t"`; the plain vulnerable build silently counts
+1 → 0, and crafted-DB read/`MATCH 'alpha'` plus a clean secure-delete DELETE
+are ASan-clean. Pinned source markers: vulnerable `ext/fts5/fts5_index.c:5525`
+`nPg = iPgIdx;` and `:5533` unbounded write; fixed `:5525`
+`nNewPg = iPgIdx;`, `:5532` `iKeyIn>nPg` guard, `:5538` bounded write.
+Generated trees, CLI binaries, run databases and `evidence/poc.db` are
+gitignored under `build/` and regenerate from the verified tarball; the
+console log is committed. No wire/request path, named neighbour, pointer or
+command: grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL, author-only
+and unwitnessed. Witness must re-fetch the pinned zip from the URL before an
+offline replay; admission and witness verdict are still owed.

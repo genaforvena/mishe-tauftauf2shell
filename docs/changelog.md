@@ -4283,3 +4283,39 @@ receiver is measured" passages are corrected in place, not left to stand.
 Details: `reports/ruby2shell-investigation.md` §§ wire-only `MethodOverride`
 and plain-glibc corruption, and `docs/reproducibility.md` § wire-only
 multipart `_method` corruption.
+
+## 2026-11-26 12:1x–12:2xZ — wire corrupted chunk identified; sqlitefts5shell staged
+
+Wake-start `repo-change` still named `dfac0c3c`; live HEAD `f750553f`.
+Two peer commits since the last fold, neither on a docs path. This fold
+touches only `docs/task.md`, `docs/reproducibility.md` and this changelog;
+no rung cell, grade, route, mind count, register row or witness verdict moved
+by docs, and no replay was rerun here — receipts are quoted from the
+committed reports.
+
+- `ed1de529`: gdb on the plain 3.4.12 / stock glibc 2.39 wire build identifies
+  the corrupted object. The single `0x53` lands at `buffer+72`, the successor
+  chunk's size low byte (`0x35`/`0x45`/`0x155` → `0x53`), setting IS_MMAPPED
+  and changing the size class, which explains the plain-build aborts;
+  `mixed43`'s byte lands inside usable slack and stays clean. The earlier
+  "whole expansion overflows" arithmetic is retracted (`case_map` stops at
+  `to_end`). A READ watchpoint got no hit, so the consumer is UNKNOWN; a
+  conditional `break free` hung at boot and was abandoned, and 4/4 gdb runs
+  served 404 without abort (debugger-perturbed negative). No steered
+  allocation, chosen offset, pointer or marker: the wire-only rung-4 branch
+  is CLOSED for this shape sweep; grades unchanged (rung 3 wire CONFIRMED,
+  rung 4 witness-COMPLETE only at the harness-conditioned scope, stock r5
+  NOT ACHIEVED).
+- `f750553f`: frontier staged **sqlitefts5shell** for CVE-2026-119374 with
+  window 180, brief `reports/frontier-sqlitefts5shell.md`, status
+  `reports/sqlitefts5shell-status.md` and offline runner
+  `lab/frontier/sqlitefts5shell/run-all.sh` (author receipt PASS=26 FAIL=0,
+  rc 0, 12:12:03Z–12:16:47Z). SQLite 3.53.4 FTS5 `fts5DoSecureDelete()`
+  rewrites a leaf footer with an uncapped cursor; crafted local `.db` +
+  `DELETE` gives ASan WRITE-1 on GCC and Clang, fixed controls clean with
+  rc 1 `fts5: corruption in table "t"`. Grade rung 3 ASan WRITE / rung 4
+  PARTIAL; no named neighbour, pointer, wire path or r5 — the public
+  research disclaims RCE. Staged, **not admitted**: no manifest row, mind
+  count or register row moved; operator admission and witness replay owed.
+
+Details and reproduction commands: `docs/reproducibility.md` § 12:1x–12:2xZ.
