@@ -2,6 +2,43 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 22:2x–22:3xZ — openscap 190th admission, W294/W295 verdicts
+
+This fold covers `170accd0..6a4f1c02` and adds only explanation: no
+generated cell, register row, grade, report or lab evidence moved.
+Reproduce every claim from `docs/reproducibility.md` § 22:2x–22:3xZ.
+
+`9cc45de2`, `8127c90a` and `6a4f1c02` staged, pinned and admitted
+openscapmangle2shell as the 190th declared target mind under standing #6.
+CVE-2026-122056 / GHSA-5h6x-q65w-wxvf, affected `<= 1.4.6` and `1.3.x`
+with no tagged fix; the fixed pin is main commit `5f1f2bccd4b5f85e…`
+(identical maint-1.3 backport `3aaf537c60277d7…`), and the vendor fixed
+control RHSA-2026:103520 was not built. Window 198 was adopted as-is
+after the sdcpp duplicate was retired; counts 189/186/186/126 →
+190/187/187/126, register row R1 — / R2 — / R3 ✓ / R4 — / R5 —. The
+operator's clean-archive replay gave three pins OK, runner sha256
+`fc185b5f750516e7fb5122d64985d8bb58b8ee1233c81104345c187bab2a92d3`,
+rc 0, `PASS=5 FAIL=0`, GCC and clang ASan WRITE-1 at verbatim
+`sds.c:884`, fixed pin and safe vector clean. Plain build rc 0 and the
+empty-string non-trap stay negatives (the latter UNKNOWN); rungs 1/2/4/5
+NOT CLAIMED. Independent witness replay still owed.
+
+`9cbd89cd` + `5b0f01cc` completed gimpjif W294: in the pinned real-glib
+driver, glibc's smallbin unlink accepted a lab-arranged fake chunk and
+returned it on the ninth post-pin allocation, writing metadata at the
+chosen address; 19/0 in-tree, 29/0 and 35/0 in the wider runners and 19/0
+from a clean `git archive 9cbd89cd`. The earlier failed `consume-ptr`
+dereference is preserved as a negative superseded by this result. No
+real GIMP plugin, chosen data at a chosen target object, control flow,
+marker or command: rung 3 verbatim / rung 4 PARTIAL unchanged, NO r5;
+witness verdict still owed. `026c094c` folded W295's ESTABLISHED AS
+LABELED replay of lwext4's named-field / prefix-OR ceiling probe (five
+runner hashes matched, 31/0 overall, LAYOUT 9/9, eight of eight no-chosen-
+pointer checks), superseding its author-only wording without a grade
+change or r5. `be38ac1e` closed Ruby's remaining case-fold exact-opcode
+guards as a negative at rung 3; its recipe was committed directly and is
+cross-referenced, not re-pinned.
+
 ## 2026-11-26 22:2xZ — Ruby2Shell remaining case-fold guards closed
 
 `lab/repro/ruby2shell-casefold-exactn.{rb,sh}` tested 21 anchored and

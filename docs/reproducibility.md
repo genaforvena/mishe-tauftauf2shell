@@ -15742,3 +15742,78 @@ U+0390 variants false) on both builds. The optional GDB trace uses
 `endp` just past `ss` for `\Aß`; long-fold variants do not reach the
 opcode because the exact-string prefilter rejects them. Grade rung 3
 unchanged; lane CLOSED.
+
+## 2026-11-26 22:2x–22:3xZ — openscap admission, gimpjif W294 unlink, lwext4 W295
+
+### openscapmangle2shell — admitted 190th, rung 3 only
+
+From `lab/frontier/openscapmangle2shell`, `PIN_HASHES.txt` is a plain
+three-line sha256sum manifest: run `sha256sum -c PIN_HASHES.txt` from
+`pins/` and expect `sds.c.vuln`
+`af1e727994f48b125434c1c58da6d852f46b285bb2291441a289790e04c5c9df`
+(tag 1.4.6 = `af8cd99abf97f9f2c3b44378e144e88df634f56d`),
+`sds.c.fixed`
+`05481a0e70b5687deec9f972ee56d1c7599fdd50b076d9716c3b47ed77e89e59e59`
+(main fix `5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163`) and
+`fix-5f1f2bcc.patch`
+`fa693b7ce8af855fb392c7c249a27f05cb7821d2171f67962e2366881defdabb`.
+The verbatim sink is lines 853-887 with `#line 853 "src/DS/sds.c"`;
+`sh run-all.sh` builds GCC and clang ASan harnesses and expects
+`PASS=5 FAIL=0` (22:20Z and the operator's 22:26Z clean-archive replay,
+runner sha256
+`fc185b5f750516e7fb5122d64985d8bb58b8ee1233c81104345c187bab2a92d3`).
+The slash vector's expected ASan bytes are `heap-buffer-overflow`,
+`WRITE of size 1` at `src/DS/sds.c:884`, 0 bytes after an 8-byte region
+allocated at `:860` via `harness/main.c:23`; the fixed pin allocates 9
+bytes and the safe vector `a/b@c` is clean on both pins. Plain build rc 0
+on the attack vector, and the empty-string vector produces no ASan
+report: both are preserved negatives, the latter UNKNOWN. No full
+`oscap` / libxml2 build or CLI replay exists; independent witness replay
+is owed. Raw run traces under `runs/` are tracked but addresses and PIDs
+are run-specific; detail and claim URLs are in
+`reports/frontier-openscapmangle2shell.md` and
+`reports/openscapmangle2shell-status.md`.
+
+### gimpjif2shell W294 — real glibc accepts the lab-arranged fake chunk
+
+From `lab/frontier/gimpjif2shell`, `bash realglib/run-consumer.sh unlink`
+rebuilds `realglib/real-driver.c` (sha256
+`86fe2997c8fb30cd0ff3ee8698138a698028ea871e4dc4281aefd06d6c2608b3`,
+runner sha256
+`f615d6fb350b642d0798f5df2da2611e124d8e9a4aa1742112015131013cd232`)
+and expects 19 PASS / 0 FAIL; `bash run-all.sh` gives 29/0 and
+`bash realglib/run-real.sh` 35/0. The pinned 324-byte JIF-shaped payload
+keeps A's size word `0x111`, supplies the live `unsorted_chunks(av)`
+pointer in A->fd and points A->bk at a static fake chunk 16 bytes before
+an aligned 64-byte buffer. Expected bytes in the tracked
+`realglib/evidence/consumer-unlink.log` (sha256
+`ac2ec245b3c6aa8b02f1046b61623b016d74b92870a3b49bc222f508d075c94b`)
+are `POST_PIN A_size_word=0000000000000111`,
+`UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+`UNLINK_FD_WORD_CHANGED=1` and rc 0: the eighth `g_try_malloc(260)`
+returns A, the ninth returns the fake chunk, and its first two words
+change from `603639fc85630000…` to `c75e5c3806000000…` and zero. A clean
+`git archive 9cbd89cd` replay at 22:26Z repeated 19/0 in
+`/tmp/w294-clean`. The earlier `consume-ptr` fake-unlink negative is
+superseded by this completed result, not erased. No real GIMP plugin
+read, no chosen data at a chosen target object, no control flow, marker
+or command: grade stays rung 3 verbatim / rung 4 PARTIAL, NO r5, and the
+independent witness verdict is still owed.
+
+### lwext4shell W295 — named-field probe independently replayed
+
+The § 22:0xZ `run-gdt-layout.sh` recipe is unchanged. Witness W295 used
+one unmodified command from the planted checkout,
+`bash lab/frontier/lwext4shell/replay-clean.sh 8b608414 /tmp/lwext4-witness-layout`.
+Expect `REPLAY_RC=0`, all five runner hashes matching (`fd9e7d3e…`,
+`e32862ed…`, `80587918…`, `c8efbeea…`, `a85e1a82…`), pins
+`890484c7`/`b9c842f1`, 31 PASS / 0 FAIL overall, REAL 17/0, VICTIM 9/0,
+GDT 11/0, `LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`, `LAYOUT 5/0`.
+Nine fresh GDB sections hold `DELTA=4112`, `SIZEOF=144` and `bad_bytes=0`;
+gdt 8 changes no field, gdt 33215..34000 reaches 7/12/13 of the named
+fields, and the covered bytes remain prefix-OR masked (`end_write` only
+`0x1`/`0xff`/all-ones, fully covered pointers `0xffffffffffffffff`).
+Verdict: ESTABLISHED AS LABELED at the exact scope, no grade change, NO
+r5; detail in the gitignored site at
+`.mishe-tauftauf/artifacts/witness-w295-lwext4-layout/detail.md`.
+This supersedes the earlier "author-only" wording for that probe only.

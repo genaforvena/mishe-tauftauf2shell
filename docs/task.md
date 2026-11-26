@@ -14809,3 +14809,87 @@ Every verdict above is labeled operator, author, clean-archive or independent
 witness as observed; none moves a generated grade cell here. What would
 change the fold: a later verdict contradicting one of these scopes, or a
 checker RED on committed HEAD.
+
+## 2026-11-26 22:2x–22:3xZ — openscap 190th admitted, W294/W295 verdicts, bounded negatives
+
+This fold covers `170accd0..6a4f1c02`. No generated cell, register row,
+grade, report or lab evidence was edited here; the operator's README,
+results and SVG regeneration in `6a4f1c02` is explained, not re-pinned.
+
+- `9cc45de2`, `8127c90a` and `6a4f1c02` staged, pinned and **admitted
+  openscapmangle2shell as the 190th declared target mind** under standing
+  #6 at 22:2xZ. CVE-2026-122056 / GHSA-5h6x-q65w-wxvf (CVSS 5.9, CWE-787;
+  affected `<= 1.4.6` and `1.3.x`, no tagged upstream fix): an all-slash
+  href makes `ds_sds_mangle_filepath()` write 2N expanded bytes plus a NUL
+  into a `strlen(f)*2` heap buffer. Tag 1.4.6 is
+  `af8cd99abf97f9f2c3b44378e144e88df634f56d`; the fix is on main at
+  `5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163` and identically on
+  maint-1.3 at `3aaf537c60277d7fb2130b90e6e1c3623ec03e3b`. A read-only
+  scout's line-number correction (`:865`/`:889`) came from moving `main`;
+  the pinned tag's malloc at `sds.c:860` and terminator at `:884` match
+  the advisory. The staged two-pane window 198 (reused after the sdcpp
+  duplicate was retired) was adopted as-is: `dead=0`, one registry entry,
+  no duplicate CVE/GHSA. Counts moved 189/186/186/126 → 190/187/187/126;
+  the register row is R1 — / R2 — / R3 ✓ / R4 — / R5 —. Operator clean
+  replay from `git archive HEAD lab/frontier/openscapmangle2shell` with
+  six prebuilt binaries and `runs/` removed: three `sha256sum -c` pins OK,
+  runner sha256 `fc185b5f750516e7fb5122d64985d8bb58b8ee1233c81104345c187bab2a92d3`,
+  rc 0, `PASS=5 FAIL=0`, GCC ASan WRITE of size 1 at verbatim `sds.c:884`
+  0 bytes after an 8-byte region allocated at `:860`, clang ASan
+  reproduces, fixed pin and safe vector `a/b@c` clean. R1/R2 NOT CLAIMED
+  (plain build rc 0; the advisory's empty-string vector did not trap and
+  stays UNKNOWN), R4 NOT CLAIMED (constant NUL immediately after the
+  buffer, no chosen byte, offset, pointer, marker or command), R5 NOT
+  CLAIMED (sink-only harness, no CLI or wire path). Independent witness
+  replay is still owed; nothing here is self-acceptance.
+- `9cbd89cd` + `5b0f01cc` completed gimpjif2shell W294: re-derivation from
+  Ubuntu glibc 2.39 shows the 66300-byte allocation enters the unsorted
+  loop *before* `inflate()`, so A is already in the 0x110 smallbin when
+  the overflow rewrites its metadata; the first fault is the smallbin
+  `bck->fd != victim` check (`malloc.c:3956`, installed line 3985). The
+  earlier `consume-ptr` negative (fault at installed line 4013) is a
+  preserved negative superseded by this completed result, not erased.
+  New `unlink` mode: `real-driver.c` sha256
+  `86fe2997c8fb30cd0ff3ee8698138a698028ea871e4dc4281aefd06d6c2608b3`,
+  runner `f615d6fb350b642d0798f5df2da2611e124d8e9a4aa1742112015131013cd232`,
+  19 PASS / 0 FAIL in-tree, 29/0 from `run-all.sh` and 35/0 from
+  `run-real.sh`. `realglib/evidence/consumer-unlink.log` sha256
+  `ac2ec245b3c6aa8b02f1046b61623b016d74b92870a3b49bc222f508d075c94b`
+  records `UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+  `UNLINK_FD_WORD_CHANGED=1`, rc 0: all ten post-pin `g_try_malloc(260)`
+  calls complete, the eighth returns the corrupted neighbour A and the
+  ninth returns the lab-arranged fake chunk at the chosen address, where
+  glibc writes smallbin/tcache metadata. A clean `git archive` replay of
+  `9cbd89cd` at 22:26Z repeated 19/0 in `/tmp/w294-clean`. Ceiling: a
+  real glibc allocator accepts a fake chunk, not a real GIMP plugin
+  allocation, chosen data at a chosen target object, control flow, marker
+  or command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL,
+  NO r5. An independent witness verdict is still owed.
+- `026c094c` folded witness **W295's ESTABLISHED AS LABELED** verdict for
+  lwext4's named-field / prefix-OR ceiling probe, which the earlier fold
+  left author-only. From `git archive 8b608414` with staged evidence
+  deleted, the unmodified `replay-clean.sh` gave `REPLAY_RC=0`: 31 PASS /
+  0 FAIL overall, REAL 17/0, VICTIM 9/0, GDT 11/0, `LAYOUT_MATCHED=9/9`,
+  `NO_CHOSEN_PTR_MATCHED=8/8`, `LAYOUT 5/0`; all five runner hashes and
+  pins `890484c7`/`b9c842f1` matched. Nine GDB sections held `DELTA=4112`
+  and `SIZEOF=144` with `bad_bytes=0`; gdt 8 touched no field and gdt
+  33215..34000 reached 7/12/13 named fields. A NULL `end_write` became
+  only `0x1`/`0xff`/all-ones and covered pointers
+  `0xffffffffffffffff`: no chosen address, dereference, marker or
+  command, no counterexample and NO r5. Overall grade unchanged. Detail:
+  `.mishe-tauftauf/artifacts/witness-w295-lwext4-layout/detail.md`.
+- `be38ac1e` closed Ruby's remaining case-fold exact-opcode guards: 21
+  anchored and folded-literal shapes on both ASan builds produced only
+  the already-known `str_lower_case_match regexec.c:4278` reports for
+  single-byte variants, no ASan reports for multi-byte variants, and
+  identical multi-byte match outcomes across builds. GDB confirms
+  `OP_EXACTN_IC` is reached by the folded literal `\Aß` but not by any
+  long-fold subject, so the 3.4.13-only `OP_EXACT1_IC`/`OP_EXACTN_IC`
+  guards have no observed second vulnerability. Grade rung 3 unchanged;
+  the author's recipe is already in `docs/reproducibility.md` and is
+  cross-referenced, not re-pinned.
+
+Every count above is an operator, author, clean-archive or independent
+witness observation as labeled; none moves a generated grade cell here.
+What would change the fold: a later verdict contradicting one of these
+exact scopes, or a checker RED on committed HEAD.
