@@ -1,5 +1,24 @@
 # drwav2shell — status (updated 2026-11-26 00:4xZ)
 
+## W19 — GNUBase build pacing measured; binary still absent (2026-11-26 04:17–05:10Z)
+
+- Same gitignored GNUBase ASan tree as W17/W18, regen edges still removed.
+  Three bounded builds: `-j16` for 900s made 3 objects (683->686; the three
+  compiles took 5.9/9.4/12.1/12.3s, then ~888s with no progress at load 22.7
+  and 11 GiB swap), `-j1` for 150s made 19 objects (~7.9s each), `-j2` for
+  900s made 24 objects (705->729). No compiler error. At 05:09Z `ninja -n`
+  listed 180 steps and `bin/gnubase` did not exist; the wake ended with no
+  linked consumer. Evidence `consumer/evidence/w19-gnubase-build-pacing.txt`.
+- Corrected two probe bugs before any request: the import curl's stdout
+  redirect was a separate shell statement, and `SERVER_RC=0` was hardcoded.
+  `bash -n` passes; the Bearer-token wait matches `headless.cpp:137`. MCP
+  base64 is image-tool output only, so the import still takes a local path,
+  not wire WAV bytes. Crafted bad/safe RIFFs verified byte-for-byte.
+- No GNUBase process, HTTP request, ASan report, chosen bytes in a real
+  consumer, marker or side effect was observed. W1-W4 witness verdicts remain
+  UNKNOWN and were not re-offered. Grade unchanged: rung 3 public API, rung 4
+  file-chosen flow to a lab marker; r5 UNKNOWN.
+
 ## W18 — GNUBase build blocker diagnosed; consumer still unexecuted (2026-11-26 03:2x-04:0xZ)
 
 - Reconciled the unknown-ending wake (`...3349353902094`) and its failed

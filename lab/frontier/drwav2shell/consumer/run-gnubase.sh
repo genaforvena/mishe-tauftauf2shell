@@ -38,7 +38,7 @@ SESSION=$(sed -n 's/^[Mm]cp-[Ss]ession-[Ii]d: //p' "$OUT/initialize.headers" | t
 [[ -n "$SESSION" ]] && HDR+=(-H "Mcp-Session-Id: $SESSION")
 curl -sS "${HDR[@]}" -X POST "$URL" -d '{"jsonrpc":"2.0","method":"notifications/initialized"}' >/dev/null
 curl -sS -D "$OUT/import.headers" "${HDR[@]}" -X POST "$URL" \
-  -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"audioFile_import\",\"arguments\":{\"files\":[\"$WAV\"]}}}"
+  -d "{\"jsonrpc\":\"2.0\",\"id\":2,\"method\":\"tools/call\",\"params\":{\"name\":\"audioFile_import\",\"arguments\":{\"files\":[\"$WAV\"]}}}" \
   >"$OUT/import.body"
 sleep 1
 echo "PID=$PID LOG=$LOG WAV=$WAV"
@@ -47,5 +47,6 @@ echo '--- import.body ---'
 cat "$OUT/import.body"
 echo
 kill "$PID" 2>/dev/null || true
-wait "$PID" 2>/dev/null || true
-echo SERVER_RC=0
+wait "$PID" 2>/dev/null
+RC=$?
+echo "SERVER_RC=$RC"

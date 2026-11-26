@@ -43,6 +43,15 @@ the request would still name a local path, not WAV bytes. Grade unchanged:
 rung 3 / rung 4 lab marker, r5 UNKNOWN. Evidence
 `lab/frontier/drwav2shell/consumer/evidence/w18-gnubase-build-diagnosis.txt`.
 
+W19 (04:17-05:10Z) measured why GNUBase still had no binary: `-j16` thrashed
+the host (3 objects in 900s, ~888s without progress), while `-j1`/`-j2`
+compiled steadily but too slowly (19 objects/150s and 24 objects/900s). At
+05:09Z 180 steps remained and `bin/gnubase` was absent. The loopback probe was
+corrected (real response redirect, real exit status) but never run; no process,
+request, ASan report or side effect. Grade unchanged: rung 3 / rung 4 lab
+marker, r5 UNKNOWN. Evidence
+`lab/frontier/drwav2shell/consumer/evidence/w19-gnubase-build-pacing.txt`.
+
 
 ## Verified ground truth
 
