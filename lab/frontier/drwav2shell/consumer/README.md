@@ -202,3 +202,16 @@ calls in any source file at HEAD. grep.app again returned a Vercel checkpoint
 (same W11 negative). No native network metadata caller, no build, no replay;
 grade and r5 status unchanged. Exact reads, lines and commands:
 `evidence/w14-advisories-and-cortex.txt`.
+
+## Locally provisioned source-tree corpus (W15, 2026-11-26 00:13Z)
+
+Read-only grep over real source trees already provisioned in `lab/frontier/`
+found one third-party `dr_wav.h` outside this lab: EasyRPG inside Synchronet's
+`syncrpg` door. Its banner reports 0.14.5 and it contains the `metadataCursor`
+desync code, but its hash differs from the pinned vulnerable header (no byte
+identity claim). Its only call is `drwav_init_ex()` with `DRWAV_SEQUENTIAL`
+(`decoder_drwav.cpp:65-68`), never `DRWAV_WITH_METADATA`; the header gate at
+`:3269` therefore leaves `isProcessingMetadata` false. Provisioned SDL_mixer
+trees have no `dr_wav.h`. No real Linux metadata-API caller in this corpus;
+bounded negative, not proof of absence. No build or run. Exact lines, hashes
+and commands: `evidence/w15-local-deps-callers.txt`.

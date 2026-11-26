@@ -1,0 +1,60 @@
+drwav2shell W15 — locally provisioned source-tree corpus (2026-11-26 00:13Z)
+
+Scope: read-only source provisioning. No build, no run, no loopback service,
+no external probe, no edit to any other target's files. Fifth corpus searched,
+distinct from Sourcegraph (W6/W9/W10), Debian Code Search (W10), grep.app
+(W11/W14) and public web/advisory search (W5/W11/W14).
+
+Command and result:
+  find lab/frontier -type f -name dr_wav.h
+13 paths. Twelve belong to this lab's own pins/src/build trees under
+lab/frontier/drwav2shell/. Exactly one belongs to another target's provisioned
+real source tree:
+
+  lab/frontier/synchronet2shell/src-tree/src/doors/syncrpg/easyrpg/src/external/dr_wav.h
+
+EasyRPG (vendored under Synchronet's syncrpg door) reports 0.14.5:
+  :148 DRWAV_VERSION_MAJOR 0
+  :149 DRWAV_VERSION_MINOR 14
+  :150 DRWAV_VERSION_REVISION 5
+  :8564 "v0.14.5 - 2026-03-03" change-log entry
+SHA-256 of that header:
+  2a7050e9f118431700419744b1dc16f1eb27d448b05dbab7bf51e14f554b27b6
+This is NOT byte-identical to this lab's pinned vulnerable header
+(pins/vuln/dr_wav.h
+c69816d0e0ac6cab3df8bf2f42df451d4531c2bfa34f7d7a69e959e6ed399038) or its
+fixed header (fad60f1e...f308cd), so no byte-identity claim is made.
+
+Vulnerable-shaped code IS present in that header (metadataCursor desync):
+  :2103 metadataCursor field; :2179 smpl reader; :2268 cue reader
+  :2748-2782 smpl branch (pass-1 count reserves slot, pass-2 parse at :2780,
+    cursor advance at :2782)
+  :2820-2831 cue branch (pass-1 count at :2825, pass-2 parse at :2829,
+    cursor advance at :2831)
+  :3269 isProcessingMetadata = !sequential && ((flags & DRWAV_WITH_METADATA) != 0)
+
+Sole caller in the EasyRPG tree (grep over the whole easyrpg subtree for every
+drwav_init* spelling; all other matches are header definitions/docs):
+  src/decoder_drwav.cpp:65-68
+    #if DRWAV_VERSION_MINOR < 14
+      drwav_init_ex(&handle, read_func, seek_func, nullptr, &this->stream, nullptr, DRWAV_SEQUENTIAL, nullptr)
+    #else
+      drwav_init_ex(&handle, read_func, seek_func, tell_func, nullptr, &this->stream, nullptr, DRWAV_SEQUENTIAL, nullptr)
+    #endif
+Flags in the same header: :290 DRWAV_SEQUENTIAL = 0x00000001,
+:291 DRWAV_WITH_METADATA = 0x00000002. The call sets only SEQUENTIAL, so
+:3269 evaluates isProcessingMetadata = false and the metadata parser is never
+entered. This agrees with W10's pinned flag gate: init_ex never ORs
+DRWAV_WITH_METADATA. Any WAV origin, network or local, is moot for this CVE
+because the affected parser is not called.
+
+SDL_mixer trees in lab/frontier/sdlmixer2shell/deps/ vendor src/dr_libs with
+dr_flac.h and dr_mp3.h but no dr_wav.h; decoder_wav.c is SDL's own parser.
+No dr_wav caller there.
+
+Conclusion: NEGATIVE for a real Linux metadata-API caller in the locally
+provisioned corpus. A real game engine ships vulnerable-version-shaped bytes
+but cannot reach the desync. Limits: this is another bounded, biased corpus
+(other targets' pinned source trees), not proof of absence. Grade unchanged:
+rung 3 real consumer/public API; rung 4 file-chosen control flow to a lab
+marker; no wire-driven corruption, command, shell or r5.

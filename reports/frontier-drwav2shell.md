@@ -1,6 +1,6 @@
 # frontier brief — drwav2shell (CVE-2026-11316)
 
-Status 2026-11-25 23:06Z: rung 3 real consumer/public API; rung 4
+Status 2026-11-26 00:13Z: rung 3 real consumer/public API; rung 4
 file-chosen control flow to a lab marker in a -no-pie consumer. W8 found a
 real network-mounted file playback path in sphaira on vulnerable 0.14.1 and
 replayed the exact sphaira, Moondust and yup dependency headers. The
@@ -11,8 +11,11 @@ caller at all in the Debian corpus. W11 triaged three new vendor candidates
 and the `drwav_open_*_with_metadata` spelling; W13 closed Moondust's
 downloader at the call-graph level (local SDL_RWFromFile only). W14 re-read
 the Talos advisory and closed one new candidate, cortex.cpp (vendored 0.12.16
-header, zero drwav calls). No native network caller on vulnerable bytes was
-measured. W1-W4, W9, W10 and W11 witness verdicts remain UNKNOWN.
+header, zero drwav calls). W15 searched the locally provisioned source-tree
+corpus: EasyRPG vendors a 0.14.5-shaped header with the desync code but calls
+only `drwav_init_ex()` with `DRWAV_SEQUENTIAL`, never the metadata bit.
+No native network caller on vulnerable bytes was measured. W1-W4, W9, W10
+and W11 witness verdicts remain UNKNOWN.
 
 ## Verified ground truth
 
@@ -483,3 +486,26 @@ rung 4 file-chosen control flow to a lab marker; no wire-driven corruption,
 command, shell or r5. Raw evidence: `consumer/evidence/w13-moondust-chain.txt`.
 No witness replay was requested; the sphaira network-backed path is still
 source-only because no Switch runtime is in scope.
+
+## W15 — locally provisioned source-tree corpus negative (2026-11-26 00:13Z)
+
+A fifth corpus, the real source trees already provisioned under
+`lab/frontier/`, was searched read-only. Of 13 `dr_wav.h` files, twelve are
+this lab's own pins/src/build and one is a real third-party consumer: EasyRPG
+vendored inside Synchronet's `syncrpg` door
+(`synchronet2shell/src-tree/src/doors/syncrpg/easyrpg/src/external/dr_wav.h`).
+Its banner reports 0.14.5 (`:148-150`, `:8564`) and the desync code is present
+(`metadataCursor` at `:2103`, smpl/cue branches at `:2748-2782`/`:2820-2831`,
+gate at `:3269`), but its header hash `2a7050e9...554b27b6` differs from the
+pinned vulnerable `c69816d0...`, so byte identity is not claimed.
+
+The only call site in that tree, `decoder_drwav.cpp:65-68`, is
+`drwav_init_ex()` with `DRWAV_SEQUENTIAL` (0x1) and no
+`DRWAV_WITH_METADATA` (0x2, header `:290-291`). At `:3269`
+`isProcessingMetadata = !sequential && ((flags & DRWAV_WITH_METADATA) != 0)`
+is false, so the metadata parser is never entered on any WAV, whatever its
+origin. Provisioned SDL_mixer trees carry `dr_flac.h`/`dr_mp3.h` but no
+`dr_wav.h`. This confirms W10's flag gate on an in-tree real consumer while
+leaving the r5 prerequisite unmet; it is a bounded corpus negative, not proof
+of absence. No build, no run, no grade change. Raw evidence:
+`consumer/evidence/w15-local-deps-callers.txt`.

@@ -1,4 +1,4 @@
-# drwav2shell — status (updated 2026-11-25 23:06Z)
+# drwav2shell — status (updated 2026-11-26 00:13Z)
 ## 2026-11-25 08:35Z — ADMITTED under standing #6 (144th route)
 
 - Verified staged claim, charter, wall, lab and pre-existing window 152; no
@@ -391,3 +391,29 @@ makes the low-half pointer land on a useful object without harness grooming.
   rung 4 file-chosen control flow to a lab marker; no wire-driven corruption,
   command, shell or r5. r5 prerequisite still an executable Linux network
   metadata caller; none observed.
+
+## W15 — locally provisioned source-tree corpus negative (2026-11-26 00:13Z)
+
+- Fifth corpus, distinct from the four public indexes: read-only grep over
+  real source trees already provisioned under `lab/frontier/`. No build, no
+  run, no loopback service, no external probe and no edit to another target's
+  files. No new drwav witness verdict on the tape (latest #4642, 00:08:58Z);
+  W1-W4 remain owed and were not re-offered.
+- `find lab/frontier -type f -name dr_wav.h` returned 13 paths: twelve in this
+  lab's own pins/src/build and one real third-party tree, EasyRPG vendored
+  under `synchronet2shell/src-tree/src/doors/syncrpg/easyrpg/src/external/`.
+  Its banner reports 0.14.5 (`:148-150`, `:8564`), but SHA-256
+  `2a7050e9...554b27b6` is not byte-identical to the pinned vulnerable
+  `c69816d0...`, so no byte-identity claim is made. The desync code is present
+  (`:2103`, `:2748-2782`, `:2820-2831`, gate at `:3269`).
+- Its sole call site, `decoder_drwav.cpp:65-68`, calls `drwav_init_ex()` with
+  `DRWAV_SEQUENTIAL` (0x1) and never `DRWAV_WITH_METADATA` (0x2, header
+  `:290-291`). The `:3269` gate therefore keeps `isProcessingMetadata` false:
+  a real consumer ships vulnerable-version-shaped bytes but cannot reach the
+  parser. W10's flag gate is confirmed on an in-tree real consumer.
+- SDL_mixer's provisioned `deps/` vendor `dr_flac.h`/`dr_mp3.h` but no
+  `dr_wav.h`; its `decoder_wav.c` is SDL's own parser. No dr_wav caller there.
+- NEGATIVE, bounded and biased by the local corpus, not proof of absence.
+  Grade unchanged: rung 3 real consumer/public API, rung 4 file-chosen
+  control flow to a lab marker; no wire-driven corruption, command, shell or
+  r5. Raw evidence: `consumer/evidence/w15-local-deps-callers.txt`.
