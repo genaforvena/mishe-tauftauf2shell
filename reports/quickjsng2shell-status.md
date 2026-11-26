@@ -20,4 +20,4 @@ use-after-free. Brief `reports/frontier-quickjsng2shell.md`, charter
   bytes contradict it; no CVE and OSV 404; os-module command claim untested;
   distinct project from staged quickjsbcode2shell; GCC-only build.
 - Owed: operator admission, witness clean-archive replay, plain-build
-  chosen-object readback experiment. Window 190 adopted once created.
+  chosen-object readback experiment. Window 190 live, inner panes %384/%385.
