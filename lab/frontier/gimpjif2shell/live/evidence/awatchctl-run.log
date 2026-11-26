@@ -1,0 +1,21 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 21:06:01.246: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 21:06:01.246: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 21:06:12.443: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 21:06:12.443: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 21:06:12.443: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.445: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.446: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.448: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.449: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.449: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.450: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.451: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.458: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.462: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 21:06:12.462: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+WATCH_ARMED pid=1706897 out=0x58d1073cf1d0 avail_out=2147483778 chosen=0x7f0000414243 inflate=0x7d9c2921b9a0
+WATCH_WORD_BEFORE=010000000000000000f33c07d15800000000000000000000
+WATCH_MODULE=/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1 base=0x7d9c2920f000 sym=inflate
+WATCH_SURVIVED total_out=448 ret=1
+WATCH_WORD_AFTER=4d4d4d4d4d4d4d4d43424100007f00004d4d4d4d4d4d4d4d

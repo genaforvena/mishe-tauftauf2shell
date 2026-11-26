@@ -1,0 +1,41 @@
+[New LWP 1707309]
+[New LWP 1707017]
+[New LWP 1707016]
+[New LWP 1707015]
+[New LWP 1707014]
+[New LWP 1707013]
+[New LWP 1707012]
+[New LWP 1707011]
+[New LWP 1707010]
+[New LWP 1707009]
+[New LWP 1707008]
+[New LWP 1707007]
+[New LWP 1707006]
+[New LWP 1707005]
+[New LWP 1707004]
+[New LWP 1707003]
+[New LWP 1706954]
+[New LWP 1706953]
+[New LWP 1706952]
+
+warning: Could not load shared library symbols for .//usr/lib64/ld-linux-x86-64.so.2.
+Do you need "set solib-search-path" or "set sysroot"?
+
+warning: Unable to find dynamic linker breakpoint function.
+GDB will be unable to debug shared library initializers
+and track explicitly loaded dynamic code.
+
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+0x00007d9c28d6ea3b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+Hardware access (read/write) watchpoint 1: *(unsigned long long *)0x58d1073cf2e8
+[Switching to LWP 1707309]
+
+Thread 2 "file-gif-load" hit Hardware access (read/write) watchpoint 1: *(unsigned long long *)0x58d1073cf2e8
+
+Value = 139637981004355
+0x00007d9c292342aa in poke_after_delay () from /tmp/awatchctl.so
+AWATCHCTL_HIT_1
+#0  0x00007d9c292342aa in poke_after_delay () from /tmp/awatchctl.so
+#1  0x00007d9c28c9e8bb in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#2  0x00007d9c28d1c538 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+[LWP 1707309 exited]
