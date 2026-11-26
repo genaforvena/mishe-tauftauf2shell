@@ -1,0 +1,20 @@
+# OpenSCAP ds_sds_mangle_filepath — pinned raw bytes (fetched 2026-11-26 22:18Z)
+# Fetch is read-only provisioning from raw.githubusercontent.com; no external probe.
+
+af1e727994f48b125434c1c58da6d852f46b285bb2291441a289790e04c5c9df  sds.c.vuln
+  source: https://raw.githubusercontent.com/OpenSCAP/openscap/1.4.6/src/DS/sds.c
+  tag 1.4.6 = af8cd99abf97f9f2c3b44378e144e88df634f56d (latest upstream tag)
+  sink: function at :853, undersized malloc at :860, unconditional NUL at :884
+
+05481a0e70b5687deec9f972ee56d1c7599fdd50b076d9716c3b47ed77e89e59  sds.c.fixed
+  source: https://raw.githubusercontent.com/OpenSCAP/openscap/5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163/src/DS/sds.c
+  first fix on main = 5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163
+  only change: :860 malloc(strlen(f)*2) -> malloc((strlen(f)*2)+1)
+
+fa693b7ce8af855fb392c7c249a27f05cb7821d2171f67962e2366881defdabb  fix-5f1f2bcc.patch
+  source: https://github.com/OpenSCAP/openscap/commit/5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163.patch
+  1 file, 1 insertion, 1 deletion, no test added
+
+# maint-1.3 backport (not pinned into the harness): 3aaf537c60277d7fb2130b90e6e1c3623ec03e3b
+# No upstream tagged release contains the fix. Vendor fixed control (not built here):
+# RHSA-2026:103520, openscap 1:1.4.6-1.1.hum1 in Red Hat:hummingbird:1.

@@ -1,0 +1,22 @@
+From 5f1f2bccd4b5f85e44a21a0ce3c854fbb65a2163 Mon Sep 17 00:00:00 2001
+From: Matthew Burket <mburket@redhat.com>
+Date: Thu, 5 Nov 2026 12:08:41 -0600
+Subject: [PATCH] Fix off by one error in ds_sds_mangle_filepath
+
+---
+ src/DS/sds.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/src/DS/sds.c b/src/DS/sds.c
+index 81b7568e80..297199904b 100644
+--- a/src/DS/sds.c
++++ b/src/DS/sds.c
+@@ -857,7 +857,7 @@ char* ds_sds_mangle_filepath(const char* filepath)
+ 
+ 	// the string will grow 2x the size in the worst case (every char is /)
+ 	// TODO: We can do better than this by counting the slashes
+-	char* ret = malloc(strlen(filepath) * sizeof(char) * 2);
++	char* ret = malloc((strlen(filepath) * sizeof(char) * 2) + 1);
+ 
+ 	const char* src_it = filepath;
+ 	char* dst_it = ret;

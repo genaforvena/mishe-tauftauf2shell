@@ -1,0 +1,7 @@
+PASS asan-vuln slashes WRITE-1 at pinned sink
+OBS empty vector rc=0, no ASan report (negative preserved)
+PASS clang-asan-vuln slashes reproduces
+PASS fixed and safe vectors clean under ASan
+PASS plain-build attack outcome recorded
+PASS fixed plain output is 8 dashes
+PASS=5 FAIL=0
