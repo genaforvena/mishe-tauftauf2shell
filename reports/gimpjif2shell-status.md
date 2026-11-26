@@ -41,4 +41,10 @@ clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
   `TOTAL: 29 PASS / 0 FAIL`, rc 0; raw logs in `lab/frontier/gimpjif2shell/out/`.
 - In-tree `run-witness.sh` 2026-11-26 02:59Z: all five pins exact,
   `REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, `TOTAL: 29 PASS /
-  0 FAIL`, rc 0. Clean-archive receipt to be appended after commit.
+  0 FAIL`, rc 0.
+- Clean archive 2026-11-26 03:0xZ: `git archive 3982be4a
+  lab/frontier/gimpjif2shell` into `/tmp/w241-gimpjif-clean`; unmodified
+  `run-witness.sh` (sha256
+  `f562ad3132dbd970ec9c8aab403138fa7925d8068dea515566bcc1c4fd367e58`,
+  identical in-tree) returned `WITNESS REPLAY PASS`, five pins exact,
+  `REPLAY_PASS=6 REPLAY_FAIL=0`, `TOTAL: 29 PASS / 0 FAIL`, rc 0.
