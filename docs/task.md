@@ -2652,6 +2652,13 @@ Jenkins and PingFederate are vendor/researcher claims, not lab findings.
 flags, so the vulnerable assembly path cannot run here. Same
 structural-consumer screen that ruled out nginx CVE-2026-123007.
 Revisit only on a person-owned AVX-512-capable lane.
+W288 2026-11-26 21:17Z re-measured the gate: Red Hat's own detector prints
+`bmi2 : Unaffected hardware!`, `grep -om1 -E 'avx512[_]?vbmi' /proc/cpuinfo`
+is empty, no `sde`/`sde64` binary exists, and the installed JVM is
+`17.0.21.1+2-1-24.04.1-Ubuntu` (Oracle's first-fixed Java 17 line). Dedicated
+brief `reports/frontier-java4shell.md` preserves the claim, the
+Oracle-vs-Rapid7 fixed-version discrepancy and the constrained-byte rung-4
+ceiling; still no admission, no lane and no window.
 
 #### Frontier brief 2026-11-20: Apache2Root (CVE-2026-119618)
 
