@@ -5330,11 +5330,16 @@ serial to `make_params`, while the method-entry pointer remained intact. A
 same-boot query resolved `0x1853` to `ParamList`. This is a real method-key
 alias, but the GDB queries perturb the allocator: a six-fresh-process sweep
 with those queries in place hit a VM text pointer on the first POST and an
-empty ID slot (`0 -> 0x53`) on the second, never the `make_params` item. The
-uninstrumented wire path was therefore tested directly: one C=128 production
-attack followed by 20 benign multipart POSTs on fresh connections returned
-404 for the attack and every follow-up, with the process alive. No changed
-dispatch, disclosure, command or second command was observed.
+empty ID slot (`0 -> 0x53`) on the second, never the `make_params` item. A
+second, non-perturbing pass removed every pre-overflow Ruby API call; four
+fresh processes then consistently hit raw path bytes
+(`"/home/m..." -> "/home/m...S"`) on the first POST and an empty slot on the
+second. The `make_params` item is therefore not a stable target under the
+debugger. The uninstrumented wire path was therefore tested directly: one
+C=128 production attack followed by 20 benign multipart POSTs on fresh
+connections returned 404 for the attack and every follow-up, with the process
+alive. No changed dispatch, disclosure, command or second command was
+observed.
 
 Disposition: the mixed27 self-consumer is **RESOLVED**; the tested
 `make_params`/`ParamList` alias is **inert on this request surface**. Full
