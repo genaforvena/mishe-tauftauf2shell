@@ -117,3 +117,57 @@ gdb-alias-wire3.peer gdb-alias-wire2.cmd` (same controls):
 `gdb-run.sh` defaults to the original W7 arguments when called with no
 parameters. Both wire replays require ports 19003–19006 free and kill only
 the daemon and peer they start. No non-loopback probe, no other plant or node.
+
+## W12 (2026-11-26 02:58–03:02Z) — live-daemon negative control, no steering
+
+Question: W8 showed the OOB store overwrites the **low 32 bits** of a live
+`json_object_entry.value` pointer. Could a peer choose the original low 32 bits
+and turn the fatal free into a benign one, i.e. steer the freed pointer to a
+chosen live object? This is a new, bounded control, not a retry of the closed
+address-steering lanes.
+
+Method: same pinned 4.7.2 `-g -O0` watchdog child, one loopback type-`Z`
+`WD_POOL_CONFIG_DATA` packet with `backend_desc` N=129 and 12-byte hostname,
+under gdb (gdb disables ASLR for the inferior, so addresses are stable across
+runs). Ports 19003–19006 were checked free before each run; only the peer and
+daemon started by each script were killed. No breakpoint at
+`watchdog.c:4478` with an early `kill` in the decisive runs — the daemon outcome
+was allowed to complete.
+
+- CHOSEN `0x11111111`: slot `0x55555591dbe0` before `0x00005555558cfca8`,
+  after `0x0000555511111111`; SIGSEGV at `utils/json.c:1079` in
+  `json_value_free_ex`.
+- CHOSEN `0x558cfca8` (exact low 32 bits of the pre-store pointer): before and
+  after both `0x00005555558cfca8` — the pointer is restored — yet after the
+  config-verify warnings the child prints `free(): invalid pointer` and dies
+  with SIGABRT. Replayed twice, identical normalized hash.
+- CHOSEN `0x558c5ad8` (low 32 bits of the parsed JSON root): after
+  `0x00005555558c5ad8`, same `free(): invalid pointer` / SIGABRT. A conditional
+  breakpoint at `utils/json.c:1075` on that pointer fires **once** — the normal
+  `json_value_free(root)` entry — not a second visit, so there is no evidence
+  the free was routed to a chosen live node.
+
+Earlier runs that stopped at `watchdog.c:4478` and killed the child immediately
+appeared clean; that was an artifact of our own early stop, not a daemon
+outcome. Those transcripts were discarded and must not be cited as clean.
+
+Conclusion: the eventual `free(): invalid pointer` abort on the live daemon is
+value-independent, extending W8's harness finding from a synthetic consumer to
+the real watchdog child. The only value-dependent effect measured is the
+earlier SIGSEGV when the chosen low 32 bits map to unmapped memory. W8's label
+stands: peer-controlled low-32 value at a layout-fixed destination; no
+destination steering, no demonstrated steering to a chosen live object, no
+command side effect, no r5. The chosen low-32 values are build/host-specific
+under a debugger-disabled ASLR and are not a wire-portable address primitive.
+Grade unchanged. Author-measured only; no witness replay of this control.
+
+Replay from the repository root (assets in
+`lab/pgpool2shell/config/pointer-control/`):
+
+    bash lab/pgpool2shell/config/gdb-run.sh 0x11111111 pointer-control/before.out pointer-control/before.peer gdb-alias-wire2.cmd
+    bash lab/pgpool2shell/config/gdb-run.sh 0x558cfca8 pointer-control/restore-count.out pointer-control/restore-count.peer pointer-control/gdb-count.cmd
+    bash lab/pgpool2shell/config/gdb-run.sh 0x558c5ad8 pointer-control/root-count.out pointer-control/root-count.peer pointer-control/gdb-count.cmd
+    bash lab/pgpool2shell/config/pointer-control/hash-evidence.sh
+
+`EVIDENCE_HASHES.txt` holds the four normalized hashes: baseline
+`542fd88b…`, restored `90e11d54…` twice, root `55cbf6ae…`.
