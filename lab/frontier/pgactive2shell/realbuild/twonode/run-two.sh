@@ -16,6 +16,7 @@ CONFLICT_TYPE=${CONFLICT_TYPE:-insert_insert}
 CATALOG_PROBE=${CATALOG_PROBE:-0}
 ORIGIN_REWRITE=${ORIGIN_REWRITE:-0}
 ORIGIN_TUPLE=${ORIGIN_TUPLE:-0}
+ORIGIN_PAYLOAD_LEN=${ORIGIN_PAYLOAD_LEN:-130}
 LIBDIR=/tmp/pgactive-build/pg16root/usr/lib/postgresql/16/lib
 V219SO=/tmp/pgactive-full-219/pgactive-2.1.9/pgactive.so.v219-installed
 V2210SO=/tmp/pgactive-full-2210/pgactive-2.1.10/pgactive.so
@@ -185,7 +186,7 @@ if [ "$ORIGIN_TUPLE" = 1 ]; then
     # parser about the local tuple's origin id, not the worker's own origin.
     psql2 -c "ALTER SYSTEM SET pgactive.debug_apply_delay=5000;" >evidence/delay2.out 2>&1
     psql2 -c "SELECT pg_reload_conf();" >>evidence/delay2.out 2>&1
-    LONG="pgactive_1_1_1_1_$(printf 'AZ%.0s' $(seq 1 130))"
+    LONG="pgactive_1_1_1_1_$(printf 'AZ%.0s' $(seq 1 "$ORIGIN_PAYLOAD_LEN"))"
     printf '%s\n' "$LONG" >evidence/tuple-origin-name.txt
     psql1 -c "INSERT INTO public.t VALUES (1, 'node1');" >evidence/insert1.out 2>&1
     status INSERT1 $?

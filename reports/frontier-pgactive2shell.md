@@ -251,22 +251,27 @@ change to the rung ceiling.
 Rungs 1 (deterministic trigger), 2 (unbounded `%s` into a fixed stack object)
 and 3 (ASan-confirmed corruption) are established on the verbatim pinned
 function, in the standalone harness and inside a live PostgreSQL backend
-reached by SQL. Rung 4 is now MET AS LABELED in two places: chosen bytes at
+reached by SQL. Rung 4 is now MET AS LABELED in two places:
 chosen offsets 0, 64 and 92 in the standalone harness, and 128 consecutive
 chosen `41/5a` bytes read from the live backend stack at offsets 0..127 via
-the `LIVE_CAPTURE` marker before the error longjmp. The marker is
-instrumentation, not a saved pointer or an IP; the ASan build confirms the
-same write independently, now also in the complete pinned 2.1.9 extension via
-the real SQL function and, from 22:23Z, in a live apply worker driven by a
-remote insert (see below). Not established: arbitrary bytes carried on the
-replication wire, control of a saved pointer/return address (the saved RA at
-120 is overwritten but the pinned `!= 4` check sends every overflowing input
-through the error longjmp), an IP, a command side effect, or rung 5.
-The advisory's command-execution claim remains a claim. The authenticated
-`PR:L` precondition and the need for a writable replication-origin name are
-part of it, not hidden. The original
-pinned harness was independently replayed by witness #3896; the SQL-path,
-live-capture and full-extension evidence has not been independently replayed.
+the `LIVE_CAPTURE` marker before the error longjmp. From 2026-11-26 there is a
+third, stronger observation in a live apply worker: a 616-byte crafted origin
+name puts chosen `41 5a` bytes into the `callback`, `arg` and `previous` words
+of the live `ErrorContextCallback`, and the error path dereferences the
+corrupted callback (signal 11). It is still a chosen *invalid* address, not a
+chosen command. The two marker sites remain instrumentation; the ASan build
+confirms the same write independently, now also in the complete pinned 2.1.9
+extension via the real SQL function and, from 22:23Z on 2026-11-25, in a live
+apply worker driven by a remote insert (see below). Not established: arbitrary
+bytes carried on the replication wire, control of a saved pointer/return
+address (the saved RA at 120 is overwritten but the pinned `!= 4` check sends
+every overflowing input through the error longjmp), a chosen IP or command, a
+command side effect, or rung 5. The advisory's command-execution claim remains
+a claim. The authenticated `PR:L` precondition and the need for a writable
+replication-origin name are part of it, not hidden. The original pinned
+harness was independently replayed by witness #3896; the SQL-path,
+live-capture, full-extension and catalog-arm evidence has not been
+independently replayed.
 
 
 ## Cheapest next experiment
@@ -458,3 +463,29 @@ and `LIB_OK=1`. The first smoke at 00:54Z failed two wrapper assertions
 (ASan used-hash timing and an ASan-arm node-2 recovery-mode stop); both the
 failure and its fix are preserved in `originwire/FINDINGS.md`. This is an
 author smoke, not an independent witness verdict; replay offered as #4657.
+
+## Consumed chosen callback pointer in the live apply worker (2026-11-26 03:15Z)
+
+The saved return address is not the only consumed word on the error path.
+`process_remote_insert()` pushes a live `ErrorContextCallback` on
+`error_context_stack` before conflict logging (`pgactive_apply.c:631-643`), so
+`errstart()` dereferences its `callback` word on the way to the longjmp. A
+lab-only noinline probe in `pgactive_parse_replident_name()` measured that
+struct at `&replication_name + 464` (with `callback`, `arg`, `previous` at
++464/+472/+480). The original 275-byte catalog name writes 261 bytes and
+stops short: a negative. But `pg_replication_origin.roname` is `text` on
+PG16.15, and `pg_replication_origin_create()` accepted a 616-byte name; the
+new `ORIGIN_PAYLOAD_LEN` knob in `run-two.sh` drives that arm. With 600 `AZ`
+pairs, the probe printed
+`CBREACH buf=0x7ffc183fbee0 cb=0x7ffc183fc0b0 delta=464
+fn=0x5a415a415a415a41 arg=0x5a415a415a415a41 prev=0x5a415a415a415a41`
+and node 2's apply worker was then `terminated by signal 11`
+(`TERMINATIONS1=0 TERMINATIONS2=1`); the normal library was restored to
+`3177a37c...162998`. This is chosen bytes at chosen offsets in a pointer that
+the live error path actually consumes — stronger than the earlier
+in-function marker, but still not rung 5: the target is an invalid chosen
+address, there is no chosen command or command side effect, and ASLR moved
+`action_error_callback` between runs. A marker-placement attempt is preserved
+as a negative in `callbackreach/FINDINGS.md`. Author observation, not an
+independent witness verdict. One-command replay:
+`sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh`.
