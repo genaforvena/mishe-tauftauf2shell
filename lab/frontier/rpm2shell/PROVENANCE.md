@@ -191,6 +191,39 @@ backtrace. The corrupted object's identity stays UNKNOWN.
 | `real/install/asan-vuln-attack.log` | `390d4b7f1af8a50943fdb22c7af20016620de55ecc212194ba6daa993d29b504` |
 | `real/install/gdb-plain-attack.log` | `95f30085da1c0701b1984c6844b4e6122c4b3ed5c65539e42f4b100fb0cb9289` |
 
+## Chosen-byte GC pointer dereference (2026-11-26 17:30Z)
+
+    cd lab/frontier/rpm2shell
+    bash real/run-gc-pointer.sh
+
+Verified **GC_POINTER_PASS=10 GC_POINTER_FAIL=0**. The runner uses the plain
+vulnerable Debug `rpm -i` with a private `--dbpath`, no `LD_PRELOAD` and no
+debugger-forced call; the four `/tmp` package names are guarded and cleaned.
+`real/gc-pointer.gdb` sets a pending breakpoint at pinned `rpmfi.cc:2243`
+and a Python breakpoint at `liblua5.2.so.0` offset `0xe9a6`
+(`lua_resume+0x206`, `movzbl 0x9(%r14),%r13d`), gated on the copy so an
+incidental startup visit cannot match. A filler sample:
+`COPY_BUF=0x5555555a8600 NEXT_ADDR=0x5555555a8620
+NEXT_AFTER=0x4141414141414141` and `CHOSEN_PTR=0x4141414141414141
+PREV_OBJ=0x5555555a8620 NEXT_ADDR=0x5555555a8620 MATCH=1`; `%r14`/`%rdx`
+hold the chosen value and `stepi` faults in the liblua GC walk under
+`rpmluaFree`. B filler reproduces the chain with `0x4242424242424242`.
+`attack-validtarget.rpm` writes the little-endian live GCObject address
+`0x5555555f54a0` into the same payload qword; `V.log` records `MATCH=1`
+and a non-faulting dereference under GDB's ASLR-disabled layout, while the
+plain ASLR run of the same bytes faults rc 139. Zero-filler and short-read
+controls return rc 1 without a fault; fixed ASan attack rc 1 ASan-clean.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/gc-pointer.gdb` | `100855c01b6a91ea936d742b359738c9f3ea223ef4a905de4a01ac338961b5ee` |
+| `real/run-gc-pointer.sh` | `6d9ae836287adacc21f4ed3a64e59a89c4cb766cd09b8d04cb23c02cd4530a8c` |
+| `real/gc-pointer/A.log` | `2b25230bb758322d66667dc1eae2d2abcc9cedad117e4fda6b1f9716a0cf6fa4` |
+| `real/gc-pointer/B.log` | `94ae87715802c13ef284e11e080f2515269e5a9d2d163743acc5706fd4790abb` |
+| `real/gc-pointer/V.log` | `3a190b3da653b829fe8ae76016867c63a7f1516eb30eb129f229d756639ee07f` |
+| `real/gc-pointer/attack-validtarget.rpm` | `df41e11e5d0cb4258eb6ecba5805f073d18a19299d1e21cd6256719d79a5fbc3` |
+| `real/gc-pointer/plain-validtarget.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell

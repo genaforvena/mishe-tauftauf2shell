@@ -3,9 +3,10 @@
 Status: **real-consumer lane measured 2026-11-26**. Rung 3 is confirmed in
 the pinned function and real rpm; rung 4 is DEMONSTRATED by a crafted RPM
 writing 64 chosen bytes past a 1-byte allocation in real `rpm2cpio` and
-`rpm2archive`, including a pointer-bearing lab-groomed adjacent allocation
-in the plain consumer. Independent witness replay of this new lane
-is pending. No pointer hijack, wire target, command or rung 5.
+`rpm2archive`, and on plain `rpm -i` by chosen bytes becoming a live liblua
+GC pointer that is dereferenced; under GDB's deterministic layout a chosen
+live heap address survives that dereference. Independent witness replay of
+this new lane is pending. No ASLR-stable target, wire target, command or r5.
 
 ## Claim and scope
 
@@ -206,12 +207,42 @@ GDB places the fault in `liblua5.2.so.0` from `rpmluaFree`
 rc 1; the runner repeats A 3/3 and zero/short-read 2/2 each. Chosen payload
 bytes therefore decide whether the *unmodified plain* install process faults
 at teardown — no `LD_PRELOAD`, allocator seam or debugger-forced execution.
-Safe-newc and stripped controls also return 1 without a fault. The fault
-site is not a controlled pointer dereference: which live object the overwrite
-corrupts, and whether any chosen value reaches a semantic dereference, remain
-UNKNOWN. No pointer hijack, command or r5. Install uses a private `--dbpath`
-and four guarded, cleaned `/tmp` names; no other filesystem location is
-written.
+Safe-newc and stripped controls also return 1 without a fault.
+At teardown the chosen bytes become a live GC pointer (next subsection), so
+this is not merely a value-independent crash. Valid-target redirection, a
+loopback wire path and command execution are not demonstrated. Install uses
+a private `--dbpath` and four guarded, cleaned `/tmp` names; no other
+filesystem location is written.
+
+### Chosen bytes become a dereferenced liblua GC pointer (2026-11-26 17:30Z)
+
+`bash lab/frontier/rpm2shell/real/run-gc-pointer.sh` (10 PASS / 0 FAIL) runs
+the plain vulnerable `rpm -i` under GDB with no `LD_PRELOAD` and no injected
+call. The pinned post-copy breakpoint at `lib/rpmfi.cc:2243` prints
+`COPY_BUF=0x5555555a8600 NEXT_ADDR=0x5555555a8620
+NEXT_AFTER=0x4141414141414141`: the 64-byte write covers the first qword of
+a naturally adjacent live object at `buf+0x20`. A breakpoint at
+`liblua5.2.so.0` offset `0xe9a6` (`lua_resume+0x206`, the GC-list visit
+`movzbl 0x9(%r14),%r13d`) records the last visited GCObject addresses. It
+observes `CHOSEN_PTR=0x4141414141414141 PREV_OBJ=0x5555555a8620
+NEXT_ADDR=0x5555555a8620 MATCH=1`: the object visited immediately before the
+chosen value is exactly the overwritten object. `%r14` and `%rdx` hold the
+chosen value; stepping one instruction faults at an address derived from
+that value, with backtrace `liblua5.2` ← `rpmluaFree`
+(`rpmio/rpmlua.cc:153`) ← `rpmFreeRpmrc` ← `rpmcliFini` ← `main`. Replacing
+the filler with `B` produces the same chain with `0x4242424242424242`.
+A third fixture writes the little-endian address `0x5555555f54a0` (a live
+GCObject in this deterministic GDB layout) into the same qword: the walk
+still reaches the chosen pointer with `MATCH=1`, and the `movzbl 0x9(%r14)`
+dereference succeeds without a fault. The same bytes in a plain ASLR
+process fault with rc 139, so the valid target is a lab-layout fact, not an
+ASLR-stable one. Zero filler and the same-error short-read fixture exit 1
+without a fault, and the fixed ASan build rejects the attack (rc 1,
+ASan-clean). The overwritten object is a liblua collectable whose first
+qword is its `next` pointer; chosen bytes therefore replace a live pointer
+that liblua dereferences during teardown. A second chosen dereference at a
+chosen valid target, a wire path and any command remain UNKNOWN/NO.
+Evidence: `real/gc-pointer/{A,B,V}.log`, `real/gc-pointer.gdb`.
 
 ## Witness replay (W238, 2026-11-26)
 
@@ -240,20 +271,21 @@ above is later work and still lacks an independent witness. Full W238 detail:
   plain GDB observes the bytes and a lab-groomed live pointer-bearing
   allocation overwritten by chosen `A` bytes. On the independent `rpm -i`
   path, chosen filler bytes decide whether the unmodified plain process
-  faults at teardown (`A`/`B` rc 139, zero/short-read rc 1). Natural adjacent
-  layout varies, and the corrupted object's identity and pointer target
-  control remain UNKNOWN; no natural semantic pointer dereference was
-  observed in 52 plain GDB `rpm2cpio` runs (see above).
-- **Not rung 5:** no loopback service or wire request, no controlled pointer
-  hijack, no command and no observed command side effect.
+  faults at teardown (`A`/`B` rc 139, zero/short-read rc 1), and GDB traces
+  the chosen qword into a live liblua GC pointer that is dereferenced. A
+  chosen live GCObject address survives that dereference under GDB's
+  ASLR-disabled layout; the same bytes fault (rc 139) in a plain ASLR
+  process, so an ASLR-stable target, wire path, command and command side
+  effect remain UNKNOWN/NO. No natural semantic dereference was seen in
+  52 plain `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
+- **Not rung 5:** no loopback service or wire request, no ASLR-stable target
+  redirection, no command and no observed command side effect.
 
-Next experiment: identify which live object on the `rpm -i` path is corrupted
-by the chosen bytes and whether a non-crashing value reaches a semantic
-dereference; a fault in lua teardown is not pointer hijack. A non-crashing
-chosen pointer value must be observed reaching a dereference before any
-hijack claim. Keep the allocator instrumentation and stripped/query negatives
-attached to any broader claim. No command execution without a live target and
-benign side effect.
+Next experiment: find an ASLR-stable way to choose a valid GC target (or a
+pointer-free consumer) and measure whether the walk reaches a second chosen
+dereference; that is the remaining step toward a hijack claim. No command
+execution without a live target and benign side effect. Keep the allocator
+instrumentation and stripped/query negatives attached to any broader claim.
 
 ## Duplicate check
 

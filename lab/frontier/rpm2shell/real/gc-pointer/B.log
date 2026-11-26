@@ -1,0 +1,36 @@
+Breakpoint 1 at 0x26a9: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc, line 66.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, main (argc=11, argv=0x7fffffffe0a8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:66
+66	    rpmts ts = NULL;
+Breakpoint 2 at 0x7ffff7f22231: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmfi.cc, line 2243.
+Breakpoint 3 at 0x7ffff7dcd9a6
+COPY_BUF=0x5555555a8600 NEXT_ADDR=0x5555555a8620 NEXT_AFTER=0x4242424242424242
+error: unpacking of archive failed: cpio: read failed - No such file or directory
+error: filetypes-1.0-1.noarch: install failed
+CHOSEN_PTR=0x4242424242424242 PREV_OBJ=0x5555555a8620 NEXT_ADDR=0x5555555a8620 MATCH=1
+
+Breakpoint 3, 0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+=== STOPPED ON CHOSEN POINTER ===
+#0  0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#1  0x00007ffff7dd31bb in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#2  0x00007ffff7e5faca in rpmluaFree (lua=0x555555609560) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmlua.cc:153
+#3  0x00007ffff7f35d8c in rpmFreeRpmrc () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmrc.cc:1739
+#4  0x00007ffff7f02985 in rpmcliFini (optCon=0x55555557bfa0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/poptALL.cc:291
+r14            0x4242424242424242  4774451407313060418
+rdx            0x4242424242424242  4774451407313060418
+rip            0x7ffff7dcd9a6      0x7ffff7dcd9a6
+   0x7ffff7dcd99e:	jmp    0x7ffff7dcd9a1
+   0x7ffff7dcd9a0:	jb     0x7ffff7dcdca0
+=> 0x7ffff7dcd9a6:	movzbl 0x9(%r14),%r13d
+   0x7ffff7dcd9ab:	mov    %r13d,%eax
+=== STEPI INTO THE DEREFERENCE ===
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#0  0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#1  0x00007ffff7dd31bb in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#2  0x00007ffff7e5faca in rpmluaFree (lua=0x555555609560) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmlua.cc:153
+#3  0x00007ffff7f35d8c in rpmFreeRpmrc () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmrc.cc:1739
+#4  0x00007ffff7f02985 in rpmcliFini (optCon=0x55555557bfa0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/poptALL.cc:291
