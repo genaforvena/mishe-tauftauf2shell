@@ -190,6 +190,7 @@ independent replay at that scope. Author reports are never acceptance.
 | **Fceux2Shell** | ✓ | ✓ | ✓ | ◐ | — | **STAGED 19:2xZ, NOT ADMITTED; declared in the 20:27Z 152-role engine config with no generated wake units (doctor RED, person-reserved), window 159 adopted, witness replay UNKNOWN.** CVE-2026-136918 (FCEUX < 2.8.0, UNIF MAPR declared size `0xffffffff` wraps the board-name allocation; CNA CWE-190, CVSS4 8.5 `AV:L/AC:L/AT:N/PR:N/UI:P/VC:H/VI:H/VA:H`); fixed 2.8.0 (`c40fcf63`), vulnerable parent `1e1de9b`, fix `d9132c2`. Verbatim pinned `SetBoardName()` under GCC and Clang ASan: heap `WRITE of size 19`, 0 bytes after a 1-byte region; fixed and safe controls clean. Plain file-chosen bytes land at `boardname+1..+16` (`PAST_ALLOC=41552c66664d495348452d4643455558`) before the wild terminator faults; `bash lab/frontier/fceux2shell/run-all.sh` = 14 PASS / 0 FAIL. Rung 4 PARTIAL at chosen offsets only; no adjacent object, pointer control, live ROM consumer, wire path, command or r5. [Status](reports/fceux2shell-status.md) · [Brief](reports/frontier-fceux2shell.md) |
 | **Nfdump2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 21:4xZ under standing #6 as the 152nd declared target mind; window 160 adopted; hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** GHSA-gpgq-hv9x-7mqj (public GHSA endpoint returned HTTP 404 on 2026-11-25; no CVE/CVSS claimed); upstream fix `32b9cbe7`, vulnerable parent `8a00543a`. A truncated EXgenericFlow element passes `VerifyV3Record()` and reaches the `msecReceived` store past the element; verbatim pinned functions under GCC+Clang ASan give heap `WRITE of size 8` 0 bytes after a 48-byte region, fixed rejects and safe controls clean, plain canary `EXPECTED_BYTES=9b50351f49010000` = `CANARY_AFTER`; `bash lab/frontier/nfdump2shell/run-all.sh` 10 PASS / 0 FAIL. Rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with harness-chosen value; no adjacent object, pointer, wire, command or r5. Witness W235 (2026-11-25) ESTABLISHED AS LABELED from a clean archive (22 PASS / 0 FAIL, eight exact pins, ASan WRITE-8 at pinned `Process_nfd:121`, fixed/safe controls clean), no contradiction or grade change; live pinned `nfcapd` loopback reachability stays UNKNOWN. |
 | **Leptonica2Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 23:2xZ under standing #6 as the 153rd declared target mind; window 161 adopted; hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-137063 (2026-11-25, CWE-122, CVSS 6.8), Leptonica 1.79.0 through 1.87.0; upstream fix `c493a776` adds the missing size guard, no fixed release named in the feed. Verbatim pinned `l_byteaCreate()` and `l_byteaInitFromStream()` from tag 1.87.0 and the fix, driven by a sparse 1,000,000,001-byte read-only mapped stream: GCC and Clang ASan `WRITE of size 1000000001`, 0 bytes after a 201-byte region; fixed rejects (`stream too large`), 16-byte stream clean; synthetic bounded plain consumer reads chosen `MISHE-LEPTONICA` at `data+201..215`. `bash lab/frontier/leptonica2shell/run-all.sh` 17 PASS / 0 FAIL, also from clean archive `925b35c2`. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL harness-chosen consumer; no real library, pointer, wire or command, no r5, witness UNKNOWN. [Brief](reports/frontier-leptonica2shell.md) · [Status](reports/leptonica2shell-status.md) |
+| **Libxml22Shell** | ✓ | ✓ | ✓ | ◐ | — | **ADMITTED 01:4xZ under standing #6 as the 154th declared target mind; window 162 adopted; hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-86138 (MITRE, CWE-190, CVSS 6.9), libxml2 before 2.15.4, fix `a4cba4b5`; a 32-bit `namelen + plen + 1` wrap under-allocates the dictionary string pool before the prefix/name `memcpy`. Verbatim pinned `xmlDictAddQString()` from v2.15.3 and the fix gives GCC and Clang ASan `WRITE of size 4294967280`, 0 bytes after a 1048-byte region; wrap-to-1000 fixed control and safe input clean, plain build shows chosen `MISHE-LIBXML2!!` past the pool. Preserved negative: v2.15.4 and byte-identical master still overflow on wrap-to-zero. `bash lab/frontier/libxml22shell/run-witness.sh`: 26 PASS / 0 FAIL both from clean archive and at HEAD; witness W236 ESTABLISHED AS LABELED. Rung 4 PARTIAL synthetic canary only; no real library, XML wire, pointer, command or r5. [Brief](reports/frontier-libxml22shell.md) · [Status](reports/libxml22shell-status.md) |
 
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
 rung, grade, route, mind-count, witness or R5 cell. Ruby2Shell's stock Rails
@@ -495,6 +496,19 @@ UNKNOWN. `cd lab/frontier/libgphoto2shell && sh harness/check.sh` stayed
 `PASS=146 FAIL=0`, trace `e364f756…c6c98` (observed here); W170-W172's
 lab-assisted pointer placements and witness #2892's rung-3 scope are
 unmoved, author-only rung 4 and r5 UNKNOWN.
+
+Libgphoto2 W197/W199 (`8ca09205`, `12bba987`) gives a from-scratch replay of
+the device-only top-header lane: from a clean `git archive` of `8ca09205`,
+`TARBALL=<pinned 2.5.34 tarball> sh
+lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh` checks the
+tarball SHA-256 `5df9e774…ff7f28` and the six-patch chain, rebuilds GCC -O2
+from scratch and derives its own top size under gdb. Observed: 4/4 pins OK,
+`fresh TOP=0x0000000000012b71` (the author build used `0x12bd1`, so the word
+is build-specific, not device-observable), build-derived `jl2005c.so`
+`55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. Author replay, not a
+witness verdict; grade unchanged, no wire, physical USB, command or r5. Raw
+outputs stay in `/tmp/w199-lgp-replay`, recreated by the wrapper on each run.
+
 
 Libsshch W1 (`a6893b10`, 02:4xZ) supersedes the row's "no real SSH build,
 wire packet" clause at the 01:58Z staged scope. Full pinned ASan libssh
@@ -3636,7 +3650,7 @@ owed.
 
 ## How the plant works
 
-Each admitted family is its own mind with its own tmux window: 153 target
+Each admitted family is its own mind with its own tmux window: 154 target
 minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `mosquitto2shell`, `dragonfly2shell`, `postgres2shell`, `brotli2shell`,
 `freeradius2shell`, `falkordb2shell`, `freeswitch2shell`, `freerdp2shell`,
@@ -3673,7 +3687,8 @@ minds — `ruby2shell`, `php2shell`, `node2shell`, `apache2shell`,
 `open5gs2shell`, `yojimbo2shell`, `libsshch2shell`, `socat2shell`,
 `ccextractor2shell`, `mcuboot2shell`, `drwav2shell`, `vtkdicom2shell`,
 `xschem2shell`, `stbvorbis2shell`, `ctranslate22shell`, `solanum2shell`,
-`aspell2shell`, `freeimage2shell`, `nfdump2shell` and `leptonica2shell`. Each builds
+`aspell2shell`, `freeimage2shell`, `nfdump2shell`, `leptonica2shell` and
+`libxml22shell`. Each builds
 affected harnesses, drives toward rung 4 and authors its report under
 `reports/`.
 

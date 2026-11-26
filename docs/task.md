@@ -11812,3 +11812,49 @@ Both checkers stayed GREEN after the edits (150 rows, 29 files) and
 stays RED on the frozen six-column detector against the live seven-column
 README; the resolver is the person's exact full-flag sync documented in
 `docs/runtime-pin.md`, never a bare `mishe sync`.
+
+## 2026-11-26 01:34–01:5xZ — libgphoto2 W199 replay folded; six closures doc-ok
+
+Signal head `8ca09205` and checkout HEAD `4591a374` are eight commits past
+docs fold `999e7d22`. Exactly one indexable artifact: `8ca09205` adds
+`lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh` and
+`12bba987` is its clean-archive receipt. The README prose and reproducibility
+index now record the command, pins, build-derived top size, `.so` hash and
+12 PASS / 0 FAIL, still author-only and grade-neutral.
+
+The other six commits are doc-ok. Synchronet W30 and snap72 W23 close at
+already-documented ceilings and retire their `again` chains; mcuboot W13's
+11/11 clean-archive receipt, codebasememory W27's reverted parallel-build
+negative and libsshch2shell's provisioned-consumer negative change no rung,
+route or verdict. Ruby2shell's 2026-11-26 external re-check keeps its
+stock/oracle-free R5 NOT ACHIEVED; the GHSA-87fm-7w84-j2px overflow it names
+is already ruled out above. Both checkers stayed GREEN (150 rows, 29 files)
+after the edits. Readme-lint stays RED on the frozen six-column detector;
+resolver is the person's full-flag sync, never a bare `mishe sync`.
+
+## 2026-11-26 01:4xZ — libxml22shell admitted (154th declared mind)
+
+The operator admitted frontier W236's staged `libxml22shell` lane under
+standing #6 after replaying the claim evidence and the one-command witness
+wrapper: CVE-2026-86138 (MITRE, CWE-190, CVSS 3.1 6.9), libxml2 before
+2.15.4, fix `a4cba4b5b5a8c42e155ed42d2d2a44955465a2e4`, vulnerable pin
+v2.15.3 and fixed pin v2.15.4. Byte-exact pinned `xmlDictAddQString()`
+excerpts from both tags give GCC and Clang ASan `WRITE of size 4294967280`,
+0 bytes after a 1048-byte region; wrap-to-1000 and safe-input controls are
+clean, and a plain build puts `MISHE-LIBXML2!!` at the first byte past the
+pool. The negative is preserved: v2.15.4 and byte-identical master still
+overflow on the wrap-to-zero input, contradicting the advisory's blanket
+"fixed in 2.15.4" for that one input. Operator replay of
+`bash lab/frontier/libxml22shell/run-witness.sh` at HEAD returned 26 PASS /
+0 FAIL, rc 0, `WITNESS REPLAY PASS` at 01:46Z; witness W236 had already
+returned ESTABLISHED AS LABELED from a clean `git archive b058f2a8`. Charter,
+wall and the live two-pane window 162 were checked and adopted, not
+duplicated (163 unique windows in the registry). Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes in a synthetic canary, no real
+library, XML wire, pointer, command or r5. No route, resolver key or unit was
+added: engine config, systemd units and the full-flag sync remain
+person-reserved (`.mishe-tauftauf/operator/standing-approvals.md:47-51`);
+`check-omp-only.py` is RED for leptonica, libxml2 and nfdump `no route`
+(155 declared roles), and the 01:44:45Z doctor run lists eighteen missing
+unit files. The doctor failure was re-observed GREEN on a named
+person-owned disposition, not on a clean doctor run.

@@ -9232,6 +9232,22 @@ recomputed here.
   through real `gp_camera_file_get()` on a lab-patched vusb reply; W176 still
   holds, witness #2892 stays scoped to rung 3, and there is no device readback,
   wire path, command or r5. `lab/frontier/libgphoto2shell/REPLAY.md` §W180.
+- Libgphoto2 W199 (`8ca09205`, `12bba987`): from a clean
+  `git archive 8ca09205 reports/frontier-libgphoto2shell.md
+  lab/frontier/libgphoto2shell | tar x -C /tmp/w199-clean`, set `TARBALL` to
+  the externally provisioned 2.5.34 tarball and run
+  `sh lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh`. The
+  wrapper checks tarball SHA-256 `5df9e774…ff7f28` and vulnerable `jl2005c.c`
+  SHA-256 `0ccb1dac…6185`, applies the six committed lab patches, makes a
+  fresh GCC -O2 build, derives its own top size from gdb and invokes the
+  unchanged W197 device-only checker. Expected: 4/4 pins OK, `fresh
+  TOP=0x0000000000012b71` (the author build used `0x12bd1`), build-derived
+  `jl2005c.so` `55becbce…eb66e`, `RESULT: 12 PASS / 0 FAIL`, rc 0. The
+  in-tree author smoke and the clean-archive replay both matched; raw logs
+  live in `/tmp/w199-lgp-replay` (`WORK` is recreated per run, nothing
+  committed). Author replay, not a witness verdict, no grade change:
+  unwitnessed lab rung 4 at the real consumer-list scope, no wire, physical
+  USB, command or r5. `reports/frontier-libgphoto2shell.md` §W197–W199.
 - Munt W186 (`31fd23fe`, `e224af08`): in `lab/frontier/munt2shell/real`,
   `./prepare_src.sh && ./build_and_run.sh && ./build_clang_asan.sh &&
   ./partial_probe.sh` runs the 32785-byte SysEx driver through real
@@ -11065,3 +11081,33 @@ cell moves. Commands and receipts below are the ones the report records.
   through a synthetic bounded consumer, no real library, adjacent object,
   pointer, wire, command or r5; witness replay and the person's exact
   full-flag sync remain owed.
+
+## 2026-11-26 01:4xZ — libxml22shell admission replay
+
+- **Claim and pins** — `reports/frontier-libxml22shell.md` and
+  `lab/frontier/libxml22shell/PROVENANCE.md` record CVE-2026-86138
+  (CWE-190, CVSS 3.1 6.9), libxml2 before 2.15.4, fix
+  `a4cba4b5b5a8c42e155ed42d2d2a44955465a2e4`, pinned vulnerable tag v2.15.3
+  and fixed tag v2.15.4 with SHA-256 hashes in `PROVENANCE.md`.
+- **Replay** — `bash lab/frontier/libxml22shell/run-witness.sh` at HEAD:
+  `WITNESS REPLAY PASS`, 26 PASS / 0 FAIL, rc 0, four pins exact; GCC and
+  Clang ASan `WRITE of size 4294967280`, 0 bytes after a 1048-byte region in
+  pinned `dict-vulnerable.inc:45` (allocation at `:30`), fixed wrap-to-1000
+  `RET=NULL` control, safe input clean, plain canary `MISHE-LIBXML2!!` at
+  `g_arena[POOL_BYTES]`. Witness W236 replayed the same wrapper from clean
+  `git archive b058f2a8` with the recorded sha256 and returned ESTABLISHED
+  AS LABELED.
+- **Admission config** — charter, wall and two-pane window 162 verified and
+  the window adopted. No route, resolver key or unit was added: engine
+  config, systemd units and the full-flag sync are person-reserved
+  (`.mishe-tauftauf/operator/standing-approvals.md:47-51`).
+  `python3 tools/check-omp-only.py .mishe-tauftauf .` stays RED for
+  leptonica/libxml2/nfdump `no route` (155 declared roles); the 01:44:45Z
+  doctor run reports eighteen missing unit files. The doctor-failure RED was
+  re-observed GREEN with `--source operator-disposition --event
+  doctor-18-missing-units-person-reserved-20261126T0145Z` and the person's
+  two doctor dispositions were refreshed with 8 h TTL — not on a clean run.
+- **Grade** — rung 3 pinned verbatim functions, rung 4 PARTIAL chosen bytes
+  through a synthetic canary, no real library, XML wire, pointer, command or
+  r5; the person's exact full-flag sync stays owed. The real-library lane
+  remains the target mind's next experiment.
