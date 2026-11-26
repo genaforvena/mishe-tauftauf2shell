@@ -15053,6 +15053,16 @@ The driver widens to all 16, confirms each one under ASan on 3.4.12
 1024 trials report `match=false` on both builds (`candidates.txt`, `asan.txt`,
 `plain-3.4.12.txt`, `plain-3.4.13.txt` under
 `lab/build/evidence/casefold-foldbytes/`). No oracle; grade stays rung 3.
+`bash lab/repro/ruby2shell-casefold-stringprime.sh` tests whether a *Ruby*
+String buffer can prime that byte. Its C extension uses `rb_str_buf_new` to
+make non-embedded Strings (VWA embeds literals such as `"f"*24`), fills them
+with each fold's second byte, and the driver drops them, runs `GC.start`,
+compiles the matching one-byte-exact regex and records `match?`. Two sizes
+(24 and 512 bytes), three prime counts (1, 8, 64) and a tcache-disabled arm
+give 96/96 `match=false` on plain 3.4.12 and 3.4.13; GDB at
+`regexec.c:4278` (`tend - t == 1`) shows `t[1]` only stale pointer-like bytes
+(`5b`, `f8`, `f9`, `22`, `2b`, `5c`, `5d`), never a primed byte
+(`lab/build/evidence/casefold-stringprime/`). Lane CLOSED, grade rung 3.
 
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts

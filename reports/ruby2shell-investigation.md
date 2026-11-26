@@ -6329,3 +6329,40 @@ Grade unchanged at rung 3: no write, pointer control, command or wire path.
 Do not repeat this 16-candidate matrix or the 256-byte prime sweep unchanged.
 Reopen only with a measured path that places a chosen byte at `exact+1` in a
 live consumer, or a distinct consumed function with a new falsifiable shape.
+
+## 2026-11-26 21:1xZ — Ruby-String priming cannot put a chosen byte at `exact+1`
+
+The fold-byte sweep left one allocation-shape question open: the earlier
+oracle probe primed a raw `malloc(24)` chunk, not a buffer owned by a Ruby
+object. `lab/repro/ruby2shell-casefold-stringprime.{c,rb,sh,gdb}` tests that
+shape. The analysis-only C extension builds non-embedded Ruby Strings with
+`rb_str_buf_new` (a Ruby literal `"f"*24` is embedded under VWA and never
+reaches `malloc`), fills each with a candidate fold's **second** byte, and
+returns them to Ruby; the driver drops the Array, calls `GC.start`, compiles
+the matching one-byte-exact `/f/i` or `/s/i`, and records `match?`. Two buffer
+sizes were used: 24 bytes (glibc 0x20 tcache) and 512 bytes (0x210), with
+1, 8 and 64 primed strings per case. A fourth arm repeats the 64-buffer large
+prime under `GLIBC_TUNABLES=glibc.malloc.tcache_count=0` to test whether an
+unsorted-bin split preserves the chosen byte. GDB breaks at
+`regexec.c:4278` and reads `t[0]`/`t[1]` only when `tend - t == 1`, which
+proves the vulnerable comparison actually ran in every observed hit.
+
+Observed (gitignored `lab/build/evidence/casefold-stringprime/plain.txt`
+and `gdb-*.log`): **96/96** plain trials report `match=false`, 48 on affected
+3.4.12 and 48 on fixed 3.4.13, across both modes and all three prime counts.
+All four GDB arms give exactly 8 one-byte-exact hits — one per fold case —
+with `t[0]` equal to the pattern byte (`66` or `73`) and `t[1]` only stale
+values: `5b`, `f8`, `f9`, `22` in the default arms and `2b`, `5b`, `5c`, `5d`
+with tcache disabled. No arm ever shows a primed byte (`66`, `69`, `6c`, `73`,
+`74`) at `exact+1`, so the match outcome cannot be steered. The values are
+consistent with glibc free-list metadata occupying user-data offsets 0..7 of
+a freed small chunk, and disabling tcache does not move the allocation to a
+shape that preserves the prime.
+
+Conclusion: this closes the named string-prime lane. The case-fold OOB read
+is still confirmed (the GDB hits are the same vulnerable comparison), but
+there is no chosen-byte match oracle on app-defined text and no wire path.
+Grade unchanged at rung 3. Do not repeat this prime matrix unchanged; a
+reopen needs a measured allocation that puts attacker bytes at `exact+1` in
+a live consumer, or a distinct consumed function with a new falsifiable
+shape.
