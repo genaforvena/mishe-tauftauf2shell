@@ -1,9 +1,15 @@
-# live555vorbis2shell — staged status (W296, 2026-11-26)
+# live555vorbis2shell — admitted status (W296/W297, 2026-11-26)
 
-Frontier STAGED this candidate on 2026-11-26 from pinned raw mirror blobs;
-the operator has NOT admitted it. Admission is a standing-#6 decision owned
-by the operator; an independent witness replay is owed after handoff and is
-not self-acceptance.
+Admitted by the operator at 22:5xZ under standing #6 as the 191st declared
+target mind: claim source CVE-2026-137587 / GHSA-h6r7-83p9-fpf5, affected
+`< 2026.08.25`, fixed 2026.08.25 (mirror pins `bf1e426a…` vulnerable,
+`6b80d6bd…` fixed), claimed unchecked `memmove` reads in
+`parseVorbisOrTheoraConfigStr()`, and a named rung-4 experiment (chosen-byte
+readback in the extracted harness, then a loopback RTSP SDP vulnerable/fixed
+pair). No duplicate CVE, GHSA or sink lane. Window 199 was adopted as-is on
+the inner tmux socket (panes %404/%405, dead=0, one registry entry). The
+independent witness replay (W297) is recorded below; author reports are not
+self-acceptance.
 
 Claim: CVE-2026-137587 / GHSA-h6r7-83p9-fpf5 (unreviewed import), CNA
 VulnCheck, CWE-125, CVSS 7.1, affected `< 2026.08.25`, fixed 2026.08.25.
@@ -35,6 +41,29 @@ those are source-bound from the fix diff and raw blobs. The patch hunk
 header's line numbers are patch-relative and three lines short of the raw
 blob: the harness asserts raw `:186/:188/:190`.
 
-Owed: independent clean-archive witness replay, then an operator admission
-decision. Registered grade R1 — / R2 — / R3 ✓ / R4 — / R5 —; R4/R5 NOT
-CLAIMED.
+Owed: none for admission or replay. W297 independent witness replay (tape
+#5893/#5894) CLOSED ESTABLISHED AS LABELED at the registered rung-3 scope,
+no counterexample and no grade change; folded into `research-manifest.json`.
+Named depth experiment under standing #7: extend the local driver to print
+the three destination buffers and show attacker-chosen bytes read past the
+source allocation (rung 4 in the extracted harness only); then build the
+pinned pre-fix RTP client and replay a loopback RTSP SDP `a=fmtp config=`
+against a vulnerable/fixed pair for rung 2 and any real-client readback.
+Keep plain rc=0, fixed commit `ef760df8569703b93f8df990a07086d7e760d171`
+(hardened file `6b80d6bd4be5eaf8923ddefb8501063cab74fa8918b67691dfd02ae3fa3c344d`)
+and the safe-vector control. Registered grade R1 — / R2 — / R3 ✓ / R4 — /
+R5 —; R4/R5 NOT CLAIMED.
+
+## Operator clean-archive admission replay (22:48Z)
+
+From `git archive HEAD lab/frontier/live555vorbis2shell` with `runs/` and the
+five prebuilt harness binaries removed: pins 3/3 OK against
+`PIN_HASHES.txt`, runner sha256
+`9cd39b0a13dd6e1f0fde58e65de9bfce9ba18db0e22155afcc21b92ce8a67db8`,
+`sh run-all.sh` rc 0, `PASS=9 FAIL=0`. Fresh GCC ASan: `READ of size
+65535/65534/98` at verbatim `liveMedia/VorbisAudioRTPSource.cpp:186/:188/:190`
+in `memmove`, 0 bytes after the exact-size `base64Decode` `new[]` region;
+clang ASan reproduces at `:186`. Fixed pin and safe vector rc 0 without
+ASan, plain vulnerable A rc 0 with `id=65535 comment=0 setup=0 ident=0`
+(rung 1/2 negative preserved). The patch hunk's `:183/:185/:187` are
+patch-relative; raw pinned lines are authoritative.
