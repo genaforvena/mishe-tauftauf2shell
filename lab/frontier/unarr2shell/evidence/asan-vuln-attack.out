@@ -1,0 +1,54 @@
+=================================================================
+==274962==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x512000000141 at pc 0x7bbc320f6260 bp 0x7ffe910c7b30 sp 0x7ffe910c72d8
+WRITE of size 101 at 0x512000000141 thread T0
+    #0 0x7bbc320f625f in strcat ../../../../src/libsanitizer/asan/asan_interceptors.cpp:515
+    #1 0x5979947cb2d2 in tar_get_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/unarr-1.1.0/tar/parse-tar.c:253
+    #2 0x5979947c8671 in ar_entry_get_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/unarr-1.1.0/common/unarr.c:65
+    #3 0x5979947c785d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/harness/driver.c:35
+    #4 0x7bbc31c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7bbc31c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5979947c7584 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/build/vuln/driver+0x2584) (BuildId: 20fae486e57c3e6deed618a6cef911746f252e81)
+
+0x512000000141 is located 0 bytes after 257-byte region [0x512000000040,0x512000000141)
+allocated by thread T0 here:
+    #0 0x7bbc320fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5979947cb0e0 in tar_get_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/unarr-1.1.0/tar/parse-tar.c:243
+    #2 0x5979947c8671 in ar_entry_get_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/unarr-1.1.0/common/unarr.c:65
+    #3 0x5979947c785d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/harness/driver.c:35
+    #4 0x7bbc31c2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7bbc31c2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5979947c7584 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/unarr2shell/build/vuln/driver+0x2584) (BuildId: 20fae486e57c3e6deed618a6cef911746f252e81)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/asan/asan_interceptors.cpp:515 in strcat
+Shadow bytes around the buggy address:
+  0x511ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x511fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x511fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x512000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x512000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x512000000100: 00 00 00 00 00 00 00 00[01]fa fa fa fa fa fa fa
+  0x512000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x512000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x512000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x512000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x512000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==274962==ABORTING
