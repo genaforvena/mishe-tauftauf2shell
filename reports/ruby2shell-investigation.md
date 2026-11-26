@@ -6291,3 +6291,41 @@ allocator groom does not turn `Regexp#match?` into a chosen-byte oracle on
 this build. No write, pointer control, command or wire primitive; grade
 unchanged. Do not repeat the 256-byte sweep unchanged; reopen only with a
 measured path that places a chosen byte at `exact+1` in a live consumer.
+
+## 2026-11-26 21:0xZ — no Unicode fold makes the case-fold OOB a stable match oracle
+
+The previous section left a specific prediction: if some Unicode character
+folds to an ASCII letter followed by a pointer-typical byte (`0x00`, `0x4b`,
+`0x5c`, `0x7f`), then `/<letter>/i` compiling to a one-byte `reg->exact` would
+return true exactly when the stale byte at `exact+1` matched that fold's
+second byte — a response-visible one-byte heap oracle on app-defined text.
+
+`lab/repro/ruby2shell-casefold-foldbytes.{rb,sh}` tests it. The Ruby script
+enumerates every codepoint `0..0x10FFFF` with a full case fold (`downcase(:fold)`)
+whose first byte is an ASCII letter `a-z` and whose length is at least two;
+the shell driver confirms the OOB path under ASan and then runs 32 fresh plain
+processes per candidate on each build.
+
+Observed: **16 candidates, zero with a pointer-typical second byte.** The
+second fold bytes are only `66 69 6c 73 ca cc` — ASCII letters from Latin
+ligatures (`FB00`..`FB06`, folds `ff`/`fi`/`fl`/`ffi`/`ffl`/`st`) or the lead
+byte of a combining mark (`cc`) / modifier letter (`ca`). The literal search
+is therefore structurally empty, not merely negative.
+
+The widened 16-candidate matrix is a stronger test of the same OOB site. On
+3.4.12 ASan, **16/16** candidates produce `heap-buffer-overflow` in
+`str_lower_case_match` (`regexec.c:4278`), extending the confirmed OOB shape
+beyond `ß`/`ẞ`/`İ` to `U+01F0`, `U+1E96`..`U+1E9A` and `U+FB00`..`U+FB06`.
+On fixed 3.4.13 all 16 are clean. On plain builds, **512/512** trials per
+build report `match=false` — 32/32 false for every candidate on 3.4.12 and
+the same 32/32 on 3.4.13. No candidate ever returns true, so no fold byte
+sampled a stale `exact+1` value. Evidence is gitignored under
+`lab/build/evidence/casefold-foldbytes/` (`candidates.txt`, `asan.txt`,
+`plain-3.4.12.txt`, `plain-3.4.13.txt`, per-case ASan logs).
+
+Conclusion: the one-byte OOB read is confirmed for a broader set of folds,
+but neither the literal pointer-byte fold nor any real fold yields an oracle.
+Grade unchanged at rung 3: no write, pointer control, command or wire path.
+Do not repeat this 16-candidate matrix or the 256-byte prime sweep unchanged.
+Reopen only with a measured path that places a chosen byte at `exact+1` in a
+live consumer, or a distinct consumed function with a new falsifiable shape.

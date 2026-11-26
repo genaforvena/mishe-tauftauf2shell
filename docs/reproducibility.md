@@ -15042,6 +15042,18 @@ or `0x5d`), never the primed byte; the oracle is CLOSED. With GDB's
 `t[1]` bytes, so the stale pointer byte is not predictable either. Grade
 stays rung 3.
 
+`bash lab/repro/ruby2shell-casefold-foldbytes.sh` tests a related prediction:
+a Unicode fold whose second byte matches a stale pointer fragment at
+`reg->exact+1` would make `Regexp#match?` a byte oracle. The Ruby script
+enumerates all codepoints whose full case fold starts with an ASCII letter and
+exceeds one byte; there are 16 and **none** has a second byte of `00 4b 5c 7f`.
+The driver widens to all 16, confirms each one under ASan on 3.4.12
+(16/16 `heap-buffer-overflow` in `str_lower_case_match`, clean on fixed
+3.4.13), then runs 32 fresh plain processes per candidate per build. All
+1024 trials report `match=false` on both builds (`candidates.txt`, `asan.txt`,
+`plain-3.4.12.txt`, `plain-3.4.13.txt` under
+`lab/build/evidence/casefold-foldbytes/`). No oracle; grade stays rung 3.
+
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
 
