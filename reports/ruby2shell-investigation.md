@@ -5202,3 +5202,48 @@ one-bit-write scope.
 ```
 bash lab/repro/ruby2shell-tos-mbuf-shapes.sh
 ```
+
+## Multi-codepoint OR in one heap word (2026-11-26, 13:59Z)
+
+The chosen-bit write in `next_state_val` (`regparse.c:4589`) is not limited
+to one bit per reparse. `Regexp#to_s` walks every escaped codepoint in the
+character-class comment; each one ORs bit `V&31` into the 32-bit word at
+`cc+8+4*(V/32)`. Several codepoints with the same `V/32` therefore OR
+several chosen bits into the *same* word.
+
+`lab/repro/ruby2shell-tos-multi.rb` puts `841,842,847` (bits 1, 2, 7 of
+`V/32 = 0x42`) in one comment. A hardware watchpoint on the resulting word
+at `cc+272` on plain 3.4.12 observed `0xf7fac023 -> 0xf7fac027 ->
+0xf7fac0a7` (`lab/build/evidence/tos-steer/multi-or/gdb-watch.out`,
+gitignored). The word holds the low half of a pointer into an anonymous
+mapping near the shared libraries; the process exits normally, so that
+particular target has no observed consumer.
+
+The live `cc->mbuf` pointer is deterministic. With codes `100`,
+`100,101`, `100,101,102` and `100,101,102,103` (bits 0..3 of `V/32 = 8`,
+target `cc+40`), plain 3.4.12 faults at exactly `0x1`, `0x3`, `0x7` and
+`0xf` in 4/4 arms; fixed 3.4.13 and safe ASCII controls return 0. The
+primitive is therefore a chosen multi-bit OR value in a live pointer field,
+not merely a chosen single bit.
+
+The broader relative-pointer sweep (14 pointer-shaped words at known
+offsets after `cc`, bits 4..9) produced no deterministic effect: two
+single-run `rc=134` arms were layout artifacts (`V=0x847` aborted 0/12 on
+repetition, `V=0x1188` 1/12), and no arm changed `Regexp#to_s` output.
+This negative is preserved; it does not reopen the CLOSED large-V
+absolute-steering lane.
+
+Grade: secondary-lane **rung 4 narrow scope** — chosen multi-bit OR value
+at a chosen offset in a live pointer, fix-sensitive and deterministic for
+the `mbuf` arm. It remains OR-only (no bit clearing), the `mbuf` is NULL,
+and there is no valid-pointer redirect, benign marker, wire-only path or
+witness replay. Primary grades unchanged; full stock/oracle-free/persistent
+rung 5 **NOT ACHIEVED**.
+
+```
+bash lab/repro/ruby2shell-tos-multi.sh
+```
+
+The relative-pointer sweep is reproduced by
+`bash lab/repro/ruby2shell-tos-relptr.sh` (evidence
+`lab/build/evidence/tos-steer/relptr/summary.txt`, gitignored).
