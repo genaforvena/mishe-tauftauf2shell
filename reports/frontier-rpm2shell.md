@@ -254,17 +254,35 @@ shifts; A/B and the plain/fixed controls remain hard assertions (8 PASS /
 0 FAIL on every replay, 10 PASS when V aligns). The valid-target hit stays
 a lab-layout observation, not an ASLR-stable target.
 
-Clean-archive caveat (2026-11-26 18:48Z): replaying the runners from
-`git archive HEAD` into a long `/tmp` checkout path (with workspace-only
-builds, source tree and config symlinked in) returned `GC_POINTER_PASS=2 /
-FAIL=6` and `INSTALL_CONSUMER_PASS=13 / FAIL=1`: A/B lost `MATCH=1`, and
-plain install aborted in glibc (rc 134) instead of faulting in liblua.
-No clean-archive provisioning defect was found; the runners' heap layout
-depends on checkout path length, so these pointer and plain-fault checks
-must be replayed from the shared worktree path used in the replay request.
-The deterministic ASan evidence (`run-real.sh`, `run-scaled-payload.sh`)
-does not depend on that layout. Grade stays rung 4 author-DEMONSTRATED
-with this limitation attached.
+Clean-archive caveat (2026-11-26 18:48Z, superseded as a replay blocker):
+replaying the runners from `git archive HEAD` into a long `/tmp` checkout
+path (with workspace-only builds, source tree and config symlinked in)
+returned `GC_POINTER_PASS=2 / FAIL=6` and
+`INSTALL_CONSUMER_PASS=13 / FAIL=1`: A/B lost `MATCH=1`, and plain install
+aborted in glibc (rc 134) instead of faulting in liblua. The 18:54Z probe
+isolated the cause: the exact `RPM_CONFIGDIR` string length changes the
+teardown heap adjacency. An 88-character checkout with its default config
+failed `GC_POINTER` 6 PASS / 2 FAIL in 8/8 runs; pointing the same runner at
+an 18-character symlink to the same config returned 0 FAIL in all replays,
+while a 27-character symlink still failed 5 PASS / 3 FAIL. A 56-character
+clean archive and the 64-character worktree already passed. No
+clean-archive provisioning defect was found; the deterministic ASan WRITE
+checks (`run-real.sh`, `run-scaled-payload.sh`) never depended on this
+layout.
+
+Replay repair (2026-11-26 19:14Z): both `real/run-gc-pointer.sh` and
+`real/run-install-consumer.sh` now create an 18-character symlink to the
+same vulnerable config with `mktemp`, use it for every vulnerable `rpm -i`
+invocation (including GDB's `set environment`), and remove it on EXIT via a
+trap separate from `fresh()`'s cleanup. Package bytes, binaries, fixtures,
+allocation site and controls are unchanged; V stays informational when a
+live target does not align. Author verification: 18 consecutive
+`run-gc-pointer.sh` replays (six each from the 64-character worktree, the
+56-character clean archive and the 88-character checkout) returned 0 FAIL
+(10 PASS / 0 FAIL in three runs, 8 PASS / 0 FAIL otherwise), and all three
+checkouts returned `INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0`.
+Grade stays rung 4 author-DEMONSTRATED with the layout limitation attached;
+independent witness replay of this lane is still pending.
 
 ### Measured ASLR ceiling (2026-11-26 18:04Z)
 

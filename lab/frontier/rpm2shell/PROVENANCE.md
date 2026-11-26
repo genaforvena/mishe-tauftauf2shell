@@ -336,14 +336,49 @@ are unchanged hard assertions. Three consecutive runs returned 8 PASS /
 | `real/gc-pointer/discover.gdb` | `79e947240c48960c83f070338dd9060e8367b922736af553c41ebfe7fb0cf72c` |
 | `real/aslr-window/redirect-bound.md` | `20c5323ac6c97edaff31bf2db99f57004277f141e1b748ea1f655ebcbacbbcec` |
 
-Clean-archive caveat (18:48Z): `git archive HEAD lab/frontier/rpm2shell`
-into `/tmp/rpm2shell-clean-7dIe4e/lab/frontier/rpm2shell`, with workspace
-builds, `src/rpm` and `install-vuln` symlinked in, returned
-`GC_POINTER_PASS=2 FAIL=6` and `INSTALL_CONSUMER_PASS=13 FAIL=1`: A/B lost
-`MATCH=1`, plain install aborted rc 134, V discovered no live object. All
-fixtures and runner bytes were present; the pointer/plain-fault checks are
-checkout-path-layout sensitive. Replay those from the shared worktree path
-(the subject of DM #5729). The ASan WRITE checks are layout-independent.
+Clean-archive caveat (18:48Z, kept as a measured negative): `git archive HEAD
+lab/frontier/rpm2shell` into
+`/tmp/rpm2shell-clean-7dIe4e/lab/frontier/rpm2shell`, with workspace builds,
+`src/rpm` and `install-vuln` symlinked in, returned `GC_POINTER_PASS=2
+FAIL=6` and `INSTALL_CONSUMER_PASS=13 FAIL=1`: A/B lost `MATCH=1`, plain
+install aborted rc 134, V discovered no live object. All fixtures and runner
+bytes were present. This was later isolated to the exact `RPM_CONFIGDIR`
+string length, not a missing artifact, and is superseded as a replay blocker
+by the repair below. The ASan WRITE checks are layout-independent.
+
+## Config-path layout cause and replay repair (2026-11-26 19:14Z)
+
+Unpatched `run-gc-pointer.sh` from an 88-character checkout path
+(`/tmp/r2s-very-long-checkout-path-for-layout-isolation-2e7b91/.../real`):
+6 PASS / 2 FAIL in 8/8 runs, with B losing `MATCH=1`; passing
+`RPM_CONFIGDIR_VULN=/tmp/r2s-cfg.zz999` (18 characters, symlink to the same
+install-vuln config) gave 8 PASS / 0 FAIL, while a 27-character symlink gave
+5 PASS / 3 FAIL and also flipped the plain ASLR target rc to 134. A fresh
+56-character clean archive (`/tmp/r2s-clean-verify-9f3c2a/.../real`) returned
+8 PASS / 0 FAIL for gc-pointer and 14 PASS / 0 FAIL for install-consumer
+with no override, so the earlier 58-character-path failure was a layout
+observation, not a path-length law.
+
+Both runners now create an 18-character config symlink with
+`mktemp -d /tmp/r2s-cfg.XXXXX` + `rmdir` + `ln -s`, substitute it only for
+the vulnerable config, and remove it from an EXIT trap distinct from
+`fresh()`'s `/tmp` fixture cleanup. The first repair attempt put the removal
+inside `cleanup()`, which `fresh()` calls before the first run; it failed
+3 PASS / 5 FAIL from the worktree and was reverted before the final patch.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-gc-pointer.sh` | `e8e4b5f8cbfb8d78b2e72fc80d5e9d946f955d0696815c058d0b8bfd72ce4a47` |
+| `real/run-install-consumer.sh` | `79f2784be63cf0573dc05a6c19324664d83f5ea8373369ef6edc311e64b58a8c` |
+
+Repaired-runner verification: six consecutive `run-gc-pointer.sh` runs at
+each of the 64-character worktree, 56-character clean archive and
+88-character checkout returned 0 FAIL (10 PASS / 0 FAIL three times, 8 PASS /
+0 FAIL fifteen times); one `run-install-consumer.sh` at each path returned
+14 PASS / 0 FAIL. The 88-character checkout used symlinks to the workspace
+builds, source tree and config; no build or network was needed. Grade and
+ASLR ceiling are unchanged; V remains INFO when the discovered layout does
+not align.
 
 ## Verification
 

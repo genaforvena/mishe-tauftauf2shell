@@ -9,6 +9,15 @@ root=$(cd .. && pwd)
 config=${RPM_CONFIGDIR_VULN:-$root/install-vuln/lib/rpm}
 fixed_config=${RPM_CONFIGDIR_FIXED:-$root/build-fixed-asan}
 [ -f "$config/rpmrc" ] || config=$root/build-vuln-asan
+# The chosen-byte GC chain at process teardown depends on the exact
+# RPM_CONFIGDIR string length: a long checkout path moves the natural
+# adjacency and breaks the B chain. Normalize to an 18-character symlink to
+# the same config so replay is path-independent. Package bytes, the binary
+# and the allocation site are unchanged.
+cfg_link=$(mktemp -d /tmp/r2s-cfg.XXXXX) || exit 1
+rmdir "$cfg_link" || exit 1
+ln -s "$config" "$cfg_link" || exit 1
+config=$cfg_link
 vuln_plain=$root/build-vuln-plain/tools/rpm
 fixed_asan=$root/build-fixed-asan/tools/rpm
 for bin in "$vuln_plain" "$fixed_asan"; do
@@ -47,7 +56,7 @@ cleanup() {
     rm -f /tmp/README /tmp/linkme /tmp/myscript.sh
     rmdir /tmp/mydir 2>/dev/null || true
 }
-trap cleanup EXIT
+trap 'cleanup; rm -f "$cfg_link"' EXIT
 fresh() { cleanup; rm -rf "$work/db"; mkdir -p "$work/db"; }
 
 pass=0

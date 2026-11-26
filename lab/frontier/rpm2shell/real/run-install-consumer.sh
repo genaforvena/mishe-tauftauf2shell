@@ -10,6 +10,13 @@ root=$(cd .. && pwd)
 vuln_config=${RPM_CONFIGDIR_VULN:-$root/install-vuln/lib/rpm}
 fixed_config=${RPM_CONFIGDIR_FIXED:-$root/build-fixed-asan}
 [ -f "$vuln_config/rpmrc" ] || vuln_config=$root/build-vuln-asan
+# Normalize the config path length for the plain install fault the same way
+# as run-gc-pointer.sh: the natural liblua adjacency is layout-sensitive
+# to this string. Package bytes, binary and allocation site are unchanged.
+cfg_link=$(mktemp -d /tmp/r2s-cfg.XXXXX) || exit 1
+rmdir "$cfg_link" || exit 1
+ln -s "$vuln_config" "$cfg_link" || exit 1
+vuln_config=$cfg_link
 work=$PWD/install
 mkdir -p "$work"
 
@@ -26,7 +33,7 @@ cleanup() {
     rm -f /tmp/README /tmp/linkme /tmp/myscript.sh
     rmdir /tmp/mydir 2>/dev/null || true
 }
-trap cleanup EXIT
+trap 'cleanup; rm -f "$cfg_link"' EXIT
 fresh() {
     cleanup
     rm -rf "$work/db"
