@@ -31,13 +31,13 @@ build_one() { # COMMIT BUILD_DIR asan|plain
         echo "CACHED $build"
         return
     fi
-    local cflags="" ldflags=""
+    local cflags="" ldflags="" devel="--disable-devel"
     if [ "$mode" = asan ]; then
         cflags="-O0 -g -fno-omit-frame-pointer -fsanitize=address"
         ldflags="-fsanitize=address"
+        devel="--enable-devel"
     fi
-    (cd "$build" && "../$src/configure" --enable-devel \
-        CFLAGS="$cflags" LDFLAGS="$ldflags") || exit 2
+    (cd "$build" && "../$src/configure" "$devel" CFLAGS="$cflags" LDFLAGS="$ldflags") || exit 2
     # VPATH build: generated headers are found first relative to their
     # including source file, so seed both the build and source directories.
     (cd "$build" && make -j4) || true
@@ -57,4 +57,26 @@ build_one "$F_SHA" build-fixed-plain plain
 for b in build-vuln-asan build-fixed-asan build-vuln-plain build-fixed-plain; do
     [ -x "$b/src/nfcapd/nfcapd" ] && [ -x "$b/src/nfdump/nfdump" ] || exit 2
 done
+# configure.ac:27-36 appends -fsanitize=address in --enable-devel mode even
+# when CFLAGS is empty; assert the built ELF, not the requested flags. Plain
+# builds are libtool shell wrappers whose real binary is in .libs/.
+has_asan() { # PATH
+    local p=$1
+    if file "$p" | grep -q 'shell script'; then
+        p="$(dirname "$p")/.libs/$(basename "$p")"
+    fi
+    file "$p" | grep -q 'ELF' || { echo "NOT_ELF $p"; exit 2; }
+    nm "$p" 2>/dev/null | grep -q ' __asan_init'
+}
+for b in build-vuln-asan build-fixed-asan; do
+    for x in nfcapd/nfcapd nfdump/nfdump; do
+        has_asan "$b/src/$x" || { echo "ASAN_MISSING $b/src/$x"; exit 2; }
+    done
+done
+for b in build-vuln-plain build-fixed-plain; do
+    for x in nfcapd/nfcapd nfdump/nfdump; do
+        if has_asan "$b/src/$x"; then echo "PLAIN_INSTRUMENTED $b/src/$x"; exit 2; fi
+    done
+done
+echo BUILD_INSTRUMENTATION_OK
 echo BUILD_WIRE_OK

@@ -436,3 +436,65 @@ from the pinned GitHub tarballs verified against `build-wire.sh`
 `bash run-etype.sh` returned **17 PASS / 0 FAIL** with the same capture
 readbacks and flow counts as in-tree. No assertion weakened; no generated
 evidence copied into the archive. Witness replay requested on the tape.
+
+## Build-label correction and pointer-object boundary (2026-11-26 19:29Z)
+
+Material correction to earlier full-collector "plain" labels. The pinned
+`configure.ac:27-36` unconditionally appends
+`-fno-omit-frame-pointer -fsanitize=address` when `--enable-devel` is set,
+even when `CFLAGS` is empty. `build-wire.sh` had passed `--enable-devel`
+for all four builds, so `build-vuln-plain` and `build-fixed-plain` were
+ASan-instrumented too: their old `Makefile` had
+`CFLAGS = ... -fsanitize=address ...,` and `nm` on the old
+`build-vuln-plain/src/nfcapd/nfcapd` showed `T __asan_init` and
+`T __asan_report_store8`, although `ldd` found no `libasan` (runtime linked
+statically). The generated `harness/driver.c` "plain" binaries in
+`run-all.sh` are a separate thing: compiled directly by `gcc` with no
+sanitizer flag, genuinely uninstrumented.
+
+`build-wire.sh` now configures plain builds with `--disable-devel` and
+asserts the built ELF actually has (`asan`) or lacks (`plain`)
+`__asan_init`; libtool shell wrappers are resolved to `.libs/` first, and a
+non-ELF target fails the check. Both the true/false discrimination and
+`BUILD_INSTRUMENTATION_OK` were observed. Fresh plain ELFs
+(`src/build-vuln-plain/src/nfcapd/.libs/nfcapd`,
+`src/build-fixed-plain/src/nfcapd/.libs/nfcapd`) have zero `__asan_init`
+symbols and no `libasan` in `ldd`.
+
+Consequence: earlier full-collector observations labeled "plain" were made
+under ASan instrumentation. The observed chosen bytes and flow counts stand,
+but the "without ASan" wording in `run-alias.sh`, `run-etype.sh` and
+`run-hdr.sh` case labels described those builds wrongly until this fix. No
+grade claim changes. After the rebuild: `run-all.sh` 10/0,
+`run-adjacent.sh` 12/0, `run-alias.sh` 11/0, `run-etype.sh` 17/0,
+`run-hdr.sh` 12/0, `run-edge.sh` 8/0, and `run-wire.sh` with genuine plain
+builds 13/0. The genuine plain element-type case still reads
+`REC2_FOUND=1 REC2_TYPE=0100 REC2_LENGTH=0101 REC2_FLAGS_NFVERSION=0000`
+with two flows.
+
+Pointer-object boundary: source inspection of the pinned tree found no
+pointer field in the V3 wire records or extension structs written by
+`Process_nfd()` (`pins/nfxV3.h:138-178` for `EXgenericFlow_t`,
+`pins/nfxV3.h:787-790` for `record_map_t`, which belongs to the reader).
+Pointer-bearing objects are separate allocations: `FlowSource_t` at
+`src/collector/flowsource.h:45-63` holds `nffile`, `dataBlock`,
+`exporters` and `last_exp`; `exporter_entry_t` is returned by
+`getExporter()` and updated at `nfd_raw.c:169-174` and `:296`. GDB at the live
+`Process_nfd()` breakpoint (`nfd_raw.c:157`, caller `nfcapd.c:461`) measured:
+
+```
+ASan build: in_buff=0x531000000800 fs=0x512000000340
+            dataBlock=0x7fffef6d6800 nffile=0x50c0000001c0
+Genuine plain ELF: in_buff=0x555555578240 fs=0x5555555882c0
+            dataBlock=0x7ffff4e40010 nffile=0x555555588f40
+```
+
+In the plain allocator the 65535-byte `in_buff` chunk ends at
+`in_buff+0x10010`; the following small chunk's user bytes at
+`in_buff+0x10010` hold the source-ident string, and `fs` starts 0x80 bytes
+later. Neither crossing write (8-byte store at element payload offset 16,
+ICMP swap at `srcPort`/`dstPort`) reaches those bytes from a record inside
+`in_buff`. An over-long element can make `GetExtension()` read past the
+buffer (`nfd_raw.c:259` under the max-size `edge` shape), but that is a
+read, not a chosen-pointer write. No pointer overwrite, marker or command
+side effect was observed; grade stays rung 3 verbatim / rung 4 PARTIAL.

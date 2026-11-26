@@ -97,8 +97,8 @@ views of the same store, neither a wire input nor a command. See
 
 ### Live loopback collector (2026-11-26)
 
-`build-wire.sh` provisions the two pinned source tarballs (SHA-256 verified)
-and builds complete `nfcapd` + `nfdump` pairs with ASan and plain flags.
+and builds complete `nfcapd` + `nfdump` pairs in an ASan flavor and a
+genuine uninstrumented plain flavor (see the correction below).
 `run-wire.sh` starts `nfcapd` bound to `127.0.0.1`, sends a datagram with
 `wire_send.py`, terminates the daemon and reads its capture with `nfdump`.
 Both build flavours give **13 PASS / 0 FAIL**:
@@ -122,8 +122,10 @@ What it crosses is the next V3 record in the same datagram: its 12-byte
 header is overwritten with the receive-time-derived `msecReceived`, and
 `Process_nfd()` drops that record. The 48-byte single-record datagram writes
 into stale receive-buffer bytes after the packet; its flow is still written
-with garbage-derived field values. No ASan report appears in any live case,
-plain or ASan.
+with garbage-derived field values. The ASan collector reports no fault
+inside the 64 KiB receive allocation; the genuine plain collector has no
+sanitizer. Earlier full collectors labeled "plain" were in fact
+ASan-instrumented, as corrected below.
 
 An attempted alias shape (4-byte element in a 16-byte record so the store
 lands inside a still-valid second record) was measured and discarded:
@@ -257,8 +259,9 @@ over setting the type directly. No pointer, marker, command or r5.
   8-byte OOB value is collector-time derived, and there is no pointer
   hijack, benign command or command side effect. No rung 5 claim is made.
 
-Next experiment: seek a pointer-bearing object adjacent to the short
-element rather than another wire field. Five alias geometries are resolved:
+Next experiment: no pointer-bearing object was found in the wire records or
+adjacent to `in_buff`, so this lane is bounded by a measured structural
+boundary, not by an untested idea. Five alias geometries are resolved:
 the first clobbered a header, the second writes chosen bytes to a processed
 record's timestamp field, the third to its `flags`/`nfversion` header field,
 the fourth to its element type (a parser acceptance decision), and a
@@ -270,6 +273,31 @@ it draws the would-be chosen bytes from the fixed V3 record type (`0b 00`).
 Direct record-size framing remains unproven. Witness replay of the live
 wire, allocation-boundary, header-control and element-type lanes is still
 owed; the chosen-byte payload replay is ESTABLISHED AS LABELED (W280).
+
+### Build-label correction and pointer boundary (2026-11-26 19:29Z)
+
+Pinned `configure.ac:27-36` appends `-fsanitize=address` under
+`--enable-devel` even with empty `CFLAGS`. `build-wire.sh` used that flag
+for all four collectors, so the two previously called "plain" were ASan
+builds (`__asan_init` present in the built ELF). The script now uses
+`--disable-devel` for plain and asserts `__asan_init` present/absent in the
+actual ELF, resolving libtool wrappers to `.libs/`. Fresh plain collectors
+have no ASan symbols or `libasan`; all live runners pass again with them
+(`run-alias.sh` 11/0, `run-etype.sh` 17/0, `run-hdr.sh` 12/0,
+`run-wire.sh` plain 13/0, `run-edge.sh` 8/0), and the element-type case
+still writes `REC2_TYPE=0100` with two flows. The harness `run-all.sh`
+"plain" binaries were always genuinely uninstrumented `gcc` builds; no
+grade claim changes.
+
+The pointer-lane question is closed by observation: V3 wire records and
+`Process_nfd()`'s extension structs carry no pointers; `FlowSource_t`,
+`nffile_t`, exporter entries and the output `dataBlock` are separate
+allocations. GDB at live `Process_nfd()` measured `in_buff=0x555555578240`,
+`fs=0x5555555882c0`, `nffile=0x555555588f40`, `dataBlock=0x7ffff4e40010`
+in the genuine plain build; the chunk after `in_buff` holds the source
+ident string, not a pointer. An over-long element can make `GetExtension()`
+read past the buffer (`nfd_raw.c:259`), but that is a read. No pointer
+overwrite, benign marker or command side effect: grade unchanged.
 
 ## Duplicate check
 
