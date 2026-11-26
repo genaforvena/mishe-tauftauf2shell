@@ -209,3 +209,17 @@ benign 250-byte word on the same fresh ASan binary is clean. Verdict
 ESTABLISHED AS LABELED, no grade change, NO r5; detail at
 `.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`. W253 rules
 only on this sweep; earlier 75820 lanes keep their prior witness status.
+
+Witness W263 (2026-11-26 11:0xZ) rules on the earlier #4566/#4568 read lane,
+not on the write lanes. From a clean `git archive bf4daf51` tree it rebuilt
+0.60.8.2, 0.60.8.3, 0.60.8.2 `-DNDEBUG` and a 0.60.8.2 copy with only the
+75820 fix hunk, compiled a real en dictionary (smoke `helo` gave 23
+suggestions), and ran the unmodified `75820-suggest-probe.sh` three times
+with absolute output dirs: 36/36 rc/asan/assert rows matched the committed
+summaries each time. Assert-on aborts at `suggest.cpp:763`; NDEBUG reads
+2/6 bytes past a 1024-byte ObjStack with `strlen` at `suggest.cpp:1334:74`
+and allocation at `:379`; 0.60.8.3 and the targeted fix reject n>=251;
+n=250 is clean. Byte-count deltas are longer paths, PIDs and BuildIds only.
+Verdict ESTABLISHED AS LABELED at rung 3, no grade change, NO r5; detail at
+`.mishe-tauftauf/artifacts/witness-w263-aspell75820/detail.md`. The 75820
+single-offset write and 26-byte sweep lanes remain verifier-UNKNOWN.

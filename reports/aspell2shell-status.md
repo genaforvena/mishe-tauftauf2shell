@@ -119,8 +119,11 @@ Grade: CVE-2026-75818 stays **rung 3**; CVE-2026-75820 is **rung 4 PARTIAL**
 (input-chosen normalized bytes at a chosen offset in a real consumer, with
 vulnerable/fixed/safe controls). Arbitrary byte values, arbitrary offsets,
 dereferenced pointers, benign markers, commands and rung 5 are NOT measured.
-Witness replay was offered at #4566/#4568 (read) and #4611 (write); no
-verdict yet, so both claims remain verifier-UNKNOWN. Details in
+Witness: W263 (2026-11-26) independently replayed the #4566/#4568 read lane
+from a clean archive with four fresh builds — ESTABLISHED AS LABELED, rung 3
+only, no grade change, NO r5 (detail:
+`.mishe-tauftauf/artifacts/witness-w263-aspell75820/detail.md`). The #4611
+single-offset write lane remains verifier-UNKNOWN. Details in
 `reports/frontier-aspell2shell.md`.
 
 Byte-value sweep (23:56Z, `harness/75820-byte-sweep.sh`): breaking on the
@@ -159,3 +162,16 @@ fresh vulnerable build, and in-tree with a fresh work dir — each gave
 tarballs were re-fetched and the release trees diff clean, and a benign
 250-byte word on the same ASan binary is clean. Detail:
 `.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.
+
+Witness receipt (2026-11-26 11:0xZ, W263): the #4566/#4568 read lane is
+ESTABLISHED AS LABELED, no grade change, NO r5. A clean `git archive
+bf4daf51` tree, three hash-checked pinned tarballs, four fresh Clang ASan
+builds and a locally compiled real en dictionary gave 36/36 matching
+rc/asan/assert rows in each of three unmodified probe passes. Assert-on
+0.60.8.2 aborts at `suggest.cpp:763`; the NDEBUG build reads 2/6 bytes past
+a 1024-byte ObjStack at `suggest.cpp:1334`; real 0.60.8.3 and the targeted
+fix hunk reject n>=251, and n=250 is clean. Byte-count deltas are longer
+artifact paths, PIDs and BuildIds only. Detail:
+`.mishe-tauftauf/artifacts/witness-w263-aspell75820/detail.md`. The
+single-offset write lane stays verifier-UNKNOWN; W253 rules only on the
+consecutive-offset sweep.
