@@ -370,3 +370,10 @@ after the sender refactor: `run-alias.sh` 11 PASS / 0 FAIL, `run-wire.sh`
 control from a flow payload timestamp to a record header control field in
 a live processed record; still no pointer, command or r5. Witness replay
 is owed.
+
+Clean-archive replay of commit `4c1fc9ee` into an empty
+`/tmp/w-nfdump-hdr-clean` rebuilt all four collector pairs from the GitHub
+tarballs verified against the pinned SHA-256 constants in `build-wire.sh`
+(`BUILD_WIRE_OK`): `run-hdr.sh` returned **12 PASS / 0 FAIL**. The clean
+readbacks and flow counts match the in-tree result above; no assertion was
+weakened and no generated evidence was copied into the archive.
