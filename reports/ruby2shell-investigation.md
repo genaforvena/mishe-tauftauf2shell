@@ -4477,5 +4477,21 @@ maps for the pinned Ruby), but no new ASLR-dependent primitive was claimed.
   dereferences it. C=80's other pointer hit remains the boot Prism node /
   StringScanner family already closed.
 
+### Ruby 4.0.9 per-build check — NEGATIVE (2026-11-26, direct session)
+
+Official Ruby 4.0.9 (`ruby 4.0.9 (2026-10-23 revision 3e93b23afc)`) was built
+twice from tar.xz SHA-256
+`a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4`:
+one `--disable-yjit` build and one default `--enable-yjit` build. Their
+handler tables are at ELF `0x6f0da0` and `0x82e5a0`, with 124 normal entries
+each. Neither table contains a valid handler whose low byte is `0x53`
+(`0x73` likewise none). The selected 20-arm matrix per build (nop,
+opt_getconstant_path, putnil/putself/putobject/putspecialobject, duparray/
+duphash, definemethod, getlocal_WC_0 × `{0x53,0x73}`) produced only
+`SIGSEGV`/`SIGILL` in fresh processes: no eval result, marker or command.
+The 4.0 compiler shape scan covered 8,188 files / 178,920 iseqs and found
+0 compatible shapes. This does not reopen the 3.4/3.3 result and does not
+change the grade; it is a per-build bounded negative.
+
 Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
