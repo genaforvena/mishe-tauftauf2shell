@@ -12108,13 +12108,18 @@ witness verdict or mind count moved.
   bytes, wrapper hash and witness detail path. The operator's DM #4807 is
   satisfied by that fold.
 - `925a3bcf`: unarr2shell W244 staged a USTAR prefix/name one-byte NUL heap
-  WRITE (CVE-2026-111273), window 169, not admitted, witness replay owed. The
-  README gains a STAGED-NOT-ADMITTED row; the declared mind count stays 160.
-  Reproducibility records the tarball/raw pins, CMake/public-API replay,
-  seven-check output, and the preserved negative that v1.2.0/v1.2.1 are not
-  fixed upstream, so the +1-byte control is synthetic. DM #4777's 158/159
-  admissions were already current in the README and both docs after
-  `2a09507a`; nothing duplicated.
+  WRITE (CVE-2026-111273), and operator commit `c7893753` admitted it at
+  ~04:1xZ as the 161st mind (window 169 adopted); the README row and the
+  161-mind list are current. The unmodified `run-witness.sh` (sha256
+  `27d67792…968931d02`) replayed in-tree and from a clean `git archive
+  925a3bcf`: seven exact pins, `REPLAY_PASS=10 REPLAY_FAIL=0`, inner
+  `TOTAL: 7 PASS / 0 FAIL`, rc 0. The advisory's patched-1.2.0 claim is
+  refuted by byte-identical v1.2.0/v1.2.1 sink; no grade change, no r5 and
+  no independent witness verdict was claimed by admission.
+  Reproducibility records the tarball/raw pins, CMake/public-API replay and
+  the seven-check output; the synthetic +1-byte control is the only fixed
+  control. DM #4827 is satisfied by the corrected fold below and the
+  in-tree/clean-archive receipts in `docs/reproducibility.md`.
 - `33057c3f` (libsshch W27) re-read Remmina `remmina_ssh.c` (SHA-256
   `4118fa44…bf98d`) and the 2019 archive threads: the distinct callback does
   `write(fd, data, len)` at `:555`, all seven `ssh_channel_free()` sites are
@@ -12144,3 +12149,78 @@ lives under `harness/`). `check-readme.py` and `check-reproducibility.py`
 were run after the edits. Readme-lint stays RED on the frozen six-column
 detector against the live seven-cell README and is person-reserved (exact
 full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`).
+
+## 2026-11-26 04:15–04:3xZ — W244 admission receipts, W245 staged lane, five bounded negatives
+
+Signal head `2daaa4eef180`, wake-start HEAD `f7d5074f`, five commits since the
+last docs fold `65258744`, plus two earlier Ruby/Drwav lanes that fold left
+uncovered. This scoped edit touches only `README.md`, `docs/task.md` and
+`docs/reproducibility.md`. No rung cell, grade, route,
+witness verdict or R5 cell moved; the staged Speex row is not a new mind, so
+the declared count stays 161. The earlier W244 passage above is corrected in
+place: unarr is admitted, and its replay is no longer owed.
+
+- `c7893753`: the operator admitted unarr2shell at ~04:1xZ as the 161st mind
+  (window 169 adopted); README row 200 and the mind list are current. DM
+  #4827's receipt is recorded here and in `docs/reproducibility.md`: the
+  unmodified `run-witness.sh` (sha256 `27d67792…968931d02`) was replayed
+  in-tree here and from a clean `git archive 925a3bcf`, both giving seven
+  exact pins, `REPLAY_PASS=10 REPLAY_FAIL=0`, inner `TOTAL: 7 PASS / 0 FAIL`,
+  rc 0. The advisory's patched-1.2.0 claim stays refuted by the byte-identical
+  v1.2.0/v1.2.1 sink; no grade change, no r5, and the operator's replays are
+  not an independent witness verdict.
+- `2daaa4ee`: frontier staged speex2shell (CVE-2026-116741 /
+  GHSA-jmfj-jxhf-c4c3) in window 170, **not admitted**. A non-owned
+  `SpeexBits` buffer makes `speex_bits_read_whole_bytes()` set
+  `nchars = bits->buf_size` at pinned `bits.c:177` instead of the remaining
+  capacity, then write `nchars` caller bytes from `bits->chars[pos]`
+  (`:184`); vendor fix merge `09b569d1b437…` uses the remaining space and no
+  public release contains it. Four real autotools builds of tagged 1.2.1
+  source give GCC/Clang ASan `WRITE of size 1`, 0 bytes after a 16-byte
+  region, `harness/run-all.sh` 28 PASS / 0 FAIL and unmodified
+  `run-witness.sh` 10/0 with inner 28/0 in-tree. Rung 4 is chosen bytes
+  `i..p` at offsets 0..7 of an adjacent plain-build canary (`delta=32`,
+  `changed=8 chosen=1`, fixed control `changed=0 chosen=0`) under the stated
+  two-call/glibc-adjacency/no-free conditions. No pointer, command, wire
+  consumer or r5; stack reachability and the fix-commit UBSan report remain
+  separate UNKNOWNs. Witness replay is owed.
+- `4508d139` (libsshch W28): the compiled vulnerable call site does put a
+  wire-derived value in RAX at `call *0x10(%rsp)` (`0x1041f`), but this
+  host's execute-only `[vsyscall]` page has no raw-syscall gadget: 96
+  children setting RAX=39 and calling the three entries/offsets 0..31 gave
+  `sweep done`, rc 0, no `RAW_SYSCALL_GADGET`; a direct `execve` call at
+  `0xffffffffff600005` faulted (status `0x8b`). W26's four heap-slot/libc
+  address pairs also have no constant delta. Thread (2) closes at the
+  documented host ceiling; no harness or library source changed, no replay
+  or witness, grade unchanged.
+- `3b464fa4` (Ruby W28): the advisory-named entry points collapse to the
+  same two fixed bytes. `lab/repro/ruby2shell-entrypoints.sh entrypoints-2`
+  drives `upcase`/`swapcase` to sizefield `0x353` (byte `0x53`) and
+  `downcase(:fold)` / `String#casecmp?` / `Symbol#casecmp?` to `0x373`
+  (`0x73`) on vulnerable 3.4.12, with fixed-build and short-input controls
+  clean; a first-pass layout flake is preserved, with 3/3 identical reruns.
+  No chosen byte or new consumer; grades unchanged.
+- `f7d5074f` (open5gs W13): research closed at the documented ceiling and
+  the live-NRF replay asks #4225/#4263/#4171 were withdrawn after four
+  unanswered two-hour polls. Those verdicts stay UNKNOWN, never GREEN;
+  W210/W217's ESTABLISHED AS LABELED verdict covers the pinned shim only.
+  Grade unchanged and author-only: rung 3 ASan corruption, rung 4 process
+  kill, NO r5.
+- `8e026a95` (Ruby W27) and `c00c3bed` (drwav W18): all 14 encodings in the
+  fix series produce the same fixed overflow byte (`0x53` upcase, `0x73`
+  fold) and none exceeds 2:1, so the "another encoding yields chosen bytes"
+  lane is a bounded negative. Drwav's stalled GNUBase build was diagnosed as
+  CMake `VerifyGlobs.cmake` CONFIGURE_DEPENDS re-checks (>900s per ninja
+  call) rather than compilation, and the MCP tool name was corrected to
+  `audioFile_import`; no binary, process, request or ASan report was
+  observed, grade unchanged (r5 UNKNOWN).
+
+Observed at this fold: `bash lab/frontier/unarr2shell/run-witness.sh` passed
+in-tree and from a narrow clean `git archive 925a3bcf` extraction, both with
+`REPLAY_PASS=10 REPLAY_FAIL=0`, `TOTAL: 7 PASS / 0 FAIL`, rc 0;
+`bash lab/frontier/speex2shell/run-witness.sh` gave six exact pins,
+`REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, inner
+`TOTAL: 28 PASS / 0 FAIL`, rc 0, in-tree only. Readme-lint stays RED on the
+frozen six-column detector against the live seven-cell README; resolver is
+the person's exact full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`.
