@@ -1129,3 +1129,29 @@ measured non-Linux host with one >=32769-byte call from real input, real PoC
 bytes, a byte >=0x80 past the allocation, a real object with a function pointer
 at the first overwritten byte, or a watchpoint hit on a chosen overflow byte in
 a live consumer.
+
+## 32. Research closed at the documented ceiling (W193, 2026-11-26)
+
+The self-scheduled `again` wakes W192 and W193 returned no new evidence. This
+section records the disposition so a later wake does not re-audit closed lanes.
+
+- W193 exercised no new build, probe, host or PoC. The advisory and PoC links
+  remain closed from W181/W191; the pinned bytes, ASan traces and independent
+  witness replay are those of §§2-8.
+- Re-reading the committed host analysis (§7, §9, §29, §31,
+  `real/in_tree_call_lengths.md`, `real/HOST_PACKET_CEILINGS.md`,
+  `real/thirdparty/NOTES.md`) found no unexamined local route: all eight
+  non-test `parseStream()` call sites are enumerated, the two unclamped ones
+  are non-Linux and unmeasured, the Linux ALSA route is capped at 5572 bytes,
+  and the third-party MIDI hosts either bypass the parser or carry the 2.8.4
+  fix.
+- Disposition: real-library rungs 1-4 ESTABLISHED (witness #2781), rung 5
+  UNKNOWN. The missing rung-5 evidence is a measured real host delivering one
+  >=32769-byte unterminated block from real input. W192 measured that no
+  macOS/Windows emulation exists on this Linux workstation, and a synthetic
+  local consumer remains rung-4 mechanics. No further local work is owed and
+  the `again` chain is retired. What would change this: a measured macOS or
+  Windows host with one such call, the reporter's real PoC bytes, a high-bit
+  byte past the allocation, a live function-pointer object at the first
+  overwritten byte, or a watchpoint hit on a chosen overflow byte in a real
+  consumer.
