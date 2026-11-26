@@ -11872,3 +11872,27 @@ the replay commands, hashes, expected bytes and the gitignored detail path;
 the 16th printed byte `0x11` is heap residue, so only the 15-byte chosen
 prefix is claimed. Real-library reachability stays UNKNOWN. No rung, route
 or mind-count cell moved; both checkers stayed GREEN (151 rows, 29 files).
+
+## 2026-11-26 02:0xZ — rpm2shell W237 staged lane folded
+
+Signal head `9d77e107` was three commits past docs fold `e8aff103`.
+`815a1b0a` stages the rpm lane with a verbatim-pinned `iterReadArchiveNext()`
+harness (28 PASS / 0 FAIL; rung 3 pinned verbatim, rung 4 PARTIAL chosen
+bytes past a 1-byte allocation in a synthetic consumer), `9d77e107` receipts
+the `git archive 815a1b0a` clean replay into `/tmp/w237-rpm-clean` and window
+163, and `a92af05c` closes Ruby2Shell's last named offset-0 candidate C=128
+as an inert Prism node from boot-time `require` with a matching safe-input
+control; no README or reproducibility passage named that sweep as open, so
+it is doc-ok with no edit. Unread #4673's libxml22shell admission was already
+self-folded by the operator in `a41c3636`.
+
+One new README row records Rpm2Shell as STAGED, NOT ADMITTED with witness
+UNKNOWN and the no-real-consumer/no-r5 ceiling, following the Fceux staged
+row precedent. The reproducibility index now carries the CVE sources,
+commit-level pins, clean-replay command, expected ASan and canary bytes, the
+`-O1` ASan negative, and the gitignored raw-log paths. No rung, route,
+mind-count or R5 cell moved. `run-witness.sh` was re-run at this fold:
+28 PASS / 0 FAIL, `WITNESS REPLAY PASS`, rc 0. Both checkers are GREEN after
+the fold (152 rows, 29 files). Readme-lint stays RED on the frozen
+six-column detector against the live seven-column README; the resolver is
+the person's exact full-flag sync, never a bare `mishe sync`.

@@ -11135,3 +11135,43 @@ cell moves. Commands and receipts below are the ones the report records.
   through a synthetic canary, no real library, XML wire, pointer, command or
   r5; the person's exact full-flag sync stays owed. The real-library lane
   remains the target mind's next experiment.
+
+## 2026-11-26 01:5xZ — rpm2shell W237 staged lane
+
+- **Claim and pins** — `reports/frontier-rpm2shell.md` and
+  `lab/frontier/rpm2shell/PROVENANCE.md` record CVE-2026-95520 (Red Hat CNA,
+  CWE-787, CVSS 3.1 7.1; [CVE](https://www.cve.org/CVERecord?id=CVE-2026-95520),
+  [GHSA](https://github.com/advisories/ghsa-4hhr-mf67-g46r),
+  [Red Hat bug](https://bugzilla.redhat.com/show_bug.cgi?id=2537809)). The
+  provisioned upstream clone HEAD is `7c4768a9`; fix `5bc8705e0` (parent
+  `c36e85503`) has no containing tag there, so released affected/fixed
+  versions are UNKNOWN and the pins are commit-level: full `lib/rpmfi.cc`
+  `51d5d7c9…7ccf27` (vulnerable) and `eaca65fd…cb376a` (fixed), verbatim
+  excerpts `dd72be1b…49e9ff` and `0c00ded1…b92721`. Full hashes and the
+  byte-exact `sed` extraction are in `PROVENANCE.md`.
+- **Replay** — `bash lab/frontier/rpm2shell/run-witness.sh` rehashes the four
+  pins, rebuilds every binary and returns `WITNESS REPLAY PASS`, `REPLAY_PASS=5
+  REPLAY_FAIL=0`, rc 0; `run-all.sh` reports `TOTAL: 28 PASS / 0 FAIL`.
+  Re-observed at this fold from the checkout; the author's clean
+  `git archive 815a1b0a lab/frontier/rpm2shell` into `/tmp/w237-rpm-clean`
+  gave the same 28/0 and is receipted in `reports/rpm2shell-status.md`.
+- **Expected bytes** — `rpm_loff_t` is `int64_t`, so header size
+  `UINT64_MAX` is `-1`, `xmalloc(lsize + 1)` gets zero and returns a 1-byte
+  region. GCC and Clang ASan at `-O0` report `heap-buffer-overflow`,
+  `WRITE of size 64`, `0 bytes after 1-byte region`, write frame
+  `pins/iter-vulnerable.inc:61` in `iterReadArchiveNext()`; fixed attack
+  `RET=-15` and safe input `RET=0` are ASan-clean, vulnerable safe input is
+  clean. Plain attack returns `RET=-13` and prints
+  `CANARY_AFTER=495348452d52504d2121414141414141` — the chosen `MISHE-RPM!!`
+  tail from byte 1 and `A` filler after it; byte 0 lands inside the
+  allocation. Plain safe and fixed attack print no canary. Preserved
+  negative: GCC 13.3 ASan at `-O1` inlines `rpmcpioRead()` and misses the
+  overflow, so all ASan builds use `-O0`.
+- **Regeneration and boundary** — raw logs live in the gitignored
+  `lab/frontier/rpm2shell/out/` and `out-replay.log`; the cloned source stays
+  in gitignored `src/rpm/`. The stand-in `rpmcpioRead()` caps the copy at the
+  64 bytes actually present instead of the declared `UINT64_MAX`, so rung 4
+  is PARTIAL in a synthetic consumer: no real rpm build, crafted package,
+  wire, adjacent live object, pointer, command or r5. Witness replay and
+  operator admission are UNKNOWN/owed; window 163 was created but no route
+  or wake unit was added.
