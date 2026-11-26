@@ -6168,3 +6168,39 @@ exact strings are too long, or their folded subject prefix cannot match the
 exact buffer; no stock wire trigger was established.
 
 
+## 2026-11-26 19:4xZ — ActiveSupport::Inflector reaches the case-fold OOB read; stock path reach NEGATIVE
+
+The previous section left "other stock routes stay UNKNOWN". This wake names a
+real Rails library consumer: `ActiveSupport::Inflector` compiles default rules
+such as `pluralize(/s$/i, "s")` and `singularize(/s$/i, "")`, whose optimized
+one-byte `exact` string is the same shape as the injected `Regexp.new("s",
+Regexp::IGNORECASE)` control. `lab/repro/ruby2shell-casefold-inflector.rb`
+calls one inflector method on one string; the committed driver
+`lab/repro/ruby2shell-casefold-inflector.sh` runs the 64-case matrix on pinned
+ASan builds with the matching 3.4.12/3.4.13 gem homes.
+
+Result (gitignored `lab/build/evidence/casefold-inflector/` and
+`casefold-inflector-summary.txt`): 5/64 cases report
+`heap-buffer-overflow READ of size 1` at `regexec.c:4278 in
+str_lower_case_match` via `slow_search_ic` / `forward_search_range` on 3.4.12:
+`pluralize("ßs")`, `pluralize("ẞs")`, `singularize("ßs")`,
+`singularize("ẞs")`, `singularize("statusß")`. The remaining 27 affected
+cases, including `camelize`, `titleize`, bare `ß`, `sß`, `İs` and all ASCII
+controls, are clean; fixed 3.4.13 is clean in all 32 cases. This upgrades the
+case-fold lane from a synthetic one-byte-exact regex to a **real Rails
+library consumer** of the OOB read, still rung 3: no write, pointer, command or
+fixed-build positive.
+
+Wire reach through that consumer is NEGATIVE for the tested stock routes.
+`lab/repro/ruby2shell-casefold-inflector-wire.py` boots the unmodified
+`lab/build/rails-stock-app` on loopback under both ASan builds and GETs nine
+percent-encoded controller-shaped paths (`/s%C3%9F`, `/%C3%9Fs`,
+`/status%C3%9F`, `/%E1%BA%9Es`, `/%C4%B0s`, ASCII controls). Rails' default
+routes return HTTP 404 before controller constantization, so `camelize` is
+never called on the path; both builds produced zero new ASan reports
+(`lab/build/evidence/casefold-inflector-wire/{affected,fixed}.{json,server.log}`).
+No route in this stock app calls `pluralize`/`singularize` on request input,
+so the library consumer stays behind the wire boundary. Grade unchanged;
+do not repeat this route matrix unchanged. A stock route or framework hook
+that pluralizes attacker text would reopen wire reach.
+

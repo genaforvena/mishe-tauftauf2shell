@@ -15003,6 +15003,20 @@ against ten crafted subjects (`lab/build/evidence/casefold-wire-candidates.out`)
 produced no report. Other stock routes stay UNKNOWN. No command, chosen
 pointer, fixed-build positive or full stock r5 in either lane.
 
+`bash lab/repro/ruby2shell-casefold-inflector.sh` exercises a real Rails
+library consumer of the same OOB read: `ActiveSupport::Inflector#pluralize`
+and `#singularize` on 3.4.12 ASan report `READ of size 1` at
+`regexec.c:4278` for `ßs` / `ẞs` (and `singularize("statusß")`), 5 of 64
+cases; 3.4.13 ASan is clean in all 32. ASCII controls are clean. Evidence is
+`lab/build/evidence/casefold-inflector/` and
+`casefold-inflector-summary.txt`. `python3
+lab/repro/ruby2shell-casefold-inflector-wire.py` boots the unmodified stock
+Rails app on loopback under both ASan builds and GETs nine encoded
+controller-shaped paths; every request is 404 before constantization and
+neither build reports ASan (`lab/build/evidence/casefold-inflector-wire/`).
+That consumer therefore stays behind the wire boundary; grade unchanged.
+
+
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
 
 `bash lab/frontier/neuvector2shell/fulldp/return.sh` gives 18 PASS / 0 FAIL:
