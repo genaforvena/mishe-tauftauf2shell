@@ -2095,9 +2095,15 @@ external contact at replay time.
   PASS`, rc 0, all 11 normalized hashes identical, including both gdb readbacks.
   An earlier run at `efa6f075` failed 10/11 because the wrapper named a
   nonexistent `gdb-w9-post-alt.cmd` (the committed trace is `gdb-w9-post.cmd`;
-  fixed at `d379108d`). This is an author clean-archive receipt, NOT an
-  independent witness verdict; grade stays rung 4 wire-scope chosen bytes, with
-  no crash, chosen address, command or rung 5 on this branch.
+  fixed at `d379108d`). That was an author clean-archive receipt; witness W255
+  (2026-11-26 08:1xZ) independently replayed the unmodified wrapper from a
+  clean `git archive d379108d` in 179.4 s rc 0 with 11/11 normalized hashes
+  and the direct-call wrapper at `9dcf21b6` with 7/7 — ESTABLISHED AS LABELED
+  at both scopes, no grade change, NO r5. An independent upstream re-fetch
+  timed out and stays UNKNOWN. Detail:
+  `.mishe-tauftauf/artifacts/witness-w255-pgpool2shell/detail.md`. Grade stays
+  rung 4 wire-scope chosen bytes, with no crash, chosen address, command or
+  rung 5 on this branch.
 - **Tacplus2Shell W129 live write-what-where** (commit `7603775`,
   [status](../reports/tacplus2shell-status.md) W129). Build the plain 2.1.2
   pins as in the admission recipe (`src-plain/`, `src-fixed-plain/`), then

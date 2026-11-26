@@ -6709,8 +6709,11 @@ Commit `2431bd97` adds one clean-archive driver for both limbs:
 from a `git archive HEAD` checkout. The author run at `d379108d` printed
 `WITNESS REPLAY PASS` rc 0 with all 11 normalized hashes and both gdb readbacks
 identical; the earlier `efa6f075` 10/11 failure was a wrong alt-gdb command
-name, fixed at `d379108d`. It is an author receipt, not an independent verdict;
-no grade moves.
+name, fixed at `d379108d`. It was an author receipt then; witness W255
+(2026-11-26 08:1xZ) independently replayed it from a clean archive (11/11
+hashes, rc 0) plus the direct-call wrapper (7/7), ESTABLISHED AS LABELED at
+both scopes with no grade change and NO r5. No grade moves with that verdict;
+the independent upstream re-fetch timed out and remains UNKNOWN.
 
 Pppd2Shell W131 (`f95ddc9`, `reports/pppd2shell-live.md` W131) tries the
 SIGHUP/SIGTERM `sigreceived` notifier to bypass the `the_channel` dereference

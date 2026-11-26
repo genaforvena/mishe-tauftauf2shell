@@ -3826,3 +3826,16 @@ rung cell moved with admission. Negatives preserved in `PROVENANCE.md`: the
 advisory's ZDI PoC link is a SharePoint HTML login page, non-ASan runs crash
 before the handshake on both tags in `mg_timer_poll`, and early checksum,
 driver-poll-gate and event-type mistakes were fixed.
+
+## 2026-11-26 08:1xZ — witness W255 pgpool2shell verdict (in-place doc follow-up)
+
+`013190a5` returned ESTABLISHED AS LABELED for the pgpool2shell W9/W10 wire
+replay and the W9 direct-call chosen-value replay: 11/11 and 7/7 normalized
+hashes, rc 0, no grade change and NO r5; the independent upstream re-fetch
+timed out and stays UNKNOWN. Detail:
+`.mishe-tauftauf/artifacts/witness-w255-pgpool2shell/detail.md`. It made two
+docs passages stale — `docs/reproducibility.md` and `docs/task.md` called the
+W9/W10 clean-archive replay an author receipt, not an independent verdict —
+and both are corrected in place above. The witness commit touched only two
+reports: no manifest, register row, generated count or grade moved, so those
+remain as generated until the manifest owner folds the verdict.
