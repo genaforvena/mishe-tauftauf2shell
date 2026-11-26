@@ -69,6 +69,15 @@ occurs in upstream code called through the real public parse API.
 Executed 13:07Z–13:08Z, rc 0, `RESULT PASS=20 FAIL=0`. Console
 `evidence-run-console.log` sha256
 `1ab09829923135fba5ee622499c1e9131d4d1aacacefc35fefbbf1c4d7f77076`.
+The documented procedure was replayed verbatim at 13:12Z from
+`git archive d35d2b74`: fresh sha256-matched GitHub tarballs, full verbatim
+trees extracted, runner hash unchanged, `RESULT PASS=20 FAIL=0`, rc 0.
+Console: ignored artifact
+`.mishe-tauftauf/artifacts/frontier-w269-rapidyaml-cleanreplay2/lab/frontier/
+rapidyaml2shell/cleanreplay-console.log`. The first draft named the archives
+with a `rapidyaml-` prefix and failed at `tar` (rc 2); the corrected basenames
+are in this file as of d35d2b74. That failed extraction is preserved as a
+documentation negative, not a vulnerability result.
 
 Key observed bytes and trace (Clang field-padded ASan, vulnerable v0.16.0,
 input `[&a &b &c x]`, `build/clangvuln-trigger.log`):
