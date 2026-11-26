@@ -42,8 +42,9 @@ Admission adds no grade.
   `gp_camera_init()` with a lab-patched `vusb` virtual USB device: count 1022
   produces ASan `WRITE of size 16384` at real `jl2005c/jl2005c.c:152`; the
   fixed build makes no oversized device request. No real USB hardware, wire
-  or camera-consumer network path; no socket, pointer-control chain, command
-  or witness verdict on the graded claims. Rung 5 UNKNOWN.
+  or camera-consumer network path; no socket, pointer-control chain or command.
+  W170-W172 remain unwitnessed; the separate W197 device-only lane was
+  ESTABLISHED by W257 below. Rung 5 UNKNOWN.
 - W171 (author-observed, unwitnessed): the device reply restores the real
   caller frame (canary, saved rbx/rbp/RIP) so `jl2005c_init` returns normally
   into `camera_init` and `gp_camera_init` reports rc=0. The device-chosen
@@ -72,6 +73,18 @@ Admission adds no grade.
   UNKNOWN. Evidence:
   `lab/frontier/libgphoto2shell/evidence/real-plain-consumer-write.out`,
   `evidence/replay-vusb-guards.patch`.
+
+- W197 device-only top-header lane (W257 witness verdict, 2026-11-26):
+  ESTABLISHED AS LABELED at the lab rung-4 real-consumer-list scope only;
+  no contradiction, no grade change, NO r5. Independent clean-archive replay
+  (157 committed files, 4/4 pins, release tarball re-fetched and hashed)
+  ran unmodified: 12 PASS / 0 FAIL, rc 0, 60.7 s, fresh `TOP=0x12b71`, no
+  spilled `priv` in the `jl2005c_init` frame, repair with pointer word 0 and
+  that build constant lists 1022 real files with ASLR off and on, wrong-top
+  and no-repair controls abort, safe count 100 lists 100. No canary/RIP/live
+  pointer supply, `file_get`, wire, USB hardware or command; r5 UNKNOWN.
+  W170/W171/W172 above remain unwitnessed. Detail:
+  `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/detail.md`.
 
 Next for the target mind: replay the virtual-port lane independently
 (`lab/frontier/libgphoto2shell/REAL-BUILD.md`) and hunt counterexamples to the

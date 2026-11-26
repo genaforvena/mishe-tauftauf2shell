@@ -681,9 +681,9 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   from gdb on the vulnerable build and is not device-observable; the fixed
   camlib control belongs to the prior builds (`pins/fix-6a3393d.patch`), not
   to this replay. `file_get` still hangs on the zero-length table entry, so
-  no consumer file write is claimed. Grade unchanged: unwitnessed lab rung 4
-  at the real consumer-list scope, no wire, physical USB, command or rung 5
-  (UNKNOWN). One-command replay
+  no consumer file write is claimed. Grade unchanged: lab rung 4 at the real
+  consumer-list scope, unwitnessed until W257 (verdict below), no wire,
+  physical USB, command or rung 5 (UNKNOWN). One-command replay
   `lab/frontier/libgphoto2shell/live/replay-w197-gcc-o2-device-only.sh`
   (12 PASS / 0 FAIL), raw
   `lab/frontier/libgphoto2shell/evidence/w197-gcc-o2-device-only.out`.
@@ -701,14 +701,32 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   W197 checker. Author in-tree smoke at 01:27Z: 4/4 pins OK, `fresh
   TOP=0x0000000000012b71` (different from the author build's `0x12bd1`),
   `RESULT: 12 PASS / 0 FAIL`, rc=0, ~60 s. This confirms the size word is
-  build-specific and the replay needs no author tree; it is still an author
-  replay, not a witness verdict, and changes no grade.
+  build-specific and the replay needs no author tree; it was an author replay
+  at the time (W257 verdict below), and changes no grade.
   The committed wrapper was then replayed from `git archive 8ca09205` into
   `/tmp/w199-clean` with only the pinned tarball supplied externally: 4/4
   pins OK, fresh `TOP=0x0000000000012b71`, build-derived `jl2005c.so`
   sha256 `55becbce689e3ed556b55a2fd6cd04a2ae461a02016b26f5a6fd51a6d34eb66e`,
   `RESULT: 12 PASS / 0 FAIL`, rc=0, ~57 s. No author `/tmp` build was
   consumed. Scope and grade unchanged.
+
+  **W257 witness verdict (2026-11-26 08:5xZ, standing ask #4642/#4654/#4666):
+  ESTABLISHED AS LABELED at the claimed lab rung-4 scope**, no contradiction,
+  no grade change, NO r5. Independent clean archive `git archive 8ca09205`
+  (157 committed files, 4/4 pins OK) with the 2.5.34 release tarball
+  re-fetched from `REAL-BUILD.md` and matched to
+  `5df9e774…f659ff7f28`; wrapper and inner checker SHA-256 identical to the
+  worktree and staging commit. One unmodified 60.7 s run: rc 0, `RESULT: 12
+  PASS / 0 FAIL`, fresh `TOP=0x12b71` from its own gdb map, `priv` not found
+  in the frame, no-repair and wrong-top controls abort, repair lists 1022
+  entries with ASLR off and on, safe count lists 100. The freshly built
+  `.so` digest differs from the author's clean receipt (build-path
+  dependence documented in `REPLAY.md` W180), while the source hash, top
+  constant and every check reproduce. Reply pointer 0 and build-measured
+  size only; real consumer-list scope, no canary/RIP/live pointer supply,
+  `file_get`, wire, USB hardware or command; r5 stays UNKNOWN. Older
+  W170/W171/W172 claims are not covered by this verdict. Detail:
+  `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/detail.md`.
 
 - Page-alignment family refines the W197 repair (W200, 2026-11-26, lab-only):
   glibc's `sysmalloc` assertion at `malloc.c:2599` requires
