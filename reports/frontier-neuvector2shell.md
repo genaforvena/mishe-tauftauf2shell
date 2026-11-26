@@ -5,11 +5,14 @@ ESTABLISHED AS LABELED (W240 and W278, 2026-11-26). Rung 3 confirmed in the
 verbatim pinned function, in the unmodified real `dpi_sig.c` object built
 against real NeuVector headers, through a REST-validated controller-shaped
 JSON message with real wildcard expansion (W274), and over the real
-enforcer AF_UNIX datagram path in a lab consumer (W280). W278 measures
-chosen wire bytes overwriting the saved RBP **and return slot** in an
-optimized real-object lab frame: rung 4 mechanics demonstrated in the lab
-build and independently replayed. Still no full enforcer binary, live
-REST/CRD target, chosen address, command or rung 5.
+enforcer AF_UNIX datagram path in a lab consumer (W280), and in the full
+enforcer `dp` binary itself (W282). W278 measured chosen wire bytes
+overwriting the saved RBP **and return slot** in an optimized real-object
+lab frame and was independently replayed; W283 repeats that measurement
+in the live full enforcer's plain `-O2` frame. Still no live REST/CRD
+target, chosen address, command or rung 5. W282/W283 have not yet been
+replayed by the witness.
+
 
 ## REST-validated wire-path reproduction (W274, 2026-11-26)
 
@@ -260,6 +263,27 @@ into the fixed-commit binary were ASan-clean, and the fixed binary logged
 raw logs: `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md` and
 `PROVENANCE.md`.
 
+## Full-enforcer saved frame (W283, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/fulldp/frame.sh` → **22 PASS / 0
+FAIL**, rc 0. The same pinned full `dp` is rebuilt at `-O2 -g` with no
+ASan, fortify or stack protector (`nm` confirms zero `__asan` symbols),
+and the REST-valid 2233-byte datagram is sent over the real control socket
+while the enforcer runs under gdb. The breakpoint at `dpi_sig.c:662` is
+installed but not reached: a SIGSEGV occurs inside the pattern loop at
+`dpi_sig.c:657`, where the live frame reads `BUF→RBP=2096`, `LEN=2194`.
+Saved RBP and return slot hold chosen wire bytes: `0x2a2e612a2e612a2e` /
+`0x2e612a2e612a2e61` for `a*`, `0x2a2e422a2e422a2e` /
+`0x2e422a2e422a2e42` for `B*`. Without gdb the attack faults (`RC=139`);
+the safe and fixed-binary controls survive and the fixed binary skips the
+rule. Full flags, hashes, addresses and logs:
+`lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`.
+
+This moves the W278/W280 measured chosen-byte frame into the **live full
+enforcer**. Grade is unchanged: the bytes are ASCII regex text, not a
+chosen address, and the process faults before returning. No pointer
+redirection, command or side effect.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
@@ -272,21 +296,22 @@ raw logs: `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md` and
   bytes observed at chosen offsets past the logical buffer in a synthetic
   frame, in the saved RBP slot of an `-O0` real-object frame, and in *both*
   saved RBP and saved return slot of an `-O2` real-object frame driven by a
-  REST-valid wire message. W282 advances the confirmed corruption to the
-  live enforcer binary, but still faults inside `dpi_sig_bld()` before
-  returning: the overwritten words hold ASCII regex bytes, not a chosen
-  address. No pointer redirection, command or observed side effect. Grade
-  stays rung 4 PARTIAL by label, not advanced.
+  REST-valid wire message; W283 repeats that measurement in the live full
+  enforcer's `-O2` frame. Both attack traces fault inside `dpi_sig_bld()`
+  before returning: the overwritten words hold ASCII regex bytes, not a
+  chosen address. No pointer redirection, command or observed side effect.
+  Grade stays rung 4 PARTIAL by label, not advanced.
 - **Not rung 5:** no REST/CRD endpoint is contacted, the enforcer is run in
-  standalone loopback mode under ASan, and there is no benign command side
+  standalone loopback mode (ASan and plain builds), and there is no benign
   effect. The Go agent cannot be built here (host Go 1.22.2, `go.mod`
   requires 1.27.4).
 
-Next experiment: read the full enforcer's `-O2` saved frame under gdb with
-the datagram sent after the breakpoint, and compare it with the patched
-5.5.6 frame; only a measured live-consumer layout would justify considering
-a chosen-address in-process marker. Keep the no-command / no-rung-5 ceiling
-until a benign side effect on a live target is observed.
+Next experiment: the live `-O2` frame is now measured, so the remaining
+gap is a non-ASCII chosen word that survives to a return, plus a reachable
+authenticated REST/CRD target with a benign command side effect. Any
+chosen-address marker stays an in-process rung-4 mechanic until then. Keep
+the no-command / no-rung-5 ceiling; the witness has not yet replayed W282
+or W283.
 
 ## Duplicate check
 
