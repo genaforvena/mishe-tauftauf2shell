@@ -1,0 +1,16 @@
+probe.xml:1: parser error : Name too long: NCName
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                                                                               ^
+probe.xml:1: parser error : StartTag: invalid element name
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                                                                               ^
+probe.xml:1: parser error : Name too long: NCName
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                                                                               ^
+probe.xml:1: parser error : StartTag: invalid element name
+aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+                                                                               ^
+PARSER_PROBE NAME_LEN=50001 HUGE=0 DOC=NULL ERRCODE=68 MSG=StartTag: invalid element name
+
+PARSER_PROBE NAME_LEN=10000001 HUGE=1 DOC=NULL ERRCODE=68 MSG=StartTag: invalid element name
+

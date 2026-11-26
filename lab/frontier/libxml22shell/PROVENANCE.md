@@ -79,5 +79,19 @@ build directory; it is the one-command replay for the witness.
 ## Grade
 
 Rung 3 pinned verbatim (GCC + Clang ASan WRITE), rung 4 PARTIAL (chosen bytes
-past the pool in a plain-process canary). No real library build, no XML wire
-input, no pointer, no command, no r5.
+past the pool in a plain-process canary). W237 added a real-library build and
+public-API/parser bound checks; no vulnerable live consumer, XML wire input,
+pointer, command or r5.
+
+## W237 real-library consumer probe (2026-11-26)
+
+`realbuild/src/libxml2-v2.15.3.tar.gz` (SHA-256
+`0da50c1415f4ec0364569d2119b1436ba837b31df44af28569d234272c23cf1f`)
+provisioned from
+`https://gitlab.gnome.org/GNOME/libxml2/-/archive/v2.15.3/libxml2-v2.15.3.tar.gz`.
+`realbuild/run-real.sh` is the one-command replay: it rehashes the tarball,
+builds static libxml2 v2.15.3 without sanitizers, compiles `probe.c` and
+`parser-probe.c`, runs safe / over-limit / parser cases and asserts four
+result lines (`REAL REPLAY PASS`, rc 0 observed). Exact commands, outputs,
+the source-bound citation and the timed-out 4 GiB case are in
+`realbuild/evidence.md`. The pinned staged evidence above is unchanged.

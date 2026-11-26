@@ -9,6 +9,12 @@ pointer control, no command execution and no rung 5. An important negative is
 preserved: the published v2.15.4 fix does **not** stop the wrap-to-zero
 input.
 
+W237 (2026-11-26) added a real-libxml2 v2.15.3 build and a measured
+consumer-boundary negative: the public dictionary API rejects names longer
+than `INT_MAX/2` before reaching the wrapping `xmlDictAddQString()` call, and
+the XML parser caps names at 50000 bytes (10M with `XML_PARSE_HUGE`). Grade
+unchanged; see `lab/frontier/libxml22shell/realbuild/evidence.md`.
+
 ## Claim and scope
 
 - CVE-2026-86138, CNA MITRE, published 2026-09-05, CWE-190 with resultant
@@ -85,16 +91,26 @@ Exact hashes, commands and raw logs are in `PROVENANCE.md`.
   past the allocation in a live plain process; the write offset is fixed by
   the struct layout, not chosen by the input. No adjacent live object, no
   pointer-bearing target and no XML-derived bytes.
-- **Not rung 5:** no real libxml2 build, no XML document, no parser API, no
-  loopback socket, no attacker control of the value, no pointer hijack, no
-  command and no observed side effect.
+- **Not rung 5:** the W237 real-library build is a public-API consumer probe
+  that the length gate rejects; no vulnerable live consumer, XML wire input,
+  loopback socket, attacker-controlled value, pointer hijack, command or
+  observed side effect exists.
 
-Cheapest next experiment: build real libxml2 v2.15.3 without sanitizers,
-call `xmlDictCreateSub`/`xmlDictAddQString` through `xmlDictAddQName` with a
-synthetic 2^32-byte name, and check whether the post-pool bytes overlap a live
-`xmlDictEntry` or `xmlDictStrings` object; then determine whether a real XML
-parser can be made to supply a name near 2^32 bytes. Preserve the no-wire,
-no-pointer and no-command ceiling until measured.
+Real-library lane (W237, measured): real libxml2 v2.15.3 was built without
+sanitizers (`realbuild/run-real.sh`, `REAL REPLAY PASS`). Its public QName API
+`xmlDictQLookup()` with a 15-byte prefix and a 1 GiB+1 local name returns NULL
+and allocates no entry (`MODE=over ... RET=NULL ... DICT_SIZE=0`), while a
+16-byte name succeeds. Source bound: the only production caller of
+`xmlDictAddQString()` is `xmlDictLookupInternal()` (dict.c:762), which rejects
+`len > INT_MAX/2` at lines 681-687 before the call, so a ~2^32-byte name can
+never reach the wrapping 32-bit sum through the public API. The parser caps
+names at 50000 bytes (10M with `XML_PARSE_HUGE`), confirmed with a 50001-byte
+and a 10000001-byte element name: both parses fail `Name too long: NCName`.
+No post-pool overlap with a live `xmlDictEntry` or `xmlDictStrings` object was
+reachable; the partial rung-4 result stays confined to the verbatim harness.
+A full 4 GiB-name probe timed out without output and is recorded UNKNOWN, not
+as a pass. Keep the no-pointer/no-command ceiling; see
+`lab/frontier/libxml22shell/realbuild/evidence.md`.
 
 ## Duplicate check
 

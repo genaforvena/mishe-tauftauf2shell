@@ -1,2 +1,8 @@
 out/
 out-replay.log
+realbuild/libxml2-v2.15.3/
+realbuild/build/
+realbuild/probe
+realbuild/parser-probe
+realbuild/src/
+realbuild/*.log
