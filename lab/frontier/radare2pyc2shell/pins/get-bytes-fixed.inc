@@ -1,0 +1,12 @@
+static ut8 *get_bytes(RBuffer *buffer, ut32 size) {
+	if (size >= ST32_MAX) {
+		return NULL;
+	}
+	ut8 *ret = R_NEWS0 (ut8, size + 1);
+	if (ret && r_buf_read (buffer, ret, size) < size) {
+		free (ret);
+		return NULL;
+	}
+	return ret;
+}
+
