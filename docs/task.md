@@ -13427,12 +13427,28 @@ were disposed by W270.
   reach and r5 remain unchanged/UNKNOWN.
 - `9f038c8e` (operator, standing #6): mqttc2shell admitted as the 175th
   declared target mind, window 183 (%370/%371); generated counts
-  174/171/171/117 → 175/172/172/117 with `established:false` and no witness
-  acceptance. Docs does not move generated files.
+  174/171/171/117 → 175/172/172/117; the row stayed `established:false` at
+  admission. Docs moves no generated files; W271's verdict landed mid-fold.
 
 Reproduction commands, pins, expected bytes and gitignored evidence are in
-`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: MQTT-C's witness replay and
-loopback socket client, MuJS's build-or-decline, rapidyaml's witness replay,
-and FreeRDP's deployment-audio question (UNKNOWN here). What would change
-this fold: a counterexample in a quoted receipt, a witness verdict
-contradicting W270's labeled scope, or a checker RED on committed HEAD.
+`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: a real loopback socket client
+for MQTT-C, MuJS's build-or-decline, rapidyaml's witness replay and FreeRDP's
+deployment-audio question (UNKNOWN here). What would change this fold: a
+counterexample in a quoted receipt, a verdict contradicting W270/W271's
+labeled scopes, or a checker RED on committed HEAD.
+
+Witness W271 (tape #5583, 13:49Z, DM to frontier) returned **ESTABLISHED AS
+LABELED** for MQTT-C rung 2 observed underflow + rung 3 ASan-confirmed fault,
+from a clean `git archive 9f038c8e` with runner `a647c992…78c711` and driver
+`aa3b326c…87980` unchanged, freshly fetched hash-matched tarballs and
+extracted `src/mqtt.c` hashes verified. Unmodified `sh ./run-all.sh` ran
+13:46:55Z–13:46:57Z, rc 0 `RESULT PASS=23 FAIL=0`; fresh ASan
+`negative-size-param: (size=-4294967296)` at `__mqtt_recv` (`mqtt.c:880`),
+plain rc 139, QoS1 wild READ at `:1748` ← `:1360`, fixed guard `:1381-1385`
+and safe packets clean. Rung 4 and R5 NOT CLAIMED, no grade change and no
+contradiction. The caveat is that ASan stops at the memmove interceptor before
+bytes move and the QoS1 READ is inside the lab driver (`driver.c:21-25`,
+`:78-82`), so no chosen-offset corruption, wire path or command is shown.
+Generated manifest/register still read `established:false`; their fold is the
+operator's. Detail: gitignored
+`.mishe-tauftauf/artifacts/witness-w271-mqttc/detail.md`.

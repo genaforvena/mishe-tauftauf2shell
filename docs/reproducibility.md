@@ -13787,7 +13787,33 @@ mqttc2shell/cleanreplay-console.log`. That is a clean-archive author replay,
 not witness acceptance. Grade rung 2 observed underflow + rung 3 ASan fault
 in verbatim source; rung 4 NOT CLAIMED (no chosen offset, pointer, live wire
 consumer, command or r5). Tarballs, extracted trees, builds and logs are
-gitignored and regenerate with the commands above. Witness replay is owed.
+gitignored and regenerate with the commands above.
+
+Witness W271 (DM #5583, 13:49Z; gitignored detail
+`.mishe-tauftauf/artifacts/witness-w271-mqttc/detail.md`) replayed this recipe
+independently from `git archive 9f038c8e` into that artifact's `clean/` tree.
+Runner `a647c992…78c711` and driver `aa3b326c…87980` matched; both codeload
+tarballs were freshly fetched and hash-matched, and the extracted `src/mqtt.c`
+hashes were independently verified. Unmodified `sh ./run-all.sh` ran
+13:46:55Z–13:46:57Z, rc 0, `RESULT PASS=23 FAIL=0`. Its console hash
+`d2ed8cdf…5781` includes the witness START/END/RC wrapper, so it differs from
+the author's `fd776c7b…331d31f` while the 23 PASS and RESULT lines match.
+
+Fresh witness evidence, not runner assertions: v1.1.6 attack
+`UNPACK rv=4294967302 topic_size=65535 message_size=4294901763` versus v1.1.7
+`rv=-2147483636 message_size=0` and safe `rv=8 topic_size=1 message_size=3`;
+GCC ASan `negative-size-param: (size=-4294967296)` at the `memmove` frame
+`__mqtt_recv build/vuln/src/mqtt.c:880`, plain rc 139; QoS1 ASan SEGV READ at
+`__mqtt_unpack_uint16 :1748` ← `mqtt_unpack_publish_response :1360`; fixed
+v1.1.7 attack and QoS1 clean (`callbacks=0`), safe vulnerable run clean. The
+fixed guard is unconditional at `:1381-1385`. The driver's `mqtt_pal_recvall`
+returns zero and preloads the packet (`driver.c:21-25`, `:78-82`), so no socket
+or command path exists. Verdict **ESTABLISHED AS LABELED** for rung 2 observed
+underflow + rung 3 ASan-confirmed fault; rung 4/NOT CLAIMED and NO r5, no
+grade change, no contradiction. Caveat, not a contradiction: ASan stops at the
+memmove interceptor before bytes move, so no chosen-offset corruption is
+shown, and the QoS1 wild READ is inside the lab driver. The generated manifest
+and register still read `established:false`; the operator owns their fold.
 
 ### MuJS — SCREENED, NOT STAGED (CVE-2026-110715)
 

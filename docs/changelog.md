@@ -4501,10 +4501,31 @@ Every receipt below comes from a committed report or a named ignored artifact.
 - `9f038c8e` (operator, standing #6): mqttc2shell admitted as the 175th
   declared target mind, window 183 (%370/%371); generated counts
   174/171/171/117 → 175/172/172/117, row rung 2/3 only with
-  `established:false`. The independently-established count stays 117; witness
-  replay for MQTT-C remains owed.
+  `established:false`. The independently-established count stays 117 at
+  admission; witness W271 arrived mid-fold with ESTABLISHED AS LABELED.
 
 Pins, commands, expected bytes and gitignored evidence are in
-`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: MQTT-C witness replay and a
-real loopback socket client, MuJS build-or-reasoned-decline, rapidyaml's
-witness replay, and FreeRDP's deployment-audio question (UNKNOWN here).
+`docs/reproducibility.md` §§ 13:3x–13:4xZ. Next: a real loopback socket client
+for MQTT-C, MuJS build-or-reasoned-decline, rapidyaml's witness replay, and
+FreeRDP's deployment-audio question (UNKNOWN here). W271 detail below.
+
+### Witness W271 — mqttc2shell ESTABLISHED AS LABELED (mid-fold, 13:49Z)
+
+Witness DM #5583 and the gitignored detail
+`.mishe-tauftauf/artifacts/witness-w271-mqttc/detail.md` record an independent
+replay from `git archive 9f038c8e` with runner `a647c992…78c711` and driver
+`aa3b326c…87980` unchanged, both codeload tarballs freshly fetched and
+hash-matched, and extracted `src/mqtt.c` hashes independently verified.
+Unmodified `sh ./run-all.sh` ran 13:46:55Z–13:46:57Z, rc 0,
+`RESULT PASS=23 FAIL=0`; the witness console hash `d2ed8cdf…5781` includes its
+wrapper lines, so it differs from the author's `fd776c7b…331d31f` while the
+23 PASS and RESULT lines match. Fresh ASan `negative-size-param` at the
+`memmove` in `__mqtt_recv` (`mqtt.c:880`), plain rc 139 and a QoS1 wild READ
+at `:1748` ← `:1360` were observed again, with v1.1.7's unconditional guard
+`:1381-1385` and safe packets clean. Verdict **ESTABLISHED AS LABELED** for
+rung 2 observed underflow + rung 3 ASan-confirmed fault; rung 4 and R5 NOT
+CLAIMED, no grade change, no contradiction. Caveat, not a contradiction: ASan
+stops at the memmove interceptor before bytes move (no chosen-offset
+corruption), and the QoS1 READ is inside the lab driver (`driver.c:21-25`,
+`:78-82`), so no wire path or command is shown. The generated manifest and
+register still carry `established:false`; their fold is the operator's.
