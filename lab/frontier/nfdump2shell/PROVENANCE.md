@@ -647,3 +647,13 @@ overwrite, benign marker or command: no r5. Grade: rung 3 confirmed in the
 live process as well as the harness; rung 4 DEMONSTRATED for availability
 (live daemon abort with vulnerable/fixed/safe controls) alongside the earlier
 rung 4 PARTIAL chosen-byte field control.
+
+Clean-archive replay: `git archive 59f81481 lab/frontier/nfdump2shell`
+extracted into an empty `/tmp/w-nfdump-v6-clean`; `run-v6edge.sh`
+self-provisioned both SHA-verified pinned tarballs and rebuilt all four
+collector pairs (`BUILD_WIRE_OK`, `BUILD_INSTRUMENTATION_OK`). The runner
+returned **17 PASS / 0 FAIL**, rc 0, with the same six cases: ASan WRITE-8
+8 bytes past a 65535-byte region at `nfd_raw.c:256`; plain attack `rc=134`
+with `free(): invalid next size (normal)`; safe and fixed `rc=0` with one
+flow and `Corrupt nfd record` respectively. No generated evidence, build
+directory or assertion was carried into the archive.

@@ -165,3 +165,10 @@ collector: `rc=134` (SIGABRT) in 3/3 runs with glibc heap-corruption
 diagnostics; same-size safe case gives one clean flow and the fixed case
 rejects the short element, both `rc=0`. No chosen value, pointer, marker or
 command; no r5. Witness replay of this lane is owed.
+
+Clean-archive receipt: `git archive 59f81481 lab/frontier/nfdump2shell`
+into `/tmp/w-nfdump-v6-clean`, fresh builds of all four pinned collector
+pairs (`BUILD_WIRE_OK`, `BUILD_INSTRUMENTATION_OK`), `run-v6edge.sh`
+**17 PASS / 0 FAIL**, rc 0 — ASan WRITE-8 beyond the 65535-byte region,
+plain `rc=134` with glibc corruption, safe/fixed `rc=0`. No generated
+evidence copied. Witness replay remains owed.
