@@ -5386,6 +5386,14 @@ the low byte of a code pointer. The eight adjacent qwords mix code and heap
 pointers inside a large Ruby heap page. No reader, call, disclosure, command
 or second command was observed, and the owning object is UNKNOWN. This is a
 pointer-write observation, not pointer control or demonstrated impact.
+A first consumer probe was attempted and failed. A temporary GDB script
+broke at `string.c:7839` and armed a hardware write watch on
+`current_buffer + 112`; three condition variants (capa only, request source
+length 68, and the attack's first `0xdf` byte) all armed on the same boot-time
+buffer at `0x7fffdaf49700`, before Puma started, and never caught the request
+overflow. The request itself returned 404 in all three runs. No reader or
+caller was identified; the probe script was removed rather than left as a
+misleading artifact. The owner stays UNKNOWN.
 
 Disposition: the method-alias destination lane is **CLOSED** on the named
 evidence. Full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**;
