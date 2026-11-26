@@ -12600,6 +12600,33 @@ counts; docs did not touch those files.
   wire path, command or r5. Window 174 adopted (panes %350/%351 live, no
   duplicate); the hy4-flash route and three generated wake units remain
   missing (person-reserved). Generated counts moved 165/162/162/109 →
-  166/163/163/109 by the operator, not by this fold. Independent witness
-  replay is owed and `established` stays false. Full pins, hashes and
+  166/163/163/109 by the operator, not by this fold. Witness W256 later
+  returned ESTABLISHED AS LABELED (8 PASS / 0 FAIL from a clean
+  `git archive 66833e50`), flipping `established` to true and moving the
+  generated count 109→110; no rung cell moved. Full pins, hashes and
   expected bytes are in `docs/reproducibility.md`.
+
+## 2026-11-26 08:2x–08:3xZ — YARV handler and allocator closures, W256 verdict
+
+Three commits advanced HEAD from the previous fold's `43e3a514` to
+`b2f1d401`; no rung cell, grade, route or R5 cell moved by docs.
+
+- `e22e2796` (Ruby direct session) measured the threaded-handler lane:
+  `JEMTRACE_FREE_ALL_Q0` found 1,854 `vm_exec_core` handler pointers on the
+  request worker. The committed `ruby2shell-iseq-lowbyte` probe faulted or
+  errored on all 220 3.4.12 cases; on 3.3.13 a forged iseq produced a real
+  reversible Float disclosure of the `putnil` handler, but 182,906 stock
+  iseqs plus loaded Sinatra/ERB iseqs had zero compatible shapes. Lane closed
+  for stock/Rails code; grades unchanged.
+- `e6c69e17` closed the glibc tcache class-promotion lead (`0x53`/`0x73` set
+  `IS_MMAPPED`, so the free aborts in `munmap_chunk`) and named C=160's
+  adjacent consumer as `vm_make_env_each`'s Ruby VALUE local, not a pointer.
+  Stock/oracle-free/persistent r5 stays NOT ACHIEVED.
+- `b2f1d401` (witness W256) replayed mongoosemip2shell's canonical runner
+  from a clean `git archive 66833e50` with both tarballs independently
+  re-fetched: 8 PASS / 0 FAIL rc 0 in 18.9 s, ESTABLISHED AS LABELED at
+  rung 3 verbatim / rung 4 PARTIAL, no grade change, NO r5. The witness
+  commit flipped the generated manifest row to `established=true` and moved
+  the generated count 109→110; docs corrected only prose and did not touch
+  README/results/SVG/manifest. Detail:
+  `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.

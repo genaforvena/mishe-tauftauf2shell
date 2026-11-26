@@ -3821,8 +3821,14 @@ and 163rd register row at 08:19Z under standing #6, window 174 adopted
 (panes %350/%351 live, no duplicate); the hy4-flash route and three generated
 wake units remain missing (person-reserved). Generated counts moved
 165/162/162/109 → 166/163/163/109 with that admission, not by this fold.
-Independent witness replay is still owed and `established` stays false; no
-rung cell moved with admission. Negatives preserved in `PROVENANCE.md`: the
+Witness W256 (`b2f1d401`) replayed the canonical runner from a clean
+`git archive 66833e50` with both tarballs re-fetched and pin-matched: 8 PASS
+/ 0 FAIL rc 0 in 18.9 s, ESTABLISHED AS LABELED at rung 3 verbatim / rung 4
+PARTIAL, no grade change and NO r5. That witness commit flipped the manifest
+row to `established=true` and moved the generated count 109→110; docs only
+corrected prose. Detail:
+`.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.
+No rung cell moved with admission. Negatives preserved in `PROVENANCE.md`: the
 advisory's ZDI PoC link is a SharePoint HTML login page, non-ASan runs crash
 before the handshake on both tags in `mg_timer_poll`, and early checksum,
 driver-poll-gate and event-type mistakes were fixed.
@@ -3839,3 +3845,27 @@ W9/W10 clean-archive replay an author receipt, not an independent verdict —
 and both are corrected in place above. The witness commit touched only two
 reports: no manifest, register row, generated count or grade moved, so those
 remain as generated until the manifest owner folds the verdict.
+
+## 2026-11-26 08:2x–08:3xZ — Ruby YARV handler lane and allocator closures
+
+`e22e2796` measured the threaded-handler lane on `iseq_encoded[0]`, the only
+same-thread native first qword that is both a live code pointer and consumed
+by dispatch. Free-time Q-word logging (`JEMTRACE_FREE_ALL_Q0` in
+`lab/preload/jemtrace.c`) found 1,854 handler pointers on the request worker;
+after subtracting the segment's `0x36000` file offset they resolve to the
+handler table at ELF `0x552640`. The committed
+`lab/repro/ruby2shell-iseq-lowbyte.{c,rb}` probe applies only `0x53`/`0x73`
+to one handler: 220 cases on 3.4.12 all ended fatal/timeout/error with no
+completed evaluation or command. On 3.3.13 (tarball SHA-256
+`6bd764359992373a96556b45fb7dfe6b6170da34a0a2fd0b7e1be7932fea982b`) the
+`putself` low-`0x53` target enters `putobject`; a forged
+`[putself][putnil][leave]` disclosed the `putnil` handler as a reversible
+Float (`identity == recovered == 0x640409f875d2`). But the committed scanner
+`lab/repro/ruby2shell-iseq-shapes.rb` found 0 matching shapes in 8,458 files
+/ 182,906 iseqs and in loaded Sinatra and ERB iseqs, so the disclosure lane
+is closed for stock/Rails code. `e6c69e17` closed two follow-ups: a grown
+glibc chunk cannot enter a tcache bin because `0x53`/`0x73` set
+`IS_MMAPPED` and the free aborts in `munmap_chunk` before `tcache_put`, and
+C=160's jemalloc pointer is `vm_make_env_each`'s Ruby VALUE local, not a C
+pointer. Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.

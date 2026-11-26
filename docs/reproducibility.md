@@ -12559,7 +12559,7 @@ not touch those files.
   witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED).
 
 - **Mongoosemip2Shell (frontier W250) — admitted 166th mind, MIP FIN+payload
-  heap OOB write; witness replay still owed.** GHSA-4mgp-8m9m-q872 /
+  heap OOB write; witness W256 ESTABLISHED AS LABELED.** GHSA-4mgp-8m9m-q872 /
   ZDI-CAN-29386 (advisory says no CVE); affected `<= 7.23`, patched `7.24` by
   `9c6b4edd37869816b186e16e7a6616229c49f9fc`. Tag refs `7.23 =
   02bdbb9ed6f0a8f7c42228c6e7cb35d748b60551`, `7.24 =
@@ -12596,9 +12596,72 @@ not touch those files.
   with the wrapper. The operator's clean-archive replays of both wrapper
   versions returned `RESULT PASS=8 FAIL=0` rc 0 with the pinned tarballs and
   patch copied in; receipt
-  `.mishe-tauftauf/replays/mongoosemip2shell-op-20261126T0819Z`. That is an
-  author-side receipt, not an independent verdict. Grade rung 3 verbatim /
-  rung 4 PARTIAL (chosen length and `0x5a` bytes, no named adjacent object or
-  pointer), no live wire path, command or r5. `43e3a514` admitted the target
-  as the 166th declared mind and 163rd register row, window 174 adopted;
-  `established` stays false and an independent witness replay is owed.
+  `.mishe-tauftauf/replays/mongoosemip2shell-op-20261126T0819Z`. Those are
+  author-side receipts; witness W256 independently replayed the canonical
+  wrapper from a clean `git archive 66833e50` with both tarballs re-fetched
+  and matched to their pins, printing `RESULT PASS=8 FAIL=0` rc 0 in 18.9 s.
+  Grade rung 3 verbatim / rung 4 PARTIAL (chosen length and `0x5a` bytes, no
+  named adjacent object or pointer), no live wire path, command or r5.
+  `43e3a514` admitted the target as the 166th declared mind and 163rd
+  register row, window 174 adopted; W256's verdict made the manifest row
+  `established=true` and the generated count 109→110. Detail:
+  `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`.
+
+## 2026-11-26 08:2x–08:3xZ — Ruby YARV handler lane closures, W256 receipt
+
+Recipes for `e22e2796` and `e6c69e17`; no replay was rerun in this fold and
+the bytes below are quoted from the committed investigation report. Both
+limbs are bounded negatives; grades unchanged.
+
+- **Ruby2Shell threaded-handler lane — disclosure primitive closed for stock
+  shapes.** The committed tracer feature is `JEMTRACE_FREE_ALL_Q0` in
+  `lab/preload/jemtrace.c`; the target survey command is
+  `JEMTRACE_FREE_ALL_Q0=1 JEM_CLASS=80 JEM_WIRE_PORT=4588 bash
+  lab/repro/ruby2shell-jemalloc-wire.sh control jemq0-survey`. It logged
+  `Q total=552468`, 1,854 threaded handler pointers on the request worker;
+  subtracting the `0x36000` file offset resolves them to ELF `0x552640`.
+  Build the analysis probe against the pinned plain build:
+
+  ```sh
+  gcc -shared -fPIC -O0 -g -Ilab/build/plain/ruby-3.4.12 \
+    -Ilab/build/plain/ruby-3.4.12/include \
+    -Ilab/build/plain/ruby-3.4.12-plain/include/ruby-3.4.0 \
+    -Ilab/build/plain/ruby-3.4.12-plain/include/ruby-3.4.0/x86_64-linux \
+    -o lab/repro/ruby2shell_iseq_lowbyte.so \
+    lab/repro/ruby2shell-iseq-lowbyte.c
+  ```
+
+  Expect all 220 cases (110 handler indices × `{0x53,0x73}`, one fresh
+  process each, source `nil`) to end `SIGILL`/`SIGSEGV`, fatal VM error,
+  NoMemory/TypeError or timeout, with no marker or command. The 3.3.13
+  disclosure arm uses the tar.xz with SHA-256
+  `6bd764359992373a96556b45fb7dfe6b6170da34a0a2fd0b7e1be7932fea982b`;
+  the script header records build-specific offsets (`nil` source 0x2645d2,
+  insns_address_table 0x5e85a0), so run
+  `ruby lab/repro/ruby2shell-iseq-lowbyte.rb disclosure 53 2645d2 5e85a0`
+  on that build: the forged `[putself][putnil][leave]` printed
+  `identity=0x640409f875d2 recovered=0x640409f875d2` as a Float. Pass the
+  Ruby 3.3.13 core tree and the installed 3.4.12 gems as ARGV roots to
+  `ruby lab/repro/ruby2shell-iseq-shapes.rb` to close the stock path; its
+  closing line was `files=8458 iseqs=182906 matches=0`. Loaded Sinatra
+  (3,493 iseqs on 3.4.12, 3,387 on 3.3.13) and 42 ERB templates compiled
+  through Erubi/ERB (118 iseqs) gave 0 matches.
+  Gitignored evidence `lab/build/evidence/jemq0-survey.{trace,maps,out}` and
+  `jemq0-fiber-survey.*` regenerates with the survey command above. The
+  follow-up closures are structural: `0x53`/`0x73` set glibc's
+  `IS_MMAPPED` so a tcache class-promotion free aborts in `munmap_chunk`,
+  and C=160's adjacent `malloc(0x88)` is `vm_make_env_each` (`vm.c:1018`),
+  whose q0 is a Ruby local VALUE. Grades unchanged: rung 4 witness-COMPLETE,
+  harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+  r5 NOT ACHIEVED.
+- **Witness W256 — mongoosemip2shell clean-archive replay.** From a clean
+  `git archive 66833e50` with both tarballs re-fetched from `PROVENANCE.md`
+  and matched to their pins, `sh lab/frontier/mongoosemip2shell/run-all.sh`
+  printed `RESULT PASS=8 FAIL=0` rc 0 in 18.9 s; both vulnerable ASan traces
+  match `WRITE of size 400` at `mongoose.c:9763` (pinned
+  `src/net_builtin.c:1527`) 0 bytes after a 512-byte region, the 7.24 attack
+  grows to 800 with `0x5a` at offsets 400/520/799 and all controls clean.
+  Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no
+  grade change, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w256-mongoosemip2shell/detail.md`;
+  the manifest row is generated, not hand-edited by docs.
