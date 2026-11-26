@@ -498,3 +498,15 @@ ICMP swap at `srcPort`/`dstPort`) reaches those bytes from a record inside
 buffer (`nfd_raw.c:259` under the max-size `edge` shape), but that is a
 read, not a chosen-pointer write. No pointer overwrite, marker or command
 side effect was observed; grade stays rung 3 verbatim / rung 4 PARTIAL.
+
+Clean-archive receipt for `ceb87a6e`: `git archive` of the committed lane
+into an empty `/tmp/w-nfdump-plainfix-clean`, with only the two ignored
+SHA-verified pinned tarballs copied into `src/`, rebuilt all four collectors
+from scratch (`BUILT build-vuln-asan`, `BUILT build-fixed-asan`,
+`BUILT build-vuln-plain`, `BUILT build-fixed-plain` followed by
+`BUILD_INSTRUMENTATION_OK` and `BUILD_WIRE_OK`). On those fresh binaries:
+`run-etype.sh` 17 PASS / 0 FAIL, `run-alias.sh` 11 PASS / 0 FAIL,
+`run-hdr.sh` 12 PASS / 0 FAIL, `run-edge.sh` 8 PASS / 0 FAIL, and
+`run-wire.sh` with `V_BUILD`/`F_BUILD` set to the genuine plain builds
+13 PASS / 0 FAIL. No generated evidence was copied into the archive and no
+assertion was weakened.

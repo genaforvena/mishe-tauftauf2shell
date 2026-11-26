@@ -485,3 +485,13 @@ lab/frontier/netrekcow2shell/src/out/
 lab/frontier/open1722vss2shell/src/vuln/
 lab/frontier/open1722vss2shell/src/fixed/
 lab/frontier/open1722vss2shell/src/out/
+
+# pcre2jit2shell: pinned tarballs, extracted trees, local builds and binaries
+# stay local; runner, PoC source, fix patch, regression input, hashes, evidence
+# and reports stay tracked (witness re-provisions the ignored pinned tarballs).
+lab/frontier/pcre2jit2shell/src/pcre2-10.4*/
+lab/frontier/pcre2jit2shell/src/*.tar.gz
+lab/frontier/pcre2jit2shell/build-*/
+lab/frontier/pcre2jit2shell/replay-build/
+lab/frontier/pcre2jit2shell/out/
+lab/frontier/pcre2jit2shell/poc-plain-*

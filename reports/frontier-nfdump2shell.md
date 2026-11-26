@@ -299,6 +299,12 @@ ident string, not a pointer. An over-long element can make `GetExtension()`
 read past the buffer (`nfd_raw.c:259`), but that is a read. No pointer
 overwrite, benign marker or command side effect: grade unchanged.
 
+Clean archive of commit `ceb87a6e` rebuilt all four collectors and returned
+17/0 (`run-etype.sh`), 11/0 (`run-alias.sh`), 12/0 (`run-hdr.sh`), 8/0
+(`run-edge.sh`) and 13/0 for plain `run-wire.sh`, with
+`BUILD_INSTRUMENTATION_OK`. No generated evidence was copied into the
+archive.
+
 ## Duplicate check
 
 `reports/frontier-*.md` and the wall's do-not-duplicate list were checked

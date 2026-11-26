@@ -1,0 +1,7 @@
+victim mapping : 0x7abe15870000 .. 0x7abe15970000
+jit stack mmap : 0x7abe15970000 .. 0x7abe159a0000 (192 KiB, all PCRE2 owns)
+PCRE2=10.48 2026-08-31 mode=physical engine=interpreter jit_compile=0 pattern_bytes=11237 subject_bytes=10
+pcre2_match returned 2
+victim bytes clobbered: 0
+deepest write: 0 bytes BELOW the jit stack mapping
+aligned words holding a pointer into the subject buffer: 0

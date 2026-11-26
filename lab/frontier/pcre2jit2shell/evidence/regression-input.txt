@@ -1,0 +1,2 @@
+/((?(DEFINE)\[()\g{-1}]{1400}).{1}(?R)|)/expand,jit
+    AAAAAA\=jitstack=192

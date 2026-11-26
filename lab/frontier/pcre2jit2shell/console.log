@@ -1,0 +1,47 @@
+PASS pin src/pcre2-10.48.tar.gz
+PASS pin src/pcre2-10.49.tar.gz
+PASS pin src/fix.patch
+PASS pin src/poc-upstream.c
+PASS pin evidence/regression-input.txt
+PASS vulnerable pcre2_jit_compile.c
+PASS fixed pcre2_jit_compile.c
+PASS upstream fix patch applies cleanly to pinned 10.48
+PASS vuln lacks fix flag
+PASS fixed has fix flag
+PASS plain JIT build vuln
+PASS plain JIT build fixed
+PASS compile advisory PoC vuln
+PASS compile advisory PoC fixed
+PASS compile small-frame control
+PASS valid physical run vuln-jit (try 3, rc 0)
+PASS valid physical run vuln-nojit (try 3, rc 0)
+PASS valid physical run vuln-small (try 5, rc 1)
+PASS valid physical run fixed-jit (try 8, rc 1)
+PASS valid physical run fixed-nojit (try 2, rc 0)
+PASS shipped CLI regression vuln faults
+PASS shipped CLI regression vuln rc 139
+PASS shipped CLI regression fixed
+PASS shipped CLI regression fixed rc0
+PASS vuln JIT binary version and engine
+PASS vuln JIT stack-limit return
+PASS vuln victim bytes clobbered 139976
+PASS vuln deepest write 139976 bytes below mapping
+PASS vuln subject-buffer pointers in victim 15
+PASS vuln JIT PoC exit code
+PASS vuln interpreter match succeeds
+PASS vuln interpreter victim clean
+PASS vuln interpreter no pointers
+PASS vuln interpreter exit code
+PASS small frame match succeeds
+PASS small frame victim clean
+PASS small frame exit code
+PASS fixed JIT binary version and engine
+PASS fixed JIT stack-limit return
+PASS fixed JIT victim clean
+PASS fixed JIT no escaped write
+PASS fixed JIT no pointers
+PASS fixed JIT exit code
+PASS fixed interpreter match succeeds
+PASS fixed interpreter victim clean
+PASS fixed interpreter exit code
+RESULT PASS=46 FAIL=0
