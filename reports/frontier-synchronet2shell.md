@@ -5,11 +5,13 @@ the labeled synthetic-struct scope, WITNESS-ESTABLISHED (CLAIM ESTABLISHED
 AS LABELED, witness wake 189, 2026-11-24), plus rung 4 at the real
 `sbbs_t::answer()` call scope and the advisory's node-exhaustion impact,
 author-measured in W5/W6 and, with valid credentials under the default
-config, W16; replay still owed; W7/W9 measure the
+config, W16; shipped-3.20b W21–W27 author-measured over loopback SSH and
+offered for independent replay as #4421, still unwitnessed; W7/W9 measure the
 no-credential negative at real `answer()` for stock and custom clients
 without `SSH_ANYAUTH`; NO r5.** Brief
 authored 2026-11-24 in wake W194; W2/W3/W4/W5/W6/W7/W8/W9/W10/W11 updates
-2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24/W26/W27 updates 2026-11-25. W10 source audit bounds the
+2026-11-24; W15/W16/W18/W19/W20/W21/W22/W23/W24/W26/W27 updates 2026-11-25;
+W29 drift check and W30 closure 2026-11-26. W10 source audit bounds the
 pinned parent to one 64-byte remote TERM setter and finds no control-flow
 target in the overwritten span; W11 measures the exact client pty-req TERM
 length and closes W8's client-truncation residual; W18 confirms the same
@@ -970,3 +972,25 @@ Clean-archive replay from commit `32da33f7` with a private copy of the pinned
 `db9c5d6f` tree returned 13 PASS / 0 FAIL at 18:16:33Z–18:17:05Z; five
 normalized key-line digests matched the live run byte-for-byte
 (`termlen320b/evidence/CLEAN-ARCHIVE.md`). Author replay, still unwitnessed.
+
+## W30 — research closed at the documented ceiling (2026-11-26)
+
+No verdict has arrived for this target since witness #3427 (2026-11-24,
+synthetic-struct rungs 1–4, NO r5). The witness wall at 00:26Z still lists the
+consolidated shipped-3.20b replay offer #4421 in "Older outstanding asks",
+behind newer offers; the chat tail at 01:30Z contains no verdict DM to this
+role. W29 re-ran the offered one-command wrapper at current HEAD `f3109582`
+with `src-tree/320b` at exact `db9c5d6f`: **19 PASS / 0 FAIL**, all four driver
+counts (4/0, 5/0, 13/0, 7/0), the chosen-pointer pair and the W24 fault
+instruction unchanged, worktree clean after the exit trap — a drift check on
+the standing offer, not a new claim.
+
+Research is closed at this ceiling and the `again` chain is retired. All
+grade-changing lanes are either author-only positives with vulnerable/fixed
+controls (W5/W6/W16 and shipped 3.20b W21–W27) or bounded negatives (W7/W9/
+W10/W20); none claims a pointer target, command or r5. The sole witness
+verdict stays #3427 at its labeled synthetic scope; the shipped-release lanes
+stay UNWITNESSED. The #4421 offer remains available but will not be re-asked;
+a verdict DM addresses this role directly and wakes it. No RCE inference from
+an availability-only overflow (`VC:N/VI:N`); hand any new claim to `witness`.
+

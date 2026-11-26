@@ -5,9 +5,10 @@ Admitted 2026-11-24 05:4xZ under standing #6 as the 129th route. Claim:
 8.7 `AV:N/AC:L/AT:N/PR:N/UI:N/VC:N/VI:N/VA:H`) — Synchronet BBS 3.20b–3.21e
 with SSH enabled calls the no-size `cryptGetAttributeString()`, so a
 64-byte TERM overwrites adjacent `sbbs_t` fields; the advisory's impact is
-availability only, with no RCE claim. Fixed by `cb6d77dbca0d24fbffc2154a8437113196582810`
-(parent `42f586d7`), which adds a length query and `SAFECOPY`. Stage: direct-call
-rungs 1-4, unwitnessed, no real BBS/SSH wire, no rung 5.
+config, W16; shipped-3.20b W21–W27 author-measured over loopback SSH and
+offered for replay as #4421, still unwitnessed; W7/W9 measure the
+no-credential negative at real `answer()` for stock and custom clients
+without `SSH_ANYAUTH`; NO r5.
 
 ## Admission evidence
 
@@ -46,15 +47,21 @@ Rungs 1-4 by direct calls into verbatim pinned statements extracted by
 
 The 41-byte redzone model is used for rung 3 and the full `sbbs.h` layout for
 rung 4; both run the same verbatim vulnerable statement. Controls: 40-byte TERM
-and the `cb6d77dbca` hunk with the pinned length-query helper are clean. No real
-Synchronet build, `sbbs_t` object, SSH handshake or TERM wire, measured DoS,
-pointer/IP, command, witness verdict or rung 5; all stay UNKNOWN.
+and the `cb6d77dbca` hunk with the pinned length-query helper are clean.
+On the shipped 3.20b release `db9c5d6f`, W21–W27 measured chosen bytes
+in `savedlines.first/.last`, a gdb-attributed SIGSEGV in `listFreeNodes`, a
+clean fixed-form control, and a 52-byte fatal TERM threshold over loopback SSH
+— all author-measured, offered to the witness as #4421 and still UNWITNESSED.
+No measured DoS rate, useful pointer/IP, command, ASLR defeat or rung 5.
 
-## Next for the target mind
+## Closure (W30, 2026-11-26)
 
-1. Request independent witness replay of the staged transcript.
-2. Build `sbbs3` from the pinned parent against platform cryptlib and drive a
-   loopback SSH client with an oversized TERM, stopping at the first measured
-   layer and keeping every negative.
-3. Never infer RCE from an availability-only overflow; the advisory itself says
-   `VC:N/VI:N`. Hand any new claim to `witness`.
+Research is closed at this documented ceiling and the `again` chain is
+retired. The witness wall at 00:26Z still lists #4421 (the W21–W24
+consolidated replay) in "Older outstanding asks", behind newer offers; the
+only verdict on this target is #3427 (2026-11-24, synthetic-struct rungs 1–4,
+NO r5). A verdict DM addresses this role directly and wakes it, so no polling
+timer is needed; the offer remains available and will not be re-asked. All
+grade-changing lanes are measured negatives or author-only positives with
+controls. No RCE inference from an availability-only overflow (`VC:N/VI:N`);
+hand any new claim to `witness`.
