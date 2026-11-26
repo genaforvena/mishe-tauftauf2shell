@@ -4055,3 +4055,59 @@ All three geometries are closed for the missing oracle. The wire-only
 information disclosure class on this build is arena-region/GC-page addresses
 only; no libc or Ruby-code base crossed the wire, and main-arena fd/bk still
 never reaches a reflected value. Grades unchanged.
+
+### Coverage-band rescan, inter-request GAP timing and comp529b bin state — three bounded NEGATIVEs (2026-11-26, thirteenth wake)
+
+Veria re-read at 05:54Z: `dateModified` still `2026-11-21T03:52:00.000Z`.
+Its PoC section still promises "remote code execution on stock Rails on 25
+November 2026, or later if major vendors have not shipped a fix by then";
+the date has passed with no mechanics or link. No external claim adopted.
+
+**Lever 1 — reflection scan of the chosen-header coverage band.** The
+four-arm N∈{540,556,572,588} sweep (report item at line 1850) measured a fully
+chosen `[0x5353…, 0x251]` successor header at the corrupted boundary, but its
+responses were never byte-scanned for reflected chosen bytes. Replaying
+`python3 lab/repro/ruby2shell-reflect-scan.py cov-n$n- --n $n --fill-len 256
+--drain-len 1024` over the 24 surviving historical HTML responses gives
+`files=24 parts=816 deviations=0 leakshapes=0`; all 11 (n=540), 6 (n=556),
+4 (n=572) and 3 (n=588) responses are byte-clean, including the surviving
+`cov-n588-18`. An initial invocation with `--pattern 250,90` produced
+363/198/132/99 byte-0 deviations; those were a scanner-argument mismatch
+(decimal 250 vs the bodies' `0x250`), not corruption — the bodies' first
+drain qwords are `5002000000000000 9000000000000000`. Corrected result:
+the chosen header is not reflected. Evidence:
+`lab/build/evidence/covband-reflect-scan.txt` (gitignored).
+
+**Lever 2 — inter-request GAP against sweep persistence.** The previous
+wake's binding blocker was that planted victims stay live until a major GC
+frees them with the corrupted size. `RUBY2SHELL_CLAIM_GAP` exists in the
+driver (`lab/repro/ruby2shell-shrink-claim.sh:44,148`) but had never been
+exercised. A 12-fresh-process arm at N=972, plant `1000x4`, claim
+`1039@0x400:0x411,1015`, `RAILS_MAX_THREADS=1`, 5 s idle after the plant:
+**12/12 aborted at the attack** (11 `corrupted size vs. prev_size`, 1
+`munmap_chunk(): invalid pointer`), **0** claim pops, **0** survivors; the
+B→A snapshots show the victim size rewritten `0x25/0x115/0x415 →
+0x53/0x153/0x453` and the fatal free follows in the same request. Two
+smoke runs at the same geometry reproduced the pattern. The idle does not
+move the corrupted chunk out of the fatal free path. Evidence:
+`lab/build/evidence/gap5-summary.txt`, `gap5smoke-summary.txt` and
+`stock-rails-gap5{,-smoke}-*.server.log` (gitignored).
+
+**Lever 3 — comp529b bin residency (previous wake's open UNKNOWN).** Six
+fresh processes at N=1500, `METHOD_LEAD_A=529`, planted `1008x40,976x9`,
+`ATTACK_CHAIN=1`, with `MTRACE_DUMP_TCACHE=1`, `MTRACE_DUMP_RANGE=0x400..0x6a0`
+and `MTRACE_DUMP_BINS=1`: 2/6 survived the whole request sequence (404 → 404
+→ 404 → 404 → `/up` 200), 4/6 aborted. In both survivors the victim header
+is `vhdr=0x…2c70` with `vsize=0x50` (the `0x25→0x53` rewrite), its `vfd` is
+`0x100000001` and `vbk` a heap pointer; the sampled bins (`nb=0x410/0x5d0/
+0x5e0/0x610/0x680`) read `fd=0 bk=0` at the overflow, the tcache `S` lines
+cover only classes `0x3d/0x3e/0x3f`, and **no `M 63f` claim allocation ever
+fires** (0 target pops). The claim-size bin is therefore still unobserved at
+the claim moment: UNKNOWN preserved, not closed. Evidence:
+`lab/build/evidence/comp529tc-summary.txt` and
+`stock-rails-comp529tc-*.server.log` (gitignored).
+
+Disposition: no chosen-byte write into a reflected value, no claim pop of the
+grown victim, no command, no second command. Grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
