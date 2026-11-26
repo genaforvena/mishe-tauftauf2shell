@@ -172,3 +172,25 @@ until independent replay (requested in tape 5605) and not rung 5: the
 written values are zeros and a chosen bit byte, never a chosen address, and
 no command runs. The 4098-byte `ipg=32777` case with ASan and fixed/safe
 controls remains the separately replayed rung-3 real-mount evidence.
+
+## One-command clean-archive replay (2026-11-26 14:37Z)
+
+The three runners assume a provisioned `real/lwext4-upstream` clone, which a
+clean `git archive` does not contain (it is gitignored). To remove that
+witness-replay friction, `bash replay-clean.sh [REF] [DEST]` archives `REF`
+(use `352f77e9` for the recorded state), provisions the two pinned detached
+worktrees by public `git clone`/`git worktree add --detach` (no target probe),
+deletes every staged evidence output and build directory, then runs
+`run-all.sh`, `run-real.sh` and `run-victim.sh` unmodified and prints the
+runner hashes, the fresh evidence hashes and `REPLAY_RC`.
+
+Verified at 14:36Z from `git archive 352f77e9` into
+`/tmp/lwext4-witness-test2`: runner hashes `fd9e7d3e…`, `e32862ed…` and
+`80587918…` unchanged; `TOTAL: 31 PASS / 0 FAIL`, `REAL_PASS=17 REAL_FAIL=0`,
+`VICTIM_PASS=9 VICTIM_FAIL=0`, `REPLAY_RC=0`. Fresh rung-4 gdb evidence
+reproduced the exact claims: `b.buf->bc = 0x7fffffffdc70` and
+`b.buf - b.data = 4112` before the store, `bc = 0x0` after it, `0xfe` at
+`b.data+8192` (addresses differ under ASLR, delta and values do not). Fresh
+ASan evidence reproduced `WRITE of size 4098`, `0 bytes after 4096-byte
+region`, frames `ext4_fs.c:404` ← `:611`. This is an author reproducibility
+check, not independent acceptance; the witness verdict remains owed.
