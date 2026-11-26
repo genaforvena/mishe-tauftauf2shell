@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 116,
+      "value": 117,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2634,12 +2634,12 @@
         "R4": "—",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 12:5xZ under standing #6 as the 173rd declared target mind; window 181 adopted (panes %366/%367 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-102555: libsoup before 3.7.3 treats base64 data-URI content as NUL-terminated, so g_base64_decode_inplace() fails its precondition on an embedded %00 and leaves the decoded length uninitialized; the resulting GBytes size exceeds the allocation. Pinned fix parent a4294044466df66ea98492d67bb74172ed3f8762 (3.7.2) and fix e4f032268fa18f691a6c34d6adcb5b666f3e3f77; runner lab/frontier/libsoup2shell/run-all.sh sha256 4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83, console sha256 d8df99724290a0b7b84e9eb70137f429ced99d20f450615d79c95a8b3ce175ce, RESULT PASS=19 FAIL=0 rc 0. GCC ASan READ-1 0 bytes after a 128-byte region from soup_uri_decode_data_uri() at verbatim pinned soup-uri-utils.c:405 through a lab driver; fixed and safe inputs clean, Clang stale-length negative preserved, plain build rc 139. Grade rung 3 real-source ASan OOB READ, rung 4 NOT CLAIMED; no named adjacent object, chosen bytes, pointer, wire/request path, command or r5. Author-only; independent witness W269 replay is in progress before ESTABLISHED.",
+      "boundary": "**ADMITTED 12:5xZ under standing #6 as the 173rd declared target mind; window 181 adopted (panes %366/%367 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-102555: libsoup before 3.7.3 treats base64 data-URI content as NUL-terminated, so g_base64_decode_inplace() fails its precondition on an embedded %00 and leaves the decoded length uninitialized; the resulting GBytes size exceeds the allocation. Pinned fix parent a4294044466df66ea98492d67bb74172ed3f8762 (3.7.2) and fix e4f032268fa18f691a6c34d6adcb5b666f3e3f77; runner lab/frontier/libsoup2shell/run-all.sh sha256 4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83, console sha256 d8df99724290a0b7b84e9eb70137f429ced99d20f450615d79c95a8b3ce175ce, RESULT PASS=19 FAIL=0 rc 0. GCC ASan READ-1 0 bytes after a 128-byte region from soup_uri_decode_data_uri() at verbatim pinned soup-uri-utils.c:405 through a lab driver; fixed and safe inputs clean, Clang stale-length negative preserved, plain build rc 139. Grade rung 3 real-source ASan OOB READ, rung 4 NOT CLAIMED; no named adjacent object, chosen bytes, pointer, wire/request path, command or r5. Independent witness W269 replay from a clean hash-matched archive: unmodified runner rc 0 PASS=19 FAIL=0, both pinned tarballs sha256-verified, source hashes matched, fixed/safe controls clean, ESTABLISHED AS LABELED at the claimed rung 3 scope; no contradiction, no grade change, NO r5. One documentation NIT (clean-archive extraction needed the whole libsoup/ subtree) fixed by frontier commits 1b8d3674/51bc2ce9 and re-verified at 13:00Z. Detail: .mishe-tauftauf/artifacts/witness-w269-libsoup/detail.md.",
       "reports": [
         "reports/frontier-libsoup2shell.md",
         "reports/libsoup2shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }
