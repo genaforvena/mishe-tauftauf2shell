@@ -30,9 +30,11 @@ is rung-4 mechanics and was not replayed by the witness.
 Next: no bundled decoder reaches the vulnerable append API — every in-tree
 consumer uses `speex_bits_read_from` (which resets `nbBits` and writes at
 offset 0), so a crafted bitstream cannot reach `bits.c:184` in this tree;
-an external consumer using the append API remains UNKNOWN. Also open: allocator
-metadata control before any `free` and the heap-only scope (stack path
-UNKNOWN). The released-fixed-tag question is answered negative as of
+an external consumer using the append API remains UNKNOWN. Allocator metadata
+control was answered additively below (forged neighbour `size` → tcache
+confusion → overlapping allocation, with a vendor-fixed control, but only
+with a deliberately added `free`); the heap-only scope (stack path UNKNOWN)
+stands. The released-fixed-tag question is answered negative as of
 2026-11-26 (header); a future release would change that observation.
 The operator's admission and any witness replay are not substitute acceptance.
 
@@ -64,3 +66,12 @@ Additive wake 2026-11-26: source search over `src-vuln/` found no production
 caller of `speex_bits_read_whole_bytes` (definition at `bits.c:156`, header
 at `speex_bits.h:88` only), and the pointer-control probe above. Details and
 exact observed bytes in `reports/frontier-speex2shell.md` §6.
+
+Additive same-day probe (~17:15Z): `harness/alloc-primitive.sh` (9 PASS /
+0 FAIL, rc 0) forges the adjacent chunk's malloc size field to `0x31` with
+`p2[0..7]`, then, with a deliberately added `free(v)`, gets `malloc(32)` to
+return that chunk (`reuse=1`) and overwrite the following chunk's size field
+(`overlap=1`, `csize_after=0xabab…`). Vendor-fixed: `bsize_after=0x21`,
+`reuse=0`, `overlap=0`. Lab heap-layout primitive only; different free
+conditions from the staged claim, no command/wire/r5, not witness-replayed.
+Details in `reports/frontier-speex2shell.md` §6 and `PROVENANCE.md`.

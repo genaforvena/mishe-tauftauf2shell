@@ -18,6 +18,13 @@ and the bundled-decoder reachability experiment returned a negative (§6).
 No wire consumer, no command and no r5; W245 witness verdict is unchanged and
 does not cover these additive observations.
 
+Update 2026-11-26 ~17:15Z (speex2shell wake): the corrupted neighbour chunk
+size field was turned into a controlled tcache-bin confusion with an
+overlapping allocation in the vendor-vulnerable build and a clean fixed
+control (§6). This probe deliberately adds a `free()` of the corrupted
+chunk, so its conditions differ from the staged rung-4 claim; no command,
+wire path or r5.
+
 ## 1. Verified ground truth
 
 - Claim: https://github.com/advisories/GHSA-jmfj-jxhf-c4c3
@@ -132,9 +139,12 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
    Reaching the sink requires an external application that uses the append
    API on a non-owned, already-buffered `SpeexBits`; no such consumer was
    identified. Wire reachability stays UNKNOWN.
-2. Test whether the corrupted adjacent chunk metadata can be turned into a
-   controlled allocation/layout primitive before any `free`, with safe
-   controls; do not assume the current 8-byte data overwrite is enough.
+2. **Answered additively (§6).** The corrupted neighbour chunk `size` field
+   (`p2[0..7]` at `buf+24..31`) was forged to `0x31`; after a deliberately
+   added `free(v)` the 0x20 chunk enters the 0x30 tcache bin, `malloc(32)`
+   returns it with a 32-byte user area overlapping the next chunk's header,
+   and the fixed control does neither. Conditions differ from the staged
+   claim, which frees nothing.
 3. **Answered negative at query time.** GitLab's refs query lists the fix
    commit on two branches and no tag, and both mirrors' newest tag is
    `Speex-1.2.1`; there is no released fixed build to replace the pinned fix
@@ -198,3 +208,24 @@ marker execution; it remains rung-4 mechanics because the consumer is a
 harness, no command runs and no wire or request input is involved. The two
 reads still corrupt the neighbouring chunk header, which is never freed, as
 in the staged claim. Not independently replayed by the witness.
+
+### Allocator-size / overlapping-allocation probe (~17:15Z)
+
+`harness/alloc-primitive.c` and `harness/alloc-primitive.sh` (new, unpinned)
+use the same non-owner 16-byte `SpeexBits`, 8-byte seed and two oversize
+reads. `adjacent.c` put caller bytes at canary offsets 0..7; the same bytes
+can instead be read as the neighbour's malloc **chunk size** field: the
+second read's `p2[0..7]` land at `buf+24..31`. The probe sets that field to
+`0x31` while the original chunk size is `0x21`, sets a plausible next-chunk
+size in harness-controlled heap layout, then calls `free(v)` and
+`malloc(32)`. Vulnerable plain gcc (`evidence/alloc-vuln-plain.out`):
+`bsize_before=0x21 bsize_after=0x31`, `reuse=1 re=v`,
+`csize_after=0xabababababababab overlap=1`. Vendor-fixed
+(`evidence/alloc-fixed-plain.out`): `bsize_after=0x21`, `reuse=0`,
+`overlap=0`. `bash lab/frontier/speex2shell/harness/alloc-primitive.sh`
+reported 9 PASS / 0 FAIL, rc 0; six direct repeat runs also rc 0.
+This is a controlled heap-layout primitive in the lab, not a command or a
+wire path. **Condition change:** unlike the staged rung-4 claim and the
+pointer probe, this experiment *does* free the corrupted chunk; glibc
+tcache behaviour and the harness-seeded next-chunk size are part of the
+observation. Not replayed by the witness.

@@ -18,3 +18,5 @@ evidence/adjacent-vuln-plain
 evidence/adjacent-fixed-plain
 evidence/ptr-vuln-plain
 evidence/ptr-fixed-plain
+evidence/alloc-vuln-plain
+evidence/alloc-fixed-plain

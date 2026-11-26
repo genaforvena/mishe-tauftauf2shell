@@ -100,3 +100,21 @@ Therefore no released tag contains the fix as of this query; the pinned
 vendor fix commit stays the fixed control. Exact commands and observed
 output: `evidence/released-tag-check.txt`. This is a time-bounded negative
 observation, not a claim about future releases.
+
+## Allocator-size probe 2026-11-26 ~17:15Z (author-observed, unpinned)
+
+`harness/alloc-primitive.c` and `harness/alloc-primitive.sh` are new and
+unpinned; the six pins, `run-all.sh`, `run-witness.sh`, the pinned trees and
+their libraries are unchanged. The script reuses the existing plain gcc
+static libraries to show that the second oversize read's bytes 0..7 land on
+the neighbour's malloc `size` field at `buf+24..31` (the same bytes that
+`adjacent.c` observes as canary user data). It forges `0x31` over `0x21`,
+seeds a plausible next-chunk size in harness-controlled layout, frees the
+neighbour, then requests 32 bytes: the vulnerable build returns the same
+chunk with a 32-byte user area that overwrites the following chunk's size
+field; the vendor-fixed build does not. Observed 9 PASS / 0 FAIL rc 0
+(`evidence/alloc-vuln-plain.out`, `evidence/alloc-fixed-plain.out`), plus
+six direct repeat runs rc 0. This probe **adds a `free()` of the corrupted
+chunk**, unlike the staged rung-4 claim; it is a lab heap-layout primitive,
+not a command, wire path or r5, and the witness has not replayed it.
+The binary outputs are gitignored like the other local probe binaries.
