@@ -128,3 +128,27 @@ are therefore bounded well below the 64-byte `NameData`. The overflowing
 275-byte name in this arm is privileged local catalog state, not wire bytes.
 This is a source-bounded negative for the generated-name path; it does not
 close other consumers of catalog-derived names.
+
+### Author smoke receipts (2026-11-26 00:54Z and 00:59Z)
+
+First smoke, wrapper commit `3dd99685`, FAILED with 2 assertions: ASan-arm
+`LIB_OK=0` and `PGSTOP2=1`. Cause of the first: `run-two.sh:28` writes
+`/tmp/twonode-used-sha.txt` before the ASan rebuild, so it records the base
+2.1.9 hash (`3177a37c...162998`) rather than the rebuilt ASan library
+(`6bab75f3b7c6a84f7451fe5e578edb0a856b4b8a24523690e9193539b11f6b8d` at
+00:54Z and 00:59Z). Cause of the second: the ASan arm restarts node 2
+("all server processes terminated; reinitializing", `psql FATAL: the
+database system is in recovery mode`); `pg_ctl -m fast -w stop` then returned
+1 on that arm. Both arms still produced `ASAN_BUILD=0` and four ASan
+`stack-buffer-overflow` reports with `WRITE of size 261`. Evidence retained
+in `/tmp/pgactive-originwire-witness.IFtFVT`.
+
+Second smoke, wrapper commit `99adbb67` (from a clean archive of HEAD),
+PASS with `FAILURES=0`, `LEFTOVER_POSTMASTERS=0`, all three arms `RC=0`,
+`LIB_OK=1`, markers `CREATE_GROUP=0`, `NODE1/2_READY=r`,
+`TUPLE_ORIGIN_INSERT=0`, `TABLE_ON_NODE2=t`, `PGSTOP1/2=0`, plain and fixed
+`TERMINATIONS1/2=0`, and ASan arm `PGSTOP2=0` observed (the recovery-mode
+stop failure did not recur). Evidence in
+`/tmp/pgactive-originwire-witness.D61ol3`. The wrapper now records the ASan
+stop value without asserting it and asserts the absence of leftover
+postmasters instead. Author smoke only; no witness verdict is claimed.

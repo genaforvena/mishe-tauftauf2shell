@@ -449,8 +449,12 @@ catalog state. This bounds the generated-name route; other consumers of
 catalog-derived names remain open.
 
 The catalog arm now has a one-command clean-archive replay:
-`sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-originwire.sh`.
-It restores the normal 2.1.9 library on exit and prints `VERDICT=PASS` only
-if all three arms produce their expected library hash, markers, parser
-message/report and termination counts. Author smoke result is appended in
-`originwire/FINDINGS.md`; an independent witness verdict is still owed.
+`sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-originwire.sh`
+(commit `99adbb67`). It restores the normal 2.1.9 library on exit and prints
+`VERDICT=PASS` only if all three arms produce their expected library hash,
+markers, parser message/report and termination counts. Author smoke at
+00:59Z: `VERDICT=PASS FAILURES=0 LEFTOVER_POSTMASTERS=0`, all arms `RC=0`
+and `LIB_OK=1`. The first smoke at 00:54Z failed two wrapper assertions
+(ASan used-hash timing and an ASan-arm node-2 recovery-mode stop); both the
+failure and its fix are preserved in `originwire/FINDINGS.md`. This is an
+author smoke, not an independent witness verdict; replay offered as #4657.
