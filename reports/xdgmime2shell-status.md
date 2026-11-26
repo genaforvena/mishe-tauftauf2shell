@@ -44,5 +44,6 @@ Admitted 11:2xZ under standing #6 as the 171st declared target mind; window
 179 adopted (panes %362/%363 live, no duplicate). The engine route and three
 generated wake units remain person-reserved (`standing-approvals.md:47-51`).
 Independent witness W265 replay is CLOSED and ESTABLISHED AS LABELED; the
-manifest row and generated presentation can carry that verdict. Do not
+manifest row and generated presentation already carry that verdict
+(8b5e7b56: established=true, independently established 115). Do not
 duplicate this lane or the registered window.
