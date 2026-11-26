@@ -12150,15 +12150,15 @@ were run after the edits. Readme-lint stays RED on the frozen six-column
 detector against the live seven-cell README and is person-reserved (exact
 full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`).
 
-## 2026-11-26 04:15–04:3xZ — W244 admission receipts, W245 staged lane, five bounded negatives
+## 2026-11-26 04:15–04:3xZ — W244 admission receipts, W245 staged lane, five bounded negatives (W245 corrected at 04:5xZ)
 
-Signal head `2daaa4eef180`, wake-start HEAD `f7d5074f`, five commits since the
-last docs fold `65258744`, plus two earlier Ruby/Drwav lanes that fold left
-uncovered. This scoped edit touches only `README.md`, `docs/task.md` and
-`docs/reproducibility.md`. No rung cell, grade, route,
-witness verdict or R5 cell moved; the staged Speex row is not a new mind, so
-the declared count stays 161. The earlier W244 passage above is corrected in
-place: unarr is admitted, and its replay is no longer owed.
+Signal head `fe57af5e8bb3`, wake-start HEAD `2768fb84`. This scoped fold
+corrects the earlier passage in place: unarr is admitted and its replay is no
+longer owed; Speex is now the admitted 162nd mind with a settled witness, so
+the staged/not-admitted and replay-owed wording below is stale. No rung cell,
+grade, route, witness verdict or R5 cell moved here — W245's verdict is scoped
+to the staged claim. `README.md` row 201 and the mind list already say
+ADMITTED 162, so this fold edits only the two docs.
 
 - `c7893753`: the operator admitted unarr2shell at ~04:1xZ as the 161st mind
   (window 169 adopted); README row 200 and the mind list are current. DM
@@ -12169,8 +12169,8 @@ place: unarr is admitted, and its replay is no longer owed.
   rc 0. The advisory's patched-1.2.0 claim stays refuted by the byte-identical
   v1.2.0/v1.2.1 sink; no grade change, no r5, and the operator's replays are
   not an independent witness verdict.
-- `2daaa4ee`: frontier staged speex2shell (CVE-2026-116741 /
-  GHSA-jmfj-jxhf-c4c3) in window 170, **not admitted**. A non-owned
+- `fe57af5e`: the operator admitted speex2shell (CVE-2026-116741 /
+  GHSA-jmfj-jxhf-c4c3) at 04:4xZ as the 162nd mind, window 170 adopted. A non-owned
   `SpeexBits` buffer makes `speex_bits_read_whole_bytes()` set
   `nchars = bits->buf_size` at pinned `bits.c:177` instead of the remaining
   capacity, then write `nchars` caller bytes from `bits->chars[pos]`
@@ -12183,7 +12183,9 @@ place: unarr is admitted, and its replay is no longer owed.
   `changed=8 chosen=1`, fixed control `changed=0 chosen=0`) under the stated
   two-call/glibc-adjacency/no-free conditions. No pointer, command, wire
   consumer or r5; stack reachability and the fix-commit UBSan report remain
-  separate UNKNOWNs. Witness replay is owed.
+  separate UNKNOWNs. Witness W245 (#4847, `cabf5b41`) independently replayed
+  from a clean archive and serially in-tree (10/0, inner 28/0, rc 0) and is
+  ESTABLISHED AS LABELED at the staged claim's scope; no grade or r5 change.
 - `4508d139` (libsshch W28): the compiled vulnerable call site does put a
   wire-derived value in RAX at `call *0x10(%rsp)` (`0x1041f`), but this
   host's execute-only `[vsyscall]` page has no raw-syscall gadget: 96

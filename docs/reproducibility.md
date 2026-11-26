@@ -11647,9 +11647,9 @@ command service. NOT ESTABLISHED rung 5.
   at the documented ceiling and the idle `again` chain retired. None of
   these five carries an independent witness verdict.
 
-## 2026-11-26 04:15–04:3xZ — speex2shell W245 staged lane and five bounded negatives
+## 2026-11-26 04:15–04:3xZ — speex2shell W245 admission, witness and five bounded negatives (folded at 04:5xZ)
 
-- **Speex2shell W245 (staged, witness replay owed)** — `reports/frontier-speex2shell.md`,
+- **Speex2shell W245 (admitted 162nd mind; witness ESTABLISHED AS LABELED)** — `reports/frontier-speex2shell.md`,
   `reports/speex2shell-status.md` and `lab/frontier/speex2shell/PROVENANCE.md`
   record CVE-2026-116741 / GHSA-jmfj-jxhf-c4c3 (GitHub advisory 2026-10-27)
   and reporter issue `xiph/speex#42`. Affected: libspeex through 1.2.1.
@@ -11683,9 +11683,15 @@ command service. NOT ESTABLISHED rung 5.
   `1dc5d05c2ff7a6c7ada028003a88178600aeb4d3a865b261400bf10b61a7b84f`)
   rehashes all six pins, deletes builds/evidence and rebuilds; observed
   in-tree here: `REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, inner
-  `TOTAL: 28 PASS / 0 FAIL`, rc 0. Clean-archive replay was not run here and
-  no witness verdict exists. Rung 4 is limited to the two chosen bytes at
-  code-determined offsets under the stated non-owner/adjacency/no-free
+  `TOTAL: 28 PASS / 0 FAIL`, rc 0. Witness W245 (#4847, `cabf5b41`) replayed
+  from a clean archive and serially in-tree, both 10/0 with inner 28/0 rc 0,
+  upstream hashes and MR !32 verified; verdict ESTABLISHED AS LABELED at the
+  staged claim's scope. The operator's admission `fe57af5e` replayed from a
+  clean `git archive 2daaa4ee` with six pins exact and 10/0, inner 28/0 rc 0;
+  an earlier concurrent in-tree replay failed 19/9 because a parallel replay
+  deleted shared build dirs, and the serial rerun passed — no harness or pin
+  changed. Rung 4 is limited to the two chosen bytes at code-determined
+  offsets under the stated non-owner/adjacency/no-free
   conditions; no pointer, command, wire consumer or r5. Stack reachability
   and the fix-commit UBSan report are separate UNKNOWNs. Raw build trees are
   gitignored; the evidence outputs and `evidence-replay/run-all.log` are
