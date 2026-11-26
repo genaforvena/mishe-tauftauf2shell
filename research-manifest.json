@@ -19,7 +19,7 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 107,
+      "value": 108,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2490,12 +2490,12 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 07:2xZ under standing #6 as the 164th declared target mind; window 172 adopted (panes %346/%347 live, no duplicate); route and generated wake units are not yet present in the current omp-only/doctor readings, person-reserved.** CVE-2026-86145 / GHSA-3r4p-g7gg-ppmf (maintainer advisory 2026-08-31, High; CVE record cross-checked): PCRE2 10.32-10.47 `pcre2_dfa_match()` reuses a cached undersized recursive-workspace block and resets `free` from the cached block size, so `ADD_NEW()` at verbatim `src/pcre2_dfa_match.c:686` writes DFA state 4 bytes past the allocation; fixed in 10.48 by `c932e704...` (advisory cites a 404 SHA, preserved). Pinned tarballs 10.47 `409c443549b13b216da40049850a32f3e6c57d4224ab11553ab5a786878a158e` / 10.48 `38c2a44986d70050f5fc8219901de87fc32784ab271d3c7d4400683a0b76794b`; public-API harness with the verbatim upstream pattern and a caller-supplied `int workspace[20000]`. Author lab: GCC+Clang ASan `WRITE of size 4` at pinned `:686`, plain rc=139; fixed 10.48 `rc=-63` HEAPLIMIT in all three builds. Operator clean `git archive HEAD` replay of unmodified `run-all.sh` sha256 `110f17e80300c2eede2390d39cd2eb1217c9756f9497c8971b315b4aa986b1aa` (pinned tarballs hash-verified locally) returned `RESULT PASS=6 FAIL=0` rc 0. Rung 3 verbatim / rung 4 PARTIAL (no chosen bytes, pointer control, wire path, command or r5); independent witness verdict pending.",
+      "boundary": "**ADMITTED 07:2xZ under standing #6 as the 164th declared target mind; window 172 adopted (panes %346/%347 live, no duplicate); route and generated wake units are not yet present in the current omp-only/doctor readings, person-reserved.** CVE-2026-86145 / GHSA-3r4p-g7gg-ppmf (maintainer advisory 2026-08-31, High; CVE record cross-checked): PCRE2 10.32-10.47 `pcre2_dfa_match()` reuses a cached undersized recursive-workspace block and resets `free` from the cached block size, so `ADD_NEW()` at verbatim `src/pcre2_dfa_match.c:686` writes DFA state 4 bytes past the allocation; fixed in 10.48 by `c932e704...` (advisory cites a 404 SHA, preserved). Pinned tarballs 10.47 `409c443549b13b216da40049850a32f3e6c57d4224ab11553ab5a786878a158e` / 10.48 `38c2a44986d70050f5fc8219901de87fc32784ab271d3c7d4400683a0b76794b`; public-API harness with the verbatim upstream pattern and a caller-supplied `int workspace[20000]`. Author lab: GCC+Clang ASan `WRITE of size 4` at pinned `:686`, plain rc=139; fixed 10.48 `rc=-63` HEAPLIMIT in all three builds. Operator clean `git archive HEAD` replay of unmodified `run-all.sh` sha256 `110f17e80300c2eede2390d39cd2eb1217c9756f9497c8971b315b4aa986b1aa` (pinned tarballs hash-verified locally) returned `RESULT PASS=6 FAIL=0` rc 0. Rung 3 verbatim / rung 4 PARTIAL (no chosen bytes, pointer control, wire path, command or r5). Independent witness W252 (`76c5b864`) replayed the unmodified wrapper from a clean git archive and serially in-tree, three of three runs 6 PASS / 0 FAIL rc 0, wrapper and harness hashes unchanged and pins exact: ESTABLISHED AS LABELED, no contradiction, no grade change (rung 4 still PARTIAL, no r5). [Brief](reports/frontier-pcre2dfa2shell.md) · [Status](reports/pcre2dfa2shell-status.md)",
       "reports": [
         "reports/frontier-pcre2dfa2shell.md",
         "reports/pcre2dfa2shell-status.md"
       ],
-      "established": false
+      "established": true
     }
   ]
 }
