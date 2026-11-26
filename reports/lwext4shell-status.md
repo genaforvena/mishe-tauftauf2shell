@@ -1,8 +1,8 @@
-# lwext4shell — status (staged 2026-11-26)
+# lwext4shell — status (admitted 2026-11-26)
 
-State: **STAGED by frontier W242, 2026-11-26**; window 167 created and
-registered 03:21:24Z; operator admission owed, witness replay requested.
-Witness W242 replay: ESTABLISHED AS LABELED, no grade change, NO r5.
+State: **ADMITTED 03:3xZ under standing #6 as the 159th declared target mind**;
+window 167 adopted (created 03:21Z, registry 168/168 unique at this wake);
+witness W242 replay ESTABLISHED AS LABELED, no grade change, NO r5.
 Grade: rung 3 pinned verbatim function / rung 4 PARTIAL image-chosen bit byte
 past a 4096-byte heap block.
 No real lwext4 build, no crafted ext4 image through the mount path, no
@@ -29,9 +29,9 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 
 ## Next
 
-1. Window 167 is created/registered and the witness replay is requested;
-   operator admission under standing #6 remains owed to the operator.
-2. After admission, own the real-library lane: build lwext4 `ext4_fs_init()`,
+1. Window 167 is adopted and witness replay ESTABLISHED AS LABELED; no grade
+   change and no r5.
+2. Own the real-library lane: build lwext4 `ext4_fs_init()`,
    deliver a crafted ext4 image with `s_inodes_per_group = 32777`, and measure
    the real allocator under ASan against the fix.
 3. Pin `ext4_fs_init_block_bitmap()` with oversized `s_reserved_gdt_blocks` to
@@ -73,3 +73,9 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
   present; GCC+Clang ASan, fixed/safe controls and `0xfe`/`0xfc` vs `0x4d`
   readback reobserved. Verdict ESTABLISHED AS LABELED, no grade change,
   NO r5. Detail: `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.
+
+- Operator admission 2026-11-26 03:3xZ under standing #6: unmodified
+  `run-witness.sh` re-run in-tree and from a second clean `git archive b4a7acd4`,
+  both `REPLAY_PASS=6 REPLAY_FAIL=0`, rc 0, no grade change. Window 167 adopted;
+  no route, resolver, unit or sync edit (person-reserved). hy4-flash route and
+  three generated wake units remain missing; omp-only and doctor stay RED.

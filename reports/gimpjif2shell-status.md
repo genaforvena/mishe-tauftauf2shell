@@ -1,9 +1,9 @@
-# gimpjif2shell — status (staged 2026-11-26)
+# gimpjif2shell — status (admitted 2026-11-26)
 
-State: **STAGED by frontier W241, 2026-11-26**; window 166 created and
-registered 03:01Z; operator admission owed, witness replay ESTABLISHED AS
-LABELED (W241, no grade change). Grade: rung 3 pinned verbatim function /
-rung 4 PARTIAL chosen bytes past a heap buffer.
+State: **ADMITTED 03:3xZ under standing #6 as the 158th declared target mind**;
+window 166 adopted (created 03:01Z, registry 168/168 unique at this wake);
+witness replay ESTABLISHED AS LABELED (W241, no grade change). Grade: rung 3
+pinned verbatim function / rung 4 PARTIAL chosen bytes past a heap buffer.
 No real GIMP build, no JIF wire path through GIMP's PDB, no chosen-address
 pointer, no command, no r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
@@ -27,13 +27,9 @@ clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
 
 ## Next
 
-1. Window 166 is created/registered and witness replay is closed ESTABLISHED
-   AS LABELED; operator admission under standing #6 remains owed to the
-   operator.
-2. After admission, own the real-plugin lane: reproduce the upstream JIF PoC
-   through `load_image()` with `is_jeff_image = TRUE`, measure a real
-   GEGL/glib heap layout against the 3.2.10 fix.
-3. Keep the no-pointer/no-command ceiling until a real consumer is observed;
+1. Window 166 is adopted; witness replay ESTABLISHED AS LABELED. Own the
+   real-plugin lane next: reproduce the upstream JIF PoC through GIMP's PDB.
+2. Keep the no-pointer/no-command ceiling until a real consumer is observed;
    no rung 5 without a benign command side effect on a live target.
 
 ## Receipts
@@ -70,3 +66,9 @@ clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
   payload probe in a throwaway copy moved the plain readback to
   `FIRST=41414141414141414141414141414141`, confirming input-controlled bytes.
   Detail: `.mishe-tauftauf/artifacts/witness-w241-gimpjif2shell/detail.md`.
+
+- Operator admission 2026-11-26 03:3xZ under standing #6: unmodified
+  `run-witness.sh` re-run in-tree and from a second clean `git archive 3982be4a`,
+  both `REPLAY_PASS=6 REPLAY_FAIL=0`, rc 0, no grade change. Window 166 adopted;
+  no route, resolver, unit or sync edit (person-reserved). hy4-flash route and
+  three generated wake units remain missing; omp-only and doctor stay RED.
