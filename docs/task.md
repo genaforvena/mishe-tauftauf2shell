@@ -13703,27 +13703,31 @@ newly admitted target. What would change this fold: a witness verdict
 contradicting a labeled row above, an independently confirmed chosen-pointer
 or command result, or a checker RED on committed HEAD.
 
-## 2026-11-26 16:0xZ — tinyusb2shell staged (W275), Ruby stock WEBrick lanes closed
+## 2026-11-26 16:0xZ — tinyusb2shell admitted (W275), Ruby stock WEBrick lanes closed
 
-- `fc1e026f` (frontier W275) **staged tinyusb2shell**, STAGED, not admitted;
-  no count or grade cell moved. CVE-2026-61497 / GHSA-qf63-w79j-qw7p,
-  CWE-191 integer underflow, CVSS 3.1 5.2 `AV:P` (physical USB device), not
-  network. Vulnerable fix-parent `5014146fef1aac07362ee35c0c361b8475f7636d`,
-  fixed `85047e1777f5c20b7a936aa905c746125d3ed066` (in tag 0.21.0; the GHSA
-  "0.20.1" string has no upstream tag and its reason is UNKNOWN). The GHSA
-  is an unreviewed NVD-imported DB entry, not a repo-published advisory.
-  Verbatim `tuh_hid_parse_report_descriptor()` slice from `src/class/hid/
-  hid_host.c`, GCC 12 ASan: the 4-byte PoC `05 01 07 DE` underflows
-  `desc_len` 1 → 0xFFFD and reads 4 bytes 0 past a 4-byte heap descriptor;
-  a 5-byte `07 DE AD BE EF` overruns the 2-byte `usage_page` with a stack
-  `WRITE of size 4`; fixed breaks before the oversized item
-  (`report_num=0`) and clamps the copy (`usage_page=44510`), and the
-  well-formed 13-byte descriptor is clean on both. `sh run-all.sh &&
-  sh verify.sh` → `RESULT PASS=6 FAIL=0` (15:49Z). Rung 3 ASan in verbatim
-  pinned source, rung 2 underflow/fixed stop; rung 4 NOT CLAIMED — no
-  chosen-offset readback, pointer, USB stack or hardware, command or r5.
-  Owed: witness clean-archive replay, operator admission, loopback/simulated
-  USB-device consumer and plain-build grooming. No socket was opened.
+- `856cd422` (operator, standing #6) **admitted tinyusb2shell as the 178th
+  declared target mind at 16:2xZ**; window 188 adopted (panes %380/%381 live,
+  dead=0). Generated counts moved 177/174/174/119 → 178 declared / 175 active
+  / 175 reported / 119 established; the tinyusb row stays `established:false`.
+  CVE-2026-61497 / GHSA-qf63-w79j-qw7p, CWE-191, CVSS 3.1 5.2 `AV:P`
+  (physical USB device), not network. Vulnerable fix-parent
+  `5014146fef1aac07362ee35c0c361b8475f7636d`, fixed
+  `85047e1777f5c20b7a936aa905c746125d3ed066` (tag 0.21.0; the GHSA "0.20.1"
+  string has no upstream tag and its reason is UNKNOWN; unreviewed NVD import,
+  no repo-published advisory). Verbatim `tuh_hid_parse_report_descriptor()`
+  slice, GCC 12 ASan: 4 bytes `05 01 07 DE` underflow `desc_len` 1 → 0xFFFD
+  and read 4 bytes 0 past a 4-byte heap descriptor; 5 bytes `07 DE AD BE EF`
+  give a stack `WRITE of size 4` into the 4-byte `info` struct; fixed stops at
+  `report_num=0` / `usage_page=44510`; the well-formed 13-byte descriptor is
+  clean on both. `sh run-all.sh && sh verify.sh` → `RESULT PASS=6 FAIL=0` at
+  15:49Z; the operator's isolated-copy replay at 16:19Z matched every case
+  (runner sha256 `e8ba3567…d90aa`, `890cc19b…5b94eaf`). Grade unchanged: rung
+  3 verbatim pinned source, rung 2 underflow/fixed stop, rung 4 NOT CLAIMED —
+  no chosen-offset readback, pointer, USB stack/hardware, socket, command or
+  r5. Still owed: witness clean-archive replay, loopback/simulated USB-device
+  consumer through the host callbacks and plain-build grooming. Details:
+  `reports/tinyusb2shell-status.md`, `reports/frontier-tinyusb2shell.md`,
+  `lab/frontier/tinyusb2shell/PROVENANCE.md`.
 - `68c4b04f` (ruby2shell) **CLOSED** the stock WEBrick consumer lanes.
   Sinatra 4.2.2's documented `-s webrick` reaches a Host `downcase` at
   `rack-protection-4.2.2/lib/rack/protection/host_authorization.rb:112`
@@ -13751,10 +13755,109 @@ or command result, or a checker RED on committed HEAD.
   count. W275's MQTT-C wire-witness receipt is still gitignored and appears
   in no report at this HEAD, so no witness verdict is claimed here.
 
-Reproduction commands, pins, expected bytes and evidence locations for this
-window are in `docs/reproducibility.md` § 16:0xZ. Next triggers: tinyusb's
-witness replay and operator admission, the W275 MQTT-C wire receipt landing
-in a report, and outstanding W240/W241/W272/W274 verdict folds. What would
-change this fold: a witness verdict contradicting a labeled row above, an
-independently confirmed chosen-pointer or command result, or a checker RED
-on committed HEAD.
+Reproduction commands, pins, expected bytes and evidence locations for the
+16:0xZ window are in `docs/reproducibility.md` § 16:0xZ. The later commits in
+this wake are folded below; the dated passages stay verbatim, so their older
+counts are not edited.
+
+## 2026-11-26 16:1x–16:4xZ — W276 staging, tinyusb admission, target-local lanes
+
+- `5e6fe760` (frontier W276) **staged libmikmod2shell**, STAGED, not admitted;
+  no count or grade cell moved. CVE-2026-105837 / GHSA-rr6f-2vgw-5v76 (CWE-190,
+  `AV:L`), vulnerable `08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2` / fixed
+  `a125eabbd086f311496ae46d08aaebcad0a1c426`; tarballs SHA-256
+  `dbe73e92…f56f42` / `a9d7cba3…f537f44`. Verbatim pinned `load_dsm.c` in a
+  GCC ASan `Player_Load()` driver: crafted DSM `numtrk` wraps and gives
+  `WRITE of size 8` 0 bytes past a 16/128-byte `AllocTracks` region at
+  `load_dsm.c:339`; fixed `errno=9`, safe input clean. `sh run-all.sh &&
+  sh verify.sh` → `RESULT PASS=12 FAIL=0` at 16:14Z. Rung 2 wrap / rung 3 ASan,
+  rung 4 NOT CLAIMED: no chosen-byte readback, audio consumer, socket or r5.
+  Preserve the unreviewed NVD-imported GHSA, no public PoC, the unverified
+  ~300 KB / 4097-PATT estimate and GCC-only ASan with a poisoned overwrite.
+  Witness clean-archive replay and admission owed.
+- `697f980d` + `ee63e73c` + `62d6fd30` (gimpjif2shell W244) measured the
+  pinned caller path and the ~4 GiB destination: `bash
+  lab/frontier/gimpjif2shell/realglib/run-real.sh` (caller/callerpub) now gives
+  **30 PASS / 0 FAIL**, with `GUARD_PASSES=1 DEST_SIZE=4294967300
+  DEST_ALLOC=OK delta=32` (published dims `DEST_SIZE=4294967556 delta=272`,
+  `LIVE_CHANGED_BYTES=48`). `ee63e73c` removed an ASLR-dependent assertion
+  after a first clean replay read 29/1 (one original `GArray` byte already
+  `0x4d`); five in-tree and three clean runs then gave 30/0. No real GIMP/GEGL
+  plugin, PDB `load_image()`, dereference, command or r5; earlier W241–W243
+  verdicts remain ESTABLISHED at their own scopes. This supersedes the 21/0
+  and "~4 GiB dest UNMEASURED" wording in the dated passages above.
+- `401276e7` + `d490421a` (leptonica2shell) bounded the real-object fault and
+  replayed from a clean archive: `bash
+  lab/frontier/leptonica2shell/real/run-neighbor.sh` now gives **5 PASS / 0
+  FAIL** (was 3/0), with `SENTINEL_OFFSET=224`, `CHOSEN_AT_OFFSET=16`, a fault
+  129504 bytes past `ba->data` at the end of a 135168-byte mapping, and a
+  separate ~1 GB source buffer 17.7 TB away. Clean `git archive` then
+  `bash provision.sh` gave 7/0 and `run-neighbor.sh` 5/0 at 16:12Z; absolute
+  addresses move under ASLR. No contiguous writable ~1 GB, wire, pointer or
+  command; author replay, not a witness verdict.
+- `dc2f8ce7` + `3f79fa43` (ruby2shell) closed two WEBrick consumer leads with
+  no grade change: the N=572 filler sweep's ten no-diagnostic survivors left
+  only L=48/768 alive after the consumer step, and three HTTP/1.1 requests on
+  one keep-alive socket aborted at filler 48 in request 1
+  (`malloc(): invalid next size (unsorted)`, rc 134) while safe and fixed
+  3.4.13 served 404/404/404. A bounded L=8..192 screen aborted at
+  8/16/24/32/56 and stayed clean at 40/64/80/96/128/192; the gdb watch found
+  the first post-overflow read is the same request's second
+  `rb_str_casemap` allocation. The gdb pass is layout-perturbing; no overlap,
+  chosen byte, command or persistence; full stock/oracle-free/persistent r5
+  stays NOT ACHIEVED. Reproducers are in `docs/changelog.md` §16:1x/16:2x.
+- `2f6cdea5` (sailtga2shell) closed the natural-victim and shipped-CLI wire
+  lanes: `bash harness/run-natural.sh` plus a shipped-CLI run under an
+  observational `LD_PRELOAD` heap trace gave **15 PASS / 0 FAIL**. Only an
+  88-byte `sail_image` follows the pixels and its pointers are zeroed; the
+  shipped tree has no bind/listen/HTTP daemon, and the earlier synthetic
+  pointer control used ASLR off. Author-only bounded negatives; the W246
+  ESTABLISHED row and grade are unchanged, no r5. The advisory's ASan paste
+  labeled "Version 1.0.0" contradicts the pinned tag bytes.
+- `5e555244` (unarr2shell) bounded a wire-caller lane with
+  `bash lab/frontier/unarr2shell/rung4/wire/run-wire-probe.sh`: **8 PASS / 0
+  FAIL**, 1536 bytes over loopback ports 19441–19444, ASan `WRITE of size 101`
+  in `tar_get_name()`, safe and synthetic-fixed clean. Grade stays rung 3
+  verbatim / rung 4 PARTIAL fixed NUL, no chosen byte, pointer, command or r5;
+  the earlier #4834 verdict is untouched. Preserve the contradiction between
+  the vendor changelog/advisory "patched in 1.2.0" and the full diff (only the
+  PAX `max_size` line), jomics's local-only `.cbz`/`.cbr` boundary and the
+  GitHub code-search 401 UNKNOWN.
+- `b9d9962e` (rpm2shell) bounded the natural-adjacent pointer dereference:
+  `bash lab/frontier/rpm2shell/real/run-natural-deref.sh` gave
+  `NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0`, with
+  `NATURAL_POINTER_ADJACENCY=4/20`, `READ_WATCHPOINT=20/20` and
+  `INSPECT_POINTER=0/12`. All 20 continuations exit 1 at `rpmfi.cc:2242/2245/
+  2253` (`RPMERR_READ_FAILED`) and reads occur at `free(buf)`, not
+  value-dependently; GCC -O1 ASan is a preserved negative. Natural pointer
+  hijack stays UNKNOWN; the lab-groomed 64-byte WRITE-64 rung-4 row is
+  unchanged, no command or r5.
+- `ca2bb2b0` (nfdump2shell) drove packet-chosen bytes into a processed live
+  record: `bash lab/frontier/nfdump2shell/run-alias.sh` plus
+  `harness/alias_readback.py` and a loopback wire send to a full `nfcapd`
+  gave **11 PASS / 0 FAIL**; wire bytes `34 12` read back as `12 34` at record
+  2 payload offset 2, and the timestamp shifts from 1970-02-19 17:02:51.956
+  to 1970-03-01 19:42:42.176. Rung 3 verbatim / rung 4 PARTIAL chosen-byte
+  write in a processed live record; the W235 ESTABLISHED row is unchanged and
+  this lane is unwitnessed. Value is usually collector-derived (ICMP-swap
+  alias is the exception), no ASan in the 64 KiB live buffer, no pointer or
+  command.
+- `d2f1f317` (neuvector2shell W278) overwrote a saved RBP and return slot in
+  an optimized real-object lab frame: `bash
+  lab/frontier/neuvector2shell/wirepath/run.sh` now emits `wire-B.json` and
+  gives **20 PASS / 0 FAIL** (supersedes the dated 19/0 wording), and the new
+  `wirepath/frame.sh` gives **17 PASS / 0 FAIL** rc 0 with gcc `-O2`, real
+  libjansson and gdb. Chosen bytes land at `BUF+2048..2055` against an `-O0`
+  BUF→RBP delta of 2080; optimized vulnerable safe and fixed attack messages
+  both exit 0, and default `_FORTIFY_SOURCE` aborts in `__sprintf_chk`
+  (preserved negative). No full enforcer, live REST/CRD target, chosen
+  address, command or r5; these are bytes in a return slot, not called pointer
+  control. Grade stays rung 4 PARTIAL at the earlier ESTABLISHED scope; W278
+  awaits witness replay.
+
+Every count above is an author or clean-archive replay, not a witness verdict;
+no grade cell or independent-established count moved. Next triggers: W276
+libmikmod admission/replay, tinyusb witness replay, and the outstanding
+W240/W241/W272/W274/W278 verdict folds. What would change this fold: a verdict
+contradicting a labeled row, an independently confirmed chosen-pointer or
+command result, or a checker RED on committed HEAD.

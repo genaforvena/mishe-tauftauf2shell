@@ -44,7 +44,8 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| Tinyusb2Shell W275 (newest, STAGED) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 16:0xZ |
+| Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
+| Libmikmod2Shell W276 (newest, STAGED) | [status](../reports/libmikmod2shell-status.md), [brief](../reports/frontier-libmikmod2shell.md) | CVE-2026-105837 / GHSA-rr6f-2vgw-5v76, pins `08d7d210…` / `a125eabb…`, `AV:L` | `sh run-all.sh && sh verify.sh` in `lab/frontier/libmikmod2shell` | `RESULT PASS=12 FAIL=0`; GCC ASan `WRITE of size 8` at `load_dsm.c:339` via `Player_Load()` 0 bytes past a 16/128-byte `AllocTracks` region; fixed `errno=9`, safe clean; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness owed; full procedure in § 16:1x–16:4xZ |
 | Quickjsbcode2Shell (newest) | [status](../reports/quickjsbcode2shell-status.md), [brief](../reports/frontier-quickjsbcode2shell.md) | CVE-2026-88378 / GHSA-jww9-7qmq-6hv5, pins `04be2460…` / `42526037…`, no release tags | `bash lab/frontier/quickjsbcode2shell/run-all.sh` (sha256 `7031c420…c09b1cd5`) | `RESULT PASS=25 FAIL=0 rc 0`; GCC ASan `WRITE of size 96` at `quickjs.c:38820` on the 21-byte upstream regression, fixed rejects, real bytecode round-trip `value=2` on both, Clang silent; rung 3, rung 4 NOT CLAIMED, witness replay owed. Admitted 177th by `4336a4d2`; full procedure in § 15:0x–15:4xZ |
 | Axis2guththila2Shell W273 (newest) | [status](../reports/axis2guththila2shell-status.md), [brief](../reports/frontier-axis2guththila2shell.md) | CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`, CNA range before `f2b30c15…` | `sh run-all.sh && sh verify.sh` in `lab/frontier/axis2guththila2shell` | `RESULT PASS=4 FAIL=0`; GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308` from the 19-byte `<!ENTITY x "y"><a/>`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 15:0x–15:4xZ |
 | Libsoup2Shell (newest) | [status](../reports/libsoup2shell-status.md), [brief](../reports/frontier-libsoup2shell.md), [provenance](../lab/frontier/libsoup2shell/PROVENANCE.md) | fix parent `a4294044…` and fix `e4f03226…`; both GitLab tarballs SHA-256-pinned; extract the **full** pinned `libsoup/` subtree | `cd lab/frontier/libsoup2shell && ./run-all.sh` (runner sha256 `4dadfa60…d83`) | `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0; ASan READ-1 at `soup-uri-utils.c:405`; rung 3, rung 4 NOT CLAIMED; W269 clean-archive ESTABLISHED AS LABELED at that scope, NIT fixed. Full procedure at the tail of this file |
@@ -14163,6 +14164,9 @@ clean-archive receipt (`git archive 6d4d551b`, pinned tarball hash-checked,
 `realcaller/run.sh 22/0`, `wirepath/run.sh 19/0`, `run-all.sh 29/0`,
 `REPLAY_PASS=5`); witness notified on DM 5639, no independent verdict
 claimed. Detail: `reports/frontier-neuvector2shell.md`.
+Superseded by `d2f1f317`: `wirepath/run.sh` now emits `wire-B.json` and gives
+**20 PASS / 0 FAIL**, and `wirepath/frame.sh` gives 17/0; see § 16:1x–16:4xZ.
+The 19/0 above is the older W274 scope, preserved as dated history.
 
 ### PJPROJECT W241 — live library object (`4f9314a9`, `b76012a3`)
 
@@ -14198,6 +14202,9 @@ rc 0. `a23384e2` is the clean-archive replay of `edd20190` (`3/0`, rc 0).
 Grade rung 3 real / rung 4 PARTIAL: sentinel and observer are synthetic, no
 pointer-bearing victim consumed, no wire or command. Detail
 `reports/frontier-leptonica2shell.md`.
+Superseded by `401276e7`/`d490421a`: the same run now gives **5 PASS / 0 FAIL**
+and a clean-archive replay gives 7/0 + 5/0; see § 16:1x–16:4xZ. The 3/0 above
+is the older `edd20190` scope, preserved as dated history.
 
 ### GIMP JIF W243 — on-disk file path (`cf956faf`, `d2252911`)
 
@@ -14216,6 +14223,9 @@ archive replay of `cf956faf` (`21/0`, rc 0). The real plugin's ~4 GiB `dest`
 allocation is omitted by the driver, so that consumer is UNMEASURED; no GIMP
 plugin, PDB call, pointer deref, command or r5. This W243 is distinct from
 radare2pyc2shell's W243. Detail `reports/frontier-gimpjif2shell.md`.
+Superseded by `697f980d`/`ee63e73c`/`62d6fd30`: the caller/callerpub run gives
+**30 PASS / 0 FAIL**, `DEST_ALLOC=OK` and `LIVE_CHANGED_BYTES=48`; see
+§ 16:1x–16:4xZ. The 21/0 and "UNMEASURED dest" above are the older W243 scope.
 
 ### rpm2shell real consumer (`aaedfd2f`)
 
@@ -14314,9 +14324,9 @@ Every `NN PASS / MM FAIL` above is an author or clean-archive replay in this
 window, not an independent witness verdict except W273. The 119 established
 count and every register grade cell are unchanged by this fold.
 
-## 2026-11-26 16:0xZ — tinyusb staging, Ruby stock WEBrick closure
+## 2026-11-26 16:0xZ — tinyusb staged then admitted, Ruby stock WEBrick closure
 
-### TinyUSB HID report-descriptor underflow (`fc1e026f`, STAGED)
+### TinyUSB HID report-descriptor underflow (`fc1e026f` staged, `856cd422` ADMITTED)
 
 CVE-2026-61497 / GHSA-qf63-w79j-qw7p (CWE-191, CVSS 3.1 5.2, `AV:P`), pins
 vulnerable fix-parent `5014146fef1aac07362ee35c0c361b8475f7636d` and fixed
@@ -14348,9 +14358,12 @@ Rung 3 only, rung 4 NOT CLAIMED — no chosen-offset readback, pointer, live
 USB consumer/hardware, socket, command or r5. Preserve the unreviewed
 NVD-imported GHSA, the "0.20.1" vs "0.21.0" discrepancy and the absent
 upstream published advisories. Details:
-`reports/frontier-tinyusb2shell.md`, `reports/tinyusb2shell-status.md`,
-`lab/frontier/tinyusb2shell/PROVENANCE.md`. STAGED, not admitted; witness
-clean-archive replay and operator admission owed.
+`reports/frontier-tinyusb2shell.md`, `reports/tinyusb2shell-status.md`.
+Operator `856cd422` admitted the lane as the 178th declared mind at 16:2xZ
+(window 188, panes %380/%381); generated counts are 178/175/175/119 with
+`established:false`. The 16:19Z isolated-copy replay matched all six cases.
+Witness clean-archive replay, a loopback/simulated USB-device consumer and
+plain-build grooming are still owed.
 
 ### Ruby2Shell stock WEBrick consumer closure (`68c4b04f`)
 
@@ -14391,3 +14404,171 @@ shipped-callback recipe remains § 15:0x–15:4xZ above, and the merge moved no
 row or count. Every `PASS/FAIL` count above is an author observation, not a
 witness verdict; the 119 established count and all register grade cells are
 unchanged by this fold.
+
+## 2026-11-26 16:1x–16:4xZ — tinyusb admission, W276 staging, target-local lanes
+
+### Libmikmod2Shell W276 STAGED (`5e6fe760`)
+
+CVE-2026-105837 / GHSA-rr6f-2vgw-5v76 (CWE-190, `AV:L`); vulnerable
+`08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2` / fixed
+`a125eabbd086f311496ae46d08aaebcad0a1c426`, tarballs SHA-256
+`dbe73e92401f7e12d2153169b15da2f9981bc8323395d5dc2e35e08946f56f42` /
+`a9d7cba3e1867fefbf385cb16da859d23e042fbe54a8ee370ced963d5e537f44`, pinned
+vulnerable `load_dsm.c` `42fa90bb7dd4fbbf8f00c3dcc39743f8848786014aead7c51d7e1ae5d8e147d5`.
+From `lab/frontier/libmikmod2shell`, `sh run-all.sh && sh verify.sh` builds
+both tags (`cmake -DCMAKE_C_FLAGS=-fsanitize=address…`, target
+`mikmod-static`), generates the DSM with `python3 harness/make_dsm.py`, and
+runs a GCC ASan driver through `Player_Load()`. Expect
+`RESULT PASS=12 FAIL=0` at 16:14Z: `WRITE of size 8` at `load_dsm.c:339`,
+0 bytes past a 16/128-byte `AllocTracks` region after the `numtrk` wrap;
+fixed `errno=9`, safe DSM clean. Tarballs, trees and logs are gitignored and
+regenerated by those commands. Rung 2 wrap / rung 3 ASan, rung 4 NOT CLAIMED
+— no chosen-byte readback, audio consumer, socket, command or r5. Preserve
+the unreviewed NVD-imported GHSA, no public PoC, the unverified ~300 KB /
+4097-PATT estimate and GCC-only ASan with a poisoned overwrite. STAGED, not
+admitted; witness replay owed. Details: `reports/frontier-libmikmod2shell.md`,
+`reports/libmikmod2shell-status.md`, `charters/libmikmod2shell.md`.
+
+### Superseded live-object counts in this window
+
+- GIMP JIF (`697f980d`, `ee63e73c`, `62d6fd30`): fix `2b2bbb8ffa6a88…`,
+  parent `b5a3e0b6df9986…`; full-file SHA-256 `7811585724082652…` /
+  `703c1e124d3bf8e1…`, excerpts `36288ad05b7a57b9…` / `98d710f4bf9002ad…`.
+  `bash lab/frontier/gimpjif2shell/realglib/run-real.sh` in caller and
+  callerpub modes now gives **30 PASS / 0 FAIL** rc 0 with
+  `GUARD_PASSES=1 DEST_SIZE=4294967300 DEST_ALLOC=OK delta=32`; published
+  dims give `DEST_SIZE=4294967556 delta=272 LIVE_CHANGED_BYTES=48`. The first
+  clean replay of `697f980d` gave 29/1 because ASLR had already made one
+  original `GArray` byte `0x4d`; `ee63e73c` made the assertions
+  ASLR-independent, then five in-tree and three clean runs gave 30/0 (the
+  29/1 log is `/tmp/w244-clean-replay.log`, outside the repo). No real
+  GIMP/GEGL plugin (gtk+-3.0, babl, gegl-0.4 and gimp-3.0 dev packages are
+  missing), PDB `load_image()`, dereference or command; earlier W241–W243
+  ESTABLISHED verdicts stay at their labeled scopes.
+- Leptonica (`401276e7`, `d490421a`): fix `c493a776e6bc6cfb1d8d15152a0b74f3d15b33fd`
+  patch and vulnerable 1.87.0 raw `src/bytearray.c`, as in the older recipe
+  above. `bash lab/frontier/leptonica2shell/real/run-neighbor.sh` on the
+  pinned plain tree with `-Wl,--wrap=calloc` now gives **5 PASS / 0 FAIL**
+  (`SENTINEL_OFFSET=224`, `CHOSEN_AT_OFFSET=16`); the fault is 129504 bytes
+  past `ba->data` at the end of a 135168-byte mapping, while the ~1 GB source
+  buffer is a separate mapping 17.7 TB away. Clean `git archive HEAD
+  lab/frontier/leptonica2shell/real` → `bash provision.sh` gave 7/0 and
+  `run-neighbor.sh` gave 5/0 at 16:12Z; ASLR moved absolute addresses
+  (`FAULT_ADDR=0x5ee5dbd1e000`, `DATA_ADDR=0x5ee5dbcfe620`) while the
+  invariants repeated. No contiguous writable ~1 GB, wire, pointer or
+  command; author replay, not a witness verdict.
+- Ruby (`dc2f8ce7`, `3f79fa43`): `bash
+  lab/repro/ruby2shell-webrick-filler-sweep.sh` (22 fresh processes, 22
+  lengths), then
+  `RUBY2SHELL_STOCK_ORDER=filler-first RUBY2SHELL_STOCK_SERVER=webrick
+  RUBY2SHELL_STOCK_SETTLE=2 bash lab/repro/ruby2shell-stock-baseline.sh attack
+  TAG`, and `bash lab/repro/ruby2shell-webrick-keepalive.sh` with
+  `webrick-keep-client.py` / `webrick-keep-watch.{gdb,sh}`. The survivor set
+  after the consumer step is L=48/768; filler 48 on one HTTP/1.1 socket
+  aborts at request 1 (`malloc(): invalid next size (unsorted)`, rc 134),
+  safe and fixed 3.4.13 serve 404/404/404, and L=8/16/24/32/56 abort while
+  40/64/80/96/128/192 stay clean. The gdb watch is layout-perturbing (L=40
+  aborts under gdb); the first post-overflow read is the same request's
+  second `rb_str_casemap` allocation. No overlap, chosen byte, command or
+  persistence; full stock/oracle-free/persistent r5 stays NOT ACHIEVED and
+  the witness-ESTABLISHED harness-condition r5 stays as labeled.
+
+### SailTGA natural-victim and shipped-CLI wire closure (`2f6cdea5`)
+
+CVE-2026-54626 / GHSA-744p-cqg2-m33h; pins v0.9.10
+`cdd9d5f20bd0bf83683637afee61dd7e954162b2` / v1.0.0
+`0f969168b9d19d43f448d2237990ec247ba822ca`, fix
+`fa24bceb93958ad665dbc3cf6b49a1079ab12559`, parent
+`2a4c3b7af46af7e244155e305027507e9e7493bd`. From
+`lab/frontier/sailtga2shell`, run `bash harness/run-natural.sh`; for the
+wire arm compile the shipped CLI with an observational `LD_PRELOAD`
+`heap_trace.so` and generate the palette POC with
+`python3 harness/make-palette-poc.py … 68 43424100 00007f00` (bpp=8
+control). Expect **15 PASS / 0 FAIL**. The only object after the pixels is
+an 88-byte `sail_image` whose pointers are zeroed; the shipped tree has no
+bind/listen/HTTP daemon (only an outbound `requests.get` snippet), and the
+earlier synthetic pointer control used ASLR off. Author-only bounded
+negatives; W246's ESTABLISHED row and grade are unchanged, no r5. Preserve
+the advisory ASan paste labeled "Version 1.0.0" against tag bytes. Details:
+`reports/frontier-sailtga2shell.md`, `reports/sailtga2shell-status.md`.
+
+### Unarr wire-caller lane (`5e555244`)
+
+CVE-2026-111273 / GHSA-fj4h-mpx9-46qj; v1.1.0 tarball SHA-256
+`4dc03f03e6215c4fcba4927962c7551c1eea690ae6de7c6251de4006d76adfd5`, raw
+`parse-tar.c` `d07acabdfb4c8d1b1673f81daafb3fd0cc6c563a053797e6e6127ad2f797ce14`;
+v1.2.0/1.2.1/master all `bd9bf8d99e1274ba6a870c39ee694c80843dc3b7821fca7b219bef480f3a4482`.
+`bash lab/frontier/unarr2shell/rung4/wire/run-wire-probe.sh` compiles
+`wire_driver.c` with GCC ASan against the pinned vulnerable library and a
+synthetic fixed library, then sends 1536 bytes from a Python TCP client to
+127.0.0.1 ports 19441–19444. Expect **8 PASS / 0 FAIL**: ASan `WRITE of size
+101` in `tar_get_name()`, safe and synthetic-fixed clean. Grade stays rung 3
+verbatim / rung 4 PARTIAL fixed NUL; no chosen byte, pointer, command or r5,
+and the earlier #4834 verdict is untouched. Preserve the contradiction
+between the vendor changelog/advisory "patched in 1.2.0" and the full diff
+(only the PAX `max_size` line), jomics's local-only `.cbz`/`.cbr` boundary
+and the GitHub code-search 401 UNKNOWN.
+
+### RPM natural-adjacent pointer dereference (`b9d9962e`)
+
+CVE-2026-95520 / GHSA-4hhr-mf67-g46r; parent
+`c36e855034e604ef20863d541d44ef8c2dbac9e8` / fix
+`5bc8705e0f9a9ffc123fb1c693bdad13de9f7c03`; full files SHA-256
+`51d5d7c96773ca2e00c20e5cba7f049d896300d9f255d0fffadd4193fa7ccf27` /
+`eaca65fdb04b9b8fe7647f2df4aa033d7b40d850500e7c82f9a91a3d87cb376a`,
+excerpts `dd72be1bdb92c68b2d97e38f977344cc5b411c56ee16952e2d1010d8ed49e9ff`
+/ `0c00ded194575ec9649e3532ff09713faa5e96b36acb10524fb5adc776b92721`.
+`bash lab/frontier/rpm2shell/real/run-natural-deref.sh` with
+`gdb inspect-adjacent.gdb` / `layout-continue.gdb` / `rwatch-after.gdb` gives
+`NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0`,
+`NATURAL_POINTER_ADJACENCY=4/20`, `READ_WATCHPOINT=20/20`,
+`INSPECT_POINTER=0/12`. All 20 continuations exit 1 at
+`rpmfi.cc:2242/2245/2253` (`RPMERR_READ_FAILED`), reads occur at `free(buf)`
+and not value-dependently, and GCC -O1 ASan is a preserved negative. Natural
+pointer hijack is UNKNOWN; the lab-groomed WRITE-64 rung-4 row is unchanged,
+no command or r5. Detail: `reports/frontier-rpm2shell.md`.
+
+### nfdump packet-chosen bytes in a live record (`ca2bb2b0`)
+
+GHSA-gpgq-hv9x-7mqj only (advisory and API returned HTTP 404 on 2026-11-25,
+so no CVE/CVSS is claimed); fix
+`32b9cbe7f17e099d59fc5eac71c84c6c6f051fa5`, parent
+`8a00543aa5c7b25b7d3f7642fdf306fd9979f237`; `nfd_raw.c` SHA-256
+`f946944aa4c65085af96dc56fb622e40fd4eb8c3662e8ba7f2336a9377f92869` /
+`b6fbdd91fbac138ec1eac2c2becabcf82a59b9f46249979027cf086ceaa650ea`.
+`bash lab/frontier/nfdump2shell/run-alias.sh`, then
+`python3 harness/alias_readback.py` and `wire_send.py` to a full 127.0.0.1
+`nfcapd` read back with `nfdump`; expect **11 PASS / 0 FAIL**. Wire bytes
+`34 12` read back as `12 34` at record 2 payload offset 2 and the timestamp
+shifts from 1970-02-19 17:02:51.956 to 1970-03-01 19:42:42.176. Rung 3
+verbatim / rung 4 PARTIAL chosen-byte write in a processed live record;
+W235's ESTABLISHED row is unchanged and this lane is unwitnessed. The value
+is generally collector-derived (ICMP-swap alias is the exception), there is
+no ASan in the 64 KiB live buffer, no pointer and no command.
+
+### NeuVector W278 optimized real-object frame (`d2f1f317`)
+
+CVE-2026-127182 / GHSA-3x2m-c67v-vw77; fix
+`0a1dc965317581d2959ecc3d3d1f9cf87e6e1066`, parent
+`48ae8b5cac5ec3a7e332e5272e9b3050f44396cb`, cherry-pick
+`229a57a06e8c8bab9a019c5790c402837794e4b3`, 5.6 branch
+`c39c38c2812ce6c8cdb4597a6346905b777fdcc2`; full files SHA-256
+`1fbf0ba4aa731f8a92801002d2fe39141c2a88ea9a96d18507af47ae3303072b` /
+`cc9d9c48ea07b015c7254946ab1c630f3aea2ce3a80d0042880b5cedaa284b08`,
+excerpts `a3f74b69151d28acd5cb80eeb1a79949016598f61e0213272648888bbdcea10f`
+/ `b08af876c7ac71f2f3416b6dc9ee9f0c27816742fc6aea71a4e68bad1431de59`.
+`bash lab/frontier/neuvector2shell/wirepath/run.sh` now emits `wire-B.json`
+and gives **20 PASS / 0 FAIL**; the new
+`bash lab/frontier/neuvector2shell/wirepath/frame.sh` gives **17 PASS / 0
+FAIL** rc 0 using gcc `-O2 -g -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+-fno-stack-protector -fno-omit-frame-pointer`, real libjansson and gdb.
+Chosen bytes land at `BUF+2048..2055` against an `-O0` BUF→RBP delta of 2080
+and overwrite the saved RBP/return slot; optimized vulnerable safe and fixed
+attack messages both exit 0, and default `_FORTIFY_SOURCE` aborts in
+`__sprintf_chk` (preserved negative). No full enforcer, live REST/CRD target,
+chosen address, command or r5 — bytes in a return slot are not called pointer
+control. Grade stays rung 4 PARTIAL at the earlier ESTABLISHED scope; W278
+awaits witness replay. Detail: `reports/frontier-neuvector2shell.md`.
+
+Every count in this section is an author or clean-archive replay, not an
+independent verdict; no grade cell or independent-established count moved.

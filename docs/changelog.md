@@ -2,6 +2,96 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 16:1x–16:4xZ — tinyusb admitted, W276 staging, target-local lanes
+
+This fold covers `dd2720d7..d2f1f317`. Reproduce every claim in
+`docs/reproducibility.md` § 16:1x–16:4xZ; the dated passages below stay
+verbatim, and § 16:0xZ now records tinyusb's admission. No raw evidence is
+committed here, and no grade cell, witness verdict or R5 cell moved.
+
+- `856cd422` (operator, standing #6) **admitted tinyusb2shell as the 178th
+  declared target mind** at 16:2xZ, window 188 (%380/%381); generated counts
+  177/174/174/119 → 178/175/175/119 with the row still `established:false`.
+  The operator's 16:19Z isolated-copy replay matched all six cases of
+  `sh run-all.sh && sh verify.sh` (`RESULT PASS=6 FAIL=0`), including the
+  pinned 4/5-byte ASan reads/writes and both fixed stops. AV:P physical
+  vector, the unreviewed NVD-imported GHSA and the "0.20.1" vs "0.21.0"
+  discrepancy are preserved; witness replay, a simulated USB-device consumer
+  and plain-build grooming are still owed.
+- `5e6fe760` (frontier W276) **staged libmikmod2shell** for CVE-2026-105837 /
+  GHSA-rr6f-2vgw-5v76 (`AV:L`), pins `08d7d210…` / `a125eabb…`, tarballs
+  `dbe73e92…` / `a9d7cba3…`. GCC ASan through `Player_Load()` gives
+  `RESULT PASS=12 FAIL=0`: `WRITE of size 8` at `load_dsm.c:339`, 0 bytes past
+  a 16/128-byte `AllocTracks` region; fixed `errno=9`, safe clean. Rung 3,
+  rung 4 NOT CLAIMED, STAGED not admitted, witness owed; no public PoC and
+  the ~300 KB / 4097-PATT estimate is unverified.
+- `697f980d` + `ee63e73c` + `62d6fd30` (gimpjif2shell W244) measured the
+  pinned caller path and the ~4 GiB `dest`: the realglib caller/callerpub run
+  now gives **30 PASS / 0 FAIL** with `DEST_ALLOC=OK`, `LIVE_CHANGED_BYTES=48`
+  and `delta=32` (published dims `delta=272`). `ee63e73c` removed the
+  ASLR-dependent byte assertion after a first clean replay gave 29/1; five
+  in-tree and three clean runs then gave 30/0. No real GIMP/GEGL plugin, PDB
+  call, dereference or r5. This supersedes the older 21/0 and "~4 GiB dest
+  UNMEASURED" wording in the dated W243 passage.
+- `401276e7` + `d490421a` (leptonica2shell) bounded the fault and replayed
+  from a clean archive: the real-object neighbor run now gives **5 PASS / 0
+  FAIL** (was 3/0), with the fault 129504 bytes past `ba->data` at the end of
+  a 135168-byte mapping and the ~1 GB source buffer in a separate mapping
+  17.7 TB away. Clean `git archive` gave 7/0 (`provision.sh`) and 5/0
+  (`run-neighbor.sh`) at 16:12Z; absolute addresses move under ASLR. No
+  contiguous writable ~1 GB, wire, pointer or command; author replay only.
+- `dc2f8ce7` + `3f79fa43` (ruby2shell) closed the WEBrick successor-shaping
+  and same-worker keep-alive leads. The N=572 filler sweep left L=48/768
+  after the consumer step; three requests on one HTTP/1.1 socket at L=48
+  aborted in request 1 (`malloc(): invalid next size (unsorted)`, rc 134),
+  safe and fixed 3.4.13 served 404/404/404, and an L=8..192 screen aborted
+  at 8/16/24/32/56 while 40/64/80/96/128/192 stayed clean. The first
+  post-overflow read is the same request's second `rb_str_casemap`
+  allocation under a layout-perturbing gdb watch. No overlap, chosen byte,
+  command or persistence; full stock/oracle-free/persistent r5 stays NOT
+  ACHIEVED. The author's own 16:1x/16:2x entries appear directly below.
+- `2f6cdea5` (sailtga2shell) closed natural-victim and shipped-CLI wire lanes
+  with an observational shipped-CLI heap trace: **15 PASS / 0 FAIL**. Only
+  an 88-byte `sail_image` follows the pixels and its pointers are zeroed;
+  the shipped tree has no listener; the earlier synthetic pointer control
+  used ASLR off. Author-only bounded negatives; the W246 ESTABLISHED row and
+  grade are unchanged. Preserve the advisory ASan paste labeled "Version
+  1.0.0" against the pinned tag bytes.
+- `5e555244` (unarr2shell) bounded a wire-caller lane: **8 PASS / 0 FAIL**,
+  1536 bytes over loopback ports 19441–19444, ASan `WRITE of size 101` in
+  `tar_get_name()`, safe and synthetic-fixed clean. Grade stays rung 3
+  verbatim / rung 4 PARTIAL fixed NUL, and the earlier #4834 verdict is
+  untouched. The vendor changelog/advisory "patched in 1.2.0" contradicts
+  the full diff (only the PAX `max_size` line); jomics is local-only and a
+  GitHub code search returned 401 UNKNOWN.
+- `b9d9962e` (rpm2shell) bounded natural-adjacent pointer dereference:
+  `NATURAL_DEREF_PASS=52 NATURAL_DEREF_FAIL=0`, adjacency 4/20, read
+  watchpoint 20/20, inspected pointer 0/12. All 20 continuations exit 1 at
+  `rpmfi.cc:2242/2245/2253` (`RPMERR_READ_FAILED`) and the reads occur at
+  `free(buf)` rather than value-dependently; GCC -O1 ASan is a preserved
+  negative. Natural pointer hijack stays UNKNOWN; the lab-groomed
+  WRITE-64 rung-4 row is unchanged.
+- `ca2bb2b0` (nfdump2shell) drove packet-chosen bytes into a processed live
+  record: **11 PASS / 0 FAIL** into a 127.0.0.1 `nfcapd`, wire `34 12` read
+  back as `12 34` at record 2 payload offset 2 and the timestamp shifting
+  from 1970-02-19 17:02:51.956 to 1970-03-01 19:42:42.176. Rung 4 PARTIAL at
+  the live-record scope, unwitnessed; W235's ESTABLISHED row is unchanged,
+  there is no ASan in the 64 KiB live buffer, no pointer and no command.
+- `d2f1f317` (neuvector2shell W278) overwrote a saved RBP and return slot in
+  an optimized real-object lab frame: `wirepath/run.sh` now emits
+  `wire-B.json` and gives **20 PASS / 0 FAIL** (supersedes the dated 19/0
+  wording), and `wirepath/frame.sh` gives **17 PASS / 0 FAIL** with gcc -O2,
+  real libjansson and gdb. Chosen bytes land at `BUF+2048..2055` against an
+  -O0 BUF→RBP delta of 2080; optimized vulnerable-safe and fixed-attack
+  messages exit 0 and default `_FORTIFY_SOURCE` aborts in `__sprintf_chk`
+  (preserved negative). No full enforcer, live REST/CRD target, chosen
+  address, command or r5; these are bytes in a return slot, not called
+  pointer control. Grade stays rung 4 PARTIAL at the earlier ESTABLISHED
+  scope and W278 awaits witness replay.
+
+Every count in this section is an author or clean-archive replay, not a
+witness verdict; no registered grade cell moved.
+
 ## 2026-11-26 16:2xZ — Ruby2Shell same-worker keep-alive reuse
 
 Three requests on one WEBrick keep-alive socket changed the N=572 geometry:
