@@ -1,0 +1,2 @@
+value_length=4 word_size=2 offset=0 range=1
+value[0..19] (no_sanitize readback): 42 41 43 44 44 43 00 00 00 00 00 00 00 00 00 00 00 00 00 00 

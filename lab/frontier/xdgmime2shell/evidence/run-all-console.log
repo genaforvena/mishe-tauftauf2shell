@@ -1,0 +1,46 @@
+PASS pin tar-vuln-0305e05c
+PASS pin tar-fixed-1debecbf
+PASS pin fix-commit-patch
+PASS pin public-api-driver
+PASS pin state-probe-driver
+PASS pin vulnerable-parser
+PASS pin fixed-parser
+PASS source marker lines vuln=486 fixed=486
+PASS fix patch hunks
+PASS pin magic-attack2
+PASS pin magic-attack4
+PASS pin magic-mask
+PASS pin magic-safe1
+PASS gcc builds (vuln+fixed, asan+plain)
+./run-all.sh: line 63: 3857571 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-attack2.bin > "$L/vuln-asan-attack2.log" 2>&1
+PASS gcc vuln asan attack2 WRITE-2 at pinned line after 4-byte region
+./run-all.sh: line 63: 3857606 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-attack4.bin > "$L/vuln-asan-attack4.log" 2>&1
+PASS gcc vuln asan attack4 WRITE-4 8 bytes after 8-byte region
+./run-all.sh: line 63: 3857659 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-mask.bin > "$L/vuln-asan-mask.log" 2>&1
+PASS gcc vuln asan mask report first OOB write
+PASS gcc vuln probe attack2 chosen 43 44 written as 44 43 at offsets 4/5
+PASS gcc vuln probe attack4 OOB word at offsets 16/17
+PASS gcc vuln probe mask chosen 47 48 written as 48 47 at offsets 4/5
+PASS gcc vuln probe mask two OOB writes (value and mask)
+PASS gcc fixed asan attack2 clean and matchlet parsed
+PASS gcc fixed probe attack2 swapped in-bounds, no OOB bytes
+PASS gcc vuln asan safe word_size=1 clean
+PASS gcc vuln plain build shows OOB bytes
+PASS gcc fixed plain build no OOB bytes
+PASS clang builds (vuln+fixed, asan+plain)
+./run-all.sh: line 63: 3857898 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-attack2.bin > "$L/vuln-asan-attack2.log" 2>&1
+PASS clang vuln asan attack2 WRITE-2 at pinned line after 4-byte region
+./run-all.sh: line 63: 3857933 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-attack4.bin > "$L/vuln-asan-attack4.log" 2>&1
+PASS clang vuln asan attack4 WRITE-4 8 bytes after 8-byte region
+./run-all.sh: line 63: 3857980 Aborted                 (core dumped) ASAN_OPTIONS=abort_on_error=1:halt_on_error=1 "$VAS" evidence/magic-mask.bin > "$L/vuln-asan-mask.log" 2>&1
+PASS clang vuln asan mask report first OOB write
+PASS clang vuln probe attack2 chosen 43 44 written as 44 43 at offsets 4/5
+PASS clang vuln probe attack4 OOB word at offsets 16/17
+PASS clang vuln probe mask chosen 47 48 written as 48 47 at offsets 4/5
+PASS clang vuln probe mask two OOB writes (value and mask)
+PASS clang fixed asan attack2 clean and matchlet parsed
+PASS clang fixed probe attack2 swapped in-bounds, no OOB bytes
+PASS clang vuln asan safe word_size=1 clean
+PASS clang vuln plain build shows OOB bytes
+PASS clang fixed plain build no OOB bytes
+RESULT PASS=39 FAIL=0

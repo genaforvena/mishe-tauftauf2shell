@@ -1,0 +1,111 @@
+=================================================================
+==3858071==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000034 at pc 0x61ffa93fbe32 bp 0x7ffee4f2c6f0 sp 0x7ffee4f2c6e8
+WRITE of size 2 at 0x502000000034 thread T0
+    #0 0x61ffa93fbe31 in _xdg_mime_magic_parse_magic_line /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:486:43
+    #1 0x61ffa93f909c in _xdg_mime_magic_read_magic_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:773:12
+    #2 0x61ffa93f8f7d in _xdg_test_magic_read_from_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:815:9
+    #3 0x61ffa93f929c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/probe.c:25:3
+    #4 0x760e6422a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x760e6422a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x61ffa931f434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0x2e434) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+
+0x502000000034 is located 0 bytes after 4-byte region [0x502000000030,0x502000000034)
+allocated by thread T0 here:
+    #0 0x61ffa93ba283 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0xc9283) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+    #1 0x61ffa93fb0e6 in _xdg_mime_magic_parse_magic_line /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:392:21
+    #2 0x61ffa93f909c in _xdg_mime_magic_read_magic_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:773:12
+    #3 0x61ffa93f8f7d in _xdg_test_magic_read_from_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:815:9
+    #4 0x61ffa93f929c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/probe.c:25:3
+    #5 0x760e6422a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x760e6422a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x61ffa931f434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0x2e434) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:486:43 in _xdg_mime_magic_parse_magic_line
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa 00 00 fa fa[04]fa fa fa 04 fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3858071==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x502000000054 at pc 0x61ffa93fc491 bp 0x7ffee4f2c6f0 sp 0x7ffee4f2c6e8
+WRITE of size 2 at 0x502000000054 thread T0
+    #0 0x61ffa93fc490 in _xdg_mime_magic_parse_magic_line /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:492:46
+    #1 0x61ffa93f909c in _xdg_mime_magic_read_magic_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:773:12
+    #2 0x61ffa93f8f7d in _xdg_test_magic_read_from_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:815:9
+    #3 0x61ffa93f929c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/probe.c:25:3
+    #4 0x760e6422a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x760e6422a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x61ffa931f434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0x2e434) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+
+0x502000000054 is located 0 bytes after 4-byte region [0x502000000050,0x502000000054)
+allocated by thread T0 here:
+    #0 0x61ffa93ba283 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0xc9283) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+    #1 0x61ffa93fb3ad in _xdg_mime_magic_parse_magic_line /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:413:24
+    #2 0x61ffa93f909c in _xdg_mime_magic_read_magic_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:773:12
+    #3 0x61ffa93f8f7d in _xdg_test_magic_read_from_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:815:9
+    #4 0x61ffa93f929c in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/probe.c:25:3
+    #5 0x760e6422a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x760e6422a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x61ffa931f434 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/vuln_asan/probe-clang+0x2e434) (BuildId: c048ff6d20b7739b77f33d424ab95280c7a0b758)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/xdgmime2shell/src/vuln/src/xdgmimemagic.c:492:46 in _xdg_mime_magic_parse_magic_line
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa 00 00 fa fa 04 fa fa fa[04]fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+value_length=4 word_size=2 offset=0 range=1
+value[0..19] (no_sanitize readback): 42 41 43 44 44 43 00 00 00 00 00 00 00 00 00 00 02 11 00 00 
+mask[0..19] (no_sanitize readback): 46 45 47 48 48 47 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
