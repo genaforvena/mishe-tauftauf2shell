@@ -1,0 +1,61 @@
+=================================================================
+==4098110==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50c000000180 at pc 0x5e9ec55a232a bp 0x7fffee5256a0 sp 0x7fffee525690
+WRITE of size 8 at 0x50c000000180 thread T0
+    #0 0x5e9ec55a2329 in DSM_Load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/loaders/load_dsm.c:339
+    #1 0x5e9ec5583360 in Player_LoadGeneric_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:570
+    #2 0x5e9ec5583360 in Player_LoadGeneric /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:647
+    #3 0x5e9ec5583a0b in Player_LoadFP /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:675
+    #4 0x5e9ec5583a5c in Player_Load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:689
+    #5 0x5e9ec557e9ac in main harness/driver.c:27
+    #6 0x7e65ca02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #7 0x7e65ca02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #8 0x5e9ec557e7e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/build/vuln/driver+0x117e4) (BuildId: 9c27f7158db159d20784f7048937ce4db93df2ee)
+
+0x50c000000180 is located 0 bytes after 128-byte region [0x50c000000100,0x50c000000180)
+allocated by thread T0 here:
+    #0 0x7e65ca4fd340 in calloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:77
+    #1 0x5e9ec557ed9b in MikMod_calloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/mmio/mmalloc.c:118
+    #2 0x5e9ec55827b0 in AllocTracks /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:219
+    #3 0x5e9ec55a1343 in DSM_Load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/loaders/load_dsm.c:302
+    #4 0x5e9ec5583360 in Player_LoadGeneric_internal /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:570
+    #5 0x5e9ec5583360 in Player_LoadGeneric /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:647
+    #6 0x5e9ec5583a0b in Player_LoadFP /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:675
+    #7 0x5e9ec5583a5c in Player_Load /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/playercode/mloader.c:689
+    #8 0x5e9ec557e9ac in main harness/driver.c:27
+    #9 0x7e65ca02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #10 0x7e65ca02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #11 0x5e9ec557e7e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/build/vuln/driver+0x117e4) (BuildId: 9c27f7158db159d20784f7048937ce4db93df2ee)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmikmod2shell/src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/loaders/load_dsm.c:339 in DSM_Load
+Shadow bytes around the buggy address:
+  0x50bfffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50bfffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x50c000000000: fa fa fa fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x50c000000080: 00 00 00 00 00 00 00 00 fa fa fa fa fa fa fa fa
+  0x50c000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x50c000000180:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50c000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4098110==ABORTING

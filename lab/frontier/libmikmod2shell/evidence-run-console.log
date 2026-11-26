@@ -1,0 +1,44 @@
+== tarballs ==
+dbe73e92401f7e12d2153169b15da2f9981bc8323395d5dc2e35e08946f56f42  src/vuln.tar.gz
+a9d7cba3e1867fefbf385cb16da859d23e042fbe54a8ee370ced963d5e537f44  src/fixed.tar.gz
+== vuln pinned load_dsm.c ==
+42fa90bb7dd4fbbf8f00c3dcc39743f8848786014aead7c51d7e1ae5d8e147d5  src/mikmod-08d7d2106ce3d1d6ef1dddb060e04a10b7dc8ae2/libmikmod/loaders/load_dsm.c
+== fixed pinned load_dsm.c ==
+553c70854ee37041b9ff1d9d2c2bcdd17451956e6368a896f498e7a66c5836fe  src/mikmod-a125eabbd086f311496ae46d08aaebcad0a1c426/libmikmod/loaders/load_dsm.c
+== generated inputs ==
+inputs/attack.dsm: 432 bytes numchn=2 numpat=32769 product=65538 truncated=2 patt=2
+inputs/attack16.dsm: 432 bytes numchn=16 numpat=4097 product=65552 truncated=16 patt=2
+inputs/safe.dsm: 432 bytes numchn=2 numpat=2 product=4 truncated=4 patt=2
+469d0d844fef2539db7ca2113b22d4da3f669aedbf1e675fecb5b3e17f438f53  inputs/attack.dsm
+f99bb5698fdcb6a9bb6a11dc901b91bb7b662030b34117924c155cb1884ba6a9  inputs/attack16.dsm
+0fc2ffcce73c0ce92d7e657040b3c54e16bddf80340e863be992c43f721bd475  inputs/safe.dsm
+vuln attack rc=1
+vuln attack16 rc=1
+vuln safe rc=0
+fixed attack rc=1
+fixed attack16 rc=1
+fixed safe rc=0
+== evidence hashes ==
+ec7ff748f1cd7b6f3c632101c088e63a1c18a29d0b0c41e560e10b18f6e375b6  evidence/fixed-asan-attack.out
+ec7ff748f1cd7b6f3c632101c088e63a1c18a29d0b0c41e560e10b18f6e375b6  evidence/fixed-asan-attack16.out
+b45085baa52065be465023d3103f6ce3dca52797bb46b0e94871765c456b43a2  evidence/fixed-asan-safe.out
+40a77dbc7ab53330043a0a19836ef8496ff9e5d44328bcc96bc22b3d951b2288  evidence/vuln-asan-attack.out
+0345168146bf532b8df19f23dc672de0d5a19cc4a2f172df5cf91c4c2196e48a  evidence/vuln-asan-attack16.out
+b45085baa52065be465023d3103f6ce3dca52797bb46b0e94871765c456b43a2  evidence/vuln-asan-safe.out
+fd12e2f32dc80f7b5af37690ecee34c97b44b2f0b1d5f1b929f3ccb1a43429e3  harness/driver.c
+ce529c15020f1771da6358d6382cef4eddeacf7f11705cc50c2ac5c4de9ab4cd  harness/make_dsm.py
+332485d16ab6d811f00e582b8b789ab21047dcc5ddfdc926e4f0c5e43a30077c  run-all.sh
+40e841d7e4a9e76f7f0a383a84338bfe707bdd4a9aa68a7cb1bf535fcfcd1929  verify.sh
+PASS vuln attack ASan heap WRITE
+PASS vuln attack report points at verbatim load_dsm.c:339
+PASS vuln attack 16-byte allocation exactly overrun
+PASS vuln attack16 128-byte allocation exactly overrun
+PASS vuln attack16 ASan heap WRITE
+PASS vuln safe clean
+PASS fixed attack rejected at header, no ASan
+PASS fixed attack16 rejected at header, no ASan
+PASS fixed safe clean
+PASS vuln source has unguarded UWORD truncation
+PASS fixed source has product bound
+PASS fixed source has DSM_MAXCHAN bound
+RESULT PASS=12 FAIL=0
