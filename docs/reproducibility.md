@@ -12387,7 +12387,7 @@ artifact. None of these limbs moves a grade or a rung cell.
   PARTIAL (16-bit index, not chosen bytes or a pointer), no wire path,
   command or r5. At staging it had no evidence-register row or mind-count
   claim; `fc907f63` later admitted it as the 165th declared mind, with the
-  admission receipt below. Witness replay was still owed at that commit.
+  admission receipt below. Witness replay was then owed; W254 below closed it.
 - **Aspell2Shell 75820 consecutive-offset sweep — witness W253 replay,
   ESTABLISHED AS LABELED at that scope only.** The unmodified wrapper
   SHA-256 `8319cf0ddd8b569b6a7725da5ff7cf972284d84b860ed3b3623e4a9a2287597d`
@@ -12453,9 +12453,14 @@ from the committed receipts and the W17 report.
   the wrapper. The operator replayed the unmodified wrapper from
   `git archive 8b4caaf9` into `.mishe-tauftauf/replays/libde265shell-w249`
   with 12 PASS / 0 FAIL rc 0 and digest `acf09b51…d62d19d1b`; that is an author
-  receipt, not an independent verdict, which was still owed at admission.
-  Generated counts moved to 165 declared / 162 active / 162 rows / 108
-  independently established, with rung cells ✓/✓/✓/◐/— (rung 3 verbatim, rung 4
+  receipt. Witness W254 independently replayed the same wrapper from the same
+  clean archive, re-fetching all three pinned inputs, in 187.45 s rc 0: 12 PASS
+  / 0 FAIL, both ASan traces matching, fixed/benign controls clean and two extra
+  benign inputs clean. Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung
+  4 PARTIAL, no contradiction, no grade change, NO r5; detail:
+  `.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`. Generated
+  counts moved to 165 declared / 162 active / 162 rows / 109 independently
+  established, with rung cells ✓/✓/✓/◐/— (rung 3 verbatim, rung 4
   PARTIAL), no chosen bytes, pointer control, wire path, command or r5.
 - **Ruby2Shell W17 — below-unsorted fake chunks and GET reflection (bounded
   NEGATIVEs, both lanes CLOSED).** Use the provisioned plain Ruby 3.4.12 and

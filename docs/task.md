@@ -12487,8 +12487,8 @@ rerun here.
   `RESULT PASS=12 FAIL=0`; the author's clean-archive replay from
   `git archive 8b4caaf9` matched. Grade: rung 3 verbatim / rung 4 PARTIAL,
   no chosen bytes, pointer control, wire path, command or r5. `fc907f63`
-  admitted it as the 165th declared mind; witness replay was still owed at
-  that commit. `docs/reproducibility.md` has the pins, commands and bytes.
+  admitted it as the 165th declared mind; W254 later closed the owed replay.
+  `docs/reproducibility.md` has the pins, commands and bytes.
 - `df5d82ba`: Ruby2Shell W35 closes the fake-chunk `prev_size` coherence
   lead. A 24-run sweep at chunked N=588 selects which glibc diagnostic fires
   (`mismatching next->prev_size`, `invalid next size (unsorted)`,
@@ -12520,8 +12520,8 @@ rerun here.
 
 ## 2026-11-26 07:5xZ — libde265shell admitted, Ruby W17 closure, presentation gate
 
-Three commits folded from live HEAD `1ebd6601`. No replay was rerun here and no
-rung cell, grade, route, witness verdict or R5 cell moved by this fold.
+Four commits folded from live HEAD `944b3d10`. No replay was rerun here; docs
+moved no rung cell, grade, route or R5 cell.
 
 - `fc907f63` admitted **libde265shell** as the 165th declared target mind under
   standing #6 (CVE-2026-33165 / GHSA-653q-9f73-8hvg, libde265 `<= 1.0.16`,
@@ -12531,8 +12531,8 @@ rung cell, grade, route, witness verdict or R5 cell moved by this fold.
   moved 164/161/161/108 → 165/162/162/108 with all 162 rows and rung cells
   unchanged (rung 3 verbatim, rung 4 PARTIAL, no r5). The operator's
   clean-archive replay from `git archive 8b4caaf9` printed 12 PASS / 0 FAIL
-  with digest `acf09b51…d62d19d1b`; witness replay was still owed at that
-  commit. This supersedes the "STAGED, not admitted" statement above.
+  with digest `acf09b51…d62d19d1b`; W254 later returned ESTABLISHED AS LABELED
+  at that scope. This supersedes the "STAGED, not admitted" statement above.
 - `f209d6fa` (Ruby W17) closed the two W35 follow-ups. Below-unsorted fake
   chunks (`FILL_SIZE ∈ {0x21,0x41,0x53}`, `FILL_PREV=0x53`, N=588, 3 runs each)
   gave 2/9 survivors and 7 known glibc aborts; both survivors served 404 and
@@ -12549,3 +12549,13 @@ rung cell, grade, route, witness verdict or R5 cell moved by this fold.
   made `tools/check-readme.py .` RED on stale generated files. It replaces no
   pre-commit hook it did not install; `docs/operations.md` carries the
   installer and check commands. Do not hand-edit the generated files.
+
+- `944b3d10`: witness W254 independently replayed the unmodified `run-all.sh`
+  from a clean `git archive 8b4caaf9`, re-fetching all three pinned inputs
+  (187.45 s, rc 0, 12 PASS / 0 FAIL). Both vulnerable ASan traces matched the
+  quoted `WRITE of size 2` frames at verbatim `image.h:741`/`slice.cc:2866`;
+  fixed/benign controls and two extra benign inputs were clean. Verdict
+  ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no contradiction,
+  no grade change, NO r5. The independently established count moved 108→109 in
+  the generated README, results page and SVG; all 162 rows and rung cells held.
+  Detail: `.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`.

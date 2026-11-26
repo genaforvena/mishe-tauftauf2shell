@@ -3695,7 +3695,7 @@ clean-archive replay of the unmodified `run-all.sh` (SHA-256
 same frames. That is an author receipt, not an independent verdict. Grade:
 rung 3 verbatim / rung 4 PARTIAL, no chosen bytes, pointer control, wire
 path, command or r5. `fc907f63` later admitted the lane as the 165th declared
-target mind; an independent witness replay was still owed. Both build
+target mind; witness replay was then owed (closed by W254 below). Both build
 path negatives (autotools absent on the CMake-only fixed tag; a C++ driver
 rejects the advisory's C source) are preserved in `PROVENANCE.md`.
 
@@ -3724,7 +3724,16 @@ ladder SVG; all 162 register rows and every rung cell held (rung 3 verbatim,
 rung 4 PARTIAL, no r5). The operator's clean-archive replay of the unmodified
 wrapper from `git archive 8b4caaf9` printed 12 PASS / 0 FAIL with digest
 `acf09b51…d62d19d1b`; that is an author-side receipt, not an independent
-witness verdict, which was still owed at that commit.
+witness verdict; W254 below later established the row at its labeled scope.
+
+`944b3d10` (witness W254) independently replayed the unmodified `run-all.sh`
+from a clean `git archive 8b4caaf9`, re-fetching all three pinned inputs, in
+187.45 s rc 0: 12 PASS / 0 FAIL, both vulnerable ASan traces matching the
+quoted frames, fixed/benign controls clean and two extra benign inputs clean.
+Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no
+contradiction, no grade change and NO r5. The independently established count
+moved 108→109; 165 declared / 162 active / 162 rows and all rung cells held.
+Detail: `.mishe-tauftauf/artifacts/witness-w254-libde265shell/detail.md`.
 
 `f209d6fa` (Ruby W17) closed both leads left open by W35. Forged tcache-sized
 chunks below the unsorted band (`FILL_SIZE ∈ {0x21,0x41,0x53}`,
