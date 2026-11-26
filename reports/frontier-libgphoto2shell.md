@@ -709,3 +709,25 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   sha256 `55becbce689e3ed556b55a2fd6cd04a2ae461a02016b26f5a6fd51a6d34eb66e`,
   `RESULT: 12 PASS / 0 FAIL`, rc=0, ~57 s. No author `/tmp` build was
   consumed. Scope and grade unchanged.
+
+- Page-alignment family refines the W197 repair (W200, 2026-11-26, lab-only):
+  glibc's `sysmalloc` assertion at `malloc.c:2599` requires
+  `old_end = old_top + (size & ~7)` to be page-aligned; it does not compare
+  the overflowed top-size word with the real top size. On the W197 GCC -O2
+  build gdb maps `top=0x...7430` and measured word `0x12bd1`, so every word
+  with low 12 bits `0xbd1` satisfies the assertion. A sweep of 20 magnitudes
+  found 18 (`0xbd1` through `0x11bd1`) reaching `AFTER_INIT rc=0` and a real
+  `gp_camera_folder_list_files rc=0 count=1022`; `0x13bd1` and `0x20bd1`
+  fault at SIGSEGV, and wrong low bits (`0xad1`) give the sysmalloc assertion
+  (rc 134). The committed replay
+  `lab/frontier/libgphoto2shell/live/replay-w200-page-family.sh` checks three
+  magnitudes (`0xbd1`, `0x2bd1`, `0x4bd1`), one with ASLR on, plus the
+  wrong-low-bit and over-large controls: 11 PASS / 0 FAIL on the author build
+  (`evidence/w200-page-family.out`) and, against the independent W199 clean
+  build whose low bits are `0xb71` (`0xb71`/`0x2b71`/`0x4b71`), 11 PASS / 0
+  FAIL (`evidence/w200-page-family-clean.out`). The reply word's magnitude is
+  therefore not a host-derived secret; only a 12-bit page congruence is
+  build-specific, so a malicious device would have to cycle candidates — an
+  inference, since no wire path was tested here. The congruence is still NOT
+  device-observable, and no canary, saved RIP, command or witness replay is
+  involved. Grade unchanged: author-side lab rung 4, rung 5 UNKNOWN.

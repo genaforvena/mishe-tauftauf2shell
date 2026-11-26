@@ -1,0 +1,66 @@
+== W200: sysmalloc page congruence, not the measured top size ==
+source=/tmp/w193-lgp-base/src/libgphoto2-2.5.34 sha=0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185 build=/tmp/w197-o2
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 1 (jl2005c.c:155) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+process 2932541 is executing new program: /tmp/w197-o2/consumer-probe
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w197-o2/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=camera@entry=0x5555555592a0, port=0x55555555a690, priv=0x5555555633f0) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:155
+155		priv->model = info[6];
+$1 = 0x5555555633f0
+0x555555567430:	0x0000000000000000	0x0000000000012bd1
+Pattern not found.
+[Inferior 1 (process 2932541) killed]
+measured top word 0x0000000000012bd1; low 12 bits 0xbd1
+== small constant, ASLR off ==
+=== SMALL top=0xbd1 aslr=off rc=124 ===
+W195_NATURAL priv=0 top=bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+== different magnitudes, same congruence, ASLR off ==
+=== MID top=0x2bd1 aslr=off rc=124 ===
+W195_NATURAL priv=0 top=2bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+=== LARGE top=0x4bd1 aslr=off rc=124 ===
+W195_NATURAL priv=0 top=4bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+== same congruence, ASLR on ==
+=== MID_ASLR top=0x2bd1 aslr=on rc=124 ===
+W195_NATURAL priv=0 top=2bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+== wrong low bits (xor 0x100) ==
+=== BAD top=0xad1 aslr=off rc=134 ===
+W195_NATURAL priv=0 top=ad1 n=15936
+AFTER_INIT rc=0
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+timeout: the monitored command dumped core
+Aborted
+== same congruence but too large (measured + 0x1000) ==
+=== OVER top=0x13bd1 aslr=off rc=139 ===
+W195_NATURAL priv=0 top=13bd1 n=15936
+AFTER_INIT rc=0
+timeout: the monitored command dumped core
+Segmentation fault
+PASS three distinct magnitudes
+PASS family shares low 12 bits
+PASS bad word has different low bits
+PASS small fixed word lists 1022
+PASS mid fixed word lists 1022
+PASS large fixed word lists 1022
+PASS mid fixed word lists 1022 with ASLR on
+PASS wrong low bits fail sysmalloc assertion
+PASS wrong low bits no listing
+PASS over-large word faults
+PASS over-large word no listing
+RESULT: 11 PASS / 0 FAIL
