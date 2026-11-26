@@ -299,6 +299,24 @@ remotely closed channel in its data callback and reclaims the freed objects,
 and the peer is authenticated (PR:L). No persistent shell or remote command
 service. NOT ESTABLISHED rung 5; additive and unwitnessed.
 
+Clean-archive receipt (commit `d2c2432e`, 2026-11-26 02:36Z): committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive HEAD`
+into `/tmp/w25-arch`, with symlinks to this lab's two pinned mirror trees,
+their ASan build directories and hostkey (the archive carries no build
+artifacts or private key). `sh real/run-syswire.sh` there rebuilt both ASan
+libraries from the pinned trees and reported **6 PASS / 0 FAIL**, rc 0. Its
+probe found a different slot, `0x50c00001c3c0`, and the replay printed
+`CLIENT syswire fn=0x7db681858750 sess=0x50c00001c3c8 cmd=touch evidence-wire-syswire.marker bad=0`,
+`SERVER wirelist it=0x502000006f70 next=0x50c00001c420 data=0x50c00001c408`,
+`SERVER SYSWIRE armed fn=0x7db681858750 cmd=0x50c00001c3c8`,
+`SERVER target_after=0x41414141414141c1 groom_ptr=0x50c00001c3c0`,
+`CLIENT rc=0 SERVER status=0x0`, marker created; the bad-callee lane again
+faulted at `channels.c:697`. The different slot and code address from the
+in-tree run confirm probe-supplied addresses, not copied logs. This checks
+committed harness and driver text; W25 remains additive and unwitnessed.
+The archive wrote only under `/tmp/w25-arch`; the pinned in-tree evidence is
+unchanged.
+
 
 ## Verified ground truth
 Claim source: CVE-2026-59850 advisory https://www.libssh.org/security/advisories/CVE-2026-59850.txt (USN-9187-1, 2026-11-23, scout-supplied). Affects libssh <0.12.1/<0.11.5; fixed 0.12.1/0.11.5. Primitive: use-after-free read via channel data callbacks on remotely closed channels; CVSS PR:L (authenticated). Fix https://github.com/libssh/libssh-mirror/commit/7dfabb1fd213196c4912c314b418ff36c882ea54, parent a540e27659b08828ef61f2910a790f7cf2af9f8d; pins in lab/frontier/libsshch2shell/pins.sha256.
