@@ -13,7 +13,6 @@ in the live full enforcer's plain `-O2` frame. Still no live REST/CRD
 target, chosen address, command or rung 5. W282/W283 have not yet been
 replayed by the witness.
 
-
 ## REST-validated wire-path reproduction (W274, 2026-11-26)
 
 `bash lab/frontier/neuvector2shell/wirepath/run.sh` -> **19 PASS / 0 FAIL**,
