@@ -9563,9 +9563,10 @@ on loopback.
   rc 0, with both pinned source digests exact and 16/16 chosen-byte RNG
   destinations for each fill value. Verdict **ESTABLISHED AS LABELED** for
   W6's probabilistic low-byte `--rand-dest` control, no grade change, NO r5;
-  stock distro build and `IPOPT_LSRR` remain UNKNOWN, and wire stages #3942
-  plus W5 #3958 stay OWED. `reports/hping3shell-status.md` §Witness verdict
-  W212.
+  stock distro build and `IPOPT_LSRR` remain UNKNOWN. The #3942 wire-stage
+  and #3958 W5 replay asks were withdrawn at chat #4603; those limbs stay
+  author-side with verdict UNKNOWN (a scope label, not an open ask).
+  `reports/hping3shell-status.md` §Witness verdict W212 and §Next.
 
 ## 2026-11-25 03:2xZ — socat2shell FRONTIER-STAGED lane (rung corrected)
 
@@ -11172,6 +11173,80 @@ cell moves. Commands and receipts below are the ones the report records.
   in gitignored `src/rpm/`. The stand-in `rpmcpioRead()` caps the copy at the
   64 bytes actually present instead of the declared `UINT64_MAX`, so rung 4
   is PARTIAL in a synthetic consumer: no real rpm build, crafted package,
-  wire, adjacent live object, pointer, command or r5. Witness replay and
-  operator admission are UNKNOWN/owed; window 163 was created but no route
-  or wake unit was added.
+  wire, adjacent live object, pointer, command or r5. Witness W238
+  (2026-11-26) replayed both the in-tree and clean `git archive 815a1b0a`
+  `run-witness.sh` with `WITNESS REPLAY PASS`, 28 PASS / 0 FAIL rc 0, four
+  pins plus full/excerpt upstream hashes exact, and the GCC 13.3 `-O1`
+  negative independently reproduced: ESTABLISHED AS LABELED at that scope,
+  no grade change and NO r5. Detail lives in the gitignored
+  `.mishe-tauftauf/artifacts/witness-w238-rpm2shell/detail.md`. Admission and
+  route state follow the README row; window 163 exists but generated wake
+  units are person-reserved.
+
+## 2026-11-26 02:1xZ — pjproject2shell W239 staged lane
+
+- **Claim and pins** — `reports/frontier-pjproject2shell.md` and
+  `lab/frontier/pjproject2shell/PROVENANCE.md` record CVE-2026-77396 /
+  GHSA-6p2p-5wf8-h5hr (GitHub CNA, 2026-07-13, CWE-122/CWE-787, Moderate;
+  [GHSA](https://github.com/pjsip/pjproject/security/advisories/GHSA-6p2p-5wf8-h5hr)).
+  Advisory affected range is pjproject <= 2.17 with no patched version named;
+  fix `7ecc6584969a923c4190b6912afbf5952b5a4b9f` (2026-07-13), vulnerable
+  parent `c1ea7648fb53f945493972a23133b9e0d3e4a1fe`. Released version
+  boundaries beyond the advisory statement are UNKNOWN. Full-file pins are
+  `1ccafcd255ad996e572753495191ff5347b2062c9152617458425f30c9446081`
+  (vulnerable `avi_player.c`, 1338 lines) and
+  `dae6aeee810d88173657cefb3486f89bdee77dbe87b2520a5ae784f854fc5042` (fixed,
+  1366 lines); verbatim excerpts are upstream lines 1208-1228
+  `45fe04f09520dfef6f2cc52f70d6293a4fdd96e7f76d6eb41a79e2586e710ba1` and
+  1208-1256 `2cc1805d5dee8959837926dcb492ffb3b53de4b2a2b4e063f0afc4f3f11139de`.
+- **Replay** — from `lab/frontier/pjproject2shell`, `bash run-all.sh` scores
+  `TOTAL: 29 PASS / 0 FAIL`, rc 0; `bash run-witness.sh` rehashes the four
+  pins, deletes `out/` and rebuilds every binary. The author's clean
+  `git archive 814e9392 lab/frontier/pjproject2shell` into
+  `/tmp/w239-pjproject-clean` ran the unmodified wrapper (sha256
+  `28added488bf8fd11a1e896b933c28c2f686394d5ceca34fc232c3f994e2335f`) with
+  `WITNESS REPLAY PASS`, 29 PASS / 0 FAIL rc 0 and four pins exact; in-tree
+  replay matched. That is an author replay, not a witness verdict.
+- **Expected bytes** — the file-supplied `ch.len` drives
+  `file_read3(fd, frame->buf, ch.len, ...)` past the release-build no-op
+  `pj_assert(frame->size >= ch.len)`. GCC and Clang ASan at `-O0` report
+  `heap-buffer-overflow`, `WRITE of size 64`, `0 bytes after 48-byte region`,
+  write frame `avi_get_frame ... pins/avi-vulnerable.inc:15`; fixed attack is
+  clean at `AVI_FRAME_SIZE=48`, and safe input (chunk length 48) is clean in
+  both bodies. Plain readback prints
+  `CANARY_AFTER=4d495348452d504a50524f4a45435421`: bytes 48..63 are the
+  chosen `MISHE-PJPROJECT!` marker; plain fixed and safe runs write none.
+- **Regeneration and boundary** — raw logs are gitignored under
+  `lab/frontier/pjproject2shell/out/`; the stand-in caps the payload at 64
+  present bytes and the frame at a logical 48 bytes, so rung 4 is PARTIAL in
+  a synthetic plain process: no real pjmedia build, crafted AVI, network
+  wire, adjacent live object, pointer, command or r5. Window 164 was created
+  (165 windows / 165 unique names); route and wake-unit generation are
+  person-reserved, witness replay is UNKNOWN and an independent verdict has
+  not arrived.
+
+## 2026-11-26 02:2xZ — rpm2shell and pjproject2shell admissions
+
+- **Operator replay** — `bash lab/frontier/rpm2shell/run-witness.sh` at HEAD
+  returned `TOTAL: 28 PASS / 0 FAIL`, rc 0, `WITNESS REPLAY PASS`; witness
+  W238 independently ESTABLISHED AS LABELED from a clean `git archive
+  815a1b0a`, with all four pins and both raw upstream full/excerpt hashes
+  exact. `bash lab/frontier/pjproject2shell/run-witness.sh` at HEAD returned
+  `TOTAL: 29 PASS / 0 FAIL`, rc 0, `WITNESS REPLAY PASS`; its witness verdict
+  stays UNKNOWN (requested), author clean-archive replay from `814e9392` is
+  recorded in the section above. Both wrappers were unmodified.
+- **Admission** — the operator admitted both lanes under standing #6 as the
+  155th and 156th declared target minds. Windows 163 and 164 were already
+  live and were adopted, not duplicated; the registry holds 165 windows /
+  165 unique names. Charter, seed wall, brief, status and PROVENANCE were
+  checked before admission. No route, resolver key, systemd unit, pin or
+  sync edit: engine config, units and the full-flag sync are person-reserved
+  (`.mishe-tauftauf/operator/standing-approvals.md:47-51`). The doctor exits
+  1 at 02:14:50Z and 02:19:49Z on 24 missing unit files (three each for
+  aspell, fceux, freeimage, leptonica, libxml2, nfdump, pjproject, rpm);
+  `omp-only` is RED for five no-route roles (157 declared). GREEN
+  dispositions of the failure signals are not claims of engine health.
+- **Grade** — both remain rung 3 pinned verbatim code and rung 4 PARTIAL
+  chosen bytes in a synthetic plain readback. No real library build, crafted
+  RPM or AVI input, wire path, pointer, command or r5. The real-consumer
+  lanes stay with the newly admitted minds.

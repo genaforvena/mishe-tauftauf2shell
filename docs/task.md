@@ -10980,8 +10980,9 @@ labels stay as recorded below.
 - Hping W212 (#4000) is an independent **ESTABLISHED AS LABELED** verdict for
   W6's probabilistic low-byte RNG-control lane: unmodified `replay-rngctl.sh`
   on a clean `git archive 659f6eb0` gave 20 checks rc 0 with exact pins and
-  16/16 chosen-byte destinations. Wire stages #3942 and W5 #3958 remain
-  OWED. No grade change or r5.
+  16/16 chosen-byte destinations. Wire stages #3942 and W5 #3958 were
+  later withdrawn at chat #4603: author-side verdict UNKNOWN, no further
+  replay owed. No grade change or r5.
 - No rung cell, route, mind count or R5 cell moved by either edge; recipes,
   expected bytes and gitignored-regeneration notes are in
   `docs/reproducibility.md` under the 03:1xZ lane.
@@ -11896,3 +11897,59 @@ mind-count or R5 cell moved. `run-witness.sh` was re-run at this fold:
 the fold (152 rows, 29 files). Readme-lint stays RED on the frozen
 six-column detector against the live seven-column README; the resolver is
 the person's exact full-flag sync, never a bare `mishe sync`.
+
+## 2026-11-26 02:12–02:2xZ — rpm W238 verdict, hping W22 closure, pjproject W239 staged lane
+
+Signal head `cfd49a4a` was seven commits past docs fold `0e1c774c`. Three
+material deltas are folded here on `docs/reproducibility.md` and
+`docs/task.md`:
+
+- `ae271349` (witness W238) makes the old Rpm2Shell row's `witness UNKNOWN`
+  and `witness replay owed` wrong. Both in-tree and clean `git archive 815a1b0a`
+  replays returned `WITNESS REPLAY PASS`, 28 PASS / 0 FAIL rc 0, four pins and
+  both upstream full/excerpt digests exact; the GCC 13.3 `-O1` negative was
+  independently reproduced. Verdict ESTABLISHED AS LABELED at the staged
+  synthetic-consumer scope, no grade change and NO r5. The reproducibility
+  section now records the verdict and the gitignored witness detail path.
+- `814e9392` + `bc4447fa` stage pjproject2shell W239 on CVE-2026-77396:
+  verbatim-pinned `avi_get_frame()` chunk-length read, GCC/Clang ASan
+  `WRITE-64` past a 48-byte logical frame, 29 PASS / 0 FAIL, clean archive
+  from `814e9392`, window 164, witness UNKNOWN. A new reproducibility section
+  carries the four pins, command, expected bytes and synthetic-consumer
+  ceiling; no rung, route or R5 cell moved. The concurrent operator wake
+  owns the admission row and generated unit state.
+- `9ffd6a65` (hping W22) withdraws the remaining #3942/#3958 replay asks at
+  chat #4603 and closes research at the documented ceiling after a
+  2026-11-26 external re-check (CVE still PUBLISHED, no fixed release).
+  Two passages that still said replay OWED now say author-side verdict
+  UNKNOWN with no further replay owed; W207/W212/W224 labels stay unchanged.
+
+Doc-ok with no edit: `b401fcbd`/`9a46b9e2` add libsshch2shell W24's
+wire-resident second callback iterator (6 PASS / 0 FAIL, clean `git archive`
+receipt) while the first redirect stays app-owned and the README row's
+authenticated-peer/fake-callback ceiling still holds; `cfd49a4a` records
+open5gs2shell W12's witness-queue deferral with no verdict or grade change;
+`1604f532` names Ruby's jemalloc adjacent consumer without moving a grade.
+Post-fold smoke: both checkers, scoped `git diff --check` and the two
+one-command replays are re-run before the scoped commit.
+
+## 2026-11-26 02:17–02:3xZ — rpm2shell (155th) and pjproject2shell (156th) admitted
+
+The operator admitted two staged frontier lanes under standing #6 after
+replaying both one-command wrappers at HEAD: rpm 28 PASS / 0 FAIL rc 0 and
+pjproject 29 PASS / 0 FAIL rc 0, both `WITNESS REPLAY PASS`. Witness W238 had
+already ESTABLISHED rpm's staged replay AS LABELED; pjproject's independent
+verdict is UNKNOWN and requested. Charters, seed walls, briefs, statuses,
+PROVENANCE and the two live two-pane windows (163/164, registry 165 unique)
+were checked and adopted. README rows, the 156-mind count and both status
+files were folded; checkers stayed GREEN (153 rows, 29 files).
+
+No route, resolver key, unit, pin or sync edit was made: engine config and
+the full-flag sync stay person-reserved
+(`.mishe-tauftauf/operator/standing-approvals.md:47-51`). Doctor exits 1 at
+02:14:50Z and 02:19:49Z on 24 missing unit files, and `omp-only` is RED on
+five no-route roles; the doctor and wake-failure signals were re-observed
+GREEN on named person-owned dispositions, not on clean runs. Grades are
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL synthetic chosen bytes,
+no real library/consumer, wire, pointer, command or r5. The newly admitted
+minds keep the real-rpm and real-pjproject consumer lanes.
