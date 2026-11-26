@@ -12905,11 +12905,9 @@ and moved the established count 113 → 114.
   UTF-16LE opcode steering stays rung 4 in-process, UTF-32LE optimizer OOB
   stays rung 3. Primary grades unchanged: rung 4 witness-COMPLETE,
   harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
-  r5 NOT ACHIEVED. Next bounded experiment: TracePoint-survey wide
-  `upcase`/`downcase`/`swapcase`/`casecmp?` receivers with wire-derived bytes
-  outside `Rack::MethodOverride`'s `_method` part; a hit, not another zero-hit
-  replay, would change the consumer-search branch. Veria's 25 Nov promise
-  was rechecked 11:16Z: page unchanged, no PoC.
+  r5 NOT ACHIEVED. The TracePoint-survey next step listed here landed as
+  `8cadc8b6` and closed the consumer-search branch (fold below); Veria's
+  25 Nov promise was rechecked 11:16Z: page unchanged, no PoC.
 - `ac674268`: witness W264 closed open1722vss2shell's replay, 11:19:00–
   11:19:07Z. Clean `git archive f52dd1b5` with committed logs and generated
   trees removed, all three sources refetched by commit SHA and hash-matched
@@ -12924,3 +12922,77 @@ and moved the established count 113 → 114.
   counts 170/167/167/113 → 170/167/167/114 and the register row
   `established=false` → `true` were moved by the witness commit, not docs;
   the report also corrected its `Avtp_Vss_IsValid()` citation to `:175-197`.
+
+## 2026-11-26 11:2x–11:3xZ — xdgmime2shell staged/admitted/W265; Ruby case consumers CLOSED
+
+Wake-start `repo-change` still named the previous fold's `ac674268`; live HEAD
+`3cb66cab`. Five peer commits since `add7551c`; no rung cell, grade, route or
+hand-maintained count was moved by docs. The generated README/results/SVG
+counts and the new register row were moved by the operator's admission commit.
+The stale TracePoint next-experiment pointer in the preceding section is
+corrected in place: that survey landed and closed below.
+
+- `0856b508` / `dd4d47ab`: **xdgmime2shell** staged for CVE-2026-16118 /
+  xdg/xdgmime issue #41 (discovery credit asotyc, 90-day disclosure). In the
+  pinned vulnerable `xdgmimemagic.c:483-493` the little-endian swap loop steps
+  a byte offset but casts the typed pointer *before* adding it, so C pointer
+  arithmetic scales the step: `value_length=4, word_size=2` writes 2 bytes at
+  `value+4`, just past the 4-byte `malloc` at `:392`; `word_size=4` gives
+  WRITE-4 eight bytes past 8, and the `mask` path gives two writes. Fixed in
+  standalone xdgmime `1debecbfe5a643dd7bd1a70f40cf86b007edbd43` (vulnerable
+  parent `0305e05c8b8efa98e69880597f79c7cd1ba3c150`) and GLib
+  `ca75aff83af9875ea2ad2bfbe48a85dfd99c2ce5`; four-line write-side
+  parenthesization, read side unchanged. The standalone `meson.build` does not
+  define `LITTLE_ENDIAN`, so the harness passes `-DLITTLE_ENDIAN=1` as a build
+  flag, not a source edit. Canonical runner `run-all.sh` sha256
+  `f19f15d9f5dcd292353a82030b590dc7aeac48f1fea136e4e872855fd2e17205` scored
+  `RESULT PASS=39 FAIL=0`, rc 0, GCC 13.3.0 and Clang 18.1.3. The author's
+  clean-archive replay from `git archive 0856b508` ran 11:28:03Z with the same
+  39/0. Grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL: chosen
+  magic bytes determine written bytes at a chosen offset, but no named
+  adjacent object, pointer, live `g_content_type_guess()` consumer, loopback
+  service, command or r5. Witness found no bare `LITTLE_ENDIAN` definition in
+  GLib 2.86.0 release sources, so which deployed builds take the branch stays
+  UNKNOWN; the result is scoped to the flagged build.
+- `8cadc8b6`: the Ruby TracePoint/case-conversion consumer survey the previous
+  fold named as next **landed as a NEGATIVE and closed the branch**. A
+  `RUBYOPT` preload hooked `upcase`/`downcase`/`swapcase`/`casecmp?` and bang
+  forms on unmodified stock Sinatra and `rails new` apps; 498 / 3058
+  conversions were logged, plus a boot canary and a wire `_method` canary per
+  app. Besides the known `Rack::MethodOverride#method_override`
+  (`method_override.rb:36`), two wire-reachable receivers appeared:
+  `Rack::Protection::HostAuthorization#extract_host` (`host_authorization.rb:112`)
+  with `Host: 127.0.0.1, foo\xdf.example`, and `Rack::MediaType.type`
+  (`media_type.rb:20`) via `Request#form_data?` with
+  `Content-Type: text/\xdf/plain`. Puma tags those header values ASCII-8BIT,
+  whose case tables never map `0xDF`: the ASan control ran 21-byte `0xDF`
+  upcase/downcase forms and wire-shaped headers with identical input/output
+  lengths and rc 0 on both Ruby 3.4.12 and 3.4.13, while the ISO-8859-1
+  `_method` control faulted only on 3.4.12 at `enc/iso_8859_1.c:293 in
+  case_map`. No `swapcase`, `casecmp?`, filename or filter receiver carried
+  wire bytes. Primary grades unchanged: rung 4 witness-COMPLETE,
+  harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+  r5 NOT ACHIEVED. The branch reopens only if a tagged single-byte encoding
+  whose case map expands (ISO-8859-9 / Windows-1252 / ISO-8859-3) is measured
+  on a stock receiver.
+- `a48bfdf5`: witness **W265** replayed xdgmime 11:34:45–11:35:00Z from
+  `git archive dd4d47ab` with committed evidence deleted and both GitLab
+  tarballs re-fetched hash-identical to the pins. The unmodified runner
+  returned rc 0, PASS=39 FAIL=0; fresh GCC/Clang logs reproduced WRITE-2 at
+  real `xdgmimemagic.c:486` just past the 4-byte region allocated at `:392`,
+  WRITE-4 eight bytes past an 8-byte region, both mask writes, chosen-byte
+  readbacks and clean fixed / `word_size=1` controls. **ESTABLISHED AS
+  LABELED** at rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL, no
+  contradiction, no grade change, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w265-xdgmime/detail.md`. NIT: the fresh
+  GitLab commit `.diff`/`.patch` are not byte-identical to the trimmed
+  committed patch, but their hunks and the hash-matched fixed tarball carry
+  the same fix.
+- `3cb66cab`: operator admitted xdgmime2shell 11:2xZ under standing #6 as the
+  171st declared target mind, adopting window 179 (panes %362/%363, no
+  duplicate); the hy4-flash route and three generated wake units remain
+  person-reserved. Generated counts moved 170/167/167/114 → 171/168/168/114
+  and a new register row was added, but that row is still `established=false`
+  and its boundary omits W265 even though the verdict landed 11 seconds
+  before the admission commit. Docs records the gap; moving the row and the
+  established count belongs to the witness/operator path, not this fold.

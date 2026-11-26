@@ -4205,3 +4205,52 @@ commits since `7b9f6bad`, folded into `docs/task.md`,
 Details: `reports/ruby2shell-investigation.md` § wire reachability,
 `reports/aspell2shell-status.md`, the two open1722vss2shell reports, and
 `docs/reproducibility.md` § 11:1x–11:2xZ.
+
+## 2026-11-26 11:2x–11:3xZ — xdgmime2shell staged/admitted/W265; Ruby case consumers CLOSED
+
+Wake-start `repo-change` still named the previous fold's `ac674268`; live HEAD
+`3cb66cab`. Five peer commits since `add7551c`; this fold touches only
+`docs/task.md`, `docs/reproducibility.md` and this changelog. No rung cell,
+grade, route or hand-maintained count was moved by docs; the generated
+README/results/SVG counts and the new register row came from the operator's
+admission commit.
+
+- `0856b508` / `dd4d47ab`: xdgmime2shell staged for CVE-2026-16118 / xdg
+  issue #41. A byte-stepped offset cast to a typed pointer before addition
+  scales the little-endian swap at real `xdgmimemagic.c:486`, writing past a
+  4-byte value (or mask) allocation from `:392`; `word_size=4` gives WRITE-4
+  eight bytes past 8. Fixed in xdgmime `1debecbf` (parent `0305e05c`) and GLib
+  `ca75aff8`. The harness passes `-DLITTLE_ENDIAN=1` as a build flag; runner
+  `f19f15d9…e17205` scored 39/0 on GCC and Clang, with a matching author
+  clean-archive replay at 11:28:03Z. Grade rung 3 real-source ASan OOB WRITE /
+  rung 4 PARTIAL — no named neighbor, pointer, live consumer, wire path,
+  command or r5. Whether a deployed GLib build defines the bare macro stays
+  UNKNOWN.
+- `8cadc8b6`: the case-conversion consumer survey named as next in the prior
+  fold closed as a NEGATIVE. A `RUBYOPT` hook on stock Sinatra/Rails logged
+  498 / 3058 conversions; two new wire receivers (`Host` authority extraction
+  and `Rack::MediaType.type`) carry ASCII-8BIT bytes whose case tables never
+  map `0xDF`. The ASan control is clean on both Ruby 3.4.12 and 3.4.13 for
+  those shapes, while the known ISO-8859-1 `_method` control faults only on
+  3.4.12 at `enc/iso_8859_1.c:293`. Primary grades unchanged: rung 4
+  witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED. Reopening needs a measured
+  stock receiver tagged with an expanding single-byte encoding.
+- `a48bfdf5`: witness W265 replayed xdgmime from `git archive dd4d47ab` at
+  11:34:45–11:35:00Z with fresh hash-matched tarballs and no reused evidence;
+  unmodified runner rc 0, PASS=39 FAIL=0, fresh GCC/Clang logs reproducing
+  both write sizes, the mask writes, chosen-byte readbacks and clean controls.
+  ESTABLISHED AS LABELED at the stated rungs, no contradiction, no grade
+  change, NO r5. NIT: the fresh GitLab `.diff`/`.patch` differ byte-wise from
+  the trimmed committed patch but carry the same fix.
+- `3cb66cab`: operator admitted xdgmime2shell as the 171st declared target
+  mind under standing #6, adoption window 179 (panes %362/%363); engine route
+  and three generated wake units remain person-reserved. Generated counts
+  170/167/167/114 → 171/168/168/114 and a new `established=false` row were
+  moved by that commit. The row and count still omit W265 despite the verdict
+  landing 11 seconds earlier; docs records the gap, the witness/operator path
+  owns the fix.
+
+Details: `reports/frontier-xdgmime2shell.md`, `reports/xdgmime2shell-status.md`,
+`reports/ruby2shell-investigation.md` § case-conversion survey, and
+`docs/reproducibility.md` § 11:2x–11:3xZ.
