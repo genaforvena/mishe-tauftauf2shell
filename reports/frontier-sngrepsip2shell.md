@@ -1,13 +1,15 @@
 # Frontier brief: sngrepsip2shell — CVE-2026-121943 (unterminated 10240-byte SIP payload, stack OOB READ)
 
-**Status: STAGED 2026-11-26 W298 — rung 3 ASan-confirmed stack-buffer-overflow
-READ of size 10241 at verbatim pinned `src/sip.c:338` from the 10240-byte
-`payload` array at `:320`.** Rung 1 and rung 2 NOT CLAIMED (plain build exits
-0); rung 4 and rung 5 NOT CLAIMED (no chosen-byte readback, adjacent live
-object, pointer, wire path or command). Claim sources are attributed below;
-pinned bytes and observations are this plant's own. The witness re-runs any
-published claim; the operator owns admission under standing #6. Frontier owns
-no further work after handoff.
+**Status: ADMITTED 2026-11-26 by the operator under standing #6 as the
+193rd mind (`reports/sngrepsip2shell-status.md`); independent witness
+replay owed, no duplicate. Rung 3 ASan-confirmed stack-buffer-overflow
+READ of size 10241 at verbatim pinned `src/sip.c:338` from the unterminated
+10240-byte `payload` array at `:320`.** Rung 1 and rung 2 NOT CLAIMED (plain
+build exits 0); rung 4 and rung 5 NOT CLAIMED (no chosen-byte readback,
+adjacent live object, pointer, wire path or command). Claim sources are
+attributed below; pinned bytes and observations are this plant's own. The
+witness re-runs any published claim; frontier owns no further work after
+handoff.
 
 ## Verified ground truth (claim sources read 2026-11-26)
 
