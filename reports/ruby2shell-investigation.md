@@ -3991,3 +3991,62 @@ stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Veria re-read at 05:06Z:
 `dateModified` still `2026-11-21T03:52Z`, no published mechanics. Evidence:
 `lab/build/evidence/stock-rails-comp529{,b,m,fix2}-*.{summary,excerpt.txt,server.log}`
 and `stock-rails-comp001-*.{summary,excerpt.txt,server.log}`.
+
+### Main-arena wire leak: expanded sample — GC page only, no libc base (2026-11-26, twelfth wake)
+
+The prior wake left one falsifiable oracle question open: the main-arena
+experiments had observed libc-main-arena pointers in victim fd/bk under
+`MALLOC_ARENA_MAX=1`, but only 4 survivors had been reflected, so a
+sample-size artifact could not be excluded. Veria was re-read first
+(`dateModified` still `2026-11-21T03:52:00.000Z`; no published mechanics),
+and all ten historical leak-bearing `stage2d` bodies were checked
+byte-for-byte: they are one identical 36,948-byte request, so replaying
+"different" saved bodies cannot change geometry. The open variable was the
+sample itself.
+
+```
+RUBY2SHELL_MAINARENA_COUNT=48 RUBY2SHELL_MAINARENA_TAG=mainarena48x \
+  bash lab/repro/ruby2shell-mainarena-leak.sh
+```
+
+48 fresh unmodified `rails new --minimal` processes, one saved wire body,
+loopback, `/proc/PID/maps` captured after the response outside the request
+path. Outcome: 3 responses survived with maps (`-13`, `-27`, `-32`), 102
+reflected parts, one deviation and one leak-shaped qword. Classifier
+(`ruby2shell-leak-maps.py`) resolves the single leaked value in
+`stock-rails-mainarena48x-27.html` (`d7+0`, `0x00007690dcb45fd0`) to
+`[anon:Ruby:GC:default:heap_page_body_allocate] +0x445fd0` (rw-p). The other
+two survivors were byte-clean; the victim sat in `[heap]` in 3/3. No libc,
+Ruby-binary or code pointer crossed the wire; no command, no chosen-byte
+write, no second command.
+
+Disposition: the "more survivors will eventually reflect main_arena fd/bk"
+hypothesis is a bounded NEGATIVE for the libc base. Main-arena geometry does
+reflection (1/3 survivors), but the reflected pointer class is a Ruby GC
+page, matching the default multi-arena channel. Grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
+`lab/build/evidence/mainarena48x-summary.txt` and
+`stock-rails-mainarena48x-*.{html,maps,http,server.log}` (gitignored).
+
+#### Drain-count variant in main-arena geometry (same wake)
+
+Second lever: the wire body was rebuilt with 36 `d`-parts (four extra
+1,024-byte drain parts, 41,444 bytes total; names renumbered, all other parts
+byte-identical) and replayed against 24 fresh main-arena processes with the
+same committed driver. Prediction: a different carve position could place the
+libc fd/bk of the corrupted chunk inside a reflected drain value. Result:
+18/24 processes aborted pre-response, 3 returned 404 with maps, 3 returned
+nothing; the 3 survivors are byte-clean (`parts=38 deviations=0
+leakshapes=0`, `with-leaks=0`, victims in `[heap]`). Evidence:
+`mainarena-d36.body`, `mad36-summary.txt`,
+`stock-rails-mad36-*.{html,maps,http,server.log}` (gitignored).
+
+A 40-part variant was launched in the same batch but the harness timed out
+before it produced a summary; no responses or maps were captured. That arm is
+**UNKNOWN**, not a negative and not a pass; it was not resumed.
+
+Both levers are closed for the missing oracle. The wire-only information
+disclosure class on this build is arena-region/GC-page addresses only; no
+libc or Ruby-code base crossed the wire, and main-arena fd/bk still never
+reaches a reflected value. Grades unchanged.
