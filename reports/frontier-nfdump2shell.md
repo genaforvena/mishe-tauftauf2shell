@@ -130,6 +130,13 @@ first`). The resulting csv line carried the pre-swap value, so it proves no
 chosen-byte write into a processed record. Preserved as a negative result;
 no claim is made from it.
 
+Clean-archive replay: the first attempt (commit `9fbeec88`) failed 3 PASS /
+10 FAIL because `build-wire.sh` did not create the ignored `src/` directory;
+the daemon log named the missing binary. Commit `81e3cd8e` fixes the path
+and verifies all four binaries, after which `git archive 81e3cd8e` into an
+empty directory rebuilds both commit pairs and gives 13 PASS / 0 FAIL for
+ASan and plain. No assertion was relaxed to obtain the pass.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the

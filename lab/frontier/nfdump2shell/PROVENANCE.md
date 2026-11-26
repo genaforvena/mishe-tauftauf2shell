@@ -188,6 +188,24 @@ V_BUILD=src/build-vuln-plain/src F_BUILD=src/build-fixed-plain/src \
 TOTAL: 13 PASS / 0 FAIL
 ```
 
+The first clean-archive replay from commit `9fbeec88` returned
+**3 PASS / 10 FAIL**: `build-wire.sh` did `cd .../src` before creating that
+directory, so in an archive with no ignored `src/` the four builds landed at
+the lab root and the runner could not find the collectors. The failure was
+diagnosed from `harness/out/wire/vuln-attack/daemon.log`
+(`nfcapd: No such file or directory`), not by weakening an assertion.
+Commit `81e3cd8e` adds `mkdir -p .../src` plus an explicit post-build binary
+check; the clean replay was repeated from that commit.
+
+Replay from `git archive 81e3cd8e lab/frontier/nfdump2shell` into
+`/tmp/w-nfdump-wire-clean2`: `build-wire.sh` fetched and SHA-verified both
+tarballs and built all four collector pairs, then `run-wire.sh` returned
+**13 PASS / 0 FAIL** for the ASan builds and **13 PASS / 0 FAIL** for the
+plain builds (`V_BUILD`/`F_BUILD`/`WIRE_OUT` overrides). `run-witness.sh`
+from the first (faulty) clean archive still returned `WITNESS REPLAY PASS`
+(22 PASS / 0 FAIL) and `run-adjacent.sh` 12 PASS / 0 FAIL — those runners do
+not use the full collector builds.
+
 Observed (values differ between runs because the store is wall-clock derived):
 
 ```

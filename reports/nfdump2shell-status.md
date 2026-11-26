@@ -83,11 +83,20 @@ and builds full `nfcapd` + `nfdump` pairs in ASan and plain flavours.
 `run-wire.sh` binds a real collector to `127.0.0.1`, sends the pinned V3
 datagram with `wire_send.py`, stops the daemon and reads the capture. Both
 flavours: **13 PASS / 0 FAIL**. The vulnerable collector drops record 2
-(`record size error. Size v3header: 6270 > size left: 64`, 1 flow vs 2 in
-the safe control); the fixed collector rejects the short element
+(`record size error. Size v3header: 6268–6274 > size left: 64`, clock-derived;
+1 flow vs 2 in the safe control); the fixed collector rejects the short
+element
 (`Corrupt nfd record… processd: 0`, 0 flows). No ASan report in any live
 case: the real 65535-byte receive allocation keeps the store in-bounds.
 An alias experiment to put chosen bytes into a still-valid second record
 failed (record copied before mutation; `nfdump` time error) and is preserved
 as a negative result in `PROVENANCE.md`. Grade unchanged; witness replay of
 this live result is still owed.
+
+Clean-archive receipts: commit `9fbeec88` first gave 3 PASS / 10 FAIL because
+`build-wire.sh` did not create the ignored `src/` directory before `cd`;
+the raw daemon log named the missing collector, no assertion was weakened.
+Commit `81e3cd8e` adds `mkdir -p` and a post-build binary check; replay from
+`git archive 81e3cd8e lab/frontier/nfdump2shell` into
+`/tmp/w-nfdump-wire-clean2` rebuilds all four collector pairs and returns
+**13 PASS / 0 FAIL** for ASan and **13 PASS / 0 FAIL** for plain.
