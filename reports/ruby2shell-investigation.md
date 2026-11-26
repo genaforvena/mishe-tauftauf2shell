@@ -4230,3 +4230,65 @@ the unsorted band (`FILL_SIZE ∈ {0x21,0x41,0x53}` with `FILL_PREV=0x53`) to te
 whether a tcache-sized forged chunk is popped into a live reflected allocation
 instead of entering the unsorted checks; falsifier is clean 404 with zero
 deviations or the same allocator aborts.
+
+### Fake chunks below the unsorted band — bounded NEGATIVE (2026-11-26, seventeenth wake)
+
+The previous wake's named variant ran unchanged: chunked N=588,
+`FILL_PREV=0x53`, `FILL_SIZE ∈ {0x21,0x41,0x53}`, 3 runs each, with
+`DRAIN=1024:32`, `DRAIN_FAKE=1`, `FILL=256`, part charset and the
+`00005102` tail. Prediction: a tcache-sized forged chunk is popped into a
+live reflected allocation (or shows a new abort signature). Falsifier:
+clean 404 with zero deviations/leak shapes, or the known allocator aborts.
+
+Result: **2/9 processes survived; 7 aborted**. Survivors `chs0x21-2` and
+`chs0x53-3` served the attack POST as HTTP 404, stayed alive and served the
+later `/up` as 200. `chs0x21-2` prints `corrupted size vs. prev_size` only
+in its server log at shutdown, after both requests — a corrupted-heap
+observation, not a write primitive; `chs0x53-3` has no diagnostic. The 7
+aborts are the already-seen glibc metadata checks: `sysmalloc` assertion
+(`0x21-1`, `0x21-3`, `0x41-1`, `0x41-3`) and `malloc(): invalid next size
+(unsorted)` (`0x41-2`, `0x53-1`, `0x53-2`). Reflect scan of each survivor
+with its matching `--pattern 0x53,<size>` found **0 deviations and 0
+leak-shaped qwords in 34 reflected parts per survivor** (68 parts total).
+No forged tcache-sized chunk reached a reflected allocation and no pointer
+of any kind crossed the wire.
+
+Disposition: the below-unsorted-band fake-chunk variant is **closed** — it
+changes only which glibc diagnostic fires and whether the process survives.
+Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Evidence (gitignored): `lab/build/evidence/stock-rails-chs*`
+`.out`/`.server.log`/`.html`/`.body` files and the scan output quoted above.
+
+### GET query values as a post-overflow reflection surface — bounded NEGATIVE (2026-11-26, seventeenth wake)
+
+New consumer, not a multipart-only re-run: the development routing-error page
+renders GET as well as POST parameters, so a long GET value could be allocated
+after the upcase overflow and reflect bytes from the corrupted band. The
+driver's `RUBY2SHELL_STOCK_ROUTE` is passed verbatim into the POST URL, so no
+script edit was needed.
+
+Two geometry fixes were required before the test was valid. (a) A 1024-byte
+query value URL-encoded from the glibc pattern contains `%00`; on a fixed
+3.4.13 control that suppressed the entire params block (0 reflected parts,
+40,082-byte page) — the value could not be observed. (b) A 1024-byte printable
+`A` value under the name `q0` reflected correctly (35 parts, `q0` length 1024,
+all bytes `A`); the scanner leak-checks `q0` without byte-diffing it.
+
+Result at `RUBY2SHELL_STOCK_FILL_PREV=0x250`, `FILL_SIZE=0x90`, N=524:
+**24/24 vulnerable processes aborted** — no page and no post-overflow GET
+value to inspect. Re-run at the two geometries that had survived earlier
+(chunked N=588, `FILL_PREV=0x53`, `FILL_SIZE ∈ {0x21,0x53}`, 6 runs each):
+2/12 survived (HTTP 404, alive), and both reflected `q0` as the original 1024
+`A` bytes. Matching-pattern reflect scan gave **0 deviations and 0
+leak-shaped qwords in 35 parts per survivor**; no pointer of any kind crossed
+the wire. A fixed-3.4.13 control with the same 1024-byte `A` query at the
+0x250/0x90 geometry served a clean 404 and reflected 35 byte-clean parts.
+
+Disposition: the GET-parameter surface is **closed** — it adds a fresh
+reflected allocation but that allocation stays intact, and the geometry that
+would exercise the corrupted band never survives the request. Grades unchanged
+(rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 NOT ACHIEVED). Evidence (gitignored):
+`lab/build/evidence/stock-rails-qgetv-*`, `qgets*`, `qget-fixed-*`,
+`qget-print*` `.out`/`.server.log`/`.html`.
