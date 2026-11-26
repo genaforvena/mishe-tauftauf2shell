@@ -1,0 +1,15 @@
+W28 vsyscall fixed-address probe Thu 26 Nov 2026 04:15:34 AM UTC
+6.8.0-149-generic
+--- /proc/self/maps ---
+ffffffffff600000-ffffffffff601000 --xp 00000000 00:00 0                  [vsyscall]
+--- indirect call site ---
+   10412:	4c 89 f6             	mov    %r14,%rsi
+   10415:	4c 89 ea             	mov    %r13,%rdx
+   10418:	89 c1                	mov    %eax,%ecx
+   1041a:	44 8b 44 24 04       	mov    0x4(%rsp),%r8d
+   1041f:	ff 54 24 10          	call   *0x10(%rsp)
+   10423:	89 c6                	mov    %eax,%esi
+   10425:	85 c0                	test   %eax,%eax
+--- probe ---
+sweep done
+rc=0
