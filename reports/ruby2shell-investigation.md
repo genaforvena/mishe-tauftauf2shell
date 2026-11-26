@@ -3752,3 +3752,49 @@ Veria's advisory was re-checked this wake: `dateModified` still
 `2026-11-21T03:52Z`, PoC unpublished, no mechanics adopted. Grades unchanged:
 rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+### Cross-encoding overflow-byte sweep — all 14 fix-series encodings — bounded NEGATIVE (2026-11-26, seventh wake)
+
+The sixth wake closed Bug 2's ">3:1 expansion" reopen. This wake closed a
+different adjacent lane named by the charter: fix commit `ruby/ruby@d582f8f`
+changed the vulnerable `to < to_end` loop in **14** single-byte encodings,
+but all prior impact work used only ISO-8859-1. If another encoding's
+`case_map` wrote an input-derived byte, or expanded more than 2:1, it would
+give the wire attacker chosen bytes instead of a fixed literal and could
+change the grade. Source and observation both say no.
+
+Source: a read-only survey of all 14 `case_map()` functions in
+`lab/build/ruby-3.4.12/enc/` found one expansion path in each — `code ==
+SHARP_s` (0xDF, `enc/iso_8859.h:1`) writes a fixed literal pair before the
+trailing `*to++ = code`. UPCASE emits `'S','S'` (0x53 0x53); FOLD emits
+`'s','s'` (0x73 0x73); UPCASE|TITLECASE emits `'S','s'`. Every other mapping
+is a single byte (`code +/- constant` or a `static const UChar[256]` table).
+No multi-byte write takes its value from the input byte, a flag or a table;
+no encoding exceeds 2:1. The fix `to_end - to > 1` requires two bytes of
+room, so with exactly one byte left the loop exits without writing.
+
+Empirical: new committed `lab/repro/ruby2shell-crossenc-stageA.rb`
+parameterizes the deterministic glibc Stage A canary placement over all 14
+encodings. A primer of 780 × 0xDF fills buffer1' exactly; the real string
+`'a' + 779 × 0xDF` places the one-byte overflow on the adjacent buffer2'
+size LSB. Running the affected plain build (`ruby-3.4.12-plain`, rev
+`366f5fdc00`) under `lab/preload/mtrace.so`, the last F-line sizefield
+before `munmap_chunk(): invalid pointer` is `0x353` for upcase in **all 14**
+encodings and `0x373` for fold in 12/14. The two first-run fold placement
+failures (ISO-8859-1, Windows-1252 — last F-line `0x21`, no abort) are glibc
+layout flukes, not a semantic difference: both reproduce `0x373` in 3/3
+reruns with identical input. Fixed `ruby-3.4.13-plain` controls for ISO-8859-1
+upcase and fold: rc=0, out=1559, zero aborts, no corrupted victim chunk.
+
+Disposition: across the whole fix series the overflow byte is a fixed literal
+(0x53 upcase, 0x73 fold). The wire attacker chooses the input length and the
+case operation, never the byte value, and no encoding gives ratio >2:1. The
+"another encoding in the fix series yields a stronger primitive" lane is a
+bounded NEGATIVE; it adds no code-pointer source and no chosen-byte write.
+Veria's advisory was re-checked this wake: `dateModified` still
+`2026-11-21T03:52Z`, PoC unpublished, no mechanics adopted. Grades unchanged:
+rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
+`lab/build/evidence/crossenc-summary.txt` and
+`lab/build/evidence/crossenc-<encoding>-<op>.{out,err}` plus
+`crossenc-<encoding>-fold-rerun{1,2,3}.{out,err}`.
