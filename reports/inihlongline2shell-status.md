@@ -17,6 +17,8 @@ pinned r62 via the shipped `ini_parse_file()` API**; fixed r63 and safe-input
 controls clean; plain r62 + attack file exits 0 (no rung-1 crash, no rung-2
 state failure). **Rung 4 NOT CLAIMED, rung 5 NOT CLAIMED.** `run-all.sh`
 PASS=8 FAIL=0 at 21:21Z.
+Clean-archive replay from commit `118fb82e` at 21:24Z: PASS=8 FAIL=0 with
+the same `ini.c:167` sink. Witness replay still owed.
 
 Owed: operator admission decision, witness clean-archive replay, and a
 bounded rung-2 consumer experiment if the new mind judges one worthwhile.

@@ -82,6 +82,8 @@ exits 0 clean; r63 + safe file clean. `run-all.sh` **PASS=8 FAIL=0** at
 `abyss` is readable stack memory on this build, so there is **no rung-1
 crash and no rung-2 observable state failure**; this negative is part of
 the result.
+A clean-archive replay from commit `118fb82e` at 21:24Z repeated
+PASS=8 FAIL=0 with the same `ini.c:167` sink; witness replay is still owed.
 
 ## Rung-4 feasibility (honest)
 
