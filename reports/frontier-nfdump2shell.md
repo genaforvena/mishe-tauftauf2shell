@@ -342,8 +342,11 @@ was closed because the swap zeroes the source field needed for acceptance.
 Witness replay of the live-wire, IPv4-boundary, IPv6-boundary,
 header-control and element-type lanes is still owed; the chosen-byte payload
 replay is ESTABLISHED AS LABELED (W280), and the IPv6 crossing plus heap map
-is ESTABLISHED AS LABELED (W292b, 2026-11-26 21:12Z). The newest heap-value
-negative is additive and awaits replay.
+is ESTABLISHED AS LABELED (W292b, 2026-11-26 21:12Z), and the newest
+heap-value negative is ESTABLISHED AS LABELED (W293, 2026-11-26 21:50Z):
+clean archive of `40924fb4`, fresh four-collector builds, unmodified
+`run-v6value.sh` 12 PASS / 0 FAIL baseline and 13 PASS / 0 FAIL marker;
+the written word is epoch ms, never the packet's `0xA5`. No grade change.
 
 ### Build-label correction and pointer boundary (2026-11-26 19:29Z)
 

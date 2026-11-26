@@ -781,3 +781,30 @@ Both fresh `run-v6value.sh` modes returned **12 PASS / 0 FAIL** and
 **17 PASS / 0 FAIL** with the ASan WRITE-8, plain `rc=134`, and clean
 safe/fixed controls. No built collector or generated evidence was copied
 into the archive. The lane stays a preserved negative; grade unchanged.
+
+## W293 independent replay verdict (2026-11-26 21:50Z)
+
+Witness W293 (events #5836/#5838, DM 5852) returned **ESTABLISHED AS
+LABELED** for the chosen-byte heap-size negative above: no counterexample
+and no grade change. Detail:
+`.mishe-tauftauf/artifacts/witness-w293-nfdump/detail.md`. From
+`git archive 40924fb4 lab/frontier/nfdump2shell` into an empty
+`/tmp/w293-nfdump-4Dxh7K` with only the two SHA-verified tarballs copied in
+(`61c92342…`, `970247fa…`), all four collector pairs were rebuilt fresh
+(`BUILD_WIRE_OK`, `BUILD_INSTRUMENTATION_OK`); one parallel-autotools
+`filter.h` race was preserved and a serial rebuild was clean. Unmodified
+`run-v6value.sh`: RC=0, **12 PASS / 0 FAIL**, `MSEC=1795729729448`,
+`TARGET_BYTES=a827d519a2010000`, `HDR_SIZE_AFTER=00000001a219d527`,
+`PKT_TAIL=00000000000000000000000001000400`. Marker mode: RC=0,
+**13 PASS / 0 FAIL**, `MSEC=1795729736268`,
+`PKT_TAIL=a5a5a5a5a5a5a5a5a5a5a5a501000400`,
+`TARGET_BYTES=4c42d519a2010000`,
+`HDR_SIZE_AFTER=00000001a219d542`. The written word is the epoch-ms value
+in both modes, not the packet's `0xA5`; the post-write size is
+`(msec>>8)&((1<<56)-1)` in both. GDB breakpoints were read-only `printf`;
+no memory or registers were forced. Fresh source rechecks:
+`nfcapd.c:442` assigns `fs->received = tv` from `gettimeofday()` at
+`:343`, pinned `nfd_raw-parent.c:188` computes `msecReceived`, and
+`nfd_raw.c:256` stores it. Grade unchanged: rung 3 live / rung 4
+availability + chosen-offset PARTIAL / NO r5. The five older replay lanes
+remain queued and were not re-run by the witness this round.
