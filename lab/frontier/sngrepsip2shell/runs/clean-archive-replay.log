@@ -1,0 +1,14 @@
+PASS four pins sha256-match manifest
+PASS verbatim slices generated with pinned-line assertions
+PASS verbatim sink slices match raw pinned lines
+PASS GCC ASan vulnerable build
+PASS GCC ASan fixed build
+PASS GCC plain vulnerable build
+PASS clang ASan vulnerable build
+PASS GCC ASan stack OOB READ at raw sip.c:338, payload at :320
+PASS fixed pin MAX_SIP_PAYLOAD+1 control clean
+PASS 10239-byte safe vector clean on vulnerable pin
+PASS 10241-byte guard rejects before copy
+PASS plain vulnerable attack exits 0 (rung 1/2 negative preserved)
+PASS clang ASan reproduces the same read
+RESULT PASS=13 FAIL=0
