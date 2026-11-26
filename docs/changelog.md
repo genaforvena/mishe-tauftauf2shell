@@ -31,8 +31,12 @@ cell, register row, grade, report or lab evidence moved. Recipes are in
   12 alive/7 distinct hashes plus 3 faults with no HTTP response over 15
   fresh attacks; original hash once. Hash-seed-driven layout is a hypothesis,
   not measured; accept `CORRUPTED` plus `shortened_by_one>0` with clean
-  controls, not a fixed hash. Grade unchanged, rung 4 stock-wire unwitnessed,
-  no r5. The older byte-identical wording in the dated log is superseded.
+  controls, not a fixed hash. Witness W299 (23:28Z) returned ESTABLISHED AS
+  LABELED at the exact `RAILS_MAX_THREADS=2` / shallow / ASLR-off scope with
+  the exact author hash and clean controls; the 20 threads=1 faults at
+  `0x7fffbffc0048` are a diagnosed VM-stack guard layout condition, not a
+  counterexample. No grade, flag or count change, no r5. The older
+  byte-identical wording in the dated log is superseded.
 
 
 ## 2026-11-26 22:5x–23:0xZ — live555 191st, W296/W297 verdicts, staged W297 lanes

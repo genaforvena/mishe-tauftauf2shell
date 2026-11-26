@@ -16102,11 +16102,22 @@ guarantee: W299's 15 fresh ASLR-off attacks gave 12 alive responses with
 seven distinct hashes and three SIGSEGV faults with no HTTP response.
 `setarch -R` is effective, but Ruby's per-process hash seed stays random;
 its role in the layout change is a plausible, unmeasured hypothesis. A clean
-differ, a fault without HTTP response or a dirty control is the contradiction;
-a different hash is not. The driver returns rc 0 after a faulted request, so
-read `http_status`, `health` and `exit_after_request` from its JSON.
-Gitignored W299 evidence: `lab/build/evidence/w299-*.{json,html,server.log}`
-and `lab/build/evidence/w299-aslr-off-determinism/summary.txt`; see
-`reports/ruby2shell-investigation.md` § 23:2xZ. Grade unchanged, stock-wire
-rung 4 unwitnessed, no r5.
+differ or dirty control is the contradiction; a different hash is not, and a
+no-response fault needs the layout diagnosis below. The driver returns rc 0
+after a faulted request, so read `http_status`, `health` and
+`exit_after_request` from its JSON. Gitignored W299 evidence:
+`lab/build/evidence/w299-*.{json,html,server.log}` and
+`lab/build/evidence/w299-aslr-off-determinism/summary.txt`.
+Witness W299 (23:28Z) is **ESTABLISHED AS LABELED** at the exact
+`RAILS_MAX_THREADS=2` / shallow / ASLR-off / both-GEM_PATH-overrides scope:
+attack 200/alive, 54,795 bytes, `c6be1419…` exact, differ 306→302 / 4 missing
+/ 293 shortened / `verdict=CORRUPTED`, control 55,667-byte `56eb2e92…`, safe
+3,079 bytes, fixed 500/alive, ASLR-on exact in 3/6 trials. With the driver's
+default `RAILS_MAX_THREADS=1`, 20 attacks faulted at `0x7fffbffc0048`, an
+unmapped VM-stack guard gap also seen in the author's preserved fault: a
+layout condition, not a counterexample. Hash-seed causality stays unmeasured.
+The register's `established` flag was already true; no grade or count change,
+no pointer, command or r5. Detail: `.mishe-tauftauf/artifacts/
+witness-w299-ruby/detail.md` and `reports/ruby2shell-investigation.md`
+§ 23:2xZ.
 

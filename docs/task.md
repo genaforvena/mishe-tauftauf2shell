@@ -15053,13 +15053,23 @@ cell, register row, grade, report or lab evidence was moved. Reproduce from
   the causal link to allocation/GC layout is a **hypothesis, not a
   measurement**. The acceptance invariant is HTTP 200, worker alive,
   `verdict=CORRUPTED` and `shortened_by_one>0` with clean control/safe/fixed
-  legs, not a byte-exact hash; a fault with no response or a clean differ is
-  the contradiction. The driver's attack rc 0 after a faulted request must
-  not be trusted; read `http_status`, `health` and `exit_after_request`.
+  legs, not a byte-exact hash; a clean differ or dirty control is the
+  contradiction. A no-response fault is a layout condition to diagnose, and
+  the driver's attack rc 0 after a faulted request must not be trusted; read
+  `http_status`, `health` and `exit_after_request`.
   Its recipe in `docs/reproducibility.md` § 18:5x was updated by the author,
   superseding the older "3/3 byte-identical" wording in this dated log.
-  Grade unchanged: stock-wire rung 4 remains unwitnessed, full rung 5 NOT
-  ACHIEVED.
+- Witness W299 (23:28Z) returned **ESTABLISHED AS LABELED** for the stock-wire
+  rung-4 corruption at the exact `RAILS_MAX_THREADS=2`, shallow, ASLR-off,
+  both-GEM_PATH-overrides scope: driver `01193fbe…`, differ `779a615f…`,
+  tarball `f79c6e78…`, attack 200/alive with 54,795-byte `c6be1419…` and
+  306→302 / 4 missing / 293 shortened `CORRUPTED`; control/safe/fixed clean,
+  ASLR-on exact in 3/6 trials. Twenty default `RAILS_MAX_THREADS=1` attacks
+  faulted in an unmapped VM-stack guard gap at `0x7fffbffc0048`, matching the
+  author's preserved fault: a layout diagnosis, not a contradiction. The
+  hash-seed causal link stays unmeasured. The register's `established` flag
+  was already true; no grade change, count change, pointer, command or r5.
+  Detail: `.mishe-tauftauf/artifacts/witness-w299-ruby/detail.md`.
 
 Every count above is an operator, author, clean-archive or independent
 witness observation as labeled; none moves a generated grade cell here.
