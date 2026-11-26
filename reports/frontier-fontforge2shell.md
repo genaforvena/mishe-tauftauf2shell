@@ -433,3 +433,49 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   made from them.
 - Operator owns admission; the person owns charter, wake units and the
   full-flag sync. Do not duplicate this lane.
+
+## W31 (2026-11-26) — research closed at the documented ceiling
+
+Decision: stop the `--again 300s` chain. Witness #3309 remains ESTABLISHED
+rungs 1-4 only at the labeled direct-call / truncated-table / stand-in-struct
+scope, with NO r5; every real-build lane stays author-side. Witness #4165
+(W17 bundled replay) was still queued at 01:09Z: its wall mtime was
+00:26:43Z (W236 libxml2 verdict), and leptonica, pgpool, open5gs and openexr
+offers sat ahead of it. No new fontforge verdict or replay demand appeared,
+so no nudge or re-offer was sent. Addressed witness replies wake this role
+directly; retiring the timer does not lose the outstanding offer.
+
+Upstream status, checked at 01:09Z by provisioning-only GitHub API reads:
+PR <https://github.com/fontforge/fontforge/pull/5957> is CLOSED and MERGED
+at `2026-11-19T14:45:35Z`, merge commit `65e80b5dfb6691a1c8a532cfbb8ec905949e0c9a`
+— the same one-line `glyph>=0` fix already pinned in `PINS.md`. The latest
+upstream release is still tag `20251009` (published `2025-10-09T19:23:52Z`),
+the vulnerable version; no released fixed build was observed. This changes
+neither the grade nor the UNKNOWN real-file reachability.
+
+Fresh one-command author-side receipt at HEAD `56d35f6d`:
+`cd lab/frontier/fontforge2shell && sh replay-all.sh`. Observed verbatim:
+`PASS replay-real.sh rc=0 [REPLAY_REAL_OK: 17/17 stable-lane checks passed]`,
+`PASS replay-nonpie.sh rc=0 [REPLAY_NONPIE_OK: 15 checks, 0 failed]`,
+`PASS replay-negdiv.sh rc=0 [REPLAY_NEGDIV_OK: 20 checks, 0 failed]`,
+`REPLAY_ALL_OK: 3 suites (17 + 15 + 20 = 52 checks), 0 failed`, rc 0.
+The replay rewrote only pid tokens in four committed gdb transcripts; those
+incidental diffs were restored. This is a live-tree author replay, not an
+independent verdict.
+
+The called-pointer hypothesis is source-bound shut at the measured states:
+`encoding.c:2560` uses a live `tounicode` iconv descriptor before
+`:2592`'s `tounicode_func`, and `getformint16()` (`fvimportbdf.c:1354-1363`)
+can produce only one distinct negative index (`low-256`) per truncated
+table, with every later index forced to `-1`. W27-W30 already measured the
+descriptor, second-import, duplicate-table and `fromunicode` variants as
+negatives. Zeroing the descriptor and installing a chosen function pointer
+therefore cannot be done in one import; GUI, other loaders, a deliberate
+called-pointer groom inside the 1 KiB window and a second-stage overflow
+remain UNKNOWN, not measured paths.
+
+Reopen only on: an independent witness verdict that widens the real-path
+grade, a measured call/branch at a file-chosen address in the real process,
+a benign marker execution there, or a newly measured consumer that changes
+the source-bound conclusion above. Do not re-send #4165 or re-sweep closed
+lanes without one of those. Yield `verified` with no `--again`.
