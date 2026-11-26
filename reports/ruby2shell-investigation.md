@@ -4111,3 +4111,32 @@ Disposition: no chosen-byte write into a reflected value, no claim pop of the
 grown victim, no command, no second command. Grades unchanged: rung 4
 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+### Transfer-Encoding: chunked wire shaping at N=588 — bounded NEGATIVE (2026-11-26, fourteenth wake)
+
+The stock driver has a chunked knob (`lab/repro/ruby2shell-stock-rails.sh:78-80`)
+that had never been exercised in this investigation. Prediction: sending the
+N=588 chosen-header multipart body with `Transfer-Encoding: chunked` would
+change Rack/Puma's carve position, potentially reflecting a chosen `0x53` run
+in the development routing-error params page or exposing a heap/libc qword.
+Seven fresh vulnerable-3.4.12 processes (one timing probe plus `ch588-1..6`)
+used `DRAIN=1024:32` with fake-pattern drain bytes, `FILL=256` of
+`[0x250, 0x90]`, `PART_CHARSET=1`, tail `00005102`; the unchunked N=588 cohort
+is the historical control.
+
+Outcome: **6/7 chunked processes aborted during body parsing** with
+`malloc(): invalid next size (unsorted)` (trigger-http `000`, process dead),
+and **1/7 (`ch588-1`) survived with a clean 404** whose params page reflected
+34 parts with 0 deviations and 0 leak-shaped qwords — identical to the
+unchunked coverage band. No reflected `0x53` run, no chosen-byte write into a
+live value, no libc/code pointer, no command. Fixed-3.4.13 controls under the
+identical chunked wire survived 2/2 with clean 404 and 34 clean reflected
+parts, so the abort is attributable to the vulnerable one-byte overflow, not
+to chunked parsing itself. The chunked lane is closed: it converts the carve
+into an immediate glibc abort rather than a reflection oracle. Evidence:
+`lab/build/evidence/ch588-reflect-scan.txt`, `stock-rails-ch588-{probe,1..6}.{out,server.log}`
+and `stock-rails-ch588fix-{1,2}.{out,server.log}` (gitignored).
+
+Disposition: grades unchanged — rung 4 witness-COMPLETE, harness-condition
+rung 5 witness-ESTABLISHED, stock/oracle-free/persistent rung 5
+**NOT ACHIEVED**. No command, no second command.
