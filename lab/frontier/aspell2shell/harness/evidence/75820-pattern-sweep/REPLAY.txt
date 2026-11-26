@@ -1,0 +1,42 @@
+CVE-2026-75820 — chosen byte sequence at consecutive OOB offsets
+(2026-11-26 01:06Z, author run)
+
+Claim: in a real Aspell 0.60.8.2 `-DNDEBUG` recover-mode ASan build, a
+304-byte personal-word-list word whose size byte wraps to 48 drives 40
+consecutive input-chosen normalized bytes (0x01..0x1a, then 0x01..0x0e)
+into memory just past the 64-byte `String` allocated at suggest.cpp:1469.
+The bytes are class codes from `to_normalized` (typo_editdist.cpp:154-170),
+not arbitrary bytes: no pointer bytes, no dereference, no marker execution
+and no command side effect. Grade stays 75818 rung 3 / 75820 rung 4 PARTIAL /
+NO r5. This extends the single-offset result in ../75820-byte-sweep to a
+consecutive chosen sequence; it does not widen the rung.
+
+Exact input: personal word = 44-byte alphabet pattern
+`abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqr` repeated six times plus
+`abcdefghijklmnopqrstuvwxyzabcdefghijklmn`, length 304 (wrapped size byte
+48 at writable.cpp:517); query = that word with its last `n` replaced by
+`s`, length 304, fed through real `aspell -a`.
+
+Build: the three binaries come from the pinned source trees in
+`real-build/` with the recipe in `../75820-write/REPLAY.txt`
+(clang ASan, `-DNDEBUG`, recover mode). The harness rebuilds them when its
+work dir is empty; this run reused binaries built from those same trees.
+
+Replay from the repo root (absolute paths required for --personal):
+
+    sh lab/frontier/aspell2shell/harness/75820-pattern-sweep.sh \
+      /tmp/aspell-pattern-evidence /tmp/aspell-pattern-work
+
+Result: `8 PASS / 0 FAIL`. `summary.txt` records plain_writes=2, the first
+WRITE at 0x...ea00 located 0 bytes after the 64-byte region [e9c0,ea00),
+41 GDB store hits at strictly increasing destination addresses, the raw
+characters `a..z` mapping to normalized bytes `1..26`, and the memory dump
+before (all 0xbe ASan fill) and after the stores (0x01..0x1a, 0x01..0x0e).
+Fixed 0.60.8.3 and the targeted 0.60.8.2 + fix-hunk build both reject the
+304-byte word with rc 1, no ASan report and no WRITE.
+
+Absolute addresses vary with heap layout and build path; the offsets,
+bytes and class-code mapping are stable. `gdb.cmd` uses the store address
+`0x5555557d0fac` (`mov %r12b,(%r14)`, `fine_tune_score+2220`); pass
+`STORE_ADDR=0x...` for a different build. All input is local files; no
+network probe.

@@ -1,0 +1,748 @@
+Breakpoint 1 at 0x5555557d0fac
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+WARNING: Unable to enter Nroff mode: Unknown mode: "nroff".
+@(#) International Ispell Version 3.1.20 (but really Aspell 0.60.8.2 NDEBUG)
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x5555555c754f bp 0x7fffffffd4c0 sp 0x7fffffffcc88
+READ of size 50 at 0x519000007c80 thread T0
+[Detaching after fork from child process 3171110]
+    #0 0x5555555c754e in strlen (/tmp/aspell-byte-sweep/build-vuln/aspell+0x7354e) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555557cec24 in (anonymous namespace)::Working::score_list() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1334:74
+    #2 0x5555557cadda in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:529:7
+    #3 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/tmp/aspell-byte-sweep/build-vuln/aspell+0x7354e) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3) in strlen
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x5555557dd24e bp 0x7fffffffd1d0 sp 0x7fffffffd1c8
+READ of size 1 at 0x519000007c80 thread T0
+    #0 0x5555557dd24d in aspeller::phonet(char const*, char*, int, aspeller::PhonetParms const&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/phonet.cpp:212:37
+    #1 0x5555557daee4 in aspeller::PhonetSoundslike::to_soundslike(char*, char const*, int) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/phonetic.cpp:168:22
+    #2 0x5555557d7229 in aspeller::Language::to_soundslike(char*, char const*, int) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/language.hpp:317:27
+    #3 0x5555557d7229 in (anonymous namespace)::Working::to_soundslike(char const*, unsigned int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:255:34
+    #4 0x5555557cec35 in (anonymous namespace)::Working::score_list() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1334:51
+    #5 0x5555557cadda in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:529:7
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/phonet.cpp:212:37 in aspeller::phonet(char const*, char*, int, aspeller::PhonetParms const&)
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+BEFORE
+0x50600000e960:	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe
+0x50600000e968:	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe
+0x50600000e970:	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe
+0x50600000e978:	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe
+0x50600000e980:	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe	0xbe
+HIT 1 dest=0x50600000e960 raw=a norm=1
+HIT 2 dest=0x50600000e961 raw=b norm=2
+HIT 3 dest=0x50600000e962 raw=c norm=3
+HIT 4 dest=0x50600000e963 raw=d norm=4
+HIT 5 dest=0x50600000e964 raw=e norm=5
+HIT 6 dest=0x50600000e965 raw=f norm=6
+HIT 7 dest=0x50600000e966 raw=g norm=7
+HIT 8 dest=0x50600000e967 raw=h norm=8
+HIT 9 dest=0x50600000e968 raw=i norm=9
+HIT 10 dest=0x50600000e969 raw=j norm=10
+HIT 11 dest=0x50600000e96a raw=k norm=11
+HIT 12 dest=0x50600000e96b raw=l norm=12
+HIT 13 dest=0x50600000e96c raw=m norm=13
+HIT 14 dest=0x50600000e96d raw=n norm=14
+HIT 15 dest=0x50600000e96e raw=o norm=15
+HIT 16 dest=0x50600000e96f raw=p norm=16
+HIT 17 dest=0x50600000e970 raw=q norm=17
+HIT 18 dest=0x50600000e971 raw=r norm=18
+HIT 19 dest=0x50600000e972 raw=s norm=19
+HIT 20 dest=0x50600000e973 raw=t norm=20
+HIT 21 dest=0x50600000e974 raw=u norm=21
+HIT 22 dest=0x50600000e975 raw=v norm=22
+HIT 23 dest=0x50600000e976 raw=w norm=23
+HIT 24 dest=0x50600000e977 raw=x norm=24
+HIT 25 dest=0x50600000e978 raw=y norm=25
+HIT 26 dest=0x50600000e979 raw=z norm=26
+HIT 27 dest=0x50600000e97a raw=a norm=1
+HIT 28 dest=0x50600000e97b raw=b norm=2
+HIT 29 dest=0x50600000e97c raw=c norm=3
+HIT 30 dest=0x50600000e97d raw=d norm=4
+HIT 31 dest=0x50600000e97e raw=e norm=5
+HIT 32 dest=0x50600000e97f raw=f norm=6
+HIT 33 dest=0x50600000e980 raw=g norm=7
+HIT 34 dest=0x50600000e981 raw=h norm=8
+HIT 35 dest=0x50600000e982 raw=i norm=9
+HIT 36 dest=0x50600000e983 raw=j norm=10
+HIT 37 dest=0x50600000e984 raw=k norm=11
+HIT 38 dest=0x50600000e985 raw=l norm=12
+HIT 39 dest=0x50600000e986 raw=m norm=13
+HIT 40 dest=0x50600000e987 raw=n norm=14
+HIT 41 dest=0x50600000e988 raw=o norm=15
+AFTER41
+0x50600000e960:	0x01	0x02	0x03	0x04	0x05	0x06	0x07	0x08
+0x50600000e968:	0x09	0x0a	0x0b	0x0c	0x0d	0x0e	0x0f	0x10
+0x50600000e970:	0x11	0x12	0x13	0x14	0x15	0x16	0x17	0x18
+0x50600000e978:	0x19	0x1a	0x01	0x02	0x03	0x04	0x05	0x06
+0x50600000e980:	0x07	0x08	0x09	0x0a	0x0b	0x0c	0x0d	0x0e
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x5555557d1034 bp 0x7fffffffd4b0 sp 0x7fffffffd4a8
+READ of size 1 at 0x519000007c80 thread T0
+    #0 0x5555557d1033 in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1483:25
+    #1 0x5555557cae4f in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:536:7
+    #2 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #3 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #4 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #5 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #6 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #7 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1483:25 in (anonymous namespace)::Working::fine_tune_score(int)
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x5555557cf3b9 bp 0x7fffffffd4c0 sp 0x7fffffffd4b8
+READ of size 1 at 0x519000007c80 thread T0
+    #0 0x5555557cf3b8 in aspeller::InsensitiveCompare::operator()(char const*, char const*) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/language.hpp:421:35
+    #1 0x5555557cf3b8 in (anonymous namespace)::Working::skip_first_couple(std::_List_iterator<(anonymous namespace)::ScoreWordSound>&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:353:19
+    #2 0x5555557cf3b8 in (anonymous namespace)::Working::score_list() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1366:15
+    #3 0x5555557cb0f2 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:586:7
+    #4 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #5 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #6 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #7 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #8 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #9 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #10 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #11 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/language.hpp:421:35 in aspeller::InsensitiveCompare::operator()(char const*, char const*) const
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50600000ea00 at pc 0x5555557d1020 bp 0x7fffffffd4b0 sp 0x7fffffffd4a8
+WRITE of size 1 at 0x50600000ea00 thread T0
+    #0 0x5555557d101f in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1484:23
+    #1 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #2 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #3 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #4 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #5 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #6 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #7 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x50600000ea00 is located 0 bytes after 64-byte region [0x50600000e9c0,0x50600000ea00)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555556c4b11 in acommon::String::reserve_i(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.cpp:32:24
+    #2 0x5555557d0c6a in acommon::String::reserve(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:79:7
+    #3 0x5555557d0c6a in acommon::String::resize(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:339:7
+    #4 0x5555557d0c6a in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1469:12
+    #5 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1484:23 in (anonymous namespace)::Working::fine_tune_score(int)
+Shadow bytes around the buggy address:
+  0x50600000e780: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e800: fd fd fd fa fa fa fa fa fd fd fd fd fd fd fd fa
+  0x50600000e880: fa fa fa fa fd fd fd fd fd fd fd fa fa fa fa fa
+  0x50600000e900: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e980: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50600000ea00:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50600000ea53 at pc 0x5555557d1422 bp 0x7fffffffd4b0 sp 0x7fffffffd4a8
+WRITE of size 1 at 0x50600000ea53 thread T0
+    #0 0x5555557d1421 in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1485:21
+    #1 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #2 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #3 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #4 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #5 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #6 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #7 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x50600000ea53 is located 83 bytes after 64-byte region [0x50600000e9c0,0x50600000ea00)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555556c4b11 in acommon::String::reserve_i(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.cpp:32:24
+    #2 0x5555557d0c6a in acommon::String::reserve(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:79:7
+    #3 0x5555557d0c6a in acommon::String::resize(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:339:7
+    #4 0x5555557d0c6a in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1469:12
+    #5 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1485:21 in (anonymous namespace)::Working::fine_tune_score(int)
+Shadow bytes around the buggy address:
+  0x50600000e780: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e800: fd fd fd fa fa fa fa fa fd fd fd fd fd fd fd fa
+  0x50600000e880: fa fa fa fa fd fd fd fd fd fd fd fa fa fa fa fa
+  0x50600000e900: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e980: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50600000ea00: fa fa fa fa fa fa fa fa fa fa[fa]fa fa fa fa fa
+  0x50600000ea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50600000ea00 at pc 0x5555557e042a bp 0x7ffffffe71f0 sp 0x7ffffffe71e8
+READ of size 1 at 0x50600000ea00 thread T0
+    #0 0x5555557e0429 in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp
+    #1 0x5555557d10b7 in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1486:29
+    #2 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #3 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x50600000ea00 is located 0 bytes after 64-byte region [0x50600000e9c0,0x50600000ea00)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555556c4b11 in acommon::String::reserve_i(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.cpp:32:24
+    #2 0x5555557d0c6a in acommon::String::reserve(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:79:7
+    #3 0x5555557d0c6a in acommon::String::resize(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:339:7
+    #4 0x5555557d0c6a in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1469:12
+    #5 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&)
+Shadow bytes around the buggy address:
+  0x50600000e780: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e800: fd fd fd fa fa fa fa fa fd fd fd fd fd fd fd fa
+  0x50600000e880: fa fa fa fa fd fd fd fd fd fd fd fa fa fa fa fa
+  0x50600000e900: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e980: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50600000ea00:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50600000ea00 at pc 0x5555557e00b2 bp 0x7ffffffe71f0 sp 0x7ffffffe71e8
+READ of size 1 at 0x50600000ea00 thread T0
+    #0 0x5555557e00b1 in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp:53:32
+    #1 0x5555557d10b7 in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1486:29
+    #2 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #3 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x50600000ea00 is located 0 bytes after 64-byte region [0x50600000e9c0,0x50600000ea00)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555556c4b11 in acommon::String::reserve_i(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.cpp:32:24
+    #2 0x5555557d0c6a in acommon::String::reserve(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:79:7
+    #3 0x5555557d0c6a in acommon::String::resize(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:339:7
+    #4 0x5555557d0c6a in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1469:12
+    #5 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp:53:32 in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&)
+Shadow bytes around the buggy address:
+  0x50600000e780: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e800: fd fd fd fa fa fa fa fa fd fd fd fd fd fd fd fa
+  0x50600000e880: fa fa fa fa fd fd fd fd fd fd fd fa fa fa fa fa
+  0x50600000e900: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e980: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50600000ea00:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50600000ea00 at pc 0x5555557e0289 bp 0x7ffffffe71f0 sp 0x7ffffffe71e8
+READ of size 1 at 0x50600000ea00 thread T0
+    #0 0x5555557e0288 in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp:70:12
+    #1 0x5555557d10b7 in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1486:29
+    #2 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #3 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x50600000ea00 is located 0 bytes after 64-byte region [0x50600000e9c0,0x50600000ea00)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x5555556c4b11 in acommon::String::reserve_i(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.cpp:32:24
+    #2 0x5555557d0c6a in acommon::String::reserve(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:79:7
+    #3 0x5555557d0c6a in acommon::String::resize(unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/string.hpp:339:7
+    #4 0x5555557d0c6a in (anonymous namespace)::Working::fine_tune_score(int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1469:12
+    #5 0x5555557cc6b4 in (anonymous namespace)::Working::suggestions() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:606:5
+    #6 0x5555557c3941 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1642:24
+    #7 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #8 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #9 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #10 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #11 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #12 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #13 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/typo_editdist.cpp:70:12 in aspeller::typo_edit_distance(acommon::ParmString, acommon::ParmString, aspeller::TypoEditDistanceInfo const&)
+Shadow bytes around the buggy address:
+  0x50600000e780: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e800: fd fd fd fa fa fa fa fa fd fd fd fd fd fd fd fa
+  0x50600000e880: fa fa fa fa fd fd fd fd fd fd fd fa fa fa fa fa
+  0x50600000e900: fd fd fd fd fd fd fd fa fa fa fa fa fd fd fd fd
+  0x50600000e980: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+=>0x50600000ea00:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ea80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000eb80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x50600000ec80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x5555557d87d2 bp 0x7fffffffd700 sp 0x7fffffffd6f8
+READ of size 1 at 0x519000007c80 thread T0
+    #0 0x5555557d87d1 in acommon::hash<char const*>::operator()(char const*) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/hash_fun.hpp:32:14
+    #1 0x5555557d87d1 in acommon::HashTable<acommon::HashSetParms<char const*, acommon::hash<char const*>, (anonymous namespace)::StrEquals, false>>::find_i(char const* const&, bool&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/hash-t.hpp:139:16
+    #2 0x5555557d87d1 in acommon::HashTable<acommon::HashSetParms<char const*, acommon::hash<char const*>, (anonymous namespace)::StrEquals, false>>::insert(char const* const&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/hash-t.hpp:90:28
+    #3 0x5555557c5304 in (anonymous namespace)::Sugs::transfer((anonymous namespace)::SuggestionsImpl&, int) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1576:30
+    #4 0x5555557c5304 in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1658:11
+    #5 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #6 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #7 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #8 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #9 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #10 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #11 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/hash_fun.hpp:32:14 in acommon::hash<char const*>::operator()(char const*) const
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+=================================================================
+==3171067==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000007c80 at pc 0x55555570a1fa bp 0x7fffffffd990 sp 0x7fffffffd988
+READ of size 1 at 0x519000007c80 thread T0
+    #0 0x55555570a1f9 in acommon::DecodeNormLookup::decode(char const*, int, acommon::FilterCharVector&) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/convert.cpp:665:13
+    #1 0x555555774f5f in acommon::Convert::convert(char const*, int, acommon::String&, acommon::FilterCharVector&) const /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/convert.hpp:177:18
+    #2 0x555555774f5f in acommon::Convert::convert(char const*, int, acommon::String&) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/convert.hpp:205:9
+    #3 0x555555774f5f in aspell_string_enumeration_next /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/string_enumeration-c.cpp:43:26
+    #4 0x5555556969da in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:917:20
+    #5 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #6 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #7 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #8 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+0x519000007c80 is located 0 bytes after 1024-byte region [0x519000007880,0x519000007c80)
+allocated by thread T0 here:
+    #0 0x55555564ab13 in malloc (/tmp/aspell-byte-sweep/build-vuln/aspell+0xf6b13) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+    #1 0x555555712437 in acommon::ObjStack::ObjStack(unsigned long, unsigned long) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/objstack.cpp:18:32
+    #2 0x5555557c874a in (anonymous namespace)::Working::Working(aspeller::SpellerImpl*, aspeller::Language const*, acommon::String const&, aspeller::SuggestParms const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:379:5
+    #3 0x5555557c391a in (anonymous namespace)::SuggestImpl::suggest(char const*) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/suggest.cpp:1641:25
+    #4 0x5555557462a6 in aspeller::SpellerImpl::suggest(acommon::MutableString) /tmp/aspell-byte-sweep/build-vuln/../src-vuln/modules/speller/default/speller_impl.cpp:134:23
+    #5 0x555555796f70 in aspell_speller_suggest /tmp/aspell-byte-sweep/build-vuln/../src-vuln/lib/speller-c.cpp:202:41
+    #6 0x555555696364 in pipe() /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:895:25
+    #7 0x55555568e642 in main /tmp/aspell-byte-sweep/build-vuln/../src-vuln/prog/aspell.cpp:419:5
+    #8 0x7ffff782a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #9 0x7ffff782a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #10 0x5555555afcc4 in _start (/tmp/aspell-byte-sweep/build-vuln/aspell+0x5bcc4) (BuildId: 25eea49a1846b94b34d4646da2501d7943cbfae3)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /tmp/aspell-byte-sweep/build-vuln/../src-vuln/common/convert.cpp:665:13 in acommon::DecodeNormLookup::decode(char const*, int, acommon::FilterCharVector&) const
+Shadow bytes around the buggy address:
+  0x519000007a00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007a80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007b80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000007c00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000007c80:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000007d80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x519000007e00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x519000007e80: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x519000007f00: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+& abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdefghijklmnopqrstuvwxyzabcdefghijklms 3 0: abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdeabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdeabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcde, abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcdeabcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcde, abcdefghijklmnopqrstuvwxyzabcdefghijklmnopqrabcde
+
+[Inferior 1 (process 3171067) exited normally]

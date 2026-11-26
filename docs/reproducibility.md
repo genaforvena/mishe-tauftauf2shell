@@ -10663,6 +10663,16 @@ of 5, with hungerg-free retired in `routes.json`. No target grade changed.
   Arbitrary byte values, arbitrary offsets, pointer control, marker, command
   and r5 are NOT measured; witness UNKNOWN. Recover-mode ASan and gdb are for
   observation; details in `reports/frontier-aspell2shell.md`.
+- **Aspell2Shell 75820 — chosen byte sequence at consecutive offsets** — from
+  `lab/frontier/aspell2shell` run `sh harness/75820-pattern-sweep.sh /tmp/aspell-pattern-evidence /tmp/aspell-pattern-work`;
+  expect `8 PASS / 0 FAIL`. A 304-byte personal word wraps to size byte 48;
+  GDB logs 41 stores at increasing addresses with raw `a..z` mapping to
+  normalized `0x01..0x1a`, and the 40 destination bytes change from `0xbe`
+  fill to `0x01..0x1a, 0x01..0x0e`. Plain ASan reports the first WRITE 0 bytes
+  past a 64-byte `String`; 0.60.8.3 and the targeted fix reject rc 1 with no
+  ASan. Values are still class codes, not arbitrary bytes; no pointer,
+  marker, command, r5 or witness verdict. Details:
+  `harness/evidence/75820-pattern-sweep/REPLAY.txt`.
 - **FreeImage2Shell** — CVE-2026-118753 / GHSA-wr69-568q-rrqg, Danoli3
   FreeImage before 3.19.25. Vulnerable `3.19.24` `4916e0ec`, fixed `3.19.25`
   `363311f1`, fix `0da5ddb4`. Pin sha256 values are

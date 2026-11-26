@@ -184,3 +184,19 @@ normalized class codes, still at one fixed offset. Those codes come from
 alpha classes and one catch-all code to non-alpha; pointer bytes,
 arbitrary byte values, arbitrary offsets, dereference and commands remain
 NOT measured. No grade or rung-5 change.
+
+Consecutive-offset sweep (2026-11-26 01:06Z): `harness/75820-pattern-sweep.sh`
+uses a 304-byte personal word (44-byte alphabet pattern repeated, wrapped
+size byte 48) and a one-character-different query. GDB at the same store
+instruction records 41 stores at strictly increasing destination addresses
+whose raw characters are `a..z` then `a..` and whose normalized bytes are
+`0x01..0x1a` then `0x01..`; the memory dump changes 40 bytes from ASan
+malloc fill `0xbe` to `0x01..0x1a, 0x01..0x0e`. The plain recover-ASan run
+reports the first WRITE 0 bytes past a 64-byte `String`; 0.60.8.3 and the
+targeted-fix build reject the word (rc 1, no ASan). Replay is
+**8 PASS / 0 FAIL** (`harness/evidence/75820-pattern-sweep/REPLAY.txt`).
+This widens the measured primitive from one chosen class byte to a
+consecutive chosen sequence at consecutive OOB offsets. The values remain
+class codes 1..26, not arbitrary bytes: no pointer bytes, arbitrary offset,
+dereference, marker or command. Grade and r5 status unchanged; witness
+verdict on the earlier claims still UNKNOWN.
