@@ -1,6 +1,6 @@
-# libsmpp342shell — staged status (W271, 2026-11-26)
+# libsmpp342shell — ADMITTED 13:5xZ under standing #6 (W271); witness replay owed
 
-## What is staged
+## Admission evidence
 
 - Target: Osmocom libsmpp34 `smpp34_unpack()` C-Octet unbounded `strlen`
   heap over-read, CVE-2026-75895 / GHSA-fpm9-38vr-4gp8. Advisory labels name
@@ -12,12 +12,19 @@
 - Harness: `lab/frontier/libsmpp342shell/run-all.sh`, `harness/driver.c`,
   `PROVENANCE.md`; tarballs and `build/` are gitignored.
 - Window: dedicated two-pane target window created by frontier on the inner
-  tmux socket; registered in the site window registry.
+  tmux socket (window 184, panes %372/%373, dead=0); registered in the site
+  window registry (185 windows, 185 unique names). Operator admission at
+  13:5xZ; no dedicated OMP route or generated wake unit yet (person-reserved).
 
 ## Measured result at handoff
 
 `run-all.sh` sha256 `373fcdc9a182485efc38dbb3b7fa99908a57f80cd4e4977838058be708405637`,
-console `evidence-run-console.log`, `RESULT PASS=31 FAIL=0 rc 0` at 13:51Z.
+console `evidence-run-console.log` sha256
+`cbd591997570a70ca4645719f4a5dab841d09400add9970b4f4b07f4d4562ccb`,
+`RESULT PASS=31 FAIL=0 rc 0` at 13:51Z. Operator re-ran the unmodified runner
+at 14:0xZ from the same pinned tarballs; stdout hash matched the staged console
+byte-for-byte and is preserved at
+`.mishe-tauftauf/artifacts/operator-w20261126-libsmpp34-smoke/console.log`.
 GCC and Clang ASan both report `heap-buffer-overflow`, `READ of size 2`,
 `0 bytes after 17-byte region` through the verbatim
 `def_frame/bind_transmitter.frame:1` C_OCTET macro. The fixed build rejects
@@ -29,7 +36,7 @@ PDU parses to `rv=0` in both builds; a guard-page plain build faults rc 139.
 Rung 3 ASan-confirmed heap OOB READ in verbatim pinned source; rung 4 NOT
 CLAIMED (one chosen byte supplied; no chosen-offset read-back, pointer
 steering, live wire consumer, command or r5). Witness replay from clean
-tarballs is owed; operator admission is owed. Cheapest rung-moving experiment:
+tarballs is owed; admission is complete. Cheapest rung-moving experiment:
 a local loopback SMPP consumer feeding the 17-byte PDU from a client into
 `smpp34_unpack()` under ASan, then heap grooming for chosen-byte read-back.
 

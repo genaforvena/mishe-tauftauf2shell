@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 175,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ) and mqttc2shell (13:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 176,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ) and libsmpp342shell (13:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 172,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ and mqttc2shell admitted 13:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 173,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ and libsmpp342shell admitted 13:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 172,
+      "value": 173,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2672,6 +2672,22 @@
         "reports/mqttc2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Libsmpp342Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 13:5xZ under standing #6 as the 176th declared target mind; window 184 adopted (panes %372/%373 live, no duplicate); operator smoke replay byte-identical `RESULT PASS=31 FAIL=0`; rung 4 NOT CLAIMED, witness replay owed.** CVE-2026-75895 / GHSA-fpm9-38vr-4gp8 (GitHub Advisory Database, unreviewed, High 7.5, `CVSS:3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N`, CWE-125) claims a crafted SMPP C-Octet heap over-read in libsmpp35 0.1.0–1.8.0; the version label is a preserved discrepancy — the one-line patch is in Osmocom libsmpp34 1.14.5 -> 1.14.6 (`af0e2912057551dab97bbe26e6a41f18a75f3bbb`, `strlen` -> `strnlen(aux,left)`), pinned peeled commits `d6ac32fd…` / `f93991bd…`. The `C_OCTET` macro scans before its bounds check; a 17-byte `bind_transmitter` PDU with one unterminated byte gives GCC and Clang ASan `heap-buffer-overflow READ of size 2` 0 bytes past the 17-byte allocation at verbatim `def_frame/bind_transmitter.frame:1` through public `smpp34_unpack()`, with plain guard-page rc 139. Fixed build rejects with `rv=-1`, valid 31-byte PDU parses `rv=0` in both builds. Runner `373fcdc9…` and console `cbd59199…`; frontier staged at `58f43e61`, operator re-run from the same pinned tarballs reproduced the console hash byte-for-byte in `.mishe-tauftauf/artifacts/operator-w20261126-libsmpp34-smoke/`. Grade rung 3 ASan-confirmed OOB READ in verbatim source; rung 4 NOT CLAIMED — one chosen byte, no chosen-offset read-back, pointer steering, live wire consumer or command; rung 5 NOT CLAIMED. No dedicated OMP route or wake unit yet (person-reserved). [Brief](reports/frontier-libsmpp342shell.md), [status](reports/libsmpp342shell-status.md)",
+      "reports": [
+        "reports/frontier-libsmpp342shell.md",
+        "reports/libsmpp342shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
