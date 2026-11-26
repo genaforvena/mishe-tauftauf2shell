@@ -6,8 +6,10 @@ pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL at
 staging, extended W242 by real-glib/real-zlib chosen bytes and a chosen
 pointer value in an adjacent live GLib object, and W243 by an **on-disk
 JIF99a file** whose 16-bit frame dimensions reach the wrapped arithmetic
-through a real `FILE*` header parse. No real GIMP plugin build, no PDB call,
-no dereference of the chosen pointer, no command and no rung 5.
+through a real `FILE*` header parse. W244 measures the pinned caller's size
+guard and ~4 GiB `dest` allocation with real glib, for both file-reachable
+wrapped products. No real GIMP plugin build, no PDB call, no dereference of
+the chosen pointer, no command and no rung 5.
 
 ## Claim and scope
 
@@ -124,9 +126,8 @@ but the *same* wrapped product is file-reachable as `len = 45771`,
 16-bit fields in `ReadImage()`'s frame descriptor. The W243 artifact instead
 uses `len = 33025`, `height = 65026`: `0x80000002`, doubling wraps to
 `data_size = 4`, `avail_out = 2147483650`. In the real plugin `dest` is
-`(gsize)len * (gsize)height * 2` (~4 GiB) in either case; this synthetic
-driver does not make that allocation, so the large-`dest` consumer remains
-UNMEASURED.
+`(gsize)len * (gsize)height * 2` (~4 GiB) in either case; W243 did not make
+that allocation, but W244 below measures it with real glib.
 
 `realglib/make-jif.py` writes a complete JIF99a file: 6-byte magic, 7-byte
 screen descriptor, graphics-control extension with a transparent index
@@ -146,12 +147,48 @@ fixed build rejects with `RC=0 ERR=image data` and no live-object change;
 safe 4x4 no-alpha file leaves the object unchanged. The first generator
 attempt omitted the code-size byte, so the pin read `bpp=12` and rejected
 the file; the byte was restored and the failing logs are preserved in the
-transcript. `bash run-real.sh` now reports **21 PASS / 0 FAIL**.
+transcript. `bash run-real.sh` now reports **30 PASS / 0 FAIL**.
 
 This is an on-disk file artifact reaching the pinned function through a
 real `FILE*`, still not a GIMP plugin or PDB `load_image()` call: the
-header parser, `GimpImage`/`GError` consumption and destination allocation
-are thin stand-ins.
+header parser and `GimpImage`/`GError` consumption are thin stand-ins.
+
+## Pinned caller conditions: size guard and ~4 GiB `dest` (W244, 2026-11-26)
+
+Source check before building: the caller at
+`file-gif-load-vulnerable.c:1348` rejects frames only when
+`len > G_MAXSIZE / height / (alpha_frame ? (promote_to_rgb ? 4 : 2) : 1)`.
+On this 64-bit host `G_MAXSIZE` is `2^64-1`, so neither wrapped product is
+rejected; the allocation at `:1376` is `(gsize)len * (gsize)height * 2`,
+4,294,967,300 bytes for `33025x65026` and 4,294,967,556 for
+`45771x46918`. The pin writes `dest` only while `pos < data_size` (4 or
+260), so `dest` is not itself the overflow target; corruption stays in the
+undersized `indexes` and its neighbour.
+
+`realglib/real-driver.c` gained `caller` and `callerpub` modes: they parse
+the W243 JIF file, reproduce the pinned guard with its exact divisor, probe
+the allocation with `g_try_malloc` (the plugin uses `g_malloc`, which aborts
+on failure; a successful `g_try_malloc` shows the real call would succeed),
+then groom the heap and call the verbatim pin with the real `dest` pointer.
+`make-jif.py published 4d` writes the advisory's `45771x46918` dims with a
+324-byte chosen payload, so `data_size = 260` matches the ASan harness.
+
+Fresh logs under `realglib/evidence/`:
+- `file-caller.log`: `CALLER screen=33025x65026 ... limit=141841294818300`,
+  `GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK
+  DEST_PTR=0x776b1167c010`, `delta=32`, `RC=1`, eight chosen `0x4d` bytes
+  in the live `GArray`.
+- `file-callerpub.log`: `GUARD_PASSES=1 DEST_SIZE=4294967556`,
+  `DEST_ALLOC=OK`, `usable=264`, `delta=272`, `RC=1`, all 48 inspected
+  live-object bytes `0x4d` (`LIVE_CHANGED_BYTES=48`).
+- `file-caller-fixed.log`: same guard and allocation succeed, fixed pin
+  rejects with `RC=0 ERR=image data`, live object byte-identical.
+
+`bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0. The GIMP object
+construction that precedes the guard in the real `ReadImage()`
+(`gimp_image_new`, `gimp_layer_new`, `gimp_image_insert_layer`,
+`gimp_item_transform_translate`) is still omitted, as is the GIMP build,
+the PDB `load_image()` wire, any pointer dereference, a command and rung 5.
 
 ## Grade and tractability
 
@@ -168,12 +205,13 @@ are thin stand-ins.
 
 Next experiment: provision the GIMP 3.2.x source at the vulnerable pin and
 the 3.2.10 fix, build the real `file-gif-load` plugin against GIMP/GEGL, and
-feed the W243 JIF file through the real `load_image()` with
-`is_jeff_image = TRUE` on loopback, including the ~4 GiB `dest` allocation
-that the synthetic driver omits. W242/W243 already measured the real
-glib/glibc allocator layout and a live-object pointer field, so the
-remaining gap is the real plugin/PDB consumer. No rung 5 without a benign
-command side effect on that live target.
+feed the W243/W244 JIF files through the real `load_image()` with
+`is_jeff_image = TRUE` on loopback, including the GIMP object construction
+that precedes the now-measured guard and ~4 GiB `dest` allocation. W242-W244
+already measured the real glib/glibc allocator layout, a live-object pointer
+field and both caller conditions, so the remaining gap is the real
+plugin/PDB consumer. No rung 5 without a benign command side effect on that
+live target.
 
 ## Duplicate check and screened candidates
 

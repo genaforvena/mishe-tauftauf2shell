@@ -62,5 +62,20 @@ has evidence/file-safe.log "LIVE_CHANGED_BYTES=0" && ok "safe on-disk JIF leaves
 has evidence/file-fixed.log "RC=0 ERR=image data" && ok "fixed build rejects on-disk wrapped input" || bad "fixed build rejects on-disk wrapped input"
 has evidence/file-fixed.log "LIVE_CHANGED_BYTES=0" && ok "fixed build leaves live object intact for on-disk input" || bad "fixed build leaves live object intact for on-disk input"
 
+echo "== pinned ReadImage() caller conditions: guard and ~4 GiB dest =="
+python3 make-jif.py evidence/published.jif published 4d > evidence/make-published.log 2>&1
+evidence/real-vuln  caller    evidence/attack.jif    > evidence/file-caller.log 2>&1
+evidence/real-vuln  callerpub evidence/published.jif > evidence/file-callerpub.log 2>&1
+evidence/real-fixed callerpub evidence/published.jif > evidence/file-caller-fixed.log 2>&1
+has evidence/file-caller.log "GUARD_PASSES=1 DEST_SIZE=4294967300" && ok "pinned 64-bit guard passes for 33025x65026" || bad "pinned 64-bit guard passes for 33025x65026"
+has evidence/file-caller.log "DEST_ALLOC=OK" && ok "~4 GiB dest allocation succeeds with real glib" || bad "~4 GiB dest allocation succeeds with real glib"
+has evidence/file-caller.log "LIVE_AFTER=4d4d4d4d4d4d4d4d" && ok "chosen bytes reach live neighbour after dest allocation" || bad "chosen bytes reach live neighbour after dest allocation"
+has evidence/file-callerpub.log "GUARD_PASSES=1 DEST_SIZE=4294967556" && ok "published 45771x46918 passes guard with ~4 GiB dest" || bad "published 45771x46918 passes guard with ~4 GiB dest"
+has evidence/file-callerpub.log "DEST_ALLOC=OK" && ok "published dims dest allocation succeeds" || bad "published dims dest allocation succeeds"
+has evidence/file-callerpub.log "delta=272" && ok "260-byte indexes chunk keeps live neighbour at +272" || bad "260-byte indexes chunk keeps live neighbour at +272"
+has evidence/file-callerpub.log "LIVE_CHANGED_BYTES=48" && ok "published dims overwrite all 48 inspected live bytes" || bad "published dims overwrite all 48 inspected live bytes"
+has evidence/file-caller-fixed.log "RC=0 ERR=image data" && ok "fixed pin rejects published dims after caller allocation" || bad "fixed pin rejects published dims after caller allocation"
+has evidence/file-caller-fixed.log "LIVE_CHANGED_BYTES=0" && ok "fixed caller leaves live object intact" || bad "fixed caller leaves live object intact"
+
 echo "TOTAL: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]

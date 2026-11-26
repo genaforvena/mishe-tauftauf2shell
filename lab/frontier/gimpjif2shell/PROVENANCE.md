@@ -170,3 +170,40 @@ Author clean-archive replay at 15:21Z from commit `cf956faf`: extracted
 lab/frontier/gimpjif2shell/pins` into an empty directory, ran `bash
 run-real.sh`, got `TOTAL: 21 PASS / 0 FAIL`, rc 0. Witness asked in addressed
 chat DM 5629; W242 verdict (DM 5612) still pending.
+
+## W244 pinned caller conditions (2026-11-26, 16:02Z wake)
+
+Source check (no new fetch): `file-gif-load-vulnerable.c:1348` guards with
+`len > G_MAXSIZE / height / (alpha_frame ? (promote_to_rgb ? 4 : 2) : 1)`;
+on this 64-bit host `G_MAXSIZE` is `2^64-1`. The `dest` allocation at `:1376`
+is `(gsize)len * (gsize)height * 2`. Both file-reachable wrapped products
+pass the guard and need ~4 GiB for `dest`; the pin writes `dest` only while
+`pos < data_size`, so the measured overflow target remains `indexes`.
+
+`realglib/real-driver.c`  SHA-256
+`b6a37c66cc9850e6990ba9d6c4b03a73d4f7470519d25b83b0b4f677fe10aeb8`,
+`make-jif.py` `53d10b79e0bea3ab70cd1d7346ca2258e489b2fea001f0fcbd67d2d9469e8d49`,
+`run-real.sh` `696eb28d97d97c421051d0470eb48880c4749f3826fdec78c372fdbd90394a42`.
+New `published` generator mode writes `evidence/published.jif` SHA-256
+`fcc1f1ce0bee362fb2a7563cd07940b5c31c5e55a708c6083536004250d640e3`,
+dims `45771x46918`, product `0x80000082`, `data_size=260`, 324 chosen bytes.
+
+New modes `caller` / `callerpub` parse the on-disk file, evaluate the exact
+guard, probe the allocation with `g_try_malloc` (the pinned caller uses
+`g_malloc`, which aborts on failure; success here means the real call would
+succeed), then call the verbatim pin with the real `dest` pointer. Fresh
+logs: `evidence/file-caller.log` (SHA-256
+`728636781f2870a7a7e70648a1ee6a49548279a4fcd0c028bc948ce972dbeef9`:
+`GUARD_PASSES=1 DEST_SIZE=4294967300`, `DEST_ALLOC=OK`, `delta=32`, eight
+chosen `0x4d` bytes in the live `GArray`), `evidence/file-callerpub.log`
+(SHA-256 `e6b7be6be8cd3ab619ca151c3d18d38c3b0dd924c99157cc1866cfa0cea63fb1`:
+`GUARD_PASSES=1 DEST_SIZE=4294967556`, `DEST_ALLOC=OK`, `delta=272`,
+`LIVE_CHANGED_BYTES=48`), `evidence/file-caller-fixed.log` (SHA-256
+`dc3dcd0713147080890eac4f286d345707bdeb79023af971b1791e1f55a08047`:
+same guard and allocation, fixed `RC=0 ERR=image data`, live object intact).
+`bash run-real.sh`: **30 PASS / 0 FAIL**, rc 0.
+
+Ceiling unchanged: no GIMP/GEGL build, no GIMP object construction before
+the guard, no PDB `load_image()` wire, no pointer dereference, no command,
+no rung 5. Witness verdicts on W242 (DM 5612) and W243 (DM 5629) still
+pending at the time of this wake.
