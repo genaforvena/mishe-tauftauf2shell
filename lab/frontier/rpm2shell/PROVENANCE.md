@@ -40,8 +40,9 @@ returns `RPMERR_BAD_HEADER` before the allocation.
   `rpmfilesFMode`, `rpmfilesFLinks`, `rpmfilesFSize`, `rpmfilesFLink`
   (fixed body only), `rpmcpioRead`, `rpmcpioSetExpectedFileSize`, the error
   constants, an `xmalloc` and a caller. Both bodies are `#include`d verbatim.
-- `rpm_loff_t` is `int64_t`; the advisory's `UINT64_MAX` is represented as
-  `-1`, so `lsize + 1` is exactly zero without signed overflow. `xmalloc(0)`
+- Upstream `rpm_loff_t` is `uint64_t`; the advisory's `UINT64_MAX` makes
+  `lsize + 1` wrap to zero exactly. The harness uses `int64_t` and represents
+  the same bit pattern as `-1`; `-1 + 1` is also exactly zero. `xmalloc(0)`
   returns a 1-byte region under ASan.
 - `rpmcpioRead()` stand-in copies `min(len, g_payload_len)` bytes; for the
   attack case that is 64 bytes from a chosen payload (`MISHE-RPM!!` then
@@ -53,6 +54,58 @@ returns `RPMERR_BAD_HEADER` before the allocation.
   pinned function and does not report the overflow (`RET=-13`). All ASan
   binaries are therefore built at `-O0`; GCC and Clang both report the WRITE
   there. The `-O1` non-detection is preserved as a negative result.
+
+## Real consumer lane (2026-11-26)
+
+Reconciliation: the previous wake left the blobless clone with all 746 tracked
+paths staged deleted; `git restore` timed out halfway. A full clone was made
+at `c36e855034e604ef20863d541d44ef8c2dbac9e8`, with fixed worktree
+`5bc8705e0f9a9ffc123fb1c693bdad13de9f7c03`. The incomplete clone is retained
+as untracked `src/rpm-partial-restore-1795702560`.
+
+Development files for popt 1.19, libarchive 3.7.2, libmagic and scdoc were
+downloaded with `apt-get download` and extracted under `deps/root`; no host
+package was installed. The popt/libarchive pkg-config prefixes were relocated
+to that tree, and unversioned shared-library symlinks point at the host's
+matching runtime libraries. Lua 5.2, zlib, bzip2, lzma, zstd and OpenSSL came
+from the host.
+
+Both real builds use GCC 13.3.0, Ninja, Debug/`-O0`, `ENABLE_ASAN=ON`,
+`WITH_SEQUOIA=OFF`, `WITH_OPENSSL=ON`, Python/plugins/NLS/OpenMP and both
+database backends off, and optional capability/ACL/audit/SELinux/DBus/
+fapolicyd/libdw/libelf/readline integrations off. Workspace-only configure and
+build logs are `configure-vuln.log`, `build-vuln.log`, `configure-fixed.log`
+and `build-fixed.log`. A separate plain Debug vulnerable build is in
+`build-vuln-plain` (`configure-vuln-plain.log`, `build-vuln-plain.log`).
+
+`real/consumer.spec` is the upstream `tests/data/SPECS/filetypes.spec` recipe
+with the symlink target changed to the equal-length `MISHE-RPM!!`. It was built
+with `_binary_payload w.ufdio`, `_target_platform noarch-linux`,
+`SOURCE_DATE_EPOCH=1234567890`, `optflags -O2 -g`,
+`build_mtime_policy clamp_to_source_date_epoch`, weak user/group dependencies
+off and autosigning disabled. The generated v6 package uses stripped cpio.
+
+`real/make-attack.py` parses the RPM header and both cpio forms, verifies the
+safe symlink's 11-byte size and payload, then emits the attack, safe-newc and
+stripped-attack fixtures. It updates v6 payload-size and payload-hash tags when
+replacing the payload; signature-header digests are intentionally stale, and
+`rpm2archive`/`rpm2cpio` already disable digest/signature/header checks in
+`tools/rpm2archive.cc:321-328`.
+
+Replay:
+
+    cd lab/frontier/rpm2shell
+    bash real/run-real.sh
+
+Author run 2026-11-26 15:15Z: **21 PASS / 0 FAIL**. Real vulnerable consumers
+abort with ASan `WRITE of size 64` 0 bytes after a 1-byte region; fixed attack
+returns 1 and all safe controls return 0. `real/adjacent.c` provides a
+lab-only LD_PRELOAD `malloc(1)` seam which places a live marker-pointer guard
+after the victim with tcache disabled; `plain-layout-groom.log` shows that
+pointer overwritten by chosen `A` bytes. Natural unmodified layout varied:
+`plain-layout.log` records one 0x31-chunk pointer hit, while
+`plain-layout-sweep.log` records a later 12-miss sweep. Raw logs and rc files
+are under `real/`.
 
 ## Verification
 

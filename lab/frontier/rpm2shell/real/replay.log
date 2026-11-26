@@ -1,0 +1,24 @@
+real/run-real.sh: line 18: 3834598 Aborted                 (core dumped) env RPM_CONFIGDIR="$config" ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 "$binary" "$package" > /dev/null 2> "$log"
+PASS vuln-rpm2cpio-attack rc=134
+real/run-real.sh: line 18: 3834748 Aborted                 (core dumped) env RPM_CONFIGDIR="$config" ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 "$binary" "$package" > /dev/null 2> "$log"
+PASS vuln-rpm2archive-attack rc=134
+PASS fixed-rpm2cpio-attack rc=1
+PASS fixed-rpm2archive-attack rc=1
+PASS vuln-rpm2cpio-safe rc=0
+PASS fixed-rpm2cpio-safe rc=0
+PASS vuln-rpm2archive-safe rc=0
+PASS fixed-rpm2archive-safe rc=0
+PASS vuln-rpm2cpio-stripped-attack rc=1
+PASS vuln-rpm2cpio-attack.log real ASan write
+PASS vuln-rpm2archive-attack.log real ASan write
+PASS fixed-rpm2cpio-attack.log ASan-clean
+PASS fixed-rpm2archive-attack.log ASan-clean
+PASS vuln-rpm2cpio-safe.log ASan-clean
+PASS fixed-rpm2cpio-safe.log ASan-clean
+PASS vuln-rpm2archive-safe.log ASan-clean
+PASS fixed-rpm2archive-safe.log ASan-clean
+PASS vuln-rpm2cpio-stripped-attack.log ASan-clean
+PASS stripped payload preserves negative
+PASS rpm -qlvp is header-only negative
+PASS lab-groomed real-consumer adjacent pointer overwrite
+REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0

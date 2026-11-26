@@ -1,11 +1,11 @@
 # Frontier brief: rpm iterReadArchiveNext symlink-size wrap — CVE-2026-95520
 
-Status: **STAGED 2026-11-26 by frontier W237**, awaiting operator admission;
-witness replay ESTABLISHED AS LABELED (W238, 2026-11-26). Rung 3 pinned
-verbatim function; rung 4 PARTIAL (chosen bytes observed past the requested
-1-byte region in a synthetic plain readback; the ASan build overwrites the
-real 1-byte allocation). No real rpm build, no crafted RPM file, no wire
-input, no pointer, no command and no rung 5.
+Status: **real-consumer lane measured 2026-11-26**. Rung 3 is confirmed in
+the pinned function and real rpm; rung 4 is DEMONSTRATED by a crafted RPM
+writing 64 chosen bytes past a 1-byte allocation in real `rpm2cpio` and
+`rpm2archive`, including a pointer-bearing lab-groomed adjacent allocation
+in the plain consumer. Independent witness replay of this new lane
+is pending. No pointer hijack, wire target, command or rung 5.
 
 ## Claim and scope
 
@@ -27,7 +27,8 @@ input, no pointer, no command and no rung 5.
   `xmalloc(0)` yields a one-byte region, then the independently controlled
   cpio payload size drives `rpmcpioRead()` to copy attacker-controlled bytes
   past that region. The advisory names `rpm2cpio`, `rpm2archive` and
-  `rpm -qlvp` as reachable tools; none is exercised in these staged bytes.
+  `rpm -qlvp` as reachable tools. Real `rpm2cpio` and `rpm2archive` are now
+  exercised; plain `rpm -qlvp` is a measured header-only negative.
 
 ## Pins and source-bound mechanism
 
@@ -46,7 +47,7 @@ input, no pointer, no command and no rung 5.
   `rpm_loff_t lsize = rpmfilesFSize(fi->files, fx);`
   `char *buf = (char *)xmalloc(lsize + 1);`
   `if (rpmcpioRead(fi->archive, buf, lsize) != lsize) rc = RPMERR_READ_FAILED;`
-  `rpm_loff_t` is `int64_t`, so `UINT64_MAX` is `-1`, `-1 + 1 = 0`.
+  `rpm_loff_t` is `uint64_t`, so `UINT64_MAX + 1` wraps to zero exactly.
 - Fix hunk adds `const char *link = rpmfilesFLink(fi->files, fx);` and
   `if (link == NULL || lsize != strlen(link)) return RPMERR_BAD_HEADER;`
   before the allocation, relying on the header's 256 MB total size cap.
@@ -79,6 +80,58 @@ edited. Exact hashes, commands and raw logs are in `PROVENANCE.md`.
 GCC and Clang both fire. This is an instrumentation limitation, not a claim
 that the vulnerable code is safe at `-O1`.
 
+## Real rpm consumer evidence (2026-11-26)
+
+Built rpm 6.1.90 from vulnerable parent `c36e85503` and fixed commit
+`5bc8705e0` with GCC 13.3.0, Debug/`-O0`, `ENABLE_ASAN=ON`, OpenSSL crypto,
+and optional host integrations disabled. Local popt/libarchive/libmagic/scdoc
+development files were extracted under `lab/frontier/rpm2shell/deps/root`;
+no host packages were installed. Workspace-only configure/build logs:
+`configure-vuln.log`, `build-vuln.log`, `configure-fixed.log`,
+`build-fixed.log`.
+
+`real/consumer.spec` builds an uncompressed package containing
+`/opt/linkme -> MISHE-RPM!!`. `real/make-attack.py` locates the symlink's
+physical `RPMTAG_LONGFILESIZES` element rather than assuming an offset,
+verifies the 11-byte header value and stripped-cpio payload, then emits:
+
+- `safe-newc.rpm`: regular newc payload, header symlink size 11;
+- `attack.rpm`: the same v6 header with size `UINT64_MAX`, regular newc
+  symlink payload of 64 bytes (`MISHE-RPM!!` + 53 `A` bytes);
+- `stripped-attack.rpm`: size `UINT64_MAX` with the original v6 `07070X`
+  stripped payload, preserving the non-triggering negative.
+
+Fixture SHA-256: safe seed `620889c2c2abe1d5facbce8254a033912fe071798a52704ed9e0ecf026af1f71`;
+attack `068a2a2ec36e6c4baa3d619fa9d84326cff66793ac397a6141fcc5f5f7d18592`;
+safe-newc `6369c178d3716c3ef8d8ef906449e942af0d7bb0a946bb2d486e81115d137cbb`;
+stripped attack `b78f89b4ed8514606719c15decfce90b5702f9e5fe3e70a38ba2e4bb08b762cc`.
+
+`bash lab/frontier/rpm2shell/real/run-real.sh`: **21 PASS / 0 FAIL**.
+Vulnerable `rpm2cpio` and `rpm2archive` both abort under ASan (rc 134) with
+`WRITE of size 64`, 0 bytes after a 1-byte region, allocation at
+`lib/rpmfi.cc:2241`, copy through `rpmcpioRead()` at `:2242`, and caller
+`tools/rpm2archive.cc:249`. Fixed attack returns 1 with no ASan report for
+both consumers; vulnerable and fixed safe-newc controls return 0.
+
+The plain Debug consumer was stopped immediately after the real copy;
+`real/plain-readback.log` shows all 64 chosen bytes. For deterministic
+adjacent-object evidence, `real/adjacent.c` is an LD_PRELOAD lab seam that
+intercepts `malloc(1)`, disables tcache, and places a live 64-byte guard
+allocation whose first qword points to a marker. `real/plain-layout-groom.log`
+shows the 0x51 guard chunk after the 0x21 victim chunk and the marker pointer
+at `buf+0x20` changing to `0x4141414141414141`. This is instrumented rung-4
+mechanics, not a claim about natural allocator layout. Unmodified sweeps were
+variable: `real/plain-layout.log` records one pointer-valued 0x31-chunk hit,
+while `real/plain-layout-sweep.log` records a later 12-miss sweep. The natural
+object's type and semantic role remain UNKNOWN; no controlled pointer hijack
+is claimed.
+
+Measured scope negatives: the default RPM v6 stripped `07070X` payload does
+not produce an ASan write on this path; `rpm2cpio` returns 1 after
+libarchive reports `Size required (-1)`. Plain `rpm -qlvp --nodigest`
+returns 0 and lists the malicious size without entering the archive
+iterator. Do not claim the stripped-payload or query-only paths trigger.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
@@ -92,29 +145,28 @@ GCC and Clang ASan -O0 logs show `WRITE of size 64`, 0 bytes after the
 and allocation frame `:60`; fixed attack `RET=-15`, both safe runs `RET=0`,
 plain attack `RET=-13` with the canary hex above. The claim's `-O1` negative
 was reproduced independently: GCC 13.3.0 `-O1 -fsanitize=address` exits 0
-with `RET=-13` and no report. No real rpm build, crafted package, wire input,
-pointer, command or r5; operator admission still pending. Full detail:
+with `RET=-13` and no report. At W238 time there was no real rpm build,
+crafted package, wire input, pointer, command or r5; the real-consumer lane
+above is later work and still lacks an independent witness. Full W238 detail:
 `.mishe-tauftauf/artifacts/witness-w238-rpm2shell/detail.md`.
 
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in the verbatim
-  pinned `iterReadArchiveNext()`, with fixed and safe-input controls.
-- **Rung 4 PARTIAL:** the bytes are chosen in the harness and observed past
-  the requested 1-byte region in a synthetic plain readback; the offset is
-  fixed by the allocation layout, and the copy length is capped by the
-  stand-in (64 bytes, not the declared `UINT64_MAX`). No real rpm build,
-  crafted package, adjacent live object, pointer, wire or command.
-- **Not rung 5:** no loopback target, no attacker-supplied package bytes
-  through a real API, no pointer hijack, no command and no observed side
-  effect.
+  pinned function, plus real rpm `rpm2cpio` and `rpm2archive` WRITE reports
+  with fixed and safe-input controls.
+- **Rung 4 DEMONSTRATED:** 64 chosen bytes past a real 1-byte allocation;
+  plain GDB observes the bytes and a lab-groomed live pointer-bearing
+  allocation overwritten by chosen `A` bytes. Natural adjacent layout varies,
+  and pointer target control/downstream use remain UNKNOWN.
+- **Not rung 5:** no loopback service or wire request, no controlled pointer
+  hijack, no command and no observed command side effect.
 
-Cheapest next experiment: build real rpm at the vulnerable parent with ASan
-and use `rpm2cpio` on a synthesized package carrying a symlink header with
-`RPMTAG_LONGFILESIZES = 0xFFFFFFFFFFFFFFFF` and a payload whose cpio entry
-has a small controlled file size; measure the real `rpmcpioRead()` length and
-whether the bytes land in a live adjacent object. Keep the no-pointer and
-no-command ceiling until a real consumer and a fixed control are observed.
+Next experiment: identify a naturally adjacent object and test whether a
+non-crashing chosen pointer value reaches a downstream dereference in the
+real consumer. Keep the allocator instrumentation and stripped/query
+negatives attached to any broader claim. No command execution without a live
+target and benign side effect.
 
 ## Duplicate check
 
