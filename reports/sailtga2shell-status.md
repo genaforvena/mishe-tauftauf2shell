@@ -38,7 +38,12 @@ under an LD_PRELOAD interposer with ASLR disabled, crafted RLE packets set a
 live adjacent victim's pointer field to a chosen canonical value, retarget it
 to a lab benign marker and call it (`BENIGN_MARKER_EXECUTED` plus a side-effect
 file); matching-stride and vendor-fixed controls stay clean. All of that is
-synthetic in-process rung-4 mechanics, NOT r5. Still UNKNOWN: a natural
-application object reached before free and any wire/request consumer. Keep
-the advisory's `Version: 1.0.0` ASan paste as a discrepancy, not a fact.
-An independent witness verdict is not substitute acceptance.
+synthetic in-process rung-4 mechanics, NOT r5. The second W1 pass closed the
+two open lanes negatively: `harness/run-natural.sh` 15/0 traced the shipped
+CLI's real heap; the only object after the pixel buffer is an 88-byte
+`sail_image` allocated after the writes with all pointer fields zeroed, and the
+plain shipped CLI aborts on `malloc(): corrupted top size` for the bpp=32 input
+(matching-stride control converts; fixed build rejects it). A full upstream
+search found no shipped listener/wire path to the decoder. Grade stays rung 4,
+NO r5. Keep the advisory's `Version: 1.0.0` ASan paste as a discrepancy, not
+a fact. An independent witness verdict is not substitute acceptance.

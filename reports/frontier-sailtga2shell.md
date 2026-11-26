@@ -7,7 +7,10 @@ scope; no grade change, NO r5.
 Rungs 1–3 observed locally with the real public `sail_load_from_file()` API and
 GCC+Clang ASan; rung 4 demonstrated in the lab under a plain allocator —
 attacker-chosen bytes `AA BB CC DD` land at offsets 256..263 past a 256-byte
-pixel allocation. No pointer control, no command execution, no wire path, no r5.
+pixel allocation. The initial witness scope had no pointer control; W1 later
+showed synthetic in-process pointer control with ASLR disabled (section 6),
+and closed the natural-object and wire lanes negatively (section 7).
+No command execution on a live target, no wire path, no r5.
 Duplicate check before provisioning: no `sail` slug in the do-not-duplicate
 list, no `reports/frontier-*sail*`, no sail window/charter/mind on the tape.
 Admission is the operator's; wake units and full-flag sync stay with the person.
@@ -149,6 +152,47 @@ inner `TOTAL: 38 PASS / 0 FAIL`.
   aborts on glibc metadata corrupted by the overflow. The marker now uses
   `write`/`open`/`close` syscalls only; the call completes and the destructor
   still reports the victim.
-- Still UNKNOWN: a naturally occurring application object (not a lab
-  interposer victim) reached before free; any network/request consumer; r5.
+- Closed this wake (section 7): no NATURAL pointer-bearing victim, and no
+  shipped wire/request path. Both are negative results, not pending work.
+
+## 7. W1 second pass: natural-object and wire lanes closed (2026-11-26 16:23Z)
+
+- `bash harness/run-natural.sh` -> **15 PASS / 0 FAIL**, evidence in
+  `lab/frontier/sailtga2shell/evidence-w4/`. An OBSERVATIONAL malloc tracer
+  (LD_PRELOAD that only logs; no victim placement, no changed return value)
+  records the real heap of the SHIPPED v0.9.10 `sail convert` CLI. Inputs are
+  55-byte color-mapped 16x16 indexed-RLE TGAs so decoding can complete: the
+  `bpp=32` attack and a matching-stride `bpp=8` control.
+- Source structure: the 256-byte pixel buffer is allocated at
+  `src/sail/sail_advanced.c:135`; there is no heap allocation between it and
+  the RLE loop at `src/sail-codecs/tga/tga.c:262-270`. Every pointer-bearing
+  object in the decode path (`sail_io`, hidden_state, `tga_state`,
+  `sail_image`, palette, source_image, metadata) is allocated BEFORE the pixel
+  buffer. The only allocations after the writes are raw mirror scratch
+  buffers (`tga.c:289-293`).
+- The trace does find a real pointer-bearing object immediately after the
+  pixel buffer in the safe control: pixel `0x...ba0` (256 bytes), next malloc
+  `0x...cb0` (delta 272, inside the overwritten 1 KB), size 88 =
+  `sizeof(struct sail_image)`. It is allocated during post-decode conversion,
+  AFTER all writes, and `sail_alloc_image()` zeroes every field at
+  `src/sail-common/image.c:39-52`. Its pointers therefore cannot be corrupted
+  by this write; post-decode objects are initialized over any bytes we placed.
+- Plain shipped CLI on the `bpp=32` input aborts with
+  `malloc(): corrupted top size` (rc 134): the 1 KB write also reaches the
+  top-chunk header, so an ordinary shipped consumer does not even reach a
+  later natural call site. The matching-stride control converts (rc 0) and
+  the vendor-fixed v1.0.0 example rejects the attack with
+  `SAIL_ERROR_INVALID_IMAGE` while accepting the control.
+- Wire lane: an exhaustive read of the shipped v0.9.10 tree found NO
+  `bind`/`listen`, HTTP/RTSP service, daemon or network callback. The only
+  network-looking item is an outbound `requests.get()` snippet in
+  `src/bindings/sail-python/README.md:307-315`; raw TGA cannot be auto-probed
+  there and needs an explicit `with_codec(CodecInfo.from_name('TGA'))`.
+  Every complete byte-to-sink path is local file or memory. No shipped
+  loopback request path exists; a lab-composed HTTP service would still be a
+  synthetic consumer and is not a basis for r5.
+- Grade unchanged: rung 4 under the recorded conditions, NO r5. What would
+  change this: a shipped consumer allocating a pointer-bearing object BEFORE
+  the RLE loop and calling a field after decode, or a shipped listener that
+  feeds untrusted bytes to the decoder. Both were searched for and not found.
 
