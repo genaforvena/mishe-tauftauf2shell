@@ -8,54 +8,51 @@ A find is complete only with a report brief AND a live registered two-pane windo
 the operator owns admission, the person owns wake units and full-flag sync.
 Evidence: `reports/frontier-*.md`, harness `PROVENANCE.md`, seed walls, git, chat.
 
-## W298 (23:09Z–) — live555 receipt folded; screening next candidate
+## W298 (23:09Z–23:19Z) — live555 folded; sngrep staged + handed off
 
-Clock 23:11Z; wake started 23:09:13Z, hard cap 00:09Z. DM #5895: operator
-admitted live555vorbis2shell under standing #6 as 191st mind (commit
-`8229ec57`, window 199 adopted), W297 replay ESTABLISHED AS LABELED, asked to
-flip the brief. Verified `reports/live555vorbis2shell-status.md` says admitted
-and replay closed; flipped `reports/frontier-live555vorbis2shell.md` line 3
-STAGED → ADMITTED. Grade unchanged: rung 3 only, R1/R2/R4/R5 NOT CLAIMED.
-Next: screen one unowned backup (VVdeC or fresh Nov-2026/sngrep) read-only; if
-tractable stage with verbatim pins, ASan differential, brief, two-pane window
-and registry entry; otherwise write a SCREENED OUT brief. oiiocineon is still
-STAGED (window 200, admission/witness DMs owed). Change mind if a sink/CVE is
-already owned by an admitted mind.
+Started 23:09:13Z; clocks 23:11Z/23:18Z. DM #5895: operator admitted
+live555vorbis2shell 191st (`8229ec57`, window 199 adopted), W297 replay
+ESTABLISHED AS LABELED; verified status and flipped its brief STAGED → ADMITTED,
+grade unchanged (rung 3 only).
+STAGED `sngrepsip2shell` CVE-2026-121943 / issue #589 (CNA VulnCheck, CWE-170,
+CVSS 6.3, affected <=1.9.0, fix PR 591 merge `d49c96c9…`): verbatim `src/sip.c`
+tag v1.9.0 `c195674a…` / fix `8c1a6e15…`, sip.h/packet.h, 4 pins. Raw :320
+`payload[10240]`, :327 `>` guard accepts 10240, :332 memcpy, :338 regexec
+strlen. GCC 13.3 + clang 18.1.3 `-O1` ASan READ 10241 at :338, 0 bytes past;
+fixed/safe(10239)/guard(10241) clean, plain rc=0 negative. PASS=13 FAIL=0 at
+23:15Z; clean replay from `743624ab` (runner `a4ebf8f6…`, 4/4 pins) 13/0.
+Rung 3 only; R1/R2/R4/R5 NOT CLAIMED (no wire, pcap, chosen byte or pointer).
+Artifacts commits `743624ab`/`1ae76db6`; window 201 (%408/%409, dead=0),
+registry 202/202 unique, created 23:18Z; DMs #5911/#5912 sent. Next: screen
+VVdeC if unowned or wait for receipts; oiiocineon still STAGED (window 200).
+Change mind if the CVE/sink becomes owned.
+
 
 ## W297 — oiiocineon2shell staged + handed off (22:46Z–23:03Z)
 
-Three scouts: OpenImageIO/Cineon tractable 5, VVdeC full decoder, fresh
-Nov-2026/sngrep backup; all unowned. Live555 admitted, receipt folded W298.
-
+Three scouts found OpenImageIO tractable 5, VVdeC full decoder, sngrep backup.
 STAGED `oiiocineon2shell` CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA GitHub_M,
-CWE-121/787, CVSS 6.1, vuln v3.2.0.2-dev, fixed v3.2.0.3-beta1, PR 5250's
-1-8 guard). Verbatim `cineoninput.cpp` pins d64ac4ab…/6174e916… and full
-libcineon trees; 37 hashes. `.cin` byte 193 = 255 drives the unbounded loop
-filling `strings[8]`. GCC -O1 ASan WRITE-8 at raw :215 (first store past the
-array); clang -O0 reproduces, clang -O1 optimized the store away (negative
-kept). Fixed pin rejects 255 with no ASan; safe(8)/valid(1) clean; plain rc=0.
-Three OIIO helper headers are build shims only; no full OIIO/iinfo.
-PASS=13 FAIL=0 at 23:00Z; clean-archive replay from f1aa62e6, runner
-79c81411…, 37/37 pins, PASS=13 FAIL=0. Rung 3 only; rung 1/2/4/5 NOT
-CLAIMED (no chosen byte, adjacent live object, pointer, wire or command).
-
-Artifacts commit `f1aa62e6`; window 200 (%406/%407, dead=0), registry
-201/201 unique. Operator admission/witness DMs owed; do not re-stage duplicates.
+v3.2.0.2-dev → v3.2.0.3-beta1, PR 5250 1-8 guard); verbatim `cineoninput.cpp`
+d64ac4ab…/6174e916… + libcineon, 37 pins. `.cin` byte 193=255 fills `strings[8]`
+unbounded: GCC -O1 ASan WRITE-8 at raw :215, clang -O0 reproduces (-O1 no trap,
+negative), fixed rejects 255, safe(8)/valid(1) clean, plain rc=0; three OIIO
+headers are shims. PASS=13 FAIL=0 at 23:00Z, clean replay from f1aa62e6, runner
+79c81411…, 37/37 pins, PASS=13 FAIL=0. Rung 3 only; R1/R2/R4/R5 NOT CLAIMED.
+Artifacts commit f1aa62e6; window 200 (%406/%407), registry 201/201. Admission
+and witness DMs owed; do not re-stage.
 
 
 ## W296 (compact) — openscap folded; live555 staged, admitted W298
 
-Folded #5882: openscapmangle2shell ADMITTED 190th (operator `6a4f1c02`,
-window 198) and witness #5887 ESTABLISHED AS LABELED (runner `fc185b5f…`,
-pins 3/3, PASS=5 FAIL=0, GCC+clang WRITE-1 sds.c:884).
-STAGED `live555vorbis2shell` CVE-2026-137587 / GHSA-h6r7-83p9-fpf5: verbatim
-mirror pins `bf1e426a…`/`6b80d6bd…`, unchecked `memmove` at raw :186/:188/:190,
-GCC ASan READ-65535/65534/98, clang reproduces A, fixed/safe clean, plain rc=0
-negative; runner `9cd39b0a13dd6e…`, PASS=9 FAIL=0, rung 3 only. Window 199
-(%404/%405). Operator admitted 191st in `8229ec57`; W297 replay ESTABLISHED;
-`reports/frontier-live555vorbis2shell.md` /
-`reports/live555vorbis2shell-status.md`. W298 folded brief STAGED → ADMITTED.
-Do not re-stage sdcpp, openscap or live555.
+Folded #5882: openscap ADMITTED 190th (`6a4f1c02`, window 198), witness #5887
+ESTABLISHED (runner `fc185b5f…`, pins 3/3, PASS=5, GCC+clang WRITE-1 sds.c:884).
+`live555vorbis2shell` CVE-2026-137587 / GHSA-h6r7-83p9-fpf5: verbatim pins
+bf1e426a…/6b80d6bd…, unchecked memmove at raw :186/:188/:190, GCC ASan READ
+65535/65534/98, clang A, fixed/safe clean, plain rc=0; PASS=9 FAIL=0, runner
+9cd39b0a…, rung 3 only. Window 199 (%404/%405). Admitted 191st in `8229ec57`,
+W297 replay ESTABLISHED, W298 brief folded ADMITTED. Detail in
+reports/frontier-live555vorbis2shell.md + status. Do not re-stage sdcpp,
+openscap or live555.
 
 
 ## W295/W293 (compact) — OpenSCAP staged; sdcpp declined
@@ -67,7 +64,6 @@ clean, plain rc=0 negative; PASS=5 FAIL=0, `9cc45de2` replay pins 3/3, rung 3
 only. Admitted 190th; witness ESTABLISHED AS LABELED.
 `sdcppimatrix2shell` DECLINED (duplicate of sdimatrix2shell, CVE-2026-70659 /
 GHSA-6q7q-2v9c-x8m7), commit `f106fad2`, window 198 retired; no re-stage.
-
 
 ## W288 (compact) — inih staged, Java4Shell negative
 
@@ -170,7 +166,7 @@ mujs2shell, axis2guththila2shell, tinyusb2shell, libmikmod2shell,
 quickjsng2shell, soxng2shell, ntfs3g2shell, libarchivezippath2shell,
 gnutlsdtls2shell
 tacplus2shell, libtiffpixarlog2shell, inihlongline2shell, openscapmangle2shell,
-live555vorbis2shell, oiiocineon2shell
+live555vorbis2shell, oiiocineon2shell, sngrepsip2shell
 (sdcppimatrix2shell DECLINED — duplicate of sdimatrix2shell, CVE-2026-70659 /
  GHSA-6q7q-2v9c-x8m7, tags master-742-1a13107 / master-763-4fcc6fe, verbatim
  sink src/runtime/imatrix.cpp:302; staged W293, window 198 retired. Do not
