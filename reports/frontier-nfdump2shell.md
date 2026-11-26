@@ -163,6 +163,30 @@ and verifies all four binaries, after which `git archive 81e3cd8e` into an
 empty directory rebuilds both commit pairs and gives 13 PASS / 0 FAIL for
 ASan and plain. No assertion was relaxed to obtain the pass.
 
+### Receive-allocation boundary (2026-11-26)
+
+`nfcapd.c:273` allocates `in_buff` with `NETWORK_INPUT_BUFF_SIZE` (65535,
+`src/collector/nfnet.h:49`) and `nfcapd.c:319` receives with
+`recvfrom(..., 65535, ...)`. IPv4 UDP carries at most 65507 payload bytes,
+so the OOB store can never cross the allocation. `run-edge.sh` sends a
+65507-byte datagram whose last element is a header-only EXgenericFlow
+(length 4): `VerifyV3Record()` accepts it, `GetExtension()` returns
+`in_buff + 65507`, and the `msecReceived` store lands at 65523..65530 —
+four bytes inside the 65535-byte buffer. ASan consequently reports no
+write overflow. The same geometry reads `inPackets`/`proto` past the end:
+
+```
+ERROR: AddressSanitizer: heap-buffer-overflow
+READ of size 1
+SUMMARY: ... nfd_raw.c:259:34 in Process_nfd
+```
+
+`run-edge.sh`: **8 PASS / 0 FAIL** with a complete-element safe control (1
+flow, no report) and a fixed control (`Corrupt nfd record`, no report).
+This confirms the live ASan-clean result is structural, not incidental,
+and closes the direct write-past-allocation route. The crossing access is
+a read of packet-derived heap bytes, not a chosen-byte write or pointer.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the

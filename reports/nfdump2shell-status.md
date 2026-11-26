@@ -135,3 +135,18 @@ pairs. `run-alias.sh` returned **11 PASS / 0 FAIL**; `run-wire.sh` returned
 overrides, and `run-witness.sh` returned `WITNESS REPLAY PASS`. No assertion
 was weakened for the sender change. Independent witness replay of the
 chosen-byte and live wire results is still owed.
+
+## Receive-allocation boundary (2026-11-26)
+
+`run-edge.sh` sends a 65507-byte IPv4 UDP datagram with a header-only
+EXgenericFlow element last. `GetExtension()` returns `in_buff + 65507`; the
+`msecReceived` store lands at 65523..65530, four bytes inside the
+`NETWORK_INPUT_BUFF_SIZE` (65535) allocation. ASan reports no write
+overflow, but later struct reads cross the end:
+`heap-buffer-overflow READ of size 1 ... nfd_raw.c:259 in Process_nfd`.
+`run-edge.sh`: **8 PASS / 0 FAIL**, with a complete-element safe control
+(1 flow, no report) and a fixed control (`Corrupt nfd record`, no report).
+The clean ASan result in the earlier live-wire lanes is therefore
+structural: a maximum UDP payload cannot cross the 65535-byte buffer.
+Grade unchanged: rung 3 verbatim / rung 4 PARTIAL; the crossing access is
+a read, not a pointer or command.

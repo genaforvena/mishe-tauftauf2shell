@@ -293,3 +293,19 @@ SHA-verified tarballs and returned **11 PASS / 0 FAIL** for `run-alias.sh`,
 plain `run-wire.sh` overrides, and `WITNESS REPLAY PASS` for
 `run-witness.sh`. No generated evidence was copied into the archive and no
 assertion was weakened.
+
+## Receive-allocation boundary (2026-11-26)
+
+`harness/wire_send.py` modes `edge` and `edge-safe` build maximum-size
+65507-byte datagrams; `run-edge.sh` drives them against the live ASan
+collector. `edge` ends with a 4-byte header-only EXgenericFlow element,
+so `GetExtension()` returns `in_buff + 65507` and the pinned store lands
+at 65523..65530 inside the 65535-byte `malloc` (`nfcapd.c:273`,
+`nfnet.h:49`). In-tree result: **8 PASS / 0 FAIL**. Observed ASan report:
+`heap-buffer-overflow`, `READ of size 1`, `nfd_raw.c:259:34 in
+Process_nfd`. Safe control: 1 flow, no report. Fixed control: `Corrupt
+nfd record`, no report. The in-tree `build-vuln-plain` directory is stale
+ASan-instrumented (`config.log` CFLAGS contain `-fsanitize=address`), so
+`run-edge.sh` does not assert on it; clean-archive builds use empty
+CFLAGS. No write crosses the allocation, so this lane bounds rather than
+advances the grade.
