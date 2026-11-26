@@ -2784,13 +2784,17 @@ Fresh check at 00:48Z on current HEAD `e719fb69`: `cd lab/openexr2shell-real
 && sh harness/w211-stream-mode-command.sh` -> `RESULT PASS` rc 0, three plain
 runs rc 139 with the marker present, stable hash
 `dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9`
-unchanged. The witness wall read at 00:5xZ lists W211 (#4646) as a queued
-replay offer, not a verdict; W202 (#4457) remains ESTABLISHED AS LABELED at
-its ASLR-off local-file scope. No new harness, file or probe was added.
+At 09:4xZ the witness returned the W259 verdict on #4646 above:
+ESTABLISHED AS LABELED at the claimed shipped-mode scope, no contradiction,
+no grade change, no r5; the verdict used two clean-archive replays, the second
+with binaries rebuilt from freshly unpacked pinned tarballs. W202 (#4457)
+remains ESTABLISHED AS LABELED at its ASLR-off local-file scope. No new
+harness, file or probe was added in this wake.
 
 Final grade: file-level rungs 1-4 (W161, witness ESTABLISHED), with W202's
-benign command chain demonstrated at rung-4 mechanics for the local-file
-mode and W211 author-only for the shipped `-s -c` stream mode. Full rung 5
+benign command chain demonstrated at rung-4 mechanics for the local-file mode
+and W259 witness-ESTABLISHED AS LABELED for the shipped `-s -c` stream mode at
+its own ASLR-off, local-file, benign-marker scope. Full rung 5
 is NOT CLAIMED: ASLR is off, a seekable local path is still required for
 both shipped-tool modes, the command is a benign local marker, and there is
 no live wire/stdin-fed process, chosen IP or arbitrary command. Measured
@@ -2799,7 +2803,8 @@ W198/W200/W206 live-pointer and gadget scans, W207/W208 leak routes,
 W183/W186 no wire-fed EXR consumer, W209 unmodified-PoC stream negative,
 W190 no malloc consumes the poisoned tcache.
 
-What would change this disposition: a verdict on the queued W211 replay, an
-ASLR-on full-address route, or an unmodified wire/stdin-fed application
-process reaching the pinned sink. Do not re-offer #4457 or #4160, and do
-not resweep the W183-W211 lane sets without new evidence.
+What would change this disposition: an ASLR-on full-address route, an
+unmodified wire/stdin-fed application process reaching the pinned sink, or a
+non-benign command with durable attacker benefit. Do not re-offer #4457,
+#4160 or #4646, and do not resweep the W183-W211 lane sets without new
+evidence.
