@@ -4180,3 +4180,53 @@ stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
 `.server.log`, `.html` files (gitignored). Next bounded experiment: sweep
 `FILL_PREV` toward coherence with `FILL_SIZE` at `0x91`/`0x93` to test whether
 the `mismatching next->prev_size` check gates a deeper unlink path.
+
+### Fake-chunk prev_size coherence, self-coherent sizes and second-request survival — three bounded NEGATIVEs (2026-11-26, sixteenth wake)
+
+The prior wake's named experiment ran unchanged: at chunked N=588,
+`DRAIN=1024:32` fake pattern, `FILL=256`, `PART_CHARSET=1`, tail `00005102`,
+vulnerable 3.4.12, sweep `FILL_PREV ∈ {0x90, 0x91, 0x250, 0x251}` against
+`FILL_SIZE ∈ {0x91, 0x93}`, 3 processes each (24 runs). Prediction: a coherent
+`prev_size` would convert `malloc(): mismatching next->prev_size (unsorted)`
+into a deeper unlink check or a survivor with fd/bk-shaped qwords in its
+reflected parts. Falsifier: unchanged signatures or clean 404 with zero
+deviations.
+
+Result: **9/24 processes survived with HTTP 404; 15 aborted**. The `prev_size`
+field does select the *check* — `0x90`/`0x251` gave
+`mismatching next->prev_size`, `0x91`/`0x250` gave `invalid next size (unsorted)`
+or a `sysmalloc` assertion — but the strict falsifier on primitive output was
+met: reflect scan of all 9 survivors with the matching `--pattern` found
+**0 deviations and 0 leak-shaped qwords in 306 reflected parts**. Two survivors
+(`chp0x91-p0x250-1`, `chp0x93-p0x91-1`) print `corrupted size vs. prev_size`
+only during graceful shutdown, after both requests completed; that is a
+corrupted-heap observation, not a write primitive. Fixed-3.4.13 controls under
+the identical chunked wire at `0x91/0x90` and `0x93/0x91` (2+2 runs) returned
+clean 404, stayed alive and reflected 136 byte-clean parts, so the aborts stay
+attributable to the vulnerable overflow.
+
+Two direct extensions of the same lane were then measured. (a) **Self-coherent
+`prev == size`** (`0x53/0x53`, `0x93/0x93`, `0x250/0x250`, `0x251/0x251`, 3
+runs each, plus the existing `0x91/0x91` cohort): 3/15 survivors, all with
+0 deviations/0 leak shapes; no deeper unlink path appeared. (b) **Second
+request on a corrupted survivor**: 12 processes at the two best-survival
+geometries (`0x93/0x90`, `0x250/0x250`) each received the first chunked attack
+and a second unchunked multipart POST; 4/12 served both requests (404 then 404)
+and stayed alive, but their second 404 pages held 0 deviations and 0 leak
+shapes across 136 reflected parts. The corrupted heap can persist through a
+second request at these geometries, yet no byte of attacker-chosen input
+reaches a live or reflected value and no command is carried.
+
+Disposition: the fake-chunk lane is **closed** — the attacker controls which
+glibc diagnostic fires and whether the process survives, but no `fd`/`bk`
+pointer, libc/code base, chosen-byte write or second distinct command was
+observed. Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Evidence (all gitignored): `lab/build/evidence/chp-sweep-summary.txt`,
+`chp-coherent-summary.txt`, `chp-fixed-summary.txt`, `chp-second-summary.txt`,
+`stock-rails-chp*` and `stock-rails-chc*` `.out`/`.server.log`/`.html`/`.body`
+files, and `second-fake-*.body`. Next bounded experiment: fake chunks *below*
+the unsorted band (`FILL_SIZE ∈ {0x21,0x41,0x53}` with `FILL_PREV=0x53`) to test
+whether a tcache-sized forged chunk is popped into a live reflected allocation
+instead of entering the unsorted checks; falsifier is clean 404 with zero
+deviations or the same allocator aborts.
