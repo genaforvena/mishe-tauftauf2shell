@@ -25,7 +25,7 @@ allocation on a DELETE. Brief: `reports/frontier-sqlitefts5shell.md`.
   `sqlite3Fts5PutVarint` → `fts5DoSecureDelete` → `fts5FlushSecureDelete` →
   `fts5FlushOneHash` at generated `sqlite3.c:256373` (write site) and
   `:268441` (varint encoder). Pinned source markers:
-  `ext/fts5/fts5_index.c:5525` `nPg = iPgIdx;`, `:5533` unbounded write;
+  `ext/fts5/fts5_index.c:5525` `nPg = iPgIdx;`, `:5534` unbounded write;
   fixed `:5532` `iKeyIn>nPg` guard, `:5538` bounded write.
 - Controls: plain vulnerable DELETE silently succeeds (count 1 → 0); fixed
   GCC and Clang ASan are clean with rc 1 `fts5: corruption in table "t"`;

@@ -58,7 +58,7 @@ exists in the runner.
 
 - Vulnerable `ext/fts5/fts5_index.c:5525` — `nPg = iPgIdx;`
   (the write cursor is reassigned to the shortened index size).
-- Vulnerable `ext/fts5/fts5_index.c:5533` —
+- Vulnerable `ext/fts5/fts5_index.c:5534` —
   `nPg += sqlite3Fts5PutVarint(&aPg[nPg], ...)`.
 - Fixed `ext/fts5/fts5_index.c:5525` — `nNewPg = iPgIdx;`
   → `5532` — `if( iKeyIn>nPg ){ FTS5_CORRUPT_IDX(p); break; }`

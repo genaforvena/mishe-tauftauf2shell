@@ -102,7 +102,7 @@ URL in `PROVENANCE.md`).
   Safe controls on the vulnerable build: crafted-DB read/`MATCH 'alpha'` and
   a clean FTS5 `secure-delete` table DELETE are both ASan-clean.
 - Source markers: vulnerable `ext/fts5/fts5_index.c:5525` (`nPg = iPgIdx;`)
-  and `:5533` (unbounded `PutVarint`); fixed `:5525` (`nNewPg = iPgIdx;`),
+  and `:5534` (unbounded `PutVarint`); fixed `:5525` (`nNewPg = iPgIdx;`),
   `:5532` (guard), `:5538` (bounded write).
 
 ## Honest rung-4 feasibility assessment
