@@ -5535,3 +5535,39 @@ the corrupted successor. Require `_int_free_merge_chunk` to pass `unlink_chunk`
 and a later request to return an overlapping allocation; zero `fd/bk` or an
 abort closes the arm. This is a new consumer-shaping experiment, not a repeat
 of the Puma fake-header sweep.
+
+### WEBrick N=572 filler sweep — two stochastic survivors, no deterministic reclaim (2026-11-26, 16:1xZ)
+
+The named successor-shaping arm ran 22 fresh stock-Sinatra/WEBrick processes
+with one filler part before `_method`, N=572, filler lengths
+8/16/24/32/40/48/56/64/72/80/96/112/128/160/192/224/256/320/384/512/768/1024,
+and a two-second settle before the later GET. Lengths
+32/40/48/72/96/128/160/320/384/768 served both requests without an allocator
+diagnostic; 24/56/112/224/256/512 reached the delayed
+`corrupted size vs. prev_size` path; 8/16/64/80/192/1024 aborted in the trigger.
+The committed driver is `lab/repro/ruby2shell-webrick-filler-sweep.sh`;
+`ruby2shell-stock-baseline.sh` now accepts `RUBY2SHELL_STOCK_SERVER=webrick`
+and `RUBY2SHELL_STOCK_SETTLE`.
+
+Continuing past the first allocator read separated the survivors. Filler
+32/40/72/96/128/160/320/384 still aborted in `unlink_chunk`; 48 and 768 passed
+the consumer and served a later GET. At L=48 the merge-return dump showed a
+valid unsorted chunk: `prev_size=0`, `size=0x271`, and arena `fd/bk` links at
+the former mapping-buffer user pointer. This is allocator state, not an
+overlapping allocation or attacker-controlled write.
+
+No later request deterministically reclaimed that exact chunk. A GDB malloc
+return probe across claim lengths `0x200..0x800` saw only other addresses;
+`MALLOC_ARENA_MAX=1` changed the layout and the formerly surviving fillers
+aborted; a non-perturbing parent-side `process_vm_readv` hunt for the retained
+`A` + `S` case-output pattern found the free `0x270` chunk only stochastically
+and did not reproduce a follow-up overwrite. The case-watch script now has
+opt-in `RUBY2SHELL_WATCH_CONTINUE`, `RUBY2SHELL_WATCH_RECLAIM`, and
+`RUBY2SHELL_WATCH_DUMP_MERGE` modes for this test.
+
+Disposition: successor shaping is a **bounded NEGATIVE**. It can avoid the
+immediate `unlink_chunk` abort in some runs, but no repeatable overlap,
+chosen-byte write, command, second command or persistence followed. Full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. The next arm
+must make same-arena reuse deterministic or place attacker-shaped bytes in
+the successor before teardown; repeating the same filler list is closed.

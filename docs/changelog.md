@@ -2,6 +2,17 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 16:1xZ — Ruby2Shell WEBrick successor shaping
+
+The N=572 pre-`_method` filler sweep (22 lengths) found ten no-diagnostic
+survivors, but continuing the allocator consumer left only L=48/768 alive.
+L=48 could leave a valid unsorted `0x270` chunk; no later request
+deterministically reclaimed it. `MALLOC_ARENA_MAX=1` changed layout and
+aborted, and non-perturbing `process_vm_readv` tracking did not reproduce a
+follow-up overwrite. No overlap, command or persistence; full
+stock/oracle-free/persistent R5 remains NOT ACHIEVED. Reproducer:
+`lab/repro/ruby2shell-webrick-filler-sweep.sh`.
+
 ## 2026-11-26 16:0xZ — tinyusb2shell staged, Ruby stock WEBrick lanes closed
 
 This fold covers `1995e07a..59c2e2e6`. Reproduce every claim in

@@ -7,6 +7,12 @@ TAG="${2:-stock-$MODE-1}"
 N="${RUBY2SHELL_STOCK_N:-828}"
 FILL="${RUBY2SHELL_STOCK_FILL:-6}"
 ORDER="${RUBY2SHELL_STOCK_ORDER:-method-first}"
+SERVER_ARGS=()
+case "${RUBY2SHELL_STOCK_SERVER:-puma}" in
+  webrick) SERVER_ARGS=(-s webrick) ;;
+  puma) ;;
+  *) echo "unsupported RUBY2SHELL_STOCK_SERVER: ${RUBY2SHELL_STOCK_SERVER}" >&2; exit 2 ;;
+esac
 if [ "$MODE" = fixed ]; then
   RB="${3:-lab/build/plain/ruby-3.4.13-plain/bin/ruby}"
 else
@@ -35,9 +41,9 @@ sys.stdout.buffer.write(body + b'\r\n--XB--\r\n')
 PY
 if [ "${RUBY2SHELL_STOCK_TRACE:-0}" = 1 ]; then
   MTRACE_FD=2 LD_PRELOAD="$PWD/lab/preload/mtrace.so" \
-    "$RB" lab/repro/ruby2shell-stock-baseline.ru > "$LOG" 2>&1 &
+    "$RB" lab/repro/ruby2shell-stock-baseline.ru "${SERVER_ARGS[@]}" > "$LOG" 2>&1 &
 else
-  "$RB" lab/repro/ruby2shell-stock-baseline.ru > "$LOG" 2>&1 &
+  "$RB" lab/repro/ruby2shell-stock-baseline.ru "${SERVER_ARGS[@]}" > "$LOG" 2>&1 &
 fi
 PID=$!
 READY=NO
@@ -55,6 +61,7 @@ done
   curl -s -m 20 -X POST "http://127.0.0.1:$PORT/not-a-route" \
     -H 'Content-Type: multipart/form-data; boundary=XB' \
     --data-binary "@$BODY" -w '\nTRIGGER_HTTP=%{http_code}\n'
+  sleep "${RUBY2SHELL_STOCK_SETTLE:-0}"
   echo '-- later request:'
   curl -s -m 5 "http://127.0.0.1:$PORT/" -w '\nALIVE_HTTP=%{http_code}\n'
 } > "$OUT" 2>&1
