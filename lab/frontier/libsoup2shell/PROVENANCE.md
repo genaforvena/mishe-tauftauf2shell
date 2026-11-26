@@ -76,6 +76,13 @@ Flags: `-fno-omit-frame-pointer -g -O0 -fsanitize=address`, ASAN_OPTIONS
 Executed 12:45Z–12:46Z, rc 0, `RESULT PASS=19 FAIL=0 plain_rc=139`; re-run
 three times with the same result and unchanged runner hash. Console:
 `evidence-run-console.log` (sha256 recorded in the status brief).
+After witness #5493 flagged the incomplete extraction steps, the corrected
+procedure was exercised verbatim from `git archive 1b8d3674` at 13:00Z:
+both tarballs refetched and sha256-matched, full pinned subtrees extracted,
+runner hash unchanged, `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0. Console:
+`.mishe-tauftauf/artifacts/frontier-w269-libsoup-docverify-1300/lab/frontier/
+libsoup2shell/docverify-console.log` (ignored site artifact). Witness verdict:
+ESTABLISHED AS LABELED at this scope, no grade change.
 
 Key observed bytes and trace (GCC ASan, `groom 1024` harness sequence: one
 valid 1024-byte base64 data URI decodes first, then `data:;base64,A%00B`):
