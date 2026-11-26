@@ -5347,3 +5347,50 @@ stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. A new method-table
 experiment must first name a request-invoked destination method with a
 signature/consumer mismatch; repeating benign POSTs after the same C=128
 attack is closed. Primary grades are unchanged.
+
+## Production class screen: no second method table; stable code-pointer byte write (2026-11-26, 14:3xZ)
+
+The standing next action was to reopen method-table work only with a named
+request-invoked destination method. `ParamList` is not such a method: it is
+the constant `Rack::Multipart::ParamList` (`rack/multipart.rb:25`), passed as
+an argument at `rack/request.rb:515`. The aliased donor `make_params` is
+`ActionDispatch::Http::ParamBuilder#make_params` (`param_builder.rb:163`).
+The observed key alias therefore renames a method entry to a constant name;
+no request dispatches it, so the lane is structurally inert on this app.
+
+The dated 25-Nov Veria trigger also produced no new mechanics: the canonical
+page still carries `dateModified=2026-11-21T03:52Z` and still says the
+stock-Rails PoC will be published "25 November 2026, or later if major
+vendors have not shipped a fix by then". Nothing was adopted as fact.
+
+Bounded experiment (`lab/repro/ruby2shell-prod-class-scan.sh`, committed):
+production `RACK_ENV` on unmodified classic Sinatra, classes
+112/160/192/224/256/320/384, wire-only `_method` bodies, jemtrace adjacency
+dump plus backtraces for allocations in `[C-96, C+96]`. Every arm returned
+`TRIGGER_HTTP=404`, a live process and exactly one capa-paired adjacent qword
+ending in `0x53`; the C=112 safe-input control gave zero. With the required
+`0x36000` text-segment correction applied to frames relative to each run's
+load base, the only correctly attributed owner backtrace (C=384) resolves to
+boot-time `iseq_alloc` under `load_iseq_eval` — the already-closed boot-iseq
+family. No captured backtrace resolved to `hash_table_extend`
+(`id_table.c:198`) or `method_added` (`vm_method.c:1234`); most adjacent
+allocations had no captured backtrace and their identity stays UNKNOWN. A
+fresh C=128 control landed in `ruby_dtoa`/`rb_find_global_entry`, so the
+earlier production ID-table hit is not a stable per-process target. No
+request-invoked method destination was named.
+
+One new, unresolved observation is preserved. At C=112 the corrupted qword is
+stable across four fresh processes at `ruby_text_base + 0x1e5553` (ELF
+`0x225553`, `oldbt_bugreport`, `vm_backtrace.c:1115`): the overflow changes
+the low byte of a code pointer. The eight adjacent qwords mix code and heap
+pointers inside a large Ruby heap page. No reader, call, disclosure, command
+or second command was observed, and the owning object is UNKNOWN. This is a
+pointer-write observation, not pointer control or demonstrated impact.
+
+Disposition: the method-alias destination lane is **CLOSED** on the named
+evidence. Full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**;
+primary grades are unchanged. A future method lane needs a request-invoked
+destination with a mismatched signature; a future C=112 lane needs a consumed
+owner for the `oldbt_bugreport` pointer. Evidence (gitignored):
+`lab/build/evidence/prodscan{112,128,160,192,224,256,320,384}.*`,
+`prod112r{1,2,3}.*` and `prodscan112ctl.*`.
