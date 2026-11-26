@@ -3798,3 +3798,42 @@ stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
 `lab/build/evidence/crossenc-summary.txt` and
 `lab/build/evidence/crossenc-<encoding>-<op>.{out,err}` plus
 `crossenc-<encoding>-fold-rerun{1,2,3}.{out,err}`.
+
+### Veria-named entry points — bounded NEGATIVE (2026-11-26, eighth wake)
+
+The advisory's technical section names four reachable entry points, but the
+report previously mentioned them only in its summary (`:9`); all impact work
+used `upcase`, with fold tested only in Stage A'. If `swapcase` or
+`casecmp?` used a different allocation path or overflow byte, it could widen
+the primitive. Source: `string.c:4363-4377` (`str_casecmp_p`) calls
+`rb_str_downcase` twice with `sym_fold`; `sym_casecmp_p` (`:12259-12264`)
+routes through the same function. Both reach `rb_str_casemap`
+(`:7808-7882`). Prediction: the fixed fold byte `0x73`; two back-to-back
+mapping buffers might shift the victim but not the byte value.
+
+New committed `lab/repro/ruby2shell-entrypoints.rb` and `.sh` reuse the
+Stage A canary geometry (primer 780 × `0xDF`, real `'a' + 779 × 0xDF`) under
+`lab/preload/mtrace.so`, with fixed-build and N=20 safe-input controls. On
+vulnerable 3.4.12 all five entry points corrupted the adjacent buffer
+sizefield and aborted with `munmap_chunk(): invalid pointer` (rc=134):
+`upcase`/`swapcase` → `0x353` (byte `0x53`), `downcase(:fold)` /
+`String#casecmp?` / `Symbol#casecmp?` → `0x373` (byte `0x73`). Fixed 3.4.13
+and safe N=20 on 3.4.12: rc=0, no abort, out=1559/39 bytes. One first-pass
+`Symbol#casecmp?` run (`entrypoints-1`) did not abort — a layout flake
+conserved here; 3/3 identical reruns abort at `0x373`, and `casecmp?` aborts
+3/3, as with the seventh wake's fold flake.
+
+Disposition: every advisory-named entry point collapses to the same two
+fixed bytes. No chosen-byte write, code-pointer source or new consumer;
+the entry-point lane is a bounded NEGATIVE and grades are unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Veria re-read this
+wake: `dateModified` still `2026-11-21T03:52Z`, PoC unpublished; web search
+found no published exploit code. Evidence:
+`lab/build/evidence/entrypoints-2-summary.txt`,
+`entrypoints-2-<op>-{vuln,fixed,safe}.{out,err}`, and
+`entrypoints-2-{casecmp,symcasecmp}-r{1,2,3}.{out,err}`.
+
+```
+bash lab/repro/ruby2shell-entrypoints.sh entrypoints-2
+```
