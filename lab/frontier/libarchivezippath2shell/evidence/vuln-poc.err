@@ -1,0 +1,67 @@
+=================================================================
+==2609151==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x531000074800 at pc 0x7c66350fb303 bp 0x7ffe457e1c90 sp 0x7ffe457e1438
+WRITE of size 131072 at 0x531000074800 thread T0
+    #0 0x7c66350fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5f4b1f25846b in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x5f4b1f25846b in copy_path libarchive/archive_write_set_format_zip.c:2328
+    #3 0x5f4b1f25846b in archive_write_zip_header libarchive/archive_write_set_format_zip.c:1193
+    #4 0x5f4b1f1e6c76 in _archive_write_header libarchive/archive_write.c:782
+    #5 0x5f4b1f1e5fb0 in archive_write_header libarchive/archive_virtual.c:117
+    #6 0x5f4b1f12724e in append_archive tar/write.c:719
+    #7 0x5f4b1f12724e in append_archive_filename tar/write.c:683
+    #8 0x5f4b1f12724e in write_archive tar/write.c:520
+    #9 0x5f4b1f12825e in tar_mode_c tar/write.c:258
+    #10 0x5f4b1f11da30 in main tar/bsdtar.c:1004
+    #11 0x7c663462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #12 0x7c663462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #13 0x5f4b1f119864 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libarchivezippath2shell/build/vuln/bsdtar+0x47864) (BuildId: da700191a3f73f0d0c65eae5eb8437eb0ab09d47)
+
+0x531000074800 is located 0 bytes after 65536-byte region [0x531000064800,0x531000074800)
+allocated by thread T0 here:
+    #0 0x7c66350fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5f4b1f25045b in cd_alloc libarchive/archive_write_set_format_zip.c:300
+    #2 0x5f4b1f25840d in archive_write_zip_header libarchive/archive_write_set_format_zip.c:1191
+    #3 0x5f4b1f1e6c76 in _archive_write_header libarchive/archive_write.c:782
+    #4 0x5f4b1f1e5fb0 in archive_write_header libarchive/archive_virtual.c:117
+    #5 0x5f4b1f12724e in append_archive tar/write.c:719
+    #6 0x5f4b1f12724e in append_archive_filename tar/write.c:683
+    #7 0x5f4b1f12724e in write_archive tar/write.c:520
+    #8 0x5f4b1f12825e in tar_mode_c tar/write.c:258
+    #9 0x5f4b1f11da30 in main tar/bsdtar.c:1004
+    #10 0x7c663462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x7c663462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x5f4b1f119864 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libarchivezippath2shell/build/vuln/bsdtar+0x47864) (BuildId: da700191a3f73f0d0c65eae5eb8437eb0ab09d47)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x531000074580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000074600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000074680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000074700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x531000074780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x531000074800:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000074880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000074900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000074980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000074a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x531000074a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2609151==ABORTING
