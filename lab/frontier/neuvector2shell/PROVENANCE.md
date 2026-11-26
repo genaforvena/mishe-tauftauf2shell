@@ -192,3 +192,42 @@ a clean archive of `d2f1f317` at 16:56Z (realcaller 22, wirepath 20, frame
 fixed source `cc9d9c48...` exact) and verdict ESTABLISHED AS LABELED, no
 grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w280-neuvector/detail.md`.
+
+## Live AF_UNIX datagram path (W280, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17 PASS / 0
+FAIL**, rc 0 (prerequisite: `bash realcaller/run.sh && bash wirepath/run.sh`
+supplied the objects and the generated messages). New files:
+`wirepath/loopback.c` and `wirepath/loopback.sh`. The runner regenerates
+no pinned bytes: it slices the verbatim `dp_ctrl_bld_dlp()` excerpt from
+`$ROOT/dp/ctrl.c:2098-2208` at run time (SHA-256 `bc3bf526…ce424`) and
+links the byte-identical pinned ASan objects built by `realcaller/run.sh`.
+
+The lab consumer binds the pinned enforcer socket path
+`/tmp/dp_listen.sock` (`dp/ctrl.c:45`), receives one AF_UNIX SOCK_DGRAM
+datagram with `recvfrom` into an 8192-byte buffer (`ctrl.c:2382-2396`),
+parses it with real `libjansson.so.4` (`/usr/lib/x86_64-linux-gnu/
+libjansson.so.4`), selects the `ctrl_bld_dlp` key (`ctrl.c:2405,2475-2476`)
+and calls the verbatim consumer. Only transport scaffolding, debug macros
+and small helpers are local. It is NOT the full enforcer `dp` binary: the
+control handler function body, dataplane threads, hyperscan detector and
+REST/CRD endpoint are absent.
+
+Attack datagram: 2233 bytes, exactly the REST-valid W274 JSON (name 256,
+16 patterns of 64 bytes `a*`x32, pre-expansion total 1024). The live
+consumer reported `AddressSanitizer: stack-buffer-overflow`,
+`WRITE of size 121`, address at offset 2080 in `dlpsig_buf` (line 621),
+write frame `dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`. Safe datagram (139
+bytes) into the vulnerable object and attack datagram into the fixed pinned
+object both returned `LOOPBACK rc=0` and stayed ASan-clean. Normalized
+facts: `wirepath/EVIDENCE.md`; raw logs in ignored
+`wirepath/out/loopback-*.log`.
+
+Full-enforcer `dp` build remains BLOCKED (scout map, W280): `dp/Makefile:12`
+links `-lhs`; hyperscan/vectorscan headers and library are absent locally
+and absent from configured apt metadata (`package/Dockerfile.enforcer:22-26`
+uses SUSE `nv-deps`). `libjansson-dev` and `liburcu-dev` dev files are also
+absent (runtime `.so.4`/`.so.8` only); `go.mod:3` needs Go 1.27.4 while
+the host has 1.22.2 (agent build, not `dp`). W280 is the reachable
+socket-to-function lane under those blockers; grade unchanged, no chosen
+address, command or r5.

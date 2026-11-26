@@ -58,3 +58,28 @@ the bytes are ASCII regex text, not a valid code pointer. There is no live
 enforcer binary, no REST/CRD endpoint, no pointer redirection, no benign
 command and no rung-5 side effect. These byte values must not be reported
 as pointer control or execution.
+
+## W280 — live AF_UNIX datagram path (2026-11-26)
+
+Command: `bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17
+PASS / 0 FAIL**, rc 0. The consumer binds the pinned socket path
+`/tmp/dp_listen.sock` (`dp/ctrl.c:45`), receives a real `SOCK_DGRAM`
+datagram (`ctrl.c:2389-2396`), parses it with real `libjansson.so.4`,
+selects the `ctrl_bld_dlp` key (`ctrl.c:2405,2475-2476`) and calls the
+verbatim pinned `dp_ctrl_bld_dlp()` excerpt, which reaches the
+byte-identical pinned `dpi_sig_bld()` ASan object from `realcaller/run.sh`.
+Only the transport scaffold, logging and small helpers are local; this is
+still a lab consumer process, NOT the full enforcer `dp` binary and no
+controller/REST endpoint is contacted.
+
+Observed: the attack datagram was exactly 2233 bytes (the W274 message
+generated from REST-valid inputs: name 256, 16x64-byte patterns, 1024-byte
+pre-expansion total). ASan in the live consumer reported
+`stack-buffer-overflow`, `WRITE of size 121`, address at offset 2080 of
+`dlpsig_buf` (line 621), write frame `dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`.
+Safe datagram (139 bytes): `LOOPBACK rc=0`, ASan-clean. Attack datagram
+into the fixed pinned object: `LOOPBACK rc=0`, ASan-clean. Raw logs in
+ignored `wirepath/out/loopback-{attack,safe,fixed}.log`.
+
+Ceiling unchanged: real socket transport and real parser do not add
+chosen-address control, a command, an enforcer binary or rung 5.

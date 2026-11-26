@@ -3,12 +3,13 @@
 Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
 ESTABLISHED AS LABELED (W240 and W278, 2026-11-26). Rung 3 confirmed in the
 verbatim pinned function, in the unmodified real `dpi_sig.c` object built
-against real NeuVector headers, and through a REST-validated
-controller-shaped JSON message with real wildcard expansion (W274). W278
-measures chosen wire bytes overwriting the saved RBP **and return slot**
-in an optimized real-object lab frame: rung 4 mechanics demonstrated in
-the lab build and independently replayed. Still no full enforcer binary,
-live loopback REST/CRD target, chosen address, command or rung 5.
+against real NeuVector headers, through a REST-validated controller-shaped
+JSON message with real wildcard expansion (W274), and over the real
+enforcer AF_UNIX datagram path in a lab consumer (W280). W278 measures
+chosen wire bytes overwriting the saved RBP **and return slot** in an
+optimized real-object lab frame: rung 4 mechanics demonstrated in the lab
+build and independently replayed. Still no full enforcer binary, live
+REST/CRD target, chosen address, command or rung 5.
 
 ## REST-validated wire-path reproduction (W274, 2026-11-26)
 
@@ -79,6 +80,30 @@ clean archive of `d2f1f317` (22/20/17 PASS, three pins exact) and verdict
 ESTABLISHED AS LABELED with no grade change and NO r5; both traces fault
 at `dpi_sig.c:657` before returning. Detail:
 `.mishe-tauftauf/artifacts/witness-w280-neuvector/detail.md`.
+
+
+## Live AF_UNIX datagram path (W280, 2026-11-26)
+
+`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17 PASS / 0
+FAIL**, rc 0. A lab consumer binds the enforcer's pinned socket path
+`/tmp/dp_listen.sock` (`dp/ctrl.c:45`), receives one real `SOCK_DGRAM`
+datagram (`ctrl.c:2389-2396`), parses it with real `libjansson.so.4`,
+selects `ctrl_bld_dlp` (`ctrl.c:2405,2475-2476`) and calls the verbatim
+pinned `dp_ctrl_bld_dlp()` excerpt linked to the byte-identical pinned
+`dpi_sig_bld()` ASan object. The attack datagram was exactly 2233 bytes,
+the REST-valid W274 message generated from name 256 and 16x64-byte
+patterns (1024-byte pre-expansion total). The live consumer reported
+`stack-buffer-overflow`, `WRITE of size 121`, offset 2080 of `dlpsig_buf`
+(line 621), write frame `dpi_sig_bld dp/dpi/sig/dpi_sig.c:658`. Safe
+datagram (139 bytes) and attack datagram into the fixed pinned object both
+returned `LOOPBACK rc=0`, ASan-clean. Normalized facts:
+`lab/frontier/neuvector2shell/wirepath/EVIDENCE.md`.
+
+This closes the "locally generated JSON fed directly to the function" gap
+with a real transport and real wire parser, but it is a single lab process,
+NOT a full enforcer `dp` binary: the control handler body, dataplane
+threads, hyperscan detector and REST/CRD endpoint are still absent. Grade
+unchanged; no chosen address, command or r5.
 
 ## Claim and scope
 
@@ -216,13 +241,23 @@ no hyperscan/urcu libraries, no chosen address, no command or side effect.
   REST-valid wire message. No full enforcer binary, no live REST/CRD
   endpoint, no pointer redirection to a chosen address, command or
   observed side effect. Grade stays rung 4 PARTIAL by label, not advanced.
-- **Not rung 5:** no live loopback target and no benign command execution.
+- **Not rung 5:** no live enforcer or REST/CRD target (W280 is one lab
+  consumer process on the real socket path) and no benign command side
+  effect.
 
-Next experiment: build a full vulnerable 5.5.x enforcer `dp` with ASan and
-`-fno-stack-protector` and drive the W274 `ctrl_bld_dlp` message to a live
-loopback target, then measure the live frame and compare with 5.5.6. Only
-then consider a chosen-address in-process marker; keep the no-command /
-no-rung-5 ceiling until a benign side effect is observed.
+Next experiment: a full vulnerable 5.5.x enforcer `dp` binary with ASan and
+`-fno-stack-protector`, driven by the same W274 message over the real
+socket, then compare the live frame with 5.5.6. Full `dp` is currently
+BLOCKED by missing hyperscan/vectorscan development files: `dp/Makefile:12`
+links `-lhs` and the pinned sources need `hs/hs.h`; no `libhs`, header or
+apt metadata is present on this host (SUSE `nv-deps` is the upstream
+source). `libjansson-dev` and `liburcu-dev` are also absent, though apt
+metadata offers them; Go 1.22.2 cannot build the agent (`go.mod` needs
+1.27.4). W280 exercises the same socket -> jansson -> consumer -> pinned
+function path without those dependencies, but is not the full dataplane.
+Only with a measured live-consumer layout consider a chosen-address
+in-process marker; keep the no-command / no-rung-5 ceiling until a benign
+side effect is observed.
 
 ## Duplicate check
 
