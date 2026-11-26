@@ -11,7 +11,8 @@ image-chosen bytes overwriting an adjacent live `ext4_buf` in the real plain
 build. Grade: **rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the
 lab build, independently replayed as labeled by W273**. No chosen-address
 pointer, no command and no rung 5. The 71473 lanes were independently
-replayed; the 71474 sibling bit-write lane is author-measured only.
+replayed; the 71474 sibling bit-write lane and its named-field / prefix-OR
+ceiling probe are author-measured only.
 
 ## Claims
 
@@ -205,6 +206,32 @@ plain fault; no benign marker execution is claimed. Raw records:
 `real-vuln-gdt-*-plain.out` logs. W273 replayed the earlier two lanes, not
 this one.
 
+### Named-field reach and the prefix-OR ceiling (2026-11-26 22:0xZ)
+
+`bash run-gdt-layout.sh`: **5 PASS / 0 FAIL**, rc 0. Answering the DM's
+falsifiable question, this reuses the same plain vulnerable build and reads
+all 18 eight-byte words of the live adjacent `ext4_buf` before `:332` and
+after `:335` for nine `s_reserved_gdt_blocks` values (8 control; 33215,
+33222, 33230, 33247, 33919, 33926, 33990, 34000). The summarizer checks
+every one of the 144 bytes against `after = before | ((1<<n)-1)` with
+`n = clamp(2 + gdt - 8*k, 0, 8)` and `k` the byte offset from `data`:
+`LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`.
+
+Result: the bit-set reaches **13 named fields** of the adjacent live object —
+`flags`, `lba`, `data`, `lru_prio`, `lru_id`, `refctr`, `bc`, `on_dirty_list`,
+`lba_node`, `lru_node`, `dirty_node`, `end_write`, `end_write_arg` — not just
+`bc`'s low byte. The in-bounds `gdt=8` control leaves all 144 bytes unchanged.
+There is **no full-pointer primitive**: a fully covered byte becomes `0xff`
+and the boundary byte only a low-bit prefix mask, so a fully covered pointer
+is `0xffffffffffffffff` (unmapped) and a straddling pointer keeps its high
+bytes. The NULL function pointer `end_write` can only become `2^k-1`
+(`0x01`…`0xff`, `0xffff`, …), never a valid code address. `data` is either
+untouched or `0xffffffffffffffff`; `bc` ranges from one prefix-masked low
+byte (`0x…dc41`) to all-ones. No chosen address and no benign marker
+execution. Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
+`real/evidence/real-vuln-71474-gdt-layout-summary.out`,
+`real/summarize_gdt_layout.py`. Author-measured; witness replay pending.
+
 ## Grade and tractability
 
 - **Rung 3 CONFIRMED:** GCC/Clang ASan on verbatim pinned excerpts *and*
@@ -223,8 +250,12 @@ this one.
 - **Rung 4 DEMONSTRATED (CVE-2025-71474 sibling, author only):** the real
   block-bitmap bit-set loop ORs an image-selected mask (`0x01`..`0xff`) into
   the low byte of the adjacent live `ext4_buf.bc`; the in-bounds `gdt=8`
-  control leaves it untouched. Chosen bits, not a chosen address; not
-  independently replayed, and the overall grade and r5 ceiling are unchanged.
+  control leaves it untouched. A follow-up probe shows the same loop reaches
+  13 named fields of that object, but the byte-level prefix-OR model rules
+  out a chosen address: covered bytes become `0xff`, the boundary byte a
+  low-bit prefix mask, and the `end_write` function pointer only `2^k-1`.
+  Chosen bits, not a chosen address; not independently replayed, and the
+  overall grade and r5 ceiling are unchanged.
 - **Not rung 5:** no live network target, no benign command side effect and
   no attacker-chosen address; debugger-forced inspection stays rung-4
   mechanics.

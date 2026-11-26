@@ -256,3 +256,33 @@ Fresh gdt summary reproduced masks `0x00/0x01/0x03/0x07/0x0f/0x3f/0xff`
 with delta 4112 and `bc` before `0x7fffffffdc60` (different ASLR base than
 the committed log). Author check, not independent acceptance; the witness
 was asked in DM 5856.
+
+## Named-field reach / prefix-OR ceiling probe (2026-11-26 22:0xZ)
+
+DM #5861 asked whether the 71474 bit-set can reach a named adjacent object
+or a full pointer under a controlled heap layout. `bash run-gdt-layout.sh`
+(5 PASS / 0 FAIL, rc 0) reuses the plain vulnerable library and reads all 18
+eight-byte words of the live adjacent `ext4_buf` (144 bytes at data+4112)
+before `src/ext4_fs.c:332` and after `:335`, for `s_reserved_gdt_blocks`
+values 8 (in-bounds control), 33215, 33222, 33230, 33247, 33919, 33926,
+33990 and 34000. `real/summarize_gdt_layout.py` checks all 144 bytes against
+the prefix-OR model `after = before | ((1<<clamp(bit_max-8*k,0,8))-1)` with
+`bit_max = 2 + s_reserved_gdt_blocks` and k the absolute byte offset from
+`block_bitmap.data`: `LAYOUT_MATCHED=9/9`, `NO_CHOSEN_PTR_MATCHED=8/8`.
+
+The bit-set reaches 13 named fields of the live object (flags, lba, data,
+lru_prio, lru_id, refctr, bc, on_dirty_list, lba_node, lru_node, dirty_node,
+end_write, end_write_arg) — not just bc's low byte. The control leaves all
+144 bytes unchanged. No field can be set to a chosen address: a fully covered
+byte becomes `0xff` and the boundary byte only a low-bit prefix mask, so a
+fully covered pointer becomes `0xffffffffffffffff` (unmapped) while a
+straddling pointer keeps its high bytes. The NULL function pointer
+`end_write` can only become `2^k-1` (`0x01`, `0x03`, … `0xff`, …
+`0xffffffffffffffff`), never a valid code address; no benign marker
+execution is claimed.
+
+Records: `real/evidence/real-vuln-71474-gdt-layout-gdb.out`,
+`real/evidence/real-vuln-71474-gdt-layout-summary.out`, the assertion helper
+`real/summarize_gdt_layout.py` and `run-gdt-layout.sh`. `replay-clean.sh` now
+runs all five runners. Author-measured, not independently replayed; no grade
+change, NO r5.
