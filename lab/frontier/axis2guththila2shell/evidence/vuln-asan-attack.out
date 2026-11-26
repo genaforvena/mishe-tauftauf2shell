@@ -1,0 +1,55 @@
+raw[0]=60
+reader=0x507000000090 bytes=19
+=================================================================
+==3760137==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x507000000198 at pc 0x62b89f3cec19 bp 0x7ffe1ff80900 sp 0x7ffe1ff808f0
+READ of size 4 at 0x507000000198 thread T0
+    #0 0x62b89f3cec18 in guththila_xml_reader_wrapper_next /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/src/axis-axis2-c-core-584ce5bd3c98/axiom/src/parser/guththila/guththila_xml_reader_wrapper.c:308
+    #1 0x62b89f3ce380 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/harness/driver.c:47
+    #2 0x7328ae62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x7328ae62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x62b89f3ce024 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/build/vuln/driver+0xd024) (BuildId: 6ed551be037525c0552f3b5f31504aa47e8b29a8)
+
+0x507000000198 is located 192 bytes after 72-byte region [0x507000000090,0x5070000000d8)
+allocated by thread T0 here:
+    #0 0x7328aeafd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x62b89f3f0ea5 in axutil_allocator_malloc_impl /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/src/axis-axis2-c-core-584ce5bd3c98/util/src/allocator.c:29
+    #2 0x62b89f3ce622 in axiom_xml_reader_create_basic /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/src/axis-axis2-c-core-584ce5bd3c98/axiom/src/parser/guththila/guththila_xml_reader_wrapper.c:218
+    #3 0x62b89f3cf005 in axiom_xml_reader_create_for_memory /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/src/axis-axis2-c-core-584ce5bd3c98/axiom/src/parser/guththila/guththila_xml_reader_wrapper.c:286
+    #4 0x62b89f3ce316 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/harness/driver.c:41
+    #5 0x7328ae62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7328ae62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x62b89f3ce024 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/build/vuln/driver+0xd024) (BuildId: 6ed551be037525c0552f3b5f31504aa47e8b29a8)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/axis2guththila2shell/src/axis-axis2-c-core-584ce5bd3c98/axiom/src/parser/guththila/guththila_xml_reader_wrapper.c:308 in guththila_xml_reader_wrapper_next
+Shadow bytes around the buggy address:
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x507000000000: fa fa fa fa 00 00 00 00 00 00 00 00 04 fa fa fa
+  0x507000000080: fa fa 00 00 00 00 00 00 00 00 00 fa fa fa fa fa
+  0x507000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x507000000180: fa fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3760137==ABORTING
