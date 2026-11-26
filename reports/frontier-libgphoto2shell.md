@@ -693,3 +693,13 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   constant is reproducible across build directories, not device-observable.
   Raw output:
   `lab/frontier/libgphoto2shell/evidence/w197-fresh-build-repro.out`.
+  A from-scratch replay from a fresh release tarball plus the full six-patch
+  lab chain (W199, 2026-11-26) removes the last dependency on the author's
+  `/tmp` build: `sh lab/frontier/libgphoto2shell/live/replay-w197-clean-archive.sh`
+  extracts the pinned 2.5.34 tarball, applies the patches, rebuilds GCC -O2
+  from scratch, derives its own top size from gdb and invokes the unchanged
+  W197 checker. Author in-tree smoke at 01:27Z: 4/4 pins OK, `fresh
+  TOP=0x0000000000012b71` (different from the author build's `0x12bd1`),
+  `RESULT: 12 PASS / 0 FAIL`, rc=0, ~60 s. This confirms the size word is
+  build-specific and the replay needs no author tree; it is still an author
+  replay, not a witness verdict, and changes no grade.
