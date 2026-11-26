@@ -2485,8 +2485,12 @@ for the Rails path), while a plant wake service is capped at
 `memory.max=2 GiB`, `memory.high=1.5 GiB` inside a slice capped at 5 GiB
 and already holding ~2.5 GiB. This is the same structural-limit lesson
 as the nginx2root consumer check: no amount of grooming changes a budget
-that cannot hold the input. Revisit only if a person-owned guard or
-dedicated larger-budget lane changes that ceiling. The other five GHSAs
+that cannot hold the input. Revisit only if a person-owned guard or a
+dedicated larger-budget lane changes that ceiling. The >3:1 input-ratio
+reopen was closed on 2026-11-26 (`840957d1`): a full-Unicode sweep of all
+1,112,064 non-surrogate codepoints measured at most 3.00 output bytes per
+input byte (upcase/swapcase, including the fixed 3.4.13 build), so only a
+host guard permitting >6 GB RSS remains as a reopen condition. GHSA-87fm-7w84-j2px stays UNKNOWN / host-guard BLOCKED. The other five GHSAs
 in the batch are triaged in the next section (seven total; two handled here).
 
 #### Triaged 2026-11-20: remaining five GHSAs in the 2026-11-18 Ruby batch
@@ -8390,7 +8394,7 @@ Duplicate check: the CVE/GHSA and jq appear only in the lane's own brief,
 pins, provenance and harness; no other README, report or docs lane claims
 them. Brief: `reports/frontier-jq2shell.md`; pins/tags:
 `lab/frontier/jq2shell/PINS.sha256`; provenance and negatives:
-`lab/frontier/jq2shell/PROVENANCE.md`. No `reports/jq2shell-status.md` exists.
+`lab/frontier/jq2shell/PROVENANCE.md`; `reports/jq2shell-status.md` now exists.
 FRONTIER-STAGED at rungs 1-4 on direct-call verbatim-pinned `jv.c` slices:
 `PASS=64 FAIL=0` from a clean `git archive HEAD` replay in this wake,
 trace `8d537806…cef1e7`; gcc+clang ASan `WRITE of size 48` at pinned
@@ -12085,5 +12089,58 @@ plain lane returned `syswire-plain: 6 PASS / 0 FAIL` with `published=1`,
 fixed/bad-callee, rc 0. `check-readme.py` GREEN 156 rows,
 `check-reproducibility.py` GREEN 29 files, and `git diff --check` on the
 three docs paths rc 0. Readme-lint stays RED on the frozen six-column
+detector against the live seven-cell README and is person-reserved (exact
+full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`).
+
+## 2026-11-26 04:0xZ — W243/W244 fold, admission fold, and five bounded negatives
+
+Signal head `840957d1c727`, wake-start HEAD `925a3bcf`, nine commits since the
+last fold (`2a09507a`). This scoped edit touches only `README.md`,
+`docs/task.md` and `docs/reproducibility.md`; no rung cell, grade, route,
+witness verdict or mind count moved.
+
+- `cee3588b`, `179d5789`, `fa80e44e`: radare2pyc2shell W243 staged a PYC
+  ASCII size-wrap heap WRITE (31 PASS / 0 FAIL), the witness returned
+  ESTABLISHED AS LABELED from both the worktree and clean `git archive
+  cee3588b`, and the operator admitted it at 03:5xZ as the 160th mind
+  (window 168). The README row already carried the verdict and the 160-mind
+  count/list; reproducibility now records the nine pins, commands, expected
+  bytes, wrapper hash and witness detail path. The operator's DM #4807 is
+  satisfied by that fold.
+- `925a3bcf`: unarr2shell W244 staged a USTAR prefix/name one-byte NUL heap
+  WRITE (CVE-2026-111273), window 169, not admitted, witness replay owed. The
+  README gains a STAGED-NOT-ADMITTED row; the declared mind count stays 160.
+  Reproducibility records the tarball/raw pins, CMake/public-API replay,
+  seven-check output, and the preserved negative that v1.2.0/v1.2.1 are not
+  fixed upstream, so the +1-byte control is synthetic. DM #4777's 158/159
+  admissions were already current in the README and both docs after
+  `2a09507a`; nothing duplicated.
+- `33057c3f` (libsshch W27) re-read Remmina `remmina_ssh.c` (SHA-256
+  `4118fa44…bf98d`) and the 2019 archive threads: the distinct callback does
+  `write(fd, data, len)` at `:555`, all seven `ssh_channel_free()` sites are
+  teardown/error paths, and the archive thread stays open with no provisioned
+  consumer. `66698fb4` (libgphoto2 W200) shows the `sysmalloc` assertion at
+  `malloc.c:2599` checks page congruence, not the measured top size; two
+  builds each returned `RESULT: 11 PASS / 0 FAIL`. `d6190fb8` (awslc W225)
+  rebuilt FIPS 3.3.0/3.6.0 in real FIPS mode: 3.3.0 reproduces the
+  `WRITE of size 16` at `aes_nohw.c:388` from `EVP_DecryptUpdate`, 3.6.0 is
+  clean, and `replay-fips-mode.sh` gave 25 PASS / 0 FAIL in-tree and from a
+  clean archive; ASan disables the FIPS integrity check, so no CMVP claim.
+  `840957d1` (Ruby Bug 2) closed the >3:1 expansion route over all Unicode
+  codepoints, leaving only the >6 GB RSS guard as a reopen; the earlier
+  revisit clause above is corrected. `7886fd0b` (jq) retired the idle
+  `again` chain at the documented ceiling, with `check.sh` PASS=64 FAIL=0
+  and all four normalized traces byte-identical; the old "no status file"
+  sentence above is deleted. These are author-side negatives or receipts;
+  no witness verdict was claimed for any of them.
+
+Observed at this fold: `bash lab/frontier/radare2pyc2shell/run-witness.sh`
+gave nine exact pins, `REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`,
+inner `TOTAL: 31 PASS / 0 FAIL`, rc 0;
+`bash lab/frontier/unarr2shell/harness/run-all.sh` gave `TOTAL: 7 PASS / 0
+FAIL`, rc 0 with GCC and Clang `WRITE of size 101` at pinned
+`parse-tar.c:253` (the status file's root-level path is wrong; the script
+lives under `harness/`). `check-readme.py` and `check-reproducibility.py`
+were run after the edits. Readme-lint stays RED on the frozen six-column
 detector against the live seven-cell README and is person-reserved (exact
 full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`).

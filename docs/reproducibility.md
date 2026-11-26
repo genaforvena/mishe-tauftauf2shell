@@ -11522,3 +11522,113 @@ command service. NOT ESTABLISHED rung 5.
   `lab/frontier/libsshch2shell/real/evidence-swplain-*` and gitignored
   marker files; the full mechanism is in
   `reports/frontier-libsshch2shell.md` §W26.
+
+## 2026-11-26 03:3x–04:0xZ — radare2pyc2shell W243 admission, unarr2shell W244 staged lane, and five bounded negatives
+
+- **Radare2Pyc2shell W243 (admitted, witness ESTABLISHED AS LABELED)** —
+  `reports/frontier-radare2pyc2shell.md` and
+  `lab/frontier/radare2pyc2shell/PROVENANCE.md` record CVE-2026-81878 /
+  GHSA-9phv-v2w8-56j3. Advisory affected `<= 6.1.8` and claims patched
+  `6.1.9` (no such tag); fix
+  `6727454b666b28c33837b219a5f91136461357c0` (parent `838df53e`) guards
+  `size >= ST32_MAX`, and 6.2.0 is the first verified fixed release. Full
+  source SHA-256: `marshal-6.1.8.c`
+  `41698e7886715b57427b166c90101aa132eadec821de66fccbf477a147cbb51c`,
+  `marshal-fix-6727454.c`
+  `3d8b2a625a96a750ad2135a32d975715f91a262d6bd71695b5ed9982bcf0c313`,
+  `marshal-6.2.0.c`
+  `0aedf7fb536fbfeb6c5cdb7804dce6a40e15807cfe107a0ac6c31c7115f4a45c`,
+  `buf-6.1.8.c`
+  `538a6784eeb0e7f673625f73fce58e97c957f2b3dd41b90528d2f4b57493a52f`;
+  four excerpts `pins/get-bytes-vulnerable.inc`
+  `a3f2083495e1e6205fc77934167ae195a3968607bdc5b24f0aa653f6962c396f`,
+  `pins/get-bytes-fixed.inc`
+  `8e41575a6e315364b95e125524db2fa9e28d8347b27dae8bf5c4004c95cff9ba`,
+  `pins/ascii-readers.inc`
+  `d19406980365f39859bcee067be6a940fcad812ddf23d0db48476484b16ed26e`,
+  `pins/buf-sink.inc`
+  `4f3e1082ed37fd99f92d010c3b7037ef955583c9b795603d4c1de89892d5c9dd`,
+  plus `harness/driver.c`
+  `6995deba366eba8e92523316bf3230470397cce4291538b4912d5290ad485ce3`.
+- **Replay and bytes (W243)** — from the repo root
+  `bash lab/frontier/radare2pyc2shell/run-all.sh` builds five binaries and
+  checks nine pins; expect `TOTAL: 31 PASS / 0 FAIL`, rc 0. GCC and Clang
+  ASan print `WRITE of size 4294967295`, 0 bytes past a 1-byte region,
+  frame #0 `memset`, #1 pinned `r_buf_read pins/buf-sink.inc:496`, #2
+  `get_bytes pins/get-bytes-vulnerable.inc:3`; fixed attack
+  `MODE=attack LEN_FIELD=4294967295 RC=3 SINK=0`, safe `RC=0 SINK=0`.
+  The plain lane bounds the sink to eight bytes and logs
+  `SINK_LEN=4294967295 SINK_BYTE=ff` — the driver's fixed byte, not a
+  stream-chosen byte, with no readback; changing the crafted length to
+  `fe ff ff ff` moves `SINK_LEN` to `4294967294`. The unmodified
+  `run-witness.sh` (sha256
+  `ec1bf9246f8b2f9225d02fe983ca060e6e86a546c8566125aaf4b3a3ab6c3d54`)
+  was replayed in-tree here and by witness W243 from clean `git archive
+  cee3588b`: both `REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`,
+  inner `TOTAL: 31 PASS / 0 FAIL`, rc 0; verdict ESTABLISHED AS LABELED,
+  no grade change, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w243-radare2pyc2shell/detail.md`;
+  raw logs in the gitignored `lab/frontier/radare2pyc2shell/out/`.
+- **Unarr2shell W244 (staged, witness owed)** —
+  `reports/frontier-unarr2shell.md`, `reports/unarr2shell-status.md` and
+  `lab/frontier/unarr2shell/PROVENANCE.md` record CVE-2026-111273 /
+  GHSA-fj4h-mpx9-46qj (2026-10-31, Moderate). Advisory affected `<=
+  1.1.0`, claims patched 1.2.0. Source tarball v1.1.0 SHA-256
+  `4dc03f03e6215c4fcba4927962c7551c1eea690ae6de7c6251de4006d76adfd5`;
+  raw `tar/parse-tar.c` v1.1.0
+  `d07acabdfb4c8d1b1673f81daafb3fd0cc6c563a053797e6e6127ad2f797ce14`
+  and v1.2.0/v1.2.1 both
+  `bd9bf8d99e1274ba6a870c39ee694c80843dc3b7821fca7b219bef480f3a4482`;
+  harness `driver.c`
+  `16258974dae175312a4df9cad329c2adc5a5b9410b659d097319c652ea13c88f`,
+  `make-poc.py`
+  `6f7bdcada7872cfb6ae7d8d13734dbc58fea82bee0a37eb624d2da15ddf0a22f`,
+  `run-all.sh`
+  `fc8a0be05461ad8fcb571f857a37cee7e6586a49c2a8293c7e8dbae6544d3b12`.
+  Note the script lives at `harness/run-all.sh`, not the root path quoted
+  in the status file.
+- **Replay and bytes (W244)** — `bash
+  lab/frontier/unarr2shell/harness/run-all.sh` builds the real v1.1.0
+  library through CMake (`-DCMAKE_BUILD_TYPE=Debug -DBUILD_SHARED_LIBS=OFF
+  -DENABLE_7Z=OFF`, ASan, `-O0 -g`), generates a checksum-correct 100-byte
+  name / 156-byte prefix USTAR header and expects `TOTAL: 7 PASS / 0
+  FAIL`, rc 0 (observed here). GCC ASan gives `WRITE of size 101`,
+  `0 bytes after 257-byte region`, `tar_get_name pinned parse-tar.c:253`
+  from `ar_entry_get_name common/unarr.c:65`; shadow byte `01`; Clang
+  reproduces at `:253:17`. Short-name/short-prefix controls and the
+  synthetic `malloc(256 + 2)` control are clean. **Preserved negative**:
+  the advisory's patched 1.2.0 and 1.2.1 contain the identical sink, so
+  there is no vendor fixed control and "fixed" means a local one-line
+  change, not a release. Grade rung 3 verbatim / rung 4 PARTIAL fixed NUL
+  at a code-determined offset; no chosen byte, pointer, wire path, command
+  or r5. Window 169 staged, not admitted; witness replay owed. Raw logs
+  are in the gitignored `lab/frontier/unarr2shell/` build and `evidence/`
+  trees, regenerated by `bash lab/frontier/unarr2shell/run-witness.sh`.
+- **Bounded negatives and receipts (author-side, no grade change)** —
+  libsshch W27 (`33057c3f`) re-read Remmina `src/remmina_ssh.c` (SHA-256
+  `4118fa44d8136a49cb45ebc30e3b2c8b3b71d5fa0e2eaabb66e23a205b5bf98d`)
+  and the 2019 archive threads; the callback writes to an fd at `:555`,
+  all seven `ssh_channel_free()` sites are teardown/error paths, and no
+  consumer is provisioned in the archive thread — source-bound only, no
+  harness replay or witness. Libgphoto2 W200 (`66698fb4`):
+  `lab/frontier/libgphoto2shell/live/replay-w200-page-family.sh` needs gdb
+  and `setarch -R`; both builds returned `RESULT: 11 PASS / 0 FAIL` for
+  congruent top words (`0xbd1`/`0x2bd1`/`0x4bd1` and `0xb71`/`0x2b71`/
+  `0x4b71`), with wrong-low-bit `0xad1` aborting in `sysmalloc` rc 134;
+  the congruence is not device-observable and no wire path was tested.
+  Awslc W225 (`d6190fb8`): `sh lab/frontier/awslc2shell/replay-fips-mode.sh`
+  rebuilds FIPS 3.3.0/3.6.0 with `-DFIPS=1 -DASAN=1` and Clang, verifies
+  `-DBORINGSSL_FIPS` in `flags.make`, and gave 25 PASS / 0 FAIL in-tree
+  and from a clean archive; 3.3.0 prints `WRITE of size 16`, 0 bytes
+  after a 31-byte region at `aes_nohw.c:388` via `EVP_DecryptUpdate`,
+  while 3.6.0 is clean. ASan disables the FIPS integrity check upstream,
+  so no CMVP claim. Ruby Bug 2 (`840957d1`):
+  `lab/build/plain/ruby-3.4.12-plain/bin/ruby
+  lab/repro/ruby2shell-bug2-expansion.rb {upcase,downcase,swapcase}` swept
+  1,112,064 non-surrogate codepoints; all runs printed
+  `verdict=NO_RATIO_GT3`, maximum 3.00 for upcase/swapcase and 1.50 for
+  downcase, including the fixed 3.4.13 build. Jq (`7886fd0b`):
+  `bash harness/check.sh` gave `PASS=64 FAIL=0 TRACE=8d537806…cef1e7`
+  after normalizing PID/address noise in four raw logs; research closed
+  at the documented ceiling and the idle `again` chain retired. None of
+  these five carries an independent witness verdict.
