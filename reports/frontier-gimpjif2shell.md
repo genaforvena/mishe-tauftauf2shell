@@ -1,7 +1,8 @@
 # Frontier brief: GIMP JIF `ReadJeffsImage()` heap overflow — CVE-2026-136329
 
-Status: **STAGED 2026-11-26 W241**; window and operator admission owed.
-Rung 3 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
+Status: **STAGED 2026-11-26 W241**; window 166 created and registered
+03:01Z; operator admission and witness replay owed. Rung 3 pinned verbatim
+function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
 (chosen bytes past the 260-byte heap buffer in a synthetic plain process).
 No real GIMP/GEGL build, no JIF file through GIMP's PDB, no chosen-address
 pointer, no command and no rung 5.

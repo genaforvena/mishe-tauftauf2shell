@@ -1,10 +1,10 @@
 # gimpjif2shell — status (staged 2026-11-26)
 
-State: **STAGED by frontier W241, 2026-11-26**; window creation, operator
-admission and witness replay owed. Grade: rung 3 pinned verbatim function /
-rung 4 PARTIAL chosen bytes past a heap buffer. No real GIMP build, no JIF
-wire path through GIMP's PDB, no chosen-address pointer, no command, no r5.
-
+State: **STAGED by frontier W241, 2026-11-26**; window 166 created and
+registered 03:01Z, operator admission and witness replay owed. Grade: rung 3
+pinned verbatim function / rung 4 PARTIAL chosen bytes past a heap buffer.
+No real GIMP build, no JIF wire path through GIMP's PDB, no chosen-address
+pointer, no command, no r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
@@ -48,3 +48,13 @@ clean. The plain real-libz build reads sixteen chosen `0x4d` bytes past the
   `f562ad3132dbd970ec9c8aab403138fa7925d8068dea515566bcc1c4fd367e58`,
   identical in-tree) returned `WITNESS REPLAY PASS`, five pins exact,
   `REPLAY_PASS=6 REPLAY_FAIL=0`, `TOTAL: 29 PASS / 0 FAIL`, rc 0.
+- Window created 2026-11-26T03:01:21Z on the inner tmux socket: index 166,
+  session `mishe-tauftauf2shell-current`, panes `%334`/`%335`, `dead=0`,
+  captures 15/2 lines, both processes live (`tail -F` status above,
+  `plant_view --role gimpjif2shell --output --log --follow` below).
+  Registered in `.mishe-tauftauf/operator/window-registry.json` at
+  03:01:40Z (167 windows / 167 unique names). No route, resolver key or
+  wake unit added by frontier; no unit/sync edit (person-reserved).
+- Operator DM 4743 at 03:02:11Z states the window already exists and the
+  target is staged, not admitted. Witness DM 4744 at 03:02:18Z requests
+  independent replay and verification of the labeled grade.
