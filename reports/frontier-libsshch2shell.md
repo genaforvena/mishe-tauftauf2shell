@@ -28,6 +28,10 @@ W25 adds an unwitnessed ASan lane (6 PASS / 0 FAIL) joining W24's wire-resident
 callback iterator and callbacks structure to W16's wire-resident command and
 W14's direct libc `system()` callee; neither the harness trampoline nor an
 app-owned static command string is on the executed path. No grade change.
+W26 adds an unwitnessed plain (non-ASan) lane (6 PASS / 0 FAIL) that removes
+the cross-run ASan slot probe from W25: the server publishes the live channel
+object address through shared memory before the wire packet is sent, and the
+post-free malloc is checked to recycle that exact object. No grade change.
 W14 adds an unwitnessed plain lane (6 PASS / 0 FAIL) in which the indirect call
 from `channel_rcv_data()` targets real libc `system()` with a wire-chosen
 `channel->session` argument, so no harness trampoline is in the path; the
@@ -316,6 +320,59 @@ in-tree run confirm probe-supplied addresses, not copied logs. This checks
 committed harness and driver text; W25 remains additive and unwitnessed.
 The archive wrote only under `/tmp/w25-arch`; the pinned in-tree evidence is
 unchanged.
+
+## W26: W25 wire mechanics in a plain build with in-run address handoff (2026-11-26 03:28Z)
+
+Additive and unwitnessed; no claim or grade change. Why: the earlier W24 plain
+attempt (`real/evidence-wl-plain-negative.out`) used a slot probed in a
+different process and ended `CLIENT rc=0 SERVER status=0x8b` — the client's
+wire pointer did not match the chunk the plain allocator recycled. W26 tests
+the causal repair: publish the address in the same run, then require the
+recycled pointer to match. `real/run-syswire-plain.sh` builds both pinned
+commits with the Release/plain recipe (`build-plain-vuln`, `build-plain-fixed`,
+no sanitizer, `ldd` guard) and compiles `real_wire.c` with the five W25 flags
+plus `-DW26_PLAINADDR` and the no-op ASan-interface shim. Loopback only, no
+library source change. Result: **6 PASS / 0 FAIL**, rc 0.
+
+Mechanism: the server records the channel object when it registers callbacks
+and writes its address into a `MAP_SHARED | MAP_ANONYMOUS` slot mapped before
+`fork()`; the client polls that slot before building the groom packet, using
+the published address for `channel->session`, the callbacks struct and the
+iterator. This is lab-only IPC, not an attacker primitive. After the
+in-callback free, `malloc(128)` must return the same object; the harness
+prints `match=1` only when it does. The W25 executed path is unchanged:
+wire-resident callbacks struct and iterator, wire-resident command, direct
+libc `system()`, no `exec_trampoline` or app-owned static command.
+
+Vulnerable evidence (`real/evidence-swplain-vuln-syswire-plain.out`):
+`SERVER plainaddr published=0x610ddacd5ac0`,
+`CLIENT plainaddr slot=0x610ddacd5ac0`,
+`CLIENT syswire fn=0x790460658750 sess=0x610ddacd5ac8 cmd=touch evidence-wire-syswire.marker bad=0`,
+`SERVER plainaddr recycled=0x610ddacd5ac0 live=0x610ddacd5ac0 match=1`,
+`SERVER wirelist it=0x610ddacd5690 next=0x610ddacd5b20 data=0x610ddacd5b08`,
+`SERVER SYSWIRE armed fn=0x790460658750 cmd=0x610ddacd5ac8`,
+`SERVER target_after=0x41414141414141c1`, `SERVER done data_packets=2`,
+`CLIENT rc=0 SERVER status=0x0`, marker created
+(`real/evidence-swplain-sideeffect.kept`), no trampoline, no ASan report.
+Three repeats printed different heap slots (`0x57483e8beac0`,
+`0x5da79fdeeac0`, `0x5fe6bdd52ac0`) and different code addresses, each with
+`match=1`, armed wire bytes, chosen write, clean exit and a marker
+(`real/evidence-swplain-vuln-repeat{1,2,3}.out`). Fixed lane
+(`real/evidence-swplain-fixed-syswire-plain.out`): no data #2, no wirelist or
+`SYSWIRE`, no marker, clean status. Wire-chosen invalid callee
+(`real/evidence-swplain-vuln-syswire-plain-bad.out`):
+`SERVER SYSWIRE armed fn=0x4141414141414141` and
+`CLIENT rc=0 SERVER status=0x8b`, no marker and no `SERVER done`.
+
+With all six Wn flags undefined, the preprocessed harness is byte-identical
+to HEAD (`clang -E -P`, `cmp` clean). Ceiling unchanged and stricter in one
+way: the ASan-only allocator condition and cross-run probe are gone, but the
+address still comes from a lab shared-memory handoff, the callee is a
+forked-peer PIE address (ASLR-local), the app still frees a remotely closed
+channel in its data callback and reclaims the freed objects, and the peer is
+authenticated (PR:L). No persistent shell, command service or remote RCE;
+NOT ESTABLISHED rung 5, additive and unwitnessed.
+
 
 
 ## Verified ground truth

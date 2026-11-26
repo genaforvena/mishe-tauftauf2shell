@@ -1,0 +1,26 @@
+[2026/11/26 03:28:15.658328, 1] ssh_strict_fopen:  Failed to open a file /etc/ssh/ssh_known_hosts for reading: No such file or directory
+SERVER auth len user=5 pass=9 success=0
+CLIENT auth rc=0
+CLIENT channel local=43 remote=43
+SERVER registered callbacks on channel 43
+SERVER plainaddr published=0x57483e8beac0
+SERVER data #1 len=12 first=f 
+CLIENT plainaddr slot=0x57483e8beac0
+CLIENT syswire fn=0x72b5fe858750 sess=0x57483e8beac8 cmd=touch evidence-wire-syswire.marker bad=0
+CLIENT sent call fn=0x57483751bbe0 bad=0
+CLIENT sent groom wire pointer=0x5748375998a8 survive=0
+CLIENT sent close+data marker=MISHE-LIBSSH-UAF-WIRE
+SERVER close callback
+SERVER data #2 len=128 first=È off16=i
+SERVER nodetach saved_buf=0x57483e8beb50 saved_it=0x57483e8be690
+[2026/11/26 03:28:16.841771, 1] ssh_socket_exception_callback:  Socket exception callback: 2 (32)
+SERVER groom alloc=0x57483e8beac0 wire_off120=0x5748375998a8 target=0x5748375998a8 survive=0
+SERVER plainaddr recycled=0x57483e8beac0 live=0x57483e8beac0 match=1
+SERVER inline cbs=0x57483e8beb08 off=72
+SERVER wirelist it=0x57483e8be690 next=0x57483e8beb20 data=0x57483e8beb08
+SERVER SYSWIRE armed fn=0x72b5fe858750 cmd=0x57483e8beac8
+SERVER nodetach reclaim it=0x57483e8be690 want=0x57483e8be690 buf=0x57483e8beb50 want=0x57483e8beb50
+SERVER done data_packets=2 marker_hits=0
+SERVER exec rc=-1
+SERVER target_after=0x41414141414141c1 groom_ptr=0x57483e8beac0
+CLIENT rc=0 SERVER status=0x0
