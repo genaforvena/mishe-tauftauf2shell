@@ -3707,3 +3707,48 @@ witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Evidence:
 `lab/build/evidence/jemwire-prod640{,bt,bt1..bt4,range,range1..range3}.{trace,maps,summary}`
 and `jemwire-prod640ctl2.*`.
+
+### Bug 2 reopen condition ">3:1 expansion" — closed by full-Unicode sweep (2026-11-26, sixth wake)
+
+The fourth wake left GHSA-87fm-7w84-j2px host-guard BLOCKED and named one
+non-host reopen condition: "a measured input with expansion ratio above 3:1".
+The reasoning was that the `int` wrap needs ~2^32 output bytes, so a larger
+output/input byte ratio needs fewer source bytes and shrinks the mapping-buffer
+series (`≈6N` at 3:1, about 4.3 GB) below the wake cgroup's 2 GiB `memory.max`.
+This wake closes that condition: no such input exists in this Ruby tree.
+
+Source check: all 1528 entries of `CaseFold_11_Table` in
+`lab/build/ruby-3.4.12/enc/unicode/15.0.0/casefold.h` (lines 17-1545) were
+parsed and their UTF-8 output/input byte ratios computed. The maximum is
+exactly 3.00, attained only by U+0390 and U+03B0 (each 2 input bytes to
+3 × 2 = 6 output bytes). The apparent 4:1 candidates at U+0442 and U+03B9
+are in `CaseUnfold_11_Table`, the case-insensitive comparison-alternative
+table, not in any case conversion path.
+
+Empirical check (committed `lab/repro/ruby2shell-bug2-expansion.rb`): sweep
+every Unicode scalar value (1,112,064 non-surrogate codepoints) through the
+real affected plain build `ruby-3.4.12-plain` (rev `366f5fdc00`) and measure
+`out.bytesize / in.bytesize` per single-codepoint string:
+
+```
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-bug2-expansion.rb upcase
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-bug2-expansion.rb downcase
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-bug2-expansion.rb swapcase
+lab/build/plain/ruby-3.4.13-plain/bin/ruby lab/repro/ruby2shell-bug2-expansion.rb upcase
+```
+
+Observed: `upcase` max 3.000000 (U+0390, U+03B0); `swapcase` max 3.000000
+(same two); `downcase` max 1.500000 (U+0130, U+023A, U+023E); fixed 3.4.13
+`upcase` control also 3.000000 (U+0390, U+03B0). Every run printed
+`verdict=NO_RATIO_GT3`. Source parse and observed case mapping agree.
+
+Disposition: the "expansion ratio >3:1" reopen condition is **closed as a
+bounded NEGATIVE** for Unicode 15.0 default case mapping on this tree. Input
+choice cannot reduce the Bug 2 peak below the ~4.3 GB derived earlier, so the
+only remaining reopen is a host cgroup permitting >6 GB RSS (a protected host
+guard change unavailable to this plant). GHSA-87fm-7w84-j2px stays
+**UNKNOWN / host-guard BLOCKED**; no ASan report or wire result was produced.
+Veria's advisory was re-checked this wake: `dateModified` still
+`2026-11-21T03:52Z`, PoC unpublished, no mechanics adopted. Grades unchanged:
+rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
