@@ -331,3 +331,42 @@ advances the grade.
 
 Witness replay of this boundary lane is still owed (tape #5680); the
 in-tree and clean-archive author replays each returned 8 PASS / 0 FAIL.
+
+## Chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
+
+Additive files/hashes (`wire_send.py` and `alias_readback.py` gained
+backward-compatible modes):
+
+| artifact | SHA-256 |
+| --- | --- |
+| `run-hdr.sh` | `35281932abe4f11a2a37e057deb6f40e0eed10952369e53d52701f7175590d69` |
+| `harness/wire_send.py` | `23f5a64c2a7347b7830a423e2f59ddb4f8a67cb2b4ef7a20fdb4d8f002177476` |
+| `harness/alias_readback.py` | `ff3adf90f161c95201bbf164c7d3064cdbe952844e2f823e0e2fa2854bb2e5c2` |
+
+`hdr` geometry: record 1 is 48 bytes (12-byte header + truncated 20-byte
+EXgenericFlow + 16-byte dummy), so its flow view sees `srcPort` at
+record1+56, `dstPort` at record1+58 and `proto` at record1+60. Record 2
+starts at record1+48, so those offsets are its `exporterID` (8..9),
+`flags`/`nfversion` (10..11) and element type (12). The element type low
+byte is 1 (ICMP), which triggers the pinned swap: the chosen `exporterID`
+wire bytes `03 ab` are written reversed as `ab 03` into record 2's
+`flags`/`nfversion`, and `exporterID` is zeroed, all before record 2 is
+verified, copied and written to the capture. Safe mode uses a complete
+52-byte first element; fixed mode rejects the short element.
+
+`run-hdr.sh` ports 10121..10124, **12 PASS / 0 FAIL** in-tree:
+
+```
+vuln-hdr-asan    REC2_EXPORTER=0000 REC2_FLAGS_NFVERSION=ab03  flows: 2
+vuln-hdr-plain   REC2_EXPORTER=0000 REC2_FLAGS_NFVERSION=ab03  flows: 2
+vuln-hdr-safe    REC2_EXPORTER=03ab REC2_FLAGS_NFVERSION=0003  flows: 2
+fixed-hdr        REC2_FOUND=0                                 flows: 0
+```
+
+No ASan report (the store is inside the 65535-byte receive buffer); fixed
+logs `Corrupt nfd record: expected 2 records, processd: 0`. Regression
+after the sender refactor: `run-alias.sh` 11 PASS / 0 FAIL, `run-wire.sh`
+13 PASS / 0 FAIL, `run-edge.sh` 8 PASS / 0 FAIL. This extends chosen-byte
+control from a flow payload timestamp to a record header control field in
+a live processed record; still no pointer, command or r5. Witness replay
+is owed.

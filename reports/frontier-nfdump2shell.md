@@ -189,6 +189,30 @@ This confirms the live ASan-clean result is structural, not incidental,
 and closes the direct write-past-allocation route. The crossing access is
 a read of packet-derived heap bytes, not a chosen-byte write or pointer.
 
+### Packet-chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
+
+A third alias geometry targets the record header rather than flow data.
+Record 1 is 48 bytes (12-byte header + truncated 20-byte EXgenericFlow +
+16-byte dummy). Its flow view's `srcPort`(40)/`dstPort`(42)/`proto`(44)
+aliases record 2's `exporterID`(8..9)/`flags`+`nfversion`(10..11)/element
+type(12). The element type low byte is 1 (ICMP), so the pinned swap copies
+the packet-chosen `exporterID` bytes into record 2's header and zeroes the
+source -- before that record is verified, copied and written to the capture.
+`run-hdr.sh` drives four live collectors: **12 PASS / 0 FAIL**.
+
+```
+vuln-hdr-asan    REC2_EXPORTER=0000 REC2_FLAGS_NFVERSION=ab03  flows: 2
+vuln-hdr-plain   REC2_EXPORTER=0000 REC2_FLAGS_NFVERSION=ab03  flows: 2
+vuln-hdr-safe    REC2_EXPORTER=03ab REC2_FLAGS_NFVERSION=0003  flows: 2
+fixed-hdr        REC2_FOUND=0                                 flows: 0
+```
+
+Wire bytes `03 ab` in `exporterID` become `ab 03` in the captured header's
+`flags`/`nfversion`; the safe control keeps `0003`, and the fixed build
+logs `Corrupt nfd record: expected 2 records, processd: 0`. No ASan report:
+the store is inside the 64 KiB receive buffer. This is chosen-byte control
+over a header field in a live processed record, not a pointer or command.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE of size 8 in the
@@ -197,25 +221,28 @@ a read of packet-derived heap bytes, not a chosen-byte write or pointer.
   packet-controlled. The collector-time-derived 8-byte value clobbers the
   next V3 record's header in a live `nfcapd` and drops that record (1 flow
   instead of 2). Separately, the pinned ICMP swap writes packet-chosen bytes
-  at a chosen offset in a later, processed record's copied payload in ASan
-  and plain collectors, with complete-element safe and fixed controls.
-  No pointer-bearing object or command is targeted.
+  at chosen offsets in a later, processed record's copied payload and V3
+  header (`flags`/`nfversion`) in ASan and plain collectors, with
+  complete-element safe and fixed controls. The targeted header field is
+  not used as a pointer or a parser control by this build. No
+  pointer-bearing object or command is targeted.
 - **Not rung 5:** a live loopback `nfcapd` and a real request now exist, but
   there is no attacker control of the written value, no pointer hijack, no
   benign command and no command side effect. No rung 5 claim is made.
 
 Next experiment: seek a pointer-bearing object adjacent to the short
-element, or a way to place packet-chosen bytes in a passed control field
-rather than the flow timestamp. Three alias attempts are resolved: the
-first clobbered a header, the second writes chosen bytes to a processed
-record's timestamp field, and a 2026-11-26 framing attempt aimed the swap
-at a later record's `size` field but did not trigger. With a 58-byte first
-record, the short flow view's `proto` byte aliases the second record's
-size low byte (`0x40`), not its `numElements`, so no ICMP swap ran; the
-56-byte layout that does trigger it draws the would-be chosen bytes from
-the fixed V3 record type (`0b 00`). No framing control was demonstrated.
-Witness replay of the live wire and allocation-boundary results is still
-owed; the chosen-byte replay is ESTABLISHED AS LABELED (W280).
+element, or a control field whose corruption changes parsing or output.
+Four alias geometries are resolved: the first clobbered a header, the
+second writes chosen bytes to a processed record's timestamp field, the
+third writes chosen bytes to its `flags`/`nfversion` header field, and a
+2026-11-26 framing attempt aimed the swap at a later record's `size` field
+but did not trigger. With a 58-byte first record, the short flow view's
+`proto` byte aliases the second record's size low byte (`0x40`), not its
+`numElements`, so no ICMP swap ran; the 56-byte layout that does trigger
+it draws the would-be chosen bytes from the fixed V3 record type (`0b 00`).
+No framing control was demonstrated. Witness replay of the live wire,
+allocation-boundary and header-control lanes is still owed; the
+chosen-byte payload replay is ESTABLISHED AS LABELED (W280).
 
 ## Duplicate check
 

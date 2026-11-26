@@ -1,12 +1,12 @@
 #!/usr/bin/env python3
-"""Read record 2's first 8 bytes from a pinned nfcapd capture.
+"""Read record 2's header or first payload bytes from a pinned nfcapd capture.
 
-The two-record alias datagram makes record 1's truncated EXgenericFlow
-store 8 packet-chosen bytes at record 2's payload offset 2. This helper
-finds record 2's header/element prefix in the written capture and prints
-its first 8 payload bytes, so the assertion does not depend on nfdump's
-multi-threaded console interleaving.
+With no second argument this finds the two-record alias datagram's record 2
+header/element prefix and prints its first 8 payload bytes. With "hdr" it
+locates record 2 by its distinct inPackets/inBytes pair and prints the
+captured record header's exporterID and flags/nfversion bytes.
 """
+import struct
 import sys
 
 PREFIX = bytes.fromhex("0b004800020000000000000301003400")
@@ -15,6 +15,17 @@ PREFIX = bytes.fromhex("0b004800020000000000000301003400")
 def main():
     with open(sys.argv[1], "rb") as f:
         data = f.read()
+    if len(sys.argv) > 2 and sys.argv[2] == "hdr":
+        marker = struct.pack("<QQ", 5, 500)  # victim's inPackets/inBytes
+        pos = data.rfind(marker)
+        if pos < 0:
+            print("REC2_FOUND=0")
+            return 1
+        header = data[pos - 24 - 16:pos - 24]
+        print("REC2_FOUND=1 REC2_EXPORTER=" + header[8:10].hex()
+              + " REC2_FLAGS_NFVERSION=" + header[10:12].hex()
+              + " REC2_SIZE=" + header[2:4].hex())
+        return 0
     pos = data.rfind(PREFIX)
     if pos < 0:
         print("REC2_FOUND=0")
