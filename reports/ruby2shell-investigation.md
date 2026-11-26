@@ -3837,3 +3837,80 @@ found no published exploit code. Evidence:
 ```
 bash lab/repro/ruby2shell-entrypoints.sh entrypoints-2
 ```
+
+### Threaded-dispatch low-byte redirect — structurally CLOSED across builds (2026-11-26, tenth wake)
+
+The ninth wake surveyed freed first qwords in Ruby text and found 1,854
+threaded `iseq_encoded` handler pointers in `vm_exec_core`; a throwaway
+internal-API probe applying the fixed overflow byte `0x53`/`0x73` to
+`iseq_encoded[0]` ended 220/220 arms fatal on plain 3.4.12. That was recorded
+as a 3.4.12-only bounded negative with the 3.3.13 table dump named as the next
+experiment. This wake ran the decisive consumer-behavior check and closes the
+lane across both builds.
+
+**Failed prediction (preserved).** The first hypothesis was structural:
+`0x53` and `0x73` are odd, and gcc computed-goto labels ought to be >=8-byte
+aligned, so the overwritten pointer could never equal a valid handler entry.
+The dumped tables **falsify** this: handler low bytes are arbitrary (101 of
+204 entries on 3.3.13, 101 of 220 on 3.4.12 are odd). labels are emitted at
+the end of the preceding instruction, not aligned. There *are* valid
+same-page redirect targets.
+
+**Method.** New committed `lab/repro/ruby2shell-dispatch-table.py` scans
+`.data.rel.ro` of a plain Ruby binary for the longest run of 8-byte qwords
+inside `vm_exec_core`, maps each table index to an opcode via the tree's
+generated `insns.inc`, groups handlers by 256-byte page, and tests whether a
+first-opcode handler shares a page with an entry whose low byte is `0x53` or
+`0x73`. The overflow sets only the low byte, so the target is
+`(handler & ~0xff) | byte` — a valid handler only on that same page.
+
+**Observed.**
+
+```
+3.3.13 (204 handlers, 48 pages): valid-redirect pages
+  0x264f00: topn=0xbf, setn=0x73, adjuststack=0x39, +4 trace entries
+  0x267100: trace_opt_plus=0x89, trace_opt_ge=0x05, trace_opt_aset=0x73, +6
+  verdict=NO_REACHABLE_REDIRECT
+3.4.12 (220 handlers, 54 pages): valid-redirect page
+  0x21ca00: opt_le=0xd9, opt_gt=0x0d, opt_ge=0x73
+  verdict=NO_REACHABLE_REDIRECT
+```
+
+On both builds the only valid redirect targets are comparison/stack/trace
+opcodes (`opt_le`/`opt_gt` -> `opt_ge` on 3.4.12; `topn`/`adjuststack` ->
+`setn` and trace arithmetic -> `trace_opt_aset` on 3.3.13). None of the
+opcodes that can lead a live `iseq_encoded` (`nop`, `getlocal`,
+`getlocal_WC_0/1`, `putnil`, `putself`, `putobject`, `putspecialobject`,
+`setlocal`, `getinstancevariable`, `definemethod`, `defined`) share those
+pages. Comparison and trace opcodes require operands already on the stack and
+never appear at encoded index 0, which is the only position a wire one-byte
+overflow of an adjacent iseq buffer can reach. Every reachable overwrite
+therefore lands mid-instruction, matching the 3.4.12 probe's 220/220 fatal
+arms.
+
+Empirical cross-check on the unmodified stock Sinatra/Puma 3.4.12 request
+worker: the ninth wake's `jemq0-survey.trace` records every free-time first
+qword (`Q tid ptr q0`). Using that run's `.maps` Ruby base `0x5714ffbf9000`,
+1,854 of the 552,468 `Q` values resolve into `vm_exec_core` — exactly the
+ninth wake's count — and **zero** resolve onto the sole redirect page
+`0x21ca00`. The busiest handler pages are `0x21b300` (`putnil`/`putself`/
+`putobject`), `0x21a400` (`definemethod`) and `0x219600`
+(`getlocal_WC_0`), all non-redirect pages. Real request iseqs therefore never
+begin on a page where `0x53`/`0x73` could reach a valid handler.
+
+**Disposition:** the threaded-dispatch low-byte lane is a bounded NEGATIVE
+for full rung 5 on both affected builds. It is a genuine "consumer behavior"
+determination, not a reliance on the earlier probe: a valid redirect exists
+in principle but is unreachable from the only position the fixed-byte write
+can touch. No chosen-byte write, code-pointer disclosure or persistence
+follows. Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Evidence: `lab/build/evidence/dispatch-table-3.3.13.out` and
+`dispatch-table-3.4.12.out`.
+
+```
+python3 lab/repro/ruby2shell-dispatch-table.py \
+    lab/build/plain/ruby-3.3.13-plain/bin/ruby 0x2637c0 0x2698c0 /tmp/ruby-3.3.13/insns.inc
+python3 lab/repro/ruby2shell-dispatch-table.py \
+    lab/build/plain/ruby-3.4.12-plain/bin/ruby 0x2191f0 0x21fbcd lab/build/ruby-3.4.12/insns.inc
+```
