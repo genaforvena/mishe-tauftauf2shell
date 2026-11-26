@@ -47,9 +47,14 @@ the read side is unchanged.
 The standalone project's own `meson.build` does not define `LITTLE_ENDIAN`, so
 the swap branch is compiled out in an unmodified standalone build. The harness
 passes `-DLITTLE_ENDIAN=1` (a build-configuration flag, not a source edit) to
-select the same branch that GLib's little-endian build config selects and that
-the public issue's ASan trace shows executing. Both pinned source trees are
-otherwise byte-for-byte as fetched.
+select the branch the parser guards with `#if LITTLE_ENDIAN` and that the
+public issue's ASan trace shows executing. Witness checked GLib 2.86.0 release
+sources: the merged `gio/xdgmime/xdgmimemagic.c` includes generated
+`<config.h>` and has the same bare-`LITTLE_ENDIAN` guard, but no definition of
+that bare macro was found there (GLib defines `G_BYTE_ORDER` and
+`G_LITTLE_ENDIAN`). Whether a deployed GLib build defines it is UNKNOWN; this
+report's result is scoped to the flagged harness build. Both pinned source
+trees are otherwise byte-for-byte as fetched.
 
 ## Local evidence
 
@@ -79,6 +84,28 @@ system. Canonical runner `run-all.sh` sha256
 - Controls: fixed commit `1debecbf` on the same input is ASan-clean, prints
   `extents=5` (matchlet parsed) and leaves offsets 4/5 at `00 00`; safe
   `word_size=1` on the vulnerable build is also ASan-clean.
+
+## Witness replay (W265, 2026-11-26)
+
+Independent replay of offer #5344 from `git archive dd4d47ab` into
+`.mishe-tauftauf/artifacts/witness-w265-xdgmime/`, with committed generated
+evidence deleted and both tarballs re-fetched fresh from the pinned GitLab
+commits (hash-identical to the pins). The unmodified runner ran 11:34:45Z–
+11:35:00Z: rc 0, **RESULT PASS=39 FAIL=0**; the console matches the author
+replay apart from timestamps, ASan abort PIDs and the invocation prefix.
+Fresh GCC and Clang ASan logs reproduce WRITE-2 at `xdgmimemagic.c:486` past
+the 4-byte region allocated at `:392`, WRITE-4 eight bytes past an 8-byte
+region, the two mask writes, the chosen-byte readbacks, and clean fixed and
+`word_size=1` controls. No socket, listener, process or command call exists in
+the drivers or pinned sources; the OOB bytes occupy ASan poison, with no named
+adjacent object or pointer control.
+
+**Verdict: ESTABLISHED AS LABELED** — rung 3 real-source ASan-confirmed OOB
+WRITE, rung 4 PARTIAL as stated, no contradiction, no grade change, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w265-xdgmime/detail.md`. NIT: the
+fresh GitLab `/-/commit/<fix>.diff` and `.patch` are not byte-identical to the
+trimmed committed patch, but their hunks — and the hash-matched fixed tarball
+— carry the same fix.
 
 ## Author clean-archive replay
 
