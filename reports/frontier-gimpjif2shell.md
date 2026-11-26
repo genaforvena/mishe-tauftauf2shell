@@ -567,3 +567,38 @@ process; the log ends with plugin/script-fu/GIMP `Terminated`. This is a
 negative result for the observed window, not evidence that the pointer is
 never used later. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5: still
 no dereference, downstream use or command.
+
+## Hardware access watchpoint on the chosen word (W291, 2026-11-26)
+
+W290's SIGSEGV handler could only see a *dereference* of the overwritten
+word. New question: does the real plugin ever **read** it? A temporary
+variant of the committed `live/watchptr-shim.c` (source SHA-256
+`9e64a848648152b0aab01a38af0909de22d897e4f8129821e0442006f5ac0184`,
+built `.so` SHA-256
+`c13235c7acb7d0ecf5c8e6bf3a9ad1695a00fe855ff415de0df7cc749a8e3791`)
+adds `prctl(PR_SET_PTRACER, PR_SET_PTRACER_ANY, 0, 0, 0)` when arming so
+gdb can attach under this host's `ptrace_scope=1`. The committed shim
+(`5231e828…`) was not edited; only the extracted AppRun preload line was
+pointed at the temporary `.so` and then restored to its original hash
+`bad34884…`; `inflate-shim.so` (`fc73e957…`) was never swapped.
+
+With `published-ptr.jif` through the real GIMP 3.2.8 PDB path in a fresh
+HOME under `timeout -k 5 65`, `live/evidence/awatch-ptr-run.log`
+(SHA-256 `c52b55ef6c2daa2723d8db9e32e66a495079856fa48d7c056d35482890773b2d`)
+records pid 1623271, `out=0x64964bd11220`,
+`WATCH_WORD_BEFORE=01000000000000005013d14b966400000000000000000000`,
+`WATCH_SURVIVED total_out=448 ret=1`, and
+`WATCH_WORD_AFTER=4d4d4d4d4d4d4d4d43424100007f00004d4d4d4d4d4d4d4d`.
+gdb attached to that pid and set `awatch *(unsigned long long *)0x64964bd11338`
+(`out+280`), then continued for 28 s.
+`live/evidence/awatch-ptr-gdb.log` (SHA-256
+`9802e7ad850cae7694ef4557d1959c32cc13d3028801d1b6730de2ff3610429e`)
+shows `Hardware access (read/write) watchpoint 1` installed and **no hit**
+before the outer kill: no observed read or write of the chosen word after
+the decompression. The result is bounded: the attach happened after the
+call began, gdb reported no `libthread_db` and could not load dynamic
+linker symbols, and no positive control proved watchpoint insertion on
+every one of the process's 18 LWPs. It does not prove the word is never
+read later. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5: still no
+downstream consumer, chosen address or command.
+

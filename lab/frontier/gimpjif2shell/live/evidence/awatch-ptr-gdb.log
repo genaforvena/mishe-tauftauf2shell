@@ -1,0 +1,29 @@
+[New LWP 1623291]
+[New LWP 1623290]
+[New LWP 1623289]
+[New LWP 1623288]
+[New LWP 1623287]
+[New LWP 1623286]
+[New LWP 1623285]
+[New LWP 1623284]
+[New LWP 1623283]
+[New LWP 1623282]
+[New LWP 1623281]
+[New LWP 1623280]
+[New LWP 1623279]
+[New LWP 1623278]
+[New LWP 1623277]
+[New LWP 1623274]
+[New LWP 1623273]
+[New LWP 1623272]
+
+warning: Could not load shared library symbols for .//usr/lib64/ld-linux-x86-64.so.2.
+Do you need "set solib-search-path" or "set sysroot"?
+
+warning: Unable to find dynamic linker breakpoint function.
+GDB will be unable to debug shared library initializers
+and track explicitly loaded dynamic code.
+
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+0x00007250cbb6f300 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+Hardware access (read/write) watchpoint 1: *(unsigned long long *)0x64964bd11338
