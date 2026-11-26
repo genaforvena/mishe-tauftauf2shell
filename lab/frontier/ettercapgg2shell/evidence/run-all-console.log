@@ -1,0 +1,26 @@
+PASS PIN tar-v0.8.4.1
+PASS PIN tar-v0.8.5.1
+PASS PIN fix-pr1330
+PASS PIN driver
+PASS PIN vulnerable function starts at verbatim ec_gg.c:599
+PASS PIN fixed function starts at verbatim ec_gg.c:631
+PASS PIN vulnerable-body
+PASS PIN fixed-body
+PASS PIN fixed hunk carries GHSA marker and snprintf(str, size
+PASS PIN vulnerable tbuf3 allocation is 30 bytes
+PASS PIN fixed tbuf3 allocation is 64 bytes
+PASS vuln-gcc-asan-attack: ASan WRITE-overflow at verbatim ec_gg.c:673
+PASS vuln-gcc-asan-safe: no ASan report
+PASS fixed-gcc-asan-attack: fixed helper bounds output to 29 chars
+PASS fixed-gcc-asan-safe: no ASan report
+PASS vuln-gcc-plain-attack: chosen hex digit in bounds; suffix bytes past offset 30
+PASS vuln-gcc-plain-safe: no bytes past offset 30 on safe version
+PASS fixed-gcc-plain-attack: fixed helper bounds output to 29 chars
+PASS vuln-clang-asan-attack: ASan WRITE-overflow at verbatim ec_gg.c:673
+PASS vuln-clang-asan-safe: no ASan report
+PASS fixed-clang-asan-attack: fixed helper bounds output to 29 chars
+PASS fixed-clang-asan-safe: no ASan report
+PASS vuln-clang-plain-attack: chosen hex digit in bounds; suffix bytes past offset 30
+PASS vuln-clang-plain-safe: no bytes past offset 30 on safe version
+PASS fixed-clang-plain-attack: fixed helper bounds output to 29 chars
+RESULT PASS=25 FAIL=0
