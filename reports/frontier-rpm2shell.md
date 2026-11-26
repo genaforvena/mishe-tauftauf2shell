@@ -407,6 +407,23 @@ above. No command execution without a live target and benign side effect.
 Keep the allocator instrumentation and stripped/query negatives attached to
 any broader claim.
 
+### Fresh-build clean-archive replay (2026-11-26 20:29–20:54Z)
+
+`real/run-real-witness.sh` rebuilt all three rpm binaries from the pinned
+git trees in a clean archive and ran the four grade-carrying runners. The
+source-level claim replays: `run-real.sh` 21 PASS / 0 FAIL and
+`run-scaled-payload.sh` 21 PASS / 0 FAIL, with fresh ASan WRITEs of 64/512/
+4096 bytes and clean fixed/safe controls. The two `rpm -i` layout
+assertions did **not** replay on those fresh binaries:
+`run-install-consumer.sh` returned 13 PASS / 1 FAIL (safe control rc 0,
+author layout rc 1), and `run-gc-pointer.sh` returned 6 PASS / 2 FAIL
+(B's chosen qword dereference and adjacency pass; A's `CHOSEN_PTR` chain
+does not align). Fresh builds embed different debug paths, so heap layout
+is a different lab condition. Rung 4 is therefore **author-layout
+DEMONSTRATED**, not a layout-independent replay claim; the fresh-build
+negative is preserved in `lab/frontier/rpm2shell/PROVENANCE.md`. Grade is
+unchanged in the committed layout; independent witness verdict still UNKNOWN.
+
 ## Duplicate check
 
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`

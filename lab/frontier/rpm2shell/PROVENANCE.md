@@ -487,3 +487,51 @@ Author run 2026-11-26 01:52Z: **28 PASS / 0 FAIL**, rc 0. Raw logs in
 `bash run-witness.sh` rehashes the four pins, rebuilds every binary and
 asserts the same evidence; clean-archive replay is recorded in
 `reports/rpm2shell-status.md`.
+
+## Fresh-build clean-archive replay (2026-11-26 20:29–20:54Z)
+
+Bounded attempt to make the real-consumer grade replayable without any
+author binary: `real/run-real-witness.sh` hash-checks both pinned git trees
+(`c36e85503`, `5bc8705e0`), compiles vulnerable ASan, fixed ASan and plain
+vulnerable rpm from source with the recorded CMake options, installs a
+fresh vulnerable config and runs the four grade-carrying runners.
+Prerequisites in a clean archive are symlinks to the pinned, ignored
+provisioning trees (`src/rpm`, `src/rpm-fixed`, `deps/root`); no build
+output is copied.
+
+`git archive HEAD lab/frontier/rpm2shell` into
+`/tmp/r2s-witness.0ejkuv4B` (52-character checkout), symlinked
+prerequisites, fresh builds. All three builds configured and completed.
+Results with the installed config normalized to an 18-character symlink:
+
+- `run-real.sh`: RC 0, **21 PASS / 0 FAIL** — fresh binaries reproduce the
+  64-byte ASan WRITE at `rpmfi.cc:2242`, fixed rc 1 and safe controls rc 0.
+- `run-scaled-payload.sh`: RC 0, **21 PASS / 0 FAIL** after the runner was
+  changed to honor `RPM_CONFIGDIR_VULN`/`RPM_CONFIGDIR_FIXED` (it previously
+  `cd`-ed only to the author's `install-vuln` path). All three lengths and
+  the GDB far-end readback pass on the fresh binaries. Before that repair
+  the same run used the wrong config and reported plain rc 139 for 64/512
+  and hung in the GDB readback; both are replay-condition failures, not a
+  changed copy length.
+- `run-install-consumer.sh`: RC 1, **13 PASS / 1 FAIL**. The fresh ASan
+  WRITE and all three plain fault traces pass; `plain-vuln-safe` returns rc
+  0 where the author layout returned rc 1. This assertion is a
+  layout-dependent control status, not a copy result.
+- `run-gc-pointer.sh`: RC 1, **6 PASS / 2 FAIL** (V stays INFO). B's chosen
+  `0x4242424242424242` dereference and `buf+0x20` adjacency pass on the
+  fresh binary; A's `CHOSEN_PTR / MATCH` chain does not align. Fresh plain
+  and fixed binaries are not byte-identical to the author binaries
+  (different build paths in debug info), so the heap layout is a different
+  lab condition; the A-chain result is NOT reproduced there.
+
+Consequence: the source-level ASan write and all scaled lengths replay from
+fresh builds, but the two `rpm -i` pointer-chain assertions are lab-layout
+specific. Grade remains rung 3 verbatim plus rung 4 author-DEMONSTRATED in
+the committed layout; the fresh-build replay is a measured negative for the
+A-chain and safe-control rc assertions and is preserved here. No witness
+verdict, no wire path, no command, no r5.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-real-witness.sh` | `10efeadbe6374d523289c333b3927bb7c0ab9f46aa3ae9dd41bc00c9c99bd489` |
+| `real/run-scaled-payload.sh` (config override) | `d0540006339a7a6fe106730f5ebaf180e1bfe406298f30c1792a113e75054609` |

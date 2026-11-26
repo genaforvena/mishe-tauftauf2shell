@@ -4,8 +4,9 @@
 set -u
 cd "$(dirname "$0")"
 root=$(cd .. && pwd)
-vuln_config=$(cd "$root/install-vuln/lib/rpm" && pwd)
-fixed_config=$(cd "$root/build-fixed-asan" && pwd)
+vuln_config=${RPM_CONFIGDIR_VULN:-$root/install-vuln/lib/rpm}
+fixed_config=${RPM_CONFIGDIR_FIXED:-$root/build-fixed-asan}
+[ -f "$vuln_config/rpmrc" ] || vuln_config=$root/build-vuln-asan
 sizes=(64 512 4096)
 
 pass=0
