@@ -7,8 +7,8 @@ ROOT=$(cd "$(dirname "$0")/../.." && pwd)
 cd "$ROOT" || exit 2
 EVID=lab/build/evidence/wpqw-u32le
 mkdir -p "$EVID"
-RUBY12=lab/build/ruby-3.4.12-asan/bin/ruby
-RUBY13=lab/build/ruby-3.4.13-asan/bin/ruby
+RUBY12=${RUBY12:-lab/build/ruby-3.4.12-asan/bin/ruby}
+RUBY13=${RUBY13:-lab/build/ruby-3.4.13-asan/bin/ruby}
 SCRIPT=lab/repro/ruby2shell-wpqw-u32le.rb
 run() {
   ver=$1; bin=$2; shift 2

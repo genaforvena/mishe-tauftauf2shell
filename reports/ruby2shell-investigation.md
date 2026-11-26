@@ -4670,3 +4670,19 @@ patch-sensitively. No write, pointer control, disclosure or wire-only
 reachability; requires a UTF-32LE regex with an attacker-chosen pattern.
 Primary grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+### Plain-build control
+`lab/repro/ruby2shell-wpqw-u32le.sh` accepts `RUBY12`/`RUBY13` overrides;
+with the genuine non-ASan binaries
+`lab/build/plain/ruby-3.4.12-plain/bin/ruby` and
+`lab/build/plain/ruby-3.4.13-plain/bin/ruby`, all 20 arms (seven steering
+indices and three codepoints per build) returned rc=0 with `good=true`,
+`bad=false`. Neither a crash nor a verdict deviation appeared on 3.4.12.
+The one-byte OOB remains ASan-visible corruption only: no consumer-visible
+effect on this host, no grade increase beyond rung 3.
+
+Next bounded experiment: survey the local Rails/Sinatra gem trees for any
+default path that compiles a request-derived `Regexp` with UTF-16LE or
+UTF-32LE encoding. If none exists, both wpqw secondary lanes are
+wire-unreachable and remain lab-only; a found path would change the
+reachability grade.
