@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 184,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ) and libarchivezippath2shell (19:2xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 185,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ) and pcre2jit2shell (19:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 181,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ and libarchivezippath2shell admitted 19:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 182,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ, libarchivezippath2shell admitted 19:2xZ and pcre2jit2shell admitted 19:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 181,
+      "value": 182,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2814,6 +2814,22 @@
       "reports": [
         "reports/frontier-libarchivezippath2shell.md",
         "reports/libarchivezippath2shell-status.md"
+      ],
+      "established": false
+    },
+    {
+      "target": "Pcre2Jit2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "—",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 19:5xZ under standing #6 as the 185th declared target mind; staged window 194 adopted (panes %392/%393 live, dead=0, registry 195/195 unique names, no duplicate); operator clean-archive replay at 19:55Z of `git archive HEAD lab/frontier/pcre2jit2shell` with only the ignored pinned `src/pcre2-10.48.tar.gz` and `src/pcre2-10.49.tar.gz` copied in gives runner sha256 `d9c5a6ebfb6f0ad627823e6cec2c6dfaacbf0936a573a678bb9a2403b3ac112e`, rc 0, `RESULT PASS=46 FAIL=0`, with all pins and source hashes asserted by the runner.** CVE-2026-103111 / GHSA-r9hj-j2rw-4q3m (PCRE2, High CVSS 3.1 AV:N/AC:L/PR:L/UI:N/S:U/C:L/I:H/A:L, CWE-787, affected <= 10.48, patched 10.49; fix commit `2b4038298072684b0fae29b15bedfb1a75bda46d`): in verbatim pinned `src/pcre2_jit_compile.c` `allocate_stack()` lowers `STACK_TOP` by the whole frame at :3531 before the limit check at :3543, while the resize stub at :14088 subtracts a fixed `STACK_GROWTH_RATE` 8192 (:102) without rechecking the top, so a 1,400-distinct-capture single frame crosses below the granted JIT stack. The fix's own regression line through shipped `pcre2test` faults pinned 10.48 (`Segmentation fault`, rc 139) and cleanly returns `Failed: error -46: JIT stack limit reached` on 10.49. The hash-matched advisory PoC against unmodified 10.48 places a separate 1 MiB victim mapping below the 192 KiB JIT mapping and observes 139,972–139,976 bytes clobbered, deepest write 139,976 bytes below the stack and 15 aligned words holding pointers into the 10-byte subject; no-jit, 100-capture small-frame and pinned 10.49 JIT controls are clean. Grade: rung 2 shipped-CLI crash and rung 4 physical separate-mapping control from the staged report, marked Limited in the register because the written words are JIT frame state, not attacker-chosen bytes, a controlled pointer or a marker; rung 3 ASan NOT CLAIMED (stores are emitted by JIT machine code into mmapped regions; two ASan builds were killed during compilation), rung 5 NOT CLAIMED (no socket, live consumer, command or wire input). Preserved negatives: `MAP_FIXED_NOREPLACE` placement collides under ASLR on some tries (only successful placements asserted, collisions kept), macOS/AArch64 and Rosetta observations not reproduced, no patched-10.48 physical run. Owed: independent witness clean-archive replay and the named depth experiment — build a loopback-only consumer that JITs an attacker-supplied pattern with a growable stack, drive it over a request and look for corruption of a second request allocation, chosen-offset readback and then a benign marker, keeping no-jit/small-frame/fixed and safe-input controls.",
+      "reports": [
+        "reports/frontier-pcre2jit2shell.md",
+        "reports/pcre2jit2shell-status.md"
       ],
       "established": false
     }

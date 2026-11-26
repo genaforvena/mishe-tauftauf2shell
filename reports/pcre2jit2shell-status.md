@@ -1,11 +1,22 @@
-# pcre2jit2shell — status (STAGED 2026-11-26 19:3xZ)
+# pcre2jit2shell — status (ADMITTED 2026-11-26 19:5xZ)
 
-STAGED by frontier W285; awaiting operator admission under standing #6. Brief
-`reports/frontier-pcre2jit2shell.md`, charter `charters/pcre2jit2shell.md`,
-seed wall `.mishe-tauftauf/walls/pcre2jit2shell.md`, harness
-`lab/frontier/pcre2jit2shell/` (`PROVENANCE.md` has pins, traces and negatives).
-Target window 194 is live on the inner tmux socket (panes %392/%393, dead=0,
-tail/python3); the registry has 195/195 unique window names.
+ADMITTED under standing #6 as the 185th declared target mind; staged window 194
+adopted (panes %392/%393 live, dead=0, registry 195/195 unique names, no
+duplicate). Brief `reports/frontier-pcre2jit2shell.md`, charter
+`charters/pcre2jit2shell.md`, seed wall `.mishe-tauftauf/walls/pcre2jit2shell.md`,
+harness `lab/frontier/pcre2jit2shell/` (`PROVENANCE.md` has pins, traces and
+preserved negatives).
+
+- Operator clean-archive replay at 19:55Z: `git archive HEAD
+  lab/frontier/pcre2jit2shell` with only the ignored pinned
+  `src/pcre2-10.48.tar.gz` / `src/pcre2-10.49.tar.gz` copied in; runner sha256
+  `d9c5a6ebfb6f0ad627823e6cec2c6dfaacbf0936a573a678bb9a2403b3ac112e`, rc 0,
+  `RESULT PASS=46 FAIL=0`. The runner re-asserted both tarball hashes, the fix
+  patch, advisory PoC, regression input and pinned source hashes. Shipped
+  `pcre2test` regression faults pinned 10.48 (rc 139) and returns -46 on 10.49;
+  physical PoC: 139,972 bytes clobbered, deepest write 139,976 bytes below the
+  JIT mapping, 15 subject-pointer words, with clean no-jit, small-frame and
+  fixed controls. Independent witness replay is owed.
 
 - Pins: 10.48 tarball SHA-256
   `ebcc25aadf2a51fa1fefa9b8bc9e7a79b3dae86870a0f1152a22e42befd46888`, 10.49
@@ -43,7 +54,7 @@ tail/python3); the registry has 195/195 unique window names.
   boundary without changing library state, and the written words are JIT frame
   state (subject pointers observed, not arbitrary chosen bytes). No command,
   socket, control-flow target or live wire consumer.
-- Owed: operator admission, independent witness clean-archive replay, and the
+- Owed: independent witness clean-archive replay, and the
   loopback consumer experiment — drive the same pattern through a live local
   JIT-with-growable-stack service, then seek chosen-offset readback and a
   benign marker. Keep all four controls; do not infer RCE from advisory prose.
