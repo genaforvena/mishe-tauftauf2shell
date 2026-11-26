@@ -145,7 +145,7 @@ def etype_datagram(first, nfversion=1):
                         1764000000, 1, 2) + body
 
 
-def edge_datagram(total=65507):
+def edge_datagram(total=65507, marker=None):
     """Fill a maximum UDP payload with a 4-byte flow element last.
 
     Layout: 16 B nfd header + 12 B record header + dummy element
@@ -160,7 +160,7 @@ def edge_datagram(total=65507):
     dummy_len = total - 16 - 12 - 4
     body = REC_HDR.pack(V3_RECORD, REC_HDR.size + dummy_len + 4,
                         2, 0, 0, 0, 0, 3)
-    body += ELEM_HDR.pack(DUMMY_TYPE, dummy_len) + bytes(dummy_len - 4)
+    body += ELEM_HDR.pack(DUMMY_TYPE, dummy_len) + (bytes([marker]) * (dummy_len - 4) if marker is not None else bytes(dummy_len - 4))
     body += ELEM_HDR.pack(EX_GENERIC_FLOW, 4)
     return NFD_HDR.pack(VERSION_NFDUMP, NFD_HDR.size + len(body),
                         1764000000, 1, 1) + body
@@ -194,6 +194,8 @@ def datagram(mode):
         return edge_safe_datagram()
     if mode == "v6edge":
         return edge_datagram(65527)
+    if mode == "v6edge-marker":
+        return edge_datagram(65527, marker=0xA5)
     if mode == "v6edge-safe":
         return edge_safe_datagram(65527)
 
@@ -227,7 +229,7 @@ def main():
     ap.add_argument("mode", choices=("attack", "safe", "icmp", "single",
                                      "alias", "alias-safe", "hdr", "hdr-safe",
                                      "edge", "edge-safe",
-                                     "v6edge", "v6edge-safe",
+                                     "v6edge", "v6edge-marker", "v6edge-safe",
                                      "etype", "etype-bad", "etype-safe"))
 
     a = ap.parse_args()

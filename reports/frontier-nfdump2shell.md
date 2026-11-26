@@ -223,6 +223,39 @@ SIGABRT. A UDP datagram on `::1` cannot exceed 65527 B, so the store offset
 `cnt+16` cannot reach any pointer-bearing field in the following chunks;
 the value is collector-timestamp derived. No pointer, marker or command.
 
+### Chosen-byte control of the heap size field closed (2026-11-26 21:32Z)
+
+Lane pick #5828 asked whether the OOB store can carry wire-chosen bytes, not
+just a chosen offset, into the adjacent chunk's `size` field and produce a
+chosen outcome. `run-v6value.sh` reads the word and the post-write header in
+the genuine plain collector under GDB (read-only; no debugger-forced value),
+sending the same 65527-byte `v6edge` datagram twice: once zero-padded, once
+with a new `v6edge-marker` mode whose dummy element payload is all `0xA5`.
+Results: **12 PASS / 0 FAIL** and **13 PASS / 0 FAIL**.
+
+```
+baseline  MSEC=1795728774350 HOST_MS=1795728774325 delta_ms=25
+          TARGET_BYTES=ce94c619a2010000  HDR_SIZE_AFTER=00000001a219c694
+marker    MSEC=1795728776730 HOST_MS=1795728776682 delta_ms=48
+          PKT_TAIL=a5a5a5a5a5a5a5a5a5a5a5a501000400
+          TARGET_BYTES=1a9ec619a2010000  HDR_SIZE_AFTER=00000001a219c69e
+```
+
+The written bytes equal the little-endian `msecReceived` word, match the
+host clock within 48 ms, and never appear in the packet tail even when the
+packet carries 12 chosen `0xA5` bytes there. `nfcapd.c:442` is the only
+assignment of `fs->received` in `nfcapd.c` (`tv` from `gettimeofday()` at
+:343; the only other assignment in the tree is `sflow/sfcapd.c:419`), and
+pinned `nfd_raw-parent.c:188` computes `tv_sec*1000 + tv_usec/1000`. The
+post-write size field is exactly `(msecReceived >> 8) & ((1<<56)-1)`:
+`~7.0e9`, with byte 7 zero, regardless of packet content. A sender can move
+only low-order milliseconds by timing, never the high epoch bytes, so no
+small or otherwise useful chunk size can be chosen from the wire. This
+preserves the negative; it is not a pointer, marker or command, and the
+grade is unchanged. Runner SHA-256
+`236e44631e5d3e6bdbd54d9a097bd5169c827bf1c8d1f32c81e11eda98d2eeba`;
+sender SHA-256 `1fafc01e06eaa6290822d9399b3c7d3997cd613029219ee0fc08a000a6b3aaa3`.
+
 ### Packet-chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
 
 A third alias geometry targets the record header rather than flow data.
@@ -308,7 +341,9 @@ record's `size` field did not trigger, and the direct record-size/count lane
 was closed because the swap zeroes the source field needed for acceptance.
 Witness replay of the live-wire, IPv4-boundary, IPv6-boundary,
 header-control and element-type lanes is still owed; the chosen-byte payload
-replay is ESTABLISHED AS LABELED (W280).
+replay is ESTABLISHED AS LABELED (W280), and the IPv6 crossing plus heap map
+is ESTABLISHED AS LABELED (W292b, 2026-11-26 21:12Z). The newest heap-value
+negative is additive and awaits replay.
 
 ### Build-label correction and pointer boundary (2026-11-26 19:29Z)
 

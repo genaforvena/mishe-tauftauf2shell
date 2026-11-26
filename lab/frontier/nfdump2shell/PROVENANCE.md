@@ -716,3 +716,57 @@ A second clean-archive replay of final HEAD `149d113a` into an empty
 `/tmp/w-nfdump-heap-final` rebuilt all four collector pairs and returned
 **7 PASS / 0 FAIL**, rc 0, with the same `HEAPMAP` line and no `cp` errors;
 both `harness/out/v6heap/gdb.log` and `sender.log` were written.
+
+## Chosen bytes cannot reach the heap size field (2026-11-26 21:32Z)
+
+New/changed local files:
+
+| artifact | SHA-256 | change |
+| --- | --- | --- |
+| `run-v6value.sh` | `236e44631e5d3e6bdbd54d9a097bd5169c827bf1c8d1f32c81e11eda98d2eeba` | new |
+| `harness/wire_send.py` | `1fafc01e06eaa6290822d9399b3c7d3997cd613029219ee0fc08a000a6b3aaa3` | add `v6edge-marker` |
+
+Lane pick #5828 (witness #5824 / W292b ESTABLISHED AS LABELED) asked whether
+the IPv6 store can carry wire-chosen bytes into the adjacent chunk's `size`
+field. `run-v6value.sh` sets two read-only GDB breakpoints in the genuine
+uninstrumented plain collector (`nfd_raw.c:256` before the store, `:259`
+after), prints `msecReceived`, `fs->received`, the 16 packet tail bytes, the
+8 stored bytes and the post-write chunk header, and compares the word with
+`date +%s%3N` printed immediately before the send. The debugger writes no
+memory and forces no value. Commands and results:
+
+```
+bash lab/frontier/nfdump2shell/run-v6value.sh
+TOTAL: 12 PASS / 0 FAIL
+MSEC=1795728774350 HOST_MS=1795728774325 delta_ms=25
+TARGET_BYTES=ce94c619a2010000  HDR_SIZE_AFTER=00000001a219c694
+PKT_TAIL=00000000000000000000000001000400
+
+V6VALUE_MODE=v6edge-marker V6VALUE_PORT=10266 \
+V6VALUE_OUT=harness/out/v6value-marker bash lab/frontier/nfdump2shell/run-v6value.sh
+TOTAL: 13 PASS / 0 FAIL
+MSEC=1795728776730 HOST_MS=1795728776682 delta_ms=48
+PKT_TAIL=a5a5a5a5a5a5a5a5a5a5a5a501000400
+TARGET_BYTES=1a9ec619a2010000  HDR_SIZE_AFTER=00000001a219c69e
+```
+
+Logs: `harness/out/v6value/{gdb.log,sender.log}` and
+`harness/out/v6value-marker/{gdb.log,sender.log}`. The two datagrams have
+identical structure and length (65527 B); only the dummy payload differs.
+The written bytes are the little-endian `msecReceived` word in both cases,
+match the wall clock within 48 ms, and are absent from the packet tail even
+when that tail holds 12 attacker-chosen `0xA5` bytes. Source check in the
+pinned tree: `nfcapd.c:442` is the only place `nfcapd.c` assigns
+`fs->received` (`tv` from `gettimeofday()` at `:343`); the only other
+assignment in the whole tree is `sflow/sfcapd.c:419`. Pinned
+`nfd_raw-parent.c:188` computes `tv_sec*1000 + tv_usec/1000`.
+
+The measured post-write chunk size equals
+`(msecReceived >> 8) & ((1<<56)-1)` exactly: `0x1a219c694` vs
+`0x1a219c69e`, i.e. ~7.0e9 with byte 7 zero. Timing moves only low-order
+milliseconds; the high epoch bytes cannot be set from the wire and no small
+or useful chunk size is reachable. No pointer, marker or command side effect
+is observed, so this is preserved as a negative and the grade is unchanged.
+Regression after the sender change: `run-all.sh` 10 PASS / 0 FAIL and
+`run-v6edge.sh` 17 PASS / 0 FAIL, including the ASan WRITE-8, plain `rc=134`
+and clean safe/fixed controls.
