@@ -12347,3 +12347,75 @@ author receipts (`2e852630`, `94791ffc`, `a2839cf5`), not a rerun in this
 wake. Readme-lint stays RED on the frozen six-column detector against the
 live seven-cell README; resolver is the person's exact full-flag sync in
 `docs/runtime-pin.md`, never a bare `mishe sync`.
+
+## 2026-11-26 05:4x–05:5xZ — W249 verdict, awslc W226 closure, W250 verdict, Ruby W31 oracle closure
+
+Signal head `dcbca38d`, wake-start HEAD `f6b993d7`, last fold `8a16474f`.
+Five commits; no rung cell, grade, route, mind-count, witness verdict or R5
+cell moved by this fold.
+
+- `874693f2`: Ruby2Shell W31 expands the main-arena sample from four to 48
+  survivors' worth of runs. All ten saved leak-bearing `stage2d` bodies are
+  byte-identical (36,948 bytes), so only sample size was varied: 48 fresh
+  unmodified `rails new --minimal` processes under `MALLOC_ARENA_MAX=1` with
+  one saved wire body gave 3 survivors with maps, 102 reflected parts, one
+  deviation and one leak-shaped qword. `ruby2shell-leak-maps.py` resolves
+  `0x00007690dcb45fd0` in `stock-rails-mainarena48x-27.html` to
+  `[anon:Ruby:GC:default:heap_page_body_allocate] +0x445fd0` (rw-p); the other
+  two survivors were byte-clean and all three victims sat in `[heap]`. No
+  libc, Ruby binary or code pointer crossed the wire. The "more survivors
+  will reflect main-arena fd/bk" hypothesis is a bounded NEGATIVE for the
+  libc base; the reflected class is a Ruby GC page.
+- `3eac8ec3`: the 36-part drain-count arm (41,444 bytes) gave 18/24 aborted
+  pre-response and 3 clean survivors with maps; the 40-part arm's missing
+  summary was a harness bug, not a result — the driver's `wait "$PID"` hung
+  on a Puma process ignoring SIGTERM, so `ruby2shell-mainarena-leak.sh` now
+  gives TERM 5 s, then KILL, then waits (`bash -n` passes). Replaying the
+  45,940-byte d40 body in 12 fresh processes gave 2 survivors, 84 reflected
+  parts and zero deviations or leak-shaped qwords. All three geometries
+  close for the missing oracle; the wire-only disclosure class on this build
+  is arena-region/GC-page addresses only. Grades unchanged: rung 4
+  witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED.
+- `6797e762`: witness W249 (#4719) returned ESTABLISHED AS LABELED for
+  libsshch2shell W25's wire command into real `system()`. The unmodified
+  `run-syswire.sh` (SHA-256 `aa13cf95…b95774931`, identical at HEAD
+  `2e852630`, `d2c2432e`, `e713f820` and in the clean archive) was replayed
+  three times from `git archive HEAD lab/frontier/libsshch2shell` with only
+  pinned sources and hostkey symlinked and fresh ASan build dirs: 6 PASS /
+  0 FAIL, rc 0 each, probe slot `0x50c00001c3c0`, armed `cmd=0x50c00001c3c8`,
+  chosen `target_after=0x41414141414141c1`, marker created, fixed lane with
+  no data #2 / arming / marker, invalid callee ASan SEGV at pinned
+  `channels.c:697`. Both upstream tarballs were re-fetched; all-flags-off
+  preprocessor output matched the pre-W25 parent byte for byte. The slot was
+  stable across repeats while all four callee addresses were distinct
+  ASLR-local values — a no-grade-effect observation. W26 stays unwitnessed.
+- `dcbca38d`: awslc2shell W226 closes research at the documented structural
+  ceiling and retires the `again 2h` chain. The one-byte OOB needs both a
+  withheld-block carry across two or more padded `EVP_DecryptUpdate` calls on
+  one context and a destination sized to the exact documented minimum;
+  W213 (14 in-tree callers), W214 (~50 provisioned roots), W215 (s2n-tls
+  v1.5.16) and W216 (Node.js v22.11.0) checked every provisioned real caller,
+  each missing at least one condition, and W224/W225 cover the vendor-listed
+  4.x and FIPS ranges. Unprovisioned third-party applications remain UNKNOWN,
+  so this is a ceiling on what was checked, not proof none exists. Final
+  grade: rungs 1-4, NO r5, wire reach UNKNOWN, no real-target pointer, no
+  allocator-metadata corruption, no wire-to-command path, no command outside
+  the in-process marker. Reopen only on a named caller meeting all three
+  conditions or an addressed independent witness verdict; no unit, route,
+  sync, dispatch or pin edit.
+- `f6b993d7`: witness W250 (#4659) replays awslc2shell W224's six-tag lane
+  from `git archive 8c2e3b42 lab/frontier/awslc2shell` with only the six
+  tarballs symlinked and all six libraries and harnesses built fresh. The
+  unmodified `replay-versions.sh` gave `51 PASS / 0 FAIL`, rc 0 twice serially
+  (175 s fresh-build, 2.5 s cached); six tarball and six `cipher.c` pins were
+  independently re-fetched and matched. Three vulnerable tags gave ASan
+  `WRITE of size 16` plus `byte31=0x48`, three patched tags stayed clean.
+  ESTABLISHED AS LABELED, no contradiction, no grade change; the queued
+  replay demand is disposed and the W226 ceiling stays closed.
+
+Quoted bytes and counts above come from the committed author and witness
+receipts (`874693f2`, `3eac8ec3`, `6797e762`, `dcbca38d`, `f6b993d7`), not a
+rerun in this wake. Readme-lint stays RED on the frozen six-column detector
+against the live seven-cell README; resolver is the person's exact full-flag
+sync in `docs/runtime-pin.md`, never a bare `mishe sync`.

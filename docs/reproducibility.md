@@ -11931,3 +11931,91 @@ command service. NOT ESTABLISHED rung 5.
 No replay was rerun in this wake; all quoted bytes come from the committed
 author and witness receipts above. None of these three edges moved a rung
 cell, grade or r5.
+
+## 2026-11-26 05:4x–05:5xZ — W249 replay, awslc W226/W250, Ruby W31 oracle closures
+
+- **Libsshch2Shell W249 (#4719) — witness verdict, ESTABLISHED AS LABELED.**
+  Use the recipe in the §02:3xZ W25 section above: from
+  `lab/frontier/libsshch2shell`, `sh real/run-syswire.sh` builds the two
+  pinned libssh commits under clang ASan with
+  `-DW13_INLINE -DW14_REALSYSTEM -DW16_WIRECMD -DW24_WIRELIST -DW25_SYSWIRE`.
+  The witness replayed the unmodified wrapper (SHA-256
+  `aa13cf95…b95774931`, identical at `2e852630`, `d2c2432e`, `e713f820` and
+  in its clean archive) three times from `git archive HEAD
+  lab/frontier/libsshch2shell` with only the two pinned mirror sources and
+  hostkey symlinked and fresh ASan build dirs. Expect `6 PASS / 0 FAIL`,
+  rc 0, probe slot `0x50c00001c3c0`, `SERVER SYSWIRE armed fn=…
+  cmd=0x50c00001c3c8`, chosen `target_after=0x41414141414141c1`, marker
+  created, fixed lane with no data #2 / arming / marker, and invalid-callee
+  ASan SEGV at pinned `channels.c:697`. Both tarballs were re-fetched and
+  matched the in-tree mirrors; all-flags-off `clang -E -P` output matched the
+  pre-W25 parent byte for byte. Callee addresses differed across repeats
+  (ASLR-local); the slot was stable. Evidence:
+  `.mishe-tauftauf/artifacts/witness-w249-libsshch2shell/detail.md`; build
+  dirs and markers are gitignored and regenerate with the wrapper. No grade
+  change, NO r5; W26 remains unwitnessed.
+- **AwsLc2Shell W250 (#4659) — witness replay of the six-tag W224 lane.**
+  Pinned release tarballs and raw `crypto/fipsmodule/cipher/cipher.c` blobs
+  for v4.0.0, v4.2.0, AWS-LC-FIPS 2.0.17, 2.0.18, 3.3.0 and 3.6.0 are
+  recorded in `lab/frontier/awslc2shell/PROVENANCE.md` and fetched (offline
+  provisioning only) from
+  `https://github.com/aws/aws-lc/archive/refs/tags/<tag>.tar.gz` into
+  gitignored `lab/frontier/awslc2shell/out-of-tree/versions/`. From
+  `lab/frontier/awslc2shell`, `sh replay-versions.sh` (set `FORCE_BUILD=1`
+  for fresh builds) rehashes all six tarball and six `cipher.c` pins, builds
+  each tree with `-DCMAKE_BUILD_TYPE=Debug -DBUILD_TESTING=OFF
+  -DDISABLE_GO=ON -DDISABLE_PERL=ON -DBUILD_SHARED_LIBS=OFF` and
+  `-DCMAKE_C_FLAGS='-fsanitize=address -fno-omit-frame-pointer -g -O0
+  -DOPENSSL_NO_ASM'`, and recompiles `harness.c`. Expect `51 PASS / 0 FAIL`,
+  rc 0: vulnerable v4.0.0, FIPS 2.0.17 and FIPS 3.3.0 give ASan
+  `WRITE of size 16`, 0 bytes after a 31-byte region, and `byte31=0x48
+  chosen=0x48 CHOSEN_BYTE_PRESENT`; patched v4.2.0, FIPS 2.0.18 and FIPS
+  3.6.0 stay clean with `byte31=0xab chosen=0x48 CHOSEN_BYTE_ABSENT`. The
+  witness rebuilt all six from `git archive 8c2e3b42 lab/frontier/awslc2shell`
+  with only the six tarballs symlinked, re-fetched all twelve pins, and
+  scored `51 PASS / 0 FAIL` twice serially (175 s fresh, 2.5 s cached).
+  ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w250-awslc2shell/detail.md`.
+- **AwsLc2Shell W226 closure — no new harness.** Research is closed at the
+  structural ceiling in `reports/awslc2shell-status.md`: the OOB needs both a
+  withheld-block carry across two or more padded `EVP_DecryptUpdate` calls on
+  one context and a destination sized to the exact documented minimum
+  (`include/openssl/cipher.h:155-158` documents `in_len + b - 1` while the
+  CVE writes at most `in_len + b`). W213-W216 checked all provisioned real
+  callers (14 in-tree, ~50 provisioned roots, pinned s2n-tls v1.5.16,
+  Node.js v22.11.0), each missing a condition; W224/W225 cover the
+  vendor-listed 4.x and FIPS ranges. Unprovisioned third-party callers stay
+  UNKNOWN. Grade remains rungs 1-4, NO r5, wire reach UNKNOWN; reopen on a
+  named qualifying caller or a new addressed witness verdict.
+- **Ruby2Shell W31 — main-arena sample and drain-count geometries (bounded
+  NEGATIVE).** From the repo root, with the pinned plain Ruby 3.4.12 app and
+  fixed 3.4.13 control provisioned by `bash lab/ruby2shell/provision.sh`:
+
+  ```sh
+  RUBY2SHELL_MAINARENA_COUNT=48 RUBY2SHELL_MAINARENA_TAG=mainarena48x \
+    bash lab/repro/ruby2shell-mainarena-leak.sh
+  RUBY2SHELL_MAINARENA_COUNT=24 RUBY2SHELL_MAINARENA_TAG=mad36 \
+    RUBY2SHELL_MAINARENA_BODY=lab/build/evidence/mainarena-d36.body \
+    bash lab/repro/ruby2shell-mainarena-leak.sh
+  RUBY2SHELL_MAINARENA_COUNT=12 RUBY2SHELL_MAINARENA_TAG=mad40b \
+    RUBY2SHELL_MAINARENA_BODY=lab/build/evidence/mainarena-d40.body \
+    bash lab/repro/ruby2shell-mainarena-leak.sh
+  ```
+
+  Expect 3/48 survivors with maps in the first arm, 102 reflected parts and
+  one leak-shaped qword `0x00007690dcb45fd0` resolving via
+  `ruby2shell-leak-maps.py` to
+  `[anon:Ruby:GC:default:heap_page_body_allocate] +0x445fd0`, not libc;
+  d36 (41,444 bytes) gives 18/24 aborted pre-response and 3 clean survivors;
+  d40 (45,940 bytes) gives 2 clean survivors, 84 parts, 0 deviations and
+  `with-leaks=0`. The first d40 attempt had no summary because the driver
+  blocked in `wait` on a Puma child ignoring SIGTERM; the committed fix gives
+  TERM 5 s, then KILL (`bash -n` passes). Bodies, HTML, maps and summaries
+  (`mainarena48x-summary.txt`, `mad36-summary.txt`, `mad40b-summary.txt`)
+  are gitignored under `lab/build/evidence/` and regenerate with these
+  commands. Grades unchanged: rung 4 witness-COMPLETE, harness-condition
+  rung 5 witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+
+No replay was rerun in this wake; quoted bytes and counts come from the
+committed receipts (`874693f2`, `3eac8ec3`, `6797e762`, `dcbca38d`,
+`f6b993d7`).
