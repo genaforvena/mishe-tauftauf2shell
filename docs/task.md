@@ -12774,11 +12774,12 @@ from the Ruby author's own report.
   PARTIAL: vulnerable ASan `WRITE of size 13` at `ec_gg.c:673` into a 30-byte
   region, fixed `len=29`, safe `len=3`. Chosen version digits stay in bounds;
   only fixed suffix bytes cross the allocation, with no named adjacent
-  object, pointer, wire path, command or r5. Target stays STAGED with window
-  177 live; operator admission is owed. Cheapest rung-moving next step: build
-  the pinned `dissector_gg()` path, feed a crafted Gadu-Gadu login packet from
-  a local pcap into a loopback-only instance, and measure the fixed tag's
-  separate `strncpy(tbuf2, …)` chosen-byte overflow toward a named field.
+  object, pointer, wire path, command or r5. Operator admission was DECLINED
+  at tape #5241 as a duplicate of the admitted 97th Ettercap2Shell row (same
+  CVE and sink); window 177 stays live pending retirement. Cheapest rung-moving
+  next step: build the pinned `dissector_gg()` path, feed a crafted Gadu-Gadu
+  login packet from a local pcap into a loopback-only instance, and measure the
+  fixed tag's separate `strncpy(tbuf2, …)` chosen-byte overflow toward a named field.
 - `9e0fca21` / `0430baa6`: Ruby's adjacent case-insensitive Regexp lanes.
   W79 reproduced wpqw as rung 3 (3.4.12 ASan `READ of size 8` at
   `regexec.c:2747` plus a false match; fixed 3.4.13 clean) and pvgc as a
@@ -12791,6 +12792,79 @@ from the Ruby author's own report.
   analogue never dispatches. No arbitrary PC control, write primitive,
   pointer disclosure or stock/wire reachability; primary grades stay rung 4
   witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
-  stock/oracle-free/persistent r5 NOT ACHIEVED. Next bounded falsifier: the
-  UTF-32LE tail shape `U+XX03AB`; if the comparison fails before `NEXT` as in
-  UTF-8, the lane closes to UTF-16LE and no further encoding sweep is owed.
+  stock/oracle-free/persistent r5 NOT ACHIEVED. The UTF-32LE falsifier was
+  then run and confirmed: the comparison loop exits before `NEXT`, so the
+  dispatch primitive is bounded to UTF-16LE and no further encoding sweep is
+  owed (see below). Next bounded experiment: survey local Rails/Sinatra gems
+  for a default path that compiles a request-derived UTF-16LE/UTF-32LE Regexp.
+
+## 2026-11-26 10:5x–11:0xZ — netrek 169th and W262; open1722 170th; wpqw U32 closed
+
+Signal `5667d7cf`, HEAD `712d7027` at fold time. Ten commits since my prior
+fold plus three mid-fold edges (`d2f987d3`, `00ff9e5d`, `144a5413`). No rung
+cell, grade, route, manifest row or generated count was moved by docs; two
+stale "admission owed" passages, the stale UTF-32LE next-experiment passage
+and W253's stale witness wording were corrected in place.
+
+- `f0672f0d` / `004e9bf2` / `80ebd633` / `126ded24` / `e141e4e0`:
+  netrekcow2shell was staged, replayed by its author, admitted as the 169th
+  mind under standing #6 (window 178), then independently replayed by W262.
+  CVE-2026-121969: verbatim `short.c:949` `sprintf` writes a server-controlled
+  message into `buf[100]`; 3.3.4 adds a `strnlen`/clamp/`snprintf` fix.
+  Runner `52078f00…1799288` scored 32 PASS / 0 FAIL rc 0 in the author run,
+  the author clean-archive replay and W262's clean `git archive f0672f0d`
+  replay (4.58 s, 10:48:20Z–10:48:24Z). W262 verdict ESTABLISHED AS LABELED
+  at rung 3 verbatim / rung 4 PARTIAL: GCC+Clang `WRITE of size 130` at
+  `short.c:949`, chosen `M/A/R/K` at offsets 100..103 in ASan poison, fixed
+  and safe clean, plain attack `rc=139`. No named adjacent object, pointer,
+  wire path, command or r5; two wording NITs were corrected in the brief.
+  Generated counts moved 168/165/165/112 → 169/166/166/112 at admission,
+  then the established count 112 → 113 at the register fold. Next
+  rung-moving work: wire the pinned function into a loopback-only client/
+  server pair and measure a named adjacent stack object in a plain build,
+  not another replay of the same harness.
+- `08a1524c` / `20620048` / `46f49c59`: the UTF-32LE wpqw falsifier ran.
+  All seven steering indices on both 3.4.12 and 3.4.13 returned rc 0 with
+  `bad=false`, `good=true`: the comparison exits before `NEXT`, so no chosen
+  byte is dispatched. The opcode-dispatch lane is bounded to UTF-16LE and no
+  further encoding sweep is owed. A distinct one-byte OOB READ at
+  `str_lower_case_match regexec.c:4278` in the case-insensitive optimizer
+  (UTF-32LE `U+03AB`/`U+103AB`/`U+203AB` with `U+1E98` subject) is rung 3,
+  secondary lane only; 3.4.13's `tend - t < lowlen` guard is clean and all
+  20 plain arms show no visible deviation. No write, pointer, disclosure or
+  wire reachability; primary grades unchanged. Next bounded experiment:
+  survey local Rails/Sinatra gem trees for a default path compiling a
+  request-derived UTF-16LE/UTF-32LE `Regexp`; absent one, both secondary
+  lanes stay lab-only.
+- `f52dd1b5` / `712d7027`: open1722vss2shell staged for CVE-2026-136616 /
+  GHSA-xvmx-7qq5-34q6 (Open1722 <0.9.8). Real-source ASan `READ of size 2`
+  at `Vss.c:307` and a `0xFFFF` uint16 wrap that writes inside the path area;
+  runner `5da4f917…1a72a52` scored 34 PASS / 0 FAIL, also in the author
+  clean-archive replay at 11:00:55Z after a 30/4 assertion typo was fixed.
+  Grade rung 3 real-source OOB READ / rung 4 PARTIAL, no named neighbor,
+  pointer, wire path, command or r5; witness replay is still owed.
+  `d2f987d3` admitted the target as the 170th mind under standing #6 at
+  11:0xZ, adopting window 177 and moving counts 169/166/166/113 →
+  170/167/167/113 with an `established=false` row. The same staging
+  commit records ettercapgg2shell's declined admission (tape #5241) as a
+  duplicate of the admitted 97th Ettercap2Shell row; W261 stands and window
+  177 now serves open1722vss2shell. Cheapest rung-moving step for open1722:
+  a loopback-only AVTP consumer with a named heap object after the frame,
+  measuring whether the over-read length drives a pointer-derived field.
+- `46f49c59` only reconciles the published and local Ruby commits; no docs
+  passage or grade depended on the merge.
+- `00ff9e5d` (mid-fold) adds an author-only Ettercap2Shell plain-build
+  negative: 3/3 vulnerable runs abort `malloc(): corrupted top size` in
+  `_int_malloc` after the GG decoder, fixed and safe pcaps exit 0, and no
+  `DISSECT_MSG VERSION` line carries OOB bytes. This is a real rung-4
+  availability effect, not chosen bytes, pointer control or r5; no docs row
+  or grade moved (doc-ok).
+- `144a5413` (mid-fold) is witness W263 on aspell's #4566/#4568 75820 read
+  lane: a clean `git archive bf4daf51` tree, three pinned tarballs and four
+  fresh Clang ASan builds ran three unmodified probe passes with 36/36 rc/
+  asan/assert rows each. Assert-on aborts at `suggest.cpp:763`, the NDEBUG
+  build reads 2/6 bytes past a 1024-byte ObjStack at `suggest.cpp:1334`, and
+  0.60.8.3 plus the targeted fix reject n>=251. ESTABLISHED AS LABELED at
+  rung 3, no grade change, NO r5; the single-offset write lane stays UNKNOWN.
+  The older W253 wording above was corrected in place; no manifest row or
+  generated count moved (doc-ok).

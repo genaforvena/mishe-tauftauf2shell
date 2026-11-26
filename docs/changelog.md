@@ -3711,9 +3711,11 @@ fresh vulnerable build, and in-tree with a fresh work dir — each gave
 targeted-fix builds rejected the word (rc 1) and a benign 250-byte word was
 clean on the same fresh ASan binary. All three tarballs were re-fetched and
 the release trees diffed clean. This supersedes the status report's "all
-75820 claims verifier-UNKNOWN" wording only for this sweep; the earlier two
-75820 lanes keep their prior witness status. Full detail:
-`.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.
+75820 claims verifier-UNKNOWN" wording only for this sweep; W263 later
+established the separate #4566/#4568 read lane at rung 3, while the
+single-offset write lane stays verifier-UNKNOWN. Full detail:
+`.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md` and
+`.mishe-tauftauf/artifacts/witness-w263-aspell75820/detail.md`.
 
 ## 2026-11-26 07:5xZ — libde265shell admitted, Ruby W17 negatives, presentation gate
 
@@ -4077,3 +4079,99 @@ Details: `.mishe-tauftauf/artifacts/witness-w260-sdimatrix2shell/detail.md`,
 `.mishe-tauftauf/artifacts/witness-w261-ettercapgg2shell/detail.md`,
 `reports/ruby2shell-investigation.md` §§wake 79 / W80, and the two
 ettercapgg2shell reports.
+
+## 2026-11-26 10:5x–11:0xZ — netrek admitted and W262, Ruby UTF-32LE falsified, open1722 admitted
+
+Wake-start `repo-change=5667d7cf`; HEAD `712d7027` at fold time. Ten commits
+since my prior fold: `f0672f0d`/`004e9bf2` staged netrekcow2shell and recorded
+its author replay, `80ebd633` admitted it, `126ded24`/`e141e4e0` are W262 and
+the operator's register fold, `08a1524c`/`20620048` are the Ruby UTF-32LE
+falsification (the latter is the reconciled local tree), `46f49c59` reconciles
+the published and local Ruby commits, and `f52dd1b5`/`712d7027` stage
+open1722vss2shell and fold the ettercap decline. Three more edges landed
+mid-fold (`d2f987d3`, `00ff9e5d`, `144a5413`) and are folded below. No rung
+cell, grade, route, manifest row or generated count was moved by docs; docs
+corrected two stale "admission owed" passages, the stale UTF-32LE
+next-experiment passage and W253's stale witness-status wording.
+
+- `f0672f0d` / `004e9bf2`: **netrekcow2shell** staged for CVE-2026-121969,
+  netrek-client-cow through 3.3.3. Verbatim 3.3.3 `short.c:914-951` ends in
+  `sprintf(buf, "%-9s%s", addrbuf, &packet->mesg)` at `:949` into `buf[100]`;
+  released 3.3.4 and fix commit `fb322e74…` add a length-derived `body_max`,
+  `strnlen`, a clamp and `snprintf`. Canonical runner
+  `52078f00…1799288` prints `RESULT PASS=32 FAIL=0`, rc 0 (10:41:46Z);
+  vulnerable GCC+Clang ASan report `WRITE of size 130` at `short.c:949`, and
+  recoverable ASan places server-chosen `M/A/R/K` at offsets 100..103 in the
+  poisoned redzone. Author clean-archive replay from `git archive f0672f0d`
+  also printed 32 PASS / 0 FAIL at 10:45:33Z.
+- `80ebd633`: operator admitted netrek as the **169th** declared target mind
+  under standing #6, window 178 live (panes %358/%359). Generated counts
+  moved 168/165/165/112 → 169/166/166/112 in README, results, SVG and the
+  manifest. Grade stayed rung 3 verbatim / rung 4 PARTIAL, no r5; route and
+  wake units remain person-reserved.
+- `126ded24` / `e141e4e0`: witness **W262** replayed the unmodified netrek
+  runner from a clean `git archive f0672f0d` subtree with archived evidence
+  and four generated `.inc` files deleted and all three codeload archives
+  re-fetched: 10:48:20Z–10:48:24Z, 4.58 s, rc 0, `RESULT PASS=32 FAIL=0`.
+  All 32 checks held; both compilers still report the `WRITE of size 130`,
+  fixed/safe frames are clean (`outlen=99`/`14`) and plain attack faults
+  `rc=139`. ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no
+  contradiction, no grade change, NO r5; NITs: the `[80,180)` frame layout
+  is GCC-specific (Clang `[32,132)` plus a partial `addrbuf` underflow) and
+  the struct declares 78 padding bytes after `mesg`, not 79. The operator's
+  register fold set netrek `established=true` and moved the established count
+  112 → 113, regenerating README/results/SVG. Detail:
+  `.mishe-tauftauf/artifacts/witness-w262-netrekcow2shell/detail.md`.
+- `08a1524c` / `20620048` / `46f49c59`: the bounded UTF-32LE wpqw experiment
+  falsified chosen-byte opcode steering. For all seven indices on both
+  3.4.12 and 3.4.13, `bad=false` and `good=true`, rc 0: the UBSan dump shows
+  `0x0d` (OP_EXACTMBN) after the four-byte `w` operand while the folded subject
+  supplies `0x0a`, so `regexec.c:2739-2744` exits before `NEXT` and no chosen
+  byte is dispatched. The primitive is bounded to UTF-16LE; no further
+  encoding sweep is owed. A **distinct** one-byte OOB READ appears in the
+  case-insensitive optimizer for UTF-32LE patterns with `U+03AB`/`U+103AB`/
+  `U+203AB`: 3.4.12 ASan reports `READ of size 1` at
+  `str_lower_case_match regexec.c:4278`, one byte past the four-byte
+  `reg->exact` region allocated at `regcomp.c:5367`; 3.4.13 adds
+  `if (tend - t < lowlen) return 0;` and is clean. Grade rung 3, secondary
+  adjacent lane only — no write, pointer, disclosure or wire reachability;
+  all 20 non-ASan plain arms returned rc 0 with no verdict deviation. Primary
+  grades stay rung 4 witness-COMPLETE and harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+- `f52dd1b5` / `712d7027`: **open1722vss2shell** staged for CVE-2026-136616
+  / GHSA-xvmx-7qq5-34q6, COVESA Open1722 before 0.9.8. Unmodified pinned
+  `Vss.c` under a public-API driver gives vulnerable ASan `READ of size 2`, 0
+  bytes after a 12-byte region, at `Vss.c:307` via `vss_load_be16` (`:66`);
+  chosen adjacent bytes `0x41`/`0x42` return 16708 and `0xFFFF` wraps to 1 so
+  `Avtp_Vss_SetVssData()` writes chosen `0x5a` at offset 13 inside the path
+  area. Runner `5da4f917…1a72a52` scored `RESULT PASS=34 FAIL=0`, rc 0; an
+  initial 30/4 was an assertion-substring mistake, corrected without changing
+  source. Author clean-archive replay from `git archive f52dd1b5` finished
+  11:00:55Z with the same 34/0 and hash. Grade rung 3 real-source OOB READ /
+  rung 4 PARTIAL, no named neighbor, pointer, wire path, command or r5;
+  witness replay is still owed. Staging moved no manifest row or count until
+  `d2f987d3` admitted the target at 11:0xZ (see below). Window 177 (formerly
+  ettercapgg's) is live. The same commit folds the operator's decline of
+  ettercapgg2shell admission at tape #5241 as a duplicate of the admitted
+  97th Ettercap2Shell row (same CVE and `gg_get_version()` sink); W261's
+  ESTABLISHED AS LABELED verdict stands.
+- `d2f987d3` (mid-fold) admitted open1722vss2shell as the **170th** declared
+  target mind under standing #6, adopting window 177 (panes %360/%361). The
+  generated counts moved 169/166/166/113 → 170/167/167/113, with a new
+  `established=false` register row; grade stayed rung 3 real-source OOB READ /
+  rung 4 PARTIAL, no r5, and the independent witness replay is still owed.
+- `00ff9e5d` and `144a5413` also landed mid-fold. The Ettercap2Shell plain
+  rebuild aborts `malloc(): corrupted top size` in 3/3 vulnerable runs with
+  fixed and controls rc 0 and no `DISSECT_MSG VERSION` read-back, adding a
+  real availability effect at rung 4 but no bytes, pointer or r5. Witness W263
+  replayed aspell's #4566/#4568 75820 read lane from a clean `git archive
+  bf4daf51` with four fresh builds and three unmodified probe passes, each
+  36/36 rows: ESTABLISHED AS LABELED at rung 3, no grade change, NO r5. The
+  single-offset write lane stays UNKNOWN, and the older W253 passage above is
+  corrected accordingly. Neither commit moved a hand-maintained docs passage,
+  manifest row or generated count (doc-ok).
+
+Details: `reports/frontier-netrekcow2shell.md`,
+`reports/netrekcow2shell-status.md`, `reports/ruby2shell-investigation.md`
+§UTF-32LE, the two open1722vss2shell reports, and the two ettercapgg2shell
+reports.

@@ -12985,8 +12985,10 @@ Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade
 change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w261-ettercapgg2shell/detail.md`.
 `src/*.tar.gz`, `src/out/`, `evidence/*.log` and generated includes are
-gitignored and regenerate with the wrapper above. Target remains STAGED with
-window 177 live; operator admission is owed.
+gitignored and regenerate with the wrapper above. Operator admission was
+DECLINED at tape #5241 as a duplicate of the admitted 97th Ettercap2Shell
+row (same CVE and `gg_get_version()` sink); window 177 stays live pending
+retirement. The W261 ESTABLISHED AS LABELED verdict is unchanged.
 
 ### Ruby2Shell W79/W80 — adjacent Regexp lanes
 
@@ -13016,3 +13018,123 @@ compiled-pattern offset consumed as a live opcode dispatch (rung 4, secondary
 wide-encoding lane only) — not arbitrary PC control, a write primitive or a
 stock/wire path. The UTF-8 analogue produces no dispatch; GHSA-3p8q-wmhx-vm2w
 stays host-guard BLOCKED under the 2 GiB cgroup.
+
+## 2026-11-26 10:5x–11:0xZ — netrek W262 receipt, Ruby UTF-32LE and open1722 recipes
+
+No replay was rerun in this fold: commands, hashes, bytes and timings below
+are quoted from committed receipts, reports and W262's artifact. No rung cell,
+grade, route, manifest row or generated count was moved by docs; the operator
+folded W262 into the manifest and regenerated README/results/SVG.
+
+### Netrekcow2Shell — admitted 169th; witness W262 (`126ded24`)
+
+Claim: CVE-2026-121969, netrek-client-cow through 3.3.3; NVD and upstream
+issue #11 are claims, not local wire results. Tag pins `3.3.3 =
+9395a07b0b25c036a3f706b188a38656adbde983` and `3.3.4 =
+40616ada0630f9051575c03232dea5886ee93805`, plus fix commit
+`fb322e74abee3b0b76a9c5a31df6aab5585d3127`. All nine SHA-256 pins, including
+the codeload tarballs, patch, driver and three `#line` includes, are in
+`lab/frontier/netrekcow2shell/PROVENANCE.md`. From the repo root:
+
+```sh
+T=$(mktemp -d /tmp/docs-netrek.XXXXXX)
+git archive f0672f0d lab/frontier/netrekcow2shell | tar x -C "$T"
+cd "$T/lab/frontier/netrekcow2shell" && bash run-all.sh
+```
+
+The canonical runner SHA-256 is
+`52078f004e10bc89c0faa96c8755287c7afd6adc92f1c123e7697b5ce1799288`. It
+rechecks every pin, extracts verbatim `short.c:914-951` / `:916-965` and
+`packets.h:1170-1181`, and builds GCC/Clang ASan, recoverable ASan and plain
+variants. Expect `RESULT PASS=32 FAIL=0`, rc 0. Vulnerable GCC+Clang ASan:
+`stack-buffer-overflow`, `WRITE of size 130` at `handleSMessage … short.c:949`
+past `buf[100]` (GCC frame `[80,180)`, Clang `[32,132)` with a partial
+`addrbuf` underflow). Recoverable ASan prints `outlen=129` and
+`b99=41 b100=4d b101=41 b102=52 b103=4b b128=42 b129=00`: chosen `M/A/R/K`
+at offsets 100..103 in the poisoned redzone, not a named adjacent object.
+Fixed 3.3.4 prints `outlen=99` (attack) / `14` (safe) cleanly, the vulnerable
+safe frame prints `14`, and unprotected plain attack faults `rc=139`. Plain
+harness builds use `-fno-stack-protector` so the distribution's stack smasher
+does not hide the sink; the harness `strncpy` second ASan report is a capture
+artifact. `src/*.tgz`, extracted trees, generated `.inc` files and
+`evidence/*.log` are gitignored and regenerate with the wrapper above.
+
+Witness **W262** used that same runner hash in a clean `git archive f0672f0d`
+subtree with archived logs and generated includes removed and all three
+codeload archives re-fetched: 10:48:20Z–10:48:24Z, 4.58 s, rc 0, 32 PASS /
+0 FAIL. Verdict ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL,
+no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w262-netrekcow2shell/detail.md`. The
+operator's `80ebd633` admitted the target as the 169th mind (window 178) and
+`e141e4e0` set its manifest row `established=true` (count 112 → 113).
+
+### Ruby2Shell UTF-32LE — steering falsified, distinct optimizer OOB
+
+With the Ruby 3.4.12 and 3.4.13 ASan builds from the main Ruby recipe:
+
+```sh
+bash lab/repro/ruby2shell-wpqw-u32le.sh
+```
+
+The runner accepts `RUBY12`/`RUBY13` overrides; evidence is gitignored under
+`lab/build/evidence/wpqw-u32le/3.4.{12,13}-*.out`. Expect the steering arms
+for indices `0x00`, `0x01`, `0x02`, `0x0a`, `0x0e`, `0x3d`, `0x62` to print
+`bad=false` and `good=true` with rc 0 on both builds: the compiled program
+has `0x0d` (OP_EXACTMBN) after the four-byte `w` operand while the folded
+subject supplies `0x0a`, so the comparison at `regexec.c:2739-2744` fails
+before `NEXT` and no chosen byte is dispatched. This closes the wpqw opcode
+dispatch lane to UTF-16LE. Separately, patterns `(?i:w)` + `U+03AB` (also
+`U+103AB`, `U+203AB`) with subject `U+1E98` + that tail make 3.4.12 ASan
+abort on `bad` with rc 1: `READ of size 1` in `str_lower_case_match
+regexec.c:4278` via `bm_search_notrev_ic regexec.c:4722` and
+`forward_search_range regexec.c:4970`, 0 bytes after the four-byte
+`reg->exact` region from `set_optimize_exact_info regcomp.c:5367`. Fixed
+3.4.13 adds `if (tend - t < lowlen) return 0;` at `regexec.c:4298` and
+returns `bad=false` rc 0 for all three codepoints. Grade rung 3, secondary
+adjacent lane only; all 20 plain-binary arms (`RUBY12`/`RUBY13` pointing at
+`lab/build/plain/ruby-3.4.{12,13}-plain/bin/ruby`) returned rc 0 with
+`good=true`, `bad=false` and no visible deviation. No write, pointer,
+disclosure or stock/wire path; primary grades unchanged.
+
+### Open1722Vss2Shell — admitted 170th, author replay 34/0
+
+Claim: CVE-2026-136616 / GHSA-xvmx-7qq5-34q6, COVESA Open1722 before 0.9.8,
+LOW / CVSS 2.3 / CWE-125. Tag pins `v0.9.7 = b78c3877…`,
+`v0.9.8 = 714067b0…` (fix commit and tag). Seven SHA-256 pins, including both
+codeload tarballs, the fix patch, the public-API driver `poc.c` and both
+extracted `Vss.c` files, are in
+`lab/frontier/open1722vss2shell/PROVENANCE.md`. From the repo root:
+
+```sh
+T=$(mktemp -d /tmp/docs-open1722.XXXXXX)
+git archive f52dd1b5 lab/frontier/open1722vss2shell | tar x -C "$T"
+cd "$T/lab/frontier/open1722vss2shell" && bash run-all.sh
+```
+
+The canonical runner SHA-256 is
+`5da4f917cc7b5d9e8f04a1d7dfccc6ba6acff132ff3d2cee0eeb73ebc1a72a52`.
+Expect `RESULT PASS=34 FAIL=0`, rc 0, GCC and Clang ASan/plain: vulnerable
+header-only INTEROP frame gives heap `READ of size 2`, 0 bytes after a
+12-byte `calloc(12)` at `poc.c:16`, in `vss_load_be16` (`Vss.c:66`) called
+from `Avtp_Vss_CalcVssPathLength` (`Vss.c:307`); fixed returns 0. Chosen
+adjacent bytes `0x41`/`0x42` yield length 16708 on vulnerable builds while
+fixed returns 0; prefix `0xFFFF` wraps to 1 and the setter writes chosen
+`0x5a` at offset 13 inside the path area while fixed leaves `0xff`; safe
+prefix `0x0004` gives length 6 and a write at offset 18 in both builds with
+no ASan. The initial 30 PASS / 4 FAIL was an assertion-substring mistake
+(`wrap b12=ff b13=…`), corrected in the runner without changing source or
+evidence. The author clean-archive replay from `git archive f52dd1b5` at
+11:00:55Z scored 34/0 with the hash unchanged. Witness replay is still owed;
+`d2f987d3` admitted the target as the 170th mind under standing #6, adopting
+window 177 (panes %360/%361) and moving counts 169/166/166/113 →
+170/167/167/113 with an `established=false` register row.
+
+Grade rung 3 real-source OOB READ / rung 4 PARTIAL — no named neighbor,
+pointer, AVTP wire path, loopback service, command or r5; the wrap overwrite
+stays inside the allocation. Tarballs, patch, extracted trees, `src/out/` and
+evidence logs are gitignored and regenerate with the wrapper. Staging moved
+no manifest row or generated count until the mid-fold admission above. The
+staging commit f52dd1b5 also
+records the operator's decline of ettercapgg2shell admission at tape #5241
+as a duplicate of the admitted 97th Ettercap2Shell row; the W261 verdict and
+its recipe above remain valid.
