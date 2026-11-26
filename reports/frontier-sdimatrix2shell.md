@@ -68,6 +68,29 @@ end. Those bytes stay inside that vector's malloc chunk: no named *adjacent*
 object, pointer control, CLI/`--imat-in` path, live process, command execution
 or r5. Advisory RCE framing remains a claim.
 
+## Witness verdict (W260, 2026-11-26 09:5xZ, #5199)
+
+**ESTABLISHED AS LABELED** at the rung 3 verbatim / rung 4 PARTIAL scope; no
+contradiction, no grade change, **NO r5**. Witness checked the canonical
+`run-all.sh` hash `65ca30af…d7e741` in the worktree, at `f0eec56a` and in a
+clean `git archive f0eec56a` subtree, deleted all provisioned artifacts, then
+ran the unmodified wrapper from that archive: rc 0, `RESULT PASS=10 FAIL=0`
+in 115.53 s (09:49:01Z–09:50:56Z). All seven pinned hashes held after fresh
+codeload/github fetches. GCC and Clang ASan both report `READ of size 4`,
+`0 bytes after 4-byte region` at frame #0 `src/runtime/imatrix.cpp:302`
+(`e.counts[i] += ncall` in the verbatim vulnerable body); the freshly fetched
+fixed body rejects the duplicate with `inconsistent size for a repeated
+entry (1 vs 3)` and `ok=0` in all three build modes; safe inputs are clean.
+Plain vulnerable builds print `counts_oob1=0x41414141
+counts_oob2=0x41414141` past the 1-element `counts` vector on both compilers.
+Those chosen ints remain inside that vector's malloc chunk: no named adjacent
+object, pointer, CLI path, wire input, command or r5. The advisory's RCE
+prose stays a claim; operator admission is a separate matter. NIT: Clang
+renders the `#line` path as an absolute, nonexistent
+`/home/mesh-home/mishe-tauftauf2shell/src/runtime/imatrix.cpp:302`; the
+verbatim suffix and line agree with GCC and the pinned source. Detail:
+`.mishe-tauftauf/artifacts/witness-w260-sdimatrix2shell/detail.md`.
+
 ## Cheapest next rung-moving experiment
 
 Build the pinned `sd-cli` and feed the exact crafted file through
