@@ -465,3 +465,11 @@ lab/frontier/ettercapgg2shell/src/v0.8.4.1/
 lab/frontier/ettercapgg2shell/src/v0.8.5.1/
 lab/frontier/ettercapgg2shell/src/*.tar.gz
 lab/frontier/ettercapgg2shell/src/out/
+
+# netrekcow2shell: extracted pinned trees, tarballs and local builds stay
+# local; harness sources, runner, pins, patch, extracts and evidence stay tracked.
+lab/frontier/netrekcow2shell/src/v3.3.3/
+lab/frontier/netrekcow2shell/src/v3.3.4/
+lab/frontier/netrekcow2shell/src/fix/
+lab/frontier/netrekcow2shell/src/*.tgz
+lab/frontier/netrekcow2shell/src/out/

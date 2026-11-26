@@ -1,0 +1,43 @@
+PASS PIN tar-v3.3.3
+PASS PIN tar-v3.3.4
+PASS PIN tar-fix
+PASS PIN fix-commit
+PASS PIN driver
+PASS PIN verbatim function starts at short.c:914 / :916
+PASS PIN fixed hunk identical in release 3.3.4 and fix commit fb322e74
+PASS PIN vulnerable-body
+PASS PIN fixed-body
+PASS PIN packet-struct
+PASS PIN vulnerable verbatim 100-byte stack buf and unchecked sprintf
+PASS PIN fixed hunk uses length, strnlen and snprintf
+In file included from src/poc.c:39:
+short.c: In function ‘handleSMessage’:
+short.c:962:32: warning: ‘%s’ directive output may be truncated writing up to 99 bytes into a region of size 91 [-Wformat-truncation=]
+short.c:962:5: note: ‘snprintf’ output between 10 and 109 bytes into a destination of size 100
+In file included from src/poc.c:39:
+short.c: In function ‘handleSMessage’:
+short.c:962:32: warning: ‘%s’ directive output may be truncated writing up to 99 bytes into a region of size 91 [-Wformat-truncation=]
+short.c:962:5: note: ‘snprintf’ output between 10 and 109 bytes into a destination of size 100
+PASS builds gcc (vuln/fixed asan, vuln recover, vuln/fixed plain)
+PASS builds clang (vuln/fixed asan, vuln recover, vuln/fixed plain)
+PASS gcc ASan: stack WRITE-130 at verbatim short.c:949, past buf[100]
+PASS vuln-gcc-asan-safe: clean ASan, outlen=14
+PASS fixed-gcc-asan-attack: clean ASan, outlen=99
+PASS fixed-gcc-asan-safe: clean ASan, outlen=14
+PASS gcc recover ASan: chosen M/R/K at buf[100..103] in poisoned redzone
+./run-all.sh: line 101: 3635941 Segmentation fault      (core dumped) "$OUT/vuln-$CC-plain" attack > "$log" 2>&1
+PASS gcc plain: attack crashes (rc=139) with 30 bytes past buf
+PASS vuln-gcc-plain-safe: clean ASan, outlen=14
+PASS fixed-gcc-plain-attack: clean ASan, outlen=99
+PASS fixed-gcc-plain-safe: clean ASan, outlen=14
+PASS clang ASan: stack WRITE-130 at verbatim short.c:949, past buf[100]
+PASS vuln-clang-asan-safe: clean ASan, outlen=14
+PASS fixed-clang-asan-attack: clean ASan, outlen=99
+PASS fixed-clang-asan-safe: clean ASan, outlen=14
+PASS clang recover ASan: chosen M/R/K at buf[100..103] in poisoned redzone
+./run-all.sh: line 101: 3636152 Segmentation fault      (core dumped) "$OUT/vuln-$CC-plain" attack > "$log" 2>&1
+PASS clang plain: attack crashes (rc=139) with 30 bytes past buf
+PASS vuln-clang-plain-safe: clean ASan, outlen=14
+PASS fixed-clang-plain-attack: clean ASan, outlen=99
+PASS fixed-clang-plain-safe: clean ASan, outlen=14
+RESULT PASS=32 FAIL=0
