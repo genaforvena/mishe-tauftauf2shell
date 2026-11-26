@@ -19,6 +19,12 @@ preserved negatives).
   `sox_read` (`formats.c:1414`) from `sox_flow_effects` (`effects.c:444`),
   0 bytes after a 32,768-byte region; fixed and 8-bit-only safe controls exit
   0 with no ASan report.
+- Staged in commit `5a6572e6`; `sh run-all.sh` from the committed runner returned
+  `RESULT PASS=27 FAIL=0` at 17:26Z on a full clean rebuild (both ASan CLIs).
+  First pass was 26 PASS / 1 FAIL on a literal trace string (`after a
+  32768-byte region` vs the actual `after 32768-byte region`); the assertion
+  was corrected and the full replay passed. Operator DM 5686 and witness
+  replay request 5685 sent; no witness verdict yet.
 - Grade: rung 3 ASan WRITE in verbatim pinned source through the shipped CLI;
   rung 4 NOT CLAIMED — no chosen-offset readback, pointer steering, command,
   socket or daemon consumer. Value control is partial; "remote" in the CVE
@@ -27,4 +33,5 @@ preserved negatives).
   visible; GHSA affected/patched fields are UNKNOWN; fixed tag bundles other
   changes, so attribution uses the single patch only.
 - Owed: operator admission, witness clean-archive replay, plain-build
-  readback/grooming experiment. Window 191 live on the inner tmux socket.
+  readback/grooming experiment. Window 191 live on the inner tmux socket,
+  panes %386/%387, registered 192/192 at 17:23Z; operator admission owed.
