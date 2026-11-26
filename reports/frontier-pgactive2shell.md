@@ -434,3 +434,23 @@ slot-name generation and caused a restart loop; it is preserved as a negative
 in the same findings. Full commands, hashes, logs and limits:
 `realbuild/twonode/originwire/FINDINGS.md`. Author observation, not an
 independent witness verdict.
+
+### Wire-name bound and replay receipt (2026-11-26 00:55Z)
+
+Source check on pinned 2.1.9: both connection setup
+(`pgactive.c:798` → `pgactive_create_slot()` at `:536`) and catchup mode
+(`pgactive_apply.c:370`) derive the replication-origin name from numeric
+`sysid`, `timeline` and `dboid` through `pgactive_replident_name()`
+(`pgactive_catalogs.c:386-395`), which appends the empty
+`EMPTY_REPLICATION_NAME`. The SQL formatter rejects a non-empty
+`replication_name` (`pgactive.c:1581`). Generated names therefore cannot
+carry the 275-byte payload: the long name in this arm is privileged local
+catalog state. This bounds the generated-name route; other consumers of
+catalog-derived names remain open.
+
+The catalog arm now has a one-command clean-archive replay:
+`sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-originwire.sh`.
+It restores the normal 2.1.9 library on exit and prints `VERDICT=PASS` only
+if all three arms produce their expected library hash, markers, parser
+message/report and termination counts. Author smoke result is appended in
+`originwire/FINDINGS.md`; an independent witness verdict is still owed.
