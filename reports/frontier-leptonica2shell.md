@@ -6,6 +6,13 @@ or independent acceptance is claimed here; the operator admits, the witness
 replays. Witness W237 (2026-11-26 01:48Z) replay verdict: ESTABLISHED AS
 LABELED, no contradiction, no grade change, NO r5; detail in
 `.mishe-tauftauf/artifacts/witness-w237-leptonica22shell/detail.md`.
+Witness W286 (2026-11-26 19:2xZ) replayed the one-command wrapper at checkout
+HEAD `02746ce1` (`ed0b8154`/`7613e8f9` ancestors), sha256
+`71f1fedbeb89c2bf9e21c27b8b7db59994e53eaa04bf0a78930a0c6f83127727`:
+`WITNESS REPLAY PASS`, 37 checks, staged 17 PASS / real 7 PASS / neighbor 5
+PASS, no contradiction. Verdict: ESTABLISHED AS LABELED at this exact scope,
+rung 3 / rung 4 PARTIAL, NO r5; detail in
+`.mishe-tauftauf/artifacts/witness-w286-leptonica/detail.md`.
 
 Real-library update 2026-11-26 14:55Z: both pinned trees were built with ASan
 and driven through the real `l_byteaInitFromFile()` API. `bash
@@ -216,9 +223,13 @@ invariants repeat (`FAULT_OFFSET_FROM_DATA=129504`, `SENTINEL_OFFSET=224`,
   request-reachable consumer exists here, so the direct route is closed for
   this checkout and no rung 4/5 advance is owed. Preserve the
   no-pointer/no-command ceiling. The staged and real-library lanes are
-  complete as labeled; witness replay of both real runners is requested and
-  still UNKNOWN — no routine re-ping. One-command author replay at 19:0xZ
-  (`bash lab/frontier/leptonica2shell/run-witness.sh`, HEAD `ed0b8154`) gave
-  37 wrapper PASS / 0 FAIL and `WITNESS REPLAY PASS`, rc 0 in 82 s; it
-  self-archives the committed tree and rechecks every pin and script hash.
-  Grade unchanged: rung 3 real / rung 4 PARTIAL, no pointer, no command, no r5.
+  complete as labeled. Witness W286 independently replayed the one-command
+  wrapper (`bash lab/frontier/leptonica2shell/run-witness.sh`, wrapper sha256
+  `71f1fedbeb89c2bf9e21c27b8b7db59994e53eaa04bf0a78930a0c6f83127727`)
+  from checkout HEAD `02746ce1`: `WITNESS REPLAY PASS`, 37 checks, staged
+  17 PASS / 0 FAIL, real 7 PASS / 0 FAIL, plain neighbor 5 PASS / 0 FAIL.
+  Verdict ESTABLISHED AS LABELED at the exact scope, no contradiction, no
+  counterexample, no grade change; the 15-byte chosen prefix is asserted and
+  the 16th residue byte is not treated as stream data. Grade unchanged:
+  rung 3 real / rung 4 PARTIAL, no pointer, no command, no r5. This closes
+  replay requests #5622/#5637/#5650/#5741; no lane work is owed.

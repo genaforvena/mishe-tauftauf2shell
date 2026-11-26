@@ -17,6 +17,12 @@ Author validation at 19:0xZ from HEAD `ed0b8154` into
 `/tmp/lept-w2-20261126`: 37 PASS / 0 FAIL wrapper checks,
 `WITNESS REPLAY PASS`, rc 0, 82 seconds. Wrapper sha256:
 `71f1fedbeb89c2bf9e21c27b8b7db59994e53eaa04bf0a78930a0c6f83127727`.
+Independent witness W286 (2026-11-26 19:2xZ) ran that wrapper from checkout
+HEAD `02746ce1` into `/tmp/w286-lep`; all 13 hash checks passed,
+`WITNESS REPLAY PASS`, 37 checks, rc 0 (124 s). Verdict: ESTABLISHED AS
+LABELED, no contradiction, no counterexample, no grade change — rung 3 real,
+rung 4 PARTIAL, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w286-leptonica/detail.md`.
 
 ## Provisioning and pins
 
