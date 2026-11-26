@@ -3522,3 +3522,75 @@ W215, rung 4 file-chosen lab marker author-observed in W1-W4 with no
 independent verdict, r5 UNMET/UNKNOWN; W1-W4 verdicts stay UNKNOWN and the
 again chain is retired. No rung cell, grade, route, mind count, witness
 verdict or R5 cell moved by any limb in this fold.
+
+The 2026-11-26 07:0x–07:1xZ limbs fold six commits: one bounded Ruby
+negative, one independent witness verdict, one research closure, one staged
+target, its witness request and its raw run-all traces. No rung cell, grade,
+route, mind count, witness verdict or R5 cell moved.
+
+Ruby2Shell W33 (`025480e3`) closes the never-exercised
+`Transfer-Encoding: chunked` knob (`lab/repro/ruby2shell-stock-rails.sh:78-80`)
+at N=588 as a bounded NEGATIVE. Seven fresh vulnerable 3.4.12 processes (one
+timing probe plus `ch588-1..6`) used `DRAIN=1024:32` fake-pattern drain bytes,
+`FILL=256` of `[0x250, 0x90]`, `PART_CHARSET=1` and tail `00005102`, with the
+unchunked N=588 coverage band as control. Six of seven aborted during body
+parsing with `malloc(): invalid next size (unsorted)` (HTTP 000, process dead);
+the one survivor (`ch588-1`) returned a clean 404 whose 34 reflected parts had
+0 deviations and 0 leak-shaped qwords. Fixed 3.4.13 controls under the same
+chunked wire survived 2/2 with the same clean 34-part page, so the abort is
+attributed to the vulnerable one-byte overflow, not to chunked parsing. No
+reflected `0x53` run, chosen-byte write into a live value, libc/code pointer,
+command or second command. Grades unchanged: rung 4 witness-COMPLETE,
+harness-condition rung 5 witness-ESTABLISHED, stock/oracle-free/persistent
+r5 NOT ACHIEVED.
+
+Witness W251 (`9cace3e0`) supersedes W26's "unwitnessed plain lane" wording:
+offer #4774 is ESTABLISHED AS LABELED with no contradiction, no grade change
+and NO r5. The unmodified `real/run-syswire-plain.sh` (SHA-256 `247db414…`,
+identical at the worktree, introducing commit `669b1dbd`, HEAD `c5877121` and
+the clean `git archive 669b1dbd` replay tree) ran three times: 6 PASS / 0
+FAIL, rc 0, `match=1` recycled slot equal to the in-run published address,
+wire-sent command armed server-side, chosen
+`target_after=0x41414141414141c1` and marker created, with no trampoline and
+no sanitizer; the fixed lane stayed clean and an invalid callee gave status
+`0x8b` with no marker. Both pinned tarballs were re-fetched by SHA. Heap
+addresses differed per build/path, as the in-run handoff predicts.
+
+N2n2Shell W24 (`3d46fd31`) closes research at the documented ceiling and
+retires the `--again 2h` chain. It supersedes the older "rung 4 PARTIAL" and
+"cheapest next experiment" framing: rungs 1-4 are established on the real
+pinned supernode over one loopback UDP `REGISTER_SUPER_NAK`, including W10's
+wire-chosen `comm` dereference and W11's fixed non-PIE address, bounded by
+W22 under PIE and by W23's rejection on the complete upstream fixed tree. The
+new source check finds `0x42f3e8` = `mgmt_event_subscribers+8`; `mgmt_req_t`
+(`src/management.h:42-57`) has no function pointer, the callable tables
+(`mgmt_handler_t.func`, `mgmt_events[]`) are separate, `mgmt_event_post`
+(`src/edge_management.c:336-341`) selects by topic independently of `comm`,
+and W11's 632-byte zero run is pre-existing `.bss`, not overflow bytes. No
+marker execution, canary/RIP hit, control-flow takeover, command or r5.
+Witness #3909 and the consolidated #4445 stay UNKNOWN, not passes; neither
+replay is repeated without a verdict. Reopen only on an addressed verdict or
+a measured wire-to-callback/command path.
+
+Pcre2dfa2Shell is STAGED by frontier W248 (`b3f2ad2e`, brief amended in
+`57cc216e`, raw run-all traces kept in `4eebc8b0`) as a new target mind; at
+those commits it was not yet an admitted route — admission is a separate,
+later operator action: charter
+`charters/pcre2dfa2shell.md`, brief `reports/frontier-pcre2dfa2shell.md`,
+status and pinned harness under `lab/frontier/pcre2dfa2shell/`.
+CVE-2026-86145 / GHSA-3r4p-g7gg-ppmf affects PCRE2 10.32-10.47 and is fixed
+in 10.48 by `c932e704…`; the advisory-cited `3979bb90…` does not resolve
+(404), and that discrepancy is preserved. Pinned tarballs 10.47 `409c4435…`
+and 10.48 `38c2a449…` build a public-API consumer that reaches ASan
+`WRITE of size 4` at verbatim `src/pcre2_dfa_match.c:686` through
+`pcre2_dfa_match_8` over six `(?R)` frames, while plain 10.47 faults rc 139
+and all 10.48 controls return `rc=-63` (`PCRE2_ERROR_HEAPLIMIT`). Author run
+6 PASS / 0 FAIL; the six per-tag/per-compiler raw receipts in `4eebc8b0` match
+those cells. Rung 3 verbatim, rung 4 PARTIAL (DFA state integers, not
+chosen bytes at chosen offsets), no pointer primitive, wire path, command or
+r5. Replay was requested by DM after staging and is NOT a verdict; no
+independent replay has been observed. Two neighbouring candidate screens are
+preserved as negatives: libpng CVE-2025-65018 produced no ASan report or
+canary change in five builds, and libtiff CVE-2026-18495 needs a >4 GiB
+`StripByteCounts` and a matching multi-gigabyte `memset()` before its sink, so
+neither was staged.

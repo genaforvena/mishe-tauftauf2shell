@@ -12094,3 +12094,127 @@ file. The front-page presentation changed in `8e35aa10`; re-render it with
 `python3 tools/render-presentation.py` and check with `--check` before
 editing `research-manifest.json`, since `README.md`, `docs/results.md` and
 `docs/assets/evidence-ladder.svg` are generated from it.
+
+## 2026-11-26 07:0x–07:1xZ — Ruby W33 chunked negative, W251 verdict, n2n closure, pcre2 staging
+
+No replay was rerun for this fold; each quoted byte or count comes from the
+committed receipts (`025480e3`, `9cace3e0`, `3d46fd31`, `b3f2ad2e`, `57cc216e`)
+and the tracked pcre2 evidence files.
+
+- **Ruby2Shell W33 — `Transfer-Encoding: chunked` at N=588 (bounded
+  NEGATIVE).** Provision the plain Ruby 3.4.12 tree with
+  `bash lab/ruby2shell/provision.sh` and the stock Rails app with
+  `bash lab/repro/ruby2shell-stock-rails-setup.sh`; the fixed control uses the
+  plain 3.4.13 build from the report. The chunked knob is
+  `RUBY2SHELL_STOCK_CHUNKED=1` at `lab/repro/ruby2shell-stock-rails.sh:78-80`.
+  From the repo root, for each fresh-process tag `ch588-1..6` (and one timing
+  probe), run:
+
+  ```sh
+  RUBY2SHELL_STOCK_N=588 RUBY2SHELL_STOCK_FILL=256 \
+  RUBY2SHELL_STOCK_FILL_PREV=0x250 RUBY2SHELL_STOCK_FILL_SIZE=0x90 \
+  RUBY2SHELL_STOCK_DRAIN=1024:32 RUBY2SHELL_STOCK_DRAIN_FAKE=1 \
+  RUBY2SHELL_STOCK_PART_CHARSET=1 RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+  RUBY2SHELL_STOCK_CHUNKED=1 \
+  bash lab/repro/ruby2shell-stock-rails.sh attack ch588-1
+  python3 lab/repro/ruby2shell-reflect-scan.py ch588-1- --n 588 --fill-len 256 --drain-len 1024
+  ```
+
+  Expect 6/7 vulnerable processes aborted during body parsing with
+  `malloc(): invalid next size (unsorted)`, `TRIGGER_HTTP=000`, process dead;
+  the survivor's 404 reflects `parts=34 deviations=0 leakshapes=0`. The
+  unchunked N=588 coverage band is the historical control, and two fixed
+  3.4.13 processes under the identical chunked wire survive with the same
+  clean 34-part page. No `0x53` reflection, chosen-byte write, libc/code
+  pointer or command; stock/oracle-free/persistent r5 stays NOT ACHIEVED.
+  Bodies, HTML, `.out` and `.server.log` files (`stock-rails-ch588-*`,
+  `stock-rails-ch588fix-*`) and `ch588-reflect-scan.txt` are gitignored under
+  `lab/build/evidence/` and regenerate with these commands; the unchunked
+  `cov-n588-*` responses are an earlier arm and are needed for its comparison.
+- **Libsshch2Shell W26 — witness W251 replay (#4774), ESTABLISHED AS LABELED.**
+  From `lab/frontier/libsshch2shell`, `sh real/run-syswire-plain.sh` builds
+  both pinned libssh trees in plain Release and drives W25's wire mechanics
+  without a sanitizer, using a pre-fork shared-memory slot for the in-run
+  address handoff. Expect, in three serial runs, `6 PASS / 0 FAIL`, rc 0,
+  `match=1` with the recycled slot equal to the published address,
+  `SYSWIRE armed` with the wire-sent command, chosen
+  `target_after=0x41414141414141c1`, a created marker, no trampoline, clean
+  fixed lane, and status `0x8b` with no marker for an invalid callee. The
+  witness used the unmodified wrapper (SHA-256 `247db414…`, identical at the
+  worktree, commit `669b1dbd`, HEAD `c5877121` and the replay tree), replayed
+  three times from its own `git archive 669b1dbd lab/frontier/libsshch2shell`
+  at `/tmp/w251-w26-arch` with only the two pinned mirror sources and hostkey
+  symlinked, rebuilt both plain libraries, and re-fetched both upstream
+  tarballs by SHA. Heap addresses differ per build/path; that is expected.
+  Full evidence: `.mishe-tauftauf/artifacts/witness-w251-libsshch2shell/detail.md`.
+  Build dirs and markers are gitignored and regenerate with the wrapper. This
+  supersedes the earlier "W26 unwitnessed" wording. No grade change, NO r5.
+- **N2n2Shell W24 — source-bound callback check and closure; no replay.** The
+  closure corrects the older "rung 4 PARTIAL / cheapest next experiment"
+  framing: rungs 1-4 are established on the real pinned supernode reached by
+  one loopback UDP NAK (recipes in the W1/W3/W4 and W11 bullets above), with
+  W22's default-PIE negative and W23's upstream-fixed rejection. W24 adds only
+  source inspection: `0x42f3e8` is `mgmt_event_subscribers+8`; pinned
+  `src/management.h:42-57` gives `mgmt_req_t` pointers, ints, a char array and
+  a sockaddr union but no function pointer; the callable objects
+  `mgmt_handler_t.func` (`src/management.h:64-69`) and `mgmt_events[]`
+  (`src/edge_management.c:323-327`) are separate; `mgmt_event_post`
+  (`src/edge_management.c:336-341`) indexes those events by topic, not by
+  `comm`; and W11's 632-byte zero run is pre-existing `.bss`. No new build,
+  process, request or side effect. Witness #3909 and consolidated #4445 stay
+  UNKNOWN and are not replayed without a verdict. Research lane CLOSED; the
+  `--again 2h` chain is retired; reopening needs an addressed verdict or a
+  measured wire-to-callback/command path. No grade or r5 change.
+- **Pcre2dfa2Shell staged (`b3f2ad2e`, brief amended `57cc216e`) — public-API
+  DFA workspace OOB write.** CVE-2026-86145 / GHSA-3r4p-g7gg-ppmf affects PCRE2
+  10.32-10.47, fixed in 10.48 by `c932e70451eafef922ebef364ac25042f0031135`;
+  advisory URL and CVE record are in `reports/frontier-pcre2dfa2shell.md`.
+  The advisory-cited `3979bb90cc692a371d33e6b159dc324f27361deb` 404s; that
+  discrepancy is preserved, not silently corrected. Pinned tarballs: 10.47
+  `409c443549b13b216da40049850a32f3e6c57d4224ab11553ab5a786878a158e`, 10.48
+  `38c2a44986d70050f5fc8219901de87fc32784ab271d3c7d4400683a0b76794b`; pins
+  and exact `cmake`/`make`/link commands are in
+  `lab/frontier/pcre2dfa2shell/PROVENANCE.md`. One command rebuilds both
+  trees in three modes and drives the public-API consumer:
+
+  ```sh
+  sh lab/frontier/pcre2dfa2shell/run-all.sh
+  ```
+
+  Expect `RESULT PASS=6 FAIL=0`: vulnerable 10.47 GCC/Clang ASan report
+  `AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4`, frame #0
+  `internal_dfa_match` at verbatim `src/pcre2_dfa_match.c:686`, #1 `:2978`,
+  #2-#7 `:2808` (six `(?R)` recursions), #8 `pcre2_dfa_match_8` at `:4027`;
+  tracked `evidence/clang-vuln-asan.out` (staging) and
+  `evidence/10.47-{clang,gcc}-asan.out` (raw run-all traces, kept in
+  `4eebc8b0`) record the full traces; their ASLR addresses differ, so do not
+  expect byte-identical files.
+  The vulnerable GCC plain build faults rc 139; its tracked
+  `evidence/10.47-gcc-plain.out` and `evidence/plain-vuln.out` are empty
+  because the crash wrote no stdout — the rc is recorded in `PROVENANCE.md`
+  and the brief, not in those files. Fixed
+  10.48 GCC/Clang ASan and GCC plain all return `rc=-63`
+  (`PCRE2_ERROR_HEAPLIMIT`) with no report.
+  The trigger is the upstream
+  pattern `(*LIMIT_HEAP=4)(?=(?=(?=(?=(?=(?=(?=(?=a))(?R))))))).` against
+  subject `"a"` with a caller-supplied `int workspace[20000]`; passing
+  `workspace=NULL, wscount=0` returns `-51` in both trees (caller
+  precondition, not a security result). `run-all.sh` provisions the two
+  codeload tarballs when absent but does not verify their SHA-256; recompute
+  them against the two pins above before trusting a fresh download. Build
+  directories under gitignored `lab/frontier/pcre2dfa2shell/out/` regenerate
+  with the wrapper; ten `evidence/*.out` files are tracked — four from staging
+  and six raw per-tag/per-compiler receipts from `4eebc8b0`. Rung 3 verbatim,
+  rung 4 PARTIAL (DFA state integers, not chosen bytes at chosen offsets), no
+  pointer primitive, wire path, command or r5. Staged at `b3f2ad2e`;
+  operator admission is a separate later action. Replay was requested by DM
+  after `b3f2ad2e` and is not a verdict —
+  no independent replay has been observed. Libpng CVE-2025-65018 and libtiff
+  CVE-2026-18495 were screened out as negatives in the same brief.
+
+This fold does not edit `research-manifest.json` or the generated front page.
+At the staging edge pcre2dfa2shell had no evidence-register row; any later row
+comes from the operator's admission and generated-presentation edit, not from
+this fold. Re-render `README.md`, `docs/results.md` and
+`docs/assets/evidence-ladder.svg` with `python3 tools/render-presentation.py`
+only when the manifest changes, and check them with `--check`.
