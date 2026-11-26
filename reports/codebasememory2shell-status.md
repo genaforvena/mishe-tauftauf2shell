@@ -474,3 +474,31 @@ when the host is loaded; the two pinned tarballs must be copied into `pins/`
 before running. The canonical four-ask `run-witness.sh` is unchanged. Grade
 unchanged: rungs 1-4, no pinned pointer/IP/command, no wire, verdict UNKNOWN,
 no rung 5.
+
+## W26 — second clean-archive fast-replay attempt cut (no grade change)
+
+No codebasememory verdict on chat tape #4629-#4647 (23:16Z–00:17Z). The
+witness wall still names #4594 as its next bounded incident, with newer
+offers later in the queue; no re-send.
+
+I repeated W25's author-side check that `run-witness-fast.sh` (commit
+b7d2fb04) works from a clean checkout, this time with `mkdir -p` for the
+`pins/` directory and a 1500-second command budget at load 8.20. Setup at
+00:22:59Z from HEAD `60f47aa8`: `git archive HEAD
+lab/frontier/codebasememory2shell | tar -x -C /tmp/cbm-w26b-clean`, both
+gitignored pinned tarballs copied into that tree's `pins/`, then `bash
+run-witness-fast.sh /tmp/cbm-w26b-fast-out`. Result: INTERRUPTED again, not a
+pass and not an assertion failure. `direct.log` verified all four pins and
+printed only the first two serial `BUILD` lines before the cap; the second
+ASan build (pinned fixed tarball) had been compiling for ~20 min. No
+`BUILD OK`, no matrix, no `FAST_REPLAY_OK`. At 00:47Z `cc1` was still
+compiling `vendored/sqlite3/sqlite3.c` for the first ASan harness at load
+~9.7, so clean-archive rebuild cost is dominated by cold ASan compiles under
+a loaded host, not by the wrapper's assertions. Partial transcripts:
+`/tmp/cbm-w26b-replay.log`, `/tmp/cbm-w26b-fast-out/direct.log`. The W24
+in-tree smoke (15 PASS / 0 FAIL, ~8 min) and the canonical four-ask
+`run-witness.sh` are unchanged; no wrapper or pin edit was made.
+
+Guidance to the witness stays W25's: #4594 needs a ≥30-minute budget from a
+clean archive. No new claim and no verdict assumed. Grade unchanged: rungs
+1-4, no pinned pointer/IP/command, no wire, verdict UNKNOWN, no rung 5.
