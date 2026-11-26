@@ -1,0 +1,13 @@
+PASS 1.8.13-gcc-asan-attack
+PASS 1.8.13-gcc-asan-safe
+PASS 1.8.13-clang-asan-attack
+PASS 1.8.13-clang-asan-safe
+PASS 1.8.13-gcc-plain-attack
+PASS 1.8.13-gcc-plain-safe
+PASS 1.8.14-gcc-asan-attack
+PASS 1.8.14-gcc-asan-safe
+PASS 1.8.14-clang-asan-attack
+PASS 1.8.14-clang-asan-safe
+PASS 1.8.14-gcc-plain-attack
+PASS 1.8.14-gcc-plain-safe
+RESULT PASS=12 FAIL=0

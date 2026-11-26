@@ -1,0 +1,11 @@
+--- a/src/xkb/XKBGetMap.c
++++ b/src/xkb/XKBGetMap.c
+@@ -242,7 +242,7 @@
+     return Success;
+ }
+ 
+-static Status
++Status
+ _XkbReadKeyActions(XkbReadBufferPtr buf, XkbDescPtr info, xkbGetMapReply *rep)
+ {
+     int i;

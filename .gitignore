@@ -444,3 +444,11 @@ lab/frontier/solanum2shell/live/probe-vuln-510.out
 lab/frontier/solanum2shell/live/probe-vuln-490.out
 lab/frontier/solanum2shell/live/probe-fixed490.out
 lab/frontier/solanum2shell/live/probe-vulnsafe420.out
+
+# libx11xkb2shell: extracted pinned trees, local builds and configure logs
+# stay local; harness sources, runner, pins, fix patch and evidence stay tracked.
+lab/frontier/libx11xkb2shell/src/libX11-*/
+lab/frontier/libx11xkb2shell/src/*.tar.xz
+lab/frontier/libx11xkb2shell/build/
+lab/frontier/libx11xkb2shell/evidence/build-*.log
+lab/frontier/libx11xkb2shell/evidence/configure-*.log
