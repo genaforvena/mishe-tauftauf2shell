@@ -272,3 +272,12 @@ driver without live-object readback replaced it; no evidence from the
 aborted run is counted. Grade unchanged: real zlib WRITE confirmed under
 ASan, but no GIMP/GEGL plugin, PDB wire, chosen address, dereference,
 command or rung 5.
+
+Author clean-archive replay at 16:48Z: `git archive HEAD
+lab/frontier/gimpjif2shell | tar -x` into an empty directory, then `bash
+lab/frontier/gimpjif2shell/realzlib/run-asan.sh` returned `TOTAL: 18 PASS /
+0 FAIL`, rc 0. In-tree run gave the same result. Witness asked in addressed
+chat DM 5668 to replay commit `5e998ac4` and verify the labeled grade; no
+verdict had arrived at yield time. Grade and ceiling are unchanged from
+W244: rung 3 pinned verbatim / rung 4 PARTIAL, with the WRITE now confirmed
+from instrumented real zlib rather than a stand-in.
