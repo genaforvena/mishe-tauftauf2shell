@@ -603,3 +603,48 @@ evidence. Raw logs and package hashes: `real/leak-probe/`.
 | `real/leak-probe/short-main-digest.out` | `6498a8e0a2527719990f8b4c5b3e56486823cc8ff32ece4c9fb0b84fa2001883` |
 | `real/leak-probe/control-64char.out` | `3fba1e73ddc8c4a61e2ef746aab508ba7f692777bf0b16ea894d137a471eecc0` |
 | `real/leak-probe/two-packages.out` | `e95a8f23afe6f5678f9ce7367201c1163e29e351ca8c2737778d3089bde8a582` |
+
+## Debugger-free ASLR-off chosen-pointer lane (2026-11-26 22:36–22:44Z)
+
+New bounded lane: remove the debugger from the *measured* process while
+keeping the real vulnerable `rpm -i` consumer. `setarch -R` (available,
+rc 0) disables ASLR for a plain process; no `LD_PRELOAD` and no debugger
+attach is used in the measured runs. `real/run-setarch-nogdb.sh` uses the
+load-bearing runner layout: absolute binary path, absolute 18-character
+`RPM_CONFIGDIR` symlink, the long `--dbpath $PWD/gc-pointer/db`, and an
+18-character absolute fixture path. Shrinking any of those changes the
+adjacency: an early probe with a short `/tmp/r2s-nogdb/db` gave rc 1 with
+no chosen-pointer dereference even though the same bytes under the exact
+argv fault (preserved as a negative, not a pass).
+
+Two in-tree runs gave `SETARCH_NOGDB_PASS=6 SETARCH_NOGDB_FAIL=0`: three
+wild-chosen-pointer installs rc 139, two safe installs rc 1, one fixed-ASan
+install rc 1 with no AddressSanitizer report. `summary.txt` persists each
+rc. The same argv under GDB (`gc-pointer.gdb`, `$want=0x4242…`, no forced
+call) gives `COPY_BUF=0x5555555a7e10`,
+`NEXT_AFTER=0x4242424242424242`, `CHOSEN_PTR=… PREV_OBJ=0x5555555a7e30
+NEXT_ADDR=0x5555555a7e30 MATCH=1`, a visit at liblua5.2 offset `0xe9a6`
+and SIGSEGV in `rpmluaFree`. That ties the debugger-free rc 139 to the
+chosen-byte GC `next` pointer rather than an unrelated fault. **This
+removes the debugger from the rung-4 dereference but does not remove the
+ASLR-off lab condition, and does not add a command, wire path or r5.**
+
+Attempted valid target, preserved as a negative: GDB's `discover.gdb`
+observes a live GCObject address in its own ASLR-off layout; baking that
+address into the payload and then running the *plain* setarch -R process
+did not survive in six trials across two runner runs (rc 134/139/139 and
+134/139/134; `VALID_*` in `summary.txt`). GDB's inferior environment shifts
+the heap relative to the plain process even with ASLR disabled. Core dumps
+were advertised by the shell but apport left no new core under
+`/var/lib/apport/coredump`, so no debugger-free address discovery was
+available in this wake. No ASLR-stable target was measured.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-setarch-nogdb.sh` | `e2ed234bd584cc2e870824c9c7e7788bf2022eefe4925b573d2a2119d8cfe8de` |
+| `real/setarch-nogdb/summary.txt` | `39161917b072ff25098c6e846944f86fa41e0c3bbfd78f67461f46e175077ba0` |
+| `real/setarch-nogdb/gdb-B-wild.log` | `d95b584bf18dbfb23405c01f321242c75fb60dee7c6e06151e6b7c66129cae20` |
+| `real/setarch-nogdb/wild-1.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+
+In-tree only: this runner needs the untracked vulnerable/fixed builds, so
+no clean-archive replay is claimed for this lane.

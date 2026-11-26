@@ -15,3 +15,5 @@ real/aslr-window/sample/
 real/aslr-window/*.rpm
 real/aslr-window/make-*.log
 real/install/db/
+
+real/gc-pointer/attack-C-reloc.rpm

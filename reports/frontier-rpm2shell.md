@@ -394,9 +394,11 @@ above is later work and still lacks an independent witness. Full W238 detail:
   the chosen qword into a live liblua GC pointer that is dereferenced. A
   chosen live GCObject address survives that dereference under GDB's
   ASLR-disabled layout; the same bytes fault (rc 139) in a plain ASLR
-  process, so an ASLR-stable target, wire path, command and command side
-  effect remain UNKNOWN/NO. No natural semantic dereference was seen in
-  52 plain `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
+  process. Under `setarch -R` the chosen-pointer fault also reproduces in
+  a plain no-debugger process, but no live-target address redirection
+  survives there. An ASLR-stable target, wire path, command and command
+  side effect remain UNKNOWN/NO. No natural semantic dereference was seen
+  in 52 plain `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
 - **Not rung 5:** no loopback service or wire request, no ASLR-stable target
   redirection, no command and no observed command side effect.
 
@@ -445,6 +447,21 @@ installing either, so the disclosure cannot be fed back into the crafted
 package in this consumer. No delta to the cpio buffer or GC object was
 measured; grade unchanged, no wire path or r5. Evidence and hashes in
 `lab/frontier/rpm2shell/PROVENANCE.md` and `real/leak-probe/`.
+
+### Debugger-free ASLR-off run (2026-11-26 22:36–22:44Z)
+
+`real/run-setarch-nogdb.sh` disables ASLR with `setarch -R` and measures
+unmodified vulnerable `rpm -i` with no debugger attached: three
+wild-chosen-pointer runs rc 139, two safe runs rc 1, fixed ASan rc 1 and
+clean; 6 PASS / 0 FAIL in two in-tree runs. The same fixture, binary and
+argument lengths under GDB show `MATCH=1` for `buf+0x20` and the chosen
+qword visited as a live liblua GC object at `liblua5.2.so.0:0xe9a6`, so the
+debugger-free fault is the chosen-byte pointer dereference, not an
+unrelated crash. Attempting a *valid* chosen target from GDB's
+discovery layout failed in all six plain ASLR-off runs (rc 134/139), so the
+lab condition and the grade are unchanged: still rung 4 author-layout
+DEMONSTRATED, no ASLR-stable target, no command, no r5. Evidence and hashes:
+`lab/frontier/rpm2shell/PROVENANCE.md` and `real/setarch-nogdb/`.
 
 ## Duplicate check
 
