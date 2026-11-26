@@ -5035,3 +5035,71 @@ here; no external mechanics were adopted.
 ```
 bash lab/repro/ruby2shell-uaf-steer.sh
 ```
+
+## GHSA-7whj-cfh7-xgm4 — chosen-offset one-bit write (2026-11-26, 12:57Z)
+
+This is the secondary `Regexp#to_s` lane, not the primary CVE. Earlier
+evidence (report :4296/:4499) graded its plain-build `[BUG]` crash as rung 2.
+The new question was whether the *fault target* is chosen by pattern bytes:
+falsifier = layout-dependent pointer, as in the BBuf lane.
+
+Mechanism in the affected 3.4.12 tree: `rb_reg_str_with_term` (`re.c:628`)
+re-parses the raw pattern with `onig_new` but without the preprocessing
+added in 3.4.13 (`check_code_point`, `regparse.c:4836`). A pattern
+`(?:[](?#\x{V})])` reaches `next_state_val` (`regparse.c:4589`), where
+`BITSET_SET_BIT_CHKDUP(cc->bs, (int)*from)` expands to a read and
+`BS_ROOM(bs, pos) |= BS_BIT(pos)`: a one-bit OR at the 4-byte word
+`cc->bs[(V>>5)*4]`, bit `V&31`. Both the offset and the bit are chosen
+by the pattern's codepoint; the host object is a regex parser CClassNode.
+
+Measured on plain (unsanitized) 3.4.12 with debug symbols and ASan 3.4.12,
+with fixed 3.4.13 controls:
+
+- ASan UBSan reports `index V>>5 out of bounds for type 'Bits [8]'`
+  exactly: V=0x110001 → 34816, V=0x400000 → 131072,
+  V=0x7fffffff → 67108863. The ASan fault address tracks
+  `(per-run cc->bs) + (V>>5)*4`; low-codepoint runs had
+  `cc->bs` near `0x50600000addxx`, so V=0x110001 faulted at
+  `0x50600000cfde8` and V=0x400000 at `0x506000012de48`. All three
+  vulnerable ASan runs crashed (rc=139); fixed 3.4.13-asan returned
+  the expected string with no index error.
+- Plain 3.4.12: low codepoints (0x110000–0x110041) survived all three
+  runs each — the OR landed in mapped heap memory; 0x7fffffff crashed
+  3/3 with varying low-12-bit fault addresses. The *absolute* fault
+  address on the stock build is layout-dependent; only the offset
+  relative to `cc->bs` is chosen by the pattern.
+- Controls: fixed plain/ASan 3.4.13 returned rc=0 for V=0x110001 and
+  0x7fffffff; safe input V=0x41 returned rc=0 on both vulnerable
+  builds with no UBSan index report. V=0x10ffff is **not** a safe
+  control on 3.4.12 (ASan index 34815, rc=139); that naive assumption
+  was falsified and the control changed to ASCII 0x41.
+
+Direct write proof on the unsanitized build (gdb watchpoint on the
+computed target word, three fresh processes with the same `cc->bs`):
+
+```
+V=0x110001  offset=139264 bit=1  old=1433858452 new=1433858454
+V=0x110041  offset=139272 bit=1  old=1433858885 new=1433858887
+V=0x110080  offset=139280 bit=0  old=4151394328 new=4151394329
+```
+
+The watchpoint fired on each `|=` and the new word differs from the old
+by exactly `1 << (V&31)`. The target words are live heap data in the
+process `[heap]` mapping; their exact contents vary with allocator
+layout, so no claim is made about a particular object type. Gitignored
+evidence: `lab/build/evidence/tos-steer/summary.txt` and
+`gdb-110001.out`, `gdb-110041.out`, `gdb-110080.out`.
+
+Grade: **rung 4 at the narrow one-bit-write scope in this secondary
+lane** — chosen offset and chosen bit exercised in the lab build, with
+fixed and safe-input controls. It is NOT arbitrary-byte or pointer
+control, has no benign-marker execution, no wire-only reachability
+(arbitrary patterns must already reach the application), and no
+independent witness replay; primary grades are unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+Plain fault-address steering is CLOSED for this lane, as in BBuf.
+
+```
+bash lab/repro/ruby2shell-tos-steer.sh
+```
