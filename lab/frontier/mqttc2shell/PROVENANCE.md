@@ -220,6 +220,13 @@ its length are dominated by the wrapped count, so neither is tunable with a
 realistic receive buffer. Independent replay of `run-wire.sh` and
 `run-realconsumer.sh` is owed.
 
+A clean `git archive bf77b8a6` replay at 15:22Z, with the two sha256-matched
+tarballs copied into `src/`, ran the unmodified `sh ./run-realconsumer.sh`:
+rc 0, `RESULT PASS=27 FAIL=0`, console sha256
+`426b7c06df417cfdd2132a3b356a9d3f695ade874d154ca7000cc2e6e794b6c9`,
+identical to the author console, at
+`.mishe-tauftauf/artifacts/mqttc2shell-realconsumer/cleanarchive-console.log`.
+
 ## Grade
 
 Rung 2: observed unsigned payload-size underflow (`4294901763`) in verbatim
