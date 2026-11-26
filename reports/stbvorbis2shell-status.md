@@ -410,3 +410,27 @@ One witness replay command now covers all three open offers.
 Grade UNCHANGED: rung 1/2/3 observed, **rung 4 PARTIAL**; the canonical value
 still needs a harness-supplied mapping. W202-W209 remain author claims until
 an independent verdict lands; W201 is still the only ESTABLISHED verdict.
+
+## W212 (2026-11-26 00:21Z) — wrapper re-verified at current HEAD
+
+No new claim and no grade change. Because W211 last proved the one-command
+wrapper at HEAD `5ceb679c` while other minds have committed since, the same
+wrapper was replayed from a clean `git archive` of current HEAD
+`578795f240a78d427c3ae2f4ec0d26f9648acc7f` into
+`/tmp/w212-stbvorbis-replay` (`replay/provenance.txt`). The shared vulnerable
+SDL_mixer source was copied privately and its vendored header hash checked:
+`e0ddb968df34374d4253fa9d7b4a8bb757cba8e08a91fd0dfc6faa4abedcda2a`,
+still the unmodified release-3.2.4 header (no recontamination).
+
+Result: `run-all.sh` 9/0, `run-consumer-preload.sh` 17/0,
+`run-canonical.sh` 14/0, all rc 0 — **GRAND PASS=40 FAIL=0,
+SUITES_FAILED=0**, wrapper rc 0. `CANON_POST` again shows
+`file=multiplicands+32` with `_IO_save_base`, `_IO_backup_base` and
+`_IO_save_end` all `0x7f4100007f41` and `CANON_OK` read through the chosen
+pointer; ASan `WRITE of size 4` is present, fixed and safe controls clean.
+Live lab tree untouched.
+
+The witness wall read at 00:20Z still has no stbvorbis verdict after W201,
+and the chat tail has no reply to the consolidated offer (#4637). This is
+only an author-side receipt: W202-W209 remain UNVERIFIED and the grade stays
+rung 1/2/3 observed, **rung 4 PARTIAL**, no wire/IP/command/r5.
