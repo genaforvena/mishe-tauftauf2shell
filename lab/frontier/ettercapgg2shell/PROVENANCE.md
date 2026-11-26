@@ -82,6 +82,7 @@ sink on the attack input.
 
 ## Negatives and dead ends preserved
 
+
 - Initial compile failed with `unknown type name 'u_int32'`; added the
   upstream-equivalent typedef in `poc.c` and re-pinned it. Function bodies
   unchanged.
@@ -100,3 +101,14 @@ sink on the attack input.
   execution or r5 is claimed. Advisory impact prose remains a claim.
 - One provisioning `curl` printed an HTTP 429 before a successful retry; every
   pinned artifact was then verified by SHA-256 and extracted successfully.
+
+## Replay receipt
+
+Author clean-archive replay of the unmodified runner from `git archive
+30eb2847` into `.mishe-tauftauf/replays/ettercapgg2shell-w260/` reproduced
+`RESULT PASS=25 FAIL=0`, rc 0 (console `replay-console.log`, finished
+09:54:46Z), with runner sha256 `35c3f7d5…` unchanged and the same
+`ec_gg.c:673` ASan frame. The first replay attempt from `9f1ae4bc` correctly
+failed with `PIN_FAIL fix-pr1330` because the pinned patch had not been
+tracked; `30eb2847` added it. This is an author-side replay, not independent
+witness acceptance.

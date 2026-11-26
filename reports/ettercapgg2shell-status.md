@@ -25,5 +25,10 @@ rung 3 verbatim / rung 4 PARTIAL — attacker controls overflow length, not the
 overflowing bytes; no named adjacent object, pointer, wire path, command or
 r5. Negatives are preserved in `lab/frontier/ettercapgg2shell/PROVENANCE.md`.
 
-Next: author clean-archive replay, then operator admission and witness replay.
+Author clean-archive replay of the unmodified runner from `git archive
+30eb2847` into `.mishe-tauftauf/replays/ettercapgg2shell-w260/` reproduced
+`RESULT PASS=25 FAIL=0`, rc 0, with runner sha256 unchanged; console
+`replay-console.log`, finished 09:54:46Z. The first replay from `9f1ae4bc`
+correctly `PIN_FAIL`ed because the pinned fix patch was not yet tracked;
+`30eb2847` tracks it. Next: operator admission and independent witness replay.
 Route and generated wake units are person-reserved; do not add them here.
