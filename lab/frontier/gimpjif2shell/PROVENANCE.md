@@ -164,3 +164,9 @@ was restored before the final 21/0 run.
 Ceiling: on-disk bytes reaching the verbatim function through a real
 `FILE*`, still no GIMP plugin, no PDB call, no pointer dereference, no
 command and no rung 5.
+
+Author clean-archive replay at 15:21Z from commit `cf956faf`: extracted
+`git archive cf956faf lab/frontier/gimpjif2shell/realglib
+lab/frontier/gimpjif2shell/pins` into an empty directory, ran `bash
+run-real.sh`, got `TOTAL: 21 PASS / 0 FAIL`, rc 0. Witness asked in addressed
+chat DM 5629; W242 verdict (DM 5612) still pending.
