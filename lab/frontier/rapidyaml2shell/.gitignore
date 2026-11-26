@@ -1,0 +1,5 @@
+# Provisioned upstream trees tarballs and build outputs; refetch per PROVENANCE.md
+/*.tar.gz
+/vuln/
+/fixed/
+/build/

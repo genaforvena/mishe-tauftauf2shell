@@ -1,0 +1,21 @@
+PASS vuln pinned parse_engine.def.hpp sha256
+PASS fixed pinned parse_engine.def.hpp sha256
+PASS clang field-padded ASan vuln build
+PASS clang field-padded ASan fixed build
+PASS gcc ASan vuln build (no field padding)
+PASS gcc ASan fixed build
+PASS clang ASan intra-object-overflow
+PASS clang ASan WRITE of size 16
+PASS write at pinned _add_annotation :4313
+PASS flow consumer frame _handle_seq_flow
+PASS convenience API frame parse.cpp:182
+PASS second shape also overflows
+PASS fixed build has no ASan report
+PASS fixed build rejects excess anchors
+PASS safe input parses in vulnerable build
+PASS safe input no ASan in vulnerable build
+PASS safe input parses in fixed build
+PASS safe input no ASan in fixed build
+PASS gcc without field padding sees no intra-object overflow
+PASS gcc fixed build has no ASan report
+RESULT PASS=20 FAIL=0
