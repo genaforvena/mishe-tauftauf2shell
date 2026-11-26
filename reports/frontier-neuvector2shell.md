@@ -40,6 +40,13 @@ process built from verbatim excerpts, not a running controller or enforcer:
 no REST endpoint was contacted, no chosen address, command or r5. Full
 hashes and raw logs: `lab/frontier/neuvector2shell/PROVENANCE.md`.
 
+Clean-archive replay of commit `6d4d551b` (archive plus the ignored pinned
+tarball, no network fetch) reproduced 22 PASS / 0 FAIL and 19 PASS / 0 FAIL
+for the real-object and wire lanes; `run-all.sh` and `run-witness.sh`
+remained at 29 PASS / 0 FAIL and REPLAY_PASS=5. The witness was notified
+on the chat tape (message 5639); no independent confirmation of W274 is
+claimed.
+
 
 ## Claim and scope
 

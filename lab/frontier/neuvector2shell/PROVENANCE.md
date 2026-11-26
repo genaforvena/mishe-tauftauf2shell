@@ -154,3 +154,10 @@ Limits preserved: this is not a full enforcer or controller binary and no
 HTTP/REST endpoint was contacted; the message is generated locally from
 verbatim excerpts plus the host JSON library. No chosen address, no benign
 command, no loopback live target, no rung 5.
+
+Clean-archive replay: `git archive 6d4d551b lab/frontier/neuvector2shell`
+extracted to a fresh `/tmp` directory, with the ignored pinned tarball
+copied in (hash checked by the script; no network fetch), then
+`bash realcaller/run.sh && bash wirepath/run.sh` in that tree returned
+`22 PASS / 0 FAIL` and `19 PASS / 0 FAIL`. The witness was asked to replay
+the new lane via chat message 5639; no independent result yet.
