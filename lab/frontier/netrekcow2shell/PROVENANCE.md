@@ -45,8 +45,9 @@ make ASan attribute frames to the real source line numbers.
   `sprintf(buf, "%-9s%s", addrbuf, &packet->mesg);`. No length check and no
   NUL guarantee for the packet body.
 - `packets.h:1170-1181`: `struct mesg_s_spacket` has `unsigned char length`
-  at offset 4 and `char mesg` at offset 5, followed by only 79 bytes of
-  declared padding; `length` is attacker-supplied and can claim more.
+  at offset 4 and `char mesg` at offset 5, followed by 78 declared padding
+  bytes (79 including `mesg` through the 84-byte struct's end); `length` is
+  attacker-supplied and can claim more.
 - 3.3.4 `short.c:916-965`: computes
   `body_max = packet->length > offsetof(..., mesg) ? length - offsetof(...) : 0`,
   `n = strnlen(&packet->mesg, body_max)`, clamps `n` to `sizeof(body)-1`,
@@ -59,9 +60,10 @@ make ASan attribute frames to the real source line numbers.
 `./run-all.sh > evidence/run-all-console.log 2>&1`, rc 0,
 **RESULT PASS=32 FAIL=0**. GCC and Clang, vulnerable tag 3.3.3:
 `ERROR: AddressSanitizer: stack-buffer-overflow`, `WRITE of size 130`, frame
-`handleSMessage ... short.c:949`, frame description
-`'buf' (line 916)` at `[80, 180)` and "Memory access at offset 180 overflows
-this variable". With `-fsanitize-recover=address` and
+`handleSMessage ... short.c:949` past `buf[100]`. GCC's frame description is
+`'buf' (line 916)` at `[80, 180)` with "Memory access at offset 180 overflows
+this variable"; Clang's is `[32, 132)` with "offset 132 partially underflows
+addrbuf". With `-fsanitize-recover=address` and
 `ASAN_OPTIONS=halt_on_error=0` the same run prints `outlen=129`,
 `b99=41 b100=4d b101=41 b102=52 b103=4b b128=42 b129=00`: server-chosen
 `M`,`A`,`R`,`K` at stack offsets 100..103, i.e. past the 100-byte buffer.
@@ -89,3 +91,12 @@ the vulnerable safe frame is also clean at `outlen=14`.
 - No wire socket, pcap, live target, named adjacent object, pointer control,
   command execution or r5 was observed. Do not upgrade the grade on the
   advisory's exploitability prose.
+
+## Independent witness replay (W262, 10:48Z)
+
+The unmodified runner was replayed from a clean `git archive f0672f0d`
+subtree with archived evidence logs and generated `.inc` files removed and
+all three tarballs re-fetched fresh: rc 0, `RESULT PASS=32 FAIL=0` in 4.58 s.
+All pins, start lines, controls and compiler observations held; verdict
+ESTABLISHED AS LABELED with no grade change and NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w262-netrekcow2shell/detail.md`.

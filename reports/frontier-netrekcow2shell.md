@@ -32,7 +32,8 @@ sprintf(buf, "%-9s%s", addrbuf, &packet->mesg);
 
 with no bound on the message body and no NUL guarantee. The pinned
 `packets.h:1170-1181` layout has `unsigned char length` at offset 4,
-`char mesg` at offset 5 and only 79 bytes of declared padding afterwards;
+`char mesg` at offset 5 and 78 declared padding bytes after it (79 bytes
+including `mesg` through the 84-byte struct's end).
 `length` is attacker-supplied. A body with no NUL in the struct makes
 `sprintf` read past the declared packet and write an unbounded string into the
 100-byte stack buffer.
@@ -59,8 +60,10 @@ Observed with runner sha256
 `52078f004e10bc89c0faa96c8755287c7afd6adc92f1c123e7697b5ce1799288`:
 **RESULT PASS=32 FAIL=0, rc 0** (author run 2026-11-26 10:41:46Z). Vulnerable
 GCC+Clang ASan: `stack-buffer-overflow`, `WRITE of size 130`, frame
-`handleSMessage ... short.c:949`, `'buf' (line 916)` at `[80, 180)` with
-"Memory access at offset 180 overflows this variable". Recoverable ASan
+`handleSMessage ... short.c:949` past `buf[100]` (line 916). GCC's frame
+describes `buf` at `[80, 180)` with "Memory access at offset 180 overflows
+this variable"; Clang's puts it at `[32, 132)` and reports offset 132
+partially underflowing `addrbuf`. Recoverable ASan
 (`halt_on_error=0`) observes `outlen=129` and chosen bytes
 `b99=41 b100=4d b101=41 b102=52 b103=4b b128=42 b129=00`: the server-chosen
 `M`, `A`, `R`, `K` land at buffer offsets 100..103. Unprotected plain attack
@@ -87,7 +90,28 @@ and commit SHA, and the runner was then invoked unmodified: rc 0,
 pin, both start-line assertions, the fix-commit/release hunk identity check
 and all compiler-mode observations held. Console:
 `.mishe-tauftauf/replays/netrekcow2shell-w261/lab/frontier/netrekcow2shell/evidence/replay-console.log`.
-This is an author replay, not independent acceptance; witness replay is owed.
+This is an author replay, not independent acceptance.
+
+## Witness verdict (W262, 2026-11-26 10:48Z, #5245)
+
+**ESTABLISHED AS LABELED** at the rung 3 verbatim / rung 4 PARTIAL scope; no
+contradiction, no grade change, **NO r5**. Witness checked the canonical
+runner hash `52078f00…1799288` in the worktree, at `f0672f0d` and in a clean
+`git archive f0672f0d` subtree, deleted all archived evidence logs and four
+generated `.inc` files, re-fetched the three codeload archives fresh by tag
+and commit SHA, then ran the unmodified wrapper: rc 0, `RESULT PASS=32 FAIL=0`
+in 4.58 s (10:48:20Z–10:48:24Z). All 32 checks held: eight input/body pins,
+both start lines 914/916, the 3.3.4/fix-commit hunk-identity check, both
+verbatim marker checks, ten builds and all compiler-mode observations. Fresh
+GCC and Clang logs show `WRITE of size 130` at `short.c:949` past `buf[100]`;
+the recoverable runs capture `outlen=129` and `M/A/R/K` at buffer offsets
+100..103 in ASan poison, fixed and safe frames are clean (`outlen=99`/`14`),
+and plain vulnerable attacks fault (`rc=139`). No named adjacent object,
+pointer, live wire, command or r5. Two wording corrections from this replay:
+the `[80,180)` frame description is GCC-specific (Clang reports `[32,132)`
+and a partial underflow of `addrbuf`), and the struct declares 78 padding
+bytes after `mesg`, not 79. Detail:
+`.mishe-tauftauf/artifacts/witness-w262-netrekcow2shell/detail.md`.
 
 ## Cheapest next rung-moving experiment
 
