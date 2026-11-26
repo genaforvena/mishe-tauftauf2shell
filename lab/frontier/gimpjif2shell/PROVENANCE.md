@@ -281,3 +281,56 @@ chat DM 5668 to replay commit `5e998ac4` and verify the labeled grade; no
 verdict had arrived at yield time. Grade and ceiling are unchanged from
 W244: rung 3 pinned verbatim / rung 4 PARTIAL, with the WRITE now confirmed
 from instrumented real zlib rather than a stand-in.
+
+## W246 real GIMP 3.2.8 plugin / PDB lane (2026-11-26, 16:54Z wake)
+
+Provisioned the official Linux AppImage
+`GIMP-3.2.8-x86_64.AppImage` from `download.gimp.org/gimp/v3.2/linux/`
+and verified it against the same directory's `SHA256SUMS`; extracted it
+under `/tmp/gimpjif-appimage/squashfs-root` (not in Git). `AppRun
+--version` reports `GNU Image Manipulation Program version 3.2.8`.
+GIMP 3.2.8 source `plug-ins/common/file-gif-load.c` SHA-256
+`a016e3c1505fb7b9a68b77e27d474388ce7c30fcb223204e779f0a5de41fc159`
+still has `data_size = len * height`, the alpha doubling and
+`zs.avail_out = len * height` at :1543-1601; 3.2.8 is not the fixed
+release. Its `ReadJeffsImage` normalizes byte-identical to
+`pins/jif-vulnerable.inc` (139 lines, whitespace-only differences).
+
+Real PDB invocation in a fresh `$HOME` profile:
+`AppRun -i --batch-interpreter plug-in-script-fu-eval -b '(gimp-file-load
+RUN-NONINTERACTIVE "<jif>" "<base>")' -b '(gimp-quit 0)'`. The shipped
+`file-gif-load` child process is unmodified. `live/inflate-shim.c` is
+appended to the extracted AppRun's `LD_PRELOAD` after AppRun resets and
+rebuilds that variable; it wraps real `inflate()` via `dlsym
+(RTLD_NEXT, "inflate")` and dumps heap bytes after the write.
+
+`live/evidence/appimage-published-shim.log`: a real `file-gif-load` child
+reports `avail_out_before=2147483778 total_out=324 ret=1` (the pid and
+heap address vary per ASLR run); `SHIM_HEAD` is sixteen `0x4d` bytes;
+`SHIM_EDGE` dumps 96 bytes from `out+252`: the last 8 bytes of the
+260-byte `indexes` region and the first 64 bytes past it are all chosen
+`0x4d`, followed by unrelated heap bytes; `SHIM_FAR` at `out+360` is
+unchanged. `live/evidence/appimage-safe-shim.log`: safe 4x4 file loads
+through the same PDB (`batch command executed successfully`, width 4)
+and emits zero shim lines. `bash live/run-appimage.sh` codifies the
+provisioning, shim build, both PDB runs and the content assertions.
+Clean in-tree replay at 17:31Z: `bash live/run-appimage.sh` returned
+`TOTAL: 9 PASS / 0 FAIL`, rc 0, with each run in a fresh `$HOME` profile
+and the log files above regenerated. An earlier run reported 8 PASS /
+1 FAIL because the chosen-byte assertion used a hardcoded hex literal
+with the wrong count; counting leading `4d` pairs fixed the assertion.
+The underlying 72-byte chosen prefix was identical in both runs.
+
+Preserved negatives: setting `LD_PRELOAD` outside AppRun produced no
+shim lines because AppRun unsets it; attaching gdb to the plugin child
+was refused by Yama `ptrace_scope` (`live/evidence/failed-gdb-attach.log`);
+a killed GIMP tree made later batch runs hang until its processes were
+killed; the first batch omitted `--batch-interpreter` and the second
+used the GIMP 2 name `gimp-image-width`, both timed out. The attack run
+was killed at our timeout after the WRITE was observed: the real plugin
+did not finish the subsequent large image/layer/`dest` work on this
+host, so this lane proves the wrapped call and chosen bytes, not a
+completed load. Grade unchanged: rung 3 pinned verbatim / rung 4
+PARTIAL. The real vulnerable plugin and PDB wire are now exercised, but
+no named live victim object in the plugin process, no chosen address,
+no dereference, no command and no rung 5.

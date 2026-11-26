@@ -223,6 +223,34 @@ counted. This strengthens rung 3 (real library performs the confirmed
 WRITE) but does not change the grade: no plugin, PDB wire, chosen address,
 dereference, command or rung 5.
 
+## Real GIMP 3.2.8 plugin reached through the PDB (W246, 2026-11-26)
+
+The official GIMP 3.2.8 AppImage was SHA256-verified against upstream's
+`SHA256SUMS`, extracted locally and driven headless with
+`--batch-interpreter plug-in-script-fu-eval`. Its shipped
+`file-gif-load` plugin is vulnerable: the 3.2.8 source still computes
+`data_size = len * height`, doubles it for alpha and leaves
+`zs.avail_out` unwrapped, and its `ReadJeffsImage` normalizes
+byte-identical to the pinned vulnerable excerpt. No plugin source was
+changed. The 3.2.8 AppImage predates the fix; no fixed AppImage was
+available for this lane, so the fixed control remains the pinned build
+from W242-W245.
+
+`live/inflate-shim.c`, appended to `LD_PRELOAD` inside the extracted
+AppRun, wraps the plugin's real `inflate()` and reads bytes after the
+write. With `published.jif` (advisory product `45771 * 46918 =
+0x80000082`), the real plugin child reports `avail_out_before=2147483778`,
+`total_out=324`, and 64 chosen `0x4d` bytes past the 260-byte `indexes`
+region (`live/evidence/appimage-published-shim.log`). The safe 4x4 JIF
+loads through the same PDB with width 4 and produces no shim lines
+(`appimage-safe-shim.log`). The attack run was killed at our timeout
+after the observed write: the subsequent ~2 GiB image/layer/`dest` work
+did not finish on this host. That stall is preserved; the lane proves
+the wrapped call and chosen bytes in a real plugin process, not a
+completed load. Replay: `bash live/run-appimage.sh`.
+`bash live/run-appimage.sh` replayed cleanly at 17:31Z: `TOTAL: 9 PASS /
+0 FAIL`, rc 0, regenerating both logs in fresh profiles.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
@@ -232,20 +260,24 @@ dereference, command or rung 5.
   logical heap object in the synthetic harness; W242 additionally observes
   chosen bytes and a chosen pointer value in a live GLib object on the real
   allocator with real zlib, and W243 with file-chosen bytes and a file-chosen
-  pointer value in a live GLib object on the real allocator. The WRITE is
-  performed by the pinned function with a thin consumer; no real GIMP
-  plugin, no PDB call, no dereference of the chosen pointer, no command.
+  pointer value in a live GLib object on the real allocator. W246 reaches
+  the unmodified vulnerable `file-gif-load` plugin in a real GIMP 3.2.8
+  process through the PDB with a file-chosen wrapped product and observes
+  64 chosen bytes past the real 260-byte allocation. The grade stays PARTIAL
+  because that plugin run identifies no named live victim object, and there
+  is no chosen address, dereference of a chosen pointer or command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
-Next experiment: provision the GIMP 3.2.x source at the vulnerable pin and
-the 3.2.10 fix, build the real `file-gif-load` plugin against GIMP/GEGL, and
-feed the W243/W244 JIF files through the real `load_image()` with
-`is_jeff_image = TRUE` on loopback, including the GIMP object construction
-that precedes the now-measured guard and ~4 GiB `dest` allocation. W242-W244
-already measured the real glib/glibc allocator layout, a live-object pointer
-field and both caller conditions, so the remaining gap is the real
-plugin/PDB consumer. No rung 5 without a benign command side effect on that
-live target.
+Next experiment: finish the real-plugin load rather than stopping at the
+observed WRITE. The GIMP 3.2.8 AppImage now supplies a real vulnerable
+plugin and PDB wire; the JIF load stalls in the later large image/layer/
+`dest` work on this host. A bounded next step is to observe where it stalls
+(gegl tile allocation versus heap damage after the overwrite), and to add
+a fixed-plugin control from the fix commit `2b2bbb8ffa6a88e82c72fe1208adc275dddffcd7`
+once a fixed AppImage or a build against the AppImage's bundled libgimp is
+available. W242-W245 already measured the real allocator layout, a live
+GLib object pointer field, the caller guard and the instrumented real-zlib
+WRITE. No rung 5 without a benign command side effect on a live target.
 
 ## Duplicate check and screened candidates
 
