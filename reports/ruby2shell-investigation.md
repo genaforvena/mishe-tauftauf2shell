@@ -3908,7 +3908,11 @@ witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
 Evidence: `lab/build/evidence/dispatch-table-3.3.13.out` and
 `dispatch-table-3.4.12.out`.
 
+Both binaries and the generated `insns.inc` are provisioned lab build inputs;
+the 3.3.13 header comes from the pinned source tar. Re-run from the repo root:
+
 ```
+tar -xJf lab/src/ruby-3.3.13.tar.xz -C /tmp --wildcards 'ruby-3.3.13/insns.inc'
 python3 lab/repro/ruby2shell-dispatch-table.py \
     lab/build/plain/ruby-3.3.13-plain/bin/ruby 0x2637c0 0x2698c0 /tmp/ruby-3.3.13/insns.inc
 python3 lab/repro/ruby2shell-dispatch-table.py \

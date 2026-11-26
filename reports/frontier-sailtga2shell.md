@@ -37,9 +37,10 @@ Admission is the operator's; wake units and full-flag sync stay with the person.
 advances the pointer by `pixel_size` per pixel in both packet types:
 `memcpy(pixels, pixel, pixel_size)` at `tga.c:269` (run) and
 `strict_read(..., pixels, pixel_size)` at `tga.c:277` (raw). With `bpp=32`,
-four chosen bytes are written per one-byte pixel slot, so the second run packet
-lands past the 256-byte allocation. The earlier CVE-2026-40494 clamp bounds
-pixel *count*, not bytes per pixel.
+four chosen bytes are written per one-byte pixel slot. Each `0xFF` packet
+holds 128 pixels, so the first packet's 65th write already crosses byte 256;
+both packets overshoot and 1024 bytes are written in total. The earlier
+CVE-2026-40494 clamp bounds pixel *count*, not bytes per pixel.
 
 Vendor fix (commit `fa24bce…`, identical raw bytes at tag `v1.0.0`) adds
 `if (sail_bits_per_pixel(pixel_format) != (unsigned)file_header.bpp) return
@@ -82,11 +83,11 @@ No external probing is authorized; all testing stays in the lab and on loopback.
 ## 5. Negatives, discrepancies and UNKNOWNs
 
 - Advisory's ASan paste claims a `Version: 1.0.0` build still crashes at
-  `tga.c:303`; raw `v1.0.0` `tga.c` verifiably contains both guards and the
-  pinned v1.0.0 build rejects the input. The paste is likely a pre-release
-  master build; treat it as a claim, not the tag's behavior. Advisory's
-  `tga.c:303` line also differs from the v0.9.10 sink at `:269` because of
-  intervening changes; the raw tag bytes are authoritative.
+  `tga.c:303`, and its text calls the header-bpp clamp `1..32`; raw v0.9.10
+  `tga.c:240` rejects `pixel_size > 16` and the sink is `:269`. Raw `v1.0.0`
+  contains both vendor guards and the pinned v1.0.0 build rejects the input.
+  Treat the paste as a claim from a different (likely pre-release master)
+  build, not as the tag's behavior; the raw tag bytes are authoritative.
 - v1.0.0 needs optional libswscale headers absent on this host. Empty stub
   headers are supplied through `CMAKE_C_FLAGS` and libswscale is forced OFF;
   only unused code behind `SAIL_MANIP_SWSCALE_ENABLED` sees them. No upstream
@@ -99,5 +100,8 @@ No external probing is authorized; all testing stays in the lab and on loopback.
   argument; without it ASan controls stay clean, avoiding a false positive
   from the measurement itself.
 - No RCE, no pointer overwrite, no r5. Real-world application reachability
-  beyond "any app that loads an untrusted TGA through SAIL" is UNKNOWN. Witness
-  replay verdict is not yet claimed by this mind.
+  beyond "any app that loads an untrusted TGA through SAIL" is UNKNOWN. This
+  mind does not claim a witness verdict. Independent witness W246 replayed the
+  unmodified wrapper from a clean `git archive 2bcda7e8` and ruled
+  ESTABLISHED AS LABELED, no grade change, NO r5
+  (`artifacts/witness-w246-sailtga2shell/detail.md`).
