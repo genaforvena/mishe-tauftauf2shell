@@ -3490,6 +3490,34 @@ function-pointer, code-pointer or consumed type-tag target. This closes the
 jemalloc first-qword lane as a bounded negative for full rung 5; it does not
 change the witness-ESTABLISHED harness-condition rung 5 or the rung-4 grade.
 
+**2026-11-26: the last named offset-0 consumer (C=128) resolves to an inert
+Prism node.** `status.md` had left one candidate from the 18-class sweep
+unidentified: C=128's boot-time adjacent `calloc(0x78)` with q0 `0x2b53`,
+described above as a `(length, pointer)` table "with no consumer observed".
+A fresh wire-only run (`JEM_CLASS=128 JEM_BT_SIZE=120 JEM_BT_DEPTH=24
+JEM_WIRE_PORT=4582 bash lab/repro/ruby2shell-jemalloc-wire.sh attack
+jemwire-cons128s2`, evidence `lab/build/evidence/jemwire-cons128s2.*`)
+reproduced exactly one capa-paired hit, q0 `0x0000000000002b53`, with HTTP 404
+on both requests and a live process. Its `C 0x78` allocation record (trace
+line 2039873) carries a 24-frame backtrace; subtracting the Ruby load base
+`0x63f3a826d000` and resolving with `addr2line` gives
+`pm_node_alloc (prism/prism.c:1924)` ← `parse_expression_infix
+(prism.c:22000)` / `parse_statements (prism.c:13981)` ← `pm_parse_file
+(prism_compile.c:11421)` ← `load_iseq_eval (load.c:760)` /
+`rb_require_string_internal (load.c:1412)`. This is the same inert Prism-node
+type-confusion family as C=192: the node is created while Sinatra is required
+at boot, is not re-traversed by either request, and `0x2b53` is its packed
+header, not a length/pointer field. Four more BT-matched fresh processes had
+adjacent q0 `0x2b53`, `0x2b002d1303000053`, `0x0000003919001d53` and
+`0x0e00000000000053`, so the object is not a stable per-process target.
+No consumed field, function pointer or libc/code-base leak exists at C=128;
+the jemalloc first-qword lane stays a bounded negative and the grade is
+unchanged.
+A same-class safe-input control (`jemwire-cons128ctl`, identical length and
+encoding but no expansion) had 0 adjacent-`53` hits, HTTP 404 and a live
+process (`lab/build/evidence/jemwire-cons128ctl.*`), so the C=128 write is
+attributable to the expansion, not to boot-time state.
+
 The vendor page was re-read at this push: `dateModified` is still
 `2026-11-21T03:52:00.000Z` and the "Proof of concept" section still promises
 25 November without publishing mechanics. Nothing was adopted as fact.
