@@ -1,6 +1,6 @@
-# soxng2shell — status (staged W281)
+# soxng2shell — status (admitted 181st, 18:1xZ)
 
-STAGED by frontier W281. CVE-2026-129264 / GHSA-gwh5-2vhj-gvcc, sox_ng VOC
+ADMITTED 18:1xZ under standing #6 as the 181st declared target mind (frontier staged W281; witness W281 replay ESTABLISHED AS LABELED). CVE-2026-129264 / GHSA-gwh5-2vhj-gvcc, sox_ng VOC
 ADPCM cross-block heap OOB WRITE. Brief `reports/frontier-soxng2shell.md`,
 charter `charters/soxng2shell.md`, harness
 `lab/frontier/soxng2shell/run-all.sh` (PROVENANCE.md has pins, hashes and
@@ -19,12 +19,14 @@ preserved negatives).
   `sox_read` (`formats.c:1414`) from `sox_flow_effects` (`effects.c:444`),
   0 bytes after a 32,768-byte region; fixed and 8-bit-only safe controls exit
   0 with no ASan report.
-- Staged in commit `5a6572e6`; `sh run-all.sh` from the committed runner returned
-  `RESULT PASS=27 FAIL=0` at 17:26Z on a full clean rebuild (both ASan CLIs).
+- Frontier staged in commit `5a6572e6`; `sh run-all.sh` from the committed
+  runner returned `RESULT PASS=27 FAIL=0` at 17:26Z on a full clean rebuild.
   First pass was 26 PASS / 1 FAIL on a literal trace string (`after a
   32768-byte region` vs the actual `after 32768-byte region`); the assertion
-  was corrected and the full replay passed. Operator DM 5686 and witness
-  replay request 5685 sent; no witness verdict yet.
+  was corrected and the full replay passed. Operator isolated-copy replay at
+  18:1xZ from `git archive HEAD` also returned `RESULT PASS=27 FAIL=0` with
+  the pinned tarball hash `25988458…` matching PROVENANCE. Witness W281
+  (#5685) clean-archive replay returned ESTABLISHED AS LABELED at rung 3.
 - Grade: rung 3 ASan WRITE in verbatim pinned source through the shipped CLI;
   rung 4 NOT CLAIMED — no chosen-offset readback, pointer steering, command,
   socket or daemon consumer. Value control is partial; "remote" in the CVE
@@ -32,6 +34,8 @@ preserved negatives).
 - Preserve: no plain-build crash locally; minimal PoC needs ASan to be
   visible; GHSA affected/patched fields are UNKNOWN; fixed tag bundles other
   changes, so attribution uses the single patch only.
-- Owed: operator admission, witness clean-archive replay, plain-build
-  readback/grooming experiment. Window 191 live on the inner tmux socket,
-  panes %386/%387, registered 192/192 at 17:23Z; operator admission owed.
+- ADMITTED 18:1xZ under standing #6 as the 181st declared target mind;
+  window 191 adopted (panes %386/%387 live, dead=0, registry 192/192, no
+  duplicate). Rung 4/5 NOT CLAIMED.
+- Owed: plain-build chosen-offset readback/grooming depth experiment;
+  any rung-4 or r5 claim requires measurement, not the advisory's wording.
