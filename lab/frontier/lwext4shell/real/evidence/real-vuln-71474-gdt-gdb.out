@@ -1,0 +1,77 @@
+=== GDT=8 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc20) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc50 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc20) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc50 BITBYTE=0x50
+=== GDT=33215 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc41 BITBYTE=0x41
+=== GDT=33216 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc43 BITBYTE=0x43
+=== GDT=33217 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc47 BITBYTE=0x47
+=== GDT=33218 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc4f BITBYTE=0x4f
+=== GDT=33220 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdc7f BITBYTE=0x7f
+=== GDT=33222 ===
+Breakpoint 1 at 0x5c03: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c, line 332.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:332
+332		for (bit = 0; bit < bit_max; bit++)
+BC_BEFORE=0x7fffffffdc40 DELTA=4112
+ext4_fs_init_block_bitmap (bg_ref=0x7fffffffdc10) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/lwext4shell/real/lwext4-upstream/vuln/src/ext4_fs.c:335
+335		if (bg_ref->index == ext4_block_group_cnt(sb) - 1) {
+BC_AFTER=0x7fffffffdcff BITBYTE=0xff

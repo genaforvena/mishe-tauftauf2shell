@@ -1,0 +1,8 @@
+GDT_BITS gdt=8 before=0x7fffffffdc50 after=0x7fffffffdc50 delta=4112 mask=0x00 MATCH=1
+GDT_BITS gdt=33215 before=0x7fffffffdc40 after=0x7fffffffdc41 delta=4112 mask=0x01 MATCH=1
+GDT_BITS gdt=33216 before=0x7fffffffdc40 after=0x7fffffffdc43 delta=4112 mask=0x03 MATCH=1
+GDT_BITS gdt=33217 before=0x7fffffffdc40 after=0x7fffffffdc47 delta=4112 mask=0x07 MATCH=1
+GDT_BITS gdt=33218 before=0x7fffffffdc40 after=0x7fffffffdc4f delta=4112 mask=0x0f MATCH=1
+GDT_BITS gdt=33220 before=0x7fffffffdc40 after=0x7fffffffdc7f delta=4112 mask=0x3f MATCH=1
+GDT_BITS gdt=33222 before=0x7fffffffdc40 after=0x7fffffffdcff delta=4112 mask=0xff MATCH=1
+GDT_MATCHED=7

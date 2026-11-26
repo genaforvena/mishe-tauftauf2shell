@@ -10,8 +10,8 @@ ESTABLISHED AS LABELED, no grade change, NO r5. Real-library lane staged
 image-chosen bytes overwriting an adjacent live `ext4_buf` in the real plain
 build. Grade: **rung 3 CONFIRMED / rung 4 DEMONSTRATED by the author in the
 lab build, independently replayed as labeled by W273**. No chosen-address
-pointer, no command and no rung 5. Both CVE-2025-71473 and CVE-2025-71474
-are staged.
+pointer, no command and no rung 5. The 71473 lanes were independently
+replayed; the 71474 sibling bit-write lane is author-measured only.
 
 ## Claims
 
@@ -165,6 +165,46 @@ new lane (tape 5605) was independently replayed by W273 from a clean archive
 (tape 5616): ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w273-lwext4/detail.md`.
 
+### CVE-2025-71474 chosen-bit write into live `bc` (rung 4, author-observed)
+
+`bash lab/frontier/lwext4shell/run-gdt-bit.sh`: **11 PASS / 0 FAIL**, rc 0.
+The vulnerable full library is rebuilt plain (`-g -O0`, separate
+`build-vuln-gdt` tree); the driver and the 71474 patcher are the same real
+ones. No ASan here: ASan faults at the first OOB byte (`data+4096`) and cannot
+reach the header. `bit_max = 2 + s_reserved_gdt_blocks` (the super-in-group
+bit plus one group descriptor), so the loop at `src/ext4_fs.c:333` sets bits
+0..`bit_max`-1 in `block_bitmap.data`. The adjacent `ext4_buf` header starts
+at `data+4112` and its `bc` field at `data+4152`, so bit index 33216 begins
+that pointer's low byte. Gdb at `:332` (before the loop) and `:335` (after)
+reads, always with `buf - data = 4112`:
+
+| `s_reserved_gdt_blocks` | `bc` before | `bc` after | mask OR-ed |
+| --- | --- | --- | --- |
+| 8 (in-bounds control) | `0x7fffffffdc50` | `0x7fffffffdc50` | `0x00` |
+| 33215 | `0x7fffffffdc40` | `0x7fffffffdc41` | `0x01` |
+| 33216 | `0x7fffffffdc40` | `0x7fffffffdc43` | `0x03` |
+| 33217 | `0x7fffffffdc40` | `0x7fffffffdc47` | `0x07` |
+| 33218 | `0x7fffffffdc40` | `0x7fffffffdc4f` | `0x0f` |
+| 33220 | `0x7fffffffdc40` | `0x7fffffffdc7f` | `0x3f` |
+| 33222 | `0x7fffffffdc40` | `0x7fffffffdcff` | `0xff` |
+
+The pointer's upper bytes are unchanged in every readback (addresses vary
+with ASLR); the in-bounds `gdt=8` image mounts cleanly (`BG_REF_RC=0`, rc 0)
+and every crafted gdt faults the plain process with rc 139. A large field
+(`65535`) sets all bytes from `data+4096` through `data+8192`, yielding
+`bc = 0xffffffffffffffff`. The fixed build rejects the same crafted geometry
+at mount with `FS_INIT_RC=95` in the ASan lane above.
+
+Ceiling: this is a bitwise OR into the low byte of a live pointer field,
+chosen from eight masks by one on-disk 16-bit field — not an arbitrary
+address, not a full pointer replacement, no command. The header's own `data`
+pointer is overwritten in the same window and is the likely cause of the
+plain fault; no benign marker execution is claimed. Raw records:
+`real/evidence/real-vuln-71474-gdt-gdb.out`,
+`real/evidence/real-vuln-71474-gdt-summary.out` and the per-image
+`real-vuln-gdt-*-plain.out` logs. W273 replayed the earlier two lanes, not
+this one.
+
 ## Grade and tractability
 
 - **Rung 3 CONFIRMED:** GCC/Clang ASan on verbatim pinned excerpts *and*
@@ -180,14 +220,21 @@ new lane (tape 5605) was independently replayed by W273 from a clean archive
   4098-byte case. Conditions: one-entry bcache, ipg=65537, debugger
   readback; no chosen-address pointer control. W273 replay confirmed the
   adjacency and bit-byte provenance under ASLR; no grade change.
+- **Rung 4 DEMONSTRATED (CVE-2025-71474 sibling, author only):** the real
+  block-bitmap bit-set loop ORs an image-selected mask (`0x01`..`0xff`) into
+  the low byte of the adjacent live `ext4_buf.bc`; the in-bounds `gdt=8`
+  control leaves it untouched. Chosen bits, not a chosen address; not
+  independently replayed, and the overall grade and r5 ceiling are unchanged.
 - **Not rung 5:** no live network target, no benign command side effect and
   no attacker-chosen address; debugger-forced inspection stays rung-4
   mechanics.
 
 Next bounded lane: seek a chosen-address pointer primitive or a live
 loopback target with a benign command side effect; neither is measured here.
-Do not relabel the adjacent-object byte write as remote code execution. Both
-CVEs are staged; do not collapse the two into one claim.
+Do not relabel either adjacent-object byte write as remote code execution.
+Both CVEs are staged as separate claims: 71473 zero-fills `bc` from
+`s_inodes_per_group`, 71474 ORs a chosen mask into its low byte from
+`s_reserved_gdt_blocks`.
 
 ## Duplicate check
 

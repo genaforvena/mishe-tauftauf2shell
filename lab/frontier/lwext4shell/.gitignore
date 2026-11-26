@@ -19,3 +19,6 @@ real/evidence/build-vuln-plain.log
 real/evidence/compile-vuln-plain.log
 real/evidence/craft-victim.out
 real/evidence/real-vuln-victim-plain.out
+real/build-vuln-gdt/
+real/driver-vuln-gdt
+real/evidence/real-vuln-gdt-*-plain.out

@@ -42,8 +42,8 @@ the zero fill is 4098 bytes (2 past the 4096-byte object) and the bit-set loop
 sets bits 1..7 of byte 4097 (`0xfe`); input 32778 yields bits 2..7 (`0xfc`).
 Fix excerpt lines 23-26 reject `inodes_per_group > block_size * 8` with `EIO`
 before the store. The CVE-2025-71474 hunk in the same commit
-(`bitmap_bits = block_size * 8`, `bit_max > bitmap_bits`) is read but not
-staged.
+(`bitmap_bits = block_size * 8`, `bit_max > bitmap_bits`) is staged in the
+real lane and the chosen-bit lane below.
 
 ## Harness boundary and evidence
 
@@ -175,18 +175,44 @@ no command runs.
 The 4098-byte `ipg=32777` case with ASan and fixed/safe
 controls remains the separately replayed rung-3 real-mount evidence.
 
+## CVE-2025-71474 chosen-bit lane (2026-11-26 21:4xZ)
+
+`bash run-gdt-bit.sh` (11 PASS / 0 FAIL, rc 0) rebuilds the vulnerable full
+library plain in `real/build-vuln-gdt` and reuses `real/mount_driver.c` and
+`real/craft_image_71474.py`. Only `s_reserved_gdt_blocks` changes between the
+images. With `bit_max = 2 + s_reserved_gdt_blocks`, the bit-set loop at
+`vuln/src/ext4_fs.c:333` walks past the 4096-byte bcache buffer; the adjacent
+live `ext4_buf` begins at `data+4112` and its `bc` field at `data+4152`.
+Gdb at `:332`/`:335` read `bc` before and after, with `buf - data = 4112`
+throughout. Masks OR-ed into the low byte: gdt 8 (control) `0x00`, 33215
+`0x01`, 33216 `0x03`, 33217 `0x07`, 33218 `0x0f`, 33220 `0x3f`, 33222
+`0xff`; upper bytes unchanged, control mounts cleanly (`BG_REF_RC=0`, rc 0),
+every crafted image faults the plain process with rc 139. `gdt=65535` yields
+`bc = 0xffffffffffffffff`. Records:
+`real/evidence/real-vuln-71474-gdt-gdb.out`,
+`real/evidence/real-vuln-71474-gdt-summary.out` and the per-image
+`real-vuln-gdt-*-plain.out` logs; the assertion helper is
+`real/summarize_gdt_bit.py`.
+
+Grade: rung 4 DEMONSTRATED by the author for the sibling CVE, with the same
+ceiling as the 71473 lane — a bitwise OR into a live pointer byte chosen by
+an on-disk field, never an arbitrary address, full pointer replacement or
+command. Not independently replayed as of this record; no change to the
+overall grade or to the NO-r5 ceiling.
+
 ## One-command clean-archive replay (2026-11-26 14:37Z)
 
-The three runners assume a provisioned `real/lwext4-upstream` clone, which a
+The runners assume a provisioned `real/lwext4-upstream` clone, which a
 clean `git archive` does not contain (it is gitignored). To remove that
 witness-replay friction, `bash replay-clean.sh [REF] [DEST]` archives `REF`
 (use `352f77e9` for the recorded state) and resolves `DEST` to an absolute
 path before `cd`, so relative destinations work. It provisions the two pinned
 detached worktrees by public `git clone`/`git worktree add --detach` (no
 target probe), deletes every staged evidence output and build directory, then
-runs `run-all.sh`, `run-real.sh` and `run-victim.sh` unmodified and prints the
-runner hashes (from the archived scripts), the fresh evidence hashes and
-`REPLAY_RC`.
+runs `run-all.sh`, `run-real.sh`, `run-victim.sh` and `run-gdt-bit.sh`
+unmodified and prints their runner hashes (from the archived scripts), the
+fresh evidence hashes and `REPLAY_RC`. W273's run predates the fourth runner;
+the three historical hashes below are from that state.
 
 Verified at 14:36Z from `git archive 352f77e9` into
 `/tmp/lwext4-witness-test2`: runner hashes `fd9e7d3e…`, `e32862ed…` and
