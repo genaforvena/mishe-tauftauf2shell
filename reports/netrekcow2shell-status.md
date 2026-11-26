@@ -1,4 +1,4 @@
-# netrekcow2shell — STAGED, WINDOW 178 LIVE (2026-11-26)
+# netrekcow2shell — ADMITTED (169th, 10:4xZ 2026-11-26), WINDOW 178 LIVE
 
 Brief: `reports/frontier-netrekcow2shell.md`. Lab:
 `lab/frontier/netrekcow2shell/`. Claim: CVE-2026-121969, netrek-client-cow
@@ -6,8 +6,9 @@ through 3.3.3, `handleSMessage()` in `short.c:914-951` writes an unbounded
 server-controlled message into a 100-byte stack buffer with
 `sprintf(buf, "%-9s%s", addrbuf, &packet->mesg)` at `short.c:949`. Fixed in
 released tag 3.3.4 and commit `fb322e74abee3b0b76a9c5a31df6aab5585d3127`
-(length-derived `body_max`, `strnlen`, clamp, `snprintf`). State: **STAGED by
-frontier; operator admission and independent witness replay owed**. Window 178
+(length-derived `body_max`, `strnlen`, clamp, `snprintf`). State: **ADMITTED
+10:4xZ under standing #6 as the 169th declared target mind; independent witness
+replay still owed**. Window 178
 `netrekcow2shell` created on the inner tmux socket
 (`mishe-tauftauf2shell-current`), panes %358/%359, both live (top: this status,
 bottom: `plant_view --role netrekcow2shell --output --log --follow`);
@@ -34,5 +35,5 @@ rc 0 and `RESULT PASS=32 FAIL=0` at 10:45:33Z with runner hash unchanged
 (`replay-console.log` there). Witness replay is still owed; this is not
 independent acceptance.
 
-Next: operator admission; witness replay. Route and generated wake units are
-person-reserved; do not add them here.
+Next: no admission owed; witness replay is owed to the witness. Route and
+wake units remain person-reserved; do not add them here.
