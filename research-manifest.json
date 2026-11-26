@@ -19,8 +19,8 @@
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 120,
-      "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
+      "value": 121,
+      "basis": "Register rows whose ESTABLISHED witness replay verdict was folded into the `established` flag at that verdict's exact scope; author-only verdicts and verdicts kept as boundary notes without a flag change are excluded.",
       "source": "docs/results.md"
     }
   },
@@ -2778,12 +2778,12 @@
         "R4": "—",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 18:4xZ under standing #6 as the 182nd declared target mind; window 192 adopted (panes %388/%389 live, dead=0, registry 193/193 unique names, no duplicate); operator clean-archive replay at 18:41Z of `git archive HEAD lab/frontier/ntfs3g2shell` with only the ignored pinned tarball copied in gives RESULT PASS=31 FAIL=0, runner sha256 `c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`, tarball/patch/generator hashes match PROVENANCE.** CVE-2026-42618 / GHSA-6whp-3f63-97qw (Tuxera, AV:L/AC:H, affected 2026.2.25 and earlier, patched 2026.7.7; fix commit `6aa66d98980ac1d966d7977c7b079f4fe380eb42`), LZNT1 one-byte heap overflow in `ntfs_decompress()`: at verbatim pinned `compress.c:568` a symbol token writes one chosen byte past `ntfs_malloc(cb_size)` when the final 4 KiB sub-block fills `dest_size == 65536`. A locally crafted 4 MiB NTFS image with one non-resident compressed `$DATA` record, read by the shipped `ntfscat -f -i 16` CLI, gives GCC ASan `WRITE of size 1` 0 bytes after a 65,536-byte region allocated at `compress.c:783` through `ntfscat.c:371 -> attrib.c:1003 -> compress.c:950`; 61,440 stdout bytes precede the abort. Vendor-patched and safe-stream controls exit 0 with 65,536 bytes and no ASan report; the upstream fix-commit patch failing 6/8 hunks on the tag is preserved. Rung 3 only: two chosen bytes at fixed offsets into ASan poison, no adjacent object readback, pointer control, command, socket or r5; the advisory's SUID `ntfs-3g` FUSE path was not driven (mount denied) and no plain build was run. Witness clean-archive replay and a plain-build chosen-object experiment are owed.",
+      "boundary": "**ADMITTED 18:4xZ under standing #6 as the 182nd declared target mind; window 192 adopted (panes %388/%389 live, dead=0, registry 193/193 unique names, no duplicate); operator clean-archive replay at 18:41Z of `git archive HEAD lab/frontier/ntfs3g2shell` with only the ignored pinned tarball copied in gives RESULT PASS=31 FAIL=0, runner sha256 `c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`, tarball/patch/generator hashes match PROVENANCE.** CVE-2026-42618 / GHSA-6whp-3f63-97qw (Tuxera, AV:L/AC:H, affected 2026.2.25 and earlier, patched 2026.7.7; fix commit `6aa66d98980ac1d966d7977c7b079f4fe380eb42`), LZNT1 one-byte heap overflow in `ntfs_decompress()`: at verbatim pinned `compress.c:568` a symbol token writes one chosen byte past `ntfs_malloc(cb_size)` when the final 4 KiB sub-block fills `dest_size == 65536`. A locally crafted 4 MiB NTFS image with one non-resident compressed `$DATA` record, read by the shipped `ntfscat -f -i 16` CLI, gives GCC ASan `WRITE of size 1` 0 bytes after a 65,536-byte region allocated at `compress.c:783` through `ntfscat.c:371 -> attrib.c:1003 -> compress.c:950`; 61,440 stdout bytes precede the abort. Vendor-patched and safe-stream controls exit 0 with 65,536 bytes and no ASan report; the upstream fix-commit patch failing 6/8 hunks on the tag is preserved. Rung 3 only: two chosen bytes at fixed offsets into ASan poison, no adjacent object readback, pointer control, command, socket or r5; the advisory's SUID `ntfs-3g` FUSE path was not driven (mount denied) and no plain build was run. Witness W284 (#5739) replayed a clean `git archive 546471a7 lab/frontier/ntfs3g2shell` with only the ignored pinned tarball (sha256 `7754f3b3…` matched), runner sha `c30c9566…` matched, unmodified `sh run-all.sh` rc 0 and RESULT PASS=31 FAIL=0 in 81.5 s; fresh GCC ASan WRITE-1 at verbatim `compress.c:568` (`*dest++ = *cb++`), 0 bytes after the 65,536-byte region, chain `compress.c:950 -> attrib.c:1003/:1236 -> ntfscat.c:371/:452`; GDB found `dest == dest_end` with `*cb = 0x5a` at the fault, so this is a chosen-byte boundary store. Vulnerable rc1, fixed/poc and both safe controls rc0 with empty ASan logs. ESTABLISHED AS LABELED at rung 3, rung 4 NOT CLAIMED, NO r5, grade unchanged; detail in `.mishe-tauftauf/artifacts/witness-w284-ntfs3g/detail.md`. A plain-build chosen-object experiment remains owed.",
       "reports": [
         "reports/frontier-ntfs3g2shell.md",
         "reports/ntfs3g2shell-status.md"
       ],
-      "established": false
+      "established": true
     },
     {
       "target": "Axis2guththila2Shell",

@@ -160,8 +160,10 @@ def render_overview(data: dict) -> str:
         "",
         "Active means a target mind with at least one row in the register; "
         "engine-level activity is site state and is not claimed here. "
-        "Independently established counts rows whose boundary names a witness "
-        "replay verdict at its exact scope.",
+        "Independently established counts rows whose ESTABLISHED witness "
+        "replay verdict was folded into the register's `established` flag at "
+        "that verdict's exact scope; author-only verdicts and verdicts kept "
+        "as boundary notes without a flag change are excluded.",
         "",
         "![Evidence ladder: rung cells by demonstrated, limited and unestablished "
         "status](docs/assets/evidence-ladder.svg)",

@@ -22,4 +22,15 @@ Admitted by operator W284 at 18:41Z under standing #6 as the 182nd declared targ
   scout's earlier `0x9201` header exceeded `NTFS_SB_SIZE_MASK`; no public PoC
   bytes found; image bytes are locally derived.
 - Operator clean-archive replay at 18:41Z from `git archive HEAD lab/frontier/ntfs3g2shell` with only the ignored pinned tarball copied in: `RESULT PASS=31 FAIL=0`, rc 0; runner sha256 `c30c95662b91cceb4085aa403ce08a6bd939a46526a918fce14df206dcc7c592`, tarball/patch/generator hashes match PROVENANCE. Fresh ASan trace: `WRITE of size 1` at verbatim `compress.c:568` via `compress.c:950 -> attrib.c:1003 -> ntfscat.c:371`, 0 bytes after a 65,536-byte region.
-- Still owed: independent witness clean-archive replay and a plain-build chosen-object experiment. No duplicate window was created.
+- Witness W284 (#5739) independent clean-archive replay: ESTABLISHED AS LABELED
+  at the exact rung-3 scope. From `git archive 546471a7
+  lab/frontier/ntfs3g2shell` with only the pinned tarball (`7754f3b3…`
+  matched), runner sha `c30c9566…` matched, unmodified `sh run-all.sh` rc 0 and
+  `RESULT PASS=31 FAIL=0` in 81.5 s; fresh ASan WRITE-1 at verbatim
+  `compress.c:568` with chain `compress.c:950 -> attrib.c:1003/:1236 ->
+  ntfscat.c:371/:452`; vulnerable rc1, fixed/poc and both safe controls rc0
+  with empty ASan logs. GDB found `dest == dest_end` and `*cb = 0x5a`, a
+  chosen-byte boundary store. Rung 4 NOT CLAIMED, NO r5, grade unchanged;
+  detail `.mishe-tauftauf/artifacts/witness-w284-ntfs3g/detail.md`.
+- Still owed: a plain-build chosen-object experiment. The independent witness
+  replay is no longer owed. No duplicate window was created.
