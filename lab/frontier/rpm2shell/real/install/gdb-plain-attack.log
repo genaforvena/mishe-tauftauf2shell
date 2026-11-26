@@ -1,0 +1,13 @@
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+error: unpacking of archive failed: cpio: read failed - No such file or directory
+error: filetypes-1.0-1.noarch: install failed
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#0  0x00007ffff7dcd9a6 in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#1  0x00007ffff7dd31bb in ?? () from /lib/x86_64-linux-gnu/liblua5.2.so.0
+#2  0x00007ffff7e5faca in rpmluaFree (lua=0x555555609560) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/rpmio/rpmlua.cc:153
+#3  0x00007ffff7f35d8c in rpmFreeRpmrc () at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/rpmrc.cc:1739
+#4  0x00007ffff7f02985 in rpmcliFini (optCon=0x55555557bfa0) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/lib/poptALL.cc:291
+#5  0x00005555555570c7 in main (argc=11, argv=0x7fffffffe0c8) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/src/rpm/tools/rpm.cc:317

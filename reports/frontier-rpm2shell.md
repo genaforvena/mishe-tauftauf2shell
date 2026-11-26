@@ -178,6 +178,41 @@ not claimed. Grade unchanged: rung 4 DEMONSTRATED with attacker-chosen length
 and bytes; natural pointer control and downstream dereference remain UNKNOWN;
 no r5.
 
+### Independent consumer: real `rpm -i` faults naturally (2026-11-26 17:00Z)
+
+`tools/rpm2cpio` is a symlink to `rpm2archive` in these builds, so the archive
+iterator was also exercised through the install (`fsm`) path. Source mapping
+of the pinned tree found four archive-reader construction sites
+(`tools/rpm2archive.cc:247`, `lib/fsm.cc:865`, `sign/rpmsignverity.cc:141-142`,
+`python/rpmfiles-py.c:507`); every caller stops on negative
+`RPMERR_READ_FAILED`, and the two wrapper iterators use bounds-checked
+`rpmfilesFLinks()` with negative `fx`. That is source reasoning, not runtime
+proof for all four consumers.
+
+`real/relocate-install.py` copies the existing fixtures with `/opt/` → `/tmp/`
+(equal-length header and cpio names, so no tag offset changes) and derives
+`real/install/attack-reloc.rpm`, `attack-zero-reloc.rpm` (53 zero filler
+bytes), `safe-reloc.rpm` and `short-read-reloc.rpm` (declared symlink size 64
+with only 11 payload bytes: the same short-read error without wrap or
+overflow). `bash lab/frontier/rpm2shell/real/run-install-consumer.sh`:
+**14 PASS / 0 FAIL**. Vulnerable ASan `rpm -i --dbpath <tmp>` aborts rc 134
+with `WRITE of size 64`, 0 bytes after the 1-byte region, write frame
+`iterReadArchiveNext` at `rpmfi.cc:2242` through `rpmfiNext` at `:867`; fixed
+ASan rc 1 and ASan-clean. Vulnerable plain `rpm -i` faults 3/3 with rc 139;
+GDB places the fault in `liblua5.2.so.0` from `rpmluaFree`
+(`rpmio/rpmlua.cc:153`) ← `rpmFreeRpmrc` ← `rpmcliFini` ← `main`
+(`tools/rpm.cc:317`). Manual repeats before the runner measured A filler
+5/5 rc 139, B filler 3/3 rc 139, zero filler 3/3 rc 1 and short-read 3/3
+rc 1; the runner repeats A 3/3 and zero/short-read 2/2 each. Chosen payload
+bytes therefore decide whether the *unmodified plain* install process faults
+at teardown — no `LD_PRELOAD`, allocator seam or debugger-forced execution.
+Safe-newc and stripped controls also return 1 without a fault. The fault
+site is not a controlled pointer dereference: which live object the overwrite
+corrupts, and whether any chosen value reaches a semantic dereference, remain
+UNKNOWN. No pointer hijack, command or r5. Install uses a private `--dbpath`
+and four guarded, cleaned `/tmp` names; no other filesystem location is
+written.
+
 ## Witness replay (W238, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/rpm2shell/run-witness.sh` from the
@@ -203,19 +238,22 @@ above is later work and still lacks an independent witness. Full W238 detail:
   with fixed and safe-input controls.
 - **Rung 4 DEMONSTRATED:** 64 chosen bytes past a real 1-byte allocation;
   plain GDB observes the bytes and a lab-groomed live pointer-bearing
-  allocation overwritten by chosen `A` bytes. Natural adjacent layout varies,
-  and pointer target control/downstream use remain UNKNOWN; no natural
-  semantic pointer dereference was observed in 52 plain GDB runs (see above).
+  allocation overwritten by chosen `A` bytes. On the independent `rpm -i`
+  path, chosen filler bytes decide whether the unmodified plain process
+  faults at teardown (`A`/`B` rc 139, zero/short-read rc 1). Natural adjacent
+  layout varies, and the corrupted object's identity and pointer target
+  control remain UNKNOWN; no natural semantic pointer dereference was
+  observed in 52 plain GDB `rpm2cpio` runs (see above).
 - **Not rung 5:** no loopback service or wire request, no controlled pointer
   hijack, no command and no observed command side effect.
 
-Next experiment: find a consumer or code path that continues past
-`RPMERR_READ_FAILED` and uses a naturally adjacent object after the copy; the
-real `rpm2cpio` path returns immediately, so it cannot show a downstream
-dereference. A non-crashing chosen pointer value must be observed reaching a
-dereference before any hijack claim. Keep the allocator instrumentation and
-stripped/query negatives attached to any broader claim. No command execution
-without a live target and benign side effect.
+Next experiment: identify which live object on the `rpm -i` path is corrupted
+by the chosen bytes and whether a non-crashing value reaches a semantic
+dereference; a fault in lua teardown is not pointer hijack. A non-crashing
+chosen pointer value must be observed reaching a dereference before any
+hijack claim. Keep the allocator instrumentation and stripped/query negatives
+attached to any broader claim. No command execution without a live target and
+benign side effect.
 
 ## Duplicate check
 

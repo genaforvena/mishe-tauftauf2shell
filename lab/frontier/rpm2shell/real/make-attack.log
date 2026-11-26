@@ -1,1 +1,1 @@
-symlink_index=1 size_offset=0x1770 payload_offset=0x1a24 old_size=11 new_size=UINT64_MAX safe_newc_payload=676 attack_newc_payload=728
+symlink_index=1 size_offset=0x1770 payload_offset=0x1a24 old_size=11 new_size=UINT64_MAX safe_newc_payload=676 attack_newc_payload=728 chosen_payload_bytes=64

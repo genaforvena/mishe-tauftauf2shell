@@ -158,6 +158,39 @@ with no stack, so the earlier fault is not claimed.
 | `real/rwatch-after.gdb` | `8af2955cae1f4f9521aaa9ce35996b855959416a32ed252ff258eddbec89eea0` |
 | `real/inspect-adjacent.gdb` | `91f749037e99aa6819e9889f6e3e543d1e8ff1067c29657fe24d6715df0455f3` |
 
+## Independent install (`fsm`) consumer probe (2026-11-26 17:00Z)
+
+    cd lab/frontier/rpm2shell
+    bash real/run-install-consumer.sh
+
+Verified **INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0**. The runner
+regenerates `attack.rpm`/`safe-newc.rpm` with the unchanged
+`real/make-attack.py` CLI, then `real/relocate-install.py` writes four
+equal-length path-relocated fixtures under `real/install/`. Each install
+uses a private `--dbpath`, `--nodeps --noscripts --nodigest --nosignature
+--nofiledigest --ignoresize`; the four `/tmp` package names are guarded and
+cleaned by a trap. Vulnerable ASan `rpm -i` rc 134 with
+`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 64`, write frame
+`iterReadArchiveNext rpmfi.cc:2242` via `rpmfiNext :867`; fixed ASan rc 1
+ASan-clean. Vulnerable plain `rpm -i` rc 139 in 3/3 runner runs (5/5 in an
+earlier manual repeat); `attack-zero-reloc.rpm` and `short-read-reloc.rpm`
+rc 1 in 2/2 runner runs each (3/3 each manually), safe-newc rc 1 without a
+fault. `real/install/gdb-plain-attack.log` records the natural `SIGSEGV` in
+`liblua5.2.so.0` via `rpmluaFree` ← `rpmFreeRpmrc` ← `rpmcliFini` ← `main`.
+Manual B-filler repeats were 3/3 rc 139. No `LD_PRELOAD` or debugger-forced
+execution was used in any rc observation; the GDB run only records the
+backtrace. The corrupted object's identity stays UNKNOWN.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-install-consumer.sh` | `da1de8f74b914ba6c9ad450782568247ea8c464f919c8cafa1f9a2009488eae8` |
+| `real/relocate-install.py` | `25ac3fbda8d5496968e9ae942ccff9ed97f39bd403d5685660cfba60fd4a2baa` |
+| `real/install/attack-reloc.rpm` | `3049e7a94c3db7ad7c572e0a0c79454000490770e630ffdbfcd8c745b00468db` |
+| `real/install/attack-zero-reloc.rpm` | `ab97e02fecdf432b120a7f62e95990dcc3394a37e1b836774d357c251c127a41` |
+| `real/install/short-read-reloc.rpm` | `831534eeee6d409b674c972f09d5eba9dee7d5400f68919cc8a55d93203496df` |
+| `real/install/asan-vuln-attack.log` | `390d4b7f1af8a50943fdb22c7af20016620de55ecc212194ba6daa993d29b504` |
+| `real/install/gdb-plain-attack.log` | `95f30085da1c0701b1984c6844b4e6122c4b3ed5c65539e42f4b100fb0cb9289` |
+
 ## Verification
 
     cd lab/frontier/rpm2shell
