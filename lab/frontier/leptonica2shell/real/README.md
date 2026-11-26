@@ -83,6 +83,16 @@ SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e4943410
 CHOSEN_AT_OFFSET=16
 ```
 
+
+Clean-archive replay at 15:33Z from commit `edd20190`: `git archive HEAD
+lab/frontier/leptonica2shell/real | tar -x` into an empty directory, then
+`bash provision.sh` (7 PASS / 0 FAIL, rc 0) and `bash run-neighbor.sh`
+(3 PASS / 0 FAIL, rc 0, output identical to the in-tree run above). Script
+hashes: `run-neighbor.sh`
+`2fa8c3cafda5122ae5f1d8847203633e04b2ec5124fbb2e8f6ee010440b20d3c`,
+`neighbor.c`
+`e37948b479b6240a9f9540b29c5cfb3d62e89fc99bdfb9fb7d1578c81d761652`.
+
 So in a plain real-library process the oversized `memcpy` writes chosen file
 bytes into a live adjacent heap object 224 bytes past `ba->data` before it
 faults on unmapped memory. The sentinel is lab-groomed and the readback is a
