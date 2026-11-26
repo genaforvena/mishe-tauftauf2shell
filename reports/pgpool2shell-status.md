@@ -265,5 +265,21 @@ completed admission after re-verifying the pins and replaying the harness.
   four normalized hashes in `lab/pgpool2shell/config/pointer-control/`.
   Author-measured, no witness replay; grade unchanged.
 
+- **Independent witness verdict W255 (2026-11-26 08:07–08:2xZ):** both
+  offered clean-archive wrappers were replayed unmodified with fresh builds
+  from the verified tarballs. The wire wrapper at `d379108d` gave rc 0 in
+  179.4 s with `WITNESS REPLAY PASS`, 11/11 normalized hashes, W10's three
+  cases, both live-gdb readbacks (`num_wd=129`, chosen ports
+  `0x42424242` / `0x11111111`, hostname-derived `trusted_servers`
+  `0x5555555555555555` / `0x4141414141414141`) and the W11 auth probe
+  (`CONFIG_DATA=1`, `auth_reject=0`). The direct-call wrapper at `9dcf21b6`
+  gave rc 0, `HARNESS REPLAY PASS`, 7/7 hashes, A–G with ASan clean.
+  Pins matched 2/2; independent upstream re-fetch timed out and stays
+  UNKNOWN. Verdict **ESTABLISHED AS LABELED at both claimed scopes**:
+  rung 4 chosen-value/byte control at wire and direct-call scope, no rung 3
+  on this branch, no crash, no chosen address, no follow-on dereference,
+  NO r5, no grade change. Detail:
+  `.mishe-tauftauf/artifacts/witness-w255-pgpool2shell/detail.md`.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.

@@ -211,3 +211,23 @@ hashes identical; build log
 clean-archive receipt, NOT an independent witness verdict. Grade unchanged:
 rung 4 direct-call chosen bytes, ASan clean, no crash, no chosen address, no
 command, no rung 5.
+
+## Independent witness verdict (W255, 2026-11-26 08:1xZ)
+
+From a clean `git archive d379108d`, with the unmodified wire wrapper
+`lab/pgpool2shell/wdnodes/wire/run-witness.sh` (SHA-256
+`eb4b8369…757080`, identical in worktree, at `d379108d` and HEAD), one run
+was rc 0 in 179.4 s: `WITNESS REPLAY PASS`, 11/11 normalized hashes,
+including both live-gdb chosen-value readbacks (`0x42424242` /
+`0x11111111` ports and `0x5555555555555555` / `0x4141414141414141`
+`trusted_servers`). W10's safe N=128 and fixed N=129 controls held, and
+the W11 auth probe again showed `CONFIG_DATA=1`, `auth_reject=0`.
+A second clean-archive run of the direct-call wrapper at `9dcf21b6`
+replayed cases A–G: `HARNESS REPLAY PASS`, 7/7 hashes, rc 0, ASan clean.
+Pin hashes matched `SHA256SUMS` 2/2 in both runs; an independent upstream
+re-fetch was attempted but timed out, so that check stays UNKNOWN.
+Verdict: **ESTABLISHED AS LABELED at both claimed scopes** — rung 4
+wire-scope and direct-call chosen-value/byte control, no rung 3 on this
+branch, no crash, no chosen address, no follow-on dereference, NO r5.
+No grade change. Detail:
+`.mishe-tauftauf/artifacts/witness-w255-pgpool2shell/detail.md`.
