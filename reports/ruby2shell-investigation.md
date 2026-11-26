@@ -3918,3 +3918,76 @@ python3 lab/repro/ruby2shell-dispatch-table.py \
 python3 lab/repro/ruby2shell-dispatch-table.py \
     lab/build/plain/ruby-3.4.12-plain/bin/ruby 0x2191f0 0x21fbcd lab/build/ruby-3.4.12/insns.inc
 ```
+
+### Fixed-length method composition (buffer2 size class) — bounded NEGATIVE (2026-11-26, eleventh wake)
+
+The tenth wake closed the dispatch lane. This wake tested the one lever that
+decouples the overflow from its consumer: change the **composition** of the
+`_method` value at constant total length. All prior claim/consH arms varied
+total N, which couples buffer1 class, victim, buffer2 request and result size
+together; composition was never varied at fixed victim geometry.
+
+Prediction: with N=1500, buffer1's request stays `0x608` and the `0x53` byte
+still lands on the physical neighbour's size LSB, but replacing 528 sharp-s
+bytes with ASCII drops buffer2's request from `0x5f2` (large-bin splitter) to
+`0x3e2` (tcache `0x3f0` class). If buffer2 then pops from tcache it no longer
+scans/re-bins the grown victim, and a matched-class claim request could
+exact-fit pop V and carry chosen bytes at V — the wall's missing "steered
+allocation carrying attacker-shaped bytes" condition.
+
+Two analysis-only lab fixes were necessary. The tracer's second-buffer
+predictor assumed an all-sharp-s body (`consumed = capa/2 + 1`), so with a
+long ASCII prefix the A snapshot never fired and the first arm was blind.
+`lab/preload/mtrace.c` now reads `MTRACE_CASE_LEAD_A` (default 1, preserving
+every prior repro) and computes `consumed = (capa + lead + 1) / 2`;
+`lab/repro/ruby2shell-shrink-claim.sh` passes that knob and accepts
+`RUBY2SHELL_CLAIM_RB`/`RUBY2SHELL_CLAIM_GEMS` overrides for the fixed build.
+No request-path or app behaviour changed.
+
+```
+RUBY2SHELL_CLAIM_STACK=rails RUBY2SHELL_CLAIM_N=1500 \
+RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_TAG=comp529b \
+RUBY2SHELL_CLAIM_PLANT=1008x40,976x9 \
+RUBY2SHELL_CLAIM_PARTS=1590@0x410:0x414 \
+RUBY2SHELL_CLAIM_THREADS=1 RUBY2SHELL_CLAIM_KEEPALIVE=1 \
+RUBY2SHELL_CLAIM_BINDUMPS=1 RUBY2SHELL_CLAIM_COUNT=6 \
+METHOD_LEAD_A=529 ATTACK_CHAIN=1 \
+CONSUMER_SPEC=400x200 FILLER_SPEC=400x200 \
+POISON_GROWN=0x650 POISON_NEXT=0x90 \
+bash lab/repro/ruby2shell-shrink-claim.sh
+```
+
+Observed (six fresh processes per arm, stock `rails new --minimal` app,
+`RAILS_MAX_THREADS=1`, loopback; tabulated `claim` and `other-pops` count M/C
+lines returning the exact victim pointer after the B snapshot):
+
+| arm | composition | claim classes | claims / other-pops | outcome |
+| --- | --- | --- | --- | --- |
+| `comp529` (blind, predictor mismatch) | `a`×529 + `ß`×967 | 0x63f | 0 / 0 | 5 aborts, 1 alive |
+| `comp529b` (predictor fixed) | `a`×529 + `ß`×967 | 0x63f | 0 / 0 | 4 aborts, 2 alive (404 + `/up` 200) |
+| `comp001` control | `a` + `ß`×1495 | 0x63f | 0 / 0 | 4 aborts, 2 alive |
+| `comp529m` matched classes | `a`×529 + `ß`×967 | 0x241, 0x441, 0x63f | 0 / 0 | 6 aborts |
+| `comp529fix2` fixed 3.4.13, same body | `a`×529 + `ß`×967 | 0x63f | 0 / 0 | 3/3 alive, 404, no abort |
+
+The lever worked mechanically: `lab/build/evidence/stock-rails-comp529b-2.server.log`
+shows `B … size=0x415`, `A … size=0x453` at the same victim, followed by
+`M 0 3e2 7875349a0600` — buffer2's request really moved from `0x5f2` into the
+`0x3f0` tcache class, at a pointer far from the grown victim. But **no M/C
+line after A ever returns the victim pointer**: zero claims and zero other
+pops in 18 vulnerable runs across two claim geometries, including claim parts
+of 568/1080/1590 bytes whose requests `0x241`/`0x441`/`0x63f` map to chunk
+classes `0x250`/`0x450`/`0x650`, covering the observed grown sizes. The fixed
+control with the identical body is clean (3/3 alive, no abort), so the aborts
+stay attributable to the overflow. `MTRACE_DUMP_BINS` emitted zero `L` lines
+(no arena head detectable in this process), so bin residency of V is
+**UNKNOWN**; the observed fact is the absence of a post-A pop at V, not a
+bin-chain proof.
+
+Disposition: the "shrink buffer2 into tcache so the grown victim survives and
+is exact-fit claimed" lever is a bounded NEGATIVE. No steered allocation with
+chosen bytes, no code-pointer source, no persistence. Grades unchanged: rung 4
+witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Veria re-read at 05:06Z:
+`dateModified` still `2026-11-21T03:52Z`, no published mechanics. Evidence:
+`lab/build/evidence/stock-rails-comp529{,b,m,fix2}-*.{summary,excerpt.txt,server.log}`
+and `stock-rails-comp001-*.{summary,excerpt.txt,server.log}`.

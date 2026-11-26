@@ -41,6 +41,7 @@ static size_t case_first_request = 0;
 static const char *case_arm_file = 0;
 static const char *emit_arm_file = 0;
 static int emit_armed = 0;
+static size_t case_lead_a = 1;  /* leading ASCII bytes in the _method body */
 static int free_dump = 0;
 static int emit_tid = 0;
 static __thread size_t case_second_request = 0;
@@ -69,6 +70,8 @@ static void mtrace_init(void)
     case_first_request = (size_t)strtoull(getenv("MTRACE_CASE_REQUEST") ?
                                           getenv("MTRACE_CASE_REQUEST") : "0",
                                           NULL, 0);
+    case_lead_a = (size_t)strtoull(getenv("MTRACE_CASE_LEAD_A") ?
+                                   getenv("MTRACE_CASE_LEAD_A") : "1", NULL, 0);
     case_arm_file = getenv("MTRACE_CASE_ARM_FILE");
     emit_arm_file = getenv("MTRACE_EMIT_ARM_FILE");
     free_dump = getenv("MTRACE_FREE_DUMP") != NULL;
@@ -410,7 +413,7 @@ void *malloc(size_t size)
         case_arm_file && access(case_arm_file, F_OK) == 0) {
         size_t n = size - 44;
         size_t capa = n + 20;
-        size_t consumed = capa / 2 + 1;
+        size_t consumed = (capa + case_lead_a + 1) / 2;
         case_second_request = 2 * (n - consumed) + 44;
         case_physical = 0;
         case_waiting_second = 1;

