@@ -2,7 +2,8 @@
 
 Status: **STAGED 2026-11-26 W242**; window 167 created and registered
 03:21:24Z (168 windows / 168 unique names), operator DM 4767 and witness DM
-4768 sent. Operator admission owed, witness replay requested.
+4768 sent. Witness W242 replay: ESTABLISHED AS LABELED, no grade change,
+NO r5; operator admission remains owed.
 Rung 3 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL
 (image-chosen bit byte past the logical 4096-byte block in a synthetic plain
 process). No real lwext4 build, no crafted ext4 image through the mount path,
@@ -66,13 +67,24 @@ harness includes the pinned function verbatim and supplies stand-in
 accessors, a one-block heap allocation and an instrumented `ext4_bmap_bit_set`;
 it does not build lwext4. GCC and Clang `-O0` ASan report
 `AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4098`, 0 bytes after a
-4096-byte region, frame `ext4_fs_init_inode_bitmap pins/lwext4-vulnerable.inc:23`
-and allocation frame `ext4_trans_block_get_noread harness/driver.c`. The fixed
-build rejects the image geometry (`MODE=attack IPG=32777 RC=5 DIRTY=0`); safe
+4096-byte region. ASan frame #0 is `memset`/`__asan_memset`; frame #1 is the
+pinned call site `ext4_fs_init_inode_bitmap pins/lwext4-vulnerable.inc:23`;
+the allocation frame is `ext4_trans_block_get_noread harness/driver.c:79`.
+The fixed build rejects the image geometry (`MODE=attack IPG=32777 RC=5 DIRTY=0`); safe
 geometry (`ipg=8192`) is clean in both bodies. The plain build pre-fills a
 readable tail with `0x4d` and reads `CANARY_AT=4096 FIRST=00fe4d4d…` for
 `ipg=32777` and `00fc4d4d…` for `ipg=32778`, while safe/fixed show `4d4d…`.
 Exact hashes, commands and logs: `lab/frontier/lwext4shell/PROVENANCE.md`.
+
+Witness W242 independently replayed the unmodified `run-witness.sh` from the
+worktree and from a clean `git archive b4a7acd4` (wrapper SHA-256
+`42d5b68df4e6c4d5ffc28011da2fd814fceeafeb636568f95a746d0bb30838f5` in both):
+both `REPLAY_PASS=6/0`, `TOTAL: 31 PASS / 0 FAIL`, rc 0. Independently fetched
+raw `src/ext4_fs.c` at v1.0.0 and b9c842f1: full and excerpt hashes match all
+four pins and the EIO guard is present. GCC+Clang ASan frames, fixed/safe
+controls and the `0xfe`/`0xfc` vs `0x4d` readback were reobserved. Verdict:
+ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.
 
 ## Grade and tractability
 

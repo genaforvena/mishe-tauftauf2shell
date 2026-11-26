@@ -2,6 +2,7 @@
 
 State: **STAGED by frontier W242, 2026-11-26**; window 167 created and
 registered 03:21:24Z; operator admission owed, witness replay requested.
+Witness W242 replay: ESTABLISHED AS LABELED, no grade change, NO r5.
 Grade: rung 3 pinned verbatim function / rung 4 PARTIAL image-chosen bit byte
 past a 4096-byte heap block.
 No real lwext4 build, no crafted ext4 image through the mount path, no
@@ -19,8 +20,9 @@ on a one-block buffer without checking the image-derived count against
 block-bitmap OOB is in the same fix but NOT staged locally.
 
 `run-all.sh`: 31 PASS / 0 FAIL. GCC and Clang ASan report
-`heap-buffer-overflow`, `WRITE of size 4098`, 0 bytes past a 4096-byte region,
-frame `ext4_fs_init_inode_bitmap pins/lwext4-vulnerable.inc:23`. Fixed attack
+`heap-buffer-overflow`, `WRITE of size 4098`, 0 bytes past a 4096-byte region;
+ASan frame #0 is `memset`/`__asan_memset`, frame #1 is the pinned call site
+`ext4_fs_init_inode_bitmap pins/lwext4-vulnerable.inc:23`. Fixed attack
 returns `RC=5`; safe geometry is clean. Plain canary reads `0xfe` (ipg=32777)
 or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 `0x4d`.
@@ -62,3 +64,12 @@ or `0xfc` (ipg=32778) at `block+4097`, tracking the input; safe/fixed read
 - Operator DM 4767 at 03:21Z states the window already exists and the target
   is staged, not admitted. Witness DM 4768 at 03:21Z requests independent
   replay and verification of the labeled grade.
+
+- Witness W242 independent replay (03:25Z): unmodified wrapper from worktree
+  and a second clean `git archive b4a7acd4` tree at `/tmp/w242-clean`
+  (sha256 `42d5b68df4e6c4d5ffc28011da2fd814fceeafeb636568f95a746d0bb30838f5`,
+  identical in both), both `REPLAY_PASS=6/0`, `TOTAL: 31 PASS / 0 FAIL`, rc 0;
+  raw upstream v1.0.0 / b9c842f1 full and excerpt hashes exact, EIO guard
+  present; GCC+Clang ASan, fixed/safe controls and `0xfe`/`0xfc` vs `0x4d`
+  readback reobserved. Verdict ESTABLISHED AS LABELED, no grade change,
+  NO r5. Detail: `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.

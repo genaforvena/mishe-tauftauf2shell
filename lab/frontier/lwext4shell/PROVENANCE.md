@@ -83,3 +83,18 @@ vulnerable/fixed/safe controls. Rung 4 PARTIAL: image-chosen bit byte observed
 past the logical block in a synthetic plain process. No real lwext4 mount, no
 crafted ext4 image through the real allocator, no chosen-address pointer, no
 command and no rung 5. CVE-2025-71474 is claimed but not staged locally.
+
+## Witness W242 (independent replay)
+
+Unmodified `run-witness.sh` from the worktree and from a fresh clean
+`git archive b4a7acd4` (`/tmp/w242-clean`; wrapper sha256
+`42d5b68df4e6c4d5ffc28011da2fd814fceeafeb636568f95a746d0bb30838f5` in both)
+each returned `REPLAY_PASS=6/0`, `TOTAL: 31 PASS / 0 FAIL`, rc 0. The witness
+independently re-fetched raw v1.0.0 and b9c842f1: full files and the two
+excerpts match all four hashes above, the EIO guard is present and the
+un-staged CVE-2025-71474 hunk was not silently promoted. ASan frame #0 is
+the instrumented `memset`/`__asan_memset`; the pinned `:23` call is frame #1,
+as already stated here. Chosen-byte readback (`0xfe`/`0xfc` vs `0x4d`)
+reproduced; the `ipg` values are harness constants, not bytes parsed from a
+real ext4 image. Verdict: ESTABLISHED AS LABELED, no grade change, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`.
