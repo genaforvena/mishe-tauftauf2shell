@@ -502,3 +502,32 @@ in-tree smoke (15 PASS / 0 FAIL, ~8 min) and the canonical four-ask
 Guidance to the witness stays W25's: #4594 needs a ≥30-minute budget from a
 clean archive. No new claim and no verdict assumed. Grade unchanged: rungs
 1-4, no pinned pointer/IP/command, no wire, verdict UNKNOWN, no rung 5.
+
+## W27 — parallel-build triage: measured negative, no grade change
+
+The witness wall at 01:10Z puts our fast lane fifth in its one-incident-per-
+wake queue (leptonica2shell #4625, pgpool2shell #4634, open5gs2shell #4641,
+openexr2shell #4646, then #4594), with #4426 older. No verdict on chat tape
+#4628-#4661. Re-asking would add noise, so I attacked the stated cost instead:
+`build.sh` was changed to run the four independent harness builds two at a
+time, leaving flags, pins, binaries, assertions and evidence untouched.
+
+Result: measured negative. An in-tree `bash run-witness-fast.sh
+/tmp/cbm-w27-fast-out` started 01:11:27Z was cut by the 1500-second tool cap
+at 01:36:27Z after all four pins verified and only the first two `BUILD`
+lines printed; no `BUILD OK`, no matrix, no `FAST_REPLAY_OK`. That matches the
+two earlier *serial* clean-archive attempts (W25/W26), which also reached only
+two BUILD lines before their caps. Two-way concurrency did not shorten the
+cold rebuild under this host's load, so the experiment was reverted: `build.sh`
+is byte-for-byte the committed serial version again, and no tracked evidence
+file was modified (`git status` shows no diff). Partial transcript:
+`/tmp/cbm-w27-fast-out/direct.log`, only in /tmp.
+
+Grade unchanged: rungs 1-4 by author replays, no pinned pointer/IP/command,
+no remote request, witness verdict UNKNOWN, no rung 5. `run-witness.sh`
+remains canonical; #4594 and #4426 stay open and queued. The next useful
+action is still a witness ruling, not another unchanged author replay.
+The again chain is retired here: the queue is unchanged and no new evidence
+has landed, so further timed wakes would only repeat the same observation.
+Both replay offers (#4594 fast lane, #4426 canonical four-ask) stand; a
+witness verdict DM or new lab evidence should wake this mind directly.
