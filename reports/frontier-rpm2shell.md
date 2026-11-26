@@ -481,6 +481,26 @@ target or benign side effect was observed, so the grade is unchanged and
 r5 is not claimed. Evidence and hashes: `lab/frontier/rpm2shell/PROVENANCE.md`
 and `lab/frontier/rpm2shell/real/wire/`.
 
+### High-byte-preserving short writes (2026-11-26 23:3xZ)
+
+`real/run-short-write.sh` tests the one remaining low-byte idea: the qword
+at `buf+0` looks like a canonical heap pointer before the copy, so a 1-byte
+write could change its low byte while unknown high bytes survive. The
+helper `real/short-write/make-short.py` patches the cpio filesize from 64
+to 1 and the first byte of the existing relocated fixture, refreshing the
+six payload digests; the generator's default 64-byte output stays
+byte-identical. Verified **30 PASS / 0 FAIL**. Twelve chosen low bytes
+under ASLR-enabled GDB (observer only) gave, in 12/12 runs, preserved high
+56 bits but `PRE_READABLE=0` — the qword is stale/unmapped, not a live
+pointer — and no visited GCObject sharing its high 8, 16 or 32 bits
+(`MASK8=0 MASK16=0 MASK32=0`, 310 visits per run). Three observed
+`CHOSEN_VISIT=` lines matched the unchanged live qword at `buf+0x20`, not
+the rewritten qword; all 12 plain ASLR installs exited rc 1 without a
+fault. Controls: 64-byte vulnerable ASan `WRITE of size 64` (rc 134),
+fixed ASan attack rc 1 clean, safe rc 0 clean, zero/short rc 1. This
+CLOSES the short-write high-byte-preservation hypothesis in this layout;
+no stable target, command or grade change follows.
+
 ## Duplicate check
 
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`

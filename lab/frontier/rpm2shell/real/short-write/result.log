@@ -1,0 +1,32 @@
+PASS generator default output byte-identical to attack.rpm
+PASS byte 00: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 10: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 20: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 30: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 40: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 50: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 60: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 70: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 80: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 90: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte a0: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte b0: high bytes preserved, no liblua visit on rewritten buf+0 qword
+PASS byte 00: plain ASLR install exits 1 without fault
+PASS byte 10: plain ASLR install exits 1 without fault
+PASS byte 20: plain ASLR install exits 1 without fault
+PASS byte 30: plain ASLR install exits 1 without fault
+PASS byte 40: plain ASLR install exits 1 without fault
+PASS byte 50: plain ASLR install exits 1 without fault
+PASS byte 60: plain ASLR install exits 1 without fault
+PASS byte 70: plain ASLR install exits 1 without fault
+PASS byte 80: plain ASLR install exits 1 without fault
+PASS byte 90: plain ASLR install exits 1 without fault
+PASS byte a0: plain ASLR install exits 1 without fault
+PASS byte b0: plain ASLR install exits 1 without fault
+run-short-write.sh: line 99: 3521603 Aborted                 (core dumped) RPM_CONFIGDIR="$vuln_config" ASAN_OPTIONS=detect_leaks=0:abort_on_error=1 "$vuln_asan" attack.rpm > "$work/logs/asan-64.log" 2>&1
+PASS 64-byte control: real ASan WRITE in vulnerable consumer
+PASS plain zero control rc=1
+PASS plain short control rc=1
+PASS fixed ASan attack rc=1 ASan-clean
+PASS vulnerable ASan safe input rc=0 ASan-clean
+SHORT_WRITE_PASS=30 SHORT_WRITE_FAIL=0

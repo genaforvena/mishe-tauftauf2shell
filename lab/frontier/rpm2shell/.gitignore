@@ -20,3 +20,11 @@ real/gc-pointer/attack-C-reloc.rpm
 real/wire/db/
 real/wire/port
 real/wire/serve/
+real/short-write/db/
+real/short-write/run/
+real/short-write/fixtures/
+real/short-write/trials/
+real/short-write/trials2/
+real/short-write/obs-*.log
+real/short-write/smoke.log
+real/short-write/*.rpm

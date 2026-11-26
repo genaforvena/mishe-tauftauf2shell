@@ -707,3 +707,38 @@ at 1 in one pass and 139 in the final pass, consistent with the recorded
 layout sensitivity. Log: `real/wire/clean-archive-replay.log`, sha256
 `e60d7bf11f057d02f49e11c7922dd80734c54c8d8b76fee52943244347ce7be7`.
 This is an author replay of a clean archive, not an independent verdict.
+
+## High-byte-preserving short-write probe (2026-11-26 23:3xZ)
+
+New bounded lane, not a repeat of the 33+-byte metadata sweep. Question: the
+qword at `buf+0` is canonical-looking before the copy; if a 1-byte write
+changes only its low byte, the unknown high bytes survive. Can that redirect
+a live liblua GC walk under plain ASLR? `real/run-short-write.sh` patches the
+cpio filesize from 64 to 1 and the first chosen byte of
+`install/attack-reloc.rpm`, refreshing only the six payload digest tags;
+archive length and RPM header size (`UINT64_MAX`) are unchanged. The
+generator's default 64-byte output remains byte-identical to `attack.rpm`.
+
+Verified **SHORT_WRITE_PASS=30 SHORT_WRITE_FAIL=0** (rc 0). Twelve chosen
+low bytes (`00 10 … b0`) under ASLR-enabled GDB
+(`set disable-randomization off`, observer only, no forced call,
+no `LD_PRELOAD`) gave, in 12/12 runs: a canonical-looking pre-copy qword at
+`buf+0` whose high 56 bits are preserved after the copy, `PRE_READABLE=0`
+(a 8-byte `read_memory` at that address fails — stale/unmapped, not a live
+pointer), `PRE_Q18=0x31`, 310 post-copy GC visits, and
+`MASK8=0 MASK16=0 MASK32=0`: no visited GCObject shares the rewritten
+qword's high 8, 16 or 32 bits. The three `CHOSEN_VISIT=` lines observed
+matched the unchanged live qword at `buf+0x20`, not the rewritten qword.
+All 12 plain ASLR installs exit rc 1 without fault. Controls: 64-byte
+vulnerable ASan rc 134 with `WRITE of size 64`, fixed ASan attack rc 1 clean,
+vulnerable ASan safe rc 0 clean, zero/short rc 1. No chosen redirect, no
+stable target, no command or grade change; this CLOSES the short-write
+high-byte-preservation hypothesis in this layout.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-short-write.sh` | `fddb832c40cf5b47bc09da10a119f26546802703ad38bcb2bbc9bf1f193bf587` |
+| `real/short-write/observe.gdb` | `ad6475db99f2c5f346c3f560d1a5944cc26378d9277abc419b37f7ffc471899c` |
+| `real/short-write/make-short.py` | `6900f591ef733203eb2d2b43d0fd025640c1e847e171d7de172aa6cef5fa3894` |
+| `real/short-write/result.log` | `3f2f4eb4840b462cd5c6cd71e32a4c6aef1ae7b09eafaa3531fa26dca4401745` |
+| `real/make-attack.py` (unchanged) | `71c99bfcff878f8bb731c981c616d478d37598aa12911aaefddc6bfe6a92784f` |
