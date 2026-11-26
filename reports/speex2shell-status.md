@@ -1,11 +1,11 @@
-# speex2shell — staged (frontier W245, 2026-11-26)
+# speex2shell — admitted (frontier W245, operator 2026-11-26)
 
 Brief: `reports/frontier-speex2shell.md`. Lab: `lab/frontier/speex2shell/`.
 Claim: CVE-2026-116741 / GHSA-jmfj-jxhf-c4c3, `speex_bits_read_whole_bytes()`
 non-owner truncation writes caller-chosen bytes past a `SpeexBits` buffer.
 Affected "through 1.2.1"; vendor fix commit `09b569d1b437e5edccf3406a38714ad795e46d38`
-(GitLab MR !32), first released fixed tag UNKNOWN. State: **STAGED by frontier,
-not admitted**; window 170 created by frontier; admission is the operator's.
+(GitLab MR !32), first released fixed tag UNKNOWN. State: **ADMITTED by the
+operator under standing #6 as the 162nd declared target mind; window 170 adopted.**
 
 Evidence: `bash lab/frontier/speex2shell/harness/run-all.sh` → 28 PASS / 0 FAIL rc 0.
 Four real libspeex builds from the pinned tarball (ASan clang vulnerable and
@@ -28,3 +28,22 @@ Witness W245 (04:35Z, #4847): independent clean-archive and serial in-tree
 replays both `REPLAY_PASS=10/0`, inner `28/0`, rc 0; upstream hashes and MR !32
 verified. ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
 `.mishe-tauftauf/artifacts/witness-w245-speex2shell/detail.md`.
+
+## Admission receipt (operator, 04:3x–04:4xZ)
+
+- Unmodified `run-witness.sh` sha256
+  `1dc5d05c2ff7a6c7ada028003a88178600aeb4d3a865b261400bf10b61a7b84f`.
+  Clean `git archive 2daaa4ee` replay: `REPLAY_PASS=10 REPLAY_FAIL=0`, inner
+  `TOTAL: 28 PASS / 0 FAIL`, rc 0, six pins exact. In-tree replay first failed
+  (`19 PASS / 9 FAIL`: clang ASan builds saw `./autogen.sh: No such file or
+  directory` while a concurrent replay deleted the shared build dirs);
+  a serial re-run passed `10/0`, inner `28/0`, rc 0. The failure was a
+  concurrent-run race on `lab/frontier/speex2shell/`, not staged-evidence
+  breakage; no harness or pin was changed. Logs: `/tmp/speex-witness-intree.log`,
+  `/tmp/speex-witness-clean.log`, `/tmp/speex-witness-intree2.log`.
+- Frontier's two-pane window 170 adopted (registry: 171 windows / 171 unique
+  names, panes live); no window was recreated. Charter, seed wall, brief and
+  PROVENANCE read. Grade unchanged: rung 3 verbatim / rung 4 demonstrated lab
+  impact under stated conditions, no pointer, command, wire or r5.
+- Witness W245 (#4847, 04:35Z) independently ESTABLISHED AS LABELED; that
+  verdict is scoped to the staged claim and is not a new grade.
