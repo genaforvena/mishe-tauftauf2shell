@@ -15,6 +15,13 @@ not rung 4 or rung 5. Safe-link, tcache-disabled, named-group, jemalloc and
 ASLR-off calibration produced no stock controlled free, duplicate, overlap,
 command, persistence or second command. Full stock/oracle-free/persistent
 Ruby2Shell rung 5 remains NOT ACHIEVED.
+The reproducer later gained nested-exclusion promotion (stale data 20→40
+bytes), same-connection regexp primers, isolated pid files and timeouts. A
+21-count primer sweep and an eight-run K=12 repeat produced only allocator
+integrity failures/hangs; the lone smallbin-linked-list abort was stochastic,
+not a controlled write. The complete attack/safe/fixed/ASan matrix still
+passes its expected observations.
+
 
 
 ## 2026-11-26 16:4x–17:1xZ — libmikmod admitted (179th), quickjsng staged, W278 witness, bounded lanes

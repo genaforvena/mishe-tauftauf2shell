@@ -5733,3 +5733,31 @@ primers so the stale 0x20 BBuf decodes to a valid chunk. Require a later
 duplicate/alias diagnostic or repeated live allocation; an invalid-pointer
 SIGSEGV closes the arm. Do not repeat the named-group-only sweep or direct
 tail-byte steering.
+
+### Promoted-buffer same-worker primer sweep — bounded NEGATIVE (2026-11-26, later direct session)
+
+The wire reproducer now accepts `RUBY2SHELL_REGEXP_NESTED_EXTRAS`,
+`RUBY2SHELL_REGEXP_PRIMER_K`, a raw `RUBY2SHELL_REGEXP_PRIMER`, a request
+timeout, and per-run Rails pid files. With two nested exclusions and a prior
+same-connection form request repeating `[[:^ascii:][^一]&&x]` as alternatives,
+21 primer counts (0..400) were exercised on fresh stock Rails processes.
+
+No run returned HTTP 500/alive or produced a repeated live allocation. The
+observed terminals remained allocator failures: `free(): invalid pointer`,
+`munmap_chunk(): invalid pointer`, `double free or corruption (out)`, SIGSEGV,
+or a signal-handler hang after abort. One K=12 run reached
+`malloc(): smallbin double linked list corrupted`; an eight-run repeat of that
+arm produced six invalid-pointer aborts, one `munmap_chunk` abort, one
+smallbin-linked-list abort and one null SIGSEGV/hang. The smallbin result is
+therefore stochastic and not a controlled write.
+
+Evidence: `lab/build/evidence/ruby2shell-promoted-primer-sweep3.json` and
+`ruby2shell-smallbin-repeat.json` (gitignored). The complete affected/safe/
+fixed/ASan matrix was rerun after the script changes; all four modes returned
+`expected_observed=true` (`regexp-final-*`). No command, second command,
+persistence, overlap or pointer control was observed.
+
+Next: run the K=12 promoted-buffer arm under the pair-only allocator tracer
+and inspect the smallbin failure's chunk links. The decisive result is whether
+any corrupted `fd/bk` value is pattern-derived; a generic glibc integrity abort
+closes this arm.

