@@ -84,7 +84,7 @@ at `dpi_sig.c:657` before returning. Detail:
 
 ## Live AF_UNIX datagram path (W280, 2026-11-26)
 
-`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17 PASS / 0
+`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **24 PASS / 0
 FAIL**, rc 0. A lab consumer binds the enforcer's pinned socket path
 `/tmp/dp_listen.sock` (`dp/ctrl.c:45`), receives one real `SOCK_DGRAM`
 datagram (`ctrl.c:2389-2396`), parses it with real `libjansson.so.4`,
@@ -98,6 +98,15 @@ patterns (1024-byte pre-expansion total). The live consumer reported
 datagram (139 bytes) and attack datagram into the fixed pinned object both
 returned `LOOPBACK rc=0`, ASan-clean. Normalized facts:
 `lab/frontier/neuvector2shell/wirepath/EVIDENCE.md`.
+
+At `-O2` with fortify disabled and no stack protector, the same script
+delivers the datagram while gdb waits at `dpi_sig.c:662`: `BUF→RBP=2096`,
+saved RBP `0x2a2e612a2e612a2e` and return slot `0x2e612a2e612a2e61` for
+`a*` patterns; `0x2a2e422a2e422a2e` / `0x2e422a2e422a2e42` for `B*`.
+Optimized vulnerable object on the safe datagram and optimized fixed
+object on the attack datagram both return `LOOPBACK rc=0`. The W278
+chosen-byte claim therefore also holds when the bytes arrive over the real
+socket path, still under the same fortify/no-stack-protector conditions.
 
 This closes the "locally generated JSON fed directly to the function" gap
 with a real transport and real wire parser, but it is a single lab process,

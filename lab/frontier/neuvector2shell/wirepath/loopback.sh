@@ -91,5 +91,52 @@ hasnt "$OUT/loopback-safe.log" 'AddressSanitizer' && ok "safe message ASan-clean
 has "$OUT/loopback-fixed.log" 'LOOPBACK rc=0' && ok "fixed pinned source completes on live socket (rc=0)" || bad "fixed pinned source completes on live socket (rc=0)"
 hasnt "$OUT/loopback-fixed.log" 'AddressSanitizer' && ok "fixed pinned source ASan-clean on live socket" || bad "fixed pinned source ASan-clean on live socket"
 
+
+echo "== optimized real frame over the live socket =="
+O2FLAGS="-g -O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0 -fno-stack-protector -fno-omit-frame-pointer"
+FIXED=$(readlink -f ../src/dpi_sig-fixed.c)
+(cd "$ROOT" && gcc $O2FLAGS $ROOT_INC -c dp/dpi/sig/dpi_sig.c -o "$OUT/loopback-real-vuln-o2.o") && \
+    (cd "$ROOT" && gcc $O2FLAGS $ROOT_INC -x c -c "$FIXED" -o "$OUT/loopback-real-fixed-o2.o") && \
+    gcc $O2FLAGS -Igen -Ijansson $ROOT_INC -c loopback.c -o "$OUT/loopback-o2.o" && \
+    gcc $O2FLAGS -o "$OUT/loopback-o2-vuln" "$OUT/loopback-o2.o" "$OUT/loopback-real-vuln-o2.o" "$LIB" && \
+    gcc $O2FLAGS -o "$OUT/loopback-o2-fixed" "$OUT/loopback-o2.o" "$OUT/loopback-real-fixed-o2.o" "$LIB" && \
+    ok "optimized live consumer and pinned objects build" || { bad "optimized live consumer and pinned objects build"; echo "TOTAL: $pass PASS / $((fail+1)) FAIL"; exit 1; }
+run_case "$OUT/loopback-o2-vuln" "$OUT/wire-safe.json" "$OUT/loopback-o2-safe.log" || true
+run_case "$OUT/loopback-o2-fixed" "$OUT/wire-attack.json" "$OUT/loopback-o2-fixed.log" || true
+has "$OUT/loopback-o2-safe.log" 'LOOPBACK rc=0' && ok "optimized vulnerable object: safe datagram rc=0" || bad "optimized vulnerable object: safe datagram rc=0"
+has "$OUT/loopback-o2-fixed.log" 'LOOPBACK rc=0' && ok "optimized fixed object: attack datagram rc=0" || bad "optimized fixed object: attack datagram rc=0"
+
+run_gdb_case() {
+    local msg="$1" log="$2"
+    rm -f "$SOCK" "$CLIENT"
+    gdb -q -batch \
+        -ex 'set pagination off' \
+        -ex 'break dp/dpi/sig/dpi_sig.c:662' \
+        -ex 'run' \
+        -ex 'printf "O2 LOOP FRAME BUF=%p RBP=%p DELTA=%ld\n", &dlpsig_buf[0], $rbp, (long)($rbp - &dlpsig_buf[0])' \
+        -ex 'printf "O2 LOOP SAVED slot0=%p slot1=%p\n", *(void **)$rbp, *(void **)((char *)$rbp + 8)' \
+        --args "$OUT/loopback-o2-vuln" > "$log" 2>&1 &
+    local pid=$!
+    for _ in $(seq 1 300); do
+        grep -Fq 'O2 LOOP SAVED' "$log" && break
+        sleep 0.02
+    done
+    python3 -c 'import socket,sys; d=open(sys.argv[1],"rb").read(); s=socket.socket(socket.AF_UNIX,socket.SOCK_DGRAM); s.bind(sys.argv[2]); s.sendto(d,sys.argv[3]); print("SENT bytes=%d"%len(d))' \
+        "$msg" "$CLIENT" "$SOCK" >> "$log" 2>&1 || true
+    wait "$pid" 2>/dev/null || true
+    rm -f "$SOCK" "$CLIENT"
+}
+run_gdb_case "$OUT/wire-attack.json" "$OUT/loopback-o2-gdb-a.log"
+run_gdb_case "$OUT/wire-B.json" "$OUT/loopback-o2-gdb-B.log"
+grep -E 'O2 LOOP FRAME|O2 LOOP SAVED|SENT bytes=' "$OUT/loopback-o2-gdb-a.log" | head -4
+grep -E 'O2 LOOP FRAME|O2 LOOP SAVED|SENT bytes=' "$OUT/loopback-o2-gdb-B.log" | head -4
+grep -qE 'O2 LOOP FRAME BUF=[^ ]+ RBP=[^ ]+ DELTA=2096' "$OUT/loopback-o2-gdb-a.log" && \
+    ok "live socket optimized frame BUF-to-RBP delta 2096" || bad "live socket optimized frame BUF-to-RBP delta 2096"
+grep -qE 'O2 LOOP SAVED slot0=0x[0-9a-f]*61[0-9a-f]* slot1=0x[0-9a-f]*61[0-9a-f]*' "$OUT/loopback-o2-gdb-a.log" && \
+    ok "live socket 'a' bytes fill saved RBP and return slot" || bad "live socket 'a' bytes fill saved RBP and return slot"
+grep -qE 'O2 LOOP SAVED slot0=0x[0-9a-f]*42[0-9a-f]* slot1=0x[0-9a-f]*42[0-9a-f]*' "$OUT/loopback-o2-gdb-B.log" && \
+    ok "live socket 'B' bytes replace saved RBP and return slot" || bad "live socket 'B' bytes replace saved RBP and return slot"
+! cmp -s <(grep '^O2 LOOP SAVED' "$OUT/loopback-o2-gdb-a.log") <(grep '^O2 LOOP SAVED' "$OUT/loopback-o2-gdb-B.log") && \
+    ok "wire pattern controls saved frame words over live socket" || bad "wire pattern controls saved frame words over live socket"
 echo "TOTAL: $pass PASS / $fail FAIL"
 [ "$fail" -eq 0 ]

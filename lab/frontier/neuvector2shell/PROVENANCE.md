@@ -195,7 +195,7 @@ grade change, NO r5. Detail:
 
 ## Live AF_UNIX datagram path (W280, 2026-11-26)
 
-`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17 PASS / 0
+`bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **24 PASS / 0
 FAIL**, rc 0 (prerequisite: `bash realcaller/run.sh && bash wirepath/run.sh`
 supplied the objects and the generated messages). New files:
 `wirepath/loopback.c` and `wirepath/loopback.sh`. The runner regenerates
@@ -222,6 +222,18 @@ bytes) into the vulnerable object and attack datagram into the fixed pinned
 object both returned `LOOPBACK rc=0` and stayed ASan-clean. Normalized
 facts: `wirepath/EVIDENCE.md`; raw logs in ignored
 `wirepath/out/loopback-*.log`.
+
+The script also builds optimized (`-O2 -g -U_FORTIFY_SOURCE
+-D_FORTIFY_SOURCE=0 -fno-stack-protector -fno-omit-frame-pointer`)
+vulnerable/fixed consumer binaries from the pinned objects and replays the
+datagrams. Safe datagram into the optimized vulnerable object and attack
+datagram into the optimized fixed object both returned `LOOPBACK rc=0`.
+Under gdb (`break dpi_sig.c:662`) with the datagram sent only after the
+breakpoint, `BUF→RBP=2096`; `a*` patterns give saved RBP
+`0x2a2e612a2e612a2e` and return slot `0x2e612a2e612a2e61`, `B*` patterns
+give `0x2a2e422a2e422a2e` / `0x2e422a2e422a2e42`. Raw logs:
+`wirepath/out/loopback-o2-gdb-{a,B}.log`. Both attack processes fault at
+`dpi_sig.c:657` before returning: ASCII regex bytes, not a chosen address.
 
 Full-enforcer `dp` build remains BLOCKED (scout map, W280): `dp/Makefile:12`
 links `-lhs`; hyperscan/vectorscan headers and library are absent locally

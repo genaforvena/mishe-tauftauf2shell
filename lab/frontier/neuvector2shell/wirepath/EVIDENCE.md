@@ -61,7 +61,7 @@ as pointer control or execution.
 
 ## W280 — live AF_UNIX datagram path (2026-11-26)
 
-Command: `bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **17
+Command: `bash lab/frontier/neuvector2shell/wirepath/loopback.sh` -> **24
 PASS / 0 FAIL**, rc 0. The consumer binds the pinned socket path
 `/tmp/dp_listen.sock` (`dp/ctrl.c:45`), receives a real `SOCK_DGRAM`
 datagram (`ctrl.c:2389-2396`), parses it with real `libjansson.so.4`,
@@ -81,5 +81,18 @@ Safe datagram (139 bytes): `LOOPBACK rc=0`, ASan-clean. Attack datagram
 into the fixed pinned object: `LOOPBACK rc=0`, ASan-clean. Raw logs in
 ignored `wirepath/out/loopback-{attack,safe,fixed}.log`.
 
+The same script then links `-O2 -U_FORTIFY_SOURCE -D_FORTIFY_SOURCE=0
+-fno-stack-protector -fno-omit-frame-pointer` consumer objects against the
+byte-identical pinned vulnerable/fixed objects, replays the same datagrams
+and reads the frame under gdb while the datagram is in flight (`run_gdb_case`
+waits for the breakpoint before sending). Optimized vulnerable object:
+safe datagram `LOOPBACK rc=0`; optimized fixed object: attack datagram
+`LOOPBACK rc=0`. Attack datagram under gdb: `BUF→RBP=2096`, saved RBP
+`0x2a2e612a2e612a2e`, return slot `0x2e612a2e612a2e61` (`a*` patterns);
+the `B*` datagram yields `0x2a2e422a2e422a2e` /
+`0x2e422a2e422a2e42`. Raw logs: `out/loopback-o2-gdb-{a,B}.log`.
+
 Ceiling unchanged: real socket transport and real parser do not add
-chosen-address control, a command, an enforcer binary or rung 5.
+chosen-address control, a command, an enforcer binary or rung 5. Both
+optimized attack traces fault at `dpi_sig.c:657` before returning; the
+saved words hold ASCII regex bytes, not a valid pointer.
