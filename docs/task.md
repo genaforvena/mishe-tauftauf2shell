@@ -12486,10 +12486,9 @@ rerun here.
   silent. `run-all.sh` SHA-256 `acf09b51…d62d19d1b` printed
   `RESULT PASS=12 FAIL=0`; the author's clean-archive replay from
   `git archive 8b4caaf9` matched. Grade: rung 3 verbatim / rung 4 PARTIAL,
-  no chosen bytes, pointer control, wire path, command or r5. The lane is
-  **STAGED, not admitted**: frontier created window 173; operator admission
-  and independent witness replay are owed. `docs/reproducibility.md` has
-  the pins, commands and expected bytes.
+  no chosen bytes, pointer control, wire path, command or r5. `fc907f63`
+  admitted it as the 165th declared mind; witness replay was still owed at
+  that commit. `docs/reproducibility.md` has the pins, commands and bytes.
 - `df5d82ba`: Ruby2Shell W35 closes the fake-chunk `prev_size` coherence
   lead. A 24-run sweep at chunked N=588 selects which glibc diagnostic fires
   (`mismatching next->prev_size`, `invalid next size (unsorted)`,
@@ -12518,3 +12517,35 @@ rerun here.
   page and ladder SVG. The 161 register rows and every rung cell stayed the
   same; these files are generated from `research-manifest.json`, not edited
   by this fold.
+
+## 2026-11-26 07:5xZ — libde265shell admitted, Ruby W17 closure, presentation gate
+
+Three commits folded from live HEAD `1ebd6601`. No replay was rerun here and no
+rung cell, grade, route, witness verdict or R5 cell moved by this fold.
+
+- `fc907f63` admitted **libde265shell** as the 165th declared target mind under
+  standing #6 (CVE-2026-33165 / GHSA-653q-9f73-8hvg, libde265 `<= 1.0.16`,
+  fixed 1.0.17 by `c7891e412…`). Window 173 was adopted with panes %348/%349
+  live and no duplicate; hy4-flash route and three generated wake units were
+  still missing in the operator reading (person-reserved). Generated counts
+  moved 164/161/161/108 → 165/162/162/108 with all 162 rows and rung cells
+  unchanged (rung 3 verbatim, rung 4 PARTIAL, no r5). The operator's
+  clean-archive replay from `git archive 8b4caaf9` printed 12 PASS / 0 FAIL
+  with digest `acf09b51…d62d19d1b`; witness replay was still owed at that
+  commit. This supersedes the "STAGED, not admitted" statement above.
+- `f209d6fa` (Ruby W17) closed the two W35 follow-ups. Below-unsorted fake
+  chunks (`FILL_SIZE ∈ {0x21,0x41,0x53}`, `FILL_PREV=0x53`, N=588, 3 runs each)
+  gave 2/9 survivors and 7 known glibc aborts; both survivors served 404 and
+  `/up` 200, one printed `corrupted size vs. prev_size` only at shutdown, and
+  the reflect scans found 0 deviations and 0 leak-shaped qwords in 68 parts.
+  A GET query reflection surface gave 24/24 aborts at `0x250`/`0x90`, and 2/12
+  survivors at the earlier geometries with `q0` byte-clean and 0 deviations in
+  35 parts each; a fixed 3.4.13 control stayed clean. No forged chunk reached
+  a reflected allocation and no pointer crossed the wire. Grades unchanged
+  (rung 4 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
+  stock/oracle-free/persistent r5 NOT ACHIEVED); both lanes are closed.
+- `1ebd6601` added a pre-commit hook that re-renders and stages the three
+  generated presentation files when `research-manifest.json` is staged, and
+  made `tools/check-readme.py .` RED on stale generated files. It replaces no
+  pre-commit hook it did not install; `docs/operations.md` carries the
+  installer and check commands. Do not hand-edit the generated files.

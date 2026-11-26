@@ -12385,8 +12385,9 @@ artifact. None of these limbs moves a grade or a rung cell.
   in `PROVENANCE.md`: v1.0.17 has no `autogen.sh` (CMake-only), and a C++
   driver rejects the advisory's C source. Grade rung 3 verbatim / rung 4
   PARTIAL (16-bit index, not chosen bytes or a pointer), no wire path,
-  command or r5. STAGED, not admitted: witness replay and operator admission
-  are owed; no evidence-register row or mind-count claim is made here.
+  command or r5. At staging it had no evidence-register row or mind-count
+  claim; `fc907f63` later admitted it as the 165th declared mind, with the
+  admission receipt below. Witness replay was still owed at that commit.
 - **Aspell2Shell 75820 consecutive-offset sweep — witness W253 replay,
   ESTABLISHED AS LABELED at that scope only.** The unmodified wrapper
   SHA-256 `8319cf0ddd8b569b6a7725da5ff7cf972284d84b860ed3b3623e4a9a2287597d`
@@ -12425,3 +12426,80 @@ independently established count is now 108 in `README.md`, `docs/results.md`
 and `research-manifest.json`. Do not hand-edit those files; re-render with
 `python3 tools/render-presentation.py` when the manifest changes and check
 with `--check`. No harness, pin, grade or rung cell moved with that count.
+
+## 2026-11-26 07:5xZ — libde265shell admission and Ruby W17 negative recipes
+
+No replay was rerun in this fold; hashes, counts and bytes below are quoted
+from the committed receipts and the W17 report.
+
+- **Libde2652Shell — admitted as the 165th declared mind (`fc907f63`).** The
+  pinned tarballs and `POC.zip`, CMake flags, advisory `poc.c` link and both
+  254-byte inputs are in the preceding section. From the repository root the
+  one-command replay is
+
+  ```sh
+  sh lab/frontier/libde265shell/run-all.sh
+  ```
+
+  The wrapper SHA-256 is
+  `acf09b514fad9465cefe481e4a3cff7cccf19419be41dd87267afe3d62d19d1b`. Expect
+  `RESULT PASS=12 FAIL=0`: the two vulnerable ASan cells report
+  `AddressSanitizer: heap-buffer-overflow`, `WRITE of size 2`, 2 bytes past a
+  2496-byte region at verbatim `libde265/image.h:741` from `slice.cc:2866`;
+  fixed 1.0.17 and benign inputs are clean in all three modes and the plain
+  vulnerable build exits 0 silently. Twelve tracked
+  `evidence/<tag>-<spec>-<input>.out` files carry the two traces and ten empty
+  controls; gitignored `src/` tarballs, trees and `out/` builds regenerate with
+  the wrapper. The operator replayed the unmodified wrapper from
+  `git archive 8b4caaf9` into `.mishe-tauftauf/replays/libde265shell-w249`
+  with 12 PASS / 0 FAIL rc 0 and digest `acf09b51…d62d19d1b`; that is an author
+  receipt, not an independent verdict, which was still owed at admission.
+  Generated counts moved to 165 declared / 162 active / 162 rows / 108
+  independently established, with rung cells ✓/✓/✓/◐/— (rung 3 verbatim, rung 4
+  PARTIAL), no chosen bytes, pointer control, wire path, command or r5.
+- **Ruby2Shell W17 — below-unsorted fake chunks and GET reflection (bounded
+  NEGATIVEs, both lanes CLOSED).** Use the provisioned plain Ruby 3.4.12 and
+  stock `rails new --minimal` app from the W35 bullet, plus the committed
+  `lab/repro/ruby2shell-stock-rails.sh` driver and
+  `lab/repro/ruby2shell-reflect-scan.py` scanner. For the forged-chunk arm:
+
+  ```sh
+  export RUBY2SHELL_STOCK_N=588 RUBY2SHELL_STOCK_FILL=256 \
+    RUBY2SHELL_STOCK_DRAIN=1024:32 RUBY2SHELL_STOCK_DRAIN_FAKE=1 \
+    RUBY2SHELL_STOCK_PART_CHARSET=1 RUBY2SHELL_STOCK_TAIL_HEX=00005102 \
+    RUBY2SHELL_STOCK_CHUNKED=1 RUBY2SHELL_STOCK_FILL_PREV=0x53
+  export RUBY2SHELL_STOCK_FILL_SIZE=0x21   # also 0x41 and 0x53; 3 fresh runs each
+  bash lab/repro/ruby2shell-stock-rails.sh attack chs0x21-1
+  python3 lab/repro/ruby2shell-reflect-scan.py chs0x21-2- \
+    --n 588 --fill-len 256 --drain-len 1024 --pattern 0x53,0x21
+  ```
+
+  Expect 2/9 survivors (`chs0x21-2`, `chs0x53-3`) serving 404 and a later `/up`
+  200, with 7 known glibc aborts (`sysmalloc` assertion or `invalid next size
+  (unsorted)`) and `corrupted size vs. prev_size` only in one survivor's
+  shutdown log. Each survivor's matching `--pattern 0x53,<size>` scan gives 0
+  deviations and 0 leak-shaped qwords in 34 parts (68 total).
+
+  For the GET arm set `RUBY2SHELL_STOCK_ROUTE` to the URL carrying a 1024-byte
+  printable `q0=A…A` query (the driver passes it verbatim into the POST URL;
+  the exact string is in the W17 report) and use
+  `RUBY2SHELL_STOCK_FILL_PREV=0x250`, `RUBY2SHELL_STOCK_FILL_SIZE=0x90`, N=524:
+  24/24 vulnerable processes abort. At the two earlier surviving geometries
+  (chunked N=588, `FILL_PREV=0x53`, `FILL_SIZE ∈ {0x21,0x53}`, 6 runs each),
+  2/12 survive with `q0` byte-clean and 0 deviations/0 leak-shaped qwords in
+  35 parts each; fixed 3.4.13 at 0x250/0x90 serves a clean 404 with 35
+  byte-clean parts. A URL-encoded glibc-pattern query containing `%00`
+  suppresses the params block on the fixed control and is recorded as an
+  invalid geometry, not a pass. Gitignored evidence under `lab/build/evidence/`
+  (`stock-rails-chs*`, `stock-rails-qgetv-*`, `qgets*`, `qget-fixed-*`,
+  `qget-print*` `.out`/`.server.log`/`.html`/`.body`) regenerates with these
+  arms. Grades unchanged (rung 4 witness-COMPLETE, harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED).
+- **Presentation gate (`1ebd6601`).** `python3 tools/render-presentation.py
+  --check` verifies that `README.md`, `docs/results.md` and
+  `docs/assets/evidence-ladder.svg` match `research-manifest.json`;
+  `python3 tools/check-readme.py .` also goes RED when any generated file is
+  stale. `sh tools/install-pre-commit-presentation.sh` installs the hook that
+  re-renders and stages those files whenever the manifest is staged, without
+  replacing a hook it did not install. A manifest edit without a re-render is
+  a RED check, never a passing claim.

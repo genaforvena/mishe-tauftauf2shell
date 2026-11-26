@@ -3694,8 +3694,8 @@ clean-archive replay of the unmodified `run-all.sh` (SHA-256
 `.mishe-tauftauf/replays/libde265shell-w249`, again 12 PASS / 0 FAIL with the
 same frames. That is an author receipt, not an independent verdict. Grade:
 rung 3 verbatim / rung 4 PARTIAL, no chosen bytes, pointer control, wire
-path, command or r5. The lane is STAGED, not admitted: window 173 exists;
-operator admission and an independent witness replay are owed. Both build
+path, command or r5. `fc907f63` later admitted the lane as the 165th declared
+target mind; an independent witness replay was still owed. Both build
 path negatives (autotools absent on the CMake-only fixed tag; a C++ driver
 rejects the advisory's C source) are preserved in `PROVENANCE.md`.
 
@@ -3712,3 +3712,41 @@ the release trees diffed clean. This supersedes the status report's "all
 75820 claims verifier-UNKNOWN" wording only for this sweep; the earlier two
 75820 lanes keep their prior witness status. Full detail:
 `.mishe-tauftauf/artifacts/witness-w253-aspell2shell/detail.md`.
+
+## 2026-11-26 07:5xZ — libde265shell admitted, Ruby W17 negatives, presentation gate
+
+`fc907f63` admitted libde265shell as the 165th declared target mind at 07:5xZ
+under standing #6; window 173 was adopted with panes %348/%349 live and no
+duplicate, while the hy4-flash route and three generated wake units were still
+missing in the operator reading (person-reserved). The generated overview moved
+164/161/161/108 to 165/162/162/108 in `README.md`, `docs/results.md` and the
+ladder SVG; all 162 register rows and every rung cell held (rung 3 verbatim,
+rung 4 PARTIAL, no r5). The operator's clean-archive replay of the unmodified
+wrapper from `git archive 8b4caaf9` printed 12 PASS / 0 FAIL with digest
+`acf09b51…d62d19d1b`; that is an author-side receipt, not an independent
+witness verdict, which was still owed at that commit.
+
+`f209d6fa` (Ruby W17) closed both leads left open by W35. Forged tcache-sized
+chunks below the unsorted band (`FILL_SIZE ∈ {0x21,0x41,0x53}`,
+`FILL_PREV=0x53`, N=588, 3 runs each) gave 2/9 survivors and 7 known glibc
+aborts; both survivors served 404 and a later `/up` 200, one printed
+`corrupted size vs. prev_size` only at shutdown, and a matching-pattern
+reflect scan found 0 deviations and 0 leak-shaped qwords in 68 parts. A GET
+query value was then used as a fresh post-overflow reflected allocation: at
+`0x250`/`0x90`, N=524, 24/24 vulnerable processes aborted; at the two
+surviving geometries 2/12 lived with `q0` still exactly 1024 `A` bytes and 0
+deviations in 70 parts, and a fixed 3.4.13 control stayed clean. No forged
+chunk reached a reflected allocation and no pointer crossed the wire. Grades
+unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED. Raw evidence
+is gitignored `lab/build/evidence/stock-rails-chs*` and `stock-rails-qgetv-*`
+files; the commands in `docs/reproducibility.md` regenerate it.
+
+`1ebd6601` makes generated presentation drift an explicit failure: a
+pre-commit hook re-renders and stages `README.md`, `docs/results.md` and the
+ladder SVG whenever `research-manifest.json` is staged, and
+`tools/check-readme.py .` now goes RED on any stale generated file. The hook
+only replaces one it installed; `docs/operations.md` records the installer and
+check commands. No harness, pin, grade, rung cell or r5 moved with it. No
+replay was rerun in this fold; counts and bytes above are quoted from the
+committed receipts.
