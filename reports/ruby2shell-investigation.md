@@ -6426,3 +6426,32 @@ byte count keep `s2` inside the subject for these shapes, so the added guard
 reads as defensive hardening, not a reachable second vulnerability here.
 Grade unchanged at rung 3. Do not repeat this matrix unchanged; reopen only
 with a shape that reports inside `string_cmp_ic` itself.
+
+## 2026-11-26 22:2xZ — remaining regexec case-fold guards: no reachable second report
+
+The 3.4.12→3.4.13 `regexec.c` diff adds four case-fold bounds: the
+`string_cmp_ic` guard closed in §22:1xZ, `len != enclen(...)` in
+`OP_EXACT1_IC` (fixed :2751), `len > endp - p` in `OP_EXACTN_IC`
+(fixed :2844), and the known `tend - t < lowlen` in
+`str_lower_case_match` (:4298). Prediction: a folded subject longer
+than the compiled exact bytes (`ß`→`ss`, `ﬃ`→`ffi`, U+0390→six bytes)
+would reach the two remaining guards and give an ASan read or a
+match differential on 3.4.12.
+
+`lab/repro/ruby2shell-casefold-exactn.{rb,sh}` ran 21 shapes in fresh
+ASan processes on both builds (gitignored
+`lab/build/evidence/casefold-exactn/summary.txt`). Every anchored
+single-byte shape (`\As` vs `ß`/`ẞ`/`ﬃ`, lookbehind, 115/116-byte
+tails) still takes the already-known `str_lower_case_match` path at
+`regexec.c:4278` on 3.4.12 and clean-fails on 3.4.13. All multi-byte
+shapes agree across builds: `\Ass` vs `ß` and `\Asss` vs `ßs` match
+true on both; folded-literal `\Aß` vs `ß` matches true on both;
+U+0390 long-fold variants match false on both with no ASan report.
+GDB at vulnerable `regexec.c:2830` confirmed `\Aß` reaches
+`OP_EXACTN_IC` with compiled bytes `ss` and `endp` immediately after
+them, but the long-fold variants never reach that opcode — the
+optimizer's exact-string prefilter rejects the subject first.
+No second reachable vulnerability, no chosen byte and no grade move;
+rung 3 unchanged. Do not repeat this shape matrix unchanged; reopen
+only with a measured `OP_EXACTN_IC`/`OP_EXACT1_IC` hit whose fold
+length exceeds the exact operand.

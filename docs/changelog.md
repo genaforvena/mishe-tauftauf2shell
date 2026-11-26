@@ -2,6 +2,20 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 22:2xZ — Ruby2Shell remaining case-fold guards closed
+
+`lab/repro/ruby2shell-casefold-exactn.{rb,sh}` tested 21 anchored and
+folded-literal shapes on both ASan builds: all single-byte variants
+still fault only in the already-known `str_lower_case_match
+regexec.c:4278`, and every multi-byte variant agrees across builds
+with no ASan report. GDB confirmed `OP_EXACTN_IC` is reached by the
+folded literal `\Aß` but not by any long-fold subject, so the
+3.4.13-only `OP_EXACT1_IC`/`OP_EXACTN_IC` length guards have no
+observed second vulnerability here. Grade rung 3 unchanged; full
+stock/oracle-free/persistent r5 still NOT ACHIEVED. Recipe in
+`docs/reproducibility.md`, detail in report §22:2xZ.
+
+
 ## 2026-11-26 18:5x–19:2xZ — axis2 admitted (183rd), W284 verdict fold, libarchive staged
 
 This fold covers `80597400..c7f8e2b1`; reproduce every claim from

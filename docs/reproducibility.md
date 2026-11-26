@@ -15728,3 +15728,17 @@ here; both lanes are CLOSED at grade rung 3.
 
 Every count above is an operator, author, clean-archive or witness
 observation as labeled; no generated grade cell moved here.
+
+### Ruby casefold exact-opcode guards (negative)
+
+`bash lab/repro/ruby2shell-casefold-exactn.sh` runs 21 shapes on
+3.4.12/3.4.13 ASan builds, one fresh process each; expect six
+3.4.12 `str_lower_case_match regexec.c:4278` reports for the
+single-byte shapes (`\As` vs `ß`/`ẞ`/`ﬃ`, lookbehind), zero reports
+in `OP_EXACT1_IC`/`OP_EXACTN_IC`, and identical match outcomes for
+every multi-byte shape (`\Ass` vs `ß` true, `\Aß` vs `ß` true,
+U+0390 variants false) on both builds. The optional GDB trace uses
+`break regexec.c:2830` on 3.4.12 and shows `p = "ss\001"`,
+`endp` just past `ss` for `\Aß`; long-fold variants do not reach the
+opcode because the exact-string prefilter rejects them. Grade rung 3
+unchanged; lane CLOSED.
