@@ -5364,3 +5364,47 @@ here.
 
 What would change this fold: a verdict contradicting a labeled row, a checker
 RED on committed HEAD, or a later report misquoting one of these receipts.
+
+## 2026-11-26 21:3x–21:5xZ — inihlongline 188th admission, W293 sdcpp staged, 71474 bit-write lane
+
+This fold covers `3c1471d5..b189cf86`; reproduce from
+`docs/reproducibility.md` § 21:3x–21:5xZ. No generated cell, grade, register
+row or raw evidence is committed here.
+
+- `1b88f2aa` (operator, standing #6) admitted inihlongline2shell as the
+  **188th** declared target mind at 21:4xZ, superseding the STAGED state
+  recorded in the 20:3x–21:0xZ and 21:08–21:3xZ folds. Window 197 was
+  adopted as-is (%398/%399, dead=0); generated counts 187/184/184/125 →
+  188/185/185/125 with `established:false` unchanged. The 21:42Z operator
+  clean-archive replay removed all four prebuilt binaries, verified three
+  pins and runner sha256 `f5ea71cf…f7c5d`, and gave rc 0 / PASS=8 FAIL=0
+  with the same `ini.c:167` ASan READ-1 and plain rc=0 negative. Rung 3
+  only, rung 4/5 NOT CLAIMED, witness replay owed.
+- `086783e0` + `011ad6b0` (W293) staged sdcppimatrix2shell
+  (CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7, window 198, %400/%401). Four
+  self-computed SHA-256 pins, a 298-byte repeated-name `.imatrix` input
+  and `run-all.sh` gave 17/0 at 21:42Z; a clean archive of `086783e0`
+  repeated 17/0 at 21:46Z. ASan `READ of size 4` at
+  `imatrix.cpp.vuln:302`, 0 bytes past the 4-byte vector from `:288`;
+  plain `double free or corruption (out)` rc 134, fixed rc 3 with the new
+  guard, safe clean. Rung 1/2/3 only, rung 4 NOT CLAIMED (the OOB read
+  traps first), rung 5 NOT CLAIMED (file only); admission and witness owed.
+  The full-tarball timeout (87 MB partial deleted) is a preserved negative
+  and the advisory's real `sd-cli` SIGSEGV was not re-tested.
+- `b189cf86` (lwext4) added a separate CVE-2025-71474 chosen-bit lane:
+  `run-gdt-bit.sh` 11/0, `bit_max = 2 + s_reserved_gdt_blocks` driving
+  `src/ext4_fs.c:333` to OR masks `0x01`..`0xff` into the low byte of a
+  live `ext4_buf.bc` at `data+4152`, with the `gdt=8` control clean and
+  every crafted image faulting plain rc 139. Author-only rung 4
+  DEMONSTRATED (chosen bits, not a chosen address), no command and no r5;
+  W273 replayed only the 71473 lanes, so this lane stays unwitnessed and
+  the overall grade is unchanged.
+- `3c1471d5` (nfdump) replayed a clean archive of `40924fb4`: fresh
+  SHA-verified builds gave v6value 12/0 and 13/0 and v6edge 17/0 with the
+  WRITE-8, plain rc 134 and clean controls. The chosen-byte lane remains a
+  negative and the grade stays unchanged.
+
+DM #5830's Java4Shell, W292 and W292b items were already folded by
+`bd11795c`; this fold does not re-pin them. What would change it: a verdict
+contradicting a labeled row, a checker RED on committed HEAD, or a later
+report misquoting these receipts.

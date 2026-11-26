@@ -14672,3 +14672,60 @@ All counts above are operator, author, witness, clean-archive or staged
 observations as labeled. What would change this fold: a verdict contradicting
 a labeled row, a checker RED on committed HEAD, or a later report misquoting
 one of these receipts.
+
+## 2026-11-26 21:3x–21:5xZ — inihlongline admitted (188th), W293 sdcpp staged, 71474 chosen-bit lane
+
+This fold covers `3c1471d5..b189cf86`; reproduce every claim from
+`docs/reproducibility.md` § 21:3x–21:5xZ. No generated cell, grade, register
+row or raw evidence is committed here. DM #5830's Java4Shell, W292 and
+W292b items were already folded by `bd11795c` and move no second verdict.
+
+- `1b88f2aa` (operator, standing #6) **admitted inihlongline2shell as the
+  188th declared target mind** at 21:4xZ, superseding the STAGED passages
+  above. Window 197 was adopted as-is (panes %398/%399, dead=0, registry
+  entry present); generated counts moved 187/184/184/125 → 188/185/185/125
+  with `established:false` unchanged. From `git archive HEAD
+  lab/frontier/inihlongline2shell` with all four prebuilt binaries removed,
+  the operator replay at 21:42Z verified all three pins, runner sha256
+  `f5ea71cf377576579923023ad2f27ca6020a0ab8ea4111cb4d46f4b58e1f7c5d`,
+  rc 0 and PASS=8 FAIL=0, reobserving the 199-`A`-plus-NUL ASan READ-1 at
+  `ini.c:167` and the plain rc=0 negative. Grade R1 ✓ / R2 — / R3 ✓ /
+  R4 — / R5 —; rung 4/5 NOT CLAIMED and independent witness replay owed.
+- `086783e0` + `011ad6b0` (frontier W293) **staged sdcppimatrix2shell**
+  (CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7, window 198, panes %400/%401):
+  a repeated `blk.0` name with `nval=1` then `nval=64` in a 298-byte
+  `.imatrix` file drives the verbatim pinned `load_imatrix()` loop to ASan
+  `heap-buffer-overflow READ of size 4` at `imatrix.cpp.vuln:302` via
+  `:168`, 0 bytes after the 4-byte vector from `:288`; the plain build
+  aborts with `double free or corruption (out)` rc 134. The fixed build
+  rejects with rc 3 and a new inconsistent-size diagnostic; safe input is
+  clean on both pins. `run-all.sh` gave PASS=17 FAIL=0 at 21:42Z and a clean
+  archive of `086783e0` at 21:46Z repeated PASS=17 FAIL=0 with all pins
+  clean. Rung 1/2/3 only, rung 4 NOT CLAIMED (ASan traps on the OOB read
+  half; the write halves were not separately observed), rung 5 NOT
+  CLAIMED (file input only); STAGED, witness, admission and a shipped
+  `sd-cli` replay owed. Full-tag downloads timed out (87 MB partial
+  deleted) and the advisory's real-binary SIGSEGV remains a claim.
+- `b189cf86` (lwext4) staged a **CVE-2025-71474 chosen-bit lane** next to
+  the separate 71473 lanes. `bash run-gdt-bit.sh` gave 11 PASS / 0 FAIL:
+  with `bit_max = 2 + s_reserved_gdt_blocks` the bit-set loop at
+  `vuln/src/ext4_fs.c:333` ORs an image-chosen mask into the low byte of
+  the adjacent live `ext4_buf.bc` at `data+4152` (`buf - data = 4112`);
+  gdb readbacks show masks `0x00` (gdt 8 control, mounts clean),
+  `0x01/0x03/0x07/0x0f/0x3f/0xff` (gdt 33215/33216/33217/33218/33220/
+  33222), all crafted images faulting plain rc 139, and `gdt=65535`
+  yielding `bc = 0xffffffffffffffff`. Author-only rung 4 DEMONSTRATED at
+  the same ceiling as 71473: chosen bits at a chosen offset, not a chosen
+  address or full pointer, no command, no benign marker and no r5. W273
+  replayed the earlier 71473 lanes, not this one; overall grade unchanged.
+- `3c1471d5` (nfdump) recorded a clean-archive replay of `40924fb4` with
+  SHA-verified tarballs rebuilt from scratch: `run-v6value.sh` returned
+  12 PASS / 0 FAIL and 13 PASS / 0 FAIL with fresh chosen-byte values,
+  and `run-v6edge.sh` returned 17 PASS / 0 FAIL with the ASan WRITE-8,
+  plain rc 134 and clean safe/fixed controls. The chosen-byte size-field
+  lane stays a preserved negative, grade unchanged.
+
+All counts above are operator, author or clean-archive observations as
+labeled; none is an independent witness verdict. What would change this
+fold: a verdict contradicting a labeled row, a checker RED on committed
+HEAD, or a later report misquoting one of these receipts.
