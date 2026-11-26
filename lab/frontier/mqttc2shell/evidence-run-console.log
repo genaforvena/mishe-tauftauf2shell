@@ -1,0 +1,24 @@
+PASS tarball src/mqtt-1.1.6.tar.gz sha256
+PASS tarball src/mqtt-1.1.7.tar.gz sha256
+PASS vulnerable mqtt.c verbatim sha256
+PASS fixed mqtt.c verbatim sha256
+PASS vuln plain build
+PASS vuln ASan build
+PASS fixed plain build
+PASS fixed ASan build
+PASS vuln unpack underflow payload size 4294901763
+PASS fixed unpack rejects malformed PUBLISH
+PASS safe unpack control
+PASS vuln ASan negative-size-param -4294967296
+PASS vuln ASan frame at verbatim mqtt.c:880
+PASS vuln ASan nonzero exit (1)
+PASS vuln plain crash rc
+PASS fixed ASan clean exit
+PASS fixed callback not invoked
+PASS fixed error is malformed response
+PASS fixed no ASan report
+PASS vuln safe packet clean exit
+PASS vuln safe packet normal parse
+PASS qos1 ASan read at verbatim mqtt.c:1748
+PASS fixed qos1 clean
+RESULT PASS=23 FAIL=0

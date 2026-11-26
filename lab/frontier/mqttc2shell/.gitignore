@@ -1,0 +1,5 @@
+# Provisioned upstream source snapshots and build outputs; refetch per PROVENANCE.md
+/src/*
+!/src/.gitkeep
+/build/
+/build-test/
