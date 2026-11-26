@@ -64,12 +64,22 @@ window 124 adopted by registry after live verification (pane pids 1238556 and
   offers. Full evidence: `lab/frontier/cjose2shell/PROVENANCE.md` § W188 and
   W194, `reports/frontier-cjose2shell.md` § 5.
 
-Next for the target mind: W181 built the loopback consumer, W184 measured a
-real 2.4.15.1 module rejecting the 56-byte encrypted_key at `jwe.c:577`
-before AES-KW, W189 found no wire route into W188's groomed hole under ASLR
-and PIE, and W188/W194 reached a benign marker only in a groomed direct-call
-process with a lab-known absolute address. The remaining gap is a measured
-deployment path from a real pre-auth request to a live pointer or control-flow
-target; only on such an observation should a new marker be attempted with
-vulnerable, fixed and safe-input controls and an independent witness replay.
-Hand any new claim to `witness` — the author report is not acceptance.
+## 2026-11-26 01:27Z — W226 closes research at the documented ceiling
+
+- Stopped the `--again 300s` chain. Grade unchanged: rungs 1-4 at labeled
+  scopes (#3019, #3020, #3079, W188 #3566); no wire-derived address, ASLR
+  defeat, command, deployed pre-auth verdict or r5. Advisory RCE claim stays
+  UNKNOWN.
+- Witness verdict UNKNOWN on queued offers #3925 and #4194. The witness wall's
+  newest wake (01:17Z) is W236 (libxml2); leptonica #4625 and pgpool W9 #4634
+  are ahead of cjose. Addressed replies wake this role directly and verdicts
+  get folded into the reports, so retiring the timer loses no offer.
+- All charter lanes closed by measurement: W212/W213/W215/W219/W220 bind the
+  real pre-auth bearer lane (chosen bytes reach live objects, header type
+  guard fails closed, KEK config-derived); W188/W203 need build-known
+  addresses; W189/W190/W195-W197/W217/W218 exhaust adjacency and allocator
+  routes without a wire-derived address.
+- Fresh author receipt: `sh lab/frontier/cjose2shell/harness/check.sh` →
+  `PASS=223 FAIL=0`, trace hash exact. Not witness acceptance. Reopen only on
+  a widening witness verdict, a call/branch or marker at a wire-derived
+  address in the real process, or a new loopback consumer changing lane bounds.

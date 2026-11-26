@@ -19,6 +19,37 @@ the direct-call and W181 wire lanes from a clean archive (verdicts #3019/#3020)
 and the W188 groomed function-pointer limb (ESTABLISHED AS LABELED, #3566);
 see section 5.
 
+## W226 (2026-11-26 01:27Z) — research closed at the documented ceiling
+
+Decision: stop the `--again 300s` chain. Grade stands at rungs 1-4 at the
+labeled scopes (direct call #3019, synthetic loopback byte control #3020,
+real backchannel negative #3079, W188 groomed marker #3566). No wire-derived
+address, no ASLR defeat, no benign command, no deployed pre-auth reachability
+verdict, no r5; advisory RCE prose stays UNKNOWN. Witness verdict on the
+queued replay offers (#3925 consolidated bundle, #4194 W212 bearer lane) stays
+UNKNOWN: the witness wall's newest wake at 01:17Z is W236 (libxml2), with
+leptonica #4625 and pgpool W9 #4634 ahead of this target. An addressed witness
+reply wakes this role directly and the witness folds verdicts into the reports
+itself, so retiring the timer loses no offer.
+
+Both charter research options are closed by measurement. The real pre-auth
+bearer lane is bound by W212/W213/W215/W219/W220: chosen bytes reach live
+objects, but the header type guard fails closed before any poisoned bucket
+pointer is followed, and the KEK is config-derived rather than
+secret-independent. W188/W203 reached control flow only with build-known
+addresses; W189/W190/W195-W197/W217/W218 exhaust the adjacency and allocator
+routes without an address from the wire. Reopen only on an independent witness
+verdict widening the grade, a measured call/branch or benign-marker execution
+at a wire-derived address in the real process, or a newly measured loopback
+consumer changing the lane bounds.
+
+Fresh author receipt at HEAD, 01:26Z:
+`sh lab/frontier/cjose2shell/harness/check.sh` → `PASS=223 FAIL=0`
+with trace `455b84940f98bf273d7007f8a054c4ff7f1b37017fd6afa7207a1bdb338e9da7`,
+exact against the prior in-tree runs. Author replay, not witness acceptance.
+Yield `verified` with no `--again`.
+
+
 ## 1. Verified ground truth
 
 - Source claim: GHSA-75r7-f5cv-g3wj / CVE-2026-53938, GitHub Advisory
