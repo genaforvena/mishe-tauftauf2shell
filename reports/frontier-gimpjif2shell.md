@@ -675,3 +675,33 @@ flow, and not a real-plugin observation. Grade stays rung 3 pinned verbatim
 / rung 4 PARTIAL chosen bytes, NO r5. Full hashes and the preserved
 `consume-ptr` negative are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+
+
+## Fake chunk at a chosen address accepted by real glibc (W294, 2026-11-26)
+
+W293's fault was identified as glibc's smallbin list check
+(`bck->fd != victim`, upstream `malloc/malloc.c:3956`): the pin's
+66300-byte `compressed` allocation bins A into the 0x110 smallbin before
+`inflate()` overwrites A's metadata. A new `unlink` mode supplies a
+consistent fake chunk: A's size stays `0x111`, A->fd is the live unsorted
+arena pointer and A->bk is a static 64-byte buffer minus 16, pre-arranged
+with `fake->fd = A's chunk header` and `fake->bk = smallbin head`. All
+addresses in the fake pair are harness-known; the pointer *word* that
+reaches A->bk comes from the JIF-shaped decompressed payload.
+
+`lab/frontier/gimpjif2shell/realglib/evidence/consumer-unlink.log`
+records `UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+`UNLINK_FD_WORD_CHANGED=1`, `RC=0`. Ten post-pin `g_try_malloc(260)`
+calls complete: the eighth returns the corrupted adjacent chunk A and
+the ninth returns the fake chunk at the chosen address; glibc wrote its
+smallbin/tcache metadata into that address. `bash realglib/run-consumer.sh`
+reports **19 PASS / 0 FAIL** with the safe 4x4 and fixed-pin controls
+still clean; `run-all.sh` 29/0 and `run-real.sh` 35/0.
+
+This is allocator-level pointer control in the pinned real-glib driver,
+not a real GIMP plugin allocation, not attacker-chosen data written to an
+arbitrary live object, no control flow and no command. Grade stays rung 3
+pinned verbatim / rung 4 PARTIAL, NO r5. Hashes, the superseded
+`consume-ptr` negative and the clean-archive replay receipt are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+

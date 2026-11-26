@@ -909,3 +909,52 @@ Ceiling unchanged: real glib + glibc allocator consumer in the pinned
 driver, no real GIMP plugin read, no successful chosen-address
 dereference, no benign marker or command, grade rung 3 pinned verbatim /
 rung 4 PARTIAL, NO r5.
+
+## W294 fake chunk accepted by real glibc (2026-11-26, 22:19Z)
+
+W293's fault was re-derived from Ubuntu glibc 2.39 source: the pin's
+66300-byte `compressed` allocation runs the unsorted loop *before*
+`inflate()`, so A is already in the 0x110 smallbin when the overflow
+rewrites its metadata. The first fault is the smallbin list check
+`bck->fd != victim` (upstream `malloc/malloc.c:3956`, installed debug
+line 3985), not the unsorted-bin checks. The earlier `consume-ptr`
+negative (fault at installed line 4013) was reproduced while repairing
+this mode; it is superseded by the completed result below, not erased.
+
+New mode `unlink` in `realglib/real-driver.c` (SHA-256
+`86fe2997c8fb30cd0ff3ee8698138a698028ea871e4dc4281aefd06d6c2608b3`)
+keeps A's original size word `0x111`, supplies the live
+`unsorted_chunks(av)` pointer in A->fd and points A->bk at a static fake
+chunk 16 bytes before a 64-byte aligned buffer. The fake chunk's fd word
+is pre-set to A's *chunk* header (not its user pointer) and its bk word to
+`unsorted_chunks(av) + 0x100`, the head of the 0x110 smallbin. The chosen
+bytes come from the same 324-byte JIF-shaped payload; the driver arranges
+the fake chunk and its valid back-pointer as a lab precondition. Runner
+`realglib/run-consumer.sh` SHA-256
+`f615d6fb350b642d0798f5df2da2611e124d8e9a4aa1742112015131013cd232`,
+now 19 PASS / 0 FAIL in-tree, also 29 PASS / 0 FAIL (`run-all.sh`) and
+35 PASS / 0 FAIL (`run-real.sh`).
+
+`realglib/evidence/consumer-unlink.log` SHA-256
+`ac2ec245b3c6aa8b02f1046b61623b016d74b92870a3b49bc222f508d075c94b`
+records `UNLINK_SETUP fake=0x6385c5ec7260 … bin=0x775125004c20
+victim_chunk=0x6385fc393660`, `POST_PIN A_size_word=0000000000000111
+A_fd=0000775125004b20 A_bk=00006385c5ec7260`,
+`UNLINK_RETURN_VICTIM=1`, `UNLINK_RETURN_FAKE=1`,
+`UNLINK_FAKE_AFTER=c75e5c3806000000…` versus
+`UNLINK_FAKE_BEFORE=603639fc85630000…`, `UNLINK_FD_WORD_CHANGED=1`,
+`RC=0`: all ten post-pin `g_try_malloc(260)` calls complete; the eighth
+returns the corrupted neighbouring chunk A and the ninth returns the fake
+chunk at the file-chosen address. glibc wrote its smallbin/tcache
+metadata into that chosen address (the first word changed from the
+pre-arranged chunk pointer to a protected tcache pointer, the second was
+cleared to zero). Safe 4x4 and fixed-pin controls from W293 remain clean
+in the same runner.
+
+Ceiling: this is a real glibc allocator accepting a fake chunk whose
+address is supplied by overflow bytes in the pinned JIF-shaped payload.
+It is not a real GIMP plugin allocation, not attacker-controlled data
+written to an arbitrary target object, not control flow, and not a
+command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL
+(chosen-address fake chunk accepted and returned in the pinned real-glib
+driver), NO r5. Witness asked in chat; clean-archive replay owed.

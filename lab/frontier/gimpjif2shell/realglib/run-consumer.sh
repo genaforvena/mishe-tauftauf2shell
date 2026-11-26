@@ -24,7 +24,7 @@ gcc -O0 -g -Wall -I. $GLIB_CFLAGS -DVARIANT_FIXED \
   && ok "consumer fixed build" || bad "consumer fixed build"
 
 echo "== runs =="
-for mode in consume consumesz consume-safe; do
+for mode in consume consumesz consume-safe unlink; do
   evidence/real-consumer-vuln "$mode" > "evidence/consumer-$mode.log" 2>&1
   echo "RC=$?" >> "evidence/consumer-$mode.log"
 done
@@ -61,6 +61,20 @@ has evidence/consumer-gdb.log "_int_malloc" \
 has evidence/consumer-gdb.log "0x4d4d4d4d4d4d4d4d" \
   && ok "faulting pointer register holds the chosen bk word" \
   || bad "faulting pointer register holds the chosen bk word"
+
+echo "== chosen-address fake chunk accepted by real glibc =="
+has evidence/consumer-unlink.log "RC=0" \
+  && ok "fake-chunk pair completes all ten post-pin allocations" \
+  || bad "fake-chunk pair completes all ten post-pin allocations"
+has evidence/consumer-unlink.log "UNLINK_RETURN_VICTIM=1" \
+  && ok "post-pin malloc returns the corrupted adjacent chunk" \
+  || bad "post-pin malloc returns the corrupted adjacent chunk"
+has evidence/consumer-unlink.log "UNLINK_RETURN_FAKE=1" \
+  && ok "post-pin malloc returns the fake chunk at the chosen address" \
+  || bad "post-pin malloc returns the fake chunk at the chosen address"
+has evidence/consumer-unlink.log "UNLINK_FD_WORD_CHANGED=1" \
+  && ok "glibc writes the chosen fake chunk fd word" \
+  || bad "glibc writes the chosen fake chunk fd word"
 
 echo "== controls =="
 has evidence/consumer-consume-safe.log "RC=0" \
