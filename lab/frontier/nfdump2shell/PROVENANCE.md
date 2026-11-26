@@ -510,3 +510,40 @@ from scratch (`BUILT build-vuln-asan`, `BUILT build-fixed-asan`,
 `run-wire.sh` with `V_BUILD`/`F_BUILD` set to the genuine plain builds
 13 PASS / 0 FAIL. No generated evidence was copied into the archive and no
 assertion was weakened.
+
+## Crossing-write bound on the live receive allocation (2026-11-26 19:47Z)
+
+The direct route to a pointer-bearing object past `in_buff` is closed by
+arithmetic and live observation, not by a harness-only assumption. Pinned
+`EXgenericFlow_t` offsets (`pins/nfxV3.h:138-192`) put `msecReceived` at
+element-header offset +20..27, `srcPort` at +44..45, `dstPort` at +46..47
+and `proto` at +48. A valid IPv4 UDP datagram carries at most 65507 bytes,
+and `nfcapd.c:273` receives into a 65535-byte `malloc`, so an element
+header must start at E<=65503. The 8-byte store then ends at E+27<=65530,
+five bytes inside the allocation. For the pinned ICMP swap to be triggered
+by packet bytes, `proto` must satisfy E+48<=65506, which forces
+`dstPort`<=65504, also inside. For `dstPort` to cross the allocation
+(E+46>=65535), E>=65489 and `proto`>=65537: the trigger byte lies past both
+the datagram and the allocation, so the swap cannot be wire-triggered into
+that region.
+
+GDB confirmation on the genuine uninstrumented ELF
+(`src/build-vuln-plain/src/nfcapd/.libs/nfcapd`, `LD_LIBRARY_PATH` set to
+`src/build-vuln-plain/src/libnffile/.libs`), break `nfd_raw.c:259`, live
+`edge` datagram (`WIRE_LEN=65507`):
+
+```
+BP in_buff=0x555555578230 cnt=65507 fs=0x5555555882b0
+in_buff+65528: 01 00 00 00 00 00 00 00
+in_buff+65536: 00 00 00 00 00 00 00 00
+in_buff+65544: 21 00 00 00 00 00 00 00
+```
+
+`genericFlow` is optimized out at `-O2`; from the shipped `edge_datagram()`
+layout the element header sits at `in_buff+65503` and the flow view at
+`in_buff+65507`, matching the ASan `READ of size 1` at `nfd_raw.c:259`
+recorded by `run-edge.sh`. The `01` residue at +65528 is heap state, not a
+wire-chosen trigger; no chosen write crossed the allocation. The temporary
+GDB runner and log are under the ignored `harness/out/gdb-edge-swap*`;
+they are not part of the replay. Grade unchanged: rung 3 verbatim / rung 4
+PARTIAL, NO r5.

@@ -305,6 +305,21 @@ Clean archive of commit `ceb87a6e` rebuilt all four collectors and returned
 `BUILD_INSTRUMENTATION_OK`. No generated evidence was copied into the
 archive.
 
+### Crossing-write bound (2026-11-26 19:47Z)
+
+The 8-byte timestamp store cannot cross the live 65535-byte receive buffer
+from any valid UDP datagram: a 65507-byte packet allows an element header
+only at `E<=65503`, so the store ends at `E+27<=65530`. The ICMP swap writes
+at `E+46..47` only when `proto` at `E+48` is an ICMP byte from the packet;
+packet bytes end at 65507, which forces the write target to `<=65504`.
+Making the target cross (`E>=65489`) puts the trigger byte at `>=65537`,
+past both packet and allocation. GDB at the live plain collector's
+`nfd_raw.c:259` with the 65507-byte `edge` datagram measured
+`in_buff=0x555555578230`, `in_buff_cnt=65507`, and heap residue
+`01 00 00 00 ...` at `in_buff+65528` — a trigger byte there is not
+attacker-chosen from the wire. No crossing write, no pointer control; grade
+unchanged, NO r5. Detail: `lab/frontier/nfdump2shell/PROVENANCE.md`.
+
 ## Duplicate check
 
 `reports/frontier-*.md` and the wall's do-not-duplicate list were checked
