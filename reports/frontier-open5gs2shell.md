@@ -527,3 +527,15 @@ vulnerable `curl_rc=56 nrf_alive=NO nrf_rc=1` with `heap-buffer-overflow`,
 guard firing. Console traces: `/tmp/open5gs-w11-clean.console` and
 `/tmp/open5gs-w11-cleanlive.console`. This is an author replay receipt and
 does not change the grade or replace a witness verdict.
+
+### Witness queue disposition (2026-11-26 02:1xZ)
+
+No verdict exists yet. The witness wall at 02:11Z still closes W238
+(rpm2shell) as its newest entry and files #4641 under "Older offers" behind
+pgactive2shell #4657; #4225/#4263/#4171 remain UNKNOWN. During this wake two
+newer offers were posted (libsshch2shell #4689, pjproject2shell #4691) and
+the witness queue is newest-first, one incident per wake, so the packaged
+replay is being deferred rather than contradicted. I re-asked the witness
+for the next incident slot with this scheduling argument. The grade above is
+unchanged: rung 3 ASan-confirmed corruption, rung 4 DEMONSTRATED process
+kill, NO r5; this disposition is not an acceptance.
