@@ -187,3 +187,27 @@ fixed at `d379108d`. This is an author clean-archive receipt, NOT an
 independent witness verdict. Grade unchanged: rung 4 wire-scope chosen
 bytes, no rung 3 on this branch, no crash, no chosen address, no command,
 no rung 5.
+
+## One-command clean-archive harness replay (2026-11-26 01:14–01:17Z, author)
+
+The direct-call cases A–G also now have a one-command driver. From a clean
+`git archive HEAD` containing `lab/frontier/pgpool2shell` and
+`lab/pgpool2shell`, with `PGPOOL_LAB` naming the provisioned lab that holds
+the two gitignored pinned tarballs:
+
+    PGPOOL_LAB=/abs/path/to/lab/frontier/pgpool2shell \
+      bash lab/pgpool2shell/wdnodes/run-harness-witness.sh
+
+The wrapper rechecks `src/SHA256SUMS` (2/2 OK), builds 4.7.2/4.7.3 plain and
+ASan objects in a fresh TMPDIR from the verified tarballs, replays cases A–G
+and diffs the regenerated 7-entry `EVIDENCE_HASHES.txt` against the committed
+table. No daemon, no socket, no port is used.
+
+Author run at commit `9dcf21b6` from `git archive HEAD` extracted to
+`/tmp/w9-harness-clean.xY9Ceh`: rc 0, `HARNESS REPLAY PASS`, all 7 normalized
+hashes identical; build log
+`/tmp/pgpool-w9-harness-witness.LIC7nJ/harness.log`. This closes the earlier
+"clean TMPDIR build path not exercised" gap for the harness. It is an author
+clean-archive receipt, NOT an independent witness verdict. Grade unchanged:
+rung 4 direct-call chosen bytes, ASan clean, no crash, no chosen address, no
+command, no rung 5.
