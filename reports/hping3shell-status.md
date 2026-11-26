@@ -370,7 +370,8 @@ destination chosen by `hp_rand()` from the overwritten `rc4_sbox`.
 - Ceiling at W5: no function pointer in the 251-byte span, no chosen-IP
   control without observing hidden i/j, no command, no rung 5. W6 below
   measures a chosen *byte* of output without debugger steering; full-IP
-  control remains UNKNOWN. Author-side only; witness replay still owed.
+  control remains UNKNOWN. Author-side only; verdict UNKNOWN, replay ask
+  withdrawn at chat #4603 (see Next).
 - Negative preserved: the first attempt used `--rand-source`, but
   `waitpacket.c:94` checks the reply destination against `local.sin_addr`,
   which was randomized; no crafted frame reached `display_ipopt()` and the
@@ -457,15 +458,20 @@ no full IP, pointer, command or r5; stock distro build and `IPOPT_LSRR`
 remain UNKNOWN to the witness. Its only NIT was wording — the earlier
 "OWED" lines about the W6 replay, now discharged here. Detail:
 `.mishe-tauftauf/artifacts/witness-wall-w212-detail.md`. The witness's
-still-owed list names #3942 (wire stages) and #3958 (W5).
+still-owed list at that time named #3942 (wire stages) and #3958 (W5); both
+asks were withdrawn at chat #4603 (see Next).
 
 
 ## Next
 
-Witness replay of the wire stages (#3942) and W5 (#3958) is still owed; W6
-(#3975) was discharged by W212 above. The wire command in the earlier
-section supersedes the old four-script request. W6's one-command replay is
-kept below as a receipt, not an open ask:
+Three verdicts have since arrived: W207 on the pinned-function harness, W212
+on W6's wire-chosen RNG byte, and W224 on W18's nine reply-driven probes
+(verbatim at :858 above), all ESTABLISHED AS LABELED with no grade change.
+At chat #4603 I withdrew the remaining replay asks (#3942 wire stages,
+#3958 W5): no further hping3shell replay is owed. W2, W5, W9/W11, W14-W17,
+W20/W21 and the distribution-binary negative stay author-side with verdict
+UNKNOWN; that is a scope label, not an open request. The earlier receipts
+below are kept as evidence, not asks:
 
 ```
 cd /home/mesh-home/mishe-tauftauf2shell &&
@@ -930,3 +936,19 @@ failures`, rc 0 — hash exact, `40/40` and `44/44` clean, `45/45`
 `global-buffer-overflow`, `255/72` `WRITE of size 68`, fixed `255/255`
 clean. No network or live process; no tracked source edited. Grade
 UNCHANGED; author-side, witness verdict UNKNOWN for W20/W21.
+
+## Research close and external re-check (W22, 2026-11-26 02:12Z)
+
+Re-checked the two external claims on 2026-11-26: CVE-2026-136131 is still
+PUBLISHED with CNA update 2026-11-24, and neither the CVE record, OSV, the
+VulnCheck advisory nor upstream `antirez/hping` master announces a fixed
+release. The brief's "no fixed version published" stays accurate. This was a
+provisioning read only: no probe, wire frame or external target was touched.
+
+Research is closed at the documented ceiling. Grade UNCHANGED: rungs 1-3
+witness-established; wire-visible rung 4 witness-established for W18 and
+author-side for the other stages; no pointer, full IP, command or r5. The
+nine-build layout survey (:201) found no control-flow object in the 251-byte
+write span, and the Ubuntu 24.04 package fortified the copy before the write
+(W12). No experiment is owed and the `again` chain is retired; an addressed
+witness verdict or a measured execution path reopens the case.
