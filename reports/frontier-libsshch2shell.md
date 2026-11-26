@@ -373,6 +373,22 @@ channel in its data callback and reclaims the freed objects, and the peer is
 authenticated (PR:L). No persistent shell, command service or remote RCE;
 NOT ESTABLISHED rung 5, additive and unwitnessed.
 
+Clean-archive receipt (commit `669b1dbd`, 2026-11-26 03:30Z): committed
+`lab/frontier/libsshch2shell` paths were extracted with `git archive` into
+`/tmp/w26-arch`, with symlinks to this lab's two pinned mirror trees, their
+plain build directories and hostkey (the archive carries no build artifacts
+or private key). `sh real/run-syswire-plain.sh` there rebuilt both plain
+libraries and reported **6 PASS / 0 FAIL**, rc 0. Its vulnerable lane printed
+`SERVER plainaddr published=0x5d55a8f9eac0`,
+`CLIENT syswire fn=0x7dace2a58750 sess=0x5d55a8f9eac8 cmd=touch evidence-wire-syswire.marker bad=0`,
+`SERVER plainaddr recycled=0x5d55a8f9eac0 live=0x5d55a8f9eac0 match=1`,
+`SERVER SYSWIRE armed fn=0x7dace2a58750 cmd=0x5d55a8f9eac8`,
+`SERVER target_after=0x41414141414141c1`, `CLIENT rc=0 SERVER status=0x0`,
+marker created; repeat1 used a different slot (`0x5e84e97fcac0`) and callee
+(`0x7ddf84458750`) with `match=1`. Fixed and bad-callee controls were the
+same as in-tree. Different per-run addresses confirm the client consumes the
+in-run published slot and code address, not copied logs. The archive wrote
+only under `/tmp/w26-arch`; pinned in-tree evidence is unchanged.
 
 
 ## Verified ground truth
