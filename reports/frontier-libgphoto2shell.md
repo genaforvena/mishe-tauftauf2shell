@@ -687,3 +687,9 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `lab/frontier/libgphoto2shell/live/replay-w197-gcc-o2-device-only.sh`
   (12 PASS / 0 FAIL), raw
   `lab/frontier/libgphoto2shell/evidence/w197-gcc-o2-device-only.out`.
+  A second, from-scratch GCC -O2 build in a fresh build directory from the
+  same pinned source tree reproduced the same `0x12bd1` top size and the
+  same 12 PASS / 0 FAIL replay (2026-11-26T00:5xZ, ~58 s), so the build
+  constant is reproducible across build directories, not device-observable.
+  Raw output:
+  `lab/frontier/libgphoto2shell/evidence/w197-fresh-build-repro.out`.
