@@ -6072,8 +6072,24 @@ Escalation arms are bounded negatives:
 
 Grade: a new **stock wire-only rung-4 consumer-visible write** on Ruby 3.4.11
 under a labeled ASLR-off deployment condition. It does not establish rung 5:
-no command, chosen pointer, fixed-build positive, witness replay, or second
+no plant-witness ESTABLISHED verdict, command, chosen pointer, or second
 distinct command. Prior witness-ESTABLISHED harness rung 5 is unchanged; full
 stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
+
+Independent replay (fresh-context task agent, not a plant witness verdict):
+the source pin and both script digests matched
+(`01193fbe8f83…` driver, `779a615f527d…` differ). With the driver's own
+`RUBY2SHELL_ONIGMO_GEM_PATH` set to the 3.4.12 gem home, two default attacks
+and a `PAD=8` varied attack all returned 200/alive with the identical
+54,795-byte `c6be1419…` page; each differ reported 306→302 rows, 4 missing and
+293 one-byte-shortened rows. Control-vs-itself was CLEAN; safe affected was
+200/alive with 3,079 bytes; fixed 3.4.13 was 500/alive with
+`too many range repeat`. Evidence:
+`lab/build/evidence/wire-indep-{ctrl2,atk1b,atk2,pad8,safe,fixed,fixed-defgem}.{json,html}`
+and `wire-indep-diff-*.json`. Important setup nuance: setting only the shell's
+`GEM_PATH` leaves the driver's derived 3.4.11 gem home in place and the attack
+faulted without HTTP response; use both the shell and driver override as in
+`docs/reproducibility.md`. No command, callback or second request execution
+was observed; this is replay of the rung-4 corruption only.
 
 

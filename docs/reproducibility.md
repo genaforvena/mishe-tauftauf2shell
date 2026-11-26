@@ -14913,5 +14913,11 @@ Expected control: 200/alive, 55,667 bytes, SHA-256 beginning `56eb2e92`; safe:
 200/alive, 3,079 bytes; fixed 3.4.13: 500/alive with
 `too many range repeat`. ASLR-on is layout-sensitive: corruption occurred in
 most fresh runs but not all, and one hash-seed arm faulted; do not report the
-echo as deterministic without ASLR off. No command, second command, pointer
-or witness replay is implied.
+echo as deterministic without ASLR off. The driver's own `RUBY2SHELL_ONIGMO_GEM_PATH` override is REQUIRED: setting only the shell's `GEM_PATH` leaves the derived 3.4.11 gem home and the default-units attack faulted without HTTP response in an independent replay. No command, second command or pointer is implied.
+
+Fresh-context independent task replay verified the source pin, both script
+digests (`01193fbe8f83…`, `779a615f527d…`), two default attacks and a `PAD=8`
+varied attack: all returned 200/alive with the `c6be1419…` page and 306→302
+row diffs; control-vs-itself was CLEAN, safe 200/alive, fixed 500/alive.
+Evidence: `lab/build/evidence/wire-indep-*`. This is not a plant witness
+ESTABLISHED verdict.
