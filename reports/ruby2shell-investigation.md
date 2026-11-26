@@ -4686,3 +4686,68 @@ default path that compiles a request-derived `Regexp` with UTF-16LE or
 UTF-32LE encoding. If none exists, both wpqw secondary lanes are
 wire-unreachable and remain lab-only; a found path would change the
 reachability grade.
+
+## Wire reachability of the wide-encoding regexp lanes (2026-11-26, 11:04Z wake) — NEGATIVE
+
+The prior experiment ran verbatim. Static survey: 127 `Regexp.new`/`compile`
+sites in the installed 3.4.12 plain gem tree; the only sites taking a dynamic
+pattern that could plausibly come from a request are
+`action_dispatch/http/mime_type.rb:313,319` (`Regexp.quote(mime_type.to_s)`,
+quoted, so `(?i:w)` is escaped to literals),
+`action_dispatch/routing/inspector.rb:132` (dev-only route grep), and
+`mapper.rb:263` (app-defined route `format:` requirement). No site supplies a
+case-insensitive attacker-chosen pattern in a wide encoding.
+
+Dynamic check: `lab/repro/ruby2shell-wpqw-reach.{rb,py,sh}` boots an
+unmodified stock Sinatra (`ruby2shell-stock-baseline.ru`) and stock
+`rails new` app with a `RUBYOPT` preload that logs every Ruby-level
+`Regexp.new`/`compile` (encoding, options, source bytes, caller) and every
+wide-encoded `String#blank?` receiver. It also counts all regexp
+constructions so a zero-hit result is not an inert hook. Evidence is
+gitignored under `lab/build/evidence/wpqw-reach/`. A boot-time positive
+control with `(?i:w)`+U+03AB in UTF-16LE/UTF-32LE logged both patterns.
+
+| Wire arm | Sinatra | Rails |
+| --- | --- | --- |
+| `Accept` header with raw UTF-16LE / UTF-32LE bytes | 400 (Puma bad headers) | 400 (Puma bad headers) |
+| multipart `_method` or `q` with `charset=UTF-16LE`/`UTF-32LE`, body `(?i:w)`+U+03AB, a valid `x`, or U+1E98+tail | 500 `Encoding::CompatibilityError` | 500 `Encoding::CompatibilityError` |
+| percent-encoded wide bytes in query | 404 | 404 |
+| `/rails/info/routes?grep=` wide bytes | 404 | 400 `ActionController::BadRequest: Invalid encoding for parameter` |
+| ASCII canary `X2SHELLCANARY123` in header, query, multipart body, User-Agent | 404 | 404 |
+
+Trace result (both apps): Sinatra 88 / Rails 72 regexp constructions, **all**
+logged; **zero** UTF-16/32 patterns, **zero** wide `blank?` receivers and
+**zero** patterns containing the ASCII canary bytes. Both apps survived all
+arms. Rack's `tag_multipart_encoding` does force a wide encoding onto a
+part's name and body (`rack/multipart/parser.rb:587-588`), but every such
+request dies at an encoding-compatibility check before any regexp compiles.
+A wide pattern *can* be compiled on a default path: `String#blank?` falls back
+to `ENCODED_BLANKS[self.encoding]`
+(`activesupport/core_ext/object/blank.rb:153-162`), which compiles
+`\A[[:space:]]*\z` in the wide encoding (measured with the tracer). Its source
+is fixed and has no case-insensitive flag. Under ASan 3.4.12, that fixed wide
+pattern matched against a wide U+1E98+U+03AB subject produced no ASan report
+(`lab/build/evidence/wpqw-reach/blank-asan.out`, rc=0; unrelated UBSan
+misaligned-load reports at boot). The canary arms close the wider question:
+no default request path in either app compiles an unquoted, request-derived
+pattern at all.
+
+**Conclusion:** both wpqw secondary lanes require an attacker-chosen pattern
+in UTF-16LE/UTF-32LE that no stock Rails/Sinatra request path supplies; they
+are lab-only. The UTF-16LE verdict-steering lane stays rung 4 at its
+in-process scope; the UTF-32LE optimizer OOB stays rung 3. Primary grades
+unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+External claim rechecked 11:16Z (now past the promised 25 Nov): Veria's page
+still says "25 November 2026, or later" and still carries
+`dateModified 2026-11-21T03:52Z`; no PoC or mechanics published. Watch only.
+
+Next bounded experiment: TracePoint-survey a stock Rails/Sinatra request for
+`String#upcase`, `String#downcase`, `String#swapcase` and `casecmp?` receivers
+whose bytes came from the wire outside `Rack::MethodOverride`'s `_method`
+part (header normalization, ETag/Content-Type handling, parameter filtering).
+A second, differently-groomed consumer of the primary one-byte overflow would
+change the rung-4/rung-5 picture; zero wire-derived receivers closes the
+consumer-search branch. Falsifier: no TracePoint hit with wire bytes on any
+stock arm.
