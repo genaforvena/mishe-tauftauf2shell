@@ -771,3 +771,34 @@ OBSERVED for tag 2); the real-audio-source question is CLOSED at the source
 level as described above. No lab-level UNKNOWN remains: only the
 deployment-specific question of whether an attacker can influence the
 server's captured audio content stays open and is not measurable here.
+
+## Wake 20 (2026-11-26): chosen call target in the live rdpsnd log object
+
+The wake-18 controlled dereference does reach an indirect call. In a
+scratch-instrumented plain build of pinned 3.32.0 d27a4f7c, the same 16384-byte
+copy writes the live rdpsnd channel `s_wLog` object at `out_buffer+8880`.
+Its fields are `Appender` +40, `Parent` +48, `custom` +112 and `context` +120
+(`offsetof` against the pinned internal `wlog.h`; `CRITICAL_SECTION` is 48
+bytes). The lab's synthetic playback source — not the client wire — places
+`system()` in `custom`, a pointer to a benign command string in `context` and
+`Name`, zeroes `FilterLevel`, and preserves `Appender`/`Parent`. FreeRDP's own
+client quality-mode `WLog_DBG` after the copy then reaches
+`WLog_Layout_GetMessagePrefix`, whose default layout calls
+`log->custom(log->context)` for `%ctx` (`Layout.c:211-213`). The benign command
+`touch /tmp/frw20-rce-marker` executed twice (observed marker timestamps
+12:39:05.376Z and 12:45:35.836Z).
+
+Controls on the same loopback build, `-auth`, two PDUs: with the call target
+zeroed (`FR_NO_CALL=1`) the wrap and 16384-byte copy still occur but no marker
+appears; with the upstream-style `nBlockAlign / 7 < nChannels` guard the wrap
+does not occur (normal 8820+7564 copy) and no marker appears; with benign PCM
+only (`FR_BENIGN_ONLY=1`) there is no wrap and no marker. Evidence and raw-log
+locations: `lab/freerdp2shell-src/call_target_stock.txt`.
+
+This stays a rung-4 lab mechanic, not rung 5 and not witness acceptance: the
+chosen pointer/argument/command come from the server-side synthetic audio
+source (wake 17 bounds stock bytes to server capture), a scratch client delay
+is needed for a post-write log, and two log fields are preserved through the
+playback source so the real appender chain can be reached. The client chooses
+the wrap and the target offset, not the written bytes. No committed replay
+patch, digest or `verify_live.sh` changed; no off-loopback probe.
