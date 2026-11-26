@@ -13860,8 +13860,8 @@ or command path exists. Verdict **ESTABLISHED AS LABELED** for rung 2 observed
 underflow + rung 3 ASan-confirmed fault; rung 4/NOT CLAIMED and NO r5, no
 grade change, no contradiction. Caveat, not a contradiction: ASan stops at the
 memmove interceptor before bytes move, so no chosen-offset corruption is
-shown, and the QoS1 wild READ is inside the lab driver. The generated manifest
-and register still read `established:false`; the operator owns their fold.
+shown, and the QoS1 wild READ is inside the lab driver. The manifest and
+register fold landed in `e8fc7ab9` (section below): 119 established rows.
 
 ### MuJS — SCREENED, NOT STAGED (CVE-2026-110715)
 
@@ -13945,3 +13945,129 @@ CCV_CODE_POINT so the bitset write disappears. No shape allocates `mbuf`;
 the proposed non-NULL redirect experiment is CLOSED. Grade stays narrow
 secondary-lane rung 4 and large-V absolute-address steering stays CLOSED;
 no witness replay.
+
+## 2026-11-26 14:0x–15:0xZ — libsmpp342shell admission, MuJS/QuickJS stage replays, MQTT-C wire, pjproject real consumer
+
+### Generated-count and verdict fold (`e8fc7ab9`)
+
+The operator's commit admits libsmpp342shell as the 176th declared mind and
+folds W270/W271's ESTABLISHED AS LABELED rows into `docs/results.md` and the
+manifest (established count 117 → 119). Generated counts are 176 declared /
+173 active / 173 rows / 119 established in `README.md` and `docs/results.md`;
+`docs` does not edit generated files. W270 and W271's replay procedures and
+caveats remain in the 13:3x–13:4xZ section above; neither verdict moved a
+grade cell.
+
+### Libsmpp342Shell — CVE-2026-75895 / GHSA-fpm9-38vr-4gp8
+
+Advisory: `https://github.com/advisories/GHSA-fpm9-38vr-4gp8` (unreviewed,
+CVSS 3.1/AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:N/A:N, CWE-125). It names libsmpp35
+0.1.0–1.8.0; the one-line fix `strlen` → `strnlen(aux,left)` is in Osmocom
+libsmpp34 1.14.5 → 1.14.6, fix `af0e2912057551dab97bbe26e6a41f18a75f3bbb`.
+Pinned peeled commits `d6ac32fde99f08b2019a5ca095471456583dc93a` (vuln) and
+`f93991bd19b6715a6e1782711734cfc52760432e` (fixed); tarballs are gitignored
+and refetch commands plus every negative are in
+`lab/frontier/libsmpp342shell/PROVENANCE.md`.
+
+```
+sha256sum lab/frontier/libsmpp342shell/run-all.sh
+  # 373fcdc9a182485efc38dbb3b7fa99908a57f80cd4e4977838058be708405637
+sha256sum lab/frontier/libsmpp342shell/evidence-run-console.log
+  # cbd591997570a70ca4645719f4a5dab841d09400add9970b4f4b07f4d4562ccb
+bash lab/frontier/libsmpp342shell/run-all.sh   # RESULT PASS=31 FAIL=0, rc 0
+```
+
+Expected: GCC and Clang ASan both report `heap-buffer-overflow`, `READ of
+size 2`, 0 bytes after a 17-byte region via the verbatim
+`def_frame/bind_transmitter.frame:1` C_OCTET macro; fixed rejects the same
+PDU `rv=-1, len(system_id):2` cleanly, a complete valid PDU parses `rv=0` on
+both pins, and a guard-page plain build faults rc 139. Operator re-ran the
+unmodified runner at 14:0xZ with byte-identical stdout, kept in gitignored
+`.mishe-tauftauf/artifacts/operator-w20261126-libsmpp34-smoke/console.log`.
+Rung 3 only; no chosen-offset read-back, pointer, wire consumer, command or
+r5. Clean-archive witness replay is still owed. Author detail:
+`reports/libsmpp342shell-status.md`.
+
+### MuJS — staged after the 13:3xZ screen (`9549f0d8`)
+
+CVE-2026-110715 / GHSA-45w2-9pc7-5crm; pins `307f18c4216420f2f56e22d8e7040baa39a6304a`
+and `32064e10caa45e68fc87331ca53d042049cc9396`. The advisory writeup
+`https://hackmd.io/@haind-pwn/mujs-array-length-flat-oob` returned HTTP 404;
+the fix adds `&& idx_b < obj->u.a.flat_length` in both simple-array branches
+of `jsarray.c` and changes the heapsort comparison at `:357`. Run
+`bash lab/frontier/mujs2shell/run-all.sh` (sha256
+`5aca123ab59aae54f9bd9f96896b61ef290516d22867a6acfd655cf913f59e68`):
+`RESULT PASS=23 FAIL=0 rc 0` at 14:06Z. The committed console is
+`lab/frontier/mujs2shell/evidence-run-console.log`. Expected: four-line JS
+`var a=[3,1,2]; a.length=1000; a.sort();` gives GCC ASan
+`heap-buffer-overflow`, `READ of size 1` at verbatim `jsarray.c:246` in
+`Ap_sort_cmp` through the real CLI; fixed sorts `sorted-length=1000` cleanly,
+and the normal-sort control prints `normal=3 1,2,3` on both pins. No OOB
+WRITE, rung 4 or r5; witness replay and admission owed. The same commit
+preserves the musl regcomp timed-out harness evidence as a screen with no
+register row (`reports/frontier-muslregex2shell.md`).
+
+### QuickJS bytecode count (`2de8ea98`)
+
+CVE-2026-88378 / GHSA-jww9-7qmq-6hv5; pins
+`04be246001599f5995fa2f2d8c91a0f198d3f34c` and
+`42526037cfc0b2a94a875c0de0f4bbeaf597a542`, no release tags. Run
+`bash lab/frontier/quickjsbcode2shell/run-all.sh` (sha256
+`7031c42086ccaad2ee329b18c597cd0fc2b62fe98dd9a6c30f249bc3c09b1cd5`):
+`RESULT PASS=25 FAIL=0 rc 0`. Expected: GCC ASan `heap-buffer-overflow`,
+`WRITE of size 96`, 0 bytes after an 88-byte region at verbatim
+`quickjs.c:38820` in `JS_ReadFunctionTag` on the upstream 21-byte regression
+input; fixed emits `SyntaxError: integer overflow while reading bytecode`,
+a real bytecode round-trip evaluates `value=2` on both, and Clang 18 ASan is
+silent (preserved negative). Upstream-fixed bytes only — rung 3, no chosen
+value, witness replay, rung 4 or r5. Detail:
+`reports/quickjsbcode2shell-status.md`.
+
+### MQTT-C loopback wire runner (`5cf5c644`)
+
+`sha256sum lab/frontier/mqttc2shell/run-wire.sh` →
+`f929a0b120460d7fcb810e9c0add2456e9fcf5d90507dff981a87883ab61787a`;
+`harness/wire_driver.c` →
+`0c1744c7b13580fd0a4cc022ee737073dbcc137e1a881d02db0396995c1cfeb3`. Run
+`bash lab/frontier/mqttc2shell/run-wire.sh`: rc 0, `RESULT PASS=29 FAIL=0`,
+console sha256
+`acc585e79d551fef73d1f4bff624ddd74102b84f4c76f49a699001cfdd36cbd5` in
+gitignored `.mishe-tauftauf/artifacts/mqttc2shell-wire/wire-console.log`.
+A forked local broker sends `30 04 ff ff 00 00` in two 50 ms-separated
+`recv()` chunks on 127.0.0.1; no bytes are preloaded. Expected:
+`PAL_RECV ... calls=2 bytes=6`, ASan `negative-size-param:
+(size=-4294967296)` at `mqtt.c:880`, plain child signal 11; v1.1.7 reports
+`callbacks=0, error=-2147483636` with no ASan; safe packet yields 8 bytes,
+`callbacks=1 topic_size=1 message_size=3`; QoS1 wild READ at `:1748`, clean
+on fixed. Clean `git archive 5cf5c644` replay at 14:44Z returned the same
+console hash. No chosen-offset store: `consumed = 2^32 + RL + 2` puts the
+`memmove()` source ~4 GiB past the destination for realistic buffers. W271
+replayed `run-all.sh` only; this runner's witness replay is owed.
+
+### PJPROJECT real pjmedia consumer (`759825c1`, W240)
+
+CVE-2026-77396 / GHSA-6p2p-5wf8-h5hr, pins `c1ea7648fb53f945493972a23133b9e0d3e4a1fe`
+and `7ecc6584969a923c4190b6912afbf5952b5a4b9f`; no patched version is named
+by the advisory. Build and run with
+`bash lab/frontier/pjproject2shell/real/build-real.sh` then
+`bash lab/frontier/pjproject2shell/real/run-real.sh`, using full upstream
+tarballs, `PJMEDIA_HAS_VIDEO=1`, `-DNDEBUG` and ASan at `-O0` (the debug
+build without `-DNDEBUG` aborts at the release no-op assert: build-mode
+control). Expected from crafted 48/64/512-byte `00dc` AVIs through
+`pjmedia_avi_player_create_streams()` and `pjmedia_port_get_frame()`:
+vulnerable ASan `WRITE of size 64` and `WRITE of size 512` 0 bytes after a
+48-byte region in real `avi_get_frame()`, neighbor hex
+`4d495348452d504a50524f4a454354214a21` (chosen `MISHE-PJPROJECT!` at bytes
+48..63), fixed/safe rc 0 with `frame.size=48` and no ASan. Raw logs are
+gitignored under `lab/frontier/pjproject2shell/real/out-vuln/` and
+`out-fixed/`. Clean `git archive 759825c1` replay at 15:05Z: build rc 0 with
+both tarball hashes exact, run rc 0 with the identical six-case transcript;
+in-tree `run-witness.sh` printed `WITNESS REPLAY PASS`. Grade rung 4 with a
+driver-provided live sentinel; no library object, pointer, wire or command,
+so r5 stays UNKNOWN. Author detail: `reports/pjproject2shell-status.md`.
+
+Other peer commits in this window (neuvector, leptonica, sailtga, lwext4,
+gimpjif, libxml2, Ruby, FreeRDP W22, radare2pyc, nfdump, unarr) left the
+generated counts and every register grade cell unchanged; their exact pins,
+commands and gitignored evidence are in the named reports and in
+`docs/changelog.md`. No re-run here is claimed as a witness verdict.

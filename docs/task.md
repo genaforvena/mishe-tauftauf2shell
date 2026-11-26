@@ -13449,6 +13449,80 @@ and safe packets clean. Rung 4 and R5 NOT CLAIMED, no grade change and no
 contradiction. The caveat is that ASan stops at the memmove interceptor before
 bytes move and the QoS1 READ is inside the lab driver (`driver.c:21-25`,
 `:78-82`), so no chosen-offset corruption, wire path or command is shown.
-Generated manifest/register still read `established:false`; their fold is the
-operator's. Detail: gitignored
+Generated manifest/register were folded in `e8fc7ab9` (below). Detail: gitignored
 `.mishe-tauftauf/artifacts/witness-w271-mqttc/detail.md`.
+
+## 2026-11-26 14:0x–15:0xZ — libsmpp342shell admitted, verdicts folded, new staged lanes and real-consumer replays
+
+- `e8fc7ab9` (operator, standing #6): **libsmpp342shell admitted as the 176th
+  declared target mind**, window 184 (panes %372/%373), generated counts
+  175/172/172/117 → 176/173/173/119. The same commit folded W270's
+  CodebaseMemory #4426 and W271's MQTT-C verdicts into the evidence register
+  (117 → 119 established rows, no grade change). CVE-2026-75895 /
+  GHSA-fpm9-38vr-4gp8 names "libsmpp35 0.1.0–1.8.0" while the one-line
+  `strlen` → `strnlen(aux,left)` fix is in libsmpp34 1.14.5 → 1.14.6
+  (`af0e2912…`, peeled pins `d6ac32fd…` / `f93991bd…`) — the discrepancy is
+  preserved, not silently corrected. Runner
+  `lab/frontier/libsmpp342shell/run-all.sh` sha256 `373fcdc9…08405637`,
+  console `cbd59199…72f4d4562ccb`, `RESULT PASS=31 FAIL=0 rc 0`; operator
+  re-ran it byte-identically at 14:0xZ. GCC and Clang ASan both report
+  `READ of size 2` 0 bytes after a 17-byte region through the verbatim
+  C_OCTET macro; fixed rejects `rv=-1` cleanly, valid PDU parses `rv=0` on
+  both. Grade: rung 3 only, **rung 4 NOT CLAIMED**, no chosen-offset read-back,
+  pointer, live wire consumer, command or r5; a clean-archive witness replay
+  is still owed. Detail: `reports/libsmpp342shell-status.md`.
+- `9549f0d8` supersedes the 13:3xZ MuJS screen above: **mujs2shell is now
+  STAGED**, not declined. CVE-2026-110715 / GHSA-45w2-9pc7-5crm, pins
+  `307f18c4…` / `32064e10…`, runner sha256 `5aca123a…f913f59e68`,
+  `RESULT PASS=23 FAIL=0 rc 0` at 14:06Z. `var a=[3,1,2]; a.length=1000;
+  a.sort();` gives GCC ASan `READ of size 1` at verbatim `jsarray.c:246` in
+  `Ap_sort_cmp` through the real CLI; fixed sorts cleanly and a normal-sort
+  control is clean on both pins. The advisory writeup 404 is preserved;
+  no OOB WRITE, chosen-offset read-back, rung 4 or r5. Witness replay and
+  admission owed. The same commit preserves musl regcomp's timed-out harness
+  evidence as a screen (UNKNOWN, no register row).
+- `2de8ea98` staged **quickjsbcode2shell** for CVE-2026-88378 /
+  GHSA-jww9-7qmq-6hv5: `bc_get_leb128_int()` overflows the constant-pool count
+  into a small allocation in `JS_ReadFunctionTag()`; pins
+  `04be2460…` / `42526037…`; runner sha256 `7031c420…2b62fe98dd9a6c30f249bc3c09b1cd5`,
+  `RESULT PASS=25 FAIL=0 rc 0`. GCC ASan `WRITE of size 96` 0 bytes after an
+  88-byte region at verbatim `quickjs.c:38820` on the upstream 21-byte
+  regression input; fixed rejects it, a real bytecode round-trip evaluates
+  `value=2` on both, Clang ASan is silent (preserved negative).
+  Rung 3 only; no chosen value, witness replay, rung 4 or r5.
+- `759825c1` (the edge commit) advanced pjproject2shell W240 to a **real
+  pjmedia consumer**: full-vendor builds at `c1ea7648` / `7ecc6584` with
+  `PJMEDIA_HAS_VIDEO=1`, `-DNDEBUG` and ASan, crafted 48/64/512-byte `00dc`
+  AVIs through `pjmedia_avi_player_create_streams()` +
+  `pjmedia_port_get_frame()`; vulnerable `WRITE of size 64` and `WRITE of
+  size 512` 0 bytes after a 48-byte region in `avi_get_frame()`, chosen
+  `MISHE-PJPROJECT!` at bytes 48..63 of a live sentinel, fixed clamp and safe
+  input clean. Debug build without `-DNDEBUG` aborts at the assert (build-mode
+  control). Clean `git archive 759825c1` replay rc 0 with identical six-case
+  transcript. Grade rung 4 real-consumer sentinel; no library object, pointer,
+  wire or command, so r5 remains UNKNOWN. Detail:
+  `reports/pjproject2shell-status.md`.
+- `5cf5c644` gave MQTT-C a wire-backed path: `run-wire.sh` (sha256
+  `f929a0b1…87a83ab61787a`) and `wire_driver.c` (sha256
+  `0c1744c7…699001cfdd36cbd5`) replace the PAL stub with `recv()` on a
+  127.0.0.1 socket, a local broker sends the 6-byte packet in two chunks;
+  `RESULT PASS=29 FAIL=0`, clean-archive replay identical. The same underflow
+  and fixed/safe controls now hold on a real loopback receive path, but the
+  32-bit size field makes `consumed = 2^32 + RL + 2`, so the `memmove()` source
+  is ~4 GiB past its destination: no chosen-offset store, and rung 4 stays
+  NOT CLAIMED. W271 covered `run-all.sh` only; the wire runner's own witness
+  replay is owed.
+- Peer commits between `e8fc7ab9` and `759825c1` also advanced target-local
+  lanes (neuvector real-object replay, leptonica real-library replay, sailtga,
+  lwext4 real mount path, gimpjif W242 glib/zlib, libxml2 public-API gate,
+  Ruby consumer negatives, FreeRDP W22 clean-room replay, radare2pyc, nfdump,
+  unarr glibc negative). They moved no generated count or grade cell; the
+  exact pins, bytes and negatives stay in their reports and in
+  `docs/changelog.md`. `2296dbfb` documented the FreeRDP clean-room replay.
+
+Reproduction commands, pins, expected bytes and evidence locations are in
+`docs/reproducibility.md` § 14:0x–15:0xZ. Next triggers: libsmpp34, MuJS and
+QuickJS witness replays/admissions, MQTT-C wire-runner replay, and the
+operator's fold of any newly admitted target. What would change this fold:
+a witness verdict contradicting a labeled row above, a checker RED on
+committed HEAD, or a generated count that disagrees with `e8fc7ab9`.
