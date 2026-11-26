@@ -956,8 +956,11 @@ fixed-tree-supernode,attack-sender,safe-sender}.log`.
 both extracted tree versions, the non-PIE build, the exact wire and chosen
 address, zeroed forwarding, peer registration, liveness, absence of a
 crash report, and the safe control: `RESULT 16 PASS / 0 FAIL`, rc 0 with
-`REPLAY_LOGDIR=/tmp/n2n-w23-out`, `PORT_BASE=20120`. Clean-archive replay
-receipt follows.
+`REPLAY_LOGDIR=/tmp/n2n-w23-out`, `PORT_BASE=20120`. From `git archive
+198065c0` extracted to `/tmp/n2n-w23-archive` and replayed with cwd `/`,
+`REPLAY_LOGDIR=/tmp/n2n-w23-archive-out`, `PORT_BASE=20200`, the same script
+returned `RESULT 16 PASS / 0 FAIL`, rc 0, including the zeroed forward,
+process liveness and the safe 48-byte control.
 
 This closes W22's final UNKNOWN as a negative control: the upstream fix
 prevents the overflow before any wire-chosen pointer reaches `comm`. The
