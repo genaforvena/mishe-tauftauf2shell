@@ -19,6 +19,10 @@ or wire, so rung 5 is still UNKNOWN. W172 kept guard chunks after the victim
 so the real `gp_file_save()` wrote the device-directed bytes to a host file;
 that is rung 4 extended to a real consumer side effect, still unwitnessed,
 lab-assisted and without a wire or command path.
+The 2026-11-23 replay above is scoped to rung 3; the later independent W257
+replay (2026-11-26) ESTABLISHED the separate W197 device-only repair lane AS
+LABELED at the lab rung-4 real-consumer-list scope. It adds no r5 and does
+not witness W167-W172 or W200. Rung 5 stays UNKNOWN.
 Byte-exact pins and hashes:
 `lab/frontier/libgphoto2shell/PINS.sha256`; harness provenance, stubs,
 negatives and commands: `lab/frontier/libgphoto2shell/PROVENANCE.md`. Frontier

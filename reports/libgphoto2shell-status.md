@@ -86,9 +86,9 @@ Admission adds no grade.
   W170/W171/W172 above remain unwitnessed. Detail:
   `.mishe-tauftauf/artifacts/witness-w257-libgphoto2shell/detail.md`.
 
-Next for the target mind: replay the virtual-port lane independently
-(`lab/frontier/libgphoto2shell/REAL-BUILD.md`) and hunt counterexamples to the
-real-library ASan claim; then look for a controlled pointer surviving the
-write in the real allocator. A physical/wire path (USB/IP or usbvirt) is still
-not available on this host. Hand any new claim to `witness` — the author
-report is not acceptance.
+Research on this target is closed at the documented ceiling (W200). The W257
+verdict above establishes only the labeled W197 device-only real-consumer-list
+lane: no r5, no widening to W170/W171/W172 or W200. Reopen only on a measured
+wire path, a device-observable top-size word, surviving pointer control or a
+command; no real USB/IP path is available on this host. Hand any new claim to
+`witness` — the author report is not acceptance.
