@@ -1,0 +1,53 @@
+=================================================================
+==2943330==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x519000000498 at pc 0x6355cabfe0e8 bp 0x7ffcbe8da570 sp 0x7ffcbe8d9d30
+WRITE of size 4294967280 at 0x519000000498 thread T0
+    #0 0x6355cabfe0e7 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/out/clang-asan-vuln+0xc50e7) (BuildId: 96dc6f786c612f9affe83cada8f06f669657dd44)
+    #1 0x6355cac3e9e4 in xmlDictAddQString /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/harness/../pins/dict-vulnerable.inc:45:5
+    #2 0x6355cac3e9e4 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/harness/driver.c:157:11
+    #3 0x79e5cd02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x79e5cd02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x6355cab65354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/out/clang-asan-vuln+0x2c354) (BuildId: 96dc6f786c612f9affe83cada8f06f669657dd44)
+
+0x519000000498 is located 0 bytes after 1048-byte region [0x519000000080,0x519000000498)
+allocated by thread T0 here:
+    #0 0x6355cac001a3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/out/clang-asan-vuln+0xc71a3) (BuildId: 96dc6f786c612f9affe83cada8f06f669657dd44)
+    #1 0x6355cac3ea38 in xmlMalloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/harness/driver.c:73:12
+    #2 0x6355cac3ea38 in xmlDictAddQString /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/harness/../pins/dict-vulnerable.inc:30:29
+    #3 0x6355cac3ea38 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/harness/driver.c:157:11
+    #4 0x79e5cd02a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x79e5cd02a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x6355cab65354 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/out/clang-asan-vuln+0x2c354) (BuildId: 96dc6f786c612f9affe83cada8f06f669657dd44)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libxml22shell/out/clang-asan-vuln+0xc50e7) (BuildId: 96dc6f786c612f9affe83cada8f06f669657dd44) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x519000000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x519000000400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x519000000480: 00 00 00[fa]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x519000000700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2943330==ABORTING
