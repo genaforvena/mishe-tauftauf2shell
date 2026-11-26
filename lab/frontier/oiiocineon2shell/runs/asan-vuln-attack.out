@@ -1,0 +1,49 @@
+=================================================================
+==3104791==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x739a6c400160 at pc 0x56c921b4cc6f bp 0x7ffe719a2fd0 sp 0x7ffe719a2fc0
+WRITE of size 8 at 0x739a6c400160 thread T0
+    #0 0x56c921b4cc6e in open_like src/cineon.imageio/cineoninput.cpp:215
+    #1 0x56c921b4c9f2 in main h/driver.cpp:25
+    #2 0x739a6e42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #3 0x739a6e42a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #4 0x56c921b3d804 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/h/asan-vuln+0x3804) (BuildId: 65bfb778e0e119333aab37a81237b81582f0ca00)
+
+Address 0x739a6c400160 is located in stack of thread T0 at offset 96 in frame
+    #0 0x56c921b4cb4d in open_like h/sink_vuln.cpp:3
+
+  This frame has 1 object(s):
+    [32, 96) 'strings' <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/cineon.imageio/cineoninput.cpp:215 in open_like
+Shadow bytes around the buggy address:
+  0x739a6c3ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c3fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c3fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c400000: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+  0x739a6c400080: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 00 00 00 00
+=>0x739a6c400100: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x739a6c400180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c400200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c400280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c400300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x739a6c400380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3104791==ABORTING

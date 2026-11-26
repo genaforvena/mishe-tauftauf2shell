@@ -1,0 +1,3 @@
+attack255.cin: numberOfElements=255, 2048 bytes
+safe8.cin: numberOfElements=8, 2048 bytes
+valid1.cin: numberOfElements=1, 2048 bytes

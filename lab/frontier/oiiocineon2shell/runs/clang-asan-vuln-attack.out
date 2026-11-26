@@ -1,0 +1,49 @@
+=================================================================
+==3104814==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7329aba000e0 at pc 0x5ddbc98d9f77 bp 0x7fff731dff90 sp 0x7fff731dff88
+WRITE of size 8 at 0x7329aba000e0 thread T0
+    #0 0x5ddbc98d9f76 in open_like /home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/src/cineon.imageio/cineoninput.cpp:215:20
+    #1 0x5ddbc98d9caf in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/h/driver.cpp:25:15
+    #2 0x7329ada2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7329ada2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x5ddbc97e7634 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/h/clang-asan-vuln+0x2e634) (BuildId: dcdc06e6aee0126821ed6d47b3eee206016453f1)
+
+Address 0x7329aba000e0 is located in stack of thread T0 at offset 96 in frame
+    #0 0x5ddbc98d9e3f in open_like /home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/h/sink_vuln.cpp:3
+
+  This frame has 1 object(s):
+    [32, 96) 'strings' <== Memory access at offset 96 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/oiiocineon2shell/src/cineon.imageio/cineoninput.cpp:215:20 in open_like
+Shadow bytes around the buggy address:
+  0x7329ab9ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329ab9ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329ab9fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329ab9fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329aba00000: f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5 f5
+=>0x7329aba00080: f1 f1 f1 f1 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x7329aba00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329aba00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329aba00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329aba00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7329aba00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3104814==ABORTING
