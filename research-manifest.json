@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 169,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ) and netrekcow2shell (10:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 170,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ) and open1722vss2shell (11:0xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 166,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ and netrekcow2shell admitted 10:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 167,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ and open1722vss2shell admitted 11:0xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 166,
+      "value": 167,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2576,6 +2576,22 @@
         "reports/netrekcow2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Open1722Vss2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 11:0xZ under standing #6 as the 170th declared target mind; window 177 adopted (panes %360/%361 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-136616 / GHSA-xvmx-7qq5-34q6: COVESA Open1722 before 0.9.8 `Avtp_Vss_CalcVssPathLength()` at real `src/avtp/acf/custom/Vss.c:307` reads a path prefix past a 12-byte header-only INTEROP VSS frame in uint16 arithmetic, and prefix 0xFFFF wraps so `Avtp_Vss_SetVssData()` writes a chosen byte into the path area; fixed in 0.9.8 commit `714067b0134cf36f89464dbc6ec25529c0e189c7`. Canonical `run-all.sh` sha256 `5da4f917cc7b5d9e8f04a1d7dfccc6ba6acff132ff3d2cee0eeb73ebc1a72a52`; author clean-archive replay from `f52dd1b5` returned `RESULT PASS=34 FAIL=0` rc 0 with GCC+Clang ASan heap READ of size 2, 0 bytes after a 12-byte region, chosen adjacent bytes driving length 16708, fixed build clean. Grade rung 3 real-source ASan OOB READ / rung 4 PARTIAL; no named adjacent object, pointer, AVTP wire path, command or r5. Independent witness replay owed.",
+      "reports": [
+        "reports/frontier-open1722vss2shell.md",
+        "reports/open1722vss2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }

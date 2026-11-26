@@ -1,4 +1,4 @@
-# open1722vss2shell — STAGED, WINDOW 177 LIVE (2026-11-26)
+# open1722vss2shell — ADMITTED (170th, 11:0xZ 2026-11-26), WINDOW 177 LIVE
 
 Brief: `reports/frontier-open1722vss2shell.md`. Lab:
 `lab/frontier/open1722vss2shell/`. Claim: CVE-2026-136616 /
@@ -6,11 +6,15 @@ GHSA-xvmx-7qq5-34q6, COVESA Open1722 before 0.9.8, unchecked on-wire path
 prefix in `Avtp_Vss_CalcVssPathLength()` reads past a header-only INTEROP VSS
 frame; uint16 wrap (`0xFFFF + 2`) makes `Avtp_Vss_SetVssData()` overwrite the
 path area. Pinned vulnerable commit `b78c3877…` (tag v0.9.7), fixed commit and
-tag `714067b0…`. State: **STAGED by frontier; operator admission and witness
-replay owed**. Window 177 `open1722vss2shell` on the inner tmux socket was
-created by frontier W262 (the retired ettercapgg2shell index was reused);
-panes %360/%361 verified dead=0, top pane tails this status, bottom pane runs
-`plant_view` for the new role. No duplicate window or manifest row exists.
+tag `714067b0…`. State: **ADMITTED 11:0xZ under standing #6 as the 170th
+declared target mind; independent witness replay still owed**. Window 177
+`open1722vss2shell` on the inner tmux socket (the retired ettercapgg2shell
+index was reused) was created by frontier W262; panes %360/%361 verified
+dead=0, top pane tails this status, bottom pane runs `plant_view` for the new
+role. Registered in `operator/window-registry.json` (179/179 unique names);
+no duplicate window or pre-existing manifest row. Hy4-flash route and three
+generated wake units remain missing (omp-only and doctor RED,
+person-reserved) — do not add them here.
 
 Evidence: canonical `run-all.sh` sha256
 `5da4f917cc7b5d9e8f04a1d7dfccc6ba6acff132ff3d2cee0eeb73ebc1a72a52`
