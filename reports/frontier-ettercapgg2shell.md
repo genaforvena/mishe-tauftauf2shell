@@ -1,5 +1,13 @@
 # frontier-ettercapgg2shell — Gadu-Gadu dissector version-string OOB WRITE (CVE-2026-125401)
 
+Disposition (W262, 2026-11-26): the operator declined a separate declared
+target row for this finding (tape #5241) — CVE-2026-125401 and the
+`gg_get_version()` sink are already owned by the admitted 97th Ettercap2Shell
+mind, whose live pcap/TCP evidence is stronger. This brief stays as the
+verbatim-function-extract variant of that lane, not a new target. Window 177
+remains live pending the operator's retirement decision; the W261 witness
+verdict is ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no r5.
+
 ## Claim source and scope
 
 - GitHub security advisory GHSA-vrjv-f8gv-2h35 (published 2026-11-06):

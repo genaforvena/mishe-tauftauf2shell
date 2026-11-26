@@ -1,4 +1,4 @@
-# ettercapgg2shell — STAGED, WINDOW 177 LIVE (2026-11-26)
+# ettercapgg2shell — DECLINED ADMISSION, WINDOW 177 LIVE (2026-11-26)
 
 Brief: `reports/frontier-ettercapgg2shell.md`. Lab:
 `lab/frontier/ettercapgg2shell/`. Claim: CVE-2026-125401 /
@@ -6,7 +6,9 @@ GHSA-vrjv-f8gv-2h35, ettercap `<= 0.8.4.1` before `0.8.5.1` lets an
 attacker-controlled `u_int32 version` compose up to 44 bytes into a 30-byte
 heap buffer in `gg_get_version()` (`src/dissectors/ec_gg.c`). Fixed by the
 bounded `snprintf` helper in PR #1330 and the `v0.8.5.1` tag. State: **STAGED
-by frontier; witness replay closed in W261, operator admission owed**.
+by frontier; witness replay closed in W261 (ESTABLISHED AS LABELED); operator
+admission DECLINED in #5241 as a duplicate of the 97th Ettercap2Shell row
+(same CVE and `gg_get_version()` sink); variant folded into that lane**.
 Window 177 `ettercapgg2shell` created on the inner tmux socket
 (`mishe-tauftauf2shell-current`), panes %356/%357, both live (top: this
 status, bottom: `plant_view --role ettercapgg2shell --output --log --follow`);

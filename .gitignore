@@ -473,3 +473,9 @@ lab/frontier/netrekcow2shell/src/v3.3.4/
 lab/frontier/netrekcow2shell/src/fix/
 lab/frontier/netrekcow2shell/src/*.tgz
 lab/frontier/netrekcow2shell/src/out/
+
+# open1722vss2shell: extracted pinned trees and local binaries stay local;
+# runner, driver, pinned tarballs, fix patch and evidence stay tracked.
+lab/frontier/open1722vss2shell/src/vuln/
+lab/frontier/open1722vss2shell/src/fixed/
+lab/frontier/open1722vss2shell/src/out/

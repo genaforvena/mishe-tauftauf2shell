@@ -1,0 +1,35 @@
+PASS PIN tar-v0.9.7
+PASS PIN tar-714067b0
+PASS PIN fix-commit-patch
+PASS PIN driver
+PASS PIN vulnerable-Vss.c
+PASS PIN fixed-Vss.c
+PASS PIN CalcVssPathLength at Vss.c:295 (vuln) / :294 (fixed)
+PASS PIN vulnerable raw prefix read and unchecked setter offset
+PASS PIN fixed clamp, overflow test and setter no-op guard
+PASS PIN fix patch carries both hunks
+PASS builds gcc (vuln/fixed asan + plain, real Vss.c)
+PASS builds clang (vuln/fixed asan + plain, real Vss.c)
+PASS gcc ASan: heap READ-2 past 12-byte VSS header at real Vss.c:307
+PASS vuln-gcc-asan-adjacent: clean rc=0 adjacent len=16708
+PASS vuln-gcc-asan-wrap: clean rc=0 wrap b12=ff b13=5a b20=00
+PASS vuln-gcc-asan-safe: clean rc=0 safe b18=5a
+PASS fixed-gcc-asan-read-oob: clean rc=0 read_oob len=0
+PASS fixed-gcc-asan-adjacent: clean rc=0 adjacent len=0
+PASS fixed-gcc-asan-wrap: clean rc=0 wrap b12=ff b13=ff b20=00
+PASS fixed-gcc-asan-safe: clean rc=0 safe b18=5a
+PASS vuln-gcc-plain-adjacent: clean rc=0 adjacent len=16708
+PASS vuln-gcc-plain-wrap: clean rc=0 b12=ff b13=5a b20=00
+PASS fixed-gcc-plain-wrap: clean rc=0 b12=ff b13=ff b20=00
+PASS clang ASan: heap READ-2 past 12-byte VSS header at real Vss.c:307
+PASS vuln-clang-asan-adjacent: clean rc=0 adjacent len=16708
+PASS vuln-clang-asan-wrap: clean rc=0 wrap b12=ff b13=5a b20=00
+PASS vuln-clang-asan-safe: clean rc=0 safe b18=5a
+PASS fixed-clang-asan-read-oob: clean rc=0 read_oob len=0
+PASS fixed-clang-asan-adjacent: clean rc=0 adjacent len=0
+PASS fixed-clang-asan-wrap: clean rc=0 wrap b12=ff b13=ff b20=00
+PASS fixed-clang-asan-safe: clean rc=0 safe b18=5a
+PASS vuln-clang-plain-adjacent: clean rc=0 adjacent len=16708
+PASS vuln-clang-plain-wrap: clean rc=0 b12=ff b13=5a b20=00
+PASS fixed-clang-plain-wrap: clean rc=0 b12=ff b13=ff b20=00
+RESULT PASS=34 FAIL=0
