@@ -1,0 +1,35 @@
+From da49a37041e78ba7148b24bf6500c4c18c8ecbb0 Mon Sep 17 00:00:00 2001
+From: Stellersjay <jay@stellersjay.pub>
+Date: Mon, 11 May 2026 10:43:30 -0700
+Subject: [PATCH] Addresses an incomplete fix from 1b0b660
+
+---
+ quickjs.c                         | 1 +
+ tests/fix_set_array_length-uaf.js | 6 ++++++
+ 2 files changed, 7 insertions(+)
+ create mode 100644 tests/fix_set_array_length-uaf.js
+
+diff --git a/quickjs.c b/quickjs.c
+index cc314a791..43966b14a 100644
+--- a/quickjs.c
++++ b/quickjs.c
+@@ -9901,6 +9901,7 @@ static int set_array_length(JSContext *ctx, JSObject *p, JSValue val,
+         if (len < old_len) {
+             for(i = len; i < old_len; i++) {
+                 JS_FreeValue(ctx, p->u.array.u.values[i]);
++                p->u.array.u.values[i] = JS_UNDEFINED;
+             }
+             p->u.array.count = len;
+         }
+diff --git a/tests/fix_set_array_length-uaf.js b/tests/fix_set_array_length-uaf.js
+new file mode 100644
+index 000000000..5f4224d1b
+--- /dev/null
++++ b/tests/fix_set_array_length-uaf.js
+@@ -0,0 +1,6 @@
++// Crash — heap-use-after-free (confirmed with ASan)
++const arr = [{a:1}, {b:2}, {c:3}, {d:4}, {e:5}];
++arr.length = 2;   // frees elements 2-4
++arr.length = 5;   // grows length back; count stays at 2
++arr.push({f:6}); // count jumps to 6; elements 2-4 are freed but readable
++print(JSON.stringify(arr[3])); // reads freed memory

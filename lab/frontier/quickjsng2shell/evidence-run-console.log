@@ -1,0 +1,41 @@
+PASS vulnerable tarball sha256
+PASS fixed tarball sha256
+PASS advisory PoC sha256
+PASS fix commit patch sha256
+PASS vulnerable quickjs.c verbatim sha256
+PASS fixed quickjs.c verbatim sha256
+PASS set_array_length function diff is one added line
+PASS fix patch contains the one-line guard
+PASS vulnerable free line verbatim
+PASS vulnerable setter leaves freed pointer
+PASS fixed setter clears freed slot
+PASS gcc ASan build vuln
+PASS gcc ASan build fixed
+PASS vulnerable UAF report
+PASS vulnerable READ-4
+PASS verbatim js_dup frame
+PASS verbatim fast-array frame
+PASS freed object boundary
+PASS vulnerable ASan exits 1
+PASS fixed setter yields empty slot
+PASS fixed no ASan report
+PASS fixed ASan clean exit
+PASS vuln safe array readback
+PASS vuln safe no ASan
+PASS vuln safe clean exit
+PASS fixed safe array readback
+PASS fixed safe no ASan
+PASS fixed safe clean exit
+RESULT PASS=28 FAIL=0
+PASS vuln UAF
+PASS vuln READ-4
+PASS vuln js_dup frame
+PASS vuln fast-array frame
+PASS vuln freed boundary
+PASS fixed empty slot
+PASS fixed no ASan
+PASS vuln safe readback
+PASS vuln safe clean
+PASS fixed safe readback
+PASS fixed safe clean
+RESULT PASS=11 FAIL=0

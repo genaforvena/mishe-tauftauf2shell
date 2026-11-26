@@ -1,0 +1,145 @@
+./build-asan/qjs --std /tmp/poc_gc.js 
+=================================================================
+==1991224==ERROR: AddressSanitizer: heap-use-after-free on address 0x507000008520 at pc 0x63c7806ea1fe bp 0x7ffdad53c8c0 sp 0x7ffdad53c8b0
+READ of size 4 at 0x507000008520 thread T0
+    #0 0x63c7806ea1fd in JS_FreeValueRT /home/calleax/git/quickjs/quickjs.c:6778
+    #1 0x63c7806ea1fd in js_array_finalizer /home/calleax/git/quickjs/quickjs.c:6489
+    #2 0x63c7806e8d87 in free_object /home/calleax/git/quickjs/quickjs.c:6660
+    #3 0x63c7806e9377 in free_gc_object /home/calleax/git/quickjs/quickjs.c:6680
+    #4 0x63c7806e9377 in free_zero_refcount /home/calleax/git/quickjs/quickjs.c:6702
+    #5 0x63c7806e9377 in js_free_value_rt /home/calleax/git/quickjs/quickjs.c:6748
+    #6 0x63c7806eb537 in JS_FreeValueRT /home/calleax/git/quickjs/quickjs.c:6779
+    #7 0x63c7806eb537 in JS_FreeValue /home/calleax/git/quickjs/quickjs.c:6786
+    #8 0x63c780694668 in JS_CallInternal /home/calleax/git/quickjs/quickjs.c:20155
+    #9 0x63c780693c5e in JS_CallInternal /home/calleax/git/quickjs/quickjs.c:17954
+    #10 0x63c7808023b5 in async_func_resume /home/calleax/git/quickjs/quickjs.c:20431
+    #11 0x63c78082215f in js_async_function_resume /home/calleax/git/quickjs/quickjs.c:20686
+    #12 0x63c780823743 in js_async_function_call /home/calleax/git/quickjs/quickjs.c:20805
+    #13 0x63c780858e42 in js_execute_sync_module /home/calleax/git/quickjs/quickjs.c:30766
+    #14 0x63c780859b85 in js_inner_module_evaluation /home/calleax/git/quickjs/quickjs.c:30878
+    #15 0x63c78085a35c in js_evaluate_module /home/calleax/git/quickjs/quickjs.c:30925
+    #16 0x63c78085a35c in JS_EvalFunctionInternal /home/calleax/git/quickjs/quickjs.c:36507
+    #17 0x63c78085aa0b in JS_EvalFunction /home/calleax/git/quickjs/quickjs.c:36521
+    #18 0x63c780651abd in eval_buf /home/calleax/git/quickjs/qjs.c:128
+    #19 0x63c780651c12 in eval_file /home/calleax/git/quickjs/qjs.c:165
+    #20 0x63c780650933 in main /home/calleax/git/quickjs/qjs.c:686
+    #21 0x70ef9482a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #22 0x70ef9482a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #23 0x63c780650f64 in _start (/home/calleax/git/quickjs/build-asan/qjs+0x35f64) (BuildId: e959e042f54bc6846acc7907f8caa3ace317a643)
+
+0x507000008520 is located 0 bytes inside of 72-byte region [0x507000008520,0x507000008568)
+freed by thread T0 here:
+    #0 0x70ef94cfc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x63c7806e9377 in free_gc_object /home/calleax/git/quickjs/quickjs.c:6680
+    #2 0x63c7806e9377 in free_zero_refcount /home/calleax/git/quickjs/quickjs.c:6702
+    #3 0x63c7806e9377 in js_free_value_rt /home/calleax/git/quickjs/quickjs.c:6748
+    #4 0xbafa78f9be580cff  (<unknown module>)
+
+previously allocated by thread T0 here:
+    #0 0x70ef94cfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x63c780689d5f in js_malloc_rt /home/calleax/git/quickjs/quickjs.c:1627
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/calleax/git/quickjs/quickjs.c:6778 in JS_FreeValueRT
+Shadow bytes around the buggy address:
+  0x507000008280: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa 00 00
+  0x507000008300: 00 00 00 00 00 00 00 fa fa fa fa fa 00 00 00 00
+  0x507000008380: 00 00 00 00 00 fa fa fa fa fa 00 00 00 00 00 00
+  0x507000008400: 00 00 00 fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x507000008480: 00 fa fa fa fa fa 00 00 00 00 00 00 00 00 00 fa
+=>0x507000008500: fa fa fa fa[fd]fd fd fd fd fd fd fd fd fa fa fa
+  0x507000008580: fa fa fd fd fd fd fd fd fd fd fd fa fa fa fa fa
+  0x507000008600: fd fd fd fd fd fd fd fd fd fa fa fa fa fa 00 00
+  0x507000008680: 00 00 00 00 00 00 00 fa fa fa fa fa fd fd fd fd
+  0x507000008700: fd fd fd fd fd fd fa fa fa fa 00 00 00 00 00 00
+  0x507000008780: 00 00 00 fa fa fa fa fa 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1991224==ABORTING
+(browserland_adventures)  1 calleax@erank:~/git/quickjs$ vim poc_gc.js
+(browserland_adventures) calleax@erank:~/git/quickjs$ vim poc.js 
+(browserland_adventures) calleax@erank:~/git/quickjs$ ./build-asan/qjs --std poc.js 
+=================================================================
+==1994348==ERROR: AddressSanitizer: heap-use-after-free on address 0x507000008280 at pc 0x6253a8c5cb72 bp 0x7fff4bf041d0 sp 0x7fff4bf041c0
+READ of size 4 at 0x507000008280 thread T0
+    #0 0x6253a8c5cb71 in js_dup /home/calleax/git/quickjs/quickjs.c:1546
+    #1 0x6253a8c5cb71 in js_get_fast_array_element /home/calleax/git/quickjs/quickjs.c:9501
+    #2 0x6253a8cd6865 in JS_GetPropertyValue /home/calleax/git/quickjs/quickjs.c:9571
+    #3 0x6253a8c27186 in JS_CallInternal /home/calleax/git/quickjs/quickjs.c:19162
+    #4 0x6253a8d933b5 in async_func_resume /home/calleax/git/quickjs/quickjs.c:20431
+    #5 0x6253a8db315f in js_async_function_resume /home/calleax/git/quickjs/quickjs.c:20686
+    #6 0x6253a8db4743 in js_async_function_call /home/calleax/git/quickjs/quickjs.c:20805
+    #7 0x6253a8de9e42 in js_execute_sync_module /home/calleax/git/quickjs/quickjs.c:30766
+    #8 0x6253a8deab85 in js_inner_module_evaluation /home/calleax/git/quickjs/quickjs.c:30878
+    #9 0x6253a8deb35c in js_evaluate_module /home/calleax/git/quickjs/quickjs.c:30925
+    #10 0x6253a8deb35c in JS_EvalFunctionInternal /home/calleax/git/quickjs/quickjs.c:36507
+    #11 0x6253a8deba0b in JS_EvalFunction /home/calleax/git/quickjs/quickjs.c:36521
+    #12 0x6253a8be2abd in eval_buf /home/calleax/git/quickjs/qjs.c:128
+    #13 0x6253a8be2c12 in eval_file /home/calleax/git/quickjs/qjs.c:165
+    #14 0x6253a8be1933 in main /home/calleax/git/quickjs/qjs.c:686
+    #15 0x7e070f02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x7e070f02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x6253a8be1f64 in _start (/home/calleax/git/quickjs/build-asan/qjs+0x35f64) (BuildId: e959e042f54bc6846acc7907f8caa3ace317a643)
+
+0x507000008280 is located 0 bytes inside of 72-byte region [0x507000008280,0x5070000082c8)
+freed by thread T0 here:
+    #0 0x7e070f4fc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x6253a8c7a377 in free_gc_object /home/calleax/git/quickjs/quickjs.c:6680
+    #2 0x6253a8c7a377 in free_zero_refcount /home/calleax/git/quickjs/quickjs.c:6702
+    #3 0x6253a8c7a377 in js_free_value_rt /home/calleax/git/quickjs/quickjs.c:6748
+    #4 0x4cb1fee2cbfec4ff  (<unknown module>)
+    #5 0x51600000007f  (<unknown module>)
+
+previously allocated by thread T0 here:
+    #0 0x7e070f4fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x6253a8c1ad5f in js_malloc_rt /home/calleax/git/quickjs/quickjs.c:1627
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/calleax/git/quickjs/quickjs.c:1546 in js_dup
+Shadow bytes around the buggy address:
+  0x507000008000: 00 00 00 00 00 fa fa fa fa fa 00 00 00 00 00 00
+  0x507000008080: 00 00 00 fa fa fa fa fa 00 00 00 00 00 00 00 00
+  0x507000008100: 00 fa fa fa fa fa 00 00 00 00 00 00 00 00 00 fa
+  0x507000008180: fa fa fa fa 00 00 00 00 00 00 00 00 00 fa fa fa
+  0x507000008200: fa fa fd fd fd fd fd fd fd fd fd fa fa fa fa fa
+=>0x507000008280:[fd]fd fd fd fd fd fd fd fd fa fa fa fa fa fd fd
+  0x507000008300: fd fd fd fd fd fd fd fa fa fa fa fa 00 00 00 00
+  0x507000008380: 00 00 00 00 00 fa fa fa fa fa fd fd fd fd fd fd
+  0x507000008400: fd fd fd fd fa fa fa fa 00 00 00 00 00 00 00 00
+  0x507000008480: 00 fa fa fa fa fa 00 00 00 00 00 00 00 00 00 fa
+  0x507000008500: fa fa fa fa 00 00 00 00 00 00 00 00 00 fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1994348==ABORTING

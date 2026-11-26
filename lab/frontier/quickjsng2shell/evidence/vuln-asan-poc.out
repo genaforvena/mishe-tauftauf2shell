@@ -1,0 +1,108 @@
+=================================================================
+==107144==ERROR: AddressSanitizer: heap-use-after-free on address 0x5070000087c0 at pc 0x5c7e201a7d1a bp 0x7fff6c71f1c0 sp 0x7fff6c71f1b0
+READ of size 4 at 0x5070000087c0 thread T0
+    #0 0x5c7e201a7d19 in js_dup build/vuln/quickjs.c:1546
+    #1 0x5c7e201e2782 in js_get_fast_array_element build/vuln/quickjs.c:9478
+    #2 0x5c7e201e35e7 in JS_GetPropertyValue build/vuln/quickjs.c:9548
+    #3 0x5c7e2023057f in JS_CallInternal build/vuln/quickjs.c:19110
+    #4 0x5c7e2023ed88 in async_func_resume build/vuln/quickjs.c:20379
+    #5 0x5c7e2024052f in js_async_function_resume build/vuln/quickjs.c:20634
+    #6 0x5c7e202415d4 in js_async_function_call build/vuln/quickjs.c:20753
+    #7 0x5c7e2027f936 in js_execute_sync_module build/vuln/quickjs.c:30714
+    #8 0x5c7e20280d17 in js_inner_module_evaluation build/vuln/quickjs.c:30826
+    #9 0x5c7e2028147a in js_evaluate_module build/vuln/quickjs.c:30873
+    #10 0x5c7e202ab994 in JS_EvalFunctionInternal build/vuln/quickjs.c:36455
+    #11 0x5c7e202abafd in JS_EvalFunction build/vuln/quickjs.c:36469
+    #12 0x5c7e2019c1dd in eval_buf build/vuln/qjs.c:128
+    #13 0x5c7e2019c499 in eval_file build/vuln/qjs.c:165
+    #14 0x5c7e2019f01e in main build/vuln/qjs.c:686
+    #15 0x7984ab82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #16 0x7984ab82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #17 0x5c7e2019a8a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/quickjsng2shell/build/vuln/qjs+0x3e8a4) (BuildId: 783b43aa461ce4f4b013cb4737bf244882de7de3)
+
+0x5070000087c0 is located 0 bytes inside of 72-byte region [0x5070000087c0,0x507000008808)
+freed by thread T0 here:
+    #0 0x7984abcfc4d8 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0x5c7e201aa0b6 in js_def_free build/vuln/quickjs.c:2041
+    #2 0x5c7e201a858d in js_free_rt build/vuln/quickjs.c:1651
+    #3 0x5c7e201cc4f9 in free_object build/vuln/quickjs.c:6649
+    #4 0x5c7e201cc57e in free_gc_object build/vuln/quickjs.c:6657
+    #5 0x5c7e201cc6c1 in free_zero_refcount build/vuln/quickjs.c:6679
+    #6 0x5c7e201ccbc4 in js_free_value_rt build/vuln/quickjs.c:6725
+    #7 0x5c7e201cce71 in JS_FreeValueRT build/vuln/quickjs.c:6756
+    #8 0x5c7e201ccf2b in JS_FreeValue build/vuln/quickjs.c:6763
+    #9 0x5c7e201e5f59 in set_array_length build/vuln/quickjs.c:9880
+    #10 0x5c7e201e7552 in JS_SetPropertyInternal2 build/vuln/quickjs.c:10062
+    #11 0x5c7e2022e27e in JS_CallInternal build/vuln/quickjs.c:18917
+    #12 0x5c7e2023ed88 in async_func_resume build/vuln/quickjs.c:20379
+    #13 0x5c7e2024052f in js_async_function_resume build/vuln/quickjs.c:20634
+    #14 0x5c7e202415d4 in js_async_function_call build/vuln/quickjs.c:20753
+    #15 0x5c7e2027f936 in js_execute_sync_module build/vuln/quickjs.c:30714
+    #16 0x5c7e20280d17 in js_inner_module_evaluation build/vuln/quickjs.c:30826
+    #17 0x5c7e2028147a in js_evaluate_module build/vuln/quickjs.c:30873
+    #18 0x5c7e202ab994 in JS_EvalFunctionInternal build/vuln/quickjs.c:36455
+    #19 0x5c7e202abafd in JS_EvalFunction build/vuln/quickjs.c:36469
+    #20 0x5c7e2019c1dd in eval_buf build/vuln/qjs.c:128
+    #21 0x5c7e2019c499 in eval_file build/vuln/qjs.c:165
+    #22 0x5c7e2019f01e in main build/vuln/qjs.c:686
+    #23 0x7984ab82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #24 0x7984ab82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #25 0x5c7e2019a8a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/quickjsng2shell/build/vuln/qjs+0x3e8a4) (BuildId: 783b43aa461ce4f4b013cb4737bf244882de7de3)
+
+previously allocated by thread T0 here:
+    #0 0x7984abcfd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5c7e201aa094 in js_def_malloc build/vuln/quickjs.c:2036
+    #2 0x5c7e201a8325 in js_malloc_rt build/vuln/quickjs.c:1627
+    #3 0x5c7e201a890d in js_malloc build/vuln/quickjs.c:1715
+    #4 0x5c7e201c51dd in JS_NewObjectFromShape build/vuln/quickjs.c:5701
+    #5 0x5c7e201c5d90 in JS_NewObjectProtoClass build/vuln/quickjs.c:5828
+    #6 0x5c7e201c7249 in JS_NewObject build/vuln/quickjs.c:6002
+    #7 0x5c7e202188e0 in JS_CallInternal build/vuln/quickjs.c:17669
+    #8 0x5c7e2023ed88 in async_func_resume build/vuln/quickjs.c:20379
+    #9 0x5c7e2024052f in js_async_function_resume build/vuln/quickjs.c:20634
+    #10 0x5c7e202415d4 in js_async_function_call build/vuln/quickjs.c:20753
+    #11 0x5c7e2027f936 in js_execute_sync_module build/vuln/quickjs.c:30714
+    #12 0x5c7e20280d17 in js_inner_module_evaluation build/vuln/quickjs.c:30826
+    #13 0x5c7e2028147a in js_evaluate_module build/vuln/quickjs.c:30873
+    #14 0x5c7e202ab994 in JS_EvalFunctionInternal build/vuln/quickjs.c:36455
+    #15 0x5c7e202abafd in JS_EvalFunction build/vuln/quickjs.c:36469
+    #16 0x5c7e2019c1dd in eval_buf build/vuln/qjs.c:128
+    #17 0x5c7e2019c499 in eval_file build/vuln/qjs.c:165
+    #18 0x5c7e2019f01e in main build/vuln/qjs.c:686
+    #19 0x7984ab82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #20 0x7984ab82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #21 0x5c7e2019a8a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/quickjsng2shell/build/vuln/qjs+0x3e8a4) (BuildId: 783b43aa461ce4f4b013cb4737bf244882de7de3)
+
+SUMMARY: AddressSanitizer: heap-use-after-free build/vuln/quickjs.c:1546 in js_dup
+Shadow bytes around the buggy address:
+  0x507000008500: fa fa fa fa 00 00 00 00 00 00 00 00 00 fa fa fa
+  0x507000008580: fa fa 00 00 00 00 00 00 00 00 00 fa fa fa fa fa
+  0x507000008600: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa 00 00
+  0x507000008680: 00 00 00 00 00 00 00 fa fa fa fa fa 00 00 00 00
+  0x507000008700: 00 00 00 00 00 fa fa fa fa fa fd fd fd fd fd fd
+=>0x507000008780: fd fd fd fa fa fa fa fa[fd]fd fd fd fd fd fd fd
+  0x507000008800: fd fa fa fa fa fa fd fd fd fd fd fd fd fd fd fa
+  0x507000008880: fa fa fa fa 00 00 00 00 00 00 00 00 00 fa fa fa
+  0x507000008900: fa fa fd fd fd fd fd fd fd fd fd fd fa fa fa fa
+  0x507000008980: 00 00 00 00 00 00 00 00 00 fa fa fa fa fa 00 00
+  0x507000008a00: 00 00 00 00 00 00 00 fa fa fa fa fa 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==107144==ABORTING
