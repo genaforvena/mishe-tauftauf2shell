@@ -136,3 +136,49 @@ lab/frontier/pjproject2shell` into `/tmp/w240-pjproject-clean`, then
 `PULL_DONE frame.size=48` with `AVI video chunk (64) exceeds frame buffer
 (48), truncating`. Staged `run-witness.sh` also still returns
 `WITNESS REPLAY PASS` at commit `759825c1`.
+
+## Real library-object lane (W241, 2026-11-26 15:26Z)
+
+`real/real-driver.c` gains a third mode, `realobj`. It derives 48 bytes from
+the real format manager, allocates the frame with the real allocator
+`pj_pool_alloc(pool, framebytes)`, creates two live audio ports with
+`pjmedia_null_port_create()` (each in its own library pool), then calls the
+real library constructor
+`pjmedia_bidirectional_port_create(pool, nget, nput, &victim)`, whose first
+allocation is `PJ_POOL_ZALLOC_T(pool, struct bidir_port)` — so the live
+120-byte `pjmedia_port` sits immediately after the frame in the same pool
+block. It prints `delta = victim - buf`, the victim's key fields and 64 raw
+bytes before and after `pjmedia_port_get_frame()`, and does not call or
+destroy the corrupted port.
+
+    bash lab/frontier/pjproject2shell/real/run-realobj.sh
+
+Result 15:26Z: `delta=48` in all five runs, **TOTAL: 11 PASS / 0 FAIL**,
+rc 0. Raw logs: `real/out-vuln/realobj-vuln-{attack64,attack512,safe48}.log`
+and `real/out-fixed/realobj-fixed-{attack64,safe48}.log`.
+
+- Vulnerable `attack64`: `VICTIM_BYTES_AFTER:4d495348452d504a50524f4a45435421…`,
+  `VICTIM_AFTER name=0x4a502d454853494d` (the other fields unchanged because
+  only 16 chosen bytes reach the object), `PULL_DONE status=0 frame.size=64`.
+- Vulnerable `attack512`: `VICTIM_BYTES_AFTER` is 64 bytes of repeated
+  `4d495348452d504a50524f4a45435421`; `name=0x4a502d454853494d`,
+  `sig=0x4853494d`, `get=0x215443454a4f5250`,
+  `put=0x4a502d454853494d`, `pdata=0x4a502d454853494d`, `frame.size=512`.
+  No pointer is dereferenced or called. The vulnerable build also prints
+  `Assert failed: frame->size >= ch.len` from the release-mode `pj_assert`
+  macro but continues into `file_read3()`.
+- Vulnerable safe48 and both fixed cases: `VICTIM_BEFORE`/`VICTIM_AFTER` and
+  their 64-byte dumps are byte-identical; fixed attack64 logs
+  `AVI video chunk (64) exceeds frame buffer (48), truncating`.
+
+No ASan report is expected in `realobj` mode: both objects are inside one
+pj pool block, so no redzone is crossed. The evidence is the chosen-byte
+overwrite of live library fields, not an ASan diagnostic.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/real-driver.c` | `8304b76dfbefe8c2ecbb7eb35a7c3a81ca32d6ea3b66de8ed87b50d21342deef` |
+| `real/run-realobj.sh` | `d6435096a6d5853c720e522681cb244667fad5ffc55e41e08a125ae25963b6cc` |
+
+Regression at 15:27Z: `bash real/run-real.sh` still reproduces all six W240
+cases (ASan WRITE-64/WRITE-512, neighbor marker, fixed clamp, safe control).

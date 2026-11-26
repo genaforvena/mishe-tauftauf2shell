@@ -1,12 +1,15 @@
 # Frontier brief: pjproject AVI video chunk length overflow — CVE-2026-77396
 
 Status: **ADMITTED 2026-11-26 by the operator** (156th target). W239 witness
-replay ESTABLISHED AS LABELED for the staged excerpt evidence. W240 adds a
-real `pjmedia` build at both pins: ASan-confirmed OOB WRITE of 64 and 512
+replay ESTABLISHED AS LABELED for the staged excerpt evidence. W240 built
+both pinned trees with real `pjmedia`: ASan-confirmed OOB WRITE of 64 and 512
 bytes in real `avi_get_frame()` and chosen-marker overwrite of a live
-adjacent sentinel, with fixed and safe controls. Grade: **rung 3 confirmed in
-the real consumer / rung 4 with a driver-provided sentinel**. No library
-object overwrite, no pointer, no wire, no command and no rung 5.
+adjacent sentinel. W241 moves the frame into the real pj pool and overwrites
+a live, library-created `pjmedia_port` object 48 bytes later, including its
+function-pointer fields. Grade: **rung 3 confirmed in the real consumer /
+rung 4 author-DEMONSTRATED with a real library object** (W240/W241 await
+witness verdict). No pointer was called, no wire, no command, no rung 5.
+
 
 ## Claim and scope
 
@@ -105,6 +108,41 @@ Exact commands, hashes, AVI bytes and raw logs:
 (`build-real.sh` + `run-real.sh`) reproduced all six cases at 15:05Z;
 `run-witness.sh` still returns `WITNESS REPLAY PASS`.
 
+## Real library-object victim (W241, 2026-11-26 15:26Z)
+
+`bash lab/frontier/pjproject2shell/real/run-realobj.sh` adds a `realobj`
+mode to the same driver and replays all five cases: **11 PASS / 0 FAIL**.
+The 48-byte frame comes from the real allocator `pj_pool_alloc(pool, 48)`;
+`pjmedia_null_port_create()` then builds two live audio ports (each in its
+own library pool) and the library constructor
+`pjmedia_bidirectional_port_create(pool, get, put, &victim)` allocates the
+120-byte `struct bidir_port` from the **same** driver pool. Measured
+`victim - buf = 48` in all five runs. The frame pull is still the real
+`pjmedia_avi_player_create_streams()` → `pjmedia_port_get_frame()` path.
+Because both objects live inside one pj pool block, ASan correctly reports
+nothing; the proof is readback of the live object's fields before and after.
+
+- Vulnerable `attack64`: `VICTIM_BYTES_AFTER` starts
+  `4d495348452d504a50524f4a45435421`; the live `info.name.ptr` becomes
+  `0x4a502d454853494d` (chosen ASCII bytes), while fields past byte 16 are
+  untouched. `PULL_DONE status=0 frame.size=64`.
+- Vulnerable `attack512`: all 64 inspected object bytes become repeated
+  `MISHE-PJPROJECT!`; `name.ptr=0x4a502d454853494d`,
+  `sig=0x4853494d`, `get_frame=0x215443454a4f5250`,
+  `put_frame=0x4a502d454853494d`, `port_data.pdata=0x4a502d454853494d`.
+  These are chosen bytes, not a dereferenced or called pointer.
+- Vulnerable 48-byte safe input and both fixed cases: victim fields and
+  bytes are byte-identical before and after, with
+  `PULL_DONE frame.size=48`; the fixed build logs its truncation clamp.
+
+Caveat: the adjacency is produced by the driver's real allocation order
+(`pj_pool_alloc` then a library constructor using that pool), not by a
+shipped caller's natural object layout. The victim is a real library object
+created by a real library constructor, but no attacker-controlled path in
+released pjmedia places a port object immediately after an AVI frame buffer.
+Script hashes, raw logs and the clean-archive receipt are in `PROVENANCE.md`.
+
+
 ## Witness replay (W239, 2026-11-26)
 
 ESTABLISHED AS LABELED. `bash lab/frontier/pjproject2shell/run-witness.sh` from
@@ -128,21 +166,22 @@ supersedes it. Full detail:
   pinned branch, plus a real `pjmedia` build at the vulnerable parent, show
   heap OOB WRITEs of 64 and 512 bytes in `avi_get_frame()` on a real crafted
   AVI, with fixed and safe-input controls.
-- **Rung 4 with a driver-provided live object:** chosen
-  `MISHE-PJPROJECT!` bytes land at frame+48..+63 and overwrite an adjacent
-  18-byte sentinel read back after the real `pjmedia_port_get_frame()` call.
-  The adjacent object is allocated by the driver, not a library object; no
-  pointer was corrupted and no command executed. Do not overstate as pointer
-  control.
+- **Rung 4 author-DEMONSTRATED with a real library object:** in a real
+  `pjmedia` build, chosen `MISHE-PJPROJECT!` bytes overwrite a live
+  `pjmedia_port` created by `pjmedia_bidirectional_port_create()` from the
+  same pj pool, 48 bytes past the frame: a pointer-valued field at 64-byte
+  length and signature, `get_frame`, `put_frame` and `pdata` at 512 bytes.
+  None of those pointers was called or dereferenced, and the adjacency is
+  driver-groomed through real allocator calls rather than a shipped caller
+  layout. Rung 4 is author evidence until the witness replays W240/W241.
 - **Not rung 5:** no live loopback service, no attacker-supplied bytes
   through a network wire, no pointer hijack, no command side effect.
 
-Cheapest next experiment: place a real `pjmedia` object (e.g. a pool block
-or port struct) immediately after the frame buffer and see whether chosen
-bytes corrupt a field that changes a later library decision. That would
-upgrade rung 4 from a sentinel to a library-object overwrite. Rung 5 would
-additionally need a loopback target reachable by attacker-supplied AVI bytes
-and a benign command side effect with vulnerable, fixed and safe controls.
+The remaining work is scope, not mechanics: a shipped pjmedia caller whose
+real object layout puts a live pointer-bearing field directly after the AVI
+frame, then a loopback target fed attacker AVI bytes and a benign command
+side effect with vulnerable, fixed and safe controls. No such path has been
+observed; do not claim it.
 
 ## Duplicate check
 
