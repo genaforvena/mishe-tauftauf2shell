@@ -907,8 +907,13 @@ pins, the PIE binary type, the exact wire and chosen pointer, the
 unmapped target in the live mappings, the SIGSEGV at the dereference,
 the plain-process crash, and the fresh safe control: `RESULT 18 PASS /
 0 FAIL`, rc 0 from the working tree with `REPLAY_LOGDIR=/tmp/n2n-w22-out2`,
-`PORT_BASE=19900`, and from a clean `git archive HEAD` with cwd `/`,
-`REPLAY_LOGDIR=/tmp/n2n-w22-archive-out`, `PORT_BASE=20000`.
+`PORT_BASE=19900`, and from a clean `git archive 963477d8` extracted with
+cwd `/`, `REPLAY_LOGDIR=/tmp/n2n-w22-archive-out`, `PORT_BASE=20000`; both
+runs returned 18 PASS / 0 FAIL and rc 0. Both builds are ET_DYN PIE;
+their Build IDs differ because debug paths embed the temporary source
+tree (`d451dcacd037ae046c135c449d7b5839cb09c85f` working tree,
+`4870643e662335d117d96c35407bf334aef2f97b` clean archive). The archive
+replay also reproduced the plain crash (`rc=139`) and the safe forward.
 
 This closes the default-PIE UNKNOWN as a negative control: the chosen
 pointer is still consumed, but its fixed non-PIE address does not
