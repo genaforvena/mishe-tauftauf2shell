@@ -31,8 +31,8 @@ fetch_tar() {
   fi
   check "$expected" "$SRC/$tarball"
 }
-fetch_tar "$VULN_COMMIT" "$VULN_TAG.tar.gz" ce9bf4b7c7eba45ba4462354688c5409cf9aecd37c0ed64915653c9de90a0d72 || exit 1
-fetch_tar "$FIXED_COMMIT" "$FIXED_TAG.tar.gz" f9b27fe71485a86f68ac2f0a84559b8d220736de6bae05e2bcd4189b6d435e74 || exit 1
+fetch_tar "$VULN_COMMIT" "$VULN_TAG.tar.gz" 863e674f6b8d00422e4a35d13b7ed91f2b76977f35d4499f9162a488c3315c00 || exit 1
+fetch_tar "$FIXED_COMMIT" "$FIXED_TAG.tar.gz" a070f629972355e936e5b4decbe12d91c179c1f412feac2915cd7dde799577d8 || exit 1
 
 PATCH=$SRC/fix-4fcc6fef.patch
 if [ ! -f "$PATCH" ]; then

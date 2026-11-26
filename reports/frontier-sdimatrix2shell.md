@@ -47,7 +47,7 @@ payload carrying chosen bits. No model file, CLI, listener, socket or external
 target is used.
 
 Observed with runner sha256
-`aea439caffe5b9878d72c669da6577e17cdd62777b7dcae507797c4481bb77b9`:
+`65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741`:
 **RESULT PASS=10 FAIL=0, rc 0**. On the vulnerable tag both compilers report
 `ERROR: AddressSanitizer: heap-buffer-overflow`, `READ of size 4`, 0 bytes
 after the 4-byte `values` region, at verbatim `src/runtime/imatrix.cpp:302`

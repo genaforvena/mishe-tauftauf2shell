@@ -12,7 +12,7 @@ Window 176 `sdimatrix2shell` created on the inner tmux socket
 status, bottom: `plant_view --role sdimatrix2shell --output --log --follow`);
 registered in `operator/window-registry.json`. No duplicate window is needed.
 Evidence: canonical `run-all.sh` sha256
-`aea439caffe5b9878d72c669da6577e17cdd62777b7dcae507797c4481bb77b9` verifies
+`65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741` verifies
 pinned tarballs, fix patch, verbatim extracted function bodies and harness
 SHA-256s; it rebuilds both tags under GCC+Clang ASan and GCC+Clang plain and
 drives the crafted file through the real `load_imatrix` body.

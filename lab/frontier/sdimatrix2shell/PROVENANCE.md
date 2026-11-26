@@ -24,14 +24,19 @@ network target is contacted at run time.
 
 | artifact | SHA-256 |
 | --- | --- |
-| `src/master-742-1a13107.tar.gz` | `ce9bf4b7c7eba45ba4462354688c5409cf9aecd37c0ed64915653c9de90a0d72` |
-| `src/master-763-4fcc6fe.tar.gz` | `f9b27fe71485a86f68ac2f0a84559b8d220736de6bae05e2bcd4189b6d435e74` |
+| `src/master-742-1a13107.tar.gz` (codeload by commit SHA) | `863e674f6b8d00422e4a35d13b7ed91f2b76977f35d4499f9162a488c3315c00` |
+| `src/master-763-4fcc6fe.tar.gz` (codeload by commit SHA) | `a070f629972355e936e5b4decbe12d91c179c1f412feac2915cd7dde799577d8` |
 | `src/fix-4fcc6fef.patch` (raw commit patch) | `792c4d07666ad59720653345d0b68beded615a55b6e3dedf79e182d939f659d6` |
 | verbatim vulnerable function body (lines 253..308) | `6d1a5fc1b09cefafe2fefaed1bc5fdae4ca8e425fa424facab99b257103362d1` |
 | verbatim fixed function body (lines 253..312) | `b45cf140d68f49e419876f433990bbe2ef6aff378c2feb1711530c16d5d8375a` |
 | `mkinput.cpp` | `9d5ea511cb942848b3fc6e5b51043dc7d7d029e3aec98a0fc7c4d43574e7450b` |
 | `poc.cpp` | `4a26967209966ff9f209d0ff4f70bf84c22c978b25f370c2399b0c3f9845e19f` |
-| `run-all.sh` (canonical runner) | `aea439caffe5b9878d72c669da6577e17cdd62777b7dcae507797c4481bb77b9` |
+| `run-all.sh` (canonical runner) | `65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741` |
+
+The runner fetches by commit SHA from codeload. Earlier tag-URL archive bytes
+(`ce9bf4b7…`, `f9b27fe7…`) differ in archive metadata, but both forms extract
+the same pinned function bodies (`6d1a5fc1…`, `b45cf140…`). The table pins the
+bytes the canonical runner actually fetches.
 
 The runner rechecks tarballs, fix patch, generator and driver before building;
 it also checks that the extracted bodies equal the pinned hashes and that the
@@ -96,3 +101,8 @@ writing; the chosen bytes come from the subsequent `counts[i] += ncall` store.
   each intermediate hash was replaced in the runner, not left stale.
 - No `sd-cli` build, model conversion, wire input, pointer control, command
   execution or r5 is claimed. Advisory exploitability prose is a claim.
+- First clean-archive replay at commit `05369943` failed with `PIN_FAIL` on
+  the vulnerable tarball: the runner fetched codeload by commit SHA while the
+  pin had been computed from a tag-URL fetch. Re-pinned both archives to the
+  SHA-URL bytes (extracted bodies unchanged) rather than changing the fetch
+  URL; the corrected runner hash is recorded above.
