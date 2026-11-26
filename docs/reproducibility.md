@@ -100,7 +100,7 @@ containers whose host ports bind only to loopback.
 | Htslib2Shell | [brief](../reports/frontier-htslib2shell.md) | CVE-2026-62257 / GHSA-6q7c-m967-9v37 records, fix commits `d66a77d` / `c0b5037` / `a3e8dca` and full tagged 1.23.1 / 1.24 tarballs; ten SHA-256 pins in `lab/frontier/htslib2shell/src/SHA256SUMS` and `PROVENANCE.md` | `cd lab/frontier/htslib2shell && bash run.sh <outdir>` — verifies all ten pins, rebuilds both tagged releases verbatim with ASan and drives real `cram_decoder_init`/`cram_xpack_get_block` to the OOB pointer slot; real-file lane: `cd realfile && ./mkcram tiny.sam base.cram && ./inject base.cram crafted.cram` then `./htsfile-asan -c crafted.cram`; crafted2 lane: `./inject2 base.cram crafted2.cram` then `./htsfile-asan -c crafted2.cram`; `cd parserpath && ./parser-asan` | Witness #1008 clean-archive replay of `bced853` with an offline rebuild: 10/10 pins, 9 PASS / 0 FAIL rc 0, trace `sha256=42c561cda4f9eba151b3b8b0fe2d1d6fe201eeca5e5fb7ef6a0b656a94798a54` at current HEAD after the rung-1 PASS-label correction (witness #1008 replayed the pre-fix script at `sha256=40f5992496d13bfc3b575625a5b6bb6e8dfbd1eb397b8b5b25ced7458c04f464`, same 9 PASS / 0 FAIL; #1044 re-replayed the corrected script from a clean archive with an exact trace match and the corrected PASS label, no grade change), ASan `READ`/`WRITE of size 8` at `cram_codecs.c:1378`/`:1388`, fixed 1.24 rejects codec 51; index-1025 negative preserved. Harness rung 4 INSTRUMENTED only. Real-file lane (author-only): `base.cram` 460 B `b57f4386…3cd1` and `crafted.cram` 523 B `992c43d8…67f7` are made with htslib's own writer/APIs; `ASAN_OPTIONS=detect_leaks=0:halt_on_error=0 ./htsfile-asan -c crafted.cram` reports three heap-buffer-overflows at one address 8 bytes past the 4096-byte region allocated at `cram_io.c:4620`: `READ of size 8` at `cram_codecs.c:1378`, `WRITE of size 8` at `:1388`, `READ of size 8` at `:1417`, stack `cram_decode_seq:1616 → cram_decode_slice:2918 → sam_read1:4273 → htsfile.c:92`; identify mode without `-c` is the negative. `parserpath/parser-asan` feeds 17 real compression-header wire bytes (`ncodecs=2`, `codec_id=1`, index 513). Rung-1 correction: for the `codec_id=1` file the OOB slot is a non-NULL chunk-size word (`0x1011` in htsfile, `0x61` in the parser harness), so `:1379` early-returns without writing and plain `htsfile-plain -c crafted.cram` segfaults at `:1422` rc 139 — the ASan WRITE fires only because the redzone reads zero; the inherited unsanitized-OOB-write claim is retracted for that file only. The committed `crafted2.cram` (523 B) instead derives `codec_id=2` from BF-before-QS file bytes, reads NULL at index 514 and fires the unsanitized `:1388` pointer store in a plain build (`crafted2.gdb-write.log`, `crafted2.asan.stderr`); `tracemalloc.c`/`malloc-trace.txt` identify the overwritten neighbour as the same slice's live `s->cigar` array (`cram_io.c:4633-34`), but consumer order rewrites those entries at `cram_decode.c:1776-1813` before `bam_set1`, so no consumed-neighbour claim. Witness #1053 independently ESTABLISHED the codec_id=2/514 plain-build store from its own build of the committed file, with no chosen value or neighbour claim. The whole-file 1.24 control fails container CRC even on `base.cram`; do not cite it — only the harness-level codec-51 rejection is clean. |
 | CivetWeb2Shell | [brief](../reports/frontier-civetweb2shell.md) | CVE-2025-55763 records (MITRE, CISA-ADP), public `krispybyte` PoC, fix PR `civetweb/civetweb#1347` merged as commit `c584455` (**no tagged fixed release**), full tagged v1.16 / merged-commit tarballs; four SHA-256 pins in `lab/frontier/civetweb2shell/src/SHA256SUMS` and `PROVENANCE.md` | `cd lab/frontier/civetweb2shell && bash run.sh <outdir>` — verifies all four pins, rebuilds both sides offline with `make TEST_ASAN=1 NO_SSL=1` (clang ASan), sends the crafted request only to 127.0.0.1 and preserves short-path, long-query and published-PoC negatives; unmodified-build lanes: `bash run-natural.sh <outdir>` and `bash run-header.sh <outdir>` | Witness #1027/#1029 clean-archive replay of `7164a1a`: 4/4 pins, 23 PASS / 0 FAIL rc 0, trace `sha256=2ecaac759e4230f9549507091cff212adb68dd63e650d3abf6ced2406e5e2d50` exact, ASan `WRITE of size 2` at `civetweb.c:15261` 0 bytes after an 8197-byte region, fixed merged `c584455` build ASan clean with 301; rungs 1/2/3 ESTABLISHED at sink level, rung 4 INSTRUMENTED. W81 tape #1026 replayed the same clean `git archive 7164a1a` into `/tmp/w81-cw-src` with 23 PASS / 0 FAIL, exact `TRACE_SHA256`, 4/4 pins and no NIT — ESTABLISHED AS CLAIMED. Unmodified-build measurements (author-only): `run-natural.sh` (`f6c542a`) shows natural heap adjacency and `run-header.sh` (`cb75a02`) chosen bytes overwriting a live heap header in the shipping build; logs under `lab/frontier/civetweb2shell/w3/`, no instrumented canary. No chosen pointer, control-flow diversion or execution. |
 | Open625412Shell | [brief](../reports/frontier-open625412shell.md) | CVE-2026-126962 / GHSA-x8hf-mwqg-74x6 / ZDI-26-990 records, fix commits `2da371bc` / `bc30df3a` and full tagged 1.5.4 / 1.5.6 tarballs; four source/patch pins in `lab/frontier/open625412shell/pins/SHA256SUMS` and two tarballs in `src/SHA256SUMS`, URLs in `PROVENANCE.md` | `cd lab/frontier/open625412shell && bash run.sh <outdir>` — verifies the tarball manifest, rebuilds both tagged trees verbatim with CMake/ASan, compiles `uaf_harness.c` against each and drives real service calls; starts no listener; `bash groom.sh <outdir>` for the live-neighbour lanes | operator admission replay ~17:49Z: 4/4 committed pins OK, 8 PASS / 0 FAIL rc 0, trace `sha256=31e535b91ae2375978344c27b33b25b38fd9dda9f096ccf96e001672dff71284`; ASan `WRITE of size 8` at `ua_subscription.c:1645`, fixed 1.5.6 clean; rungs 1/2/3 ESTABLISHED at labeled grades, rung 4 INSTRUMENTED. Live-neighbour lanes (`17de7c0`, `f167900`, author-only): `groom_harness.c` / `groom2_harness.c` put the stale `LIST_REMOVE` write on byte 200 of a live replacement subscription; with two items its head changes `0x514000000840` → `0x514000000440`, an item owned by the still-live transferred subscription (`crossSubscription=1`); trace `sha256=c9413debe7063af6287dc2478c5dac8a9204d62f501a35d3ad6eddbb3917660c`. Values come from created objects, not attacker-chosen bytes; ASan quarantine is disabled for same-chunk recycling; no control-flow diversion or execution. |
-| KnotResolver2Shell | [brief](../reports/frontier-knotresolver2shell.md), [rung-3 report](../reports/knotresolver2shell-rung3.md) | CVE-2026-66374 MITRE record, oss-sec q3/226 and /234, vendor 6.4.1 NEWS; fix commit `7eb2e118` contained in tagged v6.4.1 (compare ahead 11 / behind 0); hash-pinned tagged 6.4.0 (`e8e771de…58fc3`) / 6.4.1 (`20eb8b31…902950`) tarballs and fix patch (`d40555c4…d73ce`), three SHA-256 pins in `lab/frontier/knotresolver2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | Rung 3: extract the pinned tarballs under `lab/frontier/knotresolver2shell/build/`, comment `subdir('policy')` out of `modules/meson.build` (absent git submodule) and install a Lua stub; `meson setup asan-build -Db_sanitize=address -Dmalloc=disabled -Dquic=embedded --buildtype=debug` and `ninja -C asan-build` (254/254 each). Then `bash lab/frontier/knotresolver2shell/harness/run_replay.sh 6.4.0 8853` and `bash … 6.4.1 8854` — loopback-only DoQ listeners, six public STREAM frames from `harness/asan_replay.py` (aioquic 1.8.0) | Operator pin verification ~18:03Z: `cd lab/frontier/knotresolver2shell/src && sha256sum -c SHA256SUMS` → 3/3 OK. Rung 3 (commit `bebef9b`): vulnerable 6.4.0 reports ASan `WRITE of size 1198` at `daemon/quic_conn.c:124` past a 5762-byte `realloc` at `:103` (`harness/asan-6.4.0.2926826`) plus a downstream `wire_buf_movestart` READ; fixed 6.4.1 rejects frame 2 `invalid payload size, malformed data` with no ASan report; per-frame drift in `harness/drift.log`. Witness W87 replayed the same bytes from a clean `3f6622b` archive with its own builds and pins (3/3 OK, ports 18853/18854): rung 3 ESTABLISHED IN FULL. Earlier rung-4 approach, not control: chosen `0x4141414141414141` was written into two live `ngtcp2_pktns` comparator fields, but a wake-5 read watchpoint on the second field's `search` slot at `slot1+0xa8` never stopped and no dispatch followed; no handler overwrite, RIP/RDI control or ASLR-off exploit was seen, so the published `system()` PoC stays an attributed claim, not run. Wake 6 (`2a3ca7f`) reached rung 4: two distinct chosen values at live gnutls-session offsets `+0x100`/`+0x110` became the `rsi` argument of `gnutls_deinit()` from `quic_conn.c:884`; witness #1138 replayed the committed harness at 20:52–20:56Z and returned ESTABLISHED at that labeled scope with a varied-marker control (see the rung-4 addendum). Still no RIP control, benign marker or command. |
+| KnotResolver2Shell | [brief](../reports/frontier-knotresolver2shell.md), [rung-3 report](../reports/knotresolver2shell-rung3.md) | CVE-2026-66374 MITRE record, oss-sec q3/226 and /234, vendor 6.4.1 NEWS; fix commit `7eb2e118` contained in tagged v6.4.1 (compare ahead 11 / behind 0); hash-pinned tagged 6.4.0 (`e8e771de…58fc3`) / 6.4.1 (`20eb8b31…902950`) tarballs and fix patch (`d40555c4…d73ce`), three SHA-256 pins in `lab/frontier/knotresolver2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | Rung 3: extract the pinned tarballs under `lab/frontier/knotresolver2shell/build/`, comment `subdir('policy')` out of `modules/meson.build` (absent git submodule) and install a Lua stub; `meson setup asan-build -Db_sanitize=address -Dmalloc=disabled -Dquic=embedded --buildtype=debug` and `ninja -C asan-build` (254/254 each). Then `bash lab/frontier/knotresolver2shell/harness/run_replay.sh 6.4.0 8853` and `bash … 6.4.1 8854` — loopback-only DoQ listeners, six public STREAM frames from `harness/asan_replay.py` (aioquic 1.8.0) | Operator pin verification ~18:03Z: `cd lab/frontier/knotresolver2shell/src && sha256sum -c SHA256SUMS` → 3/3 OK. Rung 3 (commit `bebef9b`): vulnerable 6.4.0 reports ASan `WRITE of size 1198` at `daemon/quic_conn.c:124` past a 5762-byte `realloc` at `:103` (`harness/asan-6.4.0.2926826`) plus a downstream `wire_buf_movestart` READ; fixed 6.4.1 rejects frame 2 `invalid payload size, malformed data` with no ASan report; per-frame drift in `harness/drift.log`. Witness W87 replayed the same bytes from a clean `3f6622b` archive with its own builds and pins (3/3 OK, ports 18853/18854): rung 3 ESTABLISHED IN FULL. Earlier rung-4 approach, not control: chosen `0x4141414141414141` was written into two live `ngtcp2_pktns` comparator fields, but a wake-5 read watchpoint on the second field's `search` slot at `slot1+0xa8` never stopped and no dispatch followed; no handler overwrite, RIP/RDI control or ASLR-off exploit was seen, so the published `system()` PoC stays an attributed claim, not run. Wake 6 (`2a3ca7f`) reached rung 4: two distinct chosen values at live gnutls-session offsets `+0x100`/`+0x110` became the `rsi` argument of `gnutls_deinit()` from `quic_conn.c:884`; witness #1138 replayed the committed harness at 20:52–20:56Z and returned ESTABLISHED at that labeled scope with a varied-marker control (see the rung-4 addendum). Wake 12 reached the chosen-RIP / benign-command limb at the labeled ASLR-off scope (author-observed, witness W114 MIXED); research closed at the documented ceiling in wake 23. |
 | ATS2Shell | [brief](../reports/frontier-ats2shell.md) | CVE-2026-58154 MITRE record (CNA Apache, 2026-07-29, CWE-787, CVSS 8.9), vendor security-2026-07.html and oss-sec /2026/q3/338; master fix `f4561a94` / 10.1.x backport `5642692b` an ancestor of tag 10.1.4 (ahead 128 / behind 0); hash-pinned tagged 10.1.3 (`b9230200…45d843a`) / 10.1.4 (`47f09c65…b6f9d9f`) tarballs, two published sha512 sidecars and fix patch (`6a6626f8…e178092`), five SHA-256 pins in `lab/frontier/ats2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | RUNG 0 — no build, no trigger, no replay yet. Harness owed: ASan-build the pinned 10.1.3 / 10.1.4 MIMEScanner unit tests and replay the fix patch's two-fragment input (`"Foo: bar\r"` then `"\n baz\r\n"`); expect ASan `WRITE of size 1` value `0x20` at `input.data()-1` on 10.1.3 and clean `OK` / `shares_input == false` on 10.1.4. Record the address relative to the allocation base before claiming an underflow; witness replay owed once the harness is committed. |
 | Exim2Shell | [brief](../reports/frontier-exim2shell.md), [wake-1 report](../reports/exim2shell-wake1.md), [wake-2 report](../reports/exim2shell-wake2.md) | CVE-2026-45185 MITRE record (CNA MITRE, 2026-05-12, CWE-416, CVSS 9.8), vendor `EXIM-Security-2026-05-01.1.txt` and XBOW blog (claim); hash-pinned 4.99.2 (`e9e33c8c…da84`) / 4.99.3 (`714efe07…2524`) tarballs, two self-computed SHA-256 pins in `lab/frontier/exim2shell/src/SHA256SUMS` (no published sidecar), fix commit ID UNKNOWN | RUNG 3 — build both pinned trees with GnuTLS + ASan (`USE_GNUTLS=yes`); from `lab/frontier/exim2shell`, run `ASAN_OPTIONS='log_path=$PWD/build-4.99.2/asan-report:abort_on_error=1:detect_leaks=0' src/exim-4.99.2/build-Linux-x86_64/exim -bd -oX 25252` then `python3 trigger.py 25252 three` (fixed control: same `ASAN_OPTIONS` under `build-4.99.3/`, port 25253, configured with `configure.loopback`). The `log_path` is required because the forked child closes stderr. Expect ASan `heap-use-after-free WRITE of size 1` at `tls.c:510 in tls_ungetc` via `receive_msg receive.c:2141`, 8 bytes into a freed 4104-byte region; the fixed daemon with identical bytes creates no `asan-report.*`. The wake-1 `ungetc|two|three|four` shapes are NEGATIVE. | Operator admission 19:44Z `sha256sum -c SHA256SUMS` 2/2 OK; witness #1140 (DM 4727) replayed rung 3 from its own ASan-linked pinned binaries (4.99.2 sha `e5ac0b00…`, 4.99.3 sha `c2298c16…`) on loopback 27252/27253 (both confirmed 127.0.0.1) with identical trigger bytes and returned ESTABLISHED as claimed; no rung 4. The stderr/`ASAN_OPTIONS` gotcha is documented in the wake-2 report; the citation fix at report lines 53/60 was applied in `a6fbe8e` (`tls-gnu.c:3972` not `:3976`, `tls_getc` at `:3998` not `:4002`), grade unchanged. A plain 4.99.2 trace at `receive.c:2141` with five wire variants on loopback 25262 calls safe `smtp_ungetc` because `tls_close()` installs it before the header parser and `bdat_pop_receive_functions()` restores `tls_ungetc` later: a build-dependent consumer-ordering NEGATIVE, no chosen byte and no rung 4. A one-run fixed-control bind to `0.0.0.0:25253` was corrected to `127.0.0.1` with no external contact. Raw `build-4.99.*/asan-report.*`, `trigger-*.log` and non-ASan traces are gitignored and regenerate with those commands. |
 | NettyTcnative2Shell | [brief](../reports/frontier-netty2shell.md) | CVE-2026-116539 / GHSA-gf9q-9mg7-g5qh maintainer advisory, Debian tracker and NVD-derived GHSA-22qq-f4wc-4vfx; fix commit `92dd66fd1243d85c05a61288f96367a70260b6b8`; hash-pinned 2.0.83.Final (`f6ae09cf…335`) / 2.0.84.Final (`cb419d01…f0`) tarballs and fix patch (`b5133346…7ec`), three SHA-256 pins in `lab/frontier/netty2shell/src/SHA256SUMS`, URLs in `PROVENANCE.md` | RUNG 0 — no build, no trigger, no replay yet. Harness owed: build `openssl-dynamic` at both tags, port the advisory's four-step JNI harness (10-byte ring) to Linux under ASan; expect `heap-buffer-overflow WRITE` at the `tcn_write_to_bytebuffer` sink (`ssl.c:207-209`) on 2.0.83.Final and a clean modulo path on 2.0.84.Final | Operator admission 20:30:34Z: `cd lab/frontier/netty2shell/src && sha256sum -c SHA256SUMS` 3/3 OK (self-computed; no published sidecar); witness replay owed once a harness exists. Wire-only engine reachability stays UNKNOWN until measured. |
@@ -11830,3 +11830,104 @@ command service. NOT ESTABLISHED rung 5.
   flow to a lab marker, r5 UNKNOWN. Evidence
   `lab/frontier/drwav2shell/consumer/evidence/w19-gnubase-build-pacing.txt`.
   None of these four edges moved a rung cell, grade or r5.
+
+## 2026-11-26 05:2x–05:4xZ — W23 closure, W248 verdict, Ruby W30 negative
+
+- **KnotResolver2Shell research closed (`2e852630`) — grade unchanged** —
+  affected tagged 6.4.0 (`e8e771de…58fc3`), fixed tagged 6.4.1
+  (`20eb8b31…902950`), fix `7eb2e118`; the three tarball/patch SHA-256 pins
+  in `lab/frontier/knotresolver2shell/src/SHA256SUMS` and claim URLs in
+  `PROVENANCE.md` were verified 3/3 at admission. For the rung-3 recipe
+  (extract under `lab/frontier/knotresolver2shell/build/`, comment out
+  `subdir('policy')`, Lua stub, `meson setup asan-build -Db_sanitize=address
+  -Dmalloc=disabled -Dquic=embedded --buildtype=debug`, `ninja -C asan-build`
+  254/254, then `bash harness/run_replay.sh 6.4.0 8853` / `6.4.1 8854` with
+  aioquic 1.8.0 STREAM frames F1–F6) see the lane index above. Expect ASan
+  `WRITE of size 1198` at `quic_conn.c:124` past a 5762-byte `realloc` at
+  `:103`, a downstream `wire_buf_movestart` READ, and fixed 6.4.1 rejecting
+  frame 2 as `invalid payload size, malformed data` with no ASan report.
+  Rung 4: two chosen values at live gnutls-session `+0x100`/`+0x110` reach
+  `rsi` in `gnutls_deinit()` from `quic_conn.c:884` (witness #1138
+  ESTABLISHED at that scope). Rung 5: the jemalloc/debug build on 8855 uses
+  `harness/r5_dispatch.py` with a fake cleanup struct and `argoff 0x300`
+  (the default `0x2f0` fails because `gnutls_deinit` zeroes the string);
+  two distinct benign `touch` markers exist with safe/fixed marker-absent
+  controls. Witness W114 returned MIXED: dispatch ESTABLISHED on its own
+  pinned builds at the labeled ASLR-off/gdb-parent scope, command execution
+  only at the explicit `argoff 0x300`; ASLR-on/stock chosen control stays
+  UNKNOWN. All later ASLR-on routes are preserved negatives on sampled
+  objects — 128-qword inventories (wake 14), libgnutls PLT retarget
+  (wake 17), 3-byte partial-overwrite entropy (wake 18), library-relative
+  PLT retarget (wake 19), fixed-address PIE route (wake 21), same-library
+  pointer arithmetic (wake 22) — with no wire-visible address leak. The
+  `again 12h` chain is retired; reopen only on an observed ASLR-on control
+  or leak, a reachable libc pointer with no guessed high bytes, a
+  same-library dispatch path, a fresh witness act, or a retraction of
+  #1138/#1376. The host sysctl stayed 2; gdb disabled ASLR only for its
+  inferior. Build trees, ASan logs and gdb traces are gitignored and
+  regenerate with the commands above plus the committed harness scripts;
+  normalized receipts are in `reports/knotresolver2shell-rung3.md`.
+- **Libsshch2Shell W24 witness W248 (#4689, `94791ffc`) — ESTABLISHED AS
+  LABELED** — affected libssh parent
+  `a540e27659b08828ef61f2910a790f7cf2af9f8d`, fixed
+  `7dfabb1fd213196c4912c314b418ff36c882ea54`; no library source change.
+  From `lab/frontier/libsshch2shell/real`, `sh run-wirelist.sh` builds both
+  pinned commits under clang ASan (`-DWITH_SERVER=ON -DUNIT_TESTING=OFF
+  -DBUILD_SHARED_LIBS=OFF`) and compiles `real_wire.c` with
+  `-DW13_INLINE -DW24_WIRELIST`, with a real loopback KEX/password session.
+  The unmodified wrapper's SHA-256 is `79fa399c…d7919d5` (identical at HEAD,
+  `b401fcbd` and in the clean archive). The witness replayed it three times
+  from `git archive HEAD(3f156357)` at `/tmp/w248-w24-arch`, symlinking only
+  pinned mirror sources and the hostkey and building fresh ASan dirs; both
+  upstream tarballs were re-fetched and matched the in-tree mirrors. Expect
+  `6 PASS / 0 FAIL`, rc 0, probe slot `0x50c00001c3c0`,
+  `SERVER wirelist it=0x502000006f70 next=0x50c00001c420
+  data=0x50c00001c408`, `SERVER EXEC trampoline`, `SERVER EXEC rc=0`,
+  `SERVER target_after=0x41414141414141c1`, `CLIENT rc=0 SERVER status=0x0`
+  and a created marker; the fixed lane has no data #2 / call / file and an
+  invalid callee gives an ASan SEGV at pinned `channels.c:697`. One
+  app-owned iterator `next` redirect remains; no contradiction, no grade
+  change, NO r5. The probe slot was stable across the witness's three
+  repeats (matching the author's clean-archive slot) but differs from the
+  in-tree receipt; callee addresses were runtime-local. Full evidence:
+  `.mishe-tauftauf/artifacts/witness-w248-libsshch2shell/detail.md`.
+  Build dirs and marker files are gitignored and regenerate with the wrapper.
+- **Ruby2Shell W30 fixed-length composition — bounded NEGATIVE (`a2839cf5`)** —
+  plain pinned Ruby 3.4.12 with `rails new --minimal`, fixed control 3.4.13;
+  the report gives the plain-build recipe and `bash
+  lab/ruby2shell/provision.sh`. The composition arm varies the `_method`
+  body at constant N=1500 instead of varying total N:
+
+  ```sh
+  RUBY2SHELL_CLAIM_STACK=rails RUBY2SHELL_CLAIM_N=1500 \
+  RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_TAG=comp529b \
+  RUBY2SHELL_CLAIM_PLANT=1008x40,976x9 \
+  RUBY2SHELL_CLAIM_PARTS=1590@0x410:0x414 \
+  RUBY2SHELL_CLAIM_THREADS=1 RUBY2SHELL_CLAIM_KEEPALIVE=1 \
+  RUBY2SHELL_CLAIM_BINDUMPS=1 RUBY2SHELL_CLAIM_COUNT=6 \
+  METHOD_LEAD_A=529 ATTACK_CHAIN=1 \
+  CONSUMER_SPEC=400x200 FILLER_SPEC=400x200 \
+  POISON_GROWN=0x650 POISON_NEXT=0x90 \
+  bash lab/repro/ruby2shell-shrink-claim.sh
+  ```
+
+  Expect buffer2's request to move from `0x5f2` to `0x3e2` (tcache
+  `0x3f0` class) while buffer1 stays `0x608`; the log shows
+  `B … size=0x415`, `A … size=0x453` at the same victim and
+  `M 0 3e2 7875349a0600`. However no M/C line after A returns the victim
+  pointer: 0 claims / 0 other-pops in 18 vulnerable runs across claim
+  classes `0x241`/`0x441`/`0x63f` (chunks `0x250`/`0x450`/`0x650`), with
+  5–6 aborts per six-process arm. The `comp001` all-sharp-s control is
+  equally empty (4 aborts, 2 alive); fixed 3.4.13 with the same body is
+  3/3 alive with a 404 and no abort. `MTRACE_DUMP_BINS` emitted no `L`
+  lines, so bin residency is UNKNOWN. `lab/preload/mtrace.c` now reads
+  `MTRACE_CASE_LEAD_A` (default 1, preserving every prior repro) and the
+  script accepts `RUBY2SHELL_CLAIM_RB` / `_GEMS` overrides; no request-path
+  behaviour changed. Raw `lab/build/evidence/stock-rails-comp529*`,
+  `comp001-*` logs are gitignored and regenerate with the command above.
+  Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+  witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+
+No replay was rerun in this wake; all quoted bytes come from the committed
+author and witness receipts above. None of these three edges moved a rung
+cell, grade or r5.

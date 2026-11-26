@@ -3997,7 +3997,8 @@ Frontier's DM #1070 carried brief `reports/frontier-knotresolver2shell.md`
 with SHA-256 pins in `lab/frontier/knotresolver2shell/src/SHA256SUMS` and a
 URL/digest table in `PROVENANCE.md`. The operator admitted this target under
 standing approval #6, no re-ask. Operator pin check ~18:03Z: `sha256sum -c`
-3/3 OK. Unlike the recent admissions, this one is **RUNG 0** — frontier built
+3/3 OK. Unlike the recent admissions, this one was **RUNG 0** at
+admission — frontier built
 nothing, ran no PoC and opened no window or seed wall; the operator created
 both. All five elements are in
 `.mishe-tauftauf/charters/knotresolver2shell.md`: **claim source** —
@@ -4035,7 +4036,10 @@ operator created the 60th `engine/routes.json` entry and this mind's wake
 trigger units with the pinned full-flag sync from
 `docs/runtime-pin.md`, a seed wall and the two-pane window (inner socket index
 65). Never run a bare `mishe sync`. This makes 56 admitted target minds in the
-README table; an independent witness replay is owed once a harness exists.
+README table; the witness replay once owed has returned: W87 for rung 3,
+#1138 for rung 4 and W114 MIXED for the rung-5 limb. Research closed at the
+documented ceiling in wake 23 (`2e852630`), with the `again 12h` chain
+retired.
 
 #### Admitted 2026-11-21 ~19:00Z: ATS2Shell / ats2shell (CVE-2026-58154)
 
@@ -12286,3 +12290,60 @@ committed operator and witness receipts (`ebd8aea8`, `0d3cd9f5`,
 the frozen six-column detector against the live seven-cell README; resolver
 is the person's exact full-flag sync in `docs/runtime-pin.md`, never a bare
 `mishe sync`.
+
+## 2026-11-26 05:2x–05:4xZ — W23 closure, W248 verdict and Ruby W30 negative
+
+Signal head `2e852630`, wake-start HEAD `2e852630`, last fold `235cf4e1`.
+Three commits; no rung cell, grade, route, mind-count, witness verdict or R5
+cell moved by this fold.
+
+- `2e852630`: KnotResolver2Shell research closed at the documented ceiling
+  (wake 23, ~05:2xZ); the `again 12h` safety-net chain is retired. Final grade
+  is unchanged: rung 3 ESTABLISHED (witness W87), rung 4 witness-ESTABLISHED
+  (#1138), rung 5 author-observed at the labeled ASLR-off / gdb-parent /
+  jemalloc-debug scope with witness W114 MIXED; ASLR-on/stock chosen control
+  UNKNOWN. Every later ASLR-on route is a preserved negative on the sampled
+  objects: 128-qword inventories at `slot1` and `priv` (wake 14), libgnutls
+  PLT retarget (wake 17), 3-byte partial-overwrite entropy (wake 18),
+  library-relative PLT retarget with mapping bases (wake 19), fixed-address
+  route on the PIE main binary (wake 21), and same-library pointer arithmetic
+  (wake 22). No wire-visible address leak was observed. The brief's stale
+  "rung 0 / no witness replay owed / cheapest next experiment" status is
+  replaced by the closure and final grade; its admission notes are labeled
+  history, not a current ceiling. The lane reopens only on an observed
+  ASLR-on control or leak, a reachable libc pointer whose high bytes need no
+  guess, a same-library dispatch path, a fresh witness act, or a retraction
+  of #1138/#1376. Addressed DMs wake the role regardless of the retired
+  schedule.
+- `94791ffc`: witness W248 (#4689) returned ESTABLISHED AS LABELED for
+  libsshch2shell W24's wire-resident second callback iterator. The unmodified
+  `run-wirelist.sh` (SHA-256 `79fa399c…d7919d5`) was replayed three times from
+  a clean `git archive 3f156357` with symlinks only to pinned sources and the
+  hostkey, fresh ASan build dirs, and re-fetched pinned tarballs: 6 PASS / 0
+  FAIL and rc 0 each, probe slot `0x50c00001c3c0`, chosen
+  `SERVER target_after=0x41414141414141c1`, fixed lane with no data #2 / call
+  / file, and an invalid-callee ASan SEGV at pinned `channels.c:697`. One
+  app-owned iterator `next` redirect remains; no contradiction, no grade
+  change, NO r5. A probe-slot observation (stable across the witness's three
+  repeats, different from the in-tree receipt) has no grade effect. The
+  README row now carries W24/W248, and W25/W26 stay author-only.
+- `a2839cf5`: Ruby2Shell W30 closes the fixed-length composition lever as a
+  bounded NEGATIVE. At constant N=1500, replacing 528 sharp-s bytes with ASCII
+  moved buffer2's request from `0x5f2` into the `0x3e2` tcache class, but no
+  post-A pop returned the grown victim: 0 claims / 0 other-pops in 18
+  vulnerable runs across claim classes `0x241`/`0x441`/`0x63f`
+  (0x250/0x450/0x650 chunks), with the fixed 3.4.13 control 3/3 alive and no
+  abort. `MTRACE_DUMP_BINS` emitted no `L` lines, so bin residency of the
+  victim is UNKNOWN; the observed fact is the absent pop, not a bin-chain
+  proof. Two analysis-only lab fixes preserve every prior repro:
+  `MTRACE_CASE_LEAD_A` (default 1) and `RUBY2SHELL_CLAIM_RB` / `_GEMS`
+  overrides. Grades unchanged: rung 4 witness-COMPLETE, harness-condition
+  rung 5 witness-ESTABLISHED, stock/oracle-free/persistent r5 NOT ACHIEVED.
+  Veria's page re-read at 05:06Z still had `dateModified`
+  `2026-11-21T03:52Z` and no published mechanics.
+
+Quoted replay bytes and counts above come from the committed witness and
+author receipts (`2e852630`, `94791ffc`, `a2839cf5`), not a rerun in this
+wake. Readme-lint stays RED on the frozen six-column detector against the
+live seven-cell README; resolver is the person's exact full-flag sync in
+`docs/runtime-pin.md`, never a bare `mishe sync`.
