@@ -108,3 +108,47 @@ No external probing is authorized; all testing stays in the lab and on loopback.
   unmodified wrapper from a clean `git archive 2bcda7e8` and ruled
   ESTABLISHED AS LABELED, no grade change, NO r5
   (`artifacts/witness-w246-sailtga2shell/detail.md`).
+
+## 6. W1 target-mind results (2026-11-26)
+
+All new files are un-pinned and local to the lab; `run-witness.sh` pins are
+untouched and a fresh replay still reads `REPLAY_PASS=14 REPLAY_FAIL=0`,
+inner `TOTAL: 38 PASS / 0 FAIL`.
+
+- `harness/run-memory.sh` — **10 PASS / 0 FAIL**. Junior
+  `sail_load_from_memory()` on the 28-byte TGA returns `rc=301`
+  `SAIL_ERROR_CODEC_NOT_FOUND`: TGA has no magic number, so auto-probe never
+  selects the codec and this entry point does not reach the sink by itself.
+  The documented advanced memory path
+  `sail_codec_info_from_extension("tga")` ->
+  `sail_start_loading_from_memory()` -> `sail_load_next_frame()` ->
+  `sail_stop_loading()` DOES reach it: GCC ASan `WRITE of size 4` at verbatim
+  `tga.c:269`, 0 bytes after 256 bytes; plain chosen bytes at 256..263;
+  v1.0.0 `rc=213`. Evidence `evidence-w1/`.
+- `harness/run-realapp.sh` — **9 PASS / 0 FAIL**. Two SHIPPED SAIL
+  applications reach the sink. The v0.9.10 `sail` CLI `convert` shows ASan
+  `WRITE of size 4` at `tga.c:269` with the real stack
+  `convert_impl` (`examples/c/sail/sail.c:185`) -> `sail_load_next_frame` ->
+  `tga.c:269`. The shipped v1.0.0 `advanced` example faults the same sink on
+  v0.9.10 libs and is rejected by vendor-fixed v1.0.0 libs with the guard at
+  `tga.c:146`. Evidence `evidence-w2/`.
+- `harness/run-pointer.sh` — **13 PASS / 0 FAIL**. An LD_PRELOAD malloc
+  interposer places a live pointer-bearing victim 272 bytes after the
+  256-byte pixel buffer. Crafted RLE packets control arbitrary 4-byte-aligned
+  dwords across the written 1 KB region (packet boundaries choose each
+  dword's value). The victim `fp` was set to chosen canonical
+  `0x00007f0000414243`; with ASLR disabled it was retargeted to a lab benign
+  marker and called, producing `BENIGN_MARKER_EXECUTED` and a side-effect
+  file. Matching-stride `safe8` leaves `fp`, `magic` and canary intact;
+  vendor-fixed v1.0.0 rejects the input (`rc=213`) and places no victim.
+  Evidence `evidence-w3/`. This is pointer control plus benign marker
+  execution in a SYNTHETIC in-process consumer with ASLR disabled, no free
+  of corrupted metadata and no wire/request path: **rung-4 mechanics only,
+  not r5**.
+- Negative result preserved: a libc allocation inside the benign marker
+  aborts on glibc metadata corrupted by the overflow. The marker now uses
+  `write`/`open`/`close` syscalls only; the call completes and the destructor
+  still reports the victim.
+- Still UNKNOWN: a naturally occurring application object (not a lab
+  interposer victim) reached before free; any network/request consumer; r5.
+

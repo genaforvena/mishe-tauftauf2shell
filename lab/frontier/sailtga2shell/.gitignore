@@ -9,6 +9,7 @@ evidence/vendor-fix.diff
 evidence/vuln-clang-asan
 evidence/
 evidence-*.log
+evidence-w*/
 witness-*.log
 evidence/vuln-gcc-asan
 evidence/vuln-plain

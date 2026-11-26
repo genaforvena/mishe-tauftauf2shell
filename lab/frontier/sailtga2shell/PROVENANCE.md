@@ -69,5 +69,26 @@ Observed on 2026-11-26: `run-all.sh` 38 PASS / 0 FAIL rc 0 from a clean tree;
 - Advisory's pasted ASan log is labeled `Version: 1.0.0` but the raw v1.0.0 tag
   has the guard and the built v1.0.0 control rejects the PoC. Recorded as a
   claim/version discrepancy, not as an unpatched release.
-- Only the file API was exercised; `sail_load_from_memory()` and any live
-  network caller are UNKNOWN. No pointer control, no command, no wire, no r5.
+- At W246 only the file API was exercised; W1 below adds the memory APIs and
+  synthetic pointer control. Any live network caller remains UNKNOWN, and
+  there is no wire path and no r5.
+
+## W1 additions (2026-11-26, target mind; un-pinned)
+
+The ten pins above are unchanged; `run-witness.sh` still replays 14/0. New
+lab-only files, deliberately NOT added to the pin lists:
+
+- `harness/memory-driver.c`, `harness/run-memory.sh` -> `evidence-w1/`
+  (10 PASS / 0 FAIL): junior and explicit-codec public memory APIs.
+- `harness/run-realapp.sh` -> `evidence-w2/` (9 PASS / 0 FAIL): compiles the
+  SHIPPED `examples/c/sail/sail.c` CLI (v0.9.10) and the shipped `advanced.c`
+  example (v1.0.0) against the pinned static build trees. The CLI needs
+  `-fopenmp` for `libsail-manip.a`. No upstream source byte is modified.
+- `harness/victim_preload.c`, `harness/pointer-driver.c`,
+  `harness/make-pointer-poc.py`, `harness/run-pointer.sh` -> `evidence-w3/`
+  (13 PASS / 0 FAIL): LD_PRELOAD malloc interposer, synthetic live victim,
+  ASLR disabled with `setarch -R`, syscall-only benign marker.
+
+`evidence-w*/` is gitignored, like `evidence/`. The extra evidence is local
+lab output, not a new claim about the pinned builds or the witness replay.
+

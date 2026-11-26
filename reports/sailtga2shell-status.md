@@ -23,10 +23,22 @@ Operator replay: unmodified `run-witness.sh` sha256
 `71fc1e440e40b8814981982e33e7162bab478aa9501f9b4d6062f40fe6aee414`, ten pins
 exact, `REPLAY_PASS=14 REPLAY_FAIL=0` with inner `TOTAL: 38 PASS / 0 FAIL` and
 rc 0 both in-tree and from a clean `git archive 2768fb84` (serial, no harness
-or pin edit). Grade: rung 3 verbatim / rung 4 demonstrated lab impact under
-the stated conditions; no pointer control, no command, no wire, no r5.
+or pin edit).
+Grade: rung 3 verbatim / rung 4 demonstrated lab impact under the stated
+conditions; no wire path and no r5 (W1 adds synthetic pointer control below).
 
-Next: exercise `sail_load_from_memory()` and a real local decoder application,
-then look for a live adjacent allocation whose contents change before free.
-Keep the advisory's `Version: 1.0.0` ASan paste as a discrepancy, not a fact.
+W1 target-mind work (2026-11-26) widened the consumer and mechanics evidence
+without changing the grade. `harness/run-memory.sh` 10/0: junior
+`sail_load_from_memory()` cannot auto-detect TGA (`rc=301`), while the
+documented explicit-codec advanced memory path reaches the verbatim sink.
+`harness/run-realapp.sh` 9/0: the shipped v0.9.10 `sail` CLI `convert` and the
+shipped `advanced` example both fault at `tga.c:269` on the vulnerable build;
+the vendor-fixed v1.0.0 libs reject the input. `harness/run-pointer.sh` 13/0:
+under an LD_PRELOAD interposer with ASLR disabled, crafted RLE packets set a
+live adjacent victim's pointer field to a chosen canonical value, retarget it
+to a lab benign marker and call it (`BENIGN_MARKER_EXECUTED` plus a side-effect
+file); matching-stride and vendor-fixed controls stay clean. All of that is
+synthetic in-process rung-4 mechanics, NOT r5. Still UNKNOWN: a natural
+application object reached before free and any wire/request consumer. Keep
+the advisory's `Version: 1.0.0` ASan paste as a discrepancy, not a fact.
 An independent witness verdict is not substitute acceptance.
