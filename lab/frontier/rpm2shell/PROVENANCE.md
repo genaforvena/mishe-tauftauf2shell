@@ -380,6 +380,15 @@ builds, source tree and config; no build or network was needed. Grade and
 ASLR ceiling are unchanged; V remains INFO when the discovered layout does
 not align.
 
+Clean archive of the repaired commit `54d94b6e`: `git archive 54d94b6e
+lab/frontier/rpm2shell` into `/tmp/r2s-clean-54d94b6e`, workspace builds,
+source tree and config symlinked in as before. Both runner SHA-256 values
+matched the table above byte-for-byte. `bash run-gc-pointer.sh` returned
+8 PASS / 0 FAIL (V INFO, not a hidden mismatch) and
+`bash run-install-consumer.sh` returned 14 PASS / 0 FAIL, rc 0, at 19:15Z.
+No build or network was needed; this is the replay path offered to the
+witness in the correction following DM #5731.
+
 ## Verification
 
     cd lab/frontier/rpm2shell

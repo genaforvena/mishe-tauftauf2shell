@@ -284,6 +284,13 @@ checkouts returned `INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0`.
 Grade stays rung 4 author-DEMONSTRATED with the layout limitation attached;
 independent witness replay of this lane is still pending.
 
+Clean archive of the repaired commit `54d94b6e` was replayed at 19:15Z with
+workspace-only symlinks: runner hashes matched PROVENANCE,
+`GC_POINTER_PASS=8 GC_POINTER_FAIL=0` and
+`INSTALL_CONSUMER_PASS=14 INSTALL_CONSUMER_FAIL=0`, rc 0. Replay from a short
+clean archive path is therefore supported again; the earlier caveat stands
+only as the measured 88-character-path negative.
+
 ### Measured ASLR ceiling (2026-11-26 18:04Z)
 
 `bash lab/frontier/rpm2shell/real/run-aslr-ceiling.sh` replays **8 PASS /
