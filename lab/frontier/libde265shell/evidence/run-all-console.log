@@ -1,0 +1,29 @@
+PASS 1.0.16 clang-asan reproducer.bin rc=1 ASan WRITE-2 image.h:741
+PASS 1.0.16 clang-asan safe.bin rc=0 clean control
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c: In function ‘main’:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c:22:5: warning: ignoring return value of ‘fread’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   22 |     fread(buf, 1, sz, f);
+      |     ^~~~~~~~~~~~~~~~~~~~
+PASS 1.0.16 gcc-asan reproducer.bin rc=1 ASan WRITE-2 image.h:741
+PASS 1.0.16 gcc-asan safe.bin rc=0 clean control
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c: In function ‘main’:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c:22:5: warning: ignoring return value of ‘fread’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   22 |     fread(buf, 1, sz, f);
+      |     ^~~~~~~~~~~~~~~~~~~~
+PASS 1.0.16 gcc-plain reproducer.bin rc=0 plain build ran
+PASS 1.0.16 gcc-plain safe.bin rc=0 clean control
+PASS 1.0.17 clang-asan reproducer.bin rc=0 clean control
+PASS 1.0.17 clang-asan safe.bin rc=0 clean control
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c: In function ‘main’:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c:22:5: warning: ignoring return value of ‘fread’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   22 |     fread(buf, 1, sz, f);
+      |     ^~~~~~~~~~~~~~~~~~~~
+PASS 1.0.17 gcc-asan reproducer.bin rc=0 clean control
+PASS 1.0.17 gcc-asan safe.bin rc=0 clean control
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c: In function ‘main’:
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libde265shell/src/poc/poc.c:22:5: warning: ignoring return value of ‘fread’ declared with attribute ‘warn_unused_result’ [-Wunused-result]
+   22 |     fread(buf, 1, sz, f);
+      |     ^~~~~~~~~~~~~~~~~~~~
+PASS 1.0.17 gcc-plain reproducer.bin rc=0 clean control
+PASS 1.0.17 gcc-plain safe.bin rc=0 clean control
+RESULT PASS=12 FAIL=0
