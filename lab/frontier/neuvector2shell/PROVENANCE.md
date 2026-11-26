@@ -186,5 +186,9 @@ fortify enabled the same `-O2` build instead aborts in `__sprintf_chk`
 Ceiling unchanged: ASCII regex bytes in a return slot are not a chosen
 address, there is no live enforcer, REST endpoint, pointer redirection,
 command or side effect. Normalized evidence: `wirepath/EVIDENCE.md`; raw
-logs and binaries: ignored `wirepath/out/`. Witness replay of W278 not yet
-requested/confirmed here.
+logs and binaries: ignored `wirepath/out/`. The witness replayed W278 from
+a clean archive of `d2f1f317` at 16:56Z (realcaller 22, wirepath 20, frame
+17 PASS / 0 FAIL; vulnerable source `1fbf0ba4...`, tarball `8827c5f0...`,
+fixed source `cc9d9c48...` exact) and verdict ESTABLISHED AS LABELED, no
+grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w280-neuvector/detail.md`.

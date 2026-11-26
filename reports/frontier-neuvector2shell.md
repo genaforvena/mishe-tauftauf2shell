@@ -1,14 +1,14 @@
 # Frontier brief: NeuVector DLP/WAF rule stack overflow — CVE-2026-127182
 
 Status: **ADMITTED 2026-11-26 as the 157th target mind**; witness replay
-ESTABLISHED AS LABELED (W240, 2026-11-26). Rung 3 confirmed in the verbatim
-pinned function, in the unmodified real `dpi_sig.c` object built against
-real NeuVector headers, and through a REST-validated controller-shaped JSON
-message with real wildcard expansion (W274). W278 measures chosen wire
-bytes overwriting the saved RBP **and return slot** in an optimized
-real-object lab frame: rung 4 mechanics demonstrated in the lab build, new
-claim pending witness replay. Still no full enforcer binary, live loopback
-REST/CRD target, chosen address, command or rung 5.
+ESTABLISHED AS LABELED (W240 and W278, 2026-11-26). Rung 3 confirmed in the
+verbatim pinned function, in the unmodified real `dpi_sig.c` object built
+against real NeuVector headers, and through a REST-validated
+controller-shaped JSON message with real wildcard expansion (W274). W278
+measures chosen wire bytes overwriting the saved RBP **and return slot**
+in an optimized real-object lab frame: rung 4 mechanics demonstrated in
+the lab build and independently replayed. Still no full enforcer binary,
+live loopback REST/CRD target, chosen address, command or rung 5.
 
 ## REST-validated wire-path reproduction (W274, 2026-11-26)
 
@@ -74,8 +74,11 @@ preserved. Details, hashes and the ceiling:
 These are chosen bytes at chosen offsets, including the saved return slot,
 in a lab frame driven by a REST-valid controller-shaped message. They are
 ASCII regex bytes, not a chosen address: no pointer redirection, no benign
-command side effect, no live enforcer. Witness replay of W278 is pending,
-so the previously ESTABLISHED grade remains as labeled until verified.
+command side effect, no live enforcer. The witness replayed W278 from a
+clean archive of `d2f1f317` (22/20/17 PASS, three pins exact) and verdict
+ESTABLISHED AS LABELED with no grade change and NO r5; both traces fault
+at `dpi_sig.c:657` before returning. Detail:
+`.mishe-tauftauf/artifacts/witness-w280-neuvector/detail.md`.
 
 ## Claim and scope
 
@@ -206,14 +209,13 @@ no hyperscan/urcu libraries, no chosen address, no command or side effect.
   built with real NeuVector headers, and through a REST-validated
   controller-shaped JSON message with real wildcard expansion; all have
   fixed and safe-input controls.
-- **Rung 4 lab mechanics (W278, pending witness):** chosen bytes observed at
-  chosen offsets past the logical buffer in a synthetic frame, in the saved
-  RBP slot of an `-O0` real-object frame, and in *both* saved RBP and saved
-  return slot of an `-O2` real-object frame driven by a REST-valid wire
-  message. No full enforcer binary, no live REST/CRD endpoint, no pointer
-  redirection to a chosen address, command or observed side effect. The
-  previously ESTABLISHED grade stays rung 4 PARTIAL until witness replay of
-  W278.
+- **Rung 4 lab mechanics (W278, witness ESTABLISHED AS LABELED):** chosen
+  bytes observed at chosen offsets past the logical buffer in a synthetic
+  frame, in the saved RBP slot of an `-O0` real-object frame, and in *both*
+  saved RBP and saved return slot of an `-O2` real-object frame driven by a
+  REST-valid wire message. No full enforcer binary, no live REST/CRD
+  endpoint, no pointer redirection to a chosen address, command or
+  observed side effect. Grade stays rung 4 PARTIAL by label, not advanced.
 - **Not rung 5:** no live loopback target and no benign command execution.
 
 Next experiment: build a full vulnerable 5.5.x enforcer `dp` with ASan and
