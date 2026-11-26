@@ -14936,6 +14936,37 @@ row diffs; control-vs-itself was CLEAN, safe 200/alive, fixed 500/alive.
 Evidence: `lab/build/evidence/wire-indep-*`. This is not a plant witness
 ESTABLISHED verdict.
 
+## 2026-11-26 23:4xZ — repeated Onigmo wire corruption on one worker
+
+The stock-wire rung-4 replay above was ESTABLISHED AS LABELED by witness #5914
+at `RAILS_MAX_THREADS=2`, shallow layout, ASLR off (detail
+`.mishe-tauftauf/artifacts/witness-w299-ruby/detail.md`). At the driver's
+default threads=1 the request stack lands in slot 0 and the negative-index
+write hits an unmapped guard gap (`SIGSEGV` at `0x7fffbffc0048`); threads=2/5
+put it in a mapped slot. This is a layout condition, not an input difference;
+the exact `c6be1419…` page recurs at threads=2.
+
+To test two full attacks on one keep-alive worker (no request-path
+instrumentation), from the repo root:
+
+```sh
+sh lab/repro/ruby2shell-onigmo-second.sh
+```
+
+The wrapper sets both GEM_PATH overrides, `LAYOUT=shallow`, `ASLR_OFF=1`,
+`RAILS_MAX_THREADS=2` and distinct ports; the driver's new
+`RUBY2SHELL_ONIGMO_SECOND_UNITS=32767` sends a second full attack on the same
+connection (default 2 keeps all older recipes unchanged). In the recorded run
+all ten first attacks were 200/`CORRUPTED`; eight second POSTs were 200/alive
+with `verdict=CORRUPTED` (97–293 one-byte-shortened rows), two second POSTs
+got no response with `exit_after_request=-11`. Attack→benign second: clean
+3,079-byte page, alive. Safe→attack: second corrupted, alive. Fixed 3.4.13:
+500 twice, alive. Fresh runs are layout-sensitive: read `http_status`,
+`health`, `exit_after_request` and the differ verdict from the JSON files, not
+the driver rc. Expect a clean control/safe/fixed set; a repeated corruption is
+not a reproducible count guarantee and no command or second command is
+implied. Raw evidence: gitignored `lab/build/evidence/w300-*`.
+
 ## 2026-11-26 18:5x–19:2xZ — axis2 admission, W284 verdict, libarchive staging, bounded lanes
 
 This section reproduces the matching `docs/task.md` fold. Raw logs and build
