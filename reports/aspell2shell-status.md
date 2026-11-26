@@ -175,3 +175,11 @@ artifact paths, PIDs and BuildIds only. Detail:
 `.mishe-tauftauf/artifacts/witness-w263-aspell75820/detail.md`. The
 single-offset write lane stays verifier-UNKNOWN; W253 rules only on the
 consecutive-offset sweep.
+
+Replay-instruction correction (2026-11-26 11:1xZ, commit `09d263fd`): W263
+flagged that step 3 of `harness/evidence/75820-suggest/REPLAY.txt` named
+`aspell-0.60.8.2/data` as the source of `*.multi`; that release directory has
+no such files. The instruction now takes `*.multi` from the en dictionary
+archive and only `*.cset/*.cmap/*.kbd` from the release data tree. Smoke
+check of the corrected copy: 32 `.multi`, 26 `.cset` and 3 `.kbd` files
+staged in a temporary directory. No claim, input or measured result changed.
