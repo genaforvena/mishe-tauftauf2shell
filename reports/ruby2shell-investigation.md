@@ -5913,3 +5913,35 @@ The new question is cross-consumer interleaving, not another primer-count or
 smallbin sweep. Pass requires an address-matched overwrite of a freed BBuf
 tcache word before a later Regexp compile consumes it; no matched overwrite
 closes the combined lane.
+
+## Combined primary-overflow → Regexp BBuf tcache lane — CLOSED (2026-11-26 18:19Z)
+
+One keep-alive connection to one stock Rails Puma worker
+(`RAILS_MAX_THREADS=1`, plain vulnerable 3.4.12) served a benign
+`/rails/info/notes` Regexp POST (200), the wire-only mixed27
+`_method.to_s.upcase` one-byte overflow (404, process alive), then a second
+benign Regexp POST (200). `lab/preload/casemaptrace.c` only observes
+`malloc`/`free` addresses; it writes nothing into the process. Evidence:
+`lab/build/evidence/combined-keepalive-{1.trace,1.json}`.
+
+Across 370 candidate 65–80-byte allocation destinations and 11,976 frees of
+0x20-class chunks (9,086 unique addresses), there were **zero** cases where
+the overflow destination equalled a freed chunk's user pointer or any of its
+first eight bytes (the tcache `next` word). 326 destinations fell in a freed
+chunk's 16-byte header instead.
+
+This is structural, not a failed grooming count. `rb_str_casemap` allocates
+`offsetof(mapping_buffer, space) + capa = 24 + (input_len + 20)` bytes at
+`lab/build/plain/ruby-3.4.12/string.c:7830-7842`; the SHARP_s branch writes
+one byte at `space + capa`, i.e. at `user + request_size`. With glibc,
+`next_user - user = chunksize = align16(request_size + 8)`, so the byte can
+only land 8–24 bytes **before** the following chunk's user pointer: in that
+chunk's `prev_size`/`size` header, never in its tcache-linked user data.
+A standalone glibc model (`lab/build/casemap-delta-model.c`, gitignored)
+measured destinations at offsets −23..−8 from an adjacent 0x20 chunk's user
+pointer over input lengths 1..96: zero tcache-word hits. No heap placement of
+a 0x20 BBuf can put its `next` word inside the reachable window.
+
+Grades unchanged: wire-only secondary rung 3; prior rung-4 scopes
+witness-COMPLETE; harness-condition rung 5 ESTABLISHED as labeled; full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
