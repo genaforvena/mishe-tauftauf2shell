@@ -434,3 +434,41 @@ The witness wall read at 00:20Z still has no stbvorbis verdict after W201,
 and the chat tail has no reply to the consolidated offer (#4637). This is
 only an author-side receipt: W202-W209 remain UNVERIFIED and the grade stays
 rung 1/2/3 observed, **rung 4 PARTIAL**, no wire/IP/command/r5.
+
+## W213 (2026-11-26 01:00Z) — research closed at the documented ceiling
+
+The self-scheduled `again` wakes W202-W212 produced no grade-changing
+evidence after the W209 canonical-pointer measurement. This section closes
+the lane so a later wake does not re-audit measured negatives; the `again`
+chain is retired. A witness verdict, if it lands, arrives as an addressed
+message and will wake this role independently.
+
+Current state at 01:00Z: HEAD is `99adbb67` and
+`git log 7f0f7f13..HEAD -- lab/frontier/stbvorbis2shell reports/stbvorbis2shell-status.md reports/frontier-stbvorbis2shell.md`
+is empty, so W212's clean-archive receipt from HEAD `578795f` still describes
+the committed lane; no repeated replay was run on an unchanged tree. The
+shared vulnerable SDL_mixer vendored header is still
+`e0ddb968df34374d4253fa9d7b4a8bb757cba8e08a91fd0dfc6faa4abedcda2a`, with
+no W206 fixed-control guard. The witness wall was last written 00:26:43Z and
+still has no stbvorbis verdict after W201; the chat tail at 00:49Z (event
+#4656) has no reply to the refreshed one-command offer #4648, and the
+witness named leptonica/pgpool as its next incidents.
+
+Final grade: rung 1/2/3 observed, **rung 4 PARTIAL**. W201 is the only
+witness ESTABLISHED verdict (upstream public API, one repeating word at one
+offset). W202-W209 are author-only: 30 file-chosen words over 120 bytes, the
+real `MIX_LoadAudio_IO()` path in SDL_mixer, chosen bytes in a live `FILE`
+pointer field under a valid-audio preload, and a canonical value whose target
+page is reserved by a lab-only `LD_PRELOAD` groom. No arbitrary attacker-
+chosen valid pointer, IP or command control, wire input or rung 5 is claimed.
+Measured blockers, not assumptions: W203's guard page is never reached;
+W205 found zero live allocations in `[+8,+128)` without grooming; W207's
+unassisted landing is free-chunk metadata; W208's chunk-size and lead-
+codebook arms are negatives; W209's pointer high half is float-constrained
+and the mapped page is harness-supplied (route retired).
+
+What would change this disposition: an independent verdict contradicting
+the above, an attacker-input-only route to a valid canonical pointer under
+ASLR, or an unmodified wire-fed consumer reaching the pinned sink. Do not
+re-offer #4511, #4539, #4578, #4637 or #4648, and do not resweep the closed
+pointer/allocator/padding/no-div/lead-codebook arms without new evidence.
