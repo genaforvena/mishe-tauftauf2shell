@@ -1,11 +1,14 @@
-# frontier-ntfs3g2shell — QUEUED FOR STAGING: LZNT1 one-byte heap WRITE (CVE-2026-42618)
+# frontier-ntfs3g2shell — STAGED: shipped-CLI LZNT1 one-byte heap WRITE (CVE-2026-42618)
 
-Status: **QUEUED FOR STAGING; rung-3 ASan WRITE observed in the pinned function
-via a synthetic caller (W282, 2026-11-26)**. Advisory, source and patch were
-read; a local GCC ASan `WRITE of size 1` at verbatim `compress.c:568` and a
-clean vendor-patched control were observed. The shipped `ntfscat` CLI has
-not been driven with an NTFS image; no window or mind was created, and rung 4
-is NOT CLAIMED. Next wake: craft the image, exercise the real CLI, then stage.
+Status: **STAGED in W283 (2026-11-26); rung-3 ASan WRITE confirmed through the
+shipped `ntfscat` CLI with a locally crafted 4 MiB NTFS image; rung 4 NOT
+CLAIMED.** The W282 synthetic-caller observation below is retained as the
+mechanism-first step. The W283 clean-archive runner
+`lab/frontier/ntfs3g2shell/run-all.sh` reports PASS=31 FAIL=0: vulnerable
+pinned build gives `WRITE of size 1` at verbatim `compress.c:568`, 0 bytes
+after a 65,536-byte region, while the vendor-patched build and a safe stream
+exit 0 ASan-clean. Charter, seed wall, status report and window are in place;
+operator admission and witness replay are owed.
 
 ## Claim source and scope
 
@@ -79,32 +82,30 @@ from the GHSA applied cleanly: the same input gave rc 0 and no ASan report
 synthetic consumer; do not relabel this as a CLI reproduction or rung 4.
 
 
+## Observed shipped-CLI reproduction (W283)
+
+`lab/frontier/ntfs3g2shell/` stages a clean-archive runner. Pinned `mkntfs`
+bootstraps a deterministic 4 MiB image; `src/gen_image.py` patches MFT record 16
+with a non-resident compressed `$DATA` (one cluster at LCN 1000, then a
+15-cluster hole, compression unit 4) and puts the W282 stream in the 16th LZNT1
+sub-block. The shipped `ntfscat -f -i 16 IMG` under GCC ASan gives
+`heap-buffer-overflow`, `WRITE of size 1` at verbatim `compress.c:568`, 0 bytes
+after a 65,536-byte region allocated at `compress.c:783`, through frames
+`ntfscat.c:371 -> attrib.c:1003 -> compress.c:950`; 61,440 stdout bytes precede
+the abort. The vendor-patched build emits 65,536 bytes with no ASan report; a
+safe stream (two final literal tokens removed) is clean on both builds.
+`sh run-all.sh` PASS=31 FAIL=0. Image and source hashes, control commands and
+negatives are in the harness `PROVENANCE.md`; traces in `evidence/`.
+
 ## Rung-4 feasibility and cheapest experiment
 
 One chosen byte at a fixed heap boundary supports rung 3 but not rung 4:
 no arbitrary address, no pointer overwrite, no control-flow steering, and
 no wire listener (rung 5 N/A). `AV:L` and a crafted-image precondition further
-limit it. If later evidence shows a longer overwrite or adjacent-object
-control, revisit; until then do not infer a shell path.
-
-Pinned build command for the next wake (top-level `make`; `make ntfsprogs/ntfscat`
-from the root has no rule):
-`CFLAGS='-O1 -g -fsanitize=address -fno-omit-frame-pointer' LDFLAGS='-fsanitize=address' ./configure --disable-shared && make -j6`.
-
-Shipped-CLI input shape (still a plan): non-resident `$DATA` with
-`ATTR_IS_COMPRESSED` + `FILE_ATTR_COMPRESSED`, data size >= 64 KiB, runlist
-with at least one sparse run in a 16-cluster compression block, and 16 LZNT1
-sub-blocks. `ntfscat` reads in 4096-byte chunks; on the 16th chunk
-`decompsz == cb_size == 65536` so a stray symbol lands in ASan poison;
-earlier chunks write in-bounds into the next sub-block. The final sub-block
-must use phrase tokens: a literal-only stream needs 4608 input bytes, but
-`NTFS_SB_SIZE_MASK` is 0x0fff, capping a sub-block at 4098 bytes, so the
-earlier scout-suggested header `0x9201` cannot work. The observed harness
-stream was one literal tag `0xfe`, 169 all-phrase tags `0xff` (`pt=0`,
-3-byte copies), and a final tag `0x3f` whose last two symbol tokens overflow;
-header `0x8b57`, 2906 bytes total. Embedding that stream in the final 4 KiB
-region of a crafted image is the next step. No public PoC was found; the
-image bytes must be constructed locally and preserved.
+limit it. The advisory names the SUID `ntfs-3g` FUSE path; this lab cannot mount
+(Operation not permitted), so only `ntfscat` was driven. If a plain-build
+grooming experiment shows a chosen byte in an adjacent object, revisit;
+until then do not infer a shell path.
 
 Prior frontier notes (`reports/frontier-quickjsbcode2shell.md:99-100`,
 `frontier-quickjsng2shell.md:104-106`) rejected this CVE as needing a
