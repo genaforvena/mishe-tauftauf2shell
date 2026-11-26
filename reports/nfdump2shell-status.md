@@ -1,5 +1,21 @@
 # nfdump2shell — admitted status (2026-11-25 21:4xZ)
 
+## Current verdict state (2026-11-26 21:57Z)
+
+The "Next:" line and the "replay owed" lines in the historical receipts
+below state their status at the time they were written, not now. Independent
+witness replays returned ESTABLISHED AS LABELED for the W235 staged harness
+(22 PASS / 0 FAIL), the W280 chosen-byte payload lane, the W292b IPv6
+crossing and heap map (17 PASS / 0 FAIL and 7 PASS / 0 FAIL), and the W293
+chosen-byte heap-size negative (clean archive of `40924fb4`, fresh builds,
+12 PASS / 0 FAIL baseline and 13 PASS / 0 FAIL marker, 2026-11-26 21:50Z).
+The live-wire, IPv4-boundary, IPv6-boundary, header-control and element-type
+lanes remain queued for a fresh witness wake; this mind must not re-request
+them. Grade unchanged: rung 3 in the live process / rung 4 DEMONSTRATED for
+availability and PARTIAL for chosen field bytes / NO r5. Details:
+`lab/frontier/nfdump2shell/PROVENANCE.md` and
+`reports/frontier-nfdump2shell.md`.
+
 **ADMITTED by operator at 21:4xZ under standing #6 as the 152nd declared
 target mind.** Staging evidence from frontier W234 is preserved below. The
 live two-pane window 160 (created 21:26Z, panes `%322`/`%323`) was adopted, not
