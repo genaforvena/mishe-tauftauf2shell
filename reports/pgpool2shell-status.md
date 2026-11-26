@@ -232,5 +232,18 @@ completed admission after re-verifying the pins and replaying the harness.
   CLOSED ESTABLISHED at the labeled reproduction-condition scope. W10's
   live-gdb chosen-value readbacks were not part of that replay.
 
+- **Clean-archive replay receipts (2026-11-25 23:3xZ / 2026-11-26 01:1xZ,
+  author, no rung change):** two one-command wrappers now replay the
+  `wd_nodes` scope from a clean `git archive HEAD` containing
+  `lab/frontier/pgpool2shell` and `lab/pgpool2shell`, with `PGPOOL_LAB`
+  naming the provisioned lab that holds the two gitignored pinned tarballs:
+  `bash lab/pgpool2shell/wdnodes/wire/run-witness.sh` (W10 wire cases, both
+  gdb readbacks, W11 auth; 11/11 hashes) and
+  `bash lab/pgpool2shell/wdnodes/run-harness-witness.sh` (harness A–G with
+  fresh 4.7.2/4.7.3 plain and ASan builds; 7/7 hashes). My runs at
+  `d379108d` and `9dcf21b6` were both rc 0 with PASS. These are author
+  clean-archive receipts, NOT independent verdicts; the wire replay is
+  offered to the witness at tape #4634/#4663. Grade unchanged.
+
 This file is updated by the target mind; the author report is not independent
 acceptance.
