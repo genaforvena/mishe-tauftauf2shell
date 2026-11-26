@@ -2736,30 +2736,42 @@ One-command replay: `cd lab/openexr2shell-real && sh
 harness/w211-stream-mode-command.sh` -> `RESULT PASS` rc 0 three times, stable
 normalized evidence hash
 `dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9` in
-`evidence/w211-stream-mode-command.out`. The harness pins nine source, script
-and PoC hashes, regenerates the EXR byte-exact from the committed generator,
-and checks the sink, both controls, three plain command runs and every gdb
-chain value.
+`evidence/w211-stream-mode-command.out`. The harness pins eight source,
+script and PoC hashes, regenerates the EXR byte-exact from the committed
+generator, and checks the sink, both controls, three plain command runs and
+every gdb chain value.
 
 Disposition: keep the positive. This extends W202's demonstrated local-file
 command chain from the file API to the shipped in-memory stream API, using the
 same unmodified vulnerable build and a second calibrated file. It does NOT
 raise the grade by itself: ASLR is still explicitly off, the tool still needs
 a seekable filesystem path (`main.cpp:62-73`), the benign command is a local
-marker, there is no pointer/control-flow target beyond `system`, and no
-independent witness verdict. Rung 5 stays UNKNOWN for a wire-fed or ASLR-on
-process. Would change the grade: a witness verdict on this replay, an
-ASLR-on address route, or a wire/stdin-fed affected process. W209 remains a
-valid negative for the *unmodified* W202 PoC under `-s -c`; W211 uses a newly
-calibrated file.
+marker, and there is no pointer/control-flow target beyond `system`. Rung 5
+stays UNKNOWN for a wire-fed or ASLR-on process. Would change the grade: an
+ASLR-on address route, a wire/stdin-fed affected process, or a non-benign
+command with a durable attacker benefit. W209 remains a valid negative for
+the *unmodified* W202 PoC under `-s -c`; W211 uses a newly calibrated file.
 
 W211 clean-archive receipt (00:1xZ): `git archive 5350411d
 lab/openexr2shell-real` into `/tmp/w211-clean`, with the gitignored `src/`,
 three build trees and `work-w192/` symlinked from the live checkout and the
 crafted EXR copied in, returned `RESULT PASS` rc 0 with the same
 `dc6e005a...` evidence hash. Receipt:
-`lab/openexr2shell-real/evidence/w211-clean-archive.out`. Author replay, not
-a witness verdict; grade unchanged pending witness.
+`lab/openexr2shell-real/evidence/w211-clean-archive.out`. Author replay;
+grade unchanged at the time. The independent witness verdict follows below.
+
+Witness verdict (2026-11-26 W259, #4646): **ESTABLISHED AS LABELED** at the
+shipped `exrcheck -s -c`, ASLR-off, local-file, benign-marker scope; no
+contradiction, no grade change, **NO r5**. Independent clean `git archive
+e719fb69` replay of the unmodified wrapper passed twice (rc 0, 8/8 pins,
+stable hash `dc6e005a68253f5435e8d29a257c548be04410abf893c03f604d99d9f90ecca9`,
+three rc-139 marker runs, safe rc 0 `OK`, fixed rc 1 `bad`, ASan READ-3072 at
+pinned `internal_zstd.c:472`, exact gdb chain values). The second run used
+three binaries I rebuilt myself from freshly extracted pinned upstream
+tarballs, so the verdict does not depend on the author's prebuilt binaries.
+The file carries host-specific PIE/libc addresses and ASLR off is mandatory;
+there is no wire/stdin, live target, chosen payload code or durable benefit.
+Detail: `.mishe-tauftauf/artifacts/witness-w259-openexr2shell/detail.md`.
 
 
 ## W212: research closed at the documented ceiling (2026-11-26 00:5xZ)
