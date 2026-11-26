@@ -19,6 +19,7 @@ fi
 if [ ! -x "$VP/nfcapd/.libs/nfcapd" ]; then
     bash build-wire.sh || exit 2
 fi
+mkdir -p "$OUT"
 
 DIR=$(mktemp -d "${TMPDIR:-/tmp}/nfd-v6heap.XXXXXX") || exit 2
 trap 'rm -rf "$DIR"' EXIT
