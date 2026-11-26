@@ -61,6 +61,15 @@ the pointer, argument and command are server-side synthetic playback bytes,
 the client chooses only the wrap and target offset, there is no wire-derived
 command and no witness replay (`lab/freerdp2shell-src/call_target_stock.txt`,
 `reports/freerdp2shell-status.md`).
+Wake 21 (`7f7fffc8`) CLOSED the remaining byte-provenance route on that
+build: `rdpsnd_server_send_samples()` copies server-local capture, and the
+client's only byte array (`cbSize` waveform extension) lands in a separate
+`format->data` allocation with no copy into `out_buffer`. The real-parser
+measurement (`lab/freerdp2shell-src/wire_byte_range.txt`) reports
+`RESULT=WIRE_EXCLUDED wire_at_call_target=0`: wire marker `0x5a` is 272
+bytes away from `out_buffer`, while all W20 field slots carry capture
+`0xde`. The wire controls wrap, offset and length, not the written bytes,
+so R5 stays blocked at byte provenance on this lane.
 
 The libIEC61850 lane is different: a wire-supplied chain already calls real
 libc `system` in the live unsanitized server with a target-written marker

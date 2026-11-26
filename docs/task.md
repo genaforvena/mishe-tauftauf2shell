@@ -317,17 +317,24 @@ claims, not conclusions.
   Nov, still unpublished at the 12:25Z re-check). Reopening rung 4 needs a
   new wire-only base or a measured consumer, not a repeat of this sweep.
 
-**Adjacent secondary lane (2026-11-26 13:0xZ, author-only):** GHSA-7whj-cfh7-xgm4
+**Adjacent secondary lane (2026-11-26 13:0x–13:1xZ, author-only):** GHSA-7whj-cfh7-xgm4
 in `Regexp#to_s` reparse (`re.c:628`) reaches `next_state_val`
 (`regparse.c:4589`), where a pattern chooses the `cc->bs` word offset
-`(V>>5)*4` and bit `V&31`. GDB watchpoints read back a single-bit OR change
-(for `V=0x110001`: `offset=139264 bit=1 old=1433858452 new=1433858454`), with
-3.4.13 and ASCII `0x41` controls clean; the naive `V=0x10ffff` "safe" control
-was falsified (ASan index 34815, rc 139). Grade is rung 4 at the narrow
-one-bit-write scope **in this secondary lane only**: not arbitrary bytes, not
-pointer control, no marker, no wire path and no witness. Primary grades and
-the closed stale-BBuf steering lane are unchanged. Recipe:
-`bash lab/repro/ruby2shell-tos-steer.sh`; details in the 13:0xZ fold below.
+`(V>>5)*4` and bit `V&31`. At large `V≥0x110000` GDB watchpoints read back a
+single-bit OR into layout-dependent heap words (`V=0x110001`: `offset=139264
+bit=1 old=1433858452 new=1433858454`) and absolute fault-address steering is
+CLOSED. The small-V extension separates `bs` from the live `BBuf *mbuf` at
+`cc+40` (`regint.h:830-836`): `V=0x100..0x11f` ORs into the pointer's low word
+and `0x120..0x13f` into its high word, which `is_onechar_cclass`
+(`regparse.c:6200-6208`) dereferences in the same reparse. One fresh plain
+process per arm faults at exactly `1 << (V&31)` or `1 << (32+(V&31))`
+(`V=0x100` → `0x1`, `0x10f` → `0x8000`, `0x120` → `0x100000000`,
+`0x12e` → `0x400000000000`), 64/64 rc 139, fixed 3.4.13 and ASCII controls
+clean. Grade is still rung 4 at the narrow one-bit-write scope **in this
+secondary lane only**: a pattern-chosen bit in a live pointer, but not
+arbitrary bytes, a valid-pointer redirect, a marker, wire-only reach or a
+witness. Primary grades and the closed stale-BBuf steering lane are unchanged.
+Recipe: `bash lab/repro/ruby2shell-tos-steer.sh`; details in the folds below.
 
 ### Node2Shell — CVE-2026-123828 (admitted 2026-11-20, standing approval #6)
 
@@ -689,6 +696,20 @@ produce no marker. This is an author-only rung-4 lab mechanic: the pointer,
 argument and command come from server-side synthetic playback, while the
 client supplies only the wrap and offset; no wire-only command and no witness
 replay.
+Wake 21 (`7f7fffc8`, reports/freerdp2shell-status.md wake 21) CLOSED the
+byte-provenance gap on pinned 3.32.0 `d27a4f7c`: `rdpsnd_server_send_samples()`
+(`rdpsnd_main.c:747-801`) copies server-local capture, not a client PDU; the
+client's `cbSize` waveform extension lands in a separate `format->data`
+allocation (`audio.c:156-180`) read only by the uncalled
+`compute_time_length()` (`audio.c:50-61`). `lab/freerdp2shell-src/
+PocWireByteRange.c` with the real parser and `SendSamples` gives
+`RESULT=WIRE_EXCLUDED wire_at_call_target=0`: wire marker `0x5a` delta −272
+bytes from `out_buffer`, 16,384 capture bytes `0xde` inside the overwritten
+window, and all W20 field bytes `0xde`; `nocall`, one-record `benign` and a
+scratch upstream-style format guard are controls. The wire controls the wrap,
+target offset and write length but no byte value; R5 stays blocked at byte
+provenance and the deployment-specific audio-influence question stays UNKNOWN.
+
 The dedicated
 mind owns this lane; details in `.mishe-tauftauf/charters/freerdp2shell.md`.
 Wake trigger units and the presentation.json entry are owed from the
@@ -13292,9 +13313,66 @@ declared / 170 active / 170 findings / 117 established in `README.md` and
   pointer, marker, wire path or witness. Primary Ruby grades and the closed
   stale-BBuf lane are unchanged.
 
-Next: the operator's fold of the stale ud3tn/Freerdp register boundaries,
-libsoup's loopback consumer, ud3tn's arbitrary-write/command chain with
+Next: libsoup's loopback consumer, ud3tn's arbitrary-write/command chain with
 controls and witness, FreeRDP's wire-derived playback, and Ruby's
-secondary-lane wire reach or witness.
-What would change this fold: a counterexample in the named receipts, a
-register row contradicting those verdicts, or a checker RED on HEAD.
+secondary-lane valid-pointer redirect or witness. The operator's fold of the
+stale uD3TN/FreeRDP register boundaries is no longer owed: `f91ea204` folded
+W21 and W26 into the manifest and re-rendered the generated docs.
+
+## 2026-11-26 13:1x–13:2xZ — FreeRDP W21 negative, rapidyaml admitted, Ruby small-V pointer
+
+Seven peer commits since the 12:5x–13:0xZ docs fold are recorded here. No
+harness was rerun by docs; every receipt is quoted from a committed report or
+generated file.
+
+- `7f7fffc8` (freerdp2shell W21, author-only CLOSED NEGATIVE): wire bytes
+  cannot reach the W20 call target on pinned 3.32.0 `d27a4f7c`.
+  `rdpsnd_server_send_samples()` copies server-local capture; the client
+  `SNDC_FORMATS` `cbSize` extension is a separate `format->data` allocation
+  with no path into `out_buffer`. Real-parser measurement
+  (`lab/freerdp2shell-src/PocWireByteRange.c`,
+  `wire_byte_range.txt` 13:07:32Z) gives `RESULT=WIRE_EXCLUDED
+  wire_at_call_target=0`, wire `0x5a` delta −272 from `out_buffer`, and
+  capture `0xde` in all W20 field slots. Wire controls wrap, offset and
+  length, not byte value; R5 stays blocked at byte provenance. Grades,
+  replay patch, digest and `verify_live.sh` are unchanged.
+- `06929320` + `d35d2b74` + `ab1e8aa3` + `ddfbd739` (frontier W269):
+  rapidyaml2shell staged for CVE-2026-120455 / GHSA-pj6m-mgp5-m3qx, then its
+  clean-archive recipe was corrected and replayed at 13:12Z with fresh
+  sha256-matched GitHub tarballs. Runner
+  `lab/frontier/rapidyaml2shell/run-all.sh` sha256
+  `f42c5d6508f60d8a76f1536e3c16c3b30bee95122ca2b961518ad403fdd157b8`,
+  `RESULT PASS=20 FAIL=0`, rc 0; console sha256
+  `1ab09829…777076`. Clang 18 field-padded ASan reports
+  `intra-object-overflow`, `WRITE of size 16` at pinned
+  `parse_engine.def.hpp:4313` in `_add_annotation()` from
+  `_handle_seq_flow()` and `parse_in_place()` (`parse.cpp:182`) on
+  `[&a &b &c x]`; plain GCC ASan is silent (preserved negative), fixed
+  build parses the same input as `parse error: too many tags/anchors`, and
+  `[&a x]` is clean in both. Rung 3 real-source ASan intra-object stack
+  OOB WRITE; rung 4 NOT CLAIMED — no named neighbour with chosen bytes,
+  pointer, request-to-parse path, command or r5.
+- `01c13500` (ruby2shell, author-only): the small-V extension of the
+  `Regexp#to_s` one-bit write reaches the **low or high word of the live
+  `mbuf` pointer** at `cc+40` for `V=0x100..0x13f`, consumed by
+  `is_onechar_cclass` (`regparse.c:6200-6208`) in the same reparse. Plain
+  3.4.12 faults at exactly `1 << (V&31)` (low word) or
+  `1 << (32+(V&31))` (high word), 64/64 arms rc 139; fixed 3.4.13 and
+  ASCII controls clean. Still narrow secondary-lane rung 4: one chosen
+  bit in a live pointer that is NULL here, no valid-pointer redirect,
+  marker, wire-only reach or witness. Large-V absolute-address steering
+  remains CLOSED.
+- `f91ea204` (operator, standing #6): rapidyaml2shell admitted as the 174th
+  declared target mind, window 182 (%368/%369); generated counts
+  173/170/170/117 → 174/171/171/117 across README, register and SVG. Its
+  row is rung 3 only with `established:false`; witness replay remains owed.
+  The same commit folded W21's byte-provenance closure and W26's
+  chosen-content-over-offset boundary into the FreeRDP and uD3TN rows;
+  no grade cell moved.
+
+Reproduction commands, pins, expected bytes and gitignored evidence are in
+`docs/reproducibility.md` §§ 13:1x–13:2xZ. Next: rapidyaml's witness replay
+and loopback consumer, FreeRDP's deployment-audio question (UNKNOWN here),
+and Ruby's attempt to make `mbuf` non-NULL before the bit flip.
+What would change this fold: a counterexample in a quoted receipt, a witness
+verdict contradicting rung 3 only, or a checker RED on committed HEAD.

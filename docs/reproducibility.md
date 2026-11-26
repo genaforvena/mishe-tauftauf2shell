@@ -13599,5 +13599,134 @@ e.g. `V=0x110001 offset=139264 bit=1 old=1433858452 new=1433858454`.
 Fixed 3.4.13 and ASCII `0x41` controls are clean; `V=0x10ffff` is a
 falsified control (ASan index 34815, rc 139). Evidence is gitignored under
 `lab/build/evidence/tos-steer/` and regenerates with the script. Narrow
-rung 4 in this secondary lane only: no arbitrary byte, pointer, marker, wire
-path or witness; primary Ruby grades unchanged.
+rung 4 in this secondary lane only: no arbitrary byte or pointer value,
+marker, wire path or witness; primary Ruby grades unchanged. The later
+small-V section below extends this to a chosen bit in a live pointer, which
+does not make the pointer arbitrary.
+
+## 2026-11-26 13:1x–13:2xZ — rapidyaml runner, FreeRDP wire-byte closure, Ruby small-V pointer
+
+### Rapidyaml2Shell — staged then admitted 174th (CVE-2026-120455)
+
+Claim sources: CVE-2026-120455 / GHSA-pj6m-mgp5-m3qx (published 2026-11-02,
+updated 2026-11-09, CVSS v4 6.9 `AV:L`, CWE-787/121), OSV
+`https://osv.dev/vulnerability/CVE-2026-120455`, upstream issue
+`https://github.com/biojppm/rapidyaml/issues/680` (static source review
+only), and fix commit `https://github.com/biojppm/rapidyaml/commit/
+0b4f4c1985dc` (PR #682, unreleased: `/releases/latest` still returns
+v0.16.0). Affected: rapidyaml through v0.16.0; the fixed control is built
+from commit `0b4f4c1985dc99d2773c1f1da7b447d610bbb1d4`, not a release.
+
+From `lab/frontier/rapidyaml2shell`, refetch and verify both archives before
+running; `curl -O` keeps the URL basename (`0b4f4c1985dc.tar.gz` expands to
+the full-hash directory):
+
+```
+curl -sSL -O https://github.com/biojppm/rapidyaml/archive/f8ac8dd50f4f7916579d55a05ebf9c6488e52670.tar.gz
+curl -sSL -O https://github.com/biojppm/rapidyaml/archive/0b4f4c1985dc.tar.gz
+# sha256 79a6e1d649a6858eca5f6a8c752b4b3d067519cdc6ae3c804fca41b63ae16633
+# sha256 63b7becba7c21694f61fc3249d059333ec01e857bced3bc8046c4623d4d31d47
+mkdir -p vuln fixed
+tar xzf f8ac8dd50f4f7916579d55a05ebf9c6488e52670.tar.gz -C vuln
+tar xzf 0b4f4c1985dc.tar.gz -C fixed
+./run-all.sh
+```
+
+Runner sha256
+`f42c5d6508f60d8a76f1536e3c16c3b30bee95122ca2b961518ad403fdd157b8`; it
+checks both pinned `parse_engine.def.hpp` hashes before compiling the full
+verbatim trees (vulnerable `f77f58dc…95068a6`, fixed `5f25e6b7…82d4cd7`)
+with a lab-only driver calling the real `ryml::parse_in_place()`. Expected
+console (`evidence-run-console.log`, sha256
+`1ab09829923135fba5ee622499c1e9131d4d1aacacefc35fefbbf1c4d7f77076`):
+`RESULT PASS=20 FAIL=0`, rc 0, 13:07Z–13:08Z. Clang 18 with
+`-fsanitize-address-field-padding=2` reports `AddressSanitizer:
+intra-object-overflow`, `WRITE of size 16` at pinned
+`src/c4/yml/parse_engine.def.hpp:4313` in `_add_annotation()` called from
+`_handle_seq_flow()` and `parse_in_place()` (`parse.cpp:182`) on
+`[&a &b &c x]`; `{val: &a &b &c x}` also gives WRITE-16. Fixed build:
+`PARSE_ERROR parse error: too many tags/anchors`, no ASan. Safe `[&a x]`:
+`PARSED nodes=2` in both. Plain GCC ASan is silent on the vulnerable build
+(the 48-byte `Entry` stays inside the enclosing stack `TmpParser`): a
+preserved negative, not a failure. Three tag lines and block sequence
+anchors reach earlier consumer errors here and are preserved negatives,
+not claimed triggers.
+
+Frontier replayed the documented procedure verbatim at 13:12Z from
+`git archive d35d2b74` with fresh sha256-matched tarballs: runner hash
+unchanged, `RESULT PASS=20 FAIL=0`, rc 0; console in ignored artifact
+`.mishe-tauftauf/artifacts/frontier-w269-rapidyaml-cleanreplay2/lab/frontier/rapidyaml2shell/cleanreplay-console.log`.
+The first PROVENANCE draft used wrong tarball basenames and failed at
+`tar` (rc 2); d35d2b74 fixed them. Tarballs, extracted trees, builds and
+logs are intentionally gitignored and regenerate with the commands above;
+the first console log is committed. Operator admission `f91ea204` folded
+the register row as rung 3 only (`established:false`); no witness verdict
+has landed. Grades: rung 3 real-source ASan intra-object stack OOB WRITE;
+rung 4 NOT CLAIMED, no chosen bytes at chosen offsets, pointer, request-
+to-parse path, command or r5.
+
+### Freerdp2Shell — wake-21 wire-byte provenance CLOSED NEGATIVE (author-only)
+
+On pinned plain 3.32.0 `d27a4f7c1c63b62a5e60e5d939ad116cfb58ffc1`, the
+lab driver `lab/freerdp2shell-src/PocWireByteRange.c` feeds the real
+`rdpsnd_server_recv_formats()` parser a two-record `SNDC_FORMATS` PDU whose
+ADPCM record carries `cbSize=256` filled with wire marker `0x5a`; the real
+`SelectFormat()` wraps `out_frames` and the real `SendSamples()` copies a
+separate server-capture stand-in `0xde`. Modes are `vuln` (default),
+`nocall`, `benign` (one PCM record, no wrap) and `fixed` (scratch
+`rdpsnd_main.c` with upstream-style `nBlockAlign / 7 < nChannels` guard).
+No committed build script exists for this driver; the receipt records a
+gcc plain build of the pinned source and the exact flags are UNKNOWN here.
+Expected trace in `lab/freerdp2shell-src/wire_byte_range.txt` (13:07:32Z):
+
+```
+vuln    wire record cbsize=256 data[0]=5a data[255]=5a
+        SelectFormat rc=12 out_frames=0xfffffffffffffffc out_buffer_size=8820
+        wire_blob-out_buffer delta=-272 bytes (separate allocation)
+        W20 fields 8880=de 8888=de 8920=de 8928=de 8992=de 9000=de 12000=de
+        window [8820,25204): wire_0x5a=0 capture_0xde=16384
+        RESULT=WIRE_EXCLUDED wire_at_call_target=0
+nocall  8992=00 9000=00; benign NO_WRAP; fixed SelectFormat rc=6 NO_WRAP
+```
+
+No replay patch, digest or `verify_live.sh` changed; no live session was
+rerun and no probe left loopback. The client controls wrap, offset and
+length, not any byte inside the written range. The W20 marker therefore
+stays a rung-4 lab mechanic and R5 is blocked at byte provenance; whether a
+deployment lets a remote attacker influence captured audio remains UNKNOWN.
+
+### Ruby2Shell — small-V chosen bit in a live `mbuf` pointer (author-only)
+
+The same `bash lab/repro/ruby2shell-tos-steer.sh` script extends the sweep
+into `V=0x100..0x13f`. `regint.h:830-836` places `CClassNode`'s 32-byte
+`bs` at `cc+8` and `BBuf *mbuf` at `cc+40`, so an OR into `bs+32` or `bs+36`
+hits the low or high word of the live pointer; `is_onechar_cclass`
+(`regparse.c:6200-6208`) reads `GET_CODE_POINT(n, bbuf->p)` from that field
+later in the same reparse. One fresh unsanitized 3.4.12 process per arm,
+with a hardware watchpoint in `lab/repro/ruby2shell-tos-steer.gdb`, gives
+`V=0x100 mbuf=(nil) 0 -> 1 bit=0` and `V=0x10000 word 0x10 -> 0x11` (the
+latter is other heap data, not this pointer). Expected plain faults:
+
+```
+V=0x100 rc=139 fault 0x0000000000000001
+V=0x101 rc=139 fault 0x0000000000000002
+V=0x10f rc=139 fault 0x0000000000008000
+V=0x11f rc=139 fault 0x0000000080000000
+V=0x120 rc=139 fault 0x0000000100000000
+V=0x12e rc=139 fault 0x0000400000000000
+fixed 3.4.13 V=0x100/0x120 rc=0; vulnerable ASCII V=0x41 rc=0
+```
+
+All 32 low-word and 15 high-word arms fault at exactly
+`1 << (V&31)` / `1 << (32+(V&31))`; the high-word arms `0x12f..0x13f`
+return rc 139 with a noncanonical pointer reported at `0x0`. Full table in
+gitignored `lab/build/evidence/tos-steer/small-v-sweep.txt`; the watchpoint
+logs are `gdb-small-100.out` and `gdb-small-10000.out`, and
+`plain12-100-full.out` ends in `is_onechar_cclass+0x17`
+(`regparse.c:6207`) from `parse_exp` (`regparse.c:6467`). Regenerate with
+the script; no replay by witness. Grade stays narrow secondary-lane rung 4:
+one chosen bit in a pointer that is NULL here, no valid-pointer redirect,
+arbitrary byte, marker, wire-only reach or witness. Large-V absolute fault-
+address steering remains CLOSED; the next bounded experiment is to make
+`mbuf` non-NULL with a multi-byte codepoint in the same class before
+flipping a bit.

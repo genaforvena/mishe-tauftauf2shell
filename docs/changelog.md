@@ -4403,7 +4403,50 @@ every receipt is quoted from committed reports or named witness artifacts.
   stale-BBuf lane are unchanged.
 
 Details, pins, expected bytes and regeneration commands are in
-`docs/reproducibility.md` §§ 12:5x–13:0xZ; the current next actions are the
-operator's fold of the stale ud3tn/Freerdp register boundaries, libsoup's
-consumer, ud3tn's write/command chain, FreeRDP's wire-derived playback and
-Ruby's secondary-lane witness.
+`docs/reproducibility.md` §§ 12:5x–13:0xZ. The operator's fold of the stale
+uD3TN/FreeRDP register boundaries landed in `f91ea204`; the remaining next
+actions are libsoup's loopback consumer, ud3tn's write/command chain,
+FreeRDP's wire-derived playback and Ruby's secondary-lane witness.
+
+## 2026-11-26 13:1x–13:2xZ — FreeRDP W21 negative, rapidyaml admitted, Ruby pointer bit
+
+This is a docs-only fold of seven peer commits since `3f385581`. No harness
+was rerun and no generated file was moved; all receipts are quoted from
+committed reports, generated files or named ignored artifacts.
+
+- `7f7fffc8` (freerdp2shell W21, author-only CLOSED NEGATIVE): on pinned
+  3.32.0 `d27a4f7c`, the wire cannot supply any byte at the W20 call target.
+  `rdpsnd_server_send_samples()` copies server-local capture; the client's
+  `cbSize` extension is a separate `format->data` allocation. Real-parser
+  measurement `RESULT=WIRE_EXCLUDED wire_at_call_target=0`, wire `0x5a`
+  delta −272 from `out_buffer`, capture `0xde` in all W20 slots, with
+  `nocall`, `benign` and scratch-fixed controls. Wire controls wrap, offset
+  and length only; R5 stays blocked at byte provenance. Wrote the closure
+  into `docs/task.md`, `docs/rce.md` and a reproducibility recipe.
+- `06929320`/`d35d2b74`/`ab1e8aa3`/`ddfbd739` (frontier W269): rapidyaml2shell
+  staged for CVE-2026-120455 / GHSA-pj6m-mgp5-m3qx, its clean-archive
+  procedure corrected after a `tar` rc 2 on wrong tarball basenames, then
+  replayed at 13:12Z with fresh sha256-matched GitHub archives. Runner
+  sha256 `f42c5d65…157b8`, `RESULT PASS=20 FAIL=0`, rc 0; Clang 18
+  field-padded ASan `intra-object-overflow` WRITE-16 at pinned
+  `parse_engine.def.hpp:4313` on `[&a &b &c x]`, fixed build reports
+  `parse error: too many tags/anchors`, plain GCC ASan silent (preserved
+  negative). Grade rung 3 real-source intra-object stack OOB WRITE; rung 4
+  NOT CLAIMED, no chosen offsets, pointer, wire consumer or r5.
+- `01c13500` (ruby2shell, author-only): the `Regexp#to_s` one-bit write now
+  reaches the low or high word of the live `mbuf` pointer at `cc+40` for
+  `V=0x100..0x13f`; plain 3.4.12 faults at exactly `1 << (V&31)` or
+  `1 << (32+(V&31))` in 64/64 arms, fixed and ASCII controls clean. Still
+  narrow secondary-lane rung 4 (NULL pointer here, no redirect, marker,
+  wire-only reach or witness); large-V absolute-address steering stays
+  CLOSED. Top-level pointer and reproducibility recipe updated.
+- `f91ea204` (operator, standing #6): rapidyaml2shell admitted as the 174th
+  mind, window 182 (%368/%369), generated counts 173/170/170/117 →
+  174/171/171/117, row rung 3 only with `established:false`. The same
+  commit folded W21 and W26 into the FreeRDP/uD3TN register boundaries;
+  no grade cell moved. Witness replay remains owed for rapidyaml.
+
+Pins, commands, expected bytes and gitignored evidence are in
+`docs/reproducibility.md` §§ 13:1x–13:2xZ. Next: rapidyaml's witness replay
+and loopback consumer, FreeRDP's deployment-audio question (UNKNOWN here),
+and Ruby's non-NULL `mbuf` experiment.
