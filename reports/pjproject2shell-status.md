@@ -1,4 +1,4 @@
-# pjproject2shell — admitted status (2026-11-26 22:44Z W244 update)
+# pjproject2shell — admitted status (2026-11-26 23:13Z W298 update)
 
 **ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
 target mind.** Window 164 was already live and was adopted, not duplicated.
@@ -39,8 +39,9 @@ pj pool; W242 overwrites a live `pj_mutex_t` at frame+48 through the SHIPPED
 `pjmedia_vid_port_create()` clock path with no driver-groomed victim; W243 puts
 a live pointer-bearing `pjmedia_clock` at frame+48 via a shipped-SAMPLE
 allocation order. Fixed `7ecc6584` and safe 48-byte input are clean in all
-lanes. No pointer called, no wire, command or r5. W240–W243 await witness
-verdict; W239 is ESTABLISHED AS LABELED for the staged excerpt only. The
+lanes. No pointer called, no wire, command or r5. W243 is ESTABLISHED AS
+LABELED (W298, 23:05Z); W240–W242 still await verdict; W239 is ESTABLISHED
+AS LABELED for the staged excerpt only. The
 earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
 
 ## Next
@@ -58,9 +59,10 @@ earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
    glibc list pointers at +24/+32 are beyond a 64-byte write but inside a
    512-byte one; no function-pointer/callback object follows the frame in
    production. Grade unchanged; no witness replay repeated.
-4. Next: fold an actual W240–W243 witness verdict when one arrives; no r5
-   without a live loopback target, attacker AVI on a wire, a benign command
-   side effect and vulnerable/fixed/safe controls.
+4. Next: fold W240–W242 witness verdicts when they arrive (W243 closed
+   ESTABLISHED AS LABELED in W298); no r5 without a live loopback target,
+   attacker AVI on a wire, a benign command side effect and vulnerable/fixed/
+   safe controls.
 
 ## Receipts
 
@@ -120,3 +122,16 @@ earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
   from byte 16 onward while `vidport-asan-attack512.log` is repeated chosen
   marker across all 88 bytes. No production callback-pointer victim; grade
   unchanged, no replay repeated. Detail in `reports/frontier-pjproject2shell.md`.
+- Witness W298 verdict 2026-11-26 23:05Z (tape #5904/#5905): W243 shipped-
+  sample clock lane ESTABLISHED AS LABELED, grade unchanged, NO r5. Clean
+  git archive `a98128fc` into `/tmp/pjproject-witness-w298`, driver/runner
+  sha256 `a6cd99f9…`/`403b3944…` and three AVI fixtures hash-matched;
+  unmodified `build-real.sh` rc 0 with both pinned tarballs hash-matched,
+  `avi_get_frame_symbols=1` in each library; `run-clock.sh` rc 0, 10 PASS /
+  0 FAIL. Five `CLOCK_ALLOC delta=48 size=96`; chosen marker in the clock's
+  real pointer fields at 512 bytes, safe/fixed byte-identical, fixed clamp
+  logged. NIT: the driver's printed cb/user/lock labels are one word off
+  because the probe mirror omits `max_jump` (`clock_thread.c:119`); raw bytes
+  confirm chosen values at the real offsets, no grade impact. W240/W241/W242
+  verdicts still owed. Detail in
+  `.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md`.

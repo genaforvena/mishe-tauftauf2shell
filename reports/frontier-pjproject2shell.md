@@ -13,8 +13,9 @@ pool, with no driver-groomed victim. W243 adds a natural shipped-sample
 allocation order that puts a live, pointer-bearing `pjmedia_clock` at the
 same offset, with chosen bytes in its pool/callback/user_data/lock words.
 Grade: **rung 3 confirmed in the real consumer / rung 4 author-DEMONSTRATED
-with a real library object and natural shipped-caller adjacency**. W240–W243
-await witness verdict. No pointer was called, no wire, no command, no r5.
+with a real library object and natural shipped-caller adjacency**. W243
+witness replay ESTABLISHED AS LABELED (W298); W240–W242 still await verdict.
+No pointer was called, no wire, no command, no r5.
 
 
 
@@ -213,12 +214,24 @@ without calling or destroying it (`_exit(0)` after readback).
 release-style ASan builds returned **10 PASS / 0 FAIL**: `CLOCK_ALLOC
 delta=48 size=96` in all five runs; vulnerable 64-byte `00dc` overwrites
 `clock->pool` with chosen `0x4a502d454853494d` and the first 16 object bytes
-with `4d495348452d504a50524f4a45435421`; vulnerable 512-byte writes chosen
-words into `cb`, `user_data` and `lock`
-(`pool=cb=0x4a502d454853494d`, `user=0x215443454a4f5250`). Safe 48-byte
+with `4d495348452d504a50524f4a45435421`; vulnerable 512-byte writes the
+chosen marker across the whole readback (`CLOCK_BEFORE cb=0x1dcd6500` →
+`CLOCK_AFTER pool=cb=0x4a502d454853494d`,
+`user=0x215443454a4f5250`, `lock=0x4a502d454853494d`; see label correction
+below). Safe 48-byte
 input and both fixed cases leave the 128 readback bytes byte-identical,
 fixed logs the truncation clamp and `frame.size=48`. No pointer was called
 or dereferenced: the clock was never started, stopped or destroyed.
+
+Field-label correction (verified at the vulnerable pin; W298 witness NIT):
+the driver's `struct probe_clock` mirrors `clock_thread.c:110-132` but omits
+`pj_uint64_t max_jump` at `:119`, so its printed `cb` (offset 48) is the real
+`max_jump` (baseline `0x1dcd6500`), printed `user` (56) is the real `cb` and
+printed `lock` (80) is the real `running`/`quitting` word. The real pointer
+fields are `cb` +56, `user_data` +64, `thread` +72 and `lock` +88. The printed
+labels are shifted one word; the chosen-byte claim rests on the 128-byte
+`CLOCK_BYTES_AFTER` dump, which is the repeating marker at every real offset.
+No grade impact.
 
 Caveat: the natural allocation order is in a shipped *sample* application,
 not in a library-internal AVI consumer; the two library-internal callers
@@ -281,6 +294,24 @@ limited to the staged excerpt evidence; the W240 real-consumer lane above
 supersedes it. Full detail:
 `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
 
+## Witness replay (W298, W243, 2026-11-26 23:05Z)
+
+ESTABLISHED AS LABELED for W243 exact scope; grade unchanged, NOT r5.
+Independent clean `git archive a98128fc lab/frontier/pjproject2shell` into
+`/tmp/pjproject-witness-w298`: driver sha256 `a6cd99f9…dc3fd9b2a`, runner
+sha256 `403b3944…0e0d768f` and three AVI fixture hashes matched. Unmodified
+`build-real.sh` rc 0 with both pinned tarballs hash-matched and
+`avi_get_frame_symbols=1` in each library; unmodified `run-clock.sh` rc 0,
+`10 PASS / 0 FAIL`. Five `CLOCK_ALLOC delta=48 size=96`; vulnerable 64 writes
+the chosen pool word and 16 object bytes, 512 writes 128 marker bytes; safe48
+and both fixed runs byte-identical with the clamp logged. Source lines
+`vid_streamutil.c:733/:754/:760`, `clock_thread.c:174` and
+`avi_player.c:1221/:1222` verified fresh. No counterexample and no benign
+input tripping the oracle. Its one NIT is the field-label shift corrected in
+the W243 section above. The clock was never started, stopped or called; no
+wire and no command. W240/W241/W242 verdicts remain owed. Detail:
+`.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md`.
+
 ## Grade and tractability
 
 - **Rung 3 confirmed in a real consumer:** GCC and Clang ASan on the verbatim
@@ -299,7 +330,8 @@ supersedes it. Full detail:
   W243 adds a natural shipped-*sample* allocation order where a live
   pointer-bearing `pjmedia_clock` sits at frame+48 and its `pool`, `cb`,
   `user_data` and `lock` words take chosen values, again without a call.
-  Rung 4 is author evidence until the witness replays W240–W243.
+  W243's replay is ESTABLISHED AS LABELED (W298); W240–W242 remain author
+  evidence until replayed.
 
 - **Not rung 5:** no live loopback service, no attacker-supplied bytes
   through a network wire, no pointer hijack, no command side effect.
