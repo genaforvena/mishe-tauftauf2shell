@@ -5799,3 +5799,117 @@ build override to the wire reproducer and measure the same notes Regexp
 double-free on the other affected builds (plain 3.3.13 and 4.0.9), with
 fixed 3.4.13 and safe-input controls, before investing further in glibc
 shaping on 3.4.12.
+
+## Ruby build override and cross-version notes matrix — bounded NEGATIVE (2026-11-26, direct session)
+
+`lab/repro/ruby2shell-regexp-notes-wire.py` now accepts
+`RUBY2SHELL_REGEXP_RUBY` and `RUBY2SHELL_REGEXP_GEM_PATH`; without a gem
+override it selects the matching installed `lib/ruby/gems/<API>` directory.
+The stock app's locked gems were provisioned into the 3.3.0 and 4.0.0 lab gem
+homes from `vendor/cache`; no application code or middleware changed. The
+ASan mode retains the plain 3.4.12 gem home because those native extensions
+are ABI-compatible and the ASan gem home does not contain Rails.
+
+The wall's K=12/nested-2 matrix was run on fresh stock Rails processes:
+
+| arm | observed |
+| --- | --- |
+| affected plain 3.3.13, three attacks | two `free(): invalid pointer` aborts, one 60 s request/health timeout; no HTTP response |
+| affected plain 4.0.9, three attacks | three `free(): invalid pointer` aborts; Ruby bug report ends in `bbuf_free regparse.c:145` / `parse_char_class:5072` |
+| affected plain 3.4.12 reference | `free(): invalid pointer` abort in the same `bbuf_free:5072` path |
+| safe input on 3.3.13 / 4.0.9 / 3.4.12 | HTTP 200, `/up` 200, process alive |
+| fixed plain 3.4.13, malicious body | HTTP 500 (`too many multibyte code ranges`), `/up` 200, process alive |
+| affected ASan 3.4.12 reference | `heap-use-after-free` in `bbuf_free`, expected observation passes |
+
+Evidence is gitignored under `lab/build/evidence/regexp-version-matrix*.json`,
+`regexp-ruby{33,40}-*`, and `regexp-wire-final-*`. No run produced a live
+duplicate, overlap, pointer disclosure, command, persistence or second
+command. The affected-build terminals are the same secondary rung-3 UAF, not
+a version-specific exploitation primitive.
+
+### Promoted data buffer with tcache disabled — bounded NEGATIVE
+
+A first nested-130 attempt returned HTTP 500/alive on both affected and fixed
+builds with `ArgumentError (invalid Unicode range)`. Standalone validation
+found the cause: the old `0xA000 + i*0x100` sequence crossed U+D800..U+DFFF at
+i=56. This was an invalid-input control failure, not an allocator result. The
+generator now skips the surrogate block and emits unique increasing code
+points; nested counts 0/2/56/57/130/200 all reach the intended fixed-build
+`too many multibyte code ranges` error.
+
+With the corrected nested-130 pattern, `GLIBC_TUNABLES=glibc.malloc.tcache_count=0`,
+K=12, two fresh attacks on each affected build all died with SIGSEGV in
+`__libc_free <- bbuf_free:145 <- parse_char_class` (`:5074` on 3.3.13, `:5072`
+on 4.0.9). Safe affected controls remained 200/alive and fixed 3.4.13 remained
+500/alive. Evidence: `regexp-largebuf-tcache0-matrix-valid.json` and
+`ruby{33,40}-k12-n130b-tc0-*`. No duplicate, overlap or survivor was observed;
+promoting the stale data chunk past the tcache maximum does not change the
+stale 16-byte BBuf struct's consumer.
+
+## Small-pattern allocation-failure UAF — deterministic lab reproduction (2026-11-26, direct session)
+
+A separate in-process experiment shrank the secondary UAF to the 34-byte
+UTF-8 pattern `(?i:[[:^ascii:][^一]&&[^二]&&x])`. The new
+`lab/preload/failmalloc.c` interposer arms after a READY handshake, starts
+counting at the observed 456-byte Regexp setup allocation, and fails the first
+40-byte `realloc`. `lab/repro/ruby2shell-regexp-failmalloc.py` drives it and
+classifies the affected/fixed/safe controls.
+
+Observed controls, three fresh processes each:
+
+| arm | observed |
+| --- | --- |
+| affected plain 3.3.13 | 3/3 SIGSEGV, `bbuf_free:145` / `parse_char_class:5074` |
+| affected plain 3.4.12 | 3/3 SIGSEGV, `bbuf_free:145` / `parse_char_class:5072` |
+| affected plain 4.0.9 | 3/3 SIGSEGV, `bbuf_free:145` / `parse_char_class:5072` |
+| fixed plain 3.4.13 | 3/3 `RegexpError:failed to allocate memory`, exit 0 |
+| safe affected pattern `(?i:[a&&b])` | 3/3 `OK`, exit 0 |
+
+Evidence: `regexp-failmalloc-{smoke2,ruby33-smoke2,ruby40-smoke2,fixed-smoke2,safe-smoke}*`.
+This is an **LD_PRELOAD-conditioned in-process rung-3 reproduction**, not a
+wire-only result and not rung 4 or rung 5.
+
+### Exact stale-object lifecycle and safe-linking closure
+
+A GDB breakpoint trace on the 3.4.12 small pattern observed the same 16-byte
+BBuf `B` through the complete failure sequence:
+
+1. `parse_char_class:4977` frees `B->p` and then `B`; tcache 0x20 count moves
+   4 -> 5 -> 6.
+2. The failing `and_cclass` allocates a new BBuf struct, which reclaims `B`,
+   then allocates its 20-byte data buffer. The injected 40-byte `realloc`
+   fails.
+3. `and_cclass:2159` cleanup frees the new data pointer and reclaims `B` into
+   tcache again.
+4. `parse_char_class:5072` reads stale `B->p` and passes it directly to
+   `xfree`; glibc SIGSEGVs on the encoded value.
+
+The decisive detail is that `B->p` overlaps tcache `next`, but `bbuf_free`
+does **not** apply `REVEAL_PTR`. It frees the raw safe-linking word
+`PROTECT_PTR(&B->next, H)`, not `H`. In the traced run the pre-free tcache bin
+was nonempty (`count=4`, valid head), yet the stale read was still the invalid
+encoded value `0x555000962427`. Therefore merely arranging a nonempty tcache
+bin cannot turn this consumer into a valid free.
+
+A 33-count same-process Regexp primer sweep (0..32) produced the same
+`bbuf_free:5072` SIGSEGV every time; no primer count yielded a survivor or
+duplicate. A 360-run jemalloc allocation-failure sweep found only one early
+68-byte-setup null crash; the 40-byte critical point returned a clean
+`RegexpError`. Evidence: `failmalloc-small-regexp-primer-sweep.json`,
+`failmalloc-small-regexp-jemalloc-sweep.jsonl`, and the GDB breakpoint
+transcript summarized above.
+
+**Conclusion:** the allocation-failure lane is a compact, controlled lab
+reproduction of the known UAF and a confirmation of the safe-linking blocker.
+It provides no controlled free, duplicate, overlap, disclosure or command.
+Grades remain unchanged: wire-only secondary rung 3, prior rung-4 scopes
+witness-COMPLETE, harness-condition rung 5 ESTABLISHED as labeled, full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+Next falsifiable experiment: on one keep-alive Puma worker, measure whether a
+benign `/rails/info/notes` Regexp request leaves 0x20 BBuf chunks in the same
+thread's tcache at the next request's earlier `_method.to_s.upcase` overflow.
+The new question is cross-consumer interleaving, not another primer-count or
+smallbin sweep. Pass requires an address-matched overwrite of a freed BBuf
+tcache word before a later Regexp compile consumes it; no matched overwrite
+closes the combined lane.
