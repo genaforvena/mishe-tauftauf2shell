@@ -65,18 +65,24 @@ Re-apply these changes and the seven-column README checker on upgrade; see
 The `readme-lint` producer runs the checker from the pinned release
 (`releases/<sha>/tools/check-readme.py`) against the LIVE repo's `README.md`,
 so the detector is frozen while its input changes. The current pin
-(`0d686bb…`) carries `EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3", "R4",
+(`0d686bb…`) carries `EXPECTED_COLUMNS = ("Target", "R1", "R2", "R3",
 "Evidence / boundary")`, matching the six-column table that shipped until
 2026-11-21. On 2026-11-21 the owner added rung 5: the repo's own
-`tools/check-readme.py` and the live README table now use seven columns
+`tools/check-readme.py` and the live table then used seven columns
 (`"R5"` inserted before `"Evidence / boundary"`); R5 cells now vary by
-target. The frozen pin still has
-six columns, so until the unit is re-pointed the producer can read RED from
-that detector/input mismatch; re-pointing stays reserved to the person under
-the full-flag sync below. If the signal is RED, compare the pinned checker's
-`EXPECTED_COLUMNS` with the live header and confirm the repo's own
-`python3 tools/check-readme.py .` before editing docs — a cell-count mismatch
-there is a pin issue, not a missing README row.
+target. The frozen pin still has six columns, so until the unit is re-pointed
+the producer can read RED from that detector/input mismatch; re-pointing
+stays reserved to the person under the full-flag sync below.
+
+On 2026-11-26 the seven-column register moved out of `README.md` into
+`docs/results.md`, generated from `research-manifest.json` by
+`tools/render-presentation.py`. The frozen release checker still targets
+`README.md` and now also lacks the table there, so its RED is a pin issue,
+not a missing finding. The live check is
+`python3 tools/check-readme.py .`; the generated files are verified with
+`python3 tools/render-presentation.py --check`. Compare the pinned checker's
+`EXPECTED_COLUMNS` with the live `docs/results.md` header before editing
+either, and leave re-pointing to the person.
 
 
 1. **Unit marker** (`units.py`): `# m2shell-generated: …` — each plant's

@@ -13,7 +13,11 @@ from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 REQUIRED = [
-    "README.md", "docs/reproducibility.md", "docs/task.md", "docs/runtime-pin.md",
+    "README.md", "research-manifest.json", "tools/render-presentation.py",
+    "docs/results.md", "docs/methodology.md", "docs/architecture.md",
+    "docs/changelog.md", "docs/operations.md",
+    "docs/assets/evidence-ladder.svg",
+    "docs/reproducibility.md", "docs/task.md", "docs/runtime-pin.md",
     "lab/node2shell/provision.sh", "lab/ruby2shell/provision.sh",
     "lab/php2shell/provision.sh", "lab/php2shell/build.sh", "lab/php2shell/build-fpm.sh",
     "lab/php2shell/build-apache.sh", "lab/preload/build-mtrace.sh",
