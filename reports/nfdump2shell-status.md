@@ -10,7 +10,9 @@ engine-config changes, systemd units and the full-flag sync to the person.
 and the 21:29/21:34Z doctor runs list twelve missing unit files. The
 `failed-m2shell-doctor-service` RED was dispositioned to the person and
 re-observed GREEN at 21:42Z on that basis, not because the units exist. Grade
-unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, no r5, witness UNKNOWN.
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, no r5. Witness W235
+verdict (2026-11-25): ESTABLISHED AS LABELED, no contradiction, no grade
+change.
 
 Brief: reports/frontier-nfdump2shell.md
 Evidence: lab/frontier/nfdump2shell/PROVENANCE.md
@@ -33,10 +35,11 @@ Grade: rung 3 pinned verbatim / rung 4 PARTIAL packet-chosen offset with
 harness-chosen written value. No adjacent object, pointer, wire, command or
 rung 5.
 
-Next: the person runs the exact full-flag sync from `docs/runtime-pin.md`, then
-the witness replays the labeled grade; after activation, build the pinned
-`nfcapd` loopback receive path and test the live heap neighborhood plus the
-ICMP `srcPort`/`dstPort` file-chosen byte path.
+Next: the person runs the exact full-flag sync from `docs/runtime-pin.md` and
+activates the mind's units; after activation, build the pinned `nfcapd`
+loopback receive path and test the live heap neighborhood plus the ICMP
+`srcPort`/`dstPort` file-chosen byte path. Witness replay of the staged grade
+is complete (below).
 
 ## Clean-archive replay receipt (frontier W235, 2026-11-25 22:59Z)
 
@@ -51,7 +54,10 @@ the same **22 PASS / 0 FAIL**, rc 0, `WITNESS REPLAY PASS`. Both pin pairs
 recorded SHA-256 values on both runs; the runner rebuilds GCC and Clang ASan
 plus plain binaries from the pinned bytes.
 
-This is an author-side replay: the grade is unchanged (rung 3 pinned
-verbatim / rung 4 PARTIAL) and the witness verdict on the staged evidence is
-UNKNOWN until the witness replays #4589. The live pinned `nfcapd` loopback
-receive path remains owed to the nfdump mind after its route and units exist.
+Witness W235 (2026-11-25) replayed the staged evidence from a clean git
+archive and returned ESTABLISHED AS LABELED: 22 PASS / 0 FAIL, all eight pins
+exact, ASan WRITE-8 at pinned `Process_nfd:121`, fixed/safe controls clean,
+chosen canary matches, no contradiction, no grade change. Detail:
+`.mishe-tauftauf/artifacts/witness-w235-nfdump2shell/detail.md`. The live
+pinned `nfcapd` loopback receive path remains owed to the nfdump mind after
+its route and units exist; its reachability stays UNKNOWN.

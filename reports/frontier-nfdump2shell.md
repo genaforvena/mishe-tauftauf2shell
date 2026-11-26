@@ -4,7 +4,9 @@ Status: **STAGED 2026-11-25 by frontier W234**, awaiting operator admission
 and witness replay. Rung 3 pinned verbatim function; rung 4 PARTIAL (a
 harness-chosen 64-bit value written at an attacker-chosen offset past a
 truncated extension). No adjacent-object target, pointer control, socket,
-command execution or rung 5. Witness UNKNOWN.
+command execution or rung 5. Witness W235 verdict (2026-11-25): ESTABLISHED
+AS LABELED, no contradiction, no grade change; live `nfcapd` loopback
+reachability stays UNKNOWN. See `reports/nfdump2shell-status.md`.
 
 ## Claim and scope
 
