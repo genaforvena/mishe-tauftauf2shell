@@ -15015,6 +15015,19 @@ Rails app on loopback under both ASan builds and GETs nine encoded
 controller-shaped paths; every request is 404 before constantization and
 neither build reports ASan (`lab/build/evidence/casefold-inflector-wire/`).
 That consumer therefore stays behind the wire boundary; grade unchanged.
+`python3 lab/repro/ruby2shell-casefold-params-wrapper.py` probes the one
+request-reachable inflector sink: it copies the pinned stock Rails app to
+`lab/build/rails-params-wrapper-app`, adds an ASCII controller whose
+`controller_name` returns `"statusßs"`, an ASCII control controller and
+ASCII routes, then boots a fresh ASan server per case. On 3.4.12 the JSON
+POST to `/sink` aborts with `READ of size 1` at `regexec.c:4278`, with the
+live stack `params_wrapper.rb:258 → :264 → :145 → :152` → `singularize`
+→ `apply_inflections`; GET `/sink`, JSON POST `/ascii` and all three 3.4.13
+cases return 200 with no ASan and stay alive. Rails' router rejects
+non-ASCII controller names, so the sharp-s text is app-defined, not
+wire-supplied; wire reach stays CLOSED and the grade stays rung 3. Evidence
+is `lab/build/evidence/casefold-params-wrapper/summary.json` plus per-case
+server logs.
 
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts

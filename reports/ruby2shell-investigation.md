@@ -6201,6 +6201,54 @@ never called on the path; both builds produced zero new ASan reports
 (`lab/build/evidence/casefold-inflector-wire/{affected,fixed}.{json,server.log}`).
 No route in this stock app calls `pluralize`/`singularize` on request input,
 so the library consumer stays behind the wire boundary. Grade unchanged;
-do not repeat this route matrix unchanged. A stock route or framework hook
-that pluralizes attacker text would reopen wire reach.
+do not repeat this route matrix unchanged.
 
+## 2026-11-26 20:1xZ — ParamsWrapper reaches the case-fold OOB on a live request; text is app-defined, wire CLOSED
+
+The previous section left "a stock route or framework hook that pluralizes
+attacker text would reopen wire reach". This wake probes the only
+request-reachable inflector sink found by the scoped gem grep,
+`action_controller/metal/params_wrapper.rb:152
+klass.controller_name.singularize`.
+
+`lab/repro/ruby2shell-casefold-params-wrapper.py` copies the pinned stock
+`rails new` app to `lab/build/rails-params-wrapper-app`, adds one
+scaffold-shaped ASCII controller whose `self.controller_name` returns
+`"statusßs"`, an ASCII control controller, and ASCII routes. Rails 8's
+`ActionDispatch::Routing::Mapper#translate_controller` rejects non-ASCII
+controller names in route definitions (`mapper.rb:332-337`), so the sharp-s
+text here is **app-defined, not wire-supplied**. Each case boots a fresh
+unmodified Rails server with a pinned ASan Ruby and sends one ordinary
+loopback request; no middleware, preload, debugger or app hook is in the
+request path.
+
+Observed (gitignored `lab/build/evidence/casefold-params-wrapper/`,
+`summary.json` and per-case server logs):
+
+| build | request | HTTP | ASan | alive after |
+| --- | --- | --- | --- | --- |
+| 3.4.12 | JSON POST `/sink` (sharp-s wrapper text) | connection closed by abort | `heap-buffer-overflow READ of size 1` | no (abort) |
+| 3.4.12 | GET `/sink` (no parameter wrapping) | 200 | 0 | yes |
+| 3.4.12 | JSON POST `/ascii` (ASCII wrapper text) | 200 | 0 | yes |
+| 3.4.13 | JSON POST `/sink` | 200 | 0 | yes |
+| 3.4.13 | GET `/sink` | 200 | 0 | yes |
+| 3.4.13 | JSON POST `/ascii` | 200 | 0 | yes |
+
+ASan detail for the one positive: `READ of size 1` at
+`0x502000065db1`, `0 bytes after 1-byte region` allocated by
+`set_optimize_exact_info` (`regcomp.c:5367`); fault at
+`str_lower_case_match regexec.c:4278`. The live Ruby stack is
+`params_wrapper.rb:258 process_action` → `:264 _wrapper_key` → `:145 name`
+→ `:152 block in name` → `inflector/methods.rb:51 singularize` → `:366
+apply_inflections` → `string.c:6198 rb_str_sub_bang` → `regexec.c:4278`.
+This establishes the case-fold OOB read on an actual Rails **request path**,
+not only in a direct library call: parameter wrapping resolves its key during
+`process_action`, before CSRF and the controller action.
+
+Grade unchanged at rung 3: a confirmed OOB read with a real framework
+consumer and wire-adjacent trigger, still no write, pointer control, command
+or attacker-chosen bytes. Wire reach through this sink is CLOSED for stock
+apps: the router rejects non-ASCII controller names, and this probe's
+sharp-s string comes from app code. Do not repeat this six-case matrix or
+the nine-path route matrix unchanged; reopen only with a stock framework
+hook that calls `singularize`/`pluralize` on attacker-controlled text.
