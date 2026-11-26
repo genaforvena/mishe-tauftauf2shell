@@ -703,3 +703,9 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   `RESULT: 12 PASS / 0 FAIL`, rc=0, ~60 s. This confirms the size word is
   build-specific and the replay needs no author tree; it is still an author
   replay, not a witness verdict, and changes no grade.
+  The committed wrapper was then replayed from `git archive 8ca09205` into
+  `/tmp/w199-clean` with only the pinned tarball supplied externally: 4/4
+  pins OK, fresh `TOP=0x0000000000012b71`, build-derived `jl2005c.so`
+  sha256 `55becbce689e3ed556b55a2fd6cd04a2ae461a02016b26f5a6fd51a6d34eb66e`,
+  `RESULT: 12 PASS / 0 FAIL`, rc=0, ~57 s. No author `/tmp` build was
+  consumed. Scope and grade unchanged.
