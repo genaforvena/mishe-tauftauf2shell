@@ -227,3 +227,48 @@ Ceiling unchanged: no GIMP/GEGL build, no GIMP object construction before
 the guard, no PDB `load_image()` wire, no pointer dereference, no command,
 no rung 5. Witness verdicts on W242 (DM 5612) and W243 (DM 5629) still
 pending at the time of this wake.
+
+## W245 real-zlib ASan replay (2026-11-26, 16:20Z wake)
+
+The W241 preserved negative said an ASan build with uninstrumented system
+libz stays silent. That is about instrumentation, not the consumer: zlib
+1.3.2 source was built locally with `-fsanitize=address` and linked
+statically into a small driver that includes the unmodified pin and omits
+the live-victim readback. The OOB WRITE frame then comes from real zlib.
+
+Vendored source `realzlib/zlib-1.3.2.tar.gz` SHA-256
+`bb329a0a2cd0274d05519d61c667c062e06990d72e125ee2dfa8de64f0119d16`
+(byte-identical copy of `lab/frontier/zlib2shell/src/zlib-1.3.2.tar.gz`,
+local provisioning only, no external fetch this wake). Driver
+`realzlib/asan-driver.c` SHA-256
+`e4728d659a371ef6ceb10c4367348b05536f6d57f049b9ce31973cfeb5949d50`;
+runner `realzlib/run-asan.sh` SHA-256
+`47fd4c1ac45daaf11c30d95e476431dd2345c6a2baa6952eb322dc671d8b463e`.
+
+`realzlib/evidence/asan-realz-bytes.log` (SHA-256
+`44a26a8568c13227905ff598b74c76d0c319215802fe2d37ba765bd400ddecf7`):
+`MODE=bytes ZLIB=1.3.2 DATA_SIZE=260 AVAIL_OUT=2147483778`,
+`ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 1`,
+frames `#0 inflate_fast inffast.c:252`, `#1 inflate inflate.c:917`,
+`#2 ReadJeffsImage pins/jif-vulnerable.inc:106`, allocation frame
+`pins/jif-vulnerable.inc:40`, `0 bytes after 260-byte region`.
+
+`realzlib/evidence/asan-realz-file.log` (SHA-256
+`f67691540398979837972a4d38e28c598b46aa3f853bd1c4b9d6fd8b5a055f2a`):
+the on-disk JIF99a file from `realglib/make-jif.py` reaches
+`DATA_SIZE=4 AVAIL_OUT=2147483650` through a real `FILE*`; ASan reports
+`WRITE of size 1` in real `inflate_fast`, `0 bytes after 4-byte region`.
+Fixed control (SHA-256
+`c7e36bc860a6bb19ac4cf151fb0aa496350f7ce02a22e27a10519fa570b1ed00`)
+has `RC=0 ERR=image data` and no ASan report; safe 4x4 file (SHA-256
+`cc51de1483be9206988937c05a672fbd56be12ee83f6a8ef3e02b946aa544c40`)
+is ASan-clean. `bash run-asan.sh`: **18 PASS / 0 FAIL**.
+
+Preserved negative: the first attempt reused `realglib/real-driver.c`
+under ASan and aborted before the pin at `real-driver.c:266` with
+`unknown-crash READ of size 48` on a 40-byte `GArray` struct (the glibc
+usable-size assumption does not hold under the ASan allocator). A dedicated
+driver without live-object readback replaced it; no evidence from the
+aborted run is counted. Grade unchanged: real zlib WRITE confirmed under
+ASan, but no GIMP/GEGL plugin, PDB wire, chosen address, dereference,
+command or rung 5.

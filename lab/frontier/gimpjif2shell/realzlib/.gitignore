@@ -1,0 +1,7 @@
+build-zlib/
+zlib-src/
+evidence/asan-driver-vuln
+evidence/asan-driver-fixed
+evidence/asan-realz-vuln
+evidence/cmake.log
+evidence/zlib-build.log

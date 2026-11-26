@@ -8,8 +8,10 @@ pointer value in an adjacent live GLib object, and W243 by an **on-disk
 JIF99a file** whose 16-bit frame dimensions reach the wrapped arithmetic
 through a real `FILE*` header parse. W244 measures the pinned caller's size
 guard and ~4 GiB `dest` allocation with real glib, for both file-reachable
-wrapped products. No real GIMP plugin build, no PDB call, no dereference of
-the chosen pointer, no command and no rung 5.
+wrapped products. W245 rebuilds real zlib 1.3.2 with ASan, so the heap OOB
+WRITE frame comes from the real library rather than a stand-in `inflate()`.
+No real GIMP plugin build, no PDB call, no dereference of the chosen
+pointer, no command and no rung 5.
 
 ## Claim and scope
 
@@ -64,9 +66,10 @@ site `ReadJeffsImage pins/jif-vulnerable.inc:106`, with the allocation frame at
 ASan-clean in both bodies. The plain real-libz build reads sixteen chosen
 `0x4d` bytes at `indexes + 260` (`CANARY_AT=260 FIRST=4d4d…`). An
 ASan build using the uninstrumented system libz stays silent while the
-decompress completes — a preserved negative showing why the instrumented
-stand-in `inflate()` is required. Exact hashes, commands and logs are in
-`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+decompress completes — a preserved negative showing why ASan instrumentation
+is needed. W245 resolves that instrumentation gap by rebuilding real zlib
+with ASan instead of using a stand-in. Exact hashes, commands and logs are
+in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 ## Witness replay (W241, 2026-11-26)
 
@@ -194,10 +197,37 @@ guard in the real `ReadImage()`
 `gimp_item_transform_translate`) is still omitted, as is the GIMP build,
 the PDB `load_image()` wire, any pointer dereference, a command and rung 5.
 
+## Instrumented real zlib: OOB WRITE frame in inflate (W245, 2026-11-26)
+
+Real zlib 1.3.2 source was built locally with `-fsanitize=address` and
+linked statically into a driver that includes the unmodified pin, supplies
+only the thin `GimpImage`/`GError`/`ReadOK` stand-ins, and has no
+live-victim readback. There is no stand-in `inflate()`: the faulting store
+is performed by the real library. `bash run-asan.sh`: **18 PASS / 0 FAIL**.
+
+Staged `0x80000082` input: `MODE=bytes ZLIB=1.3.2 DATA_SIZE=260
+AVAIL_OUT=2147483778`; ASan reports `heap-buffer-overflow`, `WRITE of size
+1`, `0 bytes after 260-byte region`, with frames `inflate_fast
+inffast.c:252` -> `inflate inflate.c:917` -> `ReadJeffsImage
+pins/jif-vulnerable.inc:106`; allocation frame
+`pins/jif-vulnerable.inc:40`. The on-disk JIF99a file mode reports the
+same WRITE in real `inflate_fast`, `0 bytes after 4-byte region`, from
+`DATA_SIZE=4 AVAIL_OUT=2147483650`. Fixed control: `RC=0 ERR=image data`,
+no ASan report; safe 4x4 file: ASan-clean.
+
+Preserved negative: reusing `realglib/real-driver.c` under ASan aborted
+before the pin with `unknown-crash READ of size 48` on a 40-byte `GArray`
+struct — its glibc usable-size layout assumption does not survive the ASan
+allocator. The dedicated driver avoided the readback; that run is not
+counted. This strengthens rung 3 (real library performs the confirmed
+WRITE) but does not change the grade: no plugin, PDB wire, chosen address,
+dereference, command or rung 5.
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE in verbatim pinned
-  bytes, with fixed and safe-input controls.
+  bytes, with fixed and safe-input controls; W245 confirms the same WRITE
+  with instrumented real zlib 1.3.2 (`inflate_fast` frame, no stand-in).
 - **Rung 4 PARTIAL:** input-chosen bytes observed at chosen offsets past the
   logical heap object in the synthetic harness; W242 additionally observes
   chosen bytes and a chosen pointer value in a live GLib object on the real

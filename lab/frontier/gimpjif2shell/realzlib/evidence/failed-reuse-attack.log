@@ -1,0 +1,53 @@
+LAYOUT groom=0x511000000040 usable=256
+LAYOUT live_struct=0x504000000010 live_data=0x50c000000040 delta=-893353197616
+=================================================================
+==93284==ERROR: AddressSanitizer: unknown-crash on address 0x504000000010 at pc 0x64def484f42b bp 0x7ffddb6e6960 sp 0x7ffddb6e6950
+READ of size 48 at 0x504000000010 thread T0
+    #0 0x64def484f42a in main lab/frontier/gimpjif2shell/realglib/real-driver.c:266
+    #1 0x7a102e82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #2 0x7a102e82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #3 0x64def484c5e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/realzlib/evidence/asan-realz-vuln+0x45e4) (BuildId: c102ec798f90f1c9f99e2fe5672a501853fbedad)
+
+0x504000000038 is located 0 bytes after 40-byte region [0x504000000010,0x504000000038)
+allocated by thread T0 here:
+    #0 0x7a102eefd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x7a102ed19b79 in g_malloc (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x62b79) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #2 0x7a102ecdcc12 in g_array_sized_new (/lib/x86_64-linux-gnu/libglib-2.0.so.0+0x25c12) (BuildId: 32e71bdc4300e9f407c74441d1b02d962c8af007)
+    #3 0x64def484f254 in main lab/frontier/gimpjif2shell/realglib/real-driver.c:258
+    #4 0x7a102e82a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7a102e82a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x64def484c5e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/realzlib/evidence/asan-realz-vuln+0x45e4) (BuildId: c102ec798f90f1c9f99e2fe5672a501853fbedad)
+
+SUMMARY: AddressSanitizer: unknown-crash lab/frontier/gimpjif2shell/realglib/real-driver.c:266 in main
+Shadow bytes around the buggy address:
+  0x503ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x503fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x504000000000: fa fa[00]00 00 00 00 fa fa fa fa fa fa fa fa fa
+  0x504000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x504000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==93284==ABORTING
