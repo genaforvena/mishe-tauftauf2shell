@@ -1907,3 +1907,22 @@ Affected 8.4.27 log `w71-nofsize/aftershell-tfm-8.4.27-app-tfm.log` (sha256
 at K, no splice/takeover/upload/marker, `negative=1` with clean timing/safe
 controls. Stock/default reachability remains UNKNOWN with this structural
 blocker; do not repeat unchanged. Full detail: report W71 no-FSIZE section.
+
+## Wake 72 (2026-11-26) — no-clamp write interruption closed; research retired
+
+Named experiment: can handled, non-fatal signals cut the
+`ps_files_write` pwrite without `RLIMIT_FSIZE`? Committed probe
+`lab/repro/php2shell-write-cut-signal-probe.{c,sh}` pwrites 256 MiB after a
+4 MiB old tail with a no-`SA_RESTART` handler while flooded by
+SIGUSR1/SIGCONT/SIGWINCH. All three runs wrote all 268435456 bytes (1351 /
+7796 / 2825 handler hits, child exit 0): `verdict=NO_SHORT_WRITE`, log sha256
+`f1fd3a6c…3c45baa`. Private tiny tmpfs also unavailable (`unshare -Ur`:
+`write failed /proc/self/uid_map: Operation not permitted`); the shared 16G
+`/dev/shm` and 97%-full root filesystem were NOT exhausted for a lab cut.
+Ptrace count rewriting is debugger-forced rung-4 mechanics, FUSE tooling is
+absent, i_size-polled SIGKILL needs forbidden worker death. Grade unchanged:
+W66 full rung 5 witness-ESTABLISHED AS LABELED; W70 author-side chain;
+stock/unlabelled reachability UNKNOWN. Again chain retired: yield `verified`
+with no `--again`; reopen only on a measured no-clamp short-write path, a
+grade-changing witness verdict, or a stock-configuration observation. Full
+commands, hashes and preserved negatives: report W72.

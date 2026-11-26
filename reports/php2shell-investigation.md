@@ -2262,3 +2262,85 @@ tail survives at K and the splice primitive cannot form. The harness's closing
 NOT the applied limit in this variant — the shim's `unlimited` lines are the
 applied state. This is a preserved negative for stock/default reachability,
 not a retry of the W63/W64/W66 mechanisms; stock RCE remains UNKNOWN.
+
+## Research closed at the documented ceiling; again chain retired (W72, 2026-11-26 01:13Z; author-side)
+
+Plate: one bounded falsifiable experiment, then closure. The wall's named
+next step required a write-interruption mechanism other than shim, CPU,
+cgroup OOM, io.max, PHP fatal, `RLIMIT_FSIZE` or unchanged splice geometry.
+
+### Measured negative: handled signals do not short-write pwrite
+
+`ps_files_write` (`lab/build/php-8.4.27-app/ext/session/mod_files.c:227-278`)
+uses one `pwrite(fd, val, len, 0)` at offset 0, truncates first only when the
+new value is shorter (`:239-242`), and merely warns on a short count
+(`:268-275`). The splice needs a SHORT count with a surviving worker. Test
+whether a non-fatal, handled signal can produce one without a size clamp:
+
+```sh
+bash lab/repro/php2shell-write-cut-signal-probe.sh \
+  lab/build/evidence/w72-write-cut/probe 2>&1 |
+  tee lab/build/evidence/w72-write-cut/probe-run.log
+sha256sum lab/build/evidence/w72-write-cut/probe-run.log \
+  lab/repro/php2shell-write-cut-signal-probe.c \
+  lab/repro/php2shell-write-cut-signal-probe.sh
+```
+
+The child writes a 4 MiB 'O' tail, installs a no-`SA_RESTART` handler and
+pwrites 256 MiB of 'N' at offset 0; the parent floods it with the signal for
+the duration. Observed (`w72-write-cut/probe-run.log`, sha256
+`f1fd3a6cc920c608ba5e66872d8a1180021a8d1d517f74eb97ae6c07e3c45baa`):
+
+```
+signal=SIGUSR1 pwrite=268435456 of 268435456 errno=0 handler_hits=1351
+signal=SIGUSR1 child_exit=0
+signal=SIGCONT pwrite=268435456 of 268435456 errno=0 handler_hits=7796
+signal=SIGCONT child_exit=0
+signal=SIGWINCH pwrite=268435456 of 268435456 errno=0 handler_hits=2825
+signal=SIGWINCH child_exit=0
+verdict=NO_SHORT_WRITE — handled signals do not interrupt pwrite
+```
+
+Probe source sha256 `fac4f3445c27e552af07a198d253e08ed46d50e68648ffb586fb9b13e1f5895a`,
+wrapper sha256 `34eb878836076fd5b9cdaf93c77d8b3a74a3f4b692c5aa07184a6e7edc3c1e27`.
+The write completes in full despite thousands of delivered, handled signals;
+a PHP worker cannot get a splice from this route. Kernel-level negative, no
+FPM build or wire input needed.
+
+### Other no-clamp routes: structural negatives, not run
+
+- Tiny tmpfs for `session.save_path` (ENOSPC short write): `unshare -Ur true`
+  printed `unshare: write failed /proc/self/uid_map: Operation not permitted`
+  (rc 1). No unprivileged private mount. `df -h /dev/shm` shows a shared 16G
+  tmpfs with 53M used and `/` is 914G with 35G free (97% used); deliberately
+  exhausting either to force ENOSPC would affect the host and other plants,
+  so it was NOT attempted. This is a capability/scope limit, not a claim
+  that ENOSPC cannot short-write a file in general.
+- `ptrace(PTRACE_SYSCALL)` rewriting the `pwrite64` count to K is debugger-
+  forced execution: rung-4 mechanics by `docs/rce.md`, explicitly not a
+  rung-5 trigger, and the W66 gate requires no debugger.
+- A FUSE `save_path` that short-writes needs FUSE tooling absent from this
+  host, and would itself be a synthetic consumer, not a stock path.
+- Polling `i_size` then sending SIGKILL needs worker death (GAP forbids it)
+  and page-grid alignment; the shim/W63 death variants are already closed
+  (`reports/php2shell-status.md` wake 59 and W63/W64).
+- Inotify-based truncation races cannot restore the OLD tail once the new
+  value has been written; W71 already shows a full write erases the splice.
+
+### Grade and closure
+
+Grade UNCHANGED: W66 two-pool GAP remains full rung 5 **ESTABLISHED AS
+LABELED** (witness W221); W70 seeded-token single-pool remains an author-side
+full chain backed by two fresh-byte clean-archive replays (W71), without a
+formal plant-witness replay; W71 no-FSIZE and W72 signal/ENOSPC routes are
+preserved negatives. Stock/default deployment reachability and unlabelled
+RCE stay UNKNOWN. No grade was upgraded and no closed negative was retried.
+
+Research is closed at this ceiling and the `--again 300s` chain is retired:
+yield `verified` without a timer. Addressed messages and witness verdicts
+wake this role directly. Reopen only on one of: (1) a measured, authorized,
+unprivileged short-write path that leaves new prefix + OLD tail without a
+clamp; (2) a witness verdict that contradicts or upgrades a grade; (3) an
+observation of the splice on stock/default PHP configuration. Do not re-send
+the old offers, repeat W66/W70/W71 replays, or sweep closed mechanisms
+without one of those triggers.
