@@ -9,10 +9,12 @@ a live, library-created `pjmedia_port` object 48 bytes later, including its
 function-pointer fields. W242 drives the same overflow through the SHIPPED
 `pjmedia_vid_port_create()` clock path: its own frame buffer is followed at
 exactly +48 by a live `pj_mutex_t` allocated by the library from the same
-pool, with no driver-groomed victim. Grade: **rung 3 confirmed in the real
-consumer / rung 4 author-DEMONSTRATED with a real library object and a
-natural shipped-caller adjacency** (W240/W241/W242 await witness verdict).
-No pointer was called, no wire, no command, no rung 5.
+pool, with no driver-groomed victim. W243 adds a natural shipped-sample
+allocation order that puts a live, pointer-bearing `pjmedia_clock` at the
+same offset, with chosen bytes in its pool/callback/user_data/lock words.
+Grade: **rung 3 confirmed in the real consumer / rung 4 author-DEMONSTRATED
+with a real library object and natural shipped-caller adjacency**. W240–W243
+await witness verdict. No pointer was called, no wire, no command, no r5.
 
 
 
@@ -196,6 +198,34 @@ rebuilt both pinned trees and reproduced all 16 checks; the first attempt
 at 17:51Z had a transient `make -j6` provisioning failure, preserved in
 `PROVENANCE.md`.
 
+## Natural pointer-bearing victim in a shipped caller (W243, 2026-11-26 20:24Z)
+
+`real/clock-driver.c` + `real/run-clock.sh` (commit `a98128fc`) reproduce the
+allocation order of the shipped sample
+`pjsip-apps/src/samples/vid_streamutil.c`: `play_file.read_buf` is allocated
+from the app pool (`:733`/`:754`), then `pjmedia_clock_create2()` is called
+on that same pool (`:760`), and `clock_thread.c:174` allocates the live
+pointer-bearing `struct pjmedia_clock` from it. The driver uses only real
+pjmedia APIs; a local mirror of `clock_thread.c:110-132` reads the object
+without calling or destroying it (`_exit(0)` after readback).
+
+`bash lab/frontier/pjproject2shell/real/run-clock.sh` against both pinned
+release-style ASan builds returned **10 PASS / 0 FAIL**: `CLOCK_ALLOC
+delta=48 size=96` in all five runs; vulnerable 64-byte `00dc` overwrites
+`clock->pool` with chosen `0x4a502d454853494d` and the first 16 object bytes
+with `4d495348452d504a50524f4a45435421`; vulnerable 512-byte writes chosen
+words into `cb`, `user_data` and `lock`
+(`pool=cb=0x4a502d454853494d`, `user=0x215443454a4f5250`). Safe 48-byte
+input and both fixed cases leave the 128 readback bytes byte-identical,
+fixed logs the truncation clamp and `frame.size=48`. No pointer was called
+or dereferenced: the clock was never started, stopped or destroyed.
+
+Caveat: the natural allocation order is in a shipped *sample* application,
+not in a library-internal AVI consumer; the two library-internal callers
+checked above have a mutex or no adjacent object. No wire input reaches
+`avi_get_frame()`, so this remains rung 4, not rung 5. Clean-archive replay
+receipt and hashes are in `PROVENANCE.md`.
+
 
 ## Witness replay (W239, 2026-11-26)
 
@@ -229,17 +259,20 @@ supersedes it. Full detail:
   driver-groomed through real allocator calls rather than a shipped caller
   layout. W242 adds a natural shipped-caller adjacency: a live `pj_mutex_t`
   at frame+48, overwritten with chosen bytes without driver grooming.
-  Rung 4 is author evidence until the witness replays W240/W241/W242.
+  W243 adds a natural shipped-*sample* allocation order where a live
+  pointer-bearing `pjmedia_clock` sits at frame+48 and its `pool`, `cb`,
+  `user_data` and `lock` words take chosen values, again without a call.
+  Rung 4 is author evidence until the witness replays W240–W243.
 
 - **Not rung 5:** no live loopback service, no attacker-supplied bytes
   through a network wire, no pointer hijack, no command side effect.
 
-The remaining work is scope, not mechanics: control of a pointer-bearing
-value in a natural shipped layout, then a loopback target fed attacker AVI
-bytes and a benign command side effect with vulnerable, fixed and safe
-controls. W242 found natural adjacency to a live mutex but no attacker-chosen
-pointer value or call through it; no network wire into `avi_get_frame()`
-exists in the pinned source. Do not claim that path.
+The remaining work is scope, not mechanics: a pointer-bearing victim in a
+natural production-library layout (W243's natural victim is in a shipped
+sample), then a loopback target fed attacker AVI bytes and a benign command
+side effect with vulnerable, fixed and safe controls. No pointer was
+called, and no network wire into `avi_get_frame()` exists in the pinned
+source. Do not claim that path.
 
 Negative checked: the shipped video bridge
 `pjmedia_vid_conf_add_port()` allocates `cport->get_buf` as the last item

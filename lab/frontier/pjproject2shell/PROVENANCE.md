@@ -273,3 +273,46 @@ values above; all six clean logs show `delta=48`, the vulnerable 64-byte
 chosen bytes in the live mutex, vulnerable 512-byte ASan `WRITE of size
 512` through `enc_clock_cb`, and fixed/safe byte-identical mutex state.
 No witness verdict for W240/W241/W242 as of chat event 5689 (17:35Z).
+
+## Natural pointer-bearing victim in a shipped sample (W243, 2026-11-26 20:24Z)
+
+`real/clock-driver.c` (sha256
+`a6cd99f903bf7e17cfec480148746755fc3933d33e5b703bde72de5dc3fd9b2a`) and
+`real/run-clock.sh` (sha256
+`403b3944dbdbadd39c2b16dbf1bc466f99f65871b53f90e84c5959c20e0d768f`)
+reproduce the allocation order of the shipped sample
+`pjsip-apps/src/samples/vid_streamutil.c`: at `:733`/`:754` the AVI read
+buffer comes from the app pool, then `:760` calls
+`pjmedia_clock_create2(pool, ...)`; `clock_thread.c:174` allocates the live
+`struct pjmedia_clock` from that same pool. The driver uses only shipped
+pjmedia APIs; its `struct probe_clock` mirrors the private layout at
+`clock_thread.c:110-132` for readback only, and never starts, stops,
+destroys or calls through the clock (`_exit(0)` after readback).
+
+In-tree `bash real/run-clock.sh` at 20:24Z: compile rc 0 for both pins,
+five runs rc 0, **TOTAL: 10 PASS / 0 FAIL**. Every run logs
+`CLOCK_ALLOC delta=48 size=96`. Vulnerable `attack64`:
+`CLOCK_BYTES_AFTER:4d495348452d504a50524f4a45435421...` and
+`CLOCK_AFTER pool=0x4a502d454853494d` (16 chosen bytes). Vulnerable
+`attack512`: `pool=cb=0x4a502d454853494d`,
+`user=0x215443454a4f5250`, `lock=0x4a502d454853494d`. Safe 48-byte input
+and both fixed cases have byte-identical `CLOCK_BEFORE`/`CLOCK_AFTER`
+fields and 128-byte readbacks; fixed logs the truncation clamp and
+`PULL_DONE ... frame.size=48`. Fixture hashes are unchanged from W240
+(`383683fc…`, `834cf4cb…`, `a21a70cf…`).
+
+Scope limit: the natural layout is in a shipped *sample* application, not a
+library-internal AVI consumer; the library callers checked in W241/W242
+give a driver-groomed port or a live mutex. The clock was never started or
+dereferenced; there is no wire path, pointer call, command or rung 5.
+No witness verdict for W240–W243 as of chat event 5787 (20:18Z).
+
+Clean-archive receipt 20:32Z: `git archive a98128fc
+lab/frontier/pjproject2shell` into `/tmp/w243-pjproject-clean.Cj0ttc`, then
+unmodified `bash real/build-real.sh` (rc 0, both tarballs re-fetched with
+the pinned hashes above, `avi_get_frame_symbols=1` in both libraries,
+`PROVISION_DONE`) and `bash real/run-clock.sh` (rc 0, **TOTAL: 10 PASS /
+0 FAIL**). All five clean logs show `CLOCK_ALLOC delta=48 size=96`, the
+same chosen-byte `CLOCK_BYTES_AFTER` prefix and pointer words as in-tree,
+and byte-identical fixed/safe clocks. Driver and runner sha256 values
+matched the in-tree values above.
