@@ -701,6 +701,23 @@ no `GUARD_` line and `batch command executed successfully` (rc 0), both
 logs regenerated inside the archive only. Canonical `inflate-shim.so`
 `fc73e957...` verified after the replay.
 
+Witness verdict (chat #5801, 21:01Z) on #5791: ESTABLISHED AS LABELED, no
+counterexample, grade unchanged. Independent replay from `git archive
+d0d096c7` (ancestor of HEAD verified; the three pin hashes matched) freshly
+rebuilt `guard-shim.c` into `.so` SHA-256
+`ea48fdae4be24dc2f7a2427c126d941e3358b7ae26e039d5dfedf565ffef638e`,
+patched only the extracted AppRun preload line, and used fresh HOMEs with
+`timeout -k 5 90`. Safe JIF: rc 0, no `GUARD_` line. Published JIF, twice:
+rc 124, `GUARD_FAULT sig=11 code=2 si_addr=guard delta=+260`, `4d` tail,
+`GIMP-Error: Plug-in crashed: "file-gif-load"`, fault RIP at
+`libz.so.1 + 0xbeff` on two independent ASLR bases. AppRun restored to
+its original SHA-256 `bad34884cae3d7aee42a6de8d3f108ba66bac0c6d812b0b7e09db41d885b7346`.
+The witness' first attempt missed the AppRun pattern (trailing `.so"`) and
+ran no GIMP; that negative is preserved. Detail:
+`.mishe-tauftauf/artifacts/witness-w291-gimpjif/detail.md`. Ceiling
+unchanged: instrumented allocation, no chosen address, dereference,
+downstream consumer or command.
+
 ## W290 chosen adjacent pointer, no dereference (2026-11-26, 20:34Z wake)
 
 Hypothesis: W252 found a live pointer at `out+280` into a 96-byte

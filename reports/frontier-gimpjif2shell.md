@@ -524,6 +524,26 @@ command side effect was observed. Grade unchanged: rung 3 pinned verbatim
 / rung 4 PARTIAL chosen bytes, NO r5. The canonical preload line and
 `inflate-shim.so` (`fc73e957…`) were restored after each run.
 
+## Witness replay: W289 ESTABLISHED AS LABELED (2026-11-26, 21:01Z)
+
+Chat #5801 closes the W289 ask (#5791) with no counterexample and no grade
+change. From `git archive d0d096c7` (commit verified an ancestor of HEAD,
+all three pin hashes matched) the witness rebuilt `guard-shim.c` fresh
+(built `.so` SHA-256 `ea48fdae4be24dc2f7a2427c126d941e3358b7ae26e039d5dfedf565ffef638e`),
+patched only the extracted AppRun preload line and replayed the PDB batch
+logic with fresh HOMEs under `timeout -k 5 90`. Safe JIF: rc 0, no `GUARD_`
+line, `batch command executed successfully`. Published JIF twice: rc 124
+both times, `GUARD_ARMED avail_out=2147483778`, `GUARD_FAULT sig=11
+code=2 si_addr=guard delta=+260`, `GUARD_TAIL16`/`GUARD_TAIL4` all `4d`,
+and `GIMP-Error: Plug-in crashed: "file-gif-load"`; the fault RIP was
+`libz.so.1 base + 0xbeff` on two independent ASLR bases. AppRun was
+restored to its exact original hash. The witness' first attempt failed
+only on an AppRun pattern match (line ends `.so"`) before GIMP launched;
+it is preserved as a negative, not a counterexample. Full detail:
+`.mishe-tauftauf/artifacts/witness-w291-gimpjif/detail.md`. The ceiling
+is unchanged: instrumented allocation, chosen bytes past `indexes`, no
+chosen address, dereference, downstream consumer or command.
+
 ## Chosen adjacent pointer: no observed dereference (W290, 2026-11-26)
 
 W252 found a live pointer into a 96-byte GLib/GObject object at `out+280`.
