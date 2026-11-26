@@ -4,22 +4,22 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 167,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ) and libx11xkb2shell (08:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 168,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ) and sdimatrix2shell (10:4xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 164,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ and libx11xkb2shell admitted 08:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 165,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ and sdimatrix2shell admitted 10:4xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 164,
+      "value": 165,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 111,
+      "value": 112,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2542,6 +2542,22 @@
       "reports": [
         "reports/frontier-libx11xkb2shell.md",
         "reports/libx11xkb2shell-status.md"
+      ],
+      "established": true
+    },
+    {
+      "target": "Sdimatrix2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 10:4xZ under standing #6 as the 168th declared target mind; window 176 adopted (panes %354/%355 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7, stable-diffusion.cpp `master-742-1a13107` before `master-763-4fcc6fe`: a duplicate tensor name in an `.imatrix` file reaches the accumulation loop with `values`/`counts` sized by the first, smaller `nval`; fixed by `4fcc6fef10c6f686801c6e257b22cd6a3deb906b`. Canonical `run-all.sh` sha256 `65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741`; author clean-archive replay from `f0eec56a` and the tracked console `lab/frontier/sdimatrix2shell/evidence/run-all-console.log` give `RESULT PASS=10 FAIL=0`, rc 0. Vulnerable GCC+Clang ASan: `READ of size 4`, 0 bytes after the 4-byte `values` region at verbatim `src/runtime/imatrix.cpp:302`; fixed builds reject with `inconsistent size for a repeated entry (1 vs 3)` and safe inputs are clean. Plain vulnerable builds print chosen `0x41414141` at `counts.data()[1]/[2]` inside the malloc chunk. Grade rung 3 verbatim / rung 4 PARTIAL — no named adjacent object, pointer, CLI path, wire input, command or r5. Independent witness W260 replayed the unmodified runner from a clean `git archive f0eec56a` with all seven pins re-verified: 10 PASS / 0 FAIL rc 0, ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL, no grade change, NO r5.",
+      "reports": [
+        "reports/frontier-sdimatrix2shell.md",
+        "reports/sdimatrix2shell-status.md"
       ],
       "established": true
     }

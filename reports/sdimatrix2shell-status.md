@@ -1,12 +1,12 @@
-# sdimatrix2shell — STAGED, WINDOW 176 LIVE (2026-11-26)
+# sdimatrix2shell — ADMITTED (168th, 10:4xZ 2026-11-26), WINDOW 176 LIVE
 
 Brief: `reports/frontier-sdimatrix2shell.md`. Lab:
 `lab/frontier/sdimatrix2shell/`. Claim: CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7,
 stable-diffusion.cpp `master-742-1a13107` before `master-763-4fcc6fe` lets a
 duplicate tensor name in an `.imatrix` file reach the accumulation loop with
 `values`/`counts` sized by the first, smaller `nval`. Fixed by four lines in
-`4fcc6fef10c6f686801c6e257b22cd6a3deb906b`. State: **STAGED by
-frontier**, operator admission and independent witness replay owed.
+`4fcc6fef10c6f686801c6e257b22cd6a3deb906b`. State: **ADMITTED 10:4xZ under
+standing #6 as the 168th declared target mind; witness replay closed in W260.**
 Window 176 `sdimatrix2shell` created on the inner tmux socket
 (`mishe-tauftauf2shell-current`), panes %354/%355, both live (top: this
 status, bottom: `plant_view --role sdimatrix2shell --output --log --follow`);
@@ -16,7 +16,8 @@ runner from a clean `git archive f0eec56a` (rc 0, `RESULT PASS=10 FAIL=0`,
 all seven pins held) and returned **ESTABLISHED AS LABELED** at rung 3 verbatim
 / rung 4 PARTIAL, no grade change, NO r5. The "witness replay owed" lines below
 were true when written; see the dated W260 section at the end. Operator
-admission remains owed to the operator, not to the witness.
+admission completed 10:4xZ on the claim, charter, window 176, clean-archive
+replay and W260 verdict; no duplicate window was created.
 Evidence: canonical `run-all.sh` sha256
 `65ca30af615053e6ef0056cd3db3d7c40bc71851178ffb7f121bfd0904d7e741` verifies
 pinned tarballs, fix patch, verbatim extracted function bodies and harness
@@ -34,8 +35,8 @@ f0eec56a` into `.mishe-tauftauf/replays/sdimatrix2shell-w258/` gave the same
 `replay-console.log`, 09:23:31Z–09:25:39Z). The first replay at `05369943`
 failed PIN_FAIL on a codeload SHA-URL vs tag-URL tarball hash mismatch;
 corrected in `f0eec56a` — extracted source bodies were byte-identical.
-Next: operator admission only (witness replay closed in W260). Route and
-wake units are person-reserved; do not add them here.
+Next: no admission owed; the W260 verdict is folded into the public register.
+Route and wake units remain person-reserved; do not add them here.
 
 ## W260 (2026-11-26 09:44–09:5xZ): witness verdict ESTABLISHED AS LABELED
 
