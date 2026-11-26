@@ -123,25 +123,50 @@ in this tree; the PDF path takes a list of filenames, not attacker-controlled
 wire bytes. The first caller-stack assertion failed because ASan prints
 callee-first; the assertion order was corrected, the observed report was not.
 
-### Plain-build live neighbor probe (2026-11-26 15:33Z)
+Bounded external-caller negative (2026-11-26 16:1xZ): a read-only
+gitignore-respecting search of the checkout's `lab/` C/C++/header sources
+found no caller of any `l_bytea*` API outside this project. The sole other
+consumer of Leptonica's `allheaders.h`, `ghostscript2shell`'s
+`base/tessocr.cpp:60`, uses in-memory `Pix` APIs and `gp_fread` for
+Tesseract data, never a Leptonica stream reader. Untracked bulk trees were
+not exhaustively enumerated after a gitignore-disabled scan timed out, so
+this is a bounded negative for tracked sources, not a universal claim.
+
+### Plain-build live neighbor probe and fault boundary (2026-11-26 16:09Z)
 
 `real/run-neighbor.sh` builds the same pinned 1.87.0 tree without ASan and
 links `real/neighbor.c` with `-Wl,--wrap=calloc`. The wrapper recognizes the
 vulnerable `calloc(201, 1)` in `l_byteaCreate()`, allocates a live 512-byte
 sentinel right after it, and fills it with `0x5a`; the fixture plants the
-chosen marker at stream offsets 208..1024 (step 32). A SIGSEGV observer reads
-the sentinel before `_exit(77)`. Observed in-tree and from a clean archive at
-commit `edd20190`: `TOTAL: 3 PASS / 0 FAIL`, rc 0, with
-`SIGNAL=SIGSEGV SENTINEL_OFFSET=224`,
-`SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e49434100`
-and `CHOSEN_AT_OFFSET=16`. The chosen bytes reach a live adjacent heap object
-224 bytes past `ba->data` before the copy faults on unmapped memory. Safe
-16-byte stream: `BA=nonnull`, `SIZE=16 NO_FAULT=1`, rc 0, no fault. The
-sentinel is lab-groomed and the observer is a fault handler, not a
-request-reachable consumer; no pointer value or command is read or executed.
-An early runner revision checked `NO_FAULT` before `SIZE` and failed only
-that safe-control pattern; the check order was corrected, no observation
-changed.
+chosen marker at stream offsets 208..1024 (step 32). A `sigaction` SIGSEGV
+observer reads the sentinel, reports `siginfo_t.si_addr` and dumps
+`/proc/self/maps` before `_exit(77)`. Observed in-tree:
+`TOTAL: 5 PASS / 0 FAIL`, rc 0, with `SIGNAL=SIGSEGV SENTINEL_OFFSET=224`,
+`SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e49434100`,
+`CHOSEN_AT_OFFSET=16`, and:
+
+```
+FAULT_ADDR=0x617109a4e000 FAULT_OFFSET_FROM_DATA=129504
+DATA_ADDR=0x617109a2e620 SOURCE_ADDR=0x7193f2853010 SOURCE_DELTA=17742122076656
+617109a2d000-617109a4e000 rw-p 00000000 00:00 0                          [heap]
+7193f2853000-71942e200000 rw-p 00000000 00:00 0
+```
+
+The chosen bytes reach a live adjacent heap object 224 bytes past `ba->data`
+before the copy faults exactly at the end of the 135,168-byte heap mapping,
+129,504 (`0x1f9e0`) bytes past `ba->data`. The 1,000,000,001-byte source
+buffer lives in a separate 1,000,001,536-byte anonymous mapping 17.7 TB away,
+because `l_binaryReadSelectStream()` allocates it with `calloc(1,
+bytestoread + 1)` (utils2.c:1508). No contiguous writable gigabyte follows
+the small destination allocation in this process, so an ordinary consumer
+faults after overwriting at most ~129 KB of heap. The sentinel, address
+observer and map dump are lab-groomed mechanics, not a request-reachable
+consumer; no pointer value or command is read or executed. Safe 16-byte
+stream: `BA=nonnull`, `SIZE=16 NO_FAULT=1`, rc 0, no fault. An early runner
+revision checked `NO_FAULT` before `SIZE` and failed only that safe-control
+pattern; the check order was corrected, no observation changed. Earlier
+clean-archive replay of the 3-check version at 15:33Z from commit `edd20190`
+was 3 PASS / 0 FAIL; the current 5-check version is replayed below.
 
 ## Feasibility assessment and ceilings
 
@@ -159,16 +184,19 @@ changed.
   adjacent object 224 bytes past `ba->data` but that object is lab-groomed and
   read by a fault handler, not by a request-reachable consumer. No pointer
   value is consumed and no command executes. The unbounded plain process
-  faults on unmapped memory after those bytes. The real-library caller
-  `saConcatenatePdfToData()` reaches the WRITE but offers no chosen-byte
-  readback.
+  faults at the end of its heap mapping, 129,504 bytes past `ba->data`; the
+  ~1GB source buffer is in a separate mapping 17.7 TB away. The real-library
+  caller `saConcatenatePdfToData()` reaches the WRITE but offers no
+  chosen-byte readback.
 - Rung 5: NOT CLAIMED — real library and process, but no wire input, no live
   server, no pointer-bearing victim object and no command execution. The
   advisory is a local file/stream parser issue.
-- Next experiment: find an external consumer that feeds a >1 GB stream to a
-  Leptonica API reachable from request bytes. The plain real-library process
-  now measured writes chosen bytes into a live adjacent object and then faults
-  on unmapped memory, so a live consumer would need a mapped destination past
-  that object; record that as a structural boundary if none exists. Preserve
-  the no-pointer/no-command ceiling. The staged and real-library lanes are
+- Next experiment: an external consumer that feeds a >1 GB stream to a
+  Leptonica API reachable from request bytes would also need its own
+  contiguous writable ~1 GB mapping immediately after the small destination;
+  no such consumer is present in this checkout, and the measured fault
+  boundary above records why the ordinary case cannot survive the copy. A
+  read-only hunt across other locally provisioned lab trees is running; a
+  negative result is preserved, not retried into existence. Preserve the
+  no-pointer/no-command ceiling. The staged and real-library lanes are
   complete as labeled; witness replay of both real runners is requested.

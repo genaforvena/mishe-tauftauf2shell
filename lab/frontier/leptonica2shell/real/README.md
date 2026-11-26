@@ -75,23 +75,25 @@ with `0x5a`; the fixture plants `MISHE-LEPTONICA` at offsets 208..1024 (step
 bytes. A SIGSEGV observer prints the sentinel before exiting 77. No upstream
 byte is changed; the sentinel and observer are synthetic lab mechanics.
 
-Observed 2026-11-26 ~15:31Z, `TOTAL: 3 PASS / 0 FAIL`, rc 0:
+Observed 2026-11-26 ~16:09Z, `TOTAL: 5 PASS / 0 FAIL`, rc 0:
 
 ```
 SIGNAL=SIGSEGV SENTINEL_OFFSET=224
+FAULT_ADDR=0x617109a4e000 FAULT_OFFSET_FROM_DATA=129504
+DATA_ADDR=0x617109a2e620 SOURCE_ADDR=0x7193f2853010 SOURCE_DELTA=17742122076656
 SENTINEL_FIRST32=000000000000000000000000000000004d495348452d4c4550544f4e49434100
 CHOSEN_AT_OFFSET=16
 ```
 
+The two address lines are new: the SIGSEGV observer now uses `sigaction` and
+reports `siginfo_t.si_addr` plus the live `/proc/self/maps` dump kept in
+`evidence/neighbor-plain-attack.out`. No upstream byte is changed; the
+sentinel, observer and map reader are lab mechanics.
 
-Clean-archive replay at 15:33Z from commit `edd20190`: `git archive HEAD
-lab/frontier/leptonica2shell/real | tar -x` into an empty directory, then
-`bash provision.sh` (7 PASS / 0 FAIL, rc 0) and `bash run-neighbor.sh`
-(3 PASS / 0 FAIL, rc 0, output identical to the in-tree run above). Script
-hashes: `run-neighbor.sh`
-`2fa8c3cafda5122ae5f1d8847203633e04b2ec5124fbb2e8f6ee010440b20d3c`,
+Script hashes: `run-neighbor.sh`
+`d37b459cad45ffb87bf2013c3065a938e9069d47cc8b3e54e575a0e3c29a5101`,
 `neighbor.c`
-`e37948b479b6240a9f9540b29c5cfb3d62e89fc99bdfb9fb7d1578c81d761652`.
+`4cf69a40567efd8a2f577bf848348833ef48d02c139f5b8e00a89c6592e9971b`.
 
 So in a plain real-library process the oversized `memcpy` writes chosen file
 bytes into a live adjacent heap object 224 bytes past `ba->data` before it
@@ -103,6 +105,23 @@ NO_FAULT=1`, rc 0, and no sentinel is created because the 201-byte allocation
 never occurs. A first runner revision checked `NO_FAULT` before `SIZE` and
 reported 2 PASS / 1 FAIL on that safe control; only the check pattern was
 reordered, no observation was changed.
+
+## Measured structural boundary (2026-11-26 16:09Z)
+
+The fault address is the first byte past the process heap mapping:
+`617109a2d000-617109a4e000 rw-p ... [heap]` is 135,168 bytes, `ba->data` is
+at `0x617109a2e620`, and `si_addr` is exactly the mapping end, 129,504
+(`0x1f9e0`) bytes past `ba->data`. The 1,000,000,001-byte source buffer is
+**not** adjacent: `l_binaryReadSelectStream()` calls `calloc(1,
+bytestoread + 1)` (utils2.c:1508), which glibc places in a separate
+1,000,001,536-byte anonymous mapping at `0x7193f2853000`, 17,742,122,076,656
+bytes above `ba->data`. An overflow of 1,000,000,001 bytes therefore cannot
+land on its own source buffer in this build; it marches past the small heap
+and faults. A live consumer would need its own contiguous writable mapping
+of about a gigabyte immediately after the 201-byte allocation to survive;
+no such consumer is present in this checkout (see caller enumeration below).
+This is a measured boundary for this plain real-library process, not a proof
+about every possible host allocator or future consumer.
 
 ## Caller enumeration and boundary
 
@@ -117,6 +136,22 @@ live server, no pointer-bearing victim object and no command side effect.
 Chosen-byte readback is held by the staged harness's synthetic bounded
 consumer and by the lab-groomed live neighbor in the plain real-library
 probe above (rung 4 PARTIAL in both cases).
+
+## External caller hunt (2026-11-26 16:1xZ, bounded negative)
+
+A read-only search of the checkout's `lab/` C/C++/header sources
+(gitignore-respecting, ~185 frontier projects) found **no** external caller
+of `l_byteaInitFromStream()`, `l_byteaInitFromFile()` or any other `l_bytea*`
+API outside this project. The only other project including Leptonica's
+`allheaders.h` is `ghostscript2shell`'s
+`src/ghostpdl-ghostpdl-10.07.0/base/tessocr.cpp:60`; it uses in-memory `Pix`
+APIs and `gp_fread` for Tesseract tessdata, never a Leptonica stream reader.
+Untracked bulk trees (`lab/src/`, `lab/frontier/*/deps/`, other gitignored
+directories) were not exhaustively enumerated: a gitignore-disabled scan
+timed out. This is a bounded negative for tracked sources and docs, not a
+claim about every local file or about production hosts. No request-reachable
+consumer was found; the measured fault boundary above is the conclusion for
+this checkout.
 
 ## Preserved negative
 

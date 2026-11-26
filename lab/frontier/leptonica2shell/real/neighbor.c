@@ -13,6 +13,7 @@
 #include <string.h>
 #include <unistd.h>
 #include <stddef.h>
+#include <fcntl.h>
 #include "allheaders.h"
 
 extern void *__real_calloc(size_t nmemb, size_t size);
@@ -20,11 +21,14 @@ extern void *__real_calloc(size_t nmemb, size_t size);
 static unsigned char *sentinel;
 static unsigned char *ba_data;
 static const size_t sentinel_size = 512;
+static void *source_addr;      /* 1GB read buffer, captured by the calloc wrapper */
 
 void *__wrap_calloc(size_t nmemb, size_t size)
 {
     void *p = __real_calloc(nmemb, size);
 
+    if (!source_addr && nmemb == 1 && size > 1000000000)
+        source_addr = p;
     if (!sentinel && nmemb == 201 && size == 1) {
         ba_data = (unsigned char *)p;
         sentinel = (unsigned char *)__real_calloc(1, sentinel_size);
@@ -56,15 +60,44 @@ static void hexdump_label(const char *label, const unsigned char *p, size_t n)
     (void)ignored;
 }
 
-static void on_segv(int sig)
+static void emit_maps(void)
 {
-    char line[128];
+    char buf[16384];
+    ssize_t n;
+    int fd = open("/proc/self/maps", O_RDONLY);
+
+    if (fd < 0) return;
+    emit("MAPS_BEGIN\n");
+    while ((n = read(fd, buf, sizeof(buf))) > 0) {
+        ssize_t ignored = write(2, buf, (size_t)n);
+        (void)ignored;
+    }
+    emit("MAPS_END\n");
+    close(fd);
+}
+
+static void on_segv(int sig, siginfo_t *si, void *ctx)
+{
+    char line[192];
     unsigned char *cursor = sentinel;
+    unsigned char *fault = (unsigned char *)si->si_addr;
     size_t i;
 
     (void)sig;
+    (void)ctx;
     sprintf(line, "SIGNAL=SIGSEGV SENTINEL_OFFSET=%td\n",
             sentinel && ba_data ? sentinel - ba_data : (ptrdiff_t)-1);
+    emit(line);
+    sprintf(line, "FAULT_ADDR=%p FAULT_OFFSET_FROM_DATA=%td\n",
+            (void *)fault,
+            ba_data ? (ptrdiff_t)(fault - ba_data) : (ptrdiff_t)-1);
+    emit(line);
+    sprintf(line, "DATA_ADDR=%p SOURCE_ADDR=%p SOURCE_DELTA=%td\n",
+            ba_data ? (void *)ba_data : NULL,
+            source_addr ? (void *)source_addr : NULL,
+            ba_data && source_addr
+                ? (ptrdiff_t)((unsigned char *)source_addr - ba_data)
+                : (ptrdiff_t)-1);
     emit(line);
     if (cursor) {
         hexdump_label("SENTINEL_FIRST32=", cursor, 32);
@@ -79,6 +112,7 @@ static void on_segv(int sig)
             }
         }
     }
+    emit_maps();
     _exit(77);
 }
 
@@ -86,9 +120,13 @@ int main(int argc, char **argv)
 {
     L_BYTEA *ba;
     size_t nbytes = 0;
+    struct sigaction sa;
 
     if (argc != 2) return 2;
-    signal(SIGSEGV, on_segv);
+    memset(&sa, 0, sizeof(sa));
+    sa.sa_sigaction = on_segv;
+    sa.sa_flags = SA_SIGINFO;
+    if (sigaction(SIGSEGV, &sa, NULL) != 0) return 2;
     ba = l_byteaInitFromFile(argv[1]);
     printf("BA=%s\n", ba ? "nonnull" : "NULL");
     if (!ba) return 0;

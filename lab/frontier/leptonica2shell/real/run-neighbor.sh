@@ -51,6 +51,14 @@ case "$A" in
   *'CHOSEN_AT_OFFSET='*) ok 'chosen stream bytes land in live adjacent sentinel before fault';;
   *) bad 'no chosen-byte readback from live sentinel';;
 esac
+case "$A" in
+  *'FAULT_ADDR='*'FAULT_OFFSET_FROM_DATA='*) ok 'fault address and offset from ba->data captured';;
+  *) bad 'no fault-address evidence';;
+esac
+case "$A" in
+  *'MAPS_BEGIN'*'MAPS_END'*) ok 'live mappings captured at fault';;
+  *) bad 'no /proc/self/maps evidence';;
+esac
 
 printf '== plain real vulnerable 1.87.0, safe 16-byte stream\n'
 S=$(out/real-neighbor "$SAFE" 2>&1); SRC=$?
