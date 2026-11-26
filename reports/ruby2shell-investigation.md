@@ -5290,3 +5290,55 @@ Evidence (gitignored): `lab/build/evidence/stock-baseline-filevtable-n*.out`,
 `.server.log`, `.body`, `filevtable-n*.files`, and the temporary diagnostic
 `filetrace.c`/`filetrace.so`. A new lane still requires a named consumed
 function/code pointer or a wire-only libc/Ruby-code base.
+
+## Mixed27 successor consumer resolved; production method-ID alias inert on tested wire surface (2026-11-26, 14:2xZ)
+
+The earlier watchpoint silence left the primary glibc wire consumer UNKNOWN.
+`lab/repro/ruby2shell-mp-consumer.gdb` now arms the read watchpoint only after
+`case_map` returns and installs the successor-free breakpoint only then. On
+stock classic Sinatra / plain Ruby 3.4.12, `mixed27` produced:
+
+```
+BEFORE next_size_at=...: 0x45  ...
+AFTER  next_size_at=...: 0x53  ...
+SELF copy-out read ignored
+FREE successor user=... target+8
+  rb_str_casemap string.c:7873
+  mapping_buffer_free string.c:7798
+  ruby_sized_xfree -> __GI___libc_free
+```
+
+The first read is Ruby's own `memcpy` at `string.c:7866`, copying the
+overflow-written byte into the result. The successor is the **second
+case-mapping buffer**: the first overflow corrupts the top-chunk size before
+that buffer is allocated, and `mapping_buffer_free` later frees it through
+the `IS_MMAPPED` path. No allocator or application reader occurs before this
+self-free. This closes the abandoned consumer question for this geometry; it
+does not create an exploitation primitive.
+
+Controls: the identical malicious `mixed27` request on fixed 3.4.13 returned
+404 and did not abort. Its source-line mapping differs, so the post-casemap
+breakpoint did not arm on that build; this is a response-level fixed control,
+not a claimed fixed consumer trace. Same-length safe inputs returned 404 in
+the wire matrix. The affected trace is
+`lab/build/evidence/mp-method-21/gdb-mp-consumer.log` (gitignored).
+
+A separate production-jemalloc C=128 probe used a hardware **write**
+watchpoint on the adjacent qword. One instrumented run caught a live
+`rb_id_table` item change `0x1808 -> 0x1853`; `rb_id2name` resolved the old
+serial to `make_params`, while the method-entry pointer remained intact. A
+same-boot query resolved `0x1853` to `ParamList`. This is a real method-key
+alias, but the GDB queries perturb the allocator: a six-fresh-process sweep
+with those queries in place hit a VM text pointer on the first POST and an
+empty ID slot (`0 -> 0x53`) on the second, never the `make_params` item. The
+uninstrumented wire path was therefore tested directly: one C=128 production
+attack followed by 20 benign multipart POSTs on fresh connections returned
+404 for the attack and every follow-up, with the process alive. No changed
+dispatch, disclosure, command or second command was observed.
+
+Disposition: the mixed27 self-consumer is **RESOLVED**; the tested
+`make_params`/`ParamList` alias is **inert on this request surface**. Full
+stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**. A new method-table
+experiment must first name a request-invoked destination method with a
+signature/consumer mismatch; repeating benign POSTs after the same C=128
+attack is closed. Primary grades are unchanged.

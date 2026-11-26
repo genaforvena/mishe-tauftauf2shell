@@ -6,6 +6,7 @@ byte; attacker controls buffer size via input length). Affected
 3.3<3.3.14, 3.4<3.4.13, 4.0<4.0.10; fix commit `ruby/ruby@d582f8f`.
 
 
+- **2026-11-26 (direct session) — mixed27 successor consumer RESOLVED; method-ID alias tested, grade unchanged.** Post-overflow-only GDB watchpoints show the first read is Ruby's own copy-out (`string.c:7866`) and the successor is the second case-mapping buffer freed by `mapping_buffer_free` (`string.c:7873`); no external reader precedes the `IS_MMAPPED` self-free. Fixed 3.4.13 returned 404 (response-level control; line mapping differs). A production jemalloc C=128 write watchpoint caught `make_params` ID serial `0x1808 -> 0x1853` (`ParamList`) with the method-entry pointer intact, but instrumentation perturbed later layouts and the uninstrumented attack plus 20 benign multipart POSTs stayed 404/alive. No dispatch change, command or second command; full stock/oracle-free/persistent rung 5 remains **NOT ACHIEVED**.
 - **2026-11-26 (direct session) — request-scoped FILE-vtable adjacency CLOSED;
   grade unchanged.** Three stock-Sinatra plain-3.4.12 traces at N=524/588/1004
   found no FILE-sized allocation within 64 bytes of the primary overflow
