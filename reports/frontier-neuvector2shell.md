@@ -326,7 +326,10 @@ truncates the pointer below this PIE binary's text at
 No chosen executable address, marker, command or r5. Grade unchanged.
 Detail: `lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`.
 
-
+Clean-archive replay of commit `9877257a` (archive plus the ignored pinned
+tarball only) reproduced 12 PASS / 0 FAIL at 19:48Z; author-tree
+regressions stayed at 29/0, witness replay 5/0 and loopback 24/0. The
+witness was asked on tape #5770; no independent verdict yet.
 
 ## Grade and tractability
 
