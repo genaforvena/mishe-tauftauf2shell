@@ -662,3 +662,28 @@ that processes untrusted camera data automatically. Rung 5 is UNKNOWN.
   Grade unchanged: author-side rung 4, unwitnessed, no wire, command or
   physical USB path, rung 5 UNKNOWN. Raw output (build, gdb map, controls
   and sweep): `lab/frontier/libgphoto2shell/evidence/w196-gcc-device-only.out`.
+
+- GCC -O2 frame reopens the device-only top-header lane (W197, 2026-11-26,
+  lab-assisted rung 4): a GCC 2.5.34 build of the same pinned tree with
+  `-O2 -g -fPIC -fno-omit-frame-pointer -fno-stack-protector` has no copy of
+  the live `priv` pointer anywhere in the `jl2005c_init` stack frame (gdb
+  `find /g $rsp, $rbp+0x200, priv` at `jl2005c.c:155`: `Pattern not found`),
+  unlike the W195/W196 `-O0` frames. The top header is still at
+  `priv+0x4040/0x4048` (prev_size 0, size `0x12bd1`); because those offsets
+  map to bulk-reply bytes `0x3E30/0x3E38`, a reply with the pointer word set
+  to the device-constant `0` and the top size set to that build constant
+  reaches `AFTER_INIT rc=0` and a real
+  `gp_camera_folder_list_files rc=0 count=1022`, with ASLR on too. No host
+  address, canary, saved RIP or destination pointer is supplied: `0` and the
+  size are fixed reply bytes. Controls: no repair (mode `s`) still gives init
+  rc=0 then `malloc(): corrupted top size` (rc 134); top size `0` aborts in
+  `sysmalloc`; safe count 100 lists 100 entries. The build constant was read
+  from gdb on the vulnerable build and is not device-observable; the fixed
+  camlib control belongs to the prior builds (`pins/fix-6a3393d.patch`), not
+  to this replay. `file_get` still hangs on the zero-length table entry, so
+  no consumer file write is claimed. Grade unchanged: unwitnessed lab rung 4
+  at the real consumer-list scope, no wire, physical USB, command or rung 5
+  (UNKNOWN). One-command replay
+  `lab/frontier/libgphoto2shell/live/replay-w197-gcc-o2-device-only.sh`
+  (12 PASS / 0 FAIL), raw
+  `lab/frontier/libgphoto2shell/evidence/w197-gcc-o2-device-only.out`.

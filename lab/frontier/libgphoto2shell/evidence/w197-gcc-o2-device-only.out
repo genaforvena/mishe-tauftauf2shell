@@ -1,0 +1,63 @@
+== W197 GCC -O2 no-canary device-only top-header repair ==
+source=/tmp/w193-lgp-base/src/libgphoto2-2.5.34 sha=0ccb1dac24a837bc58a414942cc74bec47586b826c6c0c91ddcec3adea3d6185
+CFLAGS=-O2 -g -fPIC -fno-omit-frame-pointer -fno-stack-protector
+TOP=0x12bd1 (build constant measured by gdb, not device observable)
+== gdb map at jl2005c.c:155, safe count, ASLR off ==
+No symbol table is loaded.  Use the "file" command.
+Breakpoint 1 (jl2005c.c:155) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+process 2914714 is executing new program: /tmp/w197-o2/consumer-probe
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+warning: Temporarily disabling breakpoints for unloaded shared library "/tmp/w197-o2/installdir/lib/libgphoto2/2.5.34/jl2005c.so"
+
+Breakpoint 1, jl2005c_init (camera=camera@entry=0x5555555592a0, port=0x55555555a690, priv=0x5555555633f0) at /tmp/w193-lgp-base/src/libgphoto2-2.5.34/camlibs/jl2005c/jl2005c.c:155
+155		priv->model = info[6];
+$1 = 0x5555555633f0
+0x555555567430:	0x0000000000000000	0x0000000000012bd1
+Pattern not found.
+[Inferior 1 (process 2914714) killed]
+== device-only: full table write, no pointer/header repair ==
+=== DEVICE_ONLY aslr=off rc=134 ===
+AFTER_INIT rc=0
+malloc(): corrupted top size
+timeout: the monitored command dumped core
+Aborted
+== device-constant pointer + build-constant top size ==
+=== REPAIR aslr=off rc=124 ===
+W195_NATURAL priv=0 top=12bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+== same repair with ASLR on ==
+=== REPAIR_ASLR aslr=on rc=124 ===
+W195_NATURAL priv=0 top=12bd1 n=15936
+AFTER_INIT rc=0
+LIST rc=0 count=1022
+FIRST_NAME=jl_001.ppm
+== wrong top size ==
+=== WRONG_TOP aslr=off rc=134 ===
+W195_NATURAL priv=0 top=0 n=15936
+AFTER_INIT rc=0
+Fatal glibc error: malloc.c:2599 (sysmalloc): assertion failed: (old_top == initial_top (av) && old_size == 0) || ((unsigned long) (old_size) >= MINSIZE && prev_inuse (old_top) && ((unsigned long) old_end & (pagesize - 1)) == 0)
+timeout: the monitored command dumped core
+Aborted
+== safe count ==
+=== SAFE aslr=off rc=124 ===
+AFTER_INIT rc=0
+LIST rc=0 count=100
+FIRST_NAME=jl_001.ppm
+PASS gdb maps top size 0x12bd1
+PASS gdb finds no spilled priv on the frame
+PASS device-only init survives
+PASS device-only first consumer allocation aborts
+PASS device-only no consumer listing
+PASS device-constant repair lists 1022 entries
+PASS repair has no heap abort
+PASS repair survives ASLR on
+PASS wrong top size aborts in sysmalloc
+PASS wrong top size no consumer listing
+PASS safe count lists 100 entries
+PASS safe count has no heap abort
+RESULT: 12 PASS / 0 FAIL
