@@ -11440,3 +11440,82 @@ command service. NOT ESTABLISHED rung 5.
   object: no real GIMP/GEGL build, no JIF through the PDB, no chosen-address
   pointer, no command, no r5. Window 166 is registered; the target is STAGED,
   NOT ADMITTED — operator admission under standing #6 remains owed.
+
+## 2026-11-26 03:1x–03:2xZ — lwext4shell W242 staged lane, witness verdict, and two author-only pointer lanes
+
+- **Claim and pins** — `reports/frontier-lwext4.md`,
+  `reports/lwext4shell-status.md` and `lab/frontier/lwext4shell/PROVENANCE.md`
+  record CVE-2025-71473 (NVD 2026-11-20, CWE-787, lwext4 <= 1.0.0):
+  `ext4_fs_init_inode_bitmap()` calls
+  `memset(b.data, 0, (inodes_per_group + 7) / 8)` on a one-block buffer
+  without bounding the image-derived `s_inodes_per_group`. Upstream issue
+  `https://github.com/gkostka/lwext4/issues/93`, PR
+  `https://github.com/gkostka/lwext4/pull/111`; fix `b9c842f168e6044bd03fe34e1237eda33c299908`,
+  parent `a2dacdc14ea45745a3d65d2a1ea62d1b3681bfdc`, no numeric fixed release
+  observed. Full `src/ext4_fs.c` pins: v1.0.0
+  `c14c4c3378abb985c28025f35d142c753e05bb6df5d171282ed83d7ccf6c09eb`, fix
+  `b259a4bbe8a836d0ce7b78e6dbf0fb9eb29dbe056ce93b69cab7a2975de7bd1f`;
+  verbatim excerpts `pins/lwext4-vulnerable.inc` (lines 382-423)
+  `c93eaa348724a76546e9d9af248d816569f948bf7823590fdab95f38e8df9e07` and
+  `pins/lwext4-fixed.inc` (lines 421-468)
+  `516bdf3b178b121881fec04d9c4f9f63a8a6a1ed53fe83155357fa9ea8d644a5`.
+  Sibling CVE-2025-71474 is in the same fix but source-read only, NOT staged.
+- **Replay** — from the repo root `bash lab/frontier/lwext4shell/run-all.sh`
+  builds GCC and Clang ASan plus plain and fixed/safe controls; expect
+  `TOTAL: 31 PASS / 0 FAIL`, rc 0. The author's
+  `bash lab/frontier/lwext4shell/run-witness.sh` rehashes all five pins and
+  the driver. Independent witness W242 replayed the unmodified wrapper in-tree
+  and from clean `git archive b4a7acd4` into `/tmp/w242-clean` (author's
+  earlier clean replay used `/tmp/w242-lwext4-clean`); wrapper SHA-256
+  `42d5b68df4e6c4d5ffc28011da2fd814fceeafeb636568f95a746d0bb30838f5` in
+  both witness trees. Each gave `REPLAY_PASS=6 REPLAY_FAIL=0`, 31 PASS / 0
+  FAIL, rc 0, with the full and excerpt upstream hashes exact and the EIO
+  guard present; verdict ESTABLISHED AS LABELED, no grade change, NO r5.
+- **Expected bytes** — with `ipg=32777` the vulnerable excerpt computes a
+  4098-byte `memset` into a 4096-byte one-block heap region. GCC and Clang
+  ASan report `heap-buffer-overflow`, `WRITE of size 4098`, 0 bytes after the
+  region; frame #0 is the instrumented `memset`/`__asan_memset`, frame #1 the
+  pinned call at `ext4_fs_init_inode_bitmap pins/lwext4-vulnerable.inc:23`,
+  allocation at `ext4_trans_block_get_noread harness/driver.c:79`. Fixed
+  attack prints `MODE=attack IPG=32777 RC=5 DIRTY=0`; safe `ipg=8192` is clean
+  in both bodies. Plain pre-filled canary prints
+  `CANARY_AT=4096 FIRST=00fe4d4d…` for `ipg=32777` and `00fc…` for `32778`,
+  while safe/fixed print `4d4d…`: the OOB byte tracks the image-derived
+  field, not heap residue.
+- **Regeneration and boundary** — raw logs live in
+  `lab/frontier/lwext4shell/out/` and are gitignored; URLs, commands and
+  hashes are in `PROVENANCE.md`, witness detail in
+  `.mishe-tauftauf/artifacts/witness-w242-lwext4shell/detail.md`. Grade stays
+  rung 3 pinned verbatim / rung 4 PARTIAL image-chosen bit byte past a
+  synthetic block: no real lwext4 build, no crafted ext4 image through the
+  mount path, no chosen-address pointer, no command, no r5. Window 167 is
+  registered; the target is STAGED, NOT ADMITTED — operator admission under
+  standing #6 remains owed, and the declared mind count/list is unchanged.
+- **Pgactive2Shell W10/W11 live error-callback pointer (author-only)** —
+  from the repo root
+  `sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh`
+  replays a 616-byte replication-origin name through a two-node PostgreSQL
+  16.15 apply worker on loopback. Expect the probe to print
+  `CBREACH ... delta=464 fn=0x5a415a415a415a41 arg=0x5a415a415a415a41 prev=0x5a415a415a415a41`
+  followed by node 2 `terminated by signal 11`; the clean-archive author
+  smoke at `570384a2` returned `VERDICT=PASS FAILURES=0 LEFTOVER_POSTMASTERS=0`
+  with short control 0/0 and fixed arm 0/0. The first smoke's exact-one
+  termination assertion failed and is preserved in
+  `callbackreach/FINDINGS.md`. Raw logs are under the gitignored
+  `realbuild/twonode/callbackreach/` tree. This is a chosen *invalid* pointer
+  consumed by the live error path, not a chosen valid address, IP or
+  command; author observation only, no witness verdict and no grade/r5 move.
+- **Libsshch2Shell W26 plain in-run address handoff (author-only)** —
+  `bash lab/frontier/libsshch2shell/real/run-syswire-plain.sh` builds both
+  pinned libssh trees in plain Release and drives W25's wire mechanics with
+  no sanitizer. Expect `6 PASS / 0 FAIL`, rc 0, the server to publish
+  `plainaddr` through a pre-fork shared-memory slot, `recycled=<published>
+  live=<published> match=1`, direct libc `system()` at a fork-peer PIE
+  address, a target-created marker and clean fixed/invalid-callee controls;
+  three repeats produced different heap and code addresses with the same
+  match and marker. The handoff is lab IPC, the peer is authenticated and
+  there is no persistent shell or remote command service: additive,
+  unwitnessed, no grade or r5 change. Evidence is in
+  `lab/frontier/libsshch2shell/real/evidence-swplain-*` and gitignored
+  marker files; the full mechanism is in
+  `reports/frontier-libsshch2shell.md` §W26.

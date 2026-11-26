@@ -12040,3 +12040,48 @@ Observed at this fold: neuvector `run-witness.sh` gave
 rc 0. Readme-lint stays RED on the frozen six-column detector against the
 live seven-cell README and is person-reserved (exact full-flag sync in
 `docs/runtime-pin.md`, never a bare `mishe sync`).
+
+## 2026-11-26 03:22–03:3xZ — W242 staged-lane fold and two author-only boundary corrections
+
+- `b4a7acd4`, `ac43d792`, `43302a9f`: frontier staged lwext4shell W242
+  (CVE-2025-71473, image-derived `s_inodes_per_group` drives a 4098-byte
+  `memset` into a 4096-byte heap block), registered window 167, and witness
+  W242 returned ESTABLISHED AS LABELED in-tree and from clean
+  `git archive b4a7acd4` (31 PASS / 0 FAIL, `REPLAY_PASS=6`, five pins exact,
+  `0xfe`/`0xfc` versus `0x4d` readback). The README gained a
+  STAGED-NOT-ADMITTED row; reproducibility records the NVD/upstream URLs,
+  full and excerpt hashes, build and wrapper commands, expected ASan/canary
+  bytes, gitignored logs and the witness detail path. Operator admission is
+  still owed, so the 157-mind count and name list are unchanged.
+- `9c36c294`, `570384a2`, `0f05163c`: pgactive2shell consumed a chosen
+  (invalid) `ErrorContextCallback` pointer in a live apply worker via a
+  616-byte origin name; the clean-archive author replay returned
+  `VERDICT=PASS FAILURES=0`. The README's blanket no-pointer clause is
+  narrowed to no saved RA / no chosen valid address, command or r5, and
+  reproducibility carries the one-command replay, expected `CBREACH` and
+  SIGSEGV bytes, the preserved first-smoke assertion failure and the
+  unwitnessed status.
+- `669b1dbd`: libsshch2shell W26 runs W25's direct-`system()` wire mechanics
+  in a plain build with an in-run shared-memory address handoff (6 PASS /
+  0 FAIL). The README row now names the handoff as lab IPC and keeps the
+  authenticated-peer / ASLR-local / no-r5 ceiling; reproducibility records
+  the command and expected `match=1` and marker bytes. Additive, author-only,
+  unwitnessed, no grade move.
+- Doc-ok with no edit: `c0c2aaae` (Ruby C=640 adjacent consumer identified
+  as boot-time Prism/ISEQ compile allocation; bounded negative, fixed `0x53`,
+  no chosen byte or wire disclosure, grades unchanged), plus the two commits
+  already covered by the witness verdict above. No README or reproducibility
+  passage had left the C=640 consumer open.
+
+Observed at this fold: `bash lab/frontier/lwext4shell/run-witness.sh` gave
+`REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, rc 0. The pgactive
+callback replay script returned `VERDICT=PASS FAILURES=0`,
+`TERMINATIONS2=1` on the long arm, 0/0 on short and fixed arms,
+`LEFTOVER_POSTMASTERS=0` and both library and source restored, rc 0. The W26
+plain lane returned `syswire-plain: 6 PASS / 0 FAIL` with `published=1`,
+`slot=1`, `recycled=1`, marker on the vulnerable and repeat arms and none on
+fixed/bad-callee, rc 0. `check-readme.py` GREEN 156 rows,
+`check-reproducibility.py` GREEN 29 files, and `git diff --check` on the
+three docs paths rc 0. Readme-lint stays RED on the frozen six-column
+detector against the live seven-cell README and is person-reserved (exact
+full-flag sync in `docs/runtime-pin.md`, never a bare `mishe sync`).
