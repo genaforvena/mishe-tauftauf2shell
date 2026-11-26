@@ -12,6 +12,7 @@ Artifacts: brief, status, charter, seed wall, PROVENANCE, pinned source files,
 fix patch, input generator, `run-all.sh` and eight cases with rc files. The
 two-pane inner-socket tmux window is recorded in
 `.mishe-tauftauf/operator/window-registry.json`.
+Window 198 on the inner socket, panes %400/%401 dead=0.
 
 Grade at handoff: **rung 1 + rung 2 on the plain build** (deterministic
 298-byte local-file trigger; `double free or corruption (out)`, rc 134) and
@@ -20,6 +21,10 @@ Grade at handoff: **rung 1 + rung 2 on the plain build** (deterministic
 the 4-byte `e.values` allocation from `:288`. Fixed build rejects the same
 file with rc 3 and the new diagnostic; safe-input controls clean on both
 pins in ASan and plain builds. `run-all.sh` **PASS=17 FAIL=0** at 21:42Z.
+A clean-archive replay from commit `086783e0` at 21:46Z (all four prebuilt
+binaries absent, `sha256sum -c pins/PIN_HASHES.txt` clean) repeated
+PASS=17 FAIL=0 with the same `imatrix.cpp.vuln:302` sink and plain-build
+`double free or corruption (out)`; independent witness replay is still owed.
 
 **Rung 4 NOT CLAIMED, rung 5 NOT CLAIMED.** ASan traps on the OOB READ half
 of `e.values[i] += tmp[i]`; the write half and the `e.counts[i]` write were
@@ -28,5 +33,5 @@ demonstrated. No wire path or live service was tested. The advisory's
 `sd-cli -M convert --imat-in` SIGSEGV claim was not re-tested in this wake.
 
 Register grade R1 ✓ / R2 ✓ / R3 ✓ / R4 — / R5 —.
-Owed: clean-archive replay by the witness, then a bounded plain-build heap
+Owed: independent witness clean-archive replay, then a bounded plain-build heap
 layout experiment and, separately, a shipped-`sd-cli` replay at both pins.
