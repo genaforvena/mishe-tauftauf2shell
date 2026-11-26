@@ -5402,3 +5402,51 @@ destination with a mismatched signature; a future C=112 lane needs a consumed
 owner for the `oldbt_bugreport` pointer. Evidence (gitignored):
 `lab/build/evidence/prodscan{112,128,160,192,224,256,320,384}.*`,
 `prod112r{1,2,3}.*` and `prodscan112ctl.*`.
+
+## C=112 code-pointer lane: no consumed owner — CLOSED (2026-11-26, 15:2xZ)
+
+The prior wake left one unresolved observation: four fresh production
+C=112 processes each had one adjacent qword whose value was
+`exec_base + 0x1e5553`, i.e. ELF `0x225553` = `oldbt_bugreport + 0x13`
+in `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (`oldbt_bugreport` is at
+`0x225540`). This wake tested whether that pointer has a consumer.
+
+Geometry confirmed from `lab/preload/jemtrace.c`: `dump_window` emits `b=`
+qwords at the allocation pointer and `a=` qwords at `ptr + sz`. At C=112
+the watched RString allocation is `0x70` bytes; its character data starts
+24 bytes into the allocation (`mapping_buffer` header), so capacity
+`0x58` ends at `0x18 + 0x58 = 0x70` — the first byte of the adjacent
+chunk's first qword. The overflow byte therefore can change that qword's
+low byte. The value is stable relative to the text base across
+`prod112r1`, `prod112r2`, `prod112r3` and `prodscan112`.
+
+Two falsifiers were run. First, a paired safe/attack comparison of every
+`capa=0x58` dump: 16 of the 18 adjacent qword sequences are byte-identical
+between the arms; the attack-only case buffer is the sole new adjacency
+carrying the code pointer. The safe arm has no such case-buffer dump. That
+confirms the observation is attack-path-specific but says nothing about a
+consumer. Second, a direct execution test: committed
+`lab/repro/ruby2shell-prod112-consumer.sh` starts the unchanged classic
+Sinatra app in production under jemalloc and GDB, with execute
+breakpoints at `oldbt_bugreport` (`0x225540`, `vm_backtrace.c:1115`) and
+at the corrupted address `oldbt_bugreport + 19` (`0x225553`), then drives
+one wire-only attack POST and a follow-up request. Breakpoints only
+observe; no hook, middleware, debugger write or marker is in the request
+path. Both arms returned `TRIGGER_HTTP=404` and `ALIVE_HTTP=404`, with
+`entry-hits=0 plus13-hits=0` for attack and safe
+(`lab/build/evidence/prod112cons-{attack2,safe1}.{gdb,out,body}`).
+
+Source audit agrees: the only reference to `oldbt_bugreport` in the
+affected tree is `vm_backtrace.c:1138` (`arg.func = oldbt_bugreport`),
+inside the fatal `rb_print_backtrace` path, which no request reaches.
+The adjacent chunk's eight qwords mix code and heap pointers in a Ruby
+heap page; its owning object remains UNKNOWN. No reader, call,
+disclosure, command or second command was observed.
+
+Disposition: the C=112 code-pointer lane is **CLOSED** for lack of a
+consumed owner. This is not pointer control and not demonstrated impact.
+Primary grades are unchanged: rung 4 witness-COMPLETE; harness-condition
+rung 5 witness-ESTABLISHED; full stock/oracle-free/persistent rung 5
+**NOT ACHIEVED**. A future C=112 lane must name a request-invoked
+consumer of that pointer; otherwise a new wire-only libc/Ruby-code base
+is required.
