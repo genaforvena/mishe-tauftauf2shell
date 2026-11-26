@@ -148,21 +148,33 @@ Chosen-byte readback is held by the staged harness's synthetic bounded
 consumer and by the lab-groomed live neighbor in the plain real-library
 probe above (rung 4 PARTIAL in both cases).
 
-## External caller hunt (2026-11-26 16:1xZ, bounded negative)
+## External caller hunt (2026-11-26 16:1x-16:4xZ, bounded negative)
 
-A read-only search of the checkout's `lab/` C/C++/header sources
-(gitignore-respecting, ~185 frontier projects) found **no** external caller
-of `l_byteaInitFromStream()`, `l_byteaInitFromFile()` or any other `l_bytea*`
-API outside this project. The only other project including Leptonica's
-`allheaders.h` is `ghostscript2shell`'s
-`src/ghostpdl-ghostpdl-10.07.0/base/tessocr.cpp:60`; it uses in-memory `Pix`
-APIs and `gp_fread` for Tesseract tessdata, never a Leptonica stream reader.
-Untracked bulk trees (`lab/src/`, `lab/frontier/*/deps/`, other gitignored
-directories) were not exhaustively enumerated: a gitignore-disabled scan
-timed out. This is a bounded negative for tracked sources and docs, not a
-claim about every local file or about production hosts. No request-reachable
-consumer was found; the measured fault boundary above is the conclusion for
-this checkout.
+A read-only search of the checkout's `lab/` C/C++/header sources found **no**
+request-reachable caller of `l_byteaInitFromStream()`,
+`l_byteaInitFromFile()` or any other `l_bytea*` API outside this project.
+The gitignore-disabled gap noted by the first pass was closed on 2026-11-26
+16:48Z with bounded, fixed-depth enumeration (never an unscoped `find`/`rtk`,
+which had timed out): `find lab -maxdepth 6 \( -name bytearray.c -o -name
+allheaders.h \)` returns exactly four files — the vulnerable and fixed
+vendored trees under `real/src/` and `real/src-fixed/`. Their only callers
+are the library `saConcatenatePdfToData()` (`src/pdfio1.c:2169`), local
+regression programs (`bytea_reg.c`, `pdfio2_reg.c`, `xtractprotos.c`) and the
+tracked local harnesses (`caller.c`, `realfile.c`, `neighbor.c`,
+`harness/driver.c`); every data source is a caller-supplied local filename,
+local sparse-file fixture or in-memory buffer, never a socket, HTTP or
+request-dispatch path. The only other project including Leptonica's
+`allheaders.h` is `ghostscript2shell`'s gitignored
+`src/ghostpdl-ghostpdl-10.07.0/base/tessocr.cpp:60`; a grep of the whole file
+for `l_byteaInitFromStream|l_byteaInitFromFile|pixReadStream|pixReadMem`
+returns zero hits (it uses in-memory `Pix` APIs and `gp_fread` for Tesseract
+tessdata). Other image lanes (imgproxy, thorvg, ImageMagick, libvips,
+freeimage, libheif, libraw, OpenEXR, DCMTK, assimp, MapServer, Pillow, FLTK,
+JXR, libgphoto2, libfontenc, OpenJPEG, libtiff, libpng, GIMP-JIF,
+ccextractor, VTK-DICOM) hold their own upstream trees but no Leptonica
+sources. This remains a bounded negative for this checkout, not a claim about
+production hosts. No request-reachable consumer was found; the measured
+fault boundary above is the conclusion for this checkout.
 
 ## Preserved negative
 

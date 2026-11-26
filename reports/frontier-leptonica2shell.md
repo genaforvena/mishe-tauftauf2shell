@@ -123,14 +123,22 @@ in this tree; the PDF path takes a list of filenames, not attacker-controlled
 wire bytes. The first caller-stack assertion failed because ASan prints
 callee-first; the assertion order was corrected, the observed report was not.
 
-Bounded external-caller negative (2026-11-26 16:1xZ): a read-only
-gitignore-respecting search of the checkout's `lab/` C/C++/header sources
-found no caller of any `l_bytea*` API outside this project. The sole other
-consumer of Leptonica's `allheaders.h`, `ghostscript2shell`'s
-`base/tessocr.cpp:60`, uses in-memory `Pix` APIs and `gp_fread` for
-Tesseract data, never a Leptonica stream reader. Untracked bulk trees were
-not exhaustively enumerated after a gitignore-disabled scan timed out, so
-this is a bounded negative for tracked sources, not a universal claim.
+Bounded external-caller negative (2026-11-26 16:1x-16:4xZ): a read-only
+search of the checkout's `lab/` C/C++/header sources found no caller of any
+`l_bytea*` API outside this project. The gitignore-disabled gap left by the
+first pass was closed at 16:48Z with bounded, fixed-depth enumeration (never
+an unscoped `find`/`rtk`, which had timed out): `find lab -maxdepth 6 \(
+-name bytearray.c -o -name allheaders.h \)` returns exactly four files — the
+vulnerable and fixed vendored trees under `real/src/` and `real/src-fixed/`.
+Their callers are the library `saConcatenatePdfToData()`
+(`src/pdfio1.c:2169`), local regression programs and the tracked local
+harnesses; all data sources are local filenames, fixtures or in-memory
+buffers, never a socket or request-dispatch path. The sole other consumer of
+Leptonica's `allheaders.h`, `ghostscript2shell`'s gitignored
+`base/tessocr.cpp:60`, has zero `l_bytea*`/`pixReadStream`/`pixReadMem` hits
+and uses in-memory `Pix` APIs and `gp_fread` for Tesseract tessdata. No
+request-reachable consumer exists in this checkout. This is a bounded
+negative for this checkout, not a claim about production hosts.
 
 ### Plain-build live neighbor probe and fault boundary (2026-11-26 16:09Z)
 
@@ -202,9 +210,11 @@ invariants repeat (`FAULT_OFFSET_FROM_DATA=129504`, `SENTINEL_OFFSET=224`,
 - Next experiment: an external consumer that feeds a >1 GB stream to a
   Leptonica API reachable from request bytes would also need its own
   contiguous writable ~1 GB mapping immediately after the small destination;
-  no such consumer is present in this checkout, and the measured fault
-  boundary above records why the ordinary case cannot survive the copy. A
-  read-only hunt across other locally provisioned lab trees is running; a
-  negative result is preserved, not retried into existence. Preserve the
+  the measured fault boundary above records why the ordinary case cannot
+  survive the copy. The read-only hunt across locally provisioned lab trees
+  is **complete with a negative** (16:48Z, bounded to this checkout): no
+  request-reachable consumer exists here, so the direct route is closed for
+  this checkout and no rung 4/5 advance is owed. Preserve the
   no-pointer/no-command ceiling. The staged and real-library lanes are
-  complete as labeled; witness replay of both real runners is requested.
+  complete as labeled; witness replay of both real runners is requested and
+  still UNKNOWN — no routine re-ping.
