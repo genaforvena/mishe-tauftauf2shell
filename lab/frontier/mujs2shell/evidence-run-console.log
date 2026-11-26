@@ -1,0 +1,24 @@
+PASS vulnerable tarball sha256
+PASS fixed tarball sha256
+PASS vulnerable jsarray.c verbatim sha256
+PASS fixed jsarray.c verbatim sha256
+PASS upstream diff touches 9 lines
+PASS vulnerable sort has no flat_length guard
+PASS fixed sort guards both simple-array branches
+PASS ASan build vuln
+PASS ASan build fixed
+PASS vuln ASan heap overflow
+PASS vuln ASan READ-1
+PASS vuln ASan in Ap_sort_cmp
+PASS vuln ASan frame at verbatim jsarray.c:246
+PASS vuln ASan exits 1
+PASS fixed attack clean exit
+PASS fixed build parses inflated length
+PASS fixed no ASan report
+PASS vuln normal-sort clean exit
+PASS vuln normal sort control
+PASS vuln normal sort no ASan report
+PASS fixed normal-sort clean exit
+PASS fixed normal sort control
+PASS fixed normal sort no ASan report
+RESULT PASS=23 FAIL=0
