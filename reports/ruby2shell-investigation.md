@@ -4621,3 +4621,68 @@ again the chosen tail high byte at operand+8. Prediction: the primitive
 generalizes to the other 4-byte-unit encoding. Falsifier: the comparison
 loop fails before `NEXT`, as it did in UTF-8 — then the lane is closed to
 UTF-16LE only and no further encoding sweep is warranted.
+
+## UTF-32LE case-insensitive probes (2026-11-26, 10:48Z wake) — steering falsified; distinct optimizer OOB
+
+The prior wall's exact bounded experiment ran verbatim. Reproduction:
+`lab/repro/ruby2shell-wpqw-u32le.{rb,sh}`; evidence is gitignored under
+`lab/build/evidence/wpqw-u32le/3.4.{12,13}-*.out`.
+
+### Chosen-byte steering does NOT generalize (falsifier CONFIRMED)
+For pattern `(?i:w)` + `U+(idx<<8|0x03)` + `AB` in UTF-32LE and subject
+`U+1E98` + tail, `bad=false` and `good=true` for every tested index
+(0x00, 0x01, 0x02, 0x0a, 0x0e, 0x3d, 0x62) on **both** builds, rc=0. The
+UBSan dump of the compiled program shows
+`... 0d 04 00 00 00 03 00 00 00 03 01 00 00 41 00 00 00 42 00 00 00 01 ...`:
+the byte after the four-byte 'w' operand is `0x0d` (OP_EXACTMBN), whereas
+the folded subject supplies `0x0a` (from U+030A) at that offset. The
+`while (len-- > 0) if (*p != *q) goto fail;` loop at `regexec.c:2739-2744`
+exits before `NEXT`, so no opcode is dispatched and the chosen byte is
+never consumed. Same outcome as the UTF-8 boundary. **The wpqw opcode-
+dispatch steering primitive is bounded to UTF-16LE; no further encoding
+sweep is warranted.** Grade unchanged (rung 4 for the UTF-16LE lane only).
+
+### Distinct one-byte OOB read in the case-insensitive optimizer
+Pattern `(?i:w)` + `U+03AB` (also `U+103AB`, `U+203AB`) in UTF-32LE with
+subject `U+1E98` + that tail: `good=true` first, then 3.4.12 ASan aborts
+on the `bad` match with rc=1:
+
+```
+ERROR: AddressSanitizer: heap-buffer-overflow ... READ of size 1
+  #0 str_lower_case_match regexec.c:4278
+  #1 bm_search_notrev_ic regexec.c:4722
+  #2 forward_search_range regexec.c:4970
+0x...1874 is located 0 bytes after 4-byte region allocated by
+  set_optimize_exact_info regcomp.c:5367
+SUMMARY: AddressSanitizer: heap-buffer-overflow regexec.c:4278 in str_lower_case_match
+```
+
+The optimizer's `reg->exact` buffer is four bytes; U+1E98 folds to eight
+bytes (`w` + U+030A in UTF-32LE), and `*t++` in the comparison loop reads
+one byte past the buffer. Fixed 3.4.13 returns `bad=false` cleanly, rc=0,
+for all three codepoints. The fix is a separate one-line hunk from the
+`match_at` over-advance guard: 3.4.13 adds
+`if (tend - t < lowlen) return 0;` at `regexec.c:4298` (3.4.12 :4273).
+
+**Grade: rung 3 — confirmed corruption, secondary adjacent lane.** Observed
+one-byte OOB READ under ASan, attacker-chosen pattern and subject, fixed
+patch-sensitively. No write, pointer control, disclosure or wire-only
+reachability; requires a UTF-32LE regex with an attacker-chosen pattern.
+Primary grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+### Plain-build control
+`lab/repro/ruby2shell-wpqw-u32le.sh` accepts `RUBY12`/`RUBY13` overrides;
+with the genuine non-ASan binaries
+`lab/build/plain/ruby-3.4.12-plain/bin/ruby` and
+`lab/build/plain/ruby-3.4.13-plain/bin/ruby`, all 20 arms (seven steering
+indices and three codepoints per build) returned rc=0 with `good=true`,
+`bad=false`. Neither a crash nor a verdict deviation appeared on 3.4.12.
+The one-byte OOB remains ASan-visible corruption only: no consumer-visible
+effect on this host, no grade increase beyond rung 3.
+
+Next bounded experiment: survey the local Rails/Sinatra gem trees for any
+default path that compiles a request-derived `Regexp` with UTF-16LE or
+UTF-32LE encoding. If none exists, both wpqw secondary lanes are
+wire-unreachable and remain lab-only; a found path would change the
+reachability grade.
