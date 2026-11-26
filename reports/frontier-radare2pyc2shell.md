@@ -1,10 +1,12 @@
 # Frontier brief: radare2 PYC ASCII size-wrap heap WRITE — CVE-2026-81878 / GHSA-9phv-v2w8-56j3
 
 Status: **STAGED 2026-11-26 W243**. Window 168 created and registered below;
-operator admission owed; witness replay owed. Rung 3 pinned verbatim function
-and sink (GCC+Clang ASan heap WRITE); rung 4 PARTIAL (a four-byte crafted
-marshal length field selects the ~4GB write length and a bounded readback shows
-the `0xff` fill past a zero-byte allocation in a synthetic plain process). No
+operator admission owed; witness W243 replay ESTABLISHED AS LABELED, no
+grade change, NO r5. Rung 3 pinned verbatim function and sink (GCC+Clang
+ASan heap WRITE); rung 4 PARTIAL (a four-byte crafted marshal length field
+selects the ~4GB write length; the plain lane logs sink arguments and writes
+8 bounded bytes in a synthetic process — no written-byte readback, no
+chosen fill byte). No
 radare2/`rabin2` build, no crafted `.pyc` through the real binary-loader path,
 no chosen-address pointer, no command and no rung 5.
 
@@ -69,25 +71,34 @@ length before the allocation and never reaches the sink.
 The harness compiles the pinned `get_bytes()` and ASCII readers verbatim under
 `#line`, with stand-in `RBuffer`, `R_NEWS0`/`R_NEW0`, `get_ut32()` and
 `buf_read()`; it does not build radare2. GCC and Clang `-O0` ASan report
-`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4294967295`, fault
-frame `r_buf_read pins/buf-sink.inc:496`, allocation frame
-`get_bytes pins/get-bytes-vulnerable.inc:2` (the pinned `R_NEWS0` call). Fixed
+`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4294967295`, at an
+address `0 bytes after a 1-byte region` (the `calloc(0,1)` request wraps to
+zero; ASan's usable chunk is one byte). ASan frame #0 is `memset` /
+`__asan_memset`, frame #1 is `r_buf_read pins/buf-sink.inc:496`, frame #2
+`get_bytes pins/get-bytes-vulnerable.inc:3`; allocation frame #0 is `calloc`,
+frame #1 `get_bytes pins/get-bytes-vulnerable.inc:2` (the pinned `R_NEWS0`
+call). Fixed
 build on the same four-byte `ff ff ff ff` stream: `MODE=attack
 LEN_FIELD=4294967295 RC=3 SINK=0`, ASan-clean. Safe 16-byte stream:
-`LEN_FIELD=16 RC=0 SINK=0` in both builds. Plain instrumented build bounds the
-sink to eight observable bytes and records `SINK_R=0 SINK_LEN=4294967295
-SINK_BYTE=ff`, then returns `RC=3 SINK=1` — direct evidence that the caller's
-post-check fires only after the sink has written. Plain fixed build:
-`RC=3 SINK=0`. Exact commands, hashes and logs: the lab `PROVENANCE.md`.
+LEN_FIELD=16 RC=0 SINK=0` in both builds. Plain instrumented build logs
+`SINK_BUF=<addr> SINK_R=0 SINK_LEN=4294967295 SINK_BYTE=ff` and performs an
+8-byte `memset` through the sink stand-in, then returns `RC=3 SINK=1` —
+direct evidence that the caller's post-check fires only after the sink has
+written. It does not read the written bytes back; `SINK_BYTE=ff` is the
+driver's fixed `b->Oxff_priv` (`harness/driver.c:136`), not a byte selected
+by the crafted stream. Plain fixed build: `RC=3 SINK=0`. Exact commands,
+hashes and logs: the lab `PROVENANCE.md`.
 
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed heap OOB WRITE from verbatim pinned
   bytes, with fixed-commit, fixed-release and safe-input controls.
 - **Rung 4 PARTIAL:** a four-byte attacker-selected marshal length field drives
-  the sink length (`4294967295`) and the bounded plain readback shows `0xff`
-  past a zero-byte allocation in a synthetic process. No real `.pyc`, no
-  `rabin2`/`r2` build, no pointer control, no command.
+  the sink length (`4294967295`); the plain lane logs the sink arguments and
+  performs a bounded 8-byte fill past a zero-byte `calloc` request (ASan:
+  a 1-byte region) in a synthetic process. No written-byte readback, no
+  chosen fill byte, no real `.pyc`, no `rabin2`/`r2` build, no pointer
+  control, no command.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
 Cheapest next experiment: build radare2 6.1.8 with ASan, write a minimal `.pyc`

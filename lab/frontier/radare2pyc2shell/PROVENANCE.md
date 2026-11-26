@@ -49,17 +49,25 @@ external target was probed; every run below is local.
 Clang ASan vuln, GCC plain vuln/fixed), runs eight cases, and checks nine hashes.
 
 `out/gcc-attack.log` and `out/clang-attack.log` both contain
-`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4294967295`, fault
-frame `r_buf_read pins/buf-sink.inc:496`, and allocation frame
-`get_bytes pins/get-bytes-vulnerable.inc:2` (the pinned `R_NEWS0` call site).
+`AddressSanitizer: heap-buffer-overflow`, `WRITE of size 4294967295`, at 0
+bytes past a 1-byte region (the `calloc(0,1)` request is zero bytes). ASan
+frame #0 is `memset`/`__asan_memset`; pinned `r_buf_read pins/buf-sink.inc:496`
+is frame #1, `get_bytes pins/get-bytes-vulnerable.inc:3` frame #2. Allocation
+frame #0 is `calloc`, pinned `get_bytes pins/get-bytes-vulnerable.inc:2` is
+frame #1 (the `R_NEWS0` call site).
 
 `out/fixed-attack.log`: `MODE=attack LEN_FIELD=4294967295 RC=3 SINK=0`, no ASan.
 `out/vuln-safe.log` and `out/fixed-safe.log`: `MODE=safe LEN_FIELD=16 RC=0 SINK=0`,
-no ASan. `out/plain-attack.log`:
+`out/plain-attack.log`:
 `SINK_BUF=<addr> SINK_R=0 SINK_LEN=4294967295 SINK_BYTE=ff` then
 `MODE=attack LEN_FIELD=4294967295 RC=3 SINK=1 SINK_LEN=4294967295 SINK_BYTE=ff`.
-`out/plain-safe.log` has no `SINK_BUF=`. `out/plain-fixed-attack.log`:
-`MODE=attack LEN_FIELD=4294967295 RC=3 SINK=0`.
+The plain lane logs sink arguments and writes eight bytes through the sink
+stand-in; it does not read the written bytes back, and `SINK_BYTE=ff` is the
+driver's fixed `b->Oxff_priv` (`harness/driver.c:136`), not stream-chosen.
+Changing the crafted length field from `ff ff ff ff` to `fe ff ff ff` in a
+throwaway copy moves `SINK_LEN` to `4294967294` with `SINK_BYTE` still `ff`
+(W243 witness probe). `out/plain-safe.log` has no `SINK_BUF=`.
+`out/plain-fixed-attack.log`: `MODE=attack LEN_FIELD=4294967295 RC=3 SINK=0`.
 
 The plain build bounds the pinned sink to eight bytes so the demonstration is
 safe locally; the ASan build executes the full pinned `memset` length and aborts
@@ -69,3 +77,14 @@ command or loopback service was exercised.
 - `run-witness.sh`, SHA-256 `ec1bf9246f8b2f9225d02fe983ca060e6e86a546c8566125aaf4b3a3ab6c3d54`:
   clean `rm -rf out` replay verified all nine pins then `run-all.sh`;
   `REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, inner `TOTAL: 31 PASS / 0 FAIL`.
+
+## Independent witness replay (W243, 2026-11-26 03:46Z)
+
+Frontier DM #4802. Unmodified wrapper (sha256
+`ec1bf9246f8b2f9225d02fe983ca060e6e86a546c8566125aaf4b3a3ab6c3d54`) replayed
+in the worktree and from clean `git archive cee3588b`: both
+`REPLAY_PASS=10 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, inner `TOTAL: 31 PASS /
+0 FAIL`, rc 0. Independent raw GETs reproduced all four full-file hashes and
+all four excerpt hashes; the fix-parent fetch at `838df53e` is byte-identical
+to 6.1.8. Verdict: ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w243-radare2pyc2shell/detail.md`.
