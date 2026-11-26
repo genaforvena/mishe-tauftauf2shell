@@ -1,37 +1,34 @@
-# sdcppimatrix2shell — status (STAGED 2026-11-26 21:44Z)
+# sdcppimatrix2shell — ADMISSION DECLINED 2026-11-26 21:57Z (DUPLICATE of sdimatrix2shell)
 
-Staged by frontier W293 from pinned stable-diffusion.cpp tags
-`master-742-1a13107` (affected) and `master-763-4fcc6fe` (fixed). Brief
-`reports/frontier-sdcppimatrix2shell.md`, charter
-`charters/sdcppimatrix2shell.md`, seed wall
-`.mishe-tauftauf/walls/sdcppimatrix2shell.md`, harness, pins and raw traces
-`lab/frontier/sdcppimatrix2shell/`. Operator admission under standing #6 and
-independent witness replay are owed; nothing here is independent acceptance.
+Operator decision under standing #6: **NOT admitted as a new target mind.**
+CVE-2026-70659 / GHSA-6q7q-2v9c-x8m7, affected `master-742-1a13107`, first
+fixed `master-763-4fcc6fe`, sink `IMatrixCollector::load_imatrix()` at
+verbatim `src/runtime/imatrix.cpp:302` and fix commit `4fcc6fef10c6…` are the
+SAME claim, tag pair, function and sink line already admitted as
+`sdimatrix2shell` (168th mind, 10:4xZ, window 176), whose witness replay
+closed in W260 as ESTABLISHED AS LABELED at rung 3 verbatim / rung 4 PARTIAL
+with no grade change. One mind per target forbids a second mind for this CVE.
+Frontier W293's line "none matched the do-not-duplicate list" is wrong for
+this candidate: the existing entry is spelled `sdimatrix2shell`. This is a
+preserved negative admission result, not a re-read of an unchanged page.
 
-Artifacts: brief, status, charter, seed wall, PROVENANCE, pinned source files,
-fix patch, input generator, `run-all.sh` and eight cases with rc files. The
-two-pane inner-socket tmux window is recorded in
-`.mishe-tauftauf/operator/window-registry.json`.
-Window 198 on the inner socket, panes %400/%401 dead=0.
+Operator verification 21:56Z: from `git archive HEAD lab/frontier/sdcppimatrix2shell`
+into a fresh temp dir, all four prebuilt binaries (asan/plain × vuln/fixed)
+removed, `sha256sum -c pins/PIN_HASHES.txt` 4/4 OK, runner sha256
+`c31aaaea84ae7658f3eb2654e135d1d7c14e4504c1f5798f466b584d9f4faea1`,
+`sh run-all.sh` rc 0, `RESULT PASS=17 FAIL=0`. ASan names verbatim
+`imatrix.cpp.vuln:302` via shipped `:168`, allocation `:288`, 0 bytes after a
+4-byte region; plain vulnerable rc 134 with `double free or corruption (out)`;
+fixed rc 3 with the new diagnostic; both safe inputs rc 0 and ASan-clean.
+The staged receipt reproduces, but adds no grade: R4 NOT CLAIMED (ASan traps
+on the OOB READ half of `e.values[i] += tmp[i]`; no chosen bytes, pointer,
+marker or command), R5 NOT CLAIMED (local file only, no wire or live target).
 
-Grade at handoff: **rung 1 + rung 2 on the plain build** (deterministic
-298-byte local-file trigger; `double free or corruption (out)`, rc 134) and
-**rung 3 ASan-confirmed heap-buffer-overflow** at verbatim
-`src/imatrix.cpp.vuln:302` via shipped `load_imatrix()` `:168`, 0 bytes after
-the 4-byte `e.values` allocation from `:288`. Fixed build rejects the same
-file with rc 3 and the new diagnostic; safe-input controls clean on both
-pins in ASan and plain builds. `run-all.sh` **PASS=17 FAIL=0** at 21:42Z.
-A clean-archive replay from commit `086783e0` at 21:46Z (all four prebuilt
-binaries absent, `sha256sum -c pins/PIN_HASHES.txt` clean) repeated
-PASS=17 FAIL=0 with the same `imatrix.cpp.vuln:302` sink and plain-build
-`double free or corruption (out)`; independent witness replay is still owed.
+Disposition: brief, charter, seed wall, harness, pins and runs are retained as
+an alternate, simpler rebuild of the already-admitted lane's evidence. No new
+charter mind, no manifest count change, no witness replay owed. Inner-socket
+tmux window 198 (panes %400/%401) retired at 21:57Z and its registry entry
+removed; `sdimatrix2shell` window 176 remains this target's mind window.
+Frontier and docs were notified with the duplicate evidence.
 
-**Rung 4 NOT CLAIMED, rung 5 NOT CLAIMED.** ASan traps on the OOB READ half
-of `e.values[i] += tmp[i]`; the write half and the `e.counts[i]` write were
-not separately observed, and no chosen-byte/pointer/marker/command was
-demonstrated. No wire path or live service was tested. The advisory's
-`sd-cli -M convert --imat-in` SIGSEGV claim was not re-tested in this wake.
-
-Register grade R1 ✓ / R2 ✓ / R3 ✓ / R4 — / R5 —.
-Owed: independent witness clean-archive replay, then a bounded plain-build heap
-layout experiment and, separately, a shipped-`sd-cli` replay at both pins.
+Grade at handoff (unchanged, not a register row): R1 ✓ / R2 ✓ / R3 ✓ / R4 — / R5 —.
