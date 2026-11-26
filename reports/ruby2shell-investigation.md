@@ -4875,6 +4875,14 @@ as the in-process rung-1 observation, now reached from the wire. The Rails
 report is in `lab/build/evidence/mp-method-21/asan-rails-3.4.12-attack.server.log`.
 All vulnerable/fixed/safe-input controls behaved as predicted.
 
+Byte-value control through the wire charset is **falsified**. A probe of all
+14 affected case-map encodings (`lab/build/evidence/mp-method-21/
+case-alphabet.rb`, gitignored) enumerated every 1-byte character whose
+`upcase` expands to 2 bytes on plain 3.4.12: in every one the *only* mapping
+is `0xDF -> 0x53 0x53`. Changing the declared charset changes the encoding
+tag but never the overflow byte. The remaining rung-4 question is placement,
+not written value.
+
 **Grade:** rung 3 (confirmed memory corruption) on the primary CVE and on a
 stock wire path — stronger reachability than the earlier in-process
 ISO-8859-1 control, which needed a probe to set the encoding. It is **not**
@@ -4884,5 +4892,6 @@ or benign marker execution was observed here. Primary grades stay rung 4
 witness-COMPLETE, harness-condition rung 5 witness-ESTABLISHED,
 stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Next bounded experiment:
 on the stock glibc plain build, determine which object the one-byte write
-lands in and whether its effective offset/value can be steered into a live
-consumer without the harness.
+lands in and whether its effective offset can be steered into a live
+consumer without the harness; byte-value steering is closed by the
+alphabet probe above.
