@@ -1,11 +1,12 @@
 # frontier-tinyusb2shell — HID report-descriptor underflow (CVE-2026-61497)
 
-Status: **STAGED, rung 3 ASan-confirmed in verbatim pinned source (W275,
-2026-11-26)**. The highest-ranked retained candidate after Axis2/C: a small
+Status: **ADMITTED as the 178th target (operator commit `856cd422`); rung 3
+ASan-confirmed in verbatim pinned source (W275, 2026-11-26)**. A small
 deterministic descriptor, a one-line bounds fix with a second hardening hunk,
 and a clean wire-adjacent consumer path (USB enumeration). No physical USB
-hardware was used and no network socket was opened. Pins, hashes and preserved
-negatives are in `lab/frontier/tinyusb2shell/PROVENANCE.md`.
+hardware was used and no network socket was opened. Pins, hashes, preserved
+negatives and line-number corrections are in
+`lab/frontier/tinyusb2shell/PROVENANCE.md`.
 
 ## Claim source and scope
 
@@ -42,17 +43,18 @@ negatives are in `lab/frontier/tinyusb2shell/PROVENANCE.md`.
 
 ## Source-bound mechanism (pinned bytes)
 
-- `tuh_hid_parse_report_descriptor()` in `src/class/hid/hid_host.c` (line 680
-  at the vulnerable pin) iterates HID report items. It consumes one header,
-  decrements `uint16_t desc_len`, expands a size field of 3 to 4 bytes, then
-  at verbatim lines 800–801 does `desc_report += size; desc_len -= size;`
+- `tuh_hid_parse_report_descriptor()` starts at **verbatim pinned line 674** of
+  `src/class/hid/hid_host.c` (not 680, which is a header-union bitfield). It
+  iterates HID report items, consumes one header, decrements `uint16_t
+  desc_len`, and expands a size field of 3 to 4 bytes. At verbatim lines
+  **794-795** (not 800-801) it does `desc_report += size; desc_len -= size;`
   with **no check that `size <= desc_len`**. A truncated final item wraps the
-  counter (e.g. `1 - 4 = 0xFFFD`) and the parser keeps dereferencing bytes
-  past the descriptor buffer.
+  counter (e.g. `1 - 4 = 0xFFFD`) and the parser keeps dereferencing bytes past
+  the descriptor buffer.
 - The same loop copies a GLOBAL_USAGE_PAGE item with
-  `memcpy(&info->usage_page, desc_report, size)` (verbatim line 750) into a
-  2-byte field. An item declaring 4 bytes overruns that field even when the
-  descriptor itself has 4 bytes available.
+  `memcpy(&info->usage_page, desc_report, size)` at **verbatim line 741** (not
+  750) into a 2-byte field. An item declaring 4 bytes overruns that field even
+  when the descriptor itself has 4 bytes available.
 - Fix hunk 1: `if (size > desc_len) break;` after the size expansion. Fix
   hunk 2: `memcpy(..., TU_MIN(size, sizeof(info->usage_page)))`. Both are
   present at the fixed pin and were exercised independently below.
@@ -62,13 +64,16 @@ negatives are in `lab/frontier/tinyusb2shell/PROVENANCE.md`.
   enumeration buffer, passes it to the application's `tuh_hid_mount_cb()`,
   which calls this parser. The input is attacker-controlled device bytes;
   this lab supplies an equivalent in-memory buffer to the verbatim parser.
+  Line numbers in ASan traces below (e.g. parser line 68) are relative to the
+  extracted function, not to the upstream file.
 
 ## Local experiment and observed bytes
 
 `lab/frontier/tinyusb2shell/run-all.sh` slices the parser function
 **byte-for-byte** from each pinned `src/class/hid/hid_host.c` into
 `build/<pin>/parser.inc`, then compiles it with GCC 12 `-fsanitize=address`.
-`sh run-all.sh && sh verify.sh` produced `RESULT PASS=6 FAIL=0` at 15:49Z.
+`sh run-all.sh && sh verify.sh` produced `RESULT PASS=6 FAIL=0` (the saved
+console has no timestamp; "15:49Z" in the wall is prose, not console output).
 Local additions are only `harness/driver.c`, `harness/shim.h` (constant values
 copied from the pinned `hid.h`/`hid_host.h`) and the include paths; no upstream
 source was modified.
@@ -119,8 +124,10 @@ values reach any observable host output before claiming disclosure.
 ## Ranked alternatives from this sweep
 
 - libmikmod CVE-2026-105837 / GHSA-rr6f-2vgw-5v76: DSM `numtrk` UWORD
-  truncation → heap OOB write, fixed 3.3.14 by `a125eabb…`; deterministic file
-  trigger derivable, but AV:L and roughly 300 KB / 4097 PATT blocks of input.
+  truncation → heap OOB write, fixed 3.3.14 by `a125eabb…`. W276 derived a
+  432-byte DSM trigger and staged it as libmikmod2shell with window 189; the
+  earlier "~300 KB / 4097 PATT" estimate in this brief was wrong. Do not
+  duplicate that lane.
 
 ## Do-not-duplicate and boundaries
 

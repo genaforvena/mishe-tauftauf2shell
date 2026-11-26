@@ -1,11 +1,12 @@
 # frontier-libsmpp342shell — SMPP C-Octet unbounded `strlen` (CVE-2026-75895)
 
 Status: **staged, rung 3 ASan-confirmed in verbatim pinned source (W271,
-2026-11-26)**. Ranked first of seven new candidates from two read-only advisory
-sweeps: one-line always-on fix, small C codebase, direct public API taking a
-buffer and explicit length, and a 17-byte deterministic input. Pins, hashes,
-refetch commands and negatives are in
-`lab/frontier/libsmpp342shell/PROVENANCE.md`.
+2026-11-26), independently replayed ESTABLISHED AS LABELED (W279, 2026-11-26)**.
+Ranked first of seven new candidates from two read-only advisory sweeps:
+one-line always-on fix, small C codebase, direct public API taking a buffer
+and explicit length, and a 17-byte deterministic input. Pins, hashes,
+refetch commands, negatives and witness detail are in
+`lab/frontier/libsmpp342shell/PROVENANCE.md` and below.
 
 ## Claim source and scope
 
@@ -103,18 +104,34 @@ record it as a live-loopback read; then try heap grooming so a plain build's
 observe the length actually consumed. A rung-4 claim needs observed chosen
 bytes at chosen offsets, not a larger repeated read.
 
+## Independent witness replay (W279, 2026-11-26)
+
+Witness #5652 replayed stage `58f43e61` from a clean archive: runner
+`373fcdc9...`, driver `f2d0ceed...` and console `cbd59199...` hashes matched
+PROVENANCE. Both tarballs were refetched from the exact PROVENANCE URLs and
+sha256-matched (`6a275907...` / `c85f8d09...`). The unmodified `sh run-all.sh`
+returned rc 0 with `RESULT PASS=31 FAIL=0`; the fresh console was byte-identical
+to the staged console. Fresh raw evidence: GCC and Clang ASan
+`heap-buffer-overflow READ of size 2`, 0 bytes after the 17-byte region, frame
+`smpp34_unpack build/vuln/def_frame/bind_transmitter.frame:1` in `strlen`,
+allocation at `harness/driver.c:52`; the plain build faults on the guard page
+with rc 139. The one-line fixed build rejects the same input with `rv=-1`, and
+the valid 31-byte PDU parses with `rv=0`, clean under both compilers. Verdict:
+**ESTABLISHED AS LABELED**, rung 3 confirmed, no r4/r5, no contradiction.
+Evidence: `.mishe-tauftauf/artifacts/witness-w276-libsmpp342shell/`.
+
 ## Ranked alternatives from the same sweeps
 
 - bellard/quickjs CVE-2026-88378 / GHSA-jww9-7qmq-6hv5: unsigned LEB128 in
   `bc_get_leb128_int()` becomes a negative bytecode-function count, with an
-  exact 21-byte regression input in fix commit `42526037…`; high tractability,
-  but no release tags and QuickJS-NG (an adjacent but different project) is a
-  wall backup with a 404 advisory page. Kept as next candidate.
+  exact 21-byte regression input in fix commit `42526037…`; staged as
+  quickjsbcode2shell in W271 (window 185), no longer a next candidate.
 - musl CVE-2026-107891: `regcomp()` int overflow with a short repetition
   pattern and a one-file patch (`7813e911…`, untagged); needs a regex-parser
   harness, MED.
-- Apache Axis2/C CVE-2026-124023: default Guththila parser indexes an
-  10-entry event map with a raw byte; needs real `axutil_env_t` objects, MED.
+- Apache Axis2/C CVE-2026-124023: default Guththila parser indexes a
+  10-entry event map with a raw byte; staged as axis2guththila2shell in W273
+  (window 187).
 - libsmpp34 beat all of these on source size, pin availability and the
   direct buffer+length API, not on advisory severity.
 
@@ -122,5 +139,5 @@ bytes at chosen offsets, not a larger repeated read.
 
 No admitted target or screened lane is reused. All testing is local against
 the pinned source; no external system was probed. Admission is the operator's;
-wake units and full-flag sync stay with the person. Witness replay of this
-runner from a clean archive is owed before any ESTABLISHED verdict.
+wake units and full-flag sync stay with the person. Clean-archive witness
+replay completed in W279 with ESTABLISHED AS LABELED (section above).
