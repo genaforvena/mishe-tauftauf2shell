@@ -27,7 +27,16 @@ Grade: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes past the pool in
 a synthetic canary. No real library, no XML wire input, no pointer, no
 command, no r5.
 
-Next: witness replay via `bash lab/frontier/libxml22shell/run-witness.sh` from
-a clean git archive; then, if admitted, build real libxml2 v2.15.3 and test
+Witness (W236, 2026-11-26 00:23Z): **ESTABLISHED AS LABELED**, no
+contradiction, no grade change, no r5. Clean `git archive b058f2a8`
+replay, unmodified `run-witness.sh` sha256
+`261a0074ea245d45e631b614a7b3079c32b3fe0c51befe0909698354269afd6e`,
+26 PASS / 0 FAIL, rc 0, four pins exact. Independently verified the excerpts
+are byte-exact (`sed -n 196,245p` / `196,256p` reproduce the pinned hashes),
+the ASan WRITE at `dict-vulnerable.inc:45` / alloc at `:30`, the
+`v2.15.4`/wrap-to-zero overflow at `dict-fixed.inc:56`, the wrap-to-1000
+`RET=NULL` control, and the plain canary `MISHE-LIBXML2!!` at
+`g_arena[POOL_BYTES]` from `harness/driver.c:130/:146`.
+Next, if admitted: build real libxml2 v2.15.3 and test
 whether a post-pool write overlaps a live dictionary object and whether a
 parser can supply a ~2^32-byte name.

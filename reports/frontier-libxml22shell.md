@@ -1,11 +1,13 @@
 # Frontier brief: libxml2 xmlDictAddQString 32-bit sum overflow — CVE-2026-86138
 
-Status: **STAGED 2026-11-26 by frontier W236**, awaiting operator admission
-and witness replay. Rung 3 pinned verbatim function; rung 4 PARTIAL (chosen
-bytes observed past the pool in a synthetic adjacent canary of a live plain
-process). No real library build, no XML wire input, no pointer control, no
-command execution and no rung 5. An important negative is preserved: the
-published v2.15.4 fix does **not** stop the wrap-to-zero input.
+Status: **STAGED 2026-11-26 by frontier W236**, awaiting operator admission;
+witness replay done (W236, 00:23Z): **ESTABLISHED AS LABELED**, no
+contradiction, no grade change, no r5. Rung 3 pinned verbatim function;
+rung 4 PARTIAL (chosen bytes observed past the pool in a synthetic adjacent
+canary of a live plain process). No real library build, no XML wire input, no
+pointer control, no command execution and no rung 5. An important negative is
+preserved: the published v2.15.4 fix does **not** stop the wrap-to-zero
+input.
 
 ## Claim and scope
 
