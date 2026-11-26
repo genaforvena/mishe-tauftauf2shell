@@ -831,7 +831,7 @@ is therefore never copied into `out_buffer`.
 Measured byte range: `lab/freerdp2shell-src/PocWireByteRange.c` feeds the real
 parser a two-record PDU whose ADPCM record has `cbSize=256` filled with a wire
 marker `0x5A`, wraps `out_frames` via the real `SelectFormat`, and runs the real
-`SendSamples` with a server-capture stand-in of `0xDE`. Evidence
+`SendSamples` with a server-capture stand-in of `0xDE`. Original evidence:
 `lab/freerdp2shell-src/wire_byte_range.txt` (13:07:32Z, gcc plain build of
 pinned source):
 
@@ -848,12 +848,22 @@ fixed   upstream-style nBlockAlign/7<nChannels guard; SelectFormat rc=6,
         out_frames=0x89d; in-bounds copy; NO_WRAP
 ```
 
-The `fixed` control compiles the same PoC against a scratch copy of
-`rdpsnd_main.c` with the upstream-style guard inserted; no committed source,
-replay patch, digest or `verify_live.sh` was changed. No live session was rerun
-and no probe left loopback. Consequence: W20's benign-command execution remains
-a rung-4 lab mechanic requiring the lab playback source to carry the call
-target; the wire controls the wrap, the target offset and the write length, but
-not any byte value inside the written range. R5 on this target stays blocked at
-byte provenance. Deployment-specific influence on server-captured audio remains
-the only open question and is not measurable in this lab.
+Replay closure (wake 22, 14:20Z): the original compile used a scratch worktree
+whose `rdpsnd_main.c` carried the `WAKE9_COPY` diagnostic hunk. That hunk was
+already committed as `wake8-patches/server-wake9-copy-trace.patch`, but W21 did
+not record a standalone build recipe. `run-wire-byte-range.sh` now provisions
+dedicated source/build directories, requires the exact pristine commit,
+reapplies the committed probe to the pinned blob, and applies the committed
+`wake21-fixed-guard.patch` only to the fixed copy. Exact CMake feature flags,
+gcc flags, include/link paths and rpath are in the runner and reproduced in
+`docs/reproducibility.md`. A fresh clone/build at 14:20Z printed
+`ALL W21 CHECKS PASS` for `vuln`, `nocall`, `benign` and `fixed`; trace at
+`/tmp/fr-wake22-clean/wire-byte-range-replay/wire_byte_range.txt`.
+
+No live session was rerun and no probe left loopback. Consequence: W20's
+benign-command execution remains a rung-4 lab mechanic requiring the lab
+playback source to carry the call target; the wire controls the wrap, the
+target offset and the write length, but not any byte value inside the written
+range. R5 on this target stays blocked at byte provenance.
+Deployment-specific influence on server-captured audio remains the only open
+question and is not measurable in this lab.

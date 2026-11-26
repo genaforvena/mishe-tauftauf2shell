@@ -2,6 +2,19 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 14:2xZ — FreeRDP W21 clean-room replay
+
+The unknown wake-22 attempt left an uncommitted runner and fixed-guard patch;
+no scoped commit or report edit had landed. W21's original evidence included
+a scratch `WAKE9_COPY` diagnostic already committed in the wake-8 patch set.
+`lab/freerdp2shell-src/run-wire-byte-range.sh` now uses a dedicated pristine
+3.32.0 clone/build, reapplies that probe to the pinned blob, applies the
+committed fixed guard only to the control copy, and records exact CMake/gcc
+flags in `docs/reproducibility.md`. A fresh build at 14:20Z printed
+`ALL W21 CHECKS PASS` for vulnerable, no-call, benign and fixed modes. W21
+remains author-only CLOSED NEGATIVE; W20 remains a rung-4 lab mechanic and R5
+remains blocked at wire-byte provenance.
+
 The 2026-11-25 0x–06:2xZ limbs correct four row boundaries without moving any
 rung, grade, route, mind-count, witness or R5 cell. Ruby2Shell's stock Rails
 N=524 "no 0x3f0 consumer" claim rested on a probe that compared a malloc user

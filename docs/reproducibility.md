@@ -13676,9 +13676,57 @@ ADPCM record carries `cbSize=256` filled with wire marker `0x5a`; the real
 separate server-capture stand-in `0xde`. Modes are `vuln` (default),
 `nocall`, `benign` (one PCM record, no wrap) and `fixed` (scratch
 `rdpsnd_main.c` with upstream-style `nBlockAlign / 7 < nChannels` guard).
-No committed build script exists for this driver; the receipt records a
-gcc plain build of the pinned source and the exact flags are UNKNOWN here.
-Expected trace in `lab/freerdp2shell-src/wire_byte_range.txt` (13:07:32Z):
+
+Replay command:
+
+```sh
+FREERDP_WORK=/tmp/fr-wire-replay \
+  bash lab/freerdp2shell-src/run-wire-byte-range.sh
+```
+
+The runner clones tag `3.32.0`, requires HEAD to equal the full pinned SHA and
+requires a clean worktree. It uses dedicated `$WORK/wire-src3320` and
+`$WORK/wire-build3320_plain` paths so other scratch modifications cannot taint
+the receipt. Library build:
+
+```sh
+cmake -S "$SRC" -B "$PLAIN" -GNinja -DCMAKE_BUILD_TYPE=Debug \
+  -DCMAKE_C_FLAGS='' \
+  -DWITH_SERVER=ON -DWITH_CLIENT=OFF -DWITH_SERVER_CHANNELS=ON \
+  -DWITH_KRB5=OFF -DWITH_PKCS11=OFF -DWITH_SMARTCARD_EMULATE=OFF \
+  -DWITH_FFMPEG=OFF -DWITH_SWSCALE=OFF -DCHANNEL_URBDRC=OFF \
+  -DWITH_CUPS=OFF -DWITH_FUSE=OFF
+ninja -C "$PLAIN" -j16 libwinpr3.so libfreerdp3.so libfreerdp-server3.so
+```
+
+The original W21 compile included the scratch worktree's `WAKE9_COPY`
+diagnostic hunk. The runner recreates that exact translation unit by applying
+the already-committed `wake8-patches/server-wake9-copy-trace.patch` to
+`git show $PIN:channels/rdpsnd/server/rdpsnd_main.c` at
+`$WORK/wire-probed/rdpsnd_main.c`; the fixed copy at `$WORK/wire-fixed/` also
+applies `wake21-fixed-guard.patch`. Exact driver compile (fixed substitutes
+`$WORK/wire-fixed/rdpsnd_main.c` for `$PROBE`):
+
+```sh
+gcc -g -O1 -fno-omit-frame-pointer -std=gnu11 \
+  -Wno-deprecated-declarations -DRDPSND_MAIN_SRC=\"$PROBE\" \
+  -I"$SRC/winpr/include" -I"$PLAIN/winpr/include" -I"$PLAIN" \
+  -I"$PLAIN/include" -I"$SRC/include" -I"$SRC/channels/rdpsnd/server" \
+  -I"$SRC/channels/rdpsnd/common" \
+  "$HERE/PocWireByteRange.c" -o "$OUT/PocWireByteRange" \
+  -L"$PLAIN/libfreerdp" -L"$PLAIN/winpr/libwinpr" \
+  -L"$PLAIN/server/common" \
+  -Wl,-rpath,"$PLAIN/libfreerdp:$PLAIN/winpr/libwinpr:$PLAIN/server/common" \
+  -lfreerdp3 -lwinpr3 -lfreerdp-server3 -lpthread -lm -ldl
+```
+
+Here `$HERE=lab/freerdp2shell-src`, `$WORK=${FREERDP_WORK:-/tmp/fr-wake2}`,
+`$SRC=$WORK/wire-src3320`, `$PLAIN=$WORK/wire-build3320_plain`,
+`$PROBE=$WORK/wire-probed/rdpsnd_main.c`, and
+`$OUT=$WORK/wire-byte-range-replay` unless `FREERDP_WIRE_OUT` overrides it.
+A fresh local-clone build at 14:20Z printed `ALL W21 CHECKS PASS`; trace at
+`/tmp/fr-wake22-clean/wire-byte-range-replay/wire_byte_range.txt`. Expected
+semantic trace (timestamps, PIDs and build paths vary):
 
 ```
 vuln    wire record cbsize=256 data[0]=5a data[255]=5a
@@ -13690,11 +13738,11 @@ vuln    wire record cbsize=256 data[0]=5a data[255]=5a
 nocall  8992=00 9000=00; benign NO_WRAP; fixed SelectFormat rc=6 NO_WRAP
 ```
 
-No replay patch, digest or `verify_live.sh` changed; no live session was
-rerun and no probe left loopback. The client controls wrap, offset and
-length, not any byte inside the written range. The W20 marker therefore
-stays a rung-4 lab mechanic and R5 is blocked at byte provenance; whether a
-deployment lets a remote attacker influence captured audio remains UNKNOWN.
+No live session was rerun and no probe left loopback. The client controls
+wrap, offset and length, not any byte inside the written range. The W20 marker
+therefore stays a rung-4 lab mechanic and R5 is blocked at byte provenance;
+whether a deployment lets a remote attacker influence captured audio remains
+UNKNOWN.
 
 ### Ruby2Shell — small-V chosen bit in a live `mbuf` pointer (author-only)
 

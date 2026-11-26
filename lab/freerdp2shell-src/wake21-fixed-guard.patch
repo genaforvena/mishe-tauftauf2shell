@@ -1,0 +1,10 @@
+--- a/rdpsnd_main.c
++++ b/rdpsnd_main.c
+@@ -425,0 +426,7 @@
++			/* Wake-21 control: upstream-style overflow-safe guard. */
++			if (format->nBlockAlign / 7ULL < format->nChannels)
++			{
++				error = CHANNEL_RC_BAD_CHANNEL;
++				goto out;
++			}
++
