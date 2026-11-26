@@ -512,3 +512,38 @@ publish none; the fix is milestone 3.2.10. No published fixed AppImage is
 available, so the W248 locally built plugin remains the only fixed attempt
 and its startup abort remains unexplained. Grade unchanged rung 3 / rung 4
 PARTIAL, NO r5.
+
+## W251 live caller and adjacent heap metadata (2026-11-26, 18:41Z wake)
+
+New temporary shim `live/heapmeta-shim.c` SHA-256
+`b895d22a681909f324ecc4a0be5c24a7cb49fb2e0037aa58bb2d0ec35b77a385`.
+It interposes only `inflate()` (no malloc/calloc/free interposition, unlike
+the two rc-139 shims of W250), resolves the caller with `dladdr` and reads
+glibc chunk headers past `strm->next_out`. Built with
+`gcc -shared -fPIC -O2 -o live/inflate-shim.so live/heapmeta-shim.c -ldl`
+over the ignored canonical binary, then run with the already-patched
+`/tmp/gimpjif-appimage/squashfs-root/AppRun` on
+`realglib/evidence/long.jif` in a fresh `/tmp/gimpjif-hm-XXXXXX` HOME,
+`timeout -k 5 90`. Evidence: `live/evidence/heapmeta-long.log` SHA-256
+`54ae671c00faa5598ebe43e783c04bbaa89126f1322bcbbea7271d9426594fe1`.
+Key lines: `SHIM_INFLATE pid=2831889 avail_out_before=2147483778
+total_out=448 ret=1 out=0x62fc976da1d0`; `SHIM_CALLER .../file-gif-load+
+0x3778`; `SHIM_CHUNK0 usable=264 chunksz=272`; `SHIM_CHUNK1 off=+272
+raw_size=4d4d4d4d4d4d4d4d masked=5570193308531903816`; all-chosen
+`SHIM_EDGE` (96 pairs) and `SHIM_FAR` (32 pairs). `addr2line -f -e
+<squashfs-root>/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/
+file-gif-load 0x3778` gives `ReadJeffsImage` at
+`/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1614`
+(file reports ELF PIE with debug_info, BuildID
+`c1fc4188ab124775bd918c44cdd5a2925c56e823`, not stripped). The bounded
+90 s timeout ended the child after the dump; no batch-success line is in
+the log, as in W250. Canonical shim rebuilt afterwards from
+`live/inflate-shim.c` (SHA-256 of source
+`c978b58f062b332ada1e8d5b2c9a14eba70bed5db79b2b3e431dfe8609bc639b`,
+binary `fc73e957e24d933bbf7667dc9166ed5e45ee41b01c1c7b584c4dfc839d7923d5`,
+byte-identical to the W250 restore). Interpretation: chosen bytes corrupt
+a named allocator structure (the next glibc chunk size word) in the real
+plugin process, and the caller is identified at source line 1614; this is
+not an ASan WRITE in the real plugin, not a named user object, not a
+chosen address, dereference or command. Grade unchanged rung 3 / rung 4
+PARTIAL, NO r5.

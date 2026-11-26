@@ -380,3 +380,22 @@ byte-for-byte and a fresh batch returned rc 0. Cause UNKNOWN; no evidence
 from those runs is counted. Upstream publishes no AppImage after 3.2.8 and
 the fix is milestone 3.2.10, so the fixed-plugin control stays unavailable.
 Grade: rung 3 / rung 4 PARTIAL, NO r5.
+
+## Live caller and adjacent heap metadata in the real plugin (W251, 2026-11-26)
+
+`live/heapmeta-shim.c` extends only the working inflate-only shim (no malloc
+interposition): after the real inflate it resolves the caller with `dladdr`
+and reads glibc chunk headers around `indexes`. It was compiled over the
+ignored `live/inflate-shim.so`, run on `long.jif` through the unmodified
+GIMP 3.2.8 AppRun/PDB path, and the canonical shim was then rebuilt
+(SHA-256 `fc73e957...`, unchanged). `live/evidence/heapmeta-long.log`
+(SHA-256 `54ae671c...`) records `avail_out_before=2147483778 total_out=448
+ret=1`, `SHIM_CALLER .../file-gif-load+0x3778`, which `addr2line` resolves
+to `ReadJeffsImage` at `file-gif-load.c:1614` in the unmodified 3.2.8 plugin
+(debug info present, BuildID `c1fc4188...`). `SHIM_CHUNK0 usable=264
+chunksz=272` names the overflowed `indexes` chunk; `SHIM_CHUNK1 off=+272
+raw_size=4d4d4d4d4d4d4d4d` shows file-chosen bytes replacing the size
+field of the immediately following live heap chunk. `SHIM_EDGE` and
+`SHIM_FAR` are entirely chosen `0x4d`. No ASan instrumented the real
+plugin, no named user object, chosen address, dereference or command was
+observed: grade stays rung 3 / rung 4 PARTIAL, NO r5.
