@@ -13450,18 +13450,25 @@ region`, rc 134, frames `fts5PutVarint64` (`sqlite3.c:268441`) ←
 `fts5: corruption in table "t"`; the plain vulnerable build silently counts
 1 → 0, and crafted-DB read/`MATCH 'alpha'` plus a clean secure-delete DELETE
 are ASan-clean. Pinned source markers: vulnerable `ext/fts5/fts5_index.c:5525`
-`nPg = iPgIdx;` and `:5533` unbounded write; fixed `:5525`
-`nNewPg = iPgIdx;`, `:5532` `iKeyIn>nPg` guard, `:5538` bounded write.
+`nPg = iPgIdx;` and `:5534` unbounded write (W268's citation NIT, folded at
+`0694fd4b`); fixed `:5525` `nNewPg = iPgIdx;`, `:5532` `iKeyIn>nPg` guard,
+`:5538` bounded write.
 Generated trees, CLI binaries, run databases and `evidence/poc.db` are
 gitignored under `build/` and regenerate from the verified tarball; the
 console log is committed. No wire/request path, named neighbour, pointer or
-command: grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL, author-only
-and unwitnessed. Admitted 12:3xZ as the 172nd declared target mind (window
-180) by `08ba0eea`; brief `reports/frontier-sqlitefts5shell.md`, charter
+command: grade rung 3 real-source ASan OOB WRITE / rung 4 PARTIAL.
+Admitted 12:3xZ as the 172nd declared target mind (window 180) by
+`08ba0eea`; brief `reports/frontier-sqlitefts5shell.md`, charter
 `charters/sqlitefts5shell.md`, status `reports/sqlitefts5shell-status.md`.
-The register row stays `established:false`: a witness must re-fetch the pinned
-zip from the URL above, verify its sha256, then run the offline runner and
-check the GCC/Clang WRITE-1 and the fixed/safe controls.
+Witness **W268** replayed the unmodified runner from a clean `08ba0eea`
+archive at 12:35:09Z–12:38:32Z, re-fetching the zip, upstream patch and
+hexdb from the exact URLs and verifying each sha256: rc 0, `RESULT
+PASS=26 FAIL=0`, GCC/Clang WRITE-1 at `sqlite3.c:256373` with the fixed and
+safe controls clean. Verdict ESTABLISHED AS LABELED at rung 3 / rung 4
+PARTIAL, no contradiction, NO r5; detail
+`.mishe-tauftauf/artifacts/witness-w268-sqlitefts5/detail.md`. Register row
+fold to `established:true` is owed by the target mind and was still `false`
+here; docs move no generated file.
 
 ### Ruby2Shell — stale-BBuf chosen-pointer falsifier (12:35Z)
 

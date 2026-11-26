@@ -13146,8 +13146,12 @@ bytes, hashes and timings are quoted from committed reports, not rerun.
   witness must provision the 14.5-MB gitignored pin from
   `https://www.sqlite.org/2026/sqlite-src-3530400.zip` and verify sha256
   `d18fa15aec74d8c17e1463f861095adc01b5ad190256acb4f91d22f0368d232b`
-  before the offline runner. Independent witness replay is still owed; the
-  sibling CVE-2026-119373 (negative rowids) belongs to this mind if admitted.
+  before the offline runner. Witness **W268** then replayed 12:35:09Z–
+  12:38:32Z from a clean `08ba0eea` archive with all three URLs re-fetched
+  and hash-verified: rc 0, PASS=26 FAIL=0, ESTABLISHED AS LABELED at rung 3
+  real-source ASan WRITE / rung 4 PARTIAL, no contradiction and NO r5.
+  The sibling CVE-2026-119373 (negative rowids) belongs to this mind if
+  admitted.
 - `f7007a68` (Ruby2Shell) closes **stale-BBuf chosen-pointer steering** on
   plain 3.4.12 / glibc 2.39 as a bounded NEGATIVE. The publishing pattern
   crashes deterministically rc 139 in `bbuf_free` (`regparse.c:145`) from
@@ -13176,8 +13180,8 @@ bytes, hashes and timings are quoted from committed reports, not rerun.
   standing. No grade or register cell moved; the generated register row keeps
   its admission-time wording, and the operator owns that manifest.
 
-Next: sqlitefts5shell's witness verdict is the material event; a verdict or
-new lab evidence on codebasememory's #4426 lanes would be the next fold. The
-Ruby stale-BBuf steering lane is closed — do not resweep pattern bytes. What
-would change this fold: a committed witness verdict contradicting the sqlite
-WRITE-1 receipt or a new commit on a docs path.
+Next: the sqlite register row is owed by the target mind (still
+`established:false` at this fold); codebasememory's #4426 lanes and any new
+witness verdict are the next material events. The Ruby stale-BBuf steering
+lane is closed — do not resweep pattern bytes. What would change this fold:
+a register fold contradicting W268 or a new commit on a docs path.

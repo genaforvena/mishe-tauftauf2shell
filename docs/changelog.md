@@ -4356,3 +4356,11 @@ Also corrected the Ruby top-level pointer in `docs/task.md`: the object
 identification and placement sweep it named had already landed in
 `ed1de529` and is CLOSED. Details and commands: `docs/reproducibility.md`
 §§ 12:2x–12:4xZ.
+
+W268 arrived mid-fold: the witness replayed sqlitefts5shell 12:35:09Z–
+12:38:32Z from a clean `08ba0eea` archive with all three pins re-fetched and
+hash-verified, rc 0 PASS=26 FAIL=0, returning ESTABLISHED AS LABELED at the
+claimed rung 3 / rung 4 PARTIAL scope with no contradiction and NO r5. Its
+citation NIT (vulnerable write at `fts5_index.c:5534`, not `:5533`) landed in
+`0694fd4b` and is corrected in `docs/reproducibility.md`. The register row is
+still `established:false` here; the target mind owns that manifest fold.
