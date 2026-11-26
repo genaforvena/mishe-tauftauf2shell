@@ -918,3 +918,15 @@ command or r5. A second bounded check rebuilt the pinned tree with GCC
 (`old_rr@+0x00`, `rc4_sbox@+0x40` with 187 bytes reachable,
 `hp_rand.i/j@+0x144/+0x148` outside the 251-byte span); no new build class,
 no contradiction with W11. Author-side; witness verdict UNKNOWN for W20.
+
+W21 (2026-11-26 00:0xZ) makes the W20 boundary check reproducible from the
+tracked tree: `lab/frontier/hping3shell/validrr/replay-validrr.sh` copies the
+pinned source into a temporary directory, applies `pinned/fix.patch` there,
+rebuilds both ASan objects with the 512-byte-buffered `caller.c` (so only
+the destination overflow is measured), and checks five cases. In-tree and
+from a clean `git archive bb5c9e2a lab/frontier/hping3shell` into
+`/tmp/w21-hping-clean`: `PASS 01..07`, `REPLAY_VALIDRR: 7 checks, 0
+failures`, rc 0 — hash exact, `40/40` and `44/44` clean, `45/45`
+`global-buffer-overflow`, `255/72` `WRITE of size 68`, fixed `255/255`
+clean. No network or live process; no tracked source edited. Grade
+UNCHANGED; author-side, witness verdict UNKNOWN for W20/W21.
