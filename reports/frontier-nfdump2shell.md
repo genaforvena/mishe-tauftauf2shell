@@ -227,8 +227,9 @@ over a header field in a live processed record, not a pointer or command.
   not used as a pointer or a parser control by this build. No
   pointer-bearing object or command is targeted.
 - **Not rung 5:** a live loopback `nfcapd` and a real request now exist, but
-  there is no attacker control of the written value, no pointer hijack, no
-  benign command and no command side effect. No rung 5 claim is made.
+  the attacker-controlled writes are two-byte flow/header scalars, the
+  8-byte OOB value is collector-time derived, and there is no pointer
+  hijack, benign command or command side effect. No rung 5 claim is made.
 
 Next experiment: seek a pointer-bearing object adjacent to the short
 element, or a control field whose corruption changes parsing or output.
