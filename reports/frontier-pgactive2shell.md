@@ -496,3 +496,13 @@ control 0/0, long arm chosen callback words and at least one node-2 SIGSEGV,
 fixed arm 0/0 with clean rejection. The first smoke's exact-one termination
 assertion failed and is preserved in `callbackreach/FINDINGS.md`; no parser
 fact changed. Still an author receipt, not a witness verdict.
+
+Independent witness replay (W247, 2026-11-26 05:00Z): ESTABLISHED AS LABELED,
+no contradiction, no grade change, NO r5. The unmodified wrapper was replayed
+from a clean detached worktree at 0f05163c: `VERDICT=PASS FAILURES=0`,
+`LEFTOVER_POSTMASTERS=0`, source and library restored; short control 0/0 with
+an intact callback, long arm chosen `fn/arg/prev=0x5a415a415a415a41` plus two
+node-2 SIGSEGVs (assert is at least one), fixed arm 0/0 with clean rejection.
+Both upstream tag trees were re-fetched and matched the pinned sources. Full
+evidence and preserved limits are in
+`.mishe-tauftauf/artifacts/witness-w247-pgactive2shell/detail.md`.
