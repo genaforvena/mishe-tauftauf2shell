@@ -1,6 +1,46 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+
+## 2026-11-26 18:1x–18:4xZ — soxng and ntfs3g admitted, W281 verdict, libsmpp count fold
+
+This fold covers `727f6985..36022791`; reproduce every claim from
+`docs/reproducibility.md` § 18:1x–18:4xZ. No generated cell, grade or raw
+evidence is committed here.
+
+- `727f6985` (operator, standing #6) admitted soxng2shell as the **181st**
+  declared target mind at 18:1xZ (window 191, %386/%387, registry 192/192),
+  superseding the W281 STAGED state from `5a6572e6` + `c803e89a`. Counts
+  180/177/177/119 → 181/178/178/119 with `established:false` unchanged. The
+  operator's isolated-copy replay gave `RESULT PASS=27 FAIL=0`; witness W281
+  (#5685) replay returned ESTABLISHED AS LABELED at rung 3 for the shipped-CLI
+  ASan `WRITE of size 4` at `src/voc.c:415`. Rung 4 NOT CLAIMED: no
+  chosen-offset readback, pointer, listener, plain crash or command.
+- `5ace417b`'s libsmpp342shell W279 witness verdict was folded into the
+  manifest in `59ceb714` / `c527b9a3`, moving the established count 119 → 120
+  (rung 3 only, no r4/r5). `42533e6b` reconciled origin and local main without
+  moving a claim. This supersedes the "119→120 owed" passages in the dated
+  16:4xZ entries; it is a generated-count fold, not a new observation.
+- `4b898a70` + `23f05566` screened FRR out and queued ntfs-3g; `e6695f4d`
+  staged ntfs3g2shell and `36022791` (operator, standing #6) admitted it as
+  the **182nd** at 18:41Z (window 192, %388/%389, registry 193/193 unique).
+  Vulnerable 2026.2.25 SHA-256 `7754f3b3…d008a`, vendor patch
+  `6a53ca72…eb3f`, fixed 2026.7.7, fix `6aa66d98…eb42`. A 4 MiB image with a
+  final `0x8b57` LZNT1 header drives the shipped `ntfscat` CLI to ASan
+  `WRITE of size 1` at `compress.c:568`, 0 bytes past a 65,536-byte region;
+  full replay `RESULT PASS=31 FAIL=0` in-tree and from a clean archive, with
+  vendor-patched and safe-input controls clean. Rung 3 only, rung 4 NOT
+  CLAIMED; the SUID mount path was not driven (mount refused) and no plain
+  build ran. The failed fix-commit patch (6/8 hunks) and `0x9201` header are
+  preserved negatives. Witness replay and a plain-build chosen-object
+  experiment remain owed.
+
+Other commits in the range (`4371ae34`, `3602b71a`, `f71aa273`, `c2cc89b3`,
+`4c1fc9ee`, `6e69183d`, `91231731`, `bc7dc0ef`, `10b172e7`, `c1493208`,
+`f3c84c5d`, `f84b9faf`, `a8b8cc45`, `f45faa06`) are target-local report,
+status or brief-wording changes; their dated evidence stays in the reports
+and this fold moves no grade or generated cell for them.
+
 ## 2026-11-26 18:1xZ — Ruby2Shell cross-version matrix and small failed-realloc UAF
 
 `ruby2shell-regexp-notes-wire.py` gained Ruby/gem-home overrides. Stock Rails
