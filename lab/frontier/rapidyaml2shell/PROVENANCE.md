@@ -16,11 +16,14 @@ curl -sSL -O https://github.com/biojppm/rapidyaml/archive/0b4f4c1985dc.tar.gz
 # tarball sha256: 79a6e1d649a6858eca5f6a8c752b4b3d067519cdc6ae3c804fca41b63ae16633
 #                 63b7becba7c21694f61fc3249d059333ec01e857bced3bc8046c4623d4d31d47
 mkdir -p vuln fixed
-tar xzf rapidyaml-f8ac8dd50f4f7916579d55a05ebf9c6488e52670.tar.gz -C vuln
-tar xzf rapidyaml-0b4f4c1985dc.tar.gz -C fixed
+tar xzf f8ac8dd50f4f7916579d55a05ebf9c6488e52670.tar.gz -C vuln
+tar xzf 0b4f4c1985dc.tar.gz -C fixed
 # fix tarball extracts as rapidyaml-0b4f4c1985dc99d2773c1f1da7b447d610bbb1d4
 ./run-all.sh
 ```
+`curl -O` keeps the URL basename: the vulnerable archive is
+`f8ac8dd50f4f7916579d55a05ebf9c6488e52670.tar.gz` and the fix archive is
+`0b4f4c1985dc.tar.gz`, which expands to the full-hash directory shown below.
 
 - Vulnerable: v0.16.0 release commit
   `f8ac8dd50f4f7916579d55a05ebf9c6488e52670`. Verbatim hashes:
