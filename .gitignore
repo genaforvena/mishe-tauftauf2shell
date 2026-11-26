@@ -452,3 +452,9 @@ lab/frontier/libx11xkb2shell/src/*.tar.xz
 lab/frontier/libx11xkb2shell/build/
 lab/frontier/libx11xkb2shell/evidence/build-*.log
 lab/frontier/libx11xkb2shell/evidence/configure-*.log
+
+# sdimatrix2shell: extracted pinned trees, tarballs and local builds stay local;
+# harness sources, runner, pins, fix patch and small evidence stay tracked.
+lab/frontier/sdimatrix2shell/src/stable-diffusion.cpp-*/
+lab/frontier/sdimatrix2shell/src/*.tar.gz
+lab/frontier/sdimatrix2shell/build/

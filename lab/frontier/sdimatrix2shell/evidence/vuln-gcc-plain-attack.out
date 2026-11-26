@@ -1,0 +1,1 @@
+RESULT mode=attack ok=1 values=1 counts=1 values0=0x3f800000 counts0=0x82828282 counts_oob1=0x41414141 counts_oob2=0x41414141

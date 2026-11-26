@@ -1,0 +1,11 @@
+CHECK vuln-gcc-asan-attack PASS
+CHECK vuln-clang-asan-attack PASS
+CHECK fixed-gcc-asan-attack PASS
+CHECK fixed-clang-asan-attack PASS
+CHECK vuln-gcc-plain-attack PASS
+CHECK vuln-clang-plain-attack PASS
+CHECK fixed-gcc-plain-attack PASS
+CHECK vuln-gcc-asan-safe PASS
+CHECK fixed-gcc-asan-safe PASS
+CHECK vuln-gcc-plain-safe PASS
+RESULT PASS=10 FAIL=0

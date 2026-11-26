@@ -1,0 +1,1 @@
+RESULT mode=safe ok=1 values=1 counts=1 values0=0x11111111 counts0=0x41414141 counts_oob1=0x00000000 counts_oob2=0x00000000
