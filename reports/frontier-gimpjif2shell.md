@@ -651,3 +651,27 @@ names 3.2.8 (2026-11-02) as current stable on 2026-11-26; no published
 fixed AppImage exists for the 3.2.10 fix milestone. Grade unchanged rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 
+
+## Allocator consumer of the chosen bytes (W293, 2026-11-26)
+
+W292 closed the `indexes[i]` read path, not the allocator's. A new
+`realglib/real-driver.c` mode grooms the adjacent 272-byte glibc chunk A
+into the smallbin while the pinned function reuses chunk B as `indexes`;
+A's size, fd and bk words lie at B+264, +272 and +280, inside the 324-byte
+chosen write. After the pin, ten `g_try_malloc(260)` calls drain tcache and
+force glibc to process A. `bash realglib/run-consumer.sh`: **15 PASS /
+0 FAIL** in-tree and in a fresh workdir.
+
+`realglib/evidence/consumer-consume.log` shows the chosen words reaching A
+(`POST_PIN A_size_word=4d4d… A_fd=4d4d… A_bk=4d4d…`) and rc 139 at the
+eighth post-pin allocation. `consumer-gdb.log` puts the fault in
+`_int_malloc` (`malloc.c:3985`) with the faulting register holding
+`0x4d4d4d4d4d4d4d4d` — the JIF-chosen bk word is dereferenced as a pointer
+and faults. A second mode that changes only the size word to `0x210` still
+faults with chosen fd/bk; safe 4x4 and fixed-pin controls stay clean.
+This is a real glibc consumer's *failed* dereference of a chosen address
+in a pinned real-glib driver, not a successful dereference, not control
+flow, and not a real-plugin observation. Grade stays rung 3 pinned verbatim
+/ rung 4 PARTIAL chosen bytes, NO r5. Full hashes and the preserved
+`consume-ptr` negative are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
