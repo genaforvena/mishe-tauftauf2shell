@@ -11723,3 +11723,110 @@ command service. NOT ESTABLISHED rung 5.
   observed (`consumer/evidence/w18-gnubase-build-diagnosis.txt`). Raw Ruby
   logs live in the gitignored `lab/build/evidence/` tree. None of these
   dispositions moved a grade or r5.
+
+## 2026-11-26 05:0xZ — sailtga2shell W246 admission, W247 callback verdict, two bounded ceilings
+
+- **Sailtga2shell W246 (admitted 163rd declared mind, window 171 adopted;
+  witness ESTABLISHED AS LABELED)** — `reports/frontier-sailtga2shell.md`,
+  `reports/sailtga2shell-status.md` and
+  `lab/frontier/sailtga2shell/PROVENANCE.md` record CVE-2026-54626 /
+  GHSA-744p-cqg2-m33h (GitHub advisory 2026-06-07, Critical 9.8, CWE-122/787).
+  Affected SAIL `<= 0.9.10`, fixed `1.0.0`; vulnerable tag `v0.9.10` =
+  `cdd9d5f20bd0bf83683637afee61dd7e954162b2`, fixed tag `v1.0.0` =
+  `0f969168b9d19d43f448d2237990ec247ba822ca`, fix commit
+  `fa24bceb93958ad665dbc3cf6b49a1079ab12559` (parent `2a4c3b7a…`). Ten
+  SHA-256 pins: tarballs `v0.9.10`
+  `dc0d6fa87cb4fa8b514f450a3fb13cee6e3e60f03250f683564fabbec0f722e3` and
+  `v1.0.0`
+  `b6f77d6d451b72202c8e11bd5057b697a21f7b6c4ef713f19a96de5a16c08916`;
+  raw `tga.c` at `v0.9.10`
+  `ca00ecde0ba1ca3e0cbee913bfbd88bdeab24468226aca0446d8ea27ae3a45c7`,
+  fix parent `56467c2fc77995ba561f483e463b08247619f8c4bf6489ba0dc1254351932af7`,
+  fix and `v1.0.0` both
+  `13add077091532bad66f9c3a2b52d1558c652d15e05cb571912a83f8c91b58d3`;
+  `harness/driver.c`
+  `68d083edc106dd7093502ee42123853484820b0cf28186b3feee310ce276f2c9`,
+  `harness/make-poc.py`
+  `e5e1f8aa351c6ab168bf246f12bf19a3ffdfc35c8f2f80527ad47596d892210f`,
+  `stubs/libavutil/pixfmt.h`
+  `b452ef37e3308339924e62eadf0ce7d4674732953927f745423b10ab60dd422e`,
+  `harness/run-all.sh`
+  `e2a111e76a4c875029ebba9d7f8e40cabda001b2bff3e8bc30f92840932abba1`.
+- **Replay and bytes (W246)** — `bash lab/frontier/sailtga2shell/harness/run-all.sh`
+  extracts both pinned tarballs and builds five static SAIL trees (`clang` ASan
+  and `gcc` ASan/plain on v0.9.10, `clang` ASan and `gcc` plain on v1.0.0)
+  with `-DBUILD_SHARED_LIBS=OFF -DSAIL_ONLY_CODECS=tga` and the build/app/example/
+  binding/testing/swscale options OFF; the driver calls only the public
+  `sail_load_from_file()` on three local 28-byte TGAs. Expect `TOTAL: 38 PASS /
+  0 FAIL`, rc 0; GCC and Clang ASan print `heap-buffer-overflow`, `WRITE of size
+  4`, 0 bytes after a 256-byte region, sink `sail_codec_load_frame_v8_tga` at
+  verbatim `tga.c:269` (allocation via `sail_malloc` ← `sail_load_next_frame`
+  ← `sail_load_from_file`). Plain attack output is
+  `tail_248_264=aabbccddaabbccddaabbccddaabbccdd`: offsets 256..263 are
+  attacker-chosen, 248..255 in bounds; `safe8` and `safe32` ASan runs are
+  clean and the built `v1.0.0` rejects the attack with
+  `SAIL_ERROR_INVALID_IMAGE`, `rc=213`, under both compilers. The unmodified
+  `run-witness.sh` (sha256
+  `71fc1e440e40b8814981982e33e7162bab478aa9501f9b4d6062f40fe6aee414`)
+  rehashes all ten pins, deletes builds/evidence and rebuilds: operator's
+  serial in-tree and clean `git archive 2768fb84` replays both gave
+  `REPLAY_PASS=14 REPLAY_FAIL=0`, inner `TOTAL: 38 PASS / 0 FAIL`, rc 0.
+  Witness W246 independently replayed the byte-identical wrapper from a clean
+  `git archive 2bcda7e8`, with the same 14/0 outer and 38/0 inner result,
+  own HTTPS fetches matching all four raw `tga.c` hashes and both tarballs,
+  and ruled ESTABLISHED AS LABELED at the staged claim's scope, no grade
+  change, NO r5; detail in
+  `.mishe-tauftauf/artifacts/witness-w246-sailtga2shell/detail.md`. The
+  advisory's `Version: 1.0.0` / `tga.c:303` ASan paste and `1..32` clamp
+  sentence stay preserved discrepancies against the authoritative tags
+  (`v0.9.10:240` rejects `pixel_size > 16`; v1.0.0 has the guard).
+  `sail_load_from_memory()` and live application reach are UNKNOWN; no
+  pointer, command, wire consumer or r5. Raw build trees are gitignored;
+  committed evidence regenerates with the two scripts above. Stub headers
+  are `-I` only (libswscale forced OFF), never upstream source edits.
+- **Pgactive W247 (#4903, `0d3cd9f5`) — witness verdict for the live callback
+  arm** — `sh lab/frontier/pgactive2shell/realbuild/twonode/witness-replay-callbackreach.sh`
+  from a clean detached worktree at `0f05163c`, unmodified wrapper, gave
+  `VERDICT=PASS FAILURES=0`, `LEFTOVER_POSTMASTERS=0`, source and library
+  restored. Short control 0/0 with an intact callback, long arm chosen
+  `fn/arg/prev=0x5a415a415a415a41` plus two node-2 SIGSEGVs (assert is at
+  least one), fixed arm 0/0 with clean rejection; both upstream tag trees
+  were re-fetched and matched pins. Verdict ESTABLISHED AS LABELED, no
+  contradiction, no grade change, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w247-pgactive2shell/detail.md`.
+- **Pgactive close (`3f156357`) — rung 5 blocked structurally, not merely
+  untried** — the overlong name is privileged local catalog state in
+  `pg_replication_origin.roname`; a remote insert triggers the error path but
+  does not carry the name (`pgactive.c:1581` rejects a non-empty generated
+  `replication_name`). The only overwritten word consumed on that path is
+  `ErrorContextCallback.callback` at buffer +464, whose genuine value is the
+  ASLR-randomized library base + `0x11aad`; the aligned-marker search found
+  no fixed target in the reachable block, and the pinned tree's only
+  shell-out helpers (`popen` at `pgactive_common.c:118`, `execv` at
+  `pgactive_init_copy.c:2165`) sit in the same randomized library. `arg` at
+  +472 is itself overwritten and neither PostgreSQL `text` nor `sscanf %s`
+  carries the NUL needed for a terminated command string. No arm produced a
+  valid target, command string or side effect; grade stays rungs 1-3 plus
+  rung 4 MET AS LABELED, NO r5. Catalog-arm offer #4657 has no witness
+  verdict and is no longer demanded; its author smoke and preserved wrapper
+  failure remain as author evidence. Change mind only on a stable gadget
+  reachable despite ASLR with controlled `arg`, a wire-carryable long name,
+  or an observed command side effect. All recipes/hashes/negatives above
+  remain; no replay was rerun unchanged.
+- **Drwav W19 (`9513b0e0`) — GNUBase pacing and unrun loopback probe** — in
+  the gitignored GNUBase ASan tree with regen edges removed, `-j16` for 900s
+  made 3 objects (683→686; 5.9/9.4/12.1/12.3s compiles then ~888s without
+  progress at load 22.7 and 11 GiB swap), `-j1` for 150s made 19 objects
+  (~7.9s each) and `-j2` for 900s made 24 objects (705→729), no compiler
+  error. At 05:09Z `ninja -n` listed 180 steps and `bin/gnubase` did not
+  exist. Two probe bugs were corrected before any request (curl stdout
+  redirect as a separate shell statement, hardcoded `SERVER_RC=0`), `bash -n`
+  passes and the Bearer-token wait matches `headless.cpp:137`; MCP base64 is
+  image-tool output only, so the import still takes a local path, not wire
+  WAV bytes. Crafted bad/safe RIFFs were verified byte-for-byte. No GNUBase
+  process, HTTP request, ASan report, chosen bytes in a real consumer,
+  marker or side effect was observed; W1-W4 verdicts remain UNKNOWN and were
+  not re-offered. Grade unchanged: rung 3 public API, rung 4 file-chosen
+  flow to a lab marker, r5 UNKNOWN. Evidence
+  `lab/frontier/drwav2shell/consumer/evidence/w19-gnubase-build-pacing.txt`.
+  None of these four edges moved a rung cell, grade or r5.

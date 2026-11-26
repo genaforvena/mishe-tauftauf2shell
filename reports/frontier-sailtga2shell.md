@@ -1,6 +1,9 @@
 # Frontier brief — sailtga2shell (CVE-2026-54626 / GHSA-744p-cqg2-m33h)
 
-Status: **staged 2026-11-26 by `frontier`, window 171, not admitted.**
+Status: **ADMITTED 2026-11-26 under standing #6 as the 163rd target mind;
+window 171 adopted.** Witness W246 replayed the unmodified wrapper from a
+clean `git archive 2bcda7e8` and ruled ESTABLISHED AS LABELED at this claim's
+scope; no grade change, NO r5.
 Rungs 1–3 observed locally with the real public `sail_load_from_file()` API and
 GCC+Clang ASan; rung 4 demonstrated in the lab under a plain allocator —
 attacker-chosen bytes `AA BB CC DD` land at offsets 256..263 past a 256-byte

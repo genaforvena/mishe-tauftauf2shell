@@ -12226,3 +12226,63 @@ in-tree and from a narrow clean `git archive 925a3bcf` extraction, both with
 frozen six-column detector against the live seven-cell README; resolver is
 the person's exact full-flag sync in `docs/runtime-pin.md`, never a bare
 `mishe sync`.
+
+## 2026-11-26 05:0xZ — sailtga W246 admission fold, W247 verdict, two ceiling closures
+
+Signal head `3f156357`, wake-start HEAD `3f156357`, last fold `c7c09f52`.
+Four commits since the fold. No rung cell, grade, route, mind-count,
+witness verdict or R5 cell moved by this fold; the README row count stays
+160 and the mind list already includes sailtga2shell as the 163rd.
+
+- `ebd8aea8`: operator admitted sailtga2shell (CVE-2026-54626 /
+  GHSA-744p-cqg2-m33h) at 05:0xZ under standing #6 as the 163rd declared
+  target mind, window 171 adopted; hy4-flash route and three generated wake
+  units remain missing (omp-only and doctor RED, person-reserved). The
+  `image_type=9` format resolves to 1 byte/pixel while header `bpp=32`
+  drives a 4-byte RLE stride at verbatim `tga.c:269`, so 1024 bytes are
+  written past a 256-byte allocation. Five real static SAIL builds give
+  GCC/Clang ASan `WRITE of size 4` 0 bytes after the region and plain
+  chosen `aa bb cc dd` at offsets 256..263; matching-stride controls are
+  clean and pinned `v1.0.0` rejects with `rc=213`. `harness/run-all.sh`
+  38 PASS / 0 FAIL. The operator's unmodified `run-witness.sh` (sha256
+  `71fc1e44…6f40fe6aee414`) replayed serially in-tree and from a clean
+  `git archive 2768fb84`: ten pins exact, 14/0 outer, inner 38/0, rc 0.
+  Witness W246 (clean `git archive 2bcda7e8`, own HTTPS source re-checks)
+  returned ESTABLISHED AS LABELED at that scope, NO r5. The advisory's
+  `Version: 1.0.0` ASan paste is a discrepancy, not a fact; memory API and
+  live application reach stay UNKNOWN. The brief's stale "staged, not
+  admitted" status line was corrected here; ten pins, expected bytes and
+  gitignored evidence regeneration are in `docs/reproducibility.md`.
+- `0d3cd9f5`: witness W247 (#4903) independently replayed the pgactive
+  callback-reach wrapper from a clean worktree at `0f05163c`:
+  `VERDICT=PASS FAILURES=0`, `LEFTOVER_POSTMASTERS=0`, short 0/0 with an
+  intact callback, long chosen
+  `fn/arg/prev=0x5a415a415a415a41` plus two node-2 SIGSEGVs, fixed 0/0 with
+  clean rejection, source and library restored, both tag trees matching
+  pins. ESTABLISHED AS LABELED, no grade change, NO r5. The README row's
+  earlier "author-only, unwitnessed" clause for W10/W11 was corrected.
+- `3f156357`: research on pgactive closed at the documented ceiling. The
+  long name is privileged local catalog state, not wire-carried; the only
+  consumed overwritten word is `ErrorContextCallback.callback` at +464,
+  whose real value is ASLR-randomized, with no fixed target in the
+  reachable block and no usable `arg` for a terminated command. No arm gave
+  a valid target, command string or side effect. Catalog-arm offer #4657
+  has no verdict and is no longer demanded; author smoke and the preserved
+  wrapper failure stay as author evidence. Change mind only on an ASLR-safe
+  gadget with controlled `arg`, a wire-carryable name, or an observed
+  command side effect.
+- `9513b0e0`: drwav W19 measured why GNUBase still had no consumer binary —
+  `-j16` made 3 objects in 900s (~888s stalled at load 22.7), `-j1` 19 in
+  150s, `-j2` 24 in 900s; at 05:09Z 180 ninja steps remained and
+  `bin/gnubase` was absent. Two loopback-probe bugs were fixed (`bash -n`
+  passes) but the probe was never run: no process, request, ASan report,
+  chosen bytes in a real consumer, marker or side effect. W1-W4 verdicts
+  stay UNKNOWN and were not re-offered; grade rung 3 / rung 4 lab marker,
+  r5 UNKNOWN.
+
+Observed at this fold: the replay bytes quoted above come from the
+committed operator and witness receipts (`ebd8aea8`, `0d3cd9f5`,
+`c458c8c2`, `3f156357`), not a rerun in this wake. Readme-lint stays RED on
+the frozen six-column detector against the live seven-cell README; resolver
+is the person's exact full-flag sync in `docs/runtime-pin.md`, never a bare
+`mishe sync`.
