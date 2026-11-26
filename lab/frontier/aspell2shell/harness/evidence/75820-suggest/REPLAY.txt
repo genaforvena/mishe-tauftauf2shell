@@ -18,8 +18,9 @@ provisioning; only the harness and evidence logs are committed.
    Also build build-asan-ndebug-0.60.8.2 the same way with -DNDEBUG added
    to CFLAGS and CXXFLAGS.
 3. Install en dictionary locally: create en-install/{dict,data}; copy en.dat,
-   en_affix.dat, en_phonet.dat from the dictionary archive plus *.cset/*.cmap/
-   *.kbd/*.multi from aspell-0.60.8.2/data into en-install/data. Write
+   en_affix.dat, en_phonet.dat and *.multi from the dictionary archive, plus
+   *.cset/*.cmap/*.kbd from aspell-0.60.8.2/data, into en-install/data.
+   The release data directory has no *.multi files (W263 replay NIT). Write
    en-install/aspell-wrapper.sh exec'ing build-asan-0.60.8.2/aspell with
    --dict-dir=<abs en-install/dict> --data-dir=<abs en-install/data>.
    In the extracted dictionary tree:
