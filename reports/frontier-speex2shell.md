@@ -1,6 +1,8 @@
 # Frontier brief — speex2shell (CVE-2026-116741 / GHSA-jmfj-jxhf-c4c3)
 
 Status: **staged 2026-11-26 by `frontier`, window 170, not admitted.**
+Witness W245 (2026-11-26 04:35Z): replay ESTABLISHED AS LABELED, no grade
+change, NO r5; evidence in the witness wall and its W245 detail artifact.
 Rungs 1–4 observed locally against a real libspeex build through public APIs;
 rung 4 is demonstrated impact in the lab (attacker-chosen bytes at chosen
 offsets in a live adjacent heap object), with explicit conditions below. No
@@ -19,7 +21,7 @@ wake units and full-flag sync stay with the person.
   buffer (`speex_bits_init_buffer()` / `speex_bits_set_bit_buffer()`),
   corrupting heap or stack memory and crashing applications.
 - Vendor fix: https://gitlab.xiph.org/xiph/speex/-/merge_requests/32,
-  merge commit `09b569d1b437e5edccf3406a38714ad795e46d38`, one security
+  MR !32 head commit `09b569d1b437e5edccf3406a38714ad795e46d38`, one security
   hunk plus an unrelated signed-shift cleanup. GitHub tag listing at
   2026-11-26 shows no tag newer than `Speex-1.2.1`, so the fix commit is not
   in any public release; first released fixed tag is **UNKNOWN/NONE** and
@@ -118,3 +120,24 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
    controls; do not assume the current 8-byte data overwrite is enough.
 3. Check upstream for a released tag containing `09b569d1` and replace the
    fix-commit control with the release if one exists.
+
+## Witness verdict — W245 (tape #4847, 2026-11-26 04:35Z)
+
+The unmodified top-level `run-witness.sh` (sha256 `1dc5d05c…1a7b84f`) passed
+`REPLAY_PASS=10 REPLAY_FAIL=0`, `TOTAL: 28 PASS / 0 FAIL`, rc 0 from a clean
+`git archive 2daaa4ee` tree and, serially, in the worktree. Independent raw
+GETs reproduced all three source/tarball pins; GitLab MR !32 is merged at the
+pinned head commit with exactly the security hunk, and the pinned vulnerable
+and fixed files differ in only that hunk plus the unrelated signed-shift
+cleanup. GCC+Clang ASan `WRITE of size 1` at verbatim `bits.c:184`, chosen
+`i..p` in the adjacent canary with `changed=8 chosen=1`, fixed and safe
+controls clean. A first replay attempt run concurrently with the clean-tree
+replay failed in autotools setup; serial reruns in both trees passed, so the
+failure is preserved as a concurrency artifact, not a reproduced claim defect.
+VERDICT: ESTABLISHED AS LABELED, grade unchanged (rung 3 verbatim / rung 4
+lab impact under stated conditions), NO pointer control, command, wire path
+or r5. Stack path, released fixed tag and the follow-up UBSan observation
+stay UNKNOWN. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w245-speex2shell/detail.md`.
+Two wording NITs are folded above and in `PROVENANCE.md`: the wrapper path
+and the "merge commit" label for the one-parent MR head commit.

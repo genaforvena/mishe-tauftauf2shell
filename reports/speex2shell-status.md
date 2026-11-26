@@ -23,3 +23,8 @@ test the corrupted adjacent chunk metadata for a controlled allocator
 primitive, and check for a released fixed tag. Heap only; stack path and
 wire reachability UNKNOWN. The operator's admission and any witness replay
 are not substitute acceptance.
+
+Witness W245 (04:35Z, #4847): independent clean-archive and serial in-tree
+replays both `REPLAY_PASS=10/0`, inner `28/0`, rc 0; upstream hashes and MR !32
+verified. ESTABLISHED AS LABELED, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w245-speex2shell/detail.md`.

@@ -16,7 +16,9 @@ no external system was probed. No source outside the lab was written.
   rendered no text through the reader; the causal chain below comes from the
   raw pinned source and the vendor patch, not from that page.
 - Vendor fix: https://gitlab.xiph.org/xiph/speex/-/merge_requests/32,
-  merge commit `09b569d1b437e5edccf3406a38714ad795e46d38`. Retrieved through
+  MR !32 head commit `09b569d1b437e5edccf3406a38714ad795e46d38`
+  (one parent; GitLab reports `merge_commit_sha` null).
+  Retrieved through
   `https://gitlab.xiph.org/api/v4/projects/xiph%2Fspeex/merge_requests/32/changes`.
 - Reference source line: https://github.com/xiph/speex/blob/Speex-1.2.1/libspeex/bits.c#L177
   (vulnerable assignment `nchars=bits->buf_size;`).
@@ -48,8 +50,9 @@ compiles `harness/driver.c` and `harness/adjacent.c` against those libraries
 through public headers only and runs the assertions. Outputs are written to
 `evidence/`; build logs are gitignored.
 
-`bash harness/run-witness.sh` rehashes the six pins above, deletes every build
-tree and all evidence, rebuilds from the tarball and re-asserts the ASan sink
+`bash run-witness.sh` from `lab/frontier/speex2shell` rehashes the six pins
+above, deletes every build tree and all evidence, rebuilds from the tarball
+and re-asserts the ASan sink
 and adjacent-object bytes. Itself not pinned (no self-hash circle).
 
 Observed in-tree on 2026-11-26: `run-all.sh` 28 PASS / 0 FAIL rc 0;
