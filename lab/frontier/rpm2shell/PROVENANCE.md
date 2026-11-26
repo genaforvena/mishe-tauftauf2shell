@@ -550,3 +550,56 @@ Across the two fresh replays the invariant ASan WRITE and scaled-length
 checks passed every time, while every pointer-chain, lab-groom and
 zero/safe control assertion varied between layouts. Preserve both runs; do
 not select the favorable one as the grade claim.
+
+## Bounded information-leak probe (2026-11-26 21:24–21:29Z)
+
+New lane, not a repeat of the config-length sweep: pinned `lib/rpmvs.cc:206-209`
+formats a short digest buffer with `%p`. Question: can a real `rpm -i`
+disclose a live heap address, and does that give an ASLR-stable route to the
+chosen-byte GC pointer? All runs used the plain vulnerable build at
+`c36e85503` (`build-vuln-plain/tools/rpm`), an 18-character `RPM_CONFIGDIR`
+symlink, a private `--dbpath`, and `--nodeps --noscripts --nofiledigest
+--ignoresize`; no debugger forced a call and no `LD_PRELOAD` was used.
+
+Package mutation, recipe rather than a committed generator: parse the
+signature header of `real/install/attack-reloc.rpm` at byte 96; tag 273
+(`RPMSIGTAG_SHA256`) is a 64-character string at signature data offset 0.
+Overwrite its first two bytes with `5\0`, leaving the main header and the
+chosen 64-byte cpio payload byte-identical (`/tmp/r2s-leak5.rpm`, sha256
+`ed2af0b98…1c325`). Real output, two fresh processes:
+
+```
+error: /tmp/r2s-leak5.rpm: Header SHA256 digest: BAD (package tag 273: invalid data 0x5c686932fe28 (1))
+error: /tmp/r2s-leak5.rpm: Header SHA256 digest: BAD (package tag 273: invalid data 0x5f92259f8e28 (1))
+```
+
+Both rc 1. Earlier samples in the same layout gave `0x5777763c6df8`,
+`0x650664cc2e08` and `0x55b3bab7fe38`; the low 12 bits differ across runs,
+so this is an ASLR-random disclosure of the signature-string allocation,
+not a stable address. The package is rejected before any archive iteration.
+
+Controls: (a) truncating the *main-header* payload digest tag 5092 to `5\0`
+and recomputing both header digests (SHA256 and SHA3-256 over magic +
+main-header bytes) yields `hdr load: BAD` rc 1, not the `%p` message; a
+64-character digest changed to `6…` with the same digest refresh loads and
+reaches the payload check, so the failure is specific to the short main
+string. (b) Supplying the leak package and the attack package to one
+`rpm -i` invocation gives rc 2: both packages are verified in an up-front
+pass, the leak line prints, and the second package is also digest-rejected
+before payload read. There is no adaptive input channel in this consumer:
+the bytes of a later package cannot depend on the earlier package's stderr.
+
+Conclusion: a real heap-pointer disclosure primitive EXISTS in the pinned
+consumer, but in a rejected package, with an ASLR-random value and no
+measured delta to the `buf+0x20` GC object or the 1-byte cpio buffer. It is
+not a chosen-byte control, pointer control, wire path, command or r5, and
+does not change the grade. No further leak-work was scheduled on this
+evidence. Raw logs and package hashes: `real/leak-probe/`.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/leak-probe/short-sig-digest-1.out` | `fca814882c0b721f57e243e4277316f6d697180a24bb263fff3984df3f1dcafb` |
+| `real/leak-probe/short-sig-digest-2.out` | `d17459e1311fe29e517fba131851bb4ae9208ac552bed5d2d57d43cb191207d2` |
+| `real/leak-probe/short-main-digest.out` | `6498a8e0a2527719990f8b4c5b3e56486823cc8ff32ece4c9fb0b84fa2001883` |
+| `real/leak-probe/control-64char.out` | `3fba1e73ddc8c4a61e2ef746aab508ba7f692777bf0b16ea894d137a471eecc0` |
+| `real/leak-probe/two-packages.out` | `e95a8f23afe6f5678f9ce7367201c1163e29e351ca8c2737778d3089bde8a582` |

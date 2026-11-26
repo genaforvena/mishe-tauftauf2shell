@@ -432,6 +432,20 @@ control statuses failed. Across both fresh replays only the ASan WRITE and
 scaled-length checks were invariant; every pointer-chain, groom and
 zero/safe assertion varied with heap layout.
 
+### Information-leak probe (2026-11-26 21:24–21:29Z)
+
+The pinned `lib/rpmvs.cc:206-209` `%p` diagnostic does disclose a heap
+address from a real plain `rpm -i`: a 64-character signature digest tag 273
+truncated to `5\0` makes rpm print `package tag 273: invalid data 0x… (1)`
+and exit 1. Fresh runs gave different low bits (`0x5c686932fe28`,
+`0x5f92259f8e28`, `0x55b3bab7fe38`, plus earlier samples), so the value is
+ASLR-random. Truncating a main-header digest string instead gives
+`hdr load: BAD`, and a two-package `rpm -i` verifies both packages before
+installing either, so the disclosure cannot be fed back into the crafted
+package in this consumer. No delta to the cpio buffer or GC object was
+measured; grade unchanged, no wire path or r5. Evidence and hashes in
+`lab/frontier/rpm2shell/PROVENANCE.md` and `real/leak-probe/`.
+
 ## Duplicate check
 
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`

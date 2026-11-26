@@ -1,0 +1,6 @@
+error: /tmp/r2s-leak5.rpm: Header SHA3-256 digest: BAD (Expected 51a6419bc97647c2a6cf1de97ccef5355fdebcda418b4e298d86e50f152c9b0e != e09f726c527cff860fd21d2a0a5133069fbfa8246be6e190574060fb0e4ccee6)
+error: /tmp/r2s-leak5.rpm: Header SHA256 digest: BAD (package tag 273: invalid data 0x55b3bab7fe38 (1))
+error: /tmp/r2s-leak5.rpm cannot be installed
+error: install/attack-reloc.rpm: Header SHA3-256 digest: BAD (Expected 51a6419bc97647c2a6cf1de97ccef5355fdebcda418b4e298d86e50f152c9b0e != e09f726c527cff860fd21d2a0a5133069fbfa8246be6e190574060fb0e4ccee6)
+error: install/attack-reloc.rpm: Header SHA256 digest: BAD (Expected 1f10ce11370180dfe4cb7e929b140cfc9360bf0c5e5d9036047ee3dfa07b080d != 214ecf5463835cf84e0f122b1079d638ee50a32c2a044ce2181ebbdcc4908291)
+error: install/attack-reloc.rpm cannot be installed
