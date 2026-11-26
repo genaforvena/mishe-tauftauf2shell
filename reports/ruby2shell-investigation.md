@@ -4042,11 +4042,16 @@ leakshapes=0`, `with-leaks=0`, victims in `[heap]`). Evidence:
 `mainarena-d36.body`, `mad36-summary.txt`,
 `stock-rails-mad36-*.{html,maps,http,server.log}` (gitignored).
 
-A 40-part variant was launched in the same batch but the harness timed out
-before it produced a summary; no responses or maps were captured. That arm is
-**UNKNOWN**, not a negative and not a pass; it was not resumed.
+A 40-part arm was launched in the same batch but produced no summary: the
+driver's `wait "$PID"` blocked after a surviving Puma process ignored
+SIGTERM. This was a harness bug, not a result. `ruby2shell-mainarena-leak.sh`
+now gives TERM 5 s, then KILL, then waits; `bash -n` passes. Replaying the
+40-part body (45,940 bytes) with the repaired driver in 12 fresh processes
+produced 2 survivors with maps, 84 reflected parts, zero deviations, zero
+leak-shaped qwords (`with-leaks=0`). Evidence: `mainarena-d40.body`,
+`mad40b-summary.txt` and `stock-rails-mad40b-*.{html,maps}` (gitignored).
 
-Both levers are closed for the missing oracle. The wire-only information
-disclosure class on this build is arena-region/GC-page addresses only; no
-libc or Ruby-code base crossed the wire, and main-arena fd/bk still never
-reaches a reflected value. Grades unchanged.
+All three geometries are closed for the missing oracle. The wire-only
+information disclosure class on this build is arena-region/GC-page addresses
+only; no libc or Ruby-code base crossed the wire, and main-arena fd/bk still
+never reaches a reflected value. Grades unchanged.

@@ -54,8 +54,13 @@ if [ "${1:-}" = "--one" ]; then
   rm -f "$ARM"
   if kill -0 "$PID" 2>/dev/null; then
     cat "/proc/$PID/maps" > "$EV/stock-rails-$TAG.maps" 2>/dev/null
-    kill "$PID" 2>/dev/null
   fi
+  kill "$PID" 2>/dev/null
+  for _ in $(seq 1 50); do
+    kill -0 "$PID" 2>/dev/null || break
+    sleep 0.1
+  done
+  kill -9 "$PID" 2>/dev/null
   wait "$PID" 2>/dev/null
   exit 0
 fi
