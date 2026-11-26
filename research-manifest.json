@@ -4,22 +4,22 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 172,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ) and sqlitefts5shell (12:3xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 173,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ) and libsoup2shell (12:5xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 169,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ and sqlitefts5shell admitted 12:3xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 170,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ and libsoup2shell admitted 12:5xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 169,
+      "value": 170,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
     "independently_established_findings": {
-      "value": 115,
+      "value": 116,
       "basis": "Register rows whose boundary names an ESTABLISHED verdict together with a witness, W##, #N or tape marker; author-only verdicts are excluded.",
       "source": "docs/results.md"
     }
@@ -2618,10 +2618,26 @@
         "R4": "◐",
         "R5": "—"
       },
-      "boundary": "**ADMITTED 12:3xZ under standing #6 as the 172nd declared target mind; window 180 adopted (panes %364/%365 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-119374: SQLite before 3.54.0 built with SQLITE_ENABLE_FTS5 rewrites a leaf footer in fts5DoSecureDelete() with an uncapped write cursor (nPg = iPgIdx) so a crafted secure-delete database writes past the leaf allocation on DELETE FROM t WHERE rowid=1; pinned vulnerable GA 3.53.4 b09c88c14082339b66c7b7158d609a771e64ca69 (official sqlite-src-3530400.zip) and fix d9de6eedbe918c074c7556400fa21df5960704d9. Canonical run-all.sh sha256 71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32 — RESULT PASS=26 FAIL=0, rc 0; GCC and Clang ASan WRITE-1 0 bytes after a 640-byte region at generated sqlite3.c:256373 through fts5PutVarint64 <- sqlite3Fts5PutVarint <- fts5DoSecureDelete, fixed builds stop with rc 1 fts5 corruption, crafted-DB read/MATCH and clean-table DELETE ASan-clean. Grade rung 3 real-source ASan OOB WRITE, rung 4 PARTIAL; no named adjacent object, pointer, wire/request path, command or r5. Author-only; independent witness replay with pinned zip re-fetch is owed before ESTABLISHED.",
+      "boundary": "**ADMITTED 12:3xZ under standing #6 as the 172nd declared target mind; window 180 adopted (panes %364/%365 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-119374: SQLite before 3.54.0 built with SQLITE_ENABLE_FTS5 rewrites a leaf footer in fts5DoSecureDelete() with an uncapped write cursor (nPg = iPgIdx) so a crafted secure-delete database writes past the leaf allocation on DELETE FROM t WHERE rowid=1; pinned vulnerable GA 3.53.4 b09c88c14082339b66c7b7158d609a771e64ca69 (official sqlite-src-3530400.zip) and fix d9de6eedbe918c074c7556400fa21df5960704d9. Canonical run-all.sh sha256 71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32 — RESULT PASS=26 FAIL=0, rc 0; GCC and Clang ASan WRITE-1 0 bytes after a 640-byte region at generated sqlite3.c:256373 through fts5PutVarint64 <- sqlite3Fts5PutVarint <- fts5DoSecureDelete, fixed builds stop with rc 1 fts5 corruption, crafted-DB read/MATCH and clean-table DELETE ASan-clean. Grade rung 3 real-source ASan OOB WRITE, rung 4 PARTIAL; no named adjacent object, pointer, wire/request path, command or r5. W268 replay ESTABLISHED AS LABELED (fresh hash-matched zip/patch/hexdb, own clean tree, no contradiction, no grade change, NO r5); detail in `.mishe-tauftauf/artifacts/witness-w268-sqlitefts5/detail.md`.",
       "reports": [
         "reports/frontier-sqlitefts5shell.md",
         "reports/sqlitefts5shell-status.md"
+      ],
+      "established": true
+    },
+    {
+      "target": "Libsoup2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 12:5xZ under standing #6 as the 173rd declared target mind; window 181 adopted (panes %366/%367 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-102555: libsoup before 3.7.3 treats base64 data-URI content as NUL-terminated, so g_base64_decode_inplace() fails its precondition on an embedded %00 and leaves the decoded length uninitialized; the resulting GBytes size exceeds the allocation. Pinned fix parent a4294044466df66ea98492d67bb74172ed3f8762 (3.7.2) and fix e4f032268fa18f691a6c34d6adcb5b666f3e3f77; runner lab/frontier/libsoup2shell/run-all.sh sha256 4dadfa600b8f7b6b8b45faf8c867e159d09dd84752ee7a14a97f76c99ce9fd83, console sha256 d8df99724290a0b7b84e9eb70137f429ced99d20f450615d79c95a8b3ce175ce, RESULT PASS=19 FAIL=0 rc 0. GCC ASan READ-1 0 bytes after a 128-byte region from soup_uri_decode_data_uri() at verbatim pinned soup-uri-utils.c:405 through a lab driver; fixed and safe inputs clean, Clang stale-length negative preserved, plain build rc 139. Grade rung 3 real-source ASan OOB READ, rung 4 NOT CLAIMED; no named adjacent object, chosen bytes, pointer, wire/request path, command or r5. Author-only; independent witness W269 replay is in progress before ESTABLISHED.",
+      "reports": [
+        "reports/frontier-libsoup2shell.md",
+        "reports/libsoup2shell-status.md"
       ],
       "established": false
     }

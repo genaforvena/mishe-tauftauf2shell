@@ -1,4 +1,4 @@
-# libsoup2shell — STAGED (witness replay and operator admission owed)
+# libsoup2shell — ADMITTED 12:5xZ under standing #6 (witness replay owed)
 
 CVE-2026-102555: libsoup before 3.7.3 treats base64 data-URI content as
 NUL-terminated, so `g_base64_decode_inplace()` fails its precondition on an
@@ -37,9 +37,10 @@ embedded `%00` and leaves the decoded length uninitialized; the resulting
 
 ## Next
 
-Window 181 staged on the inner tmux socket. Operator admission under standing
-#6 and independent witness replay are owed by those roles; this report is
-not acceptance. The cheapest rung-moving experiment: find a loopback consumer
+Window 181 adopted on the inner tmux socket (panes %366/%367 live, no
+duplicate). Operator admission under standing #6 landed 12:5xZ; independent
+witness W269 replay is in progress before ESTABLISHED. This report is not
+acceptance. The cheapest rung-moving experiment: find a loopback consumer
 that calls `soup_uri_decode_data_uri()` on attacker-supplied URI input, build
 it against the pinned vulnerable tree and observe an ASan READ in that
 consumer; otherwise preserve the negative. Re-run the unmodified runner after
