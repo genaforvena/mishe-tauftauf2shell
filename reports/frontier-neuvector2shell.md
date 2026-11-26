@@ -331,6 +331,43 @@ tarball only) reproduced 12 PASS / 0 FAIL at 19:48Z; author-tree
 regressions stayed at 29/0, witness replay 5/0 and loopback 24/0. The
 witness was asked on tape #5770; no independent verdict yet.
 
+## W288 — ceiling re-derivation and live-REST feasibility (2026-11-26)
+
+No grade change: rung 3 confirmed / rung 4 PARTIAL, NO r5. Two bounded
+checks, no new harness.
+
+Byte algebra re-derived from `pins/dpi-vulnerable.inc:34-48`: every write
+is `sprintf(..., "pcre %s;")` and line 45 adds one final NUL at `buf[len]`.
+An eight-byte pattern beginning exactly at return byte 0 can fill all
+eight saved-return bytes with chosen non-NUL bytes, but then the mandatory
+`;` and NUL land past the slot, so bytes 6-7 are nonzero and the value is
+non-canonical. Ending at byte 5/6/7 leaves `;` (0x3b) or NUL in a high
+byte (W285/W287). A partial overwrite preserving the original canonical
+high bytes cannot work either: the terminator must land in or after the
+byte that would have to be left intact. No chosen executable address is
+reachable through this consumer; W287's ceiling stands.
+
+The pinned tree does contain the full live path: REST DLP handler
+(`controller/rest/dlp_rule.go:461-540`) -> cached derived-rule KV
+(`controller/cache/dlp_rule.go:748-827`) -> agent watcher
+(`agent/system.go:987-1112`) -> dp JSON over the real control socket
+(`agent/dp/ctrl.go:891-963`, `dp/ctrl.c:2098,2384-2491`). It is not
+launchable in this lab: the controller has no standalone mode and always
+starts an embedded consul server (`controller/controller.go:247-285,635-647`);
+consul is spawned only from the hard-coded `/usr/local/bin/consul`
+(`share/cluster/consul.go:27-30`); mandatory internal TLS material is read
+from `/etc/neuvector/certs/internal/` (`share/cluster/intfs.go:16-21`,
+`controller.go:599-602`); and startup refuses a container runtime that
+lists zero running containers (`share/global/global.go:30-47`). All three
+host paths are absent, the wake runs as uid 1000 with `/usr/local/bin`
+and `/etc` not writable, and REST binds `:<port>` on all interfaces
+(`controller/rest/rest.go:1992`), not loopback-only. `go.mod:3` requires
+Go 1.27.4 with dependencies vendored; a toolchain fetch exists (`go.dev`
+answered 302 to dl.google.com at 20:08Z) but removes none of those gates.
+Verdict: NO-GO in budget. This is a lab-feasibility negative, not a claim
+that the upstream path is broken. The witness queue still owes W280/W282/
+W283/W285/W287 verdicts (#5770 is first in its next wake).
+
 ## Grade and tractability
 
 - **Rung 3:** GCC and Clang ASan-confirmed stack OOB WRITE in the verbatim
@@ -354,12 +391,12 @@ witness was asked on tape #5770; no independent verdict yet.
   effect. The Go agent cannot be built here (host Go 1.22.2, `go.mod`
   requires 1.27.4).
 
-Next experiment: the chosen-tail ceiling is now measured, so further
-pointer work on this consumer has no known route to a canonical address.
-The only remaining path past PARTIAL is a benign side effect on a live
-authenticated REST/CRD target with vulnerable/fixed/safe controls. Keep
-the no-command / no-rung-5 ceiling; the witness has not yet replayed
-W280/W282/W283/W285 or W287.
+Next experiment: no pointer route remains on this consumer (W287/W288),
+and W288 measured that a live authenticated REST/CRD target is not
+launchable under this plant's lab constraints. Keep the no-command /
+no-rung-5 ceiling. Await the witness verdicts owed for W280/W282/W283/
+W285/W287 (#5770 first) rather than author replays; a genuinely different
+live target or consumer would be needed to advance the grade.
 
 ## Duplicate check
 
