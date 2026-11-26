@@ -62,6 +62,12 @@ def main():
         "safe-utf8": (b"\xdf" * 21, b"UTF-8", b"_method"),
         "canary": (b"CASECANARY123", b"ISO-8859-1", b"_method"),
         "other-field": (b"\xdf" * 21, b"ISO-8859-1", b"q"),
+        "pure20": (b"\xdf" * 20, b"ISO-8859-1", b"_method"),
+        "pure21": (b"\xdf" * 21, b"ISO-8859-1", b"_method"),
+        "mixed27": (b"a" + b"\xdf" * 27, b"ISO-8859-1", b"_method"),
+        "mixed43": (b"a" + b"\xdf" * 43, b"ISO-8859-1", b"_method"),
+        "mixed59": (b"a" + b"\xdf" * 59, b"ISO-8859-1", b"_method"),
+        "mixed43-utf8": (b"a" + b"\xdf" * 43, b"UTF-8", b"_method"),
     }
     payload, charset, field = shapes[mode]
     print("mode=%s charset=%s field=%s bytes=%s status=%s" % (

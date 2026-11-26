@@ -4895,3 +4895,40 @@ on the stock glibc plain build, determine which object the one-byte write
 lands in and whether its effective offset can be steered into a live
 consumer without the harness; byte-value steering is closed by the
 alphabet probe above.
+
+## Wire-only heap corruption on stock glibc, no sanitizer (2026-11-26, 11:48Z)
+
+The parity-flip shape from the source audit (`a` + N×`0xDF`, so the overflow
+offset R = N+45 is even and R ≡ 8 (mod 16) at N ≡ 11 (mod 16)) was driven
+through the same wire-only multipart `_method` sink on the **plain** 3.4.12
+build — stock glibc 2.39, no ASan, no valgrind, no hook, no grooming. One
+fresh unmodified classic Sinatra server per repetition; 8 repetitions per
+shape, 2 on 3.4.13. Harness
+`lab/repro/ruby2shell-mp-mixed-plain.sh` (wire shapes in
+`ruby2shell-mp-method-21.py`); gitignored evidence under
+`lab/build/evidence/mp-method-21/plain-*.{out,server.log}`.
+
+| Wire shape (all `charset=ISO-8859-1` unless noted) | 3.4.12 plain | 3.4.13 plain |
+| --- | --- | --- |
+| `pure20` (20×`0xDF`, no overflow) | 0/8 abort, 404 | 0/2, 404 |
+| `pure21` (21×`0xDF`, R odd → slack) | 0/8 abort, 404 | 0/2, 404 |
+| `mixed27` (`a` + 27×`0xDF`) | **3/8 abort**, `corrupted size vs. prev_size` | 0/2, 404 |
+| `mixed43` (`a` + 43×`0xDF`) | 0/8 abort, 404 | 0/2, 404 |
+| `mixed59` (`a` + 59×`0xDF`) | **2/8 abort**, `malloc(): invalid next size (unsorted)` | 0/2, 404 |
+| `mixed43`, `charset=UTF-8` (same bytes, no expansion) | 0/8 abort, 404 | 0/2, 404 |
+
+The aborting logs show the readiness `GET /` 404 followed immediately by the
+glibc diagnostic, with no POST response — the process died in the request.
+`mixed43` being clean in this server layout is the same
+layout dependence already recorded for the in-process shape (5/10 aborts
+there); it is preserved as a negative, not retried into existence. The
+`mixed43-utf8` arm is the decisive encoding control: identical wire bytes,
+only the declared charset differs, and all 8 runs are clean.
+
+**Grade:** rung 3 (confirmed corruption) on the production, unsanitized
+consumer, now from a single wire-only request with no middleware or harness
+in the request path. Still **not rung 4**: the write is one fixed `0x53` byte
+into heap metadata; no chosen-offset write, pointer control or benign marker
+execution was observed. Full rung 5 remains NOT ACHIEVED. The next bounded
+experiment is to determine whether the corrupted metadata can be turned into
+a steered allocation on the wire path without the prior harness grooming.
