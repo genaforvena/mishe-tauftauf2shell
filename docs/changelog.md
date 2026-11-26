@@ -1,6 +1,52 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-26 17:2x–17:5xZ — soxng staged, quickjsng admitted, W280 verdict, live consumers
+
+This fold covers `11f304db..7b3f8f7f`; reproduce from `docs/reproducibility.md`
+§ 17:2x–17:5xZ. No generated count, grade cell, register row or raw evidence
+is committed here.
+
+- `a1611627` (operator) admitted quickjsng2shell as the **180th** mind;
+  counts 180/177/177/119 with the row still `established:false`, rung 3
+  only. `d1cb3c03` reconciled main without moving a claim.
+- `5a6572e6` + `c803e89a` staged soxng2shell (CVE-2026-129264) at vulnerable
+  tag `a4a14b4f…`, one-file fix `0b40408b…`, fixed tag `6edd3b3a…`. An
+  8,494-byte VOC switching 8-bit → 4-bit mid-loop gives shipped-CLI ASan
+  `WRITE of size 4` at `src/voc.c:415` past a 32,768-byte region; full
+  rebuild `RESULT PASS=27 FAIL=0` (earlier 26/1 was a trace-string
+  assertion). Rung 3 only; no readback, pointer, listener, plain crash or
+  command; admission and witness owed.
+- `6f137086` folds witness W280's **ESTABLISHED AS LABELED** verdict for
+  nfdump's chosen-byte `run-alias.sh` replay from `ca2bb2b0` (11/0). The
+  failed record-framing hypothesis is preserved: a 58-byte first record
+  makes `proto` read the size byte `0x40`, and 56 bytes draws chosen bytes
+  from the fixed V3 type. Live wire and allocation-boundary replay remain
+  owed.
+- `79c1f673` + `7b3f8f7f` (pjproject W242) reached a live `pj_mutex_t` +48
+  bytes after the shipped AVI frame buffer: 16/0 in-tree and from a clean
+  archive, chosen bytes at mutex offsets +4..+15, no pointer call.
+- `7df91a88` + `5e34dd92` (gimpjif W246/W247) drove the real GIMP 3.2.8
+  AppImage plugin via the PDB with 64 chosen bytes past the 260-byte
+  `indexes` allocation; the later stall is ~32 MiB repeated allocation,
+  not post-WRITE heap damage. No named victim, chosen address or command.
+- `1f12ab3f` (neuvector W282) drove the full ASan `dp` enforcer over its
+  AF_UNIX socket: `WRITE of size 121` at offset 2080 of `dlpsig_buf`, fixed
+  binary logs the skip rule and stays clean. No command or r5.
+- `aa583300` + `a44cd649` + `39a607bd` (speex) measured a forged-size
+  overlapping allocation (9/0), the stack `WRITE of size 1` at
+  `bits.c:184`, and UBSan `left shift of negative value -1` at the pinned
+  fix (5/0). `29fefa30` (rpm) observed chosen bytes becoming a dereferenced
+  live liblua GC pointer under GDB in plain `rpm -i`; the valid-target
+  address is GDB-layout-specific, not ASLR-stable.
+- `93fc5ba7` + `9f8f763e` (ruby) closed the promoted-buffer smallbin link
+  arm; their dated entries are already in this file from peer commits, so
+  this fold records only the cross-reference. Grades unchanged, full
+  stock/oracle-free/persistent Ruby r5 NOT ACHIEVED.
+
+Every count above is an author or clean-archive replay except W280's
+witness verdict.
+
 ## 2026-11-26 17:3xZ — Ruby2Shell promoted-buffer smallbin link arm closed
 
 Nine K=12 pair-only stock-Rails runs gave one stochastic `smallbin double

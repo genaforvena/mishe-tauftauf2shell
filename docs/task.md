@@ -13994,3 +13994,83 @@ All counts above are author or clean-archive replays except the W278 witness
 verdict; the generated manifest/register is unchanged by this prose fold.
 What would change it: a verdict contradicting a labeled row, a checker RED
 on committed HEAD, or a later report showing a quoted result was misquoted.
+
+## 2026-11-26 17:2x–17:5xZ — soxng staged, quickjsng admitted (180th), W280 verdict, live-consumer lanes
+
+This fold covers `11f304db..7b3f8f7f`. Reproduce the claims in
+`docs/reproducibility.md` § 17:2x–17:5xZ. No generated file, register row or
+other mind's lab evidence is moved here.
+
+- `a1611627` (operator, standing #6) admitted quickjsng2shell as the
+  **180th declared target mind**; generated counts moved
+  179/176/176/119 → 180/177/177/119, row still `established:false`. The
+  earlier STAGED row in this fold's window is superseded; rung 3 only.
+  `d1cb3c03` reconciles main and moved no claim.
+- `5a6572e6` + `c803e89a` (frontier W281) staged soxng2shell for
+  CVE-2026-129264 / GHSA-gwh5-2vhj-gvcc. Vulnerable tag `sox_ng-14.8.1`
+  `a4a14b4f…`, one-file fix `0b40408b…`, first fixed tag `sox_ng-14.9.0`
+  `6edd3b3a…`; the local fixed control is the vulnerable tag plus only that
+  patch. An 8,494-byte `.voc` switches from 8-bit to 4-bit CRLADPCM4
+  mid-loop, so two samples are stored per one reserved iteration: shipped
+  `sox_ng` CLI gives GCC ASan `WRITE of size 4` at verbatim `src/voc.c:415`
+  0 bytes past a 32,768-byte region; fixed and 8-bit-safe controls clean.
+  `sh run-all.sh` gave **27 PASS / 0 FAIL** on a full clean rebuild; an
+  earlier 26/1 was a literal trace-string mismatch in the assertion and is
+  preserved as a negative. Rung 3 only, rung 4 NOT CLAIMED: advisory
+  "remote" means decoding an attacker file, no listener, no chosen-offset
+  readback, pointer, command or plain-build crash. Admission, witness and
+  plain-build grooming owed.
+- `6f137086` folds witness **W280's nfdump verdict: ESTABLISHED AS LABELED**
+  for the packet-chosen-byte result: clean archive of `ca2bb2b0`, all four
+  collectors rebuilt and hashed, **11 PASS / 0 FAIL**, both chosen-byte
+  readbacks and flow counts reproduced. The live wire and allocation-boundary
+  lanes are still UNWITNESSED. A separate framing attempt aimed at a later
+  record's `size` field is preserved as a failed hypothesis: at 58 bytes
+  `proto` reads the size byte `0x40`, at 56 bytes the source bytes are the
+  fixed V3 type `0b 00`; no framing control was demonstrated.
+- `79c1f673` + `7b3f8f7f` (pjproject W242) reached a live `pj_mutex_t`
+  exactly +48 bytes after the shipped `pjmedia_vid_port` AVI frame buffer:
+  **16 PASS / 0 FAIL** in-tree and again from a clean archive; the first
+  clean attempt failed on a build setup issue and was repaired, not counted.
+  Chosen marker bytes reach mutex bytes +4..+15; the changed first word's
+  cause is UNKNOWN and no pointer was called. Earlier `frm_mutex=0` is
+  superseded for this loaded layout.
+- `7df91a88` + `5e34dd92` (gimpjif W246/W247) drove the SHA-256-verified
+  GIMP 3.2.8 AppImage plugin through the PDB with a wrapped real `inflate()`:
+  64 chosen `0x4d` bytes read back past the real 260-byte `indexes`
+  allocation. W247 localized the later stall to repeated ~32 MiB allocation
+  after the WRITE, not heap damage; one run was killed rc 137 under host
+  memory pressure. No named live victim, chosen address, dereference or
+  command; grade unchanged.
+- `1f12ab3f` (neuvector W282) removed the hyperscan blocker with local
+  sources and drove the **full pinned `dp` enforcer** under ASan over its
+  AF_UNIX `SOCK_DGRAM` socket: `stack-buffer-overflow WRITE of size 121`
+  at offset 2080 of `dlpsig_buf` (`dpi_sig.c:621`), rc 0; the fixed binary
+  logs `exceeds max sig len(2048) … skip rule` and is clean. Overwritten
+  words are ASCII regex bytes, with no chosen address, command or r5.
+- `aa583300` + `a44cd649` + `39a607bd` (speex2shell) measured three lanes:
+  forging the adjacent malloc size field to `0x31` yields an overlapping
+  allocation and a following-chunk overwrite (**9 PASS / 0 FAIL**); a
+  stack-backed non-owner `SpeexBits` gives ASan `WRITE of size 1` at verbatim
+  `bits.c:184` with chosen bytes in a neighbouring canary; the issue-#42
+  already-full input at the pinned fix gives UBSan `left shift of negative
+  value -1` (`bits-fix-09b569d1.c:185:24`, 5/0). No wire path, pointer or
+  command.
+- `29fefa30` (rpm2shell) crossed from value-only fault to **dereference** in
+  real plain `rpm -i` under GDB with no injected call: the 64-byte write
+  covers a live liblua `GCObject` qword, the GC walk reaches
+  `CHOSEN_PTR=0x4141414141414141`, and a step faults on an address derived
+  from it. A live-target address `0x5555555f54a0` also matches under the
+  deterministic GDB layout, not ASLR-stably. No valid-target redirection,
+  command or grade change.
+- `93fc5ba7` + `9f8f763e` (ruby2shell) closed the promoted-buffer smallbin
+  link arm: no stale `fd/bk` word can be a valid heap pointer because all
+  observed mapping low-32 values exceed the Unicode code-point cap. The
+  dated entries landed directly in `docs/changelog.md` via peer commits;
+  this fold only records them here. Grades unchanged; full
+  stock/oracle-free/persistent r5 remains NOT ACHIEVED.
+
+Every count above is an author or clean-archive replay except W280's witness
+verdict; no registered grade cell moved. What would change this fold: a
+verdict contradicting a labeled row, a checker RED on committed HEAD, or a
+later report misquoting one of these receipts.

@@ -46,6 +46,8 @@ containers whose host ports bind only to loopback.
 |---|---|---|---|---|
 | Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
 | Quickjsng2Shell W279 (newest, STAGED) | [status](../reports/quickjsng2shell-status.md), [brief](../reports/frontier-quickjsng2shell.md), [provenance](../lab/frontier/quickjsng2shell/PROVENANCE.md) | GHSA-r6vf-p8wr-4vg9 (no CVE, OSV 404), pins v0.14.0 `3c051980…` / v0.15.0 `433941b9…`, fix `da49a370…`; advisory "patched None" contradicted by tags | `sh run-all.sh && sh verify.sh` in `lab/frontier/quickjsng2shell` | `RESULT PASS=28 FAIL=0` and `PASS=11 FAIL=0`; GCC ASan `heap-use-after-free READ of size 4` at `quickjs.c:1546` via `:9478`, 0 bytes inside a 72-byte freed region; fixed prints `undefined`, safe clean; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness owed; full procedure in § 16:4x–17:1xZ |
+| Soxng2Shell W281 (newest, STAGED) | [status](../reports/soxng2shell-status.md), [brief](../reports/frontier-soxng2shell.md), [provenance](../lab/frontier/soxng2shell/PROVENANCE.md) | CVE-2026-129264 / GHSA-gwh5-2vhj-gvcc, vulnerable tag `sox_ng-14.8.1` `a4a14b4f…`, fix `0b40408b…`, fixed tag `sox_ng-14.9.0` `6edd3b3a…` | build both pinned trees with autoreconf + ASan; `sh run-all.sh` in `lab/frontier/soxng2shell` | `RESULT PASS=27 FAIL=0` full rebuild; shipped CLI ASan `WRITE of size 4` at `src/voc.c:415` 0 bytes past a 32,768-byte region from an 8,494-byte `.voc`; fixed/safe clean; rung 3, rung 4 NOT CLAIMED, no plain crash, admission and witness owed; full procedure in § 17:2x–17:5xZ |
+| Supersession — quickjsng2shell row above | [status](../reports/quickjsng2shell-status.md) | Operator `a1611627` admitted the target as the 180th mind; generated counts 180/177/177/119 | no new harness | The row's STAGED wording is the pre-admission state; `established:false` and rung 3 only are unchanged |
 | Libmikmod2Shell W276 (ADMITTED 16:5xZ, 179th) | [status](../reports/libmikmod2shell-status.md), [brief](../reports/frontier-libmikmod2shell.md) | CVE-2026-105837 / GHSA-rr6f-2vgw-5v76, pins `08d7d210…` / `a125eabb…`, `AV:L` | `sh run-all.sh && sh verify.sh` in `lab/frontier/libmikmod2shell` (runner `332485d1…30077c`, verify `40e841d7…4c1929`) | `RESULT PASS=12 FAIL=0`; GCC ASan `WRITE of size 8` at `load_dsm.c:339` via `Player_Load()` 0 bytes past a 16/128-byte `AllocTracks` region; fixed `errno=9`, safe clean; rung 3, rung 4 NOT CLAIMED, admitted as 179th at 16:5xZ with operator isolated-copy replay, witness owed; full procedure in § 16:1x–16:4xZ |
 | Quickjsbcode2Shell (newest) | [status](../reports/quickjsbcode2shell-status.md), [brief](../reports/frontier-quickjsbcode2shell.md) | CVE-2026-88378 / GHSA-jww9-7qmq-6hv5, pins `04be2460…` / `42526037…`, no release tags | `bash lab/frontier/quickjsbcode2shell/run-all.sh` (sha256 `7031c420…c09b1cd5`) | `RESULT PASS=25 FAIL=0 rc 0`; GCC ASan `WRITE of size 96` at `quickjs.c:38820` on the 21-byte upstream regression, fixed rejects, real bytecode round-trip `value=2` on both, Clang silent; rung 3, rung 4 NOT CLAIMED, witness replay owed. Admitted 177th by `4336a4d2`; full procedure in § 15:0x–15:4xZ |
 | Axis2guththila2Shell W273 (newest) | [status](../reports/axis2guththila2shell-status.md), [brief](../reports/frontier-axis2guththila2shell.md) | CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`, CNA range before `f2b30c15…` | `sh run-all.sh && sh verify.sh` in `lab/frontier/axis2guththila2shell` | `RESULT PASS=4 FAIL=0`; GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308` from the 19-byte `<!ENTITY x "y"><a/>`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 15:0x–15:4xZ |
@@ -14733,3 +14735,75 @@ count; grade and the no-r5 ceiling are unchanged.
 
 Every count in this section is an author or clean-archive replay except the
 W278 witness verdict; no generated grade cell or register row moved here.
+
+## 2026-11-26 17:2x–17:5xZ — soxng, quickjsng admission, W280 verdict, live-consumer lanes
+
+This section reproduces the claims in the matching `docs/task.md` fold.
+Raw logs and gitignored build trees regenerate with the commands below; no
+claim depends on an uncommitted artifact.
+
+### Quickjsng2shell admission and SoX NG staging
+
+`a1611627` admitted quickjsng2shell as the 180th mind (180/177/177/119;
+row `established:false`); the pins, runner and expected bytes are in §
+16:4x–17:1xZ. For soxng2shell (`5a6572e6`, `c803e89a`), fetch the tag
+archives `sox_ng-14.8.1` (`a4a14b4f58ac2c08c4cc416a7cffe8a4c50a0b7d`) and
+`sox_ng-14.9.0` (`6edd3b3ae204908101a8c1bd54903971e0393b4d`), apply fix
+`0b40408b516a3628cfcfd83d32028cf361c8ac90` to the vulnerable tree for the
+local control, then run `sh lab/frontier/soxng2shell/run-all.sh` from the
+committed runner with autoreconf and the dependency-free configure options
+recorded in `lab/frontier/soxng2shell/PROVENANCE.md`. Expect a full rebuild
+of both ASan CLIs, `RESULT PASS=27 FAIL=0`, the generated 8,494-byte `.voc`
+giving `heap-buffer-overflow WRITE of size 4` at verbatim `src/voc.c:415`
+via `sox_read` (`formats.c:1414`) and `sox_flow_effects` (`effects.c:444`),
+0 bytes after a 32,768-byte region; fixed and 8-bit-only controls exit 0
+with no report. The first pass was 26/1 on a literal `after a 32768-byte
+region` string and is preserved. No plain crash, chosen-offset readback,
+pointer, listener or command; rung 3 only.
+
+### Nfdump W280 witness verdict and failed framing lane
+
+`6f137086` records witness W280 replaying `run-alias.sh` from `git archive
+ca2bb2b0`: four collectors rebuilt and hashed, **11 PASS / 0 FAIL**, both
+chosen-byte readbacks and flow counts reproduced — ESTABLISHED AS LABELED
+for that lane only. The 58-byte framing attempt is a negative: the short
+flow view's `proto` reads record 2's size low byte `0x40`, not
+`numElements`; 56 bytes makes `proto` read `01` but the source becomes the
+fixed V3 type `0b 00`. W280 did not replay the live wire or allocation
+boundary; those stay UNKNOWN.
+
+### Pjproject W242, GimpJIF W246/W247, Neuvector W282
+
+From `lab/frontier/pjproject2shell`, the shipped-video-port driver
+`real/vidport-driver.c` against both pinned trees gives twice **16 PASS /
+0 FAIL**; `git archive 79c1f673` plus a repaired first build reproduces it.
+Expect a live `pj_mutex_t` at frame-buffer +48 and chosen bytes at mutex
+offsets +4..+15; the first word's change is UNKNOWN and no pointer is
+called. For GimpJIF, verify the GIMP 3.2.8 AppImage against upstream
+`SHA256SUMS`, extract it and drive headless through the PDB with the
+committed `inflate()` shim: `sh run-all.sh` gives rc 0 and 64 chosen `0x4d`
+bytes past the 260-byte `indexes` allocation; the post-WRITE stall is
+repeated ~32 MiB allocation, and one rc 137 kill under host pressure is a
+preserved negative. Neuvector W282's full-enforcer recipe is in
+`lab/frontier/neuvector2shell/fulldp/EVIDENCE.md`: provision hyperscan from
+local sources, build pinned `dp` under ASan with
+`-fno-omit-frame-pointer -fno-stack-protector -U_FORTIFY_SOURCE`, start
+`dp -s -n 1` on `/tmp/dp_listen.sock`, then send the REST-valid message over
+`AF_UNIX SOCK_DGRAM`. Expect `stack-buffer-overflow WRITE of size 121` at
+offset 2080 of `dlpsig_buf` (`dpi_sig.c:621`), fixed binary clean with
+`exceeds max sig len(2048) … skip rule`; no command side effect.
+
+### Speex allocation, stack and fixed-commit lanes; RPM GC pointer
+
+`lab/frontier/speex2shell/harness/alloc-primitive.sh` forges the neighbour
+chunk size to `0x31` and reports 9/0; `stack-asan.c` gives ASan
+`WRITE of size 1` at `bits.c:184` with a fixed clean control, and
+`lab/frontier/speex2shell/harness/ubsan-fixed-case.sh` compiles pinned
+`bits-fix-09b569d1.c` with UBSan for `left shift of negative value -1`
+(`bits-fix-09b569d1.c:185:24`, 5/0). For RPM, replay
+`lab/frontier/rpm2shell/real/run-install-consumer.sh` and the pinned GDB
+breakpoint at `lib/rpmfi.cc:2243`: expect `NEXT_AFTER=0x4141414141414141`,
+the GC walk reaching that chosen pointer, and a fault on a derived address
+in plain `rpm -i`; the live-target address match is GDB-layout-specific.
+All counts in this section are author or clean-archive replays except
+W280's witness verdict; no generated grade cell or register row moved here.
