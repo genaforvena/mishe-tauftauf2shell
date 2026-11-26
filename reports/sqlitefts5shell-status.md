@@ -1,4 +1,4 @@
-# sqlitefts5shell — staged by frontier; admission and witness replay owed
+# sqlitefts5shell — admitted (witness replay owed)
 
 CVE-2026-119374: SQLite before 3.54.0 built with `SQLITE_ENABLE_FTS5` rewrites
 an FTS5 leaf footer in `fts5DoSecureDelete()` with an uncapped write cursor,
@@ -37,8 +37,12 @@ allocation on a DELETE. Brief: `reports/frontier-sqlitefts5shell.md`.
 
 ## Next
 
-Staged 2026-11-26 with registered two-pane window 180. Operator admission and
-independent witness replay are owed; witness must re-fetch the pinned zip from
-the exact URL and verify its hash before the offline runner. Do not duplicate
-this lane or its window. The sibling CVE-2026-119373 (`detail=none` negative
-rowids) belongs to this mind if admitted, not a separate window.
+Admitted 12:3xZ under standing #6 as the 172nd declared target mind; window
+180 adopted (panes %364/%365 live, no duplicate). The engine route and three
+generated wake units remain person-reserved (`standing-approvals.md:47-51`).
+Independent witness replay is owed: re-fetch the pinned official 3.53.4 zip
+from the exact URL in `PROVENANCE.md`, verify its sha256, then run the offline
+runner and check the GCC/Clang WRITE-1 and the fixed/safe controls. The row is
+`established:false` until that verdict; the sibling CVE-2026-119373
+(`detail=none` negative rowids) belongs to this mind if admitted. Do not
+duplicate this lane or the registered window.

@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 171,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ) and xdgmime2shell (11:2xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
+      "value": 172,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ) and sqlitefts5shell (12:3xZ) admitted 2026-11-26 under standing #6; the earlier roster name list is preserved in docs/architecture.md.",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 168,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ and xdgmime2shell admitted 11:2xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 169,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ and sqlitefts5shell admitted 12:3xZ. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 168,
+      "value": 169,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2608,6 +2608,22 @@
         "reports/xdgmime2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "Sqlitefts5Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "◐",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 12:3xZ under standing #6 as the 172nd declared target mind; window 180 adopted (panes %364/%365 live, no duplicate); hy4-flash route and three generated wake units remain missing (omp-only and doctor RED, person-reserved).** CVE-2026-119374: SQLite before 3.54.0 built with SQLITE_ENABLE_FTS5 rewrites a leaf footer in fts5DoSecureDelete() with an uncapped write cursor (nPg = iPgIdx) so a crafted secure-delete database writes past the leaf allocation on DELETE FROM t WHERE rowid=1; pinned vulnerable GA 3.53.4 b09c88c14082339b66c7b7158d609a771e64ca69 (official sqlite-src-3530400.zip) and fix d9de6eedbe918c074c7556400fa21df5960704d9. Canonical run-all.sh sha256 71b234d43ebd56187ce679e680b124ecb498dbb40894509785864090e6d10a32 — RESULT PASS=26 FAIL=0, rc 0; GCC and Clang ASan WRITE-1 0 bytes after a 640-byte region at generated sqlite3.c:256373 through fts5PutVarint64 <- sqlite3Fts5PutVarint <- fts5DoSecureDelete, fixed builds stop with rc 1 fts5 corruption, crafted-DB read/MATCH and clean-table DELETE ASan-clean. Grade rung 3 real-source ASan OOB WRITE, rung 4 PARTIAL; no named adjacent object, pointer, wire/request path, command or r5. Author-only; independent witness replay with pinned zip re-fetch is owed before ESTABLISHED.",
+      "reports": [
+        "reports/frontier-sqlitefts5shell.md",
+        "reports/sqlitefts5shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
