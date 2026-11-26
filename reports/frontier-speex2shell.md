@@ -5,11 +5,18 @@ Witness W245 (2026-11-26 04:35Z): replay ESTABLISHED AS LABELED, no grade
 change, NO r5; evidence in the witness wall and its W245 detail artifact.
 Rungs 1–4 observed locally against a real libspeex build through public APIs;
 rung 4 is demonstrated impact in the lab (attacker-chosen bytes at chosen
-offsets in a live adjacent heap object), with explicit conditions below. No
-pointer control, no command execution and no rung 5. Duplicate check before
-provisioning: no `reports/frontier-*speex*`, no speex window/charter/mind on
-the tape, absent from the do-not-duplicate list. Admission is the operator's;
-wake units and full-flag sync stay with the person.
+offsets in a live adjacent heap object), with explicit conditions below. The
+witness verdict covers no pointer control; an additive in-process pointer
+control result is recorded in §6. No command execution and no rung 5.
+Duplicate check before provisioning: no `reports/frontier-*speex*`, no speex
+window/charter/mind on the tape, absent from the do-not-duplicate list.
+Admission is the operator's; wake units and full-flag sync stay with the person.
+
+Update 2026-11-26 (speex2shell wake): an in-process function-pointer overwrite
+and benign marker are now demonstrated under the same four conditions (§6),
+and the bundled-decoder reachability experiment returned a negative (§6).
+No wire consumer, no command and no r5; W245 witness verdict is unchanged and
+does not cover these additive observations.
 
 ## 1. Verified ground truth
 
@@ -95,10 +102,13 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
 
 ## 4. Ceiling and negatives
 
-- No pointer overwrite, no function-pointer control, no benign command
-  marker, no live wire consumer and no r5. Rung 4 is limited to chosen bytes
-  at code-determined offsets in an adjacent live object under the stated
-  allocator conditions.
+- A function-pointer overwrite and an in-process benign marker are now
+  demonstrated (§6): chosen bytes at canary offsets 0..7 replace a live
+  neighbour's function pointer and a call through it fires the marker. That
+  is rung-4 mechanics; it is not command execution, not a wire path and not
+  r5. The underlying primitive remains chosen bytes at code-determined
+  offsets in an adjacent live object under the stated allocator conditions.
+- No benign command, no live wire consumer and no r5.
 - The advisory also claims stack corruption; only the heap path was driven.
   Stack reachability is **UNKNOWN**.
 - A later issue comment reports a negative truncated length / UBSan
@@ -111,10 +121,15 @@ re-asserts the sink and the adjacent bytes; result recorded in the wall.
 
 ## 5. Cheapest next experiments
 
-1. Drive the sink from a real decoder entry point (crafted Speex bitstream
-   through `speex_decode`/`speex_bits_read_whole_bytes` on a non-owned
-   buffer) to establish whether any network-facing consumer reaches it with
-   attacker-controlled bytes.
+1. **Answered negative for the bundled source tree.** No production caller
+   of `speex_bits_read_whole_bytes` exists in `src-vuln/`; every real
+   consumer (`src/speexdec.c:678`, OSS-Fuzz `speexdec_fuzzer.cc:294`,
+   `speexclient/speex_jitter_buffer.c:70`, `doc/sampledec.c:46`, TI decoders)
+   uses `speex_bits_read_from`, which resets `nbBits` and writes from offset
+   0, so a crafted bitstream through those paths cannot reach `bits.c:184`.
+   Reaching the sink requires an external application that uses the append
+   API on a non-owned, already-buffered `SpeexBits`; no such consumer was
+   identified. Wire reachability stays UNKNOWN.
 2. Test whether the corrupted adjacent chunk metadata can be turned into a
    controlled allocation/layout primitive before any `free`, with safe
    controls; do not assume the current 8-byte data overwrite is enough.
@@ -141,3 +156,36 @@ stay UNKNOWN. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w245-speex2shell/detail.md`.
 Two wording NITs are folded above and in `PROVENANCE.md`: the wrapper path
 and the "merge commit" label for the one-parent MR head commit.
+
+## 6. Additive wake 2026-11-26 (speex2shell, author-observed)
+
+Consumer-path check (read-only source inspection of the pinned tree):
+`grep -n 'speex_bits_read_from|speex_bits_read_whole_bytes' src-vuln/`
+shows the vulnerable append function only at its definition
+(`libspeex/bits.c:156`) and declaration (`include/speex/speex_bits.h:88`).
+`speex_bits_read_from` (`bits.c:109-145`) truncates non-owner oversize input
+to `buf_size`, writes at `chars[0..]`, and sets `nbBits=nchars<<3`, so it has
+no `pos`-offset overflow. No in-tree bitstream path reaches `bits.c:184`.
+
+Pointer-control probe `harness/ptr-control.c`, run by
+`bash lab/frontier/speex2shell/harness/ptr-control.sh` (8 PASS / 0 FAIL,
+rc 0) against the existing plain gcc libspeex static libraries, no rebuild
+of the pinned trees. Conditions unchanged: `speex_bits_init_buffer` with a
+16-byte heap buffer, `owner=0`, an 8-byte seed read, then two 16-byte
+oversize reads, `delta=32`, no free. The neighbour is a 16-byte struct
+`{ void (*fn)(void); unsigned long tag; }`; the second read's bytes 8..15
+land at its `fn` field. The address of `benign_marker` is resolved at
+runtime and copied into `p2[8..15]`, so ASLR is handled by the input itself.
+
+Vulnerable build (`evidence/ptr-vuln-plain.out`, one observed run):
+`delta=32`, `target=0x56c8c6b362a9 bytes=a962b3c6c8560000`,
+`vfn=0x56c8c6b362a9 tag=5a5a5a5a5a5a5a5a`, `BENIGN_MARKER_CALLED`,
+`marker_called=1`, rc 0. Vendor-fixed build
+(`evidence/ptr-fixed-plain.out`): `delta=32`, `vfn` remains the original
+`noop` pointer, `marker_called=0`, rc 0, and `tag` intact in both. The
+script also asserts `vfn` equals the printed chosen target. This upgrades
+rung 4 from data bytes to in-process function-pointer control plus benign
+marker execution; it remains rung-4 mechanics because the consumer is a
+harness, no command runs and no wire or request input is involved. The two
+reads still corrupt the neighbouring chunk header, which is never freed, as
+in the staged claim. Not independently replayed by the witness.

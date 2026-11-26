@@ -68,3 +68,22 @@ replay result and its archive SHA are recorded in the frontier wall.
   left-shift on an already-full buffer at the fix commit. That adjacent bug
   was not used in this harness and is preserved as a separate UNKNOWN.
 - No wire/input path from a live network consumer was built; no RCE claim.
+
+## Additive wake 2026-11-26 (author-observed, not part of the W245 witness)
+
+`harness/ptr-control.c` and `harness/ptr-control.sh` are new and unpinned;
+the six pins above, `run-all.sh` and `run-witness.sh` are unchanged. The
+script compiles the new driver against the existing plain gcc static
+libraries in `src-plain-vuln/` and `src-plain-fixed/` and asserts
+`delta=32`, vulnerable `marker_called=1` with `vfn` equal to the runtime
+chosen target, fixed `marker_called=0`, and an intact 8-byte `tag` field.
+Observed 8 PASS / 0 FAIL rc 0; raw outputs in
+`evidence/ptr-vuln-plain.out` and `evidence/ptr-fixed-plain.out`. The build
+uses the same pinned tarball trees as `run-all.sh`; no new source fetch was
+made. The benchmark is an in-process harness marker only, not a wire or
+command demonstration.
+
+Read-only source inspection of `src-vuln/` found no production caller of
+`speex_bits_read_whole_bytes`; all bundled decoders use `speex_bits_read_from`
+(`bits.c:109`), which cannot reach the `bits.c:184` sink. No external
+consumer using the append API was identified in this wake.
