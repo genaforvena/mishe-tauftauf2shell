@@ -4457,5 +4457,25 @@ stock/Rails code, despite the primitive being real.
 
 ASLR-off determinism was verified (`setarch -m -R` twice gives byte-identical
 maps for the pinned Ruby), but no new ASLR-dependent primitive was claimed.
+
+### Follow-up allocator closures
+
+- **glibc tcache class promotion — structurally blocked.** A 72-byte mapping
+  request writes at user offset `R=0x48`, the next chunk's `size` LSB. In an
+  isolated probe, an adjacent 0x40 chunk's field changed `0x41→0x53` exactly
+  as predicted (`v-size-after=0x53`). Freeing that chunk then called
+  `munmap_chunk()` and aborted `munmap_chunk(): invalid pointer` before
+  `tcache_put`; `0x53` has bit 1 set, which is glibc's `IS_MMAPPED`, and both
+  Ruby2Shell bytes (`0x53`, `0x73`) set it. A grown chunk therefore cannot
+  enter a tcache bin by the normal free path. The only way around this is a
+  second write that clears the flag, which this primitive does not provide.
+- **C=160 jemalloc consumer — named, inert.** The adjacent worker
+  `malloc(0x88)` backtrace resolves to `vm_make_env_each` (`vm.c:1018`,
+  `ALLOC_N(VALUE, env_size)` via `rb_gc_impl_malloc`). Its q0 is
+  `env_body[0]`, a Ruby local VALUE. The low-byte write makes it an odd
+  immediate, not an address; the request survives and no later consumer
+  dereferences it. C=80's other pointer hit remains the boot Prism node /
+  StringScanner family already closed.
+
 Grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
 witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
