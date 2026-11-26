@@ -547,3 +547,51 @@ plugin process, and the caller is identified at source line 1614; this is
 not an ASan WRITE in the real plugin, not a named user object, not a
 chosen address, dereference or command. Grade unchanged rung 3 / rung 4
 PARTIAL, NO r5.
+
+## W252 allocator-site naming and crash isolation (2026-11-26, 19:18Z wake)
+
+New committed shims `live/allocsite-shim.c` (SHA-256
+`cfc81d28025c24401571e09fbd54ebae7ca136c87ba4bb7ca9ba29d17e953a45`)
+and `live/galloc-shim.c` (SHA-256
+`af3178f1c56b2db2f88ab6826cdba3a11e35df21ae41b5e89c32449ac36702e4`),
+both compiled over the ignored `live/inflate-shim.so` and restored to
+the canonical binary (SHA-256
+`fc73e957e24d933bbf7667dc9166ed5e45ee41b01c1c7b584c4dfc839d7923d5`)
+after each bounded run. Command shape for each run: from
+`/tmp/gimpjif-appimage/squashfs-root`, `timeout -k 5 90 env HOME=<fresh>
+./AppRun -i --batch-interpreter plug-in-script-fu-eval -b "(let* ((img
+(car (gimp-file-load RUN-NONINTERACTIVE \".../long.jif\" \"long.jif\"))))
+(gimp-message (number->string (car (gimp-image-get-width img)))))" -b
+'(gimp-quit 0)'`, output redirected to the evidence file, then stale
+GIMP processes killed.
+
+Evidence: `live/evidence/allocsite-long.log` (SHA-256
+`3bad8ee6cc1652b50cef6ed477930593d5a6f90b8aa57ef3b296bcb141349a65`,
+rc 137), `live/evidence/allocsite-long2.log` (SHA-256
+`fec465f02108d12a5bc51362cb4566f2cb20441e1b5247f1e78d832902275114`,
+rc 124), `live/evidence/galloc-long.log` (SHA-256
+`b562deb0724f315f5c1ddc281f736731e10714f7f4f444765f3a4370857842b7`,
+rc 124), and the preserved negative
+`live/evidence/allocsite-long3.log` (SHA-256
+`147d8a81bdf4909f56019d3df70755f494db1ae0f6ac73b9589ee8003032052c`,
+rc 139, one line, zero `SHIM_` lines). Each successful run reports
+`avail_out_before=2147483778 total_out=448 ret=1`, `SHIM_PRECHUNK0
+raw_size=0x111`, `SHIM_POSTCHUNK1 raw_size=4d4d4d4d4d4d4d4d`, and
+all-chosen `SHIM_EDGE`/`SHIM_FAR`.
+
+`addr2line -f -C -e <.../file-gif-load/file-gif-load> 0x3565` gives
+`ReadJeffsImage ...file-gif-load.c:1547`; `0x3778` gives
+`ReadJeffsImage ...file-gif-load.c:1614`. On the bundled stripped
+`libglib-2.0.so.0`, `0x65822` maps to `g_malloc`; on
+`libgobject-2.0.so.0`, `0x3f097` maps to
+`g_type_module_register_type`. In `galloc-long.log`,
+`SHIM_ALLOC kind=2 ... delta=+0 n=260` names `indexes` as the
+`g_try_malloc` at 1547; `kind=1 ... delta=+368 n=96` names the adjacent
+96-byte allocation as a `g_malloc` from
+`g_type_module_register_type`. `SHIM_PREUSER1` in that log stores
+`0100000000000000` followed by the exact `out+368` pointer, so a live
+object at `out+272` points at that named allocation before the write.
+Interpretation: caller and allocation-site identity for adjacent live
+objects are now measured in the real plugin; the `out+272` object type,
+a chosen address, a dereference and a command remain unobserved.
+Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.

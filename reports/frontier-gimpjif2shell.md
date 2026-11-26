@@ -399,3 +399,44 @@ field of the immediately following live heap chunk. `SHIM_EDGE` and
 `SHIM_FAR` are entirely chosen `0x4d`. No ASan instrumented the real
 plugin, no named user object, chosen address, dereference or command was
 observed: grade stays rung 3 / rung 4 PARTIAL, NO r5.
+
+## Allocator-site naming in the real plugin (W252, 2026-11-26)
+
+`live/allocsite-shim.c` keeps only one libc `malloc` wrapper: it calls
+`__libc_malloc` and records one return address in a static ring (no TLS,
+no dlsym or formatting in the allocator path), then dumps pre- and
+post-inflate chunk headers and ring hits near `strm->next_out`. Compiled
+over the ignored `live/inflate-shim.so` and run on `long.jif` through the
+unmodified GIMP 3.2.8 AppRun/PDB in a fresh HOME under `timeout -k 5 90`,
+it survived startup (rc 137 at the timeout only). In
+`live/evidence/allocsite-long2.log` the pre-write dump shows the
+272-byte `indexes` chunk (`raw_size=0x111`), three live 32-byte chunks
+after it, and a live object at `out+272` whose first 16 bytes are
+`01 00...` plus a pointer into the overflow region; post-write that
+chunk's size word is `4d4d4d4d4d4d4d4d`. The ring names the `indexes`
+allocation as `file-gif-load+0x3565`, which `addr2line` resolves to
+`ReadJeffsImage` at `file-gif-load.c:1547`, and two adjacent allocations
+at `out+336` (16 bytes) and `out+368` (96 bytes) to
+`libglib-2.0.so.0+0x65822` (`g_malloc`).
+
+`live/galloc-shim.c` instead interposes only `g_malloc` and
+`g_try_malloc` (one return address, direct `__libc_malloc`, no dlsym in
+the allocator path). `live/evidence/galloc-long.log` reproduces the
+same WRITE and names the `indexes` allocation as
+`g_try_malloc` from `ReadJeffsImage:1547`; the 96-byte allocation at
+`out+368` is a `g_malloc` call from
+`libgobject-2.0.so.0+0x3f097` (`g_type_module_register_type`), and the
+pre-write pointer stored at `out+280` points exactly at that 96-byte
+object. All 448 written bytes remain chosen `0x4d`.
+
+A third run adding `__builtin_return_address(1)` to the working shim
+died at rc 139 before startup output with zero `SHIM_` lines
+(`live/evidence/allocsite-long3.log`), reproducing the W250 crash
+cause: the extra stack-frame read, not malloc-family interposition by
+itself. The shim was reverted byte-for-byte and the canonical binary
+restored (`fc73e957...`) after each run.
+
+Grade stays rung 3 / rung 4 PARTIAL, NO r5. Allocation callers for
+adjacent live objects are now named in the real plugin, but the
+`out+272` object's type is still unknown, no chosen address was used,
+no chosen pointer was dereferenced and no command side effect was seen.
