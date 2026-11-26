@@ -188,6 +188,50 @@ No external system was probed or scanned.
 Disposition: thread (1) stays open with no provisioned consumer; the W9/W18
 negative stands. No harness change, no replay, no witness result.
 
+## W27: second external-consumer probe and free-ordering negative (2026-11-26 04:12Z)
+
+Not a new lane, replay or grade change. Thread (1) from W9 was probed once more
+with read-only public-source provisioning; no external target was tested.
+
+- Sourcegraph public code index, query `context:global ssh_channel_free and
+  channel_data_function lang:C count:100 fork:yes archived:yes`
+  (`https://sourcegraph.com/.api/search/stream`, fetched 04:00Z): the only
+  distinct non-libssh consumer file returned was `github.com/FreeRDP/Remmina`
+  `src/remmina_ssh.c`. Every other hit was a vendored libssh tree or one of
+  the examples already surveyed in W9.
+- Remmina `master:src/remmina_ssh.c`, raw-fetched from
+  `https://raw.githubusercontent.com/FreeRDP/Remmina/master/src/remmina_ssh.c`,
+  3245 lines, SHA-256
+  `4118fa44d8136a49cb45ebc30e3b2c8b3b71d5fa0e2eaabb66e23a205b5bf98d`:
+  `.channel_data_function = remmina_ssh_cp_to_fd_cb` at :178; the callback
+  (:542-558) only does `write(fd, data, len)` at :555; the close callback
+  (:561-582) only removes the event fd and closes it. All seven
+  `ssh_channel_free()` sites (:2275, :2295, :2377, :2560, :3010, :3058, :3162)
+  are tunnel teardown, open-forward error paths or session cleanup, not a
+  data callback. Negative — the same shape as the pinned `ssh_X11_client.c`.
+- Full text of libssh archive threads 2019-02 #0000007 and #0000008 re-read:
+  the author frees in the main event loop after `ssh_channel_is_closed()`,
+  not in `my_channel_data_function()`; the follow-up states
+  `ssh_channel_do_free()` runs only on `CLOSED_REMOTE`/`NOT_BOUND`. This
+  confirms W23's reading of the 2019 claim; it stays unreproduced.
+
+Pinned-source ordering check (why thread (1) is hard; not a new claim):
+`ssh_channel_free()` sets `FREED_LOCAL` and calls `ssh_channel_do_free()` only
+when `CLOSED_REMOTE`/`NOT_BOUND` are already set (`channels.c.vuln:1317-1331`);
+`ssh_channel_do_free()` removes the channel from `session->channels` and frees
+it (`:1340-1360`); `channel_rcv_close()` sets `CLOSED_REMOTE` then do-frees a
+`FREED_LOCAL` channel (`:807-809`); `channel_from_msg()` reaches
+`ssh_channel_from_local()`, which iterates `session->channels` (`:412-425`).
+An app free in the main loop before CLOSE therefore removes the channel before
+a later DATA packet can be routed to it. The UAF shape needs the free inside
+the data callback after a remote CLOSE, while `channel_rcv_data()` still holds
+the live local `channel` pointer — exactly the harness condition. No
+remote-only path supplies it.
+
+Disposition: thread (1) stays open with no provisioned consumer; the W9/W18
+negatives stand. The archive thread is a user claim, not a consumer tree. No
+harness change, no replay, no witness result; grade unchanged.
+
 ## W24: wire-resident callback iterator (2026-11-26 02:05Z)
 
 Additive and unwitnessed; no claim or grade change. `real/run-wirelist.sh`
