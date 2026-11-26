@@ -463,6 +463,21 @@ lab condition and the grade are unchanged: still rung 4 author-layout
 DEMONSTRATED, no ASLR-stable target, no command, no r5. Evidence and hashes:
 `lab/frontier/rpm2shell/PROVENANCE.md` and `real/setarch-nogdb/`.
 
+### Loopback wire delivery (2026-11-26 22:56Z)
+
+`real/run-wire-consumer.sh` serves the crafted package from a
+loopback-only Python HTTP server and passes the URL to a real `rpm -i`,
+which fetches it through its own `%_urlhelper` (curl). In-tree result is
+12 PASS / 0 FAIL: vulnerable ASan rc 134 with the same `WRITE of size 64`
+in `iterReadArchiveNext` at `rpmfi.cc:2242`, fixed and safe rc 1 and
+ASan-clean, plain vulnerable rc 139, zero/short fixtures rc 1, and a
+closed-port URL rc 1 clean. The server log records HTTP 200 GETs for all
+fixtures. This is a measured remote *delivery* path for the corruption, not
+command execution: no chosen pointer, ASLR-stable target or benign side
+effect was observed, so the grade is unchanged and r5 is not claimed.
+Evidence and hashes: `lab/frontier/rpm2shell/PROVENANCE.md` and
+`lab/frontier/rpm2shell/real/wire/`.
+
 ## Duplicate check
 
 `reports/frontier-*.md`, the wall's do-not-duplicate list and `lab/frontier/`

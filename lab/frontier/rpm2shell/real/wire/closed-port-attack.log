@@ -1,0 +1,3 @@
+curl: (7) Failed to connect to 127.0.0.1 port 44807 after 0 ms: Couldn't connect to server
+error: Executing url helper "/usr/bin/curl   --silent --show-error --fail --globoff --location -o /home/mesh-home/mishe-tauftauf2shell/lab/frontier/rpm2shell/install-vuln/var/tmp/rpm-tmp.y2GF7R http://127.0.0.1:44807/attack-reloc.rpm" failed with status 7
+error: skipping http://127.0.0.1:44807/attack-reloc.rpm - transfer failed

@@ -1,0 +1,4 @@
+3049e7a94c3db7ad7c572e0a0c79454000490770e630ffdbfcd8c745b00468db  install/attack-reloc.rpm
+ab97e02fecdf432b120a7f62e95990dcc3394a37e1b836774d357c251c127a41  install/attack-zero-reloc.rpm
+9d5cddec8ee32520ffa2be2bff8f14672f57c80d004c3f12a3c44c2033ab6e75  install/safe-reloc.rpm
+831534eeee6d409b674c972f09d5eba9dee7d5400f68919cc8a55d93203496df  install/short-read-reloc.rpm

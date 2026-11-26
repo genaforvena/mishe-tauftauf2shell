@@ -648,3 +648,44 @@ available in this wake. No ASLR-stable target was measured.
 
 In-tree only: this runner needs the untracked vulnerable/fixed builds, so
 no clean-archive replay is claimed for this lane.
+
+## Loopback wire delivery lane (2026-11-26 22:56Z)
+
+New bounded lane: the crafted package is delivered to a real `rpm -i` over
+loopback HTTP using rpm's own URL machinery. `real/run-wire-consumer.sh`
+starts `real/wire/http_server.py` bound only to `127.0.0.1` on an ephemeral
+port, copies the four `relocate-install.py` fixtures into its served
+directory, and passes `http://127.0.0.1:$PORT/<fixture>` to the same three
+built binaries used by the other grade runners. No external network is
+contacted; curl is invoked only by rpm's `%_urlhelper` macro and `NO_PROXY=*`
+is set for the child.
+
+First in-tree run: `WIRE_CONSUMER_PASS=12 WIRE_CONSUMER_FAIL=0`. The
+vulnerable ASan `rpm -i` aborts (rc 134) on `WRITE of size 64` in
+`iterReadArchiveNext` at `rpmfi.cc:2242` reached through
+`rpmcpioRead` (`lib/cpio.cc:444`), exactly as in the file-based consumer;
+the fixed ASan binary returns rc 1 with no ASan report; the safe fixture on
+the vulnerable ASan binary returns rc 1 clean; the plain vulnerable binary
+returns rc 139 on the attack fixture and rc 1 on the zero and short-read
+fixtures. A URL to a bound-then-released closed port returns rc 1 clean,
+so the fault follows the fetched bytes rather than the URL argument. The
+server log records `GET ... 200` for all four fixtures. The served fixture
+hashes match `install/*.rpm` recorded in `real/wire/fixtures.sha256`.
+
+This adds a real wire input path for the same corruption, but no chosen
+pointer, benign command or ASLR-stable target; it does not change the grade
+and is not r5.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-wire-consumer.sh` | `e6ffe2adf9ad49311789966593fae3547bd9753a25d0804f8b32c61fafe164db` |
+| `real/wire/http_server.py` | `a3b89c3bc9d7f22b29d038823993aa206eba62f2ab1aeb7a4f0a0990e6b2d998` |
+| `real/wire/asan-vuln-attack.log` | `b30746f71a2d6140af6185f50f5bada116d33e76e30819072d8f25a0ac8fba46` |
+| `real/wire/server.log` | `d41dc44736acb14b8599c79be93456dcb38ccdfac0382f01ea82251287222693` |
+| `real/wire/fixtures.sha256` | `fd1175661bbcdf83a829b2af77158b06935b4bc115b8e018a3ce31b0940a9942` |
+| `real/wire/asan-fixed-attack.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
+| `real/wire/asan-vuln-safe.log` | `9e9557932d7b5ef764dc06be81bb703a88ba1d0da0d3c921ce75e7b711b5bed1` |
+| `real/wire/closed-port-attack.log` | `b1fefd83646c685fa636387cd45206eb7dc5030dd13fa5b2175ca050dfb23412` |
+
+First measurement is in-tree only; the build trees are untracked. A
+clean-archive replay result is appended below if one is measured.
