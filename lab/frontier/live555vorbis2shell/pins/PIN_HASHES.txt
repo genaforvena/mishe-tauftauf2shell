@@ -1,0 +1,3 @@
+bf1e426a3761642089a8dafff635cd24b0b4fc609e779202832d1cb4f5c11ddf  VorbisAudioRTPSource.cpp.vuln
+6b80d6bd4be5eaf8923ddefb8501063cab74fa8918b67691dfd02ae3fa3c344d  VorbisAudioRTPSource.cpp.fixed
+7bbe420e829b0d4968030d0ab7a016c65d181cb431983a8bff59f18c5edf54ac  fix-ef760df.patch

@@ -1,0 +1,10 @@
+PASS three pins sha256-match manifest
+PASS verbatim sink slices
+PASS asan-vuln-a READ-65535 at pinned line 186
+PASS asan-vuln-b READ-65534 at pinned line 188
+PASS asan-vuln-c READ-98 at pinned line 190
+PASS clang ASan reproduces first memmove OOB read
+PASS safe vector and fixed pin clean under ASan
+PASS plain vulnerable outcome recorded
+PASS plain fixed pin exits 0
+PASS=9 FAIL=0

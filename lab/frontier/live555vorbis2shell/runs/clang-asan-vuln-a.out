@@ -1,0 +1,53 @@
+=================================================================
+==2951335==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x50200000001c at pc 0x60482696a567 bp 0x7ffe1e57b7d0 sp 0x7ffe1e57af90
+READ of size 65535 at 0x50200000001c thread T0
+    #0 0x60482696a566 in __asan_memmove (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/clang-asan-vuln+0xc5566) (BuildId: cc4f64c9d0f47a24b50b003b8c972096cdf3a30e)
+    #1 0x6048269ae33a in parseVorbisOrTheoraConfigStr(char const*, unsigned char*&, unsigned int&, unsigned char*&, unsigned int&, unsigned char*&, unsigned int&, unsigned int&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/liveMedia/VorbisAudioRTPSource.cpp:186:7
+    #2 0x6048269ad21d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/driver.cpp:45:5
+    #3 0x71fe5982a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #4 0x71fe5982a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #5 0x6048268d1344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/clang-asan-vuln+0x2c344) (BuildId: cc4f64c9d0f47a24b50b003b8c972096cdf3a30e)
+
+0x50200000001c is located 0 bytes after 12-byte region [0x502000000010,0x50200000001c)
+allocated by thread T0 here:
+    #0 0x6048269aa8d1 in operator new[](unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/clang-asan-vuln+0x1058d1) (BuildId: cc4f64c9d0f47a24b50b003b8c972096cdf3a30e)
+    #1 0x6048269acb5f in base64Decode(char const*, unsigned int&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/driver.cpp:27:21
+    #2 0x6048269ad70b in parseVorbisOrTheoraConfigStr(char const*, unsigned char*&, unsigned int&, unsigned char*&, unsigned int&, unsigned char*&, unsigned int&, unsigned int&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/liveMedia/VorbisAudioRTPSource.cpp:135:26
+    #3 0x6048269ad21d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/driver.cpp:45:5
+    #4 0x71fe5982a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x71fe5982a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x6048268d1344 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/clang-asan-vuln+0x2c344) (BuildId: cc4f64c9d0f47a24b50b003b8c972096cdf3a30e)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/live555vorbis2shell/h/clang-asan-vuln+0xc5566) (BuildId: cc4f64c9d0f47a24b50b003b8c972096cdf3a30e) in __asan_memmove
+Shadow bytes around the buggy address:
+  0x501ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x501fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x502000000000: fa fa 00[04]fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000080: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000100: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x502000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2951335==ABORTING

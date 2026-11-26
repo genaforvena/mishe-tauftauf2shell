@@ -1,0 +1,117 @@
+From ef760df8569703b93f8df990a07086d7e760d171 Mon Sep 17 00:00:00 2001
+From: "github-actions[bot]"
+ <41898282+github-actions[bot]@users.noreply.github.com>
+Date: Wed, 26 Aug 2026 05:34:25 +0000
+Subject: [PATCH] version - 2026.08.25
+
+- Fixed a bug in "VorbisAudioRTPSource" that could have caused a malicious SDP description to
+  crash a RTP client.  (Thanks to 'Tristan' for reporting this.)
+---
+ .../include/BasicUsageEnvironment_version.hh      |  4 ++--
+ .../include/UsageEnvironment_version.hh           |  4 ++--
+ config.linux-with-shared-libraries                |  2 +-
+ groupsock/include/groupsock_version.hh            |  4 ++--
+ liveMedia/VorbisAudioRTPSource.cpp                | 15 +++++++++------
+ liveMedia/include/liveMedia_version.hh            |  4 ++--
+ 6 files changed, 18 insertions(+), 15 deletions(-)
+
+diff --git a/BasicUsageEnvironment/include/BasicUsageEnvironment_version.hh b/BasicUsageEnvironment/include/BasicUsageEnvironment_version.hh
+index 74a974c..7affba9 100644
+--- a/BasicUsageEnvironment/include/BasicUsageEnvironment_version.hh
++++ b/BasicUsageEnvironment/include/BasicUsageEnvironment_version.hh
+@@ -19,8 +19,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
+ #ifndef _BASICUSAGEENVIRONMENT_VERSION_HH
+ #define _BASICUSAGEENVIRONMENT_VERSION_HH
+ 
+-#define BASICUSAGEENVIRONMENT_LIBRARY_VERSION_STRING	"2026.08.14"
+-#define BASICUSAGEENVIRONMENT_LIBRARY_VERSION_INT		1786665600
++#define BASICUSAGEENVIRONMENT_LIBRARY_VERSION_STRING	"2026.08.25"
++#define BASICUSAGEENVIRONMENT_LIBRARY_VERSION_INT		1787616000
+ 
+ extern char const* const BasicUsageEnvironmentLibraryVersionStr;
+ extern int const BasicUsageEnvironmentLibraryVersionInt;
+diff --git a/UsageEnvironment/include/UsageEnvironment_version.hh b/UsageEnvironment/include/UsageEnvironment_version.hh
+index 6679b7a..86293f4 100644
+--- a/UsageEnvironment/include/UsageEnvironment_version.hh
++++ b/UsageEnvironment/include/UsageEnvironment_version.hh
+@@ -19,8 +19,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
+ #ifndef _USAGEENVIRONMENT_VERSION_HH
+ #define _USAGEENVIRONMENT_VERSION_HH
+ 
+-#define USAGEENVIRONMENT_LIBRARY_VERSION_STRING	"2026.08.14"
+-#define USAGEENVIRONMENT_LIBRARY_VERSION_INT		1786665600
++#define USAGEENVIRONMENT_LIBRARY_VERSION_STRING	"2026.08.25"
++#define USAGEENVIRONMENT_LIBRARY_VERSION_INT		1787616000
+ 
+ extern char const* const UsageEnvironmentLibraryVersionStr;
+ extern int const UsageEnvironmentLibraryVersionInt;
+diff --git a/config.linux-with-shared-libraries b/config.linux-with-shared-libraries
+index 14d0f0c..f0a014e 100644
+--- a/config.linux-with-shared-libraries
++++ b/config.linux-with-shared-libraries
+@@ -4,7 +4,7 @@
+ # One or more interfaces were added, but no existing interfaces were changed or removed => CURRENT += 1; REVISION = 0; AGE += 1
+ 
+ libliveMedia_VERSION_CURRENT=120
+-libliveMedia_VERSION_REVISION=8
++libliveMedia_VERSION_REVISION=9
+ libliveMedia_VERSION_AGE=0
+ libliveMedia_LIB_SUFFIX=so.$(shell expr $(libliveMedia_VERSION_CURRENT) - $(libliveMedia_VERSION_AGE)).$(libliveMedia_VERSION_AGE).$(libliveMedia_VERSION_REVISION)
+ 
+diff --git a/groupsock/include/groupsock_version.hh b/groupsock/include/groupsock_version.hh
+index 3a7a6a0..3e0b034 100644
+--- a/groupsock/include/groupsock_version.hh
++++ b/groupsock/include/groupsock_version.hh
+@@ -19,8 +19,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
+ #ifndef _GROUPSOCK_VERSION_HH
+ #define _GROUPSOCK_VERSION_HH
+ 
+-#define GROUPSOCK_LIBRARY_VERSION_STRING	"2026.08.14"
+-#define GROUPSOCK_LIBRARY_VERSION_INT		1786665600
++#define GROUPSOCK_LIBRARY_VERSION_STRING	"2026.08.25"
++#define GROUPSOCK_LIBRARY_VERSION_INT		1787616000
+ 
+ extern char const* const groupsockLibraryVersionStr;
+ extern int const groupsockLibraryVersionInt;
+diff --git a/liveMedia/VorbisAudioRTPSource.cpp b/liveMedia/VorbisAudioRTPSource.cpp
+index edce800..fd3bbe4 100644
+--- a/liveMedia/VorbisAudioRTPSource.cpp
++++ b/liveMedia/VorbisAudioRTPSource.cpp
+@@ -183,13 +183,16 @@ void parseVorbisOrTheoraConfigStr(char const* configStr,
+ 
+     // Copy the remaining config bytes into the appropriate 'header' buffers:
+     if (identificationHdr != NULL) {
++      if (rem < identificationHdrSize) break;
+       memmove(identificationHdr, p, identificationHdrSize); ADVANCE(identificationHdrSize);
+-      if (commentHdr != NULL) {
+-        memmove(commentHdr, p, commentHdrSize); ADVANCE(commentHdrSize);
+-	if (setupHdr != NULL) {
+-          memmove(setupHdr, p, setupHdrSize); ADVANCE(setupHdrSize);
+-        }
+-      }
++    }
++    if (commentHdr != NULL) {
++      if (rem < commentHdrSize) break;
++      memmove(commentHdr, p, commentHdrSize); ADVANCE(commentHdrSize);
++    }
++    if (setupHdr != NULL) {
++      if (rem < setupHdrSize) break;
++      memmove(setupHdr, p, setupHdrSize); ADVANCE(setupHdrSize);
+     }
+   } while (0);
+ 
+diff --git a/liveMedia/include/liveMedia_version.hh b/liveMedia/include/liveMedia_version.hh
+index fd86990..af2bd26 100644
+--- a/liveMedia/include/liveMedia_version.hh
++++ b/liveMedia/include/liveMedia_version.hh
+@@ -19,8 +19,8 @@ along with this library; if not, write to the Free Software Foundation, Inc.,
+ #ifndef _LIVEMEDIA_VERSION_HH
+ #define _LIVEMEDIA_VERSION_HH
+ 
+-#define LIVEMEDIA_LIBRARY_VERSION_STRING	"2026.08.14"
+-#define LIVEMEDIA_LIBRARY_VERSION_INT		1786665600
++#define LIVEMEDIA_LIBRARY_VERSION_STRING	"2026.08.25"
++#define LIVEMEDIA_LIBRARY_VERSION_INT		1787616000
+ 
+ extern char const* const liveMediaLibraryVersionStr;
+ extern int const liveMediaLibraryVersionInt;
