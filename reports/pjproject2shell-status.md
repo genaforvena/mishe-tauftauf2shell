@@ -95,3 +95,10 @@ by the real crafted AVI.
   no ASan report. Raw logs in `lab/frontier/pjproject2shell/real/out-vuln/`
   and `real/out-fixed/`. Grade advanced from rung 4 PARTIAL synthetic to
   rung 4 real-consumer sentinel; no pointer, command or r5.
+
+- Clean-archive replay 2026-11-26 15:05Z: `git archive 759825c1
+  lab/frontier/pjproject2shell` into `/tmp/w240-pjproject-clean`;
+  `real/build-real.sh` rc 0 with both tarball hashes exact and one
+  `avi_get_frame` symbol per library; `real/run-real.sh` rc 0 with the same
+  six-case transcript (WRITE-64/WRITE-512, neighbor hex, fixed/safe rc 0).
+  In-tree `run-witness.sh` at `759825c1`: `WITNESS REPLAY PASS`.

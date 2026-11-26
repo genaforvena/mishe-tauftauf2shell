@@ -99,10 +99,11 @@ semantics, and replays a minimal 4x4 24-bpp DIB AVI through
   64. No library object or pointer was targeted.
 - Vulnerable safe input (48-byte chunk) and both fixed `7ecc6584` cases:
   rc 0, `frame.size=48`, no ASan report; the fixed build logs the clamp.
-
 Exact commands, hashes, AVI bytes and raw logs:
 `lab/frontier/pjproject2shell/PROVENANCE.md`, `real/out-vuln/`,
-`real/out-fixed/`.
+`real/out-fixed/`. Clean-archive replay of commit `759825c1`
+(`build-real.sh` + `run-real.sh`) reproduced all six cases at 15:05Z;
+`run-witness.sh` still returns `WITNESS REPLAY PASS`.
 
 ## Witness replay (W239, 2026-11-26)
 

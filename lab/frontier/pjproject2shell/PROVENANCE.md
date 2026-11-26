@@ -125,3 +125,14 @@ No pointer was corrupted, no command ran, and no external target was
 contacted. Grade after this lane: rung 3 confirmed in the real pjmedia
 consumer; rung 4 with a driver-provided live adjacent sentinel (no library
 object or pointer control); no rung 5.
+
+Clean-archive replay 2026-11-26 15:05Z: `git archive 759825c1
+lab/frontier/pjproject2shell` into `/tmp/w240-pjproject-clean`, then
+`bash real/build-real.sh` (rc 0, both tarball hashes above, one
+`avi_get_frame` symbol in each built library) and `bash real/run-real.sh`
+(rc 0 driver of all six cases). Clean logs match the in-tree transcript:
+`WRITE of size 64` and `WRITE of size 512`, 0 bytes after a 48-byte region,
+`NEIGHBOR_AFTER=4d495348452d504a50524f4a454354214a21`, fixed
+`PULL_DONE frame.size=48` with `AVI video chunk (64) exceeds frame buffer
+(48), truncating`. Staged `run-witness.sh` also still returns
+`WITNESS REPLAY PASS` at commit `759825c1`.
