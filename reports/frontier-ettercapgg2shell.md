@@ -56,7 +56,7 @@ Observed with runner sha256
 `ERROR: AddressSanitizer: heap-buffer-overflow`, `WRITE of size 13`,
 `0 bytes after 30-byte region`, with frame
 `#1 gg_get_version src/dissectors/ec_gg.c:673` and the allocation at
-`poc.c:35`. Fixed-tag runs truncate to `len=29` with the same 30-byte buffer
+`poc.c:58`. Fixed-tag runs truncate to `len=29` with the same 30-byte buffer
 and no ASan report; safe version `0x0000002a` is clean on both tags. Plain
 vulnerable builds show the chosen first hex digit `0x34` at offset 11 (in
 bounds) and suffix bytes `0x69` at offset 30 and `0x78` at offset 42 (past
@@ -72,6 +72,28 @@ allocation; the bytes that cross offset 30 are fixed suffix strings, so
 attacker control is over the overflow *length*, not the overflowing bytes.
 There is no named adjacent object, pointer control, live wire path, command
 execution or r5.
+
+## Witness verdict (W261, 2026-11-26 10:37Z, #5208)
+
+**ESTABLISHED AS LABELED** at the rung 3 verbatim / rung 4 PARTIAL scope; no
+contradiction, no grade change, **NO r5**. Witness checked the canonical
+`run-all.sh` hash `35c3f7d5…458958c4` in the worktree, at `a6d617ee` and in a
+clean `git archive a6d617ee` subtree, deleted the archived evidence and
+generated includes, provisioned both codeload tarballs fresh by commit SHA,
+then ran the unmodified wrapper from that archive: rc 0,
+`RESULT PASS=25 FAIL=0` in 2.51 s (10:37:36Z–10:37:38Z). All four source/driver
+pins, both extracted bodies and both start-line assertions held. GCC and
+Clang ASan both report `WRITE of size 13`, `0 bytes after 30-byte region`, at
+verbatim `src/dissectors/ec_gg.c:673`, with the `calloc(30, …)` stack at
+`poc.c:58`. Fixed GCC+Clang ASan and plain runs emit `len=29` with no ASan;
+safe version `0x0000002a` emits `len=3` and no ASan. Plain vulnerable builds
+print chosen `b11=34` in bounds and fixed suffix bytes `b30=69`, `b42=78`
+past the 30-byte allocation. Source lines in the freshly fetched tarballs
+agree: vulnerable `:669` sprintf plus `:673`/`:676` strcats; fixed `:715`
+`snprintf(str, size, "%s", buf)`. NIT: earlier text named `poc.c:35` for the
+allocation; the pinned driver's line is 58 (corrected above). No named
+adjacent object, pointer, wire path, command or r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w261-ettercapgg2shell/detail.md`.
 
 ## Cheapest next rung-moving experiment
 

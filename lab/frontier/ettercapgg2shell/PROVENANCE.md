@@ -65,7 +65,7 @@ building. The generated `.inc` files carry `#line 599`/`#line 631` naming
 `0x44000042`: `ERROR: AddressSanitizer: heap-buffer-overflow`,
 `WRITE of size 13`, `0 bytes after 30-byte region`, frame
 `#1 gg_get_version src/dissectors/ec_gg.c:673` (the first `strcat`), allocation
-from `poc.c:35`. The composed string is
+from `poc.c:58`. The composed string is
 `unknown (0x44000042) + has audio + eraomnix` = 43 chars + NUL = 44 bytes.
 Both compilers' fixed-tag ASan and plain runs accept the attack version but
 truncate output to 29 chars with the same 30-byte caller buffer; safe version
