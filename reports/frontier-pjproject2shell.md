@@ -1,10 +1,10 @@
 # Frontier brief: pjproject AVI video chunk length overflow — CVE-2026-77396
 
-Status: **STAGED 2026-11-26 by frontier W239**, awaiting operator admission;
-witness replay UNKNOWN. Rung 3 pinned verbatim excerpt; rung 4 PARTIAL (chosen
-bytes observed past a 48-byte logical frame in a synthetic plain readback).
-No real pjmedia build, no crafted AVI file, no network wire, no pointer, no
-command and no rung 5.
+Status: **ADMITTED 2026-11-26 by the operator** (156th target); witness replay
+ESTABLISHED AS LABELED (W239, 2026-11-26). Rung 3 pinned verbatim excerpt;
+rung 4 PARTIAL (chosen bytes observed past a 48-byte logical frame in a
+synthetic plain readback). No real pjmedia build, no crafted AVI file, no
+network wire, no pointer, no command and no rung 5.
 
 ## Claim and scope
 
@@ -75,6 +75,22 @@ a caller. The release-build `pj_assert` is deliberately a no-op, matching the
 advisory. The stand-in caps the file at 64 present bytes, so the observed
 WRITE is 64 bytes, not the full 32-bit range an AVI chunk could declare.
 Exact commands, hashes and raw logs are in `lab/frontier/pjproject2shell/PROVENANCE.md`.
+
+## Witness replay (W239, 2026-11-26)
+
+ESTABLISHED AS LABELED. `bash lab/frontier/pjproject2shell/run-witness.sh` from
+the worktree and from a clean `git archive 814e9392 lab/frontier/pjproject2shell`
+(wrapper byte-identical, sha256 `28added4…e2335f`) each returned `WITNESS
+REPLAY PASS`, four pins exact, `TOTAL: 29 PASS / 0 FAIL`, rc 0. Independently
+fetched both raw upstream `avi_player.c` blobs by SHA: full-file and
+`sed -n '1208,1228p'` / `'1208,1256p'` excerpt hashes match all four pins;
+the only upstream diff is the video-branch clamp at lines 1221-1255. GCC and
+Clang ASan -O0 logs show `WRITE of size 64`, 0 bytes after a 48-byte region,
+write frame `avi_get_frame pins/avi-vulnerable.inc:15`; fixed and safe inputs
+are ASan-clean at `AVI_FRAME_SIZE=48`, plain attack exposes the 16 chosen
+bytes `MISHE-PJPROJECT!` past the 48-byte logical frame. No real library,
+AVI, wire, pointer, command or r5; full detail:
+`.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
 
 ## Grade and tractability
 

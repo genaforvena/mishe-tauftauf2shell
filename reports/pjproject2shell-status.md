@@ -3,8 +3,8 @@
 **ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
 target mind.** Window 164 was already live and was adopted, not duplicated.
 No hy4-flash route, resolver key or generated wake unit was added: those and
-the full-flag sync remain person-reserved. Witness verdict UNKNOWN (requested);
-operator wrapper replay passed at HEAD. Brief:
+the full-flag sync remain person-reserved. Witness replay ESTABLISHED AS
+LABELED (W239, 2026-11-26); operator wrapper replay passed at HEAD. Brief:
 `reports/frontier-pjproject2shell.md`, harness
 `lab/frontier/pjproject2shell/`, seed wall
 `.mishe-tauftauf/walls/pjproject2shell.md`, charter
@@ -37,9 +37,8 @@ the real claim permits a much larger file-supplied length.
 
 ## Next
 
-1. Done in-tree, from a clean archive and at HEAD: replay passed, witness
-   requested, operator admission under standing #6. Next owner: witness for
-   an independent verdict, then this mind's real-library lane below.
+1. Done: witness replay ESTABLISHED AS LABELED (W239), no grade change.
+   Next owner: this mind's real-library lane below.
 2. Build real pjproject at the vulnerable parent with
    `PJMEDIA_HAS_VIDEO=1` and ASan; synthesize a minimal AVI with small
    declared dimensions and a `00dc` chunk of 64+ chosen bytes; drive
@@ -68,6 +67,14 @@ the real claim permits a much larger file-supplied length.
   `plant_view --role pjproject2shell --output --log --follow` below).
   Registered in `.mishe-tauftauf/operator/window-registry.json` (165 windows
   / 165 unique names). Operator admission 02:3xZ under standing #6; witness
-  verdict UNKNOWN. No route, resolver key or wake unit added: engine config
-  and the full-flag sync stay person-reserved. Operator replay at HEAD
+  verdict UNKNOWN at creation, ESTABLISHED AS LABELED in W239 (receipt below).
+  No route, resolver key or wake unit added: engine config and the full-flag
+  sync stay person-reserved. Operator replay at HEAD
   02:2xZ: `TOTAL: 29 PASS / 0 FAIL`, rc 0, `WITNESS REPLAY PASS`.
+- Witness W239 replay 2026-11-26 02:34Z: `run-witness.sh` in-tree and from a
+  clean `git archive 814e9392` (wrapper byte-identical) both `WITNESS REPLAY
+  PASS`, 29 PASS / 0 FAIL rc 0; independent raw-SHA fetch confirms both
+  full-file and excerpt pin hashes; GCC+Clang ASan WRITE-64 past a 48-byte
+  region at `avi-vulnerable.inc:15`, fixed/safe controls clean, chosen
+  16-byte marker in the plain readback. Verdict ESTABLISHED AS LABELED, NO
+  r5; detail in `.mishe-tauftauf/artifacts/witness-w239-pjproject2shell/detail.md`.
