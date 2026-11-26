@@ -6252,3 +6252,42 @@ apps: the router rejects non-ASCII controller names, and this probe's
 sharp-s string comes from app code. Do not repeat this six-case matrix or
 the nine-path route matrix unchanged; reopen only with a stock framework
 hook that calls `singularize`/`pluralize` on attacker-controlled text.
+
+## 2026-11-26 20:4xZ — case-fold OOB byte is not steerable by allocator groom; no match oracle
+
+The previous section left one open question: `str_lower_case_match`
+(`regexec.c:4278`) compares `lowlen` folded bytes against `t[]` while
+`tend-t` is only one byte for `/s/i`, so its second comparison reads the byte
+immediately after `reg->exact`. If that byte were attacker-steerable, the
+boolean result of `Regexp#match?` would be a one-byte heap-read oracle.
+
+`lab/repro/ruby2shell-casefold-oracle.{c,rb,sh}` tests that prediction. The
+analysis-only extension frees a 24-byte allocation (the same 0x20 glibc chunk
+that `xmalloc(1)` reuses) after filling it with a chosen byte, then Ruby
+compiles `/s/i` and tests `ß` (fold `ss`), `ẞ` (`SS`), `İ` (`i` + combining
+dot), plus ASCII `S`/`t` controls. One process per primed byte, 0..255,
+plain 3.4.12 and fixed 3.4.13.
+
+Observed (gitignored `lab/build/evidence/casefold-oracle/sweep-*.txt`): both
+the 3.4.12 and 3.4.13 sweeps have 256/256 rows with `sharp-s=false
+sharp-cap=false dotted-i=false ascii-match=true ascii-miss=false` — no primed
+byte changes any outcome on either build. GDB at
+`regexec.c:4278` explains why: with byte `0x73` primed eight times, the word
+at `t` (`reg->exact`) is `00007ffff7e04b73` for the first match — byte 0 is
+the copied pattern `s`, byte 1 is `0x4b` from a stale libc pointer — or
+`0000000555555c73` / `0000000555555d73` — byte 1 `0x5c`/`0x5d` from stale
+heap pointers. The primed byte never becomes `t[1]`; the following byte is a
+pointer fragment in recycled chunk padding. With a single prime it is
+consistently `t1=5c` for every byte except `0x41`, where incidental layout
+change gives `t1=4b`.
+
+A further 16 fresh processes with GDB's `set disable-randomization off`
+sampled `t[1]` as `0c 1a 28 49 4b×2 62 66 6a 87 a7 b1 cb d8 e3 e5` — 15
+distinct bytes in 16 runs. The stale pointer fragment is not predictable
+under the live ASLR setting either, so no stable oracle exists.
+
+Conclusion: the one-byte over-read is real (ASan, `rung 3`) but the
+allocator groom does not turn `Regexp#match?` into a chosen-byte oracle on
+this build. No write, pointer control, command or wire primitive; grade
+unchanged. Do not repeat the 256-byte sweep unchanged; reopen only with a
+measured path that places a chosen byte at `exact+1` in a live consumer.

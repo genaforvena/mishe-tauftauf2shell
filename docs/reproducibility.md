@@ -15029,6 +15029,19 @@ wire-supplied; wire reach stays CLOSED and the grade stays rung 3. Evidence
 is `lab/build/evidence/casefold-params-wrapper/summary.json` plus per-case
 server logs.
 
+`bash lab/repro/ruby2shell-casefold-oracle.sh` tests whether the OOB byte can
+be steered into a `Regexp#match?` oracle: an analysis-only extension fills a
+24-byte allocation (the same 0x20 chunk as `xmalloc(1)`) with each byte 0..255
+before `/s/i` is compiled, then `ß` / `ẞ` / `İ` and ASCII `S` / `t` are
+matched, one process per byte on plain 3.4.12 and 3.4.13. Both sweeps give
+256/256 rows `sharp-s=false sharp-cap=false dotted-i=false
+ascii-match=true ascii-miss=false` (`lab/build/evidence/casefold-oracle/sweep-*.txt`).
+GDB at `regexec.c:4278` shows `t[1]` is a stale pointer byte (`0x4b`, `0x5c`
+or `0x5d`), never the primed byte; the oracle is CLOSED. With GDB's
+`set disable-randomization off`, 16 fresh processes sample 15 distinct
+`t[1]` bytes, so the stale pointer byte is not predictable either. Grade
+stays rung 3.
+
 
 ### Neuvector tuned return, GIMP caller, nfdump element type, leptonica and rpm receipts
 
