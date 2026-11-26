@@ -14584,3 +14584,91 @@ All counts above are operator, author, witness, clean-archive or staged
 observations as labeled. What would change this fold: a verdict contradicting
 a labeled row, a checker RED on committed HEAD, or a later report misquoting
 one of these receipts.
+
+## 2026-11-26 21:0x–21:2xZ — libtiffpixarlog admitted (187th), verdict folds, staged inih and bounded lanes
+
+This fold covers `f4381597..8e5bf87b`; recipes are in
+`docs/reproducibility.md` § 21:0x–21:2xZ. The generated overview at HEAD
+reads 187 declared / 184 active / 184 rows / 125 independently established.
+It supersedes the "STAGED, admission and witness owed" wording for
+libtiffpixarlog in § 20:3x–21:0xZ; the Java4Shell screen and inih staging in
+that section stand, with the clean-archive receipt added below. No generated
+cell, grade, register row, report or raw evidence is moved here.
+
+- `f4381597` (operator, standing #6) **admitted libtiffpixarlog2shell as the
+  187th declared target mind** at 21:0xZ: window 196 adopted (panes
+  %396/%397 live, dead=0), one registry entry, counts 186/183/183/123 →
+  187/184/184/124. The 21:04Z operator clean-archive replay of
+  `git archive HEAD lab/frontier/libtiffpixarlog2shell` forced both tiff
+  trees to rebuild and gave runner sha256
+  `95aafb2b84dd1542a13b6508e7e5dac8ab9921fc50f4651e45ee0ef0fd46dbc7`,
+  rc 0, `RESULT PASS=26 FAIL=0` in 28 s, all five pin hashes asserted.
+  CVE-2026-12912 / GHSA-cg4c-j43f-qcg7, pins tiff 4.7.1 `f698d94f…` /
+  4.7.2 `672bd7d1…`, fix `ba2b04b1…`. ASan `WRITE of size 1` at verbatim
+  `tif_pixarlog.c:470` (256 bytes emitted into a 192-byte scanline), fixed
+  guard and two safe formats clean. Grade rung 3 only; rung 4 NOT CLAIMED
+  (bytes in poison, no plain neighbour or chosen-offset readback) and rung 5
+  NOT CLAIMED (local file vector).
+- The same commit **folded witness W291b gnutlsdtls2shell (#5805)**
+  ESTABLISHED AS LABELED: independent clean-archive replay, all four hashes
+  matched, rc 0 in 419 s, `RESULT PASS=12 FAIL=0`, WRITE-1475 at
+  `buffers.c:1035`. Count 123 → 124, no grade change. The operator's
+  300 s-cut replay remains UNKNOWN and is not a second pass. `f8b80d8a`
+  **folded W292 libtiffpixarlog2shell (#5823)** ESTABLISHED AS LABELED:
+  clean selective archive, six hashes matched, PASS=26 FAIL=0, fresh
+  WRITE-1 at `tif_pixarlog.c:470` deterministic in four runs; count 124 →
+  125, no grade change. Both verdicts are scoped to their labeled harness
+  runs; neither transfers rung 4/5.
+- `ea25b121` (gimpjif) preserved the **W289 verdict** from chat #5801:
+  ESTABLISHED AS LABELED at the rebuilt guard-page scope, safe rc 0, two
+  published runs rc 124 with `delta=+260` and chosen `4d` tail, fault RIP
+  in real `libz.so.1` on two ASLR bases. `fa1006ae` (W290) placed
+  `0x00007f0000414243` at `out+280`; it was present after `total_out=448`
+  but no fault was observed before the timeout. `149d113a`/`158d42cc`
+  (W291) added a hardware `awatch` on that word in the live plugin: no hit
+  in 28 s, while a same-process positive control wrote the same value 12 s
+  later and did hit at `poke_after_delay` with
+  `Value = 139637981004355 (0x7f0000414243)`. The watcher attached after
+  `inflate` began and 18 LWPs were unverified, so this is a bounded negative
+  for the observed window, not a proof of non-use. Grade unchanged rung 3 /
+  rung 4 PARTIAL, NO r5; no dereference, downstream consumer or command.
+- `3d74e580` and `860403e1` (nfdump) **closed the live IPv6 pointer lane**:
+  `run-v6heap.sh` gives 7 PASS / 0 FAIL and maps `in_buff=0x5555555781c0`,
+  chunk size 65552, `next_chunk=0x5555555881c0`, target `+7` of the next
+  header and size field 33; the earlier 65,527-byte `::1` datagram puts the
+  eight-byte `msecReceived` write at `in_buff+65543`. `cnt+16` and the
+  maximum datagram bound exclude a pointer-bearing target. Clean archives
+  of `3d74e580` and HEAD `149d113a` each repeated 7/0 with the same heap
+  map. Value is collector-time derived, no pointer, marker or command;
+  grade rung 3 live / rung 4 availability plus PARTIAL chosen bytes, NO r5,
+  witness UNKNOWN.
+- `21ba9d5b` (ruby) **closed the Unicode fold-byte oracle**: 16 folded
+  candidates have second bytes `66 69 6c 73 ca cc` only, none pointer-like
+  (`00 4b 5c 7f`); ASan 16/16 on 3.4.12 and clean on fixed 3.4.13; 32 fresh
+  plain processes per candidate per build give 1024/1024 `match=false`.
+  Grade stays rung 3, no write, command or wire; the recipe was already in
+  `docs/reproducibility.md` and is cross-referenced, not duplicated.
+- `c727247f` and `49ec6363` (Java4Shell) **screened out** CVE-2026-114938
+  locally: `bmi2 : Unaffected hardware!`, zero `avx512*`, no SDE in PATH,
+  JVM 17.0.21.1 at/after Oracle's first fixed release. No build, trigger,
+  bytes or rung; rung 0 here. Re-open only with working SDE and a pinned
+  affected/fixed pair. `118fb82e`/`8e5bf87b` **staged inihlongline2shell**
+  (STAGED, not admitted): CVE-2025-71450, r62 `9c15fa75…` / r63
+  `5d7967de…`, fix `8e06f6b`; 199 `A` plus NUL makes `ini_parse_file()`
+  read one byte below `abyss[16]` at verbatim `ini.c:167` under ASan;
+  fixed/safe clean, plain r62 exits 0. `run-all.sh` PASS=8 FAIL=0 at
+  21:21Z and a clean archive of `118fb82e` repeated PASS=8 FAIL=0 at 21:24Z.
+  Window 197, rung 3 only, rung 4/5 NOT CLAIMED, admission and witness owed.
+- `d48c0aab` (rpm) preserved a **second fresh-build replay** totalling
+  `WITNESS_REAL_TOTAL PASS=60 FAIL=4`; scaled lengths replayed 21/0 again,
+  but pointer chains, groom and zero/safe assertions varied with checkout
+  path and heap layout. Only the ASan WRITE and scaled-length checks were
+  invariant across both fresh replays; rung 4 stays author-layout
+  DEMONSTRATED, witness UNKNOWN, no ASLR-stable target, wire, command or
+  r5. `f820dad8` only reconciled origin/main with local main and moves no
+  claim.
+
+All counts above are operator, author, witness, clean-archive or staged
+observations as labeled. What would change this fold: a verdict contradicting
+a labeled row, a checker RED on committed HEAD, or a later report misquoting
+one of these receipts.

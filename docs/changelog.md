@@ -5299,3 +5299,68 @@ row or raw evidence is committed here.
 
 What would change this fold: a verdict contradicting a labeled row, a checker
 RED on committed HEAD, or a later report misquoting one of these receipts.
+
+## 2026-11-26 21:0x–21:2xZ — libtiffpixarlog admitted (187th), two verdict folds, inih staged
+
+This fold covers `f4381597..8e5bf87b`; reproduce every claim from
+`docs/reproducibility.md` § 21:0x–21:2xZ. The generated overview at HEAD
+reads 187 declared / 184 active / 184 rows / 125 independently established.
+No generated cell, register row, grade, report, SVG or raw evidence is moved
+here.
+
+- `f4381597` (operator, standing #6) admitted libtiffpixarlog2shell as the
+  **187th** declared target mind at 21:0xZ, adopting window 196 (panes
+  %396/%397 live, dead=0, one registry entry). The 21:04Z clean-archive
+  replay forced both pinned tiff trees to rebuild: runner sha256
+  `95aafb2b84dd1542a13b6508e7e5dac8ab9921fc50f4651e45ee0ef0fd46dbc7`,
+  rc 0, `RESULT PASS=26 FAIL=0` in 28 s, five pin hashes asserted. Counts
+  186/183/183/123 → 187/184/184/124, superseding the STAGED row. The same
+  commit folded witness W291b gnutlsdtls2shell (#5805) ESTABLISHED AS LABELED
+  at its exact scope: clean archive, four hashes matched, rc 0 in 419 s,
+  `RESULT PASS=12 FAIL=0`, WRITE-1475 at `buffers.c:1035`; no grade change.
+  The operator's 300 s-cut replay stays UNKNOWN and was not corroboration.
+- `f8b80d8a` folded witness W292 libtiffpixarlog2shell (#5823) ESTABLISHED AS
+  LABELED: clean selective archive, six hashes matched, `RESULT PASS=26
+  FAIL=0`, fresh ASan WRITE-1 at `tif_pixarlog.c:470` deterministic in four
+  runs, no grade change. Established count 124 → 125. The row stays rung 3;
+  rung 4/5 NOT CLAIMED, with a plain-build neighbour experiment left open.
+- `ea25b121`, `fa1006ae`, `149d113a` and `158d42cc` (gimpjif) preserved the
+  W289 witness verdict (chat #5801) ESTABLISHED AS LABELED at the
+  instrumented guard-page scope, then tested the chosen word at `out+280`
+  with a hardware watchpoint in the real plugin. The 28 s `awatch` saw no
+  hit while the same-process positive control did hit at `poke_after_delay`
+  with `0x7f0000414243`, so the negative holds only for that window. Grade
+  unchanged rung 3 / rung 4 PARTIAL, NO r5.
+- `3d74e580` and `860403e1` (nfdump) mapped the live IPv6 victim: seven
+  checks PASS / 0 FAIL with `in_buff=0x5555555781c0`, chunk size 65552,
+  next chunk header at +65536 and the WRITE at +65543 (byte 7 of that
+  header); clean archives of `3d74e580` and HEAD `149d113a` repeated 7/0.
+  The eight-byte write is collector-timestamp derived; `cnt+16` and the
+  65,527-byte datagram maximum close the pointer lane. No pointer, marker
+  or command; witness UNKNOWN.
+- `21ba9d5b` (ruby) closed the Unicode fold-byte match oracle: 16 folded
+  candidates have no pointer-typical second byte, and 32 fresh plain
+  processes per candidate per build all report `match=false` (1024 trials).
+  ASan 16/16 on 3.4.12, clean on fixed 3.4.13; grade stays rung 3. The
+  recipe was already in `docs/reproducibility.md` and was not duplicated.
+- `c727247f` and `49ec6363` (Java4Shell) screened out CVE-2026-114938 on
+  this host: Red Hat's detector prints `bmi2 : Unaffected hardware!`, no
+  `avx512*` flags, no SDE in PATH, and the JVM is 17.0.21.1. No build, no
+  input bytes, no rung claimed; re-rank only with working SDE and a pinned
+  affected/fixed pair.
+- `118fb82e` and `8e5bf87b` staged inihlongline2shell (CVE-2025-71450):
+  pins r62 `9c15fa75…` / r63 `5d7967de…`, fix `8e06f6b`; a 199-`A` line
+  plus NUL makes `abyss[strlen(abyss)-1]` read one byte below the 16-byte
+  stack buffer at verbatim `ini.c:167`. `run-all.sh` gave PASS=8 FAIL=0 at
+  21:21Z and a clean archive of `118fb82e` repeated PASS=8 FAIL=0 with the
+  same sink; plain r62 exits 0. Window 197, STAGED only, rung 3, rung 4/5
+  NOT CLAIMED, admission and witness owed.
+- `d48c0aab` (rpm) preserved a second fresh-build replay (`WITNESS_REAL_TOTAL
+  PASS=60 FAIL=4`). Across both fresh replays only the ASan WRITE and
+  scaled-length checks were invariant; pointer-chain, groom and safe-status
+  assertions varied with heap layout. Grade stays author-layout rung 4
+  DEMONSTRATED, witness UNKNOWN, no wire path or r5. `f820dad8` reconciled
+  origin/main with local main and adds no claim.
+
+What would change this fold: a verdict contradicting a labeled row, a checker
+RED on committed HEAD, or a later report misquoting one of these receipts.
