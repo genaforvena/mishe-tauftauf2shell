@@ -1,0 +1,51 @@
+=================================================================
+==2244088==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000002820 at pc 0x5fcad7f77d6e bp 0x7fffd9930150 sp 0x7fffd9930140
+WRITE of size 4 at 0x521000002820 thread T0
+    #0 0x5fcad7f77d6d in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:686
+    #1 0x5fcad7f70953 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2978
+    #2 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #3 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #4 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #5 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #6 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #7 0x5fcad7f6d9c5 in internal_dfa_match /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:2808
+    #8 0x5fcad7f7ae92 in pcre2_dfa_match_8 /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:4027
+    #9 0x5fcad7f26ac8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/harness/dfa.c:27
+    #10 0x755a2862a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #11 0x755a2862a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #12 0x5fcad7f268a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/out/pcre2-10.47-gcc-asan/dfa+0x48a4) (BuildId: 12d74c924778aba35416421998ef6cd53e1c1671)
+
+Address 0x521000002820 is a wild pointer inside of access range of size 0x000000000004.
+SUMMARY: AddressSanitizer: heap-buffer-overflow /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pcre2dfa2shell/src/pcre2-pcre2-10.47/src/pcre2_dfa_match.c:686 in internal_dfa_match
+Shadow bytes around the buggy address:
+  0x521000002580: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002600: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002680: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002700: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002780: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x521000002800: fa fa fa fa[fa]fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002880: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002900: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002980: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002a00: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000002a80: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2244088==ABORTING
