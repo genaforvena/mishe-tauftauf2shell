@@ -309,3 +309,63 @@ Verdict on the #219 fold (#224): ESTABLISHED for the wire-only,
 pre-auth 32 KiB read and live pointer disclosure. The witness agrees the
 enlargement stays layout-dependent on fresh brokers and that wire-derived
 code execution remains UNKNOWN. No new poison lane was claimed or tested.
+
+## Rung-5 queue pick #5710 — live-tcache groom, measured closure (18:16-18:41Z)
+
+One bounded attempt: make a live tcache chunk sit directly after the 1-byte
+payload, then use the wire-derived `C + 0x15b40` and one safe-linked `fd` to
+observe a controlled malloc return or `MEMCPY`. No command marker was sent,
+no debugger-supplied address was used for the poison, and the 256/96-byte
+limbs already closed in the previous section were not repeated blindly.
+
+**Structural finding that invalidates the assumed fd offset.** Under gdb on
+the stock-glibc 2.1.2 broker, the 1-byte payload `P` always has a 0x20 chunk
+at `P-0x10`; the chunk at `P+0x10` has size word `0xc1`, `fd=0` and `key=
+0x8d00000000`. That is an *allocated* websocket out_packet, not a tcache
+entry: a breakpoint on `__libc_free` conditional on that exact pointer never
+hit, and `tcache->counts[10]` at the overflow point was 1 with head at a
+different address (e.g. `0x5f148bb66840` while `P=0x5f148bb7af30`). Both the
+old `P+0x50` fd offset and the newly measured `P+0x20` fd offset therefore
+write into live out_packet data, not into tcache metadata. Evidence:
+`logs/gdb-layout1.log`, `logs/gdb-tcache-inspect2.log`,
+`logs/gdb-ng-state.log`, `logs/gdb-ng-free2.log`.
+
+**Three bounded groom variants, all negative.**
+
+1. **PING buffer after the payload.** Same-connection WS PING (125-byte
+   payload) allocated its out_packet exactly at `P+0x20` (chunk `0xc1`,
+   `logs/gdb-ng-observe.log`); eight phantom frames walked `pos` to `P+0x20`
+   so a 96-byte write started at the chunk's user data without touching its
+   size. Wire-only fd `((P+0x20)>>12)^P` from leaked `C` was written at
+   stream offset 0. No controlled return: six echo-PING triggers all reused
+   one head chunk, and eight held-PING buffers allocated elsewhere.
+   Evidence `logs/ng-self.log`, `logs/gdb-ng-self2.log`,
+   `logs/gdb-ng-state.log`.
+2. **WS_CLOSE buffer after the payload.** Same geometry, but the close frame
+   did not free the out_packet (`fd=0`, `key=0x8d00000000` at the overflow
+   point); tcache head still elsewhere. Evidence `logs/ng-close.log`,
+   `logs/gdb-ng-close.log`, `logs/gdb-ng-close-free.log`.
+3. **Seed-close reuse.** Close a seed whose 1-byte payload and 0xc0 PING
+   buffer are adjacent so both become tcache heads, then reclaim the 0x20
+   slot for the overflow source. The victim's payload came from top instead
+   (`P-C = 0x74c20`, not the measured `0x15b40`), and the adjacent chunk was
+   again allocated, not tcache. Evidence `logs/reuse-observe.log`,
+   `logs/gdb-reuse-observe.log`.
+
+**Why no adjacent tcache run forms.** Repeated 125-byte PING echoes on one
+connection reuse the same 0xc0 chunk (four frees of one pointer,
+`logs/gdb-freec0.log`); held partial-PING buffers from separate connections
+are ~0x1470 apart because each connection also allocates its context. No
+wire sequence tested on this host produced a live tcache chunk immediately
+after the overflow source.
+
+**Controls.** Fixed 2.1.3 (ASan) on 27082 and safe input (`--empty 0`, no
+underflow) on vulnerable 2.1.2 (ASan) on 27083 both returned a clean WS
+close and zero AddressSanitizer errors (`logs/fixed-trigger.log`,
+`logs/fixed-control.log`, `logs/safe-trigger.log`, `logs/safe-control.log`).
+
+**Disposition.** Rung 5 remains UNKNOWN, not ESTABLISHED; rung 4 information
+disclosure is unchanged. This lane is closed for these three groom variants.
+Return only with a *measured* wire sequence that puts a live tcache chunk
+immediately after the overflow source; do not retry these variants or the
+256/96-byte limbs on the same layout.
