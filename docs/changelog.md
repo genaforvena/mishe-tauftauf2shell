@@ -2,6 +2,88 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-26 15:0x–15:4xZ — quickjsbcode2shell 177th, W273 lwext4, real-consumer and wire lanes, closed negatives
+
+This fold covers `bf13ceab..81e3cd8e`. Reproduce every claim in
+`docs/reproducibility.md` § 15:0x–15:4xZ; no raw evidence is committed here.
+
+- `4336a4d2` (operator, standing #6) admitted quickjsbcode2shell as the
+  **177th declared target mind**, window 185 (%374/%375, dead=0). Generated
+  counts moved 176/173/173/119 → **177/174/174/119** in `README.md`,
+  `docs/results.md` and `research-manifest.json`; the independent-established
+  count stays 119 and the QuickJS row stays `established:false` (rung 3 only,
+  runner `7031c420…c09b1cd5`, `PASS=25 FAIL=0`, witness replay owed). The
+  reconcile edge `010f4cbb` moved no row or count. Earlier docs folds still
+  read 176/173/173/119 because they are dated history, not current counts.
+- `aa6afcd2` folds witness **W273's lwext4shell verdict: ESTABLISHED AS
+  LABELED** (14:42Z, clean `git archive cbadc189`, staged evidence removed,
+  `replay-clean.sh` 31/0, real 17/0, victim 9/0, `REPLAY_RC=0`). Fresh ASan
+  `WRITE of size 4098` 0 bytes past a 4096-byte region (`ext4_fs.c:404` ←
+  `:611`), gdb delta 4112 with non-null then zeroed `bc`, `0xfe` at
+  `data+8192` over three ASLR-on repeats, image-derived `ipg=65539 → 0xf8`.
+  No command/wire/pointer-control call, no grade change, NO r5. `94958123`
+  repaired two post-verdict NITs (byte-offset wording, relative `DEST`) with
+  a relative-`DEST` smoke (`31/0`, same hashes) that changed no evidence.
+- `8ffb83b0` / `603e222d` staged axis2guththila2shell (CVE-2026-124023 /
+  GHSA-qv28-p6jq-5h3f; pins `584ce5bd…` / `f01683ec…`, `PASS=4 FAIL=0`,
+  GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308`). STAGED,
+  not admitted; rung 3 only, rung 4 NOT CLAIMED; witness replay, admission,
+  loopback consumer and plain-build grooming owed. No count or grade cell
+  moved.
+- `6d4d551b` + `f5741ac5` (neuvector2shell W274): a REST-validated
+  controller-shaped message within documented limits expands `*` after the
+  check (`pre_total=1024 expanded_total=1536 wire_total=1824`) and reaches
+  real `dpi_sig_bld()` (`dpi_sig.c:658`), ASan `WRITE of size 121` at offset
+  2080 of a 2048-byte buffer, `wirepath/run.sh 19/0` — rung 3 verbatim / rung
+  4 PARTIAL, no REST endpoint, full enforcer, chosen address, command or r5.
+  `f5741ac5` is the author's clean-archive receipt (`22/0` + `19/0`,
+  `run-all.sh 29/0`, `REPLAY_PASS=5`); witness notified on DM 5639, no
+  independent verdict claimed.
+- `4f9314a9` + `b76012a3` (pjproject2shell W241) overwrote a live
+  library-created `pjmedia_port` 48 bytes after a real `pj_pool_alloc` frame,
+  with chosen `MISHE-PJPROJECT!` bytes in `name.ptr`, `sig`, `get_frame`,
+  `put_frame` and `port_data.pdata` (`run-realobj.sh 11/0`, readback proof,
+  ASan silent in a shared pool). `b76012a3` is the clean-archive replay
+  receipt and records the natural-caller negative (no shipped natural
+  adjacency). No pointer called, wire, command or r5; W240/W241 verdicts
+  awaited. No register grade cell moved.
+- `edd20190` + `a23384e2` (leptonica2shell) planted `MISHE-LEPTONICA` in a
+  live 512-byte heap sentinel (`SENTINEL_OFFSET=224`,
+  `CHOSEN_AT_OFFSET=16`, `3/0`); `a23384e2` is the clean-archive receipt.
+  `cf956faf` + `d2252911` (gimpjif2shell W243) drove a complete on-disk JIF99a
+  (`len=33025`, `height=65026`, `product=0x80000002`, `data_size=4`) through
+  a real `FILE*` parse into chosen neighbor bytes, with a never-dereferenced
+  file-chosen pointer value (`run-real.sh 21/0`; clean replay `21/0`) — the
+  ~4 GiB `dest` consumer remains UNMEASURED. `aaedfd2f` (rpm2shell) built real
+  rpm 6.1.90 and saw `WRITE of size 64` past a 1-byte region in both
+  `rpm2cpio` and `rpm2archive` (`21/0`), with an instrumented pointer field
+  in a plain groom and preserved stripped/query negatives. All are author
+  rung-4 mechanics on real objects, not witnessed, not r5.
+- `bf77b8a6` + `6b1beb43` (mqttc2shell) reached the verbatim shipped
+  `simple_subscriber.c:123-133` callback from a loopback wire broker: ASan
+  `READ of size 65535` in the shipped `memcpy` at `:127`, pure child SIGSEGV,
+  fixed rejects (`27/0`); `6b1beb43` is the clean-archive receipt. Grade stays
+  rung 3 wire-backed, rung 4 NOT CLAIMED. `9fbeec88` + `81e3cd8e` (nfdump2shell)
+  drove a V3 datagram into a real 127.0.0.1 nfcapd collector in ASan and plain
+  (`13/0` each; vulnerable drops record 2, fixed rejects; no ASan in the real
+  65535-byte buffer); the chosen-byte alias shape is a preserved negative,
+  and the first clean-archive attempt was `3 PASS / 10 FAIL` until `81e3cd8e`
+  added `mkdir -p` and a post-build binary check. Witness replay of the live
+  wire is still owed; no pointer, command or r5.
+- `0c0a0021` (speex2shell) added an in-process function-pointer overwrite and
+  benign-marker call (`8/0`) with vendor-fixed control; rung-4 mechanics only,
+  not replayed by W245, wire reachability UNKNOWN. `35081006` **CLOSED** the
+  ruby2shell C=112 code-pointer lane (no consumed owner: 16/18 byte-identical
+  qwords, GDB `entry-hits=0`, `+13-hits=0`, source reference only in fatal
+  `rb_print_backtrace`). `d5299c81` **CLOSED** unarr2shell's upstream-fix lane
+  (master head `704ea083` still vulnerable, no vendor fixed control; the +1
+  NUL lands in glibc slack). No primary grade changed for either closure.
+
+The 119 established count and every register grade cell are unchanged by
+this fold; every `PASS/FAIL` count above is an author or clean-archive replay
+except the W273 verdict. The dated folds below are preserved verbatim, so
+their older 176/173/173/119 counts are not edited.
+
 ## 2026-11-26 14:2xZ — FreeRDP W21 clean-room replay
 
 The unknown wake-22 attempt left an uncommitted runner and fixed-guard patch;
