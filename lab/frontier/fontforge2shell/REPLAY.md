@@ -529,3 +529,26 @@ takes the first match. Oracle: 16/16 checks, rc 0, final line
 `REPLAY_W29_OK: 16 checks, 0 failed`. Method, hashes and limits:
 `TWOSTORE.md`. Author-side negative, not a witness verdict; no branch,
 marker, command, r5 or grade change. No new replay demand; #4165 stays queued.
+
+## W30 — symmetric fromunicode pointer is written but unused (2026-11-26 00:2xZ)
+
+`make-frompath-case.py` regenerates `frompath.pcf` (291 bytes, sha256
+`f4513ca207a8742821ce76a9cc307e065cbc3183fa34e6cd570e277fccdf9a2b`),
+`import-frompath.ff`, `import-frompath-save.ff` and the gdb command from
+`truncated.pcf`. With `build-nopie` and `build-fixed-nopie` present:
+
+```sh
+sh replay-w30.sh
+```
+
+Expected: `glyph=-172` writes `0x00414243` into `Encoding.fromunicode`
+(`encs-688`); live descriptor `0xa89d80` before the store, chosen value after;
+no breakpoint hit for `iconv if $rdi == 0x414243` and none for `EncFromUni`;
+plain Import and Import+Save rc 0, patched rc 0, patched source still has
+`glyph>=0 && glyph!=0xffff && glyph<b->glyphcnt`. Oracle: 12/12 checks,
+rc 0, final line `REPLAY_W30_OK: 12 checks, 0 failed`. The gdb transcript
+contains live heap addresses, so only its marker lines and the PCF hash are
+asserted; its raw hash is provenance, not a stable oracle. Full decision and
+limits in `FROMPATH.md`. Author-side negative, not a witness verdict; no
+called chosen address, marker, command, r5 or grade change. No new replay
+demand; #4165 stays queued.

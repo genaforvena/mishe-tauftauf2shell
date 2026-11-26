@@ -1,0 +1,16 @@
+PASS generated PCF hash matches committed case
+PASS store breakpoint sees negative glyph and live descriptor
+PASS chosen value reaches Encoding.fromunicode
+PASS no iconv call with chosen descriptor
+PASS no EncFromUni call after the write
+PASS gdb process exits normally
+PASS plain Import survives
+PASS plain Import+Save survives
+PASS patched build survives the same file
+PASS patched source keeps the glyph guard
+PASS fromunicode has a guarded iconv call site
+PASS no assignment site for fromunicode_func
+=== W30 normalized hashes ===
+frompath.pcf  f4513ca207a8742821ce76a9cc307e065cbc3183fa34e6cd570e277fccdf9a2b
+gdb-w30-frompath-nopie.out  39d7b005f20e7b2bd602b419d19d48b31955e29b52f9306992ff0be382f006fb
+REPLAY_W30_OK: 12 checks, 0 failed

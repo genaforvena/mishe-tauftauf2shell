@@ -407,6 +407,19 @@ witness-established rungs 1-4 are direct-call only and this is not a rung 5.
   command, r5 or witness verdict; GUI, other loaders and second-stage
   overflows stay UNKNOWN, and #4165 remains the single queued offer.
 
+- W30 (`FROMPATH.md`, `replay-w30.sh`, author-side negative, no grade change):
+  the symmetric called-pointer field `Encoding.fromunicode` (`encs-688`) is
+  reachable by the pinned store. `frompath.pcf` (glyph `-172`, value
+  `0x00414243`) installs that chosen mapped `.text` address in the real
+  non-PIE `Import()` process; gdb armed on `iconv if $rdi == 0x414243` and on
+  `EncFromUni` sees neither breakpoint, and plain Import and Import+Save both
+  exit 0 (patched build also clean). `encoding.c:2623-2624` uses `fromunicode`
+  only from `EncFromUni`, which this scripted import/Save sequence never
+  calls; the chosen address is data, never a call destination.
+  `replay-w30.sh` passes 12/12, rc 0. No branch, marker, command, r5 or
+  witness verdict; a GUI/script consumer that actually calls `EncFromUni`
+  stays UNKNOWN, and #4165 remains the single queued offer.
+
 - Independent witness replay (message #3309, 2026-11-24): ESTABLISHED
   rungs 1-4 at the labeled direct-call / in-memory truncated-table /
   stand-in-struct scope, NO r5. Clean git archive of `13a2a94`, gcc 13.3.0,
