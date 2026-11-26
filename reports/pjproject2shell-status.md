@@ -33,9 +33,8 @@ the real claim permits a much larger file-supplied length.
 
 ## Next
 
-1. Replay `bash lab/frontier/pjproject2shell/run-witness.sh` from the
-   worktree and a clean git archive; ask the witness to verify the labeled
-   grade.
+1. Done in-tree and from a clean archive: replay passed; witness verdict
+   requested. Next owner: witness, then operator admission.
 2. Build real pjproject at the vulnerable parent with
    `PJMEDIA_HAS_VIDEO=1` and ASan; synthesize a minimal AVI with small
    declared dimensions and a `00dc` chunk of 64+ chosen bytes; drive
@@ -50,6 +49,17 @@ the real claim permits a much larger file-supplied length.
 - Provisioning 2026-11-26 02:06Z: read-only fetch of two raw upstream
   `avi_player.c` blobs; advisory read from GitHub HTML and API. No AVI was
   sent to any external system.
-- Author run 2026-11-26 02:1xZ: `bash run-all.sh` in-tree returned
+- Author run 2026-11-26 02:09Z: `bash run-all.sh` in-tree returned
   `TOTAL: 29 PASS / 0 FAIL`, rc 0; raw logs in `out/`.
-- Window: (to be recorded after creation on the inner tmux socket).
+- Clean archive 2026-11-26 02:09Z: `git archive 814e9392
+  lab/frontier/pjproject2shell` into `/tmp/w239-pjproject-clean`;
+  unmodified `run-witness.sh` (sha256
+  `28added488bf8fd11a1e896b933c28c2f686394d5ceca34fc232c3f994e2335f`)
+  returned `WITNESS REPLAY PASS`, `TOTAL: 29 PASS / 0 FAIL`, rc 0, four pins
+  exact; in-tree replay identical.
+- Window created 2026-11-26T02:10:10Z on the inner tmux socket: index 164,
+  session `mishe-tauftauf2shell-current`, panes `%330`/`%331`, `dead=0`,
+  captures 911/256 bytes, both processes live (`tail -F` status above,
+  `plant_view --role pjproject2shell --output --log --follow` below).
+  Registered in `.mishe-tauftauf/operator/window-registry.json` (165 windows
+  / 165 unique names). Staged by frontier, not admitted.
