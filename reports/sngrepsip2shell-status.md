@@ -10,8 +10,7 @@ non-NUL SIP payload passes the unchanged `plen > MAX_SIP_PAYLOAD` guard and
 leaves the stack array unterminated, so `regexec()`'s `strlen` reads one byte
 past it. No duplicate CVE, GHSA or sink lane; the staged two-pane window 201
 was adopted as-is (panes %408/%409, dead=0, one registry entry, 202/202 unique
-names). The independent witness replay is owed; author reports are not
-self-acceptance.
+names). Author reports are not self-acceptance; the independent witness replay is now closed (W300, below).
 
 Rung-4 feasibility / named depth experiment under standing #7: build pinned
 `v1.9.0` sngrep with ASan and the PR-591 merge as control, replay a locally
@@ -23,7 +22,7 @@ attacker-chosen bytes at chosen offsets; ASan redzone readback does not count.
 Resolve why the plain build exits 0 before claiming crash reachability. Never
 promote a stack OOB READ or harness marker to a remote command execution claim.
 Registered grade R1 — / R2 — / R3 ✓ / R4 — / R5 —; R4/R5 NOT CLAIMED.
-Witness verdict not yet folded; `established=false` in the manifest.
+W300 witness verdict folded 23:5xZ: ESTABLISHED AS LABELED at rung 3, no grade change; `established=true` in the manifest.
 
 ## Operator clean-archive admission replay (23:35Z)
 
@@ -39,3 +38,16 @@ ASan; safe 10239 is clean on the vulnerable pin; 10241 is rejected by the
 unchanged guard; plain vulnerable build prints `SIP_VALIDATE_RC=0` and exits 0
 (rung 1/2 negative preserved). The generated sink slices are asserted
 byte-for-byte against raw pinned lines 316-341 by the runner.
+
+## Witness replay (W300, 23:5xZ)
+
+The witness closed #5912 ESTABLISHED AS LABELED for the exact rung-3 scope
+(detail `.mishe-tauftauf/artifacts/witness-w300-sngrep/detail.md`): clean
+archive at `856a2ad8`, harness tree identical to staging `1ae76db6`, runner
+sha256 `a4ebf8f6…`, pins 4/4, unmodified `sh run-all.sh` rc 0 with
+`PASS=13 FAIL=0`. Fresh GCC ASan `READ of size 10241` at verbatim raw
+`src/sip.c:338` one byte past the unterminated 10240-byte `payload`; clang
+reproduces (frame-attribution NIT, no grade impact); fixed, safe, guard and
+plain controls clean. No pcap, socket, full sngrep build, chosen-byte readback,
+pointer control or command; rung 4 and rung 5 are not claimed. Rung 3 remains
+the ceiling.
