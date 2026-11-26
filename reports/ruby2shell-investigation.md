@@ -4751,3 +4751,57 @@ A second, differently-groomed consumer of the primary one-byte overflow would
 change the rung-4/rung-5 picture; zero wire-derived receivers closes the
 consumer-search branch. Falsifier: no TracePoint hit with wire bytes on any
 stock arm.
+
+## Case-conversion consumer survey on stock Rails/Sinatra (2026-11-26, 11:27Z wake) — NEGATIVE
+
+The prior experiment ran verbatim. The static grep found about 60
+case-conversion sites across `rack-3.2.8`, `actionpack-8.1.4.1` and
+`sinatra-4.2.2`; the request-adjacent ones are `rack/method_override.rb:36`
+(`method.to_s.upcase`, already known), `rack/utils.rb:172`
+(`param.downcase!`), `rack/media_type.rb:20,40` (`type.downcase!`),
+`rack/headers.rb:235` (`key.downcase`),
+`action_dispatch/http/request.rb:141` (`method.downcase`),
+`journey/router/utils.rb:34` (`$1.upcase` on an encoded path) and
+`metal/rendering.rb:232` (`casecmp?`).
+
+`lab/repro/ruby2shell-case-reach.{rb,py,sh}` repeats the wpqw harness shape: a
+`RUBYOPT` preload intercepts `upcase`, `downcase`, `swapcase`, `casecmp?` and
+their bang forms on an **unmodified** stock Sinatra and `rails new` app; a
+loopback-only wire script delivers `0xDF` in `charset=ISO-8859-1` parts, UTF-8
+`ß`, an ASCII canary in `_method`, wire-shaped `Content-Type`/`Host` values,
+override headers, query values and the Rails dev route grep. Evidence is
+gitignored under `lab/build/evidence/case-reach/`. Hook liveness: 498 Sinatra /
+3058 Rails conversions logged, one boot canary plus one wire `_method` canary
+per app, and a synthetic `ISO-8859-1 0xDF` classifier control logged in both.
+
+| Traced suspect receiver | Encoding | Sinatra | Rails |
+| --- | --- | --- | --- |
+| `Rack::MethodOverride#method_override` (`method_override.rb:36`), `_method` with `charset=ISO-8859-1`, UTF-8 `ß` or raw `0xDF` | ISO-8859-1 / UTF-8 / ASCII-8BIT | hit, 404 | hit, 404 |
+| `Rack::Protection::HostAuthorization#extract_host` (`host_authorization.rb:112`), `Host: 127.0.0.1, foo\xdf.example` | ASCII-8BIT | hit, 403 | no hit |
+| `Rack::MediaType.type` (`media_type.rb:20`) via `Request#form_data?`/`#parseable_data?`, `Content-Type: text/\xdf/plain` | ASCII-8BIT | hit, 404 | hit, 404 |
+
+No `swapcase`, `casecmp?`, filename or parameter-filter receiver carried wire
+bytes; the route grep returned 400 before any case conversion. The two new
+consumers are structurally inert for CVE-2026-132825: Puma supplies header
+values as ASCII-8BIT, whose case tables never map `0xDF`. The ASan control
+`lab/repro/ruby2shell-case-reach-asan.{rb,sh}` confirms it: 21-byte `0xDF`
+`upcase`/`downcase`/`downcase!` and the wire-shaped `Content-Type`/`Host`
+receivers returned rc=0 with identical input/output lengths on both 3.4.12 and
+3.4.13; the ISO-8859-1 `_method` control gave
+`SUMMARY: AddressSanitizer: heap-buffer-overflow enc/iso_8859_1.c:293 in
+case_map` (rc=1) only on 3.4.12, while 3.4.13 produced 21→42 `SS` bytes.
+UTF-8 `ß`*21 `upcase` was clean on both. The first probe run reported rc=1 for
+the bang forms because `String#downcase!` returns `nil` when it makes no
+change; the probe was corrected to fall back to the receiver and re-run.
+
+**Conclusion:** the consumer-search branch is CLOSED. `_method` remains the
+only stock wire path that delivers a single-byte-encoded `0xDF` into a case
+conversion; the two additional wire-reachable conversions cannot expand.
+Primary grades unchanged: rung 4 witness-COMPLETE, harness-condition rung 5
+witness-ESTABLISHED, stock/oracle-free/persistent rung 5 **NOT ACHIEVED**.
+
+Next bounded experiment: check whether a stock request can make Rack tag a
+header-derived string with a single-byte encoding whose case map expands
+(ISO-8859-9 / Windows-1252 / ISO-8859-3), instead of ASCII-8BIT. If the tag is
+fixed at the Puma boundary, no new consumer exists; a measured tagged receiver
+would reopen the branch with a different grooming shape.
