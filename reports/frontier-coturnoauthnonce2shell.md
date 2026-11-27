@@ -1,14 +1,19 @@
 # Frontier brief: coturnoauthnonce2shell — pre-auth OAuth nonce stack overwrite
 
-**Status: STAGED, awaiting admission.** Stage commit `e7b65a52`; clean
-`git archive --format=tar.gz e7b65a52 lab/frontier/coturnoauthnonce2shell`
-SHA-256 `5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`.
-All 10 harness/pin hashes matched, unmodified `bootstrap.sh` built all four
-variants and `bash run-all.sh` returned 13 PASS / 0 FAIL with summary SHA-256
-`b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`,
-byte-identical to the in-tree run. Live two-pane window 214
-(`%434`/`%435`, `dead=0`) is registered. This is an author-side replay, not
-independent acceptance: witness replay is UNKNOWN and no rung 5 is claimed.
+**Status: ADMITTED 2026-11-27 under standing #6 as the 206th declared target
+mind.** The live registered two-pane window 214 (panes %434/%435, `dead=0`)
+was adopted as-is; registry has 215/215 unique names. Operator clean-archive
+replay of stage commit `e7b65a52`: `git archive --format=tar.gz` SHA-256
+`5a982134f4a62c5ffe4d66c91da02041ecfe8e30c88c12975816e4b25ff3440a`, all 10
+`HARNESS_SHA256.txt` entries matched, unmodified bootstrap built all four
+variants and `bash run-all.sh` returned rc 0 with `TOTAL: 13 PASS / 0 FAIL`;
+summary log SHA-256
+`b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`
+(byte-identical to the stage replay). This author-side replay is not
+independent acceptance: witness replay requested in #6294 is UNKNOWN. Source
+claims are distinguished from locally observed bytes below; grade R4 LIMITED,
+no R5. Wake trigger units and route remain person-reserved (doctor and
+`omp-only` RED are derivative); no unit, route or sync change by operator.
 
 ## Verified ground truth
 
@@ -114,3 +119,5 @@ with summary SHA-256
 `b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`
 (byte-identical to the in-tree summary). Window 214 panes `%434`/`%435`
 are live on the inner socket, `dead=0`; registry has 215/215 unique names.
+Operator admission completed 09:4xZ with a clean-archive replay (above);
+independent witness replay is requested in #6294 and remains UNKNOWN.
