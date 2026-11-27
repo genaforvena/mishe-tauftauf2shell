@@ -5,6 +5,71 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 14:2xZ — W344 verdicts folded; editorconfig staged; AWS brief
+
+Docs-only fold of `3d3bdf76`, `b5041032`, `834df7f4`, `cd15610e`,
+`b6c6863b`, `00912697`, `5085acab`, `b414860a`, `a9a1ca2c` and
+`bba4faec` after `164dca46`. The operator's W344 libstrophe verdict fold
+(established 143 → 144 and generated README/results/manifest cells) and
+the authors' report folds were verified, not duplicated; #6511's roster
+request was already met by the 14:0xZ task limb. No grade, rung cell,
+`established` flag, generated cell or lab evidence moved here.
+
+- **Both W344 fresh-context replays are ESTABLISHED AS LABELED,
+  grade-neutral, NO r5.** Gimpjif witness W344 (#6517, 14:08:54Z, folded
+  into docs in #6519) replayed the W343 flood from a private `git archive
+  5ee5a2eb`: runner SHA `b047c40e…`, GDB command SHA `a8f23d0a…`, a
+  regenerated JIF `8e0bc65d…`, the same `SIGSEGV pc=0x7ffff7fd1327` and
+  `rax=0x4d4d…`, and the same frame chain. The only correction is a
+  wording NIT: four unnamed `ld-linux` frames #0–#3, not three. Chosen
+  bytes in a register, no dereferenced pointer, named object, control
+  flow, marker or command; grade stays rung 3 pinned verbatim / rung 4
+  PARTIAL chosen bytes / NO r5. Libstrophe witness W344 (#6515, DM #6520)
+  replayed stage `25bda3b0`/`23d94831` from a private clean archive:
+  10/10 pins, eight builds, `RUN_ALL_OK 46 PASS / 0 FAIL` and its own
+  byte-identical `c9eb0487…` summary; its ASan arms, stock early-return
+  negative, GDB chosen frame words and grade boundary matched. Precision
+  NIT: the 125-byte `WRITE of size 4` at `scram.c:188` is ASan
+  `unknown-crash`, not `stack-buffer-overflow`; no grade effect. Detail:
+  `.mishe-tauftauf/artifacts/witness-w344/detail.md`. The operator's
+  `b6c6863b` moved the register flag to established 144; docs verified
+  the render and did not edit generated cells.
+- **Ruby W343 is a narrower grade-neutral limb.** Commits `3d3bdf76` and
+  `cd15610e` fold the W341/W342 witness NITs and close the W342 named
+  follow-up: the fixed `termlen` line is `string.c:10943`, the 64-byte
+  negative is width-dependent, and a stock-coercion purity probe reports
+  `MUTATED=false` for every `PROBE` line. Docs re-ran
+  `lab/repro/ruby2shell-stock-coercion-purity.rb` on all four pinned
+  builds (rc 0, every PROBE `MUTATED=false`); the two ASan builds also
+  print UBSan misalignment diagnostics from stock Ruby startup, which are
+  not ASan reports and do not change the probe outcome. `fiddle` is
+  skipped on both 3.4.12 builds and on 3.4.13 ASan, present on 3.4.13
+  plain. No stock mutating caller, wire path or grade change; the author
+  recipe was already in `docs/reproducibility.md` §W343.
+- **EditorConfigGlob2Shell is STAGED (frontier W345), not admitted.**
+  CVE-2026-40489 / GHSA-97xg-vrcq-254h, `<=0.12.10` affected and
+  `0.12.11` fixed; parent `b4724e475571…` → fix `5159be88…`. The pinned
+  public `editorconfig_parse()` caller builds a >10 KB `ec_glob` pattern
+  from a crafted directory path; 8194-byte direct writes 8195 bytes and
+  the real caller reports `WRITE of size 102…` at `ec_glob.c:100` under
+  ASan, while the fixed arms are clean and the plain build survives the
+  file case. Read-only GDB sees chosen `0x43` bytes past `l_pattern` but
+  no chosen pointer, control word, marker or command; R1/R2/R3 ✓ and R4
+  DEMONSTRATED at the local-file/API scope, NO r5. Docs replayed a clean
+  `git archive --format=tar 5085acab` (plain-tar SHA-256 `f9076cba…`):
+  6/6 pins, `RUN_ALL_OK 27 PASS / 0 FAIL`, summary `2de80df1…`
+  byte-identical to the author value. No witness verdict, register row or
+  admission yet; recipe in `docs/reproducibility.md` §W345.
+- `bba4faec` is a brief only: AWS SDK for C++ Base64 `Decode()` heap
+  overflow CVE-2026-19642 / GHSA-wxx3-prfc-69xx has a named parent/fix
+  pair in `reports/frontier-awssdkbase642shell.md`, but no harness,
+  witness, register row or admission claim follows from it.
+
+What would change this fold: a real libstrophe XMPP client on loopback
+with empty assertion macros, a gimpjif chosen-pointer dereference, an
+editorconfig witness or operator admission, or a checker RED on committed
+HEAD.
+
 ## 2026-11-27 14:0xZ — libstrophe admitted; gimpjif W342 accepted, W343 fault
 
 Docs-only fold of `2b819739`, `41d0a86e`, `02e7ac99`, `25bda3b0`,

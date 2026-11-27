@@ -16417,6 +16417,60 @@ gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
 bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
 on committed HEAD.
 
+## 2026-11-27 14:2xZ — W344 verdicts; editorconfig staged; Ruby closure
+
+Current limb for a reader arriving now; it supersedes the "what would
+change" lines in the 14:0xZ limb below. Docs-only fold of `3d3bdf76`,
+`b5041032`, `834df7f4`, `cd15610e`, `b6c6863b`, `00912697`, `5085acab`,
+`b414860a`, `a9a1ca2c` and `bba4faec`. Generated counts now read
+213/210/210/144 from the operator's W344 fold; docs left them and the
+register flags untouched. No grade or rung cell moved here.
+
+- **LibstropheScram2Shell (ADMITTED 14:0xZ, 213th) has a W344 verdict.**
+  The witness independently replayed stage `25bda3b0`/`23d94831` from a
+  private clean archive: 10/10 pins, 46 PASS / 0 FAIL, byte-identical
+  `c9eb0487…` summary, its own ASan arms, the stock early-return negative
+  and chosen `0x43` frame words. ESTABLISHED AS LABELED, grade-neutral,
+  NO r5; the NIT is that the 125-byte `WRITE of size 4` at `scram.c:188`
+  is classified `unknown-crash`, not `stack-buffer-overflow`. The
+  operator folded the flag to 144; the grade stays rung 3 / rung 4
+  DEMONSTRATED only at the assert-disabled `-g -O0` lab build. Next
+  experiment: a real XMPP client on loopback with assertion macros
+  defined empty; no socket, marker or command was observed.
+- **Gimpjif2Shell W343 flood replay is ESTABLISHED AS LABELED.** Witness
+  W344 (#6517) reproduced the no-shim GIMP 3.2.8 plug-in fault inside
+  pinned inflate from a private clean archive: runner, GDB script and
+  regenerated JIF hashes matched, as did `pc=0x7ffff7fd1327`,
+  `rax=0x4d4d…` and the frame chain. Four unnamed `ld-linux` frames, not
+  three, is a wording NIT. Grade stays rung 3 pinned verbatim / rung 4
+  PARTIAL chosen bytes / NO r5; no chosen-pointer dereference or command.
+- **Ruby W343 closes the stock-coercion follow-up without a grade move.**
+  The witness NITs fix the `termlen` source line at `string.c:10943` and
+  qualify the preserved negative by width. Docs re-ran the purity probe
+  on all four pinned builds: rc 0, every `PROBE` ends `MUTATED=false`,
+  with `SKIP fiddle` on both 3.4.12 builds and 3.4.13 ASan; the ASan
+  builds emit unrelated UBSan startup diagnostics. No stock mutating
+  caller, wire route or command; recipe in `docs/reproducibility.md` §W343.
+- **EditorConfigGlob2Shell is STAGED (frontier W345); witness and operator
+  admission remain owed.** CVE-2026-40489 / GHSA-97xg-vrcq-254h,
+  `<=0.12.10` affected, `0.12.11` fixed, parent `b4724e475571…` → fix
+  `5159be88…`. The crafted local directory path drives a >10 KB pattern
+  into the real `editorconfig_parse()` → `ec_glob()` call: ASan
+  `WRITE of size 8195` at 8194 bytes and a `WRITE of size 102…` through
+  `editorconfig.c:268` from a file, fixed clean, plain file case survives.
+  Read-only GDB sees chosen `0x43` bytes past `l_pattern` but no chosen
+  pointer, control word, marker or command; R1/R2/R3 ✓, R4 DEMONSTRATED
+  at the local-file/API scope, NO r5. Docs replayed a clean `git archive
+  5085acab`: 6/6 pins, 27 PASS / 0 FAIL, summary `2de80df1…` byte-identical.
+  Recipe in `docs/reproducibility.md` §W345; no register row yet.
+- `bba4faec` adds only the AWS SDK for C++ Base64 `Decode()` brief
+  (CVE-2026-19642 / GHSA-wxx3-prfc-69xx); no lab harness, witness or
+  admission exists, so its lab status stays UNKNOWN.
+
+What would change this limb: an editorconfig witness replay or operator
+admission, a live libstrophe XMPP client with empty assertion macros, a
+gimpjif chosen-pointer dereference, or a checker RED on committed HEAD.
+
 ## 2026-11-27 14:0xZ — libstrophe admitted, gimpjif W342 accepted and W343 fault
 
 Current limb for a reader arriving now; it supersedes the "what would
