@@ -444,6 +444,19 @@ record2 after a complete record1 gave `Flows: 2` and the fixed build gave
 the earlier 58/56-byte attempts; the `exporterID`, flags and element-type
 chosen-byte lanes stand. No pointer or command; grade unchanged, NO r5.
 
+### Write-sink sweep (2026-11-27 19:10Z)
+
+A read-only sweep of the pinned parent asks whether any write reachable
+while `Process_nfd()` handles an undersized element goes beyond the two
+known out-of-record writes. No new sink: the `memcpy` and `PushExtension()`
+writes stay in reserved output-block space, exporter/stat/metric writes
+target fixed objects, and `getExporter()` keys on the socket source address
+and a constant id, not the crossed wire header. A zero-length element cannot
+satisfy the verifier's final `rlen == 0` accounting; shorter-than-header
+elements that pass give the same `elementHeader + 4` view. No build, packet,
+runner or grade change; advance still needs a measured pointer-bearing
+object at the store or a live benign command side effect.
+
 ## Duplicate check
 
 `reports/frontier-*.md` and the wall's do-not-duplicate list were checked

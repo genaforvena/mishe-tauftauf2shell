@@ -1019,3 +1019,32 @@ select a different pointer-bearing object?
 No chosen pointer, marker or command path opens here. Grade unchanged: rung 3
 live / rung 4 availability DEMONSTRATED (real-clock 3/3 SIGABRT) plus
 chosen-offset PARTIAL / NO r5.
+
+## Write-sink sweep closure (2026-11-27 19:10Z)
+
+Question: does any write reachable while pinned `Process_nfd()` handles an
+undersized element go beyond the two known out-of-record writes and land in
+a pointer-bearing object or take a wire-chosen value? Read-only sweep of the
+pinned parent `8a00543aa5c7b25b7d3f7642fdf306fd9979f237`; no build, packet,
+runner or assertion changed. Answer: **no new sink**.
+
+- The only writes into the out-of-record `EXgenericFlow` view are the clock
+  store at `nfd_raw.c:256` and the ICMP port swap at `:263-270` (W317).
+- `memcpy` at `:233` and `PushExtension` at `:241-251` write into
+  pre-reserved output-block space; `IsAvailable` at `:228` accounts for
+  `recordHeaderV3->size + receivedSize`.
+- `getExporter()` at `:68-72` keys on `VERSION_NFDUMP`, constant id 0 and
+  `fs->ipAddr`; the wire `exporterID` is not consulted, so a crossed record
+  header cannot retarget the exporter pointer. Exporter, `stat_record` and
+  `UpdateMetric()` counters are fixed objects; no field of the OOB view is
+  used as an index, length, pointer or allocator size (W317, 12:25Z closure).
+- A zero-length element cannot pass the verifier's final `rlen == 0`
+  accounting: advancing by zero lands the next iteration on the same
+  element header, and a terminal zero-length element fails the `rlen < 4`
+  guard. Elements shorter than the 4-byte header that do pass still yield
+  the already-known `elementHeader + 4` view, with no additional write.
+  The fixed verifier rejects every `length < 4`.
+
+Advance still needs a measured pointer-bearing object at the store or a live
+benign command side effect. Grade unchanged: rung 3 live / rung 4
+availability DEMONSTRATED plus chosen-offset PARTIAL / NO r5.

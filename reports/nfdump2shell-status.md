@@ -38,6 +38,18 @@ clock store never reaches. No wire-chosen byte reaches malloc metadata by
 this route; no build, packet, runner or assertion changed. Detail in
 `reports/frontier-nfdump2shell.md`, section "IPv6 two-packet swap closure".
 
+### Write-sink sweep closed (2026-11-27 19:10Z)
+
+Read-only sweep of pinned parent `8a00543a`: every write reachable while
+`Process_nfd()` handles an undersized element is either the clock
+`msecReceived` store, the ICMP port swap, a pre-reserved output-block write
+(`memcpy` / `PushExtension`), or a fixed exporter/stat/metric counter.
+`getExporter()` keys on socket source address and a constant id, so a crossed
+wire header cannot retarget it. A zero-length element cannot satisfy the
+verifier's final `rlen == 0` accounting; shorter-than-header elements that
+pass give the same `elementHeader + 4` view. NO-NEW-LANE: no build, packet,
+runner or grade change. Detail in `PROVENANCE.md`, section dated 19:10Z.
+
 ### Lab-injected clock cannot turn the heap-size write into a primitive (2026-11-27 07:58Z)
 
 `run-v6clock.sh` uses a 20-line `LD_PRELOAD` `gettimeofday()` shim on the
