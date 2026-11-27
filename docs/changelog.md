@@ -6,6 +6,79 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 20:0xZ — Ruby W367/W357; Checkmk replay; gimpjif/nfdump closures
+
+Docs-only fold of the six commits after `cc777e1a` through `e8d4c27b`:
+`cf5e1ad8`, `27d64eb8`, `ccdbad4b`, `b902273f`, `55fa746c` and `e8d4c27b`.
+Late report-only `90e2b3bd` puts the already-recorded W366 verdict in the
+gimpjif status header; it adds no result and is covered below. This also
+completes the W366 verdict wording left uncommitted by the prior docs wake.
+No grade, rung cell, register flag, generated count, README, results,
+manifest, SVG, report or lab evidence moved here. Recipes and docs' own
+smoke observations are in `docs/reproducibility.md` §20:0xZ.
+
+- **Ruby W356 has an independent W367 verdict** (`ccdbad4b`), ESTABLISHED
+  AS LABELED at the pinned build/valgrind/read-only-GDB scope. The operator
+  folded the boundary wording only: grade-neutral, NO r5, generated count
+  unchanged at 219/216/216/150. This is a verdict for the prev_size-LSB arm,
+  not a new wire or command result.
+- **Ruby W357 falsifies the higher-size-byte hypothesis** (`e8d4c27b`).
+  The first driver sweep used `Encoding::ISO-8859-1`, which parses as
+  subtraction and raised `NameError` in all 18 arms; that negative is
+  preserved. With `Encoding::ISO_8859_1`, `"aaa" + N x 0xDF` for
+  N=27/43/59 gives 18/18 valgrind arms: nine vulnerable arms have one
+  `case_map` write plus the known `memmove` copy-out read, 0 bytes after
+  74/90/106-byte blocks, and all nine patched arms have zero writes/reads.
+  All 72 fresh plain processes, including even-capacity N=19, returned rc 0
+  without glibc metadata diagnostics. GDB on 3.4.12 N=27 reads `capa=50`,
+  `slot=current_buffer+74`, `used=51`: the slot changes `0x00 -> 0x53` while
+  the successor boundary at `current_buffer+80` is unchanged. The write is
+  in current-chunk padding; under this allocation shape only R == 0 or 8
+  (mod 16) can reach successor prev_size or size LSB. No grade change, wire
+  request, chosen address, marker or command. Next named experiment W358:
+  survey two-byte uppercase expansions for a byte other than fixed `0x53`.
+- **Gimpjif W356 preserves the split-map negative** (`27d64eb8`). Moving a
+  coherent fake map to `ARRBASE-0x800` and filling 256 loader-array slots
+  still failed in two unmodified-runner replays: runtime `idx` drifted
+  -0x130 then +0x100 from the encoded pointers. Both reached pinned inflate
+  but produced only genuine `adler32`/`adler32_z` resolutions and the genuine
+  GOT write, with no chosen-map hit, `l_used` store or chosen GOT value.
+  JIF SHA-256 values are `8fd3ac21…` and `e6fc29ac…`. Grade unchanged:
+  rung 3 pinned verbatim / rung 4 chosen-pointer read, NO chosen-address
+  write, NO r5. A further attempt needs an `idx`-independent layout; do not
+  replay these two JIFs unchanged.
+- **nfdump closes the pinned write-sink sweep with NO-NEW-LANE**
+  (`cf5e1ad8`). Read-only review of parent `8a00543a` found only the known
+  clock store and ICMP swap in the out-of-record view; `memcpy` and
+  `PushExtension()` stay in reserved output space, exporter/stat/metric
+  writes target fixed objects, and `getExporter()` keys on socket source
+  plus constant id rather than the crossed wire header. A zero-length
+  element cannot pass final `rlen == 0` accounting. No build, packet,
+  runner, assertion or grade change; advance still needs a measured
+  pointer-bearing object at the store or a live benign command side effect.
+- **Checkmk W367 has a clean-archive replay but remains STAGED**
+  (`b902273f`, `55fa746c`). A clean `git archive --format=tar b902273f
+  lab/frontier/checkmk2shell` has SHA-256
+  `3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`;
+  it matched 12/12 stable pins and returned `RUN_ALL_OK 11 PASS / 0 FAIL`.
+  The real pinned parser has ASan `stack-buffer-overflow`, WRITE size 10000,
+  at `mkevent.cc:46` via `:144`; fixed output truncates to 8191. R3 is
+  confirmed on that parser, while R4 remains LIMITED to the isolated
+  verbatim-sink/no-canary/no-PIE marker at text offset 8172. R5 is NOT
+  CLAIMED; operator admission and independent witness replay remain owed.
+- **Gimpjif W366 verdict wording is corrected** (`9e15fd98`, `15f9817a`).
+  The unchanged W353 JIF logs three `do_lookup_x` entries, not nine: nine
+  is the number of logged fields per entry. Witness replay established the
+  corrected-entry/read-only-sink scope AS LABELED, grade-neutral, NO r5;
+  no replay is owed beyond that verdict. The layout-conditioned
+  `0x12e1`/`rax=0x240040` NIT remains a read-only negative.
+
+What would change this fold: W358's expansion-byte survey, a Checkmk real
+parser return-path transfer or loopback notification-spooler replay, a
+gimpjif `idx`-independent fake map or observed chosen-address store, a
+nfdump pointer-bearing store consumer, or a checker RED on committed HEAD.
+
+
 ## 2026-11-27 19:1xZ — Checkmk mkevent stack overflow staged (W367)
 
 Frontier staged `checkmk2shell` with live inner-socket window 228 (panes
@@ -67,11 +140,12 @@ already carries. Recipes in `docs/reproducibility.md` §18:4xZ.
 - **Gimpjif2Shell W355 bounds the write sinks without observing a write**
   (`5785d7da`), author-only and grade-neutral. Correction: `0xa0a0` is
   `check_match`, not `do_lookup_x` (entry `0xa220`, bit-hit branch `0xa540`).
-  A read-only GDB observer on the unchanged W353 JIF saw nine `do_lookup_x`
-  entries, including the chosen `memcpy` hash `0xd827590` with `flags=0x5`
-  and libz `undef_map=0x7ffff7aa8000`; the GNU bit test failed, so
-  `check_match` never ran and the pinned terminal fault stayed at `0x1327`
-  with `rax=0`. glibc 2.41 disassembly shows no chosen-address write inside
+  A read-only GDB observer on the unchanged W353 JIF saw three
+  `do_lookup_x` entries (nine logged fields), including the chosen
+  `memcpy` hash `0xd827590` with `flags=0x5` and libz
+  `undef_map=0x7ffff7aa8000`; the GNU bit test failed, so `check_match`
+  never ran and the author's terminal fault stayed at `0x1327` with `rax=0`.
+  glibc 2.41 disassembly shows no chosen-address write inside
   `do_lookup_x`; only after `check_match` acceptance do `l_used` at forged
   map offset `0x414` (`0xb200`) and the caller GOT slot at `0x11257`
   (`mov %rax,0x0(%r13)`) become reachable. Three forged-map JIFs were
@@ -84,6 +158,7 @@ already carries. Recipes in `docs/reproducibility.md` §18:4xZ.
   only repair stale "author-only pending witness" wording; W352/W353 are
   ESTABLISHED AS LABELED at their pinned read-only-observer scopes. No new
   verdict, count or grade here.
+
 
 Docs' own replays here: all six W355 patched valgrind arms returned rc 0
 with `writes=0 reads=0` and no case-map site; all 18 W356 valgrind arms

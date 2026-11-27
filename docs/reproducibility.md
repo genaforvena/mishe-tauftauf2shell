@@ -44,7 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| CheckmkMkevent2Shell W367 (STAGED 19:1xZ) | [status](../reports/checkmk2shell-status.md), [brief](../reports/frontier-checkmk2shell.md), [provenance](../lab/frontier/checkmk2shell/PROVENANCE.md) | CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq, Checkmk 2.5.0 `<2.5.0p21`, 2.4.0 `<2.4.0p42`, 2.3.0 EOL; fix `265c0ab68fb50bedd0102536eb92612a3eb1af91`, parent `9a64b94964c5cc34d82daa888d675b86f835e861`; 12 stable source/harness pins in `SHA256SUMS` | `cd lab/frontier/checkmk2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (real pinned `parse_notification()` plus isolated verbatim sink, local only) | `RUN_ALL_OK 11 PASS / 0 FAIL`; real parser ASan `stack-buffer-overflow WRITE of size 10000` at `mkevent.cc:46` via `:144`; fixed truncates to 8191; isolated no-canary/no-PIE sink offset 8172 prints `BENIGN_MARKER`, offsets 8171/8173 fail; R4 LIMITED to isolated sink, R5 NOT CLAIMED |
+| CheckmkMkevent2Shell W367 (STAGED 19:1xZ; clean archive replay) | [status](../reports/checkmk2shell-status.md), [brief](../reports/frontier-checkmk2shell.md), [provenance](../lab/frontier/checkmk2shell/PROVENANCE.md) | CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq; Checkmk 2.5.0 `<2.5.0p21`, 2.4.0 `<2.4.0p42`, 2.3.0 EOL; fix `265c0ab68fb50bedd0102536eb92612a3eb1af91`, parent `9a64b94964c5cc34d82daa888d675b86f835e861`; 12 stable pins in `SHA256SUMS` | `cd lab/frontier/checkmk2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (real pinned `parse_notification()` plus isolated verbatim sink, local only) | Clean `b902273f` archive `3a5b3ef2…`: 12/12 pins, `RUN_ALL_OK 11 PASS / 0 FAIL`; real parser ASan WRITE size 10000 at `mkevent.cc:46` via `:144`; fixed truncates to 8191; R4 LIMITED to isolated sink, R5 NOT CLAIMED; admission and witness owed |
 | PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; W365 ESTABLISHED AS LABELED) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:true` at the W365 scope (`11163cef`); full procedure in §§18:0xZ/18:2xZ |
 | LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; W364 ESTABLISHED AS LABELED at pinned-sink scope) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. W364 replayed clean archive `4678a157` (TAR `06329456…`) twice at 5/0 with read-only GDB chosen `0x31` bytes; ESTABLISHED AS LABELED at the pinned-sink harness scope, grade-neutral, NO r5, no live ZFILE wire; full procedure in §17:2xZ |
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
@@ -20448,6 +20448,159 @@ count 149 are operator-owned. Live loopback ZFILE remains owed. Detail:
 `lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
 `reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.
 
+## 2026-11-27 20:0xZ — Ruby W367/W357; gimpjif W356; nfdump; Checkmk replay
+
+### Ruby2Shell W356 — W367 witness verdict (no new harness)
+
+The §18:4xZ W356 driver, six pinned builds and read-only GDB recipe are
+unchanged. Witness W367 (message #6776; operator fold `ccdbad4b`) returned
+ESTABLISHED AS LABELED at that pinned build/valgrind/read-only-GDB scope,
+grade-neutral and NO r5. The operator changed register boundary wording
+only; generated counts remain 219/216/216/150. Detail:
+`reports/ruby2shell-investigation.md` §19:2xZ.
+
+### Ruby2Shell W357 — k=3 higher-byte hypothesis FALSIFIED
+
+The first sweep used `Encoding::ISO-8859-1`, which Ruby parses as
+subtraction; all 18 arms raised `NameError` before `upcase`. The corrected
+committed input uses `Encoding::ISO_8859_1`. From the repository root with
+the same six gitignored plain builds used by W356:
+
+```sh
+sha256sum lab/repro/ruby2shell-rung3-mixed3.rb \
+  lab/repro/ruby2shell-mixed3-slot.gdb
+for rb in lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+          lab/build/plain/ruby-3.3.13-plain/bin/ruby \
+          lab/build/plain/ruby-4.0.9-plain/bin/ruby \
+          lab/build/plain/ruby-3.4.13-plain/bin/ruby \
+          lab/build/plain/ruby-3.3.14-plain/bin/ruby \
+          lab/build/plain/ruby-4.0.10-plain/bin/ruby; do
+  for n in 27 43 59; do
+    valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed3.rb "$n"
+  done
+done
+for rb in lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+          lab/build/plain/ruby-3.3.13-plain/bin/ruby \
+          lab/build/plain/ruby-4.0.9-plain/bin/ruby \
+          lab/build/plain/ruby-3.4.13-plain/bin/ruby \
+          lab/build/plain/ruby-3.3.14-plain/bin/ruby \
+          lab/build/plain/ruby-4.0.10-plain/bin/ruby; do
+  for n in 19 27 43 59; do
+    for rep in 1 2 3; do "$rb" lab/repro/ruby2shell-rung3-mixed3.rb "$n"; done
+  done
+done
+gdb -q -batch -x lab/repro/ruby2shell-mixed3-slot.gdb --args \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-rung3-mixed3.rb 27
+```
+
+Expect input SHA-256
+`1cd19b6205d63c80ad1ecaaa7df83df522e1c6bed3ef7d0663c6d56f314f9555`
+and GDB script
+`6fd8735c56837f60fbb73ab8b1f498f40945e16655e1dabf8cf77f228aa4731f`.
+Each of the nine vulnerable valgrind arms must show exactly one
+`Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and the known
+`memmove` copy-out read, `0 bytes after a block of size 74/90/106`, rc 0;
+all nine patched arms must show zero invalid writes/reads and no case-map
+site. All 72 plain processes must return rc 0 without `munmap_chunk`,
+`corrupted size`, `invalid next size` or double-free diagnostics. GDB must
+print `capa=50`, `slot=current_buffer+74`, `AFTER used=51`, with the slot
+byte changing `0x00 -> 0x53` and the successor boundary at
+`current_buffer+80` unchanged. The request is `R=capa+24`; stock glibc
+sizes the chunk `C=ceil((R+8)/16)*16`, so only `R==0` or `R==8` (mod 16)
+can reach successor prev_size or size LSB. Every other residue is current
+chunk padding. Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w357/`; the failed first-sweep logs are
+historical evidence, while the loops regenerate the corrected matrix.
+No wire request, chosen address, marker or command; grades unchanged.
+Detail: `reports/ruby2shell-investigation.md` §19:2xZ.
+
+Docs replayed only the committed GDB arm here: rc 0, `capa=50`,
+`slot=0x555555c78eea`, `AFTER used=51`, slot `0x00 -> 0x53`, successor
+boundary unchanged, and normal Ruby exit. Docs did not rerun the author's
+18-arm valgrind or 72-process plain matrix.
+
+### Gimpjif2Shell W356 — split-map negative under live `idx` drift
+
+No new runner or observer: reuse the SHA-verified AppImage runner and the
+W355 forged-map read-only observer. Run each JIF separately from the
+repository root after the §18:0xZ AppImage provisioning:
+
+```sh
+sha256sum lab/frontier/gimpjif2shell/live/run-appimage-min340.sh \
+  lab/frontier/gimpjif2shell/live/gdb-w355-forged.cmd \
+  lab/frontier/gimpjif2shell/live/evidence/w356-splitmap-try01.jif \
+  lab/frontier/gimpjif2shell/live/evidence/w356-splitmap-try02.jif
+export GIMPJIF_W340_GDB="$PWD/lab/frontier/gimpjif2shell/live/gdb-w355-forged.cmd"
+export GIMPJIF_W340_JIF="$PWD/lab/frontier/gimpjif2shell/live/evidence/w356-splitmap-try01.jif"
+export GIMPJIF_W340_OUT=/tmp/w356-try01-run.log GIMPJIF_W340_LOG=/tmp/w356-try01-gdb.log
+bash lab/frontier/gimpjif2shell/live/run-appimage-min340.sh
+export GIMPJIF_W340_JIF="$PWD/lab/frontier/gimpjif2shell/live/evidence/w356-splitmap-try02.jif"
+export GIMPJIF_W340_OUT=/tmp/w356-try02-run.log GIMPJIF_W340_LOG=/tmp/w356-try02-gdb.log
+bash lab/frontier/gimpjif2shell/live/run-appimage-min340.sh
+```
+
+Expect runner SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`,
+observer `23c3cbf1e00f66d9964c3e61d755e160d21ba4fc2115e90b333fd736e8d1842a`,
+and JIFs
+`8fd3ac21aefa9def5a920949e7244fe2757db4231564df176468af7b6605874a`
+/`e6fc29ac1f0894fcea9cb7b574252ae4766d482adb40579efcfbe0693a84d4b4`.
+Both runs must reach pinned inflate. The preserved runs measured
+`idx=0x555555678f40` (-0x130 from the first encoding) and
+`idx=0x555555679040` (+0x100 from the second), with only genuine
+`adler32`/`adler32_z` resolutions and genuine GOT write
+`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`; no chosen-map hit,
+`0xb200` LUSED store or chosen GOT value. Static JIF pointer words depend
+on runtime `idx`; a further attempt needs an `idx`-independent layout.
+Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer read,
+NO chosen-address write, NO r5. Docs did not run the AppImage. Exact log
+hashes and generator bounds: `lab/frontier/gimpjif2shell/PROVENANCE.md`
+§W356.
+
+### nfdump2shell — write-sink sweep CLOSED (NO-NEW-LANE)
+
+This is a read-only source result, not a new runtime replay. Inspect pinned
+parent `8a00543aa5c7b25b7d3f7642fdf306fd9979f237`, especially
+`src/netflow/nfd_raw.c:68-72`, `:228-270`, `:292`, and
+`src/collector/metric.c:91-113`, `:167-169`. The only out-of-record writes
+are the clock store at `nfd_raw.c:256` and ICMP swap at `:263-270`;
+`memcpy`/`PushExtension()` use reserved output space, exporter/stat/metric
+writes target fixed objects, and the crossed wire header cannot retarget
+`getExporter()`. A zero-length element cannot satisfy final `rlen == 0`
+accounting. No build, packet, runner, assertion or grade changed. Advance
+still needs a measured pointer-bearing object at the store or a live benign
+command side effect. Detail: `lab/frontier/nfdump2shell/PROVENANCE.md`
+§Write-sink sweep closure and `reports/frontier-nfdump2shell.md` §Write-sink
+sweep. Docs performed no new nfdump run.
+
+### CheckmkMkevent2Shell W367 — clean archive replay, still STAGED
+
+The stage recipe is in §19:1xZ. Reproduce the clean replay without copying
+generated evidence:
+
+```sh
+git archive --format=tar b902273f lab/frontier/checkmk2shell > /tmp/checkmk-w367.tar
+sha256sum /tmp/checkmk-w367.tar
+mkdir -p /tmp/checkmk-w367
+tar -xf /tmp/checkmk-w367.tar -C /tmp/checkmk-w367
+cd /tmp/checkmk-w367/lab/frontier/checkmk2shell
+sha256sum -c SHA256SUMS
+./harness/run-all.sh
+```
+
+Expect TAR SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`,
+12/12 stable pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. The real parser's ASan
+WRITE size 10000 and fixed 8191-byte truncation remain R3 evidence; the
+offset-8172 `BENIGN_MARKER` remains R4 LIMITED to the isolated
+verbatim-sink/no-canary/no-PIE wrapper. R5 is NOT CLAIMED; operator admission
+and independent witness replay remain owed. Docs replayed this exact clean
+archive here and observed the expected TAR hash, 12/12 pins and 11 PASS /
+0 FAIL. Detail: `reports/frontier-checkmk2shell.md` and
+`lab/frontier/checkmk2shell/PROVENANCE.md`.
+
+
 ## 2026-11-27 18:4xZ — Ruby W355/W356; gimpjif W355 write-sink bound
 
 ### Ruby2Shell W355 — patched 3.4.13 / 4.0.10 fixed control (CLOSED)
@@ -20534,7 +20687,7 @@ new=0x53`, `AFTER next new=0x91`. One unsanitized rep per build per N
 author's three-rep 72-process sweep was not re-run here. Observer, JIF and
 entry-log hashes matched the pins above on disk; no AppImage was run.
 
-### Gimpjif2Shell W355 — write-sink bound, no write (author-only)
+### Gimpjif2Shell W355 — write-sink bound; W366 witness replay
 
 No new consumer harness: use the unchanged W353 JIF and the §18:0xZ AppImage
 runner with the committed read-only observers. Offsets: `0xa0a0` is
@@ -20553,9 +20706,10 @@ Expect observer hashes
 entry-log hash
 `67087d00913b96c727fd437794433b6f228ba2c87f00e08b1891712144c83c23` (run
 log `55da35d9…`). With the pinned GIMP 3.2.8 AppImage / glibc 2.41 ld.so,
-expect nine `do_lookup_x` entries, the chosen `memcpy` hash `0xd827590`
-with `flags=0x5` and libz `undef_map=0x7ffff7aa8000`, a failed GNU bit test
-and the pinned terminal fault at `0x1327` with `rax=0`. Disassembly shows
+expect three `do_lookup_x` entries (nine logged fields) including the
+chosen `memcpy` hash `0xd827590` with `flags=0x5` and libz
+`undef_map=0x7ffff7aa8000`, a failed GNU bit test and, in the author's
+layout, a terminal fault at `0x1327` with `rax=0`. Disassembly shows
 the first reachable stores only after `check_match`: `l_used` at map offset
 `0x414` (`0xb200`) and the caller GOT at `0x11257` (`mov %rax,0x0(%r13)`);
 neither fires. The three forged JIFs
@@ -20569,6 +20723,24 @@ never reach `memcpy` because the fake tables overlap loader slots
 chosen-address write, NO r5; grade-neutral. Docs did not run the AppImage.
 Detail `lab/frontier/gimpjif2shell/PROVENANCE.md` §W355; the W363/W365
 verdict wording fold (`46831ba9`) adds no new verdict here.
+
+Witness W366 (#6760; operator `9e15fd98`, author `15f9817a`) replayed both
+cases from private `git archive --format=tar 5785d7da
+lab/frontier/gimpjif2shell` SHA-256
+`d84fd5b79b87a1e300fd5bff4635f8ccb747c5a92806039cf2d7490292b39702` with
+all six pins matched (runner, both observers, W353 JIF, forged-003 JIF, four
+author logs and the AppImage). Run A on the unchanged JIF returned rc 0 with
+both PASS lines, `idx=0x555555679180`, three ENTRY hits at
+`pc=0x7ffff7fd1220` and a chosen TABLE hit at `P1=0x5555556c0240` with no
+store; run B on forged-003 returned rc 0 with genuine resolutions only and
+the genuine GOT write byte-for-byte as authored, no LUSED store, chosen GOT
+value or chosen-map hit. Verdict ESTABLISHED AS LABELED at the corrected
+entry / read-only-sink scope, grade-neutral, NO r5; the established count
+stays 150. NITs: `idx` drift and run A's nonzero
+`l_gnu_bitmask_idxbits` moved its terminal fault to `0x12e1` /
+`rax=0x240040`. No replay is owed beyond this verdict. Detail:
+`.mishe-tauftauf/artifacts/witness-w366/detail.md` (gitignored site
+artifact, regenerated by the witness).
 
 ## 2026-11-27 18:2xZ — Ruby W354 branch matrix; W365 verdicts
 
@@ -20892,4 +21064,5 @@ verbatim-sink/no-canary/no-PIE wrapper prints `BENIGN_MARKER` at text offset
 8172; offsets 8171/8173 fail without the marker. R4 is LIMITED to that
 isolated sink scope, R5 is NOT CLAIMED, and operator admission plus
 independent witness replay remain owed. Window 228 is live with panes
-%462/%463 on the inner socket.
+%462/%463 on the inner socket. The clean-archive replay is folded in
+§20:0xZ.

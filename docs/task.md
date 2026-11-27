@@ -16456,6 +16456,65 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 20:0xZ — Ruby W367/W357; Checkmk replay; sink closures
+
+Current limb for a reader arriving now; it supersedes the 18:4xZ limb's
+open W357 question. One docs-only fold of `cf5e1ad8`, `27d64eb8`,
+`ccdbad4b`, `b902273f`, `55fa746c` and `e8d4c27b` after `cc777e1a`;
+late report-only `90e2b3bd` adds no result beyond the W366 wording below.
+This also completes the W366 wording left uncommitted by the prior docs
+wake. No grade, rung cell, register flag, generated count or lab evidence
+moved here. Recipes and docs' own smoke observations:
+`docs/reproducibility.md` §20:0xZ.
+
+- **Ruby W356 witness verdict W367 landed** (`ccdbad4b`): ESTABLISHED AS
+  LABELED at the pinned build/valgrind/read-only-GDB scope, grade-neutral,
+  NO r5. The operator changed boundary wording only; generated counts stay
+  219/216/216/150.
+- **Ruby W357 closed the k=3 higher-byte hypothesis as FALSIFIED**
+  (`e8d4c27b`). The initial `Encoding::ISO-8859-1` driver raised
+  `NameError` in all 18 arms; the corrected `Encoding::ISO_8859_1` matrix
+  has one `case_map` write plus the known copy-out read on all nine
+  vulnerable arms at 74/90/106 bytes and zero/zero on all nine patched
+  arms. All 72 fresh plain processes returned rc 0 without a glibc
+  metadata diagnostic. GDB on 3.4.12 N=27 shows `capa=50`, `used=51`, and
+  `current_buffer+74` changing `0x00 -> 0x53` while the successor boundary
+  at `+80` is unchanged: the byte lands in current-chunk padding. Under
+  this allocation shape no leading-byte count reaches a higher size byte.
+  Grade unchanged, no wire/address/marker/command. Next W358 surveys
+  two-byte uppercase expansions for a first byte other than `0x53`.
+- **Gimpjif W356 is a preserved split-map negative** (`27d64eb8`). The fake
+  map moved to `ARRBASE-0x800` with 256 filled array slots, but `idx`
+  drifted -0x130 then +0x100 between two unmodified-runner replays. Both
+  reached pinned inflate and produced only genuine libz resolutions plus
+  the genuine GOT write; no chosen-map hit, LUSED store or chosen GOT
+  value. Grade and NO-r5 ceiling unchanged; another attempt needs an
+  `idx`-independent layout, not a replay of these JIFs unchanged.
+- **Gimpjif W366 verdict wording corrected** (`9e15fd98`, `15f9817a`):
+  three `do_lookup_x` entries with nine logged fields each, not nine
+  entries. The W355 corrected-entry/read-only-sink verdict is ESTABLISHED
+  AS LABELED, grade-neutral, NO r5; the `0x12e1`/`rax=0x240040` NIT is a
+  layout-conditioned read-only negative. No replay is owed beyond it.
+- **nfdump write-sink sweep CLOSED, NO-NEW-LANE** (`cf5e1ad8`). Read-only
+  review of pinned parent `8a00543a` found no additional reachable store:
+  the known clock/swap writes are the only out-of-record writes, output
+  copies stay in reserved space, fixed counters cannot be retargeted by
+  the crossed header, and zero-length elements fail final accounting.
+  No build, packet, runner, assertion or grade change; a pointer-bearing
+  store consumer or live benign command remains necessary.
+- **Checkmk W367 clean archive replay landed, still STAGED** (`b902273f`,
+  `55fa746c`). Archive `3a5b3ef2…` matched 12/12 pins and
+  `RUN_ALL_OK 11 PASS / 0 FAIL`. R3 is confirmed on the real pinned
+  parser; R4 is LIMITED to the isolated verbatim-sink/no-canary/no-PIE
+  marker. R5 NOT CLAIMED; operator admission and independent witness
+  replay remain owed.
+
+At this limb: W358's expansion-byte survey, a Checkmk real-parser
+return-path transfer or loopback spooler/Event Console replay, a gimpjif
+`idx`-independent fake map or chosen-address store, a nfdump pointer-bearing
+store consumer, or a checker RED on committed HEAD.
+
+
 ## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif write bound
 
 Current limb for a reader arriving now; it supersedes the 18:2xZ limb's
@@ -16498,6 +16557,7 @@ generated count or lab evidence moved here. Recipes in
   strtab tables outside the observed ARR slot range, remeasure `idx`/zlen.
 - **Gimpjif verdict wording** (`46831ba9`) folds W363/W365 into the brief
   and status; the verdicts and their NITs are already in §18:2xZ.
+
 
 At this limb: W357's higher-byte result, a gimpjif chosen-address write or
 witness verdict for W354, a canonical-target or wire replay for PyMuPDF, a
