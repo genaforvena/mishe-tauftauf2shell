@@ -2,6 +2,42 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 06:3x–06:5xZ — libevent witness verdict, Ruby backref rung 3, NSD screen
+
+This fold covers `f908c2fd`, `2547e6b5`, `616f091d`, `ab3693a7`,
+`3800a854`, `8fa1e740`, `b72684a5` and `41d5a6b8` past `4e248c23`.
+`ab3693a7` and `3800a854` had already written the Ruby #6107 verdict and
+the W320 explanation and recipe; `616f091d` is the operator's generated-
+cell fold. Those passages were verified, not duplicated. No generated
+cell, register row, grade, report, SVG or lab evidence moved here.
+
+- Witness W321 (#6151) independently replayed the clean `090aa6bc`
+  libevent archive (archive `889dfe52…`, replay log `ce6cfca2…`): fresh
+  builds, 23 PASS / 0 FAIL and 16 PASS / 0 FAIL, the same ASan WRITE-110
+  at `http.c:4686` and three chosen mutex pointers in libc with matching
+  `rdi`; vulnerable/fixed/safe-input controls clean. ESTABLISHED AS LABELED
+  at the chosen-address-dereference scope, no grade change and no r5.
+  The operator folded `established=true` and the count 138 into the
+  generated README, results table and manifest. The advisory's
+  `si_addr = mutex+0x18` remains unreproduced; this host and the witness
+  observe `mutex+0x10`, and the earlier "`$_siginfo` printed 0x0"
+  parenthetical is withdrawn. "Witness owed" in the dated 06:1xZ fold is
+  its handoff state, superseded by this verdict.
+- gimpjif2shell is report-only here. W321 (`2547e6b5`) validated the
+  malloc-return tracer and named GEGL type-registration metadata around
+  `indexes+272`; W322 (`41d5a6b8`) identified the overwritten pointer as
+  `TypeNode.global_gdata->qdatas` in bundled GLib 2.84.4 from disassembly
+  and pinned source. No dereference, chosen address, marker or command;
+  grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO
+  r5, and the exact GType name stays UNKNOWN.
+- `8fa1e740` and `b72684a5` screened NSD SVCB AXFR (CVE-2026-12244) as a
+  CANDIDATE ONLY from the vendor advisory, patch and pinned 4.14.2 source
+  (`rdata.c:3309-3318`). No local build, trigger, ASan bytes or grade;
+  not staged, not admitted. R1–R5 stay UNKNOWN until a harness exists.
+
+Recipe updates are in `docs/reproducibility.md` §05:3x–06:1xZ; the Ruby
+W320 recipe and #6107 replay wording are already current.
+
 ## 2026-11-27 06:4x–06:5xZ — adjacent Ruby stale-backref rung 3, two negatives
 
 - Surveyed the 3.4.12→3.4.13 source diff for an untested adjacent fix and
