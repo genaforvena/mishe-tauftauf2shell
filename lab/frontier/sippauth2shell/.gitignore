@@ -8,6 +8,8 @@ runs/
 harness/vuln-asan
 harness/fixed-asan
 harness/vuln-plain
+harness/*.o
+pins/release-*.tar.gz
 harness/fixed-plain
 harness/vuln-marker
 harness/fixed-marker
