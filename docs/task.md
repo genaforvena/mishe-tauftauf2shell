@@ -16456,6 +16456,53 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif write bound
+
+Current limb for a reader arriving now; it supersedes the 18:2xZ limb's
+"W355 patched control" question. One docs-only fold of `5785d7da`,
+`7de447f1`, `46831ba9` and `cf323ddd`: no grade, rung cell, register flag,
+generated count or lab evidence moved here. Recipes in
+`docs/reproducibility.md` §18:4xZ.
+
+- **Ruby W355 — patched fixed control CLOSED** (`7de447f1`). The committed
+  input `lab/repro/ruby2shell-rung3-mixed.rb` with N=27/43/59 on plain
+  3.4.13 (rev `48857d6f2e`) and 4.0.10 (rev `a704b7cd95`) gives six valgrind
+  arms with rc 0, zero invalid writes/reads and no `case_map` site; GC
+  conditional-jump diagnostics are not memory-access findings. All 24 fresh
+  plain processes, including N=28, are rc 0. No grade: this closes the
+  size-LSB fixed-control half on all three patched branches, so do not
+  repeat the W353/W354 vulnerable matrix or this control unchanged.
+- **Ruby W356 — prev_size-LSB arm CLOSED** (`cf323ddd`). N=35/51/67
+  (N ≡ 3 mod 16) puts the single `0x53` byte on the successor chunk's
+  prev_size LSB. The committed
+  `lab/repro/ruby2shell-mixed-prevsize.sh` and `.gdb` show 18/18 valgrind
+  arms with one `case_map` write plus the known `memmove` copy-out read on
+  vulnerable 3.4.12/3.3.13/4.0.9, and zero/zero on patched
+  3.4.13/3.3.14/4.0.10; 72 fresh plain processes including even-N=36 are
+  rc 0 because an in-use chunk ignores its prev_size. GDB on 3.4.12 N=35
+  reads `slot=current_buffer+80`: `0x00` before / `0x53` after with the
+  successor size LSB staying `0x91`. No wire, chosen bytes or command;
+  grades unchanged. Next bounded experiment W357: k=3 leading ASCII bytes
+  (`R=N+k+44`, N=27/43/59 ⇒ R ≡ 10 mod 16) to reach byte 2 of the
+  successor size word, same six branches; falsifier is no write on
+  vulnerable or any write on patched. Do not repeat either k=1 parity.
+- **Gimpjif W355 — write sinks identified, no write observed** (`5785d7da`).
+  `0xa0a0` is `check_match`; `do_lookup_x` enters at `0xa220` and its
+  bit-hit branch is `0xa540`. Read-only observers on the unchanged W353 JIF
+  reached the chosen `memcpy` map but the GNU bit test failed; disassembly
+  puts the first reachable stores only after `check_match` (`l_used` at
+  map+`0x414`, caller GOT at `0x11257`). Three forged-map JIFs hit genuine
+  symbols only, logged a genuine GOT write and no LUSED store, and never
+  reached `memcpy` (fake tables overlapped `ARR[6..]`). Rung 3/rung 4
+  unchanged, NO r5. Next bound: place the fake link_map and its Dyn/sym/
+  strtab tables outside the observed ARR slot range, remeasure `idx`/zlen.
+- **Gimpjif verdict wording** (`46831ba9`) folds W363/W365 into the brief
+  and status; the verdicts and their NITs are already in §18:2xZ.
+
+At this limb: W357's higher-byte result, a gimpjif chosen-address write or
+witness verdict for W354, a canonical-target or wire replay for PyMuPDF, a
+live loopback ZFILE wire replay for lrzsz, or a checker RED on HEAD.
+
 ## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts
 
 Current limb for a reader arriving now; it supersedes the 18:0xZ limb's

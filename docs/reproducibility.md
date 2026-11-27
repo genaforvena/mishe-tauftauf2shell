@@ -20447,6 +20447,128 @@ count 149 are operator-owned. Live loopback ZFILE remains owed. Detail:
 `lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
 `reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.
 
+## 2026-11-27 18:4xZ — Ruby W355/W356; gimpjif W355 write-sink bound
+
+### Ruby2Shell W355 — patched 3.4.13 / 4.0.10 fixed control (CLOSED)
+
+The two gitignored plain builds are provisioned from official tarballs:
+3.4.13 (rev `48857d6f2e`) SHA-256
+`6474dff9c02ea685fc44877a4807a27366bf109b176dad182108bb8c96d09589` (pinned
+in `lab/ruby2shell/provision.sh`) and 4.0.10 (rev `a704b7cd95`) SHA-256
+`1537f7a6003c436546ecab6b48b6e7725a9af2328f45a8af7f42f41c5df90ab8` (full
+provision/build recipe in `reports/ruby2shell-investigation.md` §16:4xZ).
+With both installed under `lab/build/plain/` and the committed input script
+present, run from the repository root:
+
+```sh
+sha256sum lab/repro/ruby2shell-rung3-mixed.rb
+for rb in lab/build/plain/ruby-3.4.13-plain/bin/ruby \
+          lab/build/plain/ruby-4.0.10-plain/bin/ruby; do
+  for n in 27 43 59; do
+    valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"
+  done
+done
+```
+
+Expect input SHA-256
+`42997e67604c579a70119ce942209efc22b4023652b0cca9ddf4ec514e60f94c` and
+six arms at rc 0 with zero `Invalid write` and zero `Invalid read` and no
+`case_map (iso_8859_1.c:293)` site. Nonzero valgrind error summaries are
+`Conditional jump or move depends on uninitialised value(s)` in
+`RB_SPECIAL_CONST_P` from `gc_mark_maybe_internal (gc.c:2273)`: Ruby GC
+noise, not an access finding. Fresh unsanitized processes with three reps
+per build per N and a safe N=28 arm must all return rc 0 with no glibc
+corruption message. Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w355/`; no claim relies on the binaries
+being present in a fresh checkout. Grade-neutral; detail
+`reports/ruby2shell-investigation.md` §18:3xZ.
+
+### Ruby2Shell W356 — mixed prev_size-LSB arm (CLOSED)
+
+N=35/51/67 (N ≡ 3 mod 16) puts the fixed `0x53` on the successor glibc
+chunk's prev_size LSB. The committed driver runs six plain builds: vulnerable
+3.4.12/3.3.13/4.0.9 (pins in §18:0xZ / §17:0xZ) and patched
+3.4.13/4.0.10 above plus 3.3.14 (SHA-256
+`e24ef6d97095a9c42bf8259a2de33a25aac8d92bb48fefdbdc81724b87784854`).
+
+```sh
+sha256sum lab/repro/ruby2shell-mixed-prevsize.sh \
+  lab/repro/ruby2shell-mixed-prevsize.gdb \
+  lab/repro/ruby2shell-rung3-mixed.rb
+bash lab/repro/ruby2shell-mixed-prevsize.sh
+gdb -q -batch -x lab/repro/ruby2shell-mixed-prevsize.gdb --args \
+  lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-rung3-mixed.rb 35
+```
+
+Expect driver SHA-256
+`0d978e918a4b6e677d60edbf927f592200c1c15174de7d0455eb5192435f22e8`, GDB
+script `4df5ce4fcf394fdeced45ba8bbb09fd869b7242d3d1ba6650fdde390b946090c`
+and input `42997e67604c579a70119ce942209efc22b4023652b0cca9ddf4ec514e60f94c`.
+The 18 vulnerable valgrind arms must print `writes=1 reads=1` with `0 bytes
+after a block of size 80/96/112` at `case_map (iso_8859_1.c:293)` plus the
+known `memmove` copy-out read, rc 0; all nine patched arms must print
+`writes=0 reads=0`. All 72 fresh plain processes (three reps per build per
+N plus even-N=36) must be rc 0 with no `munmap_chunk`, `corrupted size`,
+`invalid next size` or double-free diagnostic: the in-use chunk ignores its
+prev_size. GDB must print `BEFORE slot old=0x00`, `BEFORE next old=0x91`,
+`AFTER used=57 slot new=0x53`, `AFTER next new=0x91` from
+`slot=current_buffer+80` (an 80-byte request gets a 0x60 glibc chunk). The
+in-bounds `slot-8` also becomes `0x53` from ordinary case-map output, not a
+second OOB store. Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w356/`; rebuild commands for all six
+builds are in the report. No wire request, chosen attacker bytes or command:
+grades unchanged. Detail `reports/ruby2shell-investigation.md` §18:5xZ.
+
+Docs replayed both Ruby recipes in the working checkout with the gitignored
+builds present. All six W355 patched valgrind arms returned rc 0 with
+`writes=0 reads=0` and no case-map site. All 18 W356 valgrind arms were
+observed across two runs (the 300-second command cap interrupted the
+committed driver after 14 arms, so the remaining four were replayed with
+the same command); every vulnerable arm printed `writes=1 reads=1` with
+80/96/112-byte blocks and every patched arm `writes=0 reads=0`. GDB printed
+`BEFORE slot old=0x00`, `BEFORE next old=0x91`, `AFTER used=57 slot
+new=0x53`, `AFTER next new=0x91`. One unsanitized rep per build per N
+(24 processes including N=36) was rc 0 with no glibc diagnostic; the
+author's three-rep 72-process sweep was not re-run here. Observer, JIF and
+entry-log hashes matched the pins above on disk; no AppImage was run.
+
+### Gimpjif2Shell W355 — write-sink bound, no write (author-only)
+
+No new consumer harness: use the unchanged W353 JIF and the §18:0xZ AppImage
+runner with the committed read-only observers. Offsets: `0xa0a0` is
+`check_match`, `do_lookup_x` enters at `0xa220`, its bit-hit branch is
+`0xa540`.
+
+```sh
+sha256sum lab/frontier/gimpjif2shell/live/gdb-w355-entry.cmd \
+  lab/frontier/gimpjif2shell/live/gdb-w355-forged.cmd \
+  lab/frontier/gimpjif2shell/live/evidence/w355-entry-gdb.log
+```
+
+Expect observer hashes
+`1585a2a426fd7d055d2346b6137abd0c1b45f664c7f10512dc9f2536917a701f` and
+`23c3cbf1e00f66d9964c3e61d755e160d21ba4fc2115e90b333fd736e8d1842a` and
+entry-log hash
+`67087d00913b96c727fd437794433b6f228ba2c87f00e08b1891712144c83c23` (run
+log `55da35d9…`). With the pinned GIMP 3.2.8 AppImage / glibc 2.41 ld.so,
+expect nine `do_lookup_x` entries, the chosen `memcpy` hash `0xd827590`
+with `flags=0x5` and libz `undef_map=0x7ffff7aa8000`, a failed GNU bit test
+and the pinned terminal fault at `0x1327` with `rax=0`. Disassembly shows
+the first reachable stores only after `check_match`: `l_used` at map offset
+`0x414` (`0xb200`) and the caller GOT at `0x11257` (`mov %rax,0x0(%r13)`);
+neither fires. The three forged JIFs
+`e0171aa0…` (zlen 430), `0a5c275b…` (zlen 805, pointer at ARR[2]) and
+`52131b94c153ae3cac7e6f6e2c71eb50f5fcc66d527bb4b2a0b395b99e7757f8`
+(zlen 805, corrected to P1+0x40=ARR[0]) all resolve genuine
+`adler32`/`adler32_z` only, log one genuine GOT write
+(`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`) with no LUSED store, and
+never reach `memcpy` because the fake tables overlap loader slots
+`ARR[6..]`. Rung 3 pinned verbatim / rung 4 chosen-pointer read, NO
+chosen-address write, NO r5; grade-neutral. Docs did not run the AppImage.
+Detail `lab/frontier/gimpjif2shell/PROVENANCE.md` §W355; the W363/W365
+verdict wording fold (`46831ba9`) adds no new verdict here.
+
 ## 2026-11-27 18:2xZ — Ruby W354 branch matrix; W365 verdicts
 
 ### Ruby2Shell W354 — mixed parity on 3.3.13 / 4.0.9 with patched 3.3.14

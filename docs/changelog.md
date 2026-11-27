@@ -6,6 +6,84 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif W355 write bound
+
+Docs-only fold of `5785d7da`, `7de447f1`, `46831ba9` and `cf323ddd`
+(HEAD; the repo-change signal edge is `7de447f1`). No grade, rung cell,
+register flag, generated count, README, results, manifest, SVG, report or
+lab evidence moved here: all four commits are author lab/report work, and
+`46831ba9` folds witness verdicts into the gimpjif reports that §18:2xZ
+already carries. Recipes in `docs/reproducibility.md` §18:4xZ.
+
+- **Ruby W355 closes the patched fixed-control half** (`7de447f1`),
+  grade-neutral. The exact W354 mixed input (`a` + N x `0xDF`, N = 27/43/59,
+  N ≡ 11 mod 16) on plain 3.4.13 (rev `48857d6f2e`) and 4.0.10
+  (rev `a704b7cd95`) gives 6/6 valgrind arms rc 0 with zero invalid writes,
+  zero invalid reads and no `case_map (iso_8859_1.c:293)` site; the nonzero
+  error summaries are `RB_SPECIAL_CONST_P` conditional-jump GC noise from
+  `gc_mark_maybe_internal (gc.c:2273)`, not access diagnostics. Three fresh
+  plain reps per build per N plus N=28 (24 processes) are all rc 0 with no
+  glibc metadata diagnostic. The falsifier (any write on a patched build)
+  is not met. With W351/W354 this closes the fixed-control half of the
+  size-LSB shape on 3.4.13/4.0.10/3.3.14. Grade unchanged: primary wire-only
+  rung 3 CONFIRMED, W341/W342 adjacent rung 3, witness-COMPLETE rung 4,
+  harness-condition rung 5 witness-ESTABLISHED at its labeled scope; full
+  stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+- **Ruby W356 closes the prev_size-LSB arm** (`cf323ddd`), grade-neutral.
+  N = 35/51/67 (N ≡ 3 mod 16, so `R = N+45 ≡ 0` mod 16) on vulnerable
+  3.4.12/3.3.13/4.0.9 and patched 3.4.13/3.3.14/4.0.10 gives 18/18 valgrind
+  arms with one `Invalid write of size 1` at `case_map` and the known
+  copy-out `Invalid read of size 1` at `memmove`, both 0 bytes after an
+  80/96/112-byte block, rc 0; all nine patched arms show zero writes, zero
+  reads and no case-map site. All 72 fresh plain processes, including the
+  even-N=36 safe control, are rc 0 without malloc/glibc diagnostics: unlike
+  the size-LSB parity, a prev_size-LSB byte is inert while the chunk is in
+  use. GDB on plain 3.4.12 N=35 reads the successor's prev_size LSB at
+  `space+capa = current_buffer+80` as `0x00` (size LSB `0x91`) before
+  `case_map` and `0x53` (size still `0x91`) after `used=57`; the in-bounds
+  byte at `slot-8` also becomes `0x53` from ordinary case-map output, not a
+  second OOB store. No wire request, chosen attacker bytes or command;
+  grades unchanged. Next named experiment W357: k=3 leading ASCII bytes to
+  put the write on byte 2 of the successor size word (`R=74/90/106 ≡ 10`
+  mod 16), with the same three vulnerable and three patched branches.
+- **Gimpjif2Shell W355 bounds the write sinks without observing a write**
+  (`5785d7da`), author-only and grade-neutral. Correction: `0xa0a0` is
+  `check_match`, not `do_lookup_x` (entry `0xa220`, bit-hit branch `0xa540`).
+  A read-only GDB observer on the unchanged W353 JIF saw nine `do_lookup_x`
+  entries, including the chosen `memcpy` hash `0xd827590` with `flags=0x5`
+  and libz `undef_map=0x7ffff7aa8000`; the GNU bit test failed, so
+  `check_match` never ran and the pinned terminal fault stayed at `0x1327`
+  with `rax=0`. glibc 2.41 disassembly shows no chosen-address write inside
+  `do_lookup_x`; only after `check_match` acceptance do `l_used` at forged
+  map offset `0x414` (`0xb200`) and the caller GOT slot at `0x11257`
+  (`mov %rax,0x0(%r13)`) become reachable. Three forged-map JIFs were
+  negatives: only genuine `adler32`/`adler32_z` resolutions, one genuine GOT
+  write (`rel_addr=0x7ffff7aa30f0`, `value=0x7ffff7a87ae0`), no LUSED store,
+  and the `memcpy` lookup never reached — the fake tables overlap loader
+  array slots `ARR[6..]`. Rung 3 pinned verbatim / rung 4 chosen-pointer
+  read, NO chosen-address write, NO r5.
+- **Gimpjif W363/W365 verdict folds in the brief and status** (`46831ba9`)
+  only repair stale "author-only pending witness" wording; W352/W353 are
+  ESTABLISHED AS LABELED at their pinned read-only-observer scopes. No new
+  verdict, count or grade here.
+
+Docs' own replays here: all six W355 patched valgrind arms returned rc 0
+with `writes=0 reads=0` and no case-map site; all 18 W356 valgrind arms
+matched the author's 9 vulnerable `writes=1 reads=1` at 80/96/112 bytes and
+9 patched `writes=0 reads=0`, GDB on 3.4.12 N=35 showed `0x00`/`0x91` →
+`0x53`/`0x91` at `used=57`, and one unsanitized rep per build per N (24
+processes including even-N=36) returned rc 0 without a glibc diagnostic.
+The committed W356 driver's full 72-process plain sweep was not reached
+before its replay hit a 300-second command cap; it is not claimed here.
+Observer and JIF hashes were rechecked on disk; docs did not run the
+AppImage or the forged-JIF observers.
+
+What would change this fold: W357's higher-byte size-field result, a
+gimpjif fake map outside the ARR slots or an observed chosen-address write,
+a witness verdict or counterexample for gimpjif W354, a canonical-target or
+wire replay for PyMuPDF, a live loopback ZFILE wire replay for lrzsz, or a
+checker RED on committed HEAD.
+
 ## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts landed
 
 Docs-only fold of `9f19d6d9` (Ruby W354 branch matrix) and the operator's
