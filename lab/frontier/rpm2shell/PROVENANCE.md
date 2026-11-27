@@ -763,3 +763,50 @@ different configuration and new dependencies, and no new replay verdict in
 chat through #5989 (02:03Z). Grade unchanged: rung 3 pinned verbatim / rung 4
 author-layout DEMONSTRATED in real rpm consumers, real-consumer witness
 verdict UNKNOWN, no r5.
+
+## W307 non-PIE fixed-address GC target (2026-11-27 02:2xZ)
+
+New build configuration, not a repeat of the low-byte, short-write, metadata
+or setarch lanes. Question: with ASLR active, can a *fixed* address be the
+chosen live GC pointer in an otherwise unmodified real `rpm -i` consumer?
+`real/run-nopie-target.sh` builds the pinned vulnerable parent without PIE
+(`-fno-pie -no-pie`, `file` reports `ELF 64-bit LSB executable`), patches
+the 64-byte cpio payload so `buf+0x20` receives the fixed `.bss` address
+`0x4063a0` (little-endian at payload offset 32), and compares it with the
+unchanged A-filler fixture. All processes run with ASLR on; no
+`LD_PRELOAD`, no debugger-forced call. GDB is observer-only: it reports
+`COPY_BUF=0x454560 NEXT_ADDR=0x454580 NEXT_AFTER=0x4063a0` and
+`CHOSEN_PTR=0x4063a0 PREV_OBJ=0x454580 NEXT_ADDR=0x454580 MATCH=1` at
+`liblua5.2.so.0` `lua_resume+0x206` (`movzbl 0x9(%r14)`), i.e. the chosen
+fixed qword is the natural adjacency and is then walked as a GCObject.
+
+Plain ASLR results: 10/10 fixed-target installs exit rc 1 with only the
+normal cpio read-failure messages; 5/5 A-filler installs exit rc 139.
+Fixed ASan build rejects the same fixture rc 1 with no ASan report.
+`NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` rc 0 in-tree and again from a
+clean `git archive cd28c444 lab/frontier/rpm2shell` with only pinned
+sources/dev headers and the fixed build symlinked as provisioning; the
+runner hash matched in both. The chosen `.bss` qword is zero, so the GC walk
+terminates: this demonstrates a chosen ASLR-stable address reaching a live
+semantic dereference in the real consumer, **not** control of a useful live
+object, a code pointer, a command or r5. Grade: additive rung-4 mechanics
+datum; overall grade remains rung 3 pinned verbatim / rung 4
+author-layout DEMONSTRATED, real-consumer witness verdict UNKNOWN.
+
+| artifact | sha256 |
+| --- | --- |
+| `real/run-nopie-target.sh` | `f849bc8779689283ab353a5b38b46ddc35ff43f9164695708d220dd4bf01f8d6` |
+| `real/nopie/attack-bss.rpm` | `47c96f67f275cd4f057f17fefa8b7b08ded07cabfd996ce5a2dbb4aee39033aa` |
+| `real/nopie/attack-A.rpm` | `3049e7a94c3db7ad7c572e0a0c79454000490770e630ffdbfcd8c745b00468db` |
+| `real/nopie/gdb-bss.log` | `d877f41120c795c6aaf11486a420d25f605d9b7d842ccd1e66fa1dbcc236774b` |
+| `real/nopie/plain-bss-1.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+| `real/nopie/plain-A-1.log` | `b6264b50253809d05203f21bb08f424dc25ce880beed039eec68db5b486ae86b` |
+| `real/nopie/fixed-asan-bss.log` | `acb38b2a128f56d9b57423f4ee9fc0fc646cd450436542ff304b60ae0a5b16a0` |
+| `real/nopie/repeats.txt` | `2f9511a71b87083383161bd37651b3932ade6cc173ba6bb471c02ad90c59c11f` |
+| `real/nopie/clean-archive-replay.log` | `3514380ee99227dd774ea1ad4af9bb45642d804803e6269b18d34e1f2016b20c` |
+
+The two plain logs are byte-identical cpio failure text; the discriminator
+is the exit status recorded in `repeats.txt` (rc 1 vs rc 139), not the log
+contents. Scoped commits: `493f094f` (runner), `cd28c444` (status
+reconciliation). No witness replay of this new lane has been requested or
+observed; the standing real-consumer asks are not repeated.

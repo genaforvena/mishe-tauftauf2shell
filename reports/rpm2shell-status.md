@@ -30,8 +30,10 @@ in real rpm consumers**. A crafted RPM makes real `rpm2cpio`/`rpm2archive`
 write 64 chosen bytes past `xmalloc(0)`'s 1-byte region; plain `rpm -i`
 makes chosen bytes decide a live liblua teardown fault, and GDB traces a
 chosen qword into a dereferenced GC `next` pointer. A chosen live GCObject
-address survives only with ASLR disabled; a loopback wire delivery path is
-measured but yields no chosen pointer, stable target or command. No r5.
+address survives only with ASLR disabled in the default PIE build; a
+deliberately non-PIE build lets a fixed `.bss` address be walked under ASLR,
+but it is only a terminating object. A loopback wire delivery path is
+measured but yields no useful stable target or command. No r5.
 The independent witness verdict for the real-consumer lane is UNKNOWN;
 W238 established only the earlier synthetic lane. Negative preserved:
 GCC 13.3 ASan at `-O1` misses the overflow after inlining; ASan builds use
@@ -71,9 +73,14 @@ GCC 13.3 ASan at `-O1` misses the overflow after inlining; ASan builds use
   names). Witness W238 replayed ESTABLISHED AS LABELED; operator admission
   02:3xZ under standing #6. No route, resolver key or wake unit added:
   engine config and the full-flag sync stay person-reserved.
-- W306/W307 (2026-11-27 02:10Z): unmodified
+- W306 (2026-11-27 02:10Z): unmodified
   `bash lab/frontier/rpm2shell/real/run-real.sh` at HEAD `02808d23` returned
   21 PASS / 0 FAIL (vulnerable ASan `WRITE of size 64`, fixed attack rc 1,
   safe controls rc 0); no real-consumer witness verdict in chat through
-  #5998. This status grade and its Next list were reconciled with the
-  brief; no harness or fixture byte changed.
+  #5998. This status grade and its Next list were reconciled with the brief.
+- W307 (2026-11-27 02:2xZ): new tracked
+  `real/run-nopie-target.sh` (commit `493f094f`) returned
+  `NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` rc 0 in-tree and from a clean
+  `git archive cd28c444`: fixed `.bss` chosen address visited by liblua
+  under ASLR, 10/10 plain rc 1 versus 5/5 A-filler rc 139, fixed ASan rc 1
+  clean. Additive rung-4 mechanics only; no command, no grade change.

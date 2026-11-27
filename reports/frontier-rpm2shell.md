@@ -411,20 +411,24 @@ above is later work and still lacks an independent witness. Full W238 detail:
   ASLR-disabled layout; the same bytes fault (rc 139) in a plain ASLR
   process. Under `setarch -R` the chosen-pointer fault also reproduces in
   a plain no-debugger process, but no live-target address redirection
-  survives there. An ASLR-stable target, command and command side effect
-  remain UNKNOWN/NO. No natural semantic dereference was seen in 52 plain
+  survives there. In the default PIE build an ASLR-stable target remains
+  UNKNOWN; in a non-PIE build a chosen fixed `.bss` address is walked by
+  liblua under ASLR (section below), but it is only a terminating object.
+  No useful live-object redirect, command or command side effect is
+  controlled. No natural semantic dereference was seen in 52 plain
   `rpm2cpio` runs (above); this dereference is on `rpm -i` only.
 - **Not rung 5:** a loopback-only HTTP wire delivery path does carry the
   crafted package into real `rpm -i` (`run-wire-consumer.sh`, below), but
   it yields no chosen pointer, no ASLR-stable target redirection, no
-  command and no observed command side effect. Wire delivery is not r5.
+  command and no observed command side effect. The non-PIE fixed-address
+  terminator (below) is not a command path. Wire delivery is not r5.
 
-Next experiment: a different consumer, allocator layout or an information
-leak would be needed for an ASLR-stable GC target; the package-only partial
-overwrite, fixed-address and short-write routes were measured and failed
-above. No command execution without a live target and benign side effect.
-Keep the allocator instrumentation and stripped/query negatives attached to
-any broader claim.
+Next experiment: a chosen fixed address whose object fields are also
+controlled would be needed for a useful redirect; the package-only partial
+overwrite, fixed-address terminator, high-byte short-write, layout sweeps
+and second-consumer routes were measured and bounded above. No command
+execution without a live target and benign side effect. Keep the allocator
+instrumentation and stripped/query negatives attached to any broader claim.
 
 ### Fresh-build clean-archive replay (2026-11-26 20:29–20:54Z)
 
@@ -475,10 +479,30 @@ argument lengths under GDB show `MATCH=1` for `buf+0x20` and the chosen
 qword visited as a live liblua GC object at `liblua5.2.so.0:0xe9a6`, so the
 debugger-free fault is the chosen-byte pointer dereference, not an
 unrelated crash. Attempting a *valid* chosen target from GDB's
-discovery layout failed in all six plain ASLR-off runs (rc 134/139), so the
-lab condition and the grade are unchanged: still rung 4 author-layout
-DEMONSTRATED, no ASLR-stable target, no command, no r5. Evidence and hashes:
-`lab/frontier/rpm2shell/PROVENANCE.md` and `real/setarch-nogdb/`.
+discovery layout failed in all six plain ASLR-off runs (rc 134/139). The lab
+condition and grade stay rung 4 author-layout DEMONSTRATED, with no
+ASLR-stable target in that PIE layout, no command and no r5.
+Evidence and hashes: `lab/frontier/rpm2shell/PROVENANCE.md` and
+`real/setarch-nogdb/`.
+
+### Non-PIE fixed-address GC target (2026-11-27 02:2xZ)
+
+`real/run-nopie-target.sh` changes only the build configuration: the pinned
+vulnerable rpm is compiled with `-fno-pie -no-pie` (`file` reports an ELF
+executable, not PIE) and the 64-byte crafted payload puts the fixed `.bss`
+address `0x4063a0` little-endian at offset 32, i.e. the qword the copy writes
+at `buf+0x20`. With ASLR active, observer-only GDB reports
+`NEXT_AFTER=0x4063a0` and `CHOSEN_PTR=0x4063a0 ... MATCH=1` at the liblua GC
+visit: the chosen fixed address is the natural adjacency and is walked as a
+live GCObject. Ten unmodified plain installs with that fixture exit rc 1
+(normal cpio failure text); five with A filler exit rc 139; the fixed ASan
+build exits rc 1 with no report. `NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0`
+rc 0 both in-tree and from a clean `git archive cd28c444`, with the runner
+byte-identical. The chosen `.bss` qword is zero, so the walk terminates:
+this is a chosen ASLR-stable address reaching a real semantic dereference,
+not control of a useful live object, code pointer, command or side effect.
+It does not change the overall grade or the default PIE ceiling above.
+Evidence and hashes: PROVENANCE section W307 and `real/nopie/`.
 
 ### Loopback wire delivery (2026-11-26 22:56Z)
 
