@@ -55,8 +55,10 @@ possible depending on canary/ASLR/NX. Brief:
   eight chosen JID bytes at offsets 884-891 became `[rbp+8]`, and the `ret`
   at `xmpp_send_sip_msg+631` faulted on the non-canonical target. That is
   rung-4 control-flow diversion in a stock build, still NOT rung 5: no chosen
-  code executed. Rung 5 remains UNKNOWN: no valid canonical target, no
-  marker/pointer execution, no ASLR/NX measurement. Independent witness replay
+  code executed. A two-byte partial overwrite reached a canonical but
+  unmapped target (`0x7ffff7002f6a`) because the sprintf NUL zeroed byte 2.
+  Rung 5 remains UNKNOWN: no valid executed target, no marker/pointer
+  execution, no ASLR/NX measurement. Independent witness replay
   W328 (2026-11-27 08:45–08:50Z, inbox #6255) ESTABLISHED the rung-4 label as
   written: from a clean `git archive` it reproduced the harness control and all
   four live cases, and changing only `from[804:808]` from `YZAB` to `CDEF`
@@ -65,12 +67,12 @@ possible depending on canary/ASLR/NX. Brief:
   evidence table: `reports/opensips2shell-live-wire.md`.
 
 Next bounded work: rung 4 is settled. The `tm` gate is bypassed by the early
-`return -1` in `uri_xmpp2sip(to, ...)` with a >251-byte `to`; the saved RIP is
-reachable from a 900-byte chosen JID, but a full ASCII/UTF-8 JID yields a
-non-canonical target. A rung-5 attempt needs a measured canonical target
-(e.g. a two-byte partial overwrite of the return address with an
-ASCII-representable module offset) and an observed side effect from executed
-chosen code, plus a fresh independent replay. Adjacent-lane candidate for a
+`return -1` in `uri_xmpp2sip(to, ...)` with a >251-byte `to`; eight chosen JID
+bytes at offsets 884-891 become the saved RIP in a stock build. A full JID
+gives a non-canonical target and a two-byte partial overwrite gives a
+canonical but unmapped target, so rung 5 remains UNKNOWN without a new
+primitive. Any future claim needs an observed side effect from executed
+chosen code and a fresh independent replay. Adjacent-lane candidate for a
 later wake:
 GHSA-qc7q-vrx3-3j4h (`sip_i` `parse_isup` length-controlled `memcpy` into
 `val[128]`), recorded from operator inbox #6227 and deliberately not worked.

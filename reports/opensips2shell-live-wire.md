@@ -76,15 +76,15 @@ stanza: `<?xml version='1.0'?><stream:stream ... from='127.0.0.1'>` plus
   the stock code. With the 299-byte JID the same fields are intact
   (`fromstr_len=303`) and no crash occurs; 4.0.2 ignores the stanza before
   dialback and neither overflows nor crashes.
-- **Not claimed**: control-flow diversion. In the instrumented frame the
-  saved-RIP slot is 904 bytes past `buf_from` and received only the final NUL
-  (`ripbytes=0007c310837e0000`). Stock 4.0.1 disassembly places the saved RIP
-  at `rbp+8`, i.e. `buf_from+888`, so a 900-byte JID would put chosen bytes
-  `from[884:892]` there, but the stock process died inside `tm` before return
-  and no overwritten RIP was observed. **Rung 5 UNKNOWN**: no benign marker,
-  no pointer-control execution, no ASLR/NX measurement, no remote path outside
-  this plant's loopback listener. The independent witness replay below
-  confirmed these labels and found no rung-5 evidence.
+- **Not claimed in the first replay**: control-flow diversion. At that time
+  the saved-RIP slot in the instrumented frame was 904 bytes past `buf_from`
+  and received only the final NUL (`ripbytes=0007c310837e0000`); stock 4.0.1
+  disassembly places the saved RIP at `rbp+8` (`buf_from+888`), but the stock
+  process died inside `tm` before return. A later early-return bypass did
+  reach the stock saved RIP (section below). **Rung 5 UNKNOWN**: no benign
+  marker, no valid executed target, no ASLR/NX measurement, no remote path
+  outside this plant's loopback listener. The independent witness replay
+  below confirmed the earlier labels and found no rung-5 evidence.
 
 ## Negative results preserved
 
@@ -197,11 +197,28 @@ Assessment: this upgrades rung-4 mechanics from "chosen bytes corrupt a
 length field" to "chosen bytes become the saved return address and the CPU
 attempts the transfer", in a stock build without entering `tm`. It is still
 **rung 4**: the target was non-canonical, so no attacker-chosen code ran.
-Rung 5 remains UNKNOWN — no valid canonical target, no benign command, no
-observed side effect from executed chosen bytes. A partial overwrite of the
-low return-address bytes (JID length 885/886) is a separate, unrun
-hypothesis; ASCII/UTF-8 attribute bytes cannot encode the leading NUL bytes
-of a full 64-bit canonical stack or module address.
+
+Partial-overwrite probe (09:30Z): an 886-byte JID with `from[884:886]="j/"`
+left only the low two return-address bytes chosen; the `sprintf` terminator
+NUL landed on byte 2 and bytes 3-7 kept the original return address. The CPU
+transferred control to a **canonical** target `0x7ffff7002f6a` (gdb `#0` at
+the target, not at the `ret`) and faulted because it is unmapped: the module
+base was `0x7ffff7eda000`, so the target was ~0xed70000 bytes below it. The
+`xmpp:destroy: cleaning up...` line in that capture came from the parent's
+normal shutdown, not from executed chosen code. Evidence:
+`artifacts-early/gdb-partial-886.log` sha256
+`a8e72754c85d3050ac4f567fb4e27be09b95a4aa47a0872ee547302c469f445b`,
+`artifacts-early/wire-partial-886.log` sha256
+`086b626be327d5efe91574835713448e945ed1a6af4ec8e754b178bcd8a4effd`,
+gdb script `gdb-partial.cmd` sha256
+`c67c342c5239d80107402e1b95aca2905e1a9633494017eba9c75b1ff72dfa12`.
+
+This closes the two-byte partial-overwrite route: XML-encodable attribute
+bytes plus the terminating NUL cannot produce a mapped code address here.
+Rung 5 remains UNKNOWN — no valid executed target, no benign command, no
+observed side effect from chosen bytes. A future attempt needs a different
+measured way to keep the original high return-address bytes while controlling
+the low ones, or a separate writable-and-executable primitive.
 
 ## Reproduction
 
