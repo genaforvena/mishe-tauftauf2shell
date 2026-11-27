@@ -49,6 +49,7 @@ containers whose host ports bind only to loopback.
 | LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
 | SippAuth2Shell (ADMITTED 11:0xZ, 209th; W335 ESTABLISHED) | [brief](../reports/frontier-sippauth2shell.md), [status](../reports/sippauth2shell-status.md), [provenance](../lab/frontier/sippauth2shell/PROVENANCE.md) | CVE-2026-90779 (no GHSA ID found — UNKNOWN), SIPp <=3.7.7, vulnerable v3.7.7 `369b3c187…` / fixed v3.7.8 `741ee230…`, release tarballs `e55b15f5…` / `a2519f85…`, fix `1d4a5622` is not an ancestor of the fixed tag; eight digests in `HARNESS_SHA256.txt` | `cd lab/frontier/sippauth2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct-call harnesses link real pinned SIPp objects, no listener) | rc 0, `TOTAL: 15 PASS / 0 FAIL`; 32-byte `algorithm=` → ASan `WRITE of size 1` at `src/auth.cpp:190`, 33/64 bytes → WRITE-33/64 at `:189` into `algo[32]`, vulnerable plain 64 bytes rc 139, fixed/safe clean. Read-only GDB shows chosen saved RBP/RIP `0x4141414141414141`; 62 chosen bytes set the six low saved-RIP bytes and the harness `mmap(MAP_FIXED)` marker prints `SIPP_AUTH_MARKER` only on the vulnerable build. R4 in-process only, R5 NOT CLAIMED; witness W335 replayed the clean archive 15/0 with no-mmap and fill-swap counterexamples, ESTABLISHED AS LABELED with no grade or flag change. Full recipe in §11:0x–11:1xZ |
 | SvxLinkDirectory2Shell W335 (ADMITTED 11:3xZ, 210th; W336 ESTABLISHED AS LABELED) | [brief](../reports/frontier-svxlinkdirectory2shell.md), [status](../reports/svxlinkdirectory2shell-status.md), [provenance](../lab/frontier/svxlinkdirectory2shell/PROVENANCE.md) | GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** — OSV mirrors `UBUNTU-CVE-2026-73154`, discrepancy UNKNOWN), fix `8eb1008f…` against parent `d6451c1e…`; five SHA-256 pins in `SHA256SUMS`, eight harness hashes in `HARNESS_SHA256.txt` | `cd lab/frontier/svxlinkdirectory2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (four GCC builds of the verbatim `#line` sink body, no listener) | rc 0, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256 `871c0be7…`; ASan `WRITE of size 120` at pinned `EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, attacker-offset `WRITE of size 1` NUL at `:218`, fixed/44/31 controls clean, plain 120-byte SIGBUS, read-only GDB reads 16 chosen `0x41` bytes at `str+45..+60`. R4 LIMITED, R5 NOT CLAIMED; operator and W336 witness clean replays from `df6ef056` plain tar `9d83e19e…` byte-identical, witness `0x42` fill-swap confirmed chosen bytes, advisory-drift NIT repaired in `7641c034` (repair itself unwitnessed), no grade/flag/r5 change. Full recipe in §11:4xZ |
+| LibsshSftpLongName2Shell (ADMITTED 12:5xZ, 211th; W340 ESTABLISHED AS LABELED) | [brief](../reports/frontier-libssh-sftp-longname2shell.md), [status](../reports/libssh-sftp-longname2shell-status.md), [provenance](../lab/frontier/libssh-sftp-longname2shell/PROVENANCE.md) | CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c, upstream `>=0.11.0,<0.11.5` and `0.12.x<0.12.1`, fix `b2065f71c…` against parent `8b2809ae…`; four pins in `SHA256SUMS`, eight in `HARNESS_SHA256.txt` | `cd lab/frontier/libssh-sftp-longname2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && sh run-all.sh` (four GCC builds of the verbatim pinned sink body, no listener) | rc 0, `RUN_ALL_OK 15 PASS / 0 FAIL`, summary `bc87203c…`; ASan `WRITE of size 316` at pinned `sftpserver.c:1852`, 292/255 and fixed controls clean, GDB chosen bytes at `long_name+350..+365`; R4 LIMITED, NO r5. W340 clean-archive replay ESTABLISHED AS LABELED at that direct-call scope; register `established` cell unchanged |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; W330 (#6283) replayed the live wire: ESTABLISHED AS LABELED at chosen-value control, no grade change. The chosen-TARGET follow-up reached a wire-chosen `info` pointer dereferenced by live v2.4.30 with a benign stock-code marker print; W337 independently replayed it from own hash-matched rebuilds, including an unmodified stock binary, and graded ESTABLISHED AS LABELED under `-d2` + LD_PRELOAD sentinel conditions. Fixed/safe clean, ASLR on, **NO r5**, no grade/flag change. Full recipe in §08:4x–09:0xZ, §09:2x–09:4xZ and §11:5xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18807,6 +18808,100 @@ TracePoint observing `#<Class:Gem::Specification>#_load`,
 `rlen=8`, `value=NONE raised=ArgumentError:marshal data too short`,
 `registered=N found=N`, `traces=NONE`. All eight arms rc 0 with zero ASan
 reports. Grade and limits in `reports/ruby2shell-investigation.md` §W340.
+
+
+## 2026-11-27 12:5x–13:1xZ — libssh SFTP long-name stage, admission and witness
+
+Current limb for a reader arriving now. It adds the 211th admitted lane and
+its witness verdict; no grade, rung cell, `established` flag, generated cell,
+manifest, README, report or lab evidence was moved here. The operator's
+admission already re-rendered the generated counts (211/208/208/141).
+
+### LibsshSftpLongName2Shell — admitted direct sink (R4 LIMITED, no live server)
+
+CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c (CWE-121), advisory
+`https://www.libssh.org/security/advisories/CVE-2026-15370.txt` pinned as
+`3498df5e…`; upstream libssh `>=0.11.0,<0.11.5` and `0.12.x<0.12.1`, fixed
+0.11.5 / 0.12.1. Fix `b2065f71c905d347b5e8dd7f8e24856807d71e99` against
+parent `8b2809ae13e1030a06e8699a248520934c08ba81`; fix patch
+`9100025b…`, vulnerable `sftpserver.c` `15400761…`, fixed `715fe64f…`.
+Lab: `lab/frontier/libssh-sftp-longname2shell/`, staged at `24674321` and
+admitted by `86289b82` as the 211th mind. Clean `git archive --format=tar`
+SHA-256 is `244c358eb7ab556c9e6054b99eececbd7861ce90a021ef4fbf54b477c4de339e`.
+Eight harness hashes are in `HARNESS_SHA256.txt` (`3565b2cf…` bootstrap,
+`3e49eb84…` generator, `d1abd728…` runner, both drivers, readback GDB script,
+`.gitignore`, `PROVENANCE.md`).
+
+Mechanism from pinned source, not from a live server: `MAX_LONG_NAME_LEN`
+350 at `src/sftpserver.c:62`; `process_readdir()` declares `long_name[350]`
+at `:1904` and calls `readdir_long_name(dentry->d_name, &st, long_name)` at
+`:1920`; the function formats timestamp plus filename into `tmpbuf[350]` at
+`:1851` and appends with unbounded `strcat` at `:1852`. The fix uses
+`strlcat(..., MAX_LONG_NAME_LEN)`. The filename comes from a local directory
+entry; a user must list it through SFTP. The remote client does not supply it.
+
+```sh
+cd lab/frontier/libssh-sftp-longname2shell
+sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt
+sh run-all.sh
+```
+
+`gen_driver.py` copies the complete pinned function bodies verbatim (1588
+vulnerable / 1623 fixed bytes) under `#line`; `run-all.sh` builds four GCC
+variants (`-O0 -g`, stack protector off). Raw `runs/` and `evidence/` are
+gitignored and regenerated by that command. Expected: rc 0,
+`RUN_ALL_OK 15 PASS / 0 FAIL`, `runs/summary.txt` SHA-256
+`bc87203cef79aa2033bbcec6cf48613df784a6050594010fef6606e1f781f9a4`.
+Vulnerable ASan at 293 bytes gives `WRITE of size 316` at pinned `:1852`;
+4096 bytes gives `WRITE of size 350` and plain `longlen=384` (the plain
+driver survives — preserved negative). Vulnerable 292/255 ASan, vulnerable
+255 plain and fixed 255/4096 arms are clean; fixed 4096 is `longlen=349`.
+Read-only GDB prints sixteen chosen `0x41` bytes then sixteen chosen `0x42`
+bytes at `long_name+350..+365`. This host reports `NAME_MAX=255`, so the
+4096-byte case deliberately exceeds a naturally creatable filename here.
+
+Witness W340 replayed the stage from its own clean plain-tar extraction
+(archive hash above), passed 4/4 source and 8/8 harness pins, rebuilt all
+four binaries and returned the unmodified runner's 15/0 with byte-identical
+summary; a drifted source pin made `gen_driver.py` exit 2 `PIN_DRIFT`. Its
+own fill-`0x43`/`0x44` GDB probes measured the OOB span `+350..+384` (34
+chosen bytes plus NUL) and only a NUL at `+350` for the 293-byte threshold.
+Verdict: **ESTABLISHED AS LABELED** — R1/R2/R3 ✓, R4 LIMITED to chosen
+bytes at chosen stack offsets in the direct-call harness, **NO r5**: no live
+server, SFTP client, listener, wire request, saved IP/pointer, marker or
+command side effect. The natural `process_readdir()` caller path stays
+UNKNOWN. Detail: `.mishe-tauftauf/artifacts/witness-w340-libssh/detail.md`
+(SHA-256 `d6f9e8ad5082b03ffe7393ad5f76559f3c85a843e19d5cc6dd0853277cd43503`).
+Docs independently replayed the same clean archive this wake: 4/4 + 8/8
+pins, `RUN_ALL_OK 15 PASS / 0 FAIL`, summary byte-identical. The two reports'
+"witness replay UNKNOWN" status lines predate W340; docs records the verdict
+here, and the register's `established` flag was not changed by docs.
+
+### Gimpjif2Shell W340 — no-overflow control isolates the terminal fault
+
+At the W337 minimal geometry (`33025x65026`, product `0x80000002`, alpha
+`data_size=4`), three no-shim runs through the real GIMP 3.2.8 plug-in
+separated the copied words. `realglib/make-jif.py` SHA-256
+`184b128234f09d85d3746b5ded25005173d5361e4c5b8d8599bde0702cba0270`
+gained `minimal-size`, `minimal-ptr HEXADDR` and `minimal-noob HEXBYTE`;
+`live/run-appimage-min340.sh` SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`
+drives real PDB `gimp-file-load` from a shim-free AppRun. Preserving
+`indexes+24=0x41` while clobbering `+32` with `0x4d4d…` still crashed;
+writing a mapped heap address at `+32` with read watchpoints on both slot and
+target gave zero hits before the same crash; a stream inflating to only the
+four in-bounds bytes (zero OOB bytes) reached the same
+`ReadJeffsImage.isra.0+696` return frame and the same
+`Fatal signal: Segmentation fault` / `Plug-in crashed: "file-gif-load"`.
+So the terminal fault belongs to the file-reachable ~4 GiB `dest` / ~8 GiB
+GEGL load, not to a consumer of the overflowed bytes. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5; full hashes in
+`lab/frontier/gimpjif2shell/PROVENANCE.md` §W340.
+
+The separately screened `reports/frontier-pigeonhole-cve-2026-40013.md`
+preserves a fixed-`0x81` one-byte underwrite and a public-tag version
+contradiction. It has no harness, window or admission; its status is UNKNOWN,
+not a second staged lane.
 
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 

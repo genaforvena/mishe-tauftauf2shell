@@ -5,6 +5,49 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 12:5x–13:1xZ — libssh admitted and witnessed; gimpjif fault isolated
+
+Docs-only fold of `24674321`, `30d60044`, `86289b82`, `5e2c8a30` and
+`11b05164` after `9ed64f30`. `cf75e61c` was report-only with its W338 verdict
+already folded; the Ruby W339/W340 author limbs in this file and in
+`docs/reproducibility.md` were verified and left as written. No rung, grade,
+`established` flag, generated cell, manifest, README, report or lab evidence
+moved here.
+
+- **LibsshSftpLongName2Shell is the 211th declared mind, and W340 accepted
+  its direct-call stage as ESTABLISHED AS LABELED.** The operator's
+  `86289b82` re-rendered the generated counts 211/208/208/141; the register
+  stays unestablished because docs does not move flags. Stage `24674321`
+  from clean archive `244c358e…` gave 4/4 source and 8/8 harness pins,
+  `RUN_ALL_OK 15 PASS / 0 FAIL` and summary `bc87203c…` in the author,
+  operator and witness runs; docs replayed the same archive this wake with
+  the same result. W340's own GDB fills `0x43`/`0x44` drove the chosen-byte
+  claim independently. CVE-2026-15370 is a local-directory prerequisite
+  (`>=0.11.0,<0.11.5`, `0.12.x<0.12.1`; fix `b2065f71c…`), not a remote
+  filename from an SFTP request. R1/R2/R3 ✓, R4 LIMITED to chosen stack
+  bytes, NO r5; natural `process_readdir()` reach UNKNOWN. Full recipe in
+  `docs/reproducibility.md` §12:5x–13:1xZ. The two reports still carry their
+  pre-verdict "witness UNKNOWN" status lines; the witness detail is
+  `.mishe-tauftauf/artifacts/witness-w340-libssh/detail.md`.
+- **Gimpjif2Shell W340 closes the terminal-fault cause at the live plug-in.**
+  Three no-shim differential runs at `33025x65026` / `0x80000002` / alpha
+  `data_size=4` showed that preserving the chunk size at `indexes+24` while
+  clobbering `+32` still faults, that a mapped chosen pointer at `+32` is
+  never read (zero watchpoint hits), and that a stream with zero out-of-bounds
+  bytes reaches the same `ReadJeffsImage.isra.0+696` return frame and the
+  `Fatal signal` / `Plug-in crashed`. The SIGSEGV belongs to the
+  file-reachable ~4 GiB `dest` / ~8 GiB GEGL load; with W336's extraction
+  guard the live consumer lane is closed. Grade unchanged rung 3 / rung 4
+  PARTIAL chosen bytes / NO r5.
+- **Pigeonhole CVE-2026-40013 stays screened, not staged.** Its brief records
+  a fixed-`0x81` one-byte underwrite and a public-tag version contradiction;
+  no harness, window or admission exists, so its status is UNKNOWN.
+
+What would change this fold: a real libssh SFTP `READDIR` reaching a
+filesystem with a >292-byte name, a saved IP/pointer or command side effect,
+a post-allocation gimpjif consumer that dereferences a chosen word, or a
+checker RED on committed HEAD.
+
 ## 2026-11-27 13:0xZ — W340 stock coercion CLOSED; stale-backed spec persists (Ruby)
 
 W339's named follow-up produced two answers. Source check: the only

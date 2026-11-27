@@ -16376,3 +16376,44 @@ gimpjif load, a successful dereference of a chosen gimpjif word, a live
 SvxLink reply reaching `setData()`, a command path on the bzfs probe, or a
 checker RED on committed HEAD. Do not repeat either wrapped geometry, the
 same watcher re-arms, or the closed nfdump selection routes unchanged.
+
+## 2026-11-27 12:5x–13:1xZ — 211th admission, libssh W340 verdict, gimpjif fault closed
+
+Current limb for a reader arriving now; it supersedes the "next experiment"
+lines in the 12:3xZ limb above. Docs-only fold of the frontier stage/replay,
+the operator's admission, the W340 witness and the gimpjif W340 control. No
+rung cell, grade, `established` flag or generated count was moved here.
+
+- **LibsshSftpLongName2Shell (ADMITTED 12:5xZ, 211th; W340 ESTABLISHED AS
+  LABELED).** CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c, fix `b2065f71c…`, is an
+  unbounded `strcat` in `readdir_long_name()` (`sftpserver.c:1852`) reached
+  only when a user lists a directory whose local filename is long enough.
+  The direct-call harness from clean archive `244c358e…` gave 4/4 + 8/8 pins,
+  15 PASS / 0 FAIL and summary `bc87203c…` in three independent runs; docs
+  reproduced it this wake. W340's separate GDB fills and drift probe
+  establish the chosen-byte span `+350..+384` at the direct-call scope only:
+  R1/R2/R3 ✓, R4 LIMITED, NO r5, and no live SFTP server or wire request.
+  The natural caller remains the open question: a pinned vulnerable/fixed
+  libssh build plus a filesystem permitting a >292-byte name, with its real
+  caller frame and fixed/safe controls. The screened Pigeonhole
+  CVE-2026-40013 brief is not admitted; its status stays UNKNOWN.
+- **Gimpjif2Shell W340 isolates the terminal SIGSEGV to geometry.** The
+  no-overflow control at the minimal file-reachable geometry still reaches
+  the real `ReadJeffsImage.isra.0+696` frame and crashes; a chosen mapped
+  pointer at `indexes+32` is never read. W336's source guard plus this
+  control close the live-consumer lane in both geometries. Grade unchanged
+  rung 3 / rung 4 PARTIAL chosen bytes / NO r5; do not repeat the same
+  geometries or watcher arms unchanged.
+- **Ruby W339/W340 widen the stale-tail boundary without widening grade.**
+  W339 made stock `Gem::Specification._load` consume stale `slice!` bytes;
+  W340 closed the coercion-free stock route (`out_len=70`, `q=0`, `r=0`,
+  identical on vulnerable and fixed) while registering a stale-backed spec
+  through stock APIs (`registered=Y found=1` on 3.4.12, clean reject on
+  3.4.13). Both remain narrow in-process, harness-triggered rung-4 adjacent
+  lanes with no command, wire or full r5 claim.
+
+What would change this limb: a natural libssh consumer reaching the sink
+with real long filenames, any saved control word or command side effect, a
+gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
+bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
+on committed HEAD.
