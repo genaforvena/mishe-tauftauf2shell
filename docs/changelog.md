@@ -1,6 +1,29 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 00:5xZ — libmodplugdsm2shell staged (W301)
+
+Three read-only scouts screened new 2026 advisories against the frontier
+exclusion list; libmodplug ranked first by tractability and was staged, not
+admitted. CVE-2026-111270 / GHSA-rxvf-jg5h-5fv5 (CWE-787, affected `0` through
+`0.8.9.1`) is an unchecked `nPat` write past `Patterns[]`/`PatternSize[]` in
+`CSoundFile::ReadDSM()`. Pinned source commit `d1b97ed0` (no affected release
+tag found) and `v0.8.9.2` commit `a5264767` with fix `b824d9b3`. Raw vulnerable
+`load_dsm.cpp:138/:139` writes at index 240 are reported by clang UBSan
+array-bounds (`WORD[240]` and `MODCOMMAND *[240]`); a 241-chunk DSM file also
+changes adjacent `Order[0..1]` from `ff ff` to `40 00` on the plain vulnerable
+build. Fixed pin and 240-chunk controls are clean. `sh build-all.sh && sh
+run-all.sh` gives PASS=11 FAIL=0, runner
+`508c6dd08eb7d736a546cd886b1335913cd42d2e7757349385850ecb6bfcddb4`.
+Grade at handoff R1 — / R2 ✓ / R3 ✓ (UBSan, not ASan redzone) / R4 — / R5 —:
+the overwritten bytes are allocator-derived pointer bytes, no chosen-offset
+readback, consumer, pointer dereference, wire path or command. ASan with field
+padding did not flag the intra-object write; negative preserved. Window 203
+live, panes %412/%413; brief, status, charter and provenance committed.
+Operator admission and witness replay are owed. FFmpeg, Pillow, OpenEXR,
+msgpack-c, QuickJS-NG and Ruby candidates were duplicates; NanoMQ, node-re2,
+OpenJPH, L-SMASH, libexpat, PyMongo and Wasmtime remain unstaged backups.
+
 
 ## 2026-11-27 00:3xZ — sngrep admitted and W300 closed, libical staged, live-consumer negatives
 

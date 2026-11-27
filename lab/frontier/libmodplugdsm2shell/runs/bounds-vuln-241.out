@@ -1,0 +1,19 @@
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:138:4: runtime error: index 240 out of bounds for type 'WORD[240]' (aka 'unsigned short[240]')
+    #0 0x626f3004b509 in CSoundFile::ReadDSM(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:138:22
+    #1 0x626f3004ae43 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/harness.cpp:22:18
+    #2 0x7cc2b8c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7cc2b8c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x626f3001fa24 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/harness-vuln-bounds+0x12a24) (BuildId: a55b8379489b09055efabecb16e70853cc513c36)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:138:4 
+/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:139:4: runtime error: index 240 out of bounds for type 'MODCOMMAND *[240]' (aka '_MODCOMMAND *[240]')
+    #0 0x626f3004b527 in CSoundFile::ReadDSM(unsigned char const*, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:139:19
+    #1 0x626f3004ae43 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/harness.cpp:22:18
+    #2 0x7cc2b8c2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7cc2b8c2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x626f3001fa24 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/harness-vuln-bounds+0x12a24) (BuildId: a55b8379489b09055efabecb16e70853cc513c36)
+
+SUMMARY: UndefinedBehaviorSanitizer: undefined-behavior /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/load_dsm.cpp:139:4 
+ARGV1=vectors/attack241.dsm
+BUFSIZE=2156 FIRST=52494646
+READDMS=1 TYPE=8192 NCH=4 ORDER[0..7]=4000ffffffffffff

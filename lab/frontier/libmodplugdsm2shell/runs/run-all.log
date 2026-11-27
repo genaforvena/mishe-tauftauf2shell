@@ -1,0 +1,12 @@
+PASS pinned source checksums
+PASS vector sizes
+PASS vulnerable 241 PATT: UBSan array-bounds at raw load_dsm.cpp:138 (WORD[240])
+PASS vulnerable 241 PATT: UBSan array-bounds at raw load_dsm.cpp:139 (MODCOMMAND*[240])
+PASS vulnerable 240 PATT control: no sanitizer finding
+PASS vulnerable 240 PATT control: Order[] unchanged
+PASS fixed 241 PATT control: no sanitizer finding
+PASS fixed 241 PATT control: Order[] unchanged
+PASS plain vulnerable 241 PATT: Order[] corrupted
+PASS plain vulnerable 240 PATT: Order[] intact
+PASS plain fixed 241 PATT: Order[] intact
+PASS=11 FAIL=0

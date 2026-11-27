@@ -1,0 +1,9 @@
+
+=================================================================
+==68580==ERROR: LeakSanitizer: detected memory leaks
+
+Direct leak of 1536 byte(s) in 1 object(s) allocated from:
+    #0 0x5d83c9644d11 in operator new[](unsigned long) (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/harness-vuln-asan+0x110d11) (BuildId: 79312c43143c4d6451b4c520828147d359dd025b)
+    #1 0x5d83c965e705 in CSoundFile::AllocatePattern(unsigned int, unsigned int) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libmodplugdsm2shell/src-vuln/src/sndfile.cpp:341:18
+
+SUMMARY: AddressSanitizer: 1536 byte(s) leaked in 1 allocation(s).
