@@ -15534,11 +15534,12 @@ wording in §02:3xZ is superseded.
 `0a4168f5` watched the real-libz OOB store inside the live GIMP 3.2.8 plug-in
 under a no-shim AppRun: `indexes+264`, the following chunk's size word, takes
 chosen `0x4d` bytes over `0x21` with backtraces through bundled `libz.so.1`
-`inflate` to `ReadJeffsImage` at `file-gif-load.c:1613`, and the later `free`
-faults at `:1616` with `rax=0x4d4d…`; safe JIF clean, 13 PASS / 0 FAIL. This is
-allocator metadata, not a named-object write, chosen address or successful
-dereference; the following chunk's owner is UNKNOWN. Grade stays rung 3 pinned
-verbatim / rung 4 PARTIAL chosen bytes, no r5.
+`inflate` to `ReadJeffsImage` at `file-gif-load.c:1613`, and the author's
+terminal `free` at `:1616` with `rax=0x4d4d…` (run-dependent, §03:2xZ);
+safe JIF clean, 13 PASS / 0 FAIL. This is allocator metadata, not a named
+object write, chosen address or successful dereference; the following chunk's
+owner is UNKNOWN. Grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes, no r5.
 
 `2d2e540e` already wrote its own coherent briefs for the Ruby W306
 `repeat_range[mem]` census (§02:5xZ); no duplicate was added. The wrapped-ID
@@ -15561,3 +15562,58 @@ binary's result, not a fresh-build invariant. Recipes in
 verdict contradicting these scopes, a report misquoting the receipts, or a
 checker RED on committed HEAD. No generated cell, count, grade or report moved
 here.
+
+## 2026-11-27 03:2xZ — sqlitesession 199th, gimpjif frame nit, rpm W310 boundary
+
+`ca9a5d35`, `23180c2e` and `fd648aa3` staged, replayed and admitted
+**sqlitesession2shell** as the 199th declared target mind (CVE-2026-119379,
+CWE-787, CVSS 3.1 7.8 HIGH). Only SQLite < 3.54.0 built with
+`-DSQLITE_ENABLE_SESSION` is in scope; pins 3.53.4 `b09c88c1…` and 3.54.0
+`6932c59e…`, upstream fix `64459c87…`. Reusing a table name in a 242-byte
+upstream changeset skips the apply-context reset, so `sessionUpdateFind()`
+memsets 12 bytes over a 4-byte logical `aUpdateMask` request. The runner
+`f16b47cd…` gave `BUILD_OK` / `PASS=44 FAIL=0` in-tree and from a clean
+20-file `git archive ca9a5d35`; ASan `WRITE of size 12`, 0 bytes after a
+16-byte region at amalgamation `sqlite3.c:238155` (raw
+`ext/session/sqlite3session.c:4401`) on the vulnerable pin, fixed and both
+single-block controls clean, plain vulnerable rc 139 in 5/5. The published
+"4-byte region" was not observed; no chosen-byte readback, pointer, marker,
+wire service or r5. Admission adopted window 207 and folded generated
+counts 198/195/195/132 → 199/196/196/132 with `established=false`; grade
+R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, independent witness replay owed.
+
+`8b7372bb` recorded two independent gimpjif2shell verdicts without moving
+the grade: W308 (#6006, clean 130-file `47e0e07d` archive) gave core 29/0,
+`REPLAY_PASS=6 REPLAY_FAIL=0` and 9/0 on the gdb runner; W310 (#6019, clean
+135-file `0a4168f5` archive) gave 13/0 on the watcher and directly
+re-observed `indexes+264` taking chosen `0x4d` bytes over the following
+chunk's `0x21` size word with watch frames through bundled `libz.so.1`
+`inflate` to `file-gif-load.c:1613`. Both ESTABLISHED AS LABELED with a
+fault-frame NIT: the named `free` at `:1616` with `rax=0x4d4d…` did not
+recur, and the fresh faults landed in other layout-sensitive allocator
+sites (`g_malloc0`/`free` via `ReadImage:1477`). The assertion is chosen-byte
+allocator corruption in the live plug-in, not a particular frame or
+register; the chunk's owner is UNKNOWN, grade stays rung 3 pinned verbatim /
+rung 4 PARTIAL, no fixed AppImage, NO r5. The older `§03:0xZ` wording naming
+`:1616` as a replay expectation is corrected in place, not merely covered.
+
+`887e8858` and `5435355c` closed rpm2shell W310's question of why one fresh
+non-PIE binary reached the live GC dereference and another did not: the
+controlled variable was embedded absolute-path *length*, not path text,
+source, harness or pin. A matched-length rebuild gave `13 PASS / 0 FAIL` in
+4/4 runs with 5/5 A-filler rc 139 and `MATCH=1`; short-path rebuilds failed
+in 4/4 (`8/5`, `9/4`, `10/3`, `9/4`), and a third matched path in the
+unmodified `run-pathlen-control.sh` smoke matched `13/0` against `11/2`.
+Both keep `0x4063a0`, rc 1 fixed-target installs and a clean fixed ASan
+control. A static survey then found zero objects in the non-PIE writable
+static range with both a Lua tag byte and a usable `next` qword: the chosen
+zero `.bss` qword's GC walk terminates and the useful ASLR-stable target is
+UNKNOWN. The rung-4 datum remains the chosen fixed-address write plus
+vulnerable/fixed/safe controls; grade stays rung 3 pinned verbatim / rung 4
+author-layout DEMONSTRATED, real-consumer witness UNKNOWN, no r5.
+
+`22f1489c` already wrote coherent Ruby W310 cache-point briefs in all three
+docs (§03:1xZ); they were verified and not duplicated. Recipes and exact
+observations for this fold are in `docs/reproducibility.md` §03:2xZ. What
+would change these limbs: a witness verdict contradicting these scopes, a
+report misquoting the receipts, or a checker RED on committed HEAD.

@@ -2,6 +2,66 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 03:2xZ — sqlitesession 199th, gimpjif fault frames, rpm path length
+
+This fold covers `ca9a5d35`, `8b7372bb`, `23180c2e`, `22f1489c`, `887e8858`,
+`fd648aa3` and `5435355c`, seven commits past `84e8d0e8`. `22f1489c` already
+carried coherent Ruby W310 cache-point briefs in all three docs (§03:1xZ);
+verified and not duplicated. Explanation and recipes only — no generated
+cell, register row, grade, count, report, SVG or lab evidence moved here.
+
+- `ca9a5d35` staged **sqlitesession2shell** from CVE-2026-119379 (CWE-787,
+  CVSS 3.1 7.8 HIGH). SQLite < 3.54.0 only when built with
+  `-DSQLITE_ENABLE_SESSION`: vulnerable tag 3.53.4
+  `b09c88c14082339b66c7b7158d609a771e64ca69` and fixed tag 3.54.0
+  `6932c59ee5c280599dfae9e7b431698a7cab9687` (archives `d18fa15a…` /
+  `88476598…`), upstream fix `64459c87…`. A repeated table name skips the
+  apply-context reset; a 242-byte upstream changeset with `nCol=2` then
+  `nCol=64` makes `sessionUpdateFind()` allocate 4 logical bytes and memset
+  12. Runner `f16b47cd…`: `BUILD_OK` then `PASS=44 FAIL=0`, ASan
+  `WRITE of size 12`, 0 bytes after a 16-byte region at amalgamation
+  `sqlite3.c:238155` (raw `ext/session/sqlite3session.c:4401`), fixed and
+  both single-block controls clean, plain vulnerable rc 139 in 5/5. The
+  published "4-byte region" geometry was NOT observed; no chosen-byte
+  readback, pointer, wire, marker or r5. `23180c2e` repeated that runner
+  from a clean 20-file `git archive ca9a5d35` with the same hash and bytes.
+  `fd648aa3` admitted the 199th mind, adopting window 207 and folding
+  generated counts 198/195/195/132 → 199/196/196/132 with
+  `established=false`; grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, independent
+  witness replay owed. The generated README, results, SVG and manifest
+  remain the operator's; no generated cell was edited here.
+- `8b7372bb` qualified gimpjif2shell's terminal frame. W308 (#6006, 02:43Z)
+  from a clean 130-file `47e0e07d` archive gave `REPLAY_PASS=6 REPLAY_FAIL=0`,
+  core 29/0 and 9/0 on the gdb runner; W310 (#6019, 03:10Z) from a clean
+  135-file `0a4168f5` archive matched the watcher hashes and gave 13/0,
+  eight chosen-byte watch hits through bundled `libz.so.1` `inflate` to
+  `ReadJeffsImage:1613` and `0x21 → 0x4d → … → 0x4d4d…` in the following
+  chunk's size word; the safe 4x4 log was clean. Both verdicts ESTABLISHED
+  AS LABELED with a fault-frame NIT, no grade change and NO r5: the author's
+  `free` at `file-gif-load.c:1616` with `rax=0x4d4d…` did not recur (W310
+  faulted in `g_malloc0` via `gimp_drawable_get_buffer`/`ReadImage:1477`,
+  `rax=0x5555557044c0`; W308 saw a third `free` site). The generalized
+  allocator-metadata assertion, not one frame or register, is the
+  repeatable observation; the following chunk's owner stays UNKNOWN.
+- `887e8858` and `5435355c` closed rpm2shell W310's build divergence.
+  Fresh non-PIE builds from the same pinned source, flags and runner differ
+  only in embedded absolute-path *length*: a matched-length tree gave
+  `NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` in 4/4 runs with 5/5 A-filler
+  rc 139 and `MATCH=1` (`8c2408f3…`), a short-path tree failed 4/4
+  (`8/5`, `9/4`, `10/3`, `9/4`; A-filler 0/5–3/5; `ccc96564…`). A third
+  matched path in the unmodified `run-pathlen-control.sh` smoke gave 2/0
+  overall (13/0 against 11/2). Both keep `nm` symbol `0x4063a0`, fixed-
+  target rc 1 and a clean fixed ASan control. An observer-only GDB survey
+  of 800 static bytes found 23 nonzero Lua tag bytes but zero objects with
+  both a valid `next` qword in that range and the thread pointer at
+  `A+0x20`: no static fake GCObject chain, so the chosen zero `.bss` walk
+  terminates. Grade stays rung 3 pinned verbatim / rung 4 author-layout
+  DEMONSTRATED, real-consumer witness UNKNOWN, useful target UNKNOWN, no r5.
+
+Recipes in `docs/reproducibility.md` §03:2xZ. What would change these limbs:
+a witness verdict contradicting these scopes, a report misquoting the
+receipts, or a checker RED on committed HEAD.
+
 ## 2026-11-27 03:1xZ — W310 cache-point metadata lane never reached (Ruby)
 
 - New `lab/repro/ruby2shell-onigmo-watch-cache-point.{py,gdb}` watches the
@@ -43,12 +103,13 @@ evidence moved.
   the wrapped `inflate()` by `avail_out=0x80000082` and watches `indexes+264`,
   the following chunk's size word; chosen `0x4d` bytes replace `0x21` through
   `0x4d4d4d4d4d4d4d4d`, backtraces reach `ReadJeffsImage` at
-  `file-gif-load.c:1613`, and the later `free` faults at `:1616` with
-  `rax=0x4d4d…`. `bash live/run-appimage-watch.sh`: 13 PASS / 0 FAIL; the safe
-  4x4 JIF raises no watch hit. The following chunk is allocator metadata, not
-  a named live object, chosen address or successful dereference; its original
-  owner stays UNKNOWN after a tracer stalled the plug-in before `inflate`.
-  Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+  `file-gif-load.c:1613`; the author's terminal `free` at `:1616` with
+  `rax=0x4d4d…` is run-dependent (§03:2xZ). `bash live/run-appimage-watch.sh`
+  gave 13 PASS / 0 FAIL; the safe 4x4 JIF raises no watch hit. The following
+  chunk is allocator metadata, not a named live object, chosen address or
+  successful dereference; its original owner stays UNKNOWN after a tracer
+  stalled the plug-in before `inflate`. Grade unchanged: rung 3 pinned
+  verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 - `2d2e540e` censused the wrapped-ID `reg->repeat_range[mem]` read: at ID
   `−32767` its qword is a stack-pointer split that differentiates
   `regexec.c:3846/3881/3884`, but pads and extra wire fields do not change its
