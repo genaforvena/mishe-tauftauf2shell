@@ -5,11 +5,12 @@ Admitted 2026-11-21 ~00:5xZ as a dedicated target mind under standing approval
 two-pane window and restorer entry are live. Presentation fold: operator
 #6273 at `c0d6b5fd` (R4 demonstrated, tier LIVE/CODE/HARNESS). Independent
 witness replay of the live wire (#6283, W330): ESTABLISHED AS LABELED,
-no grade change, NO r5. Unit re-rendering stays with the
-person and uses the full-flag sync in `docs/runtime-pin.md` — never a bare
-`mishe sync`. Frontier re-ran the extracted harness from committed sources at
-handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed `ALL CHECKS PASS`,
-rc 0; pins `1a16963f…` / `f2686d5b…` match the brief.
+no grade change, NO r5. Witness replay of the chosen-target probe (#6416,
+W337): ESTABLISHED AS LABELED at that label, NO r5. Unit re-rendering stays
+with the person and uses the full-flag sync in `docs/runtime-pin.md` — never
+a bare `mishe sync`. Frontier re-ran the extracted harness from committed
+sources at handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed
+`ALL CHECKS PASS`, rc 0; pins `1a16963f…` / `f2686d5b…` match the brief.
 
 ## Target
 
@@ -60,9 +61,9 @@ Live stock process (2026-11-27, section below): rungs 1/2/3 ESTABLISHED on
 loopback with the real layout; rung 4 DEMONSTRATED chosen-value control at
 real stock member offsets (`ares`, `info`, `fd`, `playerIndex`,
 `dotNotation`). W330's independent replay (#6283, section below) backed that
-value-control claim without extending it. A later author-only probe (final
-section) adds a live chosen-TARGET pointer dereference; it is unwitnessed
-and is not r5.
+value-control claim without extending it. The chosen-TARGET pointer probe
+(final section) was replayed independently by W337 (#6416): ESTABLISHED AS
+LABELED, NO r5.
 
 ## Probe policy
 
@@ -162,7 +163,7 @@ witness artifact `.mishe-tauftauf/artifacts/witness-w330-bzfs/detail.md`.
 ASan write size tracks the offered second-packet bytes (see above); no
 grade change.
 
-## Chosen-target pointer probe, 2026-11-27 (author only; unwitnessed)
+## Chosen-target pointer probe, 2026-11-27
 
 Operator #6385 under standing approval #8 asked for one bounded loopback
 experiment: retarget a pointer-bearing member from the real second-packet
@@ -171,7 +172,8 @@ write and look for a subsequent request-driven dereference. Result:
 stock-code benign marker print in a live v2.4.30 process. No command was
 executed and no marker file was created; this is not r5 under the charter's
 command-execution definition.** The sentinel is an LD_PRELOAD lab mapping;
-independent replay is requested before treating the upgrade as ESTABLISHED.
+independent replay W337 (#6416, section below) returned ESTABLISHED AS LABELED
+under the stated conditions, NO r5.
 
 Builds and pins: stock tarballs SHA-256 `29b3b97f…` (v2.4.30) and
 `86a5ded5…` (v2.4.32). Rebuilt plain binary `a18e88cd…`, ASan binary
@@ -233,7 +235,76 @@ bytes kept the prior pattern; no other corrupted member was repaired.
 
 Grade: rung 4 rises from chosen-VALUE to **chosen-TARGET pointer control
 with a live request-driven benign dereference and a stock-code marker
-print**, author-observed only. It is not control-flow hijack, a
-function-pointer overwrite, a lab-chosen command or r5; witness replay is
-owed. Earlier W330 stays ESTABLISHED AS LABELED with no grade change at
-that time.
+print**. It is not control-flow hijack, a function-pointer overwrite, a
+lab-chosen command or r5. Witness replay W337 (section below) returned
+ESTABLISHED AS LABELED under the stated conditions; NO r5. Earlier W330 stays
+ESTABLISHED AS LABELED with no grade change at that time.
+
+## Independent witness replay, 2026-11-27 W337 (not author)
+
+Witness #6416 replayed the chosen-target probe with its own builds, not the
+author's binaries. Verdict: **ESTABLISHED AS LABELED** for commit `b2da0a75`
+at chosen-TARGET pointer control with a request-driven benign dereference and
+a stock-code marker print, under the report's stated conditions (`-d2` debug
+level, LD_PRELOAD lab sentinel, locally built stock source tree). **NO r5**:
+no control-flow hijack, function-pointer overwrite, lab-chosen command,
+marker file, debugger write or forced call.
+
+Clean inputs and pins: stock tarballs `29b3b97f…` (v2.4.30) and `86a5ded5…`
+(v2.4.32); author binaries plain `a18e88cd…`, ASan `38035fc9…`, fixed
+`5bd85e32…`; runner `1c0afb6d…`, client `32e8872f…` and
+`sentinel-marker.so` `f2e39e47…` all matched. The witness rebuilt its marker
+`.so` from `sentinel.c -DMARKER76` and got the byte-identical `f2e39e47…`
+hash. Instrumented source pin `ab167aab…` (stock `19aeebbe…` plus two
+`BZTRACE countMessage-deref` lines; its diff against W330's trace is only
+those two lines), fixed source `1ca99576…` unchanged from W330.
+
+Own builds: private reflink trees under
+`.mishe-tauftauf/artifacts/witness-w330-bzfs/`; the pinned source was copied
+into both 2.4.30 trees and rebuilt with `make -C src -j2` (rc 0). Witness
+binary hashes `73a72545…` (ASan) and `15320354…` (plain) differ from the
+author's only by build paths. It also built an **unmodified stock** 2.4.30
+server (`NetHandler.cxx` `19aeebbe…`, `NetHandler.h` `0951be0f…`, no trace
+lines, binary `c5c6fd87…`, build rc 0).
+
+Replay (127.0.0.1 only, ports 15170–15177, no listener left):
+
+- Instrumented plain, port 15170 (`ptr-w337-plain-pointer.log`): member
+  readback `ares=0x200000000000 info=0x200000000000 playerIndex=0 fd=8`,
+  `after-body len=0 ... tcplen=4`, then
+  `countMessage-deref ... info=0x200000000000 now=4.216051 code=0 len=4
+  dir=0`; later SIGSEGV at nil from the remaining corrupted members. Object
+  addresses differed between arms while the sentinel stayed fixed (ASLR on).
+- ASan, port 15176 (`ptr-w337-asan2.log`): `heap-use-after-free`,
+  `WRITE of size 1028`, stack `recv` → `NetHandler::receive` (`:649`) →
+  `tcpReceive` (`:577`) → `handleTcpPacket` (`GameKeeper.cxx:374`) → `main`.
+- Instrumented marker arm, port 15173 (`ptr-w337-plain-marker.log.out:38`):
+  `Player BZP-PTR-MARKER-W336 [0] outbound UDP up`, with header code
+  `MsgUDPLinkEstablished` (0x6f67) and the sentinel string at
+  `PlayerInfo::callSign` offset 76.
+- **Unmodified stock marker arm**, port 15177
+  (`ptr-w337-stockmarker.log.out:38`): the same print with no instrumentation
+  in the binary. `gdb ptype /o PlayerInfo` on that binary reports
+  `/* 76 | 32 */ char callSign[32];`, and the marker string exists only in the
+  rebuilt sentinel `.so` (`grep -c BZP` on the client is 0). The print is
+  stock `logDebugMessage(2, "Player %s [%d] outbound UDP up\n",
+  info->getCallSign(), playerIndex)` in `NetHandler::tcpReceive()`.
+- Fixed v2.4.32 pointer and marker arms (ports 15172/15174): first packet
+  rejected with `sent huge packet length (len=1024), possible attack`,
+  second `sendall` BrokenPipe, server alive, zero marker prints.
+- Well-formed safe input, port 15175: ordinary `info=0x575a2cbbe918`, server
+  alive, no chosen-pointer trace. `randomize_va_space=2` in every arm;
+  `ss -ltn` showed ports 15170–15177 free after replay.
+
+Counterexamples and limits: the witness's first ASan arm (port 15171) exited
+before connect with "ASan runtime does not come first", caused by its
+LD_PRELOAD ordering; re-running with `libasan.so.8` preloaded first
+reproduced the write. Its added trace reads `info->now` immediately before
+stock `countMessage` reads the same field, so it does not manufacture a
+dereference; the unmodified-stock marker arm removes that concern
+independently. The marker print still needs `-d2` and the lab LD_PRELOAD
+sentinel at a fixed canonical address. No wire-side command side effect, no
+remote shell, no deployment claim. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w337-bzfs/detail.md`, console summaries
+`.mishe-tauftauf/artifacts/witness-w330-bzfs/w337-*.console`, and the
+gitignored server logs `lab/bzfs2shell-live/ptr-w337-*.log{,.out,.client}`.

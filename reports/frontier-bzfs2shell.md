@@ -14,8 +14,10 @@ entry are owed from the person's full-flag sync.**
 **Update 2026-11-27:** the status above is the 2026-11-21 handoff snapshot.
 The stock-layout gap it calls UNKNOWN was subsequently closed on a live
 loopback `bzfs` process; see "Post-handoff live stock-build replay" below and
-`reports/bzfs2shell-status.md`. The witness verdict above covers only the
-pinned harness, not that live replay.
+`reports/bzfs2shell-status.md`. Verdict #761 above covers only the pinned
+harness; the live wire and chosen-TARGET probes were replayed separately by
+W330 and W337 (sections below and in the status report), both ESTABLISHED AS
+LABELED with NO r5.
 
 **Scope judgment for the operator**: `bzfs` is a dedicated C++ game server, not
 a language runtime or HTTP server. It is included here as an X2Shell-class
@@ -212,6 +214,10 @@ ESTABLISHED AS LABELED, no grade change, NO r5. Full evidence is in
 
 Chosen-pointer follow-up (2026-11-27, operator #6385): the live stock
 v2.4.30 process dereferenced a wire-chosen `info` pointer in a request-driven
-path and printed a unique benign marker through a stock logging call. This
-is author-observed, unwitnessed and NOT execution or r5; exact wire, pins
-and controls are in `reports/bzfs2shell-status.md`.
+path, printed a unique benign marker through a stock logging call, and is
+independently replayed by W337 (#6416): ESTABLISHED AS LABELED at
+chosen-TARGET pointer control under the stated `-d2` and LD_PRELOAD sentinel
+conditions. Unmodified-stock and fixed/safe controls accompany the replay.
+This is NOT execution or r5; exact wire, pins, logs and limits are in
+`reports/bzfs2shell-status.md` and
+`.mishe-tauftauf/artifacts/witness-w337-bzfs/detail.md`.
