@@ -2,6 +2,66 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 09:4x–10:0xZ — W331/W330 verdicts, tcpreplay stage, mapped RIP
+
+Explanation and recipes only; no rung/grade cell moved by this fold. It
+covers `c99b722d`, `d090aa74`, `dd1be657`, `52bcb913`, `e5962cd9`,
+`968b6f35` and `859cf35f` past `52153b2c`. Ruby W330's own changelog/repro
+fold in `d090aa74` was verified and is not repeated; `52bcb913` only dropped
+stale CMake artifacts. The operator's `e5962cd9` moved `docs/results.md`'s
+established count 139 → 140 and the coturn row; those generated cells stay
+theirs.
+
+- **Coturn's replay question is closed.** W331 (#6310–#6312) independently
+  replayed the clean `5a982134…` archive: 10/10 hashes, own four-variant
+  build, unmodified runner 13 PASS / 0 FAIL, byte-identical `b9c20a26…`
+  summary, fresh ASan `WRITE of size 990` at `ns_turn_msg.c:2363` and a
+  fixed guard reject. ESTABLISHED AS LABELED at the clean-archive/harness
+  scope only: no live process, wire request, RIP, marker or command; R4
+  LIMITED, R5 NOT CLAIMED, established 140.
+- **Gimpjif W327/W329 replays are closed.** W328 (#6263) replayed W327 from
+  a clean 201-file archive: four pins, two rc-0 AppImage runs, all six
+  `0x7ffff02a…` words `None` in `/proc/<pid>/maps`, `CANDIDATES` empty and
+  zero watchers armed (no new zero-read sample). W330 (#6292) replayed both
+  W329 arms from clean archive `5446f2d5…`: ASLR-shifted heap but identical
+  offsets, `POST qdatas=0x…4140` in the changed arm, two watchpoints, zero
+  hits and no completed-load consumer in either arm. Both ESTABLISHED AS
+  LABELED, grade unchanged (rung 3 pinned verbatim / rung 4 PARTIAL / NO
+  r5); nothing left owed.
+- **OpenSIPS one-byte overwrite reaches mapped code but no chosen code.**
+  With a 260-byte `to`, stock 4.0.1 no-canary takes the early return; the
+  baseline saved RIP at `uri_xmpp2sip` frame #1 is `0x7ffff7ee66bb`
+  (`xmpp.so+0xc6bb`). JID byte 884 lands in RIP byte 0 and `sprintf`'s NUL
+  in byte 1, so a 885-byte `from` with `from[884]='A'` gives
+  `0x7ffff7ee0041` (`+0x6041`, `sha_hash+411`), which the `ret` actually
+  enters. The 256-byte window `+0x6000…+0x60ff` has no `ret`/`call`; the
+  saved RBP is noncanonical `0x5a59585756555453`, the next instruction is
+  rbp-relative, raw `0xa8` is rejected by expat, and fixed 4.0.2 plus the
+  299-byte baseline are clean. Rung-4 mapped transfer, no side effect, no
+  witness for this new case, r5 UNKNOWN; no grade moved.
+- **Tcpreplayservices2Shell staged, not admitted.** W332 staged
+  `lab/frontier/tcpreplayservices2shell` for CVE-2026-102896 /
+  GHSA-fwcr-mqg6-hqmx (affected <=4.6.0-beta2 `9d291ec9…`, fixed
+  4.6.0-beta3 `e6e32ec7…`): an unbounded `strncpy` count in
+  `parse_services()` (`src/common/services.c:35-90`) writes 20 chosen
+  digits into 10-byte `port[]`. Vulnerable ASan gives `WRITE of size 20`
+  at `:74` (11 digits → WRITE-11), fixed and 5/9-digit inputs clean,
+  12 PASS / 0 FAIL. Clean `git archive 52bcb913` replay (archive
+  `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; window
+  215 panes `%436`/`%437`, registry 216/216. Operator admission and
+  witness replay remain UNKNOWN; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED.
+- **Two replay UNKNOWNs closed in the register.** Under #6287, the Berry
+  row now records W326's independent clean-archive 59/0 replay and
+  source-bound ASan WRITE-225 with fresh saved-RIP readback, and the bzfs
+  row records W330's independent live-wire replay. Both ESTABLISHED AS
+  LABELED at their scopes; no grade change, no r5, Berry stays R4 ◐ with
+  `established:false`.
+
+What would change this fold: an executed chosen target with an observed
+side effect, a tcpreplay admission/witness verdict, a Berry consumer or a
+checker RED on committed HEAD.
+
+
 ## 2026-11-27 09:3x–09:5xZ — W330 Ruby chilled `append_as_bytes` OOB store
 
 - The named `rb_str_concat` stale-encoding experiment is a **NEGATIVE**: a

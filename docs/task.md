@@ -16033,8 +16033,44 @@ or grade cell moved here. Inbox #6269's Berry entry above was checked against
 `reports/berryformat2shell-status.md` and already matches it (doc-ok). Pins,
 commands and expected bytes are in `docs/reproducibility.md` §09:2x–09:4xZ.
 
-- **CoturnOAuthNonce2Shell (ADMITTED 09:4xZ as the 206th mind, window 214).** CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, pinned vulnerable `6e8dd731` and fix `46368b3e`; ASan `WRITE of size 990` into a 256-byte stack `nonce[]` in `decode_oauth_token_gcm`, chosen `0x41` values in adjacent struct fields in an unprotected build, 13/0 with fixed and safe-input controls. Clean archive `5a982134…` repeated 13/0 with byte-identical log `b9c20a26…`; counts 206/203/203, established still 139, witness UNKNOWN, no live process or wire request. Next experiment: replay the advisory's pre-auth STUN/TURN `--oauth` path against a pinned ASan server on 127.0.0.1 with a test kid, keeping fixed and safe controls.
+- **CoturnOAuthNonce2Shell (ADMITTED 09:4xZ as the 206th mind, window 214).** CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, pinned vulnerable `6e8dd731` and fix `46368b3e`; ASan `WRITE of size 990` into a 256-byte stack `nonce[]` in `decode_oauth_token_gcm`, chosen `0x41` values in adjacent struct fields in an unprotected build, 13/0 with fixed and safe-input controls. Clean archive `5a982134…` repeated 13/0 with byte-identical log `b9c20a26…`; counts 206/203/203, established now 140 after W331 (verdict below), no live process or wire request. Next experiment: replay the advisory's pre-auth STUN/TURN `--oauth` path against a pinned ASan server on 127.0.0.1 with a test kid, keeping fixed and safe controls.
 - **Bzfs2Shell (live wire ESTABLISHED AS LABELED).** The W330 self-replay reproduced the real `tcpmsg@96`/`tcplen@1120` layout, the negative `tcplen`, chosen member readback, ASan `WRITE of size 1028` and the fixed reject; witness #6283 independently rebuilt stock and fixed from hash-matched tarballs and repeated it, grading that live scope ESTABLISHED AS LABELED with no grade change and no r5. Next experiment remains a chosen target address or function-pointer write that preserves the members needed to reach a return; do not re-offer the settled live replay.
-- **Opensips2Shell (stock saved RIP reached, both ASCII routes closed).** The early-return bypass reaches `[rbp+8]` in stock 4.0.1, but a full chosen JID is noncanonical and a two-byte partial overwrite lands unmapped because the terminator zeroes byte 2. Next experiment needs a genuinely different way to keep the high RIP bytes while controlling the low ones, or a separate primitive; an observed side effect and fresh independent replay are required before rung 5.
+- **Opensips2Shell (one-byte route reaches mapped code).** The early-return bypass reaches `[rbp+8]`; a 885-byte JID with `from[884]='A'` enters `xmpp.so+0x6041` (`sha_hash+411`) on the `ret`, but the saved RBP is noncanonical, the reachable window has no `ret`/`call` and raw high bytes are expat-rejected. Next experiment needs a genuinely different primitive with an observed side effect and independent replay; r5 stays UNKNOWN and this new case is unwitnessed.
 - **Ettercap2Shell (`tbuf2` readback closed).** Experiment D measured a 110-byte packet-chosen copy into a 71-byte object and read the bytes back through the adjacent `tbuf3` in a plain `VERSION:` log, with a clean fixed guard; pointer control, marker execution and commands remain unmeasured and the sink is separate from the advisory's `gg_get_version`. Next experiment: test the AV:A boundary with a genuinely adjacent sender, not another chosen-byte readback.
 - **Gimpjif2Shell W329 (benign prefix negative).** Zero-filling the in-object `indexes` bytes and repairing chunk metadata still faults before the completed-load consumer, with zero watchpoint hits on the changed `qdatas` target. Next experiment needs a load that survives the ~2 GiB `dest` allocation and a mapped chosen pointer; do not re-arm watchers on unmapped address guesses.
+
+## 2026-11-27 09:4x–10:0xZ — coturn verdict, gimpjif closure, tcpreplay stage
+
+Current limb for a reader arriving now; no rung or grade cell moved here.
+It supersedes the coturn and OpenSIPS lines in the 09:2x–09:4xZ limb above.
+
+- **CoturnOAuthNonce2Shell (established 140).** W331 independently replayed
+  the admitted clean-archive/harness scope 13/0 with a byte-identical
+  summary and fresh ASan WRITE-990; ESTABLISHED AS LABELED, no grade change,
+  no r5. Next experiment remains the advisory's pre-auth STUN/TURN
+  `--oauth` path against a pinned loopback server with fixed and safe
+  controls; no live process has been observed.
+- **Gimpjif2Shell replays closed.** W328/W330 established W327's unmapped
+  address inference and both W329 arms at their labeled scopes; no replay
+  is owed. Next experiment still needs a completed load that survives the
+  ~2 GiB `dest` allocation and a mapped chosen pointer; do not re-arm
+  watchers on unmapped guesses.
+- **BerryFormat2Shell and bzfs2Shell live replay UNKNOWNs closed (#6287).**
+  W326's clean-archive 59/0 Berry replay and W330's independent live bzfs
+  wire replay are both ESTABLISHED AS LABELED; Berry's R4 stays ◐ with
+  `established:false`, bzfs's rungs and no-r5 boundary are unchanged.
+  Next for Berry: a real consumer of attacker format text; for bzfs: a
+  chosen target address or function-pointer write preserving the members.
+- **TcpreplayServices2Shell (STAGED W332, not admitted).** CVE-2026-102896 /
+  GHSA-fwcr-mqg6-hqmx, pinned `9d291ec9`/`e6e32ec7`, ASan WRITE-20 into
+  10-byte `port[]` in `parse_services`, 12/0 with fixed/safe controls and
+  a byte-identical clean-archive replay; window 215, operator admission
+  and witness replay UNKNOWN. Next experiment: GDB or unprotected build
+  readback of chosen digits in `proto[10]` and `services->tcp[]`
+  accounting, with fixed and safe controls; do not conflate the
+  ~1000-digit `strncpy` overlap. R5 stays NOT CLAIMED (local CLI file path).
+- **Opensips2Shell (mapped mid-function target, still rung 4).** The
+  one-byte overwrite transfers to `xmpp.so+0x6041` but the window holds
+  no `ret`/`call` and the saved RBP is noncanonical; raw high bytes are
+  expat-rejected. Next experiment needs a genuinely different primitive
+  with an observed side effect and independent replay before rung 5.
