@@ -9085,3 +9085,68 @@ zero on patched 3.4.13/3.3.14/4.0.10, with fresh-plain glibc metadata
 diagnostics on at least one vulnerable build. Falsifier: no overflow on
 k=3 (parity formula wrong) or any write on a patched build. Do not
 repeat the k=1 N=27/43/59 or N=35/51/67 arms unchanged.
+
+## 2026-11-27 19:2xZ — W357: k=3 higher-byte hypothesis FALSIFIED; overflow confirmed
+
+W357 asked whether three leading ASCII bytes move the single-byte overflow
+from the two known glibc LSB fields onto a higher byte of the successor
+chunk's size word. Input `"aaa" + N x "\xDF"` under ISO-8859-1 upcase gives
+`capa = N+23`, `R = 24+capa = N+47`; N = 27/43/59 gives R = 74/90/106,
+all == 10 (mod 16). Prediction: one `case_map` write on the three vulnerable
+builds, zero on the three patched builds, and a fresh-process glibc metadata
+diagnostic on at least one vulnerable build. Falsifier: no k=3 overflow, any
+patched write, or no reachable metadata byte.
+
+The first sweep (19:20Z) failed in the driver: `Encoding::ISO-8859-1` parses
+as subtraction and raised `NameError`, so all 18 arms exited rc=1 with no
+upcase call. That negative is preserved at
+`lab/build/evidence/casemap-chain/w357/vg-*.txt`. The driver was corrected to
+`Encoding::ISO_8859_1`; the corrected matrix is `vg2-*.txt` in the same
+gitignored directory.
+
+Corrected valgrind 18/18: each of the nine vulnerable arms has exactly one
+`Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and the known
+copy-out `Invalid read` at `memmove`, `0 bytes after a block of size
+74/90/106` for N=27/43/59; `rc=0`. Callers: 3.4.12 `rb_str_casemap
+string.c:7839` (alloc `default.c:8195`), 3.3.13 `:7414` (alloc
+`objspace_xmalloc0 gc.c:12617` from `:7409`), 4.0.9 `:7844` (alloc
+`default.c:8300` from `gc.c:5161`). All nine patched arms: zero invalid
+writes, zero invalid reads, no `case_map` site; only the usual Ruby GC
+`Conditional jump ... uninitialised` noise.
+
+Fresh unsanitized glibc: three reps per build for N in {19,27,43,59} on all
+six builds (72 processes), all `rc=0`, with no `munmap_chunk`, `corrupted
+size`, `invalid next size` or double-free diagnostic. N=19 is the even-capacity
+safe control. Evidence `.../w357/plain-*.txt`. The third prediction — a
+metadata diagnostic — was not met.
+
+gdb on plain 3.4.12 N=27 with the committed
+`lab/repro/ruby2shell-mixed3-slot.gdb` read `capa=50`,
+`slot = current_buffer + 74 = space + capa`, `used=51`; the byte at `slot`
+changed `0x00 -> 0x53`, while the bytes at `slot+6` (the successor chunk
+boundary at `current_buffer + 80`) were unchanged. The byte therefore lands
+in the current chunk's user tail, not in successor metadata. Log
+`.../w357/gdb-3.4.12-27.log`.
+
+This is structural, not a layout accident. The malloc request is `R =
+capa+24`; on stock glibc the chunk is `C = ceil((R+8)/16)*16` and the
+successor chunk begins at `buffer + C - 16`. The OOB slot is `buffer + R`.
+It can equal only `C-16` (successor `prev_size` LSB, `R == 0` mod 16, closed
+in W356) or `C-8` (successor `size` LSB, `R == 8` mod 16, closed in
+W353/W354); every other residue lands in the current chunk's padding. No
+leading-byte count can put this fixed-width write on a higher size byte under
+this allocation shape. Do not repeat the k=3 N=27/43/59 arms unchanged.
+
+Grade unchanged: primary wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4,
+harness-condition rung 5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. No wire request, chosen
+address, marker or command was involved. The W367 replay of W356 (message
+#6776) is ESTABLISHED AS LABELED at the pinned build/valgrind/read-only-gdb
+scope, grade-neutral and NO r5; the operator folded that verdict at commit
+`ccdbad4b`.
+
+Next named experiment W358: survey two-byte uppercase expansions across
+Ruby single-byte encodings to see whether the OOB byte can be chosen rather
+than the fixed `0x53`. This is a byte-value question, not a repeat of W348's
+write-bound matrix. Prediction: some expansion writes a first byte other
+than `0x53`; falsifier: all two-byte expansions start `0x53` or none exist.
