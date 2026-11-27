@@ -555,8 +555,10 @@ Both runner PASS lines; PRE `idx=0x555555679070`, delta `0x47210`;
 dense sweep boundary. Preserved generator negatives: 6-byte word and
 big-endian byte order, both stuck at the array deref. No shim, no debugger
 write, no chosen-address write, control flow, marker or command; NO r5.
-Author-only pending witness replay (addition to open offer #6661); verified
-grade unchanged: rung 3 pinned verbatim / rung 4 ✓ at the W349
+Witness W365 (#6743/#6745) replayed this limb from a clean private archive and
+returned ESTABLISHED AS LABELED at the pinned live-loader / read-only-observer
+scope, grade-neutral, NO r5; NIT: exact idx/delta/hit count drifted on replay.
+Verified grade unchanged: rung 3 pinned verbatim / rung 4 ✓ at the W349
 chosen-pointer scope. SHAs: W353 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
@@ -578,5 +580,8 @@ AppImage's glibc 2.41 `ld-linux-x86-64.so.2`, with `inflate` and
 is therefore in live ld.so symbol lookup, not a GIMP/GEGL object write.
 GDB captured this consumer before its terminal internal error; no W354
 terminal stop is claimed, and W353's separate terminal fault remains.
-Grade unchanged, NO r5; W352/W353 remain author-only pending W363. Full
-hashes and the next bound are in the W354 provenance section.
+Grade unchanged, NO r5; W352 and W353 are no longer author-only: W363 (#6699)
+and W365 (#6743/#6745) returned ESTABLISHED AS LABELED at their pinned
+read-only-observer scopes. W365 NITs: exact idx/delta/hit-count drift; W354
+fixed control and ld.so symbolization read but not independently replayed.
+Full hashes and the next bound are in the W354 provenance section.

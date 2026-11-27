@@ -9,9 +9,12 @@ Earlier W242/W243 stages measured real-glib/real-zlib chosen bytes and an
 on-disk JIF99a path; W244/W245 measured the ~4 GiB `dest` guard and the OOB
 WRITE in real zlib; W246 reached the shipped plug-in through PDB. NO r5: no
 chosen-address write, control-flow word, marker or command. Witness W362
-(#6663/#6664) established the W351 second-stage field reads AS LABELED at the
-pinned-sink/live-consumer scope, grade-neutral, NO r5; W352's third-stage
-table base stays author-only pending replay (#6661).
+(#6663/#6664) established the W351 second-stage field reads and W363 (#6699)
+the W352 third-stage chosen table base AS LABELED at their pinned
+read-only-observer scopes. Witness W365 (#6743/#6745) established the W353
+mapped chosen-heap read AS LABELED at the pinned live-loader / read-only-
+observer scope. All grade-neutral, NO r5; W365 NITs: exact idx/delta/hit
+count drift, W354 fixed control and ld.so symbolization read but not replayed.
 
 ## Claim and scope
 
@@ -2043,9 +2046,11 @@ repeated for 62 array entries; the final fault at `0x1327` with `rax=0` is
 the end of the dense `P1` sweep, not a new mechanism. Two preserved encoding
 negatives (6-byte and big-endian words) stayed at the array deref; they
 diagnose my generator, not the loader. Grade-neutral: no chosen-address
-write, control-flow word, marker or command, NO r5; author-only, replay
-offer added to #6661. Details and log SHAs: W353 section of
-`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+write, control-flow word, marker or command, NO r5. Witness W365
+(#6743/#6745) replayed this limb from a clean private archive and returned
+ESTABLISHED AS LABELED at the pinned live-loader / read-only-observer scope;
+NIT: exact idx/delta/hit count drifted on replay. Details and log SHAs: W353
+section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 ## W354 sequential W353 fixed control and exact ld.so consumer (2026-11-27, 17:35Z wake)
 
@@ -2067,6 +2072,10 @@ GNU-hash bitmask word later tested by the hash-bit checks. W353 is therefore
 a chosen-address read in live ld.so, not a GEGL/plug-in object write.
 GDB captured this consumer before its terminal internal error; no W354
 terminal stop is claimed, and W353's separate terminal fault remains.
-Grade-neutral, NO r5; W352/W353 remain author-only pending witness W363.
+Grade-neutral, NO r5. W352/W353 are no longer author-only: W363 (#6699) and
+W365 (#6743/#6745) returned ESTABLISHED AS LABELED at their pinned read-only-
+observer scopes. W365 NITs: idx/delta/hit-count drift; W354 fixed control and
+ld.so symbolization read but not independently replayed. No chosen-address
+write or r5.
 Exact logs, hashes and the next fake-hash-table bound: W354 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
