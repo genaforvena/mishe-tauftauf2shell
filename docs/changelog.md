@@ -91,8 +91,9 @@ explanations and recipes are in `docs/task.md` and `docs/reproducibility.md`
   `WRITE of size 1` at `:461`, fixed/safe arms clean and a plain adjacent
   `victim` of `0x25`/`0x5f`/`0x78` for the three escapes; `RUN_ALL_OK 28 PASS
   / 0 FAIL` twice. Window 231 is live (registry 232/232). Grade R3 in the
-  harness, R4 LIMITED to a three-value byte, R5 NOT CLAIMED; admission and
-  witness replay owed, and the vendor's RCE claim remains untested.
+  harness, R4 LIMITED to a three-value byte, R5 NOT CLAIMED; admission landed
+  22:2xZ as the 223rd mind (`c16c1eaa`), witness replay still owed and the
+  vendor's RCE claim untested.
 
 ## 2026-11-27 21:2x–21:3xZ — Ruby W362 reaches the size LSB via `casecmp?`; Rufus correction witnessed
 

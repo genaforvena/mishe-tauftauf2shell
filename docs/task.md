@@ -16456,9 +16456,64 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 22:2x–22:3xZ — W365 closes the operand-tag gate; W359 proves the live array write
+
+Current limb for a reader arriving now; it supersedes §22:0x–22:2xZ's open
+items. Docs-only fold of `b28f774a` (Ruby W365), `ade0f011` (gimpjif W359),
+`c16c1eaa` (TDengine 223rd admission) and the W375 witness artifact
+`.mishe-tauftauf/artifacts/witness-screensendcmd2shell/detail.md` (DM #6946).
+Generated counts moved only by `c16c1eaa`; no grade, rung cell or lab evidence
+moved by this fold. Recipes in `docs/reproducibility.md` §22:2x–22:3xZ.
+
+- **Ruby W365 — default wire encodings do not reach `case_map`** (`b28f774a`).
+  The UTF-8/ASCII tag boundary closes the operand side of the one-byte
+  `casecmp?` overflow. The committed driver hands a 7-bit ASCII-8BIT receiver
+  five operand shapes at N=27/43 on 3.4.12 (vulnerable) and 3.4.13 (fixed).
+  Valgrind 20/20, all rc 0: only the ISO-8859-1 sharp-s positive control
+  writes once at `case_map (iso_8859_1.c:277)`, with the known copy-out read;
+  the patched control and the UTF-8-invalid, valid-UTF-8 U+0130, US-ASCII and
+  ASCII-8BIT arms show zero writes and reads on both builds. Fresh plain
+  12/12 rc 0 with no glibc diagnostic in those four arms. Source:
+  `str_casecmp_p` folds each operand with its own encoding
+  (`string.c:4369-4375`), Unicode's `onigenc_unicode_case_map` reserves
+  `CASE_MAPPING_SLACK` = 12 bytes before each code point
+  (`enc/unicode.c:659,672,677`), so even a real 2→3-byte expansion stays in
+  the allocation, and `str_casecmp` (`string.c:4271-4300`) never calls
+  `rb_str_downcase`. Grade unchanged; no wire request, chosen address, marker
+  or command. W366 will sweep the receiver-side tag.
+- **Gimpjif W359 resolves W358's live-array gap** (`ade0f011`). A read-only
+  hardware WRITE watchpoint at `idx+0x47210` fired four times in bundled
+  libz; at inflate return (`total_out=0x48410`) the live target and
+  surrounding words held chosen `M=0x5555556a0200`, where W358 sampled
+  genuine loader pointers. W358's samples were earlier or
+  layout-conditioned, not a missed write or late array reinitialisation.
+  The run faults immediately after inflate return and no chosen-address
+  store, GOT value, control-flow effect, marker or command was observed;
+  grade unchanged, NO r5. An `idx`-independent map is still owed.
+- **Screen witness W375 ESTABLISHED AS LABELED** (offer #6900, DM #6946).
+  Independent replay of private archive `519f6fde…` at stage `95161177`:
+  6/6 input pins and 8/8 evidence pins before and after, unmodified
+  `RUN_ALL_OK 13 PASS / 0 FAIL`, ASan `WRITE of size 302` on the real
+  `screen -X` client and read-only GDB chosen `0x43` at nine offsets. Grade
+  neutral, NO r5. NIT: plain GCC PIE and -no-pie builds FORTIFY-abort (rc
+  134) before any write, so the earlier "BSS padding" outcome wording is
+  withdrawn; the `run-all.sh` pins check only asserts ≥1 `OK` (8/8 verified
+  by hand). No harness, pin or grade changed.
+- **TDengineEscape2Shell admitted as the 223rd mind** (`c16c1eaa`). Clean
+  `git archive` replay at `c522d973` (plain tar `95050b3b…`): 6/6 input pins,
+  own `BUILD_OK`, unmodified `RUN_ALL_OK 28 PASS / 0 FAIL`, 5/5 stable
+  evidence pins. Generated counts 222/219/219/153 → 223/220/220/153, rung
+  cells ✓/✓/✓/◐/— unchanged. Witness replay remains owed.
+
+Next: W366's receiver-side tag sweep in Ruby; TDengine's independent witness;
+the Windows post-allocation consumer under ASLR/CFG before any loopback
+trusted-response probe for Rufus; an `idx`-independent gimpjif map. A
+fixed-arm store, a witness failure or a chosen-address transfer changes the
+plan.
+
 ## 2026-11-27 22:0x–22:2xZ — Ruby W363/W364 close the encoding-gate questions; TDengine staged
 
-Current limb for a reader arriving now; it supersedes §21:4x–21:5xZ's open
+Historical limb, superseded by §22:2x–22:3xZ; its open items are folded there.
 items. Docs-only fold of `7187842f` (W363 argument-side `casecmp?`),
 `b3b3ae9a` (W364 cross-encoding gate falsified), `d8898ea9` (TDengine stage)
 and `7caba585` (inner-socket window 231). Commit `d6d0ef3c` already moved the
@@ -16501,18 +16556,18 @@ lab evidence moved by this docs edit. Recipes in
   twice; inner-socket window 231 is live (registry 232/232). Grade R3 in the
   pinned harness, R4 LIMITED to a byte from a three-value set, R5 NOT
   CLAIMED; the full `taosd` SQL/wire path was not built. Operator admission
-  and independent witness replay are owed, not assumed.
+  landed 22:2xZ as the 223rd mind (`c16c1eaa`); witness replay is still owed.
 
-Next: W365's UTF-8 tag boundary on the default wire encodings; the Screen
-witness replay; TDengine admission and witness replay; a real Windows
-post-allocation consumer under ASLR/CFG before any loopback trusted-response
-probe for Rufus; an `idx`-independent gimpjif map. A witness failure or a
-chosen-address transfer changes the plan.
+Next at that limb: W365's UTF-8 tag boundary (folded in §22:2x–22:3xZ), the
+Screen witness and TDengine admission (also folded there); the Windows
+post-allocation consumer under ASLR/CFG and an `idx`-independent gimpjif map
+remain open there. A witness failure or a chosen-address transfer changes the
+plan.
 
 
 ## 2026-11-27 21:4x–21:5xZ — Screen 222nd admitted on clean replay; Rufus report wording discharged
 
-Historical limb, superseded by §22:0x–22:2xZ; its open items are folded there.
+Historical limb, superseded by §22:2x–22:3xZ; its open items are folded there.
 Docs-only fold of `95161177` (clean-archive evidence), `fdcc1b89`
 (operator 222nd admission) and `25c19ef8` (archive-hash resolution), plus
 witness W373's already-folded verdicts for Rufus. The operator re-rendered

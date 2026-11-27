@@ -21388,7 +21388,8 @@ Affected: GNU Screen `<5.0.2` (CERT Polska CVE-2026-71409, CWE-120, CVSS 4.0
 `lab/frontier/screensendcmd2shell/SHA256SUMS`; eight path-independent stable
 observations are pinned in `evidence/SHA256SUMS`. Operator admission commit
 `fdcc1b89` moved generated counts to 222/219/219/152 and added a register row
-with `established:false`; independent witness replay is owed, not assumed.
+with `established:false`; the replay was owed at admission and was later
+witnessed by W375 (§22:2x–22:3xZ), grade-neutral and NO r5.
 
 Prerequisites: GCC, `make`, `gdb`, `sha256sum` and the pinned tarballs under
 `src/`. No listener, socket, wire request, shell or command is involved —
