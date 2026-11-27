@@ -914,6 +914,8 @@ FAIL**, and `run-witness.sh` from the same archive gave 29 PASS / 0 FAIL
 with 6/0 replay checks. The first clean replay had returned 7 PASS / 1 FAIL
 solely because it asserted `malloc` and this layout faulted in `free`; that
 failure is preserved, not erased.
+The final exact-SHA replay from the recording commit `25bb618d` repeated
+9 PASS / 0 FAIL with the same chosen-byte register value.
 
 Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL natural chosen
 bytes, NO r5. This names live call paths that *attempt* the allocator

@@ -1340,6 +1340,11 @@ at file-gif-load.c:1616`, `#5 ReadImage (... is_jeff_image=1) at :1468`,
 `rax=0x4d4d4d4d4d4d4d4d`. This is a closer site than the author run's
 `malloc` frame: the overflowed object's own `g_free` faults on chosen-
 corrupted metadata. Both sites are layout-sensitive and both are kept.
+Final exact-SHA replay from the recording commit `25bb618d`: a fresh
+`git archive 25bb618d lab/frontier/gimpjif2shell` into
+`/tmp/w304-final-replay` gave `TOTAL: 9 PASS / 0 FAIL`, rc 0, again with
+`rax=0x4d4d4d4d4d4d4d4d`. No source changed between the two replays; the
+assertion fix is included in `25bb618d`.
 Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
 NO r5. A chosen-byte pattern in `rax` inside `malloc` or `free` is evidence
 of corrupt allocator state reached from the live JIF path, not of a
