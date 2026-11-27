@@ -15141,3 +15141,44 @@ Every count above is an operator, author, clean-archive or witness observation
 as labeled; none moves a generated grade cell here. What would change this
 fold: a later verdict contradicting one of these exact scopes, a report
 misquoting these receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 00:2xZ — gdb-watched repeat-ID write target: same-slot steering CLOSED
+
+This fold covers the single commit `3934a6e5` after the last fold. Its author
+already added the briefs in `docs/changelog.md` and `docs/reproducibility.md`
+(§ 00:2xZ); this section adds the explanation only. No generated cell,
+register row, grade, count, manifest, SVG, report or lab evidence was moved;
+no independent witness replay of the gdb limb is claimed.
+
+- On pinned 3.4.11 (`f79c6e78…`) under the stock Rails notes route,
+  `RAILS_MAX_THREADS=2`, shallow layout and ASLR off, a gdb watch on
+  `regexec.c:3845` gated to a >300 KB pattern and attributed to the second
+  POST by a marker file observed every `mem=-32767` write at
+  `alloca_base - 262136`, in pattern-source stack bytes. The overwritten
+  qword was a small repeat-stack index (3–105, one large uninitialized value
+  at the first write), never a chosen byte or pointer. First and second
+  requests wrote to **different** slots in all three fresh processes, so the
+  same-slot persistence/steering branch is CLOSED for this recipe. The W300
+  faulting case was not reproduced under gdb; its write address is UNKNOWN.
+- One explicit diagnostic caveat: Rails 8.1 sets `Regexp.timeout = 1` and the
+  gdb-slowed match exceeds it. `lab/repro/ruby2shell-onigmo-notimeout.rb`
+  disables that timeout through `RUBYOPT` for the gdb process only; it changes
+  no wire input, pattern or overflow and supports no stock-wire timing claim.
+  Two second POSTs exceeded the 120 s driver timeout under gdb while their
+  negative writes were still logged after the marker; the third served both
+  (200/52,730 B then 200/54,795 B, alive). Read the gitignored
+  `lab/build/evidence/w301-mark*.{json,server.log}` files rather than the
+  driver rc.
+- The ASLR-off standalone harness `ruby2shell-onigmo-repeat-address.rb`, with
+  the exact wire pattern, reached two distinct regexec allocation addresses
+  8,208 B apart but no negative-mem write for synthetic subjects. It is
+  harness-only and neither supports nor contradicts the wire targets; do not
+  promote it to a consumer observation.
+
+Grade unchanged: stock-wire rung 4 witness-ESTABLISHED at the labeled scope,
+full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**; no command, second
+command, chosen byte, pointer or count moved. Recipe: `sh
+lab/repro/ruby2shell-onigmo-repeat-gdb.sh`; detail in report § 00:2xZ. What
+would change this fold: a witness contradicting the distinct-slot result at
+the exact gdb scope, a report misquoting these receipts, or a checker RED on
+committed HEAD.
