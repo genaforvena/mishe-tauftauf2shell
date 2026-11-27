@@ -9394,3 +9394,87 @@ ASCII receiver of folded length 1+2N. Predict the same one-byte write
 at R on the vulnerable builds and zero on patched; falsifier is no
 write at R or any patched write. First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"s"*54).b; t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p s.casecmp?(t)'`.
+
+## 2026-11-27 22:0xZ — W363: argument-side `casecmp?` folds attacker input the same way
+
+W363 tested the request-shaped call `known.casecmp?(user_string)`: the
+ISO-8859-1 sharp-s string is the **second** operand. `str_casecmp_p`
+(`lab/src/cmp/ruby-3.4.12/string.c:4363-4377`) folds the receiver first
+(`:4374`) and the argument second (`:4375`) before `rb_str_eql`, so the
+argument still reaches `rb_str_casemap`. This is a different allocation
+order from W362, where the vulnerable string was the receiver.
+
+Method: `lab/repro/ruby2shell-rung3-mixed-casecmp-arg.rb` uses an ASCII
+receiver `"a" + "s" * 2N` and an ISO-8859-1 argument `"a" + N x "\xDF"`.
+The argument's `capa = N+21` and `R = capa+24 = N+45 = 72/88/104` at
+N=27/43/59, i.e. the successor chunk's size LSB; N=28 is the even-capa
+control. `mismatch` changes only the receiver's first byte and returns
+`false`. `lab/repro/ruby2shell-mixed-casecmp-arg.sh` runs the valgrind
+matrix plus five fresh-plain reps per vulnerable arm and N=28 control,
+two per patched arm and five mismatch reps; the 600 s timeout interrupted
+the plain matrix at 4.0.9 N=27 rep 5, and
+`lab/repro/ruby2shell-mixed-casecmp-arg-tail.sh` completed the remaining
+arms (with core dumps disabled and a skip for already-observed outputs).
+Raw evidence: `lab/build/evidence/casemap-chain/w363/` — `matrix.txt`,
+`matrix-tail.txt`, `smoke-3.4.12-27.txt`, the gdb log below and
+`plain/*.txt`. All 83 plain arms were observed; none is inferred from a
+missing file.
+
+Prediction: one `case_map` write at R on each vulnerable build, zero on
+patched. Falsifier: no write at R (allocation order or ASCII receiver
+optimizes the fold away), any patched write, or a reliable clean-run
+dodge where the receiver-side lane aborts.
+
+Valgrind 18/18: each of the nine vulnerable arms has exactly one
+`Invalid write of size 1` at `case_map (iso_8859_1.c:277)` plus one
+copy-out `Invalid read of size 1`, "0 bytes after a block of size
+72/88/104"; all nine patched arms have zero invalid writes and zero
+invalid reads; all rc=0 with `result=true`. The matching first command
+on 3.4.12 N=27 is in `smoke-3.4.12-27.txt`.
+
+gdb on 3.4.12 N=27, reusing the committed
+`lab/repro/ruby2shell-mixed-fold-size.gdb` with the new driver
+(`gdb-3.4.12-27-arg-casecmp.log`): the break fires on the `capa=48`
+buffer, which must be the sharp-s argument (the 55-byte ASCII receiver
+would get `capa=75` under `string.c:7830`). The chunk header reads
+`(prev_size, size) = (0, 0x51)`; at `string.c:7839` the slot `buffer+72`
+holds `0x81`, and at `:7850` (`used=49`) it holds `0x73` while size byte 1
+stays `0x00`. This inferior exited normally under gdb — one layout
+observation, not a safety claim; the fresh plain runs below abort on the
+same builds.
+
+Fresh-plain with churn, all 83 reps observed: 3.4.12 match aborted 4/5
+at N=27 (three `corrupted size vs. prev_size`, one `munmap_chunk():
+invalid pointer`), 2/5 at N=43 (munmap), 5/5 at N=59 (three corrupted
+size, two rc=134 with no matched diagnostic); 3.3.13 aborted 1/5, 1/5
+and 5/5 (munmap, munmap, then one munmap, two `malloc(): invalid next
+size (unsorted)` and two unmatched rc=134); 4.0.9 aborted 4/5 at N=27
+and 1/5 at N=43 (munmap) and gave one rc=139 SIGSEGV at N=59 on a fresh
+rerun. The original N=59 rep 3 was interrupted by the 600 s deadline
+after writing `corrupted size vs. prev_size while consolidating`
+(`plain/ruby-4.0.9-plain-59-match-3.txt`); that observation is preserved
+separately from the rc=139 rerun, with no cause claimed for either.
+All 15 even-N=28 controls and all 18 patched reps exited rc=0 with
+`result=true`; the five 3.4.12 mismatch reps gave four clean
+`result=false` and one munmap abort.
+
+The falsifier is **not** met: the write occurs at R on exactly the
+vulnerable builds in either operand position, no patched write exists,
+and argument-side folding shows the same layout-dependent abort family.
+Prediction supported at the measured scope. Grade unchanged: primary
+CVE wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4, harness-
+condition rung 5 witness-ESTABLISHED only at its labeled scope, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. This wake adds a caller
+shape, not a new impact grade; no wire request, chosen address, marker
+or command was used.
+
+Next named experiment W364: cross-encoding gate. Puma supplies request
+header values as ASCII-8BIT, while the overflow needs ISO-8859-1. Drive
+`ascii8bit_receiver.casecmp?(iso8859_1_argument)` and the reverse order
+on 3.4.12 N=27 (and 3.4.13 control): `rb_enc_compatible`
+(`string.c:4369`) may return nil or an ASCII-8BIT encoding whose case
+table does not expand `0xDF`, closing this route for wire-shaped
+receivers. Prediction: no `case_map` write when either operand is
+ASCII-8BIT and the sharp-s operand is ISO-8859-1; falsifier: an observed
+write at R in either order. First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).b; t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
