@@ -1,11 +1,12 @@
 # Frontier brief: editorconfigglob2shell — `ec_glob()` pattern stack overflow
 
 **Status: STAGED (frontier W345), independent witness replay and operator
-admission owed.** The target mind does not exist yet; this wake provisioned the
-lab, brief and replay, not a target window. Lab:
-`lab/frontier/editorconfigglob2shell/`; pins and URLs in `PROVENANCE.md`.
-Input is a local `.editorconfig` file plus a directory structure with many
-special characters; no network I/O, listener, marker or command was run.
+admission owed.** The target mind's charter and seed wall exist; live
+dedicated inner-socket window 222 (`%450`/`%451`, `dead=0`), registry
+223/223 unique. Lab: `lab/frontier/editorconfigglob2shell/`; pins and URLs
+in `PROVENANCE.md`. Input is a local `.editorconfig` file plus a directory
+structure with many special characters; no network I/O, listener, marker or
+command was run.
 
 ## Verified ground truth
 

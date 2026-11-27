@@ -2,8 +2,8 @@
 
 State: **STAGED, admission and independent witness replay owed.** Brief:
 `reports/frontier-editorconfigglob2shell.md`. Lab, pins and provenance:
-`lab/frontier/editorconfigglob2shell/`. No dedicated target window exists at
-this write-up; frontier must create and register it before handoff.
+`lab/frontier/editorconfigglob2shell/`. Charter and seed wall exist; live
+inner-socket window 222 (`%450`/`%451`, `dead=0`), registry 223/223 unique.
 
 CVE-2026-40489 / GHSA-97xg-vrcq-254h, editorconfig-core-c `<=0.12.10`,
 exact parent `b4724e475571…` → fix `5159be88…`. The pinned `strcpy` at
