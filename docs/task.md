@@ -15460,3 +15460,42 @@ silent timeout as FAIL; repaired in-tree 6/0 core, 12/0 span, no orphan.
 Grade unchanged rung 3 / rung 4 PARTIAL / NO r5; negative preserved, 12/0
 environment-sensitive. Recipes §02:2xZ. No generated cell, count or flag
 moved here.
+
+## 2026-11-27 02:3x–02:4xZ — rpm W307 fixed-address target, lzxwindow admitted 198th
+
+`493f094f`, `cd28c444` and `b670b1a7` added rpm2shell W307. A build-only
+change to `-fno-pie -no-pie` lets a crafted 64-byte cpio payload put the fixed
+`.bss` address `0x4063a0` at `buf+0x20`; under normal ASLR an unmodified
+`rpm -i` walks it as a live liblua GC object (observer-only GDB:
+`NEXT_AFTER=0x4063a0`, `CHOSEN_PTR=0x4063a0 ... MATCH=1` at
+`lua_resume+0x206`). Ten plain fixed-target installs exit rc 1, five
+A-filler installs rc 139, fixed ASan rc 1 clean, runner `f849bc87…` scored
+13/0 in-tree and from a clean `git archive cd28c444`. The `.bss` qword is
+zero, so the walk terminates: a chosen ASLR-stable address reaches a real
+semantic dereference but not a useful object, code pointer, command or r5.
+`cd28c444` reconciled the status grade with the real-consumer lane: rung 3
+pinned verbatim and real rpm / rung 4 author-layout DEMONSTRATED in real
+consumers; default PIE needs ASLR disabled for a chosen live GCObject, and the
+measured loopback wire path yields no chosen pointer, useful stable target or
+command. Real-consumer witness verdict UNKNOWN (W238 covered only the earlier
+synthetic lane), no r5. This supersedes the admission-time grade wording in
+the older W237 and admission limbs above, kept as pre-real-consumer history.
+
+`b8f8f23c`, `cccea45e` and `15295203` staged, replayed and admitted
+lzxwindow2shell as the 198th mind (window 206 adopted, counts
+197/194/194/132 → 198/195/195/132, `established=false`). Pinned 7-Zip 26.05
+`b88c6bc0…` / 26.06 `d3296e39…`, a four-line in-constructor / resize `_pos`
+reset bundled in the 26.06 release commit. The generated harness drives a
+21-bit window decode, a shrink to 15 bits and a 4096-byte replay: vulnerable
+ASan `WRITE of size 4096` 4064 bytes past a 32800-byte region at raw
+`LzxDecoder.cpp:1396`, fixed clean; published `0x14A420` geometry SEGVs
+vulnerable; plain vulnerable replay exits 0. Runner `a89a11cb…` gave
+`BUILD_OK` / `PASS=28 FAIL=0` in-tree and from `git archive b8f8f23c` (10
+lab files). Grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —: no real CAB consumer,
+chosen-byte readback, pointer, wire path, marker or command; the writeup's
+FSOP/RCE chain is an untested claim. Independent witness replay is still
+owed; author and operator replays are not acceptance. Recipes in
+`docs/reproducibility.md` §02:3xZ. What would change these limbs: a witness
+verdict contradicting either scope, a report misquoting these receipts, or a
+checker RED on committed HEAD. No generated cell, count, grade or report moved
+here.

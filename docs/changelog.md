@@ -1,6 +1,72 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:3x–02:4xZ — rpm W307 fixed-address target, lzxwindow 198th
+
+This fold covers `493f094f..15295203`, six commits past `3842f09e`; none of
+their authors wrote briefs in these three docs. The repo-change edge named
+`cccea45e`, and `15295203` landed after it and is included here. Explanation
+and recipes only: no generated cell, register row, grade, count, SVG, report
+or lab evidence moved.
+
+- `493f094f`, `cd28c444` and `b670b1a7` recorded rpm2shell W307, a build-only
+  change question: with ASLR active, can a *fixed* address be the chosen live
+  liblua GC pointer in an unmodified real `rpm -i` consumer? The new tracked
+  `lab/frontier/rpm2shell/real/run-nopie-target.sh` (sha256 `f849bc87…`)
+  builds the pinned vulnerable parent without PIE (`-fno-pie -no-pie`; `file`
+  reports an ELF executable) and patches the 64-byte cpio payload so the qword
+  at `buf+0x20` is the fixed `.bss` address `0x4063a0`. Observer-only GDB
+  reported `NEXT_AFTER=0x4063a0` and `CHOSEN_PTR=0x4063a0 ... MATCH=1` at
+  `lua_resume+0x206`, i.e. the chosen fixed qword is the natural adjacency and
+  is walked as a GCObject. Ten plain ASLR installs exited rc 1 with normal
+  cpio failure text, five A-filler installs rc 139, and the fixed ASan build
+  rc 1 with no report: `NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` rc 0 in-tree
+  and again from a clean `git archive cd28c444 lab/frontier/rpm2shell` with
+  the runner byte-identical. The chosen `.bss` qword is zero, so the walk
+  terminates: a chosen ASLR-stable address reaches a real semantic
+  dereference, but not a useful live object, code pointer, command or r5.
+  `cd28c444` reconciled the status grade to the real-consumer lane: rung 3
+  pinned verbatim and real rpm / rung 4 author-layout DEMONSTRATED in real
+  consumers; in the default PIE build a chosen live GCObject address survives
+  only with ASLR disabled, and the loopback wire path yields no chosen
+  pointer, stable useful target or command. The independent witness verdict
+  for the real-consumer lane stays UNKNOWN (W238 established only the earlier
+  synthetic lane) and there is no r5. This current grade supersedes the
+  admission-time "no real rpm build, crafted package" wording in the older
+  W237 and admission sections below, kept as pre-real-consumer history.
+  Recipe: `docs/reproducibility.md` §02:3xZ.
+- `b8f8f23c`, `cccea45e` and `15295203` staged, replayed and admitted
+  lzxwindow2shell from CVE-2026-125742 / GHSA-vfpw-mfgh-fqwf (CWE-787, CVSS
+  8.5 HIGH). Affected 26.05 and earlier, fixed 26.06; vulnerable tag 26.05 is
+  `b88c6bc09339de32f7d18bbab900686b244f42ba` and fixed tag 26.06 is
+  `d3296e39e1f1f92c7b41c0c3848e65640428d42d`, both pinned via the GitHub tags
+  API. The security delta is four added lines in
+  `CPP/7zip/Compress/LzxDecoder.cpp` (constructor `_pos(0)` /
+  `_overDict(false)` and `_pos = 0` on window resize), bundled in the release
+  commit; `pins/fix.patch` is a frontier-generated diff of the two verbatim
+  pinned files, not an upstream patch artifact. The frontier-generated harness
+  encodes minimal LZX uncompressed blocks from the pinned bit grammar and
+  drives public API only: a real 1,355,296-byte decode in a 21-bit window, a
+  shrink to 15 bits, then a 4096-byte replay. At the published stale offset
+  `0x14A420` the vulnerable pin retains `pos=1352736` and ASan faults at raw
+  `LzxDecoder.cpp:1396`; the fixed pin resets `pos=0` and stays clean. At the
+  near offset `0x9000`, vulnerable GCC ASan reports `heap-buffer-overflow`,
+  `WRITE of size 4096`, 4064 bytes after a 32800-byte region at that same
+  sink; fixed is clean. Runner `a89a11cb7d…` gave rc 0 `BUILD_OK` then rc 0
+  `PASS=28 FAIL=0` in-tree and from a clean `git archive b8f8f23c` (10
+  committed files, no runs, checkouts, builds or binaries). Negatives
+  preserved: both pins return `S_FALSE` on the replay from the retained
+  byte-mode cursor; plain vulnerable replay exits 0 because the far write
+  lands in mapped heap; no raw two-volume CAB, real `7z x` consumer,
+  chosen-byte readback, pointer, wire path, marker or command was observed,
+  and the writeup's FILE-vtable/FSOP chain is an untested claim. Operator
+  `15295203` admitted the 198th mind at 02:4xZ, adopting staged window 206
+  (207/207 unique names) and folding generated counts 197/194/194/132 →
+  198/195/195/132 with `established=false`; grade stays R1 — / R2 ✓ / R3 ✓ /
+  R4 — / R5 —. Frontier and operator replays are not acceptance: independent
+  witness replay is still owed (handoff #6004 operator, #6005 witness).
+  Recipe: `docs/reproducibility.md` §02:3xZ.
+
 ## 2026-11-27 02:2xZ — AFFLIB admitted 197th, W305b gimpjif runner-nit
 
 This section folds `b82698ff` and `c90de48d`, two commits that landed after

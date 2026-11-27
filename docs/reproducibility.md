@@ -16732,3 +16732,83 @@ The first poll-only variant's five 13/3 failures are preserved as a negative.
 Full transcript: `.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`
 (gitignored). No W303 register flag or count moved by this fold.
 
+
+## 2026-11-27 02:3xZ — rpm W307 non-PIE target and lzxwindow W307 admission
+
+### rpm2shell — W307 fixed-address GC target
+
+From `lab/frontier/rpm2shell`, with the pinned vulnerable source tree, dev
+headers and fixed ASan build symlinked/provisioned as in
+`real/run-real-witness.sh`:
+
+```sh
+bash real/run-nopie-target.sh
+```
+
+Expect rc 0 with `NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0`. The runner builds
+the pinned vulnerable rpm with `-fno-pie -no-pie` (`file` reports an ELF
+executable, not PIE) unless `RPM2SHELL_NOPIE_BIN` reuses one, and patches the
+64-byte cpio payload so `buf+0x20` holds the fixed `.bss` address `0x4063a0`
+little-endian at offset 32; `RPM_CONFIGDIR_VULN`, `RPM_CONFIGDIR_FIXED` and
+`RPM2SHELL_FIXED_BIN` are the other provisioning overrides. Observer-only GDB
+(no forced call, no preload) logs `COPY_BUF=0x454560 NEXT_ADDR=0x454580
+NEXT_AFTER=0x4063a0` and `CHOSEN_PTR=0x4063a0 ... MATCH=1` at
+`liblua5.2.so.0` `lua_resume+0x206`, so the chosen qword is the natural
+adjacency and is walked as a GCObject. Five plain ASLR installs with that
+fixture exit rc 1 with only cpio read-failure text, five with the unchanged
+A filler exit rc 139, and the fixed ASan build exits rc 1 with no ASan
+report; the two plain logs are byte-identical and the discriminator is the
+exit status in `real/nopie/repeats.txt`. Runner sha256
+`f849bc8779689283ab353a5b38b46ddc35ff43f9164695708d220dd4bf01f8d6`; the
+same result was replayed from a clean `git archive cd28c444
+lab/frontier/rpm2shell` with only pinned sources/dev headers and the fixed
+build symlinked. Raw logs under gitignored `real/nopie/` regenerate with the
+runner. The chosen `.bss` qword is zero and the walk terminates: this is a
+chosen ASLR-stable address reaching a real semantic dereference, not a useful
+live-object redirect, code pointer, command or r5. The status grade was
+reconciled at `cd28c444` to rung 3 pinned verbatim and real rpm / rung 4
+author-layout DEMONSTRATED in real consumers; the real-consumer witness
+verdict stays UNKNOWN and no grade cell moved. Hashes and the negative
+controls: `lab/frontier/rpm2shell/PROVENANCE.md` § W307 and
+`reports/frontier-rpm2shell.md` § "Non-PIE fixed-address GC target".
+
+### lzxwindow2shell — W307 staging and 198th admission replay
+
+From the repository root, into an empty work directory:
+
+```sh
+git archive b8f8f23c lab/frontier/lzxwindow2shell | tar -x -C "$work"
+cd "$work/lab/frontier/lzxwindow2shell"
+sh build-all.sh && sh run-all.sh
+```
+
+Expect exactly 10 committed lab files (no `runs/`, source checkouts, build
+directories or binaries), rc 0 `BUILD_OK` then rc 0 `PASS=28 FAIL=0`, runner
+sha256 `a89a11cb7d9818751faf92ec4aeadbfd8ff01f6dbd05301dc754248f8fce2cd8`.
+`build-all.sh` verifies the pins and compiles the verbatim pinned
+`CPP/7zip/Compress/LzxDecoder.cpp` plus `C/Alloc.c` against the generated
+`harness.cpp` for both tags in ASan and plain modes. Pin checksums:
+vulnerable 26.05 tarball `989c658cef4c13124ed1f4ff7330a6ce5ab22cefdbbc9daae9b2c110dde9a63b`
+(`b88c6bc09339de32f7d18bbab900686b244f42ba`), fixed 26.06 tarball
+`63bbf0ede83e4286ec8a2905ed732a12acc36dd4771984d870b054240ce761fa`
+(`d3296e39e1f1f92c7b41c0c3848e65640428d42d`), fix diff
+`5296adfbc7f92d1936c1a3a4f03799a3c03aec4a3482e957581b6ef7d9db51ce`; full
+digests in `pins/SHA256SUMS`, `pins/tags.json` and `HARNESS_SHA256.txt`.
+Expected bytes: at published stale `0x14A420`, vulnerable `PHASE1
+pos=1352736` and retains it after the 15-bit shrink while fixed reports
+`pos=0`; vulnerable replay ASan-faults at raw `LzxDecoder.cpp:1396`, fixed is
+clean. At near `0x9000`, vulnerable GCC ASan reports `heap-buffer-overflow`,
+`WRITE of size 4096`, 4064 bytes after a 32800-byte region at that same sink;
+fixed writes at offset 0 and is clean. Preserved negatives: both pins return
+`S_FALSE` on `PHASE3` from the retained byte-mode cursor, plain vulnerable
+replay exits 0 because the far write lands in mapped heap, and no raw
+two-volume CAB, real `7z x` consumer, chosen-byte readback, pointer, wire
+path, marker or command was observed — the writeup's FILE-vtable/FSOP chain
+is a claim, not reproduced. At `15295203` the operator admitted the 198th
+mind (window 206 adopted, 207/207 unique names; generated counts
+197/194/194/132 → 198/195/195/132, `established=false`), with grade R1 — /
+R2 ✓ / R3 ✓ / R4 — / R5 —. Both frontier and operator clean-archive replays
+returned the same hash and counts; independent witness replay is owed and
+author replay is not acceptance. Details: `reports/frontier-lzxwindow2shell.md`,
+`reports/lzxwindow2shell-status.md` and
+`lab/frontier/lzxwindow2shell/PROVENANCE.md`.
