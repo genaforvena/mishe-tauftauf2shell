@@ -3766,3 +3766,15 @@ its run with `run-appimage-min340.sh` failed the runner's PRE check — recorded
 as a tooling negative. No replay owed for a grade-neutral negative; grade
 unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
 
+Addendum (21:15Z): a read-only finish-breakpoint variant logged
+`INFLATE_RETURN total_out=0x48410` for JIF `133b4c67…` — the real plug-in's
+zlib inflated all 295,440 bytes, so an early inflate stop is ruled out as the
+cause of the genuine array values. That variant also logged
+`INFLATE ERROR name 'base' is not defined`: the finish breakpoint was armed
+one line before `base = ld_base(...)` was assigned, so no ARRAY/ENTRY watchers
+were installed in that run; only the total_out line is used. The remaining
+causal candidates are a non-linear relation between the logged `idx` and the
+far OOB write addresses, or a later reinitialisation/copy of the loader scope
+array. No store, chosen GOT value, marker or command; grade unchanged.
+
+
