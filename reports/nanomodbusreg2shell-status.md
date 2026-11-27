@@ -1,11 +1,13 @@
-# nanomodbusreg2shell — status (staged 2026-11-27)
+# nanomodbusreg2shell — status (admitted 2026-11-27)
 
-State: **STAGED 16:3xZ under standing #6; operator admission and independent
-witness replay owed.** Brief:
-`reports/frontier-nanomodbusreg2shell.md`. Lab, pins and full disclosure:
-`lab/frontier/nanomodbusreg2shell/PROVENANCE.md`. Staged inner-socket window
-225; registry entry to be written with live pane IDs. Wake units, routes and
-sync stay person-reserved.
+State: **ADMITTED 17:0xZ under standing #6 as the 217th declared target mind;
+W362 independent replay ESTABLISHED AS LABELED at the real-loopback-wire /
+minimal no-PIE/no-canary/no-fortify caller scope (grade-neutral, NO r5).**
+Brief: `reports/frontier-nanomodbusreg2shell.md`. Lab, pins and full
+disclosure: `lab/frontier/nanomodbusreg2shell/PROVENANCE.md`. Staged
+two-pane window 225 (`%456`/`%457`, `dead=0`) adopted as-is; registry
+226/226 unique, exactly one nanomodbusreg2shell entry created 16:32Z.
+Wake units, routes and sync stay person-reserved.
 
 CVE-2026-29972 / GHSA-5hc8-p74q-47pp, High, CWE-121. nanoMODBUS through
 v1.22.0; fixed in v1.22.1 by
@@ -28,5 +30,22 @@ prints `BENIGN_MARKER`.
 
 Grade: R1/R2/R3 ✓; R4 DEMONSTRATED at the real-wire/loopback lab scope with
 disclosed build conditions. R5 NOT CLAIMED: no shell command, no hardened
-caller, no witness verdict. `established:false` until a witness verdict
-lands.
+caller, no wire-supplied address; the label-writing marker and the chosen
+saved-RIP word live in a deliberately small no-PIE/no-canary/no-fortify lab
+frame. The row is now `established:true` at that exact scope only.
+
+W362 witness fold (2026-11-27, 17:0xZ wake): inbox #6654 and
+`.mishe-tauftauf/artifacts/witness-w362/detail.md`. Private `git archive
+--format=tar 48360585` gave the same plain-tar SHA-256 `d47d2b119…`,
+11/11 pins, unmodified `sh harness/run-all.sh` rc 0, `RUN_ALL_OK 17 PASS /
+0 FAIL` and a byte-identical summary. The witness rebuilt its own binaries:
+ASan `WRITE of size 2` at `nanomodbus.c:603` from both the unmodified
+upstream `client-tcp.c:83` example and a minimal real socket caller, fixed
+v1.22.1 `READ_RC -2`, safe `byte_count=4` clean; two fresh wire-driven runs
+printed `BENIGN_MARKER` with no debugger or harness write, while the same
+`0x43` payload without the chosen address faulted (`CLIENT_RC -11`) with no
+marker. Disclosed negative preserved: the unmodified upstream example's own
+frame puts `r_regs` 800 bytes below its saved RIP, so 250 bytes cannot reach
+it there. Would change the verdict: pin/summary drift, a debugger or harness
+write, a fixed-arm store, a shell command side effect, or the overwrite in
+a hardened/upstream caller.

@@ -1,7 +1,8 @@
 # uxplaypin2shell — status (admitted 2026-11-27)
 
 State: **ADMITTED 16:1xZ under standing #6 as the 216th declared target
-mind; independent witness replay still owed.** Brief:
+mind; W362 independent replay ESTABLISHED AS LABELED at the pinned-sink/argv
+scope (grade-neutral, NO r5).** Brief:
 `reports/frontier-uxplaypin2shell.md`. Lab, pins and provenance:
 `lab/frontier/uxplaypin2shell/PROVENANCE.md`. Staged inner-socket window 224
 (`%454`/`%455`, `dead=0`) adopted as-is; registry 225/225 unique. Wake units,
@@ -32,5 +33,20 @@ byte-identical to the author run, including the GDB saved-RIP check.
 
 Grade: R1/R2/R3 ✓; R4 DEMONSTRATED at the pinned-sink/argv lab scope under
 disclosed no-PIE/no-canary/no-fortify conditions; R5 NOT CLAIMED (no live
-listener, wire request, marker or command effect). `established:false` until
-a witness verdict lands.
+listener, wire request, marker or command effect). The row is now
+`established:true` at that exact scope only.
+
+W362 witness fold (2026-11-27, 17:0xZ wake): inbox #6656 and
+`.mishe-tauftauf/artifacts/witness-w362/detail.md`. Private archives of both
+offers, 4/4 pins, unmodified runner rc 0 with `RUN_ALL_OK 10 PASS / 0 FAIL`
+and a byte-identical summary across six stable runs; own ASan WRITE-128/80
+at `uxplaypin.cpp:38`, `-DFIXED` transcribed hunk clean, GDB read-only
+`saved rip = 0x4343434343434343`. Counterexamples preserved: the plist stub
+supplies pointer and length from argv (no RTSP wire), an 80-byte plain run
+faults in `free()` with saved RIP untouched, and real-daemon layout, canary,
+PIE and fortify remain UNKNOWN. Hash NIT: the offered `8d72e4a6…` is the
+raw `abb7f49c` git-archive TAR stream, not a tree hash; at `92b513e0` the
+stream is `d66b5244…` while the runner blob and all pinned files are
+byte-identical. Would change the verdict: a debugger/harness write, a real
+wire path, a command effect, or a claim that the fixed arm used the fixed
+header.
