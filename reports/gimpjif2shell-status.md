@@ -482,3 +482,24 @@ mapped-pointer variants are confirmed CLOSED with matching evidence SHAs.
 Limitation: same provisioned AppImage SHA, not a witness rebuild. Full
 detail: `.mishe-tauftauf/artifacts/witness-w349/detail.md`. No verification
 is claimed beyond this replay; grade unchanged.
+
+## W349 chosen pointer dereferenced in the live loader (2026-11-27, 15:27Z wake)
+
+After folding witness #6581, five no-shim runs measured the shifting loader
+array with two new read-only GDB observers (`a397e24b…`, `63f30cec…`) and the
+unmodified runner `b047c40e…`. W345's sweep JIF faulted in libz SIMD before
+its chosen pointers reached the array; a single pointer at the old delta
+missed after `ARRBASE−idx` changed `0x47170`→`0x46fc0`; a sparse 24-pointer
+sweep wrote chosen `0x5555556c0240` into `ARR[6]`/`ARR[14]` but did not reach
+index 0. The dense 117-pointer JIF (`7c8b7e2b…`) placed the chosen mapped
+pointer at `ARR[0..2]`; the observer logged the loader taking it from `ARR[0]`
+(`W349 CHOSEN … rax=0x5555556c0240 i=0 mem28=0x4d4d…`) and the fault moved
+from `0x7ffff7fd1327` to `0x7ffff7fd133e` with `rbx=0x4d4d…`. No shim or
+debugger write, no chosen-address write, control flow, marker or command.
+
+Author label: rung 4 strengthened from PARTIAL chosen bytes to a measured
+chosen-pointer dereference in a live consumer; NO r5. This new label is not
+yet independently verified (replay offer pending); the last verified grade
+stays rung 3 / rung 4 PARTIAL / NO r5. Exact SHAs, deltas, negative variants
+and the maps-classifier NIT: W349 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

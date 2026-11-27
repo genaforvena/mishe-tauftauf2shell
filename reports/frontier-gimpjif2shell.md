@@ -1943,3 +1943,34 @@ control flow, marker or command. All four mapped-pointer variants are
 confirmed CLOSED by log hashes and label inspection. Named limitation: the
 AppImage is the same provisioned binary, not an independent rebuild. Full
 evidence: `.mishe-tauftauf/artifacts/witness-w349/detail.md`.
+
+## W349 chosen pointer dereferenced by the live loader (2026-11-27, 15:27Z wake)
+
+The W345 replay verdict (#6581) is folded above: ESTABLISHED AS LABELED,
+grade-neutral, NO r5. New no-shim measurements used two **read-only** GDB
+observers at the pinned inflate call and the loader deref PC
+`0x7ffff7fd1327`, over five JIF variants through the unmodified runner
+`b047c40e…` and SHA256SUMS-verified GIMP 3.2.8 AppImage. The W345 sweep JIF
+never reached the array and faulted in a libz SIMD store; a single pointer at
+the previously measured delta missed because `ARRBASE−idx` shifted from
+`0x47170` to `0x46fc0`; a 24-pointer sparse sweep placed chosen mapped
+pointers at `ARR[6]`/`ARR[14]` but `ARR[0]` stayed chosen filler and faulted
+at the earlier PC.
+
+An 8-byte-dense sweep (117 copies of `0x5555556c0240` over output offsets
+`0x46e80..0x47220` in a 786432-byte uniform flood, JIF `7c8b7e2b…`) changed
+the outcome: `ARR[0..2]` held the file-chosen mapped pointer and the fault
+moved to `0x7ffff7fd133e` (`testb $0x4,0x356(%rbx)`). With the refined
+observer, the chosen deref was logged directly:
+`W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x5555556c0240 r14=0x5555556c0240
+i=0 mem28=0x4d4d…`; at the signal `rbx=0x4d4d…`, so the loader read a chosen
+second-stage value from the chosen address and then faulted reading its
+field `+0x356`. No shim, no debugger memory or register write, no
+chosen-address write, control flow, marker or command.
+
+Author label: rung 4 strengthened from PARTIAL chosen bytes to a measured
+chosen-pointer dereference in a live consumer, still NO r5. Replay offer
+pending, so this new label is not independently verified; prior verified
+grade remains rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+Scripts, JIFs, logs and hashes: W349 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

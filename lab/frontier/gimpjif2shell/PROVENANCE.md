@@ -3071,3 +3071,98 @@ verdict: a different fault instruction, shim in path, heap-range `rax` hit,
 mapped chosen value in a fault register, control-flow/command effect, or a
 CLOSED variant shown successful. Full evidence:
 `.mishe-tauftauf/artifacts/witness-w349/detail.md`.
+
+## W349 in-run loader-array measurement: file-chosen pointer dereferenced (2026-11-27, 15:27Z wake)
+
+All five runs below use the unmodified `live/run-appimage-min340.sh`
+(SHA-256 `b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`,
+which strips every gimpjif2shell shim line from AppRun and asserts none
+remains), the SHA256SUMS-verified GIMP 3.2.8 AppImage, the file-reachable
+`data_size=4` / `avail_out=0x80000002` geometry and new **read-only** GDB
+scripts. The scripts install a breakpoint at the pinned inflate call and then
+on the loader dereference PC `0x7ffff7fd1327`; they only print state and never
+write memory, registers or plug-in bytes.
+
+### Instrumentation
+
+- `live/gdb-w349-deref-obs.cmd` SHA-256
+  `a397e24b3c48361275f26da229d5c31ab49fde6fe54add4a9499a5f95146f8ed`:
+  logs rax/r14/loop index/array words at the first eight deref hits and the
+  array at a signal stop.
+- `live/gdb-w349-chosen-deref.cmd` SHA-256
+  `63f30cec10be9f1cc3084b6989d01930bda316067880cf040d196cd15815cfc1`:
+  additionally logs every hit whose `rax` equals the JIF-chosen mapped
+  pointer `0x5555556c0240`, the pre-read `rbx`, `*(rax+0x28)` and, at the
+  signal, `rbx` and the faulting field address.
+- NIT: both scripts printed `map=[unmapped]` for heap and ld-linux addresses
+  in this batch (their `/proc/pid/maps` classifier failed); do not use that
+  label as a mapping fact. The chosen pointer address is inside the heap
+  range recorded in W345/W349 replay logs, and the dereference succeeded,
+  which independently shows it was mapped.
+
+### Negative and intermediate runs (do not repeat unchanged)
+
+- W345's committed sweep JIF `0896977e…` with `deref-obs`: PRE
+  `idx=0x555555678fd0`, `ARRBASE-idx=0x47170`. All 32 observed deref hits
+  used genuine loader/lib addresses (`0x7ffff7ffe5f0`, `0x7ffff7fb48e0`,
+  `0x7ffff7e65000`, ...) and `ARR[0..7]` held those same genuine pointers:
+  the patterned flood never reached the array before a libz SIMD store
+  `mov %cl,(%r15)` faulted at `0x7ffff7a8feff`. This explains W345's
+  "no heap dereference hit, crash after GDB return": the terminal fault was
+  a different consumer, not a missed breakpoint. GDB log SHA-256
+  `452d4a823a2f09abbc90cbc5cbea05cafd16243400580123eb8d4eca9d0d83a5`;
+  run log `cf23ab82…`.
+- One chosen pointer at output offset `0x47170` (291184) in a 786432-byte
+  `0x4d` flood, JIF `0857219cb4b4b21a0e2583f3fa0bcb8d0f10d94b229813e9e1c1020bf9a03dbd`:
+  PRE `idx=0x555555678500`; 32 genuine deref hits, then the original fault
+  at `0x7ffff7fd1327` with `ARR[0..15]=0x4d4d…` and
+  `ARRBASE-idx=0x46fc0` — the pointer landed near `ARR[54]`, not `ARR[0]`.
+  GDB log `4597e2ba4603b1c496862f4f1a26aca69387ae16816e48346b013afc2ba03c51`;
+  run log `d2874928…`.
+- 24 chosen pointers every `0x40` bytes over output offsets
+  `0x46e00..0x473c0`, JIF `8d9ba89e88df8537c4f1eee7cb9c85f145ac6fd4cc385fff01b2c9a5fe50673c`:
+  PRE `idx=0x555555679080`, `ARRBASE-idx=0x47210`; at the signal
+  `ARR[6]` and `ARR[14]` held `0x5555556c0240` while `ARR[0]` stayed
+  `0x4d4d…`, so the loader faulted at index 0 before reaching them. This is
+  the first observed chosen mapped pointer inside the live array, not yet a
+  dereference. GDB log `b9768628301ca4846d3480685f8a2d08b9e0d394cfe5e09f1ac955a4fc3ef0f0`;
+  run log `96288954…`.
+
+### Positive run: chosen pointer occupies ARR[0] and is dereferenced
+
+JIF `7c8b7e2b398e3343bc7ef9b7b665cbff9e730d0bc1c3d90883402a94490bd466`
+places the chosen pointer `0x5555556c0240` at **every** 8-byte-aligned output
+offset from `0x46e80` to `0x47220` (117 copies) in an otherwise uniform
+786432-byte `0x4d` flood (`zlib.compress` output 804 bytes). Two no-shim
+runs with the same JIF and the two scripts above:
+
+- With `deref-obs`: PRE `idx=0x555555679030`, `ARRBASE-idx=0x47210`;
+  `ARR[0..2]=0x5555556c0240`, `ARR[3..15]=0x4d4d…`; the terminal SIGSEGV
+  moved from `0x7ffff7fd1327` (`mov 0x28(%rax),%rbx`) to
+  `0x7ffff7fd133e` (`testb $0x4,0x356(%rbx)`). GDB log SHA-256
+  `23cdf26cbdc130c876f554cd87b9f1483fa3558f286088ba816be853573aec11`;
+  run log `1dc9313b…`.
+- With `chosen-deref`: PRE `idx=0x555555679030`, `ARRBASE-idx=0x47210`;
+  the first eight deref hits used genuine loader pointers, then
+  `W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240
+  r14=0x5555556c0240 i=0 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff526add8
+  mem28=0x4d4d4d4d4d4d4d4d`: the loader loaded the file-chosen mapped
+  pointer from `ARR[0]` and read field `+0x28`, obtaining the chosen filler
+  value `0x4d4d…`. The terminal fault is `0x7ffff7fd133e` with
+  `rbx=0x4d4d4d4d4d4d4d4d`, i.e. the derived second-stage pointer is faulted
+  at `+0x356`. GDB log SHA-256
+  `53cca8cc6a72d0bb1dc9d91f8d4b5f03b3b7c7db263dcb3588fac32aa64e6ae9`;
+  run log `4dc23eb1…`. Both runner outputs reported `PASS: pinned inflate
+  reached` and `PASS: fault captured in GDB`, rc 0.
+
+This is a measured two-stage chosen-pointer chain in a live consumer:
+file-chosen bytes land in a named heap-resident ld-linux pointer array at
+index 0, the loader dereferences that chosen mapped address and loads a
+chosen value into `rbx`, and the fault site changes to a field read of that
+chosen value. It is **not** a chosen-address write, control-flow redirection,
+marker or command; no live loopback command side effect exists. Author label:
+rung 4 strengthened from PARTIAL chosen bytes to chosen-pointer dereference
+in a live consumer, still NO r5; replay offer pending, so this label is not
+yet independently verified. The result depends on hitting the shifting
+`ARRBASE-idx` with an 8-byte-dense JIF pattern; the sparse and single-offset
+variants above are preserved negatives.
