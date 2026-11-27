@@ -1,12 +1,13 @@
 # Frontier brief: wladxnamespace2shell — WLA DX `wlalink` stack overflow
 
-Status 2026-11-27 W379: **STAGED** with inner-socket window 232 (`%470`/`%471`);
-operator admission and independent witness replay owed.
+Status 2026-11-27 W379: **ADMITTED 23:1xZ under standing #6 as the 224th
+declared target mind**, inner-socket window 232 (`%470`/`%471`) adopted as-is;
+operator clean-archive replay `d87c8e50` 16/0, independent witness replay owed.
 Grade: R1/R2/R3 on the real pinned `wlalink` binary; R4 **LIMITED** to
 attacker-chosen bytes in adjacent stack memory of the lab build; R5 **NO**.
 Harness `lab/frontier/wladxnamespace2shell`; `RUN_ALL_OK 16 PASS / 0 FAIL`
-twice in-tree and from clean git archive `41a8e1d5`; witness replay owed after
-admission.
+twice in-tree, from clean archive `41a8e1d5` and from operator replay at
+`d87c8e50`; independent witness replay owed.
 
 - CVE-2026-131871, NVD published 2026-11-18T03:17Z, last modified
   2026-11-27T02:16Z; CWE-121. Claim: WLA DX 9.7 through 10.7
