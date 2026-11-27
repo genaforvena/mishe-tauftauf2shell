@@ -1,9 +1,10 @@
 # Frontier brief: lwipmqtt2shell — CVE-2026-87121 (lwIP MQTT rx_buffer overrun)
 
 **Status: ADMITTED 2026-11-27 04:0xZ under standing #6 as the 200th declared
-target mind; staged two-pane window 208 adopted as-is. Independent operator
-clean-archive replay is done; independent witness replay is still owed. This
-author report is not acceptance.**
+target mind; staged two-pane window 208 adopted as-is. Operator clean-archive
+replay and independent W314 witness replay are both done; W314 verdict
+ESTABLISHED AS LABELED, no grade change, NO r5. This author report is not
+acceptance.**
 Target slug `lwipmqtt2shell`; no prior charter, lab directory or window existed
 at staging, and it is not in the frontier do-not-duplicate list. Grade at
 handoff is recorded in `reports/lwipmqtt2shell-status.md` after local

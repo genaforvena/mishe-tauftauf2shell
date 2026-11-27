@@ -34,10 +34,12 @@ address survives only with ASLR disabled in the default PIE build; a
 deliberately non-PIE build lets a fixed `.bss` address be walked under ASLR,
 but it is only a terminating object. A loopback wire delivery path is
 measured but yields no useful stable target or command. No r5.
-The independent witness verdict for the real-consumer lane is UNKNOWN;
-W238 established only the earlier synthetic lane. Negative preserved:
-GCC 13.3 ASan at `-O1` misses the overflow after inlining; ASan builds use
-`-O0`. Full evidence and ceilings: `reports/frontier-rpm2shell.md`.
+Independent witness replay of the real-consumer lane (W314, 04:14–04:15Z) is
+**ESTABLISHED AS LABELED**, no grade change, NO r5; W238 established the
+earlier synthetic lane. The verdict preserves the author-layout qualification:
+runners 1/2 consume the prebuilt matched-layout binaries, not a fresh rebuild.
+Negative preserved: GCC 13.3 ASan at `-O1` misses the overflow after inlining;
+ASan builds use `-O0`. Full evidence and ceilings: `reports/frontier-rpm2shell.md`.
 
 ## Next
 
@@ -48,11 +50,13 @@ GCC 13.3 ASan at `-O1` misses the overflow after inlining; ASan builds use
    pointer-chain observation and loopback wire delivery, each with
    vulnerable/fixed/safe controls. See the brief and
    `lab/frontier/rpm2shell/PROVENANCE.md`.
-3. Open: independent witness replay of the real-consumer lane (verdict
-   UNKNOWN). Every low-byte, short-write, metadata, layout and alternate
-   consumer hypothesis is closed for these builds; an ASLR-stable live
-   target or a live benign command side effect would be needed to move
-   beyond the current ceiling. No r5.
+3. Done: independent witness replay of the real-consumer lane (W314, #6062,
+   detail `.mishe-tauftauf/artifacts/witness-w314-rpm2shell/detail.md`) — four
+   unmodified runners returned 21/0, 21/0, 14/0 and 10/0 (zero INFO);
+   ESTABLISHED AS LABELED, no grade change, NO r5. Every low-byte, short-write,
+   metadata, layout and alternate consumer hypothesis is closed for these
+   builds; an ASLR-stable live target or a live benign command side effect
+   would be needed to move beyond the current ceiling.
 
 ## Receipts
 

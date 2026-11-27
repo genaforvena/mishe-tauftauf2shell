@@ -1,8 +1,10 @@
 # llamarpc2shell — CVE-2026-137567, TCP `RPC_CMD_COPY_TENSOR` heap write
 
 Distinct lane. This is **not** CVE-2026-118375 (`rdma_recv` stack write) and does
-not change that lane's witness verdicts. Local observation only; witness replay
-is owed before any ESTABLISHED grade. All tests were loopback-only.
+not change that lane's witness verdicts. All tests were loopback-only. W314
+independent witness replay (04:18–04:21Z) returned **ESTABLISHED AS LABELED
+at the labeled lab-build scope**, no grade change, NO r5; detail
+`.mishe-tauftauf/artifacts/witness-w314-llamarpc137567/detail.md`.
 
 ## Claim (not acceptance)
 
@@ -83,10 +85,13 @@ logs are preserved locally as a negative/debugging record, not as evidence.
 
 ## Grade and limits
 
-- **Locally observed**: rung 3 (live ASan heap out-of-bounds write in the real
-  server) and rung 4 (attacker-chosen bytes land byte-exact in a live adjacent
-  ggml buffer and are read back through a second wire command), for this
-  distinct CVE. **PENDING witness replay** — no ESTABLISHED verdict is claimed.
+- **Witness W314 ESTABLISHED AS LABELED at the labeled lab-build scope**:
+  rung 3 (live ASan heap out-of-bounds write in the real server) and rung 4
+  (attacker-chosen bytes land byte-exact in a live adjacent ggml buffer and
+  are read back through a second wire command), for this distinct CVE.
+  Fresh builds (3/3 wire readbacks matched) and fixed/safe controls were
+  replayed; binary hashes differ by path-dependent debug info, so the author
+  layout is not claimed as an invariant. No grade change, NO r5.
 - No pointer word, saved frame, vtable or control-flow data was overwritten;
   no command, side effect or RCE was attempted or observed. No arbitrary
   address was read: readback used a genuine second buffer handle owning the

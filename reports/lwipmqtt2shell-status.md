@@ -7,8 +7,9 @@ no fixed upstream release as of 2026-11-27, so the fixed control is the
 production hunk of upstream `68b2c1191886578d40342846db6ab9a0099c2f40`
 applied to the vulnerable tree. The delta is a bounds check on
 `client->msg_idx` in `src/apps/mqtt/mqtt.c:862`. Window 208 was adopted as-is
-(panes %422/%423 dead=0, 209/209 unique registry names); independent operator
-clean-archive replay is done and independent witness replay is owed.
+(panes %422/%423 dead=0, 209/209 unique registry names); operator clean-archive
+replay and independent W314 witness replay are both done: **ESTABLISHED AS
+LABELED** at the R2/R3/limited-R4 scope, no grade change, NO r5.
 
 The harness runs the byte-unmodified public 2.7 KiB `mqtt_repro.c` (Savannah
 bug 68590) directly into `mqtt_parse_incoming()` with a 200-byte pbuf of
@@ -44,7 +45,10 @@ Operator replay at 04:0xZ from `git archive 124c9a40 lab/frontier/lwipmqtt2shell
 OK, `sh build-all.sh` 12 `BUILD_OK`, unmodified `sh run-all.sh` rc 0
 `PASS=12 FAIL=0`; raw `mqtt.c:862:26: runtime error: index 128 out of bounds
 for type 'u8_t [128]'`. Admitted under standing #6 as the 200th declared
-target mind; independent witness replay is owed.
+target mind. W314 independent witness replay (04:1xZ, clean archive at
+`124c9a40`, both compilers, detail
+`.mishe-tauftauf/artifacts/witness-w314-lwipmqtt/detail.md`) returned
+ESTABLISHED AS LABELED at this scope; no grade change, NO r5.
 
 ## Named depth experiment
 
