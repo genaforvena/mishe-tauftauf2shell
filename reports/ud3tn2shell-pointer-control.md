@@ -174,3 +174,66 @@ benign-command side effect and no witness replay. R5 remains UNKNOWN. The
 attempt stops here as scoped; the several intermediate `chain-w*` runs are
 preserved as negative iterations (each abort was a collateral header that had
 to be preserved, never a change to the underlying primitive).
+
+## W-2026-11-27 second wake: wire-driven benign command on the live daemon
+
+Grade: **rung 5 demonstrated on the pinned v0.15.1 plain build under the
+explicit lab conditions below, NOT ESTABLISHED** — no independent witness
+replay has run. Rung 3/4 evidence above is unchanged.
+
+The earlier chosen-address write was aimed at the wrong heap. A live
+`struct agent` node with `trx_callback` is in the PIE brk heap
+(`0x5555555b8...`), while the admin-record parser's one-byte chunk and tcache
+are in a second thread arena (`0x7ffff0001040`). `arena-probe/mainheap.bin`
+and `arena-probe2/chain.log` show the live `"config"` agent node at
+`0x5555555b8bf0`/`0x5555555b8bd0` with a `0x61` chunk header at `F-8`;
+`arena-probe/heap.bin` shows only *copies* of agent structs in the parser
+arena. gdb's `agent_forward` breakpoint proves the callback is invoked from
+the brk-heap node, not the parser-arena copy.
+
+New harness `harness/call_chain.{py,gdb}` discovers the live node and header
+at startup (`agent_manager.c:560`) without extra wire, then sends four
+CBOR-framed MTCP bundles over 127.0.0.1 to the plant-started daemon:
+
+1. benign admin pre-bundle (source-EID length 8, seq 1);
+2. 768-byte crafted trigger (EID length 0, seq 2) whose
+   `record->status_report` is the discovered agent node `F`; its collateral
+   headers are preserved and the `record` size word at `p+0xf8` is `0x61`;
+3. follow-up admin bundle (EID length `0x48`, seq 3) whose 0x60-chunk EID
+   allocation is served from the poisoned tcache bin at `F`, writing 0x48
+   chosen bytes over the agent's `trx_callback`, `param`, sink and flags;
+4. non-admin bundle addressed to `dtn://ud3tn.dtn/config` (seq 4), whose
+   ADU delivery reaches `agent_forward`.
+
+`agent_manager.c:414` compiles the indirect call as `mov 0x38(%rax),%rdx;
+mov %rdx,%rdi; call *%r8`; the MEMORY-class `struct bundle_adu` first argument
+leaves `rdi` for `param`. The overwritten callback is `system` and `param`
+points at a `touch <lab marker path>` command embedded at `p+0x200` in the
+crafted stream.
+
+Observed in `call-rce4/chain.log` (plain v0.15.1, ASLR disabled by gdb, PIE
+base `0x555555554000`, libc base `0x7ffff7c00000`, `system=0x7ffff7c58750`,
+thread arena `0x7ffff0000000`): discovered `F=0x5555555b8bd0`, header `0x61`;
+`FREE_REC status=0x5555555b8bd0`; follow-up `STORE p=0x5555555b8bd0 rem=71`;
+`CALL_SITE ag=0x5555555b8bd0 trx=0x7ffff7c58750 param=0x7ffff0001240`;
+`SYSTEM_HIT rdi=0x7ffff0001240` with `x/s` showing the exact `touch` command;
+`Detaching after vfork` followed by the marker file
+`call-rce4/marker.txt` being created by the daemon. gdb observes only; the
+call and the vfork are the daemon's own, not debugger-forced.
+
+Controls with the identical wire: `call-safe/chain.log` (trigger EID length 8)
+has no chosen allocation, `CALL_SITE trx=0x55555558356a` (original
+`rx_callback`) and no marker; `call-fixed/chain.log` (v0.15.2 ASan, hash
+`5653296d…`) has zero `AddressSanitizer` reports, original callback and no
+marker. Vulnerable binary hash `36d77768…`; `reports.c` hashes
+`e722cddc…`/`ea68a68d…` match `src/PINS.txt`. Debug-build daemon (`-L 4`, no
+AAP2 secret) binds only 127.0.0.1; no credential, off-loopback target or
+external action. Earlier negatives (raw TCP, 4-byte STCP, BPv7, aborted
+record-free route) stay preserved.
+
+This is deliberately labeled: ASLR is off, addresses are discovered live by
+gdb, and the command is a filesystem marker inside the lab. ESTABLISHED rung 5
+requires an independent witness replay of this exact wire and build. The
+earlier `call-vuln*` and `call-rce2`/`call-rce3` logs are preserved as negative
+iterations (wrong heap, shifted layout and a breakpoint that stopped before
+`system()` executed), not erased or folded into the positive.
