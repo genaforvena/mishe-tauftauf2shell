@@ -343,3 +343,31 @@ chosen-pointer dereference, control flow or command side effect. Grade
 unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
 Scripts, JIFs, transcripts and hashes in the W340 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W341 second upstream geometry (2026-11-27, 13:03Z wake)
+
+Grade-neutral. No replay, messages or signals owed. gimp.org still lists
+3.2.8 as current stable (checked 13:1xZ); no vendor-shipped fixed build.
+Upstream issue 17001's second geometry (`65535x32769`, product
+`0x80007fff`, alpha `data_size=65534`) was driven through the same no-shim
+GDB-verified GIMP 3.2.8 plug-in path. Three runs:
+
+- 98307 chosen `0x4d` bytes (~32 KiB OOB): `PRE avail=0x80007fff`,
+  POST `chunk_size=0x10011`; 4098 of 4100 words dumped after `indexes` are
+  chosen, the sole other word is a ragged partial write at `idx+98304`.
+  No live pointer word in the span, so no watchpoint could be armed.
+- Zero-OOB control (65534 in-bounds bytes): the adjacent object is a single
+  ~132 KiB free chunk of size `0x20441`; same `Fatal signal` / plug-in crash
+  as W340's control at the other geometry.
+- Preserved-size run (all chosen except the `0x20441` word at `+65544`):
+  WRITE watch on that word and READ watch on its `fd` armed at the real
+  plug-in return logged **zero hits** before the same terminal crash.
+
+Source inspection also closes the thumbnail route: `gif_load_thumb()` calls
+the same `load_image()` with no downscale, so JIF thumbnails keep the same
+~4 GiB `dest`. No chosen-pointer dereference, allocator consumption of the
+groomed free chunk, marker or command. Grade unchanged rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes / NO r5; no witness replay offered
+(same disposition as W334-W340). JIFs, scripts, logs and hashes: W341
+section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+

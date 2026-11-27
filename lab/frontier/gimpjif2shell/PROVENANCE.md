@@ -2694,3 +2694,76 @@ in both geometries. No chosen-pointer dereference, control flow, marker or
 command side effect. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
 chosen bytes, NO r5. Grade-neutral; no witness replay offered, consistent
 with W334-W337. Do not repeat these three probes unchanged.
+
+## W341 second upstream geometry: ~32 KiB OOB has no live pointer (2026-11-27, 13:03Z wake)
+
+Read-only provisioning: gimp.org downloads still lists 3.2.8 as current
+stable (2026-11-02) at 13:1xZ — no vendor-shipped fixed build. Upstream
+issue 17001 describes a second PoC geometry, `65535x32769`, whose product
+`0x80007fff` alpha-doubles to `data_size=65534` and writes ~32 KiB past the
+64 KiB `indexes` chunk. Source inspection of the pinned file also shows
+`gif_load_thumb()` calls the same `load_image()` with no downscale, so the
+JIF thumbnail procedures do not shrink `dest`; that route is closed.
+
+`realglib/make-jif.py` gained modes `large` (`98307` chosen bytes: 65534
+in-bounds + 32773 OOB), `large-run N HEXBYTE`, `large-hex HEXSTRING` and
+`large-size HEXADDR` (preserves the adjacent free-chunk size word at
+`indexes+65544`). Generator SHA-256
+`f49b2cb8413b116ac78f722d1202f6215a67f4a9d71cbbdee7eda1dcdaca0874`.
+
+Three no-shim runs through the SHA-verified GIMP 3.2.8 AppImage used the
+W340 stripped AppRun and the runner
+`live/run-appimage-min340.sh` SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`.
+The runner's `PRE avail=0x80000002` grep prints FAIL at this geometry;
+the GDB log is the evidence.
+
+- Attack: JIF `live/evidence/w341-large-4d.jif` SHA-256
+  `0d3c1ba5f50361e1819b42ebf1e79fc7fcd96bce6b5ab15144bed1e49ae1bc04`;
+  GDB `live/gdb-large341.cmd` SHA-256
+  `be2c086053b25299ae12d5ec9b22b4410fcadb48e459b65c2a296a0340dc53d0`;
+  transcript `w341-large-full.log` SHA-256
+  `33ec4f5cfd3d8e7f92a0e824fef815c314638fbc57835ace748e1f55427a344f`;
+  GDB log `w341-large-gdb.log` SHA-256
+  `95096ec14f45e21b8c1e655cacda435787751c84e51a5eebd419998665ac984d`.
+  `W341 PRE avail=0x80007fff idx=0x555555722bf0`; POST
+  `chunk_size=0x10011`; the 32800-byte dump from `idx+65520` found 4098
+  chosen `0x4d` words out of 4100 and exactly one non-chosen word, a
+  ragged partial write at `idx+98304` (`0x4d4d4d`). No live pointer word
+  in the OOB span; no watchpoint could be armed on one. Same terminal
+  `Plug-in crashed: "file-gif-load"`.
+- No-overflow control: JIF `w341-large-noob.jif` SHA-256
+  `bac9910a8e1caedd6cc0403132383bf8049aa912b6a22de545f5579a37eb5886`
+  (only the 65534 in-bounds bytes); transcript `w341-large-noob-full.log`
+  SHA-256 `1d65efd8b35b96f6bcd4968f507a1e9cac70103e3cc436b6aa2d283746806917`;
+  GDB log `w341-large-noob-gdb.log` SHA-256
+  `f03d18d2321f9da6e6ae64d49711ad85f8e54064b81ef309bf7afc62cb70916a`.
+  POST shows `idx+65528=0x4d4d…` (in-bounds tail) and the untouched free
+  chunk size `idx+65544=0x20441`. Same `Fatal signal: Segmentation fault`
+  and plug-in crash. The adjacent geometry is a single ~132 KiB free
+  chunk, not a live object.
+- Size-preserving: JIF `w341-large-size.jif` SHA-256
+  `7243eafe5ec6bb5e729047848ef94862fbb4f203bc7e7f50234355395bf0fb34`
+  (chosen `0x4d` everywhere except the preserved `0x20441` word at
+  `+65544`); GDB `live/gdb-large341-size.cmd` SHA-256
+  `8f1af5108c2bb395074fae53110a680f9c191b1164080b03c79ee7dba68ec7a4`;
+  transcript `w341-large-size-full.log` SHA-256
+  `8e3cf9fb42a5a8ea98a8b6b762d5b47126665a0b54cbae6a771aa85ea61ef392`;
+  GDB log `w341-large-size-gdb.log` SHA-256
+  `918e599399b281abafbe3bc26b1c872e7497bd1477b8c77e9ee16315e52f7c3e`.
+  PUT `free_size=0x20441`, `free_fd=free_bk=0x4d4d…`; WRITE watch on the
+  size word and READ watch on `free_fd` were armed at the real plug-in
+  return and logged **zero hits** before the same terminal crash.
+
+Preserved tooling negative: the first attack invocation passed a relative
+JIF path, which GIMP resolved under `squashfs-root`; it never reached
+inflate and its log was overwritten by the corrected run. No evidence
+from that invocation is counted.
+
+Conclusion: the second published geometry gives a much wider chosen span
+but only over a free chunk and top-chunk slack, with no live pointer word
+to dereference and no allocator consumption of the groomed free chunk
+before the geometry-driven fault. Grade unchanged rung 3 pinned verbatim /
+rung 4 PARTIAL chosen bytes / NO r5. Grade-neutral; no witness replay
+offered, consistent with W334-W340. Do not repeat these probes unchanged.
+
