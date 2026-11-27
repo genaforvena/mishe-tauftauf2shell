@@ -16277,17 +16277,20 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
   bounds. No chosen bytes at chosen offsets, wire path or r5. Next:
   establish a real caller that reads the stale length.
 
-- **Bzfs2Shell W336 chosen-TARGET probe is author-only, unwitnessed.**
+- **Bzfs2Shell W336 chosen-TARGET probe is W337 ESTABLISHED AS LABELED.**
   Live v2.4.30 on loopback dereferenced a wire-chosen `info` pointer in a
   request-driven path and printed a unique benign marker through stock
-  logging, with fixed v2.4.32 and safe input clean and ASLR on. That
-  raises the author's rung-4 label from chosen-VALUE to chosen-TARGET
-  pointer control, **NO r5** and no grade cell moved; witness replay is
-  owed. Recipe, pins and gitignored-log limitations in
-  `docs/reproducibility.md` §11:5xZ.
+  logging, with fixed v2.4.32 and safe input clean and ASLR on. W337
+  rebuilt both sides from hash-matched tarballs, rebuilt the marker `.so`
+  byte-identically and reproduced the deref, ASan WRITE-1028 and the
+  marker even from an UNMODIFIED stock binary, under `-d2` plus a
+  fixed-address LD_PRELOAD sentinel; no command or control-flow hijack.
+  The chosen-VALUE → chosen-TARGET rung-4 label rise is witnessed,
+  **NO r5**, no grade/flag cell moved. Recipe, pins and gitignored-log
+  limitations in `docs/reproducibility.md` §11:5xZ.
 
 What would change this limb: a loopback SvxLink directory reply reaching
-`setData()` (its witness verdict is already closed), an independent replay
-of the bzfs chosen-target probe, a successful gimpjif allocator
-dereference, a real consumer of Ruby's stale bound, or a checker RED on
-committed HEAD.
+`setData()` (its witness verdict is already closed), a command-execution
+path on the bzfs chosen-target probe (its W337 replay is closed), a
+successful gimpjif allocator dereference, a real consumer of Ruby's stale
+bound, or a checker RED on committed HEAD.
