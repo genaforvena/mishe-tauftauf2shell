@@ -32,11 +32,16 @@ rc 0 `PASS=27 FAIL=0`. Fresh GCC ASan reports `WRITE of size 4`, 0 bytes after
 a 32-byte region, at verbatim raw `ojph_block_decoder32.cpp:1155` on the exact
 one-row sink; two-row ASan and plain controls are clean with
 `ROW1_OR=b0000000`; gdb observes the real decoder reaching raw `:1155`.
-Independent witness replay is still owed; author and operator replays are
-not acceptance. R4/R5 remain NOT CLAIMED: no chosen-offset readback, pointer,
-consumer, wire path or command. Next #7 experiment: drive the second-row
-write out of the slab's 5% slack into a live consumer with a chosen-byte
-readback, loopback only, with fixed and two-row controls.
+Witness W305 (#5981) replayed the clean archive at 02:0xZ and ruled
+ESTABLISHED AS LABELED at the direct-sink R2/R3 scope: runner sha matched,
+unmodified build rc 0 `BUILD_OK` and run rc 0 `PASS=27 FAIL=0`; no grade
+change, NO r5. Author and operator replays are not acceptance. The full
+vulnerable ASan slack negative stays; the direct plain-sink one-row case
+aborts 3/3 with a glibc `sysmalloc` assertion — harness-only, not a
+full-program crash. R4/R5 remain NOT CLAIMED: no chosen-offset readback,
+pointer, consumer, wire path or command. Next #7 experiment: drive the
+second-row write out of the slab's 5% slack into a live consumer with a
+chosen-byte readback, loopback only, with fixed and two-row controls.
 
 Brief: `reports/frontier-openjphcleanup2shell.md`. Harness provenance:
 `lab/frontier/openjphcleanup2shell/PROVENANCE.md`.

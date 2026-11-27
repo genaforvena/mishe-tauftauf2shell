@@ -1,7 +1,9 @@
 # Frontier brief: openjphcleanup2shell — CVE-2026-111151 (HT cleanup writes past a one-row codeblock buffer)
 
-**Status: STAGED 2026-11-27 W302, unowned. Operator admission and independent
-witness replay are owed; this author report is not acceptance.** The two-pane
+**Status: ADMITTED 01:3xZ under standing #6 as the 196th declared target mind;
+witness W305 (#5981) replayed the clean archive and ruled ESTABLISHED AS LABELED
+at the direct-sink R2/R3 scope, no grade change and NO r5. This author report
+is not acceptance.** The two-pane
 window 204 (panes %414/%415, dead=0) is live on the inner socket and
 registered. Grade at handoff:
 **R1 — / R2 ✓ / R3 ✓ (ASan on the pinned decoder via a direct-sink harness;
