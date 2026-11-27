@@ -70,6 +70,10 @@ bash harness/run-all.sh
 ```
 `run-all.sh` checks the two source pins and 17 behavioral cases; final result
 `RUN_ALL_OK 18 PASS / 0 FAIL`. Its logs are in `harness/evidence/run-all/`.
+Clean-archive replay at commit `b05c1126`: `git archive --format=tar HEAD
+lab/frontier/tasmotadg2shell` extracted to a fresh `/tmp` directory, then
+unmodified `build.sh` (`BUILD_OK`) and `run-all.sh` (`RUN_ALL_OK 18 PASS /
+0 FAIL`). No local-only file outside the archive is needed to replay.
 
 ## Observations (host ASan, GCC 13.3.0, -O0 -g)
 
