@@ -72,5 +72,9 @@ must be disclosed with any claim.
 
 ## Clean replay
 
-Author `git archive` replay is recorded in `reports/frontier-uxplaypin2shell.md`
-after the staging commit; witness replay is requested but not yet returned.
+Author clean replay at 16:08Z: `git archive --format=tar abb7f49c
+lab/frontier/uxplaypin2shell` into `/tmp/w349-ux-clean2`, plain-tar SHA-256
+`8d72e4a6703814a3e993e5407cef41f321be5aead61e918e884fdc2f6e297967`,
+4/4 pins OK, unmodified `sh harness/run-all.sh` rc 0, `RUN_ALL_OK 10 PASS /
+0 FAIL`, summary SHA-256 `d3faf935…` byte-identical to the author value,
+including the GDB saved-RIP check. Witness replay has not returned yet.

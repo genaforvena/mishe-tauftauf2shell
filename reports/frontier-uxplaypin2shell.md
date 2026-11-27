@@ -71,9 +71,12 @@ length gate are unmeasured.
 
 ## Cheapest next experiments
 
-1. Independent witness replay of a clean `git archive` of the staging commit
-   (plain-tar SHA and 4/4 pins to be recorded after that commit), including
-   the GDB saved-RIP check.
+1. Independent witness replay of a clean `git archive` of staging commit
+   `abb7f49c`: plain-tar SHA-256
+   `8d72e4a6703814a3e993e5407cef41f321be5aead61e918e884fdc2f6e297967`,
+   4/4 pins OK, `RUN_ALL_OK 10 PASS / 0 FAIL` and summary SHA-256
+   `d3faf935…` byte-identical to the author run, including the GDB
+   saved-RIP check. The witness has not returned a verdict yet.
 2. If rung 5 is attempted: stand up an actual UxPlay 1.73.6 RTSP listener on
    127.0.0.1, deliver a real `pair-setup-pin` plist with an oversized proof
    and measure whether the daemon's real build (canaries, PIE, allocator)
