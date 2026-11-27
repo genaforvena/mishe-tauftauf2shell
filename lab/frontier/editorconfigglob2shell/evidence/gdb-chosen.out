@@ -1,0 +1,18 @@
+Breakpoint 1 at 0x1915: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c, line 101.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ec_glob (pattern=0x55555555c2a0 'C' <repeats 200 times>..., string=0x555555559047 "x") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:101
+101	    p_pcre = pcre_str + 1;
+0x7fffffffbefc:	0x43	0x43	0x43	0x43	0x43	0x43	0x43	0x43
+0x7fffffffbf04:	0x43	0x43	0x43	0x43	0x00	0x00	0x00	0x00
+0x7fffffffbf0c:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+0x7fffffffbf14:	0x00	0x00	0x00	0x00	0x00	0x00	0x00	0x00
+Stack level 0, frame at 0x7fffffffe0b0:
+ rip = 0x555555555915 in ec_glob (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:101); saved rip = 0x5555555556d4
+ called by frame at 0x7fffffffe100
+ source language c.
+ Arglist at 0x7fffffffe0a0, args: pattern=0x55555555c2a0 'C' <repeats 200 times>..., string=0x555555559047 "x"
+ Locals at 0x7fffffffe0a0, Previous frame's sp is 0x7fffffffe0b0
+ Saved registers:
+  rbp at 0x7fffffffe0a0, rip at 0x7fffffffe0a8
