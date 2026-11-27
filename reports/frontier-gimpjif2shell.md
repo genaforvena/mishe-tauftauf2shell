@@ -1096,7 +1096,7 @@ NO r5. Object identity, chosen-address dereference, control flow and any
 command side effect remain UNKNOWN. Exact logs and hashes are in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
-Author clean-archive replay at 04:12Z: `git archive b3e21b50
+Author clean-archive replay at 04:10Z: `git archive b3e21b50
 lab/frontier/gimpjif2shell` extracted into a fresh `/tmp` directory, then
 `bash lab/frontier/gimpjif2shell/live/run-appimage-readptr.sh` with the
 shared SHA-verified AppImage workdir returned `TOTAL: 16 PASS / 0 FAIL`,

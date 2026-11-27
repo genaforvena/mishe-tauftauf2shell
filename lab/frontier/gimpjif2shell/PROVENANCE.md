@@ -1652,7 +1652,7 @@ command was observed. The earlier W252 misstatement that its pointer
 targeted `out+368` was corrected above from `galloc-long.log`'s raw
 bytes (`out+304`); this no-shim log agrees.
 
-Author clean-archive replay at 04:12Z: `git archive b3e21b50
+Author clean-archive replay at 04:10Z: `git archive b3e21b50
 lab/frontier/gimpjif2shell` into a fresh `/tmp/gimpjif-readptr-clean-*`
 tree, then `bash lab/frontier/gimpjif2shell/live/run-appimage-readptr.sh`
 from that tree with the shared SHA-verified AppImage workdir:
