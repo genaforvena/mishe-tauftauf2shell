@@ -2,7 +2,10 @@
 
 Status 2026-11-27 W369: **ADMITTED 21:1xZ as the 221st declared target mind**;
 window 229 adopted as-is. Operator clean replay at 21:07Z of `0415fa78`: 16/16
-pins and `RUN_ALL_OK 11 PASS / 0 FAIL`; independent witness replay owed. Grade
+pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. Witness W372 graded stage
+`0415fa78`/receipt `7064369a` ESTABLISHED AS LABELED, and W373 graded the
+correction `553bfad5`/TAR `d8ec9e29…` ESTABLISHED AS LABELED; both are
+grade-neutral, R4 LIMITED, NO r5, with no further replay owed. Grade
 R3 confirmed on the pinned parser; R4 **LIMITED** to a synthetic adjacent victim
 in a no-PIE/no-canary lab build. R5 NOT CLAIMED. Staging commit `0415fa78`;
 clean `git archive --format=tar` SHA-256

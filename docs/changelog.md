@@ -70,6 +70,10 @@ dedicated two-pane window are staged for operator admission and witness replay.
 The same-release `FindSocket()` sink and the 5.0.3 `SendCreateMsg()` sibling
 are folded into this one target, not staged separately.
 
+Admitted 21:4xZ as the 222nd declared mind on the clean `519f6fde…` archive
+replay (`fdcc1b89`); independent witness replay is still owed. The recipe and
+generated-count boundary are in §21:4x–21:5xZ of `reproducibility.md`.
+
 ## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
 
 Third fold of `309a72e5`, `553bfad5`, `285c0dea`, `624d0a27` and

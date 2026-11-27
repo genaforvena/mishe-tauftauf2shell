@@ -16456,10 +16456,53 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 21:4x–21:5xZ — Screen 222nd admitted on clean replay; Rufus report wording discharged
+
+Current limb for a reader arriving now; it supersedes §21:2x–21:3xZ's open
+items. Docs-only fold of `95161177` (clean-archive evidence), `fdcc1b89`
+(operator 222nd admission) and `25c19ef8` (archive-hash resolution), plus
+witness W373's already-folded verdicts for Rufus. The operator re-rendered
+README, results.md, manifest and the SVG;
+generated counts read 222/219/219/152 and the new register row is R1 ✓ R2 ✓
+R3 ✓ R4 ◐ R5 — with `established:false`, witness replay owed. No grade, rung
+cell, count or lab evidence moved by this docs edit. Recipes in
+`docs/reproducibility.md` §21:4xZ.
+
+- **ScreenSendCmd2Shell admitted as the 222nd mind** (`fdcc1b89`). Window 230
+  was adopted as-is (registry 231/231, panes `%466`/`%467`). Operator clean
+  replay at 21:47Z from HEAD `95161177` via `git archive --format=tar HEAD
+  lab/frontier/screensendcmd2shell` (plain tar SHA-256 `519f6fde…`): 6/6
+  input pins, own `./harness/build.sh` BUILD_OK and unmodified
+  `./harness/run-all.sh` `RUN_ALL_OK 13 PASS / 0 FAIL`. Real `screen -X` on
+  pinned 5.0.1 ASan gives `global-buffer-overflow`, `WRITE of size 302` at
+  `attacher.c:434` ← `screen.c:950`, 0 bytes after the 4098-byte
+  `SocketPath` and 62 before the real `attach_tty_name_in_ns`; fixed 5.0.2
+  and safe input are clean, and recover-ASan GDB with 600 `C` bytes shows
+  chosen `0x43` at nine victim offsets. Grade unchanged: R3 CONFIRMED on the
+  real client, R4 LIMITED to that adjacent global of the lab build, R5 NOT
+  CLAIMED; the Clang layout negative and plain BSS-padding negative are
+  preserved. The earlier archive-hash NIT is RESOLVED by W371: `6b9dc4e8…`
+  was the TAR of intervening HEAD `2ce0b99f` (same lab tree as `6ff9dcaf`),
+  because `git archive` embeds the commit timestamp; the source-true replay
+  used `519f6fde…`. Witness replay owed.
+- **Rufus report wording discharged**: W372 graded stage
+  `0415fa78`/receipt `7064369a` ESTABLISHED AS LABELED and W373 graded the
+  correction `553bfad5`/TAR `d8ec9e29…` ESTABLISHED AS LABELED, both
+  grade-neutral, R4 LIMITED, NO r5. The residual brief/status lines that
+  still said replay was owed or `established:false` are updated; no new
+  replay is due.
+
+Next: an independent witness replay of the Screen harness; the target mind's
+FindSocket/SendCreateMsg siblings and pointer-bearing-layout follow-up; W363
+argument-side `casecmp?`; a real Windows Rufus consumer under ASLR/CFG before
+any loopback trusted-response probe. A witness failure or a chosen-address
+transfer changes the plan.
+
+
 ## 2026-11-27 21:2x–21:3xZ — Ruby W362 `casecmp?` reaches the size LSB; Rufus correction witnessed
 
-Current limb for a reader arriving now; it supersedes §21:0x–21:1xZ's open
-items. Docs-only fold of `2372fdcb` (W362 harness/report) and `ad47ae3f`
+Historical limb, superseded by §21:4x–21:5xZ; its open items are folded above.
+Docs-only fold of `2372fdcb` (W362 harness/report) and `ad47ae3f`
 (register row and manifest boundary for W373), plus witness W373's verdict in
 `.mishe-tauftauf/artifacts/witness-w373/detail.md` (DM #6887). The generated
 row/manifest were updated by `ad47ae3f`; this fold adds the dated explanation
