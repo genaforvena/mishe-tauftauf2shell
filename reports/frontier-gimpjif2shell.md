@@ -921,6 +921,15 @@ failure is preserved, not erased.
 The final exact-SHA replay from the recording commit `25bb618d` repeated
 9 PASS / 0 FAIL with the same chosen-byte register value.
 
+Independent witness W308 (#6006) re-ran both runners from a clean
+`47e0e07d` archive: 6/0 with core 29/0, and 9/0 on the gdb runner. Its
+fresh plug-in SIGSEGV did NOT reproduce the named `free` at
+`file-gif-load.c:1616` frame; it faulted in `free` via
+`gimp_drawable_get_buffer` / `ReadImage:1477` with the same chosen-byte
+`rax`. All three fault sites are layout-sensitive: the generalized
+`malloc|free`/chosen-register assertion, not any one frame, is the
+repeatable check.
+
 Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL natural chosen
 bytes, NO r5. This names live call paths that *attempt* the allocator
 dereference — including the overflowed object's own `g_free` in
@@ -968,8 +977,13 @@ The 8 KiB file-chosen JIF reaches the wrapped call
 with backtrace `#0/#1` in the bundled `libz.so.1` `inflate` path, `#2` in
 `ReadJeffsImage (... len=45771, height=46918, alpha_frame=1, is_jeff_image=1)`
 at `file-gif-load.c:1613`. The chosen `0x4d` bytes are observed byte by byte
-replacing the following chunk's `0x21` size word, and the plug-in later
-faults in `free` at `file-gif-load.c:1616` with `rax=0x4d4d4d4d4d4d4d4d`.
+replacing the following chunk's `0x21` size word. The plug-in later
+faults on corrupt allocator metadata: the author's run ended in `#0 free
+()` at `file-gif-load.c:1616` with `rax=0x4d4d4d4d4d4d4d4d`, but an
+independent W310 clean-archive replay faulted in `g_malloc0` via
+`gimp_drawable_get_buffer` (`ReadImage:1477`), `rax=0x5555557044c0`.
+The terminal frame/register are run-dependent; the watch hits are the
+repeatable observation.
 The safe 4x4 JIF under the identical debugger loads cleanly and raises no
 watch hit. `bash live/run-appimage-watch.sh`: **13 PASS / 0 FAIL**, rc 0.
 

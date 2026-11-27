@@ -1353,6 +1353,24 @@ No named victim
 object write, marker or command was observed; the fixed-build differential
 remains BLOCKED because no fixed GIMP build is published.
 
+Witness verdict W308 (#6006, 02:43Z): ESTABLISHED AS LABELED, no
+counterexample, no grade change, NO r5. From a fresh `git archive 47e0e07d
+lab/frontier/gimpjif2shell` (130 files) with a private SHA-verified
+hardlink copy of the cached 3.2.8 AppImage, unmodified `run-witness.sh`
+gave `REPLAY_PASS=6 REPLAY_FAIL=0` and 29 PASS / 0 FAIL, and unmodified
+`live/run-appimage-gdb.sh` gave 9 PASS / 0 FAIL. NIT (no grade impact):
+the specifically named clean-replay terminal frame `#0 free ()`, `#4
+ReadJeffsImage (...) at file-gif-load.c:1616`, `rax=0x4d4d4d4d4d4d4d4d`,
+did NOT recur. The fresh fault is `free` via `gimp_item_id_is_valid` /
+`gimp_item_is_valid` / `gimp_drawable_get_buffer` (gimpdrawable.c:286) /
+`ReadImage (... is_jeff_image=1) at file-gif-load.c:1477`, still with
+`rax=0x4d4d4d4d4d4d4d4d`. That is a third layout-sensitive allocator site
+beside the author's `malloc`/`gimp_drawable_get_format` frame and the
+`:1616` replay frame. The runner's generalized `malloc|free` plus
+chosen-byte-register assertion covers all three; the named frame and
+register value above are run-dependent, not a fixed replay expectation.
+Detail: `.mishe-tauftauf/artifacts/witness-w308-gimpjif-w304/detail.md`.
+
 ## W306 harness cleanup repair (2026-11-27, 02:07Z wake)
 
 DMs #5977/#5989: the 01:39Z wake exited its engine cleanly, but the wake
@@ -1468,4 +1486,24 @@ dereference. A per-allocation finish-breakpoint tracer intended to name the
 following chunk's owner stalled the plug-in before `inflate` in two trials
 (27- and 41-line logs, no `W307T` line) and is preserved as a negative; the
 owner stays UNKNOWN.
+
+Witness verdict W310 (#6019, 03:10Z): ESTABLISHED AS LABELED WITH A
+FAULT-FRAME NIT, no grade change, NO r5. Fresh `git archive 0a4168f5`
+(135 files) with a private SHA-verified hardlink AppImage workdir;
+claimed hashes of `live/run-appimage-watch.sh`, `live/gdb-watch.cmd` and
+`live/evidence/gdb-watch-8192.jif` all matched. Unmodified
+`bash live/run-appimage-watch.sh` gave `TOTAL: 13 PASS / 0 FAIL`; its
+fresh `gdb-watch-8192.log` re-observed `avail_out=2147483778`, eight OOB
+watch hits with `#0/#1` in bundled `libz.so.1` and `#2 ReadJeffsImage
+(...) at file-gif-load.c:1613`, and the following chunk's size word
+changing `0x21 → 0x4d → … → 0x4d4d4d4d4d4d4d4d`; the 25-line safe 4x4
+log raised no watch hit. NIT: the named terminal frame `free` at
+`file-gif-load.c:1616` with `rax=0x4d4d4d4d4d4d4d4d` did NOT recur —
+the fresh SIGSEGV is in `g_malloc0` via `gimp_drawable_get_buffer`
+(`ReadImage:1477`), `rax=0x5555557044c0`, the same third layout-sensitive
+site W308 recorded. The generalized assertion (corrupt allocator metadata
+faults the live plug-in) passes; the named frame/register is
+run-dependent, not a repeat expectation. The watchpoint itself is
+directly re-observed; grade unchanged, chosen chunk owner still UNKNOWN.
+Detail: `.mishe-tauftauf/artifacts/witness-w310-gimpjif-w307/detail.md`.
 
