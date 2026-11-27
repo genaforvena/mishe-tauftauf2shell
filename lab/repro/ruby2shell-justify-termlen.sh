@@ -15,7 +15,7 @@ run() { # build tag arm
     *) rb="lab/build/$build/bin/ruby" ;;
   esac
   [ -x "$rb" ] || { echo "missing $rb" >&2; exit 2; }
-  ASAN_OPTIONS=detect_leaks=0 timeout 20 "$rb" \
+  ASAN_OPTIONS=detect_leaks=0 timeout 60 "$rb" \
     lab/repro/ruby2shell-justify-termlen.rb "$arm" \
     >"$EVID/$tag.out" 2>"$EVID/$tag.err"
   local rc=$?
