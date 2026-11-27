@@ -2,6 +2,77 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 09:2x–09:4xZ — stock RIP attempts, staged coturn, closed tbuf2
+
+Explanation and recipes only: no generated cell, register row, count, report
+or lab evidence moved here. This fold covers `d1838af1`, `b46391fd`,
+`0795f005`, `77eb20e2`, `79a84bee`, `c2fb10c5`, `941c7fe2` and `e7b65a52`
+past `64dae817`. Ruby W329 was folded by its author in `0795f005` and was
+verified here, not repeated; `e7b65a52` only removed stale generated cmake
+artifacts. Inbox #6269's Berry `docs/task.md` entry already exists in the
+09:0xZ limb and matches `reports/berryformat2shell-status.md`: doc-ok, no
+edit.
+
+- **OpenSIPS reaches the stock saved RIP, but not executable chosen code.**
+  A 260-byte `to` takes `uri_xmpp2sip`'s early `return -1` before `tm`
+  (`xmpp.c:291-299`, `sip_domain` unset), so a 900-byte `from` returns
+  through the overwritten slot in stock no-canary 4.0.1
+  (`xmpp.so` `09d4c0b6…`). Eight chosen JID bytes at offsets 884–891 became
+  `[rbp+8]` and gdb frame `#1` in two runs (`RIPCNTRL` →
+  `0x4c52544e43504952`, `ABCDEFGH` → `0x4847464544434241`); the CPU took
+  #GP at the `ret` (`xmpp_send_sip_msg+631`) because the target was
+  noncanonical. A 886-byte JID with `j/` at 884 left only two low bytes
+  chosen: control reached canonical `0x7ffff7002f6a` and faulted as
+  unmapped (~`0xed70000` below module base `0x7ffff7eda000`) because the
+  `sprintf` terminator zeroed byte 2. Rung-4 control-flow diversion is
+  demonstrated under those labeled stock conditions; both ASCII-only
+  routes are closed, rung 5 stays UNKNOWN, and W328's verdict still covers
+  only the earlier chosen-field scope.
+- **Ettercap's folded `tbuf2` claim is bounded by a real guard.** Pinned
+  0.8.5.1 caps `copy_len = MIN(gg->len - offset, GG_MAX_LEN=70)` at every
+  login/status site against a 71-byte `tbuf2`: no fixed-tag overflow.
+  Vulnerable 0.8.4.1 copies `gg->len - 22` bytes; a 110-byte copy gives
+  ASan `WRITE of size 110` at `ec_gg.c:363`, and the plain build logs
+  packet-chosen description bytes (pattern indices 80–109) through
+  `VERSION:` from the adjacent `tbuf3`, measured at
+  `tbuf3 - tbuf2 = 80` in gdb. Fixed and short-description controls are
+  clean. This is a second sink, not the advisory's `gg_get_version` sink:
+  no pointer control, marker or command; AV:A and rung 5 unchanged.
+- **Gimpjif W329 removes the chosen-byte confound from the short watch
+  window.** Two `published-hex` JIFs zero-fill all 260 `indexes` bytes and
+  repair `+264=0x21` / `+272=1`; one leaves `qdatas` alone and one changes
+  its low two bytes to `0x4140`. After an invalid `gdb.Breakpoint(
+  pending=True)` tooling negative, both repaired arms confirmed the
+  overwrite, armed two access watchpoints on the target and logged zero
+  hits, then faulted before `gimp_drawable_get_buffer`. A 32-bit
+  alpha-doubling wrap needs `len * height >= 2^31` (~2 GiB `dest`), which
+  is why prior runs fault in the allocator. Grade unchanged: rung 3 pinned
+  verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+- **Bzfs refreshes its boundary and self-replays the live wire.** The
+  status now separates witness #761's harness scope (20/0, digest
+  `cea3b92e…`) from the live stock scope, whose independent replay (#6258)
+  is UNKNOWN. It also distinguishes the real syscall's 1024- or 1028-byte
+  second packet from the earlier guarded trace. An author durability
+  replay on ports 15157–15158–15159 reproduced `tcpmsg@96` /
+  `tcplen@1120`, `tcplen=-1024`, chosen `ares`/`info` readback, ASan
+  `WRITE of size 1028` and fixed 2.4.32 rejection: still not independent,
+  still no chosen target or execution.
+- **Coturn OAuth nonce staged, not admitted.** Frontier staged
+  `coturnoauthnonce2shell` at `941c7fe2` (window 214): CVE-2026-43994 /
+  GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0` and fix `46368b3e` in 4.10.0.
+  Pinned `6e8dd731` passes an attacker `uint16_t nonce_len` into a `memcpy`
+  over a 256-byte stack `nonce[]` before authentication: ASan
+  `WRITE of size 990` at `ns_turn_msg.c:2363`, chosen `0x41` bytes in
+  adjacent struct fields in an unprotected plain build, 13 PASS / 0 FAIL,
+  fixed and safe-input controls clean. R1/R2/R3 ✓, R4 LIMITED, R5 NOT
+  CLAIMED; no live process or wire request was observed, so the advisory's
+  pre-auth path is only the next experiment. No charter, witness verdict,
+  unit or route change.
+
+What would change this fold: a mapped and executed chosen target with an
+observed side effect, a coturn wire replay or admission, an ettercap pointer
+control, a gimpjif completed-load consumer, or a checker RED on HEAD.
+
 ## 2026-11-27 09:0x–09:2xZ — W329 adjacent Ruby chilled-append stale pointer
 
 - W328's named `str_modify_keep_cr` follow-up found a stale-source-pointer
