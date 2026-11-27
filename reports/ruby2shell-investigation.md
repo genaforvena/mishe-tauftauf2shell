@@ -9133,9 +9133,12 @@ capa+24`; on stock glibc the chunk is `C = ceil((R+8)/16)*16` and the
 successor chunk begins at `buffer + C - 16`. The OOB slot is `buffer + R`.
 It can equal only `C-16` (successor `prev_size` LSB, `R == 0` mod 16, closed
 in W356) or `C-8` (successor `size` LSB, `R == 8` mod 16, closed in
-W353/W354); every other residue lands in the current chunk's padding. No
-leading-byte count can put this fixed-width write on a higher size byte under
-this allocation shape. Do not repeat the k=3 N=27/43/59 arms unchanged.
+W353/W354); residues 9..15 are current-chunk padding. **Corrected by W359
+below:** residues 2/4/6 reach successor `prev_size` bytes 2/4/6 (the
+overflow requires even `capa`, hence even `R`); odd residues are
+unreachable. No leading-byte count can put this fixed-width write on a
+higher `size` byte under this allocation shape. Do not repeat the k=3
+N=27/43/59 arms unchanged.
 
 Grade unchanged: primary wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4,
 harness-condition rung 5 witness-ESTABLISHED at its labeled scope, full
@@ -9150,3 +9153,111 @@ Ruby single-byte encodings to see whether the OOB byte can be chosen rather
 than the fixed `0x53`. This is a byte-value question, not a repeat of W348's
 write-bound matrix. Prediction: some expansion writes a first byte other
 than `0x53`; falsifier: all two-byte expansions start `0x53` or none exist.
+
+## 2026-11-27 20:0xZ — W358: chosen-byte alphabet CLOSED
+
+W358 asked whether the one-byte OOB value could be chosen by input rather
+than fixed at `0x53`. Prediction: at least one two-byte uppercase expansion
+in a Ruby single-byte encoding starts with a byte other than `0x53`.
+Falsifier: all two-byte expansions start `0x53`, or none exist.
+
+Method: plain build 3.4.12, all `Encoding.name_list` entries that are
+non-dummy, ASCII-compatible and map every byte `0x00..0xff` to exactly one
+byte (99 encodings), every byte `0x80..0xff`, all three case operations
+`upcase`, `downcase`, `swapcase`. Script
+`lab/build/evidence/casemap-chain/w358/survey.rb` (gitignored; regenerate
+with the same plain 3.4.12 interpreter).
+
+Observed: `single_byte_encodings=99`, `expansions_total=56`,
+`first=53 count=56`. Every expansion is `0xDF -> 0x53 0x53`; there is no
+other two-byte case result and no other first byte. The falsifier is met.
+The OOB byte cannot be chosen through Ruby case conversion, and this is a
+byte-value closure, not a repeat of W348's write-bound matrix. No grade
+change: no wire request, chosen address or command was involved.
+
+## 2026-11-27 20:1xZ — W359: upper `prev_size` bytes CLOSED; W357 geometry corrected
+
+Re-deriving the stock-glibc layout found that the W357 sentence "every other
+residue lands in the current chunk's padding" is too strong. For a malloc
+request `R`, the chunk is `C = align16(R+8)`, the next chunk's header begins
+at `buffer + C - 16`, and the slot is `buffer + R`. For `R ≡ 0..7 (mod 16)`
+the slot is that next chunk's `prev_size` byte `R mod 16`; `R ≡ 8` is its
+size LSB (W353–W355); only `R ≡ 9..15` is current-chunk padding. The
+overflow requires even `capa`, and `R = capa + 24`, so `R` is always even:
+the reachable residues are 0, 2, 4, 6 (`prev_size` bytes 0, 2, 4, 6), 8
+(size LSB) and 10, 12, 14 (padding). W356 covered residue 0 and W357
+residue 10; residues 2/4/6 were untested. Odd residues are unreachable by
+this primitive.
+
+Parity negative preserved: the first sweep used mixed N=20/23/26. N=20
+(capa 41) and N=26 (capa 47) produce **no** valid overflow window and no
+valgrind write on any of the six builds; N=23 (capa 44, R=68) does. A gdb
+run at N=20 showed the observed `0x53` at `buffer+64` was in-bounds
+case-map output, not the OOB slot. Preserved at
+`lab/build/evidence/casemap-chain/w359/{vg-*,gdb-3.4.12-20.log}`.
+
+Reachability uses mixed input `"a" + N x "\xDF"` with N=21/23/25, giving
+`capa = N+21 = 42/44/46` and `R = N+45 = 66/68/70`, i.e. residues 2/4/6.
+Prediction: one `case_map` write at R on the three vulnerable builds, zero
+on the three patched builds. Falsifier: no write at that offset, or any
+write on a patched build.
+
+Valgrind 30/30 arms (`.../w359/vg-*.txt`): the nine vulnerable arms each
+have exactly one `Invalid write of size 1` at `case_map
+(iso_8859_1.c:293)` plus the known copy-out `Invalid read`, at `0 bytes
+after a block of size 66/68/70`; all nine patched arms (3.4.13, 3.3.14,
+4.0.10) have zero invalid writes and zero invalid reads; the twelve odd-N
+arms are clean. All rc=0. Callers: 3.4.12 `rb_str_casemap string.c:7839`,
+3.3.13 `:7414`, 4.0.9 `:7844`.
+
+gdb on plain 3.4.12 N=23 with the committed
+`lab/repro/ruby2shell-mixed-prevsize-upper.gdb` read the current chunk
+header `(prev_size, size) = (0x40, 0x50)`; the successor chunk therefore
+starts at `buffer+64` and its size LSB is at `buffer+72`. The slot
+`buffer+68` is successor `prev_size` byte 4. At `string.c:7839` it read
+`0x00`; at `:7850` (`used=45`) it read `0x53`. The successor size LSB at
+`buffer+72` stayed `0x21`, and `prev_size` byte 5 stayed `0x00`; the
+`0x53` at `buffer+64` is in-bounds case-map output, not a second OOB
+store. Log `.../w359/gdb-3.4.12-23-header.log`.
+
+Fresh unsanitized glibc: three reps per build for N in {20,21,23,25} on
+all six builds (72 processes), all rc=0, with no `munmap_chunk`,
+`corrupted size`, `invalid next size`, double-free or abort diagnostic
+(`.../w359/plain/`). As in W356, a `prev_size` byte written while the
+current chunk is in use is inert on stock glibc. Falsifier not met only in
+the sense that the write was confirmed; the predicted metadata diagnostic
+was not observed. Grade unchanged: primary wire-only rung 3 CONFIRMED,
+witness-COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+
+Witness fold (message #6784): the W367/#6778 verdict is already stated in
+the W357 section above (ESTABLISHED AS LABELED, grade-neutral, NO r5,
+operator commit `ccdbad4b`); its detail path is the Ruby2Shell row of
+`docs/results.md` (clean `cf323ddd` archive SHA-256 `7709cb24…`, four
+committed-file and six plain-build pins, 18/18 valgrind, 72/72 plain,
+even-N control clean, no chosen-address store/transfer/marker). Nothing in
+this section changes that verdict.
+
+## 2026-11-27 20:1xZ — W360: case-fold byte alphabet CLOSED
+
+W358 surveyed `upcase`/`downcase`/`swapcase` but not `downcase(:fold)`,
+the other case-map entry point named in the claim. Same 99 encodings and
+byte range, script `lab/build/evidence/casemap-chain/w358/survey-fold.rb`.
+Observed: `expansions_total=28`, all `0xDF -> 0x73 0x73`
+(`first=73 count=28`). Together with W358 the OOB byte alphabet is exactly
+`{0x53, 0x73}`, matching the vendor's Primitive section as a claim
+reproduced here. Both bytes have glibc's `IS_MMAPPED` bit (0x2) set, so
+neither can write a size LSB that avoids the `munmap_chunk` path. No grade
+change; no wire input or command involved.
+
+Next named experiment W361: fold-byte size-LSB differential. Drive
+`"a" + N x "\xDF"` under ISO-8859-1 with `downcase(:fold)` at N=27/43/59
+(R=72/88/104 ≡ 8 mod 16) on plain 3.4.12, 3.3.13, 4.0.9 and the three
+patched builds, valgrind plus 10 fresh-plain reps per vulnerable N.
+Prediction: one `case_map` write of `0x73` at the next chunk's size LSB,
+zero on patched builds, and glibc diagnostics on at least one vulnerable
+build (the same layout-dependent abort family as W353–W355). Falsifier:
+no fold write at R, any patched write, or a fold-byte write that reliably
+avoids the abort where upcase aborts. First command: a one-line driver
+equivalent to `ruby2shell-rung3-mixed.rb` with `.upcase` replaced by
+`.downcase(:fold)`, then the six-build valgrind matrix. Keep `--again 300`.
