@@ -38,7 +38,14 @@ is read from pinned advisory/source claims and was **not** exercised locally.
 verbatim under a `#line` directive; `bootstrap.sh` can re-fetch the pins.
 Four GCC builds (vulnerable/fixed × ASan/plain, `-O0 -g`, stack protector off
 to expose the natural saved-frame layout) and the unmodified `run-all.sh`
-gave `RUN_ALL_OK 18 PASS / 0 FAIL` (summary in `runs/summary.txt`):
+gave `RUN_ALL_OK 18 PASS / 0 FAIL` (summary in `runs/summary.txt`). An author
+clean replay of `df6ef056` used `git archive --format=tar` (plain-tar SHA-256
+`9d83e19e929f2fc603bacbef212bbd10ca9433b1719a20cae1097b1f35f6e5c2`, not a
+`.tar.gz` container), matched 8/8 harness hashes and returned a byte-identical
+summary SHA-256
+`871c0be7fdee729bec5c96ce53f31ea577c44680f28b2bcfa71d917a7d75e6bb`; the
+summary hashes PID/address-normalized tokens so volatile ASan addresses do not
+spoil the comparison. Author replay is not witness acceptance.
 
 - Vulnerable ASan, 120 chosen `A` bytes: `stack-buffer-overflow WRITE of size
   120` at the pinned `EchoLinkStationData.cpp:217`, 0 bytes past the 45-byte

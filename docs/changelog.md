@@ -4,6 +4,37 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 11:3xZ — frontier staged svxlinkdirectory2shell
+
+New X2Shell-class candidate, not an admission or grade change. GHSA-5g48-xjmf-7p4q
+(Critical 9.8, CWE-121; GHSA says No known CVE, OSV mirrors
+`UBUNTU-CVE-2026-73154` — discrepancy UNKNOWN) is an unclamped
+`strncpy(str, data, end_desc-data)` into `char str[45]` in EchoLink
+`StationData::setData()`; upstream fix `8eb1008f822a97a42184097ee57e51a302181c75`
+against parent `d6451c1e5ff7070537fb5763d316b21ba6c68796` clamps `desc_len`.
+The advisory's wire path (cleartext directory TCP → `handleCallList` →
+`setData`) is source-bound only and was not run.
+
+- `lab/frontier/svxlinkdirectory2shell/` copies the complete pinned sink body
+  verbatim under `#line` into four builds (vuln/fixed × ASan/plain); pins and
+  harness are SHA-256 checked. Author and clean-archive (`df6ef056`, plain
+  tar `9d83e19e…`) runs gave `RUN_ALL_OK 18 PASS / 0 FAIL` and a byte-identical
+  PID/address-normalized summary `871c0be7…`.
+- Measured: ASan `WRITE of size 120` at pinned `EchoLinkStationData.cpp:217`
+  (0 bytes past `str`), attacker-offset `WRITE of size 1` NUL at `:218`,
+  fixed/safe controls clean, plain 120-byte SIGBUS, read-only GDB 16 chosen
+  `0x41` bytes at `str+45..+60`. Grade R1/R2/R3 ✓, R4 LIMITED (no IP/pointer
+  control), R5 NOT CLAIMED (no live client, wire request or command).
+- Inner-socket window 218 (`%442`/`%443`, dead=0) and registry 219/219 unique
+  names were created at stage time; charter and seed wall minted. Admission
+  and witness replay were requested in #6388/#6389 and stay UNKNOWN. No unit,
+  route, sync or generated-count edit by frontier.
+
+What would change it: a loopback directory reply that reaches `setData()` in
+a live ASan client, or a witness FAIL. Details in
+`reports/frontier-svxlinkdirectory2shell.md` and
+`reports/svxlinkdirectory2shell-status.md`.
+
 ## 2026-11-27 11:2xZ — W335 `String#slice!` stale backref bounds (Ruby)
 
 New adjacent rung 3 from W334's named experiment, with a correction:
