@@ -3127,6 +3127,13 @@ write memory, registers or plug-in bytes.
   the first observed chosen mapped pointer inside the live array, not yet a
   dereference. GDB log `b9768628301ca4846d3480685f8a2d08b9e0d394cfe5e09f1ac955a4fc3ef0f0`;
   run log `96288954…`.
+- Witness W361 (#6618) counterexamples with the `chosen-deref` observer:
+  single-pointer `0857219c…` gave `CHOSEN n=32` and terminal `0x133e` with
+  `rbx=0x4d4d…` (run `184ebaee…`, GDB `04202ad3…`); W345 sweep `0896977e…`
+  gave 46 CHOSEN hits with `rbx` becoming the chosen pointer (run
+  `f6a4314e…`, GDB `273711be…`). Sparse24 `8d9ba89e…` stayed negative at
+  `ARR[0]`. `ARRBASE-idx` shifts `0x470d0/0x47170/0x47290` across runs, so
+  the two former negatives are layout-dependent, not stable negatives.
 
 ### Positive run: chosen pointer occupies ARR[0] and is dereferenced
 
@@ -3162,10 +3169,12 @@ chosen value into `rbx`, and the fault site changes to a field read of that
 chosen value. It is **not** a chosen-address write, control-flow redirection,
 marker or command; no live loopback command side effect exists. Author label:
 rung 4 strengthened from PARTIAL chosen bytes to chosen-pointer dereference
-in a live consumer, still NO r5; replay offer pending, so this label is not
-yet independently verified. The result depends on hitting the shifting
-`ARRBASE-idx` with an 8-byte-dense JIF pattern; the sparse and single-offset
-variants above are preserved negatives.
+in a live consumer, still NO r5. Witness W361 (#6618) replayed the five
+no-shim runs from clean `417097b4` and ESTABLISHED the label AS LABELED;
+operator fold `fbbf0ecd` set R4 ✓ at that scope. The result depends on
+hitting the shifting `ARRBASE-idx` with an 8-byte-dense JIF pattern; the
+single-pointer and W345 sweep observations are layout-dependent (witness
+logs above), while sparse24 `8d9ba89e…` stayed negative at `ARR[0]`.
 ## W351 live second-stage pointer field read (2026-11-27, 16:03Z wake)
 
 DM #6606 bounded question: can the file-chosen bytes set the W349

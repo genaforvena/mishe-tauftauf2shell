@@ -1974,8 +1974,12 @@ chosen-pointer dereference in a live consumer, still NO r5. Witness W361
 (JIF `7c8b7e2b…`, chosen pointer `0x5555556c0240` dereferenced at
 `0x7ffff7fd1327`, fault `0x7ffff7fd133e` with `rbx=0x4d4d…`); operator fold
 `fbbf0ecd` set R4 ✓ at that scope. The single-pointer `0857219c…` and W345
-sweep `0896977e…` negatives were contradicted by W361; sparse24
-`8d9ba89e…` stayed negative at `ARR[0]`.
+sweep `0896977e…` labels were layout-dependent, not stable negatives:
+witness W361 (#6618) measured `CHOSEN n=32` and terminal `0x133e` with
+`rbx=0x4d4d…` for the former (run `184ebaee…`, GDB `04202ad3…`) and 46
+CHOSEN hits with `rbx` becoming the chosen pointer for the latter (run
+`f6a4314e…`, GDB `273711be…`); `ARRBASE-idx` moved
+`0x470d0/0x47170/0x47290`. Sparse24 `8d9ba89e…` stayed negative at `ARR[0]`.
 Scripts, JIFs, logs and hashes: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 

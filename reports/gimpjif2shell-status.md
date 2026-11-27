@@ -504,10 +504,13 @@ chosen-pointer dereference in a live consumer, still NO r5. Witness W361
 `7c8b7e2b…`, runner `b047c40e…`, run log `3ada9f47…` and GDB `754d125b…`:
 ESTABLISHED AS LABELED; operator fold `fbbf0ecd` set R4 ✓ at that scope, NO r5.
 Correction preserved: single-pointer `0857219c…` and W345 sweep `0896977e…`
-were called negative here, but W361 contradicted both — each produced an
-explicit chosen-pointer dereference; only sparse24 `8d9ba89e…` stayed
-negative at `ARR[0]`. Heap delta varies `0x470d0/0x47170/0x47210`. Exact
-SHAs, deltas and the maps-classifier NIT: W349 section of
+were called negative here, but W361 showed those observations are
+layout-dependent, not stable negatives: `CHOSEN n=32`, terminal `0x133e`,
+`rbx=0x4d4d…` for the former (run `184ebaee…`, GDB `04202ad3…`) and 46
+CHOSEN hits with `rbx` becoming the chosen pointer for the latter (run
+`f6a4314e…`, GDB `273711be…`). Only sparse24 `8d9ba89e…` stayed negative at
+`ARR[0]`. Heap delta varies `0x470d0/0x47170/0x47290`.
+Exact SHAs, deltas and the maps-classifier NIT: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 ## W351 chosen second-stage pointer with valid field reads (2026-11-27, 16:03Z wake)
