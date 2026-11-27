@@ -1,0 +1,57 @@
+DGR_WIRE_SENT numeric=65 strings=1 wire_len=159
+DGR_WIRE_RECEIVED len=159
+=================================================================
+==2934504==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x515000000283 at pc 0x74dbe22ce693 bp 0x7ffd6088ff60 sp 0x7ffd6088f6f0
+WRITE of size 11 at 0x515000000283 thread T0
+    #0 0x74dbe22ce692 in vsnprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1652
+    #1 0x74dbe22d0786 in snprintf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1723
+    #2 0x58c98059562f in SendReceiveDeviceGroupMessage(device_group*, device_group_member*, unsigned char*, int, bool) harness/gen/main_wire.vuln.cpp:166
+    #3 0x58c98059655f in ProcessDeviceGroupMessage(unsigned char*, int) harness/gen/main_wire.vuln.cpp:318
+    #4 0x58c9805976db in main harness/main_wire.cpp:71
+    #5 0x74dbe1a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x74dbe1a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x58c9805946c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tasmotadg2shell/harness/gen/dgr.vuln.wire.asan+0x36c4) (BuildId: 224c804e7c4cc37fb7ede92d54edc78700f68344)
+
+0x515000000283 is located 3 bytes after 512-byte region [0x515000000080,0x515000000280)
+allocated by thread T0 here:
+    #0 0x74dbe22fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x58c980594d97 in SendReceiveDeviceGroupMessage(device_group*, device_group_member*, unsigned char*, int, bool) harness/gen/main_wire.vuln.cpp:24
+    #2 0x58c98059655f in ProcessDeviceGroupMessage(unsigned char*, int) harness/gen/main_wire.vuln.cpp:318
+    #3 0x58c9805976db in main harness/main_wire.cpp:71
+    #4 0x74dbe1a2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x74dbe1a2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x58c9805946c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/tasmotadg2shell/harness/gen/dgr.vuln.wire.asan+0x36c4) (BuildId: 224c804e7c4cc37fb7ede92d54edc78700f68344)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1652 in vsnprintf
+Shadow bytes around the buggy address:
+  0x515000000000: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x515000000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x515000000280:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x515000000300: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x515000000380: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x515000000400: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x515000000480: fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd fd
+  0x515000000500: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==2934504==ABORTING

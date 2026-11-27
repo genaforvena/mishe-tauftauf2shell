@@ -526,3 +526,11 @@ lab/opensips2shell-live/401-plain/
 lab/opensips2shell-live/402-asan/
 lab/opensips2shell-live/evidence/
 lab/opensips2shell-live/*.log
+
+# tasmotadg2shell W380: pinned 53 MB archive, extracted tree and generated
+# harness binaries/sources stay local. Harness scripts, pinned .ino copies,
+# shim, drivers, status and evidence transcripts stay tracked.
+lab/frontier/tasmotadg2shell/src/tasmota-pinned.tar.gz
+lab/frontier/tasmotadg2shell/src/Tasmota-*/
+lab/frontier/tasmotadg2shell/src/tasmota.h
+lab/frontier/tasmotadg2shell/harness/gen/
