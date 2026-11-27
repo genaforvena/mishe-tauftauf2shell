@@ -103,6 +103,12 @@ no RBP-free route to chosen code (only relative calls to non-canonical
 addresses, conditional jumps back into rbp-relative code, and `ret imm16`
 popping a non-executable heap pointer); the staged two-stanza variant is
 closed by the single-NUL geometry. No live run, no grade change.
+A 2026-11-27 11:13Z re-check also found zero RBP writes (`mov rbp,rsp`,
+`lea rbp,[rsp+..]`, `pop rbp`) before the first control transfer in any of
+the 256 offsets, so no entry can repair the corrupted frame pointer; the
+eight `ret imm16` entries still pop the unchanged heap pointer because a
+staged stanza reaching that stack slot would first divert the earlier
+stanza's own saved RIP. No grade change.
 Adjacent candidate recorded for a later wake:
 GHSA-qc7q-vrx3-3j4h (`sip_i` `parse_isup` length-controlled `memcpy` into
 `val[128]`), recorded from operator inbox #6227 and deliberately not worked.

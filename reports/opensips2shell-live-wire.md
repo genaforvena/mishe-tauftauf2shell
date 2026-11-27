@@ -388,6 +388,28 @@ half) or `ff ff` (high half); raw NUL is rejected at the XML gate recorded
 above and UTF-8 never emits `00` or `ff`. No chosen code, no command, no
 side effect; rung 5 stays UNKNOWN.
 
+## RBP-repair gadget route closed (2026-11-27 11:13Z)
+
+The prior sweep treated every RBP reference as fatal, but a first
+instruction such as `mov rbp,rsp`, `lea rbp,[rsp+..]` or `pop rbp` would
+*repair* the ASCII-corrupted saved RBP from the still-canonical RSP before
+any RBP-relative load. That loophole is closed on the pinned stock module
+(sha256 `09d4c0b6…`): re-decoding all 256 entry offsets `0x6000`–`0x60ff`
+with 20 instructions each finds **zero** RBP writes before the first
+control transfer. First-transfer mnemonics: 90 entries reach no control
+transfer in 20 instructions, 118 `jna`, 20 `call`, 11 `jmp`, 8 `ret imm16`,
+7 `jnl`, 2 `jns`; every `jmp`/`call` is relative (intra-function or
+non-canonical `0xffff…`) with no register- or `[rsp]`-indirect branch, and
+all eight `ret` entries are `ret 0x458b` popping `[rsp]`, the unchanged
+baseline heap pointer. A staged stanza cannot supply that stack slot: any
+earlier write reaching JID offset 892 (`rbp+16`) first overwrites the saved
+RIP at offsets 884–891 and diverts control in that stanza. This is a
+**static** result with no live run, chosen code, command or side effect;
+rung 5 stays UNKNOWN. Check script `gadget_rbp_check.py` sha256
+`0994442c4792d4349ad869e2ee995c44944ebe364b5600285d0695221c04c1c5`,
+output `artifacts-early/rbp-write-check.txt` sha256
+`61a93f10959e476d8059c97bcab22ddb68843d9082eac30225d01e0bcca3bceb`.
+
 ## Reproduction
 
 ```
