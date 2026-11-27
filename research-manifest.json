@@ -326,10 +326,10 @@
         "R1": "✓",
         "R2": "✓",
         "R3": "✓",
-        "R4": "◐",
+        "R4": "✓",
         "R5": "—"
       },
-      "boundary": "**HARNESS** — a 1024-byte body writes four chosen bytes past `tcpmsg[1024]` into `tcplen`; instrumented chosen-value rung 4 reads back byte-exact. No live bzfs, player socket or `NetHandler` layout. Witness #761 ESTABLISHED all four rungs at those labels (20 PASS / 0 FAIL, byte-equal five-run digest); its source-citation nit is fixed in the brief, status and PROVENANCE, harness bytes unchanged. [Brief](reports/frontier-bzfs2shell.md) · [Status](reports/bzfs2shell-status.md)",
+      "boundary": "**LIVE/CODE/HARNESS** — harness rungs 1–4 ESTABLISHED by witness #761 (20 PASS / 0 FAIL, byte-equal five-run digest; its source-citation nit was fixed in brief/status/PROVENANCE without touching pinned harness bytes). New live stock-build evidence (2026-11-27, commit `efdf5419`, `reports/bzfs2shell-status.md:66-127`): stock v2.4.30 bzfs on loopback only (127.0.0.1:15154/15155/15156), real `NetHandler` layout `sizeof=2384`, `tcpmsg` +96, `tcplen` +1120. A raw packet is consumed before auth; the client must first send `BZFLAG\\r\\n\\r\\n` and read the 9-byte welcome before the 1028-byte packet reaches `NetHandler::tcpReceive`. Body tail `00 f8 ff ff` sets `tcplen=-2048`, then `-1024`; the next `recv(fd, tcpmsg-1024, 1028)` writes at object offset -928. ASan `heap-use-after-free`, `WRITE of size 1024` through `recv` → `receive` → `tcpReceive` → `handleTcpPacket`; plain build places chosen words at real `ares/info/fd/playerIndex/dotNotation` offsets before segfaulting. Fixed v2.4.32 rejects len=1024 (`tcplen=4`) with no body recv. R4 ✓ DEMONSTRATED chosen-value control at real stock member offsets; not a chosen target address, function-pointer overwrite, marker, command or R5. Independent replay of the live wire requested in #6258 is UNKNOWN and does not alter witness #761's harness scope. [Brief](reports/frontier-bzfs2shell.md) · [Status](reports/bzfs2shell-status.md)",
       "reports": [
         "reports/bzfs2shell-status.md",
         "reports/frontier-bzfs2shell.md"
