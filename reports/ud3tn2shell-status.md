@@ -52,13 +52,15 @@ the pins and replayed the loopback wire harness before admission.
 - Not claimed at admission (2026-11-22): code execution, pointer/address
   control, measured smtcp/TCPCLv3 or BPv7 paths, public-exploit existence,
   or rung 5. Those admission-time limits are historical, not the current grade.
-- Current grade (2026-11-27, commit `9ca46a2d`): rung 3 ASan WRITE, rung 4
-  chosen bytes / chosen pointer at a live `free()` / tcache-poisoned
-  chosen-address write, and **rung 5 demonstrated on the pinned v0.15.1 plain
-  build under ASLR-off lab conditions, NOT ESTABLISHED** — the plant-started
+- Current grade (2026-11-27, commit `9ca46a2d`, witness W317 #6122): rung 3
+  ASan WRITE, rung 4 chosen bytes / chosen pointer at a live `free()` /
+  tcache-poisoned chosen-address write, and **rung 5 demonstrated on the
+  pinned v0.15.1 plain build under ASLR-off lab conditions, independently
+  replayed and ESTABLISHED AS LABELED at that scope** — the plant-started
   daemon executed a lab-chosen `touch` via an overwritten `trx_callback` with
-  an observed marker; safe and fixed controls are clean. Exact wire, hashes,
-  addresses, negatives and the owed independent witness replay are in
+  an observed marker; safe and fixed controls are clean. This is not a
+  register-ESTABLISHED flag; the operator folds grades and counts. Exact
+  wire, hashes, addresses, negatives, controls and witness NITs are in
   [reports/ud3tn2shell-pointer-control.md](ud3tn2shell-pointer-control.md),
   final section. Transport reach on smtcp/TCPCLv3/SPP is separately recorded
   there; BPv7 has no analogous sink.

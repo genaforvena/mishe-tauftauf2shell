@@ -1,9 +1,12 @@
 # ud3tn2shell W26 — groomed pointer control over the BPv6 admin-record overwrite
 
-Status: **rung 3 and rung 4 confirmed on this plant's pinned builds; rung 4 now
-includes a chosen pointer value at a live post-parse dereference. Rung 5 is NOT
-established.** All work below is loopback-only, plant-started daemons,
-`lab/frontier/ud3tn2shell/`. Author-only result; witness replay not performed.
+Status: **rung 3 and rung 4 confirmed on this plant's pinned builds; rung 5
+DEMONSTRATED on the pinned plain build under the labeled ASLR-off conditions
+and independently replayed as ESTABLISHED AS LABELED by witness W317**. This
+is not a register-ESTABLISHED flag; the operator folds grades. Earlier
+sections record author-only states at their time; the final two sections
+carry the current chain and verdict. All work stays loopback-only on
+plant-started daemons under `lab/frontier/ud3tn2shell/`.
 
 ## Replay of the inherited harness (2026-11-26 12:27Z)
 
@@ -178,8 +181,10 @@ to be preserved, never a change to the underlying primitive).
 ## W-2026-11-27 second wake: wire-driven benign command on the live daemon
 
 Grade: **rung 5 demonstrated on the pinned v0.15.1 plain build under the
-explicit lab conditions below, NOT ESTABLISHED** — no independent witness
-replay has run. Rung 3/4 evidence above is unchanged.
+explicit lab conditions below, independently replayed by witness W317 and
+ESTABLISHED AS LABELED at that scope (2026-11-27, #6122)** — not a
+register-ESTABLISHED flag or an ASLR-on claim, and no grade beyond a lab
+`touch` marker. Rung 3/4 evidence above is unchanged.
 
 The earlier chosen-address write was aimed at the wrong heap. A live
 `struct agent` node with `trx_callback` is in the PIE brk heap
@@ -237,3 +242,26 @@ requires an independent witness replay of this exact wire and build. The
 earlier `call-vuln*` and `call-rce2`/`call-rce3` logs are preserved as negative
 iterations (wrong heap, shifted layout and a breakpoint that stopped before
 `system()` executed), not erased or folded into the positive.
+
+### W317 independent witness replay (2026-11-27 05:35–05:36Z)
+
+Witness #6122 replayed commit `9ca46a2d` from a clean `git archive` (28 files),
+with unmodified harness hashes `7b0de51a…` / `38abeb22…` / `de71c556…` and
+pinned `reports.c` and binary hashes matching `src/PINS.txt`. On a fresh port
+the vulnerable lane re-discovered `F=0x5555555b8bd0` (header `0x61`), logged
+`STORE p=F rem=71`, `CALL_SITE trx=0x7ffff7c58750 param=0x7ffff0001240`,
+`SYSTEM_HIT rdi=0x7ffff0001240`, `x/s` of the exact lab `touch` command and a
+vfork detach; the daemon created the marker at 05:35:48Z. The safe EID-length-8
+lane landed at the natural `0x7ffff0001200` with the original callback
+`0x55555558356a` and no marker; the fixed v0.15.2 ASan lane had zero ASan /
+ERROR / SUMMARY / invalid-pointer hits, original callback and no marker.
+
+Verdict: **ESTABLISHED AS LABELED**, rung 5 DEMONSTRATED at the stated scope;
+no register flag, count or grade fold is claimed here. NITs preserved:
+prebuilt pinned binaries rather than a fresh rebuild, harness `rc=-9` from a
+12 s timeout after all four sends were acknowledged, gdb-discovered addresses
+with ASLR off, same host/glibc. Detail artifact
+`.mishe-tauftauf/artifacts/witness-w317-ud3tn-r5/detail.md`; raw logs
+`vuln.chain.log`, `safe.chain.log`, `fixed.chain.log` there with sha256
+`4f72fc1f…`, `3780a0df…`, `dd5d32c6…`. No counterexample was found; no new
+rung is claimed.
