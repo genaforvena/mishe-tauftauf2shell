@@ -246,11 +246,13 @@ chosen-byte write into a processed record was observed: `Process_nfd()`
 value. That experiment was removed from the shipped runner; it is recorded
 here only as a failed hypothesis, not evidence.
 
-Wire reachability is now ESTABLISHED at the harness level (real loopback
+Wire reachability is ESTABLISHED at the harness level (real loopback
 socket, real pinned collector, vulnerable/fixed/safe controls). No pointer,
-command or r5 claim is made. The live-wire and boundary replays are still
-owed; the later chosen-byte result was replayed independently by the
-witness (W280, 2026-11-26 16:59Z, ESTABLISHED AS LABELED).
+command or r5 claim is made. The chosen-byte payload lane was replayed by
+W280 (2026-11-26 16:59Z, ESTABLISHED AS LABELED); the live-wire and IPv4
+allocation-boundary replays were later returned by W314 (2026-11-27, both
+ESTABLISHED AS LABELED, sections below). Only the header-control and
+element-type lanes remain queued.
 
 ## Packet-chosen bytes in a processed live record (2026-11-26)
 
@@ -335,8 +337,10 @@ ASan-instrumented (`config.log` CFLAGS contain `-fsanitize=address`), so
 CFLAGS. No write crosses the allocation, so this lane bounds rather than
 advances the grade.
 
-Witness replay of this boundary lane is still owed (tape #5680); the
-in-tree and clean-archive author replays each returned 8 PASS / 0 FAIL.
+The boundary lane's witness replay was later returned by W314 (tape #6070,
+section below): ESTABLISHED AS LABELED, unmodified `run-edge.sh` rc0 with
+8 PASS / 0 FAIL. The author's in-tree and clean-archive replays each
+returned 8 PASS / 0 FAIL.
 
 ## Chosen bytes in a processed record's V3 header (2026-11-26 18:15Z)
 
@@ -553,6 +557,19 @@ wire-chosen trigger; no chosen write crossed the allocation. The temporary
 GDB runner and log are under the ignored `harness/out/gdb-edge-swap*`;
 they are not part of the replay. Grade unchanged: rung 3 verbatim / rung 4
 PARTIAL, NO r5.
+
+### CLI buffer-size option does not change the store geometry (2026-11-27)
+
+`nfcapd -B bufflen` (usage `src/nfcapd/nfcapd.c:145`, parsed at `:633`) is
+passed only to `Unicast_receive_socket()` / `Multicast_receive_socket()` at
+`nfcapd.c:889-891`, where it sets `SO_RCVBUF` (`src/collector/nfnet.c:347-359`).
+The receive allocation stays `malloc(NETWORK_INPUT_BUFF_SIZE)` with
+`NETWORK_INPUT_BUFF_SIZE 65535` (`nfnet.h:49`) at `nfcapd.c:273`, and
+`receive_packet()` is still called with 65535 at `:319`. No CLI setting
+resizes `in_buff`; the IPv6 store stays at `cnt+16 <= 65543`, i.e. within
+the immediate next chunk's header and never in its user data or a
+pointer-bearing object. This closes the "tune `-B` to change adjacency"
+hypothesis; grade and verdicts are unchanged.
 
 ## Closure: the swap cannot set an accepted record size or element count (2026-11-26 20:11Z)
 
