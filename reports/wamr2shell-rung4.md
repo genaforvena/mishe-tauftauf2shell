@@ -4,9 +4,9 @@ Status: **RUNG 4 ESTABLISHED in the lab build and INDEPENDENTLY REPLAYED by witn
 is UNKNOWN: a genuine wire-facing consumer is named (Envoy v1.39.3, below)
 but was NOT built or driven; no guest code executes and no benign command
 side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
-~21:50Z with the wake-2 real-store verification and ~22:02Z with verdict
-#1168. Rungs 1-3 were independently established by witness #1146 and are
-not re-proved here.
+~21:50Z with the wake-2 real-store verification, ~22:02Z with verdict
+#1168 and 2026-11-27 ~07:16Z with the offset-shift depth addendum. Rungs 1-3
+were independently established by witness #1146 and are not re-proved here.
 
 ## Result in one paragraph
 
@@ -259,3 +259,84 @@ author `0x5d39...`), so raw digests differ while the invariants match: four
 fixed offsets, chosen values, real emitter stores, clean fixed control. No
 pointer control, guest execution or wire traffic; Envoy v1.39.3 remains named
 but not built or driven; rung 5 stays UNKNOWN. The witness made no repo edits.
+
+## Addendum: attacker-adjusted offsets by module shape (2026-11-27 ~07:16Z)
+
+Operator request #6173 bounded one wake to the question left open by the
+settled claim: are the four chosen-immediate offsets fixed at
+`past=11/29/47/65`, or can the module author adjust them? Answer: **they are
+adjustable by module shape, in discrete steps, but still not by arbitrary
+byte address**. This is rung-3/4 depth, not a new rung and not rung 5.
+
+`lab/frontier/wamr2shell/make_shift_variants.py` (sha256
+`6411b130e15fe3678c40051f2751f1b381fcdbd07cc967f8775ef7532bb5283a`)
+does byte-level surgery on the pinned PoC `f4fdff5f…`; all five admission
+pins are untouched. It copies the existing 45-byte 21-result block
+(`02 01 41 01 … 41 15 0b`) and/or appends chosen `i64.const`/`i32.const`
+pairs at the block's `end`, then rewrites the code-section and body LEB
+sizes. No WAT compiler is on the host. Variant SHA-256:
+
+| Variant | Shape | sha256 |
+| --- | --- | --- |
+| `n4` / `n8` / `n16` | 4 / 8 / 16 appended `i64.const` pairs | `17f16803…` / `ecfce96a…` / `7716bbc3…` |
+| `dup_before` | copied 21-result block + 21 drops, then 8 pairs | `756cabf8…` |
+| `dup2_before` | two copies, then 8 pairs | `7f4339e9…` |
+| `dup_after` | 8 pairs, then one copied block | `3dc66921…` |
+| `split` | 4 pairs, copied block, 4 pairs | `849d6dc9…` |
+| `i32` | 8 appended `i32.const` pairs | `46aba96e…` |
+| `small1/2/4_before` | 1/2/4 one-result blocks, then 8 pairs | `33dc2264…` / `c422df9b…` / `018397f0…` |
+
+Builds are the already-committed artifacts: caller-store
+`build-plain-2.4.4-callerstore/iwasm-2.4.4` (sha256
+`de75c5e691e7700a3c159100cff61a7a1dcdf7bd9c1b381d1c7d07e19f875eac`;
+source loader sha256 `97b07155…` = pinned `b0029210…` + committed
+`caller-store.patch` `9c0e7907…`, verified by reapplying the patch),
+`build-asan-2.4.4/iwasm-2.4.4` (sha256 `a7217920…`, clean 2.4.4 tag) and
+`build-asan-2.4.5/iwasm-2.4.5` (sha256 `1799eabc…`, clean 2.4.5 tag).
+Raw logs are `.mishe-tauftauf/artifacts/wamr2shell/shift-*-callerstore.out`,
+`shift-*-asan244.out`, `shift-*-asan245.out`.
+
+Caller-store observations (real emitter stores; `phase=before` input equals
+`phase=after` readback in every listed pair; three repeat runs of
+`dup_before` gave identical offsets while destination addresses ASLR-varied):
+
+- `n4`, `n8`, `n16`: chosen 8-byte writes stay at `past=11/29/47/65`
+  regardless of appended-pair count. Count is not an offset knob.
+- `dup_before`: chosen writes at `past=46/64/82/100/118/136/154/172`, values
+  `00/01/02/03/04/05/06/07 47464544434241`; +35-byte shift and all eight
+  pairs now out of bounds.
+- `dup2_before`: `past=153/171/189/207/225/243/261/279`, same value ladder;
+  +142-byte shift. The offset lattice is discrete (0, 1, 2 copies), not a
+  continuous address control.
+- `split`: only the four pairs **after** the copied block land OOB, at
+  `past=118/136/154/172`; the four before it stay in bounds. `dup_after`
+  gives zero chosen `tag=const` OOB writes. Placement relative to the
+  desync generator, not merely its existence, selects which values land in
+  the overflow window.
+- `i32`: chosen **4-byte** immediates land at `past=9/23/37/51/65` with
+  values `03/04/05/06/07 474645`; the write width and offsets both change.
+- `small1/2/4_before`: offsets remain `11/29/47/65`. A one-result block
+  does not create the extra copy-record desync; the 21-result shape does.
+
+ASan 2.4.4 still faults during load on every shifted variant, but the
+**first** fault site moves: `n8` and `small1_before` give `WRITE of size 8`
+in `wasm_loader_emit_const` (`:9382`), 3 bytes after a 1164/1178-byte region;
+`dup_before` gives `WRITE of size 2` in `reserve_block_ret` (`:10451`), zero
+bytes after a 1458-byte region; `dup2_before` gives `WRITE of size 2` in
+`wasm_loader_push_frame_offset` (`:9775`), zero bytes after 1752 bytes;
+`dup_after` gives `WRITE of size 4` in `prepare_bytecode` (`:14251`);
+`i32` gives `WRITE of size 8` in `wasm_loader_emit_ptr` (`:9458` from
+`:11763`). So ASan corroborates real heap corruption for each shape but
+does not itself witness the shifted chosen 8-byte stores — those are proven
+by the caller-store emitter's own stores and readback, plus glibc heap
+abort (rc −6). Fixed 2.4.5 ASan has **no** error on `n8`, `dup_before`,
+`dup2_before`, `small1_before` or `i32` (only the known post-load CLI
+"Exception: native stack overflow"). Safe-input control: the unchanged
+pinned PoC produces zero `tag=const` OOB writes in the caller-store build
+and rc 0; its known ASan error is loader-generated data only.
+
+Preserved negatives: appended-pair count and inert small blocks do not move
+the offsets; placing the desync generator after the chosen pairs removes
+them from the window; the earlier `0xDEAD…` LEB rejection and six-pair
+`i32.const 0` padding negative from the main report stand. No pointer
+control, no guest execution, no wire traffic: rung 5 stays UNKNOWN.
