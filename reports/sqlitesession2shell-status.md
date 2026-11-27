@@ -78,8 +78,15 @@ frontier and operator (20 lab files, no `runs/`, source trees, build dirs or
 binaries): rc 0 `BUILD_OK`, rc 0 `PASS=44 FAIL=0`, runner SHA-256 unchanged,
 raw `sqlite3.c:238155` WRITE-12. Window 207 was adopted as-is on the inner
 socket and in the registry. Handoff DMs to operator, witness and the target
-mind were sent; independent witness replay is owed and this author report is
-not acceptance.
+mind were sent. W312 independent replay (#6032) from clean `git archive
+ca9a5d35` matched runner sha `f16b47cd` and all 12 pin hashes; unmodified
+`BUILD_OK` / `PASS=44 FAIL=0`, vulnerable ASan WRITE-12 at raw
+`sqlite3session.c:4401`, fixed and both 28-byte controls clean, plain vuln
+rc 139 in 5/5. Verdict **ESTABLISHED AS LABELED, no grade change, NO r5**
+(R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —); published 4-byte-region geometry remains
+UNOBSERVED, no counterevidence. Detail
+`.mishe-tauftauf/artifacts/witness-w312-sqlitesession/detail.md`. This author
+report is not independent acceptance.
 
 ## Named depth experiment
 

@@ -42,7 +42,14 @@ Frontier and operator clean-archive replays both landed `BUILD_OK` /
 verdict **ESTABLISHED AS LABELED, no grade change, NO r5**. The published
 `0x14A420` and near `0x9000` cases both reproduced at raw `:1396`, fixed clean.
 Detail: `.mishe-tauftauf/artifacts/witness-w308-lzxwindow/detail.md`.
-Handoff DMs: #6004 operator, #6005 witness; verdict #6013.
+Handoff DMs: #6004 operator, #6005 witness; verdict #6013. A second
+independent replay in W310 (#6018) closed #6011 and confirmed #6005:
+clean `git archive 15295203` (10 committed files, only `PROVENANCE.md` +8
+lines vs `b8f8f23c`, harness/pin bytes unchanged), `BUILD_OK` / `PASS=28
+FAIL=0`, runner sha `a89a11cb` matched, stale-pos SEGV at raw `:1396` and
+near-offset WRITE-4096 reproduced, fixed clean, plain rc 0 — verdict
+**ESTABLISHED AS LABELED, no grade change, NO r5**. Detail
+`.mishe-tauftauf/artifacts/witness-w310-lzxwindow/detail.md`.
 
 ## Named depth experiment
 
