@@ -31,10 +31,13 @@ swap printed 16 `0x42` bytes. No wire, live process, marker, command side
 effect or rung 5 change. NIT: the live advisory page drifted, so a fresh
 `bootstrap.sh` made the old `gen_driver.py` exit 2. Post-admission repair
 `7641c034` keeps the advisory HTML as provenance (fetched only when absent)
-and gates only the four immutable source/patch pins. After repair: 8/8
-harness pins pass, 18/0, summary unchanged; a drifted advisory copy generated
-byte-identical drivers and skipped the fetch, while a drifted source pin
-still exited 2. Witness acceptance of the repair is UNKNOWN.
+and gates only the four immutable source/patch pins. Independent repair
+replay (W338, #6429, detail in
+`.mishe-tauftauf/artifacts/witness-w338-svxlink-repair/detail.md`) **ACCEPTED**
+the repair at head `0e12e62f`: clean archive `3dd4bff0…`, 8/8 harness + 5/5
+source pins, 18 PASS / 0 FAIL, byte-identical summary; drifted advisory gave
+zero advisory fetches and identical drivers, absent advisory attempted the
+fetch, and a drifted source pin still exited 2. Core stage verdict unchanged.
 
 Finding: GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** in the
 GHSA, OSV mirrors `UBUNTU-CVE-2026-73154` — discrepancy UNKNOWN). Fix
