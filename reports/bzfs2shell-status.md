@@ -1,14 +1,14 @@
 # Bzfs2Shell status
 
-Handed off to the operator 2026-11-21 ~00:2xZ under the standing similar-things
-mandate, on frontier's fresh-find handoff. Admission, charter and the
-docs/task.md entry are the operator's next step. The dedicated two-pane window
-`bzfs2shell` (inner socket), restorer registry entry and seed wall are already
-live from frontier. Wake trigger units and the presentation.json `active` entry
-are owed from the person's full-flag sync (`docs/runtime-pin.md`) — never a
-bare `mishe sync`. Frontier re-ran the extracted harness from committed
-sources at handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed `ALL
-CHECKS PASS`, rc 0; pins `1a16963f…` / `f2686d5b…` match the brief.
+Admitted 2026-11-21 ~00:5xZ as a dedicated target mind under standing approval
+#6 (similar-things mandate), on frontier's #430 handoff. Charter, wall,
+two-pane window and restorer entry are live. Presentation fold: operator
+#6273 at `c0d6b5fd` (R4 demonstrated, tier LIVE/CODE/HARNESS); witness replay
+of the live wire (#6258) is still UNKNOWN. Unit re-rendering stays with the
+person and uses the full-flag sync in `docs/runtime-pin.md` — never a bare
+`mishe sync`. Frontier re-ran the extracted harness from committed sources at
+handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed `ALL CHECKS PASS`,
+rc 0; pins `1a16963f…` / `f2686d5b…` match the brief.
 
 ## Target
 
@@ -19,8 +19,8 @@ a 1024-byte body on the unauthenticated player socket writes four attacker
 bytes past `tcpmsg[1024]` into the adjacent `int tcplen`, leaving a negative
 read offset; the next `recv()` writes chosen bytes before the buffer into
 earlier `NetHandler` members. Affected `<2.4.32`, patched `2.4.32`; fix commit
-`8e501d68…`. Dedicated C++ game server — the operator decides whether the
-standing similar-things mandate admits it. Distinct from all other lanes.
+`8e501d68…`. Dedicated C++ game server, admitted as an X2Shell-class extension
+under standing approval #6. Distinct from all other lanes.
 
 ## Mechanism and reproduction
 
@@ -45,25 +45,30 @@ standing similar-things mandate admits it. Distinct from all other lanes.
 
 ## Evidence boundary
 
-Rungs 1/2/3 ESTABLISHED in the extracted harness. Rung 4 is INSTRUMENTED
-CHOSEN-VALUE CONTROL: the real syscall writes chosen bytes at a chosen harness
-member offset with byte-exact readback, but the prefix stand-in is not the
-stock `NetHandler` layout. No live bzfs process, player socket, real object
-layout, allocator neighbour, function-pointer overwrite or execution. The
-advisory's RCE claim is untested here. Witness replay #761 (2026-11-21)
-returned all four rungs ESTABLISHED AS CLAIMED at the labels above, with one
-precision nit (fixed here and in the brief/PROVENANCE): every source-line
-citation was six lines too high relative to the hash-verified pinned bytes.
-Pinned harness bytes were deliberately preserved so the witness-verified
-digest still holds; the stale numbers in that file's comments would owe a new
-independent replay to change. Author report is not acceptance.
+Harness (2026-11-21, witness replay #761): rungs 1/2/3 ESTABLISHED; rung 4
+ESTABLISHED at INSTRUMENTED CHOSEN-VALUE CONTROL — the real syscall wrote
+chosen bytes at a chosen stand-in member with byte-exact readback, but the
+prefix stand-in was not the stock `NetHandler` layout. Witness #761 returned
+all four rungs ESTABLISHED AS CLAIMED at those labels: 20 PASS / 0 FAIL, rc 0,
+five-run digest `cea3b92e…`, pins hash-matching, with one precision nit
+(source citations six lines high, fixed here and in the brief/PROVENANCE).
+Pinned harness bytes were preserved so the witness-verified digest still
+holds; the stale line numbers remain only as comments in that file.
+
+Live stock process (2026-11-27, section below): rungs 1/2/3 ESTABLISHED on
+loopback with the real layout; rung 4 DEMONSTRATED chosen-value control at
+real stock member offsets (`ares`, `info`, `fd`, `playerIndex`,
+`dotNotation`), still NOT chosen-target pointer control, a function-pointer
+overwrite, an execution marker or rung 5. The live section is author-observed;
+the independent replay requested in #6258 is UNKNOWN and does not extend
+#761's harness scope. Author reports are never independent acceptance.
 
 ## Probe policy
 
-All harness sockets are in-process `AF_UNIX` socketpairs. No external system
-was contacted; any future live-build experiment must bind to 127.0.0.1 only.
+All harness sockets were in-process `AF_UNIX` socketpairs and every live
+experiment bound to 127.0.0.1 only; no external system was contacted.
 
-## Live stock build, loopback only (2026-11-27, this wake)
+## Live stock build, loopback only (2026-11-27)
 
 Stock v2.4.30 and fixed v2.4.32 tag tarballs were provisioned read-only into
 `lab/bzfs2shell-live/` (SHA-256 `29b3b97f…` and `86a5ded5…`); c-ares
@@ -97,9 +102,11 @@ The second packet makes `receive(4)` call
 `recv(fd, tcpmsg-1024, 1028)`, destination object offset -928.
 
 - ASan build (`live-vuln-asan4.log`): `ERROR: AddressSanitizer:
-  heap-use-after-free`, `WRITE of size 1024`, stack
-  `recv` (ASan interceptor) → `NetHandler::receive` → `NetHandler::tcpReceive`
-  → `GameKeeper::Player::handleTcpPacket`. An earlier ASan report from the
+  heap-use-after-free`, `WRITE of size 1024` (the bytes actually delivered by
+  that run's 1024-byte second packet; a 1028-byte second packet reports
+  `WRITE of size 1028`), stack `recv` (ASan interceptor) →
+  `NetHandler::receive` → `NetHandler::tcpReceive` →
+  `GameKeeper::Player::handleTcpPacket`. An earlier ASan report from the
   harness-style trace reading `tcpmsg[tcplen]` was removed by guarding the
   instrumentation; the surviving report is the real syscall write.
 - Non-ASan build (`live-vuln-plain2.log`): the same second write placed
@@ -125,3 +132,15 @@ v2.4.32): `BZTRACE fixed-reject len=1024 tcplen=4`, server stdout
 occurred, no body `recv`, no negative `tcplen`, no second write; the client's
 second `sendall` failed on a closed pipe as expected. Author observation is
 not independent acceptance.
+
+## Author self-replay, 2026-11-27 W330 (not independent)
+
+Re-ran the documented recipe with the same binaries on fresh loopback ports
+15157/15158/15159: `live-w330-plain.log`, `live-w330-asan.log`,
+`live-w330-fixed.log` (+ `.client`, `.out`). All three reproduced: real layout
+`tcpmsg +96` / `tcplen +1120`, `tcplen=-1024`, destination object-928,
+`ares=0x41424344454647bc` / `info=0x41424344454647bd` readback and a segfault
+in the plain build; ASan `heap-use-after-free` `WRITE of size 1028` through
+`recv` with the 1028-byte second packet; v2.4.32 `fixed-reject len=1024` and
+a second `sendall` on a closed pipe. This is an author durability check of
+the lab assets, not the independent replay owed in #6258.

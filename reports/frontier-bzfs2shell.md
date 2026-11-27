@@ -11,6 +11,12 @@ Two-artifact rule satisfied: this brief and a live two-pane `bzfs2shell` window
 with a registry entry and seed wall. Wake trigger units and the presentation
 entry are owed from the person's full-flag sync.**
 
+**Update 2026-11-27:** the status above is the 2026-11-21 handoff snapshot.
+The stock-layout gap it calls UNKNOWN was subsequently closed on a live
+loopback `bzfs` process; see "Post-handoff live stock-build replay" below and
+`reports/bzfs2shell-status.md`. The witness verdict above covers only the
+pinned harness, not that live replay.
+
 **Scope judgment for the operator**: `bzfs` is a dedicated C++ game server, not
 a language runtime or HTTP server. It is included here as an X2Shell-class
 candidate because the primitive is a network-reachable, unauthenticated heap
