@@ -1,9 +1,20 @@
-# sippauth2shell — status (staged 2026-11-27 W334)
+# sippauth2shell — status (admitted 2026-11-27 W334)
 
-State: **STAGED, awaiting operator admission and independent witness replay.**
-Brief `reports/frontier-sippauth2shell.md`, lab
-`lab/frontier/sippauth2shell/`, provenance in that lab's `PROVENANCE.md`.
-Author-side reproduction only; the witness has not replayed it.
+State: **ADMITTED 11:0xZ under standing #6 as the 209th declared target mind;
+independent witness replay still owed.** Brief
+`reports/frontier-sippauth2shell.md`, lab
+`lab/frontier/sippauth2shell/`, provenance in that lab's `PROVENANCE.md`,
+charter `.mishe-tauftauf/charters/sippauth2shell.md`, seed wall
+`.mishe-tauftauf/walls/sippauth2shell.md`. Stage commits `b5c4e199` and
+`884f4fdc`; operator clean replay of
+`git archive --format=tar 884f4fdc lab/frontier/sippauth2shell` (plain-tar
+SHA-256 `2699180e7c67689cad4c4206bd2f6fe6f714cb1ac7783d3176b17b945eb00cba`,
+gzip container `dbeb0b98c9cf2611bd773d55e3f4e1012a68d04f3d40e2ac67e4015a13e87715`)
+matched all 8 harness/pin hashes, built all four variants and returned
+`TOTAL: 15 PASS / 0 FAIL` with the same summary SHA-256
+`8dd157952a776ea48083b9acd73c279e25a04142b4b808375fdfb3d4037fc802`. Live
+inner-socket window 217 (`%440`/`%441`, dead=0), registry 218/218 unique
+names.
 
 Finding: CVE-2026-90779 (CWE-121, SIPp <= 3.7.7), pinned v3.7.7
 `369b3c18…` → v3.7.8 `741ee230…`, exact fix `1d4a5622…` (not an ancestor of
@@ -28,8 +39,12 @@ production mapping or command side effect was observed; the source-level
 byte-identical across two runs; pin/harness hashes in
 `lab/frontier/sippauth2shell/HARNESS_SHA256.txt`.
 
-Next: operator admission under the standing mandate, witness replay of the
-stage commit, then a loopback UAS/UAC 401 challenge with 62 chosen algorithm
-bytes to test whether the sink and the control-flow diversion are reachable
-from a real request. A wire no-result is a legitimate negative; no rung-5
-claim without an observed request-driven command side effect.
+Next (admission done): independent witness replay of the stage commit, then
+one bounded depth experiment owned by the target mind: a loopback UAS/UAC
+401 challenge with 62 chosen `algorithm=` bytes, checking whether
+`createAuthHeader()` is reached from a real request and whether the return
+target is mapped in that process; fixed v3.7.8 and safe-input controls.
+Prediction: wire-reachable crash with harness-only control-flow mechanics,
+not rung 5. A wire no-result is a legitimate negative; no rung-5 claim
+without an observed request-driven command side effect. Wake units and
+routes are person-reserved.
