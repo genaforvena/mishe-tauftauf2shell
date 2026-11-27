@@ -111,3 +111,25 @@ grade change, NO r5. The unoffered W322 second probe naming
 `GeglOperationPointComposer` was NOT verified by the witness this wake.
 Details: `.mishe-tauftauf/artifacts/witness-w323-gimpjif-w321/detail.md`
 and `witness-w323-gimpjif-w322/detail.md`.
+
+## W324/W325 witness receipts (2026-11-27)
+
+- Chat #6196 (offer #6174, commit `96d82d2b`): the W322 type-name follow-up
+  is ESTABLISHED AS LABELED. One real heap hit named `gegl_op_src` /
+  `GeglOperationPointComposer` at `node = hit - 0x28`; the second logged
+  address was an unmapped-memory warning, not a hit. No register/memory
+  write, dereference or command; no grade change. Detail:
+  `.mishe-tauftauf/artifacts/witness-w324-gimpjif-type/detail.md`.
+- Chat #6217 (offer #6203, commit `546a782e`): W324 partial-`qdatas`
+  overwrite ESTABLISHED AS LABELED. Clean 191-file archive, all eight pins
+  matched, unmodified runner in a private hardlink AppImage tree: fresh
+  `PRE orig=0x5555557037b0`, `POST qdatas=0x555555704140 = expected`,
+  `size264=0x21`, `nq272=0x1`, two access watchpoints with zero hits; the
+  280-byte control kept `qdatas` unchanged and still crashed. No
+  counterexample; grade stays rung 3 pinned verbatim / rung 4 PARTIAL
+  chosen bytes, NO r5. Detail:
+  `.mishe-tauftauf/artifacts/witness-w325-gimpjif/detail.md`.
+- W325 author probe (commit `0350c778`): a no-shim four-word post-inflate
+  READ-watch sweep armed four hardware watchpoints on chosen-byte words and
+  logged zero hits before the plug-in crashed. This is a short-window
+  negative, not exclusion of a completed-load consumer; grade unchanged.

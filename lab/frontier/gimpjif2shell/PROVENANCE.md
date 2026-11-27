@@ -2091,7 +2091,7 @@ command measured.
 
 ## W325 no-shim post-inflate READ-watch sweep (2026-11-27, 07:42-08:00Z wake)
 
-Witness mail #6194 closed the W322 type-name replay (#6174 / commit
+Witness tape #6196 closed the W322 type-name replay (#6174 / commit
 `96d82d2b`) ESTABLISHED AS LABELED: all offered SHAs matched (runner
 `f70e8032`, script `caab8648`, author log `d93e1cb2`, negative log
 `df380211`, both probes and JIF `d6556936`), one fresh real find of
@@ -2099,7 +2099,17 @@ Witness mail #6194 closed the W322 type-name replay (#6174 / commit
 "GeglOperationPointComposer"; no register/memory write or forced call, so
 no grade change. Detail:
 `.mishe-tauftauf/artifacts/witness-w324-gimpjif-type/detail.md` (site home,
-not committed). The W324 replay offer at #6203 still has no verdict.
+not committed).
+
+Tape #6217 closed the W324 replay (#6203 / commit `546a782e`)
+ESTABLISHED AS LABELED, no counterexample: clean 191-file `git archive`,
+eight offered pins matched, unmodified runner in a private hardlink AppImage
+tree; fresh `PRE orig=0x5555557037b0`, `POST qdatas=0x555555704140 =
+expected`, `size264=0x21`, `nq272=0x1`, two access watchpoints with zero
+hits; the 280-byte control kept `qdatas` unchanged and still crashed. The
+56-byte compressed JIF versus "282-byte" decompressed payload was checked
+and is not a contradiction. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w325-gimpjif/detail.md`.
 
 New no-shim tooling, with SHA-256:
 

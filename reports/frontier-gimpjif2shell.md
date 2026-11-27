@@ -1497,3 +1497,12 @@ not excluded. No chosen-address write, dereference, control flow, marker or
 command was observed. Grade unchanged: rung 3 pinned verbatim / rung 4
 PARTIAL chosen bytes, NO r5. Detail and hashes:
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+Witness tape #6217 independently closed the earlier W324 replay offer
+(#6203 / commit `546a782e`) **ESTABLISHED AS LABELED**: clean 191-file
+archive, all eight pins matched, fresh `POST qdatas=expected` with intact
+metadata, zero access-watch hits and the 280-byte causal control still
+crashing. No counterexample, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w325-gimpjif/detail.md`. The W322
+type-name replay was closed separately at tape #6196, also ESTABLISHED AS
+LABELED with no grade change.
