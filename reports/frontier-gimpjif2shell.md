@@ -1725,3 +1725,31 @@ binary's compiler; allocator/free consumers (W304/W335) remain the only
 observed ones. At 11:45Z gimp.org still listed 3.2.8 as current with no
 fixed vendor build. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
 chosen bytes / NO r5.
+
+## W337 minimal geometry through the real plug-in (2026-11-27, 12:02Z wake)
+
+Grade-neutral, no replay owed. All earlier *live* runs used the published
+geometry (`45771x46918`, alpha `data_size=260`). This wake drove the
+generator's minimal mode (`33025x65026`, product `0x80000002`, alpha
+`data_size=4`, `avail_out=0x80000002`, 40 decompressed `0x4d` bytes) through
+the SHA-verified GIMP 3.2.8 plug-in, no shim, under GDB. The first runner
+resolved the inflate return to `inflate+79` in `patch-shim.so` (default
+AppRun preloads it), a preserved tooling negative; the repaired runner
+generated a private shim-free AppRun in the clean `w316` tree and the
+return frame then resolved to `ReadJeffsImage.isra.0+696` in the real
+plug-in.
+
+Observed: `PRE avail=0x80000002 idx=0x555555678fe0`; `+24=0x41` chunk size
+and `+32` heap pointer before inflate; after inflate the full 40 bytes are
+`0x4d4d…` with `+40` onward untouched. No OOB word maps to an executable
+range — `0x4d4d…`, small integers or heap `rw-p` pointers only — so no read
+watcher had a target. GDB logged no in-process fault stop; GIMP printed
+`Fatal signal: Segmentation fault` / `Plug-in crashed: "file-gif-load"`,
+the same terminal crash class as W304/W325/W329/W335.
+
+Conclusion: the minimal geometry does not lower the ~4 GiB `dest` / ~8 GiB
+GEGL load or expose a post-decode consumer or code pointer; both
+file-reachable wrapped products write chosen bytes OOB but neither
+completes. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes / NO r5. Script, JIF, transcript and hashes in the W337 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

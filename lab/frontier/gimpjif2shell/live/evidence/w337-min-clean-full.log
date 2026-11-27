@@ -1,0 +1,74 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 12:20:02.769: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 12:20:02.769: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 12:20:12.802: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 12:20:12.802: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 12:20:12.804: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.806: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.807: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.809: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.810: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.810: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.811: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.812: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.819: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.824: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 12:20:12.824: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+W337 PRE avail=0x80000002 idx=0x555555678fe0 ret=0x555555557778 pid=3949678
+W337 PRE idx=0x555555678fe0
+W337 PRE +0  =0x0000555000251ec8 map=[None]
+W337 PRE +8  =0x0000000000000000 map=[None]
+W337 PRE +16 =0x0000000000000002 map=[None]
+W337 PRE +24 =0x0000000000000041 map=[None]
+W337 PRE +32 =0x0000555555679300 map=[[heap] perms=rw-p]
+W337 PRE +40 =0x0000000000000001 map=[None]
+W337 PRE +48 =0x0000000000000000 map=[None]
+W337 PRE +56 =0x000055555561cd70 map=[[heap] perms=rw-p]
+W337 PRE +64 =0x0000000000000000 map=[None]
+W337 PRE +72 =0x0000000000006874 map=[None]
+W337 POST idx=0x555555678fe0
+W337 POST +0  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +8  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +16 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +24 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +32 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +40 =0x0000000000000001 map=[None]
+W337 POST +48 =0x0000000000000000 map=[None]
+W337 POST +56 =0x000055555561cd70 map=[[heap] perms=rw-p]
+W337 POST +64 =0x0000000000000000 map=[None]
+W337 POST +72 =0x0000000000006874 map=[None]
+W337 RETURN pc=0x555555557778 sym=[ReadJeffsImage.isra.0 + 696 in section .text of /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load]
+
+
+Fatal signal: Segmentation fault
+----- Backtrace -----
+0x4d3574 ???
+0x5cb4f9 ???
+0x5cb68a ???
+0x7d7675c4532f ???
+	./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+0x0 ???
+---------------------
+A fatal error internal to GDB has been detected, further
+debugging is not possible.  GDB will now terminate.
+
+This is a bug, please report it.  For instructions, see:
+<https://www.gnu.org/software/gdb/bugs/>.
+
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w337-min-4d.jif" "w337-min-4d.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

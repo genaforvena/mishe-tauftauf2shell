@@ -1,0 +1,83 @@
+GIMP-3.2.8-x86_64.AppImage: OK
+7d84ec054520fdbc557250a5a96e3e646837980fdf94810b31efb41eadd4ebc4  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w337-min-4d.jif
+a8f23d0a0a54e0895ca702bd2b1e2e1cfda0f924963f552d9e582fb74e0ee572  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/gdb-min337.cmd
+PASS: pinned inflate reached
+INFO: no fault captured
+--- probe log ---
+W337 PRE avail=0x80000002 idx=0x555555677d30 ret=0x555555557778 pid=3934432
+W337 PRE idx=0x555555677d30
+W337 PRE +0  =0x00005550003bec17 map=[None]
+W337 PRE +8  =0x0000000000000000 map=[None]
+W337 PRE +16 =0x0000000000000002 map=[None]
+W337 PRE +24 =0x0000000000000071 map=[None]
+W337 PRE +32 =0x0000555555677cc0 map=[[heap] perms=rw-p]
+W337 PRE +40 =0x0000000000000001 map=[None]
+W337 PRE +48 =0x0000000000000000 map=[None]
+W337 PRE +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 PRE +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 PRE +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 PRE avail=0x80000002 idx=0x555555677d30 ret=0x7ffff7aa636f pid=3934432
+W337 PRE idx=0x555555677d30
+W337 PRE +0  =0x00005550003bec17 map=[None]
+W337 PRE +8  =0x0000000000000000 map=[None]
+W337 PRE +16 =0x0000000000000002 map=[None]
+W337 PRE +24 =0x0000000000000071 map=[None]
+W337 PRE +32 =0x0000555555677cc0 map=[[heap] perms=rw-p]
+W337 PRE +40 =0x0000000000000001 map=[None]
+W337 PRE +48 =0x0000000000000000 map=[None]
+W337 PRE +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 PRE +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 PRE +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 POST idx=0x555555677d30
+W337 POST +0  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +8  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +16 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +24 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +32 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +40 =0x0000000000000001 map=[None]
+W337 POST +48 =0x0000000000000000 map=[None]
+W337 POST +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 POST +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 POST +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 RETURN pc=0x7ffff7aa636f sym=[inflate + 79 in section .text of /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/patch-shim.so]
+--- tail ---
+W337 PRE avail=0x80000002 idx=0x555555677d30 ret=0x555555557778 pid=3934432
+W337 PRE idx=0x555555677d30
+W337 PRE +0  =0x00005550003bec17 map=[None]
+W337 PRE +8  =0x0000000000000000 map=[None]
+W337 PRE +16 =0x0000000000000002 map=[None]
+W337 PRE +24 =0x0000000000000071 map=[None]
+W337 PRE +32 =0x0000555555677cc0 map=[[heap] perms=rw-p]
+W337 PRE +40 =0x0000000000000001 map=[None]
+W337 PRE +48 =0x0000000000000000 map=[None]
+W337 PRE +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 PRE +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 PRE +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 PRE avail=0x80000002 idx=0x555555677d30 ret=0x7ffff7aa636f pid=3934432
+W337 PRE idx=0x555555677d30
+W337 PRE +0  =0x00005550003bec17 map=[None]
+W337 PRE +8  =0x0000000000000000 map=[None]
+W337 PRE +16 =0x0000000000000002 map=[None]
+W337 PRE +24 =0x0000000000000071 map=[None]
+W337 PRE +32 =0x0000555555677cc0 map=[[heap] perms=rw-p]
+W337 PRE +40 =0x0000000000000001 map=[None]
+W337 PRE +48 =0x0000000000000000 map=[None]
+W337 PRE +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 PRE +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 PRE +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 POST idx=0x555555677d30
+W337 POST +0  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +8  =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +16 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +24 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +32 =0x4d4d4d4d4d4d4d4d map=[None]
+W337 POST +40 =0x0000000000000001 map=[None]
+W337 POST +48 =0x0000000000000000 map=[None]
+W337 POST +56 =0x000055555561c330 map=[[heap] perms=rw-p]
+W337 POST +64 =0x000055555561cc90 map=[[heap] perms=rw-p]
+W337 POST +72 =0x000055555561cc20 map=[[heap] perms=rw-p]
+W337 RETURN pc=0x7ffff7aa636f sym=[inflate + 79 in section .text of /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/patch-shim.so]
+Fatal signal: Segmentation fault
+GIMP-Error: Plug-in crashed: "file-gif-load"
+97a1ea3b8a26f2f36f6d20fac8bdefffe4ad546182c83c326404698bf191b9b3  /home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w337-min-full.log
+34cd7b9e2b0f7eee4de0d74ce903ed348ccc8831fad64a809736ff1d0e24267b  /tmp/w337-min-3932970.log

@@ -2551,3 +2551,67 @@ returned rc 0 with byte-identical runner/script hashes
 (`8d2b7f9e…` / `af33b29f…`). It reproduced the positive WRITE watch,
 `total_out=324`, `pos=260` at pin line 136, zero read-watch hits and a
 normal process exit. Only stack addresses differed (ASLR). Grade unchanged.
+
+## W337 minimal-geometry live probe (2026-11-27, 12:02-12:2xZ wake)
+
+Grade-neutral, no replay owed. New lane, not a folded repeat: every prior
+live AppImage run used the published geometry (`45771x46918`, product
+`0x80000082`, alpha-doubled `data_size=260`). `realglib/make-jif.py`
+already had a minimal mode (`LEN=33025 HEIGHT=65026`, product
+`0x80000002`, alpha-doubled `data_size=4`, `avail_out=0x80000002`) used
+only in the synthetic W242/W243 driver. Prediction: a 4-byte `indexes`
+chunk puts the OOB region against different live objects and might expose
+a consumer, a code pointer or a different terminal fault site.
+
+Artifacts (all under `lab/frontier/gimpjif2shell/`):
+- `live/evidence/w337-min-4d.jif` SHA-256
+  `7d84ec054520fdbc557250a5a96e3e646837980fdf94810b31efb41eadd4ebc4`
+  (47-byte file, 40 decompressed `0x4d` bytes, zlib stream 12 bytes).
+- `live/gdb-min337.cmd` SHA-256
+  `a8f23d0a0a54e0895ca702bd2b1e2e1cfda0f924963f552d9e582fb74e0ee572`:
+  breaks on `inflate`, validates `avail=0x80000002`, dumps 80 bytes at
+  `zs.next_out` at entry and return, classifies each word against
+  `/proc/<pid>/maps`, and logs any fault signal. Pure GDB reads; no
+  register, heap byte, plugin byte or allocator state is modified.
+- `live/run-appimage-min337.sh` SHA-256
+  `818b7320249c3247d14484fb06d2dd95ec153baeacfdbc9089985a90a2ee7e35`:
+  SHA256SUMS-verified 3.2.8 AppImage in the clean `/tmp/gimpjif-appimage-w316`
+  tree, a private shim-free `AppRun.min337` with every `gimpjif2shell/live/
+  *shim.so` line deleted and asserted absent, fresh `$HOME`, `setsid
+  timeout -k 5 150`, real PDB `gimp-file-load`.
+- Clean no-shim transcript `live/evidence/w337-min-clean-full.log`
+  SHA-256 `fb2a6557a7c7be6f339ff35576255e789551b759ae3f4fae94ced48f4238026b`;
+  probe log `/tmp/w337-min-3948458.log` SHA-256
+  `e3b46c85ab640851ac86f074f230a80622b427b481fa882250db662e712d319e`.
+- Preserved tooling negative: the first runner used the default
+  `/tmp/gimpjif-appimage` AppRun, which preloads `patch-shim.so`. Its
+  `live/evidence/w337-min-full.log` SHA-256
+  `97a1ea3b8a26f2f36f6d20fac8bdefffe4ad546182c83c326404698bf191b9b3`
+  reached the pinned inflate but the return frame resolved to
+  `inflate+79` in `live/patch-shim.so`; it is shim-assisted and excluded
+  from live evidence. The runner was repaired to generate a shim-free
+  AppRun before the clean run.
+
+Observed in the clean run: `PRE avail=0x80000002 idx=0x555555678fe0`;
+the return frame resolves to `ReadJeffsImage.isra.0+696` in the real
+plug-in (no shim). Before inflate, `+24=0x41` (chunk size word) and
+`+32=0x555555679300` (heap pointer), with mapped heap words at `+56`.
+After inflate, `+0/+8/+16/+24/+32` are all `0x4d4d4d4d4d4d4d4d` (all 40
+decompressed bytes, 36 past the 4-byte object); `+40=1`, `+48=0`,
+`+56` heap pointer, `+64=0`, `+72=0x6874` are untouched because the
+payload ends at 40. No word in the OOB region maps to an executable
+range (`r-xp`): candidates are `0x4d4d…`, small integers or heap
+`rw-p` pointers. No read watcher was armed because there was no pointer
+candidate to watch; no chosen absolute pointer, code-pointer slot,
+dereference, marker or command. GDB logged no in-process fault stop;
+GIMP printed `Fatal signal: Segmentation fault` and `Plug-in crashed:
+"file-gif-load"`, i.e. the same layout-sensitive terminal crash class as
+W304/W325/W329/W335, now also at the minimal geometry.
+
+Conclusion: the minimal geometry does not change the ceiling. It closes
+the last geometry question — both file-reachable wrapped products reach
+the pinned inflate and write chosen bytes OOB, but neither completes the
+~4 GiB `dest` / ~8 GiB GEGL load, and no post-decode consumer or code
+pointer was observed in either layout. Grade unchanged rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, NO r5. Do not repeat this probe
+unchanged.
