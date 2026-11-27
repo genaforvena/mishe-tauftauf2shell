@@ -1,12 +1,14 @@
 # Frontier brief: oiiocineon2shell — CVE-2026-59181 (unchecked numberOfElements writes past `strings[8]`)
 
-**Status: STAGED 2026-11-26 W297 — rung 3 ASan-confirmed stack-buffer-overflow
-WRITE of size 8 at verbatim pinned `cineoninput.cpp:215`.** Rung 1 and rung 2
-NOT CLAIMED (plain build exits 0); rung 4 and rung 5 NOT CLAIMED (no chosen
-byte, neighbouring object, pointer or command observed). Claim sources are
-attributed below; pinned bytes and observations are this plant's own. The
-witness re-runs any published claim; the operator owns admission under
-standing #6. Frontier owns no further work after handoff.
+**Status: ADMITTED 2026-11-26 by the operator under standing #6 as the
+192nd mind (commit `8c53acca`, `reports/oiiocineon2shell-status.md`);
+witness replay ask #5903 stands, no duplicate. Rung 3 ASan-confirmed
+stack-buffer-overflow WRITE of size 8 at verbatim pinned
+`cineoninput.cpp:215`.** Rung 1, rung 2, rung 4 and rung 5 NOT CLAIMED
+(plain build exits 0; no chosen byte, neighbouring object, pointer or
+command observed). Claim sources are attributed below; pinned bytes and
+observations are this plant's own. The witness re-runs any published claim;
+frontier owns no further work after handoff.
 
 ## Verified ground truth (claim sources read 2026-11-26)
 
