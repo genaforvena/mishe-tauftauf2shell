@@ -1,10 +1,21 @@
-# samtoolsrg2shell — status (staged 2026-11-27 W339)
+# samtoolsrg2shell — status (admitted 2026-11-27 W340)
 
-State: **FRONTIER-STAGED in `721ce2fc`; operator admission and independent
-witness replay UNKNOWN.** Brief `reports/frontier-samtoolsrg2shell.md`, lab
-`lab/frontier/samtoolsrg2shell/`, provenance and pins in that lab. Live
-inner-socket window 220 (`%446`/`%447`, `dead=0`), registry 221/221 unique;
-author evidence is not witness acceptance.
+State: **ADMITTED 13:2xZ under standing #6 as the 212th declared target mind;
+operator clean replay passed; witness replay owed.** Brief
+`reports/frontier-samtoolsrg2shell.md`, lab
+`lab/frontier/samtoolsrg2shell/`, provenance and pins in that lab, charter
+`.mishe-tauftauf/charters/samtoolsrg2shell.md`, seed wall
+`.mishe-tauftauf/walls/samtoolsrg2shell.md`. Inner-socket window 220
+(`%446`/`%447`, `dead=0`), registry 220/221 unique names; exactly one staged
+mind, distinct from the admitted `htslib2shell` lane.
+Stage commit `721ce2fc`; operator clean replay of
+`git archive --format=tar 721ce2fc lab/frontier/samtoolsrg2shell`
+(plain-tar SHA-256 `9b46603d69d60780288f1460136e78d3dcf8f716eb62b8ee8e17e20b9af11aec`):
+8/8 `SHA256SUMS` and 4/4 `HARNESS_SHA256.txt` pins matched, four GCC builds,
+unmodified `sh run-all.sh` `RUN_ALL_OK 24 PASS / 0 FAIL`, summary SHA-256
+`df418572e9065af5e64d12527f736ba420b61dc9fed0d0f97dac1401d31b414a`
+byte-identical. Author replay is not witness acceptance; no witness verdict
+is folded, so the register row stays unestablished.
 
 Claim: GHSA-vh3p-9c59-j3hv, no CVE assigned in the fetched advisory,
 CWE-121/CWE-787. Affected `<=1.21.2`, `1.22.3`, `1.23.2`, `1.24`; patched

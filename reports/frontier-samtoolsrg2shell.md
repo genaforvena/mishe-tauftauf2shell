@@ -1,7 +1,9 @@
 # Frontier brief: samtoolsrg2shell — mpileup `-G` read-group stack overflow
 
-**Status: FRONTIER-STAGED 2026-11-27 W339 in `721ce2fc`; operator admission
-and independent witness replay UNKNOWN.** Claim: GHSA-vh3p-9c59-j3hv (no CVE
+**Status: FRONTIER-STAGED 2026-11-27 W339; ADMITTED 13:2xZ by the operator
+under standing #6 as the 212th declared target mind; independent witness
+replay UNKNOWN.**
+Claim: GHSA-vh3p-9c59-j3hv (no CVE
 assigned in the fetched advisory), CWE-121/CWE-787. Lab:
 `lab/frontier/samtoolsrg2shell/`; exact source archives, patch, advisory,
 reproduction commands and preserved negatives are in that tree. Live dedicated
