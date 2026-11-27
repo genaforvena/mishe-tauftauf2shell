@@ -1,0 +1,50 @@
+W335: bundled GIMP 3.2.8 AppImage libc free() disassembly
+libc: 9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92  /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6
+command: objdump -d --start-address=0xa2fc0 --stop-address=0xa3060 <bundled libc.so.6>
+
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+00000000000a2fc0 <__libc_free@@GLIBC_2.2.5>:
+   a2fc0:	48 85 ff             	test   %rdi,%rdi
+   a2fc3:	0f 84 7f 01 00 00    	je     a3148 <__libc_free@@GLIBC_2.2.5+0x188>
+   a2fc9:	41 57                	push   %r15
+   a2fcb:	41 56                	push   %r14
+   a2fcd:	41 55                	push   %r13
+   a2fcf:	41 54                	push   %r12
+   a2fd1:	55                   	push   %rbp
+   a2fd2:	48 8d 6f f0          	lea    -0x10(%rdi),%rbp
+   a2fd6:	53                   	push   %rbx
+   a2fd7:	48 83 ec 28          	sub    $0x28,%rsp
+   a2fdb:	4c 8b 25 0e 1e 14 00 	mov    0x141e0e(%rip),%r12        # 1e4df0 <_IO_wfile_jumps@@GLIBC_2.2.5+0xbc8>
+   a2fe2:	48 8b 47 f8          	mov    -0x8(%rdi),%rax
+   a2fe6:	64 45 8b 2c 24       	mov    %fs:(%r12),%r13d
+   a2feb:	a8 02                	test   $0x2,%al
+   a2fed:	0f 85 ed 00 00 00    	jne    a30e0 <__libc_free@@GLIBC_2.2.5+0x120>
+   a2ff3:	4c 8b 35 8e 1d 14 00 	mov    0x141d8e(%rip),%r14        # 1e4d88 <_IO_wfile_jumps@@GLIBC_2.2.5+0xb60>
+   a2ffa:	64 49 83 3e 00       	cmpq   $0x0,%fs:(%r14)
+   a2fff:	0f 84 6b 01 00 00    	je     a3170 <__libc_free@@GLIBC_2.2.5+0x1b0>
+   a3005:	4c 8d 3d b4 2a 14 00 	lea    0x142ab4(%rip),%r15        # 1e5ac0 <_IO_2_1_stdin_@@GLIBC_2.2.5+0x1e0>
+   a300c:	a8 04                	test   $0x4,%al
+   a300e:	74 26                	je     a3036 <__libc_free@@GLIBC_2.2.5+0x76>
+   a3010:	48 8b 0d 99 21 14 00 	mov    0x142199(%rip),%rcx        # 1e51b0 <__nptl_nthreads@@GLIBC_PRIVATE+0xe0>
+   a3017:	48 8d 14 8d 00 00 00 	lea    0x0(,%rcx,4),%rdx
+   a301e:	00 
+   a301f:	48 f7 da             	neg    %rdx
+   a3022:	48 85 c9             	test   %rcx,%rcx
+   a3025:	48 c7 c1 00 00 00 fc 	mov    $0xfffffffffc000000,%rcx
+   a302c:	48 0f 44 d1          	cmove  %rcx,%rdx
+   a3030:	48 21 ea             	and    %rbp,%rdx
+   a3033:	4c 8b 3a             	mov    (%rdx),%r15
+   a3036:	49 89 c0             	mov    %rax,%r8
+   a3039:	49 83 e0 f8          	and    $0xfffffffffffffff8,%r8
+   a303d:	4c 89 c2             	mov    %r8,%rdx
+   a3040:	48 f7 da             	neg    %rdx
+   a3043:	48 39 ea             	cmp    %rbp,%rdx
+   a3046:	0f 82 04 01 00 00    	jb     a3150 <__libc_free@@GLIBC_2.2.5+0x190>
+   a304c:	40 f6 c5 0f          	test   $0xf,%bpl
+   a3050:	0f 85 fa 00 00 00    	jne    a3150 <__libc_free@@GLIBC_2.2.5+0x190>
+   a3056:	49 83 f8 1f          	cmp    $0x1f,%r8
+   a305a:	0f 86 00 01 00 00    	jbe    a3160 <__libc_free@@GLIBC_2.2.5+0x1a0>

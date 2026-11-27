@@ -2429,3 +2429,70 @@ at `:1616` with `rax=0x4d4d4d4d4d4d4d4d` remains the most specific
 previously observed fault site. That is an inference from source order plus
 the absent warning, not a new backtrace: W333's three post-stop backtrace
 attempts produced none, and the fault frame stays UNKNOWN. No grade change.
+
+## W335 allocator fault sites from the bundled libc and two no-shim replays (2026-11-27, 11:09Z wake)
+
+One bounded, no-shim lane. The previously UNKNOWN `free+115` frame is now
+identified from the SHA-verified AppImage's own libc, and a fresh live replay
+of the same 8 KiB JIF finds a *different* allocator site, so the terminal
+fault remains layout-sensitive rather than a single fixed frame.
+
+### Static: what `free+115` actually does
+
+`objdump -d --start-address=0xa2fc0 --stop-address=0xa3060` on
+`/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6`
+(SHA-256 `9792e3cbb541c8f44c7acf5f14f4022ea62998ecc787d326bed4d8b6547dfd92`;
+`nm -D` puts `free@@GLIBC_2.2.5` at `0xa2fc0`) gives `free+115 = 0xa3033`:
+`mov -0x8(%rdi),%rax` at `0xa2fe2` loads the freed chunk's size word,
+`test $0x4,%al` at `0xa300c` routes bit 2 (NON_MAIN_ARENA) to a secondary
+arena lookup, and `mov (%rdx),%r15` at `0xa3033` dereferences
+`%rdx = %rbp & -4*rcx` with `%rbp = %rdi-16`. The chosen word
+`0x4d4d4d4d4d4d4d4d` has bit 2 set. So in the W304 replay the chosen bytes
+make `free` treat a main-arena chunk as non-main and read a heap header far
+below the chunk; the dereference target is derived from the chunk address,
+not a supplied pointer. Evidence:
+`live/evidence/w335-libc-free-disasm.txt` SHA-256
+`8a3ba4caeb459590ca085e59d99b7f4bff0752cc9260afad521e6de3e8a8a8e3`.
+Plugin line attribution was checked separately: `objdump -dl
+--disassemble=ReadJeffsImage.isra.0` on the verified plug-in (SHA
+`bfcf47ce…`) puts `g_free` calls at source lines 1610, 1641, 1642, 1618
+and 1619; W304's `:1616` PC maps to the inflate-error `read_error` path,
+so that line number is a debug-attribution artifact of the error path,
+not a direct `g_free (indexes)` call site.
+
+### Live: two replays fault inside malloc on a chosen-size word
+
+`live/gdb-free115.cmd` (SHA-256
+`8a31726138e824f380b33c35b9d19a01ab755836dc933fa09914e2613f670de2`)
+adds only read-only register, memory and instruction dumps to the W304
+stop handler; `live/run-appimage-free115.sh` (SHA-256
+`41d98865f900958ee6270e4e80143a150a4b9e1744547e98823965a3d7121053`)
+replays the unchanged 8 KiB JIF (SHA-256
+`d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`)
+through the SHA256SUMS-verified GIMP 3.2.8 AppImage with no shim and no
+patched byte. Both runs printed the inflate-error warning and then SIGSEGV.
+
+- `live/evidence/w335-free115.log` SHA-256
+  `f3de30b78f26bee409fb4fd871c28be120165969ded4c39e3f1b2c3566a6e7b3`:
+  fault at libc `0x7ffff74aaaff`, backtrace `#2 malloc` ← `#7
+  gimp_color_profile_new_from_icc_profile (data=0x0, length=0)`;
+  `rdi=0x5555556fea90`, `*(rdi-8)=0x4d4d…`, `rax=0x4d4d4d4d4d4d4d48`.
+- `live/evidence/w335-free115b.log` SHA-256
+  `96b78928fa2bfaf3b85c4ccc5142d83e72a1cf31506a74d3f284907721d83312`
+  repeats it with symbols: `&malloc=0x7ffff74ae8d0` and
+  `&free=0x7ffff74aefc0` give libc base `0x7ffff740c000`, so the fault PC
+  is libc+`0x9eaff`; `x/12i` shows
+  `mov 0x8(%rdi),%rcx` / `and $0xfffffffffffffff8,%rax` /
+  `cmp (%rdi,%rax,1),%rax` at the fault. With `rdi=0x5555556fea40` and
+  `rax=0x4d4d4d4d4d4d4d48`, the compare targets
+  `0x4d4da2a2a2bd3788`, a non-canonical address. The size word at `rdi-8`
+  and the preceding word are both `0x4d4d…` — chosen bytes are being
+  consumed as live allocator metadata by a real consumer.
+
+This closes the W304 frame's instruction semantics and adds a second,
+independently observed allocator consumer. It does **not** give a chosen
+absolute address: the compare target is `chunk_pointer + chosen_size`, not
+a pointer the JIF supplies, and the access faults instead of returning
+data. No chosen-address write, successful dereference, control flow,
+marker or command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5. No replay owed for this grade-neutral finding.

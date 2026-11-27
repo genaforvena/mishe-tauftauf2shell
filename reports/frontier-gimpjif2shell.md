@@ -1671,3 +1671,27 @@ it does not turn any earlier zero-hit negative into a positive, and it does
 not restore the excluded completed-load consumer. No chosen-address
 dereference, control flow, marker or command was observed. Grade unchanged:
 rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+## Allocator fault sites resolved; second live consumer observed (W335, 2026-11-27)
+
+The W304 `free+115` frame is now decoded from the SHA-verified AppImage's
+bundled libc (`9792e3cb…`; `free` at `0xa2fc0`): `free+115 = 0xa3033` is
+`mov (%rdx),%r15` after a `test $0x4,%al` NON_MAIN_ARENA branch, reached
+with the chosen size word `0x4d4d…`. Chosen bytes therefore make `free`
+look for a heap header far below a main-arena chunk; the address comes
+from the chunk location, not from a supplied pointer. Disassembly:
+`lab/frontier/gimpjif2shell/live/evidence/w335-libc-free-disasm.txt`
+(SHA `8a3ba4ca…`).
+
+Two no-shim GDB replays of the unchanged 8 KiB JIF (`d6556936…`) with the
+verified GIMP 3.2.8 AppImage instead faulted in `malloc` at libc+
+`0x9eaff`: `cmp (%rdi,%rax,1),%rax` with `rax = chosen_size & ~7`, called
+under `gimp_color_profile_new_from_icc_profile`. `*(rdi-8)` and the word
+before it were both `0x4d4d…`; the compare target was
+`0x4d4da2a2a2bd3788`, non-canonical. Both replays printed the
+inflate-error warning first. Logs SHA `f3de30b7…` and `96b78928…` in
+`live/evidence/`; runner `live/run-appimage-free115.sh`. This is a chosen
+size consumed by a live allocator, but not a chosen absolute pointer: the
+dereference fails and neither data nor control flow is redirected.
+Fault sites remain layout-sensitive (W304 `free+115`, W335 `malloc`);
+grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.

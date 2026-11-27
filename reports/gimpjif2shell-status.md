@@ -243,3 +243,19 @@ measured no-shim 64 KiB run peaked at 833318912 bytes (0.78 GiB) with
 not cause the observed terminal SIGSEGV; that cause stays UNKNOWN. No new
 write primitive and no grade change. Hashes, limits and the sampled trace
 are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W335 allocator fault instructions (2026-11-27, 11:09Z wake)
+
+Grade-neutral. Static disassembly of the verified AppImage's bundled libc
+decodes W304's `free+115` (`0xa3033`) as `mov (%rdx),%r15` on a
+non-main-arena lookup: the chosen `0x4d4d…` size word has bit 2 set, so
+`free` reads a heap header derived from the chunk address, not a supplied
+pointer. Two fresh no-shim replays of the same 8 KiB JIF through the
+verified plug-in faulted instead in `malloc` at libc+`0x9eaff`
+(`cmp (%rdi,%rax,1),%rax` with `rax = chosen_size & ~7`), under
+`gimp_color_profile_new_from_icc_profile`; the chosen-size word was again
+`0x4d4d…` and the compare target was non-canonical, so the dereference
+fails. Fault sites are layout-sensitive across runs; no chosen-address
+write, successful dereference, marker or command. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Hashes and logs:
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
