@@ -8745,3 +8745,67 @@ byte-identical CHAIN output, matching the 3.4.13 fixed control.
 Falsifier: any invalid write or output difference on a patched branch —
 that would reopen the fix-series grade. Do not repeat the 3.4.12/13
 matrix or the vulnerable branch matrix unchanged.
+
+## 2026-11-27 16:4xZ — W351: patched 3.3.14 / 4.0.10 chain controls CLOSED
+
+W349/W350 established that chaining leaves no second odd-capacity write
+window on the three affected branches. W351 tests the other half of the
+fix-series claim: the first patched release of each affected branch must
+behave like fixed 3.4.13. Both tarballs were provisioned from
+cache.ruby-lang.org (provisioning only, never a target probe), stored in
+gitignored `lab/src/`, and built with the same plain recipe as the other
+builds (`./configure --disable-install-doc --prefix=<absolute -plain
+prefix>; make -j4; make install`, gcc 13.3.0, default CFLAGS/LDFLAGS, no
+sanitizer or allocator tunable):
+
+```
+curl -fsSL -o lab/src/ruby-3.3.14.tar.xz https://cache.ruby-lang.org/pub/ruby/3.3/ruby-3.3.14.tar.xz
+curl -fsSL -o lab/src/ruby-4.0.10.tar.xz https://cache.ruby-lang.org/pub/ruby/4.0/ruby-4.0.10.tar.xz
+# SHA-256: 3.3.14 e24ef6d97095a9c42bf8259a2de33a25aac8d92bb48fefdbdc81724b87784854
+#         4.0.10 1537f7a6003c436546ecab6b48b6e7725a9af2328f45a8af7f42f41c5df90ab8
+tar -xJf lab/src/ruby-3.3.14.tar.xz -C lab/build/w351-src
+tar -xJf lab/src/ruby-4.0.10.tar.xz -C lab/build/w351-src
+bash lab/repro/ruby2shell-casemap-chain-patched.sh
+bash lab/repro/ruby2shell-casemap-chain-gdb.sh
+```
+
+Installed builds: `ruby 3.3.14 (2026-11-19 revision f4c37f481b)` and
+`ruby 4.0.10 (2026-11-19 revision a704b7cd95) +PRISM`. Source diff
+against the vulnerable branch tarballs confirms the same guard fix at
+`enc/iso_8859_1.c:267` (`to < to_end` → `to_end - to > 1`) on both, plus
+the overflow-safe capacity multiplication in `rb_str_casemap` (3.3.14
+`:7426`/`:7429`, 4.0.10 `:7895`/`:7898`) and the sized-free correction in
+`mapping_buffer_free`. The committed harness adds two branch-specific gdb
+scripts (breakpoints 3.3.14 `:7433`/`:7451`, 4.0.10 `:7902`/`:7920`),
+`lab/repro/ruby2shell-casemap-chain-patched.sh`, and extends
+`lab/repro/ruby2shell-casemap-chain-gdb.sh` to six builds.
+
+1. Valgrind, 28 arms (14 per patched build), all `rc=0` and
+   `invalid_write=0` — including `sb21`, `sb1041` and `sbmix1041`, the
+   three shapes that write once on the vulnerable builds. The set of 14
+   `CHAIN` lines is byte-identical to the vulnerable W350 set: `sb21`
+   upcase `sha=69a5885c909c4195`, fold `7bbed07d913f65ba`; `sb1041`
+   upcase `cef0c58840d955e6`; `u03901041` upcase `65fc96834c82024e`.
+   Raw evidence: gitignored
+   `lab/build/evidence/casemap-chain/w351/valgrind-matrix.txt`.
+2. gdb, 84 rows (six builds × 14 arms), all `rc=0`. The first 56 rows
+   hash to W350's `73fa39f8ccb404cc40d537e9999165bb98b53e27acb0c42d8ef5144dd7aa0882`
+   byte-for-byte, so the earlier matrix is unchanged. Each patched build
+   matches the fixed 3.4.13 control row-for-row: `sb21`
+   `capa=41,22 used=40,2`, `sb1041` `capa=1061,1042 used=1060,1022`,
+   `sbmix1041` `capa=1061,688 used=1060,501`, every UTF-8 arm `used <
+   capa`. Full stable matrix SHA-256
+   `6a514946579c6c27fd230eaa958af3972b2fc8d57fa267c6c7303486de384508`;
+   raw logs gitignored under `lab/build/evidence/casemap-chain/`.
+
+Prediction confirmed; falsifier not met — no invalid write and no output
+difference on either patched branch. Grade unchanged: primary wire-only
+rung 3, W341/W342 adjacent rung 3, witness-COMPLETE rung 4,
+harness-condition rung 5 ESTABLISHED at its labeled scope, full stock
+rung 5 NOT ACHIEVED. Next named experiment W352: provision the EOL Ruby
+3.2.11 tarball (last 3.2 release, outside the patched ranges; Veria
+claims 3.2-and-older unfixed), build it plain and ASan, extract its
+`string.c`/`enc/iso_8859_1.c` line numbers, and run the same committed
+chain and rung-1 harnesses. Prediction: the unpatched guard and one-byte
+write are present; falsifier: an already-fixed guard or zero invalid
+writes on that branch. Do not repeat the 3.3/3.4/4.0 matrices unchanged.
