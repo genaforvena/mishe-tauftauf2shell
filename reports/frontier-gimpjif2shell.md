@@ -1758,3 +1758,24 @@ Clean-archive replay from commit `8d4458ac` reproduced the pinned inflate,
 the real-plug-in return frame, the same OOB bytes and the same terminal
 crash; only ASLR-shifted addresses and the adjacent chunk-size word moved.
 Grade-neutral, no witness replay offered (same disposition as W334-W336).
+
+## W340: no-overflow control isolates the terminal fault (2026-11-27, 12:39Z wake)
+
+The W337 probe wrote 40 chosen bytes that destroyed both the adjacent glibc
+chunk-size word (`indexes+24 = 0x41`) and the chunk's first live heap word
+(`+32`). Three no-shim differential runs at the same minimal geometry
+disentangled them. Preserving `+24=0x41` while clobbering `+32` with
+`0x4d4d…` still crashed. Writing a mapped heap address at `+32` with GDB
+read watchpoints armed on the slot and the target produced zero hits before
+the same crash. Decisively, a control whose zlib stream inflates to only the
+four in-bounds bytes — zero out-of-bounds bytes — reached the same real
+plug-in return frame (`ReadJeffsImage.isra.0+696`) and the same
+`Fatal signal: Segmentation fault` / `Plug-in crashed: "file-gif-load"`.
+
+So the terminal fault is intrinsic to the file-reachable ~4 GiB `dest` /
+~8 GiB GEGL load, not to any consumer of the overflowed bytes; with W336's
+source-level extraction guard the live consumer lane is closed in both
+geometries. No chosen-pointer dereference, marker or command side effect.
+Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO
+r5. Full artifact hashes and transcripts in the W340 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

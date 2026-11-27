@@ -321,3 +321,25 @@ inflate, the real-plug-in `ReadJeffsImage.isra.0+696` return frame, the same
 `0x4d4d…` OOB pattern and the same terminal crash; only ASLR-shifted
 addresses and the adjacent chunk-size word moved. Replay full-log SHA-256
 `71c690cbafaf283db74e38504442bbc9ee3a3b0765d9186a4a9a43db7e5d48a4`.
+
+## W340 selective payload: terminal fault is the geometry (2026-11-27, 12:39-12:55Z wake)
+
+Grade-neutral causal lane after W339 verified W337 as labeled. Three no-shim
+runs through the real GIMP 3.2.8 plug-in at the minimal geometry
+(`33025x65026`, product `0x80000002`, alpha `data_size=4`):
+
+- preserving the adjacent chunk size at `indexes+24` (`0x41`) while
+  overwriting the live heap word at `+32` with `0x4d4d…` still crashed;
+- choosing a mapped heap address at `+32` with read watchpoints on both the
+  slot and its target gave zero watch hits and the same crash;
+- a control with only four decompressed bytes, entirely inside the 4-byte
+  `indexes` object (no out-of-bounds write at all), reached the same
+  `ReadJeffsImage.isra.0+696` return frame and produced the same
+  `Fatal signal: Segmentation fault` / `Plug-in crashed`.
+
+Therefore the terminal fault belongs to the file-reachable ~4 GiB `dest` /
+~8 GiB GEGL load, not to a consumer of the overflowed bytes. No
+chosen-pointer dereference, control flow or command side effect. Grade
+unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+Scripts, JIFs, transcripts and hashes in the W340 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

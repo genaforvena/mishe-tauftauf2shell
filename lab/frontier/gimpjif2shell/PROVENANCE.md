@@ -2627,3 +2627,70 @@ untouched, and the same `Fatal signal: Segmentation fault` /
 probe-log SHA-256 `8973c7c772ebb5b940016d619b45731b22c9836458f62c7af1ad6c5e3db59295`.
 Only heap addresses and the adjacent chunk-size word shifted (ASLR /
 layout sensitivity); the grade-neutral conclusion is reproducible.
+
+## W340 selective minimal-geometry payload: terminal fault is geometry (2026-11-27, 12:39-12:55Z wake)
+
+Grade-neutral causal lane, no replay owed. W339 had independently replayed
+W337 as ESTABLISHED AS LABELED. W337's 40 chosen `0x4d` bytes destroyed both
+the adjacent glibc chunk-size word at `indexes+24` (`0x41`) and that chunk's
+first user word at `+32` (a live heap pointer), so its terminal SIGSEGV did
+not identify which corruption mattered. `realglib/make-jif.py` gained three
+no-shim differential modes (SHA-256
+`184b128234f09d85d3746b5ded25005173d5361e4c5b8d8599bde0702cba0270`):
+`minimal-size`, `minimal-ptr HEXADDR` and `minimal-noob HEXBYTE`, all at
+`33025x65026` / product `0x80000002` / alpha `data_size=4`.
+`live/run-appimage-min340.sh` (SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`)
+reuses the SHA256-verified `/tmp/gimpjif-appimage-w316` tree, strips every
+shim preload into a private shim-free AppRun, and drives real PDB
+`gimp-file-load`; `live/gdb-min340.cmd` (SHA-256
+`fb591b568f3b8e595a18477b6a8bc68105fdd079f8a92358c2b2b87872fbab7b`)
+breaks at pinned `inflate()`, arms GDB read watchpoints after the return,
+and logs any fault. All artifacts below are under
+`lab/frontier/gimpjif2shell/`.
+
+- Run A, size-preserving: `live/evidence/w340-size.jif` SHA-256
+  `b59663a1ce376a9ddc89a294778b8614444a92d63202b4ce691779b6a39874c9`
+  (24 chosen `0x4d` bytes, `+24=<Q 0x41`, `+32=<Q 0x4d4d…`), full log
+  `live/evidence/w340-size-full.log` SHA-256
+  `1655861125858041f35fd65db66871ed7f0ddf639990b758361673e6b7377759`,
+  probe log `w340-size-probe.log` SHA-256
+  `dbbef140149d1fd5f4003ed1b97380c459798ac7af77a01a17265f99bdc7ee26`.
+  PRE `idx=0x5555556790a0`, `+24=0x41`, `+32=0x5555556793c0` (heap rw-p);
+  POST kept `+24=0x41` and changed only `+32` to `0x4d4d…`; return frame
+  `ReadJeffsImage.isra.0+696` in the real plug-in; GIMP still printed
+  `Fatal signal: Segmentation fault` / `Plug-in crashed: "file-gif-load"`.
+  The runner's trailing summary hit a transient parse error because its own
+  edit landed mid-run; the GDB/GIMP transcript is intact.
+- Run B, chosen mapped pointer: `live/evidence/w340-ptr0.jif` SHA-256
+  `bd497376471c381dcb46a7a85e9734f85ba3d93604ba8b8603b7b95c9c495072`
+  (`+24=<Q 0x41`, `+32=<Q 0x0000555555678fe0`), full log
+  `w340-ptr-full.log` SHA-256
+  `2d0f5f48902aefbc6f498a1b0dd2350a3522457102f785dbab91f4539a237365`,
+  probe log `w340-ptr-probe.log` SHA-256
+  `a3339df6eaee891122cd001c6f686ec048694a69b057143455d50c8429cab9e3`.
+  POST `idx=0x5555556790b0`, `+24=0x41`, `+32=0x0000555555678fe0`.
+  Read watchpoints were armed on the slot (`0x5555556790d0`) and on the
+  chosen heap address; both logs show zero watch hits before the same
+  terminal crash. No measured read of the chosen word or its target.
+- Run C, no-overflow control: `live/evidence/w340-noob.jif` SHA-256
+  `d3b2720b7bddc47b1537999abe9fdb545382932e665b7e3fa2f21be7f2b5437c`
+  (same wrapped geometry, only four decompressed `0x4d` bytes, all inside
+  the 4-byte `indexes` object), full log `w340-noob-full.log` SHA-256
+  `47f1a5908d7ed3d3fe35e9c7cb5800ec61d956c401e1291283b357a989ae5ab8`,
+  probe log `w340-noob-probe.log` SHA-256
+  `52dce836cf05694666fa64d4c223ba3fb3f41e4a0067f74b99c3fb69cd25a5c9`.
+  POST `+0=0x000055504d4d4d4d`, `+24=0x41` and `+32=0x555555679390`
+  unchanged from PRE; the same real-plug-in return frame and the same
+  `Fatal signal` / `Plug-in crashed` result.
+
+Conclusion: with zero out-of-bounds bytes the same minimal geometry still
+faults in the same terminal class, so the observed SIGSEGV is caused by the
+file-reachable ~4 GiB `dest` / ~8 GiB GEGL load, not by any post-overflow
+consumer. Run A also refutes chunk-size corruption as the sole cause; run B
+adds a measured zero-hit watch result on a mapped chosen pointer. Together
+with W336's source-level extraction guard this closes the live consumer lane
+in both geometries. No chosen-pointer dereference, control flow, marker or
+command side effect. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5. Grade-neutral; no witness replay offered, consistent
+with W334-W337. Do not repeat these three probes unchanged.

