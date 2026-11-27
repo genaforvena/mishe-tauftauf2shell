@@ -74,4 +74,62 @@ done
 
 printf 'RUN_ALL_OK %s PASS / %s FAIL\n' "$PASS" "$FAIL" | tee runs/summary.txt
 sha256sum runs/summary.txt | tee runs/summary.sha256
+
+# Fixed-arm control, added after the original summary so its SHA stays stable.
+BASE_PASS=$PASS
+BASE_FAIL=$FAIL
+echo FIXED_PHASE
+sh build-fixed.sh > runs/build-fixed.out 2>&1 || {
+    tail -20 runs/build-fixed.out
+    FAIL=$((FAIL + 1)); echo "FAIL BUILD_FIXED"
+}
+check BUILD_FIXED runs/build-fixed.out 'BUILD_OK decode-fixed-asan'
+n=0
+for input in 'AAAA=' 'AABa=' 'AADa=' 'AB=D' '=' '=='; do
+    n=$((n + 1))
+    label="fixed-reject-$n"
+    run "$label" ./work/decode-fixed-asan "$input"
+    check_absent "F_CLEAN_$label" "evidence/$label.out" 'AddressSanitizer'
+    check "F_REJECT_$label" "evidence/$label.out" 'actual=0'
+done
+run fixed-safe ./work/decode-fixed-asan 'AAAA'
+check F_SAFE evidence/fixed-safe.out 'len=4 calculated=3 actual=3'
+check_absent F_SAFE_CLEAN evidence/fixed-safe.out 'AddressSanitizer'
+printf 'FIXED_OK %s PASS / %s FAIL\n' "$((PASS - BASE_PASS))" "$((FAIL - BASE_FAIL))" \
+    | tee runs/fixed-summary.txt
 [ "$FAIL" -eq 0 ]
+
+# Real generated-client model caller, parsing a wire-format JSON payload.
+BASE_PASS=$PASS
+BASE_FAIL=$FAIL
+echo CLIENT_PHASE
+sh build-client.sh > runs/build-client.out 2>&1 || {
+    tail -20 runs/build-client.out
+    FAIL=$((FAIL + 1)); echo "FAIL BUILD_CLIENT"
+}
+check BUILD_CLIENT_VULN runs/build-client.out 'BUILD_OK generated-client-asan'
+check BUILD_CLIENT_FIXED runs/build-client.out 'BUILD_OK generated-client-fixed-asan'
+
+run client-vuln ./work/generated-client-asan '{"data":"AAAA="}'
+check C_OVERFLOW evidence/client-vuln.out 'heap-buffer-overflow'
+check C_WRITE evidence/client-vuln.out 'WRITE of size 1'
+check C_SINK evidence/client-vuln.out 'Base64.cpp:115'
+check C_WRAPPER evidence/client-vuln.out 'HashingUtils.cpp:42'
+check C_MODEL evidence/client-vuln.out 'JsonBlobsResult.cpp:27'
+
+run client-safe ./work/generated-client-asan '{"data":"AAAA"}'
+check C_SAFE evidence/client-safe.out 'decoded=3'
+check_absent C_SAFE_CLEAN evidence/client-safe.out 'AddressSanitizer'
+
+for input in '{"data":"AAAA="}' '{"data":"AABa="}'; do
+    n=$((n + 1))
+    label="client-fixed-$n"
+    run "$label" ./work/generated-client-fixed-asan "$input"
+    check_absent "C_FIXED_CLEAN_$label" "evidence/$label.out" 'AddressSanitizer'
+    check "C_FIXED_REJECT_$label" "evidence/$label.out" 'decoded=0'
+done
+run client-fixed-safe ./work/generated-client-fixed-asan '{"data":"AAAA"}'
+check C_FIXED_SAFE evidence/client-fixed-safe.out 'decoded=3'
+check_absent C_FIXED_SAFE_CLEAN evidence/client-fixed-safe.out 'AddressSanitizer'
+printf 'CLIENT_OK %s PASS / %s FAIL\n' "$((PASS - BASE_PASS))" "$((FAIL - BASE_FAIL))" \
+    | tee runs/client-summary.txt

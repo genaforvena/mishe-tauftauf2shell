@@ -1,9 +1,11 @@
 # Frontier brief: awssdkbase642shell — Base64 decoder heap OOB write
 
-**Status: LAB VERIFIED (frontier W345), staging, window and operator
-admission owed.** A direct-call harness on pinned `Base64.cpp` reproduced the
-heap overflow and controlled the OOB byte. No dedicated window or admission
-yet; no candidate was probed outside the public advisory/commit pages.
+**Status: LAB VERIFIED (frontier W345-W348), staging and window owed.**
+Both gates named by the operator are closed: the fixed v1.11.862 Base64 arm
+against fixed CRT v0.43.2 is a clean control, and a generated REST-JSON client
+model caller carries a wire-format JSON string to the vulnerable sink. No
+dedicated window or admission yet; no candidate was probed outside the public
+advisory/commit pages.
 
 ## Verified ground truth
 
@@ -59,20 +61,31 @@ Lab condition to disclose: the AWS core allocator is a separate translation
 unit, so the harness defines `Aws::Malloc`/`Aws::Free` as `malloc`/`free`;
 the pinned `Base64.cpp` body is verbatim and the heap region is real.
 
-Fix-side caveat: the fixed arm delegates to `aws-crt-cpp` v0.43.2, so a
-clean replay needs the CRT submodule (the patch changes the pinned
-subproject from v0.42.2) or a clearly-labeled source-bound control using the
-patch's own length assertion. The public advisory's "RCE not demonstrated"
-is consistent with this bounded primitive; no control-flow, pointer or
-command claim is warranted.
+Fixed arm closed (W348): the fix's two Base64 hunks apply to a staging copy and
+compile against fixed `aws-crt-cpp` v0.43.2 `Types.cpp`, pinned common
+`encoding.c`/allocator/byte_buf/error sources and a disclosed four-symbol
+link shim. `AAAA=`, `AABa=`, `AADa=`, `AB=D`, `=` and `==` all decode to zero
+bytes with no ASan report; canonical `AAAA` still decodes to three bytes.
+This is a source-bound fixed control on the Base64 path, not a full CRT
+runtime build; the fixed SDK release itself was not built.
+Generated-client caller closed (W348): `JsonBlobsResult.cpp:21-27` (verbatim
+pinned generated model) parses a CLI wire-format JSON payload into
+`JsonValue`, calls `HashingUtils::Base64Decode` (`HashingUtils.cpp:40-42`) and
+reaches `Base64.cpp:115`. ASan reports WRITE-1 into a 2-byte region with the
+full call chain model -> wrapper -> decoder; the fixed generated-client arm
+rejects `AAAA=`/`AABa=` cleanly. The protocol-test model is generated SDK
+code, not a live AWS service endpoint; no socket or network I/O.
 
 ## Local evidence and next experiment
 
-`lab/frontier/awssdkbase642shell/` pins the SDK parent, fix patch, advisory
-and ten CRT dependency archives (18 SHA-256 pins). `sh run-all.sh` rebuilds
-three offline g++ consumers from those archives with `-g -O0`, ASan/plain and
-plain-without-asserts, and reports `RUN_ALL_OK 17 PASS / 0 FAIL` with summary
-SHA-256 `504bb8e541ebc6bfd16d73715bd144fdfffb3b42c8562e9db7a410c57903d234`.
+and eleven CRT dependency archives (21 SHA-256 pins). `sh run-all.sh`
+rebuilds the offline g++ consumers from those archives with `-g -O0`,
+ASan/plain and plain-without-asserts; its original summary stays byte-identical
+at `RUN_ALL_OK 17 PASS / 0 FAIL`, SHA-256
+`504bb8e541ebc6bfd16d73715bd144fdfffb3b42c8562e9db7a410c57903d234`.
+W348 added two replay phases after that summary: `FIXED_OK 15 PASS / 0 FAIL`
+and `CLIENT_OK 15 PASS / 0 FAIL`, so the original summary hash is unchanged.
+
 Observed: debug build aborts at `Array.h:208`'s `index < m_length` assertion;
 the `-DNDEBUG` ASan build reports `heap-buffer-overflow`, `WRITE of size 1`
 at pinned `Base64.cpp:115`, zero bytes after the 2-byte region for `AAAA=`;
@@ -85,10 +98,12 @@ consumers offline and returned the byte-identical 17/0 summary; plain-tar
 SHA-256 `0c01bf691a0f9117ac323a03309fdab904d5fa23a751de5b0471b08724e119ed`.
 This is an author durability check, not witness acceptance.
 
-Next: build the fixed v1.11.862 arm against `aws-crt-cpp` v0.43.2 to close
-the fixed control, then stage a window only if a real generated-client caller
-passes attacker-controlled wire strings to `Base64::Decode()`. Without a
-pointer or command side effect in a live target, R5 remains NO.
+Next: both operator gates are closed, so stage the target window and request
+admission. The remaining ceiling is unchanged: a wire path to a chosen-byte
+one-byte heap overrun, with no pointer, control-flow or command side effect;
+R5 remains NO. A future mind may seek a live loopback service endpoint and
+grooming that turns the one-byte write into pointer control; nothing here
+claims it.
 
 ## Ranking context
 
