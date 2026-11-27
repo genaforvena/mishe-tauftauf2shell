@@ -58,14 +58,17 @@ possible depending on canary/ASLR/NX. Brief:
   code executed. A two-byte partial overwrite reached a canonical but unmapped
   target (`0x7ffff7002f6a`) because the sprintf NUL zeroed byte 2.
   A one-byte overwrite (885-byte JID, `from[884]='A'`) then kept byte 2 and
-  produced a **mapped, executable** saved RIP `0x7ffff7ee0041`
-  (`xmpp.so` offset `0x6041`, `sha_hash+411`); the `ret` transferred control
-  there (gdb `#0` at target) but the saved RBP was non-canonical
-  `0x5a59585756555453`, the next instruction is rbp-relative, and the whole
-  reachable 256-byte window has no `ret` or `call`. Raw high bytes are
-  rejected by expat. This is still rung 4 — mapped transfer, no chosen code.
-  Rung 5 remains UNKNOWN: no valid executed target, no marker/pointer
-  execution, no side effect from chosen bytes, no ASLR/NX measurement.
+  produced a saved RIP `0x7ffff7ee0041` (`xmpp.so` offset `0x6041`,
+  `sha_hash+411`) under the **gdb default** (ASLR disabled); the `ret`
+  transferred control there (gdb `#0` at target) but the saved RBP was
+  non-canonical `0x5a59585756555453`, the next instruction is rbp-relative,
+  and the whole reachable 256-byte window has no `ret` or `call`. Raw high
+  bytes are rejected by expat. W332 measured that executable mapping is
+  base-dependent under ASLR: 3/8 runs r-xp, 4/8 r--p, 1/8 below the module;
+  a separate `si` run reached an unmapped target. This is still rung 4 —
+  mapped transfer in the gdb-default case, no chosen code. Rung 5 remains
+  UNKNOWN: no valid executed target, no marker/pointer execution, no side
+  effect from chosen bytes, no NX measurement.
   Independent witness replay
   W328 (2026-11-27 08:45–08:50Z, inbox #6255) ESTABLISHED the rung-4 label as
   written: from a clean `git archive` it reproduced the harness control and all
@@ -77,15 +80,22 @@ possible depending on canary/ASLR/NX. Brief:
   the two-marker early-return case and the 886-byte partial from a clean
   `git archive c2fb10c5`: ESTABLISHED AS LABELED, no grade change, NO rung 5;
   exact source line corrected to `xmpp.c:294`. Detail:
-  `.mishe-tauftauf/artifacts/witness-w331-opensips/detail.md`. The new
-  one-byte case has NOT been replayed yet.
+  `.mishe-tauftauf/artifacts/witness-w331-opensips/detail.md`. Witness W332
+  (2026-11-27 10:12–10:17Z, inbox #6333) independently replayed the one-byte
+  case from a clean `git archive 968b6f35`: core mechanics ESTABLISHED AS
+  LABELED, no grade change, NO rung 5, with `A`/`B` proving chosen low bytes
+  and the ASLR mapping classes above. It contradicted the "mapped and
+  executable under ASLR" sentence, now corrected here and in the live-wire
+  report. Detail: `.mishe-tauftauf/artifacts/witness-w332-opensips/detail.md`.
 
 Next bounded work: rung 4 is settled. The `tm` gate is bypassed by the early
 `return -1` in `uri_xmpp2sip(to, ...)` with a >251-byte `to`; eight chosen JID
 bytes at offsets 884-891 become the saved RIP in a stock build. A full JID
 gives a non-canonical target, a two-byte partial overwrite gives a canonical
-but unmapped target, and the one-byte overwrite gives a mapped mid-function
-target with a corrupted RBP and no `ret`/`call` in its 256-byte window. Rung 5
+but unmapped target, and the one-byte overwrite gives a mid-function target
+under the gdb default whose mapping under ASLR is base-dependent (3/8
+executable, 4/8 nonexecutable, 1/8 below the module in W332's runs), with a
+corrupted RBP and no `ret`/`call` in its 256-byte window. Rung 5
 remains UNKNOWN without a new primitive. Any future claim needs an observed
 side effect from executed chosen code and a fresh independent replay.
 later wake:

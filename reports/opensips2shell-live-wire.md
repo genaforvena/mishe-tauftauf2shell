@@ -256,9 +256,11 @@ At `uri_xmpp2sip` frame `#1` is `xmpp_send_sip_msg` with
 `0x7ffff7eda000`, executable segment `0x7ffff7ede000`–`0x7ffff7eed000`.
 JID byte `j` is stored at `buf_from[4+j]` and the saved RIP is `buf_from+888`,
 so a 885-byte `from` writes JID byte 884 into RIP byte 0 and the `sprintf`
-terminator NUL into RIP byte 1; bytes 2–7 stay original. The target is
-therefore always `xmpp.so base + 0x60XX`, with `XX` chosen by the sender —
-mapped and executable under ASLR as well as under gdb.
+terminator NUL into RIP byte 1; bytes 2–7 stay original. Under the **gdb
+default** (ASLR disabled) the target is `xmpp.so base + 0x60XX`, with `XX`
+chosen by the sender. W332's independent replay below measured that the low
+byte is attacker-chosen (`A` → `...0041`, `B` → `...0042`), and that under
+ASLR the executable mapping is base-dependent, not guaranteed.
 
 Run with `from[884]='A'` (0x41), `to` 260 bytes: at `xmpp_send_sip_msg+631`
 (`0x7ffff7ee329a`) `[rsp] = 0x00007ffff7ee0041` and
@@ -306,12 +308,29 @@ Fixed control: `artifacts-early/daemon-402-early.log` sha256
 `7736a7c0b88267a7a2a73a9e65b7653baeb3b9417cb8ba760ef54e5beacd3895`.
 All listeners were stopped; port 5269 was closed at handoff.
 
+Independent replay (W332, 2026-11-27 10:12–10:17Z, inbox #6333): core
+one-byte mechanics **ESTABLISHED AS LABELED**, no grade change, NO rung 5.
+Detail at `.mishe-tauftauf/artifacts/witness-w332-opensips/detail.md`.
+Clean `git archive 968b6f35` SHA-256
+`3b072e61c6db4219698e6cc65ea36c5902d2999d66e21961f2bf8605b97107f1`;
+pinned scripts/tarballs matched; the witness's own stock 4.0.1 no-canary
+rebuild produced `xmpp.so 09d4c0b6…` byte-identical with zero canary.
+Baseline 299-byte RIP intact; `A` at JID offset 884 gave `...0041`, `B`
+gave `...0042`, so the low byte is attacker-chosen. W332 contradicted the
+old "mapped and executable under ASLR" sentence: with
+`set disable-randomization off`, eight runs all reached the `ret` with the
+same noncanonical RBP and a slot ending `0041`, but classified against each
+run's own `info proc mappings` the target was r-xp in 3 (offset `0xb041`,
+`0xc041`), r--p in 4 (`0x1041`, `0x2041`) and below the module in 1
+(`-0x2fbf`); a separate `si` run reached `0x7ff8733e0041`, which gdb could
+not access. No chosen code or command ran in any run; no listener left.
+
 ## Static closure of the NUL-low-byte variant (2026-11-27 10:20Z)
 
 One further partial-overwrite variant needs no new live run. The saved RIP
 is `buf_from+888`, so an 884-byte JID puts the `sprintf` terminator on RIP
-byte 0 and leaves bytes 1–7 intact: the target would be
-`0x7ffff7ee6600`, module offset `0xc600`, inside the caller
+byte 0 and leaves bytes 1–7 intact: under the gdb-default base the target
+would be `0x7ffff7ee6600`, module offset `0xc600`, inside the caller
 `in_stream_node_callback` rather than `sha_hash`. On the pinned stock
 no-canary module (sha256
 `09d4c0b647950ee6545c810beec954e6565d093b2e6f3ed9881847482204a1cd`),
