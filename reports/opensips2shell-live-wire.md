@@ -111,6 +111,12 @@ bash run-live.sh 402-asan 402-asan-long 900
 `-fno-stack-protector` reproduces the probe runs. Restore from
 `src/opensips-4.0.1/modules/xmpp/xmpp.c` for the stock build.
 
+Post-commit smoke at 08:29Z: harness replay into `/tmp/opensips2shell-smoke`
+again printed `ALL CHECKS PASSED rc 0` and trace sha256
+`a69657bb243b83b850b332a4307996f5705d6b0bd6b3cdefbccba022c0c78b06`;
+`bash run-live.sh 401-asan 401-asan-smoke 299` again produced the live ASan
+overflow (`evidence/daemon-401-asan-smoke.log`). No listener left running.
+
 Adjacent-lane candidate recorded, not worked: GHSA-qc7q-vrx3-3j4h
 (`sip_i` `parse_isup` `memcpy` of attacker length into `val[128]`, affected
 `>=4.0.0,<4.0.2` and `>=3.6.0,<3.6.9`, patched `4.0.2`/`3.6.9`, pre-auth SIP
