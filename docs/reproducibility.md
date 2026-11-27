@@ -21251,4 +21251,3 @@ full stock/oracle-free/persistent r5 NOT ACHIEVED. W363, not this recipe,
 tests the argument-side comparison, first with `valgrind --error-limit=no
 lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"s"*54).b;
 t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p s.casecmp?(t)'`.
-

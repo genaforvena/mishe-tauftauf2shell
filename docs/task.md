@@ -16456,11 +16456,57 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 21:2x–21:3xZ — Ruby W362 `casecmp?` reaches the size LSB; Rufus correction witnessed
+
+Current limb for a reader arriving now; it supersedes §21:0x–21:1xZ's open
+items. Docs-only fold of `2372fdcb` (W362 harness/report) and `ad47ae3f`
+(register row and manifest boundary for W373), plus witness W373's verdict in
+`.mishe-tauftauf/artifacts/witness-w373/detail.md` (DM #6887). The generated
+row/manifest were updated by `ad47ae3f`; this fold adds the dated explanation
+and recipe. No grade, rung cell, count or lab evidence moved: count stays 152
+and the register flag still names stage `0415fa78`. Recipes in
+`docs/reproducibility.md` §21:2x–21:3xZ.
+
+- **Ruby W362 closes the last named stock entry point** (`2372fdcb`).
+  `str_casecmp_p` (`string.c:4353-4376`) calls `downcase(:fold)` on both
+  operands before `rb_str_eql`, with no first-byte or length short circuit,
+  so receiver-side `casecmp?` reaches the same `case_map` write as W361.
+  In-tree callers exist (`irb.rb:1264`, `rdoc/parser.rb:131`,
+  `reline/unicode.rb:394`); no wire input is claimed. The mixed
+  `"a" + N x 0xDF` driver keeps `R = capa+24 = N+45 = 72/88/104 ≡ 8 mod 16`
+  at N=27/43/59; valgrind 18/18 gives nine vulnerable arms with one
+  `Invalid write of size 1` at `case_map (iso_8859_1.c:277)` plus the known
+  copy-out read and nine patched arms clean, all rc 0 with `result=true`.
+  A 3.4.12 mismatch arm writes at the same slot with `result=false`. GDB on
+  plain 3.4.12 N=27 read successor `buffer+64`, slot `buffer+72` changing
+  `0x31 -> 0x73` with the size low byte unchanged, then exited normally —
+  one layout observation, not a safety claim. Fresh plain runs are partial:
+  3.4.12 match aborted 4/5, 2/5, 3/5 at N=27/43/59; 3.3.13 1/5, 0/5, 4/5;
+  4.0.9 2/5, 2/5, 4/5; mismatch gave two SIGSEGV, one glibc abort, two clean;
+  15 even-N=28 and 18 patched reps rc 0. Four arms timed out at 600 s and
+  were run later, not reported as passes from missing observations. Grade
+  unchanged, r5 NOT ACHIEVED beyond the labeled harness scope; W363 tests
+  the argument-side comparison.
+- **Witness W373 established the `553bfad5` correction** (receipt `285c0dea`).
+  From clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under GCC and
+  Clang, exact ASan and marker assertions, re-fetched pinned upstream blobs
+  confirming `parser.c:1616` and `hash.c:2217-2223` citations, verified
+  32-byte/two-slot and 62-slot accounting, read-only GDB victim at list+32
+  with guard intact, and a tampered-copy post-pin control rc 1. ESTABLISHED
+  AS LABELED, grade-neutral, R4 LIMITED, NO r5; no live process, wire,
+  service, shell or command. The register flag still names stage `0415fa78`;
+  this verdict does not regrade that scope.
+
+Next: W363's argument-side `casecmp?`, a real Windows post-allocation
+consumer under ASLR/CFG before any loopback trusted-response probe for Rufus,
+or an `idx`-independent gimpjif map. A fixed-arm store, a witness failure or
+a chosen-address transfer changes the plan.
+
+
 ## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
 
-Current limb for a reader arriving now; it supersedes the §20:0x–20:2xZ
-limb's open W361 and gimpjif `idx` questions. Docs-only fold of `309a72e5`,
-`553bfad5`, `285c0dea`, `624d0a27` and `8b24afd2`; the operator's
+Historical limb, superseded by §21:2x–21:3xZ. Docs-only fold of
+`309a72e5`, `553bfad5`, `285c0dea`, `624d0a27` and `8b24afd2`; the operator's
 README/results/manifest/SVG re-render is verified, not duplicated. No rung
 cell or lab evidence moved; the register flag and `established` count move
 only for the witness's exact stage scope. Recipes in
@@ -16475,10 +16521,12 @@ only for the witness's exact stage scope. Recipes in
   CR-2 READ-8, the chosen low-32-bit callback print and its fixed,
   not-called and one-byte-wrong controls under GCC and Clang. ESTABLISHED
   AS LABELED at stage `0415fa78`/receipt `7064369a`, grade-neutral, NO r5;
-  no wire, shell, command or real-heap adjacency. The verdict does not
-  cover the later `553bfad5` harness correction, which replays TAR
-  `d8ec9e29…` 16/16 and 11/0 and adds a post-regeneration pin check that
-  fails closed on a controlled mismatch (rc 1).
+  no wire, shell, command or real-heap adjacency; the two citation NITs
+  were fixed by the later correction. Witness W373 independently replayed
+  `553bfad5` from TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under
+  GCC and Clang, read-only GDB and tampered-copy post-pin control rc 1,
+  ESTABLISHED AS LABELED, grade-neutral, NO r5.
+
 - **Ruby W361 folds a byte into the successor size LSB** (`624d0a27`): 18/18
   valgrind arms put one `case_map` write plus the known copy-out read on
   all nine vulnerable builds and zero/zero on all nine patched. GDB on
@@ -16500,9 +16548,10 @@ only for the witness's exact stage scope. Recipes in
   `133b4c67…`. Its watcher arm was invalid (`base` unset), so only the
   `total_out` line is used and the cause stays UNKNOWN.
 
-At this limb: a real Windows post-allocation consumer under ASLR/CFG for
-Rufus, Ruby W362's `casecmp?` size-LSB lane, a gimpjif `idx`-independent map
-or chosen-address store, or a checker RED on committed HEAD.
+At this limb: the real Windows post-allocation consumer under ASLR/CFG for
+Rufus, Ruby W363's argument-side `casecmp?` comparison, a gimpjif
+`idx`-independent map or chosen-address store, or a checker RED on committed
+HEAD.
 
 
 ## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; Checkmk 220th admitted and witnessed; gimpjif W357 negatives
