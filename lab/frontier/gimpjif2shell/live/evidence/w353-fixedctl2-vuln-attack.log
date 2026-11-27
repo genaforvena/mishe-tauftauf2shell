@@ -1,0 +1,65 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln
+GLib-GIO-Message: 17:32:15.023: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:32:15.023: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+
+(process:1265924): GLib-ERROR **: 17:32:18.326: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1268870): GLib-ERROR **: 17:32:21.645: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1270460): GLib-ERROR **: 17:32:24.633: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1272615): GLib-ERROR **: 17:32:28.337: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1274323): GLib-ERROR **: 17:32:31.182: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1276258): GLib-ERROR **: 17:32:34.354: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1278343): GLib-ERROR **: 17:32:37.259: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1279654): GLib-ERROR **: 17:32:39.941: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1281761): GLib-ERROR **: 17:32:43.011: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1283749): GLib-ERROR **: 17:32:47.181: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1285564): GLib-ERROR **: 17:32:50.631: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1286554): GLib-ERROR **: 17:32:53.531: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1288697): GLib-ERROR **: 17:32:56.472: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1291060): GLib-ERROR **: 17:32:59.549: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1292118): GLib-ERROR **: 17:33:02.752: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1293317): GLib-ERROR **: 17:33:05.931: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1294247): GLib-ERROR **: 17:33:09.032: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1295414): GLib-ERROR **: 17:33:12.044: creating thread 'gmain': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+**
+GLib-GIO:ERROR:../../../gio/gtask.c:2415:g_task_thread_pool_init: assertion failed: (task_pool != NULL)
+Bail out! GLib-GIO:ERROR:../../../gio/gtask.c:2415:g_task_thread_pool_init: assertion failed: (task_pool != NULL)
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+**
+GLib-GIO:ERROR:../../../gio/gtask.c:2415:g_task_thread_pool_init: assertion failed: (task_pool != NULL)
+Bail out! GLib-GIO:ERROR:../../../gio/gtask.c:2415:g_task_thread_pool_init: assertion failed: (task_pool != NULL)
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated

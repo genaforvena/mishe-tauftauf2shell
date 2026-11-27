@@ -2030,13 +2030,14 @@ details, log SHAs and layout caveat: W352 section of
 W352's open bound question is answered on the same no-shim live path: JIF
 `f867cd09…` writes little-endian `P1` at every 8-byte output offset
 `0x47000..0x473f8` and alternates zero / `P1` words over
-`0x47400..0x47680`, so the fields `P1+0x330` (index mask) and `P1+0x338`
-(table base) receive chosen values despite the run-to-run `idx` shift.
+`0x47400..0x47680`, so the fake `link_map` fields `P1+0x330`
+(`l_gnu_bitmask_idxbits`) and `P1+0x338` (`l_gnu_bitmask`) receive chosen
+values despite the run-to-run `idx` shift.
 Unmodified runner, SHA-verified AppImage and read-only observer: both
 runner PASS lines; PRE `idx=0x555555679070`, `ARRBASE−idx=0x47210`;
 `W349 CHOSEN n=32` with `rax=P1`; both W351 STAGE2 hits; then
-`W352 TABLE pc=0x7ffff7fd12e1 rdx=0x55555556c0240 map=[[heap]] rax=0 rcx=0
-target=0x55555556c0240 map=[[heap]] word=93824993722944` — a successful
+`W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00005555556c0240 map=[[heap]] rax=0 rcx=0
+target=0x00005555556c0240 map=[[heap]] word=93824993722944` — a successful
 mapped read at the chosen target, not W352's `0x12e1` fault. The triple
 repeated for 62 array entries; the final fault at `0x1327` with `rax=0` is
 the end of the dense `P1` sweep, not a new mechanism. Two preserved encoding
@@ -2044,4 +2045,28 @@ negatives (6-byte and big-endian words) stayed at the array deref; they
 diagnose my generator, not the loader. Grade-neutral: no chosen-address
 write, control-flow word, marker or command, NO r5; author-only, replay
 offer added to #6661. Details and log SHAs: W353 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W354 sequential W353 fixed control and exact ld.so consumer (2026-11-27, 17:35Z wake)
+
+The interrupted 17:11Z wake committed only the W353 documentation; its
+follow-up control logs show PID exhaustion, not a loader result. The control
+runner now waits in the foreground, supports tagged replays, and accepts the
+observed GIMP `Plug-in crashed` message. A frozen sequential rerun on the
+W353 JIF returned `TOTAL: 10 PASS / 0 FAIL`: both safe controls rc 0; the
+vulnerable attack crashed; the fixed attack rejected the image data without
+a fault; no PID-error or shim lines appeared. This remains a locally rebuilt
+fix control, not a vendor-shipped fixed build.
+
+A new read-only observer maps `0x7ffff7fd12e1` to the AppImage's glibc 2.41
+`ld-linux-x86-64.so.2`; frames #1–#3 are ld.so, #4 is `inflate`, and #5 is
+`ReadJeffsImage:1613`. The instruction sequence matches glibc 2.41
+`do_lookup_x()`: `rbx` is the fake `link_map`, `+0x330` is
+`l_gnu_bitmask_idxbits`, `+0x338` is `l_gnu_bitmask`, and the load is the
+GNU-hash bitmask word later tested by the hash-bit checks. W353 is therefore
+a chosen-address read in live ld.so, not a GEGL/plug-in object write.
+GDB captured this consumer before its terminal internal error; no W354
+terminal stop is claimed, and W353's separate terminal fault remains.
+Grade-neutral, NO r5; W352/W353 remain author-only pending witness W363.
+Exact logs, hashes and the next fake-hash-table bound: W354 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.

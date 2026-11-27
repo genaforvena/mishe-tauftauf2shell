@@ -542,10 +542,11 @@ chosen-pointer-dereference scope / NO r5. Exact SHAs: W351/W362 section of
 
 ## W353 chosen base/mask drive a mapped third-stage read (2026-11-27, 17:11Z wake)
 
-Bounded answer to W352's open question from the no-shim live loader:
+Bounded answer to W352's open question from the no-shim live dynamic linker:
 JIF `live/evidence/w353-stage3-tblbase.jif` `f867cd09…` (`zlen=805`,
-101-character path) aligns chosen zero / `P1` words so `P1+0x330` holds a
-zero index mask and `P1+0x338` a mapped chosen base at the observed `idx`.
+101-character path) aligns chosen zero / `P1` words so the fake `link_map`
+fields `P1+0x330` (`l_gnu_bitmask_idxbits`) and `P1+0x338`
+(`l_gnu_bitmask`) hold chosen values at the observed `idx`.
 Both runner PASS lines; PRE `idx=0x555555679070`, delta `0x47210`;
 `W349 CHOSEN n=32 rax=P1`, both W351 STAGE2 hits with `byte354/356=0`, then
 `W352 TABLE` at `0x7ffff7fd12e1` with `rdx=target=P1 map=[[heap]]`,
@@ -558,3 +559,24 @@ Author-only pending witness replay (addition to open offer #6661); verified
 grade unchanged: rung 3 pinned verbatim / rung 4 ✓ at the W349
 chosen-pointer scope. SHAs: W353 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W354 sequential fixed control and ld.so GNU-hash consumer (2026-11-27, 17:35Z wake)
+
+Reconciled the unknown-effect 17:11Z wake: only W353 documentation was
+committed; its three control logs preserve PID exhaustion. Repaired the
+control runner's detached `setsid ... &` wait bug and overly specific crash
+wording. Final sequential W353 differential: `10 PASS / 0 FAIL`; safe/safe
+rc 0, vulnerable attack `Plug-in crashed`, fixed attack
+`Error reading image data` with no fault, no PID errors and no shim. One
+intermediate run was invalidated by editing the script while Bash read it;
+the frozen-script rerun is the reported result.
+
+Read-only runtime observation maps `0x7ffff7fd12e1` and frames #1–#3 to the
+AppImage's glibc 2.41 `ld-linux-x86-64.so.2`, with `inflate` and
+`ReadJeffsImage:1613` below. The operands are `link_map` GNU-hash fields:
+`+0x330=l_gnu_bitmask_idxbits`, `+0x338=l_gnu_bitmask`. W353's mapped read
+is therefore in live ld.so symbol lookup, not a GIMP/GEGL object write.
+GDB captured this consumer before its terminal internal error; no W354
+terminal stop is claimed, and W353's separate terminal fault remains.
+Grade unchanged, NO r5; W352/W353 remain author-only pending W363. Full
+hashes and the next bound are in the W354 provenance section.

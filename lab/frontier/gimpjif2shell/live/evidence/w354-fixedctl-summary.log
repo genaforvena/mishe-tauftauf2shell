@@ -1,0 +1,20 @@
+GIMP-3.2.8-x86_64.AppImage: OK
+PASS: official GIMP 3.2.8 runtime verified
+/tmp/gimpjif-fixedctl-build-JEcMhZ/gimp.tar.xz: OK
+/tmp/gimpjif-fixedctl-build-JEcMhZ/fix.patch: OK
+PASS: vulnerable and fixed plug-in binaries differ
+PASS: no-shim AppRun regenerated in both private roots
+PASS: two private AppImage roots hold the rebuilt plug-ins
+vuln safe rc=0 batch command executed successfully
+PASS: pristine plug-in loads safe 4x4 JIF
+fixed safe rc=0 batch command executed successfully
+PASS: fixed plug-in loads safe 4x4 JIF
+vuln attack rc=124 Plug-in crashed
+fixed attack rc=137 image data
+ATTACK RC vuln=124 fixed=137 (script-fu may hang after an error; rc is observation only)
+PASS: pristine plug-in faults on the attack JIF
+PASS: attack run carried no LD_PRELOAD shim
+PASS: fixed plug-in rejects the wrapping JIF
+PASS: fixed plug-in did not fault
+TOTAL: 10 PASS / 0 FAIL
+CEILING: a locally rebuilt plug-in control is not a live published fixed build; no chosen-address write, dereference, command or r5 claim.

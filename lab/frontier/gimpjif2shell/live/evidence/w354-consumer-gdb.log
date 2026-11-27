@@ -1,0 +1,42 @@
+W354 PRE avail=0x80000002 idx=0x555555679060
+W354 CONSUMER pc=0x7ffff7fd12e1 mapping=7ffff7fc8000-7ffff7ff0000 r-xp 00001000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W354 OPERANDS rdi=0x3 r12=0x1fb025d2 rbx=0x7ffff7ffe5f0 r14=0x5555556c0270
+W354 UNDEF_NAME ERROR Cannot access memory at address 0x3
+W354 FIELD l_nbuckets=0x3
+W354 FIELD l_gnu_bitmask_idxbits=0x0
+W354 FIELD l_gnu_bitmask=0x55555556c078
+W354 info symbol $pc
+No symbol matches $pc.
+
+W354 x/12i $pc-32
+   0x7ffff7fd12c1:	add    %al,(%rax)
+   0x7ffff7fd12c3:	mov    %rax,%r15
+   0x7ffff7fd12c6:	test   %rdx,%rdx
+   0x7ffff7fd12c9:	je     0x7ffff7fd13e0
+   0x7ffff7fd12cf:	mov    %r12d,%eax
+   0x7ffff7fd12d2:	mov    0x334(%rbx),%ecx
+   0x7ffff7fd12d8:	shr    $0x6,%eax
+   0x7ffff7fd12db:	and    0x330(%rbx),%eax
+=> 0x7ffff7fd12e1:	mov    (%rdx,%rax,8),%rax
+   0x7ffff7fd12e5:	mov    %r12d,%edx
+   0x7ffff7fd12e8:	shr    %cl,%edx
+   0x7ffff7fd12ea:	mov    %edx,%ecx
+
+W354 bt 16
+#0  0x00007ffff7fd12e1 in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#1  0x00007ffff7fd1fbc in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#2  0x00007ffff7fd81d4 in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#3  0x00007ffff7fda50a in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#4  0x00007ffff7a92f1c in inflate () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#5  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555617430, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=33025, height=height@entry=65026, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc1f8, error=0x7fffffffc568) at ../plug-ins/common/file-gif-load.c:1613
+#6  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555617430, file=file@entry=0x55555561ad00, len=33025, height=65026, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=33025, screenheight=65026, is_jeff_image=1, image=0x7fffffffc1f8, error=0x7fffffffc568, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#7  0x000055555555861c in load_image (file=file@entry=0x55555561ad00, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc568) at ../plug-ins/common/file-gif-load.c:625
+#8  0x0000555555558dd4 in gif_load (procedure=0x55555561c5c0, run_mode=<optimized out>, file=0x55555561ad00, metadata=<optimized out>, flags=0x7fffffffc5c4, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#9  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561c5c0, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#10 0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561c5c0, args=args@entry=0x55555561d040) at ../libgimp/gimpprocedure.c:2200
+#11 0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x555555618ed0, procedure=0x55555561c5c0, proc_return=0x7fffffffc710) at ../libgimp/gimpplugin.c:1511
+#12 gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x555555617bf0, proc_run=proc_run@entry=0x555555618ed0, procedure=0x55555561c5c0, proc_return=proc_return@entry=0x7fffffffc710) at ../libgimp/gimpplugin.c:1551
+#13 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x555555617bf0, proc_run=0x555555618ed0) at ../libgimp/gimpplugin.c:1453
+#14 gimp_plug_in_loop (plug_in=0x555555617bf0) at ../libgimp/gimpplugin.c:1356
+#15 _gimp_plug_in_run (plug_in=0x555555617bf0) at ../libgimp/gimpplugin.c:909
+

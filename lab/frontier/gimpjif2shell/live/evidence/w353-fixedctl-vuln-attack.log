@@ -1,0 +1,83 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln
+GLib-GIO-Message: 17:31:59.624: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:31:59.624: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+
+(process:1265830): GLib-ERROR **: 17:32:18.232: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1266790): GLib-ERROR **: 17:32:19.458: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1269676): GLib-ERROR **: 17:32:22.746: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1271077): GLib-ERROR **: 17:32:25.648: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1273148): GLib-ERROR **: 17:32:28.662: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1274781): GLib-ERROR **: 17:32:31.739: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1277329): GLib-ERROR **: 17:32:34.847: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1278638): GLib-ERROR **: 17:32:37.899: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1280207): GLib-ERROR **: 17:32:41.449: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+GIMP-Error: Unable to run plug-in "file-header"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-header/file-header)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-glob"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-glob/file-glob)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gih"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gih/file-gih)
+
+Failed to fork (Resource temporarily unavailable)
+
+
+(process:1283416): GLib-ERROR **: 17:32:46.462: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1285319): GLib-ERROR **: 17:32:49.728: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1286215): GLib-ERROR **: 17:32:52.454: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1287731): GLib-ERROR **: 17:32:55.527: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1290395): GLib-ERROR **: 17:32:58.558: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1291676): GLib-ERROR **: 17:33:01.840: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1292831): GLib-ERROR **: 17:33:04.841: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1294018): GLib-ERROR **: 17:33:07.851: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1294807): GLib-ERROR **: 17:33:11.048: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1296399): GLib-ERROR **: 17:33:14.130: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1297534): GLib-ERROR **: 17:33:17.225: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1298183): GLib-ERROR **: 17:33:19.425: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated

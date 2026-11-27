@@ -1,0 +1,185 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed
+GLib-GIO-Message: 17:31:59.654: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 17:31:59.654: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs'
+
+(process:1265851): GLib-ERROR **: 17:32:18.244: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+GIMP-Error: Unable to run plug-in "file-pcx"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-pcx/file-pcx)
+
+Failed to fork (Resource temporarily unavailable)
+
+
+(process:1268367): GLib-ERROR **: 17:32:21.045: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1270138): GLib-ERROR **: 17:32:23.731: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+GIMP-Error: Unable to run plug-in "file-mng"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-mng/file-mng)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-jpegxl"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-jpegxl/file-jpegxl)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-jpeg"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-jpeg/file-jpeg)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-jp2"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-jp2/file-jp2)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-ico"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-ico/file-ico)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-icns"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-icns/file-icns)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-html-table"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-html-table/file-html-table)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-heif"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-heif/file-heif)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-header"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-header/file-header)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-glob"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-glob/file-glob)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gih"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gih/file-gih)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gif-load"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gif-export"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-export/file-gif-export)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gegl"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gegl/file-gegl)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-gbr"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gbr/file-gbr)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-fli"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-fli/file-fli)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "file-fits"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-fits/file-fits)
+
+Failed to fork (Resource temporarily unavailable)
+
+
+(process:1272157): GLib-ERROR **: 17:32:27.360: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1273741): GLib-ERROR **: 17:32:29.683: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1275480): GLib-ERROR **: 17:32:32.768: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1277832): GLib-ERROR **: 17:32:35.847: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1279010): GLib-ERROR **: 17:32:38.906: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1281000): GLib-ERROR **: 17:32:42.024: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1283303): GLib-ERROR **: 17:32:46.345: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1284486): GLib-ERROR **: 17:32:48.446: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1286084): GLib-ERROR **: 17:32:51.842: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1286885): GLib-ERROR **: 17:32:54.443: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1289560): GLib-ERROR **: 17:32:57.487: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1291453): GLib-ERROR **: 17:33:00.829: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1292446): GLib-ERROR **: 17:33:03.834: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1293721): GLib-ERROR **: 17:33:06.927: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1294446): GLib-ERROR **: 17:33:10.035: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1296047): GLib-ERROR **: 17:33:13.044: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+GIMP-Error: Unable to run plug-in "contrast-retinex"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/contrast-retinex/contrast-retinex)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "compose"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/compose/compose)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "colorxhtml.py"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/colorxhtml/colorxhtml.py)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "colormap-remap"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/colormap-remap/colormap-remap)
+
+Failed to fork (Resource temporarily unavailable)
+
+GIMP-Error: Unable to run plug-in "cml-explorer"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/cml-explorer/cml-explorer)
+
+Failed to fork (Resource temporarily unavailable)
+
+
+(process:1297402): GLib-ERROR **: 17:33:16.927: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1297824): GLib-ERROR **: 17:33:18.341: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: LibGimpBase-WARNING: gimp: gimp_wire_read(): unexpected EOF
+
+(process:1298561): GLib-ERROR **: 17:33:21.447: creating thread 'gdbus': Error creating thread: Resource temporarily unavailable
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated

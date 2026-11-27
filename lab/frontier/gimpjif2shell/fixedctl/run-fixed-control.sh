@@ -4,6 +4,8 @@
 # JIFs in two private copies of the SHA-verified AppImage runtime.
 # No shim, no gdb, no plugin byte patched in memory: the only difference is
 # the pinned source patch. Temporary build roots stay outside the repo.
+# GIMPJIF_FIXEDCTL_BUILD/EVID/TAG/ATTACK allow a sequential replay to reuse a
+# build root and preserve earlier logs; run_case stays in the foreground.
 set -euo pipefail
 
 HERE="$(cd "$(dirname "$0")" && pwd)"
@@ -16,8 +18,9 @@ SRC_SHA='16a2696cadc9e03a2ef97ccb895e062f654cb2b8211fb57074db85f26646c847'
 FIX_URL='https://gitlab.gnome.org/GNOME/gimp/-/commit/2b2bbb8ffa6a88e82c72fe1208adc275dddffcd7.patch'
 FIX_SHA='92ca1593776352c11e477cfb0307874bae22de240842e893d861085c9f5edd43'
 PLUGREL='usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load'
-BUILD="$(mktemp -d /tmp/gimpjif-fixedctl-build-XXXXXX)"
-EVID="$HERE/evidence"
+BUILD="${GIMPJIF_FIXEDCTL_BUILD:-$(mktemp -d /tmp/gimpjif-fixedctl-build-XXXXXX)}"
+EVID="${GIMPJIF_FIXEDCTL_EVID:-$HERE/evidence}"
+TAG="${GIMPJIF_FIXEDCTL_TAG:-fixedctl}"
 PASS=0
 FAIL=0
 
@@ -64,7 +67,7 @@ build_plugin "$BUILD/vuln"                                  # pristine 3.2.8
 (cd "$SRC" && patch -p1 < "$BUILD/fix.patch" >/dev/null)
 build_plugin "$BUILD/fixed"                                 # same source + fix
 (cd "$SRC" && patch -R -p1 < "$BUILD/fix.patch" >/dev/null)
-sha256sum "$BUILD/vuln" "$BUILD/fixed" > "$EVID/fixedctl-binaries.sha256"
+sha256sum "$BUILD/vuln" "$BUILD/fixed" > "$EVID/$TAG-binaries.sha256"
 ! cmp -s "$BUILD/vuln" "$BUILD/fixed"
 ok "vulnerable and fixed plug-in binaries differ"
 
@@ -92,21 +95,19 @@ run_case () {
   local v="$1"
   local kind="$2"
   local jif="$3"
-  local out="$EVID/fixedctl-$v-$kind.log"
+  local out="$EVID/$TAG-$v-$kind.log"
   local home; home="$(mktemp -d /tmp/gimpjif-fixedctlhome-XXXXXX)"
   (cd "$BUILD/root-$v" && exec setsid timeout -k 5 90 env HOME="$home" \
       ./AppRun.noshim -i --batch-interpreter plug-in-script-fu-eval \
       -b "(let* ((img (car (gimp-file-load RUN-NONINTERACTIVE \"$jif\" \"$(basename "$jif")\")))) (gimp-message (number->string (car (gimp-image-get-width img)))))" \
-      -b '(gimp-quit 0)') > "$out" 2>&1 &
-  local pid=$! rc=0
-  wait "$pid" || rc=$?
-  kill -9 -- "-$pid" 2>/dev/null || true
+      -b '(gimp-quit 0)') > "$out" 2>&1
+  local rc=$?
   echo "$v $kind rc=$rc $(grep -Eo 'batch command executed successfully|Plug-in crashed|image data' "$out" | tail -1)"
   return "$rc"
 }
 
 SAFE="$BASE/realglib/evidence/safe.jif"
-ATK="$BASE/live/evidence/gdb-liveptr-8192.jif"
+ATK="${GIMPJIF_FIXEDCTL_ATTACK:-$BASE/live/evidence/gdb-liveptr-8192.jif}"
 run_case vuln safe "$SAFE" && ok "pristine plug-in loads safe 4x4 JIF" || no "pristine safe control"
 run_case fixed safe "$SAFE" && ok "fixed plug-in loads safe 4x4 JIF" || no "fixed safe control"
 set +e
@@ -114,13 +115,13 @@ run_case vuln attack "$ATK"; VRC=$?
 run_case fixed attack "$ATK"; FRC=$?
 set -e
 echo "ATTACK RC vuln=$VRC fixed=$FRC (script-fu may hang after an error; rc is observation only)"
-grep -q 'fatal error: Segmentation fault' "$EVID/fixedctl-vuln-attack.log" \
-  && ok "pristine plug-in faults on the 8 KiB attack JIF" || no "vulnerable attack fault"
-! grep -q 'SHIM_PATCH' "$EVID/fixedctl-vuln-attack.log" \
+grep -Eq 'fatal error: Segmentation fault|Plug-in crashed' "$EVID/$TAG-vuln-attack.log" \
+  && ok "pristine plug-in faults on the attack JIF" || no "vulnerable attack fault"
+! grep -q 'SHIM_PATCH' "$EVID/$TAG-vuln-attack.log" \
   && ok "attack run carried no LD_PRELOAD shim" || no "shim present in attack run"
-grep -q 'Error reading image data' "$EVID/fixedctl-fixed-attack.log" \
+grep -q 'Error reading image data' "$EVID/$TAG-fixed-attack.log" \
   && ok "fixed plug-in rejects the wrapping JIF" || no "fixed rejection"
-! grep -q 'Segmentation fault' "$EVID/fixedctl-fixed-attack.log" \
+! grep -q 'Segmentation fault' "$EVID/$TAG-fixed-attack.log" \
   && ok "fixed plug-in did not fault" || no "fixed fault"
 
 echo "TOTAL: $PASS PASS / $FAIL FAIL"
