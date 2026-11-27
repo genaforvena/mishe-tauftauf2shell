@@ -80,6 +80,10 @@
   `attach_tty_name_in_ns` bytes at offsets 0, 16, 32, 48, 64, 100, 200, 239
   and 240 all read `0x43`, the chosen `STY` byte.
 - `RUN_ALL_OK 13 PASS / 0 FAIL` on two consecutive runs.
+- Clean `git archive --format=tar HEAD lab/frontier/screensendcmd2shell` TAR
+  SHA-256 `6b9dc4e877de427ebcfcfe7fd2ae3078f99ceb1c3952e922c00a3f1bfb9109c7`
+  matched 6/6 input pins and replayed `RUN_ALL_OK 13 PASS / 0 FAIL` from a
+  fresh extraction; only the tarballs, not extracted source trees, are tracked.
 
 ## Scope limits
 
