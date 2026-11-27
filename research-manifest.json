@@ -477,12 +477,13 @@
         "R1": "✓",
         "R2": "✓",
         "R3": "✓",
-        "R4": "◐",
+        "R4": "✓",
         "R5": "—"
       },
-      "boundary": "**CODE/HARNESS** — a 299-byte JID drives `ENC_SIP_URI()`'s `sprintf` 48 bytes past `buf_from[256]`; rung 4 is instrumented chosen bytes. Needs `backend=server`; RCE depends on canary/ASLR/NX. [Status](reports/opensips2shell-status.md)",
+      "boundary": "**LIVE/CODE/HARNESS** — a 299-byte XMPP JID drives `ENC_SIP_URI()`'s `sprintf` 48 bytes past `buf_from[256]` in a stock OpenSIPS 4.0.1 loopback receiver (`backend=server`): ASan `WRITE of size 304` in `xmpp_send_sip_msg`, child exits; 4.0.2 ignores the stanza. Rung 4 demonstrated under lab conditions: an instrumented live frame sees chosen JID bytes in `fromstr.s`/`fromstr.len`, and a 900-byte JID drives a 1,111,579,232-byte allocation and SIGSEGV; 299-byte and 4.0.2 controls do not crash. No overwritten saved RIP, marker or pointer execution; R5 UNKNOWN, witness replay pending. [Status](reports/opensips2shell-status.md), [live replay](reports/opensips2shell-live-wire.md)",
       "reports": [
-        "reports/opensips2shell-status.md"
+        "reports/opensips2shell-status.md",
+        "reports/opensips2shell-live-wire.md"
       ],
       "established": false
     },
