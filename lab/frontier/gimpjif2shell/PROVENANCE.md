@@ -2088,3 +2088,49 @@ full `61d90cdb…`) is invalid: `orig=0x5555557037d0` (low16 `0x37d0`, not
 retry unchanged. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
 chosen bytes, NO r5; no chosen-target dereference, control flow, marker or
 command measured.
+
+## W325 no-shim post-inflate READ-watch sweep (2026-11-27, 07:42-08:00Z wake)
+
+Witness mail #6194 closed the W322 type-name replay (#6174 / commit
+`96d82d2b`) ESTABLISHED AS LABELED: all offered SHAs matched (runner
+`f70e8032`, script `caab8648`, author log `d93e1cb2`, negative log
+`df380211`, both probes and JIF `d6556936`), one fresh real find of
+`GData`/`TypeNode` with qname "gegl_op_src" and GType
+"GeglOperationPointComposer"; no register/memory write or forced call, so
+no grade change. Detail:
+`.mishe-tauftauf/artifacts/witness-w324-gimpjif-type/detail.md` (site home,
+not committed). The W324 replay offer at #6203 still has no verdict.
+
+New no-shim tooling, with SHA-256:
+
+- `live/gdb-readsweep-325.cmd`
+  `1454472a8d74b247343942e039d3c325b40af29b8627d39e784acc99318bce71`:
+  break on real `inflate`, validate `avail_out == 0x80000082`, read-only
+  dump of words `indexes+264` to `+1048`, choose up to four heap-pointer
+  words, arm `WP_READ` watchpoints at the validated inflate return.
+- `live/run-appimage-readsweep-325.sh`
+  `a203611b0ba7d376cde33b47657d05c783b5cb53bc5598d589607557a6a7d2da`:
+  verifies `SHA256SUMS`, regenerates a private shim-free `AppRun.readsweep325`
+  (asserts no shim lines), fresh `$HOME`, `setsid timeout 150`, GDB wrapper
+  on `file-gif-load,run`.
+- JIF `live/evidence/span-1024.jif`
+  `c7a733c96ec4863a93855818415d72f381c690d9d6801f6f599e7c02c386fe0e`.
+
+Observed in `live/evidence/w325-readsweep-probe.log` SHA-256
+`b096fd66962021f665ad0c763e73512b0c727197d2113b29996774878ecc4ff9`
+(full transcript `w325-readsweep-full.log` SHA-256
+`4752af43534e1781baa5df218fd100a73416fbb1aaff762781cd92fe60b1981e`):
+`PRE idx=0x5555557036b0 ret=0x555555557778 avail=0x80000082`; candidates
+`+280=0x5555557037e0`, `+336=0x5555557035c0`, `+344=0x5555557035a0`,
+`+376=0x555555703890`; `POST size264/nq272/qdatas280` all `0x4d4d…`;
+`W325 WATCHERS ARMED count=4` with all four hardware read watchpoints
+confirmed in the full transcript. `W325 READ HIT` count = 0; no
+`W325 SIGNAL` or `W325 EXITED` line. GIMP printed
+`Fatal signal: Segmentation fault` and
+`GIMP-Error: Plug-in crashed: "file-gif-load"`; the GDB-attached plug-in
+crash did not stop the script's signal handler, so the observation window
+ends at the crash. This is a weaker zero-read negative than W313 and does
+not prove the absence of a consumer in a completed load. No chosen-address
+write, dereference, control flow, marker or command; grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Do not retry this
+script unchanged with the same JIF and the same four words.

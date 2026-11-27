@@ -1470,3 +1470,30 @@ So a two-byte attacker-controlled write into a named live pointer field is
 achievable, but no read or dereference of the chosen target was measured and
 the crash is not attributable to that write. Grade unchanged: rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+## Four-word post-inflate read sweep, no consumer observed (W325, 2026-11-27)
+
+W313 and W324 each watched a single overwritten word and logged zero reads.
+W325 tests the broader prediction that the GEGL startup objects hit by the
+overflow are not read after decode at all. A new no-shim GDB script
+(`live/gdb-readsweep-325.cmd`, SHA-256 `1454472a…`) validates the pinned
+`inflate()` call, dumps the OOB words read-only, picks up to four
+heap-pointer words and arms hardware READ watchpoints when inflate returns.
+The runner (`live/run-appimage-readsweep-325.sh`, SHA-256 `a203611b…`)
+SHA-verifies GIMP 3.2.8, strips every shim line from a private AppRun, and
+runs the committed 1024-byte JIF under a 150 s timeout; it changes no
+register, plugin byte or heap byte.
+
+`live/evidence/w325-readsweep-probe.log` (SHA-256 `b096fd66…`; full
+transcript `4752af43…`) records `avail=0x80000082`,
+`idx=0x5555557036b0`, candidates `+280`, `+336`, `+344`, `+376`, four
+chosen `0x4d` words at inflate return, and `W325 WATCHERS ARMED count=4`
+with all four hardware watchpoints confirmed. `W325 READ HIT` count is
+**zero**; no GDB signal stop was logged before GIMP reported
+`Fatal signal: Segmentation fault` and `Plug-in crashed: "file-gif-load"`.
+Because the crash ended the observation window early, this is a weaker
+negative than W313: no consumer was seen, but a completed-load consumer is
+not excluded. No chosen-address write, dereference, control flow, marker or
+command was observed. Grade unchanged: rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes, NO r5. Detail and hashes:
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
