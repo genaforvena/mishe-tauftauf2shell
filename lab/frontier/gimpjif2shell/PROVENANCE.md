@@ -3708,3 +3708,61 @@ unpinned runs; both logged only genuine lookups and the genuine GOT write.
 Scheduling control is therefore not a deterministic-`idx` source either. No
 pointer retune was attempted, no store or chosen GOT value was observed, and
 the grade is unchanged.
+
+## W358 phase-indexed fake-map attempt: negative (2026-11-27, 20:33-21:11Z wake)
+
+Bounded repair of W356's stated gap: build a coherent fake `link_map` that
+tolerates 16-byte `idx` drift. All runs used the unmodified shim-free
+`live/run-appimage-min340.sh` (`b047c40e…`), SHA256SUMS-verified GIMP 3.2.8
+AppImage, and read-only GDB observers (software breakpoints + their own logs).
+Absolute paths are required for `GIMPJIF_W340_GDB`: a relative path resolves
+under the AppImage root and arms no observer (run1 tooling negative).
+
+Three structural findings, preserved as negatives:
+
+1. A 16-byte-phase repeating pattern cannot carry a coherent multi-field map.
+   Fields whose offsets are equal mod 16 (e.g. `+0x000`, `+0x330`, `+0x340`,
+   `+0x4a0`, st_value `+0x540`) occupy the same spray lane; their copies
+   overlap and the later write wins. Offline decompression of arm 4's JIF
+   showed output offset `0x43210` holding the st_value word rather than
+   `l_addr=0`. This confirms, mechanistically, W356's stated limit.
+2. `ARRBASE = idx + delta`, so the loader array sits at a FIXED output offset
+   `delta+8i`; phase-spraying those pointers at `delta+8i−16k` moved them up
+   to `0xa00` below the live array (arm 3 negative).
+3. `idx_nominal` must be at or below every observed idx. With a nominal above
+   actual, a fixed-address field needs an output offset ABOVE the nominal
+   one; a downward-only spray lands below the target by `|d|+16k`.
+
+Final arm: `live/w358-phaseidx.py` (`8efc0a17…`) builds 16 phase-indexed
+coherent maps. The array points at one fixed cell `M=0x5555556a0200`; only
+`*(M+0x28)` (`l_real`) is read from that cell. For phase k in `0..0xf` the
+generator writes `M_k = M + 0x600*k` into the cell at the output offset that
+lands on `M+0x28` in phase k, and builds a full map at `M_k` at output
+offsets `base + 0x600*k + f − 16*k`, so no two fields share a lane. JIF
+`live/evidence/w358-phaseidxfinal.jif` (`133b4c67…`, 101-char path, zlen 988,
+file 1026) sweeps `M` over output offsets `delta−0x800 … delta+64*8+0x800`
+to cover W351's zlen-dependent delta values.
+
+Observer `live/gdb-w358-array.cmd` (`913c51a7…`) adds an ARRAY breakpoint at
+`ld_base+0xa327` (`0x7ffff7fd1327 − 0x7ffff7fc7000`) logging `r14`, `rax`,
+`mem0`, `mem8`. Run log `w358-phaseidxfinal-run.log` (`8f101f93…`), GDB log
+`w358-phaseidxfinal-gdb.log` (`e708cc0e…`): PRE `idx=0x555555679080`,
+`ARRBASE=0x5555556c0290`, measured `delta=0x47210`, but `mem0=0x7ffff7ffe5f0`
+and `mem8=0x7ffff7fb48e0` at every ARRAY hit — both genuine loader maps, not
+`M`. Only genuine `adler32`/`adler32_z` lookups fired, with the genuine GOT
+write `rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`; no chosen map hit, no
+`0xb200` LUSED store and no chosen GOT value. Offline decompression confirms
+`M` bytes are present at output offset `0x47170` of the JIF.
+
+The causal gap is therefore upstream of the fake map: in this JIF/layout the
+file-chosen bytes encoded at the measured array output offset did not appear
+in the live array, although W353 (`f867cd09…`) did overwrite it with a dense
+same-value sweep. Cause UNKNOWN; candidates for the next wake are an early
+inflate stop in the real plug-in for this compressed stream, a non-linear
+relationship between the logged `idx` and the far OOB write addresses, and
+late reinitialisation of the scope array. A W353 positive control with the
+same 0x80000002 runner was not runnable (its `avail_out` is 0x80000082), and
+its run with `run-appimage-min340.sh` failed the runner's PRE check — recorded
+as a tooling negative. No replay owed for a grade-neutral negative; grade
+unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
+

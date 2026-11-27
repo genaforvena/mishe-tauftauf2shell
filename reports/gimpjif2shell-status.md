@@ -637,3 +637,22 @@ W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 CPU pinning (`taskset -c 0`) widened it to 0x350 in two more forged runs;
 neither control gives a deterministic `idx`.
+
+## W358 phase-indexed fake map: negative (2026-11-27, 21:11Z)
+
+Three bounded attempts to carry W353's chosen-array read to a coherent fake
+`link_map` and the `l_used`/GOT write sinks all failed, with three preserved
+structural negatives: (1) a 16-byte-phase repeating pattern cannot hold a
+multi-field map because fields equal mod 16 share a spray lane (verified by
+offline decompression of the generated JIF); (2) `ARRBASE = idx + delta`, so
+the array is at a fixed output offset and must not be phase-sprayed; (3) the
+nominal idx must be at or below every observed idx or the downward spray
+lands below the target. The final arm built 16 phase-indexed coherent maps,
+selected through the fixed `l_real` cell at `M=0x5555556a0200`, with a delta
+sweep. Live run: PRE `idx=0x555555679080`, `ARRBASE=0x5555556c0290`,
+`delta=0x47210`, but `mem0`/`mem8` at the array stayed genuine; only
+`adler32`/`adler32_z` and the genuine GOT write occurred. No chosen map hit,
+no LUSED store, no chosen GOT value. Cause of the upstream gap UNKNOWN;
+grade unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
+Evidence, generator, observer, JIF and log hashes: W358 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
