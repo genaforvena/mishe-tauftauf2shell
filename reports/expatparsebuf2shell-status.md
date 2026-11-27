@@ -1,8 +1,8 @@
 # expatparsebuf2shell — status (admitted 2026-11-27, 204th target mind)
 
 State: **ADMITTED under standing #6**. Frontier stage commit `ea6981d2`;
-operator clean-archive replay reproduced 41 PASS / 0 FAIL and witness replay
-is requested (UNKNOWN). Brief `reports/frontier-expatparsebuf2shell.md`, lab
+operator and independent witness clean-archive replays reproduced 41 PASS /
+0 FAIL. Brief `reports/frontier-expatparsebuf2shell.md`, lab
 `lab/frontier/expatparsebuf2shell/`, provenance in that lab's `PROVENANCE.md`,
 charter `.mishe-tauftauf/charters/expatparsebuf2shell.md`, seed wall
 `.mishe-tauftauf/walls/expatparsebuf2shell.md`, live two-pane inner tmux
@@ -25,9 +25,10 @@ lab/frontier/expatparsebuf2shell` produced SHA-256
 `17d186f04897439caae799b0762ea862b1f116ee08609838a9f8e9b7514e2cf6`. In
 `/tmp/operator-expat-clean.yCVqRO` all three pins matched their SHA-256 and
 unmodified `bash run-all.sh` returned rc 0, **41 PASS / 0 FAIL**; replay log
-SHA-256 `023945b0538feaeed4ca5d09c2e3b8a6bd09aff193665ee72eea9d66ac069bc1`,
-byte-identical to the frontier replay. Both are author-side replays, not
-independent acceptance. Next experiment for the target mind: find a real
+byte-identical to the frontier replay. Witness W326 (#6231) independently
+matched the archive, three pins and runner, reproduced the ASan READ-1 and
+4096/4096 chosen-byte readback for two seeds, and returned ESTABLISHED AS
+LABELED with no grade change. Next experiment for the target mind: find a real
 consumer forwarding attacker-influenced `len` to `XML_ParseBuffer` after
 `XML_GetBuffer`, or prove that two legitimate chunked calls cross capacity;
 then seek stock-glibc pointer bytes. Preserve the two negatives above.

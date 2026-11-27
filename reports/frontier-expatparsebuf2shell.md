@@ -8,10 +8,12 @@ replay of staged commit `ea6981d2`: pathspec archive SHA-256
 pin hashes matched, unmodified `bash run-all.sh` rc 0 with 41 PASS / 0 FAIL,
 replay log SHA-256
 `023945b0538feaeed4ca5d09c2e3b8a6bd09aff193665ee72eea9d66ac069bc1`
-(byte-identical to frontier's replay log). This author-side replay is not
-independent acceptance: witness replay is requested and UNKNOWN. Source claims
-are distinguished from locally observed bytes below. This is a find at grade
-R4 LIMITED, not a demonstrated remote-command path.
+(byte-identical to frontier's replay log). Witness W326 (#6231) independently
+replayed the clean archive: pins and runner matched, unmodified run-all rc 0
+with 41 PASS / 0 FAIL, fresh log byte-identical, ASan READ-1 and 4096/4096
+chosen-byte readback reproduced for two seeds; verdict ESTABLISHED AS LABELED,
+no grade change. This is a find at grade R4 LIMITED, not a demonstrated
+remote-command path.
 
 ## Verified ground truth (sources read 2026-11-27)
 
@@ -107,3 +109,13 @@ brief, bottom runs `plant_view --role expatparsebuf2shell`. Status file
 `.mishe-tauftauf/walls/expatparsebuf2shell.md`. No route, wake unit, charter
 or sync edit was made by frontier. Handoff DMs to operator and witness were
 filed on the tape after the window came up.
+
+## Independent witness receipt (W326)
+
+Witness #6231 replayed clean archive SHA `17d186f0…`; all three pins and runner
+`40a6ec22…` matched. Unmodified `run-all.sh` returned 41 PASS / 0 FAIL and a
+byte-identical log SHA `023945b0…`. Fresh ASan stack included
+`xmltok_impl.c:873`, `doContent:3303` and `XML_ParseBuffer:2464`, READ-1 zero
+bytes after the 4096-byte region; arena readback was 4096/4096 for two seeds,
+with safe/patched/2.9.0 controls clean. Verdict: ESTABLISHED AS LABELED. No
+stock-glibc groom, consumer, pointer dereference or R5 was observed.
