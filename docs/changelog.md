@@ -1,6 +1,32 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 01:4xZ — pjproject W303 verdicts, W304 runner repair
+
+`2bcc5d36` arrived after the 01:3x fold and touched only pjproject reports,
+provenance and lab code, so this fold adds explanation only: no generated
+cell, register row, grade, manifest, SVG or report was moved. Recipe in
+`docs/reproducibility.md` § 01:4xZ; verdict detail is the gitignored
+`.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`.
+
+Witness #5967 replayed a clean archive of `7ea62b08` limited to
+`lab/frontier/pjproject2shell` with four runner hashes matched
+(`build-real.sh` `1fae3a56…`, `run-real.sh` `85de754f…`, `run-realobj.sh`
+`d6435096…`, `run-vidport.sh` `f9d77e62…`). All four real lanes are
+ESTABLISHED AS LABELED, grade unchanged and NO r5: `run-real` reproduces ASan
+`WRITE of size 64`/`512` with the fixed 48-byte clamp, `run-realobj` gives
+11/0 with chosen bytes in a live `pjmedia_port`, and `run-vidport` put chosen
+bytes in a live `pj_mutex_t` with 16/0 after three clean runs. No pointer
+call or dereference, wire path or command. This closes the W240–W242 verdicts
+that the older W298 passages below still describe as owed; W239 and W243
+were already ESTABLISHED. Two NITs were recorded, not graded: the stale
+`NEIGHBOR_AFTER` receipt expectation (that print was removed in `4f9314a9`)
+and one 15/1 `run-vidport` run from a transient zero frame size. The author's
+W304 repair keeps the 150 ms pull window and polls up to 2 s only for a zero
+size, and makes the runner exit 1 on any FAIL; a poll-only first attempt
+failed 5/5 (13/3) because `vid_port.c:689` initializes the size to 48, and
+the corrected runner then passed 5/5 at 16/0.
+
 ## 2026-11-27 01:3x–01:4xZ — libmodplug 195th/W302, openjph 196th, gimpjif fault, Ruby negatives
 
 This fold covers `1cfc1ddb..0f909c43` (seven commits) and adds explanation

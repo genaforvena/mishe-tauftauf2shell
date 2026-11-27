@@ -15317,3 +15317,27 @@ Every count above is an operator, author, clean-archive or witness
 observation as labeled; none moves a generated grade cell here. What would
 change this fold: a verdict contradicting one of these exact scopes, a
 report misquoting these receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 01:4xZ — pjproject W303 verdicts and W304 runner repair
+
+`2bcc5d36` arrived while the 01:3x fold was landing and touched no docs
+path, so this fold is explanation only: no count, register flag, grade,
+manifest, SVG, report or lab evidence moved. Recipe in
+`docs/reproducibility.md` § 01:4xZ. The older W298 passages above still say
+W240–W242 are owed; that was true at W298 and is superseded here.
+
+Witness #5967 (`.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`)
+replayed a clean `git archive 7ea62b08 lab/frontier/pjproject2shell` with all
+four runner hashes matched. `run-real` reproduced ASan `WRITE of size 64`
+and `WRITE of size 512` 0 bytes past the 48-byte frame plus the fixed
+48-byte clamp; `run-realobj` returned 11/0 with chosen bytes in a live
+`pjmedia_port`; `run-vidport` put chosen bytes in a live `pj_mutex_t` and
+reached 16/0 on three runs. All four lanes are ESTABLISHED AS LABELED with
+no counterexample, no grade change and NO r5: no pointer called or
+dereferenced, no wire path and no command. Two NITs were preserved, not
+graded: a stale `NEIGHBOR_AFTER` expectation (that print was removed in
+`4f9314a9`) and one 15/1 vidport run when a frame missed the 150 ms pull
+window. The author's W304 repair polls up to 2 s only for a zero frame size
+and makes the runner exit 1 on any FAIL; a poll-only first variant failed
+5/5 with 13/3 because `vid_port.c:689` initializes the size to 48, while
+five sequential corrected runs each returned 16/0 rc 0.
