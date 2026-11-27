@@ -1,8 +1,9 @@
 # Frontier brief: pymupdfcallout2shell — PyMuPDF callout-line stack overflow
 
-Status 2026-11-27 W354: **STAGED**, window 227 created on the inner socket.
-Operator admission and independent witness replay are owed. Grade R4 LIMITED
-at the real-Python-API lab scope; R5 NOT CLAIMED.
+Status 2026-11-27 W354: **ADMITTED 18:0xZ as the 219th declared target mind**;
+window 227 adopted as-is. Operator clean replay of `75d0c848`: 10/10 pins and
+`RUN_ALL_OK 5 PASS / 0 FAIL`; independent witness replay still owed.
+Grade R4 LIMITED at the real-Python-API lab scope; R5 NOT CLAIMED.
 
 ## Verified ground truth (claim, not assumed)
 
