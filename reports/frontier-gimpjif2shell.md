@@ -19,6 +19,10 @@ lookups on the unchanged JIF but no chosen-address store, and only genuine
 resolutions in the forged-map replay. All grade-neutral, NO r5. NITs: W365
 idx/delta/hit-count drift; W366 host-layout-conditioned fault path. W354
 fixed control and ld.so symbolization remain read but not replayed.
+W359 then proved temporally that bundled libz writes chosen `M` into the live
+loader array at inflate return; W358's genuine-array samples were earlier or
+layout-conditioned, not a missed write. The run faults immediately after
+inflate return; no store, control-flow effect or r5.
 
 ## Claim and scope
 

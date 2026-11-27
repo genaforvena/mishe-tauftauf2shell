@@ -3778,3 +3778,48 @@ far OOB write addresses, or a later reinitialisation/copy of the loader scope
 array. No store, chosen GOT value, marker or command; grade unchanged.
 
 
+
+## W359 temporal write proof resolves W358 array gap (2026-11-27, 22:22-22:29Z wake)
+
+Reconciliation first: unknown attempt 59 left the target paths clean and no
+live target job. Its durable effects were W358 commits `8b24afd2` and
+`995cf1b9`; the tape/dashboard still records the wake UNKNOWN. No effect was
+repeated blindly.
+
+W358 inferred that the W358 JIF's chosen bytes might not reach the live loader
+array because loader-entry samples showed genuine pointers. W359 tested that
+inference temporally with the same JIF `133b4c67…`, the unmodified shim-free
+`run-appimage-min340.sh` (`b047c40e…`), SHA256SUMS-verified GIMP 3.2.8 AppImage,
+and read-only `live/gdb-w359-temporal.cmd` SHA-256
+`07cd4bff37b6f44cdb3f6e789a4bf711d0c3e407c0af0f3fba8deb50eec869bd`.
+The observer installs one hardware WRITE watchpoint at `idx+0x47210`, a return
+breakpoint at the pinned `inflate` caller, and a first `do_lookup_x` entry
+snapshot. It writes only its own log and software/hardware breakpoints.
+
+Run log `live/evidence/w359-temporal-run.log` SHA-256
+`757fd6a9b623d3dc0b6a24752c60848c773c6b77c2858344c25852975ef87de7`;
+relevant transcript `w359-temporal-gdb.log`. PRE `idx=0x555555679060`, target
+`0x5555556c0270`, with genuine loader words. The first `adler32` lookup also
+sampled genuine words, but occurred before the far output write. The watchpoint
+then fired four times in bundled libz at `0x7ffff7a8ff02`, `0x7ffff7a8ff0b`,
+`0x7ffff7a8ff1b`, and `0x7ffff7a8ff02`. At inflate return, `ret=1`,
+`total_out=0x48410`, `next_out=0x5555556c1470`, and the target plus surrounding
+words held `M=0x5555556a0200`.
+
+Conclusion: the far OOB address is linear (`idx + output_offset`) and the live
+loader array is overwritten in this JIF/layout. W358's genuine-array entries
+were temporal samples, not evidence of a missed write or late scope-array
+reinitialisation. The process faults immediately after inflate return before a
+second loader entry in this run; the watchpoint logged no later overwrite of
+the target. Why W358's later `adler32_z` sample was genuine in a different run
+remains layout/path-conditioned and is not inferred away.
+
+Offline control: host zlib and the AppImage's bundled zlib 1.3.1 both decompress
+the JIF to 295,952 (`0x48410`) bytes, SHA-256
+`85fc21722cb5deec664d226b80fa0e866bbc6330d483eb8350bb264eae04af29`, with `M`
+at output offsets `0x47210` and `0x47218`. This rules out a decoder-version or
+offline-parser discrepancy. No chosen-address store, chosen GOT value, marker,
+control-flow effect or command was observed. Grade unchanged: rung 3 pinned
+verbatim / rung 4 chosen-pointer dereference, NO r5. Next bounded experiment:
+keep W353's surviving `0x40` filler while placing the W358 array/map bytes, to
+test whether the immediate post-inflate fault is collateral heap corruption.

@@ -11,6 +11,9 @@ glib + real zlib chosen bytes and a chosen pointer value in an adjacent live
 GLib object. Still NO r5: no chosen-address write, control flow, marker or
 command. W366 NITs: layout-conditioned fault PC, idx drift, three lookups with
 nine logged fields.
+W359 temporally resolved W358's array gap: bundled libz overwrites the live
+loader array with chosen `M` by inflate return; W358's genuine samples were
+earlier/layout-conditioned, not a missed write. Grade unchanged, NO r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
@@ -656,3 +659,18 @@ no LUSED store, no chosen GOT value. Cause of the upstream gap UNKNOWN;
 grade unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
 Evidence, generator, observer, JIF and log hashes: W358 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W359 temporal array-write proof (2026-11-27, 22:29Z)
+
+A hardware WRITE watchpoint at `idx+0x47210` fired four times in bundled libz.
+At inflate return (`total_out=0x48410`), the live target
+`0x5555556c0270 = idx+0x47210` and surrounding words held chosen
+`M=0x5555556a0200`; before inflation they were genuine loader pointers. The
+first `adler32` lookup also occurred before the far write. This resolves the
+W358 causal gap: the OOB address is linear and the array is overwritten. The
+run faults immediately after inflate return before a second loader entry, and
+no later target overwrite was logged. No chosen-address store, GOT value,
+control-flow effect, marker or command. Grade unchanged, NO r5. Observer and
+exact logs: `live/gdb-w359-temporal.cmd`,
+`live/evidence/w359-temporal-{gdb,run}.log`; full hashes and bundled-zlib
+control in the W359 PROVENANCE section.
