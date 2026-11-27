@@ -1,0 +1,25 @@
+{
+  "cve": "CVE-2026-87121",
+  "ghsa": "GHSA-h8q6-7rjx-3m2r",
+  "cwe": "CWE-787",
+  "component": "lwIP MQTT client, mqtt_parse_incoming() rx_buffer",
+  "vulnerable": {
+    "tag": "STABLE-2_2_1_RELEASE",
+    "commit": "77dcd25",
+    "tarball": "lwip-2.2.1-vuln.tar.gz"
+  },
+  "fixed": {
+    "method": "upstream fix commit applied to vulnerable source tree",
+    "commit": "68b2c1191886578d40342846db6ab9a0099c2f40",
+    "subject": "mqtt: fix rx_buffer overrun",
+    "tarball": "lwip-2.2.1-fixed.tar.gz"
+  },
+  "followup": {
+    "commit": "576da61ccf2ede6db877f733ce2ef42cd3fdeb89",
+    "note": "adds MQTT 3.1.1 Remaining-Length cap; not applied to the pinned fixed control"
+  },
+  "public_poc": {
+    "url": "https://file.savannah.nongnu.org/file/mqtt_repro.c?file_id=58860",
+    "note": "2.7 KiB C, fed to a related public bug report; pins/mqtt_repro.c is byte-unmodified"
+  }
+}

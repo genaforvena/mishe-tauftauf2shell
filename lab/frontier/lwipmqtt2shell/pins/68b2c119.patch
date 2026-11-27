@@ -1,0 +1,85 @@
+From 68b2c1191886578d40342846db6ab9a0099c2f40 Mon Sep 17 00:00:00 2001
+From: Simon Goldschmidt <goldsimon@gmx.de>
+Date: Mon, 31 Aug 2026 13:36:07 +0200
+Subject: [PATCH] mqtt: fix rx_buffer overrun
+
+This has been reported multiple times, e.g. bug #68590, #68315 and #68581
+
+Signed-off-by: Simon Goldschmidt <goldsimon@gmx.de>
+---
+ src/apps/mqtt/mqtt.c       |  6 +++++-
+ test/unit/mqtt/test_mqtt.c | 40 ++++++++++++++++++++++++++++++++++++++
+ 2 files changed, 45 insertions(+), 1 deletion(-)
+
+diff --git a/src/apps/mqtt/mqtt.c b/src/apps/mqtt/mqtt.c
+index af4b331af..5dc7eae4c 100644
+--- a/src/apps/mqtt/mqtt.c
++++ b/src/apps/mqtt/mqtt.c
+@@ -859,7 +859,11 @@ mqtt_parse_incoming(mqtt_client_t *client, struct pbuf *p)
+         /* parse header from this pbuf and save it in client->rx_buffer in case
+            it comes in segmented */
+         b = pbuf_get_at(p, in_offset++);
+-        client->rx_buffer[client->msg_idx++] = b;
++        if (client->msg_idx < MQTT_VAR_HEADER_BUFFER_LEN) {
++          client->rx_buffer[client->msg_idx++] = b;
++        } else {
++          return MQTT_CONNECT_DISCONNECTED;
++        }
+       }
+       fixed_hdr_len++;
+ 
+diff --git a/test/unit/mqtt/test_mqtt.c b/test/unit/mqtt/test_mqtt.c
+index 9722aa662..d78ec84da 100644
+--- a/test/unit/mqtt/test_mqtt.c
++++ b/test/unit/mqtt/test_mqtt.c
+@@ -106,10 +106,50 @@ START_TEST(basic_connect)
+ }
+ END_TEST
+ 
++START_TEST(rx_overflow)
++{
++  mqtt_client_t* client;
++  struct netif netif;
++  err_t err;
++  struct mqtt_connect_client_info_t client_info = {
++    "dumm",
++    NULL, NULL,
++    10,
++    NULL, NULL, 0, 0, 0
++  };
++  struct pbuf* p;
++  unsigned char rxbuf[400];
++  LWIP_UNUSED_ARG(_i);
++
++  test_mqtt_init_netif(&netif, &test_mqtt_local_ip, &test_mqtt_netmask);
++
++  client = mqtt_client_new();
++  fail_unless(client != NULL);
++  err = mqtt_client_connect(client, &test_mqtt_remote_ip, 1234, test_mqtt_connection_cb, NULL, &client_info);
++  fail_unless(err == ERR_OK);
++
++  client->conn->connected(client->conn->callback_arg, client->conn, ERR_OK);
++  memset(rxbuf, sizeof(rxbuf), 0xff);
++  p = pbuf_alloc(PBUF_RAW, sizeof(rxbuf), PBUF_REF);
++  fail_unless(p != NULL);
++  p->payload = rxbuf;
++  /* since we hack the rx path, we have to hack the rx window, too: */
++  client->conn->rcv_wnd -= p->tot_len;
++  if (client->conn->recv(client->conn->callback_arg, client->conn, p, ERR_OK) != ERR_OK) {
++    pbuf_free(p);
++  }
++
++  mqtt_disconnect(client);
++  /* fixme: mqtt_client_fre() is missing... */
++  mem_free(client);
++}
++END_TEST
++
+ Suite* mqtt_suite(void)
+ {
+   testfunc tests[] = {
+     TESTFUNC(basic_connect),
++    TESTFUNC(rx_overflow),
+   };
+   return create_suite("MQTT", tests, sizeof(tests)/sizeof(testfunc), mqtt_setup, mqtt_teardown);
+ }
