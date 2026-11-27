@@ -5,6 +5,59 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 15:1x–15:2xZ — W347 replay-NIT closure and Ruby fix-hunk sweep
+
+Docs-only fold of `c5dbd5a5`, `e613367a` and `c271169e` after `70f1ab1a`.
+The operator's `c271169e` already put W347's grade-neutral editorconfig
+NIT closure into `docs/results.md` and `research-manifest.json`; docs left
+both generated files, README, the SVG, reports, grades, rung cells, flags
+and lab evidence untouched. No admission, window or count changed: the
+register stays 214/211/211/145.
+
+- **EditorConfigGlob2Shell's W346 replay NIT is CLOSED, grade-neutral.**
+  Frontier `c5dbd5a5` replaced the path-dependent `WRITE of size 102`
+  prefix assertion in `run-all.sh` with `check_write_gt ... 8194`, the
+  `l_pattern` capacity invariant. PROVENANCE and the report now state that
+  the file-arm ASan size grows with the absolute checkout path and that a
+  differing size is not pin drift. Witness W347 replayed `c5dbd5a5` from
+  two private clean roots (18 and 45 characters): 6/6 pins, 27 PASS /
+  0 FAIL at both, byte-identical summary `2de80df1…`, own WRITE sizes
+  10194/10225. Docs replayed the same archive at 15:1xZ: 6/6 pins,
+  27 PASS / 0 FAIL, byte-identical summary and `WRITE of size 10193`.
+  The original 26/1 short-root result stays a dated negative, not a
+  changed verdict: W346 remains ESTABLISHED AS LABELED, rung 4 at the
+  local-file/public-API scope, NO r5, no live plugin consumer or chosen
+  pointer dereference. Detail:
+  `.mishe-tauftauf/artifacts/witness-w347/detail.md`; recipe updated in
+  `docs/reproducibility.md` §14:2xZ.
+- **Ruby W347 closes W346's remaining-`string.c`-hunk experiment.** The
+  pinned 44-hunk 3.4.12→3.4.13 diff was classified hunk by hunk: 3 pure
+  integer guards, 22 already covered, 7 primary case-map hunks, 1 new
+  internal helper and 11 coercion-free shapes. The committed
+  `lab/repro/ruby2shell-fixdiff-hunk-sweep.{rb,sh}` drives 9 plain
+  `String`/`IO` arms over four builds (3.4.12/3.4.13 × plain/ASan):
+  docs re-ran it here — rc 0, 36/36 `rc=0 asan=0`, `len`/`enc`/`tail`
+  identical between vulnerable and fixed builds. `succ` resizes before
+  `TERM_FILL`; `reverse` writes within the existing length; the frozen
+  capacity hunk is only reachable through `IO#write`, which does not
+  append. No stock coercion mutator or new trigger. Grade unchanged:
+  W341/W342 rung 3, witness-COMPLETE rung 4, full rung 5 NOT ACHIEVED.
+  Next named experiment: remaining 3.4.12→3.4.13 `enc/` write-bound diffs
+  for a stock web-facing caller outside the closed sweeps; recipe in
+  `docs/reproducibility.md` §W347.
+- **AWS W345 stage has an independent witness replay, still not admitted.**
+  Witness W347 replayed `77c246b2` from its own private archive: 18/18
+  pins, 17 PASS / 0 FAIL, byte-identical summary, its own ASan
+  `WRITE of size 1` at `Base64.cpp:115` and GDB chosen bytes at offset 2;
+  ESTABLISHED AS LABELED at the direct-call lab scope, grade-neutral,
+  NO r5. No window, register fold or admission followed; the fixed-arm
+  control and real generated-client wire caller stay UNKNOWN/owed, and
+  the report's `RCE not demonstrated` is unchanged.
+
+What would change this fold: an editorconfig live plugin consumer or
+dereferenced chosen pointer, an AWS fixed arm or real wire caller, a
+Ruby `enc/` stock web-facing caller, or a checker RED on committed HEAD.
+
 ## 2026-11-27 14:4x–14:5xZ — editorconfig admitted and witnessed; AWS stage; closures
 
 Docs-only fold of `2e900484`, `e5f97d13`, `77c246b2`, `c45cf74a`,

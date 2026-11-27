@@ -16417,6 +16417,46 @@ gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
 bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
 on committed HEAD.
 
+## 2026-11-27 15:1x–15:2xZ — W347 replay NIT closed; Ruby hunk sweep closed
+
+Current limb for a reader arriving now; it supersedes the path-dependence
+NIT and "next is the hunk sweep" wording in the 14:4xZ limb below.
+Docs-only fold of `c5dbd5a5`, `e613367a` and `c271169e`. The operator had
+already folded the grade-neutral register result; counts stay
+214/211/211/145 and no grade, rung cell, flag, generated cell, report or
+lab evidence moved here.
+
+- **EditorConfigGlob2Shell W346 replay NIT CLOSED, grade-neutral.**
+  `c5dbd5a5` replaced the path-dependent `WRITE of size 102` prefix check
+  with the `WRITE size > 8194` capacity invariant. Witness W347 replayed
+  two private roots (18 and 45 characters): 6/6 pins, 27 PASS / 0 FAIL,
+  byte-identical summary `2de80df1…`, own WRITE sizes 10194/10225; docs
+  replayed the same archive here with 27/0 and `WRITE of size 10193`.
+  The 26/1 short-root result is preserved as a dated negative. W346
+  verdict stands: ESTABLISHED AS LABELED, rung 4 at the local-file/public-
+  API scope, NO r5; no live plugin consumer or chosen-pointer dereference.
+  Recipe in `docs/reproducibility.md` §14:2xZ.
+- **Ruby W347 closes the remaining `string.c` hunk experiment.** All 44
+  pinned 3.4.12→3.4.13 hunks were classified; 9 coercion-free arms over
+  four builds gave 36/36 `rc=0 asan=0` on docs' own re-run, with identical
+  `len`/`enc`/`tail` output on vulnerable and fixed builds. Grade
+  unchanged: W341/W342 rung 3, witness-COMPLETE rung 4, NO full r5.
+  Next: remaining 3.4.12→3.4.13 `enc/` write-bound diffs for a stock
+  web-facing caller outside the closed sweeps; recipe in
+  `docs/reproducibility.md` §W347.
+- **AWS W345 has an independent witness replay, still not admitted.**
+  Witness W347's private clean replay matched 18/18 pins and the
+  byte-identical 17/0 summary with its own ASan and GDB observations;
+  ESTABLISHED AS LABELED at the direct-call lab scope, grade-neutral,
+  NO r5. No register fold or admission; fixed arm against `aws-crt-cpp`
+  v0.43.2 and a generated-client wire caller are still owed, fixed-arm
+  control UNKNOWN from that replay.
+
+What would change this limb: an editorconfig live plugin consumer or
+dereferenced chosen pointer, an AWS fixed arm or real generated-client
+wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
+committed HEAD.
+
 ## 2026-11-27 14:4x–14:5xZ — editorconfig admitted/witnessed; AWS stage; closures
 
 Current limb for a reader arriving now; it supersedes the STAGED and AWS-
@@ -16468,8 +16508,8 @@ generated cell moved here.
   call site passes a coercion object to a snapshot method; both dynamic
   falsifiers are clean. Docs re-ran the mimic probe: 8/8 arms rc 0,
   `asan=0`, every `MUTATED=false` with `Encoding::CompatibilityError`.
-  No stock/gem trigger, no grade change; next is the remaining
-  `string.c` fix-diff hunk sweep. Recipe in `docs/reproducibility.md`
+  No stock/gem trigger, no grade change; the remaining `string.c` hunk
+  sweep was closed at W347 in the current limb above. Recipe in
   §W346.
 
 What would change this limb: a real AWS fixed arm or generated-client
