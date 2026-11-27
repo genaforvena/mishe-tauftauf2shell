@@ -18612,3 +18612,36 @@ W332's eight ASLR runs and the unmapped `si` run are described in the
 contradicted: the reports now describe a gdb-default mapping plus a
 base-dependent subset, and rung 5 stays UNKNOWN without an observed side
 effect from chosen code.
+
+### Ruby — W333 `rb_str_subpat_set` backref offsets across `to_str`
+
+Pinned builds: `lab/build/plain/ruby-3.4.12/ruby` (vulnerable plain),
+`lab/build/ruby-3.4.12-asan/bin/ruby`, and the matching 3.4.13 fixed
+builds. Repro scripts: `lab/repro/ruby2shell-backref-coercion.rb`,
+`lab/repro/ruby2shell-backref-coercion.sh` (432 arms),
+`lab/repro/ruby2shell-backref-coercion-whole.sh` (72 whole-capture arms),
+and `lab/repro/ruby2shell-backref-coercion-whole-gdb.cmd` (read-only
+inspection). Evidence is written to the gitignored
+`lab/build/evidence/backref-coercion/{matrix,whole-matrix}.txt` plus one
+`.out`/`.err` pair per arm.
+
+```sh
+bash lab/repro/ruby2shell-backref-coercion.sh
+bash lab/repro/ruby2shell-backref-coercion-whole.sh
+ASAN_OPTIONS=detect_leaks=0 W333_WHOLE=1 W333_MUT=shrink W333_CAP=0 \
+  W333_VLEN=296 W333_ENC=binary \
+  gdb -q -batch -x lab/repro/ruby2shell-backref-coercion-whole-gdb.cmd \
+  --args lab/build/plain/ruby-3.4.12/ruby \
+  lab/repro/ruby2shell-backref-coercion.rb
+```
+
+Expected: 63 vulnerable-ASan arms report `negative-size-param:` and the
+matching 63 vulnerable-plain arms exit 139; all 144 fixed mutation arms
+raise `RuntimeError: string modified`; vulnerable `none`/`grow` controls
+are clean. In the whole-capture stage the equal-length shrink arm prints
+`whole=1 ... len=1 head=5a chosen=1` on 3.4.12 with no ASan report, while
+all 24 fixed mutation arms raise `string modified`. The gdb dump shows
+`0x5a` at `obj+0x18` through `obj+0x137` after the `memmove`
+(`string.c:5778`) and zeros at `obj+0x140`; the entry line records the
+actual object address, so offsets must be read relative to it. Full
+interpretation and grade in `reports/ruby2shell-investigation.md` §W333.

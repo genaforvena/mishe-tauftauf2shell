@@ -7855,3 +7855,69 @@ claim of stock reachability.
 No pointer control, marker execution or wire input: this is **rung 3 — confirmed adjacent memory corruption**, not rung 4, not the
 primary CVE, not rung 5. No prior grade cell is relabeled.
 Recipe in `docs/reproducibility.md` §W331 (Ruby).
+
+## 2026-11-27 10:2x–10:5xZ — W333: `rb_str_subpat_set` backref offsets across `to_str`, narrow in-process rung 4 (Ruby)
+
+W331 named this experiment. In 3.4.12 `rb_str_subpat_set`
+(`string.c:5843-5863`) reads `start = BEG(nth)` and
+`len = END(nth) - start`, calls `StringValue(val)` (which can run an
+attacker-supplied Ruby `to_str`), and passes the cached offsets to
+`rb_str_update_0` without rechecking the receiver. 3.4.13 (`:5895-5902`)
+adds `if (start + len > RSTRING_LEN(str)) rb_raise(rb_eRuntimeError,
+"string modified")`. `rb_str_update` proper (`:5793`) coerces `val` before
+it computes `slen`, so only the backref path is stale. W320 already covered
+the whole-match, `vlen < len` shrink (`memmove` with `size=-2`) and W321 the
+`vlen == len` shrink with N−1 readable chosen bytes. This wake tested the
+untested shapes: capture 1/2 at a nonzero byte offset, `vlen == 0`, receiver
+growth, self-returning `to_str`, reclaim pressure and two-byte UTF-8
+receivers.
+
+`lab/repro/ruby2shell-backref-coercion.{rb,sh}` ran 432 arms (4 builds ×
+6 mutations × 3 captures × 3 replacement lengths × 2 encodings); evidence
+is in gitignored `lab/build/evidence/backref-coercion/matrix.txt`. The 63
+AddressSanitizer arms are all on 3.4.12-ASan with `shrink`, `shrink1`,
+`reclaim` or `self` and all report `negative-size-param:` — `(size=-39)`
+for ASCII and `(size=-79)` for two-byte encodings — at the interceptor's
+`memmove`, the same negative-size class as W320. The matching plain arms
+exit 139. No other ASan kind appeared. The 144 fixed-3.4.13 mutation arms
+all raise `RuntimeError: string modified`; both 72 `none`/`grow` fixed
+arms and all 72 vulnerable `none` controls are clean. Equal-length
+nonzero-offset shrink writes land past the shortened logical length
+(`len=1 chosen=0`), i.e. the W321 shape, not a new one.
+
+A second stage, `lab/repro/ruby2shell-backref-coercion-whole.sh`, closed the
+`beg == 0` gap with a whole-receiver capture (`/\A.*\z/m`): 72 arms in
+gitignored `lab/build/evidence/backref-coercion/whole-matrix.txt`. With
+`vlen == 0` the vulnerable build takes the `rb_str_drop_bytes` early
+return (`string.c:5751`) and clamps the stale length; no new shape. With
+`vlen == 1` the negative-size `memmove` fires (ASan `(size=-295)` and
+`(size=-591)`, plain `ArgumentError: negative array size (or size too
+big)`), while all fixed arms raise `string modified`.
+
+The new shape is the **equal-length whole-receiver shrink**: after
+`to_str` replaces a 296-byte receiver with the one-byte embedded string
+`"X"`, the stale `len = 296` equals `vlen = 296`, so no capacity check or
+first `memmove` runs, and `memmove(sptr + 0, RSTRING_PTR(val), 296)` writes
+296 chosen `0x5a` bytes into the receiver's 24-byte inline buffer. Neither
+ASan nor the plain build reports anything; the process continues with
+`len=1`. `lab/repro/ruby2shell-backref-coercion-whole-gdb.cmd` inspected
+the vulnerable plain build read-only: `rb_str_update_1` entered with
+`obj=0x7ffff761e898 beg=0 len=296 vlen=296`, `&((struct
+RString*)0)->as.embed.ary = 0x18`, and after the `memmove` (`string.c:5778`)
+memory from `obj+0x18` through `obj+0x137` is `0x5a`, with zeros at
+`obj+0x140`. All 24 fixed whole-receiver mutation arms raise `string
+modified` before any write. This is **chosen bytes at chosen offsets** in
+the lab process — a narrow adjacent **rung 4 in-process** finding,
+distinct from W321 by volume and destination (296 bytes into a 24-byte
+embedded object, not one byte past a heap buffer). The identity of the
+neighbouring object is unknown: no pointer control, no marker execution,
+no wire input.
+
+**Wire.** W322's Ripper survey (8506 files, zero dynamic `[]=`) and W323's
+live coercion observer (zero regexp-key / non-String RHS calls over stock
+Sinatra and Rails) already close this sink's wire at their surveyed scope;
+this wake did not repeat them. A stock request that supplies a non-String
+RHS to `String#[]=` with a regexp key remains UNKNOWN, not a stock claim.
+
+Current grade unchanged for the primary CVE and full rung 5. No prior
+grade cell is relabeled. Recipe in `docs/reproducibility.md` §W333 (Ruby).

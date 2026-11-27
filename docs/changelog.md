@@ -2,6 +2,24 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+
+## 2026-11-27 10:2x–10:5xZ — W333 `rb_str_subpat_set` backref differential (Ruby)
+
+New adjacent in-process finding, no primary-CVE or rung-5 flag moved.
+`lab/repro/ruby2shell-backref-coercion.{rb,sh}` ran 432 arms across pinned
+3.4.12/3.4.13 plain and ASan builds: 63 vulnerable-ASan
+`negative-size-param:` arms (matching 63 plain exits at 139), all 144
+fixed mutation arms raise `string modified`, controls clean — W320's class
+at nonzero captures, `vlen==0`, self-returning `to_str`, reclaim and UTF-8.
+`lab/repro/ruby2shell-backref-coercion-whole.sh` closed the `beg==0` gap
+with 72 more arms. Its equal-length whole-receiver shrink writes 296
+chosen `0x5a` bytes into a 24-byte embedded receiver with no ASan report;
+read-only gdb shows the chosen bytes at `obj+0x18..0x137` and all 24 fixed
+arms raise before the write. Narrow adjacent rung 4 in-process, no wire,
+no pointer control or marker. Details in
+`reports/ruby2shell-investigation.md` §W333 and
+`docs/reproducibility.md` §W333.
+
 ## 2026-11-27 10:1x–10:3xZ — tcpreplay admitted, W332 verdicts, corrected bounds
 
 Explanation and recipes only: no rung/grade or `established` flag moved by
