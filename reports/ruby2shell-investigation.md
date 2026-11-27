@@ -7948,7 +7948,7 @@ via `str_subseq` (`string.c:3045`) → `rb_str_subseq` (`:3067`) →
 with zero ASan reports. The length sweep (receivers of 1/3/5/9 bytes,
 separators of 2/4/6/10 bytes) produces the same `size=-1` ASan report
 for all four vulnerable ASan arms; the vulnerable plain arms exit
-139/139/134/135. All 20 fixed-build arms are clean and all 14
+139/139/134/135. All 20 fixed-build arms are clean and all 10
 vulnerable control arms (`partition` on the same strings,
 `to_str`-shrinking separator, ASCII `rpartition`, even-length UTF-16LE
 receivers) are clean. The `to_str`-shrinking hypothesis from W333 was
