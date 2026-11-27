@@ -15903,3 +15903,62 @@ Recipes, pins and expected bytes are in `docs/reproducibility.md`
 §05:3x–06:1xZ. What would change these limbs: a counterexample to W317 at
 its labeled scope, a SAIL PSD or libevent witness verdict, or a checker RED
 on committed HEAD.
+
+## 2026-11-27 07:3x–08:0xZ — 204th admission, witness receipts, closed lanes
+
+This limb updates the 06:1xZ section above for a reader arriving now. It
+explains and records evidence; no register cell, grade, count or generated
+row moves here. The operator admitted `expatparsebuf2shell` at 07:4xZ under
+standing #6 as the **204th declared target mind** (window 212, panes
+`%430`/`%431`, registry 213/213). Generated overview counts are
+204/201/201/138. Ruby W322's stock-coercion survey was folded directly by
+its author; no docs action remains for it.
+
+- **ExpatParseBuf2Shell (new mind, witness UNKNOWN).** CVE-2026-77214 /
+  GHSA-8xfx-9m5m-pgcp, CWE-125, libexpat <=2.8.5, fix `13c5f63a` / 2.9.0.
+  Caller-supplied `len` after `XML_GetBuffer` pushes `m_bufferEnd` past the
+  allocation in `XML_ParseBuffer` (`xmlparse.c:2464`). Pinned ASan observes
+  `READ of size 1` at `xmltok_impl.c:873`, 0 bytes after a 4096-byte region;
+  the lab allocator lets the real character-data handler receive 4096 chosen
+  bytes (seeds `0x5a`/`0x6b`, `cdata_len=8189`, `tail_seed_count=4096`).
+  `bash run-all.sh` is 41/0 in-tree and in two clean pathspec-archive replays
+  (`17d186f0…`, log `023945b0…`), one by the operator. Grade R1/R2/R3 ✓,
+  R4 LIMITED to the lab allocator, R5 NOT CLAIMED. Nothing here shows a real
+  consumer passing attacker-influenced `len`, a pointer value or a command.
+  Next experiment for that mind: find such a consumer, or prove two legitimate
+  chunked calls cross capacity, then seek stock-glibc pointer bytes. Preserve
+  the small-`CAP` rounding and adjacent-chunk-header negatives. Witness replay
+  is requested and UNKNOWN.
+- **NSD SVCB AXFR (W324 verdict landed).** Witness #6179 replayed a clean
+  38/0 archive and returned ESTABLISHED AS LABELED at the sink-harness scope;
+  there is still no AXFR wire path, named consumer, pointer control or r5.
+  The earlier "witness UNKNOWN" wording in the lane index and tail recipe is
+  superseded; no grade or flag change.
+- **Gimpjif (W324/W325 receipts).** Witness #6217 replayed the two-byte
+  `qdatas` overwrite `POST qdatas=0x…4140` with zero access-watch hits and a
+  crashing 280-byte causal control, ESTABLISHED AS LABELED; #6196 named
+  `GeglOperationPointComposer` at one real heap hit, also ESTABLISHED. W325's
+  four hardware READ watchpoints were armed but logged zero hits before the
+  plug-in crashed — a short-window negative, not exclusion of a
+  completed-load consumer. No chosen-address write, dereference, marker or
+  command; grade unchanged, NO r5. Next experiment needs a load that survives
+  long enough to read the chosen words.
+- **Nfdump (clock lane closed).** Lab-injected `gettimeofday()` words set the
+  overwritten adjacent size to `0x41`/`0x42` (rc 134) or `0x21` (rc 0,
+  exact-size no-op): no consolidation, pointer write or command; the clock is
+  an instrument, not wire control. Clean `1095ab7d` replay 5/0; real-clock
+  3/3 SIGABRT unchanged. Reopening needs a new receive mode, not another
+  datagram size or clock value.
+- **WAMR (W6 negative).** No valid module shape confines chosen stores to the
+  live `i64_consts` table: every N=1..8 shape ends at `past=172` and aborts;
+  trims either remove the overflow or hit `bh_assert_internal`; the 21-result
+  block is required. A synthetic forced-survival loader copied eight chosen
+  const bytes into seven of twelve `func->consts` entries, but the guest still
+  faulted before reading them — guest readback stays UNMEASURED even there.
+  No valid load survives, no wire path or command; R5 UNKNOWN.
+
+Commands, expected bytes and gitignored-evidence regeneration are in
+`docs/reproducibility.md` §07:3x–08:0xZ; the reports carry the full hashes.
+What would change these limbs: an expat witness verdict or a named consumer,
+a surviving consumer in the gimpjif or WAMR lanes, or a checker RED on
+committed HEAD.

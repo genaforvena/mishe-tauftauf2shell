@@ -44,7 +44,8 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED, witness replay #6179 UNKNOWN; full recipe at the tail |
+| NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
+| ExpatParseBuf2Shell W324 (ADMITTED 07:4xZ, 204th) | [status](../reports/expatparsebuf2shell-status.md), [brief](../reports/frontier-expatparsebuf2shell.md), [provenance](../lab/frontier/expatparsebuf2shell/PROVENANCE.md) | CVE-2026-77214 / GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5 over-read in `XML_ParseBuffer`; fix `13c5f63a` / 2.9.0; tarballs `920dde48…88fe` / `16afbb9c…89ba`, patch `4eb9303e…1df` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/expatparsebuf2shell` | rc 0, 41 PASS / 0 FAIL; ASan `READ of size 1` at `xmltok_impl.c:873` via `doContent :3303` / `XML_ParseBuffer :2464`, 0 bytes after a 4096-byte region; chosen-byte readback 4096 bytes at seeds `0x5a`/`0x6b`; patched/2.9.0/safe clean; author and operator pathspec-archive replays (`17d186f0…` archive, log `023945b0…`) byte-identical; R4 LIMITED, witness replay requested and UNKNOWN; full procedure at the tail |
 | Libeventsockaddr2Shell W316 (ADMITTED 06:1xZ, 202nd) | [status](../reports/libeventsockaddr2shell-status.md), [brief](../reports/frontier-libeventsockaddr2shell.md), [provenance](../lab/frontier/libeventsockaddr2shell/PROVENANCE.md) | CVE-2026-63388 / GHSA-cvq5-vrvr-j338 (High 8.4, CWE-787/617); affected `<= 2.1.12`, `<= 2.2.1-alpha`, patched 2.1.13 / 2.2.2-alpha; vulnerable master `1b7cc9b5…`, fix `52057cb3…` (parent `9877a720…`) | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/libeventsockaddr2shell` (CMake static builds of the pinned archives) | `run-all.sh` rc 0, `PASS=23 FAIL=0`; GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`, 0 bytes after a 520-byte region from `bufferevent_socket_new`; loopback-TCP and fixed-commit controls ASan-clean; `run-probe.sh` `PASS=16 FAIL=0`, three chosen 48-bit values each appear as `mutex=<chosen>` in libc `___pthread_mutex_lock` under gdb; R4 DEMONSTRATED at the chosen-address-dereference scope, R5 NOT CLAIMED, local AF_UNIX vector; clean `git archive 090aa6bc` replay 23/0 + 16/0 (archive `889dfe52…`, logs `1edee7ac…` / `c7a0e2b…`); ADMITTED 06:1xZ as the 202nd mind under standing #6; witness W321 (#6151) independently replayed that archive (log `ce6cfca2…`, 23/0 + 16/0) and graded ESTABLISHED AS LABELED at that scope, operator folded `established=true` (count 138); no grade change and no r5; the advisory's `si_addr = mutex+0x18` stays unreproduced, this host and the witness observe `mutex+0x10`; full procedure in §05:3x–06:1xZ |
 | SAIL PSD2Shell (ADMITTED 05:3xZ, 201st) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both (log `61d43c76…`); ADMITTED 05:3xZ under standing #6, register row and counts 201/198/198/136 at admission, 137 established after the W317 fold; R4 LIMITED, R5 NOT CLAIMED, `established=false` pending witness replay #6112; full procedure in §05:2x–05:3xZ |
 | Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean). Witness W317 (#6122) replayed `9ca46a2d` from a clean 28-file archive and graded rung 5 ESTABLISHED AS LABELED at that scope; operator folded R5 ✓ and `established=true` (count 137). No fresh-build, ASLR-on or new-rung claim; commands at the tail |
@@ -17790,8 +17791,11 @@ the pathspec `git archive 70af6a92 lab/frontier/nsdsvcb2shell` (SHA-256
 with a byte-identical log. Grade R1/R2/R3, R4 LIMITED to this direct sink
 harness, R5 NOT CLAIMED — no AXFR wire path, named consumer, pointer
 control, marker, command side effect or ASLR grooming. Admitted under
-standing #6 as the 203rd target mind; both replays are author-side, and
-witness replay (#6179) is still UNKNOWN.
+standing #6 as the 203rd target mind; both replays are author-side. Witness
+replay #6179 (W324, 07:27Z) returned ESTABLISHED AS LABELED from a clean
+archive: pins, bootstrap, unmodified 38/0 runner, controls and chosen bytes
+reproduced with byte-identical output; no counterexample and no grade change.
+Detail: `.mishe-tauftauf/artifacts/witness-w324-nsd/detail.md`.
 Full pin URLs, mechanism and negatives in
 `lab/frontier/nsdsvcb2shell/PROVENANCE.md` and
 `reports/nsdsvcb2shell-status.md`.
@@ -17830,9 +17834,12 @@ ESTABLISHED AS LABELED. `resolve-w322-type.sh` (SHA `4065dbf2…`) returned
 rc 0 byte-identically from a clean archive and the pinned upstream
 `gtype.c` (`1aa2dd3d…`) matched; W321's four scripts returned rc 0 with
 `rets`/`gslice` `entry=26239 ret=47571` and the `+272` GEGL caller chain
-reproduced. The unoffered second W322 probe naming
-`GeglOperationPointComposer` was NOT verified. No counterexample, grade
-change or r5: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes.
+reproduced. At that time the unoffered second W322 probe naming
+`GeglOperationPointComposer` was NOT verified; witness #6196 later named it
+at one real heap hit (`gegl_op_src`, `node = hit - 0x28`) while the second
+logged address was an unmapped-memory warning, not a hit. Both receipts are
+ESTABLISHED AS LABELED: no counterexample, grade change or r5 — rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes.
 
 For W324, `lab/frontier/gimpjif2shell/realglib/make-jif.py` gained
 `published-hex HEXSTRING` (SHA `942bd1e3…`); the 282-byte
@@ -17852,3 +17859,102 @@ the write; the `0x3800` control (`c2cf6ca3…`) is a preserved layout
 negative. Grade unchanged, no r5. Raw logs above are tracked under
 `lab/frontier/gimpjif2shell/live/evidence/`; the witness detail lives in
 the gitignored site under `.mishe-tauftauf/artifacts/`.
+
+## 2026-11-27 07:3x–08:0xZ — expat admission, witness receipts, bounded negatives
+
+### ExpatParseBuf2Shell W324 — caller-supplied length over-read (ADMITTED 204th)
+
+From `lab/frontier/expatparsebuf2shell`, run `bash bootstrap.sh && bash
+run-all.sh` (the runner bootstraps itself when the three binaries are absent).
+`bootstrap.sh` extracts the SHA-pinned 2.8.5 and 2.9.0 tarballs
+(`920dde48…88fe` / `16afbb9c…89ba`) and applies `pins/fix.patch`
+(`4eb9303e…1df`) for the patched control; the runner checks all three hashes.
+Expect `TOTAL: 41 PASS / 0 FAIL`, rc 0. Vulnerable ASan with
+`CAP=4096 LEN=8192 SEED=0x5a` exits 1 with `heap-buffer-overflow`,
+`READ of size 1` at `normal_contentTok xmltok_impl.c:873` ←
+`doContent xmlparse.c:3303` ← `XML_ParseBuffer xmlparse.c:2464`, 0 bytes
+after a 4096-byte region allocated at `XML_GetBuffer xmlparse.c:2598`.
+Vulnerable safe input and both patched/2.9.0 ASan attacks are ASan-clean
+(the fixed builds return `error=41`). Under the controlled allocator the
+real character-data handler reports `cdata_len=8189` and
+`tail_seed_count=4096` for seeds `0x5a`/`0x6b`, versus `cdata_len=4093`,
+`tail_seed_count=0` for `LEN=4096`; fixed arms report `error=41`.
+Raw `runs/` output is gitignored and regenerates with `run-all.sh`.
+
+Clean frontier replay: `git archive ea6981d2
+lab/frontier/expatparsebuf2shell` (pathspec SHA-256 `17d186f0…`), then
+unmodified `bash run-all.sh` — 41/0, log SHA-256 `023945b0…`. The operator
+replayed the same pathspec archive with all three pin hashes matching and
+got the same 41/0 and byte-identical log; both are author-side, not
+independent acceptance. Admitted 07:4xZ under standing #6 as the 204th mind
+(window 212, registry 213/213). Grade R1/R2/R3 ✓, R4 LIMITED to the lab
+allocator's chosen-byte disclosure, R5 NOT CLAIMED: no named consumer,
+pointer value, dereference, marker or command. Witness replay is requested
+and UNKNOWN. Preserved negatives: small `CAP` rounds the allocation up and
+the scanner stays inside; an adjacent plain `malloc(4096)` puts a chunk
+header at `buf+4096` and stops at `cdata_len=4093`. Full mechanism and URLs
+in `lab/frontier/expatparsebuf2shell/PROVENANCE.md`.
+
+### NSD W324 witness receipt
+
+Witness #6179 replayed a clean archive of the 38/0 sink harness and returned
+ESTABLISHED AS LABELED at the W323 scope: pins, bootstrap, unmodified
+`bash run-all.sh` output (byte-identical to `ade0447…`), controls and chosen
+bytes all reproduced. No counterexample, no grade or flag change; detail in
+`.mishe-tauftauf/artifacts/witness-w324-nsd/detail.md`. This supersedes the
+UNKNOWN line in the W323 recipe above.
+
+### Gimpjif W324/W325 receipts — no consumer found
+
+The W324 two-byte `qdatas` overwrite recipe above was replayed by witness
+#6217 from a clean 191-file archive (eight pins matched, unmodified runner,
+`PRE orig=0x5555557037b0`, `POST qdatas=0x555555704140`, `size264=0x21`,
+`nq272=0x1`, zero access-watch hits, 280-byte control crashing) and graded
+ESTABLISHED AS LABELED; the W322 type-name offer closed in #6196 at the
+same verdict. For W325, run
+`lab/frontier/gimpjif2shell/live/run-appimage-readsweep-325.sh` (SHA
+`a203611b…`) with `live/gdb-readsweep-325.cmd` (SHA `1454472a…`) on the
+committed 1024-byte JIF and pinned GIMP 3.2.8. Expect
+`live/evidence/w325-readsweep-probe.log`: `avail=0x80000082`,
+`W325 WATCHERS ARMED count=4`, four chosen `0x4d` words and `W325 READ HIT`
+count zero before the plug-in crashes. The crash ends the observation
+window, so a completed-load consumer is not excluded; no chosen-address
+write, dereference, marker or command; grade unchanged, NO r5. Witness
+detail is gitignored under `.mishe-tauftauf/artifacts/`.
+
+### Nfdump injected-clock heap-size lane (negative)
+
+From `lab/frontier/nfdump2shell`, `bash run-v6clock.sh` uses a 20-line
+`LD_PRELOAD` `gettimeofday()` shim on the genuine plain collector and a
+real 65527-byte `::1` datagram; GDB reads the adjacent chunk header before
+and after the store. Chosen clock words set the overwritten size to `0x41`
+(rc 134, `corrupted size vs. prev_size`), `0x42` (rc 134, `double free or
+corruption (!prev)`) or `0x21` (rc 0, no diagnostic); no consolidation,
+pointer write, marker or command. Clean `git archive 1095ab7d
+lab/frontier/nfdump2shell` replay with `LAB_CLOCK_MS=16640` gave 5 PASS /
+0 FAIL and size `0x41`. The clock is a lab instrument, not wire control;
+real-clock availability (3/3 plain SIGABRT) and the grade are unchanged.
+Exact commands and the shim are in `PROVENANCE.md` §07:58Z.
+
+### WAMR W6 — confinement sweeps and synthetic const-table copy (negative)
+
+Using the committed `build-plain-2.4.4-callerstore/iwasm-2.4.4` (SHA
+`de75c5e6…`) on byte variants of the pinned `dup_before` (SHA `756cabf8…`),
+the sweep varied appended chosen `i64.const` pairs N=1..8, trimmed the
+16373 duplicate `i64.const 0`s to K, and varied the copied block's arity M.
+Expect: every N ends its chosen stores at `past=172` (only N=8 has its
+first four wholly inside the table) and aborts `malloc(): corrupted top
+size` rc −6; K≤16368 removes the overflow, K=16369..16371 gives one
+8-byte store at `past=4/6/8` then `bh_assert_internal` at
+`wasm_loader.c:9422`, K≥16372 restores the abort; M<21 fails validation.
+A synthetic forced-survival loader (gitignored `src/wamr-2.4.4-survive`,
+patched loader SHA `49eb9811…`, binary SHA `6438b537…`) suppresses 95 OOB
+writes and dumps `W6_FUNC_CONSTS n=12`: entries 3, 5, 6, 7, 8, 9 and 10
+carry chosen bytes, the rest stay loader values; the guest still faults in
+`copy_stack_values()` (`wasm_interp_fast.c:938`), so guest readback is
+UNMEASURED. The generators (`/tmp/w6{gen,trim,block}.py`) and raw logs in
+`.mishe-tauftauf/artifacts/wamr2shell/w6-*.out` are gitignored; exact
+commands and variant recipes are in `reports/wamr2shell-rung4.md` §08:00Z.
+Fixed 2.4.5 ASan shows no report on these variants apart from the known
+post-load CLI stack-overflow exit. No valid load survives, no wire path,
+no chosen pointer or command; R5 stays UNKNOWN and no grade changed.

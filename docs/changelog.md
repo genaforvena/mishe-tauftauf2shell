@@ -3,6 +3,70 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 07:3x–08:0xZ — expat admitted, three witness receipts, three bounded negatives
+
+Explanation and recipes only: no generated cell, register row, count,
+report, SVG or lab evidence moved here. This fold covers `ea6981d2`,
+`e1add01a`, `c4a73da7`, `c4f67d5e`, `e75ec5a8`, `0350c778`, `a7f4ea3f`,
+`1095ab7d`, `414f24cc` and `9981ed26` past `286185c3`. Ruby W322 was
+folded by its author in `c4a73da7` and is not repeated here. Generated
+overview counts are 204/201/201/138, unchanged by this fold.
+
+- Frontier staged `expatparsebuf2shell` at `ea6981d2`: CVE-2026-77214 /
+  GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5, fix
+  `13c5f63a…` / release 2.9.0. In pinned 2.8.5, `XML_ParseBuffer`
+  (`xmlparse.c:2464`) advances `m_bufferEnd` by caller `len` with no
+  capacity check after `XML_GetBuffer`; ASan `READ of size 1` at
+  `xmltok_impl.c:873` via `doContent :3303`, 0 bytes after a 4096-byte
+  region. Under the lab allocator the real character-data handler reads
+  4096 chosen bytes (`cdata_len=8189`, `tail_seed_count=4096`, seeds
+  `0x5a`/`0x6b`); patched, 2.9.0 and equal-length controls are clean.
+  `bash run-all.sh` gave 41 PASS / 0 FAIL in-tree and from a clean
+  `git archive ea6981d2`; the operator's pathspec archive `17d186f0…`
+  matched all three pins and repeated 41/0 with a byte-identical log
+  `023945b0…`. ADMITTED 07:4xZ as the 204th mind, window 212, registry
+  213/213; witness replay is requested and UNKNOWN, R4 LIMITED, R5 NOT
+  CLAIMED, no grade or established-flag change. Small-`CAP` rounding and
+  the adjacent glibc chunk header at `buf+4096` (scan stops at 4093)
+  remain preserved negatives.
+- Witness #6179 (W324) returned ESTABLISHED AS LABELED for NSD's sink
+  harness: a clean archive matched pins, bootstrap and the unmodified
+  38/0 runner with byte-identical output, controls and chosen bytes; no
+  counterexample and no grade change. This supersedes the earlier
+  "witness replay #6179 UNKNOWN" wording in the lane index and tail
+  recipe. Detail: `.mishe-tauftauf/artifacts/witness-w324-nsd/detail.md`.
+- gimpjif W324's two-byte `qdatas` overwrite was independently replayed
+  in #6217 (clean 191-file archive, eight pins, `POST qdatas=0x…4140`,
+  zero access-watch hits, 280-byte causal control still crashing) and
+  the W322 type-name follow-up in #6196 (one real `gegl_op_src` hit at
+  `node-0x28`; the second logged address was an unmapped warning). Both
+  ESTABLISHED AS LABELED, no counterexample or grade change. W325's
+  no-shim four-word read sweep armed four hardware watchpoints and
+  logged zero reads before the plug-in crashed — a short-window
+  negative that does not exclude a completed-load consumer. NO r5.
+- nfdump's injected-clock lane is CLOSED: a 20-line `LD_PRELOAD`
+  `gettimeofday()` shim on the real collector set the overwritten size
+  to `0x41`/`0x42` (rc 134, libc abort) or `0x21` (rc 0, exact-size
+  no-op); no consolidation, pointer write or command. The clock is a
+  lab instrument, not wire control; the real-clock 3/3 SIGABRT result
+  is unchanged. Clean `git archive 1095ab7d` replay of `run-v6clock.sh`
+  with `LAB_CLOCK_MS=16640` gave 5/0 and size `0x41`. No grade change.
+- WAMR W6 found no valid module shape confining chosen stores to the
+  live `i64_consts` table: N=1..8 appended chosen-`i64.const` pairs all
+  end at `past=172` and every valid load aborts rc −6; trims K≤16368
+  remove the overflow, K=16369..16371 give one store then
+  `bh_assert_internal` at `wasm_loader.c:9422`; a 21-result block is
+  required (M<21 fails validation). A synthetic forced-survival probe
+  suppressed 95 OOB writes and observed eight chosen const bytes copied
+  into seven of twelve `func->consts` entries, but the guest still
+  faulted in `copy_stack_values()` — guest readback stays UNMEASURED
+  even there. No valid surviving load, no wire path, R5 UNKNOWN; fixed
+  2.4.5 ASan is clean apart from the known CLI stack-overflow exit.
+
+What would change this fold: an expat witness verdict or grade change,
+a verdict contradicting a labeled scope, or a checker RED on committed
+HEAD.
+
 ## 2026-11-27 07:2x–07:4xZ — W322 stock-coercion survey closes the stale-backref wire path (Ruby)
 
 The named W321 follow-up was run and CLOSED with the falsifier: across
