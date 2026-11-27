@@ -13,9 +13,11 @@ pool, with no driver-groomed victim. W243 adds a natural shipped-sample
 allocation order that puts a live, pointer-bearing `pjmedia_clock` at the
 same offset, with chosen bytes in its pool/callback/user_data/lock words.
 Grade: **rung 3 confirmed in the real consumer / rung 4 author-DEMONSTRATED
-with a real library object and natural shipped-caller adjacency**. W243
-witness replay ESTABLISHED AS LABELED (W298); W240–W242 still await verdict.
-No pointer was called, no wire, no command, no r5.
+with a real library object and natural shipped-caller adjacency**. W239
+(staged excerpt), W243 (shipped-sample clock) and W240-W242 (all four real
+lanes) are each ESTABLISHED AS LABELED by witness replay; the W303 verdict
+(#5967, 2026-11-27 01:33Z) closed the last three with no grade change. No
+pointer was called, no wire, no command, no r5.
 
 
 
@@ -312,6 +314,34 @@ the W243 section above. The clock was never started, stopped or called; no
 wire and no command. W240/W241/W242 verdicts remain owed. Detail:
 `.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md`.
 
+## Witness replay (W303, 2026-11-27 01:33Z)
+
+ESTABLISHED AS LABELED for all four real lanes (W240 `run-real`, W241
+`run-realobj`, W242 `run-vidport`, W243 `run-clock`); grade unchanged, NO r5.
+Witness #5967, detail
+`.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`. Clean
+`git archive 7ea62b08 lab/frontier/pjproject2shell`: all four runner sha256s
+matched and unmodified `build-real.sh` returned rc 0 with
+`avi_get_frame_symbols=1` in both pinned libraries. `run-real.sh` rc 0 with
+fresh ASan WRITE-64 and WRITE-512 at `avi_get_frame (avi_player.c:1222)`,
+safe48 and both fixed cases clamped to 48; `run-realobj.sh` 11 PASS / 0 FAIL
+with the chosen marker in a live `pjmedia_port`; `run-vidport.sh` 16 PASS /
+0 FAIL on three fresh runs. Source-bound at `avi_player.c:1221` ineffective
+assert / `:1222` bare `file_read3`, fixed `:1231-1235` clamp, shipped
+`enc_clock_cb vid_port.c:1176`. No pointer called or dereferenced, no wire,
+no command.
+
+Two NITs, no grade impact: (1) the #5958 receipt expected `NEIGHBOR_AFTER`
+from `run-real`, but commit `4f9314a9` removed that print before the asked
+HEAD; `real-driver.c:135` now emits only `NEIGHBOR_BEFORE`, and chosen-byte
+proof lives in the realobj and vidport lanes. (2) One `run-vidport.sh` run
+was 15 PASS / 1 FAIL (rc 0) when a transient zero frame size missed the
+150 ms wait. The author repaired the runner: `real/vidport-driver.c` now
+keeps the pull window and polls up to 2 s for a transient zero, and
+`real/run-vidport.sh` exits 1 on any FAIL. Five sequential reruns are
+16 PASS / 0 FAIL, rc 0 (receipt in `PROVENANCE.md`).
+
+
 ## Grade and tractability
 
 - **Rung 3 confirmed in a real consumer:** GCC and Clang ASan on the verbatim
@@ -330,8 +360,8 @@ wire and no command. W240/W241/W242 verdicts remain owed. Detail:
   W243 adds a natural shipped-*sample* allocation order where a live
   pointer-bearing `pjmedia_clock` sits at frame+48 and its `pool`, `cb`,
   `user_data` and `lock` words take chosen values, again without a call.
-  W243's replay is ESTABLISHED AS LABELED (W298); W240–W242 remain author
-  evidence until replayed.
+  All four real lanes are ESTABLISHED AS LABELED (W303); replay found no
+  counterexample and did not advance the grade.
 
 - **Not rung 5:** no live loopback service, no attacker-supplied bytes
   through a network wire, no pointer hijack, no command side effect.

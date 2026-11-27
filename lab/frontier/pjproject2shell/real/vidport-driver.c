@@ -138,7 +138,21 @@ int main(int argc, char **argv)
     CHECK(pjmedia_vid_port_connect(vp, sink, PJ_FALSE), "connect sink");
     status = pjmedia_vid_port_start(vp);
     fprintf(stderr, "START status=%d\n", (int)status);
+    /* Let the shipped clock complete a pull before readback. vid_port.c:689
+     * initializes frm_buf->size to 48 at creation, so waiting for nonzero
+     * alone would read before the first frame; keep the 150 ms pull window
+     * and poll only to avoid catching a transient zero-size frame (one
+     * witness run saw FRAME_SIZE_AFTER=0). avi_get_frame() assigns size
+     * after file_read3(), so a nonzero size means the write completed. */
     pj_thread_sleep(150);
+    {
+        unsigned waited = 0;
+        while (shadow->frm_buf->size == 0 && waited < 2000) {
+            pj_thread_sleep(10);
+            waited += 10;
+        }
+        fprintf(stderr, "FRAME_WAIT_MS=%u\n", waited);
+    }
     fprintf(stderr, "FRAME_SIZE_AFTER=%u\n",
             (unsigned)shadow->frm_buf->size);
     hexdump("MUTEX_AFTER", (const unsigned char *)mutex, 88);

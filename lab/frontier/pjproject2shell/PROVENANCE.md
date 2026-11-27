@@ -137,6 +137,12 @@ lab/frontier/pjproject2shell` into `/tmp/w240-pjproject-clean`, then
 (48), truncating`. Staged `run-witness.sh` also still returns
 `WITNESS REPLAY PASS` at commit `759825c1`.
 
+Current-run note (W303 nit 1, 2026-11-27): the `NEIGHBOR_AFTER` line above
+is historical evidence from the W240 driver at `759825c1`. Commit `4f9314a9`
+replaced that print with the realobj mode, so present `real-driver.c:135`
+emits only `NEIGHBOR_BEFORE` and `run-real.sh` does not assert the marker.
+Current chosen-byte proof is in the realobj and vidport lanes.
+
 ## Real library-object lane (W241, 2026-11-26 15:26Z)
 
 `real/real-driver.c` gains a third mode, `realobj`. It derives 48 bytes from
@@ -316,3 +322,29 @@ the pinned hashes above, `avi_get_frame_symbols=1` in both libraries,
 same chosen-byte `CLOCK_BYTES_AFTER` prefix and pointer words as in-tree,
 and byte-identical fixed/safe clocks. Driver and runner sha256 values
 matched the in-tree values above.
+
+## Witness replay and runner repair (W303/W304, 2026-11-27)
+
+Witness #5967 (detail
+`.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`): all four real
+lanes ESTABLISHED AS LABELED, grade unchanged, NO r5. Clean archive of HEAD
+`7ea62b08`; runner hashes `build-real.sh` `1fae3a56…`, `run-real.sh`
+`85de754f…`, `run-realobj.sh` `d6435096…`, `run-vidport.sh` `f9d77e62…`
+matched the ask. `run-real` six cases with WRITE-64/WRITE-512 and the
+48-byte fixed clamp; `run-realobj` 11 PASS / 0 FAIL; `run-vidport` 16 PASS /
+0 FAIL on three runs. No pointer called or dereferenced, no wire, command.
+
+Author repair of witness nit 2 at 01:43Z: `real/vidport-driver.c` sha256
+`35599b999f3a349efb9a5ce426abf26d0efd78891266203b8a4cadd8cd4bdeb7` and
+`real/run-vidport.sh` sha256
+`68995b6c17acd6552240a3453a69681b5265d446039a7716a50cd892f82a2a09`.
+The driver retains the 150 ms pull window and polls up to 2 s only for a
+transient zero `frm_buf->size`; the runner exits 1 when FAIL>0. A first
+poll-only version was wrong (`vid_port.c:689` sets `size=48` at creation),
+giving five runs of 13 PASS / 3 FAIL, `RESULT: FAIL`, rc 1; preserved as a
+negative. Five sequential corrected runs each returned
+`TOTAL: 16 PASS / 0 FAIL`, `RESULT: PASS`, rc 0. Final in-tree logs: vuln
+attack64 `FRAME_SIZE_AFTER=64` with chosen marker in `MUTEX_AFTER`;
+attack512 ASan `WRITE of size 512` via `enc_clock_cb vid_port.c:1176` with
+repeated chosen marker in the live mutex; fixed attack64
+`FRAME_SIZE_AFTER=48` with unchanged mutex.

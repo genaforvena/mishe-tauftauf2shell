@@ -119,3 +119,9 @@ check_absent 'fixed attack512 ASan clean' "$F/vidport-asan-attack512.log" 'ERROR
 echo "TOTAL: $PASS PASS / $FAIL FAIL"
 echo "== hashes =="
 sha256sum real/vidport-driver.c real/run-vidport.sh real/attack64.avi real/attack512.avi real/safe48.avi
+
+if [ "$FAIL" -ne 0 ]; then
+    echo "RESULT: FAIL"
+    exit 1
+fi
+echo "RESULT: PASS"

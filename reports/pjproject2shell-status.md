@@ -1,4 +1,4 @@
-# pjproject2shell — admitted status (2026-11-26 23:13Z W298 update)
+# pjproject2shell — admitted status (2026-11-27 01:43Z W304 update)
 
 **ADMITTED 02:3xZ by the operator under standing #6 as the 156th declared
 target mind.** Window 164 was already live and was adopted, not duplicated.
@@ -39,9 +39,9 @@ pj pool; W242 overwrites a live `pj_mutex_t` at frame+48 through the SHIPPED
 `pjmedia_vid_port_create()` clock path with no driver-groomed victim; W243 puts
 a live pointer-bearing `pjmedia_clock` at frame+48 via a shipped-SAMPLE
 allocation order. Fixed `7ecc6584` and safe 48-byte input are clean in all
-lanes. No pointer called, no wire, command or r5. W243 is ESTABLISHED AS
-LABELED (W298, 23:05Z); W240–W242 still await verdict; W239 is ESTABLISHED
-AS LABELED for the staged excerpt only. The
+lanes. No pointer called, no wire, command or r5. W239 (staged excerpt),
+W243 (W298) and W240-W242 (W303, 01:33Z) are each ESTABLISHED AS LABELED;
+the replay found no counterexample and did not change the grade. The
 earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
 
 ## Next
@@ -59,10 +59,12 @@ earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
    glibc list pointers at +24/+32 are beyond a 64-byte write but inside a
    512-byte one; no function-pointer/callback object follows the frame in
    production. Grade unchanged; no witness replay repeated.
-4. Next: fold W240–W242 witness verdicts when they arrive (W243 closed
-   ESTABLISHED AS LABELED in W298); no r5 without a live loopback target,
-   attacker AVI on a wire, a benign command side effect and vulnerable/fixed/
-   safe controls.
+4. Done (W303): witness replay ESTABLISHED AS LABELED for all four real
+   lanes, no grade change; two nits recorded in the brief. `run-vidport.sh`
+   now poll-guards the frame readback and exits nonzero on FAIL, verified
+   5/5 at 16 PASS / 0 FAIL. No r5 without a live loopback target, attacker
+   AVI on a wire, a benign command side effect and vulnerable/fixed/safe
+   controls.
 
 ## Receipts
 
@@ -135,3 +137,20 @@ earlier stand-in cap of 64 present bytes is removed by the real crafted AVI.
   confirm chosen values at the real offsets, no grade impact. W240/W241/W242
   verdicts still owed. Detail in
   `.mishe-tauftauf/artifacts/witness-w298-pjproject/detail.md`.
+
+- Witness W303 verdict 2026-11-27 01:33Z (tape #5967): W240/W241/W242 real
+  lanes ESTABLISHED AS LABELED, grade unchanged, NO r5. Clean archive
+  `7ea62b08`, all four runner hashes matched; unmodified `build-real.sh` rc 0
+  with `avi_get_frame_symbols=1` in both pinned libraries, `run-real.sh`
+  WRITE-64/WRITE-512 and the 48-byte fixed clamp, `run-realobj.sh` 11 PASS /
+  0 FAIL, `run-vidport.sh` 16 PASS / 0 FAIL on three runs. NITs: stale
+  `NEIGHBOR_AFTER` receipt expectation (print removed in `4f9314a9`) and one
+  15 PASS / 1 FAIL run from a transient zero frame size. Detail
+  `.mishe-tauftauf/artifacts/witness-w303-pjproject/detail.md`.
+- Runner repair 2026-11-27 01:43Z: `real/vidport-driver.c` (sha256
+  `35599b99…bdeb7`) keeps the 150 ms pull window and polls up to 2 s only for
+  a transient zero size; `real/run-vidport.sh` (sha256 `68995b6c…2a09`)
+  exits 1 when FAIL>0. First poll-only attempt failed 5/5 with 13 PASS /
+  3 FAIL because `vid_port.c:689` initializes `frm_buf->size` to 48; preserved
+  as a negative. Five sequential corrected runs: each 16 PASS / 0 FAIL,
+  `RESULT: PASS`, rc 0. Raw logs in `real/out-vuln/` and `real/out-fixed/`.
