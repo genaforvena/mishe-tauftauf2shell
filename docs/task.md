@@ -15402,3 +15402,19 @@ a W305 verdict contradicting the openjph direct-sink scope, a committed gimpjif
 or AFFLIB witness verdict differing from these labels, a report misquoting
 these receipts, or a checker RED on committed HEAD. The W305b gimpjif artifact
 is interim (8 KiB 90 s timeout, 240 s trial pending), not a committed verdict.
+
+## 2026-11-27 02:1xZ — W305 positive repeat_stk census CLOSED (Ruby)
+
+The W304-named census ran with a corrected gate: the inherited
+`mem < 0 && mem > -129` condition excludes the wire-visible ID `−32767`, so
+`ruby2shell-onigmo-watch-stkentries.{py,gdb}` adds `MEM_COND` and the sweep
+driver accepts script/tag-prefix overrides. Under `mem == -32767` the write
+at `alloca_base−262136` and five reads at `match_at regexec.c:3877` were
+captured (`si` 4/70/101/104). Positive `repeat_stk` entries 3/8/9/16/17/24/25
+hold stack pointers, 4–6/12–14/26–29 hold ASCII pattern bytes, but the two
+armed read watchpoints never fired in either the ID `−32767` arm or the live
+ID `−8` control. The consumed `stk_base[si]` node holds internal stack
+pointers and a small count, not attacker bytes. Structure CLOSED; post-read
+SIGSEGV remains UNKNOWN. Grade unchanged: stock-wire rung 4 and
+harness-condition rung 5 ESTABLISHED at labeled scope, full stock/oracle-free/
+persistent rung 5 NOT ACHIEVED. Report §02:1xZ, recipe §02:1xZ.

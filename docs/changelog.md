@@ -1,6 +1,27 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:1xZ — W305 positive repeat_stk census CLOSED (Ruby)
+
+- New `lab/repro/ruby2shell-onigmo-watch-stkentries.{py,gdb}` dumps `si` and
+  `repeat_stk[0..31]` at the armed write site and first consumed read, flags
+  pointer-like entries, watches up to two of them, and dumps the selected
+  48-byte `OnigStackType` node. `ruby2shell-onigmo-repeat-deep.sh` now takes
+  `RUBY2SHELL_ONIGMO_GDB_SCRIPT` and `RUBY2SHELL_ONIGMO_TAG_PREFIX` as defaults.
+- Gate correction: the copied W304 condition `mem < 0 && mem > -129` excludes
+  the wire-visible ID `−32767`; an ungated arm logged only `ARM` plus a
+  W300-style SIGSEGV. With `MEM_COND='mem == -32767'`, the write at
+  `alloca_base−262136` and five reads at `match_at regexec.c:3877` were
+  captured, `si` 4/70/101/104, all small. Positive entries 3/8/9/16/17/24/25
+  hold stack pointers; entries 4–6/12–14/26–29 hold ASCII pattern bytes.
+- Read watchpoints on entries 3 and 8 never fired (ID `−32767` and live ID
+  `−8` control); the consumed node held internal stack pointers and a small
+  count, no attacker-controlled pointer or chosen byte. Structure CLOSED;
+  the post-read SIGSEGV stays UNKNOWN. Grade unchanged: stock-wire rung 4
+  and harness-condition rung 5 ESTABLISHED at labeled scope, full
+  stock/oracle-free/persistent rung 5 NOT ACHIEVED. Report §02:1xZ, recipe
+  `docs/reproducibility.md` §02:1xZ.
+
 ## 2026-11-27 02:0xZ — W305 openjph ESTABLISHED, gimpjif W304 frames, AFFLIB staged W303
 
 This fold covers `fde44380..757418ab` (seven commits) and adds explanation

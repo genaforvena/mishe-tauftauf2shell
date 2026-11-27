@@ -6819,3 +6819,67 @@ ACHIEVED**. Next lane must name a wire-visible consumer: census the positive
 `match_at regexec.c:3877` to see whether any entry holds a pointer during
 the consumed read; do not repeat the negative-ID sweep unchanged.
 
+
+## 2026-11-27 02:1xZ — W305 positive repeat_stk census: pointers present, none consumed
+
+W304 closed negative repeat IDs `−1..−64` and named one remaining structural
+question: the consumed read at `match_at regexec.c:3877`
+(`si = repeat_stk[mem]; stkp = STACK_AT(si);`) is already wire-visible, so do
+the **positive** `repeat_stk` entries hold a pointer during that read? A
+pointer there would name a new wire-visible consumer; it would still be
+rung-4 mechanics without wire-only control and witness replay.
+
+`lab/repro/ruby2shell-onigmo-watch-stkentries.{py,gdb}` reuses the proven
+gate (enable at `rb_reg_initialize` with `len > 300000`, native breakpoint
+conditions inside `commands` blocks because Python `stop()` overrides them),
+but adds a `MEM_COND` environment override. That override was necessary: the
+condition copied from W304, `mem < 0 && mem > -129`, **excludes the
+wire-visible ID `−32767`**. The first run with that condition armed no write
+breakpoint and logged only `ARM` lines plus a SIGSEGV at
+`si_addr=0x7fffbffc0048` — an empty arm, not evidence (gitignored
+`lab/build/evidence/w304-deep-n32767-p0.server.log`). With
+`MEM_COND='mem == -32767'` the intended site is reached.
+
+`ruby2shell-onigmo-repeat-deep.sh` accepts `RUBY2SHELL_ONIGMO_GDB_SCRIPT` and
+`RUBY2SHELL_ONIGMO_TAG_PREFIX` as defaults, so the census runs on the same
+fresh stock-Rails worker, pinned 3.4.11 plain, shallow layout, pad 0,
+`RAILS_MAX_THREADS=1`, ASLR off. Gitignored evidence:
+`lab/build/evidence/w305b-n32767-p0.{json,server.log}` (clock 02:13:43Z) and
+the live ID `−8` control `w305n8-n8-p0.{json,server.log}` (02:14:17Z,
+`units = 65526`, `MEM_COND='mem == -8'`), with summaries
+`w305{deep,b,n8}-summary-p0.txt`.
+
+At ID `−32767` the write is at `alloca_base − 262136`; the first pre-write
+qword is ASCII pattern source `0x3a3f287d3030312c`, the post-write slot a
+small stack index (4/5). The `repeat_stk[0..31]` census at the first BEFORE
+hit and again at the first consumed read is stable:
+
+- indices 0, 1, 2 hold small values `0x6, 0x9, 0x7`; index 7 holds `0x40071`;
+- indices 3, 8, 9, 16, 17, 24, 25 hold **stack pointers**
+  (`0x7fff…`, recurring at the 8-slot stride);
+- indices 4–6, 12–14, 26–29 hold ASCII bytes of the wire pattern
+  (`{0,100},{0…`); indices 10, 11, 18–22, 30 are zero.
+
+`si` at the consumed read is `4` (ID `−32767`) or `3`/`4` (ID `−8`); the five
+read hits per arm carry slot values `4, 70, 4, 101, 104` (or `4, 3, 3, 3, 3`)
+and every backtrace top frame is `match_at regexec.c:3877`. Read watchpoints
+were armed on pointer-bearing entries 3 and 8 (two-hwatch limit) and
+**never fired** in either arm, so no positive pointer-bearing entry is a
+consumer of this path. The selected `stk_base[si]` node was dumped by caching
+`mem` and `stk_base` at the write breakpoint (both optimize out at the
+watchpoint stop): 48-byte `OnigStackType`, `type` `0x700`, internal stack
+pointers at offsets 24/40, small count/num fields. No attacker-controlled
+pointer or chosen byte is present in the consumed node.
+
+Both gated trials exited SIGSEGV (−11) after the reads with zero SIGSEGV
+events delivered to the handler — the same UNKNOWN watcher artifact as
+W303/W304, not attributed to the write. The census does not depend on it.
+
+Verdict: the positive-entry structure is **CLOSED**. The wrapped ID reaches
+a pointer-bearing neighbourhood, but the only observed consumer reads the
+corrupted negative slot as a small index and increments
+`stkp->u.repeat.count`; no new wire-visible pointer consumer exists there.
+Grade unchanged: stock-wire rung 4 witness-ESTABLISHED at labeled scope,
+harness-condition rung 5 witness-ESTABLISHED, full stock/oracle-free/
+persistent rung 5 **NOT ACHIEVED**. Next lane must name a different
+wire-visible consumer, not repeat this census or the ID sweeps.

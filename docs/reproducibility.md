@@ -16393,6 +16393,35 @@ observed in the measured window, the repair is shim-assisted, no fixed
 rung 4 PARTIAL, NO r5. Hashes and the first replay's corrected runner-hex
 defect are in `lab/frontier/gimpjif2shell/PROVENANCE.md` § W301.
 
+## 2026-11-27 02:1xZ — W305 positive repeat_stk entry census (Ruby)
+
+From the repo root, after the pinned 3.4.11 plain build and stock Rails app:
+
+```sh
+RUBY2SHELL_ONIGMO_TAG_PREFIX=w305b \
+RUBY2SHELL_ONIGMO_GDB_SCRIPT=lab/repro/ruby2shell-onigmo-watch-stkentries.gdb \
+RUBY2SHELL_ONIGMO_MEM_COND='mem == -32767' \
+sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "32767" 0 5270
+RUBY2SHELL_ONIGMO_TAG_PREFIX=w305n8 \
+RUBY2SHELL_ONIGMO_GDB_SCRIPT=lab/repro/ruby2shell-onigmo-watch-stkentries.gdb \
+RUBY2SHELL_ONIGMO_MEM_COND='mem == -8' \
+sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "8" 0 5280
+```
+
+`MEM_COND` matters: W304's inherited `mem < 0 && mem > -129` excludes ID
+`−32767`, so an ungated run arms nothing. Both scripts are gdb diagnostics
+only; no wire-only claim uses the `Regexp.timeout=nil` shim. Read the
+gitignored `lab/build/evidence/w305b-n32767-p0.{json,server.log}`,
+`w305n8-n8-p0.{json,server.log}` and their summaries. Expect a write at
+`alloca_base−262136` (ID `−32767`) or `−64` (ID `−8`), `repeat_stk[0..31]`
+holding stack pointers at indices 3/8/9/16/17/24/25 and ASCII pattern bytes
+at 4–6/12–14/26–29, `si` 3/4 at the consumed read, five read backtraces all
+top-framed `match_at regexec.c:3877`, and no `tag=stk[...]` watch fire. The
+48-byte `STK_NODE` dump shows `type` 0x700, internal stack pointers and a
+small count, not attacker bytes. Both trials exit SIGSEGV with zero watcher
+SIGSEGV events: UNKNOWN artifact, not a primitive. Structure CLOSED; full
+rung 5 NOT ACHIEVED. Detail in report §02:1xZ.
+
 ## 2026-11-27 02:0xZ — W305 openjph verdict, gimpjif W304 gdb replay, AFFLIB W303 staging
 
 Three receipts, from the repo root. No Ruby recipe here: `31974ff6` already
