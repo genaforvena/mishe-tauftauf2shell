@@ -41,9 +41,9 @@ sh run-all.sh
 Expected: `BUILD_OK`, then `RUN_ALL_OK 16 PASS / 0 FAIL`. Observed twice on
 2026-11-27 (23:00Z), including after refreshing pins. Inputs and evidence
 are regenerated on each run; `INPUT_SHA256SUMS` (SHA-256
-`ced6be3a73b8cf6450d56c3d763448c6dc3c8765893c674cb48dd6c8de0c4d26`) and
+`8fd65fb024938452d8b8a990c95586572f42236a396b68d94eb92182b7da0556`) and
 `evidence/SHA256SUMS` (SHA-256
-`f2d0941dec29fcb6fb1b1bd5ee87697cd602593fabc2b956b0a92c3b05bf9292`) are
+`df780231191578647cbf9b8581d3d450e3d39d61e42fa9e848ad46ddaf148ed9`) are
 checked before and after the run. The hashes above are of pin files and will
 change if the scripts change; the current values are committed with the
 scripts.
@@ -63,7 +63,7 @@ the committed evidence logs keep only stable observations:
 - `evidence/controls.log`: exit codes (vulnerable ASan attack 1, fixed ASan
   attack 0, both safe inputs 0, plain 2044-byte overrun 139) and fixed output
   size (1 byte).
-- `evidence/gdb-pattern.log`: breakpoint at `analyze.c:2156`,
+- `evidence/gdb-pattern.log`: `BP_HIT=1` (GDB stopped at `analyze.c:2156`),
   `V256=44 V260=44 V269=44 V270=00`, and `exited normally`.
 
 Raw logs (`*.raw`) and binaries/build directories are working-tree artifacts

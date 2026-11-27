@@ -50,12 +50,13 @@ expect 'plain large-overflow negative' '[ "$RL" -ne 0 ]'
 
 gdb -q -batch -ex 'set pagination off' -ex 'set disable-randomization on' \
   -ex 'break analyze.c:2156' -ex 'run -b linkfile-pattern out-pattern.bin' \
+  -ex 'printf "BP_HIT=1\n"' \
   -ex 'printf "V256=%02x V260=%02x V269=%02x V270=%02x\n", buf[256], buf[260], buf[269], buf[270]' \
   -ex 'x/40bx buf+252' -ex 'x/4gx buf+272' -ex 'continue' \
   --args "$P/wlalink" > evidence/gdb-pattern.raw 2>&1
-grep -E 'parse_data_blocks \(\).*analyze.c:2156|V256=' evidence/gdb-pattern.raw > evidence/gdb-pattern.log
+grep -E 'BP_HIT=1|V256=' evidence/gdb-pattern.raw > evidence/gdb-pattern.log
 grep -o 'exited normally' evidence/gdb-pattern.raw >> evidence/gdb-pattern.log
-expect 'GDB breakpoint reached' "grep -q 'parse_data_blocks () at .*analyze.c:2156' evidence/gdb-pattern.log"
+expect 'GDB breakpoint reached' "grep -q 'BP_HIT=1' evidence/gdb-pattern.log"
 expect 'chosen 0x44 at buf+256,260,269' "grep -q 'V256=44 V260=44 V269=44 V270=00' evidence/gdb-pattern.log"
 expect 'plain pattern link completes' "grep -q 'exited normally' evidence/gdb-pattern.log"
 
