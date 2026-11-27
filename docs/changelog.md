@@ -2,6 +2,29 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 00:1xZ — frontier reconciles W299; libicalclean2shell staged with limited rung 4
+
+- Reconciled unknown W299: its only durable repo effect was the intended
+  oiiocineon STAGED→ADMITTED brief update, now committed as `d4b019ce`.
+  No W299 candidate lab, window, manifest row or frontier commit existed.
+  Folded sngrep admission/replay, the site-wall untracking fix, and the
+  operator's llama.cpp/SRS/proprietary-appliance negatives without duplicating
+  owned lanes.
+- Staged unowned `libicalclean2shell` CVE-2026-134761 /
+  GHSA-p95w-9p65-m226 from v4.0.6 `9cfca65c` and v4.0.7 `cb58c3cb`; fix
+  `6c48980a` clears `root_component` before returning it. The unmodified public
+  reproducer gives eight ASan heap-UAF runs (`READ-8` at
+  `icalcomponent.c:197` via `icalparser.c:117`); fixed ten combinations and
+  complete-input controls are clean. Plain attack crashes rc 139 three times;
+  second clean returns the same stale pointer on vulnerable and not on fixed.
+- Rung 4 LIMITED: a local public-API harness reclaims the exact 72-byte
+  component through glibc tcache. Zero at offset 48 crashes; chosen
+  `0x4141414141414141` selects `icalcomponent_free()`'s benign early return.
+  GDB observes the chosen `parent` in the stale call; fixed controls do not
+  call it. `run-all.sh` PASS=57 FAIL=0. Window 202 (%410/%411) is live and
+  registered. No register row, admission, witness verdict, wire path or R5.
+
+
 ## 2026-11-26 23:4xZ — ruby2shell W299 witness fold and repeated-wire corruption
 
 - `de55426e` folds witness #5914: the stock-wire Onigmo repeat-ID rung-4

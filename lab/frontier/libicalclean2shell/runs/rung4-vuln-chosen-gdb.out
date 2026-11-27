@@ -1,0 +1,9 @@
+Breakpoint 1 at 0xfc60: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c, line 197.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+OBSERVED_FREE c=0x5555555e43c0 parent=(nil)
+OBSERVED_FREE c=0x5555555e4610 parent=(nil)
+FIRST=0x5555555e43c0 RECLAIM=0x5555555e43c0 REUSE=1 OFFSET48=0x4141414141414141 MODE=chosen
+OBSERVED_FREE c=0x5555555e43c0 parent=0x4141414141414141
+SURVIVED mode=chosen offset48_after=0x4141414141414141
+[Inferior 1 (process 3948673) exited normally]

@@ -1,0 +1,67 @@
+first clean returned: non-NULL, 186 bytes of serialized text
+second clean returned the same pointer: yes
+=================================================================
+==3948315==ERROR: AddressSanitizer: heap-use-after-free on address 0x507000000024 at pc 0x63e014bb3715 bp 0x7fffd0653130 sp 0x7fffd0653128
+READ of size 4 at 0x507000000024 thread T0
+    #0 0x63e014bb3714 in icalcomponent_isa /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c:328:23
+    #1 0x63e014bb3714 in icalcomponent_as_ical_string_r /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c:257:31
+    #2 0x63e014bb31f6 in icalcomponent_as_ical_string /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c:238:11
+    #3 0x63e014bb0d1d in report /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:35:18
+    #4 0x63e014bb0d1d in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:102:13
+    #5 0x7592eca2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #6 0x7592eca2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #7 0x63e014ad7584 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/runs/vuln-asan+0x8e584) (BuildId: 45c627e322d13502c16488d09f47cc297ba01a70)
+
+0x507000000024 is located 4 bytes inside of 72-byte region [0x507000000020,0x507000000068)
+freed by thread T0 here:
+    #0 0x63e014b7213a in free (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/runs/vuln-asan+0x12913a) (BuildId: 45c627e322d13502c16488d09f47cc297ba01a70)
+    #1 0x63e014bb0c35 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:95:16
+    #2 0x7592eca2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #3 0x7592eca2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #4 0x63e014ad7584 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/runs/vuln-asan+0x8e584) (BuildId: 45c627e322d13502c16488d09f47cc297ba01a70)
+
+previously allocated by thread T0 here:
+    #0 0x63e014b723d3 in malloc (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/runs/vuln-asan+0x1293d3) (BuildId: 45c627e322d13502c16488d09f47cc297ba01a70)
+    #1 0x63e014bc167b in icalmemory_new_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalmemory.c:324:9
+    #2 0x63e014bb136a in icalcomponent_new_impl /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c:92:34
+    #3 0x63e014bc58af in icalparser_add_line /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalparser.c:762:17
+    #4 0x63e014bb10f7 in add /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:10:32
+    #5 0x63e014bb10f7 in feed /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:20:36
+    #6 0x63e014bb0b08 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/reproducer/05-uaf-clean-ownership.c:91:11
+    #7 0x7592eca2a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #8 0x7592eca2a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #9 0x63e014ad7584 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/runs/vuln-asan+0x8e584) (BuildId: 45c627e322d13502c16488d09f47cc297ba01a70)
+
+SUMMARY: AddressSanitizer: heap-use-after-free /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libicalclean2shell/src-vuln/src/libical/icalcomponent.c:328:23 in icalcomponent_isa
+Shadow bytes around the buggy address:
+  0x506ffffffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506ffffffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506ffffffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x506fffffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x507000000000: fa fa fa fa[fd]fd fd fd fd fd fd fd fd fa fa fa
+  0x507000000080: fa fa fd fd fd fd fd fd fd fd fd fa fa fa fa fa
+  0x507000000100: fd fd fd fd fd fd fd fd fd fd fa fa fa fa fd fd
+  0x507000000180: fd fd fd fd fd fd fd fd fa fa fa fa fa fa fa fa
+  0x507000000200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x507000000280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3948315==ABORTING

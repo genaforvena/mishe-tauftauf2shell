@@ -1,0 +1,3 @@
+first clean returned: non-NULL, 186 bytes of serialized text
+second session clean returned: non-NULL, 186 bytes of serialized text
+mode=two-sessions shape=unclosed-child

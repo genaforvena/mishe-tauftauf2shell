@@ -1,0 +1,3 @@
+first clean returned: non-NULL, 358 bytes of serialized text
+second clean returned the same pointer: no
+mode=clean-free-twice shape=truncated
