@@ -24,6 +24,20 @@ observed `idx` drift exceeded the matched phase window. A combined observer
 that also broke W353 is preserved as a tooling negative, not target evidence.
 The locally rebuilt fixed differential returned `10 PASS / 0 FAIL`. Grade
 unchanged, NO r5. Details: W360 PROVENANCE section.
+
+W381 witness receipt (2026-11-27 23:4xZ, chat #7030): independent replay of
+W360 from a private clean `git archive f97ecb1f` (TAR `04411128…`, five source
+pins and five W360 evidence hashes matched, unmodified runner 29 PASS / 0
+FAIL). The read-only temporal observer saw four chosen `0x5555556a0200` M
+words read at the bundled-loader fault (`pc=0x7ffff7fd1327`, `watch_hits=4`;
+the author's `0x133e` is the later loader stage), and a locally rebuilt,
+no-shim fixedctl returned 10 PASS / 0 FAIL with the vulnerable-only crash.
+ESTABLISHED AS LABELED at the layout-conditioned chosen-pointer-read scope,
+grade-neutral, NO r5; coherent map consumption stays UNKNOWN and the array
+observer found no chosen-map hit. NITs: layout drift and a stale
+`w360-fixedctl-binaries.sha256` wording, the latter routed here by witness
+#7029 and owned by this target. No replay owed. Detail
+`.mishe-tauftauf/artifacts/witness-w381/detail.md`.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
