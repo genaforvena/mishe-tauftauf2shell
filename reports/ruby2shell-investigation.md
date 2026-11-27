@@ -8212,3 +8212,66 @@ paths work, or the fixed build shows the same effect. Do not repeat the
 `Gem::Specification` userdef shape, the Marshal fixnum/string shapes,
 `unpack("p")`, the 543-byte bands shape, partition, backref `[]=`,
 each_line, append_as_bytes, concat or setbyte unchanged.
+
+## 2026-11-27 13:0xZ — W340: stock coercion route CLOSED; stale-backed spec persists in RubyGems (Ruby)
+
+W339's named follow-up split into two answered arms. Reproduction:
+`lab/repro/ruby2shell-slice-bang-stockcoerce.{rb,sh}`; evidence gitignored
+under `lab/build/evidence/slice-bang-stockcoerce/`. Eight arms, four pinned
+builds, all rc 0 with zero ASan reports.
+
+- **Source result — a caller-defined coercion object is structurally
+  required.** In 3.4.12 `rb_str_slice_bang` (`string.c:6004`) the only
+  user-code window between `rb_reg_search` (`:6015`) and
+  `beg=BEG(nth)`/`len=END(nth)-beg` (`:6023-6024`) is
+  `rb_reg_backref_number(match, argv[1])` → `match_backref_number`
+  (`re.c:1206`). For a Symbol `argv[1]` it takes `rb_sym2str`; for a String
+  it takes `StringValueCStr`; only a non-String/non-Symbol reaches
+  `NUM2INT` (`re.c:1212`), which calls `to_int`. A stock object receives no
+  argument and holds no reference to the receiver, so no stock `to_int`
+  can mutate the string being sliced. The only regex `slice!` call in the
+  stdlib is `net/protocol.rb:454` (`while line = @wbuf.slice!(/\A[^\r\n]*(?:\n|\r(?:\n|(?!\z)))/)`),
+  with `argc==1` and therefore no coercion window at all.
+- **Arm `stockref` — NEGATIVE, identical on all four builds.** The exact
+  `net/protocol.rb:454` write-buffer shape (`+OK ` + 64 `Z` + CRLF + 256
+  `Q` + CRLF + 128 `R`, 456 bytes) gives `out_len=70`,
+  `out_head=2b4f4b205a5a5a5a…`, `after=386`, `q=0`, `r=0` on vulnerable
+  plain+ASan and fixed plain+ASan alike. The sink reads 70 live bytes, not
+  one stale byte: falsifier satisfied — no stock, coercion-free path
+  reaches the stale tail at this scope.
+- **Arm `persist` — stale-backed object reaches a later stock lookup.**
+  With the harness `to_int`, the W339 `Gem::Specification` userdef tail
+  (337 bytes on vulnerable) is consumed by `Marshal.load`; the resulting
+  object is registered with stock `Gem::Specification.add_spec` and found
+  again by stock `Gem::Specification.find_all_by_name` in the same
+  process. Vulnerable plain+ASan: `rlen=337`,
+  `value=Gem::Specification:STALE-TAIL-GEM`, `registered=Y found=1`;
+  a TracePoint records eight distinct stock calls including
+  `#<Class:Gem::Specification>#_load`, `#<Class:Gem>#load_yaml`,
+  `#<Class:Gem>#load_safe_marshal`, `#<Class:Gem::SafeMarshal>#safe_load`,
+  `#<Class:Gem::Specification>#add_spec` and
+  `#<Class:Gem::Specification>#find_all_by_name`. Fixed plain+ASan:
+  `rlen=8`, `value=NONE raised=ArgumentError:marshal data too short`,
+  `registered=N found=N`, `traces=NONE`. The stale-backed object changes
+  process state through stock RubyGems APIs and survives into a later
+  lookup; the fixed build produces neither object nor registration.
+
+Grade: **adjacent narrow rung 4 in-process, with a durable process-state
+side effect through stock APIs.** Still harness-triggered (caller-defined
+`to_int`), still no wire, no stock reach to the coercion, no command, no
+benign marker, no pointer control. The `stockref` negative CLOSES the
+"no caller-defined coercion object" route through the only stock regex
+`slice!` call site; the `persist` arm does not reopen it. Primary CVE grade,
+witness-COMPLETE rung 4 and full rung 5 unchanged.
+
+Next named experiment: a stale-backed object reaching a side effect from a
+stock request path with no harness coercion (the coercion-free route is
+now closed at `net/protocol.rb:454` scope, so look outside `slice!` — e.g.
+another coercion-taking core method reached by a stock parser), or a
+fresh-context witness replay of the persistence arm to test whether the
+registration survives an independent process. Falsifier: only
+harness-triggered paths work, or the fixed build shows the same effect.
+Do not repeat the W339 userdef/Marshal shapes, the `net/protocol.rb:454`
+arm, Marshal fixnum/string, `unpack("p")`, the 543-byte bands shape,
+partition, backref `[]=`, each_line, append_as_bytes, concat or setbyte
+unchanged.

@@ -5,6 +5,30 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 13:0xZ — W340 stock coercion CLOSED; stale-backed spec persists (Ruby)
+
+W339's named follow-up produced two answers. Source check: the only
+user-code window between `rb_reg_search` and the stale `beg`/`len` read in
+3.4.12 `rb_str_slice_bang` is `rb_reg_backref_number` → `NUM2INT` on a
+non-String/non-Symbol `argv[1]` (`re.c:1206-1212`); a stock object has no
+reference to the receiver, so no stock `to_int` can mutate the string. The
+only stdlib regex `slice!` call is `net/protocol.rb:454` with `argc==1`.
+`lab/repro/ruby2shell-slice-bang-stockcoerce.{rb,sh}` reproduces that
+exact write-buffer shape: `out_len=70`, `q=0`, `r=0` byte-identically on
+3.4.12 and 3.4.13, plain and ASan — the coercion-free route is CLOSED at
+that scope. The second arm keeps the harness `to_int` and registers the
+stale-backed `Gem::Specification` through stock APIs: vulnerable plain+
+ASan `rlen=337`, `value=Gem::Specification:STALE-TAIL-GEM`,
+`registered=Y found=1`, with a TracePoint observing `_load`, `load_yaml`,
+`load_safe_marshal`, `Gem::SafeMarshal.safe_load`, `add_spec` and
+`find_all_by_name`; fixed plain+ASan `rlen=8`, `marshal data too short`,
+`registered=N found=N`, `traces=NONE`. All eight arms rc 0, zero ASan
+reports. Adjacent narrow rung 4 in-process with a durable process-state
+side effect; still harness-triggered, no wire, no stock coercion path, no
+command or marker. Primary grade and full rung 5 unchanged. Details in
+`reports/ruby2shell-investigation.md` §W340 and
+`docs/reproducibility.md` §W340.
+
 ## 2026-11-27 12:3x–12:4xZ — W339 stale `slice!` bytes dispatch a stock `_load` (Ruby)
 
 W337's named follow-up fired at narrow in-process scope. A handcrafted

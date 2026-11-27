@@ -18780,6 +18780,34 @@ byte-identical across all builds (`rlen=337`, same dispatch and object);
 all eight arms rc 0 with zero ASan reports. Grade and limits in
 `reports/ruby2shell-investigation.md` §W339.
 
+### Ruby — W340 stock coercion CLOSED; stale-backed spec persists
+
+Same four pinned builds as §W339. Repro scripts:
+`lab/repro/ruby2shell-slice-bang-stockcoerce.rb` and `.sh` (two arms per
+build). Gitignored evidence:
+`lab/build/evidence/slice-bang-stockcoerce/matrix.txt` and per-tag
+`.out`/`.err`.
+
+```sh
+bash lab/repro/ruby2shell-slice-bang-stockcoerce.sh
+```
+
+Expected on all four builds, arm `stockref`: `before=456 out_len=70`,
+`out_head=2b4f4b205a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a5a`,
+`after=386`, `q=0`, `r=0` — byte-identical on vulnerable and fixed, so no
+coercion-free stock regex `slice!` path reaches the stale tail. Arm
+`persist` on 3.4.12 plain and ASan: `rlen=337`,
+`head=0408753a041200000047656d3a3a53706563696669636174`,
+`value=Gem::Specification:STALE-TAIL-GEM`, `registered=Y found=1`, with
+TracePoint observing `#<Class:Gem::Specification>#_load`,
+`#<Class:Gem>#load_yaml`, `#<Class:Gem>#load_safe_marshal`,
+`#<Class:Gem::SafeMarshal>#safe_load`,
+`#<Class:Gem::Specification>#add_spec` and
+`#<Class:Gem::Specification>#find_all_by_name`. On 3.4.13 plain and ASan:
+`rlen=8`, `value=NONE raised=ArgumentError:marshal data too short`,
+`registered=N found=N`, `traces=NONE`. All eight arms rc 0 with zero ASan
+reports. Grade and limits in `reports/ruby2shell-investigation.md` §W340.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay
