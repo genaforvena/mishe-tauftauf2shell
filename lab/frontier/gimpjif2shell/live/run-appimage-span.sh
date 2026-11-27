@@ -75,9 +75,12 @@ done
 ok "span and no-shim AppRun variants generated"
 
 run_jif () {
-  local variant="$1" file="$2" out="$3"
+  local variant="$1" file="$2" out="$3" secs="${4:-90}"
   local home; home="$(mktemp -d /tmp/gimpjif-span-home-XXXXXX)"
-  (cd "$ROOT" && exec setsid timeout -k 5 90 env HOME="$home" "./AppRun.$variant" -i \
+  # The 8 KiB live fault is timing/layout-sensitive: witness W305b saw
+  # three silent 90 s timeouts but natural faults at 19 s and 240 s in
+  # longer trials. Callers may raise the budget for that case only.
+  (cd "$ROOT" && exec setsid timeout -k 5 "$secs" env HOME="$home" "./AppRun.$variant" -i \
       --batch-interpreter plug-in-script-fu-eval \
       -b "(let* ((img (car (gimp-file-load RUN-NONINTERACTIVE \"$file\" \"$(basename "$file")\")))) (gimp-message (number->string (car (gimp-image-get-width img)))))" \
       -b '(gimp-quit 0)') > "$out" 2>&1 &
@@ -92,7 +95,7 @@ SAFE="$BASE/realglib/evidence/safe.jif"
 run_jif span "$SAFE" "$EVID/span-safe.log"
 run_jif span "$EVID/span-1024.jif" "$EVID/span-1024.log"
 run_jif noshim "$SAFE" "$EVID/noshim-safe.log"
-run_jif noshim "$EVID/span-8192.jif" "$EVID/noshim-8192.log"
+run_jif noshim "$EVID/span-8192.jif" "$EVID/noshim-8192.log" 300
 run_jif noshim "$EVID/span-65536.jif" "$EVID/noshim-65536.log"
 
 grep -q 'batch command executed successfully' "$EVID/span-safe.log" \
@@ -107,10 +110,11 @@ grep -q 'SPAN_RUN usable=264 chosen_run_after_usable=760' "$EVID/span-1024.log" 
 
 grep -q 'batch command executed successfully' "$EVID/noshim-safe.log" \
   && ok "safe 4x4 JIF loads with NO shim" || no "safe load without shim"
-# The exact fault site is layout-sensitive: one unshimmed run reached
-# glibc's tcache alignment check, another faulted inside the plug-in after
-# inflate reported an error. Both are natural consequences of the same
-# file-chosen overflow; assert only that the live plug-in faults.
+# The exact fault site and timing are both environment-sensitive: one
+# unshimmed run reached glibc's tcache alignment check, another faulted
+# inside the plug-in after inflate reported an error; witness W305b saw
+# three silent 90 s timeouts but natural faults in longer trials. A silent
+# timeout is a FAIL, not a pass; only the fact of a live fault is asserted.
 grep -Eq 'malloc\(\): unaligned tcache chunk detected|fatal error: Segmentation fault|Plug-in crashed: "file-gif-load"' "$EVID/noshim-8192.log" \
   && ok "8 KiB natural overflow faults the live plug-in" || no "8 KiB live fault"
 grep -q 'Plug-in crashed: "file-gif-load"' "$EVID/noshim-65536.log" \

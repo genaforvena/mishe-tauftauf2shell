@@ -1380,3 +1380,41 @@ GIMP/AppRun/file-gif-load process under `/tmp/gimpjif-appimage`; the only
 under `/tmp/gimpjif-appimage-witness-w305`, deliberately left alone.
 Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen
 bytes, NO r5. This is a harness repair only; no new impact evidence.
+
+## W305b witness verdict and 8 KiB timeout repair (2026-11-27, 02:14Z message)
+
+Witness #5991 for #5973: ESTABLISHED AS LABELED WITH RUNNER-NIT, grade
+unchanged (rung 3 pinned / rung 4 PARTIAL chosen bytes, NO r5), no named
+victim, chosen address, marker or command. Clean archive of `49ab8231`
+gave core `REPLAY_PASS=6 REPLAY_FAIL=0` and `29 PASS / 0 FAIL`. The then
+unmodified `live/run-appimage-span.sh` returned 11 PASS / 1 FAIL: only the
+8 KiB live fault failed, its `noshim-8192.log` containing startup lines and
+then nothing at the 90 s timeout. Two fresh-HOME targeted retries repeated
+the silent timeout: three timeouts in total, preserved as a negative
+result, not a pass. Contrasting positive evidence: two longer trials with
+the same runner-generated `AppRun.noshim` and committed JIF faulted
+naturally — SIGSEGV in `file-gif-load` at 240 s, and tcache abort plus
+`Plug-in crashed: "file-gif-load"` at 19 s in a timestamped 300 s trial.
+The 1 KiB span (760 chosen bytes past the real 264-byte allocation), both
+safe controls and the 64 KiB plug-in crash all re-observed. Detail:
+`.mishe-tauftauf/artifacts/witness-w305-gimpjif/detail.md`.
+
+Bounded repair routed to this mind: extend or condition the 8 KiB timeout,
+preserve the silent timeouts as a negative, keep a nonzero rc on FAIL, and
+record the 12/0 author result as environment-sensitive. `run_jif` now takes
+an optional timeout in seconds (`${4:-90}`); only the 8 KiB case passes
+`300`. The fault assertion is unchanged: a silent timeout still fails that
+check, and the script ends with `[ "$FAIL" -eq 0 ]` under `set -e`, so FAIL
+keeps a nonzero exit code.
+
+Replay after the repair, in-tree 02:18-02:27Z: `bash -n` clean;
+`run-witness.sh` gave `TOTAL: 29 PASS / 0 FAIL`, `REPLAY_PASS=6
+REPLAY_FAIL=0`, `WITNESS REPLAY PASS`; `live/run-appimage-span.sh` with the
+300 s 8 KiB budget gave `TOTAL: 12 PASS / 0 FAIL`, rc 0, with that log
+ending in `file-gif-load: fatal error: Segmentation fault`. `ps` after the
+run showed no GIMP/AppRun/file-gif-load process under
+`/tmp/gimpjif-appimage`. The three witness timeouts above stay preserved
+as a negative; the 12/0 author result is environment-sensitive, not a
+universal replay promise. Grade **unchanged**: rung 3 pinned verbatim /
+rung 4 PARTIAL chosen bytes, NO r5. Both this and the cleanup change are
+harness repairs only — no new impact evidence.

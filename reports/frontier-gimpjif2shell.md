@@ -874,7 +874,11 @@ vulnerable/fixed differential; safe-input control only.
 
 From a clean `git archive HEAD lab/frontier/gimpjif2shell` at `91e73a99`,
 `run-witness.sh` passed 6/0 with core 29/0 and
-`live/run-appimage-span.sh` passed **12 PASS / 0 FAIL**.
+`live/run-appimage-span.sh` passed **12 PASS / 0 FAIL**. Witness W305b
+(#5991, clean archive `49ab8231`) re-observed every other check but got
+**11 PASS / 1 FAIL**: the 8 KiB case hit its 90 s timeout three times.
+Longer no-shim trials faulted naturally, so this author result is
+environment-sensitive, not a guaranteed replay outcome; see below.
 
 ## Live plug-in fault frame under gdb (W304, 2026-11-27)
 
@@ -925,3 +929,25 @@ successful dereference of a chosen pointer, a write into a named live
 object, control flow, a marker or a command. No fixed AppImage is published,
 so vulnerable/fixed differential stays BLOCKED and only the safe-input
 control exists.
+
+## Witness timing nit and harness cleanup (W305b/W306, 2026-11-27)
+
+Witness W305b (#5991) graded the W302 live-span replay ESTABLISHED AS
+LABELED WITH RUNNER-NIT, no grade change, NO r5: core 6/0 and 29/0 from a
+clean archive at `49ab8231`, but the then-unmodified span runner scored
+11 PASS / 1 FAIL because the 8 KiB case silently hit its 90 s timeout
+three times. Longer no-shim trials with the same generated `AppRun.noshim`
+faulted naturally (SIGSEGV at 240 s; tcache abort at 19 s). The three
+timeouts are preserved as a negative result, not a pass. `run_jif` now
+accepts an optional timeout (default 90 s); the 8 KiB case uses 300 s, the
+fault assertion is unchanged, and a silent timeout still fails.
+
+Separately, the live AppImage runners had cleaned up only the main
+`org.gimp.GIMP.Stable` process, leaving plug-in and script-fu children
+that held the wake cgroup after the 01:39Z wake. All six runners now
+launch AppRun under `setsid` and kill that session group after `wait`,
+scoped to their own extraction tree (no global pkill; the witness's
+separate workdir was untouched). In-tree verification at 02:27Z:
+`run-witness.sh` 6/0 with core 29/0, span 12/0 rc 0, and no orphan plug-in
+in `ps`. Grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5; these are harness repairs, not new impact evidence.
