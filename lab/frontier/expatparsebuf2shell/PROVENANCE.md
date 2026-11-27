@@ -83,3 +83,10 @@ glibc groom, no named consumer, no pointer value dereference; R5 NOT CLAIMED.
 The advisory API-misuse precondition (a consumer passing attacker-controlled
 `len` to `XML_ParseBuffer` after a prior `XML_GetBuffer`) is unchanged. No
 external systems were contacted with probes.
+
+Clean-archive replay 2026-11-27T07:41Z: `git archive ea6981d2
+lab/frontier/expatparsebuf2shell` into `/tmp/w324-expat-clean`;
+`bash bootstrap.sh` then unmodified `bash run-all.sh` (sha256
+`40a6ec229bbe916973771537e9dd42b78b21d583d446b0912430a4c9ebd9c17a`)
+returned `TOTAL: 41 PASS / 0 FAIL`, rc 0; log sha256
+`023945b0538feaeed4ca5d09c2e3b8a6bd09aff193665ee72eea9d66ac069bc1`.

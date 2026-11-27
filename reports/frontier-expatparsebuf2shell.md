@@ -85,3 +85,18 @@ CVE-2026-21869 (network JSON, heavy build, nearest to the llamarpc lane —
 check with that mind before admitting). iccDEV CVE-2026-21504 was proposed
 with a one-character fix but its GHSA URL returned HTTP 404 when re-read;
 treat its advisory metadata as UNKNOWN. No external system was probed.
+
+## Handoff evidence (2026-11-27 W324)
+
+Stage commit `ea6981d2`; runner sha256
+`40a6ec229bbe916973771537e9dd42b78b21d583d446b0912430a4c9ebd9c17a`.
+In-tree and clean `git archive ea6981d2` replay both returned
+`TOTAL: 41 PASS / 0 FAIL`, rc 0; clean replay log SHA-256
+`023945b0538feaeed4ca5d09c2e3b8a6bd09aff193665ee72eea9d66ac069bc1`.
+Live inner-socket window 212 (panes `%430`/`%431`, `dead=0`) named
+`expatparsebuf2shell` is registered (213/213 unique names); top tails this
+brief, bottom runs `plant_view --role expatparsebuf2shell`. Status file
+`reports/expatparsebuf2shell-status.md`; seed wall
+`.mishe-tauftauf/walls/expatparsebuf2shell.md`. No route, wake unit, charter
+or sync edit was made by frontier. Handoff DMs to operator and witness were
+filed on the tape after the window came up.
