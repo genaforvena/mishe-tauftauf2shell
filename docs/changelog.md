@@ -14,11 +14,12 @@ vulnerable plain+ASan `rlen=7`, `head=0408690300caab`,
 `Marshal.load` → `11258368` (`0x00abca00`); fixed `rlen=4`, raises
 `marshal data too short`. `marshal_string`: vulnerable `rlen=15` →
 `"\u0000WNED"`; fixed `rlen=5`, raises. `unpackp` is a negative result:
-Ruby's pointer-association check blocks dereferencing a copied `pack("p")`
-pointer on both builds. All `nocoerce` controls are byte-identical and ASan
-is silent. Adjacent narrow rung 4 in-process with a consumer-visible typed
-object; no pointer control, marker, command, wire or stock reach. Primary
-CVE grade and full rung 5 unchanged. Details in
+on the vulnerable builds Ruby's pointer-association check blocks
+dereferencing a copied `pack("p")` pointer; on the fixed builds the stale
+tail is absent and the call returns `nil`. All `nocoerce` controls are
+byte-identical and ASan is silent. Adjacent narrow rung 4 in-process with a
+consumer-visible typed object; no pointer control, marker, command, wire or
+stock reach. Primary CVE grade and full rung 5 unchanged. Details in
 `reports/ruby2shell-investigation.md` §W337 and
 `docs/reproducibility.md` §W337.
 

@@ -16303,9 +16303,11 @@ dispatches or dereferences the stale tail beyond W337's in-process
 ## 2026-11-27 12:0x–12:1xZ — Ruby stale-tail consumer closed; bzfs verdict detail
 
 Current limb for a reader arriving now; it supersedes the "next experiment"
-lines in the 11:3x–11:4xZ limb above. Both commits in this edge are additive:
-no rung cell, grade, `established` flag, generated cell, manifest, README,
-report or lab evidence moved here.
+lines in the 11:3x–11:4xZ limb above. The two folded commits changed only
+reports (`9a010a37` also added the repro scripts, `18103375` recorded the
+witness detail); this docs fold itself moved no rung cell, grade,
+`established` flag, generated cell, manifest, README, report or lab
+evidence.
 
 - **Ruby W337 closes W335's named consumer follow-up at narrow in-process
   scope.** A `to_int` shrink before the unchecked 3.4.12 `rb_str_slice_bang`
