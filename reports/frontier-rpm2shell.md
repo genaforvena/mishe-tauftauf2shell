@@ -510,10 +510,12 @@ binary from the pinned parent in a clean archive keeps the chosen symbol
 (`NEXT_AFTER=0x4063a0`), and 5/5 fixed-target installs exit rc 1 with a clean
 fixed ASan control. The live GC assertion does not survive the rebuild: four
 runs gave 9/4, 11/2, 12/1 and 10/3 PASS/FAIL, A filler faulted only 2/5, 3/5,
-4/5 and 3/5 times, and two runs never printed `CHOSEN_PTR ... MATCH=1`. The
-13/0 author result is therefore layout-specific; the reproducible datum is
-the chosen fixed-address write plus the vulnerable/fixed/safe controls, not
-the semantic dereference. Detail and hashes: PROVENANCE section W309.
+4/5 and 3/5 times, and two runs never printed `CHOSEN_PTR ... MATCH=1`. In a
+binary/path crossover the author binary stayed 13/0 in 4/4 runs while the
+fresh binary failed in 8/8, so the divergence tracks the compiled binary,
+not checkout path, config or ASLR noise. The reproducible datum is the chosen
+fixed-address write plus the vulnerable/fixed/safe controls, not the semantic
+dereference. Detail and hashes: PROVENANCE section W309.
 
 ### Loopback wire delivery (2026-11-26 22:56Z)
 

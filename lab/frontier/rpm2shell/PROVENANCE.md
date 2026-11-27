@@ -832,12 +832,25 @@ never printed `CHOSEN_PTR=... MATCH=1` at the liblua visit even though the
 copy-site qword was the chosen address. The author build's 13/0 and 5/5
 A-filler faults are therefore layout-specific, not a fresh-build invariant.
 
+Crossover isolates the variable: the author binary run from the fresh archive
+path returned 13/0, and three further author-path runs returned 13/0, 13/0,
+13/0 (4/4 clean). The freshly compiled binary run from the author path
+returned 9/4, then 9/4, 11/2 and 10/3; with its four fresh-path runs that is
+8/8 runs carrying failures. Both binaries are non-PIE, place the chosen qword
+at `0x4063a0`, and resolve `liblua5.2.so.0` from
+`/lib/x86_64-linux-gnu/liblua5.2.so.0`. Hash/BuildID: author
+`4abba405211155a1720a94791fe931da83fc80ffa8334715ee33f7e87d0ff7b2` /
+`a3187931`, fresh `379fc48751759b49924c45962e0212ef40b42c198a0b78c89acc7a9d5bac8149` /
+`12bafc46`. Checkout path, config and ASLR noise are excluded; the divergence
+tracks the compiled binary. Which compile-time input shifts the GC layout is
+UNKNOWN (build-path-derived strings are a candidate, not a finding).
+
 What is fresh-build reproducible is the write itself: chosen fixed address at
 `buf+0x20` under normal ASLR, with the vulnerable/fixed/safe controls. What is
-author-layout only is the subsequent live GC dereference. No useful object,
-code pointer, command or side effect; no r5. Grade unchanged: rung 3 pinned
-verbatim / rung 4 author-layout DEMONSTRATED, real-consumer witness verdict
-UNKNOWN (no rpm2shell verdict in chat through #6014, 02:46Z).
+specific to the author binary is the subsequent live GC dereference. No useful
+object, code pointer, command or side effect; no r5. Grade unchanged: rung 3
+pinned verbatim / rung 4 author-layout DEMONSTRATED, real-consumer witness
+verdict UNKNOWN (no rpm2shell verdict in chat through #6014, 02:46Z).
 
 | artifact | sha256 |
 | --- | --- |
