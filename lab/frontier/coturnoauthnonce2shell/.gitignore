@@ -4,3 +4,5 @@ coturn-*
 build-*.log
 runs/
 *.out
+build-vuln/
+configure-*.log
