@@ -1,6 +1,45 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:1x–02:2xZ — W306 rpm consumer boundary, gimpjif session reap
+
+This fold covers `21fbf8ee`, `0fd2028f` and `df4caa52` and adds explanation
+and recipes only: no generated cell, register row, grade, count, manifest,
+SVG, report or lab evidence moved. `0fd2028f` (Ruby positive `repeat_stk`
+census) already committed coherent briefs in all three docs at §02:1xZ;
+verified, no edit owed. The limbs below are author records, not witness
+verdicts.
+
+- `21fbf8ee` bounded rpm2shell's consumer list. Four source-reasoned
+  `rpmfiNewArchiveReader` construction sites reduce to two reachable consumers
+  in these builds: `rpm2archive`/`rpm2cpio` (one binary, not two) and `rpm -i`.
+  The verity signer site `sign/rpmsignverity.cc:141` was measured unavailable:
+  `build-vuln-asan/tools/rpmsign --addverity attack.rpm` prints
+  `rpmsign: --addverity: unknown option` rc 1, and the fixed build has no
+  `rpmsign` (rc 127). The Python site `python/rpmfiles-py.c:507` is not built:
+  no `rpm*.so` exists under `install-vuln`. No further lane without a different
+  configuration and new dependencies. An unmodified `bash real/run-real.sh`
+  at HEAD `02808d23` (02:10Z) returned
+  `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0`, rc 0 in 3.4 s, with the
+  vulnerable ASan `WRITE of size 64`, fixed attack rc 1, safe controls rc 0
+  and the stripped-payload / header-only `rpm -qlvp` negatives unchanged.
+  No harness, fixture or runner byte changed, no witness verdict in chat
+  through #5989. Grade unchanged:
+  rung 3 pinned verbatim / rung 4 author-layout DEMONSTRATED in real rpm
+  consumers, real-consumer witness verdict UNKNOWN, no r5. Report § W306,
+  recipe `docs/reproducibility.md` §02:1xZ.
+- `df4caa52` repaired gimpjif2shell live AppImage cleanup. The 01:39Z wake's
+  SIGTERM timeout and SIGKILL of an orphan `file-gif-load` came from cleanup
+  matching only `org.gimp.GIMP.Stable -i`, leaving plug-in and script-fu
+  children in the wake cgroup. All six `live/run-appimage*.sh` runners now
+  launch each AppRun under `exec setsid timeout -k 5 90 ...`, wait on
+  `runpid`, then `kill -9 -- "-$runpid"`; no global pkill, and the separate
+  witness tree was untouched. Verified `bash -n` on all six, `run-witness.sh`
+  29/0 with `REPLAY_PASS=6 REPLAY_FAIL=0`, `run-appimage-span.sh` 12/0 rc 0,
+  and no own orphan under `/tmp/gimpjif-appimage` in `ps`. Harness repair
+  only, grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+  NO r5. Recipe `docs/reproducibility.md` §02:1xZ.
+
 ## 2026-11-27 02:1xZ — W305 positive repeat_stk census CLOSED (Ruby)
 
 - New `lab/repro/ruby2shell-onigmo-watch-stkentries.{py,gdb}` dumps `si` and

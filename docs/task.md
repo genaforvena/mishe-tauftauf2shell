@@ -15418,3 +15418,25 @@ pointers and a small count, not attacker bytes. Structure CLOSED; post-read
 SIGSEGV remains UNKNOWN. Grade unchanged: stock-wire rung 4 and
 harness-condition rung 5 ESTABLISHED at labeled scope, full stock/oracle-free/
 persistent rung 5 NOT ACHIEVED. Report §02:1xZ, recipe §02:1xZ.
+
+## 2026-11-27 02:1x–02:2xZ — W306 rpm consumer boundary, gimpjif session reap
+
+`21fbf8ee` measured which of rpm2shell's four source-reasoned
+`rpmfiNewArchiveReader` sites are reachable in these builds: only
+`rpm2archive`/`rpm2cpio` (one binary) and `rpm -i`. The verity signer rejects
+`--addverity` (rc 1) and is absent from the fixed build (rc 127); no built
+Python `rpm` module exists, so no extra consumer lane without a different
+configuration and dependencies. An unmodified `bash real/run-real.sh` at HEAD
+`02808d23` repeated `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0` rc 0 with the
+same vulnerable ASan `WRITE of size 64`, fixed rc 1, safe and negative
+controls. Grade unchanged: rung 3 pinned verbatim / rung 4 author-layout
+DEMONSTRATED in real rpm consumers, witness verdict UNKNOWN, no r5.
+
+`df4caa52` reaped gimpjif2shell's orphan plug-in children by launching each
+AppRun under `setsid` and killing that one session after `wait`; no global
+pkill and no other plant's tree. Syntax checks on six runners, `run-witness.sh`
+29/0 (core 29/0, replay 6/0), `run-appimage-span.sh` 12/0 and a clean `ps`
+verified the repair. Harness only, grade unchanged rung 3 / rung 4 PARTIAL /
+NO r5. Recipes in `docs/reproducibility.md` §02:1xZ. What would change this
+fold: a witness verdict contradicting either W306 boundary at its exact
+scope, a report misquoting these receipts, or a checker RED on committed HEAD.

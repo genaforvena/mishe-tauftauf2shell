@@ -16422,6 +16422,61 @@ small count, not attacker bytes. Both trials exit SIGSEGV with zero watcher
 SIGSEGV events: UNKNOWN artifact, not a primitive. Structure CLOSED; full
 rung 5 NOT ACHIEVED. Detail in report §02:1xZ.
 
+## 2026-11-27 02:1x–02:2xZ — rpm consumer boundary and gimpjif runner reap
+
+### rpm2shell — W306 consumer availability and invariant replay
+
+From `lab/frontier/rpm2shell`, an unmodified `bash real/run-real.sh` at repo
+HEAD `02808d23` returned rc 0 `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0`
+in 3.4 s. Expect the same bytes as the rpm real-consumer recipe above:
+vulnerable ASan `WRITE of size 64` 0 bytes after the 1-byte region at raw
+`lib/rpmfi.cc:2242` through `rpm2cpio`/`rpm2archive` (one binary), fixed attack
+rc 1 clean, safe controls rc 0, plus the stripped-payload and header-only
+`rpm -qlvp` negatives. Raw logs live in gitignored `real/`; no harness,
+fixture or runner byte changed in W306.
+
+In the same pinned build, check the two unavailable sites from
+`lab/frontier/rpm2shell`:
+
+```sh
+build-vuln-asan/tools/rpmsign --addverity attack.rpm
+build-fixed-asan/tools/rpmsign --addverity attack.rpm
+find install-vuln -name 'rpm*.so'
+```
+
+Expect `rpmsign: --addverity: unknown option` rc 1 from the vulnerable signer,
+rc 127 for the absent fixed binary, and no `rpm*.so` path. The source sites
+`sign/rpmsignverity.cc:141` and `python/rpmfiles-py.c:507` were reasoning only
+before these measurements. No new lane exists in these builds without a
+different configuration and new dependencies; no grade change, no new witness
+verdict through #5989 and no r5. Details: `reports/frontier-rpm2shell.md`
+§ W306 and `lab/frontier/rpm2shell/PROVENANCE.md` § W306.
+
+### gimpjif2shell — W306 per-run session reap
+
+From the repo root, with the SHA-verified GIMP 3.2.8 AppImage extracted under
+`/tmp/gimpjif-appimage`, syntax-check the six changed live runners and run the
+witness and span runners:
+
+```sh
+for f in lab/frontier/gimpjif2shell/live/run-appimage*.sh; do bash -n "$f"; done
+bash lab/frontier/gimpjif2shell/run-witness.sh
+GIMPJIF_APPIMAGE_WORK=/tmp/gimpjif-appimage \
+  bash lab/frontier/gimpjif2shell/live/run-appimage-span.sh
+ps -u "$(id -u)" -o pid,args
+```
+
+Expect `TOTAL: 29 PASS / 0 FAIL` with `REPLAY_PASS=6 REPLAY_FAIL=0`, then
+`TOTAL: 12 PASS / 0 FAIL` rc 0. After the span runner, the `ps` listing shows
+no GIMP, AppRun or `file-gif-load` process under `/tmp/gimpjif-appimage`; the
+pre-existing witness process under `/tmp/gimpjif-appimage-witness-w305` is
+deliberately untouched. Each AppRun now starts under
+`exec setsid timeout -k 5 90 ...` and its runner kills only
+`kill -9 -- "-$runpid"`, never a global pkill. This is harness cleanup after
+the 01:39Z orphan held the wake cgroup: no new impact bytes, grade unchanged
+rung 3 / rung 4 PARTIAL / NO r5. Detail in
+`lab/frontier/gimpjif2shell/PROVENANCE.md` § W306.
+
 ## 2026-11-27 02:0xZ — W305 openjph verdict, gimpjif W304 gdb replay, AFFLIB W303 staging
 
 Three receipts, from the repo root. No Ruby recipe here: `31974ff6` already
