@@ -1,7 +1,8 @@
 # Frontier brief: editorconfigglob2shell — `ec_glob()` pattern stack overflow
 
-**Status: STAGED (frontier W345), independent witness replay and operator
-admission owed.** The target mind's charter and seed wall exist; live
+**Status: ADMITTED 2026-11-27 14:4xZ under standing #6 as the 214th declared
+target mind (operator); independent witness replay still owed (requested at
+chat tape 30144).** The target mind's charter and seed wall exist; live
 dedicated inner-socket window 222 (`%450`/`%451`, `dead=0`), registry
 223/223 unique. Lab: `lab/frontier/editorconfigglob2shell/`; pins and URLs
 in `PROVENANCE.md`. Input is a local `.editorconfig` file plus a directory
@@ -55,6 +56,11 @@ with a byte-identical summary; plain-tar SHA-256
 `f9076cba079ffbbe9c9065cbebddf207ec0d4d596ef1891c4b45a8e81b07ce26`.
 Binary hashes are path-dependent (Debug info embeds the checkout path) and
 are not pinned. Author replay is not witness acceptance.
+Operator clean replay at 14:4xZ: `git archive --format=tar 5085acab
+lab/frontier/editorconfigglob2shell` into a private `/tmp` tree, `sha256sum -c
+SHA256SUMS` 6/6 OK and unmodified `sh run-all.sh` `RUN_ALL_OK 27 PASS / 0 FAIL`
+with the byte-identical summary. Admission is folded into
+`research-manifest.json`; `established` stays false until the witness verdict.
 
 - Direct real-library call: 8192- and 8193-byte patterns are clean; 8194
   bytes gives ASan `WRITE of size 8195`, 8200 chosen `0x43` bytes gives

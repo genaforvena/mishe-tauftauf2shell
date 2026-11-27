@@ -4,18 +4,18 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 213,
+      "value": 214,
       "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6 and openjphcleanup2shell admitted 2026-11-27 under standing #6 and afflibpage2shell admitted 2026-11-27 under standing #6 and lzxwindow2shell admitted 2026-11-27 under standing #6 and sqlitesession2shell admitted 2026-11-27 under standing #6 and lwipmqtt2shell admitted 2026-11-27 under standing #6 sailpsd2shell (05:3xZ), libeventsockaddr2shell (06:1xZ), nsdsvcb2shell (07:2xZ), expatparsebuf2shell (07:4xZ), berryformat2shell (09:0xZ), coturnoauthnonce2shell (09:4xZ), tcpreplayservices2shell (10:0xZ), libiscsiluns2shell (10:4xZ), sippauth2shell (11:0xZ), svxlinkdirectory2shell (11:3xZ), libssh-sftp-longname2shell (12:5xZ), samtoolsrg2shell (13:2xZ),",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 210,
+      "value": 211,
       "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ and openjphcleanup2shell admitted 01:3xZ and afflibpage2shell admitted 02:2xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. and lzxwindow2shell admitted 02:4xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here. sqlitesession2shell admitted 03:2xZ on 2026-11-27 under standing #6. lwipmqtt2shell admitted 04:0xZ on 2026-11-27 under standing #6. sailpsd2shell admitted 05:3xZ, libeventsockaddr2shell admitted 06:1xZ, nsdsvcb2shell admitted 07:2xZ, expatparsebuf2shell admitted 07:4xZ, berryformat2shell admitted 09:0xZ, coturnoauthnonce2shell admitted 09:4xZ, tcpreplayservices2shell admitted 10:0xZ, libiscsiluns2shell admitted 10:4xZ, sippauth2shell admitted 11:0xZ, svxlinkdirectory2shell admitted 11:3xZ, libssh-sftp-longname2shell admitted 12:5xZ, samtoolsrg2shell admitted 13:2xZ,",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 210,
-      "basis": "Evidence-register rows; one row per target, with its rung cells and boundary. lwipmqtt2shell row added 04:0xZ under standing #6. SailPsd2Shell row added 05:3xZ under standing #6. LibeventSockaddr2Shell row added 06:1xZ under standing #6.Nsdsvcb2Shell row added 07:2xZ under standing #6.ExpatParseBuf2Shell row added 07:4xZ under standing #6.BerryFormat2Shell row added 09:0xZ under standing #6.CoturnOauthNonce2Shell row added 09:4xZ under standing #6.TcpreplayServices2Shell row added 10:0xZ under standing #6.LibiscsiLuns2Shell row added 10:4xZ under standing #6.SippAuth2Shell row added 11:0xZ under standing #6.SvxLinkDirectory2Shell row added 11:3xZ under standing #6.LibsshSftpLongname2Shell row added 12:5xZ under standing #6.SamtoolsRg2Shell row added 13:2xZ under standing #6.LibstropheScram2Shell row added 14:0xZ under standing #6.",
+      "value": 211,
+      "basis": "Evidence-register rows; one row per target, with its rung cells and boundary. lwipmqtt2shell row added 04:0xZ under standing #6. SailPsd2Shell row added 05:3xZ under standing #6. LibeventSockaddr2Shell row added 06:1xZ under standing #6.Nsdsvcb2Shell row added 07:2xZ under standing #6.ExpatParseBuf2Shell row added 07:4xZ under standing #6.BerryFormat2Shell row added 09:0xZ under standing #6.CoturnOauthNonce2Shell row added 09:4xZ under standing #6.TcpreplayServices2Shell row added 10:0xZ under standing #6.LibiscsiLuns2Shell row added 10:4xZ under standing #6.SippAuth2Shell row added 11:0xZ under standing #6.SvxLinkDirectory2Shell row added 11:3xZ under standing #6.LibsshSftpLongname2Shell row added 12:5xZ under standing #6.SamtoolsRg2Shell row added 13:2xZ under standing #6.LibstropheScram2Shell row added 14:0xZ under standing #6.EditorConfigGlob2Shell row added 14:4xZ under standing #6.",
       "source": "docs/results.md"
     },
     "independently_established_findings": {
@@ -3283,6 +3283,22 @@
         "reports/libstrophescram2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "EditorConfigGlob2Shell",
+      "rungs": {
+        "R1": "✓",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "✓",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 14:4xZ under standing #6 as the 214th declared target mind; staged two-pane window 222 adopted as-is (registry 223/223 unique names, panes %450/%451 dead=0, exactly one editorconfigglob2shell entry; no duplicate mind: CVE-2026-40489 / GHSA-97xg-vrcq-254h ec_glob stack write, distinct from every admitted target).** Operator clean replay of `git archive --format=tar 5085acab lab/frontier/editorconfigglob2shell` (plain-tar SHA-256 `f9076cba079ffbbe9c9065cbebddf207ec0d4d596ef1891c4b45a8e81b07ce26`): 6/6 pins matched, four rebuilt GCC consumers, unmodified `sh run-all.sh` `RUN_ALL_OK 27 PASS / 0 FAIL`, summary `2de80df12d64a14d968b7183f7daf059eec107b1468b0c632b7858e26f5b074c` byte-identical. R1/R2/R3 ✓ and R4 ✓ at the labeled local-file/public-API lab scope: ASan `WRITE of size 8201` direct at `ec_glob.c:100`, path-dependent `WRITE of size 10212` through the real `editorconfig_parse()` caller, twelve chosen `0x43` bytes at `l_pattern+8188..+8199` under GDB with a live saved rip untouched; fixed and safe clean; the plain no-canary file case survives (preserved negative). R5 —: local file and directory path only, no socket, wire request, marker or command; independent witness replay requested (chat tape 30144) and still owed.",
+      "reports": [
+        "reports/frontier-editorconfigglob2shell.md",
+        "reports/editorconfigglob2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
