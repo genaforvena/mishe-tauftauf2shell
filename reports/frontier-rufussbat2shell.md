@@ -1,12 +1,14 @@
 # Frontier brief: rufussbat2shell — Rufus remote SBAT heap overflow
 
-Status 2026-11-27 W369: **STAGED for operator admission and independent witness
-replay**. Stage commit `0415fa78`; clean `git archive --format=tar` SHA-256
+Status 2026-11-27 W369: **ADMITTED 21:1xZ as the 221st declared target mind**;
+window 229 adopted as-is. Operator clean replay at 21:07Z of `0415fa78`: 16/16
+pins and `RUN_ALL_OK 11 PASS / 0 FAIL`; independent witness replay owed. Grade
+R3 confirmed on the pinned parser; R4 **LIMITED** to a synthetic adjacent victim
+in a no-PIE/no-canary lab build. R5 NOT CLAIMED. Staging commit `0415fa78`;
+clean `git archive --format=tar` SHA-256
 `178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`
-replayed 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. Grade R3 confirmed on the
-pinned parser; R4 **LIMITED** to a synthetic adjacent victim in a no-PIE/no-canary
-lab build. R5 NOT CLAIMED. Inner-socket window 229 (`%464`/`%465`, dead=0) is
-live and registered with two panes.
+replayed 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. Inner-socket window 229
+(`%464`/`%465`, dead=0) is live and registered with two panes.
 
 
 ## Verified ground truth (claim, not assumed)
@@ -48,7 +50,8 @@ sbat_list = calloc(num_entries + 1, sizeof(sbat_entry_t));
 `src/rufus.h:583-587` defines the x86-64 layout as an 8-byte `char* product`
 followed by a 4-byte `uint32_t version` and 4 bytes of alignment padding, so
 `sizeof(sbat_entry_t) == 16`. With no LF bytes, `num_entries` remains 1 and the
-allocation is 32 bytes: two usable entries plus one zero terminator.
+allocation is 32 bytes: exactly two 16-byte slots. Entries 0 and 1 fit; the
+entry-2 NULL-product terminator is already out of bounds.
 
 The parse loop at `src/parser.c:1651-1671` writes every nonzero-version line:
 
@@ -65,9 +68,9 @@ farther. A 60-line, 350-byte CR-only file stays below the real caller's 1 KB
 limit while driving 58 entries out of bounds.
 
 The fixed function converts CR before counting LF. The same 60-line file then
-allocates 61 entries and parses cleanly. `src/stdlg.c:1711-1724` performs the
-real download/call/terminator-loop sequence; `src/hash.c:2223-2228` later walks
-the list with `strcmp`.
+allocates 62 slots and parses cleanly, with the entry-60 terminator in bounds.
+`src/stdlg.c:1711-1724` performs the real download/call/terminator-loop sequence;
+`src/hash.c:2217-2223` later walks the list with `strcmp`.
 
 
 ## Local experiment

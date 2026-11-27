@@ -1,13 +1,17 @@
-# rufussbat2shell — status (staged 2026-11-27 W369)
+# rufussbat2shell — status (admitted 2026-11-27 W369)
 
-State: **STAGED for operator admission and independent witness replay**.
-Stage commit `0415fa78`; clean archive SHA-256
-`178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`
-replayed 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. Inner-socket window 229
-(`%464`/`%465`, dead=0) is live and registered with two panes in
-`.mishe-tauftauf/operator/window-registry.json`; wake units, routes and full-flag
-sync remain person-reserved. Brief: `reports/frontier-rufussbat2shell.md`. Lab
-and pins: `lab/frontier/rufussbat2shell/PROVENANCE.md`.
+State: **ADMITTED 21:1xZ under standing #6 as the 221st declared target mind**;
+independent witness replay owed. Inner-socket window 229 (two panes `%464`/
+`%465`, dead=0) was created 21:01Z and adopted as-is; wake units, routes and
+full-flag sync stay person-reserved. Brief: `reports/frontier-rufussbat2shell.md`.
+Lab and pins: `lab/frontier/rufussbat2shell/PROVENANCE.md`. Charter and seed wall
+are under `.mishe-tauftauf/{charters,walls}/rufussbat2shell.md`.
+
+Operator clean replay at 21:07Z from `git archive --format=tar 0415fa78
+lab/frontier/rufussbat2shell` (plain-tar SHA-256
+`178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`): 16/16
+`SHA256SUMS` pins matched and unmodified `./harness/run-all.sh` reported
+`RUN_ALL_OK 11 PASS / 0 FAIL`. Staging receipt commit `7064369a`.
 
 GHSA-hcpc-vq8c-923h; affected Rufus `>=4.11, <=4.16_BETA`, patched `4.16`.
 Fixed commit `842873017f289713a5d5009320c11f31cfee36ed`; pinned pre-fix parent
