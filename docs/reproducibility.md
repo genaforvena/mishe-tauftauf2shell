@@ -44,7 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; witness owed) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:false`; full procedure in §18:0xZ |
+| PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; W365 ESTABLISHED AS LABELED) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:true` at the W365 scope (`11163cef`); full procedure in §§18:0xZ/18:2xZ |
 | LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; W364 ESTABLISHED AS LABELED at pinned-sink scope) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. W364 replayed clean archive `4678a157` (TAR `06329456…`) twice at 5/0 with read-only GDB chosen `0x31` bytes; ESTABLISHED AS LABELED at the pinned-sink harness scope, grade-neutral, NO r5, no live ZFILE wire; full procedure in §17:2xZ |
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
@@ -20447,6 +20447,79 @@ count 149 are operator-owned. Live loopback ZFILE remains owed. Detail:
 `lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
 `reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.
 
+## 2026-11-27 18:2xZ — Ruby W354 branch matrix; W365 verdicts
+
+### Ruby2Shell W354 — mixed parity on 3.3.13 / 4.0.9 with patched 3.3.14
+
+The three gitignored plain builds come from official tarballs: 3.3.13
+(`af48f08f21`) SHA-256 `6bd764359992373a96556b45fb7dfe6b6170da34a0a2fd0b7e1be7932fea982b`,
+4.0.9 (`3e93b23afc`) `a8057adb39f51ad6dc3106237504c93dd792bb515837b4fe7817ae21ed7e51f4`
+and patched 3.3.14 (`f4c37f481b`) `e24ef6d9…` (full pin in §17:0xZ). From the
+repository root, with those builds under `lab/build/plain/`:
+
+```sh
+sha256sum lab/repro/ruby2shell-mixed-eol-branches.sh \
+  lab/repro/ruby2shell-mixed-eol-ruby-3.3.13-plain.gdb \
+  lab/repro/ruby2shell-mixed-eol-ruby-4.0.9-plain.gdb
+bash lab/repro/ruby2shell-mixed-eol-branches.sh
+```
+
+Expect driver SHA-256 `eae5b98f1698f2dc89e0299b84375bfe12f1e74ebb7f8326f1ace0c000cf7248`,
+GDB scripts `20c9b2f72474653077e7eee4da1b48ea96dfacb1e3fdf4947bc1444138ec90ab`
+(3.3.13) and `e26d63e425b201dfe1d0cf3ca4e86912c1255b538cc4fa580e15ea8853932f53`
+(4.0.9). For each vulnerable build and N = 27/43/59 expect rc 0,
+`writes=1 reads=1` and `0 bytes after a block of size 72/88/104`; all three
+patched 3.3.14 arms must print `writes=0 reads=0`. Fresh unsanitized arms
+are layout-dependent: the author reported 1/9 aborts on 3.3.13 and 3/9 on
+4.0.9 in a bounded 3-rep replay (3/12 per vulnerable build over all
+sweeps), with even-N=28 and every control arm rc 0. GDB must print
+`BEFORE ... capa=48 ... old=0x21` on 3.3.13 and `old=0x71` on 4.0.9, then
+`AFTER used=49 ... new=0x53` on both. Raw logs are gitignored under
+`lab/build/evidence/casemap-chain/w354/`; rebuild commands for the plain
+branches are in the Ruby reports, and no claim relies on those binaries
+being present in a fresh checkout. No wire request, chosen attacker byte
+or command: rung 3 only, grade unchanged. Detail:
+`reports/ruby2shell-investigation.md` §18:1xZ and the driver header.
+
+Docs replayed the committed driver in the working checkout with the
+gitignored plain builds present: 9/9 valgrind arms as above; 2/12 fresh
+plain aborts (3.3.13 N=59 `malloc(): invalid next size (unsorted)`, 4.0.9
+N=43 `munmap_chunk(): invalid pointer`), all other vulnerable arms and all
+3.3.14 arms rc 0; GDB rc 0 on both with `0x21`/`0x71` → `0x53`,
+`capa=48 used=49`. The 2/12 mix differs from the author's 3/12 per build;
+it is preserved as layout dependence, not retried into a match.
+
+### PyMuPDFCallout2Shell W365 — ESTABLISHED AS LABELED (no new harness)
+
+The §18:0xZ recipe is unchanged. Offer #6713's witness used private archive
+SHA `086cfc5f…` (matching the operator's) with 10/10 pins, two clean
+extractions and two unmodified `run-all.sh` runs at 5 PASS / 0 FAIL rc 0
+each; read-only GDB confirmed the chosen saved-RIP bytes and that the
+fault at wrapper `+244` is the `ret`, with no transfer, marker, command or
+wire. Benign `0x41200000` first crashes at count 7 (documentation NIT:
+the brief says 8), the chosen fill at count 3 stays safe, and wheel
+identity is by VersionBind rather than a published hash. Verdict scope:
+real-Python-API / published-wheel / read-only-GDB only, grade-neutral,
+R4 LIMITED, NO r5. `11163cef` moved the row flag to `established:true`
+and the generated count to 150. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w365/detail.md` (gitignored site
+artifact, regenerated by the witness, not a repo file).
+
+### Gimpjif2Shell W353 — W365 verdict note (no new harness)
+
+The §18:0xZ / §17:4xZ JIF and runner recipe is unchanged. The 18:27Z
+witness verdict for #6681/#6716 (commit `83fd02e5`) used private archive
+`3b5a2eee…`, matched four pins plus the SHA256-verified AppImage, and
+reproduced the mapped GNU-hash read at `pc=0x7ffff7fd12e1` with
+`target=rdx=P1=0x5555556c0240`, `word=93824993722944` and 46 heap hits
+per run in two unmodified rc-0 replays before the terminal deref fault.
+No shim, observer memory write, chosen-address write, marker or command.
+NITs: exact `idx`/`delta`/hit counts drift with layout, and W354's fixed
+control and symbolization were read but not replayed. ESTABLISHED AS
+LABELED at the pinned live-loader / read-only-observer scope,
+grade-neutral, NO r5; operator `9065ac1d` folded the boundary into the
+already-established row (count stays 150). Docs did not run the AppImage.
+
 ## 2026-11-27 18:0xZ — Ruby mixed parity, gimpjif W354 consumer, PyMuPDF admission
 
 ### Ruby2Shell W353 — mixed-parity size-LSB write on EOL 3.2.11 (CLOSED)
@@ -20564,7 +20637,8 @@ by `run-all.sh` and deliberately excluded from `SHA256SUMS`. The wheel is
 not ASan-instrumented: R3 rests on GDB inspection plus the deterministic
 crash. Chosen `0x4343434343434343` is noncanonical and `ret` faults
 without a transfer: R4 LIMITED at the real-Python-API lab scope, R5 NOT
-CLAIMED, `established:false` until a witness verdict.
+CLAIMED; `established:false` at that limb, W365 ESTABLISHED AS LABELED
+folded by `11163cef` (§18:2xZ).
 
 Operator clean replay used TAR SHA-256
 `086cfc5f3c2412349907ed89f4344c48a07b45298063c0c42b0c611539e9b867`

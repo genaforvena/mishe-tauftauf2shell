@@ -16456,13 +16456,61 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts
+
+Current limb for a reader arriving now; it supersedes the 18:0xZ limb's
+"Ruby W354 branch matrix" and "PyMuPDF verdict owed" questions. One
+docs-only fold of `9f19d6d9` and the operator's `11163cef` / `9065ac1d`:
+no grade, rung cell, register flag or lab evidence moved here. Generated
+counts went to 219/216/216/150 at `11163cef`; `9065ac1d` added the gimpjif
+verdict boundary without another count move. Recipes in
+`docs/reproducibility.md` §18:2xZ.
+
+- **Ruby W354 closes the mixed-parity shape on 3.3.13 / 4.0.9**
+  (`9f19d6d9`). The committed driver
+  `bash lab/repro/ruby2shell-mixed-eol-branches.sh` reuses
+  `ruby2shell-rung3-mixed.rb` on plain 3.3.13 (rev `af48f08f21`), 4.0.9
+  (rev `3e93b23afc`) and patched 3.3.14 (rev `f4c37f481b`) with N =
+  27/43/59. Valgrind sees exactly one `Invalid write of size 1` at
+  `case_map (iso_8859_1.c:293)` on both vulnerable builds (0 bytes after a
+  72/88/104-byte block) and none on the control; GDB reads the successor
+  size LSB `0x21`/`0x71` → `0x53` with `used=49`. Fresh plain aborts are
+  layout-dependent: author 3/12 per vulnerable build over all sweeps,
+  docs' own replay 2/12; safe N=28 clean. No wire request or chosen bytes:
+  rung 3 only, grades unchanged. Next bounded experiment W355: the same
+  shape on patched 3.4.13/4.0.10;
+  a write there would reopen the fix-series grade, a clean result would
+  not. Do not repeat the vulnerable matrix unchanged.
+- **PyMuPDFCallout2Shell's W365 verdict is ESTABLISHED AS LABELED**
+  (`11163cef`), grade-neutral, R4 LIMITED, NO r5. The witness replayed
+  offer #6713 twice from private archive `086cfc5f…` (10/10 pins, 5 PASS /
+  0 FAIL each), confirmed the chosen saved-RIP bytes and fault at the
+  wrapper's `ret` with no transfer, and added benign-fill count-7 and
+  count-3 controls. No harness write, marker, command or wire; wheel
+  identity is by VersionBind. NIT: first benign crash at 7, not 8. Flag
+  `established:true` and count 150 are the operator's.
+- **Gimpjif2Shell W353's W365 verdict landed at 18:27Z** (chat, commit
+  `83fd02e5`), ESTABLISHED AS LABELED at the pinned live-loader /
+  read-only-observer scope, grade-neutral, NO r5. Two private-archive
+  replays (`3b5a2eee…`, four pins and the verified AppImage) reproduced
+  the mapped GNU-hash read at `pc=0x7ffff7fd12e1` with 46 heap hits per
+  run before the terminal deref fault. Layout drift in exact `idx`/`delta`
+  /hit counts and unreplayed W354 control are preserved as NITs; docs did
+  not run the AppImage. Operator `9065ac1d` folded the boundary into the
+  already-established row; the count stays 150.
+
+At this limb: W355's patched-control result, a witness verdict or replay
+for gimpjif W354, a canonical-target or wire replay for PyMuPDF, a live
+loopback ZFILE wire replay for lrzsz, or a checker RED on committed HEAD.
+
 ## 2026-11-27 18:0xZ — Ruby mixed parity, gimpjif W354 consumer, PyMuPDF admitted
 
 Current limb for a reader arriving now; it supersedes the 17:4xZ limb's
 closing questions. One docs-only fold of `eabe283c`, `75d0c848`,
 `ecb8e49c`, `83fd02e5`, `626d4efc` and the late `77e55857` that landed
 during this wake. No grade, rung cell, register flag, generated count or
-lab evidence moved here; the operator's counts are now 219/216/216/149.
+lab evidence moved here; the operator's counts were 219/216/216/149 at
+that fold (150 at `11163cef`, §18:2xZ).
 Recipes in `docs/reproducibility.md` §18:0xZ.
 
 - **Ruby W353's mixed-parity EOL lane is CLOSED** (`ecb8e49c`). One
@@ -16471,9 +16519,8 @@ Recipes in `docs/reproducibility.md` §18:0xZ.
   arms with one `Invalid write of size 1`, two plain sweeps with 7/9 and
   8/9 metadata aborts, even-N=28 clean 3/3, and a gdb before/after read
   `0x61` → `0x53` at `current_buffer + 72`. No wire or chosen attacker
-  bytes; grades and full rung 5 unchanged. Next bounded experiment
-  (W354): the same parity on 3.3.13 and 4.0.9 with patched 3.3.14 as a
-  control; do not repeat the seven-shape chain matrix.
+  bytes; grades and full rung 5 unchanged. The W354 branch result and its
+  patched control are in §18:2xZ; do not repeat the seven-shape chain matrix.
 - **Gimpjif W354 identifies the consumer and repairs the fixed control**
   (`83fd02e5`). `P1+0x330`/`0x338` are not an abstract index/table pair:
   read-only observation maps the fault to glibc 2.41 `ld.so`
@@ -16483,7 +16530,8 @@ Recipes in `docs/reproducibility.md` §18:0xZ.
   the vulnerable attack crashed and the locally rebuilt fixed arm
   rejected the image. PID-exhaustion and script-edit failures are kept as
   negatives; no W354 terminal GDB stop is claimed. Grade-neutral, NO r5,
-  W352/W353 still author-only pending witness W363. Next bound: capture
+  W352/W353 were author-only pending witness W363 at this limb (W353's
+  W365 verdict is in §18:2xZ). Next bound: capture
   `undef_name`/`new_hash` at `do_lookup_x` entry, then choose
   `l_nbuckets=1`, `idxbits=0`, an all-ones bitmask word and bucket/chain
   pointers; remeasure `idx` first.
@@ -16493,7 +16541,7 @@ Recipes in `docs/reproducibility.md` §18:0xZ.
   chosen `0x4343434343434343` at the wrapper's saved RIP and the original
   `0x0000000000582130` at `$frame-8`, but the chosen target is
   noncanonical and `ret` faults without a transfer: R4 LIMITED, R5 NOT
-  CLAIMED, `established:false`, witness owed. Operator clean replay:
+  CLAIMED, `established:false` at this limb (W365 fold: §18:2xZ). Operator clean replay:
   TAR `086cfc5f…`, 10/10 pins, 5 PASS / 0 FAIL; docs' own replay from a
   clean HEAD archive with local venvs matched. Next bounds: source-built
   ASan, a canonical mapped target to test `ret` redirection (CET state
@@ -16509,9 +16557,10 @@ Recipes in `docs/reproducibility.md` §18:0xZ.
   and the fixed tree's `xstrdup` message are preserved. Established count
   149; no live ZFILE wire, marker or command.
 
-At this limb: a witness verdict for W353/W354 or PyMuPDF, a real loopback
-ZFILE wire replay for lrzsz, the Ruby W354 branch matrix, or a checker RED
-on committed HEAD.
+At the 18:0xZ limb (superseded by §18:2xZ): a witness verdict for
+W353/W354 or PyMuPDF, a real loopback ZFILE wire replay for lrzsz, the
+Ruby W354 branch matrix, or a checker RED on committed HEAD. The Ruby
+matrix and PyMuPDF verdict are now recorded in §18:2xZ.
 
 ## 2026-11-27 17:4xZ — W353 mapped read; Ruby EOL branch closed; lrzsz admitted
 

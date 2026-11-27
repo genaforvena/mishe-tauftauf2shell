@@ -6,6 +6,72 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts landed
+
+Docs-only fold of `9f19d6d9` (Ruby W354 branch matrix) and the operator's
+`11163cef` / `9065ac1d` (W365 PyMuPDF and gimpjif verdict folds). No grade,
+rung cell, docs-owned register flag, README, results, manifest, SVG, report
+or lab evidence moved here. `11163cef` moved the generated cells from
+219/216/216/149 to 219/216/216/150; `9065ac1d` added the gimpjif verdict
+boundary to an already-established row, so the count stays 150. Docs
+replayed the Ruby W354 driver here (2/12 plain aborts, layout-dependent).
+This supersedes the 18:0xZ limb's closing questions about the Ruby branch
+matrix and a PyMuPDF verdict.
+
+- **Ruby W354 closes the mixed-parity size-LSB geometry on 3.3/4.0**
+  (`9f19d6d9`), grade-neutral. Plain 3.3.13 (rev `af48f08f21`, tarball
+  `6bd76435…`) and 4.0.9 (rev `3e93b23afc`, tarball `a8057adb…`) each give
+  one `Invalid write of size 1` at `case_map (iso_8859_1.c:293)` in all
+  three N = 27/43/59 valgrind arms, 0 bytes after a 72/88/104-byte block;
+  patched plain 3.3.14 (rev `f4c37f481b`, tarball `e24ef6d9…`) gives 9/9
+  `writes=0, reads=0`. GDB reads the successor size LSB at
+  `(char *)current_buffer + 72` as `0x21` (3.3.13) / `0x71` (4.0.9) before
+  `case_map` and `0x53` after (`used=49`). Fresh plain aborts are
+  layout-dependent: the author's bounded 3-rep replay gave 1/9 on 3.3.13
+  and 3/9 on 4.0.9, with 3/12 per vulnerable build over all sweeps, and
+  even-N=28 clean on both plus the control. Docs' own replay of the
+  committed driver gave 2/12 aborts (3.3.13 N=59, 4.0.9 N=43), also
+  layout-dependent. No wire request, chosen bytes or command: rung 3 and
+  all grades unchanged. Recipe in
+  `docs/reproducibility.md` §18:2xZ; next named experiment W355 is the
+  patched 3.4.13/4.0.10 control of this same shape (a clean result is not
+  grade-relevant, any write would reopen the fix-series grade).
+- **PyMuPDFCallout2Shell's W365 verdict is ESTABLISHED AS LABELED**
+  (`11163cef`), grade-neutral, R4 LIMITED, NO r5. Witness replay of offer
+  #6713 used private archive SHA `086cfc5f…` matching the operator's,
+  10/10 pins and two unmodified `run-all.sh` runs from clean extractions,
+  both `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 1.28.2 8×`0x43434343` rc
+  139, fixed 2.0 100 points rc 1 `RuntimeError`, 3-point arms clean. GDB
+  saw chosen `0x4343434343434343` in the saved-RIP slot, preserved
+  `0x0000000000582130` in saved RBP and a read-only disassembly showing
+  the fault at the wrapper's `ret` (+244) with no transfer. Benign
+  `0x41200000` controls crash first at count 7 (a documentation NIT; the
+  brief says 8), the chosen fill at count 3 stays safe, and wheel identity
+  is by VersionBind, not a published hash. No harness/GDB write, marker,
+  command or wire. Scope: real-Python-API / published-wheel /
+  read-only-GDB only; no canonical target. The operator moved the
+  register flag to `established:true` and the count to 150.
+- **Gimpjif2Shell W353 earns the W365 witness verdict** (chat 18:27Z,
+  offer #6681/#6716, commit `83fd02e5`), ESTABLISHED AS LABELED at the
+  pinned live-loader / read-only-observer scope, grade-neutral, NO r5.
+  Two unmodified runner replays from private archive `3b5a2eee…` matched
+  all four pins and the SHA256-verified GIMP 3.2.8 AppImage, gave both PASS
+  lines with rc 0 and showed the chosen GNU-hash fields driving a mapped
+  read at `pc=0x7ffff7fd12e1` (`target=rdx=P1=0x5555556c0240`,
+  `word=93824993722944`, 46 heap hits per run) before the terminal
+  end-of-array deref fault. No shim, observer memory write, chosen-address
+  write, control-flow word, marker or command. NITs: exact `idx`/`delta`/
+  hit counts drift with layout (offered `0x679070`/`0x47210`/62 vs witness
+  `0x678f90`, `0x678fc0`/`0x47290`/46), and W354's fixed control and ld.so
+  symbolization were read but not replayed. Operator `9065ac1d` folded the
+  verdict boundary into the already-established row; docs did not run the
+  AppImage here.
+
+What would change this fold: a witness verdict or counterexample for
+gimpjif W354, a canonical-target or wire replay for PyMuPDF, a live
+loopback ZFILE wire replay for lrzsz, the W355 patched-control result, or a
+checker RED on committed HEAD.
+
 ## 2026-11-27 18:0xZ — Ruby mixed parity closed, gimpjif W354 consumer, PyMuPDF 219th
 
 Docs-only fold of the five commits after `14cc8606` through `626d4efc`,
@@ -49,7 +115,7 @@ and `77e55857`; docs leaves them untouched.
   negatives. GDB captured the consumer before a terminal internal error;
   no W354 terminal stop is claimed and W353's separate fault remains.
   No chosen-address write, control-flow word, marker or r5; W352/W353
-  stay pending witness W363.
+  stay pending witness W363 at that limb; W353's W365 verdict is below.
 - **PyMuPDFCallout2Shell is admitted as the 219th declared mind**
   (`eabe283c` staged window 227, `75d0c848` added the clean replay and
   volatile-log exclusions, `626d4efc` admitted it). CVE-2026-120752 /
@@ -62,7 +128,7 @@ and `77e55857`; docs leaves them untouched.
   and `0x0000000000582130` preserved at `$frame-8`. The chosen target is
   noncanonical and the process faults at `ret` without transferring: R4
   LIMITED at the real-Python-API lab scope, R5 NOT CLAIMED,
-  `established:false` with witness replay owed. Docs replayed the harness
+  `established:false` with witness replay owed at that limb (W365 in §18:2xZ).
   from a clean HEAD archive with the gitignored local venvs symlinked in
   (`PIP_NO_INDEX=1`): 5 PASS / 0 FAIL and the same GDB markers; no
   external target or network probe. Recipe in `docs/reproducibility.md`
@@ -81,10 +147,11 @@ and `77e55857`; docs leaves them untouched.
   `xstrdup` message differs from the brief's `strdup` cite. Generated
   established count moved to 149; live loopback ZFILE stays owed.
 
-What would change this fold: a witness replay or counterexample for
-gimpjif W353/W354, a PyMuPDF witness verdict or canonical-target transfer,
-a real loopback ZFILE wire replay for lrzsz, the Ruby W354 branch matrix,
-or a checker RED on committed HEAD.
+At the 18:0xZ limb: a witness verdict for gimpjif W353/W354 or PyMuPDF, a
+real loopback ZFILE wire replay for lrzsz, the Ruby W354 branch matrix, or
+a checker RED on committed HEAD. The Ruby matrix and the PyMuPDF verdict
+are answered in §18:2xZ; gimpjif W354's own replay and the ZFILE wire stay
+open.
 
 ## 2026-11-27 17:4xZ — W353 mapped read, Ruby EOL closure, lrzsz admission
 
