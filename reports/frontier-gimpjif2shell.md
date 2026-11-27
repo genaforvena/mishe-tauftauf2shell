@@ -1900,3 +1900,28 @@ rung 4 PARTIAL chosen bytes / NO r5. Lane CLOSED: the live distance is
 layout-dependent and the libz/ld-linux fault precedes the only reachable
 pointer field. Logs, JIFs and hashes: W344 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W345 loader fault instruction identified; mapped-pointer attempts CLOSED (2026-11-27, 14:41Z wake)
+
+The W343 no-shim flood's terminal fault in ld-linux was previously only
+"unsymbolized". A new read-only GDB script disassembled it: the PC
+`0x7ffff7fd1327` is `mov 0x28(%rax),%rbx`, immediately after
+`mov (%r14,%rax,8),%rax` loads a pointer from a heap-resident array with
+loop index 0. `rax=0x4d4d…` at the fault, so the overflow's chosen bytes
+occupy a live pointer slot that the dynamic loader dereferences. The libz
+return address is just after `call memcpy@plt` in the inflate window-copy
+path. The array's offset from `indexes` varied `0x46e80`–`0x47210` across
+runs, and `ARR[0..15]` were all chosen bytes in the flood. This is a stronger
+instruction-level description of the W343 fault, not a chosen-address write:
+0x4d4d… is unmapped and the dereference faults on its first field read.
+
+Attempts to place a **mapped** heap pointer (`0x5555556c0240`) in that slot
+all failed to make the loader dereference it: a 291 KiB span inflated and
+returned without a heap dereference hit; an 786 KiB `0x5a` flood faulted in
+libz SIMD instead; a single-offset `0x4d` patch missed the array because the
+distance shifted; and a layout-tolerant sweep repeating the pointer every 8
+bytes over `0x46c00..0x47400` produced no dereference hit and crashed after
+the GDB return. No chosen-address write, control flow, marker or command
+followed. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes / NO r5. Evidence, script hashes and the preserved negatives: W345
+section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

@@ -2953,3 +2953,80 @@ fault precedes the only pointer field this method can reach. Do not repeat
 these four probes or the `minimal-spec` patches at the measured offsets;
 the next advance still needs a chosen-pointer dereference by a no-shim
 method or a benign command side effect on a live target.
+
+## W345 loader fault instruction identified; mapped-pointer attempts CLOSED (2026-11-27, 14:41Z wake)
+
+The only unread inbox item was witness verdict #6517, already folded in W344;
+`mishe inbox touch gimpjif2shell` was run and nothing is owed to the witness.
+All runs below use the unmodified `live/run-appimage-min340.sh` (SHA-256
+`b047c40e…`), the SHA-256SUMS-verified GIMP 3.2.8 AppImage and the W343 JIF
+`8e0bc65d…` or regenerated `minimal-spec` JIFs; the runner strips every
+gimpjif2shell preload line from AppRun, so these are no-shim runs.
+
+### The terminal fault is a loader pointer-array dereference
+
+New read-only GDB command file `live/gdb-w345-faultinsn.cmd` (final SHA-256
+`fe654db3d4559b9bf1ce291a4e978ce485a7e4f5a706fbb9d53baacbd913d84b`)
+disassembles the signal PC and dumps the loop array. At the W343 flood's
+`pc=0x7ffff7fd1327` the instructions are `mov 0xc0(%rsp),%rax` (loop index),
+`mov (%r14,%rax,8),%rax` (load one 8-byte pointer from a heap array) and the
+faulting `mov 0x28(%rax),%rbx` (dereference field +0x28 of that pointer).
+`LOOPIDX=0`; the four register dumps show `rax=0x4d4d4d4d4d4d4d4d`, i.e. the
+pointer slot itself holds chosen bytes, and the loader dereferences it.
+The libz return address (`0x…a904e6`, file offset `0xc4e6`, immediately after
+`call memcpy@plt` at `0xc4e1`) places this loop inside the lazy PLT
+resolution reached from `inflate()`'s window-copy path. This replaces the
+older "unsymbolized ld-linux fault" description with an instruction-level
+one; it does **not** establish a chosen-address write: 0x4d4d… is unmapped,
+so the dereference faults at its first field read.
+
+The heap array's distance from `indexes` is not a constant. Measured
+`ARRBASE−idx`: `0x47210` twice (logs `w345-faultinsn-*`, `w345-array-*`),
+`0x47170` (`w345-ptr4d-gdb.log`) and `0x46e80` (`w345-eq-gdb.log`), a
+0x390 spread even with equal-length JIF paths. `ARR[0..15]` were all
+`0x4d4d…` in the flood runs, confirming the whole slot range is inside the
+overflow.
+
+### Mapped-pointer attempts (all negative)
+
+Pinned target `0x5555556c0240` is inside the mapped `[heap]` range in these
+GDB runs. Four JIF variants, all with `data_size=4` and
+`avail_out=0x80000002`:
+
+- `minimal-spec 291352 5a 291344:40026c5555550000` (JIF SHA-256
+  `58a4556c…`). First run with the dereference breakpoint installed at
+  GDB startup (script SHA-256 `f7a06e25…`) stalled during loader startup and
+  never reached the pinned inflate — a tooling negative. The corrected
+  script installs that breakpoint only at the pinned inflate (intermediate
+  SHA-256 `1fc5f115…`, final heap-only filter `fe654db3…`): inflate ran to
+  POST/RETURN with no heap-range dereference hit; four resolver hits at
+  `0x…fd132b` used ordinary loader addresses. Log `w345-ptr-short-gdb.log`
+  SHA-256 `b816edd9…`; the plug-in faulted after the GDB return, outside the
+  in-GDB signal handler.
+- `minimal-spec 786432 5a 291344:40026c5555550000` (JIF `7750374a…`):
+  no resolver hit; fault moved to libz SIMD `movups %xmm5,-0x20(%r9)` at
+  `pc=0x7ffff7a8fbe5`, showing the filler byte also changes the path.
+- `minimal-spec 786432 4d 291344:40026c5555550000` at JIF paths of both
+  lengths (`c95f389d…`): the measured delta was `0x47170`/`0x46e80`, so the
+  patch landed at `ARR[20]`/`ARR[113]` rather than `ARR[0]`; `ARR[0]` stayed
+  `0x4d4d…` and the original loader fault returned.
+- Layout-tolerant sweep `minimal-spec 786432 4d` with the chosen pointer
+  repeated every 8 bytes over output offsets `0x46c00..0x47400` (JIF SHA-256
+  `0896977e0b278a90bcaad036db2e1e4b2d4b9b8eedcaebc9d3beb003731d2959`):
+  inflate breakpoint reached, no heap dereference hit and no in-GDB signal;
+  the plug-in crashed after the return. Log `w345-sweep-gdb.log` SHA-256
+  `6e2248d6…`.
+
+No chosen mapped pointer was observed in a fault register, no chosen-address
+write to a named live object, no control flow, marker or command. Grade
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+These mapped-pointer variants are CLOSED, not to be repeated unchanged; a
+future attempt must measure the array position in the same run that writes
+the pointer, or find a different live consumer. Exact evidence (all under
+`live/evidence/`, SHA-256 in parentheses):
+`w345-faultinsn-gdb.log` (`f573d974…`), `w345-faultinsn-run.log`
+(`8be3e9bb…`), `w345-array-gdb.log` (`6400347a…`), `w345-array-run.log`
+(`1909aa8b…`), `w345-ptr-short-gdb.log` (`b816edd9…`), `w345-ptr4d-gdb.log`
+(`def7120a…`), `w345-eq-gdb.log` (`4ef03b32…`), `w345-sweep-gdb.log`
+(`6e2248d6…`), `w345-sweep-flood.jif` (`0896977e…`), `w345-flood-768k-4d.jif`
+(`c95f389d…`).

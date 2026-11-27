@@ -1,0 +1,54 @@
+W337 PRE avail=0x80000002 idx=0x555555679050 ret=0x555555557778 pid=1994989
+W337 PRE idx=0x555555679050
+W337 PRE +0  =0x0000555000251fb9 map=[unmapped]
+W337 PRE +8  =0x0000000000000000 map=[unmapped]
+W337 PRE +16 =0x0000000000000002 map=[unmapped]
+W337 PRE +24 =0x0000000000000041 map=[unmapped]
+W337 PRE +32 =0x0000555555679370 map=[unmapped]
+W337 PRE +40 =0x0000000000000001 map=[unmapped]
+W337 PRE +48 =0x0000000000000000 map=[unmapped]
+W337 PRE +56 =0x000055555561cd60 map=[unmapped]
+W337 PRE +64 =0x0000000000000000 map=[unmapped]
+W337 PRE +72 =0x0000000000006874 map=[unmapped]
+W337 SIGNAL SIGSEGV pc=0x7ffff7fd1327
+W345 PC MAP unmapped
+W345 RAX MAP unmapped
+W345 RDI MAP unmapped
+W345 RSI MAP unmapped
+W345 INS 0x7ffff7fd1307:	and    $0xc0,%al
+W345 INS 0x7ffff7fd1309:	add    %al,(%rax)
+W345 INS 0x7ffff7fd130b:	add    %al,(%rcx)
+W345 INS 0x7ffff7fd130d:	cmp    %r10,0xc0(%rsp)
+W345 INS 0x7ffff7fd1315:	jae    0x7ffff7fd1878
+W345 INS 0x7ffff7fd131b:	mov    0xc0(%rsp),%rax
+W345 INS 0x7ffff7fd1323:	mov    (%r14,%rax,8),%rax
+W345 INS => 0x7ffff7fd1327:	mov    0x28(%rax),%rbx
+W345 INS 0x7ffff7fd132b:	cmp    %r8,%rbx
+W345 INS 0x7ffff7fd132e:	je     0x7ffff7fd1304
+W345 INS 0x7ffff7fd1330:	test   %r9d,%r9d
+W345 INS 0x7ffff7fd1333:	je     0x7ffff7fd133e
+W345 STK 0x7fffffffb8e0:	0x00007ffff7aa41e0	0x00007ffff7aa44d2
+W345 STK 0x7fffffffb8f0:	0x00007ffff7a84760	0x00007fffffffba30
+W345 STK 0x7fffffffb900:	0x00007ffff7aa8000	0x00007fffffffba28
+W345 STK 0x7fffffffb910:	0x00007fffffffb994	0x0000000000000000
+W345 STK 0x7fffffffb920:	0x0000000000000002	0x00007ffff7aa442d
+W345 STK 0x7fffffffb930:	0x00007ffff7a849b8	0x00007fffffffba70
+W345 STK 0x7fffffffb940:	0x00007ffff7aa8000	0x00007fffffffba68
+W345 STK 0x7fffffffb950:	0x00007fffffffb994	0x00007ffff7a84610
+W345 MAP 555555570000-555555727000 rw-p 00000000 00:00 0                          [heap]
+W345 MAP 7fffe2b32000-7fffe2b37000 r--p 00000000 fc:00 25845217                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+W345 MAP 7fffe2b37000-7fffe2be6000 r-xp 00005000 fc:00 25845217                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+W345 MAP 7fffe2be6000-7fffe2bfa000 r--p 000b4000 fc:00 25845217                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+W345 MAP 7fffe2bfa000-7fffe2bfb000 r--p 000c8000 fc:00 25845217                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+W345 MAP 7fffe2bfb000-7fffe2c00000 rw-p 000c9000 fc:00 25845217                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libzstd.so.1
+W345 MAP 7ffff7a84000-7ffff7a87000 r--p 00000000 fc:00 25845212                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+W345 MAP 7ffff7a87000-7ffff7a9b000 r-xp 00003000 fc:00 25845212                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+W345 MAP 7ffff7a9b000-7ffff7aa2000 r--p 00017000 fc:00 25845212                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+W345 MAP 7ffff7aa2000-7ffff7aa3000 r--p 0001d000 fc:00 25845212                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+W345 MAP 7ffff7aa3000-7ffff7aa8000 rw-p 0001e000 fc:00 25845212                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1
+W345 MAP 7ffff7fc7000-7ffff7fc8000 r--p 00000000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W345 MAP 7ffff7fc8000-7ffff7ff0000 r-xp 00001000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W345 MAP 7ffff7ff0000-7ffff7ffb000 r--p 00029000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W345 MAP 7ffff7ffb000-7ffff7ffd000 r--p 00034000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W345 MAP 7ffff7ffd000-7ffff7ffe000 rw-p 00036000 fc:00 25845304                   /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib64/ld-linux-x86-64.so.2
+W345 MAP 7ffffffdd000-7ffffffff000 rw-p 00000000 00:00 0                          [stack]
