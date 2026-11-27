@@ -3,8 +3,9 @@
 **Status: STAGED 2026-11-27 W316, awaiting operator admission.** Target slug
 `libeventsockaddr2shell`. No prior brief, wall entry or lab tree names this
 target; the only earlier mention is an unscreened backup note in
-`reports/frontier-sqlitesession2shell.md`. Dedicated window and handoff DMs are
-recorded in `reports/libeventsockaddr2shell-status.md`.
+`reports/frontier-sqlitesession2shell.md`. Dedicated inner-socket window 210
+is live with panes %426/%427 (`dead=0`); full status, clean replay and handoff
+details are in `reports/libeventsockaddr2shell-status.md`.
 
 ## Verified ground truth (sources read 2026-11-27)
 

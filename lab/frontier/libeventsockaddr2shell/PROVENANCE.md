@@ -84,5 +84,8 @@ Commands: `bash bootstrap.sh`, `bash run-all.sh`, `bash run-probe.sh`.
   this harness builds directly on the host without Docker.
 - No benign marker execution, command, wire-to-TCP path, or ASLR-defeating
   groom was demonstrated. The CVSS attack vector is Local (AF_UNIX peer).
-- Replay hashes are recorded in `reports/libeventsockaddr2shell-status.md`
-  after the clean `git archive` check.
+- Clean `git archive 090aa6bc` replay at 06:04Z: archive SHA-256
+  `889dfe520826993c448f5f90d5e2392f99ec86200ecb946dd203f5eb76239aa2`,
+  unmodified `bash run-all.sh` rc 0 with 23 PASS / 0 FAIL and inner probe
+  16 PASS / 0 FAIL; replay log SHA-256
+  `1edee7ac5316ae8d40d38e01c46a9c3ea7db042bef939765937258a4beaf9abc`.
