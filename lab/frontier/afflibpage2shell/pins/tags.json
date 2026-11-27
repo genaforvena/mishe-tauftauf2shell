@@ -1,0 +1,232 @@
+[
+  {
+    "name": "v3.7.23",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.23",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.23",
+    "commit": {
+      "sha": "a1d6b350d283f4f5bff2afece8f5247b0c438a34",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/a1d6b350d283f4f5bff2afece8f5247b0c438a34"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMjM="
+  },
+  {
+    "name": "v3.7.22",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.22",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.22",
+    "commit": {
+      "sha": "f6e51a8367cff73ea24c0adf09e533483c80ecd4",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/f6e51a8367cff73ea24c0adf09e533483c80ecd4"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMjI="
+  },
+  {
+    "name": "v3.7.21",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.21",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.21",
+    "commit": {
+      "sha": "bceca6e7e359f1b5e4eb8766eb7e3ff96f560f70",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/bceca6e7e359f1b5e4eb8766eb7e3ff96f560f70"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMjE="
+  },
+  {
+    "name": "v3.7.20",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.20",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.20",
+    "commit": {
+      "sha": "bbc271c43cbff40835244d61a1f256327c8cc798",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/bbc271c43cbff40835244d61a1f256327c8cc798"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMjA="
+  },
+  {
+    "name": "v3.7.19",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.19",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.19",
+    "commit": {
+      "sha": "9f2bb1cd8ac42ee7e627a9b6f58e220ba0796725",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/9f2bb1cd8ac42ee7e627a9b6f58e220ba0796725"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTk="
+  },
+  {
+    "name": "v3.7.18",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.18",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.18",
+    "commit": {
+      "sha": "028b965ddcf5fda46428c7263d28c43e9cac868d",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/028b965ddcf5fda46428c7263d28c43e9cac868d"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTg="
+  },
+  {
+    "name": "v3.7.17",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.17",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.17",
+    "commit": {
+      "sha": "ad484d9f8c0254e3d87385453fa3d4aeaa2f2c88",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/ad484d9f8c0254e3d87385453fa3d4aeaa2f2c88"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTc="
+  },
+  {
+    "name": "v3.7.16",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.16",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.16",
+    "commit": {
+      "sha": "44f57d1f52371ffedf75cb950a444fb3c6a27b74",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/44f57d1f52371ffedf75cb950a444fb3c6a27b74"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTY="
+  },
+  {
+    "name": "v3.7.15",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.15",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.15",
+    "commit": {
+      "sha": "75923b3394b4dc8fdf55949f31241729d772064a",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/75923b3394b4dc8fdf55949f31241729d772064a"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTU="
+  },
+  {
+    "name": "v3.7.14",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.14",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.14",
+    "commit": {
+      "sha": "7ad4e860bfeeb805ef4b1c8293a5b102c0fa56b5",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/7ad4e860bfeeb805ef4b1c8293a5b102c0fa56b5"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTQ="
+  },
+  {
+    "name": "v3.7.13",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.13",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.13",
+    "commit": {
+      "sha": "4ae4640cc7b779f69c4fdfea276442901ce9256c",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/4ae4640cc7b779f69c4fdfea276442901ce9256c"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTM="
+  },
+  {
+    "name": "v3.7.12",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.12",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.12",
+    "commit": {
+      "sha": "e4d553e1cdcc8a54197d1883aa1c4fc7c83f0a79",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/e4d553e1cdcc8a54197d1883aa1c4fc7c83f0a79"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTI="
+  },
+  {
+    "name": "v3.7.11",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.11",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.11",
+    "commit": {
+      "sha": "e46567b0dcd92babd517c490ca2448bfe0e05a38",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/e46567b0dcd92babd517c490ca2448bfe0e05a38"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTE="
+  },
+  {
+    "name": "v3.7.10",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.10",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.10",
+    "commit": {
+      "sha": "4131e990eff921c792d4ad24b471a6a58d3173cb",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/4131e990eff921c792d4ad24b471a6a58d3173cb"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMTA="
+  },
+  {
+    "name": "v3.7.9",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.9",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.9",
+    "commit": {
+      "sha": "b4412d62b43e64515de297714e937b5b0c18c0d5",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/b4412d62b43e64515de297714e937b5b0c18c0d5"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuOQ=="
+  },
+  {
+    "name": "v3.7.8",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.8",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.8",
+    "commit": {
+      "sha": "531dc72bf49e62d551e71f2c79f24d9bfb212d84",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/531dc72bf49e62d551e71f2c79f24d9bfb212d84"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuOA=="
+  },
+  {
+    "name": "v3.7.7",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.7",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.7",
+    "commit": {
+      "sha": "acc0a57dd70c30cb20b4de2a411aaaf4b87101ef",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/acc0a57dd70c30cb20b4de2a411aaaf4b87101ef"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuNw=="
+  },
+  {
+    "name": "v3.7.6",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.6",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.6",
+    "commit": {
+      "sha": "efb6c4412eb51a3b9a4b36965f43e3164c0dbcaa",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/efb6c4412eb51a3b9a4b36965f43e3164c0dbcaa"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuNg=="
+  },
+  {
+    "name": "v3.7.5",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.5",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.5",
+    "commit": {
+      "sha": "2ec78af1519cc0080ea30f405a4d8135ae353036",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/2ec78af1519cc0080ea30f405a4d8135ae353036"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuNQ=="
+  },
+  {
+    "name": "v3.7.4",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.4",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.4",
+    "commit": {
+      "sha": "75ff7f7f3da1d3de729f7aa381175f619ace4820",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/75ff7f7f3da1d3de729f7aa381175f619ace4820"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuNA=="
+  },
+  {
+    "name": "v3.7.3",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/v3.7.3",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/v3.7.3",
+    "commit": {
+      "sha": "18b473eaba05bd4200646a8ca00279c8c1d77b42",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/18b473eaba05bd4200646a8ca00279c8c1d77b42"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzL3YzLjcuMw=="
+  },
+  {
+    "name": "3.7.2",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/3.7.2",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/3.7.2",
+    "commit": {
+      "sha": "c7e5e4739f83ef0e67da3cd7552b9e79be667aaa",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/c7e5e4739f83ef0e67da3cd7552b9e79be667aaa"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzLzMuNy4y"
+  },
+  {
+    "name": "3.7.1",
+    "zipball_url": "https://api.github.com/repos/sshock/AFFLIBv3/zipball/refs/tags/3.7.1",
+    "tarball_url": "https://api.github.com/repos/sshock/AFFLIBv3/tarball/refs/tags/3.7.1",
+    "commit": {
+      "sha": "09cdc80a446ee4eb6749b78377f00137e7fa78ba",
+      "url": "https://api.github.com/repos/sshock/AFFLIBv3/commits/09cdc80a446ee4eb6749b78377f00137e7fa78ba"
+    },
+    "node_id": "MDM6UmVmMjQ3NDcwMTk6cmVmcy90YWdzLzMuNy4x"
+  }
+]
