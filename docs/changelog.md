@@ -2,6 +2,50 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 07:1x–07:2xZ — WAMR offset shape, NSD clean replay (report-only)
+
+This fold covers `ae380cc5` and `840e3dd6` past `cb9ffbf3`. Explanation and
+recipes only: no generated cell, register row, count, report, SVG or lab
+evidence. The Ruby W321 fold at the top of this file and its §W321 recipe
+were already written by their author and corrected in `91382d21`; verified
+(in-length chosen bytes stock-readable in the `visible` variant), not
+duplicated here.
+
+- `ae380cc5` answers the bounded WAMR question left open by the settled rung-4
+  claim: the four chosen-immediate offsets are **adjustable by module shape
+  in discrete steps, not by arbitrary byte address**. `lab/frontier/wamr2shell/make_shift_variants.py`
+  (sha256 `6411b130…5283a`) copies the 21-result block and/or appends
+  `const`/`drop` pairs to the pinned PoC without touching the five admission
+  pins. In the caller-store 2.4.4 build, appended-pair count alone
+  (`n4`/`n8`/`n16`) and inert small blocks leave `past=11/29/47/65`; one
+  copied block before the pairs (`dup_before`) moves them to
+  `46/64/82/100/118/136/154/172`, two copies to `153…279`, and a split
+  places only the four pairs after the copied block out of bounds.
+  `dup_after` produces no chosen OOB stores; the `i32` variant changes both
+  width (4 bytes) and offsets (`9/23/37/51/65`). ASan 2.4.4 faults on every
+  shifted shape but at shape-dependent first sites; fixed 2.4.5 ASan has
+  no load-time error (only the known post-load CLI stack-overflow message).
+  control, guest execution or wire path, and rung 5 stays UNKNOWN. The
+  generated `docs/results.md` WAMR row still says the offsets stay fixed;
+  that surface is operator-owned and unchanged here.
+- `840e3dd6` advances NSD SVCB AXFR (CVE-2026-12244) from the screened
+  CANDIDATE limb in the 06:3x–06:5xZ fold to a staged harness with author
+  replay: a clean `git archive 70af6a92` (archive SHA `690c887b…e47b5`)
+  rebuilt all three trees and ran the unmodified `bash run-all.sh` at rc 0
+  with **38 PASS / 0 FAIL** (replay log SHA `ade0447…7fc`). The real
+  `read_svcb_rdata()` sink gives ASan `WRITE of size 65509` at `rdata.c:3317`
+  zero bytes after a 4096-byte region; sampled chosen bytes at offsets 10
+  through 65508 in the plain build; patched and safe inputs clean. Grade
+  stays R1/R2/R3, R4 LIMITED to the direct-sink harness, R5 NOT CLAIMED,
+  not admitted. The author replay is not independent acceptance: witness
+  replay (#6179) and operator admission (#6178) remain owed. The earlier
+  "no local build, trigger or harness" wording was the screen state.
+
+Recipes are in `docs/reproducibility.md` (WAMR shift-variant bullet and the
+NSD lane). What would change these limbs: a witness verdict or admission for
+NSD, arbitrary-address pointer control in WAMR, or a checker RED on
+committed HEAD.
+
 ## 2026-11-27 07:0x–07:1xZ — equal-length stale backref chosen-byte write (Ruby)
 
 - Ran the named follow-up to W320: a 3-byte `to_str` return makes
