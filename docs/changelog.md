@@ -6,6 +6,26 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 15:4xZ — W349 case-map chaining CLOSED (Ruby)
+
+The named follow-up to W348 is closed grade-neutral. The committed
+`lab/repro/ruby2shell-casemap-chain.{rb,sh,gdb}` harness drives seven
+shapes (odd/even single-byte lengths, alternating ASCII, and U+0390/
+U+03B0 three-fold UTF-8 shapes) through `upcase` and `fold` under
+valgrind and gdb on the vulnerable and fixed plain builds. Fourteen
+valgrind arms are rc=0 with exactly one invalid one-byte write in the
+three odd-first-capa single-byte shapes and zero elsewhere; 28 gdb rows
+identify the buffers directly (`sb1041` vulnerable
+`capas=1061,1040 used=1062,1020`, fixed `capas=1061,1042
+used=1060,1022`). `capa = remaining × buffer_count + 20` plus the 2×
+single-byte expansion and UTF-8's 12-byte mapping slack leave every
+chained buffer within capacity, so no second overflow window exists.
+Plain vulnerable and fixed outputs are byte-identical in every arm.
+Grade unchanged: primary wire-only rung 3, witness-COMPLETE rung 4,
+full stock rung 5 NOT ACHIEVED. Next named experiment: the same chain
+harness on Ruby 3.3.13 and 4.0.9 affected branches. Recipe in
+`docs/reproducibility.md` §W349.
+
 ## 2026-11-27 15:3xZ — W348 AWS/Ruby closures, gimpjif W345 label and W349 witness
 
 Docs-only fold of `25043ea9`, `250e1d9e`, `3134d73a`, `c8c74e9a` and

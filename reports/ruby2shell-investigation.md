@@ -8626,3 +8626,63 @@ buffer and hence a second one-byte overflow in one `upcase` call;
 always even and the third's parity depends on `remaining`. Falsifier:
 every chained buffer is even or stops before filling, so only the
 first buffer can overflow. Do not repeat this `enc/` sweep unchanged.
+
+## 2026-11-27 15:4xZ — W349: case-map buffer chaining CLOSED
+
+W348's named follow-up asked whether `rb_str_casemap`
+(`lab/build/ruby-3.4.12/string.c:7828-7851`) can turn one `upcase` call
+into a **second** odd-capacity buffer and hence a second one-byte
+overflow. It cannot on the measured builds. The loop allocates
+`capa = remaining × buffer_count + 20` per buffer; a single-byte
+`case_map` expands at most 2× (`enc/iso_8859_1.c:267-298` writes two
+bytes under `to < to_end`), so buffer 2 has `capa = 2·remaining + 20`
+(even, 20-byte slack) and consumes to source exhaustion. UTF-8 expands
+at most 3× (U+0390/U+03B0 → three codepoints) and
+`onigenc_unicode_case_map` (`enc/unicode.c:672-677`) subtracts
+`CASE_MAPPING_SLACK = 12`, so buffers 2 and 3 stop before their slack is
+gone.
+
+Committed harness: `lab/repro/ruby2shell-casemap-chain.rb` (seven
+shapes: `sb21`, `sb1041`, `sb2100`, `sbmix1041`, `u03901041`,
+`u03b01041`, `umix1041`; ops `upcase` and `downcase(:fold)`),
+`lab/repro/ruby2shell-casemap-chain.sh` (valgrind memcheck on the
+vulnerable plain build), and
+`lab/repro/ruby2shell-casemap-chain-gdb.sh` with its two gdb command
+files (per-buffer `capa`/`used` on vulnerable and fixed plain builds).
+`CASEMAP_DEBUG` is not compiled into the pinned binaries, so gdb
+breakpoints at `string.c:7834/7850` (3.4.12) and
+`string.c:7883/7901` (3.4.13) supply the buffer identity. Raw evidence
+is gitignored under `lab/build/evidence/casemap-chain/`.
+
+1. Valgrind, 14 arms, all `rc=0`: exactly one `Invalid write of size 1`
+   in each `sb21`, `sb1041` and `sbmix1041` arm (both ops); `sb2100`
+   (even first capa) and all eight UTF-8 arms have zero invalid writes.
+   The 3.4.12 ASan stack for `sb1041-upcase` places the write in
+   `case_map enc/iso_8859_1.c:293` called from
+   `rb_str_casemap string.c:7839`, i.e. the first buffer. The remaining
+   valgrind diagnostics are stock Ruby startup noise (uninitialised GC
+   reads and ~905 KB "definitely lost" at interpreter shutdown), not
+   stage-specific writes.
+2. gdb trace, 28 arms. Vulnerable 3.4.12: `sb21` one buffer
+   `capa=41 used=42`; `sb1041` `capa=1061,1040 used=1062,1020`;
+   `sb2100` `capa=2120,2100 used=2120,2080`; `sbmix1041`
+   `capa=1061,686 used=1062,499`; each UTF-8 shape three buffers with
+   every `used < capa` (e.g. `u03901041`
+   `capa=2102,2788,1394 used=2094,2778,1374`). Fixed 3.4.13: `sb21`
+   `capa=41,22 used=40,2` (the guard leaves one source byte for a
+   second buffer), `sb1041` `capa=1061,1042 used=1060,1022`, and all
+   other arms `used <= capa`. Harness output SHA-256 prefixes match
+   vulnerable and fixed in every arm (`sb21` upcase `69a5885c…`,
+   fold `7bbed07d…`).
+
+Falsifier met: no chained buffer has odd capa or `used > capa`; the
+only one-byte write is buffer 1 with odd N, already covered by the
+primary CVE. Grade unchanged: primary wire-only rung 3, W341/W342
+adjacent rung 3, witness-COMPLETE rung 4, harness-condition rung 5
+ESTABLISHED at its labeled scope, full stock rung 5 NOT ACHIEVED.
+Next named experiment: run the same committed chain harness on the
+other affected branches (`ruby-3.3.13-plain` and `ruby-4.0.9-plain`,
+plus their ASan builds where present) to test whether the
+`buffer_count × remaining + 20` argument holds there; falsifier is any
+chained buffer with `used > capa` or an ASan write at a buffer past the
+first. Do not repeat the 3.4.12/13 matrix unchanged.

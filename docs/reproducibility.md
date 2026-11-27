@@ -19935,6 +19935,37 @@ Docs re-ran the sweep on this host: rc 0, 504 matrix lines, 420 arms
 `heap-buffer-overflow enc/iso_8859_1.c:293 in case_map` at `n=21` and `83`
 on `ruby-3.4.12-asan`, matching the author matrix.
 
+## 2026-11-27 15:4xZ — W349 case-map chaining (Ruby)
+
+From the repo root, with both pinned plain builds and valgrind/gdb
+available:
+
+```sh
+bash lab/repro/ruby2shell-casemap-chain.sh       # valgrind, vulnerable plain
+bash lab/repro/ruby2shell-casemap-chain-gdb.sh   # gdb, vulnerable + fixed plain
+```
+
+Expect 14 valgrind arms (`rc=0` throughout): exactly one `Invalid write
+of size 1` for `sb21`, `sb1041` and `sbmix1041` (each with `upcase` and
+`fold`), zero for even-first-capa `sb2100` and all eight UTF-8 arms.
+The 28 gdb rows give the buffer identities: vulnerable 3.4.12
+`sb1041 capas=1061,1040 used=1062,1020`, `sb2100 capas=2120,2100
+used=2120,2080`, UTF-8 shapes three buffers with `used < capa`; fixed
+3.4.13 `sb21 capas=41,22 used=40,2`, `sb1041 capas=1061,1042
+used=1060,1022`, every arm `used <= capa`. All seven shapes produce
+byte-identical CHAIN lines on both plain builds. Raw matrices and
+per-arm logs are gitignored under `lab/build/evidence/casemap-chain/`.
+
+Reason: `rb_str_casemap` allocates `remaining × buffer_count + 20`
+(`lab/build/ruby-3.4.12/string.c:7830`); the single-byte guard at
+`enc/iso_8859_1.c:267` writes two bytes with only one byte left, which
+faults only when the first capa is odd, while the second buffer has
+even capa and 20 bytes of slack. UTF-8's three-fold expansion is
+covered by `CASE_MAPPING_SLACK = 12` at `enc/unicode.c:672-677`.
+Falsifier met; grade unchanged, full stock rung 5 NOT ACHIEVED.
+Detail: `reports/ruby2shell-investigation.md` §W349.
+
+
 ## 2026-11-27 15:3xZ — W348 (AwssdkBase642Shell fixed arm and generated caller)
 
 The W345 lane-index row above is the pre-W348-gate state: 18 pins, fixed arm
