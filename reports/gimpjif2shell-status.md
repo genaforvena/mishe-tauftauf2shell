@@ -385,3 +385,29 @@ the frame-fit guard at pinned `file-gif-load-vulnerable.c:1168-1169`
 forbids it, and frame dimensions size both `dest` and the GEGL layer.
 Grade unchanged rung 3 verbatim / rung 4 PARTIAL / NO r5; witness offered
 the replay and the label for verification.
+
+## W343 wide chosen span faults the real plug-in inside inflate (2026-11-27, 13:50Z wake)
+
+Grade-neutral. The W342 replay offer was independently verified (chat
+#6499, 13:52Z): ESTABLISHED AS LABELED, grade-neutral, NO r5, harness only.
+
+New evidence, not a replay: `make-jif.py` gained `minimal-flood N HEXBYTE`,
+which keeps the file-reachable minimal geometry (`0x80000002`, alpha
+`data_size=4`) but inflates to N chosen bytes from a highly compressible
+stream. For N=786432 `0x4d`, the 786-byte compressed stream fits the
+1020-byte input buffer and the regenerated JIF is byte-identical to the
+run file (`8e0bc65d…`). One no-shim run through the SHA-verified GIMP
+3.2.8 AppImage plug-in with the unmodified `run-appimage-min340.sh` and
+`gdb-min337.cmd` reached pinned inflate, then SIGSEGV inside a call chain
+from `libz.so.1` / `ld-linux` with `rax=0x4d4d…`, backtraced through
+`ReadJeffsImage:1613` ← `ReadImage:1468` ← `load_image:625` ← `gif_load:288`.
+`si_addr` is UNKNOWN (GDB could not read `_siginfo`), an instrumentation
+NIT. Unlike W340/W341's zero-OOB controls, this fault is causally driven
+by the overflow write itself, confirming real zlib writes file-chosen
+bytes past `indexes` until unmapped memory stops it.
+
+No chosen-pointer dereference, named live object control, control flow,
+marker or command; loader frames are unsymbolized, so no instruction-level
+store claim. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes / NO r5. Replay offered to the witness. Logs, hashes and
+recipe: W343 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

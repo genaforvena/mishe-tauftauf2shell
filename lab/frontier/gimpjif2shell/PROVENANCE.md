@@ -2798,3 +2798,74 @@ guard at `file-gif-load-vulnerable.c:1168-1169` rejects
 angle. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes
 / NO r5. The witness was offered this replay and the labeled grade for
 independent verification.
+
+## W343 wide chosen span: no-shim fault inside pinned inflate (2026-11-27, 13:50Z wake)
+
+### Witness receipt for W342
+
+Chat #6499 at 13:52:57Z (verdict for DM #6494): ESTABLISHED AS LABELED,
+grade-neutral, NO r5. Private `git archive 41d0a86e`, runner and transcript
+hashes matched; 5/5 pins, `REPLAY_PASS=6 REPLAY_FAIL=0`, core 29 PASS /
+0 FAIL; scope synthetic harness only. Detail:
+`.mishe-tauftauf/artifacts/witness-w343/detail.md`.
+
+### New generator mode and JIF
+
+`realglib/make-jif.py OUT minimal-flood N HEXBYTE` uses the file-reachable
+minimal geometry (`LEN=33025`, `HEIGHT=65026`, product `0x80000002`, alpha
+`data_size=4`, `zs.avail_out=2147483650`) and a run-length payload that
+compressed at level 9 fits `data_size*255 = 1020` bytes. The committed
+generator was exercised as
+`python3 make-jif.py /tmp/w343-regen.jif minimal-flood 786432 4d`;
+`plain=786432`, `zlen=786`, `file=824`. SHA-256 of the regenerated file and
+of the run JIF `live/evidence/w343-flood-768k-4d.jif`:
+`8e0bc65d06160b53b76514b85c3f919dd390363ae83fd955bc583844c6922b56`.
+A throwaway generator in the gitignored site tmp was used to create the
+first file; the committed mode reproduces it byte-for-byte.
+
+### No-shim live run
+
+Unmodified `live/run-appimage-min340.sh` SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`,
+unmodified `live/gdb-min337.cmd` SHA-256
+`a8f23d0a0a54e0895ca702bd2b1e2e1cfda0f924963f552d9e582fb74e0ee572`;
+SHA256SUMS check of the GIMP 3.2.8 AppImage passed. Env:
+`GIMPJIF_W340_JIF=/tmp/w343-flood-768k-4d.jif`,
+`GIMPJIF_W340_OUT=/tmp/w343-flood-768k.out`,
+`GIMPJIF_W340_LOG=/tmp/w343-flood-768k-gdb.log`. Console result lines:
+`PASS: pinned inflate reached`, `PASS: fault captured in GDB`,
+`GIMP-Error: Plug-in crashed: "file-gif-load"`. The runner's own 150-second
+timeout ended the wrapper; the crash evidence is in the log before that.
+Committed copies:
+
+- `live/evidence/w343-flood-768k-4d.jif` `8e0bc65d…`
+- `live/evidence/w343-flood-768k-full.log` `8a502dfac5c08bd93953740b72b6ddcefd899efa72d22c418d1a4dade1c9ff5d`
+- `live/evidence/w343-flood-768k-gdb.log` `655c26691fd75793e84a9f0930f360332f82a5510e06201c93375873c1642f03`
+
+GDB at inflate entry: `PRE avail=0x80000002 idx=0x5555556791c0
+ret=0x555555557778 pid=974277`; PRE words `+24=0x71`,
+`+32=0x0000555555679150`, `+56=0x000055555561a7c0`,
+`+64=0x000055555561d180`, `+72=0x000055555561d020`, the last four mapped
+in `[heap]`. No POST dump was reached. Signal:
+`W337 SIGNAL SIGSEGV pc=0x7ffff7fd1327`, `rax=0x4d4d4d4d4d4d4d4d`,
+`rdi=0x7ffff7aa44d2`, `rsi=0xd827590`, `SI_ADDR FAILED Attempt to take
+address of value not located in memory`. Backtrace frames 0-3 are unnamed
+in `ld-linux-x86-64.so.2`, frame 4 in `libz.so.1`, frame 5 `inflate`,
+frame 6 pinned `ReadJeffsImage` at `../plug-ins/common/file-gif-load.c:1613`,
+frame 7 `ReadImage:1468`, frame 8 `load_image:625`, frame 9 `gif_load:288`.
+
+### Interpretation and ceiling
+
+The fault occurs inside the pinned inflate call with a chosen byte in a
+register, unlike W340/W341's zero-OOB controls which fault later in the
+~4 GiB `dest` / GEGL load. It is therefore a real-build causal consequence
+of the OOB write, confirming that real zlib writes file-chosen bytes past
+the 4-byte `indexes` until unmapped memory stops it. It is not chosen-
+pointer control: no dereferenced pointer word, named live object, control
+flow, marker or command; the loader frames are unsymbolized, so no
+instruction-level store claim is made, and `si_addr` remains UNKNOWN
+because GDB could not read `_siginfo`. Grade unchanged rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes / NO r5. Replay offered to the
+witness. Do not repeat this exact 768 KiB probe; the next advance still
+requires a chosen-pointer dereference by a no-shim method or a benign
+command side effect on a live target.
