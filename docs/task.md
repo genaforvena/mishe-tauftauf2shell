@@ -16456,8 +16456,53 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
+
+Current limb for a reader arriving now; it supersedes the §20:0x–20:2xZ
+limb's open W361 and gimpjif `idx` questions. Docs-only fold of `309a72e5`,
+`553bfad5`, `285c0dea`, `624d0a27` and `8b24afd2`; the operator's
+README/results/manifest/SVG re-render is verified, not duplicated. No rung
+cell or lab evidence moved; the register flag and `established` count move
+only for the witness's exact stage scope. Recipes in
+`docs/reproducibility.md` §21:0x–21:1xZ.
+
+- **RufusSbat2Shell admitted as the 221st mind and then independently
+  witnessed** (`309a72e5`, W372). Window 229 adopted as-is (registry
+  230/230, panes `%464`/`%465`); operator clean replay from TAR
+  `178726d9…` matched 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. The
+  witness matched the same archive and all five pinned upstream blobs, then
+  reproduced the ASan WRITE-8 at `parser.c:1651` (0 bytes past 32), the
+  CR-2 READ-8, the chosen low-32-bit callback print and its fixed,
+  not-called and one-byte-wrong controls under GCC and Clang. ESTABLISHED
+  AS LABELED at stage `0415fa78`/receipt `7064369a`, grade-neutral, NO r5;
+  no wire, shell, command or real-heap adjacency. The verdict does not
+  cover the later `553bfad5` harness correction, which replays TAR
+  `d8ec9e29…` 16/16 and 11/0 and adds a post-regeneration pin check that
+  fails closed on a controlled mismatch (rc 1).
+- **Ruby W361 folds a byte into the successor size LSB** (`624d0a27`): 18/18
+  valgrind arms put one `case_map` write plus the known copy-out read on
+  all nine vulnerable builds and zero/zero on all nine patched. GDB on
+  plain 3.4.12 N=27 read successor `buffer+72` as `0x31` then `0x73` with
+  the high size byte unchanged, then aborted in `mremap_chunk`. Fresh plain
+  results are partial (29/120 before deadline): fold N=27 2/10 aborts,
+  N=43 4/9; 3.3.13/4.0.9, patched and even-N arms stay UNKNOWN. Grade and
+  NO-r5 ceiling unchanged; the fold byte does not reliably dodge the abort.
+- **Gimpjif W358 phase-indexed fake map NEGATIVE** (`8b24afd2`): a 16-byte
+  repeating phase cannot hold a multi-field map, the array must not be
+  phase-sprayed (`ARRBASE = idx + delta`), and nominal idx must not exceed
+  observed idx. The 16-map/delta-sweep arm reached
+  `idx=0x555555679080`, `ARRBASE=0x5555556c0290`, `delta=0x47210`, but
+  `mem0`/`mem8` stayed genuine; only genuine `adler32` resolutions and the
+  genuine GOT write occurred. No chosen map hit, `l_used` store or chosen
+  GOT value; cause UNKNOWN, grade unchanged, NO r5.
+
+At this limb: a real Windows post-allocation consumer under ASLR/CFG for
+Rufus, Ruby W362's `casecmp?` size-LSB lane, a gimpjif `idx`-independent map
+or chosen-address store, or a checker RED on committed HEAD.
+
+
 ## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; Checkmk 220th admitted and witnessed; gimpjif W357 negatives
-Current limb for a reader arriving now; it supersedes the 18:4xZ limb's
+Historical limb, superseded by §21:0x–21:1xZ. It superseded the 18:4xZ limb's
 open W357 question and the 20:0xZ limb's open W358/Checkmk items. First a
 docs-only fold of `cf5e1ad8`, `27d64eb8`, `ccdbad4b`, `b902273f`,
 `55fa746c` and `e8d4c27b` after `cc777e1a` (late report-only `90e2b3bd`

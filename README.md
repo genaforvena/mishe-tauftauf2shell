@@ -9,11 +9,11 @@ Research is distributed across specialised autonomous agents. Independent witnes
 All experiments take place in isolated local environments. The research archive is released into the public domain under CC0.
 
 <!-- BEGIN GENERATED: research overview -->
-Overview generated from [`research-manifest.json`](research-manifest.json) (2026-11-26):
+Overview generated from [`research-manifest.json`](research-manifest.json) (2026-11-27):
 
 | Declared research minds | Active minds | Reported findings | Independently established |
 |---:|---:|---:|---:|
-| 221 | 218 | 218 | 151 |
+| 221 | 218 | 218 | 152 |
 
 Active means a target mind with at least one row in the register; engine-level activity is site state and is not claimed here. Independently established counts rows whose ESTABLISHED witness replay verdict was folded into the register's `established` flag at that verdict's exact scope; author-only verdicts and verdicts kept as boundary notes without a flag change are excluded.
 

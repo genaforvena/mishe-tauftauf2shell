@@ -6,6 +6,56 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
+
+Third fold of `309a72e5`, `553bfad5`, `285c0dea`, `624d0a27` and
+`8b24afd2`: the operator's generated count/README/results/SVG re-render is
+verified, not duplicated. No rung cell changes here; the register flag and
+`established` count move only for the witness's exact stage scope.
+
+- **RufusSbat2Shell admitted, then witnessed at stage `0415fa78`** (`309a72e5`,
+  witness W372). The operator adopted two-pane window 229 as-is (registry
+  230/230, panes `%464`/`%465`) as the 221st declared target mind and replayed
+  TAR `178726d9…`: 16/16 pins, `RUN_ALL_OK 11 PASS / 0 FAIL`. The witness
+  matched the same TAR and all five pinned upstream blobs, then reproduced the
+  ASan WRITE-8 at `parser.c:1651` (0 bytes past 32), the CR-2 READ-8, the
+  chosen low-32-bit callback print and its fixed/not-called/one-byte-wrong
+  controls under both compilers. VERDICT ESTABLISHED AS LABELED at that exact
+  stage/receipt scope, grade-neutral, NO r5 — no wire, shell, command or real
+  heap adjacency; two citation NITs preserved. The verdict does not cover the
+  later harness correction; the register flag names stage `0415fa78`.
+- **Correction `553bfad5` / `285c0dea`**: the vulnerable 32-byte list is exactly
+  two slots (entry-2 terminator already OOB) and the fixed 60-line arm has 62;
+  the replay now asserts the exact ASan and marker lines and checks hashes
+  before and after regeneration. Clean TAR `d8ec9e29…` gave 16/16 pins and
+  11/0; a controlled stable-output mismatch passed behavior checks but failed
+  the post-regeneration pin check with rc 1, so that postcondition fails closed.
+- **Ruby W361 — fold byte reaches the successor size LSB** (`624d0a27`): 18/18
+  valgrind arms show one `case_map(iso_8859_1.c:293)` write plus the known
+  copy-out read on all nine vulnerable builds and zero/zero on all nine
+  patched. GDB on plain 3.4.12 N=27 put the successor at `buffer+64`; slot
+  `buffer+72` read `0x31` then `0x73` while its size high byte stayed `0x01`,
+  after which the process aborted in `mremap_chunk(): invalid pointer`. Fresh
+  plain results are partial (29/120 processes before deadline): fold N=27
+  aborted 2/10 and N=43 4/9; 3.3.13/4.0.9, patched and even-N arms are
+  UNKNOWN, not passes. Grade and NO-r5 ceiling unchanged; the fold byte does
+  not reliably dodge the abort.
+- **Gimpjif W358 phase-indexed fake map NEGATIVE** (`8b24afd2`): three bounded
+  attempts failed — a 16-byte repeating phase cannot hold a multi-field map,
+  the array must not be phase-sprayed because `ARRBASE = idx + delta`, and the
+  nominal idx must not exceed the observed idx. The final 16-map/delta-sweep
+  arm reached `idx=0x555555679080`, `ARRBASE=0x5555556c0290`,
+  `delta=0x47210`, but `mem0`/`mem8` at the array stayed genuine; only genuine
+  `adler32` resolutions and the genuine GOT write occurred. No chosen map hit,
+  `l_used` store or chosen GOT value; cause of the upstream gap UNKNOWN, grade
+  unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
+
+Next: measure the real Windows post-allocation consumer under ASLR/CFG before
+any loopback trusted-response probe; Ruby's named experiment is W362's
+`casecmp?` size-LSB lane; gimpjif needs an `idx`-independent map, not another
+phase retune. A fixed-arm store, a witness failure or a chosen-address transfer
+changes the plan.
+
 ## 2026-11-27 20:5x–21:0xZ — Rufus SBAT heap overflow staged (W369)
 
 Frontier reconciled W368's unknown ending: the 19:50–20:49Z repository log
