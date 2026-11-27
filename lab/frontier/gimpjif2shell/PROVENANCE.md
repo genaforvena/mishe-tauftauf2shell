@@ -1219,3 +1219,66 @@ into `/tmp/w301-gimp-clean`, then `bash run-witness.sh` gave
 `REPLAY_PASS=6 REPLAY_FAIL=0`, `WITNESS REPLAY PASS`, with core
 `TOTAL: 29 PASS / 0 FAIL`. Grade unchanged: rung 3 pinned verbatim /
 rung 4 PARTIAL, NO r5.
+
+## W302 large natural overflow and unshimmed live-plugin fault (2026-11-27, 01:04Z wake)
+
+Reconciliation: HEAD `bbe8e944`, W301 yielded `changed` cleanly at
+`bccbe970`. No unread messages, no subscribed signals. Witness queue still
+lists `#5900 gimpjif` behind `#5945 libmodplug`; a fresh addressed request
+to verify the W301 grade was sent at 01:15Z (chat id `5954`) and is
+UNANSWERED. gimp.org downloads and news at 01:09Z still list **3.2.8**
+(2026-11-02) as current stable; the fixed 3.2.10 AppImage control remains
+BLOCKED. No fixed build was provisioned and no fixed-control claim is made.
+
+Gap: all earlier live-plugin JIFs inflated to 324 or 448 chosen bytes, while
+the pinned `zs.avail_out` is the unwrapped `len*height` = 2147483778
+(`0x80000082`) and `compressed` can hold `data_size*255` = 66300 input
+bytes. A read-only scout re-confirmed from `pins/jif-vulnerable.inc:118-136`
+that no natural code path reads `indexes[i]` at `i >= data_size` (the
+`pos >= data_size` break at :122 precedes the sole read at :125), and that
+`indexes` never leaves the function; larger overflow magnitude was the
+remaining UNKNOWN.
+
+New reproducible lane: `live/span-shim.c` calls the real `inflate()` and
+only logs `malloc_usable_size`, `total_out`, and the chosen-byte run past
+the allocation; it patches no memory. `live/run-appimage-span.sh` generates
+JIFs with the new `realglib/make-jif.py published-run N HEXBYTE` mode,
+drives them through the real PDB `gimp-file-load`, and runs the faulting
+cases with **no shim at all** (a shim-free `AppRun.noshim` variant is
+generated from the AppRun outside Git). The 1 KiB case is the instrumented
+observation; 8 KiB and 64 KiB are unshimmed.
+
+Observed: `live/evidence/span-1024.log` reports
+`avail_out_before=2147483778 total_out=1024 ret=1 out=… usable=264` and
+`SPAN_RUN usable=264 chosen_run_after_usable=760` — real zlib writes 760
+chosen `0x4d` bytes past the real 264-byte usable allocation. The runner's
+safe controls (`span-safe.log`, `noshim-safe.log`) both give
+`batch command executed successfully` with no `SPAN_` line.
+
+`live/evidence/noshim-8192-tcache.log` (SHA-256
+`e6358ff2cd21ccc4a173868f30f03ae6c64f23de9daacd71199009460743fdfc`):
+unshimmed 8 KiB JIF produces `malloc(): unaligned tcache chunk detected`
+and `GIMP-Error: Plug-in crashed: "file-gif-load"`. A first shimmed run
+showed the same abort after `SPAN … total_out=0 ret=-2`; the identical
+no-shim control reproduced it, so the abort is not a shim artifact. A later
+replay of the same committed runner produced a different natural fault —
+`Jeff's Image Format-Warning: Error reading inflate failed` followed by
+`fatal error: Segmentation fault` (`live/evidence/noshim-8192.log`) — so
+the fault site is layout-sensitive; the robust claim is that the 8 KiB
+file-chosen overflow faults the live plug-in without any shim repair,
+grooming or driver simulation. `live/evidence/noshim-65536.log` shows
+`Plug-in crashed: "file-gif-load"` for 64 KiB. The 1 KiB run does not fault
+in its 90 s window, and the safe 4x4 control completes cleanly; the
+differentiating input is the inflation length.
+
+Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5. What changed is the quality of the rung-4 evidence: for the first
+time a file-chosen natural overflow faults an unmodified real GIMP plug-in
+with no shim-assisted word repair, no arranged neighbour and no synthetic
+consumer. Still absent: a named live victim object, a chosen-address or
+chosen-pointer write, a benign marker, and any command side effect. A
+glibc abort on corrupted tcache metadata is an attempted dereference of
+corrupt bytes, not a controlled pointer. No fixed-build differential exists
+(BLOCKED), so vulnerable-only with a safe-input control is the honest
+scope. Layout sensitivity is preserved as a negative, not retried into a
+positive claim.

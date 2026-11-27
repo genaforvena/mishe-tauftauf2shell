@@ -3,3 +3,4 @@ patch-shim.so
 consumer-raw.so
 consumer-patch.so
 repair-shim.so
+span-shim.so

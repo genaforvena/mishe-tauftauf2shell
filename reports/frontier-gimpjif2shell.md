@@ -335,9 +335,12 @@ without backtrace instrumentation.
   pointer value in a live GLib object on the real allocator. W246 reaches
   the unmodified vulnerable `file-gif-load` plugin in a real GIMP 3.2.8
   process through the PDB with a file-chosen wrapped product and observes
-  64 chosen bytes past the real 260-byte allocation. The grade stays PARTIAL
-  because that plugin run identifies no named live victim object, and there
-  is no chosen address, dereference of a chosen pointer or command.
+  64 chosen bytes past the real 260-byte allocation. W302 observes 760
+  chosen bytes past the real 264-byte usable allocation in that plugin and
+  an unshimmed plug-in fault from 8 KiB and 64 KiB JIFs with a clean safe
+  control. The grade stays PARTIAL because no named live victim object,
+  chosen address, dereference of a chosen pointer or command is identified;
+  the unshimmed fault is a corruption/abort, not pointer control.
 - **Not rung 5:** no live loopback target and no benign command side effect.
 
 Next experiment: obtain a fixed-plugin control from a matching GIMP 3.2
@@ -828,3 +831,43 @@ the measured window, and the repair is shim-assisted. A clean
 29/0. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
 Exact hashes and logs are in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## Large natural overflow and unshimmed live-plugin fault (W302, 2026-11-27)
+
+All earlier live JIFs inflated to 324 or 448 chosen bytes. The pinned
+`zs.avail_out` is the unwrapped `len*height` = 2147483778 while the
+attacker-filled `compressed` buffer holds up to `data_size*255` = 66300
+bytes, so the file can request a far larger decompressed run. The new
+`realglib/make-jif.py published-run N HEXBYTE` mode writes exactly that.
+No natural plugin path reads `indexes[i]` past `data_size`
+(`pins/jif-vulnerable.inc:118-136`): the `pos >= data_size` break at :122
+precedes the sole read at :125, and `indexes` is freed in place. The
+remaining question was therefore whether a larger *natural* write reaches
+a live consumer.
+
+`live/span-shim.c` is read-only: it calls the real `inflate()` and reports
+the allocation size, `total_out` and chosen-byte run; it patches nothing.
+`live/run-appimage-span.sh` drives 1 KiB, 8 KiB and 64 KiB JIFs through the
+real PDB `gimp-file-load`, with the 8 KiB and 64 KiB cases running under a
+shim-free AppRun variant. `live/evidence/span-1024.log` gives
+`total_out=1024 ret=1 usable=264` and `chosen_run_after_usable=760`:
+real zlib writes 760 file-chosen bytes past the real allocation. Both safe
+controls complete cleanly.
+
+Without any shim, an 8 KiB JIF produced
+`malloc(): unaligned tcache chunk detected` and
+`GIMP-Error: Plug-in crashed: "file-gif-load"`
+(`live/evidence/noshim-8192-tcache.log`); both the shimmed first run and
+its identical no-shim control reproduced it. A later replay of the same
+committed runner produced `Error reading inflate failed` followed by
+`fatal error: Segmentation fault` instead, so the fault site is
+layout-sensitive; only the plug-in fault is asserted. A 64 KiB JIF also
+crashes the plug-in, while 1 KiB does not fault in its 90 s window.
+
+Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5. This is the first live-plugin fault from a file-chosen overflow
+without shim-assisted repair, arranged neighbour or synthetic driver
+consumer — but it is a crash on corrupted allocator metadata, not a
+chosen-address write, named victim object, marker or command. No fixed
+AppImage is published (gimp.org still 3.2.8 at 01:09Z), so there is no
+vulnerable/fixed differential; safe-input control only.

