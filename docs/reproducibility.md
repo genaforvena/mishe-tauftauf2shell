@@ -44,9 +44,9 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| CoturnOAuthNonce2Shell W330 (STAGED 09:3xZ, not admitted) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; no live wire or witness; full recipe in §09:2x–09:4xZ |
+| CoturnOAuthNonce2Shell W330 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, witness UNKNOWN; no live wire; full recipe in §09:2x–09:4xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
-| Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5, witness owed. Full recipe in §08:4x–09:0xZ |
+| Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5; W330 (#6283) independently replayed the live wire from its own builds: ESTABLISHED AS LABELED, no grade change. Full recipe in §08:4x–09:0xZ and §09:2x–09:4xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
 | ExpatParseBuf2Shell W324 (ADMITTED 07:4xZ, 204th) | [status](../reports/expatparsebuf2shell-status.md), [brief](../reports/frontier-expatparsebuf2shell.md), [provenance](../lab/frontier/expatparsebuf2shell/PROVENANCE.md) | CVE-2026-77214 / GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5 over-read in `XML_ParseBuffer`; fix `13c5f63a` / 2.9.0; tarballs `920dde48…88fe` / `16afbb9c…89ba`, patch `4eb9303e…1df` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/expatparsebuf2shell` | rc 0, 41 PASS / 0 FAIL; ASan `READ of size 1` at `xmltok_impl.c:873` via `doContent :3303` / `XML_ParseBuffer :2464`, 0 bytes after a 4096-byte region; chosen-byte readback 4096 bytes at seeds `0x5a`/`0x6b`; patched/2.9.0/safe clean; author and operator pathspec-archive replays (`17d186f0…` archive, log `023945b0…`) byte-identical; R4 LIMITED, witness W326 ESTABLISHED AS LABELED with the same 41/0 and readback, no grade change; full procedure at the tail |
 | BerryFormat2Shell W326 (ADMITTED 09:0xZ, 205th) | [status](../reports/berryformat2shell-status.md), [brief](../reports/frontier-berryformat2shell.md), [provenance](../lab/frontier/berryformat2shell/PROVENANCE.md) | CVE-2026-3285 / GHSA-92ph-pr79-cv5g, Berry 1.1.0 tarball `b8eb94a4…69a7`, fix `7149c59a` source `96afb4d8…6439` (advisory claims only a lexer READ-1) | `cd lab/frontier/berryformat2shell && bash bootstrap.sh && bash run-all.sh` | rc 0, `TOTAL: 59 PASS / 0 FAIL`; ASan `WRITE of size 225` at `get_mode be_strlib.c:542` → `str_format:572`, all eight saved-RIP bytes overwritten in unprotected O0 (`0x2d30232b2d30232b`, noncanonical, no controlled branch), default hardening rc 134, patched plain and ASan clean, exact fix's separate `mode_fixlen` `WRITE of size 3`, lexer READ-1 control; operator clean-archive replay `2cbd8cb5…` log `e8ebb940…`, 14 pins matched; R4 LIMITED, R5 NOT CLAIMED, witness UNKNOWN. Full recipe in §08:4x–09:0xZ |
@@ -18191,8 +18191,9 @@ a corrected mistake. Fixed 2.4.32 logs `BZTRACE fixed-reject len=1024
 tcplen=4`, rejects the player and performs only the 4-byte header read. Raw
 logs are gitignored; the harness-only 38-byte-overwrite recipe and witness
 #761 verdict remain in §2026-11-21 above. The live scope has no chosen
-target address, function-pointer overwrite, execution or fresh witness;
-rungs 1/2/3 are live, rung 4 is chosen-value control, R5 UNKNOWN.
+target address, function-pointer overwrite or execution; W330 (#6283)
+independently replayed it from hash-matched builds and graded that live
+scope ESTABLISHED AS LABELED, no grade change, NO r5.
 
 ### Opensips2Shell W328 witness receipt and raw-NUL gate (negative)
 
@@ -18261,9 +18262,9 @@ CONFIRMED (rung 3 memory-safety differential), rung 4 NOT CLAIMED, wire path
 CLOSED by the `Warning.warn` survey, full rung 5 NOT ACHIEVED. Detail in
 `reports/ruby2shell-investigation.md` §W329.
 
-## 2026-11-27 09:2x–09:4xZ — staged coturn, stock-frame RIP, tbuf2, W329 and W330
+## 2026-11-27 09:2x–09:4xZ — coturn admitted, stock-frame RIP, tbuf2, W329/W330
 
-### CoturnOAuthNonce2Shell — staged direct sink (R4 LIMITED, no live wire)
+### CoturnOAuthNonce2Shell — admitted direct sink (R4 LIMITED, no live wire)
 
 From the repository root:
 
@@ -18290,7 +18291,10 @@ sides also hit an unrelated OpenSSL error-path leak, so the runner sets
 and regenerate with those two commands. The 990-byte copy is a direct sink
 harness mirror of upstream `FuzzOAuthToken.c`, not a wire result: no live
 coturn process, STUN/TURN request, saved-RIP value or witness replay exists.
-The target is STAGED (window 214, no charter, unit or route change); the
+Admitted at 09:4xZ as the 206th mind (window 214, panes %434/%435, registry
+215/215); the operator's clean archive `5a982134…` matched all 10 pins and
+repeated 13/0 with byte-identical log `b9c20a26…`. Counts are 206/203/203,
+established stays 139 and the register cell stays `established:false`. The
 advisory's pre-auth `--oauth` path is the next experiment, not a claim here.
 
 ### Opensips2Shell — stock saved RIP via the early return (rung 4 only)
@@ -18387,19 +18391,28 @@ pending=True)` call and logged no probe lines (`e3b0c442…`): a tooling
 negative, not heap evidence. Grade unchanged: rung 3 pinned verbatim / rung 4
 PARTIAL chosen bytes, NO r5; see `reports/frontier-gimpjif2shell.md` §W329.
 
-### Bzfs2Shell W330 — author durability replay, not an independent verdict
+### Bzfs2Shell W330 — independent live-wire verdict (author replay preserved)
 
 The §08:4x–09:0xZ live recipe is unchanged: `bash run_live.sh <bin> <port>
-<tag>` from `lab/bzfs2shell-live`, 127.0.0.1 only. Re-running it on ports
-15157/15158/15159 reproduced `tcpmsg@96` / `tcplen@1120` in the 2384-byte
-object, `tcplen=-1024`, `recv(fd, tcpmsg-1024, 1028)`, chosen
+<tag>` from `lab/bzfs2shell-live`, 127.0.0.1 only. An author durability
+replay on ports 15157/15158/15159 reproduced `tcpmsg@96` / `tcplen@1120` in
+the 2384-byte object, `tcplen=-1024`, `recv(fd, tcpmsg-1024, 1028)`, chosen
 `ares=0x41424344454647bc` / `info=0x41424344454647bd` readback and a plain
 segfault; ASan reported `heap-use-after-free WRITE of size 1028` through
 `recv` → `NetHandler::receive` → `NetHandler::tcpReceive` with a 1028-byte
-second packet (the 1024-byte packet used in the first replay gives
+second packet (the first replay offered 1024 bytes and reported
 `WRITE of size 1024`); fixed v2.4.32 logged `fixed-reject len=1024` and the
-client's second `sendall` failed on a closed pipe. Logs
-`live-w330-{plain,asan,fixed}.log` are gitignored. Witness #761's 20/0
-verdict covers only the earlier harness stand-in; the live scope's replay
-(#6258) is still UNKNOWN and no chosen target, function pointer or execution
-was observed.
+client's second `sendall` failed on a closed pipe. Those logs
+(`live-w330-{plain,asan,fixed}.log`) are gitignored and are not acceptance.
+
+Witness #6283 independently rebuilt stock and fixed servers from the
+hash-matched tarballs (`29b3b97f…` / `86a5ded5…`) in private reflink copies
+and replayed the same unmodified `send_packet.py` on ports
+15157/15158/15159: same layout and `tcplen=-1024`, object-928 `recv`, ASan
+`WRITE of size 1028`, chosen-member readback with SIGSEGV in plain, and
+v2.4.32 rejection with BrokenPipe on the second send. Verdict ESTABLISHED
+AS LABELED, no grade change, NO r5; no chosen target address, function
+pointer, execution marker or command. Full hashes, logs and counterexamples
+are in the gitignored witness artifact
+`.mishe-tauftauf/artifacts/witness-w330-bzfs/detail.md`. Witness #761's 20/0
+verdict remains scoped to the earlier harness stand-in.

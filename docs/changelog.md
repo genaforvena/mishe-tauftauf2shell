@@ -2,16 +2,17 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
-## 2026-11-27 09:2x–09:4xZ — stock RIP attempts, staged coturn, closed tbuf2
+## 2026-11-27 09:2x–09:4xZ — stock RIP, coturn admitted, W330 verdict
 
-Explanation and recipes only: no generated cell, register row, count, report
-or lab evidence moved here. This fold covers `d1838af1`, `b46391fd`,
-`0795f005`, `77eb20e2`, `79a84bee`, `c2fb10c5`, `941c7fe2` and `e7b65a52`
+Explanation and recipes only: no rung or grade cell moved by this fold. It
+covers `d1838af1`, `b46391fd`, `0795f005`, `77eb20e2`, `79a84bee`,
+`c2fb10c5`, `941c7fe2`, `e7b65a52`, `bf98f5ad`, `e7805ae8` and `ce790520`
 past `64dae817`. Ruby W329 was folded by its author in `0795f005` and was
 verified here, not repeated; `e7b65a52` only removed stale generated cmake
 artifacts. Inbox #6269's Berry `docs/task.md` entry already exists in the
 09:0xZ limb and matches `reports/berryformat2shell-status.md`: doc-ok, no
-edit.
+edit. The operator moved the generated counts to 206/203/203 at `ce790520`
+(established stays 139); those cells and `docs/results.md` are theirs.
 
 - **OpenSIPS reaches the stock saved RIP, but not executable chosen code.**
   A 260-byte `to` takes `uri_xmpp2sip`'s early `return -1` before `tm`
@@ -48,30 +49,35 @@ edit.
   alpha-doubling wrap needs `len * height >= 2^31` (~2 GiB `dest`), which
   is why prior runs fault in the allocator. Grade unchanged: rung 3 pinned
   verbatim / rung 4 PARTIAL chosen bytes, NO r5.
-- **Bzfs refreshes its boundary and self-replays the live wire.** The
-  status now separates witness #761's harness scope (20/0, digest
-  `cea3b92e…`) from the live stock scope, whose independent replay (#6258)
-  is UNKNOWN. It also distinguishes the real syscall's 1024- or 1028-byte
-  second packet from the earlier guarded trace. An author durability
-  replay on ports 15157–15158–15159 reproduced `tcpmsg@96` /
-  `tcplen@1120`, `tcplen=-1024`, chosen `ares`/`info` readback, ASan
-  `WRITE of size 1028` and fixed 2.4.32 rejection: still not independent,
-  still no chosen target or execution.
-- **Coturn OAuth nonce staged, not admitted.** Frontier staged
-  `coturnoauthnonce2shell` at `941c7fe2` (window 214): CVE-2026-43994 /
+- **Bzfs refreshes its boundary and closes the live witness question.** The
+  status separates witness #761's harness scope (20/0, digest `cea3b92e…`)
+  from the live stock scope. W330 (#6283) independently rebuilt stock and
+  fixed servers from hash-matched tarballs in private reflink copies and
+  replayed the live wire on 127.0.0.1 ports 15157/15158/15159: same real
+  layout (`tcpmsg@96`, `tcplen@1120`), `tcplen=-1024`, object-928 `recv`,
+  chosen member readback, ASan `WRITE of size 1028`, fixed reject.
+  ESTABLISHED AS LABELED, no grade change, NO r5; no chosen target,
+  function pointer, marker or command. The earlier author self-replay is
+  preserved only as a durability check; the ASan write size tracks the
+  offered second-packet bytes (1024 in the first replay, 1028 now).
+- **Coturn OAuth nonce admitted 206th.** Frontier staged
+  `coturnoauthnonce2shell` at `941c7fe2`: CVE-2026-43994 /
   GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0` and fix `46368b3e` in 4.10.0.
   Pinned `6e8dd731` passes an attacker `uint16_t nonce_len` into a `memcpy`
   over a 256-byte stack `nonce[]` before authentication: ASan
   `WRITE of size 990` at `ns_turn_msg.c:2363`, chosen `0x41` bytes in
   adjacent struct fields in an unprotected plain build, 13 PASS / 0 FAIL,
   fixed and safe-input controls clean. R1/R2/R3 ✓, R4 LIMITED, R5 NOT
-  CLAIMED; no live process or wire request was observed, so the advisory's
-  pre-auth path is only the next experiment. No charter, witness verdict,
-  unit or route change.
+  CLAIMED. The clean archive `5a982134…` matched all 10 pins and repeated
+  13/0 with a byte-identical `b9c20a26…` log; window 214 (%434/%435,
+  registry 215/215) was adopted and the target declared 206th at 09:4xZ.
+  No live process or wire request was observed, so the advisory's pre-auth
+  path remains the next experiment and the witness stays UNKNOWN.
 
 What would change this fold: a mapped and executed chosen target with an
-observed side effect, a coturn wire replay or admission, an ettercap pointer
-control, a gimpjif completed-load consumer, or a checker RED on HEAD.
+observed side effect, a coturn wire replay, an ettercap pointer control, a
+gimpjif completed-load consumer, a bzfs pointer-control result, or a checker
+RED on HEAD.
 
 ## 2026-11-27 09:0x–09:2xZ — W329 adjacent Ruby chilled-append stale pointer
 
@@ -125,8 +131,9 @@ verified, not repeated here.
   `dotNotation` offsets before segfaulting. Fixed 2.4.32 rejects at the
   first bound with no body `recv`. Rungs 1/2/3 now have live stock-process
   evidence, rung 4 is chosen-value control at real member offsets, not
-  chosen-target pointer control or execution; R5 stays UNKNOWN and a fresh
-  witness replay is owed for the live scope.
+  chosen-target pointer control or execution; R5 stays UNKNOWN. W330
+  (#6283) later replayed this live scope independently: ESTABLISHED AS
+  LABELED at that label, no grade change, no r5.
 - **OpenSIPS W328 closed the replay question, not rung 5.** The witness's
   clean `git archive` of `9f01094a`, hash-matched builds, harness 26/0 and
   fresh 401-asan `WRITE of size 304` / 401-plain 900-byte SIGSEGV / 402-asan
@@ -147,8 +154,8 @@ verified, not repeated here.
   LABELED, no grade change; R4 LIMITED and R5 NOT CLAIMED unchanged.
 
 What would change this fold: a Berry consumer reachability measurement, a
-bzfs live-scope witness verdict or pointer-control result, a measured OpenSIPS
-stock-frame slot, or a checker RED on committed HEAD.
+bzfs pointer-control result, a mapped executed target, or a checker RED on
+committed HEAD.
 
 
 ## 2026-11-27 08:2x–08:4xZ — W328 adjacent Ruby `setbyte` stale-length write
