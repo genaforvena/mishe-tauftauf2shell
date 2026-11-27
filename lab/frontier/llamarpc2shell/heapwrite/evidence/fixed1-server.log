@@ -1,0 +1,27 @@
+register_backend: registered backend RPC (0 devices)
+register_backend: registered backend CPU (1 devices)
+register_device: registered device CPU (AMD Ryzen 7 5700X 8-Core Processor)
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-fixed/bin/libggml-rpc.so
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-fixed/bin/libggml-cpu.so
+Starting RPC server v10.0.2
+  endpoint       : 127.0.0.1:53084
+  local cache    : n/a
+Devices:
+  CPU: AMD Ryzen 7 5700X 8-Core Processor (32019 MiB, 32019 MiB free)
+  transport      : TCP
+[create_server] listening on 127.0.0.1:53084
+[accept] accepted client connection
+Accepted client connection
+recv returned 0 (peer closed?)
+Client connection closed
+[~impl] closing socket 4
+[accept] accepted client connection
+Accepted client connection
+[hello] version: 10.0.2
+[rpc_serve_client] client connected, transport: TCP
+[alloc_buffer] device: 0, size: 4.00 KiB -> remote_ptr: 0x5c1e368a5150, remote_size: 4.00 KiB
+[alloc_buffer] device: 0, size: 4.00 KiB -> remote_ptr: 0x5c1e368a6250, remote_size: 4.00 KiB
+[copy_tensor] region (offset=0, span=16) out of tensor '' bounds (0)
+[copy_tensor] invalid tensors
+Client connection closed
+[~impl] closing socket 4

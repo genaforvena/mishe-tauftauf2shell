@@ -1,0 +1,7 @@
+bad msg size 0 (want 1)
+COPY_TENSOR failed (server closed connection)
+HELLO v10.0.2
+B handle=0x5c1e368a5150 size=4096
+A handle=0x5c1e368a6250 size=4096
+B base=0x5c1e368a4140 A base=0x5c1e368a5240
+target=0x5c1e368a4180 mode=readback

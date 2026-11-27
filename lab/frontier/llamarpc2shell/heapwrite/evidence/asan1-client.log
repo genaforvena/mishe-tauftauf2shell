@@ -1,0 +1,7 @@
+bad msg size 0 (want 1)
+COPY_TENSOR failed (server closed connection)
+HELLO v8.0.0
+B handle=0x50c000003880 size=4096
+A handle=0x50c000003940 size=4096
+B base=0x521000014100 A base=0x521000015500
+target=0x5210000154f0 mode=asan

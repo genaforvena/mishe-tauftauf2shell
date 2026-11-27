@@ -1,0 +1,84 @@
+register_backend: registered backend RPC (0 devices)
+register_backend: registered backend CPU (1 devices)
+register_device: registered device CPU (AMD Ryzen 7 5700X 8-Core Processor)
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-vuln-asan/bin/libggml-rpc.so
+load_backend: failed to find ggml_backend_init in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-vuln-asan/bin/libggml-cpu.so
+Starting RPC server v8.0.0
+  endpoint       : 127.0.0.1:53083
+  local cache    : n/a
+Devices:
+  CPU: AMD Ryzen 7 5700X 8-Core Processor (32019 MiB, 32019 MiB free)
+  transport      : TCP
+Accepted client connection
+recv returned 0 (peer closed?)
+Client connection closed
+[~impl] closing socket 4
+Accepted client connection
+[hello] version: 8.0.0
+[alloc_buffer] device: 0, size: 4096 -> remote_ptr: 50c000003880, remote_size: 4096
+[alloc_buffer] device: 0, size: 4096 -> remote_ptr: 50c000003940, remote_size: 4096
+[buffer_get_base] remote_ptr: 50c000003880
+[buffer_get_base] remote_ptr: 50c000003940
+[set_tensor] buffer: 0x50c000003940, data: 0x521000015540, offset: 0, size: 16
+[copy_tensor] src->buffer: 0x50c000003940, dst->buffer: 0x50c000003940
+=================================================================
+==1988985==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x5210000154f0 at pc 0x7594e7afb303 bp 0x7fffb060d550 sp 0x7fffb060ccf8
+WRITE of size 16 at 0x5210000154f0 thread T0
+    #0 0x7594e7afb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x7594e711f9df in ggml_backend_cpu_buffer_cpy_tensor /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-backend.cpp:2491
+    #2 0x7594e710c1c4 in ggml_backend_buffer_copy_tensor /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-backend.cpp:359
+    #3 0x7594e7952d06 in rpc_server::copy_tensor(rpc_msg_copy_tensor_req const&, rpc_msg_copy_tensor_rsp&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:1949
+    #4 0x7594e795b068 in rpc_serve_client /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:2569
+    #5 0x7594e795cf2c in ggml_backend_rpc_start_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:2716
+    #6 0x6247afd236c8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/tools/rpc/rpc-server.cpp:266
+    #7 0x7594e682a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7594e682a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x6247afd1f2c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-vuln-asan/bin/ggml-rpc-server+0x152c4) (BuildId: 556e76b863794edc14ebc8b175de8a19f06ef922)
+
+0x5210000154f0 is located 16 bytes before 4096-byte region [0x521000015500,0x521000016500)
+allocated by thread T0 here:
+    #0 0x7594e7afcf1d in posix_memalign ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:145
+    #1 0x7594e70cae32 in ggml_aligned_malloc /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml.c:368
+    #2 0x7594e711fadd in ggml_backend_cpu_buffer_type_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-backend.cpp:2543
+    #3 0x7594e7109bb2 in ggml_backend_buft_alloc_buffer /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-backend.cpp:45
+    #4 0x7594e7949db0 in rpc_server::alloc_buffer(rpc_msg_alloc_buffer_req const&, rpc_msg_alloc_buffer_rsp&) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:1424
+    #5 0x7594e7959c3e in rpc_serve_client /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:2397
+    #6 0x7594e795cf2c in ggml_backend_rpc_start_server /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/ggml/src/ggml-rpc/ggml-rpc.cpp:2716
+    #7 0x6247afd236c8 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/src/llama.cpp-b11450/tools/rpc/rpc-server.cpp:266
+    #8 0x7594e682a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #9 0x7594e682a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #10 0x6247afd1f2c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/llamarpc2shell/heapwrite/build-vuln-asan/bin/ggml-rpc-server+0x152c4) (BuildId: 556e76b863794edc14ebc8b175de8a19f06ef922)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x521000015200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000015400: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+=>0x521000015480: fa fa fa fa fa fa fa fa fa fa fa fa fa fa[fa]fa
+  0x521000015500: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015580: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000015700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==1988985==ABORTING

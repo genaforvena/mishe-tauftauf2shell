@@ -1,0 +1,8 @@
+HELLO v8.0.0
+B handle=0x62f556d3ddd0 size=4096
+A handle=0x62f556d46d40 size=4096
+B base=0x62f556d41180 A base=0x62f556d421c0
+target=0x62f556d411c0 mode=readback
+copy result=1
+readback=414243445a5a444411223344eeeeff00
+MATCH chosen bytes

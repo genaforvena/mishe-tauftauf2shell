@@ -39,3 +39,22 @@ wire/evidence/*
 !wire/evidence/client-r5-fixed.log
 !wire/evidence/r5-fixed.log
 !wire/evidence/r5-system-obs.log
+
+# CVE-2026-137567 lane: provisioned tarballs/trees, local builds and binary.
+heapwrite/src/*.tar.gz
+heapwrite/src/llama.cpp-b11450/
+heapwrite/src/llama.cpp-b12658/
+heapwrite/build-vuln/
+heapwrite/build-vuln-asan/
+heapwrite/build-fixed/
+heapwrite/tcp_client
+heapwrite/*.log
+heapwrite/evidence/*
+!heapwrite/evidence/rb3-client.log
+!heapwrite/evidence/rb4-client.log
+!heapwrite/evidence/rb5-client.log
+!heapwrite/evidence/asan1-server.log
+!heapwrite/evidence/asan1-client.log
+!heapwrite/evidence/fixed1-server.log
+!heapwrite/evidence/fixed1-client.log
+!heapwrite/evidence/safe2-client.log

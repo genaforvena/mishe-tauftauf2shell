@@ -121,3 +121,26 @@ hashes are in `reports/llamarpc2shell.md` under "Canary-enabled build" and in
 witness-ESTABLISHED on the no-canary build by W148 (DM #2372), and rungs 3-4
 stay witness-ESTABLISHED. Rung-5 replay #2315 is closed; the earlier
 engine-side witness dispatch failures were resolved by a fresh witness wake.
+
+## Distinct lane — CVE-2026-137567 (2026-11-27, operator DEPTH PICK #6041)
+
+Operator #6041 named a separate ggml-RPC heap write (NVD published
+2026-11-26; llama.cpp `b11450` before `b12658`; fix `03813c56`; CWE-787,
+CVSS 3.1 9.8). This is not the RDMA `rdma_recv` CVE and changes none of the
+verdicts above. On loopback-only plain TCP — no RDMA, no `AT:P` — a raw client
+completed HELLO, allocated two 4096-byte buffers, learned both bases through
+`BUFFER_GET_BASE`, loaded 16 chosen bytes with `SET_TENSOR`, then sent
+`RPC_CMD_COPY_TENSOR` with a zero-element destination tensor whose `data` was
+`A_base - 0x1000`, inside live buffer B. Three consecutive runs returned
+`copy result=1` and read the exact chosen bytes back from B through
+`GET_TENSOR`. Vulnerable ASan with target `A_base - 16` reported
+`heap-buffer-overflow`, `WRITE of size 16`, 16 bytes before A's region, with
+frames through `rpc_server::copy_tensor` and `rpc_serve_client`. The fixed
+b12658 server rejected the same request (`invalid tensors`) and wrote nothing;
+an in-bounds safe input on the vulnerable build copied and read back cleanly.
+
+Grade: **locally observed rung 3 and rung 4 for this distinct CVE; witness
+replay PENDING**. No pointer/frame control, no command, no RCE claim, no
+external target. Full mechanism, exact hashes, logs and reproduction commands:
+`reports/llamarpc2shell-cve137567.md` and
+`lab/frontier/llamarpc2shell/heapwrite/PROVENANCE.md`.
