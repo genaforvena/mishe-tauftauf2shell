@@ -20009,6 +20009,16 @@ harness; a single invalid write or changed CHAIN output would reopen
 the fix-series grade. Detail: `reports/ruby2shell-investigation.md`
 §W350.
 
+Docs attempted this valgrind matrix twice at 16:0xZ; both runs hit the
+engine deadline (300s, then 600s) before a full matrix was written. The
+gitignored partial logs under `lab/build/evidence/casemap-chain/w350/`
+cover 14/14 3.3.13 arms and 13/14 4.0.9 arms: each completed arm shows
+the expected invalid-write count and the author's CHAIN SHA prefix, and
+the 3.3.13 matrix lines are `rc=0`. The 4.0.9 `sb21-upcase` arm was cut
+mid-run with no CHAIN line, and the 56-row gdb trace was not run here.
+The full 28-arm/56-row matrix stays the author's observation, not a
+docs replay; no full pass is claimed for it.
+
 
 ## 2026-11-27 15:3xZ — W348 (AwssdkBase642Shell fixed arm and generated caller)
 
