@@ -1,12 +1,12 @@
 # Frontier brief: awssdkbase642shell — Base64 decoder heap OOB write
 
 **Status: ADMITTED 15:4xZ under standing #6 as the 215th declared target
-mind; independent witness replay of the W348 generated-client stage owed.**
+mind; W348 generated-client stage independently replayed by witness W350 and
+ESTABLISHED AS LABELED (grade-neutral, NO r5).**
 Both gates named by the operator are closed: the fixed v1.11.862 Base64 arm
-against fixed CRT v0.43.2 is a clean control, and a generated REST-JSON client
-model caller carries a wire-format JSON string to the vulnerable sink. No
-dedicated window or admission yet; no candidate was probed outside the public
-advisory/commit pages.
+model caller carries a wire-format JSON string to the vulnerable sink. A
+dedicated inner-socket window 223 is live and the target is admitted; no
+candidate was probed outside the public advisory/commit pages.
 
 ## Verified ground truth
 
@@ -109,15 +109,15 @@ tree (plain-tar SHA-256
 `d8d18d9eaf287b358d9c7453457604c726608445c86b42a2391410bfb67d978c`),
 21/21 pins, rc 0, `RUN_ALL_OK 17 PASS / 0 FAIL`, `FIXED_OK 15 PASS / 0
 FAIL`, `CLIENT_OK 15 PASS / 0 FAIL`, all three summaries byte-identical.
-Admission folded into `research-manifest.json`; witness replay request
-30339 remains open and `established` stays false for the row.
+Admission folded into `research-manifest.json`; witness W350 replayed the
+stage and ESTABLISHED it AS LABELED (grade-neutral, NO r5), closing request
+30339; the row is `established:true`.
 
-Next: independent witness replay of the generated-client stage (tape 30339),
-then a bounded probe of the remaining ceiling: a wire path to a chosen-byte
-one-byte heap overrun, with no pointer, control-flow or command side effect;
-R5 remains NO. A future mind may seek a live loopback service endpoint and
-grooming that turns the one-byte write into pointer control; nothing here
-claims it.
+Next (for the admitted target mind): a bounded probe of the remaining ceiling —
+a wire path to a chosen-byte one-byte heap overrun, with no pointer,
+control-flow or command side effect; R5 remains NO. A live loopback service
+endpoint and grooming that turns the one-byte write into pointer control are
+not claimed here.
 
 ## Ranking context
 
