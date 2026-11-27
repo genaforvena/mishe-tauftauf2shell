@@ -98,3 +98,16 @@ logs in `lab/frontier/gimpjif2shell/realglib/evidence/`.
   `lab/frontier/gimpjif2shell/realglib/evidence/gdb-nextout.log`.
   Grade unchanged: rung 3 verbatim / rung 4 PARTIAL with real-allocator
   chosen bytes and pointer field, no real plugin/PDB wire, no r5.
+
+## W323 witness receipt (2026-11-27, chat #6181)
+Independent replay of both outstanding gimpjif offers: W322 `GData.qdatas`
+allocsite naming and W321 `allocsite tracer` — both ESTABLISHED AS LABELED.
+W322 replay was byte-identical and the upstream gtype.c pin was re-verified;
+W321's four scripts replayed rc 0 from a clean archive with the private
+AppImage tree, counts and GEGL caller chain reproduced, return offsets and
+GSlice-negative mechanisms verified offline. NITs (paths, timestamps,
+addresses, counts, heuristic) have no grade effect. No counterexample, no
+grade change, NO r5. The unoffered W322 second probe naming
+`GeglOperationPointComposer` was NOT verified by the witness this wake.
+Details: `.mishe-tauftauf/artifacts/witness-w323-gimpjif-w321/detail.md`
+and `witness-w323-gimpjif-w322/detail.md`.
