@@ -15361,3 +15361,44 @@ stock/oracle-free/persistent rung 5 NOT ACHIEVED. Recipe in
 What would change this fold: a pointer-bearing pre-write qword at a
 measured negative offset, a non-index consumer, or a control that
 falsifies the artifact explanation.
+
+## 2026-11-27 02:0xZ — W305 openjph established 132, gimpjif W304, AFFLIB staged W303
+
+One scoped fold of `fde44380..757418ab`, explanation and recipes only.
+`31974ff6` (Ruby IDs `−17..−64`) arrived with coherent author briefs in all
+three docs; no edit was owed there. No generated cell, register row, grade,
+count, manifest, SVG, report or lab evidence moved.
+
+W305 (#5964) replayed the clean openjph archive and returned ESTABLISHED AS
+LABELED at the direct-sink R2/R3 scope: runner `2c02c8be…`, 27/0, ASan
+`WRITE-4` at raw `ojph_block_decoder32.cpp:1155` on a harness one-row buffer,
+full-program ASan negative preserved, direct plain sink's `sysmalloc` abort
+3/3 a harness-only NIT. No chosen offset, pointer, consumer, wire or command;
+grade unchanged, NO r5. The operator folded `established=true` and count
+131 → 132. This supersedes the 01:3x openjph "witness replay is still owed"
+line and the 01:2x staging brief, both kept as pre-verdict history.
+
+gimpjif W304 captured the live 8 KiB JIF fault under gdb without a preload
+shim or patched word: chosen-corrupted allocator metadata faults in `malloc`
+(author) or in `free` at `file-gif-load.c:1616` (clean replay), so the runner
+asserts `malloc|free` plus chosen bytes in `rax` plus JIF frames. The
+generalized assertion replayed 9/0 from `25bb618d`, core 29/0, safe JIF clean;
+the first 7/1 `malloc`-only failure is preserved. Grade rung 3 pinned verbatim
+/ rung 4 PARTIAL / NO r5 stays: allocator faults on corrupt metadata, no
+chosen-pointer dereference, named victim, write, marker or command, and no
+fixed AppImage (vulnerable/fixed differential BLOCKED).
+
+AFFLIB `afflibpage2shell` was staged in W303 from CVE-2026-119601: pinned
+`pagesize=100` / `sectorsize=4096` underflows the badblock-fill loop at raw
+`lib/afflib_pages.cpp:186-190`, ASan `WRITE of size 4096` into a 100-byte
+harness buffer; fixed pin rejects geometry, safe pin reads a full page.
+Runner hash `f2e166d0…`, 29/0 in-tree and clean-archive replay; grade
+R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, no live consumer, readback, pointer, wire
+or command. STAGED, unowned — admission and witness replay owed; author
+report is not acceptance.
+
+Recipes in `docs/reproducibility.md` §02:0xZ. What would change these folds:
+a W305 verdict contradicting the openjph direct-sink scope, a committed gimpjif
+or AFFLIB witness verdict differing from these labels, a report misquoting
+these receipts, or a checker RED on committed HEAD. The W305b gimpjif artifact
+is interim (8 KiB 90 s timeout, 240 s trial pending), not a committed verdict.

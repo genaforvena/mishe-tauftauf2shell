@@ -16393,6 +16393,58 @@ observed in the measured window, the repair is shim-assisted, no fixed
 rung 4 PARTIAL, NO r5. Hashes and the first replay's corrected runner-hex
 defect are in `lab/frontier/gimpjif2shell/PROVENANCE.md` § W301.
 
+## 2026-11-27 02:0xZ — W305 openjph verdict, gimpjif W304 gdb replay, AFFLIB W303 staging
+
+Three receipts, from the repo root. No Ruby recipe here: `31974ff6` already
+committed §01:5xZ with the deep-ID watch commands and expected evidence.
+
+### openjphcleanup2shell — W305 independent replay (ESTABLISHED AS LABELED)
+
+`git archive bbedbe5b lab/frontier/openjphcleanup2shell` into a private work
+dir (expect 15 files, no `runs/`, checkouts, builds or binaries), then
+`sh build-all.sh && sh run-all.sh`. Expect runner sha256
+`2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`, rc 0
+`BUILD_OK`, rc 0 `PASS=27 FAIL=0`. The sink-1row ASan output is `WRITE of size
+4` at raw `ojph_block_decoder32.cpp:1155`, 0 bytes after a 32-byte buffer;
+sink-2row ASan/plain and fixed-ASan cases are clean. Full vulnerable ASan
+stays clean and plain full decodes are byte-identical across pins; the
+one-row direct plain sink's glibc `sysmalloc` abort (3/3) is harness-only.
+Detail: `.mishe-tauftauf/artifacts/witness-w305-openjph/detail.md`.
+
+### gimpjif2shell — W304 live plug-in gdb frames
+
+From a clean `git archive 25bb618d lab/frontier/gimpjif2shell` with the cached
+SHA-verified GIMP 3.2.8 AppImage, run `bash live/run-appimage-gdb.sh`; gdb
+commands are in `live/gdb-plugin.cmd` and the wrapper is set by
+`GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run` and
+`GIMP_PLUGIN_DEBUG_WRAPPER="gdb -q -batch -x <cmd> --args"`. Expect 9 PASS /
+0 FAIL rc 0 (the author run from `fde44380` gave 8/0; the first clean replay
+gave 7/1 because it asserted `malloc` only — preserved). The 8 KiB JIF log
+shows SIGSEGV with chosen bytes in `rax`, frames in `malloc` (author run) or
+`free` at raw `file-gif-load.c:1616` (clean replay), with `ReadImage` /
+`load_image` / `gif_load` frames; the safe 4x4 JIF under the same wrapper
+reports `batch command executed successfully` and no signal. `run-witness.sh`
+from the same archive gives 29 PASS / 0 FAIL. Grade stays rung 3 pinned
+verbatim / rung 4 PARTIAL / NO r5; the fault site is layout-sensitive and no
+fixed AppImage exists. Details: `reports/frontier-gimpjif2shell.md` § W304 and
+`lab/frontier/gimpjif2shell/PROVENANCE.md` § W304.
+
+### afflibpage2shell — staged W303 (not admitted, no witness)
+
+From `lab/frontier/afflibpage2shell`: `sh build-all.sh && sh run-all.sh`.
+Expect rc 0 `BUILD_OK` then `PASS=29 FAIL=0`, runner sha256
+`f2e166d0907e746dfcd2382e51ede996cc8d8269538519ab500896633f9339ff`; a clean
+`git archive dce931cf lab/frontier/afflibpage2shell` (7 entries, no `runs/`,
+checkouts, builds or binaries) rebuilt all four libraries and repeated 29/0
+with that hash. ASan output is `heap-buffer-overflow`, `WRITE of size 4096`,
+0 bytes after a 100-byte region, at raw `lib/afflib_pages.cpp:187` from the
+617-byte generated image (`pagesize=100`, `sectorsize=4096`); the fixed pin
+reports `pagesize=0`, `GETPAGE rc=-1 errno=2`, no finding; safe geometry reads
+a full page on both pins. Plain vulnerable mode faults before readback. Grade
+R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —; admission and witness replay are owed.
+Details: `reports/frontier-afflibpage2shell.md` and
+`reports/afflibpage2shell-status.md`.
+
 ## 2026-11-27 01:5xZ — W304 deeper negative repeat-ID watch (IDs −17..−64)
 
 From the repo root, after the pinned 3.4.11 plain build and stock Rails app:

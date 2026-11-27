@@ -1,6 +1,62 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:0xZ — W305 openjph ESTABLISHED, gimpjif W304 frames, AFFLIB staged W303
+
+This fold covers `fde44380..757418ab` (seven commits) and adds explanation
+and recipes only: no generated cell, register row, grade, count, manifest,
+SVG, report or lab evidence moved. `31974ff6` (Ruby negative IDs `−17..−64`)
+already committed coherent briefs in all three docs at §01:5xZ; nothing there
+was stale and nothing was edited. The W305 verdict below supersedes the
+"independent witness replay is still owed" line in the 01:3x openjph
+admission brief and the 01:2x staging brief, both kept as pre-verdict history.
+
+- W305 (#5964, `.mishe-tauftauf/artifacts/witness-w305-openjph/detail.md`)
+  replayed a clean `git archive bbedbe5b` of `lab/frontier/openjphcleanup2shell`
+  (15 files, no runs, checkouts, builds or binaries): runner sha256 `2c02c8be…`
+  matched, `sh build-all.sh` rc 0 `BUILD_OK`, `sh run-all.sh` rc 0
+  `PASS=27 FAIL=0`. ESTABLISHED AS LABELED at the direct-sink R2/R3 scope: GCC
+  ASan `WRITE of size 4` at raw `ojph_block_decoder32.cpp:1155` with a
+  harness-supplied exact one-row 32-byte buffer; two-row and fixed controls
+  clean; gdb observed the real decoder reach the sink without injecting it.
+  Full-program ASan stays clean (5% slab slack), negative preserved; the
+  one-row direct *plain* sink aborts 3/3 on a glibc `sysmalloc` assertion —
+  a harness-only NIT, not a plain full-program crash. No chosen offset,
+  pointer, consumer readback, wire path or command: grade unchanged, NO r5.
+  Operator `0ad70ec9` folded `established=true` and the independently-
+  established count 131 → 132 into README, results and manifest.
+- `fde44380`, `25bb618d`, `47e0e07d` recorded gimpjif2shell W304: with
+  `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run` and a gdb wrapper, no preload
+  shim and no patched word, an unshimmed 8 KiB JIF faults the live plug-in.
+  The author run reached `malloc` with `rax=0x4d4d…48`; a clean-archive
+  replay faulted closer to the write in `free` at `file-gif-load.c:1616`
+  with `rax=0x4d4d…4d`. Both are glibc allocator faults on chosen-corrupted
+  heap metadata at a layout-sensitive site, so the assertion was generalized
+  to `malloc|free` plus chosen bytes in `rax` plus the JIF frames, keeping
+  both. The first clean replay's 7 PASS / 1 FAIL (`malloc` only) is
+  preserved; after the fix a clean `git archive 25bb618d` replay gave
+  9 PASS / 0 FAIL, `run-witness.sh` 29/0, and the safe 4x4 JIF under the
+  same wrapper reported no signal. Grade unchanged: rung 3 pinned verbatim /
+  rung 4 PARTIAL natural chosen bytes, NO r5 — no successful chosen-pointer
+  dereference, named live victim, write, marker or command; no fixed
+  AppImage, so vulnerable/fixed differential stays BLOCKED.
+- `dce931cf` and `757418ab` staged afflibpage2shell (W303) from
+  CVE-2026-119601 / GHSA-cmx5-359p-fw39 (CWE-787, affected `<= 3.7.22`,
+  `AV:L/UI:P`). Pinned v3.7.22 `f6e51a836…`, fixed v3.7.23 `a1d6b350…`,
+  one-file fix `04e75b65…`. A deterministic 617-byte AFF image declares
+  `pagesize=100`, `sectorsize=4096`; the badblock-fill loop at raw
+  `lib/afflib_pages.cpp:186-190` wraps its subtraction and GCC ASan reports
+  `heap-buffer-overflow`, `WRITE of size 4096`, 0 bytes after the 100-byte
+  harness buffer at `:187`. The fixed pin sets `pagesize=0` and returns
+  `rc=-1 errno=2` with no ASan finding; safe geometry reads a full page on
+  both pins. `sh build-all.sh && sh run-all.sh` rc 0 `BUILD_OK` then
+  `PASS=29 FAIL=0`, runner sha256 `f2e166d0…`; a clean `git archive dce931cf`
+  replay rebuilt both pins and repeated 29/0 with the same hash. Grade at
+  handoff R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —: no live AFFLIB consumer,
+  chosen-offset readback, pointer, wire path, marker or command; plain
+  vulnerable mode faults before readback. Admission under standing #6 and
+  independent witness replay are owed; the author report is not acceptance.
+
 ## 2026-11-27 01:5xZ — W304 deeper negative repeat IDs CLOSED (Ruby)
 
 - New `lab/repro/ruby2shell-onigmo-watch-deep.{py,gdb}` and
