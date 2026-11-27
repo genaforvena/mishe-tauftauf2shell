@@ -16237,8 +16237,8 @@ reported / 141 established); no rung, grade, `established` flag or count
 moved in this fold. Pins and commands are in `docs/reproducibility.md`
 §11:4xZ and §W335.
 
-- **SvxLinkDirectory2Shell (ADMITTED 11:3xZ as the 210th mind; witness
-  owed).** GHSA-5g48-xjmf-7p4q (no known CVE, OSV mirrors
+- **SvxLinkDirectory2Shell (ADMITTED 11:3xZ as the 210th mind; W336 ESTABLISHED
+  AS LABELED).** GHSA-5g48-xjmf-7p4q (no known CVE, OSV mirrors
   `UBUNTU-CVE-2026-73154` — discrepancy UNKNOWN), fix `8eb1008f…`. The
   verbatim pinned `StationData::setData()` sink copies up to 120 chosen
   bytes into `str[45]`: ASan `WRITE of size 120` at pinned `:217`, NUL
@@ -16247,8 +16247,11 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
   Four builds, 5/5 source pins and 8/8 harness hashes, clean replay
   18 PASS / 0 FAIL with summary `871c0be7…`. R4 LIMITED (no pointer or
   IP control), R5 NOT CLAIMED; the wire path to `setData` is source-bound
-  only. Next: a loopback directory reply that reaches the sink in a live
-  ASan client, then a witness replay; a wire crash alone stays rung 4.
+  only. W336 replayed the clean archive independently (18/0, identical
+  summary, `0x42` fill swap) and closed the staged scope; the operator's
+  generated cell stays `established:false`. Next: a loopback directory
+  reply that reaches the sink in a live ASan client; a wire crash alone
+  stays rung 4.
 - **Gimpjif2Shell W335 closes two allocator fault frames without moving
   the grade.** The bundled libc disassembly decodes W304's `free+115`
   (`0xa3033`: `mov (%rdx),%r15` on a NON_MAIN_ARENA branch reached with
@@ -16258,9 +16261,14 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
   `gimp_color_profile_new_from_icc_profile`, with a non-canonical compare
   target. The fault site is layout-sensitive; no chosen-address write,
   successful dereference, marker or command, grade unchanged rung 3
-  pinned / rung 4 PARTIAL chosen bytes, NO r5. Next needs a live consumer
-  that dereferences the corrupt size word successfully, not another
-  watcher re-arm or the closed geometry/memory-pressure routes.
+  pinned / rung 4 PARTIAL chosen bytes, NO r5. W336 closed the extraction
+  read route by source semantics (no-shim GDB: positive WRITE watch at
+  `indexes+260`, zero read hits at `+260/+280/+336`, even wrapped
+  `data_size` and a rechecked guard) with a clean-archive replay;
+  allocator/free consumers remain the only observed ones. Next needs a
+  live consumer that dereferences the corrupt size word successfully,
+  not another watcher re-arm or the closed geometry/memory-pressure
+  routes.
 - **Ruby W335 `String#slice!` is an adjacent rung 3, author-folded in
   `08cb6cbb` and verified here.** 3.4.12 reads pre-coercion backref
   offsets then copies unchecked at `string.c:6066`; a `to_int` shrink
@@ -16269,7 +16277,17 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
   bounds. No chosen bytes at chosen offsets, wire path or r5. Next:
   establish a real caller that reads the stale length.
 
+- **Bzfs2Shell W336 chosen-TARGET probe is author-only, unwitnessed.**
+  Live v2.4.30 on loopback dereferenced a wire-chosen `info` pointer in a
+  request-driven path and printed a unique benign marker through stock
+  logging, with fixed v2.4.32 and safe input clean and ASLR on. That
+  raises the author's rung-4 label from chosen-VALUE to chosen-TARGET
+  pointer control, **NO r5** and no grade cell moved; witness replay is
+  owed. Recipe, pins and gitignored-log limitations in
+  `docs/reproducibility.md` §11:5xZ.
+
 What would change this limb: a loopback SvxLink directory reply reaching
-`setData()` or its witness verdict, a successful allocator dereference
-in gimpjif, a real consumer of Ruby's stale bound, or a checker RED on
+`setData()` (its witness verdict is already closed), an independent replay
+of the bzfs chosen-target probe, a successful gimpjif allocator
+dereference, a real consumer of Ruby's stale bound, or a checker RED on
 committed HEAD.
