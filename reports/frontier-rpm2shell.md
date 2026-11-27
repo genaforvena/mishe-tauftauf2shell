@@ -537,6 +537,11 @@ original path geometry, but the target is still a zero `.bss` qword: no
 useful object, code pointer, command or side effect, and no grade change.
 Detail and hashes: PROVENANCE section W310.
 
+A fixed-address fake-object survey (PROVENANCE W310) found no static object
+in this non-PIE build whose Lua tag byte and `next` pointer both form a
+usable GCObject chain; the chosen `.bss` target's walk therefore terminates.
+The useful ASLR-stable target stays UNKNOWN.
+
 ### Loopback wire delivery (2026-11-26 22:56Z)
 
 `real/run-wire-consumer.sh` serves the crafted package from a

@@ -919,3 +919,19 @@ rc 1. This is a third independent matched-length path reproducing the live
 dereference. Logs: `.mishe-tauftauf/artifacts/rpm2shell-w310/control-smoke.log`
 and that directory's `run-matched-1.log`, `run-short-1.log`,
 `gdb-matched-1.log`, `gdb-short-1.log`.
+
+Static fake-object survey (03:29Z): the useful-target gap needs a fixed
+address whose object fields are also chosen or at least usable. At the
+copy site (`rpmfi.cc:2243`) an observer-only GDB dumped 800 bytes of the
+non-PIE binary's `.data`/`.data.rel.ro`/`.got`/`.got.plt`/`.bss`
+(`0x406160..0x406480`, `COPY_BUF=0x454f80 NEXT_AFTER=0x4063a0`). Scanning
+every 8-byte-aligned address A in that image with a Lua tag byte at A+8
+(`0x04..0x26`) found 23 nonzero tag bytes but **zero** candidates whose
+`next` qword at A also pointed into the same writable static range; none
+had both a valid `next` and the thread-path pointer at A+0x20. This is why
+the chosen `0x4063a0` qword's GC walk terminates: no static fake GCObject
+chain exists in this build. The useful fixed target is still UNKNOWN; the
+heap objects in the controlled window remain ASLR-random. Evidence:
+`r2s-w310-mem.gdb` (sha256 `416b2343...`) and `r2s-w310-mem.bin`
+(sha256 `b7ea4be4...`) under `.mishe-tauftauf/artifacts/rpm2shell-w310/`.
+No grade change.
