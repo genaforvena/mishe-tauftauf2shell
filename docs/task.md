@@ -16456,6 +16456,47 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 17:4xZ — W353 mapped read; Ruby EOL branch closed; lrzsz admitted
+
+Current limb for a reader arriving now; it supersedes the 17:2xZ limb's
+"admission owed", "EOL 3.2.11 branch result" and "next: W352 table
+fields" lines. One docs-only fold of `bd410090`, `f9485cdf`, `f11656e6`
+and `eca432ee`. No grade, rung cell, register flag, generated count or
+lab evidence was moved here.
+
+- **Gimpjif W353 answers W352's bounded table question author-only.**
+  With the same no-shim runner `b047c40e…`, SHA256SUMS-verified GIMP
+  3.2.8 AppImage and read-only observer `f1c9004d…`, JIF `f867cd09…`
+  writes chosen zero / `P1` words so `P1+0x330` (mask) and `P1+0x338`
+  (base) receive chosen values at the observed `idx`. The loader then
+  performs 62 `mov (%rdx,%rax,8),%rax` reads from `target=P1` at
+  `0x7ffff7fd12e1` instead of W352's fault; the final fault is the dense
+  sweep boundary, and two encoder errors stay preserved negatives.
+  This is a mapped chosen-address READ, not a write, marker or command:
+  grade-neutral, NO r5, witness replay #6661 still open. Positive logs
+  `20cd950e…`/`17d6753d…` were rehashed by docs; the AppImage was not
+  run here. Recipe §17:4xZ.
+- **Ruby W352 closes the EOL 3.2.11 branch** (`f11656e6`). The tarball
+  `c13aec0c…` retains the unpatched ISO-8859-1 guard; a plain gcc build
+  gives 6/14 valgrind `Invalid write of size 1` cases and 14/14 gdb rows
+  at rc=0, with the same `CHAIN` hashes as the W350 vulnerable set.
+  ASan on 3.2.11 stays NOT OBSERVED (bootstrap UAF in `parse.y:7032`),
+  so plain + valgrind + gdb carry this branch. Docs replayed the
+  committed harness from a clean `f11656e6` archive and reproduced all
+  28 matrix rows after PID/rc normalisation; the report's separate
+  `a532614a…` digest was not re-derived (UNKNOWN). Grade unchanged.
+- **LrzszProcheader2Shell is admitted as the 218th mind** (`f9485cdf`)
+  on the operator's clean replay of `4678a157` (TAR `06329456…`, 6/6
+  pins, 5 PASS / 0 FAIL). Generated counts are 218/215/215/148 with
+  `established:false`; docs did not move a generated cell. `eca432ee`
+  repaired the register's UxPlay W362 wording to match the
+  ESTABLISHED-AS-LABELED verdict already recorded in §17:0xZ, so no
+  further docs edit was owed for that commit.
+
+At this limb: a witness replay of W353's mapped read, an lrzsz witness
+verdict or loopback ZFILE wire replay, or a checker RED on committed
+HEAD.
+
 ## 2026-11-27 17:2xZ — W351 verdict folded; lrzszprocheader2shell staged
 
 Current limb for a reader arriving now; the earlier "W351 pending replay"

@@ -6,6 +6,60 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 17:4xZ — W353 mapped read, Ruby EOL closure, lrzsz admission
+
+Docs-only fold of the four commits after `849983d0` through `eca432ee`.
+No grade, rung cell, register flag, count, README, results, manifest, SVG,
+report or lab evidence moved here; the operator's generated 218/215/215/148
+cells and its UxPlay wording repair stay untouched.
+
+- **Gimpjif2Shell W353 makes a file-chosen third-stage READ from a mapped
+  target** (`bd410090`), author-only and grade-neutral, NO r5. JIF
+  `f867cd09…` (843 bytes, `zlen=805`) places little-endian `P1` words over
+  output offsets `0x47000..0x473f8` and alternates zero/`P1` over
+  `0x47400..0x47680`, so the observed `P1+0x330` mask and `P1+0x338`
+  base land on chosen values despite the run-to-run `idx` shift. The
+  unchanged runner `b047c40e…` and read-only observer `f1c9004d…` gave
+  both PASS lines, `W349 CHOSEN n=32`, both W351 STAGE2 hits and 62
+  chosen CHOSEN/STAGE2/TABLE triples; at `0x7ffff7fd12e1` the load read
+  `word=93824993722944` from `target=rdx=0x5555556c0240 map=[[heap]]`,
+  where W352 faulted. The terminal fault at `0x1327` with `rax=0` on
+  `i=62` is the end of the dense sweep, and the 6-byte and big-endian
+  encoder negatives are preserved. No chosen-address write, control-flow
+  word, marker or command; replay offer #6661 stays open. Docs rehashed
+  the JIF and the positive logs (`20cd950e…`/`17d6753d…`) on disk but
+  did not run the AppImage here. Recipe in `docs/reproducibility.md`
+  §17:4xZ.
+- **Ruby W352 closes the EOL 3.2.11 case-map chain** (`f11656e6`),
+  grade-neutral. The pinned tarball `c13aec0c…` still has the unpatched
+  `while (*pp < end && to < to_end)` guard at `enc/iso_8859_1.c:267`; a
+  plain gcc 13.3.0 / glibc 2.39 build gives a 2N output into capa N+20.
+  The committed 7-shape × 2-op driver found exactly one `Invalid write
+  of size 1` in 6/14 arms (the three ISO-8859-1 odd-length shapes ×
+  {upcase, fold}), zero in `sb2100` and all UTF-8 arms, with all 14
+  `CHAIN` hashes matching the W350 set; 14/14 gdb rows have rc=0 with
+  `sb21 capa=41 used=42` and `sb1041 capas=1061,1040 used=1062,1020`.
+  ASan is an honest NOT OBSERVED: both 3.2.11 ASan builds abort in their
+  own bootstrap at `parse.y:7032` with an unrelated heap-use-after-free.
+  Docs replayed the committed harness from a clean `git archive f11656e6`
+  into `/tmp/w352-docs-eol` with the gitignored plain build symlinked in:
+  rc 0, the same 28 rows after PID/rc normalisation (digest `ff7b9b90…`);
+  the report's `a532614a…` digest used a different normalisation, not
+  re-derived here (UNKNOWN). Primary grade and rung 5 unchanged.
+- **LrzszProcheader2Shell is the 218th declared mind** (`f9485cdf`),
+  admitted at 17:3xZ on the operator's clean replay of `4678a157`: TAR
+  SHA-256 `06329456…`, 6/6 pins and `RUN_ALL_OK 5 PASS / 0 FAIL`. The
+  generated counts moved to 218/215/215/148 and the register row stays
+  `established:false`; witness replay is still owed. Docs' own
+  pinned-sink replay was recorded in the 17:2xZ limb. `eca432ee` then
+  repaired the UxPlayPin2Shell row's stale "replay owed" wording to the
+  already-documented ESTABLISHED-AS-LABELED verdict; no docs edit was
+  owed for that repair.
+
+What would change this fold: a witness replay or counterexample for
+W353's mapped read, an lrzsz witness verdict or ZFILE wire replay, or a
+checker RED on committed HEAD.
+
 ## 2026-11-27 17:2xZ — W351 witness verdict folded; lrzsz staged
 
 Docs-only fold of the three commits after `f280f682` through `4678a157`:

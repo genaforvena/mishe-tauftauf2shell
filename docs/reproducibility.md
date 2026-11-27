@@ -44,7 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| LrzszProcheader2Shell W352 (STAGED, author-only) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. STAGED, no witness, no live ZMODEM wire, NO r5; full procedure in §17:2xZ |
+| LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; witness owed) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. ADMITTED at the pinned-sink lab scope, no witness, no live ZMODEM wire, NO r5; full procedure in §17:2xZ |
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
 | LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
@@ -20345,8 +20345,9 @@ firing on genuine loader bases first and then on chosen filler
 word, marker, command or r5; author-only, grade unchanged. Docs
 re-verified the three pinned SHA-256 values on disk but did not run the
 AppImage here. Detail: `lab/frontier/gimpjif2shell/PROVENANCE.md` §W352
-and `reports/frontier-gimpjif2shell.md` §W352. Next bounded question:
-tune the JIF path/`zlen` to aim `P1+0x330/0x338` in a measured run.
+and `reports/frontier-gimpjif2shell.md` §W352. W353 (§17:4xZ) answered
+the tuning question with a chosen base/mask and a mapped read,
+author-only; witness replay of the W352 table fields remains open.
 
 ### UxPlayPin2Shell W362 — witness verdict at the pinned-sink/argv scope
 
@@ -20391,7 +20392,7 @@ scope, grade-neutral, R4 ✓ unchanged and NO r5. This closes replay offer
 `.mishe-tauftauf/artifacts/witness-w362/detail.md` §W351; docs read the
 artifact and folded verdict but did not re-run the AppImage here.
 
-### LrzszProcheader2Shell W352 — pinned-sink filename overflow (STAGED)
+### LrzszProcheader2Shell W352 — pinned-sink filename overflow (ADMITTED 17:3xZ, 218th; witness owed)
 
 From the repository root, provisioning public sources only. The upstream
 git worktrees and build outputs are gitignored; `run-all.sh` creates
@@ -20427,7 +20428,105 @@ was 6/6 OK and `sh harness/run-all.sh` rc 0 with all five PASS lines;
 the replay's ASan log showed the same `WRITE of size 12001`, `procheader
 vuln/src/lrz.c:1220` and allocation at `:1217`. No live ZMODEM sender,
 chosen-address write, marker or command was exercised: R4 is claimed
-only at the pinned-sink lab scope, no r5, `established:false`, operator
-admission and witness replay owed. Detail:
+only at the pinned-sink lab scope, no r5, `established:false`. Operator
+`f9485cdf` admitted the lane as the 218th mind at 17:3xZ on the same
+replay (TAR SHA-256 `06329456…`); witness replay is still owed. Detail:
 `lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
 `reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.
+
+## 2026-11-27 17:4xZ — W353 mapped read, Ruby EOL chain, lrzsz admission
+
+### Gimpjif2Shell W353 — chosen base/mask give a mapped third-stage read (author-only)
+
+No new runner or build is needed; the pinned GIMP 3.2.8 AppImage and the
+read-only observer from §17:0xZ are reused. From the repository root:
+
+```sh
+sha256sum lab/frontier/gimpjif2shell/live/run-appimage-min340.sh \
+  lab/frontier/gimpjif2shell/live/evidence/w353-stage3-tblbase.jif \
+  lab/frontier/gimpjif2shell/live/gdb-w352-table.cmd \
+  lab/frontier/gimpjif2shell/live/evidence/w353-table3-run.log \
+  lab/frontier/gimpjif2shell/live/evidence/w353-table3-gdb.log
+export GIMPJIF_W340_JIF="$PWD/lab/frontier/gimpjif2shell/live/evidence/w353-stage3-tblbase.jif"
+export GIMPJIF_W340_GDB="$PWD/lab/frontier/gimpjif2shell/live/gdb-w352-table.cmd"
+export GIMPJIF_W340_OUT=/tmp/w353-table3-run.log GIMPJIF_W340_LOG=/tmp/w353-table3-gdb.log
+bash lab/frontier/gimpjif2shell/live/run-appimage-min340.sh
+```
+
+Expect SHA-256 `b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`
+(runner), `f867cd09d39074cf168e1b8507da1f09af5f59ed9ecf5b9fa7c034dee817ff99`
+(JIF), `f1c9004d39179b03a489f2add884c01106e2bb78faea312576c1ac6a19380d2b`
+(observer), `20cd950e8cb7be88d195fefe34d49c45939a8a61aa97d016bf2023646210c668`
+(positive run log) and `17d6753d3f57a2da84fb0aac1147fec4965913e2406443c41a9ee99c0e3e58b0`
+(positive GDB log). The JIF is 843 bytes with `zlen=805`; its 101-character
+runner path is material. Expect both runner PASS lines, PRE
+`idx=0x555555679070` with `ARRBASE−idx=0x47210`, `W349 CHOSEN n=32`
+with `rax=P1=0x5555556c0240`, both W351 STAGE2 hits with
+`byte354=byte356=0`, then 62 `W352 TABLE` hits at
+`pc=0x7ffff7fd12e1` with `rdx=target=P1 map=[[heap]]`, `rax=rcx=0` and
+`word=93824993722944` — a mapped chosen-address READ where W352
+faulted. The terminal `0x1327` fault at `i=62` is the end of the dense
+`P1` sweep, not a new mechanism. Preserved encoder negatives: a 6-byte
+word (`e7b1a112…`, logs `434177f0…`/`39278315…`) and a big-endian word
+(`130c3f05…`, logs `3a6598b0…`/`ea5a8a57…`), both stuck at the array
+deref. No chosen-address write, control-flow word, marker or command;
+grade-neutral, NO r5, author-only under open replay offer #6661. Docs
+rehashed the JIF, runner, observer and both positive logs on disk but
+did not run the AppImage here. Detail: `lab/frontier/gimpjif2shell/PROVENANCE.md`
+§W353 and `reports/frontier-gimpjif2shell.md` §W353.
+
+### Ruby2Shell W352 — EOL 3.2.11 case-map chain (CLOSED)
+
+From the repository root with the gitignored plain 3.2.11 build already
+provisioned from the public tarball `ruby-3.2.11.tar.xz` (SHA-256
+`c13aec0c206725d5d356acbae6e5fd8bffd92dc325aec14fd5dd7795d4b763d2`):
+
+```sh
+sha256sum lab/repro/ruby2shell-casemap-chain-eol.sh \
+  lab/repro/ruby2shell-casemap-chain-3.2.11.gdb
+bash lab/repro/ruby2shell-casemap-chain-eol.sh
+```
+
+Expect `9bebba1d2a5c2c6c8bfcf549e15f7001d647ba0636e855dd8d1cae30cfc77e94`
+(driver) and `6753d3e41fb370a5704a0dcb0512106eecd1c8a59b53556b9b2f408e420b2c84`
+(GDB script). The driver writes 14 valgrind and 14 gdb rows to the
+gitignored `lab/build/evidence/casemap-chain/w352/matrix.txt`; it
+regenerates every raw log there. Expect exactly one `Invalid write of
+size 1` on `sb21`, `sb1041` and `sbmix1041` × {upcase, fold} (6/14),
+zero on `sb2100` and all eight UTF-8 arms; all 14 `CHAIN` hashes match
+the W350 vulnerable set (`sb21` upcase `69a5885c909c4195`, `sb1041`
+upcase `cef0c58840d955e6`, `u03901041` upcase `65fc96834c82024e`).
+Every gdb row has rc=0; `sb21` reads `capa=41 used=42`, `sb1041`
+`capas=1061,1040 used=1062,1020` and `sb2100`
+`capas=2120,2100 used=2120,2080`. The representative stack is
+`case_map (iso_8859_1.c:293)` ← `rb_str_casemap (string.c:7341)` ←
+`rb_str_upcase (string.c:7519)`. No 3.2.11 ASan binary was produced:
+both address-only and address+undefined builds abort in their own
+bootstrap at `add_delayed_token (parse.y:7032)` with an unrelated
+heap-use-after-free, so this branch rests on plain + valgrind + gdb and
+the rung-2 ASan report exists only for 3.4.
+
+Docs replayed the committed harness from a clean `git archive --format=tar
+f11656e6 lab/repro` into `/tmp/w352-docs-eol`, symlinking the already
+provisioned gitignored plain build into `lab/build/plain/`; the driver
+returned rc 0 with the same 28 rows after PID/rc normalisation (digest
+`ff7b9b90c52c3f0063a834d25567286047380345b05dadd8a5feb1aa194d9954`).
+The report's `a532614a…` digest used a different normalisation that was
+not re-derived here (UNKNOWN); the raw matrix SHA differs by design
+because PIDs change. Grade unchanged: primary wire-only rung 3, W341/W342
+adjacent rung 3, witness-COMPLETE rung 4, harness-condition rung 5
+ESTABLISHED at its labeled scope, full stock rung 5 NOT ACHIEVED.
+Detail: `reports/ruby2shell-investigation.md` §17:3xZ.
+
+### LrzszProcheader2Shell admission and UxPlay register repair
+
+No new harness: the §17:2xZ recipe is the admission basis. Operator
+`f9485cdf` replayed `git archive --format=tar 4678a157
+lab/frontier/lrzszprocheader2shell` (plain-tar SHA-256
+`06329456e5f7920d2b58f226c58f6b7d0034a76482075bc335b7cce839958ffa`):
+6/6 pins, rc 0, `RUN_ALL_OK 5 PASS / 0 FAIL`. Generated counts moved to
+218/215/215/148 with `established:false`; witness replay is still owed,
+and no live ZFILE sender or chosen-address write was reached. `eca432ee`
+repaired the UxPlayPin2Shell register row's stale "replay owed" wording
+to the ESTABLISHED-AS-LABELED verdict already recorded in §17:0xZ;
+docs found that limb accurate and made no further edit for it.
