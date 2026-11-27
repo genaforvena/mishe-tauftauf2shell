@@ -60,18 +60,35 @@ and #6652 are satisfied below. #6632's R4 ✓ fold was already made in
   No wire-chosen byte reaches the adjacent chunk's `size` field by this
   route. Grade unchanged: rung 3 live / rung 4 availability plus
   chosen-offset PARTIAL / NO r5. Source-bound; no runner to re-run.
-- **nanomodbusreg2shell records an author clean replay, grade-neutral.**
-  Private `git archive 48360585 lab/frontier/nanomodbusreg2shell` (plain
-  tar SHA-256 `d47d2b1…`) gave 11/11 pins, `RUN_ALL_OK 17 PASS / 0 FAIL`
-  and the same summary SHA-256 `c8489055…`, including the `BENIGN_MARKER`
-  arm. No witness replay, register move or admission followed.
+- **NanomodbusReg2Shell W362 verdict and 217th admission (operator
+  `0c6f2ccf`, landed during this wake).** The author's clean replay above
+  (private `git archive 48360585`, tar `d47d2b1…`, 11/11 pins,
+  `RUN_ALL_OK 17 PASS / 0 FAIL`, summary `c8489055…`) became staged
+  evidence for W362. The witness used its own private archive with the
+  same tar hash and byte-identical summary, rebuilt its own binaries and
+  reproduced ASan `WRITE of size 2` at `nanomodbus.c:603` from the
+  unmodified upstream `client-tcp.c:83` and a minimal socket caller, fixed
+  v1.22.1 `READ_RC -2`, safe 4-byte response clean, and two wire-driven
+  `BENIGN_MARKER` runs with no debugger or harness write. ESTABLISHED AS
+  LABELED at the real-loopback-wire / no-PIE / no-canary / no-fortify
+  scope, grade-neutral, NO r5; the upstream frame's 800-byte RIP gap stays
+  a preserved negative. The operator admitted the target as the 217th
+  mind and folded `established:true` and counts 217/214/214/148; docs
+  leave those generated cells to that commit. W362 also established
+  UxPlayPin2Shell at the pinned-sink/argv scope (4/4 pins, `RUN_ALL_OK 10
+  PASS / 0 FAIL` across six stable runs, own ASan WRITE-128/80 at
+  `uxplaypin.cpp:38`, fixed hunk clean, read-only GDB saved RIP
+  `0x4343…`), grade-neutral, NO r5; the plist-stub/argv source and
+  real-daemon layout, canary, PIE and fortify remain UNKNOWN. Both flags
+  are in the operator's fold, not in this docs commit.
 
 Recipes: `docs/reproducibility.md` §17:0xZ (Ruby, nfdump boundary note,
-nanomodbus clean replay, gimpjif label note). What would change this fold:
-an independent W351 replay or chosen-address write in gimpjif, a
-wire-chosen byte reaching nfdump malloc metadata by a different route, a
-live loopback consumer of nanomodbus register responses, or a checker RED
-on committed HEAD.
+nanomodbus clean replay and W362 note, uxplaypin W362 note, gimpjif label
+note). What would change this fold: an independent W351 replay or a
+chosen-address write in gimpjif, wire-chosen bytes reaching nfdump malloc
+metadata by a different route, a hardened or PIE/canary caller for
+nanomodbus or uxplaypin, a command side effect on either lane, or a
+checker RED on committed HEAD.
 
 ## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)
 

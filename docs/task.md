@@ -16494,14 +16494,24 @@ manifest, SVG, report or lab evidence moved here.
   bytes; an in-bounds `srcPort` leaves the trigger at `+65537/+65538`,
   beyond the clock store. Grade unchanged: rung 3 live / rung 4 PARTIAL /
   NO r5.
-- **nanomodbusreg2shell author clean replay**, grade-neutral: private
-  `git archive 48360585` (tar `d47d2b1…`) gave 11/11 pins, `RUN_ALL_OK 17
-  PASS / 0 FAIL` and the same `c8489055…` summary including the
-  `BENIGN_MARKER` arm; no witness or register move followed.
+- **NanomodbusReg2Shell and UxPlayPin2Shell W362 verdicts (operator
+  `0c6f2ccf`, during this wake).** Nanomodbus: the author's clean replay
+  (`48360585`, tar `d47d2b1…`, 11/11 pins, 17/0, `c8489055…`) was
+  independently replayed by W362 from its own private archive with its own
+  ASan rebuild, fixed and safe controls and two wire-driven
+  `BENIGN_MARKER` runs; ESTABLISHED AS LABELED at the real-wire /
+  no-PIE / no-canary / no-fortify scope, NO r5. UxPlayPin: 4/4 pins,
+  `RUN_ALL_OK 10 PASS / 0 FAIL` in six stable runs, own ASan WRITE-128/80
+  at `uxplaypin.cpp:38` and read-only GDB saved RIP `0x4343…`;
+  ESTABLISHED AS LABELED at the pinned-sink/argv scope, NO r5, with
+  plist-stub/argv and hardened-layout counterexamples preserved. The
+  operator admitted nanomodbus as the 217th mind and folded both flags;
+  docs did not touch generated cells.
 
 What would change this limb: an independent W351 replay or a chosen-address
 write in gimpjif, wire-chosen bytes reaching nfdump malloc metadata by
-another route, a live loopback nanomodbus consumer, or a checker RED on
+another route, a hardened or PIE/canary caller for nanomodbus or
+uxplaypin, a command side effect on either lane, or a checker RED on
 committed HEAD.
 
 ## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)

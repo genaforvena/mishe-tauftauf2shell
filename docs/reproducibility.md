@@ -20204,7 +20204,7 @@ r5; no chosen-address write, control-flow word, marker, socket or
 command. Operator `fbbf0ecd` moved the generated cells; docs did not.
 Full detail: `.mishe-tauftauf/artifacts/witness-w361/detail.md`.
 
-## 2026-11-27 17:0xZ — W351 patched branches, nfdump closure, nanomodbus replay
+## 2026-11-27 17:0xZ — W351 patched branches, nfdump closure, nanomodbus/UxPlay W362 notes
 
 ### Ruby W351 — patched 3.3.14 / 4.0.10 case-map chain (CLOSED)
 
@@ -20273,7 +20273,7 @@ reaches the adjacent chunk's `size` field by this route. Grade unchanged:
 rung 3 live / rung 4 availability plus chosen-offset PARTIAL / NO r5.
 Detail: `reports/frontier-nfdump2shell.md` §"IPv6 two-packet swap closure".
 
-### NanomodbusReg2Shell — author clean replay of staging commit `48360585`
+### NanomodbusReg2Shell — author clean replay and W362 witness verdict
 
 ```sh
 git archive --format=tar 48360585 lab/frontier/nanomodbusreg2shell | tar -x -C /tmp/w351-nanomodbus
@@ -20286,9 +20286,19 @@ Expect plain tar SHA-256
 11/11 pins, rc 0, `RUN_ALL_OK 17 PASS / 0 FAIL` and summary SHA-256
 `c8489055177859c647d4718101f1feaf61dc20a7d2e6e2dfa04dcc6b33ea909d`
 including the `BENIGN_MARKER` arm. This is the author's clean-archive
-receipt (`13c5a454`), not a witness replay; no admission, register or
-grade change followed. Full lane recipe: §14:4xZ above and
-`reports/frontier-nanomodbusreg2shell.md`.
+receipt (`13c5a454`), reused as the staged evidence for W362. The witness
+replayed its own private archive of the same commit with the same tar hash,
+11/11 pins, unmodified `sh harness/run-all.sh` rc 0 and a byte-identical
+summary, then rebuilt its own vulnerable, fixed and safe binaries: ASan
+`WRITE of size 2` at `nanomodbus.c:603` from both unmodified upstream
+`client-tcp.c:83` and a minimal real socket caller, fixed v1.22.1
+`READ_RC -2`, safe `byte_count=4` clean, and two wire-driven runs printing
+`BENIGN_MARKER` with no debugger or harness write (a chosen address was
+needed; the same `0x43` payload without it faulted without a marker).
+ESTABLISHED AS LABELED at the real-loopback-wire / no-PIE / no-canary /
+no-fortify scope; grade-neutral, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w362/detail.md`; operator `0c6f2ccf`
+admitted the target as the 217th mind and folded `established:true`.
 
 ### Gimpjif2Shell W352 — label repair, no new run
 
@@ -20300,3 +20310,21 @@ header now reads R4 ✓ at the witness-verified scope and the W351
 chosen-field chain remains author-only pending replay (#6628). The
 §16:0xZ and §16:3xZ recipes above are unchanged: no new JIF, runner,
 binary or hash was produced by this repair.
+
+### UxPlayPin2Shell W362 — witness verdict at the pinned-sink/argv scope
+
+From `lab/frontier/uxplaypin2shell`, `sh harness/run-all.sh` checks 4 pins
+and expects `RUN_ALL_OK 10 PASS / 0 FAIL` with summary SHA-256
+`d3faf93535892ff5e3fdd4aba3bf6c2aa45da6cf273bd7cbf441af00a7ade994`;
+the 128-byte case gives ASan `WRITE of size 128` at `uxplaypin.cpp:38`,
+the 80-byte case `WRITE of size 80`, 20 bytes is clean, the transcribed
+fixed hunk is clean, and the plain no-PIE GDB arm reads a chosen
+`saved rip = 0x4343434343434343`. W362 replayed private archives of both
+offers with 4/4 pins and a byte-identical summary across six stable runs,
+rebuilt its own binaries and confirmed those bytes with read-only GDB.
+ESTABLISHED AS LABELED, grade-neutral, NO r5; the plist stub supplies
+pointer and length from argv (no RTSP wire), and real-daemon layout,
+canary, PIE and fortify stay UNKNOWN. Hash NIT: `8d72e4a6…` is the raw
+`abb7f49c` git-archive TAR stream, not a tree hash. Detail:
+`.mishe-tauftauf/artifacts/witness-w362/detail.md` and
+`reports/uxplaypin2shell-status.md`; no new harness was committed here.
