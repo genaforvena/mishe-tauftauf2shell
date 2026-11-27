@@ -202,6 +202,19 @@ rejected; the allocation at `:1376` is `(gsize)len * (gsize)height * 2`,
 260), so `dest` is not itself the overflow target; corruption stays in the
 undersized `indexes` and its neighbour.
 
+Structural bound on alternate dimensions (source inference, 2026-11-27):
+`len` and `height` both come from 16-bit `LM_to_uint` frame fields
+(`file-gif-load-vulnerable.c:610-611`, `:623-624`), so
+`len * height <= 65535^2 = 4294836225 < 2^32`; the product cannot wrap in
+`data_size = len * height`. The only wrap that can undersize `indexes` is
+`data_size *= 2` with `alpha_frame = TRUE`, which requires
+`len * height >= 2^31`. The caller then allocates
+`dest = (gsize)len * (gsize)height * 2 >= 2^32` bytes at `:1376`, whatever
+the factorization. No file-reachable geometry therefore gives a small
+`dest`; a host that cannot complete that allocation cannot be bypassed by
+choosing different dimensions. This does not exclude a different host or a
+consumer that survives the allocation.
+
 `realglib/real-driver.c` gained `caller` and `callerpub` modes: they parse
 the W243 JIF file, reproduce the pinned guard with its exact divisor, probe
 the allocation with `g_try_malloc` (the plugin uses `g_malloc`, which aborts
@@ -1564,11 +1577,14 @@ Both arms faulted the plug-in before the `gimp_drawable_get_buffer`
 breakpoint was reached; neither printed an image width, and both full logs
 carry the already-known post-crash GDB internal error. Benign in-object
 data therefore does not open a completed-load window, and the chosen
-`qdatas` target is still not read or dereferenced. Structural constraint
-(inference from the pinned caller plus the observed fault sites): a 32-bit
+`qdatas` target is still not read or dereferenced.
+Structural constraint (inference from the pinned caller plus the observed
+fault sites): a 32-bit
 alpha-doubling wrap needs `len * height >= 2^31`, and
-`file-gif-load-vulnerable.c:1376-1378` allocates `dest` at that size
-(~2 GiB here), after which the real plug-in has repeatedly faulted in the
+`file-gif-load-vulnerable.c:1376-1378` allocates `dest` at
+`(gsize)len * (gsize)height * 2`, i.e. ~4 GiB (W244 measured
+`DEST_SIZE=4294967556` for the advisory dimensions, `4294967300` for
+`33025x65026`), after which the real plug-in has repeatedly faulted in the
 allocator via `gimp_drawable_get_buffer` (W308 witness receipt) before any
 post-decode GLib consumer runs. This explains the short watch windows on
 this host; it does not prove the same on another host or build. Grade
