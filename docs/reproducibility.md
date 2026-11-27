@@ -13777,7 +13777,7 @@ therefore stays a rung-4 lab mechanic and R5 is blocked at byte provenance;
 whether a deployment lets a remote attacker influence captured audio remains
 UNKNOWN.
 
-### Ruby2Shell — small-V chosen bit in a live `mbuf` pointer (author-only)
+### Ruby2Shell — small-V chosen bit in a live `mbuf` pointer (witness replayed)
 
 The same `bash lab/repro/ruby2shell-tos-steer.sh` script extends the sweep
 into `V=0x100..0x13f`. `regint.h:830-836` places `CClassNode`'s 32-byte
@@ -13806,12 +13806,15 @@ gitignored `lab/build/evidence/tos-steer/small-v-sweep.txt`; the watchpoint
 logs are `gdb-small-100.out` and `gdb-small-10000.out`, and
 `plain12-100-full.out` ends in `is_onechar_cclass+0x17`
 (`regparse.c:6207`) from `parse_exp` (`regparse.c:6467`). Regenerate with
-the script; no replay by witness. Grade stays narrow secondary-lane rung 4:
-one chosen bit in a pointer that is NULL here, no valid-pointer redirect,
-arbitrary byte, marker, wire-only reach or witness. Large-V absolute fault-
-address steering remains CLOSED. The proposed non-NULL `mbuf` experiment is
-CLOSED in `7bf6d806`: no tested single-byte class shape allocates `mbuf`
-(recipe below), so no redirect was available to flip.
+the script. Witness W322 replayed this section independently on 2026-11-27
+from clean archive `96a62d92`: 64/64 chosen fault addresses, all five
+controls clean, sweep SHA `53d88c28…` byte-identical, ESTABLISHED AS
+LABELED. Grade stays narrow secondary-lane rung 4: one chosen bit in a
+pointer that is NULL here, no valid-pointer redirect, arbitrary byte,
+marker, wire-only reach or r5. Large-V absolute fault-address steering
+remains CLOSED. The proposed non-NULL `mbuf` experiment is CLOSED in
+`7bf6d806`: no tested single-byte class shape allocates `mbuf` (recipe
+below), so no redirect was available to flip.
 
 ## 2026-11-26 13:3x–13:4xZ — MQTT-C runner, MuJS screen, W270 #4426 replay, Ruby mbuf-shape closure
 

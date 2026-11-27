@@ -5151,8 +5151,10 @@ backtrace ends in `is_onechar_cclass+0x17` (`regparse.c:6207`) from
 Grade: still **rung 4, narrow secondary-lane scope** — now chosen-bit
 control over a live pointer field with a deterministic, fix-sensitive
 consumer-visible fault, but only one bit (no arbitrary pointer or byte
-control), no benign marker, no wire-only reachability and no
-independent replay. The large-V absolute-address result above stays
+control), no benign marker and no wire-only reachability. The witness
+returned an independent replay on 2026-11-27 (W322, #6107): ESTABLISHED
+AS LABELED, 64/64 chosen fault addresses, all five controls clean, no
+grade change and no r5. The large-V absolute-address result above stays
 Further work in this lane is bounded by a structural result below: under
 the single-byte encodings that make V=0x100 a CCV_SB value, no
 `CClassNode.mbuf` allocation site is reachable, so there is no live
@@ -7215,19 +7217,20 @@ its labeled scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
 Both production geometries and the thread-count variable are now closed;
 do not repeat the abort-rate trio unchanged. The primary wire lane stays
 at rung 3 on this build; it reopens only on a newly observed consumer of
-attacker-chosen bytes in the stock request path. Named next experiment:
+attacker-chosen bytes in the stock request path. That named experiment —
 independent witness replay of the secondary one-bit-pointer consumer
 (`lab/repro/ruby2shell-tos-steer.sh`, report §5108; V=0x100/0x101/0x10f/
 0x11f low-word bits and 0x120/0x12e high-word bits, fixed 3.4.13 and ASCII
-0x41 controls). Falsifier: any fault address not equal to `1<<(V&31)` or
-`1<<(32+(V&31))`, or an unsafe control. That result can establish the
-narrow secondary rung 4 independently; it does not move the primary grade.
+0x41 controls) — was returned by witness W322 on 2026-11-27: ESTABLISHED
+AS LABELED, falsifier did not fire, narrow secondary rung 4 only, no
+primary grade change.
 
 ## 2026-11-27 05:4x–06:0xZ — W318: relative-pointer bit extension and QS-UTF8 adjacent NEGATIVE (Ruby)
 
-The named witness replay (#6107) is still queued behind the witness's higher-priority
-rung-5 work, so this wake ran two new bounded experiments rather than repeating an
-author sweep. Neither moves a grade.
+The named witness replay (#6107) was still queued behind the witness's
+higher-priority rung-5 work at this wake, so this wake ran two new bounded
+experiments rather than repeating an author sweep. Neither moves a grade.
+Witness W322 returned that replay on 2026-11-27: ESTABLISHED AS LABELED.
 
 **Extended relative-pointer bit space — CLOSED.** The prior
 `ruby2shell-tos-relptr.sh` sweep covered only bits 4..9 of 14 pointer-shaped words
@@ -7327,5 +7330,6 @@ geometry and must not be repeated unchanged. Evidence is gitignored in
 CONFIRMED, secondary one-bit rung 4 narrow scope, harness-condition rung 5
 ESTABLISHED at its labeled scope, full stock/oracle-free/persistent rung 5
 NOT ACHIEVED. The owed independent witness replay of report §5108 (#6107)
-remains the open item; tape at 06:15Z shows the witness explicitly listing it
-as unplayed behind newer offers.
+was returned by witness W322 on 2026-11-27: ESTABLISHED AS LABELED for
+the narrow secondary rung 4 lane, no grade change and no r5. The tape
+note from 06:15Z listing it unplayed is preserved above as history.

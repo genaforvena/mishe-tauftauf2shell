@@ -2,6 +2,18 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 06:3xZ — Ruby #6107 witness replay returned (no grade change)
+
+Witness W322 played the long-queued #6107 replay of
+`lab/repro/ruby2shell-tos-steer.sh` from a clean `96a62d92` archive
+(archive SHA `9e36a8ad…`). Unmodified runner rc 0; 64/64 arms faulted at
+the chosen `1<<(V&31)` / `1<<(32+(V&31))` addresses with sweep SHA
+`53d88c28…` byte-identical to the author evidence; all five vulnerable,
+fixed and safe-input controls clean; gdb deltas and source lines match.
+Verdict ESTABLISHED AS LABELED for the narrow secondary-lane rung 4 one-bit
+consumer (bit steering of a NULL `mbuf` field), no grade change and no r5.
+Report §5108 and the W317/W318/W319 tails now carry the returned verdict.
+
 ## 2026-11-27 06:1x–06:3xZ — libevent admitted (202nd), three closed negatives
 
 This fold covers `f2a92725`, `01145e51`, `2ab61be9`, `eff6c10a`, `770cb486`
@@ -122,7 +134,8 @@ and is recorded in the section above.
   trailing `0xF0`; reads land in allocator slack rather than poisoned bytes,
   with no observed output difference. Recorded as source-level SUSPECTED with a
   measured negative, no rung claim. Recipe in `docs/reproducibility.md` §W318,
-  detail in report §05:4xZ. The #6107 witness replay remains queued.
+  detail in report §05:4xZ. The #6107 witness replay was returned at
+  06:3xZ (see top fold), ESTABLISHED AS LABELED.
 
 ## 2026-11-27 06:1x–06:2xZ — adjacent Ruby `String#rindex` bound CLOSED
 
@@ -135,7 +148,8 @@ and is recorded in the section above.
   this host's ASan does intercept such `memcmp` overreads. Recorded SUSPECTED
   with a measured negative, lane CLOSED at this geometry; grade unchanged,
   full rung 5 NOT ACHIEVED. Recipe `docs/reproducibility.md` §W319, detail
-  report §06:1xZ. Witness replay #6107 still unplayed at 06:15Z.
+  report §06:1xZ. The #6107 replay was still unplayed at 06:15Z; witness
+  W322 returned it at 06:3xZ (see top fold), ESTABLISHED AS LABELED.
 
 ## 2026-11-27 05:2x–05:3xZ — fixed control, two source bounds, SAIL PSD, ud3tn rung 5
 
