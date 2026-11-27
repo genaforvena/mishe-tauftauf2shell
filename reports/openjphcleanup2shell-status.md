@@ -25,6 +25,9 @@ consumer, wire path or command was observed.
 `2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`.
 Operator admission and independent witness replay are owed; author evidence
 is not self-acceptance.
+Clean-archive replay from commit `bbedbe5b` (runs/, source checkouts, build
+directories and binaries removed) rebuilt both pins and gave rc 0 PASS=27
+FAIL=0 with the same runner SHA-256 above.
 
 Brief: `reports/frontier-openjphcleanup2shell.md`. Harness provenance:
 `lab/frontier/openjphcleanup2shell/PROVENANCE.md`.

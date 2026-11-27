@@ -53,6 +53,10 @@ Details and uncertainty: `poc-source.md`.
   trace of the raw sink in the real decode path. Observed 2026-11-27 01:2xZ:
   rc 0 `PASS=27 FAIL=0`; runner SHA-256
   `2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`.
+- Clean `git archive HEAD` replay at 01:25Z from staging commit `bbedbe5b`
+  (15 committed files; `runs/`, checkouts, build directories and binaries
+  absent) rebuilt both pins and returned rc 0 `PASS=27 FAIL=0` with the same
+  runner hash above.
 - Host compilers: GCC/g++ 13.3.0 with `libasan.so.8`, CMake 3.28, gdb 13.x,
   glibc 2.39. No ASLR manipulation, LD_PRELOAD, debugger-forced execution or
   network service was used. GDB observes an existing breakpoint hit; it does

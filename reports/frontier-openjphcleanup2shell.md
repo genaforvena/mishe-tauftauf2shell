@@ -67,6 +67,9 @@ and bypass the cited generic decoder) and links the direct-sink harness
 against the pinned vulnerable ASan library. `sh run-all.sh`: **PASS=27 FAIL=0**,
 rc 0 (`runs/run-all.log`); runner SHA-256
 `2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`.
+Clean-archive replay from staging commit `bbedbe5b` at 01:25Z (15 committed
+files; `runs/`, checkouts, build directories and binaries removed) rebuilt
+both pins and returned rc 0 `PASS=27 FAIL=0` with the same runner hash.
 
 - Direct sink, one exact 32-byte row: GCC ASan reports
   `heap-buffer-overflow`, `WRITE of size 4`, `0 bytes after 32-byte region`,
