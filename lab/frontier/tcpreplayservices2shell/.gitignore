@@ -1,5 +1,6 @@
 src/
 src-*/
+build-*/
 tcpprep-*
 build-*.log
 runs/

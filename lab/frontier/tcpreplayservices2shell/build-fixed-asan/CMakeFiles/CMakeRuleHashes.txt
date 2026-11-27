@@ -1,3 +1,0 @@
-# Hashes of file build rules.
-061e258036b2288f7b67fb1246b6277a CMakeFiles/test
-e45f251769845cc7133a58d25432c0a4 src/common/git_version.c

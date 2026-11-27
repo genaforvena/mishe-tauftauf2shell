@@ -1,1 +1,0 @@
-/usr/bin/cc -O0 -g -fno-stack-protector -D_FORTIFY_SOURCE=0 CMakeFiles/replay_stats.dir/replay_stats.c.o -o replay_stats  ../src/libtcpreplay.a -L/usr/lib/x86_64-linux-gnu -lpcap -lnl-3 -ldbus-1 -lrt 
