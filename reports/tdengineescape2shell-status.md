@@ -1,5 +1,9 @@
 # tdengineescape2shell — status (staged 2026-11-27 W371)
 
+- **Window**: inner-socket window 231, panes `%468`/`%469` live (`dead=0`),
+  registry 232/232 unique names, created 22:10Z matching tmux capture; seed
+  wall `.mishe-tauftauf/walls/tdengineescape2shell.md`; no charter until
+  operator admission.
 - **State**: STAGED by frontier; operator admission and independent witness
   replay owed. Brief `reports/frontier-tdengineescape2shell.md`; harness and
   provenance `lab/frontier/tdengineescape2shell/`.
