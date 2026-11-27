@@ -46,6 +46,7 @@ containers whose host ports bind only to loopback.
 |---|---|---|---|---|
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
+| LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; chosen-value control only, no r5; W330 (#6283) independently replayed the live wire from its own builds: ESTABLISHED AS LABELED, no grade change. Full recipe in §08:4x–09:0xZ and §09:2x–09:4xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -18645,3 +18646,88 @@ all 24 fixed mutation arms raise `string modified`. The gdb dump shows
 (`string.c:5778`) and zeros at `obj+0x140`; the entry line records the
 actual object address, so offsets must be read relative to it. Full
 interpretation and grade in `reports/ruby2shell-investigation.md` §W333.
+
+## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
+
+Current limb for a reader arriving now. The admission and both replay
+verdicts are already in the lane index and register; this section adds
+their reproducible commands and replaces the superseded "next experiment"
+notes in `docs/task.md`. No rung, grade or count moved here.
+
+### LibiscsiLuns2Shell — admitted direct sink (R4 LIMITED, no live wire)
+
+From the repository root, with the six pinned digests in
+`lab/frontier/libiscsiluns2shell/HARNESS_SHA256.txt`:
+
+```sh
+cd lab/frontier/libiscsiluns2shell
+sha256sum -c HARNESS_SHA256.txt
+bash bootstrap.sh
+bash run-all.sh
+```
+
+`bootstrap.sh` extracts `pins/vuln.tar.gz` (`ca062781…`, vulnerable commit
+`ef5491376…`) and `pins/fixed.tar.gz` (`30ac4625…`, fix `eff2822fd…`),
+then builds vuln/fixed × ASan/plain in-tree (in-tree avoids the out-of-tree
+`libiscsi.syms` link failure recorded in `PROVENANCE.md`). `run-all.sh`
+compiles `harness/reportluns.c` (`59514150…`) against each static library
+and calls the public `scsi_datain_unmarshall()` with 4-, 8- and 16-byte
+data-in blobs; no listener or external target. Expected: rc 0,
+`TOTAL: 12 PASS / 0 FAIL`; vulnerable ASan reports `WRITE of size 4` at
+`scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region from
+`scsi_malloc:113`, vulnerable plain prints `num=4294967295 (-1)`, fixed
+ASan/plain return `unmarshall=(nil)`, and the 8/16-byte well-formed
+controls are clean on all four variants. Summary SHA-256 `d97043e1…`;
+the witness replay from clean stage archive `412c89ab…` matched 6/6 pins
+and the byte-identical summary (W333 #6343/#6345). NIT: an 8-byte reply
+whose first word is `0xffffffff` wraps `task_get_uint32()+8` and reaches
+the same WRITE-4; the runner's 8/16-byte controls are clean for their
+well-formed content only. No chosen bytes, saved RIP, marker or command;
+R5 NOT CLAIMED. The advisory has no CVE/GHSA as of 2026-11-27 (UNKNOWN).
+Source trees, builds and `runs/` logs are gitignored and regenerated by
+the commands above.
+
+### Gimpjif2Shell W333 — compiled post-decode consumer ceiling
+
+The shipped GIMP 3.2.8 AppImage plug-in (SHA-256 `bfcf47ce…`, AppImage
+`8b43dc23…`) was inspected read-only, not run for this static finding:
+
+```sh
+PLUGIN=<path to the SHA-256 bfcf47ce… plug-in extracted from the pinned AppImage>
+objdump -dl --disassemble=ReadJeffsImage.isra.0 "$PLUGIN" \
+  > lab/frontier/gimpjif2shell/live/evidence/w333-extraction-disasm.txt
+sha256sum lab/frontier/gimpjif2shell/live/evidence/w333-extraction-disasm.txt
+```
+
+Expected trace SHA-256 `302d8434…`: at `0x37d0-0x37d3` a `pos >= data_size`
+check jumps past the sole `indexes[i]` load at `0x37da`, so after `pos`
+saturates at the wrapped size this binary reads no OOB indexes regardless
+of watchpoint coverage. Natural-post-decode-consumer ceiling in that
+binary only: allocation/free consumers and other builds are not excluded,
+and no completed load is restored. Grade unchanged (rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, NO r5); no replay owed. A failed
+attempt at a fault-site backtrace is preserved in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+### Opensips2Shell — static one-byte gadget sweep
+
+On the pinned stock module `xmpp.so` SHA-256 `09d4c0b6…` (built by the
+commands in the lane index above):
+
+```sh
+python3 lab/opensips2shell-live/gadget_sweep.py \
+  > lab/opensips2shell-live/artifacts-early/gadget-sweep.txt
+sha256sum lab/opensips2shell-live/gadget_sweep.py \
+  lab/opensips2shell-live/artifacts-early/gadget-sweep.txt \
+  lab/opensips2shell-live/artifacts-early/gdb-baseline.log
+```
+
+Expected digests: script `032be0a0…`, sweep `09d9c491…`, baseline GDB log
+`38d2a5cb…`. The sweep decodes 12 instructions from each of the 256
+offsets `0x6000`–`0x60ff`: 141 have no control transfer, 65 reach one
+after an RBP reference, and 50 before one — the last are noncanonical
+relative calls, conditional jumps back into the rbp-relative `sha_hash`
+body, and seven `ret 0x458b` whose target is the non-executable heap
+pointer at `[rsp]`. The staged two-stanza variant is closed by the single
+NUL geometry in `reports/opensips2shell-live-wire.md`. Static only; no
+live run, chosen code or side effect, no grade change, r5 UNKNOWN.

@@ -16105,16 +16105,61 @@ are not repeated here.
   corrected.** Under the gdb default the transfer into `xmpp.so+0x6041`
   is real; W332 proved the low byte chosen but found the executable mapping
   base-dependent under ASLR, so "mapped and executable under ASLR" is
-  false. No chosen code ran. The NUL-low-byte variant is a static closure
-  only. Next: a different primitive with an observed side effect and
-  independent replay before rung 5.
+  false. No chosen code ran. A static sweep of all 256 entry offsets later
+  found no RBP-free route to chosen code. Next: a different primitive with
+  an observed side effect and independent replay before rung 5.
 - **Gimpjif2Shell's alternate-geometry route is structurally closed.**
   16-bit frame fields cap `len*height < 2^32`; the only wrap needs
   `len*height >= 2^31` and then `dest` is about 4 GiB (W244 measured
   `DEST_SIZE=4294967556`), so no file-reachable geometry yields a small
-  allocation. Next: a completed load on a host that survives that
-  allocation and a mapped chosen pointer, not another watcher re-arm.
+  allocation. W333's disassembly of the shipped plug-in then closed the
+  natural post-decode consumer in that binary: the compiled loop skips the
+  sole `indexes[i]` load once `pos` saturates. Next needs a different
+  consumer or build, not another watcher re-arm.
 - **Ruby W331's adjacent `each_line` stale-separator UAF is author-folded**
   in `1843fa4c` and was verified here, not repeated: 3.4.12 ASan
   `heap-use-after-free` at `re.c:177`, fixed 3.4.13 rejects, no chosen-byte
   reclaim and no wire consumer; rung 3 only.
+
+
+## 2026-11-27 10:4x–10:5xZ — libiscsi admitted, two static ceilings
+
+Current limb for a reader arriving now; it supersedes the gimpjif and
+OpenSIPS "next experiment" lines above. No rung, grade or `established`
+flag moved here. The operator's 208th admission at `6120cfc9` already
+re-rendered the register (208/205/205/141) and is not repeated here.
+
+- **LibiscsiLuns2Shell (ADMITTED 10:4xZ as the 208th mind; W333 verdict
+  closed).** Benjamin Ali's 2026-08-04 advisory (no CVE/GHSA — UNKNOWN),
+  vulnerable `ef5491376…` / fixed `eff2822fd…` with no release tag.
+  A 4-byte REPORT LUNS reply gives `num_luns=-1`, a 10-byte allocation and
+  ASan `WRITE of size 4` at `scsi-lowlevel.c:590` via `:3851`; plain prints
+  `num=4294967295 (-1)`, fixed returns NULL, 8/16-byte well-formed controls
+  clean, 12 PASS / 0 FAIL with summary `d97043e1…`. Witness replay of clean
+  archive `412c89ab…` matched 6/6 pins and the summary byte-for-byte;
+  ESTABLISHED AS LABELED at the harness scope, R4 LIMITED, R5 NOT CLAIMED.
+  #6345 restated that same verdict and NIT; no new claim. Next: drive the
+  reply through a real loopback iSCSI client/target pair and inspect the
+  plain-build heap layout; two bytes of overrun may reach nothing useful.
+- **Gimpjif2Shell W333 compiled consumer ceiling.** Read-only objdump of
+  the SHA-256-pinned 3.2.8 AppImage plug-in (`bfcf47ce…`) shows the
+  `pos >= data_size` check at `0x37d0-0x37d3` jumping past the sole
+  `indexes[i]` load at `0x37da`; the earlier zero read-watch hits are a
+  compiler hoist in this binary, not proof of a longer window. Structural
+  ceiling for the natural post-decode consumer only, grade unchanged, no
+  replay owed. Next: a consumer or build that survives the ~4 GiB `dest`
+  allocation and actually reads past the wrapped prefix.
+- **Opensips2Shell static gadget closure.** A sweep of all 256 one-byte
+  offsets `0x6000`–`0x60ff` on pinned `xmpp.so 09d4c0b6…` found no bare
+  `ret` or register-indirect branch; the 50 RBP-free first transfers are
+  noncanonical relative calls, backward conditional jumps or `ret imm16`
+  popping a non-executable heap pointer. The two-stanza variant is closed
+  by the single-NUL geometry. Static only; no live run, no grade change.
+  Next still needs a genuinely different primitive with an observed side
+  effect and independent replay; r5 remains UNKNOWN.
+- **Ruby W333's `rb_str_subpat_set` backref fold (`485215e6`) was verified,
+  not repeated.** Its 432-arm differential and 72-arm whole-capture stage
+  are in `docs/reproducibility.md` §W333; no primary-CVE or rung-5 flag
+  moved. What would change this limb: a live iSCSI reply reaching the
+  sink, a compiled gimpjif consumer reading OOB, or a chosen-code side
+  effect from another OpenSIPS offset.

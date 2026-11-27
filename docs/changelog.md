@@ -3,6 +3,53 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 10:5xZ — docs fold: libiscsi recipe, two static ceilings
+
+Docs-only fold of `1c8d5dcd`, `19394ee4`, `ee8316b6`, `485215e6`,
+`5d3dcc99`, `fddc64cd` and `6120cfc9` after `d7184570`. Ruby W333's own
+docs in `485215e6` and the W333/W332 verdict limb above were verified,
+not duplicated. #6345 restates #6343's libiscsi verdict with the same
+clean archive `412c89ab…`, 6/6 pins, 12/0 runner, summary `d97043e1…`
+and NIT; no new claim. The operator's 208th admission at `6120cfc9`
+already re-rendered the manifest and generated register (208 declared /
+205 active / 205 reported / 141 established, libiscsi
+`established:true`); those cells stay theirs.
+
+- `docs/reproducibility.md` gains a libiscsi lane and recipe: vulnerable
+  `ef5491376…`, fixed `eff2822fd…`, six pinned digests, own four autotools
+  builds, 4-byte reply → ASan `WRITE of size 4` at `scsi-lowlevel.c:590`
+  via `:3851`, plain `num=-1`, fixed NULL, 8/16-byte well-formed controls
+  clean, 12 PASS / 0 FAIL. The advisory has no CVE/GHSA (UNKNOWN).
+- Gimpjif W333 disassembled the shipped 3.2.8 AppImage plug-in
+  (`bfcf47ce…`): `0x37d0-0x37d3` jumps past the sole `indexes[i]` load at
+  `0x37da` once `pos >= data_size`, explaining W313/W324/W325/W329's
+  zero watch hits as a compiled hoist in that binary. Structural ceiling
+  for the natural post-decode consumer, not other builds or allocators;
+  grade unchanged, no replay owed for a static finding.
+- OpenSIPS swept all 256 one-byte entry offsets `0x6000`–`0x60ff` on
+  pinned `xmpp.so 09d4c0b6…`: no bare `ret` or register-indirect branch;
+  the 50 RBP-free first transfers are noncanonical relative calls,
+  backward conditional jumps, or `ret imm16` popping a non-executable heap
+  pointer. Two-stanza geometry closed as well. Static only, no live run,
+  no grade change, r5 UNKNOWN.
+- Doctor's 10:43:00Z cycle exited 1 on the same person-reserved missing
+  generated wake units (`.service.d/10-slice.conf`,
+  `wake-debounce-*.service`, `wake-*.path` for ~29 targets). The operator
+  dispositioned it with `signal observe failed-m2shell-doctor-service GREEN
+  --source operator-disposition --event
+  missing-generated-units-person-reserved-20261127T1043Z`; `signal show`
+  read GREEN at 10:45Z. Doctor, omp-only and signal-coverage stay RED
+  derivatives; regeneration is the person's exact full-flag sync in
+  `docs/runtime-pin.md`, never bare `mishe sync`. No unit, route or sync
+  change here.
+
+Stale "next experiment" wording for gimpjif and OpenSIPS was replaced in
+`docs/task.md`; no rung, flag or count moved by this limb. What would
+change it: a live loopback iSCSI reply reaching the sink, a gimpjif
+consumer/build that reads OOB indexes, or a measured chosen-code side
+effect from a different OpenSIPS offset.
+
+
 ## 2026-11-27 10:4xZ — W334 verdict fold (libiscsi, tcpreplay; no grade moved)
 
 Two replay UNKNOWNs closed, both ESTABLISHED AS LABELED at their stated
