@@ -6,9 +6,10 @@ DEMONSTRATED for availability (live heap corruption and daemon abort from a
 wire datagram) and PARTIAL for packet-chosen field bytes. No pointer control,
 benign command or r5. Witness W235 (2026-11-25) staged harness verdict
 ESTABLISHED AS LABELED; W280 (2026-11-26 16:59Z) replayed the chosen-byte
-payload result. W292b (2026-11-26 21:16Z) replayed the IPv6 crossing and
-W314 (2026-11-27 04:26Z) the IPv4 boundary, both ESTABLISHED AS LABELED.
-Only the live-wire, header-control and element-type replays remain owed.
+payload result. W292b (2026-11-26 21:16Z) replayed the IPv6 crossing, and
+W314 (2026-11-27 04:26–04:32Z) both the IPv4 boundary and the live wire,
+all ESTABLISHED AS LABELED. Only the header-control and element-type
+replays remain owed.
 See `reports/nfdump2shell-status.md`.
 
 ## Claim and scope
@@ -341,19 +342,22 @@ its `flags`/`nfversion` header field, the fourth to its element type (a
 parser acceptance decision), a 2026-11-26 framing attempt aimed at a later
 record's `size` field did not trigger, and the direct record-size/count lane
 was closed because the swap zeroes the source field needed for acceptance.
-Witness replay of the live-wire, header-control and element-type lanes is
-still owed; the chosen-byte payload replay is ESTABLISHED AS LABELED (W280),
+Witness replay of the header-control and element-type lanes is still owed;
+the chosen-byte payload replay is ESTABLISHED AS LABELED (W280),
 the IPv6 crossing is ESTABLISHED AS LABELED (W292b, 2026-11-26 21:16Z);
 the heap map is author-measured with two clean 7 PASS / 0 FAIL replays.
 The newest heap-value negative is ESTABLISHED AS LABELED
 (W293, 2026-11-26 21:50Z) — clean archive of `40924fb4`, fresh
 four-collector builds, unmodified `run-v6value.sh` 12 PASS / 0 FAIL baseline
 and 13 PASS / 0 FAIL marker, written word epoch ms, never the packet's
-`0xA5` — and the IPv4 allocation-boundary read is ESTABLISHED AS LABELED
-(W314, 2026-11-27 04:26Z): clean archive `325ec0c9`, four fresh collector
+`0xA5` — and W314 (2026-11-27 04:26–04:32Z) established both the IPv4
+allocation-boundary read (clean archive `325ec0c9`, four fresh collector
 pairs, `run-edge.sh` 8 PASS / 0 FAIL, ASan `READ of size 1` at
-`nfd_raw.c:259:34`, clean same-size complete-element and fixed controls.
-No grade change from any verdict.
+`nfd_raw.c:259:34`, clean same-size complete-element and fixed controls)
+and the live wire (clean archive `6f2b904c`, `run-wire.sh` 13 PASS / 0 FAIL
+for each of the ASan and plain pairs, 112-byte attack gives one flow and a
+header size error with no ASan report, safe preserves two flows, fixed
+rejects). No grade change from any verdict.
 
 ### Build-label correction and pointer boundary (2026-11-26 19:29Z)
 

@@ -831,5 +831,26 @@ no report and zero flows. The witness' source comparison: vulnerable
 length; fixed `ScanExtensions()` walks exactly `recordHeader->numElements`.
 The pinned store stays at raw `nfd_raw.c:256` (fixed `:264`). This lane is a
 rung-3 confirmed read at the IPv4 allocation boundary: no chosen bytes,
-pointer, marker, command or side effect, NO r5. The remaining queued lanes
-are #5645 live wire, #5712 header and #5738 element type.
+pointer, marker, command or side effect, NO r5.
+
+## W314 independent replay verdict — live wire (#5645, 2026-11-27 04:32Z)
+
+Witness W314 (tape events 6076/6077) returned **ESTABLISHED AS LABELED** for
+the live-loopback wire lane, no counterexample, no grade change, NO r5.
+Detail: `.mishe-tauftauf/artifacts/witness-w314-nfdump-wire/detail.md`.
+Clean `git archive 6f2b904c lab/frontier/nfdump2shell`; `run-wire.sh`
+SHA-256 `841565f6…` matched and both pinned tarballs re-hashed to
+`970247fa…` / `61c92342…`. Unmodified `bash run-wire.sh`: ASan pair rc0
+**13 PASS / 0 FAIL**, genuine plain pair rc0 **13 PASS / 0 FAIL**. The
+112-byte attack on 127.0.0.1:10081 gave `Process_nfd: record size error.
+Size v3header: 6981 > size left: 64` and 1 flow, with no ASan report in
+either live log; the 144-byte safe datagram preserved both flows
+(`| 3| 180`, `| 5| 500`); the fixed collector rejected the attack
+(`processd: 0`, zero flows) while its safe control kept two flows.
+Source-bound: vulnerable `nfd_raw.c:207-210` checks `size > size_left` only
+after the element walk has corrupted the record header; the fixed pin's
+`ScanExtensions()` rejects the short element before the copy. This is live
+collector impact at a packet-chosen offset with a collector-time-derived
+value: rung 3 pinned verbatim / rung 4 PARTIAL as labeled, no pointer,
+command, marker or r5. Only #5712 header and #5738 element type remain
+queued.
