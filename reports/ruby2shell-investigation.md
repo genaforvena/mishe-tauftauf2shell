@@ -8111,3 +8111,53 @@ falsifier: no consumer-visible read of chosen bytes past the replacement,
 or the same result on fixed 3.4.13. Do not repeat the default `slice!`
 shapes, partition, backref `[]=`, each_line, append_as_bytes, concat,
 setbyte or the 543-byte band shape unchanged.
+
+## 2026-11-27 12:0x–12:1xZ — W337: stale `slice!` bytes consumed as typed objects (Ruby)
+
+W336's named follow-up asked whether the disclosed tail reaches a live
+consumer rather than only the returned `String`. It does, in-process, with
+stock Ruby APIs. `lab/repro/ruby2shell-slice-bang-consumer.{rb,sh}` runs 20
+four-build arms (three consumer arms plus two `nocoerce` controls). Outputs
+are gitignored under `lab/build/evidence/slice-bang-consumer/`.
+
+- **Fake Marshal header (fixnum).** Receiver bytes `04 08 69 03 00 ca ab`
+  are a valid `Marshal.dump` of `0x00abca00`; `to_int` replaces the receiver
+  with the 4-byte head `04 08 69 03`, so `replace` writes a NUL at offset 4
+  and offsets 5–6 keep their original bytes. Vulnerable 3.4.12 plain and
+  ASan: `rlen=7`, `head=0408690300caab`, and `Marshal.load` returns
+  `VALUE=11258368` (`0x00abca00`) — the two high data bytes came from past
+  the post-coercion length. Fixed 3.4.13 plain and ASan: `rlen=4`,
+  `head=04086903`, `Marshal.load` raises `ArgumentError: marshal data too
+  short`.
+- **Fake Marshal header (String).** Receiver `Marshal.dump("XWNED")`; head
+  is the five signature/type/length bytes. Vulnerable builds: `rlen=15`,
+  `head=040849220a00574e4544...`, `Marshal.load` returns `"\u0000WNED"` —
+  the `WNED` bytes past the replacement are materialised as a String. Fixed:
+  `rlen=5` and the same `marshal data too short` error. `replace` forces the
+  byte immediately after the head to NUL, visible as the first string byte.
+- **Pointer consumer CLOSED at this scope.** With a `pack("p")` pointer in
+  the stale region, `String#unpack("@5p")` raises
+  `ArgumentError: no associated pointer` on both vulnerable builds and
+  returns `nil` on both fixed builds (the tail is absent). Ruby's
+  pack/unpack pointer-association check blocks dereferencing a copied
+  pointer; no chosen-address consumer was obtained.
+- **Controls.** `nocoerce` integer-index arms return the full 7/15 bytes and
+  the expected `VALUE=11258368` / `"XWNED"` on all four builds, so the
+  Marshal headers are valid and the differential is specific to the coerced
+  stale bound. Every arm is ASan-silent; the bytes stay inside the live
+  receiver buffer.
+
+Grade: **adjacent narrow rung 4 in-process, strengthened to consumer-visible
+typed objects** — a real loader materialises chosen tail bytes as an
+Integer/String on the vulnerable build and refuses on the fixed build. No
+command side effect, benign marker, pointer control or wire/stock reach;
+the object type and bytes are chosen by the caller in its own buffer.
+Primary CVE grade, witness-COMPLETE rung 4 and full rung 5 unchanged.
+
+Next named experiment: look for a stock consumer whose parsing of the stale
+tail can dispatch a method or dereference a chosen address without a
+harness-defined class (for example core classes carrying `Marshal._load`);
+falsifier: only harness-defined `_load` classes work, or the fixed build
+shows the same dispatch. Do not repeat the Marshal fixnum/string shapes
+above, the 543-byte bands shape, partition, backref `[]=`, each_line,
+append_as_bytes, concat or setbyte unchanged.

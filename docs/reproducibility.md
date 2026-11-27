@@ -18733,6 +18733,27 @@ the 543-byte reads stay inside the live buffer. `nocoerce` controls are
 byte-identical on all four builds. Grade and limits in
 `reports/ruby2shell-investigation.md` §W336.
 
+### Ruby — W337 stale `slice!` tail consumed as typed objects
+
+Same four pinned builds as §W335. Repro scripts:
+`lab/repro/ruby2shell-slice-bang-consumer.rb` and `.sh` (three consumer
+arms plus two `nocoerce` controls per build). Gitignored evidence:
+`lab/build/evidence/slice-bang-consumer/matrix.txt` and per-tag `.out`/`.err`.
+
+```sh
+bash lab/repro/ruby2shell-slice-bang-consumer.sh
+```
+
+Expected: on 3.4.12 plain and ASan, `marshal_fixnum` gives `rlen=7`,
+`head=0408690300caab`, `consumed=VALUE=11258368`; `marshal_string` gives
+`rlen=15`, `head=040849220a00574e4544...`,
+`consumed=VALUE="\u0000WNED"`. On 3.4.13 plain and ASan both give
+`rlen=4`/`rlen=5` and `consumed=RAISED=ArgumentError:marshal data too short`.
+`unpackp` raises `ArgumentError:no associated pointer` on vulnerable builds
+and returns `VALUE=nil` on fixed ones. The four `nocoerce` arms are
+identical across builds (full payload consumed); no ASan report is
+expected. Grade and limits in `reports/ruby2shell-investigation.md` §W337.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay

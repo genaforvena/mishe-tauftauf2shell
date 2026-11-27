@@ -4,6 +4,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 12:0x–12:1xZ — W337 stale `slice!` tail reaches a live consumer (Ruby)
+
+W336's named follow-up fired at narrow in-process scope. A `to_int` that
+shrinks the receiver before the unchecked 3.4.12 `rb_str_slice_bang` copy
+leaves caller-chosen bytes past the new logical end; feeding that result to
+stock `Marshal.load` materialises them as typed objects. `marshal_fixnum`:
+vulnerable plain+ASan `rlen=7`, `head=0408690300caab`,
+`Marshal.load` → `11258368` (`0x00abca00`); fixed `rlen=4`, raises
+`marshal data too short`. `marshal_string`: vulnerable `rlen=15` →
+`"\u0000WNED"`; fixed `rlen=5`, raises. `unpackp` is a negative result:
+Ruby's pointer-association check blocks dereferencing a copied `pack("p")`
+pointer on both builds. All `nocoerce` controls are byte-identical and ASan
+is silent. Adjacent narrow rung 4 in-process with a consumer-visible typed
+object; no pointer control, marker, command, wire or stock reach. Primary
+CVE grade and full rung 5 unchanged. Details in
+`reports/ruby2shell-investigation.md` §W337 and
+`docs/reproducibility.md` §W337.
+
 ## 2026-11-27 11:5x–12:0xZ — docs fold: svxlink witness, bzfs target, gimpjif ceiling
 
 Docs-only fold of `b2da0a75`, `6c20fb5c`, `ad1d9de9`, `7641c034` and
