@@ -19965,6 +19965,50 @@ covered by `CASE_MAPPING_SLACK = 12` at `enc/unicode.c:672-677`.
 Falsifier met; grade unchanged, full stock rung 5 NOT ACHIEVED.
 Detail: `reports/ruby2shell-investigation.md` §W349.
 
+Docs re-ran the valgrind harness on this host at 16:0xZ: rc 0, 14 arms;
+exactly one `Invalid write of size 1` in each `sb21`, `sb1041` and
+`sbmix1041` arm (both ops), zero in `sb2100` and all eight UTF-8 arms;
+CHAIN SHA-256 prefixes match the author's (`69a5885c…` for `sb21-upcase`,
+`7bbed07d…` for `sb21-fold`). The remaining valgrind diagnostics are
+interpreter-shutdown leak noise. The 28-row gdb matrix was read from the
+committed report, not re-run here.
+
+## 2026-11-27 16:1xZ — W350 case-map chaining on 3.3.13/4.0.9 (Ruby)
+
+From the repo root, with the pinned plain builds for Ruby 3.3.13 and
+4.0.9 and valgrind/gdb available:
+
+```sh
+bash lab/repro/ruby2shell-casemap-chain-branches.sh   # valgrind, 14 arms per branch
+bash lab/repro/ruby2shell-casemap-chain-gdb.sh        # gdb, four plain builds
+```
+
+The branch-specific command files are
+`lab/repro/ruby2shell-casemap-chain-3.3.13.gdb` and
+`lab/repro/ruby2shell-casemap-chain-4.0.9.gdb`; the pinned branch
+`string.c` lines are `:7409`/`:7425` (3.3.13) and `:7839`/`:7855`
+(4.0.9), read from gitignored release tarballs under
+`lab/build/w350-src/`. No ASan build exists for either branch, so the
+detector is valgrind plus gdb. Expect 28 valgrind arms, all `rc=0`,
+with exactly one `Invalid write of size 1` in `sb21`, `sb1041` and
+`sbmix1041` (both ops) and zero in `sb2100` and the eight UTF-8 arms;
+stacks place the write in `case_map iso_8859_1.c:293` from
+`rb_str_casemap string.c:7414` (3.3.13) / `:7844` (4.0.9), i.e. buffer 1.
+Expect 56 gdb rows: the first 28 byte-identical to W349
+(SHA-256 `f1b40763…`) and both branch builds matching vulnerable
+3.4.12 (`sb21 capa=41 used=42`, `sb1041 capa=1061,1040 used=1062,1020`,
+`sb2100 capa=2120,2100 used=2120,2080`, `sbmix1041 capa=1061,686
+used=1062,499`, UTF-8 `used < capa` in three buffers); full matrix
+SHA-256 `73fa39f8ccb404cc40d537e9999165bb98b53e27acb0c42d8ef5144dd7aa0882`.
+Raw logs are gitignored under `lab/build/evidence/casemap-chain/w350/`.
+Falsifier not met on either branch: no chained buffer has `used > capa`.
+Grade unchanged, full stock rung 5 NOT ACHIEVED. Next named experiment
+W351: provision the patched releases 3.3.14 and 4.0.10 (provisioning
+only, never a target probe), build plain debug builds and run the same
+harness; a single invalid write or changed CHAIN output would reopen
+the fix-series grade. Detail: `reports/ruby2shell-investigation.md`
+§W350.
+
 
 ## 2026-11-27 15:3xZ — W348 (AwssdkBase642Shell fixed arm and generated caller)
 
@@ -19996,12 +20040,118 @@ pinned generated `JsonBlobsResult.cpp` with `HashingUtils.cpp`,
 payload is `{"data":"AAAA="}`; ASan reports WRITE-1 at `Base64.cpp:115` via
 `HashingUtils.cpp:42` and `JsonBlobsResult.cpp:27`, and the fixed arm prints
 `decoded=0`. No listener or external probe. Grade R4 DEMONSTRATED at the
-generated-model/wire-JSON lab scope, R5 NOT CLAIMED; independent witness
-verdict UNKNOWN until replay.
+generated-model/wire-JSON lab scope, R5 NOT CLAIMED; witness W350
+independently replayed this stage (16:0xZ note below).
 
 Docs re-ran this recipe at 15:4xZ from a clean `git archive 3134d73a` into
 `/tmp/w348-docs-aws`: 21/21 pins, rc 0, `RUN_ALL_OK 17 PASS / 0 FAIL`,
 `FIXED_OK 15 PASS / 0 FAIL`, `CLIENT_OK 15 PASS / 0 FAIL`, and the three
 summary SHA-256 values byte-identical to the author's (`504bb8e5…`,
-`da2bde79…`, `7a819c41…`). That is an author/durability replay, not the
-still-UNKNOWN independent witness verdict.
+`da2bde79…`, `7a819c41…`). That is an author/durability replay; witness
+W350's independent replay and own rebuild are recorded in the 16:0xZ note below.
+
+## 2026-11-27 16:0xZ — W350 AWS witness replay and gimpjif W349 chosen-pointer recipe
+
+### AWS SDK Base64 witness W350 (replay of stage `3134d73a`)
+
+Witness worked from a private `git archive 3134d73a
+lab/frontier/awssdkbase642shell` (plain tar SHA-256
+`d8d18d9eaf287b358d9c7453457604c726608445c86b42a2391410bfb67d978c`),
+the same archive the author and docs used. `sha256sum -c SHA256SUMS` gave
+21/21 OK; `run-all.sh` SHA-256 `05b72ed7…` and SHA256SUMS SHA-256
+`7e160857…` matched the committed pins. Unmodified `sh run-all.sh`
+returned rc 0 with `RUN_ALL_OK 17 PASS / 0 FAIL`, `FIXED_OK 15 PASS /
+0 FAIL`, `CLIENT_OK 15 PASS / 0 FAIL`, zero `FAIL:` lines and all three
+summary SHA-256 values byte-identical to the author's (`504bb8e5…`,
+`da2bde79…`, `7a819c41…`).
+
+The witness also rebuilt from the pinned tarballs in a separate tree,
+applying `pins/fix.patch` SHA-256 `d7c3cf23…` to a staging copy and
+compiling with `-O1 -fno-omit-frame-pointer`, ASan and section GC (the
+runner uses `-O0`). Its binary SHA-256 prefixes were `6721f45d…`
+(`decode-vuln`), `b44d276c…` (`client-vuln`) and `f09c6156…`
+(`client-fixed`). Own runs: `AAAA=` faults with ASan `WRITE of size 1`
+into a 2-byte region at `Base64.cpp:115` for both decoder and generated
+client; `{"data":"AAAA="}` reaches it via `HashingUtils.cpp:42` and
+`JsonBlobsResult.cpp:27`; canonical `AAAA` decodes to 3 with no ASan;
+`client-fixed` rejects `AAAA=` and `AABa=` with `decoded=0`, no ASan.
+Pinned vulnerable `Base64.cpp` is `e3dedec4…` (`:95` allocates
+`decodedLength`, `:115` is `buffer[++bufferIndex]`); the harness takes
+JSON from `argv[1]` with no socket, `system`, `popen` or exec path.
+Full per-arm table, own binary hashes and exact build notes:
+`.mishe-tauftauf/artifacts/witness-w350/detail.md`.
+
+Verdict: ESTABLISHED AS LABELED, grade-neutral, NO r5. R4 stays limited
+to the generated-model/wire-JSON lab scope with allocator/link shims;
+no live endpoint, pointer control, marker or command side effect. The
+reports at `fd33aafc` say the register row is `established:true`, but
+`research-manifest.json` at that commit still has `established:false`:
+the operator's generated-file fold is pending, not a docs edit.
+
+### Gimpjif2Shell W349 dense-JIF chosen-pointer dereference (author run; docs replay negative)
+
+Provision the SHA256SUMS-verified GIMP 3.2.8 AppImage in the lane's
+default `/tmp/gimpjif-appimage-w316` workdir as in §W337, then from the
+repository root verify and run the unmodified no-shim runner with the
+new read-only observer:
+
+```sh
+sha256sum lab/frontier/gimpjif2shell/live/run-appimage-min340.sh \
+  lab/frontier/gimpjif2shell/live/gdb-w349-chosen-deref.cmd \
+  lab/frontier/gimpjif2shell/live/evidence/w349-dense117-flood.jif
+export GIMPJIF_W340_JIF="$PWD/lab/frontier/gimpjif2shell/live/evidence/w349-dense117-flood.jif"
+export GIMPJIF_W340_GDB="$PWD/lab/frontier/gimpjif2shell/live/gdb-w349-chosen-deref.cmd"
+export GIMPJIF_W340_OUT=/tmp/w349-run.log GIMPJIF_W340_LOG=/tmp/w349-gdb.log
+bash lab/frontier/gimpjif2shell/live/run-appimage-min340.sh
+```
+
+Expect SHA-256 prefixes `b047c40e…` (runner), `63f30cec…` (observer)
+and `7c8b7e2b…` (JIF). The JIF places the mapped heap pointer
+`0x5555556c0240` at every 8-byte-aligned output offset
+`0x46e80..0x47220` (117 copies) in a 786432-byte `0x4d` flood.
+The author reports `PASS: pinned inflate reached`, `PASS: fault captured
+in GDB`, `PRE idx=0x555555679030`, `ARRBASE−idx=0x47210`, `ARR[0..2]`
+holding the chosen pointer, then `W349 CHOSEN n=32 pc=0x7ffff7fd1327
+rax=0x00005555556c0240 i=0 mem28=0x4d4d4d4d4d4d4d4d` and a terminal
+SIGSEGV at `0x7ffff7fd133e` with `rbx=0x4d4d…`. Docs did not reproduce
+any `W349 CHOSEN` hit (below). The observer prints state only; no memory
+or register is written.
+Author log SHAs:
+`1dc9313b…` (run with `gdb-w349-deref-obs.cmd`), `4dc23eb1…` (run with
+the chosen-deref observer), GDB logs `23cdf26c…` and `53cca8cc…`.
+
+Do not repeat these negatives unchanged: W345's JIF `0896977e…` faults
+in libz's SIMD store before the array (`452d4a82…`); a single pointer at
+offset `0x47170` misses after `ARRBASE−idx` shifts to `0x46fc0`
+(`4597e2ba…`); the sparse 24-pointer JIF `8d9ba89e…` reaches `ARR[6]`/
+`ARR[14]` but index 0 stays chosen filler (`b9768628…`). The scripts'
+`map=[unmapped]` labels for heap and ld-linux addresses are a
+maps-classifier NIT: the chosen pointer is inside the heap range of the
+W345/W349 logs and the dereference succeeded in the author's run. Author
+label: rung 4 strengthened to a measured chosen-pointer dereference in
+a live consumer, NO r5; docs' two replays below were negative/timeout
+and no witness replay has been offered, so the last verified grade
+remains rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+Full JIF/log SHAs and scripts: `lab/frontier/gimpjif2shell/PROVENANCE.md`
+§W349.
+
+Docs ran the recipe twice at 16:0xZ from the repo root on this host with
+the provisioned SHA256SUMS-verified AppImage and the pinned pins above.
+Run 1 (gitignored `/tmp/w349-docs-gimpjif/run.log`, SHA-256
+`d96b3718209f08db7935c5ba5d816edbbeda4905f9e8143ee7b6c0d600d50f25`)
+returned `PASS: pinned inflate reached` and `PASS: fault captured in
+GDB`, but with `PRE idx=0x555555678ef0`, `ARRBASE−idx=0x47170`,
+`r14=0x5555556c0060`, 32 deref hits on genuine loader pointers, zero
+`W349 CHOSEN` hits and terminal SIGSEGV `0x7ffff7a8feff`
+(`mov %cl,(%r15)`, libz SIMD store) with `rbx=0x0000555555726fff`.
+Run 2 (gitignored `/tmp/w349-docs-gimpjif2/run.log`, SHA-256
+`d5d4a3d7acba9939bacb6ffab1fe3195e0022418f844c9a01c9990ed581fa81d`)
+hit the runner's 150-second plug-in timeout before the pinned inflate:
+`FAIL: no pinned inflate`, `INFO: no in-GDB fault stop`, empty GDB log.
+Neither run produced a chosen-pointer dereference, and the author's
+positive layout (`idx=0x555555679030`, delta `0x47210`) did not recur
+on this host with the same JIF and pins. This is a bounded negative and
+a timeout, not a refutation of the author's observation; it leaves the
+author label unreplicated and the last verified grade unchanged. A
+fresh attempt should re-measure `ARRBASE−idx` for the current run
+before placing the pointer JIF, not repeat this fixed-offset JIF again.

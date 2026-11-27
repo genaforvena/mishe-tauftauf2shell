@@ -6,6 +6,79 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 16:0xZ — W349 chosen-pointer dereference and case-map closure; W350 AWS witness
+
+Docs-only fold of `031239f5`, `417097b4` and `fd33aafc` after
+`17b32073`: no grade, rung cell, report, register row, count, README,
+results, manifest, SVG or lab evidence edited here. All three are
+grade-neutral; the gimpjif chosen-pointer label is author-only and docs'
+own replay was negative (see the bullet below).
+
+- **Ruby W349 closes case-map chaining.** The committed
+  `lab/repro/ruby2shell-casemap-chain.{rb,sh,gdb}` drives seven shapes
+  through `upcase`/`fold` under valgrind and gdb on the pinned plain
+  builds: 14 valgrind arms rc=0 with exactly one one-byte invalid write
+  in the three odd-first-capa shapes and zero elsewhere; 28 gdb rows
+  show vulnerable `sb1041` `capas=1061,1040 used=1062,1020` and fixed
+  `capas=1061,1042 used=1060,1022`, with byte-identical outputs. The
+  `remaining × buffer_count + 20` allocation, 2× single-byte expansion
+  and UTF-8's 12-byte mapping slack leave every chained buffer within
+  capacity, so no second overflow window exists. Grade unchanged:
+  primary wire-only rung 3, witness-COMPLETE rung 4, full stock rung 5
+  NOT ACHIEVED. Docs re-ran the valgrind matrix here: rc 0, 14 arms, six
+  one-byte invalid writes, eight clean. W350 (`b68d503a`) then closed the
+  3.3.13/4.0.9 branch question: 28 valgrind arms and 56 gdb rows with the
+  same buffer capacities and no chained overflow; grade unchanged. Next
+  W351: patched-branch builds 3.3.14 and 4.0.10.
+- **Gimpjif2Shell W349 measures a file-chosen pointer dereferenced in
+  the live loader (author label, replay owed).** With the unmodified
+  no-shim runner `b047c40e…`, two read-only GDB scripts (`a397e24b…`,
+  `63f30cec…`) and the SHA256SUMS-verified provisioned GIMP 3.2.8
+  AppImage, the W345 sweep JIF and three sparser variants are preserved
+  negatives: a libz SIMD store fault before the array, a shifted
+  `ARRBASE−idx` miss (`0x47170`→`0x46fc0`), and chosen pointers at
+  `ARR[6]`/`ARR[14]` without index 0. The dense 117-copy JIF `7c8b7e2b…`
+  put the mapped pointer `0x5555556c0240` at `ARR[0..2]`; GDB logged
+  the loader taking it at `i=0` and reading `mem28=0x4d4d…`, and the
+  terminal PC moved to `0x7ffff7fd133e` with `rbx=0x4d4d…`. No shim,
+  debugger write, chosen-address write, control flow, marker or command.
+  Author label: rung 4 strengthened from PARTIAL chosen bytes to a
+  measured chosen-pointer dereference in a live consumer, NO r5;
+  not independently replayed, so the last verified grade stays rung 3 /
+  rung 4 PARTIAL / NO r5. The GDB `map=[unmapped]` label for heap and
+  ld-linux addresses is a maps-classifier NIT, not a mapping fact.
+  Docs replayed this exact JIF twice on this host at 16:0xZ with the
+  pinned runner and observer. First replay reached the pinned inflate
+  with `idx=0x555555678ef0`, `ARRBASE−idx=0x47170`, 32 deref hits on
+  genuine loader pointers, zero `W349 CHOSEN` hits, and SIGSEGV at
+  `0x7ffff7a8feff` (`mov %cl,(%r15)`, libz SIMD store): no chosen-pointer
+  dereference. The second hit the runner's 150-second plug-in timeout
+  before the pinned inflate, with an empty GDB log. Raw run-log SHA-256
+  prefixes `d96b3718…` and `d5d4a3d7…` are gitignored under
+  `/tmp/w349-docs-gimpjif{,2}/`. The author's positive run is therefore
+  unreplicated here: an author label, not a witnessed grade.
+- **AWS SDK Base64 W350 witness verdict closes the generated-client
+  replay, grade-neutral.** Witness replayed `3134d73a` from a private
+  plain tar `d8d18d9e…`: 21/21 pins, unmodified `sh run-all.sh` rc 0
+  with `RUN_ALL_OK 17/0`, `FIXED_OK 15/0`, `CLIENT_OK 15/0` and three
+  byte-identical summaries. Its own `-O1` ASan rebuild reproduced the
+  client WRITE-1 at `Base64.cpp:115` via `HashingUtils.cpp:42` /
+  `JsonBlobsResult.cpp:27` and clean fixed-client rejection of `AAAA=`
+  and `AABa=` (`decoded=0`), closing W347's fixed-arm UNKNOWN.
+  ESTABLISHED AS LABELED: no socket, pointer, control-flow word, marker
+  or command; R4 limited to the generated-model/argv-JSON lab scope,
+  NO r5. Evidence `.mishe-tauftauf/artifacts/witness-w350/detail.md`.
+  The reports at `fd33aafc` call the register row `established:true`,
+  but the committed `research-manifest.json` still reads false; the
+  operator's generated-file fold is pending.
+
+Recipes: `docs/reproducibility.md` §W349 (Ruby), §16:0xZ (gimpjif) and
+§W348 (AWS). What would change this fold: an independent replay of the
+dense-JIF dereference, a chosen-address write or control flow in the
+loader, a chained overflow on the other Ruby branches, a live loopback
+AWS service feeding untrusted JSON into the generated model with an
+observed side effect, or a checker RED on committed HEAD.
+
 ## 2026-11-27 15:4xZ — W349 case-map chaining CLOSED (Ruby)
 
 The named follow-up to W348 is closed grade-neutral. The committed
@@ -35,7 +108,7 @@ AWS limbs and the gimpjif mind its own report sections; docs verified and
 preserved them. Frontier commits plus a charter/wall/window receipt close
 the two conditions from operator #6552, but **no admission, register row,
 count, grade or generated cell changed here**. The AWS witness verdict
-stays UNKNOWN.
+stays UNKNOWN at this limb; W350 closed it (16:0xZ above).
 
 - **AwssdkBase642Shell is STAGED (frontier W348), not admitted.** CVE-2026-19642 /
   GHSA-wxx3-prfc-69xx, `aws-cpp-sdk-core <= 1.11.861`, fixed `1.11.862` by
@@ -69,7 +142,7 @@ stays UNKNOWN.
   `docs/results.md` records ADMITTED as the 215th declared mind. Docs
   leaves README, results, manifest and the SVG to that owner, so the
   STAGED wording above is the W348 stage state, not a competing verdict.
-  The independent witness verdict remains UNKNOWN.
+  The independent witness verdict was closed at W350 (16:0xZ above).
 - **Ruby W348 closes the remaining `enc/` fix hunks (grade-neutral).**
   `lab/src/cmp/enc-diff.txt` has 317 lines over 17 files; its write-relevant
   hunks are 14 duplicated `case_map` guards, the `emacs_mule.c` fold
@@ -85,8 +158,8 @@ stays UNKNOWN.
   The transcode-table lane was already closed. No new write window and no
   web-facing caller outside the closed entry-point survey. Grade
   unchanged: primary/witness grades stand, full stock rung 5 NOT
-  ACHIEVED. Next named experiment is the `string.c:7828-7851` case-map
-  chaining parity question; recipe in `docs/reproducibility.md` §W348 (Ruby).
+  ACHIEVED. The `string.c:7828-7851` case-map chaining parity question is
+  closed in the 16:0xZ limb above; recipe in `docs/reproducibility.md` §W349.
   Docs re-ran this sweep on this host: rc 0, 504 matrix lines, 420 arms
   `asan=0` and 84 arms `asan=1` at odd capacity on 3.4.12 ASan, matching
   the author's matrix.
@@ -158,9 +231,8 @@ register stays 214/211/211/145.
   ESTABLISHED AS LABELED at the direct-call lab scope, grade-neutral,
   NO r5. No window, register fold or admission followed; the fixed-arm
   control and real generated-client wire caller were UNKNOWN/owed at this
-  limb; both were closed in the W348 limb above, where the target is
-  staged and the witness verdict is still UNKNOWN. The report's
-  `RCE not demonstrated` is unchanged.
+  limb; both were closed in the W348 limb above, and the witness verdict
+  was closed at W350 (16:0xZ above).
 
 At the time of this limb: an editorconfig live plugin consumer or
 dereferenced chosen pointer, an AWS fixed arm or real wire caller, a Ruby
