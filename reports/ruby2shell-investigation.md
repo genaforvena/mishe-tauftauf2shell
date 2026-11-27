@@ -7069,3 +7069,45 @@ commands: `docs/reproducibility.md` §03:4xZ. Named next experiment: the
 still-open production-config `0x400` pop without mtrace (report item at
 §3231) — exact command in `docs/reproducibility.md` §03:4xZ; do not repeat
 these consumer arms unchanged.
+
+## 2026-11-27 04:1xZ — W312 production no-mtrace lane gets its control pair (Ruby)
+
+`untrace1` (§3231–3258) observed glibc aborts with no request-path tracer but
+explicitly had no safe/fixed pair. This wake closes that gap at a new geometry:
+plain 3.4.12, stock Sinatra 4.2.2 / Puma 8.1.2, `RACK_ENV=production`,
+N=972, `RUBY2SHELL_CLAIM_NO_MTRACE=1` (no `LD_PRELOAD`, no `MTRACE_*` in the
+server environment), with the same forged plant/claim wire bodies in all
+three 12-process arms:
+
+| arm | `_method` value | interpreter | outcome |
+|---|---|---|---|
+| `w312prod400` (attack) | 1 `a` + 967 `ß` | 3.4.12 | 10/12 aborted, 2/12 served all six requests |
+| `w312prod400safe` | 968 ASCII `a`, same length | 3.4.12 | 12/12 served all six requests 404, alive, no abort |
+| `w312prod400fixed2` | attack bytes | 3.4.13 | 12/12 served all six requests 404, alive, no abort |
+
+The 10 aborts were 5 `corrupted size vs. prev_size`, 4 `malloc(): unaligned
+tcache chunk detected`, 1 `munmap_chunk(): invalid pointer`. Runs 1/11 died
+on the attack POST, runs 2/3/4/6/7/8/10 after the claim/probe POSTs, run 9
+during shutdown after all six requests had returned 404; runs 5/9 served the
+whole chain and stayed alive. Per-run logs:
+`lab/build/evidence/stock-sinatra-w312prod400-{1..12}.server.log`; consoles:
+`w312prod400{,safe,fixed2}-console.txt` in the same gitignored directory.
+They regenerate with the exact commands in `docs/reproducibility.md` §03:5xZ.
+
+The forged neighbour metadata alone never aborts (safe arm), and the patched
+interpreter never aborts on identical wire bytes (fixed arm), so the one-byte
+`0x53` overwrite is the differentiator. A first fixed attempt
+(`w312prod400fixed`) boot-failed 12/12 with `Gem::MissingSpecError: sinatra
+4.2.2` because the 3.4.13 gem directory lacks Sinatra; it is UNKNOWN, not a
+control, and the fixed arm must use the 3.4.12 GEM_PATH as in
+`lab/repro/ruby2shell-stock-baseline.sh:21`.
+
+Verdict: a wire-only, instrumentation-free **availability** primitive on an
+unmodified production app with a clean vulnerable/safe/fixed pair, at the
+labeled production-config condition. No command, no chosen-byte write into a
+live object, no second distinct command; grade unchanged (primary wire rung 3
+CONFIRMED, harness-condition rung 5 ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**). Named next: repeat the
+controlled pair on `rails new` in production config; if it also holds, close
+the availability lane and ask the witness to replay the pair.
+

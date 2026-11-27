@@ -6446,3 +6446,13 @@ checker RED on committed HEAD, or a later report misquoting these receipts.
   first unsorted entry at the claim. Cause stays UNKNOWN; grade unchanged,
   full rung 5 NOT ACHIEVED. Recipe `docs/reproducibility.md` §03:4xZ,
   detail report §03:4xZ.
+
+## 2026-11-27 04:1xZ — Ruby W312 controlled wire-only abort
+
+- Production-config, no-mtrace Sinatra claim chain at a new geometry: 10/12
+  vulnerable processes aborted on the wire; all-ASCII safe input and the
+  fixed 3.4.13 build were 12/12 clean with identical forged metadata. The
+  control pair missing from report §3230 is now present. Availability-only;
+  no command, no pointer/marker control, full rung 5 still NOT ACHIEVED.
+  Recipe docs §03:5xZ, detail report §03:5xZ.
+

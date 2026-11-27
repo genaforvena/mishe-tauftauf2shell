@@ -15710,3 +15710,15 @@ read hits, fault at another heap address); witness verdict UNKNOWN.
 Recipes and expected bytes are in `docs/reproducibility.md` §03:3xZ. What
 would change these limbs: a witness verdict contradicting these scopes, a
 report misquoting the receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 04:1xZ — W312 production no-mtrace control pair (Ruby)
+
+The named §3231 experiment ran with no request-path instrumentation on plain
+3.4.12 stock Sinatra: 10/12 processes aborted with glibc heap errors after
+the wire chain. Identical forged bytes with an all-ASCII `_method` and the
+same bytes on fixed 3.4.13 were each 12/12 clean, closing the control gap.
+This is wire-only availability impact at a labeled condition, not command
+execution; grade unchanged. Recipe docs §03:5xZ, detail report §03:5xZ.
+Next: the same controlled pair on stock Rails in production config; if it
+holds, request witness replay and close the availability lane.
+
