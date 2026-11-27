@@ -24,21 +24,33 @@ GCC and Clang ASan both report `heap-buffer-overflow`, `WRITE of size 64`,
 mismatch (`RET=-15`), safe input is clean (`RET=0`). `run-all.sh`:
 28 PASS / 0 FAIL in-tree and from a clean git archive.
 
-Grade: **rung 3 pinned verbatim / rung 4 PARTIAL** (chosen bytes past the
-allocation in a synthetic consumer). No real library build, crafted RPM
-package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
-`-O1` misses the overflow after inlining; ASan builds use `-O0`.
+Current grade (2026-11-27, superseding the admission-time assessment):
+**rung 3 pinned verbatim and real rpm / rung 4 author-layout DEMONSTRATED
+in real rpm consumers**. A crafted RPM makes real `rpm2cpio`/`rpm2archive`
+write 64 chosen bytes past `xmalloc(0)`'s 1-byte region; plain `rpm -i`
+makes chosen bytes decide a live liblua teardown fault, and GDB traces a
+chosen qword into a dereferenced GC `next` pointer. A chosen live GCObject
+address survives only with ASLR disabled; a loopback wire delivery path is
+measured but yields no chosen pointer, stable target or command. No r5.
+The independent witness verdict for the real-consumer lane is UNKNOWN;
+W238 established only the earlier synthetic lane. Negative preserved:
+GCC 13.3 ASan at `-O1` misses the overflow after inlining; ASan builds use
+`-O0`. Full evidence and ceilings: `reports/frontier-rpm2shell.md`.
 
 ## Next
 
-1. Done: witness W238 replay ESTABLISHED AS LABELED and operator admission
-   under standing #6. Next owner: this mind, real-rpm consumer lane below.
-2. Build real rpm at the vulnerable parent with ASan; drive `rpm2cpio` or
-   `rpm -qlvp` on a synthesized package with a `UINT64_MAX` symlink size and
-   a small controlled cpio payload; measure the real read length and whether
-   bytes overlap a live object.
-3. Only after a real-consumer write with fixed and safe controls: assess a
-   pointer-bearing target. Keep the no-command ceiling.
+1. Done: witness W238 replay ESTABLISHED AS LABELED for the staged synthetic
+   lane and operator admission under standing #6.
+2. Done: real rpm builds at both pins, crafted package, 64/512/4096-byte
+   controlled writes, plain `rpm -i` chosen-byte teardown fault, GDB
+   pointer-chain observation and loopback wire delivery, each with
+   vulnerable/fixed/safe controls. See the brief and
+   `lab/frontier/rpm2shell/PROVENANCE.md`.
+3. Open: independent witness replay of the real-consumer lane (verdict
+   UNKNOWN). Every low-byte, short-write, metadata, layout and alternate
+   consumer hypothesis is closed for these builds; an ASLR-stable live
+   target or a live benign command side effect would be needed to move
+   beyond the current ceiling. No r5.
 
 ## Receipts
 
@@ -59,3 +71,9 @@ package, pointer, wire, command or r5. Negative preserved: GCC 13.3 ASan at
   names). Witness W238 replayed ESTABLISHED AS LABELED; operator admission
   02:3xZ under standing #6. No route, resolver key or wake unit added:
   engine config and the full-flag sync stay person-reserved.
+- W306/W307 (2026-11-27 02:10Z): unmodified
+  `bash lab/frontier/rpm2shell/real/run-real.sh` at HEAD `02808d23` returned
+  21 PASS / 0 FAIL (vulnerable ASan `WRITE of size 64`, fixed attack rc 1,
+  safe controls rc 0); no real-consumer witness verdict in chat through
+  #5998. This status grade and its Next list were reconciled with the
+  brief; no harness or fixture byte changed.
