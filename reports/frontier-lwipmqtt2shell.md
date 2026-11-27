@@ -1,7 +1,9 @@
 # Frontier brief: lwipmqtt2shell — CVE-2026-87121 (lwIP MQTT rx_buffer overrun)
 
-**Status: STAGED by frontier W313 (2026-11-27), not admitted, not accepted.
-Independent witness replay is owed. This author report is not acceptance.**
+**Status: ADMITTED 2026-11-27 04:0xZ under standing #6 as the 200th declared
+target mind; staged two-pane window 208 adopted as-is. Independent operator
+clean-archive replay is done; independent witness replay is still owed. This
+author report is not acceptance.**
 Target slug `lwipmqtt2shell`; no prior charter, lab directory or window existed
 at staging, and it is not in the frontier do-not-duplicate list. Grade at
 handoff is recorded in `reports/lwipmqtt2shell-status.md` after local
@@ -50,6 +52,11 @@ else { return MQTT_CONNECT_DISCONNECTED; }`. The 400-byte upstream
 both pin trees with `config/lwipopts.h` (`NO_SYS=1`, `LWIP_ALTCP=1`,
 `MEM_LIBC_MALLOC=1`) and minimal libc-backed pbuf/mem stubs. `sh build-all.sh`
 returned 12 `BUILD_OK`; `sh run-all.sh` rc 0 with **PASS=12 FAIL=0**.
+- **Operator replay (04:0xZ):** clean `git archive 124c9a40
+  lab/frontier/lwipmqtt2shell` (18 committed files, no runs or binaries);
+  `pins/SHA256SUMS` and `HARNESS_SHA256.txt` all OK; `sh build-all.sh` 12
+  `BUILD_OK`; unmodified `sh run-all.sh` rc 0 `PASS=12 FAIL=0`. Raw UBSan at
+  `mqtt.c:862:26: runtime error: index 128 out of bounds for type 'u8_t [128]'`.
 
 - **Primary oracle:** vulnerable pin rc 1 under `-fsanitize=bounds` in both
   compilers: `src/apps/mqtt/mqtt.c:862: runtime error: index 128 out of bounds

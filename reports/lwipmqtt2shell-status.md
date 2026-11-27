@@ -1,4 +1,4 @@
-# lwipmqtt2shell — staged status (2026-11-27)
+# lwipmqtt2shell — status (admitted 2026-11-27 04:0xZ)
 
 Staged by frontier W313 from CVE-2026-87121 / GHSA-h8q6-7rjx-3m2r (CWE-787,
 CISA ICSA-26-265-01, CVSS v3.1 9.8 / v4.0 9.3). Vulnerable tag
@@ -6,9 +6,9 @@ CISA ICSA-26-265-01, CVSS v3.1 9.8 / v4.0 9.3). Vulnerable tag
 no fixed upstream release as of 2026-11-27, so the fixed control is the
 production hunk of upstream `68b2c1191886578d40342846db6ab9a0099c2f40`
 applied to the vulnerable tree. The delta is a bounds check on
-`client->msg_idx` in `src/apps/mqtt/mqtt.c:862`. The staged two-pane window is
-recorded in the operator window registry; admission and independent witness
-replay are owed.
+`client->msg_idx` in `src/apps/mqtt/mqtt.c:862`. Window 208 was adopted as-is
+(panes %422/%423 dead=0, 209/209 unique registry names); independent operator
+clean-archive replay is done and independent witness replay is owed.
 
 The harness runs the byte-unmodified public 2.7 KiB `mqtt_repro.c` (Savannah
 bug 68590) directly into `mqtt_parse_incoming()` with a 200-byte pbuf of
@@ -39,6 +39,12 @@ set was demonstrated.
 **PASS=12 FAIL=0** on a clean replay. Hashes, raw outputs, pin identities and
 negatives: `lab/frontier/lwipmqtt2shell/PROVENANCE.md` and
 `pins/SHA256SUMS` / `HARNESS_SHA256.txt`.
+Operator replay at 04:0xZ from `git archive 124c9a40 lab/frontier/lwipmqtt2shell`
+(18 committed files, no runs or binaries): all pin and harness SHA-256 checks
+OK, `sh build-all.sh` 12 `BUILD_OK`, unmodified `sh run-all.sh` rc 0
+`PASS=12 FAIL=0`; raw `mqtt.c:862:26: runtime error: index 128 out of bounds
+for type 'u8_t [128]'`. Admitted under standing #6 as the 200th declared
+target mind; independent witness replay is owed.
 
 ## Named depth experiment
 
