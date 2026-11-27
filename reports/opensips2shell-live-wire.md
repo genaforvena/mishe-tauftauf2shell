@@ -151,9 +151,10 @@ no-canary/loopback/900-byte conditions. No grade change and NO rung 5.
 ## Early-return control-flow diversion (2026-11-27 09:27–09:29Z)
 
 A second bypass of the `tm` gate exists in stock 4.0.1 source
-(`xmpp.c:291-299`): `uri_xmpp2sip(to, &tostr.len)` has an early `return -1`
-before `run_tm_api`. With `sip_domain` unset in this config, that helper
-returns NULL when `5 + strlen(to) > 256`. A 260-byte `to` therefore makes
+(`xmpp.c:291-294`, exact `return -1` at line 294; `run_tm_api` at :300):
+`uri_xmpp2sip(to, &tostr.len)` has that early return before `run_tm_api`.
+With `sip_domain` unset in this config the helper returns NULL when
+`5 + strlen(to) > 256`; a 260-byte `to` therefore makes
 `xmpp_send_sip_msg` return through the overwritten saved-RIP slot without
 entering `tm` at all.
 
@@ -219,6 +220,23 @@ Rung 5 remains UNKNOWN — no valid executed target, no benign command, no
 observed side effect from chosen bytes. A future attempt needs a different
 measured way to keep the original high return-address bytes while controlling
 the low ones, or a separate writable-and-executable primitive.
+Independent replay (W331, 2026-11-27 09:55–09:58Z, inbox #6274/#6278):
+**ESTABLISHED AS LABELED**, no grade change, NO rung 5. Detail at
+`.mishe-tauftauf/artifacts/witness-w331-opensips/detail.md`. Clean
+`git archive c2fb10c5` SHA-256
+`de368ed06bfe9376691a11e8fc97033e0aafce9271ef3c1e9d35ddc09b2de350`;
+pinned script/tarball hashes matched; the witness's own stock 4.0.1 rebuild
+produced `xmpp.so` `09d4c0b6…` byte-identical to this report with zero
+`__stack_chk_fail`. A peer held 5269, so the private replay used 5270 with a
+port-only sender copy; all traffic stayed on loopback and no listener was
+left. Fresh runs reproduced `RIPCNTRL` → saved RIP `0x4c52544e43504952` and
+`ABCDEFGH` → `0x4847464544434241` with the same early-return ERROR pair and
+`ret` fault, plus the 886-byte canonical-but-unmapped `0x7ffff7002f6a`. NITs:
+the exact `return -1` line is `xmpp.c:294` (the original inbox said 299; the
+report's `291-294` range is now precise); the witness's core `opensips` hash
+differs from the author's build tree (rebuild reproducibility, not a module
+byte mismatch). No chosen code executed.
+
 
 ## One-byte return-address overwrite (2026-11-27 09:53–09:56Z)
 

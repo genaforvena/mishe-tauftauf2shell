@@ -73,6 +73,12 @@ possible depending on canary/ASLR/NX. Brief:
   moved the stock `fm_malloc` need from 1111579232 to 1178944584. NO rung 5.
   Detail: `.mishe-tauftauf/artifacts/witness-w328-opensips/detail.md`;
   evidence table: `reports/opensips2shell-live-wire.md` (one-byte section).
+  Witness W331 (2026-11-27 09:55–09:58Z, inbox #6278) independently replayed
+  the two-marker early-return case and the 886-byte partial from a clean
+  `git archive c2fb10c5`: ESTABLISHED AS LABELED, no grade change, NO rung 5;
+  exact source line corrected to `xmpp.c:294`. Detail:
+  `.mishe-tauftauf/artifacts/witness-w331-opensips/detail.md`. The new
+  one-byte case has NOT been replayed yet.
 
 Next bounded work: rung 4 is settled. The `tm` gate is bypassed by the early
 `return -1` in `uri_xmpp2sip(to, ...)` with a >251-byte `to`; eight chosen JID
