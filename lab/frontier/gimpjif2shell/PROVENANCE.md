@@ -1982,9 +1982,49 @@ the 16-byte chunk at `indexes+272` is the `GData` in
 
 Limits: no symbol table entry for the static helper (it is stripped), so the
 identification rests on disassembly plus the version-matched source, not on
-a debug symbol. The exact GType name of the `TypeNode` remains UNKNOWN. No
+a debug symbol. The exact GType name is named by the second probe below. No
 post-inflate read of the field was observed (W313), chosen bytes form
 `0x4d4d…` rather than a useful address, and no dereference, control flow,
 marker or command was observed. Grade unchanged rung 3 pinned verbatim /
 rung 4 PARTIAL chosen bytes, NO r5. W321 replay offered at chat #6156 does
 not cover this W322 claim; a new replay offer was sent separately.
+
+## W322 second probe: exact GType of the owning `TypeNode` (2026-11-27, 06:54-07:04Z)
+
+Preserved negative: `live/gdb-typenode-322.cmd` SHA-256
+`4a464ed202056fae6d13de35ed20e1199d2cd0422e66ddd8b40bc7e723304b93`, log
+`live/evidence/w322-typenode.log` SHA-256
+`df380211977592728cfd4901533841cc25cafb1ac187debd942293634aa6a1a1`. It
+assumed `TypeNode == GData - 0x28`; at that address it read `1`
+(`GData.n_qdatas`) instead of the `GData` pointer, its backpointer check
+printed `=== W322 BACKPOINTER MISMATCH: no TypeNode claim ===` and no name
+was claimed. The assumption is retired, not retried unchanged.
+
+Corrected probe: `live/gdb-typenode-scan-322.cmd` SHA-256
+`caab8648d9c2cb348eee3a732b753d6da08b6c67adb5f81dc5ebffc06850a83c`,
+`live/evidence/w322-typenode-scan.log` SHA-256
+`d93e1cb2826d2e2a202e5da01b2770e4391ed13c7296262dfccbba9780cb70be`,
+parameterized runner `live/run-appimage-typenode-322.sh` SHA-256
+`f70e8032242b03ac3ae2e2366de8a6f3d5e57ed4aeb2135b815a10242d50bd43`.
+The runner re-verified the AppImage SHA256SUMS entry, generated a private
+shim-free AppRun (shim lines deleted, asserted absent), used the same
+`gdb-liveptr-8192.jif` (SHA `d6556936…`) and a fresh `$HOME`, and ran under
+`setsid timeout 180`. The GDB script stops at the wrapped `inflate()` with
+`avail_out = 2147483778`, derives `gdata = indexes+272`, finds the anonymous
+rw-p mapping containing `indexes`, and uses `find /g` for the word equal to
+`gdata`. Only the pure GLib lookups `g_quark_to_string()` and
+`g_type_name()` are called in the inferior; no plugin or heap byte is
+modified.
+
+Result: `gdata=0x5555557037c0`, heap `0x555555570000-0x555555753000`,
+`find` reports `1 pattern found` at `0x555555703658`. With
+`node = hit - 0x28`: `qname = 0x2c6` → `g_quark_to_string` gives
+`"gegl_op_src"`; `gtype = 0x5555556bcc70` → `g_type_name` gives
+`"GeglOperationPointComposer"`. This agrees with W321's chain through
+`gegl_op_src_register_type`. A second logged address `0x555555751860` comes
+from GDB's `warning: Unable to access 6049 bytes of target memory …,
+halting search`, not a pattern match; its quark/type words were `0` and no
+name was claimed from it. Terminal fault remains a layout-sensitive
+allocator fault. No chosen address, dereference, control flow, marker or
+command was observed; grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5.

@@ -1376,11 +1376,35 @@ upper halfword as padding) and `+312 = 0` (`data = NULL`).
 So the word that W312 saw replaced byte by byte with chosen `0x4d` bytes is
 the `qdatas` pointer field of a live `GData` in the `global_gdata` of the
 GEGL op_src GType registered at plug-in startup. This names the object and
-the field that were UNKNOWN in W317/W320/W321; the exact GType name is still
-UNKNOWN. The identification is from disassembly plus pinned source, not from
-a symbol table or a witness replay. No post-inflate read of that field was
+the field that were UNKNOWN in W317/W320/W321; the exact GType was named by
+the second probe below. The identification is from disassembly plus pinned
+source, not from a symbol table or a witness replay.
+No post-inflate read of that field was
 observed in W313's three watch runs, no chosen address was installed (the
 chosen bytes form `0x4d4d…`, not a useful address), no pointer dereference,
 control flow, marker or command was observed. Grade unchanged: rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes, NO r5. The witness replay offered at
 chat #6156 covers W321, not this new W322 claim.
+
+### Exact GType of the owning `TypeNode` (W322 second probe)
+
+A first no-shim GDB probe assumed `TypeNode == GData - 0x28`. Its own
+backpointer check read `1` (`GData.n_qdatas`) instead of the `GData` pointer
+and refused the claim; that assumption is preserved as a negative
+(`live/gdb-typenode-322.cmd`, `evidence/w322-typenode.log`). The corrected
+probe scans the anonymous rw-p heap mapping containing `indexes` for a word
+equal to the live `GData` address, then interprets that word's address as
+`TypeNode+0x28` and calls only the pure GLib lookups `g_quark_to_string()` and
+`g_type_name()`.
+
+`live/gdb-typenode-scan-322.cmd` / `evidence/w322-typenode-scan.log` SHA-256
+`d93e1cb2…`: one real hit at `0x555555703658` (the other logged address
+`0x555555751860` is the endpoint of a GDB unmapped-memory warning, not a
+pattern match, and yielded quark/type `0`). From `node = hit - 0x28`:
+`qname = 0x2c6` → `"gegl_op_src"` and `gtype = 0x5555556bcc70` →
+`"GeglOperationPointComposer"`. This independently agrees with W321's caller
+chain through `gegl_op_src_register_type`. No plugin or heap byte was changed;
+the inferior calls are name lookups only. Grade unchanged: the object and
+field are named, but no chosen address, dereference, control flow, marker or
+command was observed, so the grade stays rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes, NO r5.
