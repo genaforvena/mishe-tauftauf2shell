@@ -9606,3 +9606,60 @@ US-ASCII still reaches `case_map` (one write vulnerable, zero patched);
 UTF-8 closes it. Falsifier: zero writes with a 7-bit US-ASCII receiver,
 or any patched write. First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).force_encoding(Encoding::US_ASCII); t=("a"+"\xDF"*27).b.force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
+
+## 2026-11-27 22:5xZ — W366: receiver tag does not close the `case_map` gate; a UTF-8 receiver is not a defence
+
+W366 varied the encoding tag of the *receiver* of `String#casecmp?` while
+holding the attacker operand fixed: a 7-byte-free prefix plus N ISO-8859-1
+`0xDF` bytes at N=27/43. Committed driver
+`lab/repro/ruby2shell-recv-tag.rb` and runner
+`lab/repro/ruby2shell-recv-tag-matrix.sh` cover five receiver shapes on
+3.4.12 (vulnerable) and 3.4.13 (fixed); raw evidence is gitignored under
+`lab/build/evidence/casemap-chain/w366/` (`matrix.txt`, `plain.txt`, one
+valgrind output per arm).
+
+Valgrind 20/20 observed, all rc=0. On 3.4.12 the ASCII-8BIT, US-ASCII and
+7-bit UTF-8 receivers each show exactly one `Invalid write of size 1` plus
+one copy-out invalid read at "0 bytes after a block of size 72/88"; the
+same three arms on 3.4.13 show zero writes and zero reads. The write stack
+is `case_map (iso_8859_1.c:277)` → `rb_str_casemap (string.c:7839)` →
+`rb_str_downcase (string.c:8119)` → `str_casecmp_p (string.c:4375)`; the
+read is the copy-out `memcpy` at `string.c:7866`. Results were `true` at
+N=27 and `false` at N=43 for all three 7-bit arms on both builds.
+
+Two boundaries were measured. A UTF-8 receiver carrying U+00E9 (non-7-bit)
+makes `enc_compatible_latter` return 0 because `cr1 == cr2 == VALID` across
+different ASCII-compatible encodings (`encoding.c:1112-1125`): `casecmp?`
+returns `nil`, neither operand is folded, and both builds show zero writes
+at N=27/43. An ISO-8859-1 receiver carrying `0xE9` takes the `idx1 == idx2`
+early return (`encoding.c:1074-1076`), so compatibility succeeds; its own
+Latin-1 fold does not expand `0xE9`, but the `0xDF` argument still reaches
+the overflow — one write and one read at block 72/88 on 3.4.12, zero on
+3.4.13, result `false` on both builds.
+
+This corrects the prediction carried into the wake. W365's "UTF-8 closes
+it" applied to a UTF-8-tagged **argument**: invalid `0xDF` raises and a
+valid U+0130 fold has `CASE_MAPPING_SLACK`. A 7-bit UTF-8 **receiver** does
+not close anything: `rb_str_downcase` uses `str_true_enc(str)` per operand
+(`string.c:8101-8119`), so the receiver's tag cannot change the argument's
+Latin-1 fold. The only receiver-side closure observed is an actual
+non-7-bit character in a *different* encoding. Fresh plain runs, 20/20
+observed, all rc=0 with no glibc diagnostic on either build.
+
+Falsifier not met: the 7-bit US-ASCII receiver produced one write on the
+vulnerable build, the patched build produced none, and the only zero-write
+vulnerable arm was the encoding-incompatible UTF-8 receiver. Grade
+unchanged: primary CVE wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4,
+harness-condition rung 5 witness-ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. No wire request, chosen
+address, marker or command was used.
+
+Next named experiment W367: two-fold write independence. W364's `both_l`
+arm showed only one write even though `str_casecmp_p` folds both operands;
+sweep the receiver's own `0xDF` count independently of the argument's at
+N=27/43/59 on 3.4.12/3.4.13, recording each write's block size and call
+site. Prediction: a Latin-1 receiver whose own length reaches the same
+parity/geometry produces a second independent one-byte write; zero on
+3.4.13. Falsifier: exactly one write for every receiver N, or any patched
+write. First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"\xDF"*27).force_encoding(Encoding::ISO_8859_1); t=("a"+"\xDF"*43).force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
