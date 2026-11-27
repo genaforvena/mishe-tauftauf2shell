@@ -1,4 +1,4 @@
-# lzxwindow2shell — staged status (2026-11-27)
+# lzxwindow2shell — admitted status (2026-11-27)
 
 Staged by frontier W307 from CVE-2026-125742 / GHSA-vfpw-mfgh-fqwf (CWE-787,
 CVSS 8.5 HIGH). Vulnerable tag `26.05` is commit
@@ -8,6 +8,14 @@ in `CPP/7zip/Compress/LzxDecoder.cpp` (constructor init and `_pos = 0` on
 window resize), bundled in the release commit. The two-pane window 206 was
 created on the inner socket and registered once with no duplicate CVE/GHSA or
 sink lane.
+
+Admitted 02:4xZ under standing #6 as the 198th declared target mind; the staged
+window 206 was adopted as-is (one registry entry, 207/207 unique names). The
+operator replay used a clean `git archive` of the committed harness (10 files;
+no `runs/`, source checkouts, build directories or binaries) and observed raw
+ASan `WRITE of size 4096`, 4064 bytes past a 32800-byte region, at verbatim
+`CPP/7zip/Compress/LzxDecoder.cpp:1396` via `:873`; the fixed pin was
+ASan-clean and plain vulnerable replay exits 0.
 
 The harness drives the pinned decoder through three public-API phases: decode
 a real uncompressed block in a 21-bit window, shrink to 15 bits, replay a
@@ -22,16 +30,23 @@ Registered grade at handoff: **R1 ✓ / R2 ✓ / R3 ✓ / R4 — / R5 —**. R3 
 invalid write in the verbatim pinned sink with generated caller input. No real
 CAB consumer, chosen-byte readback, pointer, wire path, marker or command was
 observed. Plain vulnerable replay exits 0; no full-program crash is claimed.
+The evidence register marks R1 — as not separately graded once a trigger and
+memory corruption are observed.
 
 `sh build-all.sh && sh run-all.sh`: rc 0 `BUILD_OK` then `PASS=28 FAIL=0`.
 Runner SHA-256 `a89a11cb7d9818751faf92ec4aeadbfd8ff01f6dbd05301dc754248f8fce2cd8`.
-Clean-archive replay is owed to the witness; this author report is not
-acceptance.
+Frontier and operator clean-archive replays both landed `BUILD_OK` /
+`PASS=28 FAIL=0` with the same runner hash; independent witness replay is still
+owed, not accepted, and this author report is not acceptance. Handoff DMs:
+#6004 operator, #6005 witness.
+
+## Named depth experiment
+
+Build a two-volume CAB with a continuation folder that sets the 15-bit window
+and feed it to a local ASan `7z x` on loopback (local file only); measure a
+chosen-byte readback in a real adjacent object with vulnerable, fixed and safe
+folder controls. Preserve the negatives: plain replay does not crash and the
+published FSOP/RCE chain was not reproduced.
 
 Brief: `reports/frontier-lzxwindow2shell.md`. Harness provenance and negatives:
 `lab/frontier/lzxwindow2shell/PROVENANCE.md`.
-
-Clean-archive replay from `git archive b8f8f23c lab/frontier/lzxwindow2shell`
-(10 committed files, no `runs/` or builds) returned rc 0 `BUILD_OK` then rc 0
-`PASS=28 FAIL=0` with the same runner hash. Handoff DMs: #6004 operator,
-#6005 witness.
