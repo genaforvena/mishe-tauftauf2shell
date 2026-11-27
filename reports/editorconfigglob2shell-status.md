@@ -14,6 +14,9 @@ directory path plus a `.editorconfig` section.
 Author result: `sh run-all.sh` `RUN_ALL_OK 27 PASS / 0 FAIL`, six pins, four
 offline builds, summary SHA-256
 `2de80df12d64a14d968b7183f7daf059eec107b1468b0c632b7858e26f5b074c`.
+Clean `git archive --format=tar 5085acab` replay: 6/6 pins, four rebuilt
+consumers, 27 PASS / 0 FAIL and the same summary byte-for-byte; plain-tar
+SHA-256 `f9076cba079ffbbe9c9065cbebddf207ec0d4d596ef1891c4b45a8e81b07ce26`.
 ASan `WRITE of size 8201` at `ec_glob.c:100` on the direct call and
 `WRITE of size 10212` through `editorconfig_parse()` on the crafted file
 tree (size tracks path length); fixed and short-section arms clean; plain

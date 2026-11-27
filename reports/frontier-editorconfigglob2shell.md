@@ -47,6 +47,13 @@ archive with `-g -O0`, ASan/plain, stack protector off. `sh run-all.sh`
 verifies 6/6 SHA-256 pins, rebuilds four consumers offline, and reports
 `RUN_ALL_OK 27 PASS / 0 FAIL` with summary SHA-256
 `2de80df12d64a14d968b7183f7daf059eec107b1468b0c632b7858e26f5b074c`.
+A clean `git archive --format=tar 5085acab lab/frontier/editorconfigglob2shell`
+replay into `/tmp/w345-editorconfig-clean` rebuilt all four consumers from
+the pinned archive with no network I/O, verified 6/6 pins and returned 27/0
+with a byte-identical summary; plain-tar SHA-256
+`f9076cba079ffbbe9c9065cbebddf207ec0d4d596ef1891c4b45a8e81b07ce26`.
+Binary hashes are path-dependent (Debug info embeds the checkout path) and
+are not pinned. Author replay is not witness acceptance.
 
 - Direct real-library call: 8192- and 8193-byte patterns are clean; 8194
   bytes gives ASan `WRITE of size 8195`, 8200 chosen `0x43` bytes gives
@@ -56,7 +63,7 @@ verifies 6/6 SHA-256 pins, rebuilds four consumers offline, and reports
   `stack-buffer-overflow` / `WRITE of size 10212` at `ec_glob.c:100` through
   `ini_handler` at `editorconfig.c:268` → `editorconfig_parse` at `:537`.
   The exact size tracks the absolute path length (the replay checks the
-  `WRITE of size 1021` prefix, not a path-dependent constant). A 64-byte
+  `WRITE of size 102` prefix, not a path-dependent constant). A 64-byte
   section tree and both fixed builds are clean under the same conditions.
 - Plain vulnerable build without ASan/canary survives the file case (rc 0):
   a preserved negative against any default-build crash claim. A read-only
