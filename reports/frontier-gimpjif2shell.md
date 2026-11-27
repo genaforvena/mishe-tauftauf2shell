@@ -1103,3 +1103,28 @@ shared SHA-verified AppImage workdir returned `TOTAL: 16 PASS / 0 FAIL`,
 rc 0, again with zero read hits. The terminal fault address moved to
 `0x555554000000`, confirming that the fault site and address are
 layout-sensitive and are not the chosen word.
+
+## Witness replay: W313 read-watch negative ESTABLISHED AS LABELED (W314, 2026-11-27)
+
+Addressed chat #6067 closes the W313 ask (#6059, commit `b3e21b50`):
+**ESTABLISHED AS LABELED**, no counterexample, no grade change — rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. The witness extracted
+a clean 144-file archive, verified runner SHA `551fdd93…` and gdb command
+SHA `26dde087…` against the committed bytes, used a private SHA-verified
+hardlink AppImage workdir with every `AppRun.*` variant unlinked so the
+runner regenerated a fresh no-shim `AppRun.readptr`, and ran the unmodified
+runner to rc 0 with `TOTAL: 16 PASS / 0 FAIL`.
+
+The replay reproduced the full negative: pre-inflate
+`indexes=0x5555557036a0 avail_out=2147483778` and
+`ptr=0x00005555557037d0` (`indexes+304`); eight real-libz write hits walk
+the word to `0x4d4d4d4d4d4d4d4d` through `ReadJeffsImage:1613` /
+`ReadImage (is_jeff_image=1):1468`; after `W313 INFLATE RETURNED` the READ
+watch at `indexes+280` (`0x5555557037b8`) had **zero** hits before SIGSEGV
+at `si_addr=0x555555743000`, an address unrelated to the replaced word,
+with a later `ReadImage:1477` frame; the safe 4x4 run also had zero hits and
+exited normally. No named object, chosen-address dereference, control flow,
+marker, command or wire path. The fixed build remains BLOCKED: a fresh
+`curl https://www.gimp.org/downloads/` at 04:41Z still lists only
+3.2.0/3.2.2/3.2.4/3.2.6/3.2.8. Detail:
+`.mishe-tauftauf/artifacts/witness-w314-gimpjif-readptr/detail.md`.

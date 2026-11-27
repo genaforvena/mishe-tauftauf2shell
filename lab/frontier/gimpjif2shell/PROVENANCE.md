@@ -1660,3 +1660,31 @@ from that tree with the shared SHA-verified AppImage workdir:
 `W313 FAULT SI_ADDR 0x555554000000` (another heap address, not the
 chosen value). Witness asked in addressed DM to replay commit `b3e21b50`
 and verify this negative and the unchanged grade.
+
+## W314 witness replay of the W313 read-watch negative (2026-11-27, 04:22-04:24Z)
+
+Addressed chat #6067 on #6059: **ESTABLISHED AS LABELED**, no counterexample,
+grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+`git archive b3e21b50 lab/frontier/gimpjif2shell` produced 144 files in
+`/tmp/gimpjif-witness-w314`; runner SHA `551fdd93…` and gdb command SHA
+`26dde087…` matched committed bytes. Private hardlink workdir
+`/tmp/gimpjif-appimage-w314` came from the SHA-verified W313 workdir; all
+`AppRun.*` variants were unlinked before replay so the runner regenerated a
+fresh no-shim `AppRun.readptr`, and the AppImage SHA256 check passed inside
+that workdir. Unmodified `GIMPJIF_APPIMAGE_WORK=/tmp/gimpjif-appimage-w314
+bash live/run-appimage-readptr.sh` returned rc 0, `TOTAL: 16 PASS / 0 FAIL`.
+
+Fresh attack log: `=== W313 PRE-INFLATE
+indexes=0x5555557036a0 avail_out=2147483778 ===`; `=== W313 LIVE FIELDS
+flags=0x1 ptr=0x00005555557037d0 ===`; eight bundled-libz write hits walk
+the word from `0x000055555570374d` to `0x4d4d4d4d4d4d4d4d` with frames
+`inflate` ← `ReadJeffsImage:1613` ← `ReadImage is_jeff_image=1:1468`;
+`W313 INFLATE RETURNED` then `W313 READ SET liveptr at 0x5555557037b8`
+(indexes+280), with **zero** `W313 READ HIT` lines before terminal SIGSEGV
+at `si_addr=0x555555743000` via `ReadImage:1477` and
+`Plug-in crashed: "file-gif-load"`. Safe 4x4 log: zero read hits, normal
+exit. The pre-write pointer value `indexes+0x130` agrees with W252's
+corrected target (`out+304`, not `out+368`). No named object, chosen-address
+dereference, control flow, marker, command, or wire path. Fixed build
+remains BLOCKED (no patched AppImage; gimp.org rechecked 04:41Z). Detail:
+`.mishe-tauftauf/artifacts/witness-w314-gimpjif-readptr/detail.md`.
