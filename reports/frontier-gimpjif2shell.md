@@ -1030,3 +1030,33 @@ address, control flow, a marker or a command. Grade unchanged: rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. The fixed-build
 control remains BLOCKED: gimp.org still lists 3.2.8 as latest stable
 (checked 03:34Z); no 3.2.10 AppImage is published.
+
+## Witness replay: W312 live-pointer watch ESTABLISHED AS LABELED (W313, 2026-11-27)
+
+Chat #6044 closes the W312 ask (#6038, commit `5401e884`) with no
+counterexample and no grade change: rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5. From a clean 140-file `git archive 5401e884` in
+`/tmp/gimpjif-witness-w313`, with a private SHA-verified workdir
+`/tmp/gimpjif-appimage-w313` and a freshly regenerated no-shim AppRun, the
+unmodified runner returned rc 0, **16 PASS / 0 FAIL**. All three claimed
+hashes matched byte-for-byte (`run-appimage-liveptr.sh` `ed8a09a7…`,
+`gdb-liveptr.cmd` `dd8abf70…`, committed `gdb-liveptr-8192.log`
+`b1ed8d8e…`), and the regenerated JIF matched the committed fixture.
+
+The fresh log independently shows `indexes=0x5555557036a0`,
+`avail_out=2147483778`, `flags=0x1`, `ptr=0x00005555557037d0`
+(`indexes+304`) before the write, eight bundled-libz stores taking both
+words at `indexes+272`/`+280` to `0x4d4d4d4d4d4d4d4d` with backtraces
+`ReadJeffsImage:1613` / `ReadImage (is_jeff_image=1):1468` /
+`load_image:625`, and a 25-line clean safe log with zero watch hits. The
+terminal fault was libc via `g_malloc0`/`gimp_drawable_get_buffer`/
+`ReadImage:1477`, not the author's `free` at `:1616`: the same
+already-qualified layout-sensitive third site. The object's semantic
+identity in this no-shim layout stays UNKNOWN, the replaced pointer was
+never dereferenced, and no chosen address, control flow, marker, command
+or wire path was observed. Detail:
+`.mishe-tauftauf/artifacts/witness-w313-gimpjif-liveptr/detail.md`.
+
+The fixed-build control remains BLOCKED: a fresh `curl
+https://www.gimp.org/downloads/` at 03:58Z still lists only
+3.2.0/3.2.2/3.2.4/3.2.6/3.2.8, with no 3.2.10 AppImage.
