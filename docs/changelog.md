@@ -5,6 +5,50 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 13:2xZ — 212th mind staged; W341 samtools, gimpjif and Ruby
+
+Docs-only fold of `721ce2fc`, `c1e35335`, `6187df26`, `a9b43119` and
+`c66f46e1` after `d4148824`. The author's Ruby W341 recipe note and the
+operator's 212th admission in README/results/manifest/SVG were verified,
+not duplicated. No grade, rung cell, `established` flag, generated cell,
+manifest, README, report or lab evidence was moved here.
+
+- **SamtoolsRg2Shell is the 212th declared mind (ADMITTED 13:2xZ), staged,
+  not witness-accepted.** GHSA-vh3p-9c59-j3hv has no CVE in the fetched
+  advisory; the exact fix parent `d177071e…` → fix `bd8b5dc8…` changes
+  `fscanf("%s")` to `"%1023s"` in `bam_plcmd.c:1298`. A local file passed to
+  the real pinned `samtools mpileup -G` supplies the bytes and the length;
+  no BAM input or listener is needed. Clean plain-tar `9b46603d…` gave 8/8
+  source and 4/4 harness pins, four GCC builds, `RUN_ALL_OK 24 PASS /
+  0 FAIL` and summary `df418572…` in the operator replay; docs repeated
+  that archive this wake with byte-identical summary. Vulnerable ASan at
+  1024 bytes reports `WRITE of size 1025`, 1023 is clean, all fixed arms
+  are clean; plain 1200/2048/4096 SIGSEGV. Read-only GDB sees chosen
+  `0x42` bytes at `buf+1024`, a chosen hash pointer at 1200 and a chosen
+  saved return address at 2048. R1/R2/R3 ✓, R4 DEMONSTRATED in this lab
+  build, NO r5: no redirect to chosen executable code, marker, command,
+  live workflow or wire input. Witness replay is owed and the register
+  row stays unestablished. Full recipe in `docs/reproducibility.md`
+  §13:2xZ; status in `reports/samtoolsrg2shell-status.md`.
+- **Gimpjif2Shell W341 closes a second upstream geometry without a live
+  consumer.** Upstream issue 17001's `65535x32769` (`0x80007fff`, alpha
+  `data_size=65534`) drove the same no-shim GIMP 3.2.8 plug-in path:
+  98307 chosen `0x4d` bytes (~32 KiB OOB) left no live pointer word in the
+  span; the zero-OOB control and a preserved-size run with a watch on the
+  adjacent free chunk both reached the same terminal crash with zero read
+  hits. Source inspection also closes the thumbnail route (`gif_load_thumb()`
+  keeps the ~4 GiB `dest`). Grade unchanged rung 3 pinned verbatim /
+  rung 4 PARTIAL chosen bytes / NO r5; no replay owed.
+- **Ruby W341 replayed ESTABLISHED AS LABELED, grade-neutral.** All eight
+  arms of the W340 stock-coercion/persistence matrix reproduced on the
+  four pinned builds with matrix SHA-256 `c39897fe…`; the witness's only
+  nits were source-line and wording corrections, folded in the 13:0xZ
+  limb below and in `reports/ruby2shell-investigation.md` §W340.
+
+What would change this fold: an independent samtools witness verdict, a
+default/hardened build or real `-G` workflow reaching the sink, a gimpjif
+chosen-word dereference, or a checker RED on committed HEAD.
+
 ## 2026-11-27 12:5x–13:1xZ — libssh admitted and witnessed; gimpjif fault isolated
 
 Docs-only fold of `24674321`, `30d60044`, `86289b82`, `5e2c8a30` and
@@ -53,9 +97,11 @@ checker RED on committed HEAD.
 W339's named follow-up produced two answers. Source check: the only
 user-code window between `rb_reg_search` and the stale `beg`/`len` read in
 3.4.12 `rb_str_slice_bang` is `rb_reg_backref_number` → `NUM2INT` on a
-non-String/non-Symbol `argv[1]` (`re.c:1206-1212`); a stock object has no
-reference to the receiver, so no stock `to_int` can mutate the string. The
-only stdlib regex `slice!` call is `net/protocol.rb:454` with `argc==1`.
+non-String/non-Symbol `argv[1]` (`re.c:1207-1208` / `1220-1221`); a stock
+object holds no reference to the receiver, so no stock `to_int` can mutate
+the string. The stock stdlib regex `slice!` call is `net/protocol.rb:454`
+with `argc==1`, and the same line is vendored under RubyGems; no `ext/`
+regex `slice!` caller passes two arguments.
 `lab/repro/ruby2shell-slice-bang-stockcoerce.{rb,sh}` reproduces that
 exact write-buffer shape: `out_len=70`, `q=0`, `r=0` byte-identically on
 3.4.12 and 3.4.13, plain and ASan — the coercion-free route is CLOSED at
@@ -71,6 +117,11 @@ side effect; still harness-triggered, no wire, no stock coercion path, no
 command or marker. Primary grade and full rung 5 unchanged. Details in
 `reports/ruby2shell-investigation.md` §W340 and
 `docs/reproducibility.md` §W340.
+
+W341 fresh-context replay returned ESTABLISHED AS LABELED, grade-neutral:
+script blobs matched `11b05164` and all eight arms reproduced on the four
+pinned builds (matrix SHA-256 `c39897fe…`); the source-line and wording
+corrections above are its only nits.
 
 ## 2026-11-27 12:3x–12:4xZ — W339 stale `slice!` bytes dispatch a stock `_load` (Ruby)
 

@@ -19471,24 +19471,4 @@ the thumbnail route keeps the ~4 GiB `dest`. Grade unchanged rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5; no replay owed
 (same disposition as W334–W340).
 
-### Ruby — W341 `rb_str_justify` stale `termlen` write
-
-Same four pinned builds as §W340. Repro scripts:
-`lab/repro/ruby2shell-justify-termlen.rb` and `.sh` (three arms per build).
-Gitignored evidence: `lab/build/evidence/justify-termlen/matrix.txt` and
-per-tag `.out`/`.err`.
-
-```sh
-bash lab/repro/ruby2shell-justify-termlen.sh
-```
-
-Expected arm `attack` (4096-byte UTF-16LE receiver, `pad.to_str` swaps it to
-US-ASCII, width 4103): 3.4.12 plain rc 134 with
-`malloc(): invalid next size (unsorted)`; 3.4.12 ASan rc 1 with
-`WRITE of size 2` / `heap-buffer-overflow` in `memset` from `TERM_FILL`;
-3.4.13 plain and ASan rc 0 with `outlen=4103`, clean. Arms `nomut` and
-`safe` are clean on all four builds. The 64-byte version of the same shape
-is ASan-clean on both builds (embedded terminator area), so the large
-receiver is required. Grade and limits in
-`reports/ruby2shell-investigation.md` §W341.
 

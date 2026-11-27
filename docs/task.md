@@ -16417,3 +16417,44 @@ with real long filenames, any saved control word or command side effect, a
 gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
 bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
 on committed HEAD.
+
+## 2026-11-27 13:2xZ — 212th mind staged; W341 stage and negative lanes
+
+Current limb for a reader arriving now; it supersedes the "what would
+change" lines in the 12:5x–13:1xZ limb above. Docs-only fold of
+`721ce2fc`, `c1e35335`, `6187df26`, `a9b43119` and `c66f46e1`. No grade,
+rung cell, `established` flag or generated count was moved here.
+
+- **SamtoolsRg2Shell (ADMITTED 13:2xZ, 212th; staged, witness owed).**
+  GHSA-vh3p-9c59-j3hv is a local-file `fscanf("%s")` stack write into
+  `buf[1024]` in the real pinned `samtools mpileup -G` CLI at
+  `bam_plcmd.c:1298`; the fix caps the conversion at `%1023s`. Clean
+  archive `9b46603d…` gave 8/8 source and 4/4 harness pins, four GCC
+  builds, 24 PASS / 0 FAIL and summary `df418572…` in both the operator
+  replay and docs' own replay. ASan 1024 gives `WRITE of size 1025` with
+  1023 clean; fixed arms clean; chosen `0x42` bytes, hash pointer and
+  saved return address were observed in read-only GDB. R1/R2/R3 ✓,
+  R4 DEMONSTRATED in this lab build, NO r5, witness UNKNOWN and the
+  register unestablished. Next experiment: default/hardened and optimized
+  builds, then a real workflow that supplies a `-G` file; full pins and
+  commands are in `docs/reproducibility.md` §13:2xZ.
+- **Gimpjif2Shell W341 adds a second no-consumer geometry.** Upstream's
+  `65535x32769` geometry writes ~32 KiB of chosen bytes past `indexes` in
+  the real plug-in, but no live pointer word falls in the span and both
+  the zero-OOB control and the preserved-size watch run end in the same
+  allocation-driven crash with zero read hits; the thumbnail route keeps
+  the same ~4 GiB `dest`. Grade stays rung 3 pinned verbatim / rung 4
+  PARTIAL chosen bytes / NO r5. Do not repeat either geometry or the same
+  watcher arms unchanged.
+- **Ruby W341 witness replay is ESTABLISHED AS LABELED, grade-neutral.**
+  All eight arms of the W340 stock-coercion/persistence matrix reproduced
+  with matrix SHA-256 `c39897fe…`; the witness's source-line and wording
+  corrections are folded into `docs/changelog.md` §13:0xZ and the report.
+  No stock coercion route was reopened; the coercion-free route stays
+  CLOSED at the scoped stdlib call sites.
+
+What would change this limb: an independent samtools witness verdict, a
+samtools build or workflow that survives default hardening and reaches
+the sink, a gimpjif post-allocation consumer that dereferences a chosen
+word, a stock Ruby coercion path that mutates the receiver, or a checker
+RED on committed HEAD.
