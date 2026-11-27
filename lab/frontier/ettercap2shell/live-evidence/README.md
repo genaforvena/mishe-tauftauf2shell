@@ -92,7 +92,36 @@ backtrace was captured with
 - `plain-vuln.out`, `plain-gdb.out`, `plain-safe.out`, `plain-fixed.out` —
   plain-build abort, backtrace and controls (2026-11-26).
 
+## Experiment D — chosen-description pcaps (2026-11-27)
+
+`mkdescpcap.py` regenerates `gg-desc-{safe,edge,long}.pcap` from the frame
+builder in `../live/mkggpcap.py`; each carries safe version `0x2a` and a
+known description pattern `description[i] = (0x41 + i) mod 256`. Vulnerable
+copy lengths are 62 / 71 / 110 bytes into a 71-byte `tbuf2`; the fixed tag
+caps each at 70. SHA-256: `c8ce59958314350061e9a118152215cfc4fd4ecb9454642ff39cf38fc2d86cec`
+(safe), `249bd790bcf0bfcd0ca4b750be16998e1e5e77bf6ae15ff6ae862bce18605ae1`
+(edge), `01eb6f5e02ddad6874ddfdab691662fe1b3fed64163ed35f95a9bd7bc7157834`
+(long). Regeneration was hash-identical.
+
+Replay from a build directory (paths relative to the build directory):
+
+```
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 \
+  ./src/ettercap -T -q -r ../../../live-evidence/gg-desc-long.pcap -i lo
+```
+
+- `asan-desc-{safe,edge,long}-{0.8.4.1,0.8.5.1}.out` — vulnerable ASan is
+  clean / `WRITE of size 1` at `ec_gg.c:364` / `WRITE of size 110` at
+  `ec_gg.c:363` with the 71-byte allocation at `:355`; fixed ASan is clean
+  apart from the known shutdown race.
+- `plain-desc-{safe,edge,long}-{0.8.4.1,0.8.5.1}.out` — vulnerable long
+  prints chosen bytes in `VERSION:` then exits 134 (`free(): invalid size`),
+  safe/edge vulnerable and all fixed runs exit 0 with `VERSION: 7.7`.
+- `gdb-desc-adj.out` — measured `tbuf3 - tbuf2 = 80`, with `tbuf3` holding
+  exactly the chosen description bytes at pattern indices 80..109.
+
 `AddressSanitizer: attempting double-free` in `capture_getifs`/`pcap_freealldevs`
 on SIGTERM and `Joining already joined thread` at shutdown are incidental
 cleanup races in this build; they are not part of the GG finding. The control
-criterion is `heap-buffer-overflow` inside `gg_get_version`.
+criterion is `heap-buffer-overflow` at the tested sink (`gg_get_version` in
+Experiments A-C, `dissector_gg`'s `tbuf2` copy in Experiment D).

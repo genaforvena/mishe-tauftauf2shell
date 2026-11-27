@@ -1,0 +1,45 @@
+Function "dissector_gg" not defined.
+Breakpoint 1 (dissector_gg) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+[1mettercap 0.8.4.1[0m copyright 2001-2026 Ettercap Development Team
+
+Reading from ../../gg-desc-long.pcap
+Libnet failed IPv4 initialization. Don't send IPv4 packets.
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+[New Thread 0x7ffff66736c0 (LWP 2221344)]
+[New Thread 0x7ffff5e726c0 (LWP 2221348)]
+Starting Unified sniffing...
+
+[Switching to Thread 0x7ffff5e726c0 (LWP 2221348)]
+
+Thread 3 "ettercap" hit Breakpoint 1, dissector_gg (buf=0x55555558a7fc "*", buflen=120, len=0x7ffff5e7191c, po=0x7ffff5e71920) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/src/dissectors/ec_gg.c:310
+310	   DECLARE_DISP_PTR_END(ptr, end);
+368	   PACKET->DISSECTOR.pass = strdup(pass);
+ptr = 0x7ffff0000b70 "\f"
+end = 0x7ffff0000bfc ""
+tmp = "\360\026\347\365\377\177\000\000\001\000\000\000\000\000\000\000\020\033\347\365\377\177\000\000\377\377\377\177\000\000\000\000\300}XUUU\000\000\260\371\363\367\377\177"
+tmp2 = "\220\026\347\365\377\177\000\000\006gD\367\377\177\000\000\000\020\000\000\000\000\000\000\020\000\000\000\000\000\000\000 \fXUUU\000\000\240\026\347\365\377\177"
+gg = 0x7ffff0000b70
+gg_welcome = 0x7ffff0000b78
+gg_login50 = 0x7ffff0000b78
+gg_login60 = 0x7ffff0000b78
+gg_login70 = 0x7ffff0000b78
+gg_send_msg = 0x7ffff0000b78
+gg_recv_msg = 0x7ffff0000b78
+gg_new_status = 0x7ffff0000b78
+tbuf = 0x7ffff0000c10 "unknown"
+tbuf2 = 0x7ffff0000c50 "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256"
+tbuf3 = 0x7ffff0000ca0 "\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256"
+user = "4096\000\000\000\000\000"
+pass = "8192\000", ' ' <repeats 11 times>, '\000' <repeats 16 times>, "\002\000\000\000\000\000\000"
+$1 = 0x7ffff0000c50 "ABCDEFGHIJKLMNOPQRSTUVWXYZ[\\]^_`abcdefghijklmnopqrstuvwxyz{|}~\177\200\201\202\203\204\205\206\207\210\211\212\213\214\215\216\217\220\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256"
+$2 = 0x7ffff0000ca0 "\221\222\223\224\225\226\227\230\231\232\233\234\235\236\237\240\241\242\243\244\245\246\247\250\251\252\253\254\255\256"
+$3 = 80

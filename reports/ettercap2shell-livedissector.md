@@ -184,11 +184,69 @@ state and aborts the plain dissector process", not a modelled heap layout.
 
 Bounded negative on the natural consumer: the `DISSECT_MSG` `VERSION: %s` call
 at `ec_gg.c:376` produces no line in text-mode stdout or in the `-m` message
-log for either the vulnerable or the safe pcap, so there is no logger read-back
+log for either `gg-vuln` or `gg-safe`, so there is no logger read-back
 of the OOB bytes to report. On the vulnerable packet the allocator abort
 precedes any later consumer. A gdb attempt to dump `tbuf3` after the call
 failed because the process aborts before the memory could be read; the ASan
 write report in Experiment A remains the direct evidence of the bytes.
+Experiment D below uses a different packet (long chosen description, safe
+version) and does get a natural `VERSION:` read-back at a different sink.
+
+## Experiment D — folded `tbuf2` description claim (2026-11-27)
+
+Operator DM #6252 asked for a bounded check of the claim folded into this lane
+from the declined twin staging row
+(`reports/frontier-ettercapgg2shell.md:106-120`): the fixed tag adds a
+`copy_len` guard around `strncpy(tbuf2, description, gg->len - offset)`, which
+might make a *fully chosen-byte* overflow reachable. Pinned source check
+settles the fixed half: `v0.8.5.1/src/dissectors/ec_gg.c:168` defines
+`GG_MAX_LEN 70`, `:364` allocates `tbuf2` with `GG_MAX_LEN + 1 = 71` bytes,
+and every login/status site (`:370-375`, `:397-399`, `:423-425`, `:474-476`,
+`:490-492`, `:506-508`, `:525-527`, `:543-546`) uses
+`size_t offset`, `if (gg->len < offset) GG_BAIL()`, then
+`size_t copy_len = MIN(gg->len - offset, GG_MAX_LEN)` followed by
+`strncpy(tbuf2, ..., copy_len); tbuf2[copy_len] = '\0';`. `:358` also requires
+`gg->len == PACKET->DATA.len - 8`. Worst case is copy 70 bytes plus a NUL at
+index 70 of a 71-byte object: **no fixed-tag overflow**, reachable or not.
+
+The vulnerable tag is different. `v0.8.4.1:354-364` allocates the same
+71-byte `tbuf2` but copies `gg->len - 22` bytes with only a signed-negative
+guard, so a long LOGIN50 description writes packet-chosen bytes past the
+object. Three offline pcaps from `live-evidence/mkdescpcap.py` carry safe
+version `0x2a` ("7.7") and a known description pattern
+`description[i] = (0x41 + i) mod 256`, isolating this sink from
+`gg_get_version`:
+
+| Packet | GG payload len | vulnerable `copy_len` | vulnerable ASan | fixed ASan |
+|---|---|---|---|---|
+| `gg-desc-safe` | 84 | 62 | clean | clean |
+| `gg-desc-edge` | 93 | 71 | `WRITE of size 1`, `ec_gg.c:364` (`tbuf2[71]='\0'`) | clean |
+| `gg-desc-long` | 132 | 110 | `WRITE of size 110`, `strncpy` frame, `ec_gg.c:363`, `0 bytes after 71-byte region` allocated at `ec_gg.c:355` | clean |
+
+The `gg-desc-long` ASan report goes through the real parse stack
+(`decode_data -> decode_tcp -> decode_ip -> decode_eth -> pcap_loop ->
+capture`) and is deterministic in 3/3 replays; the fixed build's only report
+is the pre-existing `Joining already joined thread` shutdown race. Raw logs:
+`live-evidence/asan-desc-{safe,edge,long}-{0.8.4.1,0.8.5.1}.out`.
+
+The plain vulnerable build adds a natural read-back of the chosen bytes into
+a **named adjacent field**. `live-evidence/plain-desc-long-0.8.4.1.out`
+prints `DISSECT_MSG` with `STATUS:` = chosen description bytes through
+pattern index 109 and `VERSION: %s` = `91 92 93 94 95 96 97 98 99 9a 9b 9c
+9d 9e 9f a0 a1 a2 a3 a4 a5 a6 a7 a8 a9 aa ab ac ad ae` (pattern indices
+80..109), then exits 134 with `free(): invalid size`. In a gdb batch at
+`dissector_gg` (`live-evidence/gdb-desc-adj.out`) `tbuf2 = 0x...0c50`,
+`tbuf3 = 0x...0ca0`, `$3 = tbuf3 - tbuf2 = 80`: the bytes read back through
+`VERSION:` are exactly the packet-chosen description bytes that crossed into
+the adjacent `tbuf3` scratch buffer. The same packet on the fixed plain build
+exits 0 with `VERSION: 7.7`; vulnerable `desc-safe` and `desc-edge` also exit
+0 and print `VERSION: 7.7`. Plain long vulnerable is 134 in 3/3 runs. Raw
+logs: `live-evidence/plain-desc-{safe,edge,long}-{0.8.4.1,0.8.5.1}.out`.
+
+This is the folded `tbuf2` sink, **not** the advisory's `gg_get_version`
+sink. It gives the lane a measured chosen-byte write into a named live field
+with logger read-back and a fixed-build guard, but no pointer control, no
+marker execution and no command; AV:A and the rung-5 boundary are unchanged.
 
 ## Rung assessment
 
@@ -198,18 +256,22 @@ write report in Experiment A remains the direct evidence of the bytes.
 - **Rung 3 (confirmed memory corruption):** yes — ASan `WRITE of size 13`,
   `0 bytes after 30-byte region`, allocation at `dissector_gg:356`, write in
   `gg_get_version`, on the shipped vulnerable source.
-- **Rung 4 (demonstrated impact):** scoped and partial. Input bits select
-  whether and how far the write crosses, and which fixed suffix byte lands at
-  the boundary (WRITE 13 vs WRITE 12 at two source lines). On a plain,
-  non-ASan build the same packet deterministically corrupts allocator state and
-  aborts the dissector process (`malloc(): corrupted top size`, 3/3), with a
-  fixed-build clean control — a real availability effect, not just a sanitizer
-  marker. The overwritten bytes are constants from the helper; there is no
-  arbitrary-byte write, no pointer control, no benign marker execution. The
-  `DISSECT_MSG` `VERSION: %s` call after the guard is not a usable consumer:
-  it emits no line in this text mode for either vulnerable or safe input, and
-  on the vulnerable packet the allocator abort precedes it. No
-  corruption-to-control path was measured.
+- **Rung 4 (demonstrated impact):** scoped and partial. At the advisory's
+  `gg_get_version` sink, input bits select whether and how far the write
+  crosses, and which fixed suffix byte lands at the boundary (WRITE 13 vs
+  WRITE 12 at two source lines). The overwritten bytes there are constants
+  from the helper: no arbitrary-byte write, no pointer control, no benign
+  marker execution. On a plain build that packet deterministically corrupts
+  allocator state and aborts the dissector process (`malloc(): corrupted top
+  size`, 3/3), with a fixed-build clean control — a real availability effect,
+  not just a sanitizer marker. For that packet the `DISSECT_MSG` `VERSION: %s`
+  call emits no line in text mode and the allocator abort precedes it.
+  Separately, Experiment D measures the folded `tbuf2` description sink: a
+  110-byte packet-chosen copy into a 71-byte object, with chosen bytes at
+  `tbuf2+80..109` read back through the named adjacent `tbuf3` field in a
+  plain-build `VERSION:` log line and a clean fixed-build guard. That sink
+  still yields no pointer control, marker execution or command, and is not
+  the advisory's `gg_get_version` sink.
 - **Rung 5 (remote command execution):** no. No attacker-controlled command,
   no side effect beyond the deterministic abort / ASan detection, and the
   injection was from the same host on `lo`, not from an adjacent network peer.
@@ -236,18 +298,38 @@ python3 liveinject.py gg-vuln.pcap        # sends one frame on lo, then stops et
 
 Full cmake invocations are recorded in `live-evidence/README.md`.
 
+For Experiment D, regenerate the three chosen-description pcaps and replay
+them through both builds:
+
+```
+python3 lab/frontier/ettercap2shell/live-evidence/mkdescpcap.py
+cd lab/frontier/ettercap2shell/live/ettercap-0.8.4.1/build-asan
+ASAN_OPTIONS=detect_leaks=0:abort_on_error=0 \
+  ./src/ettercap -T -q -r ../../../live-evidence/gg-desc-long.pcap -i lo
+cd ../../../../../..
+cd lab/frontier/ettercap2shell/live/ettercap-0.8.5.1/build-plain
+./src/ettercap -T -q -r ../../../live-evidence/gg-desc-long.pcap -i lo
+```
+
 ## Evidence index
 
-- `live-evidence/gg-*.pcap` — seven crafted captures (78/154 bytes each).
+- `live-evidence/gg-*.pcap` — the original seven captures (78/154 bytes each)
+  plus `gg-desc-{safe,edge,long}.pcap` from Experiment D, generated by
+  `live-evidence/mkdescpcap.py` (hashes recorded in the wall).
 - `live-evidence/live-*.out` — six live-loopback runs.
 - `live-evidence/replay-*.out` — vulnerable and fixed offline replay (ASan).
 - `live-evidence/plain-*.out` — plain-build abort, fixed control, safe control
-  and gdb abort backtrace (Experiment C, 2026-11-26).
+  and gdb abort backtrace (Experiment C, 2026-11-26) plus the six
+  chosen-description logs (Experiment D, 2026-11-27).
+- `live-evidence/asan-desc-*.out` and `gdb-desc-adj.out` — Experiment D ASan
+  matrix, chosen-byte read-back and measured `tbuf3 - tbuf2 = 80`.
 - `lab/frontier/ettercap2shell/PROVENANCE.md` — earlier pin/harness provenance.
 
 ## What would change the mind
 
 A live capture that reaches `gg_get_version()` only after a rejecting guard;
-the fixed tag not matching the shipped 0.8.5.1 bytes; a natural consumer of the
-overwritten heap bytes exercising chosen control data; or an adjacent-network
-sender reproducing the write. None was observed.
+the fixed tag not matching the shipped 0.8.5.1 bytes; pointer control or
+command execution from the overwritten bytes; or an adjacent-network sender
+reproducing the write. Chosen-byte read-back through a named field is no
+longer open (Experiment D, `tbuf2` sink). None of the remaining items was
+observed.

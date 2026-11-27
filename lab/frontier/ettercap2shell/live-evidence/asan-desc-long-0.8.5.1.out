@@ -1,0 +1,25 @@
+
+[1mettercap 0.8.5.1[0m copyright 2001-2026 Ettercap Development Team
+
+Reading from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/ettercap2shell/live/gg-desc-long.pcap
+Libnet failed IPv4 initialization. Don't send IPv4 packets.
+   0 plugins (disabled by configure...)
+  42 protocol dissectors
+  56 ports monitored
+38702 mac vendor fingerprint
+1766 tcp OS fingerprint
+2182 known services
+
+Starting Unified sniffing...
+
+GG4/5 : 192.168.1.10:12345 -> 192.168.1.20:8074 - LOGIN  UIN: 4096  PWD_HASH: 0x00002000 (8192)  STATUS: ABCDEFGHIJKLMNOPQRSTUVWXYZ[\]^_`abcdefghijklmnopqrstuvwxyz{|}~ÄÅÇÉÑÖÜ (unknown)  VERSION: 7.7  LIP: 127.0.0.1:8074
+
+
+Capture file read completely, please exit at your convenience.
+
+
+End of dump file...
+
+Terminating ettercap...
+Unified sniffing was stopped.
+==2183149==ERROR: AddressSanitizer: Joining already joined thread, aborting.

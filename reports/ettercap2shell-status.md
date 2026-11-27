@@ -48,6 +48,15 @@ Admission changes no grade.
   11..18 **inside** the 30-byte object. Correction to the advisory: the bytes
   crossing the boundary are fixed suffix literals selected by input bits, not
   arbitrary attacker bytes.
+- Folded `tbuf2` claim (operator DM #5241, checked 2026-11-27 per DM #6252):
+  fixed `v0.8.5.1` caps `copy_len = MIN(gg->len - offset, GG_MAX_LEN=70)`
+  against a 71-byte `tbuf2` at every login/status site, so the claimed
+  fully-chosen-byte overflow is guarded unreachable there. Vulnerable
+  `v0.8.4.1:363` copies `gg->len - 22` bytes; a 110-byte copy lands
+  packet-chosen bytes in the adjacent `tbuf3`, read back through the natural
+  `VERSION:` logger and measured at `tbuf3 - tbuf2 = 80` in gdb. Fixed build
+  and short-description controls are clean. This is a second sink in the same
+  dissector, not the advisory's `gg_get_version` sink; no pointer control.
 
 Grade: rung 3 ASan-confirmed out-of-bounds write on verbatim pinned helper
 bytes, **now also on the real dissector path**: ettercap v0.8.4.1 and v0.8.5.1
@@ -61,13 +70,16 @@ injected as a live frame on loopback. `dissector_gg:360` calls
 packet and the fixed v0.8.5.1 build are clean. Full report:
 `reports/ettercap2shell-livedissector.md`; small artifacts:
 `lab/frontier/ettercap2shell/live-evidence/`; commit `fcec372`. Scoped partial
-rung 4 over extent and fixed literal tail remains. No arbitrary OOB bytes, no
-pointer control, no marker, no command and no rung 5. No independent witness
-verdict exists yet.
+rung 4 over extent and fixed literal tail remains at the advisory sink; no
+pointer control, marker, command or rung 5. Experiment D (2026-11-27) adds a
+separate, directly measured chosen-byte write at the folded `tbuf2` sink with
+a named adjacent field (`tbuf3`) and natural logger read-back, plus a clean
+fixed-tag guard. Still AV:A, still no witness verdict.
 
 Next bounded experiment (if resumed): test the AV:A claim with a sender that
-is genuinely adjacent rather than the same host, and look for a natural
-consumer of the overwritten `tbuf3` bytes to move rung 4 past extent control.
-Neither is a blocker. Keep rung 5 requirements unchanged: live wire-only
-trigger, chosen benign command, observed side effect, vulnerable/fixed/safe
-controls and witness replay.
+is genuinely adjacent rather than the same host. Pointer control / command
+execution from either sink remains unmeasured; the natural chosen-byte
+consumer question is closed by Experiment D for the `tbuf2` sink. Neither is
+a blocker. Keep rung 5 requirements unchanged: live wire-only trigger, chosen
+benign command, observed side effect, vulnerable/fixed/safe controls and
+witness replay.
