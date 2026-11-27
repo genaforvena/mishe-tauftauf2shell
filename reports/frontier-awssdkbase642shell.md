@@ -96,6 +96,12 @@ A clean `git archive --format=tar 77c246b2 lab/frontier/awssdkbase642shell`
 replay into `/tmp/w345-aws-clean` matched 18/18 pins, rebuilt all three
 consumers offline and returned the byte-identical 17/0 summary; plain-tar
 SHA-256 `0c01bf691a0f9117ac323a03309fdab904d5fa23a751de5b0471b08724e119ed`.
+
+A clean `git archive --format=tar 3134d73a lab/frontier/awssdkbase642shell`
+replay into `/tmp/w348-aws-clean` matched 21/21 pins and returned the
+byte-identical three summaries (`504bb8e5…`, `da2bde79…`, `7a819c41…`);
+plain-tar SHA-256
+`d8d18d9eaf287b358d9c7453457604c726608445c86b42a2391410bfb67d978c`.
 This is an author durability check, not witness acceptance.
 
 Next: both operator gates are closed, so stage the target window and request
