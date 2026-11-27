@@ -9261,3 +9261,55 @@ no fold write at R, any patched write, or a fold-byte write that reliably
 avoids the abort where upcase aborts. First command: a one-line driver
 equivalent to `ruby2shell-rung3-mixed.rb` with `.upcase` replaced by
 `.downcase(:fold)`, then the six-build valgrind matrix. Keep `--again 300`.
+
+## 2026-11-27 21:0xZ — W361: fold byte reaches the size LSB; same abort family
+
+W361 tested the one remaining untested byte/field combination from W360:
+the fold byte `0x73` written by `downcase(:fold)` at the successor chunk's
+size LSB. Method: `lab/repro/ruby2shell-rung3-mixed-fold.rb` drives
+`"a" + N x "\xDF"` under ISO-8859-1, with N=27/43/59 so
+`capa=N+21=48/64/80`, `R=capa+24=N+45=72/88/104 ≡ 8 (mod 16)`;
+`lab/repro/ruby2shell-mixed-fold-size.sh` runs valgrind on 3.4.12,
+3.3.13, 4.0.9 and patched 3.4.13, 3.3.14, 4.0.10, then fresh unsanitized
+processes. Prediction: one `case_map` write of `0x73` at R on the three
+vulnerable builds, zero on patched, and glibc diagnostics on at least one
+vulnerable build. Falsifier: no fold write at R, any patched write, or a
+fold write that reliably avoids the abort upcase shows.
+
+Valgrind 18/18 arms (`.../w361/vg-*.txt`): each of the nine vulnerable
+arms has exactly one `Invalid write of size 1` at `case_map
+(iso_8859_1.c:293)` plus the known copy-out `Invalid read`, `0 bytes
+after a block of size 72/88/104`; all nine patched arms have zero
+invalid writes and zero invalid reads; all rc=0.
+
+gdb on plain 3.4.12 N=27 with the committed
+`lab/repro/ruby2shell-mixed-fold-size.gdb` read the current chunk header
+`(prev_size, size) = (…, 0x51)`, placing the successor at `buffer+64`.
+At `string.c:7839` the slot `buffer+72` (successor size LSB) read `0x31`;
+at `:7850` (`used=49`) it read `0x73`, while byte 1 of that size word
+stayed `0x01`. The process then aborted with `mremap_chunk(): invalid
+pointer`, i.e. the fold byte takes the same `IS_MMAPPED` glibc path as
+`0x53` (`.../w361/gdb-3.4.12-27-fold.log`).
+
+Fresh-plain results are **partial**: the 120-process matrix exceeded both
+the 600 s and the resumed 1500 s command deadlines, and only the first
+29 processes completed (`.../w361/matrix-plain.txt`). On 3.4.12,
+fold N=27 aborted in 2/10 runs and fold N=43 in 4/9 runs (six
+`munmap_chunk(): invalid pointer`, one `corrupted size vs. prev_size`);
+upcase N=27 aborted in 2/10. The 3.3.13/4.0.9 arms, patched arms and
+even-N=28 safe control for this wake are UNKNOWN, not passes; prior
+wakes cover the upcase controls. The observed fold abort rates are in
+the same layout-dependent family as upcase, so the falsifier is **not**
+met: fold does not reliably dodge the abort. Prediction supported at the
+measured scope; grade unchanged — primary wire-only rung 3 CONFIRMED,
+witness-COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+
+Next named experiment W362: `casecmp?` size-LSB lane, the one claim entry
+point not covered by W348's upcase/downcase/swapcase matrix. Drive the
+same mixed N=27/43/59 input against an equal-length lowercase comparison
+string so the full case-map runs; valgrind on vulnerable 3.4.12 and
+patched 3.4.13, plus fresh-plain reps. Prediction: one `case_map` write
+at R on 3.4.12, zero on 3.4.13. Falsifier: no write at R (e.g. an early
+length or byte exit), or any patched write. First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"\xDF"*27).b; s.force_encoding(Encoding::ISO_8859_1); p s.casecmp?("a"+"s"*54)'`.
