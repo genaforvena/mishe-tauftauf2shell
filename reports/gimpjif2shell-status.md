@@ -162,3 +162,28 @@ and `witness-w323-gimpjif-w322/detail.md`.
   this build/layout. Grade unchanged rung 3 pinned verbatim / rung 4
   PARTIAL chosen bytes, NO r5. Full hashes in
   `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W329 benign inflated prefix (2026-11-27, 08:45-09:10Z)
+
+- Prediction: the earlier short watch windows might be an artifact of
+  chosen `0x4d` bytes inside `indexes`; a zero-filled in-object prefix with
+  metadata repaired could complete the load and expose a post-decode
+  consumer of the overwritten `GData.qdatas`.
+- Two `published-hex` JIFs: `w329-benign-280.jif` SHA `5862901f…`
+  (qdatas untouched) and `w329-benign-4140.jif` SHA `d2af0b24…`
+  (low two bytes of qdatas changed to `0x4140`). Both keep `+264=0x21` and
+  `+272=1`. No-shim script `live/gdb-benign-329.cmd` SHA `d79f91fe…` and
+  runner `live/run-appimage-benign-329.sh` SHA `4d864bb2…`.
+- First control run used an invalid GDB `pending=True` breakpoint argument
+  and produced an empty probe log; preserved as a tooling negative, not
+  heap evidence. After repair, both arms reached the pinned inflate,
+  confirmed `size264=0x21`, `nq272=1`, armed two access watchpoints on the
+  qdatas target and logged zero hits; both crashed before the
+  `gimp_drawable_get_buffer` breakpoint. Full hashes in
+  `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+- Conclusion: benign in-object data does not give a completed-load
+  consumer on this host. Structural inference: the wrap itself forces a
+  >=2 GiB `dest` allocation (`file-gif-load-vulnerable.c:1376-1378`), and
+  prior live runs fault in the allocator before post-decode GLib consumers.
+  Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+  NO r5. Not yet offered for witness replay at yield.

@@ -1530,3 +1530,46 @@ GDB's stop. This refutes the code-pointer inference for this build/layout,
 not the existence of a consumer in a completed load. Grade unchanged rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Hashes and logs:
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## Benign inflated prefix still gives no completed-load consumer (W329, 2026-11-27)
+
+W324's untouched-`qdatas` control already crashed, so the crash could have
+been caused by the chosen `0x4d` bytes inside `indexes` itself. W329 removes
+that variable: two `published-hex` JIFs fill all 260 bytes of `indexes` with
+zeros (valid palette indexes for `dest`) and write chosen bytes only past
+the object. Both preserve `+264=0x21` (next chunk size) and `+272=1`
+(`GData.n_qdatas`). `evidence/w329-benign-280.jif` SHA-256
+`5862901f…` stops at 280 bytes, leaving `qdatas` untouched;
+`evidence/w329-benign-4140.jif` SHA-256 `d2af0b24…` adds `40 41` at
+`+280/+281`, changing only the low two bytes of `GData.qdatas`.
+
+The no-shim `live/gdb-benign-329.cmd` (SHA-256 `d79f91fe…`) and
+`live/run-appimage-benign-329.sh` (SHA-256 `4d864bb2…`) reuse the
+SHA-verified GIMP 3.2.8 AppImage and a shim-free private AppRun; they write
+no register, plugin byte or heap byte. The first control run used a broken
+script version (`gdb.Breakpoint(..., pending=True)` is not a GDB API form)
+and logged no probe lines; it is preserved as a tooling negative
+(`w329-benign-280-probe.log` SHA-256 `e3b0c442…`). After repair:
+
+- control: `w329-benign-280b-probe.log` SHA-256 `9fe79929…` records
+  `orig=target=0x555555703800`, `size264=0x21`, `nq272=0x1`,
+  `OVERWRITE CONFIRMED` (qdatas unchanged), two access watchpoints armed,
+  zero hits; full log SHA-256 `639e0316…`.
+- changed: `w329-benign-4140-probe.log` SHA-256 `b8574800…` records
+  `orig=0x555555703800`, `POST qdatas=0x555555704140 = target`, the same
+  intact metadata, two access watchpoints armed, zero hits; full log
+  SHA-256 `2991e044…`.
+
+Both arms faulted the plug-in before the `gimp_drawable_get_buffer`
+breakpoint was reached; neither printed an image width, and both full logs
+carry the already-known post-crash GDB internal error. Benign in-object
+data therefore does not open a completed-load window, and the chosen
+`qdatas` target is still not read or dereferenced. Structural constraint
+(inference from the pinned caller plus the observed fault sites): a 32-bit
+alpha-doubling wrap needs `len * height >= 2^31`, and
+`file-gif-load-vulnerable.c:1376-1378` allocates `dest` at that size
+(~2 GiB here), after which the real plug-in has repeatedly faulted in the
+allocator via `gimp_drawable_get_buffer` (W308 witness receipt) before any
+post-decode GLib consumer runs. This explains the short watch windows on
+this host; it does not prove the same on another host or build. Grade
+unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
