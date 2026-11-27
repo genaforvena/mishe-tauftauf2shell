@@ -1870,3 +1870,67 @@ malloc did not expose the allocation to these breakpoints; no caller symbol
 named. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5; the object's C type
 remains UNKNOWN and no chosen-address write, dereference, marker or command
 was observed.
+
+## W321 validated allocation-family and caller-chain trace (2026-11-27, 06:12-06:33Z)
+
+Wake clock 06:15:21Z; wall checkpoint written 06:16Z and updated through
+the wake. Causal diagnosis of W317/W320: the AppImage libc at
+`/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libc.so.6`
+has `malloc` at `0xa28d0` and `free` at `0xa2fc0`; `objdump -d
+--start-address=0xa28d0 --stop-address=0xa3310` lists rets at `0xa2961`
+(`+0x91`), `0xa2cf1` (`+0x421`), `0xa2df2` (`+0x522`), `0xa2e7b`
+(`+0x5ab`), `0xa312b`, `0xa3148`, `0xa32c8`. W317/W320 used `+270/+399/+568`
+(none is a ret); the last three rets belong to `free`. All scripts below
+use static validated rets and no dynamic breakpoint creation, avoiding
+W319's GDB internal SIGSEGV.
+
+Artifacts and SHA-256:
+
+- `live/gdb-allocsite-rets.cmd` `8f1448ffd75552df41222fbadef65a41d6209f6f9f640588ac930caa752fe901`
+- `live/run-appimage-allocsite-rets.sh` `c198af3ffeb7ab52813a4d606177cf067d66f765c32e0416522de348eee0ad66`
+- `live/run-appimage-allocsite-rets-gslice.sh` `9b1d00ad26423ec637b97f0165b900a27caa340e185aa012960e1746da403c5a`
+- `live/gdb-allocsite-all.cmd` `7c6806e0af927003ca7c72e84e4105feb95fcab04fa2b3ce1f5da3327bddc337`
+- `live/run-appimage-allocsite-all.sh` `62a5d2c11d5aefc5018a4ef526fca009fbcd202f12829b4ed392b3a3336bb60b`
+- `live/gdb-allocsite-chain.cmd` `250fa0ada103976b1d5b91f7ed212e4f330c4cf7da47d5dd45d4fa8288362539`
+- `live/run-appimage-allocsite-chain.sh` `5c9b0a3aa085eadfa69bf286dbb80c6aba9db99cc0ce79038ab8fdcdeb5ea19c`
+- `live/evidence/w321-allocsite-rets.log` `15c16d449c4ab88853e37eeac9e69e8c01dd4256cdb79b333b9cfe9ee842da83`
+- `live/evidence/w321-allocsite-rets-gslice.log` `f093607e87db0eb2d8ec960bd99c5162c5b2f24aafe165cdd812a21fd003c0c5`
+- `live/evidence/w321-allocsite-all.log` `2596d03770af705300cc2841198a9bb2388625b059bd84a4c15cf292d7d353d3`
+- `live/evidence/w321-allocsite-chain.log` `b6df374de03ca8e7a6245747863d204b5fd614740806f0f6a222fceb965d25a6`
+- JIF `live/evidence/gdb-liveptr-8192.jif` `d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`
+
+Each runner verified the AppImage SHA256SUMS entry, regenerated a private
+AppRun with all `gimpjif2shell/live/*shim.so` lines deleted (asserted by
+`grep -q`), ran under `setsid timeout` with a fresh `$HOME`, and used
+`GIMP_PLUGIN_DEBUG_WRAP` to place GDB on the real plug-in. No shim mapping,
+plugin patch or heap byte change is in any claim.
+
+Results: rets run `entry=26239 ret=47571 traced=10675`, `indexes`
+`ReadJeffsImage.isra.0+165`, `+272` untraced; GSlice run `entry=26239
+ret=47571 traced=10683`, `+272` still untraced (and `g_slice_alloc` jumps
+to `g_malloc`, so G_SLICE is inert here); all-family run `entry=32700
+ret=29171 traced=10585`, `+272` a 16-byte `calloc` via `g_malloc0`,
+`+304/+336` via `g_realloc`/`g_malloc`; chain run `entry=32699 ret=29170
+traced=10584 chains=7412`, `+272` chain `calloc` ← `g_malloc0+26` ←
+`0x7ffff7a50236` (no symbol) ← `g_type_register_dynamic+201` ←
+`g_type_module_register_type+111` ← `gegl_op_src_register_type`, `+304` the
+same GType registration chain, `+336` `g_slist_prepend` from
+`g_type_module_register_type`. This names the *allocation context* of the
+overwritten words as GEGL operation type registration at plug-in startup;
+the C struct type remains UNKNOWN. All runs preserved `+264=0x21`,
+`+272=1`, `+280` pointing into the `+304` chunk, `+304=0x7fff00000001`,
+and the terminal allocator fault. No chosen-address write to a named live
+object, no dereference, no control flow, marker or command; grade unchanged
+rung 3 / rung 4 PARTIAL, NO r5.
+
+Preserved tooling negative: the first `gdb-allocsite-all.cmd` copy carried
+stray `+` prefixes on comment lines 3-12; `w321-allocsite-all.log` from
+that attempt shows `Error in sourced command file: Cannot enable the TUI
+when output is not a terminal`. The prefixes were removed and the run
+repeated; the failed log is not part of the claim.
+
+Witness verdict #6153 (06:22Z, `.mishe-tauftauf/artifacts/witness-w321-gimpjif-fold/detail.md`):
+the prior fold `f2a92725` is ESTABLISHED AS LABELED, all seven W319/W320
+script/log hashes matched byte-for-byte from a clean archive, no
+counterexample, grade unchanged. No replay owed on that verdict.
+

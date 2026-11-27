@@ -1287,3 +1287,54 @@ pointer-bearing chunk (`+264=0x21`, `+272=0x1`, `+280=indexes+304`,
 not make the allocation visible to these breakpoints; no caller symbol was
 named. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5. This variant is
 retired with W317/W319; the object's C type remains UNKNOWN.
+
+## Validated allocation trace: the overwritten words are GEGL type-registration metadata (W321, 2026-11-27)
+
+W317/W320's `traced=0` now has a concrete tooling cause. In the
+SHA-verified AppImage libc, the three `malloc` return offsets used by those
+runs (270/399/568) are not `ret` instructions: `objdump -d
+--start-address=0xa28d0 --stop-address=0xa2fc0` shows rets only at
+`+0x91/+0x421/+0x522/+0x5ab` (the three higher offsets W321 first tried sit
+inside `free`). Four new no-shim GDB scripts use only validated static
+return sites for `malloc`, `realloc`, `calloc`, `aligned_alloc` and
+`pvalloc`, with private regenerated AppRuns and the same JIF SHA-256
+`d6556936…`; no LD_PRELOAD, plugin byte or heap byte was changed.
+
+- `live/gdb-allocsite-rets.cmd` / `live/run-appimage-allocsite-rets.sh`,
+  `evidence/w321-allocsite-rets.log` SHA-256 `15c16d44…`: 26239 malloc
+  entries, 47571 traced returns, 10675 allocations. `indexes` resolves to
+  `ReadJeffsImage.isra.0+165`; the chunk at `+272` is untraced.
+- `run-appimage-allocsite-rets-gslice.sh`,
+  `evidence/w321-allocsite-rets-gslice.log` SHA-256 `f093607e…`: same
+  result with `G_SLICE=always-malloc`. This is a second reason W320's
+  hypothesis fails: this AppImage's `g_slice_alloc` (`libglib 0x80d00`) is a
+  jump to `g_malloc` (`0x65810`), so the environment switch creates no
+  separate path.
+- `live/gdb-allocsite-all.cmd` / `live/run-appimage-allocsite-all.sh`,
+  `evidence/w321-allocsite-all.log` SHA-256 `2596d037…`: 32700 entries,
+  29171 returns, 10585 allocations. The 16-byte chunk at `+272` is a
+  `calloc` return via `g_malloc0+26`; `+304` and `+336` are `malloc` returns
+  via `g_realloc` and `g_malloc`.
+- `live/gdb-allocsite-chain.cmd` / `live/run-appimage-allocsite-chain.sh`,
+  `evidence/w321-allocsite-chain.log` SHA-256 `b6df374d…`: 32699 entries,
+  29170 returns, 7412 captured caller chains. The `+272` chain is
+  `calloc` ← `g_malloc0+26` ← unresolved `0x7ffff7a50236` ←
+  `g_type_register_dynamic+201` ← `g_type_module_register_type+111` ←
+  `gegl_op_src_register_type`; `+304` has the same GType-registration
+  chain, while `+336` is a `g_slist_prepend` node from
+  `g_type_module_register_type`. The pointer-bearing words chosen-byte
+  writes replace therefore belong to GEGL operation type-registration
+  bookkeeping allocated during plug-in startup, not to image data. The
+  specific C struct type is still UNKNOWN; the scalar pattern is unchanged
+  (`+264=0x21`, `+272=1`, `+280` points into `+304`, `+304=0x7fff00000001`)
+  and the terminal fault remains a layout-sensitive allocator fault. No
+  chosen-pointer dereference, control flow, marker or command was observed.
+
+The first chain-run attempt failed at GDB startup because a copy had stray
+`+` prefixes in comment lines (`Cannot enable the TUI when output is not a
+terminal`); it is a preserved tooling negative, and the corrected rerun is
+the claim above. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5. Witness verdict #6153 (06:22Z) on the previous fold
+`f2a92725`: fold-only ESTABLISHED AS LABELED, all seven W319/W320 script
+and log hashes matched, no counterexample.
+
