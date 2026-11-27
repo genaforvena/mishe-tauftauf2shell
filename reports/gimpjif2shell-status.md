@@ -1,11 +1,12 @@
 # gimpjif2shell — status (admitted 2026-11-26)
 State: **ADMITTED 03:34Z under standing #6 as the 158th declared target mind**;
-window 166 adopted. Witness replay ESTABLISHED AS LABELED (W241, no grade
-change). Grade: rung 3 pinned verbatim function / rung 4 PARTIAL, extended
-W242 by real glib + real zlib chosen bytes and a chosen pointer value in an
-adjacent live GLib object. Later wakes reached the real GIMP 3.2.8 plug-in
-through the PDB and named the overwritten word, but no dereference of the
-chosen pointer, no command and no r5.
+window 166 adopted. Witness W241 replay ESTABLISHED AS LABELED (no grade
+change); W361 (#6620) independently established the W349 chosen-pointer
+dereference AS LABELED. Grade: rung 3 pinned verbatim function / rung 4 ✓ at
+the witness-verified chosen-pointer-dereference scope (operator fold
+`fbbf0ecd`), earlier W242 real glib + real zlib chosen bytes and a chosen
+pointer value in an adjacent live GLib object. Still NO r5: no chosen-address
+write, control flow, marker or command.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
@@ -498,10 +499,15 @@ from `0x7ffff7fd1327` to `0x7ffff7fd133e` with `rbx=0x4d4d…`. No shim or
 debugger write, no chosen-address write, control flow, marker or command.
 
 Author label: rung 4 strengthened from PARTIAL chosen bytes to a measured
-chosen-pointer dereference in a live consumer; NO r5. This new label is not
-yet independently verified (replay offer pending); the last verified grade
-stays rung 3 / rung 4 PARTIAL / NO r5. Exact SHAs, deltas, negative variants
-and the maps-classifier NIT: W349 section of
+chosen-pointer dereference in a live consumer, still NO r5. Witness W361
+(#6620) replayed the five no-shim runs from clean `417097b4` with JIF
+`7c8b7e2b…`, runner `b047c40e…`, run log `3ada9f47…` and GDB `754d125b…`:
+ESTABLISHED AS LABELED; operator fold `fbbf0ecd` set R4 ✓ at that scope, NO r5.
+Correction preserved: single-pointer `0857219c…` and W345 sweep `0896977e…`
+were called negative here, but W361 contradicted both — each produced an
+explicit chosen-pointer dereference; only sparse24 `8d9ba89e…` stayed
+negative at `ARR[0]`. Heap delta varies `0x470d0/0x47170/0x47210`. Exact
+SHAs, deltas and the maps-classifier NIT: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
 ## W351 chosen second-stage pointer with valid field reads (2026-11-27, 16:03Z wake)

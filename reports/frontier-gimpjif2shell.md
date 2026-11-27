@@ -1969,9 +1969,13 @@ field `+0x356`. No shim, no debugger memory or register write, no
 chosen-address write, control flow, marker or command.
 
 Author label: rung 4 strengthened from PARTIAL chosen bytes to a measured
-chosen-pointer dereference in a live consumer, still NO r5. Replay offer
-pending, so this new label is not independently verified; prior verified
-grade remains rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+chosen-pointer dereference in a live consumer, still NO r5. Witness W361
+(#6620) ESTABLISHED that no-shim label AS LABELED from clean `417097b4`
+(JIF `7c8b7e2b…`, chosen pointer `0x5555556c0240` dereferenced at
+`0x7ffff7fd1327`, fault `0x7ffff7fd133e` with `rbx=0x4d4d…`); operator fold
+`fbbf0ecd` set R4 ✓ at that scope. The single-pointer `0857219c…` and W345
+sweep `0896977e…` negatives were contradicted by W361; sparse24
+`8d9ba89e…` stayed negative at `ARR[0]`.
 Scripts, JIFs, logs and hashes: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
@@ -1994,5 +1998,5 @@ fresh vulnerable/fixed rebuild controls behaved as expected (fixed rejects
 the JIF, vulnerable plug-in crashes). The measured ceiling stays a
 chosen-pointer chain with readable fields in a live consumer: no
 chosen-address write, control-flow redirection, marker, command or r5.
-Author label is pending replay; verified grade is unchanged. Full evidence:
-W351 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+W351 remains author-only and pending replay (#6628); do not fold it into the
+W361 verdict. Full evidence for the W351 chosen-field chain:
