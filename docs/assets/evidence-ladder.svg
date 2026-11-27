@@ -33,9 +33,9 @@
 <line x1="56" y1="372" x2="924" y2="372" stroke="#e7e8e3"/>
 <text x="56" y="410" font-size="15" fill="#2c3034">R5</text>
 <text x="112" y="410" font-size="13" fill="#3e4348">Working remote command execution</text>
-<text x="500" y="414" font-size="17" text-anchor="middle" fill="#3f6b50">12</text>
+<text x="500" y="414" font-size="17" text-anchor="middle" fill="#3f6b50">13</text>
 <text x="665" y="414" font-size="17" text-anchor="middle" fill="#3e4348">2</text>
-<text x="830" y="414" font-size="17" text-anchor="middle" fill="#8b9295">184</text>
+<text x="830" y="414" font-size="17" text-anchor="middle" fill="#8b9295">183</text>
 <line x1="56" y1="428" x2="924" y2="428" stroke="#e7e8e3"/>
 <text x="56" y="452" font-size="11" fill="#6b7376">n = 198 findings · cells are rung states, not verdicts · generated from research-manifest.json (2026-11-26)</text>
 </g></svg>
