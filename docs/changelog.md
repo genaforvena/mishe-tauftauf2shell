@@ -5827,3 +5827,16 @@ checker RED on committed HEAD, or a later report misquoting these receipts.
   full rung 5 NOT ACHIEVED. Timing caveat: `Regexp.timeout` was disabled for
   the gdb process only, so no wire-only claim rests on it. Recipe in
   `docs/reproducibility.md`, result in report §00:2xZ.
+
+## 2026-11-27 01:4xZ — Ruby negative repeat IDs measured; steering CLOSED
+
+- A new gated gdb watch of wrapped repeat IDs `−2..−16` (`units =
+  65534 − k`) on pinned 3.4.11 found 11 completed stock-Rails trials whose
+  writes land exactly at `alloca_base − 8k` at stack pads 0/8/32. Every
+  target held ASCII pattern bytes before the write and a small repeat-stack
+  index (3–113) after; read backtraces show that index consumed at
+  `match_at regexec.c:3877` and once at `fstring_cmp string.c:645`, never a
+  pointer or chosen byte. The watcher trials' terminal SIGSEGV is UNKNOWN:
+  a write-breakpoint-only control did not fault. Grade unchanged, lane
+  CLOSED; recipe in `docs/reproducibility.md`, detail in report §01:4xZ.
+

@@ -6724,3 +6724,52 @@ a realloc escape, and the ASCII-only path has no multi-byte expansion.
 Grade unchanged at rung 3. **Lane CLOSED** — a new lane must still name
 a different consumed function or a wire-only libc/Ruby-code base.
 
+
+## 2026-11-27 01:4xZ — W303 negative repeat IDs −2..−16: consumed small indices, no pointer; lane CLOSED
+
+W302 named one follow-up: move the wrapped repeat ID away from `−32767`
+toward the negative IDs whose writes sit near `repeat_stk` and malloc
+metadata. The recorded pairs (units 32,767 → ID `−32767`, units 65,533 →
+ID `−1`) give `ID = units + 2 (mod 65536)`; `units = 65534 − k` selects ID
+`−k`. A plain-wire calibration at `units=65526` (ID `−8`, shallow layout,
+threads=1, ASLR off) compiled a 786,362-byte pattern, served HTTP 200 with
+14,805 bytes and stayed alive in 1.4 s — no route or application change.
+
+The new gated watcher `lab/repro/ruby2shell-onigmo-watch-neg.{py,gdb}` and
+driver `lab/repro/ruby2shell-onigmo-repeat-neg.sh` arm only after
+`rb_reg_initialize` sees >300 KB, use native `mem < 0 && mem > -33`
+conditions with gdb `commands` blocks (Python `stop()` overrides bypass gdb
+conditions, measured in W302), log the slot at both write sites, and put a
+read watchpoint on the first distinct target for five backtraces. Eleven
+completed trials (`w303-n{k}-p{0,8,32}`, gitignored
+`lab/build/evidence/w303-summary-p*.txt` and `w303-n*.{json,server.log}`)
+covered IDs `−2, −4, −8, −12, −16` at stack pad 0 and IDs `−2, −8, −16` at
+pads 8 and 32. Every write landed at the deterministic `alloca_base − 8k`
+(`−16, −32, −64, −96, −128`); changing the stack pad moved the base but not
+that delta. Every pre-write slot was ASCII pattern-source bytes; every
+post-write value was a small stack index (3–113), never a chosen byte or a
+pointer. Read backtraces show the written index actually consumed at
+`match_at regexec.c:3877` (`si = repeat_stk[mem]`) and, in one ID-`−4` arm,
+at `fstring_cmp string.c:645` — a live consumer, but of a small integer,
+not of an attacker-shaped pointer.
+
+All eleven watcher trials ended with Ruby's `Fatal signal: Segmentation
+fault` after the logged reads, with no SIGSEGV event reaching the watcher's
+signal handler. That fault is **not** attributed to the write: a control
+with the same ID-`−8` pattern under the W302 watcher (write breakpoints
+only, no read watchpoints) made 28,075 negative writes, timed out on the
+first POST after 120 s and did not fault. Hardware watchpoint deletion or
+watchpoint-altered timing remains a plausible artifact; the fault is
+preserved as UNKNOWN, not as a new primitive. The non-pointer evidence is
+measured independently of that fault.
+
+Verdict: the negative repeat-ID steering lane is **CLOSED** at IDs
+`−2..−16` and pads 0/8/32, alongside the already-closed ID `−1` sweep and
+the `−32767` watch: every target holds pattern-source bytes and receives a
+small repeat-stack index, with no pointer or chosen bytes. Grade unchanged:
+stock-wire rung 4 witness-ESTABLISHED at its labeled scope, harness-
+condition rung 5 witness-ESTABLISHED, full stock/oracle-free/persistent
+rung 5 **NOT ACHIEVED**. A new lane must either widen the negative ID past
+`−16` with a widened watch condition and find a pre-write pointer, or name
+a wire-visible consumer; do not repeat this ID/pad matrix unchanged.
+

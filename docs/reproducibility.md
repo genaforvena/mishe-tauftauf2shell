@@ -16391,3 +16391,35 @@ observed in the measured window, the repair is shim-assisted, no fixed
 3.2.10 AppImage is published, and the grade stays rung 3 pinned verbatim /
 rung 4 PARTIAL, NO r5. Hashes and the first replay's corrected runner-hex
 defect are in `lab/frontier/gimpjif2shell/PROVENANCE.md` § W301.
+
+## 2026-11-27 01:4xZ — W303 negative repeat-ID watch (IDs −2..−16)
+
+From the repo root, after the pinned 3.4.11 plain build and stock Rails app:
+
+```sh
+RUBY2SHELL_ONIGMO_GEM_PATH=lab/build/plain/ruby-3.4.12-plain/lib/ruby/gems/3.4.0 \
+  RUBY2SHELL_ONIGMO_UNITS=65526 RUBY2SHELL_ONIGMO_LAYOUT=shallow \
+  RUBY2SHELL_ONIGMO_TIMEOUT=90 RUBY2SHELL_ONIGMO_PORT=4981 \
+  python3 lab/repro/ruby2shell-onigmo-repeat-wire.py attack w303-c8
+sh lab/repro/ruby2shell-onigmo-repeat-neg.sh "2 4 8 12 16" 0 5011
+sh lab/repro/ruby2shell-onigmo-repeat-neg.sh "2 8 16" 8 5031
+sh lab/repro/ruby2shell-onigmo-repeat-neg.sh "2 8 16" 32 5041
+```
+
+`units = 65534 − k` selects wrapped ID `−k`; the first command is the
+non-gdb wire calibration (expect 200, alive). The driver runs one fresh
+threads=1/shallow/ASLR-off stock Rails worker per trial under the gdb
+watcher with the gdb-only `Regexp.timeout=nil` timing shim; no wire-only
+claim uses that shim. Read the gitignored
+`lab/build/evidence/w303-summary-p{0,8,32}.txt` and `w303-n*.{json,server.log}`
+rather than shell rc. Expect 11 completed trials: writes at
+`alloca_base − 8k` for every ID and pad, ASCII pattern bytes before, small
+repeat-stack indices (3–113) after, five read backtraces at
+`match_at regexec.c:3877` (and once `fstring_cmp string.c:645`), no pointer
+and no chosen byte. Recorded trials ended with `Fatal signal: Segmentation
+fault` after the reads, but a write-breakpoint-only control with the same
+ID-`−8` pattern made 28,075 negative writes, timed out at 120 s and did not
+fault; the fault stays UNKNOWN and is not a claimed primitive. Lane CLOSED
+for IDs `−2..−16` at pads 0/8/32; full rung 5 NOT ACHIEVED. Detail in report
+§01:4xZ.
+
