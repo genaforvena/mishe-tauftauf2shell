@@ -85,6 +85,19 @@ libevent lane, or a checker RED on committed HEAD.
   measured negative, no rung claim. Recipe in `docs/reproducibility.md` §W318,
   detail in report §05:4xZ. The #6107 witness replay remains queued.
 
+## 2026-11-27 06:1x–06:2xZ — adjacent Ruby `String#rindex` bound CLOSED
+
+- The 3.4.12→3.4.13 series also adds a character/byte bound to `str_rindex`
+  (`string.c:4623`/`:4666`). A stock `String#rindex` probe puts the vulnerable
+  first `memcmp` 26 bytes past `RSTRING_END` under gdb (s=sbeg+94, e=sbeg+108,
+  slen=40), but all six ASan shape/build arms returned `rc=0` with no report,
+  no 3.4.12/3.4.13 output difference and no chosen bytes or wire path. Exact-
+  capacity and broken-UTF-8 variants add no effect; a standalone C check shows
+  this host's ASan does intercept such `memcmp` overreads. Recorded SUSPECTED
+  with a measured negative, lane CLOSED at this geometry; grade unchanged,
+  full rung 5 NOT ACHIEVED. Recipe `docs/reproducibility.md` §W319, detail
+  report §06:1xZ. Witness replay #6107 still unplayed at 06:15Z.
+
 ## 2026-11-27 05:2x–05:3xZ — fixed control, two source bounds, SAIL PSD, ud3tn rung 5
 
 This fold covers `203587f5`, `cea10009`, `887c0523`, `a53a81c3`, `96a62d92`,

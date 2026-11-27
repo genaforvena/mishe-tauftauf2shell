@@ -7285,3 +7285,47 @@ scope, harness-condition rung 5 ESTABLISHED at its labeled scope, full
 stock/oracle-free/persistent rung 5 NOT ACHIEVED. The witness replay of report
 §5108 remains the open owed item; any counterexample there revises only that
 secondary lane.
+
+## 2026-11-27 06:1x–06:2xZ — W319: adjacent `String#rindex` character-count bound, runtime geometry measured, no effect (Ruby)
+
+Another bug fixed in the same 3.4.12→3.4.13 series was triaged as a third
+adjacent lane. `lab/src/cmp/string-diff.txt:156-193` adds `s + slen <= e` to
+both `memcmp` calls in `str_rindex` (3.4.12 `string.c:4623`/`:4635`) and an
+`RSTRING_LEN(sub) <= RSTRING_LEN(str)` guard to `rb_str_rindex` (`:4666`).
+The position is computed in CHARACTERS (`len = str_strlen(str)`,
+`slen = str_strlen(sub)`, `pos = len - slen`), but `memcmp` uses the substring's
+BYTE length. A receiver whose last `slen` characters are 2-byte and a substring
+of `slen` 4-byte characters therefore reads past `RSTRING_END(str)`.
+
+`lab/repro/ruby2shell-rindex-oob.rb` uses stock `String#rindex` only (no monkey
+patch, debugger in the request path, tracer or wire request). Its `pos` shape
+is `'a'*100 + "\u00e9"*4` (108 bytes, 104 chars) against `"\u{1d11e}"*10`
+(40 bytes, 10 chars) at `pos=94`; `zero` is a 2-byte receiver against a
+32-byte substring at `pos=0`; `safe` uses a 10-byte ASCII substring.
+A gdb breakpoint at vulnerable `string.c:4623` gives `s = sbeg+94`,
+`e = sbeg+108`, `t = ten 4-byte characters`, `slen = 40`: the first `memcmp`
+reads 26 bytes past the logical end. The fixed build's corresponding guarded
+site is not the same read. The bytes following `e` here are allocator slack
+(`00`×24 then small metadata), not attacker-chosen bytes.
+
+`bash lab/repro/ruby2shell-rindex-oob.sh` ran three shapes on the vulnerable
+ASan build and on fixed 3.4.13: **6/6 `rc=0`, zero `ERROR: AddressSanitizer`**.
+`pos` and `zero` return `nil` on both builds; `safe` returns `90` on both.
+An exact-capacity `String.new(capacity: 108)` receiver and a larger 20-character
+substring (56 bytes past the logical end) were also ASan-clean on 3.4.12;
+18 truncated-multibyte/broken-UTF-8 shape variants produced no 3.4.12/3.4.13
+output difference. A standalone C check confirms this host's ASan does report
+an 80-byte `memcmp` 8 bytes past a 108-byte heap region, so the clean result is
+not a missing interceptor in the toolchain.
+
+Verdict: the missing char/byte bound is real and its runtime geometry was
+observed, but no sanitizer-visible fault, match/no-match oracle, chosen-byte
+effect or wire path was produced through these stock `String#rindex` shapes.
+Recorded at SUSPECTED-with-negative, no rung claim; the lane is CLOSED at this
+geometry and must not be repeated unchanged. Evidence is gitignored in
+`lab/build/evidence/rindex-oob/`. Grade unchanged: primary wire rung 3
+CONFIRMED, secondary one-bit rung 4 narrow scope, harness-condition rung 5
+ESTABLISHED at its labeled scope, full stock/oracle-free/persistent rung 5
+NOT ACHIEVED. The owed independent witness replay of report §5108 (#6107)
+remains the open item; tape at 06:15Z shows the witness explicitly listing it
+as unplayed behind newer offers.

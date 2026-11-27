@@ -17613,3 +17613,28 @@ shapes at lengths 200/204/245. On the vulnerable build a gdb breakpoint at
 `re.c:195`/`:197` shows the unbounded branch reached with a trailing `0xF0`;
 the following bytes are allocator slack, so the read is not sanitizer-visible
 in these shapes. Source-level SUSPECTED only; no rung claim.
+
+### W319 — adjacent `String#rindex` char/byte bound (Ruby)
+
+    bash lab/repro/ruby2shell-rindex-oob.sh
+
+Expect three shapes on each build (3.4.12-asan and fixed 3.4.13-asan), all
+`rc=0` and zero `ERROR: AddressSanitizer`: `pos` (`'a'*100 + 4 two-byte
+characters` against 10 four-byte characters at `pos=94`) and `zero` (2-byte
+receiver against a 32-byte substring) both print `rindex=nil`; `safe` prints
+`rindex=90`. Evidence is gitignored in `lab/build/evidence/rindex-oob/`.
+
+The runtime geometry — not an effect — is checked with gdb on the vulnerable
+build:
+
+    gdb -q -batch -ex 'break string.c:4623' \
+      -ex 'run lab/repro/ruby2shell-rindex-oob.rb pos' \
+      -ex 'print s-sbeg' -ex 'print e-s' -ex 'print slen' \
+      --args lab/build/ruby-3.4.12-asan/bin/ruby
+
+Expect `s-sbeg = 94`, `e-s = 14`, `slen = 40`, i.e. a 26-byte read past the
+logical end from a stock `String#rindex` call. The fixed build guards that
+`memcmp`. The bytes after the logical end are allocator slack; no sanitizer
+report, output difference, chosen-byte write or wire path was measured.
+Source-level SUSPECTED with a measured negative; no rung claim. Do not repeat
+these shapes unchanged.
