@@ -16,6 +16,9 @@ registers into the caller's buffer before checking the requested quantity.
 Author result: `sh harness/run-all.sh` gives 11/11 pins, `RUN_ALL_OK 17 PASS
 / 0 FAIL`, summary SHA-256
 `c8489055177859c647d4718101f1feaf61dc20a7d2e6e2dfa04dcc6b33ea909d`.
+Clean replay from staging commit `48360585`: plain-tar SHA-256
+`d47d2b11984cf56ab01374de7cde90f97e8583be3120758a3fb85d6e413a0252`,
+11/11 pins, 17 PASS / 0 FAIL and the same summary byte-identical.
 ASan `WRITE of size 2` at the pinned sink, reached over a real loopback TCP
 response from a malicious Modbus server; the fixed v1.22.1 arm rejects the
 same payload (`READ_RC -2`) and the 4-byte safe response is clean. In a
