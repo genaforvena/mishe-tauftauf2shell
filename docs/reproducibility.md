@@ -50,6 +50,7 @@ containers whose host ports bind only to loopback.
 | SippAuth2Shell (ADMITTED 11:0xZ, 209th; W335 ESTABLISHED) | [brief](../reports/frontier-sippauth2shell.md), [status](../reports/sippauth2shell-status.md), [provenance](../lab/frontier/sippauth2shell/PROVENANCE.md) | CVE-2026-90779 (no GHSA ID found — UNKNOWN), SIPp <=3.7.7, vulnerable v3.7.7 `369b3c187…` / fixed v3.7.8 `741ee230…`, release tarballs `e55b15f5…` / `a2519f85…`, fix `1d4a5622` is not an ancestor of the fixed tag; eight digests in `HARNESS_SHA256.txt` | `cd lab/frontier/sippauth2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct-call harnesses link real pinned SIPp objects, no listener) | rc 0, `TOTAL: 15 PASS / 0 FAIL`; 32-byte `algorithm=` → ASan `WRITE of size 1` at `src/auth.cpp:190`, 33/64 bytes → WRITE-33/64 at `:189` into `algo[32]`, vulnerable plain 64 bytes rc 139, fixed/safe clean. Read-only GDB shows chosen saved RBP/RIP `0x4141414141414141`; 62 chosen bytes set the six low saved-RIP bytes and the harness `mmap(MAP_FIXED)` marker prints `SIPP_AUTH_MARKER` only on the vulnerable build. R4 in-process only, R5 NOT CLAIMED; witness W335 replayed the clean archive 15/0 with no-mmap and fill-swap counterexamples, ESTABLISHED AS LABELED with no grade or flag change. Full recipe in §11:0x–11:1xZ |
 | SvxLinkDirectory2Shell W335 (ADMITTED 11:3xZ, 210th; W336 ESTABLISHED AS LABELED) | [brief](../reports/frontier-svxlinkdirectory2shell.md), [status](../reports/svxlinkdirectory2shell-status.md), [provenance](../lab/frontier/svxlinkdirectory2shell/PROVENANCE.md) | GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** — OSV mirrors `UBUNTU-CVE-2026-73154`, discrepancy UNKNOWN), fix `8eb1008f…` against parent `d6451c1e…`; five SHA-256 pins in `SHA256SUMS`, eight harness hashes in `HARNESS_SHA256.txt` | `cd lab/frontier/svxlinkdirectory2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (four GCC builds of the verbatim `#line` sink body, no listener) | rc 0, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256 `871c0be7…`; ASan `WRITE of size 120` at pinned `EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, attacker-offset `WRITE of size 1` NUL at `:218`, fixed/44/31 controls clean, plain 120-byte SIGBUS, read-only GDB reads 16 chosen `0x41` bytes at `str+45..+60`. R4 LIMITED, R5 NOT CLAIMED; operator and W336 witness clean replays from `df6ef056` plain tar `9d83e19e…` byte-identical, witness `0x42` fill-swap confirmed chosen bytes, advisory-drift NIT repaired in `7641c034` (repair itself unwitnessed), no grade/flag/r5 change. Full recipe in §11:4xZ |
 | LibsshSftpLongName2Shell (ADMITTED 12:5xZ, 211th; W340 ESTABLISHED AS LABELED) | [brief](../reports/frontier-libssh-sftp-longname2shell.md), [status](../reports/libssh-sftp-longname2shell-status.md), [provenance](../lab/frontier/libssh-sftp-longname2shell/PROVENANCE.md) | CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c, upstream `>=0.11.0,<0.11.5` and `0.12.x<0.12.1`, fix `b2065f71c…` against parent `8b2809ae…`; four pins in `SHA256SUMS`, eight in `HARNESS_SHA256.txt` | `cd lab/frontier/libssh-sftp-longname2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && sh run-all.sh` (four GCC builds of the verbatim pinned sink body, no listener) | rc 0, `RUN_ALL_OK 15 PASS / 0 FAIL`, summary `bc87203c…`; ASan `WRITE of size 316` at pinned `sftpserver.c:1852`, 292/255 and fixed controls clean, GDB chosen bytes at `long_name+350..+365`; R4 LIMITED, NO r5. W340 clean-archive replay ESTABLISHED AS LABELED at that direct-call scope; register `established` cell unchanged |
+| SamtoolsRg2Shell (ADMITTED 13:2xZ, 212th; witness owed) | [brief](../reports/frontier-samtoolsrg2shell.md), [status](../reports/samtoolsrg2shell-status.md), [provenance](../lab/frontier/samtoolsrg2shell/PROVENANCE.md) | GHSA-vh3p-9c59-j3hv (no CVE in the fetched advisory), affected `<=1.21.2`, `1.22.3`, `1.23.2`, `1.24`, patched `1.21.3`, `1.22.4`, `1.23.3`, `1.24.1`, `1.25`; fix parent `d177071e…` → fix `bd8b5dc8…`; 8 source pins in `SHA256SUMS`, 4 harness pins in `HARNESS_SHA256.txt` | `cd lab/frontier/samtoolsrg2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && sh run-all.sh` (real CLI, four GCC builds, no listener) | rc 0, `RUN_ALL_OK 24 PASS / 0 FAIL`, summary `df418572…`; ASan `WRITE of size 1025` at `bam_plcmd.c:1298` for a 1024-byte token, 1023 clean; chosen `0x42` hash pointer and saved return address; fixed/safe clean; R4 DEMONSTRATED in the lab build, NO r5; witness UNKNOWN, register unestablished. Full recipe §13:2xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; W330 (#6283) replayed the live wire: ESTABLISHED AS LABELED at chosen-value control, no grade change. The chosen-TARGET follow-up reached a wire-chosen `info` pointer dereferenced by live v2.4.30 with a benign stock-code marker print; W337 independently replayed it from own hash-matched rebuilds, including an unmodified stock binary, and graded ESTABLISHED AS LABELED under `-d2` + LD_PRELOAD sentinel conditions. Fixed/safe clean, ASLR on, **NO r5**, no grade/flag change. Full recipe in §08:4x–09:0xZ, §09:2x–09:4xZ and §11:5xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -19382,3 +19383,112 @@ pointer or allocator size. No chosen pointer, marker or command path;
 grade unchanged rung 3 live / rung 4 availability DEMONSTRATED plus
 chosen-offset PARTIAL, NO r5. Details in
 `lab/frontier/nfdump2shell/PROVENANCE.md` §"Source-bound negatives".
+
+## 2026-11-27 13:2xZ — 212th admission: samtools `-G` stack write
+
+Current limb for a reader arriving now. The 212th mind was admitted by
+`a9b43119`; operator and docs each replayed the `721ce2fc` stage from a
+clean archive. No grade, rung cell, `established` flag, generated cell,
+manifest, README, report or lab evidence was moved here. Ruby W341's
+witness verdict and matrix hash are already recorded in the 12:5x–13:1xZ
+recipe above; its source-line corrections are folded into
+`docs/changelog.md` §13:0xZ.
+
+### SamtoolsRg2Shell — real `mpileup -G` CLI, staged and unwitnessed
+
+Claim: GHSA-vh3p-9c59-j3hv (no CVE assigned in the fetched advisory),
+CWE-121/CWE-787, High, `AV:N/AC:L/AT:N/PR:N/UI:P/VC:N/VI:H/VA:L`.
+Affected `<=1.21.2`, `1.22.3`, `1.23.2`, `1.24`; patched `1.21.3`,
+`1.22.4`, `1.23.3`, `1.24.1`, `1.25`. Exact fix parent
+`d177071e7b0ca1c622eb544a8698870040f23833` to fix
+`bd8b5dc8ade12e575ff2f02e8c0b7e384848a328`; the only source change is
+`fscanf(fp_rg, "%s", buf)` → `"%1023s"` at pinned `bam_plcmd.c:1298`.
+Mechanism: case `G` declares `char buf[1024]` at `:1292`, and the local
+file's whitespace-free token supplies both bytes and length before the
+later missing-input check; no BAM file is needed.
+
+All eight source/advisory/patch pins in `SHA256SUMS` with URLs in
+`lab/frontier/samtoolsrg2shell/PROVENANCE.md`: vulnerable `bam_plcmd.c`
+`9031350b1d61dd71aed3a4cb7902ba6a3afad6b2e5843ff1b54d0c2c7074e51b`,
+fixed `53092d00ad38c32ffefd11633fd7b535594c7599170e40d2502341c2b69845ef`,
+fix patch `ab206d61fb1f17dca4227c09a5be3b7e5ea851aa42c42979b5f8a0730beb778b`,
+advisory HTML `70d5c8018a937689702dbdd66a3f9b987216a8efc8394e534e9948c35c8e44c3`,
+vulnerable archive `64193d53700a6054324f05c5fe8038f5ebf0dd4a1630e3780a2e7a9c68dcc94f`,
+fixed archive `76df38216c2f07af42cf9827c3607b319d4faf5aa63ccb171b769df40c3f2df6`,
+HTSlib `8b81e23f05cafc879065d698628645169798eb7b9a0896a58842242060ca05b8`
+and htscodecs `4e608cd4015b6c6447c289e7c3c296f77fca2e8912623823363c9c26cd0579f0`.
+Four harness pins in `HARNESS_SHA256.txt`: `build-real.sh`
+`acd416d031554a8d29493285f501a20dea463d1a1a7f4c898fd96fe2b2f12afd`,
+`run-all.sh` `13a1f476384601b3b2b61e462f92b3e460dcadc3302b69d920920c7500397088`,
+`harness/gdb-real.gdb` `b9c9397aeacf4cd67e2783fa8b23fb34054d0f52b8845984762d03d2400bc186`
+and `harness/gdb-real-2048.gdb`
+`ab091b23444d18773c4bec007b61e3be63fe35c96b0ad0900a1966c21bfcce8c`.
+
+```sh
+mkdir -p /tmp/w341-samtools-clean
+git archive --format=tar 721ce2fc lab/frontier/samtoolsrg2shell | tar -xf - -C /tmp/w341-samtools-clean
+cd /tmp/w341-samtools-clean/lab/frontier/samtoolsrg2shell
+sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt
+sh run-all.sh
+```
+
+Expected: clean plain-tar SHA-256
+`9b46603d69d60780288f1460136e78d3dcf8f716eb62b8ee8e17e20b9af11aec`;
+8/8 and 4/4 pins OK; four GCC builds (vulnerable/fixed × ASan/plain);
+rc 0, `RUN_ALL_OK 24 PASS / 0 FAIL`; `runs/summary.txt` SHA-256
+`df418572e9065af5e64d12527f736ba420b61dc9fed0d0f97dac1401d31b414a`
+byte-identical. Docs observed exactly that on this host from the archive
+above; raw builds and `runs/` are gitignored and regenerated by the
+command. Expected bytes: vulnerable ASan 1023 clean, 1024 `WRITE of size
+1025`, 4096 `WRITE of size 4097` at pinned `bam_plcmd.c:1298`; fixed ASan
+1023/1024/1200/2048/4096 clean; vulnerable plain 1024 survives and
+1200/2048/4096 SIGSEGV, fixed plain clean at every length. Read-only GDB
+prints 32 chosen `0x42` bytes at `buf+1024`; at 1200 `kh_put_str2int`
+receives `h=0x4242424242424242`, and at 2048 the saved return address is
+`0x4242424242424242`. The process faults first in `kh_put_str2int`; no
+redirect to chosen executable code was observed.
+
+Conditions: GCC 13.3.0, glibc 2.39, x86-64, `-O0 -g`, stack protector
+off, plain `-fno-pie`; default distro hardening and optimized-frame
+geometry stay UNKNOWN. Grade: R1/R2/R3 ✓ in the real CLI; R4
+DEMONSTRATED in this lab build (chosen bytes and control-data values),
+R5 NOT CLAIMED: no benign marker, command, live service, request input
+or side effect. Author and operator replays are not witness acceptance;
+witness replay is owed and the register row stays unestablished.
+
+### Gimpjif2Shell W341 — second upstream geometry, no live consumer
+
+Grade-neutral author probe in `c66f46e1`; scripts, JIFs, logs and hashes
+are in `lab/frontier/gimpjif2shell/PROVENANCE.md` §W341 and under
+`lab/frontier/gimpjif2shell/live/evidence/`; docs did not rerun it. The
+second upstream geometry (`65535x32769`, product `0x80007fff`, alpha
+`data_size=65534`) wrote 98307 chosen `0x4d` bytes (~32 KiB OOB) through
+the verified no-shim GIMP 3.2.8 plug-in, with no live pointer word in the
+span. A zero-OOB control and a preserved-chunk-size run with WRITE/READ
+watchpoints both reached the same terminal crash with zero read hits.
+`gif_load_thumb()` calls the same `load_image()` without downscaling, so
+the thumbnail route keeps the ~4 GiB `dest`. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5; no replay owed
+(same disposition as W334–W340).
+
+### Ruby — W341 `rb_str_justify` stale `termlen` write
+
+Same four pinned builds as §W340. Repro scripts:
+`lab/repro/ruby2shell-justify-termlen.rb` and `.sh` (three arms per build).
+Gitignored evidence: `lab/build/evidence/justify-termlen/matrix.txt` and
+per-tag `.out`/`.err`.
+
+```sh
+bash lab/repro/ruby2shell-justify-termlen.sh
+```
+
+Expected arm `attack` (4096-byte UTF-16LE receiver, `pad.to_str` swaps it to
+US-ASCII, width 4103): 3.4.12 plain rc 134 with
+`malloc(): invalid next size (unsorted)`; 3.4.12 ASan rc 1 with
+`WRITE of size 2` / `heap-buffer-overflow` in `memset` from `TERM_FILL`;
+3.4.13 plain and ASan rc 0 with `outlen=4103`, clean. Arms `nomut` and
+`safe` are clean on all four builds. The 64-byte version of the same shape
+is ASan-clean on both builds (embedded terminator area), so the large
+receiver is required. Grade and limits in
+`reports/ruby2shell-investigation.md` §W341.
+

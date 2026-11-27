@@ -8284,3 +8284,52 @@ reproduced on the four pinned builds (own matrix SHA-256
 `c39897fe1db83a93e6de8dfb7284d5300294d8f0ad05b35b643b857ac4a475f0`); the
 two source-line/"only" wording corrections above were its only NITs. Detail:
 `.mishe-tauftauf/artifacts/witness-w341-ruby2shell/detail.md` (gitignored).
+
+## 2026-11-27 13:5xZ — W341: `rb_str_justify` stale `termlen` write (Ruby)
+
+The named W340 follow-up was searched in the pinned 3.4.12 tree for a
+coercion-taking core method outside `slice!`. All other guards in the
+3.4.12→3.4.13 fix series are already closed lanes; one unclosed candidate
+was found and reproduced. Reproduction:
+`lab/repro/ruby2shell-justify-termlen.{rb,sh}`; evidence gitignored under
+`lab/build/evidence/justify-termlen/`.
+
+- **Source.** `rb_str_justify` (`string.c:10864`) snapshots
+  `enc = STR_ENC_GET(str)` (`:10878`) and
+  `termlen = rb_enc_mbminlen(enc)` (`:10879`) *before* `NUM2LONG(w)`
+  (`:10880`) and `StringValue(pad)` (`:10882`). A pad object's `to_str` can
+  force the receiver from UTF-16LE (min length 2) to US-ASCII;
+  `rb_enc_check(str, pad)` (`:10883`) then recomputes the allocation encoding,
+  but the stale `termlen` is still used by `TERM_FILL` (`:10943`), which
+  writes `termlen` zero bytes at the end of the result. 3.4.13 moves the
+  `termlen` read to `:10940`, after both hooks.
+- **Arm `attack`** — 4096-byte UTF-16LE receiver, `pad.to_str` swaps the
+  receiver to US-ASCII, width 4103 (result request 4104 ≡ 8 mod 16).
+  Vulnerable plain: rc 134, `malloc(): invalid next size (unsorted)` — the
+  extra zero byte reaches the next chunk's size LSB. Vulnerable ASan: rc 1,
+  `WRITE of size 2` / `heap-buffer-overflow` in `memset` from `TERM_FILL`.
+  Fixed 3.4.13 plain and ASan: rc 0, `outlen=4103`, clean. Controls `nomut`
+  (hook fires without an encoding swap) and `safe` (ASCII receiver) are
+  clean on all four builds (12 arms total).
+- **Negative result preserved.** The same shape with a 64-byte receiver is
+  ASan-clean on both builds: the result is embedded/inline, so the second
+  zero byte stays inside the string's terminator area. A heap-sized
+  receiver is required; GDB at `string.c:10943` showed `termlen=2` and
+  no redzone at `p+1` in the small case.
+
+Grade: **adjacent rung 3 — confirmed corruption**, patch-sensitive, with a
+plain-build glibc abort. Still harness-triggered (caller-defined `to_str`),
+fixed byte `0x00`, no wire path, no chosen offset, no pointer or command
+control. Stdlib callers of `ljust`/`rjust`/`center` found by the source
+survey all pass Integer width and String pad, so no stock coercion path was
+established; the survey otherwise found only caller-defined objects or
+chilled-string `Warning.warn` overrides. Primary CVE grade, witness-COMPLETE
+rung 4 and full rung 5 unchanged.
+
+Next named experiment: find a stock parser that passes a caller-defined
+`to_str`/`to_int` object to a core method with a post-hook snapshot (the
+`ljust` family is the last unclosed guard in this fix series, and its stdlib
+callers are clean), or a wire-only route to the stale-tail Marshal consumer.
+Falsifier: no coercion-free caller reaches any candidate, or fixed 3.4.13
+shows the same write. Do not repeat the W339/W340 shapes, the 64-byte
+`justify` shape, the case-fold oracle, or the closed lanes unchanged.
