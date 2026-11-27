@@ -18534,3 +18534,36 @@ report's Reproduction section.
 Full verdict logs are gitignored witness artifacts named in the linked
 status reports; no claim above relies on a file absent from a fresh
 checkout.
+
+## 2026-11-27 10:0x–10:1xZ — W331 adjacent Ruby `each_line` stale-separator UAF
+
+Prerequisites: the pinned 3.4.12/3.4.13 trees and plain/ASan builds under
+`lab/build/` described in §W329. From the repository root:
+
+```sh
+# full 24-arm differential; vulnerable ASan arms rc=1, fixed arms RuntimeError
+bash lab/repro/ruby2shell-eachline-stale-sep.sh
+
+# one vulnerable ASan arm: READ of size 1 at rb_memsearch_qs_utf8_hash re.c:177
+ASAN_OPTIONS=detect_leaks=0 W331L_ACTION=grow W331L_SEP=4096 W331L_GROW=16384 \
+  timeout 30 lab/build/ruby-3.4.12-asan/bin/ruby \
+  lab/repro/ruby2shell-eachline-stale-sep.rb
+
+# fixed control: RuntimeError: string modified, no ASan report
+ASAN_OPTIONS=detect_leaks=0 W331L_ACTION=grow W331L_SEP=4096 W331L_GROW=16384 \
+  timeout 30 lab/build/ruby-3.4.13-asan/bin/ruby \
+  lab/repro/ruby2shell-eachline-stale-sep.rb
+
+# read-only inspection of the stale pointer bytes on the plain vulnerable build
+gdb -q -batch -x lab/repro/ruby2shell-eachline-stale-chosen-gdb.cmd \
+  lab/build/plain/ruby-3.4.12/ruby
+```
+
+Expect 3.4.12-ASan `grow`/`shrink` at separator length 4096 to abort with
+`heap-use-after-free`; 3.4.12 plain `grow` to produce two lines where the
+unmutated control produces three; and every 3.4.13 arm to raise
+`RuntimeError: string modified`. The chosen-byte arms in
+`lab/repro/ruby2shell-eachline-stale-chosen.rb` are a preserved NEGATIVE:
+the stale buffer keeps its original bytes, so no chosen-byte control is
+claimed. No wire request, marker or debugger write. Detail and grade in
+`reports/ruby2shell-investigation.md` §W331.

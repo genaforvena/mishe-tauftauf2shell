@@ -7794,3 +7794,64 @@ is relabeled. The `rb_str_concat` arm stays NEGATIVE. Next wake: look for a
 stock `Warning.warn` mutation reachable from a request that also grows an
 `append_as_bytes` argument; absent one, close this lane's wire and move on.
 Recipe in `docs/reproducibility.md` §W330 (Ruby).
+
+## 2026-11-27 10:0x–10:1xZ — W331: W330 wire CLOSED; adjacent `String#each_line` stale separator UAF (Ruby)
+
+The named experiment was W330's wire reachability. It is **CLOSED**. A
+read-only survey of pinned 3.4.12 found no stock `Warning.warn` override that
+mutates objects: `error.c:286-303` writes the message to stderr; minitest's
+`error_on_warning.rb:4-10` raises and is opt-in (`minitest.rb:189-197`); the
+prism `warn` polyfill (`lib/prism/polyfill/warn.rb:6-35`) is inert on 3.4.12.
+The only stock `append_as_bytes` consumers are the opt-in prism parser
+translation lexer (`lib/prism/translation/parser/lexer.rb:704-777`), whose
+arguments are freshly made byte slices, and tests/specs. No stock C caller
+exists; harness mutation is required. W330's in-process rung 4 stays as
+labeled, with no wire path.
+
+A different sink in the same pinned `string.c` delta did fire. In 3.4.12
+`rb_str_enumerate_lines` reads the separator pointer/length at `:9510-9511`
+and `:9555`, emits each line through the Ruby block with `ENUM_ELEM` at
+`:9588`, and calls `str_mod_check(str, ptr, len)` at `:9589` — but never
+re-checks the separator. 3.4.13 adds `str_mod_check(rs, rsptr, rslen)`.
+`String#each_line` therefore holds a stale separator buffer across arbitrary
+Ruby code; no chilled string, warning hook or debugger write is involved.
+
+`lab/repro/ruby2shell-eachline-stale-sep.{rb,sh}` ran 24 arms (4 builds ×
+3 actions × 2 sizes); evidence is in gitignored
+`lab/build/evidence/eachline-stale-sep/matrix.txt`. On 3.4.12-ASan with a
+4096-byte separator grown to 16384 bytes inside the first block call,
+AddressSanitizer reports `heap-use-after-free`, `READ of size 1` at
+`rb_memsearch_qs_utf8_hash` (`re.c:177`), via `rb_memsearch` (`re.c:276`)
+and `rb_str_enumerate_lines` (`string.c:9570`), rc=1. The same address was
+freed by the block's `sep.replace` through `rb_str_replace` (`string.c:6497`)
+and `str_discard` (`string.c:2699`). The `shrink` arm fires too; short (64-byte,
+embedded) separators stay clean. All 12 fixed-3.4.13 arms (plain and ASan)
+raise `RuntimeError: string modified` after one block call, and all 8
+unmutated controls are clean on both builds. On the vulnerable plain build
+the mutation changes observable line boundaries: `calls=2 lines=2
+lens=4352,4608` versus `calls=3 lines=3 lens=4352,4352,256` unmutated.
+
+Chosen-byte control was attempted and **FAILED**: same-size reallocation,
+a shared full-length substring `view`, 64-way allocator perturbation and
+`GC.start` all left the stale pointer holding its original `0x41` bytes;
+read-only gdb on the vulnerable plain build prints `0x41` at the cached
+pointer after the block, and line splitting never followed the chosen `0x44`
+bytes. `lab/repro/ruby2shell-eachline-stale-chosen.{rb,-gdb.cmd}` preserves
+that negative arm.
+
+**Wire.** A bounded survey of pinned 3.4.12 stdlib/bundled gems found the
+only non-default-separator `each_line` block callers: URI form/query decoding
+(`lib/uri/common.rb:581,586-604`, with vendored copies in bundler and
+rubygems) and CSV parsing (`.bundle/gems/csv-3.3.2/lib/csv/parser.rb:49,106`,
+called at `:936,966`). URI mutates the yielded line, never `separator`; CSV
+derives a fresh separator (`:575-576,712`) and never writes it inside the
+block. Wire bytes control the receiver, which is snapshotted as a frozen
+copy at `string.c:9506`, but not the separator object identity or buffer.
+No stock mutating separator caller was found: **wire CLOSED** at this scope.
+App-defined code passing a wire-derived mutable separator and mutating it in
+its own block was outside the surveyed files and remains UNKNOWN, not a
+claim of stock reachability.
+
+No pointer control, marker execution or wire input: this is **rung 3 — confirmed adjacent memory corruption**, not rung 4, not the
+primary CVE, not rung 5. No prior grade cell is relabeled.
+Recipe in `docs/reproducibility.md` §W331 (Ruby).

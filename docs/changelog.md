@@ -2,6 +2,26 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 10:0x–10:1xZ — W331 Ruby W330 wire closed, adjacent `each_line` UAF
+
+- The named W330 wire-reachability experiment is CLOSED: pinned 3.4.12 has
+  no stock mutating `Warning.warn`; only the opt-in prism lexer calls
+  `append_as_bytes`, with fresh arguments. W330's in-process rung 4 stands
+  unchanged, with no wire claim.
+- A new adjacent sink fired in the same 3.4.13 `string.c` delta:
+  `rb_str_enumerate_lines` caches the separator pointer/length across the
+  Ruby block and checks only the receiver for modification. The 24-arm
+  `lab/repro/ruby2shell-eachline-stale-sep.{rb,sh}` differential gives ASan
+  `heap-use-after-free` at `rb_memsearch_qs_utf8_hash re.c:177` on 3.4.12 and
+  `RuntimeError: string modified` on every fixed 3.4.13 arm; controls clean.
+- Chosen-byte reclaim and shared-view arms are preserved NEGATIVES: the
+  stale buffer keeps its original bytes, so no chosen-byte control is
+  claimed. A bounded stdlib/gems survey found URI and CSV `each_line` block
+  callers that never mutate their separator; the new lane's wire is CLOSED
+  at that scope (app-defined separator mutation UNKNOWN). Grade: adjacent
+  **rung 3 confirmed memory corruption**, no wire, no rung 4 or 5, no
+  relabeling. Repro/report/reproducibility in §W331.
+
 ## 2026-11-27 09:4x–10:0xZ — W331/W330 verdicts, tcpreplay stage, mapped RIP
 
 Explanation and recipes only; no rung/grade cell moved by this fold. It
