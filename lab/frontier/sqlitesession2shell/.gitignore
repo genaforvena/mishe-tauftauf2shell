@@ -1,0 +1,8 @@
+/src-vuln/
+/src-fixed/
+/runs/
+/harness-vuln-asan
+/harness-vuln-plain
+/harness-fixed-asan
+/harness-fixed-plain
+*.o
