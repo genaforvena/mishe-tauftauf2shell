@@ -109,6 +109,9 @@ The second packet makes `receive(4)` call
   0,8,…,88 all matched the corresponding 8 bytes of the wire pattern. The
   process then segfaulted, as expected after pointer members became
   non-dereferenceable.
+  Mapping for the second payload: object offset `m` receives payload bytes
+  `928+m` (destination `tcpmsg-1024` = object-928), so `ares` ← bytes
+  928..935, `info` ← 936..943, `fd` ← 964..967, `dotNotation` ← 992..1023.
 
 Grade update: rungs 1/2/3 are now ESTABLISHED in a **live stock v2.4.30 bzfs
 process on loopback**, with the real object layout and real `recv` write.

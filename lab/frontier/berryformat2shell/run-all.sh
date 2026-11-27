@@ -4,8 +4,7 @@ set -euo pipefail
 ROOT=$(cd -- "$(dirname -- "${BASH_SOURCE[0]}")" && pwd)
 RUNS="$ROOT/runs"
 mkdir -p "$RUNS"
-exec > >(tee "$RUNS/run-all.out") 2>&1
-
+exec > >(tee "$RUNS/run-all.out")
 PASS=0
 FAIL=0
 RC=0

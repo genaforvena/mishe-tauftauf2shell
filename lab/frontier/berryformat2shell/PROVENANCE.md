@@ -101,9 +101,11 @@ Observed 2026-11-27 W326, raw logs in `runs/`:
   one byte after static `eos`; backport and exact fix report `unfinished string`
   rc 1; safe source is clean.
 - `bash run-all.sh`: `TOTAL: 59 PASS / 0 FAIL`, rc 0. Runner SHA-256
-  `8cbda6c37f4a2fcf7ed2e523be8530939c3b3c3ecef2e06f9bf4ff31af111871`;
-  log SHA-256
-  `41e87d538b28b2dc5336f16e3ee5bd74c65900b3d02d655201d60b19218770a7`.
+  `fe6435d8609af605fc9aa5b16593186287ca34f3d9c75496c7364588be490633`;
+  summary log SHA-256
+  `e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`.
+  Shell crash notices are intentionally not in the summary log; per-test
+  ASan logs retain their own PIDs and are not expected to be byte-identical.
 
 ## Reconciliation and negatives
 

@@ -24,7 +24,7 @@ the long-`%s` input; safe format/numeric/lexer inputs are clean. The exact fix
 still has a separate numeric-format ASan WRITE-3 in `mode_fixlen:627` (local
 backport `:561`); this residual is preserved, not hidden by an extra repair.
 `bash run-all.sh`: 59 PASS / 0 FAIL. Runner SHA-256
-`8cbda6c37f4a2fcf7ed2e523be8530939c3b3c3ecef2e06f9bf4ff31af111871`.
+`fe6435d8609af605fc9aa5b16593186287ca34f3d9c75496c7364588be490633`.
 
 Next: find a real consumer that lets untrusted text control a Berry format
 string, map production hardening/stack layout, and repair the `mode_fixlen`
