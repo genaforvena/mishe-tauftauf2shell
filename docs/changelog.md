@@ -5,6 +5,76 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 14:4x–14:5xZ — editorconfig admitted and witnessed; AWS stage; closures
+
+Docs-only fold of `2e900484`, `e5f97d13`, `77c246b2`, `c45cf74a`,
+`5043c7cb` and `8c544b3e` after `09c6a854`. Generated counts now read
+214/211/211/145 from the operator's admission and W346 folds; README,
+results, manifest and the SVG were verified and left untouched. No grade,
+rung cell, `established` flag, manifest, README, report or lab evidence
+moved here. The 14:2xZ limb below is the pre-admission state.
+
+- **EditorConfigGlob2Shell is the 214th declared mind (ADMITTED 14:4xZ),
+  and W346 replay is ESTABLISHED AS LABELED, grade-neutral, NO r5.** The
+  operator's clean `git archive 5085acab` replay matched 6/6 pins and
+  returned `27 PASS / 0 FAIL` with byte-identical summary `2de80df1…`.
+  The witness worked from its own private clean archive: 6/6 pins, its own
+  four rebuilds, twelve chosen `0x43` bytes at `l_pattern+8188..+8199`
+  with a live saved rip untouched, fixed/safe clean, no socket, marker or
+  command. R1/R2/R3 ✓ and R4 ✓ at the labeled in-process local-file/public-
+  API scope, R5 —. Its one NIT is path dependence: at a 72-character root
+  the file-arm ASan `WRITE of size 10209` gives 27/0 and the claimed
+  summary, but from a 59-character root `WRITE of size 10199` misses the
+  `102` prefix check and the run is `26 PASS / 1 FAIL`; no grade effect.
+  The operator folded `established:true` and the count to 145; docs did
+  not edit generated cells. Detail:
+  `.mishe-tauftauf/artifacts/witness-w346/detail.md`.
+- **Gimpjif2Shell W344 closes the chosen-pointer-into-`inflate_state`
+  lane (negative, no replay offered).** A read-only GDB layout probe in
+  the no-shim GIMP 3.2.8 plug-in measured `indexes`→`strm->state` as
+  `+0x70d20`, `+0x70f10` or `−0xa2cc0` across runs; the last places state
+  below the overflow. zlib 1.3.2 header offsets are `wsize` +60, `whave`
+  +64, `wnext` +68, `window` +72, `lencode` +104 and `distcode` +112. A
+  minimal-spec JIF wrote `window=0x00007f0000414243` at the exact offset,
+  but only three of eight chosen bytes landed (`next_out−idx=462683`):
+  one run moved the fault to `file-gif-load.c:1616` with `rdi=0x4d4d…`
+  (the post-inflate allocator/error path), the flood stayed in
+  libz/ld-linux with `rax=0x4d4d…`, and the negative-delta dump showed
+  unchanged state fields. No chosen pointer was dereferenced. Grade stays
+  rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
+- **AWS SDK for C++ Base64 `Decode()` moves from brief to LAB VERIFIED
+  stage (frontier W345); no window, row, witness or admission.** CVE-
+  2026-19642 / GHSA-wxx3-prfc-69xx affects core `<=1.11.861`, fixed
+  `1.11.862` by `8eeac049…` against parent `2857dbc7…`. The pinned
+  `Base64.cpp` writes three bytes into a 2-byte allocation for `AAAA=`:
+  debug aborts at `Array.h:208`'s `index < m_length` assertion, while
+  `-DNDEBUG` ASan reports `WRITE of size 1` at `Base64.cpp:115` zero bytes
+  past that region and read-only GDB reads chosen `0x5A`/`0xDA` at offset
+  2 for `AABa=`/`AADa=`; canonical `AAAA` and 9-`A` inputs stay clean.
+  `run-all.sh` returns `RUN_ALL_OK 17 PASS / 0 FAIL` with summary
+  `504bb8e5…` over 18 pins. `c45cf74a` records an author clean archive
+  replay of `77c246b2` (plain tar `0c01bf69…`, 18/18 pins, byte-identical
+  17/0 summary) — a durability check, not witness acceptance. The fixed
+  arm against `aws-crt-cpp` v0.43.2 and a real generated-client wire
+  caller are still owed; no pointer, control-flow, marker or command.
+  Recipe added to `docs/reproducibility.md` §14:4xZ.
+- **Ruby W346 closes the gem-source coercion follow-up, grade-neutral.**
+  The 211-gem source survey finds no production `to_int`, no mutating
+  `to_str` body and no gem call site passing a coercion object to a
+  post-hook snapshot method; `.ljust/.rjust/.center` callers pass Integer
+  widths and String literal pads. Both dynamic falsifiers reproduce:
+  eight mimic arms rc 0, zero ASan, every `MUTATED=false` with
+  `Encoding::CompatibilityError`, and the real-gem arms clean. Docs
+  re-ran the mimic probe on this host: 8/8 rc 0, `asan=0`, every
+  `MUTATED=false`. No stock or gem trigger, no grade change; the next
+  named experiment sweeps the remaining `string.c` fix-diff hunks.
+  Recipe in `docs/reproducibility.md` §W346 (author-added, verified).
+
+What would change this fold: a real AWS fixed arm or generated-client wire
+caller, an editorconfig live plugin consumer or dereferenced chosen
+pointer, a gimpjif chosen-pointer dereference, a stock/gem Ruby coercion
+mutator, or a checker RED on committed HEAD.
+
 ## 2026-11-27 14:2xZ — W344 verdicts folded; editorconfig staged; AWS brief
 
 Docs-only fold of `3d3bdf76`, `b5041032`, `834df7f4`, `cd15610e`,

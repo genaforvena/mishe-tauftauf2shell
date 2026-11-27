@@ -16417,6 +16417,66 @@ gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
 bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
 on committed HEAD.
 
+## 2026-11-27 14:4x–14:5xZ — editorconfig admitted/witnessed; AWS stage; closures
+
+Current limb for a reader arriving now; it supersedes the STAGED and AWS-
+brief-only wording in the 14:2xZ limb below. Docs-only fold of
+`2e900484`, `e5f97d13`, `77c246b2`, `c45cf74a`, `5043c7cb` and
+`8c544b3e`. Generated counts now read 214/211/211/145 from the
+operator's admission and W346 folds; docs left README, results, manifest
+and the SVG untouched. No grade, rung cell, `established` flag or
+generated cell moved here.
+
+- **EditorConfigGlob2Shell (ADMITTED 14:4xZ, 214th; W346 ESTABLISHED AS
+  LABELED).** Operator clean archive replay of `5085acab`: 6/6 pins,
+  27 PASS / 0 FAIL, summary `2de80df1…` byte-identical. The witness
+  replayed from its own private clean archive, 6/6 pins and its own four
+  rebuilds: twelve chosen `0x43` bytes at `l_pattern+8188..+8199` with a
+  live saved rip untouched, fixed/safe clean, no socket, marker or
+  command; R1/R2/R3 ✓ and R4 ✓ at the in-process local-file/public-API
+  scope, R5 —, grade-neutral. Its NIT is path dependence: 27/0 and the
+  byte-identical summary at a 72-character root (`WRITE of size 10209`),
+  but `26 PASS / 1 FAIL` at 59 characters (`WRITE of size 10199`) because
+  the file-arm size check asserts a `102` prefix. The operator folded
+  `established:true` and the count to 145; the register row already
+  carries the verdict, so docs did not duplicate it. Detail is in
+  `.mishe-tauftauf/artifacts/witness-w346/detail.md`.
+- **Gimpjif2Shell W344 closes the chosen-pointer lane.** Read-only GDB
+  measured `indexes`→`inflate_state` as `+0x70d20`/`+0x70f10`/`−0xa2cc0`
+  across runs; a minimal-spec JIF wrote a chosen `window` pointer at
+  offset +72, but only three of eight bytes landed and no chosen pointer
+  was dereferenced. The fault stayed in libz/ld-linux (`rax=0x4d4d…`) or
+  moved to the post-inflate allocator path at `file-gif-load.c:1616`
+  (`rdi=0x4d4d…`); the negative-delta dump left state fields unchanged.
+  Grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes /
+  NO r5. No replay offered for the negative.
+- **AwssdkBase642Shell is LAB VERIFIED at frontier W345, not admitted.**
+  CVE-2026-19642 / GHSA-wxx3-prfc-69xx: core `<=1.11.861`, fix
+  `1.11.862` (`8eeac049…` vs parent `2857dbc7…`). On 18 pins,
+  `sh run-all.sh` returns `RUN_ALL_OK 17 PASS / 0 FAIL` and summary
+  `504bb8e5…`: debug aborts at `Array.h:208`'s assertion, `-DNDEBUG`
+  ASan reports `WRITE of size 1` at `Base64.cpp:115` zero bytes past a
+  2-byte region for `AAAA=`, and GDB reads chosen `0x5A`/`0xDA` at offset
+  2 for `AABa=`/`AADa=`; canonical inputs are clean. `c45cf74a` is an
+  author clean-archive replay of `77c246b2` (tar `0c01bf69…`, 18/18
+  pins, byte-identical 17/0), not witness acceptance. No window, register
+  row, witness, fixed arm against `aws-crt-cpp` v0.43.2 or real
+  generated-client wire caller; no pointer, command or r5. Recipe in
+  `docs/reproducibility.md` §14:4xZ.
+- **Ruby W346 closes gem-source coercion (grade-neutral).** No installed
+  gem defines a production `to_int` or a mutating `to_str`, and no gem
+  call site passes a coercion object to a snapshot method; both dynamic
+  falsifiers are clean. Docs re-ran the mimic probe: 8/8 arms rc 0,
+  `asan=0`, every `MUTATED=false` with `Encoding::CompatibilityError`.
+  No stock/gem trigger, no grade change; next is the remaining
+  `string.c` fix-diff hunk sweep. Recipe in `docs/reproducibility.md`
+  §W346.
+
+What would change this limb: a real AWS fixed arm or generated-client
+wire caller, an editorconfig live plugin consumer or dereferenced chosen
+word, a gimpjif chosen-pointer dereference, a stock/gem Ruby coercion
+mutator, or a checker RED on committed HEAD.
+
 ## 2026-11-27 14:2xZ — W344 verdicts; editorconfig staged; Ruby closure
 
 Current limb for a reader arriving now; it supersedes the "what would
@@ -16451,10 +16511,11 @@ register flags untouched. No grade or rung cell moved here.
   with `SKIP fiddle` on both 3.4.12 builds and 3.4.13 ASan; the ASan
   builds emit unrelated UBSan startup diagnostics. No stock mutating
   caller, wire route or command; recipe in `docs/reproducibility.md` §W343.
-- **EditorConfigGlob2Shell is STAGED (frontier W345); witness and operator
-  admission remain owed.** CVE-2026-40489 / GHSA-97xg-vrcq-254h,
-  `<=0.12.10` affected, `0.12.11` fixed, parent `b4724e475571…` → fix
-  `5159be88…`. The crafted local directory path drives a >10 KB pattern
+- **EditorConfigGlob2Shell was STAGED here (frontier W345); admission and
+  witness are recorded in the 14:4xZ limb above, not owed.**
+  CVE-2026-40489 / GHSA-97xg-vrcq-254h, `<=0.12.10` affected, `0.12.11`
+  fixed, parent `b4724e475571…` → fix `5159be88…`.
+  The crafted local directory path drives a >10 KB pattern
   into the real `editorconfig_parse()` → `ec_glob()` call: ASan
   `WRITE of size 8195` at 8194 bytes and a `WRITE of size 102…` through
   `editorconfig.c:268` from a file, fixed clean, plain file case survives.
@@ -16462,14 +16523,16 @@ register flags untouched. No grade or rung cell moved here.
   pointer, control word, marker or command; R1/R2/R3 ✓, R4 DEMONSTRATED
   at the local-file/API scope, NO r5. Docs replayed a clean `git archive
   5085acab`: 6/6 pins, 27 PASS / 0 FAIL, summary `2de80df1…` byte-identical.
-  Recipe in `docs/reproducibility.md` §W345; no register row yet.
-- `bba4faec` adds only the AWS SDK for C++ Base64 `Decode()` brief
-  (CVE-2026-19642 / GHSA-wxx3-prfc-69xx); no lab harness, witness or
-  admission exists, so its lab status stays UNKNOWN.
+  Recipe in `docs/reproducibility.md` §W345; register row and W346
+  verdict are recorded in the 14:4xZ limb above.
+- `bba4faec` was only a brief; `77c246b2` and `c45cf74a` now record a
+  lab-verified stage (`RUN_ALL_OK 17 PASS / 0 FAIL`, chosen `0x5A`/`0xDA`)
+  and an author clean replay. No window, witness, admission or fixed arm
+  yet; the 14:4xZ limb above is current.
 
-What would change this limb: an editorconfig witness replay or operator
-admission, a live libstrophe XMPP client with empty assertion macros, a
-gimpjif chosen-pointer dereference, or a checker RED on committed HEAD.
+What would change this limb: a live libstrophe XMPP client with empty
+assertion macros or a gimpjif chosen-pointer dereference; editorconfig
+admission and its witness verdict are recorded in the 14:4xZ limb above.
 
 ## 2026-11-27 14:0xZ — libstrophe admitted, gimpjif W342 accepted and W343 fault
 
