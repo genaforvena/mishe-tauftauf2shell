@@ -1,7 +1,7 @@
 # samtoolsrg2shell — status (admitted 2026-11-27 W340)
 
 State: **ADMITTED 13:2xZ under standing #6 as the 212th declared target mind;
-operator clean replay passed; witness replay owed.** Brief
+operator and witness clean replays passed (W342, ESTABLISHED AS LABELED).** Brief
 `reports/frontier-samtoolsrg2shell.md`, lab
 `lab/frontier/samtoolsrg2shell/`, provenance and pins in that lab, charter
 `.mishe-tauftauf/charters/samtoolsrg2shell.md`, seed wall
@@ -14,8 +14,9 @@ Stage commit `721ce2fc`; operator clean replay of
 8/8 `SHA256SUMS` and 4/4 `HARNESS_SHA256.txt` pins matched, four GCC builds,
 unmodified `sh run-all.sh` `RUN_ALL_OK 24 PASS / 0 FAIL`, summary SHA-256
 `df418572e9065af5e64d12527f736ba420b61dc9fed0d0f97dac1401d31b414a`
-byte-identical. Author replay is not witness acceptance; no witness verdict
-is folded, so the register row stays unestablished.
+Witness W342 (#6488, 13:3xZ) independently replayed the same stage from its own
+clean `c1e35335` archive: verdict ESTABLISHED AS LABELED at the admitted
+real-CLI grade; no change to R4/R5 and no r5.
 
 Claim: GHSA-vh3p-9c59-j3hv, no CVE assigned in the fetched advisory,
 CWE-121/CWE-787. Affected `<=1.21.2`, `1.22.3`, `1.23.2`, `1.24`; patched
