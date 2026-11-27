@@ -1,19 +1,19 @@
 =================================================================
-==1515409==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x78cfeb204192 at pc 0x78cfecea7923 bp 0x7ffc509f03c0 sp 0x7ffc509efb68
-WRITE of size 10212 at 0x78cfeb204192 thread T0
-    #0 0x78cfecea7922 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
-    #1 0x629dc658ffa2 in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:100
-    #2 0x629dc6593fef in ini_handler /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/editorconfig.c:268
-    #3 0x629dc6597168 in ini_parse_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ini.c:182
-    #4 0x629dc65972aa in ini_parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ini.c:207
-    #5 0x629dc659536e in editorconfig_parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/editorconfig.c:537
-    #6 0x629dc658fb95 in main harness/ecglob_harness.c:34
-    #7 0x78cfeca2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #8 0x78cfeca2a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #9 0x629dc658f7e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/ecglob-vuln-asan+0x37e4) (BuildId: 1e4f4d526559e95dcc352679aa0c1f3695161a42)
+==1537808==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7cd869a04192 at pc 0x7cd86b6a7923 bp 0x7ffc530200b0 sp 0x7ffc5301f858
+WRITE of size 10212 at 0x7cd869a04192 thread T0
+    #0 0x7cd86b6a7922 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
+    #1 0x62b9a5d88fa2 in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:100
+    #2 0x62b9a5d8cfef in ini_handler /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/editorconfig.c:268
+    #3 0x62b9a5d90168 in ini_parse_file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ini.c:182
+    #4 0x62b9a5d902aa in ini_parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ini.c:207
+    #5 0x62b9a5d8e36e in editorconfig_parse /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/editorconfig.c:537
+    #6 0x62b9a5d88b95 in main harness/ecglob_harness.c:34
+    #7 0x7cd86b22a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #8 0x7cd86b22a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #9 0x62b9a5d887e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/ecglob-vuln-asan+0x37e4) (BuildId: 1e4f4d526559e95dcc352679aa0c1f3695161a42)
 
-Address 0x78cfeb204192 is located in stack of thread T0 at offset 16786 in frame
-    #0 0x629dc658fd5a in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:80
+Address 0x7cd869a04192 is located in stack of thread T0 at offset 16786 in frame
+    #0 0x62b9a5d88d5a in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:80
 
   This frame has 5 object(s):
     [48, 52) 'error_code' (line 89)
@@ -25,17 +25,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563 in strcpy
 Shadow bytes around the buggy address:
-  0x78cfeb203f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb203f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x78cfeb204180: 00 00[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x78cfeb204200: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x78cfeb204280: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x78cfeb204400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a03f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a03f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7cd869a04180: 00 00[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7cd869a04200: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x7cd869a04280: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7cd869a04400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -55,4 +55,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1515409==ABORTING
+==1537808==ABORTING

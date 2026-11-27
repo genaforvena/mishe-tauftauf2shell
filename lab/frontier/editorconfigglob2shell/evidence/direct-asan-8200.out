@@ -1,15 +1,15 @@
 =================================================================
-==1515390==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ce778c04192 at pc 0x7ce77a8a7923 bp 0x7ffd6e1f4d80 sp 0x7ffd6e1f4528
-WRITE of size 8201 at 0x7ce778c04192 thread T0
-    #0 0x7ce77a8a7922 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
-    #1 0x61c4cf376fa2 in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:100
-    #2 0x61c4cf376ac1 in main harness/ecglob_harness.c:25
-    #3 0x7ce77a42a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
-    #4 0x7ce77a42a28a in __libc_start_main_impl ../csu/libc-start.c:360
-    #5 0x61c4cf3767e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/ecglob-vuln-asan+0x37e4) (BuildId: 1e4f4d526559e95dcc352679aa0c1f3695161a42)
+==1537795==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x73fcd4e04192 at pc 0x73fcd6aa7923 bp 0x7fffbfcc2b20 sp 0x7fffbfcc22c8
+WRITE of size 8201 at 0x73fcd4e04192 thread T0
+    #0 0x73fcd6aa7922 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
+    #1 0x5e9490e9ffa2 in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:100
+    #2 0x5e9490e9fac1 in main harness/ecglob_harness.c:25
+    #3 0x73fcd662a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x73fcd662a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5e9490e9f7e4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/ecglob-vuln-asan+0x37e4) (BuildId: 1e4f4d526559e95dcc352679aa0c1f3695161a42)
 
-Address 0x7ce778c04192 is located in stack of thread T0 at offset 16786 in frame
-    #0 0x61c4cf376d5a in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:80
+Address 0x73fcd4e04192 is located in stack of thread T0 at offset 16786 in frame
+    #0 0x5e9490e9fd5a in ec_glob /home/mesh-home/mishe-tauftauf2shell/lab/frontier/editorconfigglob2shell/work/src-vuln/src/lib/ec_glob.c:80
 
   This frame has 5 object(s):
     [48, 52) 'error_code' (line 89)
@@ -21,17 +21,17 @@ HINT: this may be a false positive if your program uses some custom stack unwind
       (longjmp and C++ exceptions *are* supported)
 SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563 in strcpy
 Shadow bytes around the buggy address:
-  0x7ce778c03f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c03f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-=>0x7ce778c04180: 00 00[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7ce778c04200: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
-  0x7ce778c04280: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
-  0x7ce778c04400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e03f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e03f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x73fcd4e04180: 00 00[02]f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x73fcd4e04200: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3
+  0x73fcd4e04280: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x73fcd4e04400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
 Shadow byte legend (one shadow byte represents 8 application bytes):
   Addressable:           00
   Partially addressable: 01 02 03 04 05 06 07 
@@ -51,4 +51,4 @@ Shadow byte legend (one shadow byte represents 8 application bytes):
   ASan internal:           fe
   Left alloca redzone:     ca
   Right alloca redzone:    cb
-==1515390==ABORTING
+==1537795==ABORTING
