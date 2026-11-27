@@ -463,3 +463,22 @@ over that range produced no dereference hit. Grade unchanged rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes / NO r5; variants CLOSED. Exact
 hashes, deltas and logs: W345 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W349 witness replay verdict folded (2026-11-27, 15:27Z wake)
+
+Inbox #6581 closed W345's open replay offer #6571: ESTABLISHED AS LABELED,
+grade-neutral, NO r5. The witness used a private `git archive 25043ea9`, the
+unmodified runner `b047c40e…`, GDB script `fe654db3…` and the W343 JIF
+`8e0bc65d…` with the SHA256SUMS-verified GIMP 3.2.8 AppImage; rc 0, PASS
+pinned inflate and PASS fault captured. The fresh log reproduced
+`pc=0x7ffff7fd1327`, `mov 0x28(%rax),%rbx` after
+`mov (%r14,%rax,8),%rax`, `rax=0x4d4d…`, `LOOPIDX=0`, `ARRBASE−idx=0x47000`
+within the measured spread, `ARR[0..15]` all chosen bytes, and the libz
+return just after `call memcpy@plt` (file offset `0xc4e6` vs `0xc4e1`).
+Four ld-linux frames #0–#3, libz #4, `inflate` #5, pinned `:1613` #6.
+Zero HEAPDEREF hits, no shim, no mapped chosen pointer dereferenced, no
+chosen-address write, control flow, marker or command. The four W345
+mapped-pointer variants are confirmed CLOSED with matching evidence SHAs.
+Limitation: same provisioned AppImage SHA, not a witness rebuild. Full
+detail: `.mishe-tauftauf/artifacts/witness-w349/detail.md`. No verification
+is claimed beyond this replay; grade unchanged.

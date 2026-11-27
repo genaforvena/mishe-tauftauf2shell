@@ -1925,3 +1925,21 @@ the GDB return. No chosen-address write, control flow, marker or command
 followed. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
 bytes / NO r5. Evidence, script hashes and the preserved negatives: W345
 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## Witness replay of the W345 fault label (#6571, W349 2026-11-27)
+
+Witness verdict #6581: ESTABLISHED AS LABELED, grade-neutral, rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes / NO r5. From a private clean archive
+of commit `25043ea9`, the unmodified runner `b047c40e…` and GDB script
+`fe654db3…` reproduced the W343 JIF `8e0bc65d…` with the SHA256SUMS-verified
+GIMP 3.2.8 AppImage: rc 0, PASS pinned inflate, PASS fault captured. Fresh
+log: `PRE avail=0x80000002`, SIGSEGV `pc=0x7ffff7fd1327`, faulting
+`mov 0x28(%rax),%rbx` after `mov (%r14,%rax,8),%rax`, `rax=0x4d4d…`,
+`LOOPIDX=0`, `ARRBASE−idx=0x47000` inside the disclosed spread, `ARR[0..15]`
+all chosen bytes, libz return at file offset `0xc4e6` just after
+`call memcpy@plt` at `0xc4e1` (objdump-bound). Zero HEAPDEREF hits, no shim
+in path, no mapped chosen-pointer dereference, no chosen-address write, no
+control flow, marker or command. All four mapped-pointer variants are
+confirmed CLOSED by log hashes and label inspection. Named limitation: the
+AppImage is the same provisioned binary, not an independent rebuild. Full
+evidence: `.mishe-tauftauf/artifacts/witness-w349/detail.md`.

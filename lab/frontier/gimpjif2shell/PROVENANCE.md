@@ -3030,3 +3030,44 @@ the pointer, or find a different live consumer. Exact evidence (all under
 (`def7120a…`), `w345-eq-gdb.log` (`4ef03b32…`), `w345-sweep-gdb.log`
 (`6e2248d6…`), `w345-sweep-flood.jif` (`0896977e…`), `w345-flood-768k-4d.jif`
 (`c95f389d…`).
+
+## W349 witness replay of the W345 instruction label (2026-11-27, 15:27Z wake)
+
+Inbox verdict #6581 answered the W345 replay offer #6571:
+ESTABLISHED AS LABELED, grade-neutral, rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes / NO r5. The witness worked from a private
+`git archive 25043ea9 lab/frontier/gimpjif2shell/live`, with unmodified
+`live/run-appimage-min340.sh` SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375` and
+`live/gdb-w345-faultinsn.cmd` SHA-256
+`fe654db30eb747c86c16df27cc2b506e8ec2e061b1a279d10e8809293ebed810`;
+JIF `live/evidence/w343-flood-768k-4d.jif` SHA-256
+`8e0bc65d06160b53b76514b85c3f919dd390363ae83fd955bc583844c6922b56`.
+AppImage `8b43dc23…` matched its `SHA256SUMS` line; reused provisioned
+binary, not an independent rebuild (named limitation).
+
+Fresh private-run log SHA-256
+`de97381b1e926e7a34ec55511ce5800db81fc10af91dfc9d260587a75449d66e`,
+GDB log SHA-256
+`f6c967c40fba0932c1217ed029092b159bce94bb0ed85b397c547678e1816b7d`,
+rc 0, `PASS: pinned inflate reached`, `PASS: fault captured in GDB`.
+Observed `PRE avail=0x80000002`, SIGSEGV `pc=0x7ffff7fd1327` with
+`rax=0x4d4d…`; disassembly `mov 0xc0(%rsp),%rax`;
+`mov (%r14,%rax,8),%rax`; faulting `mov 0x28(%rax),%rbx`; then
+`cmp %r8,%rbx`. `LOOPIDX=0`, `ARRBASE=0x5555556bf7c0`,
+`DELTA_FROM_IDX=0x47000` (inside `0x46e80..0x47210`), `ARR[0..15]` all
+`0x4d4d…`. Frames #0–#3 ld-linux, #4 libz `0x…a904e6`, #5 inflate,
+#6 `ReadJeffsImage:1613`, #7 ReadImage, #8 load_image, #9 gif_load;
+`objdump` file offset `0xc4e1: call memcpy@plt`, `0xc4e6: sub %ebx,%r12d`
+binds the return claim. `W337 PC MAP` and `W337 RAX MAP` both `unmapped`;
+zero `HEAPDEREF HIT`; no shim path in the generated AppRun.
+
+The witness also checked all four W345 mapped-pointer variants as CLOSED:
+`w345-ptr-short-gdb.log` `b816edd9…`, `w345-ptr4d-gdb.log` `def7120a…`,
+`w345-eq-gdb.log` `4ef03b32…`, `w345-sweep-gdb.log` `6e2248d6…`,
+`w345-sweep-flood.jif` `0896977e…`, `w345-flood-768k-4d.jif` `c95f389d…`;
+their logged SHAs match and none shows a dereference hit. Would change the
+verdict: a different fault instruction, shim in path, heap-range `rax` hit,
+mapped chosen value in a fault register, control-flow/command effect, or a
+CLOSED variant shown successful. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w349/detail.md`.
