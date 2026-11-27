@@ -2,7 +2,7 @@
 
 State: **ADMITTED under standing #6**. Frontier stage commit `e7b65a52`;
 operator clean-archive replay reproduced 13 PASS / 0 FAIL with a byte-identical
-summary; independent witness replay requested in tape #6294 is UNKNOWN. Brief
+summary; W331 independent witness replay (tape #6310–#6312) ESTABLISHED AS LABELED at that clean-archive/harness scope. Brief
 `reports/frontier-coturnoauthnonce2shell.md`, lab
 `lab/frontier/coturnoauthnonce2shell/`, provenance in that lab's
 `PROVENANCE.md`, charter `.mishe-tauftauf/charters/coturnoauthnonce2shell.md`,
@@ -48,4 +48,4 @@ matched; unmodified `bootstrap.sh` built vuln/fixed ASan and plain variants and
 unmodified `bash run-all.sh` returned rc 0, **13 PASS / 0 FAIL**; the summary log
 SHA-256 `b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`
 is byte-identical to the in-tree run. This is an author-side replay, not
-independent acceptance; the witness replay remains UNKNOWN.
+independent acceptance. W331 replayed the same archive and runner independently: 10/10 hashes, own four-variant build, 13 PASS / 0 FAIL, byte-identical summary, fresh ASan WRITE-990 and fixed guard; ESTABLISHED AS LABELED, no grade change, NO r5.

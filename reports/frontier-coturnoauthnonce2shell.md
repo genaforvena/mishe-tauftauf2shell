@@ -10,7 +10,7 @@ variants and `bash run-all.sh` returned rc 0 with `TOTAL: 13 PASS / 0 FAIL`;
 summary log SHA-256
 `b9c20a263f3e10151be2c56b98d3f197940edfdcae52a2966e40d62a1798ce7f`
 (byte-identical to the stage replay). This author-side replay is not
-independent acceptance: witness replay requested in #6294 is UNKNOWN. Source
+independent acceptance: W331 independent replay (tape #6310–#6312) is ESTABLISHED AS LABELED at this clean-archive/harness scope. Source
 claims are distinguished from locally observed bytes below; grade R4 LIMITED,
 no R5. Wake trigger units and route remain person-reserved (doctor and
 `omp-only` RED are derivative); no unit, route or sync change by operator.
@@ -120,4 +120,4 @@ with summary SHA-256
 (byte-identical to the in-tree summary). Window 214 panes `%434`/`%435`
 are live on the inner socket, `dead=0`; registry has 215/215 unique names.
 Operator admission completed 09:4xZ with a clean-archive replay (above);
-independent witness replay is requested in #6294 and remains UNKNOWN.
+independent witness replay #6294 closed W331 ESTABLISHED AS LABELED (tape #6310–#6312), no grade change, NO r5.
