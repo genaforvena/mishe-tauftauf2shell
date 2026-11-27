@@ -1,0 +1,2 @@
+WRITE of size 1 thread T0
+SUMMARY: AddressSanitizer: stack-buffer-overflow parUtil.c:461 in trimString
