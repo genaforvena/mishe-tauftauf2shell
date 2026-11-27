@@ -55,8 +55,10 @@ grep -q 'batch command executed successfully' "$EVID/gdb-safe.log" \
 
 grep -Eq 'W304 PLUGIN SIGNAL (SIGSEGV|SIGABRT|SIGBUS)' "$EVID/gdb-8192.log" \
   && ok "8 KiB chosen overflow faults the live plug-in under gdb" || no "8 KiB gdb fault"
-grep -q 'in malloc ()' "$EVID/gdb-8192.log" \
-  && ok "fault frame is inside malloc" || no "malloc fault frame"
+grep -Eq ' in (malloc|free) \(\)' "$EVID/gdb-8192.log" \
+  && ok "fault frame is inside malloc or free" || no "allocator fault frame"
+grep -Eq '^rax[[:space:]]+0x4d4d4d4d' "$EVID/gdb-8192.log" \
+  && ok "chosen 0x4d bytes are in the faulting allocator register" || no "chosen-byte register"
 grep -q ' in ReadImage ' "$EVID/gdb-8192.log" \
   && ok "fault backtrace reaches ReadImage with is_jeff_image=1" || no "ReadImage backtrace frame"
 grep -q 'is_jeff_image=1' "$EVID/gdb-8192.log" \

@@ -1304,8 +1304,8 @@ binary shipped in the SHA256-verified GIMP 3.2.8 AppImage is
 
 New files: `live/gdb-plugin.cmd` SHA-256
 `1f495a7fdaf8e025f212b549887accad75eafaf52ca452ff00df70ccc724451a`,
-`live/run-appimage-gdb.sh` SHA-256
-`b6fd7b8da8c1da88eeac98494764955343577106fdb3dab990f4bc24dfcd0ae9`.
+`live/run-appimage-gdb.sh` (after the replay-driven assertion fix) SHA-256
+`04bb2425803d8a346d79910df349eda8a6f6297814c5602debd8477391fccdbb`.
 The gdb command file prints a 25-frame backtrace and `rip rsp rdi rsi rax`
 on SIGSEGV/SIGBUS/SIGABRT in the plug-in inferior. The runner generates
 `live/evidence/gdb-8192.jif` with `make-jif.py published-run 8192 4d`, runs
@@ -1323,11 +1323,27 @@ is_jeff_image=1, ...)`, and `#15 gif_load` — after the plug-in printed
 has `batch command executed successfully` and no `W304 PLUGIN SIGNAL`.
 Preserved negative: a first attempt to follow forks from gdb launched under
 the AppRun shell stopped at an irrelevant `readlink` child; the documented
-GIMP plug-in wrapper hook replaced it, and that run is not counted.
+GIMP plug-in wrapper hook replaced it, and that run is not counted. The
+first clean-archive replay scored 7 PASS / 1 FAIL because it asserted a
+`malloc` frame and that layout faulted in `free`; the assertion was
+generalized to `malloc|free` and a chosen-byte register check added.
 
+Clean-archive verification from commit `fde44380`: `git archive fde44380
+lab/frontier/gimpjif2shell` into `/tmp/w304-gimp-clean` (reusing the
+SHA-verified AppImage in `/tmp/gimpjif-appimage`). `run-witness.sh` gave
+`TOTAL: 29 PASS / 0 FAIL`, `REPLAY_PASS=6 REPLAY_FAIL=0`, rc 0. The
+generalized runner gave `TOTAL: 9 PASS / 0 FAIL`, rc 0. Its fault log is
+preserved as `live/evidence/gdb-8192-replay.log` SHA-256
+`eda22d7b76ac6856670153c529fff40854752dcae24f082ff9f355ab0183117c`:
+`#0 free ()`, `#4 ReadJeffsImage (len=45771, height=46918, alpha_frame=1)
+at file-gif-load.c:1616`, `#5 ReadImage (... is_jeff_image=1) at :1468`,
+`rax=0x4d4d4d4d4d4d4d4d`. This is a closer site than the author run's
+`malloc` frame: the overflowed object's own `g_free` faults on chosen-
+corrupted metadata. Both sites are layout-sensitive and both are kept.
 Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
-NO r5. A chosen-byte pattern in `rax` inside `malloc` is evidence of
-corrupt allocator state reached from the live JIF path, not of a
-chosen-address write or a successful pointer dereference. No named victim
+NO r5. A chosen-byte pattern in `rax` inside `malloc` or `free` is evidence
+of corrupt allocator state reached from the live JIF path, not of a
+chosen-address write or a successful pointer dereference.
+No named victim
 object write, marker or command was observed; the fixed-build differential
 remains BLOCKED because no fixed GIMP build is published.

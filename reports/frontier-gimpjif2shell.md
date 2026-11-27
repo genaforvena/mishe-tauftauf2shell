@@ -888,24 +888,38 @@ AppImage's plug-in is unstripped with `debug_info`, so the runner
 `live/run-appimage-gdb.sh` (gdb commands in `live/gdb-plugin.cmd`) captures
 the faulting frame and a no-fault safe-input control through the same path.
 
-`live/evidence/gdb-8192.log`: after `Jeff's Image Format-Warning: Error
-reading inflate failed`, thread 1 of `file-gif-load` receives SIGSEGV with
-`rax = 0x4d4d4d4d4d4d4d48` (seven file-chosen `0x4d` bytes in allocator
-state). Frames `#0-#2` are in `malloc` from the bundled libc; `#7` is
-`gimp_color_profile_new_from_icc_profile` (with `data=0x0, length=0`),
-`#8` `gimp_image_get_color_profile`, `#9` `gimp_drawable_get_format`,
-`#12` `ReadImage (... is_jeff_image=1, ...) at file-gif-load.c:1477`,
-`#13` `load_image (..., is_jeff_image=1, ...)`, `#15` `gif_load`. The safe
-4x4 JIF under the identical wrapper
-(`live/evidence/gdb-safe.log`) reports `batch command executed successfully`
-and no signal. `bash live/run-appimage-gdb.sh`: **8 PASS / 0 FAIL**, rc 0.
+`live/evidence/gdb-8192.log` (author run): after `Jeff's Image
+Format-Warning: Error reading inflate failed`, thread 1 of `file-gif-load`
+receives SIGSEGV with `rax = 0x4d4d4d4d4d4d4d48` (seven file-chosen `0x4d`
+bytes in allocator state). Frames `#0-#2` are in `malloc` from the bundled
+libc; `#7` is `gimp_color_profile_new_from_icc_profile` (`data=0x0,
+length=0`), `#8` `gimp_image_get_color_profile`, `#9`
+`gimp_drawable_get_format`, `#12` `ReadImage (... is_jeff_image=1, ...) at
+file-gif-load.c:1477`, `#13` `load_image (..., is_jeff_image=1, ...)`, `#15`
+`gif_load`. A clean-archive replay faulted closer to the write, in
+`live/evidence/gdb-8192-replay.log`: `#0 free ()`, `#4 ReadJeffsImage
+(len=45771, height=46918, alpha_frame=1) at file-gif-load.c:1616`, `#5
+ReadImage (... is_jeff_image=1) at :1468`, with `rax =
+0x4d4d4d4d4d4d4d4d`. Both are glibc allocator faults on chosen-corrupted
+heap metadata; the exact fault site is layout-sensitive, so both are kept
+and the runner asserts `malloc|free`, chosen bytes in `rax`, and the JIF
+frames rather than a single call site. The safe 4x4 JIF under the identical
+wrapper (`live/evidence/gdb-safe.log`) reports `batch command executed
+successfully` and no signal.
+
+`bash live/run-appimage-gdb.sh` gave 8 PASS / 0 FAIL on the author run;
+with the fault-frame assertion generalized to `malloc|free`, a clean `git
+archive fde44380 lab/frontier/gimpjif2shell` replay gave **9 PASS / 0
+FAIL**, and `run-witness.sh` from the same archive gave 29 PASS / 0 FAIL
+with 6/0 replay checks. The first clean replay had returned 7 PASS / 1 FAIL
+solely because it asserted `malloc` and this layout faulted in `free`; that
+failure is preserved, not erased.
 
 Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL natural chosen
-bytes, NO r5. This names the live call path that attempts the allocator
-dereference — the first such frame reached from a file-chosen overflow —
-but it is still a fault on corrupt heap metadata, not a successful
-dereference of a chosen pointer, a write into a named live object, control
-flow, a marker or a command. The exact fault site remains layout-sensitive
-across debugger and non-debugger runs; only the fault fact and this captured
-frame are asserted. No fixed AppImage is published, so vulnerable/fixed
-differential stays BLOCKED and only the safe-input control exists.
+bytes, NO r5. This names live call paths that *attempt* the allocator
+dereference — including the overflowed object's own `g_free` in
+`ReadJeffsImage` — but it is still a fault on corrupt heap metadata, not a
+successful dereference of a chosen pointer, a write into a named live
+object, control flow, a marker or a command. No fixed AppImage is published,
+so vulnerable/fixed differential stays BLOCKED and only the safe-input
+control exists.
