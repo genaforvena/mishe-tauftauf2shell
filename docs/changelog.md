@@ -6,6 +6,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 19:1xZ — Checkmk mkevent stack overflow staged (W367)
+
+Frontier staged `checkmk2shell` with live inner-socket window 228 (panes
+%462/%463, registry 229/229 unique). CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq:
+pinned pre-fix parent `9a64b949` `mkevent.cc:124-146` builds
+`char message[8192]` and copies attacker-controlled check output through
+unbounded `append_str()`/`memcpy` at `:144`. Real parser ASan reports
+`stack-buffer-overflow`, WRITE size 10000; fixed `265c0ab6` uses `std::string`
+and truncates to 8191 bytes, with fixed/safe controls clean. Read-only GDB
+shows chosen `0x4343434343434343` at saved RIP before the real parser crashes
+in return-object construction. An isolated verbatim-sink/no-canary/no-PIE
+wrapper transfers to a local benign marker at text offset 8172; one-byte
+offset controls fail. `RUN_ALL_OK 11 PASS / 0 FAIL`. Grade R4 LIMITED to the
+isolated sink scope, R5 NOT CLAIMED; operator admission and witness replay
+are owed. Nmap CVE-2026-137977/137978 was deferred because its DNS listener
+needs privileged port 53 and the UAF timing lane is higher effort.
+
+
 ## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif W355 write bound
 
 Docs-only fold of `5785d7da`, `7de447f1`, `46831ba9` and `cf323ddd`

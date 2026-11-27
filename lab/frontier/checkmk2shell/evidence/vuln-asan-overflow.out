@@ -1,0 +1,56 @@
+=================================================================
+==3138156==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7d11a77020e0 at pc 0x59e815bfb238 bp 0x7fff0458f850 sp 0x7fff0458f010
+WRITE of size 10000 at 0x7d11a77020e0 thread T0
+    #0 0x59e815bfb237 in __asan_memcpy (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/bin/vuln-asan+0xc6237) (BuildId: 754543e7257faceb82b8a1a83133ad4591160004)
+    #1 0x59e815c417ce in (anonymous namespace)::append_str(std::basic_string_view<char, std::char_traits<char>>, char*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/../src/vuln/mkevent.cc:46:5
+    #2 0x59e815c417ce in (anonymous namespace)::parse_notification(std::span<char* const, 18446744073709551615ul>) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/../src/vuln/mkevent.cc:144:9
+    #3 0x59e815c42526 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/driver.cc:61:25
+    #4 0x7d11a902a1c9 in __libc_start_call_main csu/../sysdeps/nptl/libc_start_call_main.h:58:16
+    #5 0x7d11a902a28a in __libc_start_main csu/../csu/libc-start.c:360:3
+    #6 0x59e815b624a4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/bin/vuln-asan+0x2d4a4) (BuildId: 754543e7257faceb82b8a1a83133ad4591160004)
+
+Address 0x7d11a77020e0 is located in stack of thread T0 at offset 8416 in frame
+    #0 0x59e815c40f4f in (anonymous namespace)::parse_notification(std::span<char* const, 18446744073709551615ul>) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/../src/vuln/mkevent.cc:99
+
+  This frame has 5 object(s):
+    [32, 64) 'buf.i142' (line 52)
+    [96, 128) 'buf.i127' (line 52)
+    [160, 192) 'buf.i' (line 52)
+    [224, 8416) 'message' (line 124)
+    [8672, 8736) 'ref.tmp53' (line 146) <== Memory access at offset 8416 partially underflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/checkmk2shell/harness/bin/vuln-asan+0xc6237) (BuildId: 754543e7257faceb82b8a1a83133ad4591160004) in __asan_memcpy
+Shadow bytes around the buggy address:
+  0x7d11a7701e00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d11a7701e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d11a7701f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d11a7701f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d11a7702000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7d11a7702080: 00 00 00 00 00 00 00 00 00 00 00 00[f2]f2 f2 f2
+  0x7d11a7702100: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2
+  0x7d11a7702180: f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f2 f8 f8 f8 f8
+  0x7d11a7702200: f8 f8 f8 f8 f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x7d11a7702280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d11a7702300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3138156==ABORTING
+Aborted (core dumped)

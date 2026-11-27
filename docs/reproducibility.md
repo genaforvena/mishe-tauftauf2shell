@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| CheckmkMkevent2Shell W367 (STAGED 19:1xZ) | [status](../reports/checkmk2shell-status.md), [brief](../reports/frontier-checkmk2shell.md), [provenance](../lab/frontier/checkmk2shell/PROVENANCE.md) | CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq, Checkmk 2.5.0 `<2.5.0p21`, 2.4.0 `<2.4.0p42`, 2.3.0 EOL; fix `265c0ab68fb50bedd0102536eb92612a3eb1af91`, parent `9a64b94964c5cc34d82daa888d675b86f835e861`; 12 stable source/harness pins in `SHA256SUMS` | `cd lab/frontier/checkmk2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (real pinned `parse_notification()` plus isolated verbatim sink, local only) | `RUN_ALL_OK 11 PASS / 0 FAIL`; real parser ASan `stack-buffer-overflow WRITE of size 10000` at `mkevent.cc:46` via `:144`; fixed truncates to 8191; isolated no-canary/no-PIE sink offset 8172 prints `BENIGN_MARKER`, offsets 8171/8173 fail; R4 LIMITED to isolated sink, R5 NOT CLAIMED |
 | PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; W365 ESTABLISHED AS LABELED) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:true` at the W365 scope (`11163cef`); full procedure in §§18:0xZ/18:2xZ |
 | LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; W364 ESTABLISHED AS LABELED at pinned-sink scope) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. W364 replayed clean archive `4678a157` (TAR `06329456…`) twice at 5/0 with read-only GDB chosen `0x31` bytes; ESTABLISHED AS LABELED at the pinned-sink harness scope, grade-neutral, NO r5, no live ZFILE wire; full procedure in §17:2xZ |
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
@@ -20869,3 +20870,26 @@ and no live ZFILE sender or chosen-address write was reached. `eca432ee`
 repaired the UxPlayPin2Shell register row's stale "replay owed" wording
 to the ESTABLISHED-AS-LABELED verdict already recorded in §17:0xZ;
 docs found that limb accurate and made no further edit for it.
+
+## 2026-11-27 19:1xZ — CheckmkMkevent2Shell W367 stage
+
+```sh
+cd lab/frontier/checkmk2shell
+sha256sum -c SHA256SUMS
+./harness/run-all.sh
+```
+
+The 12 stable pins cover both source blobs, advisory/CVE records, the fix
+patch, provenance and harness scripts. The runner rebuilds ASan and plain
+arms; compiled binaries and volatile ASan/GDB logs are intentionally not
+pinned. Observed result: `RUN_ALL_OK 11 PASS / 0 FAIL`. The real pinned
+`parse_notification()` gives ASan `stack-buffer-overflow`, WRITE size 10000,
+at `mkevent.cc:46` via `:144`; 100-byte safe input is clean. The fixed
+`std::string` arm truncates 10000 bytes to 8191 and is clean in ASan and plain
+builds. Read-only GDB shows chosen `0x4343434343434343` at saved RIP before
+the real parser crashes in return-object construction. The isolated
+verbatim-sink/no-canary/no-PIE wrapper prints `BENIGN_MARKER` at text offset
+8172; offsets 8171/8173 fail without the marker. R4 is LIMITED to that
+isolated sink scope, R5 is NOT CLAIMED, and operator admission plus
+independent witness replay remain owed. Window 228 is live with panes
+%462/%463 on the inner socket.
