@@ -7,6 +7,8 @@ side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
 ~21:50Z with the wake-2 real-store verification, ~22:02Z with verdict
 #1168 and 2026-11-27 ~07:16Z with the offset-shift depth addendum. Rungs 1-3
 were independently established by witness #1146 and are not re-proved here.
+The 2026-11-27 ~07:35Z addendum names the destination as the live i64 const
+table.
 
 ## Result in one paragraph
 
@@ -340,3 +342,56 @@ the offsets; placing the desync generator after the chosen pairs removes
 them from the window; the earlier `0xDEAD…` LEB rejection and six-pair
 `i32.const 0` padding negative from the main report stand. No pointer
 control, no guest execution, no wire traffic: rung 5 stays UNKNOWN.
+
+## Addendum: the overflow lands in the live i64 constant table (2026-11-27 ~07:35Z)
+
+A gdb measurement on the committed caller-store binary names the destination
+region for the first time. This is rung-4 depth: no new rung and no wire result.
+
+Method (all artifacts already described above): regenerate `dup_before` with
+`python3 lab/frontier/wamr2shell/make_shift_variants.py dup_before
+/tmp/w5-dup.wasm` (sha256 `756cabf8…`, byte-for-byte), then under
+`gdb -q -batch` break at `wasm_loader_ctx_reinit` line 9332 and at
+`wamr_oob_log` with condition
+`ctx->p_code_compiled + size > ctx->p_code_compiled_end`; print the context
+pointers at the first real OOB; break at `wamr_oob_readback` with
+`size == 8 && ctx->p_code_compiled + size - ctx->p_code_compiled_end == 172`
+to dump the table after the last chosen store. Baseline `/tmp/w5-n8.wasm`
+regenerated as `ecfce96a…` for comparison. Raw gdb output is in the
+gitignored site at `.mishe-tauftauf/artifacts/wamr2shell/w5-const-table-gdb.out`.
+
+Measured at the first OOB (`dup_before`; absolute addresses ASLR-vary):
+
+- Compiled-code allocation: chunk header at `base-8` is `0x5c1` (a 0x5c0-byte
+  chunk, 1464 usable), `code_compiled_peak_size = 1458` and
+  `p_code_compiled_end = base + 1458`. The 6-byte slack ends at the next
+  chunk's size field (`0x71` at `end+6`).
+- `ctx->i64_consts = end + 14`, `i64_const_max_num = i64_const_num = 12`
+  (96 bytes, `end+14 … end+109`). Baseline `n8`, peak 1164: `i64_consts =
+  end + 20`, same 12 entries. The other context buffers are all below the
+  buffer (`frame_ref_bottom` `end-1634`, `frame_csp_bottom` `end-2802`,
+  `frame_offset_bottom` `end-1570`, `i32_consts` `end-1922`,
+  `v128_consts` `end-1874`); the i64 const table is the object immediately
+  after it, not free space.
+- Table dump after the final chosen store (12 × 8 bytes from `i64_consts`):
+  entries 0-1 hold the OOB frame-offset `i16`s (`0x001a001b001c001d`,
+  `0x0016001700180019`), entry 2 the loader pointer `0x000055555557dc0d`,
+  entry 3 the chosen value `0x4142434445464700`; entries 4-10 are mixed
+  chosen bytes, loader pointers and `i16`s (`0x55555557dc0d0016`,
+  `0x4344454647010000`, `0x0016414243444546`, …), entry 11 a loader
+  pointer. The first four chosen 8-byte stores (destinations
+  `end+38/56/74/92`) therefore land inside the live const table (wholly in
+  entry 3, then straddling entries 5/6, 7/8 and 9/10); the fifth starts at
+  the table's end and the last three reach following heap chunks. The
+  process ends `malloc(): corrupted top size` (rc −6) after further
+  pointer/`i16` writes.
+
+Source consequence, **unmeasured here**: `wasm_loader.c:16856-16868` copies
+`loader_ctx->i64_consts` into `func->consts` at the end of function
+preparation, so a load that survived the corruption would carry these bytes
+into the module's per-function constant pool. In these builds the load
+aborts first; no guest instruction executes. No arbitrary destination, no
+attacker-chosen pointer value (the logged pointers are loader-generated),
+no wire traffic and no benign-command side effect. Rung 5 stays UNKNOWN and
+this addendum does not re-audit witness verdict #1168. The replay offer for
+the shift ladder (tape #6192) is separate from this measurement.
