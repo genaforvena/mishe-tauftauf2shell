@@ -3,8 +3,9 @@ State: **ADMITTED 03:34Z under standing #6 as the 158th declared target mind**;
 window 166 adopted. Witness replay ESTABLISHED AS LABELED (W241, no grade
 change). Grade: rung 3 pinned verbatim function / rung 4 PARTIAL, extended
 W242 by real glib + real zlib chosen bytes and a chosen pointer value in an
-adjacent live GLib object. No real GIMP plugin build, no JIF PDB wire, no
-dereference of the chosen pointer, no command, no r5.
+adjacent live GLib object. Later wakes reached the real GIMP 3.2.8 plug-in
+through the PDB and named the overwritten word, but no dereference of the
+chosen pointer, no command and no r5.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
@@ -183,8 +184,9 @@ and `witness-w323-gimpjif-w322/detail.md`.
   `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 - Conclusion: benign in-object data does not give a completed-load
   consumer on this host. Structural inference: the wrap itself forces a
-  >=2 GiB `dest` allocation (`file-gif-load-vulnerable.c:1376-1378`), and
-  prior live runs fault in the allocator before post-decode GLib consumers.
+  ~4 GiB `dest` allocation (`file-gif-load-vulnerable.c:1376-1378`; the
+  `avail_out` bound stays ~2 GiB), and prior live runs fault in the allocator
+  before post-decode GLib consumers.
   Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
   NO r5. Witness W330 replay ESTABLISHED AS LABELED; see below.
 
@@ -205,3 +207,22 @@ and `witness-w323-gimpjif-w322/detail.md`.
   (no libthread_db, post-crash GDB internal error) preserved. Full detail
   `.mishe-tauftauf/artifacts/witness-w328-gimpjif/detail.md` and
   `witness-w330-gimpjif/detail.md`; nothing left owed for replay.
+
+## W333 compiled-consumer ceiling (2026-11-27, 10:15-10:38Z)
+
+- Read-only `objdump -dl --disassemble=ReadJeffsImage.isra.0` on the
+  SHA256SUMS-verified GIMP 3.2.8 AppImage plug-in (SHA `bfcf47ce…`) shows
+  the compiled extraction loop checks `pos >= data_size` at
+  `0x37d0-0x37d3` and jumps past the sole `indexes[i]` load at `0x37da`.
+  Once `pos` saturates at the wrapped size, this binary never reads OOB
+  indexes even though the C `break` only leaves the inner loop. That
+  explains the zero read-watch hits of W313/W324/W325/W329 as a compiler
+  hoist, not only a short pre-crash window.
+- Structural ceiling for the natural post-decode consumer in this build;
+  allocator/free consumers and other builds are not excluded. Three
+  transient GDB fault-site runner variants produced no usable backtrace
+  and were removed; the negative is recorded in `PROVENANCE.md`.
+- Evidence: `lab/frontier/gimpjif2shell/live/evidence/w333-extraction-disasm.txt`
+  (SHA `302d8434…`), reproduced byte-for-byte by the same objdump command.
+  Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+  NO r5; no replay owed for a static, grade-neutral finding.
