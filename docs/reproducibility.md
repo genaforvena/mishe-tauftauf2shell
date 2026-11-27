@@ -44,7 +44,9 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| SAIL PSD2Shell (newest, STAGED) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both; STAGED, R4 LIMITED, R5 NOT CLAIMED, witness owed; full procedure in §05:2x–05:3xZ |
+| Libeventsockaddr2Shell W316 (newest, STAGED) | [status](../reports/libeventsockaddr2shell-status.md), [brief](../reports/frontier-libeventsockaddr2shell.md), [provenance](../lab/frontier/libeventsockaddr2shell/PROVENANCE.md) | CVE-2026-63388 / GHSA-cvq5-vrvr-j338 (High 8.4, CWE-787/617); affected `<= 2.1.12`, `<= 2.2.1-alpha`, patched 2.1.13 / 2.2.2-alpha; vulnerable master `1b7cc9b5…`, fix `52057cb3…` (parent `9877a720…`) | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/libeventsockaddr2shell` (CMake static builds of the pinned archives) | `run-all.sh` rc 0, `PASS=23 FAIL=0`; GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`, 0 bytes after a 520-byte region from `bufferevent_socket_new`; loopback-TCP and fixed-commit controls ASan-clean; `run-probe.sh` `PASS=16 FAIL=0`, three chosen 48-bit values each appear as `mutex=<chosen>` in libc `___pthread_mutex_lock` under gdb; R4 DEMONSTRATED at the chosen-address-dereference scope, R5 NOT CLAIMED, local AF_UNIX vector; STAGED not admitted, admission and witness owed; full procedure in §05:3x–06:1xZ |
+| SAIL PSD2Shell (ADMITTED 05:3xZ, 201st) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both (log `61d43c76…`); ADMITTED 05:3xZ under standing #6, register row and counts 201/198/198/136 at admission, 137 established after the W317 fold; R4 LIMITED, R5 NOT CLAIMED, `established=false` pending witness replay #6112; full procedure in §05:2x–05:3xZ |
+| Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean). Witness W317 (#6122) replayed `9ca46a2d` from a clean 28-file archive and graded rung 5 ESTABLISHED AS LABELED at that scope; operator folded R5 ✓ and `established=true` (count 137). No fresh-build, ASLR-on or new-rung claim; commands at the tail |
 | Libarchivezippath2Shell W284 (newest, STAGED) | [status](../reports/libarchivezippath2shell-status.md), [brief](../reports/frontier-libarchivezippath2shell.md), [provenance](../lab/frontier/libarchivezippath2shell/PROVENANCE.md) | CVE-2026-45308 / GHSA-xgqq-r5j8-3mch, tarballs 3.8.7 `4b787cca…b9166` / 3.8.8 `038918ea…306c190`, fix `a20f89eb…`, patch `cb9a18bb…a49bad` | `sh run-all.sh` in `lab/frontier/libarchivezippath2shell` | `RESULT PASS=40 FAIL=0`; shipped `bsdtar --format=zip` re-packs a crafted PAX tar into GCC ASan `WRITE of size 65537`/`131072` 0 bytes past a 65,536-byte region at `archive_write_set_format_zip.c:2328` via `:1193`; fixed rejects, 65535-byte path clean; rung 3 only, rung 4 NOT CLAIMED, admission/witness owed; full procedure in § 18:5x–19:2xZ |
 | Supersession — axis2guththila2shell row below | [status](../reports/axis2guththila2shell-status.md) | Operator `6a1a0abb` admitted it as the 183rd mind; generated counts 183/180/180/120, then 121 after W284's ntfs3g verdict fold | no new harness | The row's STAGED / admission-owed wording is the pre-admission state; rung 3 only and `established:false` unchanged |
 | Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
@@ -56,7 +58,6 @@ containers whose host ports bind only to loopback.
 | Axis2guththila2Shell W273 (newest) | [status](../reports/axis2guththila2shell-status.md), [brief](../reports/frontier-axis2guththila2shell.md) | CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`, CNA range before `f2b30c15…` | `sh run-all.sh && sh verify.sh` in `lab/frontier/axis2guththila2shell` | `RESULT PASS=4 FAIL=0`; GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308` from the 19-byte `<!ENTITY x "y"><a/>`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 15:0x–15:4xZ |
 | Libsoup2Shell (newest) | [status](../reports/libsoup2shell-status.md), [brief](../reports/frontier-libsoup2shell.md), [provenance](../lab/frontier/libsoup2shell/PROVENANCE.md) | fix parent `a4294044…` and fix `e4f03226…`; both GitLab tarballs SHA-256-pinned; extract the **full** pinned `libsoup/` subtree | `cd lab/frontier/libsoup2shell && ./run-all.sh` (runner sha256 `4dadfa60…d83`) | `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0; ASan READ-1 at `soup-uri-utils.c:405`; rung 3, rung 4 NOT CLAIMED; W269 clean-archive ESTABLISHED AS LABELED at that scope, NIT fixed. Full procedure at the tail of this file |
 | Freerdp2Shell W20 (newest) | [status](../reports/freerdp2shell-status.md) | pinned plain 3.32.0 `d27a4f7c…`, post-auth loopback `-auth` build | server-side synthetic rdpsnd playback under gdb | chosen `s_wLog.custom/context` → `system()` via real `Layout.c:211-213`; two benign marker touches, no-call/fixed/safe clean; author-only rung-4 lab mechanic, not rung 5. Trace `lab/freerdp2shell-src/call_target_stock.txt`; recipe at the tail |
-| Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain now DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean) but NOT ESTABLISHED — witness verdict owed and no register fold; commands at the tail |
 | Ruby2Shell `Regexp#to_s` (newest) | [report](../reports/ruby2shell-investigation.md) | Ruby 3.4.12 vs fixed 3.4.13; GHSA-7whj-cfh7-xgm4 | `bash lab/repro/ruby2shell-tos-steer.sh` | chosen `cc->bs` word offset and one bit; gdb watchpoint shows a `1 << (V&31)` delta, fixed/ASCII controls clean, `V=0x10ffff` falsified; narrow rung 4, author-only. Detail at the tail |
 | Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | plain build `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (recipe in report); ASan build `lab/build/ruby-3.4.12-asan` | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh`, `stageB-rails.sh`, `bash lab/repro/ruby2shell-stageC-http.sh 3 2` with `stageC-http.ru`; rung 5 `bash lab/repro/ruby2shell-rung5-http.sh attack <tag>` (repeat with distinct tags), then `control <tag>` and `fixed <tag>` (plain 3.4.13 build recipe in the report; expect distinct markers on attacks, none on controls) (Sinatra request-thread Stage C: 3/3 attacks read chosen bytes at the nominated address in the HTTP response, 2/2 controls clean; the process aborts in worker-thread teardown after readback — depth result, no grade change); stock Rails follow-up: `bash lab/repro/ruby2shell-stock-rails-setup.sh`, then `ruby2shell-stock-rails.sh attack|control|fixed <tag>` with the exact N=524 environment in the addendum below; 3/3 attacks abort, safe/fixed controls survive, no RCE/persistence; copy-out lane: `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's="\xDF".b*21; s.force_encoding(Encoding::ISO_8859_1); p s.upcase.bytesize'` — N=21 shows `Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and `Invalid read of size 2` via `rb_str_casemap (string.c:7857)`, `outlen=42`; N=20 clean, `outlen=40`. The read byte is the same fixed `0x53`, so this is rung-3 class, not a leak or rung 4 |
 | PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-fpm-release.sh`, `build-apache.sh`, `build-apache-plain.sh`, `build-dom.sh`, `build-dom-fixed-variant.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb`; `lab/repro/php2shell-cve129538.py` and `lab/repro/php2shell-cve129538-fcgi.py` replay the adjacent CVE-2026-129538 lane on pinned 8.5.12-asan / 8.5.13-asan / 8.4.27-asan: direct php-cgi `VERDICT CONFIRMED` 7/7, FastCGI long suffix yields `PATH_INFO=".0.1"` on affected and `"/x"` on fixed 3/3, steering leaks `"23456789"` / `"27.0.0.1"` by param order 5/5; gdb observes the OOB NUL byte at `cgi_main.c:1294`, ASan silent by design; evidence `lab/build/evidence/w48-cve129538/{committed,fcgi-committed,fcgi-steered}/verdict.txt`. `python3 lab/repro/php2shell-cve129538-nginx.py` adds a real loopback nginx 1.24 → php-cgi HTTP replay: the standard `fastcgi_split_path_info` mapping is clean on both builds, a naive non-default mapping leaks `6789` / `23456789` on 8.5.12 and stays clean on 8.5.13, verdict `HTTP-REACHABLE OOB READ CONFIRMED` (evidence `lab/build/evidence/w50-nginx/verdict.txt`, gitignored). `bash lab/php2shell/build-dom.sh 8.5.12` builds one dom-enabled 8.5.12 ASan/UBSan CLI with libxml 2.9.14 compat path (the first make may hit a 1500s tool deadline at 524 objects; resume make in the build dir); `bash lab/php2shell/build-dom-fixed-variant.sh` relinks it with the byte-identical 8.5.13 `ext/dom/xml_serializer.c`; `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>` replays CVE-2026-129501 with `USE_ZEND_ALLOC=0`: vendor and XMLDocument-only bodies exit rc=1 `ASAN_DOUBLE_FREE` on affected and rc=0 CLEAN on fixed, clean control clean on both, 4-byte prefix double-freed at `dom_xml_ns_prefix_map_destroy (xml_serializer.c:126)`; default ZendMM is silent (no ASan claim there). `python3 lab/repro/php2shell-cve129501-dom-hunk2.py <php-vuln> <php-fixed>` embeds both 8.5.13 hunk-2 regression bodies: affected loses document children and orphans comments with rc=0 and no sanitizer report, fixed matches vendor EXPECT — a DOM-state fault, grade unchanged; tcache escalation is closed negative (owned `"ns"+%u` prefix max 13 bytes, glibc 0x20 bin, versus a >=32-byte PHP `zend_string`). `python3 lab/repro/php2shell-cve129291-fpm.py <php-8.4.27-fpm> <php-8.4.28-fpm>` embeds the 8.5.13 FPM phpt: 8.4.27 FAIL / 8.4.28 PASS, no ASan report, rung 2 fix-sensitive functional fault; single- and dual-TU swaps are preserved negatives. Raw evidence `lab/build/evidence/w51-129501-dom/`, `.../w52-129501-hunk2/` and `.../w52-129291-fpm/` is gitignored |
@@ -17520,11 +17521,71 @@ daemon. Vulnerable plain binary `36d77768…`, fixed v0.15.2 ASan binary
 marker. PIE base `0x555555554000`, libc base `0x7ffff7c00000`, arena
 `0x7ffff0000000`; gdb disables ASLR, so addresses are lab conditions. The
 call and vfork are the daemon's own, not debugger-forced. Rung 5 is
-DEMONSTRATED on this pinned plain build, NOT ESTABLISHED: independent
-witness replay of this exact wire/build is owed, and W315's ESTABLISHED
-verdict covers only the earlier tcache chain (NO r5). Raw `call-*` logs and
-markers are gitignored and regenerate with `call_chain.py`; the register
-cell, counts and report grade stay operator-owned until a verdict lands.
+DEMONSTRATED on this pinned plain build under ASLR-off gdb and was
+independently replayed by witness W317 (#6122) as ESTABLISHED AS LABELED at
+that exact scope; the operator folded R5 ✓ and the established count into
+the register. The earlier "NOT ESTABLISHED / verdict owed" wording is
+superseded; W315's ESTABLISHED verdict covers only the earlier tcache chain
+(NO r5). No fresh rebuild, ASLR-on discovery or new rung is claimed. Raw
+`call-*` logs and markers are gitignored and regenerate with `call_chain.py`;
+the witness replay conditions are in §05:3x–06:1xZ below.
+
+### 2026-11-27 05:3x–06:1xZ — W317 rung-5 replay, receive-path negative, staged libevent
+
+    # ud3tn2shell — witness W317 replay of the pinned plain-build command chain
+    git archive 9ca46a2d | tar -x -C /tmp/fresh        # 28 files
+    cd /tmp/fresh/lab/frontier/ud3tn2shell
+    # harness hashes 7b0de51a… / 38abeb22… / de71c556…; pinned reports.c
+    # and binary hashes match src/PINS.txt; prebuilt pinned binaries, not a
+    # fresh rebuild. Use a fresh port and ASLR-off gdb, as the author recipe
+    # above; no address is discovered with ASLR on.
+
+Expect `F=0x5555555b8bd0` (header `0x61`), `STORE p=F rem=71`, `CALL_SITE
+trx=0x7ffff7c58750 param=0x7ffff0001240`, `SYSTEM_HIT rdi=0x7ffff0001240`,
+`x/s` of the exact lab `touch` command and a vfork detach; the marker appears
+from the daemon. The safe EID-length-8 lane lands at `0x7ffff0001200` with
+the original callback `0x55555558356a` and no marker; fixed v0.15.2 ASan has
+zero ASan / ERROR / SUMMARY / invalid-pointer hits, original callback and no
+marker. W317 graded ESTABLISHED AS LABELED for rung 5 DEMONSTRATED on this
+pinned build, with NITs: harness `rc=-9` from a 12 s timeout after all four
+sends were acknowledged, prebuilt binaries, gdb-discovered addresses, same
+host/glibc. Raw witness logs carry ASLR-dependent addresses; they and the
+marker are gitignored and regenerate with `call_chain.py`.
+
+    # nfdump2shell — W318 receive-path expansion is a READ-ONLY source check
+    # pinned parent 8a00543a…: src/nfcapd/nfcapd.c:273, :319, :507;
+    # src/collector/nfnet.h:49; src/collector/nfnet.c:65,321,420 (SOCK_DGRAM);
+    # offline readers nfcapd.c:867, :878, :885; harness/wire_send.py:148-166.
+
+No new run. Every remote receive is capped at the 65,535-byte `in_buff`;
+UDP caps a datagram at 65,527 bytes, so the terminal `msecReceived` store
+cannot pass `in_buff+65543..65550` (the next chunk header) into the ident
+chunk or `FlowSource_t`. Grade unchanged; do not retry this path without a
+new receive mode.
+
+    # libeventsockaddr2shell — staged frontier lane, from lab/frontier/libeventsockaddr2shell
+    bash run-all.sh    # rc 0, PASS=23 FAIL=0
+    bash run-probe.sh  # PASS=16 FAIL=0, invokes the ASan and gdb probes
+
+Pins: vulnerable master `1b7cc9b58d6a5fdd5f33a43168245c2e1f35291f`, fix
+`52057cb33d0c20c0a0453fbabe6c0c96854931b9` (parent `9877a7205ea0`), with
+input SHA-256 values in `lab/frontier/libeventsockaddr2shell/PROVENANCE.md`.
+Expect GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`,
+0 bytes after a 520-byte region from `bufferevent_socket_new`, and clean
+loopback-TCP and fixed-commit controls. The `NDEBUG`-compiled-out
+`EVUTIL_ASSERT` at `bufferevent_sock.c:119-126` lets an AF_UNIX abstract
+name's 110-byte `accept()` length overwrite the 28-byte `conn_address`,
+`dns_request` and 74 bytes of the adjacent `evbuffer` including `lock`.
+In `run-probe.sh`, 0x1234567890AB / 0xDEADBEEF1337 / 0xCAFEBABE9988 each
+appear as `mutex=<chosen>` in `___pthread_mutex_lock`. No command, marker,
+ASLR groom or remote-TCP path; R5 NOT CLAIMED. Preserved negatives: a
+one-byte abstract name also overflows on this host, the advisory's
+`si_addr = mutex+0x18` was not reproduced, and the client writes six bytes
+at `sun_path[102..107]`. STAGED, not admitted; admission, clean-archive
+replay and witness are owed.
+
+SAIL PSD's admission at 05:3xZ adds no new recipe; its 12/0 outer and 42/0
+inner clean-archive replays are in §05:2x–05:3xZ above.
 
 ### W318 — extended relptr bits and QS-UTF8 adjacent negative (Ruby)
 

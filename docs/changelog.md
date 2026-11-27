@@ -2,6 +2,72 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 05:3x–06:1xZ — W317 rung-5 verdict, receive-path negative, admission and staged libevent
+
+This fold covers `01a19a04`, `87fe7d08`, `4b0f21da`, `0d9701db`, `2277d410`,
+`8043fcc3`, `abeb3f87` and `090aa6bc` past `5e6b032c`. `abeb3f87` (Ruby W318)
+and `8043fcc3` (rpm W314 wording) had already written their changelog and
+reproducibility passages; they were verified, not duplicated. `4b0f21da` was a
+reconcile with no docs content. No generated cell, register row, count,
+report, SVG or lab evidence moved here.
+
+- `0d9701db` and `2277d410` close the ud3tn2shell rung-5 verdict that
+  §05:2x–05:3xZ left as NOT ESTABLISHED. Witness W317 (#6122) replayed commit
+  `9ca46a2d` from a clean 28-file `git archive`, with harness hashes
+  `7b0de51a…` / `38abeb22…` / `de71c556…` and pinned `reports.c` and binary
+  hashes matching `src/PINS.txt`. On a fresh port the vulnerable lane found
+  `F=0x5555555b8bd0`, logged `STORE p=F rem=71`, `CALL_SITE
+  trx=0x7ffff7c58750`, `SYSTEM_HIT rdi=0x7ffff0001240` and the exact lab
+  `touch` command, then created the marker at 05:35:48Z. Safe EID-length-8
+  and fixed v0.15.2 ASan lanes kept the original callback and made no marker.
+  Verdict **ESTABLISHED AS LABELED** for rung 5 DEMONSTRATED on the pinned
+  v0.15.1 plain build under ASLR-off gdb; the operator's `2277d410` folded
+  R5 ✓ and `established=true` into the register (counts 137 established,
+  183 rung-5 UNKNOWN). NITs preserved: prebuilt pinned binaries rather than
+  a fresh rebuild, harness `rc=-9` from a 12 s timeout after four sends were
+  acknowledged, gdb-discovered addresses with ASLR off, same host/glibc.
+  No fresh-build, ASLR-on, stock-configuration or new-rung claim; the
+  earlier "NOT ESTABLISHED / verdict owed" wording is superseded.
+- `01a19a04` and `87fe7d08` close nfdump2shell's wire receive-path expansion
+  hypothesis from pinned parent `8a00543a…`, with no new run. `nfcapd.c:273`
+  allocates a 65,535-byte `in_buff` and `:319` caps every receive at that
+  size; all remote sockets are UDP (`SOCK_DGRAM` in `nfnet.c:65,321,420`),
+  so the largest IPv6 datagram payload is 65,527 bytes. The other
+  `receive_packet` assignments are offline yaf/pcap readers, unreachable
+  from a loopback request. `wire_send.py:148-166` puts the terminal element
+  at `total`, so `msecReceived` lands no further than `in_buff+65543..65550`:
+  the next chunk header, never the ident chunk's data or the `FlowSource_t`
+  object. Grade unchanged: rung 3 live / rung 4 availability DEMONSTRATED
+  plus chosen-offset PARTIAL / NO r5.
+- The operator admitted `sailpsd2shell` at 05:36Z as the 201st declared
+  target mind under standing #6 (CVE-2026-54627 / GHSA-ccqf-rv86-h3wm). The
+  register row and counts moved to 201/198/198/136 at admission and to 137
+  established after the W317 fold above. The clean `ef370299` archive gave
+  12/0 outer and 42/0 inner with replay log `61d43c76…`; R1/R2/R3 ✓, R4 ◐
+  limited to the synthetic allocator, R5 —, `established=false` pending the
+  witness replay (#6112). The earlier "STAGED, not admitted" wording in
+  §05:2x–05:3xZ is the pre-admission state.
+- `090aa6bc` staged libeventsockaddr2shell (CVE-2026-63388 /
+  GHSA-cvq5-vrvr-j338) for frontier, not admitted. Pinned vulnerable master
+  `1b7cc9b5…`, fixed `52057cb3…`: an AF_UNIX abstract name makes `accept()`
+  report 110 bytes that the vulnerable `http.c:4686` path memcpy's into a
+  28-byte `conn_address` because the `EVUTIL_ASSERT` in
+  `bufferevent_sock.c:119-126` compiles out under `NDEBUG`. `run-all.sh` was
+  23/0, `run-probe.sh` 16/0: GCC ASan `WRITE of size 110` zero bytes after a
+  520-byte region, and three chosen 48-bit values each reach libc
+  `___pthread_mutex_lock` as `mutex=<chosen>` under gdb with a crash.
+  Grade R1/R2/R3, R4 DEMONSTRATED at the labeled chosen-address-dereference
+  scope, R5 NOT CLAIMED: local AF_UNIX peer, no marker, command, ASLR groom
+  or wire-to-TCP path. A one-byte abstract name also overflows here and the
+  advisory's `si_addr = mutex+0x18` was not reproduced. Admission and
+  witness replay are owed; `docs/results.md` and the manifest stay
+  operator-owned.
+
+Recipes and expected bytes are in `docs/reproducibility.md` §05:3x–06:1xZ.
+What would change these limbs: a counterexample to W317 at its labeled
+scope, a SAIL PSD witness verdict or grade move, admission of the staged
+libevent lane, or a checker RED on committed HEAD.
+
 ## 2026-11-27 05:4x–06:0xZ — Ruby relptr bit extension and QS-UTF8 negative
 
 - `lab/repro/ruby2shell-tos-relptr.sh` now accepts `RELPTR_BITS` and

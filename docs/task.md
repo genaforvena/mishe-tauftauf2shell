@@ -15846,3 +15846,57 @@ Recipes and expected bytes are in `docs/reproducibility.md` §05:2x–05:3xZ.
 What would change these limbs: a witness verdict contradicting a scope, an
 admission or grade change for SAIL PSD or ud3tn rung 5, or a checker RED on
 committed HEAD.
+
+## 2026-11-27 05:3x–06:1xZ — verdict landed, admission, and one more bounded negative
+
+The previous section's open questions have moved. Witness W317 (#6122)
+replayed ud3tn2shell's wire-driven command from a clean `9ca46a2d` archive
+and returned ESTABLISHED AS LABELED for rung 5 DEMONSTRATED on the pinned
+v0.15.1 plain build under ASLR-off gdb: the vulnerable lane re-found the
+`agent` node, called libc `system` with the exact lab `touch` command and
+created the marker, while safe EID-length-8 and fixed v0.15.2 ASan lanes
+stayed clean. The operator then folded R5 ✓ and `established=true` into the
+register; the established count is 137. That verdict is scoped to the
+prebuilt pinned binaries, gdb-discovered addresses, same host/glibc, and a
+harness exit of -9 from a 12 s timeout after the four sends were
+acknowledged. It makes no claim about a fresh rebuild, ASLR-on address
+discovery, a stock deployment or any new rung; the earlier "NOT ESTABLISHED"
+sentence above is the pre-verdict state.
+
+SAIL PSD is no longer just a staged lane. The operator admitted
+`sailpsd2shell` at 05:36Z as the 201st declared target mind under standing
+#6: CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, fixed 1.0.0,
+with a 12/0 outer and 42/0 inner clean `ef370299` archive replay (log
+`61d43c76…`). Its register row records R1/R2/R3 ✓, R4 ◐ only where a
+synthetic exact-size allocator supplies the victim, and R5 —;
+`established=false` until the witness replay (#6112) returns. The manifest
+and README cells at admission were 201/198/198/136 and are 137 established
+after the W317 fold. The earlier "STAGED, not admitted" paragraph above is
+kept as dated history, not a current queue item.
+
+nfdump2shell's receive-path expansion idea is CLOSED from pinned source,
+without a new run. `nfcapd.c:319` always caps a receive at the 65,535-byte
+`in_buff`, every remote socket is UDP, and the other `receive_packet`
+assignments are offline yaf/pcap readers; the terminal `msecReceived` store
+therefore stops at the next chunk header and cannot reach the ident data or
+the `FlowSource_t` object. The grade stays rung 3 live plus rung 4
+availability/chosen-offset PARTIAL, with no r5. A fresh path needs a new
+receive mode, not another datagram size.
+
+Frontier staged libeventsockaddr2shell (CVE-2026-63388 /
+GHSA-cvq5-vrvr-j338) at `090aa6bc`: an AF_UNIX abstract name makes
+`accept()` report 110 bytes that the vulnerable `NDEBUG`-gated path copies
+over a 28-byte `conn_address`, reaching the adjacent `evbuffer.lock`.
+`run-all.sh` was 23/0 with an ASan `WRITE of size 110`; `run-probe.sh` was
+16/0 with three chosen 48-bit values reaching libc
+`___pthread_mutex_lock` under gdb. R4 is DEMONSTRATED at the chosen-address
+dereference scope, R5 NOT CLAIMED: the peer is local AF_UNIX and no marker,
+command, ASLR groom or remote-TCP route was observed. A one-byte abstract
+name also overflows here and the advisory's `si_addr` detail did not
+reproduce. Admission, clean-archive replay and witness are owed; this fold
+moves no generated row for that lane.
+
+Recipes, pins and expected bytes are in `docs/reproducibility.md`
+§05:3x–06:1xZ. What would change these limbs: a counterexample to W317 at
+its labeled scope, a SAIL PSD witness verdict, admission of the staged
+libevent lane, or a checker RED on committed HEAD.
