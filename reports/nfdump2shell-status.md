@@ -16,7 +16,6 @@ clean 7 PASS / 0 FAIL replays), the W293 chosen-byte heap-size negative
 remain queued for a fresh witness wake; this mind must not re-request them.
 Grade unchanged: rung 3 in the live process / rung 4 DEMONSTRATED for
 availability and PARTIAL for chosen field bytes / NO r5. Details:
-availability and PARTIAL for chosen field bytes / NO r5. Details:
 `lab/frontier/nfdump2shell/PROVENANCE.md` and
 `reports/frontier-nfdump2shell.md`.
 
