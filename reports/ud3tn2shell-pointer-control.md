@@ -128,3 +128,49 @@ side effect, on a live plant-started target reached by wire input, with
 vulnerable/fixed/safe-input controls and independent witness replay. A
 fixed-build fault under the same wire input would refute the inherited
 control and must be preserved.
+
+## W-2026-11-27: fresh heap-metadata chain — chosen-address allocation and write
+
+The W26 `free()` abort was misattributed. `probe-w26/tcache-inspect/gdb.log`
+shows the sequence `free(p=...1040)`, `free(F=...1200)`, `free(record=...1140)`;
+the invalid-pointer abort was on **record**, whose own size word at
+`record-8 = p+0xf8` had been zeroed by the chosen stream. The forged `free(F)`
+completed and entered tcache. That gives a fresh chain, not a retry of the
+aborted route.
+
+Prediction: preserve the collateral chunk headers, move the forged chunk past
+the natural allocation frontier, and a later wire request should be served
+from tcache at the chosen address. `harness/tcache_chain.py` and
+`harness/tcache_chain.gdb` send, on 127.0.0.1 MTCP under a plant-started
+pinned daemon: one benign BPv6 admin pre-bundle (source-EID length 8), one
+768-byte crafted trigger (source-EID length 0), then a benign follow-up with
+source-EID length `0x27` (a 40-byte, 0x30-chunk allocation). The crafted stream
+sets `record->status_report = F = p+0x300`, a 0x31 size word at `F-8` (tcache
+bin 1), a 0x41 size word at `record-8` (bin 2, so freeing the record cannot
+displace F), EID scheme 2 so `eid_free` is a no-op, and preserves the size
+words at `p+0x18`, `p+0x38`, `p+0x98`, `p+0xd8` and the top-chunk size at
+`p+0x158`. gdb disables ASLR, so `p=0x7ffff0001040` and `F=0x7ffff0001340`.
+
+Observed (`chain-far-vuln/chain.log`, plain v0.15.1): all four intended frees
+complete with no invalid-pointer abort; the follow-up parse reports
+`STORE_BEGIN p=0x7ffff0001340 record=0x7ffff00011a0 rem=38` — the EID buffer
+is the chosen address F, and `x/40bx` at that moment shows the first chosen
+wire byte `0x43` there. An earlier variant with `F=p+0x1c0`
+(`chain-final-vuln/chain.log`) also showed `p=F`, but that address coincides
+with the natural next allocation, so it is not proof; moving F past the
+frontier makes the poisoning distinguishable.
+
+Controls on the same three-bundle wire: vulnerable v0.15.1 with the trigger's
+source-EID length 8 (`chain-far-safe/chain.log`) gives no chosen allocation —
+the follow-up lands at the natural `0x7ffff0001200`; fixed v0.15.2 ASan
+(`chain-far-fixed/chain.log`) reports zero AddressSanitizer hits and follows
+the natural ASan layout. Both are clean of the faulting free chain.
+
+Grade: rung 4 now includes a tcache-poisoned, chosen-address allocation whose
+first bytes are attacker-chosen from a live wire request, on a plant-started
+loopback daemon, with vulnerable / fixed / safe-input controls. This is still
+not rung 5: no callable pointer was overwritten, no indirect call, no
+benign-command side effect and no witness replay. R5 remains UNKNOWN. The
+attempt stops here as scoped; the several intermediate `chain-w*` runs are
+preserved as negative iterations (each abort was a collateral header that had
+to be preserved, never a change to the underlying primitive).

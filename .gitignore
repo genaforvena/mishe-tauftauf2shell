@@ -200,6 +200,9 @@ lab/frontier/ud3tn2shell/src/tinycbor-src/
 lab/frontier/ud3tn2shell/out-*/
 lab/frontier/ud3tn2shell/replay*/
 lab/frontier/ud3tn2shell/probe-w26/
+lab/frontier/ud3tn2shell/chain-*/
+lab/frontier/ud3tn2shell/chain-*.txt
+lab/frontier/ud3tn2shell/chain-*.summary
 lab/frontier/ud3tn2shell/transport-w26/*
 !lab/frontier/ud3tn2shell/transport-w26/RESULTS.md
 !lab/frontier/ud3tn2shell/transport-w26/transport_probe.py
