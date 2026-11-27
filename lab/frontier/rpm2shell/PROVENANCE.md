@@ -1069,3 +1069,48 @@ fixed build is ASan-clean on all five. No new reader, chosen pointer,
 marker, command, grade change or r5. Raw packages, per-run logs and the
 patcher: `.mishe-tauftauf/artifacts/rpm2shell-w316/`; the throwaway tmp
 directory was removed after the copies were verified.
+
+## W318 (2026-11-27 06:1xZ) — CLI-controlled GC type byte is unreachable
+
+Question: the W307 non-PIE chosen pointer lands on the zero `.bss` qword of
+`rpmQVKArgs`; can an attacker-set rpm command-line option put useful bytes
+into that stable object before liblua's GC visit? No source, runner or
+committed fixture was changed. The non-PIE binary
+(`build-vuln-nopie/tools/rpm`, SHA-256
+`4abba405211155a1720a94791fe931da83fc80ffa8334715ee33f7e87d0ff7b2`) and the
+staged `real/nopie/attack-bss.rpm` (SHA-256
+`47c96f67f275cd4f057f17fefa8b7b08ded07cabfd996ce5a2dbb4aee39033aa`) were
+read and replayed only.
+
+GDB readback of `&rpmQVKArgs` (56 bytes at `0x4063a0`) after `rpmcliInit`:
+baseline `--nodeps --noscripts` gives `qva_flags=0x00060000` at `+8`
+(bytes `00 00 06 00`), `-l` adds `QUERY_FOR_LIST` (`0x860000`), and
+`--configfiles --docfiles --nosize --nolinkto` set `qva_incattr/ofvattr` at
+`+12`/`+20`. `tools/rpm.cc:91-110` performs the query-flag argument check
+before `bigMode` becomes `MODE_INSTALL` at `:112`, so `-l` does not prevent
+the install. The tag byte liblua reads at `+8` and the mark at `+9`
+(`lua_resume+0x1f7`/`+0x206`, i.e. `movzbl 0x9(%r14)` and
+`cmpb $0x8,0x8(%r14)`) stay zero: all settable `qva_flags` bits are >= 16.
+A throwaway copy of the fixture with only the payload qword changed to
+`0x4063aa` (`+10`, where `--nodeps --noscripts` produce tag `0x06`,
+LUA_TFUNCTION) is SHA-256
+`3cd420e74e7c4026431c585725a41767ef2df1a46438efd1bfa5011eeb1b6644`.
+GDB sees `COPY_BUF=0x454e00 NEXT_ADDR=0x454e20 NEXT_AFTER=0x4063aa`,
+`CHOSEN_PTR=0x4063aa PREV_OBJ=0x454e20 ... MATCH=1`, a `stepi` on the same
+liblua instruction, and frames `rpmluaFree` (`rpmio/rpmlua.cc:153`) ->
+`rpmFreeRpmrc` -> main. Twelve plain installs of that variant all fault
+rc -11: the fake object's first qword is the small integer 6, so the GC walk
+follows it to an unmapped address. The non-zero flag bytes lie at unaligned
+offsets; the 16-byte-aligned object slots (`+0`, `+16`, `+32`) have tag zero,
+and `qva_showPackage`/`qva_specQuery` are NULL in install mode.
+
+The original `+0` target is bimodal in this environment: 20 plain runs gave
+12 rc 1 / 8 rc -6 (`double free or corruption (out)`), and 20 with `-l` gave
+13 rc 1 / 7 rc -6. A filler gave 10 rc -11 / 1 rc -6 / 1 rc 1 in 12 runs,
+so the abort is generic heap-metadata damage from the 64-byte overflow, not
+a controlled GC type; safe.rpm gave 12/12 rc 1 and the fixed ASan control
+was clean. GDB with `set disable-randomization off` did not reproduce the
+abort in 3 runs. Raw logs, the re-aimed fixture and GDB scripts are in
+`.mishe-tauftauf/artifacts/rpm2shell-w318/`; throwaway `/tmp` configs and DBs
+were removed after observation. No useful object, pointer, command, side
+effect, grade change or r5; no standing replay ask is created by this note.

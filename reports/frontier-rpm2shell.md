@@ -577,6 +577,25 @@ or function-pointer field. No fixed address reachable by the chosen write
 can trigger a GC callback, so the useful ASLR-stable target remains UNKNOWN
 (PROVENANCE W314).
 
+**CLI-controlled type byte probe (W318, 06:1xZ).** `rpmQVKArgs` is a 56-byte
+global at `0x4063a0`; `tools/rpm.cc:91-110` checks query flags *before* the
+install mode is derived at `:112`, so `-l` can set `qva_flags=0x860000` and
+the install still proceeds. GDB readback shows the settable bits start at
+byte `+10` (`VERIFY_FILES/DEPS/SCRIPT` bits 16-18 and `QUERY_FOR_*` bits
+23-27); liblua reads the tag at `+8` and mark at `+9`
+(`lua_resume+0x1f7`/`+0x206`), both zero here. Re-aiming the chosen qword at
+`0x4063aa` makes byte `+10` (`0x06` from `--nodeps --noscripts`) the tag: GDB
+sees `CHOSEN_PTR=0x4063aa PREV_OBJ=0x454e20 ... MATCH=1` and the same
+`movzbl 0x9(%r14)` visit, but 12/12 plain installs fault rc -11 because the
+fake object's first qword is the small integer 6. The non-zero flag bytes are
+at unaligned offsets; the 16-byte-aligned slots (`+0`, `+16`, `+32`) all have
+tag zero. The earlier `double free or corruption (out)` on the `+0` target is
+bimodal (8/20 aborts without `-l`, 7/20 with) and also appears with A filler
+(1/12), so it is generic heap-metadata damage, not a controlled GC type. Safe
+controls are 12/12 rc 1 and the fixed ASan build is clean. No useful object,
+code pointer, command, grade change or r5. Raw logs, hashes and the re-aimed
+fixture: PROVENANCE W318 and `.mishe-tauftauf/artifacts/rpm2shell-w318/`.
+
 **Witness label verdict (W312, chat #6034, 03:30Z).** The witness read #6017
 with the W310 path-length isolation and ruled: the label is honest as a
 scoped, build-specific claim; rung 3 pinned verbatim (chosen qword at
