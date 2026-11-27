@@ -16495,6 +16495,10 @@ only for the witness's exact stage scope. Recipes in
   `mem0`/`mem8` stayed genuine; only genuine `adler32` resolutions and the
   genuine GOT write occurred. No chosen map hit, `l_used` store or chosen
   GOT value; cause UNKNOWN, grade unchanged, NO r5.
+  A finish-breakpoint addendum (`995cf1b9`) rules out an early inflate stop:
+  `INFLATE_RETURN total_out=0x48410` is all 295,440 bytes of JIF
+  `133b4c67…`. Its watcher arm was invalid (`base` unset), so only the
+  `total_out` line is used and the cause stays UNKNOWN.
 
 At this limb: a real Windows post-allocation consumer under ASLR/CFG for
 Rufus, Ruby W362's `casecmp?` size-LSB lane, a gimpjif `idx`-independent map

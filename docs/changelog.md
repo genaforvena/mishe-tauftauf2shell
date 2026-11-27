@@ -49,6 +49,10 @@ verified, not duplicated. No rung cell changes here; the register flag and
   `adler32` resolutions and the genuine GOT write occurred. No chosen map hit,
   `l_used` store or chosen GOT value; cause of the upstream gap UNKNOWN, grade
   unchanged rung 3 pinned verbatim / rung 4 chosen-pointer read, NO r5.
+  A read-only finish-breakpoint addendum (`995cf1b9`) rules out an early
+  inflate stop: `INFLATE_RETURN total_out=0x48410` is all 295,440 bytes of
+  JIF `133b4c67…`. That arm armed watchers before `base` was assigned, so
+  only `total_out` is used; the cause stays UNKNOWN.
 
 Next: measure the real Windows post-allocation consumer under ASLR/CFG before
 any loopback trusted-response probe; Ruby's named experiment is W362's
