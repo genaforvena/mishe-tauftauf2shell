@@ -1,0 +1,4 @@
+pymupdf=PyMuPDF 1.28.2: Python bindings for the MuPDF 1.28.2 library. version=1.28.2
+count=3 spec=41200000
+annot='FreeText' annotation on page 0 of <None, doc# 1>
+NO_CRASH

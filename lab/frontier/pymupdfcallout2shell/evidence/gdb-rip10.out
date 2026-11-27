@@ -1,0 +1,19 @@
+Function "_wrap_JM_set_annot_callout_line" not defined.
+Breakpoint 1 (_wrap_JM_set_annot_callout_line) pending.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+pymupdf=PyMuPDF 1.28.2: Python bindings for the MuPDF 1.28.2 library. version=1.28.2
+count=10 spec=41200000,41200000,41200000,41200000,41200000,41200000,41200000,41200000,00582130:00000000,43434343:43434343
+
+Breakpoint 1, 0x00007ffff723e4f0 in _wrap_JM_set_annot_callout_line () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pymupdfcallout2shell/venv/lib/python3.12/site-packages/pymupdf/_extra.so
+FRAME=0x7fffffffdbc8 ENTRY_RET=0x582190
+Breakpoint 2 at 0x7ffff723e5dc
+
+Breakpoint 2, 0x00007ffff723e5dc in _wrap_JM_set_annot_callout_line () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pymupdfcallout2shell/venv/lib/python3.12/site-packages/pymupdf/_extra.so
+AT_POPS pc=0x7ffff723e5dc rsp=0x7fffffffdba0 rbp=0x7ffff7711940
+0x7fffffffdbb8:	0x4120000041200000	0x0000000000582130
+0x7fffffffdbc8:	0x4343434343434343	0x0000000000ba6748
+0x7fffffffdbc8:	0x4343434343434343
+
+Program received signal SIGSEGV, Segmentation fault.
+0x00007ffff723e5e4 in _wrap_JM_set_annot_callout_line () from /home/mesh-home/mishe-tauftauf2shell/lab/frontier/pymupdfcallout2shell/venv/lib/python3.12/site-packages/pymupdf/_extra.so

@@ -1,0 +1,6 @@
+PASS vuln-safe3
+PASS vuln-crash8
+PASS gdb-chosen-saved-rip
+PASS fixed-safe3
+PASS fixed-attack100
+RUN_ALL_OK 5 PASS / 0 FAIL

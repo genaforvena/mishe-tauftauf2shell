@@ -1,0 +1,3 @@
+pymupdf=PyMuPDF 1.28.2: Python bindings for the MuPDF 1.28.2 library. version=1.28.2
+count=8 spec=43434343
+Segmentation fault (core dumped)
