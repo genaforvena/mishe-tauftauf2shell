@@ -18710,6 +18710,29 @@ after a one-byte receiver; `none`, `grow` and ordinary slice controls
 match across builds. Grade and limits in
 `reports/ruby2shell-investigation.md` §W335.
 
+### Ruby — W336 groomed bytes disclosed by `String#slice!`
+
+Same four pinned builds as §W335. Repro scripts:
+`lab/repro/ruby2shell-slice-bang-groom.rb` and `.sh` (24 shaping arms plus
+4 `nocoerce` controls). Gitignored evidence:
+`lab/build/evidence/slice-bang-groom/{matrix,control-matrix}.txt` and
+`driver.log`.
+
+```sh
+bash lab/repro/ruby2shell-slice-bang-groom.sh
+```
+
+Expected: with receiver `"Z" + "Q"*256 + "R"*286`, regexp `/(.+)/m` and a
+`to_int` that replaces the receiver with `"Z"` before returning 1, the
+vulnerable 3.4.12 plain and ASan builds return `rlen=543`, `qcount=255`
+(`qfirst=2`, `qlast=256`) and `rcount=286` (`rfirst=257`, `rlast=542`);
+the fixed 3.4.13 plain and ASan builds return `rlen=1` with zero `Q`/`R`.
+The 1064- and 8232-byte arms keep the `rlen` differential but carry mostly
+uncontrolled pointer-looking bytes; no ASan report is expected because
+the 543-byte reads stay inside the live buffer. `nocoerce` controls are
+byte-identical on all four builds. Grade and limits in
+`reports/ruby2shell-investigation.md` §W336.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay

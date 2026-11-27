@@ -8053,3 +8053,61 @@ Falsifier: no `0x5a` run beyond the replacement length on the vulnerable
 build, or any `0x5a` run past the clamp on the fixed build. Do not
 repeat partition, backref `[]=`, each_line, append_as_bytes, concat,
 setbyte or the default `slice!` shapes above.
+
+## 2026-11-27 11:4x–11:5xZ — W336: grooming the disclosed `slice!` bytes, adjacent narrow rung 4 in-process (Ruby)
+
+W335 named the shaping experiment. Its mechanism was refined by a direct
+measurement: the `to_int` that shrinks the receiver calls
+`$s.replace("Z")`, which **reuses the original heap buffer**, so the bytes
+past the new one-byte logical end are still present in that buffer. The
+unchecked 3.4.12 copy at `string.c:6066` reads them; the 3.4.13 clamp at
+`:6065-6067` does not. That makes the disclosed region groomable by the
+caller before the call, without a separate allocator reclaim.
+
+`lab/repro/ruby2shell-slice-bang-groom.{rb,sh}` runs 28 arms over the four
+pinned builds (true-plain and ASan, 3.4.12/3.4.13): two shapes (`bands`,
+`uniform`) at three sizes (543, 1064, 8232 bytes) plus one `nocoerce`
+control per build. Evidence is gitignored in
+`lab/build/evidence/slice-bang-groom/{matrix,control-matrix}.txt` and
+`driver.log`.
+
+- **Chosen bytes at chosen offsets (543-byte `bands`).** Receiver
+  `"Z" + "Q"*256 + "R"*286` (543 bytes), regexp `/(.+)/m`, capture index
+  whose `to_int` replaces the receiver with `"Z"` and returns 1.
+  Vulnerable 3.4.12 plain **and** ASan: `rlen=543`, `slen=0`,
+  `head=5a005151…`, `tail=5252…`, exactly 255 `Q` bytes at result offsets
+  2..256 and 286 `R` bytes at offsets 257..542. Fixed 3.4.13 plain and
+  ASan: `rlen=1`, `head=5a`, zero `Q`/`R`. The byte at offset 1 is the NUL
+  terminator written by `replace`; offsets 2..542 are the attacker's own
+  earlier buffer content beyond the post-coercion logical length.
+- **Larger sizes limit.** At 1064 and 8232 bytes the vulnerable builds
+  still return `rlen=1064`/`8232` against fixed `rlen=1`, but the head is
+  mostly unrelated pointer-looking heap bytes (for example
+  `5a00c7cd155d0000`, `5a004a0ae1610000`) and only incidental chosen
+  runs appear. Attacker-chosen band placement was **not** demonstrated at
+  those sizes; no pointer control was observed. No arm reports an ASan
+  error — the bytes read at the 543-byte shape are inside the still-live
+  buffer, so this is an over-read/disclosure, not an ASan WRITE.
+- **Controls.** `nocoerce` (integer capture index, no `to_int`) returns the
+  full 543 bytes with identical bytes on all four builds: the unmodified
+  path exposes the receiver's own content legitimately, and the differential
+  is specific to the stale bound. Fixed-build mutation arms never return
+  more than one byte. The W335 falsifier ("no chosen byte run past the
+  replacement on vulnerable, or any on fixed") is refuted at the 543-byte
+  shape.
+
+Grade: **adjacent rung 4, narrow and in-process only** — chosen bytes at
+chosen offsets past the post-coercion length, with fixed and control arms.
+The disclosed bytes are bytes the caller itself wrote earlier into the
+same receiver's buffer, not a groomed neighbouring object; there is no
+pointer control, benign marker, command side effect or wire/stock reach.
+Primary CVE grade, the witness-COMPLETE rung 4 and full rung 5 are
+unchanged. Recipe in `docs/reproducibility.md` §W336.
+
+Next named experiment: test whether a stale capture carrying chosen bytes
+can be fed to a live downstream consumer (for example a `String`/`Array`
+built from that result and then used by a real call) on 3.4.12 plain+ASan;
+falsifier: no consumer-visible read of chosen bytes past the replacement,
+or the same result on fixed 3.4.13. Do not repeat the default `slice!`
+shapes, partition, backref `[]=`, each_line, append_as_bytes, concat,
+setbyte or the 543-byte band shape unchanged.

@@ -4,6 +4,24 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 11:4x–11:5xZ — W336 groomed `slice!` disclosure (Ruby)
+
+W335's named shaping experiment fired in a narrower form than proposed:
+`to_int`'s `replace("Z")` reuses the receiver's heap buffer, so the bytes
+past the new logical end can be placed by the caller before the stale
+unchecked copy. `lab/repro/ruby2shell-slice-bang-groom.{rb,sh}` runs 28
+four-build arms: on vulnerable 3.4.12 plain and ASan a 543-byte receiver
+`"Z" + "Q"*256 + "R"*286` yields `rlen=543` with 255 `Q` at offsets
+2..256 and 286 `R` at offsets 257..542; fixed 3.4.13 yields `rlen=1`,
+zero chosen bytes. At 1064/8232 bytes the vulnerable builds still expose
+relative lengths but carry mostly uncontrolled pointer-looking bytes.
+No ASan report (the reads stay inside the live buffer), no pointer
+control, marker, command or wire path; the disclosed bytes are the
+caller's own earlier content beyond the post-coercion length. Grade:
+adjacent narrow rung 4 in-process; primary CVE and full rung 5 unchanged.
+Details in `reports/ruby2shell-investigation.md` §W336 and
+`docs/reproducibility.md` §W336.
+
 ## 2026-11-27 11:4xZ — docs fold: 210th admission, W335 allocator sites
 
 Docs-only fold of `d27fa721`, `08cb6cbb`, `85885507`, `03ce68a3`,
