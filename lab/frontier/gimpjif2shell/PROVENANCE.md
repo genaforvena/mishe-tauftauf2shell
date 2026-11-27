@@ -2496,3 +2496,51 @@ a pointer the JIF supplies, and the access faults instead of returning
 data. No chosen-address write, successful dereference, control flow,
 marker or command. Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL
 chosen bytes, NO r5. No replay owed for this grade-neutral finding.
+
+## W336 extraction-loop read watch with a positive control (2026-11-27, 11:37Z wake)
+
+Prediction: W333's zero-hit read watches could be a compiler artifact and
+"other builds" were left open. The pinned source itself closes that route:
+every file-reachable wrap needs `alpha_frame=TRUE`, so `pos` advances by 2
+for each `i` and the `pos >= data_size` guard at
+`pins/jif-vulnerable.inc:122` is re-evaluated before every `indexes[i]`
+load. Wrapped `data_size = 2*product mod 2^32` is always even, so the
+unguarded alpha store at line 129 ends at the logical `dest` boundary.
+
+Bounded no-shim harness observation, no shim, no patched byte, no register
+or heap write by GDB; `gcc -O0 -g -I. -DPLAIN_MODE harness/driver.c -lz`.
+
+- `run-extract-336.sh` SHA-256
+  `8d2b7f9eebce7171427d3d9bece0c4da36cf5bcec1a0e6bde5503da31d188fbe`
+  builds `out/plain-336` (gitignored) and runs GDB batch.
+- `harness/gdb-extract-336.cmd` SHA-256
+  `af33b29ff6962e5914f23b5381b655942fab4552c3286a0d70a6f8950502217f`.
+- `harness/evidence/w336-extract-full.log` SHA-256
+  `9b4f233f11d38c9d590ec841e348f693436676cff2535ab707ddcff37fb4d9a9`.
+
+Observed transcript: at pin line 106 `IDX=0x55555556a7b0 DATA_SIZE=260
+AVAIL=2147483778`; the access watchpoint on `indexes+260` fired in
+`/lib/x86_64-linux-gnu/libz.so.1` with `Old value = 90 'Z'` / `New value =
+77 'M'` (positive control that the watchpoint sees the inflate WRITE).
+Breakpoint at pin line 125 reported `i=0 pos=0 total_out=324`; the run
+continued to pin line 136 with `pos=260 total_out=324`, so 64 decompressed
+bytes past `data_size` existed but were not read by extraction. Three
+hardware read watchpoints on `+260/+280/+336` were inserted before that
+continuation and produced zero hits through the pinned function's return;
+they were then deleted before `harness/driver.c:163`, whose own canary
+readback does read `indexes+260`. An earlier script iteration that left the
+watches armed stopped there (a false positive from the harness, not from
+the pin) and is excluded; two other iterations failed on an out-of-scope
+GDB `printf`, tooling negatives only.
+
+Conclusion: no OOB `indexes` read by this pin even at `-O0` with a full,
+non-crashing observation window — the short-window excuse does not apply to
+the extraction consumer. Only allocator/free consumers (W304/W335) remain
+observed, and neither gives a chosen absolute pointer. Grade unchanged
+rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No replay
+owed for this grade-neutral finding.
+
+Vendor-build recheck at 11:45Z (provisioning only): `gimp.org/downloads/`
+still says current stable 3.2.8 (2026-11-02) and
+`download.gimp.org/gimp/v3.2/linux/` still has `0.0_LATEST-IS-3.2.8` with
+3.2.8 as its newest AppImage. No vendor-shipped fixed build.

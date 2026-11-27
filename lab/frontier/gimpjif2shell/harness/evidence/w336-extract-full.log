@@ -1,0 +1,32 @@
+Breakpoint 1 at 0x1836: file ./pins/jif-vulnerable.inc, line 106.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, ReadJeffsImage (fd=0x0, dest=0x7fffffffc140 "", bpp=8 '\b', len=2, height=1073741889, alpha_frame=1, image=0x7fffffffc118, error=0x7fffffffc120) at ./pins/jif-vulnerable.inc:106
+106	  ret = inflate (&zs, Z_NO_FLUSH);
+W336 IDX=0x55555556a7b0 DATA_SIZE=260 AVAIL=2147483778
+Hardware access (read/write) watchpoint 2: *(unsigned char *) ($w336idx + 260)
+
+Hardware access (read/write) watchpoint 2: *(unsigned char *) ($w336idx + 260)
+
+Old value = 90 'Z'
+New value = 77 'M'
+0x00007ffff7f8edd1 in ?? () from /lib/x86_64-linux-gnu/libz.so.1
+W336 WRITE WATCH FIRED (pre-inflate AVAIL=2147483778); resuming inflate
+Breakpoint 3 at 0x5555555558d7: file ./pins/jif-vulnerable.inc, line 125.
+
+Breakpoint 3, ReadJeffsImage (fd=0x0, dest=0x7fffffffc140 "", bpp=8 '\b', len=2, height=1073741889, alpha_frame=1, image=0x7fffffffc118, error=0x7fffffffc120) at ./pins/jif-vulnerable.inc:125
+125	          dest[pos++] = (indexes[i] & (mask >> j)) >> (8 - bpp - j);
+W336 EXTRACTION STORE REACHED i=0 pos=0 total_out=324
+Breakpoint 4 at 0x5555555559ed: file ./pins/jif-vulnerable.inc, line 136.
+Hardware read watchpoint 5: *(unsigned char *) ($w336idx + 260)
+Hardware read watchpoint 6: *(unsigned char *) ($w336idx + 280)
+Hardware read watchpoint 7: *(unsigned char *) ($w336idx + 336)
+
+Breakpoint 4, ReadJeffsImage (fd=0x0, dest=0x7fffffffc140 "M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377M\377"..., bpp=8 '\b', len=2, height=1073741889, alpha_frame=1, image=0x7fffffffc118, error=0x7fffffffc120) at ./pins/jif-vulnerable.inc:136
+136	  inflateEnd (&zs);
+W336 PIN COMPLETE pos=260 total_out=324; read watches end here
+MODE=attack RC=1 ERR=
+CANARY_AT=260 FIRST=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d
+[Inferior 1 (process 3824483) exited normally]
+W336 READ PHASE DONE

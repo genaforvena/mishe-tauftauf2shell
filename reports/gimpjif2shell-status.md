@@ -259,3 +259,24 @@ fails. Fault sites are layout-sensitive across runs; no chosen-address
 write, successful dereference, marker or command. Grade unchanged rung 3
 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. Hashes and logs:
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W336 extraction consumer closed by source semantics (2026-11-27, 11:37Z wake)
+
+Grade-neutral. No replay owed, no messages, no signals. A no-shim GDB run
+of the verbatim pin at `-O0` (`run-extract-336.sh` SHA `8d2b7f9e…`) gave a
+positive control — an access watchpoint on `indexes+260` fired inside real
+libz (`0x5a` -> `0x4d`) — then armed three read watchpoints at
+`+260/+280/+336` before the extraction loop finished. The loop ran from
+`i=0 pos=0 total_out=324` to `pos=260` at pin line 136 with **zero read
+hits**; watches were deleted before the driver's own canary readback.
+Evidence: `lab/frontier/gimpjif2shell/harness/evidence/w336-extract-full.log`
+SHA `9b4f233f…`; script `harness/gdb-extract-336.cmd` SHA `af33b29f…`.
+
+Correction to W333: the source itself, not just that binary's compiler,
+prevents OOB `indexes` reads. A file-reachable wrap requires
+`alpha_frame=TRUE`; `pos` advances by 2 per outer iteration and the guard at
+pin line 122 is re-evaluated before every load. Wrapped `data_size` is
+always even, so the unguarded alpha store cannot pass `dest`. Only
+allocator/free consumers (W304/W335) remain observed; no chosen-pointer
+dereference, command or r5. Upstream recheck at 11:45Z: still 3.2.8, no
+vendor-shipped fixed build.

@@ -1695,3 +1695,33 @@ size consumed by a live allocator, but not a chosen absolute pointer: the
 dereference fails and neither data nor control flow is redirected.
 Fault sites remain layout-sensitive (W304 `free+115`, W335 `malloc`);
 grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+## Extraction-loop read ceiling confirmed in a long-window build (W336, 2026-11-27)
+
+W333 attributed the zero OOB read-watch hits in the shipped plug-in to a
+compiler hoist and left other builds open. W336 adds a no-shim, no-patched-
+byte GDB observation of the verbatim pin at `-O0` in `harness/driver.c`:
+
+- positive control: an access watchpoint on `indexes+260` fired inside real
+  libz with old `0x5a` / new `0x4d` at `avail=0x80000082`;
+- the extraction store at `pins/jif-vulnerable.inc:125` was reached with
+  `i=0 pos=0 total_out=324` and ran to `pos=260` at pin line 136, leaving
+  64 inflated bytes past `data_size` unread;
+- three read watchpoints at `+260/+280/+336` were inserted before the loop
+  finished and had zero hits through the pinned function's return. They
+  were deleted before the driver's own canary readback, which does read
+  `indexes+260` and would otherwise be a false positive.
+
+Runner `run-extract-336.sh` SHA `8d2b7f9e…`, script
+`harness/gdb-extract-336.cmd` SHA `af33b29f…`, transcript
+`harness/evidence/w336-extract-full.log` SHA `9b4f233f…`.
+
+Source-level reason: every file-reachable wrap needs `alpha_frame=TRUE`, so
+`pos` advances by 2 per `i` and the guard at pin line 122 re-checks before
+each `indexes[i]` load. `data_size = 2*product mod 2^32` is always even, so
+the unguarded alpha store at line 129 never passes the logical `dest` end.
+The extraction consumer is closed by source semantics, not only by this
+binary's compiler; allocator/free consumers (W304/W335) remain the only
+observed ones. At 11:45Z gimp.org still listed 3.2.8 as current with no
+fixed vendor build. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes / NO r5.
