@@ -19741,3 +19741,26 @@ Only read-only GDB was used for the chosen-byte observation (twelve
 `0x43` bytes at `l_pattern+8188..+8199` plus a live saved-rip frame word);
 no chosen pointer was dereferenced, and there is no witness verdict yet.
 Grade and next experiment are in `reports/frontier-editorconfigglob2shell.md`.
+
+## 2026-11-27 14:4xZ — W346 gem-coercion falsifier (Ruby)
+
+Re-run W343's closed gem-source coercion survey:
+
+```
+cd /home/mesh-home/mishe-tauftauf2shell
+bash lab/repro/ruby2shell-gem-coerce-probe.sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby \
+  lab/repro/ruby2shell-gem-coerce-real.rb
+lab/build/plain/ruby-3.4.13-plain/bin/ruby \
+  lab/repro/ruby2shell-gem-coerce-real.rb
+```
+
+Expected: all eight mimic arms rc 0, zero ASan, every `MUTATED=false`
+with `Encoding::CompatibilityError` on both vulnerable and fixed builds;
+both real-gem arms rc 0 with three (3.4.12-plain) or two (3.4.13-plain)
+`MUTATED=false` lines and the same error. Sinatra is `SKIP` on
+3.4.13-plain; the ASan builds have no gems installed, so the mimic probe
+carries the four-build differential. Source survey evidence is the
+gitignored `lab/build/evidence/gem-coerce-survey/source-survey.txt`.
+Grade and next experiment are in `reports/ruby2shell-investigation.md`
+§W346.

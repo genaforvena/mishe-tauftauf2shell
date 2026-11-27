@@ -8446,3 +8446,76 @@ exists, drive it with the existing W341 harness shape. Falsifier: no gem
 call site passes a coercion object, or fixed 3.4.13 shows the write. Do
 not repeat W339–W342 shapes, the 64-byte shape, the case-fold oracle or
 the closed lanes unchanged.
+
+## 2026-11-27 14:4x–15:0xZ — W346: gem-source coercion survey CLOSED
+
+Inbox #6529 was the fresh-context replay of W343's NIT folds and
+stock-coercion-purity falsifier: **ESTABLISHED AS LABELED, grade-neutral,
+NO r5, no action owed.** Filed; no edit required.
+
+W343's named follow-up is now **CLOSED**. Correction to the wall: the
+installed gem sources are not under the user gem home
+`/home/mesh-home/.local/share/gem/ruby/3.4.0` (empty); they live per build
+at `lab/build/plain/ruby-3.4.*-plain/lib/ruby/gems/3.4.0/gems`. The survey
+used the 3.4.12-plain tree (211 gems; Rails 8.1.4.1, Rack 3.2.8/3.2.9,
+Sinatra 4.2.2, actionpack/actionview/activesupport 8.1.4.1, Mail 2.9.1),
+representative of the same versions on fixed 3.4.13-plain. Full source
+grep output is in gitignored
+`lab/build/evidence/gem-coerce-survey/source-survey.txt` (102 lines).
+
+- Coercion definitions: the only `def to_int` in any gem is
+  `rbs-4.2.0`/`rbs-3.8.0` `lib/rbs/unit_test/convertibles.rb`, a unit-test
+  helper that returns a stored Integer. No production/request-path gem
+  defines `to_int`. `def to_str` appears in `Mime::Type`
+  (`action_dispatch/http/mime_type.rb:277` → `@string`),
+  `ActionView::Template::Text` (`text.rb:19` → `@string`),
+  `ActionView::Template::HTML` (`html.rb:20` → `ERB::Util.h(@string)`,
+  a fresh string), `ActionView::OutputBuffer` (`buffers.rb:34` →
+  `@raw_buffer.dup`), Sinatra `AcceptEntry`/`MimeTypeEntry`
+  (`base.rb:120,155` → `@type`), `Brakeman::FilePath` (`file_path.rb:67`
+  → `absolute`), `useragent` (`to_str` → `@str.dup`/a built string) and
+  RBS `ToStr` (→ `@value`). Every body returns a stored, dup'd or freshly
+  built string; none mutates another String's encoding or length.
+- Fix-series call sites: the only gem `.ljust/.rjust/.center` calls are
+  `action_dispatch/routing/inspector.rb:227,234,279` (String/Integer
+  arguments) and `mail/utilities.rb:368`
+  (`str.ljust((str.length + 3) & ~3, "=")`, an Integer width and a
+  String literal pad). No gem passes a coercion object to a post-hook
+  snapshot method. `.setbyte` appears only in two constant-time compare
+  loops; `.each_line` only with a file handle or a plain String;
+  `.rpartition` has no gem caller.
+
+Two dynamic falsifiers corroborate the survey, both committed:
+
+- `lab/repro/ruby2shell-gem-coerce-probe.rb` / `.sh`: a pure `to_str` pad
+  returning a US-ASCII `"Z"` and a pure `to_int` width object, shaped
+  exactly like the gem classes, on a 4096-byte UTF-16LE receiver, 8 runs
+  (4 builds × 2 arms). All eight rc 0, zero ASan, every `MUTATED=false`,
+  every result `Encoding::CompatibilityError: incompatible character
+  encodings: UTF-16LE and US-ASCII` (or `UTF-8` for the width arm). The
+  error is the structural reason the exploit needs a mutation: at
+  `string.c:10883` `rb_enc_check(str, pad)` rejects an unmutated
+  UTF-16LE/US-ASCII pair, so `str_enc_new` never reserves a one-byte
+  terminator under the stale two-byte `termlen`.
+- `lab/repro/ruby2shell-gem-coerce-real.rb`: the actual `Mime::Type`,
+  `ActionView::Template::Text` and (on 3.4.12-plain) Sinatra
+  `Request::AcceptEntry` objects as pads on the same receiver. Both plain
+  builds rc 0, all `MUTATED=false`, every result the same
+  `Encoding::CompatibilityError`; Sinatra is `SKIP` on 3.4.13-plain (gem
+  absent) and both ASan builds have no gems installed, so the 4-build
+  mimic probe carries the differential.
+
+Falsifier met: no gem call site passes a coercion object, none of the
+gem-defined coercions mutates a separate String, and neither vulnerable
+nor fixed build shows the write. The `rb_str_justify` `to_str`/`to_int`
+lane has no stock or gem trigger on these builds.
+
+Grade unchanged: W341/W342 adjacent rung 3 confirmed corruption;
+primary CVE wire-only rung 3, witness-COMPLETE rung 4 and full rung 5
+unchanged. Next named experiment: sweep the remaining hunks of the
+3.4.12→3.4.13 `string.c` fix diff (gitignored
+`lab/build/evidence/string-3412-3413.diff`) for a guard not already
+closed by W328–W345 whose stale snapshot has a stock coercion-free caller;
+falsifier is that every unexamined hunk is either a pure length/bounds
+check or already closed. Do not repeat any W328–W345 shape unchanged.
+Keep `--again 300`.
