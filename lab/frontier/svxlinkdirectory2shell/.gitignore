@@ -1,0 +1,4 @@
+runs/*
+!runs/.keep
+*.o
+core

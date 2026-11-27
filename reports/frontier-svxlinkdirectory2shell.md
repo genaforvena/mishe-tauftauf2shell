@@ -1,0 +1,80 @@
+# Frontier brief: svxlinkdirectory2shell — EchoLink directory `setData()` stack write
+
+**Status: STAGED 2026-11-27 W335, awaiting operator admission and witness
+replay.** Claim: GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121), a stack buffer
+overflow in EchoLink's `StationData::setData()`; the advisory says **No known
+CVE**, while OSV mirrors it as `UBUNTU-CVE-2026-73154` (record discrepancy —
+UNKNOWN). Lab: `lab/frontier/svxlinkdirectory2shell/`, provenance and pins in
+that tree. No live svxlink/qtel process or wire client was run.
+
+## Verified ground truth
+
+- Claim source: `https://github.com/sm0svx/svxlink/security/advisories/GHSA-5g48-xjmf-7p4q`
+  (2026-07-12; affected `<= 26.05`, patched `26.05.0.99.0`; malicious or
+  MITM'd directory server supplies a long station description). Advisory HTML
+  SHA-256 `da77e4d1…02f4` pinned locally.
+- Upstream fix `8eb1008f822a97a42184097ee57e51a302181c75`, parent
+  `d6451c1e5ff7070537fb5763d316b21ba6c68796`. The patch clamps `desc_len` to
+  `MAXDATA-1` at `src/echolib/EchoLinkStationData.cpp:217-223`; both raw source
+  files and the patch are SHA-256 pinned (`SHA256SUMS`, `PROVENANCE.md`).
+- Grade: R1/R2/R3 ✓; R4 LIMITED (chosen bytes at chosen stack offsets in the
+  direct-call harness); R5 NOT CLAIMED (no wire request, pointer/IP, marker or
+  command side effect).
+
+## Source-bound mechanism
+
+`char str[MAXDATA]` (`MAXDATA=45`) at `EchoLinkStationData.cpp:186`; when the
+server description contains no `[` status marker,
+`end_desc = data + strlen(data)` (`:215`), then the vulnerable pin writes
+`strncpy(str, data, end_desc-data)` (`:217`) and `str[end_desc-data] = 0`
+(`:218`) with no clamp. The advisory traces the value from a cleartext TCP
+directory station-list line through `Directory::ctrlSockDataReceived` →
+`handleCallList` (`EchoLinkDirectory.cpp:534`) → `setData(buf)`. That wire path
+is read from pinned advisory/source claims and was **not** exercised locally.
+
+## Cheapest local experiment and result
+
+`gen_driver.py` re-checks five pins and copies the complete pinned function
+verbatim under a `#line` directive; `bootstrap.sh` can re-fetch the pins.
+Four GCC builds (vulnerable/fixed × ASan/plain, `-O0 -g`, stack protector off
+to expose the natural saved-frame layout) and the unmodified `run-all.sh`
+gave `RUN_ALL_OK 18 PASS / 0 FAIL` (summary in `runs/summary.txt`):
+
+- Vulnerable ASan, 120 chosen `A` bytes: `stack-buffer-overflow WRITE of size
+  120` at the pinned `EchoLinkStationData.cpp:217`, 0 bytes past the 45-byte
+  `str` (`evidence/vuln-asan-120.out`).
+- Vulnerable ASan, 45 bytes: `WRITE of size 1` at `:218`, the attacker-offset
+  NUL store (`evidence/vuln-asan-45.out`).
+- Vulnerable ASan at 44/31 bytes, fixed ASan at 44/45/120/4096 bytes: clean.
+- Vulnerable plain at 120 bytes faults (SIGBUS); plain vulnerable 44 bytes and
+  all fixed plain arms are clean.
+- Read-only GDB at the faulting `:218` frame prints 16 consecutive chosen
+  `0x41` bytes at `str+45..+60` (`evidence/gdb-readback.out`): chosen bytes are
+  at attacker-selected stack offsets, not just an overwrite count.
+
+The harness class stub, helper and driver input are lab-authored; the sink
+body is verbatim upstream. The source-level wire reach and upstream client
+configuration remain claims until the loopback experiment below.
+
+## Cheapest next rung
+
+Run a local fake EchoLink directory server on `127.0.0.1` and point an ASan
+`qtel`/`ModuleEchoLink` client's `DIRECTORY_SERVERS` at it; reply to a station
+list with the advisory's seven-line response whose fourth line carries 62–120
+chosen bytes. Assert that `setData()` is reached from the request and record
+the return-target mapping and any command side effect, with fixed
+`26.05.0.99.0` and short-description controls. A wire crash with harness-only
+control-flow mechanics is the honest outcome; no rung 5 without an observed
+request-driven command.
+
+## Ranking context
+
+Chosen over the same wake's other non-duplicate candidates: libssh SFTP
+`readdir_long_name()` CVE-2026-15370 (wire-facing chosen-byte stack overflow,
+fix `b2065f71c9`, but a heavier source build), Pigeonhole Sieve
+CVE-2026-40013 (one-byte stack write under CHECKSCRIPT), samtools
+GHSA-vh3p-9c59-j3hv and OpenColorIO CVE-2026-42450 (file-only), Suricata
+CVE-2026-57226 (fixed zero bytes), and OpenSSL CVE-2026-121481 (no fixed
+release, disputed). svxlink has an exact parent→fix pair, a short pinned
+sink, and an explicitly documented cleartext network path. WavPack (GStreamer)
+and ngtcp2 were screened out as overlaps with admitted minds.

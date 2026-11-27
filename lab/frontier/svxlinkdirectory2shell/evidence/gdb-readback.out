@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x1527: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp, line 219.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Program received signal SIGBUS, Bus error.
+EchoLink::StationData::setData (this=0x7fffffffe020, data=0x55555556b2b0 'A' <repeats 120 times>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp:218
+warning: 218	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp: No such file or directory
+CHOSEN_READBACK 41414141414141414141414141414141

@@ -1,0 +1,50 @@
+=================================================================
+==3646085==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ad13a00005d at pc 0x7ad13c8f7d48 bp 0x7ffe8a6e32a0 sp 0x7ffe8a6e2a48
+WRITE of size 120 at 0x7ad13a00005d thread T0
+    #0 0x7ad13c8f7d47 in strncpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:614
+    #1 0x63f406466880 in EchoLink::StationData::setData(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp:217
+    #2 0x63f406466b94 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp:231
+    #3 0x7ad13c02a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7ad13c02a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x63f406466404 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/runs/vuln-asan+0x2404) (BuildId: 1cc5fff1e8f1d289e7b0a7a4a4f0612f92768191)
+
+Address 0x7ad13a00005d is located in stack of thread T0 at offset 93 in frame
+    #0 0x63f406466599 in EchoLink::StationData::setData(char const*) /home/mesh-home/mishe-tauftauf2shell/lab/frontier/svxlinkdirectory2shell/EchoLinkStationData.cpp:185
+
+  This frame has 1 object(s):
+    [48, 93) 'str' (line 186) <== Memory access at offset 93 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/asan/asan_interceptors.cpp:614 in strncpy
+Shadow bytes around the buggy address:
+  0x7ad139fffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad139fffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad139fffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad139ffff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad139ffff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7ad13a000000: f1 f1 f1 f1 f1 f1 00 00 00 00 00[05]f3 f3 f3 f3
+  0x7ad13a000080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad13a000100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad13a000180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad13a000200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ad13a000280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3646085==ABORTING

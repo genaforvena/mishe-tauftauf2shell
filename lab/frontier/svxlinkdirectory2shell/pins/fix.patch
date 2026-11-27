@@ -1,0 +1,89 @@
+From 8eb1008f822a97a42184097ee57e51a302181c75 Mon Sep 17 00:00:00 2001
+From: Mark Rose <markrose@markrose.ca>
+Date: Sun, 12 Jul 2026 11:32:39 -0600
+Subject: [PATCH] Merge commit from fork
+
+* Fix stack buffer overflow in EchoLink StationData::setData
+
+The station "data" (description) field received from the EchoLink
+directory server was copied into a fixed 45-byte stack buffer (str)
+using strncpy with a length of (end_desc - data), which tracks the
+full length of the server-supplied line. A description longer than
+44 bytes overflowed the buffer, and str[end_desc-data] = 0 wrote a
+NUL at an attacker-controlled offset past the buffer.
+
+A malicious or MITM'd directory server (the protocol is cleartext)
+could exploit this for a stack smash (DoS, potential code execution).
+
+Clamp the copy length to MAXDATA-1 before copying.
+
+Co-Authored-By: Claude Fable 5 <noreply@anthropic.com>
+
+* Update versions and ChangeLog
+
+---------
+
+Co-authored-by: Claude Fable 5 <noreply@anthropic.com>
+Co-authored-by: Tobias Blomberg <sm0svx@users.noreply.github.com>
+---
+ src/echolib/EchoLinkStationData.cpp | 9 +++++++--
+ src/svxlink/ChangeLog               | 8 ++++++++
+ src/versions                        | 4 ++--
+ 3 files changed, 17 insertions(+), 4 deletions(-)
+
+diff --git a/src/echolib/EchoLinkStationData.cpp b/src/echolib/EchoLinkStationData.cpp
+index 34654ede1..4c33f9b1f 100644
+--- a/src/echolib/EchoLinkStationData.cpp
++++ b/src/echolib/EchoLinkStationData.cpp
+@@ -214,8 +214,13 @@ void StationData::setData(const char *data)
+     end_desc = data + strlen(data);
+   }
+   
+-  strncpy(str, data, end_desc-data);
+-  str[end_desc-data] = 0;
++  size_t desc_len = static_cast<size_t>(end_desc - data);
++  if (desc_len > MAXDATA - 1)
++  {
++    desc_len = MAXDATA - 1;
++  }
++  strncpy(str, data, desc_len);
++  str[desc_len] = 0;
+   m_description = str;
+   removeTrailingSpaces(m_description);
+   
+diff --git a/src/svxlink/ChangeLog b/src/svxlink/ChangeLog
+index 846f71917..996fa7b7a 100644
+--- a/src/svxlink/ChangeLog
++++ b/src/svxlink/ChangeLog
+@@ -1,3 +1,11 @@
++ 1.10.1 -- ?? Jul 2026
++-----------------------
++
++* Security: Fix stack buffer overflow in EchoLink StationData::setData.
++  Credit: Mark Rose <markrose@markrose.ca>
++
++
++
+  1.10.0 -- 23 May 2026
+ -----------------------
+ 
+diff --git a/src/versions b/src/versions
+index 7d0cb7184..c1c359d2b 100644
+--- a/src/versions
++++ b/src/versions
+@@ -1,5 +1,5 @@
+ # Project release version
+-PROJECT=26.05
++PROJECT=26.05.0.99.0
+ 
+ # Version for the Qtel application
+ QTEL=1.3.0
+@@ -14,7 +14,7 @@ LIBASYNC=1.9.0
+ SVXLINK=1.10.0
+ MODULE_HELP=1.0.1
+ MODULE_PARROT=1.1.2
+-MODULE_ECHO_LINK=1.6.1
++MODULE_ECHO_LINK=1.6.1.99.0
+ MODULE_TCL=1.0.2
+ MODULE_PROPAGATION_MONITOR=1.0.2
+ MODULE_TCL_VOICE_MAIL=1.0.4
