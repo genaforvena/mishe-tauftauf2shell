@@ -55,24 +55,33 @@ possible depending on canary/ASLR/NX. Brief:
   eight chosen JID bytes at offsets 884-891 became `[rbp+8]`, and the `ret`
   at `xmpp_send_sip_msg+631` faulted on the non-canonical target. That is
   rung-4 control-flow diversion in a stock build, still NOT rung 5: no chosen
-  code executed. A two-byte partial overwrite reached a canonical but
-  unmapped target (`0x7ffff7002f6a`) because the sprintf NUL zeroed byte 2.
+  code executed. A two-byte partial overwrite reached a canonical but unmapped
+  target (`0x7ffff7002f6a`) because the sprintf NUL zeroed byte 2.
+  A one-byte overwrite (885-byte JID, `from[884]='A'`) then kept byte 2 and
+  produced a **mapped, executable** saved RIP `0x7ffff7ee0041`
+  (`xmpp.so` offset `0x6041`, `sha_hash+411`); the `ret` transferred control
+  there (gdb `#0` at target) but the saved RBP was non-canonical
+  `0x5a59585756555453`, the next instruction is rbp-relative, and the whole
+  reachable 256-byte window has no `ret` or `call`. Raw high bytes are
+  rejected by expat. This is still rung 4 — mapped transfer, no chosen code.
   Rung 5 remains UNKNOWN: no valid executed target, no marker/pointer
-  execution, no ASLR/NX measurement. Independent witness replay
+  execution, no side effect from chosen bytes, no ASLR/NX measurement.
+  Independent witness replay
   W328 (2026-11-27 08:45–08:50Z, inbox #6255) ESTABLISHED the rung-4 label as
   written: from a clean `git archive` it reproduced the harness control and all
   four live cases, and changing only `from[804:808]` from `YZAB` to `CDEF`
   moved the stock `fm_malloc` need from 1111579232 to 1178944584. NO rung 5.
   Detail: `.mishe-tauftauf/artifacts/witness-w328-opensips/detail.md`;
-  evidence table: `reports/opensips2shell-live-wire.md`.
+  evidence table: `reports/opensips2shell-live-wire.md` (one-byte section).
 
 Next bounded work: rung 4 is settled. The `tm` gate is bypassed by the early
 `return -1` in `uri_xmpp2sip(to, ...)` with a >251-byte `to`; eight chosen JID
 bytes at offsets 884-891 become the saved RIP in a stock build. A full JID
-gives a non-canonical target and a two-byte partial overwrite gives a
-canonical but unmapped target, so rung 5 remains UNKNOWN without a new
-primitive. Any future claim needs an observed side effect from executed
-chosen code and a fresh independent replay. Adjacent-lane candidate for a
+gives a non-canonical target, a two-byte partial overwrite gives a canonical
+but unmapped target, and the one-byte overwrite gives a mapped mid-function
+target with a corrupted RBP and no `ret`/`call` in its 256-byte window. Rung 5
+remains UNKNOWN without a new primitive. Any future claim needs an observed
+side effect from executed chosen code and a fresh independent replay.
 later wake:
 GHSA-qc7q-vrx3-3j4h (`sip_i` `parse_isup` length-controlled `memcpy` into
 `val[128]`), recorded from operator inbox #6227 and deliberately not worked.

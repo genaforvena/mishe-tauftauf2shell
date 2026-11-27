@@ -220,6 +220,74 @@ observed side effect from chosen bytes. A future attempt needs a different
 measured way to keep the original high return-address bytes while controlling
 the low ones, or a separate writable-and-executable primitive.
 
+## One-byte return-address overwrite (2026-11-27 09:53–09:56Z)
+
+Bounded follow-up to DM #6307 (standing #8). The two-byte route above left a
+canonical but unmapped target. This test asked whether a **one-byte** overwrite
+can keep enough of the original return address to land in mapped code, and
+whether that code can do anything chosen. All traffic 127.0.0.1:5269; stock
+no-canary `401-plain` build; gdb `set follow-fork-mode child`; no marker or
+external action.
+
+Byte map, measured before any overwrite: a baseline run with a 299-byte `from`
+and 260-byte `to` takes the same early return but leaves the saved RIP intact.
+At `uri_xmpp2sip` frame `#1` is `xmpp_send_sip_msg` with
+`[rbp+8] = 0x7ffff7ee66bb` (`xmpp.so` offset `0xc6bb`, caller
+`in_stream_node_callback`); saved bytes little-endian are
+`bb 66 ee f7 ff 7f 00 00`. `info proc mappings` gives module base
+`0x7ffff7eda000`, executable segment `0x7ffff7ede000`–`0x7ffff7eed000`.
+JID byte `j` is stored at `buf_from[4+j]` and the saved RIP is `buf_from+888`,
+so a 885-byte `from` writes JID byte 884 into RIP byte 0 and the `sprintf`
+terminator NUL into RIP byte 1; bytes 2–7 stay original. The target is
+therefore always `xmpp.so base + 0x60XX`, with `XX` chosen by the sender —
+mapped and executable under ASLR as well as under gdb.
+
+Run with `from[884]='A'` (0x41), `to` 260 bytes: at `xmpp_send_sip_msg+631`
+(`0x7ffff7ee329a`) `[rsp] = 0x00007ffff7ee0041` and
+`[rbp] = 0x5a59585756555453` (`STUVWXYZ`, non-canonical). The `ret` executed:
+`rip` became `0x7ffff7ee0041` (`xmpp.so` offset `0x6041`, `sha_hash+411`,
+`add %eax,%edx`); gdb frame `#0` is the target, not the `ret`. The backtrace
+stopped at `0x5a5958575655545b` because the saved RBP is non-canonical, and
+the next instruction `0x6043: mov -0x18(%rbp),%eax` would fault on it. No
+attacker-chosen code ran; the chosen byte only selected a pre-existing
+mid-function instruction.
+
+This is a stronger rung-4 mechanic than the two-byte case (a real mapped
+transfer) but still **rung 4**. The reachable window is `xmpp.so` offsets
+`0x6000`–`0x60ff`, the body of `sha_hash`: static inspection finds **zero**
+`0xc3` bytes, no `ret` and no `call`, only rbp-relative local accesses and
+short relative jumps. A raw `0xa8` byte (the value needed by any high-byte
+gadget) is rejected by expat — the receiver logged
+`instream callback: 4: error` / `instream error` and no message callback, so
+the high-byte route is also closed. Saved RBP cannot be made canonical: bytes
+882–883 would both need to be NUL, and raw NULs do not reach the sink (gate
+recorded above). Controls: fixed 4.0.2 ASan with the same 885/260 input logged
+`ignoring message stanza before dialback authentication`, no ASan report, no
+crash; the 299-byte baseline left the saved RIP intact. Rung 5 stays UNKNOWN
+— no benign command, no side effect from chosen bytes, no valid executed
+target, no independent replay of this new case.
+
+Evidence (untracked raw logs, hashes here): `gdb-baseline.cmd` sha256
+`443bfb78babbdffe1de711f88024b196f2fc89d277b3db5a7486a0af3df2a619`,
+`gdb-onebyte.cmd` sha256
+`e315e626b9b5d402ad4af43949b58c428fc442241942f8c7ce357a645773d4c5`,
+`artifacts-early/gdb-baseline.log` sha256
+`38d2a5cbce62a6a84c3c615b4b988ab20535d140b0ad4b1d23ab7bb3e54c9d9f`,
+`artifacts-early/gdb-onebyte-2.log` sha256
+`cbedd2d70906ae4d63ecf48d29a41b7d93672ea552cf1bcd32ae7714efae7688`, wire
+logs `1adbeb8f0f2febba650161a432d369e899b51741c81154ab2ec0c439fb7bcfe3`
+(baseline) and
+`83ff1a83e1c253a31410576b9c32405dca7e32e97dbce5c553ff72aa8a29f4f1`
+(one-byte). Raw-byte gate: `artifacts-early/send_raw.py` sha256
+`647932eeac836ad5e6a5175872dcb168dff7c20f2f558e276e6571a3736f5584`,
+`wire-raw-a8.log`
+`487caf706dc8d9c1bbbb250997a1b158c0548d262b97ce8dbccae045db7884a2`,
+`daemon-raw.log`
+`35bb2c955b7521e325963acfb69b0686a3d836635bf5ded7b215cb3c5b5f7dda`.
+Fixed control: `artifacts-early/daemon-402-early.log` sha256
+`7736a7c0b88267a7a2a73a9e65b7653baeb3b9417cb8ba760ef54e5beacd3895`.
+All listeners were stopped; port 5269 was closed at handoff.
+
 ## Reproduction
 
 ```
