@@ -3,6 +3,22 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 08:2x–08:4xZ — W328 adjacent Ruby `setbyte` stale-length write
+
+- The W323 named diff triage found a further 3.4.13 fix in `rb_str_setbyte`:
+  3.4.12 validates the index against a length captured before `rb_to_int`,
+  3.4.13 coerces first and revalidates. A `to_int` callback that shrinks
+  the receiver passes the stale check and stores its chosen low byte at
+  the chosen offset. The 24-case plain/ASan matrix shows 3.4.12 `ok len=1`
+  and 3.4.13 `IndexError` on every attack arm, with both `nochange`
+  controls clean and zero ASan reports. A read-only gdb breakpoint reads
+  `0x5a 0x51 0x4a` before and `0x00|0x58|0xff 0x51 0x4a` after the store
+  at offset 700; the fixed-build store breakpoint has 0 hits. No stock
+  readback or wire consumer exists (static `.setbyte` survey), so this is
+  an adjacent in-process rung 4, not the primary CVE and not rung 5.
+  Repro `lab/repro/ruby2shell-setbyte-stale.{rb,sh,-gdb.cmd,-fixed-gdb.cmd}`,
+  recipe `docs/reproducibility.md` §W328, detail report §W328.
+
 ## 2026-11-27 08:1x–08:3xZ — live OpenSIPS receiver, two witness receipts, one refuted pointer guess
 
 Explanation and recipes only: no generated cell, register row, count,

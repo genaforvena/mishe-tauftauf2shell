@@ -7551,3 +7551,74 @@ other grades are untouched. Reopen only with a named stock Regexp-keyed
 caller whose replacement is attacker-influenced and non-String, a stock
 mutating `to_str`, or published PoC mechanics. Do not repeat this observer
 run unchanged.
+
+## 2026-11-27 08:2x–08:4xZ — W328: adjacent `String#setbyte` stale-length write, chosen byte at chosen offset (Ruby)
+
+W323's named follow-up was an adjacent memory-safety fix triage in the pinned
+trees, not a repeat of the closed wire lanes. `diff -u` of
+`lab/build/ruby-3.4.{12,13}/string.c`, `enc/iso_8859_1.c`, `regexec.c` and
+`re.c` (raw diffs kept under `lab/build/evidence/fix-triage-w328/`) shows the
+primary `d582f8f` one-byte fix in `enc/iso_8859_1.c:264` plus several further
+3.4.13 guards. The most tractable new one is in `rb_str_setbyte`:
+
+```c
+/* 3.4.12 string.c:6586-6601 */
+long pos = NUM2LONG(index);
+long len = RSTRING_LEN(str);          /* captured before rb_to_int */
+if (pos < -len || len <= pos) rb_raise(rb_eIndexError, ...);
+VALUE v = rb_to_int(value);           /* may run a Ruby #to_int callback */
+...
+ptr = &RSTRING_PTR(str)[pos]; *ptr = byte;
+
+/* 3.4.13 string.c:6635-6643 */
+VALUE v = rb_to_int(value);           /* coerce first */
+long len = RSTRING_LEN(str);          /* then re-read and revalidate */
+if (pos < -len || len <= pos) rb_raise(rb_eIndexError, ...);
+```
+
+A `to_int` object that shrinks its receiver through `String#slice!` therefore
+passes the vulnerable bounds check with the old length and stores its chosen
+low byte at the old offset. Driver
+`lab/repro/ruby2shell-setbyte-stale.{rb,sh}` with read-only gdb command files
+`-gdb.cmd` / `-fixed-gdb.cmd` runs four builds (3.4.12/3.4.13, plain/ASan).
+The 24-case matrix (`lab/build/evidence/setbyte-stale/matrix.txt`) gives
+3.4.12 `ok len=1` on every attack arm, 3.4.13 `IndexError: index N out of
+string` on every attack arm, both `nochange` controls `ok len=711`, and zero
+ASan reports on all four builds.
+
+A read-only breakpoint on the vulnerable store (`string.c:6609`, plain
+3.4.12) with `x/3xb ptr` before and after the single `next` gives:
+
+| offset | value | before | after |
+|---:|---:|---|---|
+| 700 | 0x00 | `0x5a 0x51 0x4a` | `0x00 0x51 0x4a` |
+| 700 | 0x58 (`X`) | `0x5a 0x51 0x4a` | `0x58 0x51 0x4a` |
+| 700 | 0xff | `0x5a 0x51 0x4a` | `0xff 0x51 0x4a` |
+
+The two neighbouring bytes are unchanged; the written byte is exactly the
+chosen low byte at the chosen stale offset. The fixed-build store breakpoint
+(`string.c:6653`) has **0 hits**; the fixed run raises `IndexError` before
+the store. `gdb-sweep.txt` and `gdb-{100,700}-{0,88,255}.log` are in the
+gitignored evidence directory. Offsets 100/200/500 did not reach the
+non-embedded store line (the receiver re-embeds after `slice!` there); a
+separate embedded-store line exists and was not swept. The debugger only
+reads memory; it writes no register, pointer or byte.
+
+LIMITATION: with `slice!` the buffer remains allocated, so ASan is clean;
+this is a stale-length invariant violation with a chosen byte outside the
+logical string, not an observed out-of-bounds heap fault. `String#[]` and
+`MatchData#[]` return copies or clamp out-of-range indices on this build, so
+no stock readback is claimed. The `replace` arm also did not fault ASan;
+its buffer stayed heap-allocated. `to_int` values are reachable only through
+application code: a static `\.setbyte\b` survey across the pinned 3.4.12
+tree, its installed gems and the four lab Rails apps found only integer
+values in `lib/random/formatter.rb` plus test/bootstraptest callers; no
+stock wire consumer passes a non-Integer value. Wire path CLOSED for this
+adjacent lane.
+
+**Grade unchanged.** This is an adjacent in-process rung 4 (chosen byte at
+chosen stale offset, read-only debugger observation), not the primary CVE and
+not a wire path. Primary wire rung 3 CONFIRMED and full rung 5 NOT ACHIEVED
+remain; W321's separate equal-length stale-backref lane is not relabeled.
+Do not repeat this driver or the `slice`-mode gdb sweep unchanged. Recipe in
+`docs/reproducibility.md` §W328.

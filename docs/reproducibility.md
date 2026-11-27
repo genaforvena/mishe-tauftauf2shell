@@ -18096,3 +18096,38 @@ The first run, which armed zero watchers without the mapping self-check,
 is preserved as a tooling negative. This refutes the code-pointer inference
 for this build/layout, not a consumer in a completed load; grade unchanged
 rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+## 2026-11-27 08:2x–08:4xZ — W328 adjacent `String#setbyte` stale-length lane
+
+Prerequisites: pinned local Ruby trees and builds under `lab/build/` (no
+network, no external target). Everything below is loopback-free in-process
+work; no HTTP request, marker or second command.
+
+```
+diff -u lab/build/ruby-3.4.12/string.c lab/build/ruby-3.4.13/string.c \
+  > lab/build/evidence/fix-triage-w328/string.diff
+diff -u lab/build/ruby-3.4.12/enc/iso_8859_1.c lab/build/ruby-3.4.13/enc/iso_8859_1.c \
+  > lab/build/evidence/fix-triage-w328/iso_8859_1.diff
+diff -u lab/build/ruby-3.4.12/regexec.c lab/build/ruby-3.4.13/regexec.c \
+  > lab/build/evidence/fix-triage-w328/regexec.diff
+diff -u lab/build/ruby-3.4.12/re.c lab/build/ruby-3.4.13/re.c \
+  > lab/build/evidence/fix-triage-w328/re.diff
+bash -n lab/repro/ruby2shell-setbyte-stale.sh
+lab/build/ruby-3.4.12/ruby -c lab/repro/ruby2shell-setbyte-stale.rb
+bash lab/repro/ruby2shell-setbyte-stale.sh
+```
+
+The driver's 24 plain/ASan cases must show 3.4.12 `ok len=1` for every
+`slice`/`replace` attack and 3.4.13 `IndexError: index N out of string`;
+both builds' `nochange` controls must show `ok len=711`. Zero ASan reports
+are expected: the `slice!` buffer is still allocated. The gdb sweep must
+read `0x5a 0x51 0x4a` before the store and `0x00|0x58|0xff 0x51 0x4a`
+after, for values 0/88/255 at offset 700; the fixed-build store breakpoint
+must have 0 hits. Outputs are gitignored under
+`lab/build/evidence/setbyte-stale/`.
+
+Do not claim stock readback: `String#[]` copies or clamps out-of-range
+indices on these builds. The chosen byte is observed by a read-only gdb
+breakpoint on the vulnerable store, with a fixed-build no-store control.
+Grade: adjacent in-process rung 4, wire path CLOSED, full rung 5 NOT
+ACHIEVED; detail in `reports/ruby2shell-investigation.md` §W328.
