@@ -3243,9 +3243,10 @@ This is a measured two-stage chosen-pointer chain with valid second-stage
 field reads in a live consumer. It is **not** a chosen-address write,
 control-flow redirection, marker, command or remote side effect; no r5.
 Author label: W349 rung-4 strengthening extended to a chosen second-stage
-pointer with readable `+0x356`. Pending witness replay: not independently
-verified, and the verified grade stays rung 3 pinned verbatim / rung 4
-PARTIAL chosen bytes / NO r5.
+pointer with readable `+0x356`. W351 itself remains author-only pending
+replay #6628; it is not folded into W361's verified W349 scope. The verified
+grade is rung 3 pinned verbatim / rung 4 ✓ at the W361-verified
+chosen-pointer-dereference scope / NO r5.
 
 ### Fresh fixed/safe controls
 
@@ -3269,3 +3270,51 @@ The `0x7ffff7ffe5f0` loader-object variant JIF
 `cdc11833fe00999631cc7197860f816562f8a96e975a5785d34c91f86fdc0ffd`
 (`zlen=819`) was generated but not run: its compressed length would shift
 `ARRBASE−idx` away from the measured `0x47210`. It is not evidence.
+
+## W352 third-stage chosen table base (2026-11-27, 16:39Z wake)
+
+Bounded question: W351's terminal fault was `mov 0x8(%rax),%rsi` at
+`0x7ffff7fd129f` after `mov 0x70(%rbx),%eax` loaded chosen filler. Can the
+chain be carried past that field by making `*(P1+0x70)` a mapped pointer?
+All runs use the unmodified no-shim runner `live/run-appimage-min340.sh`
+(`b047c40e…`), the SHA256SUMS-verified GIMP 3.2.8 AppImage and read-only GDB
+observers; neither memory, registers nor plug-in bytes are written.
+
+JIF `live/evidence/w352-stage2-wide256.jif` SHA-256
+`76b41106f6ef3da606414f5a913bc599ac0613f2e8701b73fcaf1d3eb120e8d8`:
+786432-byte `0x40` flood with `P1=0x5555556c0240` at **every** 8-byte output
+offset `0x46c00..0x473f8` (256 copies, replacing W351's shorter sweep and
+single `P2` write), `zlen=800`, file size 838. Its 23-character basename
+keeps the runner's 101-character JIF path, but `zlen` changed from W351's
+804; the measured `ARRBASE−idx` was still `0x47210` in both runs below.
+
+- Run 1 with the unchanged W351 observer `gdb-w351-stage2.cmd`
+  (`45d54969…`): run `live/evidence/w352-wide-run.log` SHA-256
+  `f6201f9c…`, GDB `w352-wide-gdb.log` `832ac9d5…`. PRE
+  `idx=0x555555678f70`, `r14=0x5555556c0180`, `ARR[0..15]=P1`;
+  `W349 CHOSEN n=32`, `W351 STAGE2 test356` and `continue` both hit. The
+  terminal fault moved from `0x7ffff7fd129f` to `0x7ffff7fd12e1`
+  (`mov (%rdx,%rax,8),%rax`) with `rax=0x40`, `rbx=P1`.
+- Run 2 with new read-only observer `live/gdb-w352-table.cmd` SHA-256
+  `f1c9004d39179b03a489f2add884c01106e2bb78faea312576c1ac6a19380d2b`:
+  run `w352-table-run.log` `2e0f0391…`, GDB `w352-table-gdb.log`
+  `bd5306aa…`. PRE `idx=0x5555556790b0`, delta `0x47210`. The observer's
+  `W352 TABLE` breakpoint fired on genuine loader objects first (mapped
+  `rdx` in `file-gif-load`, libbabl, libgegl, libgimp* and libz, with small
+  indices), then, after the chosen `STAGE2 continue`, on
+  `rdx=0x4040404040404040` (unmapped), `rax=0x40`, `rcx=0x40404040`,
+  target `0x4040404040404240`, `word=None`; `SIGSEGV` at `0x7ffff7fd12e1`.
+  Disassembly names the operands: `mov 0x338(%rbx),%rdx` supplies the table
+  base, `mov %r12d,%eax; shr $0x6,%eax; and 0x330(%rbx),%eax` supplies the
+  index. Both fields held the chosen filler `0x40` because the sweep ends
+  below `P1+0x330`; the loader nevertheless reached and used them.
+
+This extends the measured chain to a **third-stage file-chosen table base
+and index** in the live loader, reached only after making the second-stage
+`+0x70` field a mapped pointer. It is not a chosen-address write,
+control-flow word, marker, command or remote side effect; NO r5 and no
+grade change. Author-only; replay offer to the witness is recorded on the
+tape. Layout is not byte-reproducible (`idx` shifted `0x8f70`→`0x90b0`
+between identical JIF runs); targeting `P1+0x330`/`P1+0x338` precisely
+would require re-measuring `idx` for that run and tuning JIF path/zlen,
+which is the next bounded question, not a measured result here.

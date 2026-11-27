@@ -1,0 +1,139 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 16:58:58.696: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 16:58:58.696: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 16:59:13.227: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 16:59:13.227: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 16:59:13.227: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.228: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.228: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.229: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.230: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.230: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.230: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.231: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.235: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.238: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 16:59:13.238: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+W337 PRE avail=0x80000002 idx=0x5555556790b0 ret=0x555555557778 pid=403994
+W337 PRE idx=0x5555556790b0
+W337 PRE +0  =0x0000555000251c59 map=[unmapped]
+W337 PRE +8  =0x0000000000000000 map=[unmapped]
+W337 PRE +16 =0x0000000000000002 map=[unmapped]
+W337 PRE +24 =0x0000000000000041 map=[unmapped]
+W337 PRE +32 =0x00005555556793d0 map=[[heap]]
+W337 PRE +40 =0x0000000000000001 map=[unmapped]
+W337 PRE +48 =0x0000000000000000 map=[unmapped]
+W337 PRE +56 =0x000055555561cdd0 map=[[heap]]
+W337 PRE +64 =0x0000000000000000 map=[unmapped]
+W337 PRE +72 =0x0000000000006874 map=[unmapped]
+W351 P2=0x5555556c0240
+W349 DEREF n=0 pc=0x7ffff7fd1327 rax=0x00007ffff7ffe5f0 map=[rw-p] r14=0x5555556c02c0 i=0 DELTA_FROM_IDX=0x47210 rbx=0x0000000000000000 mem28=0x00007ffff7ffe5f0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x000055555556c078 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load] rax=0x0000000000000000 rcx=0x0000000000000006 r12=0x000000001fb025d2 target=0x000055555556c078 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load] word=2901555248074150280
+W349 DEREF n=1 pc=0x7ffff7fd1327 rax=0x00007ffff7fb48e0 map=[rw-p] r14=0x5555556c02c0 i=1 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7ffe5f0 mem28=0x00007ffff7fb48e0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7fb0038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1] rax=0x0000000000000007 rcx=0x0000000000000009 r12=0x000000001fb025d2 target=0x00007ffff7fb0070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1] word=5053607144735488645
+W349 DEREF n=2 pc=0x7ffff7fd1327 rax=0x00007ffff7e65000 map=[rw-p] r14=0x5555556c02c0 i=2 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7fb48e0 mem28=0x00007ffff7e65000
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7e59038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1] rax=0x0000000000000017 rcx=0x000000000000000d r12=0x000000001fb025d2 target=0x00007ffff7e590f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1] word=1446362612810912144
+W349 DEREF n=3 pc=0x7ffff7fd1327 rax=0x00007ffff7e656e0 map=[rw-p] r14=0x5555556c02c0 i=3 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7e65000 mem28=0x00007ffff7e656e0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d54038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so] rax=0x0000000000000003 rcx=0x0000000000000008 r12=0x000000001fb025d2 target=0x00007ffff7d54050 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so] word=29497808293742656
+W349 DEREF n=4 pc=0x7ffff7fd1327 rax=0x00007ffff7e65cd0 map=[rw-p] r14=0x5555556c02c0 i=4 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7e656e0 mem28=0x00007ffff7e65cd0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d46038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so] rax=0x0000000000000017 rcx=0x000000000000000b r12=0x000000001fb025d2 target=0x00007ffff7d460f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so] word=1297054375874675328
+W349 DEREF n=5 pc=0x7ffff7fd1327 rax=0x00007ffff7e662c0 map=[rw-p] r14=0x5555556c02c0 i=5 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7e65cd0 mem28=0x00007ffff7e662c0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d18038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2] rax=0x0000000000000017 rcx=0x000000000000000d r12=0x000000001fb025d2 target=0x00007ffff7d180f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2] word=128704453021843520
+W349 DEREF n=6 pc=0x7ffff7fd1327 rax=0x00007ffff7e669a0 map=[rw-p] r14=0x5555556c02c0 i=6 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7e662c0 mem28=0x00007ffff7e669a0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7c82038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2] rax=0x0000000000000017 rcx=0x000000000000000b r12=0x000000001fb025d2 target=0x00007ffff7c820f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2] word=4940743465385596928
+W349 DEREF n=7 pc=0x7ffff7fd1327 rax=0x00007ffff7c400e0 map=[rw-p] r14=0x5555556c02c0 i=7 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff7e669a0 mem28=0x00007ffff7c400e0
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7c3a038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2] rax=0x0000000000000017 rcx=0x000000000000000b r12=0x000000001fb025d2 target=0x00007ffff7c3a0f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2] word=58761638014271490
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bfc038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2] rax=0x0000000000000007 rcx=0x0000000000000009 r12=0x000000001fb025d2 target=0x00007ffff7bfc070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2] word=1196630468326461609
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7be0038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2] rax=0x0000000000000007 rcx=0x000000000000000a r12=0x000000001fb025d2 target=0x00007ffff7be0070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2] word=612489584287191207
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bbf038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2] rax=0x0000000000000007 rcx=0x0000000000000009 r12=0x000000001fb025d2 target=0x00007ffff7bbf070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2] word=9459406879309053952
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bb2038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2] rax=0x0000000000000001 rcx=0x0000000000000007 r12=0x000000001fb025d2 target=0x00007ffff7bb2040 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2] word=9529659010516258849
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7ba8038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2] rax=0x0000000000000003 rcx=0x0000000000000008 r12=0x000000001fb025d2 target=0x00007ffff7ba8050 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2] word=4648278338838431752
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7b96038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2] rax=0x0000000000000007 rcx=0x000000000000000a r12=0x000000001fb025d2 target=0x00007ffff7b96070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2] word=9246453260276006916
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7b55038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2] rax=0x0000000000000017 rcx=0x000000000000000c r12=0x000000001fb025d2 target=0x00007ffff7b550f0 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2] word=2318018335796986305
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7aa4038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1] rax=0x0000000000000007 rcx=0x000000000000000a r12=0x000000001fb025d2 target=0x00007ffff7aa4070 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1] word=1154047404522488322
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x000055555556c078 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load] rax=0x0000000000000000 rcx=0x0000000000000006 r12=0x00000000cc50ef0b target=0x000055555556c078 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load] word=2901555248074150280
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7fb0038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1] rax=0x0000000000000004 rcx=0x0000000000000009 r12=0x00000000cc50ef0b target=0x00007ffff7fb0058 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libbabl-0.1.so.0.227.1] word=5623028084723687428
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7e59038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1] rax=0x000000000000003c rcx=0x000000000000000d r12=0x00000000cc50ef0b target=0x00007ffff7e59218 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-0.4.so.0.471.1] word=1469026716876945458
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d54038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so] rax=0x0000000000000000 rcx=0x0000000000000008 r12=0x00000000cc50ef0b target=0x00007ffff7d54038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-npd-0.4.so] word=891923901305586696
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d46038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so] rax=0x000000000000001c rcx=0x000000000000000b r12=0x00000000cc50ef0b target=0x00007ffff7d46118 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgegl-sc-0.4.so] word=7535871833123339811
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7d18038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2] rax=0x000000000000003c rcx=0x000000000000000d r12=0x00000000cc50ef0b target=0x00007ffff7d18218 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-3.0.so.0.206.2] word=6647524494753688328
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7c82038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2] rax=0x000000000000001c rcx=0x000000000000000b r12=0x00000000cc50ef0b target=0x00007ffff7c82118 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimp-scriptfu-3.0.so.0.206.2] word=11781557723536359745
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7c3a038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2] rax=0x000000000000001c rcx=0x000000000000000b r12=0x00000000cc50ef0b target=0x00007ffff7c3a118 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpbase-3.0.so.0.206.2] word=585483344858513924
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bfc038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2] rax=0x0000000000000004 rcx=0x0000000000000009 r12=0x00000000cc50ef0b target=0x00007ffff7bfc058 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpcolor-3.0.so.0.206.2] word=5193011290720986454
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7be0038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2] rax=0x000000000000000c rcx=0x000000000000000a r12=0x00000000cc50ef0b target=0x00007ffff7be0098 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpconfig-3.0.so.0.206.2] word=9239205124959634570
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bbf038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2] rax=0x0000000000000004 rcx=0x0000000000000009 r12=0x00000000cc50ef0b target=0x00007ffff7bbf058 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmath-3.0.so.0.206.2] word=1526582156254577684
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7bb2038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2] rax=0x0000000000000000 rcx=0x0000000000000007 r12=0x00000000cc50ef0b target=0x00007ffff7bb2038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpmodule-3.0.so.0.206.2] word=2576094172033782922
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7ba8038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2] rax=0x0000000000000000 rcx=0x0000000000000008 r12=0x00000000cc50ef0b target=0x00007ffff7ba8038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpthumb-3.0.so.0.206.2] word=612489618050514976
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7b96038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2] rax=0x000000000000000c rcx=0x000000000000000a r12=0x00000000cc50ef0b target=0x00007ffff7b96098 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpui-3.0.so.0.206.2] word=868764510881025
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7b55038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2] rax=0x000000000000003c rcx=0x000000000000000c r12=0x00000000cc50ef0b target=0x00007ffff7b55218 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgimpwidgets-3.0.so.0.206.2] word=2315837574210388929
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00007ffff7aa4038 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1] rax=0x000000000000000c rcx=0x000000000000000a r12=0x00000000cc50ef0b target=0x00007ffff7aa4098 map=[/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libz.so.1] word=576467354510241536
+W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240 map=[[heap]] r14=0x5555556c02c0 i=0 DELTA_FROM_IDX=0x47210 rbx=0x00007ffff526add8 mem28=0x00005555556c0240
+W351 STAGE2 test356 pc=0x7ffff7fd133e rbx=0x00005555556c0240 map=[[heap]] byte354=0x40 byte356=0x40
+W351 STAGE2 continue pc=0x7ffff7fd1356 rbx=0x00005555556c0240 map=[[heap]] byte354=0x40 byte356=0x40
+W352 TABLE pc=0x7ffff7fd12e1 rdx=0x4040404040404040 map=[unmapped] rax=0x0000000000000040 rcx=0x0000000040404040 r12=0x000000000d827590 target=0x4040404040404240 map=[unmapped] word=None
+
+Thread 1 "file-gif-load" received signal SIGSEGV, Segmentation fault.
+0x00007ffff7fd12e1 in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+W337 SIGNAL SIGSEGV pc=0x7ffff7fd12e1
+W349 SIGNAL DEREF_HITS=33 rax=0x0000000000000040 map=[unmapped] rbx=0x00005555556c0240 map=[[heap]] rbx356=0x4040404040404040
+W352 SIGNAL rdx=0x4040404040404040 map=[unmapped] rcx=0x0000000040404040 r12=0x000000000d827590
+W345 LOOPIDX=0 ARRBASE=0x5555556c02c0 DELTA_FROM_IDX=0x47210
+W345 ARR[0]=0x00005555556c0240
+W345 ARR[1]=0x00005555556c0240
+W345 ARR[2]=0x00005555556c0240
+W345 ARR[3]=0x00005555556c0240
+W345 ARR[4]=0x00005555556c0240
+W345 ARR[5]=0x00005555556c0240
+W345 ARR[6]=0x00005555556c0240
+W345 ARR[7]=0x00005555556c0240
+W345 ARR[8]=0x00005555556c0240
+W345 ARR[9]=0x00005555556c0240
+W345 ARR[10]=0x00005555556c0240
+W345 ARR[11]=0x00005555556c0240
+W345 ARR[12]=0x00005555556c0240
+W345 ARR[13]=0x00005555556c0240
+W345 ARR[14]=0x00005555556c0240
+W345 ARR[15]=0x00005555556c0240
+W345 INS 0x7ffff7fd12b9:	add    0x8(%rdx),%eax
+W345 INS 0x7ffff7fd12bc:	mov    0x338(%rbx),%rdx
+W345 INS 0x7ffff7fd12c3:	mov    %rax,%r15
+W345 INS 0x7ffff7fd12c6:	test   %rdx,%rdx
+W345 INS 0x7ffff7fd12c9:	je     0x7ffff7fd13e0
+W345 INS 0x7ffff7fd12cf:	mov    %r12d,%eax
+W345 INS 0x7ffff7fd12d2:	mov    0x334(%rbx),%ecx
+W345 INS 0x7ffff7fd12d8:	shr    $0x6,%eax
+W345 INS 0x7ffff7fd12db:	and    0x330(%rbx),%eax
+W345 INS => 0x7ffff7fd12e1:	mov    (%rdx,%rax,8),%rax
+W345 INS 0x7ffff7fd12e5:	mov    %r12d,%edx
+W345 INS 0x7ffff7fd12e8:	shr    %cl,%edx
+W345 INS 0x7ffff7fd12ea:	mov    %edx,%ecx
+W345 INS 0x7ffff7fd12ec:	mov    %rax,%rdx
+W345 INS 0x7ffff7fd12ef:	shr    %cl,%rdx
+W345 INS 0x7ffff7fd12f2:	mov    %r12d,%ecx
+#0  0x00007ffff7fd12e1 in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#1  0x00007ffff7fd1fbc in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#2  0x00007ffff7fd81d4 in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#3  0x00007ffff7fda50a in ?? () from .//usr/lib64/ld-linux-x86-64.so.2
+#4  0x00007ffff7a904e6 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#5  0x00007ffff7a90f6c in inflate () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#6  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555617490, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=33025, height=height@entry=65026, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc2e8, error=0x7fffffffc658) at ../plug-ins/common/file-gif-load.c:1613
+#7  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555617490, file=file@entry=0x55555561ad60, len=33025, height=65026, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=33025, screenheight=65026, is_jeff_image=1, image=0x7fffffffc2e8, error=0x7fffffffc658, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#8  0x000055555555861c in load_image (file=file@entry=0x55555561ad60, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc658) at ../plug-ins/common/file-gif-load.c:625
+#9  0x0000555555558dd4 in gif_load (procedure=0x55555561c620, run_mode=<optimized out>, file=0x55555561ad60, metadata=<optimized out>, flags=0x7fffffffc6b4, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w352-stage2-wide256.jif" "w352-stage2-wide256.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

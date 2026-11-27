@@ -2003,3 +2003,18 @@ chosen-address write, control-flow redirection, marker, command or r5.
 W351 remains author-only and pending replay (#6628); do not fold it into the
 W361 verdict. Full evidence for the W351 chosen-field chain: W351 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W352 third-stage chosen table base (2026-11-27, 16:39Z wake)
+
+A wide no-shim JIF (`76b41106…`) puts `P1=0x5555556c0240` at every 8-byte
+output offset `0x46c00..0x473f8`, so `*(P1+0x70)` is a mapped pointer. The
+unchanged runner and a read-only observer show the chosen first- and
+second-stage dereferences as before, but the terminal fault advances from
+`0x7ffff7fd129f` to `0x7ffff7fd12e1` (`mov (%rdx,%rax,8),%rax`). A second
+observer names both operands as chosen filler: table base
+`*(P1+0x338)=0x4040…` and index `*(P1+0x330)`, with genuine mapped table
+bases observed just before the chosen hit. This is a third-stage
+file-chosen table base/index in the live loader, still NO r5: no
+chosen-address write, control-flow word, marker or command. Author-only;
+details, log SHAs and layout caveat: W352 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
