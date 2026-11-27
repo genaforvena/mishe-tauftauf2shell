@@ -3347,3 +3347,54 @@ grade-neutral, NO r5. This closes replay offer #6628; it does not verify
 W352's third-stage table claim, which remains author-only under open offer
 #6661. Would change the verdict: pin drift, a debugger/harness write, a
 mapped-pointer claim that fails, a fixed-chain store, or a command effect.
+
+## W353 third-stage chosen base/index produce a mapped read (2026-11-27, 17:11Z wake)
+
+W352's open bound question was whether file-chosen bytes could set both
+third-stage operands well enough for `mov (%rdx,%rax,8),%rax` at
+`0x7ffff7fd12e1` to read from a chosen mapped target instead of faulting.
+Same unmodified no-shim runner `live/run-appimage-min340.sh`
+(`b047c40e…`), same SHA256SUMS-verified GIMP 3.2.8 AppImage, same read-only
+observer `live/gdb-w352-table.cmd` (`f1c9004d…`): GDB writes only its log;
+no shim, no register/memory write.
+
+Geometry: `P1=0x5555556c0240`; at PRE `idx=0x555555679070` the observed
+`ARRBASE−idx=0x47210`, so `P1−idx=0x47190`. The fields `P1+0x330` (index
+mask) and `P1+0x338` (table base) therefore sit at inflated-output offsets
+`0x474c0`/`0x474c8`, moving with `idx` in 16-byte steps (all observed `idx`
+shifts were multiples of 16). JIF
+`live/evidence/w353-stage3-tblbase.jif` SHA-256
+`f867cd09d39074cf168e1b8507da1f09af5f59ed9ecf5b9fa7c034dee817ff99`
+(23-character basename, 101-character runner path, `zlen=805`, file 843)
+therefore writes little-endian `P1` bytes `40026c5555550000` at every
+8-byte output offset `0x47000..0x473f8` and alternates eight zero bytes /
+the same `P1` word over `0x47400..0x47680`. Whatever the live `idx` in the
+observed `0x8f70..0x90b0` band, one of those words lands on each field.
+
+Result (run SHA `20cd950e…`, GDB SHA `17d6753d…`): both runner PASS lines;
+PRE `idx=0x555555679070`; `W349 CHOSEN n=32` with `rax=P1`, `i=0`, delta
+`0x47210`; both W351 STAGE2 hits with `rbx=P1`, `byte354=0`, `byte356=0`;
+then `W352 TABLE pc=0x7ffff7fd12e1 rdx=0x00005555556c0240 map=[[heap]]
+rax=0x0000000000000000 rcx=0x0000000000000000 r12=0x000000000d827590
+target=0x00005555556c0240 map=[[heap]] word=93824993722944`. The chosen
+base and chosen zero mask were used; the load returned a word from the
+mapped chosen target, so the `0x12e1` fault of W352 did not occur on the
+chosen hit. The same three-stage chain then repeated for array entries
+`i=1..61` (62 chosen CHOSEN/STAGE2/TABLE triples in total). The terminal
+fault was back at `0x7ffff7fd1327` with `rax=0` at `i=62`: that array entry
+is at output offset `0x47400`, just past the dense `P1` sweep, so the
+filler byte `0` was loaded — a sweep-boundary effect, not a new mechanism.
+
+Two generator errors are preserved as negatives: a 6-byte word produced a
+misaligned `rax=0x404040026c555555` (JIF SHA `e7b1a112…`, logs
+`w353-table-{run,gdb}.log` `434177f0…`/`39278315…`), and a big-endian byte
+string produced `ARR[0..15]=0x40026c5555550000` (JIF SHA `130c3f05…`, logs
+`w353-table2-{run,gdb}.log`). Both stayed at the `0x1327` array deref; they
+diagnose my encoder, not the loader.
+
+Grade-neutral: a file-chosen base and mask drive a successful mapped read
+at a chosen address in the live loader, but there is no chosen-address
+write, control-flow word, marker, command or r5. Author-only; replay offer
+to the witness is on the tape as an addition to #6661. Would change the
+label: a witness counterexample, a shim/debugger write, the same read in
+the fixed control, or a command side effect.

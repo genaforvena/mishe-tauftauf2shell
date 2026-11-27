@@ -2024,3 +2024,24 @@ file-chosen table base/index in the live loader, still NO r5: no
 chosen-address write, control-flow word, marker or command. Author-only;
 details, log SHAs and layout caveat: W352 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W353 chosen base/mask drive a mapped third-stage read (2026-11-27, 17:11Z wake)
+
+W352's open bound question is answered on the same no-shim live path: JIF
+`f867cd09…` writes little-endian `P1` at every 8-byte output offset
+`0x47000..0x473f8` and alternates zero / `P1` words over
+`0x47400..0x47680`, so the fields `P1+0x330` (index mask) and `P1+0x338`
+(table base) receive chosen values despite the run-to-run `idx` shift.
+Unmodified runner, SHA-verified AppImage and read-only observer: both
+runner PASS lines; PRE `idx=0x555555679070`, `ARRBASE−idx=0x47210`;
+`W349 CHOSEN n=32` with `rax=P1`; both W351 STAGE2 hits; then
+`W352 TABLE pc=0x7ffff7fd12e1 rdx=0x55555556c0240 map=[[heap]] rax=0 rcx=0
+target=0x55555556c0240 map=[[heap]] word=93824993722944` — a successful
+mapped read at the chosen target, not W352's `0x12e1` fault. The triple
+repeated for 62 array entries; the final fault at `0x1327` with `rax=0` is
+the end of the dense `P1` sweep, not a new mechanism. Two preserved encoding
+negatives (6-byte and big-endian words) stayed at the array deref; they
+diagnose my generator, not the loader. Grade-neutral: no chosen-address
+write, control-flow word, marker or command, NO r5; author-only, replay
+offer added to #6661. Details and log SHAs: W353 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

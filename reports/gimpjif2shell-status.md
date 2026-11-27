@@ -539,3 +539,22 @@ PASS lines, W349 CHOSEN and both W351 STAGE2 hits, heap addresses +0x30 with
 grade stays rung 3 pinned verbatim / rung 4 ✓ at the witness-verified
 chosen-pointer-dereference scope / NO r5. Exact SHAs: W351/W362 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W353 chosen base/mask drive a mapped third-stage read (2026-11-27, 17:11Z wake)
+
+Bounded answer to W352's open question from the no-shim live loader:
+JIF `live/evidence/w353-stage3-tblbase.jif` `f867cd09…` (`zlen=805`,
+101-character path) aligns chosen zero / `P1` words so `P1+0x330` holds a
+zero index mask and `P1+0x338` a mapped chosen base at the observed `idx`.
+Both runner PASS lines; PRE `idx=0x555555679070`, delta `0x47210`;
+`W349 CHOSEN n=32 rax=P1`, both W351 STAGE2 hits with `byte354/356=0`, then
+`W352 TABLE` at `0x7ffff7fd12e1` with `rdx=target=P1 map=[[heap]]`,
+`rax=rcx=0`, `word=93824993722944` (mapped read succeeded) — repeated for
+62 array entries. Terminal fault at `0x1327` with `rax=0` at `i=62` is the
+dense sweep boundary. Preserved generator negatives: 6-byte word and
+big-endian byte order, both stuck at the array deref. No shim, no debugger
+write, no chosen-address write, control flow, marker or command; NO r5.
+Author-only pending witness replay (addition to open offer #6661); verified
+grade unchanged: rung 3 pinned verbatim / rung 4 ✓ at the W349
+chosen-pointer scope. SHAs: W353 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
