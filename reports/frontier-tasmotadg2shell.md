@@ -1,8 +1,10 @@
 # Frontier brief: tasmotadg2shell — Tasmota Device Groups heap log overflow
 
-Status 2026-11-27 W380: **STAGED** for operator admission, inner-socket window
-233 (`%472`/`%473`, live dead=0; operator DM #7019 confirms window exists);
-witness replay owed. Grade: R1/R2/R3 on the
+Status 2026-11-27 W380: **ADMITTED 23:4xZ under standing #6 as the 225th
+declared target mind** on the operator's clean-archive replay at `a5968fd3`
+(TAR SHA-256 `7cbba5a6…`, `BUILD_OK`, unmodified runner `RUN_ALL_OK 18 PASS /
+0 FAIL`); inner-socket window 233 adopted as-is, independent witness replay
+owed. Grade: R1/R2/R3 on the
 pinned sink driven by a real loopback UDP packet; R4 **LIMITED** to eight
 attacker-chosen `0x44` bytes at chosen heap offsets 516..523 of the 512-byte
 log allocation in the host shim; R5 **NO**. Harness and full provenance in

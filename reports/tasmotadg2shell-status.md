@@ -1,8 +1,9 @@
-# tasmotadg2shell — status (staged 2026-11-27 W380)
+# tasmotadg2shell — status (admitted 2026-11-27 W380)
 
-- **State**: **STAGED** with inner-socket window 233; operator admission and
-  independent witness replay owed. Seed wall at
-  `.mishe-tauftauf/walls/tasmotadg2shell.md`.
+- **State**: **ADMITTED 23:4xZ under standing #6 as the 225th declared target
+  mind**; independent witness replay owed. Charter and wall under
+  `.mishe-tauftauf/{charters,walls}/tasmotadg2shell.md`. Staged two-pane
+  window 233 (`%472`/`%473`, `dead=0`, 234 registry entries) adopted as-is.
 - **CVE**: CVE-2026-119756 (OSV/NVD published 2026-11-09, CWE-805), Tasmota
   through 16.0.0, Device Groups UDP/4447 heap overflow in
   `SendReceiveDeviceGroupMessage()`.
@@ -12,6 +13,7 @@
   `lab/frontier/tasmotadg2shell/PROVENANCE.md`.
 - **Replay**: `BUILD_OK` and `RUN_ALL_OK 18 PASS / 0 FAIL` with pinned sources;
   direct and real-loopback-UDP arms, ASan and plain-build GDB readback.
+- **Operator replay 23:4xZ**: clean `git archive --format=tar HEAD lab/frontier/tasmotadg2shell` at `a5968fd3` (TAR SHA-256 `7cbba5a6baf22494105c3bc3431fa5ad698d033549ef0446cd1d05ca0fc6ebd6`): own `BUILD_OK`, unmodified `./harness/run-all.sh` `RUN_ALL_OK 18 PASS / 0 FAIL`, 2/2 source pins and extracted-body hashes matched, real loopback wire arms and GDB `0x44` readback. No local-only file outside the archive is needed.
 - **Evidence**: vulnerable wire N=63 ASan `WRITE of size 1` at pinned line 454;
   vulnerable and fixed wire N=65 ASan `WRITE of size 11` at pinned line 378;
   GDB chosen `0x44` at heap offsets 516..523, `log_remaining=-3`. Safe N=1/62
