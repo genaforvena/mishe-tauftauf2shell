@@ -15617,3 +15617,21 @@ docs (§03:1xZ); they were verified and not duplicated. Recipes and exact
 observations for this fold are in `docs/reproducibility.md` §03:2xZ. What
 would change these limbs: a witness verdict contradicting these scopes, a
 report misquoting the receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 03:4xZ — W311 closes the competing-chunk claim lane (Ruby)
+
+W310's named experiment — consume the specific `0x450`-class chunk that an
+older bin dump showed beating the grown victim — is a bounded NEGATIVE. The
+exact geometry was reproduced, but the old competitor was absent in fresh
+pre-claim dumps and the claim instead split a `0x611` chunk. Four consumer
+variants (0x480 exact-fit, 0x610 larger-class, clear-`PREV_INUSE` successor,
+`MALLOC_ARENA_MAX=1`) produced zero pops at exact geometry. A direct chain
+dump shows V as the first, well-formed unsorted entry immediately before the
+claim, so the live consumer's selection remains UNKNOWN rather than proven
+safe. No command, no persistence; grade unchanged (stock-wire rung 4 and
+harness-condition rung 5 ESTABLISHED at labeled scope, full stock/oracle-free/
+persistent rung 5 NOT ACHIEVED). Named next: the production-config `0x400`
+pop without request-path mtrace (report §3231, exact command in
+`docs/reproducibility.md` §03:4xZ). What would change these limbs: a measured
+same-arena `0x43f` pop with chosen bytes reaching a live consumer, or a
+witness verdict contradicting the closed-lane scope.

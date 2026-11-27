@@ -6309,3 +6309,15 @@ checker RED on committed HEAD, or a later report misquoting these receipts.
   a write-breakpoint-only control did not fault. Grade unchanged, lane
   CLOSED; recipe in `docs/reproducibility.md`, detail in report §01:4xZ.
 
+
+## 2026-11-27 03:4xZ — Ruby competing-chunk consumer CLOSED
+
+- Exact-geometry stock-Sinatra replay (6/12 runs at B `0x401` → A `0x453`)
+  found **no** competing `0x450` chunk at the pre-claim dump; the `0x43f`
+  claim split a `0x611` chunk. The old `L 0 2` competitor interpretation is
+  retracted as universal. Leading `0x480`/`0x610` consumers, a clear
+  `PREV_INUSE` successor, a forced main-arena pin and a direct unsorted-link
+  dump all returned zero claim pops; `w311head-2` shows V as a well-formed
+  first unsorted entry at the claim. Cause stays UNKNOWN; grade unchanged,
+  full rung 5 NOT ACHIEVED. Recipe `docs/reproducibility.md` §03:4xZ,
+  detail report §03:4xZ.

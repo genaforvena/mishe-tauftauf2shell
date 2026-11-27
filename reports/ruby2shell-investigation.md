@@ -6997,3 +6997,75 @@ stock-wire rung 4 and harness-condition rung 5 ESTABLISHED at labeled scope,
 full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Recipe:
 `docs/reproducibility.md` §03:1xZ. Next experiment must be in another
 subsystem; do not repeat this watcher or the negative-ID sweep unchanged.
+
+## 2026-11-27 03:4xZ — W311 competing-chunk consumer CLOSED; claim still misses a valid unsorted V (Ruby)
+
+W310 named the next experiment at §2981–3031: consume the specific competing
+`0x450`-class chunk seen in an old pre-claim `L 0 2` bin dump, or make V the
+first-binned chunk, so that the later `0x43f` claim takes the grown victim.
+All arms below are analysis-only instrumentation of the unmodified stock
+Sinatra app on loopback; no command, no persistence, no grade change.
+
+**Geometry correction first.** The literal wall command omitted
+`RUBY2SHELL_CLAIM_MODE=poison`, `FILLER_SPEC=1x1200` and the forged claim list;
+its 12 runs (`stock-sinatra-w311comp-*`) had no exact `0x401→0x453` geometry
+and all aborted. The exact recipe is the `w311fine` command in
+`docs/reproducibility.md` §03:4xZ; it produced 6/12 runs with B `0x401`,
+A `0x453` (`stock-sinatra-w311fine-{1,2,4,5,6,10,11,12}.server.log`). In
+`w311fine-1` the pre-claim dump shows V at unsorted `L 0 1 ...a51b0 453`,
+**no** competing `0x450` chunk, and the `0x43f` claim returns
+`0x7147501bf290`, a split of the `0x481` largebin chunk at `L 0 3 ...bf280`.
+The old `L 0 2` competitor is therefore not a universal blocker; the
+competition hypothesis is falsified as an explanation for these runs.
+
+**Targeted-consumer arms (all bounded NEGATIVE).**
+- `w311cons480`: a leading 1,120-byte part (request `0x469`, chunk `0x480`)
+  intended to take that exact class before the `0x43f` claim; 12 processes,
+  8 exact geometries, zero claim pops. In `w311cons480-1` both `0x469`
+  allocations came from elsewhere, the pre-claim dump had only V in unsorted,
+  and the `0x43f` claim split a `0x611` chunk (`F ...ae10 611` →
+  `M 0 43f ...ae10`). The one run with 2 reported pops
+  (`w311cons480-8`) had B `0x551→0x553`, not the target geometry.
+- `w311d2` and `w311big603` (`POISON_NEXT=0x90`, successor `PREV_INUSE` clear
+  so glibc's `invalid next->prev_inuse (unsorted)` check passes; A records
+  `next_prev=0x450`, `next_size=0x90`): 14 processes, 8 exact geometries,
+  zero pops; V's sizefield stayed `0x453` through every sampled D2.
+- `w311arena1` with `MALLOC_ARENA_MAX=1`: the size-word interposer logged the
+  claim's allocated chunk word `0x451` (flags `0x1`, main arena) while V's
+  unsorted head pointed into a different mmap region; still zero pops. This
+  *forces* an arena split and is not the stock condition — the default arm
+  `w311arena` logged claim words `0x455/0x465` (flags `0x5`,
+  `NON_MAIN_ARENA` set on allocation) in the **same** heap region as V, so a
+  simple cross-arena story is NOT supported and is retracted.
+
+**Direct chain observation.** A copy of `lab/preload/mtrace.c` with an opt-in
+`W311_VCHAIN` dump (analysis-only file `lab/build/w311-mtrace.c`, gitignored)
+sampled the unsorted links immediately before each `0x43f` malloc. In
+`stock-sinatra-w311head-2.server.log` (B `0x401`, A `0x453`) it reads
+`vhdr=...a5320 size=0x453`, `vfd=72adc8000480`, `vbk=72adc808a4a0`,
+`*(vbk+0x10)=vhdr`, `head.bk=vhdr`, `head.fd=vhdr`: V is the first,
+well-formed unsorted entry; the claim still allocates
+`0x72adc807c3a0`, not V. In `w311head-1` the boot-derived `arena_head` was
+itself a `0x400`-class chunk (`head+8 == 0x401`), so bin dumps from that arm
+are UNKNOWN, not evidence of V's arena. The exact reason the live claim
+skips a first, well-formed exact-fit unsorted chunk stays **UNKNOWN**; it is
+not the old competitor, not `PREV_INUSE` on the successor, and not a plain
+arena mismatch.
+
+A standalone glibc 2.39 probe (`lab/build/w311-consumer3.c`, gitignored)
+wrote the *size field* (`vh[1]`, not the `vh[0]` prev-size tried first) to
+`0x453` on a free unsorted chunk and aborted with
+`malloc(): unsorted double linked list corrupted`; its layout clobbers the
+neighbour header, so it does not model the live forged successor and is
+recorded only as a consumer-behavior caveat, not an explanation of the live
+trace. Do not repeat that probe unchanged.
+
+Verdict: the competing-exact-fit and first-binned consumer lanes are
+**CLOSED as bounded negatives** on 3.4.12/plain glibc 2.39; the previously
+claimed universal competitor is retracted. Grade unchanged: stock-wire rung 4
+and harness-condition rung 5 ESTABLISHED at labeled scope; full
+stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Recipe and exact
+commands: `docs/reproducibility.md` §03:4xZ. Named next experiment: the
+still-open production-config `0x400` pop without mtrace (report item at
+§3231) — exact command in `docs/reproducibility.md` §03:4xZ; do not repeat
+these consumer arms unchanged.

