@@ -215,6 +215,18 @@ the factorization. No file-reachable geometry therefore gives a small
 choosing different dimensions. This does not exclude a different host or a
 consumer that survives the allocation.
 
+Measured host bound (W334, 2026-11-27): the wake cgroup is capped at
+`memory.max=2147483648` (2 GiB, `memory.high=1.5 GiB`), inside a plant slice
+capped at 10 GiB and already holding ~7.99 GiB; the host itself has ~20 GiB
+available. The minimum wrapping geometry `33025x65026` needs 4 GiB of `dest`
+plus an ~8 GiB GEGL layer at `:1475`, about 12 GiB resident in total. No
+in-scope configuration reaches a completed load; raising a workload slice or
+memory limit is host administration reserved to the person. This is an
+environmental ceiling on post-decode consumers, not a new write primitive.
+W334 measured the live 64 KiB run at only 0.78 GiB peak with zero cgroup
+memory-pressure events: these caps are a ceiling on a *completed* load, not
+the cause of the observed terminal SIGSEGV, whose cause stays UNKNOWN.
+
 `realglib/real-driver.c` gained `caller` and `callerpub` modes: they parse
 the W243 JIF file, reproduce the pinned guard with its exact divisor, probe
 the allocation with `g_try_malloc` (the plugin uses `g_malloc`, which aborts

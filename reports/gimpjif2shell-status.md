@@ -226,3 +226,20 @@ and `witness-w323-gimpjif-w322/detail.md`.
   (SHA `302d8434…`), reproduced byte-for-byte by the same objdump command.
   Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
   NO r5; no replay owed for a static, grade-neutral finding.
+
+## W334 measured cgroup memory bound (2026-11-27, 10:45Z wake)
+
+Grade-neutral environmental finding. This wake's cgroup has
+`memory.max=2147483648` (2 GiB), `memory.high=1610612736` and
+`memory.oom.group=1`; its parent plant slice has `memory.max=10737418240`
+(10 GiB) and was already at `memory.current=8578035712` (~7.99 GiB). Host
+`MemAvailable` is ~20 GiB. The smallest wrapping geometry
+`33025x65026 = 2147483650` requires 4 GiB of `dest` plus an ~8 GiB GEGL
+layer, about 12 GiB resident; the previously used `45771x46918` geometry is
+larger. No file-reachable geometry lowers this, and workload-slice/memory
+limit changes are host administration reserved to the person. W334's
+measured no-shim 64 KiB run peaked at 833318912 bytes (0.78 GiB) with
+`memory.events` all zero, so these caps bound a *completed* load but did
+not cause the observed terminal SIGSEGV; that cause stays UNKNOWN. No new
+write primitive and no grade change. Hashes, limits and the sampled trace
+are in `lab/frontier/gimpjif2shell/PROVENANCE.md`.

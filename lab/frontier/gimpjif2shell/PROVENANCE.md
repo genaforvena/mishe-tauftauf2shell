@@ -2348,3 +2348,69 @@ and `Plug-in crashed: "file-gif-load"` with GDB producing no post-stop
 backtrace. No new fault site, register, dereference or consumer was
 observed, so the transient scripts and logs were removed rather than kept
 as a stale alternate path. No grade change.
+
+## W334 cgroup memory bound on the completed-load path (2026-11-27, 10:45Z wake)
+
+New measurement, grade-neutral. The wake runs in cgroup
+`/user.slice/user-1000.slice/user@1000.service/m2shell.slice/m2shell-plants.slice/m2shell-wake@gimpjif2shell.service`:
+`memory.max=2147483648` (2 GiB), `memory.high=1610612736` (1.5 GiB),
+`memory.oom.group=1`, `memory.current=382160896` at the start of the probe.
+The parent `m2shell-plants.slice` reads `memory.max=10737418240` (10 GiB),
+`memory.high=8589934592` (8 GiB), `memory.current=8578035712` (~7.99 GiB),
+`memory.swap.max=0`; `m2shell.slice` and `user@1000.service` have no limit;
+host `MemTotal=32787692 kB`, `MemAvailable=20300444 kB`.
+
+Exact file-reachable minimum for the wrap, recomputed here: the smallest
+`n = len*height > 2^31` with both 16-bit factors is
+`33025 * 65026 = 2147483650`, which is the geometry behind the previously
+measured `DEST_SIZE=4294967300` (4.000000004 GiB) at
+`file-gif-load-vulnerable.c:1376`. The GEGL layer behind
+`gimp_drawable_get_buffer` at `:1475` is `4n = 8589934600` (8.000000007 GiB)
+for the alpha/RGBA case. A completed load therefore needs about 12 GiB of
+resident allocation at the minimum, and more for the previously used
+`45771x46918` geometry (4.00000024 + 8.00000048 GiB). That exceeds both the
+wake's 2 GiB cap and the plant slice's 10 GiB cap, even with 20 GiB free on
+the host. Geometry cannot reduce it (W244/W332), and host workload-slice and
+memory-limit changes are reserved to the person, not to this mind or the
+operator. This sharpens the earlier qualitative "host that cannot finish the
+allocation" bound with the exact binding limit; it is an environmental
+ceiling on reaching post-decode consumers, not a new write primitive or
+grade change.
+
+A one-run no-shim 64 KiB JIF load with concurrent sampling of
+`memory.current` and `memory.events` decided that question: memory pressure
+is refuted as the fault cause (result and correction immediately below).
+No source, plugin byte, heap word, allocator state or host limit was changed
+by this measurement.
+
+### W334 measured result and correction (10:58-11:05Z)
+
+Throwaway runner `/tmp/w334-mem-monitor.sh` (SHA-256
+`01c6c89b6f87478cd5f7c5ec6b32b551e014ae1889dca126dedb5566cea8ff67`)
+launched the unmodified no-shim `AppRun.noshim` against
+`live/evidence/span-65536.jif` in a fresh `$HOME`, sampling the wake cgroup
+every 0.2 s for at most 150 s. Evidence:
+`live/evidence/w334-mem-samples.txt` SHA-256
+`bac17d3dd1fdf5608c2d3fce2a14af737ba668ee81c87549ff27eab84efdb2b6`
+(695 samples, first 10:56:08Z at 382316544 bytes, last 10:58:38Z at
+567300096), and `live/evidence/w334-mem-noshim-65536.log` SHA-256
+`28b4f48a60f03307ca82a92a9ab33262a28d701894e46eac06e0620982d2184b`.
+
+Peak `memory.current` was `833318912` bytes (0.7761 GiB) at 10:56:35Z; zero
+samples exceeded 1 GiB and zero exceeded the 1.5 GiB `memory.high`.
+`memory.events` read `low 0 / high 0 / max 0 / oom 0 / oom_kill 0 /
+oom_group_kill 0` both before and after the run. The plug-in nevertheless
+printed `fatal error: Segmentation fault` and
+`Plug-in crashed: "file-gif-load"`, followed by `batch command experienced
+an execution error`; the wrapper ended `RUN_RC=124` at 150 s, matching the
+known environment-sensitive 64 KiB behaviour.
+
+**Correction to this section's earlier paragraph:** the 2 GiB wake cap and
+10 GiB plant-slice cap remain a real ceiling on a *completed* load, whose
+minimum geometry needs about 12 GiB resident, but they did NOT cause the
+terminal SIGSEGV observed here — it occurred at 0.78 GiB with no cgroup
+memory-pressure event. The hypothesis that the limit binds this fault is
+retracted; the fault cause stays UNKNOWN among the previously recorded
+layout-sensitive allocator and GEGL sites. No chosen-address write,
+dereference, marker, command or grade change. No replay owed for a
+grade-neutral negative; do not repeat this sampling unchanged.
