@@ -12,12 +12,13 @@ import sys
 
 ROOT = pathlib.Path(__file__).resolve().parent
 PINS = ROOT / "pins"
+# Only bytes that determine the generated driver are gated. The advisory HTML
+# is a dynamic public page: kept as provenance in SHA256SUMS, never a gate.
 EXPECTED = {
     "EchoLinkStationData.cpp.vuln": "a7daf3c031e715be25cdfdb10757c816d4e814dec8485a0302e536732bc14969",
     "EchoLinkStationData.cpp.fixed": "dc2e2b8a95364c7e747553d1b2f40b23630d8da97e3098364ce97ee9368e60c3",
     "EchoLinkStationData.h": "510c51a3cc2c22c6cd478ed05104184ce7c508b4ddef69404e8029a6293f537a",
     "fix.patch": "f7848f9f0d62766426fcbfb6990e61412cd86a16d89687507bb2a3d4f8ef02f4",
-    "advisory.html": "da77e4d191d0241d63778f20b1a506306f281db52c5202a664f060c970d892ff",
 }
 
 for name, digest in EXPECTED.items():

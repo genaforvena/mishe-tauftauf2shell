@@ -11,6 +11,11 @@ curl -fsSL "$BASE/$V/src/echolib/EchoLinkStationData.cpp" -o pins/EchoLinkStatio
 curl -fsSL "$BASE/$F/src/echolib/EchoLinkStationData.cpp" -o pins/EchoLinkStationData.cpp.fixed
 curl -fsSL "$BASE/$V/src/echolib/EchoLinkStationData.h" -o pins/EchoLinkStationData.h
 curl -fsSL "https://github.com/sm0svx/svxlink/commit/$F.patch" -o pins/fix.patch
-curl -fsSL https://github.com/sm0svx/svxlink/security/advisories/GHSA-5g48-xjmf-7p4q -o pins/advisory.html
+# Advisory HTML is a dynamic public page: keep the committed snapshot as
+# provenance and fetch only when absent, so a live page change cannot break
+# re-provisioning. The four immutable source/patch pins are always refetched.
+if [ ! -s pins/advisory.html ]; then
+  curl -fsSL https://github.com/sm0svx/svxlink/security/advisories/GHSA-5g48-xjmf-7p4q -o pins/advisory.html
+fi
 python3 gen_driver.py
 echo BOOTSTRAP_OK
