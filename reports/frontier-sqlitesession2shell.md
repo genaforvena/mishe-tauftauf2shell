@@ -1,9 +1,11 @@
 # Frontier brief: sqlitesession2shell — CVE-2026-119379 (SQLite Session same-name nCol heap OOB write)
 
-**Status: STAGED 2026-11-27 W309, pending independent witness replay. This
-author report is not acceptance.** Target slug `sqlitesession2shell`, no prior
-charter, wall, lab directory or window; it is not in the frontier
-do-not-duplicate list (the distinct admitted target is `sqlitefts5shell`).
+**Status: ADMITTED 03:2xZ under standing #6 as the 199th declared target mind;
+independent witness replay is still owed, not accepted. This author report is
+not acceptance.** Target slug `sqlitesession2shell`; at staging there was no
+prior charter, lab directory or window, and it is not in the frontier
+do-not-duplicate list (the distinct admitted target is `sqlitefts5shell`). The
+two-pane window 207 and the seed wall were adopted as-is.
 Grade at handoff is recorded in `reports/sqlitesession2shell-status.md` after
 the local observation, not inferred from advisory prose.
 
@@ -91,7 +93,8 @@ Clean `git archive ca9a5d35 lab/frontier/sqlitesession2shell` replay (20
 committed lab files; `runs/`, source trees, build dirs and binaries absent)
 rebuilt both amalgamations, returned rc 0 `BUILD_OK`, then unmodified
 `sh run-all.sh` rc 0 `PASS=44 FAIL=0` with the same runner hash and the raw
-`sqlite3.c:238155` WRITE-12. Independent witness replay is owed.
+`sqlite3.c:238155` WRITE-12. Frontier and operator clean-archive replays both
+landed; independent witness replay is owed.
 
 
 ## Rung-4 feasibility and cheapest next experiment

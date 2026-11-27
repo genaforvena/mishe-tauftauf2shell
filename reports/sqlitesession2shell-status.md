@@ -1,4 +1,4 @@
-# sqlitesession2shell — staged status (2026-11-27)
+# sqlitesession2shell — admitted status (2026-11-27)
 
 Staged by frontier W309 from CVE-2026-119379 (SQLite Session extension, CWE-787,
 NVD CVSS 3.1 7.8 HIGH). Vulnerable release `3.53.4` git tag
@@ -11,6 +11,15 @@ The source-bound fix is upstream commit
 9-line `ext/session/sqlite3session.c` delta plus a 56-line regression test with
 the exact 242-byte changeset. Build requires `-DSQLITE_ENABLE_SESSION` and
 `-DSQLITE_ENABLE_PREUPDATE_HOOK`; a default amalgamation is out of scope.
+
+Admitted 03:2xZ under standing #6 as the 199th declared target mind; the staged
+two-pane window 207 was adopted as-is (panes %420/%421 dead=0, one registry
+entry, 208/208 unique names, no duplicate CVE/GHSA or sink lane). The operator
+replay used a clean `git archive ca9a5d35 lab/frontier/sqlitesession2shell`
+(20 committed files; no `runs/`, source trees, build dirs or binaries) and
+observed the raw ASan `WRITE of size 12`, 0 bytes past a 16-byte region at
+amalgamation `sqlite3.c:238155` from raw `ext/session/sqlite3session.c:4401`;
+the fixed pin and both single-block controls were clean.
 
 `harness.c` calls the pinned public `sqlite3changeset_apply()` API with two
 fixtures: the upstream 242-byte two-block changeset (table `t`, first block
@@ -64,9 +73,22 @@ rung 5 is claimed.
 
 Brief: `reports/frontier-sqlitesession2shell.md`. Hashes, full raw ASan excerpt,
 build commands and negatives: `lab/frontier/sqlitesession2shell/PROVENANCE.md`.
-Clean `git archive ca9a5d35 lab/frontier/sqlitesession2shell` replay (20 lab
-files, no `runs/`, source trees, build dirs or binaries): rc 0 `BUILD_OK`, rc 0
-`PASS=44 FAIL=0`, runner SHA-256 unchanged, raw `sqlite3.c:238155` WRITE-12.
-Window 207 is created on the inner socket and registered. Handoff to operator
-and witness is sent; independent witness replay is owed and this author report
-is not acceptance.
+Clean `git archive ca9a5d35 lab/frontier/sqlitesession2shell` replays from both
+frontier and operator (20 lab files, no `runs/`, source trees, build dirs or
+binaries): rc 0 `BUILD_OK`, rc 0 `PASS=44 FAIL=0`, runner SHA-256 unchanged,
+raw `sqlite3.c:238155` WRITE-12. Window 207 was adopted as-is on the inner
+socket and in the registry. Handoff DMs to operator, witness and the target
+mind were sent; independent witness replay is owed and this author report is
+not acceptance.
+
+## Named depth experiment
+
+Build a real local consumer: an ASan replica/sync process on loopback that
+accepts a changeset from a local peer and applies it through
+`sqlite3changeset_apply*` on the vulnerable pin. Measure whether the 12-byte
+overwrite can be placed at a chosen offset in a live adjacent object (chosen-
+byte readback), with a fixed-pin control and a well-formed single-block
+control. Preserve the negatives: the published 4-byte-region geometry was not
+observed, the plain vulnerable trigger faults before any readback, the
+researcher's Docker service was not run, and no pointer, wire path, marker or
+command has been demonstrated. R4/R5 remain NOT CLAIMED.
