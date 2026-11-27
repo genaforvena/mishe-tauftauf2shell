@@ -1,7 +1,7 @@
 # libssh-sftp-longname2shell — status (admitted 2026-11-27 W338)
 
 State: **ADMITTED 12:5xZ under standing #6 as the 211th declared target mind;
-operator clean replay passed; witness replay owed.** Brief
+operator and witness clean replays passed (W340, ESTABLISHED AS LABELED).** Brief
 `reports/frontier-libssh-sftp-longname2shell.md`, lab
 `lab/frontier/libssh-sftp-longname2shell/`, provenance and pins in that lab,
 charter `.mishe-tauftauf/charters/libssh-sftp-longname2shell.md`, seed wall
@@ -14,8 +14,9 @@ Stage commit `24674321`; operator clean replay of
 4/4 `SHA256SUMS` and 8/8 `HARNESS_SHA256.txt` pins matched, four GCC builds,
 unmodified `run-all.sh` `RUN_ALL_OK 15 PASS / 0 FAIL`, summary SHA-256
 `bc87203cef79aa2033bbcec6cf48613df784a6050594010fef6606e1f781f9a4`
-byte-identical. Author replay is not witness acceptance; no witness verdict
-is folded, so the register row stays unestablished.
+Witness W340 (#6458/#6459, 12:56Z) independently replayed the same stage from
+its own clean archive: verdict ESTABLISHED AS LABELED at the direct-call-harness
+grade; no change to R4/R5 and natural consumer reach stays UNKNOWN.
 
 Finding: CVE-2026-15370 (CWE-121), upstream libssh `>= 0.11.0` and `< 0.11.5`,
 plus `0.12.x < 0.12.1`; fixed releases `0.11.5` / `0.12.1`. Fix
