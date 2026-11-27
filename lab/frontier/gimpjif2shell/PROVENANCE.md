@@ -1688,3 +1688,48 @@ corrected target (`out+304`, not `out+368`). No named object, chosen-address
 dereference, control flow, marker, command, or wire path. Fixed build
 remains BLOCKED (no patched AppImage; gimp.org rechecked 04:41Z). Detail:
 `.mishe-tauftauf/artifacts/witness-w314-gimpjif-readptr/detail.md`.
+
+## W314 locally rebuilt vulnerable/fixed plug-in control (2026-11-27, 04:44-04:58Z)
+
+New `fixedctl/run-fixed-control.sh` (run 04:52-04:57Z): rc 0,
+`TOTAL: 10 PASS / 0 FAIL`. Provisioning is pinned by SHA-256: GIMP 3.2.8
+source `16a2696cadc9e03a2ef97ccb895e062f654cb2b8211fb57074db85f26646c847`,
+pinned fix patch `92ca1593776352c11e477cfb0307874bae22de240842e893d861085c9f5edd43`
+(four hunks, offsets +2), AppImage `SHA256SUMS` verified in workdir.
+The plug-in is compiled from source twice with `-fPIE -pie`, bundled GIMP
+3.2.8 generated headers and GLib/zlib from the host; both binaries link to
+the verified AppImage libraries. Final rebuilt binaries:
+`693fe4038324a4636660af78b0b05897ec3132693210f0004184d0cda11b173d`
+(pristine) and
+`4f3d32c87d68fe808cff35b63321439d3cf644ccca1d193e79d2be8c4dd91af1`
+(patched); `cmp -s` confirms they differ. After the patched build the source
+tree was restored byte-identical to the tarball's file.
+
+Each binary is installed into a private hardlink copy of the extracted
+AppImage at `usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/
+file-gif-load`, and `AppRun.noshim` is regenerated because the shared
+workdir's `AppRun` still exports `LD_PRELOAD=.../live/patch-shim.so`.
+JIFs: safe `6dd6a44ff398388f46a44c756fb2277ebbba235d4c0e96dd064518275db9d191`,
+8 KiB attack `d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`.
+
+Logs (`fixedctl/evidence/`): `fixedctl-vuln-safe.log` SHA
+`536a5ae1eceb9b3573e901d1327b757ee2a9d6c7e65efd800f65222a31c7b06a`,
+`fixedctl-fixed-safe.log` SHA
+`cde569e654c2daabd7d3defe51883f23cb7baec2a6c4d1c5189ff8c5a584929a`,
+`fixedctl-vuln-attack.log` SHA
+`2549ced57179bce8b8c56a2804f18edabf72fbbc7a2b89e9b2be4a7f8e9a16c1`,
+`fixedctl-fixed-attack.log` SHA
+`a101449822a5e0e6d8fab1bc34c76be3ce427e33009e86f5050762fd22021612`.
+Both safe logs end with `script-fu-Warning: 4` and `batch command executed
+successfully`. Vulnerable attack: `fatal error: Segmentation fault` and no
+`SHIM_PATCH` lines; rc 124. Fixed attack: `Jeff's Image Format-Warning:
+Error reading image data. Image may be corrupt!`, no fault, rc 137. Both rc
+values are 90 s timeout/session-kill artifacts after the error path leaves
+script-fu waiting, so the runner asserts observed messages rather than rc.
+
+Preserved negative: the first control attempt (04:46Z) used the inherited
+shimmed `AppRun`; the vulnerable log had `SHIM_PATCH` lines and is excluded
+from this no-shim claim. Ceiling unchanged: locally rebuilt control, not a
+vendor-shipped fixed build; no chosen-address write, named-object
+dereference, control flow, marker, command or r5. Grade stays rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes.

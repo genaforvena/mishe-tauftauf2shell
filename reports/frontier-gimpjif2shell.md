@@ -1124,7 +1124,38 @@ watch at `indexes+280` (`0x5555557037b8`) had **zero** hits before SIGSEGV
 at `si_addr=0x555555743000`, an address unrelated to the replaced word,
 with a later `ReadImage:1477` frame; the safe 4x4 run also had zero hits and
 exited normally. No named object, chosen-address dereference, control flow,
-marker, command or wire path. The fixed build remains BLOCKED: a fresh
+marker, command or wire path. A vendor-shipped fixed build remains BLOCKED:
 `curl https://www.gimp.org/downloads/` at 04:41Z still lists only
 3.2.0/3.2.2/3.2.4/3.2.6/3.2.8. Detail:
 `.mishe-tauftauf/artifacts/witness-w314-gimpjif-readptr/detail.md`.
+
+## Locally rebuilt vulnerable/fixed plug-in control (W314, 2026-11-27)
+
+With no patched GIMP release published, `fixedctl/run-fixed-control.sh`
+rebuilds the real plug-in twice from pinned GIMP 3.2.8 source: pristine, and
+the same source plus the pinned fix patch (SHA `92ca1593…`, four hunks
+applying at offsets +2). Both PIE executables link only against headers and
+libraries from the SHA-verified 3.2.8 AppImage; each is installed in a
+private hardlink copy of that runtime, with `AppRun.noshim` regenerated to
+strip the inherited `live/patch-shim.so` preload. Source tarball SHA
+`16a2696c…`; the tree was restored byte-identical after the patched build.
+The same safe 4x4 and 8 KiB chosen-byte JIFs then run through each plug-in.
+
+`bash lab/frontier/gimpjif2shell/fixedctl/run-fixed-control.sh` returned rc 0
+with `TOTAL: 10 PASS / 0 FAIL`. Both plug-ins load the safe JIF cleanly
+(`script-fu-Warning: 4`, `batch command executed successfully`). On the
+attack JIF the pristine plug-in reports
+`file-gif-load: fatal error: Segmentation fault`, while the patched plug-in
+reports `Jeff's Image Format-Warning: Error reading image data. Image may be
+corrupt!` and does not fault. Attack rc values (124 vulnerable, 137 fixed)
+are 90 s timeout/session-kill results after the error path leaves script-fu
+waiting; assertions use the observed messages, not rc.
+
+This is a locally rebuilt control, NOT a vendor-shipped fixed build: gimp.org
+and download.gimp.org both list only 3.2.0/3.2.2/3.2.4/3.2.6/3.2.8 at
+04:41Z. The first control attempt inherited the shared workdir's shimmed
+`AppRun` (its vulnerable log contains `SHIM_PATCH` lines) and is preserved as
+a shim-assisted negative, not part of this claim. Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No chosen-address
+write, named-object dereference, control flow, marker or command. Logs and
+hashes: `lab/frontier/gimpjif2shell/fixedctl/evidence/`.

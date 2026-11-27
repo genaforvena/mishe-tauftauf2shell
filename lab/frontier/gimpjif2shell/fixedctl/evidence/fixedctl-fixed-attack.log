@@ -1,0 +1,22 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed
+GLib-GIO-Message: 04:56:04.726: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:56:04.727: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:56:17.626: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:56:17.632: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:56:17.632: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.637: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.639: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.645: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.645: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.646: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.651: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.654: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.684: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.701: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 04:56:17.702: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Jeff's Image Format-Warning: Error reading image data. Image may be corrupt!
+
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-fixed/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated

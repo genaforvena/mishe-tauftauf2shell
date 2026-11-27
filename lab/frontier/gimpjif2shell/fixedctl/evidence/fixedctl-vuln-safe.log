@@ -1,0 +1,22 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln
+GLib-GIO-Message: 04:53:55.408: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:53:55.408: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:54:10.117: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:54:10.117: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:54:10.117: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.137: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.143: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.154: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.155: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.156: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.157: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.168: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.203: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.233: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 04:54:10.233: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+script-fu-Warning: 4
+
+batch command executed successfully
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: GEGL-WARNING: (../gegl/buffer/gegl-tile-handler-cache.c:1076):gegl_tile_cache_destroy: runtime check failed: (g_queue_is_empty (&cache_queue))
+To debug GeglBuffer leaks, set the environment variable GEGL_DEBUG to "buffer-alloc"
+EEEEeEeek! 2 GeglBuffers leaked

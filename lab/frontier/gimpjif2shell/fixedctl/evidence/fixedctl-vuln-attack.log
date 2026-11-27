@@ -1,0 +1,21 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln
+GLib-GIO-Message: 04:54:33.885: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:54:33.885: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:54:45.444: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 04:54:45.444: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 04:54:45.444: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.444: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.445: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.445: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.446: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.446: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.447: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.447: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.451: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.454: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 04:54:45.454: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load: fatal error: Segmentation fault
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
