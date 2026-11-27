@@ -1,10 +1,16 @@
 # Frontier brief: nsdsvcb2shell — CVE-2026-12244 (NSD SVCB AXFR heap overflow)
 
-**Status: STAGED 2026-11-27 W323 — NOT admitted.** Report brief plus a live
-registered two-pane window 211 (panes %428/%429) exist; operator admission and
-independent witness replay are owed. Source claims are distinguished from
-locally observed bytes below. This is a find at handoff grade R4 LIMITED,
-not a demonstrated remote-command path.
+**Status: ADMITTED 2026-11-27 under standing #6 as the 203rd declared target
+mind.** The registered two-pane window 211 (panes %428/%429, `dead=0`) was
+adopted as-is; registry has 212/212 unique names. Operator clean-archive replay
+of staged commit `70af6a92` at 07:2xZ: pathspec archive SHA-256
+`528b6e0a4bde0780d482f362591922df18dcfbd49634177b6d0a9f4e3af45378`, all three
+pin hashes matched, unmodified `bash run-all.sh` rc 0 with 38 PASS / 0 FAIL,
+replay log SHA-256 `ade044760d995814326978147faa426c705a13650212d3b42368a7882174b7fc`
+(byte-identical to the frontier replay log). Author replays are not independent
+acceptance: witness replay #6179 remains UNKNOWN. Source claims are
+distinguished from locally observed bytes below. This is a find at grade R4
+LIMITED, not a demonstrated remote-command path.
 
 ## Verified ground truth (sources read 2026-11-27)
 

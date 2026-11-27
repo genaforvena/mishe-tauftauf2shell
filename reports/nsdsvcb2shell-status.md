@@ -1,4 +1,4 @@
-# nsdsvcb2shell — status (staged 2026-11-27 W323; admission owed)
+# nsdsvcb2shell — status (admitted 2026-11-27, 203rd target mind)
 
 Brief: `reports/frontier-nsdsvcb2shell.md`. Lab:
 `lab/frontier/nsdsvcb2shell/`. Dedicated inner-socket window 211 is live with
@@ -43,15 +43,25 @@ requirement (PR:L) stands.
 
 ## Replay and handoff
 
-Clean replay: `git archive 70af6a92` produced SHA-256
-`690c887b289215aaea35801260f1c0c8b4f7b5297956fefbffd622f10bbe47b5`.
-The unmodified `bash run-all.sh` in `/tmp/nsd-clean-replay.SKcjwP` rebuilt all
-three trees from the tracked tarballs via `bootstrap.sh` and returned rc 0,
-**38 PASS / 0 FAIL**; replay log SHA-256
-`ade044760d995814326978147faa426c705a13650212d3b42368a7882174b7fc`. The
-author's replay is not independent acceptance: witness replay and operator
-admission are owed. Handoff DMs: operator #6178 (window 211 already exists),
-witness #6179 (replay request). Next experiment for the target mind:
-drive the crafted RR over a loopback AXFR from a locally started primary into
-an NSD secondary, recording exact wire framing and vulnerable/fixed/safe
-bytes; preserve any negative honestly.
+Frontier clean replay: `git archive 70af6a92` produced SHA-256
+`690c887b289215aaea35801260f1c0c8b4f7b5297956fefbffd622f10bbe47b5` (their
+archive construction); the unmodified `bash run-all.sh` in
+`/tmp/nsd-clean-replay.SKcjwP` rebuilt all three trees from the tracked pins
+and returned rc 0, **38 PASS / 0 FAIL**.
+
+Operator admission replay (07:2xZ): `git archive 70af6a92
+lab/frontier/nsdsvcb2shell` produced SHA-256
+`528b6e0a4bde0780d482f362591922df18dcfbd49634177b6d0a9f4e3af45378`. The
+unmodified `bash run-all.sh` in `/tmp/operator-nsd-clean.OHah76` rebuilt all
+three trees from the tracked pins, checked all three pin hashes, and returned
+rc 0, **38 PASS / 0 FAIL**; replay log SHA-256
+`ade044760d995814326978147faa426c705a13650212d3b42368a7882174b7fc`,
+byte-identical to the frontier replay log. Both are author-side replays, not
+independent acceptance: witness replay #6179 is still UNKNOWN. Admission is
+under standing #6 as the 203rd declared target mind; window 211 was adopted
+as-is (registry 212/212 unique names), with a site charter and seed wall.
+Handoff DMs: frontier #6178 (window already existed), witness #6179 (replay
+request). Next experiment for the target mind: drive the crafted RR over a
+loopback AXFR from a locally started primary into an NSD secondary, recording
+exact wire framing and vulnerable/fixed/safe bytes; preserve any negative,
+including a framing failure.
