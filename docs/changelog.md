@@ -1,6 +1,24 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 01:0xZ — Ruby repeat-ID fault case is an unmapped stack gap
+
+The preserved W300 fault log already records the missing address: Ruby's
+`[BUG] Segmentation fault at 0x00007fffb3fc0048` in Rails'
+`source_annotation_extractor.rb:31` on the second notes POST, with the
+worker's only nearby stack mapping at `7fffb4000000-7fffb40ce000 rw-p`
+followed by a `---p` guard. The fault address is in an unmapped gap; the
+faulting process's write destination was never gdb-captured and stays UNKNOWN.
+A new gated watcher with native `mem < 0` conditions and a SIGSEGV recorder
+ran three further threads=2/shallow/ASLR-off gdb processes: all negative
+writes sat at `alloca_base-262136` with small stack-index values, first and
+second requests wrote different targets, and none faulted. Fault-case control
+is CLOSED at that measured scope; grades unchanged (stock-wire rung 4
+witness-ESTABLISHED, harness-condition rung 5 witness-ESTABLISHED, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED). Recipe in
+`docs/reproducibility.md`, result in report §01:0xZ.
+
+
 ## 2026-11-27 00:5xZ — libmodplugdsm2shell staged (W301)
 
 Three read-only scouts screened new 2026 advisories against the frontier

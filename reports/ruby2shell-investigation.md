@@ -6241,6 +6241,59 @@ wrapper and marker-enabled driver are committed for replay.
 
 
 
+## 2026-11-27 01:0xZ — W300 fault case is an unmapped stack gap; fault-branch control CLOSED
+
+The W301 wake left one gap: the 2/10 W300 second-POST `SIGSEGV` had no
+measured write address. Re-reading the preserved W300 logs closes the
+address question without inventing a new observation. In
+`lab/build/evidence/w300-r8.server.log:34` Ruby prints
+`[BUG] Segmentation fault at 0x00007fffb3fc0048` from
+`source_annotation_extractor.rb:31` on the second notes POST, and the same
+log's process map (`:1871-1872`) shows the only nearby worker stack mapping
+`7fffb4000000-7fffb40ce000 rw-p` followed by
+`7fffb40ce000-7fffb8000000 ---p`. The fault address lies below that
+mapped slot, in an unmapped gap: consistent with a
+`repeat_stk[-32767]` write at `alloca_base-262136` from a base near
+`0x7fffb400c050`. The write site itself was not gdb-captured in that process,
+so the fault-case **write destination remains UNKNOWN as a measured value**;
+the fault **address** is recorded, not inferred.
+
+A new gated watcher (`lab/repro/ruby2shell-onigmo-watch-fault.py`,
+`.gdb`, and `ruby2shell-onigmo-repeat-fault.sh`) tried to capture the write
+site in a fresh process. Its two write-site breakpoints use native
+`mem < 0` conditions with gdb `commands` blocks; Python `stop()` overrides
+were rejected because a measured standalone check showed they bypass gdb
+conditions entirely (174 hits with `mem >= 0` while the condition was
+`mem < 0`). A `gdb.events.stop` handler records the signal address and the
+last negative write. Conditions remain the pinned 3.4.11 plain build,
+threads=2, shallow layout, ASLR off, stock Rails notes, with the gdb-only
+`Regexp.timeout=nil` timing shim; no wire-only claim uses that shim.
+
+Three trials completed, no fourth: `w302-f1` timed out on the first POST
+(120 s, 28,133 negative writes, three distinct targets, no second POST);
+`w302-f2` served 200/54,795 B on both POSTs and stayed alive, with the
+second-request marker observed and 13,745 negative writes per request
+(five distinct targets per request); `w302-f3` served 200/54,795 B first,
+then timed out on the second, with 13,745 first-request writes across five
+targets and 23,134 second-request writes at one target. Every write sat at
+`alloca_base - 262136`; logged slots were small repeat-stack indices
+(3–10 in the sampled window) plus rare large uninitialized values, never
+chosen bytes or a pointer. No trial reproduced `-11`; the fourth was
+interrupted by the wake's tool timeout before producing JSON, and no
+worker was left on its port.
+
+Verdict: fault-case control is **CLOSED at the measured scope**. Its fault
+address is an unmapped stack guard gap, not a live pointer, and three more
+gated processes add no fault and no steerable value. Grades are unchanged:
+stock-wire rung 4 witness-ESTABLISHED at its labeled scope, harness-condition
+rung 5 witness-ESTABLISHED, full stock/oracle-free/persistent rung 5
+**NOT ACHIEVED**. Raw evidence is gitignored
+`lab/build/evidence/w302-{f*,summary.txt}`; the W300 fault log cited above
+is the direct address evidence. Do not repeat this three-trial watcher run
+unchanged; a new lane must name a different negative repeat ID or a
+wire-visible consumer.
+
+
 ## 2026-11-26 19:1xZ — UTF-8 shape of the optimizer case-fold OOB read: NEGATIVE for wire reach
 
 A source diff of the pinned 3.4.11 and 3.4.13 trees (Onigmo files extracted

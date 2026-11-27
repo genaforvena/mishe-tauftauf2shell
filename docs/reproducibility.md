@@ -14996,6 +14996,41 @@ False, False)` reached two distinct allocation addresses but no negative-mem
 write for synthetic subjects.
 
 
+## 2026-11-27 01:0xZ — W300 fault-address check and gated fault watcher
+
+The W300 fault address is already in the preserved log, not a new probe:
+`lab/build/evidence/w300-r8.server.log:34` records Ruby's
+`[BUG] Segmentation fault at 0x00007fffb3fc0048` in
+`source_annotation_extractor.rb:31`, and `:1871-1872` of the same log shows
+the worker stack mapping `7fffb4000000-7fffb40ce000 rw-p` followed by a
+`---p` guard, so that address is in an unmapped gap below the stack slot.
+That is a fault address; the write destination in the faulting process was
+not gdb-captured and stays UNKNOWN.
+
+The optional gated watcher adds a `gdb.events.stop` SIGSEGV recorder and uses
+native `mem < 0` breakpoint conditions with gdb `commands` blocks. Python
+`stop()` overrides must not be used for this: a standalone check measured
+174 hits with `mem >= 0` while that condition was set. From the repo root,
+after the 3.4.11 stock-app build:
+
+```sh
+sh lab/repro/ruby2shell-onigmo-repeat-fault.sh 3 4971
+```
+
+Each trial is a fresh threads=2/shallow/ASLR-off stock Rails worker behind
+the gdb-only `Regexp.timeout=nil` shim. Read
+`lab/build/evidence/w302-summary.txt` and `w302-f*.{json,server.log}`
+(gitignored), not the shell rc. The recorded run produced three completed
+trials: `w302-f1` timed out on the first POST; `w302-f2` served two
+200/54,795 B responses and stayed alive; `w302-f3` served the first and
+timed out on the second. All negative writes sat at `alloca_base-262136`
+with small repeat-stack index values, first and second requests wrote to
+different targets, and no trial faulted. Expect no chosen byte, pointer or
+command. A fourth trial was cut by the wake's tool timeout and left no
+worker on its port. Do not repeat this watcher run unchanged; a new lane
+must name a different negative repeat ID or a wire-visible consumer.
+
+
 ## 2026-11-26 18:5x–19:2xZ — axis2 admission, W284 verdict, libarchive staging, bounded lanes
 
 This section reproduces the matching `docs/task.md` fold. Raw logs and build
