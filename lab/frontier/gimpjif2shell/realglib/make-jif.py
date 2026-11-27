@@ -10,7 +10,8 @@ product 45771*46918 = 0x80000082, whose alpha-doubled data_size is 260.
 
 Usage: make-jif.py OUT (bytes HEXBYTE | ptr | published HEXBYTE |
                         published-long HEXBYTE | published-run N HEXBYTE |
-                        published-mix IN OUT | published-ptr | safe HEXBYTE)
+                        published-hex HEXSTRING | published-mix IN OUT |
+                        published-ptr | safe HEXBYTE)
 """
 import struct
 import sys
@@ -27,10 +28,13 @@ elif kind == "published-ptr":
     LEN, HEIGHT = 45771, 46918
     chosen = struct.pack("<Q", 0x00007F0000414243)
     plain = b"\x4d" * 280 + chosen + b"\x4d" * (448 - 288)
-elif kind in ("published", "published-long", "published-mix", "published-run"):
+elif kind in ("published", "published-long", "published-mix", "published-run",
+              "published-hex"):
     LEN, HEIGHT = 45771, 46918
     nbytes = 448
-    if kind == "published-mix":
+    if kind == "published-hex":
+        plain = bytes.fromhex(sys.argv[3])
+    elif kind == "published-mix":
         inside, outside = sys.argv[3], sys.argv[4]
         plain = bytes([int(inside, 16)]) * 260 + bytes([int(outside, 16)]) * (nbytes - 260)
     else:
@@ -54,7 +58,7 @@ if kind in ("bytes", "ptr"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
 elif kind in ("published", "published-long", "published-mix",
-              "published-run", "published-ptr"):
+              "published-run", "published-ptr", "published-hex"):
     assert LEN * HEIGHT == 0x80000082
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 260
 gce = b"" if kind == "safe" else b"\x21\xf9\x04\x01\x00\x00\x00\x00"

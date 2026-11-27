@@ -2028,3 +2028,63 @@ name was claimed from it. Terminal fault remains a layout-sensitive
 allocator fault. No chosen address, dereference, control flow, marker or
 command was observed; grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
 chosen bytes, NO r5.
+
+## W323 witness replay verdicts (2026-11-27, 07:0xZ message #6180)
+
+`#6170` (W322 commit `41d5a6b8`) and `#6156` (W321 commit `2547e6b5`) both
+ESTABLISHED AS LABELED, no counterexample. Clean archives, private hardlink
+AppImage tree, all offered scripts unmodified and rc 0. Detail:
+`.mishe-tauftauf/artifacts/witness-w323-gimpjif-w321/detail.md` and
+`.../witness-w323-gimpjif-w322/detail.md` (outside the repo, not committed).
+The W322 replay was byte-identical; the W321 fresh logs differ only in
+paths, timestamps, heap addresses, `traced` counts, the `INSIDE` heuristic,
+terminal-frame symbol and trailing script-fu notices. The witness checked
+all seven `rets` offsets are `c3 ret`, calloc/realloc offsets sit inside
+their symbols, `g_slice_alloc@0x80d00` is `jmp g_malloc`, and no GDB script
+writes a register. NIT preserved: GType naming is inference from
+version-matched disassembly, not a debug symbol. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. No replay owed.
+
+## W324 two-byte partial overwrite of `GData.qdatas` (2026-11-27, 07:21-07:40Z wake)
+
+Tooling: `realglib/make-jif.py` SHA-256
+`942bd1e30251c4d63cb02091dbcf29342a0b9e08245f6e217c7594bc3036ad19` gained
+`published-hex HEXSTRING`; regression check `published-run 8192 4d`
+reproduced `evidence/gdb-liveptr-8192.jif` SHA-256 `d6556936…` exactly, and
+every existing mode parsed. JIFs:
+`evidence/w324-partial-4140.jif` SHA-256
+`e5137147fb2f3e4e3c60b2997c40ce1f9477b19a48e2251504cfac8b4d959e34`,
+`evidence/w324-partial-280.jif` SHA-256
+`63de68f09215b1d0c8ba6acc67c207e28ff4da4f6c7c6a455c264418d9200fd2`,
+`evidence/w324-partial-3800.jif` SHA-256
+`54f1e613a7e13f673f3d19ace6efc6e5bac4676fc3e7501cc6531ea62b0ffd3c`.
+Runner `live/run-appimage-partialptr-324.sh` SHA-256
+`f7a7a268eccfcc712c53dfb61112671155c1a4986bbc28927e9fedc675cab5e8`,
+probe `live/gdb-partialptr-324.cmd` SHA-256
+`e3408dac2465138cab13f671a941dd5bfc33f513cd68f3c9946da35cda20da95`.
+Each run verified the AppImage SHA256SUMS entry, regenerated a private
+shim-free AppRun (shim lines deleted, asserted absent), used a fresh `$HOME`
+and `setsid timeout 180`; no register, plugin or heap byte was modified.
+
+Attack: probe `w324-partialptr-probe.log` SHA-256
+`0b0efc3737cdadf47f9303a43b51752d3c4315069d7fc761d2ca31139b539fa1`,
+full `w324-partialptr-full.log` SHA-256
+`00bcc96f3decea05c8fa78ce8d57381c3f4c5748aae68f7e2d6e39ad1ba3c041`.
+`PRE idx=0x5555557036d0 orig=0x555555703800`; `POST qdatas=0x555555704140`
+equals expected; `size264=0x21 nq272=0x1`. Two `WP_ACCESS` watchpoints on
+the recomputed target (offsets +0 and +8), armed at the validated inflate
+return site, logged zero hits; no `W324 SIGNAL` stop. GIMP printed
+`Fatal signal: Segmentation fault` with a GIMP-side backtrace; the session
+ended at the 180 s timeout.
+
+Controls: 280-byte overflow (`w324-control-280-probe.log` SHA-256
+`24758c18df78d5ac13c2caaea4ebdbae13fad6cad872a2f0cea81c91fb36d85a`,
+full `961269700a…`) has PRE=POST `qdatas=0x555555703810` and still crashes:
+the pointer change is not the cause. The `0x3800` control
+(`w324-control-3800-probe.log` SHA-256
+`c2cf6ca3dac41d59ab3356edc9c3ab9f83f1514cdb40b0b6b2980430c46db58c`,
+full `61d90cdb…`) is invalid: `orig=0x5555557037d0` (low16 `0x37d0`, not
+`0x3800`) and GDB hit an internal fatal error; preserved negative, do not
+retry unchanged. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5; no chosen-target dereference, control flow, marker or
+command measured.

@@ -1408,3 +1408,65 @@ the inferior calls are name lookups only. Grade unchanged: the object and
 field are named, but no chosen address, dereference, control flow, marker or
 command was observed, so the grade stays rung 3 pinned verbatim / rung 4
 PARTIAL chosen bytes, NO r5.
+
+## Witness replay: W321 and W322 ESTABLISHED AS LABELED (W323, 2026-11-27)
+
+The witness closed both outstanding offers in chat #6180. `#6170` replayed
+the W322 commit `41d5a6b8` from a clean archive: `resolve-w322-type.sh`
+SHA-256 `4065dbf2…` and log `14f85f9f…` matched, the unmodified script
+returned rc 0 and its replay was byte-identical. The witness verified by
+hand the load base `0x7ffff7a19000` from `g_type_register_dynamic = 0x3c8d0`
+and PC-201, the two file offsets `0x37236`/`0x372bd`, `g_malloc0(16)` stored
+at `TypeNode+0x28`, `g_realloc_n(NULL,1,16)` at `GData+8`, the three
+identifying strings and the GLib 2.84 version constants; the pinned upstream
+`gtype.c` SHA-256 `1aa2dd3d…` matches the excerpts verbatim. Its NIT stands:
+naming is an inference from version-matched disassembly, not a debug symbol;
+the GType name is UNKNOWN in that replay.
+
+`#6156` replayed the W321 commit `2547e6b5`: all four unmodified scripts
+returned rc 0 in a private hardlink AppImage tree; `rets`/`gslice`
+`entry=26239 ret=47571` matched exactly, and `all`/`chain` reproduced the
+`+272` 16-byte `calloc` via `g_malloc0+26` and the
+`g_type_register_dynamic` → `g_type_module_register_type` →
+`gegl_op_src_register_type` chain (PC shifts are ASLR, relative offsets
+identical). Every `rets` offset ends in a `c3 ret`; no GDB register write,
+chosen-address write, dereference, control flow, marker or command.
+Verdict on both: ESTABLISHED AS LABELED, no counterexample, no grade change
+(rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5).
+
+## Partial overwrite of a named live pointer, no dereference (W324, 2026-11-27)
+
+W313's zero-hit watcher observed the *old* target of `qdatas`; a full `0x4d`
+overwrite destroys the pointer, so it never tested whether a still-plausible
+pointer is read later. W324 changes only the low two bytes of the named
+`GData.qdatas` field while preserving the GData chunk size and `n_qdatas`.
+`realglib/make-jif.py` gained `published-hex HEXSTRING` (SHA-256
+`942bd1e3…`); the 282-byte JIF is `evidence/w324-partial-4140.jif` SHA-256
+`e5137147…` (260 chosen `0x4d` bytes, 4 padding bytes, `+264=0x21`,
+`+272=1`, then `40 41`).
+
+`evidence/w324-partialptr-probe.log` SHA-256 `0b0efc37…`, from the no-shim
+`live/gdb-partialptr-324.cmd` (SHA-256 `e3408dac…`) and
+`live/run-appimage-partialptr-324.sh` (SHA-256 `f7a7a268…`), records
+`idx=0x5555557036d0`, `orig=0x555555703800`, then at inflate return
+`POST qdatas=0x555555704140`, `size264=0x21`, `nq272=0x1` and
+`W324 OVERWRITE CONFIRMED`: exactly the attacker-chosen low two bytes, with
+neighbouring metadata intact. Hardware access watchpoints on the recomputed
+16-byte target, installed after inflate finished writing, had zero hits;
+no GDB signal stop was logged. GIMP later printed `Fatal signal:
+Segmentation fault` with a GIMP-side backtrace, and the run ended on the
+180 s timeout (`w324-partialptr-full.log` SHA-256 `00bcc96f…`).
+
+A layout-independent control stops the overflow at 280 bytes, leaving
+`qdatas` untouched: `w324-control-280-probe.log` SHA-256 `24758c18…` shows
+PRE and POST qdatas both `0x555555703810`, yet the same GDB internal fatal
+error and plug-in crash. The terminal crash is therefore **not** caused by
+the pointer change. A second control that wrote `0x3800` is invalid and
+preserved as a negative: the heap layout had moved the original low16 to
+`0x37d0`, so it was another change (`w324-control-3800-probe.log` SHA-256
+`c2cf6ca3…`).
+
+So a two-byte attacker-controlled write into a named live pointer field is
+achievable, but no read or dereference of the chosen target was measured and
+the crash is not attributable to that write. Grade unchanged: rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, NO r5.
