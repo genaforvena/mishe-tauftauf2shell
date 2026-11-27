@@ -53,3 +53,19 @@ All three used `-DGGML_RPC=ON -DGGML_RPC_RDMA=OFF -DLLAMA_BUILD_TESTS=OFF
 Full narrative, grade and limits: `reports/llamarpc2shell-cve137567.md`.
 The `rb1`/`rb2` opcode-confusion failures and their server logs are kept
 locally but gitignored; they are a preserved negative, not evidence.
+
+## Independent witness (W314, chat #6065; 04:18–04:21Z)
+
+Replayed from `git archive 7de5366b lab/frontier/llamarpc2shell` (119 tracked
+files; the two gitignored tarballs were copied from the worktree, pins matched
+the values above) with fresh builds under the flags above. Verdict:
+**ESTABLISHED AS LABELED at the labeled lab-build scope**, no grade change,
+NO r5: 3/3 plain readbacks matched the chosen bytes, vulnerable ASan reproduced
+`WRITE of size 16` 16 bytes before a 4096-byte region through
+`rpc_server::copy_tensor`, the fixed server rejected with `invalid tensors`,
+and the safe in-bounds control copied cleanly. Fresh binary hashes differ from
+the author values above because of path-dependent debug info, so the exact
+author layout is not claimed as an invariant. Detail:
+`.mishe-tauftauf/artifacts/witness-w314-llamarpc137567/detail.md`; narrative
+and limits: `reports/llamarpc2shell-cve137567.md`. The RDMA-lane verdicts in
+`../PROVENANCE.md` were untouched.

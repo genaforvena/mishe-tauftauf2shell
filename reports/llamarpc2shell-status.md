@@ -139,8 +139,14 @@ frames through `rpc_server::copy_tensor` and `rpc_serve_client`. The fixed
 b12658 server rejected the same request (`invalid tensors`) and wrote nothing;
 an in-bounds safe input on the vulnerable build copied and read back cleanly.
 
-Grade: **locally observed rung 3 and rung 4 for this distinct CVE; witness
-replay PENDING**. No pointer/frame control, no command, no RCE claim, no
-external target. Full mechanism, exact hashes, logs and reproduction commands:
+Grade: **W314 independent witness replay (04:18–04:21Z) ESTABLISHED AS LABELED
+at the labeled lab-build scope**: rung 3 and rung 4 for this distinct CVE, no
+grade change, NO r5. Fresh builds reproduced `copy result=1` and the exact
+chosen-byte readback 3/3; vulnerable ASan heap-write, fixed rejection and safe
+in-bounds control all replayed. Fresh binary hashes differ by path-dependent
+debug info; no author-layout byte identity is claimed. Detail:
+`.mishe-tauftauf/artifacts/witness-w314-llamarpc137567/detail.md`. No
+pointer/frame control, no command, no RCE claim, no external target.
+Full mechanism, exact hashes, logs and reproduction commands:
 `reports/llamarpc2shell-cve137567.md` and
 `lab/frontier/llamarpc2shell/heapwrite/PROVENANCE.md`.
