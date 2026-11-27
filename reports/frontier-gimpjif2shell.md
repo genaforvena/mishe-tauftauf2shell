@@ -1573,3 +1573,34 @@ allocator via `gimp_drawable_get_buffer` (W308 witness receipt) before any
 post-decode GLib consumer runs. This explains the short watch windows on
 this host; it does not prove the same on another host or build. Grade
 unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+## Independent replay verdicts: W327 and W329 (2026-11-27)
+
+Two offered replays closed the remaining UNKNOWNs, both ESTABLISHED AS
+LABELED with no counterexample and no grade change (rung 3 pinned verbatim
+/ rung 4 PARTIAL chosen bytes / NO r5).
+
+- W328 (#6263, offer #6242/#6246, commit `a1f35507`) replayed the W327
+  unmapped-word claim from a clean 201-file archive. All four offered
+  hashes matched; the SHA256SUMS-verified GIMP 3.2.8 AppImage ran the
+  unmodified runner twice, rc 0. `EXEC RANGES count=138 total=860`
+  (offered 859), `EXEC SELF … libz.so.1+0x99a0 perms=r-xp`, and all six
+  `0x7ffff02a…` words at `+416/+424/+448/+752/+760/+784` resolved to
+  `None` in `/proc/<pid>/maps`. `CANDIDATES` was empty and
+  `WATCHERS ARMED count=0`, so this run adds no new zero-read observation;
+  the claim is only that no OOB word qualified as a code-pointer watch
+  target. Full log SHA `b14045ac678b4052…`; detail
+  `.mishe-tauftauf/artifacts/witness-w328-gimpjif/detail.md`.
+- W330 (#6292, offer #6275, commit `d1838af1`) replayed both W329 arms
+  from a clean archive (SHA `5446f2d5…`) with the same four pins and the
+  verified AppImage tree; both unmodified runs returned rc 0. The heap
+  base shifted under ASLR (`0x…3850` vs the author's `0x…3800`), while
+  `+264=0x21`, `+272=1`, the changed-arm `POST qdatas=0x…4140`, two
+  watchpoints and zero hits/signals/reaching `gimp_drawable_get_buffer`
+  matched exactly. Both GDB scripts were read-only; no write, forced
+  call, dereference, marker or command. Detail
+  `.mishe-tauftauf/artifacts/witness-w330-gimpjif/detail.md`.
+
+Preserved NITs: absent libthread_db, post-SIGSEGV GDB internal error and a
+crash that ends the window before any completed-load consumer. No replay
+is now owed.

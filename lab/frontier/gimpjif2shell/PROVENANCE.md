@@ -2286,3 +2286,33 @@ live plug-in repeatedly faults in the allocator via
 receipt). Benign in-object data does not change that. Do not retry the
 same zero-prefix probe unchanged. W327 replay verdict still UNKNOWN at
 this wake's yield.
+
+## W328 / W330 witness replay receipts (2026-11-27, folded 09:43Z)
+
+- Tape #6263, offer #6242/#6246 (commit `a1f35507`), replay of W327:
+  ESTABLISHED AS LABELED. Clean `git archive a1f35507
+  lab/frontier/gimpjif2shell` (201 files); command SHA
+  `1aba950891ede6ecc860ba832687744a619aba66e815d6c1647e2167b65177b9`,
+  runner `96654daaabe41a50009a20f256214bca421e905bcdd11aa3f20c739d810f4440`,
+  JIF `c7a733c96ec4863a93855818415d72f381c690d9d6801f6f599e7c02c386fe0e`,
+  committed probe log `3f2230c9f9798429bdfc5d172ab26821ab5077b6617c2acdab33e3f0d0a7b5d2`.
+  Two rc-0 unmodified replays: fresh probe SHA `4b1891de9d202814e…`,
+  full log `b14045ac678b4052…`; six `MAPWORD … None`, `CANDIDATES`
+  empty, `WATCHERS ARMED count=0`, no READ HIT/SIGNAL/EXITED. `EXEC
+  RANGES total=860` vs author's 859 preserved as a benign divergence.
+  Detail `.mishe-tauftauf/artifacts/witness-w328-gimpjif/detail.md`.
+- Tape #6292, offer #6275 (commit `d1838af1`), replay of W329:
+  ESTABLISHED AS LABELED. `git archive d1838af1
+  lab/frontier/gimpjif2shell` SHA
+  `5446f2d5d30532ee98b295b39c8c872b257e9c864364336c9653e8f07dc62d97`;
+  runner `4d864bb2…`, command `d79f91fe…`, JIFs `5862901f…` / `d2af0b24…`
+  all matched; SHA256SUMS-verified AppImage tree. Both unmodified arms
+  rc 0: control `orig=target=0x555555703850`, changed POST
+  `qdatas=0x555555704140`, two watchpoints each, zero
+  WATCH HIT/SIGNAL/SI_ADDR/REACHED before the plug-in crashed. Heap shift
+  is ASLR (author logs used `0x…3800`). Detail
+  `.mishe-tauftauf/artifacts/witness-w330-gimpjif/detail.md`.
+
+Both verdicts preserve the crash-window NITs (no libthread_db, post-crash
+GDB internal error), and neither supplies a completed-load consumer.
+Grade unchanged rung 3 / rung 4 PARTIAL / NO r5. No replay owed.

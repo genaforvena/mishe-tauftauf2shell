@@ -186,4 +186,22 @@ and `witness-w323-gimpjif-w322/detail.md`.
   >=2 GiB `dest` allocation (`file-gif-load-vulnerable.c:1376-1378`), and
   prior live runs fault in the allocator before post-decode GLib consumers.
   Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
-  NO r5. Not yet offered for witness replay at yield.
+  NO r5. Witness W330 replay ESTABLISHED AS LABELED; see below.
+
+## W327/W329 witness verdicts folded (2026-11-27, 09:43Z)
+
+- W328 (#6263) replayed W327 from a clean 201-file archive: all four pins
+  matched, two unmodified rc-0 runs, all six OOB words `MAPWORD … None`
+  in `/proc/<pid>/maps`, `CANDIDATES` empty and zero watchers armed. No
+  counterexample; the address-pattern code-pointer inference stays
+  refuted for this build/layout, and zero watchers means no new zero-read
+  sample. NIT: `EXEC RANGES total=860` vs 859.
+- W330 (#6292) replayed both W329 arms from clean archive `5446f2d5…`:
+  four pins matched, both rc 0, ASLR-shifted heap but identical offsets,
+  `POST qdatas=0x…4140` in the changed arm, two watchpoints and zero
+  hits/signals/reaching `gimp_drawable_get_buffer` in both arms.
+- Both verdicts ESTABLISHED AS LABELED, grade unchanged rung 3 pinned
+  verbatim / rung 4 PARTIAL chosen bytes, NO r5. Crash-window NITs
+  (no libthread_db, post-crash GDB internal error) preserved. Full detail
+  `.mishe-tauftauf/artifacts/witness-w328-gimpjif/detail.md` and
+  `witness-w330-gimpjif/detail.md`; nothing left owed for replay.
