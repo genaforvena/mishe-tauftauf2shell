@@ -62,3 +62,63 @@ independent replay to change. Author report is not acceptance.
 
 All harness sockets are in-process `AF_UNIX` socketpairs. No external system
 was contacted; any future live-build experiment must bind to 127.0.0.1 only.
+
+## Live stock build, loopback only (2026-11-27, this wake)
+
+Stock v2.4.30 and fixed v2.4.32 tag tarballs were provisioned read-only into
+`lab/bzfs2shell-live/` (SHA-256 `29b3b97f…` and `86a5ded5…`); c-ares
+`cares-1_27_0` was built into a local `deps/` prefix. The traced working
+`NetHandler.cxx` differs from the hash-matched upstream source
+(`19aeebbe…`, `3abb2fa5…`, originals in `lab/bzfs2shell-live/original/`) only
+by stderr traces. Server-only builds used
+`--disable-client --disable-bzadmin --disable-plugins --enable-debug`; one
+2.4.30 build also used `--enable-asan`. Every server bound to 127.0.0.1 only
+(ports 15154/15155); no non-loopback probe was made. Runner
+`lab/bzfs2shell-live/run_live.sh`, client `send_packet.py`.
+
+Handshake prerequisite (negative result): a raw 1028-byte exploit packet is
+consumed by the pre-auth reader at `src/bzfs/bzfs.cxx:6055-6132`, never by
+`tcpReceive()`. The client must first send `BZFLAG\r\n\r\n` (10 bytes) and
+read the 9-byte welcome (`BZFS0221\x00`) before the exploit packet reaches
+`GameKeeper::Player::handleTcpPacket` → `NetHandler::tcpReceive()`.
+
+Real stock layout observed in the live process (`live-vuln-asan4.log`,
+`live-vuln-plain2.log`): `sizeof(NetHandler)=2384`, `tcpmsg` at object offset
+96, `tcplen` at 1120, `ares` at 0, `info` at 8, `fd` at 36, `peer` at 40,
+`dotNotation` at 64. The first four past-end body bytes therefore overwrite
+`tcplen` **inside the same heap object**, which stock ASan does not flag;
+the negative-offset write can and did reach before the object.
+
+With body tail `00 f8 ff ff` (little-endian -2048), the live trace records
+`receive(1028)` at `tcpmsg+4`, `size=1024`, `clobber_word=fffff800`, then
+`tcplen=-1024` at the next `tcpReceive()`. A first attempt with tail
+`f8 ff ff ff` set `tcplen=-8` — a corrected mistake, preserved as a negative.
+The second packet makes `receive(4)` call
+`recv(fd, tcpmsg-1024, 1028)`, destination object offset -928.
+
+- ASan build (`live-vuln-asan4.log`): `ERROR: AddressSanitizer:
+  heap-use-after-free`, `WRITE of size 1024`, stack
+  `recv` (ASan interceptor) → `NetHandler::receive` → `NetHandler::tcpReceive`
+  → `GameKeeper::Player::handleTcpPacket`. An earlier ASan report from the
+  harness-style trace reading `tcpmsg[tcplen]` was removed by guarding the
+  instrumentation; the surviving report is the real syscall write.
+- Non-ASan build (`live-vuln-plain2.log`): the same second write placed
+  attacker-chosen marker words at real member offsets:
+  `ares=0x41424344454647bc`, `info=0x41424344454647bd`,
+  `playerIndex=1162233792`, `fd=1094861636`, and object bytes at offsets
+  0,8,…,88 all matched the corresponding 8 bytes of the wire pattern. The
+  process then segfaulted, as expected after pointer members became
+  non-dereferenceable.
+
+Grade update: rungs 1/2/3 are now ESTABLISHED in a **live stock v2.4.30 bzfs
+process on loopback**, with the real object layout and real `recv` write.
+Rung 4 is DEMONSTRATED chosen-value control at real stock-layout member
+offsets (`ares`, `info`, `fd`, `playerIndex`, `dotNotation` control block),
+still NOT control of a chosen target address, a function-pointer overwrite,
+an execution marker or rung 5. Fixed-build control (`live-fixed.log`,
+v2.4.32): `BZTRACE fixed-reject len=1024 tcplen=4`, server stdout
+`Player [0] sent huge packet length (len=1024), possible attack` and
+`Player [0] removed ... large packet recvd`; only the 4-byte header read
+occurred, no body `recv`, no negative `tcplen`, no second write; the client's
+second `sendall` failed on a closed pipe as expected. Author observation is
+not independent acceptance.

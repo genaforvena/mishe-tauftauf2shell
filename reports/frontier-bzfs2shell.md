@@ -179,3 +179,21 @@ stale numbers remain as comments inside the digest-pinned
 `tcp_len_overflow.cpp`; those bytes are deliberately preserved so the
 witness-verified pin `1a16963f…` stays valid, and changing them would owe a new
 independent replay.
+
+## Post-handoff live stock-build replay (2026-11-27)
+
+The layout gap in section "Consumer-reality check" is now closed on a live
+loopback bzfs process built from stock tag `v2.4.30`: `tcpmsg` sits at object
+offset 96 and `tcplen` at 1120 in a 2384-byte `NetHandler`. The past-end
+overwrite is intra-object, so stock ASan does not flag the first four bytes;
+the attacker-chosen `-2048` clobber leaves `tcplen=-1024`, and a second
+packet drives `recv(fd, tcpmsg-1024, 1028)`. ASan reports a real
+`heap-use-after-free`, `WRITE of size 1024`, through `recv` →
+`NetHandler::receive` → `NetHandler::tcpReceive`; a non-ASan replay reads the
+chosen wire bytes back from real `ares`, `info`, `fd`, `playerIndex` and
+`dotNotation` offsets. The pre-auth `BZFLAG\r\n\r\n` handshake is required
+before the exploit packet reaches `tcpReceive()`. Full logs, addresses,
+build flags and the fixed-build control are in
+`reports/bzfs2shell-status.md` and `lab/bzfs2shell-live/`. Rung 4 remains a
+chosen-value control, not chosen-target pointer control or execution; rungs
+1/2/3 now have live stock-process evidence in addition to the pinned harness.
