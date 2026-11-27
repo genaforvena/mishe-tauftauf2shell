@@ -1,0 +1,22 @@
+COMPILE vuln-asan rc=0
+COMPILE fixed-asan rc=0
+COMPILE vuln-plain rc=0
+COMPILE fixed-plain rc=0
+COMPILE vuln-marker rc=0
+COMPILE fixed-marker rc=0
+PASS vuln-asan-n8-clean
+PASS vuln-asan-n31-clean
+PASS vuln-asan-n32-write1
+PASS vuln-asan-n33-write33
+PASS vuln-asan-n64-write64
+PASS vuln-asan-n64-algo-frame
+PASS fixed-asan-all-clean
+PASS vuln-plain-n31-rc0
+PASS vuln-plain-n64-rc139
+PASS fixed-plain-both-rc0
+PASS gdb-saved-rip-chosen
+PASS marker-vuln-executed
+PASS marker-fixed-returns
+PASS vuln-source-unbounded
+PASS fixed-source-bounded
+TOTAL: 15 PASS / 0 FAIL

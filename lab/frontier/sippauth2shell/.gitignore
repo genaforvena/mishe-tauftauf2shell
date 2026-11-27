@@ -1,0 +1,16 @@
+build-vuln/
+build-fixed/
+out-vuln/
+out-fixed/
+out-vuln-plain/
+out-fixed-plain/
+runs/
+harness/vuln-asan
+harness/fixed-asan
+harness/vuln-plain
+harness/fixed-plain
+harness/vuln-marker
+harness/fixed-marker
+harness/compile-*.log
+*.log
+evidence/*.out
