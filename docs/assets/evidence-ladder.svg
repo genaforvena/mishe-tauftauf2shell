@@ -27,8 +27,8 @@
 <line x1="56" y1="316" x2="924" y2="316" stroke="#e7e8e3"/>
 <text x="56" y="354" font-size="15" fill="#2c3034">R4</text>
 <text x="112" y="354" font-size="13" fill="#3e4348">Demonstrated impact</text>
-<text x="500" y="358" font-size="17" text-anchor="middle" fill="#3f6b50">32</text>
-<text x="665" y="358" font-size="17" text-anchor="middle" fill="#3e4348">144</text>
+<text x="500" y="358" font-size="17" text-anchor="middle" fill="#3f6b50">33</text>
+<text x="665" y="358" font-size="17" text-anchor="middle" fill="#3e4348">143</text>
 <text x="830" y="358" font-size="17" text-anchor="middle" fill="#8b9295">37</text>
 <line x1="56" y1="372" x2="924" y2="372" stroke="#e7e8e3"/>
 <text x="56" y="410" font-size="15" fill="#2c3034">R5</text>

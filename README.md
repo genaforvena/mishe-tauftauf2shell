@@ -24,7 +24,7 @@ Active means a target mind with at least one row in the register; engine-level a
 | R1 Suspected vulnerability | 201 | 0 | 12 |
 | R2 Reproducible crash | 205 | 0 | 8 |
 | R3 Confirmed memory corruption | 207 | 1 | 5 |
-| R4 Demonstrated impact | 32 | 144 | 37 |
+| R4 Demonstrated impact | 33 | 143 | 37 |
 | R5 Working remote command execution | 13 | 2 | 198 |
 
 Full boundaries, scope notes and links are in the [evidence register](docs/results.md).
