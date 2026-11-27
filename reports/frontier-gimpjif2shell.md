@@ -2111,3 +2111,12 @@ read-only-sink scope, grade-neutral, NO r5. NIT: run A's `idx` drifted to
 `0x12e1` instead of the author's `0x1327`; layout-conditioned and still
 read-only. Full logs, hashes and negatives: W355/W366 sections of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+A W356 split-map attempt moved the coherent fake map to `ARRBASE−0x800` and
+filled 256 loader-array slots with its address. Two unmodified-runner replays
+reached pinned inflate but observed `idx` drift of −0x130 and +0x100 against
+the encoded pointer values; only genuine `adler32`/`adler32_z` resolutions
+and the genuine GOT write occurred, with no chosen map hit, `l_used` store or
+chosen GOT value. Negative preserved; grade and r5 ceiling unchanged. Exact
+JIFs, hashes and the `idx`-dependence cause: W356 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

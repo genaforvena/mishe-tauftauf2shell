@@ -3617,3 +3617,50 @@ corrected above to three entries / nine logged fields. Would change the
 verdict: an observed chosen-address store, chosen-value GOT write,
 harness/GDB memory write, canonical transfer, marker or command, or a pin
 mismatch. No replay is owed beyond this verdict.
+
+## W356 split fake map outside the loader array: negative (2026-11-27, 18:50Z wake)
+
+Bounded repair of W355's identified overlap cause: the fake `link_map` was
+anchored at `ARRBASE−0x40`, so its `l_info[DT_*]` and hash tables fell inside
+the loader-array slots. The throwaway generator `/tmp/w356-mkforged.py` keeps
+W355's coherent `memcpy` map but anchors it at `ARRBASE−0x800`, writes every
+field relative to that map, and fills 256 consecutive loader-array slots with
+the map address `M`. The 0x800 gap leaves the map's tail before `ARRBASE`;
+noise bytes in the gap were tuned so `zlen=805` and the runner path stayed at
+101 characters, matching the W353/W355 layout band.
+
+Try 01: encoded `idx=0x555555679070`, `delta=0x47210`, `M=0x5555556bfa80`,
+chosen `st_value=0x5555556c0080`, noise 291, JIF
+`live/evidence/w356-splitmap-try01.jif` SHA-256
+`8fd3ac21aefa9def5a920949e7244fe2757db4231564df176468af7b6605874a`.
+Unmodified `run-appimage-min340.sh` (`b047c40e…`) and unchanged read-only
+`gdb-w355-forged.cmd` (`23c3cbf1…`): `PASS: pinned inflate reached`,
+`INFO: no in-GDB fault stop`, but PRE `idx=0x555555678f40` — 0x130 below the
+encoded value. Only genuine `adler32`/`adler32_z` lookups fired, with one
+genuine GOT write `rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`; no chosen
+map hit, no `0xb200` LUSED store and no chosen GOT value. Log SHAs
+`e77720b67c0a740046a6f12afaedc3065204a7e5f7cc129b8dcf0d918a3b78a4`
+(GDB), `8f8e70b0b0f32e0e16bf6ff96b604be777ce57adae700b08d08eafbb18e55e28`
+(run).
+
+Try 02 re-encoded the pointer values for the measured `idx=0x555555678f40`
+(same `delta`, `M=0x5555556bf950`, chosen `st_value=0x5555556bff50`, noise
+289), JIF `live/evidence/w356-splitmap-try02.jif` SHA-256
+`e6fc29ac1f0894fcea9cb7b574252ae4766d482adb40579efcfbe0693a84d4b4`.
+Same runner and observer: pinned inflate reached, PRE `idx=0x555555679040`
+— 0x100 above the encoded value — and again only genuine resolutions and the
+genuine GOT write; no chosen map hit, LUSED store or chosen GOT value. Log
+SHAs `89975559fd8dfe52419f72746baac799164eb64933a6689bbfd07400fd5629eb`
+(GDB), `df5b62da555686111563bc0070a12bd7ba5556af2a08e154e39589e25f00c09b`
+(run). Both runs ended in the plug-in's terminal `Fatal signal:
+Segmentation fault`, with no in-GDB fault stop.
+
+Cause of the negative: `M = idx + delta − 0x800` is a function of the runtime
+`idx`, which moved −0x130 and then +0x100 between runs even at `zlen=805`
+with the same 101-character path. Static pointer words in a JIF therefore do
+not reliably point at a coherent fake map. W353 tolerated this drift with a
+dense 16-byte-phase `P1` pattern, but that pattern cannot place a coherent
+map's fields at one chosen address. Grade unchanged: rung 3 pinned verbatim /
+rung 4 chosen-pointer read, NO chosen-address store, NO r5. Do not replay
+these two JIFs unchanged; a further attempt needs a measured `idx`-independent
+layout, which this wake did not establish.

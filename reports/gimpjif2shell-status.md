@@ -612,3 +612,12 @@ path that remains read-only. Verified grade unchanged: rung 3 pinned verbatim
 / rung 4 ✓ at the witness-verified chosen-pointer-dereference scope; NO
 chosen-address write, NO r5. Hashes and next bound: W355/W366 sections of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+W356 tested the bounded repair of moving the fake map to `ARRBASE−0x800` and
+filling 256 loader-array slots with its address. Two unmodified-runner
+replays reached pinned inflate but runtime `idx` drifted −0x130 then +0x100
+from the encoded pointer values; both produced only genuine `adler32`/
+`adler32_z` resolutions and the genuine GOT write, with no chosen map hit,
+`l_used` store or chosen GOT value. Preserved negative, no grade change and
+NO r5; a further attempt needs an `idx`-independent layout. Details, JIF and
+log hashes: W356 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

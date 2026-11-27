@@ -1,0 +1,99 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 19:09:39.842: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 19:09:39.842: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 19:10:08.338: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 19:10:08.339: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 19:10:08.339: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.426: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.427: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.430: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.430: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.431: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.431: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.433: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.534: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.629: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 19:10:08.630: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+W355F PRE avail=0x80000002 idx=0x555555679040
+W355F LD base=0x7ffff7fc7000
+W355F ENTRY n=1 name=adler32 hash=0x1fb025d2 scope=0x7ffff7ffe8e8
+W355F TABLE n=1 rbx=0x7ffff7ffe5f0 rdx=0x55555556c078 rax=0x0 hash=0x1fb025d2
+W355F TABLE n=2 rbx=0x7ffff7fb48e0 rdx=0x7ffff7fb0038 rax=0x7 hash=0x1fb025d2
+W355F TABLE n=3 rbx=0x7ffff7e65000 rdx=0x7ffff7e59038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=4 rbx=0x7ffff7e656e0 rdx=0x7ffff7d54038 rax=0x3 hash=0x1fb025d2
+W355F TABLE n=5 rbx=0x7ffff7e65cd0 rdx=0x7ffff7d46038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=6 rbx=0x7ffff7e662c0 rdx=0x7ffff7d18038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=7 rbx=0x7ffff7e669a0 rdx=0x7ffff7c82038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=8 rbx=0x7ffff7c400e0 rdx=0x7ffff7c3a038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=9 rbx=0x7ffff7c407c0 rdx=0x7ffff7bfc038 rax=0x7 hash=0x1fb025d2
+W355F TABLE n=10 rbx=0x7ffff7c40ea0 rdx=0x7ffff7be0038 rax=0x7 hash=0x1fb025d2
+W355F TABLE n=11 rbx=0x7ffff7c41590 rdx=0x7ffff7bbf038 rax=0x7 hash=0x1fb025d2
+W355F TABLE n=12 rbx=0x7ffff7bb5000 rdx=0x7ffff7bb2038 rax=0x1 hash=0x1fb025d2
+W355F TABLE n=13 rbx=0x7ffff7bb56f0 rdx=0x7ffff7ba8038 rax=0x3 hash=0x1fb025d2
+W355F TABLE n=14 rbx=0x7ffff7bb5dd0 rdx=0x7ffff7b96038 rax=0x7 hash=0x1fb025d2
+W355F TABLE n=15 rbx=0x7ffff7bb64b0 rdx=0x7ffff7b55038 rax=0x17 hash=0x1fb025d2
+W355F TABLE n=16 rbx=0x7ffff7aa8000 rdx=0x7ffff7aa4038 rax=0x7 hash=0x1fb025d2
+W355F MATCH n=1 rdi=0x7ffff7aa4437 r9=0x7ffff7a84a78 st_name=0x5f map=0x7fffffffb854
+W355F GOT n=1 rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0
+W355F ENTRY n=2 name=adler32_z hash=0xcc50ef0b scope=0x7ffff7ffe8e8
+W355F TABLE n=17 rbx=0x7ffff7ffe5f0 rdx=0x55555556c078 rax=0x0 hash=0xcc50ef0b
+W355F TABLE n=18 rbx=0x7ffff7fb48e0 rdx=0x7ffff7fb0038 rax=0x4 hash=0xcc50ef0b
+W355F TABLE n=19 rbx=0x7ffff7e65000 rdx=0x7ffff7e59038 rax=0x3c hash=0xcc50ef0b
+W355F TABLE n=20 rbx=0x7ffff7e656e0 rdx=0x7ffff7d54038 rax=0x0 hash=0xcc50ef0b
+W355F TABLE n=21 rbx=0x7ffff7e65cd0 rdx=0x7ffff7d46038 rax=0x1c hash=0xcc50ef0b
+W355F TABLE n=22 rbx=0x7ffff7e662c0 rdx=0x7ffff7d18038 rax=0x3c hash=0xcc50ef0b
+W355F TABLE n=23 rbx=0x7ffff7e669a0 rdx=0x7ffff7c82038 rax=0x1c hash=0xcc50ef0b
+W355F TABLE n=24 rbx=0x7ffff7c400e0 rdx=0x7ffff7c3a038 rax=0x1c hash=0xcc50ef0b
+
+
+Fatal signal: Segmentation fault
+----- Backtrace -----
+0x4d3574 ???
+0x5cb4f9 ???
+0x5cb68a ???
+0x792af644532f ???
+	./signal/../sysdeps/unix/sysv/linux/x86_64/libc_sigaction.c:0
+0x65450a ???
+0x655d65 ???
+0x64d354 ???
+0x913bd5 ???
+0x954cce ???
+0x7f7216 ???
+0x7f7ae6 ???
+0x5d1669 ???
+0x50e389 ???
+0x4ff704 ???
+0x697c59 ???
+0x697d55 ???
+0x94e19a ???
+0x43f4cc ???
+0x792af642a1c9 __libc_start_call_main
+	../sysdeps/nptl/libc_start_call_main.h:58
+0x792af642a28a __libc_start_main_impl
+	../csu/libc-start.c:360
+0x445544 ???
+0xffffffffffffffff ???
+---------------------
+A fatal error internal to GDB has been detected, further
+debugging is not possible.  GDB will now terminate.
+
+This is a bug, please report it.  For instructions, see:
+<https://www.gnu.org/software/gdb/bugs/>.
+
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w356-splitmap-try02.jif" "w356-splitmap-try02.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.
