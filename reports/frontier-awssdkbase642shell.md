@@ -1,9 +1,9 @@
 # Frontier brief: awssdkbase642shell — Base64 decoder heap OOB write
 
-**Status: QUEUED for lab work (frontier W345 screen); no harness, window or
-admission yet.** This brief records primary-source ground truth and the
-cheapest local experiment. No local trigger has been run; grades are UNKNOWN,
-not passes. No candidate was probed outside the public advisory/commit pages.
+**Status: LAB VERIFIED (frontier W345), staging, window and operator
+admission owed.** A direct-call harness on pinned `Base64.cpp` reproduced the
+heap overflow and controlled the OOB byte. No dedicated window or admission
+yet; no candidate was probed outside the public advisory/commit pages.
 
 ## Verified ground truth
 
@@ -36,25 +36,28 @@ not passes. No candidate was probed outside the public advisory/commit pages.
 - Duplicate check: the frontier wall has `awslc2shell` (AWS-LC TLS library)
   but no AWS SDK for C++ / Base64 lane. UxPlay, pgactive, OpenSSL CMS and
   this candidate are new scouts' finds and none has a lab tree or window.
-- Boundary arithmetic is source-bound but not yet executed: for length 5
-  with one trailing `=` (`AAAA=`), the calculator returns `2` while the
-  single loop iteration writes three bytes, so a one-byte heap overrun is
-  predicted. For length 9 the prediction is also one byte (5 allocated, 6
-  written). For canonical 4/8-character inputs the write stays in bounds.
+- Executed boundary (corrected from the initial arithmetic guess): the loop
+  consumes only complete 4-character blocks. For a 5-character input such as
+  `AAAA=` the trailing `=` lies outside the single block, so `value4` is the
+  fourth `A` (table value 0), not the sentinel. All three writes execute
+  into a 2-byte allocation; GDB confirms `m_length=2` and the third write at
+  offset 2.
 
 ## Rung-4 feasibility and limits
 
-The primitive is a heap OOB write of **one byte per malformed 4-character
-block**, not a bulk overflow. In the canonical `AAAA=` case, the fourth
-decoded value is the sentinel 255 and the third written byte becomes
-`((value3 & 3) << 6) | 255`, i.e. `0xFF` regardless of the first three
-characters — so the out-of-bounds byte is not obviously attacker-chosen.
-The patch's high-bit regression inputs matter because the parent indexes
-`m_mimeBase64DecodingTable[uint32_t(rawString[i])]` with a possibly signed
-`char`; negative values index outside the 256-byte member table. Whether
-that yields a controllable byte at the OOB offset is **UNKNOWN** until the
-real decoder is run under ASan/GDB. Do not claim chosen-byte control from
-the arithmetic alone.
+The primitive is a **one-byte heap OOB write** at offset 2 of a 2-byte
+decoded buffer. Debug builds abort before the write on `Array::GetItem`'s
+`assert(index < m_length)`; `-DNDEBUG` builds reach the sink, an assertion
+condition rather than a different allocator behavior. On the plain
+`-DNDEBUG` build the OOB byte follows
+`((value3 & 0x03) << 6) | value4`: with `AABa=` the chosen byte is `0x5A`
+and with `AADa=` it is `0xDA`, both read back in a live heap region at
+offset 2. Canonical `AAAA` and a 9-character all-`A` input stay in bounds.
+That is rung-4 chosen bytes at a chosen heap offset in the direct-call lab
+build; no pointer, saved RIP, marker, command or wire path was observed.
+Lab condition to disclose: the AWS core allocator is a separate translation
+unit, so the harness defines `Aws::Malloc`/`Aws::Free` as `malloc`/`free`;
+the pinned `Base64.cpp` body is verbatim and the heap region is real.
 
 Fix-side caveat: the fixed arm delegates to `aws-crt-cpp` v0.43.2, so a
 clean replay needs the CRT submodule (the patch changes the pinned
@@ -63,31 +66,31 @@ patch's own length assertion. The public advisory's "RCE not demonstrated"
 is consistent with this bounded primitive; no control-flow, pointer or
 command claim is warranted.
 
-## Cheapest local experiment
+## Local evidence and next experiment
 
-1. Provision the parent tarball at `2857dbc7` and the fix patch into
-   `lab/frontier/awssdkbase642shell/pins/` with SHA-256 pins; fetch is
-   provisioning, no probes.
-2. Compile the vulnerable `Base64.cpp` plus a tiny C++ harness calling
-   `Aws::Utils::Base64::Base64().Decode(input)` under ASan with `-g -O0`,
-   using the SDK core headers from the same pinned tree. If headers demand
-   more of the core library, copy the few needed headers verbatim with
-   hashes rather than linking the full SDK.
-3. Feed `AAAA=`, `AAAAA=`, 9-character padded strings, canonical `AAAA`,
-   and the patch's `0x80..0xFF` + `"AAA"` inputs. Record ASan write size and
-   offset, the OOB byte value, and fixed/safe controls. Under GDB on a plain
-   build, reset the offending byte to distinct values to test whether a
-   chosen byte reaches a live neighbour.
-4. Only if a chosen byte reaches a useful adjacent object should this be
-   staged with a window; otherwise close the lane as a bounded availability
-   bug and move to UxPlay's pre-auth RTSP stack write (fix `746ec0e`).
+`lab/frontier/awssdkbase642shell/` pins the SDK parent, fix patch, advisory
+and ten CRT dependency archives (18 SHA-256 pins). `sh run-all.sh` rebuilds
+three offline g++ consumers from those archives with `-g -O0`, ASan/plain and
+plain-without-asserts, and reports `RUN_ALL_OK 17 PASS / 0 FAIL` with summary
+SHA-256 `504bb8e541ebc6bfd16d73715bd144fdfffb3b42c8562e9db7a410c57903d234`.
+Observed: debug build aborts at `Array.h:208`'s `index < m_length` assertion;
+the `-DNDEBUG` ASan build reports `heap-buffer-overflow`, `WRITE of size 1`
+at pinned `Base64.cpp:115`, zero bytes after the 2-byte region for `AAAA=`;
+canonical `AAAA` and 9-`A` inputs are clean. Read-only GDB on the plain
+`-DNDEBUG` build, stopped at `Base64.cpp:120`, reads `m_length=2` and the
+chosen `0x5A` / `0xDA` at the OOB offset for `AABa=` / `AADa=`.
+
+Next: build the fixed v1.11.862 arm against `aws-crt-cpp` v0.43.2 to close
+the fixed control, then stage a window only if a real generated-client caller
+passes attacker-controlled wire strings to `Base64::Decode()`. Without a
+pointer or command side effect in a live target, R5 remains NO.
 
 ## Ranking context
 
 Ranked first among the scout's new finds because the sink is one file, the
 input is a short string, the parent/fix pair is exact, and the advisory
 already supplies malformed test vectors. Its ceiling is constrained: a
-one-byte heap overrun with no observed pointer control. Backups from the
+chosen-byte one-byte heap overrun with no pointer or control-flow control. Backups from the
 same scout batch: UxPlay RTSP `raop_handler_pairsetup_pin()` 64-byte stack
 write (pre-auth wire path, fix `746ec0e`), AWS pgactive `sscanf` into
 `NameData` (fix `7eb5d25`, related to the admitted pgactive family), OpenSSL

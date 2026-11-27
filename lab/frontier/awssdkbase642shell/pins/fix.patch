@@ -1,0 +1,284 @@
+From 8eeac049c37b2c4cca2a94bfb53f07ea7e4550f7 Mon Sep 17 00:00:00 2001
+From: Sam Bisciglia <sbiscigl@amazon.com>
+Date: Mon, 3 Aug 2026 06:21:30 -0400
+Subject: [PATCH] swap base64 implementation to CRT (#3882)
+
+---
+ crt/aws-crt-cpp                               |   2 +-
+ prefetch_crt_dependency.sh                    |  14 +-
+ .../include/aws/core/utils/base64/Base64.h    |   5 -
+ .../source/utils/base64/Base64.cpp            | 152 +++---------------
+ .../utils/HashingUtilsTest.cpp                |  19 +++
+ 5 files changed, 53 insertions(+), 139 deletions(-)
+
+diff --git a/crt/aws-crt-cpp b/crt/aws-crt-cpp
+index 72f84bc32746..0463563f9f65 160000
+--- a/crt/aws-crt-cpp
++++ b/crt/aws-crt-cpp
+@@ -1 +1 @@
+-Subproject commit 72f84bc327462f405c4994228fffe1eeb16cca72
++Subproject commit 0463563f9f656a493ec22ca962c2464bc8b831ab
+diff --git a/prefetch_crt_dependency.sh b/prefetch_crt_dependency.sh
+index ba0d4b35cdcb..4fea59687943 100755
+--- a/prefetch_crt_dependency.sh
++++ b/prefetch_crt_dependency.sh
+@@ -3,21 +3,21 @@
+ # SPDX-License-Identifier: Apache-2.0.
+ 
+ CRT_URI_PREFIX=https://codeload.github.com/awslabs
+-CRT_URI=${CRT_URI_PREFIX}/aws-crt-cpp/zip/72f84bc327462f405c4994228fffe1eeb16cca72  # v0.42.2
++CRT_URI=${CRT_URI_PREFIX}/aws-crt-cpp/zip/0463563f9f656a493ec22ca962c2464bc8b831ab  # v0.43.2
+ 
+ AWS_C_AUTH_URI=${CRT_URI_PREFIX}/aws-c-auth/zip/4b5d524bf1a511b05e0fffe5bdc51800770b9427  # v0.10.4
+-AWS_C_CAL_URI=${CRT_URI_PREFIX}/aws-c-cal/zip/9edd8eac2b21ca6a04535b91d60d361c2f1bb60f  # v0.9.14
++AWS_C_CAL_URI=${CRT_URI_PREFIX}/aws-c-cal/zip/8aa2a48a09f93c65d4cf06388e143a6584de6321  # v0.9.15
+ AWS_C_COMMON_URI=${CRT_URI_PREFIX}/aws-c-common/zip/3c69b871dfa1815231802febf1bb6899f84cccdb  # v0.14.3
+ AWS_C_COMPRESSION_URI=${CRT_URI_PREFIX}/aws-c-compression/zip/d8264e64f698341eb03039b96b4f44702a9b3f83  # v0.3.2
+ AWS_C_EVENT_STREAM_URI=${CRT_URI_PREFIX}/aws-c-event-stream/zip/51bef3c44e1058b1689751539170b2e0f589ccdb  # v0.7.1
+ AWS_C_HTTP_URI=${CRT_URI_PREFIX}/aws-c-http/zip/8aefd899fc3210bfd0e3fd414011a3cb708bf6e4  # v0.11.0
+-AWS_C_IO_URI=${CRT_URI_PREFIX}/aws-c-io/zip/54350963b64dfc6c4b0ea623b08aa252aae3d7d7  # v0.27.4
++AWS_C_IO_URI=${CRT_URI_PREFIX}/aws-c-io/zip/e2946c99521fa12d285c9a0829c92b1bf713922b  # v0.27.5
+ AWS_C_MQTT_URI=${CRT_URI_PREFIX}/aws-c-mqtt/zip/2ef9605ec9c50bea3f921e08022ddd57eed70901  # v0.16.0
+-AWS_C_S3_URI=${CRT_URI_PREFIX}/aws-c-s3/zip/1f29ef8871a27dc8b90325418780659bac534d71  # v0.13.1
+-AWS_C_SDKUTILS_URI=${CRT_URI_PREFIX}/aws-c-sdkutils/zip/cb14fea362c82c995eebd34e2e96590ab4e0ed58  # v0.2.7
++AWS_C_S3_URI=${CRT_URI_PREFIX}/aws-c-s3/zip/a852faa2df3ab2b31fb4cfd64fd3379a2f4ae22e  # v0.13.2
++AWS_C_SDKUTILS_URI=${CRT_URI_PREFIX}/aws-c-sdkutils/zip/528b9dfff4a804b334875ecf8a0471f7d1366f24  # v0.2.8
+ AWS_CHECKSUMS_URI=${CRT_URI_PREFIX}/aws-checksums/zip/1d5f2f1f3e5d013aae8810878ceb5b3f6f258c4e  # v0.2.10
+-AWS_LC_URI=${CRT_URI_PREFIX}/aws-lc/zip/683ebde4bf3bcc016a9a710ad6b49c0c91b59161  # v5.2.0
+-S2N_URI=${CRT_URI_PREFIX}/s2n/zip/f5f6c6c2ce2370de1aa3ade6899a7321d1127bb8  # v1.7.5
++AWS_LC_URI=${CRT_URI_PREFIX}/aws-lc/zip/f6acf748df0ea6157d55e640730b38d21a7751cd  # v5.4.0
++S2N_URI=${CRT_URI_PREFIX}/s2n/zip/66b1c94d1dfc99b237427cbde230eca63bb8b89c  # v1.7.6
+ 
+ 
+ echo "Removing CRT"
+diff --git a/src/aws-cpp-sdk-core/include/aws/core/utils/base64/Base64.h b/src/aws-cpp-sdk-core/include/aws/core/utils/base64/Base64.h
+index 503e73a24cfb..c231b12eea1e 100644
+--- a/src/aws-cpp-sdk-core/include/aws/core/utils/base64/Base64.h
++++ b/src/aws-cpp-sdk-core/include/aws/core/utils/base64/Base64.h
+@@ -57,11 +57,6 @@ namespace Aws
+                 * Calculates the length of an encoded base64 string based on the buffer being encoded
+                 */
+                 static size_t CalculateBase64EncodedLength(const ByteBuffer& buffer);
+-
+-            private:
+-                char m_mimeBase64EncodingTable[64];
+-                uint8_t m_mimeBase64DecodingTable[256];
+-
+             };
+ 
+         } // namespace Base64
+diff --git a/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp b/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp
+index 2103d6d5a687..c2ce37674698 100644
+--- a/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp
++++ b/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp
+@@ -3,146 +3,46 @@
+  * SPDX-License-Identifier: Apache-2.0.
+  */
+ 
++#include <aws/core/utils/UnreferencedParam.h>
+ #include <aws/core/utils/base64/Base64.h>
+-#include <cstring>
++#include <aws/crt/Types.h>
+ 
+ using namespace Aws::Utils::Base64;
+ 
+-static const uint8_t SENTINEL_VALUE = 255;
+-static const char BASE64_ENCODING_TABLE_MIME[] = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
++namespace Aws {
++namespace Utils {
++namespace Base64 {
+ 
+-namespace Aws
+-{
+-namespace Utils
+-{
+-namespace Base64
+-{
+-
+-Base64::Base64(const char *encodingTable)
+-{
+-    if(encodingTable == nullptr)
+-    {
+-        encodingTable = BASE64_ENCODING_TABLE_MIME;
+-    }
+-
+-    size_t encodingTableLength = strlen(encodingTable);
+-    if(encodingTableLength != 64)
+-    {
+-        encodingTable = BASE64_ENCODING_TABLE_MIME;
+-        encodingTableLength = 64;
+-    }
+-
+-    memcpy(m_mimeBase64EncodingTable, encodingTable, encodingTableLength);
+-
+-    memset((void *)m_mimeBase64DecodingTable, 0, 256);
+-
+-    for(uint32_t i = 0; i < encodingTableLength; ++i)
+-    {
+-        uint32_t index = static_cast<uint32_t>(m_mimeBase64EncodingTable[i]);
+-        m_mimeBase64DecodingTable[index] = static_cast<uint8_t>(i);
+-    }
+-
+-    m_mimeBase64DecodingTable[(uint32_t)'='] = SENTINEL_VALUE;
++namespace {
++Aws::Crt::ByteCursor AsCursor(const Aws::Utils::ByteBuffer& buffer) {
++  return Aws::Crt::ByteCursorFromArray(buffer.GetUnderlyingData(), buffer.GetLength());
+ }
+ 
+-Aws::String Base64::Encode(const Aws::Utils::ByteBuffer& buffer) const
+-{
+-    size_t bufferLength = buffer.GetLength();
+-    size_t blockCount = (bufferLength + 2) / 3;
+-    size_t remainderCount = (bufferLength % 3);
+-
+-    Aws::String outputString;
+-    outputString.reserve(CalculateBase64EncodedLength(buffer));
+-
+-    for(size_t i = 0; i < bufferLength; i += 3 )
+-    {
+-        uint32_t block = buffer[ i ];
+-
+-        block <<= 8;
+-        if (i + 1 < bufferLength)
+-        {
+-            block = block | buffer[ i + 1 ];
+-        }
+-
+-        block <<= 8;
+-        if (i + 2 < bufferLength)
+-        {
+-            block = block | buffer[ i + 2 ];
+-        }
+-
+-        outputString.push_back(m_mimeBase64EncodingTable[(block >> 18) & 0x3F]);
+-        outputString.push_back(m_mimeBase64EncodingTable[(block >> 12) & 0x3F]);
+-        outputString.push_back(m_mimeBase64EncodingTable[(block >> 6) & 0x3F]);
+-        outputString.push_back(m_mimeBase64EncodingTable[block & 0x3F]);
+-    }
+-
+-    if(remainderCount > 0)
+-    {
+-        outputString[blockCount * 4 - 1] = '=';
+-        if(remainderCount == 1)
+-        {
+-            outputString[blockCount * 4 - 2] = '=';
+-        }
+-    }
+-
+-    return outputString;
++Aws::Crt::ByteCursor AsCursor(const Aws::String& str) {
++  return Aws::Crt::ByteCursorFromArray(reinterpret_cast<const uint8_t*>(str.data()), str.length());
+ }
++}  // namespace
+ 
+-Aws::Utils::ByteBuffer Base64::Decode(const Aws::String& str) const
+-{
+-    size_t decodedLength = CalculateBase64DecodedLength(str);
+-
+-    Aws::Utils::ByteBuffer buffer(decodedLength);
+-
+-    const char* rawString = str.c_str();
+-    size_t blockCount = str.length() / 4;
+-    for(size_t i = 0; i < blockCount; ++i)
+-    {
+-        size_t stringIndex = i * 4;
++Base64::Base64(const char* encodingTable) { AWS_UNREFERENCED_PARAM(encodingTable); }
+ 
+-        uint32_t value1 = m_mimeBase64DecodingTable[uint32_t(rawString[stringIndex])];
+-        uint32_t value2 = m_mimeBase64DecodingTable[uint32_t(rawString[++stringIndex])];
+-        uint32_t value3 = m_mimeBase64DecodingTable[uint32_t(rawString[++stringIndex])];
+-        uint32_t value4 = m_mimeBase64DecodingTable[uint32_t(rawString[++stringIndex])];
+-
+-        size_t bufferIndex = i * 3;
+-        buffer[bufferIndex] = static_cast<uint8_t>((value1 << 2) | ((value2 >> 4) & 0x03));
+-        if(value3 != SENTINEL_VALUE)
+-        {
+-            buffer[++bufferIndex] = static_cast<uint8_t>(((value2 << 4) & 0xF0) | ((value3 >> 2) & 0x0F));
+-            if(value4 != SENTINEL_VALUE)
+-            {
+-                buffer[++bufferIndex] = static_cast<uint8_t>((value3 & 0x03) << 6 | value4);
+-            }
+-        }
+-    }
+-
+-    return buffer;
++Aws::String Base64::Encode(const Aws::Utils::ByteBuffer& buffer) const {
++  const auto encoded = Aws::Crt::Base64Encode(AsCursor(buffer));
++  return {encoded.data(), encoded.size()};
+ }
+ 
+-size_t Base64::CalculateBase64DecodedLength(const Aws::String& b64input)
+-{
+-    const size_t len = b64input.length();
+-    if(len < 2)
+-    {
+-        return 0;
+-    }
+-
+-    size_t padding = 0;
+-
+-    if (b64input[len - 1] == '=' && b64input[len - 2] == '=') //last two chars are =
+-        padding = 2;
+-    else if (b64input[len - 1] == '=') //last char is =
+-        padding = 1;
++Aws::Utils::ByteBuffer Base64::Decode(const Aws::String& str) const {
++  const auto decoded = Aws::Crt::Base64Decode(AsCursor(str));
++  return {decoded.data(), decoded.size()};
++}
+ 
+-    return (len * 3 / 4 - padding);
++size_t Base64::CalculateBase64EncodedLength(const Aws::Utils::ByteBuffer& buffer) {
++  return Aws::Crt::Base64EncodedLength(AsCursor(buffer));
+ }
+ 
+-size_t Base64::CalculateBase64EncodedLength(const Aws::Utils::ByteBuffer& buffer)
+-{
+-    return 4 * ((buffer.GetLength() + 2) / 3);
++size_t Base64::CalculateBase64DecodedLength(const Aws::String& b64input) {
++  return Aws::Crt::Base64DecodedLength(AsCursor(b64input));
+ }
+ 
+-} // namespace Base64
+-} // namespace Utils
+-} // namespace Aws
+\ No newline at end of file
++}  // namespace Base64
++}  // namespace Utils
++}  // namespace Aws
+diff --git a/tests/aws-cpp-sdk-core-tests/utils/HashingUtilsTest.cpp b/tests/aws-cpp-sdk-core-tests/utils/HashingUtilsTest.cpp
+index d32f711e8301..d442cca014c7 100644
+--- a/tests/aws-cpp-sdk-core-tests/utils/HashingUtilsTest.cpp
++++ b/tests/aws-cpp-sdk-core-tests/utils/HashingUtilsTest.cpp
+@@ -6,6 +6,7 @@
+ #include <aws/testing/AwsCppSdkGTestSuite.h>
+ 
+ #include <aws/core/utils/HashingUtils.h>
++#include <aws/core/utils/base64/Base64.h>
+ #include <aws/core/utils/memory/stl/AWSStringStream.h>
+ 
+ 
+@@ -68,6 +69,24 @@ TEST_F(HashingUtilsTest, TestBase64Decoding)
+     ASSERT_EQ(ByteBuffer((unsigned char*) "foobar", 6), test7);
+ }
+ 
++TEST_F(HashingUtilsTest, TestBase64DecodeNeverWritesMoreThanCalculatedLength)
++{
++    Aws::Vector<Aws::String> inputs = {"", "X", "Zg==", "Zm8=", "Zm9v", "Zm9vYg==", "Zm9vYmE=", "Zm9vYmFy",
++                                       "AAAA=", "AAAAA=", "AAAAAA=", "AAAAAAA=", "AB=D", "=", "==", "===", "====",
++                                       "A===", "AA==", "AAA=", "//++", "AAAA"};
++    for (int byte = 0x80; byte <= 0xFF; ++byte)
++    {
++        inputs.emplace_back(Aws::String{static_cast<char>(byte)} + "AAA");
++    }
++
++    for (const auto& input : inputs)
++    {
++        ASSERT_LE(HashingUtils::Base64Decode(input).GetLength(),
++                  Aws::Utils::Base64::Base64::CalculateBase64DecodedLength(input))
++            << "input: " << input;
++    }
++}
++
+ TEST_F(HashingUtilsTest, TestHexEncodingDecoding)
+ {
+     unsigned char beforeHexEncoding[32] =

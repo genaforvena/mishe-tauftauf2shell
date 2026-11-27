@@ -1,0 +1,2 @@
+decode-debug-asan: work/aws-sdk-cpp-2857dbc70b4b780810e304ba14514fa52d932a23/src/aws-cpp-sdk-core/include/aws/core/utils/Array.h:208: T& Aws::Utils::Array<T>::GetItem(size_t) [with T = unsigned char; size_t = long unsigned int]: Assertion `index < m_length' failed.
+Aborted (core dumped)

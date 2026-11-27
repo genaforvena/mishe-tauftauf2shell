@@ -1,0 +1,8 @@
+Breakpoint 1 at 0x1e1c: file work/sdk/aws-sdk-cpp-2857dbc70b4b780810e304ba14514fa52d932a23/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp, line 120.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, Aws::Utils::Base64::Base64::Decode (this=0x7fffffffdfc0, str="AABa=") at work/sdk/aws-sdk-cpp-2857dbc70b4b780810e304ba14514fa52d932a23/src/aws-cpp-sdk-core/source/utils/base64/Base64.cpp:120
+120	    return buffer;
+$1 = 2
+0x55555556c2b0:	0x00	0x00	0x5a	0x00
