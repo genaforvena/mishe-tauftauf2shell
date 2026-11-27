@@ -9552,3 +9552,57 @@ charset coercion to a single-byte Latin-1 encoding. Falsifier: any
 `case_map` write with a UTF-8-tagged operand, or any patched write.
 First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).b; t=("a"+"\xDF"*27).force_encoding(Encoding::UTF_8); p a.casecmp?(t)'`.
+
+## 2026-11-27 22:32Z — W365: default wire encodings do not reach `case_map`; UTF-8 slack confirmed
+
+W365 asked whether re-tagging the attacker-controlled sharp-s operand with
+the encodings a stock HTTP server actually supplies closes the one-byte
+overflow. Committed driver `lab/repro/ruby2shell-rung3-utf8-tag.rb` and
+runner `lab/repro/ruby2shell-utf8-tag-matrix.sh` drive a 7-bit ASCII-8BIT
+receiver (`"a" + "s"*54`) against five operand shapes at N=27/43 on
+3.4.12 (vulnerable) and 3.4.13 (fixed). Raw evidence is gitignored under
+`lab/build/evidence/casemap-chain/w365/` (`matrix.txt`, `plain.txt`, one
+valgrind output per arm).
+
+Valgrind 20/20 observed, all rc=0. The vulnerable Latin-1 positive control
+has exactly one `Invalid write of size 1` plus one copy-out invalid read at
+"0 bytes after a block of size 72/88" on both N; the same control on
+3.4.13 has zero writes and zero reads. All four other arms — UTF-8-tagged
+0xDF (invalid byte), valid UTF-8 U+0130 (`İ`, 2 source bytes folding to
+`i` + combining dot, 3 output bytes), US-ASCII-tagged 0xDF, and
+ASCII-8BIT-tagged 0xDF — have **zero writes and zero reads on both
+builds**. Results: `utf8_invalid` returns
+`ArgumentError: input string invalid`, `utf8_valid`/`usascii_arg`/
+`ascii_arg` return `false`. Fresh plain 3.4.12, 12/12 observed, rc=0 with
+no glibc diagnostic in any of those four arms.
+
+The source explains the boundary. `str_casecmp_p` folds each operand with
+its own encoding (`string.c:4369-4375`); `rb_str_casemap` raises the
+ArgumentError when `case_map` reports an invalid input
+(`string.c:7840-7848`). `onigenc_unicode_case_map`
+(`enc/unicode.c:659,672,677`) reserves `CASE_MAPPING_SLACK` = 12 bytes by
+subtracting it from `to_end` and checks `to <= to_end` before each code
+point, so even a real 2→3-byte UTF-8 expansion cannot cross the
+allocation; the ISO-8859-1 `case_map` has no such guard. ASCII-only maps
+do not expand 0xDF at all. A source read also closes the non-predicate
+`String#casecmp`: `str_casecmp` (`string.c:4271-4300`) compares bytes with
+`TOLOWER` and never calls `rb_str_downcase`, so it is not another
+`case_map` caller.
+
+Prediction supported; falsifier (any write with a UTF-8-tagged operand,
+or any patched write) not met. The practical consequence is the same as
+W364's scope limit: a request value left as ASCII-8BIT or UTF-8 cannot
+reach `case_map` without a charset coercion to a single-byte Latin-1
+encoding. Grade unchanged: primary CVE wire-only rung 3 CONFIRMED,
+witness-COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent rung 5 NOT
+ACHIEVED. No wire request, chosen address, marker or command was used.
+
+Next named experiment W366: receiver-side tag sweep on `casecmp?`. Drive
+the same N=27/43 sharp-s argument against a 7-bit US-ASCII-tagged
+receiver on 3.4.12/3.4.13, plus a valid-UTF-8 receiver control.
+Prediction: `enc_compatible_latter` treats any 7-bit partner alike, so
+US-ASCII still reaches `case_map` (one write vulnerable, zero patched);
+UTF-8 closes it. Falsifier: zero writes with a 7-bit US-ASCII receiver,
+or any patched write. First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).force_encoding(Encoding::US_ASCII); t=("a"+"\xDF"*27).b.force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
