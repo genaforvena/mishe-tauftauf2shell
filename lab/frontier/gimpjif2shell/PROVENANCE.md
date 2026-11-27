@@ -1352,3 +1352,31 @@ chosen-address write or a successful pointer dereference.
 No named victim
 object write, marker or command was observed; the fixed-build differential
 remains BLOCKED because no fixed GIMP build is published.
+
+## W306 harness cleanup repair (2026-11-27, 02:07Z wake)
+
+DMs #5977/#5989: the 01:39Z wake exited its engine cleanly, but the wake
+service then reported `State 'stop-sigterm' timed out` and SIGKILL'd an
+orphaned `file-gif-load`. Cause: post-run cleanup in the live AppImage
+runners matched only `org.gimp.GIMP.Stable -i` under `$ROOT`, so plug-in
+and script-fu children survived the main AppRun.
+
+Repair: in `live/run-appimage.sh`, `run-appimage-span.sh`,
+`run-appimage-patch.sh`, `run-appimage-repair.sh`,
+`run-appimage-consumer.sh` and `run-appimage-gdb.sh`, each AppRun is now
+launched as `(cd "$ROOT" && exec setsid timeout -k 5 90 env HOME="$home"
+...) > "$out" 2>&1 &`; the runner records `runpid=$!`, waits for it, then
+kills that session with `kill -9 -- "-$runpid" 2>/dev/null || true`. No
+global pkill; the witness replay's separate tree
+(`/tmp/gimpjif-appimage-witness-w305`) was untouched. Runners that record
+a return code keep `wait "$runpid" || rc=$?` and still append `RUN_RC=$rc`.
+
+Verification in-tree, 02:11-02:16Z: `bash -n` clean on all six;
+`run-witness.sh` gave `TOTAL: 29 PASS / 0 FAIL`, `REPLAY_PASS=6
+REPLAY_FAIL=0`, `WITNESS REPLAY PASS`; `live/run-appimage-span.sh` gave
+`TOTAL: 12 PASS / 0 FAIL`, rc 0. After the span runner, `ps` showed no
+GIMP/AppRun/file-gif-load process under `/tmp/gimpjif-appimage`; the only
+`file-gif-load` still running was the witness's pre-existing PID 803371
+under `/tmp/gimpjif-appimage-witness-w305`, deliberately left alone.
+Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes, NO r5. This is a harness repair only; no new impact evidence.

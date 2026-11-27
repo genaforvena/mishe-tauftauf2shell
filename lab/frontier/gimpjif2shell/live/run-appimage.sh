@@ -68,12 +68,15 @@ run_jif () {
   local home; home="$(mktemp -d /tmp/gimpjif-home-XXXXXX)"
   # A stale GIMP/plugin process makes later batch invocations hang; always
   # start from a fresh profile and clean up on exit.
-  (cd "$ROOT" && timeout -k 5 90 env HOME="$home" ./AppRun -i \
+  (cd "$ROOT" && exec setsid timeout -k 5 90 env HOME="$home" ./AppRun -i \
       --batch-interpreter plug-in-script-fu-eval \
       -b "(let* ((img (car (gimp-file-load RUN-NONINTERACTIVE \"$file\" \"$(basename "$file")\")))) (gimp-message (number->string (car (gimp-image-get-width img)))))" \
-      -b '(gimp-quit 0)') > "$out" 2>&1 || true
-  ps -u "$(id -u)" -o pid,args | grep -F "$ROOT" | grep 'org.gimp.GIMP.Stable -i' \
-    | grep -v grep | awk '{print $1}' | xargs -r kill -9 || true
+      -b '(gimp-quit 0)') > "$out" 2>&1 &
+  runpid=$!
+  wait "$runpid" || true
+  # The plug-in and script-fu children outlive the main AppRun; kill their
+  # whole session so none holds the wake cgroup. Scoped to this run only.
+  kill -9 -- "-$runpid" 2>/dev/null || true
 }
 
 SAFE="$BASE/realglib/evidence/safe.jif"
