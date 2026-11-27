@@ -8934,3 +8934,60 @@ the patched control; falsifier: no invalid write at `R = N+45`, or any
 write/diagnostic on 3.3.14. First command:
 `for rb in lab/build/plain/ruby-3.3.13-plain/bin/ruby lab/build/plain/ruby-4.0.9-plain/bin/ruby; do for n in 27 43 59; do valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"; done; done`.
 Do not repeat the seven-shape chain matrix unchanged.
+## 2026-11-27 18:1xZ — W354: mixed-parity geometry on the 3.3 and 4.0 branches CLOSED
+
+W353 closed the one-leading-`a` mixed shape on EOL 3.2.11 only. W354 applies
+it to the two other affected branches, plain `ruby-3.3.13-plain`
+(rev `af48f08f21`) and `ruby-4.0.9-plain` (rev `3e93b23afc`), with patched
+plain `ruby-3.3.14-plain` (rev `f4c37f481b`) as control. Prediction: the
+same one-byte `case_map` write at `R = N+45` on both vulnerable builds and
+zero on the patched control. Falsifier: no write at that offset, or any
+write/diagnostic on 3.3.14. Neither half of the falsifier is met.
+
+1. **Valgrind, 9/9 arms** (three builds x N=27/43/59, `--error-limit=no`,
+   `rc=0`): 3.3.13 and 4.0.9 each have exactly one `Invalid write of size 1`
+   at `case_map (iso_8859_1.c:293)` with `0 bytes after a block of size
+   72/88/104` — 24-byte `mapping_buffer` header + capa N+21 (48/64/80), so
+   `R = N+45 == 8 (mod 16)`, the successor's glibc size LSB. 3.3.13 stacks:
+   write from `rb_str_casemap (string.c:7414)`, allocation via
+   `objspace_xmalloc0 (gc.c:12617)` from `rb_str_casemap (string.c:7409)`,
+   copy-out `Invalid read` in `memmove` from `rb_str_casemap
+   (string.c:7441)`. 4.0.9 stacks: write from `string.c:7844`, allocation
+   via `string.c:7839`, copy-out read from `string.c:7871`. Patched 3.3.14:
+   all three arms `writes=0, reads=0`. Raw logs: gitignored
+   `lab/build/evidence/casemap-chain/w354/vg-*.txt`.
+2. **Fresh unsanitized processes (stock glibc 2.39)**: one rep per N in the
+   committed driver gave 3.3.13 N=27 `rc=0`, N=43 `rc=134 munmap_chunk():
+   invalid pointer`, N=59 `rc=134 malloc(): invalid next size (unsorted)`;
+   4.0.9 was clean 4/4 including safe N=28; 3.3.14 clean 4/4. The 4.0.9
+   clean sample is preserved as a negative, not retried into existence; a
+   bounded 3-rep replay per N classified it as layout dependence, not a
+   structural difference: 3.3.13 1/9 aborts (N=59 unsorted), 4.0.9 3/9
+   (`N=43` 2/3 `munmap_chunk`, `N=59` 1/3 `rc=134` without a matched
+   diagnostic string), 8/9 and 6/9 clean respectively. Safe N=28 (even
+   capa, no overflow) was `rc=0` on both vulnerable builds and the control.
+   Logs: `.../w354/plain/` and `.../w354/replay/`.
+3. **Direct byte observation (gdb, N=27)**: breakpoint at the first
+   `case_map` call with `current_buffer->capa == 48` reads the successor
+   size LSB at `(char *)current_buffer + 72` as `0x21` on 3.3.13 and `0x71`
+   on 4.0.9; after `case_map` it is `0x53` on both (`used=49`). Source line
+   maps verified against `lab/build/w350-src/`: 3.3.13 call `:7414` / used
+   `:7425`, 4.0.9 `:7844` / `:7855`. Logs: `.../w354/gdb-*-27.log`.
+
+Replay all three halves with the committed driver
+`bash lab/repro/ruby2shell-mixed-eol-branches.sh` (per-branch gdb scripts
+`lab/repro/ruby2shell-mixed-eol-ruby-{3.3.13,4.0.9}-plain.gdb`). No wire
+request, no chosen bytes and no command execution: this closes the mixed
+geometry on every affected branch at rung 3; it is not a grade change.
+Grade unchanged: primary wire-only rung 3, W341/W342 adjacent rung 3,
+witness-COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED at
+its labeled scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+
+Next named experiment W355: complete the fixed-control half of this exact
+shape on the two remaining patched builds, plain 3.4.13 and 4.0.10 (W351
+covered them only for the seven-shape chain matrix). First command:
+`for rb in lab/build/plain/ruby-3.4.13-plain/bin/ruby lab/build/plain/ruby-4.0.10-plain/bin/ruby; do for n in 27 43 59; do valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"; done; done`.
+Prediction: zero writes and zero reads on all six arms. Falsifier: any
+invalid write/read on a patched build — that would reopen the fix-series
+grade, so this control is grade-relevant even though a clean result is not.
+Do not repeat the vulnerable branch matrix unchanged.
