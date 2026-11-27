@@ -1,0 +1,31 @@
+== pin verification ==
+PASS pin src/file-gif-load-vulnerable.c
+PASS pin src/file-gif-load-fixed.c
+PASS pin pins/jif-vulnerable.inc
+PASS pin pins/jif-fixed.inc
+PASS pin harness/driver.c
+== clean rebuild and full run ==
+PASS run-all.sh full replay
+TOTAL: 29 PASS / 0 FAIL
+PASS ASan write frame pins vulnerable inflate call
+PASS ASan allocation frame pinned
+PASS clang ASan write frame pins vulnerable excerpt
+PASS clang ASan write past 260-byte buffer
+PASS fixed build ASan-clean on attack
+PASS fixed build rejects wrapped JIF size
+PASS fixed build ASan-clean on safe input
+PASS fixed build accepts safe JIF
+PASS vulnerable build ASan-clean on safe input
+PASS vulnerable build accepts safe JIF
+PASS 16 chosen 0x4d bytes past 260-byte buffer
+PASS safe input writes no chosen marker
+PASS plain fixed build rejects wrapped size
+PASS plain fixed build writes no chosen marker
+PASS real-libz ASan build reports no fault
+PASS real-libz build completes decompress
+PASS pin hash pins/jif-vulnerable.inc
+PASS pin hash pins/jif-fixed.inc
+PASS pin hash src/file-gif-load-vulnerable.c
+PASS pin hash src/file-gif-load-fixed.c
+REPLAY_PASS=6 REPLAY_FAIL=0
+WITNESS REPLAY PASS

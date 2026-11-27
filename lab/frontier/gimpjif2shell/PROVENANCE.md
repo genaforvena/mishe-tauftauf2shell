@@ -2767,3 +2767,34 @@ before the geometry-driven fault. Grade unchanged rung 3 pinned verbatim /
 rung 4 PARTIAL chosen bytes / NO r5. Grade-neutral; no witness replay
 offered, consistent with W334-W340. Do not repeat these probes unchanged.
 
+## W342 clean-archive witness freshness replay (2026-11-27, 13:40Z wake)
+
+No messages, signals or owed replay at wake start. The charter's first step
+was last executed by W308 at 02:43Z (archive `47e0e07d`); `run-witness.sh`
+covers only the synthetic harness, so this is a freshness/integrity receipt,
+not new impact evidence.
+
+- Archive: `git archive HEAD lab/frontier/gimpjif2shell` at `514b636a` into
+  `/tmp/w342-gimpjif-clean`; extracted runner SHA-256
+  `f562ad3132dbd970ec9c8aab403138fa7925d8068dea515566bcc1c4fd367e58`,
+  identical to the in-tree runner.
+- Unmodified `bash run-witness.sh` from the archive tree: rc 0, five of five
+  pins exact, `REPLAY_PASS=6 REPLAY_FAIL=0`, core
+  `TOTAL: 29 PASS / 0 FAIL`. Transcript
+  `harness/evidence/w342-clean-witness-replay.log` SHA-256
+  `f114865afc80e22893ab6a6f418d6c16105c3e0f198d5260de3742a7e71a8695`
+  (byte-identical to captured stdout).
+- Scope: gcc/clang ASan excerpt, fixed/safe controls, real-libz negative and
+  plain chosen-byte readback only. No GIMP plug-in, GDB or AppImage; the
+  live-lane ceiling from W333-W341 is untouched.
+
+Read-only closure attempted alongside the replay: the "small canvas, huge
+JIF" idea cannot reduce `dest`. The pinned loader's `ReadImage` frame-fit
+guard at `file-gif-load-vulnerable.c:1168-1169` rejects
+`leftpos+len > screenwidth || toppos+height > screenheight`; frame
+`len`/`height`, not the screen dimensions, size both the `dest` allocation
+(`:1375-1378`) and the layer (`:1236-1248`) behind
+`gimp_drawable_get_buffer` (`:1475-1478`). No new probe ran on this closed
+angle. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes
+/ NO r5. The witness was offered this replay and the labeled grade for
+independent verification.

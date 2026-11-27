@@ -1812,3 +1812,17 @@ offered (same disposition as W334-W340). Artifacts, hashes and the preserved
 relative-path tooling negative are in the W341 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+## W342 freshness replay and canvas closure (2026-11-27, 13:40Z wake)
+
+The charter's first step, `run-witness.sh`, had not been executed since W308
+at 02:43Z. A clean `git archive 514b636a` replay returned rc 0, five pins
+exact, `REPLAY_PASS=6 REPLAY_FAIL=0` and `29 PASS / 0 FAIL`; the transcript
+is in the lane's harness evidence. This is a freshness/integrity receipt for
+the synthetic harness, not impact evidence: no live plug-in or GDB run.
+
+Read-only source review closed the remaining geometry idea: the pinned
+loader's frame-fit guard (`file-gif-load-vulnerable.c:1168-1169`) rejects a
+JIF frame larger than the canvas, and frame `len`/`height` size both `dest`
+and the layer, so no small-`dest` file-reachable geometry exists. Grade
+unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5;
+the witness was offered the replay and the label for verification.

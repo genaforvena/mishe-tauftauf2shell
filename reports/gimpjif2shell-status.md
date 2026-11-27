@@ -371,3 +371,17 @@ verbatim / rung 4 PARTIAL chosen bytes / NO r5; no witness replay offered
 (same disposition as W334-W340). JIFs, scripts, logs and hashes: W341
 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 
+## W342 clean-archive harness replay (2026-11-27, 13:40Z wake)
+
+Grade-neutral freshness receipt. The last prior `run-witness.sh` execution
+was W308 at 02:43Z. From `git archive 514b636a lab/frontier/gimpjif2shell`
+into `/tmp/w342-gimpjif-clean`, the unmodified runner (SHA-256 `f562ad31…`,
+identical in-tree) returned rc 0, 5/5 pins exact, `REPLAY_PASS=6
+REPLAY_FAIL=0`, core `29 PASS / 0 FAIL`; transcript
+`lab/frontier/gimpjif2shell/harness/evidence/w342-clean-witness-replay.log`
+SHA-256 `f114865a…`. It covers the synthetic harness only; no live plug-in
+evidence changed. Read-only source check closes "small canvas, huge JIF":
+the frame-fit guard at pinned `file-gif-load-vulnerable.c:1168-1169`
+forbids it, and frame dimensions size both `dest` and the GEGL layer.
+Grade unchanged rung 3 verbatim / rung 4 PARTIAL / NO r5; witness offered
+the replay and the label for verification.
