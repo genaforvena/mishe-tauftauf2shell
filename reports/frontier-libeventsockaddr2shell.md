@@ -10,6 +10,13 @@ replay log SHA-256 `c7a0e2bec8040e6b49cf35d158b4dd67c5c5c5d9a854a29dc0e1cdeb5da6
 Author reports are not independent acceptance; witness replay was requested in
 tape #6142.
 
+Witness W321 (#6151) independently replayed the clean archive (SHA
+`889dfe52...`): fresh builds, `run-all.sh` 23 PASS / 0 FAIL, probe 16 PASS /
+0 FAIL (replay log SHA `ce6cfca2...`), the same ASan WRITE-110 at
+`http.c:4686`, three chosen mutex pointers in libc with matching `rdi`, clean
+controls. Verdict **ESTABLISHED AS LABELED**, no grade change, NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w321-libevent/detail.md`.
+
 ## Verified ground truth (sources read 2026-11-27)
 
 - **Claim source:**
@@ -57,9 +64,12 @@ loopback-TCP control mode and a short receive timeout).
   `evbuffer_get_length` frame and `peer_socklen=110` in the backtrace.
 - Corrections preserved: a one-byte abstract name ALSO overflows on this host
   (kernel reports 110), so it is not a safe control; the advisory's
-  `si_addr = mutex+0x18` was not reproduced (`$_siginfo` printed 0x0); the
-  client writes 6 bytes, not 8, at `sun_path[102..107]`. No marker, command,
-  ASLR groom or remote-TCP path was observed.
+  `si_addr = mutex+0x18` was not reproduced. W322 local reproduction and
+  witness W321 agree that the fault address here is `mutex+0x10`
+  (`0x1234567890bb` for `mutex=0x1234567890ab`); the earlier "printed 0x0"
+  parenthetical was unsupported by committed evidence and is withdrawn.
+  The client writes 6 bytes, not 8, at `sun_path[102..107]`. No marker,
+  command, ASLR groom or remote-TCP path was observed.
 
 ## Rung assessment and cheapest next experiment
 

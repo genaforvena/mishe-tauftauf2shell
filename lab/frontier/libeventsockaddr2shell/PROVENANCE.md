@@ -75,10 +75,13 @@ Commands: `bash bootstrap.sh`, `bash run-all.sh`, `bash run-probe.sh`.
   this host: Linux reports `socklen=110` for the AF_UNIX accept regardless of
   the abstract name length. The short-name control is therefore NOT a safe
   input; the loopback-TCP control is the safe input.
-- The advisory's gdb `si_addr = mutex+0x18` was NOT reproduced: in batch mode
-  `$_siginfo._sifields._sigfault.si_addr` printed `0x0`. The chosen pointer in
-  `mutex=`/`rdi` and the faulting call were reproduced; the exact fault address
-  remains UNKNOWN here.
+- The advisory's gdb `si_addr = mutex+0x18` was NOT reproduced. W322 local
+  reproduction and witness W321 both observe the fault address as
+  `mutex+0x10`: for `mutex=0x1234567890ab`, raw
+  `$_siginfo._sifields._sigfault.si_addr = 0x1234567890bb`. The earlier
+  "printed `0x0`" parenthetical had no committed gdb script or evidence and
+  is withdrawn; the chosen pointer in `mutex=`/`rdi` and the faulting call
+  were reproduced, and `+0x18` remains UNKNOWN here.
 - The advisory's line numbers (`bufferevent_sock.c:119-126`, `http.c:4686`)
   match the pinned vulnerable commit. Its `Version` details were Docker-based;
   this harness builds directly on the host without Docker.
@@ -89,3 +92,21 @@ Commands: `bash bootstrap.sh`, `bash run-all.sh`, `bash run-probe.sh`.
   unmodified `bash run-all.sh` rc 0 with 23 PASS / 0 FAIL and inner probe
   16 PASS / 0 FAIL; replay log SHA-256
   `1edee7ac5316ae8d40d38e01c46a9c3ea7db042bef939765937258a4beaf9abc`.
+
+## Receipts folded W322 (2026-11-27)
+
+- Operator admission #6146: 202nd target mind under standing #6; archive
+  SHA `889dfe52...`, replay log SHA `c7a0e2be...`, 23/0 + 16/0, no grade
+  change.
+- Witness W321 #6151: clean-archive replay 23/0 + 16/0 (log SHA
+  `ce6cfca2...`), ESTABLISHED AS LABELED, NO r5, no grade change; detail under
+  `.mishe-tauftauf/artifacts/witness-w321-libevent/detail.md`.
+- W322 local `si_addr` reproduction: gdb batch script
+  (`set pagination off`, `handle SIGSEGV stop nopass`, `run`, then
+  `printf "raw si_addr = %p\n", $_siginfo._sifields._sigfault.si_addr`)
+  against `build-vuln-prod/r1_server_threaded` with
+  `r1_client set 102 0x1234567890AB` gave
+  `___pthread_mutex_lock (mutex=0x1234567890ab)`, `rdi 0x1234567890ab`,
+  `raw si_addr = 0x1234567890bb`, log SHA-256
+  `e8c3aab4c726650b09d6d9aa48e2347a7b766b37cf3d5058541eac99e3228806`
+  (throwaway `/tmp/libevent-siginfo.log`, minute 17). Matches witness.
