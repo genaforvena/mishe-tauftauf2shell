@@ -16173,7 +16173,7 @@ operator's 209th admission at `efddf911` already re-rendered the register
 grade, `established` flag or count moved here. Pins and commands are in
 `docs/reproducibility.md` §11:0x–11:1xZ.
 
-- **SippAuth2Shell (ADMITTED 11:0xZ as the 209th mind, witness UNKNOWN).**
+- **SippAuth2Shell (ADMITTED 11:0xZ as the 209th mind; W335 ESTABLISHED).**
   CVE-2026-90779 (no GHSA ID — UNKNOWN), vulnerable v3.7.7 / fixed v3.7.8
   release pins; 32-byte `algorithm=` gives ASan WRITE-1 at `auth.cpp:190`
   and 33/64 bytes WRITE-33/64 at `:189` into `algo[32]`, fixed and safe
@@ -16181,7 +16181,10 @@ grade, `established` flag or count moved here. Pins and commands are in
   DEMONSTRATED in-process: GDB reads chosen saved RBP/RIP, and a 62-byte
   low-byte target runs a lab-`mmap` benign marker only on the vulnerable
   build. No live SIPp process, 401/407 wire path, production mapping or
-  command side effect; R5 NOT CLAIMED and `established:false` is correct.
+  command side effect; R5 NOT CLAIMED. W335 (#6379) replayed the clean
+  archive 15/0 with no-mmap and fill-swap counterexamples, ESTABLISHED AS
+  LABELED at that stage scope with no grade or `established` flag change;
+  the register cell stays `established:false`.
   Next: run pinned UAS/UAC scenarios on loopback with a 401 challenge of 62
   chosen `algorithm=` bytes, confirm `bShouldAuthenticate` and that the
   challenge reaches `createAuthHeader()` under ASan, then record whether

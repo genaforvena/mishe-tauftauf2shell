@@ -19,8 +19,12 @@ or generated cell moved here.
   `:189`, plain 64 bytes rc 139, fixed/safe clean, 15 PASS / 0 FAIL. Read-only
   GDB sees chosen saved RBP/RIP; the 62-byte low-byte target runs a harness
   `mmap(MAP_FIXED)` marker only on the vulnerable build. R4 is in-process
-  only; no live SIPp, 401/407 wire path, production mapping or command, and
-  the witness replay is still owed (`established:false`).
+  only; no live SIPp, 401/407 wire path, production mapping or command.
+  Witness W335 (#6379) independently replayed the clean `2699180e…` archive
+  with 8/8 pins, its own four builds and a byte-identical 15/0 summary, plus
+  no-mmap and `0x42`-fill counterexamples: ESTABLISHED AS LABELED at that
+  stage scope, no grade or `established` flag change, NO r5. The register
+  cell stays operator-owned and unchanged (`established:false`).
 - Ruby W333's independent witness verdict W334 (#6367) is ESTABLISHED AS
   LABELED at the author's narrow in-process scope: clean 3.4.12/3.4.13
   rebuilds plus the unmodified 72-arm matrix, 296 chosen `0x5a` bytes at
