@@ -115,6 +115,18 @@ bytes `11..17` appear at pixel-buffer offsets 8..14 and offset 15 remains
 `cc`. Vulnerable depth-1, fixed attack and fixed depth-1 controls contain no
 chosen guard pattern.
 
+## Clean-archive replay (2026-11-27 05:27Z)
+
+Staged commit `ef370299` was exported with `git archive`; archive SHA-256
+`54dd5d8b13510881224d7acdb384435e897b23647020fd17d7a9d7e048672445`.
+From the fresh extraction, unmodified `bash run-probe.sh` rc 0: outer
+**12 PASS / 0 FAIL**, inner `run-all.sh` **42 PASS / 0 FAIL**. All pin checks
+passed, GCC ASan again reported WRITE-1 at raw `psd.c:354` zero bytes after
+the 8-byte region, and the chosen guard pattern appeared exactly once.
+Replay log SHA-256:
+`61d43c7639b6d52dad30cf978f26d3bf00d60bb3d57a4f15a4d461f385855502`.
+Local artifact: `.mishe-tauftauf/artifacts/frontier-w315-sailpsd/`.
+
 ## Negatives, discrepancies and limits
 
 - The advisory's pasted ASan frame says `psd.c:371`; the pinned v0.9.10 raw

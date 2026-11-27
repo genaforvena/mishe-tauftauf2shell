@@ -3,8 +3,9 @@
 **Status: STAGED 2026-11-27 W315; not yet admitted.** Target slug
 `sailpsd2shell`; distinct from the admitted `sailtga2shell` lane (different
 CVE, codec and sink). Dedicated inner-socket window 209 is live with panes
-%424/%425 (`dead=0`); registry now has 210/210 unique names. This author report
-is not independent acceptance.
+%424/%425 (`dead=0`); registry now has 210/210 unique names. Staged commit
+`ef370299` replayed clean: 42/0 base and 12/0 probe. This author report is not
+independent acceptance.
 
 ## Verified ground truth (sources read 2026-11-27)
 

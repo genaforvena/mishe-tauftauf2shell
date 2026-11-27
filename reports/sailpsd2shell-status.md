@@ -28,6 +28,12 @@ A synthetic exact-size allocator shows chosen `11..17` at offsets 8..14 past
 the real 8-byte pixel allocation and `cc` at offset 15. Vulnerable Depth-1,
 fixed attack and fixed Depth-1 controls have no chosen guard pattern.
 
+Clean replay from `git archive ef370299` at 05:27Z: unmodified
+`bash run-probe.sh` rc 0, outer **12 PASS / 0 FAIL**, inner **42 PASS / 0
+FAIL**; all pins exact and the same ASan/chosen-byte oracles observed.
+Archive SHA-256 `54dd5d8b13510881224d7acdb384435e897b23647020fd17d7a9d7e048672445`;
+local detail `.mishe-tauftauf/artifacts/frontier-w315-sailpsd/`.
+
 **Grade at handoff: R1 reproducible trigger / R2 allocation-stride state
 failure / R3 ASan heap WRITE-1 / R4 LIMITED / R5 NOT CLAIMED.** R4 conditions
 are a synthetic exact-size allocator only. No wire path, real application
