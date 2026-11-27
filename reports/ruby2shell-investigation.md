@@ -9313,3 +9313,84 @@ patched 3.4.13, plus fresh-plain reps. Prediction: one `case_map` write
 at R on 3.4.12, zero on 3.4.13. Falsifier: no write at R (e.g. an early
 length or byte exit), or any patched write. First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"\xDF"*27).b; s.force_encoding(Encoding::ISO_8859_1); p s.casecmp?("a"+"s"*54)'`.
+
+## 2026-11-27 21:2xZ — W362: `String#casecmp?` reaches the same successor size LSB
+
+W362 closed the one stock entry point named in the advisory that W348's
+upcase/downcase/swapcase matrix had not exercised. Source audit of the
+affected tree: `str_casecmp_p` (`string.c:4353-4376`) calls
+`rb_str_downcase(1, &fold_opt, str)` on **both** operands before
+`rb_str_eql`, so the full `rb_str_casemap` path runs regardless of an
+early byte difference; there is no length- or first-byte short circuit.
+Stock in-tree callers exist (`irb.rb:1264`, `rdoc/parser.rb:131`,
+`reline/unicode.rb:394`); this wake makes no claim that any of those
+callers receives wire input.
+
+Method: `lab/repro/ruby2shell-rung3-mixed-casecmp.rb` drives
+`"a" + N x "\xDF"` under ISO-8859-1 against an ASCII comparison string
+whose folded length matches (`"a" + "s" * 2N`). The mixed prefix keeps
+`capa = N+21` even and `R = capa+24 = N+45 = 72/88/104 ≡ 8 (mod 16)`
+at N=27/43/59, i.e. the successor chunk's size LSB. `match` returns
+`true`; `mismatch` changes only the comparison's first byte and returns
+`false`. `lab/repro/ruby2shell-mixed-casecmp.sh` runs the six-build
+valgrind matrix and bounded fresh-plain reps (five per vulnerable arm,
+two per patched arm, five mismatch and five even-N=28 control).
+Gitignored raw evidence: `lab/build/evidence/casemap-chain/w362/`,
+including `vg-*.txt`, `plain/*.txt`, the bounded tail in
+`matrix-tail.txt` and the gdb transcript below.
+
+Prediction: one `case_map` write at R on all three vulnerable builds,
+zero on all three patched builds. Falsifier: no write at R (early exit),
+any patched write, or a `casecmp?` write that reliably avoids the abort
+the upcase/fold lanes show.
+
+Valgrind 18/18 arms: each of the nine vulnerable arms has exactly one
+`Invalid write of size 1` at `case_map (iso_8859_1.c:277)` plus the
+known copy-out `Invalid read`, "0 bytes after a block of size
+72/88/104"; all nine patched arms have zero invalid writes and zero
+invalid reads; every arm exits rc=0 with `result=true`. A separate
+mismatch-input valgrind arm on 3.4.12 N=27 shows the same write and
+read with `result=false` (`vg-mismatch-3.4.12-27.txt`): the differing
+first byte does not prevent the fold.
+
+gdb on plain 3.4.12 N=27, reusing the committed
+`lab/repro/ruby2shell-mixed-fold-size.gdb` with the new driver
+(`gdb-3.4.12-27-casecmp.log`): the current chunk header is
+`(prev_size, size) = (0, 0x51)`, putting the successor at `buffer+64`.
+At `string.c:7839` the slot `buffer+72` reads `0x31`; at `:7850`
+(`used=49`) it reads `0x73`, while byte 1 of the size word stays
+`0x00`. Unlike the W361 fold run, this inferior exited normally under
+gdb; that is one layout observation, not a safety claim (the fresh
+plain runs below abort on the same builds).
+
+Fresh-plain results with churn (all rc=134 unless noted): 3.4.12
+match aborted 4/5 at N=27 (`corrupted size vs. prev_size` x2,
+`munmap_chunk(): invalid pointer` x2), 2/5 at N=43, 3/5 at N=59;
+3.3.13 aborted 1/5, 0/5 and 4/5 (two `malloc(): invalid next size
+(unsorted)`, two rc=134 with no matching diagnostic); 4.0.9 aborted
+2/5, 2/5 and 4/5. All 15 even-N=28 controls and all 18 patched reps
+exited rc=0 with `result=true`. The five 3.4.12 mismatch reps gave
+two SIGSEGV (rc=139), one `corrupted size vs. prev_size` and two clean
+`result=false`; SIGSEGV is preserved as observed, with no cause
+claimed. The first 600 s matrix command timed out at 4.0.9 N=59 rep 4;
+its remaining 4.0.9 rep and all patched/mismatch reps were run
+separately in `matrix-tail.txt`, so no arm is reported as a pass from
+a missing observation.
+
+The falsifier is **not** met: the write occurs at R on exactly the
+vulnerable builds, no patched write exists, and `casecmp?` shows the
+same layout-dependent glibc abort family rather than dodging it.
+Prediction supported at the measured scope. Grade unchanged: primary
+CVE wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4, harness-
+condition rung 5 witness-ESTABLISHED only at its labeled scope, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. This wake adds one
+public API to the measured callers, not a new impact grade.
+
+Next named experiment W363: argument-side `casecmp?`. The call sites
+most likely on a request path compare a trusted string against
+attacker input (`known.casecmp?(user_string)`), so drive N=27/43/59
+with the ISO-8859-1 sharp-s string as the **second** operand of an
+ASCII receiver of folded length 1+2N. Predict the same one-byte write
+at R on the vulnerable builds and zero on patched; falsifier is no
+write at R or any patched write. First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"s"*54).b; t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p s.casecmp?(t)'`.
