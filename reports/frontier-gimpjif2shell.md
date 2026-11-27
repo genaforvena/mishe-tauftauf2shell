@@ -1,17 +1,15 @@
 # Frontier brief: GIMP JIF `ReadJeffsImage()` heap overflow — CVE-2026-136329
 
 Status: **ADMITTED 2026-11-26 03:34Z as the 158th target mind**; window 166
-adopted; witness replay ESTABLISHED AS LABELED (W241, no grade change). Rung 3
-pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 PARTIAL at
-staging, extended W242 by real-glib/real-zlib chosen bytes and a chosen
-pointer value in an adjacent live GLib object, and W243 by an **on-disk
-JIF99a file** whose 16-bit frame dimensions reach the wrapped arithmetic
-through a real `FILE*` header parse. W244 measures the pinned caller's size
-guard and ~4 GiB `dest` allocation with real glib, for both file-reachable
-wrapped products. W245 rebuilds real zlib 1.3.2 with ASan, so the heap OOB
-WRITE frame comes from the real library rather than a stand-in `inflate()`.
-No real GIMP plugin build, no PDB call, no dereference of the chosen
-pointer, no command and no rung 5.
+adopted. Rung 3 pinned verbatim function (GCC+Clang ASan heap WRITE); rung 4 ✓
+at the witness-verified scope: W361 established that a file-chosen mapped
+pointer reaches a live ld-linux array in the real GIMP 3.2.8 AppImage, is
+dereferenced at `0x7ffff7fd1327`, and loads a chosen value into `rbx`.
+Earlier W242/W243 stages measured real-glib/real-zlib chosen bytes and an
+on-disk JIF99a path; W244/W245 measured the ~4 GiB `dest` guard and the OOB
+WRITE in real zlib; W246 reached the shipped plug-in through PDB. NO r5: no
+chosen-address write, control-flow word, marker or command. W351's second-
+stage field reads remain author-only pending replay (#6628).
 
 ## Claim and scope
 
@@ -2003,4 +2001,5 @@ the JIF, vulnerable plug-in crashes). The measured ceiling stays a
 chosen-pointer chain with readable fields in a live consumer: no
 chosen-address write, control-flow redirection, marker, command or r5.
 W351 remains author-only and pending replay (#6628); do not fold it into the
-W361 verdict. Full evidence for the W351 chosen-field chain:
+W361 verdict. Full evidence for the W351 chosen-field chain: W351 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
