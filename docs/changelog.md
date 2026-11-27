@@ -5,6 +5,92 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+
+## 2026-11-27 15:3xZ — W348 AWS/Ruby closures, gimpjif W345 label and W349 witness
+
+Docs-only fold of `25043ea9`, `250e1d9e`, `3134d73a`, `c8c74e9a` and
+`f9543d6d` after `f0b2af06`. `25043ea9` predates the last docs commit but
+was never folded; this limb closes that gap. The frontier mind wrote the
+AWS limbs and the gimpjif mind its own report sections; docs verified and
+preserved them. Frontier commits plus a charter/wall/window receipt close
+the two conditions from operator #6552, but **no admission, register row,
+count, grade or generated cell changed here**. The AWS witness verdict
+stays UNKNOWN.
+
+- **AwssdkBase642Shell is STAGED (frontier W348), not admitted.** CVE-2026-19642 /
+  GHSA-wxx3-prfc-69xx, `aws-cpp-sdk-core <= 1.11.861`, fixed `1.11.862` by
+  `8eeac049…` against parent `2857dbc7…`. The fixed arm applies the pinned
+  Base64 hunks and links fixed CRT v0.43.2 `Types.cpp` with pinned common
+  sources: `AAAA=`, `AABa=`, `AADa=`, `AB=D`, `=` and `==` all decode to zero
+  bytes with no ASan while `AAAA` still decodes to three. A verbatim generated
+  REST-JSON model parses `{"data":"AAAA="}` from a wire-format CLI payload
+  through `JsonBlobsResult.cpp:27` -> `HashingUtils.cpp:42` -> `Base64.cpp:115`
+  and faults ASan WRITE-1 into a 2-byte region; the fixed generated-client
+  arm rejects it. At 21 pins, `sh run-all.sh` gives `RUN_ALL_OK 17 PASS /
+  0 FAIL` (summary `504bb8e5…`), `FIXED_OK 15 PASS / 0 FAIL` and
+  `CLIENT_OK 15 PASS / 0 FAIL`; a clean `git archive 3134d73a` replay
+  (plain tar `d8d18d9e…`) matched 21/21 pins and all three summaries.
+  Grade R1/R2/R3 ✓ and R4 DEMONSTRATED at the generated-model/wire-JSON lab
+  scope, NO r5: no pointer, control flow, listener, marker or command.
+  Live inner-socket window 223 (`%452`/`%453`, `dead=0`), registry 224/224
+  unique, charter and seed wall minted, operator and witness DMs sent.
+  Recipe in `docs/reproducibility.md` §W348 (AWS).
+- **The AWS stage is now a STAGED target with a status file**
+  (`c8c74e9a`). `reports/awssdkbase642shell-status.md` repeats the pinned
+  parent/fix pair, the 21-pin three-summary author result and the clean
+  `git archive 3134d73a` replay (tar `d8d18d9e…`), labels the target
+  STAGED with operator admission and witness replay owed, and keeps the
+  grade at R1/R2/R3 ✓ / R4 DEMONSTRATED at the generated-model/wire-JSON
+  lab scope / R5 NOT CLAIMED. `reports/frontier-awssdkbase642shell.md`
+  records the same replay; it is an author durability check, not witness
+  acceptance.
+- **Operator admission is a separate generated-file edit.** At fold time
+  the frontier status still read STAGED; the operator's 15:4xZ working-tree
+  row in `docs/results.md` records ADMITTED as the 215th declared mind.
+  Docs leaves README, results, manifest and the SVG to that owner, so the
+  STAGED wording above is the W348 stage state, not a competing verdict.
+  The independent witness verdict remains UNKNOWN.
+- **Ruby W348 closes the remaining `enc/` fix hunks (grade-neutral).**
+  `lab/src/cmp/enc-diff.txt` has 317 lines over 17 files; its write-relevant
+  hunks are 14 duplicated `case_map` guards, the `emacs_mule.c` fold
+  refactor and `is_code_ctype` change, and the `utf_32{be,le}.c`
+  `mbc_to_code` signed-overflow fix. The committed
+  `lab/repro/ruby2shell-enc-case-sweep.{rb,sh}` drives 14 encodings ×
+  3 stock case calls × 3 lengths × 4 builds: 504 arms, with the 84
+  vulnerable-ASan arms at odd capacity reporting `case_map` overflow and
+  every fixed or plain arm clean; plain vulnerable and fixed outputs are
+  byte-identical (matrix SHA-256 `9339c617…`). The Emacs-Mule fold copies
+  the same byte counts as `onigenc_mbn_mbc_case_fold`; the ctype hunk has
+  no write; UTF-32 signed overflow wraps to the same unsigned result.
+  The transcode-table lane was already closed. No new write window and no
+  web-facing caller outside the closed entry-point survey. Grade
+  unchanged: primary/witness grades stand, full stock rung 5 NOT
+  ACHIEVED. Next named experiment is the `string.c:7828-7851` case-map
+  chaining parity question; recipe in `docs/reproducibility.md` §W348 (Ruby).
+  Docs re-ran this sweep on this host: rc 0, 504 matrix lines, 420 arms
+  `asan=0` and 84 arms `asan=1` at odd capacity on 3.4.12 ASan, matching
+  the author's matrix.
+- **Gimpjif2Shell W345 names the fault instruction; W349 witness replay is
+  ESTABLISHED AS LABELED, grade-neutral.** The author's read-only GDB
+  script `live/gdb-w345-faultinsn.cmd` (SHA-256 `fe654db3…`) disassembled
+  the W343 flood's terminal PC `0x7ffff7fd1327`: loop index from
+  `0xc0(%rsp)`, `mov (%r14,%rax,8),%rax` loads a pointer from a heap array,
+  and `mov 0x28(%rax),%rbx` faults on `rax=0x4d4d…`. `LOOPIDX=0`,
+  `ARRBASE−idx` varies `0x46e80`–`0x47210`, and `ARR[0..15]` hold chosen
+  bytes. This corrects "unsymbolized ld-linux frame" but is not a
+  chosen-address write: 0x4d4d… is unmapped. Four mapped-pointer variants
+  toward `0x5555556c0240` all failed (short span, `0x5a` SIMD fault,
+  shifted `0x4d` patch, repeated-pointer sweep) and are CLOSED. Witness
+  W349 replayed a private `git archive 25043ea9` with the unmodified
+  runner `b047c40e…` and the same GDB script/JIF `8e0bc65d…`: rc 0,
+  `PASS: pinned inflate reached`, `PASS: fault captured in GDB`, fresh log
+  SHA-256 `de97381b…` and GDB log `f6c967c4…`, `DELTA_FROM_IDX=0x47000`,
+  zero HEAPDEREF hits, no shim, no mapped chosen-pointer dereference.
+  Limitation: the GIMP AppImage is the provisioned binary, not a witness
+  rebuild. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
+  bytes / NO r5; detail `.mishe-tauftauf/artifacts/witness-w349/detail.md`,
+  recipe in `docs/reproducibility.md` §W345.
+
 ## 2026-11-27 15:1x–15:2xZ — W347 replay-NIT closure and Ruby fix-hunk sweep
 
 Docs-only fold of `c5dbd5a5`, `e613367a` and `c271169e` after `70f1ab1a`.
@@ -42,21 +128,25 @@ register stays 214/211/211/145.
   capacity hunk is only reachable through `IO#write`, which does not
   append. No stock coercion mutator or new trigger. Grade unchanged:
   W341/W342 rung 3, witness-COMPLETE rung 4, full rung 5 NOT ACHIEVED.
-  Next named experiment: remaining 3.4.12→3.4.13 `enc/` write-bound diffs
-  for a stock web-facing caller outside the closed sweeps; recipe in
-  `docs/reproducibility.md` §W347.
+  W347's named `enc/` follow-up was closed at W348 above: all remaining
+  write-relevant hunks are guarded, refactors or already covered lanes.
+  Recipe for the closed sweep: `docs/reproducibility.md` §W347.
 - **AWS W345 stage has an independent witness replay, still not admitted.**
   Witness W347 replayed `77c246b2` from its own private archive: 18/18
   pins, 17 PASS / 0 FAIL, byte-identical summary, its own ASan
   `WRITE of size 1` at `Base64.cpp:115` and GDB chosen bytes at offset 2;
   ESTABLISHED AS LABELED at the direct-call lab scope, grade-neutral,
   NO r5. No window, register fold or admission followed; the fixed-arm
-  control and real generated-client wire caller stay UNKNOWN/owed, and
-  the report's `RCE not demonstrated` is unchanged.
+  control and real generated-client wire caller were UNKNOWN/owed at this
+  limb; both were closed in the W348 limb above, where the target is
+  staged and the witness verdict is still UNKNOWN. The report's
+  `RCE not demonstrated` is unchanged.
 
-What would change this fold: an editorconfig live plugin consumer or
-dereferenced chosen pointer, an AWS fixed arm or real wire caller, a
-Ruby `enc/` stock web-facing caller, or a checker RED on committed HEAD.
+At the time of this limb: an editorconfig live plugin consumer or
+dereferenced chosen pointer, an AWS fixed arm or real wire caller, a Ruby
+`enc/` stock web-facing caller, or a checker RED on committed HEAD. The
+two AWS/Ruby items are closed in the W348 limb above; a checker RED would
+still change this fold.
 
 ## 2026-11-27 14:4x–14:5xZ — editorconfig admitted and witnessed; AWS stage; closures
 
