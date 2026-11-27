@@ -6,6 +6,10 @@ routes and sync stay person-reserved. Brief:
 `reports/frontier-checkmk2shell.md`. Lab and pins:
 `lab/frontier/checkmk2shell/PROVENANCE.md`. Charter and seed wall are under
 `.mishe-tauftauf/{charters,walls}/checkmk2shell.md`.
+Staging commit `b902273f`; clean archive TAR SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`
+replayed 12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`.
+
 
 CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq; affected Checkmk 2.5.0 before 2.5.0p21,
 2.4.0 before 2.4.0p42, and 2.3.0 (EOL). Fixed source commit

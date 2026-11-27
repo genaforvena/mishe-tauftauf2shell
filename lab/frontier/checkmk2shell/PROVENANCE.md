@@ -81,7 +81,10 @@ UTF-8 continuation sequence.
 
 - Fixed plain 10000-byte arm: rc 0, message size 8191.
 
-Replay result: `RUN_ALL_OK 11 PASS / 0 FAIL` (`evidence/last-run.out`).
+Replay result: `RUN_ALL_OK 11 PASS / 0 FAIL` (`evidence/last-run.out`). Clean
+`git archive --format=tar b902273f lab/frontier/checkmk2shell` TAR SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`
+replayed 12/12 pins and the same 11 PASS / 0 FAIL.
 
 ## Scope limits
 

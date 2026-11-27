@@ -4,6 +4,10 @@ Status 2026-11-27 W367: **STAGED**; live inner-socket window 228 with two
 registered panes. Operator admission and independent witness replay are owed.
 Grade R3 confirmed on the real pinned parser; R4 **LIMITED** to an isolated
 verbatim-sink/no-canary/no-PIE build with benign marker execution. R5 NOT CLAIMED.
+Staging commit `b902273f`; clean `git archive --format=tar` SHA-256
+`3a5b3ef20bbf9bcbf3efa6c68fdbbcba9b45fb343de41d92d5be3126f25cab52`
+replayed 12/12 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`.
+
 
 ## Verified ground truth (claim, not assumed)
 
