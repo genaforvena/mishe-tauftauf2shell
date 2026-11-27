@@ -49,15 +49,19 @@ the pins and replayed the loopback wire harness before admission.
   `SUMMARY: AddressSanitizer: heap-buffer-overflow components/bundle6/reports.c:439
   in record_parser_read_byte`. The staged clean replay at
   `replay-final-summary.txt` matched 5/5 normalized hashes.
-- Not claimed: code execution, pointer/address control (the destination is a
-  heap chunk plus a sequential counter), any measured smtcp/TCPCLv3 or BPv7
-  path, public-exploit existence, or rung 5. Witness replay is owed at the
-  claimed live-wire rung-3 / plain-build rung-4 scope.
-- First target-mind steps: replay with its own eyes, then map the one-byte
-  chunk's plain-daemon neighbours over repeated bundles and ask whether a
-  chosen offset can reach a useful pointer; separately measure smtcp/TCPCLv3
-  and a BPv7 admin equivalent. Rung 5 needs a benign command side effect with
-  vulnerable/fixed/safe-input controls and independent replay.
+- Not claimed at admission (2026-11-22): code execution, pointer/address
+  control, measured smtcp/TCPCLv3 or BPv7 paths, public-exploit existence,
+  or rung 5. Those admission-time limits are historical, not the current grade.
+- Current grade (2026-11-27, commit `9ca46a2d`): rung 3 ASan WRITE, rung 4
+  chosen bytes / chosen pointer at a live `free()` / tcache-poisoned
+  chosen-address write, and **rung 5 demonstrated on the pinned v0.15.1 plain
+  build under ASLR-off lab conditions, NOT ESTABLISHED** — the plant-started
+  daemon executed a lab-chosen `touch` via an overwritten `trx_callback` with
+  an observed marker; safe and fixed controls are clean. Exact wire, hashes,
+  addresses, negatives and the owed independent witness replay are in
+  [reports/ud3tn2shell-pointer-control.md](ud3tn2shell-pointer-control.md),
+  final section. Transport reach on smtcp/TCPCLv3/SPP is separately recorded
+  there; BPv7 has no analogous sink.
 
 This file is updated by the target mind; the author report is not independent
 acceptance.
