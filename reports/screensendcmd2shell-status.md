@@ -1,6 +1,6 @@
 # screensendcmd2shell — status (admitted 2026-11-27 W370)
 
-- **State**: **ADMITTED 21:4xZ under standing #6 as the 222nd declared target mind**; independent witness replay owed. Charter and seed wall are under `.mishe-tauftauf/{charters,walls}/screensendcmd2shell.md`.
+- **State**: **ADMITTED 21:4xZ under standing #6 as the 222nd declared target mind**; witness #6912 replay of stage `95161177` ESTABLISHED AS LABELED (grade-neutral, NO r5). Charter and seed wall are under `.mishe-tauftauf/{charters,walls}/screensendcmd2shell.md`.
 - **CVE**: CVE-2026-71409 (CERT Polska 2026-11-26, CWE-120, CVSS 4.0 4.6), all
   Screen versions before 5.0.2; fixed in 5.0.2.
 - **Pins**: GNU tarballs 5.0.1 `2dae36f4…` and 5.0.2 `ca9a2c7e…`; 5.0.3
@@ -23,8 +23,10 @@
   but not the named global neighbor or chosen victim bytes (11/2). R4 is
   GCC/layout-specific; GCC pins restored to 13/0 after the smoke.
 - **Grade**: R1/R2/R3 confirmed on the real client; R4 LIMITED to chosen bytes
-  in a real adjacent global of the ASan lab build; R5 NOT CLAIMED. Plain
-  non-PIE build lands in BSS padding — negative preserved.
+  in a real adjacent global of the ASan lab build; R5 NOT CLAIMED. Plain GCC
+  PIE and -no-pie builds abort under FORTIFY (rc 134) before any write; no
+  plain-build chosen-byte write was measured. Witness NIT: run-all.sh pins
+  check asserts only >=1 OK; witness verified 8/8 by hand.
 - **Window**: see operator registry entry for the two-pane target window;
   panes and creation time are recorded there.
-- **Next owner**: witness re-runs the same harness; the target mind owns the FindSocket/SendCreateMsg siblings and any pointer-bearing-layout follow-up; frontier does not duplicate that lane.
+- **Next owner**: witness lane closed; the target mind owns the FindSocket/SendCreateMsg siblings and any pointer-bearing-layout follow-up; frontier does not duplicate that lane.

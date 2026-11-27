@@ -6,6 +6,58 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 22:2x–22:3xZ — Ruby W365 and gimpjif W359 close open lanes; Screen witnessed; TDengine admitted
+
+Witness #6912 replay of screensendcmd2shell stage `95161177` is ESTABLISHED
+AS LABELED, grade-neutral, NO r5: ASan `WRITE of size 302` on the real
+`screen -X` client, chosen `0x43` at nine offsets in the GCC-lab adjacent
+global, `RUN_ALL_OK 13 PASS / 0 FAIL`. The brief, status and provenance now
+state what was measured about plain builds: independent GCC PIE and -no-pie
+builds abort under FORTIFY (rc 134) before any write; the earlier claim that
+the overflow lands in BSS padding had no write measurement and is withdrawn.
+The second NIT (`run-all.sh` pins check asserts only >=1 `OK`; the witness
+verified 8/8 by hand) is recorded in the status; the harness and its pinned
+archive hash are unchanged. No grade, rung cell or generated count moved.
+- **Libvorbis CVE-2026-137079 SCREENED, not staged** (`libvorbislap2shell`).
+  The pinned v1.3.7 `_ov_getlap()` tail runs against an open PR #136 control:
+  GCC 13.3.0 ASan reports `negative-size-param (size=-16)` at the pinned
+  `memcpy` (`vorbisfile.c:2250`) for a negative sample count and
+  `dynamic-stack-buffer-overflow WRITE of size 248` at the pinned `memset`
+  (`:2245`) for the zero-sample branch, which overruns a 224-byte free tail
+  by 24 zero bytes. The `-fno-stack-protector` negative-count run completes
+  with `lapcount=4` and no captured bytes; no real Ogg trigger was built.
+  `RUN_ALL_OK 16 PASS / 0 FAIL`; R3 at pinned-sink scope, R4 NOT CLAIMED
+  (no chosen-byte store), R5 NO. Both upstream PRs were unmerged, so the
+  fixed side is a proposed patch, not a release. Brief in
+  `reports/frontier-libvorbislap2shell.md`; no window or generated-count
+  change.
+
+- **TDengineEscape2Shell admitted as the 223rd mind** (`c16c1eaa`, DM #6956).
+  Operator clean replay 22:18Z from `git archive --format=tar c522d973
+  lab/frontier/tdengineescape2shell` (plain tar `95050b3b…`): 6/6 input pins,
+  own `BUILD_OK`, unmodified `./harness/run-all.sh` `RUN_ALL_OK 28 PASS /
+  0 FAIL`, 5/5 stable-evidence pins and GCC/Clang ASan `WRITE of size 1` at
+  `parUtil.c:461`. Generated counts moved 222/219/219/153 → 223/220/220/153;
+  rung cells stay ✓/✓/✓/◐/—. Witness replay remains owed; grade unchanged.
+- **Ruby W365 closes the UTF-8 tag boundary** (`b28f774a`). Valgrind 20/20
+  observed, all rc 0: only the ISO-8859-1 sharp-s positive control writes
+  one byte at `case_map (iso_8859_1.c:277)` (N=27/43, 3.4.12); the patched
+  control and all UTF-8-tagged (invalid and valid U+0130), US-ASCII-tagged
+  and ASCII-8BIT-tagged arms have zero invalid writes and reads. Fresh plain
+  12/12 rc 0 with no glibc diagnostic in those four arms. Source read closes
+  the boundary: each operand folds with its own encoding, Unicode's
+  `CASE_MAPPING_SLACK` of 12 bytes bounds 2→3-byte expansions, and
+  `str_casecmp` (`string.c:4271-4300`) never calls `rb_str_downcase`. Grade
+  unchanged; no wire request, chosen address, marker or command. Next named
+  experiment W366 sweeps the receiver-side tag.
+- **Gimpjif W359 proves the live loader-array overwrite** (`ade0f011`). A
+  read-only hardware WRITE watchpoint at `idx+0x47210` fired four times in
+  bundled libz; at inflate return (`total_out=0x48410`) the live target and
+  surrounding words held chosen `M=0x5555556a0200`, where W358 had sampled
+  genuine pointers. The earlier causal gap is resolved temporally; the run
+  faults immediately after inflate return and no chosen-address store,
+  control-flow effect, marker or command was observed. Grade unchanged, NO r5.
+
 ## 2026-11-27 22:0x–22:2xZ — Ruby W363/W364 close the encoding-gate questions; TDengine staged
 
 Docs-only fold of `7187842f` (argument-side `casecmp?`), `b3b3ae9a`
@@ -83,9 +135,9 @@ count stays 152 and the register flag still names stage `0415fa78`.
   process, wire, service, shell or command. This verdict is for the
   correction, not a regrade of W372's stage scope.
 
-Next: W365's UTF-8 tag boundary in Ruby; the real Windows post-allocation
-consumer under ASLR/CFG before any loopback trusted-response probe for Rufus;
-an `idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
+Next: W366's receiver-side tag sweep in Ruby; the TDengine and Windows
+post-allocation consumer witnesses under their labeled scopes; an
+`idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
 chosen-address transfer changes the plan.
 
 ## 2026-11-27 21:2x–21:4xZ — Screen CVE-2026-71409 staged (W370)
@@ -99,16 +151,19 @@ before the real `attach_tty_name_in_ns` global, at `attacher.c:434` ←
 report; safe input is clean. A recover-ASan build under GDB with a 600-byte
 `STY` put the chosen `0x43` at nine offsets in that real global. Grade R3
 confirmed on the real client, R4 LIMITED to chosen bytes in a real adjacent
-global of the lab build, R5 NOT CLAIMED; the plain non-PIE overflow lands in
-BSS padding (negative preserved). `RUN_ALL_OK 13 PASS / 0 FAIL` twice, six
-input pins and eight stable-evidence pins. Brief, status, provenance and the
-dedicated two-pane window are staged for operator admission and witness replay.
+global of the lab build, R5 NOT CLAIMED; independent GCC PIE and -no-pie
+builds FORTIFY-abort (rc 134) before any write (W375 NIT negative preserved).
+`RUN_ALL_OK 13 PASS / 0 FAIL` twice, six input pins and eight stable-evidence
+pins. Brief, status, provenance and the dedicated two-pane window are staged
+for operator admission and witness replay.
 The same-release `FindSocket()` sink and the 5.0.3 `SendCreateMsg()` sibling
 are folded into this one target, not staged separately.
 
 Admitted 21:4xZ as the 222nd declared mind on the clean `519f6fde…` archive
-replay (`fdcc1b89`); independent witness replay is still owed. The recipe and
-generated-count boundary are in §21:4x–21:5xZ of `reproducibility.md`.
+replay (`fdcc1b89`); witness W375 replayed stage `95161177` ESTABLISHED AS
+LABELED, grade-neutral, NO r5 (witness artifact
+`.mishe-tauftauf/artifacts/witness-screensendcmd2shell/`). The recipe and
+generated-count boundary are in §21:4xZ of `reproducibility.md`.
 
 ## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
 
@@ -159,12 +214,12 @@ verified, not duplicated. No rung cell changes here; the register flag and
   JIF `133b4c67…`. That arm armed watchers before `base` was assigned, so
   only `total_out` is used; the cause stays UNKNOWN.
 
-Next: the Ruby size-LSB lane has moved past the argument-side and
-cross-encoding gates to W365's UTF-8 tag boundary; the real Windows
-post-allocation consumer under ASLR/CFG still precedes any loopback
-trusted-response probe for Rufus; gimpjif needs an `idx`-independent map, not
-another phase retune. A fixed-arm store, a witness failure or a chosen-address
-transfer changes the plan.
+Next: the Ruby size-LSB lane has moved past the UTF-8 tag boundary to W366's
+receiver-side tag sweep; the real Windows post-allocation consumer under
+ASLR/CFG still precedes any loopback trusted-response probe for Rufus;
+gimpjif W359 proved the live array overwrite but still needs an
+`idx`-independent map. A fixed-arm store, a witness failure or a
+chosen-address transfer changes the plan.
 
 ## 2026-11-27 20:5x–21:0xZ — Rufus SBAT heap overflow staged (W369)
 

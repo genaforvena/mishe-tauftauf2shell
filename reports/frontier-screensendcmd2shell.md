@@ -79,9 +79,10 @@ it. No server, listener, wire request, shell or command is used.
 - R4 **LIMITED**: GDB observes chosen `0x43` at nine distinct offsets in the
   real `attach_tty_name_in_ns` global of the ASan lab build. No function
   pointer, callback, control-flow transfer, shell or command was exercised;
-  global ordering is toolchain-specific. A plain non-PIE 5.0.1 build puts the
-  same overflow in BSS padding rather than a live object — a preserved
-  negative, not a pass.
+  global ordering is toolchain-specific. Independent plain GCC builds (PIE
+  and -no-pie) abort under FORTIFY with rc 134 before any write — a
+  preserved negative, not a pass; no plain-build chosen-byte write was
+  measured.
 - R5: NOT CLAIMED. No loopback service, wire/request input or command side
   effect; the input is local attacker-controlled environment.
 
@@ -90,7 +91,7 @@ it. No server, listener, wire request, shell or command is used.
 
 1. Rebuild with a linker layout placing a pointer-bearing global after
    `SocketPath` and measure whether a chosen `STY` can redirect it; preserve
-   the current ASan-real-neighbor and plain-padding negatives.
+   the current ASan-real-neighbor and plain-build FORTIFY-abort negatives.
 2. Reach `SendCreateMsg()` (5.0.2, fixed in 5.0.3) through `screen -X` with a
    crafted new-window command and replay the same ASan/GDB pair.
 3. Examine `FindSocket()`'s `socket.c:196` sink with directory entries whose

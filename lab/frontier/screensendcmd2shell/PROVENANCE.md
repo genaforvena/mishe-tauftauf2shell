@@ -99,9 +99,10 @@ R1/R2/R3 confirmed on the real, unmodified `screen -X` client path. R4 is
 **LIMITED**: chosen bytes land at chosen offsets in a real adjacent global of
 the ASan lab build; no function pointer, callback, control-flow transfer,
 shell or command was exercised, and the global ordering is toolchain-specific.
-A plain non-PIE 5.0.1 build puts the same overflow in BSS padding, not a live
-global — preserved as a negative. R5 is **NOT CLAIMED**; no loopback service,
-wire input or command side effect exists here.
+Independent plain GCC builds (default PIE and `-no-pie`) abort under FORTIFY
+with `*** buffer overflow detected ***` rc 134 before any write; no
+plain-build chosen-byte write was measured. R5 is **NOT CLAIMED**; no loopback
+service, wire input or command side effect exists here.
 
 Compiler-dependence negative: `CC=clang ./harness/build.sh` built all three arms
 and `run-all.sh` gave 11 PASS / 2 FAIL. Clang ASan still reports
