@@ -25,7 +25,6 @@ hypotheses and contradictory results; treat unknowns as unknowns.
 An idle wake is not work. When a target has no owed experiment, the mind
 must either (a) push the same target deeper toward rung 4 with a bounded,
 falsifiable experiment that could change a grade — a new consumer, a
-wire-pure version of a debugger-assisted step, stock-allocator placement,
 a live process, a stronger marker, or a counterexample to an existing
 claim — or (b) if rung 4 is genuinely closed on this host/build, mine an
 **adjacent vulnerability in the same target/runtime**: same source tree,
@@ -16425,7 +16424,7 @@ change" lines in the 12:5x–13:1xZ limb above. Docs-only fold of
 `721ce2fc`, `c1e35335`, `6187df26`, `a9b43119` and `c66f46e1`. No grade,
 rung cell, `established` flag or generated count was moved here.
 
-- **SamtoolsRg2Shell (ADMITTED 13:2xZ, 212th; staged, witness owed).**
+- **SamtoolsRg2Shell (ADMITTED 13:2xZ, 212th; W342 witness ESTABLISHED).**
   GHSA-vh3p-9c59-j3hv is a local-file `fscanf("%s")` stack write into
   `buf[1024]` in the real pinned `samtools mpileup -G` CLI at
   `bam_plcmd.c:1298`; the fix caps the conversion at `%1023s`. Clean
@@ -16434,10 +16433,14 @@ rung cell, `established` flag or generated count was moved here.
   replay and docs' own replay. ASan 1024 gives `WRITE of size 1025` with
   1023 clean; fixed arms clean; chosen `0x42` bytes, hash pointer and
   saved return address were observed in read-only GDB. R1/R2/R3 ✓,
-  R4 DEMONSTRATED in this lab build, NO r5, witness UNKNOWN and the
-  register unestablished. Next experiment: default/hardened and optimized
-  builds, then a real workflow that supplies a `-G` file; full pins and
-  commands are in `docs/reproducibility.md` §13:2xZ.
+  R4 DEMONSTRATED in this lab build, NO r5. W342 witness replay (13:3xZ,
+  #6487/#6488) is ESTABLISHED AS LABELED, grade-neutral: clean archive,
+  own four CLI builds, 24 PASS / 0 FAIL with byte-identical summary,
+  source-bound ASan frames and a new `0x43`-tail GDB probe that moved both
+  chosen pointer and saved RIP; no redirect, marker or wire input.
+  Next experiment: default/hardened and optimized builds, then a real
+  workflow that supplies a `-G` file; full pins and commands are in
+  `docs/reproducibility.md` §13:2xZ. The register flag stays operator-owned.
 - **Gimpjif2Shell W341 adds a second no-consumer geometry.** Upstream's
   `65535x32769` geometry writes ~32 KiB of chosen bytes past `indexes` in
   the real plug-in, but no live pointer word falls in the span and both
@@ -16453,8 +16456,7 @@ rung cell, `established` flag or generated count was moved here.
   No stock coercion route was reopened; the coercion-free route stays
   CLOSED at the scoped stdlib call sites.
 
-What would change this limb: an independent samtools witness verdict, a
-samtools build or workflow that survives default hardening and reaches
-the sink, a gimpjif post-allocation consumer that dereferences a chosen
-word, a stock Ruby coercion path that mutates the receiver, or a checker
-RED on committed HEAD.
+What would change this limb: a samtools build or workflow that survives
+default hardening and reaches the sink, a gimpjif post-allocation consumer
+that dereferences a chosen word, a stock Ruby coercion path that mutates
+the receiver, or a checker RED on committed HEAD.

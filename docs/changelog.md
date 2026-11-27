@@ -13,8 +13,8 @@ operator's 212th admission in README/results/manifest/SVG were verified,
 not duplicated. No grade, rung cell, `established` flag, generated cell,
 manifest, README, report or lab evidence was moved here.
 
-- **SamtoolsRg2Shell is the 212th declared mind (ADMITTED 13:2xZ), staged,
-  not witness-accepted.** GHSA-vh3p-9c59-j3hv has no CVE in the fetched
+- **SamtoolsRg2Shell is the 212th declared mind (ADMITTED 13:2xZ; W342
+  witness ESTABLISHED AS LABELED).** GHSA-vh3p-9c59-j3hv has no CVE in the
   advisory; the exact fix parent `d177071e…` → fix `bd8b5dc8…` changes
   `fscanf("%s")` to `"%1023s"` in `bam_plcmd.c:1298`. A local file passed to
   the real pinned `samtools mpileup -G` supplies the bytes and the length;
@@ -27,9 +27,17 @@ manifest, README, report or lab evidence was moved here.
   `0x42` bytes at `buf+1024`, a chosen hash pointer at 1200 and a chosen
   saved return address at 2048. R1/R2/R3 ✓, R4 DEMONSTRATED in this lab
   build, NO r5: no redirect to chosen executable code, marker, command,
-  live workflow or wire input. Witness replay is owed and the register
-  row stays unestablished. Full recipe in `docs/reproducibility.md`
-  §13:2xZ; status in `reports/samtoolsrg2shell-status.md`.
+  live workflow or wire input. W342 fresh-context witness replay (13:3xZ,
+  chat #6487/#6488) graded ESTABLISHED AS LABELED, grade-neutral, NO r5:
+  clean `c1e35335` archive, 8/8 + 4/4 pins, its own four CLI builds,
+  unmodified 24 PASS / 0 FAIL with byte-identical summary, own ASan WRITE
+  sizes 1025/1201/2049/4097 at pinned `bam_plcmd.c:1298`, and a new
+  `0x43`-tail GDB probe that moved the file-chosen hash pointer and saved
+  RIP to `0x4343…`; the ASan SUMMARY naming `scanf_common` instead of the
+  sink is a wording NIT. No redirect, marker, command or wire input.
+  Full recipe in `docs/reproducibility.md` §13:2xZ; detail
+  `.mishe-tauftauf/artifacts/witness-w342-samtools/detail.md`. The
+  register `established` flag stays the operator's edit.
 - **Gimpjif2Shell W341 closes a second upstream geometry without a live
   consumer.** Upstream issue 17001's `65535x32769` (`0x80007fff`, alpha
   `data_size=65534`) drove the same no-shim GIMP 3.2.8 plug-in path:
@@ -45,9 +53,9 @@ manifest, README, report or lab evidence was moved here.
   nits were source-line and wording corrections, folded in the 13:0xZ
   limb below and in `reports/ruby2shell-investigation.md` §W340.
 
-What would change this fold: an independent samtools witness verdict, a
-default/hardened build or real `-G` workflow reaching the sink, a gimpjif
-chosen-word dereference, or a checker RED on committed HEAD.
+What would change this fold: a default/hardened build or real `-G` workflow
+reaching the sink, a gimpjif chosen-word dereference, or a checker RED on
+committed HEAD.
 
 ## 2026-11-27 12:5x–13:1xZ — libssh admitted and witnessed; gimpjif fault isolated
 
