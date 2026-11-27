@@ -8225,13 +8225,15 @@ builds, all rc 0 with zero ASan reports.
   user-code window between `rb_reg_search` (`:6015`) and
   `beg=BEG(nth)`/`len=END(nth)-beg` (`:6023-6024`) is
   `rb_reg_backref_number(match, argv[1])` → `match_backref_number`
-  (`re.c:1206`). For a Symbol `argv[1]` it takes `rb_sym2str`; for a String
+  (`re.c:1207-1208`). For a Symbol `argv[1]` it takes `rb_sym2str`; for a String
   it takes `StringValueCStr`; only a non-String/non-Symbol reaches
-  `NUM2INT` (`re.c:1212`), which calls `to_int`. A stock object receives no
+  `NUM2INT` (`re.c:1220-1221`), which calls `to_int`. A stock object receives no
   argument and holds no reference to the receiver, so no stock `to_int`
-  can mutate the string being sliced. The only regex `slice!` call in the
+  can mutate the string being sliced. The regex `slice!` call in the
   stdlib is `net/protocol.rb:454` (`while line = @wbuf.slice!(/\A[^\r\n]*(?:\n|\r(?:\n|(?!\z)))/)`),
-  with `argc==1` and therefore no coercion window at all.
+  with `argc==1` and therefore no coercion window at all; the same line also
+  appears in `rubygems/vendor/net-protocol/lib/net/protocol.rb:454` (also
+  `argc==1`), and no regex `slice!` caller in `ext/` passes two arguments.
 - **Arm `stockref` — NEGATIVE, identical on all four builds.** The exact
   `net/protocol.rb:454` write-buffer shape (`+OK ` + 64 `Z` + CRLF + 256
   `Q` + CRLF + 128 `R`, 456 bytes) gives `out_len=70`,
@@ -8260,8 +8262,8 @@ Grade: **adjacent narrow rung 4 in-process, with a durable process-state
 side effect through stock APIs.** Still harness-triggered (caller-defined
 `to_int`), still no wire, no stock reach to the coercion, no command, no
 benign marker, no pointer control. The `stockref` negative CLOSES the
-"no caller-defined coercion object" route through the only stock regex
-`slice!` call site; the `persist` arm does not reopen it. Primary CVE grade,
+"no caller-defined coercion object" route through the stock regex `slice!`
+call sites; the `persist` arm does not reopen it. Primary CVE grade,
 witness-COMPLETE rung 4 and full rung 5 unchanged.
 
 Next named experiment: a stale-backed object reaching a side effect from a
@@ -8275,3 +8277,10 @@ Do not repeat the W339 userdef/Marshal shapes, the `net/protocol.rb:454`
 arm, Marshal fixnum/string, `unpack("p")`, the 543-byte bands shape,
 partition, backref `[]=`, each_line, append_as_bytes, concat or setbyte
 unchanged.
+
+W341 fresh-context witness replay returned ESTABLISHED AS LABELED,
+grade-neutral: the script blobs matched `11b05164` exactly and all eight arms
+reproduced on the four pinned builds (own matrix SHA-256
+`c39897fe1db83a93e6de8dfb7284d5300294d8f0ad05b35b643b857ac4a475f0`); the
+two source-line/"only" wording corrections above were its only NITs. Detail:
+`.mishe-tauftauf/artifacts/witness-w341-ruby2shell/detail.md` (gitignored).

@@ -18809,6 +18809,13 @@ TracePoint observing `#<Class:Gem::Specification>#_load`,
 `registered=N found=N`, `traces=NONE`. All eight arms rc 0 with zero ASan
 reports. Grade and limits in `reports/ruby2shell-investigation.md` §W340.
 
+W341 fresh-context witness replay: script blobs matched `11b05164` exactly;
+all eight arms reproduced on the four pinned builds (own matrix SHA-256
+`c39897fe1db83a93e6de8dfb7284d5300294d8f0ad05b35b643b857ac4a475f0`),
+verdict ESTABLISHED AS LABELED, grade-neutral. Detail (gitignored):
+`.mishe-tauftauf/artifacts/witness-w341-ruby2shell/detail.md`.
+
+
 
 ## 2026-11-27 12:5x–13:1xZ — libssh SFTP long-name stage, admission and witness
 

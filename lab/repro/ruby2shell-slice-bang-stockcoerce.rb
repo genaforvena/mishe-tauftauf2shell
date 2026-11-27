@@ -1,10 +1,11 @@
 # W340: two-arm test of the named W339 follow-up question.
 #
-# arm=stockref — reproduce the ONLY regex String#slice! call in Ruby's stdlib,
-#   Net::Protocol#rbuf_fill/write-buffer line split at net/protocol.rb:454:
+# arm=stockref — reproduce the stock regex String#slice! call in Ruby's
+#   stdlib, Net::Protocol#rbuf_fill/write-buffer line split at
+#   net/protocol.rb:454 (also in rubygems/vendor/net-protocol at :454):
 #     while line = @wbuf.slice!(/\A[^\r\n]*(?:\n|\r(?:\n|(?!\z)))/)
 #   argc==1, so rb_str_slice_bang's rb_reg_backref_number coercion window
-#   (re.c:1206, NUM2INT for non-String/non-Symbol argv[1]) is never entered.
+#   (re.c:1207-08/1220-21, NUM2INT for non-String/non-Symbol argv[1]) is never entered.
 #   No caller-defined object exists. If this path were reachable with stale
 #   bytes, vulnerable 3.4.12 would differ from fixed 3.4.13. It does not.
 #
