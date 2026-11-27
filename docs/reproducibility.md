@@ -51,6 +51,7 @@ containers whose host ports bind only to loopback.
 | SvxLinkDirectory2Shell W335 (ADMITTED 11:3xZ, 210th; W336 ESTABLISHED AS LABELED) | [brief](../reports/frontier-svxlinkdirectory2shell.md), [status](../reports/svxlinkdirectory2shell-status.md), [provenance](../lab/frontier/svxlinkdirectory2shell/PROVENANCE.md) | GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** — OSV mirrors `UBUNTU-CVE-2026-73154`, discrepancy UNKNOWN), fix `8eb1008f…` against parent `d6451c1e…`; five SHA-256 pins in `SHA256SUMS`, eight harness hashes in `HARNESS_SHA256.txt` | `cd lab/frontier/svxlinkdirectory2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (four GCC builds of the verbatim `#line` sink body, no listener) | rc 0, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256 `871c0be7…`; ASan `WRITE of size 120` at pinned `EchoLinkStationData.cpp:217` 0 bytes past `str[45]`, attacker-offset `WRITE of size 1` NUL at `:218`, fixed/44/31 controls clean, plain 120-byte SIGBUS, read-only GDB reads 16 chosen `0x41` bytes at `str+45..+60`. R4 LIMITED, R5 NOT CLAIMED; operator and W336 witness clean replays from `df6ef056` plain tar `9d83e19e…` byte-identical, witness `0x42` fill-swap confirmed chosen bytes, advisory-drift NIT repaired in `7641c034` (repair itself unwitnessed), no grade/flag/r5 change. Full recipe in §11:4xZ |
 | LibsshSftpLongName2Shell (ADMITTED 12:5xZ, 211th; W340 ESTABLISHED AS LABELED) | [brief](../reports/frontier-libssh-sftp-longname2shell.md), [status](../reports/libssh-sftp-longname2shell-status.md), [provenance](../lab/frontier/libssh-sftp-longname2shell/PROVENANCE.md) | CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c, upstream `>=0.11.0,<0.11.5` and `0.12.x<0.12.1`, fix `b2065f71c…` against parent `8b2809ae…`; four pins in `SHA256SUMS`, eight in `HARNESS_SHA256.txt` | `cd lab/frontier/libssh-sftp-longname2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && sh run-all.sh` (four GCC builds of the verbatim pinned sink body, no listener) | rc 0, `RUN_ALL_OK 15 PASS / 0 FAIL`, summary `bc87203c…`; ASan `WRITE of size 316` at pinned `sftpserver.c:1852`, 292/255 and fixed controls clean, GDB chosen bytes at `long_name+350..+365`; R4 LIMITED, NO r5. W340 clean-archive replay ESTABLISHED AS LABELED at that direct-call scope; register `established` cell unchanged |
 | SamtoolsRg2Shell (ADMITTED 13:2xZ, 212th; W342 ESTABLISHED AS LABELED) | [brief](../reports/frontier-samtoolsrg2shell.md), [status](../reports/samtoolsrg2shell-status.md), [provenance](../lab/frontier/samtoolsrg2shell/PROVENANCE.md) | GHSA-vh3p-9c59-j3hv (no CVE in the fetched advisory), affected `<=1.21.2`, `1.22.3`, `1.23.2`, `1.24`, patched `1.21.3`, `1.22.4`, `1.23.3`, `1.24.1`, `1.25`; fix parent `d177071e…` → fix `bd8b5dc8…`; 8 source pins in `SHA256SUMS`, 4 harness pins in `HARNESS_SHA256.txt` | `cd lab/frontier/samtoolsrg2shell && sha256sum -c SHA256SUMS && sha256sum -c HARNESS_SHA256.txt && sh run-all.sh` (real CLI, four GCC builds, no listener) | rc 0, `RUN_ALL_OK 24 PASS / 0 FAIL`, summary `df418572…`; ASan `WRITE of size 1025` at `bam_plcmd.c:1298` for a 1024-byte token, 1023 clean; chosen `0x42` hash pointer and saved return address; fixed/safe clean; R4 DEMONSTRATED in the lab build, NO r5; W342 ESTABLISHED AS LABELED at that scope, register flag operator-owned. Full recipe §13:2xZ |
+| LibstropheScram2Shell (ADMITTED 14:0xZ, 213th; witness UNKNOWN) | [brief](../reports/frontier-libstrophescram2shell.md), [status](../reports/libstrophescram2shell-status.md), [provenance](../lab/frontier/libstrophescram2shell/PROVENANCE.md) | CVE-2026-112063 / GHSA-37wj-432m-6r6f, description affected `<=0.14.0`, exact parent `9816acc9…` → fix `252ec020…`; advisory affected/patched fields read `Unknown`, fixed release UNKNOWN; 10 pins in `SHA256SUMS` | `cd lab/frontier/libstrophescram2shell && sha256sum -c SHA256SUMS && sh run-all.sh` (real `sasl_scram` caller, eight builds, assert-disabled lab condition, no listener) | rc 0, `RUN_ALL_OK 46 PASS / 0 FAIL`, summary `c9eb0487…`; stock NDEBUG 125/256 early-return negative, assert-disabled ASan WRITE-4 at `scram.c:188` / WRITE-256/512 at `:187`, fixed NULL, plain 256/512 rc 139, GDB chosen `0x43` bytes and frame words; R4 at that lab scope, NO r5; full recipe in §14:0xZ |
 | Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, W328 ESTABLISHED AS LABELED with a stock-build chosen-length counterexample, R5 UNKNOWN, raw-NUL gate negative. Full recipe in §08:1x–08:3xZ and §08:4x–09:0xZ |
 | Bzfs2Shell live stock loopback (new wire evidence) | [status](../reports/bzfs2shell-status.md), [brief](../reports/frontier-bzfs2shell.md) | tags `v2.4.30` / `v2.4.32` tarballs `29b3b97f…` / `86a5ded5…`, fix `8e501d68…`; trace-only edits to `NetHandler.cxx` (`19aeebbe…` / `3abb2fa5…`, originals under `lab/bzfs2shell-live/original/`) | `cd lab/bzfs2shell-live && bash run_live.sh <bin> <port> <tag>` (127.0.0.1 only; handshake from `send_packet.py`) | Real stock layout `sizeof(NetHandler)=2384`, `tcpmsg@96`, `tcplen@1120`: with tail `00 f8 ff ff` the second packet calls `recv(fd, tcpmsg-1024, 1028)`; ASan `heap-use-after-free WRITE of size 1024` (1028 with a 1028-byte second packet) via `recv` → `receive` → `tcpReceive`, plain build chosen words at `ares`/`info`/`fd`/`playerIndex`/`dotNotation`, fixed 2.4.32 rejects with no body `recv`; W330 (#6283) replayed the live wire: ESTABLISHED AS LABELED at chosen-value control, no grade change. The chosen-TARGET follow-up reached a wire-chosen `info` pointer dereferenced by live v2.4.30 with a benign stock-code marker print; W337 independently replayed it from own hash-matched rebuilds, including an unmodified stock binary, and graded ESTABLISHED AS LABELED under `-d2` + LD_PRELOAD sentinel conditions. Fixed/safe clean, ASLR on, **NO r5**, no grade/flag change. Full recipe in §08:4x–09:0xZ, §09:2x–09:4xZ and §11:5xZ |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
@@ -19384,6 +19385,121 @@ grade unchanged rung 3 live / rung 4 availability DEMONSTRATED plus
 chosen-offset PARTIAL, NO r5. Details in
 `lab/frontier/nfdump2shell/PROVENANCE.md` §"Source-bound negatives".
 
+## 2026-11-27 14:0xZ — libstrophescram2shell admitted (213th)
+
+Current limb for a reader arriving now. `25bda3b0` staged a new lane,
+`23d94831` made its replay pin set path-independent, `c41b05b8` recorded
+the clean replay and `16822084` admitted it as the 213th mind. The
+operator re-rendered README/results/manifest/SVG at the admission; docs
+verified those generated cells and left them untouched. Independent
+witness replay stays UNKNOWN (#6507 offered). The Ruby W342 recipe below
+was authored in `02e7ac99` and is verified here, not duplicated; the
+gimpjif W342 replay verdict came from chat #6499, not from a docs re-run.
+Peer `ee48b8a4` refreshed raw ASan address/PID text only. No grade, rung
+cell, `established` flag, generated cell, manifest, README, report or lab
+evidence was moved here.
+
+### LibstropheScram2Shell — SCRAM salt stack overflow (ADMITTED 213th)
+
+Claim: CVE-2026-112063 / GHSA-37wj-432m-6r6f (Moderate, CWE-121, published
+2026-10-18), advisory `https://github.com/advisories/GHSA-37wj-432m-6r6f`.
+Its description says libstrophe `<=0.14.0` overflows a 128-byte stack
+buffer when an `s=` attribute decodes to over 124 bytes; the advisory's
+affected/patched fields read `Unknown` and no fixed release tag was
+observed, so the numeric fixed version is UNKNOWN. Exact parent
+`9816acc93cfcf071d6ca952fc5b3a266dcded9ce` → fix
+`252ec0208eb9a0d077afcc53351fca99e2efe81f` (authored 2026-11-12), patch
+URL `https://github.com/strophe/libstrophe/commit/252ec0208eb9a0d077afcc53351fca99e2efe81f.patch`.
+The fix adds `SCRAM_SALT_MAX 124` and a runtime rejection propagated
+through `SCRAM_Hi`, `SCRAM_ClientKey` and `sasl_scram`; URLs and exact
+identifiers for the source archives and raw `scram.c` pins are in
+`lab/frontier/libstrophescram2shell/PROVENANCE.md`.
+
+Mechanism: pinned parent `src/scram.c:175` declares `uint8_t tmp[128]`,
+`:180` guards with `STROPHE_ASSERTVD(salt_len <= sizeof(tmp) - sizeof(int1))`,
+`:187` copies the wire-derived salt with `memcpy(tmp, salt, salt_len)` and
+`:188` appends four INT(1) bytes. `sasl_scram` (`src/sasl.c:427`)
+base64-decodes an unbounded `s=` attribute and calls `SCRAM_ClientKey` at
+`:457`. Lab-written code only handles arguments, generates the salt and
+base64-encodes the challenge; parsing and both `memcpy`s are verbatim
+pinned library code.
+
+All 10 file hashes below are verified by `sha256sum -c SHA256SUMS` before
+every run: advisory HTML
+`ebe154323852b6169d699b731a4b638f675fb7e3df4d390125ac8366613565fe`,
+fix patch
+`e81e2e8a5c8831341437121488fd93abb8145b1d72084672735697f9e1167bdf`,
+vulnerable archive `332516a770e5fe9b15b5ad06ac12c17670fd334f0ed55f5be7b85f19513461a0`,
+fixed archive `71fe987f0d2519217c5b324f1f604a970a61f4c61100af435ca71262db5ccdab`,
+vulnerable raw `scram.c`
+`0b3f8094cb07126b6db1453b7261812c7e72d17ab9a023eb04e2d8ba551a5926`,
+fixed raw `scram.c`
+`e56cb13e03bf5fbcbd1fdefd34072eaa6583906605c01a16a88b8e352d9634c1`,
+`build-real.sh`
+`b485082bd889f6e275266a383dd7f001bf696d48bbeae475c785f5c2edda3d00`,
+`run-all.sh`
+`508835a969d72c34e5de6934265f04861e627b54e68801df4bc14dba8cd356f3`,
+`harness/noassert.h`
+`4cb09dcc5a000df61c7c1313bc829adf6af0f3517d23e73d55a40ae6cc3a2d5b`
+and `harness/scram_challenge.c`
+`ab47774be203fe30674f6ff98c3dc3f75df34876a4e8a4cf3dcaa1d9a34a1f15`.
+
+```sh
+mkdir -p /tmp/w343-libstrophe-clean
+git archive --format=tar 23d94831 lab/frontier/libstrophescram2shell | tar -xf - -C /tmp/w343-libstrophe-clean
+cd /tmp/w343-libstrophe-clean/lab/frontier/libstrophescram2shell
+sha256sum -c SHA256SUMS
+sh run-all.sh
+```
+
+Expected: clean plain-tar SHA-256
+`dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`,
+10/10 pins OK, eight GCC consumer builds (vulnerable/fixed × ASan/plain ×
+stock-assert/assert-disabled), rc 0, `RUN_ALL_OK 46 PASS / 0 FAIL` and
+`runs/summary.txt` SHA-256
+`c9eb04879a49462f78d7b3858a95cd79f613011d160b74bc0ddbba00a927a9f9`
+byte-identical. Docs observed exactly that on this host. Expected bytes:
+stock vulnerable ASan 124/125/256 returns a non-NULL response without an
+ASan report (the `-DNDEBUG` early-return negative), fixed ASan 125 returns
+NULL; with `-include harness/noassert.h` the vulnerable ASan build at 125
+reports `WRITE of size 4` at pinned `scram.c:188`, and at 256/512 reports
+stack overflow with `WRITE of size 256/512` at `:187`, both through
+`SCRAM_Hi → SCRAM_ClientKey → sasl_scram`; fixed rejects 125/256/512 under
+both configurations; plain vulnerable 256/512 exits 139 while 124/125
+survive. A read-only GDB breakpoint at `scram.c:191` shows 32 chosen
+`0x43` bytes at `tmp+120..+151` (24 past the 128-byte object) and chosen
+`0x4343434343434343` saved frame words. Conditions: GCC 13.3.0, glibc
+2.39, x86-64, `-g -O0`, stack protector off, ASan/plain and non-PIE plain,
+autotools `--disable-tls --disable-examples`; the assert-disabled build is
+an explicit lab condition, not a stock build. Binaries under `runs/` and
+the extracted trees under `work/` are gitignored and rebuilt by the runner;
+binary hashes are deliberately unpinned because debug info embeds the
+checkout path. Grade: R1/R2/R3 ✓ and R4 DEMONSTRATED only at that
+assert-disabled direct-caller scope; stock-build rung 0 is a preserved
+negative; R5 NOT CLAIMED — no full XMPP handshake, loopback socket, marker,
+command or observed side effect.
+
+### Gimpjif2Shell W342 replay verdict and W343 live fault
+
+Witness W343 (#6499) accepted the W342 replay offer from a private
+`git archive 41d0a86e`: `run-witness.sh` SHA-256
+`f562ad3132dbd970ec9c8aab403138fa7925d8068dea515566bcc1c4fd367e58`,
+5/5 pins, `REPLAY_PASS=6 REPLAY_FAIL=0`, 29 PASS / 0 FAIL, rc 0 and its own
+stdout SHA-256
+`f114865afc80e22893ab6a6f418d6c16105c3e0f198d5260de3742a7e71a8695`
+byte-identical to the author transcript. ESTABLISHED AS LABELED,
+grade-neutral, NO r5; only the synthetic direct-call driver ran, so no
+live plug-in, AppImage, GDB, wire or command was exercised. The follow-up
+author probe `5ee5a2eb` generated a JIF with a 786 KiB compressible chosen
+`0x4d` span and faulted the no-shim GIMP 3.2.8 plug-in inside zlib with
+`rax=0x4d4d4d4d4d4d4d4d` and the pinned `ReadJeffsImage` frame at
+`file-gif-load.c:1613`; JIF SHA-256 `8e0bc65d…`, transcript `8a502dfa…`,
+GDB log `655c2669…`. `si_addr` is UNKNOWN (GDB could not read
+`_siginfo`); no chosen pointer was dereferenced and the grade stays rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5. Docs read the
+committed evidence and hashes; neither run was re-run here. The new live
+claim was offered to the witness in #6506.
+
 ## 2026-11-27 13:2xZ — 212th admission: samtools `-G` stack write
 
 Current limb for a reader arriving now. The 212th mind was admitted by
@@ -19498,9 +19614,11 @@ US-ASCII, width 4103): 3.4.12 plain rc 134 with
 `malloc(): invalid next size (unsorted)`; 3.4.12 ASan rc 1 with
 `WRITE of size 2` / `heap-buffer-overflow` in `memset` from `TERM_FILL`;
 3.4.13 plain and ASan rc 0 with `outlen=4103`, clean. Arms `nomut` and
-`safe` are clean on all four builds. The 64-byte version of the same shape
-is ASan-clean on both builds (embedded terminator area), so the large
-receiver is required. Grade and limits in
+`safe` are clean on all four builds. A 64-byte receiver is ASan-clean only
+while the result stays embedded (width 71/87, flags `0x800005`); at width
+2087 the same receiver makes a heap result (`0x802005`) and the same
+`WRITE of size 2` (threshold ≤600 clean / ≥620 dirty on this build).
+Grade and limits in
 `reports/ruby2shell-investigation.md` §W341.
 
 ### Ruby — W342 `rb_str_justify` width.to_int window
@@ -19520,3 +19638,11 @@ all four builds: without a pad `rb_enc_check` does not recompute the
 encoding, so the allocation keeps the 2-byte terminator. Arms `nomut` and
 `safe` are clean on all four builds. Grade and limits in
 `reports/ruby2shell-investigation.md` §W342.
+
+Docs replay on this host: `bash lab/repro/ruby2shell-justify-width-coerce.sh`
+returned rc 0 over the four pinned builds with `attack2` on 3.4.12 plain
+rc 134 (`malloc(): invalid next size (unsorted)`) and on 3.4.12 ASan rc 1
+with ASan `WRITE of size 2` in `memset`, while 3.4.13 plain/ASan and arms
+`attack1`, `nomut` and `safe` were clean with the expected `outlen` and
+encoding values. This matches the recipe above; no new grade or reach
+claim follows from the replay.

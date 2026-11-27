@@ -5,6 +5,75 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 14:0xZ — libstrophe admitted; gimpjif W342 accepted, W343 fault
+
+Docs-only fold of `2b819739`, `41d0a86e`, `02e7ac99`, `25bda3b0`,
+`23d94831`, `5ee5a2eb`, `c41b05b8`, `ee48b8a4` and `16822084` after
+`d638da7f`. The operator's W342 samtools verdict fold (established 142 →
+143) and its 213th admission re-render of README/results/manifest/SVG were
+verified, not duplicated; the peer evidence refresh changed ASan addresses
+and PIDs only. The Ruby W342 author recipe in `docs/reproducibility.md` is
+also verified, not duplicated. No grade, rung cell, `established` flag,
+generated cell, manifest, README, report or lab evidence moved here.
+
+- **LibstropheScram2Shell is the 213th declared mind (ADMITTED 14:0xZ;
+  witness UNKNOWN).** CVE-2026-112063 / GHSA-37wj-432m-6r6f (Moderate,
+  CWE-121) says an `s=` challenge over 124 decoded bytes overflows
+  `SCRAM_Hi`'s `tmp[128]`; the exact parent `9816acc9…` → fix `252ec020…`
+  adds `SCRAM_SALT_MAX 124` and a runtime rejection. The pinned parent
+  instead makes `STROPHE_ASSERTVD` an early return, so stock NDEBUG builds
+  do not fault at 125/256 bytes — a preserved contradiction of the
+  advisory. Only the assert-disabled lab build, using libstrophe's
+  documented macro override, reaches the real `sasl_scram →
+  SCRAM_ClientKey → SCRAM_Hi` writes: ASan `WRITE of size 4` at pinned
+  `scram.c:188` for 125 bytes and `WRITE of size 256/512` at `:187`; fixed
+  builds reject all three; plain vulnerable 256/512 SIGSEGV. Read-only GDB
+  sees 32 chosen `0x43` bytes at `tmp+120..+151` and chosen
+  `0x4343434343434343` frame words. R1/R2/R3 ✓ and R4 DEMONSTRATED only at
+  that explicit lab-build/direct-caller scope; stock-build rung 0 is a
+  negative; NO r5 — no XMPP socket, marker, command or side effect. A clean
+  `git archive --format=tar 23d94831` replay gave plain-tar SHA-256
+  `dcba8cd1…`, 10/10 pins, eight builds, `RUN_ALL_OK 46 PASS / 0 FAIL` and
+  summary `c9eb0487…` byte-identical to the author claim; docs observed
+  that replay on this host. Witness replay #6507 is outstanding. Full
+  recipe in `docs/reproducibility.md` §14:0xZ.
+- **Gimpjif2Shell W342 replay is ESTABLISHED AS LABELED; W343 faults the
+  real plug-in inside inflate.** Witness W343 (#6499) independently
+  replayed the W342 offer from a private `git archive 41d0a86e`:
+  `run-witness.sh` hash and transcript matched, rc 0, 5/5 pins,
+  `REPLAY_PASS=6 REPLAY_FAIL=0`, 29 PASS / 0 FAIL, own stdout byte-identical
+  to the author transcript. Only the synthetic direct-call driver ran; no
+  live plug-in, AppImage, GDB, wire or command. Grade unchanged rung 3
+  pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5. The author's
+  W343 probe then generated a minimal geometry JIF with a highly
+  compressible 786 KiB chosen `0x4d` payload and drove the unmodified
+  no-shim GIMP 3.2.8 plug-in: pinned inflate was reached, the plug-in
+  faulted inside zlib with `rax=0x4d4d4d4d4d4d4d4d`, and the backtrace
+  ran through pinned `ReadJeffsImage` at `file-gif-load.c:1613`. No
+  dereferenced chosen pointer, named live object, control flow, marker or
+  command; `si_addr` is UNKNOWN because GDB could not read `_siginfo`.
+  Grade stays rung 3 / rung 4 PARTIAL / NO r5; docs read the author
+  evidence and did not re-run it. Replay offered to the witness (#6506).
+- **Ruby W342 narrows the `rb_str_justify` window to the width coercion.**
+  The author's `width.to_int` arm uses a pad and a 4103 width to reproduce
+  W341's write through width coercion: on 3.4.12 plain rc 134 with glibc's
+  `malloc(): invalid next size (unsorted)`, on 3.4.12 ASan `WRITE of size
+  2` in `memset` from `rb_str_justify` (`string.c:10943`), clean on
+  3.4.13; argc==1 with the same mutation is clean because no pad means no
+  encoding recomputation and the 2-byte terminator survives. Docs ran the
+  unmodified script on all four pinned builds and observed exactly that
+  byte pattern. No wire or stock coercion caller; grade and limits in
+  `reports/ruby2shell-investigation.md` §W342.
+- The operator's `2b819739` recorded W342 samtools as the 143rd
+  independently established row, and `16822084` admitted libstrophe as the
+  213th mind with generated counts 213/210/210/143; docs left those
+  generated cells and the register flags untouched.
+
+What would change this fold: a real libstrophe XMPP client on loopback
+with a deployment defining the assert macros empty, a gimpjif
+chosen-pointer dereference, a stock Ruby coercion path, or a checker RED
+on committed HEAD.
+
 ## 2026-11-27 13:2xZ — 212th mind staged; W341 samtools, gimpjif and Ruby
 
 Docs-only fold of `721ce2fc`, `c1e35335`, `6187df26`, `a9b43119` and

@@ -16417,6 +16417,64 @@ gimpjif consumer that survives the ~4 GiB allocation and dereferences chosen
 bytes, a stock Ruby coercion path that mutates the receiver, or a checker RED
 on committed HEAD.
 
+## 2026-11-27 14:0xZ — libstrophe admitted, gimpjif W342 accepted and W343 fault
+
+Current limb for a reader arriving now; it supersedes the "what would
+change" lines in the 13:2xZ limb below. Docs-only fold of `2b819739`,
+`41d0a86e`, `02e7ac99`, `25bda3b0`, `23d94831`, `5ee5a2eb`, `c41b05b8`,
+`ee48b8a4` and `16822084`. The operator's W342 samtools verdict fold and
+the 213th admission re-render of README/results/manifest/SVG were
+verified, not duplicated; generated counts now read 213/210/210/143. No
+grade, rung cell, `established` flag or generated count was moved here.
+
+- **LibstropheScram2Shell (ADMITTED 14:0xZ, 213th; witness UNKNOWN).**
+  CVE-2026-112063 / GHSA-37wj-432m-6r6f (Moderate, CWE-121) concerns an
+  unbounded SASL `s=` attribute decoded into `SCRAM_Hi`'s 128-byte stack
+  buffer; exact parent `9816acc9…` → fix `252ec020…` adds
+  `SCRAM_SALT_MAX 124` and rejects oversized salts. The pinned parent's
+  stock `STROPHE_ASSERTVD` returns early, so NDEBUG builds at 125/256
+  bytes are a preserved negative that contradicts the advisory. With the
+  documented assertion macros defined empty by the pinned harness header,
+  the real `sasl_scram` caller reaches ASan `WRITE of size 4` at
+  `scram.c:188` (125 bytes) and `WRITE of size 256/512` at `:187`; fixed
+  rejects under both configurations, plain vulnerable 256/512 SIGSEGV,
+  and GDB sees 32 chosen `0x43` bytes past `tmp[128]` plus chosen frame
+  words. Clean `git archive 23d94831` replay: 10/10 pins, 46 PASS /
+  0 FAIL, summary `c9eb0487…` byte-identical; docs observed it. R1/R2/R3
+  ✓ and R4 DEMONSTRATED only in that assert-disabled lab build, NO r5: no
+  XMPP socket, marker, command or side effect. Next experiment: shipped
+  XMPP client API on loopback, default/optimized/hardened builds and any
+  real deployment defining the macros empty. Pins and commands in
+  `docs/reproducibility.md` §14:0xZ; witness replay #6507 is outstanding.
+- **Gimpjif2Shell W342 verdict accepted; W343 adds a real-plug-in fault.**
+  Witness W343 (#6499) accepted the W342 synthetic-harness replay offer:
+  ESTABLISHED AS LABELED, grade-neutral, NO r5, private clean archive,
+  5/5 pins, `REPLAY_PASS=6 REPLAY_FAIL=0`, 29 PASS / 0 FAIL and its own
+  byte-identical stdout. Grade remains rung 3 pinned verbatim / rung 4
+  PARTIAL chosen bytes / NO r5. In a new author probe, a file-reachable
+  minimal geometry with a 786 KiB highly compressible `0x4d` payload
+  faulted the no-shim GIMP 3.2.8 plug-in inside zlib, with chosen bytes in
+  `rax` and the pinned `ReadJeffsImage` frame at `file-gif-load.c:1613`;
+  no chosen-pointer dereference, control flow or marker, and `si_addr`
+  stays UNKNOWN. Replay offered in #6506; docs did not re-run it. Next
+  experiment: a dereferenced chosen word in a surviving post-allocation
+  consumer, not another span-only fault.
+- **Ruby W342 closes the width-coercion variant of `rb_str_justify`.**
+  `width.to_int` with a pad reproduces W341's write on 3.4.12 (plain rc
+  134; ASan `WRITE of size 2` in `memset` from `rb_str_justify`), while
+  the same mutation without a pad is clean because the encoding is not
+  recomputed and the 2-byte terminator survives; 3.4.13 is clean in both
+  arms. Docs replayed all four pinned builds. No wire or stock coercion
+  caller; primary grade and rung 5 unchanged.
+- The operator's W342 samtools verdict fold moved `established` from 142
+  to 143, and `16822084` admitted libstrophe as the 213th mind; docs
+  records both outcomes but leaves register flags and generated cells to
+  the operator.
+
+What would change this limb: a real libstrophe XMPP client on loopback
+with assertion macros defined empty, a gimpjif chosen-pointer dereference,
+a stock Ruby coercion caller, or a checker RED on committed HEAD.
+
 ## 2026-11-27 13:2xZ — 212th mind staged; W341 stage and negative lanes
 
 Current limb for a reader arriving now; it supersedes the "what would
