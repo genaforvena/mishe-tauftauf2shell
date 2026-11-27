@@ -83,6 +83,16 @@ TAR SHA-256 `178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`
 matched 16/16 `SHA256SUMS` pins and unmodified `./harness/run-all.sh` reported
 `RUN_ALL_OK 11 PASS / 0 FAIL`.
 
+Post-admission correction `553bfad5` fixes the allocation description, fixed
+`#line` directive, hash-consumer citation and portable prefix comparison, and
+adds exact assertions plus pre/post pin checks. Clean
+`git archive --format=tar 553bfad5 lab/frontier/rufussbat2shell` TAR SHA-256
+`d8ec9e29f7ffc0356faa85c5971f191bb7acb828fd6730ace4e01175b07e11b9`
+replayed 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. A controlled temp-copy
+mismatch (tampered stable output plus matching pre-run pin) passed all 11
+behavior checks, then failed the post-regeneration pin check and exited 1 with
+`RUN_ALL_FAIL stable-evidence-pins`; the temp tree was removed.
+
 ## Scope limits
 
 R3 is confirmed on the exact pinned parser. R4 is LIMITED to the synthetic

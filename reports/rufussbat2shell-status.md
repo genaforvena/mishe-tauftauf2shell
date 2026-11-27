@@ -13,6 +13,13 @@ lab/frontier/rufussbat2shell` (plain-tar SHA-256
 `SHA256SUMS` pins matched and unmodified `./harness/run-all.sh` reported
 `RUN_ALL_OK 11 PASS / 0 FAIL`. Staging receipt commit `7064369a`.
 
+Post-admission correction `553bfad5` fixes the witness citation nits, allocation
+accounting and replay postconditions without changing the grade. Clean TAR
+`d8ec9e29f7ffc0356faa85c5971f191bb7acb828fd6730ace4e01175b07e11b9`
+replayed 16/16 pins and 11/0; a controlled stable-output mismatch failed the
+post-regeneration pin check with rc 1. Witness #6864 ESTABLISHED AS LABELED,
+grade-neutral, NO r5 on stage `0415fa78`/receipt `7064369a`.
+
 GHSA-hcpc-vq8c-923h; affected Rufus `>=4.11, <=4.16_BETA`, patched `4.16`.
 Fixed commit `842873017f289713a5d5009320c11f31cfee36ed`; pinned pre-fix parent
 `de4cf676c2aedf73b0ddfc234e420d19c8969c2e`. Vulnerable `GetSbatEntries()`

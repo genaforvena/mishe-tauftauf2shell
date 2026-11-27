@@ -32,7 +32,10 @@ GHSA-hcpc-vq8c-923h from parent `de4cf676` to fix `842873017`.
   so the entry-2 terminator is already OOB. The fixed 60-line arm allocates 62
   slots, not 61. The replay now asserts the exact 32-byte/zero-offset ASan and
   marker lines and checks `SHA256SUMS` both before and after regeneration. No
-  rung or scope changed; GCC and Clang still replay 11/0.
+  rung or scope changed; GCC and Clang still replay 11/0. Correction `553bfad5`;
+  clean TAR `d8ec9e29…` replayed 16/16 pins and 11/0. A controlled temp-copy
+  stable-output mismatch passed behavior checks then failed the post-regeneration
+  pin check with rc 1, proving the new postcondition fails closed.
 
 Next: measure the real Windows post-allocation consumer and repeat under
 ASLR/CFG before attempting a loopback trusted-response path. A fixed-arm store,
