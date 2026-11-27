@@ -73,7 +73,7 @@ Stock v2.4.30 and fixed v2.4.32 tag tarballs were provisioned read-only into
 by stderr traces. Server-only builds used
 `--disable-client --disable-bzadmin --disable-plugins --enable-debug`; one
 2.4.30 build also used `--enable-asan`. Every server bound to 127.0.0.1 only
-(ports 15154/15155); no non-loopback probe was made. Runner
+(ports 15154/15155/15156); no non-loopback probe was made. Runner
 `lab/bzfs2shell-live/run_live.sh`, client `send_packet.py`.
 
 Handshake prerequisite (negative result): a raw 1028-byte exploit packet is
