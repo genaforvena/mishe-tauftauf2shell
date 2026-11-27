@@ -2,6 +2,80 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 05:2x–05:3xZ — fixed control, two source bounds, SAIL PSD, ud3tn rung 5
+
+This fold covers `203587f5`, `cea10009`, `887c0523`, `a53a81c3`, `96a62d92`,
+`ef370299`, `856d0b95`, `9ca46a2d` and `7b8df2a4` past `15da61ce`. The Ruby
+W316 witness and W317 thread-count briefs were already written by `96a62d92`
+in this file and in `docs/reproducibility.md` §§W316/W317; verified, not
+duplicated. Explanation and recipes only — no generated cell, register row,
+grade, count, report, SVG or lab evidence moved.
+
+- `203587f5` rebuilt the real GIMP 3.2.8 `file-gif-load` plug-in twice from
+  pinned source (`16a2696c…`) with and without the pinned fix patch
+  (`92ca1593…`), installed each into a private hardlink AppImage workdir with
+  `AppRun.noshim`, and ran the no-shim control: rc 0, 10 PASS / 0 FAIL. Both
+  plug-ins load the safe JIF clean; the vulnerable plug-in faults on the
+  chosen-byte JIF while the patched plug-in reports a corrupt-image warning
+  and no fault. Rebuilt binaries `693fe403…` / `4f3d32c8…` differ; attack and
+  safe JIFs are `d6556936…` / `6dd6a44f…`. The first 04:46Z attempt inherited
+  the shimmed `AppRun` and is preserved as a negative. This is a locally
+  rebuilt fixed control, NOT a vendor-shipped patched build; grade rung 3
+  pinned verbatim / rung 4 PARTIAL chosen bytes unchanged, no r5.
+- `cea10009` ran the W313 control pair on stock Rails in production config
+  with no request-path tracer: 12/12 attack processes aborted on the attack
+  POST, safe 12/12 and fixed 12/12 served all six requests with `up=200
+  alive=YES`. The recipe in `docs/reproducibility.md` §W313 already records
+  the geometry and expected bytes; witness W316 (#6095) and the `threads=1`
+  follow-up W317 are briefed above and close the availability lane at their
+  labeled scopes. No command, no survivor, no grade change, NO r5.
+- `887c0523` bounded rpm2shell's symlink-size primitive: only declared size
+  `0xffffffffffffffff` produces `lsize + 1 == 0` and the 1-byte region with
+  `WRITE of size 64`; `0xfffffffffffffffe`, `0x7fffffffffffffff` and
+  `0x100000000` abort in allocation, and size 11 copies cleanly. Fixed ASan
+  `rpm2cpio` rejects all five variants with rc 1 and no report. Attack
+  package `068a2a2e…`, patcher `117dac68…`; boundary note only, no new
+  reader, pointer, grade change or r5.
+- `a53a81c3` closed nfdump2shell's chosen-index metric/stat hypothesis from
+  pinned source: `nfxV3.h:138-192` offsets put `inPackets`/`inBytes`/`proto`
+  inside the 48-byte `EXgenericFlow_t`, `Process_nfd()` writes only
+  `msecReceived` past the record (`nfd_raw.c:256`), and `UpdateMetric()`
+  (`metric.c:167-214`) plus the `stat_record` updates (`nfd_raw.c:126-155`)
+  use those fields as values, never as index, length, pointer or allocation
+  size. No chosen-address write via this consumer; no run and no grade
+  change. Only #5712 header and #5738 element type remain queued.
+- `ef370299` staged SAIL PSD (`sailpsd2shell`, CVE-2026-54627 /
+  GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, fixed 1.0.0) and `856d0b95`
+  recorded a clean replay. Bitmap mode with depth 8 is mapped to a BPP1
+  indexed format, so the 8x8 one-channel input allocates 8 bytes and the
+  last row writes offsets 7..14. Five real-API builds give rc 0 with 42 PASS
+  / 0 FAIL, GCC and Clang ASan `WRITE of size 1` at raw `psd.c:354` zero
+  bytes after the 8-byte region, clean depth-1 and fixed controls; a
+  synthetic exact-size allocator probe puts chosen bytes `11..17` at offsets
+  8..14 (12/0). Clean `git archive ef370299` replay was again 12/0 outer and
+  42/0 inner (archive `54dd5d8b…`, replay log `61d43c76…`). Grade R1 / R2 /
+  R3 with R4 LIMITED to the synthetic allocator, R5 NOT CLAIMED; STAGED, not
+  admitted, with the plain-build width-64 experiment still named.
+- `9ca46a2d` and `7b8df2a4` advanced ud3tn2shell from the earlier
+  tcache-chosen-address write to a wire-driven benign command. Four
+  CBOR-framed loopback MTCP bundles from a plant-started pinned v0.15.1 plain
+  daemon poison the tcache at the live `agent` node, overwrite `trx_callback`
+  with libc `system` and `param` with a lab `touch` command; gdb observes
+  `CALL_SITE trx=0x7ffff7c58750` and `SYSTEM_HIT`, then the daemon's own
+  `vfork` creates the marker. Safe EID-length-8 and fixed v0.15.2 ASan
+  controls leave the original callback and create no marker. Vulnerable
+  binary `36d77768…`, fixed `5653296d…`; PIE base `0x555555554000`, libc
+  `0x7ffff7c00000`, gdb disables ASLR, so the address is a lab condition.
+  This is rung 5 DEMONSTRATED on the pinned plain build, NOT ESTABLISHED:
+  no independent witness verdict for this exact wire/build, no ASLR-on or
+  non-gdb address discovery, no register flag or count fold. W315's
+  ESTABLISHED verdict covers only the earlier tcache chain, still NO r5.
+
+Recipes and expected bytes are in `docs/reproducibility.md` §05:2x–05:3xZ.
+What would change these limbs: a witness verdict contradicting these scopes,
+an admission or grade change for SAIL PSD or ud3tn rung 5, or a checker RED
+on committed HEAD.
+
 ## 2026-11-27 05:1x–05:2xZ — W316 witness replay and W317 thread-count control (Ruby)
 
 - Witness W316 (#6095) replayed the committed W313 Rails production
@@ -69,8 +143,9 @@ cell, register row, grade, count, report, SVG or lab evidence moved.
   `indexes+280` had zero hits before SIGSEGV at `si_addr=0x555555743000`,
   an unrelated heap address. Pre-write pointer `indexes+0x130` agrees with
   the corrected `out+304` target. ESTABLISHED AS LABELED, no counterexample,
-  grade rung 3 / rung 4 PARTIAL unchanged; fixed control still BLOCKED (no
-  patched AppImage; gimp.org rechecked 04:41Z), NO r5.
+  grade rung 3 / rung 4 PARTIAL unchanged; no vendor-shipped patched
+  AppImage then (gimp.org rechecked 04:41Z), NO r5 — a locally rebuilt
+  plug-in control landed later (`203587f5`, §05:2x–05:3xZ).
 - `96bf358b` folded witness #6065 for llamarpc2shell's distinct
   CVE-2026-137567 TCP lane (04:18–04:21Z): fresh builds from a clean
   119-file `7de5366b` archive reproduced 3/3 byte-exact chosen-byte wire
@@ -103,9 +178,11 @@ cell, register row, grade, count, report, SVG or lab evidence moved.
   safe trigger length and fixed v0.15.2 ASan controls follow the natural
   layout with no chosen allocation. Under gdb ASLR is disabled, so the
   chosen address is a lab condition, not an ASLR-stable claim. Grade rung 4
-  now also covers a tcache-poisoned chosen-address allocation reached from a
-  live wire request; no callable pointer, indirect call, benign-command side
-  effect or witness replay — R5 remains UNKNOWN.
+  then also covered a tcache-poisoned chosen-address allocation reached from
+  a live wire request; at that commit no callable pointer, indirect call or
+  command had been shown. W315 later ESTABLISHED the chain at its labeled
+  scope (NO r5), and `9ca46a2d` reports a wire-driven command DEMONSTRATED
+  but NOT ESTABLISHED (§05:2x–05:3xZ).
 
 Recipes and expected bytes are in `docs/reproducibility.md` §04:2x–04:5xZ.
 What would change these limbs: a witness verdict contradicting these scopes,
@@ -155,8 +232,8 @@ moved here.
   was clean. The author's terminal `free` at `:1616` with `rax=0x4d4d…`
   is layout-sensitive, not a replay expectation. Grade unchanged: rung 3
   pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5 — no named object,
-  dereference, chosen address, control flow, marker or command; fixed
-  control BLOCKED (gimp.org offers 3.2.8 only).
+  dereference, chosen address, control flow, marker or command; no
+  vendor-shipped patched AppImage then (gimp.org offered 3.2.8 only).
 - `bfd7b8a5` recorded the author's clean-archive 16/0 replay of `5401e884`
   and asked witness #6038. `2dadcb8a` folded witness #6044: a clean 140-file
   archive, private SHA-verified AppImage workdir and regenerated no-shim
@@ -5998,9 +6075,9 @@ every receipt is quoted from committed reports or named witness artifacts.
 
 Details, pins, expected bytes and regeneration commands are in
 `docs/reproducibility.md` §§ 12:5x–13:0xZ. The operator's fold of the stale
-uD3TN/FreeRDP register boundaries landed in `f91ea204`; the remaining next
-actions are libsoup's loopback consumer, ud3tn's write/command chain,
-FreeRDP's wire-derived playback and Ruby's secondary-lane witness.
+uD3TN/FreeRDP register boundaries landed in `f91ea204`; this is the
+historical 12:5xZ next-action list, not a current queue — ud3tn's
+write/command chain has since advanced (§05:2x–05:3xZ).
 
 ## 2026-11-26 13:1x–13:2xZ — FreeRDP W21 negative, rapidyaml admitted, Ruby pointer bit
 

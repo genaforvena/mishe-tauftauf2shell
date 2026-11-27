@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| SAIL PSD2Shell (newest, STAGED) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both; STAGED, R4 LIMITED, R5 NOT CLAIMED, witness owed; full procedure in §05:2x–05:3xZ |
 | Libarchivezippath2Shell W284 (newest, STAGED) | [status](../reports/libarchivezippath2shell-status.md), [brief](../reports/frontier-libarchivezippath2shell.md), [provenance](../lab/frontier/libarchivezippath2shell/PROVENANCE.md) | CVE-2026-45308 / GHSA-xgqq-r5j8-3mch, tarballs 3.8.7 `4b787cca…b9166` / 3.8.8 `038918ea…306c190`, fix `a20f89eb…`, patch `cb9a18bb…a49bad` | `sh run-all.sh` in `lab/frontier/libarchivezippath2shell` | `RESULT PASS=40 FAIL=0`; shipped `bsdtar --format=zip` re-packs a crafted PAX tar into GCC ASan `WRITE of size 65537`/`131072` 0 bytes past a 65,536-byte region at `archive_write_set_format_zip.c:2328` via `:1193`; fixed rejects, 65535-byte path clean; rung 3 only, rung 4 NOT CLAIMED, admission/witness owed; full procedure in § 18:5x–19:2xZ |
 | Supersession — axis2guththila2shell row below | [status](../reports/axis2guththila2shell-status.md) | Operator `6a1a0abb` admitted it as the 183rd mind; generated counts 183/180/180/120, then 121 after W284's ntfs3g verdict fold | no new harness | The row's STAGED / admission-owed wording is the pre-admission state; rung 3 only and `established:false` unchanged |
 | Tinyusb2Shell W275 (newest, ADMITTED 16:2xZ) | [status](../reports/tinyusb2shell-status.md), [brief](../reports/frontier-tinyusb2shell.md), [provenance](../lab/frontier/tinyusb2shell/PROVENANCE.md) | CVE-2026-61497 / GHSA-qf63-w79j-qw7p, fix-parent `5014146f…` / fix `85047e1…` (0.21.0), `AV:P` physical vector | `sh run-all.sh && sh verify.sh` in `lab/frontier/tinyusb2shell` | `RESULT PASS=6 FAIL=0`; ASan heap `READ of size 4` 0 bytes past a 4-byte descriptor (`05 01 07 DE`) and stack `WRITE of size 4` into a 4-byte `info` (`07 DE AD BE EF`); fixed `report_num=0` / `usage_page=44510`; rung 3, rung 4 NOT CLAIMED, admitted as 178th at 16:2xZ, witness replay owed; full procedure in § 16:0xZ |
@@ -55,7 +56,7 @@ containers whose host ports bind only to loopback.
 | Axis2guththila2Shell W273 (newest) | [status](../reports/axis2guththila2shell-status.md), [brief](../reports/frontier-axis2guththila2shell.md) | CVE-2026-124023 / GHSA-qv28-p6jq-5h3f, pins `584ce5bd…` / `f01683ec…`, CNA range before `f2b30c15…` | `sh run-all.sh && sh verify.sh` in `lab/frontier/axis2guththila2shell` | `RESULT PASS=4 FAIL=0`; GCC ASan `READ of size 4` at `guththila_xml_reader_wrapper.c:308` from the 19-byte `<!ENTITY x "y"><a/>`; rung 3, rung 4 NOT CLAIMED, STAGED not admitted, witness/admission owed; full procedure in § 15:0x–15:4xZ |
 | Libsoup2Shell (newest) | [status](../reports/libsoup2shell-status.md), [brief](../reports/frontier-libsoup2shell.md), [provenance](../lab/frontier/libsoup2shell/PROVENANCE.md) | fix parent `a4294044…` and fix `e4f03226…`; both GitLab tarballs SHA-256-pinned; extract the **full** pinned `libsoup/` subtree | `cd lab/frontier/libsoup2shell && ./run-all.sh` (runner sha256 `4dadfa60…d83`) | `RESULT PASS=19 FAIL=0 plain_rc=139`, rc 0; ASan READ-1 at `soup-uri-utils.c:405`; rung 3, rung 4 NOT CLAIMED; W269 clean-archive ESTABLISHED AS LABELED at that scope, NIT fixed. Full procedure at the tail of this file |
 | Freerdp2Shell W20 (newest) | [status](../reports/freerdp2shell-status.md) | pinned plain 3.32.0 `d27a4f7c…`, post-auth loopback `-auth` build | server-side synthetic rdpsnd playback under gdb | chosen `s_wLog.custom/context` → `system()` via real `Layout.c:211-213`; two benign marker touches, no-call/fixed/safe clean; author-only rung-4 lab mechanic, not rung 5. Trace `lab/freerdp2shell-src/call_target_stock.txt`; recipe at the tail |
-| Ud3tn2Shell W26 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, tcache/glibc negative, command chain UNKNOWN; author-only. Commands at the tail |
+| Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain now DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean) but NOT ESTABLISHED — witness verdict owed and no register fold; commands at the tail |
 | Ruby2Shell `Regexp#to_s` (newest) | [report](../reports/ruby2shell-investigation.md) | Ruby 3.4.12 vs fixed 3.4.13; GHSA-7whj-cfh7-xgm4 | `bash lab/repro/ruby2shell-tos-steer.sh` | chosen `cc->bs` word offset and one bit; gdb watchpoint shows a `1 << (V&31)` delta, fixed/ASCII controls clean, `V=0x10ffff` falsified; narrow rung 4, author-only. Detail at the tail |
 | Ruby2Shell | [report](../reports/ruby2shell-investigation.md) | `bash lab/ruby2shell/provision.sh` | plain build `lab/build/plain/ruby-3.4.12-plain/bin/ruby` (recipe in report); ASan build `lab/build/ruby-3.4.12-asan` | `lab/repro/ruby2shell-rung1.rb`, `stageA.rb`, `stageC.sh`, `stageB-http.sh`, `stageB-rails.sh`, `bash lab/repro/ruby2shell-stageC-http.sh 3 2` with `stageC-http.ru`; rung 5 `bash lab/repro/ruby2shell-rung5-http.sh attack <tag>` (repeat with distinct tags), then `control <tag>` and `fixed <tag>` (plain 3.4.13 build recipe in the report; expect distinct markers on attacks, none on controls) (Sinatra request-thread Stage C: 3/3 attacks read chosen bytes at the nominated address in the HTTP response, 2/2 controls clean; the process aborts in worker-thread teardown after readback — depth result, no grade change); stock Rails follow-up: `bash lab/repro/ruby2shell-stock-rails-setup.sh`, then `ruby2shell-stock-rails.sh attack|control|fixed <tag>` with the exact N=524 environment in the addendum below; 3/3 attacks abort, safe/fixed controls survive, no RCE/persistence; copy-out lane: `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's="\xDF".b*21; s.force_encoding(Encoding::ISO_8859_1); p s.upcase.bytesize'` — N=21 shows `Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and `Invalid read of size 2` via `rb_str_casemap (string.c:7857)`, `outlen=42`; N=20 clean, `outlen=40`. The read byte is the same fixed `0x53`, so this is rung-3 class, not a leak or rung 4 |
 | PHP2Shell | [report](../reports/php2shell-investigation.md), [status](../reports/php2shell-status.md) | `bash lab/php2shell/provision.sh` | `bash lab/php2shell/build.sh`, `build-fpm.sh`, `build-fpm-release.sh`, `build-apache.sh`, `build-apache-plain.sh`, `build-dom.sh`, `build-dom-fixed-variant.sh` | `lab/repro/php2shell-*.sh`, `*.py`, `*.gdb`; `lab/repro/php2shell-cve129538.py` and `lab/repro/php2shell-cve129538-fcgi.py` replay the adjacent CVE-2026-129538 lane on pinned 8.5.12-asan / 8.5.13-asan / 8.4.27-asan: direct php-cgi `VERDICT CONFIRMED` 7/7, FastCGI long suffix yields `PATH_INFO=".0.1"` on affected and `"/x"` on fixed 3/3, steering leaks `"23456789"` / `"27.0.0.1"` by param order 5/5; gdb observes the OOB NUL byte at `cgi_main.c:1294`, ASan silent by design; evidence `lab/build/evidence/w48-cve129538/{committed,fcgi-committed,fcgi-steered}/verdict.txt`. `python3 lab/repro/php2shell-cve129538-nginx.py` adds a real loopback nginx 1.24 → php-cgi HTTP replay: the standard `fastcgi_split_path_info` mapping is clean on both builds, a naive non-default mapping leaks `6789` / `23456789` on 8.5.12 and stays clean on 8.5.13, verdict `HTTP-REACHABLE OOB READ CONFIRMED` (evidence `lab/build/evidence/w50-nginx/verdict.txt`, gitignored). `bash lab/php2shell/build-dom.sh 8.5.12` builds one dom-enabled 8.5.12 ASan/UBSan CLI with libxml 2.9.14 compat path (the first make may hit a 1500s tool deadline at 524 objects; resume make in the build dir); `bash lab/php2shell/build-dom-fixed-variant.sh` relinks it with the byte-identical 8.5.13 `ext/dom/xml_serializer.c`; `python3 lab/repro/php2shell-cve129501-dom.py <php-vuln> <php-fixed>` replays CVE-2026-129501 with `USE_ZEND_ALLOC=0`: vendor and XMLDocument-only bodies exit rc=1 `ASAN_DOUBLE_FREE` on affected and rc=0 CLEAN on fixed, clean control clean on both, 4-byte prefix double-freed at `dom_xml_ns_prefix_map_destroy (xml_serializer.c:126)`; default ZendMM is silent (no ASan claim there). `python3 lab/repro/php2shell-cve129501-dom-hunk2.py <php-vuln> <php-fixed>` embeds both 8.5.13 hunk-2 regression bodies: affected loses document children and orphans comments with rc=0 and no sanitizer report, fixed matches vendor EXPECT — a DOM-state fault, grade unchanged; tcache escalation is closed negative (owned `"ns"+%u` prefix max 13 bytes, glibc 0x20 bin, versus a >=32-byte PHP `zend_string`). `python3 lab/repro/php2shell-cve129291-fpm.py <php-8.4.27-fpm> <php-8.4.28-fpm>` embeds the 8.5.13 FPM phpt: 8.4.27 FAIL / 8.4.28 PASS, no ASan report, rung 2 fix-sensitive functional fault; single- and dual-TU swaps are preserved negatives. Raw evidence `lab/build/evidence/w51-129501-dom/`, `.../w52-129501-hunk2/` and `.../w52-129291-fpm/` is gitignored |
@@ -13601,16 +13602,20 @@ chunk at `p=0x7ffff0001040`, then 280 chosen bytes cover
 `record->status_report`, `bpdu` and `bundle_source_eid`. Expect
 `POSTPARSE status_report=0x5a5a5a5a5a5a5a5a` and `#0 __GI___libc_free
 (mem=0x5a5a5a5a5a5a5a5a5a)` from `free_administrative_record`
-(`report_manager.c:128`). Forcing tcache poisoning instead aborts at glibc
-`malloc.c:4507` (`free(): invalid pointer`): no arbitrary write. `harness/
+(`report_manager.c:128`). The original tcache-poisoning attempt aborted at
+glibc `malloc.c:4507` (`free(): invalid pointer`); later collateral-size
+repairs reached a chosen-address write (§05:2x–05:3xZ). `harness/
 gdb_probe.py`, `heap_map.gdb`, `postparse.gdb`, `free_inspect.gdb`,
 `malloc_log.c` and `transport-w26/{transport_probe.py,make_bpv7_admin.py,
 RESULTS.md}` document the 25-case transport matrix; CBOR-MTCP, SMTCP,
 TCPCLv3 and SPP-framed TCPSPP reach the fault with fixed/safe controls
 clean, raw MTCP and 4-byte ION-STCP prefix fail, BPv7 finds no sink, and
-BIBE/sqlite CLAs are untested. No command sink was found in `components/`.
-Author-only; no witness. Replay evidence is gitignored under `replay-w26*/`
-and regenerates with those commands.
+BIBE/sqlite CLAs are untested. No `system`/`popen`/`exec*` sink exists in
+`components/`; the later command reaches libc `system` through an
+overwritten callback (§05:2x–05:3xZ). At W26 this was author-only; W315
+later ESTABLISHED the tcache chain at its labeled scope (NO r5), and the
+rung-5 command remains unwitnessed. Replay evidence is gitignored under
+`replay-w26*/` and regenerates with those commands.
 
 ### Ruby2Shell — `Regexp#to_s` chosen one-bit write (author-only)
 
@@ -17230,7 +17235,8 @@ GC-read `+9`, four malformed at `+8`, no usable field; useful target UNKNOWN.
 chosen word. W314 witness #6067 (clean 144-file `b3e21b50` archive, private
 SHA-verified AppImage workdir with all `AppRun.*` unlinked) returned 16/0
 rc 0 with zero read hits: ESTABLISHED AS LABELED, no counterexample; the
-fixed build remains BLOCKED.
+fixed build remained BLOCKED then; `203587f5` rebuilt a patched plug-in
+control that passed 10/0 without the shim (§05:2x–05:3xZ).
 
 ### W312 — production no-mtrace claim control pair (Ruby, §03:5xZ)
 
@@ -17300,7 +17306,9 @@ write hits through bundled `libz` `inflate` ← `ReadJeffsImage:1613`, then
 zero `W313 READ HIT` lines after `W313 INFLATE RETURNED` before a SIGSEGV
 at an unrelated heap address; the safe 4x4 JIF exits normally. Per-thread
 watchpoint coverage stays UNKNOWN (`libthread_db` unavailable); do not
-claim a consumer read. Fixed control BLOCKED: no patched AppImage published.
+claim a consumer read. No vendor-shipped patched AppImage then;
+`203587f5` rebuilt a patched plug-in control that passed 10/0
+(§05:2x–05:3xZ).
 
     # llamarpc2shell — CVE-2026-137567 TCP lane (witness scope, W314)
     git archive 7de5366b lab/frontier/llamarpc2shell | tar -x -C /tmp/fresh
@@ -17345,8 +17353,9 @@ Under gdb (ASLR disabled) the third bundle is served from
 `STORE_BEGIN p=0x7ffff0001340` with the first wire byte `0x43` present.
 Controls: vulnerable trigger with source-EID length 8 lands at the natural
 `0x7ffff0001200`; fixed 0.15.2 ASan follows its natural layout with zero
-hits. No callable pointer, indirect call, command side effect or witness
-replay; R5 stays UNKNOWN.
+hits. W315 later ESTABLISHED this chain at its labeled scope (NO r5);
+`9ca46a2d` reached a wire-driven benign command DEMONSTRATED, NOT
+ESTABLISHED, with the exact wire, hashes and controls in §05:2x–05:3xZ.
 
 ### W313 — Rails production no-mtrace control pair (Ruby, §03:5xZ)
 
@@ -17426,3 +17435,92 @@ fixed are byte-identical to the W313 wire
 The availability primitive is thread-count invariant; grade unchanged,
 no survivor and no command. Evidence is gitignored under
 `lab/build/evidence/stock-rails-w317rails1t{,-safe,-fixed}-*.{summary,server.log}`.
+
+### 2026-11-27 05:2x–05:3xZ — fixed control, source bounds, SAIL PSD, ud3tn rung 5
+
+    # gimpjif2shell — locally rebuilt vulnerable/fixed plug-in, no shim
+    bash lab/frontier/gimpjif2shell/fixedctl/run-fixed-control.sh
+
+Expect rc 0, `TOTAL: 10 PASS / 0 FAIL`. GIMP source `16a2696c…` and fix
+patch `92ca1593…` (upstream commit `2b2bbb8f…`) are pinned in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`; rebuilt plug-ins `693fe403…`
+(pristine) and `4f3d32c8…` (patched) differ, safe JIF `6dd6a44f…` loads
+clean on both, attack JIF `d6556936…` faults only on the pristine plug-in.
+The patched side prints `Jeff's Image Format-Warning: Error reading image
+data. Image may be corrupt!` and no fault. Attack rc 124/137 are script-fu
+timeout/session-kill artifacts: assert messages, not rc. The first 04:46Z
+attempt with a shimmed `AppRun` is preserved as a negative. No vendor-shipped
+patched AppImage exists; gimp.org listed only through 3.2.8 at 04:41Z.
+
+    # rpm2shell — W316 declared-size boundary (throwaway patcher, not committed)
+    # patcher sha256 117dac68… over attack.rpm 068a2a2e…;
+    # rewrite RPMTAG_LONGFILESIZES qword at header offset 0x1770, then run
+    # the vulnerable and fixed ASan tools/rpm2cpio from real/run-real.sh
+
+Expect `UINT64_MAX` → rc 134 ASan `WRITE of size 64` on a 1-byte region;
+`UINT64_MAX-1` and `0x7fffffffffffffff` → allocation-size abort;
+`0x100000000` and `11` → vulnerable rc 1 clean. Fixed ASan rejects all five
+with rc 1 and no report. Raw packages, per-run logs and patcher are
+gitignored under `.mishe-tauftauf/artifacts/rpm2shell-w316/`. `lib/cpio.cc:442`
+clamps the copy length, so only `lsize = -1` makes `lsize + 1` wrap to zero.
+
+    # nfdump2shell — W317 source-bound negative, no new run
+    # pinned parent 8a00543a…: src/libnffile/nfxV3.h:138-192,
+    # src/netflow/nfd_raw.c:256, :126-155, src/collector/metric.c:167-214
+
+`EXgenericFlow_t` is 48 bytes; `Process_nfd()` writes only `msecReceived`
+past the record and every other field is read. `UpdateMetric()` switches on
+`proto` and accumulates `inPackets`/`inBytes` into a calloc'd counter, and
+the `stat_record` updates do the same: no OOB-view field is an index,
+length, pointer or allocator size. No chosen-address write follows this
+consumer; no expected bytes to assert because no trigger was added.
+
+    # sailpsd2shell — staged frontier lane, from lab/frontier/sailpsd2shell
+    bash run-all.sh    # rc 0, PASS=42 FAIL=0
+    bash run-probe.sh  # rc 0, PASS=12 FAIL=0, invokes run-all.sh
+    git archive ef370299 | tar -x -C /tmp/fresh
+    cd /tmp/fresh/lab/frontier/sailpsd2shell && bash run-probe.sh
+
+Pins: tarballs v0.9.10 `dc0d6fa8…` / v1.0.0 `b6f77d6d…`; `psd-v0.9.10.c`
+`9d661a57…`, `psd-helpers-v0.9.10.c` `789ac9b1…`, fix-parent helper
+`23362356…`, fix/v1.0.0 helper `f3f7f3fd…`, `psd-v1.0.0.c` `33905062…`;
+`run-all.sh` `62f795f1…`, `run-probe.sh` `a19c4f97…`; generated attack
+`attack.psd` `313b5a92…` (104 bytes) and `safe-depth1.psd` `a3c07560…` (48
+bytes). Expect five real-API builds, GCC/Clang ASan `WRITE of size 1` at raw
+`psd.c:354` zero bytes after an 8-byte region from
+`sail_load_next_frame()`, depth-1 and v1.0.0 controls clean (fixed rejects
+with rc 201). The probe wraps `sail_malloc`/`sail_free` with an exact-size
+allocator and puts chosen bytes `11..17` at offsets 8..14, leaving offset
+15 as `cc`; that is the only chosen-byte claim. Clean-archive replay used
+archive `54dd5d8b…` and replay log `61d43c76…`, again 12/0 outer and 42/0
+inner. STAGED, not admitted; R4 LIMITED to the synthetic allocator, R5 NOT
+CLAIMED. Generated PSDs and build output are gitignored and regenerate with
+the scripts. The advisory text saying `psd.c:371` / `Version: 1.0.0` is a
+preserved discrepancy: the pinned vulnerable sink is `:354`.
+
+    # ud3tn2shell — wire-driven benign command (author, ASLR off under gdb)
+    cd lab/frontier/ud3tn2shell
+    python3 harness/call_chain.py \
+      --binary "$PWD/src/ud3tn-v0.15.1-plain/build/posix/ud3tn" \
+      --outdir "$PWD/call-vuln-witness" --port <fresh> \
+      --marker "$PWD/call-vuln-witness/marker.txt"
+    # safe: add --forged-eid-len 8, separate --outdir/--marker/--port
+    # fixed: swap --binary to src/ud3tn-v0.15.2/build/posix/ud3tn
+
+Four CBOR-framed MTCP bundles go to the plant-started daemon on 127.0.0.1:
+benign admin EID length 8, a 768-byte trigger with zero EID length and
+`status_report` aimed at the live `agent` node, a follow-up 0x60-chunk admin
+bundle that overwrites `trx_callback`/`param`, and a non-admin bundle that
+reaches `agent_forward`. Expect `CALL_SITE ag=0x5555555b8bd0
+trx=0x7ffff7c58750 param=0x7ffff0001240`, `SYSTEM_HIT` with the exact
+`touch` command, `Detaching after vfork`, and a marker file created by the
+daemon. Vulnerable plain binary `36d77768…`, fixed v0.15.2 ASan binary
+`5653296d…`; safe and fixed logs keep the original callback and create no
+marker. PIE base `0x555555554000`, libc base `0x7ffff7c00000`, arena
+`0x7ffff0000000`; gdb disables ASLR, so addresses are lab conditions. The
+call and vfork are the daemon's own, not debugger-forced. Rung 5 is
+DEMONSTRATED on this pinned plain build, NOT ESTABLISHED: independent
+witness replay of this exact wire/build is owed, and W315's ESTABLISHED
+verdict covers only the earlier tcache chain (NO r5). Raw `call-*` logs and
+markers are gitignored and regenerate with `call_chain.py`; the register
+cell, counts and report grade stay operator-owned until a verdict lands.
