@@ -91,3 +91,22 @@ saved-RIP overwrite would additionally require a much longer digit run,
 where the advisory observed the separate `strncpy-param-overlap` defect;
 do not conflate the two. R5 stays NOT CLAIMED: this is a local CLI file path
 with no wire input or command side effect.
+
+## Handoff evidence (W332)
+
+Stage commit `52bcb913` (stage `dd1be657`, followed by a scoped cleanup that
+untracked CMake artifacts). Clean `git archive --format=tar.gz 52bcb913
+lab/frontier/tcpreplayservices2shell` SHA-256
+`f8dfc7071d456ca0668695f52a653ba42b6e699d4478666e2fc6accbda74af30`. In
+`/tmp/w332-tcpreplay-clean.hsBDFd`, all 10 `HARNESS_SHA256.txt` entries
+matched, unmodified `bash bootstrap.sh` produced four `BUILD_OK` lines, and
+unmodified `bash run-all.sh` returned rc 0 with `TOTAL: 12 PASS / 0 FAIL`.
+Summary log SHA-256
+`98b924412bb7bb7ae7d684ddd52446e0695d94cf9598e181e278f07ca4cc3f41` is
+byte-identical to the in-tree summary. This is an author-side clean replay,
+not independent acceptance. Live inner-socket window 215 panes `%436`/`%437`
+are live with `dead=0`; registry has 216/216 unique names. Operator admission
+and witness replay remain UNKNOWN. Coturnoauthnonce2shell's witness verdict
+was independently reported ESTABLISHED AS LABELED in tape #6311 / folded in
+commit `e5962cd9` (established count 139 -> 140); it is a separate lane and
+needs no edit here.

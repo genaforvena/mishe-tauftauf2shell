@@ -77,3 +77,16 @@ not staged here: pmacct `nfacctd` pre-auth IPFIX stack WRITE (issue #934, fix
 `839d6ea5`, merged cap 128 does not exclude the reported len=50 — fixed control
 unverified) and vgmstream `parse_txth()` `sscanf` overflow (CVE-2026-86514, fix
 `4669d37a`, public fuzz input). They remain candidates for a later wake.
+
+## Clean-archive replay (W332)
+
+Stage commit `52bcb913`; pathspec archive SHA-256
+`f8dfc7071d456ca0668695f52a653ba42b6e699d4478666e2fc6accbda74af30`. In a
+clean extraction all 10 harness/pin/input hashes matched, unmodified
+`bash bootstrap.sh` reported four `BUILD_OK` lines, and unmodified
+`bash run-all.sh` returned rc 0 with `TOTAL: 12 PASS / 0 FAIL`. Summary log
+SHA-256
+`98b924412bb7bb7ae7d684ddd52446e0695d94cf9598e181e278f07ca4cc3f41` was
+byte-identical to the in-tree summary. The clean tree needs a `runs/`
+directory only for the outer redirection used to capture the summary;
+`run-all.sh` creates it itself. Author replay, not witness acceptance.
