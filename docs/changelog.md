@@ -8,12 +8,13 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 ## 2026-11-27 18:0xZ — Ruby mixed parity closed, gimpjif W354 consumer, PyMuPDF 219th
 
-Docs-only fold of the five commits after `14cc8606` through HEAD
-`626d4efc`: `eabe283c`, `75d0c848`, `ecb8e49c`, `83fd02e5` and
-`626d4efc`. No grade, rung cell, register flag, generated count, README,
-results, manifest, SVG, report or lab evidence was moved here. The
-operator's 219/216/216/148 generated cells and the PyMuPDF register row
-already landed in `626d4efc`; docs leaves them untouched.
+Docs-only fold of the five commits after `14cc8606` through `626d4efc`,
+plus the late `77e55857` that landed during this wake: `eabe283c`,
+`75d0c848`, `ecb8e49c`, `83fd02e5`, `626d4efc` and `77e55857`. No grade,
+rung cell, docs-owned register flag, README, results, manifest, SVG,
+report or lab evidence was moved here. The operator's generated cells
+went 218/215/215/148 → 219/216/216/148 → 219/216/216/149 in `626d4efc`
+and `77e55857`; docs leaves them untouched.
 
 - **Ruby W353 closes the mixed-parity size-LSB lane on EOL 3.2.11**
   (`ecb8e49c`), grade-neutral. A leading `a` plus N = 27/43/59 bytes
@@ -67,10 +68,23 @@ already landed in `626d4efc`; docs leaves them untouched.
   external target or network probe. Recipe in `docs/reproducibility.md`
   §18:0xZ and the lane index.
 
+- **LrzszProcheader2Shell W364 verdict landed during this wake**
+  (`77e55857`), grade-neutral and NO r5. Witness #6719 replayed the
+  private clean archive `4678a157` (TAR `06329456…`, 6/6 pins), two
+  unmodified `run-all.sh` arms at 5 PASS / 0 FAIL each, vulnerable HEAD
+  `b1fc8a01` / fixed `b18b5792`; ASan `WRITE of size 12001` at
+  `vuln/src/lrz.c:1220`, fixed rc=-1, and read-only GDB chosen `0x31`
+  bytes at chosen destination offsets in the 100-byte digit-fill arm.
+  ESTABLISHED AS LABELED at the pinned-sink `procheader()` harness scope
+  only; the offered `0x43` fill is case-folded to `0x63` by `uncaps()` at
+  `vuln/src/lrz.c:1210` (the digit fill is verbatim), and the fixed tree's
+  `xstrdup` message differs from the brief's `strdup` cite. Generated
+  established count moved to 149; live loopback ZFILE stays owed.
+
 What would change this fold: a witness replay or counterexample for
-gimpjif W353/W354, an lrzsz witness verdict or ZFILE wire replay, a
-PyMuPDF witness verdict or canonical-target transfer, the Ruby W354
-branch matrix, or a checker RED on committed HEAD.
+gimpjif W353/W354, a PyMuPDF witness verdict or canonical-target transfer,
+a real loopback ZFILE wire replay for lrzsz, the Ruby W354 branch matrix,
+or a checker RED on committed HEAD.
 
 ## 2026-11-27 17:4xZ — W353 mapped read, Ruby EOL closure, lrzsz admission
 

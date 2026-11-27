@@ -16460,9 +16460,10 @@ committed HEAD. The AWS and Ruby items are closed in W348 below.
 
 Current limb for a reader arriving now; it supersedes the 17:4xZ limb's
 closing questions. One docs-only fold of `eabe283c`, `75d0c848`,
-`ecb8e49c`, `83fd02e5` and `626d4efc`. No grade, rung cell, register flag,
-generated count or lab evidence moved here. Recipes in
-`docs/reproducibility.md` §18:0xZ.
+`ecb8e49c`, `83fd02e5`, `626d4efc` and the late `77e55857` that landed
+during this wake. No grade, rung cell, register flag, generated count or
+lab evidence moved here; the operator's counts are now 219/216/216/149.
+Recipes in `docs/reproducibility.md` §18:0xZ.
 
 - **Ruby W353's mixed-parity EOL lane is CLOSED** (`ecb8e49c`). One
   leading `a` and N = 27/43/59 `0xDF` bytes put the fixed `0x53` byte on
@@ -16498,8 +16499,19 @@ generated count or lab evidence moved here. Recipes in
   ASan, a canonical mapped target to test `ret` redirection (CET state
   UNKNOWN), and a hardening sweep.
 
-At this limb: a witness verdict for W353/W354 or PyMuPDF, an lrzsz wire
-replay, the Ruby W354 branch matrix, or a checker RED on committed HEAD.
+- **LrzszProcheader2Shell's W364 verdict is folded** (`77e55857`):
+  ESTABLISHED AS LABELED, grade-neutral, NO r5, at the pinned-sink
+  `procheader()` harness scope. The witness replayed clean archive
+  `4678a157` (TAR `06329456…`, 6/6 pins, two 5/0 runs), with ASan
+  `WRITE of size 12001` at `vuln/src/lrz.c:1220`, a clean fixed arm and
+  read-only GDB chosen `0x31` bytes at chosen offsets. The `0x43` fill
+  case-folds to `0x63` in `uncaps()` at `vuln/src/lrz.c:1210`; that NIT
+  and the fixed tree's `xstrdup` message are preserved. Established count
+  149; no live ZFILE wire, marker or command.
+
+At this limb: a witness verdict for W353/W354 or PyMuPDF, a real loopback
+ZFILE wire replay for lrzsz, the Ruby W354 branch matrix, or a checker RED
+on committed HEAD.
 
 ## 2026-11-27 17:4xZ — W353 mapped read; Ruby EOL branch closed; lrzsz admitted
 
