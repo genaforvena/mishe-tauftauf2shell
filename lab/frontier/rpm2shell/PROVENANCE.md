@@ -967,3 +967,29 @@ pointer fields (`qva_showPackage`, `qva_specQuery`) begin later at offset
 24 and are never reached by the GC walk through the zero leading qword.
 So package or CLI input cannot prepopulate the chosen address with a
 useful live pointer. No grade change; useful ASLR-stable target UNKNOWN.
+
+## W314 (2026-11-27 04:0xZ) — relaxed static-target survey
+
+The W310 survey required a static fake GCObject whose `next` pointed into the
+writable static range. That requirement is unnecessary for a terminal object
+(zero `next`), so the same preserved 800-byte runtime dump of
+`0x406160..0x406480` (the whole non-PIE writable image: `.data`
+`0x406160..0x406360`, `.bss` `0x406360..0x406418`, plus got/rel-ro), sha256
+prefix `b7ea4be4`, was rescanned for every 8-byte-aligned address A with a Lua
+tag byte `0x04..0x26` at A+8 and at A+9. Original dump command is preserved in
+`.mishe-tauftauf/artifacts/rpm2shell-w310/r2s-w310-mem.gdb`.
+
+At A+9 (the byte actually read by liblua's GC visit) there are zero tagged
+addresses. At A+8 there are four: `0x406198` (tag `0x08`), `0x406218`
+(`0x20`), `0x406278` (`0x0c`) and `0x4062e8` (`0x08`). Their `next` qwords are
+`0`, `0x0000000400000000`, `0x4000000000000000` and `0`; fields at A+0x10,
+A+0x18 and A+0x20 are zero or the same garbage constants. None is a valid
+collectible GCObject with a metatable pointer or a function pointer, so no
+fixed address reachable by the chosen write can trigger a GC callback or
+supply a useful object. The terminal-object variant of the static-target
+hypothesis is closed; the useful ASLR-stable target stays UNKNOWN and the
+grade stays rung 3 pinned verbatim / rung 4 author-layout DEMONSTRATED with
+no r5. No runner, source or package byte changed.
+
+Chat check at 04:06Z: #6048 (consolidated real-consumer replay request) still
+unopened by the witness; #5630/#5669/#5729 still owed. Acceptance UNKNOWN.

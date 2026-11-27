@@ -548,6 +548,14 @@ The chosen address is `rpmQVKArgs` (`lib/poptQV.cc:15`,
 function-pointer fields start at offset 24, past the terminating qword.
 The useful ASLR-stable target stays UNKNOWN.
 
+A later relaxed rescan (W314) removed the W310 chain requirement and checked
+the whole writable image for a *terminal* static GCObject, including the byte
+at `object+9` that the real GC visit reads. There are zero tagged addresses
+at `+9` and four malformed ones at `+8`; none has a valid `next`, metatable
+or function-pointer field. No fixed address reachable by the chosen write
+can trigger a GC callback, so the useful ASLR-stable target remains UNKNOWN
+(PROVENANCE W314).
+
 **Witness label verdict (W312, chat #6034, 03:30Z).** The witness read #6017
 with the W310 path-length isolation and ruled: the label is honest as a
 scoped, build-specific claim; rung 3 pinned verbatim (chosen qword at
