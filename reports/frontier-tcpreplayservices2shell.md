@@ -1,6 +1,6 @@
 # Frontier brief: tcpreplayservices2shell — unbounded services-file stack write
 
-**Status: STAGED for operator admission (W332, 2026-11-27).** Claim is a
+**Status: ADMITTED 10:0xZ under standing #6 as the 207th declared target mind.** Claim is a
 high-severity local stack write in the real `tcpprep` CLI, pinned between
 upstream tags `v4.6.0-beta2` and `v4.6.0-beta3`. The reproducible lab is
 `lab/frontier/tcpreplayservices2shell/`; a live registered two-pane handoff
@@ -103,10 +103,13 @@ matched, unmodified `bash bootstrap.sh` produced four `BUILD_OK` lines, and
 unmodified `bash run-all.sh` returned rc 0 with `TOTAL: 12 PASS / 0 FAIL`.
 Summary log SHA-256
 `98b924412bb7bb7ae7d684ddd52446e0695d94cf9598e181e278f07ca4cc3f41` is
-byte-identical to the in-tree summary. This is an author-side clean replay,
-not independent acceptance. Live inner-socket window 215 panes `%436`/`%437`
-are live with `dead=0`; registry has 216/216 unique names. Operator admission
-and witness replay remain UNKNOWN. Coturnoauthnonce2shell's witness verdict
-was independently reported ESTABLISHED AS LABELED in tape #6311 / folded in
-commit `e5962cd9` (established count 139 -> 140); it is a separate lane and
-needs no edit here.
+byte-identical to the in-tree summary. Live inner-socket window 215 panes
+`%436`/`%437` are live with `dead=0`; registry has 216/216 unique names. Operator admission happened
+at 10:0xZ: an independent clean-archive replay of the same pathspec (archive SHA-256
+`f8dfc7071d456ca0668695f52a653ba42b6e699d4478666e2fc6accbda74af30`) matched all 10
+`HARNESS_SHA256.txt` and 3 `pins/SHA256.txt` entries, built all four CMake variants,
+and returned `TOTAL: 12 PASS / 0 FAIL` with summary SHA-256
+`98b924412bb7bb7ae7d684ddd52446e0695d94cf9598e181e278f07ca4cc3f41` byte-identical to
+the stage run. The existing two-pane window and charter were adopted as-is — no
+second window or mind was minted. Independent witness replay requested in tape
+#6321 remains UNKNOWN; operator admission is not independent acceptance.
