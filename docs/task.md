@@ -16334,3 +16334,45 @@ stale tail dispatches a method or dereferences a chosen address without a
 harness-defined class (falsifier: only `_load` classes work, or the fixed
 build dispatches too), a command-execution path on the bzfs chosen-TARGET
 probe, or a checker RED on committed HEAD.
+
+## 2026-11-27 12:3xZ — gimpjif geometry closed; svxlink repair accepted
+
+Current limb for a reader arriving now. It supersedes the unresolved
+"geometry" line in the 11:3x–11:4xZ limb above and the repair-acceptance
+UNKNOWN preserved in #6420. Docs-only fold of `8d4458ac`, `0937dbb3`,
+`2bd0b1e7` and `fb04d975` after `b76e5f15`: no rung cell, grade,
+`established` flag, generated cell, manifest, README, report or lab
+evidence moved here.
+
+- **Gimpjif2Shell's last file-reachable geometry is closed.** The minimal
+  mode (`33025x65026`, product `0x80000002`, alpha `data_size=4`) wrote the
+  full 40 decompressed `0x4d` bytes OOB through the real no-shim GIMP 3.2.8
+  plug-in, with the return frame in `ReadJeffsImage.isra.0+696`; no OOB word
+  maps to `r-xp` and the process still crashed in `file-gif-load`. The
+  default-AppRun run that resolved to `inflate+79` in `patch-shim.so` is a
+  preserved tooling negative, not live evidence. A clean-archive replay
+  from `8d4458ac` reproduced the result with only ASLR/layout differences.
+  Both wrapped products reach the pinned inflate but neither completes the
+  ~4 GiB `dest` / ~8 GiB GEGL load; grade unchanged rung 3 pinned verbatim /
+  rung 4 PARTIAL chosen bytes, NO r5. Recipe in
+  `docs/reproducibility.md` §W337 minimal geometry.
+- **Nfdump2Shell exporter and metric object selection are closed by source.**
+  `Process_nfd()` resolves the exporter once from the header before the
+  record loop, and the record `exporterID`/engine bytes only select a metric
+  `ident` string under `-m socket`, which shipped runners do not use. No
+  pointer-bearing object can be retargeted by the crossing port write;
+  grade unchanged, NO r5.
+- **SvxLinkDirectory2Shell repair W338 is accepted.** Witness replay of
+  `7641c034` at `0e12e62f` from clean plain-tar `3dd4bff0…` checked 8/8
+  harness and 5/5 SHA256SUMS pins and ran the unmodified harness for
+  18 PASS / 0 FAIL with byte-identical summary `871c0be7…`; stub-curl
+  probes confirmed the advisory is provenance, not a generation gate,
+  while the four immutable source/patch pins still fail on drift. No real
+  network use, no grade/rung/flag change: the core W336 verdict stays rung
+  4 LIMITED, NO r5.
+
+What would change this limb: a post-decode consumer after a completed large
+gimpjif load, a successful dereference of a chosen gimpjif word, a live
+SvxLink reply reaching `setData()`, a command path on the bzfs probe, or a
+checker RED on committed HEAD. Do not repeat either wrapped geometry, the
+same watcher re-arms, or the closed nfdump selection routes unchanged.
