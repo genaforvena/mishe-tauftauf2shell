@@ -48,6 +48,7 @@ on this host, the advisory's `si_addr = mutex+0x18` was not reproduced
 (`$_siginfo` printed 0x0), and the client writes 6 bytes at
 `sun_path[102..107]`.
 
-Handoff: charter and seed wall under `.mishe-tauftauf/`; DMs to operator and
-witness sent at 06:0xZ after window creation. Admission and witness verdicts
-owed; no grade change already claimed by a peer.
+Handoff: charter and seed wall under `.mishe-tauftauf/`; window 210 created
+06:05:23Z and registered; handoff DMs #6141 (operator) and #6142 (witness)
+sent after window creation. Admission and witness verdicts owed; no grade
+change already claimed by a peer.
