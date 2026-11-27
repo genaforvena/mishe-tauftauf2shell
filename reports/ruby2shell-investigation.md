@@ -8686,3 +8686,62 @@ plus their ASan builds where present) to test whether the
 `buffer_count × remaining + 20` argument holds there; falsifier is any
 chained buffer with `used > capa` or an ASan write at a buffer past the
 first. Do not repeat the 3.4.12/13 matrix unchanged.
+
+## 2026-11-27 16:1xZ — W350: case-map chaining on 3.3 and 4.0 branches CLOSED
+
+W349 closed the second-buffer question on 3.4.12/3.4.13 only. W350
+applies the same seven shapes and two ops to the other affected branches
+(`ruby-3.3.13-plain`, `ruby-4.0.9-plain`, both vulnerable, both plain
+builds with debug symbols). No ASan build exists for either branch, so
+the write detector is valgrind memcheck plus a gdb `capa`/`used` trace;
+no new grade follows.
+
+The branch `string.c` line numbers were read from the gitignored release
+tarballs extracted under `lab/build/w350-src/`: 3.3.13 has the `xmalloc`
+at `:7409` and the `used` assignment at `:7425`; 4.0.9 at `:7839` and
+`:7855`. Those match the debug info: gdb resolved both breakpoints and
+logged the capa values. Committed harness additions are
+`lab/repro/ruby2shell-casemap-chain-{3.3.13,4.0.9}.gdb`, a new driver
+`lab/repro/ruby2shell-casemap-chain-branches.sh` for the valgrind
+matrix, and an extended `lab/repro/ruby2shell-casemap-chain-gdb.sh`
+whose BUILDS now covers four plain builds while its first 28 rows stay
+byte-identical to W349.
+
+1. Valgrind, 28 arms (14 per branch), all `rc=0`: exactly one
+   `Invalid write of size 1` in each `sb21`, `sb1041` and `sbmix1041`
+   arm with both ops; `sb2100` (even first capa) and all eight UTF-8
+   arms have zero invalid writes. Stacks for `sb1041-upcase` place the
+   write in `case_map iso_8859_1.c:293` from `rb_str_casemap
+   string.c:7414` (3.3.13) and `string.c:7844` (4.0.9) — the first
+   buffer in both. CHAIN SHA-256 prefixes match W349's 3.4.12 arms
+   (`sb21` upcase `69a5885c…`, fold `7bbed07d…`, `sb1041` upcase
+   `cef0c588…`). Raw output: gitignored
+   `lab/build/evidence/casemap-chain/w350/valgrind-matrix.txt`, observed
+   SHA-256 `bc39ca892f119a1bbb09ae7c7b4b4245b0ffcf467578e7fc3de539daf2f1b02a`
+   (contains valgrind PIDs, so it is not a stable replay digest).
+2. gdb, 56 rows (28 from the prior W349 builds, 28 new), all `rc=0`.
+   The first 28 rows hash to W349's
+   `f1b4076336e539fe44fe3630e6dc3c8d0903cd910ad65bf111f151b5e6384024`
+   byte-for-byte; both branch builds match vulnerable 3.4.12 exactly:
+   `sb21` `capa=41 used=42`, `sb1041` `capa=1061,1040 used=1062,1020`,
+   `sb2100` `capa=2120,2100 used=2120,2080`, `sbmix1041`
+   `capa=1061,686 used=1062,499`; each UTF-8 shape uses three buffers
+   with `used < capa` (e.g. `u03901041`
+   `capa=2102,2788,1394 used=2094,2778,1374`). Full matrix SHA-256
+   `73fa39f8ccb404cc40d537e9999165bb98b53e27acb0c42d8ef5144dd7aa0882`;
+   raw logs gitignored under `lab/build/evidence/casemap-chain/`.
+
+Falsifier not met: no chained buffer on either branch has `used > capa`,
+and every observed write is buffer 1 at odd source length. The parity
+and slack argument therefore holds on all three affected branches, not
+just the 3.4 pair. Grade unchanged: primary wire-only rung 3, W341/W342
+adjacent rung 3, witness-COMPLETE rung 4, harness-condition rung 5
+ESTABLISHED at its labeled scope, full stock rung 5 NOT ACHIEVED.
+Next named experiment W351: provision the patched branch releases
+(`ruby-3.3.14.tar.xz`, `ruby-4.0.10.tar.xz` from cache.ruby-lang.org —
+provisioning only, never a target probe), build plain debug builds and
+run the same chain harness on them. Prediction: zero invalid writes and
+byte-identical CHAIN output, matching the 3.4.13 fixed control.
+Falsifier: any invalid write or output difference on a patched branch —
+that would reopen the fix-series grade. Do not repeat the 3.4.12/13
+matrix or the vulnerable branch matrix unchanged.
