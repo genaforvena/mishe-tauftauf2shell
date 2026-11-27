@@ -2,6 +2,23 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 05:4x–06:0xZ — Ruby relptr bit extension and QS-UTF8 negative
+
+- `lab/repro/ruby2shell-tos-relptr.sh` now accepts `RELPTR_BITS` and
+  `RELPTR_EVID` (defaults unchanged). Bits 0..3 and 10..31 at the 14 known
+  pointer-shaped words after `CClassNode` gave 364/364 `rc=0` arms, zero faults
+  and one normalized `Regexp#to_s` output shape in two complete repetitions on
+  plain 3.4.12, with fixed 3.4.13 and ASCII controls clean. A third repetition
+  was cut by the command timeout after 117 clean arms (remainder UNKNOWN, not
+  retried). The relative-pointer bit space is CLOSED; grade unchanged.
+- Adjacent `re.c` QS-UTF8: the 3.4.12→3.4.13 diff adds an end bound to
+  `rb_memsearch_qs_utf8_hash`, but 18 ASan `String#include?` arms on 3.4.12 /
+  3.4.13 returned clean. gdb confirmed the vulnerable branch is reached with a
+  trailing `0xF0`; reads land in allocator slack rather than poisoned bytes,
+  with no observed output difference. Recorded as source-level SUSPECTED with a
+  measured negative, no rung claim. Recipe in `docs/reproducibility.md` §W318,
+  detail in report §05:4xZ. The #6107 witness replay remains queued.
+
 ## 2026-11-27 05:2x–05:3xZ — fixed control, two source bounds, SAIL PSD, ud3tn rung 5
 
 This fold covers `203587f5`, `cea10009`, `887c0523`, `a53a81c3`, `96a62d92`,

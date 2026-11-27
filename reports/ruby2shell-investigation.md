@@ -7222,3 +7222,66 @@ independent witness replay of the secondary one-bit-pointer consumer
 0x41 controls). Falsifier: any fault address not equal to `1<<(V&31)` or
 `1<<(32+(V&31))`, or an unsafe control. That result can establish the
 narrow secondary rung 4 independently; it does not move the primary grade.
+
+## 2026-11-27 05:4x–06:0xZ — W318: relative-pointer bit extension and QS-UTF8 adjacent NEGATIVE (Ruby)
+
+The named witness replay (#6107) is still queued behind the witness's higher-priority
+rung-5 work, so this wake ran two new bounded experiments rather than repeating an
+author sweep. Neither moves a grade.
+
+**Extended relative-pointer bit space — CLOSED.** The prior
+`ruby2shell-tos-relptr.sh` sweep covered only bits 4..9 of 14 pointer-shaped words
+after the live `CClassNode`. The driver now takes `RELPTR_BITS` and `RELPTR_EVID`
+(defaults unchanged: `4 5 6 7 8 9` and `lab/build/evidence/tos-steer/relptr`), and
+records each arm's fault address. With
+`RELPTR_BITS="0 1 2 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31"`
+at the same 14 bases (`140 2c0 440 500 840 900 1080 1180 1240 1640 1840 1a00
+2340 2580`), 364 arms × plain 3.4.12 / fixed 3.4.13 were run in two complete
+repetitions. Both repetitions: 364/364 vulnerable `rc=0`, zero fault or abort
+lines; fixed 3.4.13 and the vulnerable ASCII V=0x41 control also `rc=0`.
+Normalising the codepoint digits in all 364 vulnerable `Regexp#to_s` outputs
+gives one shape, so no arm changed regex semantics. A third repetition was cut
+by the 600-second command timeout after 117 arms (all `rc=0`, no fault); its
+remainder is UNKNOWN and was not retried. Evidence is gitignored in
+`lab/build/evidence/tos-steer/relptr-ext-bits{, -r2, -r3}/` and
+`relptr-ext{,-r2,-r3}-console.txt`. Bits 0..31 at these 14 words are now a
+negative result; do not reuse this bit space unchanged.
+
+```
+RELPTR_EVID=lab/build/evidence/tos-steer/relptr-ext-bits \
+RELPTR_BITS="0 1 2 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31" \
+bash lab/repro/ruby2shell-tos-relptr.sh
+```
+
+**Adjacent `re.c` QS-UTF8 bound — source-level SUSPECTED, no reproduced effect.**
+The local 3.4.12→3.4.13 diff (`lab/src/cmp/re-diff.txt:5-33`) adds an end bound
+`e` to `rb_memsearch_qs_utf8_hash` (`re.c:173-203`) and passes `xe` / `ys+n` at
+both call sites; the 3.4.12 hash reads `x[1..3]` without checking the end.
+`lab/repro/ruby2shell-qs-utf8.rb` drives the stock consumer `String#include?`
+with `pattern` (truncated multibyte in the needle), `haystack` (truncated
+multibyte at the receiver end, lengths chosen so the Quick-Search step lands on
+the final byte) and `safe` shapes, each with exact-capacity `.dup` strings.
+All 18 arms (ASan 3.4.12 / 3.4.13 × 3 shapes × lengths 200/204/245) returned
+`rc=0` with no `ERROR: AddressSanitizer`. A gdb breakpoint on the affected
+3.4.12 build confirms the branch is reached at `re.c:195` and `:197` with
+`x[0]=f0` at the logical end and `x[1..3]=00`; the reads land in allocator
+slack, not ASan-poisoned bytes, and no output difference was observed. The
+source-level missing bound is real, but no ASan-visible fault, oracle or
+chosen-byte effect was produced through these String shapes, so the lane stays
+at SUSPECTED with a measured negative; no rung claim is made. Evidence is
+gitignored in `lab/build/evidence/qs-utf8/`.
+
+```
+for b in ruby-3.4.12-asan ruby-3.4.13-asan; do
+  for mode in pattern haystack safe; do
+    ASAN_OPTIONS=detect_leaks=0 lab/build/$b/bin/ruby \
+      lab/repro/ruby2shell-qs-utf8.rb "$mode" 204
+  done
+done
+```
+
+Grade unchanged: primary wire rung 3 CONFIRMED, secondary one-bit rung 4 narrow
+scope, harness-condition rung 5 ESTABLISHED at its labeled scope, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. The witness replay of report
+§5108 remains the open owed item; any counterexample there revises only that
+secondary lane.

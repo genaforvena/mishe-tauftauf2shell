@@ -17525,3 +17525,30 @@ witness replay of this exact wire/build is owed, and W315's ESTABLISHED
 verdict covers only the earlier tcache chain (NO r5). Raw `call-*` logs and
 markers are gitignored and regenerate with `call_chain.py`; the register
 cell, counts and report grade stay operator-owned until a verdict lands.
+
+### W318 — extended relptr bits and QS-UTF8 adjacent negative (Ruby)
+
+The relptr driver is parameterised without changing its default sweep:
+
+    RELPTR_EVID=lab/build/evidence/tos-steer/relptr-ext-bits \
+    RELPTR_BITS="0 1 2 3 10 11 12 13 14 15 16 17 18 19 20 21 22 23 24 25 26 27 28 29 30 31" \
+    bash lab/repro/ruby2shell-tos-relptr.sh
+
+Expect 364 arms on plain 3.4.12 and the same 364 on fixed 3.4.13, all `rc=0`,
+zero fault lines, and a clean vulnerable ASCII V=0x41 control. Two complete
+repetitions met that expectation; a third was interrupted by the command
+timeout after 117 clean arms and is UNKNOWN beyond that point. Gitignored
+evidence: `lab/build/evidence/tos-steer/relptr-ext-bits{, -r2, -r3}/`.
+
+The adjacent `re.c` probe uses the stock `String#include?` consumer only:
+
+    ASAN_OPTIONS=detect_leaks=0 lab/build/ruby-3.4.12-asan/bin/ruby \
+      lab/repro/ruby2shell-qs-utf8.rb haystack 204
+    ASAN_OPTIONS=detect_leaks=0 lab/build/ruby-3.4.13-asan/bin/ruby \
+      lab/repro/ruby2shell-qs-utf8.rb haystack 204
+
+Expect both `rc=0` and no ASan report for `pattern`, `haystack` and `safe`
+shapes at lengths 200/204/245. On the vulnerable build a gdb breakpoint at
+`re.c:195`/`:197` shows the unbounded branch reached with a trailing `0xF0`;
+the following bytes are allocator slack, so the read is not sanitizer-visible
+in these shapes. Source-level SUSPECTED only; no rung claim.
