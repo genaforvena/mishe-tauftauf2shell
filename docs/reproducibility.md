@@ -17759,6 +17759,38 @@ This closes the wire path for W321's adjacent in-process chosen-byte
 write; no grade change. A named new call site or published PoC mechanics
 would reopen it.
 
+### W323 — dynamic coercion-closure observer (Ruby, negative)
+
+```
+lab/build/plain/ruby-3.4.12-plain/bin/ruby -c lab/repro/ruby2shell-coercion-tracepoint.rb
+bash -n lab/repro/ruby2shell-coercion-tracepoint.sh
+bash lab/repro/ruby2shell-coercion-tracepoint.sh selfcheck-3 selfcheck
+bash lab/repro/ruby2shell-coercion-tracepoint.sh vuln-4 stock
+bash lab/repro/ruby2shell-coercion-tracepoint.sh rails-2 rails
+RUBY2SHELL_TP_RAILS_APP=lab/build/rails-stock-full-app \
+  bash lab/repro/ruby2shell-coercion-tracepoint.sh rails-full-1 rails
+RUBY2SHELL_TP_RAILS_APP=lab/build/rails-params-wrapper-app \
+  bash lab/repro/ruby2shell-coercion-tracepoint.sh rails-params-1 rails
+```
+
+The `.rb` is both a small Sinatra app and a `RUBYOPT=-r` preload for a stock
+`rails new` app. It prepends a module to `String` that records the argument
+types of every Ruby-visible `String#[]=` and pairs it with a `:c_call`
+TracePoint counter (C-frame `tp.binding` is nil here, so TracePoint alone
+cannot see arguments). Each run appends one `SUMMARY aset=N c_entries=N
+regexp_keys=N nonstring_rhs=N hits=N` line to its gitignored
+`lab/build/evidence/coercion-tracepoint-<tag>.log`.
+
+Expect `selfcheck` to report `aset=3 c_entries=3 regexp_keys=2
+nonstring_rhs=1 hits=1` — this is the positive control, driven by the
+deliberate `s[/c/] = 123` in the app's `/observer-selfcheck` route. Expect
+`stock` Sinatra traffic to report all zeros and each of the three `rails`
+modes (minimal, full and params-wrapper) to report
+`aset=30 c_entries=30 regexp_keys=0 nonstring_rhs=0 hits=0`. All requests are
+small and safe; no vulnerability trigger, marker or debugger. Direct C calls
+that bypass the Ruby method table are not observed here and remain covered
+only by W322's static enumeration. Grade unchanged; see report §W323.
+
 ### NSD SVCB AXFR direct sink (W323, ADMITTED 07:2xZ as 203rd; clean author replay)
 
 From `lab/frontier/nsdsvcb2shell`, `bash bootstrap.sh && bash run-all.sh`

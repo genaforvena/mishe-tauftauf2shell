@@ -7500,3 +7500,54 @@ attacker-influenced non-String replacement, or a stock `to_str` that
 mutates the receiver it is coercing into. Do not repeat this survey
 unchanged; a reopening needs a named new call site or Veria's published
 mechanics.
+
+## 2026-11-27 08:0x–08:1xZ — W323: dynamic coercion-closure test CLOSED (Ruby)
+
+W322 closed the stale-backref wire path with a Ripper survey of 8506 source
+files. This named follow-up tested the part of that closure a source grep
+cannot see: metaprogramming and C `rb_funcall` callers of `String#[]=` in a
+live stock process. `TracePoint(:c_call)` on this build returns
+`tp.binding == nil` for C frames, so it cannot expose the argument vector;
+the observer therefore prepends a Ruby module to `String` that records the
+key and replacement types and calls `super`. A parallel `:c_call` TracePoint
+cross-checks that the call reached the stock C `String#[]=`.
+
+Canonical driver (loopback only, no vulnerability trigger):
+
+```
+lab/build/plain/ruby-3.4.12-plain/bin/ruby -c lab/repro/ruby2shell-coercion-tracepoint.rb
+bash lab/repro/ruby2shell-coercion-tracepoint.sh selfcheck-3 selfcheck
+bash lab/repro/ruby2shell-coercion-tracepoint.sh vuln-4 stock
+bash lab/repro/ruby2shell-coercion-tracepoint.sh rails-2 rails
+RUBY2SHELL_TP_RAILS_APP=lab/build/rails-stock-full-app \
+  bash lab/repro/ruby2shell-coercion-tracepoint.sh rails-full-1 rails
+```
+
+The positive control (`GET /observer-selfcheck`) fired: `aset=3`,
+`c_entries=3`, `regexp_keys=2`, `nonstring_rhs=1`, `HITS=1` (the deliberate
+`s[/c/] = 123` at `sinatra/base.rb:1809`), proving the observer sees Ruby
+calls, Regexp keys, non-String replacements and the C-entry cross-check.
+Against it:
+
+| mode | requests | aset | c_entries | regexp_keys | nonstring_rhs | hits |
+|---|---|---:|---:|---:|---:|---:|
+| Sinatra stock traffic | GET /, GET /health?q, POST /echo, POST multipart /trigger, 404, headers | 0 | 0 | 0 | 0 | 0 |
+| stock `rails new` (minimal) | GET /up, /, /rails/info/notes, /missing-controller, POST multipart / | 30 | 30 | 0 | 0 | 0 |
+| stock `rails new` (full) | same | 30 | 30 | 0 | 0 | 0 |
+| stock `rails new` params-wrapper | same | 30 | 30 | 0 | 0 | 0 |
+
+Multipart bodies are deliberately safe (two `0xDF` bytes, far below the
+21-byte overflow threshold). Logs are gitignored under
+`lab/build/evidence/coercion-tracepoint-*.{log,out}`.
+
+LIMITATION: direct C calls to `rb_str_aset`/`rb_str_subpat_set` that bypass
+the Ruby method table are invisible to a prepend. W322 enumerated those
+statically (`string.c:5874`/`:5936`, `date_parse.c:333`); no new one appeared.
+
+**Grade unchanged.** The falsifier did not fire: the dynamic survey saw zero
+Regexp-key or non-String-replacement `String#[]=` calls in either stock
+Rails app, so W321's wire path stays CLOSED and the primary wire rung 3 and
+other grades are untouched. Reopen only with a named stock Regexp-keyed
+caller whose replacement is attacker-influenced and non-String, a stock
+mutating `to_str`, or published PoC mechanics. Do not repeat this observer
+run unchanged.

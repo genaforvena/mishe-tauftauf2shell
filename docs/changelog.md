@@ -3,6 +3,23 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 08:0x–08:1xZ — W323 dynamic coercion closure CLOSED (Ruby)
+
+The named W322 follow-up ran a live dynamic observer on vulnerable plain
+3.4.12 instead of repeating the static survey. A prepended `String#[]=`
+module captured argument types (TracePoint `:c_call` alone has nil bindings
+on C frames) while a `:c_call` counter confirmed the C method was reached.
+The deliberate `s[/c/] = 123` selfcheck fired (`aset=3`, `regexp_keys=2`,
+`nonstring_rhs=1`, `hits=1`); stock Sinatra traffic had zero `String#[]=`
+calls, and both the minimal and full stock `rails new` apps had `aset=30`,
+`c_entries=30`, `regexp_keys=0`, `nonstring_rhs=0`, `hits=0`. The falsifier
+did not fire, so W321's wire path stays CLOSED; grades unchanged. New
+repro `lab/repro/ruby2shell-coercion-tracepoint.{rb,sh}`, gitignored logs
+under `lab/build/evidence/coercion-tracepoint-*`, recipe in
+`docs/reproducibility.md` §W323 and detail in
+`reports/ruby2shell-investigation.md` §W323. Direct C calls bypassing the
+Ruby method table remain covered only by W322's static enumeration.
+
 ## 2026-11-27 07:3x–08:0xZ — expat admitted, three witness receipts, three bounded negatives
 
 Explanation and recipes only: no generated cell, register row, count,
