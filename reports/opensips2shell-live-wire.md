@@ -148,6 +148,61 @@ receiver, rung 4 demonstrated chosen-field control with an observed
 allocation-size change in stock and instrumented live builds under the stated
 no-canary/loopback/900-byte conditions. No grade change and NO rung 5.
 
+## Early-return control-flow diversion (2026-11-27 09:27–09:29Z)
+
+A second bypass of the `tm` gate exists in stock 4.0.1 source
+(`xmpp.c:291-299`): `uri_xmpp2sip(to, &tostr.len)` has an early `return -1`
+before `run_tm_api`. With `sip_domain` unset in this config, that helper
+returns NULL when `5 + strlen(to) > 256`. A 260-byte `to` therefore makes
+`xmpp_send_sip_msg` return through the overwritten saved-RIP slot without
+entering `tm` at all.
+
+Method: stock no-canary `401-plain/modules/xmpp/xmpp.so` (hash unchanged,
+`09d4c0b6…`), launched under `gdb -batch` with `set follow-fork-mode child`
+(the first fork is the "XMPP receiver"), one stream header and one
+`<message/>` on 127.0.0.1:5269. `from` is 900 bytes with an 8-byte chosen
+marker at JID offsets 884-891; the stock saved RIP is `buf_from+888`, so JID
+offset 884 is its low byte. Sender/gdb scripts: `send_early.py` sha256
+`850a5fa1c8a5f068719d78ca8988f04b3f94aa489f7c52681211cfafad3fd551`,
+`gdb-early.cmd`.
+
+Observed (two runs, only the marker changed):
+
+| marker at JID 884 | saved RBP `[rbp]` | saved RIP `[rbp+8]` | gdb frame `#1` |
+| --- | --- | --- | --- |
+| `RIPCNTRL` | `0x5a59585756555453` (`STUVWXYZ`) | `0x4c52544e43504952` (`RIPCNTRL`) | `0x4c52544e43504952` |
+| `ABCDEFGH` | same (`STUVWXYZ`) | `0x4847464544434241` (`ABCDEFGH`) | `0x4847464544434241` |
+
+Both runs logged `ERROR:xmpp:uri_xmpp2sip: Buffer overflow` and
+`ERROR:xmpp:xmpp_send_sip_msg: Failed to translate xmpp uri to sip uri`,
+proving the early return was taken, then stopped on SIGSEGV at
+`xmpp_send_sip_msg+631`. Disassembly shows `0x929a` (function offset `+631`)
+is exactly the function's `ret`. gdb keeps `#0` at the `ret` because the
+chosen target `0x4c52…` / `0x4847…` is non-canonical (bits 63:48 !=
+sign-extended bit 47), so #GP is raised at the return instruction. The
+overwritten return address is the attacker's eight chosen wire bytes in a
+**stock** live receiver; control transfer was attempted but no chosen
+address executed.
+
+Evidence: `artifacts-early/gdb-stock-early.log` sha256
+`956e3e2dba84c851a546801e906a8ac57dcecb4904726703f697751de551c76d`,
+`artifacts-early/gdb-stock-early-2.log` sha256
+`90a49a155dae19ae9ec273181ef1c49af78847d2878c258b966b3f228b0e1c82`, wire
+logs `68c25577e34f14a05e2772a847470f407031dbf419d40ae6fe71078261c9a7b5`
+and `1647dc1b193b58e9d15041e12c6d292ebc6debab5079017ea79661bd21ffcc17`.
+Loopback only; no listener left behind; no marker, pointer dereference or
+rung-5 claim.
+
+Assessment: this upgrades rung-4 mechanics from "chosen bytes corrupt a
+length field" to "chosen bytes become the saved return address and the CPU
+attempts the transfer", in a stock build without entering `tm`. It is still
+**rung 4**: the target was non-canonical, so no attacker-chosen code ran.
+Rung 5 remains UNKNOWN — no valid canonical target, no benign command, no
+observed side effect from executed chosen bytes. A partial overwrite of the
+low return-address bytes (JID length 885/886) is a separate, unrun
+hypothesis; ASCII/UTF-8 attribute bytes cannot encode the leading NUL bytes
+of a full 64-bit canonical stack or module address.
+
 ## Reproduction
 
 ```
