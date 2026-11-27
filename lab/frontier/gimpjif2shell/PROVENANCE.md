@@ -2544,3 +2544,10 @@ Vendor-build recheck at 11:45Z (provisioning only): `gimp.org/downloads/`
 still says current stable 3.2.8 (2026-11-02) and
 `download.gimp.org/gimp/v3.2/linux/` still has `0.0_LATEST-IS-3.2.8` with
 3.2.8 as its newest AppImage. No vendor-shipped fixed build.
+
+Clean-archive reproduction (11:5xZ): `git archive 6c20fb5c
+lab/frontier/gimpjif2shell` into `/tmp/w336-clean`; the unmodified runner
+returned rc 0 with byte-identical runner/script hashes
+(`8d2b7f9e…` / `af33b29f…`). It reproduced the positive WRITE watch,
+`total_out=324`, `pos=260` at pin line 136, zero read-watch hits and a
+normal process exit. Only stack addresses differed (ASLR). Grade unchanged.

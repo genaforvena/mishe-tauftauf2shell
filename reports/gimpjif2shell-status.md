@@ -280,3 +280,8 @@ always even, so the unguarded alpha store cannot pass `dest`. Only
 allocator/free consumers (W304/W335) remain observed; no chosen-pointer
 dereference, command or r5. Upstream recheck at 11:45Z: still 3.2.8, no
 vendor-shipped fixed build.
+
+Clean-archive replay at 11:5xZ from `git archive 6c20fb5c` reproduced the
+same positive WRITE watch, `total_out=324`, `pos=260` and zero read hits
+with byte-identical runner and script; only stack addresses shifted.
+Commit `6c20fb5c` (runner, script, transcript, brief, status, PROVENANCE).
