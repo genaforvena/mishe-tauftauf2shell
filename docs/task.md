@@ -15341,3 +15341,23 @@ window. The author's W304 repair polls up to 2 s only for a zero frame size
 and makes the runner exit 1 on any FAIL; a poll-only first variant failed
 5/5 with 13/3 because `vid_port.c:689` initializes the size to 48, while
 five sequential corrected runs each returned 16/0 rc 0.
+
+## 2026-11-27 01:5xZ — W304 deeper negative repeat IDs CLOSED, Ruby grade unchanged
+
+`ruby2shell` widened the gated Onigmo watch from `mem > -33` to
+`mem > -129` and swept wrapped IDs `−17..−64` (`units = 65534 − k`) at
+pad 0 on pinned 3.4.11, one fresh threads=1/shallow/ASLR-off stock Rails
+worker per trial. All 48 completed: writes at `alloca_base − 8k`
+(deltas −136…−512), first pre-write qword ASCII pattern source, zero
+stack/mmap/PIE `PTR` lines, post-write and all 240 read values small
+indices (4–112) consumed at `match_at regexec.c:3877`. The 48 terminal
+`Fatal signal: Segmentation fault` lines without a SIGSEGV event remain
+an UNKNOWN watcher artifact, not a primitive (W303 write-only control
+did not fault). The negative repeat-ID steering lane is now CLOSED for
+IDs `−1..−64` plus `−32767`; stock-wire rung 4 and harness-condition
+rung 5 stay witness-ESTABLISHED at their labeled scopes, full
+stock/oracle-free/persistent rung 5 NOT ACHIEVED. Recipe in
+`docs/reproducibility.md` §01:5xZ, evidence in report §01:5xZ.
+What would change this fold: a pointer-bearing pre-write qword at a
+measured negative offset, a non-index consumer, or a control that
+falsifies the artifact explanation.

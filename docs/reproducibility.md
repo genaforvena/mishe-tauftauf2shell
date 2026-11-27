@@ -16393,6 +16393,32 @@ observed in the measured window, the repair is shim-assisted, no fixed
 rung 4 PARTIAL, NO r5. Hashes and the first replay's corrected runner-hex
 defect are in `lab/frontier/gimpjif2shell/PROVENANCE.md` § W301.
 
+## 2026-11-27 01:5xZ — W304 deeper negative repeat-ID watch (IDs −17..−64)
+
+From the repo root, after the pinned 3.4.11 plain build and stock Rails app:
+
+```sh
+sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "17 18 19 20 21 22 23 24 25 26 27 28 29 30 31 32" 0 5200
+sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "33 34 35 36 37 38 39 40 41 42 43 44 45 46 47 48" 0 5200
+sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "49 50 51 52 53 54 55 56 57 58 59 60 61 62 63 64" 0 5200
+```
+
+Each ID uses `units = 65534 − k` and runs a fresh threads=1/shallow/
+ASLR-off stock Rails worker under the gdb-only timing shim; no wire-only
+claim uses that shim. `ruby2shell-onigmo-watch-deep.py` widens the W303
+condition to `mem < 0 && mem > -129`, logs `PRE k=<id>` on the first hit per
+target, flags stack/mmap/PIE pre-write qwords with `PTR`, and watches up to
+three targets for five read backtraces. Read the gitignored
+`lab/build/evidence/w304-deep-summary-p0.txt` and
+`w304-deep-n{17..64}-p0.{json,server.log}` rather than shell rc. Expect 48
+completed trials: writes at `alloca_base − 8k` (deltas −136…−512), ASCII
+pattern source before, small repeat-stack indices (4–112) after, 240 reads
+at `match_at regexec.c:3877`, zero `PTR` lines and zero SIGSEGV events. The
+48 `Fatal signal: Segmentation fault` lines after the reads are an
+UNKNOWN watcher artifact (W303 write-only control did not fault), not a
+claimed primitive. Lane CLOSED through ID −64; full rung 5 NOT ACHIEVED.
+Detail in report §01:5xZ.
+
 ## 2026-11-27 01:4xZ — W303 negative repeat-ID watch (IDs −2..−16)
 
 From the repo root, after the pinned 3.4.11 plain build and stock Rails app:

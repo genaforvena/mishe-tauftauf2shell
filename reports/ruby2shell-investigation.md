@@ -6773,3 +6773,49 @@ rung 5 **NOT ACHIEVED**. A new lane must either widen the negative ID past
 `−16` with a widened watch condition and find a pre-write pointer, or name
 a wire-visible consumer; do not repeat this ID/pad matrix unchanged.
 
+## 2026-11-27 01:5xZ — W304 deeper negative repeat IDs −17..−64: still no pointer; lane CLOSED through −64
+
+W303 named one widening: sweep IDs −17..−64 with the native watch condition
+`mem < 0 && mem > -129`, logging the qword before each write. The new
+`lab/repro/ruby2shell-onigmo-watch-deep.{py,gdb}` keeps the proven gdb
+design — arm only after `rb_reg_initialize` sees >300 KB, filter with native
+breakpoint conditions inside `commands` blocks because Python `stop()`
+overrides them (W302), and watch up to three distinct targets for five read
+backtraces. It adds an explicit `PRE k=<id>` line on the first hit at each
+target, a `PTR` line when a pre-write qword classifies as stack (`0x7ffc…`),
+mmap (`0x7f…`) or PIE/brk (`0x555…`), and pointer-aware read logging.
+`lab/repro/ruby2shell-onigmo-repeat-deep.sh` runs one fresh stock-Rails
+worker per ID with `units = 65534 − k`, pinned 3.4.11 plain, shallow layout,
+pad 0, `RAILS_MAX_THREADS=1`, ASLR off. The `Regexp.timeout=nil` shim is a
+gdb-timing diagnostic only, never a wire-only claim.
+
+All 48 trials completed (`w304-deep-n{17..64}-p0`, gitignored
+`lab/build/evidence/w304-deep-summary-p0.txt` and `w304-deep-n*.{json,
+server.log}`; clock 01:50–01:54Z). Every write landed at
+`alloca_base − 8k` for `k=17..64`, i.e. deterministic deltas
+`−136, −144, … −512`, so the widening reached half a kilobyte below
+`repeat_stk` without finding a new occupant class. Each trial's first
+pre-write qword was ASCII pattern source (`other`; 33 distinct qwords across
+the sweep), no `PTR` line appeared anywhere, and post-write values were
+small repeat-stack indices (4–112), never chosen bytes or pointers. All 240
+read watchpoint hits (five per trial) carried small values 4–112 and every
+backtrace top frame was `match_at regexec.c:3877` — the same live consumer
+as W303, but of an integer index, not a pointer.
+
+As in W303, all 48 server logs print `Fatal signal: Segmentation fault`
+after the reads and zero SIGSEGV events reach the watcher's handler. That
+fault remains **UNKNOWN** and is not attributed to the write or counted as
+a primitive; watchpoint deletion/timing is still the open artifact. The
+no-pointer evidence is independent of it.
+
+Verdict: the wrapped negative repeat-ID steering lane is **CLOSED** for IDs
+`−1..−64` (pads 0/8/32 where measured) and the already-closed `−32767`
+watch. There is no pre-write pointer at any measured negative offset and no
+wire-visible consumer of one. Grade unchanged: stock-wire rung 4
+witness-ESTABLISHED at labeled scope, harness-condition rung 5
+witness-ESTABLISHED, full stock/oracle-free/persistent rung 5 **NOT
+ACHIEVED**. Next lane must name a wire-visible consumer: census the positive
+`repeat_stk` entries selected by the already-wire-visible `si` index at
+`match_at regexec.c:3877` to see whether any entry holds a pointer during
+the consumed read; do not repeat the negative-ID sweep unchanged.
+

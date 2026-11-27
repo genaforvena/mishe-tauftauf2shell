@@ -1,6 +1,27 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 01:5xZ — W304 deeper negative repeat IDs CLOSED (Ruby)
+
+- New `lab/repro/ruby2shell-onigmo-watch-deep.{py,gdb}` and
+  `ruby2shell-onigmo-repeat-deep.sh` widened the native watch to
+  `mem < 0 && mem > -129` and swept wrapped IDs `−17..−64` at pad 0 on
+  pinned 3.4.11 (48/48 completed trials, gitignored
+  `lab/build/evidence/w304-deep-summary-p0.txt`). Writes land at
+  deterministic `alloca_base − 8k` (deltas −136…−512); the first
+  pre-write qword is ASCII pattern source in every trial, no
+  stack/mmap/PIE `PTR` line appears, and post-write plus all 240 read
+  values are small indices 4–112 consumed at `match_at regexec.c:3877`.
+- The 48 `Fatal signal: Segmentation fault` lines after the reads, with
+  zero SIGSEGV events reaching the handler, stay UNKNOWN as a watcher
+  artifact; W303's write-only control did not fault. No pointer, chosen
+  byte or new consumer was demonstrated.
+- Grade unchanged: stock-wire rung 4 witness-ESTABLISHED, harness-
+  condition rung 5 witness-ESTABLISHED, full stock/oracle-free/persistent
+  rung 5 NOT ACHIEVED. Negative repeat-ID steering CLOSED through −64;
+  next lane must name a wire-visible consumer. Report §01:5xZ, recipe
+  `docs/reproducibility.md` §01:5xZ.
+
 ## 2026-11-27 01:4xZ — pjproject W303 verdicts, W304 runner repair
 
 `2bcc5d36` arrived after the 01:3x fold and touched only pjproject reports,
