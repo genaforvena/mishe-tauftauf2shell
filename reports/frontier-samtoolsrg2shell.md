@@ -1,8 +1,8 @@
 # Frontier brief: samtoolsrg2shell — mpileup `-G` read-group stack overflow
 
-**Status: FRONTIER-STAGED 2026-11-27 W339; operator admission and independent
-witness replay UNKNOWN.** Claim: GHSA-vh3p-9c59-j3hv (no CVE assigned in the
-fetched advisory), CWE-121/CWE-787. Lab:
+**Status: FRONTIER-STAGED 2026-11-27 W339 in `721ce2fc`; operator admission
+and independent witness replay UNKNOWN.** Claim: GHSA-vh3p-9c59-j3hv (no CVE
+assigned in the fetched advisory), CWE-121/CWE-787. Lab:
 `lab/frontier/samtoolsrg2shell/`; exact source archives, patch, advisory,
 reproduction commands and preserved negatives are in that tree. Live dedicated
 inner-socket window 220 (`%446`/`%447`, `dead=0`) is registered 221/221 unique.
@@ -37,16 +37,18 @@ sink or synthetic caller. Four binaries were rebuilt from immutable git
 archives: vulnerable/fixed × ASan/plain, with pinned HTSlib `36ef0a191cf1c9ec2b2236640384926454a503fe`
 and htscodecs `b9fc194f772e45bb0a1f44b08cbf8697a1384bae`.
 
-  `[mpileup] no input file/data given` error.
 
 `sh run-all.sh` verifies 8 source/advisory/patch pins and 4 harness pins,
 rebuilds if needed, and returned `RUN_ALL_OK 24 PASS / 0 FAIL`. Summary SHA-256
 `df418572e9065af5e64d12527f736ba420b61dc9fed0d0f97dac1401d31b414a`.
+A clean `git archive 721ce2fc` extraction rebuilt all four binaries and
+returned the same 24 PASS / 0 FAIL and byte-identical summary; author replay
+is not witness acceptance.
 
 - Vulnerable ASan: 1023-byte token clean; 1024 gives `WRITE of size 1025` at
   `bam_plcmd.c:1298`; 1200/2048/4096 give the same real-frame overflow.
 - Fixed ASan: 1023/1024/1200/2048/4096 all clean, returning the ordinary
-  `[mpileup no input file/data given]` error.
+  `[mpileup] no input file/data given` error.
 - Vulnerable plain: 1024 survives; 1200/2048/4096 terminate with SIGSEGV.
   Fixed plain remains clean at every length.
 - Read-only GDB after `fscanf` sees 32 chosen `0x42` bytes at `buf+1024`.
