@@ -1,0 +1,4 @@
+3a2773fa94a804d041dbf875f90f18f4b589fe0d4d001679490cf40d003944e8  src-vuln/src/core/codestream/ojph_codeblock.cpp
+78ea7f3bed05d777caa3c1c644cd680382565395c7d892bf50a0fb780a3eebf1  src-fixed/src/core/codestream/ojph_codeblock.cpp
+6cc2ef065143c4fdc2e285010b5ebd51d082be695b7272b1d29af33b412abb49  src-vuln/src/core/coding/ojph_block_decoder32.cpp
+6cc2ef065143c4fdc2e285010b5ebd51d082be695b7272b1d29af33b412abb49  src-fixed/src/core/coding/ojph_block_decoder32.cpp

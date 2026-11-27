@@ -1,6 +1,27 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 01:2xZ — openjphcleanup2shell staged (W302)
+
+Four read-only scouts screened the W301 backup list; OpenJPH ranked first on
+tractability and was staged, not admitted. CVE-2026-111151 /
+GHSA-5g7q-q9vm-h587 (CWE-787, affected `<= 0.32.0`) is an HT cleanup write of
+a second sample row past a one-row codeblock buffer. Pinned vulnerable tag
+`0.32.0` commit `23c4228` and fixed tag `0.33.0` commit `345a8bc`; the verbatim
+one-file fix rounds the codeblock row count to even, while the decoder body is
+byte-identical across pins. A direct sink harness calling the pinned decoder
+with an exact 32-byte one-row buffer gets GCC ASan `WRITE of size 4` at raw
+`ojph_block_decoder32.cpp:1155`, 0 bytes after the region; two-row controls
+are clean. The real decoder reaches that line on a 147-byte
+pinned-compressor codestream under gdb, but full-program ASan is clean because
+the library slab keeps 5% slack — negative preserved. `sh build-all.sh && sh
+run-all.sh`: PASS=27 FAIL=0, runner
+`2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`. Grade at
+handoff R1 — / R2 ✓ / R3 ✓ (direct-sink ASan, not a full-decoder redzone fault)
+/ R4 — / R5 —. A two-pane window is live and registered; operator admission
+and witness replay are owed. NanoMQ, node-re2, L-SMASH, libexpat, PyMongo and
+Wasmtime remain unstaged backups with the reasons in the brief.
+
 ## 2026-11-27 01:0xZ — Ruby repeat-ID fault case is an unmapped stack gap
 
 The preserved W300 fault log already records the missing address: Ruby's
