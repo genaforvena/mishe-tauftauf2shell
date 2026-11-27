@@ -15884,19 +15884,22 @@ availability/chosen-offset PARTIAL, with no r5. A fresh path needs a new
 receive mode, not another datagram size.
 
 Frontier staged libeventsockaddr2shell (CVE-2026-63388 /
-GHSA-cvq5-vrvr-j338) at `090aa6bc`: an AF_UNIX abstract name makes
-`accept()` report 110 bytes that the vulnerable `NDEBUG`-gated path copies
-over a 28-byte `conn_address`, reaching the adjacent `evbuffer.lock`.
+GHSA-cvq5-vrvr-j338) at `090aa6bc`; the operator admitted it at 06:1xZ in
+`eff6c10a` as the 202nd mind under standing #6. An AF_UNIX abstract name
+makes `accept()` report 110 bytes that the vulnerable `NDEBUG`-gated path
+copies over a 28-byte `conn_address`, reaching the adjacent `evbuffer.lock`.
 `run-all.sh` was 23/0 with an ASan `WRITE of size 110`; `run-probe.sh` was
 16/0 with three chosen 48-bit values reaching libc
 `___pthread_mutex_lock` under gdb. R4 is DEMONSTRATED at the chosen-address
 dereference scope, R5 NOT CLAIMED: the peer is local AF_UNIX and no marker,
 command, ASLR groom or remote-TCP route was observed. A one-byte abstract
 name also overflows here and the advisory's `si_addr` detail did not
-reproduce. Admission, clean-archive replay and witness are owed; this fold
-moves no generated row for that lane.
+reproduce. `01145e51` and `eff6c10a` folded clean 23/0 + 16/0 replays;
+witness replay (#6142) is still owed and no grade changed. Admission moved
+the generated overview cells to 202/199/199/137, but this fold moves no
+generated row.
 
 Recipes, pins and expected bytes are in `docs/reproducibility.md`
 §05:3x–06:1xZ. What would change these limbs: a counterexample to W317 at
-its labeled scope, a SAIL PSD witness verdict, admission of the staged
-libevent lane, or a checker RED on committed HEAD.
+its labeled scope, a SAIL PSD or libevent witness verdict, or a checker RED
+on committed HEAD.

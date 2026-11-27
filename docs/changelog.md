@@ -2,6 +2,44 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 06:1x–06:3xZ — libevent admitted (202nd), three closed negatives
+
+This fold covers `f2a92725`, `01145e51`, `2ab61be9`, `eff6c10a`, `770cb486`
+and `62240c01` past `358aa9c2`. No generated cell, register row, count,
+report, SVG or lab evidence moved here; `README.md`, `docs/results.md` and
+`research-manifest.json` are operator-owned.
+
+- `eff6c10a` admitted `libeventsockaddr2shell` (CVE-2026-63388 /
+  GHSA-cvq5-vrvr-j338) at 06:1xZ under standing #6 as the 202nd declared
+  mind. The operator updated the generated overview to 202/199/199/137 and
+  rung cells R4 ◐ 138 / R5 184. Grades are unchanged from staging: R4 at
+  the chosen-address dereference scope, R5 NOT CLAIMED, Local AF_UNIX
+  vector, witness #6142 still owed.
+- `01145e51` and `2ab61be9` folded the clean `git archive 090aa6bc` replay
+  (archive `889dfe52…`, frontier log `1edee7ac…`), window 210 panes
+  %426/%427 and handoff DMs #6141/#6142. `eff6c10a` adds the operator
+  admission replay (log `c7a0e2b…`); both are 23 PASS / 0 FAIL outer and
+  16 PASS / 0 FAIL inner.
+- `770cb486` CLOSED the rpm2shell W318 CLI-controlled GC type byte probe:
+  `rpmQVKArgs` byte `+10` flags are settable but unaligned, the aligned tag
+  and mark bytes stay zero, 12/12 re-aimed installs fault rc -11 on the
+  small-integer fake object, and the `+0` double-free is bimodal generic
+  heap damage. No useful object, grade change or r5.
+- `f2a92725` CLOSED the gimpjif2shell W320 `G_SLICE=always-malloc` variant:
+  four malloc breakpoints armed, the same wrapped call, still `traced=0`,
+  no caller named, object C type UNKNOWN, grade rung 3 / rung 4 PARTIAL
+  with no r5.
+- `62240c01` (Ruby W319) CLOSED the adjacent `String#rindex` character/byte
+  bound with a measured negative: gdb shows a 26-byte read past the logical
+  end but all ASan shapes are rc 0 with no report or output difference.
+  Its author wrote the changelog and reproducibility passages; verified,
+  not duplicated here.
+
+Recipes are in `docs/reproducibility.md` §05:3x–06:1xZ and §W319. What
+would change these limbs: a libevent witness verdict or grade move, a
+counterexample to any closed negative above, or a checker RED on committed
+HEAD.
+
 ## 2026-11-27 05:3x–06:1xZ — W317 rung-5 verdict, receive-path negative, admission and staged libevent
 
 This fold covers `01a19a04`, `87fe7d08`, `4b0f21da`, `0d9701db`, `2277d410`,
@@ -65,8 +103,9 @@ report, SVG or lab evidence moved here.
 
 Recipes and expected bytes are in `docs/reproducibility.md` §05:3x–06:1xZ.
 What would change these limbs: a counterexample to W317 at its labeled
-scope, a SAIL PSD witness verdict or grade move, admission of the staged
-libevent lane, or a checker RED on committed HEAD.
+scope, a SAIL PSD or libevent witness verdict or grade move, or a checker
+RED on committed HEAD. The staged libevent limb was admitted in `eff6c10a`
+and is recorded in the section above.
 
 ## 2026-11-27 05:4x–06:0xZ — Ruby relptr bit extension and QS-UTF8 negative
 
