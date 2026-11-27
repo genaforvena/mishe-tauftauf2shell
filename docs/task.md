@@ -14206,6 +14206,17 @@ generated cell, register row, grade, report or lab evidence is moved here.
   attacker-steered primitive; grade unchanged (stock-wire rung 4 and
   harness-condition rung 5 ESTABLISHED at labeled scope, full rung 5 NOT
   ACHIEVED). Details: `reports/ruby2shell-investigation.md` §02:5xZ.
+- W310 (`lab/repro/ruby2shell-onigmo-watch-cache-point.{py,gdb}`) watched the
+  W306-named second metadata consumer at `regexec.c:2242` (`find_cache_point`,
+  outer repeat ID `−32767`) on the same stock Rails wire attack. The pinned
+  3.4.11 plain replay logged zero `find_cache_point` entries and zero
+  BEFORE/READ/WATCH events under both the exact ID gate and broad gates; the
+  activation logger showed `num_cache_opcodes = 1`, UNINIT status and
+  `num_fails <= 15` versus a 69/71 threshold for attack-length subjects. Lane
+  CLOSED as unreached (not proven safe); W303–W306 close Onigmo metadata as an
+  attacker-steered path. Grade unchanged (stock-wire rung 4 and
+  harness-condition rung 5 ESTABLISHED at labeled scope, full rung 5 NOT
+  ACHIEVED). Details: `reports/ruby2shell-investigation.md` §03:1xZ.
 - `8c845617` + `f620d6ae` opened a second Ruby lane: the stock-wire Onigmo
   repeat-ID write on pinned 3.4.11 (`f79c6e78…`). A 393 KB `tag` through the
   unmodified Rails `/rails/info/notes` route gives a repeat ID of 32,768 and

@@ -6949,3 +6949,51 @@ ACHIEVED**. Next named experiment: census the other metadata consumer,
 `match_cache_point` at `regexec.c:2242` (`reg->repeat_range[cache_opcode->
 outer_repeat_mem]`), in the same attack; do not repeat this watcher or the
 negative-ID sweep unchanged.
+
+## 2026-11-27 03:1xZ — W310 cache-point metadata consumer never reached (Ruby)
+
+W306 closed the `match_at` reads of the OOB `reg->repeat_range[mem]` and named
+the other metadata consumer at `regexec.c:2242`, inside `find_cache_point`
+called from `CHECK_MATCH_CACHE` (`regexec.c:2605`) as
+`reg->repeat_range[cache_opcode->outer_repeat_mem]`. Question: on the same
+stock-wire attack, does the cache path read the wrapped ID `−32767` metadata
+and expose a new attacker-influenced branch or allocation?
+
+New committed `lab/repro/ruby2shell-onigmo-watch-cache-point.{py,gdb}` arms at
+`find_cache_point + 168` (verified with `info line regexec.c:2242` on the pinned
+3.4.11 plain binary), gates on the outer ID via a native gdb `commands`
+condition, caches `reg` at `find_cache_point` entry, and would dump the range
+address/lower/upper, mapping, cache-opcode metadata and `repeat_stk` slot
+before watching the 8-byte slot for five read backtraces. It also logs up to
+`RUBY2SHELL_ONIGMO_GATE_LOG` match-cache activation comparisons at
+`match_at + 1126` (`regexec.c:4122`), so a no-hit result distinguishes an
+inactive cache from a broken site. The entry detector is deliberately a
+non-internal breakpoint: gdb printed `Breakpoint 3 at 0x15edb0` for it in the
+replay.
+
+Evidence (gitignored): `lab/build/evidence/w310cp-n32767-p0.{json,server.log}`
+(03:19:53Z), plus detector variants `w310diag-*`, `w310all-*`, `w310all2-*`
+and the 100-gate `w310gate-*` replay. Conditions: pinned 3.4.11 plain, stock
+Rails `/rails/info/notes`, shallow layout, pad 0, `RAILS_MAX_THREADS=1`, ASLR
+off, one fresh worker under gdb; body 852,076 B, request 200 with 54,795 reply
+bytes and health 200. The replay logged 23 `ARM len=3932xx` lines, 12 gate
+lines and **zero** `find_cache_point` entries, zero BEFORE/READ/WATCH lines.
+Broad gates (`mem > -1000000`, literal `1`) also produced zero hits, so this is
+not merely a wrong outer-ID condition.
+
+The activation comparisons read `num_cache_opcodes = 1` throughout; threshold
+`(end - str) * num_cache_opcodes` is 69/71 for the attack-length subjects,
+while `num_fails` reaches only 15 in the sampled 100 gates (short-subject
+matches contribute the three at-or-above-threshold samples). `status` is the
+UNINIT value 1 at every sampled comparison; the cache never becomes a live
+consumer in these replays. No OOB metadata address, byte or branch was
+observed at `regexec.c:2242`; nothing here upgrades W306's grade.
+
+Verdict: the cache-point metadata lane is **CLOSED — structurally not reached
+by the stock wire pattern on the tested build**, not a demonstrated safe
+primitive. Together with W303–W306, the Onigmo `repeat_range`/`repeat_stk`
+metadata lanes are closed as attacker-steered paths. Grade unchanged:
+stock-wire rung 4 and harness-condition rung 5 ESTABLISHED at labeled scope,
+full stock/oracle-free/persistent rung 5 **NOT ACHIEVED**. Recipe:
+`docs/reproducibility.md` §03:1xZ. Next experiment must be in another
+subsystem; do not repeat this watcher or the negative-ID sweep unchanged.

@@ -2,6 +2,25 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 03:1xZ — W310 cache-point metadata lane never reached (Ruby)
+
+- New `lab/repro/ruby2shell-onigmo-watch-cache-point.{py,gdb}` watches the
+  W306-named second consumer, `reg->repeat_range[cache_opcode->
+  outer_repeat_mem]` at `regexec.c:2242` inside `find_cache_point`, with an
+  outer-ID gate, an entry detector and a match-cache activation logger.
+- Canonical ID `−32767` replay (852,076 B body, HTTP 200/54,795 B reply,
+  health 200) logged 23 compile gates, 12 activation comparisons and zero
+  `find_cache_point` entries, zero BEFORE/READ/WATCH lines. Broad gates
+  (`mem > -1000000`, literal `1`) also hit nothing, so this is not a wrong
+  outer-ID condition. Activation shows `num_cache_opcodes = 1`, UNINIT status
+  and `num_fails <= 15` against a 69/71 threshold for attack-length subjects:
+  the cache never becomes a live consumer on this stock wire path.
+- The lane is CLOSED as unreached, not proven safe; W303–W306 close the
+  Onigmo metadata paths as attacker-steered. Grade unchanged: stock-wire rung
+  4 and harness-condition rung 5 ESTABLISHED at labeled scope, full
+  stock/oracle-free/persistent rung 5 NOT ACHIEVED. Report §03:1xZ, recipe
+  `docs/reproducibility.md` §03:1xZ.
+
 ## 2026-11-27 03:0xZ — W308 lzxwindow verdict, W307 gimpjif watch, W309 rpm boundary
 
 This fold covers `6379d9bd`, `0a4168f5`, `2d2e540e`, `85786f56` and

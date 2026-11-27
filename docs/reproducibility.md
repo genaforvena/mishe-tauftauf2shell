@@ -16909,3 +16909,31 @@ dereference. Grade is unchanged (rung 3 pinned verbatim / rung 4 author-layout
 DEMONSTRATED, real-consumer witness UNKNOWN), no r5; the compile-time cause is
 UNKNOWN. Details: `lab/frontier/rpm2shell/PROVENANCE.md` § W309 and
 `reports/frontier-rpm2shell.md` § "Fresh-build boundary".
+
+## 2026-11-27 03:1xZ — W310 cache-point metadata census (Ruby)
+
+Run on the pinned 3.4.11 plain build against the generated stock Rails app on
+loopback. The watcher arms at `find_cache_point + 168` (regexec.c:2242;
+`info line regexec.c:2242` on this binary), gates on
+`cache_opcode->outer_repeat_mem`, caches `reg` at function entry, logs the
+match-cache activation comparison at `match_at + 1126`, and would watch the
+8-byte metadata slot for five reads if the site were reached:
+
+    RUBY2SHELL_ONIGMO_TAG_PREFIX=w310cp \
+      RUBY2SHELL_ONIGMO_GDB_SCRIPT=lab/repro/ruby2shell-onigmo-watch-cache-point.gdb \
+      RUBY2SHELL_ONIGMO_MEM_COND='mem == -32767' \
+      RUBY2SHELL_ONIGMO_GATE_LOG=12 \
+      sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "32767" 0 5290
+
+Expected on the pinned build: HTTP 200 with 54,795 reply bytes and health 200;
+`lab/build/evidence/w310cp-n32767-p0.server.log` shows three installed
+breakpoints (gate 0x161396, cache site 0x15ee58, entry 0x15edb0), 23
+`ONIG_CP ARM len=3932xx` lines, 12 `ONIG_CP GATE` lines and zero `ENTRY`,
+`BEFORE`, `READ` or `WATCH` lines. Gate values include
+`num_cache_opcodes=1`, status 1 (UNINIT) and `num_fails` 1..11 against a
+threshold of 69; the 100-gate variant
+(`RUBY2SHELL_ONIGMO_GATE_LOG=100`, tag `w310gate`) reached at most 15 fails
+for those subjects and still zero entries. Replacing the condition with
+`mem > -1000000` or `1` also yields zero hits, so assert the zero-entry
+observation, not a specific stack address. Grade unchanged; details:
+`reports/ruby2shell-investigation.md` §03:1xZ.
