@@ -3166,3 +3166,97 @@ in a live consumer, still NO r5; replay offer pending, so this label is not
 yet independently verified. The result depends on hitting the shifting
 `ARRBASE-idx` with an 8-byte-dense JIF pattern; the sparse and single-offset
 variants above are preserved negatives.
+## W351 live second-stage pointer field read (2026-11-27, 16:03Z wake)
+
+DM #6606 bounded question: can the file-chosen bytes set the W349
+second-stage `rbx` to a live mapped object whose `+0x356` field read is
+valid? All runs use the **unmodified** no-shim runner
+`live/run-appimage-min340.sh` SHA-256
+`b047c40e279d8fb6f343e133fc482640c4339798959e2dedcc3edbcfdfb50375`,
+the SHA256SUMS-verified GIMP 3.2.8 AppImage and a new **read-only** observer
+`live/gdb-w351-stage2.cmd` SHA-256
+`45d54969b8711c23aeaa129dce32909eceef263771769d964ab3fae6e5a6d6b8`.
+The observer fixes the W349 scripts' `/proc/maps` classifier (they read the
+permissions token as the high address and printed `unmapped` for every
+mapped value); it installs breakpoints only and never writes memory,
+registers or plug-in bytes. JIFs come from the committed generator mode
+`realglib/make-jif.py minimal-spec N FILL OFFSET:HEX,…`.
+
+### Layout control (two bounded negatives, do not repeat unchanged)
+
+- JIF `/tmp/w351-stage2-self.jif` SHA-256
+  `d00e73395a00de3057578a65a1990216ddaef501a1ef2aadd1d88921b8517a55`
+  used big-endian hex pointer bytes and a 25-character path. PRE
+  `idx=0x555555678840`, `ARRBASE−idx=0x46f10`,
+  `ARR[0]=0x40026c5555550000`, fault back at `0x7ffff7fd1327`. Logs
+  `live/evidence/w351-misencoded-{gdb,run}.log` SHA-256
+  `05f692d2…`/`284f6620…`. Wrong byte order and path length.
+- JIF `live/evidence/w351-stage2-self-12.jif` SHA-256
+  `c47322aeffea44bb01aa79657632470f2d5e5677a02bd93cced48bb38b37abcf`
+  has correct little-endian pointers and the exact W349 101-character path,
+  but `zlen=808`. PRE `idx=0x555555678fd0`, `ARRBASE−idx=0x47170`; 32
+  genuine loader derefs then a libz SIMD store `mov %cl,0x1(%r15)` faulted
+  at `0x7ffff7a8ff07`, before the chosen hit. Logs
+  `w351-self12-{gdb,run}.log` SHA-256 `45ac8c77…`/`6c5aaf9b…`.
+
+Measured constraint: `ARRBASE−idx` follows the compressed stream length and
+the JIF path length (804 → `0x47210`, 805/808 → `0x47170`, 813 → `0x46f10`;
+a 76-character shorter path alone shifted `0x47210`→`0x46f10`). The
+positive JIF below holds `zlen=804` at the same 101-character path.
+
+### Positive run: chosen second-stage pointer and valid field reads
+
+JIF `live/evidence/w351-stage2-f40-123.jif` SHA-256
+`971b6b4b9652fb2b2c60a05fa8c943a058fa84e1ea69748255e83399aebd8282`:
+786432-byte `0x40` flood, `P1=0x5555556c0240` at every 8-byte offset
+`0x46e80..0x47220`, and `P2=P1` written little-endian at output offset
+`0x47238` (`*(P1+0x28)`), `zlen=804`, `file=842`. Both runner checks PASS.
+PRE `idx=0x555555679050`, `ARRBASE−idx=0x47210`,
+`ARR[0..2]=0x00005555556c0240`. The observer logged:
+
+    W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240 map=[[heap]] r14=0x5555556c0260 i=0 mem28=0x00005555556c0240
+    W351 STAGE2 test356 pc=0x7ffff7fd133e rbx=0x00005555556c0240 map=[[heap]] byte354=0x40 byte356=0x40
+    W351 STAGE2 continue pc=0x7ffff7fd1356 rbx=0x00005555556c0240 map=[[heap]] byte354=0x40 byte356=0x40
+
+The live loader therefore took the file-chosen mapped pointer from
+`ARR[0]`, read the file-chosen `P2` from `*(P1+0x28)` into `rbx`, and
+executed both `testb $0x3,0x354(%rbx)` and `testb $0x4,0x356(%rbx)` on that
+chosen pointer without faulting; the bytes at those fields are the chosen
+filler `0x40`. The terminal fault moved to `0x7ffff7fd129f`
+(`mov 0x8(%rax),%rsi`) after `mov 0x70(%rbx),%eax` loaded chosen
+`0x4040404040404040` into `rax`; `rbx` remained the chosen mapped pointer.
+GDB log `live/evidence/w351-f40-gdb.log` SHA-256
+`5426bd4a4c120518f82d3629498d6c255658054ea40991091541b09dc4acfd3f`;
+run log `w351-f40-run.log` SHA-256
+`a20ff08574cb9121f8fea6eeb54e627e934555e28e5aedac1690e644aab2acb8`.
+
+This is a measured two-stage chosen-pointer chain with valid second-stage
+field reads in a live consumer. It is **not** a chosen-address write,
+control-flow redirection, marker, command or remote side effect; no r5.
+Author label: W349 rung-4 strengthening extended to a chosen second-stage
+pointer with readable `+0x356`. Pending witness replay: not independently
+verified, and the verified grade stays rung 3 pinned verbatim / rung 4
+PARTIAL chosen bytes / NO r5.
+
+### Fresh fixed/safe controls
+
+Rebuilt plug-ins from `fixedctl-build-JEcMhZ` re-hashed against the
+committed `fixedctl/evidence/fixedctl-binaries.sha256` (`693fe403…` vuln,
+`4f3d32c8…` fixed); no shim in either private AppRun. Re-run on the positive
+JIF and `realglib/evidence/safe.jif`:
+
+- vuln + safe: rc 0, `batch command executed successfully`, log
+  `w351-fixedctl-vuln-safe.log` SHA-256 `11ec64a0…`.
+- fixed + safe: rc 0, `batch command executed successfully`, log
+  `w351-fixedctl-fixed-safe.log` SHA-256 `4eae2bae…`.
+- fixed + attack: rc 137 (script-fu timeout after error),
+  `Jeff's Image Format-Warning: Error reading image data`, no segmentation
+  fault, log `w351-fixedctl-fixed-attack.log` SHA-256 `583412fd…`.
+- vuln + attack: rc 124, `GIMP-Error: Plug-in crashed: "file-gif-load"`,
+  log `w351-fixedctl-vuln-attack.log` SHA-256 `5f9ac51c…`.
+
+The `0x7ffff7ffe5f0` loader-object variant JIF
+`live/evidence/w351-stage2-ldobj-1.jif` SHA-256
+`cdc11833fe00999631cc7197860f816562f8a96e975a5785d34c91f86fdc0ffd`
+(`zlen=819`) was generated but not run: its compressed length would shift
+`ARRBASE−idx` away from the measured `0x47210`. It is not evidence.

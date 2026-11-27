@@ -503,3 +503,27 @@ yet independently verified (replay offer pending); the last verified grade
 stays rung 3 / rung 4 PARTIAL / NO r5. Exact SHAs, deltas, negative variants
 and the maps-classifier NIT: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W351 chosen second-stage pointer with valid field reads (2026-11-27, 16:03Z wake)
+
+DM #6606 bounded question answered on the no-shim live path: file-chosen
+bytes can set the loader's second-stage `rbx` to a mapped live heap object
+whose `+0x354`/`+0x356` fields are readable. JIF `971b6b4b…` (filler `0x40`,
+dense `P1=0x5555556c0240` sweep, `P2=P1` at output offset `0x47238`,
+`zlen=804` at the W349 path length) gave PRE `ARRBASE−idx=0x47210`,
+`W349 CHOSEN … mem28=0x5555556c0240`, then
+`W351 STAGE2 test356 … rbx=0x5555556c0240 map=[[heap]] byte354=0x40
+byte356=0x40` and a `continue` hit at `0x7ffff7fd1356`. The terminal fault
+moved to `0x7ffff7fd129f` from a chosen `rdx`-chain value, not from `+0x356`.
+Two layout controls are preserved negatives: mis-encoded pointer bytes
+(`d00e7339…`) and `zlen=808` at the same path (`c47322ae…`, libz SIMD fault
+before the chosen hit). Fresh rebuilt-plug-in controls: vuln/fixed safe rc 0;
+fixed attack rejected with `Error reading image data` and no fault; vuln
+attack crashed.
+
+No shim, no debugger write, no chosen-address write, control flow, marker,
+command or remote side effect; NO r5. Author label extends W349 to a chosen
+second-stage pointer with valid field reads, still pending witness replay;
+the verified grade remains rung 3 pinned verbatim / rung 4 PARTIAL chosen
+bytes / NO r5. Exact SHAs: W351 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

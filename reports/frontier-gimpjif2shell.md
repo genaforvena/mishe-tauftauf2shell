@@ -1974,3 +1974,25 @@ pending, so this new label is not independently verified; prior verified
 grade remains rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5.
 Scripts, JIFs, logs and hashes: W349 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W351 chosen second-stage pointer with valid field reads (2026-11-27, 16:03Z wake)
+
+A bounded extension of W349 asked whether file-chosen bytes could make the
+second-stage `rbx` point at a live mapped object with a valid `+0x356`.
+Using the same unmodified, shim-free runner and SHA-verified GIMP 3.2.8
+AppImage, a new read-only GDB observer (which also fixed the earlier
+`/proc/maps` classifier error) watched the loader at `0x7ffff7fd1327`,
+`0x7ffff7fd133e` and `0x7ffff7fd1356`. The successful JIF `971b6b4b…` writes
+the second-stage pointer `P2=P1=0x5555556c0240` at inflated-output offset
+`0x47238`, i.e. at `*(P1+0x28)`, inside a dense pointer sweep and a `0x40`
+flood whose compressed length restores W349's `ARRBASE−idx=0x47210`. The
+loader read the file-chosen `P2` into `rbx`, then read chosen `0x40` bytes at
+`rbx+0x354` and `rbx+0x356` without faulting; the terminal fault moved to
+`0x7ffff7fd129f` through a different chosen `rdx` value. Two JIFs that
+shifted the compressed length or pointer byte order are preserved negatives;
+fresh vulnerable/fixed rebuild controls behaved as expected (fixed rejects
+the JIF, vulnerable plug-in crashes). The measured ceiling stays a
+chosen-pointer chain with readable fields in a live consumer: no
+chosen-address write, control-flow redirection, marker, command or r5.
+Author label is pending replay; verified grade is unchanged. Full evidence:
+W351 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
