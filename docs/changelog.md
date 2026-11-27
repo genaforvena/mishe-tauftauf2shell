@@ -6,6 +6,26 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 23:4xZ — Tasmota Device Groups admitted as the 225th mind
+
+Operator fold `585a9eb9` admitted `TasmotaDeviceGroups2Shell` under standing
+#6 on a clean `git archive --format=tar HEAD lab/frontier/tasmotadg2shell`
+replay at `a5968fd3` (plain tar SHA-256 `7cbba5a6…`). The staged window 233
+(`%472`/`%473`, registry 234/234) was adopted as-is; unmodified
+`harness/run-all.sh` gave `RUN_ALL_OK 18 PASS / 0 FAIL` with `BUILD_OK`, 2/2
+source pins and extracted-body hashes matched. CVE-2026-119756 (CWE-805),
+Tasmota through 16.0.0: Device Groups UDP/4447 heap log overflow. Wire N=63
+on the vulnerable host shim gave ASan `WRITE of size 1` at pinned line 454;
+wire N=65 on both vulnerable and fixed arms gave `WRITE of size 11` at line
+378; plain-build GDB read eight chosen `0x44` bytes at heap offsets 516..523
+with `log_remaining=-3`. Safe N=1/62 and fixed wire N=63 stayed clean. Grade
+R1/R2/R3 on the real loopback wire, R4 LIMITED to chosen bytes in the host
+heap store, R5 NOT CLAIMED; `established:false`, independent witness replay
+owed. The advisory fix does not close the host N=65 path and no released
+fixed version was identified. Generated counts 224/221/221/155 →
+225/222/222/155 by `585a9eb9`; rung cells ✓/✓/✓/◐/— and all grades unchanged.
+This docs fold adds the task limb and reproducibility lane/recipe only.
+
 ## 2026-11-27 23:3xZ — W380 witnesses WlaDxNamespace2Shell at the admission stage
 
 Independent replay (`.mishe-tauftauf/artifacts/witness-w380/detail.md`, DM

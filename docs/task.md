@@ -16456,10 +16456,40 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-27 23:0x–23:1xZ — W367 finds two writes where oracles report one; WLA DX admitted
+## 2026-11-27 23:3x–23:4xZ — Tasmota Device Groups admitted; witness replay owed
 
-Current limb for a reader arriving now; it supersedes §22:4x–22:5xZ's open
-items. Docs-only fold of `d87c8e50` (Ruby W367), the frontier W379 stage
+Current limb for a reader arriving now; it supersedes §23:0x–23:1xZ's open
+items. Docs-only fold of `585a9eb9` (the operator's admission of the 225th
+target mind: register row, regenerated README/results/SVG and repaired
+reports). No grade, rung cell, count or lab evidence moved by this docs edit.
+
+- **TasmotaDeviceGroups2Shell admitted as the 225th mind** (`585a9eb9`). The
+  frontier staged it at window 233 (`%472`/`%473`, registry 234/234) and the
+  operator adopted it as-is on a clean `git archive --format=tar HEAD
+  lab/frontier/tasmotadg2shell` replay at `a5968fd3` (plain tar SHA-256
+  `7cbba5a6…`): own `BUILD_OK`, unmodified `./harness/run-all.sh`
+  `RUN_ALL_OK 18 PASS / 0 FAIL`, 2/2 source pins and extracted-body hashes
+  matched. CVE-2026-119756 (CWE-805): Tasmota through 16.0.0, Device Groups
+  UDP/4447 `SendReceiveDeviceGroupMessage()` heap log overflow. In the host
+  shim, real loopback wire N=63 gives ASan `WRITE of size 1` at pinned line
+  454, and vulnerable and fixed wire N=65 give `WRITE of size 11` at line 378;
+  plain-build GDB reads eight chosen `0x44` bytes at heap offsets 516..523
+  with `log_remaining=-3`. Safe N=1/62 and fixed wire N=63 are clean.
+  R1/R2/R3 on the real loopback wire, R4 LIMITED to chosen bytes in the host
+  shim's heap store, R5 NOT CLAIMED; `established:false` and independent
+  witness replay owed. The fix commit does not close N=65 in this host build
+  and no released fixed version was identified (UNKNOWN). Generated counts
+  224/221/221/155 → 225/222/222/155 by `585a9eb9`; rung cells ✓/✓/✓/◐/—
+  unchanged.
+
+Next: the admitted mind owns the ESP/newlib, heap-adjacency and released-fix
+lanes; a witness verdict or a grade change moves the presentation.
+
+## 2026-11-27 23:0x–23:1xZ — W367 finds two writes where oracles report one; WLA DX admitted (historical)
+
+Historical limb, superseded by §23:3x–23:4xZ; its open items are folded there.
+
+Docs-only fold of `d87c8e50` (Ruby W367), the frontier W379 stage
 (`22cd1519`, `41a8e1d5`, `77ccb7a3`) and the operator's admission fold
 `0514b648` (register row, README/SVG and generated counts). No grade, rung
 cell, count or lab evidence moved by this docs edit. Recipe in
