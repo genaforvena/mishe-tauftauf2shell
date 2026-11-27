@@ -6,6 +6,70 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 21:2x–21:3xZ — Ruby W362 reaches the size LSB via `casecmp?`; Rufus correction witnessed
+
+Docs-only fold of `2372fdcb` (W362 harness/report) and `ad47ae3f` (register
+row and manifest boundary for W373), with the W373 verdict from
+`.mishe-tauftauf/artifacts/witness-w373/detail.md` and DM #6887. The
+generated row/manifest were updated by `ad47ae3f`; this fold adds the dated
+explanation and recipe. No grade, rung cell, count or lab evidence moved:
+count stays 152 and the register flag still names stage `0415fa78`.
+
+- **Ruby W362 closes the remaining named entry point** (`2372fdcb`). Source
+  audit of `str_casecmp_p` (`string.c:4353-4376`) shows `downcase(:fold)` on
+  both operands before comparison, with no first-byte or length short
+  circuit; stock in-tree callers exist but no wire input is claimed. The
+  mixed `"a" + N x 0xDF` driver keeps `R = capa+24 = 72/88/104 ≡ 8 (mod 16)`
+  at N=27/43/59. Valgrind 18/18: nine vulnerable arms each have one
+  `Invalid write of size 1` at `case_map (iso_8859_1.c:277)` plus the known
+  copy-out read; nine patched arms have zero invalid accesses; all rc 0
+  with `result=true`. A 3.4.12 mismatch arm writes at the same slot with
+  `result=false`. GDB on plain 3.4.12 N=27 saw successor `buffer+64` and
+  slot `buffer+72` change `0x31 -> 0x73` with the size low byte unchanged;
+  that inferior exited normally (one layout observation, not a safety
+  claim). Fresh plain runs are partial and not generalized: 3.4.12 match
+  aborted 4/5 at N=27, 2/5 at N=43, 3/5 at N=59; 3.3.13 1/5, 0/5, 4/5;
+  4.0.9 2/5, 2/5, 4/5; five mismatch reps gave two SIGSEGV, one glibc
+  abort and two clean; all 15 even-N=28 and 18 patched reps rc 0. The
+  600 s matrix timed out before four arms, run later in `matrix-tail.txt`.
+  Grade unchanged: wire-only rung 3 CONFIRMED, witness-COMPLETE rung 4,
+  harness-condition rung 5 witness-ESTABLISHED at its labeled scope, full
+  stock/oracle-free/persistent r5 NOT ACHIEVED. W363 tests argument-side
+  `casecmp?`.
+- **Rufus correction `553bfad5` independently witnessed** (W373, artifact
+  above). From clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0
+  under GCC and Clang, exact ASan/marker assertion lines, re-fetched
+  upstream blobs confirming corrected `parser.c:1616` and
+  `hash.c:2217-2223` citations, verified 32-byte/two-slot and 62-slot
+  accounting, read-only GDB victim at list+32 with guard intact, and a
+  tampered-copy post-regeneration pin check failing closed (rc 1).
+  ESTABLISHED AS LABELED, grade-neutral, R4 LIMITED, NO r5; no live
+  process, wire, service, shell or command. This verdict is for the
+  correction, not a regrade of W372's stage scope.
+
+Next: W363's argument-side `casecmp?` comparison; the real Windows
+post-allocation consumer under ASLR/CFG before any loopback trusted-response
+probe for Rufus; an `idx`-independent gimpjif map. A fixed-arm store, a
+witness failure or a chosen-address transfer changes the plan.
+
+## 2026-11-27 21:2x–21:4xZ — Screen CVE-2026-71409 staged (W370)
+
+Frontier pinned GNU Screen 5.0.1/5.0.2 tarballs and built the real client with
+ASan. A loopback-local 3899-byte `SCREENDIR` plus a 300-byte `STY` drove the
+unmodified `screen -X echo hi` path into `global-buffer-overflow`,
+`WRITE of size 302`, 0 bytes after the 4098-byte `SocketPath` and 62 bytes
+before the real `attach_tty_name_in_ns` global, at `attacher.c:434` ←
+`screen.c:950`. Fixed 5.0.2 answers `Socket path too long.` with no ASan
+report; safe input is clean. A recover-ASan build under GDB with a 600-byte
+`STY` put the chosen `0x43` at nine offsets in that real global. Grade R3
+confirmed on the real client, R4 LIMITED to chosen bytes in a real adjacent
+global of the lab build, R5 NOT CLAIMED; the plain non-PIE overflow lands in
+BSS padding (negative preserved). `RUN_ALL_OK 13 PASS / 0 FAIL` twice, six
+input pins and eight stable-evidence pins. Brief, status, provenance and the
+dedicated two-pane window are staged for operator admission and witness replay.
+The same-release `FindSocket()` sink and the 5.0.3 `SendCreateMsg()` sibling
+are folded into this one target, not staged separately.
+
 ## 2026-11-27 21:0x–21:1xZ — Rufus 221st admitted and witnessed; Ruby W361; gimpjif W358 negatives
 
 Third fold of `309a72e5`, `553bfad5`, `285c0dea`, `624d0a27` and
@@ -22,8 +86,9 @@ verified, not duplicated. No rung cell changes here; the register flag and
   chosen low-32-bit callback print and its fixed/not-called/one-byte-wrong
   controls under both compilers. VERDICT ESTABLISHED AS LABELED at that exact
   stage/receipt scope, grade-neutral, NO r5 — no wire, shell, command or real
-  heap adjacency; two citation NITs preserved. The verdict does not cover the
-  later harness correction; the register flag names stage `0415fa78`.
+  heap adjacency; two citation NITs preserved. Those NITs were fixed by
+  the later correction, which W373 witnessed separately; the register flag
+  still names stage `0415fa78`.
 - **Correction `553bfad5` / `285c0dea`**: the vulnerable 32-byte list is exactly
   two slots (entry-2 terminator already OOB) and the fixed 60-line arm has 62;
   the replay now asserts the exact ASan and marker lines and checks hashes
@@ -54,11 +119,12 @@ verified, not duplicated. No rung cell changes here; the register flag and
   JIF `133b4c67…`. That arm armed watchers before `base` was assigned, so
   only `total_out` is used; the cause stays UNKNOWN.
 
-Next: measure the real Windows post-allocation consumer under ASLR/CFG before
-any loopback trusted-response probe; Ruby's named experiment is W362's
-`casecmp?` size-LSB lane; gimpjif needs an `idx`-independent map, not another
-phase retune. A fixed-arm store, a witness failure or a chosen-address transfer
-changes the plan.
+Next: the Ruby size-LSB lane has moved to W363's argument-side `casecmp?`
+after W362 closed the receiver entry point; the real Windows post-allocation
+consumer under ASLR/CFG still precedes any loopback trusted-response probe
+for Rufus; gimpjif needs an `idx`-independent map, not another phase retune.
+A fixed-arm store, a witness failure or a chosen-address transfer changes
+the plan.
 
 ## 2026-11-27 20:5x–21:0xZ — Rufus SBAT heap overflow staged (W369)
 

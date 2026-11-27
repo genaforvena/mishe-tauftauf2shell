@@ -44,7 +44,8 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| RufusSbat2Shell W369 (ADMITTED 21:1xZ, 221st; W372 ESTABLISHED AS LABELED at stage `0415fa78`, NO r5) | [status](../reports/rufussbat2shell-status.md), [brief](../reports/frontier-rufussbat2shell.md), [provenance](../lab/frontier/rufussbat2shell/PROVENANCE.md) | GHSA-hcpc-vq8c-923h, Rufus `>=4.11, <=4.16_BETA`, patched `4.16`; fix `842873017f289713a5d5009320c11f31cfee36ed`, parent `de4cf676c2aedf73b0ddfc234e420d19c8969c2e`; stable source/harness/control pins in `SHA256SUMS` | `cd lab/frontier/rufussbat2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (exact extracted `GetSbatEntries()`, local file only; no Windows/network) | GCC and Clang: `RUN_ALL_OK 11 PASS / 0 FAIL`; vulnerable CR-60 ASan heap WRITE-8 at `parser.c:1651`, 0 bytes after 32; CR-2 terminator READ-8; fixed 60/2 clean; synthetic adjacent victim/no-PIE chosen callback prints `BENIGN_MARKER`; R4 LIMITED, R5 NOT CLAIMED. Witness W372 replayed stage `0415fa78` (TAR `178726d9…`, 16/16 pins, upstream blobs matched) and graded ESTABLISHED AS LABELED at that exact scope, grade-neutral, NO r5. Operator's post-admission correction `553bfad5` replayed TAR `d8ec9e29…` 16/16 and 11/0, with a controlled stable-output mismatch failing the post-regeneration pin check rc 1; that later harness is unwitnessed. Recipe and gitignored evidence in §21:0x–21:1xZ |
+| RufusSbat2Shell W369 (ADMITTED 21:1xZ, 221st; W372 ESTABLISHED AS LABELED at stage `0415fa78`, W373 at correction `553bfad5`, NO r5) | [status](../reports/rufussbat2shell-status.md), [brief](../reports/frontier-rufussbat2shell.md), [provenance](../lab/frontier/rufussbat2shell/PROVENANCE.md) | GHSA-hcpc-vq8c-923h, Rufus `>=4.11, <=4.16_BETA`, patched `4.16`; fix `842873017f289713a5d5009320c11f31cfee36ed`, parent `de4cf676c2aedf73b0ddfc234e420d19c8969c2e`; stable source/harness/control pins in `SHA256SUMS` | `cd lab/frontier/rufussbat2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (exact extracted `GetSbatEntries()`, local file only; no Windows/network) | GCC and Clang: `RUN_ALL_OK 11 PASS / 0 FAIL`; vulnerable CR-60 ASan heap WRITE-8 at `parser.c:1651`, 0 bytes after 32; CR-2 terminator READ-8; fixed 60/2 clean; synthetic adjacent victim/no-PIE chosen callback prints `BENIGN_MARKER`; R4 LIMITED, R5 NOT CLAIMED. Witness W372 replayed stage `0415fa78` (TAR `178726d9…`, 16/16 pins, upstream blobs matched) and graded ESTABLISHED AS LABELED at that exact scope, grade-neutral, NO r5. Witness W373 then replayed the corrected harness from clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under GCC and Clang, source-true citation fixes and two-slot/62-slot accounting, read-only GDB at list+32 and a tampered-copy post-pin control rc 1, graded ESTABLISHED AS LABELED, grade-neutral, R4 LIMITED, NO r5. The operator's earlier correction replay also showed a controlled stable-output mismatch failing the post-regeneration pin check rc 1. Recipe and gitignored evidence in §21:0x–21:1xZ |
+| ScreenSendCmd2Shell W370 (STAGED 21:4xZ; admission/witness owed) | [status](../reports/screensendcmd2shell-status.md), [brief](../reports/frontier-screensendcmd2shell.md), [provenance](../lab/frontier/screensendcmd2shell/PROVENANCE.md) | CVE-2026-71409, CWE-120, Screen `<5.0.2`, fixed 5.0.2; GNU tarballs 5.0.1 `2dae36f4…09869d` / 5.0.2 `ca9a2c7e…b332`; 5.0.3 `941c98ff…` read-only for the `SendCreateMsg()` sibling; six input pins in `SHA256SUMS`, eight evidence pins in `evidence/SHA256SUMS`, exact fix hunk in `src/fix.patch` | `cd lab/frontier/screensendcmd2shell && ./harness/build.sh && ./harness/run-all.sh` (three in-tree ASan builds of the real client, loopback-local deep `SCREENDIR`, no listener or wire) | `RUN_ALL_OK 13 PASS / 0 FAIL` twice; real `screen -X` ASan `global-buffer-overflow`, `WRITE of size 302`, 0 bytes after `SocketPath` and 62 before the real `attach_tty_name_in_ns`, at `attacher.c:434` ← `screen.c:950`; fixed 5.0.2 and safe input clean; recover-ASan GDB shows chosen `0x43` at nine victim offsets; R4 LIMITED, R5 NOT CLAIMED |
 | CheckmkMkevent2Shell W367 (STAGED 19:1xZ; clean archive replay) | [status](../reports/checkmk2shell-status.md), [brief](../reports/frontier-checkmk2shell.md), [provenance](../lab/frontier/checkmk2shell/PROVENANCE.md) | CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq; Checkmk 2.5.0 `<2.5.0p21`, 2.4.0 `<2.4.0p42`, 2.3.0 EOL; fix `265c0ab68fb50bedd0102536eb92612a3eb1af91`, parent `9a64b94964c5cc34d82daa888d675b86f835e861`; 12 stable pins in `SHA256SUMS` | `cd lab/frontier/checkmk2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (real pinned `parse_notification()` plus isolated verbatim sink, local only) | Clean `b902273f` archive `3a5b3ef2…`: 12/12 pins, `RUN_ALL_OK 11 PASS / 0 FAIL`; real parser ASan WRITE size 10000 at `mkevent.cc:46` via `:144`; fixed truncates to 8191; R4 LIMITED to isolated sink, R5 NOT CLAIMED; admission and witness owed |
 | PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; W365 ESTABLISHED AS LABELED) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:true` at the W365 scope (`11163cef`); full procedure in §§18:0xZ/18:2xZ |
 | LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; W364 ESTABLISHED AS LABELED at pinned-sink scope) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. W364 replayed clean archive `4678a157` (TAR `06329456…`) twice at 5/0 with read-only GDB chosen `0x31` bytes; ESTABLISHED AS LABELED at the pinned-sink harness scope, grade-neutral, NO r5, no live ZFILE wire; full procedure in §17:2xZ |
@@ -21199,4 +21200,55 @@ regeneration; clean TAR
 `d8ec9e29f7ffc0356faa85c5971f191bb7acb828fd6730ace4e01175b07e11b9`
 gave 16/16 and 11/0, while a controlled stable-output mismatch passed
 behavior checks but failed the post-regeneration pin check with rc 1.
-Witness replay for the corrected harness is owed, not assumed.
+Witness W373 (#6885, receipt `285c0dea`) independently replayed that
+correction from clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0
+under GCC and Clang, exact new ASan and marker assertions, corrected upstream
+citations checked against re-fetched blobs (`parser.c:1616`,
+`hash.c:2217-2223` with `strcmp` at `:2218`), 32-byte/two-slot and 62-slot
+accounting verified from the pinned parser bodies, read-only GDB victim at
+list+32 with guard intact, and a tampered-copy post-regeneration pin check
+failing closed (rc 1). ESTABLISHED AS LABELED, grade-neutral, NO r5; no live
+process, wire, service, shell or command. The register flag still names
+stage `0415fa78`; this verdict does not regrade that scope.
+
+## 2026-11-27 21:2x–21:3xZ — Ruby W362 `casecmp?` reaches the successor size LSB
+
+Prerequisite: the six plain builds from §20:0x–20:2xZ
+(`ruby-3.4.12-plain`, `ruby-3.3.13-plain`, `ruby-4.0.9-plain` vulnerable;
+`ruby-3.4.13-plain`, `ruby-3.3.14-plain`, `ruby-4.0.10-plain` patched) and
+`valgrind`. The driver and runner are committed; raw logs under gitignored
+`lab/build/evidence/casemap-chain/w362/` regenerate with these commands.
+No listener, wire request or live server is involved.
+
+```sh
+bash lab/repro/ruby2shell-mixed-casecmp.sh
+SKIP_VG=1 bash lab/repro/ruby2shell-mixed-casecmp.sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-rung3-mixed-casecmp.rb 27 match
+```
+
+Expect 18 valgrind lines: each of the nine vulnerable arms (three builds ×
+N=27/43/59) has `rc=0 writes=1` with one `Invalid write of size 1` at
+`case_map (iso_8859_1.c:277)` and the known copy-out read, 0 bytes after a
+72/88/104-byte block, and `result=true`; all nine patched arms have
+`writes=0 reads=0` and no case-map site. The single 3.4.12 mismatch arm
+writes at the same slot with `result=false`: the differing first byte does
+not stop the fold. The plain arms are layout-dependent and are not a pass
+criterion: 3.4.12 match aborted 4/5, 2/5 and 3/5 at N=27/43/59 (glibc
+`corrupted size vs. prev_size` or `munmap_chunk(): invalid pointer`),
+3.3.13 1/5, 0/5 and 4/5, 4.0.9 2/5, 2/5 and 4/5; five 3.4.12 mismatch
+reps gave two SIGSEGV, one glibc abort and two clean `result=false`; all 15
+even-N=28 controls and all 18 patched reps are rc 0 with `result=true`.
+The first 600 s matrix timed out at 4.0.9 N=59 rep 4; the remaining arm and
+the patched/mismatch reps were run separately into `matrix-tail.txt`, so no
+arm is reported as a pass from a missing observation. GDB reused the
+committed `lab/repro/ruby2shell-mixed-fold-size.gdb` with this driver
+(`gdb-3.4.12-27-casecmp.log`, gitignored): successor at `buffer+64`, slot
+`buffer+72` read `0x31` then `0x73` while the size LSB stayed `0x00`; that
+inferior exited normally, which is one layout observation, not a safety
+claim. Grades are unchanged: wire-only rung 3 CONFIRMED, witness-COMPLETE
+rung 4, harness-condition rung 5 witness-ESTABLISHED at its labeled scope,
+full stock/oracle-free/persistent r5 NOT ACHIEVED. W363, not this recipe,
+tests the argument-side comparison, first with `valgrind --error-limit=no
+lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 's=("a"+"s"*54).b;
+t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p s.casecmp?(t)'`.
+

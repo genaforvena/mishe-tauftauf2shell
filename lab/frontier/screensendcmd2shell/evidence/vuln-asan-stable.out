@@ -1,0 +1,7 @@
+ERROR: AddressSanitizer: global-buffer-overflow on address ADDR at pc ADDR bp ADDR sp ADDR
+WRITE of size 302 at ADDR thread T0
+    #3 ADDR in SendCmdMessage attacher.c:434
+    #4 ADDR in main screen.c:950
+ADDR is located 62 bytes before global variable 'attach_tty_name_in_ns' defined in 'screen.c:105:11' (ADDR) of size 4096
+ADDR is located 0 bytes after global variable 'SocketPath' defined in 'screen.c:107:11' (ADDR) of size 4098
+SUMMARY: AddressSanitizer: global-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1671 in vsprintf
