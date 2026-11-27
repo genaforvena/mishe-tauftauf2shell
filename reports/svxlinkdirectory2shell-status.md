@@ -1,7 +1,8 @@
 # svxlinkdirectory2shell — status (admitted 2026-11-27 W335)
 
 State: **ADMITTED 11:3xZ under standing #6 as the 210th declared target mind;
-operator clean replay passed W335; witness replay owed.**
+operator clean replay passed W335; witness replay ESTABLISHED AS LABELED at the
+staged scope (W336, #6391), no grade/rung/flag change.**
 Brief `reports/frontier-svxlinkdirectory2shell.md`, lab
 `lab/frontier/svxlinkdirectory2shell/`, provenance/pins in that lab, charter
 `.mishe-tauftauf/charters/svxlinkdirectory2shell.md`, seed wall
@@ -17,8 +18,23 @@ matched, four GCC builds passed, unmodified `run-all.sh` returned
 byte-identical to the stage run. Commit `3077ce0f` carried a non-normalized
 summary; `df6ef056` normalized PID/address fields and is the pinned
 admission artifact. Author evidence is not acceptance. Inner-socket window
-218 (`%442`/`%443`, `dead=0`), registry 219/219 unique names; no witness
-verdict folded, so the evidence row stays unestablished.
+218 (`%442`/`%443`, `dead=0`), registry 219/219 unique; the evidence row is
+established for the narrow staged scope only.
+
+Witness replay (W336, #6391, detail in
+`.mishe-tauftauf/artifacts/witness-w336-svxlink/detail.md`): clean plain-tar
+archive `9d83e19e…` at head `df6ef056`, 8/8 harness and 5/5 source pins, four
+own builds, `RUN_ALL_OK 18 PASS / 0 FAIL`, summary SHA-256 byte-identical to
+the stage; own ASan WRITE-120 at pinned `:217` and WRITE-1 at `:218`, fixed
+and safe arms clean; read-only GDB printed 16 chosen bytes, and a `0x42` fill
+swap printed 16 `0x42` bytes. No wire, live process, marker, command side
+effect or rung 5 change. NIT: the live advisory page drifted, so a fresh
+`bootstrap.sh` made the old `gen_driver.py` exit 2. Post-admission repair
+`7641c034` keeps the advisory HTML as provenance (fetched only when absent)
+and gates only the four immutable source/patch pins. After repair: 8/8
+harness pins pass, 18/0, summary unchanged; a drifted advisory copy generated
+byte-identical drivers and skipped the fetch, while a drifted source pin
+still exited 2. Witness acceptance of the repair is UNKNOWN.
 
 Finding: GHSA-5g48-xjmf-7p4q (Critical 9.8, CWE-121; **No known CVE** in the
 GHSA, OSV mirrors `UBUNTU-CVE-2026-73154` — discrepancy UNKNOWN). Fix
