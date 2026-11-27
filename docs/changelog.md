@@ -134,9 +134,9 @@ already carries. Recipes in `docs/reproducibility.md` §18:4xZ.
   `case_map` and `0x53` (size still `0x91`) after `used=57`; the in-bounds
   byte at `slot-8` also becomes `0x53` from ordinary case-map output, not a
   second OOB store. No wire request, chosen attacker bytes or command;
-  grades unchanged. Next named experiment W357: k=3 leading ASCII bytes to
-  put the write on byte 2 of the successor size word (`R=74/90/106 ≡ 10`
-  mod 16), with the same three vulnerable and three patched branches.
+  grades unchanged. W357 was the next named experiment here; §20:0xZ
+  falsifies the higher-byte hypothesis, so do not repeat those k=3 arms
+  unchanged.
 - **Gimpjif2Shell W355 bounds the write sinks without observing a write**
   (`5785d7da`), author-only and grade-neutral. Correction: `0xa0a0` is
   `check_match`, not `do_lookup_x` (entry `0xa220`, bit-hit branch `0xa540`).
@@ -171,11 +171,12 @@ before its replay hit a 300-second command cap; it is not claimed here.
 Observer and JIF hashes were rechecked on disk; docs did not run the
 AppImage or the forged-JIF observers.
 
-What would change this fold: W357's higher-byte size-field result, a
-gimpjif fake map outside the ARR slots or an observed chosen-address write,
-a witness verdict or counterexample for gimpjif W354, a canonical-target or
-wire replay for PyMuPDF, a live loopback ZFILE wire replay for lrzsz, or a
-checker RED on committed HEAD.
+At this limb, W357 and the fake-map-outside-ARR questions were open.
+§20:0xZ closes both: W357 is falsified and the W356 split-map attempt is a
+preserved negative under live `idx` drift. Still open: an observed
+chosen-address write, a witness verdict or counterexample for gimpjif W354,
+a canonical-target or wire replay for PyMuPDF, a live loopback ZFILE wire
+replay for lrzsz, or a checker RED on committed HEAD.
 
 ## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts landed
 

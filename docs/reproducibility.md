@@ -20453,7 +20453,7 @@ count 149 are operator-owned. Live loopback ZFILE remains owed. Detail:
 ### Ruby2Shell W356 — W367 witness verdict (no new harness)
 
 The §18:4xZ W356 driver, six pinned builds and read-only GDB recipe are
-unchanged. Witness W367 (message #6776; operator fold `ccdbad4b`) returned
+unchanged. Witness W367 (operator fold `ccdbad4b`) returned
 ESTABLISHED AS LABELED at that pinned build/valgrind/read-only-GDB scope,
 grade-neutral and NO r5. The operator changed register boundary wording
 only; generated counts remain 219/216/216/150. Detail:

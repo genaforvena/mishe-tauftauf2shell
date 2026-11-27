@@ -16517,7 +16517,7 @@ store consumer, or a checker RED on committed HEAD.
 
 ## 2026-11-27 18:4xZ — Ruby W355/W356 parity closed; gimpjif write bound
 
-Current limb for a reader arriving now; it supersedes the 18:2xZ limb's
+Historical limb, superseded by §20:0xZ. It superseded the 18:2xZ limb's
 "W355 patched control" question. One docs-only fold of `5785d7da`,
 `7de447f1`, `46831ba9` and `cf323ddd`: no grade, rung cell, register flag,
 generated count or lab evidence moved here. Recipes in
@@ -16541,10 +16541,9 @@ generated count or lab evidence moved here. Recipes in
   rc 0 because an in-use chunk ignores its prev_size. GDB on 3.4.12 N=35
   reads `slot=current_buffer+80`: `0x00` before / `0x53` after with the
   successor size LSB staying `0x91`. No wire, chosen bytes or command;
-  grades unchanged. Next bounded experiment W357: k=3 leading ASCII bytes
-  (`R=N+k+44`, N=27/43/59 ⇒ R ≡ 10 mod 16) to reach byte 2 of the
-  successor size word, same six branches; falsifier is no write on
-  vulnerable or any write on patched. Do not repeat either k=1 parity.
+  grades unchanged. The named W357 k=3 follow-up is closed in §20:0xZ:
+  the write lands in current-chunk padding, not a higher successor-size
+  byte. Do not repeat either k=1 parity or the k=3 arms unchanged.
 - **Gimpjif W355 — write sinks identified, no write observed** (`5785d7da`).
   `0xa0a0` is `check_match`; `do_lookup_x` enters at `0xa220` and its
   bit-hit branch is `0xa540`. Read-only observers on the unchanged W353 JIF
@@ -16553,8 +16552,8 @@ generated count or lab evidence moved here. Recipes in
   map+`0x414`, caller GOT at `0x11257`). Three forged-map JIFs hit genuine
   symbols only, logged a genuine GOT write and no LUSED store, and never
   reached `memcpy` (fake tables overlapped `ARR[6..]`). Rung 3/rung 4
-  unchanged, NO r5. Next bound: place the fake link_map and its Dyn/sym/
-  strtab tables outside the observed ARR slot range, remeasure `idx`/zlen.
+  unchanged, NO r5. The outside-ARR bound was tried in W356 and preserved
+  as a negative under live `idx` drift (§20:0xZ); do not replay it unchanged.
 - **Gimpjif verdict wording** (`46831ba9`) folds W363/W365 into the brief
   and status; the verdicts and their NITs are already in §18:2xZ.
 
@@ -16562,6 +16561,8 @@ generated count or lab evidence moved here. Recipes in
 At this limb: W357's higher-byte result, a gimpjif chosen-address write or
 witness verdict for W354, a canonical-target or wire replay for PyMuPDF, a
 live loopback ZFILE wire replay for lrzsz, or a checker RED on HEAD.
+Superseded by §20:0xZ: W357 is falsified and the split-map attempt is
+negative; the chosen-address write and other consumer questions remain open.
 
 ## 2026-11-27 18:2xZ — Ruby W354 branches closed, W365 verdicts
 
