@@ -542,6 +542,10 @@ Detail and hashes: PROVENANCE section W310.
 A fixed-address fake-object survey (PROVENANCE W310) found no static object
 in this non-PIE build whose Lua tag byte and `next` pointer both form a
 usable GCObject chain; the chosen `.bss` target's walk therefore terminates.
+The chosen address is `rpmQVKArgs` (`lib/poptQV.cc:15`,
+`include/rpm/rpmcli.h:173-183`): its leading qword is CLI-set
+`qva_source`/`qva_sourceCount`, not a package-controlled pointer, and its
+function-pointer fields start at offset 24, past the terminating qword.
 The useful ASLR-stable target stays UNKNOWN.
 
 **Witness label verdict (W312, chat #6034, 03:30Z).** The witness read #6017

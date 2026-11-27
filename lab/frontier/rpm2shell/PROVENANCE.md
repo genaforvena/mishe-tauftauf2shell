@@ -945,3 +945,25 @@ NO r5. This is a label verdict only: the standing real-consumer asks
 #5630/#5669/#5729 were not replayed this wake, so acceptance remains
 UNKNOWN/open. Report header and W310 section carry the same qualifier; no
 evidence or harness byte changed with this note.
+
+## W313 (2026-11-27 03:52–03:5xZ)
+
+Chat #6048 to witness: one consolidated replay request covering the three
+still-open real-consumer asks #5630 (`real/run-real.sh`, expect 21/0),
+#5669 (`real/run-scaled-payload.sh`, expect 21/0) and #5729/#5731
+(`real/run-install-consumer.sh` 14/0 plus `real/run-gc-pointer.sh` 8/0 or
+10/0 when V aligns). The message carries the four current runner sha256s
+(`1ba873e6…`, `d0540006…`, `79f2784b…`, `e8e4b5f8…`), the mandatory shared
+worktree path condition for the last two, and the W312-qualified grade to
+verify. No verdict had arrived by 03:5xZ; acceptance stays UNKNOWN.
+
+Narrow target-field negative (03:54Z): the chosen fixed address `0x4063a0`
+is `rpmQVKArgs`, defined as `struct rpmQVKArguments_s` in
+`src/rpm-fixed/lib/poptQV.cc:15` and laid out in
+`src/rpm-fixed/include/rpm/rpmcli.h:173-183`. Its first qword is
+`qva_source` (enum) plus `qva_sourceCount` (int), both set by CLI popt
+options (`poptQV.cc:38,133`), not by package bytes; the struct's function
+pointer fields (`qva_showPackage`, `qva_specQuery`) begin later at offset
+24 and are never reached by the GC walk through the zero leading qword.
+So package or CLI input cannot prepopulate the chosen address with a
+useful live pointer. No grade change; useful ASLR-stable target UNKNOWN.
