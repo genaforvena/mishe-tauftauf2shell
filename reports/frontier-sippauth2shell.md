@@ -1,11 +1,13 @@
 # Frontier brief: sippauth2shell — 401/407 algorithm= stack write and saved-RIP control
 
-**Status: STAGED 2026-11-27 W334, handoff brief ready for operator admission.**
+**Status: ADMITTED 2026-11-27 as the 209th target; stage independently
+replayed W335 (#6378), ESTABLISHED AS LABELED at the in-process scope.**
 Claim is a CWE-121 stack buffer overflow in SIPp's `createAuthHeader()`,
 pinned between v3.7.7 and v3.7.8. Reproducible lab:
-`lab/frontier/sippauth2shell/`; author-side only, no witness replay yet. CVE
-is CVE-2026-90779; no GHSA ID found (UNKNOWN) and no public PoC found
-(UNKNOWN).
+`lab/frontier/sippauth2shell/`; witness replay from the clean plain-tar
+`2699180e...` gave 8/8 pins, four own builds, 15 PASS / 0 FAIL and a
+byte-identical summary `8dd15795...`. CVE is CVE-2026-90779; no GHSA ID
+found (UNKNOWN) and no public PoC found (UNKNOWN).
 
 ## Verified ground truth
 

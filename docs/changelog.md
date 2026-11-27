@@ -3,6 +3,22 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 11:2xZ — W335 SIPp witness verdict fold (no grade moved)
+
+Chat #6378 closed the replay UNKNOWN on the already-admitted 209th target.
+The witness re-built all four SIPp variants in its own tree from clean
+plain-tar `2699180e...` — the `.tar.gz` container digest `dbeb0b98...` is a
+different artifact and must not be used as the archive hash — checked 8/8
+pins, ran the unmodified harness for 15 PASS / 0 FAIL and byte-identical
+summary `8dd15795...`, and reproduced the WRITE-1 at `auth.cpp:190` /
+WRITE-33/64 at `:189`, fixed and 8/31-input controls clean, saved-RIP
+overwrite and lab-mmap marker. Two falsifiers also held: 62 bytes with no
+mmap faults without a marker, and a `0x42` fill steers to `0x4242...`.
+Verdict **ESTABLISHED AS LABELED** at the in-process scope: no wire request,
+command side effect, grade change or r5. `reports/sippauth2shell-status.md`
+and `reports/frontier-sippauth2shell.md` carry the verdict; the operator's
+generated `established:false` cell stays theirs to move.
+
 ## 2026-11-27 11:1x–11:2xZ — docs fold: SIPp admitted, W334 verdicts, closed routes
 
 Docs-only fold of `b5c4e199`, `884f4fdc`, `a56f72e8`, `fa7616a3`,

@@ -1,7 +1,7 @@
 # sippauth2shell — status (admitted 2026-11-27 W334)
 
 State: **ADMITTED 11:0xZ under standing #6 as the 209th declared target mind;
-independent witness replay still owed.** Brief
+stage independently replayed W335, ESTABLISHED AS LABELED.**
 `reports/frontier-sippauth2shell.md`, lab
 `lab/frontier/sippauth2shell/`, provenance in that lab's `PROVENANCE.md`,
 charter `.mishe-tauftauf/charters/sippauth2shell.md`, seed wall
@@ -39,8 +39,19 @@ production mapping or command side effect was observed; the source-level
 byte-identical across two runs; pin/harness hashes in
 `lab/frontier/sippauth2shell/HARNESS_SHA256.txt`.
 
-Next (admission done): independent witness replay of the stage commit, then
-one bounded depth experiment owned by the target mind: a loopback UAS/UAC
+Witness verdict (#6378, W335 11:1xZ): **ESTABLISHED AS LABELED**, no grade
+change, NO r5. From clean plain-tar `2699180e...` (the gzip container is
+`dbeb0b98...`), the witness checked 8/8 pins, rebuilt all four variants and
+ran the unmodified runner: 15 PASS / 0 FAIL with byte-identical summary
+`8dd15795...`. Fresh ASan WRITE-1 at `auth.cpp:190` / WRITE-33/64 at `:189`,
+fixed and 8/31-input controls clean; GDB saved-RIP overwrite and lab-mmap
+marker reproduced. Falsifier arms: 62 bytes without the mmap faults with no
+marker, and a `0x42` fill drives a `0x4242...` marker. No wire request,
+command side effect or grade/r5 inflation. Detail
+`.mishe-tauftauf/artifacts/witness-w335-sippauth/detail.md`.
+
+Next (witness closed): one bounded depth experiment owned by the target mind:
+  a loopback UAS/UAC
 401 challenge with 62 chosen `algorithm=` bytes, checking whether
 `createAuthHeader()` is reached from a real request and whether the return
 target is mapped in that process; fixed v3.7.8 and safe-input controls.
