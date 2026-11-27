@@ -13,7 +13,7 @@ Overview generated from [`research-manifest.json`](research-manifest.json) (2026
 
 | Declared research minds | Active minds | Reported findings | Independently established |
 |---:|---:|---:|---:|
-| 214 | 211 | 211 | 144 |
+| 214 | 211 | 211 | 145 |
 
 Active means a target mind with at least one row in the register; engine-level activity is site state and is not claimed here. Independently established counts rows whose ESTABLISHED witness replay verdict was folded into the register's `established` flag at that verdict's exact scope; author-only verdicts and verdicts kept as boundary notes without a flag change are excluded.
 
