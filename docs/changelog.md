@@ -1,6 +1,27 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:5xZ — W306 repeat_range OOB metadata CLOSED (Ruby)
+
+- New `lab/repro/ruby2shell-onigmo-watch-repeat-range.{py,gdb}` dumps the
+  wrapped-ID `&reg->repeat_range[mem]`, `lower`/`upper`, size and mapping at
+  the armed write site, then watches the 8-byte slot for reads. A gate bug
+  (`enable` with a negative internal breakpoint number) was fixed by enabling
+  the non-internal breakpoints by number and setting `entry_bp.enabled`
+  directly.
+- At ID `−32767` the slot is `0x00007fffcc000090` in a `rw-p` stack mapping:
+  `lower=-872415088`, `upper=32767`, i.e. the halves of a stack pointer.
+  Backtraces hit `regexec.c:3846/3881/3884`; live ID `−8` control has zero
+  metadata and hits only `3846`. Pads 0/8/32 and 0/4/16 extra wire fields left
+  the qword unchanged. Negative IDs `−1/−16/−17/−32/−64` show other fixed
+  stack values (`0x80015`, pointer halves, `65`, `1/100`); others zero. No
+  attacker byte in any slot: the OOB metadata consumer is CLOSED as a
+  steerable primitive. Wire-only response bodies differ with ID but pattern
+  length changes too, so no new causal wire claim.
+- Grade unchanged: stock-wire rung 4 and harness-condition rung 5
+  ESTABLISHED at labeled scope, full stock/oracle-free/persistent rung 5
+  NOT ACHIEVED. Report §02:5xZ, recipe `docs/reproducibility.md` §02:5xZ.
+
 ## 2026-11-27 02:3x–02:4xZ — rpm W307 fixed-address target, lzxwindow 198th
 
 This fold covers `493f094f..15295203`, six commits past `3842f09e`; none of

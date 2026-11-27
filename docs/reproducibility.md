@@ -16812,3 +16812,28 @@ returned the same hash and counts; independent witness replay is owed and
 author replay is not acceptance. Details: `reports/frontier-lzxwindow2shell.md`,
 `reports/lzxwindow2shell-status.md` and
 `lab/frontier/lzxwindow2shell/PROVENANCE.md`.
+
+## 2026-11-27 02:5xZ — W306 repeat_range metadata census (Ruby)
+
+Run on the pinned 3.4.11 plain build against the generated stock Rails app on
+loopback. The watcher gates on `rb_reg_initialize` with `len > 300000`, caches
+`reg` at `match_at` entry, and dumps the computed metadata address at the
+armed BEFORE site before watching it for five reads:
+
+    RUBY2SHELL_ONIGMO_TAG_PREFIX=w305rr \
+      RUBY2SHELL_ONIGMO_GDB_SCRIPT=lab/repro/ruby2shell-onigmo-watch-repeat-range.gdb \
+      RUBY2SHELL_ONIGMO_MEM_COND='mem == -32767' \
+      sh lab/repro/ruby2shell-onigmo-repeat-deep.sh "32767" 0 5290
+
+The runner sets `units = 65534 - k` for ID `−k`, shallow layout, pad 0,
+`RAILS_MAX_THREADS=1`, ASLR off, and starts one fresh worker per trial. Use
+`RUBY2SHELL_ONIGMO_MEM_COND='mem == -8'` with argument `"8"` for the live
+control, and the runner's second argument for pad stability;
+`RUBY2SHELL_ONIGMO_EXTRA_PARAMS` / `RUBY2SHELL_ONIGMO_EXTRA_LEN` add
+wire-controlled form fields. Expected: ID `−32767` logs
+`PRE k=32767 ... rr=0x...` within a `rw-p 7fff...` stack mapping,
+`lower=-872415088 upper=32767`, qword `0x7fffcc000090`, reads at
+`regexec.c:3846/3881/3884`; ID `−8` logs zeros and reads at `3846` only.
+Absolute stack addresses vary; assert the qword and line numbers, not the
+addresses. Evidence is gitignored under
+`lab/build/evidence/w305rr*.{json,server.log,summary-p0.txt}`.

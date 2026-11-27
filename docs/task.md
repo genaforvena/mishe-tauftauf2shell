@@ -14196,6 +14196,16 @@ generated cell, register row, grade, report or lab evidence is moved here.
   adjacent live object, pointer, command, socket or r5; advisory is
   AV:L/AC:H/UI:R and claims corruption only. Admission, witness and a
   plain-build chosen-offset experiment are owed.
+- W306 (`lab/repro/ruby2shell-onigmo-watch-repeat-range.{py,gdb}`) censused the
+  wrapped-ID `reg->repeat_range[mem]` OOB metadata read that steers
+  `regexec.c:3846/3881/3884`. ID `−32767` reads a `rw-p` stack qword
+  `0x00007fffcc000090` as `lower=-872415088`/`upper=32767` (pointer halves);
+  live ID `−8` control reads zeros and hits only `3846`. The qword survived
+  stack pads 0/8/32 and 0/4/16 extra wire fields; IDs `−1/−16/−17/−32/−64`
+  exposed other fixed stack values, never wire-pattern bytes. CLOSED as an
+  attacker-steered primitive; grade unchanged (stock-wire rung 4 and
+  harness-condition rung 5 ESTABLISHED at labeled scope, full rung 5 NOT
+  ACHIEVED). Details: `reports/ruby2shell-investigation.md` §02:5xZ.
 - `8c845617` + `f620d6ae` opened a second Ruby lane: the stock-wire Onigmo
   repeat-ID write on pinned 3.4.11 (`f79c6e78…`). A 393 KB `tag` through the
   unmodified Rails `/rails/info/notes` route gives a repeat ID of 32,768 and

@@ -6883,3 +6883,69 @@ Grade unchanged: stock-wire rung 4 witness-ESTABLISHED at labeled scope,
 harness-condition rung 5 witness-ESTABLISHED, full stock/oracle-free/
 persistent rung 5 **NOT ACHIEVED**. Next lane must name a different
 wire-visible consumer, not repeat this census or the ID sweeps.
+
+## 2026-11-27 02:5xZ — W306 `repeat_range[mem]` OOB metadata: live pointer-derived branch, not attacker-steered (Ruby)
+
+W305 closed the `repeat_stk` pointer entries and named one consumer still
+unmeasured: the same wrapped negative ID also indexes
+`reg->repeat_range[mem]`, whose `lower`/`upper` control the branches at
+`regexec.c:3846` (OP_REPEAT), `3881` and `3884` (OP_REPEAT_INC). Question: does
+that out-of-bounds read consume attacker-influenced bytes and steer a branch
+beyond the known one-byte reply shortening?
+
+New committed `lab/repro/ruby2shell-onigmo-watch-repeat-range.{py,gdb}` reuses
+the proven gate (`rb_reg_initialize` with `len > 300000`, native `mem`
+conditions installed by `commands` blocks) and the `MEM_COND` override. At the
+armed BEFORE site (`&match_at+2410`) it caches `reg` from `match_at` entry
+(optimized out at the write site), dumps `&reg->repeat_range[mem]`, its two
+ints, `sizeof(OnigRepeatRange)` (8), the `/proc/<pid>/maps` line owning the
+address, and arms one 8-byte READ watchpoint with five backtraces. First arm
+failed with `Python Exception <class 'gdb.error'>: Negative breakpoint number
+'-1'`: internal gdb breakpoints have negative numbers, so the `enable` command
+aborted and no site was reached. The watcher now enables the two non-internal
+write breakpoints by number and sets `entry_bp.enabled = True` directly.
+
+Evidence (gitignored): `lab/build/evidence/w305rr-n32767-p0.{json,server.log}`
+(ID `−32767`, units 32767), live ID `−8` control `w305rr8-n8-p0.*`,
+`w305rrpad{0,8,32}-n32767-p0.server.log`, `w305rre{0,4,16}-n32767-p0.server.log`,
+the negative-ID sweep `w305rrsw-n{1,2,4,8,12,16,17,32,64}-p0.server.log`, and
+wire-only HTML `w306wire-k{0,16,64,32767}.html`. Conditions: pinned 3.4.11
+plain, stock `/rails/info/notes`, shallow layout, `RAILS_MAX_THREADS=1`,
+ASLR off, one fresh worker per trial under gdb except the last HTML set.
+
+At ID `−32767` the metadata address is `reg + 12,778,872`, inside a
+`rw-p 7fffcc000000-7fffcd56b000` stack mapping. Its qword is
+`0x00007fffcc000090`: `lower = -872415088` (`0xcc000090`) and
+`upper = 32767` (`0x00007fff`) — the two 32-bit halves of a **stack pointer**,
+not a valid repeat range. Read backtraces hit `regexec.c:3846` twice, then
+`3881` and `3884`; the live ID `−8` control has qword `0` (`lower = upper =
+0`) and all five hits at `3846` only. This is a real, branch-differentiating
+consumer of the OOB metadata read, beyond the previously watched
+`repeat_stk[mem]` index consumer.
+
+Steering test: the same pointer qword appears in four fresh processes at stack
+pads 0/8/32 and with 0, 4 or 16 extra wire form fields (0/128/32 bytes each);
+only `reg` and the computed `rr` address move. Across negative IDs the slot
+holds fixed stack values: `−2/−4/−8/−12` zero, `−1` `lower=524309`
+(`0x80015`), `−16/−32` the same pointer halves, `−17` `lower=65` (`'A'`),
+`−64` `lower=1, upper=100` (a borrowed valid range from adjacent stack data).
+No ASCII wire-pattern byte was found in any metadata qword; the attacker
+chooses *which* fixed stack qword is interpreted, not its bytes.
+
+Wire-only responses without gdb differ by ID (control 55,667 B/1,719 lines;
+ID `−16` 54,795 B/1,699 lines with 666 differing lines; `−64` 55,087 B/1,704
+lines with 656; `−32767` 52,730 B/1,638 lines with 1,338; ID `−1` produced no
+HTML). Pattern length also changes with the ID, so the body-size differences
+are **not** attributed solely to the metadata read. Known one-byte line
+shortening remains the only consumer-visible wire effect established here.
+
+Verdict: the OOB metadata read is **CLOSED as an attacker-steered primitive**
+on this build and harness. It steers repeat branches with a stable stack
+pointer split, but the bytes are not wire-influenced under the tested knobs,
+and no new control or pointer consumer follows. Grade unchanged: stock-wire
+rung 4 witness-ESTABLISHED at labeled scope, harness-condition rung 5
+witness-ESTABLISHED, full stock/oracle-free/persistent rung 5 **NOT
+ACHIEVED**. Next named experiment: census the other metadata consumer,
+`match_cache_point` at `regexec.c:2242` (`reg->repeat_range[cache_opcode->
+outer_repeat_mem]`), in the same attack; do not repeat this watcher or the
+negative-ID sweep unchanged.
