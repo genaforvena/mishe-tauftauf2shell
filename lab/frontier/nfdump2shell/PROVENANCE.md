@@ -893,7 +893,7 @@ wall-clock derived on every live packet. This closes the plausible
 "chosen-index metric write" hypothesis; grade stays rung 3 live / rung 4
 availability + chosen-offset PARTIAL / NO r5.
 
-## W318 source-bound negative — no wire input path enlarges the OOB store (2026-11-27 05:55Z)
+## W318 source-bound negative — no wire input path enlarges the OOB store (2026-11-27 05:40Z)
 
 Read-only check of the pinned parent
 `8a00543aa5c7b25b7d3f7642fdf306fd9979f237`; no new run, no claim change.
@@ -914,7 +914,7 @@ source-ident chunk or the `FlowSource_t` object?
   `NextYafRecord` (`:867`, `-y` yaf file) and `NextPacket` (`:878`, `:885`,
   pcap file/device under `ENABLE_READPCAP`). `NextPacket` passes the same
   `buffer_size` to `decode_packet()`
-  (`src/collector/pcap_reader.c:449-460`) and is not a remote input path;
+  (`src/collector/pcap_reader.c:449-459`) and is not a remote input path;
   neither reader is reachable from a loopback wire request.
 - `harness/wire_send.py:148-166` places the 4-byte terminal EXgenericFlow
   element at `total`, so the `msecReceived` store is at `total+16`. With
