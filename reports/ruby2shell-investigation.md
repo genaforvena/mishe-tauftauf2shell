@@ -8301,8 +8301,8 @@ was found and reproduced. Reproduction:
   force the receiver from UTF-16LE (min length 2) to US-ASCII;
   `rb_enc_check(str, pad)` (`:10883`) then recomputes the allocation encoding,
   but the stale `termlen` is still used by `TERM_FILL` (`:10943`), which
-  writes `termlen` zero bytes at the end of the result. 3.4.13 moves the
-  `termlen` read to `:10940`, after both hooks.
+  writes `termlen` zero bytes at the end of the result. 3.4.13 also reads
+  `termlen` at `:10943`, but after both hooks.
 - **Arm `attack`** — 4096-byte UTF-16LE receiver, `pad.to_str` swaps the
   receiver to US-ASCII, width 4103 (result request 4104 ≡ 8 mod 16).
   Vulnerable plain: rc 134, `malloc(): invalid next size (unsorted)` — the
@@ -8311,11 +8311,15 @@ was found and reproduced. Reproduction:
   Fixed 3.4.13 plain and ASan: rc 0, `outlen=4103`, clean. Controls `nomut`
   (hook fires without an encoding swap) and `safe` (ASCII receiver) are
   clean on all four builds (12 arms total).
-- **Negative result preserved.** The same shape with a 64-byte receiver is
-  ASan-clean on both builds: the result is embedded/inline, so the second
-  zero byte stays inside the string's terminator area. A heap-sized
-  receiver is required; GDB at `string.c:10943` showed `termlen=2` and
-  no redzone at `p+1` in the small case.
+- **Negative result preserved, with a width qualifier (W343 witness).** A
+  64-byte UTF-16LE receiver is ASan-clean on both builds only when the
+  result is embedded/inline (width 71/87, flags `0x800005`), so the second
+  zero byte stays inside the RVALUE slot; GDB at `string.c:10943` showed
+  `termlen=2` and no redzone at `p+1`. The same 64-byte receiver at width
+  2087 produces a heap result (flags `0x802005`) and the same ASan
+  `WRITE of size 2` 0 bytes after a 2088-byte region; measured threshold on
+  this build: width ≤600 clean, ≥620 dirty. A heap-sized result, not a
+  heap-sized receiver as such, is required for the overflow.
 
 Grade: **adjacent rung 3 — confirmed corruption**, patch-sensitive, with a
 plain-build glibc abort. Still harness-triggered (caller-defined `to_str`),

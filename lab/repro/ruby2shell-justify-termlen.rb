@@ -6,8 +6,8 @@
 # BEFORE width = NUM2LONG(w) (:10880) and StringValue(pad) (:10882).
 # A pad object's to_str can change the receiver's encoding; rb_enc_check
 # (:10883) then recomputes the allocation encoding, but the stale termlen is
-# still used by TERM_FILL (:10943). 3.4.13 moves the termlen read to :10940,
-# after both hooks. This script tests that patch-sensitive window.
+# still used by TERM_FILL (:10943). 3.4.13 also reads termlen at :10943,
+# but after both hooks. This script tests that patch-sensitive window.
 #
 # arms:
 #   attack  4096-byte UTF-16LE receiver (mbminlen 2), pad.to_str forces
@@ -17,9 +17,12 @@
 #   nomut   same receiver and pad object, to_str does not change encoding.
 #   safe    ASCII receiver, pad.to_str forces US-ASCII (termlen 1 both ways).
 #
-# Negative result preserved: the same shape with a 64-byte receiver stays
-# inside the string's embedded/inline terminator area and is ASan-clean on
-# both builds; the heap-sized receiver above is required.
+# Negative result preserved (W343 witness qualifier): a 64-byte receiver is
+# ASan-clean only while the result stays embedded — width 71/87 gives flags
+# 0x800005. The same 64-byte receiver at width 2087 makes a heap result
+# (flags 0x802005) and the same ASan WRITE of size 2; measured threshold on
+# this build: width <=600 clean, >=620 dirty. The 4104-byte heap result in
+# the attack arm above is what the size-LSB corruption requires.
 #
 # Usage: ruby ruby2shell-justify-termlen.rb attack|nomut|safe
 arm = ARGV[0]
