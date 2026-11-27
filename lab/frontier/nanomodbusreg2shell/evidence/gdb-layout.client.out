@@ -1,0 +1,28 @@
+Breakpoint 1 at 0x4025da: file src/nanomodbus-v1.22.0.c, line 581.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, recv_read_registers_res (nmbs=0x7fffffffdf50, quantity=2, registers=0x7fffffffde48) at src/nanomodbus-v1.22.0.c:581
+581	    nmbs_error err = recv_res_header(nmbs);
+#0  recv_read_registers_res (nmbs=0x7fffffffdf50, quantity=2, registers=0x7fffffffde48) at src/nanomodbus-v1.22.0.c:581
+#1  0x0000000000405bd9 in read_registers (nmbs=0x7fffffffdf50, fc=3 '\003', address=26, quantity=2, registers=0x7fffffffde48) at src/nanomodbus-v1.22.0.c:2018
+#2  0x0000000000405c1b in nmbs_read_holding_registers (nmbs=0x7fffffffdf50, address=26, quantity=2, registers_out=0x7fffffffde48) at src/nanomodbus-v1.22.0.c:2023
+#3  0x0000000000407a44 in main (argc=3, argv=0x7fffffffe288) at src/client-tcp.c:83
+#3  0x0000000000407a44 in main (argc=3, argv=0x7fffffffe288) at src/client-tcp.c:83
+83	    err = nmbs_read_holding_registers(&nmbs, 26, 2, r_regs);
+Stack level 3, frame at 0x7fffffffe170:
+ rip = 0x407a44 in main (src/client-tcp.c:83); saved rip = 0x7ffff7c2a1ca
+ caller of frame at 0x7fffffffd860
+ source language c.
+ Arglist at 0x7fffffffe160, args: argc=3, argv=0x7fffffffe288
+ Locals at 0x7fffffffe160, Previous frame's sp is 0x7fffffffe170
+ Saved registers:
+  rbp at 0x7fffffffe160, rip at 0x7fffffffe168
+$1 = 0x7fffffffde48
+Error reading 2 holding registers at address 26 - invalid response received
+Coil at address 64 value: 0
+Coil at address 65 value: 0
+Coil at address 66 value: 0
+[Inferior 1 (process 3808040) exited with code 01]
+harness/gdb-layout.cmd:10: Error in sourced command file:
+The program has no registers now.

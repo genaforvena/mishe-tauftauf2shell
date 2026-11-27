@@ -1,0 +1,52 @@
+=================================================================
+==3890187==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x785bd8500024 at pc 0x5d5b2170e5bb bp 0x7ffd148ccc20 sp 0x7ffd148ccc10
+WRITE of size 2 at 0x785bd8500024 thread T0
+    #0 0x5d5b2170e5ba in recv_read_registers_res src/nanomodbus-v1.22.0.c:603
+    #1 0x5d5b21713f92 in read_registers src/nanomodbus-v1.22.0.c:2018
+    #2 0x5d5b21713fd4 in nmbs_read_holding_registers src/nanomodbus-v1.22.0.c:2023
+    #3 0x5d5b21717c5c in read_two harness/client-wire.c:19
+    #4 0x5d5b217180c0 in main harness/client-wire.c:47
+    #5 0x785bda62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x785bda62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5d5b2170b664 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomodbusreg2shell/build/min-asan+0x2664) (BuildId: 89ca7763603f5c94bbe93a23ae6e030e403a9412)
+
+Address 0x785bd8500024 is located in stack of thread T0 at offset 36 in frame
+    #0 0x5d5b21717b43 in read_two harness/client-wire.c:17
+
+  This frame has 1 object(s):
+    [32, 36) 'regs' (line 18) <== Memory access at offset 36 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/nanomodbus-v1.22.0.c:603 in recv_read_registers_res
+Shadow bytes around the buggy address:
+  0x785bd84ffd80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd84ffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd84ffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd84fff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd84fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x785bd8500000: f1 f1 f1 f1[04]f3 f3 f3 f5 f5 f5 f5 f5 f5 f5 f5
+  0x785bd8500080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd8500100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd8500180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd8500200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x785bd8500280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3890187==ABORTING

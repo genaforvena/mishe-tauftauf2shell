@@ -1,0 +1,63 @@
+=================================================================
+==3890021==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7ea4c7d00094 at pc 0x5a2f661db59b bp 0x7ffe5cfba780 sp 0x7ffe5cfba770
+WRITE of size 2 at 0x7ea4c7d00094 thread T0
+    #0 0x5a2f661db59a in recv_read_registers_res src/nanomodbus-v1.22.0.c:603
+    #1 0x5a2f661e0f72 in read_registers src/nanomodbus-v1.22.0.c:2018
+    #2 0x5a2f661e0fb4 in nmbs_read_holding_registers src/nanomodbus-v1.22.0.c:2023
+    #3 0x5a2f661e53e9 in main src/client-tcp.c:83
+    #4 0x7ea4c982a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x7ea4c982a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x5a2f661d8644 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nanomodbusreg2shell/build/example-asan+0x3644) (BuildId: 4d1f9172d76ab4a6d4812d7f7d4a4e2d0410506e)
+
+Address 0x7ea4c7d00094 is located in stack of thread T0 at offset 148 in frame
+    #0 0x5a2f661e4a04 in main src/client-tcp.c:15
+
+  This frame has 13 object(s):
+    [32, 33) 'objects_count' (line 136)
+    [48, 96) 'platform_conf' (line 28)
+    [128, 132) 'w_regs' (line 73)
+    [144, 148) 'r_regs' (line 82) <== Memory access at offset 148 overflows this variable
+    [160, 168) 'file' (line 95)
+    [192, 256) 'buffers' (line 132)
+    [288, 736) 'nmbs' (line 36)
+    [800, 808) 'ids' (line 135)
+    [832, 960) 'vendor_name' (line 119)
+    [992, 1120) 'product_code' (line 119)
+    [1152, 1280) 'major_minor_revision' (line 119)
+    [1312, 1562) 'coils' (line 48)
+    [1632, 2656) 'mem' (line 131)
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow src/nanomodbus-v1.22.0.c:603 in recv_read_registers_res
+Shadow bytes around the buggy address:
+  0x7ea4c7cffe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7cffe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7cfff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7cfff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7d00000: f1 f1 f1 f1 01 f2 00 00 00 00 00 00 f2 f2 f2 f2
+=>0x7ea4c7d00080: 04 f2[04]f2 00 f2 f2 f2 00 00 00 00 00 00 00 00
+  0x7ea4c7d00100: f2 f2 f2 f2 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7d00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7d00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7ea4c7d00280: 00 00 00 00 00 00 00 00 00 00 00 00 f2 f2 f2 f2
+  0x7ea4c7d00300: f2 f2 f2 f2 00 f2 f2 f2 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==3890021==ABORTING

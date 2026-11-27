@@ -1,0 +1,5 @@
+SERVER_REQ fc=15 length=8 pdu=004000020103
+SERVER_REQ fc=1 length=6 pdu=00400003
+SERVER_REQ fc=16 length=11 pdu=001a000204007b007c
+SERVER_REQ fc=3 length=6 pdu=001a0002
+SERVER_ATTACK_SENT fc=3 byte_count=250 byte=0x41
