@@ -1,0 +1,60 @@
+===========================================================
+== Subject:     Possible stack buffer overflow while processing
+==              long filenames in sftp server
+==
+== CVE ID#:     CVE-2026-15370
+==
+== Versions:    libssh >= 0.11.0;  < 0.11.5; < 0.12.1
+==
+== Summary:     Unsafe construction of long names during listing
+==              of attacker controlled directory could cause RCE
+==
+== Component:   sftp server only
+==
+===========================================================
+
+===========
+Description
+===========
+
+During directory listing in SFTP server, we constructed longname
+field using unsafe strcat. For long filenames, this could cause
+stack buffer overflow and potential code execution on the server.
+
+The pre-requisite is the user listing files in the attacker controlled
+directory on filesystem that allows long filenames). In this scenario
+the attacker controls how many bytes from filename are written behind
+the buffer bounds (but they need to be valid characters for filename).
+
+==================
+Patch Availability
+==================
+
+A patch addressing the issue has been committed to the libssh
+master branch under hash b2065f71c905d347b5e8dd7f8e24856807d71e99.
+Additionally, libssh 0.12.1 and 0.11.5 have been issued
+as security releases to correct the defect.  SSH administrators are
+advised to upgrade to these releases or apply the patch as soon
+as possible.
+
+==================
+CVSSv3 calculation
+==================
+CVSS:3.1/AV:L/AC:H/PR:L/UI:R/S:U/C:H/I:H/A:H (6.7)
+
+==========
+Workaround
+==========
+
+None
+
+=======
+Credits
+=======
+
+Originally reported by Tristan Madani.
+Patches provided by Jakub Jelen of the libssh team.
+
+==========================================================
+== The libssh team
+==========================================================

@@ -1,0 +1,51 @@
+=================================================================
+==4043822==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7bec9290025e at pc 0x7bec94af6260 bp 0x7ffda36d6f70 sp 0x7ffda36d6718
+WRITE of size 316 at 0x7bec9290025e thread T0
+    #0 0x7bec94af625f in strcat ../../../../src/libsanitizer/asan/asan_interceptors.cpp:515
+    #1 0x56bea490ce6f in readdir_long_name /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c:1852
+    #2 0x56bea490d317 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c:1881
+    #3 0x7bec9462a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7bec9462a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x56bea490c304 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/runs/vuln-asan+0x1304) (BuildId: 26523f3886e7e9dad4d6f2f335c09b47e3685bb9)
+
+Address 0x7bec9290025e is located in stack of thread T0 at offset 606 in frame
+    #0 0x56bea490cf05 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c:1858
+
+  This frame has 2 object(s):
+    [48, 192) 'st' (line 1871)
+    [256, 606) 'long_name' (line 1880) <== Memory access at offset 606 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/asan/asan_interceptors.cpp:515 in strcat
+Shadow bytes around the buggy address:
+  0x7bec928fff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900000: f1 f1 f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900080: 00 00 00 00 00 00 00 00 f2 f2 f2 f2 f2 f2 f2 f2
+  0x7bec92900100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7bec92900200: 00 00 00 00 00 00 00 00 00 00 00[06]f3 f3 f3 f3
+  0x7bec92900280: f3 f3 f3 f3 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7bec92900400: f1 f1 f1 f1 00 00 00 00 00 00 02 f2 f2 f2 f2 f2
+  0x7bec92900480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==4043822==ABORTING

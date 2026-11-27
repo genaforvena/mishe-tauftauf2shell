@@ -1,0 +1,13 @@
+Breakpoint 1 at 0x15bd: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c, line 1854.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, readdir_long_name (z_file_name=0x5555555592a0 'A' <repeats 200 times>..., z_st=0x7fffffffe040, z_long_name=0x7fffffffdee0 "-rw-r--r--   1 1000 1000 2147483647 Jan  1 00:00:00 1970 ", 'A' <repeats 143 times>...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c:1854
+warning: 1854	/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c: No such file or directory
+CHOSEN_41 41414141414141414141414141414141
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, readdir_long_name (z_file_name=0x5555555592a0 'B' <repeats 200 times>..., z_st=0x7fffffffe040, z_long_name=0x7fffffffdee0 "-rw-r--r--   1 1000 1000 2147483647 Jan  1 00:00:00 1970 ", 'B' <repeats 143 times>...) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c:1854
+1854	in /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libssh-sftp-longname2shell/sftpserver.c
+CHOSEN_42 42424242424242424242424242424242

@@ -1,0 +1,708 @@
+From b2065f71c905d347b5e8dd7f8e24856807d71e99 Mon Sep 17 00:00:00 2001
+From: YubarajDas <dasyubaraj2020@gmail.com>
+Date: Wed, 22 Apr 2026 22:40:19 +0530
+Subject: [PATCH] fix: replace str(n)(cat|cpy) with strl(cat|cpy)
+
+Signed-off-by: YubarajDas <dasyubaraj2020@gmail.com>
+Reviewed-by: Jakub Jelen <jjelen@redhat.com>
+Reviewed-by: Andreas Schneider <asn@cryptomilk.org>
+Merge-Request: <https://gitlab.com/libssh/libssh-mirror/-/merge_requests/796>
+---
+ ConfigureChecks.cmake                 |  2 +
+ config.h.cmake                        |  6 +++
+ include/libssh/priv.h                 |  8 ++++
+ src/gcrypt_missing.c                  |  3 +-
+ src/getpass.c                         |  2 +-
+ src/knownhosts.c                      |  8 +---
+ src/match.c                           |  4 +-
+ src/misc.c                            | 51 ++++++++++++++++++---
+ src/options.c                         |  2 +-
+ src/server.c                          | 19 +++-----
+ src/sftpserver.c                      | 16 ++++---
+ src/token.c                           |  4 +-
+ tests/client/torture_auth.c           |  2 +-
+ tests/fuzz/ssh_bind_config_fuzzer.c   |  2 +-
+ tests/fuzz/ssh_client_config_fuzzer.c |  2 +-
+ tests/fuzz/ssh_sshsig_fuzzer.c        |  2 +-
+ tests/torture.c                       | 11 ++---
+ tests/unittests/torture_config.c      | 48 ++++++++++----------
+ tests/unittests/torture_misc.c        | 65 +++++++++++++++++++++++++++
+ 19 files changed, 187 insertions(+), 70 deletions(-)
+
+diff --git a/ConfigureChecks.cmake b/ConfigureChecks.cmake
+index 46dd90f7d..7ac6f3dfe 100644
+--- a/ConfigureChecks.cmake
++++ b/ConfigureChecks.cmake
+@@ -140,6 +140,8 @@ endif ()
+ check_function_exists(isblank HAVE_ISBLANK)
+ check_function_exists(strncpy HAVE_STRNCPY)
+ check_function_exists(strndup HAVE_STRNDUP)
++check_function_exists(strlcpy HAVE_STRLCPY)
++check_function_exists(strlcat HAVE_STRLCAT)
+ check_function_exists(strtoull HAVE_STRTOULL)
+ check_function_exists(explicit_bzero HAVE_EXPLICIT_BZERO)
+ check_function_exists(memset_explicit HAVE_MEMSET_EXPLICIT)
+diff --git a/config.h.cmake b/config.h.cmake
+index 428700169..0e305d4cd 100644
+--- a/config.h.cmake
++++ b/config.h.cmake
+@@ -153,6 +153,12 @@
+ /* Define to 1 if you have the `strndup' function. */
+ #cmakedefine HAVE_STRNDUP 1
+ 
++/* Define to 1 if you have the `strlcpy' function. */
++#cmakedefine HAVE_STRLCPY 1
++
++/* Define to 1 if you have the `strlcat' function. */
++#cmakedefine HAVE_STRLCAT 1
++
+ /* Define to 1 if you have the `cfmakeraw' function. */
+ #cmakedefine HAVE_CFMAKERAW 1
+ 
+diff --git a/include/libssh/priv.h b/include/libssh/priv.h
+index 598a21dc2..af70c8f45 100644
+--- a/include/libssh/priv.h
++++ b/include/libssh/priv.h
+@@ -60,6 +60,14 @@ extern "C" {
+ char *strndup(const char *s, size_t n);
+ #endif /* ! HAVE_STRNDUP */
+ 
++#ifndef HAVE_STRLCPY
++size_t strlcpy(char *dst, const char *src, size_t size);
++#endif
++
++#ifndef HAVE_STRLCAT
++size_t strlcat(char *dst, const char *src, size_t size);
++#endif
++
+ #ifdef HAVE_BYTESWAP_H
+ #include <byteswap.h>
+ #endif
+diff --git a/src/gcrypt_missing.c b/src/gcrypt_missing.c
+index 5f84e6b63..dc063772e 100644
+--- a/src/gcrypt_missing.c
++++ b/src/gcrypt_missing.c
+@@ -61,7 +61,8 @@ char *ssh_gcry_bn2dec(bignum bn) {
+   }
+ 
+   if (!gcry_mpi_cmp_ui(bn, 0)) {
+-    strcpy(ret, "0");
++      ret[0] = '0';
++      ret[1] = '\0';
+   } else {
+     ten = bignum_new();
+     if (ten == NULL) {
+diff --git a/src/getpass.c b/src/getpass.c
+index 2edab7d57..677b07772 100644
+--- a/src/getpass.c
++++ b/src/getpass.c
+@@ -74,7 +74,7 @@ static int ssh_gets(const char *prompt, char *buf, size_t len, int verify)
+         fprintf(stdout, "\n");
+ 
+         if (*tmp) {
+-            strncpy(buf, tmp, len);
++            strlcpy(buf, tmp, len);
+         }
+ 
+         if (verify) {
+diff --git a/src/knownhosts.c b/src/knownhosts.c
+index d9b41953b..4a8ea45e9 100644
+--- a/src/knownhosts.c
++++ b/src/knownhosts.c
+@@ -632,14 +632,10 @@ char *ssh_known_hosts_get_algorithms_names(ssh_session session)
+         }
+ 
+         if (needcomma) {
+-            strncat(methods_buffer,
+-                    ",",
+-                    sizeof(methods_buffer) - strlen(methods_buffer) - 1);
++            strlcat(methods_buffer, ",", sizeof(methods_buffer));
+         }
+ 
+-        strncat(methods_buffer,
+-                algo,
+-                sizeof(methods_buffer) - strlen(methods_buffer) - 1);
++        strlcat(methods_buffer, algo, sizeof(methods_buffer));
+         needcomma = true;
+ 
+         ssh_knownhosts_entry_free(entry);
+diff --git a/src/match.c b/src/match.c
+index 40b9c0f8f..cf3b15bf0 100644
+--- a/src/match.c
++++ b/src/match.c
+@@ -386,7 +386,7 @@ match_cidr_address_list(const char *address,
+     }
+ 
+     if (address != NULL) {
+-        strncpy(addr, address, NI_MAXHOST - 1);
++        strlcpy(addr, address, sizeof(addr));
+ 
+         /* Remove interface in case of IPv6 address: addr%interface */
+         a = strchr(addr, '%');
+@@ -484,7 +484,7 @@ match_cidr_address_list(const char *address,
+         }
+ #undef VALID_CIDR_CHARS
+ 
+-        strncpy(addr_buffer, cp, sizeof(addr_buffer) - 1);
++        strlcpy(addr_buffer, cp, sizeof(addr_buffer));
+         sp = strchr(addr_buffer, '/');
+         if (sp != NULL) {
+             *sp = '\0';
+diff --git a/src/misc.c b/src/misc.c
+index c37a54122..b4d694931 100644
+--- a/src/misc.c
++++ b/src/misc.c
+@@ -1145,8 +1145,7 @@ char *ssh_dirname (const char *path)
+     return NULL;
+   }
+ 
+-  strncpy(new, path, len);
+-  new[len] = '\0';
++  strlcpy(new, path, len + 1);
+ 
+   return new;
+ }
+@@ -1203,8 +1202,7 @@ char *ssh_basename (const char *path)
+     return NULL;
+   }
+ 
+-  strncpy(new, s, len);
+-  new[len] = '\0';
++  strlcpy(new, s, len + 1);
+ 
+   return new;
+ }
+@@ -1621,7 +1619,7 @@ char *ssh_path_expand_escape(ssh_session session, const char *s)
+             return NULL;
+         }
+         l = strlen(buf);
+-        strncpy(buf + l, x, MAX_BUF_SIZE - l - 1);
++        strlcpy(buf + l, x, MAX_BUF_SIZE - l);
+         buf[i] = '\0';
+         SAFE_FREE(x);
+     }
+@@ -2645,4 +2643,47 @@ FILE *ssh_strict_fopen(const char *filename, size_t max_file_size)
+     return f;
+ }
+ 
++/*
++ * BSD-compatible fallback implementations for systems without native
++ * strlcpy/strlcat. These are original implementations following the OpenBSD API
++ * specification. The strlcpy() and strlcat() API was designed by Todd C.
++ * Miller. See: https://man.openbsd.org/strlcpy.3
++ */
++
++#ifndef HAVE_STRLCPY
++size_t strlcpy(char *dst, const char *src, size_t size)
++{
++    size_t len = strlen(src);
++
++    if (size != 0) {
++        size_t copy_len = (len >= size) ? size - 1 : len;
++
++        memcpy(dst, src, copy_len);
++        dst[copy_len] = '\0';
++    }
++
++    return len;
++}
++#endif /* HAVE_STRLCPY */
++
++#ifndef HAVE_STRLCAT
++size_t strlcat(char *dst, const char *src, size_t size)
++{
++    size_t dst_len;
++    const char *p = memchr(dst, '\0', size);
++    size_t src_len = strlen(src);
++
++    dst_len = (p != NULL) ? (size_t)(p - dst) : size;
++
++    if (dst_len < size) {
++        size_t copy_len =
++            (src_len >= size - dst_len) ? size - dst_len - 1 : src_len;
++        memcpy(dst + dst_len, src, copy_len);
++        dst[dst_len + copy_len] = '\0';
++    }
++
++    return dst_len + src_len;
++}
++#endif /* HAVE_STRLCAT */
++
+ /** @} */
+diff --git a/src/options.c b/src/options.c
+index 3a5e3bc92..9539df351 100644
+--- a/src/options.c
++++ b/src/options.c
+@@ -2969,7 +2969,7 @@ static char *ssh_bind_options_expand_escape(ssh_bind sshbind, const char *s)
+             return NULL;
+         }
+         l = strlen(buf);
+-        strncpy(buf + l, x, MAX_BUF_SIZE - l - 1);
++        strlcpy(buf + l, x, MAX_BUF_SIZE - l);
+         buf[i] = '\0';
+         SAFE_FREE(x);
+     }
+diff --git a/src/server.c b/src/server.c
+index 32cee6ed1..f844c40fd 100644
+--- a/src/server.c
++++ b/src/server.c
+@@ -695,32 +695,25 @@ int ssh_auth_reply_default(ssh_session session,int partial) {
+     session->auth.supported_methods = SSH_AUTH_METHOD_PUBLICKEY | SSH_AUTH_METHOD_PASSWORD;
+   }
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_PUBLICKEY) {
+-    strncat(methods_c, "publickey,",
+-            sizeof(methods_c) - strlen(methods_c) - 1);
++      strlcat(methods_c, "publickey,", sizeof(methods_c));
+   }
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_GSSAPI_MIC){
+-	  strncat(methods_c,"gssapi-with-mic,",
+-			  sizeof(methods_c) - strlen(methods_c) - 1);
++      strlcat(methods_c, "gssapi-with-mic,", sizeof(methods_c));
+   }
+   /* Check if GSSAPI Key exchange was performed */
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_GSSAPI_KEYEX) {
+       if (ssh_kex_is_gss(session->current_crypto)) {
+-          strncat(methods_c,
+-                  "gssapi-keyex,",
+-                  sizeof(methods_c) - strlen(methods_c) - 1);
++          strlcat(methods_c, "gssapi-keyex,", sizeof(methods_c));
+       }
+   }
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_INTERACTIVE) {
+-    strncat(methods_c, "keyboard-interactive,",
+-            sizeof(methods_c) - strlen(methods_c) - 1);
++      strlcat(methods_c, "keyboard-interactive,", sizeof(methods_c));
+   }
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_PASSWORD) {
+-    strncat(methods_c, "password,",
+-            sizeof(methods_c) - strlen(methods_c) - 1);
++      strlcat(methods_c, "password,", sizeof(methods_c));
+   }
+   if (session->auth.supported_methods & SSH_AUTH_METHOD_HOSTBASED) {
+-    strncat(methods_c, "hostbased,",
+-            sizeof(methods_c) - strlen(methods_c) - 1);
++      strlcat(methods_c, "hostbased,", sizeof(methods_c));
+   }
+ 
+   if (methods_c[0] == '\0' || methods_c[strlen(methods_c)-1] != ',') {
+diff --git a/src/sftpserver.c b/src/sftpserver.c
+index b9e86ad6a..d2e5ed53f 100644
+--- a/src/sftpserver.c
++++ b/src/sftpserver.c
+@@ -1840,16 +1840,20 @@ readdir_long_name(char *z_file_name, struct stat *z_st, char *z_long_name)
+     *ptr++ = ' ';
+     *ptr = '\0';
+ 
+-    snprintf(tmpbuf, sizeof(tmpbuf), "%3d %d %d %d", (int)z_st->st_nlink,
+-             (int)z_st->st_uid, (int)z_st->st_gid, (int)z_st->st_size);
+-    strcat(z_long_name, tmpbuf);
+-
+     ctime_r(&z_st->st_mtime, time);
+     if ((ptr = strchr(time, '\n'))) {
+         *ptr = '\0';
+     }
+-    snprintf(tmpbuf, sizeof(tmpbuf), " %s %s", time + 4, z_file_name);
+-    strcat(z_long_name, tmpbuf);
++    snprintf(tmpbuf,
++             sizeof(tmpbuf),
++             "%3d %d %d %d %s %s",
++             (int)z_st->st_nlink,
++             (int)z_st->st_uid,
++             (int)z_st->st_gid,
++             (int)z_st->st_size,
++             time + 4,
++             z_file_name);
++    strlcat(z_long_name, tmpbuf, MAX_LONG_NAME_LEN);
+ 
+     return SSH_OK;
+ }
+diff --git a/src/token.c b/src/token.c
+index 3fe1745c6..572ea976b 100644
+--- a/src/token.c
++++ b/src/token.c
+@@ -338,9 +338,9 @@ char *ssh_remove_duplicates(const char *list)
+     for (i = 0; i < num_tokens; i++) {
+         if (should_copy[i]) {
+             if (need_comma) {
+-                strncat(ret, ",", (max_len - strlen(ret) - 1));
++                strlcat(ret, ",", max_len);
+             }
+-            strncat(ret, tok->tokens[i], (max_len - strlen(ret) - 1));
++            strlcat(ret, tok->tokens[i], max_len);
+             need_comma = true;
+         }
+     }
+diff --git a/tests/client/torture_auth.c b/tests/client/torture_auth.c
+index e6cae355a..76b5056d7 100644
+--- a/tests/client/torture_auth.c
++++ b/tests/client/torture_auth.c
+@@ -426,7 +426,7 @@ torture_auth_autopubkey_protected_auth_function (const char *prompt, char *buf,
+     ssh_string_free_char(expected_id);
+ 
+     data->n_calls += 1;
+-    strncpy(buf, "secret", len);
++    strlcpy(buf, "secret", len);
+     return 0;
+ }
+ 
+diff --git a/tests/fuzz/ssh_bind_config_fuzzer.c b/tests/fuzz/ssh_bind_config_fuzzer.c
+index fb5e03ee1..0d519819c 100644
+--- a/tests/fuzz/ssh_bind_config_fuzzer.c
++++ b/tests/fuzz/ssh_bind_config_fuzzer.c
+@@ -53,7 +53,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+     if (!input) {
+         return 1;
+     }
+-    strncpy(input, (const char *)data, size);
++    memcpy(input, data, size);
+     input[size] = '\0';
+ 
+     assert(nalloc_start(data, size) > 0);
+diff --git a/tests/fuzz/ssh_client_config_fuzzer.c b/tests/fuzz/ssh_client_config_fuzzer.c
+index a994f807e..5658b3e48 100644
+--- a/tests/fuzz/ssh_client_config_fuzzer.c
++++ b/tests/fuzz/ssh_client_config_fuzzer.c
+@@ -52,7 +52,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+     if (!input) {
+         return 1;
+     }
+-    strncpy(input, (const char *)data, size);
++    memcpy(input, data, size);
+     input[size] = '\0';
+ 
+     assert(nalloc_start(data, size) > 0);
+diff --git a/tests/fuzz/ssh_sshsig_fuzzer.c b/tests/fuzz/ssh_sshsig_fuzzer.c
+index 8493f2b53..3cc7f673a 100644
+--- a/tests/fuzz/ssh_sshsig_fuzzer.c
++++ b/tests/fuzz/ssh_sshsig_fuzzer.c
+@@ -56,7 +56,7 @@ int LLVMFuzzerTestOneInput(const uint8_t *data, size_t size)
+     if (signature == NULL) {
+         goto out;
+     }
+-    strncpy(signature, (const char *)data, size);
++    memcpy(signature, data, size);
+     signature[size] = '\0';
+ 
+     rc = sshsig_verify(input, sizeof(input), signature, namespace, &pkey);
+diff --git a/tests/torture.c b/tests/torture.c
+index 5482b8522..1ae6c623f 100644
+--- a/tests/torture.c
++++ b/tests/torture.c
+@@ -1868,8 +1868,7 @@ static int recursive_rm_dir_content(const char *path)
+     int rc = 0;
+     BOOL removed;
+ 
+-    strcpy(file_path, path);
+-    strcat(file_path, "\\*");
++    snprintf(file_path, sizeof(file_path), "%s\\*", path);
+ 
+     file_handle = FindFirstFile(file_path, &file_data);
+ 
+@@ -1897,9 +1896,11 @@ static int recursive_rm_dir_content(const char *path)
+             }
+ 
+             /* Create full file path */
+-            strcpy(file_path, path);
+-            strcat(file_path, "\\");
+-            strcat(file_path, file_data.cFileName);
++            snprintf(file_path,
++                     sizeof(file_path),
++                     "%s\\%s",
++                     path,
++                     file_data.cFileName);
+ 
+             attributes = GetFileAttributes(file_path);
+             if (attributes & FILE_ATTRIBUTE_DIRECTORY) {
+diff --git a/tests/unittests/torture_config.c b/tests/unittests/torture_config.c
+index 24f247e60..984408fb5 100644
+--- a/tests/unittests/torture_config.c
++++ b/tests/unittests/torture_config.c
+@@ -2563,21 +2563,21 @@ static void torture_config_parser_get_cmd(void **state)
+     (void)state;
+ 
+     /* Ignore leading whitespace */
+-    strncpy(data, "  \t\t  string\n", sizeof(data));
++    strlcpy(data, "  \t\t  string\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_cmd(&p);
+     assert_string_equal(tok, "string");
+     assert_int_equal(*p, '\0');
+ 
+     /* but keeps the trailing whitespace */
+-    strncpy(data, "string  \t\t  \n", sizeof(data));
++    strlcpy(data, "string  \t\t  \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_cmd(&p);
+     assert_string_equal(tok, "string  \t\t  ");
+     assert_int_equal(*p, '\0');
+ 
+     /* should not drop the quotes and not split them into separate arguments */
+-    strncpy(data, "\"multi string\" something\n", sizeof(data));
++    strlcpy(data, "\"multi string\" something\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_cmd(&p);
+     assert_string_equal(tok, "\"multi string\" something");
+@@ -2585,7 +2585,7 @@ static void torture_config_parser_get_cmd(void **state)
+ 
+     /* But it does not split tokens by whitespace
+      * if they are not quoted, which is weird */
+-    strncpy(data, "multi string something\n", sizeof(data));
++    strlcpy(data, "multi string something\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_cmd(&p);
+     assert_string_equal(tok, "multi string something");
+@@ -2646,33 +2646,33 @@ static void torture_config_parser_get_token(void **state)
+     (void)state;
+ 
+     /* Ignore leading whitespace (from get_cmd() already */
+-    strncpy(data, "  \t\t  string\n", sizeof(data));
++    strlcpy(data, "  \t\t  string\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "string");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "  \t\t  string", sizeof(data));
++    strlcpy(data, "  \t\t  string", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "string");
+     assert_int_equal(*p, '\0');
+ 
+     /* drops trailing whitespace */
+-    strncpy(data, "string  \t\t  \n", sizeof(data));
++    strlcpy(data, "string  \t\t  \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "string");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "string  \t\t  ", sizeof(data));
++    strlcpy(data, "string  \t\t  ", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "string");
+     assert_int_equal(*p, '\0');
+ 
+     /* Correctly handles tokens in quotes */
+-    strncpy(data, "\"multi string\" something\n", sizeof(data));
++    strlcpy(data, "\"multi string\" something\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "multi string");
+@@ -2681,7 +2681,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "something");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "\"multi string\" something", sizeof(data));
++    strlcpy(data, "\"multi string\" something", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "multi string");
+@@ -2691,7 +2691,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* Consistently splits unquoted strings */
+-    strncpy(data, "multi string something\n", sizeof(data));
++    strlcpy(data, "multi string something\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "multi");
+@@ -2703,7 +2703,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "something");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "multi string something", sizeof(data));
++    strlcpy(data, "multi string something", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "multi");
+@@ -2716,7 +2716,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* It is made to parse also option=value pairs as well */
+-    strncpy(data, "  key=value  \n", sizeof(data));
++    strlcpy(data, "  key=value  \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2725,7 +2725,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "value");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "  key=value  ", sizeof(data));
++    strlcpy(data, "  key=value  ", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2735,7 +2735,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* spaces are allowed also around the equal sign */
+-    strncpy(data, "  key  =  value  \n", sizeof(data));
++    strlcpy(data, "  key  =  value  \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2744,7 +2744,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "value");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "  key  =  value  ", sizeof(data));
++    strlcpy(data, "  key  =  value  ", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2754,7 +2754,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* correctly parses even key=value pairs with either one in quotes */
+-    strncpy(data, "  key=\"value with spaces\" \n", sizeof(data));
++    strlcpy(data, "  key=\"value with spaces\" \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2763,7 +2763,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "value with spaces");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "  key=\"value with spaces\" ", sizeof(data));
++    strlcpy(data, "  key=\"value with spaces\" ", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2783,7 +2783,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* Only one equal sign is allowed */
+-    strncpy(data, "key==value\n", sizeof(data));
++    strlcpy(data, "key==value\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2795,7 +2795,7 @@ static void torture_config_parser_get_token(void **state)
+     assert_string_equal(tok, "value");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "key==value", sizeof(data));
++    strlcpy(data, "key==value", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "key");
+@@ -2808,26 +2808,26 @@ static void torture_config_parser_get_token(void **state)
+     assert_int_equal(*p, '\0');
+ 
+     /* Unmatched quotes */
+-    strncpy(data, " \"value\n", sizeof(data));
++    strlcpy(data, " \"value\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "value");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, " \"value", sizeof(data));
++    strlcpy(data, " \"value", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "value");
+     assert_int_equal(*p, '\0');
+ 
+     /* Escaped quotes */
+-    strncpy(data, " \"value with \\\"escaped\\\" quotes\"   \n", sizeof(data));
++    strlcpy(data, " \"value with \\\"escaped\\\" quotes\"   \n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "value with \"escaped\" quotes");
+     assert_int_equal(*p, '\0');
+ 
+-    strncpy(data, "\\\"value with \\\"escaped\\\" quotes\\\"\n", sizeof(data));
++    strlcpy(data, "\\\"value with \\\"escaped\\\" quotes\\\"\n", sizeof(data));
+     p = data;
+     tok = ssh_config_get_token(&p);
+     assert_string_equal(tok, "\\\"value");
+diff --git a/tests/unittests/torture_misc.c b/tests/unittests/torture_misc.c
+index 88bb73741..788efb624 100644
+--- a/tests/unittests/torture_misc.c
++++ b/tests/unittests/torture_misc.c
+@@ -1282,6 +1282,69 @@ static void torture_ssh_get_hexa(void **state)
+     ssh_string_free_char(hex);
+ }
+ 
++static void torture_strlcpy(void **state)
++{
++    char dest[16];
++    size_t len;
++
++    (void)state;
++
++    /* Test basic copy */
++    len = strlcpy(dest, "hello", sizeof(dest));
++    assert_int_equal(len, 5);
++    assert_string_equal(dest, "hello");
++
++    /* Test truncation */
++    len = strlcpy(dest, "this is a very long string", sizeof(dest));
++    assert_int_equal(len, 26);          /* Returns source length, not copied */
++    assert_int_equal(strlen(dest), 15); /* Truncated to fit */
++
++    /* Test empty string */
++    len = strlcpy(dest, "", sizeof(dest));
++    assert_int_equal(len, 0);
++    assert_string_equal(dest, "");
++
++    /* Test size 0 - should not modify dest */
++    memset(dest, 'x', sizeof(dest));
++    len = strlcpy(dest, "test", 0);
++    assert_int_equal(len, 4);
++    assert_int_equal(dest[0], 'x'); /* Unchanged */
++}
++
++static void torture_strlcat(void **state)
++{
++    char dest[32];
++    size_t len;
++
++    (void)state;
++
++    /* Test basic concatenation */
++    strlcpy(dest, "hello", sizeof(dest));
++    len = strlcat(dest, " world", sizeof(dest));
++    assert_int_equal(len, 11);
++    assert_string_equal(dest, "hello world");
++
++    /* Test concatenation to full buffer */
++    strlcpy(dest, "123456789012345678901234567890", sizeof(dest));
++    len = strlcat(dest, "x", sizeof(dest));
++    assert_int_equal(
++        len,
++        31); /* 30 + 1 = 31, buffer already full so nothing appended */
++
++    /* Test concatenation when dest is already full */
++    memset(dest, 'x', sizeof(dest) - 1);
++    dest[sizeof(dest) - 1] = '\0';
++    len = strlcat(dest, "test", sizeof(dest));
++    assert_int_equal(len, 35);          /* 31 + 4 */
++    assert_int_equal(strlen(dest), 31); /* Unchanged */
++
++    /* Test empty append */
++    strlcpy(dest, "test", sizeof(dest));
++    len = strlcat(dest, "", sizeof(dest));
++    assert_int_equal(len, 4);
++    assert_string_equal(dest, "test");
++}
++
+ int torture_run_tests(void) {
+     int rc;
+     struct CMUnitTest tests[] = {
+@@ -1319,6 +1382,8 @@ int torture_run_tests(void) {
+         cmocka_unit_test(torture_ssh_check_username_syntax),
+         cmocka_unit_test(torture_ssh_is_ipaddr),
+         cmocka_unit_test(torture_ssh_get_hexa),
++        cmocka_unit_test(torture_strlcpy),
++        cmocka_unit_test(torture_strlcat),
+     };
+ 
+     ssh_init();
+-- 
+GitLab
+
