@@ -504,3 +504,12 @@ lab/frontier/gnutlsdtls2shell/build-*/
 lab/frontier/gnutlsdtls2shell/opt/
 lab/frontier/gnutlsdtls2shell/poc-3.8.*
 lab/frontier/gnutlsdtls2shell/*.err
+
+# lzxwindow2shell: extracted pinned trees, compiled harnesses and replay logs
+# stay local; pins, fix diff, harness sources, scripts and reports stay tracked.
+lab/frontier/lzxwindow2shell/src-vuln/
+lab/frontier/lzxwindow2shell/src-fixed/
+lab/frontier/lzxwindow2shell/runs/
+lab/frontier/lzxwindow2shell/harness-vuln-*
+lab/frontier/lzxwindow2shell/harness-fixed-*
+lab/frontier/lzxwindow2shell/alloc-*.o
