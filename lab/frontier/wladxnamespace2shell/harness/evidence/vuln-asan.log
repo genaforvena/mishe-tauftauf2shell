@@ -1,0 +1,4 @@
+ERROR: AddressSanitizer: stack-buffer-overflow
+WRITE of size 1
+analyze.c:2155
+analyze.c:2155

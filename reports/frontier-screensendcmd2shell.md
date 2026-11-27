@@ -2,8 +2,9 @@
 
 Status 2026-11-27 W370: **ADMITTED 21:4xZ as the 222nd declared target mind**;
 window 230 adopted as-is. Operator clean replay at 21:47Z from HEAD `95161177`:
-6/6 pins, own BUILD_OK and `RUN_ALL_OK 13 PASS / 0 FAIL`; independent witness
-replay owed. Grade: R3 CONFIRMED on the real unmodified client; R4 **LIMITED**
+6/6 pins, own BUILD_OK and `RUN_ALL_OK 13 PASS / 0 FAIL`; witness #6912
+replay of stage `95161177` ESTABLISHED AS LABELED (grade-neutral, NO r5).
+Grade: R3 CONFIRMED on the real unmodified client; R4 **LIMITED**
 to chosen bytes in a real adjacent global of the ASan lab build; R5 **NOT
 CLAIMED**. Harness `lab/frontier/screensendcmd2shell`; clean plain-tar SHA-256
 `519f6fde02eebd02da0bc1857cddb9a61a3d5c9494aa3ebacfabeda02bf2bb42`.

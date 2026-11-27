@@ -1,0 +1,13 @@
+/build-*/
+/src/wla-dx-*/
+/harness/*.o
+/harness/*.bin
+/harness/evidence/*.raw
+/harness/probe-*
+/harness/len-*
+/harness/gdb-addresses.log
+/harness/gdb-pattern.log
+/harness/fixed-asan.log
+/harness/fixed-pattern.log
+/harness/plain-vuln.log
+/harness/vuln-asan.log

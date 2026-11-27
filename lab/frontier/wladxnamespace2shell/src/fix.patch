@@ -1,0 +1,254 @@
+From 63755ffcd12f78d3bbadf3b24796383c734c4d77 Mon Sep 17 00:00:00 2001
+From: Ville Helin <ville.helin@gmail.com>
+Date: Fri, 6 Nov 2026 23:03:28 +0200
+Subject: [PATCH] Fixed buffer overflows in the linker
+
+---
+ CHANGELOG                              |  6 +-
+ tests/6502/state_functions_test/main.s | 12 +++-
+ wlalink/analyze.c                      | 96 +++++++++++++++++++++++---
+ wlalink/main.c                         |  2 +-
+ 4 files changed, 103 insertions(+), 13 deletions(-)
+
+diff --git a/CHANGELOG b/CHANGELOG
+index 49156f48..83806aa1 100644
+--- a/CHANGELOG
++++ b/CHANGELOG
+@@ -1624,11 +1624,15 @@ v1.0 (10-Jul-2000) The first public release.
+ 4... WLALINK History
+ ------------------------------------------------------------------------------
+ 
+-v5.24 (13-Sep-2026) Added support for paword(a).
++v5.24 (06-Nov-2026) Added support for paword(a).
+                     -C removes duplicate definitions in symbol file.
+                     WLALINK now places same-size sections in a stable
+                       order (object-file order) so packing does not depend
+                       on the host C library's qsort().
++                    Fixed buffer overflows when parsing section namespaces,
++                      names and bank lists in objects and libraries. Reject
++                      overlong or unterminated fields without limiting valid
++                      namespaces to 255 bytes (thanks to Deus Rex / Cyrex)
+ 
+ v5.23 (22-Jul-2026) .MACRO calls should now work properly in listfiles.
+                     Added support for SPAN in .SECTIONs.
+diff --git a/tests/6502/state_functions_test/main.s b/tests/6502/state_functions_test/main.s
+index c69e5394..3a177012 100644
+--- a/tests/6502/state_functions_test/main.s
++++ b/tests/6502/state_functions_test/main.s
+@@ -15,7 +15,9 @@
+         .function align_plus(n) read_align()+n
+         .function align_negative() -align()
+         .function align_smaller() align() < 32
+-        .assert align() == 1 && read_align() == 1
++        .if align() != 1 || read_align() != 1
++        .fail "Initial alignment must be 1."
++        .endif
+ 
+         .db "01>"                       ; @BT TEST-01 01 START
+         .db align(), read_align()       ; @BT 01 01
+@@ -26,7 +28,10 @@
+ 
+         .align 16
+         .define saved_align align()
+-        .assert read_align() == 16
++        .if align() == 16 && read_align() == 16
++        .else
++        .fail "Alignment must be 16 after .ALIGN 16."
++        .endif
+         .assert align_negative() == -16
+         .assert align_smaller() == 1
+         .db "02>"                       ; @BT TEST-02 02 START
+@@ -35,6 +40,9 @@
+         .db "<02"                       ; @BT END
+ 
+         .align 32
++        .if align() != 32
++        .fail "Alignment must be 32 after .ALIGN 32."
++        .endif
+         .assert align_smaller() == 0
+         .db "03>"                       ; @BT TEST-03 03 START
+         .db align(), read_align()       ; @BT 20 20
+diff --git a/wlalink/analyze.c b/wlalink/analyze.c
+index f75df309..99108382 100644
+--- a/wlalink/analyze.c
++++ b/wlalink/analyze.c
+@@ -2104,7 +2104,7 @@ int parse_data_blocks(void) {
+   struct section *s;
+   int section_id_base, i, x;
+   unsigned char *t, *p;
+-  char buf[256];
++  char buf[MAX_NAME_LENGTH + 1];
+ 
+   g_obj_tmp = g_obj_first;
+   section_id_base = 0;
+@@ -2139,20 +2139,47 @@ int parse_data_blocks(void) {
+ 
+           /* name */
+           i = 0;
+-          while (*t != SECTION_STATUS_FREE && *t != SECTION_STATUS_FORCE && *t != SECTION_STATUS_OVERWRITE &&
++          while (t < p && *t != SECTION_STATUS_FREE && *t != SECTION_STATUS_FORCE && *t != SECTION_STATUS_OVERWRITE &&
+                  *t != SECTION_STATUS_HEADER && *t != SECTION_STATUS_SEMIFREE && *t != SECTION_STATUS_ABSOLUTE &&
+                  *t != SECTION_STATUS_RAM_FREE && *t != SECTION_STATUS_SUPERFREE && *t != SECTION_STATUS_SEMISUBFREE &&
+                  *t != SECTION_STATUS_RAM_FORCE && *t != SECTION_STATUS_RAM_SEMIFREE && *t != SECTION_STATUS_RAM_SEMISUBFREE &&
+-                 *t != SECTION_STATUS_SEMISUPERFREE)
++                 *t != SECTION_STATUS_SEMISUPERFREE) {
++            if (i >= (int)sizeof(s->name) - 1) {
++              print_text(NO, "PARSE_DATA_BLOCKS: Section name is too long.\n");
++              free(s);
++              return FAILED;
++            }
+             s->name[i++] = *(t++);
++          }
++          if (t >= p) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section name.\n");
++            free(s);
++            return FAILED;
++          }
+           s->name[i] = 0;
++          if (p - t < 2) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Truncated section status/keep fields.\n");
++            free(s);
++            return FAILED;
++          }
+           s->status = *(t++);
+           s->keep = *(t++);
+ 
+           /* namespace */
+           i = 0;
+-          while (*t != 0)
++          while (t < p && *t != 0) {
++            if (i >= (int)sizeof(buf) - 1) {
++              print_text(NO, "PARSE_DATA_BLOCKS: Section namespace is too long.\n");
++              free(s);
++              return FAILED;
++            }
+             buf[i++] = *(t++);
++          }
++          if (t >= p) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section namespace.\n");
++            free(s);
++            return FAILED;
++          }
+           buf[i] = 0;
+           t++;
+           if (buf[0] == 0)
+@@ -2165,6 +2192,7 @@ int parse_data_blocks(void) {
+               nspace = calloc(1, sizeof(struct namespace_def));
+               if (nspace == NULL) {
+                 print_text(NO, "PARSE_DATA_BLOCKS: Out of memory.\n");
++                free(s);
+                 return FAILED;
+               }
+               nspace->label_map = hashmap_new();
+@@ -2178,16 +2206,38 @@ int parse_data_blocks(void) {
+           /* banks */
+           if (s->status == SECTION_STATUS_SEMISUPERFREE) {
+             i = 0;
+-            while (*t != 0)
++            while (t < p && *t != 0) {
++              if (i >= (int)sizeof(s->banks) - 1) {
++                print_text(NO, "PARSE_DATA_BLOCKS: Section bank list is too long.\n");
++                free(s);
++                return FAILED;
++              }
+               s->banks[i++] = *(t++);
++            }
++            if (t >= p) {
++              print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section bank list.\n");
++              free(s);
++              return FAILED;
++            }
+             s->banks[i] = 0;
+             t++;
+           }
+ 
+           /* SPAN banks */
+           i = 0;
+-          while (*t != 0)
++          while (t < p && *t != 0) {
++            if (i >= (int)sizeof(s->span_banks) - 1) {
++              print_text(NO, "PARSE_DATA_BLOCKS: Section span bank list is too long.\n");
++              free(s);
++              return FAILED;
++            }
+             s->span_banks[i++] = *(t++);
++          }
++          if (t >= p) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section span bank list.\n");
++            free(s);
++            return FAILED;
++          }
+           s->span_banks[i] = 0;
+           t++;
+           
+@@ -2239,19 +2289,46 @@ int parse_data_blocks(void) {
+ 
+         /* name */
+         i = 0;
+-        while (*t != SECTION_STATUS_FREE && *t != SECTION_STATUS_FORCE && *t != SECTION_STATUS_OVERWRITE &&
++        while (t < p && *t != SECTION_STATUS_FREE && *t != SECTION_STATUS_FORCE && *t != SECTION_STATUS_OVERWRITE &&
+                *t != SECTION_STATUS_HEADER && *t != SECTION_STATUS_SEMIFREE && *t != SECTION_STATUS_ABSOLUTE &&
+                *t != SECTION_STATUS_RAM_FREE && *t != SECTION_STATUS_SUPERFREE && *t != SECTION_STATUS_SEMISUBFREE &&
+-               *t != SECTION_STATUS_RAM_FORCE && *t != SECTION_STATUS_RAM_SEMIFREE && *t != SECTION_STATUS_RAM_SEMISUBFREE)
++               *t != SECTION_STATUS_RAM_FORCE && *t != SECTION_STATUS_RAM_SEMIFREE && *t != SECTION_STATUS_RAM_SEMISUBFREE) {
++          if (i >= (int)sizeof(s->name) - 1) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Section name is too long.\n");
++            free(s);
++            return FAILED;
++          }
+           s->name[i++] = *(t++);
++        }
++        if (t >= p) {
++          print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section name.\n");
++          free(s);
++          return FAILED;
++        }
+         s->name[i] = 0;
++        if (p - t < 2) {
++          print_text(NO, "PARSE_DATA_BLOCKS: Truncated section status/keep fields.\n");
++          free(s);
++          return FAILED;
++        }
+         s->status = *(t++);
+         s->keep = *(t++);
+           
+         /* namespace */
+         i = 0;
+-        while (*t != 0)
++        while (t < p && *t != 0) {
++          if (i >= (int)sizeof(buf) - 1) {
++            print_text(NO, "PARSE_DATA_BLOCKS: Section namespace is too long.\n");
++            free(s);
++            return FAILED;
++          }
+           buf[i++] = *(t++);
++        }
++        if (t >= p) {
++          print_text(NO, "PARSE_DATA_BLOCKS: Unterminated section namespace.\n");
++          free(s);
++          return FAILED;
++        }
+         buf[i] = 0;
+         t++;
+         if (buf[0] == 0)
+@@ -2264,6 +2341,7 @@ int parse_data_blocks(void) {
+             nspace = calloc(1, sizeof(struct namespace_def));
+             if (nspace == NULL) {
+               print_text(NO, "PARSE_DATA_BLOCKS: Out of memory.\n");
++              free(s);
+               return FAILED;
+             }
+             nspace->label_map = hashmap_new();
+diff --git a/wlalink/main.c b/wlalink/main.c
+index ad839955..ec9f96e4 100644
+--- a/wlalink/main.c
++++ b/wlalink/main.c
+@@ -34,7 +34,7 @@
+   #define WLALINK_DEBUG 1
+ */
+ 
+-char g_version_string[] = "$VER: wlalink 5.24a (3.10.2026)";
++char g_version_string[] = "$VER: wlalink 5.24a (6.11.2026)";
+ 
+ #if defined(AMIGA)
+ __near long __stack = 200000;
