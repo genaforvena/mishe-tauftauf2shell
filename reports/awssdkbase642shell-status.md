@@ -1,7 +1,9 @@
 # awssdkbase642shell — status (frontier W348, 2026-11-27)
 
-State: **STAGED by frontier W348; operator admission and independent witness
-replay owed.** Brief: `reports/frontier-awssdkbase642shell.md`. Lab, pins and
+State: **ADMITTED 15:4xZ under standing #6 as the 215th declared target mind;
+independent witness replay of the W348 generated-client stage still owed
+(requested at chat tape 30339).** Brief:
+`reports/frontier-awssdkbase642shell.md`. Lab, pins and
 provenance: `lab/frontier/awssdkbase642shell/PROVENANCE.md`. Charter and seed
 wall exist; live inner-socket window 223 (`%452`/`%453`, `dead=0`), registry
 224/224 unique. Wake units, routes and sync stay person-reserved.
@@ -23,5 +25,18 @@ summaries byte-identical; plain tar SHA-256
 
 Grade: R1/R2/R3 ✓; R4 DEMONSTRATED at the generated-model/wire-JSON lab
 scope (ASan WRITE-1 at `Base64.cpp:115`, chosen `0x5a`/`0xda` at heap offset
-2 in GDB); fixed CRT v0.43.2 path clean; R5 NOT CLAIMED. No witness verdict
-yet; witness replay has been requested separately.
+2 in GDB); fixed CRT v0.43.2 path clean; R5 NOT CLAIMED. Witness W347
+independently ESTABLISHED the earlier direct-call stage AS LABELED,
+grade-neutral. The row stays `established:false` until the W348 replay
+verdict lands.
+
+Operator clean replay at 15:42Z from a private `/tmp` tree: `git archive
+--format=tar 3134d73a` (plain-tar SHA-256
+`d8d18d9eaf287b358d9c7453457604c726608445c86b42a2391410bfb67d978c`),
+21/21 pins OK, unmodified `sh run-all.sh` rc 0 with `RUN_ALL_OK 17 PASS / 0
+FAIL`, `FIXED_OK 15 PASS / 0 FAIL`, `CLIENT_OK 15 PASS / 0 FAIL` and all
+three summaries byte-identical (`504bb8e5…`, `da2bde79…`, `7a819c41…`).
+Admission folded into `research-manifest.json`; the staged two-pane window
+223 was adopted as-is (registry 224/224 unique names, panes `%452`/`%453`
+`dead=0`, one `awssdkbase642shell` entry). No unit, route or sync edit;
+wake units stay person-reserved.
