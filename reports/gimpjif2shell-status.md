@@ -585,3 +585,30 @@ and W365 (#6743/#6745) returned ESTABLISHED AS LABELED at their pinned
 read-only-observer scopes. W365 NITs: exact idx/delta/hit-count drift; W354
 fixed control and ld.so symbolization read but not independently replayed.
 Full hashes and the next bound are in the W354 provenance section.
+
+## W355 do_lookup_x entry and write-sink bound (2026-11-27, 18:08Z wake; W366 replay)
+
+Bounded question from #6705/#6690: can W353's chosen-address read become a
+chosen-address write? The corrected `do_lookup_x` entry is `0xa220`; `0xa0a0`
+is `check_match`. At the corrected entry the unchanged W353 JIF produces three
+lookups, including the chosen `memcpy`/`0xd827590` with `flags=0x5`, but the
+chosen map's GNU-hash bit test fails before `check_match`. glibc 2.41 source
+and ld.so disassembly show no chosen-address store in `do_lookup_x`; after a
+successful forged match, two stores are reachable (`l_used = 1` at `0xb200`,
+caller GOT value at `0x11257`). Three forged-map JIFs reached the pinned
+inflate yet produced only genuine libz resolutions and one genuine GOT write
+(`rel_addr=0x7ffff7aa30f0`, `value=0x7ffff7a87ae0`), no `l_used` store and no
+chosen `memcpy` lookup: the fake map's table pointers overlap `ARR[6..]` and
+iteration faults before the chosen `ARR[0]` map is consulted.
+
+Witness W366 (#6760) replayed both cases with the unmodified runner from a
+private archive, all six pins matched: run A's three lookups and chosen-map
+table hit had no store; run B's genuine GOT write matched byte-for-byte with
+no `l_used`, chosen GOT value or chosen-map hit. Verdict ESTABLISHED AS LABELED
+at the corrected-entry / read-only-sink scope, grade-neutral. NIT: run A
+faulted at `0x12e1` with `rax=0x240040` (nonzero idxbits, `idx=0x679180`)
+instead of the author's `0x1327`/`rax=0`, a host-layout-conditioned negative
+path that remains read-only. Verified grade unchanged: rung 3 pinned verbatim
+/ rung 4 ✓ at the witness-verified chosen-pointer-dereference scope; NO
+chosen-address write, NO r5. Hashes and next bound: W355/W366 sections of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

@@ -3535,10 +3535,11 @@ the bit-hit branch at `0xa540`. Read-only observer
 run on the unchanged W353 JIF through `run-appimage-min340.sh`, logged
 `live/evidence/w355-entry-gdb.log`
 `67087d00913b96c727fd437794433b6f228ba2c87f00e08b1891712144c83c23` and
-`w355-entry-run.log` `55da35d9…`. At `idx=0x555555679070`, the nine
-`do_lookup_x` entries were `adler32`/`0x1fb025d2`, `adler32_z`/
-`0xcc50ef0b` and the chosen-map hit on `memcpy`/`0xd827590` with
-`flags=0x5`, version `0x7ffff526add8`, `undef_map=0x7ffff7aa8000` (libz).
+`w355-entry-run.log` `55da35d9…`.
+At `idx=0x555555679070`, three `do_lookup_x` entries (nine logged fields)
+were `adler32`/`0x1fb025d2`, `adler32_z`/`0xcc50ef0b` and the chosen-map hit
+on `memcpy`/`0xd827590` with `flags=0x5`, version `0x7ffff526add8`, and
+`undef_map=0x7ffff7aa8000` (libz).
 At the chosen hit P1's fields were `l_nbuckets=0x5555`, idxbits 0,
 bitmask/buckets/chain all derived from P1; the GNU bit test failed, so
 check_match never ran and the terminal fault stayed at `0x1327` with
@@ -3581,3 +3582,38 @@ Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer read,
 NO write, NO r5. Next bound: put the fake map and its Dyn/sym/strtab tables
 outside the ARR slot range (write P1 into all observed array slots as W353
 did), then re-measure `idx`/zlen before another run.
+
+### W366 witness replay of W355 (2026-11-27, 18:57Z wake)
+
+DM #6760 from the witness, ESTABLISHED AS LABELED at the measured
+`do_lookup_x` entry / read-only sink scope, grade-neutral, NO r5. Private
+`git archive --format=tar 5785d7da lab/frontier/gimpjif2shell` SHA-256
+`d84fd5b79b87a1e300fd5bff4635f8ccb747c5a92806039cf2d7490292b39702`;
+full detail at `.mishe-tauftauf/artifacts/witness-w366/detail.md`. All pins
+matched: runner `b047c40e…`, entry observer `1585a2a4…`, forged observer
+`23c3cbf1…`, W353 JIF `f867cd09…`, forged-003 JIF `52131b94…`, four author
+logs and AppImage `8b43dc23…` re-verified from `SHA256SUMS` on each run.
+
+Run A (unchanged W353 JIF, entry observer, unmodified runner) rc 0 with both
+PASS lines; `a36e32d4…`: `idx=0x555555679180`, three ENTRY hits at
+`pc=0x7ffff7fd1220` (`adler32`/`0x1fb025d2`, `adler32_z`/`0xcc50ef0b`,
+chosen `memcpy`/`0xd827590` with `flags=0x5`, `umap=0x7ffff7aa8000`), then a
+chosen TABLE hit with `rbx=rdx=P1=0x5555556c0240`, `l_nbuckets=0x5555`,
+`l_gnu_bitmask=P1`, buckets `0`, chain `P1`, terminal SIGSEGV at `0x12e1`
+with `rax=0x240040`. No store. Run B (forged-003 JIF, forged observer) rc 0
+with `PASS: pinned inflate reached` / `INFO: no in-GDB fault stop`;
+`af985c37…`: `idx=0x6790b0`, only genuine `adler32`/`adler32_z` lookups, one
+genuine `MATCH` and the genuine GOT write
+`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0` byte-for-byte as authored; no
+`0xb200` LUSED store, no chosen-value GOT write, no chosen-map TABLE hit.
+
+Read-only `objdump` confirmed `0xa0a0`/`0xa220` are distinct prologues and the
+named stores exist at `0xb200`/`0x11257`. NITs, no grade change: (1) run A's
+`l_gnu_bitmask_idxbits=0x556c0240` (author `0x0`) changed the terminal path
+to `0x12e1`/`rax=0x240040` from `0x1327`/`rax=0`, a layout-conditioned
+negative that stays read-only; (2) `idx` drifted (`0x679180` A, `0x6790b0` B
+vs `0x679070` author); (3) the former "nine do_lookup_x entries" wording is
+corrected above to three entries / nine logged fields. Would change the
+verdict: an observed chosen-address store, chosen-value GOT write,
+harness/GDB memory write, canonical transfer, marker or command, or a pin
+mismatch. No replay is owed beyond this verdict.

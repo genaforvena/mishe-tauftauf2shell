@@ -13,8 +13,12 @@ chosen-address write, control-flow word, marker or command. Witness W362
 the W352 third-stage chosen table base AS LABELED at their pinned
 read-only-observer scopes. Witness W365 (#6743/#6745) established the W353
 mapped chosen-heap read AS LABELED at the pinned live-loader / read-only-
-observer scope. All grade-neutral, NO r5; W365 NITs: exact idx/delta/hit
-count drift, W354 fixed control and ld.so symbolization read but not replayed.
+observer scope. Witness W366 (#6760) established W355's corrected
+`do_lookup_x` entry and read-only sink bound AS LABELED: three genuine/chosen
+lookups on the unchanged JIF but no chosen-address store, and only genuine
+resolutions in the forged-map replay. All grade-neutral, NO r5. NITs: W365
+idx/delta/hit-count drift; W366 host-layout-conditioned fault path. W354
+fixed control and ld.so symbolization remain read but not replayed.
 
 ## Claim and scope
 
@@ -2078,4 +2082,32 @@ observer scopes. W365 NITs: idx/delta/hit-count drift; W354 fixed control and
 ld.so symbolization read but not independently replayed. No chosen-address
 write or r5.
 Exact logs, hashes and the next fake-hash-table bound: W354 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W355 do_lookup_x entry and write-sink bound (2026-11-27, 18:08Z wake; W366 replay)
+
+W354 closed the consumer to glibc 2.41 `do_lookup_x()`; W355 corrected its
+entry to `0xa220` (`0xa0a0` is `check_match`) and asked whether the chosen
+fake `link_map` could reach a chosen-address write. Read-only observers on the
+unchanged W353 JIF logged three lookups at the corrected entry, including the
+chosen `memcpy`/`0xd827590` hit with `flags=0x5`; the chosen map's GNU-hash bit
+test failed before `check_match`. glibc 2.41 source and ld.so disassembly show
+no chosen-address store inside `do_lookup_x`: two stores are reachable only
+after a successful forged-symbol match — `l_used = 1` at `0xb200` and the
+caller GOT value at `0x11257`. Three forged-map JIFs replayed with the pinned
+inflate produced only genuine libz resolutions and one genuine GOT write
+(`rel_addr=0x7ffff7aa30f0`, `value=0x7ffff7a87ae0`): no `l_used` store, no
+chosen GOT value, no chosen `memcpy` lookup. The negative's cause is that the
+fake map's table pointers overlap loader array slots `ARR[6..]`, so iteration
+faults before the chosen `ARR[0]` map is consulted.
+
+Witness W366 (#6760) replayed the unmodified runner from private archive
+`d84fd5b7…` with all six pins matched: run A reproduced the three lookups and
+a chosen-map table hit at `P1=0x5555556c0240` with no store; run B reproduced
+the genuine GOT write byte-for-byte with no `l_used`, chosen GOT value or
+chosen-map hit. Verdict ESTABLISHED AS LABELED at the corrected-entry /
+read-only-sink scope, grade-neutral, NO r5. NIT: run A's `idx` drifted to
+`0x679180` and its `l_gnu_bitmask_idxbits` was nonzero, so it faulted at
+`0x12e1` instead of the author's `0x1327`; layout-conditioned and still
+read-only. Full logs, hashes and negatives: W355/W366 sections of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
