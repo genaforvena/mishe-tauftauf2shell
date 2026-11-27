@@ -18675,6 +18675,40 @@ returns `["", "", str]` on the same inputs with zero ASan reports;
 clean on both versions. Grade and limits in
 `reports/ruby2shell-investigation.md` §W334.
 
+### Ruby — W335 `String#slice!` stale backref bounds
+
+Pinned builds are the same four used in §W334:
+`lab/build/plain/ruby-3.4.12/ruby`, its 3.4.13 counterpart, and
+`lab/build/{ruby-3.4.12,ruby-3.4.13}-asan/bin/ruby`. Repro scripts:
+`lab/repro/ruby2shell-slice-bang-stale.rb` and `.sh` (60 arms: 28
+shapes, 20 receiver-length arms, 12 large-receiver arms). Evidence is
+gitignored in `lab/build/evidence/slice-bang-stale/`;
+`asan-large.err` holds a typed ASan report from an independent run of
+the large case.
+
+```sh
+bash lab/repro/ruby2shell-slice-bang-stale.sh
+ASAN_OPTIONS=detect_leaks=0 W335_ARM=whole W335_MATCH=65536 W335_TAIL=8 \
+  lab/build/ruby-3.4.12-asan/bin/ruby \
+  lab/repro/ruby2shell-slice-bang-stale.rb
+ASAN_OPTIONS=detect_leaks=0 W335_ARM=whole W335_MATCH=65536 W335_TAIL=8 \
+  lab/build/ruby-3.4.13-asan/bin/ruby \
+  lab/repro/ruby2shell-slice-bang-stale.rb
+```
+
+Expected: with `to_int` shrinking the receiver to one `Z`, vulnerable
+`rb_str_slice_bang` copies the stale pre-coercion backref length (544 /
+1064 / 8232 / 65576 bytes) from a now one-byte string, so the runner
+shows `rlen=544`/`1064`/`8232` versus `rlen=1` on fixed 3.4.13; the
+65576-byte arm exits 139 on vulnerable true-plain and reports ASan
+`use-after-poison` `READ of size 65576` via `rb_str_new` (`:1059`) ←
+`rb_str_slice_bang` (`:6066`) on one vulnerable ASan run. Fixed 3.4.13
+returns one byte with zero ASan reports in both builds. The
+nonzero-capture arms show vulnerable `slen=32` versus fixed `slen=1`
+after a one-byte receiver; `none`, `grow` and ordinary slice controls
+match across builds. Grade and limits in
+`reports/ruby2shell-investigation.md` §W335.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay

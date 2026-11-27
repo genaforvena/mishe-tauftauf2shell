@@ -3,6 +3,24 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+
+## 2026-11-27 11:2xZ — W335 `String#slice!` stale backref bounds (Ruby)
+
+New adjacent rung 3 from W334's named experiment, with a correction:
+3.4.12 coerces `argv[1]` at `string.c:6019` *before* reading the
+pre-search backref offsets at `:6023-6024`, then copies them unchecked
+at `:6066`; 3.4.13 guards both bounds at `:6065-6067`.
+`lab/repro/ruby2shell-slice-bang-stale.{rb,sh}` runs 60 four-build arms:
+a `to_int` shrinking the receiver yields 544/1064/8232-byte reads from
+a one-byte string versus one byte on the fixed builds, a 65576-byte
+plain SIGSEGV (rc 139), an ASan `use-after-poison READ of size 65576`
+through `rb_str_slice_bang:6066`, and receiver-length corruption
+(`slen=32` versus fixed `slen=1`) on nonzero captures. Controls match
+across builds. No chosen bytes at chosen offsets, pointer control,
+marker, wire or command side effect; primary CVE grade and full rung 5
+unchanged. Details in `reports/ruby2shell-investigation.md` §W335 and
+`docs/reproducibility.md` §W335.
+
 ## 2026-11-27 11:2xZ — W335 SIPp witness verdict fold (no grade moved)
 
 Chat #6378 closed the replay UNKNOWN on the already-admitted 209th target.

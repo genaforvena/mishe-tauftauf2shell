@@ -7982,3 +7982,74 @@ and clamps `len`. Test a shrinking receiver with a mutating capture
 index on 3.4.12/3.4.13 plain+ASan. Falsifier: no ASan OOB and no
 byte-count differential beyond the guard. Do not repeat partition,
 backref `[]=`, each_line, append_as_bytes, concat or setbyte drivers.
+
+## 2026-11-27 11:1x–11:3xZ — W335: `String#slice!` stale backref bounds, adjacent rung 3 (Ruby)
+
+W334 named this experiment in the same 3.4.12→3.4.13 `string.c` delta.
+Correction to W334's parting note: the coercion does **not** follow the
+`BEG`/`END` reads. 3.4.12 runs `rb_reg_search` at `:6015`, then
+`rb_reg_backref_number(match, argv[1])` at `:6019` (which calls a Ruby
+`to_int`), and only then reads `beg = BEG(nth)` at `:6023` and
+`len = END(nth) - beg` at `:6024`. The registers were captured by the
+pre-coercion search, so they are stale relative to the receiver's
+current length. 3.4.13 adds, at `:6065-6067`, `if (beg >
+RSTRING_LEN(str)) return Qnil;` and `if (len > RSTRING_LEN(str) - beg)
+len = RSTRING_LEN(str) - beg;`.
+
+`lab/repro/ruby2shell-slice-bang-stale.{rb,sh}` drives the unmodified
+`String#slice!` with a regexp and a capture-index object whose `to_int`
+shrinks (or grows) the receiver. The runner covers 60 arms across four
+pinned builds (true-plain and ASan 3.4.12/3.4.13): 28 shape arms, 20
+post-coercion-length arms and 12 large-receiver arms. Evidence lives in
+gitignored `lab/build/evidence/slice-bang-stale/{matrix,gen-matrix,large-matrix}.txt`
+with one `.out`/`.err` pair per arm.
+
+- **Whole-match stale copy.** Input `"A"*32 + "B"*N + "C"*8`, regexp
+  `/(A+B+C+)/`, capture 1, receiver replaced with `"Z"*1` by `to_int`.
+  Vulnerable 3.4.12 calls `rb_str_new(RSTRING_PTR(str)+0, N+40)` on a
+  one-byte receiver. With `N=32` the result is 544 bytes (`head=5a0041…`)
+  where fixed 3.4.13 returns 1 byte (`head=5a`). `N=1024` and `N=8192`
+  give 1064/8232 bytes on the vulnerable builds versus 1 on the fixed
+  builds, with pointer-looking adjacent bytes in the head (for example
+  `5a0099d13e610000407caf5669740000`). `N=65536` (65576-byte copy)
+  faults the vulnerable true-plain build with rc 139 in
+  `__memcpy_avx_unaligned_erms`; the fixed builds return one byte.
+- **Confirmed corruption.** A separate 3.4.12 ASan run of that same
+  65576-byte input (`lab/build/evidence/slice-bang-stale/asan-large.err`)
+  reports `ERROR: AddressSanitizer: use-after-poison`, `READ of size
+  65576`, via `memcpy` → `str_enc_new` (`string.c:1042`) → `str_new`
+  (`:1053`) → `rb_str_new` (`:1059`) → `rb_str_slice_bang` (`:6066`).
+  A second ASan run of the identical input in the matrix instead dies
+  with `AddressSanitizer:DEADLYSIGNAL` in the same memcpy frame, without
+  a typed report; both raw errors are preserved, not collapsed.
+- **Nonzero-offset length corruption.** `/(A+)(B+)/` capture 2 gives
+  `beg=32`, `len=256`; shrinking the receiver to one byte leaves
+  vulnerable `rlen=256` and a receiver whose length is restored to
+  `slen=32` (`STR_SET_LEN` after the `slen -= len` clamp), versus fixed
+  `rlen=0`, `slen=1`. The one-byte-shrink boundary arm (`shrink=287`)
+  gives `rlen=256` vs fixed `255`, both with `slen=32`; the fixed guard
+  clamps only the copy, not the receiver length.
+- **Controls.** `none` (no mutation), `grow`, and the ordinary
+  non-mutating `plain` arm produce byte-identical results on both
+  releases; the `reclaim` arm adds no new shape. All 20 fixed-build
+  shrink arms stay inside the new receiver length; no fixed-build arm
+  faults. The falsifier (no ASan OOB and no byte-count differential
+  beyond the guard) is refuted on the vulnerable build.
+
+Grade: **adjacent rung 3** — deterministic plain crash, ASan-confirmed
+invalid read of 65576 bytes and a measured receiver-length corruption,
+with fixed and safe-input controls. The visible prefix bytes come from
+the replacement string itself, not from a groomed neighbour object;
+no chosen bytes at chosen offsets, pointer control, marker, command
+side effect or wire input were observed. Stock reachability remains
+UNKNOWN. Primary CVE grade and full rung 5 are unchanged; no prior
+grade cell is relabeled. Recipe in `docs/reproducibility.md` §W335.
+
+Next named experiment: try to shape the disclosed region — allocate
+frozen/groomed buffers of `0x5a` before the stale `rb_str_new`, then
+check whether the 1064/8232-byte result carries attacker-chosen bytes
+at offsets beyond the replacement prefix, on 3.4.12/3.4.13 plain+ASan.
+Falsifier: no `0x5a` run beyond the replacement length on the vulnerable
+build, or any `0x5a` run past the clamp on the fixed build. Do not
+repeat partition, backref `[]=`, each_line, append_as_bytes, concat,
+setbyte or the default `slice!` shapes above.
