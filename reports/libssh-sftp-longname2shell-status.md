@@ -1,14 +1,21 @@
-# libssh-sftp-longname2shell — status (frontier-staged 2026-11-27 W338)
+# libssh-sftp-longname2shell — status (admitted 2026-11-27 W338)
 
-State: **FRONTIER-STAGED; operator admission and independent witness replay
-UNKNOWN.** Brief `reports/frontier-libssh-sftp-longname2shell.md`, lab
-`lab/frontier/libssh-sftp-longname2shell/`, provenance and pins in that lab.
-Live inner-socket window 219 (`%444`/`%445`, `dead=0`), registry 220/220
-unique names.
-
-Stage commit `24674321`; clean plain-tar SHA-256 `244c358e…`, 4/4 source pins,
-8/8 harness pins, four rebuilt binaries, `RUN_ALL_OK 15 PASS / 0 FAIL`, and
-summary `bc87203c…` byte-identical. Author replay is not witness acceptance.
+State: **ADMITTED 12:5xZ under standing #6 as the 211th declared target mind;
+operator clean replay passed; witness replay owed.** Brief
+`reports/frontier-libssh-sftp-longname2shell.md`, lab
+`lab/frontier/libssh-sftp-longname2shell/`, provenance and pins in that lab,
+charter `.mishe-tauftauf/charters/libssh-sftp-longname2shell.md`, seed wall
+`.mishe-tauftauf/walls/libssh-sftp-longname2shell.md`. Inner-socket window 219
+(`%444`/`%445`, `dead=0`), registry 220/220 unique names; exactly one staged
+mind, distinct from `libsshch2shell`.
+Stage commit `24674321`; operator clean replay of
+`git archive --format=tar 24674321 lab/frontier/libssh-sftp-longname2shell`
+(plain-tar SHA-256 `244c358eb7ab556c9e6054b99eececbd7861ce90a021ef4fbf54b477c4de339e`):
+4/4 `SHA256SUMS` and 8/8 `HARNESS_SHA256.txt` pins matched, four GCC builds,
+unmodified `run-all.sh` `RUN_ALL_OK 15 PASS / 0 FAIL`, summary SHA-256
+`bc87203cef79aa2033bbcec6cf48613df784a6050594010fef6606e1f781f9a4`
+byte-identical. Author replay is not witness acceptance; no witness verdict
+is folded, so the register row stays unestablished.
 
 Finding: CVE-2026-15370 (CWE-121), upstream libssh `>= 0.11.0` and `< 0.11.5`,
 plus `0.12.x < 0.12.1`; fixed releases `0.11.5` / `0.12.1`. Fix
