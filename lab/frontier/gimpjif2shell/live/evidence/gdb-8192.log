@@ -1,0 +1,68 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 01:51:33.462: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 01:51:33.462: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 01:51:45.232: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 01:51:45.232: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 01:51:45.232: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.232: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.232: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.233: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.233: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.233: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.233: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.234: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.237: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.240: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 01:51:45.240: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+Jeff's Image Format-Warning: Error reading inflate failed. Image may be corrupt!
+
+
+Thread 1 "file-gif-load" received signal SIGSEGV, Segmentation fault.
+0x00007ffff74aaaff in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+=== W304 PLUGIN SIGNAL SIGSEGV in inferior 1 pid 652179 ===
+rip            0x7ffff74aaaff      0x7ffff74aaaff
+rsp            0x7fffffffbf80      0x7fffffffbf80
+rdi            0x5555556fea60      93824993978976
+rsi            0x1258304           19235588
+rax            0x4d4d4d4d4d4d4d48  5570193308531903816
+#0  0x00007ffff74aaaff in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#1  0x00007ffff74adb7a in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#2  0x00007ffff74ae9ce in malloc () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#3  0x00007ffff744881b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#4  0x00007ffff7448c00 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#5  0x00007ffff7446763 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#6  0x00007ffff7446050 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#7  0x00007ffff7bf0e50 in gimp_color_profile_new_from_icc_profile (data=0x0, length=length@entry=0, error=error@entry=0x0) at ../libgimpcolor/gimpcolorprofile.c:304
+#8  0x00007ffff7cb50c5 in gimp_image_get_color_profile (image=image@entry=0x5555556eb160) at ../libgimp/gimpimagecolorprofile.c:52
+#9  0x00007ffff7cb15c0 in gimp_drawable_get_format (drawable=drawable@entry=0x5555556eba60) at ../libgimp/gimpdrawable.c:359
+#10 0x00007ffff7cee41a in _gimp_tile_backend_plugin_new (drawable=drawable@entry=0x5555556eba60, shadow=shadow@entry=0) at ../libgimp/gimptilebackendplugin.c:179
+#11 0x00007ffff7cb144e in gimp_drawable_get_buffer (drawable=drawable@entry=0x5555556eba60) at ../libgimp/gimpdrawable.c:291
+#12 0x00005555555582bf in ReadImage (fd=fd@entry=0x555555616df0, file=file@entry=0x55555561a690, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc548, error=0x7fffffffc8b8, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1477
+#13 0x000055555555861c in load_image (file=file@entry=0x55555561a690, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc8b8) at ../plug-ins/common/file-gif-load.c:625
+#14 0x0000555555558dd4 in gif_load (procedure=0x55555561bd40, run_mode=<optimized out>, file=0x55555561a690, metadata=<optimized out>, flags=0x7fffffffc914, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#15 0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd40, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#16 0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd40, args=args@entry=0x55555561c820) at ../libgimp/gimpprocedure.c:2200
+#17 0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187b0, procedure=0x55555561bd40, proc_return=0x7fffffffca60) at ../libgimp/gimpplugin.c:1511
+#18 gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175d0, proc_run=proc_run@entry=0x5555556187b0, procedure=0x55555561bd40, proc_return=proc_return@entry=0x7fffffffca60) at ../libgimp/gimpplugin.c:1551
+#19 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175d0, proc_run=0x5555556187b0) at ../libgimp/gimpplugin.c:1453
+#20 gimp_plug_in_loop (plug_in=0x5555556175d0) at ../libgimp/gimpplugin.c:1356
+#21 _gimp_plug_in_run (plug_in=0x5555556175d0) at ../libgimp/gimpplugin.c:909
+#22 0x00007ffff7cae392 in gimp_main (plug_in_type=93824992551104, argc=<optimized out>, argv=0x7fffffffcdf8) at ../libgimp/gimp.c:636
+#23 0x00007ffff7435ca8 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#24 0x00007ffff7435d65 in __libc_start_main () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/gdb-8192.jif" "gdb-8192.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

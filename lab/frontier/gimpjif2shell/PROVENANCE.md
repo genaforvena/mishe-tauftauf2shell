@@ -1290,3 +1290,44 @@ with core 29 PASS / 0 FAIL, and
 `GIMPJIF_APPIMAGE_WORK=/tmp/gimpjif-appimage bash live/run-appimage-span.sh`
 gave `TOTAL: 12 PASS / 0 FAIL`. The reused AppImage is the SHA-verified
 3.2.8 image already cached outside Git; the lab tree itself is clean.
+
+## W304 live plug-in fault frame under gdb (2026-11-27, 01:45Z wake)
+
+Upstream GIMP debugging hook used as documented at
+`https://developer.gimp.org/resource/debug/` (read-only documentation
+fetch): `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run`,
+`GIMP_PLUGIN_DEBUG_WRAPPER="gdb -q -batch -x <cmd> --args"`. The plug-in
+binary shipped in the SHA256-verified GIMP 3.2.8 AppImage is
+`ELF 64-bit LSB pie executable ... with debug_info, not stripped`, with
+`ReadJeffsImage.isra.0` at `0x34c0`. No shim is preloaded; the pristine
+`AppRun` is used.
+
+New files: `live/gdb-plugin.cmd` SHA-256
+`1f495a7fdaf8e025f212b549887accad75eafaf52ca452ff00df70ccc724451a`,
+`live/run-appimage-gdb.sh` SHA-256
+`b6fd7b8da8c1da88eeac98494764955343577106fdb3dab990f4bc24dfcd0ae9`.
+The gdb command file prints a 25-frame backtrace and `rip rsp rdi rsi rax`
+on SIGSEGV/SIGBUS/SIGABRT in the plug-in inferior. The runner generates
+`live/evidence/gdb-8192.jif` with `make-jif.py published-run 8192 4d`, runs
+the safe 4x4 JIF and the 8 KiB JIF through `gimp-file-load` in fresh `$HOME`
+profiles under a 90 s timeout each, and asserts the safe/attack contrast.
+
+In-tree run: `TOTAL: 8 PASS / 0 FAIL`, rc 0. The attack log contains
+`W304 PLUGIN SIGNAL SIGSEGV in inferior 1`, `rax
+0x4d4d4d4d4d4d4d48`, `#2 ... in malloc ()`, `#7
+gimp_color_profile_new_from_icc_profile (data=0x0, length=0)`,
+`#9 gimp_drawable_get_format`, `#12 ReadImage (... is_jeff_image=1, ...)
+at ../plug-ins/common/file-gif-load.c:1477`, `#13 load_image (...
+is_jeff_image=1, ...)`, and `#15 gif_load` — after the plug-in printed
+`Jeff's Image Format-Warning: Error reading inflate failed`. The safe log
+has `batch command executed successfully` and no `W304 PLUGIN SIGNAL`.
+Preserved negative: a first attempt to follow forks from gdb launched under
+the AppRun shell stopped at an irrelevant `readlink` child; the documented
+GIMP plug-in wrapper hook replaced it, and that run is not counted.
+
+Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5. A chosen-byte pattern in `rax` inside `malloc` is evidence of
+corrupt allocator state reached from the live JIF path, not of a
+chosen-address write or a successful pointer dereference. No named victim
+object write, marker or command was observed; the fixed-build differential
+remains BLOCKED because no fixed GIMP build is published.
