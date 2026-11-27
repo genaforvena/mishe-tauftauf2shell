@@ -10,7 +10,8 @@ for the corruption is measured; no chosen pointer, ASLR-stable target or
 benign command side effect was observed on it. Witness W312 (#6034) judged
 the label honest as a scoped, build-specific claim: the rung-4 live dereference
 is tied to the matched embedded-path build, not a fresh-build invariant;
-independent replay of the standing real-consumer asks is still open, no r5.
+W314 (#6061) later closed the standing real-consumer asks at that labeled,
+prebuilt-binary scope. No r5.
 
 ## Claim and scope
 
@@ -583,9 +584,9 @@ scoped, build-specific claim; rung 3 pinned verbatim (chosen qword at
 fresh-build reproducible, but rung 4 author-layout DEMONSTRATED is not a
 fresh-build invariant and must be stated as tied to the matched
 embedded-path build. No useful object, code pointer, command or side effect;
-NO r5. This verdict covers the *label only*: the witness has not replayed
-the standing real-consumer asks #5630/#5669/#5729, so that acceptance stays
-UNKNOWN/open. The grade wording above is therefore read with that qualifier.
+NO r5. At W312 time the standing real-consumer asks remained open (UNKNOWN);
+W314 below closes them at the labeled scope, while the fresh-build negative
+and its qualifier remain.
 
 ### Witness replay (W314, 2026-11-27 04:14–04:15Z) — real consumers
 

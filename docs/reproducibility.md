@@ -14254,7 +14254,8 @@ the sweep is variable and the natural object's type/role is UNKNOWN.
 Negatives: default stripped v6 `07070X` gives no ASan write and plain
 `rpm -qlvp --nodigest` never enters the iterator. Grade rung 3 real / rung 4
 DEMONSTRATED instrumented; no controlled pointer hijack, wire, command or
-r5; witness replay pending. Detail `reports/frontier-rpm2shell.md`.
+r5; the standing real-consumer asks were later closed by witness W314 (#6061)
+at the labeled, prebuilt-binary scope (NO r5). Detail `reports/frontier-rpm2shell.md`.
 
 ### MQTT-C shipped callback and wire runners (`bf77b8a6`, `6b1beb43`)
 
