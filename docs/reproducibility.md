@@ -18753,6 +18753,11 @@ Expected: on 3.4.12 plain and ASan, `marshal_fixnum` gives `rlen=7`,
 and returns `VALUE=nil` on fixed ones. The four `nocoerce` arms are
 identical across builds (full payload consumed); no ASan report is
 expected. Grade and limits in `reports/ruby2shell-investigation.md` §W337.
+Docs replay at 12:2xZ ran the unmodified script on the four pinned builds:
+rc 0, all 20 arms matched those bytes — including `VALUE=11258368`,
+`VALUE="\u0000WNED"`, the fixed `marshal data too short` raises and the
+`no associated pointer` / `nil` `unpackp` split — with four identical
+`nocoerce` arms and zero ASan reports.
 
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 

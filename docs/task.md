@@ -16230,8 +16230,9 @@ with an observed side effect, or a checker RED on committed HEAD.
 
 ## 2026-11-27 11:3x–11:4xZ — 210th admitted, W335 allocator and stale-bound lanes
 
-Current limb for a reader arriving now; it supersedes the "next experiment"
-lines in the 11:0x–11:2xZ limb above. The operator's 210th admission at
+This limb superseded the "next experiment" lines in the 11:0x–11:2xZ
+limb above; current work is in the 12:0x–12:1xZ limb at the tail.
+The operator's 210th admission at
 `8063345c` re-rendered the register (210 declared / 207 active / 207
 reported / 141 established); no rung, grade, `established` flag or count
 moved in this fold. Pins and commands are in `docs/reproducibility.md`
@@ -16274,8 +16275,11 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
   offsets then copies unchecked at `string.c:6066`; a `to_int` shrink
   gives 544/1064/8232/65576-byte reads from a one-byte string, a plain
   rc 139 and an ASan `use-after-poison` read, while 3.4.13 guards the
-  bounds. No chosen bytes at chosen offsets, wire path or r5. Next:
-  establish a real caller that reads the stale length.
+  bounds. W335 itself has no chosen-byte write, pointer or wire path; W337
+  (below) fed the stale tail to stock `Marshal.load` in-process and got
+  caller-chosen bytes materialised as a fixnum or String, with no pointer
+  dereference, marker or r5. Next: a stock consumer that dispatches a method
+  or dereferences a chosen address without a harness-defined `_load` class.
 
 - **Bzfs2Shell W336 chosen-TARGET probe is W337 ESTABLISHED AS LABELED.**
   Live v2.4.30 on loopback dereferenced a wire-chosen `info` pointer in a
@@ -16292,5 +16296,39 @@ moved in this fold. Pins and commands are in `docs/reproducibility.md`
 What would change this limb: a loopback SvxLink directory reply reaching
 `setData()` (its witness verdict is already closed), a command-execution
 path on the bzfs chosen-target probe (its W337 replay is closed), a
-successful gimpjif allocator dereference, a real consumer of Ruby's stale
-bound, or a checker RED on committed HEAD.
+successful gimpjif allocator dereference, a stock Ruby consumer that
+dispatches or dereferences the stale tail beyond W337's in-process
+`Marshal.load` objects, or a checker RED on committed HEAD.
+
+## 2026-11-27 12:0x–12:1xZ — Ruby stale-tail consumer closed; bzfs verdict detail
+
+Current limb for a reader arriving now; it supersedes the "next experiment"
+lines in the 11:3x–11:4xZ limb above. Both commits in this edge are additive:
+no rung cell, grade, `established` flag, generated cell, manifest, README,
+report or lab evidence moved here.
+
+- **Ruby W337 closes W335's named consumer follow-up at narrow in-process
+  scope.** A `to_int` shrink before the unchecked 3.4.12 `rb_str_slice_bang`
+  copy leaves caller bytes past the new logical end; stock `Marshal.load`
+  materialises them as typed objects. Vulnerable 3.4.12 plain and ASan:
+  `marshal_fixnum` `rlen=7`, `head=0408690300caab`, `VALUE=11258368`;
+  `marshal_string` `rlen=15`, `VALUE="\u0000WNED"`. Fixed 3.4.13 plain and
+  ASan: `rlen=4`/`5` with `ArgumentError: marshal data too short`. `unpackp`
+  is a closed negative (`no associated pointer` on vulnerable, `nil` on
+  fixed): Ruby's pointer-association check blocks a copied `pack("p")`
+  pointer. Four `nocoerce` arms are identical across builds and no ASan
+  report fires. Adjacent narrow rung 4 in-process with a consumer-visible
+  typed object; no pointer control, marker, command, wire or stock reach;
+  primary CVE grade and full rung 5 unchanged. Recipe in
+  `docs/reproducibility.md` §W337, report §W337.
+- **Bzfs2Shell W337 replay detail is doc-ok.** Commit `18103375` adds the
+  witness's own hash-matched rebuilds, unmodified-stock marker arm,
+  fixed/safe controls and gitignored log locations to the status and brief;
+  the verdict and its conditions were already folded at `9f51deb2` in the
+  bzfs register row, `docs/task.md` and §11:5xZ. No duplicate fold.
+
+What would change this limb: a stock Ruby consumer whose parsing of the
+stale tail dispatches a method or dereferences a chosen address without a
+harness-defined class (falsifier: only `_load` classes work, or the fixed
+build dispatches too), a command-execution path on the bzfs chosen-TARGET
+probe, or a checker RED on committed HEAD.

@@ -22,6 +22,25 @@ CVE grade and full rung 5 unchanged. Details in
 `reports/ruby2shell-investigation.md` §W337 and
 `docs/reproducibility.md` §W337.
 
+## 2026-11-27 12:1x–12:3xZ — docs fold: Ruby W337 consumer
+
+Docs-only fold of `18103375` and `9a010a37` after `9f51deb2`. The author's
+W337 changelog and recipe limbs were verified and left as written; the
+bzfs W337 witness detail is report-only and its verdict was already folded,
+so no duplicate limb was added. This fold closes the stale "real caller" and
+"real consumer" next lines in `docs/task.md`, adds the 12:0x current limb,
+and records the docs replay observation in `docs/reproducibility.md` §W337.
+No rung, grade, `established` flag, generated cell, manifest, README,
+report or lab evidence moved here.
+
+- **Ruby W337 replayed on this host.** `bash
+  lab/repro/ruby2shell-slice-bang-consumer.sh` ran 20 arms over the four
+  pinned builds with rc 0: vulnerable `rlen=7`/`head=0408690300caab` →
+  `VALUE=11258368` and `rlen=15` → `"\u0000WNED"` on 3.4.12 plain and ASan;
+  fixed `rlen=4`/`5` with `marshal data too short` on 3.4.13 plain and
+  ASan; `unpackp` `no associated pointer` / `nil`; four `nocoerce` arms
+  identical and zero ASan reports. Byte-identical to the committed recipe.
+
 ## 2026-11-27 11:5x–12:0xZ — docs fold: svxlink witness, bzfs target, gimpjif ceiling
 
 Docs-only fold of `b2da0a75`, `6c20fb5c`, `ad1d9de9`, `7641c034` and
