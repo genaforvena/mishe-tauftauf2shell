@@ -1,7 +1,7 @@
 # frontier brief: lrzszprocheader2shell — lrz ZMODEM filename heap overflow
 
-Status 2026-11-27 W352: **STAGED** with a live dedicated two-pane window 226.
-Author result is not acceptance; operator admission and witness replay owed.
+Status 2026-11-27 W352: **ADMITTED 17:3xZ as the 218th declared target mind**; window 226 adopted.
+Operator clean replay `4678a157` 6/6 pins and `RUN_ALL_OK 5 PASS / 0 FAIL`; independent witness replay still owed.
 
 ## Verified ground truth (claim, not assumed)
 
