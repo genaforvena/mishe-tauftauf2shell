@@ -1,6 +1,38 @@
 # Dated research updates
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
+## 2026-11-27 02:2xZ — AFFLIB admitted 197th, W305b gimpjif runner-nit
+
+This section folds `b82698ff` and `c90de48d`, two commits that landed after
+the §02:1x–02:2xZ fold; explanation and recipes only, no generated cell,
+register row, grade, count, manifest, SVG, report or lab evidence moved.
+
+- `b82698ff` admitted afflibpage2shell under standing #6 at 02:2xZ as the
+  197th declared target mind: window 205 adopted as-is, one registry entry
+  among 206 unique names, no duplicate CVE/GHSA or sink lane. Generated counts
+  196/193/193/132 → 197/194/194/132 with `established=false`; grade unchanged
+  R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —. The operator clean-archive replay used
+  `git archive dce931cf lab/frontier/afflibpage2shell` (11 committed lab
+  files, no runs, checkouts, builds or binaries): runner `f2e166d0…`,
+  rc 0 `BUILD_OK` then 29/0. Independent witness replay is still owed;
+  author and operator replays are not acceptance. This supersedes the §02:0xZ
+  "admission owed" wording.
+- `c90de48d` recorded witness #5991 for gimpjif W305b: clean archive
+  `49ab8231` gave core 6/0 and 29/0, ESTABLISHED AS LABELED WITH RUNNER-NIT
+  at the W302 live-span scope, no grade change and NO r5. The unmodified span
+  runner scored 11 PASS / 1 FAIL because its 8 KiB case silently hit the 90 s
+  budget three times; longer no-shim trials with the same generated
+  `AppRun.noshim` faulted naturally (SIGSEGV at 240 s, tcache abort at 19 s).
+  The bounded repair gives `run_jif` an optional timeout (`${4:-90}`) and only
+  the 8 KiB case 300 s; a silent timeout still FAILs and rc stays nonzero.
+  After repair, in-tree `run-witness.sh` 6/0 (core 29/0) and span 12/0 rc 0
+  with the 8 KiB log ending `file-gif-load: fatal error: Segmentation fault`,
+  no orphan. The three timeouts remain a preserved negative and the 12/0
+  author result is environment-sensitive, not a universal replay promise.
+  This supersedes the §02:0xZ "interim, not a committed verdict" line. Detail:
+  `.mishe-tauftauf/artifacts/witness-w305-gimpjif/detail.md` and report
+  § W305b/W306.
+
 ## 2026-11-27 02:1x–02:2xZ — W306 rpm consumer boundary, gimpjif session reap
 
 This fold covers `21fbf8ee`, `0fd2028f` and `df4caa52` and adds explanation
@@ -114,8 +146,9 @@ admission brief and the 01:2x staging brief, both kept as pre-verdict history.
   replay rebuilt both pins and repeated 29/0 with the same hash. Grade at
   handoff R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —: no live AFFLIB consumer,
   chosen-offset readback, pointer, wire path, marker or command; plain
-  vulnerable mode faults before readback. Admission under standing #6 and
-  independent witness replay are owed; the author report is not acceptance.
+  vulnerable mode faults before readback. Admission followed at 02:2xZ
+  (`b82698ff`, 197th); independent witness replay is still owed; author and
+  operator replays are not acceptance.
 
 ## 2026-11-27 01:5xZ — W304 deeper negative repeat IDs CLOSED (Ruby)
 

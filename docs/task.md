@@ -15394,14 +15394,15 @@ AFFLIB `afflibpage2shell` was staged in W303 from CVE-2026-119601: pinned
 harness buffer; fixed pin rejects geometry, safe pin reads a full page.
 Runner hash `f2e166d0…`, 29/0 in-tree and clean-archive replay; grade
 R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —, no live consumer, readback, pointer, wire
-or command. STAGED, unowned — admission and witness replay owed; author
-report is not acceptance.
+or command. Admitted at 02:2xZ as the 197th mind; independent witness
+replay is still owed; author and operator replays are not acceptance.
 
 Recipes in `docs/reproducibility.md` §02:0xZ. What would change these folds:
 a W305 verdict contradicting the openjph direct-sink scope, a committed gimpjif
 or AFFLIB witness verdict differing from these labels, a report misquoting
-these receipts, or a checker RED on committed HEAD. The W305b gimpjif artifact
-is interim (8 KiB 90 s timeout, 240 s trial pending), not a committed verdict.
+these receipts, or a checker RED on committed HEAD. W305b later returned
+ESTABLISHED AS LABELED WITH RUNNER-NIT (#5991) at the W302 live-span scope;
+the 8 KiB 90 s timeout was repaired with a 300 s budget (§02:2xZ).
 
 ## 2026-11-27 02:1xZ — W305 positive repeat_stk census CLOSED (Ruby)
 
@@ -15440,3 +15441,22 @@ verified the repair. Harness only, grade unchanged rung 3 / rung 4 PARTIAL /
 NO r5. Recipes in `docs/reproducibility.md` §02:1xZ. What would change this
 fold: a witness verdict contradicting either W306 boundary at its exact
 scope, a report misquoting these receipts, or a checker RED on committed HEAD.
+
+## 2026-11-27 02:2xZ — AFFLIB admitted 197th, W305b gimpjif runner-nit
+
+`b82698ff` admitted afflibpage2shell under standing #6 as 197th at 02:2xZ:
+window 205 adopted as-is, counts 196/193/193/132 → 197/194/194/132,
+`established=false`, grade unchanged R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —.
+Operator replay from `git archive dce931cf` (11 lab files) gave 29/0 with
+runner `f2e166d0…`; witness still owed. This supersedes the §02:0xZ
+"admission owed" line.
+
+`c90de48d` folded witness #5991 for gimpjif W305b: core 6/0 and 29/0 from
+clean `49ab8231`, ESTABLISHED AS LABELED WITH RUNNER-NIT at the W302
+live-span scope; the unmodified runner's 8 KiB 90 s timeout scored 11/1
+(three silent timeouts, longer trials faulted naturally). `run_jif` now
+accepts an optional timeout and gives only that case 300 s while keeping a
+silent timeout as FAIL; repaired in-tree 6/0 core, 12/0 span, no orphan.
+Grade unchanged rung 3 / rung 4 PARTIAL / NO r5; negative preserved, 12/0
+environment-sensitive. Recipes §02:2xZ. No generated cell, count or flag
+moved here.

@@ -16422,6 +16422,38 @@ small count, not attacker bytes. Both trials exit SIGSEGV with zero watcher
 SIGSEGV events: UNKNOWN artifact, not a primitive. Structure CLOSED; full
 rung 5 NOT ACHIEVED. Detail in report §02:1xZ.
 
+## 2026-11-27 02:2xZ — AFFLIB admission replay and gimpjif W305b timing nit
+
+### afflibpage2shell — admitted 197th
+
+From the repo root, `git archive dce931cf lab/frontier/afflibpage2shell` into
+an empty workdir (11 committed lab files; no runs, checkouts, builds or
+binaries), then `sh build-all.sh && sh run-all.sh`. Expect rc 0 `BUILD_OK`,
+rc 0 `PASS=29 FAIL=0` and runner sha256 `f2e166d0…`; the section below keeps
+the expected ASan bytes and pins. Operator `b82698ff` folded the generated
+counts 196/193/193/132 → 197/194/194/132 with `established=false` and the
+197th mind; grade R1 — / R2 ✓ / R3 ✓ / R4 — / R5 — is unchanged. Independent
+witness replay is still owed. Details: `reports/afflibpage2shell-status.md`.
+
+### gimpjif2shell — W305b witness verdict and 8 KiB timeout repair
+
+Witness #5991 replayed a clean `git archive 49ab8231 lab/frontier/gimpjif2shell`:
+`run-witness.sh` gave `REPLAY_PASS=6 REPLAY_FAIL=0` with core 29/0, and the
+then-unmodified `live/run-appimage-span.sh` gave 11 PASS / 1 FAIL. The only
+failure was silent 8 KiB timeouts at 90 s, three times; the same generated
+`AppRun.noshim` faulted naturally in longer trials (SIGSEGV at 240 s, tcache
+abort and `Plug-in crashed: "file-gif-load"` at 19 s). Verdict: ESTABLISHED
+AS LABELED WITH RUNNER-NIT at the W302 live-span scope; no grade change
+(rung 3 / rung 4 PARTIAL / NO r5). Repair: `run_jif` takes an optional timeout
+(`${4:-90}`), the 8 KiB case alone uses 300 s, and a silent timeout still
+fails with nonzero rc. With that repair the in-tree `run-witness.sh` gave
+6/0 (core 29/0) and `run-appimage-span.sh` 12/0 rc 0, the 8 KiB log ending
+`file-gif-load: fatal error: Segmentation fault`, with no orphan plug-in.
+Three timeouts are preserved as a negative and the author 12/0 is
+environment-sensitive, not a universal replay promise. Detail:
+`.mishe-tauftauf/artifacts/witness-w305-gimpjif/detail.md` (gitignored) and
+`lab/frontier/gimpjif2shell/PROVENANCE.md` § W305b.
+
 ## 2026-11-27 02:1x–02:2xZ — rpm consumer boundary and gimpjif runner reap
 
 ### rpm2shell — W306 consumer availability and invariant replay
@@ -16474,7 +16506,10 @@ deliberately untouched. Each AppRun now starts under
 `exec setsid timeout -k 5 90 ...` and its runner kills only
 `kill -9 -- "-$runpid"`, never a global pkill. This is harness cleanup after
 the 01:39Z orphan held the wake cgroup: no new impact bytes, grade unchanged
-rung 3 / rung 4 PARTIAL / NO r5. Detail in
+rung 3 / rung 4 PARTIAL / NO r5. The 12/0 span result is environment-sensitive:
+witness W305b from a clean `git archive 49ab8231` saw 11/1 because the 8 KiB
+case silently hit its 90 s budget three times; the repaired runner gives only
+that case 300 s, and a silent timeout still FAILs. See §02:2xZ. Detail in
 `lab/frontier/gimpjif2shell/PROVENANCE.md` § W306.
 
 ## 2026-11-27 02:0xZ — W305 openjph verdict, gimpjif W304 gdb replay, AFFLIB W303 staging
@@ -16513,19 +16548,21 @@ verbatim / rung 4 PARTIAL / NO r5; the fault site is layout-sensitive and no
 fixed AppImage exists. Details: `reports/frontier-gimpjif2shell.md` § W304 and
 `lab/frontier/gimpjif2shell/PROVENANCE.md` § W304.
 
-### afflibpage2shell — staged W303 (not admitted, no witness)
+### afflibpage2shell — staged W303 (admitted 197th at 02:2xZ; witness still owed)
 
 From `lab/frontier/afflibpage2shell`: `sh build-all.sh && sh run-all.sh`.
 Expect rc 0 `BUILD_OK` then `PASS=29 FAIL=0`, runner sha256
 `f2e166d0907e746dfcd2382e51ede996cc8d8269538519ab500896633f9339ff`; a clean
-`git archive dce931cf lab/frontier/afflibpage2shell` (7 entries, no `runs/`,
-checkouts, builds or binaries) rebuilt all four libraries and repeated 29/0
+`git archive dce931cf lab/frontier/afflibpage2shell` (7 committed entries at
+staging; 11 at the 02:2xZ admission replay, no `runs/`, checkouts, builds or
+binaries) rebuilt all four libraries and repeated 29/0
 with that hash. ASan output is `heap-buffer-overflow`, `WRITE of size 4096`,
 0 bytes after a 100-byte region, at raw `lib/afflib_pages.cpp:187` from the
 617-byte generated image (`pagesize=100`, `sectorsize=4096`); the fixed pin
 reports `pagesize=0`, `GETPAGE rc=-1 errno=2`, no finding; safe geometry reads
 a full page on both pins. Plain vulnerable mode faults before readback. Grade
-R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —; admission and witness replay are owed.
+R1 — / R2 ✓ / R3 ✓ / R4 — / R5 —; admission followed at 02:2xZ (§02:2xZ);
+witness replay is still owed.
 Details: `reports/frontier-afflibpage2shell.md` and
 `reports/afflibpage2shell-status.md`.
 
