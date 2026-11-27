@@ -3700,3 +3700,11 @@ single-pointer retune is not indicated; a further attempt needs a consumer
 that tolerates 16-byte phase drift (as W353 did) or a measured source of a
 deterministic `idx`. Raw logs: `/tmp/w357-idx-{a,b}-*`, `/tmp/w357-map{,-2}-*`
 and `/tmp/w357-delta-*` in this wake's session; SHA-256s recorded there.
+
+Extension: two more forged-map runs added `taskset -c 0` CPU pinning outside
+the same ASLR-off control. `idx` moved `0x555555678820` (GDB `6dbc7c9e…`) and
+then `0x5555556784d0` (GDB `f0aa93e7…`), a 0x350 spread wider than the
+unpinned runs; both logged only genuine lookups and the genuine GOT write.
+Scheduling control is therefore not a deterministic-`idx` source either. No
+pointer retune was attempted, no store or chosen GOT value was observed, and
+the grade is unchanged.

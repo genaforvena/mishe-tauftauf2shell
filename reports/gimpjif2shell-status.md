@@ -634,3 +634,6 @@ resolutions and the genuine GOT write. Grade unchanged rung 3 pinned verbatim
 / rung 4 chosen-pointer dereference, NO r5. A coherent static fake map needs
 an actually deterministic `idx`, not another pointer retune. Evidence:
 W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+CPU pinning (`taskset -c 0`) widened it to 0x350 in two more forged runs;
+neither control gives a deterministic `idx`.

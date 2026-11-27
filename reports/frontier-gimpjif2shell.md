@@ -2129,3 +2129,7 @@ the genuine GOT write occurred: no chosen-map hit, `l_used` store or chosen
 GOT value. ASLR-off narrows but does not eliminate the drift, so the static
 coherent map remains unreachable; grade and r5 ceiling unchanged. Hashes and
 logs: W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+CPU pinning (`taskset -c 0`) widened the spread to 0x350 across two more
+forged runs, with no chosen-map hit or store; neither lab control yields a
+deterministic `idx`.
