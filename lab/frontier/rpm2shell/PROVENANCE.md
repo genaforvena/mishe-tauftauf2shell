@@ -1037,3 +1037,35 @@ DEMONSTRATED in real rpm consumers; no useful object, code pointer, marker,
 command, side effect or wire path; no chosen-address dereference of a
 remote-controlled value; NO r5. No runner, source or package byte changed
 with this note.
+
+## W316 (2026-11-27 05:1xZ) — near-wrap symlink size variants
+
+Question: is the `UINT64_MAX` value essential, or does any large/negative
+declared symlink size reach the same 1-byte-allocation overflow? No source,
+runner or committed package was changed; a throwaway patcher copied the
+staged `real/attack.rpm` (SHA-256 `068a2a2ec36e6c4baa3d619fa9d84326cff66793ac397a6141fcc5f5f7d18592`)
+and rewrote only the symlink's `RPMTAG_LONGFILESIZES` qword at `0x1770`
+(main header at `0x1168`, symlink index 1). Patcher SHA-256
+`117dac6808b770171ad9794ab6e7fc65179b784e2b6d19eaafdb80a88f21810f`.
+
+Each variant ran once through vulnerable and fixed ASan `tools/rpm2cpio`
+with the same `RPM_CONFIGDIR` / `ASAN_OPTIONS` as `real/run-real.sh`:
+
+| declared size | vulnerable rc / report | fixed rc / report |
+|---|---|---|
+| `0xFFFFFFFFFFFFFFFF` | 134, `heap-buffer-overflow … WRITE of size 64` | 1, clean |
+| `0xFFFFFFFFFFFFFFFE` | 134, `requested allocation size 0xffffffffffffffff … exceeds maximum` | 1, clean |
+| `0x7FFFFFFFFFFFFFFF` | 134, `requested allocation size 0x8000000000000000 … exceeds maximum` | 1, clean |
+| `0x100000000` | 1, clean | 1, clean |
+| `11` (matches `strlen("MISHE-RPM!!")`) | 1, clean | 1, clean |
+
+Mechanism: `rpmcpioRead()` (`lib/cpio.cc:442-443`) clamps the requested size
+to the cpio entry's remaining bytes, so a negative `lsize` (huge `size_t`)
+copies the full 64 controlled bytes; only `lsize = -1` also makes
+`lsize + 1` wrap to zero, giving the 1-byte region. Other negatives abort
+in allocation before the copy, moderate positives copy at most `lsize`
+bytes. The fix's `lsize != strlen(link)` check rejects the mismatch and the
+fixed build is ASan-clean on all five. No new reader, chosen pointer,
+marker, command, grade change or r5. Raw packages, per-run logs and the
+patcher: `.mishe-tauftauf/artifacts/rpm2shell-w316/`; the throwaway tmp
+directory was removed after the copies were verified.

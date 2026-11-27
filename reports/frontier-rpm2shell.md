@@ -59,6 +59,24 @@ independent replay of the standing real-consumer asks is still open, no r5.
   The fixed build therefore rejects the attack input at the header check;
   the vulnerable build proceeds to the copy.
 
+**Near-wrap size variants (W316, 2026-11-27 05:1xZ).** Patching only the
+symlink's `RPMTAG_LONGFILESIZES` qword in the staged attack package
+(`real/attack.rpm`, SHA-256 `068a2a2e…`) produced five inputs. With the ASan
+`rpm2cpio` at both pins (`RPM_CONFIGDIR` and `ASAN_OPTIONS` as in
+`real/run-real.sh`): `UINT64_MAX` gives vulnerable rc 134 with
+`heap-buffer-overflow … WRITE of size 64`, as before;
+`UINT64_MAX-1` (rc 134) and `0x7FFFFFFFFFFFFFFF` (rc 134) abort earlier with
+`requested allocation size … exceeds maximum supported size` — `lsize`
+converts to a huge `size_t`, but `lsize+1` is not zero, so no 1-byte region;
+`0x100000000` and the header-matching value `11` both exit rc 1 with no ASan
+report. Fixed ASan `rpm2cpio` rejects all five with rc 1 and no ASan report.
+This bounds the primitive: `rpmcpioRead()` clamps the requested size against
+the cpio entry's remaining bytes (`lib/cpio.cc:442-443`), so a negative
+`lsize` is needed to take the full 64-byte copy, and only `lsize = -1` also
+wraps the allocation to one byte. No new reader, pointer, marker or r5.
+Raw packages, logs and the throwaway patcher: site artifact
+`.mishe-tauftauf/artifacts/rpm2shell-w316/`.
+
 ## Local evidence
 
 `bash lab/frontier/rpm2shell/run-all.sh`: **28 PASS / 0 FAIL**, rc 0.
