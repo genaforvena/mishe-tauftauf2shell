@@ -1,6 +1,6 @@
 # WAMR2Shell — chosen-immediate OOB write in the fast-interpreter loader (rung 4)
 
-Status: **RUNG 4 ESTABLISHED in the lab build and INDEPENDENTLY REPLAYED by witness verdict #1168 (2026-11-21 ~21:59Z) at the labeled scope**. Rung 5
+Status: **RUNG 4 ESTABLISHED in the lab build and INDEPENDENTLY REPLAYED by witness verdicts #1168 (2026-11-21 ~21:59Z) and #6216/W325 (2026-11-27 ~07:52Z) at the labeled scope**. Rung 5
 is UNKNOWN: a genuine wire-facing consumer is named (Envoy v1.39.3, below)
 but was NOT built or driven; no guest code executes and no benign command
 side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
@@ -9,7 +9,9 @@ side effect exists. Written 2026-11-21 ~21:26Z by `wamr2shell`, updated
 were independently established by witness #1146 and are not re-proved here.
 The 2026-11-27 ~07:35Z addendum names the destination as the live i64 const
 table; the 2026-11-27 ~08:00Z addendum records the confinement sweeps and a
-synthetic forced-survival copy observation.
+synthetic forced-survival copy observation. Witness W325 independently
+replayed the W4 offset ladder and W5 live table on its own clean builds at
+~07:52Z (verdict #6216, addendum below): no counterexample, no grade change.
 
 ## Result in one paragraph
 
@@ -140,6 +142,12 @@ immediate is emitted after the cursor passes the end. Appending real
   `wasm_loader.c:9382` on 2.4.4 and a clean 2.4.5 control. Witness-ESTABLISHED
   at the labeled scope, not merely an author claim; details and the honest
   digest divergence from ASLR are in the addendum below.
+- **Witness replay ESTABLISHED (#6216/W325, 2026-11-27 ~07:52Z)**: independent
+  clean-archive rebuild of the W4 shift ladder and W5 live-table measurement;
+  six byte-identical variants, all listed `in == mem` pairs corroborated,
+  matching ASan fault sites and a clean 2.4.5 control. No counterexample and
+  no new rung. The i32 writes log tag `u32` without an after-hook, so
+  `in == mem` is not claimed for them. Details in the addendum below.
 
 Negative results preserved: the upstream PoC's OOB window still contains no
 chosen immediates; eight appended `i64.const` pairs with `0xDEAD...`-style
@@ -461,3 +469,46 @@ attacker-chosen pointer, no wire traffic and no benign-command side effect.
 Rung 5 stays UNKNOWN. Fixed 2.4.5 ASan control on `dup_before`, the four-pair
 variant and the single-store trim: no ASan report, only the known post-load
 CLI `Exception: native stack overflow` (rc 1).
+
+## Addendum: witness W325 independent replay of the shift ladder and live table (2026-11-27 ~07:52Z)
+
+Witness W325 (DM #6216) replayed both offers from `git archive 04c318d5
+lab/frontier/wamr2shell reports/wamr2shell-rung4.md` in its own `/tmp/w325-wamr`,
+re-verified all five gitignored pins (5/5 OK), and rebuilt from clean pinned
+tags: tag `8c18e3f6`, loader `b0029210`, committed `caller-store.patch`
+`9c0e7907` -> patched loader `97b07155`, own binary `b4fc4f49`. Its own
+unpatched-ASan 2.4.4 and clean-ASan 2.4.5 binaries are `6893e64a` / `211d5a56`.
+The unmodified generator reproduced all six variants byte-for-byte:
+`ecfce96a` (n8), `756cabf8` (dup_before), `7f4339e9` (dup2_before),
+`849d6dc9` (split), `3dc66921` (dup_after), `46aba96e` (i32).
+
+Caller-store readback on the witness binary matched the author's ladder:
+`dup_before` past `46/64/82/100/118/136/154/172` and `dup2_before`
+`153/171/189/207/225/243/261/279`, eight of eight `in == mem` pairs in each;
+`split` only `118/136/154/172`; `dup_after` zero chosen-const OOB; `n8`
+`11/29/47/65`; unchanged pinned PoC zero OOB, rc 0. All vulnerable runs end
+in glibc abort. The i32 chosen 4-byte immediates log tag `u32` at
+`9/23/37/51/65` with values `03..07 474645`; this patch has no `phase=after`
+hook for `u32`, so `in == mem` is not claimed for those writes.
+
+Witness ASan 2.4.4 first faults match the author's sites and region sizes:
+`wasm_loader_emit_const :9382` (WRITE 8, 3 after 1164) on n8,
+`reserve_block_ret :10451` (WRITE 2, 0 after 1458) on dup_before,
+`wasm_loader_push_frame_offset :9775` (WRITE 2, 0 after 1752) on
+dup2_before, `prepare_bytecode :14251` (WRITE 4) on dup_after, and
+`wasm_loader_emit_ptr :9458` from `:11763` (WRITE 8) on i32. Clean 2.4.5 ASan
+on all six: zero reports, rc 1 with only the known post-load CLI
+`Exception: native stack overflow`.
+
+The witness's gdb run on its own binary and regenerated `dup_before` found
+peak 1458, chunk header `0x5c1`, `i64_consts = end+14`, 12 entries; baseline
+n8 peak 1164, `i64_consts = end+20`. At `past == 172` its 12-entry dump is
+byte-identical to the author's (entry 3 `0x4142434445464700`; first four
+chosen stores inside the live table). It also verified the source copy at
+pinned 2.4.5 `wasm_loader.c:16856-16868`, which no valid load reaches.
+
+Verdict as reported: both offers ESTABLISHED AS LABELED, no counterexample,
+grade unchanged — rung 3 pinned, rung 4 ESTABLISHED at the labeled chosen-store
+scope, NO r5; no chosen pointer, guest execution, wire traffic, marker or
+command. No replay is owed from W325. Raw detail lives in the gitignored site
+at `.mishe-tauftauf/artifacts/witness-w325-wamr/detail.md`.
