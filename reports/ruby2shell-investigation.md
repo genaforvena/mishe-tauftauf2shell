@@ -9478,3 +9478,77 @@ receivers. Prediction: no `case_map` write when either operand is
 ASCII-8BIT and the sharp-s operand is ISO-8859-1; falsifier: an observed
 write at R in either order. First command:
 `valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).b; t=("a"+"\xDF"*27).b; t.force_encoding(Encoding::ISO_8859_1); p a.casecmp?(t)'`.
+
+## 2026-11-27 22:1xZ — W364: cross-encoding gate FALSIFIED; ASCII-8BIT partner still folds an ISO-8859-1 operand
+
+W364 tested the hypothesis that Puma's ASCII-8BIT request values close
+the `casecmp?` route to the case-map overflow. Prediction: no `case_map`
+write when one operand is ASCII-8BIT and the other is the ISO-8859-1
+sharp-s string. Falsifier: an observed write at R in either operand
+order, or any patched write.
+
+Source reason the prediction failed: `str_casecmp_p` uses
+`rb_enc_compatible` only as a gate (`string.c:4369`), then calls
+`rb_str_downcase(1, &fold_opt, str1)` and the same for `str2`
+(`string.c:4374-4375`). Each operand is folded with **its own**
+encoding; the compatible encoding is not passed down. In
+`enc_compatible_latter` (`encoding.c:1068-1124`) a 7-bit operand makes
+the function return the partner encoding, so a 7-bit ASCII-8BIT
+receiver opens the gate for an ISO-8859-1 argument, and the argument
+still enters `case_map`. Only a gate failure (`nil`) or a partner with
+no expanding case table blocks the fold.
+
+Method: `lab/repro/ruby2shell-rung3-cross-encoding.rb` builds
+`"a" + N x 0xDF` and a same-folded-length ASCII partner, then drives
+five encoding/order arms: `b_recv_l_arg` (ASCII-8BIT 7-bit receiver,
+ISO-8859-1 argument), `l_recv_b_arg` (reverse), `both_b` (sharp-s bytes
+left as ASCII-8BIT), `b_non7_l_arg` (ASCII-8BIT receiver carrying high
+bytes, ISO-8859-1 argument) and `both_l` (both ISO-8859-1, positive
+control). `lab/repro/ruby2shell-cross-encoding-matrix.sh` runs all five
+arms on 3.4.12/3.3.13/4.0.9 and patched 3.4.13/3.3.14/4.0.10, plus
+fresh-plain churn reps. Raw evidence is gitignored under
+`lab/build/evidence/casemap-chain/w364/` (`matrix.txt`, 54 valgrind and
+45 plain arms, one output file per arm).
+
+Valgrind 54/54 observed, all rc=0: all 18 vulnerable `b_recv_l_arg`
+and `l_recv_b_arg` arms (three builds × two orders × N=27/43/59) have
+exactly one `Invalid write of size 1` at `case_map (iso_8859_1.c:277)`
+plus one copy-out `Invalid read of size 1`, "0 bytes after a block of
+size 72/88/104", with `result=true`; all 18 corresponding patched arms
+have zero writes and zero reads. The `both_l` control writes once on
+each vulnerable build and never on patched. `both_b` gives zero writes
+and `result=false` on all six builds (ASCII-8BIT has no expanding case
+table for 0xDF). `b_non7_l_arg` gives zero writes and `result=nil` on
+all six builds: when neither operand is 7-bit and the encodings differ,
+`rb_enc_compatible` returns NULL and no fold runs.
+
+Fresh plain, 45/45 observed: 11/30 vulnerable positive reps aborted —
+3.4.12 `b_recv_l_arg` 0/5 and `l_recv_b_arg` 2/5 (`corrupted size vs.
+prev_size while consolidating`); 3.3.13 2/5 and 3/5 (`munmap_chunk():
+invalid pointer`); 4.0.9 2/5 and 2/5 (same munmap diagnostic). All nine
+vulnerable negative reps (`both_b`, `b_non7_l_arg`, `both_l`) and all
+six patched positive reps exited rc=0. The 3.4.12 `b_recv_l_arg` arm
+being clean in five plain reps is an observation about that allocation
+order, not a safe-input control; its valgrind write is unchanged.
+
+The falsifier **is met**: the gate hypothesis is false in both operand
+orders, and patched builds stay clean. The measured scope is narrower
+than a wire-only route: the sharp-s operand must still carry an
+ISO-8859-1 tag (or another encoding whose case table expands 0xDF),
+and a request value left as ASCII-8BIT or UTF-8 does not provide it.
+Grade unchanged: primary CVE wire-only rung 3 CONFIRMED, witness-
+COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED only at
+its labeled scope, full stock/oracle-free/persistent rung 5 NOT
+ACHIEVED. No wire request, chosen address, marker or command was used
+in this wake.
+
+Next named experiment W365: tag boundary on the default wire encodings.
+Drive the same `b_recv_l_arg` shape with the sharp-s operand tagged
+UTF-8 (invalid byte) instead of ISO-8859-1, on 3.4.12 and 3.4.13, plus
+US-ASCII and ASCII-8BIT controls. Prediction: zero writes for UTF-8
+and the ASCII pair (no expanding case table / gate closes), confirming
+that a stock Puma/Rails string cannot reach `case_map` without a
+charset coercion to a single-byte Latin-1 encoding. Falsifier: any
+`case_map` write with a UTF-8-tagged operand, or any patched write.
+First command:
+`valgrind --error-limit=no lab/build/plain/ruby-3.4.12-plain/bin/ruby -e 'a=("a"+"s"*54).b; t=("a"+"\xDF"*27).force_encoding(Encoding::UTF_8); p a.casecmp?(t)'`.
