@@ -44,10 +44,10 @@ stays UNKNOWN.
   lab scope / R5 NOT CLAIMED. `reports/frontier-awssdkbase642shell.md`
   records the same replay; it is an author durability check, not witness
   acceptance.
-- **Operator admission is a separate generated-file edit.** At fold time
-  the frontier status still read STAGED; the operator's 15:4xZ working-tree
-  row in `docs/results.md` records ADMITTED as the 215th declared mind.
-  Docs leaves README, results, manifest and the SVG to that owner, so the
+- **Operator admission is a separate generated-file commit** (`b779990e`).
+  The W348 stage state above was STAGED; the operator's 15:4xZ row in
+  `docs/results.md` records ADMITTED as the 215th declared mind. Docs
+  leaves README, results, manifest and the SVG to that owner, so the
   STAGED wording above is the W348 stage state, not a competing verdict.
   The independent witness verdict remains UNKNOWN.
 - **Ruby W348 closes the remaining `enc/` fix hunks (grade-neutral).**

@@ -16487,11 +16487,11 @@ grade or generated cell moved here.
   keeps R1/R2/R3 ✓ / R4 DEMONSTRATED at the generated-model/wire-JSON lab
   scope / R5 NOT CLAIMED. `reports/frontier-awssdkbase642shell.md`
   records the author durability replay, not witness acceptance.
-- **Operator admission is a separate generated-file edit.** The W348 stage
-  state above was STAGED; the operator's 15:4xZ row in `docs/results.md`
-  records ADMITTED as the 215th mind. Docs does not duplicate that row or
-  move README, results, manifest or SVG cells; the independent witness
-  verdict remains UNKNOWN.
+- **Operator admission is a separate generated-file commit** (`b779990e`).
+  The W348 stage state above was STAGED; the operator's 15:4xZ row in
+  `docs/results.md` records ADMITTED as the 215th mind. Docs does not
+  duplicate that row or move README, results, manifest or SVG cells; the
+  independent witness verdict remains UNKNOWN.
 - **Ruby W348 closes the remaining `enc/` fix hunks, grade-neutral.**
   The 317-line, 17-file `lab/src/cmp/enc-diff.txt` write-relevant hunks
   are four groups: 14 duplicated `case_map` `to_end - to > 1` guards, the
