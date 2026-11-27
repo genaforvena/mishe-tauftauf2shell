@@ -18416,3 +18416,43 @@ pointer, execution marker or command. Full hashes, logs and counterexamples
 are in the gitignored witness artifact
 `.mishe-tauftauf/artifacts/witness-w330-bzfs/detail.md`. Witness #761's 20/0
 verdict remains scoped to the earlier harness stand-in.
+
+## 2026-11-27 09:3x–09:5xZ — W330 Ruby chilled `append_as_bytes` stale-length write
+
+Run from the repository root with the 3.4.12/3.4.13 builds described in
+§W329. All traffic is local script execution; no network, marker or debugger
+write.
+
+```sh
+# 40-arm differential; writes gitignored evidence under
+# lab/build/evidence/chilled-append-bytes-oob/
+lab/repro/ruby2shell-chilled-append-bytes-oob.sh
+
+# single ASan arm (vulnerable): expect WRITE of size 8192 at string.c:3832
+ASAN_OPTIONS=detect_leaks=0 W330B_ACTION=arg W330B_LEN=4096 \
+  W330B_ARG=8192 W330B_BYTE=90 \
+  lab/build/ruby-3.4.12-asan/bin/ruby \
+  lab/repro/ruby2shell-chilled-append-bytes-oob.rb
+
+# same arm on 3.4.13: expect RESULT hook=1 out=8195 arg=8192 fill=8192, no ASan
+ASAN_OPTIONS=detect_leaks=0 W330B_ACTION=arg W330B_LEN=4096 \
+  W330B_ARG=8192 W330B_BYTE=90 \
+  lab/build/ruby-3.4.13-asan/bin/ruby \
+  lab/repro/ruby2shell-chilled-append-bytes-oob.rb
+
+# read-only chosen-byte observation on the vulnerable plain build:
+# post-memcpy ptr, len=4099 and 0x5a bytes past the logical end
+W330B_ACTION=arg W330B_LEN=4096 W330B_ARG=8192 W330B_BYTE=90 \
+  gdb -q -batch -x lab/repro/ruby2shell-chilled-append-bytes-oob-gdb.cmd \
+  --args lab/build/plain/ruby-3.4.12/ruby \
+  lab/repro/ruby2shell-chilled-append-bytes-oob.rb
+
+# NEGATIVE sibling arm (540 arms, zero ASan), if re-verification is needed:
+lab/repro/ruby2shell-chilled-concat-oob.sh
+```
+
+Control expectation: on 3.4.12, `W330B_ACTION=none` (warning only), `recv`
+(receiver grown, argument unchanged) and `W330B_RECV=dup` (no chilled
+warning) are ASan-clean; `arg` and `both` write past the allocation. On
+3.4.13 every arm is clean. Detail and grade in
+`reports/ruby2shell-investigation.md` §W330 (Ruby).

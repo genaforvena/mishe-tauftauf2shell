@@ -7710,3 +7710,87 @@ dereference, no marker) and wire CLOSED. The primary CVE's wire rung 3 and the
 full rung 5 status are unchanged; W328's `setbyte` lane and W321's stale
 backref lane are not relabeled. Do not repeat this driver unchanged. Recipe in
 `docs/reproducibility.md` §W329.
+
+## 2026-11-27 09:3x–09:5xZ — W330: adjacent chilled `String#append_as_bytes` stale-length OOB store (Ruby)
+
+The named experiment was the `rb_str_concat` stale-encoding arm from §W329:
+codepoints whose `rb_enc_codelen` under the pre-warning encoding differs from
+the capacity implied after a `Warning.warn` callback changes the receiver's
+encoding. `lab/repro/ruby2shell-chilled-concat-oob.{rb,sh}` ran a 540-arm
+differential (4 builds × 3 source encodings × 5 codepoints × 9 actions;
+gitignored `lab/build/evidence/chilled-concat-oob/matrix.txt`): **zero ASan
+hits**. The differentials are all encoding/codelen/coderange results — e.g.
+`US-ASCII 0x41 enc16` gives `out=4 enc=UTF-16LE` on 3.4.12 against `out=5`
+on 3.4.13, and `UTF-8 0xe9 grow` gives `out=4097` against `out=4098` — with
+`RSTRING_PTR`/`RSTRING_LEN` and `rb_str_resize` re-reading the post-callback
+length before the single `memcpy`. No out-of-bounds store exists on that arm;
+it is a **NEGATIVE**, preserved here and not retried unchanged. The `to_int`
+action is likewise not a coercion path here: `<<` rejects a non-String,
+non-Integer object with `TypeError` before the callback runs on 3.4.12.
+
+The sibling arm named in §W329 did fire. In 3.4.12
+`rb_str_append_as_bytes` (`string.c:3786-3841`) sums the *pre-callback*
+argument lengths into `needed_capacity` (`:3801`), then calls
+`str_ensure_available_capa` (`:3813`), whose `str_modify_keep_cr` (`:3404`)
+emits the chilled-string deprecation warning. `Warning.warn` is Ruby code;
+the callback can grow an argument, after which the copy re-reads that
+argument's length with `RSTRING_GETMEM` (`:3831`) and passes it to `memcpy`
+(`:3832`). 3.4.13 calls `str_modify_keep_cr(str)` at `:3810`, before reading
+any argument length or computing capacity.
+
+```c
+/* 3.4.12 string.c:3786-3832, abridged */
+for (int index = 0; index < argc; index++)
+    needed_capacity += RSTRING_LEN(argv[index]);   /* stale after warning */
+str_ensure_available_capa(str, needed_capacity);   /* Warning.warn runs here */
+char *sptr = RSTRING_END(str);
+for (int index = 0; index < argc; index++) {
+    RSTRING_GETMEM(obj, ptr, len);                 /* fresh, larger length */
+    memcpy(sptr, ptr, len);                        /* writes past capacity */
+}
+```
+
+Driver `lab/repro/ruby2shell-chilled-append-bytes-oob.{rb,sh,-gdb.cmd}` uses a
+chilled `:abc.to_s` receiver and a `'Z'`-filled argument; the `arg` action
+grows that argument inside `Warning.warn`. The 40-arm differential lives in
+gitignored `lab/build/evidence/chilled-append-bytes-oob/matrix.txt`.
+
+| build / arm | 3.4.12 (vulnerable) | 3.4.13 (fixed) |
+|---|---|---|
+| `arg`, len=64 → arg=128, ASan | `WRITE of size 128`, `string.c:3832` | clean, `out=131 arg=128` |
+| `arg`, len=4096 → arg=8192, ASan | `WRITE of size 8192`, `string.c:3832` | clean, `out=8195 arg=8192` |
+| `none` (warning only), both sizes | clean, `out=67`/`4099` | identical |
+| `recv` (receiver grown only) | clean, `out=4160`/`8192` | identical |
+| `both`, len=4096, ASan | `WRITE of size 8192`, `string.c:3832` | clean, `out=12288` |
+| `safe` (non-chilled `'abc'.dup`) | `hook=0`, clean | identical |
+
+ASan report for the large arm: the write begins `0 bytes after 8192-byte
+region [0x5250000c3100,0x5250000c5100)`, allocated in
+`str_ensure_available_capa string.c:3404`; the vulnerable plain build's
+`both` arm aborts (rc=134) while `arg` alone survives. All four 3.4.13-ASan
+arms and both vulnerable controls are clean, so the argument-length staleness
+is causal, not an artifact of the chilled warning alone.
+
+Read-only gdb on the vulnerable plain `arg` arm (`gdb.txt`, no debugger
+writes): after the `memcpy`, `ptr=0x555555ba2a80`, logical `len=4099`,
+`sptr=ptr+8195`; `x/16xb` at `ptr+4088` and `ptr+8184` shows chosen `0x5a`
+bytes at offsets 4088..4103 and 8184..8187, past the logical string end.
+The byte value is chosen by `W330B_BYTE` and the offset span by
+`W330B_LEN`/`W330B_ARG`.
+
+**Wire.** No wire claim. W329's survey of pinned stdlib, installed gems and
+the lab Rails app found no request-time mutating `Warning.warn` override;
+this wake's call-site survey finds `append_as_bytes` in Prism's parser
+translation lexer (`lib/prism/translation/parser/lexer.rb:704-777`, with a
+polyfill for pre-3.4Rubies), not in stock Rails/Sinatra request handling.
+The only consumer able to mutate the argument mid-call here is the lab
+callback.
+
+**Grade.** Adjacent in-process lane: confirmed heap corruption (ASan WRITE
+with measured allocation bound) and chosen bytes at chosen offsets past the
+logical length — rung 4 at in-process scope. This is **not** the primary
+CVE's wire path and **not** rung 5; no grade cell from §W321, §W328 or §W329
+is relabeled. The `rb_str_concat` arm stays NEGATIVE. Next wake: look for a
+stock `Warning.warn` mutation reachable from a request that also grows an
+`append_as_bytes` argument; absent one, close this lane's wire and move on.
+Recipe in `docs/reproducibility.md` §W330 (Ruby).

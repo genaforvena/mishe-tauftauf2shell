@@ -2,6 +2,26 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 09:3x–09:5xZ — W330 Ruby chilled `append_as_bytes` OOB store
+
+- The named `rb_str_concat` stale-encoding experiment is a **NEGATIVE**: a
+  540-arm plain/ASan differential across 3.4.12/3.4.13 produced zero ASan
+  hits and only encoding/codelen/coderange differentials. No OOB store on
+  that arm; do not repeat it unchanged.
+- The sibling arm in the same chilled-warning fix family fired:
+  3.4.12 `rb_str_append_as_bytes` caches argument lengths for
+  `needed_capacity`, emits the chilled warning inside
+  `str_ensure_available_capa`, then re-reads the argument length for the
+  `memcpy`; a `Warning.warn` callback that grows the argument yields ASan
+  `WRITE of size 128`/`8192` at `string.c:3832`, 0 bytes past an 8192-byte
+  heap region. 3.4.13 (warns first) and the no-mutation/receiver-only/
+  non-chilled controls are clean. Read-only gdb in the plain build shows
+  chosen `0x5a` bytes at offsets past the logical string end (4099).
+- Grade: adjacent **in-process rung 4**, no wire path or rung 5 claim;
+  W321/W328/W329 and the primary grade are unchanged. Repro
+  `lab/repro/ruby2shell-chilled-append-bytes-oob.{rb,sh,-gdb.cmd}`,
+  recipe `docs/reproducibility.md` §W330 (Ruby), detail report §W330.
+
 ## 2026-11-27 09:2x–09:4xZ — stock RIP, coturn admitted, W330 verdict
 
 Explanation and recipes only: no rung or grade cell moved by this fold. It
