@@ -1,0 +1,92 @@
+PASS pin pins/vuln/src/libical/icalparser.c
+PASS pin pins/fixed/src/libical/icalparser.c
+PASS pin pins/vuln/src/libical/icalparser.h
+PASS pin pins/fixed/src/libical/icalparser.h
+PASS pin pins/vuln/src/libical/icalcomponent.c
+PASS pin pins/fixed/src/libical/icalcomponent.c
+PASS pin pins/vuln/src/libical/icalmemory.c
+PASS pin pins/fixed/src/libical/icalmemory.c
+PASS pin reproducer/05-uaf-clean-ownership.c
+PASS pin reproducer/README.md
+PASS pin reproducer/build-reproducers.sh
+PASS pin reproducer.zip
+PASS pin rung4_reclaim.c
+PASS pin observe.gdb
+Note: switching to '9cfca65c122fa23b9680a28e0c9225a2fd015fc5'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+PASS source src-vuln 9cfca65c122fa23b9680a28e0c9225a2fd015fc5
+Note: switching to 'cb58c3cb287bee48aa50cc60753155116a8f9081'.
+
+You are in 'detached HEAD' state. You can look around, make experimental
+changes and commit them, and you can discard any commits you make in this
+state without impacting any branches by switching back to a branch.
+
+If you want to create a new branch to retain commits you create, you may
+do so (now or later) by using -c with the switch command. Example:
+
+  git switch -c <new-branch-name>
+
+Or undo this operation with:
+
+  git switch -
+
+Turn off this advice by setting config variable advice.detachedHead to false
+
+PASS source src-fixed cb58c3cb287bee48aa50cc60753155116a8f9081
+PASS library build-vuln-asan
+PASS library build-fixed-asan
+PASS library build-vuln-plain
+PASS library build-fixed-plain
+PASS vuln-clean-free-destroy-truncated rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-free-destroy-unclosed-child rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-inspect-twice-truncated rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-inspect-twice-truncated stale pointer aliases first return
+PASS vuln-clean-inspect-twice-unclosed-child rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-inspect-twice-unclosed-child stale pointer aliases first return
+PASS vuln-clean-free-twice-truncated rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-free-twice-truncated stale pointer aliases first return
+PASS vuln-clean-free-twice-unclosed-child rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-clean-free-twice-unclosed-child stale pointer aliases first return
+PASS vuln-two-sessions-truncated rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-two-sessions-unclosed-child rc=1 pattern=ERROR: AddressSanitizer: heap-use-after-free
+PASS vuln-complete-truncated rc=0 pattern=mode=complete
+PASS vuln-complete-unclosed-child rc=0 pattern=mode=complete
+PASS fixed-clean-free-destroy-truncated rc=0 pattern=mode=clean-free-destroy shape=truncated
+PASS fixed-clean-free-destroy-unclosed-child rc=0 pattern=mode=clean-free-destroy shape=unclosed-child
+PASS fixed-clean-inspect-twice-truncated rc=0 pattern=mode=clean-inspect-twice shape=truncated
+PASS fixed-clean-inspect-twice-truncated fixed parser clears ownership
+PASS fixed-clean-inspect-twice-unclosed-child rc=0 pattern=mode=clean-inspect-twice shape=unclosed-child
+PASS fixed-clean-inspect-twice-unclosed-child fixed parser clears ownership
+PASS fixed-clean-free-twice-truncated rc=0 pattern=mode=clean-free-twice shape=truncated
+PASS fixed-clean-free-twice-unclosed-child rc=0 pattern=mode=clean-free-twice shape=unclosed-child
+PASS fixed-two-sessions-truncated rc=0 pattern=mode=two-sessions shape=truncated
+PASS fixed-two-sessions-unclosed-child rc=0 pattern=mode=two-sessions shape=unclosed-child
+PASS fixed-complete-truncated rc=0 pattern=mode=complete
+PASS fixed-complete-unclosed-child rc=0 pattern=mode=complete
+PASS plain-vuln-clean-free-destroy rc=139 pattern=first clean returned: non-NULL
+PASS plain-vuln-complete rc=0 pattern=mode=complete
+PASS rung4-vuln-zero rc=139 pattern=MODE=zero
+PASS rung4-vuln-chosen rc=0 pattern=SURVIVED mode=chosen offset48_after=0x4141414141414141
+PASS rung4-fixed-zero rc=0 pattern=SURVIVED mode=zero offset48_after=0000000000000000
+PASS rung4-fixed-chosen rc=0 pattern=SURVIVED mode=chosen offset48_after=0x4141414141414141
+PASS rung4-vuln-zero tcache reused freed component
+PASS rung4-vuln-chosen tcache reused freed component
+PASS rung4-fixed-zero tcache reused freed component
+PASS rung4-fixed-chosen tcache reused freed component
+PASS rung4-vuln-chosen-gdb rc=0 pattern=parent=0x4141414141414141
+PASS=57 FAIL=0

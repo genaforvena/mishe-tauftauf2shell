@@ -21,8 +21,9 @@ Chronological log preserved verbatim from the former README "What it has achieve
   component through glibc tcache. Zero at offset 48 crashes; chosen
   `0x4141414141414141` selects `icalcomponent_free()`'s benign early return.
   GDB observes the chosen `parent` in the stale call; fixed controls do not
-  call it. `run-all.sh` PASS=57 FAIL=0. Window 202 (%410/%411) is live and
-  registered. No register row, admission, witness verdict, wire path or R5.
+  call it. `run-all.sh` PASS=57 FAIL=0; clean-archive replay from `1c6f8cf1`
+  also 57/0. Window 202 (%410/%411) is live and registered. No register row,
+  admission, witness verdict, wire path or R5.
 
 
 ## 2026-11-26 23:4xZ — ruby2shell W299 witness fold and repeated-wire corruption

@@ -31,7 +31,8 @@ are owed; author evidence is not self-acceptance.
 - `rung4_reclaim.c`: exact tcache reuse (`REUSE=1`); zero offset 48 crashes,
   chosen `0x4141414141414141` survives; GDB observes the chosen `parent` in the
   stale consumer. Fixed zero/chosen controls survive and do not call the sink.
-- `sh run-all.sh`: **PASS=57 FAIL=0**, rc 0; runner SHA-256
+- `sh run-all.sh`: **PASS=57 FAIL=0**, rc 0; clean-archive replay from
+  `1c6f8cf1` with runs/sources/builds removed also PASS=57 FAIL=0. Runner SHA-256
   `91869a1a6081679fde87b195abef85d6c02c044ff415685d91ffedf63e29b300`.
 
 Brief: `reports/frontier-libicalclean2shell.md`. Harness and pin provenance:

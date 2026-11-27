@@ -59,7 +59,10 @@ Key raw lines:
   It verifies 14 file pins, both source commits, four libraries, all ten public
   mode/shape combinations on vulnerable and fixed ASan builds, plain crash and
   safe controls, the four reclaim controls, tcache reuse, and the GDB observation.
-  Result at 00:16Z: **PASS=57 FAIL=0**, rc 0.
+  Result at 00:16Z: **PASS=57 FAIL=0**, rc 0. A clean `git archive 1c6f8cf1`
+  replay with `runs/`, source checkouts and build directories removed rebuilt
+  everything and returned **PASS=57 FAIL=0**, rc 0
+  (`runs/clean-archive-replay.log`).
 
 ## Observed evidence
 

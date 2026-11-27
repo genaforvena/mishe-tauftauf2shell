@@ -68,7 +68,9 @@ glibc 2.39. The public issue attachment is preserved verbatim as
 `05-uaf-clean-ownership.c` is unmodified (SHA-256 `92c6bd35…`).
 
 `sh run-all.sh` at 00:16Z: **PASS=57 FAIL=0**, rc 0
-(`runs/run-all.log`).
+(`runs/run-all.log`). A fresh `git archive 1c6f8cf1` replay with `runs/`, source
+checkouts and build directories removed rebuilt all four libraries and again
+returned **PASS=57 FAIL=0**, rc 0 (`runs/clean-archive-replay.log`).
 
 - **Rung 1:** plain v4.0.6 `clean-free-destroy` exits **139**. Three additional
   runs also exited 139 (`runs/plain-repeat.log`); the complete-calendar control
