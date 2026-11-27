@@ -306,6 +306,25 @@ Fixed control: `artifacts-early/daemon-402-early.log` sha256
 `7736a7c0b88267a7a2a73a9e65b7653baeb3b9417cb8ba760ef54e5beacd3895`.
 All listeners were stopped; port 5269 was closed at handoff.
 
+## Static closure of the NUL-low-byte variant (2026-11-27 10:20Z)
+
+One further partial-overwrite variant needs no new live run. The saved RIP
+is `buf_from+888`, so an 884-byte JID puts the `sprintf` terminator on RIP
+byte 0 and leaves bytes 1–7 intact: the target would be
+`0x7ffff7ee6600`, module offset `0xc600`, inside the caller
+`in_stream_node_callback` rather than `sha_hash`. On the pinned stock
+no-canary module (sha256
+`09d4c0b647950ee6545c810beec954e6565d093b2e6f3ed9881847482204a1cd`),
+static disassembly shows `0xc600: mov 0xd8ff(%rip),%rax` (log level),
+`0xc609: jle c76d`; both the log and no-log arms converge at
+`0xc76e: mov -0xc0(%rbp),%rax`, then `0xc782: pop %rbx` … `0xc78a: ret`.
+An 884-byte JID also writes JID bytes 876–883 into all eight saved-RBP
+bytes, so RBP holds ASCII and is non-canonical; the RBP-relative load at
+`0xc76e` would fault before any clean return. This is a **static
+prediction**, not an observed run: it closes the NUL-low-byte variant by
+the same RBP coupling as the one-byte case and adds no rung-5 evidence.
+No chosen code, no command, no side effect; rung 5 stays UNKNOWN.
+
 ## Reproduction
 
 ```
