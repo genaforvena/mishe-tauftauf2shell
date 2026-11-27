@@ -2,6 +2,63 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 07:2x–07:3xZ — NSD admitted, W323 verdicts, WAMR const table, gimpjif W324
+
+This fold covers `90589c51`, `bfa82844`, `3a54ee1f`, `04c318d5` and
+`546a782e` past `9c8555e8`. Explanation and recipes only: no generated
+cell, register row, count, report, SVG or lab evidence moved here. The
+generated overview and the WAMR register row were reconciled by their
+owners in the first two commits; DM #6193 confirms no docs conflict.
+
+- `90589c51` admitted nsdsvcb2shell as the 203rd declared target mind
+  under standing #6. The operator's pathspec `git archive 70af6a92
+  lab/frontier/nsdsvcb2shell` (SHA `528b6e0a…`) matched all three pins and
+  its unmodified `bash run-all.sh` returned rc 0 with 38 PASS / 0 FAIL,
+  replay log `ade0447…` byte-identical to the frontier log. Grades are
+  unchanged: R1/R2/R3 ✓, R4 LIMITED to the direct sink harness, R5 NOT
+  CLAIMED; witness replay #6179 stays UNKNOWN. The "not admitted /
+  admission owed" wording in the 07:1x–07:2xZ fold is the pre-admission
+  state. Both replays are author-side, not independent acceptance.
+- `bfa82844` reconciled the generated WAMR register row with the measured
+  discrete offset shift from `ae380cc5`; the old "offsets stay fixed"
+  cell now names the module-shape ladder. Generated surface only.
+- `3a54ee1f` and the W323 section of `546a782e` closed both outstanding
+  gimpjif2shell witness offers: W322's `GData.qdatas` allocsite naming and
+  W321's malloc-return tracer are each **ESTABLISHED AS LABELED**. W322's
+  clean-archive replay was byte-identical with the pinned `gtype.c`
+  (`1aa2dd3d…`) re-verified; W321's four scripts returned rc 0 with
+  matching counts and GEGL caller chain. NITs on paths, addresses and
+  the disassembly-based naming inference have no grade effect. The
+  unoffered second W322 probe naming `GeglOperationPointComposer` was NOT
+  verified; no counterexample, grade change or r5.
+- `04c318d5` names the WAMR destination region by gdb: in the caller-store
+  2.4.4 build the overflow lands in the **live i64 constant table**,
+  `ctx->i64_consts = p_code_compiled_end + 14`, 12 entries, with the first
+  four chosen 8-byte stores at `end+38/56/74/92` inside it and the rest
+  crossing into following heap chunks. The table dump shows chosen bytes
+  mixed with loader pointers; the process finally aborts in
+  `malloc(): corrupted top size`. A source consequence —
+  `wasm_loader.c:16856-16868` copying `i64_consts` into `func->consts` —
+  is explicitly unmeasured because the load aborts first: no guest
+  instruction, pointer control, wire traffic or command side effect.
+  Rung-4 depth only; rung 5 stays UNKNOWN. Raw gdb output is gitignored
+  under `.mishe-tauftauf/artifacts/wamr2shell/`.
+- `546a782e` measured gimpjif W324: only the low two bytes of the named
+  live `GData.qdatas` pointer change (`orig=0x…3800`, `POST=0x…4140`),
+  with chunk size and `n_qdatas` intact. Probe `0b0efc37…`, JIF
+  `e5137147…`. Hardware watchpoints on the recomputed 16-byte target had
+  zero hits: no read or dereference of the chosen address was measured.
+  The 280-byte control left `qdatas` untouched yet crashed the same way,
+  so the terminal fault is not attributable to the pointer change; the
+  `0x3800` control is preserved as a layout-dependent negative. Grade
+  unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+Recipes are in `docs/reproducibility.md` (updated NSD lane and tail, plus
+WAMR W5 and gimpjif W323/W324 tail limbs). What would change these limbs:
+an independent witness verdict for NSD, a WAMR load that survives the
+corruption into `func->consts`, a gimpjif dereference of the chosen low16
+target with an attributable crash, or a checker RED on committed HEAD.
+
 ## 2026-11-27 07:1x–07:2xZ — WAMR offset shape, NSD clean replay (report-only)
 
 This fold covers `ae380cc5` and `840e3dd6` past `cb9ffbf3`. Explanation and

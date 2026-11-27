@@ -44,7 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
-| NsdSvcb2Shell W323 (STAGED, clean replay 07:0xZ) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; R4 LIMITED to the sink harness, R5 NOT CLAIMED, witness/admission owed; full recipe at the tail |
+| NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED, witness replay #6179 UNKNOWN; full recipe at the tail |
 | Libeventsockaddr2Shell W316 (ADMITTED 06:1xZ, 202nd) | [status](../reports/libeventsockaddr2shell-status.md), [brief](../reports/frontier-libeventsockaddr2shell.md), [provenance](../lab/frontier/libeventsockaddr2shell/PROVENANCE.md) | CVE-2026-63388 / GHSA-cvq5-vrvr-j338 (High 8.4, CWE-787/617); affected `<= 2.1.12`, `<= 2.2.1-alpha`, patched 2.1.13 / 2.2.2-alpha; vulnerable master `1b7cc9b5…`, fix `52057cb3…` (parent `9877a720…`) | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/libeventsockaddr2shell` (CMake static builds of the pinned archives) | `run-all.sh` rc 0, `PASS=23 FAIL=0`; GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`, 0 bytes after a 520-byte region from `bufferevent_socket_new`; loopback-TCP and fixed-commit controls ASan-clean; `run-probe.sh` `PASS=16 FAIL=0`, three chosen 48-bit values each appear as `mutex=<chosen>` in libc `___pthread_mutex_lock` under gdb; R4 DEMONSTRATED at the chosen-address-dereference scope, R5 NOT CLAIMED, local AF_UNIX vector; clean `git archive 090aa6bc` replay 23/0 + 16/0 (archive `889dfe52…`, logs `1edee7ac…` / `c7a0e2b…`); ADMITTED 06:1xZ as the 202nd mind under standing #6; witness W321 (#6151) independently replayed that archive (log `ce6cfca2…`, 23/0 + 16/0) and graded ESTABLISHED AS LABELED at that scope, operator folded `established=true` (count 138); no grade change and no r5; the advisory's `si_addr = mutex+0x18` stays unreproduced, this host and the witness observe `mutex+0x10`; full procedure in §05:3x–06:1xZ |
 | SAIL PSD2Shell (ADMITTED 05:3xZ, 201st) | [status](../reports/sailpsd2shell-status.md), [brief](../reports/frontier-sailpsd2shell.md), [provenance](../lab/frontier/sailpsd2shell/PROVENANCE.md) | CVE-2026-54627 / GHSA-ccqf-rv86-h3wm, affected `<= 0.9.10`, v0.9.10 `cdd9d5f2…` / v1.0.0 `0f969168…`, fix `f44a8b77…` | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/sailpsd2shell` | `PASS=42 FAIL=0` and `PASS=12 FAIL=0`; raw `psd.c:354` ASan `WRITE of size 1` zero bytes after 8, clean depth-1/fixed controls; chosen bytes at offsets 8..14 only under the synthetic allocator; clean `git archive ef370299` replay repeated both (log `61d43c76…`); ADMITTED 05:3xZ under standing #6, register row and counts 201/198/198/136 at admission, 137 established after the W317 fold; R4 LIMITED, R5 NOT CLAIMED, `established=false` pending witness replay #6112; full procedure in §05:2x–05:3xZ |
 | Ud3tn2Shell W26/W317 (newest) | [pointer-control report](../reports/ud3tn2shell-pointer-control.md), [transport matrix](../lab/frontier/ud3tn2shell/transport-w26/RESULTS.md) | pinned v0.15.1 `00b2fbef…` / v0.15.2 `6b18b267…`, fix `09f18b9c…`; tarball hashes UNKNOWN after HTTP 429 | `make posix` plain + ASan; gdb harness in `lab/frontier/ud3tn2shell/harness/` | groomed `free()` receives chosen `0x5a…` at a live post-parse pointer; CBOR-MTCP/SMTCP/TCPCLv3/SPP reach, command chain DEMONSTRATED on the pinned plain build under ASLR-off gdb via `call_chain.{py,gdb}` (marker observed, safe/fixed clean). Witness W317 (#6122) replayed `9ca46a2d` from a clean 28-file archive and graded rung 5 ESTABLISHED AS LABELED at that scope; operator folded R5 ✓ and `established=true` (count 137). No fresh-build, ASLR-on or new-rung claim; commands at the tail |
@@ -17736,7 +17736,7 @@ in-length chosen bytes are readable with plain `String#==`. Both are
 in-process rung 4 with chosen bytes at a chosen stale offset, not rung 5
 and no primary grade change.
 
-### NSD SVCB AXFR direct sink (W323, STAGED; clean author replay)
+### NSD SVCB AXFR direct sink (W323, ADMITTED 07:2xZ as 203rd; clean author replay)
 
 From `lab/frontier/nsdsvcb2shell`, `bash bootstrap.sh && bash run-all.sh`
 (`bootstrap.sh` is also invoked automatically when the three harness binaries
@@ -17762,10 +17762,71 @@ or external probe is used.
 
 Clean `git archive 70af6a92` replay: archive SHA-256
 `690c887b…e47b5`, unmodified `run-all.sh` rc 0 with 38 PASS / 0 FAIL,
-replay log SHA-256 `ade0447…7fc`. Grade R1/R2/R3, R4 LIMITED to this
-direct sink harness, R5 NOT CLAIMED — no AXFR wire path, named consumer,
-pointer control, marker, command side effect or ASLR grooming. STAGED, not
-admitted; witness replay (#6179) and operator admission (#6178) owed.
+replay log SHA-256 `ade0447…7fc`. The operator's admission replay used
+the pathspec `git archive 70af6a92 lab/frontier/nsdsvcb2shell` (SHA-256
+`528b6e0a…`), checked all three pins and again returned 38 PASS / 0 FAIL
+with a byte-identical log. Grade R1/R2/R3, R4 LIMITED to this direct sink
+harness, R5 NOT CLAIMED — no AXFR wire path, named consumer, pointer
+control, marker, command side effect or ASLR grooming. Admitted under
+standing #6 as the 203rd target mind; both replays are author-side, and
+witness replay (#6179) is still UNKNOWN.
 Full pin URLs, mechanism and negatives in
 `lab/frontier/nsdsvcb2shell/PROVENANCE.md` and
 `reports/nsdsvcb2shell-status.md`.
+
+## 2026-11-27 07:2x–07:3xZ — W323 verdicts, WAMR W5 const table, gimpjif W324
+
+### WAMR2Shell W5 — the overflow reaches the live i64 constant table (author-only)
+
+From the caller-store 2.4.4 tree built as in the WAMR bullets above,
+regenerate `dup_before` with
+`python3 lab/frontier/wamr2shell/make_shift_variants.py dup_before /tmp/w5-dup.wasm`
+(SHA-256 `756cabf8…`, byte-for-byte), then run
+`gdb -q -batch`, breaking at `wasm_loader_ctx_reinit:9332` and at
+`wamr_oob_log` conditioned on
+`ctx->p_code_compiled + size > ctx->p_code_compiled_end`. At the first OOB
+expect a 0x5c0-byte chunk (1464 usable), `code_compiled_peak_size=1458`
+and `ctx->i64_consts = p_code_compiled_end + 14` with
+`i64_const_num = 12`; baseline `n8` (SHA `ecfce96a…`, peak 1164) has
+`i64_consts = end + 20`. Break at `wamr_oob_readback` with
+`size == 8 && ctx->p_code_compiled + size - ctx->p_code_compiled_end == 172`
+to dump the table after the last chosen store: entries 0–1 hold OOB
+`i16`s, entry 2 a loader pointer, entry 3 `0x4142434445464700`, and the
+chosen 8-byte stores at `end+38/56/74/92` land inside the live 96-byte
+table, the last three crossing into following chunks. The process ends
+in `malloc(): corrupted top size` (rc −6). `wasm_loader.c:16856-16868`
+would copy `i64_consts` into `func->consts` on a surviving load, but no
+load survives here: this is rung-4 depth, with no guest execution,
+chosen pointer, wire traffic or command. Raw gdb output is gitignored in
+`.mishe-tauftauf/artifacts/wamr2shell/w5-const-table-gdb.out`.
+
+### Gimpjif2shell W323 witness receipts and W324 partial pointer overwrite
+
+Witness replay closed both outstanding offers in #6180/#6181: W322's
+`GData.qdatas` allocsite naming and W321's malloc-return tracer are each
+ESTABLISHED AS LABELED. `resolve-w322-type.sh` (SHA `4065dbf2…`) returned
+rc 0 byte-identically from a clean archive and the pinned upstream
+`gtype.c` (`1aa2dd3d…`) matched; W321's four scripts returned rc 0 with
+`rets`/`gslice` `entry=26239 ret=47571` and the `+272` GEGL caller chain
+reproduced. The unoffered second W322 probe naming
+`GeglOperationPointComposer` was NOT verified. No counterexample, grade
+change or r5: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes.
+
+For W324, `lab/frontier/gimpjif2shell/realglib/make-jif.py` gained
+`published-hex HEXSTRING` (SHA `942bd1e3…`); the 282-byte
+`evidence/w324-partial-4140.jif` (SHA `e5137147…`) changes only the low
+two bytes of the named live `GData.qdatas` field while preserving chunk
+size and `n_qdatas`. Run the no-shim
+`live/run-appimage-partialptr-324.sh` (SHA `f7a7a268…`) with
+`live/gdb-partialptr-324.cmd` (SHA `e3408dac…`). Expect
+`w324-partialptr-probe.log` (SHA `0b0efc37…`) to print
+`idx=0x5555557036d0`, `orig=0x555555703800`, then
+`POST qdatas=0x555555704140`, `size264=0x21`, `nq272=0x1` and
+`W324 OVERWRITE CONFIRMED`. Watchpoints installed after inflate have zero
+hits: no read or dereference of the chosen target. A 280-byte control
+(`w324-control-280-probe.log`, SHA `24758c18…`) leaves `qdatas` unchanged
+but crashes the same way, so the terminal fault is not attributable to
+the write; the `0x3800` control (`c2cf6ca3…`) is a preserved layout
+negative. Grade unchanged, no r5. Raw logs above are tracked under
+`lab/frontier/gimpjif2shell/live/evidence/`; the witness detail lives in
+the gitignored site under `.mishe-tauftauf/artifacts/`.
