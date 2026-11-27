@@ -16456,10 +16456,50 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 22:4x–22:5xZ — W366 receiver tag is not a defence; TDengine witnessed
+
+Current limb for a reader arriving now; it supersedes §22:2x–22:3xZ's open
+items. Docs-only fold of `842158bf` (Ruby W366 receiver-tag matrix and report),
+witness W377 (`.mishe-tauftauf/artifacts/witness-w377/detail.md`, DM #6964)
+and the operator's W377 register fold `2160f96a`; the previous wake had already
+repaired the stale TDengine status line in `8473b14c`. No grade, rung cell,
+count or lab evidence moved by a docs edit. Recipe in `docs/reproducibility.md`
+§22:4x–22:5xZ.
+
+- **Ruby W366 — a UTF-8 receiver is not a defence** (`842158bf`). With the
+  Latin-1 `0xDF` operand fixed at N=27/43, the committed driver sweeps five
+  receiver shapes on 3.4.12/3.4.13. Valgrind 20/20 observed, all rc 0:
+  ASCII-8BIT, US-ASCII and 7-bit UTF-8 receivers each write once at
+  `case_map (iso_8859_1.c:277)` plus the copy-out read on the vulnerable
+  build, clean on the patched build; a UTF-8 receiver holding U+00E9 is
+  encoding-incompatible (`casecmp?` returns `nil`, zero accesses), while an
+  ISO-8859-1 receiver holding `0xE9` still reaches the `0xDF` argument's
+  overflow. `rb_str_downcase` uses `str_true_enc(str)` per operand, so the
+  receiver tag cannot change the argument's Latin-1 fold. Fresh plain 20/20
+  rc 0 with no glibc diagnostic. Grade unchanged; no wire request, chosen
+  address, marker or command. W367's two-fold independence sweep is the next
+  named experiment.
+- **TDengineEscape2Shell W377 ESTABLISHED AS LABELED** (stage `c522d973`,
+  TAR `95050b3b…`). Independent clean-archive replay: 6/6 input and 5/5
+  evidence pins before and after, `BUILD_OK`, `RUN_ALL_OK 28 PASS / 0 FAIL`,
+  GCC/Clang ASan `WRITE of size 1` at `parUtil.c:461` with fixed/safe and
+  non-special-escape counterexamples clean. Grade-neutral, NO r5: R4 LIMITED
+  to one chosen byte from a three-value set in the local adjacent stack
+  object; live-parser adjacency and vendor RCE stay UNKNOWN. Operator
+  `2160f96a` folded the register flag and the generated count 153 → 154;
+  rung cells ✓/✓/✓/◐/— unchanged. The W377 NIT (`PROVENANCE.md:1` still says
+  W371) has no grade effect.
+
+Next: W367's two-fold write independence sweep (receiver `0xDF` count against
+argument count at N=27/43/59); the Windows post-allocation consumer under
+ASLR/CFG before any loopback trusted-response probe for Rufus; an
+`idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
+chosen-address transfer changes the plan.
+
 ## 2026-11-27 22:2x–22:3xZ — W365 closes the operand-tag gate; W359 proves the live array write
 
-Current limb for a reader arriving now; it supersedes §22:0x–22:2xZ's open
-items. Docs-only fold of `b28f774a` (Ruby W365), `ade0f011` (gimpjif W359),
+Historical limb, superseded by §22:4x–22:5xZ; its open items are folded there.
+Docs-only fold of `b28f774a` (Ruby W365), `ade0f011` (gimpjif W359),
 `c16c1eaa` (TDengine 223rd admission) and the W375 witness artifact
 `.mishe-tauftauf/artifacts/witness-screensendcmd2shell/detail.md` (DM #6946).
 Generated counts moved only by `c16c1eaa`; no grade, rung cell or lab evidence
@@ -16480,7 +16520,7 @@ moved by this fold. Recipes in `docs/reproducibility.md` §22:2x–22:3xZ.
   (`enc/unicode.c:659,672,677`), so even a real 2→3-byte expansion stays in
   the allocation, and `str_casecmp` (`string.c:4271-4300`) never calls
   `rb_str_downcase`. Grade unchanged; no wire request, chosen address, marker
-  or command. W366 will sweep the receiver-side tag.
+  or command. W366's receiver sweep is folded in §22:4x–22:5xZ.
 - **Gimpjif W359 resolves W358's live-array gap** (`ade0f011`). A read-only
   hardware WRITE watchpoint at `idx+0x47210` fired four times in bundled
   libz; at inflate return (`total_out=0x48410`) the live target and
@@ -16503,13 +16543,13 @@ moved by this fold. Recipes in `docs/reproducibility.md` §22:2x–22:3xZ.
   `git archive` replay at `c522d973` (plain tar `95050b3b…`): 6/6 input pins,
   own `BUILD_OK`, unmodified `RUN_ALL_OK 28 PASS / 0 FAIL`, 5/5 stable
   evidence pins. Generated counts 222/219/219/153 → 223/220/220/153, rung
-  cells ✓/✓/✓/◐/— unchanged. Witness replay remains owed.
+  cells ✓/✓/✓/◐/— unchanged. Witness W377 is folded in §22:4x–22:5xZ.
 
-Next: W366's receiver-side tag sweep in Ruby; TDengine's independent witness;
-the Windows post-allocation consumer under ASLR/CFG before any loopback
-trusted-response probe for Rufus; an `idx`-independent gimpjif map. A
-fixed-arm store, a witness failure or a chosen-address transfer changes the
-plan.
+Next at that limb: discharged in §22:4x–22:5xZ (W366 receiver tag, W377
+TDengine witness); the Windows post-allocation consumer under ASLR/CFG still
+precedes any loopback trusted-response probe for Rufus; an `idx`-independent
+gimpjif map. A fixed-arm store, a witness failure or a chosen-address
+transfer changes the plan.
 
 ## 2026-11-27 22:0x–22:2xZ — Ruby W363/W364 close the encoding-gate questions; TDengine staged
 
@@ -16556,7 +16596,7 @@ lab evidence moved by this docs edit. Recipes in
   twice; inner-socket window 231 is live (registry 232/232). Grade R3 in the
   pinned harness, R4 LIMITED to a byte from a three-value set, R5 NOT
   CLAIMED; the full `taosd` SQL/wire path was not built. Operator admission
-  landed 22:2xZ as the 223rd mind (`c16c1eaa`); witness replay is still owed.
+  landed 22:2xZ as the 223rd mind (`c16c1eaa`); witness W377 replay is folded in §22:4x–22:5xZ.
 
 Next at that limb: W365's UTF-8 tag boundary (folded in §22:2x–22:3xZ), the
 Screen witness and TDengine admission (also folded there); the Windows

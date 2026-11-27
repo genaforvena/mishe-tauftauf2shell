@@ -46,7 +46,7 @@ containers whose host ports bind only to loopback.
 |---|---|---|---|---|
 | RufusSbat2Shell W369 (ADMITTED 21:1xZ, 221st; W372 ESTABLISHED AS LABELED at stage `0415fa78`, W373 at correction `553bfad5`, NO r5) | [status](../reports/rufussbat2shell-status.md), [brief](../reports/frontier-rufussbat2shell.md), [provenance](../lab/frontier/rufussbat2shell/PROVENANCE.md) | GHSA-hcpc-vq8c-923h, Rufus `>=4.11, <=4.16_BETA`, patched `4.16`; fix `842873017f289713a5d5009320c11f31cfee36ed`, parent `de4cf676c2aedf73b0ddfc234e420d19c8969c2e`; stable source/harness/control pins in `SHA256SUMS` | `cd lab/frontier/rufussbat2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (exact extracted `GetSbatEntries()`, local file only; no Windows/network) | GCC and Clang: `RUN_ALL_OK 11 PASS / 0 FAIL`; vulnerable CR-60 ASan heap WRITE-8 at `parser.c:1651`, 0 bytes after 32; CR-2 terminator READ-8; fixed 60/2 clean; synthetic adjacent victim/no-PIE chosen callback prints `BENIGN_MARKER`; R4 LIMITED, R5 NOT CLAIMED. Witness W372 replayed stage `0415fa78` (TAR `178726d9…`, 16/16 pins, upstream blobs matched) and graded ESTABLISHED AS LABELED at that exact scope, grade-neutral, NO r5. Witness W373 then replayed the corrected harness from clean TAR `d8ec9e29…`: 16/16 pins before and after, 11/0 under GCC and Clang, source-true citation fixes and two-slot/62-slot accounting, read-only GDB at list+32 and a tampered-copy post-pin control rc 1, graded ESTABLISHED AS LABELED, grade-neutral, R4 LIMITED, NO r5. The operator's earlier correction replay also showed a controlled stable-output mismatch failing the post-regeneration pin check rc 1. Recipe and gitignored evidence in §21:0x–21:1xZ |
 | ScreenSendCmd2Shell W370 (ADMITTED 21:4xZ, 222nd; W375 ESTABLISHED AS LABELED at stage `95161177`, NO r5) | [status](../reports/screensendcmd2shell-status.md), [brief](../reports/frontier-screensendcmd2shell.md), [provenance](../lab/frontier/screensendcmd2shell/PROVENANCE.md) | CVE-2026-71409, CWE-120, Screen `<5.0.2`, fixed 5.0.2; GNU tarballs 5.0.1 `2dae36f4…09869d` / 5.0.2 `ca9a2c7e…b332`; 5.0.3 `941c98ff…` read-only for the `SendCreateMsg()` sibling; six input pins in `SHA256SUMS`, eight evidence pins in `evidence/SHA256SUMS`, exact fix hunk in `src/fix.patch` | `cd lab/frontier/screensendcmd2shell && ./harness/build.sh && ./harness/run-all.sh` (three in-tree ASan builds of the real client, loopback-local deep `SCREENDIR`, no listener or wire) | Operator clean replay 21:47Z from HEAD `95161177` (plain tar `519f6fde…`): 6/6 pins, own BUILD_OK and `RUN_ALL_OK 13 PASS / 0 FAIL`; real `screen -X` ASan `global-buffer-overflow`, `WRITE of size 302`, 0 bytes after `SocketPath` and 62 before the real `attach_tty_name_in_ns`, at `attacher.c:434` ← `screen.c:950`; fixed 5.0.2 and safe input clean; recover-ASan GDB shows chosen `0x43` at nine victim offsets; R4 LIMITED, R5 NOT CLAIMED; full procedure in §21:4xZ. Witness W375 (private artifact) rechecked 6/6 + 8/8 pins before and after, 13 PASS / 0 FAIL and all nine chosen bytes; grade-neutral NIT: plain GCC PIE and -no-pie builds FORTIFY-abort (rc 134) before any write, so the old BSS-padding claim is withdrawn |
-| TdengineEscape2Shell W371 (ADMITTED 22:2xZ, 223rd; witness owed) | [brief](../reports/frontier-tdengineescape2shell.md), [status](../reports/tdengineescape2shell-status.md), [provenance](../lab/frontier/tdengineescape2shell/PROVENANCE.md) | GHSA-4v5h-fxjw-vrmq / TD-SEC-2026-004, `<= v3.4.1.6`, fixed `v3.4.1.14` by commit `64ff9a8f…` (no such tag), parent `d91020e5…`; six input pins in `SHA256SUMS`, five stable-evidence pins in `evidence/SHA256SUMS` | `cd lab/frontier/tdengineescape2shell && sha256sum -c SHA256SUMS && ./harness/build.sh && ./harness/run-all.sh` (verbatim pinned `trimString()` in caller-shaped frames, no server or wire) | `RUN_ALL_OK 28 PASS / 0 FAIL` twice; GCC/Clang ASan `stack-buffer-overflow WRITE of size 1` at `parUtil.c:461`, fixed and safe arms clean; plain adjacent `victim` `0x25`/`0x5f`/`0x78`. Operator clean replay 22:18Z from `c522d973` tar `95050b3b…`: 6/6 input pins, own `BUILD_OK`, 28 PASS / 0 FAIL and 5/5 evidence pins. R4 LIMITED to a three-value chosen byte, NO r5; independent witness replay owed. |
+| TdengineEscape2Shell W371 (ADMITTED 22:2xZ, 223rd; W377 ESTABLISHED AS LABELED at stage `c522d973`, NO r5) | [brief](../reports/frontier-tdengineescape2shell.md), [status](../reports/tdengineescape2shell-status.md), [provenance](../lab/frontier/tdengineescape2shell/PROVENANCE.md) | GHSA-4v5h-fxjw-vrmq / TD-SEC-2026-004, `<= v3.4.1.6`, fixed `v3.4.1.14` by commit `64ff9a8f…` (no such tag), parent `d91020e5…`; six input pins in `SHA256SUMS`, five stable-evidence pins in `evidence/SHA256SUMS` | `cd lab/frontier/tdengineescape2shell && sha256sum -c SHA256SUMS && ./harness/build.sh && ./harness/run-all.sh` (verbatim pinned `trimString()` in caller-shaped frames, no server or wire) | `RUN_ALL_OK 28 PASS / 0 FAIL` twice; GCC/Clang ASan `stack-buffer-overflow WRITE of size 1` at `parUtil.c:461`, fixed and safe arms clean; plain adjacent `victim` `0x25`/`0x5f`/`0x78`. Operator clean replay 22:18Z from `c522d973` tar `95050b3b…`: 6/6 input pins, own `BUILD_OK`, 28 PASS / 0 FAIL and 5/5 evidence pins. W377 clean-archive replay matched 6/6 input and 5/5 evidence pins before and after, with fixed/safe and non-special-escape counterexamples; ESTABLISHED AS LABELED, grade-neutral, NO r5. R4 LIMITED to one chosen byte from a three-value set in the local adjacent stack object; no live parser or vendor RCE. |
 | CheckmkMkevent2Shell W367 (STAGED 19:1xZ; clean archive replay) | [status](../reports/checkmk2shell-status.md), [brief](../reports/frontier-checkmk2shell.md), [provenance](../lab/frontier/checkmk2shell/PROVENANCE.md) | CVE-2026-110470 / GHSA-p7hw-9hjv-7jpq; Checkmk 2.5.0 `<2.5.0p21`, 2.4.0 `<2.4.0p42`, 2.3.0 EOL; fix `265c0ab68fb50bedd0102536eb92612a3eb1af91`, parent `9a64b94964c5cc34d82daa888d675b86f835e861`; 12 stable pins in `SHA256SUMS` | `cd lab/frontier/checkmk2shell && sha256sum -c SHA256SUMS && ./harness/run-all.sh` (real pinned `parse_notification()` plus isolated verbatim sink, local only) | Clean `b902273f` archive `3a5b3ef2…`: 12/12 pins, `RUN_ALL_OK 11 PASS / 0 FAIL`; real parser ASan WRITE size 10000 at `mkevent.cc:46` via `:144`; fixed truncates to 8191; R4 LIMITED to isolated sink, R5 NOT CLAIMED; admission and witness owed |
 | PyMuPDFCallout2Shell W354 (ADMITTED 18:0xZ, 219th; W365 ESTABLISHED AS LABELED) | [status](../reports/pymupdfcallout2shell-status.md), [brief](../reports/frontier-pymupdfcallout2shell.md), [provenance](../lab/frontier/pymupdfcallout2shell/PROVENANCE.md) | CVE-2026-120752 / GHSA-4gw9-9rgm-rwfx, PyMuPDF `>=1.25.3,<2.0`; fix `d4298ead84ceeae1c9065c81cd9a275a1b092f5e`, pinned parent `c26130ccfc7e5d8f83a05092d959d4794c5105bb`; 10 stable `SHA256SUMS` pins (the ASLR GDB log and venv-path fixed traceback are token-checked only) | `cd lab/frontier/pymupdfcallout2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (local published wheels 1.28.2/2.0 in gitignored venvs, real `add_freetext_annot(callout=...)`, no server or wire) | `RUN_ALL_OK 5 PASS / 0 FAIL`; vulnerable 8 points rc 139, fixed 100 points rc 1 `RuntimeError: bad seq of points`; GDB chosen `0x4343434343434343` at saved RIP with `0x0000000000582130` preserved at `$frame-8`; R4 LIMITED, NO r5, `established:true` at the W365 scope (`11163cef`); full procedure in §§18:0xZ/18:2xZ |
 | LrzszProcheader2Shell W352 (ADMITTED 17:3xZ, 218th; W364 ESTABLISHED AS LABELED at pinned-sink scope) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. W364 replayed clean archive `4678a157` (TAR `06329456…`) twice at 5/0 with read-only GDB chosen `0x31` bytes; ESTABLISHED AS LABELED at the pinned-sink harness scope, grade-neutral, NO r5, no live ZFILE wire; full procedure in §17:2xZ |
@@ -21309,7 +21309,43 @@ while the fixed frame keeps `0x5a`. Grade R3 in the pinned caller-shaped
 harness, R4 LIMITED to a byte from a three-value set in an adjacent stack
 object, R5 NOT CLAIMED; no full `taosd` SQL/wire path, listener or command.
 Operator admission landed 22:2xZ as the 223rd mind (`c16c1eaa`);
-independent witness replay is still owed.
+independent witness replay landed as W377 (§22:4x–22:5xZ).
+
+## 2026-11-27 22:4x–22:5xZ — Ruby W366 receiver-tag matrix; TDengine W377 replay
+
+Prerequisites: the pinned plain Ruby builds from §20:0x–20:2xZ (3.4.12
+vulnerable, 3.4.13 fixed) and `valgrind`. The committed runner writes raw logs
+to gitignored `lab/build/evidence/casemap-chain/w366/`; regenerate them with:
+
+```sh
+bash lab/repro/ruby2shell-recv-tag-matrix.sh
+lab/build/plain/ruby-3.4.12-plain/bin/ruby lab/repro/ruby2shell-recv-tag.rb 27 usascii_recv
+```
+
+Expect 20 observed `vg build=… mode=… N=… rc=0 writes=… reads=…` arms. On
+3.4.12 `ascii_recv`, `usascii_recv` and `utf8_7bit_recv` each give
+`writes=1 reads=1`, one `Invalid write of size 1` at
+`case_map (iso_8859_1.c:277)` plus the copy-out read, `0 bytes after a block
+of size 72/88`, `result=true` at N=27 and `false` at N=43; all three arms on
+3.4.13 give `writes=0 reads=0`. `utf8_nonascii_recv` (U+00E9) is
+encoding-incompatible on both builds: zero accesses, `result=nil`.
+`latin_nonascii_recv` (ISO-8859-1 `0xE9`) stays compatible and still writes
+once on 3.4.12, zero on 3.4.13, `result=false`. Fresh plain 20/20 are rc 0
+with no glibc diagnostic. `str_true_enc(str)` folds each operand with its own
+tag, so the receiver's tag cannot change the argument's Latin-1 fold. No
+wire request, chosen address, marker or command; grade and rung cells
+unchanged.
+
+W377's TDengine replay uses the same stage and archive as §22:2x–22:3xZ:
+`git archive --format=tar c522d973 lab/frontier/tdengineescape2shell` gives
+TAR SHA-256 `95050b3b3679c51caee030f7649196d3aa26ecb3ecc88ff8c02865814be4019f`.
+From the extracted tree expect 6/6 input pins and 5/5 evidence pins before
+and after, `BUILD_OK`, `RUN_ALL_OK 28 PASS / 0 FAIL`, GCC/Clang ASan
+`stack-buffer-overflow WRITE of size 1` at `parUtil.c:461`, fixed/safe arms
+clean and plain victim bytes `0x25`/`0x5f`/`0x78`; non-special escapes and
+`n`/`q` ASan arms are clean counterexamples. ESTABLISHED AS LABELED,
+grade-neutral, NO r5, R4 LIMITED to one three-value byte in the local
+adjacent stack object; no live parser, ASLR/layout measurement or vendor RCE.
 
 ## 2026-11-27 22:2x–22:3xZ — Ruby W365, gimpjif W359, Screen witness, TDengine admission
 
@@ -21377,7 +21413,7 @@ only ≥1 `OK` (witness verified 8/8 by hand).
 
 TDengine's admission replay expects 6/6 input pins, own `BUILD_OK`,
 `RUN_ALL_OK 28 PASS / 0 FAIL`, 5/5 evidence pins and GCC/Clang ASan `WRITE
-of size 1` at `parUtil.c:461`; witness replay remains owed. Grades and rung
+of size 1` at `parUtil.c:461`; witness W377 replay is folded in §22:4x–22:5xZ. Grades and rung
 cells moved only in the generated files by `c16c1eaa`.
 
 ## 2026-11-27 21:4xZ — ScreenSendCmd2Shell admitted (222nd): clean-archive replay
