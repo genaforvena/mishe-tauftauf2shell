@@ -9026,3 +9026,62 @@ with patched 3.4.13/3.3.14/4.0.10 as controls. Prediction: one
 `case_map` write at `R=N+45` on all vulnerable arms, zero on patched;
 falsifier: no write at that offset (geometry formula wrong) or any write
 on a patched build. Do not repeat the size-LSB N=27/43/59 arms unchanged.
+
+## 2026-11-27 18:5xZ — W356: mixed-parity prev_size-LSB arm CLOSED
+
+W353/W354/W355 closed N == 11 (mod 16), where the one-byte write at
+`R = N+45` lands on the successor glibc chunk's size LSB. W356 ran the
+same mixed input (`a` + N x `0xDF`) with N = 35/51/67 (N == 3 mod 16,
+`R == 0` mod 16) on plain vulnerable 3.4.12/3.3.13/4.0.9 and patched
+3.4.13/3.3.14/4.0.10. Prediction: exactly one `case_map` write per
+vulnerable arm and zero on patched. Falsifier: no write at that offset
+(geometry wrong) or any write on a patched build. Falsifier not met.
+
+Valgrind 18/18: each of the nine vulnerable arms has exactly one
+`Invalid write of size 1` at `case_map (iso_8859_1.c:293)` and the known
+copy-out `Invalid read of size 1` at `memmove`, both `0 bytes after a
+block of size 80/96/112` for N=35/51/67; `rc=0`. Write callers:
+3.4.12 `rb_str_casemap string.c:7839` (alloc via
+`rb_gc_impl_malloc default.c:8195`), 3.3.13 `:7414` (alloc
+`objspace_xmalloc0 gc.c:12617` from `:7409`), 4.0.9 `:7844` (alloc
+`default.c:8300` from `gc.c:5161`). All nine patched arms: zero invalid
+writes, zero invalid reads, no `case_map` site. Raw logs
+`lab/build/evidence/casemap-chain/w356/vg-*.txt` (gitignored).
+
+Fresh unsanitized glibc: three reps per build per N in {35,51,67} plus
+the even-N=36 safe control (72 processes), all `rc=0`, with no
+`munmap_chunk`, `corrupted size`, `invalid next size` or double-free
+diagnostic. Unlike the size-LSB parity, a prev_size-LSB write is inert
+while the chunk is in use. Evidence `.../w356/plain/*.txt`.
+
+gdb on plain 3.4.12 N=35 (committed
+`lab/repro/ruby2shell-mixed-prevsize.gdb`, break at `string.c:7839` with
+`capa=56`, used at `:7850`) read `slot = current_buffer + 80 =
+space + capa`: an 80-byte malloc request gets a 0x60 glibc chunk, so
+`slot` is the successor's prev_size LSB and `slot+8` its size LSB.
+Before: `slot=0x00`, `slot+8=0x91`. After `used=57`: `slot=0x53`,
+`slot+8=0x91`. The in-bounds byte at `slot-8` also became `0x53`, which
+is ordinary case-map output, not a second OOB store. This confirms the
+parity split: N == 3 (mod 16) hits prev_size LSB, N == 11 (mod 16)
+hits size LSB. Log `.../w356/gdb-3.4.12-35.log`.
+
+Replay with committed `lab/repro/ruby2shell-mixed-prevsize.sh` (755),
+the same gdb script and the committed input
+`lab/repro/ruby2shell-rung3-mixed.rb N`. This closes the second
+mixed-parity glibc-field offset on all three vulnerable and all three
+patched branches; it adds no grade. Grade unchanged: primary wire-only
+rung 3 CONFIRMED, witness-COMPLETE rung 4, harness-condition rung 5
+witness-ESTABLISHED at its labeled scope, full stock/oracle-free/
+persistent rung 5 NOT ACHIEVED.
+
+Next named experiment W357: the same overflow placed on a *higher byte*
+of the successor size field. With k odd leading ASCII bytes the buffer
+is `capa = N+k+20`, `R = 24+capa = N+k+44`, and the request size is
+exactly `R`; k=1 gives only R == 0 or 8 (mod 16) (the two LSB arms just
+closed). k=3 with N=27/43/59 gives `R = 74/90/106 == 10 (mod 16)`, i.e.
+byte 2 (bits 16-23) of the successor chunk's size word. Prediction: valgrind
+shows one `case_map` write at R on vulnerable 3.4.12/3.3.13/4.0.9 and
+zero on patched 3.4.13/3.3.14/4.0.10, with fresh-plain glibc metadata
+diagnostics on at least one vulnerable build. Falsifier: no overflow on
+k=3 (parity formula wrong) or any write on a patched build. Do not
+repeat the k=1 N=27/43/59 or N=35/51/67 arms unchanged.
