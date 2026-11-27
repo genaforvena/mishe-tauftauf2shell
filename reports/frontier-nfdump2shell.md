@@ -405,6 +405,33 @@ past both packet and allocation. GDB at the live plain collector's
 attacker-chosen from the wire. No crossing write, no pointer control; grade
 unchanged, NO r5. Detail: `lab/frontier/nfdump2shell/PROVENANCE.md`.
 
+### IPv6 two-packet swap closure (2026-11-27 16:5xZ)
+
+Hypothesis: the confirmed IPv6 allocation crossing leaves `0x01` in the
+adjacent chunk's size field, which could act as `proto == ICMP` for a later
+truncated element and let the pinned port swap write wire-chosen bytes into
+malloc metadata. Closed from the pin plus the already-measured word; no new
+packet, build or runner was needed:
+
+- `pins/process-parent.inc:1-19` returns `elementHeader+4`. With the flow
+  element header at `E`, `msecReceived` sits at `E+20..27`, `srcPort` at
+  `E+44..45`, `dstPort` at `E+46..47` and the switch reads `proto` at
+  `E+48` (`pins/nfd_raw-parent.c:250-260`). Every swap write is 1..4 bytes
+  *before* its trigger byte.
+- A wire-chosen trigger implies `E+48 <= 65526`, hence `E+46..47 <= 65525`
+  and an in-bounds write. An out-of-bounds `dstPort` (`E+46 >= 65535`)
+  implies `E+48 >= 65537`, so the trigger read is allocator state, not
+  packet data. For IPv6, `E=65500` would place `dstPort` on the low bytes
+  of the next chunk's size field and `proto` at `in_buff+65548`; the prior
+  v6edge measurement `HDR_SIZE_AFTER=00000001a219c694` does leave `0x01`
+  there, but the same clock store placed the `srcPort` bytes at
+  zeroes two of them. Making `srcPort` wholly in-bounds forces `E` to
+  65489 or 65490 and the trigger to `+65537/+65538`, `prev_size` bytes the
+  clock store never reaches (it starts at `+65543`) and the wire cannot set.
+- No wire-chosen byte reaches the adjacent chunk's `size` field through
+  this swap. Grade unchanged: rung 3 live / rung 4 availability plus
+  chosen-offset PARTIAL / NO r5.
+
 ### Framing closure (2026-11-26 20:11Z)
 
 The pinned swap cannot set an accepted record `size` or `numElements`: to

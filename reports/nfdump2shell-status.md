@@ -22,6 +22,22 @@ availability and PARTIAL for chosen field bytes / NO r5. Details:
 `lab/frontier/nfdump2shell/PROVENANCE.md` and
 `reports/frontier-nfdump2shell.md`.
 
+
+### ICMP-crossing chain closed structurally (2026-11-27 16:5xZ)
+
+Read-only closure of the two-packet IPv6 hypothesis: the measured clock word
+leaves `0x01` at `in_buff+65548`, which could serve as `proto == ICMP` for a
+later truncated element whose swap lands on the adjacent chunk's `size`
+field. Pinned `GetExtension()` and `Process_nfd()` put the swap writes at
+element-header offsets `E+44..47` and the trigger read at `E+48`: a
+wire-chosen trigger forces in-bounds writes, and an out-of-bounds write
+forces a trigger read from allocator state. At `E=65500` the clock store
+supplies both the trigger and `srcPort`, so the swap only reorders clock
+bytes; an in-bounds `srcPort` puts the trigger at `+65537/+65538`, which the
+clock store never reaches. No wire-chosen byte reaches malloc metadata by
+this route; no build, packet, runner or assertion changed. Detail in
+`reports/frontier-nfdump2shell.md`, section "IPv6 two-packet swap closure".
+
 ### Lab-injected clock cannot turn the heap-size write into a primitive (2026-11-27 07:58Z)
 
 `run-v6clock.sh` uses a 20-line `LD_PRELOAD` `gettimeofday()` shim on the
