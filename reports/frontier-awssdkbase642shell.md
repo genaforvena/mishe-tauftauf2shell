@@ -79,6 +79,11 @@ at pinned `Base64.cpp:115`, zero bytes after the 2-byte region for `AAAA=`;
 canonical `AAAA` and 9-`A` inputs are clean. Read-only GDB on the plain
 `-DNDEBUG` build, stopped at `Base64.cpp:120`, reads `m_length=2` and the
 chosen `0x5A` / `0xDA` at the OOB offset for `AABa=` / `AADa=`.
+A clean `git archive --format=tar 77c246b2 lab/frontier/awssdkbase642shell`
+replay into `/tmp/w345-aws-clean` matched 18/18 pins, rebuilt all three
+consumers offline and returned the byte-identical 17/0 summary; plain-tar
+SHA-256 `0c01bf691a0f9117ac323a03309fdab904d5fa23a751de5b0471b08724e119ed`.
+This is an author durability check, not witness acceptance.
 
 Next: build the fixed v1.11.862 arm against `aws-crt-cpp` v0.43.2 to close
 the fixed control, then stage a window only if a real generated-client caller
