@@ -314,3 +314,10 @@ completes the ~4 GiB `dest` / ~8 GiB GEGL load, and neither exposes a
 code pointer or post-decode consumer. Grade unchanged rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes, NO r5. Hashes and transcript in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`, W337 section.
+
+Clean-archive replay from commit `8d4458ac` (`git archive HEAD
+lab/frontier/gimpjif2shell` into `/tmp/w337-clean`) reproduced the pinned
+inflate, the real-plug-in `ReadJeffsImage.isra.0+696` return frame, the same
+`0x4d4d…` OOB pattern and the same terminal crash; only ASLR-shifted
+addresses and the adjacent chunk-size word moved. Replay full-log SHA-256
+`71c690cbafaf283db74e38504442bbc9ee3a3b0765d9186a4a9a43db7e5d48a4`.

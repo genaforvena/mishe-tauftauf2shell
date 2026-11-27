@@ -1753,3 +1753,8 @@ file-reachable wrapped products write chosen bytes OOB but neither
 completes. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL chosen
 bytes / NO r5. Script, JIF, transcript and hashes in the W337 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+Clean-archive replay from commit `8d4458ac` reproduced the pinned inflate,
+the real-plug-in return frame, the same OOB bytes and the same terminal
+crash; only ASLR-shifted addresses and the adjacent chunk-size word moved.
+Grade-neutral, no witness replay offered (same disposition as W334-W336).

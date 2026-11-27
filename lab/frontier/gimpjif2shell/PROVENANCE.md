@@ -2615,3 +2615,15 @@ the pinned inflate and write chosen bytes OOB, but neither completes the
 pointer was observed in either layout. Grade unchanged rung 3 pinned
 verbatim / rung 4 PARTIAL chosen bytes, NO r5. Do not repeat this probe
 unchanged.
+
+Clean-archive replay at 12:2xZ from commit `8d4458ac`: `git archive HEAD
+lab/frontier/gimpjif2shell` into `/tmp/w337-clean`; the unmodified runner
+and GDB script (hashes `818b7320…` / `a8f23d0a…`, JIF `7d84ec05…`) gave
+`PASS: pinned inflate reached`, a real-plug-in return frame
+`ReadJeffsImage.isra.0+696`, `+0/+8/+16/+24/+32 = 0x4d4d…`, `+40` onward
+untouched, and the same `Fatal signal: Segmentation fault` /
+`Plug-in crashed` result. Replay full-log SHA-256
+`71c690cbafaf283db74e38504442bbc9ee3a3b0765d9186a4a9a43db7e5d48a4`,
+probe-log SHA-256 `8973c7c772ebb5b940016d619b45731b22c9836458f62c7af1ad6c5e3db59295`.
+Only heap addresses and the adjacent chunk-size word shifted (ASLR /
+layout sensitivity); the grade-neutral conclusion is reproducible.
