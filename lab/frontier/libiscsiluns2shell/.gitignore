@@ -1,0 +1,15 @@
+src-vuln/
+build-*/
+src-vuln-asan/
+src-vuln-plain/
+src-fixed-asan/
+src-fixed-plain/
+build-vuln-asan/
+autoreconf-*.log
+configure-*.log
+build-*.log
+runs/
+harness/vuln-asan
+harness/vuln-plain
+harness/fixed-asan
+harness/fixed-plain
