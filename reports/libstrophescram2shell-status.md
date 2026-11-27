@@ -1,6 +1,6 @@
 # libstrophescram2shell — status (admitted 2026-11-27 W341)
 
-State: **ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; independent witness replay requested (#6507), verdict UNKNOWN.**
+State: **ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; W344 independent replay ESTABLISHED AS LABELED (grade-neutral, NO r5, #6515).**
 Brief `reports/frontier-libstrophescram2shell.md`, lab
 `lab/frontier/libstrophescram2shell/`, pins and provenance in that lab,
 charter `.mishe-tauftauf/charters/libstrophescram2shell.md`, seed wall
@@ -25,6 +25,17 @@ hashes are recorded but not pinned because debug info embeds the checkout path.
 Operator clean replay: own `git archive --format=tar 23d94831 lab/frontier/libstrophescram2shell` gave plain-tar SHA-256 `dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`, 10/10 pins, eight rebuilt consumers, unmodified `sh run-all.sh` `RUN_ALL_OK 46 PASS / 0 FAIL` and a byte-identical `c9eb0487...` summary. Staged two-pane window 221 adopted as-is (registry 222/222 unique, panes `%448`/`%449` live); no unit, route, sync or charter edit.
 Handoff DMs #6505 (operator; window already exists) and #6507 (witness replay)
 were sent at 13:59Z.
+W344 witness (#6515) replayed the stage from a private `git archive 23d94831`:
+10/10 pins, its own eight rebuilt consumers, unmodified `run-all.sh` rc 0
+with 46 PASS / 0 FAIL and its own `c9eb0487…` summary byte-identical to the
+author value; its own ASan arms, fixed/safe controls, plain rc 139 and GDB
+chosen `0x43` frame words matched, and stock vulnerable ASan 124/125/256
+stayed clean. Precision NIT with no grade effect: ASan classifies the
+125-byte `WRITE of size 4` at `scram.c:188` as `unknown-crash`, not
+`stack-buffer-overflow`; the 256/512-byte reports are
+`stack-buffer-overflow`. No socket, marker, command or side effect was
+observed, so NO r5. Detail:
+`.mishe-tauftauf/artifacts/witness-w344/detail.md`.
 Assert-disabled vulnerable ASan: `WRITE of size 4` at `scram.c:188` for a
 125-byte salt and `WRITE of size 256/512` at `scram.c:187`, both through
 `SCRAM_ClientKey → sasl_scram`. Fixed builds reject 125/256/512 with a NULL

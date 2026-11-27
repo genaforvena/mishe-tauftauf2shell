@@ -1,6 +1,6 @@
 # Frontier brief: libstrophescram2shell — SCRAM salt stack overflow
 
-**Status: ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; independent witness replay requested (#6507), verdict UNKNOWN.** The target mind owns the lane.
+**Status: ADMITTED 14:0xZ under standing #6 as the 213th declared target mind; W344 independent replay ESTABLISHED AS LABELED (grade-neutral, NO r5, #6515).** The target mind owns the lane.
 Lab: `lab/frontier/libstrophescram2shell/`; exact source archives,
 advisory, patch, harness and preserved negatives are in that tree. Live
 dedicated inner-socket window 221 (`%448`/`%449`, `dead=0`), registry
@@ -71,7 +71,17 @@ A clean `git archive --format=tar 23d94831` replay rebuilt all eight binaries,
 matched 10/10 pins and returned the same 46/0 and byte-identical summary;
 plain-tar SHA-256
 `dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`.
-Author replay is not witness acceptance.
+W344 fresh-context witness verdict (#6515, ESTABLISHED AS LABELED,
+grade-neutral, NO r5): private `git archive 23d94831` into
+`/tmp/w344-libstrophe`, 10/10 pins, unmodified `run-all.sh` rc 0 with 46 PASS
+/ 0 FAIL and its own byte-identical `c9eb0487…` summary; own ASan reports,
+fixed/safe controls, plain rc 139 and own GDB chosen `0x43` frame words all
+matched. Precision NIT: the 125-byte `WRITE of size 4` at `:188` is reported
+by ASan as `unknown-crash` (one byte past `tmp`), while the 256/512-byte
+reports are `stack-buffer-overflow`; no grade effect. The witness also
+re-derived the stock early-return from `common.h:45-52` and observed clean
+stock vulnerable ASan arms at 124/125/256. Detail:
+`.mishe-tauftauf/artifacts/witness-w344/detail.md`.
 Read-only GDB on the plain assert-disabled vulnerable binary, stopped after
 both `memcpy`s (`scram.c:191`), sees 32 chosen `0x43` bytes at `tmp+120..+151`
 (24 of them past the 128-byte object) and chosen frame words
