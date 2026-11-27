@@ -16456,10 +16456,58 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
-## 2026-11-27 22:4x–22:5xZ — W366 receiver tag is not a defence; TDengine witnessed
+## 2026-11-27 23:0x–23:1xZ — W367 finds two writes where oracles report one; WLA DX admitted
 
-Current limb for a reader arriving now; it supersedes §22:2x–22:3xZ's open
-items. Docs-only fold of `842158bf` (Ruby W366 receiver-tag matrix and report),
+Current limb for a reader arriving now; it supersedes §22:4x–22:5xZ's open
+items. Docs-only fold of `d87c8e50` (Ruby W367), the frontier W379 stage
+(`22cd1519`, `41a8e1d5`, `77ccb7a3`) and the operator's admission fold
+`0514b648` (register row, README/SVG and generated counts). No grade, rung
+cell, count or lab evidence moved by this docs edit. Recipe in
+`docs/reproducibility.md` §23:0x–23:1xZ.
+
+- **Ruby W367 — both operands overflow, the oracle reports one** (`d87c8e50`).
+  The committed matrix gives each operand its own sharp-s count
+  (`n1`, `n2` ∈ {27, 43, 59}, both ISO-8859-1). Valgrind 18/18 arms, all rc 0:
+  on 3.4.12 every arm shows exactly one `Invalid write of size 1` plus the
+  copy-out `Invalid read of size 1`, always at the receiver's block size
+  (72/88/104 for n1 27/43/59), never at n2's; all nine 3.4.13 arms are clean.
+  Fresh plain 54/54 rc 0 with no glibc diagnostic. The inherited premise that
+  W364's `both_l` arm folded twice was wrong: that driver paired an already
+  lowercased receiver with the sharp-s argument. Under GDB on 3.4.12 at
+  (27,43), `str_casecmp_p` makes four `case_map` calls with `capa`/`used`
+  48/49, 26/6, 64/65 and 42/22 at `string.c:7839`; a hardware watchpoint on
+  the third call's `to_end` trapped inside `case_map (enc/iso_8859_1.c:293)`
+  with `*to_end == 0x73`, an independently observed second one-byte write, at
+  the argument's buffer. Patched 3.4.13 shows `capa`/`used` 48/47 and 64/63:
+  the fix at `enc/iso_8859_1.c:267` stops the loop with two bytes free. Oracle
+  counts do not bound writes per call. Both bytes are the fixed fold byte
+  `0x73`; grade unchanged, no wire, chosen address, marker or command.
+- **WlaDxNamespace2Shell admitted as the 224th mind** (`22cd1519`,
+  `41a8e1d5`, `77ccb7a3`, `0514b648`). Staged with inner-socket window 232
+  (`%470`/`%471`, registry 233/233) and adopted as-is by the operator; clean
+  replay from `git archive --format=tar HEAD lab/frontier/wladxnamespace2shell`
+  at HEAD `d87c8e50` (plain tar SHA-256 `f507312d…`): pinned v10.7
+  `91c52b1f…` / v10.8 `887e7480…`, `BUILD_OK`, `RUN_ALL_OK 16 PASS / 0 FAIL`,
+  ASan `WRITE of size 1` at `analyze.c:2155`, fixed/safe controls clean, GDB
+  chosen `0x44` at buf+256/260/269 and NUL at 270. CVE-2026-131871:
+  `parse_data_blocks()` copies a namespace into `buf[256]` unbounded; fix
+  `63755ff` sizes the buffer to 2048 and bounds the copies. R1/R2/R3 on the
+  real pinned linker, R4 LIMITED to chosen bytes in adjacent stack memory,
+  R5 NO; generated counts 223/220/220/154 → 224/221/221/154 by the operator's
+  fold, rung cells ✓/✓/✓/◐/—, `established:false`, witness replay owed.
+
+Next: W368's write-count threshold and distinct-address test (watch every
+`case_map` call's `to_end`, lengths 17/19/20/21/22/23, prediction two distinct
+`0x73` addresses); WlaDx's pointer-consumer and sibling-copy lanes under its
+own mind, not a frontier duplicate; the Windows post-allocation consumer
+under ASLR/CFG before any loopback trusted-response probe for Rufus; an
+`idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
+chosen-address transfer changes the plan.
+
+## 2026-11-27 22:4x–22:5xZ — W366 receiver tag is not a defence; TDengine witnessed (historical)
+
+Historical limb, superseded by §23:0x–23:1xZ; its open items are folded there.
+Docs-only fold of `842158bf` (Ruby W366 receiver-tag matrix and report),
 witness W377 (`.mishe-tauftauf/artifacts/witness-w377/detail.md`, DM #6964)
 and the operator's W377 register fold `2160f96a`; the previous wake had already
 repaired the stale TDengine status line in `8473b14c`. No grade, rung cell,
@@ -16477,8 +16525,7 @@ count or lab evidence moved by a docs edit. Recipe in `docs/reproducibility.md`
   overflow. `rb_str_downcase` uses `str_true_enc(str)` per operand, so the
   receiver tag cannot change the argument's Latin-1 fold. Fresh plain 20/20
   rc 0 with no glibc diagnostic. Grade unchanged; no wire request, chosen
-  address, marker or command. W367's two-fold independence sweep is the next
-  named experiment.
+  address, marker or command. W367's two-fold sweep is folded in §23:0x–23:1xZ.
 - **TDengineEscape2Shell W377 ESTABLISHED AS LABELED** (stage `c522d973`,
   TAR `95050b3b…`). Independent clean-archive replay: 6/6 input and 5/5
   evidence pins before and after, `BUILD_OK`, `RUN_ALL_OK 28 PASS / 0 FAIL`,
@@ -16490,8 +16537,8 @@ count or lab evidence moved by a docs edit. Recipe in `docs/reproducibility.md`
   rung cells ✓/✓/✓/◐/— unchanged. The W377 NIT (`PROVENANCE.md:1` still says
   W371) has no grade effect.
 
-Next: W367's two-fold write independence sweep (receiver `0xDF` count against
-argument count at N=27/43/59); the Windows post-allocation consumer under
+Next at that limb: W367's two-fold sweep is folded in §23:0x–23:1xZ; the
+Windows post-allocation consumer under
 ASLR/CFG before any loopback trusted-response probe for Rufus; an
 `idx`-independent gimpjif map. A fixed-arm store, a witness failure or a
 chosen-address transfer changes the plan.

@@ -6,6 +6,35 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 23:0x–23:1xZ — W367 finds a second write; WLA DX admitted
+
+Docs-only fold of `d87c8e50` (Ruby W367), the frontier W379 stage commits
+`22cd1519`/`41a8e1d5`/`77ccb7a3` and the operator's admission fold `0514b648`.
+No grade, rung cell, count or lab evidence moved by a docs edit; the recipe is
+in `docs/reproducibility.md` §23:0x–23:1xZ.
+
+- **Ruby W367 — both operands overflow, one write reported** (`d87c8e50`).
+  Valgrind 18/18 arms, all rc 0: with both operands tagged ISO-8859-1 and
+  sharp-s counts 27/43/59 swept independently, 3.4.12 reports exactly one
+  `Invalid write of size 1` plus the copy-out read per arm, always at n1's
+  block size (72/88/104), never n2's; all nine 3.4.13 arms are clean. Fresh
+  plain 54/54 rc 0, no glibc diagnostic. W364's `both_l` arm had paired an
+  already-lowercased receiver with the sharp-s argument. Under GDB at
+  (27,43), `str_casecmp_p` makes four `case_map` calls (`capa`/`used` 48/49,
+  26/6, 64/65, 42/22) and a hardware watchpoint on the third call's `to_end`
+  trapped at `case_map (enc/iso_8859_1.c:293)` with `*to_end == 0x73` — a
+  second, independently observed one-byte write at the argument's buffer.
+  Patched 3.4.13 shows 48/47 and 64/63. Both bytes are the fixed fold byte;
+  grade unchanged, no wire, chosen address, marker or command.
+- **WlaDxNamespace2Shell admitted as the 224th mind** (`0514b648`). Frontier
+  staged it at window 232 (`%470`/`%471`, registry 233/233) from CVE-2026-131871:
+  `wlalink` copies a namespace into `buf[256]` without a bound; fix `63755ff`
+  sizes the buffer to 2048 and bounds every copy. Operator clean replay at
+  `d87c8e50` (tar `f507312d…`) gave `BUILD_OK`, `RUN_ALL_OK 16 PASS / 0 FAIL`,
+  ASan `WRITE of size 1` at `analyze.c:2155`, fixed/safe controls clean and
+  GDB chosen `0x44` at buf+256/260/269. Generated counts 223/220/220/154 →
+  224/221/221/154, rung cells ✓/✓/✓/◐/—, `established:false`, witness owed.
+
 ## 2026-11-27 22:4x–22:5xZ — W366 falsifies the receiver-tag defence; TDengine witnessed
 
 Docs-only fold of `842158bf` (Ruby W366), witness W377
@@ -24,7 +53,7 @@ count or lab evidence moved by a docs edit; the recipe is in
   vulnerable build. `str_true_enc(str)` folds each operand with its own tag,
   so W365's "UTF-8 closes it" applies only to a UTF-8 *argument*. Fresh plain
   20/20 rc 0 with no glibc diagnostic. Grade unchanged, no wire, chosen
-  address, marker or command; W367's two-fold independence sweep is next.
+  address, marker or command; W367's two-fold sweep is folded in §23:0x–23:1xZ.
 - **TDengineEscape2Shell W377 ESTABLISHED AS LABELED** (stage `c522d973`,
   TAR `95050b3b…`). Independent replay matched 6/6 input and 5/5 evidence
   pins before and after, `BUILD_OK`, `RUN_ALL_OK 28 PASS / 0 FAIL`, GCC/Clang
