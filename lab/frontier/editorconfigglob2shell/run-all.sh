@@ -31,6 +31,22 @@ check_absent() {
         echo "PASS $name"
     fi
 }
+
+# The file-arm write size tracks the absolute checkout path length, so assert
+# the invariant (past l_pattern[8194]) instead of a path-dependent prefix.
+check_write_gt() {
+    name=$1
+    file=$2
+    limit=$3
+    size=$(sed -n 's/.*WRITE of size \([0-9][0-9]*\).*/\1/p' "$file" | sed -n 1p)
+    if [ -n "$size" ] && [ "$size" -gt "$limit" ]; then
+        PASS=$((PASS + 1))
+        echo "PASS $name"
+    else
+        FAIL=$((FAIL + 1))
+        echo "FAIL $name"
+    fi
+}
 run() {
     label=$1
     shift
@@ -81,7 +97,7 @@ SAFE=$(tail -1 runs/case-safe.txt)
 
 run file-asan-attack "$V" file "$ATTACK"
 check F_ASAN_ATTACK evidence/file-asan-attack.out 'stack-buffer-overflow'
-check F_ASAN_SIZE evidence/file-asan-attack.out 'WRITE of size 102'
+check_write_gt F_ASAN_SIZE evidence/file-asan-attack.out 8194
 check F_ASAN_REALCALLER evidence/file-asan-attack.out 'editorconfig.c:268'
 check F_ASAN_PARSE evidence/file-asan-attack.out 'editorconfig_parse'
 

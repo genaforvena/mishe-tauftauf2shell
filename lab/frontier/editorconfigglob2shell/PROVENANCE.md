@@ -40,7 +40,14 @@ verifies 6/6 pins, rebuilds four consumers offline from the pinned archive
 protector), generates attack and safe trees under `work/`, and reports
 `RUN_ALL_OK 27 PASS / 0 FAIL`. The observed summary SHA-256 in this checkout
 is `2de80df12d64a14d968b7183f7daf059eec107b1468b0c632b7858e26f5b074c`;
-ASan addresses and PIDs are not pinned.
+ASan addresses and PIDs are not pinned. The exact summary text depends only
+on PASS/FAIL counts, but the file-arm ASan WRITE size tracks the absolute
+checkout path length (10199 at root length 59, 10209 at 72, 10212 in the
+author checkout). W346 witness replay at root 59 found 26/1 under the old
+`WRITE of size 102` prefix check; the check now asserts the invariant
+`WRITE size > 8194` (`l_pattern` capacity) instead, so the 27/0 summary and
+its SHA are reproducible from roots of different lengths. Do not read a
+different ASan size as pin drift.
 
 ## Duplicates
 

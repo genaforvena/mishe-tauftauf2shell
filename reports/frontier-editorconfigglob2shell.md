@@ -55,12 +55,21 @@ the pinned archive with no network I/O, verified 6/6 pins and returned 27/0
 with a byte-identical summary; plain-tar SHA-256
 `f9076cba079ffbbe9c9065cbebddf207ec0d4d596ef1891c4b45a8e81b07ce26`.
 Binary hashes are path-dependent (Debug info embeds the checkout path) and
-are not pinned. Author replay is not witness acceptance.
+are not pinned; so is the file-arm ASan WRITE size, which grows with the
+absolute checkout path (see below). Author replay is not witness acceptance.
+The W346 witness independently reproduced the stage as labeled
+(ESTABLISHED AS LABELED, grade-neutral, NO r5) from a private archive
+(`detail.md` at `.mishe-tauftauf/artifacts/witness-w346/detail.md`).
+W347 repaired the one replay-script NIT: the WRITE-size assertion now checks
+`> 8194` rather than the path-dependent `102` prefix. Private replays from
+roots of length 51 and 75 gave 6/6 pins, 27/0 and the byte-identical summary
+SHA despite ASan WRITE sizes 10190 and 10215.
 Operator clean replay at 14:4xZ: `git archive --format=tar 5085acab
 lab/frontier/editorconfigglob2shell` into a private `/tmp` tree, `sha256sum -c
 SHA256SUMS` 6/6 OK and unmodified `sh run-all.sh` `RUN_ALL_OK 27 PASS / 0 FAIL`
 with the byte-identical summary. Admission is folded into
-`research-manifest.json`; `established` stays false until the witness verdict.
+`research-manifest.json`; on the W346 witness verdict, `established` is true
+for this stage as labeled (R4 at the local file-API scope).
 
 - Direct real-library call: 8192- and 8193-byte patterns are clean; 8194
   bytes gives ASan `WRITE of size 8195`, 8200 chosen `0x43` bytes gives
@@ -69,9 +78,10 @@ with the byte-identical summary. Admission is folded into
 - Real caller: `editorconfig_parse()` on the crafted tree reports ASan
   `stack-buffer-overflow` / `WRITE of size 10212` at `ec_glob.c:100` through
   `ini_handler` at `editorconfig.c:268` → `editorconfig_parse` at `:537`.
-  The exact size tracks the absolute path length (the replay checks the
-  `WRITE of size 102` prefix, not a path-dependent constant). A 64-byte
-  section tree and both fixed builds are clean under the same conditions.
+  The exact size tracks the absolute path length; the replay now checks that
+  the write exceeds `l_pattern`'s 8194-byte capacity, not a path prefix. A
+  64-byte section tree and both fixed builds are clean under the same
+  conditions.
 - Plain vulnerable build without ASan/canary survives the file case (rc 0):
   a preserved negative against any default-build crash claim. A read-only
   GDB run on the direct 8200-byte case, stopped at `ec_glob.c:101`, shows
