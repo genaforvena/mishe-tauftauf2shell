@@ -416,3 +416,29 @@ byte register value, no dereferenced pointer, named object, control flow,
 marker or command; loader frames unsymbolized, no instruction-level store
 claim. Logs, hashes and recipe: W343 section of
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+## W344 chosen-pointer-into-inflate_state lane CLOSED (2026-11-27, 14:07Z wake)
+
+The W343 flood replay verdict (chat #6517, 14:08:54Z) is folded above:
+ESTABLISHED AS LABELED, grade-neutral, NO r5, one NIT (three vs four
+ld-linux frames) corrected in the brief. New no-shim test: can the overflow
+write a chosen pointer into zlib's own `inflate_state` and make inflate
+dereference it? A read-only GDB layout script (`live/gdb-zstate.cmd`)
+measured `indexes`→`inflate_state` as `+0x70d20` on one run, `+0x70f10` on
+two, and `−0xa2cc0` on another — the heap order flips, so the distance is not
+a fixed file-reachable constant. Header offsets match zlib 1.3.2 (`window`
++72, `wsize` +60, `whave` +64, `wnext` +68, `lencode` +104).
+
+JIFs generated with the new `make-jif.py minimal-spec` mode placed
+`wsize=0x8000`, `whave=0x8000`, `wnext=0` and `window=0x00007f0000414243`
+at those exact output offsets. With the positive delta the bounded JIF
+moved the fault to bundled libc `0x…570e47`, frame #4 at pinned
+`file-gif-load.c:1616`, `rdi=0x4d4d…` — the post-inflate allocator/error
+path, not a dereference of the chosen pointer; only three of the eight
+chosen window bytes had landed. The 786 KiB patched flood still faulted in
+ld-linux with `rax=0x4d4d…`, before the field could be used, and in the
+negative-delta run a POST dump showed the state fields unchanged. No chosen
+pointer in a fault register, no chosen-address write into a mapped live
+object, no control flow, marker or command. Grade unchanged rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes / NO r5. Lane CLOSED; recipe, logs
+and hashes in W344 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.

@@ -77,6 +77,28 @@ elif kind == "minimal-flood":
     # while the inflated span reaches far past the 4-byte indexes object.
     plain = bytes([int(sys.argv[4], 16)]) * int(sys.argv[3])
     assert len(zlib.compress(plain, 9)) <= 4 * 255
+elif kind == "minimal-patch":
+    # W344: chosen bytes at one exact inflated-output offset, filler elsewhere.
+    # Usage: minimal-patch N OFFSET HEXBYTES FILLBYTE
+    nbytes, off = int(sys.argv[3]), int(sys.argv[4])
+    chosen = bytes.fromhex(sys.argv[5])
+    fill = int(sys.argv[6], 16)
+    plain = bytearray([fill]) * nbytes
+    plain[off:off + len(chosen)] = chosen
+    plain = bytes(plain)
+    assert len(zlib.compress(plain, 9)) <= 4 * 255
+elif kind == "minimal-spec":
+    # W344: arbitrary chosen bytes at several exact inflated-output offsets.
+    # Usage: minimal-spec N FILLHEX OFFSET:HEX[,OFFSET:HEX,...]
+    nbytes = int(sys.argv[3])
+    plain = bytearray([int(sys.argv[4], 16)]) * nbytes
+    for item in sys.argv[5].split(","):
+        off_s, hex_s = item.split(":")
+        off = int(off_s)
+        val = bytes.fromhex(hex_s)
+        plain[off:off + len(val)] = val
+    plain = bytes(plain)
+    assert len(zlib.compress(plain, 9)) <= 4 * 255
 
 elif kind == "large-size":
     LEN, HEIGHT = 65535, 32769
@@ -99,7 +121,7 @@ elif kind in ("large", "large-run", "large-hex"):
 else:
     raise SystemExit("unknown mode")
 if kind in ("bytes", "ptr", "minimal-size", "minimal-ptr", "minimal-noob",
-            "minimal-flood"):
+            "minimal-flood", "minimal-patch", "minimal-spec"):
     assert LEN * HEIGHT == 0x80000002
     assert (LEN * HEIGHT * 2) & 0xFFFFFFFF == 4
 elif kind in ("published", "published-long", "published-mix",

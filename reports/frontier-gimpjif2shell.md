@@ -1871,3 +1871,32 @@ runner and GDB-command hashes, regenerated JIF hash, fault PC/register and
 frame chain matched. Boundary restated: chosen-byte register value, no
 dereferenced pointer, named object, control flow, marker or command; the
 loader frames are unsymbolized, so no instruction-level store claim.
+
+## W344 chosen pointer into inflate_state: layout measured, lane CLOSED (2026-11-27, 14:07Z wake)
+
+W343's fault runs inside libz/ld-linux, so the next hypothesis was that the
+overflow could place a chosen pointer into zlib's own `inflate_state` and
+make inflate dereference it. A read-only GDB script measured the distance
+from `indexes` (`z_stream.next_out`) to `strm->state` in the no-shim GIMP
+3.2.8 plug-in: `+0x70d20` on one run, `+0x70f10` on two, and `−0xa2cc0` on
+another (state below `indexes`, unreachable by an upward overflow). Header
+offsets match zlib 1.3.2: `wsize` +60, `whave` +64, `wnext` +68, `window`
++72, `lencode` +104, `distcode` +112; at entry the first four are zero.
+
+New `make-jif.py minimal-spec` JIFs wrote `wsize=0x8000`, `whave=0x8000`,
+`wnext=0` and `window=0x00007f0000414243` at those exact output offsets.
+With `DELTA=+0x70f10`, the bounded JIF moved the fault from the ld-linux PC
+`0x…fd1327` to bundled libc `0x…570e47`, frame #4 at pinned
+`file-gif-load.c:1616`, `rdi=0x4d4d…`: the W335/W340 post-inflate
+allocator/error path. Only three of the eight chosen `window` bytes had
+landed (`next_out−idx=462683`). The 786 KiB patched flood still faulted in
+ld-linux with `rax=0x4d4d…`, before `updatewindow()` could use the field;
+in the negative-delta run a POST dump showed the state fields unchanged.
+
+No chosen pointer appeared in a fault register or as a dereferenced
+destination; no mapped live object received a chosen-address write; no
+control flow, marker or command. Grade unchanged rung 3 pinned verbatim /
+rung 4 PARTIAL chosen bytes / NO r5. Lane CLOSED: the live distance is
+layout-dependent and the libz/ld-linux fault precedes the only reachable
+pointer field. Logs, JIFs and hashes: W344 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

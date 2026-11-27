@@ -1,0 +1,122 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 14:27:51.245: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 14:27:51.245: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 14:28:06.988: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 14:28:06.988: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 14:28:06.988: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.991: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.992: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.994: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.995: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.995: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.996: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 14:28:06.997: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 14:28:07.005: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 14:28:07.011: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 14:28:07.011: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+W344 PRE avail=0x80000002 idx=0x555555679090
+W344 STRM=0x7fffffffc080 STATE=0x5555556e9fa0 IDX=0x555555679090 DELTA=0x70f10 pid=1611980
+W344 STATE sym=[No symbol matches 0x5555556e9fa0.] map=[[heap] perms=rw-p]
+W344 IDX map=[[heap] perms=rw-p]
+W344 FIELD strm      +0  =0x00007fffffffc080 [stack] perms=rw-p
+W344 FIELD mode      +8  =0x0000000000003f34 
+W344 FIELD last      +12 =0x0000000000000000 
+W344 FIELD wrap      +16 =0x0000000000000005 
+W344 FIELD havedict  +20 =0x0000000000000000 
+W344 FIELD flags     +24 =0x00000000ffffffff 
+W344 FIELD dmax      +28 =0x0000000000008000 
+W344 FIELD check     +32 =0x00005555556e9ab0 
+W344 FIELD total     +40 =0x0000000000000000 
+W344 FIELD head      +48 =0x0000000000000000 None
+W344 FIELD wbits     +56 =0x000000000000000f 
+W344 FIELD wsize     +60 =0x0000000000000000 
+W344 FIELD whave     +64 =0x0000000000000000 
+W344 FIELD wnext     +68 =0x0000000000000000 
+W344 FIELD window    +72 =0x0000000000000000 None
+W344 FIELD hold      +80 =0x0000000000000000 
+W344 FIELD bits      +88 =0x0000000000000000 
+W344 FIELD length    +92 =0x0000000000007fff 
+W344 FIELD offset    +96 =0x0000000000000000 
+W344 FIELD extra     +100=0x0000000000000000 
+W344 FIELD lencode   +104=0x00005555556ea4f8 [heap] perms=rw-p
+W344 FIELD distcode  +112=0x00005555556ea4f8 [heap] perms=rw-p
+W344 FIELD lenbits   +120=0x00000000e26d8c78 
+W344 FIELD distbits  +124=0x0000000000007fff 
+W344 FIELD ncode     +128=0x00000000e26d8c88 
+W344 FIELD nlen      +132=0x0000000000007fff 
+W344 FIELD ndist     +136=0x00000000e26d8c98 
+W344 FIELD have      +140=0x0000000000007fff 
+W344 FIELD next      +144=0x00005555556ea4f8 [heap] perms=rw-p
+W344 IDXW +0  =0x0000555000251f19 map=[None]
+W344 IDXW +8  =0x0000000000000000 map=[None]
+W344 IDXW +16 =0x0000000000000002 map=[None]
+W344 IDXW +24 =0x0000000000000041 map=[None]
+W344 IDXW +32 =0x00005555556793b0 map=[[heap] perms=rw-p]
+W344 IDXW +40 =0x0000000000000001 map=[None]
+W344 IDXW +48 =0x0000000000000000 map=[None]
+W344 IDXW +56 =0x000055555561cb60 map=[[heap] perms=rw-p]
+W344 IDXW +64 =0x0000000000000000 map=[None]
+W344 IDXW +72 =0x0000000000006874 map=[None]
+W344 IDXW +80 =0x0000000000000000 map=[None]
+W344 IDXW +88 =0x0000000000000041 map=[None]
+
+Thread 1 "file-gif-load" received signal SIGSEGV, Segmentation fault.
+0x00007ffff7570e47 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+W344 SIGNAL SIGSEGV pc=0x7ffff7570e47 sym=[No symbol matches 0x7ffff7570e47.]
+rax            0xd5d00000          3587178496
+rbx            0x0                 0
+rcx            0x0                 0
+rdx            0x23                35
+rsi            0x5555556a4050      93824993607760
+rdi            0x4d4d4d4d4d4d4d4d  5570193308531903821
+rbp            0x5555556a4050      0x5555556a4050
+rsp            0x7fffffffbde8      0x7fffffffbde8
+r8             0x555555704960      93824994003296
+r9             0x0                 0
+r10            0x1                 1
+r11            0x5555555bc87f      93824992659583
+r12            0x5555556a4050      93824993607760
+r13            0x3a                58
+r14            0x0                 0
+r15            0x555555690250      93824993526352
+rip            0x7ffff7570e47      0x7ffff7570e47
+eflags         0x10287             [ CF PF SF IF RF ]
+cs             0x33                51
+ss             0x2b                43
+ds             0x0                 0
+es             0x0                 0
+fs             0x0                 0
+gs             0x0                 0
+fs_base        0x7ffff5251ec0      140737306238656
+gs_base        0x0                 0
+W344 TOTAL_OUT=0x0 NEXT_OUT=0x5555556e9feb AVAIL=0x7ff8f0a7
+W344 SI_ADDR FAILED Attempt to take address of value not located in memory.
+#0  0x00007ffff7570e47 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#1  0x00007ffff7448900 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#2  0x00007ffff74465fd in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#3  0x00007ffff7446050 in ?? () from /tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#4  0x000055555555787e in ReadJeffsImage (fd=fd@entry=0x555555617430, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=33025, height=height@entry=65026, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc338, error=0x7fffffffc6a8) at ../plug-ins/common/file-gif-load.c:1616
+#5  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555617430, file=file@entry=0x55555561b390, len=33025, height=65026, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=33025, screenheight=65026, is_jeff_image=1, image=0x7fffffffc338, error=0x7fffffffc6a8, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#6  0x000055555555861c in load_image (file=file@entry=0x55555561b390, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc6a8) at ../plug-ins/common/file-gif-load.c:625
+#7  0x0000555555558dd4 in gif_load (procedure=0x55555561c3b0, run_mode=<optimized out>, file=0x55555561b390, metadata=<optimized out>, flags=0x7fffffffc704, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#8  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561c3b0, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#9  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561c3b0, args=args@entry=0x55555561ce30) at ../libgimp/gimpprocedure.c:2200
+#10 0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x555555618ed0, procedure=0x55555561c3b0, proc_return=0x7fffffffc850) at ../libgimp/gimpplugin.c:1511
+#11 gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x555555617bf0, proc_run=proc_run@entry=0x555555618ed0, procedure=0x55555561c3b0, proc_return=proc_return@entry=0x7fffffffc850) at ../libgimp/gimpplugin.c:1551
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/tmp/w344-window-p.jif" "w344-window-p.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

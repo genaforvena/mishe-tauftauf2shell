@@ -2877,3 +2877,79 @@ while the brief said three; the brief is corrected.
 Do not repeat this exact 768 KiB probe; the next advance still requires a
 chosen-pointer dereference by a no-shim method or a benign command side
 effect on a live target.
+
+## W344 chosen-pointer-into-inflate_state lane: layout measured, lane CLOSED (2026-11-27, 14:07Z wake)
+
+W343 replay verdict #6517 (14:08:54Z) folded above. New question: W343's
+fault runs inside libz/ld-linux, so can the overflow place a chosen pointer
+into zlib's own `inflate_state` and make inflate dereference it? All runs
+below use the unmodified `live/run-appimage-min340.sh` (SHA-256
+`b047c40e…`) with the SHA-verified GIMP 3.2.8 AppImage and a read-only GDB
+layout script (`live/gdb-zstate.cmd`, final SHA-256 `107e7f1a…`; earlier
+variants `b2e701e8…`, `03787a28…`, `80c641ee…` only add logging, never
+write memory). The runner strips all gimpjif2shell preloads from AppRun, so
+every run is no-shim.
+
+### Measured live layout
+
+At the pinned inflate call, the script reads `$rdi` as `z_stream *`,
+`strm->next_out` (offset 24) as `indexes`, and `strm->state` (offset 56) as
+`inflate_state *`, then prints the byte delta and the state header fields:
+
+- JIF `8e0bc65d…` (unmodified W343 flood): `idx=0x555555678860`,
+  `state=0x5555556e9580`, `DELTA=+0x70d20` (461,600). The `+0x70d20` value
+  is in the wake transcript; the preserved log below is the later
+  negative-delta run.
+- JIF `w344-window-flood.jif` (`0f3789d3…`): `DELTA=+0x70f10` (462,608),
+  twice; full field dump `w344-zstate-layout.log` SHA-256 `88c2ed06…`.
+- JIF `w344-window-short.jif` (`6701aaf1…`): `idx=0x555555678660`,
+  `state=0x5555555d59a0`, `DELTA=-0xa2cc0` (−667,584): the state was BELOW
+  `indexes`, so an upward overflow cannot reach it at all. Log
+  `w344-zstate-layout-negative.log` SHA-256 `1978755b…`.
+
+The 0x1f0 spread between the two positive deltas tracks the JIF path-string
+length; the sign flip is a heap-order change. The live layout is therefore
+not a fixed file-reachable constant.
+
+Field offsets match zlib 1.3.2 `inflate.h` (pinned source
+`realzlib/zlib-src/inflate.h:82-126`): `window` +72, `wsize` +60, `whave`
++64, `wnext` +68, `lencode` +104, `distcode` +112. At inflate entry
+`wsize=whave=wnext=window=0`; `lencode` and `distcode` are mapped heap
+pointers.
+
+### Chosen-pointer probes and result
+
+`realglib/make-jif.py` gained `minimal-patch N OFFSET HEXBYTE FILLBYTE` and
+`minimal-spec N FILLHEX OFFSET:HEX[,OFFSET:HEX,...]`, both keeping the
+file-reachable minimal geometry (`0x80000002`, alpha `data_size=4`). The
+bounded JIF `w344-window-short.jif` inflates to 462,690 bytes: filler
+`0x4d`, with `wsize=0x8000` at output offset 462668, `whave=0x8000` at
+462672, `wnext=0` at 462676, and `window=0x00007f0000414243` at 462680
+(i.e. `state+60/64/68/72` when `DELTA=+0x70f10`). The 786 KiB variant
+`w344-window-flood.jif` carries the same patches then fills to 786,432.
+
+- With `DELTA=+0x70f10`, `w344-window-short.jif` moved the terminal fault
+  from the W343 ld-linux PC `0x…fd1327` to bundled libc `0x…570e47`, frame
+  #4 at pinned `file-gif-load.c:1616`, with `rdi=0x4d4d…`. At the fault
+  `next_out−idx=462683`, so only three of the eight chosen `window` bytes
+  (0x43 0x42 0x41 → `0x414243`) had been written. This is the post-inflate
+  allocator/error path of W335/W340, not a dereference of the chosen
+  pointer. Log `w344-window-short-full.log` SHA-256 `1b6cc4c4…`, GDB
+  `w344-window-short-gdb.log` `4ee3d6f1…`.
+- The 786 KiB patched flood (`w344-window-flood.jif`, log
+  `w344-window-flood-full.log` `fe154c77…`) still faulted at
+  `pc=0x…fd1327` with `rax=0x4d4d…`: the fault occurs ~1.2 KiB into the
+  state's code-table arrays, before `updatewindow()` can use `window`.
+- In the run where `DELTA=-0xa2cc0`, a POST dump at the fault showed
+  `wsize=whave=wnext=window=0` — the patches landed nowhere near the state —
+  and the fault reverted to `pc=0x…fd1327`, `rax=0x4d4d…`.
+
+No chosen pointer was ever observed in a fault register or as a dereferenced
+destination, no mapped live object received a chosen-address write, and no
+control flow, marker or command effect appeared. Grade unchanged rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes / NO r5. Lane CLOSED: the live
+`indexes`→`inflate_state` distance is layout-dependent and the libz/ld-linux
+fault precedes the only pointer field this method can reach. Do not repeat
+these four probes or the `minimal-spec` patches at the measured offsets;
+the next advance still needs a chosen-pointer dereference by a no-shim
+method or a benign command side effect on a live target.
