@@ -74,6 +74,11 @@ The volatile ASan overflow/read logs contain PIDs and addresses and are
 gitignored. Stable control outputs and the replay summary are pinned in
 `SHA256SUMS`.
 
+Clean replay: `git archive --format=tar 0415fa78 lab/frontier/rufussbat2shell`
+TAR SHA-256 `178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`
+matched 16/16 `SHA256SUMS` pins and unmodified `./harness/run-all.sh` reported
+`RUN_ALL_OK 11 PASS / 0 FAIL`.
+
 ## Scope limits
 
 R3 is confirmed on the exact pinned parser. R4 is LIMITED to the synthetic

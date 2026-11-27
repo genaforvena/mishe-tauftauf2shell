@@ -23,9 +23,10 @@ GHSA-hcpc-vq8c-923h from parent `de4cf676` to fix `842873017`.
   receives a chosen low-32-bit callback value and prints `BENIGN_MARKER`;
   fixed, two-line and not-called controls do not. Real Windows heap adjacency,
   ASLR/CFG, the unsigned download path and any command remain UNKNOWN.
-- GCC and Clang each replayed `RUN_ALL_OK 11 PASS / 0 FAIL`. Brief, provenance,
-  status, stable evidence pins and the dedicated two-pane window are staged for
-  operator admission and independent witness replay.
+- GCC and Clang each replayed `RUN_ALL_OK 11 PASS / 0 FAIL`. Stage `0415fa78`;
+  clean TAR `178726d9…` replayed 16/16 pins and the same 11/0. Brief,
+  provenance, status, stable evidence pins and the dedicated two-pane window
+  are staged for operator admission and independent witness replay.
 
 Next: measure the real Windows post-allocation consumer and repeat under
 ASLR/CFG before attempting a loopback trusted-response path. A fixed-arm store,

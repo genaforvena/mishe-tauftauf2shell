@@ -1,10 +1,12 @@
 # Frontier brief: rufussbat2shell — Rufus remote SBAT heap overflow
 
 Status 2026-11-27 W369: **STAGED for operator admission and independent witness
-replay**. The exact vulnerable parent and fixed function were reproduced locally.
-Grade R3 confirmed on the pinned parser; R4 **LIMITED** to a synthetic adjacent
-victim in a no-PIE/no-canary lab build. R5 NOT CLAIMED. Inner-socket window 229
-(`%464`/`%465`, dead=0) is live and registered with two panes.
+replay**. Stage commit `0415fa78`; clean `git archive --format=tar` SHA-256
+`178726d9f94a0bbf2e249431fc00576dccbb610cb9c912d41ea10cab18a9c025`
+replayed 16/16 pins and `RUN_ALL_OK 11 PASS / 0 FAIL`. Grade R3 confirmed on the
+pinned parser; R4 **LIMITED** to a synthetic adjacent victim in a no-PIE/no-canary
+lab build. R5 NOT CLAIMED. Inner-socket window 229 (`%464`/`%465`, dead=0) is
+live and registered with two panes.
 
 
 ## Verified ground truth (claim, not assumed)
