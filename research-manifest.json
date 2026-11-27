@@ -4,17 +4,17 @@
   "scope": "Public presentation of the Mishe research archive. Counts describe the tracked record, not engine activity.",
   "counts": {
     "declared_research_minds": {
-      "value": 195,
-      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6",
+      "value": 196,
+      "basis": "Declared target minds: the 163 asserted in docs/architecture.md plus pcre2dfa2shell (07:2xZ), libde265shell (07:5xZ), mongoosemip2shell (08:2xZ), libx11xkb2shell (08:5xZ), sdimatrix2shell (10:4xZ), netrekcow2shell (10:4xZ), open1722vss2shell (11:0xZ), xdgmime2shell (11:2xZ), sqlitefts5shell (12:3xZ), libsoup2shell (12:5xZ), rapidyaml2shell (13:1xZ), mqttc2shell (13:4xZ), libsmpp342shell (13:5xZ), quickjsbcode2shell (15:4xZ), tinyusb2shell (16:2xZ), libmikmod2shell (16:5xZ), quickjsng2shell (17:4xZ), soxng2shell (18:1xZ), ntfs3g2shell (18:4xZ), axis2guththila2shell (19:0xZ), libarchivezippath2shell (19:2xZ), pcre2jit2shell (19:5xZ), gnutlsdtls2shell (20:4xZ) libtiffpixarlog2shell (21:0xZ), inihlongline2shell (21:4xZ), mujs2shell (22:1xZ), openscapmangle2shell (22:2xZ), live555vorbis2shell (22:5xZ) and oiiocineon2shell (23:1xZ) and sngrepsip2shell (23:3xZ) admitted 2026-11-26 under standing #6, and libicalclean2shell admitted 2026-11-27 under standing #6; the earlier roster name list is preserved in docs/architecture.md. and libmodplugdsm2shell admitted 2026-11-27 under standing #6 and openjphcleanup2shell admitted 2026-11-27 under standing #6",
       "source": "README.md roster (2026-11-26)"
     },
     "active_research_minds": {
-      "value": 192,
-      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ, libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
+      "value": 193,
+      "basis": "Distinct target minds with at least one row in the evidence register, including pcre2dfa2shell admitted 07:2xZ, libde265shell admitted 07:5xZ, mongoosemip2shell admitted 08:2xZ, libx11xkb2shell admitted 08:5xZ, sdimatrix2shell admitted 10:4xZ, netrekcow2shell admitted 10:4xZ, open1722vss2shell admitted 11:0xZ, xdgmime2shell admitted 11:2xZ, sqlitefts5shell admitted 12:3xZ, libsoup2shell admitted 12:5xZ, rapidyaml2shell admitted 13:1xZ, mqttc2shell admitted 13:4xZ, libsmpp342shell admitted 13:5xZ, quickjsbcode2shell admitted 15:4xZ, tinyusb2shell admitted 16:2xZ, libmikmod2shell admitted 16:5xZ, quickjsng2shell admitted 17:4xZ, soxng2shell admitted 18:1xZ, ntfs3g2shell admitted 18:4xZ, axis2guththila2shell admitted 19:0xZ, libarchivezippath2shell admitted 19:2xZ, pcre2jit2shell admitted 19:5xZ, gnutlsdtls2shell admitted 20:4xZ libtiffpixarlog2shell admitted 21:0xZ, inihlongline2shell admitted 21:4xZ, mujs2shell admitted 22:1xZ, openscapmangle2shell admitted 22:2xZ, live555vorbis2shell admitted 22:5xZ and oiiocineon2shell admitted 23:1xZ and sngrepsip2shell admitted 23:3xZ and libicalclean2shell admitted 00:5xZ and libmodplugdsm2shell admitted 01:2xZ and openjphcleanup2shell admitted 01:3xZ on 2026-11-27. Earlier roster asserted 163 minds but named 157; both are preserved in docs/architecture.md. Engine-level activity (routes, windows, timers) is site state and is not asserted here.",
       "source": "docs/results.md"
     },
     "reported_findings": {
-      "value": 192,
+      "value": 193,
       "basis": "Evidence-register rows; one row per target, with its rung cells and boundary.",
       "source": "docs/results.md"
     },
@@ -2992,6 +2992,22 @@
         "reports/libmodplugdsm2shell-status.md"
       ],
       "established": true
+    },
+    {
+      "target": "OpenjphCleanup2Shell",
+      "rungs": {
+        "R1": "—",
+        "R2": "✓",
+        "R3": "✓",
+        "R4": "—",
+        "R5": "—"
+      },
+      "boundary": "**ADMITTED 01:3xZ under standing #6 as the 196th declared target mind; staged two-pane window 204 adopted as-is (panes %414/%415, dead=0, one registry entry, 205/205 unique names, no duplicate CVE/GHSA or sink lane). Operator clean-archive replay at 01:3xZ from `git archive bbedbe5b lab/frontier/openjphcleanup2shell` (15 committed files; `runs/`, source checkouts, build directories and binaries absent): runner sha256 `2c02c8be816631e1c971ee854fb494a4568e61d18270339625d4c2bef4466f0e`, unmodified `sh build-all.sh` rc 0 `BUILD_OK`, `sh run-all.sh` rc 0 `PASS=27 FAIL=0`. Affected `<= 0.32.0`; vulnerable tag `0.32.0` 23c422895ce6c3a156935222e4715ee0b7be952c, fixed tag `0.33.0` 345a8bcd1c7a3908e3870797057277660a412073, verbatim one-file even-row allocation fix in `ojph_codeblock.cpp`, decoder bodies byte-identical. GCC ASan on the verbatim pinned decoder at raw `ojph_block_decoder32.cpp:1155` reports `heap-buffer-overflow`, `WRITE of size 4`, 0 bytes after a 32-byte one-row buffer via a direct sink; two-row ASan/plain controls clean with `ROW1_OR=b0000000`; gdb observes the real decoder reaching raw `:1155`. Full vulnerable ASan is a preserved negative because the library slab keeps 5% slack, so R3 rests on the direct sink. R4 and R5 NOT CLAIMED: no chosen-offset readback, consumer, pointer, wire path or command; independent witness replay owed, `established=false` until a verdict is folded.**",
+      "reports": [
+        "reports/frontier-openjphcleanup2shell.md",
+        "reports/openjphcleanup2shell-status.md"
+      ],
+      "established": false
     }
   ]
 }
