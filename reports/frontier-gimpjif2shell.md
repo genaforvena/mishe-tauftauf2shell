@@ -1270,3 +1270,20 @@ The earlier runner edits that omitted the image-load batch command and
 the `BASE` variable are preserved in the transcript; the corrected runner
 reached GDB but not the target call. Grade unchanged rung 3 / rung 4
 PARTIAL, NO r5. This method is retired, not to be repeated unchanged.
+
+## GSlice-forced malloc trace still names no allocation site (W320, 2026-11-27)
+
+Hypothesis: GLib's default GSlice magazine bypasses glibc `malloc` for
+32-byte objects, explaining W317's `traced=0`. A no-shim run with
+`G_SLICE=always-malloc` in the environment (no LD_PRELOAD shim, no plugin or
+heap patch) used `live/gdb-allocsite-gslice.cmd` (SHA-256 `d01ae2e4…`) and
+`live/run-appimage-allocsite-gslice.sh` (SHA-256 `d6c6325e…`). The fresh
+log `live/evidence/w320-allocsite-gslice.log` (SHA-256 `332e9804…`) shows
+four malloc breakpoints armed, the same wrapped call
+(`indexes=0x555555702860`, `avail_out=2147483778`) and the same
+pointer-bearing chunk (`+264=0x21`, `+272=0x1`, `+280=indexes+304`,
+`+304=0x7fff00000001`, `+336/+344` heap pointers), but `traced=0` and
+`+272/+304/+336/+368 NOT TRACED` again. Forcing GSlice through malloc did
+not make the allocation visible to these breakpoints; no caller symbol was
+named. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5. This variant is
+retired with W317/W319; the object's C type remains UNKNOWN.

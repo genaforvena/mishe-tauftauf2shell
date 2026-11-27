@@ -1848,3 +1848,25 @@ GDB fatal error; the wrapped inflate was never reached, so no word at
 tooling negative: one-shot Python return breakpoints at arbitrary libc
 caller addresses are unsafe here. Grade unchanged rung 3 / rung 4 PARTIAL,
 NO r5; no chosen-address write, dereference, marker or command.
+
+## W320 GSlice-forced malloc trace: negative (2026-11-27, 06:05-06:07Z)
+
+Hypothesis recorded on the wall: default GSlice magazines bypass glibc
+malloc, so W317's `traced=0` says nothing about the object's owner.
+`live/gdb-allocsite-gslice.cmd` SHA-256
+`d01ae2e49ebc10829e23338556da4d1ffdb690938432d782a1fd1c5b57c856ed` and
+`live/run-appimage-allocsite-gslice.sh` SHA-256
+`d6c6325e7c0333f829b9d5dac3b2c6ad850ce9b30087558a3ce82edd93947ea9`
+ran the no-shim SHA-verified 3.2.8 AppImage with `G_SLICE=always-malloc`
+in the environment only: no LD_PRELOAD shim, no plugin or heap byte patch,
+fresh `$HOME`, `setsid timeout -k 5 100`, JIF SHA-256 `d6556936…`.
+`live/evidence/w320-allocsite-gslice.log` SHA-256
+`332e980476a88f661504cc65bf27643bac90e884ca54a4021f547e90411e1704`
+shows breakpoints 1-5 armed, `W320 PRE-INFLATE indexes=0x555555702860
+traced=0`, `+272/+304/+336/+368 NOT TRACED`, and the same pointer-bearing
+32-byte chunk (`+264=0x21`, `+272=0x1`, `+280=idx+304`,
+`+304=0x7fff00000001`, `+336/+344` heap pointers). Forcing GSlice through
+malloc did not expose the allocation to these breakpoints; no caller symbol
+named. Grade unchanged rung 3 / rung 4 PARTIAL, NO r5; the object's C type
+remains UNKNOWN and no chosen-address write, dereference, marker or command
+was observed.
