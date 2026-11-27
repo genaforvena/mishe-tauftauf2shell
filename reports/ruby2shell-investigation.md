@@ -7442,3 +7442,61 @@ request — rung-4 mechanics, not rung 5. No primary grade change.
 Falsifier: a fixed-build attack that does not raise, a safe-control
 fault, or chosen bytes that are not fix-sensitive would break this
 attribution.
+
+## 2026-11-27 07:2x–07:4xZ — W322: no stock coercion caller for the stale-backref lane; wire path CLOSED (Ruby)
+
+The named W321 follow-up asked whether a stock caller of
+`String#[regexp] = val` in the pinned 3.4.12 tree can pass a non-String
+replacement whose `to_str` mutates the receiver — the one shape that
+reaches the pre-coercion match offsets of the adjacent rung 4. It cannot:
+the falsifier fired, so no request-shaped experiment was run.
+
+Why the shape is specific: vulnerable `string.c:5834-5864` captures
+`BEG(nth)`/`END(nth)` before `StringValue(val)` and then calls
+`rb_str_update_0` with those stale offsets; fixed 3.4.13 adds
+`if (start + len > RSTRING_LEN(str)) raise "string modified"` at
+`string.c:5898-5900` immediately after the coercion. The other splice
+forms coerce before computing positions (`rb_str_update`, `string.c:5803`;
+`bytesplice`, `string.c:6824/6842`), so a mutating `to_str` cannot leave
+stale offsets there. Only the Regexp-keyed form needs a stock coercion
+caller.
+
+Canonical collector (read-only, no lab process or request):
+
+```
+bash lab/repro/ruby2shell-stock-coercion-survey.sh
+```
+
+It walks 8506 `.rb` files in six roots (pinned 3.4.12 stdlib, all
+installed 3.4.0 gems, and the lab's four Rails app trees) with Ripper and
+prints every index assignment whose key looks like a Regexp plus every
+stock `def to_str` body. Result: **2** regexp-looking assignments and
+**12** stock coercions. Both assignments are Hash writes:
+`actionpack-8.1.4.1/.../journey/gtg/transition_table.rb:180`
+`to_mapping[/\A#{sym}\Z/] = to` (`@regexp_states[from] ||= {}`) and
+`railties-8.1.4.1/.../source_annotation_extractor.rb:99`
+`extensions[/\.(#{exts.join("|")})$/] = block` (`@@extensions ||= {}`).
+Dynamic `send(:[]=`/`__send__(:[]=`: **0**. Every stock `to_str` returns
+a derived string — `to_s`, `@raw_buffer.dup`, `ERB::Util.h(@string)`,
+`@string`, `self.absolute`, `@value`, `@type`, interpolated user-agent
+strings, `join(" ")`, `@str.dup` — and none mutates a String receiver
+during coercion. Two files were UNKNOWN to Ripper and are preserved as
+such: both are jbuilder generator ERB templates, not Ruby code
+(`jbuilder-2.15.1/lib/generators/rails/templates/{api_controller,controller}.rb`).
+
+Native callers were checked separately. The only C-side `[]=` in the
+installed gems is `date-3.6.0/ext/date/date_parse.c:333`
+`f_aset2(str, be, LONG2NUM(...), rep)`; `rep` comes from `rb_str_new`
+macros (`date_parse.c:64-69`) and the integer-index form coerces first.
+In the Ruby core, `rb_str_subpat_set` is called only from `string.c:5874`
+and `:5936`. Full collector output is gitignored under
+`lab/build/evidence/stock-coercion-survey/`.
+
+**Grade unchanged.** The W321 chosen-byte write remains an in-process
+rung 4 with no wire path; the primary CVE wire rung 3 and the other
+adjacent lanes are untouched. Falsifier for this closure: a stock or
+framework call site that invokes Regexp-keyed `String#[]=` with an
+attacker-influenced non-String replacement, or a stock `to_str` that
+mutates the receiver it is coercing into. Do not repeat this survey
+unchanged; a reopening needs a named new call site or Veria's published
+mechanics.

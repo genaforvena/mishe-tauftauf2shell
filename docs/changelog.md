@@ -2,6 +2,25 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+
+## 2026-11-27 07:2x–07:4xZ — W322 stock-coercion survey closes the stale-backref wire path (Ruby)
+
+The named W321 follow-up was run and CLOSED with the falsifier: across
+8506 `.rb` files in the pinned 3.4.12 stdlib, all installed 3.4.0 gems
+and the four lab Rails app trees there are zero stock Regexp-keyed
+`String#[]=` calls and zero stock `to_str` coercions that mutate a
+receiver. The only two regexp-looking assignments are Hash writes; the
+12 stock `to_str` bodies all return derived strings; dynamic `send(:[]=`
+is absent; the one native `[]=` caller (`date_parse.c:333`) uses an
+integer index and a literal replacement. New collector
+`lab/repro/ruby2shell-stock-coercion-survey.{rb,sh}` and its gitignored
+evidence under `lab/build/evidence/stock-coercion-survey/`; recipe in
+`docs/reproducibility.md` §W322 and details in
+`reports/ruby2shell-investigation.md` §W322. No grade change: W321 stays
+an in-process adjacent rung 4 with no wire path. Two jbuilder ERB
+templates remain UNKNOWN to Ripper and are preserved as such, not counted
+as clean.
+
 ## 2026-11-27 07:2x–07:3xZ — NSD admitted, W323 verdicts, WAMR const table, gimpjif W324
 
 This fold covers `90589c51`, `bfa82844`, `3a54ee1f`, `04c318d5` and

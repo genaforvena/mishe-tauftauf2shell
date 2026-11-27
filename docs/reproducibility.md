@@ -17736,6 +17736,28 @@ in-length chosen bytes are readable with plain `String#==`. Both are
 in-process rung 4 with chosen bytes at a chosen stale offset, not rung 5
 and no primary grade change.
 
+### W322 — stock-coercion survey for the stale-backref lane (Ruby, negative)
+
+```
+bash lab/repro/ruby2shell-stock-coercion-survey.sh
+```
+
+`ruby2shell-stock-coercion-survey.rb` uses Ripper on the pinned 3.4.12
+stdlib, all installed 3.4.0 gems, and the four lab Rails app trees
+(8506 `.rb` files) and prints Regexp-looking index assignments and stock
+`def to_str` bodies; the shell driver also counts dynamic `send(:[]=`
+calls. Expect rc 0, `parse_errors=2` (both jbuilder ERB templates, kept
+UNKNOWN), **2** regexp-looking assignments — both Hash writes in Action
+Pack's journey transition table and Railties' source annotation extractor
+— **12** stock `to_str` bodies (all return derived strings, none mutates
+a receiver), and **0** dynamic sends. Full output is gitignored under
+`lab/build/evidence/stock-coercion-survey/`. The native `[]=` call in
+`date-3.6.0/ext/date/date_parse.c:333` uses an integer index and a
+`rb_str_new` replacement, so it does not reach `rb_str_subpat_set`.
+This closes the wire path for W321's adjacent in-process chosen-byte
+write; no grade change. A named new call site or published PoC mechanics
+would reopen it.
+
 ### NSD SVCB AXFR direct sink (W323, ADMITTED 07:2xZ as 203rd; clean author replay)
 
 From `lab/frontier/nsdsvcb2shell`, `bash bootstrap.sh && bash run-all.sh`
