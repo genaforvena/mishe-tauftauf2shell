@@ -22,6 +22,21 @@ availability and PARTIAL for chosen field bytes / NO r5. Details:
 `lab/frontier/nfdump2shell/PROVENANCE.md` and
 `reports/frontier-nfdump2shell.md`.
 
+### Lab-injected clock cannot turn the heap-size write into a primitive (2026-11-27 07:58Z)
+
+`run-v6clock.sh` uses a 20-line `LD_PRELOAD` `gettimeofday()` shim on the
+genuine plain vulnerable collector and the real 65527-byte `::1` datagram.
+GDB reads the adjacent chunk header before/after the store; a separate
+GDB-free run records the shutdown result. Four lab-chosen clock words set
+the overwritten size to `0x41` (`rc=134`, `corrupted size vs. prev_size`),
+`0x42` (`rc=134`, `double free or corruption (!prev)`), and `0x21` with and
+without a changed `prev_size` high byte (`rc=0`, no diagnostic). Small
+sizes are therefore reachable with an injected clock, but the only outcomes
+are libc abort or an exact-size no-op: no consolidation, pointer write,
+marker or command. The clock is a lab instrument, not wire control, and
+the real-clock availability result (3/3 plain SIGABRT) is unchanged.
+Details and exact commands: `PROVENANCE.md`, section dated 07:58Z.
+
 **ADMITTED by operator at 21:4xZ under standing #6 as the 152nd declared
 target mind.** Staging evidence from frontier W234 is preserved below. The
 live two-pane window 160 (created 21:26Z, panes `%322`/`%323`) was adopted, not

@@ -927,3 +927,57 @@ This closes the receive-path expansion hypothesis. Grade stays rung 3 live /
 rung 4 availability DEMONSTRATED + chosen-offset PARTIAL / NO r5; an advance
 still needs a measured pointer-bearing adjacency or a live command side
 effect, neither of which exists in this pinned collector.
+
+## Lab-chosen clock cannot turn the heap-size write into a write primitive (2026-11-27 07:58Z)
+
+New files (no collector source or pinned byte changed):
+
+| artifact | SHA-256 | change |
+| --- | --- | --- |
+| `run-v6clock.sh` | `58c3d5715fbe922a68584dca3895c1386c369c00f7d9a4a0db80915432cae2a6` | new |
+| `harness/clock_shim.c` | `e2aa8413c66af898f4ea99d2f39d0c1c74742aba6960924ab246bd24f63e0594` | new |
+
+W293 closed wire-chosen bytes into the adjacent chunk's `size` field; the
+remaining question was structural, not wire control: the store is
+`msecReceived` from `gettimeofday()` (pinned `nfd_raw-parent.c:188`,
+`nfcapd.c:343` and `:442`), so can a *lab-chosen* clock make the overwritten
+size a small, useful value and give a heap consolidation/write primitive?
+`run-v6clock.sh` compiles a 20-line `LD_PRELOAD` shim that intercepts only
+`gettimeofday()` (monotonic `clock_gettime` is untouched), runs the genuine
+plain vulnerable collector on `::1`, sends the real 65527-byte `v6edge`
+datagram, reads the pre/post chunk header with two read-only GDB
+breakpoints, then repeats without GDB to observe the shutdown libc check.
+The shim is an instrument; the written value is **not** attacker control.
+
+```
+LAB_CLOCK_MS=16640 bash lab/frontier/nfdump2shell/run-v6clock.sh
+MSEC=16640 HDR_SIZE_BEFORE=0000000000000021
+TARGET_BYTES=0041000000000000 HDR_SIZE_AFTER=0000000000000041
+PLAIN_RUN rc=134 diagnostic=['corrupted size vs. prev_size']  (5 PASS / 0 FAIL)
+
+LAB_CLOCK_MS=16896 ... (harness/out/v6clock-ms16896)
+HDR_SIZE_AFTER=0000000000000042
+PLAIN_RUN rc=134 diagnostic=['double free or corruption (!prev)'] (5 PASS / 0 FAIL)
+
+LAB_CLOCK_MS=8448 ... (harness/out/v6clock-ms8448)
+TARGET_BYTES=0021000000000000 HDR_SIZE_AFTER=0000000000000021
+PLAIN_RUN rc=0, no heap diagnostic                            (5 PASS / 0 FAIL)
+
+LAB_CLOCK_MS=8449 ... (harness/out/v6clock-ms8449)
+TARGET_BYTES=0121000000000000 HDR_SIZE_AFTER=0000000000000021
+PLAIN_RUN rc=0, no heap diagnostic                            (5 PASS / 0 FAIL)
+```
+
+The post-write size is exactly `msecReceived >> 8` in all four runs. Small
+sizes are reachable with an injected clock, but the observed outcomes are
+only (a) libc abort on free when the size differs from the ident chunk's
+original `0x21`, or (b) a no-op when it is unchanged, even with the
+`prev_size` high byte changed. No consolidation, pointer write, marker or
+command side effect appeared. This refines W293: "no small or useful chunk
+size is reachable" is true for real wall-clock time, but a lab-injected
+clock can reach small sizes without yielding a primitive. The plain-build
+`rc=134` availability result is therefore clock-conditional in the lab;
+the wire packet chooses the offset, never the value.
+
+Grade unchanged: rung 3 live / rung 4 availability DEMONSTRATED
+(unchanged real-clock 3/3), chosen-offset PARTIAL / NO r5.
