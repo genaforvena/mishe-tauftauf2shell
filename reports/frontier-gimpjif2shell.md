@@ -292,7 +292,7 @@ write. With `published.jif` (advisory product `45771 * 46918 =
 region (`live/evidence/appimage-published-shim.log`). The safe 4x4 JIF
 loads through the same PDB with width 4 and produces no shim lines
 (`appimage-safe-shim.log`). The attack run was killed at our timeout
-after the observed write: the subsequent ~2 GiB image/layer/`dest` work
+after the observed write: the subsequent multi-gigabyte image/layer/`dest` work
 did not finish on this host. That stall is preserved; the lane proves
 the wrapped call and chosen bytes in a real plugin process, not a
 completed load. Replay: `bash live/run-appimage.sh`.
@@ -1620,3 +1620,42 @@ LABELED with no counterexample and no grade change (rung 3 pinned verbatim
 Preserved NITs: absent libthread_db, post-SIGSEGV GDB internal error and a
 crash that ends the window before any completed-load consumer. No replay
 is now owed.
+
+## Compiled extraction loop cannot read OOB `indexes` in the shipped plug-in (W333, 2026-11-27)
+
+A source-only puzzle in the earlier reports is now answered from the real
+binary. `pins/jif-vulnerable.inc:118-133` shows the `break` inside the `j`
+loop, so C semantics would still read `indexes[i]` for every
+`i < zs.total_out` after `pos` has saturated at the wrapped `data_size`.
+W313/W324/W325/W329 nevertheless saw zero read-watch hits and attributed
+part of that to a short pre-crash window. The shipped GIMP 3.2.8 AppImage
+plug-in (SHA-256 `bfcf47ce2e23efe25e12ba4f6f933005a824bfd53be2ee8f128221e41738cc6e`,
+AppImage `8b43dc23…`) has `debug_info`; `objdump -dl
+--disassemble=ReadJeffsImage.isra.0` gives the compiled loop:
+
+- `0x37d0 cmp %r14d,%edx` / `0x37d3 jae 0x382f` (source line 1629): if
+  `pos >= data_size`, jump to the outer-loop pointer increment, not to the
+  load;
+- `0x382f add $1,%r15` / `0x3833 cmp %r15,0x18(%rsp)` /
+  `0x3838 jne 0x37d0`: `r15` walks `indexes`, and `0x18(%rsp)` holds
+  `indexes + zs.total_out` (computed at `0x37a7-0x37bd` from
+  `0x78(%rsp)`, the inflate output count);
+- `0x37da movzbl (%r15),%ebp` (source line 1632) is the only
+  `indexes[i]` load and sits *after* the guard.
+
+`edx` is `pos`, initialized to zero at `0x379e`; `r14d` is the wrapped
+`data_size` (`imul` at `0x351d`, alpha `lea`/`mov` at `0x3533-0x3543`).
+The compiler therefore hoists the saturation check ahead of the only
+consumer load: once `pos` reaches the wrapped size (264 for the
+1024-byte JIF, W302 `total_out=1024`), no `indexes[i]` beyond the valid
+prefix is read in this build, regardless of watchpoint coverage or window
+length. Full read-only disassembly:
+`lab/frontier/gimpjif2shell/live/evidence/w333-extraction-disasm.txt`
+(SHA-256 `302d84344d7c2d97e4edffc45dba45cc3ec1843d277cdbb17e0e8edc563ca499`).
+
+This is a structural ceiling on the *natural* post-decode consumer in this
+shipped binary, not on allocation/free consumers or on a different build;
+it does not turn any earlier zero-hit negative into a positive, and it does
+not restore the excluded completed-load consumer. No chosen-address
+dereference, control flow, marker or command was observed. Grade unchanged:
+rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.

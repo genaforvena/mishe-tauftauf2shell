@@ -2280,12 +2280,12 @@ flow, marker or command; grade unchanged rung 3 / rung 4 PARTIAL / NO r5.
 
 Structural note (inference, not proof for other builds): the wrap requires
 `len * height >= 2^31`, so the pinned caller allocates `dest` at that size
-(`file-gif-load-vulnerable.c:1376-1378`, ~2 GiB for `45771x46918`); the
-live plug-in repeatedly faults in the allocator via
-`gimp_drawable_get_buffer` before post-decode consumers (W308 witness
-receipt). Benign in-object data does not change that. Do not retry the
-same zero-prefix probe unchanged. W327 replay verdict still UNKNOWN at
-this wake's yield.
+(file-gif-load-vulnerable.c:1376-1378, ~4 GiB; W244 measured
+`DEST_SIZE=4294967556` for `45771x46918`); the live plug-in repeatedly
+faults in the allocator via `gimp_drawable_get_buffer` before post-decode
+consumers (W308 witness receipt). Benign in-object data does not change
+that. Do not retry the same zero-prefix probe unchanged. Both outstanding
+replay verdicts have since closed (W328/W330 below).
 
 ## W328 / W330 witness replay receipts (2026-11-27, folded 09:43Z)
 
@@ -2316,3 +2316,35 @@ this wake's yield.
 Both verdicts preserve the crash-window NITs (no libthread_db, post-crash
 GDB internal error), and neither supplies a completed-load consumer.
 Grade unchanged rung 3 / rung 4 PARTIAL / NO r5. No replay owed.
+
+## W333 compiled-consumer ceiling (2026-11-27, 10:15-10:24Z wake)
+
+Read-only disassembly of the shipped GIMP 3.2.8 AppImage `file-gif-load`
+plug-in (SHA-256
+`bfcf47ce2e23efe25e12ba4f6f933005a824bfd53be2ee8f128221e41738cc6e`;
+AppImage SHA-256 `8b43dc23e58a1b66ace9dd6d4d5f7e8532f3398e6109f95a1ec0b6ad036aa250`)
+with `objdump -dl --disassemble=ReadJeffsImage.isra.0`:
+`live/evidence/w333-extraction-disasm.txt` SHA-256
+`302d84344d7c2d97e4edffc45dba45cc3ec1843d277cdbb17e0e8edc563ca499`.
+The compiled extraction loop checks `pos >= data_size` at `0x37d0-0x37d3`
+and jumps to the outer pointer increment at `0x382f` before the sole
+`indexes[i]` load at `0x37da`. `pos` is `edx` (zeroed at `0x379e`),
+`data_size` is `r14d` (`0x351d`, `0x3533-0x3543`), the walk pointer is
+`r15` and the end pointer is `indexes + zs.total_out` at `0x18(%rsp)`
+(`0x37a7-0x37bd`, `0x3833`). Thus this binary never reads `indexes[i]`
+past the wrapped prefix even though C source line 1629's `break` only
+leaves the inner `j` loop; a compiler hoist explains the W313/W324/W325/
+W329 zero read-watch hits. Structural ceiling for the natural post-decode
+consumer in this binary, not a refutation of allocator/free consumers or
+other builds; no dereference, marker or command, grade unchanged rung 3 /
+rung 4 PARTIAL / NO r5. No live run, no replay owed.
+
+Fault-site tooling negative, preserved: three transient no-shim GDB runner
+variants (plain `run`, explicit SIGSEGV handling, and the proven W329
+breakpoint script with a post-stop `bt`) were tried at 10:26-10:35Z to
+resolve the terminal fault frame. Two never reached a plug-in fault within
+120-180 s; the third replayed the same `Fatal signal: Segmentation fault`
+and `Plug-in crashed: "file-gif-load"` with GDB producing no post-stop
+backtrace. No new fault site, register, dereference or consumer was
+observed, so the transient scripts and logs were removed rather than kept
+as a stale alternate path. No grade change.

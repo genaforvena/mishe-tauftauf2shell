@@ -1,0 +1,376 @@
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load:     file format elf64-x86-64
+
+
+Disassembly of section .init:
+
+Disassembly of section .plt:
+
+Disassembly of section .plt.got:
+
+Disassembly of section .text:
+
+00000000000034c0 <ReadJeffsImage.isra.0>:
+ReadJeffsImage():
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1509
+    34c0:	41 57                	push   %r15
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1531
+    34c2:	8d 42 ff             	lea    -0x1(%rdx),%eax
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1509
+    34c5:	41 56                	push   %r14
+    34c7:	41 55                	push   %r13
+    34c9:	41 54                	push   %r12
+    34cb:	55                   	push   %rbp
+    34cc:	53                   	push   %rbx
+    34cd:	48 81 ec c8 01 00 00 	sub    $0x1c8,%rsp
+    34d4:	88 54 24 37          	mov    %dl,0x37(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1518
+    34d8:	c6 44 24 4f ff       	movb   $0xff,0x4f(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1531
+    34dd:	3c 07                	cmp    $0x7,%al
+    34df:	0f 87 bb 01 00 00    	ja     36a0 <ReadJeffsImage.isra.0+0x1e0>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1537 (discriminator 1)
+    34e5:	44 0f b6 d2          	movzbl %dl,%r10d
+    34e9:	ba 07 00 00 00       	mov    $0x7,%edx
+    34ee:	49 89 f3             	mov    %rsi,%r11
+    34f1:	41 89 ce             	mov    %ecx,%r14d
+    34f4:	49 89 ff             	mov    %rdi,%r15
+    34f7:	44 29 d2             	sub    %r10d,%edx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1526
+    34fa:	31 db                	xor    %ebx,%ebx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1537
+    34fc:	b9 07 00 00 00       	mov    $0x7,%ecx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1540
+    3501:	be 01 00 00 00       	mov    $0x1,%esi
+    3506:	66 2e 0f 1f 84 00 00 	cs nopw 0x0(%rax,%rax,1)
+    350d:	00 00 00 
+    3510:	89 f0                	mov    %esi,%eax
+    3512:	d3 e0                	shl    %cl,%eax
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1537 (discriminator 2)
+    3514:	83 e9 01             	sub    $0x1,%ecx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1540
+    3517:	09 c3                	or     %eax,%ebx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1537 (discriminator 1)
+    3519:	39 d1                	cmp    %edx,%ecx
+    351b:	75 f3                	jne    3510 <ReadJeffsImage.isra.0+0x50>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1543
+    351d:	45 0f af f0          	imul   %r8d,%r14d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1545
+    3521:	45 85 c9             	test   %r9d,%r9d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1543
+    3524:	44 89 54 24 28       	mov    %r10d,0x28(%rsp)
+    3529:	4c 89 5c 24 20       	mov    %r11,0x20(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1545
+    352e:	44 89 4c 24 18       	mov    %r9d,0x18(%rsp)
+    3533:	47 8d 04 36          	lea    (%r14,%r14,1),%r8d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1543
+    3537:	44 89 74 24 3c       	mov    %r14d,0x3c(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1545
+    353c:	45 0f 44 c6          	cmove  %r14d,%r8d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1546
+    3540:	45 89 c4             	mov    %r8d,%r12d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1545
+    3543:	45 89 c6             	mov    %r8d,%r14d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1546
+    3546:	41 c1 e4 08          	shl    $0x8,%r12d
+    354a:	45 29 c4             	sub    %r8d,%r12d
+    354d:	44 89 e7             	mov    %r12d,%edi
+    3550:	e8 4b ec ff ff       	call   21a0 <g_try_malloc@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1547
+    3555:	44 89 f7             	mov    %r14d,%edi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1546
+    3558:	48 89 44 24 08       	mov    %rax,0x8(%rsp)
+    355d:	48 89 c5             	mov    %rax,%rbp
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1547
+    3560:	e8 3b ec ff ff       	call   21a0 <g_try_malloc@plt>
+    3565:	48 89 44 24 10       	mov    %rax,0x10(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1549
+    356a:	48 85 ed             	test   %rbp,%rbp
+    356d:	0f 84 c5 00 00 00    	je     3638 <ReadJeffsImage.isra.0+0x178>
+    3573:	48 85 c0             	test   %rax,%rax
+    3576:	0f 84 bc 00 00 00    	je     3638 <ReadJeffsImage.isra.0+0x178>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1524
+    357c:	31 ed                	xor    %ebp,%ebp
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1562
+    357e:	80 7c 24 4f 00       	cmpb   $0x0,0x4f(%rsp)
+    3583:	44 8b 4c 24 18       	mov    0x18(%rsp),%r9d
+    3588:	48 8d 7c 24 4f       	lea    0x4f(%rsp),%rdi
+    358d:	4c 8b 5c 24 20       	mov    0x20(%rsp),%r11
+    3592:	44 8b 54 24 28       	mov    0x28(%rsp),%r10d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1574
+    3597:	4c 8d ac 24 c0 00 00 	lea    0xc0(%rsp),%r13
+    359e:	00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1562
+    359f:	0f 84 43 01 00 00    	je     36e8 <ReadJeffsImage.isra.0+0x228>
+    35a5:	44 89 54 24 20       	mov    %r10d,0x20(%rsp)
+    35aa:	4c 89 5c 24 28       	mov    %r11,0x28(%rsp)
+    35af:	44 89 4c 24 38       	mov    %r9d,0x38(%rsp)
+    35b4:	89 5c 24 18          	mov    %ebx,0x18(%rsp)
+    35b8:	89 eb                	mov    %ebp,%ebx
+    35ba:	44 89 e5             	mov    %r12d,%ebp
+    35bd:	49 89 fc             	mov    %rdi,%r12
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1564
+    35c0:	4c 89 f9             	mov    %r15,%rcx
+    35c3:	ba 01 00 00 00       	mov    $0x1,%edx
+    35c8:	be 01 00 00 00       	mov    $0x1,%esi
+    35cd:	4c 89 e7             	mov    %r12,%rdi
+    35d0:	e8 2b ee ff ff       	call   2400 <fread@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1564 (discriminator 1)
+    35d5:	48 85 c0             	test   %rax,%rax
+    35d8:	74 5e                	je     3638 <ReadJeffsImage.isra.0+0x178>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1571
+    35da:	0f b6 74 24 4f       	movzbl 0x4f(%rsp),%esi
+    35df:	40 84 f6             	test   %sil,%sil
+    35e2:	0f 84 eb 00 00 00    	je     36d3 <ReadJeffsImage.isra.0+0x213>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1574
+    35e8:	4c 89 f9             	mov    %r15,%rcx
+    35eb:	ba 01 00 00 00       	mov    $0x1,%edx
+    35f0:	4c 89 ef             	mov    %r13,%rdi
+    35f3:	e8 08 ee ff ff       	call   2400 <fread@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1574 (discriminator 1)
+    35f8:	48 85 c0             	test   %rax,%rax
+    35fb:	74 3b                	je     3638 <ReadJeffsImage.isra.0+0x178>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1582 (discriminator 1)
+    35fd:	0f b6 74 24 4f       	movzbl 0x4f(%rsp),%esi
+    3602:	40 84 f6             	test   %sil,%sil
+    3605:	0f 84 c8 00 00 00    	je     36d3 <ReadJeffsImage.isra.0+0x213>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1592
+    360b:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+    3610:	89 d9                	mov    %ebx,%ecx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1582 (discriminator 1)
+    3612:	31 c0                	xor    %eax,%eax
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1592
+    3614:	48 01 f9             	add    %rdi,%rcx
+    3617:	eb 18                	jmp    3631 <ReadJeffsImage.isra.0+0x171>
+    3619:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+    3620:	41 0f b6 54 05 00    	movzbl 0x0(%r13,%rax,1),%edx
+    3626:	88 14 01             	mov    %dl,(%rcx,%rax,1)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1582 (discriminator 1)
+    3629:	48 83 c0 01          	add    $0x1,%rax
+    362d:	39 c6                	cmp    %eax,%esi
+    362f:	7e 5f                	jle    3690 <ReadJeffsImage.isra.0+0x1d0>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1584
+    3631:	8d 14 03             	lea    (%rbx,%rax,1),%edx
+    3634:	39 ea                	cmp    %ebp,%edx
+    3636:	72 e8                	jb     3620 <ReadJeffsImage.isra.0+0x160>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1608
+    3638:	48 8b 84 24 00 02 00 	mov    0x200(%rsp),%rax
+    363f:	00 
+    3640:	ba 05 00 00 00       	mov    $0x5,%edx
+    3645:	48 8d 35 68 1b 00 00 	lea    0x1b68(%rip),%rsi        # 51b4 <_IO_stdin_used+0x1b4>
+    364c:	31 ff                	xor    %edi,%edi
+    364e:	48 8b 18             	mov    (%rax),%rbx
+    3651:	e8 7a eb ff ff       	call   21d0 <dcgettext@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1608 (discriminator 1)
+    3656:	48 8b 94 24 08 02 00 	mov    0x208(%rsp),%rdx
+    365d:	00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1608
+    365e:	48 89 c7             	mov    %rax,%rdi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1608 (discriminator 1)
+    3661:	48 89 de             	mov    %rbx,%rsi
+    3664:	e8 67 f6 ff ff       	call   2cd0 <read_error>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1609
+    3669:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+    366e:	e8 9d ec ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1610
+    3673:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+    3678:	e8 93 ec ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1646
+    367d:	48 81 c4 c8 01 00 00 	add    $0x1c8,%rsp
+    3684:	5b                   	pop    %rbx
+    3685:	5d                   	pop    %rbp
+    3686:	41 5c                	pop    %r12
+    3688:	41 5d                	pop    %r13
+    368a:	41 5e                	pop    %r14
+    368c:	41 5f                	pop    %r15
+    368e:	c3                   	ret
+    368f:	90                   	nop
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1595
+    3690:	01 f3                	add    %esi,%ebx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1562
+    3692:	e9 29 ff ff ff       	jmp    35c0 <ReadJeffsImage.isra.0+0x100>
+    3697:	66 0f 1f 84 00 00 00 	nopw   0x0(%rax,%rax,1)
+    369e:	00 00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1533
+    36a0:	48 8b 84 24 00 02 00 	mov    0x200(%rsp),%rax
+    36a7:	00 
+    36a8:	31 ff                	xor    %edi,%edi
+    36aa:	ba 05 00 00 00       	mov    $0x5,%edx
+    36af:	48 8d 35 fe 1a 00 00 	lea    0x1afe(%rip),%rsi        # 51b4 <_IO_stdin_used+0x1b4>
+    36b6:	48 8b 18             	mov    (%rax),%rbx
+    36b9:	e8 12 eb ff ff       	call   21d0 <dcgettext@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1533 (discriminator 1)
+    36be:	48 8b 94 24 08 02 00 	mov    0x208(%rsp),%rdx
+    36c5:	00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1533
+    36c6:	48 89 c7             	mov    %rax,%rdi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1533 (discriminator 1)
+    36c9:	48 89 de             	mov    %rbx,%rsi
+    36cc:	e8 ff f5 ff ff       	call   2cd0 <read_error>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1534
+    36d1:	eb aa                	jmp    367d <ReadJeffsImage.isra.0+0x1bd>
+    36d3:	89 dd                	mov    %ebx,%ebp
+    36d5:	44 8b 54 24 20       	mov    0x20(%rsp),%r10d
+    36da:	8b 5c 24 18          	mov    0x18(%rsp),%ebx
+    36de:	4c 8b 5c 24 28       	mov    0x28(%rsp),%r11
+    36e3:	44 8b 4c 24 38       	mov    0x38(%rsp),%r9d
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1598
+    36e8:	48 8b 44 24 08       	mov    0x8(%rsp),%rax
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1599
+    36ed:	89 6c 24 58          	mov    %ebp,0x58(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1602
+    36f1:	66 0f ef c0          	pxor   %xmm0,%xmm0
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1606
+    36f5:	48 8d 6c 24 50       	lea    0x50(%rsp),%rbp
+    36fa:	ba 70 00 00 00       	mov    $0x70,%edx
+    36ff:	48 8d 35 75 1a 00 00 	lea    0x1a75(%rip),%rsi        # 517b <_IO_stdin_used+0x17b>
+    3706:	48 89 ef             	mov    %rbp,%rdi
+    3709:	44 89 4c 24 28       	mov    %r9d,0x28(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1598
+    370e:	48 89 44 24 50       	mov    %rax,0x50(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1600
+    3713:	48 8b 44 24 10       	mov    0x10(%rsp),%rax
+    3718:	4c 89 5c 24 20       	mov    %r11,0x20(%rsp)
+    371d:	48 89 44 24 68       	mov    %rax,0x68(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1601
+    3722:	8b 44 24 3c          	mov    0x3c(%rsp),%eax
+    3726:	44 89 54 24 18       	mov    %r10d,0x18(%rsp)
+    372b:	89 44 24 70          	mov    %eax,0x70(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1604
+    372f:	48 c7 84 24 a0 00 00 	movq   $0x0,0xa0(%rsp)
+    3736:	00 00 00 00 00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1602
+    373b:	0f 29 84 24 90 00 00 	movaps %xmm0,0x90(%rsp)
+    3742:	00 
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1606
+    3743:	e8 28 eb ff ff       	call   2270 <inflateInit_@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1606 (discriminator 1)
+    3748:	44 8b 54 24 18       	mov    0x18(%rsp),%r10d
+    374d:	4c 8b 5c 24 20       	mov    0x20(%rsp),%r11
+    3752:	85 c0                	test   %eax,%eax
+    3754:	44 8b 4c 24 28       	mov    0x28(%rsp),%r9d
+    3759:	0f 85 d9 fe ff ff    	jne    3638 <ReadJeffsImage.isra.0+0x178>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1613
+    375f:	31 f6                	xor    %esi,%esi
+    3761:	48 89 ef             	mov    %rbp,%rdi
+    3764:	44 89 4c 24 38       	mov    %r9d,0x38(%rsp)
+    3769:	4c 89 5c 24 28       	mov    %r11,0x28(%rsp)
+    376e:	44 89 54 24 20       	mov    %r10d,0x20(%rsp)
+    3773:	e8 c8 ea ff ff       	call   2240 <inflate@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1614
+    3778:	83 f8 01             	cmp    $0x1,%eax
+    377b:	0f 87 df 00 00 00    	ja     3860 <ReadJeffsImage.isra.0+0x3a0>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1625 (discriminator 1)
+    3781:	48 8b 44 24 78       	mov    0x78(%rsp),%rax
+    3786:	48 85 c0             	test   %rax,%rax
+    3789:	0f 84 b0 00 00 00    	je     383f <ReadJeffsImage.isra.0+0x37f>
+    378f:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+    3794:	44 8b 54 24 20       	mov    0x20(%rsp),%r10d
+    3799:	48 89 6c 24 20       	mov    %rbp,0x20(%rsp)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1525
+    379e:	31 d2                	xor    %edx,%edx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1636
+    37a0:	44 8b 2d e9 3a 00 00 	mov    0x3ae9(%rip),%r13d        # 7290 <Gif89>
+    37a7:	44 0f b6 64 24 37    	movzbl 0x37(%rsp),%r12d
+    37ad:	48 01 f8             	add    %rdi,%rax
+    37b0:	4c 8b 5c 24 28       	mov    0x28(%rsp),%r11
+    37b5:	44 8b 4c 24 38       	mov    0x38(%rsp),%r9d
+    37ba:	49 89 ff             	mov    %rdi,%r15
+    37bd:	48 89 44 24 18       	mov    %rax,0x18(%rsp)
+    37c2:	66 66 2e 0f 1f 84 00 	data16 cs nopw 0x0(%rax,%rax,1)
+    37c9:	00 00 00 00 
+    37cd:	0f 1f 00             	nopl   (%rax)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1629
+    37d0:	44 39 f2             	cmp    %r14d,%edx
+    37d3:	73 5a                	jae    382f <ReadJeffsImage.isra.0+0x36f>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1632
+    37d5:	bf 08 00 00 00       	mov    $0x8,%edi
+    37da:	41 0f b6 2f          	movzbl (%r15),%ebp
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1627
+    37de:	31 f6                	xor    %esi,%esi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1632
+    37e0:	44 29 d7             	sub    %r10d,%edi
+    37e3:	eb 22                	jmp    3807 <ReadJeffsImage.isra.0+0x347>
+    37e5:	0f 1f 00             	nopl   (%rax)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1636
+    37e8:	44 39 e8             	cmp    %r13d,%eax
+    37eb:	0f 95 c0             	setne  %al
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1627 (discriminator 2)
+    37ee:	44 01 d6             	add    %r10d,%esi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1637
+    37f1:	83 c2 02             	add    $0x2,%edx
+    37f4:	44 29 e7             	sub    %r12d,%edi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1636
+    37f7:	f7 d8                	neg    %eax
+    37f9:	41 88 04 0b          	mov    %al,(%r11,%rcx,1)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1629
+    37fd:	83 fe 07             	cmp    $0x7,%esi
+    3800:	7f 2d                	jg     382f <ReadJeffsImage.isra.0+0x36f>
+    3802:	44 39 f2             	cmp    %r14d,%edx
+    3805:	73 28                	jae    382f <ReadJeffsImage.isra.0+0x36f>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1632
+    3807:	89 f1                	mov    %esi,%ecx
+    3809:	89 d8                	mov    %ebx,%eax
+    380b:	41 89 d0             	mov    %edx,%r8d
+    380e:	d3 e8                	shr    %cl,%eax
+    3810:	89 f9                	mov    %edi,%ecx
+    3812:	21 e8                	and    %ebp,%eax
+    3814:	d3 e8                	shr    %cl,%eax
+    3816:	8d 4a 01             	lea    0x1(%rdx),%ecx
+    3819:	43 88 04 03          	mov    %al,(%r11,%r8,1)
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1634
+    381d:	45 85 c9             	test   %r9d,%r9d
+    3820:	75 c6                	jne    37e8 <ReadJeffsImage.isra.0+0x328>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1627 (discriminator 2)
+    3822:	44 01 d6             	add    %r10d,%esi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1632
+    3825:	89 ca                	mov    %ecx,%edx
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1629
+    3827:	44 29 e7             	sub    %r12d,%edi
+    382a:	83 fe 07             	cmp    $0x7,%esi
+    382d:	7e d3                	jle    3802 <ReadJeffsImage.isra.0+0x342>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1625 (discriminator 1)
+    382f:	49 83 c7 01          	add    $0x1,%r15
+    3833:	4c 39 7c 24 18       	cmp    %r15,0x18(%rsp)
+    3838:	75 96                	jne    37d0 <ReadJeffsImage.isra.0+0x310>
+    383a:	48 8b 6c 24 20       	mov    0x20(%rsp),%rbp
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1641
+    383f:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+    3844:	e8 c7 ea ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1642
+    3849:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+    384e:	e8 bd ea ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1643
+    3853:	48 89 ef             	mov    %rbp,%rdi
+    3856:	e8 65 ea ff ff       	call   22c0 <inflateEnd@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1645
+    385b:	e9 1d fe ff ff       	jmp    367d <ReadJeffsImage.isra.0+0x1bd>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1616
+    3860:	48 8b 84 24 00 02 00 	mov    0x200(%rsp),%rax
+    3867:	00 
+    3868:	31 ff                	xor    %edi,%edi
+    386a:	ba 05 00 00 00       	mov    $0x5,%edx
+    386f:	48 8d 35 0b 19 00 00 	lea    0x190b(%rip),%rsi        # 5181 <_IO_stdin_used+0x181>
+    3876:	48 8b 18             	mov    (%rax),%rbx
+    3879:	e8 52 e9 ff ff       	call   21d0 <dcgettext@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1616 (discriminator 1)
+    387e:	48 8b 94 24 08 02 00 	mov    0x208(%rsp),%rdx
+    3885:	00 
+    3886:	48 89 de             	mov    %rbx,%rsi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1616
+    3889:	48 89 c7             	mov    %rax,%rdi
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1616 (discriminator 1)
+    388c:	e8 3f f4 ff ff       	call   2cd0 <read_error>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1617
+    3891:	48 89 ef             	mov    %rbp,%rdi
+    3894:	e8 27 ea ff ff       	call   22c0 <inflateEnd@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1618
+    3899:	48 8b 7c 24 08       	mov    0x8(%rsp),%rdi
+    389e:	e8 6d ea ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1619
+    38a3:	48 8b 7c 24 10       	mov    0x10(%rsp),%rdi
+    38a8:	e8 63 ea ff ff       	call   2310 <g_free@plt>
+/builds/GNOME/gimp/_build-x86_64_v3/../plug-ins/common/file-gif-load.c:1620
+    38ad:	e9 cb fd ff ff       	jmp    367d <ReadJeffsImage.isra.0+0x1bd>
+
+Disassembly of section .fini:
