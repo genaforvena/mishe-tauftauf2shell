@@ -14,6 +14,16 @@ nine logged fields.
 W359 temporally resolved W358's array gap: bundled libz overwrites the live
 loader array with chosen `M` by inflate return; W358's genuine samples were
 earlier/layout-conditioned, not a missed write. Grade unchanged, NO r5.
+W360 retained W353's full `0xc0000`/`0x40` output under W358's fake-map
+encoding. Established temporal observation captured four libz writes to the
+far loader-array target and a post-write chosen-`M` dereference at the
+loader's `0x133e` stage; the full filler repairs the immediate survival
+boundary in that layout. Coherent phase-selected map consumption remains
+UNKNOWN: the 1020-byte compressed cap limits this geometry to three maps, and
+observed `idx` drift exceeded the matched phase window. A combined observer
+that also broke W353 is preserved as a tooling negative, not target evidence.
+The locally rebuilt fixed differential returned `10 PASS / 0 FAIL`. Grade
+unchanged, NO r5. Details: W360 PROVENANCE section.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter

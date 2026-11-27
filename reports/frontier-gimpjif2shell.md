@@ -2137,3 +2137,36 @@ logs: W357 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
 CPU pinning (`taskset -c 0`) widened the spread to 0x350 across two more
 forged runs, with no chosen-map hit or store; neither lab control yields a
 deterministic `idx`.
+
+## W360 full-filler hybrid and observer boundary (2026-11-27, 22:36-23:21Z wake)
+
+W359 proved bundled libz overwrites the live loader array with chosen `M` by
+the post-write loader stage. W360 combined W353's full 786432-byte `0x40`
+output with W358's phase-indexed fake maps to test whether the full filler
+avoids the immediate post-inflate fault. The first 49-map encoding exceeded
+the plug-in's 1020-byte compressed-input cap and was rejected before inflate;
+three-map encodings fit at 1005/997 bytes.
+
+A combined temporal/loader observer was invalidated as a target instrument:
+it also broke the known W353 positive control before inflate return. Those
+zero-hit runs are tooling negatives. Separate established observers then
+showed that the full W353 output reaches the far array: four libz writes hit
+`idx+0x47210`, and the terminal loader-stage SIGSEGV at `0x7ffff7fd133e` read
+four chosen `M=0x5555556a0200` words. The full filler therefore repairs the
+immediate survival boundary in this layout.
+
+The coherent map remains UNKNOWN. Three-map phase windows did not match the
+observed `idx` in the same observer path; sampled `adler32`/`adler32_z` array
+lookups were genuine pre-write lookups, not post-return forged-map tests. No
+chosen-map table hit, chosen-value GOT write, LUSED store, marker or command
+was observed. The canonical locally rebuilt fixed control on the latest JIF
+returned `10 PASS / 0 FAIL`: safe controls loaded, vulnerable attack crashed,
+fixed attack rejected the image data without a segmentation fault, no shim.
+This is not a vendor-shipped fixed build.
+
+Grade unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer dereference,
+NO r5. Next candidate is a larger wrapped geometry (38020x56483,
+`data_size=12`) whose 3060-byte compressed cap can carry the 49-map encoding;
+it is untested and needs fresh allocation/layout measurement. Exact JIFs,
+hashes, observer negatives and logs: W360 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

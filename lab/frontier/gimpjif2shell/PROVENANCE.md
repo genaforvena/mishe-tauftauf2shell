@@ -3823,3 +3823,96 @@ control-flow effect or command was observed. Grade unchanged: rung 3 pinned
 verbatim / rung 4 chosen-pointer dereference, NO r5. Next bounded experiment:
 keep W353's surviving `0x40` filler while placing the W358 array/map bytes, to
 test whether the immediate post-inflate fault is collateral heap corruption.
+
+## W360 full-filler hybrid: chosen array pointer consumed, coherent map UNKNOWN (2026-11-27, 22:36-23:21Z wake)
+
+Question: W359 proved the live loader array is overwritten, then faulted
+before a second loader entry. W360 tested whether retaining W353's full
+`0xc0000`-byte `0x40` output, rather than W358's `0x48410`-byte `0x4d` output,
+lets the process survive far enough to consume W358's phase-indexed fake map.
+All live runs used the unmodified shim-free `run-appimage-min340.sh`
+(`b047c40e…`), the SHA256SUMS-verified GIMP 3.2.8 AppImage, absolute
+101-character JIF paths, and read-only GDB observers. No target memory or
+register was written by an observer.
+
+Offline decoding established the input difference: W353 JIF `f867cd09…`
+inflates to 786432 bytes of mostly `0x40`; W358 JIF `133b4c67…` inflates to
+295952 bytes of mostly `0x4d`. New generator `live/w360-hybrid.py` overlays the
+W358 fake maps on W353's full output. It keeps `M=0x5555556a0200` fixed while
+allowing `idx_nom` to be retuned independently.
+
+### Compression cap and tooling negatives
+
+The first 49-map hybrid (`w360-hybrid-map0001.jif`, SHA `8b700e9b…`) had
+`zlen=2646`. At minimal geometry `data_size=4`, the plug-in allocates
+`data_size*255 = 1020` bytes for compressed input and rejects `count >= 1020`
+before `inflate` (`src/file-gif-load-vulnerable.c:1544,1580-1594`). Run 1
+therefore produced no heap result (`w360-hybrid-run1.log`, SHA `bdf97c6f…`).
+
+Three-map variants fit the cap: broad array sweep `zlen=1005`, W353's
+`0x47000..0x47400` sweep `zlen=997`. A combined temporal/ARRAY/ENTRY observer
+was authored, but its zero-hit runs are tooling negatives, not target evidence:
+the same observer also broke the known W353 positive control before inflate
+return (`w360-w353-control-run.log` SHA `cdd9486f…`, GDB log `64a7e042…`).
+The exact observer failure cause is UNKNOWN. One retuned run also exposed a
+missing `except` in that observer (`w360-hybrid-run3.log` SHA `305c97a9…`);
+it armed no breakpoint and is discarded as a syntax negative.
+
+### Established-observer results
+
+JIF `w360-hybrid-map0005.jif` SHA
+`0fdd73402571ea0a2f68c694c477b5ac4d0cf43fe352be5ea427d9972a7618cc`
+(three maps, `idx_nom=0x555555679050`, `zlen=997`) was run with the established
+read-only `gdb-w358-array.cmd` SHA
+`913c51a7b3902642900262c7f66ef1522ed59b836e6725de293d4c853c0ad02b`.
+Run/GDB logs `w360-array-{run,gdb}.log` SHA `3332a890…` / `1b728a4f…`:
+PRE `idx=0x5555556790a0`, `ARRBASE-idx=0x47210`; 24 ARRAY/TABLE pairs through
+`adler32` and part of `adler32_z`, then the genuine GOT write
+`rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0`. Sampled array words were
+genuine. These lookups occur before the far output write, so they do not test
+the post-return array.
+
+The same JIF under the established W359 temporal observer SHA
+`07cd4bff37b6f44cdb3f6e789a4bf711d0c3e407c0af0f3fba8deb50eec869bd`
+produced `w360-temporal-{run,gdb}.log` SHA `bf6ca8af…` / `b132e185…`.
+PRE `idx=0x5555556790a0`, target `0x5555556c02b0`; the first `adler32` entry
+again preceded the far write. Four bundled-libz watch hits at
+`0x7ffff7a8ff02/ff0b/ff1b/ff02` were followed by terminal SIGSEGV
+`pc=0x7ffff7fd133e`; the target and surrounding words held
+`M=0x5555556a0200`. This is a post-write loader-stage chosen-pointer
+dereference with the full W353 filler. No `INFLATE_RETURN` line was captured,
+so `total_out` and the exact return path remain UNKNOWN for this run.
+
+Phase retuning remained layout-conditioned. JIF `661d75ee…`
+(`idx_nom=0x679080`) under the array observer measured `idx=0x679050`, below
+its nominal phase. JIF `d73241af…` (`idx_nom=0x679030`) measured `idx=0x679040`
+(phase 1) but `ARRBASE-idx=0x47170`; its 24 sampled ARRAY/TABLE pairs were
+again genuine pre-write lookups. Logs `w360-phase2-array-{run,gdb}.log` SHA
+`ea0c123a…` / `a5922535…` and `w360-arrayphase2-{run,gdb}.log` SHA
+`b63a855a…` / `52ee1292…`. Separate runs, not a controlled observer comparison,
+produced the different `idx` values. No coherent fake-map table hit,
+`0xb200` LUSED store, chosen-value GOT write, marker or command was observed.
+
+### Fixed control and conclusion
+
+The canonical locally rebuilt differential used JIF `d73241af…` and returned
+`TOTAL: 10 PASS / 0 FAIL`: both safe controls rc 0; vulnerable attack
+`Plug-in crashed`; fixed attack `Error reading image data` with no segmentation
+fault; no shim line. Summary `fixedctl/evidence/w360-fixedctl-*`: binary hashes
+`c09f0c81…`, fixed attack `57f6f862…`, fixed safe `c78e65b7…`, vulnerable
+attack `72da74e5…`, vulnerable safe `e4aab1e2…`. This is not a vendor-shipped
+fixed build. Attack rc 124/137 remain timeout/session-kill observations.
+
+Conclusion: W353's full `0x40` output repairs W359's immediate post-inflate
+boundary in the measured temporal layout; inflate reaches the far loader array
+and ld.so consumes the chosen `M` pointer at the stage-2 dereference. It does
+not yet establish consumption of a coherent phase-selected fake map. The
+1020-byte compressed-input cap limits the minimal geometry to three maps under
+this encoding, while observed `idx` drift exceeds that phase window. Grade
+unchanged: rung 3 pinned verbatim / rung 4 chosen-pointer dereference, NO r5.
+
+Next bounded repair: a larger wrapped geometry such as 38020x56483 has
+`len*height=0x80000006`, alpha `data_size=12`, and compressed cap 3060, enough
+offline for the 49-map `zlen=2646` encoding. This is an UNTESTED candidate;
+its different allocations require fresh `idx`/delta measurement and a matching
+runner/observer PRE bound. No memory-limit change is needed or authorized.

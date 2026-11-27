@@ -1,0 +1,28 @@
+W359 PRE avail=0x80000002 idx=0x5555556790a0 ret=0x555555557778 target=0x5555556c02b0 M=0x5555556a0200
+W359 PRE idx=0x5555556790a0 target=0x5555556c02b0 off=0x47210 center=0x7ffff7ffe5f0,0x7ffff7fb48e0,0x7ffff7e65000,0x7ffff7e656e0 M=0x5555556a0200 M_HITS=none
+W359 WRITE_WATCH ARMED addr=0x5555556c02b0
+W359 LD base=0x7ffff7fc7000
+W359 FIRST_ENTRY name=adler32 hash=0x1fb025d2
+W359 FIRST_ENTRY idx=0x5555556790a0 target=0x5555556c02b0 off=0x47210 center=0x7ffff7ffe5f0,0x7ffff7fb48e0,0x7ffff7e65000,0x7ffff7e656e0 M=0x5555556a0200 M_HITS=none
+W359 WRITE_WATCH n=1 addr=0x5555556c02b0 pc=0x7ffff7a8ff0b value_before=140737354130688
+W359 WATCH_INS => 0x7ffff7a8ff0b:	movzbl -0x1(%r11),%r8d
+W359 WATCH_INS 0x7ffff7a8ff10:	mov    %r15,%rcx
+W359 WATCH_INS 0x7ffff7a8ff13:	add    $0x3,%r15
+W359 WATCH_INS 0x7ffff7a8ff17:	mov    %r8b,-0x1(%r15)
+W359 WRITE_WATCH n=2 addr=0x5555556c02b0 pc=0x7ffff7a8ff1b value_before=140737354072576
+W359 WATCH_INS => 0x7ffff7a8ff1b:	mov    %r9d,%r8d
+W359 WATCH_INS 0x7ffff7a8ff1e:	cmp    $0x2,%r9d
+W359 WATCH_INS 0x7ffff7a8ff22:	ja     0x7ffff7a8fef0
+W359 WATCH_INS 0x7ffff7a8ff24:	jmp    0x7ffff7a8febe
+W359 WRITE_WATCH n=3 addr=0x5555556c02b0 pc=0x7ffff7a8ff02 value_before=140737344307712
+W359 WATCH_INS => 0x7ffff7a8ff02:	movzbl -0x2(%r11),%ecx
+W359 WATCH_INS 0x7ffff7a8ff07:	mov    %cl,0x1(%r15)
+W359 WATCH_INS 0x7ffff7a8ff0b:	movzbl -0x1(%r11),%r8d
+W359 WATCH_INS 0x7ffff7a8ff10:	mov    %r15,%rcx
+W359 WRITE_WATCH n=4 addr=0x5555556c02b0 pc=0x7ffff7a8ff0b value_before=140734626398720
+W359 WATCH_INS => 0x7ffff7a8ff0b:	movzbl -0x1(%r11),%r8d
+W359 WATCH_INS 0x7ffff7a8ff10:	mov    %r15,%rcx
+W359 WATCH_INS 0x7ffff7a8ff13:	add    $0x3,%r15
+W359 WATCH_INS 0x7ffff7a8ff17:	mov    %r8b,-0x1(%r15)
+W359 SIGNAL SIGSEGV pc=0x7ffff7fd133e watch_hits=4
+W359 SIGNAL idx=0x5555556790a0 target=0x5555556c02b0 off=0x47210 center=0x5555556a0200,0x5555556a0200,0x5555556a0200,0x5555556a0200 M=0x5555556a0200 M_HITS=-0x210,-0x208,-0x200,-0x1f8,-0x1f0,-0x1e8,-0x1e0,-0x1d8,-0x1d0,-0x1c8,-0x1c0,-0x1b8,-0x1b0,-0x1a8,-0x1a0,-0x198,-0x190,-0x188,-0x180,-0x178,-0x170,-0x168,-0x160,-0x158,-0x150,-0x148,-0x140,-0x138,-0x130,-0x128,-0x120,-0x118

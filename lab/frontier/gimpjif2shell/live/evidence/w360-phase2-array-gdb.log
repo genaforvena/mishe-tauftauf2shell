@@ -1,0 +1,54 @@
+W358 PRE avail=0x80000002 idx=0x555555679050
+W358 LD base=0x7ffff7fc7000
+W358 ENTRY n=1 name=adler32 hash=0x1fb025d2 scope=0x7ffff7ffe8e8
+W358 ARRAY n=1 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7ffe5f0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=1 rbx=0x7ffff7ffe5f0 rdx=0x55555556c078 rax=0x0 hash=0x1fb025d2
+W358 ARRAY n=2 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7fb48e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=2 rbx=0x7ffff7fb48e0 rdx=0x7ffff7fb0038 rax=0x7 hash=0x1fb025d2
+W358 ARRAY n=3 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e65000 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=3 rbx=0x7ffff7e65000 rdx=0x7ffff7e59038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=4 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e656e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=4 rbx=0x7ffff7e656e0 rdx=0x7ffff7d54038 rax=0x3 hash=0x1fb025d2
+W358 ARRAY n=5 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e65cd0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=5 rbx=0x7ffff7e65cd0 rdx=0x7ffff7d46038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=6 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e662c0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=6 rbx=0x7ffff7e662c0 rdx=0x7ffff7d18038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=7 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e669a0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=7 rbx=0x7ffff7e669a0 rdx=0x7ffff7c82038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=8 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7c400e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=8 rbx=0x7ffff7c400e0 rdx=0x7ffff7c3a038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=9 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7c407c0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=9 rbx=0x7ffff7c407c0 rdx=0x7ffff7bfc038 rax=0x7 hash=0x1fb025d2
+W358 ARRAY n=10 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7c40ea0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=10 rbx=0x7ffff7c40ea0 rdx=0x7ffff7be0038 rax=0x7 hash=0x1fb025d2
+W358 ARRAY n=11 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7c41590 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=11 rbx=0x7ffff7c41590 rdx=0x7ffff7bbf038 rax=0x7 hash=0x1fb025d2
+W358 ARRAY n=12 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7bb5000 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=12 rbx=0x7ffff7bb5000 rdx=0x7ffff7bb2038 rax=0x1 hash=0x1fb025d2
+W358 ARRAY n=13 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7bb56f0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=13 rbx=0x7ffff7bb56f0 rdx=0x7ffff7ba8038 rax=0x3 hash=0x1fb025d2
+W358 ARRAY n=14 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7bb5dd0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=14 rbx=0x7ffff7bb5dd0 rdx=0x7ffff7b96038 rax=0x7 hash=0x1fb025d2
+W358 ARRAY n=15 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7bb64b0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=15 rbx=0x7ffff7bb64b0 rdx=0x7ffff7b55038 rax=0x17 hash=0x1fb025d2
+W358 ARRAY n=16 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7aa8000 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=16 rbx=0x7ffff7aa8000 rdx=0x7ffff7aa4038 rax=0x7 hash=0x1fb025d2
+W358 MATCH n=1 rdi=0x7ffff7aa4437 r9=0x7ffff7a84a78 st_name=0x5f map=0x7fffffffb894
+W358 GOT n=1 rel_addr=0x7ffff7aa30f0 value=0x7ffff7a87ae0
+W358 ENTRY n=2 name=adler32_z hash=0xcc50ef0b scope=0x7ffff7ffe8e8
+W358 ARRAY n=17 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7ffe5f0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=17 rbx=0x7ffff7ffe5f0 rdx=0x55555556c078 rax=0x0 hash=0xcc50ef0b
+W358 ARRAY n=18 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7fb48e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=18 rbx=0x7ffff7fb48e0 rdx=0x7ffff7fb0038 rax=0x4 hash=0xcc50ef0b
+W358 ARRAY n=19 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e65000 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=19 rbx=0x7ffff7e65000 rdx=0x7ffff7e59038 rax=0x3c hash=0xcc50ef0b
+W358 ARRAY n=20 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e656e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=20 rbx=0x7ffff7e656e0 rdx=0x7ffff7d54038 rax=0x0 hash=0xcc50ef0b
+W358 ARRAY n=21 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e65cd0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=21 rbx=0x7ffff7e65cd0 rdx=0x7ffff7d46038 rax=0x1c hash=0xcc50ef0b
+W358 ARRAY n=22 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e662c0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=22 rbx=0x7ffff7e662c0 rdx=0x7ffff7d18038 rax=0x3c hash=0xcc50ef0b
+W358 ARRAY n=23 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7e669a0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=23 rbx=0x7ffff7e669a0 rdx=0x7ffff7c82038 rax=0x1c hash=0xcc50ef0b
+W358 ARRAY n=24 r14=0x5555556c0260 delta=0x47210 rax=0x7ffff7c400e0 mem0=0x7ffff7ffe5f0 mem8=0x7ffff7fb48e0 rsp40=0x7fffffffb968
+W358 TABLE n=24 rbx=0x7ffff7c400e0 rdx=0x7ffff7c3a038 rax=0x1c hash=0xcc50ef0b

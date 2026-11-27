@@ -1,0 +1,9 @@
+W360 PRE avail=0x80000002 idx=0x555555679060 ret=0x555555557778 target=0x5555556c0270 M=0x5555556a0200
+W360 PRE idx=0x555555679060 target=0x5555556c0270 off=0x47210 center=0x7ffff7ffe5f0,0x7ffff7fb48e0,0x7ffff7e65000,0x7ffff7e656e0 M=0x5555556a0200 M_HITS=none
+W360 PRE MAP0 l_addr=0x486705a3a0f47101 l_real=0x421 strtab=0x43ce7247d404ce3e symtab=0x7fffe371b9c0 nb=0x43ce7247 idxbits=0xe371bcc0 shift=0x7fff bitmask=0x7fffe371b000 buckets=0x0 chain=0x43ce7247d404ce3e type=0x7fff versyms=0x0 used=0x7fff
+W360 PRE PHASE k=0x1 selector=0x421 expected=0x5555556a0800 l_addr=0x0 l_real=0x0 strtab=0x0 symtab=0x0 nb=0x0 idxbits=0x556bf630 shift=0x5555 bitmask=0x5555556bf610 buckets=0x0 chain=0x21 type=0x0 versyms=0x0 used=0x7fff
+W360 WRITE_WATCH ARMED label=ARRAY addr=0x5555556c0270
+W360 WRITE_WATCH ARMED label=EARLY addr=0x55555567a060
+W360 WRITE_WATCH ARMED label=MAP addr=0x5555556a0210 phase=0x0 selector_phase=0x1
+W360 WRITE_WATCH ARMED label=ARRAYSTART addr=0x5555556c0060
+W360 LD base=0x7ffff7fc7000

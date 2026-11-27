@@ -1,0 +1,31 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln
+GLib-GIO-Message: 23:17:47.519: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 23:17:47.519: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 23:17:59.928: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 23:17:59.928: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 23:17:59.928: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.928: Mapped file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.929: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.929: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.929: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.930: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.930: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.930: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.933: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.936: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 23:17:59.937: Opened file '/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/w360-hybrid-map0007.jif" "w360-hybrid-map0007.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-fixedctl-build-JEcMhZ/root-vuln/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

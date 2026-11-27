@@ -1,0 +1,20 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage-w316/squashfs-root
+GLib-GIO-Message: 22:41:45.692: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 22:41:45.693: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 22:42:06.138: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 22:42:06.138: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 22:42:06.223: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.226: Mapped file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.227: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.230: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.231: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.231: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.232: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.233: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.330: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.337: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 22:42:06.337: Opened file '/tmp/gimpjif-appimage-w316/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+Jeff's Image Format-Warning: Error reading image data. Image may be corrupt!
+
