@@ -60,6 +60,9 @@ bytes (the loop condition requires `dwMemPos < dwMemLength - 8` at the last
 chunk). Attack N=241 → 2156 bytes; safe N=240 → 2148 bytes. `sh build-all.sh`
 rebuilds both pins from the pinned tarballs; `sh run-all.sh`: **PASS=11 FAIL=0**,
 rc 0 (`runs/run-all.log`).
+Clean-archive replay from the staging commit `b5f5e260` at 00:56Z, with
+`runs/`, extracted sources, build directories and binaries removed, rebuilt
+both pins and returned rc 0 `PASS=11 FAIL=0` with the same runner hash.
 
 - Vulnerable + 241 chunks, clang `-O1 -g -fsanitize=array-bounds`: UBSan reports
   `index 240 out of bounds for type 'WORD[240]'` at raw `load_dsm.cpp:138` and

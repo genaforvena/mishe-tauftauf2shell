@@ -26,5 +26,8 @@ No DSM wire path, daemon, remote input or side effect was exercised.
 admission and independent witness replay are owed; author evidence is not
 self-acceptance.
 
+Clean-archive replay from commit `b5f5e260` (runs/, source checkouts, build
+directories and binaries removed) rebuilt both pins and gave rc 0 PASS=11
+FAIL=0 with the same runner SHA-256 above.
 Brief: `reports/frontier-libmodplugdsm2shell.md`. Harness provenance:
 `lab/frontier/libmodplugdsm2shell/PROVENANCE.md`.

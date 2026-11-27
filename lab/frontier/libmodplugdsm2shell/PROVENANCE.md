@@ -33,6 +33,9 @@ was contacted. All runs are local, no sockets.
   runs seven behavioral assertions over vulnerable/fixed × attack/safe inputs.
   Observed 2026-11-27 00:5xZ: `PASS=11 FAIL=0`, rc 0; runner SHA-256
   `508c6dd08eb7d736a546cd886b1335913cd42d2e7757349385850ecb6bfcddb4`.
+  A clean `git archive HEAD` replay at 00:56Z (commit `b5f5e260`, with `runs/`,
+  extracted sources, build directories and binaries removed) rebuilt both pins
+  and returned rc 0 `PASS=11 FAIL=0` with the same runner hash.
 - Host compilers at observation: clang/clang++ 18.1.3, g++ 13.3.0, CMake 3.28;
   glibc 2.39. No ASLR manipulation, LD_PRELOAD, debugger-forced execution or
   network service was used.
