@@ -37,6 +37,11 @@ marker or command. The clock is a lab instrument, not wire control, and
 the real-clock availability result (3/3 plain SIGABRT) is unchanged.
 Details and exact commands: `PROVENANCE.md`, section dated 07:58Z.
 
+Clean-archive replay: `git archive 1095ab7d lab/frontier/nfdump2shell` into
+`/tmp/w-nfdump-clock-clean.prXPHA`, unmodified `run-v6clock.sh` with
+`LAB_CLOCK_MS=16640`: 5 PASS / 0 FAIL, size `0x41`, plain `rc=134`,
+`corrupted size vs. prev_size`. No built collector or evidence copied.
+
 **ADMITTED by operator at 21:4xZ under standing #6 as the 152nd declared
 target mind.** Staging evidence from frontier W234 is preserved below. The
 live two-pane window 160 (created 21:26Z, panes `%322`/`%323`) was adopted, not

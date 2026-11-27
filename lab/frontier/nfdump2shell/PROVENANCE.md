@@ -981,3 +981,15 @@ the wire packet chooses the offset, never the value.
 
 Grade unchanged: rung 3 live / rung 4 availability DEMONSTRATED
 (unchanged real-clock 3/3), chosen-offset PARTIAL / NO r5.
+
+Clean-archive replay of commit `1095ab7d`: `git archive 1095ab7d
+lab/frontier/nfdump2shell` extracted to
+`/tmp/w-nfdump-clock-clean.prXPHA` and `LAB_CLOCK_MS=16640 bash
+run-v6clock.sh` run there with no in-tree build or evidence copied. Fresh
+pinned tarballs were fetched and SHA-verified; the plain collector binary
+built and the runner returned **5 PASS / 0 FAIL**, with
+`HDR_SIZE_AFTER=0000000000000041` and plain `rc=134`,
+`corrupted size vs. prev_size`. The parallel ASan/fixed build logs in that
+archive hit `filter.h`/`vcs_track.h` include errors during `build-wire.sh`;
+they are irrelevant to this plain-build runner, which checks for its own
+binary before running. No generated evidence was copied into the archive.
