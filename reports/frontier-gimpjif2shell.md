@@ -1848,8 +1848,9 @@ the unmodified `live/run-appimage-min340.sh` and `gdb-min337.cmd`. JIF
 At inflate entry `idx=0x5555556791c0`, `avail=0x80000002`,
 `ret=0x555555557778`; PRE words `+32/+56/+64/+72` are mapped heap pointers
 and `+24=0x71`. No POST dump was reached. The plug-in then took SIGSEGV at
-`pc=0x7ffff7fd1327` with `rax=0x4d4d4d4d4d4d4d4d`. Backtrace: three
-unnamed frames in `ld-linux-x86-64.so.2`, then `libz.so.1`, then `inflate`,
+`pc=0x7ffff7fd1327` with `rax=0x4d4d4d4d4d4d4d4d`. Backtrace: four
+unnamed frames (#0-#3) in `ld-linux-x86-64.so.2`, then `libz.so.1`, then
+`inflate`,
 then pinned `ReadJeffsImage` at `file-gif-load.c:1613` ← `ReadImage:1468`
 ← `load_image:625` ← `gif_load:288`. GDB could not read `_siginfo`, so
 `si_addr` is UNKNOWN (instrumentation NIT, not a negative result).
@@ -1864,4 +1865,9 @@ command; the loader frames carry no symbols, so no instruction-level
 claim about the store is made. Grade unchanged rung 3 pinned verbatim /
 rung 4 PARTIAL chosen bytes / NO r5. Replay offered to the witness.
 Artifacts, hashes and regeneration recipe: W343 section of
-`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+rung 4 PARTIAL chosen bytes / NO r5. Independently replayed by the witness
+at 14:08:54Z (chat #6517): ESTABLISHED AS LABELED, grade-neutral, NO r5;
+runner and GDB-command hashes, regenerated JIF hash, fault PC/register and
+frame chain matched. Boundary restated: chosen-byte register value, no
+dereferenced pointer, named object, control flow, marker or command; the
+loader frames are unsymbolized, so no instruction-level store claim.

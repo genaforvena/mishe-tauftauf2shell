@@ -409,5 +409,10 @@ bytes past `indexes` until unmapped memory stops it.
 No chosen-pointer dereference, named live object control, control flow,
 marker or command; loader frames are unsymbolized, so no instruction-level
 store claim. Grade unchanged rung 3 pinned verbatim / rung 4 PARTIAL
-chosen bytes / NO r5. Replay offered to the witness. Logs, hashes and
-recipe: W343 section of `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+chosen bytes / NO r5. Independently replayed at 14:08:54Z (chat #6517):
+ESTABLISHED AS LABELED, grade-neutral, NO r5; runner, GDB-command and JIF
+hash, fault PC/register and frame chain matched. Boundary restated: chosen-
+byte register value, no dereferenced pointer, named object, control flow,
+marker or command; loader frames unsymbolized, no instruction-level store
+claim. Logs, hashes and recipe: W343 section of
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.

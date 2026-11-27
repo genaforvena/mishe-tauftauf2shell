@@ -2865,7 +2865,15 @@ pointer control: no dereferenced pointer word, named live object, control
 flow, marker or command; the loader frames are unsymbolized, so no
 instruction-level store claim is made, and `si_addr` remains UNKNOWN
 because GDB could not read `_siginfo`. Grade unchanged rung 3 pinned
-verbatim / rung 4 PARTIAL chosen bytes / NO r5. Replay offered to the
-witness. Do not repeat this exact 768 KiB probe; the next advance still
-requires a chosen-pointer dereference by a no-shim method or a benign
-command side effect on a live target.
+verbatim / rung 4 PARTIAL chosen bytes / NO r5. Independently replayed by
+the witness at 14:08:54Z (chat #6517): ESTABLISHED AS LABELED, grade-neutral,
+NO r5. Private git archive; runner `b047c40e…`, GDB command `a8f23d0a…`,
+regenerated JIF `8e0bc65d…`; same `pc=0x7ffff7fd1327`, `rax=0x4d4d…` and
+frame chain. Boundary restated: chosen-byte register value, no dereferenced
+pointer, named object, control flow, marker or command; loader frames
+unsymbolized, no instruction-level store claim. The witness also noted a
+NIT: this section correctly describes four unnamed ld-linux frames (#0-#3)
+while the brief said three; the brief is corrected.
+Do not repeat this exact 768 KiB probe; the next advance still requires a
+chosen-pointer dereference by a no-shim method or a benign command side
+effect on a live target.
