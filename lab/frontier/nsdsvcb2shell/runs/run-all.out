@@ -1,0 +1,42 @@
+=== pins ===
+PASS pin vuln.tar.gz sha256
+PASS pin fixed.tar.gz sha256
+PASS pin fix.patch sha256
+PASS vulnerable sink uses uint16_t size
+PASS patched sink uses size_t size
+PASS official 4.14.3 uses size_t size
+=== ASan direct-sink differential ===
+PASS vulnerable ASan attack rc!=0
+PASS ASan WRITE of size 65509
+PASS ASan sink frame rdata.c:3317
+PASS ASan 4096-byte region boundary
+PASS ASan region_create allocation frame
+PASS uint16 size wraps to 7
+PASS vulnerable ASan safe rc=0
+PASS vulnerable safe input ASan-clean
+PASS patched ASan attack rc=0
+PASS patched attack ASan-clean
+PASS patched attack returns rdlength
+PASS patched ASan safe rc=0
+PASS patched safe input ASan-clean
+=== plain chosen-byte offsets ===
+PASS plain chosen-byte seed 65 rc=0
+PASS seed 65 offset 41 at 10
+PASS seed 65 offset 42 at 11
+PASS seed 65 offset 9b at 100
+PASS seed 65 offset 37 at 4096
+PASS seed 65 offset 37 at 8192
+PASS seed 65 offset 37 at 16384
+PASS seed 65 offset 37 at 32768
+PASS seed 65 offset 1b at 65508
+PASS plain chosen-byte seed 90 rc=0
+PASS seed 90 offset 5a at 10
+PASS seed 90 offset 5b at 11
+PASS seed 90 offset b4 at 100
+PASS seed 90 offset 50 at 4096
+PASS seed 90 offset 50 at 8192
+PASS seed 90 offset 50 at 16384
+PASS seed 90 offset 50 at 32768
+PASS seed 90 offset 34 at 65508
+PASS plain safe input rc=0
+TOTAL: 38 PASS / 0 FAIL

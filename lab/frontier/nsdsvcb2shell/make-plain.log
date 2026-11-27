@@ -1,0 +1,86 @@
+make -C simdzone
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c answer.c
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/plain/simdzone'
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -g -O2 -o src/zone.o -c ./src/zone.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c axfr.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -g -O2 -o src/fallback/parser.o -c ./src/fallback/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ixfrcreate.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -g -O2 -march=westmere -o src/westmere/parser.o -c ./src/westmere/parser.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -g -O2 -march=haswell -o src/haswell/parser.o -c ./src/haswell/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c buffer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c configlexer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c configparser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c dname.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c dns.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c edns.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c iterated_hash.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c lookup3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c namedb.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c nsec3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c options.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c packet.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c query.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c rbtree.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c radtree.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c rdata.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c region-allocator.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c rrl.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c siphash.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c tsig.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c tsig-openssl.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c udb.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c util.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c bitset.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c popen3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c util/proxy_protocol.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xfrd-catalog-zones.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xfrd-disk.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xfrd-notify.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xfrd-tcp.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xfrd.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c remote.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c metrics.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xdp-server.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c xdp-util.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c difffile.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ipc.c
+ar rcs libzone.a src/zone.o src/fallback/parser.o src/westmere/parser.o src/haswell/parser.o
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c mini_event.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c netio.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c nsd.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c server.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c dbaccess.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c dbcreate.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c verify.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ./compat/cpuset.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ./compat/b64_pton.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ./compat/b64_ntop.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ./compat/setproctitle.c
+make[1]: Leaving directory '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/plain/simdzone'
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c nsd-checkconf.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c nsd-checkzone.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c nsd-control.c
+rm -f nsd.conf.sample
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.conf.sample.in > nsd.conf.sample
+rm -f nsd-control-setup.sh
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-control-setup.sh.in > nsd-control-setup.sh
+chmod +x nsd-control-setup.sh
+mkdir -p contrib
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./contrib/nsd.openrc.in > contrib/nsd.openrc
+mkdir -p contrib
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./contrib/nsd-tmpfiles.conf.in > contrib/nsd-tmpfiles.conf
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.8.in > nsd.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-checkconf.8.in > nsd-checkconf.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-checkzone.8.in > nsd-checkzone.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-control.8.in > nsd-control.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.conf.5.in > nsd.conf.5
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c ixfr.c
+gcc -I. -Isimdzone/include -I./simdzone/include -g -O2 -flto -c zonec.c
+gcc -g -O2 -flto  -o nsd answer.o axfr.o ixfr.o ixfrcreate.o buffer.o configlexer.o configparser.o dname.o dns.o edns.o iterated_hash.o lookup3.o namedb.o nsec3.o options.o packet.o query.o rbtree.o radtree.o rdata.o region-allocator.o rrl.o siphash.o tsig.o tsig-openssl.o udb.o util.o bitset.o popen3.o proxy_protocol.o xfrd-catalog-zones.o xfrd-disk.o xfrd-notify.o xfrd-tcp.o xfrd.o remote.o metrics.o  xdp-server.o xdp-util.o difffile.o ipc.o mini_event.o netio.o nsd.o server.o dbaccess.o dbcreate.o zonec.o verify.o cpuset.o b64_pton.o b64_ntop.o setproctitle.o simdzone/libzone.a -lssl -lcrypto -levent
+gcc -g -O2 -flto  -o nsd-checkconf answer.o axfr.o ixfr.o ixfrcreate.o buffer.o configlexer.o configparser.o dname.o dns.o edns.o iterated_hash.o lookup3.o namedb.o nsec3.o options.o packet.o query.o rbtree.o radtree.o rdata.o region-allocator.o rrl.o siphash.o tsig.o tsig-openssl.o udb.o util.o bitset.o popen3.o proxy_protocol.o nsd-checkconf.o simdzone/libzone.a cpuset.o b64_pton.o b64_ntop.o setproctitle.o -lssl -lcrypto -levent
+lto-wrapper: warning: using serial compilation of 10 LTRANS jobs
+lto-wrapper: note: see the ‘-flto’ option documentation for more information
+gcc -g -O2 -flto  -o nsd-checkzone answer.o axfr.o ixfr.o ixfrcreate.o buffer.o configlexer.o configparser.o dname.o dns.o edns.o iterated_hash.o lookup3.o namedb.o nsec3.o options.o packet.o query.o rbtree.o radtree.o rdata.o region-allocator.o rrl.o siphash.o tsig.o tsig-openssl.o udb.o util.o bitset.o popen3.o proxy_protocol.o xfrd-catalog-zones.o xfrd-disk.o xfrd-notify.o xfrd-tcp.o xfrd.o remote.o metrics.o  xdp-server.o xdp-util.o dbaccess.o dbcreate.o difffile.o ipc.o mini_event.o netio.o server.o zonec.o nsd-checkzone.o verify.o cpuset.o b64_pton.o b64_ntop.o setproctitle.o simdzone/libzone.a -lssl -lcrypto -levent
+lto-wrapper: warning: using serial compilation of 2 LTRANS jobs
+lto-wrapper: note: see the ‘-flto’ option documentation for more information
+gcc -g -O2 -flto  -o nsd-control answer.o axfr.o ixfr.o ixfrcreate.o buffer.o configlexer.o configparser.o dname.o dns.o edns.o iterated_hash.o lookup3.o namedb.o nsec3.o options.o packet.o query.o rbtree.o radtree.o rdata.o region-allocator.o rrl.o siphash.o tsig.o tsig-openssl.o udb.o util.o bitset.o popen3.o proxy_protocol.o nsd-control.o cpuset.o b64_pton.o b64_ntop.o setproctitle.o simdzone/libzone.a -lssl -lcrypto -levent

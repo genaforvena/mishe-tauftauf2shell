@@ -1,10 +1,10 @@
 # Frontier brief: nsdsvcb2shell — CVE-2026-12244 (NSD SVCB AXFR heap overflow)
 
-**Status: CANDIDATE SCREENED 2026-11-27 W322 — NOT staged, NOT admitted, no
-window.** No local build, trigger, ASan report or grade exists yet. Every
-statement below is a source claim unless explicitly marked as locally observed.
-This is the next candidate for a dedicated staging wake, not a find: a find
-requires this brief AND a live registered two-pane window.
+**Status: STAGED 2026-11-27 W323 — NOT admitted.** Report brief plus a live
+registered two-pane window 211 (panes %428/%429) exist; operator admission and
+independent witness replay are owed. Source claims are distinguished from
+locally observed bytes below. This is a find at handoff grade R4 LIMITED,
+not a demonstrated remote-command path.
 
 ## Verified ground truth (sources read 2026-11-27)
 
@@ -36,8 +36,8 @@ requires this brief AND a live registered two-pane window.
 Downloaded `https://nlnetlabs.nl/downloads/nsd/nsd-4.14.2.tar.gz` in W322;
 SHA-256
 `2bff57349841844d7560e76d7bd70b6bd6f4c462cdaa6d57b8e83d1e14dd22d6`
-(provisioned to `/tmp/nsd-svcb`, not yet moved into the lab tree). The entire
-standalone fix is one hunk in `rdata.c`:
+(moved into the lab tree as `pins/vuln.tar.gz` in W323). The entire standalone
+fix is one hunk in `rdata.c`:
 
 ```diff
 @@ -3282,7 +3282,7 @@ read_svcb_rdata(struct domain_table *domains, uint16_t rdlength,
@@ -61,55 +61,55 @@ Pinned vulnerable `rdata.c:3279-3321` (read verbatim) closes the mechanism:
 - `:3314-3318` then write 2 bytes at `(*rr)->rdata`, an 8-byte `domain`
   pointer at `+2`, and `svcparams_length` attacker-controlled bytes at
   `+2+sizeof(void*)` via `buffer_read_at()`. The last write is the claimed
-  ~65509-byte controlled heap overflow; the exact `sizeof(**rr)` and hence
-  the wrapped allocation size are NOT measured here.
+  ~65509-byte controlled heap overflow. The exact `sizeof(**rr)` was measured
+  locally as 24 bytes in the built 4.14.2 harness, making the wrapped size 7.
 - The lenient-secondary path deliberately skips `skip_svcparams()` and the
   following bounds checks (`:3298-3305`), so the oversized value reaches the
   allocation.
 
-No local trigger, ASan report or chosen-offset observation exists: this
-mechanism is source-bound, not an observed fault.
+Locally observed on pinned bytes in W323 (details in
+`lab/frontier/nsdsvcb2shell/PROVENANCE.md`): a harness calling the real
+`read_svcb_rdata()` from built NSD objects produces an ASan `WRITE of size
+65509` at `rdata.c:3317`, 0 bytes after a 4096-byte `region_create` chunk.
+The one-line-fixed attack and both safe-input controls are ASan-clean; a
+plain vulnerable build shows chosen bytes at offsets 10 through 65508.
 
-## Rung-4 feasibility (honest, pre-experiment)
+## Rating and limits
 
-R1 / R2 / R3 / R4 / R5 all **UNKNOWN**: no build, trigger or ASan run was
-done locally; only advisory, patch and pinned source bytes were read.
-Favorable: one-line fix, vendor-published patch and tarballs, network-reachable
-secondary path, a claimed long controlled write rather than a one-byte
-overflow, and a plausible ASan-visible heap failure. Unfavorable: no public
-repro found, the attacker must be the configured primary (PR:L), a 65512-byte
-RR demands an AXFR-carrying DNS message above the classic 65535-byte limit
-(the exact wire framing is UNKNOWN), and a long attacker-controlled write does
-not by itself demonstrate pointer control or control-flow takeover on 64-bit
-glibc. Even if R3 is reached, R4 needs chosen bytes at a chosen offset with a
-named consumer; R5 would additionally need a marker/command side effect on a
-live loopback target. Ranked above OpenSSL CVE-2026-18798 (65/18-line QUIC
-refcount patch, vendor says RCE highly improbable) and Tasmota
-CVE-2026-119756 (embedded target, conflicting GHSA identifiers) on build cost
-and primitive clarity, not on CVSS.
+**Grade at handoff: R1 ✓ / R2 ✓ / R3 ✓ ASan WRITE-65509 / R4 LIMITED
+(lab-chosen bytes at chosen offsets in a direct sink harness) / R5 NOT
+CLAIMED.** No AXFR path, named consumer, pointer control, marker, command or
+ASLR grooming was exercised. Favorable: one-line fix, vendor-published patch
+and tarballs, network-reachable secondary path, a long controlled write and
+an ASan-visible heap failure. Unfavorable: no public repro found, the attacker
+must be the configured primary (PR:L), a 65512-byte RR demands AXFR framing
+above the classic 65535-byte DNS limit (wire framing UNKNOWN here), and a
+long controlled write alone does not demonstrate control-flow takeover.
+Ranked above OpenSSL CVE-2026-18798 and Tasmota CVE-2026-119756 on build
+cost and primitive clarity, not on CVSS.
 
-## Cheapest experiment that moves it up a rung
+## Experiments: done and next
 
-1. Provision, loopback only: NSD 4.14.2 (SHA-256 above), 4.14.3 and
-   `patch_CVE-2026-12244.diff`; move pinned copies into
-   `lab/frontier/nsdsvcb2shell/` and record every hash in `PROVENANCE.md`.
-2. Sink already identified at pinned `rdata.c:3309-3318`. Build both pins
-   with ASan. Cheapest path is a harness calling `read_svcb_rdata()` with
-   minimal stubs and a crafted 65512-byte SVCB rdata; the real path is a
-   loopback AXFR from a locally started primary into an NSD secondary
-   configured by this lab. Expect an ASan WRITE on 4.14.2 and a clean
-   fixed/control run; preserve negatives.
-3. Only if R3 is observed, probe chosen bytes at the overwritten offsets and
-   name the consumer before claiming R4. Do not claim R5 without a live
-   loopback command side effect and vulnerable/fixed/safe controls.
+1. DONE in W323: pinned tarballs and patch moved into
+   `lab/frontier/nsdsvcb2shell/pins/` with recorded SHA-256 values; ASan
+   builds of 4.14.2 and 4.14.2 + one-line patch; direct-sink harness with
+   safe and fixed controls. `bash run-all.sh`: 38 PASS / 0 FAIL.
+2. DONE: chosen-byte verification at `rdata+10+k` for seeds `0x41` and
+   `0x5a`, offsets 10, 11, 100, 4096, 8192, 16384, 32768, 65508, in the
+   plain vulnerable build. No pointer control or named consumer claimed.
+3. NEXT for the dedicated mind: drive the same crafted RR over a loopback
+   AXFR from a locally started primary into an NSD secondary, record exact
+   wire framing and ASan bytes, and preserve any negative. Claim R5 only
+   with a live command side effect plus vulnerable/fixed/safe controls.
 
 ## Duplicate check and backups
 
-`grep -R '12244|NSD_4_14|svcb_rdata' reports/` returned no matches. The
-frontier wall lists NSD only as an unrelated backup label "NSD 12245" (W309),
-not this CVE, and the window registry has no nsdsvcb target. Backups retained
-from the same read-only scout: OpenSSL CVE-2026-18798 (QUIC QRX double free,
-3 files +65/-18, pre-auth but vendor rates RCE improbable) and Tasmota
+`grep -R '12244|NSD_4_14|svcb_rdata' reports/` returned no matches at screening
+time. The frontier wall lists NSD only as an unrelated backup label "NSD
+12245" (W309). Window registry entry `nsdsvcb2shell` now exists as window
+211; no other target duplicate was found. Backups retained:
+OpenSSL CVE-2026-18798 (QUIC QRX double free, 3 files +65/-18, pre-auth but
+vendor rates RCE improbable) and Tasmota
 CVE-2026-119756 (UDP device-groups heap OOB write through 16.0.0, fix commit
 `e97e1e4f7e319a55caa1613aef1f25fc81bdb554`, GHSA-ID discrepancy between EUVD
 and the patch comment). Both are unstaged and unverified locally.

@@ -1,0 +1,55 @@
+rdlength=65512 sizeof_rr=24 svcparams_length=65509 uint16_size=7 unwrapped_size=65543
+=================================================================
+==324025==ERROR: AddressSanitizer: heap-buffer-overflow on address 0x521000001100 at pc 0x7058dc0fb303 bp 0x7ffd7941a8d0 sp 0x7ffd7941a078
+WRITE of size 65509 at 0x521000001100 thread T0
+    #0 0x7058dc0fb302 in memcpy ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115
+    #1 0x5c9629314798 in memcpy /usr/include/x86_64-linux-gnu/bits/string_fortified.h:29
+    #2 0x5c9629314798 in buffer_read_at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/vuln/buffer.h:437
+    #3 0x5c9629314798 in read_svcb_rdata /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/vuln/rdata.c:3317
+    #4 0x5c962929ac1c in main ../harness.c:68
+    #5 0x7058db62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7058db62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5c962929a7c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/harness-vuln-asan+0x527c4) (BuildId: e77d2741231f0d1c8948e946deea5b4a717f866a)
+
+0x521000001100 is located 0 bytes after 4096-byte region [0x521000000100,0x521000001100)
+allocated by thread T0 here:
+    #0 0x7058dc0fd9c7 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0x5c962931b470 in region_create /home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/vuln/region-allocator.c:135
+    #2 0x5c962929ab8c in main ../harness.c:55
+    #3 0x7058db62a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #4 0x7058db62a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #5 0x5c962929a7c4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/harness-vuln-asan+0x527c4) (BuildId: e77d2741231f0d1c8948e946deea5b4a717f866a)
+
+SUMMARY: AddressSanitizer: heap-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_memintrinsics.inc:115 in memcpy
+Shadow bytes around the buggy address:
+  0x521000000e80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000000f80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001000: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x521000001080: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x521000001100:[fa]fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001180: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001200: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001280: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001300: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+  0x521000001380: fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa fa
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==324025==ABORTING

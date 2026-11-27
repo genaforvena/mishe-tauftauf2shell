@@ -1,0 +1,21 @@
+make -C simdzone
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c answer.c
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/patched/simdzone'
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c axfr.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ixfrcreate.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -o src/zone.o -c ./src/zone.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -o src/fallback/parser.o -c ./src/fallback/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c buffer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c configlexer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c configparser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dname.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dns.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -march=westmere -o src/westmere/parser.o -c ./src/westmere/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c edns.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c iterated_hash.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -march=haswell -o src/haswell/parser.o -c ./src/haswell/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c lookup3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c namedb.c
+make[1]: *** [Makefile:76: src/fallback/parser.o] Terminated
+make[1]: *** [Makefile:68: src/westmere/parser.o] Terminated
+make[1]: *** [Makefile:72: src/haswell/parser.o] Terminated

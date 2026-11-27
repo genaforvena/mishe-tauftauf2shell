@@ -1,0 +1,10 @@
+rdlength=65512 sizeof_rr=24 svcparams_length=65509 uint16_size=7 unwrapped_size=65543
+rc=65512 rr=0x5b6d248b5528 rdata=0x5b6d248b553a
+offset=10 got=0x5a want=0x5a MATCH
+offset=11 got=0x5b want=0x5b MATCH
+offset=100 got=0xb4 want=0xb4 MATCH
+offset=4096 got=0x50 want=0x50 MATCH
+offset=8192 got=0x50 want=0x50 MATCH
+offset=16384 got=0x50 want=0x50 MATCH
+offset=32768 got=0x50 want=0x50 MATCH
+offset=65508 got=0x34 want=0x34 MATCH

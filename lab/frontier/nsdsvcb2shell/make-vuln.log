@@ -1,0 +1,75 @@
+make -C simdzone
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c answer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c axfr.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ixfrcreate.c
+make[1]: Entering directory '/home/mesh-home/mishe-tauftauf2shell/lab/frontier/nsdsvcb2shell/vuln/simdzone'
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -o src/zone.o -c ./src/zone.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -o src/fallback/parser.o -c ./src/fallback/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c buffer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c configlexer.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c configparser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dname.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dns.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c edns.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c iterated_hash.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c lookup3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c namedb.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c nsec3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c options.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c packet.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c query.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c rbtree.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c radtree.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c rdata.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c region-allocator.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c rrl.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c siphash.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c tsig.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c tsig-openssl.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c udb.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c util.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c bitset.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c popen3.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c util/proxy_protocol.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xfrd-catalog-zones.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xfrd-disk.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xfrd-notify.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xfrd-tcp.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xfrd.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c remote.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c metrics.c
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -march=westmere -o src/westmere/parser.o -c ./src/westmere/parser.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xdp-server.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c xdp-util.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c difffile.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ipc.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c mini_event.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c netio.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c nsd.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c server.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dbaccess.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c dbcreate.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c verify.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ./compat/cpuset.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ./compat/b64_pton.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ./compat/b64_ntop.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c ./compat/setproctitle.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c nsd-checkconf.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c nsd-checkzone.c
+gcc -I. -Isimdzone/include -I./simdzone/include -O1 -g -fsanitize=address -fno-omit-frame-pointer -c nsd-control.c
+rm -f nsd.conf.sample
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.conf.sample.in > nsd.conf.sample
+rm -f nsd-control-setup.sh
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-control-setup.sh.in > nsd-control-setup.sh
+chmod +x nsd-control-setup.sh
+mkdir -p contrib
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./contrib/nsd.openrc.in > contrib/nsd.openrc
+mkdir -p contrib
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./contrib/nsd-tmpfiles.conf.in > contrib/nsd-tmpfiles.conf
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.8.in > nsd.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-checkconf.8.in > nsd-checkconf.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-checkzone.8.in > nsd-checkzone.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd-control.8.in > nsd-control.8
+/usr/bin/sed -e 's,@prefix\@,/usr/local,g' -e 's,@exec_prefix\@,/usr/local,g' -e 's,@sbindir\@,/usr/local/sbin,g' -e 's,@configdir\@,/etc/nsd,g' -e 's,@zonesdir\@,/etc/nsd,g' -e 's,@chrootdir\@,,g' -e 's,@runstatedir\@,/run,g' -e 's,@pidfile\@,/var/run/nsd.pid,g' -e 's,@logfile\@,/var/log/nsd.log,g' -e 's,@xfrdir\@,/tmp,g' -e 's,@xfrdfile\@,/var/db/nsd/xfrd.state,g' -e 's,@zonelistfile\@,/var/db/nsd/zone.list,g' -e 's,@cookiesecretsfile\@,/var/db/nsd/cookiesecrets.txt,g' -e 's,@nsdconfigfile\@,/etc/nsd/nsd.conf,g' -e 's,@shell\@,/bin/bash,g' -e 's,@ratelimit_default\@,off,g' -e 's,@dnstap_socket_path\@,/var/run/nsd-dnstap.sock,g' -e 's,@user\@,nsd,g' -e 's/@project\@/NSD/g' -e 's/@version\@/4.14.2/g' -e 's,@sharedfilesdir\@,/usr/local/share/nsd,g' -e "s/@date\@/`date +'%b %e, %y'`/g" ./nsd.conf.5.in > nsd.conf.5
+gcc -MMD -MP -Iinclude -I./include -I./src -I. -O1 -g -fsanitize=address -fno-omit-frame-pointer -march=haswell -o src/haswell/parser.o -c ./src/haswell/parser.c
+make[1]: *** [Makefile:68: src/westmere/parser.o] Terminated

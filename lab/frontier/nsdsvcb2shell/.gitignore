@@ -1,0 +1,7 @@
+vuln/
+patched/
+plain/
+*.o
+harness-vuln-asan
+harness-patched-asan
+harness-vuln-plain
