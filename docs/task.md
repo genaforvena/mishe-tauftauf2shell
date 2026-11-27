@@ -16456,6 +16456,51 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 18:0xZ — Ruby mixed parity, gimpjif W354 consumer, PyMuPDF admitted
+
+Current limb for a reader arriving now; it supersedes the 17:4xZ limb's
+closing questions. One docs-only fold of `eabe283c`, `75d0c848`,
+`ecb8e49c`, `83fd02e5` and `626d4efc`. No grade, rung cell, register flag,
+generated count or lab evidence moved here. Recipes in
+`docs/reproducibility.md` §18:0xZ.
+
+- **Ruby W353's mixed-parity EOL lane is CLOSED** (`ecb8e49c`). One
+  leading `a` and N = 27/43/59 `0xDF` bytes put the fixed `0x53` byte on
+  the next glibc chunk's size LSB (`R = N+45 ≡ 8 mod 16`): 9/9 valgrind
+  arms with one `Invalid write of size 1`, two plain sweeps with 7/9 and
+  8/9 metadata aborts, even-N=28 clean 3/3, and a gdb before/after read
+  `0x61` → `0x53` at `current_buffer + 72`. No wire or chosen attacker
+  bytes; grades and full rung 5 unchanged. Next bounded experiment
+  (W354): the same parity on 3.3.13 and 4.0.9 with patched 3.3.14 as a
+  control; do not repeat the seven-shape chain matrix.
+- **Gimpjif W354 identifies the consumer and repairs the fixed control**
+  (`83fd02e5`). `P1+0x330`/`0x338` are not an abstract index/table pair:
+  read-only observation maps the fault to glibc 2.41 `ld.so`
+  `do_lookup_x()` GNU-hash bitmask fields (`l_gnu_bitmask_idxbits` /
+  `l_gnu_bitmask`), so W353 is a chosen-address **read** in live symbol
+  lookup. The sequential foreground control returned 10 PASS / 0 FAIL;
+  the vulnerable attack crashed and the locally rebuilt fixed arm
+  rejected the image. PID-exhaustion and script-edit failures are kept as
+  negatives; no W354 terminal GDB stop is claimed. Grade-neutral, NO r5,
+  W352/W353 still author-only pending witness W363. Next bound: capture
+  `undef_name`/`new_hash` at `do_lookup_x` entry, then choose
+  `l_nbuckets=1`, `idxbits=0`, an all-ones bitmask word and bucket/chain
+  pointers; remeasure `idx` first.
+- **PyMuPDFCallout2Shell is the 219th mind** (`eabe283c`, `75d0c848`,
+  `626d4efc`). The published 1.28.2 wheel crashes at ≥8 callout points;
+  2.0 rejects 100 points with `RuntimeError: bad seq of points`. GDB sees
+  chosen `0x4343434343434343` at the wrapper's saved RIP and the original
+  `0x0000000000582130` at `$frame-8`, but the chosen target is
+  noncanonical and `ret` faults without a transfer: R4 LIMITED, R5 NOT
+  CLAIMED, `established:false`, witness owed. Operator clean replay:
+  TAR `086cfc5f…`, 10/10 pins, 5 PASS / 0 FAIL; docs' own replay from a
+  clean HEAD archive with local venvs matched. Next bounds: source-built
+  ASan, a canonical mapped target to test `ret` redirection (CET state
+  UNKNOWN), and a hardening sweep.
+
+At this limb: a witness verdict for W353/W354 or PyMuPDF, an lrzsz wire
+replay, the Ruby W354 branch matrix, or a checker RED on committed HEAD.
+
 ## 2026-11-27 17:4xZ — W353 mapped read; Ruby EOL branch closed; lrzsz admitted
 
 Current limb for a reader arriving now; it supersedes the 17:2xZ limb's
@@ -16568,6 +16613,8 @@ manifest, SVG, report or lab evidence moved here.
   unchanged (W361's verified R4 scope stands). Identical JIF runs shifted
   `idx` `0x8f70`→`0x90b0`, so aiming those fields is still open. Docs
   verified the committed JIF/observer/runner hashes only.
+  W354 (§18:0xZ) supersedes those field names with glibc 2.41 `ld.so`
+  `do_lookup_x()` `l_gnu_bitmask_idxbits` / `l_gnu_bitmask`; no write.
 - **nfdump2shell ICMP-to-metadata chain CLOSED from the pin**, no new run:
   the `srcPort`/`dstPort` writes sit at `E+44..47`, the `proto` trigger at
   `E+48`, so a wire-chosen trigger forces in-bounds writes and an

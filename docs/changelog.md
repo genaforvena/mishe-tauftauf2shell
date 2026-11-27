@@ -6,6 +6,72 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 18:0xZ — Ruby mixed parity closed, gimpjif W354 consumer, PyMuPDF 219th
+
+Docs-only fold of the five commits after `14cc8606` through HEAD
+`626d4efc`: `eabe283c`, `75d0c848`, `ecb8e49c`, `83fd02e5` and
+`626d4efc`. No grade, rung cell, register flag, generated count, README,
+results, manifest, SVG, report or lab evidence was moved here. The
+operator's 219/216/216/148 generated cells and the PyMuPDF register row
+already landed in `626d4efc`; docs leaves them untouched.
+
+- **Ruby W353 closes the mixed-parity size-LSB lane on EOL 3.2.11**
+  (`ecb8e49c`), grade-neutral. A leading `a` plus N = 27/43/59 bytes
+  `0xDF` (N ≡ 11 mod 16) gives capa N+21 and an overflow at
+  `R = N+45 ≡ 8 (mod 16)`. Valgrind found exactly one `Invalid write of
+  size 1` at `case_map (iso_8859_1.c:293)` in 9/9 arms, 0 bytes after a
+  72/88/104-byte block; two fresh plain sweeps saw 7/9 and 8/9 aborts
+  (`munmap_chunk(): invalid pointer` or `malloc(): invalid next size
+  (unsorted)`), and the even-N=28 safe control was 3/3 clean. GDB read
+  the successor size LSB at `(char *)current_buffer + 72` as `0x61`
+  before `case_map` and `0x53` after (`used=49`), in a process that then
+  aborted. No wire request, chosen attacker bytes or command: rung 3
+  stays primary wire-only with the W341/W342 adjacent and witness-COMPLETE
+  rung 4 scopes unchanged, full rung 5 NOT ACHIEVED. Recipe in
+  `docs/reproducibility.md` §18:0xZ; next named lane is the same parity
+  on 3.3.13 / 4.0.9 with patched 3.3.14 as control (W354), not a repeat
+  of the seven-shape matrix.
+- **Gimpjif W354 names the exact consumer and repairs the sequential
+  control** (`83fd02e5`), grade-neutral and still author-only. The
+  earlier `P1+0x330` / `P1+0x338` "index mask" / "table base" labels are
+  superseded: a read-only observer maps the `0x7ffff7fd12e1` load and
+  frames #1–#3 to AppImage glibc 2.41 `ld-linux-x86-64.so.2`
+  `do_lookup_x()`, with `+0x330 = l_gnu_bitmask_idxbits` and
+  `+0x338 = l_gnu_bitmask`; the load is a GNU-hash bitmask **word**, not
+  a bucket. The control runner's detached `setsid ... &` wait bug and
+  over-specific crash wording were fixed (script `fbe981f1…`); the
+  frozen sequential rerun gave `TOTAL: 10 PASS / 0 FAIL` (summary
+  `013f6dc0…`): both safe arms rc 0, vulnerable attack `Plug-in crashed`,
+  locally rebuilt fixed attack rejected the image without a fault, no
+  PID-exhaustion or shim lines. One 9/1 run from the old crash wording
+  and one script-edited-while-reading parse error are preserved as
+  negatives. GDB captured the consumer before a terminal internal error;
+  no W354 terminal stop is claimed and W353's separate fault remains.
+  No chosen-address write, control-flow word, marker or r5; W352/W353
+  stay pending witness W363.
+- **PyMuPDFCallout2Shell is admitted as the 219th declared mind**
+  (`eabe283c` staged window 227, `75d0c848` added the clean replay and
+  volatile-log exclusions, `626d4efc` admitted it). CVE-2026-120752 /
+  GHSA-4gw9-9rgm-rwfx: `src/__init__.py:9811-9812` passes an unchecked
+  `len(callout)` into `extra.i:787-796`, which writes 8-byte points into
+  a three-element stack array. Operator clean replay used TAR
+  `086cfc5f…`, 10/10 pins and `RUN_ALL_OK 5 PASS / 0 FAIL` with wheels
+  1.28.2 (vulnerable) and 2.0 (fixed); GDB shows
+  `ENTRY_RET=0x582190`, chosen `0x4343434343434343` at the saved-RIP slot
+  and `0x0000000000582130` preserved at `$frame-8`. The chosen target is
+  noncanonical and the process faults at `ret` without transferring: R4
+  LIMITED at the real-Python-API lab scope, R5 NOT CLAIMED,
+  `established:false` with witness replay owed. Docs replayed the harness
+  from a clean HEAD archive with the gitignored local venvs symlinked in
+  (`PIP_NO_INDEX=1`): 5 PASS / 0 FAIL and the same GDB markers; no
+  external target or network probe. Recipe in `docs/reproducibility.md`
+  §18:0xZ and the lane index.
+
+What would change this fold: a witness replay or counterexample for
+gimpjif W353/W354, an lrzsz witness verdict or ZFILE wire replay, a
+PyMuPDF witness verdict or canonical-target transfer, the Ruby W354
+branch matrix, or a checker RED on committed HEAD.
+
 ## 2026-11-27 17:4xZ — W353 mapped read, Ruby EOL closure, lrzsz admission
 
 Docs-only fold of the four commits after `849983d0` through `eca432ee`.
@@ -170,6 +236,9 @@ and #6652 are satisfied below. #6632's R4 ✓ fold was already made in
   remains an open question, not a result. Docs checked the three pinned
   SHA-256 values on disk; no replay was run here. Recipe in
   `docs/reproducibility.md` §17:0xZ.
+  W354 (§18:0xZ) later identified this as glibc `ld.so` `do_lookup_x()`:
+  `+0x330` is `l_gnu_bitmask_idxbits`, `+0x338` is `l_gnu_bitmask`, and
+  the load reads a GNU-hash bitmask word, not a table base.
 - **nfdump2shell's ICMP swap-to-metadata chain is closed from the pin,
   with no new packet or build.** With flow element header at `E`,
   `Process_nfd()` writes `srcPort`/`dstPort` at `E+44..47` and reads the
