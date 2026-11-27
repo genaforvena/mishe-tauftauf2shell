@@ -589,8 +589,9 @@ all-chosen `SHIM_EDGE`/`SHIM_FAR`.
 `g_try_malloc` at 1547; `kind=1 ... delta=+368 n=96` names the adjacent
 96-byte allocation as a `g_malloc` from
 `g_type_module_register_type`. `SHIM_PREUSER1` in that log stores
-`0100000000000000` followed by the exact `out+368` pointer, so a live
-object at `out+272` points at that named allocation before the write.
+`010000000000000040d6fb0188620000`, whose second word decodes to
+`out+304` (the following 32-byte chunk), **not** `out+368` as this
+section previously claimed (corrected W313 from the raw bytes).
 Interpretation: caller and allocation-site identity for adjacent live
 objects are now measured in the real plugin; the `out+272` object type,
 a chosen address, a dereference and a command remain unobserved.

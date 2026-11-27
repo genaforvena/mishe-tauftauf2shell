@@ -431,9 +431,11 @@ the allocator path). `live/evidence/galloc-long.log` reproduces the
 same WRITE and names the `indexes` allocation as
 `g_try_malloc` from `ReadJeffsImage:1547`; the 96-byte allocation at
 `out+368` is a `g_malloc` call from
-`libgobject-2.0.so.0+0x3f097` (`g_type_module_register_type`), and the
-pre-write pointer stored at `out+280` points exactly at that 96-byte
-object. All 448 written bytes remain chosen `0x4d`.
+`libgobject-2.0.so.0+0x3f097` (`g_type_module_register_type`). Correction
+(W313): the pointer stored at `out+280` in `SHIM_PREUSER1` decodes to
+`out+304`, the following 32-byte chunk, **not** to the 96-byte object at
+`out+368` as this paragraph previously claimed. All 448 written bytes
+remain chosen `0x4d`.
 
 A third run adding `__builtin_return_address(1)` to the working shim
 died at rc 139 before startup output with zero `SHIM_` lines
