@@ -8447,7 +8447,7 @@ call site passes a coercion object, or fixed 3.4.13 shows the write. Do
 not repeat W339–W342 shapes, the 64-byte shape, the case-fold oracle or
 the closed lanes unchanged.
 
-## 2026-11-27 14:4x–15:0xZ — W346: gem-source coercion survey CLOSED
+## 2026-11-27 14:4x–14:52Z — W346: gem-source coercion survey CLOSED
 
 Inbox #6529 was the fresh-context replay of W343's NIT folds and
 stock-coercion-purity falsifier: **ESTABLISHED AS LABELED, grade-neutral,
@@ -8519,3 +8519,41 @@ closed by W328–W345 whose stale snapshot has a stock coercion-free caller;
 falsifier is that every unexamined hunk is either a pure length/bounds
 check or already closed. Do not repeat any W328–W345 shape unchanged.
 Keep `--again 300`.
+
+## 2026-11-27 15:1x–15:2xZ — W347: remaining `string.c` fix hunks CLOSED
+
+W346's named follow-up is closed. The pinned 44-hunk diff
+(`lab/build/evidence/string-3412-3413.diff`) was classified one hunk at a
+time in gitignored
+`lab/build/evidence/fixdiff-hunk-sweep/classification.txt`: 3 pure
+integer/length guards (`LONG_MIN`/`LONG_MAX`), 22 already covered by
+W319/W328–W336/W341/W342, 7 primary case-map hunks, 1 new internal
+helper (`rb_str_make_heap`, no post-hook snapshot), and 11 coercion-free
+shapes exercised dynamically here (embedded promotion, frozen-IO capacity,
+substring/succ/reverse/scrub encoding promotion, split/chomp tails).
+The W342 note that "every guard except `justify` is
+already closed" was checked against each hunk rather than assumed.
+
+New committed harness `lab/repro/ruby2shell-fixdiff-hunk-sweep.{rb,sh}`
+drives 9 coercion-free arms (`embed-promote`, `tmp-frozen-io`, `subseq`,
+`succ`, `reverse`, `split`, `chomp`, `scrub`, `index-bounds`) on 4 builds
+(3.4.12/3.4.13 × plain/ASan): 36 arms, all rc 0, zero ASan reports, and
+byte-identical length/encoding/tail output on vulnerable and fixed builds.
+Raw output is gitignored under `lab/build/evidence/fixdiff-hunk-sweep/`.
+In particular, the `succ` and `reverse` encoding-promotion hunks are
+*not* a second stale-terminator write: `str_succ` calls `RESIZE_CAPA`
+before `TERM_FILL`, so the result buffer is resized with the current
+two-byte `termlen`; `reverse` writes only within the existing length.
+The `tmp_frozen` capacity hunk is only reachable through `IO#write`,
+which releases the temporary without appending to it.
+
+Falsifier met: no unexamined hunk has a coercion-free stale snapshot that
+changes a byte on the vulnerable build. Grade unchanged: W341/W342
+adjacent rung 3 confirmed corruption, primary CVE wire-only rung 3,
+witness-COMPLETE rung 4, full rung 5 NOT ACHIEVED. Do not repeat this
+sweep unchanged. Next named experiment: sweep the remaining
+3.4.12→3.4.13 `enc/` write-bound diffs for a stock web-facing caller not
+covered by the 288-case length sweep and 3000-case transcode fuzz
+(`lab/src/cmp/enc-diff.txt`, report §"Adjacent fix-series triage");
+falsifier is that every remaining `enc/` hunk is table metadata or an
+already closed lane. Keep `--again 300`.

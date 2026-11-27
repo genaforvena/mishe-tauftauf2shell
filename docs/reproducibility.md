@@ -19821,3 +19821,21 @@ an author durability check, not witness acceptance. No window, register
 row, admission, pointer, control flow, marker or command: R4 chosen bytes
 at a chosen heap offset in the direct-call lab build, R5 NO. Full report:
 `reports/frontier-awssdkbase642shell.md`.
+
+## 2026-11-27 15:2xZ — W347 remaining `string.c` fix hunks (Ruby)
+
+```sh
+bash lab/repro/ruby2shell-fixdiff-hunk-sweep.sh
+```
+
+Expect 36 lines (9 arms × 4 builds: `ruby-3.4.12-plain`,
+`ruby-3.4.13-plain`, `ruby-3.4.12-asan`, `ruby-3.4.13-asan`) with `rc=0
+asan=0` and byte-identical `SWEEP ... len=... enc=... tail=...` output
+between 3.4.12 and 3.4.13 for every arm. The per-hunk disposition of all
+44 hunks in `lab/build/evidence/string-3412-3413.diff` is in gitignored
+`lab/build/evidence/fixdiff-hunk-sweep/classification.txt`; raw arm output
+is in the same directory (`matrix.txt`, `<build>-<arm>.out/.err`). No
+harness-defined `to_str`/`to_int` object is used: every arm is a plain
+`String`/`IO` call. This closes the W346 named experiment; W341/W342, the
+primary CVE wire grade, witness-COMPLETE rung 4 and full rung 5 are
+unchanged. Full report: `reports/ruby2shell-investigation.md` §W347.
