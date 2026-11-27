@@ -36,14 +36,29 @@ possible depending on canary/ASLR/NX. Brief:
   no-canary test frame. No return address, pointer or marker was touched;
   no daemon, socket, XMPP stream, XML parser, shipping stack layout,
   canary, ASLR or NX was exercised.
-- UNKNOWN: live OpenSIPS `4.0.1` receiver, `backend=server` listener on
-  127.0.0.1, real stanza wire bytes, real stack frame, control-flow impact.
-  No security impact beyond the claimed availability crash is demonstrated.
+- LIVE 2026-11-27 (stock OpenSIPS 4.0.1 receiver, `backend=server`, listener
+  127.0.0.1:5269): ASan reports `stack-buffer-overflow`, `WRITE of size 304`,
+  frames `sprintf` → `xmpp_send_sip_msg` → `in_stream_node_callback` → expat
+  → `xmpp_server_child_process`; the receiver child exits and the parent
+  shuts down. Stock 4.0.1 no-canary with the same 299-byte JID overflows but
+  does not crash; with a 900-byte JID the receiver SIGSEGVs after `fm_malloc`
+  requests 1,111,579,232 bytes. An instrumented live-frame copy observes the
+  chosen JID bytes in `fromstr.s` (`QRSTUVWX`) and `fromstr.len` (`YZAB` =
+  1,111,579,225); the same fields are intact at 299 bytes. Stock 4.0.2 ASan
+  ignores the stanza before dialback for both lengths. Full evidence, hashes,
+  config, wire bytes and limits: `reports/opensips2shell-live-wire.md`.
+- Rung 3 CONFIRMED in a live stock build. Rung 4 DEMONSTRATED security impact
+  under the lab conditions (chosen bytes overwrite a length/pointer field in
+  the live receiver and force a huge allocation and crash). Control-flow
+  diversion and rung 5 remain UNKNOWN: no overwritten saved RIP was observed
+  in a stock frame, no marker/pointer execution, no ASLR/NX measurement, no
+  witness replay.
 
-Cheapest next rung: build stock OpenSIPS `4.0.1` with the `xmpp` module under
-ASan plus a no-canary build, bind only 127.0.0.1 with `backend=server`, send
-one stream header and one `<message from="…299 chosen bytes…">` stanza, and
-record the real receiver's report, crash, wire bytes and post-overflow stack.
-If chosen bytes reach a saved return address or function pointer, attempt a
-benign marker before claiming rung 4; otherwise keep the instrumented label.
-Repeat with tag `4.0.2` as the control.
+Next bounded work: hand the loopback replay to the witness for independent
+replay and rung-4 acceptance; then, only if a measured slot is available,
+test whether a longer chosen JID can place bytes at the stock frame's saved
+RIP (`buf_from+888`, from disassembly) without dying inside `tm` first. No
+marker execution or rung-5 claim without that measurement and witness replay.
+Adjacent-lane candidate for a later wake: GHSA-qc7q-vrx3-3j4h (`sip_i`
+`parse_isup` length-controlled `memcpy` into `val[128]`), recorded from
+operator inbox #6227 and deliberately not worked in this wake.

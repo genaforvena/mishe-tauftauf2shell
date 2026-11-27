@@ -516,3 +516,13 @@ lab/frontier/lzxwindow2shell/runs/
 lab/frontier/lzxwindow2shell/harness-vuln-*
 lab/frontier/lzxwindow2shell/harness-fixed-*
 lab/frontier/lzxwindow2shell/alloc-*.o
+
+# opensips2shell live replay: pinned tarballs/extracted trees, three local
+# build trees and runtime logs stay local. Scripts, config template,
+# instrumented source copy and reports stay tracked.
+lab/opensips2shell-live/src/
+lab/opensips2shell-live/401-asan/
+lab/opensips2shell-live/401-plain/
+lab/opensips2shell-live/402-asan/
+lab/opensips2shell-live/evidence/
+lab/opensips2shell-live/*.log

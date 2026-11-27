@@ -1,0 +1,21 @@
+# Loopback-only OpenSIPS config for GHSA-5gm5-wj62-p234 live replay.
+# MPATH is substituted by run-live.sh; no external address is ever used.
+log_level=4
+stderror_enabled=yes
+syslog_enabled=no
+
+mpath="MPATH"
+loadmodule "proto_udp.so"
+socket=udp:127.0.0.1:5060
+
+loadmodule "sl.so"
+loadmodule "tm.so"
+loadmodule "xmpp.so"
+modparam("xmpp", "backend", "server")
+modparam("xmpp", "xmpp_domain", "127.0.0.1")
+modparam("xmpp", "xmpp_host", "127.0.0.1")
+modparam("xmpp", "xmpp_port", 5269)
+
+route {
+    xlog("sip request ignored\n");
+}
