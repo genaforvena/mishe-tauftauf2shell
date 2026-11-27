@@ -1,0 +1,60 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 00:12:59.945: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 00:12:59.945: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 00:13:13.522: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 00:13:13.522: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 00:13:13.523: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.525: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.527: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.528: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.529: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.529: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.529: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.531: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.538: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.542: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 00:13:13.543: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+SHIM_GROOM_TRIES=0
+SHIM_GROOM_ADJ=1 B=0x7efeb8000e60 A=0x7efeb8000f70 unsorted=0x7efeb8000190 fake=0x7efec82df090 chunkA=0x7efeb8000f60 bin=0x7efeb8000290 link=0x7efec82df060 delta=272
+SHIM_BYTES=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d
+SHIM_MODE=patch total_out=324
+SHIM_FAKE_BEFORE=600f00b8fe7e000090f02dc8fe7e0000
+SHIM_PRE_MALLOC k=0
+SHIM_POST_PIN k=0 ptr=0x5a777d91b270 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=1
+SHIM_POST_PIN k=1 ptr=0x5a777d91b160 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=2
+SHIM_POST_PIN k=2 ptr=0x5a777d91b050 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=3
+SHIM_POST_PIN k=3 ptr=0x5a777d91af40 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=4
+SHIM_POST_PIN k=4 ptr=0x5a777d8e6810 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=5
+SHIM_POST_PIN k=5 ptr=0x5a777d8f3d80 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=6
+SHIM_POST_PIN k=6 ptr=0x5a777d8f4790 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=7
+SHIM_POST_PIN k=7 ptr=0x5a777d91b380 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=8
+SHIM_POST_PIN k=8 ptr=0x5a777d91b490 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=9
+SHIM_POST_PIN k=9 ptr=0x5a777d91b5a0 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=10
+SHIM_POST_PIN k=10 ptr=0x5a777d91b6b0 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=11
+SHIM_POST_PIN k=11 ptr=0x5a777d91b7c0 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=12
+SHIM_POST_PIN k=12 ptr=0x5a777d8f1e10 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=13
+SHIM_POST_PIN k=13 ptr=0x5a777d8f1f20 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=14
+SHIM_POST_PIN k=14 ptr=0x5a777d8f2030 match_A=0 match_fake=0
+SHIM_PRE_MALLOC k=15
+SHIM_POST_PIN k=15 ptr=0x5a777d8f2140 match_A=0 match_fake=0
+SHIM_FAKE_AFTER=600f00b8fe7e000090f02dc8fe7e0000
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+RUN_RC=124

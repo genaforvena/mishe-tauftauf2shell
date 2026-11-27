@@ -1,2 +1,4 @@
 inflate-shim.so
 patch-shim.so
+consumer-raw.so
+consumer-patch.so

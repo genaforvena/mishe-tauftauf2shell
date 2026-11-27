@@ -761,3 +761,40 @@ allocator consumption or a chosen-address write into a named live
 object; no control flow or command. Grade rung 3 pinned verbatim /
 rung 4 PARTIAL, NO r5. Hashes are in
 `lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+
+## Live post-pin consumer attempt (W300, 2026-11-26/27)
+
+`live/consumer-shim.c` interposes the pin's `inflate()` inside the real
+GIMP 3.2.8 plugin, grooms a shim-owned adjacent 260-byte B/A pair so A
+sits in the 0x110 smallbin, redirects this one zlib stream into B, and
+performs sixteen bounded post-pin `malloc(260)` calls. PATCH writes the
+live size/unsorted/fake words into `B+264/+272/+280` after real zlib has
+written the file-chosen `0x4d` bytes; RAW leaves them. The safe JIF
+completes with `RUN_RC=0` and arms nothing; RAW shows 24 chosen
+`0x4d` bytes and `total_out=324`; PATCH shows the same output plus the
+post-inflate words. The replay is **9 PASS / 0 FAIL** with two explicit
+UNKNOWN lines: no labelled fake-chunk return and no fake-word change.
+
+Three variants were preserved as negatives rather than retried into a
+positive: the W299 cut run returned A at `k=0` and then glibc printed
+`malloc(): smallbin double linked list corrupted` at `k=1`; writing the
+fake into the live bin head removed the abort but returned neither A nor
+the fake; a shim-local link slot with the large sorting chunk freed did
+likewise. The final variant keeps that chunk live, and all sixteen
+post-pin allocations came from other heap chunks.
+
+The neighbour is shim-arranged, never a natural plugin object, and no
+live allocation consumed the fake chunk. No chosen-address write to a
+named live object, control flow or command. Grade rung 3 pinned verbatim
+/ rung 4 PARTIAL, NO r5. Hashes and exact observed lines are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+The W297 patch runner was also repaired. Its missing-exit grep aborted
+under `set -euo pipefail` before `TOTAL`, and its fake-word comparison
+matched unrelated fields, once producing a false `PASS` for a glibc
+rewrite that had not happened. `patch-shim.c` now emits
+`SHIM_FAKE_BEFORE` and the runner compares the same word at exit. Final
+replay: 7 PASS / 0 FAIL with `UNKNOWN: fake fd word unchanged at exit`;
+the published log's before and exit words are identical. No glibc write
+into the shim fake was observed, so the grade is unchanged.

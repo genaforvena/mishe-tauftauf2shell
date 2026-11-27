@@ -1059,3 +1059,98 @@ Ceiling: the post-inflate patch runs inside a real GIMP plugin process,
 but no live allocator consumption, no chosen data written to a named
 live object, no control flow, no benign marker or command. Grade
 unchanged: rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
+
+## W300 live post-pin consumer attempt in the real plugin (2026-11-26/27)
+
+`live/consumer-shim.c` (SHA-256
+`72ac61c4f88328eaeeee94b0ca5bf24d2adebb35eed9a421cd4a7a32b25aec3b`)
+interposes the pin's single `inflate()`. It grooms a shim-owned adjacent
+260-byte B/A pair (A in the 0x110 smallbin), points a shim-local link slot
+at the fake chunk, redirects this one zlib stream into B, and makes sixteen
+bounded post-pin `malloc(260)` calls. PATCH writes a `0x111` size,
+the live unsorted-head word and the fake-chunk word into `B+264/+272/+280`
+after zlib has decompressed the file-chosen `0x4d` bytes; RAW leaves them.
+`live/run-appimage-consumer.sh` (SHA-256
+`b4d57dee5cc891cbbe21c3d5e3e1cbc76f7431d864988aa93597c5fe9ca193c3`)
+drove three controls through the SHA-verified GIMP 3.2.8 AppRun and
+reported **9 PASS / 0 FAIL**, with two explicit `UNKNOWN` lines (no fake
+return, unchanged fake word).
+
+`live/evidence/appimage-consumer-safe.log` (SHA-256
+`24d88afe2c308fb2b34ab397ec877a39b10e871efb35c1b562dcaf51a4b53ff8`):
+`batch command executed successfully`, `RUN_RC=0`, no `SHIM_` line.
+
+`live/evidence/appimage-consumer-raw.log` (SHA-256
+`d5217cfc53e2853d4bbe8238a6adf80545adf9b31de5412530cef8263e12731c`):
+`SHIM_GROOM_ADJ=1 ... delta=272`,
+`SHIM_BYTES=4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d4d`,
+`SHIM_MODE=raw total_out=324`, sixteen post-pin allocations with
+`match_A=0 match_fake=0`, and
+`SHIM_FAKE_BEFORE=600f00f0fd6f00009080a700fe6f0000` equal to
+`SHIM_FAKE_AFTER`, `RUN_RC=137`.
+
+`live/evidence/appimage-consumer-patch.log` (SHA-256
+`31f782103c6dbf1f4f852299e3062d29e0be563bc758d86853ce18d5b6a13a85`):
+`SHIM_MODE=patch total_out=324`, `SHIM_BYTES=4d...` (24 chosen bytes),
+sixteen post-pin allocations all `match_A=0 match_fake=0`,
+`SHIM_FAKE_BEFORE=600f00b8fe7e000090f02dc8fe7e0000` equal to
+`SHIM_FAKE_AFTER`, `RUN_RC=124`. No glibc corruption line and no fake
+chunk return in this replay.
+
+Preserved negative variants, transcribed from tool output at the time;
+their logs were overwritten by later replays, so only the quoted lines
+survive. (1) The W299 cut replay, whose runner was killed before a total,
+arranged the fake `bk` as the live bin head `unsorted+0x100` and freed a
+66300-byte sorting chunk: patch `k=0` returned A (`match_A=1`), then
+`k=1` printed `malloc(): smallbin double linked list corrupted` and the
+plugin terminated — a corruption detection, not a fake return. (2)
+Writing the fake into that bin head removed the abort but no A or fake
+was returned; post-pin pointers stepped by `0x110`, consistent with
+splitting a large unsorted chunk. (3) A shim-local link slot with the
+large chunk still freed also returned neither A nor the fake and left
+the fake word unchanged. The final variant keeps the large allocation
+live, matching the driver's retained chunk.
+
+Limit: A is shim-owned, never a natural plugin neighbour. Across runs the
+post-pin allocations come from varying tcache/top chunks and only one run
+reached A. No live labelled fake-chunk return, no glibc write into
+`fake_buf`, no chosen-address write to a named live object, no control
+flow and no command. The shared AppImage runners' shim filters were
+extended to remove both consumer shim names as well
+(`live/run-appimage.sh` SHA-256
+`49343cd67945887aa40bf7a51b3fe1d2af41a6ab6c11838bff0a2cd252efb613`;
+`live/run-appimage-patch.sh` SHA-256 superseded below after the W300
+runner repair)
+so either runner remains independently replayable. Core `run-all.sh`:
+29 PASS / 0 FAIL. Grade unchanged: rung 3 pinned verbatim / rung 4
+PARTIAL, NO r5.
+
+W300 also revisited the W297 canonical patch runner and found two runner
+defects. First, `set -euo pipefail` made the missing `SHIM_FAKE_EXIT`
+grep abort before `TOTAL`, so earlier patch-runner replays never printed
+a total. Second, the comparison took characters 17–32 of
+`SHIM_PATCH_WORDS` (the unsorted-head word) and compared them with
+characters 1–16 of `SHIM_FAKE_EXIT` (`fake->fd`), which could report
+`PASS: glibc rewrote the shim-arranged fake fd word` for unchanged fake
+words. That false positive was observed once:
+`SHIM_FAKE_EXIT=d8a5a829ad5c0000600f893bbf7a0000` decoded to the
+unchanged `chunkA` and `bin` words the shim itself had installed. It is
+preserved as a runner defect, not evidence of a write.
+
+`live/patch-shim.c` (new SHA-256
+`69375684f0c43b3f4868e955f0b37d14b704fc9068d2ce2d98e88ecca8a6d8e1`)
+now emits `SHIM_FAKE_BEFORE=` immediately after arranging the fake;
+`live/run-appimage-patch.sh` (new SHA-256
+`c980abc635eab529e5231d6139b246855c0f90c308bb297839412011061f86f0`)
+compares that same first word with the exit dump. Final replay: **7 PASS
+/ 0 FAIL** plus `UNKNOWN: fake fd word unchanged at exit; no live
+consumer observed`. `live/evidence/appimage-patch-published.log`
+(SHA-256
+`4e230a6e58b9817c5152ab9d2a6dddd925bf105885a79a97d50e3a3ea2a3bd56`)
+has `SHIM_FAKE_BEFORE=18e2b3aa295d000060cf365f34730000` equal to
+`SHIM_FAKE_EXIT=18e2b3aa295d000060cf365f34730000`. The safe log
+(SHA-256
+`6a752579e2fe40d8b453313a3743896cf3a5fd6f9c7d9f953970a867859a296b`)
+completes with no patch call. No glibc write into the shim fake, no
+chosen-address write to a named live object and no command; grade
+unchanged.

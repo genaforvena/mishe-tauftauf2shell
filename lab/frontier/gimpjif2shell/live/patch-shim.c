@@ -82,6 +82,7 @@ inflate (z_streamp strm, int flush)
                         chunkA, (unsigned long) strm->total_out);
           (void) write (2, hdr, n);
           emit ("SHIM_PATCH_WORDS=", out + 264, 24);
+          emit ("SHIM_FAKE_BEFORE=", fake_buf, 16);
         }
     }
   return ret;

@@ -29,7 +29,7 @@ INSERTED=0
 : > "$ARPATCH"
 while IFS= read -r line || [ -n "$line" ]; do
   case "$line" in
-    *inflate-shim.so*|*patch-shim.so*) continue ;;
+    *inflate-shim.so*|*patch-shim.so*|*consumer-raw.so*|*consumer-patch.so*) continue ;;
     exec*org.gimp.GIMP.Stable*)
       if [ "$INSERTED" -eq 0 ]; then
         printf 'export LD_PRELOAD="$LD_PRELOAD:%s"\n' "$HERE/patch-shim.so" >> "$ARPATCH"
@@ -68,17 +68,19 @@ grep -q '^SHIM_PATCH pid=' "$EVID/appimage-patch-published.log" \
 grep -q 'total_out=324' "$EVID/appimage-patch-published.log" \
   && ok "patch saw 324 inflated bytes" || no "patch byte count"
 
-WORD_BEFORE=$(grep '^SHIM_PATCH_WORDS=' "$EVID/appimage-patch-published.log" \
-  | head -1 | cut -d= -f2 | cut -c17-32)
-WORD_AFTER=$(grep '^SHIM_FAKE_EXIT=' "$EVID/appimage-patch-published.log" \
-  | head -1 | cut -d= -f2 | cut -c1-16)
-if [ -n "$WORD_AFTER" ]; then
+FAKE_BEFORE=$(grep '^SHIM_FAKE_BEFORE=' "$EVID/appimage-patch-published.log" \
+  | head -1 | cut -d= -f2 || true)
+FAKE_AFTER=$(grep '^SHIM_FAKE_EXIT=' "$EVID/appimage-patch-published.log" \
+  | head -1 | cut -d= -f2 || true)
+if [ -n "$FAKE_AFTER" ]; then
   ok "plugin reached normal exit with fake word dumped"
 else
   echo "UNKNOWN: no normal-exit dump; attacker run may have been killed"
 fi
-if [ -n "$WORD_BEFORE" ] && [ -n "$WORD_AFTER" ]; then
-  [ "$WORD_BEFORE" != "$WORD_AFTER" ] \
+if [ -n "$FAKE_BEFORE" ] && [ -n "$FAKE_AFTER" ]; then
+  BWORD=$(printf '%s' "$FAKE_BEFORE" | cut -c1-16)
+  AWORD=$(printf '%s' "$FAKE_AFTER" | cut -c1-16)
+  [ "$BWORD" != "$AWORD" ] \
     && ok "glibc rewrote the shim-arranged fake fd word in the live plugin" \
     || echo "UNKNOWN: fake fd word unchanged at exit; no live consumer observed"
 fi
