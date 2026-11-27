@@ -7622,3 +7622,91 @@ not a wire path. Primary wire rung 3 CONFIRMED and full rung 5 NOT ACHIEVED
 remain; W321's separate equal-length stale-backref lane is not relabeled.
 Do not repeat this driver or the `slice`-mode gdb sweep unchanged. Recipe in
 `docs/reproducibility.md` §W328.
+
+## 2026-11-27 09:0x–09:2xZ — W329: adjacent chilled-string append stale source pointer (Ruby)
+
+W328's named follow-up probed the remaining `str_modify_keep_cr` moves in the
+same pinned `string.c` diff, not the closed wire lanes. The clearest change
+is in `rb_str_buf_append`:
+
+```c
+/* 3.4.12 string.c:3656-3687 */
+int str2_cr = rb_enc_str_coderange(str2);
+...
+str_buf_cat4(str, RSTRING_PTR(str2), RSTRING_LEN(str2), true);
+/* str_buf_cat4 (string.c:3409-3413) calls str_modify_keep_cr(str) here,
+ * which emits the chilled-string deprecation warning via Warning.warn. */
+
+/* 3.4.13 string.c:3673-3704 */
+str_modify_keep_cr(str);                 /* warning runs before RHS capture */
+int str2_cr = rb_enc_str_coderange(str2);
+...
+rb_enc_cr_str_buf_cat(..., NULL);        /* no stale RHS coderange cache */
+RB_GC_GUARD(str2);
+```
+
+The same diff moves `str_modify_keep_cr` ahead of the encoding read in
+`rb_str_concat` (3.4.12 `string.c:3935` reads `enc` before the warning, 3.4.13
+`string.c:3963-3964` warns first) and ahead of capacity computation in
+`rb_str_append_as_bytes` (3.4.12 `:3787`, 3.4.13 `:3810`). A `Warning.warn`
+override is Ruby code, so it can replace or shrink either string while the
+vulnerable C frame still holds the old pointer, length or encoding.
+
+Driver `lab/repro/ruby2shell-chilled-append-stale.{rb,sh,-gdb.cmd,
+-fixed-gdb.cmd}` runs 120 cases (4 builds × 3 drivers × 2 receivers × 5
+callback actions) from a chilled `:abc.to_s` receiver, with an `abc`.dup
+no-warning control. Evidence is gitignored under
+`lab/build/evidence/chilled-append-stale/`.
+
+| build / arm | 3.4.12 (vulnerable) | 3.4.13 (fixed) |
+|---|---|---|
+| `append_str sym none` | `hook=1 out=67 rhs=64 x=64` | identical |
+| `append_str sym shrink` | `hook=1 out=67 rhs=1 x=63` | `hook=1 out=4 rhs=1 x=1` |
+| `append_str sym replace` | `hook=1 out=67 rhs=4096 x=48 y=0` | `hook=1 out=4099 rhs=4096 y=4096` |
+| `append_str sym reclaim` | `hook=1 out=67 rhs=4096 x=48` | `hook=1 out=4099 rhs=4096 y=4096` |
+| `append_int sym enc` | `hook=1 out=4 enc=UTF-16LE` (one byte written) | `hook=1 out=5 enc=UTF-16LE` (two bytes written) |
+| `append_str dup *` (control) | `hook=0 out=67 x=64` | identical |
+| `join sym reclaim` | `hook=0 out=67` | identical |
+
+Every arm returned rc 0 with zero ASan reports on both builds. The vulnerable
+build copies the *old* RHS bytes into the live receiver after the callback;
+the fixed build appends the current RHS. `join` emits no warning (fresh
+receiver), so it is a preserve-as-negative arm, not a second trigger. The
+`append_int`/`enc` arm shows the stale `enc` pointer (one byte written under a
+now two-byte encoding, leaving an odd-length UTF-16LE string), not an
+out-of-bounds store.
+
+Read-only gdb on the vulnerable plain build (no register, pointer or byte
+written) followed the `reclaim` arm:
+
+```
+cat4-entry src=0x7ffff5f887b8 len=64
+0x7ffff5f887b8: 0x58 0x58 0x58 0x58 0x58 0x58 0x58 0x58   # 64 X bytes
+memcpy src=0x7ffff5f887b8 entry=0x7ffff5f887b8 same=1
+0x7ffff5f887b8: 0x00 0x51 0x0a 0x00 0x10 0x52 0x00 0x00   # after callback
+0x50c00018f400: 0x61 0x62 0x63 0x00 0x51 0x0a 0x00 0x10   # receiver buffer
+```
+
+The source bytes changed between `str_buf_cat4` entry and the `memcpy` line,
+yet the same pointer was used; the resulting Ruby string contains 48 stale
+`X` bytes plus 16 bytes of reclaimed-chunk data (`x=48`). The fixed build's
+`str_buf_cat4` entry instead sees `src=0x5210000a5100 len=4096` with `0x59`
+(`Y`) bytes — the replacement buffer. This is observed stale-pointer use at
+the C memcpy site, not an ASan WRITE: Ruby's heap strings are allocated from
+its own GC allocator, so freed-chunk reads are not poisoned on this build.
+
+Wire survey: over pinned 3.4.12 stdlib, the installed 3.4.0 gems and the lab
+Rails app, the only `Warning.singleton_class.prepend` site is minitest's
+opt-in `error_on_warning.rb` (raises; no string mutation; not loaded by a
+stock server). Prism's conditional `Kernel`/`Object` `warn` polyfill is
+inactive on 3.4 and does not mutate strings either. No stock request-time
+`Warning.warn` override that mutates strings exists; this lane has **no wire path**.
+
+
+**Grade.** A new adjacent in-process lane with a confirmed stale RHS pointer
+at the append `memcpy` (rung 3 CONFIRMED as a memory-safety differential),
+**rung 4 NOT CLAIMED** (no chosen bytes at chosen offsets, no pointer
+dereference, no marker) and wire CLOSED. The primary CVE's wire rung 3 and the
+full rung 5 status are unchanged; W328's `setbyte` lane and W321's stale
+backref lane are not relabeled. Do not repeat this driver unchanged. Recipe in
+`docs/reproducibility.md` §W329.

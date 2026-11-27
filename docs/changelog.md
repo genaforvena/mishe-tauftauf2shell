@@ -2,6 +2,22 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 09:0x–09:2xZ — W329 adjacent Ruby chilled-append stale pointer
+
+- W328's named `str_modify_keep_cr` follow-up found a stale-source-pointer
+  differential in `rb_str_buf_append`: 3.4.12 passes `RSTRING_PTR(str2)` into
+  `str_buf_cat4` before the chilled-string warning runs, so a `Warning.warn`
+  override can replace the RHS while the old buffer is still the memcpy
+  source; 3.4.13 warns first. The 120-case plain/ASan matrix shows `out=67
+  rhs=4096 x=48` on 3.4.12 versus `out=4099 y=4096` on 3.4.13, with `hook=0`
+  no-warning controls and zero ASan reports (Ruby's allocator does not
+  poison freed chunks). Read-only gdb observed the same source pointer at
+  entry and at memcpy while its bytes changed from `0x58` to reclaimed-chunk
+  metadata. Grade: new adjacent in-process rung 3 memory-safety differential,
+  rung 4 NOT CLAIMED, no stock wire consumer. Repro
+  `lab/repro/ruby2shell-chilled-append-stale.{rb,sh,-gdb.cmd,-fixed-gdb.cmd}`,
+  recipe `docs/reproducibility.md` §W329, detail report §W329.
+
 ## 2026-11-27 08:4x–09:0xZ — Berry admitted 205th, live bzfs, OpenSIPS witness
 
 Explanation and recipes only, except for the OpenSIPS witness flag explicitly

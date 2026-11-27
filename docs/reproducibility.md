@@ -18226,3 +18226,36 @@ safe/patched/2.9.0 controls clean. ESTABLISHED AS LABELED, no grade change:
 R4 LIMITED, no stock-glibc groom, pointer dereference or R5. This supersedes
 the witness-UNKNOWN line in the 07:3x–08:0xZ section above for the verdict
 only; the admission grade and the two preserved negatives stay as written.
+
+## 2026-11-27 09:0x–09:2xZ — W329 adjacent chilled-string append lane
+
+Prerequisites: pinned local Ruby 3.4.12/3.4.13 trees and plain/ASan builds
+under `lab/build/` only. No network, HTTP request, marker or debugger write.
+
+```
+bash -n lab/repro/ruby2shell-chilled-append-stale.sh
+lab/build/ruby-3.4.12/ruby -c lab/repro/ruby2shell-chilled-append-stale.rb
+bash lab/repro/ruby2shell-chilled-append-stale.sh
+```
+
+The 120-case matrix is in `lab/build/evidence/chilled-append-stale/matrix.txt`
+(gitignored). Expected differential on `append_str/sym/replace` and
+`append_str/sym/reclaim`: 3.4.12 reports `hook=1 out=67 rhs=4096 x=48` (old
+RHS bytes copied after the callback); 3.4.13 reports `hook=1 out=4099
+rhs=4096 y=4096` (current RHS). `append_str/sym/shrink`: 3.4.12 `out=67
+rhs=1` vs 3.4.13 `out=4 rhs=1`. The `dup` receiver must report `hook=0` on
+both builds and `join` must report `hook=0` (negative arm). All arms must
+return rc 0 with zero ASan reports; Ruby's own string allocator does not
+poison freed chunks, so a clean ASan result is expected, not a refutation.
+
+The two read-only gdb command files must show, on 3.4.12, `cat4-entry
+src=0x… len=64` with eight `0x58` bytes, then `memcpy src=… entry=… same=1`
+with the same address holding allocator bytes (`0x00 0x51 0x0a …`) and the
+receiver buffer holding `0x61 0x62 0x63 0x00 0x51 0x0a …`. On 3.4.13 the
+`str_buf_cat4` entry must instead show `len=4096` and `0x59` bytes. The
+debugger writes no register, pointer or byte.
+
+Grade: new adjacent in-process lane, stale RHS pointer at the append memcpy
+CONFIRMED (rung 3 memory-safety differential), rung 4 NOT CLAIMED, wire path
+CLOSED by the `Warning.warn` survey, full rung 5 NOT ACHIEVED. Detail in
+`reports/ruby2shell-investigation.md` §W329.
