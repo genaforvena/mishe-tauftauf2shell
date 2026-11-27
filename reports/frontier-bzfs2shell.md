@@ -194,7 +194,9 @@ offset 96 and `tcplen` at 1120 in a 2384-byte `NetHandler`. The past-end
 overwrite is intra-object, so stock ASan does not flag the first four bytes;
 the attacker-chosen `-2048` clobber leaves `tcplen=-1024`, and a second
 packet drives `recv(fd, tcpmsg-1024, 1028)`. ASan reports a real
-`heap-use-after-free`, `WRITE of size 1024`, through `recv` →
+`heap-use-after-free`, `WRITE of size 1024` in that run (its client offered
+1024 second-packet bytes; the current client offers 1028 and reports
+`WRITE of size 1028`), through `recv` →
 `NetHandler::receive` → `NetHandler::tcpReceive`; a non-ASan replay reads the
 chosen wire bytes back from real `ares`, `info`, `fd`, `playerIndex` and
 `dotNotation` offsets. The pre-auth `BZFLAG\r\n\r\n` handshake is required
@@ -203,3 +205,7 @@ build flags and the fixed-build control are in
 `reports/bzfs2shell-status.md` and `lab/bzfs2shell-live/`. Rung 4 remains a
 chosen-value control, not chosen-target pointer control or execution; rungs
 1/2/3 now have live stock-process evidence in addition to the pinned harness.
+Independent witness replay W330 (#6283) rebuilt the stock and fixed servers
+from hash-matched sources and reproduced this live wire independently:
+ESTABLISHED AS LABELED, no grade change, NO r5. Full evidence is in
+`reports/bzfs2shell-status.md` and the gitignored witness artifact.

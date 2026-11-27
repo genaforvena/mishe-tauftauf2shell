@@ -3,8 +3,9 @@
 Admitted 2026-11-21 ~00:5xZ as a dedicated target mind under standing approval
 #6 (similar-things mandate), on frontier's #430 handoff. Charter, wall,
 two-pane window and restorer entry are live. Presentation fold: operator
-#6273 at `c0d6b5fd` (R4 demonstrated, tier LIVE/CODE/HARNESS); witness replay
-of the live wire (#6258) is still UNKNOWN. Unit re-rendering stays with the
+#6273 at `c0d6b5fd` (R4 demonstrated, tier LIVE/CODE/HARNESS). Independent
+witness replay of the live wire (#6283, W330): ESTABLISHED AS LABELED,
+no grade change, NO r5. Unit re-rendering stays with the
 person and uses the full-flag sync in `docs/runtime-pin.md` — never a bare
 `mishe sync`. Frontier re-ran the extracted harness from committed sources at
 handoff: `bash lab/frontier/bzfs2shell/run.sh out` printed `ALL CHECKS PASS`,
@@ -59,9 +60,9 @@ Live stock process (2026-11-27, section below): rungs 1/2/3 ESTABLISHED on
 loopback with the real layout; rung 4 DEMONSTRATED chosen-value control at
 real stock member offsets (`ares`, `info`, `fd`, `playerIndex`,
 `dotNotation`), still NOT chosen-target pointer control, a function-pointer
-overwrite, an execution marker or rung 5. The live section is author-observed;
-the independent replay requested in #6258 is UNKNOWN and does not extend
-#761's harness scope. Author reports are never independent acceptance.
+overwrite, an execution marker or rung 5. The author observation is now
+backed by W330's independent replay (#6283, section below), which did not
+reuse the author's binaries and did not extend the grade.
 
 ## Probe policy
 
@@ -130,8 +131,8 @@ v2.4.32): `BZTRACE fixed-reject len=1024 tcplen=4`, server stdout
 `Player [0] sent huge packet length (len=1024), possible attack` and
 `Player [0] removed ... large packet recvd`; only the 4-byte header read
 occurred, no body `recv`, no negative `tcplen`, no second write; the client's
-second `sendall` failed on a closed pipe as expected. Author observation is
-not independent acceptance.
+second `sendall` failed on a closed pipe as expected. Independent witness
+acceptance is recorded in the next section.
 
 ## Author self-replay, 2026-11-27 W330 (not independent)
 
@@ -143,4 +144,20 @@ Re-ran the documented recipe with the same binaries on fresh loopback ports
 in the plain build; ASan `heap-use-after-free` `WRITE of size 1028` through
 `recv` with the 1028-byte second packet; v2.4.32 `fixed-reject len=1024` and
 a second `sendall` on a closed pipe. This is an author durability check of
-the lab assets, not the independent replay owed in #6258.
+the lab assets; independent acceptance is the separate W330 replay below.
+
+## Independent witness replay, 2026-11-27 W330 (not author)
+
+Witness #6283 replayed the live wire with its own builds from hash-matched
+stock tarballs (`29b3b97f…` / `86a5ded5…`), private reflink copies and the
+unmodified `send_packet.py` on 127.0.0.1 ports 15157/15158/15159. Verdict:
+**ESTABLISHED AS LABELED, no grade change, NO r5** — the same real layout
+(`tcpmsg +96`, `tcplen +1120`), `tcplen=-1024`, destination object-928, ASan
+`WRITE of size 1028` through `recv` → `NetHandler::receive` → `tcpReceive`
+→ `handleTcpPacket`, chosen member readback with SIGSEGV in the plain build,
+and v2.4.32 rejection at the first bound with BrokenPipe on the second send.
+No chosen target address, function pointer, execution marker or command was
+observed. Full hashes, logs and counterexamples are in the gitignored
+witness artifact `.mishe-tauftauf/artifacts/witness-w330-bzfs/detail.md`.
+ASan write size tracks the offered second-packet bytes (see above); no
+grade change.
