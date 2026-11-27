@@ -10,7 +10,7 @@ for build in ruby-3.4.12-plain ruby-3.4.13-plain ruby-3.4.12-asan ruby-3.4.13-as
     *-plain) ruby="lab/build/plain/$build/bin/ruby" ;;
     *) ruby="lab/build/$build/bin/ruby" ;;
   esac
-  for spec in attack:0 attack:8 attack:64 attack:700 attack:4096 safe:0 safe:700 safe:4096; do
+  for spec in attack:0 attack:8 attack:64 attack:700 attack:4096 safe:0 safe:700 safe:4096 visible:8 visible:100 visible-safe:8 visible-safe:100; do
     out="$EVID/$build-${spec/:/-}"
     UBSAN_OPTIONS=halt_on_error=0 ASAN_OPTIONS=detect_leaks=0 \
       "$ruby" lab/repro/ruby2shell-backref-stale-equal.rb "$spec" \

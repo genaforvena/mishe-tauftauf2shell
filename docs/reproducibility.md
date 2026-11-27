@@ -17683,26 +17683,34 @@ bash lab/repro/ruby2shell-backref-stale-equal.sh
 
 The driver runs `attack:OFFSET` and `safe:OFFSET` on the four pinned
 builds (plain/ASan 3.4.12/3.4.13), offsets 0/8/64/700/4096 for attack
-and 0/700/4096 for safe. `lab/repro/ruby2shell-backref-stale-equal.rb`
-uses only stock `String#[]=`: a 1003-byte receiver at offset 700, a
-`to_str` callback that shrinks the receiver to `"X"` and returns the
-three chosen bytes `"ZQJ"`. With `vlen == len == 3` the negative-size
-`memmove` of W320 is skipped and the chosen bytes are written at the
-stale regexp offset. Per-arm logs are gitignored under
+and 0/700/4096 for safe, plus `visible:N`/`visible-safe:N` at N=8/100.
+`lab/repro/ruby2shell-backref-stale-equal.rb` uses only stock
+`String#[]=`: a 1003-byte receiver at offset 700, a `to_str` callback
+that shrinks the receiver to `"X"` and returns the three chosen bytes
+`"ZQJ"`. With `vlen == len == 3` the negative-size `memmove` of W320 is
+skipped and the chosen bytes are written at the stale regexp offset.
+The `visible` variant instead uses a stale `/a{N}/` match at offset 0,
+shrinks the receiver to N−1 bytes and writes N chosen `"Z"` bytes back.
+Per-arm logs are gitignored under
 `lab/build/evidence/backref-stale-equal/`. Expect:
 
 ```
-ruby-3.4.12-plain / -asan attack:*  rc=0  ok len=1 (inspect "Z" only at offset 0)
-ruby-3.4.13-plain / -asan attack:*  rc=0  raised RuntimeError: string modified
-all four builds safe:*              rc=0  ok len=303/1003/4399 (ZQJ at the match offset)
+ruby-3.4.12-plain / -asan attack:*    rc=0  ok len=1 (inspect "Z" only at offset 0)
+ruby-3.4.13-plain / -asan attack:*    rc=0  raised RuntimeError: string modified
+all four builds safe:*                rc=0  ok len=303/1003/4399 (ZQJ at the match offset)
+ruby-3.4.12-plain / -asan visible:*   rc=0  ok len=N-1 all_chosen=true
+ruby-3.4.13-plain / -asan visible:*   rc=0  raised RuntimeError: string modified
+all four builds visible-safe:*       rc=0  ok len=N+200 all_chosen=false
 ```
 
-Zero AddressSanitizer reports in all 32 arms: the 3-byte write stays
-inside the retained buffer capacity. The driver then runs a debugger
-READ on vulnerable plain 3.4.12 via
+Zero AddressSanitizer reports in all 48 arms: the write stays inside the
+retained buffer capacity. The driver then runs a debugger READ on
+vulnerable plain 3.4.12 via
 `lab/repro/ruby2shell-backref-stale-equal-gdb.cmd` (breakpoint on
 `memmove` with `size == 3` and source bytes `ZQJ`; no writes). It dumps
 `5a 51 4a` at `sptr+700` after the call while `RSTRING_LEN` is 1. That
-readback is a debugger observation — no stock Ruby API reads those
-bytes — so the result is an in-process rung 4 with chosen bytes at a
-chosen stale offset, not rung 5 and no primary grade change.
+offset-700 readback is a debugger observation — no stock Ruby API finds
+bytes past the logical length here — but the `visible` variant's N−1
+in-length chosen bytes are readable with plain `String#==`. Both are
+in-process rung 4 with chosen bytes at a chosen stale offset, not rung 5
+and no primary grade change.

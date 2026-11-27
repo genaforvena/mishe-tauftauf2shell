@@ -7398,9 +7398,9 @@ at `string.c:5770` is skipped. The receiver is 1003 bytes
 bash lab/repro/ruby2shell-backref-stale-equal.sh
 ```
 
-All 32 arms (four builds × five attack offsets 0/8/64/700/4096 × three
-safe offsets) returned rc=0 with zero AddressSanitizer reports. Each
-vulnerable attack prints `ok len=1`; each fixed attack prints
+All 48 arms (four builds × five attack offsets 0/8/64/700/4096, three
+safe offsets 0/700/4096, and two `visible`/`visible-safe` pairs at N=8/100)
+returned rc=0 with zero AddressSanitizer reports. Each vulnerable attack prints `ok len=1`; each fixed attack prints
 `raised RuntimeError: string modified`; each safe arm prints the
 unshrunken length (303/1003/4399) with `"ZQJ"` at the match offset on
 both builds. Per-arm stdout/stderr and the debugger transcript are
@@ -7418,14 +7418,27 @@ before: 05 08 50 20 01 00 00 00   (dest-4 .. dest+3)
 after:  05 08 50 20 5a 51 4a 00   (dest = sptr+700; logical len = 1)
 ```
 
+**Stock-API readback variant (same lane).** With a longer stale match
+(`/(a{N})/` at offset 0), a callback that shrinks the receiver to N−1
+bytes and returns N chosen `"Z"` bytes, the vulnerable builds end with
+`len=N−1` and `s == "Z" * (N−1)` **true** — N=8 → len 7 and N=100 →
+len 99, on plain and ASan 3.4.12. Fixed 3.4.12→3.4.13 raises
+`string modified` (0+N > N−1); the no-shrink controls yield the original
+content on all four builds. The Nth chosen byte is one byte past the
+logical length; the N−1 in-length chosen bytes are observable with
+ordinary `String#==`, without a debugger.
+
 **Grade: adjacent in-process rung 4, narrowly labeled — chosen bytes at a
-chosen stale offset inside a live Ruby object's backing store.** The
-write is fix-sensitive and the no-shrink controls are clean. It is NOT
-the primary CVE, has no wire path, no benign marker or command and no
-second-request behavior. Bytes past the logical length are not readable
-through any stock Ruby API found here (`bytesplice` and `[]=` clamp to
-`RSTRING_LEN`; `inspect`/`unpack`/`Regexp` respect it); the readback above
-is a debugger observation, which keeps this at rung-4 mechanics rather
-than rung 5. No primary grade change. Falsifier: a fixed-build attack
-that does not raise, a safe-control fault, or chosen bytes that are not
-fix-sensitive would break this attribution.
+chosen stale offset inside a live Ruby object's backing store, with
+stock-readable bytes in the offset-0 variant.** The write is
+fix-sensitive and the no-shrink controls are clean. It is NOT the
+primary CVE, has no wire path, no benign marker or command and no
+second-request behavior. Bytes past the logical length at nonzero stale
+offsets are not readable through any stock Ruby API found here
+(`bytesplice` and `[]=` clamp to `RSTRING_LEN`; `inspect`/`unpack`/
+`Regexp` respect it); the offset-700 readback above is a debugger
+observation. No request-path consumer, marker, command or second
+request — rung-4 mechanics, not rung 5. No primary grade change.
+Falsifier: a fixed-build attack that does not raise, a safe-control
+fault, or chosen bytes that are not fix-sensitive would break this
+attribution.

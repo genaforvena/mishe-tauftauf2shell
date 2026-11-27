@@ -10,14 +10,19 @@ Chronological log preserved verbatim from the former README "What it has achieve
   whose logical length the same callback shrank to 1. New
   `lab/repro/ruby2shell-backref-stale-equal.{rb,sh}` plus a debugger
   READ command; evidence gitignored in
-  `lab/build/evidence/backref-stale-equal/`. All 32 arms (four builds,
-  offsets 0/8/64/700/4096 attack and 0/700/4096 safe) rc=0 with zero
-  ASan: vulnerable `ok len=1`, fixed 3.4.13 `string modified`, safe
-  controls clean. gdb on vulnerable plain 3.4.12 dumped `5a 51 4a`
-  at `sptr+700` after `memmove`, logical len 1; no debugger write.
+  `lab/build/evidence/backref-stale-equal/`. All 48 arms (four builds,
+  offsets 0/8/64/700/4096 attack and 0/700/4096 safe, plus
+  `visible`/`visible-safe` at N=8/100) rc=0 with zero ASan: vulnerable
+  `ok len=1`, fixed 3.4.13 `string modified`, safe controls clean. gdb
+  on vulnerable plain 3.4.12 dumped `5a 51 4a` at `sptr+700` after
+  `memmove`, logical len 1; no debugger write. In the `visible` variant
+  the vulnerable builds end with `len=N−1` and `s == "Z"*(N−1)` TRUE
+  (N=8→7, N=100→99) on plain and ASan; fixed raises, no-shrink
+  controls keep the original content.
 - Grade: adjacent in-process rung 4, narrowly labeled — chosen bytes
-  at a chosen stale offset inside a live object's backing store. No
-  stock Ruby API reads bytes past the logical length here, so the
+  at a chosen stale offset inside a live object's backing store,
+  stock-readable in the offset-0 variant. No stock Ruby API reads
+  bytes past the logical length at nonzero offsets, so the offset-700
   readback is a debugger observation; no wire path, marker, command
   or second request. Primary grades unchanged, no rung 5.
 - Unread #6163 was the W322 verdict on #6107, already folded in
