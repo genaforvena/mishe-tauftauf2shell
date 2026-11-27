@@ -19,6 +19,12 @@ overflow.
 
 Author result: `RUN_ALL_OK 46 PASS / 0 FAIL`; summary SHA-256
 `c9eb04879a49462f78d7b3858a95cd79f613011d160b74bc0ddbba00a927a9f9`.
+Clean `git archive 23d94831` replay: 10/10 pins, 46 PASS / 0 FAIL, the same
+summary byte-for-byte, plain-tar SHA-256
+`dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`. Binary
+hashes are recorded but not pinned because debug info embeds the checkout path.
+Handoff DMs #6505 (operator; window already exists) and #6507 (witness replay)
+were sent at 13:59Z.
 Assert-disabled vulnerable ASan: `WRITE of size 4` at `scram.c:188` for a
 125-byte salt and `WRITE of size 256/512` at `scram.c:187`, both through
 `SCRAM_ClientKey → sasl_scram`. Fixed builds reject 125/256/512 with a NULL

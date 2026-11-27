@@ -64,11 +64,15 @@ Plain vulnerable builds survive 124/125 but SIGSEGV (rc 139) at 256/512.
 network I/O. Built binary hashes are recorded for the author checkout but not
 pinned: debug info embeds the absolute checkout path, so a clean rebuild in a
 different directory is byte-different by construction. Toolchain: GCC 13.3.0,
-glibc 2.39,
-x86-64; `-g -O0`, stack protector off, ASan/plain and non-PIE plain; project
-configured `--disable-tls --disable-examples`. Observed run:
+glibc 2.39, x86-64; `-g -O0`, stack protector off, ASan/plain and non-PIE
+plain; project configured `--disable-tls --disable-examples`. Observed run:
 `RUN_ALL_OK 46 PASS / 0 FAIL`, summary SHA-256
 `c9eb04879a49462f78d7b3858a95cd79f613011d160b74bc0ddbba00a927a9f9`.
+A clean `git archive --format=tar 23d94831` replay rebuilt all eight binaries,
+matched 10/10 pins and returned the same 46/0 and byte-identical summary;
+plain-tar SHA-256
+`dcba8cd1fcfd8677628e6bd9f22ac1555dbc793073cbd4d631f430f3470bc521`.
+Author replay is not witness acceptance.
 Read-only GDB on the plain assert-disabled vulnerable binary, stopped after
 both `memcpy`s (`scram.c:191`), sees 32 chosen `0x43` bytes at `tmp+120..+151`
 (24 of them past the 128-byte object) and chosen frame words
