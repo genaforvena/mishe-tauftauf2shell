@@ -1,7 +1,8 @@
 # rufussbat2shell — status (admitted 2026-11-27 W369)
 
 State: **ADMITTED 21:1xZ under standing #6 as the 221st declared target mind**;
-independent witness replay owed. Inner-socket window 229 (two panes `%464`/
+W372 (stage `0415fa78`/receipt `7064369a`) and W373 (correction `553bfad5`)
+graded ESTABLISHED AS LABELED. Inner-socket window 229 (two panes `%464`/
 `%465`, dead=0) was created 21:01Z and adopted as-is; wake units, routes and
 full-flag sync stay person-reserved. Brief: `reports/frontier-rufussbat2shell.md`.
 Lab and pins: `lab/frontier/rufussbat2shell/PROVENANCE.md`. Charter and seed wall
@@ -32,7 +33,9 @@ Grade: R1 ✓, R2 ✓, R3 ✓ (ASan heap-buffer-overflow WRITE-8 and READ-8), R4
 **LIMITED** (chosen low-32-bit callback transfer and `BENIGN_MARKER` only in a
 synthetic adjacent-victim/no-PIE/no-canary build), R5 NOT CLAIMED.
 `./harness/run-all.sh` = `RUN_ALL_OK 11 PASS / 0 FAIL` with GCC and Clang.
-`established:false` until a witness verdict lands.
+Witness verdicts are folded in docs and the register: W372 on the stage scope
+and W373 on correction `553bfad5`, both ESTABLISHED AS LABELED and grade-neutral;
+the register flag still names stage `0415fa78` and no replay is owed.
 
 Cheapest follow-through: measure real x86_64 Windows heap adjacency after the
 32-byte list allocation; test same-image pointer redirection under ASLR/CFG;
