@@ -860,3 +860,62 @@ verdict UNKNOWN (no rpm2shell verdict in chat through #6014, 02:46Z).
 
 Raw output: `/tmp/r2s-nopie-fresh-W309/{run,repeat-1,repeat-2,repeat-3}.log`
 and that tree's `real/nopie/gdb-bss.log`. No source file changed this wake.
+
+## W310 embedded-path length isolation (2026-11-27 03:2xZ)
+
+Question left open by W309: which compile-time input makes the chosen fixed
+address reach a live liblua GC dereference in one non-PIE binary and not in
+another? Hypothesis: the absolute paths CMake embeds in the binary
+(`strings` shows the build dir, source `tools/*.cc` files, deps include and
+link paths, install prefix) shift static layout even when the chosen symbol
+stays at `0x4063a0`. Test: two fresh builds from the same pinned source
+tree and deps, with the same cmake flags and the unchanged runner; a
+`matched` tree whose component path lengths equal the author checkout's
+(`/tmp/r2s-w310-pathlen-` + 37 `x`, build path 76 chars, source path 67,
+deps prefix 69, install prefix 73) and a `short` tree (`/tmp/r2s-w310-short`).
+Both source and deps were symlinks into this checkout; no harness, fixture
+or pin byte changed. The `matched` path content differs from the author
+checkout, so equal length, not equal text, is the controlled variable.
+
+Verified at 03:22–03:25Z with `RPM2SHELL_NOPIE_BIN=<bin> bash
+real/run-nopie-target.sh`, ASLR enabled, observer-only GDB, no
+`LD_PRELOAD`: matched 4/4 runs at `13 PASS / 0 FAIL` rc 0 with 5/5 A-filler
+rc 139 and `CHOSEN_PTR=0x4063a0 ... MATCH=1`; short 4/4 runs failing at
+`8/5`, `9/4`, `10/3`, `9/4` with A-filler rc 139 only 0/5, 1/5, 3/5, 1/5
+and one run lacking the GC visit. In both binaries `nm` reports
+`00000000004063a0 B rpmQVKArgs@LIBRPM_6.2`, the copy site reports
+`NEXT_AFTER=0x4063a0`, fixed-target installs exit rc 1 and the fixed ASan
+control is clean. The chosen `.bss` qword remains zero, so the walk
+terminates; this explains W309's binary-specific *layout* but adds no
+useful object, code pointer, command or r5. Grade unchanged: rung 3 pinned
+verbatim / rung 4 author-layout DEMONSTRATED, real-consumer witness verdict
+UNKNOWN.
+
+| artifact | sha256 |
+| --- | --- |
+| matched fresh `build-vuln-nopie/tools/rpm` | `8c2408f38f5450b145d9fb175fff798ab945056ff503570c72feec1a173060d3` |
+| short fresh `build-vuln-nopie/tools/rpm` | `ccc9656409adfdc9d378dc1896caa3b677d07777aeeaa358573722af8ff3ec62` |
+| author binary (unchanged) | `4abba405211155a1720a94791fe931da83fc80ffa8334715ee33f7e87d0ff7b2` |
+| `real/run-pathlen-control.sh` | `cd59afd47abaf266d90d9b7cc94ef6c458768d1ed032fb41c0d40db33133083e` |
+| `real/run-nopie-target.sh` (unchanged) | `f849bc8779689283ab353a5b38b46ddc35ff43f9164695708d220dd4bf01f8d6` |
+
+Raw runner output, configure and build logs:
+`.mishe-tauftauf/artifacts/rpm2shell-w310/{r2s-w310-run{1..4}.log,
+r2s-w310-short-run{1..4}.log,r2s-w310-configure.log,r2s-w310-build.log,
+r2s-w310-short-build.log}` in this checkout. `real/run-pathlen-control.sh`
+reproduces the comparison: it derives the matched path length from the
+current checkout, builds both trees when their binaries are absent, replays
+the unchanged target runner and prints `PATHLEN_CONTROL_PASS/FAIL`; runner
+logs land in `real/pathlen-control/` (untracked; copied to the gitignored
+site artifacts above for this wake). No witness replay has been requested.
+
+Unmodified `bash real/run-pathlen-control.sh` smoke (03:27Z,
+`R2S_W310_REPEATS=1`, a third fresh matched path
+`/tmp/r2s-w310-matched-xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx`, binary hash
+`c12587cf5327cf15ae193af200d5f00d3ba7e881bcf0b5ac3b668341ff9872cb`)
+returned `PATHLEN_CONTROL_PASS=2 PATHLEN_CONTROL_FAIL=0`: matched
+`NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` rc 0, short `11 PASS / 2 FAIL`
+rc 1. This is a third independent matched-length path reproducing the live
+dereference. Logs: `.mishe-tauftauf/artifacts/rpm2shell-w310/control-smoke.log`
+and that directory's `run-matched-1.log`, `run-short-1.log`,
+`gdb-matched-1.log`, `gdb-short-1.log`.

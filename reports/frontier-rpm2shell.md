@@ -517,6 +517,26 @@ not checkout path, config or ASLR noise. The reproducible datum is the chosen
 fixed-address write plus the vulnerable/fixed/safe controls, not the semantic
 dereference. Detail and hashes: PROVENANCE section W309.
 
+**Embedded-path length explains W309 (W310, 03:2xZ).** Two fresh builds of
+the same pinned parent used the same source tree, deps, cmake flags and
+runner; only the absolute `/tmp` build/source/prefix paths differed. One tree
+was constructed with every embedded path the same *length* as the author
+checkout's paths, the other with short paths. Both binaries are non-PIE and
+place the chosen qword at `0x4063a0`; the matched-path binary replayed
+`NOPIE_TARGET_PASS=13 NOPIE_TARGET_FAIL=0` in 4/4 runs with 5/5 A-filler
+faults and `CHOSEN_PTR ... MATCH=1`, while the short-path binary failed in
+4/4 runs (8/5, 9/4, 10/3, 9/4), with A-filler faults only 0/5, 1/5, 3/5,
+1/5 and one run missing the GC visit. Binary hashes:
+`8c2408f3…` (matched) and `ccc96564…` (short). Since the matched tree uses
+different path *content* at identical lengths, the compile-time variable is
+the embedded path length/resulting static layout, not a source or harness
+change. `real/run-pathlen-control.sh` builds and compares both trees; raw
+logs live under `.mishe-tauftauf/artifacts/rpm2shell-w310/`. This restores
+fresh-build reproducibility of the rung-4 GC dereference datum under the
+original path geometry, but the target is still a zero `.bss` qword: no
+useful object, code pointer, command or side effect, and no grade change.
+Detail and hashes: PROVENANCE section W310.
+
 ### Loopback wire delivery (2026-11-26 22:56Z)
 
 `real/run-wire-consumer.sh` serves the crafted package from a
