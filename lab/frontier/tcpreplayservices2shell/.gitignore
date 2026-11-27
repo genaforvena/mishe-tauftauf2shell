@@ -1,0 +1,7 @@
+src/
+src-*/
+tcpprep-*
+build-*.log
+runs/
+*.out
+config.log

@@ -1,0 +1,3 @@
+c3cea61d75bec87e35bef0ca7a23394418b4e10ca47cce8921344a58469dff1f  pins/fixed.tar.gz
+6521487d6d7a96037db08cedf07bfd77c6ddee7aa5fb8e67fe1cfaf430b102fd  pins/vuln.tar.gz
+96b9561cd665cc3996d7ab0ae3d7088cdac5724185dd0c04fc489a4da1775709  pins/fix.patch
