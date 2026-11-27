@@ -951,3 +951,36 @@ separate workdir was untouched). In-tree verification at 02:27Z:
 `run-witness.sh` 6/0 with core 29/0, span 12/0 rc 0, and no orphan plug-in
 in `ps`. Grade stays rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
 NO r5; these are harness repairs, not new impact evidence.
+
+## Read-only watchpoint on the OOB store in the real plug-in (W307, 2026-11-27)
+
+`live/gdb-watch.cmd` breaks on the real `inflate()` symbol, identifies the
+wrapped call by `zs.avail_out == 0x80000082` (offset 32 in the 64-bit
+`z_stream`), dumps the live heap at `zs.next_out` (offset 24) and installs a
+write watchpoint at `indexes + 264` — the size word of the following glibc
+chunk, since `g_try_malloc(260)` has a 272-byte chunk / 264-byte usable
+region. `live/run-appimage-watch.sh` launches the SHA-verified 3.2.8
+AppImage with GIMP's plug-in debugger hook under a regenerated **no-shim**
+AppRun; no plugin word, heap byte or allocator state is modified.
+
+The 8 KiB file-chosen JIF reaches the wrapped call
+(`indexes=0x5555556fe530`, `avail_out=2147483778`), and the watchpoint fires
+with backtrace `#0/#1` in the bundled `libz.so.1` `inflate` path, `#2` in
+`ReadJeffsImage (... len=45771, height=46918, alpha_frame=1, is_jeff_image=1)`
+at `file-gif-load.c:1613`. The chosen `0x4d` bytes are observed byte by byte
+replacing the following chunk's `0x21` size word, and the plug-in later
+faults in `free` at `file-gif-load.c:1616` with `rax=0x4d4d4d4d4d4d4d4d`.
+The safe 4x4 JIF under the identical debugger loads cleanly and raises no
+watch hit. `bash live/run-appimage-watch.sh`: **13 PASS / 0 FAIL**, rc 0.
+
+This confirms the OOB store is performed by the real library inside the
+real plug-in, directly on allocator metadata. It is still **not** a named
+live-object write, a chosen-address write, a successful pointer dereference,
+control flow, a marker or a command: the following chunk is allocator state,
+and the later `free` fault is a dereference *attempt*. Grade unchanged:
+rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. An allocation-
+caller tracer that wrapped every glib allocation in a finish breakpoint
+stalled the plug-in before `inflate` and produced no neighbour name; that
+negative is preserved, so the identity of the following chunk's original
+owner stays UNKNOWN.
+

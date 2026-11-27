@@ -1,0 +1,247 @@
+Running without type2-runtime. AppDir is /tmp/gimpjif-appimage/squashfs-root
+GLib-GIO-Message: 02:54:16.229: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 02:54:16.230: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 02:54:31.003: Adding GResources overlay '/org/gtk/libgtk=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gtk/libgtk'
+GLib-GIO-Message: 02:54:31.003: Adding GResources overlay '/org/gnome/gjs=/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs'
+GLib-GIO-Message: 02:54:31.003: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.004: Mapped file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/internal/loader.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.004: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_bootstrap/default.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.005: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encoding.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.005: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/encodingMap.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.005: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_encoding/util.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.006: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/console.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.006: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/esm/_timers.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.009: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/_legacy.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.011: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/signals.js' as a resource overlay
+GLib-GIO-Message: 02:54:31.011: Opened file '/tmp/gimpjif-appimage/squashfs-root/usr/share/org/gnome/gjs/modules/script/lang.js' as a resource overlay
+Breakpoint 1 at 0x2240
+warning: Unable to find libthread_db matching inferior's thread library, thread debugging will not be available.
+=== W307 PRE-INFLATE indexes=0x5555556fe530 avail_out=2147483778 ===
+0x5555556fe520:	0x0000000000000000	0x0000000000000111
+0x5555556fe530:	0x00007ffabd55598e	0x0000000000000000
+0x5555556fe540:	0x000055555571e010	0x00005555556ec9e0
+0x5555556fe550:	0x00005555556ecc80	0x00005555557191b0
+0x5555556fe560:	0x0000555555702800	0x00005555556ed860
+0x5555556fe570:	0x00005555556ee0d0	0x00005555556ee200
+0x5555556fe580:	0x00005555556ee350	0x00005555556ee4a0
+0x5555556fe590:	0x00005555556ccb40	0x00005555556ccc90
+0x5555556fe5a0:	0x00005555556ccdf0	0x00005555556ccf40
+0x5555556fe5b0:	0x00005555556ccd10	0x00005555556db440
+0x5555556fe5c0:	0x00005555556db630	0x00005555556db780
+0x5555556fe5d0:	0x00005555556db980	0x00005555556dbad0
+0x5555556fe5e0:	0x00005555556dbce0	0x00005555556dbe30
+0x5555556fe5f0:	0x00005555556dc050	0x00005555556dc1a0
+0x5555556fe600:	0x00005555556dc3d0	0x00005555556dc520
+0x5555556fe610:	0x00005555556db800	0x00005555556dc220
+0x5555556fe620:	0x00005555556fe360	0x00005555556fe4b0
+0x5555556fe630:	0x00005555556fe710	0x0000000000000021
+0x5555556fe640:	0x0000000000000001	0x00005555556fe660
+0x5555556fe650:	0x0000000000000000	0x0000000000000021
+0x5555556fe660:	0x00007fff00000001	0x0000000000000000
+0x5555556fe670:	0x0000000000000000	0x0000000000000021
+0x5555556fe680:	0x00005555556fe440	0x00005555556fe420
+0x5555556fe690:	0x0000000000000000	0x0000000000000071
+Hardware watchpoint 2: *((unsigned long*)0x5555556fe638)
+=== W307 WATCH SET at 0x5555556fe638 ===
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f0b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x000000000000004d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f1b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x0000000000004d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f02 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x00000000004d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f0b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x000000004d4d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f1b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x0000004d4d4d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f02 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x00004d4d4d4d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f0b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x004d4d4d4d4d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+=== W307 OOB WATCH HIT at 0x5555556fe638 ===
+#0  0x00007ffff7a91f1b in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#1  0x00007ffff7a92d8b in inflate () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libz.so.1
+#2  0x0000555555557778 in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1613
+#3  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#4  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#5  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#6  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#7  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#8  0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#9  gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+#10 0x00007ffff7cbf341 in gimp_plug_in_main_proc_run (plug_in=0x5555556175e0, proc_run=0x5555556187c0) at ../libgimp/gimpplugin.c:1453
+#11 gimp_plug_in_loop (plug_in=0x5555556175e0) at ../libgimp/gimpplugin.c:1356
+0x5555556fe628:	0x4d4d4d4d4d4d4d4d	0x4d4d4d4d4d4d4d4d
+0x5555556fe638:	0x4d4d4d4d4d4d4d4d	0x0000000000000001
+0x5555556fe648:	0x00005555556fe660	0x0000000000000000
+0x5555556fe658:	0x0000000000000021	0x00007fff00000001
+0x5555556fe668:	0x0000000000000000	0x0000000000000000
+0x5555556fe678:	0x0000000000000021	0x00005555556fe440
+0x5555556fe688:	0x00005555556fe420	0x0000000000000000
+0x5555556fe698:	0x0000000000000071	0x00007fff00000001
+
+Thread 1 "file-gif-load" received signal SIGSEGV, Segmentation fault.
+0x00007ffff74af033 in free () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+=== W307 PLUGIN SIGNAL SIGSEGV pid 1293914 ===
+rip            0x7ffff74af033      0x7ffff74af033 <free+115>
+rsp            0x7fffffffbff0      0x7fffffffbff0
+rax            0x4d4d4d4d4d4d4d4d  5570193308531903821
+#0  0x00007ffff74af033 in free () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#1  0x00007ffff7448af8 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#2  0x00007ffff74465fd in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#3  0x00007ffff7446050 in ?? () from /tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/../../../../libc.so.6
+#4  0x000055555555787e in ReadJeffsImage (fd=fd@entry=0x555555616e00, dest=dest@entry=0x7ffee1c3f010 "", bpp=8 '\b', len=len@entry=45771, height=height@entry=46918, alpha_frame=alpha_frame@entry=1, image=0x7fffffffc598, error=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:1616
+#5  0x00005555555582b5 in ReadImage (fd=fd@entry=0x555555616e00, file=file@entry=0x55555561a6a0, len=45771, height=46918, cmap=0x55555556b568 <GifScreen+8>, ncols=<optimized out>, interlace=0, leftpos=0, toppos=0, screenwidth=45771, screenheight=46918, is_jeff_image=1, image=0x7fffffffc598, error=0x7fffffffc908, number=<optimized out>, format=<optimized out>) at ../plug-ins/common/file-gif-load.c:1468
+#6  0x000055555555861c in load_image (file=file@entry=0x55555561a6a0, thumbnail=thumbnail@entry=0, is_jeff_image=1, error=error@entry=0x7fffffffc908) at ../plug-ins/common/file-gif-load.c:625
+#7  0x0000555555558dd4 in gif_load (procedure=0x55555561bd50, run_mode=<optimized out>, file=0x55555561a6a0, metadata=<optimized out>, flags=0x7fffffffc964, config=<optimized out>, run_data=0x0) at ../plug-ins/common/file-gif-load.c:288
+#8  0x00007ffff7cb8d05 in gimp_load_procedure_run (procedure=0x55555561bd50, args=<optimized out>) at ../libgimp/gimploadprocedure.c:256
+#9  0x00007ffff7cc252a in _gimp_procedure_run_array (procedure=procedure@entry=0x55555561bd50, args=args@entry=0x55555561c830) at ../libgimp/gimpprocedure.c:2200
+#10 0x00007ffff7cbdf54 in gimp_plug_in_proc_run (proc_run=0x5555556187c0, procedure=0x55555561bd50, proc_return=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1511
+#11 gimp_plug_in_proc_run_internal (plug_in=plug_in@entry=0x5555556175e0, proc_run=proc_run@entry=0x5555556187c0, procedure=0x55555561bd50, proc_return=proc_return@entry=0x7fffffffcab0) at ../libgimp/gimpplugin.c:1551
+GIMP-Error: Plug-in crashed: "file-gif-load"
+(/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/file-gif-load/file-gif-load)
+
+The dying plug-in may have messed up GIMP's internal state. You may want to save your images and restart GIMP to be on the safe side.
+
+batch command experienced an execution error:
+Error: Procedure execution of gimp-file-load failed on invalid input arguments: Procedure 'file-jif-load' returned no return values 
+Stopping at failing batch command [0]: (let* ((img (car (gimp-file-load RUN-NONINTERACTIVE "/home/mesh-home/mishe-tauftauf2shell/lab/frontier/gimpjif2shell/live/evidence/gdb-watch-8192.jif" "gdb-watch-8192.jif")))) (gimp-message (number->string (car (gimp-image-get-width img)))))
+/tmp/gimpjif-appimage/squashfs-root/usr/bin/org.gimp.GIMP.Stable: terminated: Terminated
+/tmp/gimpjif-appimage/squashfs-root/usr/lib/x86_64-linux-gnu/gimp/3.0/plug-ins/script-fu/script-fu terminated: Terminated
+
+== INFO ==
+GIMP is now running as a background process. You can quit anytime with Ctrl-C (SIGINT).
+
+If you wanted to quit immediately instead, call GIMP with --quit.

@@ -1418,3 +1418,54 @@ as a negative; the 12/0 author result is environment-sensitive, not a
 universal replay promise. Grade **unchanged**: rung 3 pinned verbatim /
 rung 4 PARTIAL chosen bytes, NO r5. Both this and the cleanup change are
 harness repairs only — no new impact evidence.
+
+## W307 read-only OOB-store watchpoint (2026-11-27, 02:32Z wake)
+
+New files: `live/gdb-watch.cmd` (SHA-256
+`caede670e6ffb4129767ea36b75f47f1f7f91c33b37d17af11dd4e62940bb3fc`),
+`live/run-appimage-watch.sh`
+(`795c665f61e0a3c52fd43baf9c9900ccef272c0fdafb7cdbffd290e80d6b6223`),
+`live/evidence/gdb-watch-8192.jif`
+(`d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`),
+`live/evidence/gdb-watch-8192.log`
+(`a9c2e771605b6665860ab304ec67065fcea59f172148f3940f7dca95af173b6c`),
+`live/evidence/gdb-watch-safe.log`
+(`ac854a7cd0ea38ed22648fef2c35ad8806f991678a7144b132311095539b77d3`).
+The two logs are single-run observations: addresses and pids vary with ASLR.
+
+Method: GIMP's `GIMP_PLUGIN_DEBUG_WRAP=file-gif-load,run` and
+`GIMP_PLUGIN_DEBUG_WRAPPER="gdb -q -batch -x live/gdb-watch.cmd --args"`
+under the SHA256-verified 3.2.8 AppRun. The runner regenerates
+`AppRun.watch` by dropping every `gimpjif2shell/live/*shim.so` export from
+the extracted AppRun, so earlier probes' preloads cannot leak into this
+control. No plugin source, heap word or allocator state is modified.
+
+`z_stream` offsets used on x86-64: `next_out` at +24, `avail_out` at +32
+(the first wrong attempt read +16/+24 and never matched; preserved as a
+measurement error, not an observation). The first successful probe ran
+against the still-patched AppRun and showed `inflate () from
+.../live/patch-shim.so` as frame #2; it is not claimed as a shim-free
+measurement. Re-running against `AppRun.noshim` / `AppRun.watch` removed
+that frame.
+
+Observed in `gdb-watch-8192.log`: `W307 PRE-INFLATE indexes=0x5555556fe530
+avail_out=2147483778`; the pre-write dump shows the `indexes` chunk size
+`0x111` at `indexes-8` and the following chunk's size `0x21` at
+`indexes+264`; eight `W307 OOB WATCH HIT` records show frames `#0` in
+`libz.so.1`, `#1 inflate ()` in `libz.so.1`, `#2 ReadJeffsImage (...
+alpha_frame=1) at file-gif-load.c:1613`, with the size word changing from
+`0x21` through `0x4d`, `0x4d4d`, ... to `0x4d4d4d4d4d4d4d4d`. The run ends
+in `W307 PLUGIN SIGNAL SIGSEGV`, `#0 free ()`, `#4 ReadJeffsImage ... at
+file-gif-load.c:1616`, `rax=0x4d4d4d4d4d4d4d4d`. The safe 4x4 control under
+the same debugger has 25 lines, `batch command executed successfully`, and
+no watch hit.
+
+`bash live/run-appimage-watch.sh`: **13 PASS / 0 FAIL**, rc 0, in-tree from
+this wake. Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL
+chosen bytes, NO r5. The watchpoint proves a real-libz store into allocator
+metadata, not a named-object write, chosen address or successful
+dereference. A per-allocation finish-breakpoint tracer intended to name the
+following chunk's owner stalled the plug-in before `inflate` in two trials
+(27- and 41-line logs, no `W307T` line) and is preserved as a negative; the
+owner stays UNKNOWN.
+
