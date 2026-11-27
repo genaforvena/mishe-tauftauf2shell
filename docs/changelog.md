@@ -2,6 +2,32 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 05:1x–05:2xZ — W316 witness replay and W317 thread-count control (Ruby)
+
+- Witness W316 (#6095) replayed the committed W313 Rails production
+  controlled pair from a clean three-file `git archive cea10009`, runner
+  SHA-256 `1c27c95d…` matching the worktree: attack 12/12 aborted on the
+  attack POST, safe 12/12 and fixed 12/12 all six requests 404 /
+  `up=200 alive=YES` with zero abort strings. Attack and fixed wire bodies
+  were byte-identical (`92a21cc4…`, 123,928 bytes) and safe differed in 967
+  `_method` bytes only; the abort-class split moved 10/2 → 8/4, both
+  classes as labeled, so a distribution NIT. ESTABLISHED AS LABELED; no
+  grade change, NO r5. Prebuilt runtimes/app were symlinked, not rebuilt;
+  the threads=1 follow-up was out of scope. Detail
+  `.mishe-tauftauf/artifacts/witness-w316-ruby-rails/detail.md`.
+- W317 ran that follow-up at exact W313 geometry with
+  `RUBY2SHELL_CLAIM_THREADS=1`: attack 12/12 aborted (9 invalid-next-size,
+  3 mismatching-prev_size), safe 12/12 and fixed 12/12 clean, no tracer in
+  any server environment, wire bodies byte-identical to W313. The
+  production availability primitive is invariant to Puma dispatch thread
+  count at this geometry, with 0/12 survivors and no command. Recipes:
+  `docs/reproducibility.md` §W317; evidence and verdict:
+  `reports/ruby2shell-investigation.md` §05:1xZ. Grade unchanged — primary
+  wire rung 3 CONFIRMED, harness-condition rung 5 ESTABLISHED at its labeled
+  scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED. Both
+  production geometries and the thread-count variable are closed; do not
+  repeat the abort-rate trio unchanged.
+
 ## 2026-11-27 04:2x–04:5xZ — W314/W315 verdict folds, nfdump closure, ud3tn chain
 
 This fold covers the eleven commits past `817db09a` through `99cffe00`.

@@ -17379,3 +17379,50 @@ next size (unsorted)`, 2 `malloc(): mismatching
 next->prev_size (unsorted)`), safe 12/12 and fixed 12/12 all six
 requests 404 with `up=200 alive=YES` and no abort line. Grade unchanged;
 availability only, no command and no surviving process.
+
+Witness W316 (#6095) replayed these exact three arms from a clean
+`git archive cea10009` (runner SHA-256 `1c27c95d313e5501e…`): attack 12/12
+aborted on the attack POST, safe 12/12 and fixed 12/12 all six requests
+404 / `up=200 alive=YES` with zero abort strings. Attack/fixed bodies were
+byte-identical (`92a21cc4a5144013e…`) and safe differed in 967 `_method`
+bytes only. The class split moved from 10/2 (author) to 8/4 (witness): a
+run-dependent distribution NIT, both classes as labeled. Verdict
+ESTABLISHED AS LABELED, no grade change, NO r5; witness detail
+`.mishe-tauftauf/artifacts/witness-w316-ruby-rails/detail.md`.
+
+### W317 — Rails production single-thread dispatch control (Ruby, §03:5xZ follow-up)
+
+The named dispatch-count experiment repeats the W313 trio at the exact
+geometry with one extra variable, `RUBY2SHELL_CLAIM_THREADS=1`; the runner
+passes `RAILS_MAX_THREADS=1` into the server environment (script line 55).
+Twelve fresh loopback processes per arm, port base 4810, production
+`rails new` app, `RUBY2SHELL_CLAIM_NO_MTRACE=1`.
+
+    # attack: 1 'a' + 967 ß in _method, no tracer in server environment
+    RACK_ENV=production RUBY2SHELL_CLAIM_STACK=rails \
+      RUBY2SHELL_CLAIM_MODE=poison RUBY2SHELL_CLAIM_N=972 \
+      RUBY2SHELL_CLAIM_TAG=w317rails1t RUBY2SHELL_CLAIM_DRAIN=984x7 \
+      RUBY2SHELL_CLAIM_PLANT=1000x6 FILLER_SPEC=1x1200 \
+      RUBY2SHELL_CLAIM_PARTS='1024@0x400:0x414,1015' \
+      RUBY2SHELL_CLAIM_COUNT=12 RUBY2SHELL_CLAIM_NO_MTRACE=1 \
+      RUBY2SHELL_CLAIM_THREADS=1 \
+      POISON_GROWN=0x450 POISON_NEXT=0x90 \
+      bash lab/repro/ruby2shell-shrink-claim.sh
+
+    # safe input: same length, all-ASCII _method — add
+    # METHOD_LEAD_A=968 and RUBY2SHELL_CLAIM_TAG=w317rails1tsafe
+
+    # fixed build: identical attack wire, patched 3.4.13 with the
+    # default 3.4.12 GEM_PATH — add
+    # RUBY2SHELL_CLAIM_RB=lab/build/plain/ruby-3.4.13-plain/bin/ruby and
+    # RUBY2SHELL_CLAIM_TAG=w317rails1tfixed
+
+Expect attack 12/12 abort on the attack POST (9 `malloc(): invalid next
+size (unsorted)`, 3 `malloc(): mismatching next->prev_size (unsorted)`),
+safe 12/12 and fixed 12/12 all six requests 404 with `up=200 alive=YES`
+and no abort line. All three attack bodies are 123,928 bytes; attack and
+fixed are byte-identical to the W313 wire
+(`92a21cc4a5144013e2104516cce0021c685337f5cc910532c84f549f2275ab25`).
+The availability primitive is thread-count invariant; grade unchanged,
+no survivor and no command. Evidence is gitignored under
+`lab/build/evidence/stock-rails-w317rails1t{,-safe,-fixed}-*.{summary,server.log}`.
