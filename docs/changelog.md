@@ -3,6 +3,23 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 11:0xZ — W334 `String#rpartition` stale tail bound (Ruby)
+
+New adjacent rung 3, no primary-CVE or rung-5 flag moved. W333's named
+experiment in the 3.4.12→3.4.13 `string.c` delta fired on the release's
+own UTF-16LE regression shape (`"A"` of 1 byte, separator `"A\x00"` of
+2 bytes): 3.4.12 ASan reports `negative-size-param: (size=-1)` in
+`memcpy` via `str_subseq:3045` → `rb_str_subseq:3067` →
+`rb_str_rpartition:11076`, and the true-plain build exits 139. Fixed
+3.4.13 returns `["", "", "A"]` clean. `lab/repro/ruby2shell-partition-stale.{rb,sh}`
+ran 40 arms (4 builds × 6 shapes plus 4 builds × 4 receiver lengths);
+the 1/3/5/9-byte receiver sweep reproduced the same `size=-1` on all
+vulnerable ASan arms, and all fixed and non-firing controls were clean.
+The `to_str`-shrinking separator hypothesis was a negative. No chosen
+bytes, pointer control, marker or wire input; stock reachability
+UNKNOWN. Details in `reports/ruby2shell-investigation.md` §W334 and
+`docs/reproducibility.md` §W334.
+
 ## 2026-11-27 10:5xZ — docs fold: libiscsi recipe, two static ceilings
 
 Docs-only fold of `1c8d5dcd`, `19394ee4`, `ee8316b6`, `485215e6`,

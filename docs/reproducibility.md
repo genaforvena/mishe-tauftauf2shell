@@ -18647,6 +18647,33 @@ all 24 fixed mutation arms raise `string modified`. The gdb dump shows
 actual object address, so offsets must be read relative to it. Full
 interpretation and grade in `reports/ruby2shell-investigation.md` §W333.
 
+### Ruby — W334 `String#rpartition` stale tail bound
+
+Pinned builds: `lab/build/plain/ruby-3.4.12/ruby` (vulnerable plain),
+`lab/build/ruby-3.4.12-asan/bin/ruby`, and the matching 3.4.13 fixed
+builds. Repro scripts: `lab/repro/ruby2shell-partition-stale.rb` and
+`lab/repro/ruby2shell-partition-stale.sh` (40 arms: 4 builds × 6 input
+shapes plus 4 builds × 4 receiver lengths). Evidence is written to the
+gitignored `lab/build/evidence/partition-stale/{matrix,gen-matrix}.txt`
+plus one `.out`/`.err` pair per arm.
+
+```sh
+bash lab/repro/ruby2shell-partition-stale.sh
+ASAN_OPTIONS=detect_leaks=0 W334_ARM=rp_gen W334_K=1 \
+  lab/build/ruby-3.4.12-asan/bin/ruby lab/repro/ruby2shell-partition-stale.rb
+ASAN_OPTIONS=detect_leaks=0 W334_ARM=rp_n1 \
+  lab/build/ruby-3.4.13-asan/bin/ruby lab/repro/ruby2shell-partition-stale.rb
+```
+
+Expected: the vulnerable 3.4.12 ASan arms report
+`negative-size-param: (size=-1)` in `memcpy` via `str_subseq`
+(`string.c:3045`) → `rb_str_subseq` (`:3067`) → `rb_str_rpartition`
+(`:11076`); the vulnerable plain arms exit 139/134/135. Fixed 3.4.13
+returns `["", "", str]` on the same inputs with zero ASan reports;
+`partition`, `to_str`-shrinking, ASCII and even-length controls are
+clean on both versions. Grade and limits in
+`reports/ruby2shell-investigation.md` §W334.
+
 ## 2026-11-27 10:4x–10:5xZ — libiscsi recipe, compiled and static ceilings
 
 Current limb for a reader arriving now. The admission and both replay

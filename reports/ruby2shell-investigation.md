@@ -7921,3 +7921,64 @@ RHS to `String#[]=` with a regexp key remains UNKNOWN, not a stock claim.
 
 Current grade unchanged for the primary CVE and full rung 5. No prior
 grade cell is relabeled. Recipe in `docs/reproducibility.md` §W333 (Ruby).
+
+## 2026-11-27 11:0xZ — W334: `String#rpartition` stale tail bound, adjacent rung 3 (Ruby)
+
+W333 named this experiment in the same 3.4.12→3.4.13 `string.c` delta.
+In 3.4.12, `rb_str_partition` (`:11014`) and `rb_str_rpartition`
+(`:11051`) compute the tail as
+`rb_str_subseq(str, pos + RSTRING_LEN(sep), RSTRING_LEN(str) - pos - RSTRING_LEN(sep))`
+with no recheck. 3.4.13 adds `long rpos = pos + RSTRING_LEN(sep); if
+(rpos > RSTRING_LEN(str)) goto failed;` to both (`:11086-11087` and
+`:11130-11131`). The regression tests added in that release include a
+UTF-16LE case: a one-byte receiver `"A"` and a two-byte separator
+`"A\x00"` in the same encoding.
+
+`lab/repro/ruby2shell-partition-stale.{rb,sh}` replayed that exact shape
+plus a receiver-length sweep across four pinned builds (true-plain and
+ASan 3.4.12/3.4.13): 40 arms in gitignored
+`lab/build/evidence/partition-stale/{matrix,gen-matrix}.txt`, one
+`.out`/`.err` pair per arm. On 3.4.12, `s.rpartition(sep)` with a
+1-byte UTF-16LE receiver and 2-byte separator reports
+`ERROR: AddressSanitizer: negative-size-param: (size=-1)` in `memcpy`
+via `str_subseq` (`string.c:3045`) → `rb_str_subseq` (`:3067`) →
+`rb_str_rpartition` (`:11076`); the true-plain build exits 139
+(SIGSEGV, backtrace through `rb_str_rpartition+0xf8` and
+`string.c:3068`). Fixed 3.4.13, plain and ASan, returns `["", "", "A"]`
+with zero ASan reports. The length sweep (receivers of 1/3/5/9 bytes,
+separators of 2/4/6/10 bytes) produces the same `size=-1` ASan report
+for all four vulnerable ASan arms; the vulnerable plain arms exit
+139/139/134/135. All 20 fixed-build arms are clean and all 14
+vulnerable control arms (`partition` on the same strings,
+`to_str`-shrinking separator, ASCII `rpartition`, even-length UTF-16LE
+receivers) are clean. The `to_str`-shrinking hypothesis from W333 was
+therefore a negative: `rpartition` with that mutation takes the failed
+branch on both builds.
+
+Mechanism: `rb_str_rindex` counts characters, clamps the start to
+`len - slen == 0`, and its `pos == 0` fast path compares the separator's
+two bytes against the one-byte receiver plus its in-bounds NUL
+terminator, returning byte position 0. The unchecked tail length is
+then `1 - 0 - 2 == -1`; the embedded-string branch of `str_subseq`
+passes it directly to `memcpy`. 3.4.13's `rpos > RSTRING_LEN(str)`
+guard sends the same input to the `failed` branch instead.
+
+Grade: **adjacent rung 3** — a deterministic crash on the true-plain
+vulnerable build plus confirmed invalid memory state under ASan, with
+fixed/safe-input controls. The copy size is always `-1`, not an
+attacker-chosen positive count; no chosen bytes at chosen offsets, no
+pointer control, no marker and no wire input were observed. Stock
+request reachability is UNKNOWN, not a claim. Primary CVE grade and
+full rung 5 are unchanged; no prior grade cell is relabeled. Recipe in
+`docs/reproducibility.md` §W334.
+
+Next named experiment: the other untested coercion guard in the same
+delta, `rb_str_slice_bang` (`String#slice!`) — 3.4.12
+`string.c:6004-6062` reads `beg = BEG(nth)` / `len = END(nth) - beg`
+before `rb_reg_backref_number(match, argv[1])` can run a mutating
+`to_int`, then calls `rb_str_new(RSTRING_PTR(str)+beg, len)` unchecked;
+3.4.13 (`:6044-6106`) adds `if (beg > RSTRING_LEN(str)) return Qnil;`
+and clamps `len`. Test a shrinking receiver with a mutating capture
+index on 3.4.12/3.4.13 plain+ASan. Falsifier: no ASan OOB and no
+byte-count differential beyond the guard. Do not repeat partition,
+backref `[]=`, each_line, append_as_bytes, concat or setbyte drivers.
