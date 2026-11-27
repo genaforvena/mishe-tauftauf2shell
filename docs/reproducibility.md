@@ -16094,7 +16094,7 @@ ASan; safe(8)/valid(1) are clean on both pins; plain rc 0 (no rung-1 claim).
 `reports/oiiocineon2shell-status.md`. Independent replay is still owed and
 the manifest keeps `established=false`: no rung 4/5 claim.
 
-### sngrepsip2shell — staged W298, rung 3 only, no admission
+### sngrepsip2shell — W298 staged; ADMITTED 193rd and W300 ESTABLISHED (supersession below)
 
 CVE record `https://cveawg.mitre.org/api/cve/CVE-2026-121943`, upstream
 issue 589 and fix PR 591 merged as `d49c96c9…` (no numbered fixed release).
@@ -16115,9 +16115,11 @@ rung-1/2 negative. The 10241-byte scan length is not a 10241-byte memcpy or
 a chosen byte; no full sngrep, libpcap, pcap, socket or wire path is built.
 Prebuilt binaries and probe scratch were removed after staging, so the
 harness is source-only; `runs/` text receipts are tracked and binaries are
-gitignored and rebuilt. Rung 3 only; no register row, witness verdict or
-standing-#6 admission yet. Detail: `reports/frontier-sngrepsip2shell.md`
-and `reports/sngrepsip2shell-status.md`.
+gitignored and rebuilt. At staging this was rung 3 only with no register row,
+witness verdict or standing-#6 admission; `856a2ad8` admitted it as the 193rd
+mind and `9e4b11c0` folded W300 ESTABLISHED AS LABELED (count 128→129).
+Detail: `reports/frontier-sngrepsip2shell.md`, the admitted
+`reports/sngrepsip2shell-status.md`, and § 00:3xZ below.
 
 ### Ruby2Shell W299 — ASLR-off echo is an invariant, not a byte-exact hash
 
@@ -16152,3 +16154,94 @@ no pointer, command or r5. Detail: `.mishe-tauftauf/artifacts/
 witness-w299-ruby/detail.md` and `reports/ruby2shell-investigation.md`
 § 23:2xZ.
 
+
+## 2026-11-27 00:3xZ — recipes for the sngrep verdict, libical stage and live-consumer negatives
+
+This section reproduces the matching `docs/task.md` fold. It adds recipes and
+boundaries only; no generated cell, grade, report or lab evidence is moved.
+
+### sngrepsip2shell — admission and W300 replay
+
+Reuse the four-pin recipe in § 23:1x–23:2xZ above; its staging wording is
+superseded by `856a2ad8` (admitted 193rd) and `9e4b11c0` (W300 verdict). For
+the verdict, take a clean `git archive 856a2ad8 lab/frontier/sngrepsip2shell`,
+remove the prebuilt binaries, confirm runner sha256
+`a4ebf8f62e9b8f4db2d4346911a059f51dc16231595b3409e016b71b03a9b819`, then run
+`sh run-all.sh`: 4/4 pins OK, rc 0, `PASS=13 FAIL=0`, GCC `-O1` ASan
+`stack-buffer-overflow READ of size 10241` at verbatim raw `src/sip.c:338`
+one byte past the 10240-byte `payload` at `:320` (`[128, 10368)`, access at
+10368); clang `-O1` reproduces at the same line with a frame-attribution NIT.
+Fixed 10240 prints `SIP_VALIDATE_RC=0` with no ASan, safe 10239 and
+guard-rejected 10241 are clean, and plain attack rc 0 is a preserved rung-1/2
+negative. No pcap, socket, full sngrep build, chosen-byte readback, pointer or
+command: rung 3 only. Detail: `.mishe-tauftauf/artifacts/witness-w300-sngrep/
+detail.md` and `reports/sngrepsip2shell-status.md`. The register's
+`established` flag is now true (count 128→129); no grade or r5 change.
+
+### oiiocineon2shell and rpm2shell — brief reconciliations
+
+The oiiocineon replay stays exactly as in § 23:1x–23:2xZ (37 pins, runner
+`79c81411016…`, 13/0, ASan `WRITE-8` at `cineoninput.cpp:215`); `d4b019ce`
+only changed its brief from STAGED to ADMITTED 192nd, with witness #5903 still
+owed and `established=false` unchanged. The rpm recipe stays in § 22:5x–23:0xZ
+(clean-archive runner `3f2d4415…`, loopback HTTP GET 11/0, ASan `WRITE-64` at
+`rpmfi.cc:2242`); `82288653` corrected the brief's stale "no wire path" prose
+to "loopback wire delivery measured, not r5". No chosen pointer, ASLR-stable
+target, command or observed side effect on that path; witness replay of the
+real-consumer lane remains owed.
+
+### Ruby2Shell — two attacks on one keep-alive worker
+
+Reuse `sh lab/repro/ruby2shell-onigmo-second.sh` from § 23:4xZ; the wrapper
+sets both GEM_PATH overrides, `LAYOUT=shallow`, `ASLR_OFF=1`,
+`RAILS_MAX_THREADS=2` and distinct ports, and the driver option
+`RUBY2SHELL_ONIGMO_SECOND_UNITS=32767` sends a second full POST on the same
+connection. Expect all ten first attacks 200/`CORRUPTED`; eight second POSTs
+200/alive/`CORRUPTED` (97–293 shortened rows), two with no response and
+`exit_after_request=-11`; attack→benign clean, safe→attack corrupted, fixed
+500 twice. Read `http_status`, `health`, `exit_after_request` and the differ
+verdict from the gitignored `lab/build/evidence/w300-*` JSON files, not the
+driver rc. Counts are layout-sensitive; no command or grade change.
+
+### libicalclean2shell — staged W300, limited rung 4
+
+Provisioning and all hashes are in `lab/frontier/libicalclean2shell/
+PROVENANCE.md` and `pins/PIN_HASHES.txt`: public reproducer zip SHA-256
+`1c7618d759d321586b83790ac8a768aa7b1b415f3d36f4f15a9c06097e74e1d5`,
+v4.0.6 `9cfca65c…` / fixed v4.0.7 `cb58c3cb…`, ownership fix `6c48980a`;
+14 file pins are checked before build. From a clean
+`git archive 1c6f8cf1 lab/frontier/libicalclean2shell` into an empty tree,
+run `sh lab/frontier/libicalclean2shell/run-all.sh` (runner SHA-256
+`91869a1a6081679fde87b195abef85d6c02c044ff415685d91ffedf63e29b300`): rc 0,
+`PASS=57 FAIL=0`, reproduced again from the stripped archive in
+`runs/clean-archive-replay.log`. Expect clang 18.1.3 static `ical` ASan/UBSan
+builds, eight vulnerable interrupted-input shapes giving `heap-use-after-free
+READ of size 8` at verbatim `icalcomponent.c:197` via `icalparser.c:117` in
+the 72-byte component, all ten fixed and vulnerable complete-input controls
+clean, and plain attack rc 139 three times. The rung-4 harness
+`rung4_reclaim.c` reuses the exact chunk: offset-48 zero exits 139, chosen
+`0x4141414141414141` exits 0 with `offset48_after=0x4141414141414141`, and
+`observe.gdb` prints the chosen `parent` in the stale `icalcomponent_free()`
+call; fixed zero/chosen controls survive without calling the sink. Source
+trees, builds, binaries and extra runs are gitignored and rebuilt by the
+runner; tracked `runs/` text receipts are the expected bytes. The 3.0-series
+fixed release is UNKNOWN. This is STAGED: no admission, witness, wire,
+pointer dereference, command or r5; grade **R1 ✓ / R2 ✓ / R3 ✓ / R4 LIMITED /
+R5 —**.
+
+### gimpjif2shell — live post-pin consumer negative
+
+With the SHA-verified GIMP 3.2.8 AppImage already extracted under
+`/tmp/gimpjif-appimage` (override with `GIMPJIF_APPIMAGE_WORK`), run
+`bash lab/frontier/gimpjif2shell/live/run-appimage-consumer.sh`. Expect
+`TOTAL: 9 PASS / 0 FAIL` plus two explicit UNKNOWN lines: no labelled
+fake-chunk return and no fake-word change. The safe JIF completes with
+`RUN_RC=0` and arms nothing; RAW shows 24 chosen `0x4d` bytes and
+`total_out=324`; PATCH adds the post-inflate pointer words but none of the
+sixteen bounded `malloc(260)` calls consumes the fake chunk. The neighbour is
+shim-arranged, never a natural plugin object. Re-run the repaired W297 runner
+`bash lab/frontier/gimpjif2shell/live/run-appimage-patch.sh` for 7 PASS / 0
+FAIL with `UNKNOWN: fake fd word unchanged at exit` — its old missing-exit
+grep and unrelated-field comparison had produced a false PASS. Exact hashes
+and lines are in `lab/frontier/gimpjif2shell/PROVENANCE.md`; evidence logs
+are tracked. Grade rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.

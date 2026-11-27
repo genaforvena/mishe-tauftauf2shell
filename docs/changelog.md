@@ -2,6 +2,55 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 00:3xZ — sngrep admitted and W300 closed, libical staged, live-consumer negatives
+
+This fold covers `856a2ad8..8ab87ca6` and adds explanation only: no generated
+cell, register row, grade, manifest, SVG, report or lab evidence was moved by
+this edit. Recipes are in `docs/reproducibility.md` § 00:3xZ. Reconciliation of
+the wake that ended unknown: its scoped docs edit never landed, so nothing
+from it was repeated; the frontier's own libical changelog entries were kept.
+
+- `856a2ad8` admitted sngrepsip2shell as the 193rd declared target mind under
+  standing #6 (window 201, panes %408/%409), counts 192/189/189/128 →
+  193/190/190/128, new row R1 — / R2 — / R3 ✓ / R4 — / R5 — with
+  `established=false` pending replay. The operator's clean-archive replay had
+  four pins OK, runner `a4ebf8f62e9b8…`, rc 0, `PASS=13 FAIL=0`, GCC and clang
+  ASan `READ-10241` at verbatim `sip.c:338`, fixed/safe/guard/plain clean.
+  `9e4b11c0` folded W300 **ESTABLISHED AS LABELED** at that exact rung-3 scope
+  and moved the independent-established count 128 → 129; generated
+  README/results/SVG/manifest regeneration was already done by the operator.
+  No pcap, socket, chosen byte, pointer, command or r5; rung 3 is the ceiling.
+- `278020a9` + `2f028253` removed site wall files from the git index (doctor
+  HOLD); that is a site-hygiene change, not a claim, grade or count change.
+  `58f6eb0b` (plus `69baa1f1`) added `lab/repro/ruby2shell-onigmo-second.sh`
+  and the driver's `RUBY2SHELL_ONIGMO_SECOND_UNITS` option: eight of ten second
+  POSTs on one keep-alive worker were 200/alive/`CORRUPTED`, two faulted with
+  no response; attack→benign clean, safe→attack corrupted, fixed 500 twice.
+  Layout-sensitive counts, no command or second command, grades unchanged.
+- `82288653` reconciled stale "no wire path" wording in the rpm brief: the
+  loopback HTTP delivery into real `rpm -i` is measured, but yields no chosen
+  pointer, ASLR-stable target, command or side effect; grade stays rung 4
+  author-layout with witness replay for the real-consumer lane still owed.
+  `d4b019ce` updated the oiiocineon brief from STAGED to ADMITTED 192nd;
+  witness #5903 stands, no claim moved.
+- `1c6f8cf1` + `e7bd221e` staged libicalclean2shell (CVE-2026-134761 /
+  GHSA-p95w-9p65-m226, affected `< 4.0.7`, vulnerable v4.0.6 `9cfca65c…`,
+  fixed v4.0.7 `cb58c3cb…`, ownership fix `6c48980a`; window 202, panes
+  %410/%411). Truncated iCalendar leaves `parser->root_component` stale; ASan
+  `READ-8` at `icalcomponent.c:197` via `icalparser.c:117` in eight vulnerable
+  interrupted shapes, fixed/complete clean, plain attack rc 139 three times.
+  Rung 4 LIMITED: an exact tcache-reclaimed 72-byte component with chosen
+  `0x4141414141414141` at offset 48 selects a benign early return; zero
+  crashes; GDB observes the chosen `parent`; fixed controls do not call the
+  sink. Runner `91869a1a…`, `PASS=57 FAIL=0` in-tree and from a clean archive
+  of `1c6f8cf1`; STAGED, no admission, witness, wire, command or r5.
+- `8ab87ca6` measured gimpjif's live post-pin consumer: the shim-arranged
+  smallbin neighbour was never consumed by a real plugin allocation (9/0 with
+  two explicit UNKNOWNs; three negative variants preserved), and the patched
+  W297 runner was repaired from a false PASS to 7/0 with `UNKNOWN: fake fd
+  word unchanged`. Grade rung 3 pinned verbatim / rung 4 PARTIAL, NO r5.
+
+
 ## 2026-11-27 00:1xZ — frontier reconciles W299; libicalclean2shell staged with limited rung 4
 
 - Reconciled unknown W299: its only durable repo effect was the intended
