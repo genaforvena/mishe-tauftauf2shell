@@ -2,6 +2,89 @@
 
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
+## 2026-11-27 04:2x–04:5xZ — W314/W315 verdict folds, nfdump closure, ud3tn chain
+
+This fold covers the eleven commits past `817db09a` through `99cffe00`.
+`b376f659` already wrote coherent Ruby W312 no-mtrace control-pair briefs in
+all three docs (§04:1xZ); verified, not duplicated. `ce85d757` and `f0d3cb7c`
+already folded the operator's generated cells: established 134 → 135
+(lwipmqtt2shell) → 136 (oiiocineon2shell), with README `200/197/197/136` and
+`docs/results.md` current. Explanation and recipes only here — no generated
+cell, register row, grade, count, report, SVG or lab evidence moved.
+
+- `ce85d757` and `f0d3cb7c` folded W314 verdicts ESTABLISHED AS LABELED with
+  no grade change and NO r5: lwipmqtt2shell at R2/R3/limited-R4 after a clean
+  `124c9a40` replay, oiiocineon2shell for #5903 at 04:27–04:28Z (advisory
+  CVE-2026-59181 / GHSA-xh8r-vmqq-56pp, `numberOfElements=255` stack writes
+  at raw `cineoninput.cpp:215`), and rpm/llamarpc report receipts. Counts
+  moved only for the two manifest `established` flags; the other verdicts
+  were boundary notes at already-established or ungraded scopes.
+- `291e4bda` folded the W315 real-consumer witness (#6062/#6061,
+  04:14–04:15Z) for rpm2shell: all four runner hashes and the vulnerable/
+  fixed source and excerpt pins matched, unmodified runners from the shared
+  `lab/frontier/rpm2shell/real` path returned 21/0, 21/0, 14/0 and 10/0 with
+  zero INFO. Fresh ASan `WRITE of size 64` zero bytes after a 1-byte region
+  at `rpmfi.cc:2242` in both `rpm2cpio` and `rpm2archive`, fixed attack rc 1
+  clean, safe controls rc 0; plain `rpm -i` SIGSEGV via `rpmluaFree
+  (rpmio/rpmlua.cc:153)`. A/B `CHOSEN_PTR … MATCH=1` at `lua_resume+0x206`
+  (`movzbl 0x9(%r14)`) with `stepi` faulting on the chosen pointer is a break
+  on a real liblua GC visit, not a debugger-forced call; V is the discovered
+  live target. Verdict closes #5630/#5669/#5729/#5731 at the labeled scope;
+  runners 1/2 consume prebuilt matched-layout binaries, so rung 4 remains
+  author-layout DEMONSTRATED, not a fresh-build invariant (13/1 and 6/2
+  fresh-build negatives preserved). No useful object, code pointer, command,
+  side effect or wire path; no grade change, NO r5.
+- `8dbabfac` folded witness #6067 for gimpjif2shell's W313 read-watch
+  negative (04:22–04:24Z): a clean 144-file `b3e21b50` archive, matching
+  runner `551fdd93…` and probe `26dde087…`, private SHA-verified hardlink
+  AppImage workdir with all `AppRun.*` unlinked, gave rc 0 with 16 PASS /
+  0 FAIL. Eight real-libz write hits walked the word to `0x4d4d…` through
+  `inflate` ← `ReadJeffsImage:1613` ← `ReadImage:1468`; the read watch at
+  `indexes+280` had zero hits before SIGSEGV at `si_addr=0x555555743000`,
+  an unrelated heap address. Pre-write pointer `indexes+0x130` agrees with
+  the corrected `out+304` target. ESTABLISHED AS LABELED, no counterexample,
+  grade rung 3 / rung 4 PARTIAL unchanged; fixed control still BLOCKED (no
+  patched AppImage; gimp.org rechecked 04:41Z), NO r5.
+- `96bf358b` folded witness #6065 for llamarpc2shell's distinct
+  CVE-2026-137567 TCP lane (04:18–04:21Z): fresh builds from a clean
+  119-file `7de5366b` archive reproduced 3/3 byte-exact chosen-byte wire
+  readbacks, vulnerable ASan `WRITE of size 16` 16 bytes before a 4096-byte
+  region through `rpc_server::copy_tensor`, fixed rejection (`invalid
+  tensors`) and a clean in-bounds control. ESTABLISHED AS LABELED at the
+  labeled lab-build scope; fresh binary hashes differ by path-dependent
+  debug info, so no author-layout byte identity is claimed. RDMA-lane
+  verdicts untouched; no grade change, NO r5.
+- `c8d6e141`, `9a860aa7`, `22dc70f7` and `99cffe00` folded nfdump2shell's
+  W314 IPv4-boundary and live-wire verdicts and closed the `-B` hypothesis.
+  The IPv4 lane (tape #6070, 04:26Z) came from a clean 27-file `325ec0c9`
+  archive with both SHA-verified tarballs: unmodified `run-edge.sh` rc 0 with
+  8 PASS / 0 FAIL, a fresh 65507-byte loopback datagram giving ASan `READ of
+  size 1` at `nfd_raw.c:259:34` (the crossing read, not the 8-byte
+  `msecReceived` store), clean complete-element and fixed controls. The live
+  wire (events 6076/6077, 04:32Z) came from `git archive 6f2b904c` with
+  `run-wire.sh` hash `841565f6…`: 13 PASS / 0 FAIL for each ASan and plain
+  pair, 112-byte attack giving a header size error and one flow with no ASan
+  report, safe preserving both flows, fixed rejecting. Both ESTABLISHED AS
+  LABELED, no grade change; only #5712 header and #5738 element type remain
+  queued. `nfcapd -B` only sets `SO_RCVBUF` (`nfnet.c:347-359`); the receive
+  buffer stays `malloc(65535)` at `nfcapd.c:273`/`:319`, so tuning `-B`
+  cannot change the adjacency — the hypothesis is CLOSED negatively.
+- `d1fc5a2f` added ud3tn2shell's fresh tcache chain (`harness/tcache_chain.
+  {py,gdb}`): repairing collateral size words lets the forged
+  `status_report` chunk at `F=p+0x300` complete `free()` and enter tcache;
+  a benign follow-up wire request is served at that chosen address with the
+  first chosen byte `0x43` present (`STORE_BEGIN p=0x7ffff0001340`). The
+  safe trigger length and fixed v0.15.2 ASan controls follow the natural
+  layout with no chosen allocation. Under gdb ASLR is disabled, so the
+  chosen address is a lab condition, not an ASLR-stable claim. Grade rung 4
+  now also covers a tcache-poisoned chosen-address allocation reached from a
+  live wire request; no callable pointer, indirect call, benign-command side
+  effect or witness replay — R5 remains UNKNOWN.
+
+Recipes and expected bytes are in `docs/reproducibility.md` §04:2x–04:5xZ.
+What would change these limbs: a witness verdict contradicting these scopes,
+a report misquoting the receipts, or a checker RED on committed HEAD.
+
 ## 2026-11-27 03:3x–03:5xZ — verdict folds, live pointer, lwipmqtt, rpm closure
 
 This fold covers `af0332cd`, `14d348e4`, `5401e884`, `bfd7b8a5`, `b7020ba3`,

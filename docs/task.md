@@ -15452,7 +15452,8 @@ configuration and dependencies. An unmodified `bash real/run-real.sh` at HEAD
 `02808d23` repeated `REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0` rc 0 with the
 same vulnerable ASan `WRITE of size 64`, fixed rc 1, safe and negative
 controls. Grade unchanged: rung 3 pinned verbatim / rung 4 author-layout
-DEMONSTRATED in real rpm consumers, witness verdict UNKNOWN, no r5.
+DEMONSTRATED in real rpm consumers, witness verdict UNKNOWN at that time,
+no r5; the W315 verdict is folded in §04:2xZ below.
 
 `df4caa52` reaped gimpjif2shell's orphan plug-in children by launching each
 AppRun under `setsid` and killing that one session after `wait`; no global
@@ -15498,9 +15499,11 @@ semantic dereference but not a useful object, code pointer, command or r5.
 pinned verbatim and real rpm / rung 4 author-layout DEMONSTRATED in real
 consumers; default PIE needs ASLR disabled for a chosen live GCObject, and the
 measured loopback wire path yields no chosen pointer, useful stable target or
-command. Real-consumer witness verdict UNKNOWN (W238 covered only the earlier
-synthetic lane), no r5. This supersedes the admission-time grade wording in
-the older W237 and admission limbs above, kept as pre-real-consumer history.
+command. Real-consumer witness verdict was UNKNOWN at that time (W238
+covered only the earlier synthetic lane), no r5; W315 later returned
+ESTABLISHED AS LABELED at that scope. This supersedes the admission-time
+grade wording in the older W237 and admission limbs above, kept as
+pre-real-consumer history.
 
 `b8f8f23c`, `cccea45e` and `15295203` staged, replayed and admitted
 lzxwindow2shell as the 198th mind (window 206 adopted, counts
@@ -15689,9 +15692,9 @@ under both compilers, `PASS=12 FAIL=0`; the published ASan heap overflow is
 NOT observed because the write is intra-object into the adjacent output
 ring. Grade R1 — / R2 ✓ / R3 ✓ / R4 LIMITED chosen-byte readback in a
 stubbed transport / R5 —. Admission at 04:0xZ adopted window 208 from a
-clean 18-file `124c9a40` archive replay (12/0); independent witness replay
-is owed. The named depth experiment is a real loopback client and local
-broker with fixed-pin and well-formed controls before any wider claim.
+returned ESTABLISHED AS LABELED at W314 (§04:2xZ). The named depth
+experiment is a real loopback client and local broker with fixed-pin and
+well-formed controls before any wider claim.
 
 Four commits landed after the admission and are folded here. `446583d5`
 corrected the W252 shim-pointer reading to `out+304`, not `out+368`; this
@@ -15700,12 +15703,13 @@ does not restore a named live object. `b3e21b50`'s post-inflate read watcher
 word before a collateral allocator SIGSEGV: a preserved negative, with
 per-thread watchpoint coverage UNVERIFIED because `libthread_db` was absent.
 `7de5366b` opened a distinct CVE-2026-137567 TCP COPY_TENSOR lane with local
-rung 3 ASan `WRITE-16` and byte-exact wire readback in 3/3 runs; it is
-PENDING witness and changes no other lane's grade. `4e972dfd`'s relaxed rpm
+PENDING witness then; W314 returned ESTABLISHED AS LABELED at the labeled
+lab-build scope and changes no other lane's grade. `4e972dfd`'s relaxed rpm
 rescan found no terminal static GCObject usable by the chosen write, so the
 useful target stays UNKNOWN.
 `0932fa04` also recorded a clean-archive read-watch replay (16/0, zero
-read hits, fault at another heap address); witness verdict UNKNOWN.
+read hits, fault at another heap address); W314 witness #6067 returned
+ESTABLISHED AS LABELED at that negative scope.
 
 Recipes and expected bytes are in `docs/reproducibility.md` §03:3xZ. What
 would change these limbs: a witness verdict contradicting these scopes, a
@@ -15722,3 +15726,50 @@ execution; grade unchanged. Recipe docs §03:5xZ, detail report §03:5xZ.
 Next: the same controlled pair on stock Rails in production config; if it
 holds, request witness replay and close the availability lane.
 
+
+## 2026-11-27 04:2x–04:5xZ — W314/W315 verdicts, nfdump closure, ud3tn chain
+
+Eleven commits past `817db09a` are folded here through `99cffe00`. The
+operator's generated cells are already current: README `200/197/197/136`,
+`docs/results.md` and the manifest established flags moved only for
+lwipmqtt2shell (134 → 135) and oiiocineon2shell (135 → 136), both
+ESTABLISHED AS LABELED with no grade change and NO r5. Ruby W312's
+production no-mtrace control pair was already briefed in §04:1xZ and all
+three docs; it is verified here, not duplicated.
+
+The five W314/W315 verdicts close formerly owed asks, all at their labeled
+scopes with no grade change and NO r5:
+
+- rpm2shell W315 (#6061/#6062) accepted the four real-consumer runners
+  (21/0, 21/0, 14/0, 10/0 with zero INFO) and all source/runner pins from
+  the shared `lab/frontier/rpm2shell/real` path. Rung 4 stays author-layout
+  DEMONSTRATED because runners 1/2 consume prebuilt matched-layout binaries;
+  fresh-build negatives are preserved. #5630/#5669/#5729/#5731 close; no
+  useful object, code pointer, command, side effect or wire path.
+- gimpjif2shell W314 (#6067) accepted the W313 read-watch negative: clean
+  144-file `b3e21b50` archive, 16/0 rc 0, zero reads of the overwritten
+  pointer word before an unrelated heap SIGSEGV. Fixed control BLOCKED;
+  per-thread watchpoint coverage UNKNOWN. No consumer read is claimed.
+- llamarpc2shell W314 (#6065) accepted the distinct CVE-2026-137567 TCP
+  lane at the labeled lab-build scope: 3/3 byte-exact wire readbacks, ASan
+  `WRITE-16`, fixed rejection and safe in-bounds control; fresh binary
+  hashes differ by path-dependent debug info. The RDMA lane is untouched.
+- nfdump2shell W314 accepted the IPv4 boundary (clean `325ec0c9`, 8/0,
+  ASan READ-1 at `nfd_raw.c:259:34`) and live wire (clean `6f2b904c`, 13/0
+  for both ASan and plain pairs) lanes; only #5712 header and #5738 element
+  type remain queued. The `-B` buffer-size hypothesis is CLOSED negatively:
+  it only sets `SO_RCVBUF`, leaving `malloc(65535)` receive geometry, so
+  it cannot change chunk adjacency.
+- lwipmqtt2shell and oiiocineon2shell verdicts moved the manifest flags;
+  the author reports remain non-acceptance.
+
+`d1fc5a2f` advanced ud3tn2shell's rung 4: preserving collateral chunk size
+words lets the forged `status_report` pointer complete `free()` into tcache
+and a later wire request be served at the chosen address `F=p+0x300` with
+the first attacker byte `0x43` there (`STORE_BEGIN p=0x7ffff0001340`).
+The safe trigger-length and fixed 0.15.2 ASan controls take the natural
+layout. gdb disables ASLR, so the address is a lab condition; no callable
+pointer, indirect call, benign command or witness replay exists — R5 stays
+UNKNOWN. Recipes and expected bytes are in `docs/reproducibility.md`
+§04:2x–04:5xZ. What would change these limbs: a verdict contradicting these
+scopes, a report misquoting the receipts, or a checker RED on committed HEAD.

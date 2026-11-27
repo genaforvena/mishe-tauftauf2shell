@@ -17213,7 +17213,11 @@ bytes, vulnerable ASan `WRITE of size 16` 16 bytes before a 4096-byte region
 at `ggml-rpc.cpp:1949`, fixed rejection and safe clean; runner `d8ac0d40…`.
 The earlier `rb1`/`rb2` opcode mistakes are preserved negatives. Rung 4
 readback uses a genuine second buffer handle, not an arbitrary-address read;
-no pointer, control flow or command. Witness owed.
+no pointer, control flow or command. W314 independent witness replay
+(04:18–04:21Z, clean 119-file `7de5366b` archive) returned ESTABLISHED AS
+LABELED at the labeled lab-build scope with 3/3 chosen-byte readbacks,
+vulnerable/fixed/safe controls reproduced; fresh binary hashes differ by
+path-dependent debug info, so author-layout byte identity is not claimed.
 
 `446583d5` corrected the W252 shim reading: `out+280` decodes to `out+304`,
 not `out+368`; the 448 chosen `0x4d` bytes are unchanged. `4e972dfd` scanned
@@ -17223,7 +17227,10 @@ GC-read `+9`, four malformed at `+8`, no usable field; useful target UNKNOWN.
 `0932fa04` repeated the read watcher from a clean
 `git archive b3e21b50 lab/frontier/gimpjif2shell`: 16/0 rc 0, zero
 `W313 READ HIT` records, fault address another heap value rather than the
-chosen word. Witness replay of that commit is asked; verdict UNKNOWN.
+chosen word. W314 witness #6067 (clean 144-file `b3e21b50` archive, private
+SHA-verified AppImage workdir with all `AppRun.*` unlinked) returned 16/0
+rc 0 with zero read hits: ESTABLISHED AS LABELED, no counterexample; the
+fixed build remains BLOCKED.
 
 ### W312 — production no-mtrace claim control pair (Ruby, §03:5xZ)
 
@@ -17255,3 +17262,88 @@ Expect attack 10/12 aborts (`corrupted size vs. prev_size`,
 pointer`), safe 12/12 and fixed 12/12 all six requests 404 with the process
 alive and no abort line. Grade unchanged; no command or chosen-byte write.
 
+
+### 2026-11-27 04:2x–04:5xZ — W314/W315 verdict replay conditions
+
+These recipes replay witness-observed lanes folded in this wake. No new
+generated cell or harness byte lives in this section.
+
+    # rpm2shell — four real-consumer runners (W315, #6062)
+    cd lab/frontier/rpm2shell/real
+    bash run-real.sh             # rc 0, REAL_CONSUMER_PASS=21 FAIL=0
+    bash run-scaled-payload.sh   # rc 0, 21 PASS / 0 FAIL
+    bash run-install-consumer.sh # rc 0, 14 PASS / 0 FAIL
+    bash run-gc-pointer.sh       # rc 0, GC_POINTER_PASS=10 FAIL=0, zero INFO
+
+Expected substantive bytes: ASan `WRITE of size 64` zero bytes after a
+1-byte region at `rpmfi.cc:2242` in `rpm2cpio` and `rpm2archive`, scaled
+writes of 64/512/4096, fixed attack rc 1 clean, safe controls rc 0; plain
+`rpm -i` SIGSEGV via `rpmluaFree (rpmio/rpmlua.cc:153)`. The GC-pointer log
+holds `CHOSEN_PTR=0x4141414141414141 … MATCH=1` at `lua_resume+0x206`
+(`movzbl 0x9(%r14)`), B repeats with `0x4242…`; V is the discovered live
+target. Runner pins `1ba873e6…`, `d0540006…`, `79f2784b…`, `e8e4b5f8…`;
+the witness ran the unmodified scripts from the shared worktree path
+`lab/frontier/rpm2shell/real`, consuming prebuilt matched-layout binaries.
+Fresh-build negatives (13/1 and 6/2) remain preserved: rung 4 is
+author-layout DEMONSTRATED, not a fresh-build invariant.
+
+    # gimpjif2shell — W313 post-inflate read watcher, W314 witness scope
+    git archive b3e21b50 lab/frontier/gimpjif2shell | tar -x -C /tmp/fresh
+    cd /tmp/fresh/lab/frontier/gimpjif2shell
+    GIMPJIF_APPIMAGE_WORK=/tmp/private-sha-verified-appimage \
+      bash live/run-appimage-readptr.sh   # rc 0, 16 PASS / 0 FAIL
+
+Unlink every `AppRun.*` variant in the private workdir first so the runner
+regenerates a fresh no-shim `AppRun.readptr`; probe SHA `26dde087…` and
+runner SHA `551fdd93…` must match committed bytes. Expect eight chosen-byte
+write hits through bundled `libz` `inflate` ← `ReadJeffsImage:1613`, then
+zero `W313 READ HIT` lines after `W313 INFLATE RETURNED` before a SIGSEGV
+at an unrelated heap address; the safe 4x4 JIF exits normally. Per-thread
+watchpoint coverage stays UNKNOWN (`libthread_db` unavailable); do not
+claim a consumer read. Fixed control BLOCKED: no patched AppImage published.
+
+    # llamarpc2shell — CVE-2026-137567 TCP lane (witness scope, W314)
+    git archive 7de5366b lab/frontier/llamarpc2shell | tar -x -C /tmp/fresh
+    # rebuild both sides with -DGGML_RPC=ON -DGGML_RPC_RDMA=OFF; then:
+    R=/tmp/fresh/lab/frontier/llamarpc2shell/heapwrite
+    PORT=53082 MODE=readback TAG=rb4 bash $R/run.sh
+    PORT=53083 MODE=asan TAG=asan1 SERVER=$R/build-vuln-asan/bin/ggml-rpc-server bash $R/run.sh
+    PORT=53084 MODE=readback TAG=fixed1 SERVER=$R/build-fixed/bin/ggml-rpc-server bash $R/run.sh
+    PORT=53085 MODE=safe TAG=safe2 bash $R/run.sh
+
+Expect 3/3 `readback=414243445a5a444411223344eeeeff00`, vulnerable ASan
+`WRITE of size 16` 16 bytes before a 4096-byte region through
+`rpc_server::copy_tensor`, fixed `invalid tensors`, safe in-bounds clean.
+Fresh binary hashes differ by path-dependent debug info; no author-layout
+identity is asserted. The older RDMA lane is a distinct verdict.
+
+    # nfdump2shell — W314 IPv4 boundary and live wire
+    git archive 325ec0c9 lab/frontier/nfdump2shell | tar -x -C /tmp/fresh
+    cd /tmp/fresh/lab/frontier/nfdump2shell
+    bash build-wire.sh    # re-hashes both pinned tarballs, builds four pairs
+    bash run-edge.sh      # rc 0, 8 PASS / 0 FAIL
+    git archive 6f2b904c lab/frontier/nfdump2shell | tar -x -C /tmp/fresh2
+    cd /tmp/fresh2/lab/frontier/nfdump2shell
+    bash run-wire.sh      # rc 0, 13 PASS / 0 FAIL for ASan and plain pairs
+
+The edge lane's 65507-byte loopback datagram gives ASan `READ of size 1`
+at `nfd_raw.c:259:34` (the crossing read), with a clean same-size
+complete-element control and fixed rejection. The 112-byte live-wire
+attack gives a header size error and one flow with no ASan report, the
+144-byte safe datagram preserves two flows and the fixed collector
+rejects. Only #5712 header and #5738 element type remain queued. The
+`nfcapd -B` hypothesis is closed: `-B` sets only `SO_RCVBUF`
+(`nfnet.c:347-359`) while `in_buff` stays `malloc(65535)` at
+`nfcapd.c:273`/`:319`.
+
+    # ud3tn2shell — fresh tcache chain to a chosen-address allocation
+    python3 lab/frontier/ud3tn2shell/harness/tcache_chain.py \
+      --binary lab/frontier/ud3tn2shell/build/plain/posix/ud3tn \
+      --outdir /tmp/chain-far-vuln --port 23624
+
+Under gdb (ASLR disabled) the third bundle is served from
+`STORE_BEGIN p=0x7ffff0001340` with the first wire byte `0x43` present.
+Controls: vulnerable trigger with source-EID length 8 lands at the natural
+`0x7ffff0001200`; fixed 0.15.2 ASan follows its natural layout with zero
+hits. No callable pointer, indirect call, command side effect or witness
+replay; R5 stays UNKNOWN.
