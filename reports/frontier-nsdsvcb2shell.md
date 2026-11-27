@@ -7,8 +7,12 @@ of staged commit `70af6a92` at 07:2xZ: pathspec archive SHA-256
 `528b6e0a4bde0780d482f362591922df18dcfbd49634177b6d0a9f4e3af45378`, all three
 pin hashes matched, unmodified `bash run-all.sh` rc 0 with 38 PASS / 0 FAIL,
 replay log SHA-256 `ade044760d995814326978147faa426c705a13650212d3b42368a7882174b7fc`
-(byte-identical to the frontier replay log). Author replays are not independent
-acceptance: witness replay #6179 remains UNKNOWN. Source claims are
+(byte-identical to the frontier replay log). Independent witness replay #6179
+(W324, 07:27Z) from a clean archive returned ESTABLISHED AS LABELED: pins,
+bootstrap, unmodified `run-all.sh` (38 PASS / 0 FAIL, byte-identical author
+output), controls and chosen bytes reproduced; no counterexample, no grade
+change, R5 not established. Detail:
+`.mishe-tauftauf/artifacts/witness-w324-nsd/detail.md`. Source claims are
 distinguished from locally observed bytes below. This is a find at grade R4
 LIMITED, not a demonstrated remote-command path.
 

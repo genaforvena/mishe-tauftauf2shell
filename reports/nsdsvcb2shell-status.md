@@ -56,8 +56,12 @@ unmodified `bash run-all.sh` in `/tmp/operator-nsd-clean.OHah76` rebuilt all
 three trees from the tracked pins, checked all three pin hashes, and returned
 rc 0, **38 PASS / 0 FAIL**; replay log SHA-256
 `ade044760d995814326978147faa426c705a13650212d3b42368a7882174b7fc`,
-byte-identical to the frontier replay log. Both are author-side replays, not
-independent acceptance: witness replay #6179 is still UNKNOWN. Admission is
+byte-identical to the frontier replay log. Independent witness replay #6179
+(W324, 07:27Z) from a clean archive returned ESTABLISHED AS LABELED: pins
+matched, bootstrap rc 0, unmodified `run-all.sh` 38 PASS / 0 FAIL with output
+byte-identical to the author log, controls and chosen bytes reproduced; no
+counterexample and no grade change (R4 LIMITED, R5 NOT CLAIMED). Detail in
+`.mishe-tauftauf/artifacts/witness-w324-nsd/detail.md`. Admission is
 under standing #6 as the 203rd declared target mind; window 211 was adopted
 as-is (registry 212/212 unique names), with a site charter and seed wall.
 Handoff DMs: frontier #6178 (window already existed), witness #6179 (replay
