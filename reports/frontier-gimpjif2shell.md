@@ -1338,3 +1338,49 @@ chosen bytes, NO r5. Witness verdict #6153 (06:22Z) on the previous fold
 `f2a92725`: fold-only ESTABLISHED AS LABELED, all seven W319/W320 script
 and log hashes matched, no counterexample.
 
+
+## Named field: the overwritten pointer is `TypeNode.global_gdata->qdatas` (W322, 2026-11-27)
+
+W321 left two frames of the `indexes+272` allocation chain unresolved. They
+are now resolved offline, without running the plug-in again. The replay script
+`lab/frontier/gimpjif2shell/live/resolve-w322-type.sh` derives the libgobject
+load base from the W321 log's `g_type_register_dynamic+201` PC and the ELF
+symbol offset `0x3c8d0`, then disassembles the two unnamed return PCs:
+`0x7ffff7a50236` is file offset `0x37236` and `0x7ffff7a502bd` is `0x372bd`.
+The library SHA-256 is `d277c689…`; the bundled libglib exports version
+2.84.4 (ELF constants `2`, `84`, `4`). The replay log is
+`evidence/w322-resolve-type.log` SHA-256 `14f85f9f…`.
+
+The function containing both sites starts at `0x37130`. Its `g_return_if_fail`
+domain/expression/function strings in the same library are `GLib-GObject`,
+`(flags & ~TYPE_FLAG_MASK) == 0` and `type_add_flags_W`; that is GLib's
+`type_add_flags_W(TypeNode *node, GTypeFlags flags)`. Its disassembly shows:
+
+- `0x3722c`: `g_malloc0(16)` returns a zeroed object; `0x37236` reads word 0
+  as `n_qdatas`, word 8 as `qdatas`, and stores the object at `0x28(%r13)` —
+  `TypeNode.global_gdata`.
+- `0x372a0`: when `n_qdatas == 0`, set it to 1 and `g_realloc_n(NULL,1,16)`;
+  `0x372bd` stores the returned `QData *` at `GData+8`.
+- The following binary search compares `QData.quark` with the
+  `static_quark_type_flags` quark and writes `QData.data` at `+8`.
+
+GLib 2.84 source (`gobject/gtype.c`, full-file SHA-256 `1aa2dd3d…`, excerpts
+pinned in `pins/glib-2.84-gtype-excerpts.txt`) defines exactly this layout:
+`struct _GData { guint n_qdatas; QData *qdatas; }` and
+`struct _QData { GQuark quark; gpointer data; }`; `g_type_register_dynamic()`
+calls `type_add_flags_W()` on the newly registered `TypeNode`. W317's
+pre-inflate words fit field for field: `+272 = 1` (`n_qdatas`), `+280 =
+indexes+304` (`qdatas`), `+304 = 0x00007fff00000001` (`quark = 1` with the
+upper halfword as padding) and `+312 = 0` (`data = NULL`).
+
+So the word that W312 saw replaced byte by byte with chosen `0x4d` bytes is
+the `qdatas` pointer field of a live `GData` in the `global_gdata` of the
+GEGL op_src GType registered at plug-in startup. This names the object and
+the field that were UNKNOWN in W317/W320/W321; the exact GType name is still
+UNKNOWN. The identification is from disassembly plus pinned source, not from
+a symbol table or a witness replay. No post-inflate read of that field was
+observed in W313's three watch runs, no chosen address was installed (the
+chosen bytes form `0x4d4d…`, not a useful address), no pointer dereference,
+control flow, marker or command was observed. Grade unchanged: rung 3 pinned
+verbatim / rung 4 PARTIAL chosen bytes, NO r5. The witness replay offered at
+chat #6156 covers W321, not this new W322 claim.

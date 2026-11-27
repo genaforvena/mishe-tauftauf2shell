@@ -1,0 +1,226 @@
+W322 libgobject SHA256 d277c68974f11e56f4e8a09d4216e8dec8a26f95a6d62eaee48ff90c5a89602e
+W322 libglib SHA256 41f221c9da2f4825c4e645c078a0f0f38e58e57ac3af9f9a39820d38e5c14e5d
+W322 g_type_register_dynamic symbol-offset=000000000003c8d0 load-base=0x7ffff7a19000 frame+272=0x37236 frame+304=0x372bd
+W322 bundled libglib version .rodata (micro, minor, major):
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libglib-2.0.so.0:     file format elf64-x86-64
+
+Contents of section .rodata:
+ 1335cc 04000000 54000000 02000000           ....T.......    
+W322 disassembly around the +272 return site (g_malloc0 of 16 bytes):
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+0000000000037220 <g_source_set_dummy_callback@@Base+0x18d0>:
+   37220:	45 89 e6             	mov    %r12d,%r14d
+   37223:	48 85 ed             	test   %rbp,%rbp
+   37226:	0f 85 34 01 00 00    	jne    37360 <g_source_set_dummy_callback@@Base+0x1a10>
+   3722c:	bf 10 00 00 00       	mov    $0x10,%edi
+   37231:	e8 aa 94 fd ff       	call   106e0 <g_malloc0@plt>
+   37236:	8b 30                	mov    (%rax),%esi
+   37238:	48 8b 78 08          	mov    0x8(%rax),%rdi
+   3723c:	49 89 45 28          	mov    %rax,0x28(%r13)
+   37240:	48 89 c5             	mov    %rax,%rbp
+   37243:	85 f6                	test   %esi,%esi
+   37245:	0f 84 73 01 00 00    	je     373be <g_source_set_dummy_callback@@Base+0x1a6e>
+   3724b:	89 f2                	mov    %esi,%edx
+   3724d:	48 89 f8             	mov    %rdi,%rax
+   37250:	48 c1 e2 04          	shl    $0x4,%rdx
+   37254:	48 01 fa             	add    %rdi,%rdx
+   37257:	eb 14                	jmp    3726d <g_source_set_dummy_callback@@Base+0x191d>
+   37259:	0f 1f 80 00 00 00 00 	nopl   0x0(%rax)
+   37260:	48 83 c0 10          	add    $0x10,%rax
+   37264:	48 39 c2             	cmp    %rax,%rdx
+   37267:	0f 84 0b 01 00 00    	je     37378 <g_source_set_dummy_callback@@Base+0x1a28>
+   3726d:	3b 18                	cmp    (%rax),%ebx
+   3726f:	75 ef                	jne    37260 <g_source_set_dummy_callback@@Base+0x1910>
+   37271:	4c 89 70 08          	mov    %r14,0x8(%rax)
+   37275:	e9 9e 00 00 00       	jmp    37318 <g_source_set_dummy_callback@@Base+0x19c8>
+   3727a:	66 0f 1f 44 00 00    	nopw   0x0(%rax,%rax,1)
+   37280:	48                   	rex.W
+   37281:	8d                   	.byte 0x8d
+   37282:	15                   	.byte 0x15
+   37283:	49 59                	rex.WB pop %r9
+   37285:	01                   	.byte 0x1
+W322 disassembly around the +304 return site (g_realloc_n of 1 QData):
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0:     file format elf64-x86-64
+
+
+Disassembly of section .text:
+
+000000000003729e <g_source_set_dummy_callback@@Base+0x194e>:
+   3729e:	00 00                	add    %al,(%rax)
+   372a0:	45 89 e6             	mov    %r12d,%r14d
+   372a3:	b8 01 00 00 00       	mov    $0x1,%eax
+   372a8:	be 01 00 00 00       	mov    $0x1,%esi
+   372ad:	89 75 00             	mov    %esi,0x0(%rbp)
+   372b0:	ba 10 00 00 00       	mov    $0x10,%edx
+   372b5:	48 89 c6             	mov    %rax,%rsi
+   372b8:	e8 e3 91 fd ff       	call   104a0 <g_realloc_n@plt>
+   372bd:	48 89 45 08          	mov    %rax,0x8(%rbp)
+   372c1:	48 89 c7             	mov    %rax,%rdi
+   372c4:	8b 45 00             	mov    0x0(%rbp),%eax
+   372c7:	48 89 fd             	mov    %rdi,%rbp
+   372ca:	8d 50 ff             	lea    -0x1(%rax),%edx
+W322 g_return_if_fail domain/function strings for type_add_flags_W:
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0:     file format elf64-x86-64
+
+Contents of section .rodata:
+ 4706c 6f720047 4c69622d 474f626a 65637400  or.GLib-GObject.
+ 4707c 4742696e                             GBin            
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0:     file format elf64-x86-64
+
+Contents of section .rodata:
+ 4cbd0 28666c61 67732026 207e5459 50455f46  (flags & ~TYPE_F
+ 4cbe0 4c41475f 4d41534b 29203d3d 20300000  LAG_MASK) == 0..
+
+/tmp/gimpjif-appimage-w316/squashfs-root/usr/lib/x86_64-linux-gnu/libgobject-2.0.so.0:     file format elf64-x86-64
+
+Contents of section .rodata:
+ 514a0 74797065 5f616464 5f666c61 67735f57  type_add_flags_W
+W322 pinned GLib 2.84 gtype.c excerpts (TypeNode/GData/QData/type_add_flags_W):
+GLib source excerpts used by W322 to identify the object at indexes+272.
+Source: https://gitlab.gnome.org/GNOME/glib/-/raw/glib-2-84/gobject/gtype.c
+Full-file SHA-256: 1aa2dd3d69cc119801263f2d6820203fb2fbfb4940a8701e27fa051dfabfb2e1
+Version check: bundled libglib-2.0.so.0 exports glib_major_version=2,
+glib_minor_version=84, glib_micro_version=4 (ELF .rodata at 0x1335d4/0x1335d0/0x1335cc).
+Fetched 2026-11-27T06:47Z as provisioning; these excerpts are pinned so replay
+needs no network. Line numbers below are from the full file.
+
+--- gtype.c:189-215 (TypeNode) ---
+struct _TypeNode
+{
+#ifdef G_ENABLE_DEBUG
+  guint        instance_count;  /* (atomic) */
+#endif
+  GTypePlugin *plugin;
+  guint        n_children; /* writable with lock */
+  guint        n_supers : 8;
+  guint        n_prerequisites : 9;
+  guint        is_abstract : 1;
+  guint        is_classed : 1;
+  guint        is_deprecated : 1;
+  guint        is_instantiatable : 1;
+  guint        is_final : 1;
+  guint        mutatable_check_cache : 1;	/* combines some common path checks */
+
+  GType       *children; /* writable with lock */
+  TypeData    *data;
+  GQuark       qname;
+  GData       *global_gdata;
+  union {
+    GAtomicArray iface_entries;		/* for !iface types */
+    GAtomicArray offsets;
+  } _prot;
+  GType       *prerequisites;
+  GType        supers[1]; /* flexible array */
+};
+
+--- gtype.c:3482-3492 (GData / QData) ---
+typedef struct _QData QData;
+struct _GData
+{
+  guint  n_qdatas;
+  QData *qdatas;
+};
+struct _QData
+{
+  GQuark   quark;
+  gpointer data;
+};
+
+--- gtype.c:3494-3525 (type_get_qdata_L) ---
+static inline gpointer
+type_get_qdata_L (TypeNode *node,
+		  GQuark    quark)
+{
+  GData *gdata = node->global_gdata;
+
+  if (quark && gdata && gdata->n_qdatas)
+    {
+      QData *qdatas = gdata->qdatas - 1;
+      guint n_qdatas = gdata->n_qdatas;
+
+      do
+	{
+	  guint i;
+	  QData *check;
+
+	  i = (n_qdatas + 1) / 2;
+	  check = qdatas + i;
+	  if (quark == check->quark)
+	    return check->data;
+	  else if (quark > check->quark)
+	    {
+	      n_qdatas -= i;
+	      qdatas = check;
+	    }
+	  else /* if (quark < check->quark) */
+	    n_qdatas = i - 1;
+	}
+      while (n_qdatas);
+    }
+  return NULL;
+}
+
+--- gtype.c:3563-3596 (type_set_qdata_W; qdata allocation) ---
+static inline void
+type_set_qdata_W (TypeNode *node,
+		  GQuark    quark,
+		  gpointer  data)
+{
+  GData *gdata;
+  QData *qdata;
+  guint i;
+  
+  /* setup qdata list if necessary */
+  if (!node->global_gdata)
+    node->global_gdata = g_new0 (GData, 1);
+  gdata = node->global_gdata;
+  
+  /* try resetting old data */
+  qdata = gdata->qdatas;
+  for (i = 0; i < gdata->n_qdatas; i++)
+    if (qdata[i].quark == quark)
+      {
+	qdata[i].data = data;
+	return;
+      }
+  
+  /* add new entry */
+  gdata->n_qdatas++;
+  gdata->qdatas = g_renew (QData, gdata->qdatas, gdata->n_qdatas);
+  qdata = gdata->qdatas;
+  for (i = 0; i < gdata->n_qdatas - 1; i++)
+    if (qdata[i].quark > quark)
+      break;
+  memmove (qdata + i + 1, qdata + i, sizeof (qdata[0]) * (gdata->n_qdatas - i - 1));
+  qdata[i].quark = quark;
+  qdata[i].data = data;
+}
+--- gtype.c:3626-3644 (type_add_flags_W) ---
+static void
+type_add_flags_W (TypeNode  *node,
+		  GTypeFlags flags)
+{
+  guint dflags;
+
+  g_return_if_fail ((flags & ~TYPE_FLAG_MASK) == 0);
+  g_return_if_fail (node != NULL);
+
+  if ((flags & TYPE_FLAG_MASK) && node->is_classed && node->data && node->data->class.class)
+    g_critical ("tagging type '%s' as abstract after class initialization", NODE_NAME (node));
+  dflags = GPOINTER_TO_UINT (type_get_qdata_L (node, static_quark_type_flags));
+  dflags |= flags;
+  type_set_qdata_W (node, static_quark_type_flags, GUINT_TO_POINTER (dflags));
+
+  node->is_abstract = (flags & G_TYPE_FLAG_ABSTRACT) != 0;
+  node->is_deprecated |= (flags & G_TYPE_FLAG_DEPRECATED) != 0;
+  node->is_final = (flags & G_TYPE_FLAG_FINAL) != 0;
+}

@@ -1,0 +1,139 @@
+GLib source excerpts used by W322 to identify the object at indexes+272.
+Source: https://gitlab.gnome.org/GNOME/glib/-/raw/glib-2-84/gobject/gtype.c
+Full-file SHA-256: 1aa2dd3d69cc119801263f2d6820203fb2fbfb4940a8701e27fa051dfabfb2e1
+Version check: bundled libglib-2.0.so.0 exports glib_major_version=2,
+glib_minor_version=84, glib_micro_version=4 (ELF .rodata at 0x1335d4/0x1335d0/0x1335cc).
+Fetched 2026-11-27T06:47Z as provisioning; these excerpts are pinned so replay
+needs no network. Line numbers below are from the full file.
+
+--- gtype.c:189-215 (TypeNode) ---
+struct _TypeNode
+{
+#ifdef G_ENABLE_DEBUG
+  guint        instance_count;  /* (atomic) */
+#endif
+  GTypePlugin *plugin;
+  guint        n_children; /* writable with lock */
+  guint        n_supers : 8;
+  guint        n_prerequisites : 9;
+  guint        is_abstract : 1;
+  guint        is_classed : 1;
+  guint        is_deprecated : 1;
+  guint        is_instantiatable : 1;
+  guint        is_final : 1;
+  guint        mutatable_check_cache : 1;	/* combines some common path checks */
+
+  GType       *children; /* writable with lock */
+  TypeData    *data;
+  GQuark       qname;
+  GData       *global_gdata;
+  union {
+    GAtomicArray iface_entries;		/* for !iface types */
+    GAtomicArray offsets;
+  } _prot;
+  GType       *prerequisites;
+  GType        supers[1]; /* flexible array */
+};
+
+--- gtype.c:3482-3492 (GData / QData) ---
+typedef struct _QData QData;
+struct _GData
+{
+  guint  n_qdatas;
+  QData *qdatas;
+};
+struct _QData
+{
+  GQuark   quark;
+  gpointer data;
+};
+
+--- gtype.c:3494-3525 (type_get_qdata_L) ---
+static inline gpointer
+type_get_qdata_L (TypeNode *node,
+		  GQuark    quark)
+{
+  GData *gdata = node->global_gdata;
+
+  if (quark && gdata && gdata->n_qdatas)
+    {
+      QData *qdatas = gdata->qdatas - 1;
+      guint n_qdatas = gdata->n_qdatas;
+
+      do
+	{
+	  guint i;
+	  QData *check;
+
+	  i = (n_qdatas + 1) / 2;
+	  check = qdatas + i;
+	  if (quark == check->quark)
+	    return check->data;
+	  else if (quark > check->quark)
+	    {
+	      n_qdatas -= i;
+	      qdatas = check;
+	    }
+	  else /* if (quark < check->quark) */
+	    n_qdatas = i - 1;
+	}
+      while (n_qdatas);
+    }
+  return NULL;
+}
+
+--- gtype.c:3563-3596 (type_set_qdata_W; qdata allocation) ---
+static inline void
+type_set_qdata_W (TypeNode *node,
+		  GQuark    quark,
+		  gpointer  data)
+{
+  GData *gdata;
+  QData *qdata;
+  guint i;
+  
+  /* setup qdata list if necessary */
+  if (!node->global_gdata)
+    node->global_gdata = g_new0 (GData, 1);
+  gdata = node->global_gdata;
+  
+  /* try resetting old data */
+  qdata = gdata->qdatas;
+  for (i = 0; i < gdata->n_qdatas; i++)
+    if (qdata[i].quark == quark)
+      {
+	qdata[i].data = data;
+	return;
+      }
+  
+  /* add new entry */
+  gdata->n_qdatas++;
+  gdata->qdatas = g_renew (QData, gdata->qdatas, gdata->n_qdatas);
+  qdata = gdata->qdatas;
+  for (i = 0; i < gdata->n_qdatas - 1; i++)
+    if (qdata[i].quark > quark)
+      break;
+  memmove (qdata + i + 1, qdata + i, sizeof (qdata[0]) * (gdata->n_qdatas - i - 1));
+  qdata[i].quark = quark;
+  qdata[i].data = data;
+}
+--- gtype.c:3626-3644 (type_add_flags_W) ---
+static void
+type_add_flags_W (TypeNode  *node,
+		  GTypeFlags flags)
+{
+  guint dflags;
+
+  g_return_if_fail ((flags & ~TYPE_FLAG_MASK) == 0);
+  g_return_if_fail (node != NULL);
+
+  if ((flags & TYPE_FLAG_MASK) && node->is_classed && node->data && node->data->class.class)
+    g_critical ("tagging type '%s' as abstract after class initialization", NODE_NAME (node));
+  dflags = GPOINTER_TO_UINT (type_get_qdata_L (node, static_quark_type_flags));
+  dflags |= flags;
+  type_set_qdata_W (node, static_quark_type_flags, GUINT_TO_POINTER (dflags));
+
+  node->is_abstract = (flags & G_TYPE_FLAG_ABSTRACT) != 0;
+  node->is_deprecated |= (flags & G_TYPE_FLAG_DEPRECATED) != 0;
+  node->is_final = (flags & G_TYPE_FLAG_FINAL) != 0;
+}

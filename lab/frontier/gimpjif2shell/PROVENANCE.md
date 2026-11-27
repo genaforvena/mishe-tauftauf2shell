@@ -1934,3 +1934,57 @@ the prior fold `f2a92725` is ESTABLISHED AS LABELED, all seven W319/W320
 script/log hashes matched byte-for-byte from a clean archive, no
 counterexample, grade unchanged. No replay owed on that verdict.
 
+
+## W322 offline resolution of the W321 frames: `GData.qdatas` named (2026-11-27, 06:37-06:53Z)
+
+Wake clock 06:40:19Z; wall checkpoint at 06:41Z. No live plug-in run, no
+network probe of a target, no heap or plugin byte changed in this wake. The
+GLib source fetch was provisioning from
+`https://gitlab.gnome.org/GNOME/glib/-/raw/glib-2-84/gobject/gtype.c`
+(full-file SHA-256 `1aa2dd3d69cc119801263f2d6820203fb2fbfb4940a8701e27fa051dfabfb2e1`);
+excerpts and line numbers are pinned in `pins/glib-2.84-gtype-excerpts.txt`.
+
+Artifacts and SHA-256:
+
+- `live/resolve-w322-type.sh` `4065dbf2bb7105beb2a23d2fed08e49ee2d8e563001255abc5bd34c87975d454`
+- `live/evidence/w322-resolve-type.log` `14f85f9f6898c22bf5854463c8482e8bfe6792cbf16ce2b32e2bf0917031e3b5`
+- `pins/glib-2.84-gtype-excerpts.txt` `852e8541b9f4be7992359010da88c501648b2df88cf046450cb59056c0a38bb7`
+- AppImage `libgobject-2.0.so.0` `d277c68974f11e56f4e8a09d4216e8dec8a26f95a6d62eaee48ff90c5a89602e`
+- AppImage `libglib-2.0.so.0` `41f221c9da2f4825c4e645c078a0f0f38e58e57ac3af9f9a39820d38e5c14e5d`
+
+Method: the script first rejects execution unless the exact W321 log lines
+for `0x7ffff7a50236`, `0x7ffff7a502bd`, `g_type_register_dynamic+201` and the
+W317 word values are present. It reads the ELF symbol offset
+`g_type_register_dynamic = 0x3c8d0` with `nm -D`, derives load base
+`0x7ffff7a19000` from the logged PC minus 201, and converts the two unnamed
+frames to file offsets `0x37236` and `0x372bd`. It then prints the
+disassembly, the `g_return_if_fail` strings and the pinned source excerpts.
+
+Observed in the replay log: `g_malloc0@plt` called with `0x10` at `0x37231`;
+the returned pointer stored at `0x28(%r13)` at `0x3723c`; a 16-byte
+`g_realloc_n@plt` at `0x372b8` whose result is stored at `0x8(%rbp)` at
+`0x372bd`; strings `GLib-GObject`, `(flags & ~TYPE_F[LAG_MASK]) == 0` and
+`type_add_flags_W` at `0x4706f`, `0x4cbd0`, `0x514a0`. The bundled libglib
+`.rodata` constants at `0x1335cc/0x1335d0/0x1335d4` are `4/84/2`, i.e. 2.84.4.
+
+The pinned 2.84 source contains `type_add_flags_W(TypeNode *node, GTypeFlags
+flags)` with exactly that assertion and a call through `type_get_qdata_L()`
+to `static_quark_type_flags`, and `type_set_qdata_W()` with `g_new0(GData,1)`
+followed by `g_renew(QData, ..., 1)`. `struct _GData { guint n_qdatas; QData
+*qdatas; }` and `struct _QData { GQuark quark; gpointer data; }` match the
+disassembly's word loads/stores and the W317 object words: `+272=1`
+(`n_qdatas`), `+280=indexes+304` (`qdatas`), `+304=0x00007fff00000001`
+(`quark=1`, upper halfword padding) and `+312=0` (`data=NULL`). Conclusion:
+the 16-byte chunk at `indexes+272` is the `GData` in
+`TypeNode.global_gdata` for the GEGL op_src GType registered by
+`gegl_op_src_register_type`, and the chosen-byte-overwritten word at
+`indexes+280` is its `qdatas` pointer field.
+
+Limits: no symbol table entry for the static helper (it is stripped), so the
+identification rests on disassembly plus the version-matched source, not on
+a debug symbol. The exact GType name of the `TypeNode` remains UNKNOWN. No
+post-inflate read of the field was observed (W313), chosen bytes form
+`0x4d4d…` rather than a useful address, and no dereference, control flow,
+marker or command was observed. Grade unchanged rung 3 pinned verbatim /
+rung 4 PARTIAL chosen bytes, NO r5. W321 replay offered at chat #6156 does
+not cover this W322 claim; a new replay offer was sent separately.
