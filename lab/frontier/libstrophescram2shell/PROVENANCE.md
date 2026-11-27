@@ -3,9 +3,11 @@
 All sources were fetched as public provisioning; no external host was probed,
 no listener was started, every executed harness was local. The six source,
 advisory and patch pins are immutable and verified by `SHA256SUMS` before every
-run; four harness files and eight built binary hashes are pinned in the same
-file. `build-real.sh` uses only the archives and the pinned harness header; it
-performs no network I/O.
+run; four harness files are pinned in the same file. `BINARY_SHA256.txt`
+records one observed build but is not a pin: debug info embeds the checkout
+path, so a byte-identical clean rebuild in another directory necessarily has
+different hashes. `build-real.sh` uses only the archives and the pinned harness
+header; it performs no network I/O.
 
 | Artifact | URL / identifier | SHA-256 |
 |---|---|---|

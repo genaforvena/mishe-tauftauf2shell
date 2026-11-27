@@ -59,9 +59,12 @@ Plain vulnerable builds survive 124/125 but SIGSEGV (rc 139) at 256/512.
 
 ## Reproduction and evidence
 
-`sh run-all.sh` pins six source/advisory/patch files, four harness files and
-eight built binary hashes; `build-real.sh` rebuilds all eight consumers from
-the pinned archives with no network I/O. Toolchain: GCC 13.3.0, glibc 2.39,
+`sh run-all.sh` pins six source/advisory/patch files and four harness files;
+`build-real.sh` rebuilds all eight consumers from the pinned archives with no
+network I/O. Built binary hashes are recorded for the author checkout but not
+pinned: debug info embeds the absolute checkout path, so a clean rebuild in a
+different directory is byte-different by construction. Toolchain: GCC 13.3.0,
+glibc 2.39,
 x86-64; `-g -O0`, stack protector off, ASan/plain and non-PIE plain; project
 configured `--disable-tls --disable-examples`. Observed run:
 `RUN_ALL_OK 46 PASS / 0 FAIL`, summary SHA-256

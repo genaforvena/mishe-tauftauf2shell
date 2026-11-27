@@ -29,10 +29,17 @@ else
     bad 'builds' 'expected eight BUILD_OK lines'
 fi
 
-if sha256sum -c BINARY_SHA256.txt >>runs/pin-check.out 2>&1; then
-    ok 'eight built binary hashes'
+BINS_OK=0
+for bin in runs/scram-vuln-asan runs/scram-vuln-plain \
+           runs/scram-fixed-asan runs/scram-fixed-plain \
+           runs/scram-vuln-noassert-asan runs/scram-vuln-noassert-plain \
+           runs/scram-fixed-noassert-asan runs/scram-fixed-noassert-plain; do
+    [ -x "$bin" ] && BINS_OK=$((BINS_OK+1))
+done
+if [ "$BINS_OK" -eq 8 ]; then
+    ok 'eight rebuilt consumer binaries present'
 else
-    bad 'binary hashes' 'sha256sum -c BINARY_SHA256.txt failed'
+    bad 'binary presence' "expected eight executables, found $BINS_OK"
 fi
 
 run_case() {
