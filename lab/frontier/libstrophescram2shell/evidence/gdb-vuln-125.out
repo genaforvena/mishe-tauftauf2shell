@@ -1,0 +1,12 @@
+Breakpoint 1 at 0x12341: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c, line 187.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+salt_len=125 fill=0x42 challenge_len=182
+sasl_scram response=non-NULL
+==743134==LeakSanitizer has encountered a fatal error.
+==743134==HINT: For debugging, try setting environment variable LSAN_OPTIONS=verbosity=1:log_threads=1
+==743134==HINT: LeakSanitizer does not work under ptrace (strace, gdb, etc)
+[Inferior 1 (process 743134) exited with code 01]
+No symbol "salt_len" in current context.
+No frame selected.
+No stack.

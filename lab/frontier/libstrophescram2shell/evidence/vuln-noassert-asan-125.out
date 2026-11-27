@@ -1,0 +1,52 @@
+salt_len=125 fill=0x42 challenge_len=182
+=================================================================
+==821707==ERROR: AddressSanitizer: unknown-crash on address 0x761fc8f0009d at pc 0x63a3e3c3e36e bp 0x7ffeb0495f70 sp 0x7ffeb0495f60
+WRITE of size 4 at 0x761fc8f0009d thread T0
+    #0 0x63a3e3c3e36d in SCRAM_Hi /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:188
+    #1 0x63a3e3c3e6fa in SCRAM_ClientKey /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:214
+    #2 0x63a3e3c3d838 in sasl_scram /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c:457
+    #3 0x63a3e3c384f1 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/harness/scram_challenge.c:69
+    #4 0x761fcae2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #5 0x761fcae2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #6 0x63a3e3c37aa4 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/runs/scram-vuln-noassert-asan+0xbaa4) (BuildId: bd5c55dc87231e5cfc86e8417cfaae20229aa8af)
+
+Address 0x761fc8f0009d is located in stack of thread T0 at offset 157 in frame
+    #0 0x63a3e3c3e1db in SCRAM_Hi /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:172
+
+  This frame has 1 object(s):
+    [32, 160) 'tmp' (line 175) <== Memory access at offset 157 partially overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: unknown-crash /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:188 in SCRAM_Hi
+Shadow bytes around the buggy address:
+  0x761fc8effe00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8effe80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8efff00: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8efff80: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8f00000: f1 f1 f1 f1 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x761fc8f00080: 00 00 00[00]f3 f3 f3 f3 00 00 00 00 00 00 00 00
+  0x761fc8f00100: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8f00180: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8f00200: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8f00280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x761fc8f00300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==821707==ABORTING

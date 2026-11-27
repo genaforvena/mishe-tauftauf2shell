@@ -1,0 +1,2 @@
+salt_len=124 fill=0x42 challenge_len=182
+sasl_scram response=non-NULL

@@ -1,0 +1,14 @@
+Breakpoint 1 at 0x405b35: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c, line 191.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+salt_len=256 fill=0x43 challenge_len=358
+
+Breakpoint 1, SCRAM_Hi (alg=0x41d3a0 <scram_sha1>, text=0x41d0d9 "password", len=8, salt=0x426460 'C' <repeats 200 times>..., salt_len=256, i=1, digest=0x4343434343434343 <error: Cannot access memory at address 0x4343434343434343>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:191
+191	    crypto_HMAC(alg, text, len, tmp, salt_len + sizeof(int1), digest);
+0x7fffffff8b38:	0x43	0x43	0x43	0x43	0x43	0x43	0x43	0x43
+0x7fffffff8b40:	0x43	0x43	0x43	0x43	0x43	0x43	0x43	0x43
+0x7fffffff8b48:	0x43	0x43	0x43	0x43	0x43	0x43	0x43	0x43
+0x7fffffff8b50:	0x43	0x43	0x43	0x43	0x43	0x43	0x43	0x43
+#0  SCRAM_Hi (alg=0x41d3a0 <scram_sha1>, text=0x41d0d9 "password", len=8, salt=0x426460 'C' <repeats 200 times>..., salt_len=256, i=1, digest=0x4343434343434343 <error: Cannot access memory at address 0x4343434343434343>) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:191
+#1  0x4343434343434343 in ?? ()
+#2  0x4343434343434343 in ?? ()

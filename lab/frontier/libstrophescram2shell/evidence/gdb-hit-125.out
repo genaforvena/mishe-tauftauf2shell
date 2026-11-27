@@ -1,0 +1,32 @@
+Breakpoint 1 at 0x113a1: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c, line 386.
+Breakpoint 2 at 0x1273b: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c, line 214.
+Breakpoint 3 at 0x122e2: file /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c, line 180.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+salt_len=125 fill=0x42 challenge_len=182
+
+Breakpoint 1, sasl_scram (ctx=0x506000000020, alg=0x5555555ab7e0 <scram_sha1>, channel_binding=0x55555559d2a0 "biws", challenge=0x7ffff5c031b0 "r=nonce,s=QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=,i=1", first_bare=0x55555559d260 "n=user,r=nonce", jid=0x55555559d220 "user@example.org", password=0x55555559d2e0 "password") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c:386
+386	    char *r = NULL;
+#0  sasl_scram (ctx=0x506000000020, alg=0x5555555ab7e0 <scram_sha1>, channel_binding=0x55555559d2a0 "biws", challenge=0x7ffff5c031b0 "r=nonce,s=QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=,i=1", first_bare=0x55555559d260 "n=user,r=nonce", jid=0x55555559d220 "user@example.org", password=0x55555559d2e0 "password") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c:386
+#1  0x00005555555604f2 in main (argc=3, argv=0x7fffffffe228) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/harness/scram_challenge.c:69
+
+Breakpoint 2, SCRAM_ClientKey (alg=0x5555555ab7e0 <scram_sha1>, password=0x55555559d2e0 "password", len=8, salt=0x50c000000040 'B' <repeats 125 times>, salt_len=125, i=1, key=0x7ffff5600080 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:214
+214	    SCRAM_Hi(alg, password, len, salt, salt_len, i, salted);
+#0  SCRAM_ClientKey (alg=0x5555555ab7e0 <scram_sha1>, password=0x55555559d2e0 "password", len=8, salt=0x50c000000040 'B' <repeats 125 times>, salt_len=125, i=1, key=0x7ffff5600080 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:214
+#1  0x0000555555565868 in sasl_scram (ctx=0x506000000020, alg=0x5555555ab7e0 <scram_sha1>, channel_binding=0x55555559d2a0 "biws", challenge=0x7ffff5c031b0 "r=nonce,s=QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=,i=1", first_bare=0x55555559d260 "n=user,r=nonce", jid=0x55555559d220 "user@example.org", password=0x55555559d2e0 "password") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c:457
+#2  0x00005555555604f2 in main (argc=3, argv=0x7fffffffe228) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/harness/scram_challenge.c:69
+$1 = 125
+
+Breakpoint 3, SCRAM_Hi (alg=0x5555555ab7e0 <scram_sha1>, text=0x55555559d2e0 "password", len=8, salt=0x50c000000040 'B' <repeats 125 times>, salt_len=125, i=1, digest=0x7ffff5400020 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:180
+180	    STROPHE_ASSERTVD(salt_len <= sizeof(tmp) - sizeof(int1));
+#0  SCRAM_Hi (alg=0x5555555ab7e0 <scram_sha1>, text=0x55555559d2e0 "password", len=8, salt=0x50c000000040 'B' <repeats 125 times>, salt_len=125, i=1, digest=0x7ffff5400020 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:180
+#1  0x0000555555566776 in SCRAM_ClientKey (alg=0x5555555ab7e0 <scram_sha1>, password=0x55555559d2e0 "password", len=8, salt=0x50c000000040 'B' <repeats 125 times>, salt_len=125, i=1, key=0x7ffff5600080 "") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/scram.c:214
+#2  0x0000555555565868 in sasl_scram (ctx=0x506000000020, alg=0x5555555ab7e0 <scram_sha1>, channel_binding=0x55555559d2a0 "biws", challenge=0x7ffff5c031b0 "r=nonce,s=QkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkI=,i=1", first_bare=0x55555559d260 "n=user,r=nonce", jid=0x55555559d220 "user@example.org", password=0x55555559d2e0 "password") at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/work/libstrophe-9816acc93cfcf071d6ca952fc5b3a266dcded9ce/src/sasl.c:457
+#3  0x00005555555604f2 in main (argc=3, argv=0x7fffffffe228) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/libstrophescram2shell/harness/scram_challenge.c:69
+alg = 0x5555555ab7e0 <scram_sha1>
+text = 0x55555559d2e0 "password"
+len = 8
+salt = 0x50c000000040 'B' <repeats 125 times>
+salt_len = 125
+i = 1
+digest = 0x7ffff5400020 ""
