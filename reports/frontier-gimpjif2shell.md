@@ -1062,3 +1062,44 @@ or wire path was observed. Detail:
 The fixed-build control remains BLOCKED: a fresh `curl
 https://www.gimp.org/downloads/` at 03:58Z still lists only
 3.2.0/3.2.2/3.2.4/3.2.6/3.2.8, with no 3.2.10 AppImage.
+
+## No post-inflate consumer read of the overwritten pointer (W313, 2026-11-27)
+
+`live/gdb-readptr.cmd` (SHA-256 `26dde087a879ccd4066b96a51270f6970b04e30fa7c9712b3b0cdcbfe027c1b2`)
+repeats W312's no-shim write watchers on `indexes+272`/`+280`, then breaks
+at `inflate()`'s return into `ReadJeffsImage` and installs a **read**
+watchpoint on the overwritten pointer word. The SIGSEGV handler prints
+`si_addr`. `bash live/run-appimage-readptr.sh` (SHA-256
+`551fdd9388c21081d80c4bb93cc87ad94e8fe92b6991d52aa435ca242246d178`)
+returned **16 PASS / 0 FAIL**, rc 0, with a fresh no-shim `AppRun.readptr`.
+
+`live/evidence/gdb-readptr-8192.log`: `indexes=0x5555556e9310`,
+`avail_out=2147483778`, `flags=0x1`, `ptr=0x00005555556e9440`
+(`indexes+304`) before the write; eight bundled-libz stores take both
+words byte by byte to `0x4d4d4d4d4d4d4d4d` with `#2 ReadJeffsImage
+(... alpha_frame=1) at file-gif-load.c:1613`, `#3 ReadImage
+(is_jeff_image=1):1468`, `#4 load_image:625`. The return breakpoint hit
+(`W313 INFLATE RETURNED`) and the read watcher was installed at
+`indexes+280`; **zero read hits** followed before the terminal SIGSEGV in
+libc via `g_malloc0` / `gimp_drawable_get_buffer` / `ReadImage:1477`.
+`W313 FAULT SI_ADDR 0x55555573f000` and `rax=0x5555556e9d40` are heap
+addresses, not the chosen `0x4d4d…` value. The safe 4x4 JIF logs a clean
+exit with zero hits.
+
+This is a preserved negative: after `inflate()` returns, no code observed
+in this run reads the replaced pointer word, and the fault is collateral
+allocator corruption at a different address. GDB warned that
+`libthread_db` was unavailable, so per-thread watchpoint coverage is not
+independently verified; the plug-in is single-threaded in this phase.
+Grade unchanged: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5. Object identity, chosen-address dereference, control flow and any
+command side effect remain UNKNOWN. Exact logs and hashes are in
+`lab/frontier/gimpjif2shell/PROVENANCE.md`.
+
+Author clean-archive replay at 04:12Z: `git archive b3e21b50
+lab/frontier/gimpjif2shell` extracted into a fresh `/tmp` directory, then
+`bash lab/frontier/gimpjif2shell/live/run-appimage-readptr.sh` with the
+shared SHA-verified AppImage workdir returned `TOTAL: 16 PASS / 0 FAIL`,
+rc 0, again with zero read hits. The terminal fault address moved to
+`0x555554000000`, confirming that the fault site and address are
+layout-sensitive and are not the chosen word.

@@ -1605,3 +1605,58 @@ remains UNKNOWN. Detail:
 Fixed-build control rechecked at 03:58Z: `curl
 https://www.gimp.org/downloads/` still lists 3.2.0/3.2.2/3.2.4/3.2.6/
 3.2.8 only; no 3.2.10 AppImage.
+
+## W313 no-shim post-inflate read watcher: no consumer read (2026-11-27)
+
+New `live/gdb-readptr.cmd` (SHA-256
+`26dde087a879ccd4066b96a51270f6970b04e30fa7c9712b3b0cdcbfe027c1b2`)
+and `live/run-appimage-readptr.sh` (SHA-256
+`551fdd9388c21081d80c4bb93cc87ad94e8fe92b6991d52aa435ca242246d178`).
+Hypothesis: if any code consumes the overwritten pointer after
+`inflate()`, a hardware READ watchpoint can name that consumer, and a
+matching `si_addr` can distinguish a chosen-address fault from collateral
+allocator corruption. The probe changes no plugin byte, heap byte or
+allocator state and generates its own no-shim `AppRun.readptr`.
+
+`bash live/run-appimage-readptr.sh`: **16 PASS / 0 FAIL**, rc 0, against
+the SHA-verified GIMP 3.2.8 AppImage. Fresh logs
+`live/evidence/gdb-readptr-8192.log` (SHA-256
+`6bbe051bec03b9c9ec4e5e6a1dba228c4d7909959fc38ba1ef8d525794e2dfbe`)
+and `gdb-readptr-safe.log` (SHA-256
+`c371b471bcc48e16d758f9795b2610da9815d8782cf33cc0ac275412403852b8`).
+Attack log: `W313 PRE-INFLATE indexes=0x5555556e9310
+avail_out=2147483778`; `W313 LIVE FIELDS flags=0x1
+ptr=0x00005555556e9440` (`indexes+304`); eight `liveptr` write hits from
+`0x00005555556e9440` through `0x4d4d4d4d4d4d4d4d`, all with `#0/#1` in
+bundled `libz.so.1`, `#2 ReadJeffsImage (alpha_frame=1) at
+file-gif-load.c:1613`, `#3 ReadImage (is_jeff_image=1):1468`, `#4
+load_image:625`. `W313 INFLATE RETURNED idx=0x5555556e9310` and
+`W313 READ SET liveptr at 0x5555556e9428` show the read watcher was
+installed after the stores. **No `W313 READ HIT` record occurs** before
+the terminal SIGSEGV; fault frames are libc /
+`g_malloc0` / `_gimp_value_array_to_gp_params` /
+`gimp_item_id_is_valid` / `gimp_item_is_valid` /
+`gimp_drawable_get_buffer` / `ReadImage:1477`, with
+`W313 FAULT SI_ADDR 0x55555573f000` and `rax=0x5555556e9d40`, neither
+equal to the chosen `0x4d4d…` word. Safe 4x4 log: 22 lines, clean exit,
+zero hits.
+
+Preserved negative with a coverage caveat: GDB reported `warning:
+Unable to find libthread_db matching inferior's thread library, thread
+debugging will not be available`; the plug-in is single-threaded in this
+phase but per-thread watchpoint coverage is UNVERIFIED. Grade unchanged:
+rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. The object
+at `indexes+272` still has no semantic name in a no-shim run; no chosen
+address, dereference of the replaced pointer, control flow, marker or
+command was observed. The earlier W252 misstatement that its pointer
+targeted `out+368` was corrected above from `galloc-long.log`'s raw
+bytes (`out+304`); this no-shim log agrees.
+
+Author clean-archive replay at 04:12Z: `git archive b3e21b50
+lab/frontier/gimpjif2shell` into a fresh `/tmp/gimpjif-readptr-clean-*`
+tree, then `bash lab/frontier/gimpjif2shell/live/run-appimage-readptr.sh`
+from that tree with the shared SHA-verified AppImage workdir:
+`TOTAL: 16 PASS / 0 FAIL`, rc 0, zero `W313 READ HIT` records,
+`W313 FAULT SI_ADDR 0x555554000000` (another heap address, not the
+chosen value). Witness asked in addressed DM to replay commit `b3e21b50`
+and verify this negative and the unchanged grade.
