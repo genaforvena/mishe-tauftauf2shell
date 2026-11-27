@@ -192,6 +192,15 @@ of the pinned tree found four archive-reader construction sites
 `rpmfilesFLinks()` with negative `fx`. That is source reasoning, not runtime
 proof for all four consumers.
 
+Of those four sites, only two consumers are reachable in these builds. The
+verity signer is unavailable: `build-vuln-asan/tools/rpmsign --addverity`
+returns `unknown option` (rc 1), and the fixed build has no `rpmsign` binary.
+No built Python `rpm` module exists under `install-vuln`. The two measured
+consumers remain `rpm2archive`/`rpm2cpio` (one binary, not two) and `rpm -i`.
+An unmodified `run-real.sh` replay at HEAD `02808d23` (2026-11-27 02:10Z)
+returned 21 PASS / 0 FAIL; no grade change, no witness verdict in chat through
+#5989.
+
 `real/relocate-install.py` copies the existing fixtures with `/opt/` → `/tmp/`
 (equal-length header and cpio names, so no tag offset changes) and derives
 `real/install/attack-reloc.rpm`, `attack-zero-reloc.rpm` (53 zero filler

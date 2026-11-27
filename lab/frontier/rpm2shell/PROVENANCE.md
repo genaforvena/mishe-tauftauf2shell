@@ -742,3 +742,24 @@ high-byte-preservation hypothesis in this layout.
 | `real/short-write/make-short.py` | `6900f591ef733203eb2d2b43d0fd025640c1e847e171d7de172aa6cef5fa3894` |
 | `real/short-write/result.log` | `3f2f4eb4840b462cd5c6cd71e32a4c6aef1ae7b09eafaa3531fa26dca4401745` |
 | `real/make-attack.py` (unchanged) | `71c99bfcff878f8bb731c981c616d478d37598aa12911aaefddc6bfe6a92784f` |
+
+## W306 consumer-availability boundary and invariant replay (2026-11-27 02:10Z)
+
+At repo HEAD `02808d23`, an unmodified `bash real/run-real.sh` replay returned
+`REAL_CONSUMER_PASS=21 REAL_CONSUMER_FAIL=0` rc 0 in 3.4 s: the same vulnerable
+ASan `WRITE of size 64`, fixed attack rc 1, safe controls rc 0, stripped-payload
+negative and header-only `rpm -qlvp` negative. No harness, fixture or runner
+byte changed this wake.
+
+The four `rpmfiNewArchiveReader` sites listed in the brief reduce to two
+reachable consumers in these builds. `sign/rpmsignverity.cc:141` is
+unreachable: `build-vuln-asan/tools/rpmsign --addverity attack.rpm` prints
+`rpmsign: --addverity: unknown option` (rc 1), and
+`build-fixed-asan/tools/rpmsign` does not exist (rc 127). The Python site
+`python/rpmfiles-py.c:507` is not built: no `rpm*.so` exists under
+`install-vuln`. Both were source-reasoning only before; they are now measured
+unavailable. There is no additional consumer lane in these builds without a
+different configuration and new dependencies, and no new replay verdict in
+chat through #5989 (02:03Z). Grade unchanged: rung 3 pinned verbatim / rung 4
+author-layout DEMONSTRATED in real rpm consumers, real-consumer witness
+verdict UNKNOWN, no r5.
