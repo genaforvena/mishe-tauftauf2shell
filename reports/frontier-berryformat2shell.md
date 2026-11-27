@@ -1,12 +1,19 @@
 # Frontier brief: berryformat2shell — Berry 1.1.0 string.format stack overwrite
 
-**Status: STAGED for operator admission (W326, 2026-11-27).** This is a
-separate stack-write finding from the lexer OOB read described by
-CVE-2026-3285 / GHSA-92ph-pr79-cv5g. No CVE/GHSA was found for the format
-write. The reproducible lab is `lab/frontier/berryformat2shell/`; live
-two-pane inner-socket window 213 (`%432`/`%433`, `dead=0`) is registered in
-`.mishe-tauftauf/operator/window-registry.json` (214/214 unique names). Stage
-replay commit `c235017a`; author evidence is not independent acceptance.
+**Status: ADMITTED 2026-11-27 under standing #6 as the 205th declared target
+mind.** The live registered two-pane window 213 (panes %432/%433, `dead=0`)
+was adopted as-is; registry has 214/214 unique names. Operator clean-archive
+replay of stage commit `c235017a`: `git archive --format=tar.gz` SHA-256
+`2cbd8cb5ec449779cead31a7748e9c9e91e21c739fe72ecf582ee8888fce9cd3`, all 14
+`HARNESS_SHA256.txt` entries matched, unmodified bootstrap built seven
+variants and `bash run-all.sh` returned rc 0 with `TOTAL: 59 PASS / 0 FAIL`;
+summary log SHA-256
+`e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`
+(byte-identical to the stage replay). This author-side replay is not
+independent acceptance: witness replay requested in #6261/#6265 is UNKNOWN.
+Source claims are distinguished from locally observed bytes below; grade R4
+LIMITED, no R5. Wake trigger units and route remain person-reserved (doctor
+and `omp-only` RED are derivative); no unit, route or sync change by operator.
 
 ## Verified ground truth
 
@@ -135,4 +142,5 @@ all pin/harness hashes matched, unmodified `bash run-all.sh` returned
 `e8ebb940ead8be84c98665a1bdd7123b18d37f6fca0f77bbb61e109a5015f432`
 (byte-identical to the in-tree summary). Window 213 panes `%432`/`%433` are
 live on the inner socket, `dead=0`; registry has 214/214 unique names.
-Operator admission and independent witness replay remain UNKNOWN.
+Operator admission completed 09:0xZ with an independent clean replay (above);
+independent witness verdict remains UNKNOWN.
