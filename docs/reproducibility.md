@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| LrzszProcheader2Shell W352 (STAGED, author-only) | [status](../reports/lrzszprocheader2shell-status.md), [brief](../reports/frontier-lrzszprocheader2shell.md), [provenance](../lab/frontier/lrzszprocheader2shell/PROVENANCE.md) | CVE-2026-105842 / GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`, fixed `b18b5792…` (0.13.0), parent `b1fc8a01…`, fix `f8caa7b1…`; stable harness/arms hashed in `SHA256SUMS` (the volatile ASan attack log is deliberately excluded) | `cd lab/frontier/lrzszprocheader2shell && sha256sum -c SHA256SUMS && sh harness/run-all.sh` (autoreconf/ASan builds of both pinned trees, direct call to real `procheader()`, no wire listener) | `RUN_ALL_OK 5 PASS / 0 FAIL`; ASan `WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, 0 bytes past the 8192-byte `:1217` region; 16-byte and fixed arms clean. STAGED, no witness, no live ZMODEM wire, NO r5; full procedure in §17:2xZ |
 | CoturnOAuthNonce2Shell W330/W331 (ADMITTED 09:4xZ, 206th) | [status](../reports/coturnoauthnonce2shell-status.md), [brief](../reports/frontier-coturnoauthnonce2shell.md), [provenance](../lab/frontier/coturnoauthnonce2shell/PROVENANCE.md) | CVE-2026-43994 / GHSA-74pg-rfh2-5qw5, coturn `<=4.9.0`, fix `46368b3e` (tag 4.10.0); pinned `6e8dd731` archive `d5152f86…`, fixed `44df0803…`, patch `f266a92e…`, 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/coturnoauthnonce2shell && bash bootstrap.sh && bash run-all.sh` (four ASan/plain builds of the direct sink harness, no listener) | rc 0, 13 PASS / 0 FAIL; ASan `WRITE of size 990` at `decode_oauth_token_gcm client/ns_turn_msg.c:2363` via `decode_oauth_token:2485`; unprotected plain build places chosen `0x41` bytes in `key_length=0x4141`, `timestamp=0x4141414141414141`, `lifetime=0x41414141`; fixed refuses `990 > 256`, nonce-256/16 clean on both (unrelated OpenSSL error-path leak in both, leak detection disabled); R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED; clean archive `5a982134…` and log `b9c20a26…` at admission, W331 witness ESTABLISHED AS LABELED at that clean-archive/harness scope (count 140); no live wire; full recipe in §09:2x–09:4xZ |
 | TcpreplayServices2Shell (ADMITTED 10:0xZ, 207th; W332 ESTABLISHED) | [brief](../reports/frontier-tcpreplayservices2shell.md), [status](../reports/tcpreplayservices2shell-status.md), [provenance](../lab/frontier/tcpreplayservices2shell/PROVENANCE.md) | CVE-2026-102896 / GHSA-fwcr-mqg6-hqmx, affected `<=4.6.0-beta2` pin `9d291ec9…`, fixed `4.6.0-beta3` pin `e6e32ec7…`; 10 harness/input SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/tcpreplayservices2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (unmodified real `tcpprep`, local services file, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 20-digit services line gives ASan `WRITE of size 20` in `parse_services` at `src/common/services.c:74` into 10-byte `port[]`, 11 digits gives WRITE-11, fixed and 5/9-digit inputs clean; clean `git archive 52bcb913` replay (archive `f8dfc707…`, summary `98b92441…` byte-identical) repeated 12/0; operator admission 10:0xZ as 207th (window 215, registry 216/216); W332 independent clean-archive replay 12/0 with byte-identical `98b92441…`, ESTABLISHED AS LABELED at that local-CLI/harness scope; R1/R2/R3 ✓, R4 LIMITED, R5 NOT CLAIMED, no grade or `established:false` change. |
 | LibiscsiLuns2Shell (ADMITTED 10:4xZ, 208th; W333 ESTABLISHED) | [brief](../reports/frontier-libiscsiluns2shell.md), [status](../reports/libiscsiluns2shell-status.md), [provenance](../lab/frontier/libiscsiluns2shell/PROVENANCE.md) | Benjamin Ali advisory 2026-08-04 (no CVE/GHSA — UNKNOWN), vulnerable `ef5491376…`, fixed `eff2822fd…` (no release tag), six SHA-256 pins in `HARNESS_SHA256.txt` | `cd lab/frontier/libiscsiluns2shell && sha256sum -c HARNESS_SHA256.txt && bash bootstrap.sh && bash run-all.sh` (direct `scsi_datain_unmarshall()` harness, four in-tree autotools builds, no listener) | rc 0, `TOTAL: 12 PASS / 0 FAIL`; 4-byte reply gives ASan `WRITE of size 4` at `lib/scsi-lowlevel.c:590` via `:3851`, 0 bytes after a 10-byte region, plain `num=4294967295 (-1)`; fixed returns NULL, 8/16-byte well-formed controls clean; summary SHA-256 `d97043e1…`; witness clean archive `412c89ab…` matched 6/6 pins, ESTABLISHED AS LABELED, R4 LIMITED, R5 NOT CLAIMED |
@@ -20306,9 +20307,11 @@ admitted the target as the 217th mind and folded `established:true`.
 and PROVENANCE wording: W361's counterexamples make the former
 single-pointer and W345-sweep negatives layout-dependent observations;
 sparse24 `8d9ba89e…` is the only durable `ARR[0]` negative. The brief
-header now reads R4 ✓ at the witness-verified scope and the W351
-chosen-field chain remains author-only pending replay (#6628). The
-§16:0xZ and §16:3xZ recipes above are unchanged: no new JIF, runner,
+header now reads R4 ✓ at the witness-verified scope and, at that repair,
+left the W351 chosen-field chain author-only pending replay (#6628). W362
+later established that chain (§17:2xZ); W352's third-stage claim remains
+author-only.
+The §16:0xZ and §16:3xZ recipes above are unchanged: no new JIF, runner,
 binary or hash was produced by this repair.
 
 ### Gimpjif2Shell W352 — third-stage chosen table base (author-only)
@@ -20362,3 +20365,69 @@ canary, PIE and fortify stay UNKNOWN. Hash NIT: `8d72e4a6…` is the raw
 `abb7f49c` git-archive TAR stream, not a tree hash. Detail:
 `.mishe-tauftauf/artifacts/witness-w362/detail.md` and
 `reports/uxplaypin2shell-status.md`; no new harness was committed here.
+
+## 2026-11-27 17:2xZ — W351 verdict fold and lrzszprocheader2shell stage
+
+### Gimpjif2Shell W351 stage-2 — W362 replay, no new harness to run
+
+No new JIF, runner or build is committed by `2027ddaf`. The witness
+replayed offer #6628 from a private archive (raw TAR SHA-256
+`5f4ff2571a0e665c009c29ae57a00771d905420c3712c6719219f7681082946f`)
+with runner `b047c40e…`, observer `45d54969…` and JIF `971b6b4b…`,
+and reused the SHA256SUMS-verified GIMP 3.2.8 AppImage `8b43dc23…`.
+Expect at the 101-character JIF path: `PASS: pinned inflate reached`,
+`PASS: fault captured in GDB`, `W349 CHOSEN n=32 pc=0x7ffff7fd1327
+rax=0x00005555556c0240 map=[[heap]] i=0 DELTA_FROM_IDX=0x47210
+mem28=0x00005555556c0240`, both W351 STAGE2 hits (`0x7ffff7fd133e`
+and `0x7ffff7fd1356`, `rbx=0x5555556c0240`, `byte354=0x40`,
+`byte356=0x40`), terminal `SIGSEGV 0x7ffff7fd129f`, `DEREF_HITS=33`.
+The witness's `idx`/`ARRBASE` were +0x30 from the author's with
+`ARRBASE−idx=0x47210` unchanged; a 90-character path yielded
+`DELTA_FROM_IDX=0xa1410` and no chosen chain. Fixed plug-in rejected the
+JIF with `Error reading image data`; the GDB observer wrote only its own
+/tmp log. Verdict ESTABLISHED AS LABELED at the pinned-sink/live-consumer
+scope, grade-neutral, R4 ✓ unchanged and NO r5. This closes replay offer
+#6628, not W352's open offer #6661. Full detail:
+`.mishe-tauftauf/artifacts/witness-w362/detail.md` §W351; docs read the
+artifact and folded verdict but did not re-run the AppImage here.
+
+### LrzszProcheader2Shell W352 — pinned-sink filename overflow (STAGED)
+
+From the repository root, provisioning public sources only. The upstream
+git worktrees and build outputs are gitignored; `run-all.sh` creates
+`vuln/` and `fixed/` from the pinned revisions if absent. All runs are
+local files, no target is contacted.
+
+```sh
+cd lab/frontier/lrzszprocheader2shell
+sha256sum -c SHA256SUMS
+sh harness/run-all.sh
+```
+
+Expect 6/6 pins OK and `RUN_ALL_OK 5 PASS / 0 FAIL`. The harness includes
+the pinned, unmodified `src/lrz.c` with `main` renamed, sets
+`protocol=ZM_ZMODEM` and calls the real static `procheader()` with a
+sender-chosen name. The 12000-byte fill-`0x43` arm gives ASan
+`WRITE of size 12001` in `strcpy` at `src/lrz.c:1220`, destination 0
+bytes after the 8192-byte region allocated at `:1217`; 16-byte vulnerable
+and fixed arms are clean (fixed `checkpath` rejects the long name after
+the safe `strdup`). Lab-only build adaptations are `AC_PREREQ` 2.72→2.71
+for host autoconf, host gettext `config.rpath`/`po/Makefile.in.in` copies
+and `-Wno-error` on the fixed tree; none touches the sink or fix hunk.
+`evidence/vuln-attack.out` is intentionally **excluded** from
+`SHA256SUMS`: its PID, ASLR addresses and build-id change per replay,
+while `run-all.sh` asserts the sink, allocation and `WRITE of size
+12001`. The other five hashed files regenerate on every run.
+
+Docs replayed the committed tree from a clean `git archive --format=tar
+4678a157 lab/frontier/lrzszprocheader2shell | tar -x -C /tmp/w352-docs-lrzsz`,
+copying in the already-provisioned gitignored `src/`, `vuln/` and `fixed/`
+worktrees (revisions `b1fc8a01…` / `b18b5792…`). `sha256sum -c SHA256SUMS`
+was 6/6 OK and `sh harness/run-all.sh` rc 0 with all five PASS lines;
+the replay's ASan log showed the same `WRITE of size 12001`, `procheader
+vuln/src/lrz.c:1220` and allocation at `:1217`. No live ZMODEM sender,
+chosen-address write, marker or command was exercised: R4 is claimed
+only at the pinned-sink lab scope, no r5, `established:false`, operator
+admission and witness replay owed. Detail:
+`lab/frontier/lrzszprocheader2shell/PROVENANCE.md` and
+`reports/frontier-lrzszprocheader2shell.md` §Rung-4 feasibility.

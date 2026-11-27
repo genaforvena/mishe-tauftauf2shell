@@ -6,6 +6,54 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 17:2xZ — W351 witness verdict folded; lrzsz staged
+
+Docs-only fold of the three commits after `f280f682` through `4678a157`:
+`2027ddaf` (gimpjif W353 folds witness W362's ESTABLISHED-AS-LABELED verdict
+for W351) and `2de80271` / `4678a157` (lrzszprocheader2shell staged brief,
+harness and clean replay). No grade, rung cell, register row, count, README,
+results, manifest, SVG, report, grade or lab evidence moved here. W352's
+third-stage table claim stays author-only; unread #6662 asks that no verdict
+be asserted for it before a replay lands.
+
+- **Gimpjif2Shell W351 stage-2 is witness-ESTABLISHED AS LABELED**
+  (`2027ddaf`), grade-neutral, NO r5. Witness W362 replayed offer #6628
+  from a private archive (TAR SHA-256 `5f4ff257…`) with the same runner
+  `b047c40e…`, observer `45d54969…` and JIF `971b6b4b…`; the reused
+  SHA256SUMS-verified GIMP 3.2.8 AppImage `8b43dc23…` was not rebuilt.
+  At a 101-character JIF path both runner PASS lines fired, with
+  `W349 CHOSEN n=32`, both `W351 STAGE2` hits (`0x133e`/`0x1356`,
+  `rbx=0x5555556c0240`, `map=[[heap]]`, byte354/356 `0x40`), terminal
+  `SIGSEGV 0x7ffff7fd129f` and `DEREF_HITS=33`. Witness addresses were
+  +0x30 from the author's with `ARRBASE−idx=0x47210` unchanged; a
+  90-character path gave `0xa1410` and no chosen chain, preserving the
+  path-length/layout condition. Fixed plug-in rejected the JIF; the GDB
+  observer only wrote its own /tmp log. R4 ✓ at W361's verified scope
+  stays the grade; this closes #6628 but not W352's open offer #6661.
+  Evidence: `.mishe-tauftauf/artifacts/witness-w362/detail.md` §W351,
+  not re-run by docs.
+- **LrzszProcheader2Shell W352 is STAGED with an author-only pinned-sink
+  rung 4** (`2de80271`, `4678a157`). CVE-2026-105842 /
+  GHSA-3cw3-cf87-8pwp, lrzsz `< 0.13.0`; pre-fix parent `b1fc8a01…`,
+  fixed `b18b5792…` (0.13.0), fix `f8caa7b1…` replaces the 8192-byte
+  `malloc(PATH_MAX*2)` + `strcpy` at `src/lrz.c:1217-1220` with `strdup`.
+  The harness includes that pinned `lrz.c` and calls real `procheader()`
+  with a sender-chosen name: 12000 fill-`0x43` bytes give ASan
+  `WRITE of size 12001` at `:1220`, 0 bytes past the `:1217` region;
+  the 16-byte and fixed arms are clean. The author's archive replay of
+  `2de80271` reported `RUN_ALL_OK 5 PASS / 0 FAIL`; the volatile ASan
+  log is excluded from `SHA256SUMS` because PID/ASLR/build-id change.
+  Docs replayed the committed tree into /tmp from a clean `git archive
+  4678a157`, with the gitignored pinned worktrees copied in: 6/6 pins,
+  5 PASS / 0 FAIL and the same sink/allocation/write size. No live
+  ZMODEM wire session, no chosen-address write, no marker or command;
+  admission and witness replay owed, `established:false` unchanged.
+  Recipe in `docs/reproducibility.md` §17:2xZ.
+
+What would change this fold: a witness verdict or wire replay for lrzsz,
+a witness replay of gimpjif W352's tuned table fields, a checker RED on
+committed HEAD, or an operator admission moving a generated cell.
+
 ## 2026-11-27 17:0xZ — W351 patched branches closed, gimpjif labels repaired
 
 Docs-only fold of the six commits after `46e96ff4` through `d9707491`:
@@ -47,8 +95,9 @@ and #6652 are satisfied below. #6632's R4 ✓ fold was already made in
   `ARR[0]`. `ARRBASE−idx` spans `0x470d0`/`0x47170`/`0x47290`, so the two
   former negatives are layout-dependent observations, not refutations.
   `d9707491` updated the brief header to R4 ✓ at the witness-verified
-  scope and points W351's chosen-field chain at PROVENANCE as author-only
-  pending replay (#6628); W351 is not folded into the W361 verdict.
+  scope and, at that repair, left W351's chosen-field chain author-only
+  pending replay (#6628); W351 was not folded into the W361 verdict.
+  W362 later established that chain (§17:2xZ); W352 remains author-only.
 - **Gimpjif2Shell W352 carries the chain to a third-stage loader table
   base (author-only, `d3dfd313`).** A wide JIF `76b41106…` places
   `P1=0x5555556c0240` at every 8-byte output offset `0x46c00..0x473f8`

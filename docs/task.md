@@ -16456,6 +16456,37 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 17:2xZ — W351 verdict folded; lrzszprocheader2shell staged
+
+Current limb for a reader arriving now; the earlier "W351 pending replay"
+and "Next W351" lines below are historical. One docs-only fold of the three
+commits after `f280f682` through `4678a157`: `2027ddaf`, `2de80271` and
+`4678a157`. No grade, rung cell, register row, count, README, results,
+manifest, SVG, report or lab evidence edited by docs.
+
+- **Gimpjif W351 stage-2 ESTABLISHED AS LABELED by W362** (`2027ddaf`),
+  grade-neutral, NO r5. Private archive `5f4ff257…`, same runner/observer/
+  JIF pins, GIMP AppImage reused; 101-character path gave both runner PASS
+  lines, `W349 CHOSEN n=32`, both `W351 STAGE2` hits with a mapped heap
+  `rbx`, terminal `0x7ffff7fd129f`, `DEREF_HITS=33`; 90 characters missed
+  the chain (`0xa1410`). Fixed plug-in rejected the JIF. R4 ✓ at W361's
+  witness scope stands; W352's third-stage claim stays author-only under
+  open replay offer #6661. Recipe cross-reference §17:2xZ.
+- **LrzszProcheader2Shell staged (W352, window 226).** CVE-2026-105842 /
+  GHSA-3cw3-cf87-8pwp, affected `< 0.13.0`, fixed `b18b5792…` (0.13.0),
+  parent `b1fc8a01…`, fix `f8caa7b1…`. The pinned real `src/lrz.c` runs
+  through `procheader()` in an ASan harness: 12000 chosen `0x43` bytes
+  give `WRITE of size 12001` at `:1220` past the 8192-byte `:1217`
+  allocation; 16-byte and fixed arms clean. Author clean replay 5 PASS /
+  0 FAIL; docs clean-archive replay also 5 PASS / 0 FAIL with 6/6 pins.
+  R4 at the pinned-sink scope only — no live wire, no chosen-address
+  write, no command, no witness; admission and replay still owed. Recipe
+  in `docs/reproducibility.md` §17:2xZ.
+
+At this limb: an lrzsz witness verdict or loopback ZFILE wire replay, a
+witness replay of gimpjif W352's table fields, an EOL 3.2.11 Ruby branch
+result, or a checker RED on committed HEAD.
+
 ## 2026-11-27 17:0xZ — W351 patched branches closed; gimpjif labels repaired
 
 Current limb for a reader arriving now; it supersedes the 16:3xZ limb's
@@ -16484,8 +16515,9 @@ manifest, SVG, report or lab evidence moved here.
   `ARRBASE−idx` spans `0x470d0`/`0x47170`/`0x47290`, and only sparse24
   `8d9ba89e…` stayed negative at `ARR[0]`. `77069c94` repaired the stale
   replay-pending wording; `d9707491` moved the brief header to R4 ✓ at the
-  W361 scope and kept W351's chosen-field chain author-only pending replay
-  (#6628). NO r5 throughout.
+  W361 scope and, at that repair, kept W351's chosen-field chain
+  author-only pending replay (#6628). W362 established it at §17:2xZ;
+  W352 stays author-only. NO r5 throughout.
 - **Gimpjif2Shell W352 third-stage table base is author-only** (`d3dfd313`):
   the wide JIF `76b41106…` (256 `P1` copies at `0x46c00..0x473f8`) makes
   the W351 `+0x70` field mapped; the live loader then faults at
