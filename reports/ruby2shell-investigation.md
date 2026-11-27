@@ -8333,3 +8333,54 @@ callers are clean), or a wire-only route to the stale-tail Marshal consumer.
 Falsifier: no coercion-free caller reaches any candidate, or fixed 3.4.13
 shows the same write. Do not repeat the W339/W340 shapes, the 64-byte
 `justify` shape, the case-fold oracle, or the closed lanes unchanged.
+
+## 2026-11-27 13:5xZ — W342: `rb_str_justify` second coercion window and stock-caller closure
+
+The W341 named follow-up is closed by source survey, and one new arm was
+run. `diff -u lab/src/cmp/ruby-3.4.12/string.c
+lab/src/cmp/ruby-3.4.13/string.c` (495 lines, 44 hunks; saved to gitignored
+`lab/build/evidence/string-3412-3413.diff`) enumerates the whole fix series:
+`concat`, `buf_append`, `cat`, `setbyte`, `subpat_set`, `slice!`,
+`drop_bytes`, `partition`/`rpartition`, `chomp`, `succ`, case-map overflow
+guards and `justify`. Every guard except `justify` is an already-closed lane
+(W328–W340); `justify` was W341. A full-tree survey of 3.4.12
+`.ljust`/`.rjust`/`.center` call sites found only String-literal pads
+(`"="`, `"\0"`, `"-"`) and Integer widths (`str.length+3`, `CRAM_BUFSIZE`,
+`$1.to_i`, `padding`, `longest_cmd_name_length`). No stock call site passes
+a coercion object: the named "stock parser" falsifier is met, with no
+coercion-free caller reaching W341's stale-termlen write.
+
+- **Second coercion window.** `termlen = rb_enc_mbminlen(enc)`
+  (`string.c:10879`) also precedes `width = NUM2LONG(w)` (`:10880`), which
+  invokes `to_int` on a non-Integer width. Repro
+  `lab/repro/ruby2shell-justify-width-coerce.{rb,sh}`; evidence gitignored
+  `lab/build/evidence/justify-width-coerce/`, 16 arms (4 builds × 4 arms).
+- **Arm `attack2`** (argc==2, UTF-16LE receiver, `width.to_int` forces
+  US-ASCII, pad `"Z"`): 3.4.12 plain rc 134, `malloc(): invalid next size
+  (unsorted)`; 3.4.12 ASan rc 1, `WRITE of size 2` / `heap-buffer-overflow`
+  in `memset` from `rb_str_justify` (`string.c:10943`) via `rb_str_ljust`
+  (`:10969`). 3.4.13 plain and ASan rc 0, `outlen=4103`,
+  `outenc=US-ASCII`. Same primitive as W341, reached through an independent
+  window.
+- **Arm `attack1`** (argc==1, same `to_int` mutation, default `" "` pad) is
+  NEGATIVE on all four builds (`outenc=UTF-16LE`, `outlen=4103`, zero
+  ASan): with no pad, `rb_enc_check` (`:10883`) never recomputes `enc`, so
+  `str_enc_new` (`:10909`) reserves a 2-byte terminator matching the stale
+  `termlen`. The coercion hook alone is not sufficient; the encoding
+  recompute is required.
+- Arms `nomut` (hook fires without mutation, UTF-16LE pad) and `safe`
+  (ASCII receiver) are clean on all four builds.
+
+Grade: **adjacent rung 3 — confirmed corruption**, unchanged from W341.
+Both windows are harness-triggered caller-defined coercions; the write is
+a fixed `0x00` pair, with no wire path, chosen offset, pointer or command
+control. Primary CVE grade, witness-COMPLETE rung 4 and full rung 5
+unchanged.
+
+Next named experiment: survey stock classes in the 3.4.12 stdlib that
+define `to_str`/`to_int` and test whether any of them can mutate a separate
+String's encoding or length when coerced — W341/W342 surveyed call sites
+only, not the coercion implementations. Falsifier: every stock coercion is
+pure with respect to other strings, or fixed 3.4.13 shows the write. Do not
+repeat W339/W340 shapes, either `justify` coercion shape unchanged, the
+64-byte `justify` shape, the case-fold oracle or the closed lanes unchanged.

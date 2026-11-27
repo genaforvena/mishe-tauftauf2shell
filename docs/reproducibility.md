@@ -19502,3 +19502,21 @@ US-ASCII, width 4103): 3.4.12 plain rc 134 with
 is ASan-clean on both builds (embedded terminator area), so the large
 receiver is required. Grade and limits in
 `reports/ruby2shell-investigation.md` §W341.
+
+### Ruby — W342 `rb_str_justify` width.to_int window
+
+```sh
+bash lab/repro/ruby2shell-justify-width-coerce.sh
+```
+
+Expected: arm `attack2` (UTF-16LE receiver, `width.to_int` swaps it to
+US-ASCII, pad `"Z"`, width 4103) reproduces W341's write through the width
+coercion window: 3.4.12 plain rc 134 with `malloc(): invalid next size
+(unsorted)`; 3.4.12 ASan rc 1 with `WRITE of size 2` /
+`heap-buffer-overflow` in `memset` from `rb_str_justify`
+(`string.c:10943`); 3.4.13 plain and ASan rc 0, `outlen=4103`, clean.
+Arm `attack1` (argc==1, same `to_int` mutation, default pad) is clean on
+all four builds: without a pad `rb_enc_check` does not recompute the
+encoding, so the allocation keeps the 2-byte terminator. Arms `nomut` and
+`safe` are clean on all four builds. Grade and limits in
+`reports/ruby2shell-investigation.md` §W342.
