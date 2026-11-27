@@ -103,7 +103,16 @@ fi
 {
   printf 'svxlinkdirectory2shell run-all\n'
   printf 'PASS=%s FAIL=%s\n' "$PASS" "$FAIL"
-  sha256sum evidence/*.out | sed 's#evidence/##'
+  for f in evidence/*.out; do
+    # Hash only stable tokens: PIDs and ASan/GDB addresses vary per run.
+    { printf '%s ' "$f"
+      awk '/ERROR: AddressSanitizer/{print "ASAN", $3}
+           /WRITE of size/{print "WRITE", $4}
+           /SETTLED/{print "SETTLED", $2, $3}
+           /CHOSEN_READBACK/{print "CHOSEN", $2}
+           /Program received/{print "SIGNAL", $4}' "$f"
+    } | sha256sum | awk -v n="$f" '{print $1, n}'
+  done
 } | tee runs/summary.txt
 
 [ "$FAIL" -eq 0 ] || exit 1
