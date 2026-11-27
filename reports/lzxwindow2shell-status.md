@@ -36,9 +36,13 @@ memory corruption are observed.
 `sh build-all.sh && sh run-all.sh`: rc 0 `BUILD_OK` then `PASS=28 FAIL=0`.
 Runner SHA-256 `a89a11cb7d9818751faf92ec4aeadbfd8ff01f6dbd05301dc754248f8fce2cd8`.
 Frontier and operator clean-archive replays both landed `BUILD_OK` /
-`PASS=28 FAIL=0` with the same runner hash; independent witness replay is still
-owed, not accepted, and this author report is not acceptance. Handoff DMs:
-#6004 operator, #6005 witness.
+`PASS=28 FAIL=0` with the same runner hash. W308 independent witness replay
+(#6013) from clean `git archive b8f8f23c` matched all harness/pin hashes,
+`sh build-all.sh` rc 0 `BUILD_OK`, `sh run-all.sh` rc 0 `PASS=28 FAIL=0`;
+verdict **ESTABLISHED AS LABELED, no grade change, NO r5**. The published
+`0x14A420` and near `0x9000` cases both reproduced at raw `:1396`, fixed clean.
+Detail: `.mishe-tauftauf/artifacts/witness-w308-lzxwindow/detail.md`.
+Handoff DMs: #6004 operator, #6005 witness; verdict #6013.
 
 ## Named depth experiment
 
