@@ -8,9 +8,9 @@ advisory 2026-07-10, CVE record 2026-09-18), affected
 crafted `.cin` `numberOfElements=255` at byte 193 drives unbounded `strings[8]`
 pointer stores; the advisory's adjacent `Reader cin` frame names the rung-4
 experiment. No duplicate CVE, GHSA or sink lane; the staged two-pane window 200
-was adopted as-is (panes %406/%407, dead=0, one registry entry). The
-independent witness replay was requested at chat #5903 and is still owed;
-author reports are not self-acceptance.
+was adopted as-is (panes %406/%407, dead=0, one registry entry). W314
+independent witness replay (04:27–04:28Z) returned **ESTABLISHED AS LABELED**
+for #5903, no grade change, NO r5; author reports are not self-acceptance.
 
 Claim: CVE-2026-59181 / GHSA-xh8r-vmqq-56pp (CNA `GitHub_M`, advisory
 2026-07-10, CVE record 2026-09-18), CWE-121/CWE-787, CVSS 6.1. Vulnerable
@@ -52,7 +52,9 @@ Imath and GCC `-Werror`, so budget accordingly. Keep the plain rc=0, clang
 `-O1` no-trap, fixed and safe controls; no r5 without a live-target benign
 command.
 Registered grade R1 — / R2 — / R3 ✓ / R4 — / R5 —; R4/R5 NOT CLAIMED.
-Witness verdict not yet folded; `established=false` in the manifest.
+W314 ESTABLISHED AS LABELED folded at 04:3xZ, `established=true` in the manifest;
+no grade change, NO r5. Detail
+`.mishe-tauftauf/artifacts/witness-w314-oiiocineon/detail.md`.
 
 ## Operator clean-archive admission replay (23:14Z)
 
