@@ -31,9 +31,13 @@ requires this brief AND a live registered two-pane window.
   source is the configured primary, which the vendor places inside NSD's
   trust boundary but still rates significant for multi-tenant secondaries.
 
-## Source-bound mechanism (patch read verbatim, function body NOT yet read)
+## Source-bound mechanism (pinned 4.14.2 bytes read locally)
 
-The entire standalone fix is one hunk in `rdata.c`:
+Downloaded `https://nlnetlabs.nl/downloads/nsd/nsd-4.14.2.tar.gz` in W322;
+SHA-256
+`2bff57349841844d7560e76d7bd70b6bd6f4c462cdaa6d57b8e83d1e14dd22d6`
+(provisioned to `/tmp/nsd-svcb`, not yet moved into the lab tree). The entire
+standalone fix is one hunk in `rdata.c`:
 
 ```diff
 @@ -3282,7 +3282,7 @@ read_svcb_rdata(struct domain_table *domains, uint16_t rdlength,
@@ -45,18 +49,31 @@ The entire standalone fix is one hunk in `rdata.c`:
  	const size_t mark = buffer_position(packet);
 ```
 
-So the causal type is the local `size` in `read_svcb_rdata()`, used to size
-storage for the SVCB target name plus svc_params. The patch alone proves the
-type widening; the exact allocation call, copy loop, write offset and the
-relation between `rdlength=65512` and the 65509-byte claim are NOT established
-until the pinned 4.14.2 `rdata.c` body is read. Treat those as UNKNOWN, not as
-verified mechanism. Cheap source-bound confirmation: download the pinned
-4.14.2 tarball, read `read_svcb_rdata()` around line 3282, and locate the
-`size`-based allocation and subsequent copy.
+Pinned vulnerable `rdata.c:3279-3321` (read verbatim) closes the mechanism:
+
+- `rdlength` and `svcparams_length` are `uint16_t`; after the target dname is
+  parsed, `svcparams_length = rdlength - length` at `:3306`.
+- `:3309` computes `size = sizeof(**rr) + 2 + sizeof(void*) +
+  svcparams_length` and assigns it to the `uint16_t` declared at `:3285`.
+  With `rdlength=65512` and a short target name the sum exceeds 65535 and
+  truncates modulo 65536, so `:3310 region_alloc(domains->region, size)`
+  returns a small chunk.
+- `:3314-3318` then write 2 bytes at `(*rr)->rdata`, an 8-byte `domain`
+  pointer at `+2`, and `svcparams_length` attacker-controlled bytes at
+  `+2+sizeof(void*)` via `buffer_read_at()`. The last write is the claimed
+  ~65509-byte controlled heap overflow; the exact `sizeof(**rr)` and hence
+  the wrapped allocation size are NOT measured here.
+- The lenient-secondary path deliberately skips `skip_svcparams()` and the
+  following bounds checks (`:3298-3305`), so the oversized value reaches the
+  allocation.
+
+No local trigger, ASan report or chosen-offset observation exists: this
+mechanism is source-bound, not an observed fault.
 
 ## Rung-4 feasibility (honest, pre-experiment)
 
-R1 / R2 / R3 / R4 / R5 all **UNKNOWN**: nothing was built or run locally.
+R1 / R2 / R3 / R4 / R5 all **UNKNOWN**: no build, trigger or ASan run was
+done locally; only advisory, patch and pinned source bytes were read.
 Favorable: one-line fix, vendor-published patch and tarballs, network-reachable
 secondary path, a claimed long controlled write rather than a one-byte
 overflow, and a plausible ASan-visible heap failure. Unfavorable: no public
@@ -73,16 +90,16 @@ and primitive clarity, not on CVSS.
 
 ## Cheapest experiment that moves it up a rung
 
-1. Provision, loopback only: NSD 4.14.2 and 4.14.3 tarballs from nlnetlabs.nl,
-   plus `patch_CVE-2026-12244.diff`; record SHA-256 of each in
-   `lab/frontier/nsdsvcb2shell/PROVENANCE.md`.
-2. Read pinned `rdata.c:3282` and identify the `size` allocation/copy sink.
-3. Build both pins with ASan. Cheapest path is a harness that calls
-   `read_svcb_rdata()` with minimal stubs and a crafted 65512-byte SVCB rdata;
-   the real path is a loopback AXFR from a locally started primary into an NSD
-   secondary configured by this lab. Expect an ASan WRITE on 4.14.2 and a
-   clean fixed/control run; preserve negatives.
-4. Only if R3 is observed, probe chosen bytes at the overwritten offsets and
+1. Provision, loopback only: NSD 4.14.2 (SHA-256 above), 4.14.3 and
+   `patch_CVE-2026-12244.diff`; move pinned copies into
+   `lab/frontier/nsdsvcb2shell/` and record every hash in `PROVENANCE.md`.
+2. Sink already identified at pinned `rdata.c:3309-3318`. Build both pins
+   with ASan. Cheapest path is a harness calling `read_svcb_rdata()` with
+   minimal stubs and a crafted 65512-byte SVCB rdata; the real path is a
+   loopback AXFR from a locally started primary into an NSD secondary
+   configured by this lab. Expect an ASan WRITE on 4.14.2 and a clean
+   fixed/control run; preserve negatives.
+3. Only if R3 is observed, probe chosen bytes at the overwritten offsets and
    name the consumer before claiming R4. Do not claim R5 without a live
    loopback command side effect and vulnerable/fixed/safe controls.
 
