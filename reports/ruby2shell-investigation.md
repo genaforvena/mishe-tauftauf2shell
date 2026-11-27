@@ -8983,11 +8983,46 @@ Grade unchanged: primary wire-only rung 3, W341/W342 adjacent rung 3,
 witness-COMPLETE rung 4, harness-condition rung 5 witness-ESTABLISHED at
 its labeled scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
 
-Next named experiment W355: complete the fixed-control half of this exact
-shape on the two remaining patched builds, plain 3.4.13 and 4.0.10 (W351
-covered them only for the seven-shape chain matrix). First command:
-`for rb in lab/build/plain/ruby-3.4.13-plain/bin/ruby lab/build/plain/ruby-4.0.10-plain/bin/ruby; do for n in 27 43 59; do valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"; done; done`.
-Prediction: zero writes and zero reads on all six arms. Falsifier: any
-invalid write/read on a patched build — that would reopen the fix-series
-grade, so this control is grade-relevant even though a clean result is not.
-Do not repeat the vulnerable branch matrix unchanged.
+## 2026-11-27 18:3xZ — W355: mixed-parity fixed-control half CLOSED
+
+W354 closed the mixed shape on vulnerable 3.3.13/4.0.9 and patched 3.3.14;
+W351 covered patched 3.4.13/4.0.10 only for the seven-shape chain matrix.
+W355 runs the exact mixed input (`a` + N x `0xDF`, N = 27/43/59, N == 11
+mod 16) on the two remaining patched plain builds, `ruby-3.4.13-plain`
+(rev `48857d6f2e`) and `ruby-4.0.10-plain` (rev `a704b7cd95`). Prediction:
+zero invalid writes and zero invalid reads on all six arms. Falsifier: any
+invalid write/read on either patched build, which would reopen the
+fix-series grade. The falsifier is not met.
+
+1. **Valgrind, 6/6 arms** (two builds x N=27/43/59, `--error-limit=no`):
+   `rc=0`, `Invalid write` count 0, `Invalid read` count 0, and no
+   `case_map (iso_8859_1.c:293)` site on any arm. The nonzero error
+   summaries (3.4.13: 31531 errors in 11 contexts; 4.0.10: 28854 in 6)
+   are exclusively `Conditional jump or move depends on uninitialised
+   value(s)` in `RB_SPECIAL_CONST_P` from `gc_mark_maybe_internal`
+   (`gc.c:2273`) — Ruby GC noise on clean runs, not a memory-access
+   diagnostic. Raw logs: gitignored
+   `lab/build/evidence/casemap-chain/w355/vg-*.txt`.
+2. **Fresh unsanitized processes**: three reps per build per N in
+   {27, 43, 59}, plus safe N=28 (24 processes total), all `rc=0` with
+   no `munmap_chunk`, `free`, `malloc` corruption, unsorted-bin, double-free
+   or heap-overflow diagnostic. Logs: `.../w355/plain-*.txt`.
+
+Replay with the committed input script
+`lab/repro/ruby2shell-rung3-mixed.rb` and the two patched binaries named
+above. This closes the fixed-control half of the mixed size-LSB shape on
+all three affected branches; it adds no grade. Grade unchanged: primary
+wire-only rung 3 CONFIRMED, W341/W342 adjacent rung 3, witness-COMPLETE
+rung 4, harness-condition rung 5 witness-ESTABLISHED at its labeled
+scope, full stock/oracle-free/persistent rung 5 NOT ACHIEVED.
+
+Next named experiment W356: the mixed shape's other glibc-field offset.
+With one leading ASCII byte `R = N+45`; N == 11 (mod 16) puts the fixed
+`0x53` on the next chunk's size LSB (closed above). N == 3 (mod 16)
+(35/51/67) puts it on that chunk's `prev_size` LSB instead — untested.
+First command:
+`for rb in lab/build/plain/ruby-{3.4.12,3.3.13,4.0.9}-plain/bin/ruby; do for n in 35 51 67; do valgrind --error-limit=no "$rb" lab/repro/ruby2shell-rung3-mixed.rb "$n"; done; done`,
+with patched 3.4.13/3.3.14/4.0.10 as controls. Prediction: one
+`case_map` write at `R=N+45` on all vulnerable arms, zero on patched;
+falsifier: no write at that offset (geometry formula wrong) or any write
+on a patched build. Do not repeat the size-LSB N=27/43/59 arms unchanged.
