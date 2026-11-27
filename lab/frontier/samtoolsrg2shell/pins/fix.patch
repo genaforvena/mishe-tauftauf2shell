@@ -1,0 +1,29 @@
+From bd8b5dc8ade12e575ff2f02e8c0b7e384848a328 Mon Sep 17 00:00:00 2001
+From: James Bonfield <jkb@sanger.ac.uk>
+Date: Thu, 13 Aug 2026 10:55:13 +0100
+Subject: [PATCH] Fix a stack-buffer-overflow when parsing mpileup -G RG.txt
+ option
+
+It has a fixed buffer size of 1024, but we now limit the amount we
+read.  We don't cope correctly with it - splitting it into two
+read-groups, but it's a silly length anyway so won't affect real world
+usage.
+
+Signed-off-by: James Bonfield <jkb@sanger.ac.uk>
+---
+ bam_plcmd.c | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/bam_plcmd.c b/bam_plcmd.c
+index f3953f6ec..ec48d8f5c 100644
+--- a/bam_plcmd.c
++++ b/bam_plcmd.c
+@@ -1295,7 +1295,7 @@ int bam_mpileup(int argc, char *argv[])
+                     fprintf(stderr, "[%s] Fail to open file %s.\n", __func__, optarg);
+                     return 1;
+                 }
+-                while (!feof(fp_rg) && fscanf(fp_rg, "%s", buf) > 0) // this is not a good style, but forgive me...
++                while (!feof(fp_rg) && fscanf(fp_rg, "%1023s", buf) > 0)
+                     khash_str2int_inc(mplp.rghash, strdup(buf));
+                 fclose(fp_rg);
+             }

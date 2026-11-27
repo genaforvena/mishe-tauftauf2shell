@@ -1,0 +1,56 @@
+=================================================================
+==226990==ERROR: AddressSanitizer: stack-buffer-overflow on address 0x7d3cd4200560 at pc 0x7d3cd6691ad0 bp 0x7ffc77960d10 sp 0x7ffc77960498
+WRITE of size 2049 at 0x7d3cd4200560 thread T0
+    #0 0x7d3cd6691acf in scanf_common ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342
+    #1 0x7d3cd66cd432 in __isoc99_vfscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1496
+    #2 0x7d3cd66cdd7b in __isoc99_fscanf ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors.inc:1523
+    #3 0x5dc45b05b981 in bam_mpileup /home/mesh-home/mishe-tauftauf2shell/lab/frontier/samtoolsrg2shell/work/samtools-vuln/bam_plcmd.c:1298
+    #4 0x5dc45b0d8353 in main /home/mesh-home/mishe-tauftauf2shell/lab/frontier/samtoolsrg2shell/work/samtools-vuln/bamtk.c:248
+    #5 0x7d3cd5e2a1c9 in __libc_start_call_main ../sysdeps/nptl/libc_start_call_main.h:58
+    #6 0x7d3cd5e2a28a in __libc_start_main_impl ../csu/libc-start.c:360
+    #7 0x5dc45b049144 in _start (/home/mesh-home/mishe-tauftauf2shell/lab/frontier/samtoolsrg2shell/runs/samtools-vuln-asan+0x4e144) (BuildId: 7e42a7b8ee8b3b158c37a381abf8aae2aba3d5d8)
+
+Address 0x7d3cd4200560 is located in stack of thread T0 at offset 1376 in frame
+    #0 0x5dc45b05a562 in bam_mpileup /home/mesh-home/mishe-tauftauf2shell/lab/frontier/samtoolsrg2shell/work/samtools-vuln/bam_plcmd.c:1162
+
+  This frame has 4 object(s):
+    [32, 36) 'nfiles' (line 1166)
+    [48, 56) 'fn' (line 1165)
+    [80, 288) 'mplp' (line 1167)
+    [352, 1376) 'buf' (line 1292) <== Memory access at offset 1376 overflows this variable
+HINT: this may be a false positive if your program uses some custom stack unwind mechanism, swapcontext or vfork
+      (longjmp and C++ exceptions *are* supported)
+SUMMARY: AddressSanitizer: stack-buffer-overflow ../../../../src/libsanitizer/sanitizer_common/sanitizer_common_interceptors_format.inc:342 in scanf_common
+Shadow bytes around the buggy address:
+  0x7d3cd4200280: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200300: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200380: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200400: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200480: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+=>0x7d3cd4200500: 00 00 00 00 00 00 00 00 00 00 00 00[f3]f3 f3 f3
+  0x7d3cd4200580: f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 f3 00 00 00 00
+  0x7d3cd4200600: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200680: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200700: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+  0x7d3cd4200780: 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00
+Shadow byte legend (one shadow byte represents 8 application bytes):
+  Addressable:           00
+  Partially addressable: 01 02 03 04 05 06 07 
+  Heap left redzone:       fa
+  Freed heap region:       fd
+  Stack left redzone:      f1
+  Stack mid redzone:       f2
+  Stack right redzone:     f3
+  Stack after return:      f5
+  Stack use after scope:   f8
+  Global redzone:          f9
+  Global init order:       f6
+  Poisoned by user:        f7
+  Container overflow:      fc
+  Array cookie:            ac
+  Intra object redzone:    bb
+  ASan internal:           fe
+  Left alloca redzone:     ca
+  Right alloca redzone:    cb
+==226990==ABORTING
+Aborted (core dumped)

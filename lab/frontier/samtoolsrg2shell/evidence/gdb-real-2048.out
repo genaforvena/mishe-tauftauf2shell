@@ -1,0 +1,25 @@
+Breakpoint 1 at 0x410bef: file bam_plcmd.c, line 1299.
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib/x86_64-linux-gnu/libthread_db.so.1".
+
+Breakpoint 1, bam_mpileup (argc=3, argv=0x7fffffffe1f0) at bam_plcmd.c:1299
+1299	                    khash_str2int_inc(mplp.rghash, strdup(buf));
+BUF_ADDRESS=0x7fffffffdb70
+0x7fffffffdf70:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x7fffffffdf78:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x7fffffffdf80:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+0x7fffffffdf88:	0x42	0x42	0x42	0x42	0x42	0x42	0x42	0x42
+RBP=0x7fffffffe080
+0x7fffffffe088:	0x4242424242424242
+#0  bam_mpileup (argc=3, argv=0x7fffffffe1f0) at bam_plcmd.c:1299
+#1  0x4242424242424242 in ?? ()
+#2  0x4242424242424242 in ?? ()
+#3  0x4242424242424242 in ?? ()
+#4  0x4242424242424242 in ?? ()
+#5  0x4242424242424242 in ?? ()
+#6  0x4242424242424242 in ?? ()
+#7  0x4242424242424242 in ?? ()
+
+Program received signal SIGSEGV, Segmentation fault.
+0x000000000040bc0a in kh_put_str2int (h=0x4242424242424242, key=0x5124c0 'A' <repeats 200 times>..., ret=0x7fffffffdb40) at /home/mesh-home/mishe-tauftauf2shell/lab/frontier/samtoolsrg2shell/work/htslib-plain/include/htslib/khash_str2int.h:30
+30	KHASH_MAP_INIT_STR(str2int, int)

@@ -1,7 +1,8 @@
 # Frontier brief: libssh-sftp-longname2shell — SFTP server long-name stack overflow
 
-**Status: FRONTIER-STAGED 2026-11-27 W338; operator admission and independent
-witness replay UNKNOWN.** Claim: CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c
+**Status: FRONTIER-STAGED 2026-11-27 W338; ADMITTED by operator commit
+`86289b82` as the 211th declared target mind; independent witness replay
+UNKNOWN.** Claim: CVE-2026-15370 / GHSA-6j7f-8jjp-mm8c
 (CWE-121), unsafe SFTP server long-name construction. Lab:
 `lab/frontier/libssh-sftp-longname2shell/`; source/patch pins and reproduction
 commands are in that tree. Live inner-socket window 219 (`%444`/`%445`,
