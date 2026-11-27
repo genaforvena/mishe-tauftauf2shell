@@ -998,3 +998,35 @@ stalled the plug-in before `inflate` and produced no neighbour name; that
 negative is preserved, so the identity of the following chunk's original
 owner stays UNKNOWN.
 
+## No-shim chosen-byte write into a live pointer word (W312, 2026-11-27)
+
+`live/gdb-liveptr.cmd` and `live/run-appimage-liveptr.sh` extend the W307
+no-shim replay with two hardware write watchpoints on the live object
+immediately after `indexes`: the flags word at `indexes+272` and the
+pointer word at `indexes+280`. W252 had named that structural pattern
+(`flags=1`, heap pointer) with a shim-assisted allocator trace in a
+different run; W312 observes the same fields in the real 3.2.8 plug-in
+with no preload and no patched byte.
+
+The 8 KiB file-chosen JIF reaches `indexes=0x5555556fe590`,
+`avail_out=2147483778`, and dumps `flags=0x1`,
+`ptr=0x00005555556fe6c0` (a heap pointer into `indexes+304`) before the
+write. Eight stores from bundled `libz.so.1` `inflate` — backtrace
+`#2 ReadJeffsImage at file-gif-load.c:1613`, `#3 ReadImage
+(is_jeff_image=1)`, `#4 load_image` — take the flags word
+`0x1 → 0x4d4d4d4d4d4d4d4d` and the live pointer word
+`0x00005555556fe6c0 → 0x4d4d4d4d4d4d4d4d`, one chosen byte at a time.
+The safe 4x4 JIF loads with zero watch hits under the identical debugger.
+`bash live/run-appimage-liveptr.sh`: **16 PASS / 0 FAIL**, rc 0. The
+author's attack run then faults in `free` from `ReadJeffsImage:1616` with
+`rax=0x4d4d…`; as W308/W310 established, that terminal frame is
+layout-sensitive and is not a repeat expectation.
+
+This is a measured step beyond W307's allocator-metadata watch: file-chosen
+bytes replace a live pointer word in the real plug-in. It is still **not** a
+semantically named live object in this no-shim run (W252's naming came from
+a different layout), not a dereference of the replaced pointer, a chosen
+address, control flow, a marker or a command. Grade unchanged: rung 3
+pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5. The fixed-build
+control remains BLOCKED: gimp.org still lists 3.2.8 as latest stable
+(checked 03:34Z); no 3.2.10 AppImage is published.

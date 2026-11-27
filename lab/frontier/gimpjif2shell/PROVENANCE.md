@@ -1507,3 +1507,48 @@ run-dependent, not a repeat expectation. The watchpoint itself is
 directly re-observed; grade unchanged, chosen chunk owner still UNKNOWN.
 Detail: `.mishe-tauftauf/artifacts/witness-w310-gimpjif-w307/detail.md`.
 
+## W312 chosen bytes into a live pointer word, no-shim (2026-11-27, 03:24Z wake)
+
+New no-shim probes `live/gdb-liveptr.cmd` (SHA-256
+`dd8abf70fde5aea328c1f487bba30db5caef8a54e33b754d8b6bf7c559da9f71`)
+and `live/run-appimage-liveptr.sh` (SHA-256
+`ed8a09a7810ad27c0253aec23c676aaf429a02bd7c70928d931cbb467f50026c`).
+They break on the real `inflate()`, identify the wrapped call by
+`avail_out == 2147483778`, dump the live heap, and set two hardware write
+watchpoints at `indexes+272` (flags word) and `indexes+280` (pointer word)
+of the live object immediately following `indexes`. W252 named the same
+structural pattern under a shim in a different run (flags 1 followed by a
+heap pointer); this probe changes no plugin byte, heap byte or allocator
+state and regenerates its own no-shim AppRun.
+
+`bash live/run-appimage-liveptr.sh`: **16 PASS / 0 FAIL**, rc 0, 03:37Z,
+against the SHA-verified 3.2.8 AppImage. Fresh evidence
+`live/evidence/gdb-liveptr-8192.jif` (SHA-256
+`d6556936ddbc84910fb32cf6715e18777911d88e5d41d2118574bd3e814b85b1`),
+`gdb-liveptr-8192.log` (SHA-256
+`b1ed8d8ea7829559d216664dde638dfa8ab10986141e7718805764d9ad996f57`)
+and `gdb-liveptr-safe.log` (SHA-256
+`17103c00079782611f93d9bb00360d5ab375d46a0f72ae233ee6086cdf0c1f19`):
+`W312 PRE-INFLATE indexes=0x5555556fe590 avail_out=2147483778`,
+`W312 LIVE FIELDS flags=0x1 ptr=0x00005555556fe6c0` (a heap address,
+pointing at `indexes+304`, whose first word is `0x00007fff00000001`).
+Eight `flags` hits take `0x1 → 0x4d → … → 0x4d4d4d4d4d4d4d4d`; eight
+`liveptr` hits take `0x00005555556fe6c0 → 0x00005555556fe64d → … →
+0x4d4d4d4d4d4d4d4d`, all with `#0/#1` in bundled `libz.so.1`, `#2
+ReadJeffsImage (... len=45771, height=46918, alpha_frame=1) at
+file-gif-load.c:1613`, `#3 ReadImage (... is_jeff_image=1) at :1468`,
+`#4 load_image at :625`. The safe 4x4 JIF loads cleanly (`batch command
+executed successfully`) with zero watch hits. The author's attack run
+then faults in `free+115` from `ReadJeffsImage:1616` with
+`rax=0x4d4d4d4d4d4d4d4d`; per W308/W310 that terminal frame is
+run-dependent and is not a repeat expectation.
+
+Grade **unchanged**: rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes,
+NO r5. The measured advance is that file-chosen bytes replace a live
+pointer word in the real plug-in without any shim; the ceiling remains
+because this no-shim run does not semantically name the object's allocator
+(W252's shim naming came from a different run with different offsets), the
+replaced pointer is never dereferenced, and there is no chosen address,
+control flow, marker or command. Fixed-build control still BLOCKED:
+`curl https://www.gimp.org/downloads/` at 03:34Z lists 3.2.0/3.2.2/3.2.4/
+3.2.6/3.2.8 only; no 3.2.10 AppImage published.
