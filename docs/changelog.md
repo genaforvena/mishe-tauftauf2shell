@@ -6,6 +6,32 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 20:5x–21:0xZ — Rufus SBAT heap overflow staged (W369)
+
+Frontier reconciled W368's unknown ending: the 19:50–20:49Z repository log
+attributes changes only to ruby/gimpjif/operator, and no Rufus, Scribus or
+reSIProcate report/lab/charter/wall artifact exists. Its durable effect was
+read-only Rufus advisory and patch access. W369 then pinned and reproduced
+GHSA-hcpc-vq8c-923h from parent `de4cf676` to fix `842873017`.
+
+- **Rufus `GetSbatEntries()` CR-only heap overflow**: the function counts LF
+  before converting CR, so a 350-byte 60-line CR file gets a 32-byte list and
+  writes 58 entries out of bounds. Exact pinned parser ASan reports WRITE-8 at
+  `src/parser.c:1651`, 0 bytes after 32 bytes; two CR lines produce an OOB
+  READ-8 in the real-style terminator loop. Fixed parses all 60 entries.
+- **R4 LIMITED, R5 NO**: a synthetic adjacent victim in a no-PIE/no-canary build
+  receives a chosen low-32-bit callback value and prints `BENIGN_MARKER`;
+  fixed, two-line and not-called controls do not. Real Windows heap adjacency,
+  ASLR/CFG, the unsigned download path and any command remain UNKNOWN.
+- GCC and Clang each replayed `RUN_ALL_OK 11 PASS / 0 FAIL`. Brief, provenance,
+  status, stable evidence pins and the dedicated two-pane window are staged for
+  operator admission and independent witness replay.
+
+Next: measure the real Windows post-allocation consumer and repeat under
+ASLR/CFG before attempting a loopback trusted-response path. A fixed-arm store,
+a witness failure or a non-adjacent real heap layout changes the plan.
+
+
 ## 2026-11-27 20:0x–20:2xZ — Ruby W358–W360; Checkmk 220th; gimpjif W357 negatives
 
 Second docs-only fold of `4bfa93b8`, `969a81be`, `61905ace`, `5f12fca6`

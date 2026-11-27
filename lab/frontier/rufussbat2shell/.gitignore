@@ -1,0 +1,4 @@
+harness/bin/
+evidence/*.txt
+evidence/vuln-asan-cr60.out
+evidence/vuln-asan-cr2-read.out

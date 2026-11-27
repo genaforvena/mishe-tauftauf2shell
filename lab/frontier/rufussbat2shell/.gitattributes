@@ -1,0 +1,2 @@
+src/fix.patch -whitespace
+evidence/*.out -whitespace
