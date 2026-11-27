@@ -59,10 +59,10 @@ holds; the stale line numbers remain only as comments in that file.
 Live stock process (2026-11-27, section below): rungs 1/2/3 ESTABLISHED on
 loopback with the real layout; rung 4 DEMONSTRATED chosen-value control at
 real stock member offsets (`ares`, `info`, `fd`, `playerIndex`,
-`dotNotation`), still NOT chosen-target pointer control, a function-pointer
-overwrite, an execution marker or rung 5. The author observation is now
-backed by W330's independent replay (#6283, section below), which did not
-reuse the author's binaries and did not extend the grade.
+`dotNotation`). W330's independent replay (#6283, section below) backed that
+value-control claim without extending it. A later author-only probe (final
+section) adds a live chosen-TARGET pointer dereference; it is unwitnessed
+and is not r5.
 
 ## Probe policy
 
@@ -161,3 +161,79 @@ observed. Full hashes, logs and counterexamples are in the gitignored
 witness artifact `.mishe-tauftauf/artifacts/witness-w330-bzfs/detail.md`.
 ASan write size tracks the offered second-packet bytes (see above); no
 grade change.
+
+## Chosen-target pointer probe, 2026-11-27 (author only; unwitnessed)
+
+Operator #6385 under standing approval #8 asked for one bounded loopback
+experiment: retarget a pointer-bearing member from the real second-packet
+write and look for a subsequent request-driven dereference. Result:
+**chosen-TARGET pointer control with a request-driven dereference and a
+stock-code benign marker print in a live v2.4.30 process. No command was
+executed and no marker file was created; this is not r5 under the charter's
+command-execution definition.** The sentinel is an LD_PRELOAD lab mapping;
+independent replay is requested before treating the upgrade as ESTABLISHED.
+
+Builds and pins: stock tarballs SHA-256 `29b3b97f…` (v2.4.30) and
+`86a5ded5…` (v2.4.32). Rebuilt plain binary `a18e88cd…`, ASan binary
+`38035fc9…`; both use the same trace-only `NetHandler.cxx` (`ab167aab…`,
+stock plus two `BZTRACE countMessage-deref` lines). Fixed binary is
+unchanged `5bd85e32…`. Runner `run_pointer.sh` (`9516b24f…`), client
+`send_pointer.py` (`093e22cb…`), `sentinel.so` (`047fcf5f…`) built from
+`sentinel.c` (one RW page at `0x200000000000`, marker word
+`0x424153454e544c42` at offset 8, SIGSEGV address/RIP logger). All are in
+the gitignored `lab/bzfs2shell-live/`. ASLR was left on:
+`randomize_va_space=2`; object addresses differed between arms while the
+sentinel address stayed fixed via `MAP_FIXED_NOREPLACE`.
+
+Wire: the pinned handshake and first 1028-byte packet with tail
+`00 f8 ff ff` (`tcplen=-1024`) are unchanged. Payload2 is 1028 bytes with
+object offset `m` fed from byte `928+m`: `ares` (offset 0) and `info`
+(offset 8) both set to `0x200000000000`, `playerIndex` (32) set to 0,
+`fd` (36) preserved as 8 from the trace, and bytes 1024..1027 (the fresh
+`tcpmsg[0..3]` header) set to `00 00 00 00` (MsgNull, len 0). Remaining
+bytes kept the prior pattern; no other corrupted member was repaired.
+
+- Vulnerable plain, port 15160 (`ptr-vulnplain.log`): member readback
+  `ares=0x200000000000 info=0x200000000000 playerIndex=0 fd=8`, object
+  bytes 0 and 8 both `0000200000000000`; `after-body len=0 ... tcplen=4`;
+  then `BZTRACE countMessage-deref this=0x6200ac6bfa40
+  info=0x200000000000 now=4.221843 code=0 len=4 dir=0`. The live server
+  dereferenced the chosen pointer in a request-driven path, with no
+  debugger and no forced call, and read a value from the lab sentinel. It
+  then took SIGSEGV at address 0 (RIP outside the sentinel), attributed to
+  the remaining corrupted members; that later crash site was not isolated.
+- Vulnerable ASan, port 15161 (`ptr-vulnasan.log`): `heap-use-after-free`,
+  `WRITE of size 1028` in `recv` → `NetHandler::receive`
+  (`NetHandler.cxx:649`) → `tcpReceive` (`:577`) → `handleTcpPacket`
+  (`GameKeeper.cxx:374`) → `main`. ASan stops at the write, so it confirms
+  the corruption but not the pointer read.
+- Fixed v2.4.32, port 15162 (`ptr-fixed.log`): first packet rejected,
+  second `sendall` raised BrokenPipe, server stayed alive, no chosen-pointer
+  trace.
+- Well-formed safe input on the vulnerable build, port 15163
+  (`ptr-safe.log`): ordinary `info=0x5a1d5e830d08`, server stayed alive.
+  Every arm killed its listener; `ss -ltn` showed ports 15160..15163 free.
+
+- Stock-code marker arm, port 15165 (`ptr-plain-marker2.log`): same wire
+  except payload2 bytes 1024..1027 carried `00 00 6f 67` (len 0, code
+  `MsgUDPLinkEstablished` 0x6f67) and the sentinel mapped a unique string
+  at `PlayerInfo::callSign` offset 76 (confirmed by `gdb ptype /o
+  PlayerInfo`: `callSign` at 76, size 32). Server stdout
+  (`ptr-plain-marker2.log.out:38`) printed
+  `Player BZP-PTR-MARKER-W336 [0] outbound UDP up` — a stock
+  `logDebugMessage(2, ...)` call in `NetHandler::tcpReceive` reading
+  `info->getCallSign()` through the chosen pointer, with `-d2`. The added
+  trace also read `info=0x200000000000 now=4.246731 code=28519 len=4`.
+  Fixed v2.4.32 with the same marker wire (port 15166,
+  `ptr-fixed-marker.log`) rejected the first packet, broke the second
+  `sendall`, stayed alive and printed the marker zero times. The marker
+  arm used `sentinel-marker.so` `f2e39e47…`, client `32e8872f…` and runner
+  `1c0afb6d…`; the four earlier arms used the hashes above. No listener
+  remained on 15160..15166.
+
+Grade: rung 4 rises from chosen-VALUE to **chosen-TARGET pointer control
+with a live request-driven benign dereference and a stock-code marker
+print**, author-observed only. It is not control-flow hijack, a
+function-pointer overwrite, a lab-chosen command or r5; witness replay is
+owed. Earlier W330 stays ESTABLISHED AS LABELED with no grade change at
+that time.

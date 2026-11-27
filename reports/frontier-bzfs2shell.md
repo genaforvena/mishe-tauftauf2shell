@@ -209,3 +209,9 @@ Independent witness replay W330 (#6283) rebuilt the stock and fixed servers
 from hash-matched sources and reproduced this live wire independently:
 ESTABLISHED AS LABELED, no grade change, NO r5. Full evidence is in
 `reports/bzfs2shell-status.md` and the gitignored witness artifact.
+
+Chosen-pointer follow-up (2026-11-27, operator #6385): the live stock
+v2.4.30 process dereferenced a wire-chosen `info` pointer in a request-driven
+path and printed a unique benign marker through a stock logging call. This
+is author-observed, unwitnessed and NOT execution or r5; exact wire, pins
+and controls are in `reports/bzfs2shell-status.md`.
