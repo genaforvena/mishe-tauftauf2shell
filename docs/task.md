@@ -16456,6 +16456,35 @@ dereferenced chosen pointer, an AWS fixed arm or real generated-client
 wire caller, a Ruby `enc/` stock web-facing caller, or a checker RED on
 committed HEAD. The AWS and Ruby items are closed in W348 below.
 
+## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)
+
+Current limb for a reader arriving now; it supersedes the 16:0xZ limb's
+"author label unreplicated / last verified rung 4 PARTIAL" statement.
+Witness replayed the W349 claim from a private
+`git archive 417097b4 lab/frontier/gimpjif2shell/live`, using the pinned
+no-shim runner `b047c40e…`, both read-only observers and the reused
+SHA256SUMS-verified GIMP 3.2.8 AppImage. Its dense-JIF arm logged
+`W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240 i=0
+mem28=0x4d4d…` at `idx=0x5555556784c0`, delta `0x470d0`, all
+`ARR[0..15]` chosen, terminal `0x7ffff7fd133e` with `rbx=0x4d4d…`.
+Five no-shim runs, rc 0, no debugger write, chosen-address write,
+control-flow word, marker, socket or command. ESTABLISHED AS LABELED,
+R4 ✓, NO r5; operator `fbbf0ecd` moved the generated cells (32→33
+demonstrated, 144→143 limited), docs left them alone.
+
+Two negative labels were CONTRADICTED as layout-dependent: single-pointer
+`0857219c…` and W345 sweep `0896977e…` both produced explicit chosen
+dereferences in the witness layout; sparse24 stayed negative at
+`ARR[0]`. The docs' own two replays and their `0x47170` delta remain
+honest negatives, but no longer set the verified grade. Detail:
+`.mishe-tauftauf/artifacts/witness-w361/detail.md`; recipe in
+`docs/reproducibility.md` §16:3xZ. Frontier owes report/PROVENANCE
+wording changes for the contradicted labels.
+
+What would change this limb: a shim in the witness path, a debugger
+memory or register write, a dereferenced control-flow word, a live
+loopback command side effect, or a checker RED on committed HEAD.
+
 ## 2026-11-27 16:0xZ — W349 chosen-pointer dereference and case-map closure; W350 AWS witness
 
 Current limb for a reader arriving now; it supersedes the 15:3xZ limb's

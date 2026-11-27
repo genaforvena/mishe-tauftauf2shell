@@ -20158,10 +20158,49 @@ Run 2 (gitignored `/tmp/w349-docs-gimpjif2/run.log`, SHA-256
 `d5d4a3d7acba9939bacb6ffab1fe3195e0022418f844c9a01c9990ed581fa81d`)
 hit the runner's 150-second plug-in timeout before the pinned inflate:
 `FAIL: no pinned inflate`, `INFO: no in-GDB fault stop`, empty GDB log.
-Neither run produced a chosen-pointer dereference, and the author's
+Neither docs run produced a chosen-pointer dereference; the author's
 positive layout (`idx=0x555555679030`, delta `0x47210`) did not recur
-on this host with the same JIF and pins. This is a bounded negative and
-a timeout, not a refutation of the author's observation; it leaves the
-author label unreplicated and the last verified grade unchanged. A
-fresh attempt should re-measure `ARRBASE−idx` for the current run
-before placing the pointer JIF, not repeat this fixed-offset JIF again.
+here. These are bounded, layout-sensitive negatives and a timeout,
+recorded before witness W361 established the positive claim (§16:3xZ);
+they do not refute it. Heap base and `ARRBASE−idx` vary run to run, so
+a fresh attempt should re-measure the delta before placing a pointer JIF.
+
+## 2026-11-27 16:3xZ — W361 witness replay of the gimpjif chosen-pointer deref
+
+Witness worked from a private `git archive 417097b4
+lab/frontier/gimpjif2shell/live` extracted to `/tmp/w361-archive`, so
+no in-tree edits were used. The runner `b047c40e…`, observers
+`63f30cec…` and `a397e24b…`, dense117 JIF `7c8b7e2b…` and both negative
+JIFs match the §16:0xZ pins. The reused provisioned AppImage printed
+`GIMP-3.2.8-x86_64.AppImage: OK` and matched SHA-256 `8b43dc23…` in its
+`SHA256SUMS` line; it was not rebuilt by the witness. Both GDB scripts
+were read for write calls: only their log files are written; breakpoints
+and `gdb.parse_and_eval` read state. The runner strips all
+`gimpjif2shell/live/*shim.so` lines from `AppRun` and asserts none remain.
+
+Positive arm (dense117 + `gdb-w349-chosen-deref.cmd`), rc 0, run-log
+SHA-256 `3ada9f47762eee33e96ccdcd6b8b279dcef854b80282568bce400e23b301fc93`
+and GDB-log SHA-256
+`754d125ba45a602b2041e3a5143fab4a22b2be638b898ebdcedb61b996ff7ae5`:
+`PASS: pinned inflate reached`, `PASS: fault captured in GDB`,
+`idx=0x5555556784c0`, `ARRBASE−idx=0x470d0`, all `ARR[0..15]` holding
+`0x5555556c0240`, first eight deref hits on genuine loader addresses,
+then `W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240 i=0
+mem28=0x4d4d…` and terminal `SIGSEGV pc=0x7ffff7fd133e` with
+`rbx=0x4d4d…`. Backtrace runs through ld-linux, libz just after
+`memcpy@plt`, `inflate`, `ReadJeffsImage file-gif-load.c:1613` and the
+GIF loader: a live consumer, not a synthetic call. The chosen word is
+file-supplied: the decompressed JIF contains the little-endian pointer
+word at 117 aligned offsets `0x46e80..0x47220`.
+
+Negative labels are layout-dependent and must not be repeated as stable:
+the single-pointer JIF `0857219c…` produced an explicit chosen deref
+(run `184ebaee…`, GDB `04202ad3…`) and the W345 sweep JIF `0896977e…`
+produced 46 chosen hits (run `f6a4314e…`, GDB `273711be…`), contradicting
+the author's negative labels; sparse24 stayed negative at `ARR[0]`
+(run `f7233116…`, GDB `03ce98e6…`). `ARRBASE−idx` varies across author,
+witness and docs runs (`0x47210`/`0x470d0`/`0x47170`), so a new attempt
+must re-measure it. Verdict: ESTABLISHED AS LABELED, grade R4 ✓ and NO
+r5; no chosen-address write, control-flow word, marker, socket or
+command. Operator `fbbf0ecd` moved the generated cells; docs did not.
+Full detail: `.mishe-tauftauf/artifacts/witness-w361/detail.md`.

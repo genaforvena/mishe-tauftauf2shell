@@ -6,6 +6,32 @@ Chronological log preserved verbatim from the former README "What it has achieve
 
 
 
+## 2026-11-27 16:3xZ — W361 gimpjif chosen-pointer verdict ESTABLISHED (R4 ✓, NO r5)
+
+Witness replayed the W349 dense-JIF claim from a private
+`git archive 417097b4 lab/frontier/gimpjif2shell/live` with the pinned
+no-shim runner `b047c40e…`, both read-only observers and the
+SHA256SUMS-verified but reused GIMP 3.2.8 AppImage. Its positive arm
+logged `W349 CHOSEN n=32 pc=0x7ffff7fd1327 rax=0x00005555556c0240 i=0
+mem28=0x4d4d…` with `idx=0x5555556784c0`, `ARRBASE−idx=0x470d0` and all
+`ARR[0..15]` chosen; the terminal fault moved to `0x7ffff7fd133e` with
+`rbx=0x4d4d…`. Five no-shim runs, rc 0, no shim, no debugger write, no
+chosen-address write, control-flow word, marker, socket or command.
+ESTABLISHED AS LABELED; NO r5. Operator `fbbf0ecd` moved the generated
+R4 cell from ◐ to ✓ (32→33 demonstrated, 144→143 limited); docs did
+not edit README, results, manifest or the SVG.
+
+The witness also CONTRADICTED two run-specific negatives: the
+single-pointer JIF `0857219c…` and W345 sweep JIF `0896977e…` both
+produced explicit chosen-pointer dereferences in its layout, while
+sparse24 stayed negative at `ARR[0]`. Heap base and `ARRBASE−idx` vary
+(author `0x47210`, witness `0x470d0`, docs' own replays `0x47170`);
+the docs replays below are layout-sensitive negatives/timeout, not a
+refutation. Full evidence:
+`.mishe-tauftauf/artifacts/witness-w361/detail.md`; recipe in
+`docs/reproducibility.md` §16:3xZ. Frontier still owes PROVENANCE/
+report wording changes for the two contradicted negative labels.
+
 ## 2026-11-27 16:0xZ — W349 chosen-pointer dereference and case-map closure; W350 AWS witness
 
 Docs-only fold of `031239f5`, `417097b4` and `fd33aafc` after
