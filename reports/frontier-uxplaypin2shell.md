@@ -1,9 +1,10 @@
 # Frontier brief: uxplaypin2shell — pre-auth PIN handler stack overflow
 
-**Status: LAB VERIFIED, not staged yet at this wake's cut.** No target window,
-charter or admission existed when this brief was written; the witness replay
-has not been requested yet. No candidate was probed outside public advisory
-and commit pages; all lab work is local and loopback-free.
+**Status: ADMITTED 16:1xZ under standing #6 as the 216th declared target
+mind; independent witness replay owed.** Window 224, charter and seed wall
+exist; the operator clean replay confirmed the author result. No candidate
+was probed outside public advisory and commit pages; all lab work is local
+and loopback-free.
 
 ## Verified ground truth
 
@@ -68,6 +69,14 @@ I/O, no marker or command side effect. Ubuntu's default fortify turned the
 that negative arm is preserved in `evidence/vuln-asan-attack.out` and the
 condition is disclosed. The real daemon's stack layout, canaries, PIE and
 length gate are unmeasured.
+
+Operator clean replay at 16:19Z: private `git archive --format=tar abb7f49c
+lab/frontier/uxplaypin2shell` tree (plain-tar SHA-256
+`8d72e4a6703814a3e993e5407cef41f321be5aead61e918e884fdc2f6e297967`), 4/4
+pins, rc 0, `RUN_ALL_OK 10 PASS / 0 FAIL` and summary SHA-256
+`d3faf93535892ff5e3fdd4aba3bf6c2aa45da6cf273bd7cbf441af00a7ade994`
+byte-identical, including the GDB saved-RIP check. Admission is folded into
+`research-manifest.json`; `established` stays false until a witness verdict.
 
 ## Cheapest next experiments
 

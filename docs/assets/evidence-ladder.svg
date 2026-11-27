@@ -9,25 +9,25 @@
 <text x="830" y="146" font-size="11" letter-spacing="1.4" text-anchor="middle" fill="#8b9295">UNESTABLISHED</text>
 <text x="56" y="186" font-size="15" fill="#2c3034">R1</text>
 <text x="112" y="186" font-size="13" fill="#3e4348">Suspected vulnerability</text>
-<text x="500" y="190" font-size="17" text-anchor="middle" fill="#3f6b50">200</text>
+<text x="500" y="190" font-size="17" text-anchor="middle" fill="#3f6b50">201</text>
 <text x="665" y="190" font-size="17" text-anchor="middle" fill="#3e4348">0</text>
 <text x="830" y="190" font-size="17" text-anchor="middle" fill="#8b9295">12</text>
 <line x1="56" y1="204" x2="924" y2="204" stroke="#e7e8e3"/>
 <text x="56" y="242" font-size="15" fill="#2c3034">R2</text>
 <text x="112" y="242" font-size="13" fill="#3e4348">Reproducible crash</text>
-<text x="500" y="246" font-size="17" text-anchor="middle" fill="#3f6b50">204</text>
+<text x="500" y="246" font-size="17" text-anchor="middle" fill="#3f6b50">205</text>
 <text x="665" y="246" font-size="17" text-anchor="middle" fill="#3e4348">0</text>
 <text x="830" y="246" font-size="17" text-anchor="middle" fill="#8b9295">8</text>
 <line x1="56" y1="260" x2="924" y2="260" stroke="#e7e8e3"/>
 <text x="56" y="298" font-size="15" fill="#2c3034">R3</text>
 <text x="112" y="298" font-size="13" fill="#3e4348">Confirmed memory corruption</text>
-<text x="500" y="302" font-size="17" text-anchor="middle" fill="#3f6b50">206</text>
+<text x="500" y="302" font-size="17" text-anchor="middle" fill="#3f6b50">207</text>
 <text x="665" y="302" font-size="17" text-anchor="middle" fill="#3e4348">1</text>
 <text x="830" y="302" font-size="17" text-anchor="middle" fill="#8b9295">5</text>
 <line x1="56" y1="316" x2="924" y2="316" stroke="#e7e8e3"/>
 <text x="56" y="354" font-size="15" fill="#2c3034">R4</text>
 <text x="112" y="354" font-size="13" fill="#3e4348">Demonstrated impact</text>
-<text x="500" y="358" font-size="17" text-anchor="middle" fill="#3f6b50">31</text>
+<text x="500" y="358" font-size="17" text-anchor="middle" fill="#3f6b50">32</text>
 <text x="665" y="358" font-size="17" text-anchor="middle" fill="#3e4348">144</text>
 <text x="830" y="358" font-size="17" text-anchor="middle" fill="#8b9295">37</text>
 <line x1="56" y1="372" x2="924" y2="372" stroke="#e7e8e3"/>
@@ -35,7 +35,7 @@
 <text x="112" y="410" font-size="13" fill="#3e4348">Working remote command execution</text>
 <text x="500" y="414" font-size="17" text-anchor="middle" fill="#3f6b50">13</text>
 <text x="665" y="414" font-size="17" text-anchor="middle" fill="#3e4348">2</text>
-<text x="830" y="414" font-size="17" text-anchor="middle" fill="#8b9295">197</text>
+<text x="830" y="414" font-size="17" text-anchor="middle" fill="#8b9295">198</text>
 <line x1="56" y1="428" x2="924" y2="428" stroke="#e7e8e3"/>
-<text x="56" y="452" font-size="11" fill="#6b7376">n = 212 findings · cells are rung states, not verdicts · generated from research-manifest.json (2026-11-26)</text>
+<text x="56" y="452" font-size="11" fill="#6b7376">n = 213 findings · cells are rung states, not verdicts · generated from research-manifest.json (2026-11-26)</text>
 </g></svg>
