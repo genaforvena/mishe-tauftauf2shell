@@ -31,7 +31,8 @@ possible depending on canary/ASLR/NX. Brief:
   303 bytes past the prefix; ASan reports `stack-buffer-overflow`,
   `WRITE of size 304`, frame `xmpp.c:285`. Fixed helper `snprintf`s into a
   1025-byte buffer, guards the length and rejects a 1500-byte JID.
-- Rung 4 INSTRUMENTED only: 16 bytes at `buf_from + 256` are byte-identical
+- Rung 4 INSTRUMENTED only (harness-era claim, superseded below for the live
+  receiver: 16 bytes at `buf_from + 256` are byte-identical
   to the attacker pattern from `from[252]` (`CHOSEN_MATCH=1`) in the
   no-canary test frame. No return address, pointer or marker was touched;
   no daemon, socket, XMPP stream, XML parser, shipping stack layout,
