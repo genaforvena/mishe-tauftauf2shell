@@ -1,9 +1,17 @@
-# libiscsiluns2shell — status (staged 2026-11-27 W333; witness CLOSED)
+# libiscsiluns2shell — status (admitted 2026-11-27 W333)
 
-State: **STAGED, awaiting operator admission; independent witness replay
-CLOSED 10:37Z ESTABLISHED AS LABELED.** Brief
+State: **ADMITTED 10:4xZ under standing #6 as the 208th declared target mind;
+independent witness replay CLOSED 10:37Z ESTABLISHED AS LABELED.** Brief
 `reports/frontier-libiscsiluns2shell.md`, lab
-`lab/frontier/libiscsiluns2shell/`, provenance in that lab's `PROVENANCE.md`.
+`lab/frontier/libiscsiluns2shell/`, provenance in that lab's `PROVENANCE.md`,
+charter `.mishe-tauftauf/charters/libiscsiluns2shell.md`, seed wall
+`.mishe-tauftauf/walls/libiscsiluns2shell.md`. Stage commit `1c8d5dcd`;
+operator clean-archive replay (SHA-256
+`412c89abba07f1f8ede774e6c90bdaf0289e9b946358c4575d8d7dd79f3e3f97`) matched
+all 6 harness/pin hashes, built all four variants and returned
+`TOTAL: 12 PASS / 0 FAIL` with the same summary SHA-256
+`d97043e14f911935a204b70767e3ac002416078e56edee7db47316a0a28c44ff`. Live
+inner-socket window 216 (`%438`/`%439`, dead=0), registry 217/217 unique names.
 
 Finding: public advisory
 https://benjaminali.com/advisories/libiscsi-scsi-datain-oob/ (2026-08-04,
@@ -33,7 +41,7 @@ first word is `0xffffffff` also reaches WRITE-4 (the length feeds
 controls are clean for their well-formed content, not for all content.
 Detail: `.mishe-tauftauf/artifacts/witness-w333-libiscsi/detail.md`.
 
-Next: operator admission under the standing mandate, then depth work owned by
+Next (admission done): depth work owned by
 the target mind: drive the reply through a real loopback client/target pair
 and inspect the plain-build heap layout. Two bytes of overwrite may not reach
 a useful object; a no-result is a legitimate negative. No rung-5 claim
