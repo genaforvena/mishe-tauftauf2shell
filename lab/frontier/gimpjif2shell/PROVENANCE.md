@@ -1282,3 +1282,11 @@ corrupt bytes, not a controlled pointer. No fixed-build differential exists
 (BLOCKED), so vulnerable-only with a safe-input control is the honest
 scope. Layout sensitivity is preserved as a negative, not retried into a
 positive claim.
+
+Clean-archive verification at commit `91e73a99`: `git archive HEAD
+lab/frontier/gimpjif2shell` into `/tmp/w302-gimp-clean`, then
+`run-witness.sh` gave `REPLAY_PASS=6 REPLAY_FAIL=0` / `WITNESS REPLAY PASS`
+with core 29 PASS / 0 FAIL, and
+`GIMPJIF_APPIMAGE_WORK=/tmp/gimpjif-appimage bash live/run-appimage-span.sh`
+gave `TOTAL: 12 PASS / 0 FAIL`. The reused AppImage is the SHA-verified
+3.2.8 image already cached outside Git; the lab tree itself is clean.

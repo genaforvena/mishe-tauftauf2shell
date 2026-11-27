@@ -871,3 +871,7 @@ consumer — but it is a crash on corrupted allocator metadata, not a
 chosen-address write, named victim object, marker or command. No fixed
 AppImage is published (gimp.org still 3.2.8 at 01:09Z), so there is no
 vulnerable/fixed differential; safe-input control only.
+
+From a clean `git archive HEAD lab/frontier/gimpjif2shell` at `91e73a99`,
+`run-witness.sh` passed 6/0 with core 29/0 and
+`live/run-appimage-span.sh` passed **12 PASS / 0 FAIL**.
