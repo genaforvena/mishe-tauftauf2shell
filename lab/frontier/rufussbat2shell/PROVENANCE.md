@@ -28,14 +28,16 @@
 
 Vulnerable `src/parser.c:1626-1637` counts LF before converting CR to LF, then
 allocates `(num_entries + 1) * sizeof(sbat_entry_t)`. With CR-only input the
-allocation is 32 bytes on x86-64. The parse loop writes one 16-byte entry per
-nonblank, nonzero-version line at `:1651-1671`. Entry 2 therefore writes its
-8-byte product pointer at offset 32 and its chosen 32-bit version at offset 40.
-The fix moves CR conversion before the LF count.
+allocation is 32 bytes on x86-64: exactly two 16-byte slots. The parse loop
+writes one 16-byte entry per nonblank, nonzero-version line at `:1651-1671`.
+Entry 2 therefore writes its 8-byte product pointer at offset 32 and its chosen
+32-bit version at offset 40; the entry-2 NULL-product terminator is also out of
+bounds. The fix moves CR conversion before the LF count, so 60 CR lines allocate
+62 slots and keep the entry-60 terminator in bounds.
 
 The real caller at `src/stdlg.c:1711-1724` downloads an unsigned response under
 1 KB, calls `GetSbatEntries()`, then loops until a NULL product. The real later
-consumer at `src/hash.c:2223-2228` walks the list with `strcmp`.
+consumer at `src/hash.c:2217-2223` walks the list with `strcmp`.
 
 ## Harness and commands
 
@@ -47,11 +49,13 @@ consumer at `src/hash.c:2223-2228` walks the list with `strcmp`.
   use `-Wl,--wrap=calloc` to place a 24-byte victim immediately after the real
   list allocation; the victim callback is at victim offset 8, exactly where
   entry 2's version field lands.
-- `harness/run-all.sh` generates LF, CRLF, CR-60, CR-2 and three-line chosen
-  version inputs under `evidence/`, rebuilds, and checks vulnerable/fixed,
-  safe/attack, marker/not-called and one-byte-wrong-target controls.
-- Replay from this directory:
-  `sha256sum -c SHA256SUMS && ./harness/run-all.sh`.
+- `harness/run-all.sh` checks the committed pins before and after regeneration,
+  generates LF, CRLF, CR-60, CR-2 and three-line chosen version inputs under
+  `evidence/`, rebuilds, and checks exact vulnerable/fixed, safe/attack,
+  marker/not-called and one-byte-wrong-target controls.
+- Replay from this directory: `./harness/run-all.sh`. The script runs
+  `sha256sum -c SHA256SUMS` both before and after rebuilding and regenerating
+  evidence, so `RUN_ALL_OK` also requires byte-identical stable outputs.
 - Cross-compiler smoke: `CC=gcc ./harness/run-all.sh` and the default Clang run
   each reported `RUN_ALL_OK 11 PASS / 0 FAIL`.
 

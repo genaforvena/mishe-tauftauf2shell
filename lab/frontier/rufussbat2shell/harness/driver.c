@@ -124,8 +124,10 @@ int main(int argc, char** argv)
 			fputs("missing wrapped victim\n", stderr);
 			return 4;
 		}
-		int prefix_in_input = g_victim->prefix >= data &&
-			g_victim->prefix < data + len;
+		uintptr_t prefix = (uintptr_t)g_victim->prefix;
+		uintptr_t base = (uintptr_t)data;
+		int prefix_in_input = prefix >= base &&
+			prefix - base < (uintptr_t)len;
 		const char* callback_name = g_victim->callback == benign_marker ?
 			"benign_marker" : g_victim->callback == not_called ?
 			"not_called" : "unexpected";

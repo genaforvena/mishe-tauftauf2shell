@@ -5,6 +5,7 @@ set -eu
 ROOT=$(CDPATH= cd -- "$(dirname -- "$0")/.." && pwd)
 cd "$ROOT"
 mkdir -p evidence
+sha256sum -c SHA256SUMS
 ./harness/build.sh
 
 fails=0
@@ -44,13 +45,13 @@ run vuln-asan-crlf3 harness/bin/vuln-asan evidence/crlf3.txt iterate
 check vuln-asan-crlf3 sh -c "test \"\$(cat evidence/vuln-asan-crlf3.rc)\" = 0 && grep -q '^ENTRIES=3$' evidence/vuln-asan-crlf3.out"
 
 run vuln-asan-cr60 harness/bin/vuln-asan evidence/cr60.txt iterate
-check vuln-asan-cr60 sh -c "test \"\$(cat evidence/vuln-asan-cr60.rc)\" != 0 && grep -q 'heap-buffer-overflow' evidence/vuln-asan-cr60.out && grep -q 'WRITE of size 8' evidence/vuln-asan-cr60.out && grep -q 'parser.c:1651' evidence/vuln-asan-cr60.out"
+check vuln-asan-cr60 sh -c "test \"\$(cat evidence/vuln-asan-cr60.rc)\" != 0 && grep -q 'heap-buffer-overflow' evidence/vuln-asan-cr60.out && grep -q 'WRITE of size 8' evidence/vuln-asan-cr60.out && grep -q '0 bytes after 32-byte region' evidence/vuln-asan-cr60.out && grep -q 'parser.c:1651' evidence/vuln-asan-cr60.out"
 
 run fixed-asan-cr60 harness/bin/fixed-asan evidence/cr60.txt iterate
 check fixed-asan-cr60 sh -c "test \"\$(cat evidence/fixed-asan-cr60.rc)\" = 0 && grep -q '^ENTRIES=60$' evidence/fixed-asan-cr60.out"
 
 run vuln-asan-cr2-read harness/bin/vuln-asan evidence/cr2.txt iterate
-check vuln-asan-cr2-read sh -c "test \"\$(cat evidence/vuln-asan-cr2-read.rc)\" != 0 && grep -q 'heap-buffer-overflow' evidence/vuln-asan-cr2-read.out && grep -q 'READ of size 8' evidence/vuln-asan-cr2-read.out"
+check vuln-asan-cr2-read sh -c "test \"\$(cat evidence/vuln-asan-cr2-read.rc)\" != 0 && grep -q 'heap-buffer-overflow' evidence/vuln-asan-cr2-read.out && grep -q 'READ of size 8' evidence/vuln-asan-cr2-read.out && grep -q '0 bytes after 32-byte region' evidence/vuln-asan-cr2-read.out"
 
 run fixed-asan-cr2 harness/bin/fixed-asan evidence/cr2.txt iterate
 check fixed-asan-cr2 sh -c "test \"\$(cat evidence/fixed-asan-cr2.rc)\" = 0 && grep -q '^ENTRIES=2$' evidence/fixed-asan-cr2.out"
@@ -65,23 +66,27 @@ wrong=$(printf '%x' "$((0x$marker + 1))")
 make_lines evidence/cr3-wrong.txt 3 '\r' "0x$wrong"
 
 run vuln-marker-attack harness/bin/vuln-marker evidence/cr3-marker.txt marker
-check vuln-marker-attack sh -c "test \"\$(cat evidence/vuln-marker-attack.rc)\" = 0 && grep -q '^BENIGN_MARKER$' evidence/vuln-marker-attack.out && grep -q 'GUARD=1122334455667788' evidence/vuln-marker-attack.out"
+check vuln-marker-attack sh -c "test \"\$(cat evidence/vuln-marker-attack.rc)\" = 0 && grep -qx 'PREFIX_IN_INPUT=1 CALLBACK=benign_marker GUARD=1122334455667788' evidence/vuln-marker-attack.out && grep -qx 'BENIGN_MARKER' evidence/vuln-marker-attack.out"
 
 run fixed-marker-attack harness/bin/fixed-marker evidence/cr3-marker.txt marker
-check fixed-marker-attack sh -c "test \"\$(cat evidence/fixed-marker-attack.rc)\" = 0 && grep -q '^NOT_CALLED$' evidence/fixed-marker-attack.out && grep -q 'GUARD=1122334455667788' evidence/fixed-marker-attack.out"
+check fixed-marker-attack sh -c "test \"\$(cat evidence/fixed-marker-attack.rc)\" = 0 && grep -qx 'PREFIX_IN_INPUT=0 CALLBACK=not_called GUARD=1122334455667788' evidence/fixed-marker-attack.out && grep -qx 'NOT_CALLED' evidence/fixed-marker-attack.out"
 
 run vuln-marker-notcalled harness/bin/vuln-marker evidence/cr3-notcalled.txt marker
-check vuln-marker-notcalled sh -c "test \"\$(cat evidence/vuln-marker-notcalled.rc)\" = 0 && grep -q '^NOT_CALLED$' evidence/vuln-marker-notcalled.out"
+check vuln-marker-notcalled sh -c "test \"\$(cat evidence/vuln-marker-notcalled.rc)\" = 0 && grep -qx 'PREFIX_IN_INPUT=1 CALLBACK=not_called GUARD=1122334455667788' evidence/vuln-marker-notcalled.out && grep -qx 'NOT_CALLED' evidence/vuln-marker-notcalled.out"
 
 run vuln-marker-wrong harness/bin/vuln-marker evidence/cr3-wrong.txt marker
-check vuln-marker-wrong-negative sh -c "test \"\$(cat evidence/vuln-marker-wrong.rc)\" != 0 && ! grep -q '^BENIGN_MARKER$' evidence/vuln-marker-wrong.out"
+check vuln-marker-wrong-negative sh -c "test \"\$(cat evidence/vuln-marker-wrong.rc)\" != 0 && grep -qx 'PREFIX_IN_INPUT=1 CALLBACK=unexpected GUARD=1122334455667788' evidence/vuln-marker-wrong.out && ! grep -qx 'BENIGN_MARKER' evidence/vuln-marker-wrong.out"
 
 run vuln-marker-cr2 harness/bin/vuln-marker evidence/cr2.txt marker
-check vuln-marker-cr2 sh -c "test \"\$(cat evidence/vuln-marker-cr2.rc)\" = 0 && grep -q '^NOT_CALLED$' evidence/vuln-marker-cr2.out"
+check vuln-marker-cr2 sh -c "test \"\$(cat evidence/vuln-marker-cr2.rc)\" = 0 && grep -qx 'PREFIX_IN_INPUT=0 CALLBACK=not_called GUARD=1122334455667788' evidence/vuln-marker-cr2.out && grep -qx 'NOT_CALLED' evidence/vuln-marker-cr2.out"
 
-if [ "$fails" -eq 0 ]; then
+if [ "$fails" -ne 0 ]; then
+  echo RUN_ALL_FAIL "$fails" | tee evidence/last-run.out
+  exit 1
+fi
+if sha256sum -c SHA256SUMS; then
   echo RUN_ALL_OK 11 PASS / 0 FAIL | tee evidence/last-run.out
 else
-  echo RUN_ALL_FAIL "$fails" | tee evidence/last-run.out
+  echo RUN_ALL_FAIL stable-evidence-pins | tee evidence/last-run.out
   exit 1
 fi

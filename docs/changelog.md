@@ -27,6 +27,12 @@ GHSA-hcpc-vq8c-923h from parent `de4cf676` to fix `842873017`.
   clean TAR `178726d9…` replayed 16/16 pins and the same 11/0. Brief,
   provenance, status, stable evidence pins and the dedicated two-pane window
   are staged for operator admission and independent witness replay.
+- **Scoped review correction**: the first draft described the vulnerable
+  32-byte allocation as two entries plus a terminator; it is exactly two slots,
+  so the entry-2 terminator is already OOB. The fixed 60-line arm allocates 62
+  slots, not 61. The replay now asserts the exact 32-byte/zero-offset ASan and
+  marker lines and checks `SHA256SUMS` both before and after regeneration. No
+  rung or scope changed; GCC and Clang still replay 11/0.
 
 Next: measure the real Windows post-allocation consumer and repeat under
 ASLR/CFG before attempting a loopback trusted-response path. A fixed-arm store,
