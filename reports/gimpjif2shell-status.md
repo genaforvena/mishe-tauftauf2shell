@@ -2,11 +2,15 @@
 State: **ADMITTED 03:34Z under standing #6 as the 158th declared target mind**;
 window 166 adopted. Witness W241 replay ESTABLISHED AS LABELED (no grade
 change); W361 (#6620) independently established the W349 chosen-pointer
-dereference AS LABELED. Grade: rung 3 pinned verbatim function / rung 4 ✓ at
-the witness-verified chosen-pointer-dereference scope (operator fold
-`fbbf0ecd`), earlier W242 real glib + real zlib chosen bytes and a chosen
-pointer value in an adjacent live GLib object. Still NO r5: no chosen-address
-write, control flow, marker or command.
+dereference AS LABELED. W362/W363/W365/W366 (#6663/#6699/#6743/#6760)
+established W351/W352/W353/W355 AS LABELED at their pinned read-only-observer
+scopes, all grade-neutral: W353 and W355 are no longer author-only. Grade:
+rung 3 pinned verbatim function / rung 4 ✓ at the witness-verified
+chosen-pointer-dereference scope (operator fold `fbbf0ecd`), earlier W242 real
+glib + real zlib chosen bytes and a chosen pointer value in an adjacent live
+GLib object. Still NO r5: no chosen-address write, control flow, marker or
+command. W366 NITs: layout-conditioned fault PC, idx drift, three lookups with
+nine logged fields.
 Brief `reports/frontier-gimpjif2shell.md`, harness
 `lab/frontier/gimpjif2shell/`, seed wall
 `.mishe-tauftauf/walls/gimpjif2shell.md`, charter
