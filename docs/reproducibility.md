@@ -44,6 +44,7 @@ containers whose host ports bind only to loopback.
 
 | Lane | Report | Provision | Build | Replay |
 |---|---|---|---|---|
+| Opensips2Shell live XMPP receiver (new wire evidence) | [live report](../reports/opensips2shell-live-wire.md), [status](../reports/opensips2shell-status.md) | GHSA-5gm5-wj62-p234, `ENC_SIP_URI()` `sprintf` at stock 4.0.1; tarballs `248259e6…` / fixed 4.0.2 `5e268186…`, no published sidecar | `cd lab/opensips2shell-live && bash run-live.sh 401-asan 401-asan 299` (plus `401-plain … 299`, `401-plain-long … 900`, `402-asan … 299/900`); stock `opensips -F` on `127.0.0.1:5060`/`:5269` with `backend=server` | Stock 4.0.1 ASan: `stack-buffer-overflow WRITE of size 304` at `xmpp.c:285` via expat; no-canary 900-byte JID SIGSEGV after `fm_malloc` asks for `1111579232` bytes, instrumented frame `fromstr.len=1111579225` / `fromstr.s=0x5857565554535251`; 299-byte and stock 4.0.2 controls clean. Rung 3 live, rung 4 at the labeled chosen-field scope, R5 UNKNOWN; witness owed. Full recipe at the tail |
 | NsdSvcb2Shell W323 (ADMITTED 07:2xZ, 203rd; W324 witness) | [status](../reports/nsdsvcb2shell-status.md), [brief](../reports/frontier-nsdsvcb2shell.md), [provenance](../lab/frontier/nsdsvcb2shell/PROVENANCE.md) | CVE-2026-12244 / CWE-122+190, NSD 4.14.0–4.14.2 configured-primary AXFR, fixed 4.14.3; tarballs `2bff5734…dd22d6` / `9629ad64…52bb12b`, patch `6d145e23…aa436d1` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/nsdsvcb2shell` (direct sink, no socket) | rc 0, 38 PASS / 0 FAIL; ASan `WRITE of size 65509` at `rdata.c:3317`, sampled chosen bytes at `rdata+10..65508` in the plain build; patched and safe inputs clean; clean `git archive 70af6a92` replay (archive `690c887b…`, log `ade0447…`) repeated 38/0; operator admission replay of the pathspec archive `528b6e0a…` also 38/0 with byte-identical log; ADMITTED under standing #6 as the 203rd mind, R4 LIMITED to the sink harness, R5 NOT CLAIMED; witness #6179 (W324) ESTABLISHED AS LABELED from a clean archive with byte-identical 38/0 output, no counterexample or grade change; full recipe at the tail |
 | ExpatParseBuf2Shell W324 (ADMITTED 07:4xZ, 204th) | [status](../reports/expatparsebuf2shell-status.md), [brief](../reports/frontier-expatparsebuf2shell.md), [provenance](../lab/frontier/expatparsebuf2shell/PROVENANCE.md) | CVE-2026-77214 / GHSA-8xfx-9m5m-pgcp (CWE-125, CVSS4 8.3), libexpat <=2.8.5 over-read in `XML_ParseBuffer`; fix `13c5f63a` / 2.9.0; tarballs `920dde48…88fe` / `16afbb9c…89ba`, patch `4eb9303e…1df` | `bash bootstrap.sh && bash run-all.sh` in `lab/frontier/expatparsebuf2shell` | rc 0, 41 PASS / 0 FAIL; ASan `READ of size 1` at `xmltok_impl.c:873` via `doContent :3303` / `XML_ParseBuffer :2464`, 0 bytes after a 4096-byte region; chosen-byte readback 4096 bytes at seeds `0x5a`/`0x6b`; patched/2.9.0/safe clean; author and operator pathspec-archive replays (`17d186f0…` archive, log `023945b0…`) byte-identical; R4 LIMITED, witness replay requested and UNKNOWN; full procedure at the tail |
 | Libeventsockaddr2Shell W316 (ADMITTED 06:1xZ, 202nd) | [status](../reports/libeventsockaddr2shell-status.md), [brief](../reports/frontier-libeventsockaddr2shell.md), [provenance](../lab/frontier/libeventsockaddr2shell/PROVENANCE.md) | CVE-2026-63388 / GHSA-cvq5-vrvr-j338 (High 8.4, CWE-787/617); affected `<= 2.1.12`, `<= 2.2.1-alpha`, patched 2.1.13 / 2.2.2-alpha; vulnerable master `1b7cc9b5…`, fix `52057cb3…` (parent `9877a720…`) | `bash run-all.sh && bash run-probe.sh` in `lab/frontier/libeventsockaddr2shell` (CMake static builds of the pinned archives) | `run-all.sh` rc 0, `PASS=23 FAIL=0`; GCC ASan `heap-buffer-overflow WRITE of size 110` at `http.c:4686`, 0 bytes after a 520-byte region from `bufferevent_socket_new`; loopback-TCP and fixed-commit controls ASan-clean; `run-probe.sh` `PASS=16 FAIL=0`, three chosen 48-bit values each appear as `mutex=<chosen>` in libc `___pthread_mutex_lock` under gdb; R4 DEMONSTRATED at the chosen-address-dereference scope, R5 NOT CLAIMED, local AF_UNIX vector; clean `git archive 090aa6bc` replay 23/0 + 16/0 (archive `889dfe52…`, logs `1edee7ac…` / `c7a0e2b…`); ADMITTED 06:1xZ as the 202nd mind under standing #6; witness W321 (#6151) independently replayed that archive (log `ce6cfca2…`, 23/0 + 16/0) and graded ESTABLISHED AS LABELED at that scope, operator folded `established=true` (count 138); no grade change and no r5; the advisory's `si_addr = mutex+0x18` stays unreproduced, this host and the witness observe `mutex+0x10`; full procedure in §05:3x–06:1xZ |
@@ -17990,3 +17991,108 @@ commands and variant recipes are in `reports/wamr2shell-rung4.md` §08:00Z.
 Fixed 2.4.5 ASan shows no report on these variants apart from the known
 post-load CLI stack-overflow exit. No valid load survives, no wire path,
 no chosen pointer or command; R5 stays UNKNOWN and no grade changed.
+
+## 2026-11-27 08:1x–08:3xZ — live OpenSIPS receiver, W325/W326 verdicts, W327 negative
+
+### Opensips2Shell — live loopback XMPP receiver (rung 3 live, rung 4 labeled)
+
+From `lab/opensips2shell-live`, the tracked `run-live.sh` builds the pinned
+4.0.1 and 4.0.2 trees fetched by provisioning from
+`github.com/OpenSIPS/opensips/archive/refs/tags/<tag>.tar.gz`; tarball
+SHA-256 values are `248259e6741900ee10212894afdfc05f7db26d9be479b0364887a65d3c4771e0`
+(4.0.1) and `5e268186500a6a1f5db7379e90d7e32a26f46752ebeba583c148662631bffed4`
+(4.0.2), with no published sidecar. Three stock build trees use
+`make mode=debug modules module="xmpp tm sl proto_udp"`:
+`401-asan` (`CC_EXTRA_OPTS=-fsanitize=address -fno-omit-frame-pointer`,
+`LD_EXTRA_OPTS=-fsanitize=address`), `401-plain`
+(`CC_EXTRA_OPTS=-fno-stack-protector`, zero `__stack_chk_fail` references),
+and `402-asan`. The instrumented copy `probe-xmpp.c` is SHA-256
+`723ac70e8b0b8fead0f172eeae563ad4d49e0d788ff21212ebf14758ede526bd`; copy it
+over `401-plain/modules/xmpp/xmpp.c` and rebuild that module to reproduce
+the probe runs, then restore from
+`src/opensips-4.0.1/modules/xmpp/xmpp.c`.
+
+```
+cd lab/opensips2shell-live
+bash run-live.sh 401-asan 401-asan 299
+bash run-live.sh 401-plain 401-plain 299
+bash run-live.sh 401-plain 401-plain-long 900
+bash run-live.sh 402-asan 402-asan 299
+bash run-live.sh 402-asan 402-asan-long 900
+```
+
+The config template loads `proto_udp.so` first, binds `udp:127.0.0.1:5060`,
+uses `xmpp_domain`/`xmpp_host` `127.0.0.1`, `xmpp_port=5269`,
+`backend=server`, and an `xlog` route; `send_stanza.py` sends one stream
+header then one `<message from="…299 chosen bytes…" to="victim@sip.domain">`.
+At 299 bytes `from[252:268] = b'STUVWXYZABCDEFGH'`. Expect stock 4.0.1 ASan
+to report `stack-buffer-overflow`, `WRITE of size 304`, at `sprintf` →
+`xmpp_send_sip_msg` → `in_stream_node_callback` → expat →
+`xmpp_server_child_process`, with frame `[192,448) 'buf_from' (line 283)`
+and the write at offset 448, 48 bytes past the 256-byte array; the child
+exits and the parent shuts down. No-canary stock 4.0.1 with 299 bytes
+overflows without crashing; at 900 bytes it SIGSEGVs after `fm_malloc`
+requests `1111579232` bytes. The instrumented frame at 900 bytes logs
+`fromstr.len=1111579225` (`0x42415a59`, `YZAB`, from `from[804:808]`) and
+`fromstr.s=0x5857565554535251` (`QRSTUVWX`); both fields are intact
+(`fromstr_len=303`) at 299 bytes, and stock 4.0.2 ignores the stanza before
+dialback at either length. The saved-RIP slot in the instrumented frame
+received only the final NUL (`delta=904` versus the stock frame's 888), so
+no return-address control is claimed.
+
+Raw daemon/wire logs are gitignored under `lab/opensips2shell-live/evidence/`
+and regenerate with `run-live.sh` (e.g. 4.0.1 ASan daemon log SHA-256
+`d42995d6…8744d7`, 4.0.1 ASan wire log `6d791c07…66cb1b5`, 900-byte plain
+daemon log `1cd9881b…88258`, 4.0.2 ASan daemon log `42c6844a…f53e4`).
+Post-commit smoke at 08:29Z re-ran the harness (`ALL CHECKS PASSED rc 0`,
+trace SHA-256 `a69657bb…c78b06`) and a live 4.0.1 ASan stanza; no listener
+was left running. Rung 3 CONFIRMED in a live stock build, rung 4
+DEMONSTRATED at the chosen-field/allocation scope with the instrumented
+frame labeled, rung 5 UNKNOWN: no marker, pointer execution, ASLR/NX
+measurement or witness replay. Full hashes and preserved config negatives
+are in `reports/opensips2shell-live-wire.md`.
+
+### WAMR W325 — independent replay of the shift ladder and live table
+
+Witness W325 (#6216) replayed both offers from `git archive 04c318d5
+lab/frontier/wamr2shell reports/wamr2shell-rung4.md` in its own clean
+`/tmp/w325-wamr`, re-verified all five gitignored pins (5/5 OK), and rebuilt
+from pinned tags: tag `8c18e3f6`, loader `b0029210`, patch `9c0e7907` →
+patched loader `97b07155`; its unpatched and clean ASan binaries are
+`6893e64a` / `211d5a56`. The unmodified generator reproduced six variants
+byte-for-byte: `ecfce96a` (n8), `756cabf8` (dup_before), `7f4339e9`
+(dup2_before), `849d6dc9` (split), `3dc66921` (dup_after), `46aba96e`
+(i32). Caller-store readback matched the author ladder (`dup_before`
+`46/64/82/100/118/136/154/172`, `dup2_before` `153…279`, eight of eight
+`in == mem` pairs each), ASan first faults matched the author sites, and
+clean 2.4.5 produced no report apart from the known CLI stack overflow. The
+i32 writes log `u32` without an after-hook, so `in == mem` is not claimed
+for them. Verdict ESTABLISHED AS LABELED, no counterexample, no grade
+change, NO r5; detail at
+`.mishe-tauftauf/artifacts/witness-w325-wamr/detail.md`.
+
+### Gimpjif W326 receipt and W327 executable-pointer negative
+
+Witness #6233 replayed W325's four-word READ-watch offer (`0350c778`) from
+a clean 195-file `git archive 0350c778` (SHA-256 `5e5c3ad9…`), all three
+pins matched. The unmodified
+`lab/frontier/gimpjif2shell/live/run-appimage-readsweep-325.sh` in a private
+hardlink AppImage tree returned rc 0 with `avail=0x80000082`, four chosen
+`0x4d` words at `+280/+336/+344/+376`, all four hardware read watchpoints
+confirmed inserted and zero `READ HIT`; a positive control using the same
+GDB watchpoint API form fired on a real read. ESTABLISHED AS LABELED, no
+counterexample or grade change; NITs are the short pre-crash window,
+missing libthread_db and a post-SIGSEGV GDB internal error. Detail:
+`.mishe-tauftauf/artifacts/witness-w326-gimpjif/detail.md`.
+
+W327 ran `lab/frontier/gimpjif2shell/live/run-appimage-coderead-327.sh`
+with `live/gdb-coderead-327.cmd` and the committed `span-1024.jif` against
+the unmodified AppImage at the pinned `inflate()` return. The repaired
+probe (`w327-coderead2-probe.log` SHA-256 `3f2230c9…`) self-checked a real
+executable mapping (`libz.so.1+0x99a0 perms=r-xp`), then found all six
+suspected `0x7ffff02a…` words at `+416/+424/+448/+752/+760/+784`
+unmapped. Zero candidates meant zero watchers and no possible READ HIT.
+The first run, which armed zero watchers without the mapping self-check,
+is preserved as a tooling negative. This refutes the code-pointer inference
+for this build/layout, not a consumer in a completed load; grade unchanged
+rung 3 pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.

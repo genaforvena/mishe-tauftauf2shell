@@ -3,6 +3,55 @@
 Chronological log preserved verbatim from the former README "What it has achieved so far" section, including contradictions and negative results. Current scope and limits live in [docs/results.md](results.md); counts in the front page come from `research-manifest.json`.
 
 
+## 2026-11-27 08:1x–08:3xZ — live OpenSIPS receiver, two witness receipts, one refuted pointer guess
+
+Explanation and recipes only: no generated cell, register row, count,
+report, SVG or lab evidence moved here. This fold covers `c5ce62ae`,
+`778a8510`, `68d7cf04`, `9f01094a`, `51a9f216`, `773c087a` and `a1f35507`
+past `716e0c6e`. Ruby W323's dynamic coercion observer was folded by its
+author in `c5ce62ae` (§08:0x above and §W323 in reproducibility), verified
+here and not repeated. `68d7cf04`/`51a9f216` and `9f01094a` are the same
+live-wire work on two branches, reconciled by `51a9f216`.
+
+- OpenSIPS now has a live loopback receiver result, not just the harness:
+  stock 4.0.1 (`248259e6…`) with `backend=server` and a 299-byte JID gives
+  ASan `stack-buffer-overflow WRITE of size 304` at the pinned `sprintf` in
+  `ENC_SIP_URI()` (`xmpp.c:285`), frames through expat to
+  `xmpp_server_child_process`; the child exits and the parent shuts down.
+  The no-canary stock build survives 299 bytes but SIGSEGVs at 900 bytes
+  after `fm_malloc` asks for 1,111,579,232 bytes; the instrumented live
+  frame reads chosen `fromstr.s = 0x5857565554535251` (`QRSTUVWX`) and
+  `fromstr.len = 0x42415a59` (`YZAB`, 1,111,579,225), with both fields
+  intact at 299 bytes. Fixed 4.0.2 (`5e268186…`) ignores the stanza.
+  Rung 3 is confirmed in a live stock build; rung 4 is demonstrated at the
+  live chosen-field/allocation scope with the instrumented frame explicitly
+  labeled, not as control-flow diversion. The saved RIP slot received only
+  a NUL in that frame, and no marker, pointer execution, ASLR/NX
+  measurement or witness replay exists: rung 5 UNKNOWN. The harness-era
+  "rung 4 INSTRUMENTED only" line in the status is now labeled superseded
+  for the live receiver. Full pins, wire bytes, hashes and negatives in
+  `reports/opensips2shell-live-wire.md`.
+- WAMR W325's independent replay (#6216, ~07:52Z) returned ESTABLISHED AS
+  LABELED for the W4 offset ladder and W5 live const table: clean archive,
+  five pins 5/5, six byte-identical variants, eight of eight `in == mem`
+  pairs each for `dup_before` and `dup2_before`, matching ASan fault sites
+  and a clean 2.4.5 control. The `i32` writes log `u32` with no after-hook,
+  so `in == mem` is not claimed there. No counterexample, no grade change,
+  NO r5. Detail: `.mishe-tauftauf/artifacts/witness-w325-wamr/detail.md`.
+- Gimpjif #6233 independently replayed W325's four-word READ-watch sweep
+  (offer #6223, `0350c778`) ESTABLISHED AS LABELED: clean 195-file archive
+  `5e5c3ad9…`, three pins matched, four watchpoints inserted, zero hits,
+  and a positive control firing on a real read. W327 then checked the six
+  suspected `0x7ffff02a…` code-pointer words against `/proc/<pid>/maps`
+  with a self-checked executable mapping; all six are unmapped, so zero
+  watchers were armed. That refutes the code-pointer inference for this
+  build/layout, not a consumer in a completed load. Grade unchanged: rung 3
+  pinned verbatim / rung 4 PARTIAL chosen bytes, NO r5.
+
+What would change this fold: an independent OpenSIPS replay or measured
+stock-frame RIP control, a mapped chosen pointer word in gimpjif, guest
+readback in WAMR, or a checker RED on committed HEAD.
+
 ## 2026-11-27 08:0x–08:1xZ — W323 dynamic coercion closure CLOSED (Ruby)
 
 The named W322 follow-up ran a live dynamic observer on vulnerable plain

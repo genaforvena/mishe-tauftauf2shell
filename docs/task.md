@@ -15962,3 +15962,47 @@ Commands, expected bytes and gitignored-evidence regeneration are in
 What would change these limbs: an expat witness verdict or a named consumer,
 a surviving consumer in the gimpjif or WAMR lanes, or a checker RED on
 committed HEAD.
+
+## 2026-11-27 08:1x–08:3xZ — live receiver evidence, two closed witness offers
+
+This limb updates the 07:3x–08:0xZ section above for a reader arriving now.
+It records evidence and next experiments; no register cell, grade, count or
+generated row moves here. The generated `docs/results.md` and manifest stay
+operator-owned. Ruby W323's dynamic coercion observer was folded by its
+author (`c5ce62ae`) and verified here; no docs action remains for it.
+
+- **Opensips2Shell (new live wire evidence).** Stock 4.0.1 XMPP receiver on
+  loopback with `backend=server`: a 299-byte JID gives ASan `WRITE of size
+  304` at `xmpp.c:285` through expat in a real receiver process; the
+  no-canary stock build survives 299 bytes and SIGSEGVs at 900 bytes after
+  a `1111579232`-byte allocation. The instrumented live frame shows chosen
+  `fromstr.s`/`fromstr.len`; 4.0.2 ignores the stanza. Rung 3 is confirmed
+  live and rung 4 is demonstrated at the labeled chosen-field scope, not as
+  control-flow diversion: the RIP slot got only a NUL, and there is no
+  marker, ASLR/NX measurement or witness replay, so R5 stays UNKNOWN. Next
+  experiment: hand the loopback replay to an independent witness; only if
+  a measured stock frame slot exists, test a longer chosen JID for saved-RIP
+  control before any marker attempt. Preserve the 299-byte survival,
+  instrumented-layout and 4.0.2 negatives. The adjacent `parse_isup`
+  `memcpy` candidate (GHSA-qc7q-vrx3-3j4h) is recorded, not worked.
+- **Gimpjif (W326 verdict, W327 refutation).** #6233 replayed W325's
+  four-watch READ sweep from a clean archive with a firing positive
+  control and zero hits — ESTABLISHED AS LABELED, no grade change. W327
+  then compared the six suspected code-pointer words with
+  `/proc/<pid>/maps`: all are unmapped, so zero watchers could be armed.
+  The code-pointer inference is refuted for this build/layout, not a
+  completed-load consumer. Next experiment needs a load that survives long
+  enough to read the chosen words and a mapped chosen pointer; do not
+  re-arm watchers on unmapped address-pattern guesses.
+- **WAMR (W325 verdict landed).** Independent clean-archive replay graded
+  W4/W5 ESTABLISHED AS LABELED with byte-identical variants, matching fault
+  sites and a clean 2.4.5 control; no counterexample or grade change. The
+  `i32` writes still lack an `in == mem` after-hook. Next experiment is
+  still a load that survives into `func->consts` with guest readback —
+  W325 closes the replay question, not that gap.
+
+Pins, commands, expected bytes and gitignored-evidence regeneration are in
+`docs/reproducibility.md` §08:1x–08:3xZ. What would change these limbs: an
+independent OpenSIPS replay or measured stock-frame control, a mapped and
+read chosen pointer in gimpjif, guest readback in WAMR, or a checker RED on
+committed HEAD.
