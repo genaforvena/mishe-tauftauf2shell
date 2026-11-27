@@ -993,3 +993,29 @@ built and the runner returned **5 PASS / 0 FAIL**, with
 archive hit `filter.h`/`vcs_track.h` include errors during `build-wire.sh`;
 they are irrelevant to this plain-build runner, which checks for its own
 binary before running. No generated evidence was copied into the archive.
+
+## Source-bound negatives — exporter and metric object routes (2026-11-27 12:25Z)
+
+Read-only check of the pinned parent `8a00543aa5c7b25b7d3f7642fdf306fd9979f237`;
+no build, packet, run, assertion or grade change. Question: can a crossing
+`srcPort`/`dstPort` write into a later record's `exporterID`/engine fields
+select a different pointer-bearing object?
+
+- `src/netflow/nfd_raw.c:68-72` builds `exporter_key_t` with
+  `.version = VERSION_NFDUMP`, `.id = 0` and `.ip = fs->ipAddr`; the V3
+  record's `exporterID` is not part of the lookup. `Process_nfd()` resolves
+  `exporter` once from the nfd header at `:170`, before the record loop, and
+  only increments `exporter->flows` at `:162`. The header crossing write
+  therefore cannot retarget that pointer.
+- `src/collector/metric.h:82` folds record `exporterID`, `engineType` and
+  `engineID` into `MetricExporterID()` at `nfd_raw.c:292`, but `UpdateMetric()`
+  (`src/collector/metric.c:167-169`) returns immediately unless `-m socket`
+  started a metric thread (`nfcapd.c:960`). Every shipped runner passes
+  `-M DIR/flows`, not `-m`. When enabled, `GetMetric()`
+  (`metric.c:91-113`) matches solely on the identical `ident` string and
+  only stores `exporterID`; it is never an index, length, pointer or
+  allocator size.
+
+No chosen pointer, marker or command path opens here. Grade unchanged: rung 3
+live / rung 4 availability DEMONSTRATED (real-clock 3/3 SIGABRT) plus
+chosen-offset PARTIAL / NO r5.
